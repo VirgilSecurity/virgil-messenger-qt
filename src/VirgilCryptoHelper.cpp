@@ -107,9 +107,16 @@ bool VirgilCryptoHelper::getCard(const std::string & identity, CardModel & card)
         // Get card
         Identity cardIdentity(identity, IdentityModel::Type::Email);
         const bool _includeUnconfirmed(true);
-        const std::vector<CardModel> _foundCards(m_servicesHub.card().search(cardIdentity, _includeUnconfirmed));
+        std::vector<CardModel> _foundCards(m_servicesHub.card().search(cardIdentity, _includeUnconfirmed));
         if (_foundCards.empty()) return false;
+        
+        // Sort cards by time and get newest
+        std::sort(_foundCards.begin(), _foundCards.end(),
+                  [](const CardModel & a, const CardModel & b) -> bool {
+                      return a.getCreatedAt() > b.getCreatedAt();
+                  });
         card = _foundCards.front();
+        
     } catch (std::exception& exception) {
         std::cerr << exception.what() << std::endl;
         return false;
