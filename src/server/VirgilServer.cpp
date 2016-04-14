@@ -35,6 +35,8 @@
  */
 
 #include "VirgilServer.h"
+
+#include <iterator>
 #include <netdb.h>
 #include <sys/types.h>
 #include <sys/socket.h>

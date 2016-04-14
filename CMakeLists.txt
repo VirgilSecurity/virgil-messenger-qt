@@ -63,6 +63,8 @@ endif ()
 string (TOLOWER "${CMAKE_SYSTEM_NAME}" SYSTEM_NAME)
 
 # Find dependencies
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
 find_package (CURL REQUIRED)
 include_directories (${CURL_INCLUDE_DIRS})
 
@@ -127,10 +129,12 @@ target_link_libraries (virgil_server
     ${VIRGIL_SDK_LIBRARIES}
     ${VIRGIL_CRYPTO_LIBRARIES}
     ${CURL_LIBRARIES}
+    Threads::Threads
 )
 
 add_dependencies (virgil_server
     json
     ${VIRGIL_CRYPTO_DEPENDENCIES}
     ${VIRGIL_SDK_DEPENDENCIES}
+    Threads::Threads
 )
