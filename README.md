@@ -1,17 +1,17 @@
 # Virgil Security Simple client/server example for *nix platforms
 
-## Quickstart
+# Quickstart
 
 ## Motivation
-This example consists of client and server parts which using Virgil Security
+This example consists of client and server parts which are using Virgil Security
 stack functionality:
 
 -   encrypt, decrypt, sign and verify data;
 -   interact with Virgil Keys Service;
 
-Both part can create own key pair and virgil cards.
-Virgil cards are pushed to Virgil Key Service.
-And private keys are stored localy in file system.
+Both parts can create their own key pair and Virgil Cards.
+Virgil Cards are pushed to Virgil Key Service.
+And private keys are stored locally in a file system.
 
 ## Unix Build
 
@@ -21,9 +21,9 @@ And private keys are stored localy in file system.
 *   [libcurl](http://curl.haxx.se/libcurl/).
 
 ### Build steps
-1.   Open terminal
+1.   Open terminal.
 
-1.   Clone project
+1.   Clone the project.
 
         git clone https://github.com/VirgilSecurity/virgil-nix-client-server-example.git
 
@@ -31,11 +31,11 @@ And private keys are stored localy in file system.
 
         cd virgil-nix-client-server-example
 
-1.   Create folder for the build purposes and go to it
+1.   Create a folder for the build purposes and go to it.
 
         mkdir build && cd build
 
-1.   Configure and build
+1.   Configure and build.
 
         cmake .. && make
 
@@ -44,9 +44,9 @@ And private keys are stored localy in file system.
 
         virgil_server <port> <email> <private key directory>
 
-- port - any port in range [2000 .. 65535]
-- email - this parameter is used like identity. It can contains any fictive value (for current example).
-- private key directory - directory there private key will be stored
+- port - any port in the range [2000 .. 65535]
+- email - this parameter is used as an identity. It can contain any fictive value (for the current example).
+- private key directory - directory where the private key will be stored.
 
 Example:
         ./virgil_server 3000 server@test.com ${HOME}/
@@ -55,10 +55,10 @@ Example:
 
         virgil_client <host name> <port> <email> <private key directory>
 
-- host name - name of host or IP address
+- host name - the name of the host or IP address
 - server's port
-- email - this parameter is used like identity. It can contains any fictive value (for current example).
-- private key directory - directory there private key will be stored
+- email - this parameter is used as an identity. It can contain any fictive value (for the current example).
+- private key directory - directory where the private key will be stored.
 
 Example:
         ./virgil_server 3000 server@test.com ${HOME}/
