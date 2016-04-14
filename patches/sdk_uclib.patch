@@ -1,0 +1,50 @@
+diff -Naur ./a/json.cmake ./b/json.cmake
+--- ./a/json.cmake	2016-03-24 17:06:46.030120946 +0200
++++ ./b/json.cmake	2016-03-24 17:07:24.102119171 +0200
+@@ -43,6 +43,8 @@
+         GIT_TAG "v1.1.0"
+         PREFIX "${CMAKE_BINARY_DIR}/ext/json"
+         SOURCE_DIR "${CMAKE_BINARY_DIR}/ext/json/src/project_json"
++	PATCH_COMMAND cd "${CMAKE_BINARY_DIR}/ext/json" && patch -p3 < "${VIRGIL_PATCH_DIR}/json_uclib.patch"
++	CMAKE_ARGS ${CMAKE_ARGS}
+         CMAKE_COMMAND ""
+         BUILD_COMMAND ""
+         INSTALL_COMMAND ""
+diff -Naur ./a/rest.cmake ./b/rest.cmake
+--- ./a/rest.cmake	2016-03-24 21:19:21.609414000 +0200
++++ ./b/rest.cmake	2016-03-24 21:33:56.293373737 +0200
+@@ -37,7 +37,8 @@
+ # Dependecy to https://github.com/anuragsoni/restless
+ 
+ # Define CMake variables
+-set (CMAKE_ARGS
++list (APPEND CMAKE_ARGS
++	 -DVIRGIL_PATCH_DIR:PATH=${VIRGIL_PATCH_DIR}
+     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+     -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
+diff -Naur ./a/virgil_crypto.cmake ./b/virgil_crypto.cmake
+--- ./a/virgil_crypto.cmake	2016-03-25 11:21:48.127737000 +0200
++++ ./b/virgil_crypto.cmake	2016-03-25 11:28:13.487719416 +0200
+@@ -33,15 +33,17 @@
+ # POSSIBILITY OF SUCH DAMAGE.
+ #
+ 
++ 	list (APPEND CMAKE_ARGS
++ 				-DVIRGIL_PATCH_DIR:PATH=${VIRGIL_PATCH_DIR}
++ 	)
+-set (CMAKE_ARGS
++list (APPEND CMAKE_ARGS
++	 -DVIRGIL_PATCH_DIR:PATH=${VIRGIL_PATCH_DIR}
+     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+     -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+     -DLIB_LOW_LEVEL_API:BOOL=ON
+     -DLIB_FILE_IO:BOOL=ON
+     -DENABLE_TESTING:BOOL=OFF
+-)
+ 
+-list (APPEND CMAKE_ARGS
+     -DCMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER}
+     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
+     -DCMAKE_CXX_FLAGS_RELEASE:STRING=${CMAKE_CXX_FLAGS_RELEASE}
+

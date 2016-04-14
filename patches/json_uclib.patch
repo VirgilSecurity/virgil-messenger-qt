@@ -1,0 +1,208 @@
+diff -Naur ./a/json/src/project_json/benchmarks/benchpress.hpp ./b/json/src/project_json/benchmarks/benchpress.hpp
+--- ./a/json/src/project_json/benchmarks/benchpress.hpp	2016-03-23 22:07:40.527140000 +0200
++++ ./b/json/src/project_json/benchmarks/benchpress.hpp	2016-03-24 13:12:28.294776000 +0200
+@@ -361,6 +361,9 @@
+     std::chrono::high_resolution_clock::time_point bp_start = std::chrono::high_resolution_clock::now();
+     benchpress::options bench_opts;
+     try {
++	std::ostringstream ostr;
++	ostr << std::thread::hardware_concurrency(); 
++
+         cxxopts::Options cmd_opts(argv[0], " - command line options");
+         cmd_opts.add_options()
+             ("bench", "run benchmarks matching the regular expression", cxxopts::value<std::string>()
+@@ -368,7 +371,7 @@
+             ("benchtime", "run enough iterations of each benchmark to take t seconds", cxxopts::value<size_t>()
+                 ->default_value("1"))
+             ("cpu", "specify the number of threads to use for parallel benchmarks", cxxopts::value<size_t>()
+-                ->default_value(std::to_string(std::thread::hardware_concurrency())))
++                ->default_value(ostr.str()))
+             ("help", "print help")
+         ;
+         cmd_opts.parse(argc, argv);
+@@ -398,4 +401,4 @@
+ }
+ #endif
+ 
+-#endif // BENCHPRESS_HPP
+\ No newline at end of file
++#endif // BENCHPRESS_HPP
+diff -Naur ./a/json/src/project_json/src/json.hpp ./b/json/src/project_json/src/json.hpp
+--- ./a/json/src/project_json/src/json.hpp	2016-03-23 22:07:40.955140000 +0200
++++ ./b/json/src/project_json/src/json.hpp	2016-03-24 13:57:46.994649485 +0200
+@@ -2739,7 +2739,7 @@
+             catch (std::out_of_range&)
+             {
+                 // create better exception explanation
+-                throw std::out_of_range("array index " + std::to_string(idx) + " is out of range");
++                throw std::out_of_range("array index is out of range");
+             }
+         }
+         else
+@@ -2783,7 +2783,7 @@
+             catch (std::out_of_range&)
+             {
+                 // create better exception explanation
+-                throw std::out_of_range("array index " + std::to_string(idx) + " is out of range");
++                throw std::out_of_range("array index is out of range");
+             }
+         }
+         else
+@@ -5789,7 +5789,9 @@
+                     // use integer array index as key
+                     case value_t::array:
+                     {
+-                        return std::to_string(array_index);
++			std::ostringstream ostr;
++    			ostr << array_index;
++                        return ostr.str();
+                     }
+ 
+                     // use key from the object
+@@ -7735,8 +7737,10 @@
+                         case 'u':
+                         {
+                             // get code xxxx from uxxxx
+-                            auto codepoint = std::strtoul(std::string(reinterpret_cast<typename string_t::const_pointer>(i + 1),
+-                                                          4).c_str(), nullptr, 16);
++
++			    std::stringstream converter(std::string(reinterpret_cast<typename string_t::const_pointer>(i + 1), 4).c_str());
++			    unsigned long int codepoint;
++			    converter >> std::hex >> codepoint;
+ 
+                             // check if codepoint is a high surrogate
+                             if (codepoint >= 0xD800 and codepoint <= 0xDBFF)
+@@ -7748,8 +7752,10 @@
+                                 }
+ 
+                                 // get code yyyy from uxxxx\uyyyy
+-                                auto codepoint2 = std::strtoul(std::string(reinterpret_cast<typename string_t::const_pointer>
+-                                                               (i + 7), 4).c_str(), nullptr, 16);
++				std::stringstream converter(std::string(reinterpret_cast<typename string_t::const_pointer>(i + 7), 4).c_str());
++			    	unsigned long int codepoint2;
++			    	converter >> std::hex >> codepoint2;
++                                
+                                 result += to_unicode(codepoint, codepoint2);
+                                 // skip the next 10 characters (xxxx\uyyyy)
+                                 i += 10;
+@@ -7798,19 +7804,28 @@
+         */
+         long double str_to_float_t(long double* /* type */, char** endptr) const
+         {
+-            return std::strtold(reinterpret_cast<typename string_t::const_pointer>(m_start), endptr);
++	    std::stringstream converter(std::string(reinterpret_cast<typename string_t::const_pointer>(m_start)));
++            long double val;
++	    converter >> val;
++	    return val;
+         }
+ 
+         /// @copydoc str_to_float_t
+         double str_to_float_t(double*, char** endptr) const
+         {
+-            return std::strtod(reinterpret_cast<typename string_t::const_pointer>(m_start), endptr);
++	    std::stringstream converter(std::string(reinterpret_cast<typename string_t::const_pointer>(m_start)));
++            double val;
++	    converter >> val;
++	    return val;
+         }
+ 
+         /// @copydoc str_to_float_t
+         float str_to_float_t(float*, char** endptr) const
+         {
+-            return std::strtof(reinterpret_cast<typename string_t::const_pointer>(m_start), endptr);
++            std::stringstream converter(std::string(reinterpret_cast<typename string_t::const_pointer>(m_start)));
++            float val;
++	    converter >> val;
++	    return val;
+         }
+ 
+         /*!
+diff -Naur ./a/json/src/project_json/src/json.hpp.re2c ./b/json/src/project_json/src/json.hpp.re2c
+--- ./a/json/src/project_json/src/json.hpp.re2c	2016-03-23 22:07:40.955140000 +0200
++++ ./b/json/src/project_json/src/json.hpp.re2c	2016-03-24 13:57:25.674650479 +0200
+@@ -2739,7 +2739,7 @@
+             catch (std::out_of_range&)
+             {
+                 // create better exception explanation
+-                throw std::out_of_range("array index " + std::to_string(idx) + " is out of range");
++                throw std::out_of_range("array index is out of range");
+             }
+         }
+         else
+@@ -2783,7 +2783,7 @@
+             catch (std::out_of_range&)
+             {
+                 // create better exception explanation
+-                throw std::out_of_range("array index " + std::to_string(idx) + " is out of range");
++                throw std::out_of_range("array index is out of range");
+             }
+         }
+         else
+@@ -5789,7 +5789,9 @@
+                     // use integer array index as key
+                     case value_t::array:
+                     {
+-                        return std::to_string(array_index);
++                        std::ostringstream ostr;
++    			ostr << array_index;
++                        return ostr.str();
+                     }
+ 
+                     // use key from the object
+@@ -7014,8 +7016,9 @@
+                         case 'u':
+                         {
+                             // get code xxxx from uxxxx
+-                            auto codepoint = std::strtoul(std::string(reinterpret_cast<typename string_t::const_pointer>(i + 1),
+-                                                          4).c_str(), nullptr, 16);
++                            std::stringstream converter(std::string(reinterpret_cast<typename string_t::const_pointer>(i + 1), 4).c_str());
++			    unsigned long int codepoint;
++			    converter >> std::hex >> codepoint;
+ 
+                             // check if codepoint is a high surrogate
+                             if (codepoint >= 0xD800 and codepoint <= 0xDBFF)
+@@ -7027,8 +7030,10 @@
+                                 }
+ 
+                                 // get code yyyy from uxxxx\uyyyy
+-                                auto codepoint2 = std::strtoul(std::string(reinterpret_cast<typename string_t::const_pointer>
+-                                                               (i + 7), 4).c_str(), nullptr, 16);
++                                std::stringstream converter(std::string(reinterpret_cast<typename string_t::const_pointer>(i + 7), 4).c_str());
++			    	unsigned long int codepoint2;
++			    	converter >> std::hex >> codepoint2;
++
+                                 result += to_unicode(codepoint, codepoint2);
+                                 // skip the next 10 characters (xxxx\uyyyy)
+                                 i += 10;
+@@ -7077,19 +7082,28 @@
+         */
+         long double str_to_float_t(long double* /* type */, char** endptr) const
+         {
+-            return std::strtold(reinterpret_cast<typename string_t::const_pointer>(m_start), endptr);
++            std::stringstream converter(std::string(reinterpret_cast<typename string_t::const_pointer>(m_start));
++            long double val;
++	    converter >> val;
++	    return val;
+         }
+ 
+         /// @copydoc str_to_float_t
+         double str_to_float_t(double*, char** endptr) const
+         {
+-            return std::strtod(reinterpret_cast<typename string_t::const_pointer>(m_start), endptr);
++            std::stringstream converter(std::string(reinterpret_cast<typename string_t::const_pointer>(m_start));
++            double val;
++	    converter >> val;
++	    return val;
+         }
+ 
+         /// @copydoc str_to_float_t
+         float str_to_float_t(float*, char** endptr) const
+         {
+-            return std::strtof(reinterpret_cast<typename string_t::const_pointer>(m_start), endptr);
++            std::stringstream converter(std::string(reinterpret_cast<typename string_t::const_pointer>(m_start));
++            float val;
++	    converter >> val;
++	    return val;
+         }
+ 
+         /*!
