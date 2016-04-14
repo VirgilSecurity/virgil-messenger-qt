@@ -40,7 +40,7 @@
 
 int main(int argc, const char * argv[]) {
     if (argc < 4) {
-        std::cerr << "Usage : ./server <port> <email> <private key directory>" << std::endl;
+        std::cerr << "Usage : virgil_server <port> <email> <private key directory>" << std::endl;
         return 0;
     }
     

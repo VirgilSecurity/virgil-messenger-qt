@@ -41,7 +41,7 @@
 
 int main(int argc, const char * argv[]) {
     if(argc < 5) {
-        std::cerr << "Usage : ./client <host name> <port> <email> <private key directory>" << std::endl;
+        std::cerr << "Usage : virgi_client <host name> <port> <email> <private key directory>" << std::endl;
         return 0;
     }
     
