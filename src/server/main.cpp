@@ -40,14 +40,14 @@
 
 int main(int argc, const char * argv[]) {
     if (argc < 4) {
-        std::cerr << "Usage : virgil_server <port> <email> <private key directory>" << std::endl;
+        std::cout << "Usage : virgil_server <port> <email> <private key directory>" << std::endl;
         return 0;
     }
     
     const uint16_t _portNum(atoi(argv[1]));
     
     if(_portNum < 2000 || _portNum > 65535) {
-        std::cerr << "Please enter a port number between 2000 - 65535" << std::endl;
+        std::cout << "Please enter a port number between 2000 - 65535" << std::endl;
         return 0;
     }
     

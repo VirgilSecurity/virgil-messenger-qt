@@ -79,14 +79,18 @@ std::string VirgilServer::processCommand(const std::string & receivedData) {
     std::cout << "Encrypted data : " << _encryptedData << std::endl;
     std::cout << "Signature : " << _signatureData << std::endl;
     
+    // Verify data
     if (m_crypto->verify(_senderIdentity,
                          _encryptedData,
                          _signatureData)) {
         std::cout << "Signature : CORRECT" << std::endl;
         
+        // Decrypt data
         std::string decryptedText;
         if (m_crypto->decrypt(_encryptedData, decryptedText)) {
             std::cout << std::endl << "Decrypted data : " << decryptedText << std::endl;
+            
+            // Received data is correct, so let's send encrypted answer to client
             return prepareAnswer(_senderIdentity, "<Data received by server : '" + decryptedText + "'>");
         } else {
             std::cout << "Decryption : ERROR" << std::endl;
