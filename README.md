@@ -61,7 +61,7 @@ Example:
 - private key directory - directory where the private key will be stored.
 
 Example:
-        ./virgil_server 3000 server@test.com ${HOME}/
+        ./virgil_client 192.168.0.101 3000 client@test.com ${HOME}/
 
 ## License
 BSD 3-Clause. See [LICENSE](https://github.com/VirgilSecurity/virgil-cli/blob/master/LICENSE) for details.
