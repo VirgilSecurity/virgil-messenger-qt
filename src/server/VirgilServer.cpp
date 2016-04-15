@@ -49,7 +49,9 @@
 /******************************************************************************/
 VirgilServer::VirgilServer(VirgilCryptoHelper * crypto) :
 m_crypto(crypto),
-m_clientFd(-1) {
+m_clientFd(-1),
+m_serverFd(-1),
+m_serverThread(0) {
 }
 
 /******************************************************************************/
@@ -121,19 +123,49 @@ std::string VirgilServer::prepareAnswer(const std::string & recipientIdentity,
 }
 
 /******************************************************************************/
-void * VirgilServer::communicationTask(void * param) {
+void * VirgilServer::serverTask(void * param) {
     std::cout << std::endl << "Thread No: " << pthread_self() << std::endl;
-    char receiveBuf[2048];
     
     VirgilServer * obj(reinterpret_cast<VirgilServer *>(param));
+    
+    struct sockaddr_in clntAdd;
+    socklen_t len(sizeof(clntAdd));
+    
+    while (true) {
+        std::cout << "Listening" << std::endl;
+        
+        const int _newFd(accept(obj->m_serverFd, (struct sockaddr *)&clntAdd, &len));
+        
+        if (_newFd < 0) {
+            std::cerr << "Cannot accept connection" << std::endl;
+            break;
+        } else {
+            std::cout << "Connection successfull" << std::endl;
+        }
+        
+        if (-1 == obj->m_clientFd) {
+            obj->m_clientFd = _newFd;
+            obj->communicationTask();
+        } else {
+            std::cout << "Close new connection" << std::endl;
+            close(_newFd);
+        }
+    }
+    
+    return 0;
+}
+
+/******************************************************************************/
+void VirgilServer::communicationTask() {
+    char receiveBuf[2048];
     
     while (true) {
         memset(receiveBuf, 0, sizeof(receiveBuf));
         
         // Receive data
-        if (0 >= read(obj->m_clientFd, receiveBuf, sizeof(receiveBuf) - 1)) {
+        if (0 >= read(m_clientFd, receiveBuf, sizeof(receiveBuf) - 1)) {
             std::cout << "Read socket error";
-            obj->m_clientFd = -1;
+            m_clientFd = -1;
             break;
         } else {
             const std::string _stdReceive(receiveBuf);
@@ -141,33 +173,33 @@ void * VirgilServer::communicationTask(void * param) {
             
             if (_stdReceive == "getIdentity") {
                 // Send of identity
-                send(obj->m_clientFd,
-                     obj->m_crypto->ownIdentity().c_str(),
-                     obj->m_crypto->ownIdentity().length(),
+                send(m_clientFd,
+                     m_crypto->ownIdentity().c_str(),
+                     m_crypto->ownIdentity().length(),
                      0);
                 continue;
             }
             
             // Process data
-            const std::string _answer(obj->processCommand(_stdReceive));
+            const std::string _answer(processCommand(_stdReceive));
             if (_answer.empty()) continue;
             
             // Send answer
             std::cout << "Server answer has been sent." << std::endl;
-            send(obj->m_clientFd, _answer.c_str(), _answer.length(), 0);
+            send(m_clientFd, _answer.c_str(), _answer.length(), 0);
         }
     }
-    std::cout << "\nClosing thread and connection" << std::endl;
-    close(obj->m_clientFd);
-    return 0;
+    close(m_clientFd);
+    m_clientFd = -1;
+    return;
 }
 
 /******************************************************************************/
 bool VirgilServer::listen(uint16_t serverPort) {
     //create socket
-    const int listenFd(socket(AF_INET, SOCK_STREAM, 0));
+    m_serverFd = socket(AF_INET, SOCK_STREAM, 0);
     
-    if(listenFd < 0) {
+    if(m_serverFd < 0) {
         std::cerr << "Cannot open socket" << std::endl;
         return false;
     }
@@ -180,37 +212,28 @@ bool VirgilServer::listen(uint16_t serverPort) {
     svrAdd.sin_port = htons(serverPort);
     
     //bind socket
-    if (::bind(listenFd, (struct sockaddr *) &svrAdd, sizeof(svrAdd)) < 0) {
+    if (::bind(m_serverFd, (struct sockaddr *) &svrAdd, sizeof(svrAdd)) < 0) {
         std::cerr << "Cannot bind" << std::endl;
         return false;
     }
     
-    ::listen(listenFd, 5);
+    ::listen(m_serverFd, 5);
     
-    struct sockaddr_in clntAdd;
-    socklen_t len(sizeof(clntAdd));
+    // Start server's thread
+    pthread_create(&m_serverThread, 0, VirgilServer::serverTask, this);
     
-    pthread_t clientThread;
-    while (true) {
-        std::cout << "Listening" << std::endl;
-        
-        const int _newFd(accept(listenFd, (struct sockaddr *)&clntAdd, &len));
-        
-        if (_newFd < 0) {
-            std::cerr << "Cannot accept connection" << std::endl;
-            return false;
-        } else {
-            std::cout << "Connection successfull" << std::endl;
-        }
-        
-        if (-1 == m_clientFd) {
-            m_clientFd = _newFd;
-            pthread_create(&clientThread, 0, VirgilServer::communicationTask, this);
-        } else {
-            std::cout << "Close new connection" << std::endl;
-            close(_newFd);
-        }
-    }
+    // Wait for thread finish
+    pthread_join(m_serverThread, 0);
+    
+    // Close socket
+    close(m_serverFd);
     
     return true;
+}
+
+/******************************************************************************/
+void VirgilServer::stop() {
+    if (m_serverThread) {
+        pthread_cancel(m_serverThread);
+    }
 }

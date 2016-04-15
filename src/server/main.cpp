@@ -34,9 +34,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <signal.h>
 #include <iostream>
 #include "VirgilServer.h"
 #include "../VirgilCryptoHelper.h"
+
+void instalSignalHandler();
+
+VirgilCryptoHelper * cryptoHelper(0);
+VirgilServer * server(0);
 
 int main(int argc, const char * argv[]) {
     if (argc < 4) {
@@ -53,6 +59,8 @@ int main(int argc, const char * argv[]) {
     
     const std::string _keysIdentity(argv[2]);
     const std::string _privateKeyDir(argv[3]);
+    
+    instalSignalHandler();
 
     std::cout << "Virgil Server Start ..." << std::endl;
     
@@ -61,12 +69,42 @@ int main(int argc, const char * argv[]) {
     if (cryptoHelper->init(_keysIdentity, _privateKeyDir)) {
         
         // Start server work
-        VirgilServer(cryptoHelper).listen(_portNum);
+        server = new VirgilServer(cryptoHelper);
+        server->listen(_portNum);
     } else {
         std::cout << "terminate server" << std::endl;
     }
 
+    delete server;
     delete cryptoHelper;
+    
+    std::cerr << std::endl << "Virgil Server Stopped" << std::endl;
 
     return 0;
+}
+
+/**
+ * @brief Handler for Ctrl-C signal.
+ * Correct stop of the server on Ctrl-C.
+ */
+void ctrlC(int s) {
+    if (server) {
+        server->stop();
+    }
+}
+
+/**
+ * @brief Install handler for Ctrl-C event.
+ */
+void instalSignalHandler() {
+    struct sigaction sigIntHandler;
+    
+    sigIntHandler.sa_handler = ctrlC;
+    sigemptyset(&sigIntHandler.sa_mask);
+    sigIntHandler.sa_flags = 0;
+    
+    sigaction(SIGINT, &sigIntHandler, 0);
+    
+    // Ignore SIGPIPE
+    sigignore(SIGPIPE);
 }

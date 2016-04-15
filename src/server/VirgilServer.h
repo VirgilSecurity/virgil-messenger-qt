@@ -54,13 +54,23 @@ public:
      */
     bool listen(uint16_t serverPort);
     
+    /**
+     * @brief Stop server.
+     */
+    void stop();
+    
 private:
     /**
-     * @brief Communication task which processed in new thread.
+     * @brief Server which processed in new thread (connections management).
      *
      * @param[in] param             pointer to parameter which passed when thread was started.
      */
-    static void * communicationTask(void * param);
+    static void * serverTask(void * param);
+    
+    /**
+     * @brief Communication task which processed in server's thread (it's for simple example).
+     */
+    void communicationTask();
     
     /**
      * @brief Process received data from client. Check signature, decode and send answer.
@@ -83,4 +93,6 @@ private:
 
     VirgilCryptoHelper * m_crypto;      /**< Pointer to external crypto helper. TODO: Use shared pointer */
     int m_clientFd;                     /**< client's socket descriptor */
+    int m_serverFd;                     /**< server's socket descriptor */
+    pthread_t m_serverThread;           /**< servers's thread */
 };
