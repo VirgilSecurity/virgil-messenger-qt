@@ -77,11 +77,11 @@ bool VirgilCryptoHelper::init(const std::string & identity,
     
     // Search for exist virgil card
     if (getCard(identity, m_currentCard) && loadPrivateKey()) {
-        std::cout << "Server keys were been loaded" << std::endl;
+        std::cout << "Virgil keys were been loaded" << std::endl;
         m_valid = true;
     } else {
         if (createCard(identity, privateKeyDir)) {
-            std::cout << "Server keys were been created" << std::endl;
+            std::cout << "Virgil keys were been created" << std::endl;
             m_valid = true;
         } else {
             std::cout << "ERROR: Can't create keys" << std::endl;
