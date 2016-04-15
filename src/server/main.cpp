@@ -104,7 +104,4 @@ void instalSignalHandler() {
     sigIntHandler.sa_flags = 0;
     
     sigaction(SIGINT, &sigIntHandler, 0);
-    
-    // Ignore SIGPIPE
-    sigignore(SIGPIPE);
 }
