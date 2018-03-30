@@ -69,4 +69,8 @@ BSD 3-Clause. See [LICENSE](https://github.com/VirgilSecurity/virgil-cli/blob/ma
 
 ## Contacts
 
-Email: <support@virgilsecurity.com>
+Our developer support team is here to help you. Find out more information on our [Help Center](https://help.virgilsecurity.com/).
+
+You can find us on [Twitter](https://twitter.com/VirgilSecurity) or send us email support@VirgilSecurity.com.
+
+Also, get extra help from our support team on [Slack](https://virgilsecurity.slack.com/join/shared_invite/enQtMjg4MDE4ODM3ODA4LTc2OWQwOTQ3YjNhNTQ0ZjJiZDc2NjkzYjYxNTI0YzhmNTY2ZDliMGJjYWQ5YmZiOGU5ZWEzNmJiMWZhYWVmYTM).
