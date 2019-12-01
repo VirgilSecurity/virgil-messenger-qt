@@ -1,0 +1,9 @@
+# CLion specific
+.idea/
+
+# debug/release folders
+debug/
+release/
+
+# Virgil IoTKIT
+.depends_cache/

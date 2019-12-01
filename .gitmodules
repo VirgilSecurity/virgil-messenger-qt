@@ -1,0 +1,3 @@
+[submodule "ext/virgil-iotkit"]
+	path = ext/virgil-iotkit
+	url = https://github.com/VirgilSecurity/virgil-iotkit
