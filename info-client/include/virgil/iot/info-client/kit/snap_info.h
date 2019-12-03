@@ -22,7 +22,7 @@ namespace VirgilIoTKit {
 
         using TEnumDevicesArray = std::vector<vs_snap_info_device_t>;
 
-        const vs_snap_service_t *serviceInterface() const override;
+        vs_snap_service_t *serviceInterface() override      { return _snapService; }
         const std::string &serviceName() const override;
 
         TEnumDevicesArray enumDevices( size_t wait_msec, size_t max_devices_amount = 1000 ) const;
@@ -37,14 +37,14 @@ namespace VirgilIoTKit {
 
     private:
         static CSnapInfoClient *_instance;
-        static const vs_snap_service_t * _snapService;
+        static vs_snap_service_t * _snapService;
         mutable vs_snap_info_client_service_t _snapInfoImpl;
         struct DeviceInfo{};
         std::vector<DeviceInfo> _devices;
 
-        static vs_status_e startNotify( vs_snap_info_device_t *device );
-        static vs_status_e generalInfo( vs_info_general_t *general_data );
-        static vs_status_e statistics(  vs_info_statistics_t *statistics );
+        static vs_status_e startNotify( struct vs_snap_service_t* service, vs_snap_info_device_t *device );
+        static vs_status_e generalInfo( struct vs_snap_service_t* service, vs_info_general_t *general_data );
+        static vs_status_e statistics(  struct vs_snap_service_t* service, vs_info_statistics_t *statistics );
 
     };
 

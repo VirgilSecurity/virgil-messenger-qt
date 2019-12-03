@@ -7,7 +7,7 @@
 #include <kit/snap_info.h>
 
 /* static */ VirgilIoTKit::CSnapInfoClient * VirgilIoTKit::CSnapInfoClient::_instance = nullptr;
-/* static */ const VirgilIoTKit::vs_snap_service_t * VirgilIoTKit::CSnapInfoClient::_snapService;
+/* static */ VirgilIoTKit::vs_snap_service_t * VirgilIoTKit::CSnapInfoClient::_snapService = nullptr;
 
 VirgilIoTKit::CSnapInfoClient::CSnapInfoClient(){
 
@@ -29,10 +29,6 @@ VirgilIoTKit::CSnapInfoClient::~CSnapInfoClient(){
 
 }
 
-const VirgilIoTKit::vs_snap_service_t * VirgilIoTKit::CSnapInfoClient::serviceInterface() const {
-    return _snapService;
-}
-
 const std::string & VirgilIoTKit::CSnapInfoClient::serviceName() const {
     using namespace std;
     static const std::string service_name = "INFO"s;
@@ -40,7 +36,7 @@ const std::string & VirgilIoTKit::CSnapInfoClient::serviceName() const {
     return service_name;
 }
 
-/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::CSnapInfoClient::startNotify( vs_snap_info_device_t *device ){
+/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::CSnapInfoClient::startNotify( struct vs_snap_service_t* service, vs_snap_info_device_t *device ){
     assert( _instance );
 
     emit _instance->deviceStarted( *device );
@@ -48,7 +44,7 @@ const std::string & VirgilIoTKit::CSnapInfoClient::serviceName() const {
     return VirgilIoTKit::VS_CODE_OK;
 }
 
-/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::CSnapInfoClient::generalInfo( vs_info_general_t *general_data ){
+/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::CSnapInfoClient::generalInfo( struct vs_snap_service_t* service, vs_info_general_t *general_data ){
     assert( _instance );
 
     emit _instance->deviceGeneralInfo( *general_data );
@@ -56,7 +52,7 @@ const std::string & VirgilIoTKit::CSnapInfoClient::serviceName() const {
     return VirgilIoTKit::VS_CODE_OK;
 }
 
-/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::CSnapInfoClient::statistics( vs_info_statistics_t *statistics ){
+/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::CSnapInfoClient::statistics( struct vs_snap_service_t* service, vs_info_statistics_t *statistics ){
     assert( _instance );
 
     emit _instance->deviceStatistics( *statistics );

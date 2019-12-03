@@ -207,7 +207,9 @@ void VirgilIoTKit::CSnapProtocol::сhangeStateNotify( const std::string &descrip
     _changeStateNotify( description );
 }
 
-/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::CSnapProtocol::netIfInit( const vs_netif_rx_cb_t rx_cb, const vs_netif_process_cb_t process_cb ){
+/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::CSnapProtocol::netIfInit( struct vs_netif_t* netif, const vs_netif_rx_cb_t rx_cb, const vs_netif_process_cb_t process_cb ){
+    (void) netif;
+
     assert( _instance );
 
     _instance->_netIfRxCallback = rx_cb;
@@ -216,21 +218,27 @@ void VirgilIoTKit::CSnapProtocol::сhangeStateNotify( const std::string &descrip
     return _instance->initInterface();
 }
 
-/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::CSnapProtocol::netIfDeinit(){
+/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::CSnapProtocol::netIfDeinit( struct vs_netif_t* netif ){
+    (void) netif;
+
     assert( _instance );
 
     return _instance->destroy();
 
 }
 
-/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::CSnapProtocol::netIfTx( const uint8_t* data, const uint16_t data_sz ){
+/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::CSnapProtocol::netIfTx( struct vs_netif_t* netif, const uint8_t* data, const uint16_t data_sz ){
+    (void) netif;
+
     assert( _instance );
 
     return _instance->sendRawData( TData( data, data + data_sz ));
 
 }
 
-/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::CSnapProtocol::netIfMac( vs_mac_addr_t* mac_addr ){
+/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::CSnapProtocol::netIfMac( const struct vs_netif_t* netif, vs_mac_addr_t* mac_addr ){
+    (void) netif;
+
     assert( _instance );
 
     auto [ ret_code, mac ] = _instance->ownMac();
