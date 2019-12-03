@@ -35,7 +35,6 @@ target_sources(info-client
         PRIVATE
         include/virgil/iot/info-client/app.h
         include/virgil/iot/info-client/main_window.h
-        include/virgil/iot/info-client/statistics.h
         include/virgil/iot/info-client/kit/logger.h
         include/virgil/iot/info-client/kit/snap_info.h
         include/virgil/iot/info-client/kit/snap_protocol.h
@@ -44,7 +43,6 @@ target_sources(info-client
 
         src/main.cpp
         src/main_window.cpp
-        src/statistics.cpp
         src/kit/hal.cpp
         src/kit/snap_info.cpp
         src/kit/snap_protocol.cpp

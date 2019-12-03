@@ -21,10 +21,4 @@
 
 using namespace std::string_literals;
 
-struct CAppSettings {
-    VirgilIoTKit::CMac _ownMac;
-};
-
-extern CAppSettings _appSettings;
-
 #endif //VIRGIL_IOT_INFO_CLIENT_APPLICATION_HEADERS_H_

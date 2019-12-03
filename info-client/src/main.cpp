@@ -5,11 +5,8 @@
 #include <kit/snap_info.h>
 #include <kit/logger.h>
 #include <main_window.h>
-#include <statistics.h>
 
 using namespace VirgilIoTKit;
-
-CAppSettings _appSettings;
 
 void InitSnap( VirgilIoTKit::CSnapUdp *snap_udp, VirgilIoTKit::CSnapInfoClient *snap_info_client, CMainWindow *main_window ) {
     using namespace VirgilIoTKit;
@@ -74,9 +71,6 @@ int main( int argc, char *argv[] )
         CMainWindow main_window;
         VirgilIoTKit::CSnapUdp snap_udp;
         VirgilIoTKit::CSnapInfoClient snap_info_client;
-        CStatistics statistics;
-
-        statistics.init();
 
         main_window.show();
 
