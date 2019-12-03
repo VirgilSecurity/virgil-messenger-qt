@@ -116,6 +116,7 @@ namespace VirgilIoTKit {
     public:
         using FChangeStateNotify = std::function<void( const std::string & )>;
 
+        CSnapProtocol();
         virtual ~CSnapProtocol();
 
         bool init( const CManufactureId &manufacture_id, const CDeviceType &device_type, const CDeviceSerial &device_serial,
@@ -140,14 +141,15 @@ namespace VirgilIoTKit {
         void сhangeStateNotify( const std::string &description );
 
     private:
+        static CSnapProtocol *_instance;
         vs_netif_t _networkInterface;
         EState _state;
         FChangeStateNotify _changeStateNotify;
 
-        static vs_status_e netIfInit( struct vs_netif_t *netif, const vs_netif_rx_cb_t rx_cb, const vs_netif_process_cb_t process_cb );
-        static vs_status_e netIfDeinit( struct vs_netif_t *netif );
-        static vs_status_e netIfTx( struct vs_netif_t *netif, const uint8_t* data, const uint16_t data_sz );
-        static vs_status_e netIfMac( const struct vs_netif_t *netif, vs_mac_addr_t* mac_addr );
+        static vs_status_e netIfDeinit();
+        static vs_status_e netIfInit( const vs_netif_rx_cb_t rx_cb, const vs_netif_process_cb_t process_cb );
+        static vs_status_e netIfTx(   const uint8_t* data, const uint16_t data_sz );
+        static vs_status_e netIfMac(  vs_mac_addr_t* mac_addr );
 
         vs_netif_rx_cb_t _netIfRxCallback;
         vs_netif_process_cb_t _netIfRxProcessCallback;
