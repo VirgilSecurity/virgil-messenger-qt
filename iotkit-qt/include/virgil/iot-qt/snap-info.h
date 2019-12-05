@@ -71,8 +71,6 @@ private:
     static VSSnapInfoClient *_instance;
     static const VirgilIoTKit::vs_snap_service_t * _snapService;
     mutable VirgilIoTKit::vs_snap_info_client_service_t _snapInfoImpl;
-    struct DeviceInfo{};
-    std::vector<DeviceInfo> _devices;
 
     static VirgilIoTKit::vs_status_e startNotify( VirgilIoTKit::vs_snap_info_device_t *device );
     static VirgilIoTKit::vs_status_e generalInfo( VirgilIoTKit::vs_info_general_t *general_data );
