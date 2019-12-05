@@ -121,7 +121,7 @@ class VSDeviceSerial {
 public:
     VSDeviceSerial(): _deviceSerial{ 0 } {}
     VSDeviceSerial( const VSDeviceSerial& ) = default;
-    VSDeviceSerial( const VirgilIoTKit::vs_device_type_t& buf ) { set( buf ); }
+    VSDeviceSerial( const VirgilIoTKit::vs_device_serial_t& buf ) { set( buf ); }
 
     VSDeviceSerial& operator=( const VSDeviceSerial& device_serial )  { return set( device_serial ); }
     VSDeviceSerial& operator=( const VirgilIoTKit::vs_device_serial_t& buf )       { return set( buf ); }

@@ -35,10 +35,7 @@
 #include <iomanip>
 #include <sstream>
 
-#include <virgil/iot-qt/snap_protocol.h>
-#include <virgil/iot-qt/snap_service.h>
-
-#include <virgil/iot/protocols/snap.h>
+#include <virgil/iot-qt/helpers.h>
 
 using namespace VirgilIoTKit;
 
@@ -186,103 +183,4 @@ std::string VSDeviceSerial::describe( bool two_symbols, bool upper_case, char di
     }
 
     return ss.str();
-}
-
-/* static */ VSSnapProtocol * VSSnapProtocol::_instance = nullptr;
-
-VSSnapProtocol::VSSnapProtocol(){
-    assert( !_instance );
-    _instance = this;
-
-}
-
-VSSnapProtocol::~VSSnapProtocol(){
-    assert( _instance );
-    _instance = nullptr;
-}
-
-bool VSSnapProtocol::init( const VSManufactureId &manufacture_id, const VSDeviceType &device_type, const VSDeviceSerial &device_serial,
-           vs_snap_device_role_e device_roles, FChangeStateNotify change_state_notify ) {
-
-    _changeStateNotify = change_state_notify;
-
-    _networkInterface.user_data = this;
-    _networkInterface.init = netIfInit;
-    _networkInterface.deinit = netIfDeinit;
-    _networkInterface.tx = netIfTx;
-    _networkInterface.mac_addr = netIfMac;
-
-    _state = EState::NotInitialized;
-
-    if( vs_snap_init( &_networkInterface, manufacture_id, device_type, device_serial, device_roles ) != VS_CODE_OK ) {
-        VS_LOG_CRITICAL( "Unable to initialize Virgil IoTKIT::SNAP protocol" );
-        return false;
-    }
-
-    return true;
-}
-
-void VSSnapProtocol::processRxData( TData &&data ) {
-    if( !_netIfRxCallback )
-        return;
-
-    const uint8_t *packet_data = nullptr;
-    uint16_t packet_data_sz = 0;
-
-    if( _netIfRxCallback( &_networkInterface, data.data(), data.size(), &packet_data, &packet_data_sz ) != VS_CODE_OK )
-        return;
-
-    if( _netIfRxProcessCallback( &_networkInterface, packet_data, packet_data_sz ) != VS_CODE_OK )
-        VS_LOG_ERROR( "Unable to process received packet" );
-}
-
-void VSSnapProtocol::сhangeStateNotify( const std::string &description ) {
-    _changeStateNotify( description );
-}
-
-/* static */ vs_status_e VSSnapProtocol::netIfInit( const vs_netif_rx_cb_t rx_cb, const vs_netif_process_cb_t process_cb ){
-    assert( _instance );
-
-    _instance->_netIfRxCallback = rx_cb;
-    _instance->_netIfRxProcessCallback = process_cb;
-
-    return _instance->initInterface();
-}
-
-/* static */ vs_status_e VSSnapProtocol::netIfDeinit(){
-    assert( _instance );
-
-    return _instance->destroy();
-
-}
-
-/* static */ vs_status_e VSSnapProtocol::netIfTx( const uint8_t* data, const uint16_t data_sz ){
-    assert( _instance );
-
-    return _instance->sendRawData( TData( data, data + data_sz ));
-
-}
-
-/* static */ vs_status_e VSSnapProtocol::netIfMac( vs_mac_addr_t* mac_addr ){
-    assert( _instance );
-
-    auto [ ret_code, mac ] = _instance->ownMac();
-
-    *mac_addr = mac;
-
-    return ret_code;
-
-}
-
-bool VSSnapProtocol::registerService( VSSnapService &snap_service ) {
-    vs_status_e ret_code;
-
-    if( vs_snap_register_service( snap_service.serviceInterface() ) != VS_CODE_OK ) {
-        VS_LOG_CRITICAL( "Unable to register service \"", snap_service.serviceName().c_str(), "\"" );
-        return false;
-    }
-
-    snap_service.setSnapProtocol( this );
-
-    return true;
 }

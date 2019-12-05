@@ -32,7 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <virgil/iot-qt/snap_info.h>
+#include <virgil/iot-qt/logger.h>
+#include <virgil/iot-qt/snap-info.h>
 
 using namespace VirgilIoTKit;
 
@@ -96,7 +97,7 @@ VSSnapInfoClient::TEnumDevicesArray VSSnapInfoClient::enumDevices( size_t wait_m
     vs_status_e ret_code;
 
     devices.resize( max_devices_amount );
-    ret_code = vs_snap_info_enum_devices( snapProtocol().netIf(), devices.data(), devices.size(), &devices_amount, wait_msec );
+    ret_code = vs_snap_info_enum_devices( snapProtocol().defaultNetif(), devices.data(), devices.size(), &devices_amount, wait_msec );
 
     devices.resize( devices_amount );
 
@@ -106,8 +107,8 @@ VSSnapInfoClient::TEnumDevicesArray VSSnapInfoClient::enumDevices( size_t wait_m
 bool VSSnapInfoClient::changePolling( size_t pooling_element, uint16_t period_seconds, bool enable, const VSMac &device_mac) const {
     vs_mac_addr_t mac = device_mac;
 
-    if( vs_snap_info_set_polling( snapProtocol().netIf(), &mac, pooling_element, enable, period_seconds ) != VS_CODE_OK ) {
-        VS_LOG_ERROR( "Unable to setup info polling" );
+    if( vs_snap_info_set_polling( snapProtocol().defaultNetif(), &mac, pooling_element, enable, period_seconds ) != VS_CODE_OK ) {
+        VSLogError( "Unable to setup info polling" );
         return false;
     }
 

@@ -37,7 +37,7 @@
 
 #include <app.h>
 
-#include <virgil/iot-qt/snap_protocol.h>
+#include <virgil/iot-qt/snap-protocol.h>
 #include <virgil/iot/protocols/snap/info/info-structs.h>
 
 class VSMainWindow : public QObject  {
@@ -54,6 +54,7 @@ public slots:
     void deviceStarted( VirgilIoTKit::vs_snap_info_device_t &device );
     void deviceGeneralInfo( VirgilIoTKit::vs_info_general_t &general_data );
     void deviceStatistics( VirgilIoTKit::vs_info_statistics_t &statistics );
+    void stateChanged( QAbstractSocket::SocketState connectionState, const std::string &description );
 
 private:
     enum class EColumn{ MAC = 0, DevRoles, Manufacture, Type, FWVersion, TLVersion, ReceivedAmount, SentAmount, ColumnsAmount };

@@ -50,16 +50,17 @@ target_sources(virgil-iotkit-qt
         PRIVATE
         include/virgil/iot-qt/logger.h
         include/virgil/iot-qt/helpers.h
-        include/virgil/iot-qt/snap_info.h
-        include/virgil/iot-qt/snap_protocol.h
-        include/virgil/iot-qt/snap_service.h
-        include/virgil/iot-qt/snap_udp.h
+        include/virgil/iot-qt/netif.h
+        include/virgil/iot-qt/netif-udp.h
+        include/virgil/iot-qt/snap-info.h
+        include/virgil/iot-qt/snap-protocol.h
+        include/virgil/iot-qt/snap-service.h
 
         src/hal.cpp
-        src/snap_info.cpp
-        src/snap_protocol.cpp
-        src/snap_service.cpp
-        src/snap_udp.cpp
+        src/helpers.cpp
+        src/netif-udp.cpp
+        src/snap-info.cpp
+        src/snap-protocol.cpp
         )
 
 target_include_directories(virgil-iotkit-qt

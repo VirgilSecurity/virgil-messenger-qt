@@ -45,6 +45,7 @@
 #include <virgil/iot/protocols/snap/snap-structs.h>
 
 class VSSnapService;
+class VSNetif;
 
 class VSSnapProtocol {
 public:
@@ -53,40 +54,21 @@ public:
     VSSnapProtocol();
     virtual ~VSSnapProtocol();
 
-    bool init( const VSManufactureId &manufacture_id, const VSDeviceType &device_type, const VSDeviceSerial &device_serial,
-               VirgilIoTKit::vs_snap_device_role_e device_roles, FChangeStateNotify change_state_notify );
+    bool init( VSNetif &network_interface, const VSManufactureId &manufacture_id, const VSDeviceType &device_type, const VSDeviceSerial &device_serial,
+               VirgilIoTKit::vs_snap_device_role_e device_roles );
     bool registerService( VSSnapService &snap_service );
 
-    const VirgilIoTKit::vs_netif_t* netIf() const { return &_networkInterface; }
-    virtual const VSMac& ownMacAddress() const = 0;
-
-protected:
-    enum class EState{ NotInitialized, Initialized, Destructed };
-    using TMacResponse = std::pair<VirgilIoTKit::vs_status_e, VSMac>;
-
-    EState state() const { return _state; }
-
-    virtual VirgilIoTKit::vs_status_e initInterface() = 0;
-    virtual VirgilIoTKit::vs_status_e destroy() = 0;
-    virtual VirgilIoTKit::vs_status_e sendRawData( TData &&data ) = 0;
-    virtual TMacResponse ownMac() const = 0;
-
-    void processRxData( TData &&data );
-    void сhangeStateNotify( const std::string &description );
+    static const VSManufactureId manufactureId();
+    static const VSDeviceSerial deviceSerial();
+    static const VSDeviceType deviceType();
+    static uint32_t deviceRoles();
+    static const VirgilIoTKit::vs_netif_t* defaultNetif();
+    static bool send( const TData &data, VirgilIoTKit::vs_netif_t* netif = nullptr );
+    static VSMac macAddress( VirgilIoTKit::vs_netif_t* netif = nullptr );
 
 private:
-    static VSSnapProtocol *_instance;
-    VirgilIoTKit::vs_netif_t _networkInterface;
-    EState _state;
-    FChangeStateNotify _changeStateNotify;
-
-    static VirgilIoTKit::vs_status_e netIfDeinit();
-    static VirgilIoTKit::vs_status_e netIfInit( const VirgilIoTKit::vs_netif_rx_cb_t rx_cb, const VirgilIoTKit::vs_netif_process_cb_t process_cb );
-    static VirgilIoTKit::vs_status_e netIfTx( const uint8_t* data, const uint16_t data_sz );
-    static VirgilIoTKit::vs_status_e netIfMac( VirgilIoTKit::vs_mac_addr_t* mac_addr );
-
-    VirgilIoTKit::vs_netif_rx_cb_t _netIfRxCallback;
-    VirgilIoTKit::vs_netif_process_cb_t _netIfRxProcessCallback;
+    static VSSnapProtocol* _instance;
+    VirgilIoTKit::vs_netif_t* _netif = nullptr;
 };
 
 #endif // _VIRGIL_IOTKIT_QT_SNAP_PROTOCOL_H_

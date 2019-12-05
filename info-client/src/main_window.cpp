@@ -35,6 +35,7 @@
 #include <app.h>
 
 #include <main_window.h>
+#include <virgil/iot-qt/logger.h>
 
 VSMainWindow::VSMainWindow() {
 }
@@ -121,6 +122,11 @@ void VSMainWindow::deviceStatistics( VirgilIoTKit::vs_info_statistics_t &statist
     dev._hasStatistics = true;
 
     updateTable();
+}
+
+void VSMainWindow::stateChanged( QAbstractSocket::SocketState connectionState, const std::string &description ) {
+    (void) connectionState;
+    changeConnectionState( description );
 }
 
 void VSMainWindow::updateTable() {

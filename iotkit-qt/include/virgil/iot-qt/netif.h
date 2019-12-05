@@ -32,13 +32,23 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <virgil/iot-qt/snap_protocol.h>
-#include <virgil/iot-qt/snap_service.h>
+#ifndef _VIRGIL_IOTKIT_QT_NETIF_H_
+#define _VIRGIL_IOTKIT_QT_NETIF_H_
 
+#include <array>
+#include <string>
+#include <vector>
+
+#include <virgil/iot-qt/helpers.h>
+#include <virgil/iot/status_code/status_code.h>
+#include <virgil/iot/provision/provision-structs.h>
 #include <virgil/iot/protocols/snap/snap-structs.h>
 
-using namespace VirgilIoTKit;
+class VSNetif {
+public:
+    virtual ~VSNetif() = default;
 
-VSSnapService::~VSSnapService(){
+    virtual VirgilIoTKit::vs_netif_t* getImplementation() = 0;
+};
 
-}
+#endif // _VIRGIL_IOTKIT_QT_NETIF_H_
