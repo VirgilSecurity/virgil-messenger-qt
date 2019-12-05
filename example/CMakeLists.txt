@@ -34,7 +34,7 @@
 
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
-project(virgil-iotkit-qt VERSION 1.0.0)
+project(info-client VERSION 1.0.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -43,39 +43,51 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt5Core CONFIG REQUIRED)
 find_package(Qt5Network CONFIG REQUIRED)
+find_package(Qt5Widgets CONFIG REQUIRED)
 
-add_library(virgil-iotkit-qt)
+add_executable(info-client)
 
-target_sources(virgil-iotkit-qt
+execute_process(
+        COMMAND git rev-parse HEAD
+        OUTPUT_VARIABLE COMPILE_GIT_HASH
+)
+
+string(STRIP ${COMPILE_GIT_HASH} COMPILE_GIT_HASH)
+
+target_compile_definitions(info-client
         PRIVATE
-        include/virgil/iot-qt/logger.h
-        include/virgil/iot-qt/helpers.h
-        include/virgil/iot-qt/netif.h
-        include/virgil/iot-qt/netif-udp.h
-        include/virgil/iot-qt/snap-info.h
-        include/virgil/iot-qt/snap-protocol.h
-        include/virgil/iot-qt/snap-service.h
-
-        src/hal.cpp
-        src/helpers.cpp
-        src/netif-udp.cpp
-        src/snap-info.cpp
-        src/snap-protocol.cpp
+        COMPILE_GIT_HASH="${COMPILE_GIT_HASH}"
         )
 
-target_include_directories(virgil-iotkit-qt
-        PUBLIC
-        include
+target_precompile_headers(info-client
+    PRIVATE
+        include/VSQApp.h
         )
 
-target_link_libraries(virgil-iotkit-qt
+target_sources(info-client
+        PRIVATE
+        include/VSQApp.h
+        include/VSQMainWindow.h
+
+        src/main.cpp
+        src/VSQMainWindow.cpp
+        )
+
+target_include_directories(info-client
+        PRIVATE
+        include/virgil/iot-qt/info-client
+        )
+
+target_link_libraries(info-client
         PRIVATE
 
-        vs-module-snap-control
-        vs-module-logger
+        virgil-iotkit-qt
         virgil-iot-status-code
+        vs-module-provision
+        vs-module-snap-factory
 
         Qt5::Core
         Qt5::Network
+        Qt5::Widgets
         )
 
