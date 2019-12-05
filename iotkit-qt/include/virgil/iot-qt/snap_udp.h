@@ -2,8 +2,8 @@
 // Created by Oleksandr Nemchenko on 23.11.2019.
 //
 
-#ifndef VIRGIL_IOT_INFO_CLIENT_KIT_SNAP_UDP_H_
-#define VIRGIL_IOT_INFO_CLIENT_KIT_SNAP_UDP_H_
+#ifndef _VIRGIL_IOTKIT_QT_SNAP_UDP_H_
+#define _VIRGIL_IOTKIT_QT_SNAP_UDP_H_
 
 #include <QtCore>
 #include <QtNetwork>
@@ -32,4 +32,4 @@ private:
     void hasInputData();
 };
 
-#endif // VIRGIL_IOT_INFO_CLIENT_KIT_SNAP_UDP_H_
+#endif // _VIRGIL_IOTKIT_QT_SNAP_UDP_H_
