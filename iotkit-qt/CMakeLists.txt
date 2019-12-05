@@ -49,6 +49,7 @@ add_library(virgil-iotkit-qt)
 target_sources(virgil-iotkit-qt
         PRIVATE
         include/virgil/iot-qt/logger.h
+        include/virgil/iot-qt/helpers.h
         include/virgil/iot-qt/snap_info.h
         include/virgil/iot-qt/snap_protocol.h
         include/virgil/iot-qt/snap_service.h
