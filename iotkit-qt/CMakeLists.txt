@@ -71,7 +71,7 @@ target_include_directories(virgil-iotkit-qt
 target_link_libraries(virgil-iotkit-qt
         PRIVATE
 
-        vs-module-snap-factory
+        vs-module-snap-control
         vs-module-logger
         virgil-iot-status-code
 
