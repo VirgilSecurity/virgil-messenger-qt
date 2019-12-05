@@ -81,7 +81,7 @@ target_include_directories(iotkit-qt-example
 target_link_libraries(iotkit-qt-example
         PRIVATE
 
-        virgil-iotkit-qt
+        #virgil-iotkit-qt
 
         Qt5::Core
         Qt5::Network
