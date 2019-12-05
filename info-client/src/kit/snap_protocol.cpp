@@ -9,34 +9,34 @@
 
 #include <virgil/iot/protocols/snap.h>
 
-VirgilIoTKit::CMac& VirgilIoTKit::CMac::set( const vs_mac_addr_t &mac ) {
+VirgilIoTKit::VSMac& VirgilIoTKit::VSMac::set( const vs_mac_addr_t &mac ) {
     std::copy( mac.bytes, mac.bytes + sizeof( mac.bytes ), _mac.begin() );
     return *this;
 }
 
-VirgilIoTKit::CMac& VirgilIoTKit::CMac::set( const uint8_t *bytes ) {
+VirgilIoTKit::VSMac& VirgilIoTKit::VSMac::set( const uint8_t *bytes ) {
     assert( bytes );
     std::copy( bytes, bytes + _mac.size(), _mac.begin() );
     return *this;
 }
 
-VirgilIoTKit::CMac& VirgilIoTKit::CMac::set( uint8_t b0, uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4, uint8_t b5 ) {
+VirgilIoTKit::VSMac& VirgilIoTKit::VSMac::set( uint8_t b0, uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4, uint8_t b5 ) {
     _mac[0] = b0; _mac[1] = b1; _mac[2] = b2; _mac[3] = b3; _mac[4] = b4; _mac[5] = b5;
     return *this;
 }
 
-VirgilIoTKit::CMac& VirgilIoTKit::CMac::set( const CMac &mac ) {
+VirgilIoTKit::VSMac& VirgilIoTKit::VSMac::set( const VSMac &mac ) {
     _mac = mac._mac;
     return *this;
 }
 
-VirgilIoTKit::CMac::operator VirgilIoTKit::vs_mac_addr_t() const {
+VirgilIoTKit::VSMac::operator VirgilIoTKit::vs_mac_addr_t() const {
     vs_mac_addr_t mac;
     std::copy( _mac.begin(), _mac.end(), mac.bytes );
     return mac;
 }
 
-std::string VirgilIoTKit::CMac::describe( bool two_symbols, bool upper_case, char divider ) const {
+std::string VirgilIoTKit::VSMac::describe( bool two_symbols, bool upper_case, char divider ) const {
     using namespace std;
 
     std::stringstream ss;
@@ -58,21 +58,21 @@ std::string VirgilIoTKit::CMac::describe( bool two_symbols, bool upper_case, cha
     return ss.str();
 }
 
-VirgilIoTKit::CManufactureId& VirgilIoTKit::CManufactureId::set( const CManufactureId& manufacture_id ) {
+VirgilIoTKit::VSManufactureId& VirgilIoTKit::VSManufactureId::set( const VSManufactureId& manufacture_id ) {
     _manufactureId = manufacture_id._manufactureId;
     return *this;
 }
 
-VirgilIoTKit::CManufactureId& VirgilIoTKit::CManufactureId::set( const vs_device_manufacture_id_t& buf ){
+VirgilIoTKit::VSManufactureId& VirgilIoTKit::VSManufactureId::set( const vs_device_manufacture_id_t& buf ){
     std::copy( buf, buf + sizeof( vs_device_manufacture_id_t ), _manufactureId.begin() );
     return *this;
 }
 
-VirgilIoTKit::CManufactureId::operator const uint8_t* () const {
+VirgilIoTKit::VSManufactureId::operator const uint8_t* () const {
     return _manufactureId.data();
 }
 
-std::string VirgilIoTKit::CManufactureId::describe( bool stop_on_zero, char symbol_on_non_ascii ) const {
+std::string VirgilIoTKit::VSManufactureId::describe( bool stop_on_zero, char symbol_on_non_ascii ) const {
     std::string str;
 
     str.reserve( _manufactureId.size() );
@@ -89,21 +89,21 @@ std::string VirgilIoTKit::CManufactureId::describe( bool stop_on_zero, char symb
     return str;
 }
 
-VirgilIoTKit::CDeviceType& VirgilIoTKit::CDeviceType::set( const CDeviceType& device_type ) {
+VirgilIoTKit::VSDeviceType& VirgilIoTKit::VSDeviceType::set( const VSDeviceType& device_type ) {
     _deviceType = device_type._deviceType;
     return *this;
 }
 
-VirgilIoTKit::CDeviceType& VirgilIoTKit::CDeviceType::set( const vs_device_type_t& buf ){
+VirgilIoTKit::VSDeviceType& VirgilIoTKit::VSDeviceType::set( const vs_device_type_t& buf ){
     std::copy( buf, buf + sizeof( vs_device_type_t ), _deviceType.begin() );
     return *this;
 }
 
-VirgilIoTKit::CDeviceType::operator const uint8_t* () const{
+VirgilIoTKit::VSDeviceType::operator const uint8_t* () const{
     return _deviceType.data();
 }
 
-std::string VirgilIoTKit::CDeviceType::describe( bool stop_on_zero, char symbol_on_non_ascii ) const {
+std::string VirgilIoTKit::VSDeviceType::describe( bool stop_on_zero, char symbol_on_non_ascii ) const {
     std::string str;
 
     str.reserve( _deviceType.size() );
@@ -119,21 +119,21 @@ std::string VirgilIoTKit::CDeviceType::describe( bool stop_on_zero, char symbol_
 
     return str;
 }
-VirgilIoTKit::CDeviceSerial& VirgilIoTKit::CDeviceSerial::set( const CDeviceSerial& device_serial ) {
+VirgilIoTKit::VSDeviceSerial& VirgilIoTKit::VSDeviceSerial::set( const VSDeviceSerial& device_serial ) {
     _deviceSerial = device_serial._deviceSerial;
     return *this;
 }
 
-VirgilIoTKit::CDeviceSerial& VirgilIoTKit::CDeviceSerial::set( const vs_device_serial_t& buf ){
+VirgilIoTKit::VSDeviceSerial& VirgilIoTKit::VSDeviceSerial::set( const vs_device_serial_t& buf ){
     std::copy( buf, buf + sizeof( vs_device_type_t ), _deviceSerial.begin() );
     return *this;
 }
 
-VirgilIoTKit::CDeviceSerial::operator const uint8_t* () const{
+VirgilIoTKit::VSDeviceSerial::operator const uint8_t* () const{
     return _deviceSerial.data();
 }
 
-std::string VirgilIoTKit::CDeviceSerial::describe( bool two_symbols, bool upper_case, char divider ) const {
+std::string VirgilIoTKit::VSDeviceSerial::describe( bool two_symbols, bool upper_case, char divider ) const {
     using namespace std;
 
     std::stringstream ss;
@@ -155,20 +155,20 @@ std::string VirgilIoTKit::CDeviceSerial::describe( bool two_symbols, bool upper_
     return ss.str();
 }
 
-/* static */ VirgilIoTKit::CSnapProtocol * VirgilIoTKit::CSnapProtocol::_instance = nullptr;
+/* static */ VirgilIoTKit::VSSnapProtocol * VirgilIoTKit::VSSnapProtocol::_instance = nullptr;
 
-VirgilIoTKit::CSnapProtocol::CSnapProtocol(){
+VirgilIoTKit::VSSnapProtocol::VSSnapProtocol(){
     assert( !_instance );
     _instance = this;
 
 }
 
-VirgilIoTKit::CSnapProtocol::~CSnapProtocol(){
+VirgilIoTKit::VSSnapProtocol::~VSSnapProtocol(){
     assert( _instance );
     _instance = nullptr;
 }
 
-bool VirgilIoTKit::CSnapProtocol::init( const CManufactureId &manufacture_id, const CDeviceType &device_type, const CDeviceSerial &device_serial,
+bool VirgilIoTKit::VSSnapProtocol::init( const VSManufactureId &manufacture_id, const VSDeviceType &device_type, const VSDeviceSerial &device_serial,
            vs_snap_device_role_e device_roles, FChangeStateNotify change_state_notify ) {
 
     _changeStateNotify = change_state_notify;
@@ -189,7 +189,7 @@ bool VirgilIoTKit::CSnapProtocol::init( const CManufactureId &manufacture_id, co
     return true;
 }
 
-void VirgilIoTKit::CSnapProtocol::processRxData( VirgilIoTKit::TData &&data ) {
+void VirgilIoTKit::VSSnapProtocol::processRxData( VirgilIoTKit::TData &&data ) {
     if( !_netIfRxCallback )
         return;
 
@@ -203,13 +203,11 @@ void VirgilIoTKit::CSnapProtocol::processRxData( VirgilIoTKit::TData &&data ) {
         VS_LOG_ERROR( "Unable to process received packet" );
 }
 
-void VirgilIoTKit::CSnapProtocol::сhangeStateNotify( const std::string &description ) {
+void VirgilIoTKit::VSSnapProtocol::сhangeStateNotify( const std::string &description ) {
     _changeStateNotify( description );
 }
 
-/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::CSnapProtocol::netIfInit( struct vs_netif_t* netif, const vs_netif_rx_cb_t rx_cb, const vs_netif_process_cb_t process_cb ){
-    (void) netif;
-
+/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::VSSnapProtocol::netIfInit( const vs_netif_rx_cb_t rx_cb, const vs_netif_process_cb_t process_cb ){
     assert( _instance );
 
     _instance->_netIfRxCallback = rx_cb;
@@ -218,27 +216,21 @@ void VirgilIoTKit::CSnapProtocol::сhangeStateNotify( const std::string &descrip
     return _instance->initInterface();
 }
 
-/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::CSnapProtocol::netIfDeinit( struct vs_netif_t* netif ){
-    (void) netif;
-
+/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::VSSnapProtocol::netIfDeinit(){
     assert( _instance );
 
     return _instance->destroy();
 
 }
 
-/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::CSnapProtocol::netIfTx( struct vs_netif_t* netif, const uint8_t* data, const uint16_t data_sz ){
-    (void) netif;
-
+/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::VSSnapProtocol::netIfTx( const uint8_t* data, const uint16_t data_sz ){
     assert( _instance );
 
     return _instance->sendRawData( TData( data, data + data_sz ));
 
 }
 
-/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::CSnapProtocol::netIfMac( const struct vs_netif_t* netif, vs_mac_addr_t* mac_addr ){
-    (void) netif;
-
+/* static */ VirgilIoTKit::vs_status_e VirgilIoTKit::VSSnapProtocol::netIfMac( vs_mac_addr_t* mac_addr ){
     assert( _instance );
 
     auto [ ret_code, mac ] = _instance->ownMac();
@@ -249,7 +241,7 @@ void VirgilIoTKit::CSnapProtocol::сhangeStateNotify( const std::string &descrip
 
 }
 
-bool VirgilIoTKit::CSnapProtocol::registerService( CSnapService &snap_service ) {
+bool VirgilIoTKit::VSSnapProtocol::registerService( VSSnapService &snap_service ) {
     vs_status_e ret_code;
 
     if( VirgilIoTKit::vs_snap_register_service( snap_service.serviceInterface() ) != VirgilIoTKit::VS_CODE_OK ) {

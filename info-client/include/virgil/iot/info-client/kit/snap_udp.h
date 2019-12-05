@@ -5,19 +5,21 @@
 #ifndef VIRGIL_IOT_INFO_CLIENT_KIT_SNAP_UDP_H_
 #define VIRGIL_IOT_INFO_CLIENT_KIT_SNAP_UDP_H_
 
+#include <app.h>
+
 #include <kit/snap_protocol.h>
 
 namespace VirgilIoTKit {
 
-    class CSnapUdp : public QObject, public CSnapProtocol {
+    class VSSnapUdp : public QObject, public VSSnapProtocol {
         Q_OBJECT
 
     public:
-        CSnapUdp() : _port( 0 ) {}
-        ~CSnapUdp() override;
+        VSSnapUdp() : _port( 0 ) {}
+        ~VSSnapUdp() override;
 
         void setBindPort( quint16 bind_port )   { _port = bind_port; }
-        const CMac& ownMacAddress() const override;
+        const VSMac& ownMacAddress() const override;
 
     private:
         vs_status_e initInterface() override;

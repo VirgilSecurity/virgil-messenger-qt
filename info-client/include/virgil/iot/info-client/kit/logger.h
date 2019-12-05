@@ -5,6 +5,8 @@
 #ifndef VIRGIL_IOTKIT_CPP_LOGGER_H
 #define VIRGIL_IOTKIT_CPP_LOGGER_H
 
+#include <app.h>
+
 #include <sstream>
 #include <virgil/iot/logger/logger.h>
 
@@ -19,7 +21,7 @@
 #undef VS_LOG_DEBUG
 
 template <typename... T>
-extern inline void log(VirgilIoTKit::vs_log_level_t log_lev, const char *cur_filename, uint32_t line_num, T&&... args){
+extern inline void log(VirgilIoTKit::vs_log_level_t log_lev, const char *cur_filename, uint32_t line_num, T... args){
     std::stringstream sstr;
     ( sstr << ... << std::forward<T>(args) );
 

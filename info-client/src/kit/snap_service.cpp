@@ -9,6 +9,6 @@
 
 #include <virgil/iot/protocols/snap/snap-structs.h>
 
-VirgilIoTKit::CSnapService::~CSnapService(){
+VirgilIoTKit::VSSnapService::~VSSnapService(){
 
 }

@@ -6,13 +6,13 @@
 
 #include <main_window.h>
 
-CMainWindow::CMainWindow() {
+VSMainWindow::VSMainWindow() {
 }
 
-CMainWindow::~CMainWindow() {
+VSMainWindow::~VSMainWindow() {
 }
 
-void CMainWindow::show() {
+void VSMainWindow::show() {
     static const std::map<EColumn, QString> tbl_headers = { { EColumn::MAC, "MAC" }, { EColumn::DevRoles, "Device Roles" }, { EColumn::Manufacture, "Manufacture" }, { EColumn::Type, "Type" }, { EColumn::FWVersion, "Firmware Version" }, { EColumn::TLVersion, "Trust List Version" }, { EColumn::ReceivedAmount, "Receives" }, { EColumn::SentAmount, "Sends" } };
 
     _tbl.setColumnCount( static_cast<int>( EColumn::ColumnsAmount ));
@@ -28,12 +28,12 @@ void CMainWindow::show() {
     changeStatusBar();
 }
 
-void CMainWindow::changeConnectionState( const std::string &connection_state ) {
+void VSMainWindow::changeConnectionState( const std::string &connection_state ) {
     _connectionState = QString::fromStdString( connection_state );
     changeStatusBar();
 }
 
-void CMainWindow::changeStatusBar() {
+void VSMainWindow::changeStatusBar() {
     QString str;
 
     if( _devices.empty() )
@@ -49,7 +49,7 @@ void CMainWindow::changeStatusBar() {
     _wnd.statusBar()->showMessage( str );
 }
 
-CMainWindow::SDeviceInfo& CMainWindow::device( const VirgilIoTKit::CMac &mac ) {
+VSMainWindow::SDeviceInfo& VSMainWindow::device( const VirgilIoTKit::VSMac &mac ) {
     for( auto &device : _devices ){
         if( device._mac == mac ) {
             return device;
@@ -60,7 +60,7 @@ CMainWindow::SDeviceInfo& CMainWindow::device( const VirgilIoTKit::CMac &mac ) {
     return _devices.back();
 }
 
-void CMainWindow::deviceStarted( VirgilIoTKit::vs_snap_info_device_t &started_device ){
+void VSMainWindow::deviceStarted( VirgilIoTKit::vs_snap_info_device_t &started_device ){
 
     SDeviceInfo& dev = device( started_device.mac );
 
@@ -70,7 +70,7 @@ void CMainWindow::deviceStarted( VirgilIoTKit::vs_snap_info_device_t &started_de
     updateTable();
 }
 
-void CMainWindow::deviceGeneralInfo( VirgilIoTKit::vs_info_general_t &general_data ){
+void VSMainWindow::deviceGeneralInfo( VirgilIoTKit::vs_info_general_t &general_data ){
     SDeviceInfo& dev = device( general_data.default_netif_mac );
 
     dev._manufactureId = general_data.manufacture_id;
@@ -83,7 +83,7 @@ void CMainWindow::deviceGeneralInfo( VirgilIoTKit::vs_info_general_t &general_da
     updateTable();
 }
 
-void CMainWindow::deviceStatistics( VirgilIoTKit::vs_info_statistics_t &statistics ){
+void VSMainWindow::deviceStatistics( VirgilIoTKit::vs_info_statistics_t &statistics ){
     SDeviceInfo& dev = device( statistics.default_netif_mac );
 
     dev._received = statistics.received;
@@ -93,7 +93,7 @@ void CMainWindow::deviceStatistics( VirgilIoTKit::vs_info_statistics_t &statisti
     updateTable();
 }
 
-void CMainWindow::updateTable() {
+void VSMainWindow::updateTable() {
     size_t row = 0;
 
     _tbl.setRowCount(0);

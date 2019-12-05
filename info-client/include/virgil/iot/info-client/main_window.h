@@ -10,12 +10,12 @@
 #include <kit/snap_protocol.h>
 #include <virgil/iot/protocols/snap/info/info-structs.h>
 
-class CMainWindow : public QObject  {
+class VSMainWindow : public QObject  {
     Q_OBJECT
 
 public:
-    CMainWindow();
-    ~CMainWindow();
+    VSMainWindow();
+    ~VSMainWindow();
 
     void show();
     void changeConnectionState( const std::string &connection_state );
@@ -30,10 +30,10 @@ private:
     struct SDeviceInfo {
         SDeviceInfo(): _hasGeneralInfo( false ), _hasStatistics( false )    {}
 
-        VirgilIoTKit::CMac _mac;
+        VirgilIoTKit::VSMac _mac;
         VirgilIoTKit::vs_snap_device_role_e _roles;
-        VirgilIoTKit::CManufactureId _manufactureId;
-        VirgilIoTKit::CDeviceType _deviceType;
+        VirgilIoTKit::VSManufactureId _manufactureId;
+        VirgilIoTKit::VSDeviceType _deviceType;
         VirgilIoTKit::vs_file_version_unpacked_t _fwVer;
         VirgilIoTKit::vs_file_version_unpacked_t _tlVer;
         uint32_t _sent;
@@ -52,7 +52,7 @@ private:
     void changeStatusBar();
     void updateTable();
 
-    SDeviceInfo& device( const VirgilIoTKit::CMac &mac );
+    SDeviceInfo& device( const VirgilIoTKit::VSMac &mac );
 };
 
 #endif //HELPERS_MAIN_WINDOW_H

@@ -8,12 +8,12 @@
 
 using namespace VirgilIoTKit;
 
-void InitSnap( VirgilIoTKit::CSnapUdp *snap_udp, VirgilIoTKit::CSnapInfoClient *snap_info_client, CMainWindow *main_window ) {
+void InitSnap( VirgilIoTKit::VSSnapUdp *snap_udp, VirgilIoTKit::VSSnapInfoClient *snap_info_client, VSMainWindow *main_window ) {
     using namespace VirgilIoTKit;
 
-    CManufactureId manufacture_id;
-    CDeviceType device_type;
-    CDeviceSerial device_serial;
+    VSManufactureId manufacture_id;
+    VSDeviceType device_type;
+    VSDeviceSerial device_serial;
     quint16 udp_bind_port = 4100;
     vs_snap_device_role_e device_role = VS_SNAP_DEV_SNIFFER;
 
@@ -29,17 +29,17 @@ void InitSnap( VirgilIoTKit::CSnapUdp *snap_udp, VirgilIoTKit::CSnapInfoClient *
         throw std::runtime_error( "Unable to initialize SNAP:INFO Client service" );
     }
 
-    if( !QObject::connect( snap_info_client, &CSnapInfoClient::deviceStarted, main_window, &CMainWindow::deviceStarted )) {
-        throw std::runtime_error( "Unable to connect CSnapInfoClient::deviceStarted to CMainWindow::deviceStarted" );
+    if( !QObject::connect( snap_info_client, &VSSnapInfoClient::deviceStarted, main_window, &VSMainWindow::deviceStarted )) {
+        throw std::runtime_error( "Unable to connect VSSnapInfoClient::deviceStarted to VSMainWindow::deviceStarted" );
     }
 
-    if( !QObject::connect( snap_info_client, &CSnapInfoClient::deviceGeneralInfo, main_window, &CMainWindow::deviceGeneralInfo )) {
-        throw std::runtime_error( "Unable to connect CSnapInfoClient::deviceGeneralInfo to CMainWindow::deviceGeneralInfo" );
+    if( !QObject::connect( snap_info_client, &VSSnapInfoClient::deviceGeneralInfo, main_window, &VSMainWindow::deviceGeneralInfo )) {
+        throw std::runtime_error( "Unable to connect VSSnapInfoClient::deviceGeneralInfo to VSMainWindow::deviceGeneralInfo" );
     }
 
 }
 
-void InitInfoClient( VirgilIoTKit::CSnapInfoClient *info_client, CMainWindow *main_window ) {
+void InitInfoClient( VirgilIoTKit::VSSnapInfoClient *info_client, VSMainWindow *main_window ) {
     constexpr auto polling_period = 1;
     constexpr auto polling_mask = VS_SNAP_INFO_GENERAL | VS_SNAP_INFO_STATISTICS;
 
@@ -47,14 +47,14 @@ void InitInfoClient( VirgilIoTKit::CSnapInfoClient *info_client, CMainWindow *ma
         throw std::runtime_error( "Unable to set data polling" );
     }
 
-    if( !QObject::connect( info_client, &CSnapInfoClient::deviceStatistics, main_window, &CMainWindow::deviceStatistics )) {
-        throw std::runtime_error( "Unable to connect CSnapInfoClient::deviceStatistics to CMainWindow::deviceStatistics" );
+    if( !QObject::connect( info_client, &VSSnapInfoClient::deviceStatistics, main_window, &VSMainWindow::deviceStatistics )) {
+        throw std::runtime_error( "Unable to connect VSSnapInfoClient::deviceStatistics to VSMainWindow::deviceStatistics" );
     }
 
-    if( !QObject::connect( info_client, &CSnapInfoClient::deviceStarted, [info_client]( vs_snap_info_device_t &device ) {
+    if( !QObject::connect( info_client, &VSSnapInfoClient::deviceStarted, [info_client]( vs_snap_info_device_t &device ) {
         info_client->setPolling( polling_mask, polling_period, device.mac );
     } )) {
-        throw std::runtime_error( "Unable to connect CSnapInfoClient::deviceStatistics to CMainWindow::deviceStatistics" );
+        throw std::runtime_error( "Unable to connect VSSnapInfoClient::deviceStatistics to VSMainWindow::deviceStatistics" );
     }
 }
 
@@ -65,12 +65,13 @@ int main( int argc, char *argv[] )
 
     VirgilIoTKit::vs_logger_init( VirgilIoTKit::VS_LOGLEV_DEBUG );
     VS_LOG_INFO( "Start Virgil IoT network analyzer" );
-    VS_LOG_INFO( "Git commit ", COMPILE_GIT_HASH );
+//    VS_LOG_INFO( "Git commit ", COMPILE_GIT_HASH );
+
 
     try{
-        CMainWindow main_window;
-        VirgilIoTKit::CSnapUdp snap_udp;
-        VirgilIoTKit::CSnapInfoClient snap_info_client;
+        VSMainWindow main_window;
+        VirgilIoTKit::VSSnapUdp snap_udp;
+        VirgilIoTKit::VSSnapInfoClient snap_info_client;
 
         main_window.show();
 

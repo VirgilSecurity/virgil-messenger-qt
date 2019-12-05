@@ -5,6 +5,8 @@
 #ifndef VIRGIL_IOT_INFO_CLIENT_KIT_SNAP_INFO_SERVICE_H_
 #define VIRGIL_IOT_INFO_CLIENT_KIT_SNAP_INFO_SERVICE_H_
 
+#include <app.h>
+
 #include <kit/snap_protocol.h>
 #include <kit/snap_service.h>
 
@@ -13,22 +15,22 @@
 
 namespace VirgilIoTKit {
 
-    class CSnapInfoClient : public QObject, public CSnapService {
+    class VSSnapInfoClient : public QObject, public VSSnapService {
         Q_OBJECT
 
     public:
-        CSnapInfoClient();
-        ~CSnapInfoClient() override;
+        VSSnapInfoClient();
+        ~VSSnapInfoClient() override;
 
         using TEnumDevicesArray = std::vector<vs_snap_info_device_t>;
 
-        vs_snap_service_t *serviceInterface() override      { return _snapService; }
+        const vs_snap_service_t *serviceInterface() override    { return _snapService; }
         const std::string &serviceName() const override;
 
         TEnumDevicesArray enumDevices( size_t wait_msec, size_t max_devices_amount = 1000 ) const;
-        bool changePolling( size_t polling_element, uint16_t period_seconds, bool enable, const CMac &device_mac = _broadcastMac ) const;
-        bool setPolling(    size_t polling_element, uint16_t period_seconds, const CMac &device_mac = _broadcastMac ) const { return changePolling( polling_element, period_seconds, true,  device_mac ); }
-        bool resetPoling(   size_t polling_element, uint16_t period_seconds, const CMac &device_mac = _broadcastMac ) const { return changePolling( polling_element, period_seconds, false, device_mac ); }
+        bool changePolling( size_t polling_element, uint16_t period_seconds, bool enable, const VSMac &device_mac = _broadcastMac ) const;
+        bool setPolling(    size_t polling_element, uint16_t period_seconds, const VSMac &device_mac = _broadcastMac ) const { return changePolling( polling_element, period_seconds, true,  device_mac ); }
+        bool resetPoling(   size_t polling_element, uint16_t period_seconds, const VSMac &device_mac = _broadcastMac ) const { return changePolling( polling_element, period_seconds, false, device_mac ); }
 
     signals:
         void deviceStarted( vs_snap_info_device_t &device );
@@ -36,15 +38,15 @@ namespace VirgilIoTKit {
         void deviceStatistics( vs_info_statistics_t &statistics );
 
     private:
-        static CSnapInfoClient *_instance;
-        static vs_snap_service_t * _snapService;
+        static VSSnapInfoClient *_instance;
+        static const vs_snap_service_t * _snapService;
         mutable vs_snap_info_client_service_t _snapInfoImpl;
         struct DeviceInfo{};
         std::vector<DeviceInfo> _devices;
 
-        static vs_status_e startNotify( struct vs_snap_service_t* service, vs_snap_info_device_t *device );
-        static vs_status_e generalInfo( struct vs_snap_service_t* service, vs_info_general_t *general_data );
-        static vs_status_e statistics(  struct vs_snap_service_t* service, vs_info_statistics_t *statistics );
+        static vs_status_e startNotify( vs_snap_info_device_t *device );
+        static vs_status_e generalInfo( vs_info_general_t *general_data );
+        static vs_status_e statistics( vs_info_statistics_t *statistics );
 
     };
 
