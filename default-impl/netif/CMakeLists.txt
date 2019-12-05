@@ -34,63 +34,9 @@
 
 cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
 
-project(iotkit-qt-example VERSION 1.0.0)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-
-find_package(Qt5Core CONFIG REQUIRED)
-find_package(Qt5Network CONFIG REQUIRED)
-find_package(Qt5Widgets CONFIG REQUIRED)
-
-add_executable(iotkit-qt-example)
-
 #
-#   Sources
+#   UDP broadcast. Default implementation.
 #
-target_sources(iotkit-qt-example
-        PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQMainWindow.h
-
-        ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQMainWindow.cpp
-        )
-
-#
-#   Definitions
-#
-target_compile_definitions(iotkit-qt-example
-        PRIVATE
-        )
-
-#
-#   Common include directories
-#
-target_include_directories(iotkit-qt-example
-        PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
-
-        INTERFACE
-        $<INSTALL_INTERFACE:include>
-        )
-
-#
-#   Link libraries
-#
-target_link_libraries(iotkit-qt-example
-        PRIVATE
-
-        virgil-iotkit-qt
-
-        Qt5::Core
-        Qt5::Network
-        Qt5::Widgets
-        )
-
-#
-#   Clang format
-#
-if(COMMAND add_clangformat)
-    add_clangformat(iotkit-qt-example)
+if (VIRGIL_IOTKIT_QT_DEFAULT_NETIF_UDP_BCAST)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/udp-broadcast)
 endif()

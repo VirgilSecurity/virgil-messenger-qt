@@ -35,8 +35,6 @@
 #ifndef _VIRGIL_IOTKIT_QT_INFO_CLIENT_MAIN_WINDOW_H_
 #define _VIRGIL_IOTKIT_QT_INFO_CLIENT_MAIN_WINDOW_H_
 
-#include "VSQApp.h"
-
 #include <virgil/iot-qt/snap-protocol.h>
 #include <virgil/iot/protocols/snap/info/info-structs.h>
 

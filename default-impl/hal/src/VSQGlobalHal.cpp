@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2019 Virgil Security, Inc.
+//  Copyright (C) 2015-2020 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -45,7 +45,8 @@ vs_logger_output_hal(const char *buffer){
 }
 
 extern "C" void
-vs_impl_msleep(size_t msec){
+vs_impl_msleep(size_t msec) {
+    // TODO: FIX IT
     auto start = std::chrono::high_resolution_clock::now();
     do {
         QCoreApplication::processEvents( QEventLoop::AllEvents, msec );
