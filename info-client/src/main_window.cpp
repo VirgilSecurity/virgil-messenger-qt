@@ -49,7 +49,7 @@ void VSMainWindow::changeStatusBar() {
     _wnd.statusBar()->showMessage( str );
 }
 
-VSMainWindow::SDeviceInfo& VSMainWindow::device( const VirgilIoTKit::VSMac &mac ) {
+VSMainWindow::SDeviceInfo& VSMainWindow::device( const VSMac &mac ) {
     for( auto &device : _devices ){
         if( device._mac == mac ) {
             return device;

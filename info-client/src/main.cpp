@@ -1,21 +1,22 @@
 
 #include <app.h>
 
-#include <kit/snap_udp.h>
-#include <kit/snap_info.h>
-#include <kit/logger.h>
+#include <virgil/iot-qt/snap_udp.h>
+#include <virgil/iot-qt/snap_info.h>
+#include <virgil/iot-qt/logger.h>
+#include <virgil/iot/protocols/snap/snap-structs.h>
 #include <main_window.h>
 
 using namespace VirgilIoTKit;
 
-void InitSnap( VirgilIoTKit::VSSnapUdp *snap_udp, VirgilIoTKit::VSSnapInfoClient *snap_info_client, VSMainWindow *main_window ) {
+void InitSnap( VSSnapUdp *snap_udp, VSSnapInfoClient *snap_info_client, VSMainWindow *main_window ) {
     using namespace VirgilIoTKit;
 
     VSManufactureId manufacture_id;
     VSDeviceType device_type;
     VSDeviceSerial device_serial;
     quint16 udp_bind_port = 4100;
-    vs_snap_device_role_e device_role = VS_SNAP_DEV_SNIFFER;
+    VirgilIoTKit::vs_snap_device_role_e device_role = VirgilIoTKit::VS_SNAP_DEV_SNIFFER;
 
     snap_udp->setBindPort( udp_bind_port );
 
@@ -39,9 +40,9 @@ void InitSnap( VirgilIoTKit::VSSnapUdp *snap_udp, VirgilIoTKit::VSSnapInfoClient
 
 }
 
-void InitInfoClient( VirgilIoTKit::VSSnapInfoClient *info_client, VSMainWindow *main_window ) {
+void InitInfoClient( VSSnapInfoClient *info_client, VSMainWindow *main_window ) {
     constexpr auto polling_period = 1;
-    constexpr auto polling_mask = VS_SNAP_INFO_GENERAL | VS_SNAP_INFO_STATISTICS;
+    constexpr auto polling_mask = VirgilIoTKit::VS_SNAP_INFO_GENERAL | VirgilIoTKit::VS_SNAP_INFO_STATISTICS;
 
     if( !info_client->setPolling( polling_mask, polling_period )){
         throw std::runtime_error( "Unable to set data polling" );
@@ -51,7 +52,7 @@ void InitInfoClient( VirgilIoTKit::VSSnapInfoClient *info_client, VSMainWindow *
         throw std::runtime_error( "Unable to connect VSSnapInfoClient::deviceStatistics to VSMainWindow::deviceStatistics" );
     }
 
-    if( !QObject::connect( info_client, &VSSnapInfoClient::deviceStarted, [info_client]( vs_snap_info_device_t &device ) {
+    if( !QObject::connect( info_client, &VSSnapInfoClient::deviceStarted, [info_client]( VirgilIoTKit::vs_snap_info_device_t &device ) {
         info_client->setPolling( polling_mask, polling_period, device.mac );
     } )) {
         throw std::runtime_error( "Unable to connect VSSnapInfoClient::deviceStatistics to VSMainWindow::deviceStatistics" );
@@ -70,8 +71,8 @@ int main( int argc, char *argv[] )
 
     try{
         VSMainWindow main_window;
-        VirgilIoTKit::VSSnapUdp snap_udp;
-        VirgilIoTKit::VSSnapInfoClient snap_info_client;
+        VSSnapUdp snap_udp;
+        VSSnapInfoClient snap_info_client;
 
         main_window.show();
 

@@ -2,15 +2,15 @@
 // Created by Oleksandr Nemchenko on 23.11.2019.
 //
 
-#include <app.h>
+#include <virgil/iot-qt/snap_udp.h>
 
-#include <kit/snap_udp.h>
+using namespace VirgilIoTKit;
 
-VirgilIoTKit::VSSnapUdp::~VSSnapUdp(){
+VSSnapUdp::~VSSnapUdp(){
 
 }
 
-VirgilIoTKit::vs_status_e VirgilIoTKit::VSSnapUdp::initInterface() {
+vs_status_e VSSnapUdp::initInterface() {
     assert( _port != 0 );
 
     VS_LOG_DEBUG( "Set UDP broadcast mode for LocalHost:", _port );
@@ -32,23 +32,23 @@ VirgilIoTKit::vs_status_e VirgilIoTKit::VSSnapUdp::initInterface() {
         VS_LOG_CRITICAL( "Socket LocalHost:", _port, " has been changed its state. New state : ", state_descr.at(socketState).c_str() );
     } )) {
         VS_LOG_ERROR( "Unable to connect VSSnapUdp::initInterface to the socket's QAbstractSocket::stateChanged signal" );
-        return VirgilIoTKit::VS_CODE_ERR_SOCKET;
+        return VS_CODE_ERR_SOCKET;
     }
 
     if( !_socket->bind( _port, QAbstractSocket::ReuseAddressHint )) {
         VS_LOG_ERROR( "Unable to bind LocalHost:", _port, ". Last error : ", _socket->errorString().toStdString().c_str() );
-        return VirgilIoTKit::VS_CODE_ERR_SOCKET;
+        return VS_CODE_ERR_SOCKET;
     }
 
     if( !connect( _socket.get(), &QUdpSocket::readyRead, this, &VSSnapUdp::hasInputData )) {
         VS_LOG_ERROR( "Unable to connect QUdpSocket::readyRead to VSSnapUdp::hasInputData " );
-        return VirgilIoTKit::VS_CODE_ERR_SOCKET;
+        return VS_CODE_ERR_SOCKET;
     }
 
-    return VirgilIoTKit::VS_CODE_OK;
+    return VS_CODE_OK;
 }
 
-void VirgilIoTKit::VSSnapUdp::hasInputData() {
+void VSSnapUdp::hasInputData() {
     TData data;
     auto data_size = _socket->pendingDatagramSize();
     QHostAddress sender_address;
@@ -60,7 +60,7 @@ void VirgilIoTKit::VSSnapUdp::hasInputData() {
     processRxData( std::move( data ));
 }
 
-const VirgilIoTKit::VSMac& VirgilIoTKit::VSSnapUdp::ownMacAddress() const {
+const VSMac& VSSnapUdp::ownMacAddress() const {
     static const VSMac mac( 10, 20, 30, 40, 50, 60 );
 
     if( !_socket ){
@@ -71,35 +71,35 @@ const VirgilIoTKit::VSMac& VirgilIoTKit::VSSnapUdp::ownMacAddress() const {
     return mac;
 }
 
-VirgilIoTKit::vs_status_e VirgilIoTKit::VSSnapUdp::destroy() {
+vs_status_e VSSnapUdp::destroy() {
     _socket.reset();
 
-    return VirgilIoTKit::VS_CODE_OK;
+    return VS_CODE_OK;
 }
 
-VirgilIoTKit::vs_status_e VirgilIoTKit::VSSnapUdp::sendRawData( TData &&data ) {
+vs_status_e VSSnapUdp::sendRawData( TData &&data ) {
     auto data_size = data.size();
     auto sent_bytes = _socket->writeDatagram( QByteArray( reinterpret_cast<const char *>(data.data()), data_size ), QHostAddress::Broadcast, _port );
     //auto sent_bytes = _socket->write( reinterpret_cast<const char *>( data.data() ), data_size );
 
     if( !_socket ){
         VS_LOG_CRITICAL( "Snap UDP implementation is not initialized" );
-        return VirgilIoTKit::VS_CODE_ERR_CTX_NOT_READY;
+        return VS_CODE_ERR_CTX_NOT_READY;
     }
 
     if( sent_bytes != data_size ) {
         VS_LOG_ERROR( "Sent bytes : ", sent_bytes, ", data bytes to send : ", data_size, ". Last error : ", _socket->errorString().toStdString().c_str() );
-        return VirgilIoTKit::VS_CODE_ERR_REQUEST_SEND;
+        return VS_CODE_ERR_REQUEST_SEND;
     }
 
-    return VirgilIoTKit::VS_CODE_OK;
+    return VS_CODE_OK;
 }
 
-VirgilIoTKit::VSSnapUdp::TMacResponse VirgilIoTKit::VSSnapUdp::ownMac() const {
+VSSnapUdp::TMacResponse VSSnapUdp::ownMac() const {
     TMacResponse response;
     auto &[ ret_code, mac ] = response;
 
-    ret_code = VirgilIoTKit::VS_CODE_OK;
+    ret_code = VS_CODE_OK;
     mac = ownMacAddress();
 
     return response;

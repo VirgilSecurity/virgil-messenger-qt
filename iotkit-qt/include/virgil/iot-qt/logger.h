@@ -5,8 +5,6 @@
 #ifndef VIRGIL_IOTKIT_CPP_LOGGER_H
 #define VIRGIL_IOTKIT_CPP_LOGGER_H
 
-#include <app.h>
-
 #include <sstream>
 #include <virgil/iot/logger/logger.h>
 

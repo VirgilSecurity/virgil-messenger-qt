@@ -28,39 +28,30 @@ target_compile_definitions(info-client
 
 target_precompile_headers(info-client
     PRIVATE
-        include/virgil/iot/info-client/app.h
+        include/virgil/iot-qt/info-client/app.h
         )
 
 target_sources(info-client
         PRIVATE
-        include/virgil/iot/info-client/app.h
-        include/virgil/iot/info-client/main_window.h
-        include/virgil/iot/info-client/kit/logger.h
-        include/virgil/iot/info-client/kit/snap_info.h
-        include/virgil/iot/info-client/kit/snap_protocol.h
-        include/virgil/iot/info-client/kit/snap_service.h
-        include/virgil/iot/info-client/kit/snap_udp.h
+        include/virgil/iot-qt/info-client/app.h
+        include/virgil/iot-qt/info-client/main_window.h
 
         src/main.cpp
         src/main_window.cpp
-        src/kit/hal.cpp
-        src/kit/snap_info.cpp
-        src/kit/snap_protocol.cpp
-        src/kit/snap_service.cpp
-        src/kit/snap_udp.cpp
         )
 
 target_include_directories(info-client
         PRIVATE
-        include/virgil/iot/info-client
+        include/virgil/iot-qt/info-client
         )
 
 target_link_libraries(info-client
         PRIVATE
 
-        vs-module-snap-factory
-        vs-module-logger
+        virgil-iotkit-qt
         virgil-iot-status-code
+        vs-module-provision
+        vs-module-snap-factory
 
         Qt5::Core
         Qt5::Network

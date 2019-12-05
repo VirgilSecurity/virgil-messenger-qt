@@ -10,4 +10,5 @@ set(VIRGIL_IOT_CONFIG_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/ext/virgil-iotkit/conf
 include(${CMAKE_CURRENT_LIST_DIR}/ext/virgil-iotkit/cmake/helpers.cmake)
 
 add_subdirectory(ext)
+add_subdirectory(iotkit-qt)
 add_subdirectory(info-client)

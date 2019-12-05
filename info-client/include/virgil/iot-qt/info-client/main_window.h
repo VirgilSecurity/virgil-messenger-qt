@@ -7,7 +7,7 @@
 
 #include <app.h>
 
-#include <kit/snap_protocol.h>
+#include <virgil/iot-qt/snap_protocol.h>
 #include <virgil/iot/protocols/snap/info/info-structs.h>
 
 class VSMainWindow : public QObject  {
@@ -30,10 +30,10 @@ private:
     struct SDeviceInfo {
         SDeviceInfo(): _hasGeneralInfo( false ), _hasStatistics( false )    {}
 
-        VirgilIoTKit::VSMac _mac;
+        VSMac _mac;
         VirgilIoTKit::vs_snap_device_role_e _roles;
-        VirgilIoTKit::VSManufactureId _manufactureId;
-        VirgilIoTKit::VSDeviceType _deviceType;
+        VSManufactureId _manufactureId;
+        VSDeviceType _deviceType;
         VirgilIoTKit::vs_file_version_unpacked_t _fwVer;
         VirgilIoTKit::vs_file_version_unpacked_t _tlVer;
         uint32_t _sent;
@@ -52,7 +52,7 @@ private:
     void changeStatusBar();
     void updateTable();
 
-    SDeviceInfo& device( const VirgilIoTKit::VSMac &mac );
+    SDeviceInfo& device( const VSMac &mac );
 };
 
 #endif //HELPERS_MAIN_WINDOW_H
