@@ -39,8 +39,6 @@ project(iotkit-qt-example)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-add_definitions(-DVERSION="0.1.0A1")
-
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt5 COMPONENTS Qml REQUIRED)
 find_package(Qt5 COMPONENTS Quick REQUIRED)
@@ -73,6 +71,8 @@ target_include_directories(iotkit-qt-example
 
 target_link_libraries(iotkit-qt-example
         PRIVATE
+
+        iotkit-qt-netif-udp-broadcast
 
         Qt5::Widgets
         Qt5::Qml

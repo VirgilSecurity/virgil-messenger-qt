@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2019 Virgil Security, Inc.
+//  Copyright (C) 2015-2020 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,43 +32,50 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef _VIRGIL_IOTKIT_QT_SNAP_PROTOCOL_H_
-#define _VIRGIL_IOTKIT_QT_SNAP_PROTOCOL_H_
+#ifndef VIRGIL_IOTKIT_QT_VSQNETIFBASE_H
+#define VIRGIL_IOTKIT_QT_VSQNETIFBASE_H
 
-//#include <array>
-//#include <string>
-//#include <vector>
-//
-//#include <virgil/iot-qt/helpers.h>
-//#include <virgil/iot/status_code/status_code.h>
-//#include <virgil/iot/provision/provision-structs.h>
-//#include <virgil/iot/protocols/snap/snap-structs.h>
+#include <QObject>
+#include <QAbstractSocket>
 
-class VSSnapService;
-class VSNetif;
+#include <virgil/iot/protocols/snap.h>
 
-class VSQSnap {
+class VSQNetifBase: public QObject {
+    Q_OBJECT
 public:
-    using FChangeStateNotify = std::function<void( const std::string & )>;
+    VSQNetifBase();
+    VSQNetifBase(VSQNetifBase const &) = delete;
+    VSQNetifBase &operator=(VSQNetifBase const &) = delete;
 
-    VSSnapProtocol();
-    virtual ~VSSnapProtocol();
+    virtual ~VSQNetifBase() = default;
 
-    bool init( VSNetif &network_interface, const VSManufactureId &manufacture_id, const VSDeviceType &device_type, const VSDeviceSerial &device_serial,
-               VirgilIoTKit::vs_snap_device_role_e device_roles );
-    bool registerService( VSSnapService &snap_service );
+signals:
+    // Do not use these signals directly from your implementation of network interface.
+    void fireReceivedBytes(const QByteArray &data);
+    void fireReceivedPacket(const QByteArray &packet);
+    void fireStateChanged(QAbstractSocket::SocketState connectionState);
 
-    static const VSManufactureId manufactureId();
-    static const VSDeviceSerial deviceSerial();
-    static const VSDeviceType deviceType();
-    static uint32_t deviceRoles();
-    static const VirgilIoTKit::vs_netif_t* defaultNetif();
-    static bool send( const TData &data, VirgilIoTKit::vs_netif_t* netif = nullptr );
-    static VSMac macAddress( VirgilIoTKit::vs_netif_t* netif = nullptr );
+protected:
+    virtual bool init() = 0;
+    virtual bool deinit() = 0;
+    virtual bool tx(const QByteArray &data) = 0;
+    virtual QString macAddr() = 0;
+
+    // This method must be called by implementation of network interface.
+    // It uses low level callbacks and sends data using signals
+    bool processData(const QByteArray &data);
 
 private:
-    static VSSnapProtocol* _instance;
-    VirgilIoTKit::vs_netif_t* _netif = nullptr;
+    friend struct VSQLowLevelNetif;
+
+    // TODO: Try to give access to vs_netif_t only
+    friend class VSQSnap;
+
+    VirgilIoTKit::vs_netif_t m_lowLevelNetif;
+    VirgilIoTKit::vs_netif_rx_cb_t m_lowLevelRxCall;
+    VirgilIoTKit::vs_netif_process_cb_t m_lowLevelPacketProcess;
+
+
 };
 
-#endif // _VIRGIL_IOTKIT_QT_SNAP_PROTOCOL_H_
+#endif //VIRGIL_IOTKIT_QT_VSQNETIFBASE_H

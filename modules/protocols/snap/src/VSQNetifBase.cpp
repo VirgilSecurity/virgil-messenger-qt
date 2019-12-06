@@ -32,37 +32,59 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
-#ifndef _VIRGIL_IOTKIT_QT_SNAP_UDP_H_
-#define _VIRGIL_IOTKIT_QT_SNAP_UDP_H_
-
-#include <QtCore>
-#include <QtNetwork>
+#include <QSharedPointer>
 
 #include <virgil/iot/qt/protocols/snap/VSQNetifBase.h>
 
-class VSQUdpBroadcast: public VSQNetifBase {
-Q_OBJECT
-public:
-    VSQUdpBroadcast(quint16 port = 4100);
-    VSQUdpBroadcast(VSQUdpBroadcast const &) = delete;
-    VSQUdpBroadcast &operator=(VSQUdpBroadcast const &) = delete;
+using namespace VirgilIoTKit;
 
-    virtual ~VSQUdpBroadcast() = default;
+extern "C" {
+    struct VSQLowLevelNetif {
+        static vs_status_e init(vs_netif_t* netif,
+                                      const vs_netif_rx_cb_t rxCb,
+                                      const vs_netif_process_cb_t processCb) {
+            Q_ASSERT(netif);
+            if (!netif) {
+                return VS_CODE_ERR_NULLPTR_ARGUMENT;
+            }
+            auto qNetif = reinterpret_cast<VSQNetifBase*>(netif);
 
-protected:
-    virtual bool init() final;
-    virtual bool deinit() final;
-    virtual bool tx(const QByteArray &data) final;
-    virtual QString macAddr() final;
+            // Save Callbacks
+            qNetif->m_lowLevelRxCall = rxCb;
+            qNetif->m_lowLevelPacketProcess = processCb;
 
-private slots:
-    void onConnectionStateChanged(QAbstractSocket::SocketState);
-    void onHasInputData();
+            // Initialize Network interface
+            return qNetif->init() ? VS_CODE_OK : VS_CODE_ERR_AMBIGUOUS_INIT_CALL;
+        }
 
-private:
-    quint16 m_port;
-    QUdpSocket m_socket;
-};
+        static vs_status_e deinit(const vs_netif_t* netif) {
+            return VS_CODE_ERR_NOT_IMPLEMENTED;
+        }
 
-#endif // _VIRGIL_IOTKIT_QT_SNAP_UDP_H_
+        static vs_status_e tx(const vs_netif_t* netif, const uint8_t* data, const uint16_t dataSz) {
+            return VS_CODE_ERR_NOT_IMPLEMENTED;
+        }
+
+        static vs_status_e mac(const vs_netif_t* netif, vs_mac_addr_t* macAddr) {
+            return VS_CODE_ERR_NOT_IMPLEMENTED;
+        }
+    };
+}
+
+VSQNetifBase::VSQNetifBase() {
+    // User data points to this object
+    m_lowLevelNetif.user_data = this;
+
+    // Prepare functionality implementations
+    m_lowLevelNetif.init = VSQLowLevelNetif::init;
+    m_lowLevelNetif.deinit = VSQLowLevelNetif::deinit;
+    m_lowLevelNetif.tx = VSQLowLevelNetif::tx;
+    m_lowLevelNetif.mac_addr = VSQLowLevelNetif::mac;
+
+    // Prepare buffer to receive data
+    m_lowLevelNetif.packet_buf_filled = 0;
+}
+
+bool VSQNetifBase::processData(const QByteArray &data) {
+    return false;
+}

@@ -42,14 +42,29 @@ include(GNUInstallDirs)
 
 project(virgil-iotkit-qt VERSION 0.1.0 LANGUAGES CXX C)
 
-set(VIRGIL_IOT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR} CACHE STRING "Path to the Virgil IoT SDK")
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# TODO: Remove it
 add_definitions(-DVERSION="0.1.0A1")
+
+
+# ---------------------------------------------------------------------------
+#   Qt
+# ---------------------------------------------------------------------------
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
+find_package(Qt5 COMPONENTS Core REQUIRED)
+find_package(Qt5 COMPONENTS Network REQUIRED)
+
 
 # ---------------------------------------------------------------------------
 #   Helper modules
 # ---------------------------------------------------------------------------
 set (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/ext/virgil-iotkit/cmake" ${CMAKE_MODULE_PATH})
 include (clangformat)
+include (helpers)
 
 # ---------------------------------------------------------------------------
 #   Version options
@@ -97,7 +112,7 @@ option(VIRGIL_IOTKIT_QT_DEFAULT_GLOBAL_HAL "Enable default global HAL implementa
 #
 #   IoTKit
 #
-#add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/ext/virgil-iotkit)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/ext/virgil-iotkit)
 
 
 # ---------------------------------------------------------------------------

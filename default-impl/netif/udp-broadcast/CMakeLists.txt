@@ -50,3 +50,9 @@ target_include_directories(iotkit-qt-netif-udp-broadcast
         PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}/include
         )
+
+target_link_libraries(iotkit-qt-netif-udp-broadcast
+        PUBLIC
+
+        iotkit-qt-snap
+        )

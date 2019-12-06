@@ -34,23 +34,36 @@
 
 cmake_minimum_required(VERSION 3.11)
 
-add_library(iotkit-qt-modules)
+add_library(iotkit-qt-snap)
 
-target_sources(iotkit-qt-modules
+target_sources(iotkit-qt-snap
         PRIVATE
 
         # Headers
-        ${CMAKE_CURRENT_LIST_DIR}/include/virgil/iot/qt/protocols/snap/VSQSnap.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/virgil/iot/qt/protocols/snap/VSQSnapINFO.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/virgil/iot/qt/protocols/snap/VSQSnapServiceBase.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/virgil/iot/qt/protocols/snap/VSQNetifBase.h
+        #${CMAKE_CURRENT_LIST_DIR}/include/virgil/iot/qt/protocols/snap/VSQSnap.h
+        #${CMAKE_CURRENT_LIST_DIR}/include/virgil/iot/qt/protocols/snap/VSQSnapINFO.h
+        #${CMAKE_CURRENT_LIST_DIR}/include/virgil/iot/qt/protocols/snap/VSQSnapServiceBase.h
 
         # Sources
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQSnap.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQSnapHelpers.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQSnapINFO.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQNetifBase.cpp
+        #${CMAKE_CURRENT_LIST_DIR}/src/VSQSnap.cpp
+        #${CMAKE_CURRENT_LIST_DIR}/src/VSQSnapHelpers.cpp
+        #${CMAKE_CURRENT_LIST_DIR}/src/VSQSnapINFO.cpp
         )
 
-target_include_directories(iotkit-qt-modules
+target_include_directories(iotkit-qt-snap
         PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}/include
         )
+
+target_link_libraries(iotkit-qt-snap
+        PUBLIC
+
+        vs-module-snap-control
+
+        Qt5::Core
+        Qt5::Network
+        )
+
+
