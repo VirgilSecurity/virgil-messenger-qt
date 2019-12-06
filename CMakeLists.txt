@@ -43,6 +43,7 @@ include(GNUInstallDirs)
 project(virgil-iotkit-qt VERSION 0.1.0 LANGUAGES CXX C)
 
 set(VIRGIL_IOT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR} CACHE STRING "Path to the Virgil IoT SDK")
+add_definitions(-DVERSION="0.1.0A1")
 
 # ---------------------------------------------------------------------------
 #   Helper modules
