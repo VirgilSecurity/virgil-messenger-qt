@@ -19,6 +19,8 @@ profile
 # CLion
 .idea
 cmake-build-*/
+debug*/
+release*/
 VERSION
 
 ####
