@@ -32,24 +32,37 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <chrono>
-#include <iostream>
-#include <thread>
-#include <QCoreApplication>
 
-extern "C" bool
-vs_logger_output_hal(const char *buffer){
-    std::cout << buffer;
+#ifndef _VIRGIL_IOTKIT_QT_SNAP_UDP_H_
+#define _VIRGIL_IOTKIT_QT_SNAP_UDP_H_
 
-    return true;
-}
+#include <QtCore>
+#include <QtNetwork>
 
-extern "C" void
-vs_impl_msleep(size_t msec) {
-    // TODO: FIX IT
-    auto start = std::chrono::high_resolution_clock::now();
-    do {
-        QCoreApplication::processEvents( QEventLoop::AllEvents, msec );
-    }
-    while( std::chrono::high_resolution_clock::now() - start <= std::chrono::milliseconds( msec ));
-}
+#include <VSQNetifBase.h>
+
+class VSQUdpBroadcast: public VSQNetifBase {
+Q_OBJECT
+public:
+    VSQUdpBroadcast(quint16 port = 4100);
+    VSQUdpBroadcast(VSQUdpBroadcast const &) = delete;
+    VSQUdpBroadcast &operator=(VSQUdpBroadcast const &) = delete;
+
+    virtual ~VSQUdpBroadcast() = default;
+
+protected:
+    virtual bool init() final;
+    virtual bool deinit() final;
+    virtual bool tx(const QByteArray &data) final;
+    virtual QString macAddr() final;
+
+private slots:
+    void onConnectionStateChanged(QAbstractSocket::SocketState);
+    void onHasInputData();
+
+private:
+    quint16 m_port;
+    QUdpSocket m_socket;
+};
+
+#endif // _VIRGIL_IOTKIT_QT_SNAP_UDP_H_

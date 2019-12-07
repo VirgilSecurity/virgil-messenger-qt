@@ -40,7 +40,7 @@ add_library(iotkit-qt-helpers INTERFACE)
 
 target_sources(iotkit-qt-helpers
         INTERFACE
-        ${CMAKE_CURRENT_LIST_DIR}/include/virgil/iot/qt/helpers/VSQSingleton.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQSingleton.h
         )
 
 target_include_directories(iotkit-qt-helpers
@@ -48,3 +48,6 @@ target_include_directories(iotkit-qt-helpers
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
         )
 
+if(COMMAND add_clangformat)
+    add_clangformat(iotkit-qt-example)
+endif()

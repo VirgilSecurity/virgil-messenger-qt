@@ -38,10 +38,12 @@ cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
 #   Default Global HAL implementations
 #
 if (VIRGIL_IOTKIT_QT_DEFAULT_GLOBAL_HAL)
-    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/hal)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/global)
 endif()
 
 #
-#   Default network interface implementations
+#   UDP broadcast network interface. Default implementation.
 #
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/netif)
+if (VIRGIL_IOTKIT_QT_DEFAULT_NETIF_UDP_BCAST)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/netif/udp-broadcast)
+endif()

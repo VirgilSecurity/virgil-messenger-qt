@@ -32,11 +32,16 @@
 #
 #   Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.11)
 
-#
-#   UDP broadcast. Default implementation.
-#
-if (VIRGIL_IOTKIT_QT_DEFAULT_NETIF_UDP_BCAST)
-    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/udp-broadcast)
+add_library(iotkit-qt-hal-global-impl)
+
+target_sources(iotkit-qt-hal-global-impl
+        PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQGlobalHal.cpp
+        )
+
+if(COMMAND add_clangformat)
+    add_clangformat(iotkit-qt-hal-global-impl)
 endif()
+

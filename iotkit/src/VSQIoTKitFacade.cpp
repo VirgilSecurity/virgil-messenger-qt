@@ -33,36 +33,3 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 
-#ifndef _VIRGIL_IOTKIT_QT_SNAP_UDP_H_
-#define _VIRGIL_IOTKIT_QT_SNAP_UDP_H_
-
-#include <QtCore>
-#include <QtNetwork>
-
-#include <virgil/iot/qt/protocols/snap/VSQNetifBase.h>
-
-class VSQUdpBroadcast: public VSQNetifBase {
-Q_OBJECT
-public:
-    VSQUdpBroadcast(quint16 port = 4100);
-    VSQUdpBroadcast(VSQUdpBroadcast const &) = delete;
-    VSQUdpBroadcast &operator=(VSQUdpBroadcast const &) = delete;
-
-    virtual ~VSQUdpBroadcast() = default;
-
-protected:
-    virtual bool init() final;
-    virtual bool deinit() final;
-    virtual bool tx(const QByteArray &data) final;
-    virtual QString macAddr() final;
-
-private slots:
-    void onConnectionStateChanged(QAbstractSocket::SocketState);
-    void onHasInputData();
-
-private:
-    quint16 m_port;
-    QUdpSocket m_socket;
-};
-
-#endif // _VIRGIL_IOTKIT_QT_SNAP_UDP_H_

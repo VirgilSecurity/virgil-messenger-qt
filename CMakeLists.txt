@@ -125,6 +125,11 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/ext/virgil-iotkit)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/helpers)
 
 #
+#   Hardware Abstraction Layer
+#
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/hal)
+
+#
 #   Default implementations
 #
 if (VIRGIL_IOTKIT_QT_DEFAULT_IMPL)
@@ -134,7 +139,7 @@ endif()
 #
 #   Modules
 #
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/modules)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/iotkit)
 
 #
 #   Example

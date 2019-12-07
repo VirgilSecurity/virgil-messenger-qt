@@ -32,7 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
+#include <VSQUdpBroadcast.h>
 
 VSQUdpBroadcast::VSQUdpBroadcast(quint16 port)
 : m_port(port) {

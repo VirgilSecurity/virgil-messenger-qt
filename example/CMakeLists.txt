@@ -73,11 +73,17 @@ target_link_libraries(iotkit-qt-example
         PRIVATE
 
         iotkit-qt-netif-udp-broadcast
+        iotkit-qt-hal-global-impl
+        iotkit-qt-facade
 
         Qt5::Widgets
         Qt5::Qml
         Qt5::Quick
         )
+
+if(COMMAND add_clangformat)
+    add_clangformat(iotkit-qt-example)
+endif()
 
 
 

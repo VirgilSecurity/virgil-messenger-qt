@@ -40,7 +40,7 @@ target_sources(iotkit-qt-netif-udp-broadcast
         PRIVATE
 
         # Headers
-        ${CMAKE_CURRENT_LIST_DIR}/include/virgil/iot/qt/netif/VSQUdpBroadcast.h
+        include/VSQUdpBroadcast.h
 
         # Sources
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQUdpBroadcast.cpp
@@ -54,5 +54,10 @@ target_include_directories(iotkit-qt-netif-udp-broadcast
 target_link_libraries(iotkit-qt-netif-udp-broadcast
         PUBLIC
 
-        iotkit-qt-snap
+        iotkit-qt-hal
+        vs-module-snap-control
         )
+
+if(COMMAND add_clangformat)
+    add_clangformat(iotkit-qt-netif-udp-broadcast)
+endif()

@@ -32,4 +32,28 @@
 #
 #   Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-add_subdirectory(snap)
+cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
+
+project(iotkit-qt-hal VERSION 0.1.0 LANGUAGES C CXX)
+
+add_library(iotkit-qt-hal INTERFACE)
+
+target_sources(iotkit-qt-hal
+        INTERFACE
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQNetifBase.h
+        )
+
+target_include_directories(iotkit-qt-hal
+        INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+        )
+
+target_link_libraries(iotkit-qt-hal
+        INTERFACE
+
+        vs-module-snap-control
+
+        Qt5::Core
+        Qt5::Network
+        )
+
