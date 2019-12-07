@@ -120,6 +120,11 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/ext/virgil-iotkit)
 # ---------------------------------------------------------------------------
 
 #
+#   Helpers
+#
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/helpers)
+
+#
 #   Default implementations
 #
 if (VIRGIL_IOTKIT_QT_DEFAULT_IMPL)
