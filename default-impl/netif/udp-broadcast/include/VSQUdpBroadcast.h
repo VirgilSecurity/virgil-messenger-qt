@@ -41,24 +41,34 @@
 
 #include <VSQNetifBase.h>
 
-class VSQUdpBroadcast: public VSQNetifBase {
-Q_OBJECT
+class VSQUdpBroadcast : public VSQNetifBase {
+    Q_OBJECT
 public:
     VSQUdpBroadcast(quint16 port = 4100);
     VSQUdpBroadcast(VSQUdpBroadcast const &) = delete;
-    VSQUdpBroadcast &operator=(VSQUdpBroadcast const &) = delete;
+    VSQUdpBroadcast &
+    operator=(VSQUdpBroadcast const &) = delete;
 
     virtual ~VSQUdpBroadcast() = default;
 
 protected:
-    virtual bool init() final;
-    virtual bool deinit() final;
-    virtual bool tx(const QByteArray &data) final;
-    virtual QString macAddr() final;
+    virtual bool
+    init() final;
+
+    virtual bool
+    deinit() final;
+
+    virtual bool
+    tx(const QByteArray &data) final;
+
+    virtual QString
+    macAddr() final;
 
 private slots:
     void onConnectionStateChanged(QAbstractSocket::SocketState);
-    void onHasInputData();
+
+    void
+    onHasInputData();
 
 private:
     quint16 m_port;

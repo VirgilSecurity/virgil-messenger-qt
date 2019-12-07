@@ -6,9 +6,7 @@
 #include <QStringList>
 #include <QQuickView>
 
-Controller::Controller( QObject* parent )
-    : QObject( parent )
-    , m_pUIContext ( nullptr ) {
+Controller::Controller(QObject *parent) : QObject(parent), m_pUIContext(nullptr) {
 
     m_pVSInfoGeneralController = new VSInfoGeneralController();
 }
@@ -18,11 +16,12 @@ Controller::~Controller() {
     delete m_pVSInfoGeneralController;
 }
 
-void Controller::setupUI() {
+void
+Controller::setupUI() {
     m_pUIContext = new QQuickView;
-    m_pUIContext->setTitle( QString("demo-iotkit-qt - ")+QString( VERSION ) );
+    m_pUIContext->setTitle(QString("demo-iotkit-qt - ") + QString(VERSION));
 
-    QQmlContext* rootContext = m_pUIContext->rootContext();
+    QQmlContext *rootContext = m_pUIContext->rootContext();
     rootContext->setContextProperty("application", this);
     rootContext->setContextProperty("vsInfoGeneralController", QVariant::fromValue(m_pVSInfoGeneralController));
 
@@ -30,7 +29,7 @@ void Controller::setupUI() {
 
     QFont f = qApp->font();
     f.setPixelSize(12);
-    qApp->setFont( f );
+    qApp->setFont(f);
     m_pUIContext->setResizeMode(QQuickView::SizeRootObjectToView);
     m_pUIContext->setSource(QUrl("qrc:/main.qml"));
 

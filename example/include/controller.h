@@ -14,14 +14,15 @@ class Controller : public QObject {
     Q_OBJECT
 
 public:
-    explicit Controller( QObject* parent = 0 );
+    explicit Controller(QObject *parent = 0);
     ~Controller();
-    void setupUI();
+    void
+    setupUI();
 
 
 private:
-    QQuickView* m_pUIContext;
-    VSInfoGeneralController* m_pVSInfoGeneralController;
+    QQuickView *m_pUIContext;
+    VSInfoGeneralController *m_pVSInfoGeneralController;
 };
 
 #endif // __CONTROLLER_H__

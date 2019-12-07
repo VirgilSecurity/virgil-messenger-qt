@@ -24,4 +24,4 @@ typedef struct {
 } vs_info_general_t;
 
 
-#endif //DEMO_IOTKIT_QT_FAKE_VS_INFO_GENERAL_T_H
+#endif // DEMO_IOTKIT_QT_FAKE_VS_INFO_GENERAL_T_H

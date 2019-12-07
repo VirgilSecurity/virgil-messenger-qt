@@ -48,6 +48,3 @@ target_include_directories(iotkit-qt-helpers
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
         )
 
-if(COMMAND add_clangformat)
-    add_clangformat(iotkit-qt-example)
-endif()

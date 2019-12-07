@@ -38,10 +38,12 @@
 #include <QObject>
 #include <VSQSingleton.h>
 
-class VSQIoTKitFacade: public QObject,  public VSQSingleton<VSQIoTKitFacade> {
+class VSQIoTKitFacade : public QObject, public VSQSingleton<VSQIoTKitFacade> {
     Q_OBJECT
 public:
-    bool init();
+    bool
+    init();
+
 private:
 };
 

@@ -35,7 +35,7 @@
 #include <iostream>
 
 extern "C" bool
-vs_logger_output_hal(const char *buffer){
+vs_logger_output_hal(const char *buffer) {
     std::cout << buffer;
 
     return true;

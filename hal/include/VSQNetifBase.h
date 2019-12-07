@@ -74,8 +74,6 @@ private:
     VirgilIoTKit::vs_netif_t m_lowLevelNetif;
     VirgilIoTKit::vs_netif_rx_cb_t m_lowLevelRxCall;
     VirgilIoTKit::vs_netif_process_cb_t m_lowLevelPacketProcess;
-
-
 };
 
 #endif //VIRGIL_IOTKIT_QT_VSQNETIFBASE_H

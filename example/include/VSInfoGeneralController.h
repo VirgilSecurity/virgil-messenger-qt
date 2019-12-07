@@ -7,26 +7,29 @@
 #include <QtCore/QList>
 #include <QtQml/QQmlListProperty>
 
-class VSInfoGeneralController : public QObject
-{
+class VSInfoGeneralController : public QObject {
     Q_OBJECT
-    Q_PROPERTY(QQmlListProperty<VSInfoGeneralModel> vsInfoGeneralList READ getVSInfoGeneralList NOTIFY vsInfoGeneralListChanged)
-    Q_PROPERTY(VSInfoGeneralModel* currentVSInfoGeneral READ getCurrentVSInfoGeneral NOTIFY currentVSInfoGeneralChanged)
+    Q_PROPERTY(QQmlListProperty<VSInfoGeneralModel> vsInfoGeneralList READ getVSInfoGeneralList NOTIFY
+                       vsInfoGeneralListChanged)
+    Q_PROPERTY(VSInfoGeneralModel *currentVSInfoGeneral READ getCurrentVSInfoGeneral NOTIFY currentVSInfoGeneralChanged)
 public:
-
-    explicit VSInfoGeneralController( QObject* parent = NULL );
+    explicit VSInfoGeneralController(QObject *parent = NULL);
     virtual ~VSInfoGeneralController();
 
-    QQmlListProperty<VSInfoGeneralModel> getVSInfoGeneralList();
-    VSInfoGeneralModel* getCurrentVSInfoGeneral();
+    QQmlListProperty<VSInfoGeneralModel>
+    getVSInfoGeneralList();
+    VSInfoGeneralModel *
+    getCurrentVSInfoGeneral();
 
 signals:
-    void vsInfoGeneralListChanged();
-    void currentVSInfoGeneralChanged();
+    void
+    vsInfoGeneralListChanged();
+    void
+    currentVSInfoGeneralChanged();
 
 private:
-    QList<VSInfoGeneralModel*> m_VSInfoGeneralList;
-    VSInfoGeneralModel* m_CurrentVSInfoGeneralModel;
+    QList<VSInfoGeneralModel *> m_VSInfoGeneralList;
+    VSInfoGeneralModel *m_CurrentVSInfoGeneralModel;
 };
 
 #endif // __VSInfoGeneralController_H__
