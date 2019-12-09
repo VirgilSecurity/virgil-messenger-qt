@@ -64,6 +64,9 @@ protected:
     virtual QString
     macAddr() final;
 
+signals:
+    void fireConnectionStateChanged(QAbstractSocket::SocketState, const QString &description);
+
 private slots:
     void onConnectionStateChanged(QAbstractSocket::SocketState);
 

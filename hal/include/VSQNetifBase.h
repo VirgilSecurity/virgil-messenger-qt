@@ -63,7 +63,7 @@ protected:
 
     // This method must be called by implementation of network interface.
     // It uses low level callbacks and sends data using signals
-    bool processData(const QByteArray &data);
+    bool processData(QByteArray &&data);
 
 private:
     friend struct VSQLowLevelNetif;

@@ -39,173 +39,74 @@ VSQUdpBroadcast::VSQUdpBroadcast(quint16 port) : m_port(port) {
 
 bool
 VSQUdpBroadcast::init() {
-    return false;
+    if( !connect( &m_socket, &QUdpSocket::stateChanged, this, &VSQUdpBroadcast::onConnectionStateChanged )) {
+        VSLogError( "Unable to connect VSQUdpBroadcast::stateChanged signal to the socket's VSQUdpBroadcast::onConnectionStateChanged slot" );
+        return false;
+    }
+
+    if( !m_socket.bind( m_port, QUdpSocket::ReuseAddressHint )) {
+        VSLogError( "Unable to bind LocalHost:", m_port, ". Last error : ", m_socket->errorString().toStdString().c_str() );
+        return false;
+    }
+
+    if( !connect( m_socket.get(), &QUdpSocket::readyRead, this, &VSQUdpBroadcast::onHasInputData )) {
+        VSLogError( "Unable to connect QUdpSocket::readyRead signal to the VSQUdpBroadcast::onHasInputData slot" );
+        return false;
+    }
+
+    return true;
+}
+
+void VSQUdpBroadcast::onConnectionStateChanged(QAbstractSocket::SocketState socket_state, const QString &description) {
+    static const std::map<QAbstractSocket::SocketState, std::string> state_descr{
+            { QAbstractSocket::SocketState::UnconnectedState, "Unconnected" },
+            { QAbstractSocket::SocketState::HostLookupState, "Host lookup" },
+            { QAbstractSocket::SocketState::ConnectingState, "Connecting" },
+            { QAbstractSocket::SocketState::ConnectedState, "Connected" },
+            { QAbstractSocket::SocketState::BoundState, "Bound" },
+            { QAbstractSocket::SocketState::ListeningState, "Listening" },
+            { QAbstractSocket::SocketState::ClosingState, "Closing" } };
+
+    emit fireConnectionStateChanged( socket_state, QString( "LocalHost:%1 : %2"). arg(m_port). arg(state_descr.at( socketState ) ));
+    VSLogCritical( "Socket LocalHost:", m_port, " has been changed its state. New state : ", state_descr.at( socketState ).c_str() );
 }
 
 bool
 VSQUdpBroadcast::deinit() {
+    m_socket.disconnectFromHost();
     return false;
 }
 
 bool
 VSQUdpBroadcast::tx(const QByteArray &data) {
+    assert(m_socket.state() == QAbstractSocket::ConnectedState && "Socket must be connected before this call");
+
+    auto sent_bytes = m_socket.writeDatagram( data, QHostAddress::Broadcast, m_port );
+
+    if( sent_bytes != data_sz ) {
+        VSLogError( "Sent bytes : ", sent_bytes, ", data bytes to send : ", data.size(), ". Last error : ", m_socket.errorString().toStdString().c_str() );
+        return false;
+    }
+
     return false;
 }
 
 QString
 VSQUdpBroadcast::macAddr() {
-    return "";
-}
-
-void
-VSQUdpBroadcast::onConnectionStateChanged(QAbstractSocket::SocketState) {
+    return m_socket.multicastInterface().hardwareAddress();
 }
 
 void
 VSQUdpBroadcast::onHasInputData() {
+    QHostAddress sender_address;
+    quint16 port;
+    auto data_size = m_socket.pendingDatagramSize();
+    QByteArray data( data_size );
+    auto read_size = m_socket.readDatagram( data.data(), data_size, &sender_address, &port);
+
+    if( read_size != data_size ){
+        VSLogError( "Unable to read ", data_size, " from address ", sender_adderss.toString().toStdString(), " on port ", port, ". ", read_size, " bytes has been read. Last error : ", m_socket.errorString().toStdString().c_str() );
+    } else {
+        processData( std::move( data ));
+    }
 }
-
-
-//#include <virgil/iot-qt/logger.h>
-//#include <virgil/iot-qt/netif-udp.h>
-//
-// using namespace VirgilIoTKit;
-//
-///* static */ VSNetifUdp* VSNetifUdp::_instance = nullptr;
-//
-// VSNetifUdp::VSNetifUdp( quint16 bind_port ) {
-//    assert( !_instance && "Only one instance is allowed" );
-//
-//    _instance = this;
-//
-//    _netif.user_data = this;
-//
-//    _netif.deinit = netifDeinit;
-//    _netif.init = netifInit;
-//    _netif.mac_addr = netifMacAddr;
-//    _netif.tx = netifTx;
-//
-//    bindPort( bind_port );
-//}
-//
-// VSNetifUdp::~VSNetifUdp() {
-//    _instance = nullptr;
-//}
-//
-///* static */ vs_status_e VSNetifUdp::netifInit( const VirgilIoTKit::vs_netif_rx_cb_t rx_cb, const
-///VirgilIoTKit::vs_netif_process_cb_t process_cb ) {
-//    assert( _instance && "Constructor must be called before this call" );
-//    assert( _instance->_port != 0 && "Port must not be zero" );
-//
-//    VSLogDebug( "Set UDP broadcast mode for LocalHost:", _instance->_port );
-//    _instance->_socket.reset( new QUdpSocket );
-//
-//    if( !connect( _instance->_socket.get(), &QAbstractSocket::stateChanged, _instance,
-//    &VSNetifUdp::connectionStateChanged )) {
-//        VSLogError( "Unable to connect VSSnapUdp::initInterface to the socket's QAbstractSocket::stateChanged signal"
-//        ); return VS_CODE_ERR_SOCKET;
-//    }
-//
-//    if( !_instance->_socket->bind( _instance->_port, QAbstractSocket::ReuseAddressHint )) {
-//        VSLogError( "Unable to bind LocalHost:", _instance->_port, ". Last error : ",
-//        _instance->_socket->errorString().toStdString().c_str() ); return VS_CODE_ERR_SOCKET;
-//    }
-//
-//    if( !connect( _instance->_socket.get(), &QUdpSocket::readyRead, _instance, &VSNetifUdp::hasInputData )) {
-//        VSLogError( "Unable to connect QUdpSocket::readyRead to VSSnapUdp::hasInputData " );
-//        return VS_CODE_ERR_SOCKET;
-//    }
-//
-//    _instance->_netifRxCallback = rx_cb;
-//    _instance->_netifRxProcessCallback = process_cb;
-//
-//    return VS_CODE_OK;
-//}
-//
-// void VSNetifUdp::connectionStateChanged( QAbstractSocket::SocketState socketState ) {
-//    static const std::map<QAbstractSocket::SocketState, std::string> state_descr{
-//            { QAbstractSocket::SocketState::UnconnectedState, "Unconnected" },
-//            { QAbstractSocket::SocketState::HostLookupState, "Host lookup" },
-//            { QAbstractSocket::SocketState::ConnectingState, "Connecting" },
-//            { QAbstractSocket::SocketState::ConnectedState, "Connected" },
-//            { QAbstractSocket::SocketState::BoundState, "Bound" },
-//            { QAbstractSocket::SocketState::ListeningState, "Listening" },
-//            { QAbstractSocket::SocketState::ClosingState, "Closing" } };
-//
-//    emit stateChanged( socketState, std::string( "LocalHost:" ) + std::to_string(_port) + " : " + state_descr.at(
-//    socketState ) ); VSLogCritical( "Socket LocalHost:", _port, " has been changed its state. New state : ",
-//    state_descr.at( socketState ).c_str() );
-//
-//}
-//
-// void VSNetifUdp::hasInputData() {
-//    TData data;
-//    auto data_size = _socket->pendingDatagramSize();
-//    QHostAddress sender_address;
-//    quint16 port = 0;
-//
-//    data.resize( data_size );
-//    auto read_size = _socket->readDatagram( reinterpret_cast<char*>( data.data() ), data.capacity(), &sender_address,
-//    &port );
-//
-//    if( !_netifRxCallback )
-//        return;
-//
-//    const uint8_t *packet_data = nullptr;
-//    uint16_t packet_data_sz = 0;
-//
-//    if( _netifRxCallback( &_instance->_netif, data.data(), data.size(), &packet_data, &packet_data_sz ) !=
-//    VirgilIoTKit::VS_CODE_OK )
-//        return;
-//
-//    if( !_netifRxProcessCallback )
-//        return;
-//
-//    if( _netifRxProcessCallback( &_instance->_netif, packet_data, packet_data_sz ) != VirgilIoTKit::VS_CODE_OK ) {
-//        VSLogError( "Unable to process received packet" );
-//    }
-//}
-//
-///* static */ VirgilIoTKit::vs_status_e VSNetifUdp::netifDeinit() {
-//    assert( _instance && "Constructor must be called before this call" );
-//
-//    _instance->_socket.reset();
-//
-//    return VirgilIoTKit::VS_CODE_OK;
-//}
-//
-///* static */ VirgilIoTKit::vs_status_e VSNetifUdp::netifTx( const uint8_t* data_buf, const uint16_t data_sz ) {
-//    assert( _instance && "Constructor must be called before this call" );
-//
-//    TData data( data_buf, data_buf + data_sz );
-//    auto sent_bytes = _instance->_socket->writeDatagram( QByteArray( reinterpret_cast<const char *>(data.data()),
-//    data_sz ), QHostAddress::Broadcast, _instance->_port );
-//
-//    if( !_instance->_socket ){
-//        VSLogCritical( "Snap UDP implementation is not initialized" );
-//        return VS_CODE_ERR_CTX_NOT_READY;
-//    }
-//
-//    if( sent_bytes != data_sz ) {
-//        VSLogError( "Sent bytes : ", sent_bytes, ", data bytes to send : ", data_sz, ". Last error : ",
-//        _instance->_socket->errorString().toStdString().c_str() ); return VS_CODE_ERR_REQUEST_SEND;
-//    }
-//
-//    return VS_CODE_OK;
-//
-//}
-//
-///* static */ VirgilIoTKit::vs_status_e VSNetifUdp::netifMacAddr( VirgilIoTKit::vs_mac_addr_t* mac_addr ) {
-//    assert( _instance && "Constructor must be called before this call" );
-//    assert( mac_addr && "mac_addr pointer must not be nullptr" );
-//
-//    // TODO : to fix !!!
-//    mac_addr->bytes[0] = 1;
-//    mac_addr->bytes[1] = 2;
-//    mac_addr->bytes[2] = 2;
-//    mac_addr->bytes[3] = 3;
-//    mac_addr->bytes[4] = 4;
-//    mac_addr->bytes[5] = 5;
-//
-//    return VS_CODE_OK;
-//}

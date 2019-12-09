@@ -85,6 +85,24 @@ VSQNetifBase::VSQNetifBase() {
     m_lowLevelNetif.packet_buf_filled = 0;
 }
 
-bool VSQNetifBase::processData(const QByteArray &data) {
-    return false;
+bool VSQNetifBase::processData(QByteArray &&data) {
+
+    if( !m_lowLevelRxCall )
+        return false;
+
+    const uint8_t *packet_data = nullptr;
+    uint16_t packet_data_sz = 0;
+
+    if( m_lowLevelRxCall( &m_lowLevelNetif, data.data(), data.size(), &packet_data, &packet_data_sz ) != VirgilIoTKit::VS_CODE_OK )
+        return false;
+
+    if( !_netifRxProcessCallback )
+        return true;
+
+    if( _netifRxProcessCallback( &_instance->_netif, packet_data, packet_data_sz ) != VirgilIoTKit::VS_CODE_OK ) {
+        VSLogError( "Unable to process received packet" );
+        return false;
+    }
+
+    return true;
 }
