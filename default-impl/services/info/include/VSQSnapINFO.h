@@ -42,15 +42,17 @@
 #include <virgil/iot-qt/snap-protocol.h>
 #include <virgil/iot-qt/snap-service.h>
 
+
 #include <virgil/iot/protocols/snap/info/info-structs.h>
 #include <virgil/iot/protocols/snap/info/info-client.h>
+#include <VSQSnapServiceBase.h>
 
-class VSSnapInfoClient : public QObject, public VSSnapService {
+class VSQSnapInfoClient : public QObject, public VSQSnapServiceBase {
     Q_OBJECT
 
 public:
-    VSSnapInfoClient();
-    ~VSSnapInfoClient() override;
+    VSQSnapInfoClient();
+    ~VSQSnapInfoClient() override;
 
     using TEnumDevicesArray = std::vector<VirgilIoTKit::vs_snap_info_device_t>;
 
@@ -58,9 +60,9 @@ public:
     const std::string &serviceName() const override;
 
     TEnumDevicesArray enumDevices( size_t wait_msec, size_t max_devices_amount = 1000 ) const;
-    bool changePolling( size_t polling_element, uint16_t period_seconds, bool enable, const VSMac &device_mac = broadcastMac ) const;
-    bool setPolling(    size_t polling_element, uint16_t period_seconds, const VSMac &device_mac = broadcastMac ) const { return changePolling( polling_element, period_seconds, true,  device_mac ); }
-    bool resetPoling(   size_t polling_element, uint16_t period_seconds, const VSMac &device_mac = broadcastMac ) const { return changePolling( polling_element, period_seconds, false, device_mac ); }
+    bool changePolling( size_t polling_element, uint16_t period_seconds, bool enable, const VSQMac &device_mac = broadcastMac ) const;
+    bool setPolling(    size_t polling_element, uint16_t period_seconds, const VSQMac &device_mac = broadcastMac ) const { return changePolling( polling_element, period_seconds, true,  device_mac ); }
+    bool resetPoling(   size_t polling_element, uint16_t period_seconds, const VSQMac &device_mac = broadcastMac ) const { return changePolling( polling_element, period_seconds, false, device_mac ); }
 
 signals:
     void deviceStarted( VirgilIoTKit::vs_snap_info_device_t &device );

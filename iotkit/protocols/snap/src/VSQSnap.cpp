@@ -47,7 +47,7 @@ using namespace VirgilIoTKit;
 /* static */ VSSnapProtocol * VSSnapProtocol::_instance = nullptr;
 
 VSSnapProtocol::VSSnapProtocol(){
-    assert( !_instance && "Constructor must be called once" );
+    Q_ASSERT( !_instance && "Constructor must be called once" );
     _instance = this;
 }
 
@@ -55,7 +55,7 @@ VSSnapProtocol::~VSSnapProtocol(){
     _instance = nullptr;
 }
 
-bool VSSnapProtocol::init( VSNetif &network_interface, const VSManufactureId &manufacture_id, const VSDeviceType &device_type, const VSDeviceSerial &device_serial,
+bool VSSnapProtocol::init( VSNetif &network_interface, const VSQManufactureId &manufacture_id, const VSDeviceType &device_type, const VSDeviceSerial &device_serial,
            vs_snap_device_role_e device_roles ) {
 
     _netif = network_interface.getImplementation();
@@ -80,7 +80,7 @@ bool VSSnapProtocol::registerService( VSSnapService &snap_service ) {
     return true;
 }
 
-/* static */ const VSManufactureId VSSnapProtocol::manufactureId() {
+/* static */ const VSQManufactureId VSSnapProtocol::manufactureId() {
     return *VirgilIoTKit::vs_snap_device_manufacture();
 }
 
@@ -108,7 +108,7 @@ bool VSSnapProtocol::registerService( VSSnapService &snap_service ) {
     return VirgilIoTKit::vs_snap_send( netif, data.data(), data.size() );
 }
 
-/* static */ VSMac VSSnapProtocol::macAddress( VirgilIoTKit::vs_netif_t* netif ) {
+/* static */ VSQMac VSSnapProtocol::macAddress( VirgilIoTKit::vs_netif_t* netif ) {
     VirgilIoTKit::vs_mac_addr_t ownMacAddr;
 
     VirgilIoTKit::vs_snap_mac_addr( netif, &ownMacAddr );

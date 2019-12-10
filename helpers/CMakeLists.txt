@@ -36,15 +36,34 @@ cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
 
 project(iotkit-qt-helpers VERSION 0.1.0 LANGUAGES C CXX)
 
-add_library(iotkit-qt-helpers INTERFACE)
+add_library(iotkit-qt-helpers)
 
 target_sources(iotkit-qt-helpers
-        INTERFACE
+        PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQMac.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQSingleton.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQMac.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQManufactureId.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQDeviceType.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQDeviceRoles.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQDeviceSerial.h
+
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQMac.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQManufactureId.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQDeviceType.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQDeviceSerial.cpp
         )
 
 target_include_directories(iotkit-qt-helpers
-        INTERFACE
+        PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+        )
+
+target_link_libraries(iotkit-qt-helpers
+        PUBLIC
+
+        Qt5::Core
+
+        vs-module-snap-control
         )
 

@@ -32,9 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <QSharedPointer>
-
-#include <virgil/iot/qt/protocols/snap/VSQNetifBase.h>
+#include <VSQNetifBase.h>
+#include <VSQLogger.h>
 
 using namespace VirgilIoTKit;
 
@@ -89,21 +88,21 @@ VirgilIoTKit::vs_netif_t *VSQNetifBase::netif() {
     return &m_lowLevelNetif;
 }
 
-bool VSQNetifBase::processData(QByteArray &&data) {
-
+bool VSQNetifBase::processData(const QByteArray &data) {
     if( !m_lowLevelRxCall )
         return false;
 
+    const uint8_t *raw_data = reinterpret_cast<const uint8_t*>(data.data());
     const uint8_t *packet_data = nullptr;
     uint16_t packet_data_sz = 0;
 
-    if( m_lowLevelRxCall( &m_lowLevelNetif, data.data(), data.size(), &packet_data, &packet_data_sz ) != VirgilIoTKit::VS_CODE_OK )
+    if( m_lowLevelRxCall( &m_lowLevelNetif, raw_data, data.size(), &packet_data, &packet_data_sz ) != VirgilIoTKit::VS_CODE_OK )
         return false;
 
-    if( !_netifRxProcessCallback )
+    if( !m_lowLevelPacketProcess )
         return true;
 
-    if( _netifRxProcessCallback( &_instance->_netif, packet_data, packet_data_sz ) != VirgilIoTKit::VS_CODE_OK ) {
+    if( m_lowLevelPacketProcess( &m_lowLevelNetif, packet_data, packet_data_sz ) != VirgilIoTKit::VS_CODE_OK ) {
         VSLogError( "Unable to process received packet" );
         return false;
     }

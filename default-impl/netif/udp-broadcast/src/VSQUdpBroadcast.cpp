@@ -75,7 +75,7 @@ VSQUdpBroadcast::deinit() {
 bool
 VSQUdpBroadcast::tx(const QByteArray &data) {
     auto data_sz = data.size();
-    assert(m_socket.state() == QAbstractSocket::ConnectedState && "Socket must be connected before this call");
+    Q_ASSERT(m_socket.state() == QAbstractSocket::ConnectedState && "Socket must be connected before this call");
 
     auto sent_bytes = m_socket.writeDatagram(data, QHostAddress::Broadcast, m_port);
 

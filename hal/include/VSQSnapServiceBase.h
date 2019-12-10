@@ -40,12 +40,12 @@
 
 class VSSnapProtocol;
 
-class VSSnapServiceBase {
+class VSQSnapServiceBase {
 public:
-    virtual ~VSSnapServiceBase() = default;
+    virtual ~VSQSnapServiceBase() = default;
 
     virtual const VirgilIoTKit::vs_snap_service_t *serviceInterface() = 0;
-//    virtual const QString &serviceName() const = 0;
+    virtual const QString &serviceName() const = 0;
 
 //    void setSnapProtocol( const VSSnapProtocol *protocol )   { m_protocol = protocol; }
 

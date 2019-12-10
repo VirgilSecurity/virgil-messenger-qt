@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2019 Virgil Security, Inc.
+//  Copyright (C) 2015-2020 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,43 +32,74 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef _VIRGIL_IOTKIT_QT_SNAP_PROTOCOL_H_
-#define _VIRGIL_IOTKIT_QT_SNAP_PROTOCOL_H_
+#ifndef _VSQ_APP_CONFIG_H_
+#define _VSQ_APP_CONFIG_H_
 
-//#include <array>
-//#include <string>
-//#include <vector>
-//
-//#include <virgil/iot-qt/helpers.h>
-//#include <virgil/iot/status_code/status_code.h>
-//#include <virgil/iot/provision/provision-structs.h>
-//#include <virgil/iot/protocols/snap/snap-structs.h>
+#include <VSQManufactureId.h>
+#include <VSQDeviceType.h>
+#include <VSQDeviceSerial.h>
+#include <VSQDeviceRoles.h>
+#include <virgil/iot/logger/logger.h>
 
-class VSSnapService;
-class VSNetif;
-
-class VSQSnap {
+class VSQAppConfig {
 public:
-    using FChangeStateNotify = std::function<void( const std::string & )>;
+    VSQAppConfig &
+    operator<<(const VSQManufactureId &manufactureId) {
+        m_manufactureId = manufactureId;
+        return *this;
+    }
 
-    VSSnapProtocol();
-    virtual ~VSSnapProtocol();
+    VSQAppConfig &
+    operator<<(const VSQDeviceType &deviceType) {
+        m_deviceType = deviceType;
+        return *this;
+    }
 
-    bool init( VSNetif &network_interface, const VSQManufactureId &manufacture_id, const VSDeviceType &device_type, const VSDeviceSerial &device_serial,
-               VirgilIoTKit::vs_snap_device_role_e device_roles );
-    bool registerService( VSSnapService &snap_service );
+    VSQAppConfig &
+    operator<<(const VSQDeviceSerial &deviceSerial) {
+        m_deviceSerial = deviceSerial;
+        return *this;
+    }
 
-    static const VSQManufactureId manufactureId();
-    static const VSDeviceSerial deviceSerial();
-    static const VSDeviceType deviceType();
-    static uint32_t deviceRoles();
-    static const VirgilIoTKit::vs_netif_t* defaultNetif();
-    static bool send( const TData &data, VirgilIoTKit::vs_netif_t* netif = nullptr );
-    static VSQMac macAddress( VirgilIoTKit::vs_netif_t* netif = nullptr );
+    VSQAppConfig &
+    operator<<(const VSQDeviceRoles &deviceRole) {
+        m_deviceRoles = deviceRole;
+        return *this;
+    }
+
+    VSQAppConfig &
+    operator<<(VirgilIoTKit::vs_log_level_t log_level) {
+        m_logLevel = log_level;
+        return *this;
+    }
+
+    const VSQManufactureId &
+    manufactureId() const {
+        return m_manufactureId;
+    }
+    const VSQDeviceType &
+    deviceType() const {
+        return m_deviceType;
+    }
+    const VSQDeviceSerial &
+    deviceSerial() const {
+        return m_deviceSerial;
+    }
+    const VSQDeviceRoles &
+    deviceRoles() const {
+        return m_deviceRoles;
+    }
+    VirgilIoTKit::vs_log_level_t
+    logLevel() const {
+        return m_logLevel;
+    }
 
 private:
-    static VSSnapProtocol* _instance;
-    VirgilIoTKit::vs_netif_t* _netif = nullptr;
+    VSQManufactureId m_manufactureId;
+    VSQDeviceType m_deviceType;
+    VSQDeviceSerial m_deviceSerial;
+    VSQDeviceRoles m_deviceRoles;
+    VirgilIoTKit::vs_log_level_t m_logLevel;
 };
 
-#endif // _VIRGIL_IOTKIT_QT_SNAP_PROTOCOL_H_
+#endif // _VSQ_APP_CONFIG_H_

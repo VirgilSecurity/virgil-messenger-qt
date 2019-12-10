@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2019 Virgil Security, Inc.
+//  Copyright (C) 2015-2020 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,43 +32,38 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef _VIRGIL_IOTKIT_QT_SNAP_PROTOCOL_H_
-#define _VIRGIL_IOTKIT_QT_SNAP_PROTOCOL_H_
+#include <app.h>
+#include <controller.h>
+#include <VSQFeatures.h>
+#include <VSQImplementations.h>
+#include <VSQAppConfig.h>
+#include <VSQManufactureId.h>
+#include <VSQUdpBroadcast.h>
+#include <VSQDeviceType.h>
+#include <VSQDeviceSerial.h>
+#include <VSQDeviceRoles.h>
+#include <VSQIoTKitFacade.h>
 
-//#include <array>
-//#include <string>
-//#include <vector>
-//
-//#include <virgil/iot-qt/helpers.h>
-//#include <virgil/iot/status_code/status_code.h>
-//#include <virgil/iot/provision/provision-structs.h>
-//#include <virgil/iot/protocols/snap/snap-structs.h>
+GuiApplication::GuiApplication(int argc, char *argv[]) : app(argc, argv) {
+    constexpr auto udpPort = 4100;
 
-class VSSnapService;
-class VSNetif;
+    m_udpBroadcast.reset(new VSQUdpBroadcast(udpPort));
 
-class VSQSnap {
-public:
-    using FChangeStateNotify = std::function<void( const std::string & )>;
+    auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT;
+    auto impl = VSQImplementations() << m_udpBroadcast.get();
+    auto roles = VSQDeviceRoles() << VirgilIoTKit::VS_SNAP_DEV_CONTROL;
+    auto app_config = VSQAppConfig() << VSQManufactureId() << VSQDeviceType() << VSQDeviceSerial()
+                                     << VirgilIoTKit::VS_LOGLEV_DEBUG << roles;
 
-    VSSnapProtocol();
-    virtual ~VSSnapProtocol();
+    if (!VSQIoTKitFacade::init(features, impl, roles, app_config))
+        throw std::runtime_error("Unable to initialize Virgil IoT KIT");
+}
 
-    bool init( VSNetif &network_interface, const VSQManufactureId &manufacture_id, const VSDeviceType &device_type, const VSDeviceSerial &device_serial,
-               VirgilIoTKit::vs_snap_device_role_e device_roles );
-    bool registerService( VSSnapService &snap_service );
+int
+GuiApplication::run() {
+    Controller controller;
 
-    static const VSQManufactureId manufactureId();
-    static const VSDeviceSerial deviceSerial();
-    static const VSDeviceType deviceType();
-    static uint32_t deviceRoles();
-    static const VirgilIoTKit::vs_netif_t* defaultNetif();
-    static bool send( const TData &data, VirgilIoTKit::vs_netif_t* netif = nullptr );
-    static VSQMac macAddress( VirgilIoTKit::vs_netif_t* netif = nullptr );
+    controller.setupUI();
 
-private:
-    static VSSnapProtocol* _instance;
-    VirgilIoTKit::vs_netif_t* _netif = nullptr;
-};
-
-#endif // _VIRGIL_IOTKIT_QT_SNAP_PROTOCOL_H_
+    return app.exec();
+}

@@ -60,5 +60,4 @@ T& VSQSingleton<T, D>::instance()
     return inst;
 }
 
-
 #endif //VIRGIL_IOTKIT_QT_VSQSINGLETON_H

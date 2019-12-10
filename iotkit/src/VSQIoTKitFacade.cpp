@@ -33,46 +33,31 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 #include <type_traits>
-#include <VSQIoTKitFacade.h>
-#include <virgil/iot/logger/logger.h>
-
 #include <VSQNetifBase.h>
+#include <VSQSnapServiceBase.h>
+#include <VSQIoTKitFacade.h>
+#include <VSQLogger.h>
 
 bool
-VSQIoTKitFacade::init(VirgilIoTKit::vs_device_manufacture_id_t manufacturer_id,
-                      VirgilIoTKit::vs_device_type_t device_type,
-                      VirgilIoTKit::vs_device_serial_t device_serial,
-                      VirgilIoTKit::vs_log_level_t log_level,
-                      uint32_t device_roles) {
-    VirgilIoTKit::vs_logger_init(log_level);
+VSQIoTKitFacade::init(const VSQFeatures &features,
+                      VSQImplementations &impl,
+                      const VSQDeviceRoles &roles,
+                      const VSQAppConfig &app_config) {
+    VirgilIoTKit::vs_logger_init(app_config.logLevel());
 
-    std::copy(m_manufacturer_id, manufacturer_id, sizeof(manufacturer_id));
-    std::copy(m_device_type, device_type, sizeof(device_type));
-    std::copy(m_device_serial, device_serial, sizeof(device_serial));
-    m_device_roles = device_roles;
+    try {
+        Q_CHECK_PTR(impl.netif());
 
-    m_initialized = true;
-}
+        if (VirgilIoTKit::vs_snap_init(impl.netif()->netif(),
+                                       app_config.manufactureId(),
+                                       app_config.deviceType(),
+                                       app_config.deviceSerial(),
+                                       app_config.deviceRoles()) != VirgilIoTKit::VS_CODE_OK)
+            throw QString("Unable to initialize SNAP");
 
-VSQIoTKitFacade &
-VSQIoTKitFacade::operator<<(VSQNetifBase &netif) {
-    Q_ASSERT(m_initialized);
-
-    if (VirgilIoTKit::vs_snap_init(netif.netif(), m_manufacturer_id, m_device_type, m_device_serial, m_device_roles) !=
-        VirgilIoTKit::VS_CODE_OK) {
-        VsLogError("Unable to initialize SNAP module");
+        return true;
+    } catch (QString &descr) {
+        VSLogCritical("Error during Virgil IoT KIT initalization : ", descr.toStdString());
+        return false;
     }
-
-    return *this;
-}
-
-VSQIoTKitFacade &
-VSQIoTKitFacade::operator<<(VSQSnapServiceBase &snap_service) {
-    Q_ASSERT(m_initialized);
-
-    if (VirgilIoTKit::vs_snap_register_service(snap_service.serviceInterface()) != VirgilIoTKit::VS_CODE_OK) {
-        VsLogError("Unable to initialize service ", snap_service.serviceName());
-    }
-
-    return *this;
 }

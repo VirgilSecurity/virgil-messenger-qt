@@ -36,22 +36,24 @@ cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
 
 project(iotkit-qt-hal VERSION 0.1.0 LANGUAGES C CXX)
 
-add_library(iotkit-qt-hal INTERFACE)
+add_library(iotkit-qt-hal)
 
 target_sources(iotkit-qt-hal
-        INTERFACE
+        PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQNetifBase.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQLogger.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQSnapServiceBase.h
+
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQNetifBase.cpp
         )
 
 target_include_directories(iotkit-qt-hal
-        INTERFACE
+        PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
         )
 
 target_link_libraries(iotkit-qt-hal
-        INTERFACE
+        PUBLIC
 
         vs-module-snap-control
 

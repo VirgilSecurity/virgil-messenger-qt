@@ -42,7 +42,7 @@ using namespace VirgilIoTKit;
 
 VSSnapInfoClient::VSSnapInfoClient(){
 
-    assert( !_instance );
+    Q_ASSERT( !_instance );
 
     _instance = this;
 
@@ -54,7 +54,7 @@ VSSnapInfoClient::VSSnapInfoClient(){
 }
 
 VSSnapInfoClient::~VSSnapInfoClient(){
-    assert( _instance );
+    Q_ASSERT( _instance );
 
     _instance = nullptr;
 
@@ -68,7 +68,7 @@ const std::string & VSSnapInfoClient::serviceName() const {
 }
 
 /* static */ vs_status_e VSSnapInfoClient::startNotify( vs_snap_info_device_t *device ){
-    assert( _instance );
+    Q_ASSERT( _instance );
 
     emit _instance->deviceStarted( *device );
 
@@ -76,7 +76,7 @@ const std::string & VSSnapInfoClient::serviceName() const {
 }
 
 /* static */ vs_status_e VSSnapInfoClient::generalInfo( vs_info_general_t *general_data ){
-    assert( _instance );
+    Q_ASSERT( _instance );
 
     emit _instance->deviceGeneralInfo( *general_data );
 
@@ -84,7 +84,7 @@ const std::string & VSSnapInfoClient::serviceName() const {
 }
 
 /* static */ vs_status_e VSSnapInfoClient::statistics( vs_info_statistics_t *statistics ){
-    assert( _instance );
+    Q_ASSERT( _instance );
 
     emit _instance->deviceStatistics( *statistics );
 
@@ -104,7 +104,7 @@ VSSnapInfoClient::TEnumDevicesArray VSSnapInfoClient::enumDevices( size_t wait_m
     return devices;
 }
 
-bool VSSnapInfoClient::changePolling( size_t pooling_element, uint16_t period_seconds, bool enable, const VSMac &device_mac) const {
+bool VSSnapInfoClient::changePolling( size_t pooling_element, uint16_t period_seconds, bool enable, const VSQMac &device_mac) const {
     vs_mac_addr_t mac = device_mac;
 
     if( vs_snap_info_set_polling( snapProtocol().defaultNetif(), &mac, pooling_element, enable, period_seconds ) != VS_CODE_OK ) {

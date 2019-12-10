@@ -48,12 +48,14 @@ add_executable(iotkit-qt-example)
 target_sources(iotkit-qt-example
         PRIVATE
             # Headers
+            ${CMAKE_CURRENT_LIST_DIR}/include/app.h
             ${CMAKE_CURRENT_LIST_DIR}/include/controller.h
             ${CMAKE_CURRENT_LIST_DIR}/include/VSInfoGeneralController.h
             ${CMAKE_CURRENT_LIST_DIR}/include/VSInfoGeneralModel.h
             ${CMAKE_CURRENT_LIST_DIR}/include/fake_vs_info_general_t.h
 
             # Sources
+            ${CMAKE_CURRENT_LIST_DIR}/src/app.cpp
             ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
             ${CMAKE_CURRENT_LIST_DIR}/src/controller.cpp
             ${CMAKE_CURRENT_LIST_DIR}/src/VSInfoGeneralController.cpp
@@ -75,6 +77,7 @@ target_link_libraries(iotkit-qt-example
         iotkit-qt-netif-udp-broadcast
         iotkit-qt-hal-global-impl
         iotkit-qt-facade
+        iotkit-qt-hal
 
         Qt5::Widgets
         Qt5::Qml

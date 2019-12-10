@@ -41,6 +41,9 @@ target_sources(iotkit-qt-facade
 
         # Headers
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQIoTKitFacade.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQFeatures.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQImplementations.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQAppConfig.h
 
         # Sources
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQIoTKitFacade.cpp

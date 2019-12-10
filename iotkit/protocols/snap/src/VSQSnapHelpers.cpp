@@ -39,34 +39,34 @@
 
 using namespace VirgilIoTKit;
 
-VSMac& VSMac::set( const vs_mac_addr_t &mac ) {
+VSQMac& VSQMac::set( const vs_mac_addr_t &mac ) {
     std::copy( mac.bytes, mac.bytes + sizeof( mac.bytes ), _mac.begin() );
     return *this;
 }
 
-VSMac& VSMac::set( const uint8_t *bytes ) {
-    assert( bytes );
+VSQMac& VSQMac::set( const uint8_t *bytes ) {
+    Q_ASSERT( bytes );
     std::copy( bytes, bytes + _mac.size(), _mac.begin() );
     return *this;
 }
 
-VSMac& VSMac::set( uint8_t b0, uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4, uint8_t b5 ) {
+VSQMac& VSQMac::set( uint8_t b0, uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4, uint8_t b5 ) {
     _mac[0] = b0; _mac[1] = b1; _mac[2] = b2; _mac[3] = b3; _mac[4] = b4; _mac[5] = b5;
     return *this;
 }
 
-VSMac& VSMac::set( const VSMac &mac ) {
+VSQMac& VSQMac::set( const VSQMac &mac ) {
     _mac = mac._mac;
     return *this;
 }
 
-VSMac::operator vs_mac_addr_t() const {
+VSQMac::operator vs_mac_addr_t() const {
     vs_mac_addr_t mac;
     std::copy( _mac.begin(), _mac.end(), mac.bytes );
     return mac;
 }
 
-std::string VSMac::describe( bool two_symbols, bool upper_case, char divider ) const {
+std::string VSQMac::describe( bool two_symbols, bool upper_case, char divider ) const {
     using namespace std;
 
     std::stringstream ss;
@@ -88,21 +88,21 @@ std::string VSMac::describe( bool two_symbols, bool upper_case, char divider ) c
     return ss.str();
 }
 
-VSManufactureId& VSManufactureId::set( const VSManufactureId& manufacture_id ) {
+VSQManufactureId& VSQManufactureId::set( const VSQManufactureId& manufacture_id ) {
     _manufactureId = manufacture_id._manufactureId;
     return *this;
 }
 
-VSManufactureId& VSManufactureId::set( const vs_device_manufacture_id_t& buf ){
+VSQManufactureId& VSQManufactureId::set( const vs_device_manufacture_id_t& buf ){
     std::copy( buf, buf + sizeof( vs_device_manufacture_id_t ), _manufactureId.begin() );
     return *this;
 }
 
-VSManufactureId::operator const uint8_t* () const {
+VSQManufactureId::operator const uint8_t* () const {
     return _manufactureId.data();
 }
 
-std::string VSManufactureId::describe( bool stop_on_zero, char symbol_on_non_ascii ) const {
+std::string VSQManufactureId::describe( bool stop_on_zero, char symbol_on_non_ascii ) const {
     std::string str;
 
     str.reserve( _manufactureId.size() );
