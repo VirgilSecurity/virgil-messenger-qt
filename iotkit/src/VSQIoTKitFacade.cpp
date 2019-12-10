@@ -31,3 +31,48 @@
 //  POSSIBILITY OF SUCH DAMAGE.
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
+
+#include <type_traits>
+#include <VSQIoTKitFacade.h>
+#include <virgil/iot/logger/logger.h>
+
+#include <VSQNetifBase.h>
+
+bool
+VSQIoTKitFacade::init(VirgilIoTKit::vs_device_manufacture_id_t manufacturer_id,
+                      VirgilIoTKit::vs_device_type_t device_type,
+                      VirgilIoTKit::vs_device_serial_t device_serial,
+                      VirgilIoTKit::vs_log_level_t log_level,
+                      uint32_t device_roles) {
+    VirgilIoTKit::vs_logger_init(log_level);
+
+    std::copy(m_manufacturer_id, manufacturer_id, sizeof(manufacturer_id));
+    std::copy(m_device_type, device_type, sizeof(device_type));
+    std::copy(m_device_serial, device_serial, sizeof(device_serial));
+    m_device_roles = device_roles;
+
+    m_initialized = true;
+}
+
+VSQIoTKitFacade &
+VSQIoTKitFacade::operator<<(VSQNetifBase &netif) {
+    Q_ASSERT(m_initialized);
+
+    if (VirgilIoTKit::vs_snap_init(netif.netif(), m_manufacturer_id, m_device_type, m_device_serial, m_device_roles) !=
+        VirgilIoTKit::VS_CODE_OK) {
+        VsLogError("Unable to initialize SNAP module");
+    }
+
+    return *this;
+}
+
+VSQIoTKitFacade &
+VSQIoTKitFacade::operator<<(VSQSnapServiceBase &snap_service) {
+    Q_ASSERT(m_initialized);
+
+    if (VirgilIoTKit::vs_snap_register_service(snap_service.serviceInterface()) != VirgilIoTKit::VS_CODE_OK) {
+        VsLogError("Unable to initialize service ", snap_service.serviceName());
+    }
+
+    return *this;
+}

@@ -41,6 +41,8 @@ add_library(iotkit-qt-hal INTERFACE)
 target_sources(iotkit-qt-hal
         INTERFACE
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQNetifBase.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQLogger.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQSnapServiceBase.h
         )
 
 target_include_directories(iotkit-qt-hal

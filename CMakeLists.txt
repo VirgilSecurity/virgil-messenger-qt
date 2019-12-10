@@ -100,6 +100,11 @@ option(VIRGIL_IOTKIT_QT_DEFAULT_IMPL "Enable Default implementations" ON)
 option(VIRGIL_IOTKIT_QT_DEFAULT_NETIF_UDP_BCAST "Enable default netif UDP broadcast implementation" ON)
 
 #
+#   Default services implementations
+#
+option(VIRGIL_IOTKIT_QT_DEFAULT_INFO "Enable default Info Service implementation" ON)
+
+#
 #   Default Global HAL implementations
 #
 option(VIRGIL_IOTKIT_QT_DEFAULT_GLOBAL_HAL "Enable default global HAL implementation" ON)

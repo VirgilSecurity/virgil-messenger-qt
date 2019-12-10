@@ -33,62 +33,63 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 #include <VSQUdpBroadcast.h>
+#include <VSQLogger.h>
 
 VSQUdpBroadcast::VSQUdpBroadcast(quint16 port) : m_port(port) {
 }
 
 bool
 VSQUdpBroadcast::init() {
-    if( !connect( &m_socket, &QUdpSocket::stateChanged, this, &VSQUdpBroadcast::onConnectionStateChanged )) {
-        VSLogError( "Unable to connect VSQUdpBroadcast::stateChanged signal to the socket's VSQUdpBroadcast::onConnectionStateChanged slot" );
+    if (!connect(&m_socket, &QUdpSocket::stateChanged, this, &VSQUdpBroadcast::onConnectionStateChanged)) {
+        VSLogError(
+                "Unable to connect VSQUdpBroadcast::stateChanged signal to the socket's "
+                "VSQUdpBroadcast::onConnectionStateChanged slot");
         return false;
     }
 
-    if( !m_socket.bind( m_port, QUdpSocket::ReuseAddressHint )) {
-        VSLogError( "Unable to bind LocalHost:", m_port, ". Last error : ", m_socket->errorString().toStdString().c_str() );
+    if (!m_socket.bind(m_port, QUdpSocket::ReuseAddressHint)) {
+        VSLogError(
+                "Unable to bind LocalHost:", m_port, ". Last error : ", m_socket.errorString().toStdString().c_str());
         return false;
     }
 
-    if( !connect( m_socket.get(), &QUdpSocket::readyRead, this, &VSQUdpBroadcast::onHasInputData )) {
-        VSLogError( "Unable to connect QUdpSocket::readyRead signal to the VSQUdpBroadcast::onHasInputData slot" );
+    if (!connect(&m_socket, &QUdpSocket::readyRead, this, &VSQUdpBroadcast::onHasInputData)) {
+        VSLogError("Unable to connect QUdpSocket::readyRead signal to the VSQUdpBroadcast::onHasInputData slot");
         return false;
     }
 
     return true;
 }
 
-void VSQUdpBroadcast::onConnectionStateChanged(QAbstractSocket::SocketState socket_state, const QString &description) {
-    static const std::map<QAbstractSocket::SocketState, std::string> state_descr{
-            { QAbstractSocket::SocketState::UnconnectedState, "Unconnected" },
-            { QAbstractSocket::SocketState::HostLookupState, "Host lookup" },
-            { QAbstractSocket::SocketState::ConnectingState, "Connecting" },
-            { QAbstractSocket::SocketState::ConnectedState, "Connected" },
-            { QAbstractSocket::SocketState::BoundState, "Bound" },
-            { QAbstractSocket::SocketState::ListeningState, "Listening" },
-            { QAbstractSocket::SocketState::ClosingState, "Closing" } };
-
-    emit fireConnectionStateChanged( socket_state, QString( "LocalHost:%1 : %2"). arg(m_port). arg(state_descr.at( socketState ) ));
-    VSLogCritical( "Socket LocalHost:", m_port, " has been changed its state. New state : ", state_descr.at( socketState ).c_str() );
+void
+VSQUdpBroadcast::onConnectionStateChanged(QAbstractSocket::SocketState socket_state) {
+    emit fireConnectionStateChanged(socket_state);
 }
 
 bool
 VSQUdpBroadcast::deinit() {
     m_socket.disconnectFromHost();
-    return false;
+    return true;
 }
 
 bool
 VSQUdpBroadcast::tx(const QByteArray &data) {
+    auto data_sz = data.size();
     assert(m_socket.state() == QAbstractSocket::ConnectedState && "Socket must be connected before this call");
 
-    auto sent_bytes = m_socket.writeDatagram( data, QHostAddress::Broadcast, m_port );
+    auto sent_bytes = m_socket.writeDatagram(data, QHostAddress::Broadcast, m_port);
 
-    if( sent_bytes != data_sz ) {
-        VSLogError( "Sent bytes : ", sent_bytes, ", data bytes to send : ", data.size(), ". Last error : ", m_socket.errorString().toStdString().c_str() );
+    if (sent_bytes != data_sz) {
+        VSLogError("Sent bytes : ",
+                   sent_bytes,
+                   ", data bytes to send : ",
+                   data.size(),
+                   ". Last error : ",
+                   m_socket.errorString().toStdString().c_str());
         return false;
     }
 
-    return false;
+    return true;
 }
 
 QString
@@ -98,15 +99,5 @@ VSQUdpBroadcast::macAddr() {
 
 void
 VSQUdpBroadcast::onHasInputData() {
-    QHostAddress sender_address;
-    quint16 port;
-    auto data_size = m_socket.pendingDatagramSize();
-    QByteArray data( data_size );
-    auto read_size = m_socket.readDatagram( data.data(), data_size, &sender_address, &port);
-
-    if( read_size != data_size ){
-        VSLogError( "Unable to read ", data_size, " from address ", sender_adderss.toString().toStdString(), " on port ", port, ". ", read_size, " bytes has been read. Last error : ", m_socket.errorString().toStdString().c_str() );
-    } else {
-        processData( std::move( data ));
-    }
+    processData(m_socket.receiveDatagram().data());
 }

@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef _VIRGIL_IOTKIT_QT_SNAP_UDP_H_
 #define _VIRGIL_IOTKIT_QT_SNAP_UDP_H_
 
@@ -65,7 +64,7 @@ protected:
     macAddr() final;
 
 signals:
-    void fireConnectionStateChanged(QAbstractSocket::SocketState, const QString &description);
+    void fireConnectionStateChanged(QAbstractSocket::SocketState);
 
 private slots:
     void onConnectionStateChanged(QAbstractSocket::SocketState);

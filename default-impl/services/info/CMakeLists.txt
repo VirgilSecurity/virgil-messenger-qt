@@ -34,35 +34,33 @@
 
 cmake_minimum_required(VERSION 3.11)
 
-add_library(iotkit-qt-facade)
+add_library(iotkit-qt-info)
 
-target_sources(iotkit-qt-facade
+target_sources(iotkit-qt-info
         PRIVATE
 
         # Headers
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQIoTKitFacade.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQSnapINFO.h
 
         # Sources
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQIoTKitFacade.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQSnapINFO.cpp
         )
 
-target_include_directories(iotkit-qt-facade
+target_include_directories(iotkit-qt-info
         PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}/include
         )
 
-target_link_libraries(iotkit-qt-facade
+target_link_libraries(iotkit-qt-info
         PUBLIC
 
-        vs-module-snap-control
-        iotkit-qt-helpers
         iotkit-qt-hal
+        vs-module-snap-control
 
         Qt5::Core
         Qt5::Network
         )
 
 if(COMMAND add_clangformat)
-    add_clangformat(iotkit-qt-facade)
+    add_clangformat(iotkit-qt-info)
 endif()
-

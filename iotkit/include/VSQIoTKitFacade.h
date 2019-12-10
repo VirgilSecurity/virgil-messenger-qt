@@ -37,14 +37,35 @@
 
 #include <QObject>
 #include <VSQSingleton.h>
+#include <virgil/iot/logger/logger.h>
+#include <virgil/iot/provision/provision-structs.h>
+
+class VSQNetifBase;
+class VSQSnapServiceBase;
 
 class VSQIoTKitFacade : public QObject, public VSQSingleton<VSQIoTKitFacade> {
     Q_OBJECT
+
 public:
     bool
-    init();
+    init(VirgilIoTKit::vs_device_manufacture_id_t manufacturer_id,
+         VirgilIoTKit::vs_device_type_t device_type,
+         VirgilIoTKit::vs_device_serial_t device_serial,
+         VirgilIoTKit::vs_log_level_t log_level,
+         uint32_t device_roles);
+
+    VSQIoTKitFacade &
+    operator<<(VSQNetifBase &netif);
+
+    VSQIoTKitFacade &
+    operator<<(VSQSnapServiceBase &snap_service);
 
 private:
+    bool m_initialized = false;
+    VirgilIoTKit::vs_device_manufacture_id_t m_manufacturer_id;
+    VirgilIoTKit::vs_device_type_t m_device_type;
+    VirgilIoTKit::vs_device_serial_t m_device_serial;
+    uint32_t m_device_roles;
 };
 
 #endif // VSQIOTKITFACADE_H

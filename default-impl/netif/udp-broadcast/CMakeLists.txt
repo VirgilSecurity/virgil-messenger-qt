@@ -56,6 +56,9 @@ target_link_libraries(iotkit-qt-netif-udp-broadcast
 
         iotkit-qt-hal
         vs-module-snap-control
+
+        Qt5::Core
+        Qt5::Network
         )
 
 if(COMMAND add_clangformat)

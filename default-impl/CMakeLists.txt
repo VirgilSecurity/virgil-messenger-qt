@@ -47,3 +47,10 @@ endif()
 if (VIRGIL_IOTKIT_QT_DEFAULT_NETIF_UDP_BCAST)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/netif/udp-broadcast)
 endif()
+
+#
+#   Info Service. Default implementation.
+#
+if (VIRGIL_IOTKIT_QT_DEFAULT_INFO)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/services/info)
+endif()

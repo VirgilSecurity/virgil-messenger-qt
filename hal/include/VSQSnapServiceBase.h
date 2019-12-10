@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2019 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,51 +32,27 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_VSQNETIFBASE_H
-#define VIRGIL_IOTKIT_QT_VSQNETIFBASE_H
+#ifndef _VIRGIL_IOTKIT_QT_SNAP_SERVICE_H_
+#define _VIRGIL_IOTKIT_QT_SNAP_SERVICE_H_
 
-#include <QObject>
-#include <QAbstractSocket>
+#include <virgil/iot/status_code/status_code.h>
+#include <virgil/iot/protocols/snap/snap-structs.h>
 
-#include <virgil/iot/protocols/snap.h>
+class VSSnapProtocol;
 
-class VSQNetifBase: public QObject {
-    Q_OBJECT
-
+class VSSnapServiceBase {
 public:
-    VSQNetifBase();
-    VSQNetifBase(VSQNetifBase const &) = delete;
-    VSQNetifBase &operator=(VSQNetifBase const &) = delete;
+    virtual ~VSSnapServiceBase() = default;
 
-    virtual ~VSQNetifBase() = default;
+    virtual const VirgilIoTKit::vs_snap_service_t *serviceInterface() = 0;
+//    virtual const QString &serviceName() const = 0;
 
-    VirgilIoTKit::vs_netif_t *netif();
+//    void setSnapProtocol( const VSSnapProtocol *protocol )   { m_protocol = protocol; }
 
-signals:
-    // Do not use these signals directly from your implementation of network interface.
-    void fireReceivedBytes(const QByteArray &data);
-    void fireReceivedPacket(const QByteArray &packet);
-    void fireStateChanged(QAbstractSocket::SocketState connectionState);
-
-protected:
-    virtual bool init() = 0;
-    virtual bool deinit() = 0;
-    virtual bool tx(const QByteArray &data) = 0;
-    virtual QString macAddr() = 0;
-
-    // This method must be called by implementation of network interface.
-    // It uses low level callbacks and sends data using signals
-    bool processData(QByteArray &&data);
+//    const VSSnapProtocol &snapProtocol() const               { return *m_protocol; }
 
 private:
-    friend struct VSQLowLevelNetif;
-
-    // TODO: Try to give access to vs_netif_t only
-    friend class VSQSnap;
-
-    VirgilIoTKit::vs_netif_t m_lowLevelNetif;
-    VirgilIoTKit::vs_netif_rx_cb_t m_lowLevelRxCall;
-    VirgilIoTKit::vs_netif_process_cb_t m_lowLevelPacketProcess;
+//    const VSSnapProtocol * m_protocol = nullptr;
 };
 
-#endif //VIRGIL_IOTKIT_QT_VSQNETIFBASE_H
+#endif // _VIRGIL_IOTKIT_QT_SNAP_SERVICE_H_

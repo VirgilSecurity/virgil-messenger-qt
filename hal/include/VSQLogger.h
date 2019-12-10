@@ -32,29 +32,28 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef _VIRGIL_IOTKIT_QT_SNAP_SERVICE_H_
-#define _VIRGIL_IOTKIT_QT_SNAP_SERVICE_H_
+#ifndef _VIRGIL_IOTKIT_QT_LOGGER_H
+#define _VIRGIL_IOTKIT_QT_LOGGER_H
 
-#include <virgil/iot-qt/snap-protocol.h>
+#include <sstream>
+#include <virgil/iot/logger/logger.h>
 
-#include <virgil/iot/status_code/status_code.h>
-#include <virgil/iot/protocols/snap/snap-structs.h>
+template <typename... T>
+extern inline void log(VirgilIoTKit::vs_log_level_t log_lev, const char *cur_filename, uint32_t line_num, T... args){
+    std::stringstream sstr;
+    ( sstr << ... << std::forward<T>(args) );
 
-class VSSnapProtocol;
+    VirgilIoTKit::vs_logger_message( log_lev, cur_filename, line_num, sstr.str().c_str() );
+}
 
-class VSSnapService {
-public:
-    virtual ~VSSnapService() = default;
+#define VSLogInfo(FRMT, ...)  log(VirgilIoTKit::VS_LOGLEV_INFO, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
+#define VSLogFatal(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_FATAL, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
+#define VSLogAlert(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_ALERT, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
+#define VSLogCritical(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_CRITICAL, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
+#define VSLogError(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_ERROR, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
+#define VSLogWarning(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_WARNING, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
+#define VSLogNotice(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_NOTICE, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
+#define VSLogTrace(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_TRACE, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
+#define VSLogDebug(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_DEBUG, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
 
-    virtual const VirgilIoTKit::vs_snap_service_t *serviceInterface() = 0;
-    virtual const std::string &serviceName() const = 0;
-
-    void setSnapProtocol( const VSSnapProtocol *protocol )   { _protocol = protocol; }
-
-    const VSSnapProtocol &snapProtocol() const               { return *_protocol; }
-
-private:
-    const VSSnapProtocol * _protocol = nullptr;
-};
-
-#endif // _VIRGIL_IOTKIT_QT_SNAP_SERVICE_H_
+#endif //_VIRGIL_IOTKIT_QT_LOGGER_H

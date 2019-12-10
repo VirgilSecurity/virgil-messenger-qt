@@ -85,6 +85,10 @@ VSQNetifBase::VSQNetifBase() {
     m_lowLevelNetif.packet_buf_filled = 0;
 }
 
+VirgilIoTKit::vs_netif_t *VSQNetifBase::netif() {
+    return &m_lowLevelNetif;
+}
+
 bool VSQNetifBase::processData(QByteArray &&data) {
 
     if( !m_lowLevelRxCall )
