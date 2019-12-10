@@ -40,6 +40,7 @@
 
 class VSQDeviceRoles {
 public:
+    using TRolesList = std::initializer_list<VirgilIoTKit::vs_snap_device_role_e>;
 
     VSQDeviceRoles&
     operator<<(VirgilIoTKit::vs_snap_device_role_e role) {
@@ -48,6 +49,9 @@ public:
     }
 
     operator quint32() const;
+
+    bool hasRole(VirgilIoTKit::vs_snap_device_role_e role) const    { return m_deviceRoles.contains(role); }
+    bool hasRoles(TRolesList roles) const;
 
 private:
     QSet<VirgilIoTKit::vs_snap_device_role_e> m_deviceRoles;

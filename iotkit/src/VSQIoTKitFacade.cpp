@@ -32,33 +32,59 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <type_traits>
 #include <VSQNetifBase.h>
 #include <VSQSnapServiceBase.h>
 #include <VSQIoTKitFacade.h>
 #include <VSQLogger.h>
 
 bool
-VSQIoTKitFacade::init(const VSQFeatures &features,
-                      VSQImplementations &impl,
-                      const VSQDeviceRoles &roles,
-                      const VSQAppConfig &app_config) {
-    VirgilIoTKit::vs_logger_init(app_config.logLevel());
+VSQIoTKitFacade::init(const VSQFeatures &features, const VSQImplementations &impl, const VSQAppConfig &appConfig) {
+    using namespace VirgilIoTKit;
+
+    instance().m_features = features;
+    instance().m_impl = impl;
+    instance().m_appConfig = appConfig;
+
+    vs_logger_init(appConfig.logLevel());
 
     try {
-        Q_CHECK_PTR(impl.netif());
+        Q_CHECK_PTR(instance().m_impl.netif());
 
-        if (VirgilIoTKit::vs_snap_init(impl.netif(),
-                                       app_config.manufactureId(),
-                                       app_config.deviceType(),
-                                       app_config.deviceSerial(),
-                                       app_config.deviceRoles()) != VirgilIoTKit::VS_CODE_OK)
-            throw QString("Unable to initialize SNAP");
+        // SNAP entities
+        if (features.hasSnap()) {
+            if (vs_snap_init(instance().m_impl.netif(),
+                             appConfig.manufactureId(),
+                             appConfig.deviceType(),
+                             appConfig.deviceSerial(),
+                             appConfig.deviceRoles()) != VirgilIoTKit::VS_CODE_OK) {
+                throw QString("Unable to initialize SNAP");
+            }
 
+            instance().registerService(VSQFeatures::SNAP_INFO_CLIENT, {VS_SNAP_DEV_CONTROL, VS_SNAP_DEV_DEBUGGER});
+        }
         return true;
 
     } catch (QString &descr) {
-        VSLogCritical("Error during Virgil IoT KIT initalization : ", descr.toStdString());
+        VSLogCritical("Error during Virgil IoT KIT initialization : ", descr.toStdString());
         return false;
     }
+}
+
+void
+VSQIoTKitFacade::registerService(VSQFeatures::EFeature feature, VSQDeviceRoles::TRolesList &&roles) {
+
+    if (!m_features.hasFeature(feature) || !m_appConfig.deviceRoles().hasRoles(roles)) {
+        return;
+    }
+
+    for (const auto &service : m_impl.services()) {
+        if (service->serviceFeature() == feature) {
+            if (vs_snap_register_service(service->serviceInterface()) != VirgilIoTKit::VS_CODE_OK) {
+                throw QString("Unable to register SNAP's %1 service").arg(service->serviceName());
+            }
+            return;
+        }
+    }
+
+    throw QString("No appropriate service has been found in the services list");
 }

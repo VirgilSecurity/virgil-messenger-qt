@@ -50,6 +50,7 @@ target_sources(iotkit-qt-helpers
 
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQMac.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQManufactureId.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQDeviceRoles.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQDeviceType.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQDeviceSerial.cpp
         )

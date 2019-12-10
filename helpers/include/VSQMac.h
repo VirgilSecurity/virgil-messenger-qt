@@ -55,12 +55,13 @@ public:
     VSQMac& set( quint8 b0, quint8 b1, quint8 b2, quint8 b3, quint8 b4, quint8 b5 );
     VSQMac& set( const VSQMac &mac );
 
-    QString describe() const;
+    QString description() const;
 
     bool equal( const VSQMac &mac ) const { return m_mac == mac.m_mac; }
+
     operator VirgilIoTKit::vs_mac_addr_t() const;
     operator const char*() const { return m_mac.data(); }
-    operator QString() const    { return describe(); }
+    operator QString() const    { return description(); }
 
 private:
     QByteArray m_mac;

@@ -32,23 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_C_QT_DEMO_APP_H
-#define VIRGIL_IOTKIT_C_QT_DEMO_APP_H
+#include <VSQDeviceRoles.h>
 
-#include <QtCore>
-#include <QGuiApplication>
-#include <VSQUdpBroadcast.h>
+bool VSQDeviceRoles::hasRoles(TRolesList roles) const {
+    for( auto role : roles ){
+        if( !m_deviceRoles.contains(role) ) {
+            return false;
+        }
+    }
 
-class GuiApplication {
-public:
-    GuiApplication(int argc, char *argv[]);
-
-    int
-    run();
-
-private:
-    VSQUdpBroadcast m_udpBroadcast;
-    QGuiApplication app;
-};
-
-#endif // VIRGIL_IOTKIT_C_QT_DEMO_APP_H
+    return true;
+}

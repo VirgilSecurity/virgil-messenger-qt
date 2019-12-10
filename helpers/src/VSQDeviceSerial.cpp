@@ -52,7 +52,7 @@ VSQDeviceSerial::operator const uint8_t* () const{
     return reinterpret_cast<const uint8_t*>(m_deviceSerial.data());
 }
 
-QString VSQDeviceSerial::describe() const {
+QString VSQDeviceSerial::description() const {
     QString str;
 
     str.reserve( m_deviceSerial.size() * 3 + 1 );

@@ -32,18 +32,28 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <app.h>
+#include <VSQApp.h>
 
 int
 main(int argc, char *argv[]) {
+    int retCode;
+
     try {
-        GuiApplication app(argc, argv);
-        return app.run();
+
+        VSQApp app(argc, argv);
+
+        retCode = app.run();
+
     } catch (std::runtime_error &err) {
         qWarning("Runtime error has been happened. Error message : %s", err.what());
-        return -1;
+
+        retCode = -1;
+
     } catch (...) {
         qWarning("Uncaught exception has been happened");
-        return -2;
+
+        retCode = -2;
     }
+
+    return retCode;
 }

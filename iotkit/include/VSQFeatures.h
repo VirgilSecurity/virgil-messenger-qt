@@ -53,6 +53,16 @@ public:
         return m_features;
     }
 
+    bool
+    hasFeature(EFeature feature) const {
+        return m_features.contains(feature);
+    }
+
+    bool
+    hasSnap() const {
+        return hasFeature(SNAP_INFO_CLIENT);
+    }
+
 private:
     TSet m_features;
 };

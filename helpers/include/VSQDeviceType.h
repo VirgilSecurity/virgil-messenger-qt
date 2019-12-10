@@ -51,12 +51,13 @@ public:
     VSQDeviceType& set( const VSQDeviceType& device_type );
     VSQDeviceType& set( const VirgilIoTKit::vs_device_type_t& buf );
 
-    QString describe( bool stop_on_zero = true, char symbol_on_non_ascii = ' ' ) const;
+    QString description( bool stop_on_zero = true, char symbol_on_non_ascii = ' ' ) const;
 
     bool equal( const VSQDeviceType &device_type ) const { return m_deviceType == device_type.m_deviceType; }
+
     operator const char* () const;
     operator const uint8_t* () const;
-    operator QString() const    { return describe(); }
+    operator QString() const    { return description(); }
 
 private:
     QByteArray m_deviceType;

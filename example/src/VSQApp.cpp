@@ -32,32 +32,36 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQIOTKITFACADE_H
-#define VSQIOTKITFACADE_H
-
-#include <QObject>
-#include <VSQSingleton.h>
-#include <virgil/iot/logger/logger.h>
-#include <virgil/iot/provision/provision-structs.h>
+#include <VSQApp.h>
+#include <controller.h>
 #include <VSQFeatures.h>
 #include <VSQImplementations.h>
-#include <VSQDeviceRoles.h>
 #include <VSQAppConfig.h>
+#include <VSQManufactureId.h>
+#include <VSQUdpBroadcast.h>
+#include <VSQDeviceType.h>
+#include <VSQDeviceSerial.h>
+#include <VSQDeviceRoles.h>
+#include <VSQIoTKitFacade.h>
 
-class VSQIoTKitFacade : public QObject, public VSQSingleton<VSQIoTKitFacade> {
-    Q_OBJECT
+VSQApp::VSQApp(int argc, char *argv[]) : app(argc, argv), m_udpBroadcast(4100) {
 
-public:
-    static bool
-    init(const VSQFeatures &features, const VSQImplementations &impl, const VSQAppConfig &app_config);
+    auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT;
+    auto impl = VSQImplementations() << &m_udpBroadcast;
+    auto roles = VSQDeviceRoles() << VirgilIoTKit::VS_SNAP_DEV_CONTROL;
+    auto appConfig = VSQAppConfig() << VSQManufactureId() << VSQDeviceType() << VSQDeviceSerial()
+                                    << VirgilIoTKit::VS_LOGLEV_DEBUG << roles;
 
-private:
-    VSQFeatures m_features;
-    VSQImplementations m_impl;
-    VSQAppConfig m_appConfig;
+    if (!VSQIoTKitFacade::init(features, impl, appConfig)) {
+        throw std::runtime_error("Unable to initialize Virgil IoT KIT");
+    }
+}
 
-    void
-    registerService(VSQFeatures::EFeature feature, VSQDeviceRoles::TRolesList &&roles);
-};
+int
+VSQApp::run() {
+    Controller controller;
 
-#endif // VSQIOTKITFACADE_H
+    controller.setupUI();
+
+    return app.exec();
+}

@@ -37,6 +37,7 @@
 
 #include <virgil/iot/status_code/status_code.h>
 #include <virgil/iot/protocols/snap/snap-structs.h>
+#include <VSQFeatures.h>
 
 class VSSnapProtocol;
 
@@ -45,6 +46,7 @@ public:
     virtual ~VSQSnapServiceBase() = default;
 
     virtual const VirgilIoTKit::vs_snap_service_t *serviceInterface() = 0;
+    virtual VSQFeatures::EFeature serviceFeature() = 0;
     virtual const QString &serviceName() const = 0;
 
 //    void setSnapProtocol( const VSSnapProtocol *protocol )   { m_protocol = protocol; }

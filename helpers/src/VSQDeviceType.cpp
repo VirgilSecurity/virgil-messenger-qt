@@ -52,7 +52,7 @@ VSQDeviceType::operator const uint8_t* () const {
     return reinterpret_cast<const uint8_t*>(m_deviceType.data());
 }
 
-QString VSQDeviceType::describe( bool stop_on_zero, char symbol_on_non_ascii ) const {
+QString VSQDeviceType::description( bool stop_on_zero, char symbol_on_non_ascii ) const {
     QString str;
 
     str.reserve( m_deviceType.size() );

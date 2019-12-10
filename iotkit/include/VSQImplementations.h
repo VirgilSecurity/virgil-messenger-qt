@@ -36,13 +36,23 @@
 #define _VSQ_IMPLEMENTATIONS_H_
 
 class VSQNetifBase;
+class VSQSnapServiceBase;
 
 class VSQImplementations {
 public:
+    using TServices = QSet<VSQSnapServiceBase *>;
+
     VSQImplementations &
     operator<<(VSQNetifBase *netif) {
         Q_CHECK_PTR(netif);
         m_netif = netif;
+        return *this;
+    }
+
+    VSQImplementations &
+    operator<<(VSQSnapServiceBase *service) {
+        Q_CHECK_PTR(service);
+        m_servicesPtrs << service;
         return *this;
     }
 
@@ -52,8 +62,14 @@ public:
         return *m_netif;
     }
 
+    const TServices &
+    services() const {
+        return m_servicesPtrs;
+    }
+
 private:
     VSQNetifBase *m_netif = nullptr;
+    TServices m_servicesPtrs;
 };
 
 #endif // _VSQ_IMPLEMENTATIONS_H_

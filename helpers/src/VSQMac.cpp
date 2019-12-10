@@ -61,7 +61,7 @@ VSQMac::operator VirgilIoTKit::vs_mac_addr_t() const {
     return mac;
 }
 
-QString VSQMac::describe() const {
+QString VSQMac::description() const {
     QString str;
 
     str.reserve( m_mac.size() * 3 + 1 );

@@ -51,12 +51,13 @@ public:
     VSQDeviceSerial& set( const VSQDeviceSerial& device_serial );
     VSQDeviceSerial& set( const VirgilIoTKit::vs_device_serial_t& buf );
 
-    QString describe() const;
+    QString description() const;
 
     bool equal( const VSQDeviceSerial &device_serial ) const { return m_deviceSerial == device_serial.m_deviceSerial; }
+
     operator const char* () const;
     operator const uint8_t* () const;
-    operator QString() const    { return describe(); }
+    operator QString() const    { return description(); }
 
 private:
     QByteArray m_deviceSerial;

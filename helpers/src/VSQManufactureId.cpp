@@ -53,7 +53,7 @@ VSQManufactureId::operator const uint8_t* () const {
 }
 
 
-QString VSQManufactureId::describe( bool stop_on_zero, char symbol_on_non_ascii ) const {
+QString VSQManufactureId::description( bool stop_on_zero, char symbol_on_non_ascii ) const {
     QString str;
 
     str.reserve( m_manufactureId.size() );

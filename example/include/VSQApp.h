@@ -32,35 +32,23 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <app.h>
-#include <controller.h>
-#include <VSQFeatures.h>
-#include <VSQImplementations.h>
-#include <VSQAppConfig.h>
-#include <VSQManufactureId.h>
+#ifndef VIRGIL_IOTKIT_C_QT_DEMO_VSQAPP_H
+#define VIRGIL_IOTKIT_C_QT_DEMO_VSQAPP_H
+
+#include <QtCore>
+#include <QGuiApplication>
 #include <VSQUdpBroadcast.h>
-#include <VSQDeviceType.h>
-#include <VSQDeviceSerial.h>
-#include <VSQDeviceRoles.h>
-#include <VSQIoTKitFacade.h>
 
-GuiApplication::GuiApplication(int argc, char *argv[]) : app(argc, argv), m_udpBroadcast(4100) {
+class VSQApp {
+public:
+    VSQApp(int argc, char *argv[]);
 
-    auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT;
-    auto impl = VSQImplementations() << &m_udpBroadcast;
-    auto roles = VSQDeviceRoles() << VirgilIoTKit::VS_SNAP_DEV_CONTROL;
-    auto app_config = VSQAppConfig() << VSQManufactureId() << VSQDeviceType() << VSQDeviceSerial()
-                                     << VirgilIoTKit::VS_LOGLEV_DEBUG << roles;
+    int
+    run();
 
-    if (!VSQIoTKitFacade::init(features, impl, roles, app_config))
-        throw std::runtime_error("Unable to initialize Virgil IoT KIT");
-}
+private:
+    VSQUdpBroadcast m_udpBroadcast;
+    QGuiApplication app;
+};
 
-int
-GuiApplication::run() {
-    Controller controller;
-
-    controller.setupUI();
-
-    return app.exec();
-}
+#endif // VSQApp

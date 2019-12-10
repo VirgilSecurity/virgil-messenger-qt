@@ -51,12 +51,13 @@ public:
     VSQManufactureId& set( const VSQManufactureId& manufacture_id );
     VSQManufactureId& set( const VirgilIoTKit::vs_device_manufacture_id_t& buf );
 
-    QString describe( bool stop_on_zero = true, char symbol_on_non_ascii = ' ' ) const;
+    QString description( bool stop_on_zero = true, char symbol_on_non_ascii = ' ' ) const;
 
     bool equal( const VSQManufactureId &manufacture_id ) const { return m_manufactureId == manufacture_id.m_manufactureId; }
+
     operator const char* () const;
     operator const uint8_t* () const;
-    operator QString() const    { return describe(); }
+    operator QString() const    { return description(); }
 
 private:
     QByteArray m_manufactureId;
