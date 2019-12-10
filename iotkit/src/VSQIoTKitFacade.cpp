@@ -48,7 +48,7 @@ VSQIoTKitFacade::init(const VSQFeatures &features,
     try {
         Q_CHECK_PTR(impl.netif());
 
-        if (VirgilIoTKit::vs_snap_init(impl.netif()->netif(),
+        if (VirgilIoTKit::vs_snap_init(impl.netif(),
                                        app_config.manufactureId(),
                                        app_config.deviceType(),
                                        app_config.deviceSerial(),
@@ -56,6 +56,7 @@ VSQIoTKitFacade::init(const VSQFeatures &features,
             throw QString("Unable to initialize SNAP");
 
         return true;
+
     } catch (QString &descr) {
         VSLogCritical("Error during Virgil IoT KIT initalization : ", descr.toStdString());
         return false;

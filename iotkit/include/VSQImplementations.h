@@ -46,9 +46,10 @@ public:
         return *this;
     }
 
-    VSQNetifBase *
+    VSQNetifBase &
     netif() {
-        return m_netif;
+        Q_CHECK_PTR(m_netif);
+        return *m_netif;
     }
 
 private:

@@ -56,6 +56,7 @@ target_link_libraries(iotkit-qt-hal
         PUBLIC
 
         vs-module-snap-control
+        iotkit-qt-helpers
 
         Qt5::Core
         Qt5::Network

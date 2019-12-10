@@ -38,27 +38,30 @@
 VSQUdpBroadcast::VSQUdpBroadcast(quint16 port) : m_port(port) {
 }
 
-bool
+VirgilIoTKit::vs_status_e
 VSQUdpBroadcast::init() {
     if (!connect(&m_socket, &QUdpSocket::stateChanged, this, &VSQUdpBroadcast::onConnectionStateChanged)) {
         VSLogError(
                 "Unable to connect VSQUdpBroadcast::stateChanged signal to the socket's "
                 "VSQUdpBroadcast::onConnectionStateChanged slot");
-        return false;
+        return VirgilIoTKit::VS_CODE_ERR_INCORRECT_ARGUMENT;
     }
 
     if (!m_socket.bind(m_port, QUdpSocket::ReuseAddressHint)) {
         VSLogError(
                 "Unable to bind LocalHost:", m_port, ". Last error : ", m_socket.errorString().toStdString().c_str());
-        return false;
+        return VirgilIoTKit::VS_CODE_ERR_INCORRECT_ARGUMENT;
     }
 
     if (!connect(&m_socket, &QUdpSocket::readyRead, this, &VSQUdpBroadcast::onHasInputData)) {
         VSLogError("Unable to connect QUdpSocket::readyRead signal to the VSQUdpBroadcast::onHasInputData slot");
-        return false;
+        return VirgilIoTKit::VS_CODE_ERR_INCORRECT_ARGUMENT;
     }
 
-    return true;
+    // TODO : implement QString ==> VSQMac
+    // m_macAddr = m_socket.multicastInterface().hardwareAddress();
+
+    return VirgilIoTKit::VS_CODE_OK;
 }
 
 void
@@ -66,13 +69,13 @@ VSQUdpBroadcast::onConnectionStateChanged(QAbstractSocket::SocketState socket_st
     emit fireConnectionStateChanged(socket_state);
 }
 
-bool
+VirgilIoTKit::vs_status_e
 VSQUdpBroadcast::deinit() {
     m_socket.disconnectFromHost();
-    return true;
+    return VirgilIoTKit::VS_CODE_OK;
 }
 
-bool
+VirgilIoTKit::vs_status_e
 VSQUdpBroadcast::tx(const QByteArray &data) {
     auto data_sz = data.size();
     Q_ASSERT(m_socket.state() == QAbstractSocket::ConnectedState && "Socket must be connected before this call");
@@ -86,15 +89,15 @@ VSQUdpBroadcast::tx(const QByteArray &data) {
                    data.size(),
                    ". Last error : ",
                    m_socket.errorString().toStdString().c_str());
-        return false;
+        return VirgilIoTKit::VS_CODE_ERR_INCORRECT_ARGUMENT;
     }
 
-    return true;
+    return VirgilIoTKit::VS_CODE_OK;
 }
 
-QString
+const VSQMac &
 VSQUdpBroadcast::macAddr() {
-    return m_socket.multicastInterface().hardwareAddress();
+    return m_macAddr;
 }
 
 void

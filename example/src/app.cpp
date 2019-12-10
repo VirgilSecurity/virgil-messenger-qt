@@ -44,13 +44,10 @@
 #include <VSQDeviceRoles.h>
 #include <VSQIoTKitFacade.h>
 
-GuiApplication::GuiApplication(int argc, char *argv[]) : app(argc, argv) {
-    constexpr auto udpPort = 4100;
-
-    m_udpBroadcast.reset(new VSQUdpBroadcast(udpPort));
+GuiApplication::GuiApplication(int argc, char *argv[]) : app(argc, argv), m_udpBroadcast(4100) {
 
     auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT;
-    auto impl = VSQImplementations() << m_udpBroadcast.get();
+    auto impl = VSQImplementations() << &m_udpBroadcast;
     auto roles = VSQDeviceRoles() << VirgilIoTKit::VS_SNAP_DEV_CONTROL;
     auto app_config = VSQAppConfig() << VSQManufactureId() << VSQDeviceType() << VSQDeviceSerial()
                                      << VirgilIoTKit::VS_LOGLEV_DEBUG << roles;

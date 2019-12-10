@@ -36,7 +36,7 @@
 #include <VSQLogger.h>
 
 using namespace VirgilIoTKit;
-
+/*
 extern "C" {
     struct VSQLowLevelNetif {
         static vs_status_e init(vs_netif_t* netif,
@@ -83,10 +83,27 @@ VSQNetifBase::VSQNetifBase() {
     // Prepare buffer to receive data
     m_lowLevelNetif.packet_buf_filled = 0;
 }
+*/
 
+VSQNetifBase::VSQNetifBase() {
+    // User data points to this object
+    m_lowLevelNetif.user_data = this;
+
+    // Prepare functionality implementations
+    m_lowLevelNetif.init = initCb;
+    m_lowLevelNetif.deinit = deinitCb;
+    m_lowLevelNetif.tx = txCb;
+    m_lowLevelNetif.mac_addr = macAddrCb;
+
+    // Prepare buffer to receive data
+    m_lowLevelNetif.packet_buf_filled = 0;
+}
+
+/*
 VirgilIoTKit::vs_netif_t *VSQNetifBase::netif() {
     return &m_lowLevelNetif;
 }
+*/
 
 bool VSQNetifBase::processData(const QByteArray &data) {
     if( !m_lowLevelRxCall )
@@ -108,4 +125,35 @@ bool VSQNetifBase::processData(const QByteArray &data) {
     }
 
     return true;
+}
+
+/*static */ VirgilIoTKit::vs_status_e VSQNetifBase::initCb(struct VirgilIoTKit::vs_netif_t *netif,
+                                                             const VirgilIoTKit::vs_netif_rx_cb_t rx_cb,
+                                                             const VirgilIoTKit::vs_netif_process_cb_t process_cb) {
+    VSQNetifBase *instance = reinterpret_cast<VSQNetifBase*>(netif->user_data);
+
+    instance->m_lowLevelRxCall = rx_cb;
+    instance->m_lowLevelPacketProcess = process_cb;
+
+    return instance->init();
+}
+
+/*static */ VirgilIoTKit::vs_status_e VSQNetifBase::deinitCb(const struct VirgilIoTKit::vs_netif_t *netif) {
+    VSQNetifBase *instance = reinterpret_cast<VSQNetifBase*>(netif->user_data);
+
+    return instance->deinit();
+}
+
+/*static */ VirgilIoTKit::vs_status_e VSQNetifBase::txCb(const struct VirgilIoTKit::vs_netif_t *netif, const uint8_t *data_raw, const uint16_t data_sz) {
+    VSQNetifBase *instance = reinterpret_cast<VSQNetifBase*>(netif->user_data);
+
+    return instance->tx(QByteArray(reinterpret_cast<const char*>(data_raw), data_sz ));
+}
+
+/*static */ VirgilIoTKit::vs_status_e VSQNetifBase::macAddrCb(const struct VirgilIoTKit::vs_netif_t *netif, struct VirgilIoTKit::vs_mac_addr_t *mac_addr) {
+    VSQNetifBase *instance = reinterpret_cast<VSQNetifBase*>(netif->user_data);
+
+    *mac_addr = instance->macAddr();
+
+    return VirgilIoTKit::VS_CODE_OK;
 }

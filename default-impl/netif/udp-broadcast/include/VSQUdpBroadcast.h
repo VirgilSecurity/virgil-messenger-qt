@@ -51,16 +51,16 @@ public:
     virtual ~VSQUdpBroadcast() = default;
 
 protected:
-    virtual bool
+    virtual VirgilIoTKit::vs_status_e
     init() final;
 
-    virtual bool
+    virtual VirgilIoTKit::vs_status_e
     deinit() final;
 
-    virtual bool
+    virtual VirgilIoTKit::vs_status_e
     tx(const QByteArray &data) final;
 
-    virtual QString
+    virtual const VSQMac &
     macAddr() final;
 
 signals:
@@ -73,6 +73,7 @@ private slots:
     onHasInputData();
 
 private:
+    VSQMac m_macAddr;
     quint16 m_port;
     QUdpSocket m_socket;
 };

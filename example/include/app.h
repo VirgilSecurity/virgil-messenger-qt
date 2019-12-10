@@ -47,7 +47,7 @@ public:
     run();
 
 private:
-    QScopedPointer<VSQUdpBroadcast> m_udpBroadcast;
+    VSQUdpBroadcast m_udpBroadcast;
     QGuiApplication app;
 };
 

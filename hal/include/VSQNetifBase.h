@@ -37,6 +37,7 @@
 
 #include <QObject>
 #include <QAbstractSocket>
+#include <VSQMac.h>
 
 #include <virgil/iot/protocols/snap.h>
 
@@ -50,7 +51,9 @@ public:
 
     virtual ~VSQNetifBase() = default;
 
-    VirgilIoTKit::vs_netif_t *netif();
+    VirgilIoTKit::vs_netif_t *netif()       { return &m_lowLevelNetif; }
+
+    operator VirgilIoTKit::vs_netif_t *()   { return netif(); }
 
 signals:
     // Do not use these signals directly from your implementation of network interface.
@@ -59,24 +62,31 @@ signals:
     void fireStateChanged(QAbstractSocket::SocketState connectionState);
 
 protected:
-    virtual bool init() = 0;
-    virtual bool deinit() = 0;
-    virtual bool tx(const QByteArray &data) = 0;
-    virtual QString macAddr() = 0;
+    virtual VirgilIoTKit::vs_status_e init() = 0;
+    virtual VirgilIoTKit::vs_status_e deinit() = 0;
+    virtual VirgilIoTKit::vs_status_e tx(const QByteArray &data) = 0;
+    virtual const VSQMac& macAddr() = 0;
 
     // This method must be called by implementation of network interface.
     // It uses low level callbacks and sends data using signals
     bool processData(const QByteArray &data);
 
 private:
-    friend struct VSQLowLevelNetif;
+//    friend struct VSQLowLevelNetif;
 
-    // TODO: Try to give access to vs_netif_t only
-    friend class VSQSnap;
+//    // TODO: Try to give access to vs_netif_t only
+//    friend class VSQSnap;
+
+    static VirgilIoTKit::vs_status_e initCb(struct VirgilIoTKit::vs_netif_t *netif,
+                                            const VirgilIoTKit::vs_netif_rx_cb_t rx_cb,
+                                            const VirgilIoTKit::vs_netif_process_cb_t process_cb);
+    static VirgilIoTKit::vs_status_e deinitCb(const struct VirgilIoTKit::vs_netif_t *netif);
+    static VirgilIoTKit::vs_status_e txCb(const struct VirgilIoTKit::vs_netif_t *netif, const uint8_t *data, const uint16_t data_sz);
+    static VirgilIoTKit::vs_status_e macAddrCb(const struct VirgilIoTKit::vs_netif_t *netif, struct VirgilIoTKit::vs_mac_addr_t *mac_addr);
 
     VirgilIoTKit::vs_netif_t m_lowLevelNetif;
-    VirgilIoTKit::vs_netif_rx_cb_t m_lowLevelRxCall;
-    VirgilIoTKit::vs_netif_process_cb_t m_lowLevelPacketProcess;
+    VirgilIoTKit::vs_netif_rx_cb_t m_lowLevelRxCall = nullptr;
+    VirgilIoTKit::vs_netif_process_cb_t m_lowLevelPacketProcess = nullptr;
 };
 
 #endif //VIRGIL_IOTKIT_QT_VSQNETIFBASE_H
