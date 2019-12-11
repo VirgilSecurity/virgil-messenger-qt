@@ -35,12 +35,12 @@
 #include <QtCore>
 
 #include <VSQApp.h>
-#include <controller.h>
+#include <VSQController.h>
 
 #include <VSQIoTKit.h>
 #include <VSQUdpBroadcast.h>
 
-VSQApp::VSQApp(int argc, char *argv[]) : QGuiApplication(argc, argv) {
+VSQApp::VSQApp() {
 }
 
 int
@@ -57,7 +57,7 @@ VSQApp::run() {
         return -1;
     }
 
-    // VSQController().setupUI();
+    VSQController().setupUI();
 
-    return exec();
+    return QGuiApplication::instance()->exec();
 }

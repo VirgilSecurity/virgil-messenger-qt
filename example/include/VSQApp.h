@@ -39,9 +39,9 @@
 #include <QGuiApplication>
 #include <VSQIoTKit.h>
 
-class VSQApp : public QGuiApplication {
+class VSQApp {
 public:
-    VSQApp(int argc, char *argv[]);
+    VSQApp();
 
     int
     run();

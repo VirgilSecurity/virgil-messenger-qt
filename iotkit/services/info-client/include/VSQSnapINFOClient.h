@@ -39,13 +39,47 @@
 
 #include <QtCore>
 
-#include <VSQMac.h>
-#include <VSQSnapServiceBase.h>
-#include <VSQSingleton.h>
+#include <VSQIoTKit.h>
 
 #include <virgil/iot/protocols/snap/info/info-structs.h>
 #include <virgil/iot/protocols/snap/info/info-client.h>
 #include <VSQSnapServiceBase.h>
+
+struct VSQDeviceInfo {
+    VSQDeviceInfo() : m_isActive(false), m_hasGeneralInfo(false), m_hasStatistics(false) {
+    }
+
+    VSQDeviceInfo(const VSQMac &mac) : VSQDeviceInfo() {
+        m_mac = mac;
+    }
+
+    VSQMac m_mac;
+    VSQDeviceRoles m_deviceRoles;
+    VSQManufactureId m_manufactureId;
+    VSQDeviceType m_deviceType;
+    VSQFileVersion m_fwVer;
+    VSQFileVersion m_tlVer;
+    quint32 m_sent;
+    quint32 m_received;
+    QDateTime m_lastTimestamp;
+
+    bool m_isActive;
+    bool m_hasGeneralInfo;
+    bool m_hasStatistics;
+
+    bool
+    equal(const VSQDeviceInfo &deviceInfo) const;
+
+    bool
+    operator==(const VSQDeviceInfo &deviceInfo) const {
+        return equal(deviceInfo);
+    }
+
+    bool
+    operator!=(const VSQDeviceInfo &deviceInfo) const {
+        return !equal(deviceInfo);
+    }
+};
 
 class VSQSnapInfoClient final : public QObject, public VSQSingleton<VSQSnapInfoClient>, public VSQSnapServiceBase {
     Q_OBJECT
@@ -53,7 +87,7 @@ class VSQSnapInfoClient final : public QObject, public VSQSingleton<VSQSnapInfoC
     friend VSQSingleton<VSQSnapInfoClient>;
 
 public:
-    using TEnumDevicesArray = QVector<VirgilIoTKit::vs_snap_info_device_t>;
+    using TEnumDevicesArray = QVector<VSQDeviceInfo>;
 
     const VirgilIoTKit::vs_snap_service_t *
     serviceInterface() override {
@@ -71,9 +105,6 @@ public:
         return name;
     }
 
-    TEnumDevicesArray
-    enumDevices(size_t waitMsec, size_t maxDevicesAmount = 1000) const;
-
     bool
     changePolling(size_t pollingElement,
                   uint16_t periodSeconds,
@@ -82,22 +113,23 @@ public:
 
 signals:
     void
-    deviceStarted(const VirgilIoTKit::vs_snap_info_device_t &device);
+    fireDeviceInfo(const VSQDeviceInfo &deviceInfo);
 
     void
-    deviceGeneralInfo(const VirgilIoTKit::vs_info_general_t &generalData);
-
-    void
-    deviceStatistics(const VirgilIoTKit::vs_info_statistics_t &statistics);
+    fireNewDevice(const VSQDeviceInfo &deviceInfo);
 
 private:
     const VirgilIoTKit::vs_snap_service_t *m_snapService;
     mutable VirgilIoTKit::vs_snap_info_client_service_t m_snapInfoImpl;
+    TEnumDevicesArray m_devicesInfo;
 
     VSQSnapInfoClient();
 
+    VSQDeviceInfo &
+    getDevice(const VSQMac &mac);
+
     static VirgilIoTKit::vs_status_e
-    startNotify(VirgilIoTKit::vs_snap_info_device_t *device);
+    startNotify(VirgilIoTKit::vs_snap_info_device_t *deviceRaw);
 
     static VirgilIoTKit::vs_status_e
     generalInfo(VirgilIoTKit::vs_info_general_t *generalData);

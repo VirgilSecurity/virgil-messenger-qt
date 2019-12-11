@@ -32,32 +32,65 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <VSQDeviceRoles.h>
+#ifndef VIRGIL_IOTKIT_QT_FILE_VERSION_H
+#define VIRGIL_IOTKIT_QT_FILE_VERSION_H
 
-VSQDeviceRoles::VSQDeviceRoles(uint32_t roles) {
-    for (uint32_t cur_role = 0; cur_role < std::numeric_limits<uint32_t>::max(); cur_role <<= 1) {
-        if (roles & cur_role) {
-            m_deviceRoles << static_cast<VirgilIoTKit::vs_snap_device_role_e>(cur_role);
-        }
+#include <QtCore>
+#include <virgil/iot/protocols/snap/snap-structs.h>
+#include <virgil/iot/protocols/snap/info/info-structs.h>
+
+class VSQFileVersion {
+public:
+    VSQFileVersion();
+    VSQFileVersion(const VirgilIoTKit::vs_file_version_unpacked_t &fileVersion) {
+        set(fileVersion);
     }
-}
-
-bool
-VSQDeviceRoles::hasRoles(TRolesList roles) const {
-    for (auto role : roles) {
-        if (!m_deviceRoles.contains(role)) {
-            return false;
-        }
+    VSQFileVersion(const VirgilIoTKit::vs_file_version_t &fileVersion) {
+        set(fileVersion);
     }
 
-    return true;
-}
+    VSQFileVersion &
+    set(const VirgilIoTKit::vs_file_version_unpacked_t &fileVersion);
 
-VSQDeviceRoles::operator uint32_t() const {
-    uint32_t roles = 0;
+    VSQFileVersion &
+    set(const VirgilIoTKit::vs_file_version_t &fileVersion);
 
-    for (auto role : m_deviceRoles)
-        roles |= role;
+    QString
+    description() const;
 
-    return roles;
-}
+    operator QString() const {
+        return description();
+    }
+    VSQFileVersion &
+    operator=(const VirgilIoTKit::vs_file_version_unpacked_t &fileVersion) {
+        return set(fileVersion);
+    }
+
+    VSQFileVersion &
+    operator=(const VirgilIoTKit::vs_file_version_t &fileVersion) {
+        return set(fileVersion);
+    }
+
+    bool
+    equal(const VSQFileVersion &fileVersion) const;
+
+    bool
+    operator==(const VSQFileVersion &fileVersion) const {
+        return equal(fileVersion);
+    }
+
+    bool
+    operator!=(const VSQFileVersion &fileVersion) const {
+        return !equal(fileVersion);
+    }
+
+private:
+    quint8 m_major;
+    quint8 m_minor;
+    quint8 m_patch;
+    quint32 m_build;
+    QDateTime m_timestamp;
+};
+
+
+#endif // VIRGIL_IOTKIT_QT_FILE_VERSION_H

@@ -36,6 +36,8 @@
 
 int
 main(int argc, char *argv[]) {
-    VSQApp app(argc, argv);
+    QGuiApplication a(argc, argv);
+
+    VSQApp app;
     return app.run();
 }

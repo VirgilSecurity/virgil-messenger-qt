@@ -32,32 +32,40 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <VSQDeviceRoles.h>
+#include <VSQFileVersion.h>
 
-VSQDeviceRoles::VSQDeviceRoles(uint32_t roles) {
-    for (uint32_t cur_role = 0; cur_role < std::numeric_limits<uint32_t>::max(); cur_role <<= 1) {
-        if (roles & cur_role) {
-            m_deviceRoles << static_cast<VirgilIoTKit::vs_snap_device_role_e>(cur_role);
-        }
-    }
+
+VSQFileVersion::VSQFileVersion() : m_major(0), m_minor(0), m_patch(0), m_build(0) {
+}
+
+VSQFileVersion &
+VSQFileVersion::set(const VirgilIoTKit::vs_file_version_t &fileVersion) {
+    m_major = fileVersion.major;
+    m_minor = fileVersion.minor;
+    m_patch = fileVersion.patch;
+    m_build = fileVersion.build;
+    m_timestamp = QDateTime::fromSecsSinceEpoch(fileVersion.timestamp, Qt::UTC, VS_START_EPOCH);
+
+    return *this;
+}
+
+VSQFileVersion &
+VSQFileVersion::set(const VirgilIoTKit::vs_file_version_unpacked_t &fileVersion) {
+    return set(reinterpret_cast<const VirgilIoTKit::vs_file_version_t &>(fileVersion));
+}
+
+QString
+VSQFileVersion::description() const {
+    return QString("%1.%2.%3.%4")
+            .arg((int)m_major)
+            .arg((int)m_minor)
+            .arg((int)m_patch)
+            .arg((int)m_build)
+            .arg(m_timestamp.toString(Qt::SystemLocaleShortDate));
 }
 
 bool
-VSQDeviceRoles::hasRoles(TRolesList roles) const {
-    for (auto role : roles) {
-        if (!m_deviceRoles.contains(role)) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-VSQDeviceRoles::operator uint32_t() const {
-    uint32_t roles = 0;
-
-    for (auto role : m_deviceRoles)
-        roles |= role;
-
-    return roles;
+VSQFileVersion::equal(const VSQFileVersion &fileVersion) const {
+    return m_major == fileVersion.m_major && m_minor == fileVersion.m_minor && m_patch == fileVersion.m_patch &&
+           m_build == fileVersion.m_build && m_timestamp == fileVersion.m_timestamp;
 }

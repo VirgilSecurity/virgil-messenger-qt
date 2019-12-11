@@ -1,4 +1,4 @@
-#include <controller.h>
+#include <VSQController.h>
 
 #include <QtGui/QGuiApplication>
 #include <QtQml>
@@ -6,18 +6,18 @@
 #include <QStringList>
 #include <QQuickView>
 
-Controller::Controller(QObject *parent) : QObject(parent), m_pUIContext(nullptr) {
+VSQController::VSQController(QObject *parent) : QObject(parent), m_pUIContext(nullptr) {
 
-    m_pVSInfoGeneralController = new VSInfoGeneralController();
+    m_pVSInfoGeneralController = new VSQInfoGeneralController();
 }
 
-Controller::~Controller() {
+VSQController::~VSQController() {
     delete m_pUIContext;
     delete m_pVSInfoGeneralController;
 }
 
 void
-Controller::setupUI() {
+VSQController::setupUI() {
     m_pUIContext = new QQuickView;
     m_pUIContext->setTitle(QString("demo-iotkit-qt - ") + QString(VERSION));
 
@@ -25,7 +25,7 @@ Controller::setupUI() {
     rootContext->setContextProperty("application", this);
     rootContext->setContextProperty("vsInfoGeneralController", QVariant::fromValue(m_pVSInfoGeneralController));
 
-    qmlRegisterType<VSInfoGeneralModel>("demo-iotkit-qt", 1, 0, "VSInfoGeneralModel");
+    qmlRegisterType<VSQInfoGeneralModel>("demo-iotkit-qt", 1, 0, "VSQInfoGeneralModel");
 
     QFont f = qApp->font();
     f.setPixelSize(12);

@@ -47,22 +47,22 @@ add_executable(iotkit-qt-example)
 
 target_sources(iotkit-qt-example
         PRIVATE
-            # Headers
+
+        # Headers
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQApp.h
-            ${CMAKE_CURRENT_LIST_DIR}/include/controller.h
-            ${CMAKE_CURRENT_LIST_DIR}/include/VSInfoGeneralController.h
-            ${CMAKE_CURRENT_LIST_DIR}/include/VSInfoGeneralModel.h
-            ${CMAKE_CURRENT_LIST_DIR}/include/fake_vs_info_general_t.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQController.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQInfoGeneralController.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQInfoGeneralModel.h
 
-            # Sources
+        # Sources
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQApp.cpp
-            ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
-            ${CMAKE_CURRENT_LIST_DIR}/src/controller.cpp
-            ${CMAKE_CURRENT_LIST_DIR}/src/VSInfoGeneralController.cpp
-            ${CMAKE_CURRENT_LIST_DIR}/src/VSInfoGeneralModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQController.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQInfoGeneralController.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQInfoGeneralModel.cpp
 
-            # Resources
-            ${CMAKE_CURRENT_LIST_DIR}/src/qml/resources.qrc
+        # Resources
+        ${CMAKE_CURRENT_LIST_DIR}/src/qml/resources.qrc
         )
 
 target_include_directories(iotkit-qt-example
@@ -78,6 +78,7 @@ target_link_libraries(iotkit-qt-example
         iotkit-qt-hal-global-impl
         iotkit-qt
         iotkit-qt-hal
+        iotkit-qt-info-client
 
         Qt5::Widgets
         Qt5::Qml

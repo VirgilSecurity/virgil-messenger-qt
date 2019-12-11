@@ -63,6 +63,11 @@ public:
         return equal(manufactureId);
     }
 
+    bool
+    operator!=(const VSQManufactureId &manufactureId) const {
+        return !equal(manufactureId);
+    }
+
     VSQManufactureId &
     set(const VSQManufactureId &manufactureId);
 

@@ -40,6 +40,7 @@
 #include <VSQDeviceSerial.h>
 #include <VSQDeviceType.h>
 #include <VSQFeatures.h>
+#include <VSQFileVersion.h>
 #include <VSQImplementations.h>
 #include <VSQIoTKitFacade.h>
 #include <VSQLogger.h>

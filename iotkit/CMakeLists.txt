@@ -55,6 +55,7 @@ target_sources(iotkit-qt
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQDeviceSerial.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQDeviceType.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQFeatures.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQFileVersion.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQImplementations.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQIoTKit.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQIoTKitFacade.h
@@ -67,6 +68,7 @@ target_sources(iotkit-qt
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQDeviceRoles.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQDeviceSerial.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQDeviceType.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQFileVersion.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQIoTKitFacade.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQMac.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQManufactureId.cpp
@@ -81,6 +83,7 @@ target_link_libraries(iotkit-qt
         PUBLIC
 
         vs-module-snap-control
+        vs-module-provision
         iotkit-qt-hal
         iotkit-qt-info-client
 

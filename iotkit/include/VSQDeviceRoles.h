@@ -42,13 +42,22 @@ class VSQDeviceRoles {
 public:
     using TRolesList = std::initializer_list<VirgilIoTKit::vs_snap_device_role_e>;
 
+    VSQDeviceRoles() = default;
+    VSQDeviceRoles(uint32_t roles);
+
     VSQDeviceRoles &
     operator<<(VirgilIoTKit::vs_snap_device_role_e role) {
         m_deviceRoles << role;
         return *this;
     }
 
-    operator quint32() const;
+    QString
+    description() const;
+
+    operator QString() const {
+        return description();
+    }
+    operator uint32_t() const;
 
     bool
     hasRole(VirgilIoTKit::vs_snap_device_role_e role) const {
@@ -61,13 +70,5 @@ private:
     QSet<VirgilIoTKit::vs_snap_device_role_e> m_deviceRoles;
 };
 
-inline VSQDeviceRoles::operator quint32() const {
-    quint32 roles = 0;
-
-    for (auto role : m_deviceRoles)
-        roles |= role;
-
-    return roles;
-}
 
 #endif // VIRGIL_IOTKIT_QT_DEVICE_ROLES_H

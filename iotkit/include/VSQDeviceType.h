@@ -63,6 +63,11 @@ public:
         return equal(deviceType);
     }
 
+    bool
+    operator!=(const VSQDeviceType &deviceType) const {
+        return !equal(deviceType);
+    }
+
     VSQDeviceType &
     set(const VSQDeviceType &deviceType);
 
