@@ -32,36 +32,43 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <VSQDeviceSerial.h>
+#include <VSQManufactureId.h>
 
-VSQDeviceSerial& VSQDeviceSerial::set( const VSQDeviceSerial& device_serial ) {
-    m_deviceSerial = device_serial.m_deviceSerial;
+VSQManufactureId &
+VSQManufactureId::set(const VSQManufactureId &manufactureId) {
+    m_manufactureId = manufactureId.m_manufactureId;
     return *this;
 }
 
-VSQDeviceSerial& VSQDeviceSerial::set( const VirgilIoTKit::vs_device_serial_t& buf ){
-    std::copy( buf, buf + sizeof( VirgilIoTKit::vs_device_serial_t ), m_deviceSerial.begin() );
+VSQManufactureId &
+VSQManufactureId::set(const VirgilIoTKit::vs_device_manufacture_id_t &buf) {
+    qCopy(buf, buf + sizeof(VirgilIoTKit::vs_device_manufacture_id_t), m_manufactureId.begin());
     return *this;
 }
 
-VSQDeviceSerial::operator const char* () const{
-    return m_deviceSerial.data();
+VSQManufactureId::operator const char *() const {
+    return m_manufactureId.data();
 }
 
-VSQDeviceSerial::operator const uint8_t* () const{
-    return reinterpret_cast<const uint8_t*>(m_deviceSerial.data());
+VSQManufactureId::operator const uint8_t *() const {
+    return reinterpret_cast<const uint8_t *>(m_manufactureId.data());
 }
 
-QString VSQDeviceSerial::description() const {
+
+QString
+VSQManufactureId::description(bool stopOnZero, char symbolOnNonAscii) const {
     QString str;
 
-    str.reserve( m_deviceSerial.size() * 3 + 1 );
+    str.reserve(m_manufactureId.size());
 
-    for( auto symbol : m_deviceSerial ) {
-        str += QString(":%1"). arg( (int)symbol, 2, 16 );
+    for (auto symbol : m_manufactureId) {
+        if (symbol >= ' ')
+            str += symbol;
+        else if (symbol > 0 || !stopOnZero)
+            str += symbolOnNonAscii;
+        else
+            break;
     }
-
-    str.remove(0, 1);   // Remove first ':'
 
     return str;
 }

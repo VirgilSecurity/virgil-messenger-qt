@@ -36,24 +36,6 @@
 
 int
 main(int argc, char *argv[]) {
-    int retCode;
-
-    try {
-
-        VSQApp app(argc, argv);
-
-        retCode = app.run();
-
-    } catch (std::runtime_error &err) {
-        qWarning("Runtime error has been happened. Error message : %s", err.what());
-
-        retCode = -1;
-
-    } catch (...) {
-        qWarning("Uncaught exception has been happened");
-
-        retCode = -2;
-    }
-
-    return retCode;
+    VSQApp app(argc, argv);
+    return app.run();
 }

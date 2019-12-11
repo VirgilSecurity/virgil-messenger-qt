@@ -32,38 +32,55 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_DEVICE_ROLES_H
-#define VIRGIL_IOTKIT_QT_DEVICE_ROLES_H
+#include <VSQMac.h>
 
-#include <QtCore>
-#include <virgil/iot/protocols/snap/snap-structs.h>
-
-class VSQDeviceRoles {
-public:
-    using TRolesList = std::initializer_list<VirgilIoTKit::vs_snap_device_role_e>;
-
-    VSQDeviceRoles&
-    operator<<(VirgilIoTKit::vs_snap_device_role_e role) {
-        m_deviceRoles << role;
-        return *this;
-    }
-
-    operator quint32() const;
-
-    bool hasRole(VirgilIoTKit::vs_snap_device_role_e role) const    { return m_deviceRoles.contains(role); }
-    bool hasRoles(TRolesList roles) const;
-
-private:
-    QSet<VirgilIoTKit::vs_snap_device_role_e> m_deviceRoles;
-};
-
-inline VSQDeviceRoles::operator quint32() const {
-    quint32 roles = 0;
-
-    for( auto role : m_deviceRoles )
-        roles |= role;
-
-    return roles;
+VSQMac &
+VSQMac::set(const VirgilIoTKit::vs_mac_addr_t &mac) {
+    qCopy(mac.bytes, mac.bytes + sizeof(mac.bytes), m_mac.begin());
+    return *this;
 }
 
-#endif //VIRGIL_IOTKIT_QT_DEVICE_ROLES_H
+VSQMac &
+VSQMac::set(const uint8_t *bytes) {
+    Q_ASSERT(bytes);
+    qCopy(bytes, bytes + m_mac.size(), m_mac.begin());
+    return *this;
+}
+
+VSQMac &
+VSQMac::set(uint8_t b0, uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4, uint8_t b5) {
+    m_mac[0] = b0;
+    m_mac[1] = b1;
+    m_mac[2] = b2;
+    m_mac[3] = b3;
+    m_mac[4] = b4;
+    m_mac[5] = b5;
+    return *this;
+}
+
+VSQMac &
+VSQMac::set(const VSQMac &mac) {
+    m_mac = mac.m_mac;
+    return *this;
+}
+
+VSQMac::operator VirgilIoTKit::vs_mac_addr_t() const {
+    VirgilIoTKit::vs_mac_addr_t mac;
+    qCopy(m_mac.begin(), m_mac.end(), mac.bytes);
+    return mac;
+}
+
+QString
+VSQMac::description() const {
+    QString str;
+
+    str.reserve(m_mac.size() * 3 + 1);
+
+    for (auto symbol : m_mac) {
+        str += QString(":%1").arg((int)symbol, 2, 16);
+    }
+
+    str.remove(0, 1); // Remove first ':'
+
+    return str;
+}

@@ -32,41 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_MAC_H
-#define VIRGIL_IOTKIT_QT_MAC_H
+#ifndef VIRGIL_IOTKIT_QT_VSQSINGLETON_H
+#define VIRGIL_IOTKIT_QT_VSQSINGLETON_H
 
-#include <QtCore>
-#include <virgil/iot/protocols/snap/snap-structs.h>
+#include <type_traits>
 
-class VSQMac {
+template <typename T, typename D = T> class VSQSingleton {
+    friend D;
+    static_assert(std::is_base_of_v<T, D>, "T should be a base type for D");
+
 public:
-    VSQMac(): m_mac(6, 0) {}
-    VSQMac( const VSQMac& ) = default;
-    VSQMac( const VirgilIoTKit::vs_mac_addr_t &mac ) { set( mac ); }
-    VSQMac( const quint8 *bytes )     { set( bytes ); }
-    VSQMac( quint8 b0, quint8 b1, quint8 b2, quint8 b3, quint8 b4, quint8 b5 )     { set( b0, b1, b2, b3, b4, b5 ); }
-
-    VSQMac &operator= ( const VirgilIoTKit::vs_mac_addr_t &mac )    { return set( mac ); }
-    VSQMac &operator= ( const VSQMac &mac )     { return set( mac ); }
-    bool operator==( const VSQMac &mac ) const  { return equal( mac ); }
-
-    VSQMac& set( const VirgilIoTKit::vs_mac_addr_t &mac );
-    VSQMac& set( const quint8 *bytes );
-    VSQMac& set( quint8 b0, quint8 b1, quint8 b2, quint8 b3, quint8 b4, quint8 b5 );
-    VSQMac& set( const VSQMac &mac );
-
-    QString description() const;
-
-    bool equal( const VSQMac &mac ) const { return m_mac == mac.m_mac; }
-
-    operator VirgilIoTKit::vs_mac_addr_t() const;
-    operator const char*() const { return m_mac.data(); }
-    operator QString() const    { return description(); }
+    static T &
+    instance();
 
 private:
-    QByteArray m_mac;
+    VSQSingleton() = default;
+    ~VSQSingleton() = default;
+    VSQSingleton(const VSQSingleton &) = delete;
+    VSQSingleton &
+    operator=(const VSQSingleton &) = delete;
 };
 
-inline const VSQMac broadcastMac( 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF );
+template <typename T, typename D>
+T &
+VSQSingleton<T, D>::instance() {
+    static D inst;
+    return inst;
+}
 
-#endif //VIRGIL_IOTKIT_QT_MAC_H
+#endif // VIRGIL_IOTKIT_QT_VSQSINGLETON_H

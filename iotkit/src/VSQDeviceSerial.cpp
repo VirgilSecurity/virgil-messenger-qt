@@ -32,35 +32,39 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_MANUFACTURE_ID_H
-#define VIRGIL_IOTKIT_QT_MANUFACTURE_ID_H
+#include <VSQDeviceSerial.h>
 
-#include <QtCore>
-#include <virgil/iot/protocols/snap/snap-structs.h>
+VSQDeviceSerial &
+VSQDeviceSerial::set(const VSQDeviceSerial &deviceSerial) {
+    m_deviceSerial = deviceSerial.m_deviceSerial;
+    return *this;
+}
 
-class VSQManufactureId {
-public:
-    VSQManufactureId(): m_manufactureId(VS_DEVICE_MANUFACTURE_ID_SIZE, 0) {}
-    VSQManufactureId( const VSQManufactureId& ) = default;
-    VSQManufactureId( const VirgilIoTKit::vs_device_manufacture_id_t& buf ) { set( buf ); }
+VSQDeviceSerial &
+VSQDeviceSerial::set(const VirgilIoTKit::vs_device_serial_t &buf) {
+    qCopy(buf, buf + sizeof(VirgilIoTKit::vs_device_serial_t), m_deviceSerial.begin());
+    return *this;
+}
 
-    VSQManufactureId& operator=( const VSQManufactureId& manufacture_id )   { return set( manufacture_id ); }
-    VSQManufactureId& operator=( const VirgilIoTKit::vs_device_manufacture_id_t& buf )  { return set( buf ); }
-    bool operator==( const VSQManufactureId &manufacture_id ) const       { return equal( manufacture_id ); }
+VSQDeviceSerial::operator const char *() const {
+    return m_deviceSerial.data();
+}
 
-    VSQManufactureId& set( const VSQManufactureId& manufacture_id );
-    VSQManufactureId& set( const VirgilIoTKit::vs_device_manufacture_id_t& buf );
+VSQDeviceSerial::operator const uint8_t *() const {
+    return reinterpret_cast<const uint8_t *>(m_deviceSerial.data());
+}
 
-    QString description( bool stop_on_zero = true, char symbol_on_non_ascii = ' ' ) const;
+QString
+VSQDeviceSerial::description() const {
+    QString str;
 
-    bool equal( const VSQManufactureId &manufacture_id ) const { return m_manufactureId == manufacture_id.m_manufactureId; }
+    str.reserve(m_deviceSerial.size() * 3 + 1);
 
-    operator const char* () const;
-    operator const uint8_t* () const;
-    operator QString() const    { return description(); }
+    for (auto symbol : m_deviceSerial) {
+        str += QString(":%1").arg((int)symbol, 2, 16);
+    }
 
-private:
-    QByteArray m_manufactureId;
-};
+    str.remove(0, 1); // Remove first ':'
 
-#endif //VIRGIL_IOTKIT_QT_MANUFACTURE_ID_H
+    return str;
+}

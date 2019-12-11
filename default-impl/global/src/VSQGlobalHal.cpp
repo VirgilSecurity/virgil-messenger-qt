@@ -33,6 +33,7 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 #include <iostream>
+#include <QtCore>
 
 extern "C" bool
 vs_logger_output_hal(const char *buffer) {

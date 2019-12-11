@@ -16,7 +16,7 @@ typedef struct {
 
 typedef struct {
     uint8_t manufacture_id[VS_DEVICE_MANUFACTURE_ID_SIZE]; /**< Manufacture ID*/
-    uint8_t device_type[VS_DEVICE_TYPE_SIZE];              /**< Device type */
+    uint8_t deviceType[VS_DEVICE_TYPE_SIZE];               /**< Device type */
     uint8_t default_netif_mac[ETH_ADDR_LEN];               /**< Default network interface MAC address*/
     uint32_t device_roles;                                 /**< Mask based on #vs_snap_device_role_e elements */
     vs_file_version_unpacked_t fw_ver;                     /**< Firmware version */

@@ -35,26 +35,25 @@
 #ifndef _VIRGIL_IOTKIT_QT_SNAP_SERVICE_H_
 #define _VIRGIL_IOTKIT_QT_SNAP_SERVICE_H_
 
-#include <virgil/iot/status_code/status_code.h>
 #include <virgil/iot/protocols/snap/snap-structs.h>
 #include <VSQFeatures.h>
-
-class VSSnapProtocol;
+#include <VSQNetifBase.h>
 
 class VSQSnapServiceBase {
 public:
     virtual ~VSQSnapServiceBase() = default;
 
+    void setNetif( VSQNetifBase *netif);
+
+    VirgilIoTKit::vs_netif_t *netif() { return m_netif ? m_netif->netif() : nullptr; }
+    const VirgilIoTKit::vs_netif_t *netif() const { return m_netif ? m_netif->netif() : nullptr; }
+
     virtual const VirgilIoTKit::vs_snap_service_t *serviceInterface() = 0;
-    virtual VSQFeatures::EFeature serviceFeature() = 0;
+    virtual VSQFeatures::EFeature serviceFeature() const = 0;
     virtual const QString &serviceName() const = 0;
 
-//    void setSnapProtocol( const VSSnapProtocol *protocol )   { m_protocol = protocol; }
-
-//    const VSSnapProtocol &snapProtocol() const               { return *m_protocol; }
-
 private:
-//    const VSSnapProtocol * m_protocol = nullptr;
+    VSQNetifBase *m_netif = nullptr;
 };
 
 #endif // _VIRGIL_IOTKIT_QT_SNAP_SERVICE_H_

@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2019 Virgil Security, Inc.
+//  Copyright (C) 2015-2020 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,28 +32,19 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef _VIRGIL_IOTKIT_QT_LOGGER_H
-#define _VIRGIL_IOTKIT_QT_LOGGER_H
+#ifndef VIRGIL_IOTKIT_C_QT_DEMO_VSQIOTKIT_H
+#define VIRGIL_IOTKIT_C_QT_DEMO_VSQIOTKIT_H
 
-#include <sstream>
-#include <virgil/iot/logger/logger.h>
+#include <VSQAppConfig.h>
+#include <VSQDeviceRoles.h>
+#include <VSQDeviceSerial.h>
+#include <VSQDeviceType.h>
+#include <VSQFeatures.h>
+#include <VSQImplementations.h>
+#include <VSQIoTKitFacade.h>
+#include <VSQLogger.h>
+#include <VSQMac.h>
+#include <VSQManufactureId.h>
+#include <VSQSingleton.h>
 
-template <typename... T>
-extern inline void log(VirgilIoTKit::vs_log_level_t log_lev, const char *cur_filename, uint32_t line_num, T... args){
-    std::stringstream sstr;
-    ( sstr << ... << std::forward<T>(args) );
-
-    VirgilIoTKit::vs_logger_message( log_lev, cur_filename, line_num, sstr.str().c_str() );
-}
-
-#define VSLogInfo(FRMT, ...)  log(VirgilIoTKit::VS_LOGLEV_INFO, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
-#define VSLogFatal(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_FATAL, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
-#define VSLogAlert(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_ALERT, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
-#define VSLogCritical(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_CRITICAL, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
-#define VSLogError(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_ERROR, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
-#define VSLogWarning(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_WARNING, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
-#define VSLogNotice(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_NOTICE, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
-#define VSLogTrace(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_TRACE, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
-#define VSLogDebug(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_DEBUG, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
-
-#endif //_VIRGIL_IOTKIT_QT_LOGGER_H
+#endif // VIRGIL_IOTKIT_C_QT_DEMO_VSQIOTKIT_H

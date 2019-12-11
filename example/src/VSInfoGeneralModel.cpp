@@ -15,8 +15,8 @@ VSInfoGeneralModel::manufacture_id() const {
 }
 
 QString
-VSInfoGeneralModel::device_type() const {
-    return QString::fromUtf8((char *)m_vs_info_general.device_type, VS_DEVICE_TYPE_SIZE);
+VSInfoGeneralModel::deviceType() const {
+    return QString::fromUtf8((char *)m_vs_info_general.deviceType, VS_DEVICE_TYPE_SIZE);
 }
 
 QString

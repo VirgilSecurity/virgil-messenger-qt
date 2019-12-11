@@ -35,41 +35,26 @@
 #ifndef _VSQ_IMPLEMENTATIONS_H_
 #define _VSQ_IMPLEMENTATIONS_H_
 
+#include <QtCore>
+
 class VSQNetifBase;
-class VSQSnapServiceBase;
 
 class VSQImplementations {
 public:
-    using TServices = QSet<VSQSnapServiceBase *>;
-
     VSQImplementations &
-    operator<<(VSQNetifBase *netif) {
-        Q_CHECK_PTR(netif);
+    operator<<(QSharedPointer<VSQNetifBase> netif) {
         m_netif = netif;
-        return *this;
-    }
-
-    VSQImplementations &
-    operator<<(VSQSnapServiceBase *service) {
-        Q_CHECK_PTR(service);
-        m_servicesPtrs << service;
         return *this;
     }
 
     VSQNetifBase &
     netif() {
-        Q_CHECK_PTR(m_netif);
-        return *m_netif;
-    }
-
-    const TServices &
-    services() const {
-        return m_servicesPtrs;
+        Q_ASSERT(m_netif);
+        return *m_netif.get();
     }
 
 private:
-    VSQNetifBase *m_netif = nullptr;
-    TServices m_servicesPtrs;
+    QSharedPointer<VSQNetifBase> m_netif;
 };
 
 #endif // _VSQ_IMPLEMENTATIONS_H_

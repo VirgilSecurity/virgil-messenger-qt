@@ -32,39 +32,59 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <VSQDeviceType.h>
+#ifndef VIRGIL_IOTKIT_QT_MANUFACTURE_ID_H
+#define VIRGIL_IOTKIT_QT_MANUFACTURE_ID_H
 
-VSQDeviceType& VSQDeviceType::set( const VSQDeviceType& device_type ) {
-    m_deviceType = device_type.m_deviceType;
-    return *this;
-}
+#include <QtCore>
+#include <virgil/iot/protocols/snap/snap-structs.h>
 
-VSQDeviceType& VSQDeviceType::set( const VirgilIoTKit::vs_device_type_t& buf ){
-    std::copy( buf, buf + sizeof( VirgilIoTKit::vs_device_type_t ), m_deviceType.begin() );
-    return *this;
-}
-
-VSQDeviceType::operator const char* () const{
-    return m_deviceType.data();
-}
-
-VSQDeviceType::operator const uint8_t* () const {
-    return reinterpret_cast<const uint8_t*>(m_deviceType.data());
-}
-
-QString VSQDeviceType::description( bool stop_on_zero, char symbol_on_non_ascii ) const {
-    QString str;
-
-    str.reserve( m_deviceType.size() );
-
-    for( auto symbol : m_deviceType ) {
-        if( symbol >= ' ' )
-            str += symbol;
-        else if ( symbol > 0 || !stop_on_zero)
-            str += symbol_on_non_ascii;
-        else
-            break;
+class VSQManufactureId {
+public:
+    VSQManufactureId() : m_manufactureId(VS_DEVICE_MANUFACTURE_ID_SIZE, 0) {
     }
 
-    return str;
-}
+    VSQManufactureId(const VSQManufactureId &) = default;
+    VSQManufactureId(const VirgilIoTKit::vs_device_manufacture_id_t &buf) {
+        set(buf);
+    }
+
+    VSQManufactureId &
+    operator=(const VSQManufactureId &manufactureId) {
+        return set(manufactureId);
+    }
+
+    VSQManufactureId &
+    operator=(const VirgilIoTKit::vs_device_manufacture_id_t &buf) {
+        return set(buf);
+    }
+
+    bool
+    operator==(const VSQManufactureId &manufactureId) const {
+        return equal(manufactureId);
+    }
+
+    VSQManufactureId &
+    set(const VSQManufactureId &manufactureId);
+
+    VSQManufactureId &
+    set(const VirgilIoTKit::vs_device_manufacture_id_t &buf);
+
+    QString
+    description(bool stopOnZero = true, char symbolOnNonAscii = ' ') const;
+
+    bool
+    equal(const VSQManufactureId &manufactureId) const {
+        return m_manufactureId == manufactureId.m_manufactureId;
+    }
+
+    operator const char *() const;
+    operator const uint8_t *() const;
+    operator QString() const {
+        return description();
+    }
+
+private:
+    QByteArray m_manufactureId;
+};
+
+#endif // VIRGIL_IOTKIT_QT_MANUFACTURE_ID_H

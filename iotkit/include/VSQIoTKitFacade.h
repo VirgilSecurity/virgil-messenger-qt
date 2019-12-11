@@ -44,20 +44,27 @@
 #include <VSQDeviceRoles.h>
 #include <VSQAppConfig.h>
 
+class VSQSnapInfoClient;
+class VSQSnapServiceBase;
+
 class VSQIoTKitFacade : public QObject, public VSQSingleton<VSQIoTKitFacade> {
     Q_OBJECT
 
 public:
-    static bool
-    init(const VSQFeatures &features, const VSQImplementations &impl, const VSQAppConfig &app_config);
+    bool
+    init(const VSQFeatures &features, const VSQImplementations &impl, const VSQAppConfig &appConfig);
 
 private:
     VSQFeatures m_features;
     VSQImplementations m_impl;
     VSQAppConfig m_appConfig;
+    QSharedPointer<VSQSnapInfoClient> m_serviceInfoClient;
 
     void
-    registerService(VSQFeatures::EFeature feature, VSQDeviceRoles::TRolesList &&roles);
+    initSnap();
+
+    void
+    registerService(VSQSnapServiceBase &service);
 };
 
 #endif // VSQIOTKITFACADE_H

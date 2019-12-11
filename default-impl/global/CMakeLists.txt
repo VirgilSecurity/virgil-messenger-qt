@@ -41,6 +41,11 @@ target_sources(iotkit-qt-hal-global-impl
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQGlobalHal.cpp
         )
 
+target_link_libraries(iotkit-qt-hal-global-impl
+        PRIVATE
+        Qt5::Core
+        )
+
 if(COMMAND add_clangformat)
     add_clangformat(iotkit-qt-hal-global-impl)
 endif()

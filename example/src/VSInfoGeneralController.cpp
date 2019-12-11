@@ -22,7 +22,7 @@ VSInfoGeneralController::VSInfoGeneralController(QObject *parent)
 
         arr[0] = '0' + i;
         copy_string_to_arr(arr, general_info.manufacture_id, 5);
-        copy_string_to_arr(arr, general_info.device_type, 5);
+        copy_string_to_arr(arr, general_info.deviceType, 5);
         copy_string_to_arr(arr, general_info.default_netif_mac, 5);
         general_info.device_roles = i;
 

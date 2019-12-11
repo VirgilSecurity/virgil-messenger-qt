@@ -34,24 +34,24 @@
 
 cmake_minimum_required(VERSION 3.11)
 
-add_library(iotkit-qt-info)
+add_library(iotkit-qt-info-client)
 
-target_sources(iotkit-qt-info
+target_sources(iotkit-qt-info-client
         PRIVATE
 
         # Headers
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQSnapINFO.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQSnapINFOClient.h
 
         # Sources
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQSnapINFO.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQSnapINFOClient.cpp
         )
 
-target_include_directories(iotkit-qt-info
+target_include_directories(iotkit-qt-info-client
         PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}/include
         )
 
-target_link_libraries(iotkit-qt-info
+target_link_libraries(iotkit-qt-info-client
         PUBLIC
 
         iotkit-qt-hal
@@ -62,5 +62,5 @@ target_link_libraries(iotkit-qt-info
         )
 
 if(COMMAND add_clangformat)
-    add_clangformat(iotkit-qt-info)
+    add_clangformat(iotkit-qt-info-client)
 endif()

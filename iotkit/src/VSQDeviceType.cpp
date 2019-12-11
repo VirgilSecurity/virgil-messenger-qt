@@ -32,50 +32,42 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_VSQNETIFBASE_H
-#define VIRGIL_IOTKIT_QT_VSQNETIFBASE_H
+#include <VSQDeviceType.h>
 
-#include <QObject>
-#include <QAbstractSocket>
+VSQDeviceType &
+VSQDeviceType::set(const VSQDeviceType &deviceType) {
+    m_deviceType = deviceType.m_deviceType;
+    return *this;
+}
 
-#include <virgil/iot/protocols/snap.h>
+VSQDeviceType &
+VSQDeviceType::set(const VirgilIoTKit::vs_device_type_t &buf) {
+    qCopy(buf, buf + sizeof(VirgilIoTKit::vs_device_type_t), m_deviceType.begin());
+    return *this;
+}
 
-class VSQNetifBase: public QObject {
-    Q_OBJECT
-public:
-    VSQNetifBase();
-    VSQNetifBase(VSQNetifBase const &) = delete;
-    VSQNetifBase &operator=(VSQNetifBase const &) = delete;
+VSQDeviceType::operator const char *() const {
+    return m_deviceType.data();
+}
 
-    virtual ~VSQNetifBase() = default;
+VSQDeviceType::operator const uint8_t *() const {
+    return reinterpret_cast<const uint8_t *>(m_deviceType.data());
+}
 
-signals:
-    // Do not use these signals directly from your implementation of network interface.
-    void fireReceivedBytes(const QByteArray &data);
-    void fireReceivedPacket(const QByteArray &packet);
-    void fireStateChanged(QAbstractSocket::SocketState connectionState);
+QString
+VSQDeviceType::description(bool stopOnZero, char symbolOnNonAscii) const {
+    QString str;
 
-protected:
-    virtual bool init() = 0;
-    virtual bool deinit() = 0;
-    virtual bool tx(const QByteArray &data) = 0;
-    virtual QString macAddr() = 0;
+    str.reserve(m_deviceType.size());
 
-    // This method must be called by implementation of network interface.
-    // It uses low level callbacks and sends data using signals
-    bool processData(const QByteArray &data);
+    for (auto symbol : m_deviceType) {
+        if (symbol >= ' ')
+            str += symbol;
+        else if (symbol > 0 || !stopOnZero)
+            str += symbolOnNonAscii;
+        else
+            break;
+    }
 
-private:
-    friend struct VSQLowLevelNetif;
-
-    // TODO: Try to give access to vs_netif_t only
-    friend class VSQSnap;
-
-    VirgilIoTKit::vs_netif_t m_lowLevelNetif;
-    VirgilIoTKit::vs_netif_rx_cb_t m_lowLevelRxCall;
-    VirgilIoTKit::vs_netif_process_cb_t m_lowLevelPacketProcess;
-
-
-};
-
-#endif //VIRGIL_IOTKIT_QT_VSQNETIFBASE_H
+    return str;
+}

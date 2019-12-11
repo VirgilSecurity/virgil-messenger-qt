@@ -34,38 +34,61 @@
 
 cmake_minimum_required(VERSION 3.11)
 
-add_library(iotkit-qt-facade)
+#
+#   Add services
+#
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/services)
 
-target_sources(iotkit-qt-facade
+add_library(iotkit-qt)
+
+target_compile_definitions(iotkit-qt
+        PRIVATE
+        USE_INFO_CLIENT=$<BOOL:${VIRGIL_IOTKIT_QT_INFO_CLIENT}>
+        )
+
+target_sources(iotkit-qt
         PRIVATE
 
         # Headers
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQIoTKitFacade.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQAppConfig.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQDeviceRoles.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQDeviceSerial.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQDeviceType.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQFeatures.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQImplementations.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQAppConfig.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQIoTKit.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQIoTKitFacade.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQLogger.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQMac.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQManufactureId.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQSingleton.h
 
         # Sources
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQDeviceRoles.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQDeviceSerial.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQDeviceType.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQIoTKitFacade.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQMac.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQManufactureId.cpp
         )
 
-target_include_directories(iotkit-qt-facade
+target_include_directories(iotkit-qt
         PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}/include
         )
 
-target_link_libraries(iotkit-qt-facade
+target_link_libraries(iotkit-qt
         PUBLIC
 
         vs-module-snap-control
-        iotkit-qt-helpers
         iotkit-qt-hal
+        iotkit-qt-info-client
 
         Qt5::Core
         Qt5::Network
         )
 
 if(COMMAND add_clangformat)
-    add_clangformat(iotkit-qt-facade)
+    add_clangformat(iotkit-qt)
 endif()
 

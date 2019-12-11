@@ -32,7 +32,42 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQIOTKITFEATURES_H
-#define VSQIOTKITFEATURES_H
+#ifndef VIRGIL_IOTKIT_QT_DEVICE_ROLES_H
+#define VIRGIL_IOTKIT_QT_DEVICE_ROLES_H
 
-#endif // VSQIOTKITFEATURES_H
+#include <QtCore>
+#include <virgil/iot/protocols/snap/snap-structs.h>
+
+class VSQDeviceRoles {
+public:
+    using TRolesList = std::initializer_list<VirgilIoTKit::vs_snap_device_role_e>;
+
+    VSQDeviceRoles &
+    operator<<(VirgilIoTKit::vs_snap_device_role_e role) {
+        m_deviceRoles << role;
+        return *this;
+    }
+
+    operator quint32() const;
+
+    bool
+    hasRole(VirgilIoTKit::vs_snap_device_role_e role) const {
+        return m_deviceRoles.contains(role);
+    }
+    bool
+    hasRoles(TRolesList roles) const;
+
+private:
+    QSet<VirgilIoTKit::vs_snap_device_role_e> m_deviceRoles;
+};
+
+inline VSQDeviceRoles::operator quint32() const {
+    quint32 roles = 0;
+
+    for (auto role : m_deviceRoles)
+        roles |= role;
+
+    return roles;
+}
+
+#endif // VIRGIL_IOTKIT_QT_DEVICE_ROLES_H

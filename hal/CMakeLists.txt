@@ -41,7 +41,6 @@ add_library(iotkit-qt-hal)
 target_sources(iotkit-qt-hal
         PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQNetifBase.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQLogger.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQSnapServiceBase.h
 
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQNetifBase.cpp
@@ -56,7 +55,7 @@ target_link_libraries(iotkit-qt-hal
         PUBLIC
 
         vs-module-snap-control
-        iotkit-qt-helpers
+        iotkit-qt
 
         Qt5::Core
         Qt5::Network

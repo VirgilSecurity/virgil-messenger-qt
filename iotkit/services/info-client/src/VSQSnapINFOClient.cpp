@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2019 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -33,58 +33,65 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 #include <VSQIoTKit.h>
-#include <VSQUdpBroadcast.h>
+#include <VSQSnapINFOClient.h>
 
-VSQUdpBroadcast::VSQUdpBroadcast(quint16 port) : m_port(port) {
+using namespace VirgilIoTKit;
+
+VSQSnapInfoClient::VSQSnapInfoClient() {
+
+    m_snapInfoImpl.device_start = startNotify;
+    m_snapInfoImpl.general_info = generalInfo;
+    m_snapInfoImpl.statistics = statistics;
+
+    m_snapService = vs_snap_info_client(m_snapInfoImpl);
+}
+
+/* static */ vs_status_e
+VSQSnapInfoClient::startNotify(vs_snap_info_device_t *device) {
+    emit instance().deviceStarted(*device);
+
+    return VS_CODE_OK;
+}
+
+/* static */ vs_status_e
+VSQSnapInfoClient::generalInfo(vs_info_general_t *generalData) {
+    emit instance().deviceGeneralInfo(*generalData);
+
+    return VS_CODE_OK;
+}
+
+/* static */ vs_status_e
+VSQSnapInfoClient::statistics(vs_info_statistics_t *statistics) {
+    emit instance().deviceStatistics(*statistics);
+
+    return VS_CODE_OK;
+}
+
+VSQSnapInfoClient::TEnumDevicesArray
+VSQSnapInfoClient::enumDevices(size_t waitMsec, size_t maxDevicesAmount) const {
+    TEnumDevicesArray devices;
+    size_t devicesAmount;
+    vs_status_e ret_code;
+
+    devices.resize(maxDevicesAmount);
+    ret_code = vs_snap_info_enum_devices(netif(), devices.data(), devices.size(), &devicesAmount, waitMsec);
+
+    devices.resize(devicesAmount);
+
+    return devices;
 }
 
 bool
-VSQUdpBroadcast::init() {
-    connect(&m_socket, &QUdpSocket::stateChanged, this, &VSQUdpBroadcast::fireConnectionStateChanged);
+VSQSnapInfoClient::changePolling(size_t poolingElement,
+                                 uint16_t periodSeconds,
+                                 bool enable,
+                                 const VSQMac &deviceMac) const {
+    vs_mac_addr_t mac = deviceMac;
 
-    if (!m_socket.bind(m_port, QUdpSocket::ReuseAddressHint)) {
-        VSLogError(
-                "Unable to bind LocalHost:", m_port, ". Last error : ", m_socket.errorString().toStdString().c_str());
+    if (vs_snap_info_set_polling(netif(), &mac, poolingElement, enable, periodSeconds) != VS_CODE_OK) {
+        VSLogError("Unable to setup info polling");
         return false;
     }
 
-    connect(&m_socket, &QUdpSocket::readyRead, this, &VSQUdpBroadcast::onHasInputData);
-
     return true;
-}
-
-bool
-VSQUdpBroadcast::deinit() {
-    m_socket.disconnectFromHost();
-    return true;
-}
-
-bool
-VSQUdpBroadcast::tx(const QByteArray &data) {
-    auto dataSz = data.size();
-    Q_ASSERT(m_socket.state() == QAbstractSocket::ConnectedState && "Socket must be connected before this call");
-
-    auto sentBytes = m_socket.writeDatagram(data, QHostAddress::Broadcast, m_port);
-
-    if (sentBytes != dataSz) {
-        VSLogError("Sent bytes : ",
-                   sentBytes,
-                   ", data bytes to send : ",
-                   data.size(),
-                   ". Last error : ",
-                   m_socket.errorString().toStdString().c_str());
-        return false;
-    }
-
-    return true;
-}
-
-QString
-VSQUdpBroadcast::macAddr() const {
-    return m_socket.multicastInterface().hardwareAddress();
-}
-
-void
-VSQUdpBroadcast::onHasInputData() {
-    processData(m_socket.receiveDatagram().data());
 }

@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2019 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,35 +32,29 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_DEVICE_SERIAL_H
-#define VIRGIL_IOTKIT_QT_DEVICE_SERIAL_H
+#ifndef _VIRGIL_IOTKIT_QT_LOGGER_H
+#define _VIRGIL_IOTKIT_QT_LOGGER_H
 
-#include <QtCore>
-#include <virgil/iot/provision/provision-structs.h>
+#include <sstream>
+#include <virgil/iot/logger/logger.h>
 
-class VSQDeviceSerial {
-public:
-    VSQDeviceSerial(): m_deviceSerial(VS_DEVICE_SERIAL_SIZE, 0) {}
-    VSQDeviceSerial( const VSQDeviceSerial& ) = default;
-    VSQDeviceSerial( const VirgilIoTKit::vs_device_serial_t& buf ) { set( buf ); }
+template <typename... T>
+extern inline void
+log(VirgilIoTKit::vs_log_level_t log_lev, const char *cur_filename, uint32_t line_num, T... args) {
+    std::stringstream sStr;
+    (sStr << ... << std::forward<T>(args));
 
-    VSQDeviceSerial& operator=( const VSQDeviceSerial& device_serial )  { return set( device_serial ); }
-    VSQDeviceSerial& operator=( const VirgilIoTKit::vs_device_serial_t& buf )       { return set( buf ); }
-    bool operator==( const VSQDeviceSerial &device_serial ) const     { return equal( device_serial ); }
+    VirgilIoTKit::vs_logger_message(log_lev, cur_filename, line_num, sStr.str().c_str());
+}
 
-    VSQDeviceSerial& set( const VSQDeviceSerial& device_serial );
-    VSQDeviceSerial& set( const VirgilIoTKit::vs_device_serial_t& buf );
+#define VSLogInfo(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_INFO, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
+#define VSLogFatal(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_FATAL, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
+#define VSLogAlert(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_ALERT, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
+#define VSLogCritical(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_CRITICAL, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
+#define VSLogError(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_ERROR, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
+#define VSLogWarning(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_WARNING, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
+#define VSLogNotice(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_NOTICE, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
+#define VSLogTrace(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_TRACE, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
+#define VSLogDebug(FRMT, ...) log(VirgilIoTKit::VS_LOGLEV_DEBUG, __FILENAME__, __LINE__, (FRMT), ##__VA_ARGS__)
 
-    QString description() const;
-
-    bool equal( const VSQDeviceSerial &device_serial ) const { return m_deviceSerial == device_serial.m_deviceSerial; }
-
-    operator const char* () const;
-    operator const uint8_t* () const;
-    operator QString() const    { return description(); }
-
-private:
-    QByteArray m_deviceSerial;
-};
-
-#endif //VIRGIL_IOTKIT_QT_DEVICE_SERIAL_H
+#endif //_VIRGIL_IOTKIT_QT_LOGGER_H

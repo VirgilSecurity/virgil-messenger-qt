@@ -52,6 +52,7 @@ public:
     virtual ~VSQNetifBase() = default;
 
     VirgilIoTKit::vs_netif_t *netif()       { return &m_lowLevelNetif; }
+    const VirgilIoTKit::vs_netif_t *netif() const      { return &m_lowLevelNetif; }
 
     operator VirgilIoTKit::vs_netif_t *()   { return netif(); }
 
@@ -62,10 +63,10 @@ signals:
     void fireStateChanged(QAbstractSocket::SocketState connectionState);
 
 protected:
-    virtual VirgilIoTKit::vs_status_e init() = 0;
-    virtual VirgilIoTKit::vs_status_e deinit() = 0;
-    virtual VirgilIoTKit::vs_status_e tx(const QByteArray &data) = 0;
-    virtual const VSQMac& macAddr() = 0;
+    virtual bool init() = 0;
+    virtual bool deinit() = 0;
+    virtual bool tx(const QByteArray &data) = 0;
+    virtual QString macAddr() const = 0;
 
     // This method must be called by implementation of network interface.
     // It uses low level callbacks and sends data using signals

@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#include <VSQIoTKit.h>
 #include <VSQNetifBase.h>
-#include <VSQLogger.h>
 
 using namespace VirgilIoTKit;
 /*
@@ -135,25 +135,26 @@ bool VSQNetifBase::processData(const QByteArray &data) {
     instance->m_lowLevelRxCall = rx_cb;
     instance->m_lowLevelPacketProcess = process_cb;
 
-    return instance->init();
+    return instance->init() ? VirgilIoTKit::VS_CODE_OK : VirgilIoTKit::VS_CODE_ERR_INIT_SNAP;
 }
 
 /*static */ VirgilIoTKit::vs_status_e VSQNetifBase::deinitCb(const struct VirgilIoTKit::vs_netif_t *netif) {
     VSQNetifBase *instance = reinterpret_cast<VSQNetifBase*>(netif->user_data);
 
-    return instance->deinit();
+    return instance->deinit() ? VirgilIoTKit::VS_CODE_OK : VirgilIoTKit::VS_CODE_ERR_DEINIT_SNAP;
 }
 
 /*static */ VirgilIoTKit::vs_status_e VSQNetifBase::txCb(const struct VirgilIoTKit::vs_netif_t *netif, const uint8_t *data_raw, const uint16_t data_sz) {
     VSQNetifBase *instance = reinterpret_cast<VSQNetifBase*>(netif->user_data);
 
-    return instance->tx(QByteArray(reinterpret_cast<const char*>(data_raw), data_sz ));
+    return instance->tx(QByteArray(reinterpret_cast<const char*>(data_raw), data_sz )) ?
+           VirgilIoTKit::VS_CODE_OK : VirgilIoTKit::VS_CODE_ERR_TX_SNAP;
+
 }
 
 /*static */ VirgilIoTKit::vs_status_e VSQNetifBase::macAddrCb(const struct VirgilIoTKit::vs_netif_t *netif, struct VirgilIoTKit::vs_mac_addr_t *mac_addr) {
     VSQNetifBase *instance = reinterpret_cast<VSQNetifBase*>(netif->user_data);
-
-    *mac_addr = instance->macAddr();
+    QString macStr = instance->macAddr();
 
     return VirgilIoTKit::VS_CODE_OK;
 }

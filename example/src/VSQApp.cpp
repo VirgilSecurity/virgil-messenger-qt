@@ -32,36 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#include <QtCore>
+
 #include <VSQApp.h>
 #include <controller.h>
-#include <VSQFeatures.h>
-#include <VSQImplementations.h>
-#include <VSQAppConfig.h>
-#include <VSQManufactureId.h>
+
+#include <VSQIoTKit.h>
 #include <VSQUdpBroadcast.h>
-#include <VSQDeviceType.h>
-#include <VSQDeviceSerial.h>
-#include <VSQDeviceRoles.h>
-#include <VSQIoTKitFacade.h>
 
-VSQApp::VSQApp(int argc, char *argv[]) : app(argc, argv), m_udpBroadcast(4100) {
-
-    auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT;
-    auto impl = VSQImplementations() << &m_udpBroadcast;
-    auto roles = VSQDeviceRoles() << VirgilIoTKit::VS_SNAP_DEV_CONTROL;
-    auto appConfig = VSQAppConfig() << VSQManufactureId() << VSQDeviceType() << VSQDeviceSerial()
-                                    << VirgilIoTKit::VS_LOGLEV_DEBUG << roles;
-
-    if (!VSQIoTKitFacade::init(features, impl, appConfig)) {
-        throw std::runtime_error("Unable to initialize Virgil IoT KIT");
-    }
+VSQApp::VSQApp(int argc, char *argv[]) : QGuiApplication(argc, argv) {
 }
 
 int
 VSQApp::run() {
-    Controller controller;
 
-    controller.setupUI();
+    auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT;
+    auto impl = VSQImplementations() << QSharedPointer<VSQUdpBroadcast>::create();
+    auto roles = VSQDeviceRoles() << VirgilIoTKit::VS_SNAP_DEV_CONTROL;
+    auto appConfig = VSQAppConfig() << VSQManufactureId() << VSQDeviceType() << VSQDeviceSerial()
+                                    << VirgilIoTKit::VS_LOGLEV_DEBUG << roles;
 
-    return app.exec();
+    if (!VSQIoTKitFacade::instance().init(features, impl, appConfig)) {
+        VSLogCritical("Unable to initialize Virgil IoT KIT");
+        return -1;
+    }
+
+    // VSQController().setupUI();
+
+    return exec();
 }

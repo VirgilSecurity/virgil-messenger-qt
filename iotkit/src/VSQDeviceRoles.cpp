@@ -32,40 +32,15 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <VSQManufactureId.h>
+#include <VSQDeviceRoles.h>
 
-VSQManufactureId& VSQManufactureId::set( const VSQManufactureId& manufacture_id ) {
-    m_manufactureId = manufacture_id.m_manufactureId;
-    return *this;
-}
-
-VSQManufactureId& VSQManufactureId::set( const VirgilIoTKit::vs_device_manufacture_id_t& buf ){
-    std::copy( buf, buf + sizeof( VirgilIoTKit::vs_device_manufacture_id_t ), m_manufactureId.begin() );
-    return *this;
-}
-
-VSQManufactureId::operator const char* () const {
-    return m_manufactureId.data();
-}
-
-VSQManufactureId::operator const uint8_t* () const {
-    return reinterpret_cast<const uint8_t*>(m_manufactureId.data());
-}
-
-
-QString VSQManufactureId::description( bool stop_on_zero, char symbol_on_non_ascii ) const {
-    QString str;
-
-    str.reserve( m_manufactureId.size() );
-
-    for( auto symbol : m_manufactureId ) {
-        if( symbol >= ' ' )
-            str += symbol;
-        else if ( symbol > 0 || !stop_on_zero)
-            str += symbol_on_non_ascii;
-        else
-            break;
+bool
+VSQDeviceRoles::hasRoles(TRolesList roles) const {
+    for (auto role : roles) {
+        if (!m_deviceRoles.contains(role)) {
+            return false;
+        }
     }
 
-    return str;
+    return true;
 }

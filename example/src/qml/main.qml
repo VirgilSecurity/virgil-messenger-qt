@@ -29,7 +29,7 @@ ApplicationWindow {
         model: vsInfoGeneralController.vsInfoGeneralList
         delegate: Row {
             Label { text: manufacture_id; width: applicationWindow.width / 6  }
-            Label { text: device_type; width: applicationWindow.width / 6  }
+            Label { text: deviceType; width: applicationWindow.width / 6  }
             Label { text: default_netif_mac; width: applicationWindow.width / 6  }
             Label { text: device_roles; width: applicationWindow.width / 6  }
             Label { text: fw_ver; width: applicationWindow.width / 6  }

@@ -40,40 +40,39 @@
 
 #include <VSQNetifBase.h>
 
-class VSQUdpBroadcast : public VSQNetifBase {
+class VSQUdpBroadcast final : public VSQNetifBase {
     Q_OBJECT
 public:
     VSQUdpBroadcast(quint16 port = 4100);
+
     VSQUdpBroadcast(VSQUdpBroadcast const &) = delete;
+
     VSQUdpBroadcast &
     operator=(VSQUdpBroadcast const &) = delete;
 
     virtual ~VSQUdpBroadcast() = default;
 
 protected:
-    virtual VirgilIoTKit::vs_status_e
-    init() final;
+    virtual bool
+    init();
 
-    virtual VirgilIoTKit::vs_status_e
-    deinit() final;
+    virtual bool
+    deinit();
 
-    virtual VirgilIoTKit::vs_status_e
-    tx(const QByteArray &data) final;
+    virtual bool
+    tx(const QByteArray &data);
 
-    virtual const VSQMac &
-    macAddr() final;
+    virtual QString
+    macAddr() const;
 
 signals:
     void fireConnectionStateChanged(QAbstractSocket::SocketState);
 
 private slots:
-    void onConnectionStateChanged(QAbstractSocket::SocketState);
-
     void
     onHasInputData();
 
 private:
-    VSQMac m_macAddr;
     quint16 m_port;
     QUdpSocket m_socket;
 };

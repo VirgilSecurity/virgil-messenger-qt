@@ -37,18 +37,14 @@
 
 #include <QtCore>
 #include <QGuiApplication>
-#include <VSQUdpBroadcast.h>
+#include <VSQIoTKit.h>
 
-class VSQApp {
+class VSQApp : public QGuiApplication {
 public:
     VSQApp(int argc, char *argv[]);
 
     int
     run();
-
-private:
-    VSQUdpBroadcast m_udpBroadcast;
-    QGuiApplication app;
 };
 
 #endif // VSQApp

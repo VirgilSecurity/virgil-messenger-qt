@@ -32,14 +32,59 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <VSQDeviceRoles.h>
+#ifndef VIRGIL_IOTKIT_QT_DEVICE_TYPE_H
+#define VIRGIL_IOTKIT_QT_DEVICE_TYPE_H
 
-bool VSQDeviceRoles::hasRoles(TRolesList roles) const {
-    for( auto role : roles ){
-        if( !m_deviceRoles.contains(role) ) {
-            return false;
-        }
+#include <QtCore>
+#include <virgil/iot/provision/provision-structs.h>
+
+class VSQDeviceType {
+public:
+    VSQDeviceType() : m_deviceType(VS_DEVICE_TYPE_SIZE, 0) {
     }
 
-    return true;
-}
+    VSQDeviceType(const VSQDeviceType &) = default;
+    VSQDeviceType(const VirgilIoTKit::vs_device_type_t &buf) {
+        set(buf);
+    }
+
+    VSQDeviceType &
+    operator=(const VSQDeviceType &deviceType) {
+        return set(deviceType);
+    }
+
+    VSQDeviceType &
+    operator=(const VirgilIoTKit::vs_device_type_t &buf) {
+        return set(buf);
+    }
+
+    bool
+    operator==(const VSQDeviceType &deviceType) const {
+        return equal(deviceType);
+    }
+
+    VSQDeviceType &
+    set(const VSQDeviceType &deviceType);
+
+    VSQDeviceType &
+    set(const VirgilIoTKit::vs_device_type_t &buf);
+
+    QString
+    description(bool stopOnZero = true, char symbolOnNonAscii = ' ') const;
+
+    bool
+    equal(const VSQDeviceType &deviceType) const {
+        return m_deviceType == deviceType.m_deviceType;
+    }
+
+    operator const char *() const;
+    operator const uint8_t *() const;
+    operator QString() const {
+        return description();
+    }
+
+private:
+    QByteArray m_deviceType;
+};
+
+#endif // VIRGIL_IOTKIT_QT_DEVICE_TYPE_H

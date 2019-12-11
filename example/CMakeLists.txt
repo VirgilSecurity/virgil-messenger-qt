@@ -76,7 +76,7 @@ target_link_libraries(iotkit-qt-example
 
         iotkit-qt-netif-udp-broadcast
         iotkit-qt-hal-global-impl
-        iotkit-qt-facade
+        iotkit-qt
         iotkit-qt-hal
 
         Qt5::Widgets

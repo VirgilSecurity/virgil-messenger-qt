@@ -34,34 +34,27 @@
 
 #include <VSQNetifBase.h>
 #include <VSQSnapServiceBase.h>
+#include <VSQSnapINFOClient.h>
+#include <VSQIoTKit.h>
 #include <VSQIoTKitFacade.h>
-#include <VSQLogger.h>
+
+using namespace VirgilIoTKit;
 
 bool
 VSQIoTKitFacade::init(const VSQFeatures &features, const VSQImplementations &impl, const VSQAppConfig &appConfig) {
-    using namespace VirgilIoTKit;
 
-    instance().m_features = features;
-    instance().m_impl = impl;
-    instance().m_appConfig = appConfig;
+    m_features = features;
+    m_impl = impl;
+    m_appConfig = appConfig;
 
     vs_logger_init(appConfig.logLevel());
 
     try {
-        Q_CHECK_PTR(instance().m_impl.netif());
-
         // SNAP entities
         if (features.hasSnap()) {
-            if (vs_snap_init(instance().m_impl.netif(),
-                             appConfig.manufactureId(),
-                             appConfig.deviceType(),
-                             appConfig.deviceSerial(),
-                             appConfig.deviceRoles()) != VirgilIoTKit::VS_CODE_OK) {
-                throw QString("Unable to initialize SNAP");
-            }
-
-            instance().registerService(VSQFeatures::SNAP_INFO_CLIENT, {VS_SNAP_DEV_CONTROL, VS_SNAP_DEV_DEBUGGER});
+            initSnap();
         }
+
         return true;
 
     } catch (QString &descr) {
@@ -71,20 +64,26 @@ VSQIoTKitFacade::init(const VSQFeatures &features, const VSQImplementations &imp
 }
 
 void
-VSQIoTKitFacade::registerService(VSQFeatures::EFeature feature, VSQDeviceRoles::TRolesList &&roles) {
+VSQIoTKitFacade::initSnap() {
 
-    if (!m_features.hasFeature(feature) || !m_appConfig.deviceRoles().hasRoles(roles)) {
-        return;
+    Q_CHECK_PTR(m_impl.netif());
+
+    if (vs_snap_init(m_impl.netif(),
+                     m_appConfig.manufactureId(),
+                     m_appConfig.deviceType(),
+                     m_appConfig.deviceSerial(),
+                     m_appConfig.deviceRoles()) != VirgilIoTKit::VS_CODE_OK) {
+        throw QString("Unable to initialize SNAP");
     }
 
-    for (const auto &service : m_impl.services()) {
-        if (service->serviceFeature() == feature) {
-            if (vs_snap_register_service(service->serviceInterface()) != VirgilIoTKit::VS_CODE_OK) {
-                throw QString("Unable to register SNAP's %1 service").arg(service->serviceName());
-            }
-            return;
-        }
+    if (m_features.hasFeature(VSQFeatures::SNAP_INFO_CLIENT)) {
+        registerService(VSQSnapInfoClient::instance());
     }
+}
 
-    throw QString("No appropriate service has been found in the services list");
+void
+VSQIoTKitFacade::registerService(VSQSnapServiceBase &service) {
+    if (vs_snap_register_service(service.serviceInterface()) != VirgilIoTKit::VS_CODE_OK) {
+        throw QString("Unable to register SNAP's %1 service").arg(service.serviceName());
+    }
 }
