@@ -9,6 +9,7 @@
 class VSQDeviceInfoController : public QObject {
     Q_OBJECT
     Q_PROPERTY(QQmlListProperty<VSQDeviceInfoModel> deviceInfoList READ getDeviceInfoList NOTIFY deviceInfoListChanged)
+    Q_PROPERTY(int visibilityMode READ visibilityMode NOTIFY visibilityModeChanged);
 
 public:
     explicit VSQDeviceInfoController(QObject *parent = NULL);
@@ -20,9 +21,15 @@ public:
     void
     change(const VSQDeviceInfo &deviceInfo);
 
+    int
+    visibilityMode() const;
+
 signals:
     void
     deviceInfoListChanged();
+
+    void
+    visibilityModeChanged();
 
 private:
     QList<VSQDeviceInfoModel *> m_deviceInfoList;

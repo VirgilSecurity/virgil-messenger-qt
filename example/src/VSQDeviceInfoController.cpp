@@ -1,3 +1,5 @@
+
+#include <QWindow>
 #include <VSQDeviceInfoController.h>
 
 VSQDeviceInfoController::VSQDeviceInfoController(QObject *parent)
@@ -32,4 +34,13 @@ VSQDeviceInfoController::change(const VSQDeviceInfo &deviceInfo) {
     VSQDeviceInfoModel *deviceInfoModel = new VSQDeviceInfoModel(deviceInfo);
     m_deviceInfoList.append(deviceInfoModel);
     emit deviceInfoListChanged();
+}
+
+int
+VSQDeviceInfoController::visibilityMode() const {
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(Q_OS_TVOS) || defined(Q_OS_WATCHOS)
+    return QWindow::FullScreen;
+#else
+    return QWindow::Windowed;
+#endif
 }

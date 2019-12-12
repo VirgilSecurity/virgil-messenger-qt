@@ -5,7 +5,7 @@ import QtQuick.Dialogs 1.0
 ApplicationWindow {
     id: applicationWindow
     visible: true
-    visibility: "Windowed"
+    visibility: VSQDeviceInfoController.visibilityMode
 
     minimumWidth: 640
     minimumHeight: 480
