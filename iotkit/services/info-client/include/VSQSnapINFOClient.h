@@ -46,7 +46,7 @@
 #include <VSQSnapServiceBase.h>
 
 struct VSQDeviceInfo {
-    VSQDeviceInfo() : m_isActive(false), m_hasGeneralInfo(false), m_hasStatistics(false) {
+    VSQDeviceInfo() : m_isActive(false), m_hasGeneralInfo(false), m_hasStatistics(false), m_sent(0), m_received(0) {
     }
 
     VSQDeviceInfo(const VSQMac &mac) : VSQDeviceInfo() {
@@ -87,6 +87,11 @@ class VSQSnapInfoClient final : public QObject, public VSQSingleton<VSQSnapInfoC
     friend VSQSingleton<VSQSnapInfoClient>;
 
 public:
+    enum EPolling {
+        GENERAL_INFO = VirgilIoTKit::VS_SNAP_INFO_GENERAL,
+        STATISTICS = VirgilIoTKit::VS_SNAP_INFO_STATISTICS
+    };
+
     using TEnumDevicesArray = QVector<VSQDeviceInfo>;
 
     const VirgilIoTKit::vs_snap_service_t *
@@ -106,7 +111,7 @@ public:
     }
 
     bool
-    changePolling(size_t pollingElement,
+    changePolling(std::initializer_list<EPolling> pollingOptions,
                   uint16_t periodSeconds,
                   bool enable,
                   const VSQMac &deviceMac = broadcastMac) const;

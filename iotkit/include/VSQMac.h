@@ -44,11 +44,14 @@ public:
     }
 
     VSQMac(const VSQMac &) = default;
-    VSQMac(const VirgilIoTKit::vs_mac_addr_t &mac) {
+    VSQMac(const VirgilIoTKit::vs_mac_addr_t &mac) : VSQMac() {
+        set(mac);
+    }
+    VSQMac(const QString &mac) : VSQMac() {
         set(mac);
     }
 
-    VSQMac(const quint8 *bytes) {
+    VSQMac(const quint8 *bytes) : VSQMac() {
         set(bytes);
     }
 
@@ -70,6 +73,14 @@ public:
     operator==(const VSQMac &mac) const {
         return equal(mac);
     }
+
+    bool
+    operator!=(const VSQMac &mac) const {
+        return !equal(mac);
+    }
+
+    VSQMac &
+    set(const QString &mac);
 
     VSQMac &
     set(const VirgilIoTKit::vs_mac_addr_t &mac);

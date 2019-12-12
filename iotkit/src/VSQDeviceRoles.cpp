@@ -35,7 +35,7 @@
 #include <VSQDeviceRoles.h>
 
 VSQDeviceRoles::VSQDeviceRoles(uint32_t roles) {
-    for (uint32_t cur_role = 0; cur_role < std::numeric_limits<uint32_t>::max(); cur_role <<= 1) {
+    for (uint64_t cur_role = 1; cur_role < std::numeric_limits<uint32_t>::max(); cur_role <<= 1) {
         if (roles & cur_role) {
             m_deviceRoles << static_cast<VirgilIoTKit::vs_snap_device_role_e>(cur_role);
         }
@@ -60,4 +60,25 @@ VSQDeviceRoles::operator uint32_t() const {
         roles |= role;
 
     return roles;
+}
+
+QString
+VSQDeviceRoles::description() const {
+    static const QMap<VirgilIoTKit::vs_snap_device_role_e, QString> rolesDescription = {
+            {VirgilIoTKit::VS_SNAP_DEV_GATEWAY, "Gateway"},
+            {VirgilIoTKit::VS_SNAP_DEV_THING, "Thing"},
+            {VirgilIoTKit::VS_SNAP_DEV_CONTROL, "Control"},
+            {VirgilIoTKit::VS_SNAP_DEV_LOGGER, "Logger"},
+            {VirgilIoTKit::VS_SNAP_DEV_SNIFFER, "Sniffer"},
+            {VirgilIoTKit::VS_SNAP_DEV_DEBUGGER, "Debugger"},
+            {VirgilIoTKit::VS_SNAP_DEV_INITIALIZER, "Initializer"}};
+    QString descr;
+
+    for (auto role : m_deviceRoles) {
+        descr += QString(", ") + rolesDescription[role];
+    }
+
+    descr.remove(0, 2); // Remove first ", "
+
+    return descr;
 }

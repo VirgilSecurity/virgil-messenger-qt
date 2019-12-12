@@ -51,17 +51,23 @@ VSQFileVersion::set(const VirgilIoTKit::vs_file_version_t &fileVersion) {
 
 VSQFileVersion &
 VSQFileVersion::set(const VirgilIoTKit::vs_file_version_unpacked_t &fileVersion) {
-    return set(reinterpret_cast<const VirgilIoTKit::vs_file_version_t &>(fileVersion));
+    m_major = fileVersion.major;
+    m_minor = fileVersion.minor;
+    m_patch = fileVersion.patch;
+    m_build = fileVersion.build;
+    m_timestamp = QDateTime::fromSecsSinceEpoch(fileVersion.timestamp, Qt::UTC, VS_START_EPOCH);
+
+    return *this;
 }
 
 QString
 VSQFileVersion::description() const {
-    return QString("%1.%2.%3.%4")
+    return QString("%1.%2.%3.%4, %5")
             .arg((int)m_major)
             .arg((int)m_minor)
             .arg((int)m_patch)
             .arg((int)m_build)
-            .arg(m_timestamp.toString(Qt::SystemLocaleShortDate));
+            .arg(m_timestamp.toString("hh:mm:ss"));
 }
 
 bool

@@ -1,8 +1,8 @@
 #ifndef __CONTROLLER_H__
 #define __CONTROLLER_H__
 
-#include "VSQInfoGeneralController.h"
-#include "VSQInfoGeneralModel.h"
+#include <VSQDeviceInfoController.h>
+#include <VSQDeviceInfoModel.h>
 
 
 // Qt headers
@@ -15,14 +15,20 @@ class VSQController : public QObject {
 
 public:
     explicit VSQController(QObject *parent = 0);
-    ~VSQController();
+    ~VSQController() = default;
     void
     setupUI();
 
+public slots:
+    void
+    onDeviceInfo(const VSQDeviceInfo &deviceInfo);
+
+    void
+    onNewDevice(const VSQDeviceInfo &deviceInfo);
 
 private:
-    QQuickView *m_pUIContext;
-    VSQInfoGeneralController *m_pVSInfoGeneralController;
+    QSharedPointer<QQuickView> m_context;
+    VSQDeviceInfoController *m_deviceInfoController;
 };
 
 #endif // __CONTROLLER_H__

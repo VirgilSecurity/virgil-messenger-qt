@@ -35,7 +35,8 @@
 #ifndef VSQIOTKITFACADE_H
 #define VSQIOTKITFACADE_H
 
-#include <QObject>
+#include <QtCore>
+#include <QtNetwork>
 #include <VSQSingleton.h>
 #include <virgil/iot/logger/logger.h>
 #include <virgil/iot/provision/provision-structs.h>
@@ -54,6 +55,10 @@ public:
     bool
     init(const VSQFeatures &features, const VSQImplementations &impl, const VSQAppConfig &appConfig);
 
+private slots:
+    void
+    onStateChangedForInfoClientPolling(QAbstractSocket::SocketState connectionState);
+
 private:
     VSQFeatures m_features;
     VSQImplementations m_impl;
@@ -65,6 +70,9 @@ private:
 
     void
     registerService(VSQSnapServiceBase &service);
+
+    void
+    startInfoClientsPolling();
 };
 
 #endif // VSQIOTKITFACADE_H

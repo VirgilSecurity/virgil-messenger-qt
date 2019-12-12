@@ -109,6 +109,9 @@ bool VSQNetifBase::processData(const QByteArray &data) {
     if( !m_lowLevelRxCall )
         return false;
 
+    if(!data.size() )
+        return false;
+
     const uint8_t *raw_data = reinterpret_cast<const uint8_t*>(data.data());
     const uint8_t *packet_data = nullptr;
     uint16_t packet_data_sz = 0;
@@ -155,6 +158,8 @@ bool VSQNetifBase::processData(const QByteArray &data) {
 /*static */ VirgilIoTKit::vs_status_e VSQNetifBase::macAddrCb(const struct VirgilIoTKit::vs_netif_t *netif, struct VirgilIoTKit::vs_mac_addr_t *mac_addr) {
     VSQNetifBase *instance = reinterpret_cast<VSQNetifBase*>(netif->user_data);
     QString macStr = instance->macAddr();
+    VSQMac macInternal = macStr;
+    *mac_addr = macInternal;
 
     return VirgilIoTKit::VS_CODE_OK;
 }

@@ -50,6 +50,7 @@ public:
     VSQNetifBase &operator=(VSQNetifBase const &) = delete;
 
     virtual ~VSQNetifBase() = default;
+    virtual QAbstractSocket::SocketState connectionState() const  = 0;
 
     VirgilIoTKit::vs_netif_t *netif()       { return &m_lowLevelNetif; }
     const VirgilIoTKit::vs_netif_t *netif() const      { return &m_lowLevelNetif; }
@@ -57,9 +58,6 @@ public:
     operator VirgilIoTKit::vs_netif_t *()   { return netif(); }
 
 signals:
-    // Do not use these signals directly from your implementation of network interface.
-    void fireReceivedBytes(const QByteArray &data);
-    void fireReceivedPacket(const QByteArray &packet);
     void fireStateChanged(QAbstractSocket::SocketState connectionState);
 
 protected:

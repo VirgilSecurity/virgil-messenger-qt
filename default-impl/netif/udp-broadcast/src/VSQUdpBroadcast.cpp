@@ -36,11 +36,11 @@
 #include <VSQUdpBroadcast.h>
 
 VSQUdpBroadcast::VSQUdpBroadcast(quint16 port) : m_port(port) {
+    connect(&m_socket, &QUdpSocket::stateChanged, static_cast<VSQNetifBase *>(this), &VSQNetifBase::fireStateChanged);
 }
 
 bool
 VSQUdpBroadcast::init() {
-    connect(&m_socket, &QUdpSocket::stateChanged, this, &VSQUdpBroadcast::fireConnectionStateChanged);
 
     if (!m_socket.bind(m_port, QUdpSocket::ReuseAddressHint)) {
         VSLogError(
@@ -62,8 +62,6 @@ VSQUdpBroadcast::deinit() {
 bool
 VSQUdpBroadcast::tx(const QByteArray &data) {
     auto dataSz = data.size();
-    Q_ASSERT(m_socket.state() == QAbstractSocket::ConnectedState && "Socket must be connected before this call");
-
     auto sentBytes = m_socket.writeDatagram(data, QHostAddress::Broadcast, m_port);
 
     if (sentBytes != dataSz) {
@@ -81,7 +79,18 @@ VSQUdpBroadcast::tx(const QByteArray &data) {
 
 QString
 VSQUdpBroadcast::macAddr() const {
-    return m_socket.multicastInterface().hardwareAddress();
+    // TODO : return real MAC address !
+
+    //    return m_socket.multicastInterface().hardwareAddress();
+
+    //            foreach (QNetworkInterface netInterface, QNetworkInterface::allInterfaces()) {
+    //            // Return only the first non-loopback MAC Address
+    //            if (!(netInterface.flags() & QNetworkInterface::IsLoopBack)) {
+    //                return netInterface.hardwareAddress();
+    //            }
+    //        }
+
+    return "01:23:45:67:89:AB";
 }
 
 void

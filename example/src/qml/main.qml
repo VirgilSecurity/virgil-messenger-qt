@@ -5,19 +5,19 @@ import QtQuick.Dialogs 1.0
 ApplicationWindow {
     id: applicationWindow
     visible: true
-    visibility: "FullScreen"
+    visibility: "Windowed"
 
     minimumWidth: 640
     minimumHeight: 480
 
     Row {
         id: labels
-        Label { text: "Manufacture ID"; width: applicationWindow.width / 6 }
-        Label { text: "Device type"; width: applicationWindow.width / 6  }
-        Label { text: "MAC address"; width: applicationWindow.width / 6  }
-        Label { text: "Device role"; width: applicationWindow.width / 6  }
-        Label { text: "Firmware version"; width: applicationWindow.width / 6  }
-        Label { text: "Trustlist version"; width: applicationWindow.width / 6  }
+        Label { text: "MAC address / Roles"; width: applicationWindow.width / 6 }
+        Label { text: "Device state"; width: applicationWindow.width / 6 }
+        Label { text: "Manufacture ID / Device Type"; width: applicationWindow.width / 6 }
+        Label { text: "Firmware / Trustlist version"; width: applicationWindow.width / 6 }
+        Label { text: "Sent / Received"; width: applicationWindow.width / 6 }
+        Label { text: "Last timestamp"; width: applicationWindow.width / 6 }
     }
 
     ListView {
@@ -26,14 +26,14 @@ ApplicationWindow {
 
         flickableDirection: Flickable.AutoFlickDirection
 
-        model: vsInfoGeneralController.vsInfoGeneralList
+        model: VSQDeviceInfoController.deviceInfoList
         delegate: Row {
-            Label { text: manufacture_id; width: applicationWindow.width / 6  }
-            Label { text: deviceType; width: applicationWindow.width / 6  }
-            Label { text: default_netif_mac; width: applicationWindow.width / 6  }
-            Label { text: device_roles; width: applicationWindow.width / 6  }
-            Label { text: fw_ver; width: applicationWindow.width / 6  }
-            Label { text: tl_ver; width: applicationWindow.width / 6  }
+            Label { text: macDeviceRoles; width: applicationWindow.width / 6 }
+            Label { text: deviceState; width: applicationWindow.width / 6 }
+            Label { text: manufactureIdDeviceType; width: applicationWindow.width / 6 }
+            Label { text: fwTlVer; width: applicationWindow.width / 6 }
+            Label { text: sentReceived; width: applicationWindow.width / 6 }
+            Label { text: lastTimestamp; width: applicationWindow.width / 6 }
         }
     }
 }

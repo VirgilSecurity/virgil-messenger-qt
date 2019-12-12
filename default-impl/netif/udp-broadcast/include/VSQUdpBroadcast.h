@@ -52,21 +52,23 @@ public:
 
     virtual ~VSQUdpBroadcast() = default;
 
+    QAbstractSocket::SocketState
+    connectionState() const override {
+        return m_socket.state();
+    }
+
 protected:
-    virtual bool
-    init();
+    bool
+    init() override;
 
-    virtual bool
-    deinit();
+    bool
+    deinit() override;
 
-    virtual bool
-    tx(const QByteArray &data);
+    bool
+    tx(const QByteArray &data) override;
 
-    virtual QString
-    macAddr() const;
-
-signals:
-    void fireConnectionStateChanged(QAbstractSocket::SocketState);
+    QString
+    macAddr() const override;
 
 private slots:
     void

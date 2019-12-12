@@ -57,7 +57,19 @@ VSQApp::run() {
         return -1;
     }
 
-    VSQController().setupUI();
+    VSQController controller;
+
+    controller.setupUI();
+
+    QObject::connect(&VSQSnapInfoClient::instance(),
+                     &VSQSnapInfoClient::fireNewDevice,
+                     &controller,
+                     &VSQController::onNewDevice);
+
+    QObject::connect(&VSQSnapInfoClient::instance(),
+                     &VSQSnapInfoClient::fireDeviceInfo,
+                     &controller,
+                     &VSQController::onDeviceInfo);
 
     return QGuiApplication::instance()->exec();
 }

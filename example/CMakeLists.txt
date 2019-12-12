@@ -51,15 +51,15 @@ target_sources(iotkit-qt-example
         # Headers
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQApp.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQController.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQInfoGeneralController.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQInfoGeneralModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQDeviceInfoController.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQDeviceInfoModel.h
 
         # Sources
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQApp.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQController.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQInfoGeneralController.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQInfoGeneralModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQDeviceInfoController.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQDeviceInfoModel.cpp
 
         # Resources
         ${CMAKE_CURRENT_LIST_DIR}/src/qml/resources.qrc

@@ -78,6 +78,7 @@ VSQSnapInfoClient::generalInfo(vs_info_general_t *generalData) {
     device.m_fwVer = generalData->fw_ver;
     device.m_tlVer = generalData->tl_ver;
 
+    device.m_isActive = true;
     device.m_hasGeneralInfo = true;
     device.m_lastTimestamp = QDateTime::currentDateTime();
 
@@ -93,6 +94,7 @@ VSQSnapInfoClient::statistics(vs_info_statistics_t *statistics) {
     device.m_sent = statistics->sent;
     device.m_received = statistics->received;
 
+    device.m_isActive = true;
     device.m_hasStatistics = true;
     device.m_lastTimestamp = QDateTime::currentDateTime();
 
@@ -102,13 +104,18 @@ VSQSnapInfoClient::statistics(vs_info_statistics_t *statistics) {
 }
 
 bool
-VSQSnapInfoClient::changePolling(size_t poolingElement,
+VSQSnapInfoClient::changePolling(std::initializer_list<EPolling> pollingOptions,
                                  uint16_t periodSeconds,
                                  bool enable,
                                  const VSQMac &deviceMac) const {
     vs_mac_addr_t mac = deviceMac;
+    size_t pollingElements = 0;
 
-    if (vs_snap_info_set_polling(netif(), &mac, poolingElement, enable, periodSeconds) != VS_CODE_OK) {
+    for (auto pollingOption : pollingOptions) {
+        pollingElements |= pollingOption;
+    }
+
+    if (vs_snap_info_set_polling(netif(), &mac, pollingElements, enable, periodSeconds) != VS_CODE_OK) {
         VSLogError("Unable to setup info polling");
         return false;
     }
