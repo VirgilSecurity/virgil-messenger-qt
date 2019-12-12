@@ -70,9 +70,6 @@ private:
 
     void
     registerService(VSQSnapServiceBase &service);
-
-    void
-    startInfoClientsPolling();
 };
 
 #endif // VSQIOTKITFACADE_H

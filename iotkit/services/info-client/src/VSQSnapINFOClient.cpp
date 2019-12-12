@@ -51,6 +51,12 @@ VSQSnapInfoClient::VSQSnapInfoClient() {
     m_snapInfoImpl.statistics = statistics;
 
     m_snapService = vs_snap_info_client(m_snapInfoImpl);
+
+    constexpr auto deadDevicesCheckMSec = 1000;
+    m_deviceAliveTimer = startTimer(deadDevicesCheckMSec, Qt::VeryCoarseTimer);
+    if (!m_deviceAliveTimer) {
+        VSLogWarning("Unable to start timer for alive device check for INFO Client");
+    }
 }
 
 /* static */ vs_status_e
@@ -65,6 +71,10 @@ VSQSnapInfoClient::startNotify(vs_snap_info_device_t *deviceRaw) {
     emit instance().fireNewDevice(device);
     emit instance().fireDeviceInfo(device);
 
+    if (!instance().startFullPolling(device.m_mac)) {
+        VSLogCritical("Unable to start polling for device ", device.m_mac);
+        return VS_CODE_ERR_POLLING_INFO_CLIENT;
+    }
     return VS_CODE_OK;
 }
 
@@ -105,9 +115,9 @@ VSQSnapInfoClient::statistics(vs_info_statistics_t *statistics) {
 
 bool
 VSQSnapInfoClient::changePolling(std::initializer_list<EPolling> pollingOptions,
-                                 uint16_t periodSeconds,
+                                 const VSQMac &deviceMac,
                                  bool enable,
-                                 const VSQMac &deviceMac) const {
+                                 uint16_t periodSeconds) const {
     vs_mac_addr_t mac = deviceMac;
     size_t pollingElements = 0;
 
@@ -140,4 +150,19 @@ VSQSnapInfoClient::getDevice(const VSQMac &mac) {
     }
 
     return *device;
+}
+
+void
+VSQSnapInfoClient::timerEvent(QTimerEvent *event) {
+    if (event->timerId() == m_deviceAliveTimer) {
+        auto currentTime = QDateTime::currentDateTime();
+
+        for (auto &device : m_devicesInfo) {
+            constexpr auto deadDelayMSec = 1500;
+            if (device.m_lastTimestamp.msecsTo(currentTime) > deadDelayMSec) {
+                device.m_isActive = false;
+                emit fireDeviceInfo(device);
+            }
+        }
+    }
 }

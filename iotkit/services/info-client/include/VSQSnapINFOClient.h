@@ -112,9 +112,15 @@ public:
 
     bool
     changePolling(std::initializer_list<EPolling> pollingOptions,
-                  uint16_t periodSeconds,
-                  bool enable,
-                  const VSQMac &deviceMac = broadcastMac) const;
+                  const VSQMac &deviceMac = broadcastMac,
+                  bool enable = true,
+                  uint16_t periodSeconds = 1) const;
+
+    bool
+    startFullPolling(const VSQMac &deviceMac = broadcastMac, uint16_t periodSeconds = 1) const {
+        return changePolling(
+                {VSQSnapInfoClient::GENERAL_INFO, VSQSnapInfoClient::STATISTICS}, deviceMac, true, periodSeconds);
+    }
 
 signals:
     void
@@ -127,8 +133,12 @@ private:
     const VirgilIoTKit::vs_snap_service_t *m_snapService;
     mutable VirgilIoTKit::vs_snap_info_client_service_t m_snapInfoImpl;
     TEnumDevicesArray m_devicesInfo;
+    int m_deviceAliveTimer = 0;
 
     VSQSnapInfoClient();
+
+    void
+    timerEvent(QTimerEvent *event) override;
 
     VSQDeviceInfo &
     getDevice(const VSQMac &mac);

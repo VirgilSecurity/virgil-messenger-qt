@@ -80,7 +80,7 @@ VSQIoTKitFacade::initSnap() {
         registerService(VSQSnapInfoClient::instance());
 
         if (m_impl.netif().connectionState() == QAbstractSocket::BoundState) {
-            startInfoClientsPolling();
+            VSQSnapInfoClient::instance().startFullPolling();
         }
 
         QObject::connect(&m_impl.netif(),
@@ -100,15 +100,6 @@ VSQIoTKitFacade::registerService(VSQSnapServiceBase &service) {
 void
 VSQIoTKitFacade::onStateChangedForInfoClientPolling(QAbstractSocket::SocketState connectionState) {
     if (connectionState == QAbstractSocket::BoundState) {
-        startInfoClientsPolling();
-    }
-}
-
-void
-VSQIoTKitFacade::startInfoClientsPolling() {
-    constexpr auto pollingDelaySec = 1;
-    if (!VSQSnapInfoClient::instance().changePolling(
-                {VSQSnapInfoClient::GENERAL_INFO, VSQSnapInfoClient::STATISTICS}, pollingDelaySec, true)) {
-        VSLogCritical("Unable to make broadcast polling request");
+        VSQSnapInfoClient::instance().startFullPolling();
     }
 }
