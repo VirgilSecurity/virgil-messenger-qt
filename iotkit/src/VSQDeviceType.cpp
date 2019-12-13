@@ -55,16 +55,16 @@ VSQDeviceType::operator const uint8_t *() const {
 }
 
 QString
-VSQDeviceType::description(bool stopOnZero, char symbolOnNonAscii) const {
+VSQDeviceType::description(bool stopOnZero, char nonPrintableSymbols) const {
     QString str;
 
     str.reserve(m_deviceType.size());
 
     for (auto symbol : m_deviceType) {
-        if (symbol >= ' ')
+        if (symbol >= 32 && symbol < 127)
             str += symbol;
         else if (symbol > 0 || !stopOnZero)
-            str += symbolOnNonAscii;
+            str += nonPrintableSymbols;
         else
             break;
     }

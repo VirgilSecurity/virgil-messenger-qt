@@ -71,14 +71,8 @@ public:
         return !equal(deviceType);
     }
 
-    VSQDeviceType &
-    set(const VSQDeviceType &deviceType);
-
-    VSQDeviceType &
-    set(const VirgilIoTKit::vs_device_type_t &buf);
-
     QString
-    description(bool stopOnZero = true, char symbolOnNonAscii = ' ') const;
+    description(bool stopOnZero = true, char nonPrintableSymbols = ' ') const;
 
     bool
     equal(const VSQDeviceType &deviceType) const {
@@ -93,6 +87,12 @@ public:
 
 private:
     QByteArray m_deviceType;
+
+    VSQDeviceType &
+    set(const VSQDeviceType &deviceType);
+
+    VSQDeviceType &
+    set(const VirgilIoTKit::vs_device_type_t &buf);
 };
 
 #endif // VIRGIL_IOTKIT_QT_DEVICE_TYPE_H

@@ -46,13 +46,16 @@
 #include <VSQSnapServiceBase.h>
 
 struct VSQDeviceInfo {
-    VSQDeviceInfo() : m_isActive(false), m_hasGeneralInfo(false), m_hasStatistics(false), m_sent(0), m_received(0) {
+    VSQDeviceInfo()
+        : m_pollingInterval(1), m_isActive(false), m_hasGeneralInfo(false), m_hasStatistics(false), m_sent(0),
+          m_received(0) {
     }
 
     VSQDeviceInfo(const VSQMac &mac) : VSQDeviceInfo() {
         m_mac = mac;
     }
 
+    quint16 m_pollingInterval;
     VSQMac m_mac;
     VSQDeviceRoles m_deviceRoles;
     VSQManufactureId m_manufactureId;
@@ -114,10 +117,10 @@ public:
     changePolling(std::initializer_list<EPolling> pollingOptions,
                   const VSQMac &deviceMac = broadcastMac,
                   bool enable = true,
-                  uint16_t periodSeconds = 1) const;
+                  quint16 periodSeconds = 1);
 
     bool
-    startFullPolling(const VSQMac &deviceMac = broadcastMac, uint16_t periodSeconds = 1) const {
+    startFullPolling(const VSQMac &deviceMac = broadcastMac, quint16 periodSeconds = 1) {
         return changePolling(
                 {VSQSnapInfoClient::GENERAL_INFO, VSQSnapInfoClient::STATISTICS}, deviceMac, true, periodSeconds);
     }

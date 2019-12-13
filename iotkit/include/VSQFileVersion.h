@@ -49,12 +49,6 @@ public:
         set(fileVersion);
     }
 
-    VSQFileVersion &
-    set(const VirgilIoTKit::vs_file_version_unpacked_t &fileVersion);
-
-    VSQFileVersion &
-    set(const VirgilIoTKit::vs_file_version_t &fileVersion);
-
     QString
     description() const;
 
@@ -90,6 +84,12 @@ private:
     quint8 m_patch;
     quint32 m_build;
     QDateTime m_timestamp;
+
+    VSQFileVersion &
+    set(const VirgilIoTKit::vs_file_version_unpacked_t &fileVersion);
+
+    VSQFileVersion &
+    set(const VirgilIoTKit::vs_file_version_t &fileVersion);
 };
 
 

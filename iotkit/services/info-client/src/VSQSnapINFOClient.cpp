@@ -59,7 +59,7 @@ VSQSnapInfoClient::VSQSnapInfoClient() {
     }
 }
 
-/* static */ vs_status_e
+vs_status_e
 VSQSnapInfoClient::startNotify(vs_snap_info_device_t *deviceRaw) {
     VSQDeviceInfo &device = instance().getDevice(deviceRaw->mac);
 
@@ -78,7 +78,7 @@ VSQSnapInfoClient::startNotify(vs_snap_info_device_t *deviceRaw) {
     return VS_CODE_OK;
 }
 
-/* static */ vs_status_e
+vs_status_e
 VSQSnapInfoClient::generalInfo(vs_info_general_t *generalData) {
     VSQDeviceInfo &device = instance().getDevice(generalData->default_netif_mac);
 
@@ -97,7 +97,7 @@ VSQSnapInfoClient::generalInfo(vs_info_general_t *generalData) {
     return VS_CODE_OK;
 }
 
-/* static */ vs_status_e
+vs_status_e
 VSQSnapInfoClient::statistics(vs_info_statistics_t *statistics) {
     VSQDeviceInfo &device = instance().getDevice(statistics->default_netif_mac);
 
@@ -117,7 +117,7 @@ bool
 VSQSnapInfoClient::changePolling(std::initializer_list<EPolling> pollingOptions,
                                  const VSQMac &deviceMac,
                                  bool enable,
-                                 uint16_t periodSeconds) const {
+                                 quint16 periodSeconds) {
     vs_mac_addr_t mac = deviceMac;
     uint32_t pollingElements = 0;
 
@@ -125,11 +125,16 @@ VSQSnapInfoClient::changePolling(std::initializer_list<EPolling> pollingOptions,
         pollingElements |= pollingOption;
     }
 
-    if (vs_snap_info_set_polling(netif(), &mac, pollingElements, enable, periodSeconds) != VS_CODE_OK) {
+    if (vs_snap_info_set_polling(nullptr, &mac, pollingElements, enable, periodSeconds) != VS_CODE_OK) {
         VS_LOG_ERROR("Unable to setup info polling");
         return false;
     }
 
+    for (auto &device : m_devicesInfo) {
+        if (deviceMac == broadcastMac || device.m_mac == deviceMac) {
+            device.m_pollingInterval = periodSeconds;
+        }
+    }
     return true;
 }
 
@@ -158,7 +163,11 @@ VSQSnapInfoClient::timerEvent(QTimerEvent *event) {
         auto currentTime = QDateTime::currentDateTime();
 
         for (auto &device : m_devicesInfo) {
-            constexpr auto deadDelayMSec = 5000;
+            constexpr auto deadDelayPollingIntervals = 3;
+            constexpr auto SecToMSec = 1000;
+
+            auto deadDelayMSec = device.m_pollingInterval * deadDelayPollingIntervals * SecToMSec;
+
             if (device.m_lastTimestamp.msecsTo(currentTime) > deadDelayMSec) {
                 device.m_isActive = false;
                 emit fireDeviceInfo(device);

@@ -52,8 +52,6 @@ public:
     virtual ~VSQNetifBase() = default;
     virtual QAbstractSocket::SocketState connectionState() const  = 0;
 
-    VirgilIoTKit::vs_netif_t *netif()       { return &m_lowLevelNetif; }
-
     operator VirgilIoTKit::vs_netif_t *()   { return &m_lowLevelNetif; }
 
 signals:
@@ -70,11 +68,6 @@ protected:
     bool processData(const QByteArray &data);
 
 private:
-//    friend struct VSQLowLevelNetif;
-
-//    // TODO: Try to give access to vs_netif_t only
-//    friend class VSQSnap;
-
     static VirgilIoTKit::vs_status_e initCb(struct VirgilIoTKit::vs_netif_t *netif,
                                             const VirgilIoTKit::vs_netif_rx_cb_t rx_cb,
                                             const VirgilIoTKit::vs_netif_process_cb_t process_cb);

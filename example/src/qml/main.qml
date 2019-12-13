@@ -32,7 +32,7 @@ ApplicationWindow {
             Label { text: deviceState; width: applicationWindow.width / 6 }
             Label { text: manufactureIdDeviceType; width: applicationWindow.width / 6 }
             Label { text: fwTlVer; width: applicationWindow.width / 6 }
-            Label { text: sentReceived; width: applicationWindow.width / 6 }
+            Label { text: statistics; width: applicationWindow.width / 6 }
             Label { text: lastTimestamp; width: applicationWindow.width / 6 }
         }
     }

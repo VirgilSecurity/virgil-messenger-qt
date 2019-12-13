@@ -11,7 +11,7 @@ class VSQDeviceInfoModel : public QObject {
     Q_PROPERTY(QString deviceState READ deviceState NOTIFY fireDeviceState)
     Q_PROPERTY(QString manufactureIdDeviceType READ manufactureIdDeviceType NOTIFY fireManufactureIdDeviceType)
     Q_PROPERTY(QString fwTlVer READ fwTlVer NOTIFY fireFwTlVer)
-    Q_PROPERTY(QString sentReceived READ sentReceived NOTIFY fireSentReceived)
+    Q_PROPERTY(QString statistics READ statistics NOTIFY fireStatistics)
     Q_PROPERTY(QString lastTimestamp READ lastTimestamp NOTIFY fireLastTimestamp)
 
 public:
@@ -43,7 +43,7 @@ public:
                                              : "---";
     }
     QString
-    sentReceived() const {
+    statistics() const {
         return m_deviceInfo.m_hasStatistics ? QString("%1\n%2").arg(m_deviceInfo.m_sent).arg(m_deviceInfo.m_received)
                                             : "---";
     }
@@ -66,7 +66,7 @@ signals:
     void
     fireFwTlVer();
     void
-    fireSentReceived();
+    fireStatistics();
     void
     fireLastTimestamp();
 

@@ -56,16 +56,16 @@ VSQManufactureId::operator const uint8_t *() const {
 
 
 QString
-VSQManufactureId::description(bool stopOnZero, char symbolOnNonAscii) const {
+VSQManufactureId::description(bool stopOnZero, char nonPrintableSymbols) const {
     QString str;
 
     str.reserve(m_manufactureId.size());
 
     for (auto symbol : m_manufactureId) {
-        if (symbol >= ' ')
+        if (symbol >= 32 && symbol < 127)
             str += symbol;
         else if (symbol > 0 || !stopOnZero)
-            str += symbolOnNonAscii;
+            str += nonPrintableSymbols;
         else
             break;
     }

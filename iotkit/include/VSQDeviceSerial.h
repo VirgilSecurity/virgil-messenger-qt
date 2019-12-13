@@ -66,12 +66,6 @@ public:
         return equal(deviceSerial);
     }
 
-    VSQDeviceSerial &
-    set(const VSQDeviceSerial &deviceSerial);
-
-    VSQDeviceSerial &
-    set(const VirgilIoTKit::vs_device_serial_t &buf);
-
     QString
     description() const;
 
@@ -88,6 +82,12 @@ public:
 
 private:
     QByteArray m_deviceSerial;
+
+    VSQDeviceSerial &
+    set(const VSQDeviceSerial &deviceSerial);
+
+    VSQDeviceSerial &
+    set(const VirgilIoTKit::vs_device_serial_t &buf);
 };
 
 #endif // VIRGIL_IOTKIT_QT_DEVICE_SERIAL_H

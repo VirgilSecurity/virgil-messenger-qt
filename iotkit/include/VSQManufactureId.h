@@ -36,7 +36,7 @@
 #define VIRGIL_IOTKIT_QT_MANUFACTURE_ID_H
 
 #include <QtCore>
-#include <virgil/iot/protocols/snap/snap-structs.h>
+#include <virgil/iot/protocols/snap.h>
 
 class VSQManufactureId {
 public:
@@ -71,14 +71,8 @@ public:
         return !equal(manufactureId);
     }
 
-    VSQManufactureId &
-    set(const VSQManufactureId &manufactureId);
-
-    VSQManufactureId &
-    set(const VirgilIoTKit::vs_device_manufacture_id_t &buf);
-
     QString
-    description(bool stopOnZero = true, char symbolOnNonAscii = ' ') const;
+    description(bool stopOnZero = true, char nonPrintableSymbols = ' ') const;
 
     bool
     equal(const VSQManufactureId &manufactureId) const {
@@ -93,6 +87,12 @@ public:
 
 private:
     QByteArray m_manufactureId;
+
+    VSQManufactureId &
+    set(const VSQManufactureId &manufactureId);
+
+    VSQManufactureId &
+    set(const VirgilIoTKit::vs_device_manufacture_id_t &buf);
 };
 
 #endif // VIRGIL_IOTKIT_QT_MANUFACTURE_ID_H

@@ -43,14 +43,9 @@ class VSQSnapServiceBase {
 public:
     virtual ~VSQSnapServiceBase() = default;
 
-    const VirgilIoTKit::vs_netif_t *netif() const { return m_netif ? m_netif->netif() : nullptr; }
-
     virtual const VirgilIoTKit::vs_snap_service_t *serviceInterface() = 0;
     virtual VSQFeatures::EFeature serviceFeature() const = 0;
     virtual const QString &serviceName() const = 0;
-
-private:
-    VSQNetifBase *m_netif = nullptr;
 };
 
 #endif // _VIRGIL_IOTKIT_QT_SNAP_SERVICE_H_

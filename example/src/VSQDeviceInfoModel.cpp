@@ -9,7 +9,7 @@ VSQDeviceInfoModel::change(const VSQDeviceInfo &deviceInfo) {
     emit fireMacDeviceRoles();
     emit fireManufactureIdDeviceType();
     emit fireFwTlVer();
-    emit fireSentReceived();
+    emit fireStatistics();
     emit fireLastTimestamp();
 }
 

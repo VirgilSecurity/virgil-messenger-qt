@@ -36,54 +36,6 @@
 #include <VSQNetifBase.h>
 
 using namespace VirgilIoTKit;
-/*
-extern "C" {
-    struct VSQLowLevelNetif {
-        static vs_status_e init(vs_netif_t* netif,
-                                      const vs_netif_rx_cb_t rxCb,
-                                      const vs_netif_process_cb_t processCb) {
-            Q_ASSERT(netif);
-            if (!netif) {
-                return VS_CODE_ERR_NULLPTR_ARGUMENT;
-            }
-            auto qNetif = reinterpret_cast<VSQNetifBase*>(netif);
-
-            // Save Callbacks
-            qNetif->m_lowLevelRxCall = rxCb;
-            qNetif->m_lowLevelPacketProcess = processCb;
-
-            // Initialize Network interface
-            return qNetif->init() ? VS_CODE_OK : VS_CODE_ERR_AMBIGUOUS_INIT_CALL;
-        }
-
-        static vs_status_e deinit(const vs_netif_t* netif) {
-            return VS_CODE_ERR_NOT_IMPLEMENTED;
-        }
-
-        static vs_status_e tx(const vs_netif_t* netif, const uint8_t* data, const uint16_t dataSz) {
-            return VS_CODE_ERR_NOT_IMPLEMENTED;
-        }
-
-        static vs_status_e mac(const vs_netif_t* netif, vs_mac_addr_t* macAddr) {
-            return VS_CODE_ERR_NOT_IMPLEMENTED;
-        }
-    };
-}
-
-VSQNetifBase::VSQNetifBase() {
-    // User data points to this object
-    m_lowLevelNetif.user_data = this;
-
-    // Prepare functionality implementations
-    m_lowLevelNetif.init = VSQLowLevelNetif::init;
-    m_lowLevelNetif.deinit = VSQLowLevelNetif::deinit;
-    m_lowLevelNetif.tx = VSQLowLevelNetif::tx;
-    m_lowLevelNetif.mac_addr = VSQLowLevelNetif::mac;
-
-    // Prepare buffer to receive data
-    m_lowLevelNetif.packet_buf_filled = 0;
-}
-*/
 
 VSQNetifBase::VSQNetifBase() {
     // User data points to this object
@@ -98,12 +50,6 @@ VSQNetifBase::VSQNetifBase() {
     // Prepare buffer to receive data
     m_lowLevelNetif.packet_buf_filled = 0;
 }
-
-/*
-VirgilIoTKit::vs_netif_t *VSQNetifBase::netif() {
-    return &m_lowLevelNetif;
-}
-*/
 
 bool VSQNetifBase::processData(const QByteArray &data) {
     if( !m_lowLevelRxCall )
@@ -130,7 +76,7 @@ bool VSQNetifBase::processData(const QByteArray &data) {
     return true;
 }
 
-/*static */ VirgilIoTKit::vs_status_e VSQNetifBase::initCb(struct VirgilIoTKit::vs_netif_t *netif,
+VirgilIoTKit::vs_status_e VSQNetifBase::initCb(struct VirgilIoTKit::vs_netif_t *netif,
                                                              const VirgilIoTKit::vs_netif_rx_cb_t rx_cb,
                                                              const VirgilIoTKit::vs_netif_process_cb_t process_cb) {
     VSQNetifBase *instance = reinterpret_cast<VSQNetifBase*>(netif->user_data);
@@ -141,13 +87,13 @@ bool VSQNetifBase::processData(const QByteArray &data) {
     return instance->init() ? VirgilIoTKit::VS_CODE_OK : VirgilIoTKit::VS_CODE_ERR_INIT_SNAP;
 }
 
-/*static */ VirgilIoTKit::vs_status_e VSQNetifBase::deinitCb(const struct VirgilIoTKit::vs_netif_t *netif) {
+VirgilIoTKit::vs_status_e VSQNetifBase::deinitCb(const struct VirgilIoTKit::vs_netif_t *netif) {
     VSQNetifBase *instance = reinterpret_cast<VSQNetifBase*>(netif->user_data);
 
     return instance->deinit() ? VirgilIoTKit::VS_CODE_OK : VirgilIoTKit::VS_CODE_ERR_DEINIT_SNAP;
 }
 
-/*static */ VirgilIoTKit::vs_status_e VSQNetifBase::txCb(const struct VirgilIoTKit::vs_netif_t *netif, const uint8_t *data_raw, const uint16_t data_sz) {
+VirgilIoTKit::vs_status_e VSQNetifBase::txCb(const struct VirgilIoTKit::vs_netif_t *netif, const uint8_t *data_raw, const uint16_t data_sz) {
     VSQNetifBase *instance = reinterpret_cast<VSQNetifBase*>(netif->user_data);
 
     return instance->tx(QByteArray(reinterpret_cast<const char*>(data_raw), data_sz )) ?
@@ -155,7 +101,7 @@ bool VSQNetifBase::processData(const QByteArray &data) {
 
 }
 
-/*static */ VirgilIoTKit::vs_status_e VSQNetifBase::macAddrCb(const struct VirgilIoTKit::vs_netif_t *netif, struct VirgilIoTKit::vs_mac_addr_t *mac_addr) {
+VirgilIoTKit::vs_status_e VSQNetifBase::macAddrCb(const struct VirgilIoTKit::vs_netif_t *netif, struct VirgilIoTKit::vs_mac_addr_t *mac_addr) {
     VSQNetifBase *instance = reinterpret_cast<VSQNetifBase*>(netif->user_data);
     QString macStr = instance->macAddr();
     VSQMac macInternal = macStr;

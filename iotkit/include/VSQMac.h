@@ -79,21 +79,6 @@ public:
         return !equal(mac);
     }
 
-    VSQMac &
-    set(const QString &mac);
-
-    VSQMac &
-    set(const VirgilIoTKit::vs_mac_addr_t &mac);
-
-    VSQMac &
-    set(const quint8 *bytes);
-
-    VSQMac &
-    set(quint8 b0, quint8 b1, quint8 b2, quint8 b3, quint8 b4, quint8 b5);
-
-    VSQMac &
-    set(const VSQMac &mac);
-
     QString
     description() const;
 
@@ -113,6 +98,21 @@ public:
 
 private:
     QByteArray m_mac;
+
+    VSQMac &
+    set(const QString &mac);
+
+    VSQMac &
+    set(const VirgilIoTKit::vs_mac_addr_t &mac);
+
+    VSQMac &
+    set(const quint8 *bytes);
+
+    VSQMac &
+    set(quint8 b0, quint8 b1, quint8 b2, quint8 b3, quint8 b4, quint8 b5);
+
+    VSQMac &
+    set(const VSQMac &mac);
 };
 
 inline const VSQMac broadcastMac(0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
