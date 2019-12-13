@@ -32,6 +32,7 @@
 #
 #   Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
 
 include(GNUInstallDirs)

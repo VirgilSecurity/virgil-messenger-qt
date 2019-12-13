@@ -33,6 +33,18 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 #include <VSQApp.h>
+#include <iostream>
+
+extern "C" bool
+vs_logger_output_hal(const char *buffer) {
+    std::cout << buffer;
+
+    return true;
+}
+
+extern "C" void
+vs_impl_msleep(size_t msec) {
+}
 
 int
 main(int argc, char *argv[]) {

@@ -43,7 +43,11 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt5 COMPONENTS Qml REQUIRED)
 find_package(Qt5 COMPONENTS Quick REQUIRED)
 
-add_executable(iotkit-qt-example)
+if(ANDROID)
+    add_library(iotkit-qt-example SHARED)
+else()
+    add_executable(iotkit-qt-example)
+endif()
 
 target_sources(iotkit-qt-example
         PRIVATE
@@ -87,6 +91,33 @@ target_link_libraries(iotkit-qt-example
 
 if(COMMAND add_clangformat)
     add_clangformat(iotkit-qt-example)
+endif()
+
+if(ANDROID)
+    message("ANDROID configuration")
+
+    #    set(ANDROID_SDK_ROOT $ANDROID_SDK)
+    #    set(CMAKE_ANDROID_ARCH_ABI armeabi-v7a)
+    #    set(CMAKE_ANDROID_STL_TYPE gnustl_shared)
+    #    set(CMAKE_CXX_COMPILER $NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/arm-linux-androideabi-g++)
+    #    set(CMAKE_C_COMPILER:STRING=$NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/arm-linux-androideabi-gcc)
+    #    set(CMAKE_PREFIX_PATH $QT_ROOT)
+    #    set(CMAKE_SYSTEM_NAME Android)
+    #    set(QT_QMAKE_EXECUTABLE $QT_ROOT/bin/qmake)
+
+
+    set(CMAKE_ANDROID_SDK "/Users/oleksandr/Android/SDK")
+    set(CMAKE_ANDROID_STL_TYPE "c++_shared")
+    set(ANDROID_SDK_ROOT ${CMAKE_ANDROID_SDK})
+    set(CMAKE_ANDROID_NDK "/Users/oleksandr/Android/SDK/ndk/20.1.5948944")
+    message("ANDROID_SDK_ROOT = ${ANDROID_SDK_ROOT}")
+    include(../ext/virgil-iotkit/cmake/android/qt-android-mk-apk.cmake)
+    qt_android_build_apk(
+            TARGET iotkit-qt-example
+            PACKAGE_NAME org.example.QmlCmakeDemo
+            QML_ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR}
+            ANDROID_EXTRA_FILES ${CMAKE_CURRENT_SOURCE_DIR}/android
+    )
 endif()
 
 
