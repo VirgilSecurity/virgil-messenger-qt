@@ -43,7 +43,6 @@
 #include <VSQFileVersion.h>
 #include <VSQImplementations.h>
 #include <VSQIoTKitFacade.h>
-#include <VSQLogger.h>
 #include <VSQMac.h>
 #include <VSQManufactureId.h>
 #include <VSQSingleton.h>

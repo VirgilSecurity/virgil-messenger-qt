@@ -57,7 +57,7 @@ public:
 
 private slots:
     void
-    onStateChangedForInfoClientPolling(QAbstractSocket::SocketState connectionState);
+    restartInfoClientPolling(QAbstractSocket::SocketState connectionState);
 
 private:
     VSQFeatures m_features;

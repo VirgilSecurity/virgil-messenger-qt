@@ -59,7 +59,6 @@ target_sources(iotkit-qt
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQImplementations.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQIoTKit.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQIoTKitFacade.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQLogger.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQMac.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQManufactureId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQSingleton.h

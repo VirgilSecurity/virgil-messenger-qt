@@ -43,7 +43,10 @@ public:
     VSQManufactureId() : m_manufactureId(VS_DEVICE_MANUFACTURE_ID_SIZE, 0) {
     }
 
-    VSQManufactureId(const VSQManufactureId &) = default;
+    VSQManufactureId(const VSQManufactureId &manufactureId) : VSQManufactureId() {
+        set(manufactureId);
+    }
+
     VSQManufactureId(const VirgilIoTKit::vs_device_manufacture_id_t &buf) {
         set(buf);
     }

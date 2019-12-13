@@ -43,7 +43,10 @@ public:
     VSQDeviceType() : m_deviceType(VS_DEVICE_TYPE_SIZE, 0) {
     }
 
-    VSQDeviceType(const VSQDeviceType &) = default;
+    VSQDeviceType(const VSQDeviceType &deviceType) : VSQDeviceType() {
+        set(deviceType);
+    }
+
     VSQDeviceType(const VirgilIoTKit::vs_device_type_t &buf) {
         set(buf);
     }

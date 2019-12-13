@@ -33,14 +33,13 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 #include <VSQMac.h>
-#include <VSQLogger.h>
 
 VSQMac &
 VSQMac::set(const QString &mac) {
     constexpr QChar divider(':');
 
     if (!mac.size() || !mac.contains(divider)) {
-        VSLogWarning("Empty MAC address has been returned");
+        VS_LOG_WARNING("Empty MAC address has been returned");
         // TODO : ???
         *this = VSQMac(10, 20, 30, 40, 50, 60);
 
@@ -98,12 +97,17 @@ VSQMac::description() const {
 
     str.reserve(m_mac.size() * 3 + 1);
 
+    bool firstSymbol = true;
     for (auto symbol : m_mac) {
-        constexpr QChar fillZero{'0'};
-        str += QString(":%1").arg((quint8)symbol, 2, 16, fillZero);
-    }
+        if (firstSymbol) {
+            firstSymbol = false;
+        } else {
+            str += QString(':');
+        }
 
-    str.remove(0, 1); // Remove first ':'
+        constexpr QChar fillZero{'0'};
+        str += QString("%1").arg((quint8)symbol, 2, 16, fillZero);
+    }
 
     return str;
 }

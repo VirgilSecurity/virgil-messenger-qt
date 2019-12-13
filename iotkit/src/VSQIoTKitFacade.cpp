@@ -58,7 +58,7 @@ VSQIoTKitFacade::init(const VSQFeatures &features, const VSQImplementations &imp
         return true;
 
     } catch (QString &descr) {
-        VSLogCritical("Error during Virgil IoT KIT initialization : ", descr.toStdString());
+        VS_LOG_CRITICAL("Error during Virgil IoT KIT initialization : %s", descr.toStdString().c_str());
         return false;
     }
 }
@@ -83,10 +83,8 @@ VSQIoTKitFacade::initSnap() {
             VSQSnapInfoClient::instance().startFullPolling();
         }
 
-        QObject::connect(&m_impl.netif(),
-                         &VSQNetifBase::fireStateChanged,
-                         this,
-                         &VSQIoTKitFacade::onStateChangedForInfoClientPolling);
+        QObject::connect(
+                &m_impl.netif(), &VSQNetifBase::fireStateChanged, this, &VSQIoTKitFacade::restartInfoClientPolling);
     }
 }
 
@@ -98,7 +96,7 @@ VSQIoTKitFacade::registerService(VSQSnapServiceBase &service) {
 }
 
 void
-VSQIoTKitFacade::onStateChangedForInfoClientPolling(QAbstractSocket::SocketState connectionState) {
+VSQIoTKitFacade::restartInfoClientPolling(QAbstractSocket::SocketState connectionState) {
     if (connectionState == QAbstractSocket::BoundState) {
         VSQSnapInfoClient::instance().startFullPolling();
     }

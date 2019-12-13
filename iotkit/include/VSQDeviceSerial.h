@@ -43,7 +43,10 @@ public:
     VSQDeviceSerial() : m_deviceSerial(VS_DEVICE_SERIAL_SIZE, 0) {
     }
 
-    VSQDeviceSerial(const VSQDeviceSerial &) = default;
+    VSQDeviceSerial(const VSQDeviceSerial &deviceSerial) : VSQDeviceSerial() {
+        set(deviceSerial);
+    }
+
     VSQDeviceSerial(const VirgilIoTKit::vs_device_serial_t &buf) {
         set(buf);
     }

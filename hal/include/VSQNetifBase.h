@@ -53,9 +53,8 @@ public:
     virtual QAbstractSocket::SocketState connectionState() const  = 0;
 
     VirgilIoTKit::vs_netif_t *netif()       { return &m_lowLevelNetif; }
-    const VirgilIoTKit::vs_netif_t *netif() const      { return &m_lowLevelNetif; }
 
-    operator VirgilIoTKit::vs_netif_t *()   { return netif(); }
+    operator VirgilIoTKit::vs_netif_t *()   { return &m_lowLevelNetif; }
 
 signals:
     void fireStateChanged(QAbstractSocket::SocketState connectionState);

@@ -39,9 +39,7 @@
 
 #include <VSQIoTKit.h>
 #include <VSQUdpBroadcast.h>
-
-VSQApp::VSQApp() {
-}
+#include <virgil/iot/logger/logger.h>
 
 int
 VSQApp::run() {
@@ -53,7 +51,7 @@ VSQApp::run() {
                                     << VirgilIoTKit::VS_LOGLEV_DEBUG << roles;
 
     if (!VSQIoTKitFacade::instance().init(features, impl, appConfig)) {
-        VSLogCritical("Unable to initialize Virgil IoT KIT");
+        VS_LOG_CRITICAL("Unable to initialize Virgil IoT KIT");
         return -1;
     }
 

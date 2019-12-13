@@ -74,11 +74,16 @@ VSQDeviceRoles::description() const {
             {VirgilIoTKit::VS_SNAP_DEV_INITIALIZER, "Initializer"}};
     QString descr;
 
+    bool firstSymbol = true;
     for (auto role : m_deviceRoles) {
-        descr += QString(", ") + rolesDescription[role];
-    }
+        if (firstSymbol) {
+            firstSymbol = false;
+        } else {
+            descr += QString(", ");
+        }
 
-    descr.remove(0, 2); // Remove first ", "
+        descr += rolesDescription[role];
+    }
 
     return descr;
 }

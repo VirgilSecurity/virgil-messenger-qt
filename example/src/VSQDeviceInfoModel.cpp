@@ -5,12 +5,12 @@ VSQDeviceInfoModel::change(const VSQDeviceInfo &deviceInfo) {
 
     m_deviceInfo = deviceInfo;
 
-    emit deviceStateChanged();
-    emit macDeviceRolesChanged();
-    emit manufactureIdDeviceTypeChanged();
-    emit fwTlVerChanged();
-    emit sentReceivedChanged();
-    emit lastTimestampChanged();
+    emit fireDeviceState();
+    emit fireMacDeviceRoles();
+    emit fireManufactureIdDeviceType();
+    emit fireFwTlVer();
+    emit fireSentReceived();
+    emit fireLastTimestamp();
 }
 
 QString

@@ -123,7 +123,7 @@ bool VSQNetifBase::processData(const QByteArray &data) {
         return true;
 
     if( m_lowLevelPacketProcess( &m_lowLevelNetif, packet_data, packet_data_sz ) != VirgilIoTKit::VS_CODE_OK ) {
-        VSLogError( "Unable to process received packet" );
+        VS_LOG_ERROR( "Unable to process received packet" );
         return false;
     }
 

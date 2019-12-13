@@ -7,12 +7,12 @@
 class VSQDeviceInfoModel : public QObject {
     Q_OBJECT
 
-    Q_PROPERTY(QString macDeviceRoles READ macDeviceRoles NOTIFY macDeviceRolesChanged)
-    Q_PROPERTY(QString deviceState READ deviceState NOTIFY deviceStateChanged)
-    Q_PROPERTY(QString manufactureIdDeviceType READ manufactureIdDeviceType NOTIFY manufactureIdDeviceTypeChanged)
-    Q_PROPERTY(QString fwTlVer READ fwTlVer NOTIFY fwTlVerChanged)
-    Q_PROPERTY(QString sentReceived READ sentReceived NOTIFY sentReceivedChanged)
-    Q_PROPERTY(QString lastTimestamp READ lastTimestamp NOTIFY lastTimestampChanged)
+    Q_PROPERTY(QString macDeviceRoles READ macDeviceRoles NOTIFY fireMacDeviceRoles)
+    Q_PROPERTY(QString deviceState READ deviceState NOTIFY fireDeviceState)
+    Q_PROPERTY(QString manufactureIdDeviceType READ manufactureIdDeviceType NOTIFY fireManufactureIdDeviceType)
+    Q_PROPERTY(QString fwTlVer READ fwTlVer NOTIFY fireFwTlVer)
+    Q_PROPERTY(QString sentReceived READ sentReceived NOTIFY fireSentReceived)
+    Q_PROPERTY(QString lastTimestamp READ lastTimestamp NOTIFY fireLastTimestamp)
 
 public:
     VSQDeviceInfoModel() {
@@ -58,17 +58,17 @@ public:
 signals:
 
     void
-    macDeviceRolesChanged();
+    fireMacDeviceRoles();
     void
-    deviceStateChanged();
+    fireDeviceState();
     void
-    manufactureIdDeviceTypeChanged();
+    fireManufactureIdDeviceType();
     void
-    fwTlVerChanged();
+    fireFwTlVer();
     void
-    sentReceivedChanged();
+    fireSentReceived();
     void
-    lastTimestampChanged();
+    fireLastTimestamp();
 
 private:
     VSQDeviceInfo m_deviceInfo;

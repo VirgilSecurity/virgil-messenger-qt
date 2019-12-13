@@ -43,8 +43,8 @@ bool
 VSQUdpBroadcast::init() {
 
     if (!m_socket.bind(m_port, QUdpSocket::ReuseAddressHint)) {
-        VSLogError(
-                "Unable to bind LocalHost:", m_port, ". Last error : ", m_socket.errorString().toStdString().c_str());
+        VS_LOG_ERROR(
+                "Unable to bind LocalHost:%d. Last error : %s", m_port, m_socket.errorString().toStdString().c_str());
         return false;
     }
 
@@ -65,12 +65,10 @@ VSQUdpBroadcast::tx(const QByteArray &data) {
     auto sentBytes = m_socket.writeDatagram(data, QHostAddress::Broadcast, m_port);
 
     if (sentBytes != dataSz) {
-        VSLogError("Sent bytes : ",
-                   sentBytes,
-                   ", data bytes to send : ",
-                   data.size(),
-                   ". Last error : ",
-                   m_socket.errorString().toStdString().c_str());
+        VS_LOG_ERROR("Sent bytes : %d, data bytes to send : %d. Last error : %s",
+                     sentBytes,
+                     data.size(),
+                     m_socket.errorString().toStdString().c_str());
         return false;
     }
 

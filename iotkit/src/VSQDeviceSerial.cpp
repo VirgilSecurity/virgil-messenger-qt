@@ -60,8 +60,15 @@ VSQDeviceSerial::description() const {
 
     str.reserve(m_deviceSerial.size() * 3 + 1);
 
+    bool firstSymbol = true;
     for (auto symbol : m_deviceSerial) {
-        str += QString(":%1").arg((int)symbol, 2, 16);
+        if (firstSymbol) {
+            firstSymbol = false;
+        } else {
+            str += QString(':');
+        }
+
+        str += QString("%1").arg((int)symbol, 2, 16);
     }
 
     str.remove(0, 1); // Remove first ':'
