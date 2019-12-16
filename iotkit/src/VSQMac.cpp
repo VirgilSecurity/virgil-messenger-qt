@@ -40,7 +40,8 @@ VSQMac::set(const QString &mac) {
 
     if (!mac.size() || !mac.contains(divider)) {
         VS_LOG_WARNING("Empty MAC address has been returned");
-        // TODO : ???
+
+        // TODO : process empty MAC address
         *this = VSQMac(10, 20, 30, 40, 50, 60);
 
     } else {

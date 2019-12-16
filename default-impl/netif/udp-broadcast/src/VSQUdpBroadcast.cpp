@@ -48,6 +48,20 @@ VSQUdpBroadcast::init() {
         return false;
     }
 
+    // TODO : set own MAC address
+    for (auto &interface : QNetworkInterface::allInterfaces()) {
+        if (interface.flags() & QNetworkInterface::IsLoopBack) {
+            continue;
+        }
+
+        QString address = interface.hardwareAddress();
+        if (address.isEmpty()) {
+            continue;
+        }
+
+        m_mac = address;
+    }
+
     connect(&m_socket, &QUdpSocket::readyRead, this, &VSQUdpBroadcast::onHasInputData);
 
     return true;
@@ -77,18 +91,8 @@ VSQUdpBroadcast::tx(const QByteArray &data) {
 
 QString
 VSQUdpBroadcast::macAddr() const {
-    // TODO : return real MAC address !
 
-    //    return m_socket.multicastInterface().hardwareAddress();
-
-    //            foreach (QNetworkInterface netInterface, QNetworkInterface::allInterfaces()) {
-    //            // Return only the first non-loopback MAC Address
-    //            if (!(netInterface.flags() & QNetworkInterface::IsLoopBack)) {
-    //                return netInterface.hardwareAddress();
-    //            }
-    //        }
-
-    return "01:23:45:67:89:AB";
+    return m_mac;
 }
 
 void
