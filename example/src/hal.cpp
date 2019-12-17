@@ -32,42 +32,17 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <VSQDeviceType.h>
+#include <VSQApp.h>
+#include <iostream>
 
-VSQDeviceType &
-VSQDeviceType::set(const VSQDeviceType &deviceType) {
-    m_deviceType = deviceType.m_deviceType;
-    return *this;
+extern "C" bool
+vs_logger_output_hal(const char *buffer) {
+    std::cout << buffer;
+
+    return true;
 }
 
-VSQDeviceType &
-VSQDeviceType::set(const VirgilIoTKit::vs_device_type_t &buf) {
-    qCopy(buf, buf + sizeof(VirgilIoTKit::vs_device_type_t), m_deviceType.begin());
-    return *this;
-}
-
-VSQDeviceType::operator const char *() const {
-    return m_deviceType.data();
-}
-
-VSQDeviceType::operator const uint8_t *() const {
-    return reinterpret_cast<const uint8_t *>(m_deviceType.data());
-}
-
-QString
-VSQDeviceType::description(bool stopOnZero, char nonPrintableSymbols) const {
-    QString str;
-
-    str.reserve(m_deviceType.size());
-
-    for (auto symbol : m_deviceType) {
-        if (symbol >= 32 && symbol < 127)
-            str += symbol;
-        else if (symbol > 0 || !stopOnZero)
-            str += nonPrintableSymbols;
-        else
-            break;
-    }
-
-    return str;
+extern "C" void
+vs_impl_msleep(size_t msec) {
+    (void)msec;
 }

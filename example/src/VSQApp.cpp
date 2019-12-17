@@ -37,8 +37,8 @@
 #include <VSQApp.h>
 #include <VSQController.h>
 
-#include <VSQIoTKit.h>
-#include <VSQUdpBroadcast.h>
+#include <virgil/iot/qt-helpers/VSQIoTKit.h>
+#include <virgil/iot/qt-udp-broadcast/VSQUdpBroadcast.h>
 #include <virgil/iot/logger/logger.h>
 
 int

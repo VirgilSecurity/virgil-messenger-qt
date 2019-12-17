@@ -1,7 +1,7 @@
 #ifndef _DEMO_IOTKIT_QT_INFO_GENERAL_MODEL_H
 #define _DEMO_IOTKIT_QT_INFO_GENERAL_MODEL_H
 
-#include <VSQSnapINFOClient.h>
+#include <virgil/iot/protocols/qt-snap/info-client/VSQSnapINFOClient.h>
 #include <QObject>
 
 class VSQDeviceInfoModel : public QObject {
@@ -27,7 +27,9 @@ public:
     }
     QString
     macDeviceRoles() const {
-        return QString("%1\n%2\n").arg(QString(m_deviceInfo.m_mac)).arg(QString(m_deviceInfo.m_deviceRoles));
+        return QString("%1\n%2\n")
+                .arg(QString(m_deviceInfo.m_mac.description()))
+                .arg(QString(m_deviceInfo.m_deviceRoles));
     }
     QString
     deviceState() const;

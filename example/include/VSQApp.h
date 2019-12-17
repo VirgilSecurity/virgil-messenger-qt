@@ -37,7 +37,7 @@
 
 #include <QtCore>
 #include <QGuiApplication>
-#include <VSQIoTKit.h>
+#include <virgil/iot/qt-helpers/VSQIoTKit.h>
 
 class VSQApp {
 public:

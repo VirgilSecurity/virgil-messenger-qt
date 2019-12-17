@@ -43,7 +43,7 @@ include(GNUInstallDirs)
 
 project(virgil-iotkit-qt VERSION 0.1.0 LANGUAGES CXX C)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # TODO: Remove it
@@ -119,23 +119,6 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/ext/virgil-iotkit)
 # ---------------------------------------------------------------------------
 #   IoTKit Qt
 # ---------------------------------------------------------------------------
-
-#
-#   Hardware Abstraction Layer
-#
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/hal)
-
-#
-#   Default implementations
-#
-if (VIRGIL_IOTKIT_QT_DEFAULT_IMPL)
-    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/default-impl)
-endif()
-
-#
-#   Modules
-#
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/iotkit)
 
 #
 #   Example

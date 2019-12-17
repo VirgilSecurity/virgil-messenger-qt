@@ -45,7 +45,7 @@ find_package(Qt5 COMPONENTS Quick REQUIRED)
 
 if(ANDROID)
     include(../ext/virgil-iotkit/cmake/android/qt-android-mk-apk.cmake)
-    
+
     add_library(iotkit-qt-example SHARED)
 else()
     add_executable(iotkit-qt-example)
@@ -61,8 +61,9 @@ target_sources(iotkit-qt-example
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQDeviceInfoModel.h
 
         # Sources
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQApp.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/hal.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQApp.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQDeviceInfoController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQDeviceInfoModel.cpp
@@ -81,9 +82,7 @@ target_link_libraries(iotkit-qt-example
         PRIVATE
 
         iotkit-qt-netif-udp-broadcast
-        iotkit-qt-hal-global-impl
         iotkit-qt
-        iotkit-qt-hal
         iotkit-qt-info-client
 
         Qt5::Widgets
