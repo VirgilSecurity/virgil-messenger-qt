@@ -48,7 +48,8 @@ VSQUdpBroadcast::init() {
         return false;
     }
 
-    // TODO : set own MAC address
+    /*
+    // TODO : set current network interface m_socket MAC address
     for (auto &interface : QNetworkInterface::allInterfaces()) {
         if (interface.flags() & QNetworkInterface::IsLoopBack) {
             continue;
@@ -61,7 +62,7 @@ VSQUdpBroadcast::init() {
 
         m_mac = address;
     }
-
+*/
     connect(&m_socket, &QUdpSocket::readyRead, this, &VSQUdpBroadcast::onHasInputData);
 
     return true;
@@ -92,7 +93,8 @@ VSQUdpBroadcast::tx(const QByteArray &data) {
 QString
 VSQUdpBroadcast::macAddr() const {
 
-    return m_mac;
+    return "01:23:45:67:89:AB";
+    //    return m_mac;
 }
 
 void
