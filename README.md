@@ -23,12 +23,16 @@ by using `androiddeployqt` tool provided by Qt library. To use it you need to in
 `deploy_android.sh` script builds, deploys and starts demo application on Android device. There are several constants that are described
 in this script.
 
-Connect your Android device and follow steps listed below :
+First of all you need to clone demo application from Github :
+
 ```bash
 git clone --recurse-submodules -b feature/android-avn https://github.com/VirgilSecurity/demo-iotkit-qt
 cd demo-iotkit-qt
-./deploy_android.sh
 ```
+
+By the next step fix variables inside `deploy_android.sh`.
+
+After this tep connect your Android device and start this script.
 
 ## License
 

@@ -13,7 +13,7 @@ VSQController::VSQController(QObject *parent) : QObject(parent) {
 void
 VSQController::setupUI() {
     m_context = decltype(m_context)::create();
-    m_context->setTitle(QString("demo-iotkit-qt - ") + QString(VERSION));
+    m_context->setTitle("Virgil IoTKIT Demo");
 
     QQmlContext *rootContext = m_context->rootContext();
     rootContext->setContextProperty("application", this);
