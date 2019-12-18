@@ -43,7 +43,7 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt5 COMPONENTS Qml REQUIRED)
 find_package(Qt5 COMPONENTS Quick REQUIRED)
 
-if(ANDROID)
+if(ANDROID_QT)
     include(../ext/virgil-iotkit/cmake/android/qt-android-mk-apk.cmake)
 
     add_library(iotkit-qt-example SHARED)
@@ -94,11 +94,10 @@ if(COMMAND add_clangformat)
     add_clangformat(iotkit-qt-example)
 endif()
 
-if(ANDROID)
-    message("ANDROID configuration")
+if(ANDROID_QT)
+    message(STATUS "ANDROID Qt configuration")
     qt_android_build_apk(
             TARGET iotkit-qt-example
-            PACKAGE_NAME org.IoTKitExample.VirgilSecurity
             QML_ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR}
             ANDROID_EXTRA_FILES ${CMAKE_CURRENT_SOURCE_DIR}/android
     )
