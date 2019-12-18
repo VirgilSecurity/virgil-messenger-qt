@@ -23,6 +23,13 @@ by using `androiddeployqt` tool provided by Qt library. To use it you need to in
 `deploy_android.sh` script builds, deploys and starts demo application on Android device. There are several constants that are described
 in this script.
 
+Connect your Android device and follow steps listed below :
+```bash
+git clone --recurse-submodules -b feature/android-avn https://github.com/VirgilSecurity/demo-iotkit-qt
+cd demo-iotkit-qt
+./deploy_android.sh
+```
+
 ## License
 
 This demo and Virgil IoTKIT is released under the [3-clause BSD License](LICENSE).

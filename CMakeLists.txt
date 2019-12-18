@@ -46,19 +46,13 @@ project(virgil-iotkit-qt VERSION 0.1.0 LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# TODO: Remove it
-add_definitions(-DVERSION="0.1.0A1")
-
-
 # ---------------------------------------------------------------------------
 #   Qt
 # ---------------------------------------------------------------------------
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt5 COMPONENTS Core REQUIRED)
-find_package(Qt5 COMPONENTS Network REQUIRED)
-
+find_package(Qt5 COMPONENTS Quick REQUIRED)
 
 # ---------------------------------------------------------------------------
 #   Helper modules
