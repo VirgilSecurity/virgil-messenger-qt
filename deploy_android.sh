@@ -43,6 +43,9 @@ CMAKE_SYSTEM_NAME=ANDROID
 # Application description
 APP_DESCRIPTION="Demo"
 
+# Cores amount
+CORES=4
+
 CMAKE_ARGS=" -DANDROID_QT=ON"
 CMAKE_ARGS+=" -DANDROID_ABI=${ANDROID_ABI}"
 CMAKE_ARGS+=" -DANDROID_NDK=${ANDROID_NDK}"
@@ -88,7 +91,7 @@ echo ==  Build target ${TARGET} and its deployment ${TARGET}-apk-install
 echo ==
 echo
 
-cmake --build ${MAKE_DIR} --target ${TARGET}-apk-install -- -j 4
+cmake --build ${MAKE_DIR} --target ${TARGET}-apk-install -- -j ${CORES}
 
 echo
 echo ==
