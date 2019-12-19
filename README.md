@@ -12,7 +12,7 @@ Demo for Virgil IoTKIT is the Virgil IoTKIT usage example based on C++ and Qt/QM
 To compile Demo for Virgil IoTKIT the following components are required:
 - C99 for Virgil IoTKIT.
 - C++14 for this demo.
-- CMake v3.11 or higher, for project building
+- CMake v3.11 or higher for project building
 - GCC or another toolchain for C/C++ compile
 - Qt for QML usage.
 
@@ -32,7 +32,7 @@ cd demo-iotkit-qt
 
 By the next step fix variables inside `deploy_android.sh`.
 
-After this tep connect your Android device and start this script.
+After this step connect your Android device and start this script.
 
 ## License
 
