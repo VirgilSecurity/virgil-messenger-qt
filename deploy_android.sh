@@ -8,8 +8,8 @@ TARGET=iotkit-qt-example
 # Build type - Release, Debug
 BUILD_TYPE=Debug
 
-# Make directory
-MAKE_DIR=${BUILD_TYPE}/shell.Android
+# Make directory. It must be one-level directory, i. e. Debug.Android
+MAKE_DIR=${BUILD_TYPE}.shell.Android
 
 # Path to the directory with Android SDK
 ANDROID_SDK=${USER_DIR}/Android/SDK
@@ -79,7 +79,8 @@ echo
 
 rm -rf ${MAKE_DIR}
 mkdir -p ${MAKE_DIR}
-cmake -B ${MAKE_DIR} ${CMAKE_ARGS} .
+cd ${MAKE_DIR}
+cmake .. ${CMAKE_ARGS}
 
 echo
 echo ==
@@ -87,7 +88,7 @@ echo ==  Build target ${TARGET} and its deployment ${TARGET}-apk-install
 echo ==
 echo
 
-cmake --build ${MAKE_DIR} --target ${TARGET}-apk-install -- -j ${CORES}
+make ${TARGET}-apk-install -j ${CORES}
 
 echo
 echo ==
