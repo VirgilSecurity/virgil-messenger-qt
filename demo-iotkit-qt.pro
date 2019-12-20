@@ -1,7 +1,6 @@
 QT += core network qml quick
 
 CONFIG += c++14
-CONFIG += debug
 
 TARGET = iotkit-qt-example
 #
@@ -19,24 +18,7 @@ HEADERS += \
         example/include/VSQApp.h \
         example/include/VSQController.h \
         example/include/VSQDeviceInfoController.h \
-        example/include/VSQDeviceInfoModel.h \
-        \
-        ext/virgil-iotkit/default-impl/qt-udp-broadcast/include/virgil/iot/qt-udp-broadcast/VSQUdpBroadcast.h \
-        ext/virgil-iotkit/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQAppConfig.h \
-        ext/virgil-iotkit/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQDeviceRoles.h \
-        ext/virgil-iotkit/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQDeviceSerial.h \
-        ext/virgil-iotkit/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQDeviceType.h \
-        ext/virgil-iotkit/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQFeatures.h \
-        ext/virgil-iotkit/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQFileVersion.h \
-        ext/virgil-iotkit/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQImplementations.h \
-        ext/virgil-iotkit/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQIoTKit.h \
-        ext/virgil-iotkit/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQIoTKitFacade.h \
-        ext/virgil-iotkit/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQMac.h \
-        ext/virgil-iotkit/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQManufactureId.h \
-        ext/virgil-iotkit/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQSingleton.h \
-        ext/virgil-iotkit/modules/protocols/qt-snap/include/virgil/iot/protocols/qt-snap/VSQNetifBase.h \
-        ext/virgil-iotkit/modules/protocols/qt-snap/include/virgil/iot/protocols/qt-snap/VSQSnapServiceBase.h \
-        ext/virgil-iotkit/modules/protocols/qt-snap/services/info-client/include/virgil/iot/protocols/qt-snap/info-client/VSQSnapINFOClient.h
+        example/include/VSQDeviceInfoModel.h
 
 #
 #   Sources
@@ -48,18 +30,7 @@ SOURCES += \
         example/src/VSQApp.cpp \
         example/src/VSQController.cpp \
         example/src/VSQDeviceInfoController.cpp \
-        example/src/VSQDeviceInfoModel.cpp \
-        \
-        ext/virgil-iotkit/default-impl/qt-udp-broadcast/src/VSQUdpBroadcast.cpp \
-        ext/virgil-iotkit/helpers/iotkit-qt/src/VSQDeviceRoles.cpp \
-        ext/virgil-iotkit/helpers/iotkit-qt/src/VSQDeviceSerial.cpp \
-        ext/virgil-iotkit/helpers/iotkit-qt/src/VSQDeviceType.cpp \
-        ext/virgil-iotkit/helpers/iotkit-qt/src/VSQFileVersion.cpp \
-        ext/virgil-iotkit/helpers/iotkit-qt/src/VSQIoTKitFacade.cpp \
-        ext/virgil-iotkit/helpers/iotkit-qt/src/VSQMac.cpp \
-        ext/virgil-iotkit/helpers/iotkit-qt/src/VSQManufactureId.cpp \
-        ext/virgil-iotkit/modules/protocols/qt-snap/src/VSQNetifBase.cpp \
-        ext/virgil-iotkit/modules/protocols/qt-snap/services/info-client/src/VSQSnapINFOClient.cpp
+        example/src/VSQDeviceInfoModel.cpp
 
 #
 #   Resources
@@ -67,17 +38,11 @@ SOURCES += \
 
 RESOURCES += example/src/qml/resources.qrc
 
-# Additional import path used to resolve QML modules in Qt Creator's code model
-QML_IMPORT_PATH = example/src/qml
+#
+#   Include path
+#
 
-# Additional import path used to resolve QML modules just for Qt Quick Designer
-QML_DESIGNER_IMPORT_PATH = example/src/qml
-
-CONFIG(debug) {
-    BUILD_DIR = $$PWD/debug
-} else {
-    BUILD_DIR = $$PWD/release
-}
+INCLUDEPATH +=  example/include
 
 #
 #   Default rules for deployment
@@ -86,61 +51,122 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
+########################
 #
-#   IoTKit Base path
+#   IoTKit
 #
-
-IOTKIT_BASE_PATH = ext/virgil-iotkit
-message("IOTKIT_BASE_PATH = $${IOTKIT_BASE_PATH}")
-#
-#   IoTKit build directory
-#
-
-unix:mac: IOTKIT_BUILD_DIR_PATH = $${BUILD_DIR}/CLion.Desktop/$${IOTKIT_BASE_PATH}
-#else:win32: IOTKIT_BUILD_DIR_PATH = $${BUILD_DIR}/iotkit/win32
-#else:unix:iphonesimulator: IOTKIT_BUILD_DIR_PATH = $${BUILD_DIR}/iotkit/ios-simulator
-#else:unix:iphone: IOTKIT_BUILD_DIR_PATH = $${BUILD_DIR}/iotkit/ios
-else:unix:android: IOTKIT_BUILD_DIR_PATH = $${BUILD_DIR}/Shell.Android/$${IOTKIT_BASE_PATH}
-#else:unix:linux:!android: IOTKIT_BUILD_DIR_PATH = $${BUILD_DIR}/iotkit/linux
-message("IOTKIT_BUILD_DIR_PATH = $${IOTKIT_BUILD_DIR_PATH}")
+########################
 
 #
-#   External libraries
+#   Project relative path
 #
 
-LIBS += -L$${IOTKIT_BUILD_DIR_PATH}/modules/logger/ -lvs-module-logger \
-        -L$${IOTKIT_BUILD_DIR_PATH}/modules/provision/ -lvs-module-provision \
-        -L$${IOTKIT_BUILD_DIR_PATH}/modules/protocols/snap -lvs-module-snap-control
+VIRGIL_IOTKIT_SOURCE_PATH = $${PWD}/ext/virgil-iotkit
+VIRGIL_IOTKIT_BUILD_PATH_BASE = $${VIRGIL_IOTKIT_SOURCE_PATH}
+
+CONFIG(debug, debug|release) {
+    VIRGIL_IOTKIT_BUILD_PATH_BASE = $${VIRGIL_IOTKIT_SOURCE_PATH}/debug
+}
+CONFIG(release, debug|release) {
+    VIRGIL_IOTKIT_BUILD_PATH_BASE = $${VIRGIL_IOTKIT_SOURCE_PATH}/release
+}
+
+unix:mac:      VIRGIL_IOTKIT_BUILD_PATH = $${VIRGIL_IOTKIT_BUILD_PATH_BASE}.mac
+linux:android: VIRGIL_IOTKIT_BUILD_PATH = $${VIRGIL_IOTKIT_BUILD_PATH_BASE}.android
+
+message("Virgil IoTKIT libraries : $${VIRGIL_IOTKIT_BUILD_PATH}")
+
+#
+#   Headers
+#
+
+HEADERS += \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/default-impl/qt-udp-broadcast/include/virgil/iot/qt-udp-broadcast/VSQUdpBroadcast.h \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQAppConfig.h \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQDeviceRoles.h \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQDeviceSerial.h \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQDeviceType.h \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQFeatures.h \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQFileVersion.h \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQImplementations.h \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQIoTKit.h \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQIoTKitFacade.h \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQMac.h \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQManufactureId.h \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/iotkit-qt/include/virgil/iot/qt-helpers/VSQSingleton.h \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/modules/protocols/qt-snap/include/virgil/iot/protocols/qt-snap/VSQNetifBase.h \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/modules/protocols/qt-snap/include/virgil/iot/protocols/qt-snap/VSQSnapServiceBase.h \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/modules/protocols/qt-snap/services/info-client/include/virgil/iot/protocols/qt-snap/info-client/VSQSnapINFOClient.h
+
+#
+#   Sources
+#
+
+SOURCES += \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/default-impl/qt-udp-broadcast/src/VSQUdpBroadcast.cpp \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/iotkit-qt/src/VSQDeviceRoles.cpp \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/iotkit-qt/src/VSQDeviceSerial.cpp \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/iotkit-qt/src/VSQDeviceType.cpp \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/iotkit-qt/src/VSQFileVersion.cpp \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/iotkit-qt/src/VSQIoTKitFacade.cpp \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/iotkit-qt/src/VSQMac.cpp \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/iotkit-qt/src/VSQManufactureId.cpp \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/modules/protocols/qt-snap/src/VSQNetifBase.cpp \
+        $${VIRGIL_IOTKIT_SOURCE_PATH}/modules/protocols/qt-snap/services/info-client/src/VSQSnapINFOClient.cpp
+
+#
+#   Libraries
+#
+
+defineReplace(add_virgiliotkit_library) {
+    LIBRARY_PATH = $$1
+    LIBRARY_NAME = $$2
+    !exists($${VIRGIL_IOTKIT_BUILD_PATH}/$${LIBRARY_PATH}/*$${LIBRARY_NAME}.*): error("Library $${LIBRARY_NAME} has not been found in $${VIRGIL_IOTKIT_BUILD_PATH}/$${LIBRARY_PATH}. Rebuild VirgilIoTKIT library")
+    return ("-L$${VIRGIL_IOTKIT_BUILD_PATH}/$${LIBRARY_PATH} -l$${LIBRARY_NAME}")
+}
+
+LIBS += $$add_virgiliotkit_library("modules/logger",         "vs-module-logger")
+LIBS += $$add_virgiliotkit_library("modules/provision",      "vs-module-provision")
+LIBS += $$add_virgiliotkit_library("modules/protocols/snap", "vs-module-snap-control")
 
 #
 #   Include path
 #
 
-INCLUDEPATH +=  $${PWD}/example/include \
-                $${IOTKIT_BASE_PATH}/default-impl/qt-udp-broadcast/include \
-                $${IOTKIT_BASE_PATH}/helpers/iotkit-qt/include \
-                $${IOTKIT_BASE_PATH}/modules/protocols/qt-snap/include \
-                $${IOTKIT_BASE_PATH}/modules/protocols/qt-snap/services/info-client/include \
+INCLUDEPATH +=  $${VIRGIL_IOTKIT_SOURCE_PATH}/default-impl/qt-udp-broadcast/include \
+                $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/iotkit-qt/include \
+                $${VIRGIL_IOTKIT_SOURCE_PATH}/modules/protocols/qt-snap/include \
+                $${VIRGIL_IOTKIT_SOURCE_PATH}/modules/protocols/qt-snap/services/info-client/include \
                 \
-                $${IOTKIT_BASE_PATH}/modules/logger/include \
-                $${IOTKIT_BASE_PATH}/modules/provision/include \
-                $${IOTKIT_BASE_PATH}/modules/provision/trust_list/include \
-                $${IOTKIT_BASE_PATH}/modules/protocols/snap/include \
-                $${IOTKIT_BASE_PATH}/modules/crypto/secmodule/include \
-                $${IOTKIT_BASE_PATH}/helpers/status_code/include \
-                $${IOTKIT_BASE_PATH}/helpers/macros/include \
-                $${IOTKIT_BASE_PATH}/helpers/storage_hal/include \
-                $${IOTKIT_BASE_PATH}/helpers/update/include \
-                $${IOTKIT_BASE_PATH}/config/pc
+                $${VIRGIL_IOTKIT_SOURCE_PATH}/modules/logger/include \
+                $${VIRGIL_IOTKIT_SOURCE_PATH}/modules/provision/include \
+                $${VIRGIL_IOTKIT_SOURCE_PATH}/modules/provision/trust_list/include \
+                $${VIRGIL_IOTKIT_SOURCE_PATH}/modules/protocols/snap/include \
+                $${VIRGIL_IOTKIT_SOURCE_PATH}/modules/crypto/secmodule/include \
+                $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/status_code/include \
+                $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/macros/include \
+                $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/storage_hal/include \
+                $${VIRGIL_IOTKIT_SOURCE_PATH}/helpers/update/include \
+                $${VIRGIL_IOTKIT_SOURCE_PATH}/config/pc
+
+#
+#   Depencies
+#
 
 DEPENDPATH += $${INCLUDEPATH}
+
+#
+#   CMake arguments
+#
+
+VIRGIL_IOTKIT_CMAKE_ARGS += "-DVIRGIL_IOT_CONFIG_DIRECTORY=$${VIRGIL_IOTKIT_ABSOLUTE_PATH}/config/pc"
 
 #
 #   Dependencies
 #
 
-#unix: LIB_EXT = a
-#PRE_TARGETDEPS += $${IOTKIT_BUILD_DIR_PATH}/modules/logger/libvs-module-logger.$${LIB_EXT} \
-#                  $${IOTKIT_BUILD_DIR_PATH}/modules/provision/libvs-module-provision.$${LIB_EXT} \
-#                  $${IOTKIT_BUILD_DIR_PATH}/modules/protocols/snap/libvs-module-snap-control.$${LIB_EXT}
+unix: LIB_EXT = a
+PRE_TARGETDEPS += $${VIRGIL_IOTKIT_BUILD_PATH}/modules/logger/libvs-module-logger.$${LIB_EXT} \
+                  $${VIRGIL_IOTKIT_BUILD_PATH}/modules/provision/libvs-module-provision.$${LIB_EXT} \
+                  $${VIRGIL_IOTKIT_BUILD_PATH}/modules/protocols/snap/libvs-module-snap-control.$${LIB_EXT}
 

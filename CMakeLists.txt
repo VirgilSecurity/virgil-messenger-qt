@@ -79,6 +79,11 @@ file(APPEND "${CMAKE_CURRENT_LIST_DIR}/VERSION" "\n")
 # ---------------------------------------------------------------------------
 
 #
+#   Use Qt Implementation
+#
+set(VIRGIL_IOT_QT ON CACHE BOOL "Use Qt implementation")
+
+#
 #   Config path
 #
 set(VIRGIL_IOT_CONFIG_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/ext/virgil-iotkit/config/pc CACHE STRING "Path to the PC configuration")

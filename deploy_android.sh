@@ -11,12 +11,6 @@ BUILD_TYPE=Debug
 # Make directory. It must be one-level directory, i. e. Debug.Android
 MAKE_DIR=${BUILD_TYPE}.shell.Android
 
-# Path to the directory with Android SDK
-ANDROID_SDK=${USER_DIR}/Android/SDK
-
-# Path to the directory with Android NDK
-ANDROID_NDK=${ANDROID_SDK}/ndk/20.1.5948944
-
 # Toolchain C and C++ compilers
 ANDROID_C_COMPILER=${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang
 ANDROID_CXX_COMPILER=${ANDROID_C_COMPILER}++
@@ -44,6 +38,7 @@ CMAKE_SYSTEM_NAME=ANDROID
 CORES=4
 
 CMAKE_ARGS=" -DANDROID_QT=ON"
+CMAKE_ARGS+=" -DVIRGIL_IOT_QT=ON"
 CMAKE_ARGS+=" -DANDROID_ABI=${ANDROID_ABI}"
 CMAKE_ARGS+=" -DANDROID_NDK=${ANDROID_NDK}"
 CMAKE_ARGS+=" -DANDROID_SDK=${ANDROID_SDK}"

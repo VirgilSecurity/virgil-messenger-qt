@@ -42,4 +42,4 @@ format_list.txt
 
 ####
 # QtCreator
-CMakeLists.txt.user
+*.user
