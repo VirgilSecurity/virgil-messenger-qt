@@ -7,6 +7,7 @@
 
 // Qt headers
 #include <QObject>
+#include <QQmlApplicationEngine>
 
 class QQuickView;
 
@@ -27,7 +28,7 @@ public slots:
     onNewDevice(const VSQDeviceInfo &deviceInfo);
 
 private:
-    QSharedPointer<QQuickView> m_context;
+    QSharedPointer<QQmlApplicationEngine> m_qmlEngine;
     VSQDeviceInfoController *m_deviceInfoController;
 };
 

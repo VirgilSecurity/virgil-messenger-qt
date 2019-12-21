@@ -6,28 +6,19 @@
 #include <QStringList>
 #include <QQuickView>
 
-VSQController::VSQController(QObject *parent) : QObject(parent) {
+VSQController::VSQController(QObject *parent) : QObject(parent),
+    m_qmlEngine(new QQmlApplicationEngine(this)) {
     m_deviceInfoController = new VSQDeviceInfoController();
 }
 
 void
 VSQController::setupUI() {
-    m_context = decltype(m_context)::create();
-    m_context->setTitle("Virgil IoTKIT Demo");
-
-    QQmlContext *rootContext = m_context->rootContext();
-    rootContext->setContextProperty("application", this);
-    rootContext->setContextProperty("VSQDeviceInfoController", QVariant::fromValue(m_deviceInfoController));
-
     qmlRegisterType<VSQDeviceInfoModel>("demo-iotkit-qt", 1, 0, "VSQDeviceInfoModel");
 
-    QFont f = qApp->font();
-    f.setPixelSize(12);
-    qApp->setFont(f);
-    m_context->setResizeMode(QQuickView::SizeRootObjectToView);
-    m_context->setSource(QUrl("qrc:/main.qml"));
-
-    m_context->show();
+    QQmlContext *rootContext = m_qmlEngine->rootContext();
+    rootContext->setContextProperty("application", this);
+    rootContext->setContextProperty("VSQDeviceInfoController", QVariant::fromValue(m_deviceInfoController));
+    m_qmlEngine->load(QUrl(QStringLiteral("qrc:/main.qml")));
 }
 
 void
