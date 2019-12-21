@@ -1,7 +1,7 @@
 #ifndef _DEMO_IOTKIT_QT_INFO_GENERAL_MODEL_H
 #define _DEMO_IOTKIT_QT_INFO_GENERAL_MODEL_H
 
-#include <virgil/iot/protocols/qt-snap/info-client/VSQSnapINFOClient.h>
+#include <virgil/iot/qt/protocols/snap/VSQSnapINFOClient.h>
 #include <QObject>
 
 class VSQDeviceInfoModel : public QObject {
