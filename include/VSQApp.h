@@ -41,10 +41,6 @@
 
 class VSQApp {
 public:
-    VSQApp() = default;
-
-    ~VSQApp() = default;
-
     int
     run();
 };
