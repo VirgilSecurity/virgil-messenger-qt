@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_C_QT_DEMO_VSQAPP_H
-#define VIRGIL_IOTKIT_C_QT_DEMO_VSQAPP_H
+#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
+#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
 
 #include <QtCore>
 #include <QGuiApplication>
