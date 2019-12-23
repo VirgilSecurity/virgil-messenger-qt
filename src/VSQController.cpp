@@ -41,7 +41,7 @@
 #include <QQuickView>
 
 VSQController::VSQController(QObject *parent) : QObject(parent),
-    m_qmlEngine(new QQmlApplicationEngine(this)) {
+    m_qmlEngine(QSharedPointer<QQmlApplicationEngine>::create(this)) {
     m_deviceInfoController = new VSQDeviceInfoController();
 }
 
