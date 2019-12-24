@@ -9,30 +9,26 @@
 Demo for Virgil IoTKIT is the Virgil IoTKIT usage example based on C++ and Qt/QML library.
 
 ## Prerequisites
-To compile Demo for Virgil IoTKIT the following components are required:
+To compile Demo for Virgil IoTKIT Qt  the following components are required:
 - C99 for Virgil IoTKIT.
 - C++14 for this demo.
-- CMake v3.11 or higher for project building
+- CMake v3.11 or higher for Virgil IoTKIT building
 - GCC or another toolchain for C/C++ compile
-- Qt for QML usage.
+- QtCreator for demo building
+- Android SDK, Android NDK for Android build. Be sure that `ANDROID_SDK` and `ANDROID_NDK` environment variables with correct paths
+are setup.
 
-Virgil IoTKIT provides `cmake/android/qt-android-mk-apk.cmake` CMake file. It allows you to deploy application for Android
-by using `androiddeployqt` tool provided by Qt library. To use it you need to install Android SDK, NDK and Qt with Android components.
-
-## Android Build
-`deploy_android.sh` script builds, deploys and starts demo application on Android device. There are several constants that are described
-in this script.
-
-First of all you need to clone demo application from Github :
-
+## Usage
+- Clone Demo IoTKIT for QT repository:
 ```bash
-git clone --recurse-submodules -b feature/android-avn https://github.com/VirgilSecurity/demo-iotkit-qt
-cd demo-iotkit-qt
+git clone --recurse-submodules https://github.com/VirgilSecurity/demo-iotkit-qt
 ```
+- Build needed platform. Use ext/virgil-iotkit/scripts/build-for-qt.sh script for this goal. You can run it without parameters
+to see supported platforms and options. For example: `build-for-qt.sh linux`, `build-for-qt.sh android armeabi-v7a` etc.
+- Open demo-iotkit-qt.pro project in QtCreator.
 
-By the next step fix variables inside `deploy_android.sh`.
-
-After this step connect your Android device and start this script.
+This application show active Virgil IoT devices. You can clone [demo-iotkit-nix](https://github.com/VirgilSecurity/demo-iotkit-nix/)
+project and start some of them to test this software. To see them start those devices and your application in the same local network.
 
 ## License
 
