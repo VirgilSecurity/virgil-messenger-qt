@@ -33,9 +33,9 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 #include <QtCore>
+#include <QtQml>
 
 #include <VSQApplication.h>
-#include <VSQController.h>
 
 #include <virgil/iot/qt/VSQIoTKit.h>
 #include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
@@ -43,6 +43,8 @@
 
 int
 VSQApplication::run() {
+
+    QQmlApplicationEngine engine;
 
     auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT;
     auto impl = VSQImplementations() << QSharedPointer<VSQUdpBroadcast>::create();
@@ -55,19 +57,12 @@ VSQApplication::run() {
         return -1;
     }
 
-    VSQController controller;
+    QQmlContext *ctxt = engine.rootContext();
+    ctxt->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
 
-    controller.setupUI();
-
-    QObject::connect(&VSQSnapInfoClient::instance(),
-                     &VSQSnapInfoClient::fireNewDevice,
-                     &controller,
-                     &VSQController::onNewDevice);
-
-    QObject::connect(&VSQSnapInfoClient::instance(),
-                     &VSQSnapInfoClient::fireDeviceInfo,
-                     &controller,
-                     &VSQController::onDeviceInfo);
+    const QUrl url(QStringLiteral("qrc:/qml/main.qml"));
+    engine.load(url);
 
     return QGuiApplication::instance()->exec();
 }
+

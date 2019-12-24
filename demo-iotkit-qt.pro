@@ -56,10 +56,7 @@ DEFINES += QT_DEPRECATED_WARNINGS \
 #
 
 HEADERS += \
-        include/VSQApp.h \
-        include/VSQController.h \
-        include/VSQDeviceInfoController.h \
-        include/VSQDeviceInfoModel.h
+        include/VSQApp.h
 
 #
 #   Sources
@@ -68,10 +65,7 @@ HEADERS += \
 SOURCES += \
         src/hal.cpp \
         src/main.cpp \
-        src/VSQApp.cpp \
-        src/VSQController.cpp \
-        src/VSQDeviceInfoController.cpp \
-        src/VSQDeviceInfoModel.cpp
+        src/VSQApplication.cpp
 
 #
 #   Resources
