@@ -32,11 +32,11 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <VSQApp.h>
+#include <VSQApplication.h>
 
 int
 main(int argc, char *argv[]) {
     QGuiApplication a(argc, argv);
 
-    return VSQApp().run();
+    return VSQApplication().run();
 }

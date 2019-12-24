@@ -32,42 +32,17 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
+#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
+
 #include <QtCore>
-
-#include <VSQApp.h>
-#include <VSQController.h>
-
+#include <QGuiApplication>
 #include <virgil/iot/qt/VSQIoTKit.h>
-#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
-#include <virgil/iot/logger/logger.h>
 
-int
-VSQApp::run() {
+class VSQApplication {
+public:
+    int
+    run();
+};
 
-    auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT;
-    auto impl = VSQImplementations() << QSharedPointer<VSQUdpBroadcast>::create();
-    auto roles = VSQDeviceRoles() << VirgilIoTKit::VS_SNAP_DEV_CONTROL;
-    auto appConfig = VSQAppConfig() << VSQManufactureId() << VSQDeviceType() << VSQDeviceSerial()
-                                    << VirgilIoTKit::VS_LOGLEV_DEBUG << roles;
-
-    if (!VSQIoTKitFacade::instance().init(features, impl, appConfig)) {
-        VS_LOG_CRITICAL("Unable to initialize Virgil IoT KIT");
-        return -1;
-    }
-
-    VSQController controller;
-
-    controller.setupUI();
-
-    QObject::connect(&VSQSnapInfoClient::instance(),
-                     &VSQSnapInfoClient::fireNewDevice,
-                     &controller,
-                     &VSQController::onNewDevice);
-
-    QObject::connect(&VSQSnapInfoClient::instance(),
-                     &VSQSnapInfoClient::fireDeviceInfo,
-                     &controller,
-                     &VSQController::onDeviceInfo);
-
-    return QGuiApplication::instance()->exec();
-}
+#endif // VSQApplication
