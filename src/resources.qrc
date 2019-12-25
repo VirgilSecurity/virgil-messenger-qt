@@ -1,5 +1,9 @@
 <RCC>
     <qresource prefix="/">
         <file>qml/main.qml</file>
+        <file>qml/DevicesList.qml</file>
+        <file>qml/DevicesListButton.qml</file>
+        <file>qml/Sniffer.qml</file>
+        <file>qml/SnifferButton.qml</file>
     </qresource>
 </RCC>

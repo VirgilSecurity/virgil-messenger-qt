@@ -36,45 +36,46 @@
 import QtQuick 2.5
 import QtQuick.Controls 2.12
 import QtQuick.Window 2.2
-import QtQuick.Layouts 1.5
+import QtQuick.Layouts 1.1
 
-ApplicationWindow {
-    id: applicationWindow
-    visible: true
-//    visibility: Window.Maximized
-    title: "IoTKit Qt Demo"
-    background: Rectangle {
-        color: "#404040"
-    }
-
-    signal changeSide()
-
-    DevicesList {
-    id: devicesList
-    visibility:true
-    }
-
-    Sniffer {
+    ListView {
     id: sniffer
-    visibility:false
+    property alias visibility : sniffer.visible
+
+        anchors.margins: 5
+        anchors.fill: parent
+        spacing: 5
+        model: SnapInfoClient
+//        delegate: Text { text: MacAddress + ", " + DeviceRoles }
+        delegate: Item
+        {
+            id: listDelegate
+
+            property var view: ListView.view
+            property var isCurrent: ListView.isCurrentItem
+
+            width: view.width
+            height: 40
+
+            Rectangle {
+                anchors.margins: 5
+                anchors.fill: parent
+                radius: height / 2
+                border {
+                    color: "gray"
+                    width: 1
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    renderType: Text.NativeRendering
+                    text: "--- 1 2 ---"
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: view.currentIndex = model.index
+                }
+            }
+        }
     }
-
-  footer: RowLayout {
-      DevicesListButton {
-        id: devicesListButton
-          onClicked: {
-            devicesList.visibility = true
-            sniffer.visibility = false
-          }
-      }
-
-      SnifferButton {
-        id: snifferButton
-          onClicked: {
-            devicesList.visibility = false
-            sniffer.visibility = true
-          }
-      }
-
-  }
-}

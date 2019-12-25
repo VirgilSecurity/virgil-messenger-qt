@@ -56,7 +56,7 @@ DEFINES += QT_DEPRECATED_WARNINGS \
 #
 
 HEADERS += \
-        include/VSQApp.h
+        include/VSQApplication.h
 
 #
 #   Sources

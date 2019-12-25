@@ -43,7 +43,6 @@
 
 int
 VSQApplication::run() {
-
     QQmlApplicationEngine engine;
 
     auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT;
