@@ -41,6 +41,9 @@ import QtQuick.Layouts 1.1
 ListView {
     id: devicesList
     property alias visibility : devicesList.visible
+    property int margin: 5
+    property int listItemHeight: 60
+    property string evenGradientColor: "#20FFFFFF"
 
     anchors.fill: parent
     model: SnapInfoClient
@@ -48,19 +51,19 @@ ListView {
     {
         id: listDelegate
 
-        property int marging: 5
         property var view: ListView.view
 
         width: view.width
-        height: 80
+        height: listItemHeight
 
         Rectangle {
             width: parent.width
             height: parent.height
             gradient: Gradient {
                 orientation: Gradient.Horizontal
-                GradientStop{ position: 0; color: index % 2 ? "#606060" : "#404040" }
-                GradientStop{ position: 1; color: "#404040" }
+                GradientStop{ position: 0; color: index % 2 ? evenGradientColor : "#00000000" }
+                GradientStop{ position: 0.5; color: index % 2 ? evenGradientColor : "#00000000" }
+                GradientStop{ position: 1; color: "#00000000" }
             }
 
         }
@@ -69,10 +72,10 @@ ListView {
             id: roleItem
             Layout.rowSpan: 2
             color: "#004000"
-            x: marging
-            y: marging
-            width: parent.height - 2 * marging
-            height: parent.height - 2 * marging
+            x: margin
+            y: margin
+            width: parent.height - 2 * margin
+            height: parent.height - 2 * margin
 
             Text {
                 color: "white"
@@ -88,7 +91,7 @@ ListView {
             color: "yellow"
             horizontalAlignment: Text.AlignLeft
             verticalAlignment: Text.AlignVCenter
-            x: parent.height + 2 * marging
+            x: parent.height + 2 * margin
             y: 0
             width: parent.height
             height: parent.height / 3
@@ -99,7 +102,7 @@ ListView {
             color: "white"
             horizontalAlignment: Text.AlignLeft
             verticalAlignment: Text.AlignVCenter
-            x: parent.height + 2 * marging
+            x: parent.height + 2 * margin
             y: parent.height / 3
             width: parent.height
             height: parent.height / 3
@@ -110,7 +113,7 @@ ListView {
             color: "white"
             horizontalAlignment: Text.AlignLeft
             verticalAlignment: Text.AlignVCenter
-            x: parent.height + 2 * marging
+            x: parent.height + 2 * margin
             y: parent.height * 2 / 3
             width: parent.height
             height: parent.height / 3

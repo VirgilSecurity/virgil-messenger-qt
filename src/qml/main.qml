@@ -39,42 +39,59 @@ import QtQuick.Window 2.2
 import QtQuick.Layouts 1.5
 
 ApplicationWindow {
+    property int footerHeight: 60
+    property int listItemHeight: 80
+    property int margin: 5
+
     id: applicationWindow
     visible: true
-//    visibility: Window.Maximized
     title: "IoTKit Qt Demo"
     background: Rectangle {
-        color: "#404040"
+        color: "#303030"
     }
 
     signal changeSide()
 
     DevicesList {
-    id: devicesList
-    visibility:true
+        id: devicesList
+        visibility: true
+        margin: margin
+        listItemHeight: listItemHeight
     }
 
     Sniffer {
-    id: sniffer
-    visibility:false
+        id: sniffer
+        visibility: false
     }
 
-  footer: RowLayout {
-      DevicesListButton {
-        id: devicesListButton
-          onClicked: {
-            devicesList.visibility = true
-            sniffer.visibility = false
-          }
-      }
+    footer: Rectangle {
+        width: parent.width
+        height: footerHeight
+        color: "black"
 
-      SnifferButton {
-        id: snifferButton
-          onClicked: {
-            devicesList.visibility = false
-            sniffer.visibility = true
-          }
-      }
+        DevicesListButton {
+            id: devicesListButton
+            side: footerHeight - 2 * margin
+            y: margin
+            onClicked: {
+                devicesList.visibility = true
+                sniffer.visibility = false
+            }
+        }
 
-  }
+        SnifferButton {
+            id: snifferButton
+            side: footerHeight - 2 * margin
+            y: margin
+            onClicked: {
+                devicesList.visibility = false
+                sniffer.visibility = true
+            }
+        }
+    }
+
+    onWidthChanged: {
+        devicesListButton.x = ( width / 2 - devicesListButton.side ) / 2;
+        snifferButton.x = ( width * 3 / 2 - snifferButton.side ) / 2;
+    }
 }
