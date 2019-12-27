@@ -47,12 +47,11 @@ ApplicationWindow {
     property int margin: 5
 
     property bool bothChildren: true
-    property bool snifferSelected: true
+    property bool snifferSelected: false
     property int devicesListX
     property int devicesListWidth
     property int snifferX
     property int snifferWidth
-
 
     function recalculateChildren() {
         devicesListButton.x = ( width / 2 - devicesListButton.side ) / 2;
