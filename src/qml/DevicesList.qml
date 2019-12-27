@@ -41,23 +41,32 @@ import QtQuick.Layouts 1.1
 ListView {
     id: devicesList
     property alias visibility : devicesList.visible
+    property string backgroundColor: "#303030"
+    property int curX
+    property int curWidth
     property int margin: 5
     property int listItemHeight: 60
     property string evenGradientColor: "#20FFFFFF"
 
     anchors.fill: parent
     model: SnapInfoClient
+
     delegate: Item
     {
         id: listDelegate
-
-        property var view: ListView.view
-
-        width: view.width
         height: listItemHeight
 
         Rectangle {
-            width: parent.width
+            y: 0
+            x: curX
+            width: curWidth
+            height: parent.height
+            color: backgroundColor
+        }
+
+        Rectangle {
+            x: curX
+            width: curWidth
             height: parent.height
             gradient: Gradient {
                 orientation: Gradient.Horizontal
@@ -72,7 +81,7 @@ ListView {
             id: roleItem
             Layout.rowSpan: 2
             color: "#004000"
-            x: margin
+            x: curX + margin
             y: margin
             width: parent.height - 2 * margin
             height: parent.height - 2 * margin
@@ -91,9 +100,9 @@ ListView {
             color: "yellow"
             horizontalAlignment: Text.AlignLeft
             verticalAlignment: Text.AlignVCenter
-            x: parent.height + 2 * margin
+            x: curX + parent.height + 2 * margin
             y: 0
-            width: parent.height
+            width: curWidth
             height: parent.height / 3
             text: isActive ? "active" : "not active"
         }
@@ -102,9 +111,9 @@ ListView {
             color: "white"
             horizontalAlignment: Text.AlignLeft
             verticalAlignment: Text.AlignVCenter
-            x: parent.height + 2 * margin
+            x: curX + parent.height + 2 * margin
             y: parent.height / 3
-            width: parent.height
+            width: curWidth
             height: parent.height / 3
             text: macAddress
         }
@@ -113,9 +122,9 @@ ListView {
             color: "white"
             horizontalAlignment: Text.AlignLeft
             verticalAlignment: Text.AlignVCenter
-            x: parent.height + 2 * margin
+            x: curX + parent.height + 2 * margin
             y: parent.height * 2 / 3
-            width: parent.height
+            width: curWidth
             height: parent.height / 3
             text: "fw " + fwVer + ", tl " + tlVer
         }

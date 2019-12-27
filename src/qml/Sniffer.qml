@@ -38,44 +38,65 @@ import QtQuick.Controls 2.12
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.1
 
-    ListView {
+ListView {
     id: sniffer
     property alias visibility : sniffer.visible
+    property int curX
+    property int curWidth
+    property int margin: 5
+    property int listItemHeight: 60
+    property string backgroundColor: "#202020"
 
-        anchors.margins: 5
-        anchors.fill: parent
-        spacing: 5
-        model: SnapInfoClient
-//        delegate: Text { text: MacAddress + ", " + DeviceRoles }
-        delegate: Item
-        {
-            id: listDelegate
+    anchors.fill: parent
+    model: SnapSniffer
 
-            property var view: ListView.view
-            property var isCurrent: ListView.isCurrentItem
+    delegate: Item
+    {
+        id: listDelegate
+        height: packetContent.y + packetContent.height + 2 * margin
 
-            width: view.width
-            height: 40
+        Rectangle {
+            y: 0
+            x: curX
+            width: curWidth
+            height: parent.height
+            color: backgroundColor
+        }
 
-            Rectangle {
-                anchors.margins: 5
-                anchors.fill: parent
-                radius: height / 2
-                border {
-                    color: "gray"
-                    width: 1
-                }
+        Text {
+            id: packetEthernetInfo
+            wrapMode: Text.Wrap
+            color: "yellow"
+            horizontalAlignment: Text.AlignLeft
+            verticalAlignment: Text.AlignVCenter
+            x: margin
+            y: margin
+            width: curWidth - margin
+            text: timestamp + " : " + macSrc + " ==> " + macDst
+        }
 
-                Text {
-                    anchors.centerIn: parent
-                    renderType: Text.NativeRendering
-                    text: "--- 1 2 ---"
-                }
+        Text {
+            id: packetSnapInfo
+            wrapMode: Text.Wrap
+            color: "lightBlue"
+            horizontalAlignment: Text.AlignLeft
+            verticalAlignment: Text.AlignVCenter
+            x: margin
+            y: packetEthernetInfo.y + packetEthernetInfo.height
+            width: curWidth - margin
+            text: serviceId + " : " + elementId
+        }
 
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: view.currentIndex = model.index
-                }
-            }
+        Text {
+            id: packetContent
+            wrapMode: Text.Wrap
+            color: "white"
+            horizontalAlignment: Text.AlignLeft
+            verticalAlignment: Text.AlignVCenter
+            x: margin
+            y: packetSnapInfo.y + packetSnapInfo.height
+            width: curWidth - margin
+            text: content
         }
     }
+}

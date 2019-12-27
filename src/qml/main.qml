@@ -41,7 +41,42 @@ import QtQuick.Layouts 1.5
 ApplicationWindow {
     property int footerHeight: 60
     property int listItemHeight: 80
+    property bool snifferOnLeft : true
+    property real snifferWidthRatio : 0.5
+    property real widthHeightToShowBoth : 1.5
     property int margin: 5
+
+    property bool bothChildren: true
+    property bool snifferSelected: true
+    property int devicesListX
+    property int devicesListWidth
+    property int snifferX
+    property int snifferWidth
+
+
+    function recalculateChildren() {
+        devicesListButton.x = ( width / 2 - devicesListButton.side ) / 2;
+        snifferButton.x = ( width * 3 / 2 - snifferButton.side ) / 2;
+
+        bothChildren = width > height * widthHeightToShowBoth ? true : false;
+
+        if(bothChildren) {
+
+            snifferX = snifferOnLeft ? 0 : width * snifferWidthRatio;
+            snifferWidth = width * snifferWidthRatio;
+
+            devicesListX = snifferOnLeft ? width * snifferWidthRatio : 0;
+            devicesListWidth = width * (1 - snifferWidthRatio );
+
+        } else {
+
+            snifferX = 0;
+            snifferWidth = width;
+
+            devicesListX = 0;
+            devicesListWidth = width;
+        }
+    }
 
     id: applicationWindow
     visible: true
@@ -50,32 +85,35 @@ ApplicationWindow {
         color: "#303030"
     }
 
-    signal changeSide()
-
     DevicesList {
         id: devicesList
-        visibility: true
         margin: margin
         listItemHeight: listItemHeight
+        visibility: bothChildren || !snifferSelected
+        curX: devicesListX
+        curWidth: devicesListWidth
     }
 
     Sniffer {
         id: sniffer
-        visibility: false
+        visibility: bothChildren || snifferSelected
+        curX: snifferX
+        curWidth: snifferWidth
     }
 
     footer: Rectangle {
         width: parent.width
         height: footerHeight
         color: "black"
+        visible: !bothChildren
 
         DevicesListButton {
             id: devicesListButton
             side: footerHeight - 2 * margin
             y: margin
             onClicked: {
-                devicesList.visibility = true
-                sniffer.visibility = false
+                snifferSelected = false;
+                recalculateChildren();
             }
         }
 
@@ -84,14 +122,17 @@ ApplicationWindow {
             side: footerHeight - 2 * margin
             y: margin
             onClicked: {
-                devicesList.visibility = false
-                sniffer.visibility = true
+                snifferSelected = true;
+                recalculateChildren();
             }
         }
     }
 
     onWidthChanged: {
-        devicesListButton.x = ( width / 2 - devicesListButton.side ) / 2;
-        snifferButton.x = ( width * 3 / 2 - snifferButton.side ) / 2;
+        recalculateChildren();
+    }
+
+    onHeightChanged: {
+        recalculateChildren();
     }
 }

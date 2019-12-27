@@ -63,7 +63,6 @@ HEADERS += \
 #
 
 SOURCES += \
-        src/hal.cpp \
         src/main.cpp \
         src/VSQApplication.cpp
 
