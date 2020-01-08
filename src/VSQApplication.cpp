@@ -33,41 +33,36 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 #include <QtCore>
+#include <QtQml>
 
-#include <VSQApp.h>
-#include <VSQController.h>
+#include <VSQApplication.h>
 
-#include <virgil/iot/qt-helpers/VSQIoTKit.h>
-#include <virgil/iot/qt-udp-broadcast/VSQUdpBroadcast.h>
+#include <virgil/iot/qt/VSQIoTKit.h>
+#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
 #include <virgil/iot/logger/logger.h>
 
 int
-VSQApp::run() {
+VSQApplication::run() {
+    QQmlApplicationEngine engine;
 
-    auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT;
+    auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT << VSQFeatures::SNAP_SNIFFER;
     auto impl = VSQImplementations() << QSharedPointer<VSQUdpBroadcast>::create();
     auto roles = VSQDeviceRoles() << VirgilIoTKit::VS_SNAP_DEV_CONTROL;
     auto appConfig = VSQAppConfig() << VSQManufactureId() << VSQDeviceType() << VSQDeviceSerial()
-                                    << VirgilIoTKit::VS_LOGLEV_DEBUG << roles;
+                                    << VirgilIoTKit::VS_LOGLEV_DEBUG << roles << VSQSnifferConfig(20);
 
     if (!VSQIoTKitFacade::instance().init(features, impl, appConfig)) {
         VS_LOG_CRITICAL("Unable to initialize Virgil IoT KIT");
         return -1;
     }
 
-    VSQController controller;
+    QQmlContext *ctxt = engine.rootContext();
+    ctxt->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
+    ctxt->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer());
 
-    controller.setupUI();
-
-    QObject::connect(&VSQSnapInfoClient::instance(),
-                     &VSQSnapInfoClient::fireNewDevice,
-                     &controller,
-                     &VSQController::onNewDevice);
-
-    QObject::connect(&VSQSnapInfoClient::instance(),
-                     &VSQSnapInfoClient::fireDeviceInfo,
-                     &controller,
-                     &VSQController::onDeviceInfo);
+    const QUrl url(QStringLiteral("qrc:/qml/main.qml"));
+    engine.load(url);
 
     return QGuiApplication::instance()->exec();
 }
+

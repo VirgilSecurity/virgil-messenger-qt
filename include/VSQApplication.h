@@ -32,11 +32,17 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <VSQApp.h>
+#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
+#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
 
-int
-main(int argc, char *argv[]) {
-    QGuiApplication a(argc, argv);
+#include <QtCore>
+#include <QGuiApplication>
+#include <virgil/iot/qt/VSQIoTKit.h>
 
-    return VSQApp().run();
-}
+class VSQApplication {
+public:
+    int
+    run();
+};
+
+#endif // VSQApplication

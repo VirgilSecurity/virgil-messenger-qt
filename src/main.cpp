@@ -32,21 +32,13 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_C_QT_DEMO_VSQAPP_H
-#define VIRGIL_IOTKIT_C_QT_DEMO_VSQAPP_H
+#include <VSQApplication.h>
 
-#include <QtCore>
-#include <QGuiApplication>
-#include <virgil/iot/qt-helpers/VSQIoTKit.h>
+int
+main(int argc, char *argv[]) {
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
-class VSQApp {
-public:
-    VSQApp() = default;
+    QGuiApplication a(argc, argv);
 
-    ~VSQApp() = default;
-
-    int
-    run();
-};
-
-#endif // VSQApp
+    return VSQApplication().run();
+}
