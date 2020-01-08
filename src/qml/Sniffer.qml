@@ -41,10 +41,7 @@ import QtQuick.Layouts 1.1
 ListView {
     id: sniffer
     property alias visibility : sniffer.visible
-    property int curX
-    property int curWidth
-    property int margin: 5
-    property int listItemHeight: 60
+    property var listItemHeight
     property string backgroundColor: "#202020"
 
     anchors.fill: parent
@@ -53,50 +50,38 @@ ListView {
     delegate: Item
     {
         id: listDelegate
-        height: packetContent.y + packetContent.height + 2 * margin
+        height: listItemHeight
+        width: parent.width
 
         Rectangle {
-            y: 0
-            x: curX
-            width: curWidth
-            height: parent.height
+            anchors.fill: parent
             color: backgroundColor
         }
 
-        Text {
-            id: packetEthernetInfo
-            wrapMode: Text.Wrap
-            color: "yellow"
-            horizontalAlignment: Text.AlignLeft
-            verticalAlignment: Text.AlignVCenter
-            x: margin
-            y: margin
-            width: curWidth - margin
-            text: timestamp + " : " + macSrc + " ==> " + macDst
-        }
+        ColumnLayout {
+            Text {
+                id: packetEthernetInfo
+                wrapMode: Text.Wrap
+                color: "yellow"
+                Layout.alignment: Qt.AlignLeft | Qt.AlignBottom
+                text: timestamp + " : " + macSrc + " ==> " + macDst
+            }
 
-        Text {
-            id: packetSnapInfo
-            wrapMode: Text.Wrap
-            color: "lightBlue"
-            horizontalAlignment: Text.AlignLeft
-            verticalAlignment: Text.AlignVCenter
-            x: margin
-            y: packetEthernetInfo.y + packetEthernetInfo.height
-            width: curWidth - margin
-            text: serviceId + " : " + elementId
-        }
+            Text {
+                id: packetSnapInfo
+                wrapMode: Text.Wrap
+                color: "lightBlue"
+                Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+                text: serviceId + " : " + elementId
+            }
 
-        Text {
-            id: packetContent
-            wrapMode: Text.Wrap
-            color: "white"
-            horizontalAlignment: Text.AlignLeft
-            verticalAlignment: Text.AlignVCenter
-            x: margin
-            y: packetSnapInfo.y + packetSnapInfo.height
-            width: curWidth - margin
-            text: content
+            Text {
+                id: packetContent
+                wrapMode: Text.Wrap
+                color: "white"
+                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                text: content
+            }
         }
     }
 }

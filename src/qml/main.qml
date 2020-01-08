@@ -109,9 +109,8 @@ ApplicationWindow {
 
     Sniffer {
         id: sniffer
+        listItemHeight: applicationWindow.listItemHeight
         visibility: bothChildren || snifferSelected
-        curX: snifferX
-        curWidth: snifferWidth
     }
 
     footer: Rectangle {
