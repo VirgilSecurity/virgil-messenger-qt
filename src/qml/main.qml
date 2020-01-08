@@ -64,6 +64,7 @@ ApplicationWindow {
     property real snifferWidthRatio : 0.5
     property real widthHeightToShowBoth : 1.5
     property int margin: dp(5)
+    property int dataFontSize: 15
 
     property bool bothChildren: true
     property bool snifferSelected: false
@@ -101,11 +102,9 @@ ApplicationWindow {
 
     DevicesList {
         id: devicesList
-        margin: margin
-        listItemHeight: listItemHeight
+        margin: applicationWindow.margin
+        listItemHeight: applicationWindow.listItemHeight
         visibility: bothChildren || !snifferSelected
-        curX: devicesListX
-        curWidth: devicesListWidth
     }
 
     Sniffer {
