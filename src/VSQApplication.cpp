@@ -49,16 +49,16 @@ VSQApplication::run() {
     auto impl = VSQImplementations() << QSharedPointer<VSQUdpBroadcast>::create();
     auto roles = VSQDeviceRoles() << VirgilIoTKit::VS_SNAP_DEV_CONTROL;
     auto appConfig = VSQAppConfig() << VSQManufactureId() << VSQDeviceType() << VSQDeviceSerial()
-                                    << VirgilIoTKit::VS_LOGLEV_DEBUG << roles << VSQSnifferConfig(20);
+                                    << VirgilIoTKit::VS_LOGLEV_DEBUG << roles << VSQSnifferConfig();
 
     if (!VSQIoTKitFacade::instance().init(features, impl, appConfig)) {
         VS_LOG_CRITICAL("Unable to initialize Virgil IoT KIT");
         return -1;
     }
 
-    QQmlContext *ctxt = engine.rootContext();
-    ctxt->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
-    ctxt->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer());
+    QQmlContext *context = engine.rootContext();
+    context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
+    context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer());
 
     const QUrl url(QStringLiteral("qrc:/qml/main.qml"));
     engine.load(url);
