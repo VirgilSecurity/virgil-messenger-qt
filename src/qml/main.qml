@@ -60,8 +60,6 @@ ApplicationWindow {
 
     property int footerHeight: dp(80)
     property int listItemHeight: dp(80)
-    property bool snifferOnLeft : true
-    property real snifferWidthRatio : 0.5
     property real widthHeightToShowBoth : 1.5
     property int margin: dp(5)
     property int dataFontSize: 15
@@ -74,25 +72,7 @@ ApplicationWindow {
     property int snifferWidth
 
     function recalculateChildren() {
-
         bothChildren = width > height * widthHeightToShowBoth ? true : false;
-
-        if(bothChildren) {
-
-            snifferX = snifferOnLeft ? 0 : width * snifferWidthRatio;
-            snifferWidth = width * snifferWidthRatio;
-
-            devicesListX = snifferOnLeft ? width * snifferWidthRatio : 0;
-            devicesListWidth = width * (1 - snifferWidthRatio );
-
-        } else {
-
-            snifferX = 0;
-            snifferWidth = width;
-
-            devicesListX = 0;
-            devicesListWidth = width;
-        }
     }
 
     function buttonClicked(snifferWasSelected){
@@ -100,17 +80,26 @@ ApplicationWindow {
         recalculateChildren();
     }
 
-    DevicesList {
-        id: devicesList
-        margin: applicationWindow.margin
-        listItemHeight: applicationWindow.listItemHeight
-        visibility: bothChildren || !snifferSelected
-    }
+    RowLayout {
+        anchors.fill: parent
 
-    Sniffer {
-        id: sniffer
-        listItemHeight: applicationWindow.listItemHeight
-        visibility: bothChildren || snifferSelected
+        Sniffer {
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            id: sniffer
+            listItemHeight: applicationWindow.listItemHeight * 1.5
+            visibility: bothChildren || snifferSelected
+        }
+
+        DevicesList {
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            id: devicesList
+            margin: applicationWindow.margin
+            listItemHeight: applicationWindow.listItemHeight
+            visibility: bothChildren || !snifferSelected
+        }
+
     }
 
     footer: Rectangle {
@@ -122,6 +111,7 @@ ApplicationWindow {
             anchors.fill: parent
 
             Item { Layout.fillWidth: true }
+
 
             SelectionButton {
                 id: devicesListButton

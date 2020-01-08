@@ -44,44 +44,58 @@ ListView {
     property var listItemHeight
     property string backgroundColor: "#202020"
 
-    anchors.fill: parent
     model: SnapSniffer
+
 
     delegate: Item
     {
         id: listDelegate
-        height: listItemHeight
         width: parent.width
+        height: bottomMargin.y + bottomMargin.height
 
         Rectangle {
             anchors.fill: parent
             color: backgroundColor
         }
 
-        ColumnLayout {
-            Text {
-                id: packetEthernetInfo
-                wrapMode: Text.Wrap
-                color: "yellow"
-                Layout.alignment: Qt.AlignLeft | Qt.AlignBottom
-                text: timestamp + " : " + macSrc + " ==> " + macDst
-            }
-
-            Text {
-                id: packetSnapInfo
-                wrapMode: Text.Wrap
-                color: "lightBlue"
-                Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
-                text: serviceId + " : " + elementId
-            }
-
-            Text {
-                id: packetContent
-                wrapMode: Text.Wrap
-                color: "white"
-                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                text: content
-            }
+        Item {
+            id: topMargin
+            anchors.top: parent.top
+            height: applicationWindow.margin * 2
         }
+
+        Text {
+            id: line1
+            anchors.top: topMargin.top
+            wrapMode: Text.Wrap
+            width: parent.width
+            color: "yellow"
+            text: timestamp + " : " + macSrc + " ==> " + macDst
+        }
+
+        Text {
+            id: line2
+            anchors.top: line1.bottom
+            wrapMode: Text.Wrap
+            width: parent.width
+            color: "lightBlue"
+            text: serviceId + " : " + elementId
+        }
+
+        Text {
+            id: line3
+            anchors.top: line2.bottom
+            wrapMode: Text.Wrap
+            width: parent.width
+            color: "white"
+            text: content
+        }
+
+        Item {
+            id: bottomMargin
+            anchors.top: line3.bottom
+            height: applicationWindow.margin * 2
+        }
+
     }
 }

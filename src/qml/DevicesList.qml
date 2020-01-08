@@ -45,7 +45,6 @@ ListView {
     property var listItemHeight
     property string evenGradientColor: "#20FFFFFF"
 
-    anchors.fill: parent
     model: SnapInfoClient
 
     delegate: Item
