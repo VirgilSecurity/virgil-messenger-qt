@@ -2,10 +2,12 @@
 import QtQuick 2.0
 
 Rectangle {
-    property var side: 100
+    property int side: applicationWindow.footerHeight - 2 * applicationWindow.margin
+    property int textFontSize
+    property string buttonText
+    property bool isSniffer
     signal clicked()
 
-    id: snifferButton
     width: side * 0.95
     height: side * 0.95
     color: "darkblue"
@@ -14,13 +16,14 @@ Rectangle {
         anchors.centerIn: parent
         renderType: Text.NativeRendering
         color: "white"
-        font.pixelSize: side * 0.25
-        text: "Sniffer"
+        font.pixelSize: applicationWindow.dp(15)
+        text: buttonText
     }
+
     MouseArea {
         anchors.fill: parent
         onClicked: {
-            snifferButton.clicked();
+            applicationWindow.buttonClicked(isSniffer);
         }
     }
 }
