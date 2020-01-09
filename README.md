@@ -1,11 +1,9 @@
 # Qt/QML Demo for Virgil IoTKIT Usage
+
 <a href="https://developer.virgilsecurity.com/docs"><img width="230px" src="https://cdn.virgilsecurity.com/assets/images/github/logos/iotkit/IoTKit.png" align="left" hspace="1" vspace="3"></a>
+&nbsp;
 
-
-
-
-
-
+&nbsp;
 # Content
 - [Introduction](#introduction)
 - [Features](#features)	
