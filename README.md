@@ -78,7 +78,7 @@ In order to use Qt for iOS please go through the following steps:
 
 ### Demo-iotkit-qt package installation
 - Clone the github project: 
-git clone --recurse-submodules https://github.com/VirgilSecurity/demo-iotkit-qt
+`git clone --recurse-submodules https://github.com/VirgilSecurity/demo-iotkit-qt`
 - Get libraries for specific platforms. To do this, run the script ext/virgil-iotkit/scripts/build-for-qt.sh and indicate the preferred platform. 
   **Example**:
   - To get a library for Android: `ext/virgil-iotkit/scripts/build-for-qt.sh android armeabi-v7a`
@@ -88,14 +88,17 @@ git clone --recurse-submodules https://github.com/VirgilSecurity/demo-iotkit-qt
   - To get a library for Windows library: `ext/virgil-iotkit/scripts/build-for-qt.sh windows`
 - Run the QtCreator. Open the downloaded project by selecting the demo-iotkit-qt.pro file in it.
 - In the project settings (button on the left) select the platforms you are interested in. E.g.:
+
 IMAGE
 
 - After that, select the platform and compiling mode. For example, for Android, the debug version:
+
 IMAGE
+
 - Next, connect your device and start execution or debugging.
 
 ## Run Demo-iotkit-qt
-This application will provide you with the list of Gateways and Thing devices that demo-iotkit-qt can detect. It searches for the IoT of the device in the local network, to which the mobile device or the stationary platform on which the application is running has access. IoT devices should use the Virgil IoTKIT library for interoperability. You can find examples of Gateway-, Thing- and other devices for UNIX / Linux platforms in the open github repository [demo-iotkit-nix] (#https://github.com/VirgilSecurity/demo-iotkit-nix/).
+This application will provide you with the list of Gateways and Thing devices that demo-iotkit-qt can detect. It searches for the IoT of the device in the local network, to which the mobile device or the stationary platform on which the application is running has access. IoT devices should use the Virgil IoTKIT library for interoperability. You can find examples of Gateway-, Thing- and other devices for UNIX / Linux platforms in the open github repository [demo-iotkit-nix](#https://github.com/VirgilSecurity/demo-iotkit-nix/).
 
 ## License
 
