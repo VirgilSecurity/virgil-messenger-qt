@@ -49,7 +49,7 @@ VSQApplication::run() {
     auto impl = VSQImplementations() << QSharedPointer<VSQUdpBroadcast>::create();
     auto roles = VSQDeviceRoles() << VirgilIoTKit::VS_SNAP_DEV_CONTROL;
     auto appConfig = VSQAppConfig() << VSQManufactureId() << VSQDeviceType() << VSQDeviceSerial()
-                                    << VirgilIoTKit::VS_LOGLEV_DEBUG << roles << VSQSnifferConfig();
+                                    << VirgilIoTKit::VS_LOGLEV_DEBUG << roles << VSQSnapSnifferQmlConfig();
 
     if (!VSQIoTKitFacade::instance().init(features, impl, appConfig)) {
         VS_LOG_CRITICAL("Unable to initialize Virgil IoT KIT");
