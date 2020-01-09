@@ -1,6 +1,11 @@
 # Qt/QML Demo for Virgil IoTKIT Usage
 <a href="https://developer.virgilsecurity.com/docs"><img width="230px" src="https://cdn.virgilsecurity.com/assets/images/github/logos/iotkit/IoTKit.png" align="left" hspace="1" vspace="3"></a>
 
+
+
+
+
+
 # Content
 - [Introduction](#introduction)
 - [Features](#features)	
@@ -9,7 +14,7 @@
   - [Install Qt](#install-qt)
   - [Getting started with Qt on Android](#getting-started-with-qt-on-android)
   - [Getting started with Qt on iOS](#getting-started-with-qt-on-ios)	
-  - [Demo-iotkit-qt package installation](#demo-iotkit-qt-package-installation]
+  - [Demo-iotkit-qt package installation](#demo-iotkit-qt-package-installation)
 - [Run Demo-iotkit-qt](#run-demo-iotkit-qt)
 
 
@@ -76,11 +81,11 @@ In order to use Qt for iOS please go through the following steps:
 git clone --recurse-submodules https://github.com/VirgilSecurity/demo-iotkit-qt
 - Get libraries for specific platforms. To do this, run the script ext/virgil-iotkit/scripts/build-for-qt.sh and indicate the preferred platform. 
   **Example**:
-  - To get a library for Android: ext/virgil-iotkit/scripts/build-for-qt.sh android armeabi-v7a
-  - To get a library for iOS library: ext/virgil-iotkit/scripts/build-for-qt.sh ios
-  - To get a library for Linux library: ext/virgil-iotkit/scripts/build-for-qt.sh linux
-  - To get a library for MacOS library: ext/virgil-iotkit/scripts/build-for-qt.sh mac
-  - To get a library for Windows library: ext/virgil-iotkit/scripts/build-for-qt.sh windows
+  - To get a library for Android: `ext/virgil-iotkit/scripts/build-for-qt.sh android armeabi-v7a`
+  - To get a library for iOS library: `ext/virgil-iotkit/scripts/build-for-qt.sh ios`
+  - To get a library for Linux library: `ext/virgil-iotkit/scripts/build-for-qt.sh linux`
+  - To get a library for MacOS library: `ext/virgil-iotkit/scripts/build-for-qt.sh mac`
+  - To get a library for Windows library: `ext/virgil-iotkit/scripts/build-for-qt.sh windows`
 - Run the QtCreator. Open the downloaded project by selecting the demo-iotkit-qt.pro file in it.
 - In the project settings (button on the left) select the platforms you are interested in. E.g.:
 IMAGE
