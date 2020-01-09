@@ -5,7 +5,7 @@ Rectangle {
     property int side: applicationWindow.footerHeight - 2 * applicationWindow.margin
     property int textFontSize
     property string buttonText
-    property bool isSniffer
+    property int menuId
     signal clicked()
 
     width: side * 0.95
@@ -23,7 +23,7 @@ Rectangle {
     MouseArea {
         anchors.fill: parent
         onClicked: {
-            applicationWindow.buttonClicked(isSniffer);
+            applicationWindow.menuItemSelected(menuId);
         }
     }
 }

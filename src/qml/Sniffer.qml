@@ -40,7 +40,6 @@ import QtQuick.Layouts 1.1
 
 ListView {
     id: sniffer
-    property alias visibility : sniffer.visible
     property var listItemHeight
     property string backgroundColor: "#202020"
 

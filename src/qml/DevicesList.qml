@@ -40,7 +40,6 @@ import QtQuick.Layouts 1.1
 
 ListView {
     id: devicesList
-    property alias visibility : devicesList.visible
     property int margin
     property var listItemHeight
     property string evenGradientColor: "#20FFFFFF"

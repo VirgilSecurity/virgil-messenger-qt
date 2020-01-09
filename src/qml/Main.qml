@@ -65,7 +65,7 @@ ApplicationWindow {
     property int dataFontSize: 15
 
     property bool bothChildren: true
-    property bool snifferSelected: false
+    property bool currentMenuId: Main.MenuId.DevicesListId
     property int devicesListX
     property int devicesListWidth
     property int snifferX
@@ -75,8 +75,13 @@ ApplicationWindow {
         bothChildren = width > height * widthHeightToShowBoth ? true : false;
     }
 
-    function buttonClicked(snifferWasSelected){
-        snifferSelected = snifferWasSelected;
+    enum MenuId {
+        SnifferId,
+        DevicesListId
+    }
+
+    function menuItemSelected(menuId){
+        currentMenuId = menuId;
         recalculateChildren();
     }
 
@@ -88,7 +93,7 @@ ApplicationWindow {
             Layout.fillWidth: true
             id: sniffer
             listItemHeight: applicationWindow.listItemHeight * 1.5
-            visibility: bothChildren || snifferSelected
+            visible: bothChildren || currentMenuId == Main.MenuId.SnifferId
         }
 
         DevicesList {
@@ -97,7 +102,7 @@ ApplicationWindow {
             id: devicesList
             margin: applicationWindow.margin
             listItemHeight: applicationWindow.listItemHeight
-            visibility: bothChildren || !snifferSelected
+            visible: bothChildren || currentMenuId == Main.MenuId.DevicesListId
         }
 
     }
@@ -112,16 +117,11 @@ ApplicationWindow {
 
             Item { Layout.fillWidth: true }
 
-
             SelectionButton {
                 id: devicesListButton
                 Layout.alignment: Qt.AlignCenter
                 buttonText: "Devices"
-                isSniffer: false
-                onClicked: {
-                    snifferSelected = false;
-                    recalculateChildren();
-                }
+                menuId: Main.MenuId.DevicesListId
             }
 
             Item { Layout.fillWidth: true }
@@ -130,11 +130,7 @@ ApplicationWindow {
                 id: snifferButton
                 Layout.alignment: Qt.AlignCenter
                 buttonText: "Sniffer"
-                isSniffer: true
-                onClicked: {
-                    snifferSelected = false;
-                    recalculateChildren();
-                }
+                menuId: Main.MenuId.SnifferId
             }
 
             Item { Layout.fillWidth: true }

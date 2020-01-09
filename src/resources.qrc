@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>qml/main.qml</file>
+        <file>qml/Main.qml</file>
         <file>qml/DevicesList.qml</file>
         <file>qml/Sniffer.qml</file>
         <file>qml/SelectionButton.qml</file>
