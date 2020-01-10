@@ -33,6 +33,7 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 #include <QtCore>
+#include <QtGUI>
 #include <QtQml>
 
 #include <VSQApplication.h>
@@ -63,6 +64,31 @@ VSQApplication::run() {
     const QUrl url(QStringLiteral("qrc:/qml/Main.qml"));
     engine.load(url);
 
+#if defined(Q_OS_LINUX) || defined(Q_OS_UNIX) || defined(Q_OS_WIN)
+    {
+        QObject *rootObject(engine.rootObjects().first());
+
+        int prevWidth = rootObject->property("width").toInt();
+        int prevHeight = rootObject->property("height").toInt();
+        int prevX = rootObject->property("x").toInt();
+        int prevY = rootObject->property("y").toInt();
+
+        QScreen *screen = QGuiApplication::primaryScreen();
+        QRect screenGeometry = screen->geometry();
+
+        constexpr qreal ratio = 0.9;
+        int newWidth = screenGeometry.width() * ratio;
+        int newHeight = screenGeometry.height() * ratio;
+
+        int newX = prevX - ( newWidth - prevWidth ) / 2;
+        int newY = prevY - ( newHeight - prevHeight ) / 2;
+
+        rootObject->setProperty("width", newWidth);
+        rootObject->setProperty("height", newHeight);
+        rootObject->setProperty("x", newX);
+        rootObject->setProperty("y", newY);
+    }
+#endif
+
     return QGuiApplication::instance()->exec();
 }
-
