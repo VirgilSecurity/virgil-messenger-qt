@@ -58,7 +58,7 @@ VSQApplication::run() {
 
     QQmlContext *context = engine.rootContext();
     context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
-    context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer());
+    context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
 
     const QUrl url(QStringLiteral("qrc:/qml/Main.qml"));
     engine.load(url);
