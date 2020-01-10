@@ -40,63 +40,61 @@ import QtQuick.Layouts 1.1
 
 ListView {
     id: sniffer
-    property alias visibility : sniffer.visible
-    property int curX
-    property int curWidth
-    property int margin: 5
-    property int listItemHeight: 60
+    property var listItemHeight
     property string backgroundColor: "#202020"
 
-    anchors.fill: parent
     model: SnapSniffer
+
 
     delegate: Item
     {
         id: listDelegate
-        height: packetContent.y + packetContent.height + 2 * margin
+        width: parent.width
+        height: bottomMargin.y + bottomMargin.height
 
         Rectangle {
-            y: 0
-            x: curX
-            width: curWidth
-            height: parent.height
+            anchors.fill: parent
             color: backgroundColor
         }
 
+        Item {
+            id: topMargin
+            anchors.top: parent.top
+            height: applicationWindow.margin * 2
+        }
+
         Text {
-            id: packetEthernetInfo
+            id: line1
+            anchors.top: topMargin.top
             wrapMode: Text.Wrap
+            width: parent.width
             color: "yellow"
-            horizontalAlignment: Text.AlignLeft
-            verticalAlignment: Text.AlignVCenter
-            x: margin
-            y: margin
-            width: curWidth - margin
             text: timestamp + " : " + macSrc + " ==> " + macDst
         }
 
         Text {
-            id: packetSnapInfo
+            id: line2
+            anchors.top: line1.bottom
             wrapMode: Text.Wrap
+            width: parent.width
             color: "lightBlue"
-            horizontalAlignment: Text.AlignLeft
-            verticalAlignment: Text.AlignVCenter
-            x: margin
-            y: packetEthernetInfo.y + packetEthernetInfo.height
-            width: curWidth - margin
             text: serviceId + " : " + elementId
         }
 
         Text {
-            id: packetContent
+            id: line3
+            anchors.top: line2.bottom
             wrapMode: Text.Wrap
+            width: parent.width
             color: "white"
-            horizontalAlignment: Text.AlignLeft
-            verticalAlignment: Text.AlignVCenter
-            x: margin
-            y: packetSnapInfo.y + packetSnapInfo.height
-            width: curWidth - margin
             text: content
         }
+
+        Item {
+            id: bottomMargin
+            anchors.top: line3.bottom
+            height: applicationWindow.margin * 2
+        }
+
     }
 }

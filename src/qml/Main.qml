@@ -60,59 +60,51 @@ ApplicationWindow {
 
     property int footerHeight: dp(80)
     property int listItemHeight: dp(80)
-    property bool snifferOnLeft : true
-    property real snifferWidthRatio : 0.5
     property real widthHeightToShowBoth : 1.5
     property int margin: dp(5)
+    property int dataFontSize: 15
 
     property bool bothChildren: true
-    property bool snifferSelected: false
+    property bool currentMenuId: Main.MenuId.DevicesListId
     property int devicesListX
     property int devicesListWidth
     property int snifferX
     property int snifferWidth
 
     function recalculateChildren() {
-
         bothChildren = width > height * widthHeightToShowBoth ? true : false;
-
-        if(bothChildren) {
-
-            snifferX = snifferOnLeft ? 0 : width * snifferWidthRatio;
-            snifferWidth = width * snifferWidthRatio;
-
-            devicesListX = snifferOnLeft ? width * snifferWidthRatio : 0;
-            devicesListWidth = width * (1 - snifferWidthRatio );
-
-        } else {
-
-            snifferX = 0;
-            snifferWidth = width;
-
-            devicesListX = 0;
-            devicesListWidth = width;
-        }
     }
 
-    function buttonClicked(snifferWasSelected){
-        snifferSelected = snifferWasSelected;
+    enum MenuId {
+        SnifferId,
+        DevicesListId
+    }
+
+    function menuItemSelected(menuId){
+        currentMenuId = menuId;
         recalculateChildren();
     }
 
-    DevicesList {
-        id: devicesList
-        margin: margin
-        listItemHeight: listItemHeight
-        visibility: bothChildren || !snifferSelected
-        curX: devicesListX
-        curWidth: devicesListWidth
-    }
+    RowLayout {
+        anchors.fill: parent
 
-    Sniffer {
-        id: sniffer
-        visibility: bothChildren || snifferSelected
-        curX: snifferX
-        curWidth: snifferWidth
+        Sniffer {
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            id: sniffer
+            listItemHeight: applicationWindow.listItemHeight * 1.5
+            visible: bothChildren || currentMenuId == Main.MenuId.SnifferId
+        }
+
+        DevicesList {
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            id: devicesList
+            margin: applicationWindow.margin
+            listItemHeight: applicationWindow.listItemHeight
+            visible: bothChildren || currentMenuId == Main.MenuId.DevicesListId
+        }
+
     }
 
     footer: Rectangle {
@@ -129,11 +121,7 @@ ApplicationWindow {
                 id: devicesListButton
                 Layout.alignment: Qt.AlignCenter
                 buttonText: "Devices"
-                isSniffer: false
-                onClicked: {
-                    snifferSelected = false;
-                    recalculateChildren();
-                }
+                menuId: Main.MenuId.DevicesListId
             }
 
             Item { Layout.fillWidth: true }
@@ -142,11 +130,7 @@ ApplicationWindow {
                 id: snifferButton
                 Layout.alignment: Qt.AlignCenter
                 buttonText: "Sniffer"
-                isSniffer: true
-                onClicked: {
-                    snifferSelected = false;
-                    recalculateChildren();
-                }
+                menuId: Main.MenuId.SnifferId
             }
 
             Item { Layout.fillWidth: true }
