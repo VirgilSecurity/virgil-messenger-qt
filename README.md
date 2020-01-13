@@ -31,6 +31,8 @@
 
 Demo for Virgil IoTKIT is the Virgil IoTKIT usage example based on C++ and Qt/QML library.
 
+Qt is a crossplatform framework for creating modern console and GUI applications. It supports wide range of desktop and mobile platforms like Windows, Linux, MacOS, Android, iOS etc.
+
 ## Features
 Demo-iotkit-qt package is a sample application that uses the virgil-iotkit library.
 
