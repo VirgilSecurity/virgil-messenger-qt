@@ -117,20 +117,18 @@ ApplicationWindow {
 
             Item { Layout.fillWidth: true }
 
-            SelectionButton {
+            Button {
                 id: devicesListButton
-                Layout.alignment: Qt.AlignCenter
-                buttonText: "Devices"
-                menuId: Main.MenuId.DevicesListId
+                text: "Devices"
+                onClicked: applicationWindow.menuItemSelected(Main.MenuId.DevicesListId)
             }
 
             Item { Layout.fillWidth: true }
 
-            SelectionButton {
+            Button {
                 id: snifferButton
-                Layout.alignment: Qt.AlignCenter
-                buttonText: "Sniffer"
-                menuId: Main.MenuId.SnifferId
+                text: "Sniffer"
+                onClicked: applicationWindow.menuItemSelected(Main.MenuId.SnifferId)
             }
 
             Item { Layout.fillWidth: true }

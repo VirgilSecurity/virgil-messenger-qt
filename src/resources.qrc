@@ -3,6 +3,5 @@
         <file>qml/Main.qml</file>
         <file>qml/DevicesList.qml</file>
         <file>qml/Sniffer.qml</file>
-        <file>qml/SelectionButton.qml</file>
     </qresource>
 </RCC>
