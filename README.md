@@ -87,6 +87,9 @@ In order to use Qt for iOS please go through the following steps:
 - Clone the github project: 
 `git clone --recurse-submodules https://github.com/VirgilSecurity/demo-iotkit-qt`
 - Get libraries for specific platforms. To do this, run the script ext/virgil-iotkit/scripts/build-for-qt.sh and indicate the preferred platform. 
+&nbsp;
+
+&nbsp;
   **Example**:
   - To get a library for Android: `ext/virgil-iotkit/scripts/build-for-qt.sh android armeabi-v7a`
   - To get a library for iOS library: `ext/virgil-iotkit/scripts/build-for-qt.sh ios`
