@@ -94,7 +94,7 @@ In order to use Qt for iOS please go through the following steps:
 - Run the QtCreator. Open the downloaded project by selecting the demo-iotkit-qt.pro file in it.
 - In the project settings (button on the left) select the platforms you are interested in. E.g.:
 
-<img width="230px" src="https://cdn.virgilsecurity.com/assets/images/github/logos/iotkit/IoTKit.png" align="left" hspace="1" vspace="3">
+IMAGE
 
 - After that, select the platform and compiling mode. For example, for Android, the debug version:
 
