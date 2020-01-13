@@ -45,10 +45,10 @@ The following section contains information on how to set up the Demo-iotkit-qt.
 
 ### Prerequisites
 Elements required for successful compilation:
-- Qt lib v. 5.12.6 or higher for demo-iotkit-qt building.
+- Qt v. 5.12.6 or higher for demo-iotkit-qt building.
 - CMake v. 3.11 or higher for Virgil IoTKit framework building.
-- С compile system v. 98 or higher for Virgil IoTKit framework building.
-- С++ compile system v. 14 or higher for Demo-iotkit-qt building.
+- С98 or higher for Virgil IoTKit framework building.
+- С++14 or higher for Demo-iotkit-qt building.
 
 Demo-iotkit-qt package was tested on the gcc, clang, mingw compilers.
 
@@ -75,8 +75,8 @@ In order to use Qt for Android please go through the following steps:
 
 - Follow the steps in the section “Getting Started with Qt for Android” at https://doc.qt.io/qt-5/android-getting-started.html. You will be prompted to install the Android SDK, Android NDK and a suitable JDK version.
 - Run the QtCreator. Choose a sample project for the platform you are interested in. In the next step, you will configure the settings for these platforms.
+- Add ${ANDROID_SDK} = path to  SDK, ${ANDROID_NDK} = path to NDK to system variables.
 - Compile and run this example on the platform you need.
-- Add (${ANDROID_SDK} = path to  SDK, ${ANDROID_NDK} = path to NDK) to system variables.
 
 ### Getting started with Qt on iOS
 In order to use Qt for iOS please go through the following steps:
@@ -90,7 +90,7 @@ In order to use Qt for iOS please go through the following steps:
 &nbsp;
 
 &nbsp;
-  **Example**:
+**Example**:
   - To get a library for Android: `ext/virgil-iotkit/scripts/build-for-qt.sh android armeabi-v7a`
   - To get a library for iOS library: `ext/virgil-iotkit/scripts/build-for-qt.sh ios`
   - To get a library for Linux library: `ext/virgil-iotkit/scripts/build-for-qt.sh linux`
@@ -113,7 +113,7 @@ This application will provide you with the list of Gateways and Thing devices th
 
 ## License
 
-This demo and Virgil IoTKIT is released under the [3-clause BSD License](LICENSE).
+This demo and Virgil IoTKIT are released under the [3-clause BSD License](LICENSE).
 
 <div id='support'/>
 
