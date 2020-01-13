@@ -87,7 +87,7 @@ ListView {
             wrapMode: Text.Wrap
             width: parent.width
             color: "white"
-            text: content
+            text: contentSize + " bytes : " + content
         }
 
         Item {
