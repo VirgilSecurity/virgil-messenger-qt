@@ -66,7 +66,7 @@ The fastest way is to install the Qt Maintenance Tool, which will install the re
 - Then, on the next page, find the “Download the Qt Online Installer” section. Select “Download” if you are comfortable with the default options and follow the further instructions.
 - Next, skipping the choice of license (this is enough for testing), select the necessary  elements to install. For example, to install the minimal package on macOS with the ability to test the application on different Android and iOS platforms, you must select the following items:
 
-<img width="230px" src="https://cdn.virgilsecurity.com/assets/images/github/iotkit_qt/Qt_components.png" align="left" hspace="1" vspace="3">
+<img width="230px" src="https://cdn.virgilsecurity.com/assets/images/github/iotkit_qt/Qt_components.png" >
 
 Next, run the Qt installation.
 
@@ -101,7 +101,7 @@ In order to use Qt for iOS please go through the following steps:
 
 - After that, select the platform and compiling mode. For example, for Android, the debug version:
 
-<img width="230px" src="https://cdn.virgilsecurity.com/assets/images/github/iotkit_qt/Qt_mode:version.png" align="left" hspace="1" vspace="3">
+<img width="230px" src="https://cdn.virgilsecurity.com/assets/images/github/iotkit_qt/Qt_mode:version.png" >
 
 - Next, connect your device and start execution or debugging.
 
