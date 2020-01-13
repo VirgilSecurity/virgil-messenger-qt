@@ -41,7 +41,7 @@ ApplicationWindow {
 
     id: applicationWindow
     visible: true
-    title: "IoTKit Qt Demo"
+    title: "Virgil IoTKit Qt Demo"
     background: Rectangle {
         color: "#303030"
     }
@@ -63,13 +63,8 @@ ApplicationWindow {
     property real widthHeightToShowBoth : 1.5
     property int margin: dp(5)
     property int dataFontSize: 15
-
     property bool bothChildren: true
     property bool currentMenuId: Main.MenuId.DevicesListId
-    property int devicesListX
-    property int devicesListWidth
-    property int snifferX
-    property int snifferWidth
 
     function recalculateChildren() {
         bothChildren = width > height * widthHeightToShowBoth ? true : false;
