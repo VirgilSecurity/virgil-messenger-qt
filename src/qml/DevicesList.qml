@@ -108,7 +108,7 @@ ListView {
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignBottom
                 color: "yellow"
-                text: isActive ? "active" : "not active"
+                text: isActive ? qsTr("active") : qsTr("not active")
             }
 
             Text {
@@ -125,7 +125,7 @@ ListView {
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignTop
                 color: "white"
-                text: "fw " + fwVer + ", tl " + tlVer
+                text: qsTr("fw ") + fwVer + qsTr(", tl ") + tlVer
             }
         }
     }

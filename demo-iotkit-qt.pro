@@ -36,7 +36,7 @@ QT += core network qml quick
 
 CONFIG += c++14
 
-TARGET = iotkit-qt-example
+TARGET = demo-iotkit-qt
 
 #
 #   Include IoTKit Qt wrapper

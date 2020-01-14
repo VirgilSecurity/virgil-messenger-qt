@@ -69,7 +69,7 @@ ListView {
             wrapMode: Text.Wrap
             width: parent.width
             color: "yellow"
-            text: timestamp + " : " + macSrc + " ==> " + macDst
+            text: timestamp + qsTr(" : ") + macSrc + qsTr(" ==> ") + macDst
         }
 
         Text {
@@ -78,7 +78,7 @@ ListView {
             wrapMode: Text.Wrap
             width: parent.width
             color: "lightBlue"
-            text: serviceId + " : " + elementId
+            text: serviceId + qsTr(" : ") + elementId
         }
 
         Text {
@@ -87,7 +87,7 @@ ListView {
             wrapMode: Text.Wrap
             width: parent.width
             color: "white"
-            text: contentSize + " bytes : " + content
+            text: contentSize + qsTr(" bytes : ") + content
         }
 
         Item {

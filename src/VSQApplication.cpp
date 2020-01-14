@@ -66,21 +66,8 @@ VSQApplication::run() {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_WATCHOS)
     {
         QObject *rootObject(engine.rootObjects().first());
-
-        int prevWidth = rootObject->property("width").toInt();
-        int prevHeight = rootObject->property("height").toInt();
-        int prevX = rootObject->property("x").toInt();
-        int prevY = rootObject->property("y").toInt();
-
-        constexpr int newWidth = 640;
-        constexpr int newHeight = 400;
-        int newX = prevX - ( newWidth - prevWidth ) / 2;
-        int newY = prevY - ( newHeight - prevHeight ) / 2;
-
-        rootObject->setProperty("width", newWidth);
-        rootObject->setProperty("height", newHeight);
-        rootObject->setProperty("x", newX);
-        rootObject->setProperty("y", newY);
+        rootObject->setProperty("width", 640);
+        rootObject->setProperty("height", 400);
     }
 #endif
 

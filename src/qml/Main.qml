@@ -41,7 +41,7 @@ ApplicationWindow {
 
     id: applicationWindow
     visible: true
-    title: "Virgil IoTKit Qt Demo"
+    title: qsTr("Virgil IoTKit Qt Demo")
     background: Rectangle {
         color: "#303030"
     }
@@ -64,10 +64,10 @@ ApplicationWindow {
     property int margin: dp(5)
     property int dataFontSize: 15
     property bool bothChildren: true
-    property bool currentMenuId: Main.MenuId.DevicesListId
+    property int currentMenuId: Main.MenuId.DevicesListId
 
     function recalculateChildren() {
-        bothChildren = width > height * widthHeightToShowBoth ? true : false;
+        bothChildren = width > (height * widthHeightToShowBoth)
     }
 
     enum MenuId {
@@ -76,8 +76,8 @@ ApplicationWindow {
     }
 
     function menuItemSelected(menuId){
-        currentMenuId = menuId;
-        recalculateChildren();
+        currentMenuId = menuId
+        recalculateChildren()
     }
 
     RowLayout {
@@ -114,7 +114,7 @@ ApplicationWindow {
 
             Button {
                 id: devicesListButton
-                text: "Devices"
+                text: qsTr("Devices")
                 onClicked: applicationWindow.menuItemSelected(Main.MenuId.DevicesListId)
             }
 
@@ -122,7 +122,7 @@ ApplicationWindow {
 
             Button {
                 id: snifferButton
-                text: "Sniffer"
+                text: qsTr("Sniffer")
                 onClicked: applicationWindow.menuItemSelected(Main.MenuId.SnifferId)
             }
 
@@ -132,11 +132,11 @@ ApplicationWindow {
     }
 
     onWidthChanged: {
-        recalculateChildren();
+        recalculateChildren()
     }
 
     onHeightChanged: {
-        recalculateChildren();
+        recalculateChildren()
     }
 
 }
