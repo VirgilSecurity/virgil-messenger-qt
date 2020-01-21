@@ -95,7 +95,7 @@ In order to use Qt for iOS please go through the following steps:
   - To get a library for iOS library: `ext/virgil-iotkit/scripts/build-for-qt.sh ios`
   - To get a library for Linux library: `ext/virgil-iotkit/scripts/build-for-qt.sh linux`
   - To get a library for MacOS library: `ext/virgil-iotkit/scripts/build-for-qt.sh mac`
-  - To get a library for Windows library: `ext/virgil-iotkit/scripts/build-for-qt.sh windows`
+  - To get a library for Windows library: `ext/virgil-iotkit/scripts/build-for-qt.sh windows`. See details in [Virgil IoTKit documentation](https://virgilsecurity.github.io/virgil-iotkit/#windows-installation).
 - Run the QtCreator. Open the downloaded project by selecting the demo-iotkit-qt.pro file in it.
 - In the project settings (button on the left) select the platforms you are interested in. E.g.:
 
