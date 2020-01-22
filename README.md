@@ -36,8 +36,8 @@ Qt is a crossplatform framework for creating modern console and GUI applications
 ## Features
 Demo-iotkit-qt package is a sample application that uses the virgil-iotkit library.
 
-- Demo-iotkit-qt is a cross-platform application, based on the Qt library.  The compilation is currently supported for Android, iOS, iOS    simulator, Linux, MacOS, and Windows.
-- In “Devices” mode, demo-iotkit-qt shows information on available IoT devices. Active devices transmit their status information using      the INFO Server of SNAP protocol service. Demo-iotkit-qt uses INFO Client.
+- Demo-iotkit-qt is a cross-platform application, based on the Qt library. It is tested for Android, iOS, iOS simulator, Linux, MacOS, and Windows.
+- In “Devices” mode, demo-iotkit-qt shows information on available IoT devices. Active devices transmit their status information using the INFO Server of SNAP protocol service. Demo-iotkit-qt uses INFO Client.
 - In "Sniffer" mode, demo-iokit-qt shows the device's packet exchange.
 
 ## Setting Up Demo-iotkit-qt
@@ -45,14 +45,14 @@ The following section contains information on how to set up the Demo-iotkit-qt.
 
 ### Prerequisites
 Elements required for successful compilation:
-- Qt v. 5.12.6 or higher for demo-iotkit-qt building.
-- CMake v. 3.11 or higher for Virgil IoTKit framework building.
+- Qt v5.12.6 or higher for demo-iotkit-qt building.
+- CMake v3.11 or higher for Virgil IoTKit framework building.
 - С98 or higher for Virgil IoTKit framework building.
 - С++14 or higher for Demo-iotkit-qt building.
 
-Demo-iotkit-qt package was tested on the gcc, clang, mingw compilers.
+Demo-iotkit-qt package was tested on the gcc, clang, mingw compilers. For Windows mingw is suggested due to binary packets received from other Virgil IoT devices compatibility.
 
-Before running the Demo-iotkit-qt, you have to:
+Before running the Demo-iotkit-qt you have to:
 - Install QtCreator and Qt library for the preferred platforms. 
 - Clone demo-iotkit-qt application from GitHub, which will download virgil-iotkit by default. 
 - Compile the Virgil IoTKit library for a given platform. 
@@ -60,11 +60,11 @@ Before running the Demo-iotkit-qt, you have to:
 
 
 ### Install Qt
-The fastest way is to install the Qt Maintenance Tool, which will install the required components. To perform Qt installation you need to:
+The fastest way is to install the Qt Maintenance Tool, which will install the required components. To perform such Qt installation you need to:
 
-- Navigate to the [QT site](#https://www.qt.io/download), select an option you need. For testing, select “Go open source” in the “Downloads for open source users” section.
+- Navigate to the QT site (https://www.qt.io/download), select an option you need. For testing, select “Go open source” in the “Downloads for open source users” section.
 - Then, on the next page, find the “Download the Qt Online Installer” section. Select “Download” if you are comfortable with the default options and follow the further instructions.
-- Next, skipping the choice of license (this is enough for testing), select the necessary  elements to install. For example, to install the minimal package on macOS with the ability to test the application on different Android and iOS platforms, you must select the following items:
+- Next, skipping the choice of license (this is enough for testing), select the necessary  elements to install. For example, to install the minimal package on macOS with the ability to test the application on different Android and iOS platforms you must select the following items:
 
 <img width="230px" src="https://cdn.virgilsecurity.com/assets/images/github/iotkit_qt/Qt_components.png" >
 
@@ -80,13 +80,13 @@ In order to use Qt for Android please go through the following steps:
 
 ### Getting started with Qt on iOS
 In order to use Qt for iOS please go through the following steps:
-- Follow the steps in the  [“Connecting iOS Devices”](#https://doc.qt.io/qtcreator/creator-developing-ios.html) article.
+- Follow the steps in the “Connecting iOS Devices” at https://doc.qt.io/qtcreator/creator-developing-ios.html.
 - Compile and run this example on the platform you need.
 
 ### Demo-iotkit-qt package installation
 - Clone the github project: 
 `git clone --recurse-submodules https://github.com/VirgilSecurity/demo-iotkit-qt`
-- Get libraries for specific platforms. To do this, run the script ext/virgil-iotkit/scripts/build-for-qt.sh and indicate the preferred platform. 
+- Get libraries for specific platforms. To do this, run the script `ext/virgil-iotkit/scripts/build-for-qt.sh` and indicate the preferred platform. 
 &nbsp;
 
 &nbsp;
@@ -109,7 +109,10 @@ In order to use Qt for iOS please go through the following steps:
 - Next, connect your device and start execution or debugging.
 
 ## Run Demo-iotkit-qt
-This application will provide you with the list of Gateways and Thing devices that demo-iotkit-qt can detect. It searches for the IoT of the device in the local network, to which the mobile device or the stationary platform on which the application is running has access. IoT devices should use the Virgil IoTKIT library for interoperability. You can find examples of Gateway-, Thing- and other devices for UNIX / Linux platforms in the open github repository [demo-iotkit-nix](#https://github.com/VirgilSecurity/demo-iotkit-nix/).
+This application will provide you with the list of Gateways and Thing devices that demo-iotkit-qt can detect. It
+searches for the IoT of the device in the local network, to which the mobile device or the stationary platform on which
+the application is running has access. IoT devices should use the Virgil IoTKIT library for interoperability. You can
+find examples of Gateway-, Thing- and other devices for UNIX / Linux platforms in the open github repository [demo-iotkit-nix](https://github.com/VirgilSecurity/demo-iotkit-nix/).
 
 ## License
 
