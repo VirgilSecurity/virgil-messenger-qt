@@ -60,14 +60,16 @@ ApplicationWindow {
 
     property int footerHeight: dp(80)
     property int listItemHeight: dp(80)
+    property int minWidthPerElement : 200
+    property int elementCount : 2
     property real widthHeightToShowBoth : 1.5
     property int margin: dp(5)
     property int dataFontSize: 15
-    property bool bothChildren: true
+    property bool allChildren: true
     property int currentMenuId: Main.MenuId.DevicesListId
 
     function recalculateChildren() {
-        bothChildren = width > (height * widthHeightToShowBoth)
+        allChildren = width > (elementCount * minWidthPerElement)
     }
 
     enum MenuId {
@@ -87,17 +89,15 @@ ApplicationWindow {
             Layout.fillHeight: true
             Layout.fillWidth: true
             id: sniffer
-            listItemHeight: applicationWindow.listItemHeight * 1.5
-            visible: bothChildren || currentMenuId == Main.MenuId.SnifferId
+            visible: allChildren || currentMenuId == Main.MenuId.SnifferId
         }
 
         DevicesList {
             Layout.fillHeight: true
             Layout.fillWidth: true
             id: devicesList
-            margin: applicationWindow.margin
             listItemHeight: applicationWindow.listItemHeight
-            visible: bothChildren || currentMenuId == Main.MenuId.DevicesListId
+            visible: allChildren || currentMenuId == Main.MenuId.DevicesListId
         }
 
     }
@@ -105,7 +105,7 @@ ApplicationWindow {
     footer: Rectangle {
         height: footerHeight
         color: "black"
-        visible: !bothChildren
+        visible: !allChildren
 
         RowLayout {
             anchors.fill: parent

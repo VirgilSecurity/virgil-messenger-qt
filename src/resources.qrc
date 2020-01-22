@@ -3,5 +3,6 @@
         <file>qml/Main.qml</file>
         <file>qml/DevicesList.qml</file>
         <file>qml/Sniffer.qml</file>
+        <file>qml/Title.qml</file>
     </qresource>
 </RCC>
