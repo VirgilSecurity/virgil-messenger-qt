@@ -32,44 +32,18 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <QtCore>
-#include <QtQml>
+import QtQuick 2.5
+import QtQuick.Layouts 1.5
+import QtQuick.Controls 2.12
 
-#include <VSQApplication.h>
-
-#include <virgil/iot/qt/VSQIoTKit.h>
-#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
-#include <virgil/iot/logger/logger.h>
-
-int
-VSQApplication::run() {
-    QQmlApplicationEngine engine;
-
-    auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT << VSQFeatures::SNAP_SNIFFER;
-    auto impl = VSQImplementations() << QSharedPointer<VSQUdpBroadcast>::create();
-    auto roles = VSQDeviceRoles() << VirgilIoTKit::VS_SNAP_DEV_CONTROL;
-    auto appConfig = VSQAppConfig() << VSQManufactureId() << VSQDeviceType() << VSQDeviceSerial()
-                                    << VirgilIoTKit::VS_LOGLEV_DEBUG << roles << VSQSnapSnifferQmlConfig();
-
-    if (!VSQIoTKitFacade::instance().init(features, impl, appConfig)) {
-        VS_LOG_CRITICAL("Unable to initialize Virgil IoT KIT");
-        return -1;
+Label {
+    Layout.fillWidth: true
+    z: 5
+    color: "white"
+    horizontalAlignment: Text.AlignHCenter
+    font.pixelSize: Qt.application.font.pixelSize * 1.3
+    background: Rectangle {
+        anchors.fill: parent
+        color: "steelblue"
     }
-
-    QQmlContext *context = engine.rootContext();
-    context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
-    context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
-
-    const QUrl url(QStringLiteral("qrc:/qml/Main.qml"));
-    engine.load(url);
-
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_WATCHOS)
-    {
-        QObject *rootObject(engine.rootObjects().first());
-        rootObject->setProperty("width", 640);
-        rootObject->setProperty("height", 400);
-    }
-#endif
-
-    return QGuiApplication::instance()->exec();
 }

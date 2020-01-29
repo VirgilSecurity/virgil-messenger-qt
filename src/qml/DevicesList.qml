@@ -38,95 +38,112 @@ import QtQuick.Controls 2.12
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.1
 
-ListView {
-    id: devicesList
-    property alias visibility : devicesList.visible
-    property string backgroundColor: "#303030"
-    property int curX
-    property int curWidth
-    property int margin: 5
-    property int listItemHeight: 60
-    property string evenGradientColor: "#20FFFFFF"
+Item {
+    property var listItemHeight
 
-    anchors.fill: parent
-    model: SnapInfoClient
+    ColumnLayout {
 
-    delegate: Item
-    {
-        id: listDelegate
-        height: listItemHeight
+        anchors.fill: parent
+        anchors.leftMargin: 5
+        anchors.rightMargin: 5
 
-        Rectangle {
-            y: 0
-            x: curX
-            width: curWidth
-            height: parent.height
-            color: backgroundColor
+        spacing: 2
+
+        Title {
+            text: qsTr("Devices list")
         }
 
-        Rectangle {
-            x: curX
-            width: curWidth
-            height: parent.height
-            gradient: Gradient {
-                orientation: Gradient.Horizontal
-                GradientStop{ position: 0; color: index % 2 ? evenGradientColor : "#00000000" }
-                GradientStop{ position: 0.5; color: index % 2 ? evenGradientColor : "#00000000" }
-                GradientStop{ position: 1; color: "#00000000" }
+        ListView {
+            property int margin
+            property string evenGradientColor: "#20FFFFFF"
+            Layout.fillHeight: true
+
+            model: SnapInfoClient
+
+            delegate: Item
+            {
+                id: listDelegate
+                width: parent.width
+                height: devicesList.listItemHeight
+                property var dataLeft: height + 3 * margin
+                property string evenGradientColor: "#20FFFFFF"
+
+                Rectangle {
+                    id: rowBackground
+                    anchors.fill: parent
+                    gradient: Gradient {
+                        orientation: Gradient.Horizontal
+                        GradientStop{ position: 0; color: index % 2 ? evenGradientColor : "#00000000" }
+                        GradientStop{ position: 0.5; color: index % 2 ? evenGradientColor : "#00000000" }
+                        GradientStop{ position: 1; color: "#00000000" }
+                    }
+
+                }
+
+                GridLayout {
+                    id: row
+                    anchors.fill: parent
+                    rows: 3
+                    flow: GridLayout.TopToBottom
+                    property var squareSide: parent.height - 2 * margin
+
+                    Item {
+                        Layout.rowSpan: 3
+                        width: 0.1
+                    }
+
+                    Rectangle {
+                        Layout.rowSpan: 3
+                        Layout.fillHeight: true
+
+                        id: roleItemBackground
+                        color: "#004000"
+                        Layout.minimumWidth: row.squareSide
+                        Layout.preferredWidth: row.squareSide
+                        Layout.maximumWidth: row.squareSide
+                        Layout.minimumHeight: row.squareSide
+                        Layout.preferredHeight: row.squareSide
+                        Layout.maximumHeight: row.squareSide
+                        Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+
+                        Text {
+                            id: roleItemText
+                            anchors.fill: parent
+                            font.pointSize: dataFontSize
+                            color: "white"
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            text: deviceRoles
+                        }
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        horizontalAlignment: Text.AlignLeft
+                        verticalAlignment: Text.AlignBottom
+                        color: "yellow"
+                        text: isActive ? "active" : "not active"
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignLeft
+                        verticalAlignment: Text.AlignVCenter
+                        color: "white"
+                        text: macAddress
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        horizontalAlignment: Text.AlignLeft
+                        verticalAlignment: Text.AlignTop
+                        color: "white"
+                        text: "fw " + fwVer + ", tl " + tlVer
+                    }
+                }
             }
-
-        }
-
-        Rectangle {
-            id: roleItem
-            Layout.rowSpan: 2
-            color: "#004000"
-            x: curX + margin
-            y: margin
-            width: parent.height - 2 * margin
-            height: parent.height - 2 * margin
-
-            Text {
-                color: "white"
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                width: parent.height
-                height: parent.height
-                text: deviceRoles
-            }
-        }
-
-        Text {
-            color: "yellow"
-            horizontalAlignment: Text.AlignLeft
-            verticalAlignment: Text.AlignVCenter
-            x: curX + parent.height + 2 * margin
-            y: 0
-            width: curWidth
-            height: parent.height / 3
-            text: isActive ? "active" : "not active"
-        }
-
-        Text {
-            color: "white"
-            horizontalAlignment: Text.AlignLeft
-            verticalAlignment: Text.AlignVCenter
-            x: curX + parent.height + 2 * margin
-            y: parent.height / 3
-            width: curWidth
-            height: parent.height / 3
-            text: macAddress
-        }
-
-        Text {
-            color: "white"
-            horizontalAlignment: Text.AlignLeft
-            verticalAlignment: Text.AlignVCenter
-            x: curX + parent.height + 2 * margin
-            y: parent.height * 2 / 3
-            width: curWidth
-            height: parent.height / 3
-            text: "fw " + fwVer + ", tl " + tlVer
         }
     }
 }

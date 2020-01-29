@@ -38,65 +38,78 @@ import QtQuick.Controls 2.12
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.1
 
-ListView {
-    id: sniffer
-    property alias visibility : sniffer.visible
-    property int curX
-    property int curWidth
-    property int margin: 5
-    property int listItemHeight: 60
-    property string backgroundColor: "#202020"
+Item {
+    ColumnLayout {
 
-    anchors.fill: parent
-    model: SnapSniffer
+        anchors.fill: parent
+        anchors.leftMargin: 5
+        anchors.rightMargin: 5
 
-    delegate: Item
-    {
-        id: listDelegate
-        height: packetContent.y + packetContent.height + 2 * margin
+        spacing: 2
 
-        Rectangle {
-            y: 0
-            x: curX
-            width: curWidth
-            height: parent.height
-            color: backgroundColor
+        Title {
+            text: qsTr("Sniffer")
         }
 
-        Text {
-            id: packetEthernetInfo
-            wrapMode: Text.Wrap
-            color: "yellow"
-            horizontalAlignment: Text.AlignLeft
-            verticalAlignment: Text.AlignVCenter
-            x: margin
-            y: margin
-            width: curWidth - margin
-            text: timestamp + " : " + macSrc + " ==> " + macDst
-        }
+        ListView {
+            id: sniffer
 
-        Text {
-            id: packetSnapInfo
-            wrapMode: Text.Wrap
-            color: "lightBlue"
-            horizontalAlignment: Text.AlignLeft
-            verticalAlignment: Text.AlignVCenter
-            x: margin
-            y: packetEthernetInfo.y + packetEthernetInfo.height
-            width: curWidth - margin
-            text: serviceId + " : " + elementId
-        }
+            Layout.fillHeight: true
+            Layout.fillWidth: true
 
-        Text {
-            id: packetContent
-            wrapMode: Text.Wrap
-            color: "white"
-            horizontalAlignment: Text.AlignLeft
-            verticalAlignment: Text.AlignVCenter
-            x: margin
-            y: packetSnapInfo.y + packetSnapInfo.height
-            width: curWidth - margin
-            text: content
+            model: SnapSniffer
+
+            delegate: Item
+            {
+                id: listDelegate
+                width: parent.width
+                height: bottomMargin.y + bottomMargin.height
+
+                Rectangle {
+                    anchors.fill: parent
+                    color: "#303030"
+                }
+
+                Item {
+                    id: topMargin
+                    anchors.top: parent.top
+                    height: applicationWindow.margin * 2
+                }
+
+                Text {
+                    id: line1
+                    anchors.top: topMargin.top
+                    wrapMode: Text.Wrap
+                    width: parent.width
+                    color: "yellow"
+                    text: timestamp + " : " + macSrc + " ==> " + macDst
+                }
+
+                Text {
+                    id: line2
+                    anchors.top: line1.bottom
+                    wrapMode: Text.Wrap
+                    width: parent.width
+                    color: "lightBlue"
+                    text: serviceId + " : " + elementId
+                }
+
+                Text {
+                    id: line3
+                    anchors.top: line2.bottom
+                    wrapMode: Text.Wrap
+                    width: parent.width
+                    color: "white"
+                    text: contentSize + " bytes : " + content
+                }
+
+                Item {
+                    id: bottomMargin
+                    anchors.top: line3.bottom
+                    height: applicationWindow.margin * 2
+                }
+
+            }
         }
     }
 }
