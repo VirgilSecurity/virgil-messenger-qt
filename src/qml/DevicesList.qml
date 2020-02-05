@@ -57,8 +57,12 @@ Item {
             property int margin
             property string evenGradientColor: "#20FFFFFF"
             Layout.fillHeight: true
+            Layout.fillWidth: true
+
 
             model: SnapInfoClient
+
+            ScrollBar.vertical: ScrollBar {}
 
             delegate: Item
             {
