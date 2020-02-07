@@ -1,0 +1,46 @@
+#####
+build*/
+install*/
+.depends_cache/
+codegen/generated/
+codegen/test/gsl/
+ext/deps/*
+docs/doxygen
+Deploy/
+
+#####
+# OS X temporary files that should never be committed
+
+.DS_Store
+*.swp
+*.lock
+profile
+
+#####
+# CLion
+.idea
+cmake-build-*/
+debug*/
+release*/
+VERSION
+
+####
+# Sublime Text 3
+*.sublime-workspace
+
+####
+# Visual Studio (VisualGDB)
+Debug*/
+gcc*
+obj/
+bin/
+.vs/
+
+Carthage
+
+####
+format_list.txt
+
+####
+# QtCreator
+*.user
