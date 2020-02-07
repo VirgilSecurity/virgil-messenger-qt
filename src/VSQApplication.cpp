@@ -36,19 +36,18 @@
 #include <QtQml>
 
 #include <VSQApplication.h>
-
-#include <virgil/iot/qt/VSQIoTKit.h>
-#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
 #include <virgil/iot/logger/logger.h>
 
-QSharedPointer<VSQUdpBroadcast> bcast = QSharedPointer<VSQUdpBroadcast>::create();
+VSQApplication::VSQApplication() {
+    m_netifUDPbcast = QSharedPointer<VSQUdpBroadcast>::create();
+}
 
 int
 VSQApplication::run() {
     QQmlApplicationEngine engine;
 
     auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT << VSQFeatures::SNAP_SNIFFER;
-    auto impl = VSQImplementations() << /*QSharedPointer<VSQUdpBroadcast>::create()*/bcast;
+    auto impl = VSQImplementations() << m_netifUDPbcast;
     auto roles = VSQDeviceRoles() << VirgilIoTKit::VS_SNAP_DEV_CONTROL;
     auto appConfig = VSQAppConfig() << VSQManufactureId() << VSQDeviceType() << VSQDeviceSerial()
                                     << VirgilIoTKit::VS_LOGLEV_DEBUG << roles << VSQSnapSnifferQmlConfig();
@@ -62,9 +61,9 @@ VSQApplication::run() {
     context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
     context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
 
+#if VS_IOS
     connect(QGuiApplication::instance(), SIGNAL(applicationStateChanged(Qt::ApplicationState)), this, SLOT(onApplicationStateChanged(Qt::ApplicationState)));
-
-
+#endif // VS_IOS
 
     const QUrl url(QStringLiteral("qrc:/qml/Main.qml"));
     engine.load(url);
@@ -80,6 +79,7 @@ VSQApplication::run() {
     return QGuiApplication::instance()->exec();
 }
 
+#if VS_IOS
 void
 VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
     static bool _deactivated = false;
@@ -91,8 +91,9 @@ VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
 
     if (_deactivated && Qt::ApplicationActive == state) {
         _deactivated = false;
-        if (bcast.get()) {
-            bcast->restart();
+        if (m_netifUDPbcast.get()) {
+            m_netifUDPbcast->restart();
         }
     }
 }
+#endif // VS_IOS

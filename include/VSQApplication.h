@@ -38,16 +38,25 @@
 #include <QtCore>
 #include <QGuiApplication>
 #include <virgil/iot/qt/VSQIoTKit.h>
+#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
 
 class VSQApplication : public QObject {
     Q_OBJECT
 public:
+    VSQApplication();
+    virtual ~VSQApplication() = default;
+
     int
     run();
 
+#if VS_IOS
 private slots:
     void
     onApplicationStateChanged(Qt::ApplicationState state);
+#endif // VS_IOS
+
+private:
+    QSharedPointer<VSQUdpBroadcast> m_netifUDPbcast;
 };
 
 #endif // VSQApplication

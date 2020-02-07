@@ -51,6 +51,10 @@ include(ext/virgil-iotkit/integration/qt/iotkit.pri)
 DEFINES += QT_DEPRECATED_WARNINGS \
         INFO_CLIENT=1
 
+CONFIG(iphoneos, iphoneos | iphonesimulator) {
+    DEFINES += VS_IOS=1
+}
+
 #
 #   Headers
 #
