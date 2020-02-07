@@ -41,12 +41,14 @@
 #include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
 #include <virgil/iot/logger/logger.h>
 
+QSharedPointer<VSQUdpBroadcast> bcast = QSharedPointer<VSQUdpBroadcast>::create();
+
 int
 VSQApplication::run() {
     QQmlApplicationEngine engine;
 
     auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT << VSQFeatures::SNAP_SNIFFER;
-    auto impl = VSQImplementations() << QSharedPointer<VSQUdpBroadcast>::create();
+    auto impl = VSQImplementations() << /*QSharedPointer<VSQUdpBroadcast>::create()*/bcast;
     auto roles = VSQDeviceRoles() << VirgilIoTKit::VS_SNAP_DEV_CONTROL;
     auto appConfig = VSQAppConfig() << VSQManufactureId() << VSQDeviceType() << VSQDeviceSerial()
                                     << VirgilIoTKit::VS_LOGLEV_DEBUG << roles << VSQSnapSnifferQmlConfig();
@@ -60,6 +62,10 @@ VSQApplication::run() {
     context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
     context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
 
+    connect(QGuiApplication::instance(), SIGNAL(applicationStateChanged(Qt::ApplicationState)), this, SLOT(onApplicationStateChanged(Qt::ApplicationState)));
+
+
+
     const QUrl url(QStringLiteral("qrc:/qml/Main.qml"));
     engine.load(url);
 
@@ -72,4 +78,21 @@ VSQApplication::run() {
 #endif
 
     return QGuiApplication::instance()->exec();
+}
+
+void
+VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
+    static bool _deactivated = false;
+    qDebug() << state;
+
+    if (Qt::ApplicationInactive == state) {
+        _deactivated = true;
+    }
+
+    if (_deactivated && Qt::ApplicationActive == state) {
+        _deactivated = false;
+        if (bcast.get()) {
+            bcast->restart();
+        }
+    }
 }

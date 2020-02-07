@@ -39,10 +39,14 @@
 #include <QGuiApplication>
 #include <virgil/iot/qt/VSQIoTKit.h>
 
-class VSQApplication {
+class VSQApplication : public QObject {
+    Q_OBJECT
 public:
     int
     run();
+
+private slots:
+void	onApplicationStateChanged(Qt::ApplicationState state);
 };
 
 #endif // VSQApplication
