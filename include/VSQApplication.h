@@ -46,7 +46,8 @@ public:
     run();
 
 private slots:
-void	onApplicationStateChanged(Qt::ApplicationState state);
+    void
+    onApplicationStateChanged(Qt::ApplicationState state);
 };
 
 #endif // VSQApplication
