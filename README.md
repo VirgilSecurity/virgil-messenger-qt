@@ -43,12 +43,20 @@ Demo-iotkit-qt package is a sample application that uses the virgil-iotkit libra
 ## Setting Up Demo-iotkit-qt
 The following section contains information on how to set up the demo-iotkit-qt.
 
+The most simple way to try IoTKit and Qt interaction:
+- Select prefered platfrom and download ready-to-use package ([Android_arm64](https://bintray.com/virgilsecurity/iotl-demo-cdn/download_file?file_path=android_arm64_v8a-0.1.3.59.zip), [Android_armv7](https://bintray.com/virgilsecurity/iotl-demo-cdn/download_file?file_path=android_armv7-0.1.3.59.zip), [Android_x86](https://bintray.com/virgilsecurity/iotl-demo-cdn/download_file?file_path=android_x86-0.1.3.59.zip), [Linux](https://bintray.com/virgilsecurity/iotl-demo-cdn/download_file?file_path=linux-0.1.3.59.zip), [MacOS](https://bintray.com/virgilsecurity/iotl-demo-cdn/download_file?file_path=MacOS-0.1.3.59.zip), [Windows](https://bintray.com/virgilsecurity/iotl-demo-cdn/download_file?file_path=windows-0.1.3.59.zip))
+- Run the downloaded Qt application
+- Run Sandbox (Sandbox must be running in the same subnetwork with qt application)
+- Create device and gateway in Sandbox and perform their provisioning and registration
+
+Otherwise you can create your own application following the instructions below
+
 ### Prerequisites
 Elements required for successful compilation:
 - Qt v5.12.6 or higher for demo-iotkit-qt building.
 - CMake v3.11 or higher for Virgil IoTKit framework building.
-- С98 or higher for Virgil IoTKit framework building.
-- С++ v.14 or higher for demo-iotkit-qt building.
+- С99 or higher for Virgil IoTKit framework building.
+- С++14 or higher for demo-iotkit-qt building.
 
 Demo-iotkit-qt package was tested on the gcc, clang, mingw compilers. For Windows mingw is suggested due to binary packets received from other Virgil IoT devices compatibility.
 
