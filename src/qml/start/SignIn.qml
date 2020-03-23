@@ -37,7 +37,7 @@ Page {
             Layout.alignment: Qt.AlignHCenter
             color: mainTextCOlor
             font.pointSize: 14
-            leftPadding: 30
+            leftPadding: 40
             background: Rectangle {
                 implicitWidth: 200
                 implicitHeight: 50
@@ -51,7 +51,6 @@ Page {
 
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-//                    leftPadding: 10
 
                     fillMode: Image.PreserveAspectFit
                     source: "../resources/Contacts.png"
@@ -77,7 +76,8 @@ Page {
             baseColor: mainAppColor
             borderColor: mainAppColor
             onClicked: {
-                loginUser(loginUsername.text)
+                //loginUser(loginUsername.text)
+                stackView.push("qrc:/qml/chat/ContactPage.qml")
             }
         }
 

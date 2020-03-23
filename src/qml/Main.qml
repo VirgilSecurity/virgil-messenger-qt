@@ -19,7 +19,7 @@ ApplicationWindow {
     property var dataBase
 
     // Main stackview
-    StackView{
+    StackView {
         id: stackView
         focus: true
         anchors.fill: parent

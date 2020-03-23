@@ -38,6 +38,39 @@
 #include <VSQApplication.h>
 #include <virgil/iot/logger/logger.h>
 
+#include <QGuiApplication>
+#include <QStandardPaths>
+#include <QSqlDatabase>
+#include <QSqlError>
+#include <QtQml>
+#include <QFont>
+
+#include "sqlcontactmodel.h"
+#include "sqlconversationmodel.h"
+
+static void connectToDatabase()
+{
+    QSqlDatabase database = QSqlDatabase::database();
+    if (!database.isValid()) {
+        database = QSqlDatabase::addDatabase("QSQLITE");
+        if (!database.isValid())
+            qFatal("Cannot add database: %s", qPrintable(database.lastError().text()));
+    }
+
+    const QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    if (!writeDir.mkpath("."))
+        qFatal("Failed to create writable directory at %s", qPrintable(writeDir.absolutePath()));
+
+    // Ensure that we have a writable location on all devices.
+    const QString fileName = writeDir.absolutePath() + "/chat-database.sqlite3";
+    // When using the SQLite driver, open() will create the SQLite database if it doesn't exist.
+    database.setDatabaseName(fileName);
+    if (!database.open()) {
+        qFatal("Cannot open database: %s", qPrintable(database.lastError().text()));
+        QFile::remove(fileName);
+    }
+}
+
 VSQApplication::VSQApplication() {
     m_netifUDPbcast = QSharedPointer<VSQUdpBroadcast>::create();
 }
@@ -60,6 +93,16 @@ VSQApplication::run() {
     QQmlContext *context = engine.rootContext();
     context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
     context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
+
+
+    qmlRegisterType<SqlContactModel>("io.qt.examples.chattutorial", 1, 0, "SqlContactModel");
+    qmlRegisterType<SqlConversationModel>("io.qt.examples.chattutorial", 1, 0, "SqlConversationModel");
+
+    connectToDatabase();
+
+    QFont fon(QGuiApplication::font());
+    fon.setPointSize(1.5 * QGuiApplication::font().pointSize());
+    QGuiApplication::setFont(fon);
 
 #if VS_IOS
     connect(QGuiApplication::instance(), SIGNAL(applicationStateChanged(Qt::ApplicationState)), this, SLOT(onApplicationStateChanged(Qt::ApplicationState)));

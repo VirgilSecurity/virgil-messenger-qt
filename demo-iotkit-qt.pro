@@ -32,7 +32,7 @@
 #
 #  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-QT += core network qml quick bluetooth
+QT += core network qml quick bluetooth sql
 
 CONFIG += c++14
 
@@ -61,7 +61,9 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
 #
 
 HEADERS += \
-        include/VSQApplication.h
+        include/VSQApplication.h \
+        include/sqlcontactmodel.h \
+        include/sqlconversationmodel.h
 
 #
 #   Sources
@@ -69,7 +71,9 @@ HEADERS += \
 
 SOURCES += \
         src/main.cpp \
-        src/VSQApplication.cpp
+        src/VSQApplication.cpp \
+        src/sqlcontactmodel.cpp \
+        src/sqlconversationmodel.cpp
 
 #
 #   Resources
