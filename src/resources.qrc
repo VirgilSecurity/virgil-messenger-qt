@@ -1,8 +1,25 @@
 <RCC>
     <qresource prefix="/">
-        <file>qml/Main.qml</file>
+        <file>qml/Main1.qml</file>
         <file>qml/DevicesList.qml</file>
         <file>qml/Sniffer.qml</file>
         <file>qml/Title.qml</file>
+        <file>qml/Main.qml</file>
+        <file>qml/start/SignIn.qml</file>
+        <file>qml/start/SignUp.qml</file>
+        <file>qml/start/PasswordResetPage.qml</file>
+        <file>qml/start/UserInfoPage.qml</file>
+        <file>qml/start/backend.js</file>
+        <file>qml/helpers/ui/CButton.qml</file>
+        <file>qml/helpers/ui/CIcon.qml</file>
+        <file>qml/resources/User.png</file>
+        <file>qml/resources/PoweredBy.png</file>
+        <file>qml/resources/Settings.png</file>
+        <file>qml/resources/Plus.png</file>
+        <file>qml/resources/Contacts.png</file>
+        <file>qml/resources/Chats.png</file>
+        <file>qml/resources/AppUserscreen.png</file>
+        <file>qml/resources/AddAccount.png</file>
+        <file>qml/resources/Group.png</file>
     </qresource>
 </RCC>

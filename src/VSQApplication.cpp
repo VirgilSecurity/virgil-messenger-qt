@@ -72,7 +72,7 @@ VSQApplication::run() {
     {
         QObject *rootObject(engine.rootObjects().first());
         rootObject->setProperty("width", 640);
-        rootObject->setProperty("height", 400);
+        rootObject->setProperty("height", 640);
     }
 #endif
 
