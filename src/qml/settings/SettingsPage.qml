@@ -2,10 +2,8 @@ import QtQuick 2.7
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.1
 
-import "start/backend.js" as Backend
-
 Page {
-    id: userInfoPage
+    id: settingsPage
 
     property string userName: ""
 

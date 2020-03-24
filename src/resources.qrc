@@ -5,11 +5,10 @@
         <file>qml/Sniffer.qml</file>
         <file>qml/Title.qml</file>
         <file>qml/Main.qml</file>
-        <file>qml/start/SignIn.qml</file>
-        <file>qml/start/SignUp.qml</file>
-        <file>qml/start/PasswordResetPage.qml</file>
-        <file>qml/start/UserInfoPage.qml</file>
-        <file>qml/start/backend.js</file>
+        <file>qml/login/Login.qml</file>
+        <file>qml/login/PasswordResetPage.qml</file>
+        <file>qml/login/login.js</file>
+        <file>qml/settings/SettingsPage.qml</file>
         <file>qml/helpers/ui/CButton.qml</file>
         <file>qml/helpers/ui/CIcon.qml</file>
         <file>qml/resources/User.png</file>
@@ -36,5 +35,6 @@
         <file>qml/resources/avatars/Hans_Gude@2x.png</file>
         <file>qml/resources/avatars/Hans_Gude@3x.png</file>
         <file>qml/resources/avatars/Hans_Gude@4x.png</file>
+        <file>qml/helpers/ui/Progress.qml</file>
     </qresource>
 </RCC>

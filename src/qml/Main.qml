@@ -3,13 +3,15 @@ import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.1
 import QtQuick.LocalStorage 2.0
 
-import "start/backend.js" as Backend
+import "login/login.js" as Backend
 import "helpers/ui"
 
 ApplicationWindow {
     id: rootWindow
     visible: true
     title: qsTr("Virgil IoTKit Qt Demo")
+    minimumWidth: 550
+    minimumHeight: 500
 
     property color backGroundColor : "#394454"
     property color mainAppColor: "#6fda9c"
@@ -27,9 +29,8 @@ ApplicationWindow {
 
     // After loading show initial Login Page
     Component.onCompleted: {
-        stackView.push("qrc:/qml/start/SignIn.qml")   //initial page
+        stackView.push("qrc:/qml/login/Login.qml")
         dataBase = userDataBase()
-        console.log(dataBase.version)
     }
 
     // Popup to show messages or warnings on the bottom postion of the screen
@@ -148,19 +149,19 @@ ApplicationWindow {
     // Show UserInfo page
     function showUserInfo(uname)
     {
-        stackView.replace("qrc:/qml/start/UserInfoPage.qml", {"userName": uname})
+        stackView.replace("qrc:/qml/login/UserInfoPage.qml", {"userName": uname})
     }
 
     // Logout and show login page
     function logoutSession()
     {
-        stackView.replace("qrc:/qml/start/SignIn.qml")
+        stackView.replace("qrc:/qml/login/SignIn.qml")
     }
 
     // Show Password reset page
     function forgotPassword()
     {
-        stackView.replace("qrc:/qml/start/PasswordResetPage.qml")
+        stackView.replace("qrc:/qml/login/PasswordResetPage.qml")
     }
 
     // Show all users
