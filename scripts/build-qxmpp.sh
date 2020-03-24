@@ -13,32 +13,6 @@ BUILD_DIR_BASE="${QXMPP_DIR}"
 PLATFORM="host"
 
 #
-#   Pack libraries to one
-#
-# function pack_libs() {
-#     LIBS_DIR=${1}
-#     FINAL_LIB="libvscryptoc.a"
-
-#     pushd ${LIBS_DIR}
-
-#       local LIBS=( "libed25519.a" "libmbedcrypto.a" "libprotobuf-nanopb.a" "libvsc_common.a" "libvsc_foundation.a" "libvsc_foundation_pb.a")
-
-#       # Split static lib to object files
-# 		  for LIB in "${LIBS[@]}"; do
-# 		      ar x ${LIB}
-# 		      rm ${LIB}
-# 		  done
-
-# 			# Combine all object files to a static lib
-# 			ar rcs ${FINAL_LIB} *.o
-
-#       # Clean up object files
-#       rm *.o
-
-#     popd
-# }
-
-#
 #   Build
 #
 function build() {
@@ -70,8 +44,6 @@ function build() {
 
       # install all targets
       make DESTDIR=${INSTALL_DIR} install
-
-    #   pack_libs ${LIBS_DIR}
 
     popd
 }
