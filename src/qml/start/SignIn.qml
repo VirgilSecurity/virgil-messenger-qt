@@ -36,7 +36,6 @@ Page {
             Layout.preferredWidth: parent.width - 20
             Layout.alignment: Qt.AlignHCenter
             color: mainTextCOlor
-            font.pointSize: 14
             leftPadding: 40
             background: Rectangle {
                 implicitWidth: 200

@@ -32,7 +32,7 @@
 #
 #  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-QT += core network qml quick bluetooth sql
+QT += core network qml quick bluetooth sql xml
 
 CONFIG += c++14
 
@@ -43,6 +43,12 @@ TARGET = demo-iotkit-qt
 #
 
 include(ext/virgil-iotkit/integration/qt/iotkit.pri)
+
+#
+#   QXMPP
+#
+QXMPP_BUILD_PATH = $$PWD/ext/qxmpp/cmake-build-host/release/installed/usr/local
+message("QXMPP location : $${QXMPP_BUILD_PATH}")
 
 #
 #   Defines
@@ -85,7 +91,15 @@ RESOURCES += src/resources.qrc
 #   Include path
 #
 
-INCLUDEPATH +=  include
+INCLUDEPATH +=  include \
+        $${QXMPP_BUILD_PATH}/include
+
+
+#
+#   Libraries
+#
+
+LIBS += -L$${QXMPP_BUILD_PATH}/lib -lqxmpp -L/usr/local/lib -lvpx -lopus
 
 #
 #   Default rules for deployment

@@ -40,6 +40,8 @@
 #include <virgil/iot/qt/VSQIoTKit.h>
 #include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
 
+#include <qxmpp/QXmppClient.h>
+
 class VSQApplication : public QObject {
     Q_OBJECT
 public:
@@ -57,6 +59,7 @@ private slots:
 
 private:
     QSharedPointer<VSQUdpBroadcast> m_netifUDPbcast;
+    QXmppClient m_xmpp;
 };
 
 #endif // VSQApplication

@@ -62,7 +62,7 @@ Page {
 
     header: ChatToolBar {
         ToolButton {
-            text: qsTr("Back")
+            text: qsTr("Log out")
             anchors.left: parent.left
             anchors.leftMargin: 10
             anchors.verticalCenter: parent.verticalCenter

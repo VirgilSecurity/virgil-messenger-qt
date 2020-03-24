@@ -90,6 +90,8 @@ VSQApplication::run() {
         return -1;
     }
 
+    m_xmpp.setActive(true);
+
     QQmlContext *context = engine.rootContext();
     context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
     context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
