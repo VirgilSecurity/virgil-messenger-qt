@@ -35,35 +35,17 @@ ApplicationWindow {
 
     // Popup to show messages or warnings on the bottom postion of the screen
     Popup {
-        id: popup
-        property alias popMessage: message.text
-
-        background: Rectangle {
-            implicitWidth: rootWindow.width
-            implicitHeight: 60
-            color: popupBackGroundColor
-        }
-
-        y: (rootWindow.height - 60)
-        modal: true
-        focus: true
-        closePolicy: Popup.CloseOnPressOutside
-        Text {
-            id: message
-            anchors.centerIn: parent
-            font.pointSize: 12
-            color: popupTextCOlor
-        }
-        onOpened: popupClose.start()
+        id: inform
     }
 
-    // Popup will be closed automatically in 2 seconds after its opened
-    Timer {
-        id: popupClose
-        interval: 2000
-        onTriggered: popup.close()
+    // Show Popup message
+    function showPopupMessage(message) {
+        inform.popupView.popMessage = message
+        inform.popupView.open()
     }
 
+
+    //------------------------------------------------------------------------
     // Create and initialize the database
     function userDataBase()
     {

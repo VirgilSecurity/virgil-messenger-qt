@@ -36,5 +36,6 @@
         <file>qml/resources/avatars/Hans_Gude@3x.png</file>
         <file>qml/resources/avatars/Hans_Gude@4x.png</file>
         <file>qml/helpers/ui/Progress.qml</file>
+        <file>qml/helpers/ui/Popup.qml</file>
     </qresource>
 </RCC>
