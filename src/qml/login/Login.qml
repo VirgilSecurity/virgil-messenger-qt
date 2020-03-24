@@ -7,13 +7,23 @@ import "../helpers/ui"
 
 Page {
     id: loginPage
+    objectName: "LoginObject"
 
+    //
     // Signals
-    signal registerClicked()
+    //
+    signal fireSignIn(string user)
+    signal fireSignUp(string user)
 
+    //
     // Properties
+    //
     property int operationTimeMaxMs: 3000
 
+
+    //
+    //  UI
+    //
     background: Rectangle {
         color: backGroundColor
     }
@@ -92,7 +102,7 @@ Page {
                 name: qsTr("Log In")
                 baseColor: mainAppColor
                 borderColor: mainAppColor
-                onClicked: showProgress(qsTr("Sign In"))
+                onClicked: signInUser(loginUsername.text)
             }
 
             Rectangle {
@@ -109,7 +119,7 @@ Page {
                 name: qsTr("Sign Up")
                 baseColor: "transparent"
                 borderColor: mainAppColor
-                onClicked: showProgress(qsTr("Sign Up"))
+                onClicked: signUpUser(loginUsername.text)
             }
         }
 
@@ -128,10 +138,32 @@ Page {
         }
     }
 
+    //
+    //  Functions
+    //
+
     function showProgress(title) {
         stackView.push("qrc:/qml/helpers/ui/Progress.qml", {"titleStr": title, "reqTimeMs": operationTimeMaxMs, "timerStart": true})
         stackView.currentItem.done.connect(function() {
             stackView.push("qrc:/qml/chat/ContactPage.qml")
         })
+    }
+
+    function signInUser(user) {
+        if (LoginLogic.validateUser(user)) {
+            showProgress(qsTr("Sign In"))
+            loginPage.fireSignIn(user)
+        } else {
+            showPopupMessage(qsTr("Incorrect user name"))
+        }
+    }
+
+    function signUpUser(user) {
+        if (LoginLogic.validateUser(user)) {
+            showProgress(qsTr("Sign Up"))
+            loginPage.fireSignUp(user)
+        } else {
+            showPopupMessage(qsTr("Incorrect user name"))
+        }
     }
 }

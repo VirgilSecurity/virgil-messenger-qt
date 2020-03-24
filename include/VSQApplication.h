@@ -51,11 +51,18 @@ public:
     int
     run();
 
-#if VS_IOS
+
 private slots:
+#if VS_IOS
     void
     onApplicationStateChanged(Qt::ApplicationState state);
 #endif // VS_IOS
+
+    void
+    onSignIn(QString userId);
+
+    void
+    onSignUp(QString userId);
 
 private:
     QSharedPointer<VSQUdpBroadcast> m_netifUDPbcast;
