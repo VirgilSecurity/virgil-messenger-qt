@@ -79,6 +79,9 @@ public:
     VSQSqlConversationModel &
     modelConversations();
 
+    Q_INVOKABLE void
+    sendMessage(QString to, QString message);
+
 signals:
     void
     fireError(QString errorText);

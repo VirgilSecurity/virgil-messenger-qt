@@ -363,7 +363,48 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
 }
 
 /******************************************************************************/
-void VSQMessenger::onPresenceReceived(const QXmppPresence &presence) {
+void
+VSQMessenger::sendMessage(QString to, QString message) {
+    static const size_t _encryptedMsgSzMax = 20 * 1024;
+    uint8_t encryptedMessage[_encryptedMsgSzMax];
+    size_t encryptedMessageSz = 0;
+
+    // Save message to DB
+    m_sqlConversations->sendMessage(to, message);
+
+    // Create JSON-formatted message to be sent
+    QJsonObject payloadObject;
+    payloadObject.insert("body", message);
+
+    QJsonObject mainObject;
+    mainObject.insert("type", "text");
+    mainObject.insert("payload", payloadObject);
+
+    QJsonDocument doc(mainObject);
+    QString internalJson = doc.toJson(QJsonDocument::Compact);
+
+    qDebug() << internalJson;
+
+    // Encrypt message
+    if (VS_CODE_OK != vs_messenger_virgil_encrypt_msg(
+                     to.toStdString().c_str(),
+                     internalJson.toStdString().c_str(),
+                     encryptedMessage,
+                     _encryptedMsgSzMax,
+                     &encryptedMessageSz)) {
+        VS_LOG_WARNING("Cannot encrypt message to be sent");
+        return;
+    }
+
+    // Send encrypted message
+    QString toJID = to + "@" + _xmppURL();
+    QString encryptedStr = QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage));
+    m_xmpp.sendMessage(toJID, encryptedStr);
+}
+
+/******************************************************************************/
+void
+VSQMessenger::onPresenceReceived(const QXmppPresence &presence) {
     VS_LOG_DEBUG("onPresenceReceived");
 }
 

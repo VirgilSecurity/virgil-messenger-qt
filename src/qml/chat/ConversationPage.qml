@@ -153,7 +153,7 @@ Page {
                     text: qsTr("Send")
                     enabled: messageField.length > 0
                     onClicked: {
-                        listView.model.sendMessage(inConversationWith, messageField.text);
+                        Messenger.sendMessage(inConversationWith, messageField.text)
                         messageField.text = "";
                     }
                 }
