@@ -65,6 +65,9 @@ public:
     Q_INVOKABLE void
     deleteUser(QString user);
 
+    Q_INVOKABLE QStringList
+    usersList();
+
 signals:
     void
     fireError(QString errorText);
@@ -91,6 +94,7 @@ private:
 
     static const QString kOrganization;
     static const QString kApp;
+    static const QString kUsers;
 
     void
     _connect(QString user);
@@ -109,6 +113,12 @@ private:
 
     bool
     _loadCredentials(const QString &user, vs_messenger_virgil_user_creds_t &creds);
+
+    void
+    _addToUsersList(const QString &user);
+
+    void
+    _saveUsersList(const QStringList &users);
 };
 
 #endif // VIRGIL_IOTKIT_QT_MESSENGER_H

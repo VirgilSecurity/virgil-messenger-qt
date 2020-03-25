@@ -39,7 +39,8 @@
 
 
 const QString VSQMessenger::kOrganization = "VirgilSecurity";
-const QString VSQMessenger::kApp = tr("IoTKit Messenger");
+const QString VSQMessenger::kApp = "IoTKit Messenger";
+const QString VSQMessenger::kUsers = "Users";
 
 
 /******************************************************************************/
@@ -65,6 +66,9 @@ VSQMessenger::_connect(QString user) {
     const size_t _pass_buf_sz = 512;
     char pass[_pass_buf_sz];
     QString jid = user + "@" + _xmppURL();
+
+    // Update users list
+    _addToUsersList(user);
 
     // Get XMPP password
     if (VS_CODE_OK != vs_messenger_virgil_get_xmpp_pass(pass, _pass_buf_sz)) {
@@ -146,9 +150,20 @@ VSQMessenger::_xmppPort() {
 
 /******************************************************************************/
 
+void
+VSQMessenger::_addToUsersList(const QString &user) {
+    // Save known user
+    auto knownUsers = usersList();
+    knownUsers.removeAll(user);
+    knownUsers.push_front(user);
+    _saveUsersList(knownUsers);
+}
+
+/******************************************************************************/
 // TODO: Use SecBox
 bool
 VSQMessenger::_saveCredentials(const QString &user, const vs_messenger_virgil_user_creds_t &creds) {
+    // Save credentials
     QByteArray baCred(reinterpret_cast<const char*>(&creds), sizeof(creds));
     QSettings settings(kOrganization, kApp);
     settings.setValue(user, baCred.toBase64());
@@ -170,6 +185,20 @@ VSQMessenger::_loadCredentials(const QString &user, vs_messenger_virgil_user_cre
 
     memcpy(&creds, baCred.data(), static_cast<size_t> (baCred.size()));
     return true;
+}
+
+/******************************************************************************/
+void
+VSQMessenger::_saveUsersList(const QStringList &users) {
+    QSettings settings(kOrganization, kApp);
+    settings.setValue(kUsers, users);
+}
+
+/******************************************************************************/
+QStringList
+VSQMessenger::usersList() {
+    QSettings settings(kOrganization, kApp);
+    return settings.value(kUsers, QStringList()).toStringList();
 }
 
 /******************************************************************************/

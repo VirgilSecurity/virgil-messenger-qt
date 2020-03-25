@@ -43,32 +43,69 @@ Page {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillHeight: true
 
-            TextField {
+            ComboBox {
                 id: loginUsername
-                placeholderText: qsTr("User name")
-
                 width: parent.width
-                color: mainTextCOlor
-                leftPadding: 40
+                leftPadding: 10
+                rightPadding: 30
+
+                editable: true
+                flat: true
+                model: Messenger.usersList()
+
+                contentItem: TextField {
+                    placeholderText: qsTr("User name")
+                    text: loginUsername.displayText
+
+                    color: mainTextCOlor
+                    leftPadding: 40
+
+                    background: Rectangle {
+                        color: "transparent"
+
+                        Image {
+                            id: userImg
+                            width: 30
+                            height: 30
+
+                            anchors.left: parent.left
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            fillMode: Image.PreserveAspectFit
+                            source: "../resources/Contacts.png"
+                        }
+                    }
+                }
+
+                indicator: Canvas {
+                    id: canvas
+                    x: loginUsername.width - width - 10
+                    y: loginUsername.topPadding + (loginUsername.availableHeight - height) / 2
+                    width: 15
+                    height: 15
+                    contextType: "2d"
+
+                    Connections {
+                        target: loginUsername
+                        onPressedChanged: canvas.requestPaint()
+                    }
+
+                    onPaint: {
+                        context.reset();
+                        context.moveTo(0, 0);
+                        context.lineTo(width, 0);
+                        context.lineTo(width / 2, height);
+                        context.closePath();
+                        context.fillStyle = loginUsername.pressed ? "grey" : mainTextCOlor;
+                        context.fill();
+                    }
+                }
 
                 background: Rectangle {
                     implicitWidth: 200
                     implicitHeight: 50
                     radius: implicitHeight / 2
                     color: "transparent"
-
-                    Image {
-                        id: userImg
-                        width: 30
-                        height: 30
-
-                        anchors.left: parent.left
-                        anchors.verticalCenter: parent.verticalCenter
-
-                        fillMode: Image.PreserveAspectFit
-                        source: "../resources/Contacts.png"
-                    }
-
 
                     Rectangle {
                         width: parent.width - 10
@@ -95,7 +132,7 @@ Page {
                 name: qsTr("Log In")
                 baseColor: mainAppColor
                 borderColor: mainAppColor
-                onClicked: signInUser(loginUsername.text)
+                onClicked: signInUser(loginUsername.editText)
             }
 
             Rectangle {
@@ -112,7 +149,7 @@ Page {
                 name: qsTr("Sign Up")
                 baseColor: "transparent"
                 borderColor: mainAppColor
-                onClicked: signUpUser(loginUsername.text)
+                onClicked: signUpUser(loginUsername.editText)
             }
         }
 
@@ -138,9 +175,9 @@ Page {
     // Show progress page
     function showProgress(title) {
         stackView.push("qrc:/qml/helpers/ui/Progress.qml", {"titleStr": title, "reqTimeMs": operationTimeMaxMs, "timerStart": true})
-//        stackView.currentItem.done.connect(function() {
-//            stackView.push("qrc:/qml/login/Login.qml")
-//        })
+        //        stackView.currentItem.done.connect(function() {
+        //            stackView.push("qrc:/qml/login/Login.qml")
+        //        })
     }
 
     function signInUser(user) {
