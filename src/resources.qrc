@@ -23,19 +23,8 @@
         <file>qml/chat/ChatToolBar.qml</file>
         <file>qml/chat/ContactPage.qml</file>
         <file>qml/chat/ConversationPage.qml</file>
-        <file>qml/resources/avatars/Albert_Einstein.png</file>
-        <file>qml/resources/avatars/Albert_Einstein@2x.png</file>
-        <file>qml/resources/avatars/Albert_Einstein@3x.png</file>
-        <file>qml/resources/avatars/Albert_Einstein@4x.png</file>
-        <file>qml/resources/avatars/Ernest_Hemingway.png</file>
-        <file>qml/resources/avatars/Ernest_Hemingway@2x.png</file>
-        <file>qml/resources/avatars/Ernest_Hemingway@3x.png</file>
-        <file>qml/resources/avatars/Ernest_Hemingway@4x.png</file>
-        <file>qml/resources/avatars/Hans_Gude.png</file>
-        <file>qml/resources/avatars/Hans_Gude@2x.png</file>
-        <file>qml/resources/avatars/Hans_Gude@3x.png</file>
-        <file>qml/resources/avatars/Hans_Gude@4x.png</file>
         <file>qml/helpers/ui/Progress.qml</file>
         <file>qml/helpers/ui/Popup.qml</file>
+        <file>qml/chat/AddContactDialog.qml</file>
     </qresource>
 </RCC>

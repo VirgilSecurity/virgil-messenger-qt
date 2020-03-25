@@ -69,8 +69,8 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
 HEADERS += \
         include/VSQApplication.h \
         include/VSQMessenger.h \
-        include/sqlcontactmodel.h \
-        include/sqlconversationmodel.h
+        include/VSQSqlContactModel.h \
+        include/VSQSqlConversationModel.h
 
 #
 #   Sources
@@ -78,10 +78,10 @@ HEADERS += \
 
 SOURCES += \
         src/VSQMessenger.cpp \
+        src/VSQSqlContactModel.cpp \
+        src/VSQSqlConversationModel.cpp \
         src/main.cpp \
-        src/VSQApplication.cpp \
-        src/sqlcontactmodel.cpp \
-        src/sqlconversationmodel.cpp
+        src/VSQApplication.cpp
 
 #
 #   Resources

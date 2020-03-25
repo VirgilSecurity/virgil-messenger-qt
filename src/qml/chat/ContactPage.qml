@@ -51,8 +51,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 
-import io.qt.examples.chattutorial 1.0
-
 Page {
     id: root
 
@@ -77,6 +75,16 @@ Page {
             font.pixelSize: 20
             anchors.centerIn: parent
         }
+
+        ToolButton {
+            text: qsTr("Add contact")
+            anchors.right: parent.right
+            anchors.rightMargin: 10
+            anchors.verticalCenter: parent.verticalCenter
+            onClicked: {
+                addContact()
+            }
+        }
     }
 
     ListView {
@@ -87,7 +95,7 @@ Page {
         bottomMargin: 48
         rightMargin: 48
         spacing: 20
-        model: SqlContactModel {}
+        model: ContactsModel
 
         delegate: ItemDelegate {
             text: model.display
@@ -102,13 +110,39 @@ Page {
                 value: mainTextCOlor
             }
 
-            onClicked: root.StackView.view.push("qrc:/qml/chat/ConversationPage.qml", { inConversationWith: model.display })
+            onClicked: {
+                ConversationsModel.recipient = model.display
+                root.StackView.view.push("qrc:/qml/chat/ConversationPage.qml", { inConversationWith: model.display })
+            }
 
             Image {
                 id: avatar
-                source: "qrc:/qml/resources/avatars/" + model.display.replace(" ", "_") + ".png"
+                source: "qrc:/qml/resources/Contacts.png"
             }
         }
+    }
+
+    //
+    //  Functions
+    //
+    function addContact() {
+        var component = Qt.createComponent("AddContactDialog.qml")
+        if (component.status === Component.Ready) {
+            var dialog = component.createObject(rootWindow)
+            dialog.applied.connect(function()
+            {
+                try {
+                    Messenger.addContact(dialog.contact)
+                } catch (error) {
+                    console.error("Cannot start initialization of device")
+                }
+                dialog.close()
+            })
+            dialog.open()
+            return dialog
+        }
+        console.error(component.errorString())
+        return null
     }
 }
 

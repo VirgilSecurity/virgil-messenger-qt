@@ -37,17 +37,28 @@
 #include <VSQMessenger.h>
 #include <QtConcurrent>
 
+#include <QStandardPaths>
+#include <QSqlDatabase>
+#include <QSqlError>
+#include <QtQml>
 
 const QString VSQMessenger::kOrganization = "VirgilSecurity";
 const QString VSQMessenger::kApp = "IoTKit Messenger";
 const QString VSQMessenger::kUsers = "Users";
-
 
 /******************************************************************************/
 VSQMessenger::VSQMessenger() {
     if (VS_CODE_OK != vs_messenger_virgil_init(_virgilURL().toStdString().c_str())) {
         qCritical() << "Cannot initialize low level messenger";
     }
+
+    _connectToDatabase();
+
+    m_sqlContacts = new VSQSqlContactModel(this);
+    m_sqlConversations = new VSQSqlConversationModel(this);
+
+    // Signal connection
+    connect(this, SIGNAL(fireReadyToAddContact(QString)), this, SLOT(onAddContactToDB(QString)));
 
     // Connect XMPP signals
     connect(&m_xmpp, SIGNAL(connected()), this, SLOT(onConnected()));
@@ -58,6 +69,38 @@ VSQMessenger::VSQMessenger() {
     connect(&m_xmpp, SIGNAL(iqReceived(const QXmppIq &)), this, SLOT(onIqReceived(const QXmppIq &)));
     connect(&m_xmpp, SIGNAL(sslErrors(const QList<QSslError> &)), this, SLOT(onSslErrors(const QList<QSslError> &)));
     connect(&m_xmpp, SIGNAL(stateChanged(QXmppClient::State)), this, SLOT(onStateChanged(QXmppClient::State)));
+}
+
+/******************************************************************************/
+void
+VSQMessenger::_connectToDatabase() {
+
+    //    var db = LocalStorage.openDatabaseSync("UserLoginApp", "1.0", "Login example!", 1000000);
+    //    db.transaction(function(tx) {
+    //        tx.executeSql('CREATE TABLE IF NOT EXISTS UserDetails(username TEXT, password TEXT, hint TEXT)');
+    //    })
+
+
+    QSqlDatabase database = QSqlDatabase::database();
+    if (!database.isValid()) {
+        database = QSqlDatabase::addDatabase("QSQLITE");
+        if (!database.isValid())
+            qFatal("Cannot add database: %s", qPrintable(database.lastError().text()));
+    }
+
+    const QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    if (!writeDir.mkpath("."))
+        qFatal("Failed to create writable directory at %s", qPrintable(writeDir.absolutePath()));
+
+    // Ensure that we have a writable location on all devices.
+    const QString fileName = writeDir.absolutePath() + "/chat-database.sqlite3";
+    qDebug() << ">>> " << fileName;
+    // When using the SQLite driver, open() will create the SQLite database if it doesn't exist.
+    database.setDatabaseName(fileName);
+    if (!database.open()) {
+        qFatal("Cannot open database: %s", qPrintable(database.lastError().text()));
+        QFile::remove(fileName);
+    }
 }
 
 /******************************************************************************/
@@ -128,6 +171,28 @@ VSQMessenger::signUp(QString user) {
         // Connect over XMPP
         _connect(user);
     });
+}
+
+/******************************************************************************/
+void
+VSQMessenger::addContact(QString contact) {
+    QtConcurrent::run([=]() {
+        // Sign Up user, using Virgil Service
+        if (VS_CODE_OK != vs_messenger_virgil_search(contact.toStdString().c_str())) {
+            auto errorText = tr("User is not registered : ") + contact;
+            emit fireInform(errorText);
+            return;
+        }
+
+        emit fireReadyToAddContact(contact);
+    });
+}
+
+/******************************************************************************/
+void
+VSQMessenger::onAddContactToDB(QString contact) {
+    m_sqlContacts->addContact(contact);
+    emit fireAddedContact(contact);
 }
 
 /******************************************************************************/
@@ -215,12 +280,26 @@ VSQMessenger::deleteUser(QString user) {
 }
 
 /******************************************************************************/
-void VSQMessenger::onConnected() {
+VSQSqlContactModel &
+VSQMessenger::modelContacts() {
+    return *m_sqlContacts;
+}
+
+/******************************************************************************/
+VSQSqlConversationModel &
+VSQMessenger::modelConversations() {
+    return *m_sqlConversations;
+}
+
+/******************************************************************************/
+void
+VSQMessenger::onConnected() {
     emit fireReady();
 }
 
 /******************************************************************************/
-void VSQMessenger::onDisconnected() {
+void
+VSQMessenger::onDisconnected() {
     VS_LOG_DEBUG("onDisconnected");
 #if 0
     emit fireError(tr("Disconnected ..."));
@@ -228,13 +307,15 @@ void VSQMessenger::onDisconnected() {
 }
 
 /******************************************************************************/
-void VSQMessenger::onError(QXmppClient::Error) {
+void
+VSQMessenger::onError(QXmppClient::Error) {
     VS_LOG_DEBUG("onError");
     emit fireError(tr("Connection error ..."));
 }
 
 /******************************************************************************/
-void VSQMessenger::onMessageReceived(const QXmppMessage &message) {
+void
+VSQMessenger::onMessageReceived(const QXmppMessage &message) {
     VS_LOG_DEBUG("onMessageReceived");
 }
 
@@ -244,17 +325,20 @@ void VSQMessenger::onPresenceReceived(const QXmppPresence &presence) {
 }
 
 /******************************************************************************/
-void VSQMessenger::onIqReceived(const QXmppIq &iq) {
+void
+VSQMessenger::onIqReceived(const QXmppIq &iq) {
     VS_LOG_DEBUG("onIqReceived");
 }
 
 /******************************************************************************/
-void VSQMessenger::onSslErrors(const QList<QSslError> &errors) {
+void
+VSQMessenger::onSslErrors(const QList<QSslError> &errors) {
     emit fireError(tr("Secure connection error ..."));
 }
 
 /******************************************************************************/
-void VSQMessenger::onStateChanged(QXmppClient::State state) {
+void
+VSQMessenger::onStateChanged(QXmppClient::State state) {
     if (QXmppClient::ConnectingState == state) {
         emit fireConnecting();
     }

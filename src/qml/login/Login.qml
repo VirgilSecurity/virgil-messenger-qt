@@ -175,9 +175,6 @@ Page {
     // Show progress page
     function showProgress(title) {
         stackView.push("qrc:/qml/helpers/ui/Progress.qml", {"titleStr": title, "reqTimeMs": operationTimeMaxMs, "timerStart": true})
-        //        stackView.currentItem.done.connect(function() {
-        //            stackView.push("qrc:/qml/login/Login.qml")
-        //        })
     }
 
     function signInUser(user) {

@@ -52,8 +52,6 @@ import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
 
-import io.qt.examples.chattutorial 1.0
-
 Page {
     id: root
 
@@ -92,9 +90,7 @@ Page {
             displayMarginEnd: 40
             verticalLayoutDirection: ListView.BottomToTop
             spacing: 12
-            model: SqlConversationModel {
-                recipient: inConversationWith
-            }
+            model: ConversationsModel
             delegate: Column {
                 anchors.right: sentByMe ? parent.right : undefined
                 spacing: 6
@@ -108,7 +104,7 @@ Page {
 
                     Image {
                         id: avatar
-                        source: !sentByMe ? "qrc:/qml/resources/avatars/" + model.author.replace(" ", "_") + ".png" : ""
+                        source: !sentByMe ? "qrc:/qml/resources/Contacts.png" : ""
                     }
 
                     Rectangle {

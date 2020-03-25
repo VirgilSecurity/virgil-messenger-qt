@@ -44,6 +44,8 @@
 using namespace VirgilIoTKit;
 #include <virgil/iot/messenger/messenger.h>
 
+#include "VSQSqlContactModel.h"
+#include "VSQSqlConversationModel.h"
 
 class VSQMessenger final : public QObject {
 
@@ -68,15 +70,33 @@ public:
     Q_INVOKABLE QStringList
     usersList();
 
+    Q_INVOKABLE void
+    addContact(QString contact);
+
+    VSQSqlContactModel &
+    modelContacts();
+
+    VSQSqlConversationModel &
+    modelConversations();
+
 signals:
     void
     fireError(QString errorText);
+
+    void
+    fireInform(QString informText);
 
     void
     fireConnecting();
 
     void
     fireReady();
+
+    void
+    fireAddedContact(QString contact);
+
+    void
+    fireReadyToAddContact(QString contact);
 
 
 private slots:
@@ -89,12 +109,20 @@ private slots:
     void onSslErrors(const QList<QSslError> &errors);
     void onStateChanged(QXmppClient::State state);
 
+    void
+    onAddContactToDB(QString contact);
+
 private:
     QXmppClient m_xmpp;
+    VSQSqlContactModel *m_sqlContacts;
+    VSQSqlConversationModel *m_sqlConversations;
 
     static const QString kOrganization;
     static const QString kApp;
     static const QString kUsers;
+
+    void
+    _connectToDatabase();
 
     void
     _connect(QString user);

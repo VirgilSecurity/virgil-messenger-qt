@@ -39,42 +39,14 @@
 #include <virgil/iot/logger/logger.h>
 
 #include <QGuiApplication>
-#include <QStandardPaths>
-#include <QSqlDatabase>
-#include <QSqlError>
-#include <QtQml>
 #include <QFont>
 
-#include "sqlcontactmodel.h"
-#include "sqlconversationmodel.h"
-
-static void connectToDatabase()
-{
-    QSqlDatabase database = QSqlDatabase::database();
-    if (!database.isValid()) {
-        database = QSqlDatabase::addDatabase("QSQLITE");
-        if (!database.isValid())
-            qFatal("Cannot add database: %s", qPrintable(database.lastError().text()));
-    }
-
-    const QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    if (!writeDir.mkpath("."))
-        qFatal("Failed to create writable directory at %s", qPrintable(writeDir.absolutePath()));
-
-    // Ensure that we have a writable location on all devices.
-    const QString fileName = writeDir.absolutePath() + "/chat-database.sqlite3";
-    // When using the SQLite driver, open() will create the SQLite database if it doesn't exist.
-    database.setDatabaseName(fileName);
-    if (!database.open()) {
-        qFatal("Cannot open database: %s", qPrintable(database.lastError().text()));
-        QFile::remove(fileName);
-    }
-}
-
+/******************************************************************************/
 VSQApplication::VSQApplication() {
     m_netifUDPbcast = QSharedPointer<VSQUdpBroadcast>::create();
 }
 
+/******************************************************************************/
 int
 VSQApplication::run() {
     QQmlApplicationEngine engine;
@@ -94,11 +66,8 @@ VSQApplication::run() {
     context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
     context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
     context->setContextProperty("Messenger", &m_messenger);
-
-    qmlRegisterType<SqlContactModel>("io.qt.examples.chattutorial", 1, 0, "SqlContactModel");
-    qmlRegisterType<SqlConversationModel>("io.qt.examples.chattutorial", 1, 0, "SqlConversationModel");
-
-    connectToDatabase();
+    context->setContextProperty("ContactsModel", &m_messenger.modelContacts());
+    context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
 
     QFont fon(QGuiApplication::font());
     fon.setPointSize(1.5 * QGuiApplication::font().pointSize());
@@ -122,6 +91,7 @@ VSQApplication::run() {
     return QGuiApplication::instance()->exec();
 }
 
+/******************************************************************************/
 #if VS_IOS
 void
 VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
@@ -140,3 +110,5 @@ VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
     }
 }
 #endif // VS_IOS
+
+/******************************************************************************/
