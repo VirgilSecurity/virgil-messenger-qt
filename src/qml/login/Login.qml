@@ -10,16 +10,9 @@ Page {
     objectName: "LoginObject"
 
     //
-    // Signals
+    //  Properties
     //
-    signal fireSignIn(string user)
-    signal fireSignUp(string user)
-
-    //
-    // Properties
-    //
-    property int operationTimeMaxMs: 3000
-
+    property int operationTimeMaxMs: 1000
 
     //
     //  UI
@@ -142,28 +135,29 @@ Page {
     //  Functions
     //
 
+    // Show progress page
     function showProgress(title) {
         stackView.push("qrc:/qml/helpers/ui/Progress.qml", {"titleStr": title, "reqTimeMs": operationTimeMaxMs, "timerStart": true})
-        stackView.currentItem.done.connect(function() {
-            stackView.push("qrc:/qml/chat/ContactPage.qml")
-        })
+//        stackView.currentItem.done.connect(function() {
+//            stackView.push("qrc:/qml/login/Login.qml")
+//        })
     }
 
     function signInUser(user) {
         if (LoginLogic.validateUser(user)) {
             showProgress(qsTr("Sign In"))
-            loginPage.fireSignIn(user)
+            Messenger.signIn(user)
         } else {
-            showPopupMessage(qsTr("Incorrect user name"))
+            showPopupError(qsTr("Incorrect user name"))
         }
     }
 
     function signUpUser(user) {
         if (LoginLogic.validateUser(user)) {
             showProgress(qsTr("Sign Up"))
-            loginPage.fireSignUp(user)
+            Messenger.signUp(user)
         } else {
-            showPopupMessage(qsTr("Incorrect user name"))
+            showPopupError(qsTr("Incorrect user name"))
         }
     }
 }

@@ -4,6 +4,8 @@ import QtQuick.Layouts 1.1
 
 Item {
     property alias popupView: popup
+    property alias popupColor: popupBackground.color
+    property alias popupColorText: message.color
 
     Popup {
         id: popup
@@ -11,9 +13,9 @@ Item {
         property alias popMessage: message.text
 
         background: Rectangle {
+            id: popupBackground
             implicitWidth: rootWindow.width
             implicitHeight: 60
-            color: popupBackGroundColor
         }
 
         enter: Transition {
@@ -37,7 +39,6 @@ Item {
         Text {
             id: message
             anchors.centerIn: parent
-            color: popupTextCOlor
         }
         onOpened: popupClose.start()
     }

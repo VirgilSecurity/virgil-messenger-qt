@@ -67,7 +67,8 @@ Page {
             anchors.leftMargin: 10
             anchors.verticalCenter: parent.verticalCenter
             onClicked: {
-                 stackView.push("qrc:/qml/login/Login.qml")
+                Messenger.logout()
+                stackView.push("qrc:/qml/login/Login.qml")
             }
         }
 

@@ -90,12 +90,10 @@ VSQApplication::run() {
         return -1;
     }
 
-    m_xmpp.setActive(true);
-
     QQmlContext *context = engine.rootContext();
     context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
     context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
-
+    context->setContextProperty("Messenger", &m_messenger);
 
     qmlRegisterType<SqlContactModel>("io.qt.examples.chattutorial", 1, 0, "SqlContactModel");
     qmlRegisterType<SqlConversationModel>("io.qt.examples.chattutorial", 1, 0, "SqlConversationModel");
@@ -113,10 +111,6 @@ VSQApplication::run() {
     const QUrl url(QStringLiteral("qrc:/qml/Main.qml"));
     engine.load(url);
 
-    QObject* qmlLoginPage = engine.rootObjects().first()->findChild<QObject*>("LoginObject");
-    connect(qmlLoginPage, SIGNAL(fireSignIn(QString)), this, SLOT(onSignIn(QString)));
-    connect(qmlLoginPage, SIGNAL(fireSignUp(QString)), this, SLOT(onSignUp(QString)));
-
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_WATCHOS)
     {
         QObject *rootObject(engine.rootObjects().first());
@@ -126,16 +120,6 @@ VSQApplication::run() {
 #endif
 
     return QGuiApplication::instance()->exec();
-}
-
-void
-VSQApplication::onSignIn(QString userId) {
-    qDebug() << "Trying to Sign In: " << userId;
-}
-
-void
-VSQApplication::onSignUp(QString userId) {
-    qDebug() << "Trying to Sign Up: " << userId;
 }
 
 #if VS_IOS

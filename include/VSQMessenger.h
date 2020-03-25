@@ -32,33 +32,83 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
-#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
+
+#ifndef VIRGIL_IOTKIT_QT_MESSENGER_H
+#define VIRGIL_IOTKIT_QT_MESSENGER_H
 
 #include <QtCore>
-#include <QGuiApplication>
-#include <VSQMessenger.h>
-#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
 
-class VSQApplication : public QObject {
+#include <virgil/iot/qt/VSQIoTKit.h>
+#include <qxmpp/QXmppClient.h>
+
+using namespace VirgilIoTKit;
+#include <virgil/iot/messenger/messenger.h>
+
+
+class VSQMessenger final : public QObject {
+
     Q_OBJECT
-public:
-    VSQApplication();
-    virtual ~VSQApplication() = default;
 
-    int
-    run();
+public:
+    VSQMessenger();
+    virtual ~VSQMessenger() = default;
+
+    Q_INVOKABLE void
+    signIn(QString user);
+
+    Q_INVOKABLE void
+    signUp(QString user);
+
+    Q_INVOKABLE void
+    logout();
+
+    Q_INVOKABLE void
+    deleteUser(QString user);
+
+signals:
+    void
+    fireError(QString errorText);
+
+    void
+    fireConnecting();
+
+    void
+    fireReady();
 
 
 private slots:
-#if VS_IOS
-    void
-    onApplicationStateChanged(Qt::ApplicationState state);
-#endif // VS_IOS
+    void onConnected();
+    void onDisconnected();
+    void onError(QXmppClient::Error);
+    void onMessageReceived(const QXmppMessage &message);
+    void onPresenceReceived(const QXmppPresence &presence);
+    void onIqReceived(const QXmppIq &iq);
+    void onSslErrors(const QList<QSslError> &errors);
+    void onStateChanged(QXmppClient::State state);
 
 private:
-    VSQMessenger m_messenger;
-    QSharedPointer<VSQUdpBroadcast> m_netifUDPbcast;
+    QXmppClient m_xmpp;
+
+    static const QString kOrganization;
+    static const QString kApp;
+
+    void
+    _connect(QString user);
+
+    QString
+    _virgilURL();
+
+    QString
+    _xmppURL();
+
+    uint16_t
+    _xmppPort();
+
+    bool
+    _saveCredentials(const QString &user, const vs_messenger_virgil_user_creds_t &creds);
+
+    bool
+    _loadCredentials(const QString &user, vs_messenger_virgil_user_creds_t &creds);
 };
 
-#endif // VSQApplication
+#endif // VIRGIL_IOTKIT_QT_MESSENGER_H

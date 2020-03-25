@@ -13,12 +13,37 @@ ApplicationWindow {
     minimumWidth: 550
     minimumHeight: 500
 
+    //
+    //  Properties
+    //
     property color backGroundColor : "#394454"
     property color mainAppColor: "#6fda9c"
     property color mainTextCOlor: "#f0f0f0"
-    property color popupBackGroundColor: "#b44"
-    property color popupTextCOlor: "#ffffff"
     property var dataBase
+
+    //
+    //  Connections
+    //
+    Connections {
+        target: Messenger
+
+        onFireError: {
+            showPopupError(errorText)
+            stackView.push("qrc:/qml/login/Login.qml")
+        }
+
+        onFireConnecting: {
+        }
+
+        onFireReady: {
+            stackView.push("qrc:/qml/chat/ContactPage.qml")
+        }
+    }
+
+
+    //
+    //  UI
+    //
 
     // Main stackview
     StackView {
@@ -39,16 +64,29 @@ ApplicationWindow {
     }
 
     // Show Popup message
-    function showPopupMessage(message) {
+    function showPopupError(message) {
+        inform.popupColor = "#b44"
+        inform.popupColorText = "#ffffff"
         inform.popupView.popMessage = message
         inform.popupView.open()
     }
 
+    function showPopupInform(message) {
+        inform.popupColor = "#FFFACD"
+        inform.popupColorText = "#00"
+        inform.popupView.popMessage = message
+        inform.popupView.open()
+    }
 
-    //------------------------------------------------------------------------
+    function showPopupSucces(message) {
+        inform.popupColor = "#66CDAA"
+        inform.popupColorText = "#00"
+        inform.popupView.popMessage = message
+        inform.popupView.open()
+    }
+
     // Create and initialize the database
-    function userDataBase()
-    {
+    function userDataBase() {
         var db = LocalStorage.openDatabaseSync("UserLoginApp", "1.0", "Login example!", 1000000);
         db.transaction(function(tx) {
             tx.executeSql('CREATE TABLE IF NOT EXISTS UserDetails(username TEXT, password TEXT, hint TEXT)');
@@ -57,106 +95,4 @@ ApplicationWindow {
         return db;
     }
 
-    // Register New user
-    function registerNewUser(uname, pword, pword2, hint)
-    {
-        var ret  = Backend.validateRegisterCredentials(uname, pword, pword2, hint)
-        var message = ""
-        switch(ret)
-        {
-        case 0: message = "Valid details!"
-            break;
-        case 1: message = "Missing credentials!"
-            break;
-        case 2: message = "Password does not match!"
-            break;
-        }
-
-        if (0 !== ret)
-        {
-            popup.popMessage = message
-            popup.open()
-            return
-        }
-
-        dataBase.transaction(function(tx) {
-            var results = tx.executeSql('SELECT password FROM UserDetails WHERE username=?;', uname);
-            console.log(results.rows.length)
-            if(results.rows.length !== 0)
-            {
-                popup.popMessage = "User already exist!"
-                popup.open()
-                return
-            }
-            tx.executeSql('INSERT INTO UserDetails VALUES(?, ?, ?)', [ uname, pword, hint ]);
-            showUserInfo(uname) // goto user info page
-        })
-    }
-
-    // Login users
-    function loginUser(uname)
-    {
-        var ret  = Backend.validateUserCredentials(uname, pword)
-        var message = ""
-        if(ret)
-        {
-            message = "Missing credentials!"
-            popup.popMessage = message
-            popup.open()
-            return
-        }
-
-//        dataBase.transaction(function(tx) {
-//            var results = tx.executeSql('SELECT password FROM UserDetails WHERE username=?;', uname);
-//            if(results.rows.length === 0)
-//            {
-//                message = "User not registered!"
-//                popup.popMessage = message
-//                popup.open()
-//            }
-//            else if(results.rows.item(0).password !== pword)
-//            {
-//                message = "Invalid credentials!"
-//                popup.popMessage = message
-//                popup.open()
-//            }
-//            else
-//            {
-//                console.log("Login Success!")
-//                showUserInfo(uname)
-//            }
-//        })
-    }
-
-    // Show UserInfo page
-    function showUserInfo(uname)
-    {
-        stackView.replace("qrc:/qml/login/UserInfoPage.qml", {"userName": uname})
-    }
-
-    // Logout and show login page
-    function logoutSession()
-    {
-        stackView.replace("qrc:/qml/login/SignIn.qml")
-    }
-
-    // Show Password reset page
-    function forgotPassword()
-    {
-        stackView.replace("qrc:/qml/login/PasswordResetPage.qml")
-    }
-
-    // Show all users
-    function showAllUsers()
-    {
-        dataBase.transaction(function(tx) {
-            var rs = tx.executeSql('SELECT * FROM UserDetails');
-            var data = ""
-            for(var i = 0; i < rs.rows.length; i++) {
-                data += rs.rows.item(i).username + "\n"
-            }
-            console.log(data)
-        })
-
-    }
 }

@@ -78,7 +78,7 @@ Page {
                 if (progressBar.value < progressBar.to) {
                     progressBar.value += 1.0
                 } else {
-                    progressBar.value = progressBar.to
+                    progressBar.value = 0
                     timeout()
                 }
             }
@@ -100,7 +100,6 @@ Page {
     }
 
     function timeout() {
-        simpleTimer.running = false
         progressPage.done()
     }
 }
