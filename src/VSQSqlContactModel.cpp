@@ -81,7 +81,7 @@ VSQSqlContactModel::_update() {
 void
 VSQSqlContactModel::addContact(QString contact) {
     QSqlQuery query;
-    query.prepare("INSERT INTO Contacts VALUES (:contact)");
+    query.prepare("INSERT OR IGNORE INTO Contacts VALUES (:contact)");
     query.bindValue(":contact", contact);
     query.exec();
 

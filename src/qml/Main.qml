@@ -44,6 +44,10 @@ ApplicationWindow {
 
         onFireAddedContact: {
         }
+
+        onFireNewMessage: {
+            showChat(from)
+        }
     }
 
 
@@ -88,5 +92,16 @@ ApplicationWindow {
         inform.popupColorText = "#00"
         inform.popupView.popMessage = message
         inform.popupView.open()
+    }
+
+    // Show chat with
+    function showChat(contact) {
+        ConversationsModel.recipient = contact
+        stackView.push("qrc:/qml/chat/ConversationPage.qml", { inConversationWith: contact })
+    }
+
+    // Show contacts
+    function showContacts() {
+        stackView.push("qrc:/qml/chat/ContactPage.qml")
     }
 }

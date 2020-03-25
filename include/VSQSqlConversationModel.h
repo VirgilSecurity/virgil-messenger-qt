@@ -60,6 +60,9 @@ public:
     Q_INVOKABLE void
     sendMessage(const QString &recipient, const QString &message);
 
+    Q_INVOKABLE void
+    receiveMessage(const QString &sender, const QString &message);
+
 signals:
     void
     recipientChanged();

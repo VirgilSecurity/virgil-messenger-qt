@@ -111,8 +111,7 @@ Page {
             }
 
             onClicked: {
-                ConversationsModel.recipient = model.display
-                root.StackView.view.push("qrc:/qml/chat/ConversationPage.qml", { inConversationWith: model.display })
+                showChat(model.display)
             }
 
             Image {

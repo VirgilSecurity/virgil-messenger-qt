@@ -98,6 +98,9 @@ signals:
     void
     fireReadyToAddContact(QString contact);
 
+    void
+    fireNewMessage(QString from, QString message);
+
 
 private slots:
     void onConnected();

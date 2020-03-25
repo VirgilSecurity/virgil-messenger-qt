@@ -35,8 +35,10 @@
 #include <virgil/iot/qt/VSQIoTKit.h>
 
 #include <VSQMessenger.h>
-#include <QtConcurrent>
 
+#include <qxmpp/QXmppMessage.h>
+
+#include <QtConcurrent>
 #include <QStandardPaths>
 #include <QSqlDatabase>
 #include <QSqlError>
@@ -74,13 +76,6 @@ VSQMessenger::VSQMessenger() {
 /******************************************************************************/
 void
 VSQMessenger::_connectToDatabase() {
-
-    //    var db = LocalStorage.openDatabaseSync("UserLoginApp", "1.0", "Login example!", 1000000);
-    //    db.transaction(function(tx) {
-    //        tx.executeSql('CREATE TABLE IF NOT EXISTS UserDetails(username TEXT, password TEXT, hint TEXT)');
-    //    })
-
-
     QSqlDatabase database = QSqlDatabase::database();
     if (!database.isValid()) {
         database = QSqlDatabase::addDatabase("QSQLITE");
@@ -316,7 +311,55 @@ VSQMessenger::onError(QXmppClient::Error) {
 /******************************************************************************/
 void
 VSQMessenger::onMessageReceived(const QXmppMessage &message) {
-    VS_LOG_DEBUG("onMessageReceived");
+
+    // TODO: Do we need a separate thread here ?
+
+    static const size_t _decryptedMsgSzMax = 10 * 1024;
+    uint8_t decryptedMessage[_decryptedMsgSzMax];
+    size_t decryptedMessageSz = 0;
+
+    // Get sender
+    QString from = message.from();
+    QStringList pieces = from.split("@");
+    if (pieces.size() < 1) {
+        VS_LOG_WARNING("Wrong sender");
+        return;
+    }
+    QString sender = pieces.first();
+
+    // Get encrypted message
+    QString msg = message.body();
+
+    // Decrypt message
+    // DECRYPTED_MESSAGE_SZ_MAX - 1  - This is required for a Zero-terminated string
+    if (VS_CODE_OK !=
+            vs_messenger_virgil_decrypt_msg(
+                sender.toStdString().c_str(),
+                msg.toStdString().c_str(),
+                decryptedMessage, decryptedMessageSz - 1,
+                &decryptedMessageSz)) {
+        VS_LOG_WARNING("Received message cannot be decrypted");
+        return;
+    }
+
+    // Add Zero termination
+    decryptedMessage[decryptedMessageSz] = 0;
+
+    // Get message from JSON
+    QByteArray baDecr(reinterpret_cast<char *> (decryptedMessage), static_cast<int> (decryptedMessageSz));
+    QJsonDocument jsonMsg(QJsonDocument::fromJson(baDecr));
+    QString decryptedString = jsonMsg["payload"]["body"].toString();
+
+    VS_LOG_DEBUG("Received message: <%s>", decryptedString.toStdString().c_str());
+
+    // Add sender to contacts
+    m_sqlContacts->addContact(sender);
+
+    // Save message to DB
+    m_sqlConversations->receiveMessage(sender, decryptedString);
+
+    // Inform system about new message
+    emit fireNewMessage(sender, decryptedString);
 }
 
 /******************************************************************************/

@@ -136,3 +136,21 @@ VSQSqlConversationModel::sendMessage(const QString &recipient, const QString &me
 }
 
 /******************************************************************************/
+void
+VSQSqlConversationModel::receiveMessage(const QString &sender, const QString &message) {
+    const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
+
+    QSqlRecord newRecord = record();
+    newRecord.setValue("author", sender);
+    newRecord.setValue("recipient", "Me");
+    newRecord.setValue("timestamp", timestamp);
+    newRecord.setValue("message", message);
+    if (!insertRecord(rowCount(), newRecord)) {
+        qWarning() << "Failed to save received message:" << lastError().text();
+        return;
+    }
+
+    submitAll();
+}
+
+/******************************************************************************/
