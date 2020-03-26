@@ -122,6 +122,8 @@ VSQMessenger::_connect(QString user) {
 /******************************************************************************/
 void
 VSQMessenger::signIn(QString user) {
+    m_sqlContacts->setUser(user);
+    m_sqlConversations->setUser(user);
     QtConcurrent::run([=]() {
         qDebug() << "Trying to Sign In: " << user;
 
@@ -148,6 +150,8 @@ VSQMessenger::signIn(QString user) {
 /******************************************************************************/
 void
 VSQMessenger::signUp(QString user) {
+    m_sqlContacts->setUser(user);
+    m_sqlConversations->setUser(user);
     QtConcurrent::run([=]() {
         qDebug() << "Trying to Sign Up: " << user;
 

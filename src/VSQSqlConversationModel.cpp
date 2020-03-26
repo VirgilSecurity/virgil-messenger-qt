@@ -43,33 +43,37 @@
 /******************************************************************************/
 void
 VSQSqlConversationModel::_createTable() {
-    if (QSqlDatabase::database().tables().contains("Conversations")) {
-        // The table already exists; we don't need to do anything.
-        return;
-    }
-
     QSqlQuery query;
     if (!query.exec(
-        "CREATE TABLE IF NOT EXISTS 'Conversations' ("
+        QString("CREATE TABLE IF NOT EXISTS %1 ("
         "'author' TEXT NOT NULL,"
         "'recipient' TEXT NOT NULL,"
         "'timestamp' TEXT NOT NULL,"
         "'message' TEXT NOT NULL,"
         "FOREIGN KEY('author') REFERENCES Contacts ( name ),"
         "FOREIGN KEY('recipient') REFERENCES Contacts ( name )"
-        ")")) {
+        ")").arg(_tableName()))) {
         qFatal("Failed to query database: %s", qPrintable(query.lastError().text()));
     }
 }
 
 /******************************************************************************/
-VSQSqlConversationModel::VSQSqlConversationModel(QObject *parent) :
-    QSqlTableModel(parent) {
-    _createTable();
-    setTable("Conversations");
+void
+VSQSqlConversationModel::_update() {
+    setTable(_tableName());
     setSort(2, Qt::DescendingOrder);
     // Ensures that the model is sorted correctly after submitting a new row.
     setEditStrategy(QSqlTableModel::OnManualSubmit);
+
+    setFilter("");
+    select();
+
+    emit recipientChanged();
+}
+
+/******************************************************************************/
+VSQSqlConversationModel::VSQSqlConversationModel(QObject *parent) :
+    QSqlTableModel(parent) {
 }
 
 /******************************************************************************/
@@ -151,6 +155,33 @@ VSQSqlConversationModel::receiveMessage(const QString &sender, const QString &me
     }
 
     submitAll();
+}
+
+/******************************************************************************/
+QString
+VSQSqlConversationModel::user() const {
+    return m_user;
+}
+
+/******************************************************************************/
+void
+VSQSqlConversationModel::setUser(const QString &user) {
+    if (user == m_user) {
+        return;
+    }
+
+    m_user = user;
+
+    _createTable();
+    _update();
+}
+
+/******************************************************************************/
+QString
+VSQSqlConversationModel::_tableName() const {
+    QString fixedUser(m_user);
+    fixedUser.remove(QRegExp("[^a-zA-Z\\d\\s]"));
+    return QString("Conversations_") + fixedUser;
 }
 
 /******************************************************************************/

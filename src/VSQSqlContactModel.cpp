@@ -41,33 +41,25 @@
 /******************************************************************************/
 void
 VSQSqlContactModel::_createTable() {
-    if (QSqlDatabase::database().tables().contains(QStringLiteral("Contacts"))) {
-        // The table already exists; we don't need to do anything.
-        return;
-    }
-
     QSqlQuery query;
-    if (!query.exec(
-        "CREATE TABLE IF NOT EXISTS 'Contacts' ("
-        "   'name' TEXT NOT NULL,"
-        "   PRIMARY KEY(name)"
-        ")")) {
+    query.prepare(QString("CREATE TABLE IF NOT EXISTS %1 ("
+                  "   'name' TEXT NOT NULL,"
+                  "   PRIMARY KEY(name)"
+                  ")").arg( _tableName()));
+    query.exec();
+
+    if (!query.exec()) {
         qFatal("Failed to query database: %s", qPrintable(query.lastError().text()));
     }
-}
-
-/******************************************************************************/
-VSQSqlContactModel::VSQSqlContactModel(QObject *parent) :
-    QSqlQueryModel(parent) {
-    _createTable();
-    _update();
 }
 
 /******************************************************************************/
 void
 VSQSqlContactModel::_update() {
     QSqlQuery query;
-    if (!query.exec("SELECT * FROM Contacts")) {
+    query.prepare(QString("SELECT * FROM %1").arg(_tableName()));
+
+    if (!query.exec()) {
         qFatal("Contacts SELECT query failed: %s", qPrintable(query.lastError().text()));
     }
 
@@ -78,10 +70,15 @@ VSQSqlContactModel::_update() {
 }
 
 /******************************************************************************/
+VSQSqlContactModel::VSQSqlContactModel(QObject *parent) :
+    QSqlQueryModel(parent) {
+}
+
+/******************************************************************************/
 void
 VSQSqlContactModel::addContact(QString contact) {
     QSqlQuery query;
-    query.prepare("INSERT OR IGNORE INTO Contacts VALUES (:contact)");
+    query.prepare(QString("INSERT OR IGNORE INTO %1 VALUES (:contact)").arg(_tableName()));
     query.bindValue(":contact", contact);
     query.exec();
 
@@ -90,6 +87,33 @@ VSQSqlContactModel::addContact(QString contact) {
     }
 
     _update();
+}
+
+/******************************************************************************/
+QString
+VSQSqlContactModel::user() const {
+    return m_user;
+}
+
+/******************************************************************************/
+void
+VSQSqlContactModel::setUser(const QString &user) {
+    if (user == m_user) {
+        return;
+    }
+
+    m_user = user;
+
+    _createTable();
+    _update();
+}
+
+/******************************************************************************/
+QString
+VSQSqlContactModel::_tableName() const {
+    QString fixedUser(m_user);
+    fixedUser.remove(QRegExp("[^a-zA-Z\\d\\s]"));
+    return QString("Contacts_") + fixedUser;
 }
 
 /******************************************************************************/

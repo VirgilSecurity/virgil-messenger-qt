@@ -46,6 +46,12 @@ public:
     VSQSqlConversationModel(QObject *parent = nullptr);
 
     QString
+    user() const;
+
+    Q_INVOKABLE void
+    setUser(const QString &user);
+
+    QString
     recipient() const;
 
     Q_INVOKABLE void
@@ -68,10 +74,17 @@ signals:
     recipientChanged();
 
 private:
+    QString m_user;
     QString m_recipient;
 
     void
     _createTable();
+
+    void
+    _update();
+
+    QString
+    _tableName() const;
 };
 
 #endif // VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H

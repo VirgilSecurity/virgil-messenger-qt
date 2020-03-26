@@ -44,16 +44,27 @@ class VSQSqlContactModel : public QSqlQueryModel {
 public:
     VSQSqlContactModel(QObject *parent = nullptr);
 
+    QString
+    user() const;
+
+    Q_INVOKABLE void
+    setUser(const QString &user);
+
 public slots:
     void
     addContact(QString contact);
 
 private:
+    QString m_user;
+
     void
     _createTable();
 
     void
     _update();
+
+    QString
+    _tableName() const;
 
 };
 
