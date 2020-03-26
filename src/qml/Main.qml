@@ -19,6 +19,10 @@ ApplicationWindow {
     property color mainAppColor: "#6fda9c"
     property color mainTextCOlor: "#f0f0f0"
 
+    property color toolbarTextColor: "white"
+    property color toolbarColor: "#455462"
+    property int   toolbarHeight: 40
+
     property bool mobileView: false
 
     //
@@ -93,7 +97,7 @@ ApplicationWindow {
         inform.popupColor = "#FFFACD"
         inform.popupColorText = "#00"
         inform.popupView.popMessage = message
-        inform.popupOnTop = false
+        inform.popupOnTop = true
         inform.popupModal = false
         inform.popupView.open()
     }
@@ -102,7 +106,7 @@ ApplicationWindow {
         inform.popupColor = "#66CDAA"
         inform.popupColorText = "#00"
         inform.popupView.popMessage = message
-        inform.popupOnTop = false
+        inform.popupOnTop = true
         inform.popupModal = false
         inform.popupView.open()
     }

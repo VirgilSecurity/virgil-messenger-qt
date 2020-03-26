@@ -59,32 +59,6 @@ Page {
     }
 
     header: ChatToolBar {
-        ToolButton {
-            text: qsTr("Log out")
-            anchors.left: parent.left
-            anchors.leftMargin: 10
-            anchors.verticalCenter: parent.verticalCenter
-            onClicked: {
-                Messenger.logout()
-                mobileView.push("qrc:/qml/login/Login.qml")
-            }
-        }
-
-        Label {
-            text: qsTr("Contacts")
-            font.pixelSize: 20
-            anchors.centerIn: parent
-        }
-
-        ToolButton {
-            text: qsTr("Add contact")
-            anchors.right: parent.right
-            anchors.rightMargin: 10
-            anchors.verticalCenter: parent.verticalCenter
-            onClicked: {
-                addContact()
-            }
-        }
     }
 
     ListView {
@@ -121,6 +95,10 @@ Page {
                 source: "qrc:/qml/resources/Contacts.png"
             }
         }
+    }
+
+    footer: FooterToolBar {
+
     }
 
     //

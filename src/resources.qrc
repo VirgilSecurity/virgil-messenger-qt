@@ -28,5 +28,7 @@
         <file>qml/iot/Sniffer.qml</file>
         <file>qml/MobileView.qml</file>
         <file>qml/DesktopView.qml</file>
+        <file>qml/chat/FooterToolBar.qml</file>
+        <file>qml/chat/ConversationToolBar.qml</file>
     </qresource>
 </RCC>

@@ -65,21 +65,7 @@ Page {
         color: bgColor
     }
 
-    header: ChatToolBar {
-        ToolButton {
-            text: qsTr("Back")
-            anchors.left: parent.left
-            anchors.leftMargin: 10
-            anchors.verticalCenter: parent.verticalCenter
-            onClicked: showContacts()
-        }
-
-        Label {
-            id: pageTitle
-            text: inConversationWith
-            font.pixelSize: 20
-            anchors.centerIn: parent
-        }
+    header: ConversationToolBar {
     }
 
     ColumnLayout {
