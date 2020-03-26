@@ -55,10 +55,14 @@ import QtQuick.Controls 2.12
 Page {
     id: root
 
+    //
+    //  Properties
+    //
     property string inConversationWith
+    property string bgColor: backGroundColor
 
     background: Rectangle {
-        color: backGroundColor
+        color: bgColor
     }
 
     header: ChatToolBar {

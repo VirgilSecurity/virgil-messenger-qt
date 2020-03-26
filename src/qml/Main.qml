@@ -1,7 +1,6 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.1
-import QtQuick.LocalStorage 2.0
 
 import "login/login.js" as Backend
 import "helpers/ui"
@@ -20,6 +19,8 @@ ApplicationWindow {
     property color mainAppColor: "#6fda9c"
     property color mainTextCOlor: "#f0f0f0"
 
+    property bool mobileView: false
+
     //
     //  Connections
     //
@@ -28,7 +29,7 @@ ApplicationWindow {
 
         onFireError: {
             showPopupError(errorText)
-            stackView.push("qrc:/qml/login/Login.qml")
+            mobileView.push("qrc:/qml/login/Login.qml")
         }
 
         onFireInform: {
@@ -56,16 +57,21 @@ ApplicationWindow {
     //  UI
     //
 
-    // Main stackview
-    StackView {
-        id: stackView
-        focus: true
-        anchors.fill: parent
+    // Mobile view
+    MobileView {
+        id: mobileView
+        visible: isMobileView()
+    }
+
+    // Desktop view
+    DesktopView {
+        id: desktopView
+        visible: !isMobileView()
     }
 
     // After loading show initial Login Page
     Component.onCompleted: {
-        stackView.push("qrc:/qml/login/Login.qml")
+        mobileView.push("qrc:/qml/login/Login.qml")
     }
 
     // Popup to show messages or warnings on the bottom postion of the screen
@@ -104,11 +110,27 @@ ApplicationWindow {
     // Show chat with
     function showChat(contact) {
         ConversationsModel.recipient = contact
-        stackView.push("qrc:/qml/chat/ConversationPage.qml", { inConversationWith: contact })
+
+        // Mobile
+        mobileView.push("qrc:/qml/chat/ConversationPage.qml", { inConversationWith: contact })
+
+        // Desktop
+        desktopView.chatView.inConversationWith = contact
     }
 
     // Show contacts
     function showContacts() {
-        stackView.push("qrc:/qml/chat/ContactPage.qml")
+        mobileView.push("qrc:/qml/chat/ContactPage.qml")
+    }
+
+    // View mode detection
+    function isMobileView() {
+        var _minSz = 640
+
+        if (rootWindow.mobileView) {
+            return true;
+        }
+
+        return rootWindow.width < _minSz;
     }
 }

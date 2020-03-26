@@ -174,14 +174,15 @@ Page {
 
     // Show progress page
     function showProgress(title) {
-        stackView.push("qrc:/qml/helpers/ui/Progress.qml", {"titleStr": title, "reqTimeMs": operationTimeMaxMs, "timerStart": true})
+        mobileView.push("qrc:/qml/helpers/ui/Progress.qml", {"titleStr": title, "reqTimeMs": operationTimeMaxMs, "timerStart": true})
     }
 
     function signInUser(user) {
         if (LoginLogic.validateUser(user)) {
             Messenger.signIn(user)
             showPopupInform("Sign In ...")
-            stackView.push("qrc:/qml/chat/ContactPage.qml")
+            mobileView.push("qrc:/qml/chat/ContactPage.qml")
+            desktopView.loginActive = false
         } else {
             showPopupError(qsTr("Incorrect user name"))
         }
@@ -191,7 +192,8 @@ Page {
         if (LoginLogic.validateUser(user)) {
             Messenger.signUp(user)
             showPopupInform("Sign Up ...")
-            stackView.push("qrc:/qml/chat/ContactPage.qml")
+            mobileView.push("qrc:/qml/chat/ContactPage.qml")
+            desktopView.loginActive = false
         } else {
             showPopupError(qsTr("Incorrect user name"))
         }

@@ -95,7 +95,7 @@ Page {
             name: qsTr("Cancel")
             baseColor: "transparent"
             borderColor: mainAppColor
-            onClicked: stackView.pop()
+            onClicked: mobileView.pop()
         }
     }
 

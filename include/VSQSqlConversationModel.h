@@ -85,6 +85,9 @@ private:
 
     QString
     _tableName() const;
+
+    QString
+    _contactsTableName() const;
 };
 
 #endif // VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H

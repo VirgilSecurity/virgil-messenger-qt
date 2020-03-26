@@ -26,5 +26,7 @@
         <file>qml/iot/DevicesList.qml</file>
         <file>qml/iot/Title.qml</file>
         <file>qml/iot/Sniffer.qml</file>
+        <file>qml/MobileView.qml</file>
+        <file>qml/DesktopView.qml</file>
     </qresource>
 </RCC>

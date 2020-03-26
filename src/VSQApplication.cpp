@@ -83,7 +83,7 @@ VSQApplication::run() {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_WATCHOS)
     {
         QObject *rootObject(engine.rootObjects().first());
-        rootObject->setProperty("width", 640);
+        rootObject->setProperty("width", 800);
         rootObject->setProperty("height", 640);
     }
 #endif

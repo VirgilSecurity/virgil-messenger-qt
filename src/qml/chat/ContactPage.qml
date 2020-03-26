@@ -66,7 +66,7 @@ Page {
             anchors.verticalCenter: parent.verticalCenter
             onClicked: {
                 Messenger.logout()
-                stackView.push("qrc:/qml/login/Login.qml")
+                mobileView.push("qrc:/qml/login/Login.qml")
             }
         }
 
@@ -90,18 +90,18 @@ Page {
     ListView {
         id: listView
         anchors.fill: parent
-        topMargin: 48
-        leftMargin: 48
-        bottomMargin: 48
-        rightMargin: 48
-        spacing: 20
+        topMargin: 20
+        leftMargin: 20
+        bottomMargin: 20
+        rightMargin: 20
+        spacing: 10
         model: ContactsModel
 
         delegate: ItemDelegate {
             text: model.display
             width: listView.width - listView.leftMargin - listView.rightMargin
-            height: avatar.implicitHeight
-            leftPadding: avatar.implicitWidth + 32
+            height: avatar.height
+            leftPadding: avatar.width + 10
 
             //contentItem.color: mainTextCOlor
             Binding {
@@ -116,6 +116,8 @@ Page {
 
             Image {
                 id: avatar
+                width: 30
+                height: 30
                 source: "qrc:/qml/resources/Contacts.png"
             }
         }

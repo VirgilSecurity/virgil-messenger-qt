@@ -50,9 +50,12 @@ VSQSqlConversationModel::_createTable() {
         "'recipient' TEXT NOT NULL,"
         "'timestamp' TEXT NOT NULL,"
         "'message' TEXT NOT NULL,"
-        "FOREIGN KEY('author') REFERENCES Contacts ( name ),"
-        "FOREIGN KEY('recipient') REFERENCES Contacts ( name )"
-        ")").arg(_tableName()))) {
+        "FOREIGN KEY('author') REFERENCES %2 ( name ),"
+        "FOREIGN KEY('recipient') REFERENCES %3 ( name )"
+        ")")
+                .arg(_tableName())
+                .arg(_contactsTableName())
+                .arg(_contactsTableName()))) {
         qFatal("Failed to query database: %s", qPrintable(query.lastError().text()));
     }
 }
@@ -65,7 +68,7 @@ VSQSqlConversationModel::_update() {
     // Ensures that the model is sorted correctly after submitting a new row.
     setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-    setFilter("");
+    setFilter("(recipient = '')");
     select();
 
     emit recipientChanged();
@@ -89,6 +92,7 @@ VSQSqlConversationModel::setRecipient(const QString &recipient) {
         return;
     }
 
+    // TODO: Prevent SQL injection !!!
     m_recipient = recipient;
 
     const QString filterString = QString::fromLatin1(
@@ -182,6 +186,14 @@ VSQSqlConversationModel::_tableName() const {
     QString fixedUser(m_user);
     fixedUser.remove(QRegExp("[^a-zA-Z\\d\\s]"));
     return QString("Conversations_") + fixedUser;
+}
+
+/******************************************************************************/
+QString
+VSQSqlConversationModel::_contactsTableName() const {
+    QString fixedUser(m_user);
+    fixedUser.remove(QRegExp("[^a-zA-Z\\d\\s]"));
+    return QString("Contacts_") + fixedUser;
 }
 
 /******************************************************************************/
