@@ -6,6 +6,8 @@ Item {
     property alias popupView: popup
     property alias popupColor: popupBackground.color
     property alias popupColorText: message.color
+    property alias popupModal: popup.modal
+    property bool popupOnTop: false
 
     Popup {
         id: popup
@@ -30,7 +32,7 @@ Item {
             popupClose.stop()
         }
 
-        y: 0
+        y: popupOnTop ? 0 : (rootWindow.height - 60)
         modal: true
         focus: true
 

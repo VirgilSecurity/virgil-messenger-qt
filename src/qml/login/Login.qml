@@ -179,7 +179,8 @@ Page {
 
     function signInUser(user) {
         if (LoginLogic.validateUser(user)) {
-            showProgress(qsTr("Sign In"))
+            showPopupInform("Sign In ...")
+            stackView.push("qrc:/qml/chat/ContactPage.qml")
             Messenger.signIn(user)
         } else {
             showPopupError(qsTr("Incorrect user name"))
@@ -188,7 +189,8 @@ Page {
 
     function signUpUser(user) {
         if (LoginLogic.validateUser(user)) {
-            showProgress(qsTr("Sign Up"))
+            showPopupInform("Sign Up ...")
+            stackView.push("qrc:/qml/chat/ContactPage.qml")
             Messenger.signUp(user)
         } else {
             showPopupError(qsTr("Incorrect user name"))

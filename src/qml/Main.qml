@@ -36,10 +36,11 @@ ApplicationWindow {
         }
 
         onFireConnecting: {
+            showPopupInform(qsTr("Connecting"))
         }
 
         onFireReady: {
-            stackView.push("qrc:/qml/chat/ContactPage.qml")
+            showPopupSucces(qsTr("Ready to chat"))
         }
 
         onFireAddedContact: {
@@ -77,6 +78,8 @@ ApplicationWindow {
         inform.popupColor = "#b44"
         inform.popupColorText = "#ffffff"
         inform.popupView.popMessage = message
+        inform.popupOnTop = true
+        inform.popupModal = true
         inform.popupView.open()
     }
 
@@ -84,6 +87,8 @@ ApplicationWindow {
         inform.popupColor = "#FFFACD"
         inform.popupColorText = "#00"
         inform.popupView.popMessage = message
+        inform.popupOnTop = false
+        inform.popupModal = false
         inform.popupView.open()
     }
 
@@ -91,6 +96,8 @@ ApplicationWindow {
         inform.popupColor = "#66CDAA"
         inform.popupColorText = "#00"
         inform.popupView.popMessage = message
+        inform.popupOnTop = false
+        inform.popupModal = false
         inform.popupView.open()
     }
 

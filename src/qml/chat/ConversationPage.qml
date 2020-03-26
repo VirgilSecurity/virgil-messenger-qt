@@ -104,6 +104,8 @@ Page {
 
                     Image {
                         id: avatar
+                        width: 45
+                        height: 45
                         source: !sentByMe ? "qrc:/qml/resources/Contacts.png" : ""
                     }
 
