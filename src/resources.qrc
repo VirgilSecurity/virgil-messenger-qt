@@ -1,9 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>qml/Main1.qml</file>
-        <file>qml/DevicesList.qml</file>
-        <file>qml/Sniffer.qml</file>
-        <file>qml/Title.qml</file>
         <file>qml/Main.qml</file>
         <file>qml/login/Login.qml</file>
         <file>qml/login/PasswordResetPage.qml</file>
@@ -26,5 +22,9 @@
         <file>qml/helpers/ui/Progress.qml</file>
         <file>qml/helpers/ui/Popup.qml</file>
         <file>qml/chat/AddContactDialog.qml</file>
+        <file>qml/iot/Main1.qml</file>
+        <file>qml/iot/DevicesList.qml</file>
+        <file>qml/iot/Title.qml</file>
+        <file>qml/iot/Sniffer.qml</file>
     </qresource>
 </RCC>
