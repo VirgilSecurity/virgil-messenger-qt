@@ -182,7 +182,7 @@ Page {
             Messenger.signIn(user)
             showPopupInform("Sign In ...")
             mobileView.push("qrc:/qml/chat/ContactPage.qml")
-            desktopView.loginActive = false
+            desktopView.mode = desktopView.kModeNormal
         } else {
             showPopupError(qsTr("Incorrect user name"))
         }
@@ -193,7 +193,7 @@ Page {
             Messenger.signUp(user)
             showPopupInform("Sign Up ...")
             mobileView.push("qrc:/qml/chat/ContactPage.qml")
-            desktopView.loginActive = false
+            desktopView.mode = desktopView.kModeNormal
         } else {
             showPopupError(qsTr("Incorrect user name"))
         }

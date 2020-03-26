@@ -16,7 +16,13 @@ ToolBar {
         ToolButton {
             id: settingsBtn
             Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-            Layout.rightMargin: 20
+            Layout.rightMargin: 10
+            Layout.minimumHeight: 40
+            Layout.minimumWidth: 40
+
+            onClicked: {
+                showSettings()
+            }
 
             background: Rectangle {
                 color: "transparent"

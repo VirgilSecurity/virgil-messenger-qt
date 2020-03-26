@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.1
 
 import "chat"
 import "login"
+import "settings"
 
 Rectangle {
     anchors.fill: parent
@@ -12,30 +13,32 @@ Rectangle {
     //
     //  Properties
     //
-    property bool loginActive: true
-    property alias chatView: chatView
+    readonly property string kModeLogin: "login"
+    readonly property string kModeSettings: "settings"
+    readonly property string kModeNormal: "normal"
 
-    //
-    //  Slots
-    //
-    onLoginActiveChanged: {
-        // TODO: Activate chat
-        if (!loginActive) {
-        }
-    }
+    property alias settings: settings
+
+    property string mode: kModeLogin
+    property alias chatView: chatView
 
     Login {
         id: login
         anchors.fill: parent
-        visible: loginActive
+        visible: mode === kModeLogin
     }
 
+    SettingsPage {
+        id: settings
+        anchors.fill: parent
+        visible: mode === kModeSettings
+    }
 
     RowLayout {
         id: layout
         anchors.fill: parent
         spacing: 7
-        visible: !loginActive
+        visible: mode === kModeNormal
 
         ContactPage {
             id: contactsView

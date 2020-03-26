@@ -33,7 +33,12 @@ ApplicationWindow {
 
         onFireError: {
             showPopupError(errorText)
+
+            // Mobile
             mobileView.push("qrc:/qml/login/Login.qml")
+
+            // Desktop
+            desktopView.mode = desktopView.kModeLogin
         }
 
         onFireInform: {
@@ -125,6 +130,41 @@ ApplicationWindow {
     // Show contacts
     function showContacts() {
         mobileView.push("qrc:/qml/chat/ContactPage.qml")
+    }
+
+    // Show settings
+    function showSettings() {
+
+        var uname = "test"
+        var ver = "0.1.0"
+
+        // Mobile
+        mobileView.push("qrc:/qml/settings/SettingsPage.qml", { userName: uname, version: ver})
+
+        // Desktop
+        desktopView.settings.userName = uname
+        desktopView.settings.version = ver
+        desktopView.mode = desktopView.kModeSettings
+    }
+
+    // Close settings
+    function closeSettings() {
+        // Mobile
+        mobileView.pop()
+
+        // Desktop
+        desktopView.mode = desktopView.kModeNormal
+    }
+
+    // Logout
+    function logout() {
+        Messenger.logout()
+
+        // Mobile
+        mobileView.push("qrc:/qml/login/Login.qml")
+
+        // Desktop
+        desktopView.mode = desktopView.kModeLogin
     }
 
     // View mode detection
