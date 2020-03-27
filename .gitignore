@@ -22,7 +22,6 @@ profile
 cmake-build-*/
 debug*/
 release*/
-VERSION
 
 ####
 # Sublime Text 3
