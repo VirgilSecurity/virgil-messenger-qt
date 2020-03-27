@@ -170,6 +170,7 @@ VSQSqlConversationModel::user() const {
 /******************************************************************************/
 void
 VSQSqlConversationModel::setUser(const QString &user) {
+    m_recipient = "";
     if (user == m_user) {
         return;
     }
