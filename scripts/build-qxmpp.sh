@@ -7,6 +7,23 @@ SCRIPT_FOLDER="$( cd "$( dirname "$0" )" && pwd )"
 QXMPP_DIR="${SCRIPT_FOLDER}/../ext/qxmpp"
 BUILD_DIR_BASE="${QXMPP_DIR}"
 
+
+#***************************************************************************************
+check_error() {
+   RETRES=$?
+   if [ $RETRES != 0 ]; then
+        echo "----------------------------------------------------------------------"
+        echo "############# !!! PROCESS ERROR ERRORCODE=[$RETRES]  #################"
+        echo "----------------------------------------------------------------------"
+        [ "$1" == "0" ] || exit $RETRES
+   else
+        echo "-----# Process OK. ---------------------------------------------------"
+   fi
+   return $RETRES
+}
+
+
+
 #
 #   Arguments
 #
@@ -38,12 +55,15 @@ function build() {
     pushd ${BUILD_DIR}
       # prepare to build
       cmake ${BUILD_DIR_BASE} ${CMAKE_ARGUMENTS} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -G "Unix Makefiles"
+      check_error
 
       # build all targets
       make -j ${CORES}
+      check_error
 
       # install all targets
       make DESTDIR=${INSTALL_DIR} install
+      check_error
 
     popd
 }
