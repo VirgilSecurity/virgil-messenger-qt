@@ -362,6 +362,7 @@ VSQMessenger::logout() {
 /******************************************************************************/
 void
 VSQMessenger::deleteUser(QString user) {
+    Q_UNUSED(user)
     logout();
 }
 
@@ -496,18 +497,19 @@ VSQMessenger::sendMessage(QString to, QString message) {
 /******************************************************************************/
 void
 VSQMessenger::onPresenceReceived(const QXmppPresence &presence) {
-    VS_LOG_DEBUG("onPresenceReceived");
+    Q_UNUSED(presence)
 }
 
 /******************************************************************************/
 void
 VSQMessenger::onIqReceived(const QXmppIq &iq) {
-    VS_LOG_DEBUG("onIqReceived");
+    Q_UNUSED(iq)
 }
 
 /******************************************************************************/
 void
 VSQMessenger::onSslErrors(const QList<QSslError> &errors) {
+    Q_UNUSED(errors)
     emit fireError(tr("Secure connection error ..."));
 }
 
