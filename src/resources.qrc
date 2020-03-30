@@ -30,5 +30,6 @@
         <file>qml/DesktopView.qml</file>
         <file>qml/chat/FooterToolBar.qml</file>
         <file>qml/chat/ConversationToolBar.qml</file>
+        <file>qml/resources/sounds/message.wav</file>
     </qresource>
 </RCC>

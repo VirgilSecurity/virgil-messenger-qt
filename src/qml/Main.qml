@@ -1,6 +1,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.1
+import QtMultimedia 5.12
 
 import "login/login.js" as LoginLogic
 import "helpers/ui"
@@ -62,6 +63,7 @@ ApplicationWindow {
         }
 
         onFireNewMessage: {
+            messageSound.play()
             showChat(from)
         }
     }
@@ -93,6 +95,12 @@ ApplicationWindow {
     // Popup to show messages or warnings on the bottom postion of the screen
     Popup {
         id: inform
+    }
+
+    // Sound effect
+    SoundEffect {
+        id: messageSound
+        source: "resources/sounds/message.wav"
     }
 
     // Show Popup message
