@@ -51,6 +51,8 @@ class VSQMessenger final : public QObject {
 
     Q_OBJECT
 
+    enum VSQEnvType { PROD, STG, DEV };
+
 public:
     Q_PROPERTY(QString currentUser READ currentUser NOTIFY fireCurrentUserChanged)
 
@@ -62,6 +64,15 @@ public:
 
     Q_INVOKABLE QString
     currentVersion() const;
+
+    VSQSqlContactModel &
+    modelContacts();
+
+    VSQSqlConversationModel &
+    modelConversations();
+
+
+public slots:
 
     Q_INVOKABLE void
     signIn(QString user);
@@ -80,12 +91,6 @@ public:
 
     Q_INVOKABLE void
     addContact(QString contact);
-
-    VSQSqlContactModel &
-    modelContacts();
-
-    VSQSqlConversationModel &
-    modelConversations();
 
     Q_INVOKABLE void
     sendMessage(QString to, QString message);
@@ -133,17 +138,22 @@ private:
     VSQSqlContactModel *m_sqlContacts;
     VSQSqlConversationModel *m_sqlConversations;
     QString m_user;
+    VSQEnvType m_envType;
+    static const VSQEnvType _defaultEnv = STG;
 
     static const QString kOrganization;
     static const QString kApp;
     static const QString kUsers;
     static const QString kVersion;
+    static const QString kProdEnvPrefix;
+    static const QString kStgEnvPrefix;
+    static const QString kDevEnvPrefix;
 
     void
     _connectToDatabase();
 
     void
-    _connect(QString user);
+    _connect(QString userWithEnv, QString userId);
 
     QString
     _virgilURL();
@@ -166,8 +176,8 @@ private:
     void
     _saveUsersList(const QStringList &users);
 
-    void
-    _setUser(const QString &user);
+    QString
+    _prepareLogin(const QString &user);
 };
 
 #endif // VIRGIL_IOTKIT_QT_MESSENGER_H

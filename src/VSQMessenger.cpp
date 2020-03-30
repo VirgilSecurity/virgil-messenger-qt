@@ -47,6 +47,9 @@
 const QString VSQMessenger::kOrganization = "VirgilSecurity";
 const QString VSQMessenger::kApp = "IoTKit Messenger";
 const QString VSQMessenger::kUsers = "Users";
+const QString VSQMessenger::kProdEnvPrefix = "prod";
+const QString VSQMessenger::kStgEnvPrefix = "stg";
+const QString VSQMessenger::kDevEnvPrefix = "dev";
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
@@ -59,10 +62,6 @@ const QString VSQMessenger::kVersion = "unknown";
 
 /******************************************************************************/
 VSQMessenger::VSQMessenger() {
-    if (VS_CODE_OK != vs_messenger_virgil_init(_virgilURL().toStdString().c_str())) {
-        qCritical() << "Cannot initialize low level messenger";
-    }
-
     _connectToDatabase();
 
     m_sqlContacts = new VSQSqlContactModel(this);
@@ -70,6 +69,7 @@ VSQMessenger::VSQMessenger() {
 
     // Signal connection
     connect(this, SIGNAL(fireReadyToAddContact(QString)), this, SLOT(onAddContactToDB(QString)));
+    connect(this, SIGNAL(fireError(QString)), this, SLOT(logout()));
 
     // Connect XMPP signals
     connect(&m_xmpp, SIGNAL(connected()), this, SLOT(onConnected()));
@@ -101,20 +101,20 @@ VSQMessenger::_connectToDatabase() {
     // When using the SQLite driver, open() will create the SQLite database if it doesn't exist.
     database.setDatabaseName(fileName);
     if (!database.open()) {
-        qFatal("Cannot open database: %s", qPrintable(database.lastError().text()));
         QFile::remove(fileName);
+        qFatal("Cannot open database: %s", qPrintable(database.lastError().text()));
     }
 }
 
 /******************************************************************************/
 void
-VSQMessenger::_connect(QString user) {
+VSQMessenger::_connect(QString userWithEnv, QString userId) {
     const size_t _pass_buf_sz = 512;
     char pass[_pass_buf_sz];
-    QString jid = user + "@" + _xmppURL();
+    QString jid = userId + "@" + _xmppURL();
 
     // Update users list
-    _addToUsersList(user);
+    _addToUsersList(userWithEnv);
 
     // Get XMPP password
     if (VS_CODE_OK != vs_messenger_virgil_get_xmpp_pass(pass, _pass_buf_sz)) {
@@ -128,12 +128,39 @@ VSQMessenger::_connect(QString user) {
 }
 
 /******************************************************************************/
-void
-VSQMessenger::_setUser(const QString &user) {
-    m_user = user;
-    m_sqlContacts->setUser(user);
-    m_sqlConversations->setUser(user);
+QString
+VSQMessenger::_prepareLogin(const QString &user) {
+    QString userId = user;
+    m_envType = _defaultEnv;
+
+    // Check required environment
+    QStringList pieces = user.split("@");
+    if (2 == pieces.size()) {
+        userId = pieces.at(1);
+        if (kProdEnvPrefix == pieces.first()) {
+            m_envType = PROD;
+        } else if (kStgEnvPrefix == pieces.first()) {
+            m_envType = STG;
+        }
+        else if (kDevEnvPrefix == pieces.first()) {
+            m_envType = DEV;
+        }
+    }
+
+    // Initialize Virgil Messenger to work with required environment
+    if (VS_CODE_OK != vs_messenger_virgil_init(_virgilURL().toStdString().c_str())) {
+        qCritical() << "Cannot initialize low level messenger";
+    }
+
+    // Set current user
+    m_user = userId;
+    m_sqlContacts->setUser(userId);
+    m_sqlConversations->setUser(userId);
+
+    // Inform about user activation
     emit fireCurrentUserChanged();
+
+    return userId;
 }
 
 /******************************************************************************/
@@ -151,15 +178,15 @@ VSQMessenger::currentVersion() const {
 /******************************************************************************/
 void
 VSQMessenger::signIn(QString user) {
-    _setUser(user);
+    auto userId = _prepareLogin(user);
     QtConcurrent::run([=]() {
-        qDebug() << "Trying to Sign In: " << user;
+        qDebug() << "Trying to Sign In: " << userId;
 
         vs_messenger_virgil_user_creds_t creds;
         memset(&creds, 0, sizeof (creds));
 
         // Load User Credentials
-        if (!_loadCredentials(user, creds)) {
+        if (!_loadCredentials(userId, creds)) {
             emit fireError(tr("Cannot load user credentials"));
             return;
         }
@@ -171,31 +198,31 @@ VSQMessenger::signIn(QString user) {
         }
 
         // Connect over XMPP
-        _connect(user);
+        _connect(user, userId);
     });
 }
 
 /******************************************************************************/
 void
 VSQMessenger::signUp(QString user) {
-    _setUser(user);
+    auto userId = _prepareLogin(user);
     QtConcurrent::run([=]() {
-        qDebug() << "Trying to Sign Up: " << user;
+        qDebug() << "Trying to Sign Up: " << userId;
 
         vs_messenger_virgil_user_creds_t creds;
         memset(&creds, 0, sizeof (creds));
 
         // Sign Up user, using Virgil Service
-        if (VS_CODE_OK != vs_messenger_virgil_sign_up(user.toStdString().c_str(), &creds)) {
+        if (VS_CODE_OK != vs_messenger_virgil_sign_up(userId.toStdString().c_str(), &creds)) {
             emit fireError(tr("Cannot Sign Up user"));
             return;
         }
 
         // Save credentials
-        _saveCredentials(user, creds);
+        _saveCredentials(userId, creds);
 
         // Connect over XMPP
-        _connect(user);
+        _connect(user, userId);
     });
 }
 
@@ -224,13 +251,45 @@ VSQMessenger::onAddContactToDB(QString contact) {
 /******************************************************************************/
 QString
 VSQMessenger::_virgilURL() {
-    return "https://messenger-stg.virgilsecurity.com";
+    QString res;
+    switch (m_envType) {
+    case PROD:
+        res = "https://messenger.virgilsecurity.com";
+        break;
+
+    case STG:
+        res = "https://messenger-stg.virgilsecurity.com";
+        break;
+
+    case DEV:
+        res = "https://messenger-dev.virgilsecurity.com";
+        break;
+    }
+
+    VS_LOG_DEBUG("Virgil URL: %s", res.toStdString().c_str());
+    return res;
 }
 
 /******************************************************************************/
 QString
 VSQMessenger::_xmppURL() {
-    return "xmpp-stg.virgilsecurity.com";
+    QString res;
+    switch (m_envType) {
+    case PROD:
+        res = "xmpp.virgilsecurity.com";
+        break;
+
+    case STG:
+        res = "xmpp-stg.virgilsecurity.com";
+        break;
+
+    case DEV:
+        res = "xmpp-dev.virgilsecurity.com";
+        break;
+    }
+
+    VS_LOG_DEBUG("XMPP URL: %s", res.toStdString().c_str());
+    return res;
 }
 
 /******************************************************************************/
@@ -297,6 +356,7 @@ void
 VSQMessenger::logout() {
     qDebug() << "Logout";
     m_xmpp.disconnectFromServer();
+    vs_messenger_virgil_logout();
 }
 
 /******************************************************************************/
