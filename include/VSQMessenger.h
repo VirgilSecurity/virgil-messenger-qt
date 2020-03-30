@@ -137,6 +137,7 @@ private:
     static const QString kOrganization;
     static const QString kApp;
     static const QString kUsers;
+    static const QString kVersion;
 
     void
     _connectToDatabase();

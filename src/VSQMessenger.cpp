@@ -48,6 +48,15 @@ const QString VSQMessenger::kOrganization = "VirgilSecurity";
 const QString VSQMessenger::kApp = "IoTKit Messenger";
 const QString VSQMessenger::kUsers = "Users";
 
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
+#if defined(VERSION)
+const QString VSQMessenger::kVersion = QString(TOSTRING(VERSION));
+#else
+const QString VSQMessenger::kVersion = "unknown";
+#endif
+
 /******************************************************************************/
 VSQMessenger::VSQMessenger() {
     if (VS_CODE_OK != vs_messenger_virgil_init(_virgilURL().toStdString().c_str())) {
@@ -136,7 +145,7 @@ VSQMessenger::currentUser() {
 /******************************************************************************/
 QString
 VSQMessenger::currentVersion() const {
-    return "0.1.0.1000-alpha";
+    return kVersion + "-alpha";
 }
 
 /******************************************************************************/
