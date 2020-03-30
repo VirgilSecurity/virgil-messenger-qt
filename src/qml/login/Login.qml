@@ -2,12 +2,10 @@ import QtQuick 2.7
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.1
 
-import "login.js" as LoginLogic
 import "../helpers/ui"
 
 Page {
     id: loginPage
-    objectName: "LoginObject"
 
     //
     //  Properties
@@ -175,27 +173,5 @@ Page {
     // Show progress page
     function showProgress(title) {
         mobileView.push("qrc:/qml/helpers/ui/Progress.qml", {"titleStr": title, "reqTimeMs": operationTimeMaxMs, "timerStart": true})
-    }
-
-    function signInUser(user) {
-        if (LoginLogic.validateUser(user)) {
-            Messenger.signIn(user)
-            showPopupInform("Sign In ...")
-            mobileView.push("qrc:/qml/chat/ContactPage.qml")
-            desktopView.mode = desktopView.kModeNormal
-        } else {
-            showPopupError(qsTr("Incorrect user name"))
-        }
-    }
-
-    function signUpUser(user) {
-        if (LoginLogic.validateUser(user)) {
-            Messenger.signUp(user)
-            showPopupInform("Sign Up ...")
-            mobileView.push("qrc:/qml/chat/ContactPage.qml")
-            desktopView.mode = desktopView.kModeNormal
-        } else {
-            showPopupError(qsTr("Incorrect user name"))
-        }
     }
 }

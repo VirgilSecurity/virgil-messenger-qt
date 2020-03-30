@@ -2,7 +2,7 @@ import QtQuick 2.7
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.1
 
-import "login/login.js" as Backend
+import "login/login.js" as LoginLogic
 import "helpers/ui"
 
 ApplicationWindow {
@@ -25,6 +25,11 @@ ApplicationWindow {
 
     property bool mobileView: false
 
+    // Mobile View Pages
+    property var contactPage
+    property var loginPage
+    property var settingsPage
+
     //
     //  Connections
     //
@@ -35,7 +40,7 @@ ApplicationWindow {
             showPopupError(errorText)
 
             // Mobile
-            mobileView.push("qrc:/qml/login/Login.qml")
+            mobileView.replace(loginPage)
 
             // Desktop
             desktopView.mode = desktopView.kModeLogin
@@ -61,6 +66,13 @@ ApplicationWindow {
         }
     }
 
+    // After loading show initial Login Page
+    Component.onCompleted: {
+        contactPage = Qt.createComponent("qrc:/qml/chat/ContactPage.qml")
+        loginPage = Qt.createComponent("qrc:/qml/login/Login.qml")
+        settingsPage = Qt.createComponent("qrc:/qml/settings/SettingsPage.qml")
+        mobileView.replace(loginPage)
+    }
 
     //
     //  UI
@@ -78,42 +90,31 @@ ApplicationWindow {
         visible: !isMobileView()
     }
 
-    // After loading show initial Login Page
-    Component.onCompleted: {
-        mobileView.push("qrc:/qml/login/Login.qml")
-    }
-
     // Popup to show messages or warnings on the bottom postion of the screen
     Popup {
         id: inform
     }
 
     // Show Popup message
-    function showPopupError(message) {
-        inform.popupColor = "#b44"
-        inform.popupColorText = "#ffffff"
+    function showPopup(message, color, textColor, isOnTop, isModal) {
+        inform.popupColor = color
+        inform.popupColorText = textColor
         inform.popupView.popMessage = message
-        inform.popupOnTop = true
-        inform.popupModal = true
+        inform.popupOnTop = isOnTop
+        inform.popupModal = isModal
         inform.popupView.open()
+    }
+
+    function showPopupError(message) {
+        showPopup(message, "#b44", "#ffffff", true, true)
     }
 
     function showPopupInform(message) {
-        inform.popupColor = "#FFFACD"
-        inform.popupColorText = "#00"
-        inform.popupView.popMessage = message
-        inform.popupOnTop = true
-        inform.popupModal = false
-        inform.popupView.open()
+        showPopup(message, "#FFFACD", "#00", true, false)
     }
 
     function showPopupSucces(message) {
-        inform.popupColor = "#66CDAA"
-        inform.popupColorText = "#00"
-        inform.popupView.popMessage = message
-        inform.popupOnTop = true
-        inform.popupModal = false
-        inform.popupView.open()
+        showPopup(message, "#66CDAA", "#00", true, false)
     }
 
     // Show chat with
@@ -121,7 +122,7 @@ ApplicationWindow {
         ConversationsModel.recipient = contact
 
         // Mobile
-        mobileView.push("qrc:/qml/chat/ConversationPage.qml", { inConversationWith: contact })
+        mobileView.replace("qrc:/qml/chat/ConversationPage.qml", { inConversationWith: contact })
 
         // Desktop
         desktopView.chatView.inConversationWith = contact
@@ -129,28 +130,22 @@ ApplicationWindow {
 
     // Show contacts
     function showContacts() {
-        mobileView.push("qrc:/qml/chat/ContactPage.qml")
+        mobileView.replace(contactPage)
     }
 
     // Show settings
     function showSettings() {
-
-        var uname = "test"
-        var ver = "0.1.0"
-
         // Mobile
-        mobileView.push("qrc:/qml/settings/SettingsPage.qml", { userName: uname, version: ver})
+        mobileView.replace(settingsPage)
 
         // Desktop
-        desktopView.settings.userName = uname
-        desktopView.settings.version = ver
         desktopView.mode = desktopView.kModeSettings
     }
 
     // Close settings
     function closeSettings() {
         // Mobile
-        mobileView.pop()
+        mobileView.replace(contactPage)
 
         // Desktop
         desktopView.mode = desktopView.kModeNormal
@@ -161,7 +156,7 @@ ApplicationWindow {
         Messenger.logout()
 
         // Mobile
-        mobileView.push("qrc:/qml/login/Login.qml")
+        mobileView.replace(loginPage)
 
         // Desktop
         desktopView.mode = desktopView.kModeLogin
@@ -176,5 +171,29 @@ ApplicationWindow {
         }
 
         return rootWindow.width < _minSz;
+    }
+
+    // Sign in
+    function signInUser(user) {
+        if (LoginLogic.validateUser(user)) {
+            Messenger.signIn(user)
+            showPopupInform("Sign In ...")
+            mobileView.replace(contactPage)
+            desktopView.mode = desktopView.kModeNormal
+        } else {
+            showPopupError(qsTr("Incorrect user name"))
+        }
+    }
+
+    // Sign up
+    function signUpUser(user) {
+        if (LoginLogic.validateUser(user)) {
+            Messenger.signUp(user)
+            showPopupInform("Sign Up ...")
+            mobileView.replace(contactPage)
+            desktopView.mode = desktopView.kModeNormal
+        } else {
+            showPopupError(qsTr("Incorrect user name"))
+        }
     }
 }

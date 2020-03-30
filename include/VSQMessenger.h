@@ -52,8 +52,16 @@ class VSQMessenger final : public QObject {
     Q_OBJECT
 
 public:
+    Q_PROPERTY(QString currentUser READ currentUser NOTIFY fireCurrentUserChanged)
+
     VSQMessenger();
     virtual ~VSQMessenger() = default;
+
+    QString
+    currentUser();
+
+    Q_INVOKABLE QString
+    currentVersion() const;
 
     Q_INVOKABLE void
     signIn(QString user);
@@ -104,6 +112,8 @@ signals:
     void
     fireNewMessage(QString from, QString message);
 
+    void
+    fireCurrentUserChanged();
 
 private slots:
     void onConnected();
@@ -122,6 +132,7 @@ private:
     QXmppClient m_xmpp;
     VSQSqlContactModel *m_sqlContacts;
     VSQSqlConversationModel *m_sqlConversations;
+    QString m_user;
 
     static const QString kOrganization;
     static const QString kApp;
@@ -153,6 +164,9 @@ private:
 
     void
     _saveUsersList(const QStringList &users);
+
+    void
+    _setUser(const QString &user);
 };
 
 #endif // VIRGIL_IOTKIT_QT_MESSENGER_H

@@ -7,9 +7,6 @@ import "../helpers/ui"
 Page {
     id: settingsPage
 
-    property string userName: ""
-    property string version: ""
-
     readonly property color kBtnColor: "#b44"
 
     background: Rectangle {
@@ -29,7 +26,7 @@ Page {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
             Layout.margins: 30
-            text: qsTr("Account: ") + userName
+            text: qsTr("Account: ") + Messenger.currentUser
             font.pointSize: 22
             color: mainTextCOlor
             elide: Text.ElideLeft
@@ -39,7 +36,7 @@ Page {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
             Layout.margins: 30
-            text: qsTr("Version: ") + version
+            text: qsTr("Version: ") + Messenger.currentVersion()
             font.pointSize: 22
             color: mainTextCOlor
             elide: Text.ElideLeft

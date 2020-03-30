@@ -13,6 +13,15 @@ ToolBar {
     RowLayout {
         anchors.fill: parent
 
+        Label {
+            text: Messenger.currentUser
+            font.pixelSize: 20
+            color: toolbarTextColor
+            font.bold: true
+            Layout.alignment: Qt.AlignLeft
+            Layout.leftMargin: 10
+        }
+
         ToolButton {
             id: settingsBtn
             Layout.alignment: Qt.AlignRight | Qt.AlignVCenter

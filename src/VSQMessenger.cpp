@@ -120,9 +120,29 @@ VSQMessenger::_connect(QString user) {
 
 /******************************************************************************/
 void
-VSQMessenger::signIn(QString user) {
+VSQMessenger::_setUser(const QString &user) {
+    m_user = user;
     m_sqlContacts->setUser(user);
     m_sqlConversations->setUser(user);
+    emit fireCurrentUserChanged();
+}
+
+/******************************************************************************/
+QString
+VSQMessenger::currentUser() {
+    return m_user;
+}
+
+/******************************************************************************/
+QString
+VSQMessenger::currentVersion() const {
+    return "0.1.0.1000-alpha";
+}
+
+/******************************************************************************/
+void
+VSQMessenger::signIn(QString user) {
+    _setUser(user);
     QtConcurrent::run([=]() {
         qDebug() << "Trying to Sign In: " << user;
 
@@ -149,8 +169,7 @@ VSQMessenger::signIn(QString user) {
 /******************************************************************************/
 void
 VSQMessenger::signUp(QString user) {
-    m_sqlContacts->setUser(user);
-    m_sqlConversations->setUser(user);
+    _setUser(user);
     QtConcurrent::run([=]() {
         qDebug() << "Trying to Sign Up: " << user;
 
@@ -215,7 +234,7 @@ VSQMessenger::_xmppPort() {
 
 void
 VSQMessenger::_addToUsersList(const QString &user) {
-    // Save known user
+    // Save known users
     auto knownUsers = usersList();
     knownUsers.removeAll(user);
     knownUsers.push_front(user);
