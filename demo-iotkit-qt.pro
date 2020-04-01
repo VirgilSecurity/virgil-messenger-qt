@@ -100,7 +100,7 @@ INCLUDEPATH +=  include \
 #
 #   Libraries
 #
-LIBS += -L$${QXMPP_BUILD_PATH}/lib -L$${QXMPP_BUILD_PATH}/lib64 -lqxmpp -L/usr/local/lib -lvpx -lopus
+LIBS += $${QXMPP_BUILD_PATH}/lib/libqxmpp.a
 
 #
 #   Default rules for deployment
