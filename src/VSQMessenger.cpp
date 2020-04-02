@@ -251,19 +251,22 @@ VSQMessenger::onAddContactToDB(QString contact) {
 /******************************************************************************/
 QString
 VSQMessenger::_virgilURL() {
-    QString res;
-    switch (m_envType) {
-    case PROD:
-        res = "https://messenger.virgilsecurity.com";
-        break;
+    QString res = qgetenv("VS_MSGR_VIRGIL");
 
-    case STG:
-        res = "https://messenger-stg.virgilsecurity.com";
-        break;
+    if (res.isEmpty()) {
+        switch (m_envType) {
+        case PROD:
+            res = "https://messenger.virgilsecurity.com";
+            break;
 
-    case DEV:
-        res = "https://messenger-dev.virgilsecurity.com";
-        break;
+        case STG:
+            res = "https://messenger-stg.virgilsecurity.com";
+            break;
+
+        case DEV:
+            res = "https://messenger-dev.virgilsecurity.com";
+            break;
+        }
     }
 
     VS_LOG_DEBUG("Virgil URL: %s", res.toStdString().c_str());
@@ -272,20 +275,23 @@ VSQMessenger::_virgilURL() {
 
 /******************************************************************************/
 QString
-VSQMessenger::_xmppURL() {
-    QString res;
-    switch (m_envType) {
-    case PROD:
-        res = "xmpp.virgilsecurity.com";
-        break;
+VSQMessenger::_xmppURL() {    
+    QString res = qgetenv("VS_MSGR_XMPP_URL");
 
-    case STG:
-        res = "xmpp-stg.virgilsecurity.com";
-        break;
+    if (res.isEmpty()) {
+        switch (m_envType) {
+        case PROD:
+            res = "xmpp.virgilsecurity.com";
+            break;
 
-    case DEV:
-        res = "xmpp-dev.virgilsecurity.com";
-        break;
+        case STG:
+            res = "xmpp-stg.virgilsecurity.com";
+            break;
+
+        case DEV:
+            res = "xmpp-dev.virgilsecurity.com";
+            break;
+        }
     }
 
     VS_LOG_DEBUG("XMPP URL: %s", res.toStdString().c_str());
@@ -295,7 +301,20 @@ VSQMessenger::_xmppURL() {
 /******************************************************************************/
 uint16_t
 VSQMessenger::_xmppPort() {
-    return 5222;
+    uint16_t res = 5222;
+    QString portStr = qgetenv("VS_MSGR_XMPP_PORT");
+
+    if (!portStr.isEmpty()) {
+        bool ok;
+        int port = portStr.toInt(&ok);
+        if (ok) {
+            res = static_cast<uint16_t> (port);
+        }
+    }
+
+    VS_LOG_DEBUG("XMPP PORT: %d", static_cast<int> (res));
+
+    return res;
 }
 
 /******************************************************************************/
