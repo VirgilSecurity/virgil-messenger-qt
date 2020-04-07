@@ -3,4 +3,4 @@
 	url = https://github.com/VirgilSecurity/virgil-iotkit.git
 [submodule "ext/qxmpp"]
 	path = ext/qxmpp
-	url = https://github.com/qxmpp-project/qxmpp.git
+	url = https://github.com/VirgilSecurity/qxmpp.git
