@@ -13,10 +13,6 @@ PLATFORM="${1}"
 PARAM_PREFIX_PATH="${2}"
 CMAKE_CUSTOM_PARAM="${3}"
 
-echo "PLATFORM=$PLATFORM"
-echo "PARAM_PREFIX_PATH=$PARAM_PREFIX_PATH"
-echo "CMAKE_CUSTOM_PARAM=$CMAKE_CUSTOM_PARAM"
-
 #
 #   Build
 #
@@ -144,5 +140,4 @@ fi
 #
 #   Build both Debug and Release
 #
-echo "CMAKE_ARGUMENTS = ${CMAKE_ARGUMENTS}"
 build "release" "${CMAKE_ARGUMENTS}"
