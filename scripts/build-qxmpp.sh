@@ -66,6 +66,13 @@ function build() {
 #
 if [[ "${PLATFORM}" == "macos" ]]; then
     CMAKE_ARGUMENTS=" \
+          -DBUILD_SHARED=OFF \
+          -DBUILD_EXAMPLES=OFF \
+          -DBUILD_TESTS=OFF \
+          -DWITH_OPUS=OFF \
+          -DWITH_VPX=OFF \
+          -DCMAKE_PREFIX_PATH=${PARAM_PREFIX_PATH} \
+           ${CMAKE_CUSTOM_PARAM} \    
     "
 
 #
