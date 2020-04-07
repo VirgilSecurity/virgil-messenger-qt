@@ -41,6 +41,7 @@ function build() {
     local BUILD_DIR=${BUILD_DIR_BASE}/cmake-build-${PLATFORM}/${BUILD_TYPE}
     local INSTALL_DIR=${BUILD_DIR_BASE}/cmake-build-${PLATFORM}/${BUILD_TYPE}/installed
     local LIBS_DIR=${INSTALL_DIR}/usr/local/lib
+    local LIBS_DIR64=${INSTALL_DIR}/usr/local/lib64
 
     echo
     echo "===================================="
@@ -65,6 +66,10 @@ function build() {
       # install all targets
       make DESTDIR=${INSTALL_DIR} install
       check_error
+
+      if [ -d ${LIBS_DIR64} ]; then
+          mv -f ${LIBS_DIR64} ${LIBS_DIR}
+      fi
 
     popd
 }
