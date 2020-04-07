@@ -4,31 +4,14 @@
 #   Global variables
 #
 SCRIPT_FOLDER="$( cd "$( dirname "$0" )" && pwd )"
+. ${SCRIPT_FOLDER}/ish/error.ish
+
 QXMPP_DIR="${SCRIPT_FOLDER}/../ext/qxmpp"
 BUILD_DIR_BASE="${QXMPP_DIR}"
-CMAKE_CUSTOM_PARAM="${@:2}"
 
-
-#***************************************************************************************
-check_error() {
-   RETRES=$?
-   if [ $RETRES != 0 ]; then
-        echo "----------------------------------------------------------------------"
-        echo "############# !!! PROCESS ERROR ERRORCODE=[$RETRES]  #################"
-        echo "----------------------------------------------------------------------"
-        [ "$1" == "0" ] || exit $RETRES
-   else
-        echo "-----# Process OK. ---------------------------------------------------"
-   fi
-   return $RETRES
-}
-
-
-
-#
-#   Arguments
-#
-PLATFORM="host"
+PLATFORM="${1}"
+PARAM_PREFIX_PATH="${2}"
+CMAKE_CUSTOM_PARAM="${3}"
 
 #
 #   Build
@@ -41,6 +24,7 @@ function build() {
     local BUILD_DIR=${BUILD_DIR_BASE}/cmake-build-${PLATFORM}/${BUILD_TYPE}
     local INSTALL_DIR=${BUILD_DIR_BASE}/cmake-build-${PLATFORM}/${BUILD_TYPE}/installed
     local LIBS_DIR=${INSTALL_DIR}/usr/local/lib
+    local LIBS_DIR64=${INSTALL_DIR}/usr/local/lib64
 
     echo
     echo "===================================="
@@ -66,21 +50,92 @@ function build() {
       make DESTDIR=${INSTALL_DIR} install
       check_error
 
+      if [ -d ${LIBS_DIR64} ]; then
+          mv -f ${LIBS_DIR64} ${LIBS_DIR}
+      fi
+
     popd
 }
 
-# Common CMake arguments for the project
-CMAKE_ARGUMENTS=" \
--DBUILD_SHARED=OFF \
--DBUILD_EXAMPLES=OFF \
--DBUILD_TESTS=OFF \
--DWITH_OPUS=OFF \
--DWITH_VPX=OFF \
--DCMAKE_PREFIX_PATH=${1} \
-${CMAKE_CUSTOM_PARAM} \
-"
+#
+#   Prepare cmake parameters
+#
 
-echo "${CMAKE_ARGUMENTS}"
+#
+#   MacOS
+#
+if [[ "${PLATFORM}" == "macos" ]]; then
+    CMAKE_ARGUMENTS=" \
+    "
+
+#
+#   Windows (mingw) over Linux
+#
+
+elif [[ "${PLATFORM}" == "windows" && "$(uname)" == "Linux" ]]; then
+    CMAKE_ARGUMENTS=" \
+          -DBUILD_SHARED=OFF \
+          -DBUILD_EXAMPLES=OFF \
+          -DBUILD_TESTS=OFF \
+          -DWITH_OPUS=OFF \
+          -DWITH_VPX=OFF \
+          -DCMAKE_PREFIX_PATH=${PARAM_PREFIX_PATH} \
+          -DCMAKE_TOOLCHAIN_FILE=/usr/share/mingw/toolchain-mingw32.cmake \
+          -DCYGWIN=1 \
+           ${CMAKE_CUSTOM_PARAM} \
+    "
+#
+#   Windows
+#
+elif [[ "${PLATFORM}" == "windows" ]]; then
+    CMAKE_ARGUMENTS=" \
+    "
+
+#
+#   Linux
+#
+elif [[ "${PLATFORM}" == "linux" ]]; then
+    CMAKE_ARGUMENTS=" \
+          -DBUILD_SHARED=OFF \
+          -DBUILD_EXAMPLES=OFF \
+          -DBUILD_TESTS=OFF \
+          -DWITH_OPUS=OFF \
+          -DWITH_VPX=OFF \
+          -DCMAKE_PREFIX_PATH=${PARAM_PREFIX_PATH} \
+           ${CMAKE_CUSTOM_PARAM} \
+    "
+
+#
+#   iOS
+#
+elif [[ "${PLATFORM}" == "ios" ]]; then
+    CMAKE_ARGUMENTS=" \
+    "
+
+#
+#   iOS Simulator
+#
+elif [[ "${PLATFORM}" == "ios-sim" ]]; then
+    build_messenger_deps
+    CMAKE_ARGUMENTS=" \
+    "
+
+#
+#   Android
+#
+elif [[ "${PLATFORM}" == "android" ]]; then
+    CMAKE_ARGUMENTS=" \
+    "
+else
+    echo "Virgil IoTKIT build script usage : "
+    echo "$0 platform < platform-specific > < QT path >"
+    echo "where : "
+    echo "   platform - platform selector. Currently supported: android, ios, ios-sim, linux, macos, mingw32, windows"
+    echo "   platform-specific for Android :"
+    echo "     android_ABI [android_platform]"
+
+    exit 1
+fi
 
 #
 #   Build both Debug and Release
