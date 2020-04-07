@@ -37,6 +37,7 @@
 #include <VSQMessenger.h>
 
 #include <qxmpp/QXmppMessage.h>
+#include <qxmpp/QXmppUtils.h>
 
 #include <QtConcurrent>
 #include <QStandardPaths>
@@ -107,6 +108,7 @@ VSQMessenger::_connectToDatabase() {
 }
 
 /******************************************************************************/
+Q_DECLARE_METATYPE(QXmppConfiguration)
 void
 VSQMessenger::_connect(QString userWithEnv, QString userId) {
     const size_t _pass_buf_sz = 512;
@@ -124,7 +126,27 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
 
     // Connect to XMPP
     emit fireConnecting();
-    m_xmpp.connectToServer(jid, QString::fromLatin1(pass));
+//    QXmppConfiguration conf;
+
+    conf.setJid(jid);
+    conf.setHost(_xmppURL());
+    conf.setPassword(QString::fromLatin1(pass));
+
+        qDebug() << "SSL: " << QSslSocket::supportsSsl();
+
+    auto logger = QXmppLogger::getLogger();
+    logger->setLoggingType(QXmppLogger::SignalLogging);
+    logger->setMessageTypes(QXmppLogger::AnyMessage);
+
+    connect(logger, &QXmppLogger::message, [=](QXmppLogger::MessageType, const QString &text){
+        qDebug() << text;
+    });
+
+    m_xmpp.setLogger(logger);
+//    m_xmpp.connectToServer(conf);
+//    m_xmpp.connectToServer(jid, QString::fromLatin1(pass));
+    qRegisterMetaType<QXmppConfiguration>("QXmppConfiguration");
+    QMetaObject::invokeMethod(&m_xmpp, "connectToServer", Qt::QueuedConnection, Q_ARG(QXmppConfiguration, conf));
 }
 
 /******************************************************************************/
@@ -275,7 +297,7 @@ VSQMessenger::_virgilURL() {
 
 /******************************************************************************/
 QString
-VSQMessenger::_xmppURL() {    
+VSQMessenger::_xmppURL() {
     QString res = qgetenv("VS_MSGR_XMPP_URL");
 
     if (res.isEmpty()) {
@@ -286,6 +308,7 @@ VSQMessenger::_xmppURL() {
 
         case STG:
             res = "xmpp-stg.virgilsecurity.com";
+            //res = "199.58.211.45";
             break;
 
         case DEV:
@@ -414,8 +437,9 @@ VSQMessenger::onDisconnected() {
 
 /******************************************************************************/
 void
-VSQMessenger::onError(QXmppClient::Error) {
+VSQMessenger::onError(QXmppClient::Error err) {
     VS_LOG_DEBUG("onError");
+    qDebug() << err;
     emit fireError(tr("Connection error ..."));
 }
 

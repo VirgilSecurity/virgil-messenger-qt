@@ -140,6 +140,7 @@ private:
     QString m_user;
     VSQEnvType m_envType;
     static const VSQEnvType _defaultEnv = STG;
+    QXmppConfiguration conf;
 
     static const QString kOrganization;
     static const QString kApp;

@@ -6,6 +6,7 @@
 SCRIPT_FOLDER="$( cd "$( dirname "$0" )" && pwd )"
 QXMPP_DIR="${SCRIPT_FOLDER}/../ext/qxmpp"
 BUILD_DIR_BASE="${QXMPP_DIR}"
+CMAKE_CUSTOM_PARAM="${@:2}"
 
 
 #***************************************************************************************
@@ -73,9 +74,11 @@ CMAKE_ARGUMENTS=" \
 -DBUILD_SHARED=OFF \
 -DBUILD_EXAMPLES=OFF \
 -DBUILD_TESTS=OFF \
--DWITH_OPUS=ON \
--DWITH_VPX=ON \
--DCMAKE_PREFIX_PATH=${1}"
+-DWITH_OPUS=OFF \
+-DWITH_VPX=OFF \
+-DCMAKE_PREFIX_PATH=${1} \
+${CMAKE_CUSTOM_PARAM} \
+"
 
 echo "${CMAKE_ARGUMENTS}"
 

@@ -115,3 +115,23 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 DEPENDPATH += $${INCLUDEPATH}
 
+contains(ANDROID_TARGET_ARCH,x86) {
+    ANDROID_EXTRA_LIBS = \
+        /Users/kutashenko/Work/virgil/messenger/virgil-messenger-qt/ext/virgil-iotkit/sdk/cmake-build-android.x86/debug/modules/messenger/crypto/libvs-messenger-crypto.so \
+        /Users/kutashenko/Work/virgil/messenger/virgil-messenger-qt/ext/virgil-iotkit/sdk/cmake-build-android.x86/debug/modules/messenger/internal/libvs-messenger-internal.so \
+        $$PWD/../openssl-curl-android/build/openssl/x86/lib/libcrypto_1_1.so \
+        $$PWD/../openssl-curl-android/build/openssl/x86/lib/libssl_1_1.so
+
+    ANDROID_PACKAGE_SOURCE_DIR = \
+        $$PWD/android
+}
+
+DISTFILES += \
+    android/AndroidManifest.xml \
+    android/build.gradle \
+    android/gradle/wrapper/gradle-wrapper.jar \
+    android/gradle/wrapper/gradle-wrapper.properties \
+    android/gradlew \
+    android/gradlew.bat \
+    android/res/values/libs.xml
+
