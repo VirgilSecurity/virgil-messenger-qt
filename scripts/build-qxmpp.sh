@@ -72,7 +72,7 @@ if [[ "${PLATFORM}" == "macos" ]]; then
           -DWITH_OPUS=OFF \
           -DWITH_VPX=OFF \
           -DCMAKE_PREFIX_PATH=${PARAM_PREFIX_PATH} \
-           ${CMAKE_CUSTOM_PARAM} \    
+           ${CMAKE_CUSTOM_PARAM} \
     "
 
 #
