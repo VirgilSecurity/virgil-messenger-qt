@@ -36,7 +36,7 @@ QT += core network qml quick bluetooth sql xml concurrent
 
 CONFIG += c++14
 
-TARGET = demo-iotkit-qt
+TARGET = virgil-messenger
 
 #
 #   Include IoTKit Qt wrapper
@@ -47,7 +47,8 @@ include(ext/virgil-iotkit/integration/qt/iotkit.pri)
 #
 #   QXMPP
 #
-QXMPP_BUILD_PATH = $$PWD/ext/qxmpp/cmake-build-host/release/installed/usr/local
+
+QXMPP_BUILD_PATH = $$PWD/ext/qxmpp/cmake-build-$${OS_NAME}/release/installed/usr/local
 message("QXMPP location : $${QXMPP_BUILD_PATH}")
 
 #
