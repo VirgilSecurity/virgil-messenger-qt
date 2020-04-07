@@ -33,12 +33,80 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 #include <VSQApplication.h>
+#include <iostream>
+
+#include <android/log.h>
+#include <pthread.h>
+#include <unistd.h>
+
+static int pfd[2];
+static pthread_t loggingThread;
+static const char *LOG_TAG = "[C]";
+
+static void *loggingFunction(void*) {
+    ssize_t readSize;
+    char buf[128];
+
+    while((readSize = read(pfd[0], buf, sizeof buf - 1)) > 0) {
+        if(buf[readSize - 1] == '\n') {
+            --readSize;
+        }
+
+        buf[readSize] = 0;  // add null-terminator
+
+        __android_log_write(ANDROID_LOG_DEBUG, LOG_TAG, buf); // Set any log level you want
+    }
+
+    return 0;
+}
+
+static int runLoggingThread() { // run this function to redirect your output to android log
+    setvbuf(stdout, 0, _IOLBF, 0); // make stdout line-buffered
+    setvbuf(stderr, 0, _IONBF, 0); // make stderr unbuffered
+
+    /* create the pipe and redirect stdout and stderr */
+    pipe(pfd);
+    dup2(pfd[1], 1);
+    dup2(pfd[1], 2);
+
+    /* spawn the logging thread */
+    if(pthread_create(&loggingThread, 0, loggingFunction, 0) == -1) {
+        return -1;
+    }
+
+    pthread_detach(loggingThread);
+
+    return 0;
+}
 
 int
 main(int argc, char *argv[]) {
+//    runLoggingThread();
+
+
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QGuiApplication a(argc, argv);
+
+    QString dataPath = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+    qDebug() << dataPath;
+
+    QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString certFile = appDataPath + QDir::separator() + "cert.pem";
+    qDebug() << certFile;
+
+    QString rccFile(":qml/resources/cert.pem");
+
+    QFile::remove(certFile);
+    QFile::copy(rccFile, certFile);
+
+    QFile f11(certFile);
+    f11.open(QIODevice::ReadOnly);
+    qDebug() << f11.readLine();
+    qDebug() << f11.readLine();
+    qDebug() << f11.readLine();
+    f11.close();
+
 
     return VSQApplication().run();
 }

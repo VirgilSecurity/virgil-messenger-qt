@@ -31,5 +31,6 @@
         <file>qml/chat/FooterToolBar.qml</file>
         <file>qml/chat/ConversationToolBar.qml</file>
         <file>qml/resources/sounds/message.wav</file>
+        <file>qml/resources/cert.pem</file>
     </qresource>
 </RCC>
