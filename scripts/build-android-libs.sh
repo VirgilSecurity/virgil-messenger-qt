@@ -51,18 +51,18 @@ fi
 #
 # Prepare directory
 #
-# if [ -d ${BUILD_DIR} ]; then
-#      rm -rf ${BUILD_DIR}
-# fi
-# mkdir ${BUILD_DIR}
-# check_error
+if [ -d ${BUILD_DIR} ]; then
+     rm -rf ${BUILD_DIR}
+fi
+mkdir ${BUILD_DIR}
+check_error
 
 pushd ${BUILD_DIR}
      #
      #    Clone repository
      #
-     # git clone --recursive -b ${LIBS_BRANCH} ${LIBS_REPO}
-     # check_error
+     git clone --recursive -b ${LIBS_BRANCH} ${LIBS_REPO}
+     check_error
 
      #
      #    Build for all Android architectures
