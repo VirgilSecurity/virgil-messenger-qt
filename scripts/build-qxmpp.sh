@@ -4,14 +4,24 @@
 #   Global variables
 #
 SCRIPT_FOLDER="$( cd "$( dirname "$0" )" && pwd )"
-. ${SCRIPT_FOLDER}/ish/error.ish
-
 QXMPP_DIR="${SCRIPT_FOLDER}/../ext/qxmpp"
 BUILD_DIR_BASE="${QXMPP_DIR}"
+CMAKE_CUSTOM_PARAM="${@:2}"
 
-PLATFORM="${1}"
-PARAM_PREFIX_PATH="${2}"
-CMAKE_CUSTOM_PARAM="${3}"
+
+#***************************************************************************************
+check_error() {
+   RETRES=$?
+   if [ $RETRES != 0 ]; then
+        echo "----------------------------------------------------------------------"
+        echo "############# !!! PROCESS ERROR ERRORCODE=[$RETRES]  #################"
+        echo "----------------------------------------------------------------------"
+        [ "$1" == "0" ] || exit $RETRES
+   else
+        echo "-----# Process OK. ---------------------------------------------------"
+   fi
+   return $RETRES
+}
 
 #
 #   Build
@@ -21,14 +31,12 @@ function build() {
     local CMAKE_ARGUMENTS=$2
     local CORES=10
 
-    local BUILD_DIR=${BUILD_DIR_BASE}/cmake-build-${PLATFORM}/${BUILD_TYPE}
-    local INSTALL_DIR=${BUILD_DIR_BASE}/cmake-build-${PLATFORM}/${BUILD_TYPE}/installed
-    local LIBS_DIR=${INSTALL_DIR}/usr/local/lib
-    local LIBS_DIR64=${INSTALL_DIR}/usr/local/lib64
+    local BUILD_DIR=${BUILD_DIR_BASE}/cmake-build-${QT_BUILD_DIR_SUFFIX}/${BUILD_TYPE}
+    local INSTALL_DIR=${QT_INSTALL_DIR_BASE}/${QT_BUILD_DIR_SUFFIX}/${BUILD_TYPE}/installed
 
     echo
     echo "===================================="
-    echo "=== ${PLATFORM} ${BUILD_TYPE} build"
+    echo "=== ${QT_BUILD_DIR_SUFFIX} ${BUILD_TYPE} build"
     echo "=== Output directory: ${BUILD_DIR}"
     echo "===================================="
     echo
@@ -50,99 +58,21 @@ function build() {
       make DESTDIR=${INSTALL_DIR} install
       check_error
 
-      if [ -d ${LIBS_DIR64} ]; then
-          mv -f ${LIBS_DIR64} ${LIBS_DIR}
-      fi
-
     popd
 }
 
-#
-#   Prepare cmake parameters
-#
+# Common CMake arguments for the project
+CMAKE_ARGUMENTS=" \
+-DBUILD_SHARED=OFF \
+-DBUILD_EXAMPLES=OFF \
+-DBUILD_TESTS=OFF \
+-DWITH_OPUS=OFF \
+-DWITH_VPX=OFF \
+-DCMAKE_PREFIX_PATH=${1} \
+${CMAKE_CUSTOM_PARAM} \
+"
 
-#
-#   MacOS
-#
-if [[ "${PLATFORM}" == "macos" ]]; then
-    CMAKE_ARGUMENTS=" \
-          -DBUILD_SHARED=OFF \
-          -DBUILD_EXAMPLES=OFF \
-          -DBUILD_TESTS=OFF \
-          -DWITH_OPUS=OFF \
-          -DWITH_VPX=OFF \
-          -DCMAKE_PREFIX_PATH=${PARAM_PREFIX_PATH} \
-           ${CMAKE_CUSTOM_PARAM} \
-    "
-
-#
-#   Windows (mingw) over Linux
-#
-
-elif [[ "${PLATFORM}" == "windows" && "$(uname)" == "Linux" ]]; then
-    CMAKE_ARGUMENTS=" \
-          -DBUILD_SHARED=OFF \
-          -DBUILD_EXAMPLES=OFF \
-          -DBUILD_TESTS=OFF \
-          -DWITH_OPUS=OFF \
-          -DWITH_VPX=OFF \
-          -DCMAKE_PREFIX_PATH=${PARAM_PREFIX_PATH} \
-          -DCMAKE_TOOLCHAIN_FILE=/usr/share/mingw/toolchain-mingw32.cmake \
-          -DCYGWIN=1 \
-           ${CMAKE_CUSTOM_PARAM} \
-    "
-#
-#   Windows
-#
-elif [[ "${PLATFORM}" == "windows" ]]; then
-    CMAKE_ARGUMENTS=" \
-    "
-
-#
-#   Linux
-#
-elif [[ "${PLATFORM}" == "linux" ]]; then
-    CMAKE_ARGUMENTS=" \
-          -DBUILD_SHARED=OFF \
-          -DBUILD_EXAMPLES=OFF \
-          -DBUILD_TESTS=OFF \
-          -DWITH_OPUS=OFF \
-          -DWITH_VPX=OFF \
-          -DCMAKE_PREFIX_PATH=${PARAM_PREFIX_PATH} \
-           ${CMAKE_CUSTOM_PARAM} \
-    "
-
-#
-#   iOS
-#
-elif [[ "${PLATFORM}" == "ios" ]]; then
-    CMAKE_ARGUMENTS=" \
-    "
-
-#
-#   iOS Simulator
-#
-elif [[ "${PLATFORM}" == "ios-sim" ]]; then
-    build_messenger_deps
-    CMAKE_ARGUMENTS=" \
-    "
-
-#
-#   Android
-#
-elif [[ "${PLATFORM}" == "android" ]]; then
-    CMAKE_ARGUMENTS=" \
-    "
-else
-    echo "Virgil IoTKIT build script usage : "
-    echo "$0 platform < platform-specific > < QT path >"
-    echo "where : "
-    echo "   platform - platform selector. Currently supported: android, ios, ios-sim, linux, macos, mingw32, windows"
-    echo "   platform-specific for Android :"
-    echo "     android_ABI [android_platform]"
-
-    exit 1
-fi
+echo "${CMAKE_ARGUMENTS}"
 
 #
 #   Build both Debug and Release

@@ -41,14 +41,13 @@ TARGET = virgil-messenger
 #
 #   Include IoTKit Qt wrapper
 #
-
+PREBUILT_PATH = $$PWD/ext/prebuilt
 include(ext/virgil-iotkit/integration/qt/iotkit.pri)
 
 #
 #   QXMPP
 #
-
-QXMPP_BUILD_PATH = $$PWD/ext/qxmpp/cmake-build-$${OS_NAME}/release/installed/usr/local
+QXMPP_BUILD_PATH = $$PREBUILT_SYSROOT
 message("QXMPP location : $${QXMPP_BUILD_PATH}")
 
 #
@@ -119,11 +118,12 @@ DEPENDPATH += $${INCLUDEPATH}
 message("ANDROID_TARGET_ARCH = $$ANDROID_TARGET_ARCH")
 
 android: {
+    LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
     ANDROID_EXTRA_LIBS = \
-        $$PWD/ext/virgil-iotkit/sdk/cmake-build-android.$$ANDROID_TARGET_ARCH/release/modules/messenger/crypto/libvs-messenger-crypto.so \
-        $$PWD/ext/virgil-iotkit/sdk/cmake-build-android.$$ANDROID_TARGET_ARCH/release/modules/messenger/internal/libvs-messenger-internal.so \
-        $$PWD/ext/android-libs/openssl-curl-android/build/openssl/$$ANDROID_TARGET_ARCH/lib/libcrypto_1_1.so \
-        $$PWD/ext/android-libs/openssl-curl-android/build/openssl/$$ANDROID_TARGET_ARCH/lib/libssl_1_1.so
+        $$LIBS_DIR/libvs-messenger-crypto.so \
+        $$LIBS_DIR/libvs-messenger-internal.so \
+        $$LIBS_DIR/libcrypto_1_1.so \
+        $$LIBS_DIR/libssl_1_1.so
 
     ANDROID_PACKAGE_SOURCE_DIR = \
         $$PWD/android
