@@ -10,6 +10,7 @@ QtObject {
     readonly property color buttonPrimaryTextColor: "#FFFFFF"
     readonly property color brandColor: "#D32F2F"
     readonly property color secondaryFontColor: "#B0BEC5"
+    readonly property color labelColor: "#6F828C"
 
     // icons
     readonly property url mainLogo: "../resources/icons/Logo-Big.svg"

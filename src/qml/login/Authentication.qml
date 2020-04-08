@@ -80,5 +80,16 @@ StackView {
 
             onClicked: authenticationPage.push(loginPage)
         }
+
+        Text {
+            text: qsTr("Powered by Virgil Security")
+            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
+            anchors.top: loginButton.bottom
+            anchors.topMargin: 40
+            color: Theme.labelColor
+            horizontalAlignment: Text.AlignHCenter
+            font.pointSize: 11
+        }
     }
 }
