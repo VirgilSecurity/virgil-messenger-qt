@@ -5,13 +5,18 @@ import QtMultimedia 5.12
 
 import "login/login.js" as LoginLogic
 import "helpers/ui"
+import "theme"
 
 ApplicationWindow {
     id: rootWindow
     visible: true
     title: qsTr("Virgil IoTKit Qt Demo")
-    minimumWidth: 550
+    minimumWidth: 320
     minimumHeight: 500
+
+    background: Rectangle {
+        color: Theme.mainBackgroundColor
+    }
 
     //
     //  Properties
@@ -30,6 +35,7 @@ ApplicationWindow {
     property var contactPage
     property var loginPage
     property var settingsPage
+    property var authenticationPage
 
     //
     //  Connections
@@ -41,7 +47,7 @@ ApplicationWindow {
             showPopupError(errorText)
 
             // Mobile
-            mobileView.replace(loginPage)
+            mobileView.replace(authenticationPage)
 
             // Desktop
             desktopView.mode = desktopView.kModeLogin
@@ -71,9 +77,11 @@ ApplicationWindow {
     // After loading show initial Login Page
     Component.onCompleted: {
         contactPage = Qt.createComponent("qrc:/qml/chat/ContactPage.qml")
-        loginPage = Qt.createComponent("qrc:/qml/login/Login.qml")
+//        loginPage = Qt.createComponent("qrc:/qml/login/Login.qml")
+        authenticationPage = Qt.createComponent("qrc:/qml/login/Authentication.qml")
         settingsPage = Qt.createComponent("qrc:/qml/settings/SettingsPage.qml")
-        mobileView.replace(loginPage)
+
+        mobileView.replace(authenticationPage)
     }
 
     //

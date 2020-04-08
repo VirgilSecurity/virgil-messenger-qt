@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.1
 import "chat"
 import "login"
 import "settings"
+import "theme"
 
 Rectangle {
     anchors.fill: parent
@@ -22,8 +23,8 @@ Rectangle {
     property string mode: kModeLogin
     property alias chatView: chatView
 
-    Login {
-        id: login
+    Authentication {
+        id: authentication
         anchors.fill: parent
         visible: mode === kModeLogin
     }

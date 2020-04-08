@@ -88,7 +88,7 @@ Page {
             height: 20
         }
 
-        CButton {
+        PrimaryButton {
             height: 50
             Layout.preferredWidth: parent.width - 20
             Layout.alignment: Qt.AlignHCenter

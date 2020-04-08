@@ -42,7 +42,7 @@ Page {
             elide: Text.ElideLeft
         }
 
-        CButton {
+        PrimaryButton {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
             height: 50
@@ -59,7 +59,7 @@ Page {
             height: 10
         }
 
-        CButton {
+        PrimaryButton {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
             height: 50
@@ -76,7 +76,7 @@ Page {
             Layout.fillHeight: true
         }
 
-        CButton {
+        PrimaryButton {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
             height: 50

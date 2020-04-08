@@ -5,7 +5,7 @@
         <file>qml/login/PasswordResetPage.qml</file>
         <file>qml/login/login.js</file>
         <file>qml/settings/SettingsPage.qml</file>
-        <file>qml/helpers/ui/CButton.qml</file>
+        <file>qml/helpers/ui/PrimaryButton.qml</file>
         <file>qml/helpers/ui/CIcon.qml</file>
         <file>qml/resources/User.png</file>
         <file>qml/resources/PoweredBy.png</file>
@@ -31,5 +31,10 @@
         <file>qml/chat/FooterToolBar.qml</file>
         <file>qml/chat/ConversationToolBar.qml</file>
         <file>qml/resources/sounds/message.wav</file>
+        <file>qml/theme/Theme.qml</file>
+        <file>qml/theme/qmldir</file>
+        <file>qml/helpers/ui/OutlineButton.qml</file>
+        <file>qml/login/Authentication.qml</file>
+        <file>qml/resources/icons/Logo-Big.svg</file>
     </qresource>
 </RCC>
