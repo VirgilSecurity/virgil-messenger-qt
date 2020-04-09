@@ -51,9 +51,6 @@ int
 VSQApplication::run() {
     QQmlApplicationEngine engine;
 
-    char *ip = NULL;
-    //vs_messenger_resolv("xmpp-stg.virgilsecurity.com", &ip);
-
     auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT << VSQFeatures::SNAP_SNIFFER;
     auto impl = VSQImplementations() << m_netifUDPbcast;
     auto roles = VSQDeviceRoles() << VirgilIoTKit::VS_SNAP_DEV_CONTROL;
