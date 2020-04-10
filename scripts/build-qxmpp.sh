@@ -57,6 +57,12 @@ function build() {
       # install all targets
       make DESTDIR=${INSTALL_DIR} install
       check_error
+      if [ -d ${INSTALL_DIR}/usr/local/lib64 ]; then 
+         cp -rf ${INSTALL_DIR}/usr/local/lib64/* ${INSTALL_DIR}/usr/local/lib 
+         check_error
+         rm -rf ${INSTALL_DIR}/usr/local/lib64
+         check_error
+      fi 
 
     popd
 }
