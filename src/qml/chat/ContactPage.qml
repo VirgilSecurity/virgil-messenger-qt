@@ -51,11 +51,13 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 
+import "../theme"
+
 Page {
     id: root
 
     background: Rectangle {
-        color: backGroundColor
+        color: Theme.contactsBackgroundColor
     }
 
     header: ChatToolBar {

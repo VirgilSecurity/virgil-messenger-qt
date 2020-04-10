@@ -36,5 +36,6 @@
         <file>qml/helpers/ui/OutlineButton.qml</file>
         <file>qml/login/Authentication.qml</file>
         <file>qml/resources/icons/Logo-Big.svg</file>
+        <file>qml/resources/icons/Search.svg</file>
     </qresource>
 </RCC>
