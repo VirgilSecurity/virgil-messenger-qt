@@ -6,6 +6,7 @@
 SCRIPT_FOLDER="$( cd "$( dirname "$0" )" && pwd )"
 QXMPP_DIR="${SCRIPT_FOLDER}/../ext/qxmpp"
 BUILD_DIR_BASE="${QXMPP_DIR}"
+CMAKE_CUSTOM_PARAM="${@:2}"
 
 
 #***************************************************************************************
@@ -22,13 +23,6 @@ check_error() {
    return $RETRES
 }
 
-
-
-#
-#   Arguments
-#
-PLATFORM="host"
-
 #
 #   Build
 #
@@ -37,13 +31,12 @@ function build() {
     local CMAKE_ARGUMENTS=$2
     local CORES=10
 
-    local BUILD_DIR=${BUILD_DIR_BASE}/cmake-build-${PLATFORM}/${BUILD_TYPE}
-    local INSTALL_DIR=${BUILD_DIR_BASE}/cmake-build-${PLATFORM}/${BUILD_TYPE}/installed
-    local LIBS_DIR=${INSTALL_DIR}/usr/local/lib
+    local BUILD_DIR=${BUILD_DIR_BASE}/cmake-build-${QT_BUILD_DIR_SUFFIX}/${BUILD_TYPE}
+    local INSTALL_DIR=${QT_INSTALL_DIR_BASE}/${QT_BUILD_DIR_SUFFIX}/${BUILD_TYPE}/installed
 
     echo
     echo "===================================="
-    echo "=== ${PLATFORM} ${BUILD_TYPE} build"
+    echo "=== ${QT_BUILD_DIR_SUFFIX} ${BUILD_TYPE} build"
     echo "=== Output directory: ${BUILD_DIR}"
     echo "===================================="
     echo
@@ -64,6 +57,12 @@ function build() {
       # install all targets
       make DESTDIR=${INSTALL_DIR} install
       check_error
+      if [ -d ${INSTALL_DIR}/usr/local/lib64 ]; then 
+         cp -rf ${INSTALL_DIR}/usr/local/lib64/* ${INSTALL_DIR}/usr/local/lib 
+         check_error
+         rm -rf ${INSTALL_DIR}/usr/local/lib64
+         check_error
+      fi 
 
     popd
 }
@@ -73,9 +72,11 @@ CMAKE_ARGUMENTS=" \
 -DBUILD_SHARED=OFF \
 -DBUILD_EXAMPLES=OFF \
 -DBUILD_TESTS=OFF \
--DWITH_OPUS=ON \
--DWITH_VPX=ON \
--DCMAKE_PREFIX_PATH=${1}"
+-DWITH_OPUS=OFF \
+-DWITH_VPX=OFF \
+-DCMAKE_PREFIX_PATH=${1} \
+${CMAKE_CUSTOM_PARAM} \
+"
 
 echo "${CMAKE_ARGUMENTS}"
 

@@ -32,21 +32,23 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <VSQApplication.h>
-#include <iostream>
-
-#include <android/VSQAndroid.h>
-
-int
-main(int argc, char *argv[]) {
+#ifndef VSQANDROID_H
+#define VSQANDROID_H
 
 #if (ANDROID)
-    VSQAndroid::prepare();
-#endif
 
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#include <QObject>
 
-    QGuiApplication a(argc, argv);
+class VSQAndroid {
+public:
+    VSQAndroid() = delete;
 
-    return VSQApplication().run();
-}
+    static bool prepare();
+
+private:
+    static int runLoggingThread();
+};
+
+#endif // ANDROID
+
+#endif // VSQANDROID_H

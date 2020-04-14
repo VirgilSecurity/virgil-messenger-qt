@@ -37,6 +37,7 @@
 #include <VSQMessenger.h>
 
 #include <qxmpp/QXmppMessage.h>
+#include <qxmpp/QXmppUtils.h>
 
 #include <QtConcurrent>
 #include <QStandardPaths>
@@ -107,6 +108,7 @@ VSQMessenger::_connectToDatabase() {
 }
 
 /******************************************************************************/
+Q_DECLARE_METATYPE(QXmppConfiguration)
 void
 VSQMessenger::_connect(QString userWithEnv, QString userId) {
     const size_t _pass_buf_sz = 512;
@@ -124,7 +126,24 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
 
     // Connect to XMPP
     emit fireConnecting();
-    m_xmpp.connectToServer(jid, QString::fromLatin1(pass));
+
+    conf.setJid(jid);
+    conf.setHost(_xmppURL());
+    conf.setPassword(QString::fromLatin1(pass));
+
+    qDebug() << "SSL: " << QSslSocket::supportsSsl();
+
+    auto logger = QXmppLogger::getLogger();
+    logger->setLoggingType(QXmppLogger::SignalLogging);
+    logger->setMessageTypes(QXmppLogger::AnyMessage);
+
+    connect(logger, &QXmppLogger::message, [=](QXmppLogger::MessageType, const QString &text){
+        qDebug() << text;
+    });
+
+    m_xmpp.setLogger(logger);
+    qRegisterMetaType<QXmppConfiguration>("QXmppConfiguration");
+    QMetaObject::invokeMethod(&m_xmpp, "connectToServer", Qt::QueuedConnection, Q_ARG(QXmppConfiguration, conf));
 }
 
 /******************************************************************************/
@@ -148,7 +167,13 @@ VSQMessenger::_prepareLogin(const QString &user) {
     }
 
     // Initialize Virgil Messenger to work with required environment
-    if (VS_CODE_OK != vs_messenger_virgil_init(_virgilURL().toStdString().c_str())) {
+    const char *cCABundle = NULL;
+    QString caPath = qgetenv("VS_CURL_CA_BUNDLE");
+    if (!caPath.isEmpty()) {
+        cCABundle = caPath.toStdString().c_str();
+    }
+
+    if (VS_CODE_OK != vs_messenger_virgil_init(_virgilURL().toStdString().c_str(), cCABundle)) {
         qCritical() << "Cannot initialize low level messenger";
     }
 
@@ -251,19 +276,22 @@ VSQMessenger::onAddContactToDB(QString contact) {
 /******************************************************************************/
 QString
 VSQMessenger::_virgilURL() {
-    QString res;
-    switch (m_envType) {
-    case PROD:
-        res = "https://messenger.virgilsecurity.com";
-        break;
+    QString res = qgetenv("VS_MSGR_VIRGIL");
 
-    case STG:
-        res = "https://messenger-stg.virgilsecurity.com";
-        break;
+    if (res.isEmpty()) {
+        switch (m_envType) {
+        case PROD:
+            res = "https://messenger.virgilsecurity.com";
+            break;
 
-    case DEV:
-        res = "https://messenger-dev.virgilsecurity.com";
-        break;
+        case STG:
+            res = "https://messenger-stg.virgilsecurity.com";
+            break;
+
+        case DEV:
+            res = "https://messenger-dev.virgilsecurity.com";
+            break;
+        }
     }
 
     VS_LOG_DEBUG("Virgil URL: %s", res.toStdString().c_str());
@@ -273,19 +301,23 @@ VSQMessenger::_virgilURL() {
 /******************************************************************************/
 QString
 VSQMessenger::_xmppURL() {
-    QString res;
-    switch (m_envType) {
-    case PROD:
-        res = "xmpp.virgilsecurity.com";
-        break;
+    QString res = qgetenv("VS_MSGR_XMPP_URL");
 
-    case STG:
-        res = "xmpp-stg.virgilsecurity.com";
-        break;
+    if (res.isEmpty()) {
+        switch (m_envType) {
+        case PROD:
+            res = "xmpp.virgilsecurity.com";
+            break;
 
-    case DEV:
-        res = "xmpp-dev.virgilsecurity.com";
-        break;
+        case STG:
+            res = "xmpp-stg.virgilsecurity.com";
+            //res = "199.58.211.45";
+            break;
+
+        case DEV:
+            res = "xmpp-dev.virgilsecurity.com";
+            break;
+        }
     }
 
     VS_LOG_DEBUG("XMPP URL: %s", res.toStdString().c_str());
@@ -295,7 +327,20 @@ VSQMessenger::_xmppURL() {
 /******************************************************************************/
 uint16_t
 VSQMessenger::_xmppPort() {
-    return 5222;
+    uint16_t res = 5222;
+    QString portStr = qgetenv("VS_MSGR_XMPP_PORT");
+
+    if (!portStr.isEmpty()) {
+        bool ok;
+        int port = portStr.toInt(&ok);
+        if (ok) {
+            res = static_cast<uint16_t> (port);
+        }
+    }
+
+    VS_LOG_DEBUG("XMPP PORT: %d", static_cast<int> (res));
+
+    return res;
 }
 
 /******************************************************************************/
@@ -395,8 +440,9 @@ VSQMessenger::onDisconnected() {
 
 /******************************************************************************/
 void
-VSQMessenger::onError(QXmppClient::Error) {
+VSQMessenger::onError(QXmppClient::Error err) {
     VS_LOG_DEBUG("onError");
+    qDebug() << err;
     emit fireError(tr("Connection error ..."));
 }
 
