@@ -104,6 +104,7 @@ Page {
                     Text {
                         color: Theme.secondaryTextColor
                         font.pointSize: 12
+												// TODO: insert from model
                         text: "latest message to be inserted and check the lenght"
                         width: parent.width
                         elide: Text.ElideRight
