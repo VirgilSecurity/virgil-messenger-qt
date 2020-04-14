@@ -126,13 +126,12 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
 
     // Connect to XMPP
     emit fireConnecting();
-//    QXmppConfiguration conf;
 
     conf.setJid(jid);
     conf.setHost(_xmppURL());
     conf.setPassword(QString::fromLatin1(pass));
 
-        qDebug() << "SSL: " << QSslSocket::supportsSsl();
+    qDebug() << "SSL: " << QSslSocket::supportsSsl();
 
     auto logger = QXmppLogger::getLogger();
     logger->setLoggingType(QXmppLogger::SignalLogging);
@@ -143,8 +142,6 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
     });
 
     m_xmpp.setLogger(logger);
-//    m_xmpp.connectToServer(conf);
-//    m_xmpp.connectToServer(jid, QString::fromLatin1(pass));
     qRegisterMetaType<QXmppConfiguration>("QXmppConfiguration");
     QMetaObject::invokeMethod(&m_xmpp, "connectToServer", Qt::QueuedConnection, Q_ARG(QXmppConfiguration, conf));
 }
@@ -170,7 +167,13 @@ VSQMessenger::_prepareLogin(const QString &user) {
     }
 
     // Initialize Virgil Messenger to work with required environment
-    if (VS_CODE_OK != vs_messenger_virgil_init(_virgilURL().toStdString().c_str())) {
+    const char *cCABundle = NULL;
+    QString caPath = qgetenv("VS_CURL_CA_BUNDLE");
+    if (!caPath.isEmpty()) {
+        cCABundle = caPath.toStdString().c_str();
+    }
+
+    if (VS_CODE_OK != vs_messenger_virgil_init(_virgilURL().toStdString().c_str(), cCABundle)) {
         qCritical() << "Cannot initialize low level messenger";
     }
 
