@@ -104,6 +104,12 @@ ToolBar {
 
                         Action { text: qsTr("New chat") }
 
+                        Action {
+                            text: qsTr("Settings")
+                            onTriggered: showSettings()
+
+                        }
+
                         MenuSeparator {
                             leftPadding: menu.menuItemPadding
                             rightPadding: menu.menuItemPadding
@@ -115,8 +121,8 @@ ToolBar {
                         }
 
                         Action {
-                            text: qsTr("Settings")
-                            onTriggered: showSettings()
+                            text: qsTr("Sign out")
+                            onTriggered: logout()
 
                         }
 

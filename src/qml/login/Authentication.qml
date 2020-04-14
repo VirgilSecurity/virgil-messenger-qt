@@ -10,7 +10,6 @@ StackView {
 
     initialItem: mainView
     anchors.fill: parent
-    width: parent.width
 
     property var loginPage
 
