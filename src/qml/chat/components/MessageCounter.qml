@@ -8,7 +8,7 @@ TextInCircle {
 
     diameter: 16
     color: Theme.messegeCountColor
-
+    opacity: count ? 1 : 0
     content: count > 9 ? '9+' : count
     pointSize: 9
 }
