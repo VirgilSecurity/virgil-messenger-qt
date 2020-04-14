@@ -9,7 +9,7 @@ ToolBar {
     height: 60
 
     background: Rectangle {
-        color: "transparent"
+        color: Theme.contactsBackgroundColor
     }
 
     Item {

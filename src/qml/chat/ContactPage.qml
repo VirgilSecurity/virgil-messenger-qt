@@ -50,8 +50,10 @@
 
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.1
 
 import "../theme"
+import "./components"
 
 Page {
     id: root
@@ -66,35 +68,62 @@ Page {
     ListView {
         id: listView
         anchors.fill: parent
-        topMargin: 20
-        leftMargin: 20
-        bottomMargin: 20
-        rightMargin: 20
-        spacing: 10
         model: ContactsModel
-
         delegate: ItemDelegate {
-            text: model.display
-            width: listView.width - listView.leftMargin - listView.rightMargin
-            height: avatar.height
-            leftPadding: avatar.width + 10
+            width: parent.width
+            contentItem: RowLayout {
+                anchors.leftMargin: 20
+                anchors.rightMargin: 20
+                anchors.fill: parent
+                height: avatar.height
+                spacing: 10
+                Loader {
+                    id: avatar
+                    sourceComponent: AvatarPlaceholder {
+                        nickname: model.display
+                    }
+                }
 
-            //contentItem.color: mainTextCOlor
-            Binding {
-                target: contentItem
-                property: "color"
-                value: mainTextCOlor
+                Column {
+                    Layout.fillWidth: true
+
+                    Text {
+                        color: Theme.primaryTextColor
+                        font.pointSize: 15
+                        text: model.display
+                    }
+
+                    Text {
+                        color: Theme.secondaryFontColor
+                        font.pointSize: 12
+                        text: "latest message to be inserted and check the lenght"
+                        width: parent.width
+                        elide: Text.ElideRight
+                    }
+                }
+
+                Column {
+                    width: 30
+                    spacing: 5
+
+                    MessageCounter {
+                       // TODO: Insert model
+                       count: 999
+                       anchors.horizontalCenter: parent.horizontalCenter
+                    }
+
+                    Text {
+                        // TODO insert model
+                        text: "16:20"
+                        color: Theme.secondaryFontColor
+                        font.pointSize: 9
+                        anchors.horizontalCenter: parent.horizontalCenter
+                    }
+                }
             }
 
             onClicked: {
                 showChat(model.display)
-            }
-
-            Image {
-                id: avatar
-                width: 30
-                height: 30
-                source: "qrc:/qml/resources/Contacts.png"
             }
         }
     }

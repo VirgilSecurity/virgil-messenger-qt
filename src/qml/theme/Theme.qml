@@ -14,6 +14,14 @@ QtObject {
     readonly property color labelColor: "#6F828C"
     readonly property color sepratorColor: "#314048"
     readonly property color menuBackgroundColor: "#7D929E"
+    readonly property color avatarBgColor: "#1976D2"
+    readonly property color avatarTextColor: "#80FFFFFF"
+    readonly property color messegeCountColor: "#F44336"
+
+    // sizes
+    readonly property real avatarHeight: 40
+    readonly property real avatarWidth: avatarHeight
+    readonly property real avatarRadius: avatarWidth / 2
 
     // icons
     readonly property url mainLogo: "../resources/icons/Logo-Big.svg"
