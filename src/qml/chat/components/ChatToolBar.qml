@@ -2,7 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.1
 
-import "../theme"
+import "../../theme"
 
 ToolBar {
     spacing: 20
@@ -41,7 +41,7 @@ ToolBar {
                     Label {
                         text: qsTr("Server description")
                         font.pointSize: 12
-                        color: Theme.secondaryFontColor
+                        color: Theme.secondaryTextColor
                     }
                 }
 
@@ -90,21 +90,59 @@ ToolBar {
                     }
 
                     Menu {
-                        property real menuWidth: 300
-
                         id: menu
+
+                        property real menuWidth: 200
+                        property real menuItemHeight: 40
+                        property real menuItemPadding: 20
+
+
+                        implicitWidth: menuWidth
+
+                        topPadding: 10
+                        bottomPadding: 10
 
                         Action { text: qsTr("New chat") }
 
-                        MenuSeparator { }
+                        MenuSeparator {
+                            leftPadding: menu.menuItemPadding
+                            rightPadding: menu.menuItemPadding
+                            contentItem: Rectangle {
+                                implicitHeight: 1
+                                implicitWidth: menu.menuWidth
+                                color: Theme.menuSeparatorColor
+                            }
+                        }
 
-                        Action { text: qsTr("Add to contacts") }
+                        Action {
+                            text: qsTr("Settings")
+                            onTriggered: showSettings()
+
+                        }
 
                         background: Rectangle {
-                            implicitWidth: 200
-                            implicitHeight: 200
+                            implicitWidth: menu.menuWidth
+                            implicitHeight: menu.contentHeight
                             color: Theme.menuBackgroundColor
                             radius: 6
+                        }
+
+                        delegate: MenuItem {
+                            id: menuItem
+                            implicitWidth: parent.width
+                            implicitHeight: menu.menuItemHeight
+                            font.pointSize: 15
+
+                            contentItem: Text {
+                                leftPadding: menu.menuItemPadding
+                                rightPadding:menu.menuItemPadding
+                                text: menuItem.text
+                                font: menuItem.font
+                                color: menuItem.highlighted ? Theme.secondaryTextColor : Theme.primaryTextColor
+                                horizontalAlignment: Text.AlignLeft
+                                verticalAlignment: Text.AlignVCenter
+                                elide: Text.ElideRight
+                            }
                         }
                     }
                 }
@@ -119,7 +157,7 @@ ToolBar {
                 contentItem: Rectangle {
                     implicitHeight: 1
                     width: parent.width
-                    color: Theme.sepratorColor
+                    color: Theme.chatSeparatorColor
                 }
             }
         }

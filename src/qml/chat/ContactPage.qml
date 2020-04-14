@@ -70,13 +70,21 @@ Page {
         anchors.fill: parent
         model: ContactsModel
         delegate: ItemDelegate {
+            id: listItem
             width: parent.width
+            leftInset: 8
+            rightInset: 8
+            background: Rectangle {
+                color: listItem.down ? Theme.contactPressedColor : "Transparent"
+                radius: 6
+            }
             contentItem: RowLayout {
                 anchors.leftMargin: 20
                 anchors.rightMargin: 20
                 anchors.fill: parent
                 height: avatar.height
                 spacing: 10
+
                 Loader {
                     id: avatar
                     sourceComponent: AvatarPlaceholder {
@@ -94,7 +102,7 @@ Page {
                     }
 
                     Text {
-                        color: Theme.secondaryFontColor
+                        color: Theme.secondaryTextColor
                         font.pointSize: 12
                         text: "latest message to be inserted and check the lenght"
                         width: parent.width
@@ -115,7 +123,7 @@ Page {
                     Text {
                         // TODO insert model
                         text: "16:20"
-                        color: Theme.secondaryFontColor
+                        color: Theme.secondaryTextColor
                         font.pointSize: 9
                         anchors.horizontalCenter: parent.horizontalCenter
                     }
@@ -126,10 +134,6 @@ Page {
                 showChat(model.display)
             }
         }
-    }
-
-    footer: FooterToolBar {
-
     }
 
     //

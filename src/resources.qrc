@@ -16,7 +16,6 @@
         <file>qml/resources/AppUserscreen.png</file>
         <file>qml/resources/AddAccount.png</file>
         <file>qml/resources/Group.png</file>
-        <file>qml/chat/ChatToolBar.qml</file>
         <file>qml/chat/ContactPage.qml</file>
         <file>qml/chat/ConversationPage.qml</file>
         <file>qml/helpers/ui/Progress.qml</file>
@@ -28,7 +27,6 @@
         <file>qml/iot/Sniffer.qml</file>
         <file>qml/MobileView.qml</file>
         <file>qml/DesktopView.qml</file>
-        <file>qml/chat/FooterToolBar.qml</file>
         <file>qml/chat/ConversationToolBar.qml</file>
         <file>qml/resources/sounds/message.wav</file>
         <file>qml/theme/Theme.qml</file>
@@ -37,5 +35,10 @@
         <file>qml/login/Authentication.qml</file>
         <file>qml/resources/icons/Logo-Big.svg</file>
         <file>qml/resources/icons/Search.svg</file>
+        <file>qml/js/strings.js</file>
+        <file>qml/chat/components/AvatarPlaceholder.qml</file>
+        <file>qml/chat/components/MessageCounter.qml</file>
+        <file>qml/chat/components/ChatToolBar.qml</file>
+        <file>qml/components/TextInCircle.qml</file>
     </qresource>
 </RCC>
