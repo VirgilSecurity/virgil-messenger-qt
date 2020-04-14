@@ -73,6 +73,22 @@ Page {
 
         Rectangle {
             height: 10
+        }
+
+        CButton {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
+            height: 50
+            name: qsTr("Send report to developers")
+            baseColor: mainAppColor
+            borderColor: mainAppColor
+            onClicked: {
+                Messenger.sendReport()
+            }
+        }
+
+        Rectangle {
+            height: 10
             Layout.fillHeight: true
         }
 

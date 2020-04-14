@@ -86,6 +86,9 @@ public slots:
     Q_INVOKABLE void
     deleteUser(QString user);
 
+    Q_INVOKABLE void
+    sendReport();
+
     Q_INVOKABLE QStringList
     usersList();
 

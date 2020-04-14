@@ -10,7 +10,7 @@ ApplicationWindow {
     id: rootWindow
     visible: true
     title: qsTr("Virgil IoTKit Qt Demo")
-    minimumWidth: 550
+    minimumWidth: 360
     minimumHeight: 500
 
     //
