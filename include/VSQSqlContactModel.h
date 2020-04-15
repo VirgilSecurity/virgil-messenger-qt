@@ -32,33 +32,40 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
-#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
+#ifndef VIRGIL_IOTKIT_QT_SQL_CONTACT_MODEL_H
+#define VIRGIL_IOTKIT_QT_SQL_CONTACT_MODEL_H
 
-#include <QtCore>
-#include <QGuiApplication>
-#include <VSQMessenger.h>
-#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
+#include <QSqlQueryModel>
 
-class VSQApplication : public QObject {
+class VSQSqlContactModel : public QSqlQueryModel {
+
     Q_OBJECT
+
 public:
-    VSQApplication();
-    virtual ~VSQApplication() = default;
+    VSQSqlContactModel(QObject *parent = nullptr);
 
-    int
-    run();
+    QString
+    user() const;
 
+    Q_INVOKABLE void
+    setUser(const QString &user);
 
-private slots:
-#if VS_IOS
+public slots:
     void
-    onApplicationStateChanged(Qt::ApplicationState state);
-#endif // VS_IOS
+    addContact(QString contact);
 
 private:
-    VSQMessenger m_messenger;
-    QSharedPointer<VSQUdpBroadcast> m_netifUDPbcast;
+    QString m_user;
+
+    void
+    _createTable();
+
+    void
+    _update();
+
+    QString
+    _tableName() const;
+
 };
 
-#endif // VSQApplication
+#endif // VIRGIL_IOTKIT_QT_SQL_CONTACT_MODEL_H

@@ -32,33 +32,34 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
-#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
 
-#include <QtCore>
-#include <QGuiApplication>
-#include <VSQMessenger.h>
-#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
+Dialog {
 
-class VSQApplication : public QObject {
-    Q_OBJECT
-public:
-    VSQApplication();
-    virtual ~VSQApplication() = default;
+    property string contact: contact.text
 
-    int
-    run();
+    x: (parent.width - width) / 2
+    y: (parent.height - height) / 2
+    visible: true
+    title: qsTr("Add Contact")
+    standardButtons: Dialog.Apply | Dialog.Cancel
 
+    contentItem: Rectangle {
+        implicitWidth: 400
+        implicitHeight: 50
 
-private slots:
-#if VS_IOS
-    void
-    onApplicationStateChanged(Qt::ApplicationState state);
-#endif // VS_IOS
+        TextField {
+            id: contact
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.topMargin: 3
 
-private:
-    VSQMessenger m_messenger;
-    QSharedPointer<VSQUdpBroadcast> m_netifUDPbcast;
-};
+            color: "black"
+            placeholderText: qsTr("Contact ID")
+            echoMode: TextInput.Normal
+        }
+    }
+}
 
-#endif // VSQApplication

@@ -38,10 +38,15 @@
 #include <VSQApplication.h>
 #include <virgil/iot/logger/logger.h>
 
+#include <QGuiApplication>
+#include <QFont>
+
+/******************************************************************************/
 VSQApplication::VSQApplication() {
     m_netifUDPbcast = QSharedPointer<VSQUdpBroadcast>::create();
 }
 
+/******************************************************************************/
 int
 VSQApplication::run() {
     QQmlApplicationEngine engine;
@@ -60,6 +65,13 @@ VSQApplication::run() {
     QQmlContext *context = engine.rootContext();
     context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
     context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
+    context->setContextProperty("Messenger", &m_messenger);
+    context->setContextProperty("ContactsModel", &m_messenger.modelContacts());
+    context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
+
+    QFont fon(QGuiApplication::font());
+    fon.setPointSize(1.5 * QGuiApplication::font().pointSize());
+    QGuiApplication::setFont(fon);
 
 #if VS_IOS
     connect(QGuiApplication::instance(), SIGNAL(applicationStateChanged(Qt::ApplicationState)), this, SLOT(onApplicationStateChanged(Qt::ApplicationState)));
@@ -71,14 +83,15 @@ VSQApplication::run() {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_WATCHOS)
     {
         QObject *rootObject(engine.rootObjects().first());
-        rootObject->setProperty("width", 640);
-        rootObject->setProperty("height", 400);
+        rootObject->setProperty("width", 800);
+        rootObject->setProperty("height", 640);
     }
 #endif
 
     return QGuiApplication::instance()->exec();
 }
 
+/******************************************************************************/
 #if VS_IOS
 void
 VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
@@ -97,3 +110,5 @@ VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
     }
 }
 #endif // VS_IOS
+
+/******************************************************************************/

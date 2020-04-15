@@ -32,24 +32,31 @@
 #
 #  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-QT += core network qml quick
+QT += core network qml quick bluetooth sql xml concurrent
 
 CONFIG += c++14
 
-TARGET = demo-iotkit-qt
+TARGET = virgil-messenger
 
 #
 #   Include IoTKit Qt wrapper
 #
-
+PREBUILT_PATH = $$PWD/ext/prebuilt
 include(ext/virgil-iotkit/integration/qt/iotkit.pri)
+
+#
+#   QXMPP
+#
+QXMPP_BUILD_PATH = $$PREBUILT_SYSROOT
+message("QXMPP location : $${QXMPP_BUILD_PATH}")
 
 #
 #   Defines
 #
 
 DEFINES += QT_DEPRECATED_WARNINGS \
-        INFO_CLIENT=1
+        INFO_CLIENT=1 \
+        CFG_CLIENT=1
 
 CONFIG(iphoneos, iphoneos | iphonesimulator) {
     DEFINES += VS_IOS=1
@@ -60,13 +67,21 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
 #
 
 HEADERS += \
-        include/VSQApplication.h
+        include/VSQApplication.h \
+        include/VSQMessenger.h \
+        include/VSQSqlContactModel.h \
+        include/VSQSqlConversationModel.h \
+        include/android/VSQAndroid.h
 
 #
 #   Sources
 #
 
 SOURCES += \
+        src/VSQMessenger.cpp \
+        src/VSQSqlContactModel.cpp \
+        src/VSQSqlConversationModel.cpp \
+        src/android/VSQAndroid.cpp \
         src/main.cpp \
         src/VSQApplication.cpp
 
@@ -80,7 +95,14 @@ RESOURCES += src/resources.qrc
 #   Include path
 #
 
-INCLUDEPATH +=  include
+INCLUDEPATH +=  include \
+        $${QXMPP_BUILD_PATH}/include
+
+
+#
+#   Libraries
+#
+LIBS += $${QXMPP_BUILD_PATH}/lib/libqxmpp.a
 
 #
 #   Default rules for deployment
@@ -94,4 +116,28 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 #
 
 DEPENDPATH += $${INCLUDEPATH}
+
+message("ANDROID_TARGET_ARCH = $$ANDROID_TARGET_ARCH")
+
+android: {
+    DEFINES += ANDROID=1
+    LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
+    ANDROID_EXTRA_LIBS = \
+        $$LIBS_DIR/libvs-messenger-crypto.so \
+        $$LIBS_DIR/libvs-messenger-internal.so \
+        $$LIBS_DIR/libcrypto_1_1.so \
+        $$LIBS_DIR/libssl_1_1.so
+
+    ANDROID_PACKAGE_SOURCE_DIR = \
+        $$PWD/android
+
+    DISTFILES += \
+        android/AndroidManifest.xml \
+        android/build.gradle \
+        android/gradle/wrapper/gradle-wrapper.jar \
+        android/gradle/wrapper/gradle-wrapper.properties \
+        android/gradlew \
+        android/gradlew.bat \
+        android/res/values/libs.xml
+}
 
