@@ -10,7 +10,6 @@ StackView {
 
     initialItem: mainView
     anchors.fill: parent
-    width: parent.width
 
     property var loginPage
 
@@ -58,7 +57,7 @@ StackView {
             horizontalAlignment: Text.AlignHCenter
 
             font.pointSize: 13
-            color: Theme.secondaryFontColor
+            color: Theme.secondaryTextColor
 
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: mainLogoText.bottom

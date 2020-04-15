@@ -21,6 +21,7 @@ Rectangle {
     property alias settings: settings
 
     property string mode: kModeLogin
+
     property alias chatView: chatView
 
     Authentication {
