@@ -45,6 +45,8 @@
 #include <QSqlError>
 #include <QtQml>
 
+#include <QDesktopServices>
+
 const QString VSQMessenger::kOrganization = "VirgilSecurity";
 const QString VSQMessenger::kApp = "IoTKit Messenger";
 const QString VSQMessenger::kUsers = "Users";
@@ -311,7 +313,6 @@ VSQMessenger::_xmppURL() {
 
         case STG:
             res = "xmpp-stg.virgilsecurity.com";
-            //res = "199.58.211.45";
             break;
 
         case DEV:
@@ -427,6 +428,12 @@ VSQMessenger::modelConversations() {
 void
 VSQMessenger::onConnected() {
     emit fireReady();
+}
+
+/******************************************************************************/
+void
+VSQMessenger::sendReport() {
+    QDesktopServices::openUrl(QUrl("mailto:?to=kutashenko@gmail.com&subject=Virgil Messenger Report&body=Here is some email body text", QUrl::TolerantMode));
 }
 
 /******************************************************************************/
