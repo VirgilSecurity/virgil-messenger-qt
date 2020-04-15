@@ -32,33 +32,62 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
-#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
+#ifndef VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H
+#define VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H
 
-#include <QtCore>
-#include <QGuiApplication>
-#include <VSQMessenger.h>
-#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
+#include <QSqlTableModel>
 
-class VSQApplication : public QObject {
+class VSQSqlConversationModel : public QSqlTableModel
+{
     Q_OBJECT
+    Q_PROPERTY(QString recipient READ recipient WRITE setRecipient NOTIFY recipientChanged)
+
 public:
-    VSQApplication();
-    virtual ~VSQApplication() = default;
+    VSQSqlConversationModel(QObject *parent = nullptr);
 
-    int
-    run();
+    QString
+    user() const;
 
+    Q_INVOKABLE void
+    setUser(const QString &user);
 
-private slots:
-#if VS_IOS
+    QString
+    recipient() const;
+
+    Q_INVOKABLE void
+    setRecipient(const QString &recipient);
+
+    QVariant
+    data(const QModelIndex &index, int role) const override;
+
+    QHash<int, QByteArray>
+    roleNames() const override;
+
+    Q_INVOKABLE void
+    sendMessage(const QString &recipient, const QString &message);
+
+    Q_INVOKABLE void
+    receiveMessage(const QString &sender, const QString &message);
+
+signals:
     void
-    onApplicationStateChanged(Qt::ApplicationState state);
-#endif // VS_IOS
+    recipientChanged();
 
 private:
-    VSQMessenger m_messenger;
-    QSharedPointer<VSQUdpBroadcast> m_netifUDPbcast;
+    QString m_user;
+    QString m_recipient;
+
+    void
+    _createTable();
+
+    void
+    _update();
+
+    QString
+    _tableName() const;
+
+    QString
+    _contactsTableName() const;
 };
 
-#endif // VSQApplication
+#endif // VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H

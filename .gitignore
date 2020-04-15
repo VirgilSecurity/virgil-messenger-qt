@@ -6,6 +6,7 @@ codegen/generated/
 codegen/test/gsl/
 ext/deps/*
 docs/doxygen
+Deploy/
 
 #####
 # OS X temporary files that should never be committed
@@ -21,7 +22,6 @@ profile
 cmake-build-*/
 debug*/
 release*/
-VERSION
 
 ####
 # Sublime Text 3

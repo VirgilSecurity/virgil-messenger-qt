@@ -32,71 +32,18 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 import QtQuick 2.5
+import QtQuick.Layouts 1.5
 import QtQuick.Controls 2.12
-import QtQuick.Window 2.2
-import QtQuick.Layouts 1.1
 
-ListView {
-    id: sniffer
-    property alias visibility : sniffer.visible
-    property int curX
-    property int curWidth
-    property int margin: 5
-    property int listItemHeight: 60
-    property string backgroundColor: "#202020"
-
-    anchors.fill: parent
-    model: SnapSniffer
-
-    delegate: Item
-    {
-        id: listDelegate
-        height: packetContent.y + packetContent.height + 2 * margin
-
-        Rectangle {
-            y: 0
-            x: curX
-            width: curWidth
-            height: parent.height
-            color: backgroundColor
-        }
-
-        Text {
-            id: packetEthernetInfo
-            wrapMode: Text.Wrap
-            color: "yellow"
-            horizontalAlignment: Text.AlignLeft
-            verticalAlignment: Text.AlignVCenter
-            x: margin
-            y: margin
-            width: curWidth - margin
-            text: timestamp + " : " + macSrc + " ==> " + macDst
-        }
-
-        Text {
-            id: packetSnapInfo
-            wrapMode: Text.Wrap
-            color: "lightBlue"
-            horizontalAlignment: Text.AlignLeft
-            verticalAlignment: Text.AlignVCenter
-            x: margin
-            y: packetEthernetInfo.y + packetEthernetInfo.height
-            width: curWidth - margin
-            text: serviceId + " : " + elementId
-        }
-
-        Text {
-            id: packetContent
-            wrapMode: Text.Wrap
-            color: "white"
-            horizontalAlignment: Text.AlignLeft
-            verticalAlignment: Text.AlignVCenter
-            x: margin
-            y: packetSnapInfo.y + packetSnapInfo.height
-            width: curWidth - margin
-            text: content
-        }
+Label {
+    Layout.fillWidth: true
+    z: 5
+    color: "white"
+    horizontalAlignment: Text.AlignHCenter
+    font.pixelSize: Qt.application.font.pixelSize * 1.3
+    background: Rectangle {
+        anchors.fill: parent
+        color: "steelblue"
     }
 }

@@ -36,33 +36,79 @@
 #include <QtQml>
 
 #include <VSQApplication.h>
-
-#include <virgil/iot/qt/VSQIoTKit.h>
-#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
 #include <virgil/iot/logger/logger.h>
 
+#include <QGuiApplication>
+#include <QFont>
+
+/******************************************************************************/
+VSQApplication::VSQApplication() {
+    m_netifUDPbcast = QSharedPointer<VSQUdpBroadcast>::create();
+}
+
+/******************************************************************************/
 int
 VSQApplication::run() {
     QQmlApplicationEngine engine;
 
     auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT << VSQFeatures::SNAP_SNIFFER;
-    auto impl = VSQImplementations() << QSharedPointer<VSQUdpBroadcast>::create();
+    auto impl = VSQImplementations() << m_netifUDPbcast;
     auto roles = VSQDeviceRoles() << VirgilIoTKit::VS_SNAP_DEV_CONTROL;
     auto appConfig = VSQAppConfig() << VSQManufactureId() << VSQDeviceType() << VSQDeviceSerial()
-                                    << VirgilIoTKit::VS_LOGLEV_DEBUG << roles << VSQSnifferConfig(20);
+                                    << VirgilIoTKit::VS_LOGLEV_DEBUG << roles << VSQSnapSnifferQmlConfig();
 
     if (!VSQIoTKitFacade::instance().init(features, impl, appConfig)) {
         VS_LOG_CRITICAL("Unable to initialize Virgil IoT KIT");
         return -1;
     }
 
-    QQmlContext *ctxt = engine.rootContext();
-    ctxt->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
-    ctxt->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer());
+    QQmlContext *context = engine.rootContext();
+    context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
+    context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
+    context->setContextProperty("Messenger", &m_messenger);
+    context->setContextProperty("ContactsModel", &m_messenger.modelContacts());
+    context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
 
-    const QUrl url(QStringLiteral("qrc:/qml/main.qml"));
+    QFont fon(QGuiApplication::font());
+    fon.setPointSize(1.5 * QGuiApplication::font().pointSize());
+    QGuiApplication::setFont(fon);
+
+#if VS_IOS
+    connect(QGuiApplication::instance(), SIGNAL(applicationStateChanged(Qt::ApplicationState)), this, SLOT(onApplicationStateChanged(Qt::ApplicationState)));
+#endif // VS_IOS
+
+    const QUrl url(QStringLiteral("qrc:/qml/Main.qml"));
     engine.load(url);
+
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_WATCHOS)
+    {
+        QObject *rootObject(engine.rootObjects().first());
+        rootObject->setProperty("width", 800);
+        rootObject->setProperty("height", 640);
+    }
+#endif
 
     return QGuiApplication::instance()->exec();
 }
 
+/******************************************************************************/
+#if VS_IOS
+void
+VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
+    static bool _deactivated = false;
+    qDebug() << state;
+
+    if (Qt::ApplicationInactive == state) {
+        _deactivated = true;
+    }
+
+    if (_deactivated && Qt::ApplicationActive == state) {
+        _deactivated = false;
+        if (m_netifUDPbcast.get()) {
+            m_netifUDPbcast->restart();
+        }
+    }
+}
+#endif // VS_IOS
+
+/******************************************************************************/

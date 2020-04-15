@@ -32,33 +32,23 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
-#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
+#ifndef VSQANDROID_H
+#define VSQANDROID_H
 
-#include <QtCore>
-#include <QGuiApplication>
-#include <VSQMessenger.h>
-#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
+#if (ANDROID)
 
-class VSQApplication : public QObject {
-    Q_OBJECT
+#include <QObject>
+
+class VSQAndroid {
 public:
-    VSQApplication();
-    virtual ~VSQApplication() = default;
+    VSQAndroid() = delete;
 
-    int
-    run();
-
-
-private slots:
-#if VS_IOS
-    void
-    onApplicationStateChanged(Qt::ApplicationState state);
-#endif // VS_IOS
+    static bool prepare();
 
 private:
-    VSQMessenger m_messenger;
-    QSharedPointer<VSQUdpBroadcast> m_netifUDPbcast;
+    static int runLoggingThread();
 };
 
-#endif // VSQApplication
+#endif // ANDROID
+
+#endif // VSQANDROID_H
