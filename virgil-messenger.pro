@@ -42,7 +42,7 @@ TARGET = virgil-messenger
 #   Include IoTKit Qt wrapper
 #
 PREBUILT_PATH = $$PWD/ext/prebuilt
-include(ext/virgil-iotkit/integration/qt/iotkit.pri)
+include($${PREBUILT_PATH}/qt/iotkit.pri)
 
 #
 #   QXMPP

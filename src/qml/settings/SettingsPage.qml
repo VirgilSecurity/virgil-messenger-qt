@@ -75,13 +75,13 @@ Page {
             height: 10
         }
 
-        CButton {
+        PrimaryButton {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
             height: 50
             name: qsTr("Send report to developers")
-            baseColor: mainAppColor
-            borderColor: mainAppColor
+            baseColor: kBtnColor
+            borderColor: kBtnColor
             onClicked: {
                 Messenger.sendReport()
             }
