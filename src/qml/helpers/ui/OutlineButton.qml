@@ -4,7 +4,7 @@ import "../../theme"
 
 Button {
     id: control
-    font.pointSize: 20
+    font.pointSize: 15
 
     property alias name: control.text
 
@@ -20,7 +20,7 @@ Button {
     background: Rectangle {
         id: bgrect
         implicitWidth: 100
-        implicitHeight: 44
+        implicitHeight: 40
         color: "transparent"
         radius: height / 2
         border.color: Theme.buttonPrimaryColor

@@ -92,6 +92,12 @@ SOURCES += \
 RESOURCES += src/resources.qrc
 
 #
+#   Icons
+#
+
+QT += svg xml
+
+#
 #   Include path
 #
 

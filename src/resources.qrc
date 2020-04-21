@@ -41,5 +41,7 @@
         <file>qml/chat/components/MessageCounter.qml</file>
         <file>qml/chat/components/ChatToolBar.qml</file>
         <file>qml/components/TextInCircle.qml</file>
+        <file>qml/login/Register.qml</file>
+        <file>qml/resources/icons/Arrow-Left.svg</file>
     </qresource>
 </RCC>

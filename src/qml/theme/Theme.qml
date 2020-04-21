@@ -19,6 +19,8 @@ QtObject {
     readonly property color messegeCountColor: "#F44336"
     readonly property color contactPressedColor: "#455A64"
     readonly property color menuSeparatorColor: "#90A4AE"
+    readonly property color inputBackgroundColor: "#37474F"
+    readonly property color toolbarSepratatorColor: "#263238"
 
 
     // sizes
