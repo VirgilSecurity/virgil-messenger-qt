@@ -1,12 +1,12 @@
 #!/bin/bash
 
-SCRIPT_FOLDER="$( cd "$( dirname "$0" )" && pwd )"
+SCRIPT_FOLDER="$(cd "$(dirname "$0")" && pwd)"
 
 #
 #   Global variables
 #
 ARCH_NAME=prebuilt.tar.gz
-PREBUILT_ARCHIVE="https://www.dropbox.com/s/hejldeu2eq4ryl0/${ARCH_NAME}"
+PREBUILT_ARCHIVE="https://www.dropbox.com/s/1dtsu4udijl8wot/${ARCH_NAME}"
 export INSTALL_DIR="${SCRIPT_FOLDER}/../ext/"
 
 #***************************************************************************************
