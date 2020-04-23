@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.3
 
 import "../helpers/ui"
 import "../theme"
+import "./components"
 
 ScrollView {
     anchors.fill: parent
@@ -21,6 +22,7 @@ ScrollView {
         Component.onCompleted: {
             registerPage = Qt.createComponent("qrc:/qml/login/Register.qml")
             loginPage = Qt.createComponent("qrc:/qml/login/Login.qml")
+
         }
     }
 
@@ -29,22 +31,16 @@ ScrollView {
         property real centralContentHeight: 600
         implicitHeight: mainView.centralContentHeight
 
-        ColumnLayout {
-            anchors.fill: parent
+        CenteredAuthLayout{
+            id: centeredAuthLayout
 
-            Item {
-                Layout.maximumHeight: (parent.height - mainView.centralContentHeight) / 2
-                Layout.fillHeight: true
-            }
-
-            Item {
+            content: Item {
                 width: 300
                 height: childrenRect.height
                 Layout.minimumHeight: childrenRect.height
                 Layout.preferredHeight: childrenRect.height
                 Layout.maximumHeight: childrenRect.height
                 Layout.alignment: Qt.AlignCenter
-
 
                 Image {
                     id: mainLogo
@@ -101,20 +97,6 @@ ScrollView {
                     anchors.topMargin: 15
                     anchors.top: registerButton.bottom
                 }
-            }
-						
-            Text {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.maximumHeight: (parent.height - mainView.centralContentHeight) / 2
-                Layout.alignment: Qt.AlignLeft | Qt.AlignBottom
-                Layout.topMargin: 15
-                Layout.bottomMargin: 15
-                text: qsTr("Powered by Virgil Security")
-                verticalAlignment: Text.AlignBottom
-                color: Theme.labelColor
-                horizontalAlignment: Text.AlignHCenter
-                font.pointSize: 11
             }
         }
     }

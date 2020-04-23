@@ -43,5 +43,6 @@
         <file>qml/components/TextInCircle.qml</file>
         <file>qml/login/Register.qml</file>
         <file>qml/resources/icons/Arrow-Left.svg</file>
+        <file>qml/login/components/CenteredAuthLayout.qml</file>
     </qresource>
 </RCC>

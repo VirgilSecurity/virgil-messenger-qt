@@ -21,7 +21,6 @@ Page {
         width: parent.width
         spacing: 15
 
-
         Rectangle { Layout.minimumHeight: 50 }
 
         Image {

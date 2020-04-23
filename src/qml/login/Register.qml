@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.1
 
 import "../helpers/ui"
 import "../theme"
+import "./components"
 
 
 Page {
@@ -16,8 +17,20 @@ Page {
 
     header: ToolBar {
         background: Rectangle {
+            implicitHeight: 60
             color: "transparent"
+
+            Rectangle {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: 20
+                anchors.rightMargin: 20
+                height: 1
+                color: Theme.toolbarSepratatorColor
+                anchors.bottom: parent.bottom
+            }
         }
+        width: parent.width
 
         RowLayout {
             id: layout
@@ -52,70 +65,68 @@ Page {
               color: "transparent"
               width: 60
               height: 60
-            }
-        }
 
-        Rectangle {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.leftMargin: 20
-            anchors.rightMargin: 20
-            anchors.top: parent.top
-            anchors.topMargin: 60
-            height: 1
-            color: Theme.toolbarSepratatorColor
+              Text {
+                text: "privet"
+              }
+            }
         }
     }
 
-    ColumnLayout {
-        width: 260
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
-        spacing: 0
+    CenteredAuthLayout {
+        content: ColumnLayout {
 
-        Label {
-            id: label
-            Layout.fillWidth: true
-            color: Theme.secondaryTextColor
-            text: qsTr("Username")
-            width: parent.width
-            font.pointSize: 11
-        }
+            Layout.preferredWidth: 260
+            Layout.maximumWidth: 260
+            Layout.alignment: Qt.AlignCenter
 
-        TextField {
-            id: username
-            Layout.fillWidth: true
-            Layout.topMargin: 10
-            height: 40
-            leftPadding: 15
-            rightPadding: 15
-            font.pointSize: 15
-            color: Theme.primaryTextColor
 
-            background: Rectangle {
-                implicitWidth: parent.width
-                implicitHeight: parent.height
-                radius: 20
-                color: Theme.inputBackgroundColor
+            spacing: 0
+
+            Label {
+                id: label
+                Layout.fillWidth: true
+                color: Theme.secondaryTextColor
+                text: qsTr("Username")
+                width: parent.width
+                font.pointSize: 11
             }
-        }
 
-        PrimaryButton {
-            text: qsTr("Create account")
-            onClicked: signUpUser(username.text)
-            Layout.fillWidth: true
-            Layout.topMargin: 15
-        }
+            TextField {
+                id: username
+                Layout.fillWidth: true
+                Layout.topMargin: 10
+                height: 40
+                leftPadding: 15
+                rightPadding: 15
+                font.pointSize: 15
+                color: Theme.primaryTextColor
 
-        Text {
-            Layout.topMargin: 10
-            Layout.maximumWidth: parent.width
-            font.pointSize: 12
-            color: Theme.secondaryTextColor
-            linkColor: Theme.buttonPrimaryColor
-            wrapMode: Text.WordWrap
-            text: "By creating an account, you agree to Virgil's <a href='https://virgilsecurity.com/terms-of-service/'>Terms of Service</a> and <a href='https://virgilsecurity.com/privacy-policy/'>Privacy Policy</a>"
-            onLinkActivated: Qt.openUrlExternally(link)
+                background: Rectangle {
+                    implicitWidth: parent.width
+                    implicitHeight: parent.height
+                    radius: 20
+                    color: Theme.inputBackgroundColor
+                }
+            }
+
+            PrimaryButton {
+                text: qsTr("Create account")
+                onClicked: signUpUser(username.text)
+                Layout.fillWidth: true
+                Layout.topMargin: 15
+            }
+
+            Text {
+                Layout.topMargin: 10
+                Layout.maximumWidth: parent.width
+                font.pointSize: 12
+                color: Theme.secondaryTextColor
+                linkColor: Theme.buttonPrimaryColor
+                wrapMode: Text.WordWrap
+                text: "By creating an account, you agree to Virgil's <a href='https://virgilsecurity.com/terms-of-service/'>Terms of Service</a> and <a href='https://virgilsecurity.com/privacy-policy/'>Privacy Policy</a>"
+                onLinkActivated: Qt.openUrlExternally(link)
+            }
         }
     }
 }
