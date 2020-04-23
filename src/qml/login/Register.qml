@@ -65,10 +65,6 @@ Page {
               color: "transparent"
               width: 60
               height: 60
-
-              Text {
-                text: "privet"
-              }
             }
         }
     }
