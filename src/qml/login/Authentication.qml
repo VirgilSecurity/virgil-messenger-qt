@@ -6,41 +6,31 @@ import "../helpers/ui"
 import "../theme"
 import "./components"
 
-ScrollView {
+StackView {
+    id: authenticationPage
+    initialItem: mainView
+
     anchors.fill: parent
-    clip: true
-    contentHeight: Math.max(authenticationPage.currentItem.implicitHeight, rootWindow.height)
+    property var loginPage
+    property var registerPage
 
-    StackView {
-        id: authenticationPage
-        initialItem: mainView
-
-        anchors.fill: parent
-        property var loginPage
-        property var registerPage
-
-        Component.onCompleted: {
-            registerPage = Qt.createComponent("qrc:/qml/login/Register.qml")
-            loginPage = Qt.createComponent("qrc:/qml/login/Login.qml")
-
-        }
+    Component.onCompleted: {
+        registerPage = Qt.createComponent("qrc:/qml/login/Register.qml")
+        loginPage = Qt.createComponent("qrc:/qml/login/Login.qml")
     }
 
     Item {
         id: mainView
-        property real centralContentHeight: 600
-        implicitHeight: mainView.centralContentHeight
 
         CenteredAuthLayout{
             id: centeredAuthLayout
 
-            content: Item {
-                width: 300
-                height: childrenRect.height
-                Layout.minimumHeight: childrenRect.height
-                Layout.preferredHeight: childrenRect.height
-                Layout.maximumHeight: childrenRect.height
+            content: ColumnLayout {
+                spacing: 10
+                Layout.maximumWidth: 300
                 Layout.alignment: Qt.AlignCenter
+                Layout.minimumHeight: 400
+                Layout.maximumHeight: 520
 
                 Image {
                     id: mainLogo
@@ -48,7 +38,8 @@ ScrollView {
                     height: 240
                     fillMode: Image.PreserveAspectFit
                     source: Theme.mainLogo
-                    anchors.horizontalCenter: parent.horizontalCenter
+                    Layout.preferredHeight: 240
+                    Layout.alignment: Qt.AlignCenter
                 }
 
                 Text {
@@ -59,9 +50,7 @@ ScrollView {
                     font.family: Theme.mainFont
                     font.pointSize: 48
                     color: Theme.brandColor
-
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: mainLogo.bottom
+                    Layout.alignment: Qt.AlignCenter
                 }
 
                 Text {
@@ -74,17 +63,19 @@ ScrollView {
 
                     font.pointSize: 13
                     color: Theme.secondaryTextColor
+                    Layout.alignment: Qt.AlignCenter
+                }
 
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: mainLogoText.bottom
+                Item {
+                    Layout.maximumHeight: 90
+                    Layout.minimumHeight: 10
+                    Layout.fillHeight: true
                 }
 
                 PrimaryButton {
                     id: registerButton
                     text: qsTr("Register")
-                    width: parent.width
-                    anchors.topMargin: 90
-                    anchors.top: mainLogoDescription.bottom
+                    Layout.fillWidth: true
                     onClicked: authenticationPage.push(authenticationPage.registerPage)
                 }
 
@@ -92,12 +83,10 @@ ScrollView {
                     id: loginButton
                     text: qsTr("Sign In")
                     onClicked: authenticationPage.push(authenticationPage.loginPage)
-                    width: parent.width
-
-                    anchors.topMargin: 15
-                    anchors.top: registerButton.bottom
+                    Layout.fillWidth: true
                 }
             }
         }
     }
 }
+
