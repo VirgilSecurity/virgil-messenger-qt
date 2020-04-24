@@ -46,8 +46,8 @@ StackView {
                     id: mainLogoText
                     text: Theme.mainLogoText
                     font.weight: Font.Bold
-                    font.capitalization: Font.AllUppercase
-                    font.family: Theme.mainFont
+                    font.capitalization: Font.Capitalize
+                    font.family: Theme.mainFontBold
                     font.pointSize: UiHelper.fixFontSz(48)
                     color: Theme.brandColor
                     Layout.alignment: Qt.AlignCenter

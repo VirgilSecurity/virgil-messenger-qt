@@ -48,5 +48,8 @@
         <file>qml/resources/icons/Logo-Big@2x.png</file>
         <file>qml/resources/icons/Logo-Big@3x.png</file>
         <file>qml/resources/icons/Logo-Big.png</file>
+        <file>qml/resources/fonts/Roboto-Bold.ttf</file>
+        <file>qml/resources/fonts/Roboto-Medium.ttf</file>
+        <file>qml/resources/fonts/Roboto-Regular.ttf</file>
     </qresource>
 </RCC>
