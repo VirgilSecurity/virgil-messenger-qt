@@ -4,7 +4,7 @@ install*/
 .depends_cache/
 codegen/generated/
 codegen/test/gsl/
-ext/deps/*
+ext/*
 docs/doxygen
 Deploy/
 
@@ -43,3 +43,7 @@ format_list.txt
 ####
 # QtCreator
 *.user
+.qmake.stash
+moc_*.h
+qrc_resources.cpp
+Makefile

@@ -79,7 +79,7 @@ Page {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
             height: 50
-            name: qsTr("Email developers")
+            name: qsTr("Send report to developers")
             baseColor: kBtnColor
             borderColor: kBtnColor
             onClicked: {
