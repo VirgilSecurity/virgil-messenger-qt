@@ -48,7 +48,7 @@ StackView {
                     font.weight: Font.Bold
                     font.capitalization: Font.AllUppercase
                     font.family: Theme.mainFont
-                    font.pointSize: Theme.ff(48)
+                    font.pointSize: UiHelper.fixFontSz(48)
                     color: Theme.brandColor
                     Layout.alignment: Qt.AlignCenter
                 }
@@ -61,7 +61,7 @@ StackView {
                     wrapMode: Text.WordWrap
                     horizontalAlignment: Text.AlignHCenter
 
-                    font.pointSize: Theme.ff(13)
+                    font.pointSize: UiHelper.fixFontSz(13)
                     color: Theme.secondaryTextColor
                     Layout.alignment: Qt.AlignCenter
                 }

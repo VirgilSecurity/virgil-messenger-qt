@@ -28,7 +28,7 @@ Page {
             Layout.fillWidth: true
             Layout.margins: 30
             text: qsTr("Account: ") + Messenger.currentUser
-            font.pointSize: Theme.ff(22)
+            font.pointSize: UiHelper.fixFontSz(22)
             color: mainTextCOlor
             elide: Text.ElideLeft
         }
@@ -38,7 +38,7 @@ Page {
             Layout.fillWidth: true
             Layout.margins: 30
             text: qsTr("Version: ") + Messenger.currentVersion()
-            font.pointSize: Theme.ff(22)
+            font.pointSize: UiHelper.fixFontSz(22)
             color: mainTextCOlor
             elide: Text.ElideLeft
         }

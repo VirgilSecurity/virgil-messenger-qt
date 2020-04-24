@@ -72,7 +72,8 @@ HEADERS += \
         include/VSQSqlContactModel.h \
         include/VSQSqlConversationModel.h \
         include/android/VSQAndroid.h \
-        include/mac/VSQMacos.h
+        include/mac/VSQMacos.h \
+        include/ui/VSQUiHelper.h
 
 #
 #   Sources
@@ -84,7 +85,8 @@ SOURCES += \
         src/VSQSqlConversationModel.cpp \
         src/android/VSQAndroid.cpp \
         src/main.cpp \
-        src/VSQApplication.cpp
+        src/VSQApplication.cpp \
+        src/ui/VSQUiHelper.cpp
 
 #
 #   Resources

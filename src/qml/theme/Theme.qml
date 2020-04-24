@@ -35,15 +35,6 @@ QtObject {
     // texts
     readonly property string mainLogoText: "virgil"
     readonly property string mainFont: "Roboto"
-
-
-    // Function to fix font size
-    function ff(reqFontSz) {
-        var referenceDPI = 129;
-        var currentDPI = Screen.pixelDensity * 25.4
-        var fixedFontSz = reqFontSz * referenceDPI / currentDPI + 0.5
-        return fixedFontSz
-    }
 }
 
 

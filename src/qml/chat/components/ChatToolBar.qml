@@ -33,14 +33,14 @@ ToolBar {
                     Layout.fillWidth: true
                     Label {
                         text: qsTr("Server Name")
-                        font.pointSize: Theme.ff(15)
+                        font.pointSize: UiHelper.fixFontSz(15)
                         color: Theme.primaryTextColor
                         font.bold: true
                     }
 
                     Label {
                         text: qsTr("Server description")
-                        font.pointSize: Theme.ff(12)
+                        font.pointSize: UiHelper.fixFontSz(12)
                         color: Theme.secondaryTextColor
                     }
                 }
@@ -86,7 +86,7 @@ ToolBar {
                     contentItem: Text {
                          text: control.text
                          color: Theme.primaryTextColor
-                         font.pointSize: Theme.ff(24)
+                         font.pointSize: UiHelper.fixFontSz(24)
                     }
 
                     Menu {
@@ -137,7 +137,7 @@ ToolBar {
                             id: menuItem
                             implicitWidth: parent.width
                             implicitHeight: menu.menuItemHeight
-                            font.pointSize: Theme.ff(15)
+                            font.pointSize: UiHelper.fixFontSz(15)
 
                             contentItem: Text {
                                 leftPadding: menu.menuItemPadding

@@ -10,5 +10,5 @@ TextInCircle {
     color: Theme.avatarBgColor
     diameter: Theme.avatarHeight
     content: Strings.getPersonInitialis(nickname)
-    pointSize: Theme.ff(20)
+    pointSize: UiHelper.fixFontSz(20)
 }

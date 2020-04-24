@@ -36,6 +36,7 @@
 #include <QtQml>
 
 #include <VSQApplication.h>
+#include <ui/VSQUiHelper.h>
 #include <virgil/iot/logger/logger.h>
 
 #include <QGuiApplication>
@@ -50,6 +51,7 @@ VSQApplication::VSQApplication() {
 int
 VSQApplication::run() {
     QQmlApplicationEngine engine;
+    VSQUiHelper uiHelper;
 
     auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT << VSQFeatures::SNAP_SNIFFER;
     auto impl = VSQImplementations() << m_netifUDPbcast;
@@ -63,6 +65,7 @@ VSQApplication::run() {
     }
 
     QQmlContext *context = engine.rootContext();
+    context->setContextProperty("UiHelper", &uiHelper);
     context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
     context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
     context->setContextProperty("Messenger", &m_messenger);

@@ -28,7 +28,7 @@ ColumnLayout {
         verticalAlignment: Text.AlignBottom
         color: Theme.labelColor
         horizontalAlignment: Text.AlignHCenter
-        font.pointSize: Theme.ff(11)
+        font.pointSize: UiHelper.fixFontSz(11)
     }
 
     onContentChanged: {

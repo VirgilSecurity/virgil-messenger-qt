@@ -47,13 +47,13 @@ Page {
               icon.width: 24
               icon.color: Theme.secondaryTextColor
               onClicked: authenticationPage.pop()
-              font.pointSize: Theme.ff(24)
+              font.pointSize: UiHelper.fixFontSz(24)
 
             }
 
             Label {
               text: qsTr("Register")
-              font.pointSize: Theme.ff(15)
+              font.pointSize: UiHelper.fixFontSz(15)
               color: Theme.primaryTextColor
               elide: Label.ElideRight
               horizontalAlignment: Qt.AlignHCenter
@@ -85,7 +85,7 @@ Page {
                 color: Theme.secondaryTextColor
                 text: qsTr("Username")
                 width: parent.width
-                font.pointSize: Theme.ff(11)
+                font.pointSize: UiHelper.fixFontSz(11)
             }
 
             TextField {
@@ -95,7 +95,7 @@ Page {
                 height: 40
                 leftPadding: 15
                 rightPadding: 15
-                font.pointSize: Theme.ff(15)
+                font.pointSize: UiHelper.fixFontSz(15)
                 color: Theme.primaryTextColor
 
                 background: Rectangle {
@@ -116,7 +116,7 @@ Page {
             Text {
                 Layout.topMargin: 10
                 Layout.maximumWidth: parent.width
-                font.pointSize: Theme.ff(12)
+                font.pointSize: UiHelper.fixFontSz(12)
                 color: Theme.secondaryTextColor
                 linkColor: Theme.buttonPrimaryColor
                 wrapMode: Text.WordWrap

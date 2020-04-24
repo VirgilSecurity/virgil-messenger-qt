@@ -10,5 +10,5 @@ TextInCircle {
     color: Theme.messegeCountColor
     opacity: count ? 1 : 0
     content: count > 9 ? '9+' : count
-    pointSize: Theme.ff(9)
+    pointSize: UiHelper.fixFontSz(9)
 }

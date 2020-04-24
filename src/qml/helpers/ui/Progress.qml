@@ -27,7 +27,7 @@ Page {
     Text {
         id: titleText
         text: titleStr
-        font.pointSize: Theme.ff(24)
+        font.pointSize: UiHelper.fixFontSz(24)
         anchors.top: parent.top
         anchors.topMargin: 30
         anchors.horizontalCenter: parent.horizontalCenter
