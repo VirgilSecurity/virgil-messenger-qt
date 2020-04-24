@@ -59,7 +59,7 @@ ToolBar {
                     }
 
                     Image {
-                        source: "qrc:/qml/resources/icons/Search.svg"
+                        source: "qrc:/qml/resources/icons/Search.png"
                         width: 24
                         height: 24
                         smooth: true

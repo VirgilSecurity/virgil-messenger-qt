@@ -30,7 +30,7 @@ QtObject {
     readonly property real avatarRadius: avatarWidth / 2
 
     // icons
-    readonly property url mainLogo: "../resources/icons/Logo-Big.svg"
+    readonly property url mainLogo: "../resources/icons/Logo-Big.png"
 
     // texts
     readonly property string mainLogoText: "virgil"

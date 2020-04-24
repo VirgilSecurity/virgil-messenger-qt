@@ -42,7 +42,7 @@ Page {
                   implicitHeight: 60
                   implicitWidth: 60
               }
-              icon.source: "../resources/icons/Arrow-Left.svg"
+              icon.source: "../resources/icons/Arrow-Left.png"
               icon.height: 24
               icon.width: 24
               icon.color: Theme.secondaryTextColor
