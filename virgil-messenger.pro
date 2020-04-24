@@ -117,7 +117,7 @@ unix:mac: {
     LIBS += -framework Sparkle
 
     DST_DLL = $${OUT_PWD}/$${TARGET}.app/Contents/Frameworks
-    QMAKE_POST_LINK += $$quote(cp -R $$PREBUILT_PATH/$${OS_NAME}/sparkle/Sparkle.framework $${DST_DLL}/$$escape_expand(\n\t))
+    QMAKE_POST_LINK += $$quote(sleep 1s && cp -R $$PREBUILT_PATH/$${OS_NAME}/sparkle/Sparkle.framework $${DST_DLL}/$$escape_expand(\n\t))
 }
 
 
