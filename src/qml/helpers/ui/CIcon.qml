@@ -10,7 +10,7 @@ Item {
     Text {
         id: unicodeTxt
         //    text: "\uf023"
-        font.pointSize: 14
+        font.pointSize: Theme.ff(14)
         color: mainAppColor
         anchors.centerIn: parent
         //anchors.left: parent.left

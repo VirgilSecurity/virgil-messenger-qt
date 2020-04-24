@@ -3,6 +3,7 @@ import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.1
 
 import "../helpers/ui"
+import "../theme"
 
 Page {
     id: settingsPage
@@ -27,7 +28,7 @@ Page {
             Layout.fillWidth: true
             Layout.margins: 30
             text: qsTr("Account: ") + Messenger.currentUser
-            font.pointSize: 22
+            font.pointSize: Theme.ff(22)
             color: mainTextCOlor
             elide: Text.ElideLeft
         }
@@ -37,7 +38,7 @@ Page {
             Layout.fillWidth: true
             Layout.margins: 30
             text: qsTr("Version: ") + Messenger.currentVersion()
-            font.pointSize: 22
+            font.pointSize: Theme.ff(22)
             color: mainTextCOlor
             elide: Text.ElideLeft
         }

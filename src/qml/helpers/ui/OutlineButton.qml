@@ -4,7 +4,7 @@ import "../../theme"
 
 Button {
     id: control
-    font.pointSize: 15
+    font.pointSize: Theme.ff(15)
 
     property alias name: control.text
 

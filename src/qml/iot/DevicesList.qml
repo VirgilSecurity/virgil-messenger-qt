@@ -113,7 +113,7 @@ Item {
                         Text {
                             id: roleItemText
                             anchors.fill: parent
-                            font.pointSize: dataFontSize
+                            font.pointSize: Theme.ff(dataFontSize)
                             color: "white"
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
