@@ -183,9 +183,9 @@ function notarize_dmg() {
 	echo
 	echo "=== Send Application for Apple's notarization"
 	echo
-	NOTARIZE_OUTPUT=$(xcrun altool -t osx -f "${DMG_FILE}" --primary-bundle-id "${PKG_IDENTIFIER}" --notarize-app --username ${USER_NAME} -p ${PASS})
+	NOTARIZE_OUTPUT=$(xcrun altool -t osx -f "${DMG_FILE}" --primary-bundle-id "${PKG_IDENTIFIER}" --notarize-app --username ${USER_NAME} -p ${PASS} 2>&1)
 	check_error
-	NOTARIZE_ID=$(echo ${NOTARIZE_OUTPUT} | grep -F 'No errors uploading' | awk -F 'RequestUUID' '{print $2}' | awk -F ' ' '{print $2}')
+	NOTARIZE_ID=$(echo ${NOTARIZE_OUTPUT} | tr -d "\n" | grep -F 'No errors uploading' | awk -F 'RequestUUID' '{print $2}' | awk -F ' ' '{print $2}')
 	check_error
 
 	echo "NOTARIZE_ID = ${NOTARIZE_ID}"
@@ -207,7 +207,7 @@ function notarize_dmg() {
 			break
 		fi
 
-		if echo ${INFO_OUTPUT} | grep -q -F 'Status: invalid'; then
+		if echo ${INFO_OUTPUT} | grep -q -F 'Status Message: Package Invalid'; then
 			echo "${INFO_OUTPUT}"
 			exit 1
 		fi
