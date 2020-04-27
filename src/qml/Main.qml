@@ -74,12 +74,20 @@ ApplicationWindow {
         }
     }
 
+    Shortcut {
+        sequence: "F5"
+        onActivated: {
+            Messenger.logout()
+            rootWindow.close()
+            app.reloadQml()
+        }
+    }
+
     // After loading show initial Login Page
     Component.onCompleted: {
-        contactPage = Qt.createComponent("qrc:/qml/chat/ContactPage.qml")
-//        loginPage = Qt.createComponent("qrc:/qml/login/Login.qml")
-        authenticationPage = Qt.createComponent("qrc:/qml/login/Authentication.qml")
-        settingsPage = Qt.createComponent("qrc:/qml/settings/SettingsPage.qml")
+        contactPage = Qt.createComponent("chat/ContactPage.qml")
+        authenticationPage = Qt.createComponent("login/Authentication.qml")
+        settingsPage = Qt.createComponent("settings/SettingsPage.qml")
 
         mobileView.replace(authenticationPage)
     }
@@ -140,7 +148,7 @@ ApplicationWindow {
         ConversationsModel.recipient = contact
 
         // Mobile
-        mobileView.replace("qrc:/qml/chat/ConversationPage.qml", { inConversationWith: contact })
+        mobileView.replace("chat/ConversationPage.qml", { inConversationWith: contact })
 
         // Desktop
         desktopView.chatView.inConversationWith = contact

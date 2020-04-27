@@ -19,7 +19,7 @@ Page {
         anchors.margins: 40
 
         Image {
-            source: "qrc:/qml/resources/AppUserscreen.png"
+            source: "../resources/AppUserscreen.png"
             Layout.alignment: Qt.AlignHCenter
         }
 

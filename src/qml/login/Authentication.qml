@@ -17,8 +17,8 @@ StackView {
     property var userList: Messenger.usersList()
 
     Component.onCompleted: {
-        registerPage = Qt.createComponent("qrc:/qml/login/Register.qml")
-        loginPage = Qt.createComponent("qrc:/qml/login/Login.qml")
+        registerPage = Qt.createComponent("Register.qml")
+        loginPage = Qt.createComponent("Login.qml")
     }
 
     Item {
