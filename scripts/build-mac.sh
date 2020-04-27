@@ -197,7 +197,7 @@ function notarize_dmg() {
 	for ((count = 1; count < 20; count++)); do
 		echo "Wait .. ${count} of 20"
 		sleep 10s
-		INFO_OUTPUT=$(xcrun altool --notarization-info "${NOTARIZE_ID}" --username ${USER_NAME} -p ${PASS})
+		INFO_OUTPUT=$(xcrun altool --notarization-info "${NOTARIZE_ID}" --username ${USER_NAME} -p ${PASS} 2>&1 | tr -d "\n")
 
 		echo ${INFO_OUTPUT} >${HOME}/2.txt
 
@@ -221,7 +221,7 @@ function notarize_dmg() {
 	echo
 	echo "=== Staple result of the notarization"
 	echo
-	STAMPLE_OUTPUT=$(xcrun stapler staple -v "${DMG_FILE}")
+	STAMPLE_OUTPUT=$(xcrun stapler staple -v "${DMG_FILE}" 2>&1 | tr -d "\n")
 
 	if echo ${STAMPLE_OUTPUT} | grep -q -F 'The staple and validate action worked!'; then
 		check_error
