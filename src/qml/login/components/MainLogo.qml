@@ -3,7 +3,7 @@ import "../../theme"
 
 Column {
     anchors.fill: parent
-    spacing: 10
+    spacing: 0
 
     Image {
         id: mainLogo

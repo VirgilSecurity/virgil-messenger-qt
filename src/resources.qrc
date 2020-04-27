@@ -56,5 +56,8 @@
         <file>qml/resources/icons/Arrow-Right.png</file>
         <file>qml/resources/icons/Arrow-Right@2x.png</file>
         <file>qml/login/components/HeaderToolbar.qml</file>
+        <file>qml/resources/icons/More.png</file>
+        <file>qml/resources/icons/More@2x.png</file>
+        <file>qml/helpers/ui/SettingsButton.qml</file>
     </qresource>
 </RCC>

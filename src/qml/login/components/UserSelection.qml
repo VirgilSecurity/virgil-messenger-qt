@@ -6,145 +6,152 @@ import "../../theme"
 import "../../components"
 import "../login.js" as LoginLogic
 
-Item {
+ColumnLayout {
     anchors.fill: parent
 
     Image {
         id: mainLogo
-        width: 48
-        height: 48
+        Layout.preferredHeight: 48
+        Layout.preferredWidth: 48
+        Layout.maximumHeight: 48
 
         fillMode: Image.PreserveAspectFit
         source: Theme.mainLogo
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
+        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+        Layout.bottomMargin: 10
     }
 
-    Button {
-        background: Rectangle {
-            color: "transparent"
-        }
+    Item {
 
-        contentItem: Item {
-            Image  {
-                source: "../../resources/icons/Arrow-Left.png"
-                fillMode: Image.PreserveAspectFit
-                horizontalAlignment: Image.AlignRight
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
+        Layout.alignment: Qt.AlignCenter
+        Layout.fillHeight: true
+        Layout.fillWidth: true
+
+        Button {
+            background: Rectangle {
+                color: "transparent"
             }
-        }
 
-        height: view.height
-        width: 100
-        anchors.top: view.top
-        anchors.right: view.left
-        visible: view.currentIndex > 0
-        onPressed: view.decrementCurrentIndex()
-    }
-
-    Button {
-        background: Rectangle {
-            color: "transparent"
-        }
-
-        contentItem: Item {
-            Image  {
-                source: "../../resources/icons/Arrow-Right.png"
-                fillMode: Image.PreserveAspectFit
-                horizontalAlignment: Image.AlignRight
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
+            contentItem: Item {
+                Image  {
+                    source: "../../resources/icons/Arrow-Left.png"
+                    fillMode: Image.PreserveAspectFit
+                    horizontalAlignment: Image.AlignRight
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                }
             }
+
+            height: view.height
+            width: 100
+            anchors.top: view.top
+            anchors.right: view.left
+            visible: view.currentIndex > 0
+            onPressed: view.decrementCurrentIndex()
         }
 
-        height: view.height
-        width: 100
-        anchors.top: view.top
-        anchors.left: view.right
-        visible: view.currentIndex < view.count - 1
-        onPressed: view.incrementCurrentIndex()
-    }
+        Button {
+            background: Rectangle {
+                color: "transparent"
+            }
 
-    SwipeView {
-        id: view
+            contentItem: Item {
+                Image  {
+                    source: "../../resources/icons/Arrow-Right.png"
+                    fillMode: Image.PreserveAspectFit
+                    horizontalAlignment: Image.AlignRight
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+            }
 
-        clip: true
-        currentIndex: pageIndicator.currentIndex
+            height: view.height
+            width: 100
+            anchors.top: view.top
+            anchors.left: view.right
+            visible: view.currentIndex < view.count - 1
+            onPressed: view.incrementCurrentIndex()
+        }
 
-        height: 240
-        width: 240
-        anchors.top: mainLogo.bottom
-        anchors.topMargin: 30
-        anchors.horizontalCenter: parent.horizontalCenter
+        SwipeView {
+            id: view
 
-        property var userChunks: LoginLogic.chunk(authenticationPage.userList, 4)
+            clip: true
+            currentIndex: pageIndicator.currentIndex
 
-        Repeater {
-            model: view.userChunks
+            height: 260
+            width: 240
 
-            Item {
-                id: firstPage
+            anchors.centerIn: parent
 
-                Grid {
-                    columns: 2
-                    spacing: 2
+            property var userChunks: LoginLogic.chunk(authenticationPage.userList, 4)
 
-                    Repeater {
-                        model: modelData
+            Repeater {
+                model: view.userChunks
 
-                        Button {
-                            width: 120
-                            height: 120
+                Item {
+                    id: firstPage
 
-                            onPressed: signInUser(modelData)
+                    Grid {
+                        columns: 2
+                        spacing: 2
 
-                            background: Rectangle {
-                                color: "transparent"
-                                radius: 6
-                            }
+                        Repeater {
+                            model: modelData
 
-                            contentItem: Item {
-                                anchors.fill: parent;
+                            Button {
+                                width: 120
+                                height: 120
 
-                                AvatarPlaceholder {
-                                    id: avatar
-                                    nickname: modelData
-                                    diameter: 60
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                    anchors.top: parent.top
-                                    anchors.topMargin: 15
+                                onPressed: signInUser(modelData)
+
+                                background: Rectangle {
+                                    color: "transparent"
+                                    radius: 6
                                 }
 
-                                Label {
-                                    text: modelData
-                                    anchors.top: avatar.bottom
-                                    anchors.topMargin: 6
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                    font.pointSize: UiHelper.fixFontSz(15)
-                                    elide: Text.ElideRight
-                                    width: parent.width - 20
-                                    horizontalAlignment: Text.AlignHCenter
-                                    color: Theme.primaryTextColor
-                                }
-                            }
+                                contentItem: Item {
+                                    anchors.fill: parent;
 
+                                    AvatarPlaceholder {
+                                        id: avatar
+                                        nickname: modelData
+                                        diameter: 60
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        anchors.top: parent.top
+                                        anchors.topMargin: 15
+                                    }
+
+                                    Label {
+                                        text: modelData
+                                        anchors.top: avatar.bottom
+                                        anchors.topMargin: 6
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        font.pointSize: UiHelper.fixFontSz(15)
+                                        elide: Text.ElideRight
+                                        width: parent.width - 20
+                                        horizontalAlignment: Text.AlignHCenter
+                                        color: Theme.primaryTextColor
+                                    }
+                                }
+
+                            }
                         }
                     }
                 }
             }
+
         }
 
-    }
+        PageIndicator {
+            id: pageIndicator
+            interactive: true
+            count: view.count
+            currentIndex: view.currentIndex
 
-    PageIndicator {
-        id: pageIndicator
-        interactive: true
-        count: view.count
-        currentIndex: view.currentIndex
-
-        anchors.bottom: view.bottom
-        anchors.bottomMargin: -15
-        anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: view.bottom
+            anchors.bottomMargin: 10
+            anchors.horizontalCenter: parent.horizontalCenter
+        }
     }
 }

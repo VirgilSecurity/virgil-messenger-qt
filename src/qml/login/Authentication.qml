@@ -10,18 +10,43 @@ StackView {
     id: authenticationPage
     initialItem: mainView
 
-    anchors.fill: parent
+    property var userList: Messenger.usersList()
+
+    background: Rectangle {
+        color: "transparent"
+    }
+
     property var loginPage
     property var registerPage
-
-    property var userList: Messenger.usersList()
 
     Component.onCompleted: {
         registerPage = Qt.createComponent("Register.qml")
         loginPage = Qt.createComponent("Login.qml")
     }
 
-    Item {
+    Page {
+        background: Rectangle {
+            color: "transparent"
+        }
+
+        header: ToolBar {
+            implicitHeight: 60
+
+            background: Rectangle {
+                color: "transparent"
+            }
+
+            SettingsButton {
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+
+                Action {
+                    text: qsTr("Settings")
+                    onTriggered: showSettings()
+                }
+            }
+        }
+
         id: mainView
 
         CenteredAuthLayout {
@@ -30,14 +55,14 @@ StackView {
             content: ColumnLayout {
                 spacing: 10
                 Layout.maximumWidth: 300
-                Layout.alignment: Qt.AlignCenter
-                Layout.minimumHeight: 300
+                Layout.alignment: Qt.AlignHCenter
+                Layout.minimumHeight: 260
                 Layout.maximumHeight: 480
 
                 Loader {
                     Layout.minimumHeight: 220
-                    Layout.maximumHeight: 420
-                    Layout.alignment: Qt.AlignCenter
+                    Layout.maximumHeight: 480
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     readonly property url mainLogoSrc: "./components/MainLogo.qml"
@@ -69,4 +94,5 @@ StackView {
         }
     }
 }
+
 
