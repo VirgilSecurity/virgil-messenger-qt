@@ -44,7 +44,7 @@ function check_env() {
 		exit 1
 	fi
 
-	if [ z"${PASS}" == "z" ]]; then
+	if [ z"${PASS}" == "z" ]; then
 		echo "PASS should contains Apple User's password"
 		exit 1
 	fi
