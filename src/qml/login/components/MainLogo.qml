@@ -3,12 +3,12 @@ import "../../theme"
 
 Column {
     anchors.fill: parent
-    spacing: 0
+    spacing: 10
 
     Image {
         id: mainLogo
-        width: 200
-        height: 200
+        width: 180
+        height: 180
 
         fillMode: Image.PreserveAspectFit
         source: Theme.mainLogo

@@ -10,7 +10,8 @@ StackView {
     id: authenticationPage
     initialItem: mainView
 
-    property var userList: Messenger.usersList()
+//    property var userList: Messenger.usersList()
+    property var userList: []
 
     background: Rectangle {
         color: "transparent"
