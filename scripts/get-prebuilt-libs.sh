@@ -31,16 +31,23 @@ echo
 echo "=== CORE VERSION = ${CORE_VER}"
 echo
 
+if [ -d ${INSTALL_DIR}/prebuilt ] && [ "${PREBUILT_SKIP}" == "true" ]; then
+ echo 
+ echo "=== Prebuild libraries found. Download skipped"
+ echo 
+ exit 0
+fi
+
 rm -rf ${INSTALL_DIR} || true
 mkdir -p ${INSTALL_DIR}
 check_error
 
 pushd ${INSTALL_DIR}
-wget -O ${ARCH_NAME} ${PREBUILT_ARCHIVE}
-check_error
+  wget -O ${ARCH_NAME} ${PREBUILT_ARCHIVE}
+  check_error
 
-tar -xvf ${ARCH_NAME}
-check_error
+  tar -xvf ${ARCH_NAME}
+  check_error
 
-rm ${ARCH_NAME}
+  rm ${ARCH_NAME}
 popd
