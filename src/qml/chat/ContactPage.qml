@@ -54,6 +54,7 @@ import QtQuick.Layouts 1.1
 
 import "../theme"
 import "./components"
+import "../components"
 
 Page {
     id: root

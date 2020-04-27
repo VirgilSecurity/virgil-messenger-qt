@@ -76,7 +76,6 @@ Page {
             Layout.maximumWidth: 260
             Layout.alignment: Qt.AlignCenter
 
-
             spacing: 0
 
             Label {

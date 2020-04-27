@@ -35,7 +35,7 @@
         <file>qml/helpers/ui/OutlineButton.qml</file>
         <file>qml/login/Authentication.qml</file>
         <file>qml/js/strings.js</file>
-        <file>qml/chat/components/AvatarPlaceholder.qml</file>
+        <file>qml/components/AvatarPlaceholder.qml</file>
         <file>qml/chat/components/MessageCounter.qml</file>
         <file>qml/chat/components/ChatToolBar.qml</file>
         <file>qml/components/TextInCircle.qml</file>
@@ -51,5 +51,9 @@
         <file>qml/resources/fonts/Roboto-Bold.ttf</file>
         <file>qml/resources/fonts/Roboto-Medium.ttf</file>
         <file>qml/resources/fonts/Roboto-Regular.ttf</file>
+        <file>qml/login/components/UserSelection.qml</file>
+        <file>qml/login/components/MainLogo.qml</file>
+        <file>qml/resources/icons/Arrow-Right.png</file>
+        <file>qml/resources/icons/Arrow-Right@2x.png</file>
     </qresource>
 </RCC>

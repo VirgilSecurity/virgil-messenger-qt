@@ -14,6 +14,8 @@ StackView {
     property var loginPage
     property var registerPage
 
+    property var userList: Messenger.usersList()
+
     Component.onCompleted: {
         registerPage = Qt.createComponent("qrc:/qml/login/Register.qml")
         loginPage = Qt.createComponent("qrc:/qml/login/Login.qml")
@@ -22,53 +24,31 @@ StackView {
     Item {
         id: mainView
 
-        CenteredAuthLayout{
+        CenteredAuthLayout {
             id: centeredAuthLayout
 
             content: ColumnLayout {
                 spacing: 10
                 Layout.maximumWidth: 300
                 Layout.alignment: Qt.AlignCenter
-                Layout.minimumHeight: 400
-                Layout.maximumHeight: 520
+                Layout.minimumHeight: 300
+                Layout.maximumHeight: 480
 
-                Image {
-                    id: mainLogo
-                    width: 240
-                    height: 240
-                    fillMode: Image.PreserveAspectFit
-                    source: Theme.mainLogo
-                    Layout.preferredHeight: 240
+                Loader {
+                    Layout.minimumHeight: 220
+                    Layout.maximumHeight: 420
                     Layout.alignment: Qt.AlignCenter
-                }
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    readonly property url mainLogoSrc: "./components/MainLogo.qml"
+                    readonly property url userSelectionSrc: "./components/UserSelection.qml"
 
-                Text {
-                    id: mainLogoText
-                    text: Theme.mainLogoText
-                    font.weight: Font.Bold
-                    font.capitalization: Font.Capitalize
-                    font.family: Theme.mainFontBold
-                    font.pointSize: UiHelper.fixFontSz(48)
-                    color: Theme.brandColor
-                    Layout.alignment: Qt.AlignCenter
-                }
-
-                Text {
-                    id: mainLogoDescription
-                    width: 180
-                    text: qsTr("The most secure messenger on the market")
-                    lineHeight: 1
-                    wrapMode: Text.WordWrap
-                    horizontalAlignment: Text.AlignHCenter
-
-                    font.pointSize: UiHelper.fixFontSz(13)
-                    color: Theme.secondaryTextColor
-                    Layout.alignment: Qt.AlignCenter
+                    source: !userList.length ? mainLogoSrc : userSelectionSrc
                 }
 
                 Item {
                     Layout.maximumHeight: 90
-                    Layout.minimumHeight: 10
+                    Layout.minimumHeight: 0
                     Layout.fillHeight: true
                 }
 
