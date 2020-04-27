@@ -51,6 +51,51 @@ function check_env() {
 }
 
 #***************************************************************************************
+function sign_file() {
+	echo "${1}"
+	codesign --force --deep --timestamp --options runtime -s "${CERT_ID}" "${1}"
+}
+#***************************************************************************************
+function sign_bundle() {
+	local BUNDLE="${1}"
+
+	echo
+	echo "-------- Sign ${1} -----------------------"
+	echo
+
+	pushd ${BUNDLE}
+	LIBS=$(find . -name "*.dylib")
+
+	echo
+	echo "=== Remove dSYM files"
+	echo
+	for i in $(find . -name "*.dSYM"); do
+		rm -rf "${i}"
+	done
+
+	echo
+	echo "=== Sign dylib files"
+	echo
+	for i in $(find . -name "*.dylib"); do
+		sign_file "${i}"
+	done
+
+	echo
+	echo "=== Sign frameworks"
+	echo
+	for i in $(find . -name "*.framework"); do
+		sign_file "${i}"
+	done
+
+	popd
+
+	echo
+	echo "=== Sign bundle"
+	echo
+	codesign --deep --force --verify --verbose --sign "${CERT_ID}" --options runtime "${BUNDLE}"
+}
+
+#***************************************************************************************
 function build_project() {
 	print_title
 
@@ -78,47 +123,19 @@ function build_project() {
 	${MACDEPLOYQT_BIN} ${APPLICATION_NAME}.app \
 		-qmldir=${PROJECT_DIR}/src/qml
 
-	pushd ${APPLICATION_NAME}.app
-	LIBS=$(find . -name "*.dylib")
+	echo
+	echo "=== Sign Autoupdate"
+	echo
+	AUTOUPDATE_APP="${BUILD_DIR}/${APPLICATION_NAME}.app/Contents/Frameworks/Sparkle.framework/Resources/Autoupdate.app"
+	sign_file "${AUTOUPDATE_APP}/Contents/MacOS/Autoupdate"
+	sign_file "${AUTOUPDATE_APP}/Contents/MacOS/fileop"
 
 	echo
-	echo "=== Remove dSYM files"
+	echo "=== Sign Main application"
 	echo
-	for i in $(find . -name "*.dSYM"); do
-		rm -rf "${i}"
-	done
-
-	echo
-	echo "=== Sign dylib files"
-	echo
-	for i in $(find . -name "*.dylib"); do
-		codesign -s "${CERT_ID}" "${i}"
-	done
-
-	echo
-	echo "=== Sign frameworks"
-	echo
-	for i in $(find . -name "*.framework"); do
-		codesign -s "${CERT_ID}" "${i}"
-	done
-
-	popd
-
-	echo
-	echo "=== Sign executable"
-	echo
-	codesign -s "${CERT_ID}" "${BUILD_DIR}/${APPLICATION_NAME}.app/Contents/MacOS/${APPLICATION_NAME}"
-	check_error
-
-	echo
-	echo "=== Sign Autoupdate.app"
-	echo
-	codesign --deep --force --verify --verbose --sign "${CERT_ID}" --options runtime "${BUILD_DIR}/${APPLICATION_NAME}.app/Contents/Frameworks/Sparkle.framework/Versions/A/Resources/Autoupdate.app"
-
-	echo
-	echo "=== Sign Main App"
-	echo
-	codesign --deep --force --verify --verbose --sign "${CERT_ID}" --options runtime "${BUILD_DIR}/${APPLICATION_NAME}.app"
+	MAIN_APP="${BUILD_DIR}/${APPLICATION_NAME}.app"
+	sign_file "${MAIN_APP}/Contents/MacOS/${APPLICATION_NAME}"
+	sign_bundle "${MAIN_APP}"
 
 	echo
 	echo "=== Set app file properties"
@@ -127,9 +144,6 @@ function build_project() {
 	hideExtention "${APP_BUNDLE}"
 
 	setIcon "${IMAGES_FOLDER}" "${APP_ICON}" "${BUILD_DIR}/${APP_BUNDLE}"
-
-	popd
-
 }
 
 #***************************************************************************************
@@ -177,7 +191,6 @@ function create_dmg() {
 
 	# cp "${DMG_RESULT}.dmg" "$DMG_PREPARE_FOLDER/${MESSENGER_BUNDLE_NAME}.dmg"
 }
-
 #***************************************************************************************
 function notarize_dmg() {
 	echo
@@ -199,7 +212,7 @@ function notarize_dmg() {
 		sleep 10s
 		INFO_OUTPUT=$(xcrun altool --notarization-info "${NOTARIZE_ID}" --username ${USER_NAME} -p ${PASS} 2>&1 | tr -d "\n")
 
-		echo ${INFO_OUTPUT} >${HOME}/2.txt
+		echo "${INFO_OUTPUT}"
 
 		if echo ${INFO_OUTPUT} | grep -q -F 'Status Message: Package Approved'; then
 			NOTARIZATION_DONE="true"
