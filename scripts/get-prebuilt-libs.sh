@@ -36,7 +36,7 @@ mkdir -p ${INSTALL_DIR}
 check_error
 
 pushd ${INSTALL_DIR}
-wget ${PREBUILT_ARCHIVE}
+wget -O ${ARCH_NAME} ${PREBUILT_ARCHIVE}
 check_error
 
 tar -xvf ${ARCH_NAME}
