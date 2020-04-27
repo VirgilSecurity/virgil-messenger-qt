@@ -3,7 +3,7 @@
 #
 #   Global variables
 #
-SCRIPT_FOLDER="$( cd "$( dirname "$0" )" && pwd )"
+SCRIPT_FOLDER="$(cd "$(dirname "$0")" && pwd)"
 source ${SCRIPT_FOLDER}/ish/common.sh
 
 PLATFORM=linux-g++
@@ -20,6 +20,8 @@ prepare_dir
 
 echo
 echo "=== Build application bundle"
+
+pushd "${BUILD_DIR}"
 
 ${LINUX_QMAKE} -config ${BUILD_TYPE} ${PROJECT_DIR} DEFINES+="VERSION=\"${VERSION}\""
 check_error
@@ -41,3 +43,5 @@ echo "=== Copy libvs-messenger-crypto.so "
 echo
 cp ${PROJECT_DIR}/ext/prebuilt/linux/usr/local/lib/libvs-messenger-crypto.so DistributionKit/lib
 check_error
+
+popd
