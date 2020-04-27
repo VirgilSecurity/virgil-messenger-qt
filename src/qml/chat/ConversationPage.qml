@@ -51,6 +51,7 @@
 import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
+import QtQuick.Dialogs 1.0
 
 Page {
     id: root
@@ -151,6 +152,26 @@ Page {
                     Layout.fillWidth: true
                     placeholderText: qsTr("Compose message")
                     wrapMode: TextArea.Wrap
+                }
+
+                Button {
+                    id: fileButton
+                    text: qsTr("File")
+                    onClicked: {
+                        fileDialog.open();
+                    }
+
+                    FileDialog {
+                        id: fileDialog
+                        title: "Please choose a file"
+                        folder: shortcuts.desktop
+                        onAccepted: {
+                            console.log("You choose: " + fileDialog.fileUrls)
+                        }
+                        onRejected: {
+                            console.log("Canceled")
+                        }
+                    }
                 }
 
                 Button {
