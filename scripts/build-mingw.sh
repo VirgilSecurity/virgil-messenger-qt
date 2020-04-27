@@ -3,7 +3,7 @@
 #
 #   Global variables
 #
-SCRIPT_FOLDER="$( cd "$( dirname "$0" )" && pwd )"
+SCRIPT_FOLDER="$(cd "$(dirname "$0")" && pwd)"
 source ${SCRIPT_FOLDER}/ish/common.sh
 
 PLATFORM=linux-mingw
@@ -24,7 +24,7 @@ pushd ${BUILD_DIR}
 ${LINUX_QMAKE} -config ${BUILD_TYPE} ${PROJECT_DIR} -spec win32-x-g++
 check_error
 
-make -j10s
+make -j10
 check_error
 
 echo
@@ -32,7 +32,6 @@ echo "== Deploying application"
 echo
 cqtdeployer -bin ${BUILD_DIR}/release/${APPLICATION_NAME}.exe -qmlDir ${PROJECT_DIR}src/qml -qmake ${LINUX_QMAKE} clear
 check_error
-
 
 echo "=== Copy libvs-messenger-internal.dll "
 cp ${PROJECT_DIR}/ext/prebuilt/linux/usr/local/lib/libvs-messenger-internal.dll DistributionKit/lib
@@ -92,4 +91,3 @@ unix2dos DistributionKit/ca/curl-ca-bundle-win.crt
 check_error
 
 popd
-
