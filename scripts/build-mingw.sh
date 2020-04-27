@@ -7,7 +7,7 @@ SCRIPT_FOLDER="$(cd "$(dirname "$0")" && pwd)"
 source ${SCRIPT_FOLDER}/ish/common.sh
 
 PLATFORM=linux-mingw
-BUILD_DIR=${PROJECT_DIR}${BUILD_TYPE}/${TOOL_NAME}.${PLATFORM}/
+BUILD_DIR=${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.${PLATFORM}/
 LINUX_QMAKE="${QT_SDK_DIR}/mingw32/bin/qmake"
 
 #***************************************************************************************
@@ -34,16 +34,23 @@ cqtdeployer -bin ${BUILD_DIR}/release/${APPLICATION_NAME}.exe -qmlDir ${PROJECT_
 check_error
 
 echo "=== Copy libvs-messenger-internal.dll "
-cp ${PROJECT_DIR}/ext/prebuilt/linux/usr/local/lib/libvs-messenger-internal.dll DistributionKit/lib
+cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/libvs-messenger-internal.dll DistributionKit/lib
 check_error
 
 echo "=== Copy libvs-messenger-crypto.dll "
-cp ${PROJECT_DIR}/ext/prebuilt/linux/usr/local/lib/libvs-messenger-crypto.dll DistributionKit/lib
+cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/libvs-messenger-crypto.dll DistributionKit/lib
 check_error
 
 echo "=== Copy openssl libraries"
-cp ${SCRIPT_FOLDER}/../pkgs/win/dll/* DistributionKit/lib
-cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libssl-10.dll DistributionKit/lib
+cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/capi.dll           DistributionKit/lib
+check_error
+cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/dasync.dll         DistributionKit/lib
+check_error
+cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/libcrypto-1_1.dll  DistributionKit/lib
+check_error
+cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/libssl-1_1.dll     DistributionKit/lib
+check_error
+cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/libssl-10.dll      DistributionKit/lib
 check_error
 
 echo "=== Add custom env variables"
