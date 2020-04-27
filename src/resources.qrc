@@ -55,5 +55,6 @@
         <file>qml/login/components/MainLogo.qml</file>
         <file>qml/resources/icons/Arrow-Right.png</file>
         <file>qml/resources/icons/Arrow-Right@2x.png</file>
+        <file>qml/login/components/HeaderToolbar.qml</file>
     </qresource>
 </RCC>

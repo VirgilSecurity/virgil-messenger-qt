@@ -32,7 +32,6 @@ Item {
                 horizontalAlignment: Image.AlignRight
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                anchors.rightMargin: 15
             }
         }
 
@@ -56,7 +55,6 @@ Item {
                 horizontalAlignment: Image.AlignRight
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                anchors.leftMargin: 15
             }
         }
 
