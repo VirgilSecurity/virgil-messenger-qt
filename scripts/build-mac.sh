@@ -236,4 +236,4 @@ function notarize_dmg() {
 check_env
 build_project
 create_dmg
-notarize_dmg
+#notarize_dmg
