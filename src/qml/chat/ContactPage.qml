@@ -97,13 +97,13 @@ Page {
 
                     Text {
                         color: Theme.primaryTextColor
-                        font.pointSize: 15
+                        font.pointSize: UiHelper.fixFontSz(15)
                         text: model.display
                     }
 
                     Text {
                         color: Theme.secondaryTextColor
-                        font.pointSize: 12
+                        font.pointSize: UiHelper.fixFontSz(12)
 												// TODO: insert from model
                         text: "latest message to be inserted and check the lenght"
                         width: parent.width
@@ -125,7 +125,7 @@ Page {
                         // TODO insert model
                         text: "16:20"
                         color: Theme.secondaryTextColor
-                        font.pointSize: 9
+                        font.pointSize: UiHelper.fixFontSz(9)
                         anchors.horizontalCenter: parent.horizontalCenter
                     }
                 }

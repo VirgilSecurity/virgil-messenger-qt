@@ -34,12 +34,19 @@
         <file>qml/theme/qmldir</file>
         <file>qml/helpers/ui/OutlineButton.qml</file>
         <file>qml/login/Authentication.qml</file>
-        <file>qml/resources/icons/Logo-Big.svg</file>
-        <file>qml/resources/icons/Search.svg</file>
         <file>qml/js/strings.js</file>
         <file>qml/chat/components/AvatarPlaceholder.qml</file>
         <file>qml/chat/components/MessageCounter.qml</file>
         <file>qml/chat/components/ChatToolBar.qml</file>
         <file>qml/components/TextInCircle.qml</file>
+        <file>qml/login/Register.qml</file>
+        <file>qml/login/components/CenteredAuthLayout.qml</file>
+        <file>qml/resources/icons/Arrow-Left@2x.png</file>
+        <file>qml/resources/icons/Arrow-Left.png</file>
+        <file>qml/resources/icons/Search.png</file>
+        <file>qml/resources/icons/Search@2x.png</file>
+        <file>qml/resources/icons/Logo-Big@2x.png</file>
+        <file>qml/resources/icons/Logo-Big@3x.png</file>
+        <file>qml/resources/icons/Logo-Big.png</file>
     </qresource>
 </RCC>

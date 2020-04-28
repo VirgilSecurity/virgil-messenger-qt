@@ -1,5 +1,5 @@
 import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick.Controls 2.4
 import QtQuick.Layouts 1.1
 
 import "chat"
@@ -7,9 +7,8 @@ import "login"
 import "settings"
 import "theme"
 
-Rectangle {
+Item {
     anchors.fill: parent
-    color: "#000000"
 
     //
     //  Properties
