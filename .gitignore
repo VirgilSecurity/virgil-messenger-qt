@@ -47,3 +47,5 @@ format_list.txt
 moc_*.h
 qrc_resources.cpp
 Makefile
+
+!scripts/macos/pkg_resources/bin

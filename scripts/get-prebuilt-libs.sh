@@ -5,8 +5,10 @@ SCRIPT_FOLDER="$(cd "$(dirname "$0")" && pwd)"
 #
 #   Global variables
 #
-ARCH_NAME=prebuilt.tar.gz
-PREBUILT_ARCHIVE="https://www.dropbox.com/s/1dtsu4udijl8wot/${ARCH_NAME}"
+CORE_VER=$(head -n 1 ${SCRIPT_FOLDER}/../VERSION_CORE)
+ARCH_NAME=prebuilt-${CORE_VER}.tgz
+PREBUILT_ARCHIVE="https://bintray.com/virgilsecurity/iotl-demo-cdn/download_file?file_path=${ARCH_NAME}"
+
 export INSTALL_DIR="${SCRIPT_FOLDER}/../ext/"
 
 #***************************************************************************************
@@ -25,16 +27,27 @@ check_error() {
 
 #*************************************************************************************************************
 
+echo
+echo "=== CORE VERSION = ${CORE_VER}"
+echo
+
+if [ -d ${INSTALL_DIR}/prebuilt ] && [ "${PREBUILT_SKIP}" == "true" ]; then
+ echo 
+ echo "=== Prebuild libraries found. Download skipped"
+ echo 
+ exit 0
+fi
+
 rm -rf ${INSTALL_DIR} || true
 mkdir -p ${INSTALL_DIR}
 check_error
 
 pushd ${INSTALL_DIR}
-wget ${PREBUILT_ARCHIVE}
-check_error
+  wget -O ${ARCH_NAME} ${PREBUILT_ARCHIVE}
+  check_error
 
-tar -xvf ${ARCH_NAME}
-check_error
+  tar -xvf ${ARCH_NAME}
+  check_error
 
-rm ${ARCH_NAME}
+  rm ${ARCH_NAME}
 popd

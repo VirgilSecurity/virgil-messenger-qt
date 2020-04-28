@@ -44,10 +44,36 @@ function check_env() {
 		exit 1
 	fi
 
-	if [ z"${PASS}" == "z" ]]; then
+	if [ z"${PASS}" == "z" ]; then
 		echo "PASS should contains Apple User's password"
 		exit 1
 	fi
+}
+
+#***************************************************************************************
+function sign_file() {
+	echo "${1}"
+	codesign --force --deep --timestamp --options runtime -s "${CERT_ID}" "${1}"
+}
+#***************************************************************************************
+function sign_bundle() {
+	local BUNDLE="${1}"
+
+	pushd ${BUNDLE}
+
+	echo
+	echo "=== Remove dSYM files"
+	echo
+	for i in $(find . -name "*.dSYM"); do
+		rm -rf "${i}"
+	done
+
+	popd
+
+	echo
+	echo "=== Sign bundle"
+	echo
+	codesign --deep --force --verify --verbose --sign "${CERT_ID}" --options runtime "${BUNDLE}"
 }
 
 #***************************************************************************************
@@ -78,47 +104,19 @@ function build_project() {
 	${MACDEPLOYQT_BIN} ${APPLICATION_NAME}.app \
 		-qmldir=${PROJECT_DIR}/src/qml
 
-	pushd ${APPLICATION_NAME}.app
-	LIBS=$(find . -name "*.dylib")
+	echo
+	echo "=== Sign Autoupdate"
+	echo
+	AUTOUPDATE_APP="${BUILD_DIR}/${APPLICATION_NAME}.app/Contents/Frameworks/Sparkle.framework/Resources/Autoupdate.app"
+	sign_file "${AUTOUPDATE_APP}/Contents/MacOS/Autoupdate"
+	sign_file "${AUTOUPDATE_APP}/Contents/MacOS/fileop"
 
 	echo
-	echo "=== Remove dSYM files"
+	echo "=== Sign Main application"
 	echo
-	for i in $(find . -name "*.dSYM"); do
-		rm -rf "${i}"
-	done
-
-	echo
-	echo "=== Sign dylib files"
-	echo
-	for i in $(find . -name "*.dylib"); do
-		codesign -s "${CERT_ID}" "${i}"
-	done
-
-	echo
-	echo "=== Sign frameworks"
-	echo
-	for i in $(find . -name "*.framework"); do
-		codesign -s "${CERT_ID}" "${i}"
-	done
-
-	popd
-
-	echo
-	echo "=== Sign executable"
-	echo
-	codesign -s "${CERT_ID}" "${BUILD_DIR}/${APPLICATION_NAME}.app/Contents/MacOS/${APPLICATION_NAME}"
-	check_error
-
-	echo
-	echo "=== Sign Autoupdate.app"
-	echo
-	codesign --deep --force --verify --verbose --sign "${CERT_ID}" --options runtime "${BUILD_DIR}/${APPLICATION_NAME}.app/Contents/Frameworks/Sparkle.framework/Versions/A/Resources/Autoupdate.app"
-
-	echo
-	echo "=== Sign Main App"
-	echo
-	codesign --deep --force --verify --verbose --sign "${CERT_ID}" --options runtime "${BUILD_DIR}/${APPLICATION_NAME}.app"
+	MAIN_APP="${BUILD_DIR}/${APPLICATION_NAME}.app"
+	sign_file "${MAIN_APP}/Contents/MacOS/${APPLICATION_NAME}"
+	sign_bundle "${MAIN_APP}"
 
 	echo
 	echo "=== Set app file properties"
@@ -127,9 +125,6 @@ function build_project() {
 	hideExtention "${APP_BUNDLE}"
 
 	setIcon "${IMAGES_FOLDER}" "${APP_ICON}" "${BUILD_DIR}/${APP_BUNDLE}"
-
-	popd
-
 }
 
 #***************************************************************************************
@@ -174,18 +169,15 @@ function create_dmg() {
 	appdmg ${APPDMG_SPEC} ${DMG_FILE}
 
 	setIcon "${IMAGES_FOLDER}" "${DMG_ICON}" "${DMG_FILE}"
-
-	# cp "${DMG_RESULT}.dmg" "$DMG_PREPARE_FOLDER/${MESSENGER_BUNDLE_NAME}.dmg"
 }
-
 #***************************************************************************************
 function notarize_dmg() {
 	echo
 	echo "=== Send Application for Apple's notarization"
 	echo
-	NOTARIZE_OUTPUT=$(xcrun altool -t osx -f "${DMG_FILE}" --primary-bundle-id "${PKG_IDENTIFIER}" --notarize-app --username ${USER_NAME} -p ${PASS})
+	NOTARIZE_OUTPUT=$(xcrun altool -t osx -f "${DMG_FILE}" --primary-bundle-id "${PKG_IDENTIFIER}" --notarize-app --username ${USER_NAME} -p ${PASS} 2>&1)
 	check_error
-	NOTARIZE_ID=$(echo ${NOTARIZE_OUTPUT} | grep -F 'No errors uploading' | awk -F 'RequestUUID' '{print $2}' | awk -F ' ' '{print $2}')
+	NOTARIZE_ID=$(echo ${NOTARIZE_OUTPUT} | tr -d "\n" | grep -F 'No errors uploading' | awk -F 'RequestUUID' '{print $2}' | awk -F ' ' '{print $2}')
 	check_error
 
 	echo "NOTARIZE_ID = ${NOTARIZE_ID}"
@@ -197,9 +189,7 @@ function notarize_dmg() {
 	for ((count = 1; count < 20; count++)); do
 		echo "Wait .. ${count} of 20"
 		sleep 10s
-		INFO_OUTPUT=$(xcrun altool --notarization-info "${NOTARIZE_ID}" --username ${USER_NAME} -p ${PASS})
-
-		echo ${INFO_OUTPUT} >${HOME}/2.txt
+		INFO_OUTPUT=$(xcrun altool --notarization-info "${NOTARIZE_ID}" --username ${USER_NAME} -p ${PASS} 2>&1 | tr -d "\n")
 
 		if echo ${INFO_OUTPUT} | grep -q -F 'Status Message: Package Approved'; then
 			NOTARIZATION_DONE="true"
@@ -207,7 +197,7 @@ function notarize_dmg() {
 			break
 		fi
 
-		if echo ${INFO_OUTPUT} | grep -q -F 'Status: invalid'; then
+		if echo ${INFO_OUTPUT} | grep -q -F 'Status Message: Package Invalid'; then
 			echo "${INFO_OUTPUT}"
 			exit 1
 		fi
@@ -221,7 +211,7 @@ function notarize_dmg() {
 	echo
 	echo "=== Staple result of the notarization"
 	echo
-	STAMPLE_OUTPUT=$(xcrun stapler staple -v "${DMG_FILE}")
+	STAMPLE_OUTPUT=$(xcrun stapler staple -v "${DMG_FILE}" 2>&1 | tr -d "\n")
 
 	if echo ${STAMPLE_OUTPUT} | grep -q -F 'The staple and validate action worked!'; then
 		check_error
