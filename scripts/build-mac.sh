@@ -59,32 +59,13 @@ function sign_file() {
 function sign_bundle() {
 	local BUNDLE="${1}"
 
-	echo
-	echo "-------- Sign ${1} -----------------------"
-	echo
-
 	pushd ${BUNDLE}
-	LIBS=$(find . -name "*.dylib")
 
 	echo
 	echo "=== Remove dSYM files"
 	echo
 	for i in $(find . -name "*.dSYM"); do
 		rm -rf "${i}"
-	done
-
-	echo
-	echo "=== Sign dylib files"
-	echo
-	for i in $(find . -name "*.dylib"); do
-		sign_file "${i}"
-	done
-
-	echo
-	echo "=== Sign frameworks"
-	echo
-	for i in $(find . -name "*.framework"); do
-		sign_file "${i}"
 	done
 
 	popd
@@ -188,8 +169,6 @@ function create_dmg() {
 	appdmg ${APPDMG_SPEC} ${DMG_FILE}
 
 	setIcon "${IMAGES_FOLDER}" "${DMG_ICON}" "${DMG_FILE}"
-
-	# cp "${DMG_RESULT}.dmg" "$DMG_PREPARE_FOLDER/${MESSENGER_BUNDLE_NAME}.dmg"
 }
 #***************************************************************************************
 function notarize_dmg() {
@@ -211,8 +190,6 @@ function notarize_dmg() {
 		echo "Wait .. ${count} of 20"
 		sleep 10s
 		INFO_OUTPUT=$(xcrun altool --notarization-info "${NOTARIZE_ID}" --username ${USER_NAME} -p ${PASS} 2>&1 | tr -d "\n")
-
-		echo "${INFO_OUTPUT}"
 
 		if echo ${INFO_OUTPUT} | grep -q -F 'Status Message: Package Approved'; then
 			NOTARIZATION_DONE="true"
