@@ -107,9 +107,6 @@ function build_project() {
 	${QMAKE_BIN} -config ${BUILD_TYPE} ${PROJECT_DIR} DEFINES+="VERSION=\"${VERSION}\""
 	check_error
 	
-	fill_plist
-	check_error	
-
 	make clean
 
 	make -j10
@@ -243,5 +240,6 @@ function notarize_dmg() {
 
 check_env
 build_project
+fill_plist
 create_dmg
 notarize_dmg
