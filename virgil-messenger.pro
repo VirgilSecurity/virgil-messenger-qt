@@ -42,7 +42,7 @@ TARGET = virgil-messenger
 #   Include IoTKit Qt wrapper
 #
 PREBUILT_PATH = $$PWD/ext/prebuilt
-include(ext/virgil-iotkit/integration/qt/iotkit.pri)
+include($${PREBUILT_PATH}/qt/iotkit.pri)
 
 #
 #   QXMPP
@@ -71,7 +71,9 @@ HEADERS += \
         include/VSQMessenger.h \
         include/VSQSqlContactModel.h \
         include/VSQSqlConversationModel.h \
-        include/android/VSQAndroid.h
+        include/android/VSQAndroid.h \
+        include/mac/VSQMacos.h \
+        include/ui/VSQUiHelper.h
 
 #
 #   Sources
@@ -83,7 +85,8 @@ SOURCES += \
         src/VSQSqlConversationModel.cpp \
         src/android/VSQAndroid.cpp \
         src/main.cpp \
-        src/VSQApplication.cpp
+        src/VSQApplication.cpp \
+        src/ui/VSQUiHelper.cpp
 
 #
 #   Resources
@@ -92,11 +95,32 @@ SOURCES += \
 RESOURCES += src/resources.qrc
 
 #
+#   Icons
+#
+
+QT += svg xml
+
+#
 #   Include path
 #
 
 INCLUDEPATH +=  include \
         $${QXMPP_BUILD_PATH}/include
+
+#
+#   Sparkle framework
+#
+unix:mac: {
+    OBJECTIVE_SOURCES += src/mac/VSQMacos.mm
+    DEFINES += MACOS=1
+    SPARKLE_LOCATION=$$PREBUILT_PATH/$${OS_NAME}/sparkle
+    message("SPARKLE LOCATION = $$SPARKLE_LOCATION")
+    QMAKE_LFLAGS  += -F$$SPARKLE_LOCATION
+    LIBS += -framework Sparkle
+
+    DST_DLL = $${OUT_PWD}/$${TARGET}.app/Contents/Frameworks
+    QMAKE_POST_LINK += $$quote(cp -R $$PREBUILT_PATH/$${OS_NAME}/sparkle/Sparkle.framework $${DST_DLL}/$$escape_expand(\n\t))
+}
 
 
 #

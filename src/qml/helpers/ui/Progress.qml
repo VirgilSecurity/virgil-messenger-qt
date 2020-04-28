@@ -27,7 +27,7 @@ Page {
     Text {
         id: titleText
         text: titleStr
-        font.pointSize: 24
+        font.pointSize: UiHelper.fixFontSz(24)
         anchors.top: parent.top
         anchors.topMargin: 30
         anchors.horizontalCenter: parent.horizontalCenter
@@ -88,7 +88,7 @@ Page {
             height: 20
         }
 
-        CButton {
+        PrimaryButton {
             height: 50
             Layout.preferredWidth: parent.width - 20
             Layout.alignment: Qt.AlignHCenter

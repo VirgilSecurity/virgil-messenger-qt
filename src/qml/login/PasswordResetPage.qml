@@ -22,7 +22,7 @@ Page {
             ToolButton {
                 id: control
                 text: qsTr("\uf060")
-                font.pointSize: 24
+                font.pointSize: UiHelper.fixFontSz(24)
                 rightPadding: 10
                 contentItem: Text {
                     text: control.text
@@ -42,7 +42,7 @@ Page {
     Text {
         id: resetText
         text: qsTr("Retrieve Password")
-        font.pointSize: 24
+        font.pointSize: UiHelper.fixFontSz(24)
         anchors.top: parent.top
         anchors.topMargin: 30
         anchors.horizontalCenter: parent.horizontalCenter
@@ -61,7 +61,7 @@ Page {
             Layout.preferredWidth: parent.width - 20
             Layout.alignment: Qt.AlignHCenter
             color: mainTextCOlor
-            font.pointSize: 14
+            font.pointSize: UiHelper.fixFontSz(14)
             leftPadding: 30
             background: Rectangle {
                 implicitWidth: 200
@@ -71,7 +71,7 @@ Page {
 
                 Text {
                     text: "\uf007"
-                    font.pointSize: 14
+                    font.pointSize: UiHelper.fixFontSz(14)
                     color: mainAppColor
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
@@ -94,7 +94,7 @@ Page {
             Layout.preferredWidth: parent.width - 20
             Layout.alignment: Qt.AlignHCenter
             color: mainTextCOlor
-            font.pointSize: 14
+            font.pointSize: UiHelper.fixFontSz(14)
             leftPadding: 30
             echoMode: TextField.PasswordEchoOnEdit
             background: Rectangle {
@@ -104,7 +104,7 @@ Page {
                 color: "transparent"
                 Text {
                     text: "\uf023"
-                    font.pointSize: 14
+                    font.pointSize: UiHelper.fixFontSz(14)
                     color: mainAppColor
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
@@ -125,7 +125,7 @@ Page {
             height: 20
         }
 
-        CButton{
+        PrimaryButton {
             height: 50
             Layout.preferredWidth: parent.width - 20
             Layout.alignment: Qt.AlignHCenter
@@ -142,7 +142,7 @@ Page {
         Text {
             id: helpText
             text: qsTr("Your Password is,")
-            font.pointSize: 16
+            font.pointSize: UiHelper.fixFontSz(16)
             Layout.preferredWidth: parent.width - 20
             Layout.alignment: Qt.AlignLeft
             leftPadding: 15
@@ -152,7 +152,7 @@ Page {
 
         Text {
             id: password
-            font.pointSize: 13
+            font.pointSize: UiHelper.fixFontSz(13)
             Layout.preferredWidth: parent.width - 20
             Layout.alignment: Qt.AlignLeft
             leftPadding: 15
