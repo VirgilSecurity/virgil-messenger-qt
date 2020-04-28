@@ -29,7 +29,7 @@ check_error
 make -j10
 check_error
 
-cqtdeployer -bin ${APPLICATION_NAME} -qmlDir ${PROJECT_DIR}src/qml -qmake ${LINUX_QMAKE} clear
+cqtdeployer -bin ${APPLICATION_NAME} -qmlDir ${PROJECT_DIR}/src/qml -qmake ${LINUX_QMAKE} clear
 check_error
 
 echo

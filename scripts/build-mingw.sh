@@ -30,7 +30,7 @@ check_error
 echo
 echo "== Deploying application"
 echo
-cqtdeployer -bin ${BUILD_DIR}/release/${APPLICATION_NAME}.exe -qmlDir ${PROJECT_DIR}src/qml -qmake ${LINUX_QMAKE} clear
+cqtdeployer -bin ${BUILD_DIR}/release/${APPLICATION_NAME}.exe -qmlDir ${PROJECT_DIR}/src/qml -qmake ${LINUX_QMAKE} clear
 check_error
 
 echo "=== Copy libvs-messenger-internal.dll "
