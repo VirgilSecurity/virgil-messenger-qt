@@ -13,7 +13,9 @@ ColumnLayout {
     Item {
         id: topItem
         Layout.maximumHeight: (parent.height - content.height) / 2
+        Layout.minimumHeight: 0
         Layout.fillHeight: true
+        Layout.fillWidth: true
     }
 
     Text {

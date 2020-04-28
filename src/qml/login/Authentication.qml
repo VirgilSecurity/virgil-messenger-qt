@@ -10,7 +10,12 @@ StackView {
     id: authenticationPage
     initialItem: mainView
 
-    anchors.fill: parent
+   	property var userList: Messenger.usersList()
+
+    background: Rectangle {
+        color: "transparent"
+    }
+
     property var loginPage
     property var registerPage
 
@@ -19,56 +24,56 @@ StackView {
         loginPage = Qt.createComponent("Login.qml")
     }
 
-    Item {
+    Page {
+        background: Rectangle {
+            color: "transparent"
+        }
+
+        header: ToolBar {
+            implicitHeight: 60
+
+            background: Rectangle {
+                color: "transparent"
+            }
+
+            SettingsButton {
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+
+                Action {
+                    text: qsTr("Settings")
+                    onTriggered: showSettings()
+                }
+            }
+        }
+
         id: mainView
 
-        CenteredAuthLayout{
+        CenteredAuthLayout {
             id: centeredAuthLayout
 
             content: ColumnLayout {
                 spacing: 10
                 Layout.maximumWidth: 300
-                Layout.alignment: Qt.AlignCenter
-                Layout.minimumHeight: 400
-                Layout.maximumHeight: 520
+                Layout.alignment: Qt.AlignHCenter
+                Layout.minimumHeight: 260
+                Layout.maximumHeight: 480
 
-                Image {
-                    id: mainLogo
-                    width: 240
-                    height: 240
-                    fillMode: Image.PreserveAspectFit
-                    source: Theme.mainLogo
-                    Layout.preferredHeight: 240
-                    Layout.alignment: Qt.AlignCenter
-                }
+                Loader {
+                    Layout.minimumHeight: 220
+                    Layout.maximumHeight: 480
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    readonly property url mainLogoSrc: "./components/MainLogo.qml"
+                    readonly property url userSelectionSrc: "./components/UserSelection.qml"
 
-                Text {
-                    id: mainLogoText
-                    text: Theme.mainLogoText
-                    font.weight: Font.Bold
-                    font.capitalization: Font.AllUppercase
-                    font.family: Theme.mainFont
-                    font.pointSize: UiHelper.fixFontSz(48)
-                    color: Theme.brandColor
-                    Layout.alignment: Qt.AlignCenter
-                }
-
-                Text {
-                    id: mainLogoDescription
-                    width: 180
-                    text: qsTr("The most secure messenger on the market")
-                    lineHeight: 1
-                    wrapMode: Text.WordWrap
-                    horizontalAlignment: Text.AlignHCenter
-
-                    font.pointSize: UiHelper.fixFontSz(13)
-                    color: Theme.secondaryTextColor
-                    Layout.alignment: Qt.AlignCenter
+                    source: !userList.length ? mainLogoSrc : userSelectionSrc
                 }
 
                 Item {
                     Layout.maximumHeight: 90
-                    Layout.minimumHeight: 10
+                    Layout.minimumHeight: 0
                     Layout.fillHeight: true
                 }
 
@@ -89,4 +94,5 @@ StackView {
         }
     }
 }
+
 
