@@ -33,17 +33,15 @@ ENTITLEMENTS="/tmp/MacSandbox-Entitlements.plist"
 APPDMG_SPEC="/tmp/spec.json"
 
 # Sparkle
-SUFeedURL="${SUFeedURL:-'URL'}"
-SUPublicEDKey="${SUPublicEDKey:-'KEY'}"
+SUFeedURL="${SUFeedURL:-""}"
+SUPublicEDKey="${SUPublicEDKey:-""}"
 
 
 #***************************************************************************************
 function fill_plist() {
   echo
   echo "=== Fill Info.plist for sparkle"
-  sed -e "s,@SUFeedURL@,${SUFeedURL},g" -e "s,@SUPublicEDKey@,${SUPublicEDKey},g" ${BUILD_DIR}/virgil-messenger.app/Contents/Info.plist > ${BUILD_DIR}/virgil-messenger.app/Contents/Info.plist.new
-  check_error
-  mv -f ${BUILD_DIR}/virgil-messenger.app/Contents/Info.plist.new ${BUILD_DIR}/virgil-messenger.app/Contents/Info.plist
+  sed -e "s,@SUFeedURL@,${SUFeedURL},g" -e "s,@SUPublicEDKey@,${SUPublicEDKey},g" ${SCRIPT_FOLDER}/../src/virgil-messenger.plist.in > ${SCRIPT_FOLDER}/../src/virgil-messenger.plist
   check_error
 }
 
@@ -239,7 +237,7 @@ function notarize_dmg() {
 #***************************************************************************************
 
 check_env
-build_project
 fill_plist
+build_project
 create_dmg
 notarize_dmg
