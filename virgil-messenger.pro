@@ -37,6 +37,7 @@ QT += core network qml quick bluetooth sql xml concurrent
 CONFIG += c++14
 
 TARGET = virgil-messenger
+macx: QMAKE_INFO_PLIST = src/virgil-messenger.plist
 
 #
 #   Include IoTKit Qt wrapper

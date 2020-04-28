@@ -32,6 +32,21 @@ APP_ICON="MyIcon.icns"
 ENTITLEMENTS="/tmp/MacSandbox-Entitlements.plist"
 APPDMG_SPEC="/tmp/spec.json"
 
+# Sparkle
+SUFeedURL="${SUFeedURL:-'URL'}"
+SUPublicEDKey="${SUPublicEDKey:-'KEY'}"
+
+
+#***************************************************************************************
+function fill_plist() {
+  echo
+  echo "=== Fill Info.plist for sparkle"
+  sed -e "s,@SUFeedURL@,${SUFeedURL},g" -e "s,@SUPublicEDKey@,${SUPublicEDKey},g" ${BUILD_DIR}/virgil-messenger.app/Contents/Info.plist > ${BUILD_DIR}/virgil-messenger.app/Contents/Info.plist.new
+  check_error
+  mv -f ${BUILD_DIR}/virgil-messenger.app/Contents/Info.plist.new ${BUILD_DIR}/virgil-messenger.app/Contents/Info.plist
+  check_error
+}
+
 #***************************************************************************************
 function check_env() {
 	if [ z"${CERT_ID}" == "z" ]; then
@@ -91,6 +106,9 @@ function build_project() {
 
 	${QMAKE_BIN} -config ${BUILD_TYPE} ${PROJECT_DIR} DEFINES+="VERSION=\"${VERSION}\""
 	check_error
+	
+	fill_plist
+	check_error	
 
 	make clean
 
