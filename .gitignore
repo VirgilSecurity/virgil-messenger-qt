@@ -43,3 +43,9 @@ format_list.txt
 ####
 # QtCreator
 *.user
+.qmake.stash
+moc_*.h
+qrc_resources.cpp
+Makefile
+
+!scripts/macos/pkg_resources/bin

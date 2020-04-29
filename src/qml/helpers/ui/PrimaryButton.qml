@@ -5,7 +5,7 @@ import "../../theme"
 
 Button {
     id: control
-    font.pointSize: 20
+    font.pointSize: UiHelper.fixFontSz(15)
 
     property alias name: control.text
     property color baseColor
@@ -24,7 +24,7 @@ Button {
     background: Rectangle {
         id: bgrect
         implicitWidth: 100
-        implicitHeight: 44
+        implicitHeight: 40
         color: Theme.buttonPrimaryColor
         opacity: control.down ? 0.7 : 1
         radius: height/2

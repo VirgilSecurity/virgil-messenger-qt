@@ -21,7 +21,6 @@ Page {
         width: parent.width
         spacing: 15
 
-
         Rectangle { Layout.minimumHeight: 50 }
 
         Image {
@@ -138,6 +137,6 @@ Page {
 
     // Show progress page
     function showProgress(title) {
-        mobileView.push("qrc:/qml/helpers/ui/Progress.qml", {"titleStr": title, "reqTimeMs": operationTimeMaxMs, "timerStart": true})
+        mobileView.push("helpers/ui/Progress.qml", {"titleStr": title, "reqTimeMs": operationTimeMaxMs, "timerStart": true})
     }
 }

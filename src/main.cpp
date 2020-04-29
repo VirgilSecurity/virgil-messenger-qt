@@ -48,5 +48,11 @@ main(int argc, char *argv[]) {
 
     QGuiApplication a(argc, argv);
 
-    return VSQApplication().run();
+    QString baseUrl;
+    if (2 == argc && argv[1] && argv[1][0]) {
+        baseUrl = QString::fromLocal8Bit(argv[1]);
+        qDebug() << "QML URL: " << baseUrl;
+    }
+
+    return VSQApplication().run(baseUrl);
 }

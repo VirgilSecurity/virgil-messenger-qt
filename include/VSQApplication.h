@@ -47,8 +47,10 @@ public:
     virtual ~VSQApplication() = default;
 
     int
-    run();
+    run(const QString &basePath);
 
+    Q_INVOKABLE
+    void reloadQml();
 
 private slots:
 #if VS_IOS
@@ -57,6 +59,7 @@ private slots:
 #endif // VS_IOS
 
 private:
+    QQmlApplicationEngine m_engine;
     VSQMessenger m_messenger;
     QSharedPointer<VSQUdpBroadcast> m_netifUDPbcast;
 };

@@ -1,14 +1,15 @@
 pragma Singleton
 
 import QtQuick 2.0
+import QtQuick.Window 2.2
 
 QtObject {
     // colors
-    readonly property color mainBackgroundColor : "#000000"
+    readonly property color mainBackgroundColor : "#13191C"
     readonly property color contactsBackgroundColor : "#202A2F"
     readonly property color color : "#FF0000"
-    readonly property color buttonPrimaryColor: "#37474F"
-    readonly property color brandColor: "#D32F2F"
+    readonly property color buttonPrimaryColor: "#D32F2F"
+    readonly property color brandColor: "white"
     readonly property color primaryTextColor: "#FFFFFF"
     readonly property color secondaryTextColor: "#B0BEC5"
     readonly property color labelColor: "#6F828C"
@@ -19,6 +20,8 @@ QtObject {
     readonly property color messegeCountColor: "#F44336"
     readonly property color contactPressedColor: "#455A64"
     readonly property color menuSeparatorColor: "#90A4AE"
+    readonly property color inputBackgroundColor: "#37474F"
+    readonly property color toolbarSepratatorColor: "#263238"
 
 
     // sizes
@@ -27,7 +30,7 @@ QtObject {
     readonly property real avatarRadius: avatarWidth / 2
 
     // icons
-    readonly property url mainLogo: "../resources/icons/Logo-Big.svg"
+    readonly property url mainLogo: "../resources/icons/Logo-Big.png"
 
     // texts
     readonly property string mainLogoText: "virgil"
