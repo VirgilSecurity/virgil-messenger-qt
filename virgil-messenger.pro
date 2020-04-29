@@ -37,7 +37,8 @@ QT += core network qml quick bluetooth sql xml concurrent
 CONFIG += c++14
 
 TARGET = virgil-messenger
-macx: QMAKE_INFO_PLIST = src/virgil-messenger.plist
+
+VERSION = $$cat($$PWD/VERSION_MESSENGER)
 
 #
 #   Include IoTKit Qt wrapper
@@ -96,12 +97,6 @@ SOURCES += \
 RESOURCES += src/resources.qrc
 
 #
-#   Icons
-#
-
-QT += svg xml
-
-#
 #   Include path
 #
 
@@ -144,6 +139,15 @@ DEPENDPATH += $${INCLUDEPATH}
 
 message("ANDROID_TARGET_ARCH = $$ANDROID_TARGET_ARCH")
 
+#
+#   macOS specific
+#
+macx: QMAKE_INFO_PLIST = $$PWD/platforms/macos/virgil-messenger.plist
+
+
+#
+#   Android specific
+#
 android: {
     DEFINES += ANDROID=1
     LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
@@ -154,15 +158,15 @@ android: {
         $$LIBS_DIR/libssl_1_1.so
 
     ANDROID_PACKAGE_SOURCE_DIR = \
-        $$PWD/android
+        $$PWD/platforms/android
 
     DISTFILES += \
-        android/AndroidManifest.xml \
-        android/build.gradle \
-        android/gradle/wrapper/gradle-wrapper.jar \
-        android/gradle/wrapper/gradle-wrapper.properties \
-        android/gradlew \
-        android/gradlew.bat \
-        android/res/values/libs.xml
+        platforms/android/AndroidManifest.xml \
+        platforms/android/build.gradle \
+        platforms/android/gradle/wrapper/gradle-wrapper.jar \
+        platforms/android/gradle/wrapper/gradle-wrapper.properties \
+        platforms/android/gradlew \
+        platforms/android/gradlew.bat \
+        platforms/android/res/values/libs.xml
 }
 
