@@ -9,6 +9,8 @@ StackView {
 
     initialItem: Qt.createComponent("./login/Authentication.qml")
 
+    property var chatWorkspace
+
     function back() {
         pop()
     }
@@ -27,11 +29,24 @@ StackView {
 
     function signIn(user) {
         if (LoginLogic.validateUser(user)) {
+            if (!chatWorkspace) chatWorkspace = Qt.createComponent("./ChatWorkspace.qml")
             Messenger.signIn(user)
             showPopupInform("Sign In ...")
-            replace(Qt.createComponent("./ChatWorkspace.qml"))
+            replace(chatWorkspace)
         } else {
             root.showPopupError(qsTr("Incorrect user name"))
+        }
+    }
+
+    // Sign up
+    function signUp(user) {
+        if (LoginLogic.validateUser(user)) {
+            if (!chatWorkspace) chatWorkspace = Qt.createComponent("./ChatWorkspace.qml")
+            Messenger.signUp(user)
+            showPopupInform("Sign Up ...")
+            replace(chatWorkspace)
+        } else {
+            showPopupError(qsTr("Incorrect user name"))
         }
     }
 
@@ -39,5 +54,10 @@ StackView {
         Messenger.logout()
 
         showAuthentication()
+    }
+
+    function showUserSettings() {
+         console.log('chatWorkspace.focus', chatWorkspace)
+        chatWorkspace.createObject(parent).showUserSettings()
     }
 }

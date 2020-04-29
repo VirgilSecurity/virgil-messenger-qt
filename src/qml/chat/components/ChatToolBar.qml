@@ -76,7 +76,7 @@ ToolBar {
 
                     Action {
                         text: qsTr("Settings")
-                        onTriggered: showSettings()
+                        onTriggered: screenManager.showUserSettings()
                     }
 
                     MenuSeparator {

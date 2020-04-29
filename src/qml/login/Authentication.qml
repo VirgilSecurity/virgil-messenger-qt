@@ -31,7 +31,6 @@ Page {
 
             Action {
                 text: qsTr("Settings")
-                onTriggered: showSettings()
             }
         }
     }

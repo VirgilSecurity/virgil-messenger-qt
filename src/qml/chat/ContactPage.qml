@@ -57,6 +57,7 @@ import "./components"
 import "../components"
 
 Page {
+
     background: Rectangle {
         color: Theme.contactsBackgroundColor
     }

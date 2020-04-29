@@ -29,6 +29,7 @@ ApplicationWindow {
     property color toolbarColor: "#455462"
     property int   toolbarHeight: 40
 
+    property real maxMobileWidth: 640
     property bool mobileView: false
 
     // Mobile View Pages
@@ -169,26 +170,12 @@ ApplicationWindow {
 
     // View mode detection
     function isMobileView() {
-        var _minSz = 640
 
         if (root.mobileView) {
             return true;
         }
 
-        return root.width < _minSz;
+        return root.width < root.maxMobileWidth;
     }
 
-
-
-    // Sign up
-    function signUpUser(user) {
-        if (LoginLogic.validateUser(user)) {
-            Messenger.signUp(user)
-            showPopupInform("Sign Up ...")
-            mobileView.replace(contactPage)
-            desktopView.mode = desktopView.kModeNormal
-        } else {
-            showPopupError(qsTr("Incorrect user name"))
-        }
-    }
 }

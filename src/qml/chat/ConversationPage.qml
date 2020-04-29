@@ -53,7 +53,7 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
 
 Page {
-
+    anchors.fill: parent
    //
     //  Properties
     //
@@ -61,7 +61,7 @@ Page {
     property string bgColor: backGroundColor
 
     background: Rectangle {
-        color: bgColor
+        color: "#5D6D7E"
     }
 
     header: ConversationToolBar {
