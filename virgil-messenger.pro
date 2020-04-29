@@ -115,8 +115,9 @@ unix:mac: {
     LIBS += -framework Sparkle -framework CoreFoundation
     INCLUDEPATH += $$SPARKLE_LOCATION/Sparkle.framework/Headers
 
-    DST_DLL = $${OUT_PWD}/$${TARGET}.app/Contents/Frameworks
-    QMAKE_POST_LINK += $$quote(cp -R $$PREBUILT_PATH/$${OS_NAME}/sparkle/Sparkle.framework $${DST_DLL}/$$escape_expand(\n\t))
+    sparkle.path = Contents/Frameworks
+    sparkle.files = $$SPARKLE_LOCATION/Sparkle.framework
+    QMAKE_BUNDLE_DATA += sparkle
 }
 
 
