@@ -74,7 +74,7 @@ HEADERS += \
         include/VSQSqlContactModel.h \
         include/VSQSqlConversationModel.h \
         include/android/VSQAndroid.h \
-        include/mac/VSQMacos.h \
+        include/macos/VSQMacos.h \
         include/ui/VSQUiHelper.h
 
 #
@@ -107,12 +107,13 @@ INCLUDEPATH +=  include \
 #   Sparkle framework
 #
 unix:mac: {
-    OBJECTIVE_SOURCES += src/mac/VSQMacos.mm
+    OBJECTIVE_SOURCES += src/macos/VSQMacos.mm
     DEFINES += MACOS=1
     SPARKLE_LOCATION=$$PREBUILT_PATH/$${OS_NAME}/sparkle
     message("SPARKLE LOCATION = $$SPARKLE_LOCATION")
     QMAKE_LFLAGS  += -F$$SPARKLE_LOCATION
-    LIBS += -framework Sparkle
+    LIBS += -framework Sparkle -framework CoreFoundation
+    INCLUDEPATH += $$SPARKLE_LOCATION/Sparkle.framework/Headers
 
     DST_DLL = $${OUT_PWD}/$${TARGET}.app/Contents/Frameworks
     QMAKE_POST_LINK += $$quote(cp -R $$PREBUILT_PATH/$${OS_NAME}/sparkle/Sparkle.framework $${DST_DLL}/$$escape_expand(\n\t))

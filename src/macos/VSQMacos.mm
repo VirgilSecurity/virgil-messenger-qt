@@ -36,11 +36,20 @@
 
 #include <QtCore>
 
-#include "mac/VSQMacos.h"
+#include <Sparkle.h>
+#include <SUUpdater.h>
+
+#include "macos/VSQMacos.h"
 
 /******************************************************************************/
 void VSQMacos::checkUpdates() {
+    [[SUUpdater sharedUpdater] checkForUpdates:nil];
+}
 
+/******************************************************************************/
+void VSQMacos::checkUpdatesBackground() {
+    [[SUUpdater sharedUpdater] setUpdateCheckInterval:3600];
+    [[SUUpdater sharedUpdater] checkForUpdatesInBackground];
 }
 
 /******************************************************************************/

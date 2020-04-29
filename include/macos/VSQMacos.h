@@ -43,6 +43,8 @@ class VSQMacos {
 public:
     VSQMacos() = delete;
 
+    static void checkUpdatesBackground();
+
     static void checkUpdates();
 };
 
