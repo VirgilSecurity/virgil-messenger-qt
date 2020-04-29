@@ -8,9 +8,9 @@ import "helpers/ui"
 import "theme"
 
 ApplicationWindow {
-    id: rootWindow
+    id: root
     visible: true
-    title: qsTr("Virgil IoTKit Qt Demo")
+    title: qsTr("Virgil Messenger")
     minimumWidth: 320
     minimumHeight: 500
 
@@ -46,11 +46,7 @@ ApplicationWindow {
         onFireError: {
             showPopupError(errorText)
 
-            // Mobile
-            mobileView.replace(authenticationPage)
-
-            // Desktop
-            desktopView.mode = desktopView.kModeLogin
+            screenManager.showAuthentication()
         }
 
         onFireInform: {
@@ -75,40 +71,43 @@ ApplicationWindow {
     }
 
     Shortcut {
-        sequence: "F5"
+        sequence: StandardKey.Refresh
         onActivated: {
             Messenger.logout()
-            rootWindow.close()
+            root.close()
             app.reloadQml()
         }
     }
 
     // After loading show initial Login Page
     Component.onCompleted: {
-        contactPage = Qt.createComponent("chat/ContactPage.qml")
-        authenticationPage = Qt.createComponent("login/Authentication.qml")
-        settingsPage = Qt.createComponent("settings/SettingsPage.qml")
+        screenManager.signIn("xlwknx")
+//        contactPage = Qt.createComponent("chat/ContactPage.qml")
+//        authenticationPage = Qt.createComponent("login/Authentication.qml")
+//        settingsPage = Qt.createComponent("settings/SettingsPage.qml")
 
-        mobileView.replace(authenticationPage)
+//        mobileView.replace(authenticationPage)
     }
 
     //
     //  UI
     //
 
+    ScreenManager {
+        id: screenManager
+    }
+
     // Mobile view
-    MobileView {
-        id: mobileView
-        visible: isMobileView()
-    }
+//    MobileView {
+//        id: mobileView
+//        visible: isMobileView()
+//    }
 
-    // Desktop view
-    DesktopView {
-        id: desktopView
-        visible: !isMobileView()
-    }
-
-
+//    // Desktop view
+//    DesktopView {
+//        id: desktopView
+//        visible: !isMobileView()
+//    }
 
     // Popup to show messages or warnings on the bottom postion of the screen
     Popup {
@@ -143,16 +142,6 @@ ApplicationWindow {
         showPopup(message, "#66CDAA", "#00", true, false)
     }
 
-    // Show chat with
-    function showChat(contact) {
-        ConversationsModel.recipient = contact
-
-        // Mobile
-        mobileView.replace("chat/ConversationPage.qml", { inConversationWith: contact })
-
-        // Desktop
-        desktopView.chatView.inConversationWith = contact
-    }
 
     // Show contacts
     function showContacts() {
@@ -177,39 +166,19 @@ ApplicationWindow {
         desktopView.mode = desktopView.kModeNormal
     }
 
-    // Logout
-    function logout() {
-        Messenger.logout()
-
-        // Mobile
-        mobileView.replace(loginPage)
-
-        // Desktop
-        desktopView.mode = desktopView.kModeLogin
-    }
 
     // View mode detection
     function isMobileView() {
         var _minSz = 640
 
-        if (rootWindow.mobileView) {
+        if (root.mobileView) {
             return true;
         }
 
-        return rootWindow.width < _minSz;
+        return root.width < _minSz;
     }
 
-    // Sign in
-    function signInUser(user) {
-        if (LoginLogic.validateUser(user)) {
-            Messenger.signIn(user)
-            showPopupInform("Sign In ...")
-            mobileView.replace(contactPage)
-            desktopView.mode = desktopView.kModeNormal
-        } else {
-            showPopupError(qsTr("Incorrect user name"))
-        }
-    }
+
 
     // Sign up
     function signUpUser(user) {

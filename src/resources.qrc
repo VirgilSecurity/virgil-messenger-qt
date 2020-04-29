@@ -59,5 +59,8 @@
         <file>qml/resources/icons/More.png</file>
         <file>qml/resources/icons/More@2x.png</file>
         <file>qml/helpers/ui/SettingsButton.qml</file>
+        <file>qml/ScreenManager.qml</file>
+        <file>qml/ChatWorkspace.qml</file>
+        <file>qml/chat/DesktopChat.qml</file>
     </qresource>
 </RCC>

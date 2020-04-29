@@ -53,9 +53,8 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
 
 Page {
-    id: root
 
-    //
+   //
     //  Properties
     //
     property string inConversationWith

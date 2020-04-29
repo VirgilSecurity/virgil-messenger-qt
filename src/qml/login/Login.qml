@@ -56,7 +56,7 @@ Page {
 
             PrimaryButton {
                 text: qsTr("Sign In")
-                onClicked: signInUser(username.text)
+                onClicked: screenManager.signIn(username.text)
                 Layout.fillWidth: true
                 Layout.topMargin: 15
             }
