@@ -11,30 +11,13 @@ PREBUILT_ARCHIVE="https://bintray.com/virgilsecurity/iotl-demo-cdn/download_file
 
 export INSTALL_DIR="${SCRIPT_FOLDER}/../ext/"
 
-#***************************************************************************************
-check_error() {
-    RETRES=$?
-    if [ $RETRES != 0 ]; then
-        echo "----------------------------------------------------------------------"
-        echo "############# !!! PROCESS ERROR ERRORCODE=[$RETRES]  #################"
-        echo "----------------------------------------------------------------------"
-        [ "$1" == "0" ] || exit $RETRES
-    else
-        echo "-----# Process OK. ---------------------------------------------------"
-    fi
-    return $RETRES
-}
 
 #*************************************************************************************************************
 
-echo
-echo "=== CORE VERSION = ${CORE_VER}"
-echo
+print_message "CORE VERSION = ${CORE_VER}"
 
 if [ -d ${INSTALL_DIR}/prebuilt ] && [ "${PREBUILT_SKIP}" == "true" ]; then
- echo 
- echo "=== Prebuild libraries found. Download skipped"
- echo 
+ print_message "Prebuild libraries found. Download skipped"
  exit 0
 fi
 

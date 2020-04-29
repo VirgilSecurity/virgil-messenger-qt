@@ -29,7 +29,8 @@ DISTRIBUTION_XML="/tmp/distribution.xml"
 DMG_ICON="Installer.icns"
 APP_ICON="MyIcon.icns"
 
-ENTITLEMENTS="/tmp/MacSandbox-Entitlements.plist"
+# not used
+# ENTITLEMENTS="/tmp/MacSandbox-Entitlements.plist"
 APPDMG_SPEC="/tmp/spec.json"
 
 # Sparkle
@@ -74,18 +75,13 @@ function sign_bundle() {
 
 	pushd ${BUNDLE}
 
-	echo
-	echo "=== Remove dSYM files"
-	echo
-	for i in $(find . -name "*.dSYM"); do
-		rm -rf "${i}"
-	done
+	print_message "Remove dSYM files"
 
+	find . -name "*.dSYM"  -exec rm -rf {} \;
 	popd
 
-	echo
-	echo "=== Sign bundle"
-	echo
+	print_message "Sign bundle"
+
 	codesign --deep --force --verify --verbose --sign "${CERT_ID}" --options runtime "${BUNDLE}"
 }
 
@@ -97,8 +93,7 @@ function build_project() {
 
 	prepare_dir
 
-	echo
-	echo "=== Build application bundle"
+	print_message "Build application bundle"
 
 	pushd ${BUILD_DIR}
 
@@ -110,32 +105,25 @@ function build_project() {
 	make -j10
 	check_error
 
-	echo
-	echo "=== Deploy MAC application"
-	echo
+	print_message "Deploy MAC application"
 
-	${MACDEPLOYQT_BIN} ${APPLICATION_NAME}.app \
-		-qmldir=${PROJECT_DIR}/src/qml
+	${MACDEPLOYQT_BIN} ${APPLICATION_NAME}.app -qmldir=${PROJECT_DIR}/src/qml
 
-	echo
-	echo "=== Sign Autoupdate"
-	echo
+	print_message "Sign Autoupdate"
+
 	AUTOUPDATE_APP="${BUILD_DIR}/${APPLICATION_NAME}.app/Contents/Frameworks/Sparkle.framework/Resources/Autoupdate.app"
 	sign_file "${AUTOUPDATE_APP}/Contents/MacOS/Autoupdate"
 	sign_file "${AUTOUPDATE_APP}/Contents/MacOS/fileop"
 
-	echo
-	echo "=== Sign Main application"
-	echo
+	print_message  "Sign Main application"
+
 	MAIN_APP="${BUILD_DIR}/${APPLICATION_NAME}.app"
 	sign_file "${MAIN_APP}/Contents/MacOS/${APPLICATION_NAME}"
 	sign_bundle "${MAIN_APP}"
 
-	echo
-	echo "=== Set app file properties"
-	echo
-	echo "hideExtention ${APP_BUNDLE}"
-	hideExtention "${APP_BUNDLE}"
+	# set on: Extension is hidden (allowed on folders)
+	print_message "Set app file properties for ${APP_BUNDLE}"
+	SetFile -a E  "${APP_BUNDLE}"
 
 	setIcon "${IMAGES_FOLDER}" "${APP_ICON}" "${BUILD_DIR}/${APP_BUNDLE}"
 }
@@ -160,10 +148,6 @@ function create_appdmg_spec() {
 EOT
 }
 
-#***************************************************************************************
-function hideExtention() {
-	SetFile -a E "${1}"
-}
 
 #***************************************************************************************
 function setIcon() {
@@ -185,22 +169,27 @@ function create_dmg() {
 }
 #***************************************************************************************
 function notarize_dmg() {
-	echo
-	echo "=== Send Application for Apple's notarization"
-	echo
+
+	print_message "Send Application for Apple's notarization"
+
 	NOTARIZE_OUTPUT=$(xcrun altool -t osx -f "${DMG_FILE}" --primary-bundle-id "${PKG_IDENTIFIER}" --notarize-app --username ${USER_NAME} -p ${PASS} 2>&1)
 	check_error
+
+	echo "NOTARIZE_OUTPUT: $NOTARIZE_OUTPUT"
+	
 	NOTARIZE_ID=$(echo ${NOTARIZE_OUTPUT} | tr -d "\n" | grep -F 'No errors uploading' | awk -F 'RequestUUID' '{print $2}' | awk -F ' ' '{print $2}')
 	check_error
 
 	echo "NOTARIZE_ID = ${NOTARIZE_ID}"
 
-	echo
-	echo "=== Get result of notarization"
-	echo
+	print_message "Get result of notarization"
+
 	NOTARIZATION_DONE="false"
-	for ((count = 1; count < 20; count++)); do
-		echo "Wait .. ${count} of 20"
+
+	count_max=20
+
+	for count in $(seq 1 ${count_max} ); do
+		echo "Wait .. ${count} of ${count_max}"
 		sleep 10s
 		INFO_OUTPUT=$(xcrun altool --notarization-info "${NOTARIZE_ID}" --username ${USER_NAME} -p ${PASS} 2>&1 | tr -d "\n")
 
@@ -221,9 +210,8 @@ function notarize_dmg() {
 		exit 1
 	fi
 
-	echo
-	echo "=== Staple result of the notarization"
-	echo
+	print_message "Staple result of the notarization"
+
 	STAMPLE_OUTPUT=$(xcrun stapler staple -v "${DMG_FILE}" 2>&1 | tr -d "\n")
 
 	if echo ${STAMPLE_OUTPUT} | grep -q -F 'The staple and validate action worked!'; then

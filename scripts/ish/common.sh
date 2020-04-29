@@ -31,6 +31,8 @@ function check_error() {
     return $RETRES
 }
 
+# export function definitions to sub-shell
+export -f check_error
 #***************************************************************************************
 function print_title() {
     echo
@@ -42,6 +44,15 @@ function print_title() {
     echo "===================================="
     echo
 }
+
+
+function print_message() {
+	echo
+	echo "=== $1"
+	echo
+}
+
+export -f print_message
 
 #***************************************************************************************
 function prepare_dir() {
