@@ -43,7 +43,7 @@ build_proc() {
     ${ANDROID_MAKE} INSTALL_ROOT=${BUILD_DIR}/android-build install
     check_error
 
-    ${ANDROID_DEPLOY_QT} --release --input ${BUILD_DIR}/android-lib${APPLICATION_NAME}.so-deployment-settings.json --output ${BUILD_DIR}/android-build --android-platform ${ANDROID_PLATFORM} --gradle
+    ${ANDROID_DEPLOY_QT} --input ${BUILD_DIR}/android-lib${APPLICATION_NAME}.so-deployment-settings.json --output ${BUILD_DIR}/android-build --android-platform ${ANDROID_PLATFORM} --gradle
     check_error
     popd
 }
