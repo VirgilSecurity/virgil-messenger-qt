@@ -113,6 +113,7 @@ Page {
                             anchors.margins: 12
                             wrapMode: Text.WordWrap
                             selectByMouse: true
+                            readOnly: true
 
                             text: isValidURL(message) ? ("<a href='"+message+"'>"+message+"</a>") : message
                             onLinkActivated:{
