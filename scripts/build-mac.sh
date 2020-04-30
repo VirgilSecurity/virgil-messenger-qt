@@ -195,8 +195,8 @@ function notarize_dmg() {
 	echo "=== Get result of notarization"
 	echo
 	NOTARIZATION_DONE="false"
-	for ((count = 1; count < 20; count++)); do
-		echo "Wait .. ${count} of 20"
+	for ((count = 1; count < 40; count++)); do
+		echo "Wait .. ${count} of 40"
 		sleep 10s
 		INFO_OUTPUT=$(xcrun altool --notarization-info "${NOTARIZE_ID}" --username ${USER_NAME} -p ${PASS} 2>&1 | tr -d "\n")
 
