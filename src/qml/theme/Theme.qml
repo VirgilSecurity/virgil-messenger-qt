@@ -3,7 +3,17 @@ pragma Singleton
 import QtQuick 2.0
 import QtQuick.Window 2.2
 
-QtObject {
+Item {
+    FontLoader {
+        id: robotoRegular
+        source: "../resources/fonts/Roboto-Medium.ttf"
+    }
+
+    FontLoader {
+        id: robotoBold
+        source: "../resources/fonts/Roboto-Bold.ttf"
+    }
+
     // colors
     readonly property color mainBackgroundColor : "#13191C"
     readonly property color contactsBackgroundColor : "#202A2F"
@@ -33,8 +43,9 @@ QtObject {
     readonly property url mainLogo: "../resources/icons/Logo-Big.png"
 
     // texts
-    readonly property string mainLogoText: "virgil"
-    readonly property string mainFont: "Roboto"
+    readonly property string mainLogoText: "Virgil"
+    readonly property string mainFont: robotoRegular.name
+    readonly property string mainFontBold: robotoBold.name
 }
 
 
