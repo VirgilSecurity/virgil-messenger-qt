@@ -6,34 +6,40 @@
 SCRIPT_FOLDER="$(cd "$(dirname "$0")" && pwd)"
 source ${SCRIPT_FOLDER}/ish/common.sh
 
-PLATFORM=mac
-BUILD_DIR=${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.${PLATFORM}/
-QMAKE_BIN=${QT_SDK_DIR}/clang_64/bin/qmake
-MACDEPLOYQT_BIN=${QT_SDK_DIR}/clang_64/bin/macdeployqt
-
-MESSENGER_BUNDLE_NAME="VirgilMessenger"
-
-RESULT_FOLDER="${BUILD_DIR}/Release"
-APP_BUNDLE="${APPLICATION_NAME}.app"
-DMG_FILE=${BUILD_DIR}/${APPLICATION_NAME}.dmg
-
-DMG_PREPARE_FOLDER="${BUILD_DIR}/DMG"
-
-DMG_PACK_FOLDER="${MESSENGER_BUNDLE_NAME}"
-
-IMAGES_FOLDER="${SCRIPT_FOLDER}/macos/pkg_resources"
-ICON_FILE=""
-BACKGROUND_FILE="Background.png"
-PKG_IDENTIFIER="com.virgilsecurity.messenger"
-DISTRIBUTION_XML="/tmp/distribution.xml"
-DMG_ICON="Installer.icns"
-APP_ICON="MyIcon.icns"
-
-APPDMG_SPEC="/tmp/spec.json"
+#
+#	General variables
+#
+PLATFORM="mac"
+BUILD_DIR="${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.${PLATFORM}"
+QMAKE_BIN="${QT_SDK_DIR}/clang_64/bin/qmake"
+MACDEPLOYQT_BIN="${QT_SDK_DIR}/clang_64/bin/macdeployqt"
+APPCAST_BIN="${PROJECT_DIR}/ext/prebuilt/macos/sparkle/bin/generate_appcast"
 
 # Sparkle
 SUFeedURL="${SUFeedURL:-""}"
 SUPublicEDKey="${SUPublicEDKey:-""}"
+
+#
+#	Resources
+#
+IMAGES_FOLDER="${SCRIPT_FOLDER}/macos/pkg_resources"
+BACKGROUND_FILE="Background.png"
+DMG_ICON="Installer.icns"
+APP_ICON="MyIcon.icns"
+
+#
+#	DMG maker
+#
+APPDMG_SPEC="/tmp/spec.json"
+PKG_IDENTIFIER="com.virgilsecurity.messenger"
+
+#
+#	Results
+#
+APP_BUNDLE="${APPLICATION_NAME}.app"
+DMG_FILE="${BUILD_DIR}/${APPLICATION_NAME}.dmg"
+UPDATE_DIR="${BUILD_DIR}/update"
+RELEASE_NOTES="${PROJECT_DIR}/release-notes.html"
 
 #***************************************************************************************
 function check_env() {
@@ -225,9 +231,25 @@ function notarize_dmg() {
 }
 
 #***************************************************************************************
+function prepare_update() {
+	new_dir "${UPDATE_DIR}"
+
+	cp "${RELEASE_NOTES}" "${UPDATE_DIR}/${APPLICATION_NAME}-${VERSION}.html"
+	check_error
+
+	cp "${DMG_FILE}" "${UPDATE_DIR}/${APPLICATION_NAME}-${VERSION}.dmg"
+	check_error
+
+	rm -rf "${HOME}/Library/Caches/Sparkle_generate_appcast" || true
+
+	"${APPCAST_BIN}" "${UPDATE_DIR}"
+}
+
+#***************************************************************************************
 
 check_env
 "${SCRIPT_FOLDER}/generate-mac-plist.sh" "${SUFeedURL}" "${SUPublicEDKey}"
 build_project
 create_dmg
 notarize_dmg
+prepare_update
