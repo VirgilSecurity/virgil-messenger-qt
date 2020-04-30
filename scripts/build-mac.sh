@@ -117,14 +117,14 @@ function build_project() {
 	echo "=== Sign Autoupdate"
 	echo
 	AUTOUPDATE_APP="${BUILD_DIR}/${APPLICATION_NAME}.app/Contents/Frameworks/Sparkle.framework/Resources/Autoupdate.app"
-	sign_file "${AUTOUPDATE_APP}/Contents/MacOS/Autoupdate"
-	sign_file "${AUTOUPDATE_APP}/Contents/MacOS/fileop"
+	sign_file "${AUTOUPDATE_APP}/Contents/macos/Autoupdate"
+	sign_file "${AUTOUPDATE_APP}/Contents/macos/fileop"
 
 	echo
 	echo "=== Sign Main application"
 	echo
 	MAIN_APP="${BUILD_DIR}/${APPLICATION_NAME}.app"
-	sign_file "${MAIN_APP}/Contents/MacOS/${APPLICATION_NAME}"
+	sign_file "${MAIN_APP}/Contents/macos/${APPLICATION_NAME}"
 	sign_bundle "${MAIN_APP}"
 
 	echo
