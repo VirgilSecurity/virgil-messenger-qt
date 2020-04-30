@@ -8,12 +8,12 @@ source ${SCRIPT_FOLDER}/ish/common.sh
 
 PLATFORM=linux-mingw
 BUILD_DIR=${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.${PLATFORM}/
-LINUX_QMAKE="${QT_SDK_DIR}/mingw32/bin/qmake"
+LINUX_QMAKE="${QT_SDK_DIR}/mingw64/bin/qmake"
 
 #***************************************************************************************
 print_title
 
-prepare_libraries
+#prepare_libraries
 
 prepare_dir
 
@@ -21,7 +21,7 @@ echo
 echo "=== Build application bundle"
 
 pushd ${BUILD_DIR}
-${LINUX_QMAKE} -config ${BUILD_TYPE} ${PROJECT_DIR} -spec win32-x-g++
+${LINUX_QMAKE} -config ${BUILD_TYPE} ${PROJECT_DIR} -spec win64-x-g++
 check_error
 
 make -j10
@@ -29,9 +29,13 @@ check_error
 
 echo
 echo "== Deploying application"
+echo ${LINUX_QMAKE}
+echo 
 echo
-cqtdeployer -bin ${BUILD_DIR}/release/${APPLICATION_NAME}.exe -qmlDir ${PROJECT_DIR}/src/qml -qmake ${LINUX_QMAKE} clear
+cqtdeployer -bin ${BUILD_DIR}/release/${APPLICATION_NAME}.exe -qmlDir ${PROJECT_DIR}/src/qml  -qmake ${LINUX_QMAKE} clear
 check_error
+
+exit 1
 
 echo "=== Copy libvs-messenger-internal.dll "
 cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/libvs-messenger-internal.dll DistributionKit/lib
@@ -58,35 +62,35 @@ sed -i 's/start/SET VS_CURL_CA_BUNDLE=%BASE_DIR%\/ca\/curl-ca-bundle-win.crt\nst
 check_error
 
 echo "=== Copy libcrypto-10.dll"
-cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libcrypto-10.dll DistributionKit/lib
+#cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libcrypto-10.dll DistributionKit/lib
 check_error
 
 echo "=== Copy libcurl-4.dll"
-cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libcurl-4.dll DistributionKit/lib
+#cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libcurl-4.dll DistributionKit/lib
 check_error
 
 echo "=== Copy libgcc_s_sjlj-1.dll"
-cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libgcc_s_sjlj-1.dll DistributionKit/lib
+#cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libgcc_s_sjlj-1.dll DistributionKit/lib
 check_error
 
 echo "=== Copy libcrypto-10.dll"
-cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libcrypto-10.dll DistributionKit/lib
+#cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libcrypto-10.dll DistributionKit/lib
 check_error
 
 echo "=== Copy libssl-10.dll"
-cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libssl-10.dll DistributionKit/lib
+#cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libssl-10.dll DistributionKit/lib
 check_error
 
 echo "=== Copy libssh2-1.dll"
-cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libssh2-1.dll DistributionKit/lib
+#cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libssh2-1.dll DistributionKit/lib
 check_error
 
 echo "=== Copy libidn2-0.dll"
-cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libidn2-0.dll DistributionKit/lib
+#cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libidn2-0.dll DistributionKit/lib
 check_error
 
 echo "=== Copy zlib1.dll"
-cp /usr/i686-w64-mingw32/sys-root/mingw/bin/zlib1.dll DistributionKit/lib
+#cp /usr/i686-w64-mingw32/sys-root/mingw/bin/zlib1.dll DistributionKit/lib
 check_error
 
 echo "=== Copy certs "
