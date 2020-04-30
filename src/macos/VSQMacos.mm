@@ -48,7 +48,7 @@ void VSQMacos::checkUpdates() {
 
 /******************************************************************************/
 void VSQMacos::checkUpdatesBackground() {
-    [[SUUpdater sharedUpdater] setUpdateCheckInterval:3600];
+    [[SUUpdater sharedUpdater] setUpdateCheckInterval:600];
     [[SUUpdater sharedUpdater] checkForUpdatesInBackground];
 }
 
