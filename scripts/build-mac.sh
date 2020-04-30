@@ -29,22 +29,11 @@ DISTRIBUTION_XML="/tmp/distribution.xml"
 DMG_ICON="Installer.icns"
 APP_ICON="MyIcon.icns"
 
-# not used
-# ENTITLEMENTS="/tmp/MacSandbox-Entitlements.plist"
 APPDMG_SPEC="/tmp/spec.json"
 
 # Sparkle
 SUFeedURL="${SUFeedURL:-""}"
 SUPublicEDKey="${SUPublicEDKey:-""}"
-
-
-#***************************************************************************************
-function fill_plist() {
-  echo
-  echo "=== Fill Info.plist for sparkle"
-  sed -e "s,@SUFeedURL@,${SUFeedURL},g" -e "s,@SUPublicEDKey@,${SUPublicEDKey},g" ${SCRIPT_FOLDER}/../src/virgil-messenger.plist.in > ${SCRIPT_FOLDER}/../src/virgil-messenger.plist
-  check_error
-}
 
 #***************************************************************************************
 function check_env() {
@@ -97,9 +86,9 @@ function build_project() {
 
 	pushd ${BUILD_DIR}
 
-	${QMAKE_BIN} -config ${BUILD_TYPE} ${PROJECT_DIR} DEFINES+="VERSION=\"${VERSION}\""
+	${QMAKE_BIN} -config ${BUILD_TYPE} ${PROJECT_DIR} VERSION="${VERSION}"
 	check_error
-	
+
 	make clean
 
 	make -j10
@@ -225,7 +214,7 @@ function notarize_dmg() {
 #***************************************************************************************
 
 check_env
-fill_plist
+"${SCRIPT_FOLDER}/generate-mac-plist.sh" "${SUFeedURL}" "${SUPublicEDKey}"
 build_project
 create_dmg
 notarize_dmg

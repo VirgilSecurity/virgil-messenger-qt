@@ -36,12 +36,17 @@
 #include <iostream>
 
 #include <android/VSQAndroid.h>
+#include <macos/VSQMacos.h>
 
 int
 main(int argc, char *argv[]) {
 
 #if (ANDROID)
     VSQAndroid::prepare();
+#endif
+
+#if (MACOS)
+    VSQMacos::checkUpdatesBackground();
 #endif
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
