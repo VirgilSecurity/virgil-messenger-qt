@@ -38,7 +38,13 @@ CONFIG += c++14
 
 TARGET = virgil-messenger
 
-VERSION = $$cat($$PWD/VERSION_MESSENGER)
+#
+#   Set version
+#
+isEmpty(VERSION) {
+    VERSION = $$cat($$PWD/VERSION_MESSENGER)
+}
+message("VERSION = $$VERSION")
 
 #
 #   Include IoTKit Qt wrapper
@@ -58,7 +64,8 @@ message("QXMPP location : $${QXMPP_BUILD_PATH}")
 
 DEFINES += QT_DEPRECATED_WARNINGS \
         INFO_CLIENT=1 \
-        CFG_CLIENT=1
+        CFG_CLIENT=1 \
+        VERSION="$$VERSION"
 
 CONFIG(iphoneos, iphoneos | iphonesimulator) {
     DEFINES += VS_IOS=1
@@ -112,7 +119,7 @@ unix:mac: {
     SPARKLE_LOCATION=$$PREBUILT_PATH/$${OS_NAME}/sparkle
     message("SPARKLE LOCATION = $$SPARKLE_LOCATION")
     QMAKE_LFLAGS  += -F$$SPARKLE_LOCATION
-    LIBS += -framework Sparkle -framework CoreFoundation
+    LIBS += -framework Sparkle -framework CoreFoundation -framework Foundation
     INCLUDEPATH += $$SPARKLE_LOCATION/Sparkle.framework/Headers
 
     sparkle.path = Contents/Frameworks

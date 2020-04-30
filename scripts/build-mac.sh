@@ -92,7 +92,7 @@ function build_project() {
 
 	pushd ${BUILD_DIR}
 
-	${QMAKE_BIN} -config ${BUILD_TYPE} ${PROJECT_DIR} DEFINES+="VERSION=\"${VERSION}\""
+	${QMAKE_BIN} -config ${BUILD_TYPE} ${PROJECT_DIR} VERSION="${VERSION}"
 	check_error
 
 	make clean

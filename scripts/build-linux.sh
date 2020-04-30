@@ -23,7 +23,7 @@ echo "=== Build application bundle"
 
 pushd "${BUILD_DIR}"
 
-${LINUX_QMAKE} -config ${BUILD_TYPE} ${PROJECT_DIR} DEFINES+="VERSION=\"${VERSION}\""
+${LINUX_QMAKE} -config ${BUILD_TYPE} ${PROJECT_DIR} VERSION="${VERSION}"
 check_error
 
 make -j10
