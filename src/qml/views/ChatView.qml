@@ -26,7 +26,7 @@ Page {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            visible: isChatLayoutStackShown()
+            visible: isChatViewStackShown()
 
             property alias chatView: chatView
             initialItem: chatView
@@ -64,7 +64,7 @@ Page {
         return !isMobileView() || isMobileView() && !isChatSelected();
     }
 
-    function isChatLayoutStackShown() {
+    function isChatViewStackShown() {
         return !isMobileView() || isMobileView() && isChatSelected();
     }
 

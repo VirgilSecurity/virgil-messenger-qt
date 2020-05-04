@@ -20,8 +20,8 @@
         <file>qml/iot/Title.qml</file>
         <file>qml/js/chat.js</file>
         <file>qml/js/login.js</file>
-        <file>qml/layouts/ChatLayout.qml</file>
-        <file>qml/layouts/MainLayout.qml</file>
+        <file>qml/views/ChatView.qml</file>
+        <file>qml/views/MainView.qml</file>
         <file>qml/pages/AccountSettingsPage.qml</file>
         <file>qml/pages/AuthenticationPage.qml</file>
         <file>qml/pages/ContactPage.qml</file>

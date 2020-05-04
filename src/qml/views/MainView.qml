@@ -39,7 +39,7 @@ StackView {
     function signIn(user) {
         if (LoginLogic.validateUser(user)) {
             if (!chatLayout) {
-                chatLayout = Qt.createComponent("./ChatLayout.qml").createObject(parent)
+                chatLayout = Qt.createComponent("./ChatView.qml").createObject(parent)
             }
             Messenger.signIn(user)
             showPopupInform("Sign In ...")
@@ -53,7 +53,7 @@ StackView {
     function signUp(user) {
         if (LoginLogic.validateUser(user)) {
             if (!chatLayout) {
-                chatLayout = Qt.createComponent("./ChatLayout.qml").createObject(parent)
+                chatLayout = Qt.createComponent("./ChatView.qml").createObject(parent)
             }
             Messenger.signUp(user)
             showPopupInform("Sign Up ...")
