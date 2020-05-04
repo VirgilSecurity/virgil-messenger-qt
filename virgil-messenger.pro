@@ -151,7 +151,10 @@ message("ANDROID_TARGET_ARCH = $$ANDROID_TARGET_ARCH")
 #
 #   macOS specific
 #
-macx: QMAKE_INFO_PLIST = $$PWD/platforms/macos/virgil-messenger.plist
+macx: {
+    ICON = $$PWD/scripts/macos/pkg_resources/MyIcon.icns
+    QMAKE_INFO_PLIST = $$PWD/platforms/macos/virgil-messenger.plist
+}
 
 
 #
