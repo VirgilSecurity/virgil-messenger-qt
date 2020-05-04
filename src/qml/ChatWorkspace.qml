@@ -53,7 +53,6 @@ Page {
         return !isMobileView() || isMobileView() && isChatWorskpacePresent();
     }
 
-    // Show chat with
     function showChat(contact) {
         if (contact === ConversationsModel.recipient) { return null }
         ConversationsModel.recipient = contact

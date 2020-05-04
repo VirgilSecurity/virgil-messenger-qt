@@ -80,16 +80,6 @@ ApplicationWindow {
         }
     }
 
-    // After loading show initial Login Page
-    Component.onCompleted: {
-        screenManager.signIn("xlwknx")
-//        contactPage = Qt.createComponent("chat/ContactPage.qml")
-//        authenticationPage = Qt.createComponent("login/Authentication.qml")
-//        settingsPage = Qt.createComponent("settings/SettingsPage.qml")
-
-//        mobileView.replace(authenticationPage)
-    }
-
     //
     //  UI
     //
@@ -97,18 +87,6 @@ ApplicationWindow {
     ScreenManager {
         id: screenManager
     }
-
-    // Mobile view
-//    MobileView {
-//        id: mobileView
-//        visible: isMobileView()
-//    }
-
-//    // Desktop view
-//    DesktopView {
-//        id: desktopView
-//        visible: !isMobileView()
-//    }
 
     // Popup to show messages or warnings on the bottom postion of the screen
     Popup {
@@ -141,30 +119,6 @@ ApplicationWindow {
 
     function showPopupSucces(message) {
         showPopup(message, "#66CDAA", "#00", true, false)
-    }
-
-
-    // Show contacts
-    function showContacts() {
-        mobileView.replace(contactPage)
-    }
-
-    // Show settings
-    function showSettings() {
-        // Mobile
-        mobileView.replace(settingsPage)
-
-        // Desktop
-        desktopView.mode = desktopView.kModeSettings
-    }
-
-    // Close settings
-    function closeSettings() {
-        // Mobile
-        mobileView.replace(contactPage)
-
-        // Desktop
-        desktopView.mode = desktopView.kModeNormal
     }
 
 

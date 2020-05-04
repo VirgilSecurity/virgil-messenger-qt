@@ -25,8 +25,6 @@
         <file>qml/iot/DevicesList.qml</file>
         <file>qml/iot/Title.qml</file>
         <file>qml/iot/Sniffer.qml</file>
-        <file>qml/MobileView.qml</file>
-        <file>qml/DesktopView.qml</file>
         <file>qml/chat/ConversationToolBar.qml</file>
         <file>qml/resources/sounds/message.wav</file>
         <file>qml/resources/cert.pem</file>
