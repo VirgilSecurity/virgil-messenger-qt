@@ -62,9 +62,6 @@ public:
     QString
     currentUser();
 
-    Q_INVOKABLE QString
-    currentVersion() const;
-
     VSQSqlContactModel &
     modelContacts();
 
@@ -85,9 +82,6 @@ public slots:
 
     Q_INVOKABLE void
     deleteUser(QString user);
-
-    Q_INVOKABLE void
-    sendReport();
 
     Q_INVOKABLE QStringList
     usersList();
@@ -148,7 +142,6 @@ private:
     static const QString kOrganization;
     static const QString kApp;
     static const QString kUsers;
-    static const QString kVersion;
     static const QString kProdEnvPrefix;
     static const QString kStgEnvPrefix;
     static const QString kDevEnvPrefix;
