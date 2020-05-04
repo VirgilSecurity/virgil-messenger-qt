@@ -32,17 +32,22 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#ifndef VSQMACOS_H
+#define VSQMACOS_H
+
 #if (MACOS)
 
-#include <QtCore>
+#include <QObject>
 
-#include "mac/VSQMacos.h"
+class VSQMacos {
+public:
+    VSQMacos() = delete;
 
-/******************************************************************************/
-void VSQMacos::checkUpdates() {
+    static void checkUpdatesBackground();
 
-}
-
-/******************************************************************************/
+    static void checkUpdates();
+};
 
 #endif // MACOS
+
+#endif // VSQMACOS_H

@@ -32,20 +32,30 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQMACOS_H
-#define VSQMACOS_H
-
 #if (MACOS)
 
-#include <QObject>
+#include <QtCore>
 
-class VSQMacos {
-public:
-    VSQMacos() = delete;
+#include <Sparkle.h>
+#include <SUUpdater.h>
 
-    static void checkUpdates();
-};
+#include "macos/VSQMacos.h"
+
+/******************************************************************************/
+void VSQMacos::checkUpdates() {
+    [[SUUpdater sharedUpdater] checkForUpdates:nil];
+}
+
+/******************************************************************************/
+void VSQMacos::checkUpdatesBackground() {
+    NSString *urlStr = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"SUFeedURL"];
+    NSURL *appcastURL = [NSURL URLWithString:[urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+    [[SUUpdater sharedUpdater] setFeedURL:appcastURL];
+    [[SUUpdater sharedUpdater] setUpdateCheckInterval:3600];
+    [[SUUpdater sharedUpdater] setAutomaticallyChecksForUpdates:TRUE];
+    [[SUUpdater sharedUpdater] checkForUpdatesInBackground];
+}
+
+/******************************************************************************/
 
 #endif // MACOS
-
-#endif // VSQMACOS_H
