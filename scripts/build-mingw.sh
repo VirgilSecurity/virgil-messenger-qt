@@ -13,7 +13,7 @@ LINUX_QMAKE="${QT_SDK_DIR}/mingw64/bin/qmake"
 #***************************************************************************************
 print_title
 
-#prepare_libraries
+prepare_libraries
 
 prepare_dir
 
@@ -34,71 +34,54 @@ echo
 echo
 cqtdeployer -bin ${BUILD_DIR}/release/${APPLICATION_NAME}.exe -qmlDir ${PROJECT_DIR}/src/qml  -qmake ${LINUX_QMAKE} clear
 check_error
+popd
 
-exit 1
+pushd ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib
+check_error
 
 echo "=== Copy libvs-messenger-internal.dll "
-cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/libvs-messenger-internal.dll DistributionKit/lib
+cp libvs-messenger-internal.dll           ${BUILD_DIR}/DistributionKit/lib
 check_error
 
 echo "=== Copy libvs-messenger-crypto.dll "
-cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/libvs-messenger-crypto.dll DistributionKit/lib
+cp libvs-messenger-crypto.dll             ${BUILD_DIR}/DistributionKit/lib
 check_error
 
 echo "=== Copy openssl libraries"
-cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/capi.dll DistributionKit/lib
+cp capi.dll                               ${BUILD_DIR}/DistributionKit/lib
 check_error
-cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/dasync.dll DistributionKit/lib
+cp dasync.dll                             ${BUILD_DIR}/DistributionKit/lib
 check_error
-cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/libcrypto-1_1.dll DistributionKit/lib
+cp libcrypto-1_1.dll                      ${BUILD_DIR}/DistributionKit/lib
 check_error
-cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/libssl-1_1.dll DistributionKit/lib
+cp libssl-1_1.dll                         ${BUILD_DIR}/DistributionKit/lib
 check_error
-cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/libssl-10.dll DistributionKit/lib
+cp libssl-10.dll                          ${BUILD_DIR}/DistributionKit/lib
 check_error
+
+echo "=== Copy depends libraries"
+cp libcurl-4.dll                         ${BUILD_DIR}/DistributionKit/lib
+check_error
+cp libssh2-1.dll                         ${BUILD_DIR}/DistributionKit/lib
+check_error
+cp libidn2-0.dll                         ${BUILD_DIR}/DistributionKit/lib
+check_error
+cp zlib1.dll                             ${BUILD_DIR}/DistributionKit/lib
+check_error
+cp libgcc_s_seh-1.dll                    ${BUILD_DIR}/DistributionKit/lib
+check_error
+cp libcrypto-10.dll                      ${BUILD_DIR}/DistributionKit/lib
+check_error
+popd
 
 echo "=== Add custom env variables"
-sed -i 's/start/SET VS_CURL_CA_BUNDLE=%BASE_DIR%\/ca\/curl-ca-bundle-win.crt\nstart/g' DistributionKit/virgil-messenger.bat
-check_error
-
-echo "=== Copy libcrypto-10.dll"
-#cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libcrypto-10.dll DistributionKit/lib
-check_error
-
-echo "=== Copy libcurl-4.dll"
-#cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libcurl-4.dll DistributionKit/lib
-check_error
-
-echo "=== Copy libgcc_s_sjlj-1.dll"
-#cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libgcc_s_sjlj-1.dll DistributionKit/lib
-check_error
-
-echo "=== Copy libcrypto-10.dll"
-#cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libcrypto-10.dll DistributionKit/lib
-check_error
-
-echo "=== Copy libssl-10.dll"
-#cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libssl-10.dll DistributionKit/lib
-check_error
-
-echo "=== Copy libssh2-1.dll"
-#cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libssh2-1.dll DistributionKit/lib
-check_error
-
-echo "=== Copy libidn2-0.dll"
-#cp /usr/i686-w64-mingw32/sys-root/mingw/bin/libidn2-0.dll DistributionKit/lib
-check_error
-
-echo "=== Copy zlib1.dll"
-#cp /usr/i686-w64-mingw32/sys-root/mingw/bin/zlib1.dll DistributionKit/lib
+sed -i 's/start/SET VS_CURL_CA_BUNDLE=%BASE_DIR%\/ca\/curl-ca-bundle-win.crt\nstart/g' ${BUILD_DIR}/DistributionKit/virgil-messenger.bat
 check_error
 
 echo "=== Copy certs "
-mkdir -p DistributionKit/ca
+mkdir -p ${BUILD_DIR}/DistributionKit/ca
 check_error
-cp ${PROJECT_DIR}/src/qml/resources/ca/curl-ca-bundle-win.crt DistributionKit/ca
+cp ${PROJECT_DIR}/src/qml/resources/ca/curl-ca-bundle-win.crt ${BUILD_DIR}/DistributionKit/ca
 check_error
-unix2dos DistributionKit/ca/curl-ca-bundle-win.crt
+unix2dos ${BUILD_DIR}/DistributionKit/ca/curl-ca-bundle-win.crt
 check_error
-
-popd
