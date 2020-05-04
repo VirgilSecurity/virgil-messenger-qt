@@ -54,6 +54,7 @@ import QtQuick.Layouts 1.12
 
 import "../theme"
 import "../components/ChatElements"
+import "../components/Headers"
 
 Page {
 
@@ -61,8 +62,7 @@ Page {
         color: Theme.contactsBackgroundColor
     }
 
-    header: ChatToolBar {
-    }
+    header: ContactHeader {}
 
     ListView {
         id: listView

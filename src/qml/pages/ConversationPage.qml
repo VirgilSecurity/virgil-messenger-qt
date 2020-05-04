@@ -65,7 +65,7 @@ Page {
         color: Theme.chatBackgroundColor
     }
 
-    header: ConversationToolBar {}
+    header: ConversationHeader {}
 
     ColumnLayout {
         anchors.fill: parent
