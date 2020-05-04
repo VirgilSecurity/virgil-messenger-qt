@@ -5,9 +5,8 @@ import QtQuick.Layouts 1.12
 import "./chat"
 
 Page {
+    focus: true
     property var currentContact: ConversationsModel.recipient
-
-    Keys.onEscapePressed: back()
 
     RowLayout {
         id: desktopLayout
@@ -36,7 +35,20 @@ Page {
                 id: chatView
                 inConversationWith: currentContact
             }
+        }
+    }
 
+    Keys.onReleased: {
+        if (event.key === Qt.Key_Back || event.key === Qt.Key_Escape) back(event)
+    }
+
+    function back(event) {
+        if (chatLayoutStack.depth > 1) {
+            chatLayoutStack.pop(StackView.Immediate)
+            event.accepted = true
+        } else if (currentContact) {
+            showContacts()
+            event.accepted = true
         }
     }
 
@@ -63,13 +75,5 @@ Page {
 
     function showUserSettings() {
         chatLayoutStack.push(Qt.createComponent("./settings/SettingsPage.qml"), StackView.Immediate)
-    }
-
-    function back() {
-        if (chatLayoutStack.depth > 1) {
-            chatLayoutStack.pop(StackView.Immediate)
-        } else {
-            showContacts()
-        }
     }
 }

@@ -1,5 +1,5 @@
-import QtQuick 2.7
-import QtQuick.Controls 2.4
+import QtQuick 2.12
+import QtQuick.Controls 2.12
 
 import "login/login.js" as LoginLogic
 
@@ -9,10 +9,17 @@ StackView {
 
     initialItem: Qt.createComponent("./login/Authentication.qml")
 
+    Keys.onReleased: {
+        if (event.key === Qt.Key_Back || event.key === Qt.Key_Escape) back(event)
+    }
+
     property var chatLayout
 
-    function back() {
-        pop()
+    function back(event) {
+        if (depth > 1) {
+            event.accepted = true
+            pop()
+        }
     }
 
     function showAuthentication() {
