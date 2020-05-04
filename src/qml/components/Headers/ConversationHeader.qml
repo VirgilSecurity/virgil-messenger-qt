@@ -30,7 +30,7 @@ ToolBar {
             }
 
             Image {
-                source: "../resources/AppUserscreen.png"
+                source: "../../resources/AppUserscreen.png"
                 width: 30
                 height: 30
                 anchors.verticalCenter: parent.verticalCenter
