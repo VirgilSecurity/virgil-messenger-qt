@@ -18,7 +18,7 @@ ToolBar {
             anchors.leftMargin: 20
             anchors.rightMargin: 20
             height: 1
-            color: Theme.toolbarSepratatorColor
+            color: Theme.chatBackgroundColor
             anchors.bottom: parent.bottom
         }
     }

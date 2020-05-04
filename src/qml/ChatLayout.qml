@@ -34,7 +34,6 @@ Page {
 
             ConversationPage {
                 id: chatView
-                bgColor: "#5D6D7E"
                 inConversationWith: currentContact
             }
 
