@@ -21,7 +21,7 @@ echo
 echo "=== Build application bundle"
 
 pushd ${BUILD_DIR}
-${LINUX_QMAKE} -config ${BUILD_TYPE} ${PROJECT_DIR} -spec win64-x-g++
+${LINUX_QMAKE} -config ${BUILD_TYPE} ${PROJECT_DIR} -spec win64-x-g++ VERSION="${VERSION}"
 check_error
 
 make -j10
@@ -46,15 +46,15 @@ cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/libvs-mes
 check_error
 
 echo "=== Copy openssl libraries"
-cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/capi.dll           DistributionKit/lib
+cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/capi.dll DistributionKit/lib
 check_error
-cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/dasync.dll         DistributionKit/lib
+cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/dasync.dll DistributionKit/lib
 check_error
-cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/libcrypto-1_1.dll  DistributionKit/lib
+cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/libcrypto-1_1.dll DistributionKit/lib
 check_error
-cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/libssl-1_1.dll     DistributionKit/lib
+cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/libssl-1_1.dll DistributionKit/lib
 check_error
-cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/libssl-10.dll      DistributionKit/lib
+cp ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib/libssl-10.dll DistributionKit/lib
 check_error
 
 echo "=== Add custom env variables"
