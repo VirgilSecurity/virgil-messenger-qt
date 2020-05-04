@@ -108,6 +108,6 @@ Page {
     }
 
     function close() {
-        parent.pop()
+        parent.pop(StackView.Immediate)
     }
 }
