@@ -21,7 +21,7 @@
         <key>NSPrincipalClass</key>
         <string>NSApplication</string>
         <key>CFBundleVersion</key>
-        <string>@FULL_VERSION@</string>
+        <string>@VERSION@</string>
         <key>SUFeedURL</key>
         <string>@SUFeedURL@</string>
         <key>SUPublicEDKey</key>

@@ -48,10 +48,17 @@ void VSQMacos::checkUpdates() {
 
 /******************************************************************************/
 void VSQMacos::checkUpdatesBackground() {
+    NSString *urlStr = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"SUFeedURL"];
+    NSURL *appcastURL = [NSURL URLWithString:[urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+    [[SUUpdater sharedUpdater] setFeedURL:appcastURL];
     [[SUUpdater sharedUpdater] setUpdateCheckInterval:600];
     [SUUpdater sharedUpdater].automaticallyChecksForUpdates = TRUE;
     [[SUUpdater sharedUpdater] checkForUpdatesInBackground];
 
+
+    NSString *verStr = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"];
+
+    NSLog(verStr);
 }
 
 /******************************************************************************/

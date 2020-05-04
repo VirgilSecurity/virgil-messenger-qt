@@ -248,7 +248,7 @@ function prepare_update() {
 #***************************************************************************************
 
 check_env
-"${SCRIPT_FOLDER}/generate-mac-plist.sh" "${SUFeedURL}" "${SUPublicEDKey}"
+"${SCRIPT_FOLDER}/generate-mac-plist.sh" "${SUFeedURL}" "${SUPublicEDKey}" "${VERSION}"
 build_project
 create_dmg
 notarize_dmg
