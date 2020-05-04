@@ -22,6 +22,7 @@ ToolButton {
 
     onClicked: menu.open()
 
+		// TODO: Extract menu to separate component
     Menu {
         id: menu
 
