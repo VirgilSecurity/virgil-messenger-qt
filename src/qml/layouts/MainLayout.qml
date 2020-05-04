@@ -10,18 +10,18 @@ StackView {
     initialItem: Qt.createComponent("../pages/AuthenticationPage.qml")
 
     Keys.onReleased: {
-        console.log('event in event', event)
-        if (event.key === Qt.Key_Back || event.key === Qt.Key_Escape) back(event)
+        if (event.key === Qt.Key_Back || event.key === Qt.Key_Escape) {
+            if (depth > 1) {
+                event.accepted = true
+                back()
+            }
+        }
     }
 
     property var chatLayout
 
-    function back(event) {
-        console.log('event in handler', event)
-        if (depth > 1) {
-            event.accepted = true
-            pop()
-        }
+    function back() {
+      pop()
     }
 
     function showAuthentication() {
