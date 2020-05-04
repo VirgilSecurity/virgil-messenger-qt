@@ -31,7 +31,7 @@ Page {
 
             Action {
                 text: qsTr("Settings")
-                onTriggered: screenManager.push(Qt.createComponent('GlobalSettingsPage.qml'))
+                onTriggered: mainLayout.push(Qt.createComponent('GlobalSettingsPage.qml'))
             }
         }
     }
@@ -68,13 +68,13 @@ Page {
                 id: registerButton
                 text: qsTr("Register")
                 Layout.fillWidth: true
-                onClicked: screenManager.push(Qt.createComponent("Register.qml"))
+                onClicked: mainLayout.push(Qt.createComponent("Register.qml"))
             }
 
             OutlineButton {
                 id: loginButton
                 text: qsTr("Sign In")
-                onClicked: screenManager.push(Qt.createComponent("Login.qml"))
+                onClicked: mainLayout.push(Qt.createComponent("Login.qml"))
                 Layout.fillWidth: true
             }
         }

@@ -9,7 +9,7 @@ StackView {
 
     initialItem: Qt.createComponent("./login/Authentication.qml")
 
-    property var chatWorkspace
+    property var chatLayout
 
     function back() {
         pop()
@@ -29,12 +29,12 @@ StackView {
 
     function signIn(user) {
         if (LoginLogic.validateUser(user)) {
-            if (!chatWorkspace) {
-                chatWorkspace = Qt.createComponent("./ChatWorkspace.qml").createObject(parent)
+            if (!chatLayout) {
+                chatLayout = Qt.createComponent("./ChatLayout.qml").createObject(parent)
             }
             Messenger.signIn(user)
             showPopupInform("Sign In ...")
-            replace(chatWorkspace)
+            replace(chatLayout)
         } else {
             root.showPopupError(qsTr("Incorrect user name"))
         }
@@ -43,12 +43,12 @@ StackView {
     // Sign up
     function signUp(user) {
         if (LoginLogic.validateUser(user)) {
-            if (!chatWorkspace) {
-                chatWorkspace = Qt.createComponent("./ChatWorkspace.qml").createObject(parent)
+            if (!chatLayout) {
+                chatLayout = Qt.createComponent("./ChatLayout.qml").createObject(parent)
             }
             Messenger.signUp(user)
             showPopupInform("Sign Up ...")
-            replace(chatWorkspace)
+            replace(chatLayout)
         } else {
             showPopupError(qsTr("Incorrect user name"))
         }
@@ -61,6 +61,6 @@ StackView {
     }
 
     function showUserSettings() {
-        chatWorkspace.showUserSettings()
+        chatLayout.showUserSettings()
     }
 }

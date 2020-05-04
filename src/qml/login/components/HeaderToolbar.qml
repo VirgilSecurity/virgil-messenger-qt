@@ -39,7 +39,7 @@ ToolBar {
             icon.height: 24
             icon.width: 24
             icon.color: Theme.secondaryTextColor
-            onClicked: screenManager.back()
+            onClicked: mainLayout.back()
             font.pointSize: UiHelper.fixFontSz(24)
         }
 

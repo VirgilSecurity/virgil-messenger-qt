@@ -23,11 +23,11 @@ Page {
         }
 
         StackView {
-            id: chatWorkspaceStack
+            id: chatLayoutStack
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            visible: isChatWorkspaceShown()
+            visible: isChatLayoutStackShown()
 
             property alias chatView: chatView
             initialItem: chatView
@@ -41,16 +41,16 @@ Page {
         }
     }
 
-    function isChatWorskpacePresent() {
-        return chatWorkspaceStack.depth > 1 || currentContact
+    function isChatSelected() {
+        return chatLayoutStack.depth > 1 || currentContact
     }
 
     function isContactsShown() {
-        return !isMobileView() || isMobileView() && !isChatWorskpacePresent();
+        return !isMobileView() || isMobileView() && !isChatSelected();
     }
 
-    function isChatWorkspaceShown() {
-        return !isMobileView() || isMobileView() && isChatWorskpacePresent();
+    function isChatLayoutStackShown() {
+        return !isMobileView() || isMobileView() && isChatSelected();
     }
 
     function showChat(contact) {
@@ -63,12 +63,12 @@ Page {
     }
 
     function showUserSettings() {
-        chatWorkspaceStack.push(Qt.createComponent("./settings/UserSettingsPage.qml"), StackView.Immediate)
+        chatLayoutStack.push(Qt.createComponent("./settings/UserSettingsPage.qml"), StackView.Immediate)
     }
 
     function back() {
-        if (chatWorkspaceStack.depth > 1) {
-            chatWorkspaceStack.pop(StackView.Immediate)
+        if (chatLayoutStack.depth > 1) {
+            chatLayoutStack.pop(StackView.Immediate)
         } else {
             showContacts()
         }

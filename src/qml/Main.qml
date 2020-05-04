@@ -41,7 +41,7 @@ ApplicationWindow {
         onFireError: {
             showPopupError(errorText)
 
-            screenManager.showAuthentication()
+            mainLayout.showAuthentication()
         }
 
         onFireInform: {
@@ -78,8 +78,8 @@ ApplicationWindow {
     //  UI
     //
 
-    ScreenManager {
-        id: screenManager
+    MainLayout {
+        id: mainLayout
     }
 
     // Popup to show messages or warnings on the bottom postion of the screen

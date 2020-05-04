@@ -103,7 +103,7 @@ ColumnLayout {
                                 width: 120
                                 height: 120
 
-                                onPressed: screenManager.signIn(modelData)
+                                onPressed: mainLayout.signIn(modelData)
 
                                 background: Rectangle {
                                     color: "transparent"
