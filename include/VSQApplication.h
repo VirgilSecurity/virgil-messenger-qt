@@ -40,6 +40,8 @@
 #include <VSQMessenger.h>
 #include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
 
+#include <macos/VSQMacos.h>
+
 class VSQApplication : public QObject {
     Q_OBJECT
 public:
@@ -47,8 +49,19 @@ public:
     virtual ~VSQApplication() = default;
 
     int
-    run();
+    run(const QString &basePath);
 
+    Q_INVOKABLE
+    void reloadQml();
+
+    Q_INVOKABLE
+    void checkUpdates();
+
+    Q_INVOKABLE QString
+    currentVersion() const;
+
+    Q_INVOKABLE void
+    sendReport();
 
 private slots:
 #if VS_IOS
@@ -57,6 +70,9 @@ private slots:
 #endif // VS_IOS
 
 private:
+    static const QString kVersion;
+
+    QQmlApplicationEngine m_engine;
     VSQMessenger m_messenger;
     QSharedPointer<VSQUdpBroadcast> m_netifUDPbcast;
 };

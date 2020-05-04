@@ -1,17 +1,22 @@
 import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick.Controls 2.4
 import QtQuick.Layouts 1.1
 import QtMultimedia 5.12
 
 import "login/login.js" as LoginLogic
 import "helpers/ui"
+import "theme"
 
 ApplicationWindow {
     id: rootWindow
     visible: true
     title: qsTr("Virgil IoTKit Qt Demo")
-    minimumWidth: 360
+    minimumWidth: 320
     minimumHeight: 500
+
+    background: Rectangle {
+        color: Theme.mainBackgroundColor
+    }
 
     //
     //  Properties
@@ -30,6 +35,7 @@ ApplicationWindow {
     property var contactPage
     property var loginPage
     property var settingsPage
+    property var authenticationPage
 
     //
     //  Connections
@@ -41,7 +47,7 @@ ApplicationWindow {
             showPopupError(errorText)
 
             // Mobile
-            mobileView.replace(loginPage)
+            mobileView.replace(authenticationPage)
 
             // Desktop
             desktopView.mode = desktopView.kModeLogin
@@ -68,12 +74,22 @@ ApplicationWindow {
         }
     }
 
+    Shortcut {
+        sequence: "F5"
+        onActivated: {
+            Messenger.logout()
+            rootWindow.close()
+            app.reloadQml()
+        }
+    }
+
     // After loading show initial Login Page
     Component.onCompleted: {
-        contactPage = Qt.createComponent("qrc:/qml/chat/ContactPage.qml")
-        loginPage = Qt.createComponent("qrc:/qml/login/Login.qml")
-        settingsPage = Qt.createComponent("qrc:/qml/settings/SettingsPage.qml")
-        mobileView.replace(loginPage)
+        contactPage = Qt.createComponent("chat/ContactPage.qml")
+        authenticationPage = Qt.createComponent("login/Authentication.qml")
+        settingsPage = Qt.createComponent("settings/SettingsPage.qml")
+
+        mobileView.replace(authenticationPage)
     }
 
     //
@@ -91,6 +107,8 @@ ApplicationWindow {
         id: desktopView
         visible: !isMobileView()
     }
+
+
 
     // Popup to show messages or warnings on the bottom postion of the screen
     Popup {
@@ -130,7 +148,7 @@ ApplicationWindow {
         ConversationsModel.recipient = contact
 
         // Mobile
-        mobileView.replace("qrc:/qml/chat/ConversationPage.qml", { inConversationWith: contact })
+        mobileView.replace("chat/ConversationPage.qml", { inConversationWith: contact })
 
         // Desktop
         desktopView.chatView.inConversationWith = contact

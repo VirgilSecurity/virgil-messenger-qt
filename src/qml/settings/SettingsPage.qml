@@ -3,11 +3,10 @@ import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.1
 
 import "../helpers/ui"
+import "../theme"
 
 Page {
     id: settingsPage
-
-    readonly property color kBtnColor: "#b44"
 
     background: Rectangle {
         color: backGroundColor
@@ -18,7 +17,7 @@ Page {
         anchors.margins: 40
 
         Image {
-            source: "qrc:/qml/resources/AppUserscreen.png"
+            source: "../resources/AppUserscreen.png"
             Layout.alignment: Qt.AlignHCenter
         }
 
@@ -27,7 +26,7 @@ Page {
             Layout.fillWidth: true
             Layout.margins: 30
             text: qsTr("Account: ") + Messenger.currentUser
-            font.pointSize: 22
+            font.pointSize: UiHelper.fixFontSz(22)
             color: mainTextCOlor
             elide: Text.ElideLeft
         }
@@ -36,20 +35,42 @@ Page {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
             Layout.margins: 30
-            text: qsTr("Version: ") + Messenger.currentVersion()
-            font.pointSize: 22
+            text: qsTr("Version: ") + app.currentVersion()
+            font.pointSize: UiHelper.fixFontSz(22)
             color: mainTextCOlor
             elide: Text.ElideLeft
         }
 
-        CButton {
+        PrimaryButton {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
-            height: 50
+            name: qsTr("Check updates")
+            onClicked: {
+                app.checkUpdates()
+            }
+        }
 
+        Rectangle {
+            height: 10
+        }
+
+        PrimaryButton {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
+            name: qsTr("Send report to developers")
+            onClicked: {
+                app.sendReport()
+            }
+        }
+
+        Rectangle {
+            height: 10
+        }
+
+        PrimaryButton {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
             name: qsTr("Logout")
-            baseColor: kBtnColor
-            borderColor: kBtnColor
             onClicked: {
                 logout()
             }
@@ -59,13 +80,10 @@ Page {
             height: 10
         }
 
-        CButton {
+        PrimaryButton {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
-            height: 50
             name: qsTr("Delete account")
-            baseColor: kBtnColor
-            borderColor: kBtnColor
             onClicked: {
                 closeSettings()
             }
@@ -75,30 +93,10 @@ Page {
             height: 10
         }
 
-        CButton {
+        PrimaryButton {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
-            height: 50
-            name: qsTr("Send report to developers")
-            baseColor: mainAppColor
-            borderColor: mainAppColor
-            onClicked: {
-                Messenger.sendReport()
-            }
-        }
-
-        Rectangle {
-            height: 10
-            Layout.fillHeight: true
-        }
-
-        CButton {
-            Layout.alignment: Qt.AlignHCenter
-            Layout.fillWidth: true
-            height: 50
             name: qsTr("Close")
-            baseColor: "transparent"
-            borderColor: kBtnColor
             onClicked: {
                 closeSettings()
             }

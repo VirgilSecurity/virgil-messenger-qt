@@ -36,20 +36,36 @@
 #include <QtQml>
 
 #include <VSQApplication.h>
+#include <ui/VSQUiHelper.h>
 #include <virgil/iot/logger/logger.h>
 
 #include <QGuiApplication>
 #include <QFont>
+#include <QDesktopServices>
+
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
+#if defined(VERSION)
+const QString VSQApplication::kVersion = QString(TOSTRING(VERSION));
+#else
+const QString VSQApplication::kVersion = "unknown";
+#endif
 
 /******************************************************************************/
 VSQApplication::VSQApplication() {
     m_netifUDPbcast = QSharedPointer<VSQUdpBroadcast>::create();
+
+#if (MACOS)
+    VSQMacos::checkUpdatesBackground();
+#endif
 }
 
 /******************************************************************************/
 int
-VSQApplication::run() {
-    QQmlApplicationEngine engine;
+VSQApplication::run(const QString &basePath) {
+
+    VSQUiHelper uiHelper;
 
     auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT << VSQFeatures::SNAP_SNIFFER;
     auto impl = VSQImplementations() << m_netifUDPbcast;
@@ -62,7 +78,16 @@ VSQApplication::run() {
         return -1;
     }
 
-    QQmlContext *context = engine.rootContext();
+    QQmlContext *context = m_engine.rootContext();    
+    if (basePath.isEmpty()) {
+        m_engine.setBaseUrl(QUrl(QStringLiteral("qrc:/qml/")));
+    } else {
+        QUrl url("file://" + basePath + "/qml/");
+        m_engine.setBaseUrl(url);
+    }
+
+    context->setContextProperty("UiHelper", &uiHelper);
+    context->setContextProperty("app", this);
     context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
     context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
     context->setContextProperty("Messenger", &m_messenger);
@@ -77,18 +102,43 @@ VSQApplication::run() {
     connect(QGuiApplication::instance(), SIGNAL(applicationStateChanged(Qt::ApplicationState)), this, SLOT(onApplicationStateChanged(Qt::ApplicationState)));
 #endif // VS_IOS
 
-    const QUrl url(QStringLiteral("qrc:/qml/Main.qml"));
-    engine.load(url);
+    reloadQml();
+
+    return QGuiApplication::instance()->exec();
+}
+
+/******************************************************************************/
+void VSQApplication::reloadQml() {
+    const QUrl url(QStringLiteral("Main.qml"));
+    m_engine.clearComponentCache();
+    m_engine.load(url);
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_WATCHOS)
     {
-        QObject *rootObject(engine.rootObjects().first());
+        QObject *rootObject(m_engine.rootObjects().first());
         rootObject->setProperty("width", 800);
         rootObject->setProperty("height", 640);
     }
 #endif
+}
 
-    return QGuiApplication::instance()->exec();
+/******************************************************************************/
+void VSQApplication::checkUpdates() {
+#if (MACOS)
+    VSQMacos::checkUpdates();
+#endif
+}
+
+/******************************************************************************/
+QString
+VSQApplication::currentVersion() const {
+    return kVersion + "-alpha";
+}
+
+/******************************************************************************/
+void
+VSQApplication::sendReport() {
+    QDesktopServices::openUrl(QUrl("mailto:?to=kutashenko@gmail.com&subject=Virgil Messenger Report&body=Here is some email body text", QUrl::TolerantMode));
 }
 
 /******************************************************************************/
