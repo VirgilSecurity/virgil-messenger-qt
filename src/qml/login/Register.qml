@@ -56,7 +56,7 @@ Page {
 
             PrimaryButton {
                 text: qsTr("Create account")
-                onClicked: signUpUser(username.text)
+                onClicked: mainLayout.signUp(username.text)
                 Layout.fillWidth: true
                 Layout.topMargin: 15
             }

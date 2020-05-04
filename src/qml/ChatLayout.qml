@@ -39,16 +39,19 @@ Page {
     }
 
     Keys.onReleased: {
-        if (event.key === Qt.Key_Back || event.key === Qt.Key_Escape) back(event)
+        if (event.key === Qt.Key_Back || event.key === Qt.Key_Escape) {
+            event.accepted = true
+            back()
+        }
     }
 
-    function back(event) {
+    function back() {
         if (chatLayoutStack.depth > 1) {
             chatLayoutStack.pop(StackView.Immediate)
-            event.accepted = true
         } else if (currentContact) {
             showContacts()
-            event.accepted = true
+        } else {
+            showContacts(null)
         }
     }
 
