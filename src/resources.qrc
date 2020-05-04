@@ -4,7 +4,7 @@
         <file>qml/login/Login.qml</file>
         <file>qml/login/PasswordResetPage.qml</file>
         <file>qml/login/login.js</file>
-        <file>qml/settings/UserSettingsPage.qml</file>
+        <file>qml/settings/SettingsPage.qml</file>
         <file>qml/helpers/ui/PrimaryButton.qml</file>
         <file>qml/helpers/ui/CIcon.qml</file>
         <file>qml/resources/User.png</file>

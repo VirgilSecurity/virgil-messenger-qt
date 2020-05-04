@@ -63,7 +63,7 @@ Page {
     }
 
     function showUserSettings() {
-        chatLayoutStack.push(Qt.createComponent("./settings/UserSettingsPage.qml"), StackView.Immediate)
+        chatLayoutStack.push(Qt.createComponent("./settings/SettingsPage.qml"), StackView.Immediate)
     }
 
     function back() {
