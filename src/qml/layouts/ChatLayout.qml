@@ -70,8 +70,7 @@ Page {
     function showChat(contact) {
         if (contact === ConversationsModel.recipient) { return null }
         ConversationsModel.recipient = contact
-        chatLayoutStack.pop(StackView.Immediate)
-
+        chatLayoutStack.pop(null, StackView.Immediate)
     }
 
     function showContacts() {
