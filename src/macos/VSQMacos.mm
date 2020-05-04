@@ -54,11 +54,6 @@ void VSQMacos::checkUpdatesBackground() {
     [[SUUpdater sharedUpdater] setUpdateCheckInterval:600];
     [SUUpdater sharedUpdater].automaticallyChecksForUpdates = TRUE;
     [[SUUpdater sharedUpdater] checkForUpdatesInBackground];
-
-
-    NSString *verStr = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"];
-
-    NSLog(verStr);
 }
 
 /******************************************************************************/
