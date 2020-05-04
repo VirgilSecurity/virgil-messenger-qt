@@ -82,9 +82,9 @@ ApplicationWindow {
         source: "resources/sounds/message.wav"
     }
 
-		// Shortcuts for hackers
-		Shortcut {
-				// TODO: remove on production or add conditional dev flag!
+    // Shortcuts for hackers
+    Shortcut {
+        // TODO: remove on production or add conditional dev flag!
         sequence: StandardKey.Refresh
         onActivated: {
             Messenger.logout()
