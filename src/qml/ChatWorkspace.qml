@@ -63,7 +63,7 @@ Page {
     }
 
     function showUserSettings() {
-        chatWorkspaceStack.push(Qt.createComponent("./settings/SettingsPage.qml"), StackView.Immediate)
+        chatWorkspaceStack.push(Qt.createComponent("./settings/UserSettingsPage.qml"), StackView.Immediate)
     }
 
     function back() {

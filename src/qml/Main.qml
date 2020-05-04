@@ -32,12 +32,6 @@ ApplicationWindow {
     property real maxMobileWidth: 640
     property bool mobileView: false
 
-    // Mobile View Pages
-    property var contactPage
-    property var loginPage
-    property var settingsPage
-    property var authenticationPage
-
     //
     //  Connections
     //

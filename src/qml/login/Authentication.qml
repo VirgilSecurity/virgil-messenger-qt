@@ -31,6 +31,7 @@ Page {
 
             Action {
                 text: qsTr("Settings")
+                onTriggered: screenManager.push(Qt.createComponent('GlobalSettingsPage.qml'))
             }
         }
     }
