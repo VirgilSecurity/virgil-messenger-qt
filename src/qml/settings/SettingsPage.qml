@@ -53,6 +53,7 @@ Page {
             borderColor: kBtnColor
             onClicked: {
                 logout()
+                close()
             }
         }
 
@@ -68,7 +69,7 @@ Page {
             baseColor: kBtnColor
             borderColor: kBtnColor
             onClicked: {
-                closeSettings()
+                close()
             }
         }
 
@@ -101,8 +102,12 @@ Page {
             baseColor: "transparent"
             borderColor: kBtnColor
             onClicked: {
-                closeSettings()
+                close()
             }
         }
+    }
+
+    function close() {
+        parent.pop()
     }
 }
