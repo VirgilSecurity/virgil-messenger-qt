@@ -57,14 +57,12 @@ Page {
     //  Properties
     //
     property string inConversationWith
-    property string bgColor: backGroundColor
 
     background: Rectangle {
-        color: "#5D6D7E"
+        color: Theme.contactsBackgroundColor
     }
 
-    header: ConversationToolBar {
-    }
+    header: ConversationToolBar {}
 
     ColumnLayout {
         anchors.fill: parent
