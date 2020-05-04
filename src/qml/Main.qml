@@ -41,7 +41,7 @@ ApplicationWindow {
         onFireError: {
             showPopupError(errorText)
 
-            mainLayout.showAuthentication()
+            // mainLayout.showAuthentication()
         }
 
         onFireInform: {
