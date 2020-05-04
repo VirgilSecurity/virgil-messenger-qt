@@ -29,7 +29,9 @@ StackView {
 
     function signIn(user) {
         if (LoginLogic.validateUser(user)) {
-            if (!chatWorkspace) chatWorkspace = Qt.createComponent("./ChatWorkspace.qml")
+            if (!chatWorkspace) {
+                chatWorkspace = Qt.createComponent("./ChatWorkspace.qml").createObject(parent)
+            }
             Messenger.signIn(user)
             showPopupInform("Sign In ...")
             replace(chatWorkspace)
@@ -41,7 +43,9 @@ StackView {
     // Sign up
     function signUp(user) {
         if (LoginLogic.validateUser(user)) {
-            if (!chatWorkspace) chatWorkspace = Qt.createComponent("./ChatWorkspace.qml")
+            if (!chatWorkspace) {
+                chatWorkspace = Qt.createComponent("./ChatWorkspace.qml").createObject(parent)
+            }
             Messenger.signUp(user)
             showPopupInform("Sign Up ...")
             replace(chatWorkspace)
@@ -57,7 +61,6 @@ StackView {
     }
 
     function showUserSettings() {
-         console.log('chatWorkspace.focus', chatWorkspace)
-        chatWorkspace.createObject(parent).showUserSettings()
+        chatWorkspace.showUserSettings()
     }
 }

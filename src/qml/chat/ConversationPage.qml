@@ -53,7 +53,6 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
 
 Page {
-    anchors.fill: parent
    //
     //  Properties
     //

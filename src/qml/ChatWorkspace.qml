@@ -1,11 +1,13 @@
-import QtQuick 2.7
+import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 
 import "./chat"
 
 Page {
-    anchors.fill: parent
+    property var currentContact: ConversationsModel.recipient
+
+    Keys.onEscapePressed: back()
 
     RowLayout {
         id: desktopLayout
@@ -21,7 +23,7 @@ Page {
         }
 
         StackView {
-            id: chatWorkspace
+            id: chatWorkspaceStack
             Layout.fillWidth: true
             Layout.fillHeight: true
 
@@ -30,43 +32,46 @@ Page {
             property alias chatView: chatView
             initialItem: chatView
 
-            pushEnter: null
-            pushExit: null
-
             ConversationPage {
                 id: chatView
                 bgColor: "#5D6D7E"
+                inConversationWith: currentContact
             }
 
         }
     }
 
-    function isChatWorspacePresent() {
-        return chatWorkspace && chatWorkspace.depth !== 1
+    function isChatWorskpacePresent() {
+        return chatWorkspaceStack.depth > 1 || currentContact
     }
 
     function isContactsShown() {
-        return !isMobileView() || isMobileView() && !isChatWorspacePresent();
+        return !isMobileView() || isMobileView() && !isChatWorskpacePresent();
     }
 
     function isChatWorkspaceShown() {
-        return !isMobileView() || isMobileView() && isChatWorspacePresent();
+        return !isMobileView() || isMobileView() && isChatWorskpacePresent();
     }
 
     // Show chat with
     function showChat(contact) {
         if (contact === ConversationsModel.recipient) { return null }
         ConversationsModel.recipient = contact
+    }
 
-        if (ConversationsModel.recipient) {
-           chatWorkspace.push(Qt.createComponent("./chat/ConversationPage.qml"), { inConversationWith: contact })
-        } else {
-            chatWorkspace.replace(Qt.createComponent("./chat/ConversationPage.qml"), { inConversationWith: contact })
-        }
+    function showContacts() {
+        showChat(null)
     }
 
     function showUserSettings() {
-        console.log('chatWorkspace.focus', chatWorkspace.focus)
-        chatWorkspace.push(Qt.createComponent("./settings/SettingsPage.qml"))
+        chatWorkspaceStack.push(Qt.createComponent("./settings/SettingsPage.qml"), StackView.Immediate)
+    }
+
+    function back() {
+        if (chatWorkspaceStack.depth > 1) {
+            chatWorkspaceStack.pop(StackView.Immediate)
+        } else {
+            showContacts()
+        }
     }
 }
