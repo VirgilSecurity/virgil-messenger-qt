@@ -76,7 +76,7 @@ ToolBar {
 
                     Action {
                         text: qsTr("Settings")
-                        onTriggered: chatLayout.showUserSettings()
+                        onTriggered: chatView.showUserSettings()
                     }
 
                     MenuSeparator {
