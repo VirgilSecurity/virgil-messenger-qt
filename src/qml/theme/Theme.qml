@@ -31,7 +31,7 @@ Item {
     readonly property color contactPressedColor: "#455A64"
     readonly property color menuSeparatorColor: "#90A4AE"
     readonly property color inputBackgroundColor: "#37474F"
-    readonly property color toolbarSepratatorColor: "#263238"
+    readonly property color chatBackgroundColor: "#263238"
 
 
     // sizes

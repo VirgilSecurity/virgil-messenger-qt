@@ -57,7 +57,7 @@ VSQApplication::VSQApplication() {
     m_netifUDPbcast = QSharedPointer<VSQUdpBroadcast>::create();
 
 #if (MACOS)
-    VSQMacos::checkUpdatesBackground();
+    VSQMacos::instance().startUpdatesTimer();
 #endif
 }
 
@@ -125,7 +125,7 @@ void VSQApplication::reloadQml() {
 /******************************************************************************/
 void VSQApplication::checkUpdates() {
 #if (MACOS)
-    VSQMacos::checkUpdates();
+    VSQMacos::instance().checkUpdates();
 #endif
 }
 

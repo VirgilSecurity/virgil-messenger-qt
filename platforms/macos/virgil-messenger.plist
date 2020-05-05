@@ -22,6 +22,10 @@
         <string>NSApplication</string>
         <key>CFBundleVersion</key>
         <string>0.1.0.1</string>
+        <key>SUFeedURL</key>
+        <string>https://virgilsecurity.bintray.com/messenger/macos/nightly/appcast.xml</string>
+        <key>SUPublicEDKey</key>
+        <string>44RVxRhV4h4Hlw+VOeXvCj78Z5NUhJ2Qi5N+kpu8KxI=</string>
         <key>NSSupportsAutomaticGraphicsSwitching</key>
         <true/>
 </dict>

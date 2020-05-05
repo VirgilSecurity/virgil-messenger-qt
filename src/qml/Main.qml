@@ -1,16 +1,16 @@
-import QtQuick 2.7
-import QtQuick.Controls 2.4
-import QtQuick.Layouts 1.1
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
 import QtMultimedia 5.12
 
-import "login/login.js" as LoginLogic
-import "helpers/ui"
+import "../qml/views"
+import "./components/Popups"
 import "theme"
 
 ApplicationWindow {
-    id: rootWindow
+    id: root
     visible: true
-    title: qsTr("Virgil IoTKit Qt Demo")
+    title: qsTr("Virgil Messenger")
     minimumWidth: 320
     minimumHeight: 500
 
@@ -29,13 +29,8 @@ ApplicationWindow {
     property color toolbarColor: "#455462"
     property int   toolbarHeight: 40
 
+    property real maxMobileWidth: 640
     property bool mobileView: false
-
-    // Mobile View Pages
-    property var contactPage
-    property var loginPage
-    property var settingsPage
-    property var authenticationPage
 
     //
     //  Connections
@@ -46,11 +41,7 @@ ApplicationWindow {
         onFireError: {
             showPopupError(errorText)
 
-            // Mobile
-            mobileView.replace(authenticationPage)
-
-            // Desktop
-            desktopView.mode = desktopView.kModeLogin
+            mainView.showAuthentication()
         }
 
         onFireInform: {
@@ -74,41 +65,11 @@ ApplicationWindow {
         }
     }
 
-    Shortcut {
-        sequence: "F5"
-        onActivated: {
-            Messenger.logout()
-            rootWindow.close()
-            app.reloadQml()
-        }
+    // THE MainView of the Application!
+
+    MainView { 
+        id: mainView
     }
-
-    // After loading show initial Login Page
-    Component.onCompleted: {
-        contactPage = Qt.createComponent("chat/ContactPage.qml")
-        authenticationPage = Qt.createComponent("login/Authentication.qml")
-        settingsPage = Qt.createComponent("settings/SettingsPage.qml")
-
-        mobileView.replace(authenticationPage)
-    }
-
-    //
-    //  UI
-    //
-
-    // Mobile view
-    MobileView {
-        id: mobileView
-        visible: isMobileView()
-    }
-
-    // Desktop view
-    DesktopView {
-        id: desktopView
-        visible: !isMobileView()
-    }
-
-
 
     // Popup to show messages or warnings on the bottom postion of the screen
     Popup {
@@ -120,6 +81,18 @@ ApplicationWindow {
         id: messageSound
         source: "resources/sounds/message.wav"
     }
+
+    // Shortcuts for hackers
+    Shortcut {
+        // TODO: remove on production or add conditional dev flag!
+        sequence: StandardKey.Refresh
+        onActivated: {
+            Messenger.logout()
+            root.close()
+            app.reloadQml()
+        }
+    }
+
 
     // Show Popup message
     function showPopup(message, color, textColor, isOnTop, isModal) {
@@ -143,83 +116,15 @@ ApplicationWindow {
         showPopup(message, "#66CDAA", "#00", true, false)
     }
 
-    // Show chat with
-    function showChat(contact) {
-        ConversationsModel.recipient = contact
-
-        // Mobile
-        mobileView.replace("chat/ConversationPage.qml", { inConversationWith: contact })
-
-        // Desktop
-        desktopView.chatView.inConversationWith = contact
-    }
-
-    // Show contacts
-    function showContacts() {
-        mobileView.replace(contactPage)
-    }
-
-    // Show settings
-    function showSettings() {
-        // Mobile
-        mobileView.replace(settingsPage)
-
-        // Desktop
-        desktopView.mode = desktopView.kModeSettings
-    }
-
-    // Close settings
-    function closeSettings() {
-        // Mobile
-        mobileView.replace(contactPage)
-
-        // Desktop
-        desktopView.mode = desktopView.kModeNormal
-    }
-
-    // Logout
-    function logout() {
-        Messenger.logout()
-
-        // Mobile
-        mobileView.replace(loginPage)
-
-        // Desktop
-        desktopView.mode = desktopView.kModeLogin
-    }
 
     // View mode detection
     function isMobileView() {
-        var _minSz = 640
 
-        if (rootWindow.mobileView) {
+        if (root.mobileView) {
             return true;
         }
 
-        return rootWindow.width < _minSz;
+        return root.width < root.maxMobileWidth;
     }
 
-    // Sign in
-    function signInUser(user) {
-        if (LoginLogic.validateUser(user)) {
-            Messenger.signIn(user)
-            showPopupInform("Sign In ...")
-            mobileView.replace(contactPage)
-            desktopView.mode = desktopView.kModeNormal
-        } else {
-            showPopupError(qsTr("Incorrect user name"))
-        }
-    }
-
-    // Sign up
-    function signUpUser(user) {
-        if (LoginLogic.validateUser(user)) {
-            Messenger.signUp(user)
-            showPopupInform("Sign Up ...")
-            mobileView.replace(contactPage)
-            desktopView.mode = desktopView.kModeNormal
-        } else {
-            showPopupError(qsTr("Incorrect user name"))
-        }
-    }
 }
