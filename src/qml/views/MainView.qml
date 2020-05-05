@@ -1,13 +1,13 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 
-import "login/login.js" as LoginLogic
+import "../js/login.js" as LoginLogic
 
 StackView {
     focus: true
     anchors.fill: parent
 
-    initialItem: Qt.createComponent("./login/Authentication.qml")
+    initialItem: Qt.createComponent("../pages/AuthenticationPage.qml")
 
     Keys.onReleased: {
         if (event.key === Qt.Key_Back || event.key === Qt.Key_Escape) {
@@ -25,15 +25,15 @@ StackView {
     }
 
     function showAuthentication() {
-        replace(Qt.createComponent("./login/Authentication.qml"))
+        replace(Qt.createComponent("../pages/AuthenticationPage.qml"))
     }
 
     function showLogin() {
-        push(Qt.createComponent("./login/Login.qml"))
+        push(Qt.createComponent("./pages/LoginPage.qml"))
     }
 
     function showRegister() {
-        push(Qt.createComponent("./login/Register.qml"))
+        push(Qt.createComponent("../pages/RegisterPage.qml"))
     }
 
     function signIn(user) {

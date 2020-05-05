@@ -1,10 +1,10 @@
-import QtQuick 2.7
-import QtQuick.Controls 2.4
-import QtQuick.Layouts 1.1
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
 import QtMultimedia 5.12
 
-import "login/login.js" as LoginLogic
-import "helpers/ui"
+import "../qml/views"
+import "./components/Popups"
 import "theme"
 
 ApplicationWindow {
@@ -41,7 +41,7 @@ ApplicationWindow {
         onFireError: {
             showPopupError(errorText)
 
-            mainLayout.showAuthentication()
+            mainView.showAuthentication()
         }
 
         onFireInform: {
@@ -65,21 +65,10 @@ ApplicationWindow {
         }
     }
 
-    Shortcut {
-        sequence: StandardKey.Refresh
-        onActivated: {
-            Messenger.logout()
-            root.close()
-            app.reloadQml()
-        }
-    }
+    // THE MainView of the Application!
 
-    //
-    //  UI
-    //
-
-    MainLayout {
-        id: mainLayout
+    MainView { 
+        id: mainView
     }
 
     // Popup to show messages or warnings on the bottom postion of the screen
@@ -92,6 +81,18 @@ ApplicationWindow {
         id: messageSound
         source: "resources/sounds/message.wav"
     }
+
+    // Shortcuts for hackers
+    Shortcut {
+        // TODO: remove on production or add conditional dev flag!
+        sequence: StandardKey.Refresh
+        onActivated: {
+            Messenger.logout()
+            root.close()
+            app.reloadQml()
+        }
+    }
+
 
     // Show Popup message
     function showPopup(message, color, textColor, isOnTop, isModal) {
