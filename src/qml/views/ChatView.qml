@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.12
 import "../pages"
 
 Page {
+    id: chatView
     focus: true
     property var currentContact: ConversationsModel.recipient
 
@@ -28,11 +29,10 @@ Page {
 
             visible: isChatViewStackShown()
 
-            property alias chatView: chatView
-            initialItem: chatView
+            initialItem: conversationPage
 
             ConversationPage {
-                id: chatView
+                id: conversationPage
                 inConversationWith: currentContact
             }
         }
