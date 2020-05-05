@@ -37,11 +37,19 @@
 
 #include <android/VSQAndroid.h>
 
+#if (VSQ_WEBDRIVER_DEBUG)
+#include "Test/Headers.h"
+#endif
+
 int
 main(int argc, char *argv[]) {
 
 #if (ANDROID)
     VSQAndroid::prepare();
+#endif
+
+#if (VSQ_WEBDRIVER_DEBUG)
+    wd_setup(argc, argv);
 #endif
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);

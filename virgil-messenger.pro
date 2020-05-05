@@ -127,6 +127,28 @@ unix:mac: {
     QMAKE_BUNDLE_DATA += sparkle
 }
 
+#
+#   Qt Web Driver
+#
+isEmpty(WEBDRIVER) {
+    message("Web Driver is disabled")
+} else {
+    message("Web Driver is enabled")
+    QTWEBDRIVER_LOCATION=$$PREBUILT_PATH/$${OS_NAME}/qtwebdriver
+    QT += widgets
+    DEFINES += WD_ENABLE_WEB_VIEW=0 \
+           WD_ENABLE_PLAYER=0 \
+           QT_NO_SAMPLES=1 \
+           VSQ_WEBDRIVER_DEBUG=1
+    HEADERS += $$QTWEBDRIVER_LOCATION/src/Test/Headers.h
+    INCLUDEPATH +=  $$QTWEBDRIVER_LOCATION/inc $$QTWEBDRIVER_LOCATION/src
+    LIBS += -L$$QTWEBDRIVER_LOCATION/bin -lchromium_base -lWebDriver_core -lWebDriver_extension_qt_base -lWebDriver_extension_qt_quick
+    LIBS += -framework Foundation
+    LIBS += -framework CoreFoundation
+    LIBS += -framework ApplicationServices
+    LIBS += -framework Security
+}
+
 
 #
 #   Libraries
