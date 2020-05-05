@@ -22,7 +22,7 @@ ToolBar {
             Layout.minimumWidth: 40
 
             onClicked: {
-                chatLayout.showContacts()
+                chatView.showContacts()
             }
 
             background: Rectangle {
