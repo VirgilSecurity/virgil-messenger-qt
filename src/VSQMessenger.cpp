@@ -45,8 +45,6 @@
 #include <QSqlError>
 #include <QtQml>
 
-#include <QDesktopServices>
-
 const QString VSQMessenger::kOrganization = "VirgilSecurity";
 const QString VSQMessenger::kApp = "IoTKit Messenger";
 const QString VSQMessenger::kUsers = "Users";
@@ -54,14 +52,7 @@ const QString VSQMessenger::kProdEnvPrefix = "prod";
 const QString VSQMessenger::kStgEnvPrefix = "stg";
 const QString VSQMessenger::kDevEnvPrefix = "dev";
 
-#define STRINGIFY(x) #x
-#define TOSTRING(x) STRINGIFY(x)
 
-#if defined(VERSION)
-const QString VSQMessenger::kVersion = QString(TOSTRING(VERSION));
-#else
-const QString VSQMessenger::kVersion = "unknown";
-#endif
 
 /******************************************************************************/
 VSQMessenger::VSQMessenger() {
@@ -194,12 +185,6 @@ VSQMessenger::_prepareLogin(const QString &user) {
 QString
 VSQMessenger::currentUser() {
     return m_user;
-}
-
-/******************************************************************************/
-QString
-VSQMessenger::currentVersion() const {
-    return kVersion + "-alpha";
 }
 
 /******************************************************************************/
@@ -428,12 +413,6 @@ VSQMessenger::modelConversations() {
 void
 VSQMessenger::onConnected() {
     emit fireReady();
-}
-
-/******************************************************************************/
-void
-VSQMessenger::sendReport() {
-    QDesktopServices::openUrl(QUrl("mailto:?to=kutashenko@gmail.com&subject=Virgil Messenger Report&body=Here is some email body text", QUrl::TolerantMode));
 }
 
 /******************************************************************************/

@@ -34,7 +34,7 @@ build_proc() {
     echo "=== Build Messenger"
     echo
     pushd ${BUILD_DIR}
-    ${ANDROID_QMAKE} ${PROJECT_FILE} -spec android-clang CONFIG+=qtquickcompiler
+    ${ANDROID_QMAKE} ${PROJECT_FILE} -spec android-clang CONFIG+=qtquickcompiler VERSION="${VERSION}"
     check_error
 
     ${ANDROID_MAKE} -j10

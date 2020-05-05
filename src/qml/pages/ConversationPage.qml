@@ -103,13 +103,27 @@ Page {
                         height: messageText.implicitHeight + 24
                         color: sentByMe ? "lightgrey" : "steelblue"
 
-                        Label {
+                        TextEdit {
                             id: messageText
-                            text: model.message
+                            property string message: model.message
+                            textFormat: Text.RichText
                             color: sentByMe ? "black" : "white"
                             anchors.fill: parent
                             anchors.margins: 12
-                            wrapMode: Label.Wrap
+                            wrapMode: Text.WordWrap
+                            selectByMouse: true
+                            readOnly: true
+
+                            text: isValidURL(message) ? ("<a href='"+message+"'>"+message+"</a>") : message
+                            onLinkActivated:{
+                                if (isValidURL(message)){
+                                   Qt.openUrlExternally(message)
+                                }
+                            }
+                            function isValidURL(message) {
+                               var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
+                               return regexp.test(message);
+                            }
                         }
                     }
                 }

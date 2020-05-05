@@ -6,31 +6,40 @@
 SCRIPT_FOLDER="$(cd "$(dirname "$0")" && pwd)"
 source ${SCRIPT_FOLDER}/ish/common.sh
 
-PLATFORM=mac
-BUILD_DIR=${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.${PLATFORM}/
-QMAKE_BIN=${QT_SDK_DIR}/clang_64/bin/qmake
-MACDEPLOYQT_BIN=${QT_SDK_DIR}/clang_64/bin/macdeployqt
+#
+#	General variables
+#
+PLATFORM="mac"
+BUILD_DIR="${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.${PLATFORM}"
+QMAKE_BIN="${QT_SDK_DIR}/clang_64/bin/qmake"
+MACDEPLOYQT_BIN="${QT_SDK_DIR}/clang_64/bin/macdeployqt"
+APPCAST_BIN="${PROJECT_DIR}/ext/prebuilt/macos/sparkle/bin/generate_appcast"
 
-MESSENGER_BUNDLE_NAME="VirgilMessenger"
+# Sparkle
+SUFeedURL="${SUFeedURL:-""}"
+SUPublicEDKey="${SUPublicEDKey:-""}"
 
-RESULT_FOLDER="${BUILD_DIR}/Release"
-APP_BUNDLE="${APPLICATION_NAME}.app"
-DMG_FILE=${BUILD_DIR}/${APPLICATION_NAME}.dmg
-
-DMG_PREPARE_FOLDER="${BUILD_DIR}/DMG"
-
-DMG_PACK_FOLDER="${MESSENGER_BUNDLE_NAME}"
-
+#
+#	Resources
+#
 IMAGES_FOLDER="${SCRIPT_FOLDER}/macos/pkg_resources"
-ICON_FILE=""
 BACKGROUND_FILE="Background.png"
-PKG_IDENTIFIER="com.virgilsecurity.messenger"
-DISTRIBUTION_XML="/tmp/distribution.xml"
 DMG_ICON="Installer.icns"
 APP_ICON="MyIcon.icns"
 
-ENTITLEMENTS="/tmp/MacSandbox-Entitlements.plist"
+#
+#	DMG maker
+#
 APPDMG_SPEC="/tmp/spec.json"
+PKG_IDENTIFIER="com.virgilsecurity.messenger"
+
+#
+#	Results
+#
+APP_BUNDLE="${APPLICATION_NAME}.app"
+DMG_FILE="${BUILD_DIR}/${APPLICATION_NAME}.dmg"
+UPDATE_DIR="${BUILD_DIR}/update"
+RELEASE_NOTES="${PROJECT_DIR}/release-notes.html"
 
 #***************************************************************************************
 function check_env() {
@@ -89,7 +98,7 @@ function build_project() {
 
 	pushd ${BUILD_DIR}
 
-	${QMAKE_BIN} -config ${BUILD_TYPE} ${PROJECT_DIR} DEFINES+="VERSION=\"${VERSION}\""
+	${QMAKE_BIN} -config ${BUILD_TYPE} ${PROJECT_DIR} VERSION="${VERSION}"
 	check_error
 
 	make clean
@@ -108,14 +117,14 @@ function build_project() {
 	echo "=== Sign Autoupdate"
 	echo
 	AUTOUPDATE_APP="${BUILD_DIR}/${APPLICATION_NAME}.app/Contents/Frameworks/Sparkle.framework/Resources/Autoupdate.app"
-	sign_file "${AUTOUPDATE_APP}/Contents/MacOS/Autoupdate"
-	sign_file "${AUTOUPDATE_APP}/Contents/MacOS/fileop"
+	sign_file "${AUTOUPDATE_APP}/Contents/macos/Autoupdate"
+	sign_file "${AUTOUPDATE_APP}/Contents/macos/fileop"
 
 	echo
 	echo "=== Sign Main application"
 	echo
 	MAIN_APP="${BUILD_DIR}/${APPLICATION_NAME}.app"
-	sign_file "${MAIN_APP}/Contents/MacOS/${APPLICATION_NAME}"
+	sign_file "${MAIN_APP}/Contents/macos/${APPLICATION_NAME}"
 	sign_bundle "${MAIN_APP}"
 
 	echo
@@ -186,8 +195,8 @@ function notarize_dmg() {
 	echo "=== Get result of notarization"
 	echo
 	NOTARIZATION_DONE="false"
-	for ((count = 1; count < 20; count++)); do
-		echo "Wait .. ${count} of 20"
+	for ((count = 1; count < 40; count++)); do
+		echo "Wait .. ${count} of 40"
 		sleep 10s
 		INFO_OUTPUT=$(xcrun altool --notarization-info "${NOTARIZE_ID}" --username ${USER_NAME} -p ${PASS} 2>&1 | tr -d "\n")
 
@@ -222,8 +231,25 @@ function notarize_dmg() {
 }
 
 #***************************************************************************************
+function prepare_update() {
+	new_dir "${UPDATE_DIR}"
+
+	cp "${RELEASE_NOTES}" "${UPDATE_DIR}/${APPLICATION_NAME}-${VERSION}.html"
+	check_error
+
+	cp "${DMG_FILE}" "${UPDATE_DIR}/${APPLICATION_NAME}-${VERSION}.dmg"
+	check_error
+
+	rm -rf "${HOME}/Library/Caches/Sparkle_generate_appcast" || true
+
+	"${APPCAST_BIN}" "${UPDATE_DIR}"
+}
+
+#***************************************************************************************
 
 check_env
+"${SCRIPT_FOLDER}/generate-mac-plist.sh" "${SUFeedURL}" "${SUPublicEDKey}" "${VERSION}"
 build_project
 create_dmg
 notarize_dmg
+prepare_update

@@ -41,10 +41,24 @@
 
 #include <QGuiApplication>
 #include <QFont>
+#include <QDesktopServices>
+
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
+#if defined(VERSION)
+const QString VSQApplication::kVersion = QString(TOSTRING(VERSION));
+#else
+const QString VSQApplication::kVersion = "unknown";
+#endif
 
 /******************************************************************************/
 VSQApplication::VSQApplication() {
     m_netifUDPbcast = QSharedPointer<VSQUdpBroadcast>::create();
+
+#if (MACOS)
+    VSQMacos::instance().startUpdatesTimer();
+#endif
 }
 
 /******************************************************************************/
@@ -106,6 +120,25 @@ void VSQApplication::reloadQml() {
         rootObject->setProperty("height", 640);
     }
 #endif
+}
+
+/******************************************************************************/
+void VSQApplication::checkUpdates() {
+#if (MACOS)
+    VSQMacos::instance().checkUpdates();
+#endif
+}
+
+/******************************************************************************/
+QString
+VSQApplication::currentVersion() const {
+    return kVersion + "-alpha";
+}
+
+/******************************************************************************/
+void
+VSQApplication::sendReport() {
+    QDesktopServices::openUrl(QUrl("mailto:?to=kutashenko@gmail.com&subject=Virgil Messenger Report&body=Here is some email body text", QUrl::TolerantMode));
 }
 
 /******************************************************************************/

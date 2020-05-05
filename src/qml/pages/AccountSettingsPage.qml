@@ -8,8 +8,6 @@ import "../theme"
 Page {
     id: settingsPage
 
-    readonly property color kBtnColor: "#b44"
-
     background: Rectangle {
         color: backGroundColor
     }
@@ -37,7 +35,7 @@ Page {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
             Layout.margins: 30
-            text: qsTr("Version: ") + Messenger.currentVersion()
+            text: qsTr("Version: ") + app.currentVersion()
             font.pointSize: UiHelper.fixFontSz(22)
             color: mainTextCOlor
             elide: Text.ElideLeft
@@ -46,14 +44,9 @@ Page {
         PrimaryButton {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
-            height: 50
-
-            name: qsTr("Logout")
-            baseColor: kBtnColor
-            borderColor: kBtnColor
+            name: qsTr("Check updates")
             onClicked: {
-                logout()
-                close()
+                app.checkUpdates()
             }
         }
 
@@ -64,43 +57,48 @@ Page {
         PrimaryButton {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
-            height: 50
-            name: qsTr("Delete account")
-            baseColor: kBtnColor
-            borderColor: kBtnColor
-            onClicked: {
-                close()
-            }
-        }
-
-        Rectangle {
-            height: 10
-        }
-
-        PrimaryButton {
-            Layout.alignment: Qt.AlignHCenter
-            Layout.fillWidth: true
-            height: 50
             name: qsTr("Send report to developers")
-            baseColor: kBtnColor
-            borderColor: kBtnColor
             onClicked: {
-                Messenger.sendReport()
+                close()
+                app.sendReport()
             }
         }
 
         Rectangle {
             height: 10
-            Layout.fillHeight: true
         }
 
         PrimaryButton {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
-            height: 50
+            name: qsTr("Logout")
+            onClicked: {
+                close()
+                logout()
+            }
+        }
+
+        Rectangle {
+            height: 10
+        }
+
+        PrimaryButton {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
+            name: qsTr("Delete account")
+            onClicked: {
+                close()
+            }
+        }
+
+        Rectangle {
+            height: 10
+        }
+
+        PrimaryButton {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
             name: qsTr("Close")
-            baseColor: "transparent"
-            borderColor: kBtnColor
             onClicked: {
                 close()
             }

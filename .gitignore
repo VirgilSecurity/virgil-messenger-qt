@@ -48,4 +48,8 @@ moc_*.h
 qrc_resources.cpp
 Makefile
 
+####
+# macOS
+platforms/macos/virgil-messenger.plist
+
 !scripts/macos/pkg_resources/bin

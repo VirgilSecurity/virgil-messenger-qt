@@ -39,6 +39,14 @@ CONFIG += c++14
 TARGET = virgil-messenger
 
 #
+#   Set version
+#
+isEmpty(VERSION) {
+    VERSION = $$cat($$PWD/VERSION_MESSENGER)
+}
+message("VERSION = $$VERSION")
+
+#
 #   Include IoTKit Qt wrapper
 #
 PREBUILT_PATH = $$PWD/ext/prebuilt
@@ -56,7 +64,8 @@ message("QXMPP location : $${QXMPP_BUILD_PATH}")
 
 DEFINES += QT_DEPRECATED_WARNINGS \
         INFO_CLIENT=1 \
-        CFG_CLIENT=1
+        CFG_CLIENT=1 \
+        VERSION="$$VERSION"
 
 CONFIG(iphoneos, iphoneos | iphonesimulator) {
     DEFINES += VS_IOS=1
@@ -72,7 +81,7 @@ HEADERS += \
         include/VSQSqlContactModel.h \
         include/VSQSqlConversationModel.h \
         include/android/VSQAndroid.h \
-        include/mac/VSQMacos.h \
+        include/macos/VSQMacos.h \
         include/ui/VSQUiHelper.h
 
 #
@@ -95,12 +104,6 @@ SOURCES += \
 RESOURCES += src/resources.qrc
 
 #
-#   Icons
-#
-
-QT += svg xml
-
-#
 #   Include path
 #
 
@@ -111,12 +114,13 @@ INCLUDEPATH +=  include \
 #   Sparkle framework
 #
 unix:mac: {
-    OBJECTIVE_SOURCES += src/mac/VSQMacos.mm
+    OBJECTIVE_SOURCES += src/macos/VSQMacos.mm
     DEFINES += MACOS=1
     SPARKLE_LOCATION=$$PREBUILT_PATH/$${OS_NAME}/sparkle
     message("SPARKLE LOCATION = $$SPARKLE_LOCATION")
     QMAKE_LFLAGS  += -F$$SPARKLE_LOCATION
-    LIBS += -framework Sparkle
+    LIBS += -framework Sparkle -framework CoreFoundation -framework Foundation
+    INCLUDEPATH += $$SPARKLE_LOCATION/Sparkle.framework/Headers
 
     sparkle.path = Contents/Frameworks
     sparkle.files = $$SPARKLE_LOCATION/Sparkle.framework
@@ -144,6 +148,18 @@ DEPENDPATH += $${INCLUDEPATH}
 
 message("ANDROID_TARGET_ARCH = $$ANDROID_TARGET_ARCH")
 
+#
+#   macOS specific
+#
+macx: {
+    ICON = $$PWD/scripts/macos/pkg_resources/MyIcon.icns
+    QMAKE_INFO_PLIST = $$PWD/platforms/macos/virgil-messenger.plist
+}
+
+
+#
+#   Android specific
+#
 android: {
     DEFINES += ANDROID=1
     LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
@@ -154,15 +170,15 @@ android: {
         $$LIBS_DIR/libssl_1_1.so
 
     ANDROID_PACKAGE_SOURCE_DIR = \
-        $$PWD/android
+        $$PWD/platforms/android
 
     DISTFILES += \
-        android/AndroidManifest.xml \
-        android/build.gradle \
-        android/gradle/wrapper/gradle-wrapper.jar \
-        android/gradle/wrapper/gradle-wrapper.properties \
-        android/gradlew \
-        android/gradlew.bat \
-        android/res/values/libs.xml
+        platforms/android/AndroidManifest.xml \
+        platforms/android/build.gradle \
+        platforms/android/gradle/wrapper/gradle-wrapper.jar \
+        platforms/android/gradle/wrapper/gradle-wrapper.properties \
+        platforms/android/gradlew \
+        platforms/android/gradlew.bat \
+        platforms/android/res/values/libs.xml
 }
 
