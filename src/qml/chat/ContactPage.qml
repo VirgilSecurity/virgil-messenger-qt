@@ -57,7 +57,6 @@ import "./components"
 import "../components"
 
 Page {
-    id: root
 
     background: Rectangle {
         color: Theme.contactsBackgroundColor
@@ -144,7 +143,7 @@ Page {
     function addContact() {
         var component = Qt.createComponent("AddContactDialog.qml")
         if (component.status === Component.Ready) {
-            var dialog = component.createObject(rootWindow)
+            var dialog = component.createObject(root)
             dialog.applied.connect(function()
             {
                 try {

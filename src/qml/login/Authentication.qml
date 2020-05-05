@@ -6,93 +6,80 @@ import "../helpers/ui"
 import "../theme"
 import "./components"
 
-StackView {
-    id: authenticationPage
-    initialItem: mainView
 
-   	property var userList: Messenger.usersList()
+Page {
+    id: authenticationPage
+
+    property var userList: Messenger.usersList()
+    property var loginPage
+    property var registerPage
 
     background: Rectangle {
         color: "transparent"
     }
 
-    property var loginPage
-    property var registerPage
+    header: ToolBar {
+        implicitHeight: 60
 
-    Component.onCompleted: {
-        registerPage = Qt.createComponent("Register.qml")
-        loginPage = Qt.createComponent("Login.qml")
-    }
-
-    Page {
         background: Rectangle {
             color: "transparent"
         }
 
-        header: ToolBar {
-            implicitHeight: 60
+        SettingsButton {
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
 
-            background: Rectangle {
-                color: "transparent"
-            }
-
-            SettingsButton {
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-
-                Action {
-                    text: qsTr("Settings")
-                    onTriggered: showSettings()
-                }
+            Action {
+                text: qsTr("Settings")
+                onTriggered: mainLayout.push(Qt.createComponent('GlobalSettingsPage.qml'))
             }
         }
+    }
 
-        id: mainView
+    CenteredAuthLayout {
+        id: centeredAuthLayout
 
-        CenteredAuthLayout {
-            id: centeredAuthLayout
+        content: ColumnLayout {
+            spacing: 10
+            Layout.maximumWidth: 300
+            Layout.alignment: Qt.AlignHCenter
+            Layout.minimumHeight: 260
+            Layout.maximumHeight: 480
 
-            content: ColumnLayout {
-                spacing: 10
-                Layout.maximumWidth: 300
-                Layout.alignment: Qt.AlignHCenter
-                Layout.minimumHeight: 260
+            Loader {
+                Layout.minimumHeight: 220
                 Layout.maximumHeight: 480
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                readonly property url mainLogoSrc: "./components/MainLogo.qml"
+                readonly property url userSelectionSrc: "./components/UserSelection.qml"
 
-                Loader {
-                    Layout.minimumHeight: 220
-                    Layout.maximumHeight: 480
-                    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    readonly property url mainLogoSrc: "./components/MainLogo.qml"
-                    readonly property url userSelectionSrc: "./components/UserSelection.qml"
+                source: !userList.length ? mainLogoSrc : userSelectionSrc
+            }
 
-                    source: !userList.length ? mainLogoSrc : userSelectionSrc
-                }
+            Item {
+                Layout.maximumHeight: 90
+                Layout.minimumHeight: 0
+                Layout.fillHeight: true
+            }
 
-                Item {
-                    Layout.maximumHeight: 90
-                    Layout.minimumHeight: 0
-                    Layout.fillHeight: true
-                }
+            PrimaryButton {
+                id: registerButton
+                text: qsTr("Register")
+                Layout.fillWidth: true
+                onClicked: mainLayout.push(Qt.createComponent("Register.qml"))
+            }
 
-                PrimaryButton {
-                    id: registerButton
-                    text: qsTr("Register")
-                    Layout.fillWidth: true
-                    onClicked: authenticationPage.push(authenticationPage.registerPage)
-                }
-
-                OutlineButton {
-                    id: loginButton
-                    text: qsTr("Sign In")
-                    onClicked: authenticationPage.push(authenticationPage.loginPage)
-                    Layout.fillWidth: true
-                }
+            OutlineButton {
+                id: loginButton
+                text: qsTr("Sign In")
+                onClicked: mainLayout.push(Qt.createComponent("Login.qml"))
+                Layout.fillWidth: true
             }
         }
     }
 }
+
 
 

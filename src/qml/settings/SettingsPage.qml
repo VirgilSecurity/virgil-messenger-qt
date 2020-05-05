@@ -59,6 +59,7 @@ Page {
             Layout.fillWidth: true
             name: qsTr("Send report to developers")
             onClicked: {
+                close()
                 app.sendReport()
             }
         }
@@ -72,6 +73,7 @@ Page {
             Layout.fillWidth: true
             name: qsTr("Logout")
             onClicked: {
+                close()
                 logout()
             }
         }
@@ -85,7 +87,7 @@ Page {
             Layout.fillWidth: true
             name: qsTr("Delete account")
             onClicked: {
-                closeSettings()
+                close()
             }
         }
 
@@ -98,8 +100,12 @@ Page {
             Layout.fillWidth: true
             name: qsTr("Close")
             onClicked: {
-                closeSettings()
+                close()
             }
         }
+    }
+
+    function close() {
+        parent.pop(StackView.Immediate)
     }
 }

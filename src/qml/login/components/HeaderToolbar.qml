@@ -18,7 +18,7 @@ ToolBar {
             anchors.leftMargin: 20
             anchors.rightMargin: 20
             height: 1
-            color: Theme.toolbarSepratatorColor
+            color: Theme.chatBackgroundColor
             anchors.bottom: parent.bottom
         }
     }
@@ -39,7 +39,7 @@ ToolBar {
             icon.height: 24
             icon.width: 24
             icon.color: Theme.secondaryTextColor
-            onClicked: authenticationPage.pop()
+            onClicked: mainLayout.back()
             font.pointSize: UiHelper.fixFontSz(24)
         }
 

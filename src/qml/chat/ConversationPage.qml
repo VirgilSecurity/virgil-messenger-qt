@@ -52,21 +52,19 @@ import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
 
-Page {
-    id: root
+import "../theme"
 
-    //
+Page {
+   //
     //  Properties
     //
     property string inConversationWith
-    property string bgColor: backGroundColor
 
     background: Rectangle {
-        color: bgColor
+        color: Theme.chatBackgroundColor
     }
 
-    header: ConversationToolBar {
-    }
+    header: ConversationToolBar {}
 
     ColumnLayout {
         anchors.fill: parent
