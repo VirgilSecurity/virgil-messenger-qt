@@ -80,3 +80,14 @@ if [ -z "$PROJECT_DIR" ] || [ ! -d ${PROJECT_DIR} ]; then
     echo "Wrong Project directory: ${PROJECT_DIR}"
     exit 1
 fi
+#***************************************************************************************
+function new_dir() {
+    if [ -d "${1}" ]; then
+        rm -rf "${1}"
+    fi
+
+    mkdir -p "${1}"
+    check_error
+}
+
+#***************************************************************************************
