@@ -106,7 +106,7 @@ Page {
                         TextEdit {
                             id: messageText
                             property string message: model.message
-                            textFormat: Text.RichText
+                            textFormat: isValidURL(message) ? TextEdit.RichText : TextEdit.PlainText
                             color: sentByMe ? "black" : "white"
                             anchors.fill: parent
                             anchors.margins: 12
@@ -114,12 +114,14 @@ Page {
                             selectByMouse: true
                             readOnly: true
 
-                            text: isValidURL(message) ? ("<a href='"+message+"'>"+message+"</a>") : message
-                            onLinkActivated:{
+                            text: isValidURL(message) ? ("<a href='"+message+"'>"+message+"</a>") : message.trim()
+
+                            onLinkActivated: {
                                 if (isValidURL(message)){
                                    Qt.openUrlExternally(message)
                                 }
                             }
+
                             function isValidURL(message) {
                                var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
                                return regexp.test(message);
@@ -148,15 +150,19 @@ Page {
 
                 TextArea {
                     id: messageField
+                    focus: true
                     Layout.fillWidth: true
                     placeholderText: qsTr("Compose message")
                     wrapMode: TextArea.Wrap
+
+                    Keys.onReturnPressed: event.modifiers ? event.accepted = false : sendButton.clicked();
                 }
 
                 Button {
                     id: sendButton
+                    property string message: messageField.text.trim()
                     text: qsTr("Send")
-                    enabled: messageField.length > 0
+                    enabled: messageField.length > 0 && message != ""
                     onClicked: {
                         Messenger.sendMessage(inConversationWith, messageField.text)
                         messageField.text = "";
