@@ -38,6 +38,8 @@ CONFIG += c++14
 
 TARGET = virgil-messenger
 
+QMAKE_TARGET_BUNDLE_PREFIX = com.virgilsecurity
+
 #
 #   Set version
 #

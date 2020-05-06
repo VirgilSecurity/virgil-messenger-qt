@@ -50,11 +50,11 @@ check_error
 echo "=== Copy openssl libraries"
 cp capi.dll                               ${BUILD_DIR}/DistributionKit/lib
 check_error
-cp dasync.dll                             ${BUILD_DIR}/DistributionKit/lib
+cp padlock.dll                            ${BUILD_DIR}/DistributionKit/lib
 check_error
-cp libcrypto-1_1.dll                      ${BUILD_DIR}/DistributionKit/lib
+cp libcrypto-1_1-x64.dll                  ${BUILD_DIR}/DistributionKit/lib
 check_error
-cp libssl-1_1.dll                         ${BUILD_DIR}/DistributionKit/lib
+cp libssl-1_1-x64.dll                     ${BUILD_DIR}/DistributionKit/lib
 check_error
 cp libssl-10.dll                          ${BUILD_DIR}/DistributionKit/lib
 check_error
