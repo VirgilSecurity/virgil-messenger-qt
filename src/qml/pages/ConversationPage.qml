@@ -106,7 +106,7 @@ Page {
                         TextEdit {
                             id: messageText
                             property string message: model.message
-                            textFormat: isValidURL(message) ? TextEdit.RichText : TextEdit.PlainText
+                            textFormat: isValidURL(message) ? Text.RichText : Text.PlainText
                             color: sentByMe ? "black" : "white"
                             anchors.fill: parent
                             anchors.margins: 12
@@ -155,7 +155,14 @@ Page {
                     placeholderText: qsTr("Compose message")
                     wrapMode: TextArea.Wrap
 
-                    Keys.onReturnPressed: event.modifiers ? event.accepted = false : sendButton.clicked();
+                    Keys.onReturnPressed: {
+                      if (event.modifiers && Qt.ShiftModifier) {
+                          event.accepted = false;
+                      } else {
+                          event.accepted = true
+                          sendButton.clicked();
+                      }
+                    }
                 }
 
                 Button {
