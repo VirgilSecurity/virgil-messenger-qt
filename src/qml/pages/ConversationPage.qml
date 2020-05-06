@@ -164,8 +164,10 @@ Page {
                     text: qsTr("Send")
                     enabled: messageField.length > 0 && message != ""
                     onClicked: {
-                        Messenger.sendMessage(inConversationWith, messageField.text)
-                        messageField.text = "";
+                        if (message != "") {
+                            Messenger.sendMessage(inConversationWith, messageField.text)
+                            messageField.text = "";
+                        }
                     }
                 }
             }
