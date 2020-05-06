@@ -60,5 +60,6 @@
         <file>qml/theme/qmldir</file>
         <file>qml/theme/Theme.qml</file>
         <file>qml/Main.qml</file>
+        <file>qml/pages/SplashScreenPage.qml</file>
     </qresource>
 </RCC>

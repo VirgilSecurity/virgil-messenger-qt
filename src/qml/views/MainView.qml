@@ -1,13 +1,14 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import Qt.labs.settings 1.1
 
 import "../js/login.js" as LoginLogic
 
 StackView {
+    id: mainView
     focus: true
     anchors.fill: parent
-
-    initialItem: Qt.createComponent("../pages/AuthenticationPage.qml")
+    initialItem: Qt.createComponent("../pages/SplashScreenPage.qml")
 
     Keys.onReleased: {
         if (event.key === Qt.Key_Back || event.key === Qt.Key_Escape) {
@@ -18,9 +19,23 @@ StackView {
         }
     }
 
+    property string lastSignedInUser
+
+    Settings {
+        property alias lastSignedInUser: mainView.lastSignedInUser
+    }
 
     function back() {
       pop()
+    }
+
+    function showMain() {
+        if (lastSignedInUser){
+            signIn(lastSignedInUser)
+        }
+        else {
+            showAuthentication()
+        }
     }
 
     function showAuthentication() {
@@ -40,6 +55,7 @@ StackView {
             Messenger.signIn(user)
             showPopupInform("Sign In ...")
             replace(Qt.createComponent("./ChatView.qml"))
+            lastSignedInUser = user
         } else {
             root.showPopupError(qsTr("Incorrect user name"))
         }
@@ -51,6 +67,7 @@ StackView {
             Messenger.signUp(user)
             showPopupInform("Sign Up ...")
             replace(Qt.createComponent("./ChatView.qml"))
+            lastSignedInUser = user
         } else {
             showPopupError(qsTr("Incorrect user name"))
         }
@@ -59,6 +76,7 @@ StackView {
     function logout() {
         Messenger.logout()
 
+        lastSignedInUser = ""
         showAuthentication()
     }
 
