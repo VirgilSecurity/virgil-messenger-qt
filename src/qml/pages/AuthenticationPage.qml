@@ -72,6 +72,7 @@ Page {
 
             OutlineButton {
                 id: loginButton
+                objectName: "bLogin"
                 text: qsTr("Sign In")
                 onClicked: mainView.push(Qt.createComponent("LoginPage.qml"))
                 Layout.fillWidth: true

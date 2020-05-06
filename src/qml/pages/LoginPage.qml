@@ -38,6 +38,7 @@ Page {
 
             TextField {
                 id: username
+                objectName: "tfLoginUsername"
                 Layout.fillWidth: true
                 Layout.topMargin: 10
                 height: 40
@@ -56,6 +57,7 @@ Page {
 
             PrimaryButton {
                 text: qsTr("Sign In")
+                objectName: "bSignIn"
                 onClicked: mainView.signIn(username.text)
                 Layout.fillWidth: true
                 Layout.topMargin: 15
