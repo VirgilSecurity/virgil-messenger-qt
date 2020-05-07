@@ -6,6 +6,11 @@
 SCRIPT_FOLDER="$(cd "$(dirname "$0")" && pwd)"
 source ${SCRIPT_FOLDER}/ish/common.sh
 
+ls /fff
+
+exit; 
+
+
 PLATFORM=linux-mingw
 BUILD_DIR=${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.${PLATFORM}/
 LINUX_QMAKE="${QT_SDK_DIR}/mingw64/bin/qmake"
@@ -15,7 +20,7 @@ print_title
 
 prepare_libraries
 
-prepare_dir
+new_dir ${BUILD_DIR}
 
 echo
 echo "=== Build application bundle"

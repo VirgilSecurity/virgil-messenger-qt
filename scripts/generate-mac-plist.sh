@@ -5,6 +5,9 @@
 #
 SCRIPT_FOLDER="$(cd "$(dirname "$0")" && pwd)"
 source ${SCRIPT_FOLDER}/ish/common.sh
+prepare_libraries
+exit 0;
+
 
 # Sparkle
 SUFeedURL="${1}"
@@ -26,9 +29,7 @@ function fill_plist() {
     local TEMPLATE_PLIST="${PLIST_DIR}/virgil-messenger.plist.in"
     local DST_PLIST="${PLIST_DIR}/virgil-messenger.plist"
 
-    if [ -f ${DST_PLIST} ]; then
-        rm "${DST_PLIST}"
-    fi
+    rm -f "${DST_PLIST}"
 
     echo
     echo "=== Fill Info.plist for sparkle"
@@ -40,17 +41,14 @@ function fill_plist() {
 
 if [ z"${SUFeedURL}" == "z" ]; then
     print_usage
-    exit 1
-fi
+exit 1
 
 if [ z"${SUPublicEDKey}" == "z" ]; then
     print_usage
-    exit 1
-fi
+exit 1
 
 if [ z"${VERSION_PLIST}" == "z" ]; then
     print_usage
-    exit 1
-fi
+exit 1
 
 fill_plist

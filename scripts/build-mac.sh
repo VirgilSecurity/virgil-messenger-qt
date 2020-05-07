@@ -69,19 +69,13 @@ function sign_bundle() {
 	local BUNDLE="${1}"
 
 	pushd ${BUNDLE}
-
-	echo
-	echo "=== Remove dSYM files"
-	echo
-	for i in $(find . -name "*.dSYM"); do
-		rm -rf "${i}"
-	done
-
+		print_message "Remove dSYM files"
+		for i in $(find . -name "*.dSYM"); do
+			rm -rf "${i}"
+		done
 	popd
 
-	echo
-	echo "=== Sign bundle"
-	echo
+	print_message "Sign bundle"
 	codesign --deep --force --verify --verbose --sign "${CERT_ID}" --options runtime "${BUNDLE}"
 }
 
@@ -91,10 +85,9 @@ function build_project() {
 
 	prepare_libraries
 
-	prepare_dir
+	new_dir ${BUILD_DIR}
 
-	echo
-	echo "=== Build application bundle"
+	print_message "Build application bundle"
 
 	pushd ${BUILD_DIR}
 
@@ -106,23 +99,17 @@ function build_project() {
 	make -j10
 	check_error
 
-	echo
-	echo "=== Deploy MAC application"
-	echo
+	print_message "Deploy MAC application"
 
 	${MACDEPLOYQT_BIN} ${APPLICATION_NAME}.app \
 		-qmldir=${PROJECT_DIR}/src/qml
 
-	echo
-	echo "=== Sign Autoupdate"
-	echo
+	print_message "Sign Autoupdate"
 	AUTOUPDATE_APP="${BUILD_DIR}/${APPLICATION_NAME}.app/Contents/Frameworks/Sparkle.framework/Resources/Autoupdate.app"
 	sign_file "${AUTOUPDATE_APP}/Contents/macos/Autoupdate"
 	sign_file "${AUTOUPDATE_APP}/Contents/macos/fileop"
 
-	echo
-	echo "=== Sign Main application"
-	echo
+	print_message "Sign Main application"
 	MAIN_APP="${BUILD_DIR}/${APPLICATION_NAME}.app"
 	sign_file "${MAIN_APP}/Contents/macos/${APPLICATION_NAME}"
 	sign_bundle "${MAIN_APP}"

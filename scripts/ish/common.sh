@@ -17,9 +17,23 @@ if [ -f "${PROJECT_DIR}/VERSION_MESSENGER" ]; then
     export VERSION="$(cat ${PROJECT_DIR}/VERSION_MESSENGER | tr -d '\n').${BUILD_NUMBER}"
 fi
 
+# trap check_error ERR
+
+trap 'trapinfo' ERR
+trapinfo(){
+    err_code=$?
+    echo "##############################################################################"
+    echo "### error at $0, line $BASH_LINENO"
+    echo "### BASH_COMMAND: $BASH_COMMAND"
+    echo "### return code status: $err_code"
+    echo "##############################################################################"
+}
+
 #***************************************************************************************
 function check_error() {
     RETRES=$?
+
+    echo $BASH_COMMAND
     if [ $RETRES != 0 ]; then
         echo "----------------------------------------------------------------------"
         echo "############# !!! PROCESS ERROR ERRORCODE=[$RETRES]  #################"
@@ -31,6 +45,7 @@ function check_error() {
     return $RETRES
 }
 
+export -f check_error
 #***************************************************************************************
 function print_title() {
     echo
@@ -43,20 +58,43 @@ function print_title() {
     echo
 }
 
-#***************************************************************************************
-function prepare_dir() {
-    echo "=== Prepare directory"
+function print_message() {
     echo
-    rm -rf ${BUILD_DIR} || true
-    mkdir -p ${BUILD_DIR}
-    check_error
+    echo "===================================="
+    echo "=== ${1}"
+    echo "===================================="
 }
 
 #***************************************************************************************
 function prepare_libraries() {
-    echo "=== Prepare libraries"
-    echo
-    ${PROJECT_DIR}/scripts/get-prebuilt-libs.sh
+
+    CORE_VER=$(head -n 1 ${SCRIPT_FOLDER}/../VERSION_CORE)
+    ARCH_NAME=prebuilt-${CORE_VER}.tgz
+    PREBUILT_ARCHIVE="https://bintray.com/virgilsecurity/iotl-demo-cdn/download_file?file_path=${ARCH_NAME}"
+
+    INSTALL_DIR="${SCRIPT_FOLDER}/../ext/"
+
+
+    print_message "CORE VERSION = ${CORE_VER}"
+
+
+    if [ -d ${INSTALL_DIR}/prebuilt ] && [ "${PREBUILT_SKIP}" == "true" ]; then
+        print_message "Prebuild libraries found. Download skipped"
+        exit 0
+    fi
+
+    new_dir ${INSTALL_DIR} 
+
+    pushd ${INSTALL_DIR}
+        wget -O ${ARCH_NAME} ${PREBUILT_ARCHIVE}
+        check_error
+
+        tar -xvf ${ARCH_NAME}
+        check_error
+
+        rm ${ARCH_NAME}
+    popd
+
 }
 
 #***************************************************************************************
@@ -82,12 +120,12 @@ if [ -z "$PROJECT_DIR" ] || [ ! -d ${PROJECT_DIR} ]; then
 fi
 #***************************************************************************************
 function new_dir() {
-    if [ -d "${1}" ]; then
-        rm -rf "${1}"
-    fi
+    echo "=== Prepare directory: ${1}"
+    rm -rf "${1}"
 
     mkdir -p "${1}"
     check_error
 }
 
+export -f new_dir
 #***************************************************************************************
