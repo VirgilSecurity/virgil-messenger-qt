@@ -61,8 +61,4 @@ StackView {
 
         showAuthentication()
     }
-
-    function showUserSettings() {
-        chatLayout.showUserSettings()
-    }
 }
