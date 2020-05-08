@@ -72,7 +72,7 @@ function prepare_libraries() {
 
     if [ -d ${INSTALL_DIR}/prebuilt ] && [ "${PREBUILT_SKIP}" == "true" ]; then
         print_message "Prebuild libraries found. Download skipped"
-        exit 0
+        return 0
     fi
 
     new_dir ${INSTALL_DIR} 
