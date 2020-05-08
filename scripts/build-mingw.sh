@@ -10,6 +10,9 @@ PLATFORM=linux-mingw
 BUILD_DIR=${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.${PLATFORM}/
 LINUX_QMAKE="${QT_SDK_DIR}/mingw64/bin/qmake"
 
+ls /ffff 
+exit 1;
+
 #***************************************************************************************
 print_title
 
