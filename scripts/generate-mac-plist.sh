@@ -34,7 +34,6 @@ function fill_plist() {
     echo
     echo "=== Fill Info.plist for sparkle"
     sed -e "s,@VERSION@,${VERSION_PLIST},g" -e "s,@SUFeedURL@,${SUFeedURL},g" -e "s,@SUPublicEDKey@,${SUPublicEDKey},g" ${TEMPLATE_PLIST} >${DST_PLIST}
-    check_error
 }
 
 #***************************************************************************************

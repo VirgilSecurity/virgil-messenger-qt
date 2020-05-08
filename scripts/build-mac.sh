@@ -92,12 +92,10 @@ function build_project() {
 	pushd ${BUILD_DIR}
 
 	${QMAKE_BIN} -config ${BUILD_TYPE} ${PROJECT_DIR} VERSION="${VERSION}"
-	check_error
 
 	make clean
 
 	make -j10
-	check_error
 
 	print_message "Deploy MAC application"
 
@@ -172,9 +170,7 @@ function notarize_dmg() {
 	echo "=== Send Application for Apple's notarization"
 	echo
 	NOTARIZE_OUTPUT=$(xcrun altool -t osx -f "${DMG_FILE}" --primary-bundle-id "${PKG_IDENTIFIER}" --notarize-app --username ${USER_NAME} -p ${PASS} 2>&1)
-	check_error
 	NOTARIZE_ID=$(echo ${NOTARIZE_OUTPUT} | tr -d "\n" | grep -F 'No errors uploading' | awk -F 'RequestUUID' '{print $2}' | awk -F ' ' '{print $2}')
-	check_error
 
 	echo "NOTARIZE_ID = ${NOTARIZE_ID}"
 
@@ -189,7 +185,6 @@ function notarize_dmg() {
 
 		if echo ${INFO_OUTPUT} | grep -q -F 'Status Message: Package Approved'; then
 			NOTARIZATION_DONE="true"
-			check_error
 			break
 		fi
 
@@ -210,7 +205,6 @@ function notarize_dmg() {
 	STAMPLE_OUTPUT=$(xcrun stapler staple -v "${DMG_FILE}" 2>&1 | tr -d "\n")
 
 	if echo ${STAMPLE_OUTPUT} | grep -q -F 'The staple and validate action worked!'; then
-		check_error
 	else
 		echo "${STAMPLE_OUTPUT}"
 		exit 1
@@ -222,10 +216,8 @@ function prepare_update() {
 	new_dir "${UPDATE_DIR}"
 
 	cp "${RELEASE_NOTES}" "${UPDATE_DIR}/${APPLICATION_NAME}-${VERSION}.html"
-	check_error
 
 	cp "${DMG_FILE}" "${UPDATE_DIR}/${APPLICATION_NAME}-${VERSION}.dmg"
-	check_error
 
 	rm -rf "${HOME}/Library/Caches/Sparkle_generate_appcast" || true
 

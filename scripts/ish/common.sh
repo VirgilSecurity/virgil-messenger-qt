@@ -17,36 +17,19 @@ if [ -f "${PROJECT_DIR}/VERSION_MESSENGER" ]; then
     export VERSION="$(cat ${PROJECT_DIR}/VERSION_MESSENGER | tr -d '\n').${BUILD_NUMBER}"
 fi
 
-# trap check_error ERR
 
-trap 'trapinfo' ERR
-trapinfo(){
+trap 'err_trap' ERR
+
+err_trap(){
     err_code=$?
     echo "##############################################################################"
-    echo "### error at $0, line $BASH_LINENO"
-    echo "### BASH_COMMAND: $BASH_COMMAND"
-    echo "### return code status: $err_code"
+    echo "### SCRIPT ERROR AT $0, IN LINE $BASH_LINENO"
+    echo "### BASH COMMAND: $BASH_COMMAND"
+    echo "### ERRORCODE: $err_code"
     echo "##############################################################################"
 }
 
-#***************************************************************************************
-function check_error() {
-    RETRES=$?
 
-    echo $BASH_COMMAND
-    if [ $RETRES != 0 ]; then
-        echo "----------------------------------------------------------------------"
-        echo "############# !!! PROCESS ERROR ERRORCODE=[$RETRES]  #################"
-        echo "----------------------------------------------------------------------"
-        [ "$1" == "0" ] || exit $RETRES
-    else
-        echo "-----# Process OK. ---------------------------------------------------"
-    fi
-    return $RETRES
-}
-
-export -f check_error
-#***************************************************************************************
 function print_title() {
     echo
     echo "===================================="
@@ -87,10 +70,8 @@ function prepare_libraries() {
 
     pushd ${INSTALL_DIR}
         wget -O ${ARCH_NAME} ${PREBUILT_ARCHIVE}
-        check_error
 
         tar -xvf ${ARCH_NAME}
-        check_error
 
         rm ${ARCH_NAME}
     popd
@@ -124,7 +105,6 @@ function new_dir() {
     rm -rf "${1}"
 
     mkdir -p "${1}"
-    check_error
 }
 
 export -f new_dir

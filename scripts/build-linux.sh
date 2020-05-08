@@ -23,20 +23,15 @@ print_message "Build application bundle"
 pushd "${BUILD_DIR}"
 
     ${LINUX_QMAKE} -config ${BUILD_TYPE} ${PROJECT_DIR} VERSION="${VERSION}"
-    check_error
 
     make -j10
-    check_error
 
     cqtdeployer -bin ${APPLICATION_NAME} -qmlDir ${PROJECT_DIR}/src/qml -qmake ${LINUX_QMAKE} clear
-    check_error
 
     print_message "Copy libvs-messenger-internal.so "
     cp ${PROJECT_DIR}/ext/prebuilt/linux/release/installed/usr/local/lib/libvs-messenger-internal.so DistributionKit/lib
-    check_error
 
     print_message "Copy libvs-messenger-crypto.so "
     cp ${PROJECT_DIR}/ext/prebuilt/linux/release/installed/usr/local/lib/libvs-messenger-crypto.so DistributionKit/lib
-    check_error
 
 popd

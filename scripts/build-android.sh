@@ -30,16 +30,12 @@ build_proc() {
     print_message "Build Messenger"
     pushd ${BUILD_DIR}
         ${ANDROID_QMAKE} ${PROJECT_FILE} -spec android-clang CONFIG+=qtquickcompiler VERSION="${VERSION}"
-        check_error
 
         ${ANDROID_MAKE} -j10
-        check_error
 
         ${ANDROID_MAKE} INSTALL_ROOT=${BUILD_DIR}/android-build install
-        check_error
 
         ${ANDROID_DEPLOY_QT} --input ${BUILD_DIR}/android-lib${APPLICATION_NAME}.so-deployment-settings.json --output ${BUILD_DIR}/android-build --android-platform ${ANDROID_PLATFORM} --gradle
-        check_error
     popd
 }
 
