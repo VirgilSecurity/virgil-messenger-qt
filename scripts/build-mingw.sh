@@ -1,4 +1,5 @@
-#!/bin/bash -xe
+#!/bin/bash
+set -o errtrace
 
 #
 #   Global variables

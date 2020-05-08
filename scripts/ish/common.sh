@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 PROJECT_DIR="${SCRIPT_FOLDER}/.."
 QT_SDK_DIR="${1:-/opt/Qt/5.12.6}"
 ANDROID_NDK="${2:-/opt/android/ndk}"
@@ -18,13 +19,21 @@ if [ -f "${PROJECT_DIR}/VERSION_MESSENGER" ]; then
 fi
 
 
-trap 'err_trap' ERR
+trap 'err_trap  $@' ERR
 
 err_trap(){
     err_code=$?
+    # ${FUNCNAME[*]} : err_trap print_message main  
+    # call from subfunction: lenght = 3
+    # ${FUNCNAME[*]} : err_trap  main
+    # call from main: lenght = 2
+    arr_shift=$((${#FUNCNAME[@]} - 2))
+    # if arr_shift eq 0. we need to ommit FUNCTION and ARGUMENTS
     echo "##############################################################################"
-    echo "### SCRIPT ERROR AT $0, IN LINE $BASH_LINENO"
-    echo "### BASH COMMAND: $BASH_COMMAND"
+    echo "### SCRIPT ERROR AT $0, IN LINE ${BASH_LINENO[$arr_shift]}"
+    [  $arr_shift -ne 0 ] && echo "### BASH FUNCTION NAME: ${FUNCNAME[$arr_shift]}"
+    echo "### BASH COMMAND: ${BASH_COMMAND[*]}"
+    [  $arr_shift -ne 0 ] && echo "### COMMAND ARGUMENTS: $@"
     echo "### ERRORCODE: $err_code"
     echo "##############################################################################"
 }
@@ -42,6 +51,7 @@ function print_title() {
 }
 
 function print_message() {
+    ls ${1}
     echo
     echo "===================================="
     echo "=== ${1}"
