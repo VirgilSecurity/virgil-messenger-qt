@@ -68,12 +68,8 @@ function sign_file() {
 function sign_bundle() {
 	local BUNDLE="${1}"
 
-	pushd ${BUNDLE}
-		print_message "Remove dSYM files"
-		for i in $(find . -name "*.dSYM"); do
-			rm -rf "${i}"
-		done
-	popd
+	print_message "Remove ${BUNDLE}/*.dSYM files" 
+	find  ${BUNDLE} -type f -name "*.dSYM" -delete
 
 	print_message "Sign bundle"
 	codesign --deep --force --verify --verbose --sign "${CERT_ID}" --options runtime "${BUNDLE}"
@@ -91,34 +87,33 @@ function build_project() {
 
 	pushd ${BUILD_DIR}
 
-	${QMAKE_BIN} -config ${BUILD_TYPE} ${PROJECT_DIR} VERSION="${VERSION}"
+		${QMAKE_BIN} -config ${BUILD_TYPE} ${PROJECT_DIR} VERSION="${VERSION}"
 
-	make clean
+		make clean
 
-	make -j10
+		make -j10
 
-	print_message "Deploy MAC application"
+		print_message "Deploy MAC application"
 
-	${MACDEPLOYQT_BIN} ${APPLICATION_NAME}.app \
-		-qmldir=${PROJECT_DIR}/src/qml
+		${MACDEPLOYQT_BIN} ${APPLICATION_NAME}.app -qmldir=${PROJECT_DIR}/src/qml
 
-	print_message "Sign Autoupdate"
-	AUTOUPDATE_APP="${BUILD_DIR}/${APPLICATION_NAME}.app/Contents/Frameworks/Sparkle.framework/Resources/Autoupdate.app"
-	sign_file "${AUTOUPDATE_APP}/Contents/macos/Autoupdate"
-	sign_file "${AUTOUPDATE_APP}/Contents/macos/fileop"
+		print_message "Sign Autoupdate"
+		AUTOUPDATE_APP="${BUILD_DIR}/${APPLICATION_NAME}.app/Contents/Frameworks/Sparkle.framework/Resources/Autoupdate.app"
+		sign_file "${AUTOUPDATE_APP}/Contents/macos/Autoupdate"
+		sign_file "${AUTOUPDATE_APP}/Contents/macos/fileop"
 
-	print_message "Sign Main application"
-	MAIN_APP="${BUILD_DIR}/${APPLICATION_NAME}.app"
-	sign_file "${MAIN_APP}/Contents/macos/${APPLICATION_NAME}"
-	sign_bundle "${MAIN_APP}"
+		print_message "Sign Main application"
+		MAIN_APP="${BUILD_DIR}/${APPLICATION_NAME}.app"
+		sign_file "${MAIN_APP}/Contents/macos/${APPLICATION_NAME}"
+		sign_bundle "${MAIN_APP}"
 
-	echo
-	echo "=== Set app file properties"
-	echo
-	echo "hideExtention ${APP_BUNDLE}"
-	hideExtention "${APP_BUNDLE}"
+		print_message "Set app file properties"
+		echo "hideExtention ${APP_BUNDLE}"
+		hideExtention "${APP_BUNDLE}"
 
-	setIcon "${IMAGES_FOLDER}" "${APP_ICON}" "${BUILD_DIR}/${APP_BUNDLE}"
+		setIcon "${IMAGES_FOLDER}" "${APP_ICON}" "${BUILD_DIR}/${APP_BUNDLE}"
+
+	popd
 }
 
 #***************************************************************************************
@@ -153,7 +148,7 @@ function setIcon() {
 	local FILE_TO_APPLY="${3}"
 
 	pushd "${ICON_FOLDER}"
-	./bin/seticon "${ICON_FILE}" "${FILE_TO_APPLY}"
+		./bin/seticon "${ICON_FILE}" "${FILE_TO_APPLY}"
 	popd
 }
 
@@ -166,19 +161,17 @@ function create_dmg() {
 }
 #***************************************************************************************
 function notarize_dmg() {
-	echo
-	echo "=== Send Application for Apple's notarization"
-	echo
+	print_message "Send Application for Apple's notarization"
+
 	NOTARIZE_OUTPUT=$(xcrun altool -t osx -f "${DMG_FILE}" --primary-bundle-id "${PKG_IDENTIFIER}" --notarize-app --username ${USER_NAME} -p ${PASS} 2>&1)
 	NOTARIZE_ID=$(echo ${NOTARIZE_OUTPUT} | tr -d "\n" | grep -F 'No errors uploading' | awk -F 'RequestUUID' '{print $2}' | awk -F ' ' '{print $2}')
 
 	echo "NOTARIZE_ID = ${NOTARIZE_ID}"
 
-	echo
-	echo "=== Get result of notarization"
-	echo
+	print_message "Get result of notarization"
+
 	NOTARIZATION_DONE="false"
-	for ((count = 1; count < 40; count++)); do
+	for count in $(seq 1 40); do
 		echo "Wait .. ${count} of 40"
 		sleep 10s
 		INFO_OUTPUT=$(xcrun altool --notarization-info "${NOTARIZE_ID}" --username ${USER_NAME} -p ${PASS} 2>&1 | tr -d "\n")
@@ -199,9 +192,8 @@ function notarize_dmg() {
 		exit 1
 	fi
 
-	echo
-	echo "=== Staple result of the notarization"
-	echo
+	print_message "Staple result of the notarization"
+
 	STAMPLE_OUTPUT=$(xcrun stapler staple -v "${DMG_FILE}" 2>&1 | tr -d "\n")
 
 	if echo ${STAMPLE_OUTPUT} | grep -q -F 'The staple and validate action worked!'; then
@@ -216,10 +208,9 @@ function prepare_update() {
 	new_dir "${UPDATE_DIR}"
 
 	cp "${RELEASE_NOTES}" "${UPDATE_DIR}/${APPLICATION_NAME}-${VERSION}.html"
-
 	cp "${DMG_FILE}" "${UPDATE_DIR}/${APPLICATION_NAME}-${VERSION}.dmg"
 
-	rm -rf "${HOME}/Library/Caches/Sparkle_generate_appcast" || true
+	rm -rf "${HOME}/Library/Caches/Sparkle_generate_appcast"
 
 	"${APPCAST_BIN}" "${UPDATE_DIR}"
 }
