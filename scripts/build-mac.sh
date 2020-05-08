@@ -197,6 +197,7 @@ function notarize_dmg() {
 	STAMPLE_OUTPUT=$(xcrun stapler staple -v "${DMG_FILE}" 2>&1 | tr -d "\n")
 
 	if echo ${STAMPLE_OUTPUT} | grep -q -F 'The staple and validate action worked!'; then
+		echo ""
 	else
 		echo "${STAMPLE_OUTPUT}"
 		exit 1
