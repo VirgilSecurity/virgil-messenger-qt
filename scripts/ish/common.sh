@@ -51,7 +51,6 @@ function print_title() {
 }
 
 function print_message() {
-    ls ${1}
     echo
     echo "===================================="
     echo "=== ${1}"
