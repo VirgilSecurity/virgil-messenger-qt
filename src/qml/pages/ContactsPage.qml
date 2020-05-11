@@ -53,8 +53,7 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 
 import "../theme"
-import "../components/ChatElements"
-import "../components/Headers"
+import "../components"
 
 Page {
 
@@ -62,7 +61,28 @@ Page {
         color: Theme.contactsBackgroundColor
     }
 
-    header: ContactHeader {}
+    header: ContactsHeader {
+        title: "Default"
+        description: "Server"
+
+        Action {
+            text: qsTr("New chat")
+            onTriggered: addContact()
+        }
+
+        Action {
+            text: qsTr("Settings")
+            onTriggered: mainView.showAccountSettings()
+        }
+
+        MenuSeparator {
+        }
+
+        Action {
+            text: qsTr("Sign out")
+            onTriggered: mainView.signOut()
+        }
+    }
 
     ListView {
         id: listView
@@ -86,7 +106,7 @@ Page {
 
                 Loader {
                     id: avatar
-                    sourceComponent: AvatarPlaceholder {
+                    sourceComponent: Avatar {
                         nickname: model.display
                     }
                 }
@@ -103,7 +123,7 @@ Page {
                     Text {
                         color: Theme.secondaryTextColor
                         font.pointSize: UiHelper.fixFontSz(12)
-												// TODO: insert from model
+                                                // TODO: insert from model
                         text: "latest message to be inserted and check the lenght"
                         width: parent.width
                         elide: Text.ElideRight
@@ -131,7 +151,7 @@ Page {
             }
 
             onClicked: {
-                showChat(model.display)
+                mainView.chatWith(model.display)
             }
         }
     }
@@ -159,4 +179,3 @@ Page {
         return null
     }
 }
-

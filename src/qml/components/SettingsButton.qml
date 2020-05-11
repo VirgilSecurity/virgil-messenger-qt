@@ -1,14 +1,12 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 
-import "../../theme"
+import "../theme"
 
-ToolButton {
+ImageButton {
     id: control
-    icon.source: "../../resources/icons/More.png"
-    icon.color: "transparent"
-    width: 60
-    height: parent.height
+
+    imageSource: "../resources/icons/More.png"
 
     property real menuWidth: 200
     property real menuItemHeight: 40
@@ -22,7 +20,7 @@ ToolButton {
 
     onClicked: menu.open()
  
-	  // TODO: Extract menu to separate component
+    // TODO: Extract menu to separate component
     Menu {
         id: menu
 

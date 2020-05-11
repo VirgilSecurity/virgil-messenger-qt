@@ -39,6 +39,8 @@ Item {
     readonly property real avatarWidth: avatarHeight
     readonly property real avatarRadius: avatarWidth / 2
 
+    readonly property real formMaximumWidth: 260
+
     // icons
     readonly property url mainLogo: "../resources/icons/Logo-Big.png"
 

@@ -3,7 +3,6 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QtMultimedia 5.12
 
-import "../qml/views"
 import "./components/Popups"
 import "theme"
 
@@ -12,25 +11,7 @@ ApplicationWindow {
     visible: true
     title: qsTr("Virgil Messenger")
     minimumWidth: 320
-    minimumHeight: 500
-
-    background: Rectangle {
-        color: Theme.mainBackgroundColor
-    }
-
-    //
-    //  Properties
-    //
-    property color backGroundColor : "#394454"
-    property color mainAppColor: "#6fda9c"
-    property color mainTextCOlor: "#f0f0f0"
-
-    property color toolbarTextColor: "white"
-    property color toolbarColor: "#455462"
-    property int   toolbarHeight: 40
-
-    property real maxMobileWidth: 640
-    property bool mobileView: false
+    minimumHeight: 600
 
     //
     //  Connections
@@ -40,8 +21,6 @@ ApplicationWindow {
 
         onFireError: {
             showPopupError(errorText)
-
-            mainView.showAuthentication()
         }
 
         onFireInform: {
@@ -67,7 +46,8 @@ ApplicationWindow {
 
     // THE MainView of the Application!
 
-    MainView { 
+
+    MainView {
         id: mainView
     }
 
@@ -116,7 +96,6 @@ ApplicationWindow {
         showPopup(message, "#66CDAA", "#00", true, false)
     }
 
-
     // View mode detection
     function isMobileView() {
 
@@ -126,5 +105,4 @@ ApplicationWindow {
 
         return root.width < root.maxMobileWidth;
     }
-
 }

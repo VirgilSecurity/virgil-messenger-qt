@@ -1,7 +1,7 @@
 import QtQuick 2.12
 
-import "../../theme"
-import "../CommonHelpers"
+import "../theme"
+import "./CommonHelpers"
 
 TextInCircle {
     property real count

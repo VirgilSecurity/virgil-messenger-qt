@@ -2,87 +2,52 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 
-import "../../theme"
-import "../ChatElements"
-import "../../js/login.js" as LoginLogic
+import "../theme"
+import "../helpers/login.js" as LoginLogic
 
 ColumnLayout {
-    anchors.fill: parent
+
+    Layout.fillWidth: true
+    Layout.maximumWidth: 350 // Theme.formMaximumWidth
+    Layout.alignment: Qt.AlignHCenter
+
+    spacing: 20
 
     Image {
-        id: mainLogo
         Layout.preferredHeight: 48
         Layout.preferredWidth: 48
-        Layout.maximumHeight: 48
+        Layout.alignment: Qt.AlignHCenter
 
         fillMode: Image.PreserveAspectFit
         source: Theme.mainLogo
-        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-        Layout.bottomMargin: 10
     }
 
-    Item {
-
-        Layout.alignment: Qt.AlignCenter
-        Layout.fillHeight: true
+    RowLayout {
+        visible: true
         Layout.fillWidth: true
+        Layout.alignment: Qt.AlignHCenter
 
-        Button {
-            background: Rectangle {
-                color: "transparent"
+        spacing: 0
+
+        Item {
+            Layout.preferredHeight: 30
+            Layout.preferredWidth: 30
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+
+            ImageButton {
+                imageSource: "../resources/icons/Arrow-Left.png"
+                visible: view.currentIndex > 0
+                onPressed: view.decrementCurrentIndex()
             }
-
-            contentItem: Item {
-                Image  {
-                    source: "../../resources/icons/Arrow-Left.png"
-                    fillMode: Image.PreserveAspectFit
-                    horizontalAlignment: Image.AlignRight
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-            }
-
-            height: view.height
-            width: 100
-            anchors.top: view.top
-            anchors.right: view.left
-            visible: view.currentIndex > 0
-            onPressed: view.decrementCurrentIndex()
         }
 
-        Button {
-            background: Rectangle {
-                color: "transparent"
-            }
-
-            contentItem: Item {
-                Image  {
-                    source: "../../resources/icons/Arrow-Right.png"
-                    fillMode: Image.PreserveAspectFit
-                    horizontalAlignment: Image.AlignRight
-                    anchors.left: parent.left
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-            }
-
-            height: view.height
-            width: 100
-            anchors.top: view.top
-            anchors.left: view.right
-            visible: view.currentIndex < view.count - 1
-            onPressed: view.incrementCurrentIndex()
-        }
 
         SwipeView {
             id: view
-
             clip: true
             currentIndex: pageIndicator.currentIndex
-
-            height: 260
             width: 240
-
-            anchors.centerIn: parent
+            height: 240
 
             property var userChunks: LoginLogic.chunk(authenticationPage.userList, 4)
 
@@ -103,7 +68,9 @@ ColumnLayout {
                                 width: 120
                                 height: 120
 
-                                onPressed: mainView.signIn(modelData)
+                                onPressed: {
+                                    mainView.signIn(modelData)
+                                }
 
                                 background: Rectangle {
                                     color: "transparent"
@@ -113,7 +80,7 @@ ColumnLayout {
                                 contentItem: Item {
                                     anchors.fill: parent
 
-                                    AvatarPlaceholder {
+                                    Avatar {
                                         id: avatar
                                         nickname: modelData
                                         diameter: 60
@@ -140,18 +107,27 @@ ColumnLayout {
                     }
                 }
             }
-
         }
 
-        PageIndicator {
-            id: pageIndicator
-            interactive: true
-            count: view.count
-            currentIndex: view.currentIndex
+        Item {
+            Layout.preferredHeight: 30
+            Layout.preferredWidth: 30
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
-            anchors.bottom: view.bottom
-            anchors.bottomMargin: 10
-            anchors.horizontalCenter: parent.horizontalCenter
+            ImageButton {
+                imageSource: "../resources/icons/Arrow-Right.png"
+                visible: view.currentIndex == 0
+                onPressed: view.incrementCurrentIndex()
+            }
         }
+    }
+
+    PageIndicator {
+        id: pageIndicator
+        interactive: true
+        count: view.count
+        currentIndex: view.currentIndex
+
+        Layout.alignment: Qt.AlignHCenter
     }
 }

@@ -1,15 +1,20 @@
 import QtQuick 2.12
+import QtQuick.Layouts 1.12
 
-import "../../theme"
+import "../theme"
 
 Column {
-    anchors.fill: parent
+
+    Layout.fillWidth: true
+    Layout.maximumWidth: Theme.formMaximumWidth
+    Layout.alignment: Qt.AlignHCenter
+
     spacing: 10
 
     Image {
         id: mainLogo
-        width: 180
-        height: 180
+        width: 96
+        height: 96
 
         fillMode: Image.PreserveAspectFit
         source: Theme.mainLogo
@@ -36,7 +41,8 @@ Column {
         horizontalAlignment: Text.AlignHCenter
 
         font.pointSize: UiHelper.fixFontSz(13)
-        color: Theme.secondaryTextColor
+        font.letterSpacing: 0.3
+        color: Theme.menuSeparatorColor
         anchors.horizontalCenter: parent.horizontalCenter
     }
 }

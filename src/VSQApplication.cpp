@@ -109,7 +109,7 @@ VSQApplication::run(const QString &basePath) {
 
 /******************************************************************************/
 void VSQApplication::reloadQml() {
-    const QUrl url(QStringLiteral("Main.qml"));
+    const QUrl url(QStringLiteral("main.qml"));
     m_engine.clearComponentCache();
     m_engine.load(url);
 
