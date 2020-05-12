@@ -1,33 +1,15 @@
 <RCC>
     <qresource prefix="/">
-        <file>qml/components/Authentication/AccountSelection.qml</file>
-        <file>qml/components/Buttons/OutlineButton.qml</file>
-        <file>qml/components/Buttons/PrimaryButton.qml</file>
-        <file>qml/components/Buttons/SettingsButton.qml</file>
-        <file>qml/components/ChatElements/AvatarPlaceholder.qml</file>
-        <file>qml/components/ChatElements/MessageCounter.qml</file>
         <file>qml/components/CommonHelpers/TextInCircle.qml</file>
         <file>qml/components/Dialogs/AddContactDialog.qml</file>
-        <file>qml/components/Headers/ContactHeader.qml</file>
-        <file>qml/components/Headers/ConversationHeader.qml</file>
-        <file>qml/components/Headers/HeaderToolbar.qml</file>
-        <file>qml/components/Icons/MainLogo.qml</file>
         <file>qml/components/Popups/Popup.qml</file>
         <file>qml/components/Progress/Progress.qml</file>
         <file>qml/iot/DevicesList.qml</file>
         <file>qml/iot/Main1.qml</file>
         <file>qml/iot/Sniffer.qml</file>
         <file>qml/iot/Title.qml</file>
-        <file>qml/js/chat.js</file>
-        <file>qml/js/login.js</file>
-        <file>qml/views/ChatView.qml</file>
-        <file>qml/views/MainView.qml</file>
         <file>qml/pages/AccountSettingsPage.qml</file>
-        <file>qml/pages/AuthenticationPage.qml</file>
-        <file>qml/pages/ContactPage.qml</file>
-        <file>qml/pages/ConversationPage.qml</file>
         <file>qml/pages/GlobalSettingsPage.qml</file>
-        <file>qml/pages/LoginPage.qml</file>
         <file>qml/pages/PasswordResetPage.qml</file>
         <file>qml/pages/RegisterPage.qml</file>
         <file>qml/resources/ca/curl-ca-bundle-win.crt</file>
@@ -56,9 +38,45 @@
         <file>qml/resources/PoweredBy.png</file>
         <file>qml/resources/Settings.png</file>
         <file>qml/resources/User.png</file>
-        <file>qml/templates/AuthenticationTemplate.qml</file>
         <file>qml/theme/qmldir</file>
         <file>qml/theme/Theme.qml</file>
-        <file>qml/Main.qml</file>
+        <file>qml/main.qml</file>
+        <file>qml/pages/SplashScreenPage.qml</file>
+        <file>qml/helpers/chat.js</file>
+        <file>qml/helpers/login.js</file>
+        <file>qml/pages/SignInPage.qml</file>
+        <file>qml/pages/AuthPage.qml</file>
+        <file>qml/MainView.qml</file>
+        <file>qml/pages/ContactsPage.qml</file>
+        <file>qml/pages/ChatPage.qml</file>
+        <file>qml/resources/icons/Grid.png</file>
+        <file>qml/resources/icons/Grid@2x.png</file>
+        <file>qml/resources/icons/Send.png</file>
+        <file>qml/resources/icons/Send@2x.png</file>
+        <file>qml/components/Form.qml</file>
+        <file>qml/components/FormLabel.qml</file>
+        <file>qml/components/FormInput.qml</file>
+        <file>qml/components/FormPrimaryButton.qml</file>
+        <file>qml/components/Footer.qml</file>
+        <file>qml/components/FormSecondaryButton.qml</file>
+        <file>qml/components/FormVendor.qml</file>
+        <file>qml/components/AccountSelection.qml</file>
+        <file>qml/components/ChatMessageInput.qml</file>
+        <file>qml/components/Avatar.qml</file>
+        <file>qml/components/ChatMessage.qml</file>
+        <file>qml/components/MessageCounter.qml</file>
+        <file>qml/components/ContactsHeader.qml</file>
+        <file>qml/components/Header.qml</file>
+        <file>qml/components/ContextMenu.qml</file>
+        <file>qml/components/ImageButton.qml</file>
+        <file>qml/components/SettingsButton.qml</file>
+        <file>qml/pages/SignInAsPage.qml</file>
+        <file>qml/components/FormImage.qml</file>
+        <file>qml/resources/icons/Lock.png</file>
+        <file>qml/resources/icons/Lock@2x.png</file>
+        <file>qml/components/FormSubtitle.qml</file>
+        <file>qml/pages/DownloadKeyPage.qml</file>
+        <file>qml/resources/icons/Key.png</file>
+        <file>qml/resources/icons/Key@2x.png</file>
     </qresource>
 </RCC>
