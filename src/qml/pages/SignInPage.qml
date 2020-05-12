@@ -23,7 +23,12 @@ Page {
         }
 
         FormPrimaryButton {
-            onClicked: mainView.signIn(username.text)
+            onClicked: {
+
+                mainView.showSignInAs()
+                // if (Messenger.usersList().searc)
+                // mainView.signIn(username.text)
+            }
             text: "Sign in"
         }
 

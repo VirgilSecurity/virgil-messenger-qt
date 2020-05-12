@@ -64,6 +64,7 @@ Control {
 
     function signOut() {
         Messenger.logout()
+
         // clear all pages in the stackview and push sign in page
         // as a first page in the stack
         stackView.clear()
@@ -101,6 +102,10 @@ Control {
 
     function showSignIn() {
         stackView.push("./pages/SignInPage.qml")
+    }
+
+    function showSignInAs() {
+        stackView.push("./pages/SignInAsPage.qml")
     }
 
     function showRegister() {

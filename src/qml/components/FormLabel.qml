@@ -12,6 +12,7 @@ Text {
     color: Theme.labelColor
     font.letterSpacing: 0.4
     font.bold: false
+    font.family: Theme.mainFont
     font.pointSize: UiHelper.fixFontSz(12)
     wrapMode: Text.WordWrap
     textFormat: Text.RichText

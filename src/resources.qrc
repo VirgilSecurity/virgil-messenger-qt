@@ -70,5 +70,10 @@
         <file>qml/components/ContextMenu.qml</file>
         <file>qml/components/ImageButton.qml</file>
         <file>qml/components/SettingsButton.qml</file>
+        <file>qml/pages/SignInAsPage.qml</file>
+        <file>qml/components/FormImage.qml</file>
+        <file>qml/resources/icons/Lock.png</file>
+        <file>qml/resources/icons/Lock@2x.png</file>
+        <file>qml/components/FormSubtitle.qml</file>
     </qresource>
 </RCC>
