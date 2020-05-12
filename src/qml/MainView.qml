@@ -108,6 +108,10 @@ Control {
         stackView.push("./pages/SignInAsPage.qml")
     }
 
+    function showDownloadKey() {
+        stackView.push("./pages/DownloadKeyPage.qml")
+    }
+
     function showRegister() {
         stackView.push("./pages/RegisterPage.qml")
     }

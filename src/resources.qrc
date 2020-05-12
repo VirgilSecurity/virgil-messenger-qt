@@ -75,5 +75,8 @@
         <file>qml/resources/icons/Lock.png</file>
         <file>qml/resources/icons/Lock@2x.png</file>
         <file>qml/components/FormSubtitle.qml</file>
+        <file>qml/pages/DownloadKeyPage.qml</file>
+        <file>qml/resources/icons/Key.png</file>
+        <file>qml/resources/icons/Key@2x.png</file>
     </qresource>
 </RCC>

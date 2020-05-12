@@ -27,6 +27,9 @@ Page {
 
         FormPrimaryButton {
             text: qsTr("Download from the Cloud")
+            onClicked: {
+                mainView.showDownloadKey()
+            }
         }
 
         FormPrimaryButton {
