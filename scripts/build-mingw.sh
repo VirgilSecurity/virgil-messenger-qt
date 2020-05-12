@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/bash -xe
+set -o errtrace
 
 #
 #   Global variables
@@ -15,73 +16,50 @@ print_title
 
 prepare_libraries
 
-prepare_dir
+new_dir ${BUILD_DIR}
 
-echo
-echo "=== Build application bundle"
+print_message "Build application bundle"
 
 pushd ${BUILD_DIR}
-${LINUX_QMAKE} -config ${BUILD_TYPE} ${PROJECT_DIR} -spec win64-x-g++ VERSION="${VERSION}"
-check_error
+    ${LINUX_QMAKE} -config ${BUILD_TYPE} ${PROJECT_DIR} -spec win64-x-g++ VERSION="${VERSION}"
 
-make -j10
-check_error
+    make -j10
 
-echo
-echo "== Deploying application"
-echo ${LINUX_QMAKE}
-echo 
-echo
-cqtdeployer -bin ${BUILD_DIR}/release/${APPLICATION_NAME}.exe -qmlDir ${PROJECT_DIR}/src/qml  -qmake ${LINUX_QMAKE} clear
-check_error
+    print_message "Deploying application"
+    echo ${LINUX_QMAKE}
+    echo 
+    echo
+    cqtdeployer -bin ${BUILD_DIR}/release/${APPLICATION_NAME}.exe -qmlDir ${PROJECT_DIR}/src/qml  -qmake ${LINUX_QMAKE} clear
 popd
 
 pushd ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib
-check_error
 
-echo "=== Copy libvs-messenger-internal.dll "
-cp libvs-messenger-internal.dll           ${BUILD_DIR}/DistributionKit/lib
-check_error
+    echo "=== Copy libvs-messenger-internal.dll "
+    cp libvs-messenger-internal.dll           ${BUILD_DIR}/DistributionKit/lib
 
-echo "=== Copy libvs-messenger-crypto.dll "
-cp libvs-messenger-crypto.dll             ${BUILD_DIR}/DistributionKit/lib
-check_error
+    echo "=== Copy libvs-messenger-crypto.dll "
+    cp libvs-messenger-crypto.dll             ${BUILD_DIR}/DistributionKit/lib
 
-echo "=== Copy openssl libraries"
-cp capi.dll                               ${BUILD_DIR}/DistributionKit/lib
-check_error
-cp padlock.dll                            ${BUILD_DIR}/DistributionKit/lib
-check_error
-cp libcrypto-1_1-x64.dll                  ${BUILD_DIR}/DistributionKit/lib
-check_error
-cp libssl-1_1-x64.dll                     ${BUILD_DIR}/DistributionKit/lib
-check_error
-cp libssl-10.dll                          ${BUILD_DIR}/DistributionKit/lib
-check_error
+    echo "=== Copy openssl libraries"
 
-echo "=== Copy depends libraries"
-cp libcurl-4.dll                         ${BUILD_DIR}/DistributionKit/lib
-check_error
-cp libssh2-1.dll                         ${BUILD_DIR}/DistributionKit/lib
-check_error
-cp libidn2-0.dll                         ${BUILD_DIR}/DistributionKit/lib
-check_error
-cp zlib1.dll                             ${BUILD_DIR}/DistributionKit/lib
-check_error
-cp libgcc_s_seh-1.dll                    ${BUILD_DIR}/DistributionKit/lib
-check_error
-cp libcrypto-10.dll                      ${BUILD_DIR}/DistributionKit/lib
-check_error
+    flist="capi.dll padlock.dll libcrypto-1_1-x64.dll libssl-1_1-x64.dll libssl-10.dll"
+    for ff in $flist; do
+        cp ${ff} ${BUILD_DIR}/DistributionKit/lib
+    done 
+
+    echo "=== Copy depends libraries"
+
+    flist="libcurl-4.dll libssh2-1.dll libidn2-0.dll zlib1.dll libgcc_s_seh-1.dll libcrypto-10.dll"
+    for ff in $flist; do
+        cp ${ff} ${BUILD_DIR}/DistributionKit/lib
+    done 
+
 popd
 
 echo "=== Add custom env variables"
 sed -i 's/start/SET VS_CURL_CA_BUNDLE=%BASE_DIR%\/ca\/curl-ca-bundle-win.crt\nstart/g' ${BUILD_DIR}/DistributionKit/virgil-messenger.bat
-check_error
 
 echo "=== Copy certs "
 mkdir -p ${BUILD_DIR}/DistributionKit/ca
-check_error
 cp ${PROJECT_DIR}/src/qml/resources/ca/curl-ca-bundle-win.crt ${BUILD_DIR}/DistributionKit/ca
-check_error
 unix2dos ${BUILD_DIR}/DistributionKit/ca/curl-ca-bundle-win.crt
-check_error
