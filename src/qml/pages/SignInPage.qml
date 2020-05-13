@@ -14,7 +14,18 @@ Page {
         title: "Sign in"
     }
 
+    Timer {
+        id: signInTimer
+        interval: 1000; running: false; repeat: false;
+        onTriggered: {
+            form.isBusy = false
+            mainView.showSignInAs({ username: username.text })
+        }
+    }
+
     Form {
+
+        id: form
 
         FormInput {
             id: username
@@ -24,8 +35,11 @@ Page {
 
         FormPrimaryButton {
             onClicked: {
+                form.isBusy = true
+                form.busyDescription = "Signing in..."
 
-                mainView.showSignInAs()
+                signInTimer.start()
+
                 // if (Messenger.usersList().searc)
                 // mainView.signIn(username.text)
             }

@@ -28,7 +28,6 @@ Control {
             id: stackView
             Layout.fillHeight: true
             Layout.fillWidth: true
-            z: 1
 
             background: Rectangle {
                 color: Theme.contactsBackgroundColor
@@ -104,8 +103,8 @@ Control {
         stackView.push("./pages/SignInPage.qml")
     }
 
-    function showSignInAs() {
-        stackView.push("./pages/SignInAsPage.qml")
+    function showSignInAs(params) {
+        stackView.push("./pages/SignInAsPage.qml", params)
     }
 
     function showDownloadKey() {

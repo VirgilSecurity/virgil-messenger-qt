@@ -7,15 +7,19 @@ import "../components"
 
 Page {
 
+    property string username
+
     background: Rectangle {
         color: Theme.mainBackgroundColor
     }
 
     header: Header {
-        title: qsTr("Sign in as")
+        title: qsTr("Sign in as %1".arg(username))
     }
 
     Form {
+
+        id: form
 
         FormImage {
             source: "../resources/icons/Lock.png"
@@ -28,6 +32,7 @@ Page {
         FormPrimaryButton {
             text: qsTr("Download from the Cloud")
             onClicked: {
+                mainView.busy()
                 mainView.showDownloadKey()
             }
         }
