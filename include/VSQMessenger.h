@@ -37,6 +37,8 @@
 #define VIRGIL_IOTKIT_QT_MESSENGER_H
 
 #include <QtCore>
+#include <QFuture>
+#include <QSemaphore>
 
 #include <virgil/iot/qt/VSQIoTKit.h>
 #include <qxmpp/QXmppClient.h>
@@ -47,13 +49,26 @@ using namespace VirgilIoTKit;
 #include "VSQSqlContactModel.h"
 #include "VSQSqlConversationModel.h"
 
-class VSQMessenger final : public QObject {
+class VSQMessenger : public QObject {
 
     Q_OBJECT
 
     enum VSQEnvType { PROD, STG, DEV };
 
+    Q_ENUMS(VSQMessengerResult)
+
 public:
+
+    enum VSQMessengerResult
+    {
+        MRES_OK,
+        MRES_ERR_NO_CRED,
+        MRES_ERR_SIGNIN,
+        MRES_ERR_SIGNUP,
+        MRES_ERR_USER_NOT_FOUND,
+        MRES_ERR_ENCRYPTION
+    };
+
     Q_PROPERTY(QString currentUser READ currentUser NOTIFY fireCurrentUserChanged)
 
     VSQMessenger();
@@ -71,25 +86,25 @@ public:
 
 public slots:
 
-    Q_INVOKABLE void
+    Q_INVOKABLE QFuture<VSQMessenger::VSQMessengerResult>
     signIn(QString user);
 
-    Q_INVOKABLE void
+    Q_INVOKABLE QFuture<VSQMessenger::VSQMessengerResult>
     signUp(QString user);
 
-    Q_INVOKABLE void
+    Q_INVOKABLE QFuture<VSQMessenger::VSQMessengerResult>
     logout();
 
-    Q_INVOKABLE void
+    Q_INVOKABLE QFuture<VSQMessenger::VSQMessengerResult>
     deleteUser(QString user);
 
     Q_INVOKABLE QStringList
     usersList();
 
-    Q_INVOKABLE void
+    Q_INVOKABLE QFuture<VSQMessenger::VSQMessengerResult>
     addContact(QString contact);
 
-    Q_INVOKABLE void
+    Q_INVOKABLE QFuture<VSQMessenger::VSQMessengerResult>
     sendMessage(QString to, QString message);
 
 signals:
@@ -132,6 +147,7 @@ private slots:
 
 private:
     QXmppClient m_xmpp;
+    QSemaphore m_semaphore;
     VSQSqlContactModel *m_sqlContacts;
     VSQSqlConversationModel *m_sqlConversations;
     QString m_user;
@@ -149,7 +165,7 @@ private:
     void
     _connectToDatabase();
 
-    void
+    bool
     _connect(QString userWithEnv, QString userId);
 
     QString
