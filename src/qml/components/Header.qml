@@ -7,7 +7,7 @@ import "../theme"
 ToolBar {
 
     property alias title: titleLabel.text
-    property alias showBackButton: backButton.visible
+    property bool showBackButton: true
     property alias showSeporator: seporator.visible
     default property alias menu: contextMenu.contentData
 
@@ -33,6 +33,9 @@ ToolBar {
 
         ImageButton {
             Layout.leftMargin: 12
+
+            opacity: showBackButton ? 1 : 0
+            enabled: showBackButton
 
             id: backButton
             imageSource: "../resources/icons/Arrow-Left.png"

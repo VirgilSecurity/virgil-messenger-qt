@@ -25,15 +25,15 @@ ApplicationWindow {
         }
 
         onFireInform: {
-            showPopupInform(informText)
+            // showPopupInform(informText)
         }
 
         onFireConnecting: {
-            showPopupInform(qsTr("Connecting"))
+            // showPopupInform(qsTr("Connecting"))
         }
 
         onFireReady: {
-            showPopupSucces(qsTr("Ready to chat"))
+            // showPopupSucces(qsTr("Ready to chat"))
         }
 
         onFireAddedContact: {

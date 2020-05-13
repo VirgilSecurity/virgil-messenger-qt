@@ -6,14 +6,13 @@ Item {
 
     anchors.fill: parent
 
-    property bool isBusy: false
-    property alias busyDescription: busyDescryption.text
+    property bool isLoading: false
 
     default property alias children: formContainer.children
 
     ColumnLayout {
         id: formContainer
-        visible: !isBusy
+        visible: !isLoading
 
         anchors {
             verticalCenter: parent.verticalCenter
@@ -27,7 +26,7 @@ Item {
     // TODO: I don't like this eather, but let's
     // keep it simple for now ;)
     ColumnLayout {
-        visible: isBusy
+        visible: isLoading
 
         anchors {
             verticalCenter: parent.verticalCenter
@@ -45,5 +44,15 @@ Item {
             id: busyDescryption
             horizontalAlignment: Text.AlignHCenter
         }
+    }
+
+    function showLoading(loadingText) {
+        isLoading = true
+        busyDescryption.text = loadingText
+    }
+
+    function hideLoading() {
+        isLoading = false
+        busyDescryption.text = ""
     }
 }

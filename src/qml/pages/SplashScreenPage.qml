@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
+import QuickFuture 1.0
 
 import "../theme"
 import "../components"
@@ -15,7 +16,13 @@ Page {
         interval: 1000; running: true; repeat: false;
         onTriggered: {
             if (mainView.lastSignedInUser) {
-                 signIn(lastSignedInUser)
+                form.showLoading("Signing in as %1...".arg(mainView.lastSignedInUser))
+
+                Future.onFinished(Messenger.signIn(mainView.lastSignedInUser), (result) => {
+                    showContacts()
+                    // form.hideLoading()
+                })
+
                 return
             }
 
@@ -24,18 +31,11 @@ Page {
     }
 
     Form {
+        id: form
+
         FormVendor {
             Layout.bottomMargin: 20
         }
-
-        FormLabel {
-            id: statusLabel
-            horizontalAlignment: Text.AlignHCenter
-        }
-    }
-
-    Component.onCompleted: {
-        statusLabel.text = "Loading user data..."
     }
 
     footer: Footer {}

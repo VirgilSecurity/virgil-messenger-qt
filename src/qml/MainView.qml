@@ -74,13 +74,15 @@ Control {
         var future = Messenger.logout()
         Future.onFinished(future, function(value) {
           console.log("Logout result: ", Future.result(future))
+
+            // clear all pages in the stackview and push sign in page
+            // as a first page in the stack
+            stackView.clear()
+            lastSignedInUser = ""
+            showAuth(true)
         })
 
-        // clear all pages in the stackview and push sign in page
-        // as a first page in the stack
-        stackView.clear()
-        lastSignedInUser = ""
-        showAuth(true)
+
     }
 
 

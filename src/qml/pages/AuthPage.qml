@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
+import QuickFuture 1.0
 
 import "../theme"
 import "../components"
@@ -23,6 +24,8 @@ Page {
 
     Form {
 
+        id: form
+
         FormVendor {
             visible: !userList.length
             Layout.bottomMargin: 35
@@ -30,6 +33,15 @@ Page {
 
         AccountSelection {
             visible: userList.length
+            onUserSelected: {
+                form.showLoading("Signing in as %1...".arg(userName))
+
+                Future.onFinished(Messenger.signIn(userName), (result) => {
+                    form.hideLoading()
+                    lastSignedInUser = userName
+                    showContacts()
+                })
+            }
         }
 
         FormPrimaryButton {

@@ -11,15 +11,16 @@ Page {
     }
 
     header: Header {
+        showBackButton: !form.isLoading
         title: "Sign in"
     }
 
     Timer {
         id: signInTimer
         interval: 1000; running: false; repeat: false;
-        onTriggered: {
-            form.isBusy = false
+        onTriggered: {            
             mainView.showSignInAs({ username: username.text })
+            form.hideLoading()
         }
     }
 
@@ -35,9 +36,7 @@ Page {
 
         FormPrimaryButton {
             onClicked: {
-                form.isBusy = true
-                form.busyDescription = "Signing in..."
-
+                form.showLoading("Signing in...")
                 signInTimer.start()
 
                 // if (Messenger.usersList().searc)

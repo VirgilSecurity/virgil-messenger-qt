@@ -7,11 +7,15 @@ import "../helpers/login.js" as LoginLogic
 
 ColumnLayout {
 
+    id: accountSelector
+
     Layout.fillWidth: true
     Layout.maximumWidth: 350 // Theme.formMaximumWidth
     Layout.alignment: Qt.AlignHCenter
 
     spacing: 20
+
+    signal userSelected (string userName)
 
     Image {
         Layout.preferredHeight: 48
@@ -69,7 +73,7 @@ ColumnLayout {
                                 height: 120
 
                                 onPressed: {
-                                    mainView.signIn(modelData)
+                                    accountSelector.userSelected(modelData)
                                 }
 
                                 background: Rectangle {

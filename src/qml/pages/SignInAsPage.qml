@@ -32,7 +32,6 @@ Page {
         FormPrimaryButton {
             text: qsTr("Download from the Cloud")
             onClicked: {
-                mainView.busy()
                 mainView.showDownloadKey()
             }
         }
