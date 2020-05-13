@@ -408,7 +408,7 @@ QFuture<VSQMessenger::VSQMessengerResult>
 VSQMessenger::logout() {
     return QtConcurrent::run([=]() -> VSQMessengerResult {
         qDebug() << "Logout";
-        m_xmpp.disconnectFromServer();
+        QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::BlockingQueuedConnection);
         vs_messenger_virgil_logout();
         return MRES_OK;
     });
