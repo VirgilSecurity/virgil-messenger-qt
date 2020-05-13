@@ -55,6 +55,12 @@ PREBUILT_PATH = $$PWD/ext/prebuilt
 include($${PREBUILT_PATH}/qt/iotkit.pri)
 
 #
+#   Include QML QFuture
+#
+include($$PWD/ext/quickfuture/quickfuture.pri)
+#include($$PWD/ext/quickpromise/quickpromise.pri)
+
+#
 #   QXMPP
 #
 QXMPP_BUILD_PATH = $$PREBUILT_SYSROOT

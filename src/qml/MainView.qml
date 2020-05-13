@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import Qt.labs.settings 1.1
+import QuickFuture 1.0
 
 import "./theme"
 import "./helpers/login.js" as LoginLogic
@@ -41,7 +42,11 @@ Control {
 
     function signIn(user) {
         if (LoginLogic.validateUser(user)) {
-            Messenger.signIn(user)
+            var future = Messenger.signIn(user)
+            Future.onFinished(future, function(value) {
+              console.log("SignIn result: ", Future.result(future))
+            })
+
             stackView.clear()
             lastSignedInUser = user
             showContacts()
@@ -52,7 +57,11 @@ Control {
 
     function signUp(user) {
         if (LoginLogic.validateUser(user)) {
-            Messenger.signUp(user)
+            var future = Messenger.signUp(user)
+            Future.onFinished(future, function(value) {
+              console.log("SignUp result: ", Future.result(future))
+            })
+
             showPopupInform("Sign Up ...")
             lastSignedInUser = user
             showContacts()
@@ -62,7 +71,10 @@ Control {
     }
 
     function signOut() {
-        Messenger.logout()
+        var future = Messenger.logout()
+        Future.onFinished(future, function(value) {
+          console.log("Logout result: ", Future.result(future))
+        })
 
         // clear all pages in the stackview and push sign in page
         // as a first page in the stack

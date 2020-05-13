@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
+import QuickFuture 1.0
 
 import "../theme"
 import "../components"
@@ -94,7 +95,10 @@ Page {
 
     footer: ChatMessageInput {
         onMessageSending: {
-            Messenger.sendMessage(ConversationsModel.recipient, message)
+            var future = Messenger.sendMessage(ConversationsModel.recipient, message)
+            Future.onFinished(future, function(value) {
+              console.log("Send message result: ", Future.result(future))
+            })
         }
     }
 }
