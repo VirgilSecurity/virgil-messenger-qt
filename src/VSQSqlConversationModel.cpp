@@ -127,7 +127,7 @@ VSQSqlConversationModel::roleNames() const {
 
 /******************************************************************************/
 void
-VSQSqlConversationModel::sendMessage(const QString &recipient, const QString &message) {
+VSQSqlConversationModel::sendMessage(QString recipient, QString message) {
     const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
 
     QSqlRecord newRecord = record();

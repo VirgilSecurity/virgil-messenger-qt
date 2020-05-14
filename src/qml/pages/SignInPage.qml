@@ -11,25 +11,38 @@ Page {
     }
 
     header: Header {
-        title: "Sign in"
+        showBackButton: !form.isLoading
+        title: qsTr("Sign in")
+    }
+
+    Timer {
+        id: signInTimer
+        interval: 1000; running: false; repeat: false;
+        onTriggered: {            
+            mainView.showSignInAs({ username: username.text })
+            form.hideLoading()
+        }
     }
 
     Form {
 
+        id: form
+
         FormInput {
             id: username
-            label: "Username"
-            placeholder: "Enter username"
+            label: qsTr("Username")
+            placeholder: qsTr("Enter username")
         }
 
         FormPrimaryButton {
             onClicked: {
+                form.showLoading(qsTr("Signing in..."))
+                signInTimer.start()
 
-                mainView.showSignInAs()
                 // if (Messenger.usersList().searc)
                 // mainView.signIn(username.text)
             }
-            text: "Sign in"
+            text: qsTr("Sign in")
         }
 
     }
