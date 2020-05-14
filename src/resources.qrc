@@ -86,5 +86,6 @@
         <file>qml/components/ServerButton.qml</file>
         <file>qml/resources/icons/Plus.png</file>
         <file>qml/resources/icons/Plus@2x.png</file>
+        <file>qml/components/CommonHelpers/IconWithText.qml</file>
     </qresource>
 </RCC>

@@ -55,6 +55,7 @@ import QuickFuture 1.0
 
 import "../theme"
 import "../components"
+import "../components/CommonHelpers"
 
 Page {
 
@@ -153,6 +154,13 @@ Page {
             onClicked: {
                 mainView.chatWith(model.display)
             }
+        }
+
+        IconWithText {
+            visible: !ContactsModel.rowCount()
+            image.source: "../resources/icons/Chats.png"
+            label.text: qsTr("Create your first chat<br />by pressing the dots<br />button above")
+            label.color: Theme.labelColor
         }
     }
 
