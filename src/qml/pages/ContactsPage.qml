@@ -76,8 +76,7 @@ Page {
             onTriggered: mainView.showAccountSettings()
         }
 
-        MenuSeparator {
-        }
+        MenuSeparator {}
 
         Action {
             text: qsTr("Sign out")
