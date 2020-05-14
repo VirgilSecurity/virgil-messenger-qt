@@ -158,9 +158,15 @@ Page {
 
         IconWithText {
             visible: !ContactsModel.rowCount()
-            image.source: "../resources/icons/Chats.png"
-            label.text: qsTr("Create your first chat<br />by pressing the dots<br />button above")
-            label.color: Theme.labelColor
+            image {
+                source: "../resources/icons/Chats.png"
+                width: 48
+                height: 48
+            }
+            label {
+                text: qsTr("Create your first chat<br />by pressing the dots<br />button above")
+                color: Theme.labelColor
+            }
         }
     }
 
