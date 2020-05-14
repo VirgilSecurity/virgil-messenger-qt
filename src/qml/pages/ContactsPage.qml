@@ -58,13 +58,15 @@ import "../components"
 
 Page {
 
+    property bool showServersPanel: true
+
     background: Rectangle {
         color: Theme.contactsBackgroundColor
     }
 
     header: ContactsHeader {
-        title: "Default"
-        description: "Server"
+        title: "Virgil"
+        description: "Default Server"
 
         Action {
             text: qsTr("New chat")
@@ -72,16 +74,13 @@ Page {
         }
 
         Action {
-            text: qsTr("Settings")
-            onTriggered: mainView.showAccountSettings()
-        }
-
-        MenuSeparator {
+            text: qsTr("New group")
+            onTriggered: addContact()
         }
 
         Action {
-            text: qsTr("Sign out")
-            onTriggered: mainView.signOut()
+            text: qsTr("Send invite")
+            onTriggered: addContact()
         }
     }
 

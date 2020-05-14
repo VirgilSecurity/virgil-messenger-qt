@@ -39,7 +39,7 @@ Page {
                 Future.onFinished(Messenger.signIn(userName), (result) => {
                     form.hideLoading()
                     lastSignedInUser = userName
-                    showContacts()
+                    showContacts(true)
                 })
             }
         }

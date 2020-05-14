@@ -7,6 +7,7 @@ import "../theme"
 import "../components"
 
 Page {
+
     background: Rectangle {
         color: Theme.chatBackgroundColor
     }

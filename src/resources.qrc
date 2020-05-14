@@ -80,5 +80,11 @@
         <file>qml/resources/icons/Key@2x.png</file>
         <file>qml/resources/icons/Logo.png</file>
         <file>qml/resources/icons/Logo@2x.png</file>
+        <file>qml/components/ServersPanel.qml</file>
+        <file>qml/resources/icons/Menu.png</file>
+        <file>qml/resources/icons/Menu@2x.png</file>
+        <file>qml/components/ServerButton.qml</file>
+        <file>qml/resources/icons/Plus.png</file>
+        <file>qml/resources/icons/Plus@2x.png</file>
     </qresource>
 </RCC>
