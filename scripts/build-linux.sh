@@ -15,7 +15,7 @@ QMAKE_PARAMS="${QMAKE_PARAMS:-" "}"
 
 print_title
 
-#prepare_libraries
+prepare_libraries
 
 new_dir ${BUILD_DIR}
 
