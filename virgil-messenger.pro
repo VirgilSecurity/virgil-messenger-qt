@@ -151,11 +151,16 @@ isEmpty(WEBDRIVER) {
     QTWEBDRIVER_LOCATION=$$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/include/qtwebdriver
     HEADERS += $$QTWEBDRIVER_LOCATION/src/Test/Headers.h
     INCLUDEPATH +=  $$QTWEBDRIVER_LOCATION $$QTWEBDRIVER_LOCATION/src
-    LIBS += -lchromium_base -lWebDriver_core -lWebDriver_extension_qt_base -lWebDriver_extension_qt_quick
-    LIBS += -framework Foundation
-    LIBS += -framework CoreFoundation
-    LIBS += -framework ApplicationServices
-    LIBS += -framework Security
+    linux:!android: { 
+        LIBS += -ldl 
+    }    
+    LIBS += -Wl,--start-group -lchromium_base -lWebDriver_core -lWebDriver_extension_qt_base -lWebDriver_extension_qt_quick -Wl,--end-group
+    macx: {
+        LIBS += -framework Foundation
+        LIBS += -framework CoreFoundation
+        LIBS += -framework ApplicationServices
+        LIBS += -framework Security
+    }
 }
 
 
