@@ -74,9 +74,9 @@ Page {
             id: listView
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.margins: pane.leftPadding + messageField.leftPadding
-            displayMarginBeginning: 40
-            displayMarginEnd: 40
+            // Layout.margins: pane.leftPadding + messageField.leftPadding
+            // displayMarginBeginning: 40
+            // displayMarginEnd: 40
             verticalLayoutDirection: ListView.BottomToTop
             spacing: 12
             model: ConversationsModel

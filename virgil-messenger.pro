@@ -109,6 +109,7 @@ RESOURCES += src/resources.qrc
 #   Include path
 #
 
+
 INCLUDEPATH +=  include \
         $${QXMPP_BUILD_PATH}/include
 
@@ -206,3 +207,11 @@ android: {
         platforms/android/res/values/libs.xml
 }
 
+RC_ICONS = platforms/windows/Virgil.ico
+
+DISTFILES += \
+    platforms/android/res/drawable-hdpi/icon.png \
+    platforms/android/res/drawable-ldpi/icon.png \
+    platforms/android/res/drawable-mdpi/icon.png \
+    platforms/macos/virgil-messenger.plist.in \
+    platforms/windows/Virgil.ico

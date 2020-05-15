@@ -1,7 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 
-import "../components/Headers/"
+import "../components"
 
 Page {
     id: registerPage
@@ -10,7 +10,7 @@ Page {
         color: "transparent"
     }
 
-    header: HeaderToolbar {
-        title: qsTr("Settings")
+    header: Header {
+        title: "Global Settings"
     }
 }
