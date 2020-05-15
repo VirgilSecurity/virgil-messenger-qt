@@ -14,6 +14,7 @@ BUILD_DIR="${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.${PLATFORM}"
 QMAKE_BIN="${QT_SDK_DIR}/clang_64/bin/qmake"
 MACDEPLOYQT_BIN="${QT_SDK_DIR}/clang_64/bin/macdeployqt"
 APPCAST_BIN="${PROJECT_DIR}/ext/prebuilt/macos/sparkle/bin/generate_appcast"
+QMAKE_PARAMS="${QMAKE_PARAMS:-" "}"
 
 # Sparkle
 SUFeedURL="${SUFeedURL:-""}"
@@ -87,7 +88,7 @@ function build_project() {
 
 	pushd ${BUILD_DIR}
 
-		${QMAKE_BIN} -config ${BUILD_TYPE} ${PROJECT_DIR} VERSION="${VERSION}"
+		${QMAKE_BIN} -config ${BUILD_TYPE} ${PROJECT_DIR} ${QMAKE_PARAMS} VERSION="${VERSION}"
 
 		make clean
 
