@@ -450,8 +450,7 @@ VSQMessenger::onDisconnected() {
     VS_LOG_DEBUG("onDisconnected");
 #if 0
     emit fireError(tr("Disconnected ..."));
-#endif
-    m_semaphore.release();
+#endif    
 }
 
 /******************************************************************************/
@@ -460,6 +459,7 @@ VSQMessenger::onError(QXmppClient::Error err) {
     VS_LOG_DEBUG("onError");
     qDebug() << err;
     emit fireError(tr("Connection error ..."));
+    m_semaphore.release();
 }
 
 /******************************************************************************/

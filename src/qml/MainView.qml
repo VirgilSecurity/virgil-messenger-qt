@@ -103,6 +103,22 @@ Control {
         stackView.pop()
     }
 
+    function navigateTo(page, params, animate, clearHistory) {
+
+        const path = "./pages/%1Page.qml".arg(page);
+
+        if (clearHistory) {
+            stackView.clear()
+        }
+
+        if (animate) {
+            stackView.push(path)
+        }
+        else {
+            stackView.push(path, StackView.Immediate)
+        }
+    }
+
     function showSplashScreen(){
         stackView.push("./pages/SplashScreenPage.qml", StackView.Immediate)
     }
@@ -136,6 +152,7 @@ Control {
         if (clear) {
             stackView.clear()
         }
+
         stackView.push("./pages/ContactsPage.qml")
     }
 
