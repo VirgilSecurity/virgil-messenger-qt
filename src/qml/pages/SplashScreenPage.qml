@@ -19,8 +19,8 @@ Page {
                 form.showLoading("Signing in as %1...".arg(mainView.lastSignedInUser))
 
                 Future.onFinished(Messenger.signIn(mainView.lastSignedInUser), (result) => {
-                    showContacts()
-                    // form.hideLoading()
+                    form.hideLoading()
+                    showContacts(true)
                 })
 
                 return

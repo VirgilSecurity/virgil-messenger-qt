@@ -12,7 +12,7 @@ Page {
 
     header: Header {
         showBackButton: !form.isLoading
-        title: "Sign in"
+        title: qsTr("Sign in")
     }
 
     Timer {
@@ -30,19 +30,19 @@ Page {
 
         FormInput {
             id: username
-            label: "Username"
-            placeholder: "Enter username"
+            label: qsTr("Username")
+            placeholder: qsTr("Enter username")
         }
 
         FormPrimaryButton {
             onClicked: {
-                form.showLoading("Signing in...")
+                form.showLoading(qsTr("Signing in..."))
                 signInTimer.start()
 
                 // if (Messenger.usersList().searc)
                 // mainView.signIn(username.text)
             }
-            text: "Sign in"
+            text: qsTr("Sign in")
         }
 
     }

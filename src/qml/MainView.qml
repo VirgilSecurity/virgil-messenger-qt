@@ -5,15 +5,12 @@ import Qt.labs.settings 1.1
 import QuickFuture 1.0
 
 import "./theme"
+import "./components"
 import "./helpers/login.js" as LoginLogic
 
 Control {
     id: mainView
     anchors.fill: parent
-
-    background: Rectangle {
-        color: Theme.mainBackgroundColor
-    }
 
     property string lastSignedInUser
 
@@ -25,8 +22,32 @@ Control {
         anchors.fill: parent
         spacing: 0
 
+        ServersPanel {
+            id: serversPanel
+            visible: stackView.currentItem && typeof(stackView.currentItem.showServersPanel) !== "undefined" && stackView.currentItem.showServersPanel
+            z: 2
+            Layout.preferredWidth: 60
+            Layout.fillHeight: true
+
+            Action {
+                text: qsTr("Settings")
+                onTriggered: mainView.showAccountSettings()
+            }
+
+            MenuSeparator {
+                leftPadding: 20
+            }
+
+            Action {
+                text: "Sign out"
+                onTriggered: mainView.signOut()
+            }
+        }
+
         StackView {
             id: stackView
+            spacing: 0
+            z: 1
             Layout.fillHeight: true
             Layout.fillWidth: true
 
@@ -81,10 +102,7 @@ Control {
             lastSignedInUser = ""
             showAuth(true)
         })
-
-
     }
-
 
     function chatWith(recipient) {
         ConversationsModel.recipient = recipient
@@ -129,7 +147,10 @@ Control {
         stackView.push("./pages/RegisterPage.qml")
     }
 
-    function showContacts() {
+    function showContacts(clear) {
+        if (clear) {
+            stackView.clear()
+        }
         stackView.push("./pages/ContactsPage.qml")
     }
 
