@@ -46,8 +46,8 @@
 #include <QtQml>
 
 #include <QuickFuture>
-Q_DECLARE_METATYPE(VSQMessenger::VSQMessengerResult)
-Q_DECLARE_METATYPE(QFuture<VSQMessenger::VSQMessengerResult>)
+Q_DECLARE_METATYPE(VSQMessenger::EnResult)
+Q_DECLARE_METATYPE(QFuture<VSQMessenger::EnResult>)
 
 const QString VSQMessenger::kOrganization = "VirgilSecurity";
 const QString VSQMessenger::kApp = "IoTKit Messenger";
@@ -61,7 +61,8 @@ const QString VSQMessenger::kDevEnvPrefix = "dev";
 VSQMessenger::VSQMessenger() : m_semaphore(1) {
 
     // Register QML typess
-    QuickFuture::registerType<VSQMessenger::VSQMessengerResult>([](VSQMessenger::VSQMessengerResult res) -> QVariant {
+    qmlRegisterType<VSQMessenger>("MesResult", 1, 0, "Result");
+    QuickFuture::registerType<VSQMessenger::EnResult>([](VSQMessenger::EnResult res) -> QVariant {
         return QVariant(static_cast<int>(res));
     });
 
@@ -208,10 +209,10 @@ VSQMessenger::currentUser() {
 }
 
 /******************************************************************************/
-QFuture<VSQMessenger::VSQMessengerResult>
+QFuture<VSQMessenger::EnResult>
 VSQMessenger::signIn(QString user) {
     auto userId = _prepareLogin(user);
-    return QtConcurrent::run([=]() -> VSQMessengerResult {
+    return QtConcurrent::run([=]() -> EnResult {
         qDebug() << "Trying to Sign In: " << userId;
 
         vs_messenger_virgil_user_creds_t creds;
@@ -235,10 +236,10 @@ VSQMessenger::signIn(QString user) {
 }
 
 /******************************************************************************/
-QFuture<VSQMessenger::VSQMessengerResult>
+QFuture<VSQMessenger::EnResult>
 VSQMessenger::signUp(QString user) {
     auto userId = _prepareLogin(user);
-    return QtConcurrent::run([=]() -> VSQMessengerResult {
+    return QtConcurrent::run([=]() -> EnResult {
         qDebug() << "Trying to Sign Up: " << userId;
 
         vs_messenger_virgil_user_creds_t creds;
@@ -259,9 +260,9 @@ VSQMessenger::signUp(QString user) {
 }
 
 /******************************************************************************/
-QFuture<VSQMessenger::VSQMessengerResult>
+QFuture<VSQMessenger::EnResult>
 VSQMessenger::addContact(QString contact) {
-    return QtConcurrent::run([=]() -> VSQMessengerResult {
+    return QtConcurrent::run([=]() -> EnResult {
         // Sign Up user, using Virgil Service
         if (VS_CODE_OK != vs_messenger_virgil_search(contact.toStdString().c_str())) {
             auto errorText = tr("User is not registered : ") + contact;
@@ -404,9 +405,9 @@ VSQMessenger::usersList() {
 }
 
 /******************************************************************************/
-QFuture<VSQMessenger::VSQMessengerResult>
+QFuture<VSQMessenger::EnResult>
 VSQMessenger::logout() {
-    return QtConcurrent::run([=]() -> VSQMessengerResult {
+    return QtConcurrent::run([=]() -> EnResult {
         qDebug() << "Logout";
         QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::BlockingQueuedConnection);
         vs_messenger_virgil_logout();
@@ -415,9 +416,9 @@ VSQMessenger::logout() {
 }
 
 /******************************************************************************/
-QFuture<VSQMessenger::VSQMessengerResult>
+QFuture<VSQMessenger::EnResult>
 VSQMessenger::deleteUser(QString user) {
-    return QtConcurrent::run([=]() -> VSQMessengerResult {
+    return QtConcurrent::run([=]() -> EnResult {
         Q_UNUSED(user)
         logout();
         return MRES_OK;
@@ -516,9 +517,9 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
 }
 
 /******************************************************************************/
-QFuture<VSQMessenger::VSQMessengerResult>
+QFuture<VSQMessenger::EnResult>
 VSQMessenger::sendMessage(QString to, QString message) {
-    return QtConcurrent::run([=]() -> VSQMessengerResult {
+    return QtConcurrent::run([=]() -> EnResult {
         static const size_t _encryptedMsgSzMax = 20 * 1024;
         uint8_t encryptedMessage[_encryptedMsgSzMax];
         size_t encryptedMessageSz = 0;

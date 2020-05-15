@@ -52,6 +52,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QuickFuture 1.0
+import MesResult 1.0
 
 import "../theme"
 import "../components"
@@ -176,7 +177,12 @@ Page {
                 try {
                     var future = Messenger.addContact(dialog.contact)
                     Future.onFinished(future, function(value) {
-                      console.log("addContact result: ", Future.result(future))
+                        var res = Future.result(future)
+                        console.log("addContact result: ", res)
+                        if (res === Result.MRES_OK) {
+                            console.log("addContact result: ", "OK")
+                        }
+
                     })
                 } catch (error) {
                     console.error("Cannot start initialization of device")
