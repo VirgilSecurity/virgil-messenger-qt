@@ -2,17 +2,15 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import Qt.labs.settings 1.1
+import QuickFuture 1.0
 
 import "./theme"
+import "./components"
 import "./helpers/login.js" as LoginLogic
 
 Control {
     id: mainView
     anchors.fill: parent
-
-    background: Rectangle {
-        color: Theme.mainBackgroundColor
-    }
 
     property string lastSignedInUser
 
@@ -24,11 +22,34 @@ Control {
         anchors.fill: parent
         spacing: 0
 
+        ServersPanel {
+            id: serversPanel
+            visible: stackView.currentItem && typeof(stackView.currentItem.showServersPanel) !== "undefined" && stackView.currentItem.showServersPanel
+            z: 2
+            Layout.preferredWidth: 60
+            Layout.fillHeight: true
+
+            Action {
+                text: qsTr("Settings")
+                onTriggered: mainView.showAccountSettings()
+            }
+
+            MenuSeparator {
+                leftPadding: 20
+            }
+
+            Action {
+                text: "Sign out"
+                onTriggered: mainView.signOut()
+            }
+        }
+
         StackView {
             id: stackView
+            spacing: 0
+            z: 1
             Layout.fillHeight: true
             Layout.fillWidth: true
-            z: 1
 
             background: Rectangle {
                 color: Theme.contactsBackgroundColor
@@ -42,7 +63,11 @@ Control {
 
     function signIn(user) {
         if (LoginLogic.validateUser(user)) {
-            Messenger.signIn(user)
+            var future = Messenger.signIn(user)
+            Future.onFinished(future, function(value) {
+              console.log("SignIn result: ", Future.result(future))
+            })
+
             stackView.clear()
             lastSignedInUser = user
             showContacts()
@@ -53,7 +78,11 @@ Control {
 
     function signUp(user) {
         if (LoginLogic.validateUser(user)) {
-            Messenger.signUp(user)
+            var future = Messenger.signUp(user)
+            Future.onFinished(future, function(value) {
+              console.log("SignUp result: ", Future.result(future))
+            })
+
             showPopupInform("Sign Up ...")
             lastSignedInUser = user
             showContacts()
@@ -63,15 +92,17 @@ Control {
     }
 
     function signOut() {
-        Messenger.logout()
+        var future = Messenger.logout()
+        Future.onFinished(future, function(value) {
+          console.log("Logout result: ", Future.result(future))
 
-        // clear all pages in the stackview and push sign in page
-        // as a first page in the stack
-        stackView.clear()
-        lastSignedInUser = ""
-        showAuth(true)
+            // clear all pages in the stackview and push sign in page
+            // as a first page in the stack
+            stackView.clear()
+            lastSignedInUser = ""
+            showAuth(true)
+        })
     }
-
 
     function chatWith(recipient) {
         ConversationsModel.recipient = recipient
@@ -104,8 +135,8 @@ Control {
         stackView.push("./pages/SignInPage.qml")
     }
 
-    function showSignInAs() {
-        stackView.push("./pages/SignInAsPage.qml")
+    function showSignInAs(params) {
+        stackView.push("./pages/SignInAsPage.qml", params)
     }
 
     function showDownloadKey() {
@@ -116,7 +147,10 @@ Control {
         stackView.push("./pages/RegisterPage.qml")
     }
 
-    function showContacts() {
+    function showContacts(clear) {
+        if (clear) {
+            stackView.clear()
+        }
         stackView.push("./pages/ContactsPage.qml")
     }
 
