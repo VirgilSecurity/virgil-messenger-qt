@@ -1,9 +1,11 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
+import QuickFuture 1.0
 
 import "../theme"
 import "../components"
+import "../helpers/login.js" as LoginLogic
 
 Page {
     readonly property string terms:
@@ -27,7 +29,7 @@ Page {
         }
 
         FormPrimaryButton {
-            onClicked: mainView.signUp(username.text)
+            onClicked: signUp(username.text)
             text: "Create account"
         }
 
@@ -37,4 +39,20 @@ Page {
     }
 
     footer: Footer {}
+
+    function signUp(user) {
+        if (LoginLogic.validateUser(user)) {
+            var future = Messenger.signUp(user)
+
+            Future.onFinished(future, function(result) {
+
+            })
+
+            showPopupInform("Sign Up ...")
+            lastSignedInUser = user
+            showContacts()
+        } else {
+            showPopupError(qsTr("Incorrect user name"))
+        }
+    }
 }

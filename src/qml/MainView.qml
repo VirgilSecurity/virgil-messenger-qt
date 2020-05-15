@@ -76,21 +76,6 @@ Control {
         }
     }
 
-    function signUp(user) {
-        if (LoginLogic.validateUser(user)) {
-            var future = Messenger.signUp(user)
-            Future.onFinished(future, function(value) {
-              console.log("SignUp result: ", Future.result(future))
-            })
-
-            showPopupInform("Sign Up ...")
-            lastSignedInUser = user
-            showContacts()
-        } else {
-            showPopupError(qsTr("Incorrect user name"))
-        }
-    }
-
     function signOut() {
         var future = Messenger.logout()
         Future.onFinished(future, function(value) {

@@ -77,12 +77,12 @@ Page {
 
         Action {
             text: qsTr("New group")
-            onTriggered: addContact()
+            // onTriggered: addContact()
         }
 
         Action {
             text: qsTr("Send invite")
-            onTriggered: addContact()
+            // onTriggered: addContact()
         }
     }
 
@@ -181,8 +181,8 @@ Page {
                         console.log("addContact result: ", res)
                         if (res === Result.MRES_OK) {
                             console.log("addContact result: ", "OK")
+                            mainView.chatWith(dialog.contact)
                         }
-
                     })
                 } catch (error) {
                     console.error("Cannot start initialization of device")

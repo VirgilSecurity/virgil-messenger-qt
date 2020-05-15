@@ -9,7 +9,7 @@ Control {
     signal messageSending(string message)
 
     width: parent.width
-    implicitHeight: scrollView.height + 20
+    implicitHeight: scrollView.height
 
     background: Rectangle {
         color: Theme.chatBackgroundColor
@@ -21,6 +21,7 @@ Control {
 
         ImageButton {
             Layout.leftMargin: 20
+            Layout.rightMargin: 10
             Layout.alignment: Qt.AlignVCenter
             imageSource: "../resources/icons/Grid.png"
         }
@@ -28,10 +29,8 @@ Control {
         ScrollView {
             id: scrollView
             Layout.fillWidth: true
-            Layout.maximumHeight: 80
-            Layout.rightMargin: 15
-            Layout.topMargin: 10
-            Layout.bottomMargin: 10
+            Layout.maximumHeight: 100
+            // Layout.rightMargin: 15
 
             TextArea {
                 id: messageField
@@ -45,19 +44,23 @@ Control {
                 color: Theme.primaryTextColor
                 verticalAlignment: TextEdit.AlignVCenter
                 leftPadding: 20
-                textFormat: "RichText"
+                topPadding: 20
+                bottomPadding: 20
+                // textFormat: "RichText"
 
                 background: Rectangle {
-                    width: scrollView.width + 15
-                    height: scrollView.height
-                    radius: 20
-                    color: "#37474F"
+                   anchors.fill: parent
+                   anchors.topMargin: 10
+                   anchors.bottomMargin: 10
+                   radius: 20
+                   color: "#37474F"
                 }
             }
         }
 
         ImageButton {
             Layout.rightMargin: 20
+            Layout.leftMargin: 10
             Layout.alignment: Qt.AlignVCenter
             objectName: "sendButton"
             imageSource: "../resources/icons/Send.png"

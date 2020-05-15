@@ -41,7 +41,7 @@ ApplicationWindow {
 
         onFireNewMessage: {
             messageSound.play()
-            showChat(from)
+            // mainView.chatWith(from)
         }
     }
 

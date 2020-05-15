@@ -60,11 +60,13 @@ Page {
                 }
             }
 
-            SettingsButton {
+  /*          SettingsButton {
                 Layout.alignment: Qt.AlignRight
                 Action { text: qsTr("Item 1") }
                 Action { text: qsTr("Item 2") }
             }
+
+   */
         }
     }
 

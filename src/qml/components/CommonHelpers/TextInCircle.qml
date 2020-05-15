@@ -1,7 +1,7 @@
 import QtQuick 2.12
 
 Rectangle {
-    property var content
+    property alias content: label.text
     property real diameter
     property real pointSize
 
@@ -10,6 +10,7 @@ Rectangle {
     radius: diameter / 2
 
     Text {
+        id: label
         text: content
         color: "white"
         font.pointSize: pointSize

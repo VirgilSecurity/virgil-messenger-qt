@@ -82,7 +82,7 @@ Control {
                     textFormat: Text.RichText
                     width: chatMessage.width
                     color: Theme.primaryTextColor
-                    font.pixelSize: UiHelper.fixFontSz(20)
+                    font.pointSize: UiHelper.fixFontSz(15)
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     selectByMouse: true
                     readOnly: true
