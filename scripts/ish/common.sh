@@ -36,6 +36,7 @@ err_trap(){
     [  $arr_shift -ne 0 ] && echo "### COMMAND ARGUMENTS: $@"
     echo "### ERRORCODE: $err_code"
     echo "##############################################################################"
+    exit 127
 }
 
 
