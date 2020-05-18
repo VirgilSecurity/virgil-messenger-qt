@@ -1,24 +1,47 @@
+#!/usr/bin/python
 import sys
 from time import sleep
 from selenium import webdriver
+from optparse import OptionParser
 
-if len(sys.argv) != 2:
-    print("Set User ID as a parameter")
-    exit(1)
-    
-userID = sys.argv[1]
+# ****************************************************************************
+# Initialization parameters
+usage = "usage: %prog "
+parser = OptionParser(usage=usage)
+parser.add_option("-u", "--user", dest="user", help="User name", metavar="USER")
+parser.add_option("-c", "--connect", dest="connect", help="Connect string", metavar="CONNECT")
+parser.add_option("-r", "--r", dest="respath", help="Log and screenshot path", metavar="RESPATH")
+(options, args) = parser.parse_args()
+
+# Check parameters
+if not options.user:
+    print("ERROR: User not specified")
+    parser.print_help()
+    sys.exit(1)
+
+if not options.connect:
+    WD_ADDRESS = 'http://localhost:9517'
+else:
+    WD_ADDRESS = options.connect
+
+if not options.respath:
+    RESPATH = "/tmp/wdscreenshots/"
+else:
+    RESPATH = options.respath
+
+# ****************************************************************************    
+userID = options.user
 print("User ID is ", userID)
-
-WD_ADDRESS = 'http://localhost:9517'
-
-print("Connecting ...")
+print("Connecting [%s]..." % WD_ADDRESS)
 wd = webdriver.Remote(WD_ADDRESS,
                       desired_capabilities={'browserStartWindow': '*'})
 
+
+# ****************************************************************************
 def save_screenshot(name):
-    wd.get_screenshot_as_file('/tmp/wdscreenshots/%s.png' % name)
+    wd.get_screenshot_as_file('%s/%s.png' % (RESPATH, name))
 
-
+# ****************************************************************************
 sleep(4)
 
 print("Click Register button")
