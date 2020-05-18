@@ -10,6 +10,7 @@ ToolBar {
     property alias title: titleLabel.text
     property alias description: descriptionLabel.text
     property alias showSeporator: seporator.visible
+    property alias search: searchId.search
 
     default property alias menu: contextMenu.contentData
 
@@ -68,17 +69,17 @@ ToolBar {
 
         Item {
             Layout.fillWidth: isSearchOpen
-            Layout.preferredWidth: 24
+            Layout.preferredWidth: 48
             height: 40
 
             Search {
                 id: searchId
+
                 onStateChanged: {
                     isSearchOpen = searchId.state === 'open'
                 }
             }
         }
-
 
         ImageButton {
             visible: !isSearchOpen

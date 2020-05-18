@@ -63,8 +63,13 @@ Page {
     }
 
     header: ContactsHeader {
+        id: contactsHeaderId
         title: "Default"
         description: "Server"
+
+        onSearchChanged: {
+            ContactsModel.setFilter(contactsHeaderId.search)
+        }
 
         Action {
             text: qsTr("New chat")
@@ -156,14 +161,19 @@ Page {
         }
 
         IconWithText {
+            property url conversationIcon: "../resources/icons/Chats.png"
+            property url searchIcon: "../resources/icons/Search_Big.png"
+            property string conversationText: qsTr("Create your first chat<br />by pressing the dots<br />button above")
+            property string searchText: qsTr("Search results<br />will appear here")
+
             visible: !ContactsModel.rowCount()
             image {
-                source: "../resources/icons/Chats.png"
+                source: contactsHeaderId.isSearchOpen ? searchIcon : conversationIcon
                 width: 48
                 height: 48
             }
             label {
-                text: qsTr("Create your first chat<br />by pressing the dots<br />button above")
+                text: contactsHeaderId.isSearchOpen ? searchText : conversationText
                 color: Theme.labelColor
             }
         }

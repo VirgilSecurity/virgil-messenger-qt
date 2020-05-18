@@ -9,8 +9,10 @@ Item {
 
     anchors.centerIn: parent
 
+    property alias search: searchField.text
+
     Behavior on width {
-        NumberAnimation { duration: 100 }
+        NumberAnimation { duration: 150; easing.type: Easing.InOutQuad }
     }
 
     state: 'closed'
@@ -31,6 +33,11 @@ Item {
             PropertyChanges {
                 target: backgroundId
                 color: Theme.inputBackgroundColor
+            }
+
+            PropertyChanges {
+                target: searchField
+                text: ''
             }
 
             PropertyChanges {
@@ -91,8 +98,6 @@ Item {
 
         leftPadding: 38
         rightPadding: 30
-
-        text: ''
 
         color: "white"
 
