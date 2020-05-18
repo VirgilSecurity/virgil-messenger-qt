@@ -21,24 +21,24 @@ def save_screenshot(name):
 
 sleep(4)
 
-print("Click Login button")
-wd.find_element_by_xpath("//OutlineButton[@objectName='bLogin' and @visible='true']").click()
+print("Click Register button")
+wd.find_element_by_xpath("//FormPrimaryButton[@objectName='btnRegister' and @visible='true']").click()
 
 print("Enter user name")
-wd.find_element_by_xpath("//TextField[@objectName='tfLoginUsername' and @visible='true']").clear()
-wd.find_element_by_xpath("//TextField[@objectName='tfLoginUsername' and @visible='true']").send_keys(userID)
+wd.find_element_by_xpath("//TextField[@visible='true']").clear()
+wd.find_element_by_xpath("//TextField[@visible='true']").send_keys(userID)
 
-print("Click Sign In button")
+print("Click \"Create account\" button")
 sleep(1)
-wd.find_element_by_xpath("//PrimaryButton[@objectName='bSignIn' and @visible='true']").click()
+wd.find_element_by_xpath("//FormPrimaryButton[@objectName='btnCreateAccount' and @visible='true']").click()
 
 print("Sleep 10s and save a Screen Shot")
 sleep(10)
-save_screenshot('login-button-pressed')
+save_screenshot('register-button-pressed')
 
-print("Check is correctly Logged In")
+print("Check is correctly Registered")
 try:
-    wd.find_element_by_xpath("//Button[@objectName='bSendMsg' and @visible='true']")
+    wd.find_element_by_xpath("//ContactsHeader[@objectName='hdrDefaultServer' and @visible='true']")
     print("Log In: SUCCESS")
 except:
     print("Log In: FAIL")
