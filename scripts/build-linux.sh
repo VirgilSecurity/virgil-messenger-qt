@@ -9,6 +9,7 @@ source ${SCRIPT_FOLDER}/ish/common.sh
 PLATFORM=linux-g++
 BUILD_DIR=${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.${PLATFORM}/
 LINUX_QMAKE="${QT_SDK_DIR}/gcc_64/bin/qmake"
+QMAKE_PARAMS="${QMAKE_PARAMS:-" "}"
 
 #***************************************************************************************
 
@@ -21,8 +22,7 @@ new_dir ${BUILD_DIR}
 print_message "Build application bundle"
 
 pushd "${BUILD_DIR}"
-
-    ${LINUX_QMAKE} -config ${BUILD_TYPE} ${PROJECT_DIR} VERSION="${VERSION}"
+    ${LINUX_QMAKE} -config ${BUILD_TYPE} ${PROJECT_DIR} ${QMAKE_PARAMS} VERSION="${VERSION}" 
 
     make -j10
 
