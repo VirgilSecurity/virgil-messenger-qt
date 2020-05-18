@@ -23,10 +23,12 @@ Page {
 
         FormInput {
             id: username
+            objectName: "fiRegisterUsername"
             label: "Username"
         }
 
         FormPrimaryButton {
+            objectName: "btnCreateAccount"
             onClicked: mainView.signUp(username.text)
             text: "Create account"
         }

@@ -67,6 +67,7 @@ Page {
     }
 
     header: ContactsHeader {
+        objectName: "hdrDefaultServer"
         title: "Virgil"
         description: "Default Server"
 

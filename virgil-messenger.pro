@@ -136,6 +136,33 @@ isEqual(OS_NAME, "macos"): {
     QMAKE_BUNDLE_DATA += sparkle
 }
 
+#
+#   Qt Web Driver
+#
+isEmpty(WEBDRIVER) {
+    message("Web Driver is disabled")
+} else {
+    message("Web Driver is enabled")
+    QT += widgets
+    DEFINES += WD_ENABLE_WEB_VIEW=0 \
+           WD_ENABLE_PLAYER=0 \
+           QT_NO_SAMPLES=1 \
+           VSQ_WEBDRIVER_DEBUG=1
+    QTWEBDRIVER_LOCATION=$$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/include/qtwebdriver
+    HEADERS += $$QTWEBDRIVER_LOCATION/src/Test/Headers.h
+    INCLUDEPATH +=  $$QTWEBDRIVER_LOCATION $$QTWEBDRIVER_LOCATION/src
+    linux:!android: { 
+        LIBS += -ldl -Wl,--start-group -lchromium_base -lWebDriver_core -lWebDriver_extension_qt_base -lWebDriver_extension_qt_quick -Wl,--end-group
+    }    
+    macx: {
+        LIBS += -lchromium_base -lWebDriver_core -lWebDriver_extension_qt_base -lWebDriver_extension_qt_quick
+        LIBS += -framework Foundation
+        LIBS += -framework CoreFoundation
+        LIBS += -framework ApplicationServices
+        LIBS += -framework Security
+    }
+}
+
 
 #
 #   Libraries
