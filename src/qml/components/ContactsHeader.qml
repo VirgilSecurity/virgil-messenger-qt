@@ -34,11 +34,12 @@ ToolBar {
 
     RowLayout {
         anchors.fill: parent
+        anchors.leftMargin: 20
+        anchors.rightMargin: 20
 
         Column {
-            Layout.fillWidth: containerId.state === 'closed'
-            Layout.leftMargin: 20
-            visible: containerId.state === 'closed'
+            Layout.fillWidth: !isSearchOpen
+            visible: !isSearchOpen
 
             Label {
                 id: titleLabel
@@ -66,100 +67,22 @@ ToolBar {
 
 
         Item {
-            id: containerId
-            Layout.fillHeight: true
-            Layout.preferredWidth: 48
-            Layout.fillWidth: containerId.state === 'open'
+            Layout.fillWidth: isSearchOpen
+            Layout.preferredWidth: 24
+            height: 40
 
-            state: 'closed'
-            states: [
-                State {
-                    name: "open"
-
-                    ParentChange {
-                        target: searchButtonId
-                        parent: searchField
-                    }
-
-                    PropertyChanges {
-                        target: backgroundId
-                        color: Theme.inputBackgroundColor
-                    }
-
-                    PropertyChanges {
-                        target: searchButtonId
-                        anchors {
-                            left: searchField.left
-                            leftMargin: 11
-                        }
-                    }
-                },
-                State {
-                    name: 'closed'
-
-                    PropertyChanges {
-                        target: closeButtonId
-                        visible: false
-                    }
-
-                    PropertyChanges {
-                        target: searchField
-                        visible: false
-                        text: ''
-                    }
-                }
-            ]
-
-            Behavior on Layout.preferredWidth {
-                NumberAnimation { duration: 100 }
-            }
-
-            TextField {
-                id: searchField
-
-                anchors.fill: parent;
-
-                leftPadding: 38
-                rightPadding: 30
-
-                text: ''
-
-                background: Rectangle {
-                    id: backgroundId
-                    radius: 20
-                    color: "transparent"
-                }
-
-                ImageButton {
-                    id: closeButtonId
-                    imageSource: "../resources/icons/Close.png"
-                    anchors {
-                        verticalCenter: parent.verticalCenter
-                        right: parent.right
-                        rightMargin: 6
-                    }
-                    onClicked: {
-                        containerId.state = 'closed'
-                    }
+            Search {
+                id: searchId
+                onStateChanged: {
+                    isSearchOpen = searchId.state === 'open'
                 }
             }
-
-            ImageButton {
-                id: searchButtonId
-                imageSource: "../resources/icons/Search.png"
-                anchors.centerIn: containerId;
-                onClicked: {
-                    containerId.state = "open"
-                }
-            }
-
-
-
         }
 
+
         ImageButton {
+            visible: !isSearchOpen
             Layout.leftMargin: 5
-            Layout.rightMargin: 12
 
             id: menuButton
             imageSource: "../resources/icons/More.png"

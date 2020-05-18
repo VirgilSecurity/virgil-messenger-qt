@@ -79,5 +79,6 @@
         <file>qml/resources/icons/Key.png</file>
         <file>qml/resources/icons/Key@2x.png</file>
         <file>qml/components/CommonHelpers/IconWithText.qml</file>
+        <file>qml/components/Search.qml</file>
     </qresource>
 </RCC>
