@@ -122,7 +122,7 @@ INCLUDEPATH +=  include \
 #
 #   Sparkle framework
 #
-unix:mac: {
+isEqual(OS_NAME, "macos"): {
     OBJECTIVE_SOURCES += src/macos/VSQMacos.mm
     DEFINES += MACOS=1
     SPARKLE_LOCATION=$$PREBUILT_PATH/$${OS_NAME}/sparkle
@@ -165,6 +165,23 @@ macx: {
     QMAKE_INFO_PLIST = $$PWD/platforms/macos/virgil-messenger.plist
 }
 
+#
+#   iOS specific
+#
+isEqual(OS_NAME, "ios"): {
+    Q_ENABLE_BITCODE.name = ENABLE_BITCODE
+    Q_ENABLE_BITCODE.value = NO
+    QMAKE_MAC_XCODE_SETTINGS += Q_ENABLE_BITCODE
+
+    LIBS_DIR = $$PWD/ext/prebuilt/ios/release/installed/usr/local/lib
+    QMAKE_RPATHDIR = @executable_path/Frameworks
+
+    IOS_DYLIBS.files = \
+    $$LIBS_DIR/libvs-messenger-crypto.dylib \
+    $$LIBS_DIR/libvs-messenger-internal.dylib
+    IOS_DYLIBS.path = Frameworks
+    QMAKE_BUNDLE_DATA += IOS_DYLIBS
+}
 
 #
 #   Android specific
