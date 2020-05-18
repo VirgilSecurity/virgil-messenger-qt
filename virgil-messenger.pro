@@ -195,12 +195,12 @@ macx: {
 #
 #   iOS specific
 #
-isEqual(OS_NAME, "ios"): {
+isEqual(OS_NAME, "ios")|isEqual(OS_NAME, "ios-sim"): {
     Q_ENABLE_BITCODE.name = ENABLE_BITCODE
     Q_ENABLE_BITCODE.value = NO
     QMAKE_MAC_XCODE_SETTINGS += Q_ENABLE_BITCODE
 
-    LIBS_DIR = $$PWD/ext/prebuilt/ios/release/installed/usr/local/lib
+    LIBS_DIR = $$PWD/ext/prebuilt/$$OS_NAME/release/installed/usr/local/lib
     QMAKE_RPATHDIR = @executable_path/Frameworks
 
     IOS_DYLIBS.files = \
