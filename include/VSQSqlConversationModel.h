@@ -64,7 +64,7 @@ public:
     roleNames() const override;
 
     Q_INVOKABLE void
-    sendMessage(const QString &recipient, const QString &message);
+    sendMessage(QString recipient, QString message);
 
     Q_INVOKABLE void
     receiveMessage(const QString &sender, const QString &message);

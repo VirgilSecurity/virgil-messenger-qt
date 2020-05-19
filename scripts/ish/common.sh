@@ -36,6 +36,7 @@ err_trap(){
     [  $arr_shift -ne 0 ] && echo "### COMMAND ARGUMENTS: $@"
     echo "### ERRORCODE: $err_code"
     echo "##############################################################################"
+    exit 127
 }
 
 
@@ -75,7 +76,7 @@ function prepare_libraries() {
         return 0
     fi
 
-    new_dir ${INSTALL_DIR} 
+    rm -rf ${INSTALL_DIR}/prebuilt
 
     pushd ${INSTALL_DIR}
         wget -O ${ARCH_NAME} ${PREBUILT_ARCHIVE}

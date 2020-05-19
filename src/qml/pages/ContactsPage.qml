@@ -51,6 +51,7 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
+import QuickFuture 1.0
 
 import "../theme"
 import "../components"
@@ -58,14 +59,16 @@ import "../components/CommonHelpers"
 
 Page {
 
+    property bool showServersPanel: true
+
     background: Rectangle {
         color: Theme.contactsBackgroundColor
     }
 
     header: ContactsHeader {
-        id: contactsHeaderId
-        title: "Default"
-        description: "Server"
+        objectName: "hdrDefaultServer"
+        title: "Virgil"
+        description: "Default Server"
 
         onSearchChanged: {
             console.log('contactsHeaderId.search', contactsHeaderId.search, 'contactsHeaderId.isSearchOpen', contactsHeaderId.isSearchOpen)
@@ -78,15 +81,13 @@ Page {
         }
 
         Action {
-            text: qsTr("Settings")
-            onTriggered: mainView.showAccountSettings()
+            text: qsTr("New group")
+            onTriggered: addContact()
         }
 
-        MenuSeparator {}
-
         Action {
-            text: qsTr("Sign out")
-            onTriggered: mainView.signOut()
+            text: qsTr("Send invite")
+            onTriggered: addContact()
         }
     }
 
@@ -190,7 +191,10 @@ Page {
             dialog.applied.connect(function()
             {
                 try {
-                    Messenger.addContact(dialog.contact)
+                    var future = Messenger.addContact(dialog.contact)
+                    Future.onFinished(future, function(value) {
+                      console.log("addContact result: ", Future.result(future))
+                    })
                 } catch (error) {
                     console.error("Cannot start initialization of device")
                 }
