@@ -9,6 +9,7 @@ Item {
 
     anchors.centerIn: parent
 
+    property alias searchPlaceholder: searchField.placeholderText
     property alias search: searchField.text
     property bool isSearchOpen: state === "open"
 
@@ -99,6 +100,8 @@ Item {
         activeFocusOnPress: true
         leftPadding: 38
         rightPadding: 30
+        font.pixelSize: UiHelper.fixFontSz(15)
+        placeholderTextColor: "#59717D"
 
         color: "white"
 
@@ -119,10 +122,6 @@ Item {
             onClicked: {
                 containerId.state = 'closed'
             }
-        }
-
-        onFocusChanged: {
-            console.log('activeFocus', activeFocus)
         }
 
         Keys.onPressed: {

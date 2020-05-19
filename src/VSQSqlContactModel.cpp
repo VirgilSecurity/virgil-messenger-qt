@@ -108,13 +108,20 @@ VSQSqlContactModel::setUser(const QString &user) {
 Q_INVOKABLE void
 VSQSqlContactModel::setContactsFilter(const QString &filter) {
     if (filter.isEmpty()) {
-        setFilter("");
+        setFilter("name LIKE NULL");
     } else {
         const QString filterString = QString::fromLatin1(
             "name LIKE '%%1%'").arg(filter);
         setFilter(filterString);
     }
 
+    select();
+}
+
+/******************************************************************************/
+Q_INVOKABLE void
+VSQSqlContactModel::clearContactsFilter() {
+    setFilter("");
     select();
 }
 

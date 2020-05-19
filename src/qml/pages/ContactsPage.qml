@@ -66,13 +66,20 @@ Page {
     }
 
     header: ContactsHeader {
+        id: contactsHeaderId
         objectName: "hdrDefaultServer"
         title: "Virgil"
         description: "Default Server"
+        searchPlaceholder: "Search conversation"
+
+        onIsSearchOpenChanged: {
+            contactsHeaderId.isSearchOpen ? ContactsModel.setContactsFilter('') : ContactsModel.clearContactsFilter()
+            emptyListPlaceholderId.visible = !ContactsModel.rowCount()
+        }
 
         onSearchChanged: {
-            console.log('contactsHeaderId.search', contactsHeaderId.search, 'contactsHeaderId.isSearchOpen', contactsHeaderId.isSearchOpen)
             ContactsModel.setContactsFilter(contactsHeaderId.search)
+            emptyListPlaceholderId.visible = !ContactsModel.rowCount()
         }
 
         Action {
@@ -163,11 +170,13 @@ Page {
         }
 
         IconWithText {
+            id: emptyListPlaceholderId
             property url conversationIcon: "../resources/icons/Chats.png"
             property url searchIcon: "../resources/icons/Search_Big.png"
             property string conversationText: qsTr("Create your first chat<br />by pressing the dots<br />button above")
             property string searchText: qsTr("Search results<br />will appear here")
-
+            property string searchEmptyText: qsTr("Nothing found")
+            // TODO bind to Q_PROPERTY, because method is not reactive ((
             visible: !ContactsModel.rowCount()
             image {
                 source: contactsHeaderId.isSearchOpen ? searchIcon : conversationIcon
@@ -175,11 +184,18 @@ Page {
                 height: 48
             }
             label {
-                text: contactsHeaderId.isSearchOpen ? searchText : conversationText
+                text: getSearchText()
                 color: Theme.labelColor
+            }
+
+            function getSearchText() {
+                if (!contactsHeaderId.isSearchOpen) return conversationText;
+                if (contactsHeaderId.search !== '') return searchEmptyText;
+                return searchText;
             }
         }
     }
+
 
     //
     //  Functions

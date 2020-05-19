@@ -53,6 +53,9 @@ public:
     Q_INVOKABLE void
     setContactsFilter(const QString &filter);
 
+    Q_INVOKABLE void
+    clearContactsFilter();
+
 public slots:
     void
     addContact(QString contact);

@@ -10,8 +10,10 @@ ToolBar {
     property alias title: titleLabel.text
     property alias description: descriptionLabel.text
     property alias showSeporator: seporator.visible
+    // search
     property alias search: searchId.search
     property alias isSearchOpen: searchId.isSearchOpen
+    property alias searchPlaceholder: searchId.searchPlaceholder
 
     default property alias menu: contextMenu.contentData
 
