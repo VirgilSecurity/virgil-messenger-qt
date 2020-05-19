@@ -35,9 +35,9 @@
 #ifndef VIRGIL_IOTKIT_QT_SQL_CONTACT_MODEL_H
 #define VIRGIL_IOTKIT_QT_SQL_CONTACT_MODEL_H
 
-#include <QSqlQueryModel>
+#include <QSqlTableModel>
 
-class VSQSqlContactModel : public QSqlQueryModel {
+class VSQSqlContactModel : public QSqlTableModel {
 
     Q_OBJECT
 
@@ -49,6 +49,9 @@ public:
 
     Q_INVOKABLE void
     setUser(const QString &user);
+
+    Q_INVOKABLE void
+    setContactsFilter(const QString &filter);
 
 public slots:
     void

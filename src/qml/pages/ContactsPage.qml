@@ -69,7 +69,7 @@ Page {
 
         onSearchChanged: {
             console.log('contactsHeaderId.search', contactsHeaderId.search, 'contactsHeaderId.isSearchOpen', contactsHeaderId.isSearchOpen)
-            ContactsModel.setFilter(contactsHeaderId.search)
+            ContactsModel.setContactsFilter(contactsHeaderId.search)
         }
 
         Action {
