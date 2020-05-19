@@ -10,9 +10,10 @@ Item {
     anchors.centerIn: parent
 
     property alias search: searchField.text
+    property bool isSearchOpen: state === "open"
 
     Behavior on width {
-        NumberAnimation { duration: 150; easing.type: Easing.InOutQuad }
+        NumberAnimation { duration: 200; easing.type: Easing.InOutQuad }
     }
 
     state: 'closed'
@@ -95,7 +96,7 @@ Item {
         id: searchField
 
         anchors.fill: parent;
-
+        activeFocusOnPress: true
         leftPadding: 38
         rightPadding: 30
 
@@ -119,6 +120,17 @@ Item {
                 containerId.state = 'closed'
             }
         }
+
+        onFocusChanged: {
+            console.log('activeFocus', activeFocus)
+        }
+
+        Keys.onPressed: {
+            if (containerId.state === "open" && (event.key === Qt.Key_Back || event.key === Qt.Key_Escape)) {
+                containerId.state = "closed"
+                event.accepted = true;
+            }
+        }
     }
 
     ImageButton {
@@ -129,6 +141,7 @@ Item {
 
         onClicked: {
             containerId.state = "open"
+            searchField.focus = true
         }
     }
 }

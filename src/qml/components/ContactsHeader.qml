@@ -11,10 +11,9 @@ ToolBar {
     property alias description: descriptionLabel.text
     property alias showSeporator: seporator.visible
     property alias search: searchId.search
+    property alias isSearchOpen: searchId.isSearchOpen
 
     default property alias menu: contextMenu.contentData
-
-    property bool isSearchOpen: false
 
     background: Rectangle {
         implicitHeight: 60
@@ -74,10 +73,6 @@ ToolBar {
 
             Search {
                 id: searchId
-
-                onStateChanged: {
-                    isSearchOpen = searchId.state === 'open'
-                }
             }
         }
 

@@ -68,6 +68,7 @@ Page {
         description: "Server"
 
         onSearchChanged: {
+            console.log('contactsHeaderId.search', contactsHeaderId.search, 'contactsHeaderId.isSearchOpen', contactsHeaderId.isSearchOpen)
             ContactsModel.setFilter(contactsHeaderId.search)
         }
 
