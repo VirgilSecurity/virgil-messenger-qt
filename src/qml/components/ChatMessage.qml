@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
+import Qt.labs.platform 1.0 as Platform
 
 import "../theme"
 
@@ -12,10 +13,21 @@ Control {
 
     property alias text: textEdit.text
     property alias author: avatar.nickname
+
     property bool messageInARow: false
     property bool firstMessageInARow: true
     property var variant
     property var timeStamp
+
+    Platform.Menu {
+        id: contextMenu
+        Platform.MenuItem {
+            text: qsTr("&Copy")
+            onTriggered: {
+                clipboard.setText(textEdit.getText(0, textEdit.length))
+            }
+        }
+    }
 
     Row {
         id: row
@@ -58,6 +70,19 @@ Control {
 
                 color: "transparent"
 
+                TapHandler {
+                    acceptedButtons: Qt.RightButton | Qt.TapAndHoldGesture
+                    onTapped: contextMenu.open()
+                }
+/*
+                MouseArea {
+                    acceptedButtons: Qt.RightButton
+                    anchors.fill: parent
+                    onClicked: {
+                        tapped()
+                    }
+                }
+*/
                 Rectangle {
                     width: chatMessage.width
                     height: textEdit.height
@@ -88,6 +113,7 @@ Control {
                     leftPadding: 15
                     rightPadding: 15
                     bottomPadding: 12
+                    enabled: false
                     textFormat: Text.RichText
                     width: chatMessage.width
                     color: Theme.primaryTextColor
