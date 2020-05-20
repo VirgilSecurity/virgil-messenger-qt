@@ -74,12 +74,10 @@ Page {
 
         onIsSearchOpenChanged: {
             contactsHeaderId.isSearchOpen ? ContactsModel.setContactsFilter('') : ContactsModel.clearContactsFilter()
-            emptyListPlaceholderId.visible = !ContactsModel.rowCount()
         }
 
         onSearchChanged: {
             ContactsModel.setContactsFilter(contactsHeaderId.search)
-            emptyListPlaceholderId.visible = !ContactsModel.rowCount()
         }
 
         Action {
@@ -176,8 +174,7 @@ Page {
             property string conversationText: qsTr("Create your first chat<br />by pressing the dots<br />button above")
             property string searchText: qsTr("Search results<br />will appear here")
             property string searchEmptyText: qsTr("Nothing found")
-            // TODO bind to Q_PROPERTY, because method is not reactive ((
-            visible: !ContactsModel.rowCount()
+            visible: !listView.contentItem.children.length
             image {
                 source: contactsHeaderId.isSearchOpen ? searchIcon : conversationIcon
                 width: 48
