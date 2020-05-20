@@ -67,8 +67,9 @@ Page {
     }
 
     header: ContactsHeader {
-        title: "Virgil Secure Communications Platform"
         description: "Virgil Server"
+        objectName: "hdrDefaultServer"
+        title: "Virgil"
 
         Action {
             text: qsTr("New Chat")

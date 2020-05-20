@@ -62,7 +62,7 @@ Control {
             Layout.rightMargin: 20
             Layout.leftMargin: 10
             Layout.alignment: Qt.AlignVCenter
-            objectName: "sendButton"
+            objectName: "btnSend"
             imageSource: "../resources/icons/Send.png"
             enabled: messageField.length > 0            
             onClicked: {

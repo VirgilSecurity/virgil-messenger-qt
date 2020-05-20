@@ -155,6 +155,7 @@ Page {
 
                 Button {
                     id: sendButton
+                    objectName: "bSendMsg"
                     text: qsTr("Send")
                     enabled: messageField.length > 0
                     onClicked: {

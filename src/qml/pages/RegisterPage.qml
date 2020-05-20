@@ -29,11 +29,13 @@ Page {
 
         FormInput {
             id: username
+            objectName: "fiRegisterUsername"
             label: "Username"
         }
 
         FormPrimaryButton {
             onClicked: signUp(username.text)
+            objectName: "btnCreateAccount"
             text: "Create account"
         }
 
