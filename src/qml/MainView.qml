@@ -39,7 +39,7 @@ Control {
             }
 
             Action {
-                text: "Sign out"
+                text: "Sign Out"
                 onTriggered: mainView.signOut()
             }
         }
@@ -65,14 +65,14 @@ Control {
         if (LoginLogic.validateUser(user)) {
             var future = Messenger.signIn(user)
             Future.onFinished(future, function(value) {
-              console.log("SignIn result: ", Future.result(future))
+              console.log("Log In result: ", Future.result(future))
             })
 
             stackView.clear()
             lastSignedInUser = user
             showContacts()
         } else {
-            root.showPopupError(qsTr("Incorrect user name"))
+            root.showPopupError(qsTr("Incorrect User Name"))
         }
     }
 
