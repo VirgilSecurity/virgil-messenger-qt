@@ -65,34 +65,37 @@ Page {
                 Action { text: qsTr("Item 1") }
                 Action { text: qsTr("Item 2") }
             }
-
-   */
+  */
         }
     }
 
     ListView {
         id: listView
-
         anchors.fill: parent
         anchors.leftMargin: 20
         anchors.rightMargin: 20
-
-        verticalLayoutDirection: ListView.BottomToTop
-        spacing: 12
+        section.property: "day"
+        section.delegate: ChatDateSeporator {
+            date: section
+        }
+        spacing: 5
+        // verticalLayoutDirection: ListView.BottomToTop
         model: ConversationsModel
         delegate: ChatMessage {
             text: message
-            author: model.author === "Me"
-                      ? Messenger.currentUser
-                      : model.author
+            author: model.author
             timeStamp: model.timestamp
-            variant: model.author === "Me"
-                      ? "light"
-                      : "dark"
+            variant: model.author === Messenger.currentUser ? "light" : "dark"
+            messageInARow: model.messageInARow
+            firstMessageInARow: model.firstMessageInARow
         }
 
         ScrollBar.vertical: ScrollBar {
             bottomPadding: 5
+        }
+
+        onCountChanged: {
+            positionViewAtEnd()
         }
     }
 

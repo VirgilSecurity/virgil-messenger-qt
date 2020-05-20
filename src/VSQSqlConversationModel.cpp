@@ -96,9 +96,12 @@ VSQSqlConversationModel::setRecipient(const QString &recipient) {
     m_recipient = recipient;
 
     const QString filterString = QString::fromLatin1(
-        "(recipient = '%1' AND author = 'Me') OR (recipient = 'Me' AND author='%1')").arg(m_recipient);
+        "(recipient = '%1' AND author = '%2') OR (recipient = '%2' AND author='%1')").arg(m_recipient, user());
+
+    setSort(2, Qt::AscendingOrder);
     setFilter(filterString);
-    select();
+
+        // select();
 
     emit recipientChanged();
 }
@@ -108,10 +111,36 @@ QVariant
 VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
     if (role < Qt::UserRole) {
         return QSqlTableModel::data(index, role);
+   }
+
+    const int firstMessageInARow = Qt::UserRole + 4;
+    const int messageInARow = Qt::UserRole + 5;
+    const int day = Qt::UserRole + 6;
+
+    const QSqlRecord currRecord = record(index.row());
+
+    if (role == firstMessageInARow) {
+        const QSqlRecord prevRecord = record(index.row() - 1);
+        const QVariant prevMsgAuthor = prevRecord.value(0);
+        const QVariant currMsgAuthor = currRecord.value(0);
+
+        return currMsgAuthor.toString() != prevMsgAuthor.toString();
     }
 
-    const QSqlRecord sqlRecord = record(index.row());
-    return sqlRecord.value(role - Qt::UserRole);
+    if (role == messageInARow) {
+        const QSqlRecord nextRecord = record(index.row() + 1);
+        const QVariant nextMsgAuthor = nextRecord.value(0);
+        const QVariant currMsgAuthor = currRecord.value(0);
+
+        return currMsgAuthor.toString() == nextMsgAuthor.toString();
+    }
+
+    if (role == day) {
+        const QVariant timestamp = currRecord.value(2);
+        return timestamp.toDate();
+    }
+
+    return currRecord.value(role - Qt::UserRole);
 }
 
 /******************************************************************************/
@@ -122,6 +151,9 @@ VSQSqlConversationModel::roleNames() const {
     names[Qt::UserRole + 1] = "recipient";
     names[Qt::UserRole + 2] = "timestamp";
     names[Qt::UserRole + 3] = "message";
+    names[Qt::UserRole + 4] = "firstMessageInARow";
+    names[Qt::UserRole + 5] = "messageInARow";
+    names[Qt::UserRole + 6] = "day";
     return names;
 }
 
@@ -131,7 +163,7 @@ VSQSqlConversationModel::sendMessage(QString recipient, QString message) {
     const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
 
     QSqlRecord newRecord = record();
-    newRecord.setValue("author", "Me");
+    newRecord.setValue("author", user());
     newRecord.setValue("recipient", recipient);
     newRecord.setValue("timestamp", timestamp);
     newRecord.setValue("message", message);
@@ -150,7 +182,7 @@ VSQSqlConversationModel::receiveMessage(const QString &sender, const QString &me
 
     QSqlRecord newRecord = record();
     newRecord.setValue("author", sender);
-    newRecord.setValue("recipient", "Me");
+    newRecord.setValue("recipient", user());
     newRecord.setValue("timestamp", timestamp);
     newRecord.setValue("message", message);
     if (!insertRecord(rowCount(), newRecord)) {

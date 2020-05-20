@@ -4,35 +4,36 @@ import QtQuick.Controls 2.12
 
 import "../theme"
 
+
 Control {
     id: chatMessage
-
-    topPadding: 10
-    leftPadding: 16
-    rightPadding: 16
-    bottomPadding: 12
-    height: textEdit.height + 16
+    height: row.implicitHeight
     width: getControlWidth()
 
     property alias text: textEdit.text
     property alias author: avatar.nickname
+    property bool messageInARow: false
+    property bool firstMessageInARow: true
     property var variant
     property var timeStamp
 
     Row {
-
+        id: row
         spacing: 12
 
         Avatar {
             id: avatar
             width: 30
+            opacity: firstMessageInARow ? 1 : 0
             diameter: 30
             pointSize: UiHelper.fixFontSz(15)
         }
 
         Column {
             spacing: 4
+
             RowLayout {
+                visible: firstMessageInARow
                 spacing: 6
 
                 Label {
@@ -51,41 +52,47 @@ Control {
                 }
             }
 
-            Control {
+            Rectangle {
                 width: chatMessage.width
                 height: textEdit.height
 
-                background: Rectangle {
+                color: "transparent"
+
+                Rectangle {
                     width: chatMessage.width
                     height: textEdit.height
-                    color: chatMessage.variant === "dark"
-                           ? Theme.mainBackgroundColor
-                           : "#59717D"
+                    color: chatMessage.variant === "dark" ? Theme.mainBackgroundColor : "#59717D"
                     radius: 20
+                }
 
-                    Rectangle {
-                        height: 20
-                        width: 20
-                        radius: 4
-                        color: chatMessage.variant === "dark"
-                               ? Theme.mainBackgroundColor
-                               : "#59717D"
-                    }
+                Rectangle {
+                    anchors.top: parent.top
+                    height: 22
+                    width: 22
+                    radius: 4
+                    color: chatMessage.variant === "dark" ? Theme.mainBackgroundColor : "#59717D"
+                }
+
+                Rectangle {
+                    visible: messageInARow
+                    anchors.bottom: parent.bottom
+                    height: 22
+                    width: 22
+                    radius: 4
+                    color: chatMessage.variant === "dark" ? Theme.mainBackgroundColor : "#59717D"
                 }
 
                 TextEdit {
                     id: textEdit
-                    topPadding: chatMessage.topPadding
-                    leftPadding: chatMessage.leftPadding
-                    rightPadding: chatMessage.rightPadding
-                    bottomPadding: chatMessage.bottomPadding
+                    topPadding: 12
+                    leftPadding: 15
+                    rightPadding: 15
+                    bottomPadding: 12
                     textFormat: Text.RichText
                     width: chatMessage.width
                     color: Theme.primaryTextColor
                     font.pointSize: UiHelper.fixFontSz(15)
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                    selectByMouse: true
-                    readOnly: true
                     text: isValidURL(message) ? ("<a href='"+message+"'>"+message+"</a>") : message
                     onLinkActivated:{
                         if (isValidURL(message)){
