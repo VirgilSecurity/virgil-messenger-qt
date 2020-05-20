@@ -87,5 +87,6 @@
         <file>qml/resources/icons/Plus.png</file>
         <file>qml/resources/icons/Plus@2x.png</file>
         <file>qml/components/CommonHelpers/IconWithText.qml</file>
+        <file>qml/components/Search.qml</file>
     </qresource>
 </RCC>

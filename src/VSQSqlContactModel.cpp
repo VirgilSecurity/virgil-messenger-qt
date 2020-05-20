@@ -56,22 +56,18 @@ VSQSqlContactModel::_createTable() {
 /******************************************************************************/
 void
 VSQSqlContactModel::_update() {
-    QSqlQuery query;
-    query.prepare(QString("SELECT * FROM %1").arg(_tableName()));
+    setTable(_tableName());
+    setSort(0, Qt::AscendingOrder);
+    // Ensures that the model is sorted correctly after submitting a new row.
+    setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-    if (!query.exec()) {
-        qFatal("Contacts SELECT query failed: %s", qPrintable(query.lastError().text()));
-    }
-
-    setQuery(query);
-    if (lastError().isValid()) {
-        qFatal("Cannot set query on SqlContactModel: %s", qPrintable(lastError().text()));
-    }
+    setFilter("");
+    select();
 }
 
 /******************************************************************************/
 VSQSqlContactModel::VSQSqlContactModel(QObject *parent) :
-    QSqlQueryModel(parent) {
+    QSqlTableModel(parent) {
 }
 
 /******************************************************************************/
@@ -106,6 +102,27 @@ VSQSqlContactModel::setUser(const QString &user) {
 
     _createTable();
     _update();
+}
+
+/******************************************************************************/
+Q_INVOKABLE void
+VSQSqlContactModel::setContactsFilter(const QString &filter) {
+    if (filter.isEmpty()) {
+        setFilter("name LIKE NULL");
+    } else {
+        const QString filterString = QString::fromLatin1(
+            "name LIKE '%%1%'").arg(filter);
+        setFilter(filterString);
+    }
+
+    select();
+}
+
+/******************************************************************************/
+Q_INVOKABLE void
+VSQSqlContactModel::clearContactsFilter() {
+    setFilter("");
+    select();
 }
 
 /******************************************************************************/
