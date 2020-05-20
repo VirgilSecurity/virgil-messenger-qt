@@ -3,6 +3,8 @@ import sys
 from time import sleep
 from selenium import webdriver
 from optparse import OptionParser
+from datetime import datetime
+import time
 
 # ****************************************************************************
 # Initialization parameters
@@ -15,9 +17,9 @@ parser.add_option("-r", "--r", dest="respath", help="Log and screenshot path", m
 
 # Check parameters
 if not options.user:
-    print("ERROR: User not specified")
-    parser.print_help()
-    sys.exit(1)
+    userID = "selenium%s" % time.mktime(datetime.now().timetuple())
+else:
+    userID = options.user
 
 if not options.connect:
     WD_ADDRESS = 'http://localhost:9517'
@@ -25,12 +27,11 @@ else:
     WD_ADDRESS = options.connect
 
 if not options.respath:
-    RESPATH = "/tmp/wdscreenshots/"
+    RESPATH = "/home/jenkins/result/screenshot"
 else:
     RESPATH = options.respath
 
 # ****************************************************************************    
-userID = options.user
 print("User ID is ", userID)
 print("Connecting [%s]..." % WD_ADDRESS)
 wd = webdriver.Remote(WD_ADDRESS,
@@ -39,7 +40,8 @@ wd = webdriver.Remote(WD_ADDRESS,
 
 # ****************************************************************************
 def save_screenshot(name):
-    wd.get_screenshot_as_file('%s/%s.png' % (RESPATH, name))
+    print("Save screenshot to %s/%s.png" % (RESPATH, name))
+    wd.get_screenshot_as_file("%s/%s.png" % (RESPATH, name))
 
 # ****************************************************************************
 sleep(4)
@@ -67,4 +69,4 @@ except:
     print("Log In: FAIL")
 
 print("Stop")
-#wd.close()
+wd.close()
