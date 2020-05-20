@@ -6,11 +6,14 @@ import "../theme"
 import "../components"
 
 ToolBar {
-
+    id: toolbarId
     property alias title: titleLabel.text
     property alias description: descriptionLabel.text
-    property alias showBackButton: backButton.visible
     property alias showSeporator: seporator.visible
+    // search
+    property alias search: searchId.search
+    property alias isSearchOpen: searchId.isSearchOpen
+    property alias searchPlaceholder: searchId.searchPlaceholder
 
     default property alias menu: contextMenu.contentData
 
@@ -33,10 +36,12 @@ ToolBar {
 
     RowLayout {
         anchors.fill: parent
+        anchors.leftMargin: 20
+        anchors.rightMargin: 20
 
         Column {
-            Layout.fillWidth: true
-            Layout.leftMargin: 20
+            Layout.fillWidth: !isSearchOpen
+            visible: !isSearchOpen
 
             Label {
                 id: titleLabel
@@ -62,19 +67,20 @@ ToolBar {
             }
         }
 
-        ImageButton {
 
-            id: backButton
-            imageSource: "../resources/icons/Search.png"
+        Item {
+            Layout.fillWidth: isSearchOpen
+            Layout.preferredWidth: 48
+            height: 40
 
-            // TODO: Componets sholdn't know about mainView
-            // The logic must be as abastract as possible.
-            onClicked: mainView.back()
+            Search {
+                id: searchId
+            }
         }
 
         ImageButton {
+            visible: !isSearchOpen
             Layout.leftMargin: 5
-            Layout.rightMargin: 12
 
             id: menuButton
             imageSource: "../resources/icons/More.png"

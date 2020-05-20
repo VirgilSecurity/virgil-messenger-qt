@@ -69,7 +69,18 @@ Page {
     header: ContactsHeader {
         description: "Virgil Server"
         objectName: "hdrDefaultServer"
+        id: contactsHeaderId
         title: "Virgil"
+        description: "Default Server"
+        searchPlaceholder: "Search conversation"
+
+        onIsSearchOpenChanged: {
+            contactsHeaderId.isSearchOpen ? ContactsModel.setContactsFilter('') : ContactsModel.clearContactsFilter()
+        }
+
+        onSearchChanged: {
+            ContactsModel.setContactsFilter(contactsHeaderId.search)
+        }
 
         Action {
             text: qsTr("New Chat")
@@ -159,12 +170,31 @@ Page {
         }
 
         IconWithText {
-            visible: !ContactsModel.rowCount()
-            image.source: "../resources/icons/Chats.png"
-            label.text: qsTr("Create your first chat<br />by pressing the dots<br />button above")
-            label.color: Theme.labelColor
+            id: emptyListPlaceholderId
+            property url conversationIcon: "../resources/icons/Chats.png"
+            property url searchIcon: "../resources/icons/Search_Big.png"
+            property string conversationText: qsTr("Create your first chat<br />by pressing the dots<br />button above")
+            property string searchText: qsTr("Search results<br />will appear here")
+            property string searchEmptyText: qsTr("Nothing found")
+            visible: !listView.contentItem.children.length
+            image {
+                source: contactsHeaderId.isSearchOpen ? searchIcon : conversationIcon
+                width: 48
+                height: 48
+            }
+            label {
+                text: getSearchText()
+                color: Theme.labelColor
+            }
+
+            function getSearchText() {
+                if (!contactsHeaderId.isSearchOpen) return conversationText;
+                if (contactsHeaderId.search !== '') return searchEmptyText;
+                return searchText;
+            }
         }
     }
+
 
     //
     //  Functions
