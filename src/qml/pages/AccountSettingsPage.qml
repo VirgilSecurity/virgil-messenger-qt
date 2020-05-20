@@ -20,27 +20,27 @@ Page {
     Form {
 
         FormPrimaryButton {
-            text: "Check updates"
+            text: "Software Update"
             onClicked: {
                 app.checkUpdates()
             }
         }
 
         FormPrimaryButton {
-            text: "Delete account"
+            text: "Delete Account"
             onClicked: {
             }
         }
 
         FormPrimaryButton {
-            text: "Send report"
+            text: "Send Report"
             onClicked: {
                 app.sendReport()
             }
         }
 
         FormPrimaryButton {
-            text: "Sign out"
+            text: "Log Out"
             onClicked: {
                 mainView.signOut()
             }

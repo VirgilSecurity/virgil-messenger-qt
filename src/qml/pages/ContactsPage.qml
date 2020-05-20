@@ -67,21 +67,21 @@ Page {
     }
 
     header: ContactsHeader {
-        title: "Virgil"
-        description: "Default Server"
+        title: "Virgil Secure Communications Platform"
+        description: "Virgil Server"
 
         Action {
-            text: qsTr("New chat")
+            text: qsTr("New Chat")
             onTriggered: addContact()
         }
 
         Action {
-            text: qsTr("New group")
+            text: qsTr("New Group")
             // onTriggered: addContact()
         }
 
         Action {
-            text: qsTr("Send invite")
+            text: qsTr("Send Invite")
             // onTriggered: addContact()
         }
     }

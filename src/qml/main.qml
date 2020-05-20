@@ -10,7 +10,7 @@ import "theme"
 ApplicationWindow {
     id: root
     visible: true
-    title: qsTr("Virgil Messenger")
+    title: qsTr("Virgil Secure Communications Platform")
     minimumWidth: 320
     minimumHeight: 600
 
