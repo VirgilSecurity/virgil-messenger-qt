@@ -71,7 +71,6 @@ Page {
         objectName: "hdrDefaultServer"
         id: contactsHeaderId
         title: "Virgil"
-        description: "Default Server"
         searchPlaceholder: "Search conversation"
 
         onIsSearchOpenChanged: {

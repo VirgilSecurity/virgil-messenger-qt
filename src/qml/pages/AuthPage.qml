@@ -47,7 +47,6 @@ Page {
         FormPrimaryButton {
             text: "Sign Up"
             objectName: "btnRegister"
-            text: "Register"
             onClicked: mainView.showRegister()
         }
 
