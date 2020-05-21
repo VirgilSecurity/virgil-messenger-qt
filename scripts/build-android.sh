@@ -42,7 +42,7 @@ build_proc() {
 
         ${ANDROID_MAKE} INSTALL_ROOT=${BUILD_DIR}/android-build install
 
-        if [[ "x$w" == "x" ]]; then
+        if [[ "x$DISABLE_RELEASE" == "x" ]]; then
             ANDROID_DEPLOY_QT_ADD_ARGS="--sign ${SCRIPT_FOLDER}/../android.keystore upload --storepass '${ANDROID_STORE_PASS}' --keypass '${ANDROID_KEY_PASS}'"
         fi
 
