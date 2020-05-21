@@ -43,7 +43,7 @@ build_proc() {
         ${ANDROID_MAKE} INSTALL_ROOT=${BUILD_DIR}/android-build install
 
         if [[ "x$w" == "x" ]]; then
-            ANDROID_DEPLOY_QT_ADD_ARGS="--sign ${SCRIPT_FOLDER}/../android.keystore upload --storepass ${ANDROID_STORE_PASS} --keypass ${ANDROID_KEY_PASS}"
+            ANDROID_DEPLOY_QT_ADD_ARGS="--sign ${SCRIPT_FOLDER}/../android.keystore upload --storepass '${ANDROID_STORE_PASS}' --keypass '${ANDROID_KEY_PASS}'"
         fi
 
         ${ANDROID_DEPLOY_QT} --input ${BUILD_DIR}/android-lib${APPLICATION_NAME}.so-deployment-settings.json --output ${BUILD_DIR}/android-build --android-platform ${ANDROID_PLATFORM} ${ANDROID_DEPLOY_QT_ADD_ARGS} --gradle
