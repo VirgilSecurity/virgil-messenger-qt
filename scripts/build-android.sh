@@ -11,11 +11,12 @@ PLATFORM=android-clang
 ANDROID_MAKE="${ANDROID_NDK}/prebuilt/${HOST_PLATFORM}/bin/make"
 ANDROID_PLATFORM="android-24"
 
+#*************************************************************************************************************
 # env variables passed to build anroid release
-# $BUILD_ANDROID_RELEASE
-# $ANDROID_STORE_PASS
-# $ANDROID_KEY_PASS
-# ./android.keystore
+# $BUILD_ANDROID_RELEASE                : boolean, from jenkins job.
+# $ANDROID_STORE_PASS                   : string
+# $ANDROID_KEY_PASS                     : string
+# {root_folder}/android.keystore        : file 
 #*************************************************************************************************************
 build_proc() {
     PLATFORM="$1"
@@ -41,8 +42,8 @@ build_proc() {
 
         ${ANDROID_MAKE} INSTALL_ROOT=${BUILD_DIR}/android-build install
 
-        if [[ "x$BUILD_ANDROID_RELEASE" != "x" ]];then
-        ANDROID_DEPLOY_QT_ADD_ARGS="--sign ${SCRIPT_FOLDER}/../android.keystore upload --storepass ${ANDROID_STORE_PASS} --keypass ${ANDROID_KEY_PASS}"
+        if [[ "x$BUILD_ANDROID_RELEASE" != "x" ]]; then
+            ANDROID_DEPLOY_QT_ADD_ARGS="--sign ${SCRIPT_FOLDER}/../android.keystore upload --storepass ${ANDROID_STORE_PASS} --keypass ${ANDROID_KEY_PASS}"
         fi
 
         ${ANDROID_DEPLOY_QT} --input ${BUILD_DIR}/android-lib${APPLICATION_NAME}.so-deployment-settings.json --output ${BUILD_DIR}/android-build --android-platform ${ANDROID_PLATFORM} ${ANDROID_DEPLOY_QT_ADD_ARGS} --gradle
