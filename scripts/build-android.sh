@@ -25,7 +25,7 @@ build_proc() {
     local ANDROID_QMAKE="${QT_SDK_DIR}/${PLATFORM}/bin/qmake"
     local BUILD_DIR="${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.${PLATFORM}"
     local ANDROID_DEPLOY_QT="${QT_SDK_DIR}/${PLATFORM}/bin/androiddeployqt"
-    local ANDROID_DEPLOY_QT_ADD_ARGS = ""
+    local ANDROID_DEPLOY_QT_ADD_ARGS=""
 
     export QT_BUILD_DIR_SUFFIX=android.${LIB_ARCH}
 
@@ -42,7 +42,7 @@ build_proc() {
 
         ${ANDROID_MAKE} INSTALL_ROOT=${BUILD_DIR}/android-build install
 
-        if [[ "x$DISABLE_RELEASE" == "x" ]]; then
+        if [[ "x$w" == "x" ]]; then
             ANDROID_DEPLOY_QT_ADD_ARGS="--sign ${SCRIPT_FOLDER}/../android.keystore upload --storepass ${ANDROID_STORE_PASS} --keypass ${ANDROID_KEY_PASS}"
         fi
 
