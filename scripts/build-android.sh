@@ -13,7 +13,7 @@ ANDROID_PLATFORM="android-24"
 
 #*************************************************************************************************************
 # env variables passed to build anroid release
-# $BUILD_ANDROID_RELEASE                : boolean, from jenkins job.
+# $DISABLE_RELEASE                      : boolean
 # $ANDROID_STORE_PASS                   : string
 # $ANDROID_KEY_PASS                     : string
 # {root_folder}/android.keystore        : file 
@@ -42,7 +42,7 @@ build_proc() {
 
         ${ANDROID_MAKE} INSTALL_ROOT=${BUILD_DIR}/android-build install
 
-        if [[ "x$BUILD_ANDROID_RELEASE" != "x" ]]; then
+        if [[ "x$DISABLE_RELEASE" == "x" ]]; then
             ANDROID_DEPLOY_QT_ADD_ARGS="--sign ${SCRIPT_FOLDER}/../android.keystore upload --storepass ${ANDROID_STORE_PASS} --keypass ${ANDROID_KEY_PASS}"
         fi
 
