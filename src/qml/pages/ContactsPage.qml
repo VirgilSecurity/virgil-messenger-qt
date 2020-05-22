@@ -124,10 +124,10 @@ Page {
                     Text {
                         color: Theme.secondaryTextColor
                         font.pointSize: UiHelper.fixFontSz(12)
-                                                // TODO: insert from model
-                        text: "latest message to be inserted and check the lenght"
+                        text: ConversationsModel.getLastMessage(model.display) ? ConversationsModel.getLastMessage(model.display) : "..."
                         width: parent.width
                         elide: Text.ElideRight
+                        textFormat: Text.RichText
                     }
                 }
 
@@ -137,7 +137,7 @@ Page {
 
                     MessageCounter {
                        // TODO: Insert model
-                       count: 999
+                       count: ConversationsModel.getCountOfUnread(model.display)
                        anchors.horizontalCenter: parent.horizontalCenter
                     }
 
