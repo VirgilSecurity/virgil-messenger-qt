@@ -36,7 +36,6 @@ Control {
             TextArea {
                 id: messageField
                 width: scrollView.width
-
                 placeholderText: qsTr("Message")
                 placeholderTextColor: "#59717D"
                 wrapMode: TextArea.Wrap
@@ -52,7 +51,7 @@ Control {
                 selectionColor: "white"
                 // textFormat: "RichText"
 
-                background: Rectangle {
+                 background: Rectangle {
                    anchors.fill: parent
                    anchors.topMargin: 10
                    anchors.bottomMargin: 10
@@ -111,13 +110,18 @@ Control {
         ImageButton {
             Layout.rightMargin: 20
             Layout.leftMargin: 10
-            Layout.alignment: Qt.AlignVCenter
-            objectName: "btnSend"
+            Layout.alignment: Qt.AlignVCenter            
+            focusPolicy: Qt.NoFocus
+            objectName: "btnSend"            
             imageSource: "../resources/icons/Send.png"
-            enabled: messageField.length > 0            
             onClicked: {
-                messageSending(messageField.text)
-                messageField.text = ""
+                const text = messageField.text + messageField.preeditText;
+
+                if (text.trim().length > 0) {
+                    messageSending(text.trim())
+                }
+
+                messageField.clear()
             }
         }
     }

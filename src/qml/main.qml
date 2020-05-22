@@ -14,6 +14,8 @@ ApplicationWindow {
     minimumWidth: 320
     minimumHeight: 600
 
+
+
     //
     //  Connections
     //

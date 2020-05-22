@@ -123,8 +123,19 @@ VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
         const QSqlRecord prevRecord = record(index.row() - 1);
         const QVariant prevMsgAuthor = prevRecord.value(0);
         const QVariant currMsgAuthor = currRecord.value(0);
+        const QVariant prevTimestamp = prevRecord.value(2);
+        const QVariant currTimestamp = currRecord.value(2);
 
-        return currMsgAuthor.toString() != prevMsgAuthor.toString();
+        // Check if previous message is from the same author
+        const bool isAuthor = currMsgAuthor.toString() != prevMsgAuthor.toString();
+
+        // Check if the message was sent in last 5 min
+        const bool isInFiveMinRange = prevTimestamp.toDateTime().addSecs(5 * 60) > currTimestamp.toDateTime();
+
+        // Message is considered to be first in a row when it
+        // sends in a range of 1 min with previous message and
+        // from the same author
+        return isAuthor || !isInFiveMinRange;
     }
 
     if (role == messageInARow) {

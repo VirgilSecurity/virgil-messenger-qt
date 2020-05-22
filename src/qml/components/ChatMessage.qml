@@ -11,23 +11,13 @@ Control {
     height: row.implicitHeight
     width: getControlWidth()
 
-    property alias text: textEdit.text
+    property string text
     property alias author: avatar.nickname
 
     property bool messageInARow: false
     property bool firstMessageInARow: true
     property var variant
     property var timeStamp
-
-    Platform.Menu {
-        id: contextMenu
-        Platform.MenuItem {
-            text: qsTr("&Copy")
-            onTriggered: {
-                clipboard.setText(textEdit.getText(0, textEdit.length))
-            }
-        }
-    }
 
     Row {
         id: row
@@ -71,7 +61,7 @@ Control {
                 color: "transparent"
 
                 TapHandler {
-                    acceptedButtons: Qt.RightButton | Qt.TapAndHoldGesture
+                    acceptedButtons: Qt.RightButton
                     onTapped: contextMenu.open()
                 }
 /*
@@ -119,7 +109,8 @@ Control {
                     color: Theme.primaryTextColor
                     font.pointSize: UiHelper.fixFontSz(15)
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                    text: isValidURL(message) ? ("<a href='"+message+"'>"+message+"</a>") : message
+                    text: chatMessage.text.split("\n").join("<br />")
+                    // text: isValidURL(message) ? ("<a href='"+message+"'>"+message+"</a>") : message
                     onLinkActivated:{
                         if (isValidURL(message)){
                            Qt.openUrlExternally(message)
@@ -129,6 +120,20 @@ Control {
                     function isValidURL(message) {
                        var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
                        return regexp.test(message);
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                    }
+
+                    Platform.Menu {
+                        id: contextMenu
+                        Platform.MenuItem {
+                            text: qsTr("&Copy")
+                            onTriggered: {
+                                clipboard.setText(textEdit.getText(0, textEdit.length))
+                            }
+                        }
                     }
                 }
             }

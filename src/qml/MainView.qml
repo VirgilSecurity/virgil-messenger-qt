@@ -105,7 +105,13 @@ Control {
 
     function navigateTo(page, params, animate, clearHistory) {
 
-        const path = "./pages/%1Page.qml".arg(page);
+        const pageName = "%1Page".arg(page)
+        const path = "./pages/%1.qml".arg(pageName)
+
+        // cancel navigation if the is already shown
+        if (stackView.currentItem.toString().startsWith(pageName)){
+            return
+        }
 
         if (clearHistory) {
             stackView.clear()
@@ -157,6 +163,6 @@ Control {
     }
 
     function showAccountSettings() {
-        stackView.push("./pages/AccountSettingsPage.qml")
+        navigateTo("AccountSettings", null, true, false)
     }
 }

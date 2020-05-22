@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
 import QuickFuture 1.0
+import QtQuick.Window 2.12
 
 import "../theme"
 import "../components"
@@ -13,6 +14,7 @@ Page {
     }
 
     header: Control {
+        id: headerControl
         height: 60
         width: parent.width
 
@@ -68,6 +70,7 @@ Page {
         anchors.fill: parent
         anchors.leftMargin: 20
         anchors.rightMargin: 20
+        height: Screen.desktopAvailableHeight - headerControl.height - footerControl.height
         section.property: "day"
         section.delegate: ChatDateSeporator {
             date: section
@@ -85,7 +88,6 @@ Page {
         }
 
         ScrollBar.vertical: ScrollBar {
-            bottomPadding: 5
         }
 
         onCountChanged: {
@@ -93,12 +95,31 @@ Page {
         }
     }
 
+    Component.onCompleted: {
+        console.log(root.height)
+
+    }
+
+    Connections {
+        target: Qt.inputMethod
+        onVisibleChanged: {
+            console.log("")
+        }
+
+        onKeyboardRectangleChanged: {
+            console.log(rc.height)
+        }
+    }
+
     footer: ChatMessageInput {
+        id: footerControl
         onMessageSending: {
             var future = Messenger.sendMessage(ConversationsModel.recipient, message)
             Future.onFinished(future, function(value) {
               console.log("Send message result: ", Future.result(future))
             })
+
+            console.log(root.height)
         }
     }
 }

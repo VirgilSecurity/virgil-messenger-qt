@@ -208,11 +208,13 @@ Page {
                     var future = Messenger.addContact(dialog.contact)
                     Future.onFinished(future, function(value) {
                         var res = Future.result(future)
-                        console.log("addContact result: ", res)
                         if (res === Result.MRES_OK) {
                             console.log("addContact result: ", "OK")
                             mainView.chatWith(dialog.contact)
+                            return
                         }
+
+                        root.showPopupError(qsTr("User not found"))
                     })
                 } catch (error) {
                     console.error("Cannot start initialization of device")

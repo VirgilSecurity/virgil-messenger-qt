@@ -14,10 +14,28 @@ Page {
     }
 
     header: Header {
-        title: "Settings"
+        title: qsTr("Settings")
     }
 
     Form {
+
+        Avatar {
+            Layout.alignment: Qt.AlignHCenter
+            diameter: 80
+            nickname: Messenger.currentUser
+        }
+
+        Label {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.bottomMargin: 50
+            font.pointSize: UiHelper.fixFontSz(18)
+            color: Theme.primaryTextColor
+            text: Messenger.currentUser
+        }
+
+        FormLabel {
+
+        }
 
         FormPrimaryButton {
             text: "Software Update"
