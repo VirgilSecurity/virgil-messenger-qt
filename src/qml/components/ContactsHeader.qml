@@ -19,7 +19,7 @@ ToolBar {
 
     background: Rectangle {
         implicitHeight: 60
-        color: "transparent"
+        color: Theme.contactsBackgroundColor
 
         Rectangle {
             id: seporator
