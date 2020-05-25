@@ -10,9 +10,6 @@ ANDOID_APP_ID="com.virgilsecurity.qtmessenger"
 PLATFORM=android-clang
 ANDROID_MAKE="${ANDROID_NDK}/prebuilt/${HOST_PLATFORM}/bin/make"
 ANDROID_PLATFORM="android-24"
-if [ "$1" == "-release" ]; then
-  ENABLE_RELEASE="true"
-fi
 
 #*************************************************************************************************************
 # env variables passed to build anroid release
