@@ -9,7 +9,7 @@ source ${SCRIPT_FOLDER}/ish/common.sh
 ANDOID_APP_ID="com.virgilsecurity.qtmessenger"
 PLATFORM=android-clang
 ANDROID_MAKE="${ANDROID_NDK}/prebuilt/${HOST_PLATFORM}/bin/make"
-ANDROID_PLATFORM="android-24"
+ANDROID_PLATFORM="android-25"
 
 #*************************************************************************************************************
 build_proc() {
