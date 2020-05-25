@@ -57,6 +57,9 @@ public:
     Q_INVOKABLE QString
     getLastMessage(const QString &user) const;
 
+    Q_INVOKABLE QString
+    getLastMessageTime(const QString &user) const;
+
     QString
     recipient() const;
 

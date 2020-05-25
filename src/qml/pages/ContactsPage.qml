@@ -136,14 +136,12 @@ Page {
                     spacing: 5
 
                     MessageCounter {
-                       // TODO: Insert model
                        count: ConversationsModel.getCountOfUnread(model.display)
                        anchors.horizontalCenter: parent.horizontalCenter
                     }
 
                     Text {
-                        // TODO insert model
-                        text: "16:20"
+                        text: ConversationsModel.getLastMessageTime(model.display) ? ConversationsModel.getLastMessageTime(model.display) : "..."
                         color: Theme.secondaryTextColor
                         font.pointSize: UiHelper.fixFontSz(9)
                         anchors.horizontalCenter: parent.horizontalCenter

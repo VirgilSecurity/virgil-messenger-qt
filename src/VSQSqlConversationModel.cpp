@@ -205,7 +205,7 @@ VSQSqlConversationModel::getLastMessage(const QString &user) const {
     QSqlQueryModel model;
     QString query;
 
-    query = QString("SELECT * FROM %1 WHERE recipient = \"%2\" ORDER BY timestamp LIMIT 1").arg(_tableName()).arg(user);
+    query = QString("SELECT * FROM %1 WHERE recipient = \"%2\" ORDER BY timestamp DESC LIMIT 1").arg(_tableName()).arg(user);
 
     model.setQuery(query);
     QString message = model.record(0).value("message").toString();
@@ -213,6 +213,22 @@ VSQSqlConversationModel::getLastMessage(const QString &user) const {
     qDebug() << message << user << query;
 
     return message;
+}
+
+/******************************************************************************/
+QString
+VSQSqlConversationModel::getLastMessageTime(const QString &user) const {
+    QSqlQueryModel model;
+    QString query;
+
+    query = QString("SELECT * FROM %1 WHERE recipient = \"%2\" ORDER BY timestamp DESC LIMIT 1").arg(_tableName()).arg(user);
+
+    model.setQuery(query);
+    QString timestamp = model.record(0).value("timestamp").toString();
+
+    qDebug() << timestamp << user << query;
+
+    return timestamp;
 }
 
 /******************************************************************************/
