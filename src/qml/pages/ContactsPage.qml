@@ -164,7 +164,7 @@ Page {
             }
 
             onClicked: {
-                mainView.chatWith(model.display)
+                mainView.showChatWith(model.display)
             }
         }
 
@@ -209,8 +209,7 @@ Page {
                     Future.onFinished(future, function(value) {
                         var res = Future.result(future)
                         if (res === Result.MRES_OK) {
-                            console.log("addContact result: ", "OK")
-                            mainView.chatWith(dialog.contact)
+                            mainView.showChatWith(dialog.contact)
                             return
                         }
 

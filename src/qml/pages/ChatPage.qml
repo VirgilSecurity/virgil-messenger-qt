@@ -3,11 +3,14 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
 import QuickFuture 1.0
 import QtQuick.Window 2.12
+import QtMultimedia 5.12
 
 import "../theme"
 import "../components"
 
 Page {
+
+    property string recipient
 
     background: Rectangle {
         color: Theme.chatBackgroundColor
@@ -77,7 +80,7 @@ Page {
         }        
         spacing: 5
         // verticalLayoutDirection: ListView.BottomToTop
-        model: ConversationsModel
+        // model: ConversationsModel
         delegate: ChatMessage {
             text: message
             author: model.author
@@ -94,30 +97,49 @@ Page {
         }
     }
 
-    Component.onCompleted: {
-        console.log(root.height)
-
-    }
-
-    Connections {
-        target: Qt.inputMethod
-        onVisibleChanged: {
-        }
-
-        onKeyboardRectangleChanged: {
-        }
-    }
-
     footer: ChatMessageInput {
         id: footerControl
         onMessageSending: {
             var future = Messenger.sendMessage(ConversationsModel.recipient, message)
             Future.onFinished(future, function(value) {
-              console.log("Send message result: ", Future.result(future))
-            })
-
-            console.log(root.height)
+              messageSent.play()
+            })            
         }
+
+
+    }
+
+    // Component events
+
+    Component.onCompleted: {
+
+        // configure conversation model to chat with
+        // recipient provided as a parameter to this page.
+
+        ConversationsModel.recipient = recipient
+        listView.model = ConversationsModel
+    }
+
+    // Connections
+
+    Connections {
+        target: Messenger
+
+        onFireNewMessage: {
+            messageReceived.play()
+        }
+    }
+
+    // Sounds
+
+    SoundEffect {
+        id: messageReceived
+        source: "../resources/sounds/message-received.wav"
+    }
+
+    SoundEffect {
+        id: messageSent
+        source: "../resources/sounds/message-sent.wav"
     }
 }
 

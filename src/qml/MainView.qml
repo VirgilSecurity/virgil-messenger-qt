@@ -89,10 +89,7 @@ Control {
         })
     }
 
-    function chatWith(recipient) {
-        ConversationsModel.recipient = recipient
-        stackView.push("./pages/ChatPage.qml")
-    }
+
 
     // Navigation
     //
@@ -103,27 +100,7 @@ Control {
         stackView.pop()
     }
 
-    function navigateTo(page, params, animate, clearHistory) {
 
-        const pageName = "%1Page".arg(page)
-        const path = "./pages/%1.qml".arg(pageName)
-
-        // cancel navigation if the is already shown
-        if (stackView.currentItem.toString().startsWith(pageName)){
-            return
-        }
-
-        if (clearHistory) {
-            stackView.clear()
-        }
-
-        if (animate) {
-            stackView.push(path)
-        }
-        else {
-            stackView.push(path, StackView.Immediate)
-        }
-    }
 
     function showSplashScreen(){
         stackView.push("./pages/SplashScreenPage.qml", StackView.Immediate)
@@ -154,6 +131,16 @@ Control {
         stackView.push("./pages/RegisterPage.qml")
     }
 
+    // Depricated method, use showChatWith instead.
+    function chatWith(recipient) {
+        ConversationsModel.recipient = recipient
+        stackView.push("./pages/ChatPage.qml")
+    }
+
+    function showChatWith(recipient) {
+        navigateTo("Chat", { recipient: recipient }, true, false)
+    }
+
     function showContacts(clear) {
         if (clear) {
             stackView.clear()
@@ -164,5 +151,27 @@ Control {
 
     function showAccountSettings() {
         navigateTo("AccountSettings", null, true, false)
+    }
+
+    function navigateTo(page, params, animate, clearHistory) {
+
+        const pageName = "%1Page".arg(page)
+        const path = "./pages/%1.qml".arg(pageName)
+
+        // cancel navigation if the page is already shown
+        if (stackView.currentItem.toString().startsWith(pageName)){
+            return
+        }
+
+        if (clearHistory) {
+            stackView.clear()
+        }
+
+        if (animate) {
+            stackView.push(path, params)
+        }
+        else {
+            stackView.push(path, params, StackView.Immediate)
+        }
     }
 }

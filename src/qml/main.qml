@@ -41,9 +41,7 @@ ApplicationWindow {
         onFireAddedContact: {
         }
 
-        onFireNewMessage: {
-            messageSound.play()
-            // mainView.chatWith(from)
+        onFireNewMessage: {            
         }
     }
 
@@ -57,12 +55,6 @@ ApplicationWindow {
     // Popup to show messages or warnings on the bottom postion of the screen
     Popup {
         id: inform
-    }
-
-    // Sound effect
-    SoundEffect {
-        id: messageSound
-        source: "resources/sounds/message.wav"
     }
 
     // Shortcuts for hackers
