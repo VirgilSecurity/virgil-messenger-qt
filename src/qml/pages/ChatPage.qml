@@ -70,11 +70,11 @@ Page {
         anchors.fill: parent
         anchors.leftMargin: 20
         anchors.rightMargin: 20
-        height: Screen.desktopAvailableHeight - headerControl.height - footerControl.height
+        anchors.bottomMargin: 5
         section.property: "day"
         section.delegate: ChatDateSeporator {
             date: section
-        }
+        }        
         spacing: 5
         // verticalLayoutDirection: ListView.BottomToTop
         model: ConversationsModel
@@ -87,8 +87,7 @@ Page {
             firstMessageInARow: model.firstMessageInARow
         }
 
-        ScrollBar.vertical: ScrollBar {
-        }
+        ScrollBar.vertical: ScrollBar { }
 
         onCountChanged: {
             positionViewAtEnd()
@@ -103,11 +102,9 @@ Page {
     Connections {
         target: Qt.inputMethod
         onVisibleChanged: {
-            console.log("")
         }
 
         onKeyboardRectangleChanged: {
-            console.log(rc.height)
         }
     }
 

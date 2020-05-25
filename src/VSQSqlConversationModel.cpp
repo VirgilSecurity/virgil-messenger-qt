@@ -151,8 +151,6 @@ VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
         return timestamp.toDate();
     }
 
-    qDebug() << currRecord;
-
     return currRecord.value(role - Qt::UserRole);
 }
 

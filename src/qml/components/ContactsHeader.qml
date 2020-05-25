@@ -80,7 +80,6 @@ ToolBar {
 
         ImageButton {
             visible: !isSearchOpen
-            Layout.leftMargin: 5
 
             id: menuButton
             image: "More"

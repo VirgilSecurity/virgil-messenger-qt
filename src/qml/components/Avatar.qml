@@ -7,7 +7,7 @@ import "../helpers/chat.js" as ChatLogic
 TextInCircle {
     property string nickname
 
-    color: intToHexColor(hashCode(nickname))
+    color: Theme.avatarBgColor // intToHexColor(hashCode(nickname))
     diameter: Theme.avatarHeight
     content: ChatLogic.getPersonInitialis(nickname)
     pointSize: UiHelper.fixFontSz(20)
