@@ -21,10 +21,10 @@ Control {
         anchors.fill: parent
 
         ImageButton {
-            Layout.leftMargin: 20
-            Layout.rightMargin: 10
+            Layout.leftMargin: 12
+            Layout.rightMargin: 2
             Layout.alignment: Qt.AlignVCenter
-            imageSource: "../resources/icons/Grid.png"
+            image: "Grid"
         }
 
         ScrollView {
@@ -108,12 +108,14 @@ Control {
         }
 
         ImageButton {
-            Layout.rightMargin: 20
-            Layout.leftMargin: 10
+            id: sendButton
+            Layout.rightMargin: 12
+            Layout.leftMargin: 2
             Layout.alignment: Qt.AlignVCenter            
             focusPolicy: Qt.NoFocus
             objectName: "btnSend"            
-            imageSource: "../resources/icons/Send.png"
+            disabled: !(messageField.text + messageField.preeditText).length
+            image: "Send"
             onClicked: {
                 const text = messageField.text + messageField.preeditText;
 

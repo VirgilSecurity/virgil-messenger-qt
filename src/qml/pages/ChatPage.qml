@@ -40,7 +40,7 @@ Page {
             anchors.rightMargin: 10
 
             ImageButton {
-                imageSource: "../resources/icons/Arrow-Left.png"
+                image: "Arrow-Left"
                 onClicked: mainView.back()
             }
 

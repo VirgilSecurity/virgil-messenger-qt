@@ -34,7 +34,7 @@ Page {
         }
 
         FormLabel {
-
+            text: qsTr("Version: %1".arg(app.currentVersion()))
         }
 
         FormPrimaryButton {

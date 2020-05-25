@@ -83,11 +83,12 @@ ToolBar {
             Layout.leftMargin: 5
 
             id: menuButton
-            imageSource: "../resources/icons/More.png"
+            image: "More"
             // visible: menu.length
             opacity: menu.length ? 1 : 0
             enabled: menu.length
             onClicked: {
+                contextMenu.currentIndex = -1
                 contextMenu.open()
             }
 
