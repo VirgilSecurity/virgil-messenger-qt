@@ -10,6 +10,9 @@ ANDOID_APP_ID="com.virgilsecurity.qtmessenger"
 PLATFORM=android-clang
 ANDROID_MAKE="${ANDROID_NDK}/prebuilt/${HOST_PLATFORM}/bin/make"
 ANDROID_PLATFORM="android-24"
+if [ "$1" == "-release" ]; then
+  ENABLE_RELEASE="true"
+fi
 
 #*************************************************************************************************************
 # env variables passed to build anroid release
@@ -42,7 +45,7 @@ build_proc() {
 
         ${ANDROID_MAKE} INSTALL_ROOT=${BUILD_DIR}/android-build install
 
-        if [[ "x$DISABLE_RELEASE" == "x" ]]; then
+        if [[ "x$ENABLE_RELEASE" != "x" ]]; then
             ANDROID_DEPLOY_QT_ADD_ARGS="--sign ${SCRIPT_FOLDER}/../android.keystore upload --storepass '${ANDROID_STORE_PASS}' --keypass '${ANDROID_KEY_PASS}'"
         fi
 
