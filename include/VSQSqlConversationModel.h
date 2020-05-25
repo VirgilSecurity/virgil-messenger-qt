@@ -60,6 +60,9 @@ public:
     Q_INVOKABLE QString
     getLastMessageTime(const QString &user) const;
 
+    Q_INVOKABLE void
+    setAsRead(const QString &user);
+
     QString
     recipient() const;
 

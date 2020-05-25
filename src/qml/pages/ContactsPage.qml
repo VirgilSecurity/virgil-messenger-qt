@@ -151,6 +151,7 @@ Page {
 
             onClicked: {
                 mainView.chatWith(model.display)
+                setAsRead(model.display);
             }
         }
 
@@ -165,6 +166,11 @@ Page {
     //
     //  Functions
     //
+    function setAsRead(user) {
+        ConversationsModel.setAsRead(user);
+        console.log("setAsRead func");
+    }
+
     function addContact() {
         var component = Qt.createComponent("../components/Dialogs/AddContactDialog.qml")
         if (component.status === Component.Ready) {

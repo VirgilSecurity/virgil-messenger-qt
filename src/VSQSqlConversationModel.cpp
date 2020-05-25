@@ -189,7 +189,7 @@ VSQSqlConversationModel::getCountOfUnread(const QString &user) {
     QSqlQueryModel model;
     QString query;
 
-    query = QString("SELECT COUNT(*) AS C FROM %1 WHERE is_read = 1 AND recipient = \"%2\"").arg(_tableName()).arg(user);
+    query = QString("SELECT COUNT(*) AS C FROM %1 WHERE is_read = 0 AND recipient = \"%2\"").arg(_tableName()).arg(user);
 
     model.setQuery(query);
     int c = model.record(0).value("C").toInt();
@@ -213,6 +213,19 @@ VSQSqlConversationModel::getLastMessage(const QString &user) const {
     qDebug() << message << user << query;
 
     return message;
+}
+
+/******************************************************************************/
+void
+VSQSqlConversationModel::setAsRead(const QString &user) {
+    QSqlQuery model;
+    QString query;
+
+    query = QString("UPDATE %1 SET is_read = 1 WHERE recipient = \"%2\"").arg(_tableName()).arg(user);
+
+    model.prepare(query);
+
+    qDebug() << user << query << model.exec();
 }
 
 /******************************************************************************/
