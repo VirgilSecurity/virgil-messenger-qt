@@ -34,7 +34,7 @@ Page {
         AccountSelection {
             visible: userList.length
             onUserSelected: {
-                form.showLoading("Signing in as %1...".arg(userName))
+                form.showLoading("Logging In as %1...".arg(userName))
 
                 Future.onFinished(Messenger.signIn(userName), (result) => {
                     form.hideLoading()
@@ -45,13 +45,13 @@ Page {
         }
 
         FormPrimaryButton {
+            text: "Sign Up"
             objectName: "btnRegister"
-            text: "Register"
             onClicked: mainView.showRegister()
         }
 
         FormSecondaryButton {
-            text: "Sign in"
+            text: "Log In"
             onClicked: mainView.showSignIn()
         }
 

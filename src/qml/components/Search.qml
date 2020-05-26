@@ -113,7 +113,7 @@ Item {
 
         ImageButton {
             id: closeButtonId
-            imageSource: "../resources/icons/Close.png"
+            image: "Close"
             anchors {
                 verticalCenter: parent.verticalCenter
                 right: parent.right
@@ -136,7 +136,7 @@ Item {
         id: searchButtonId
         anchors.verticalCenter: parent.verticalCenter
 
-        imageSource: "../resources/icons/Search.png"
+        image: "Search"
 
         onClicked: {
             containerId.state = "open"

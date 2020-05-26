@@ -52,6 +52,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QuickFuture 1.0
+import MesResult 1.0
 
 import "../theme"
 import "../components"
@@ -66,10 +67,10 @@ Page {
     }
 
     header: ContactsHeader {
-        id: contactsHeaderId
+        description: "Virgil Server"
         objectName: "hdrDefaultServer"
+        id: contactsHeaderId
         title: "Virgil"
-        description: "Default Server"
         searchPlaceholder: "Search conversation"
 
         onIsSearchOpenChanged: {
@@ -81,18 +82,18 @@ Page {
         }
 
         Action {
-            text: qsTr("New chat")
+            text: qsTr("New Chat")
             onTriggered: addContact()
         }
 
         Action {
-            text: qsTr("New group")
-            onTriggered: addContact()
+            text: qsTr("New Group")
+            // onTriggered: addContact()
         }
 
         Action {
-            text: qsTr("Send invite")
-            onTriggered: addContact()
+            text: qsTr("Send Invite")
+            // onTriggered: addContact()
         }
     }
 
@@ -163,7 +164,7 @@ Page {
             }
 
             onClicked: {
-                mainView.chatWith(model.display)
+                mainView.showChatWith(model.display)
             }
         }
 
@@ -206,7 +207,13 @@ Page {
                 try {
                     var future = Messenger.addContact(dialog.contact)
                     Future.onFinished(future, function(value) {
-                      console.log("addContact result: ", Future.result(future))
+                        var res = Future.result(future)
+                        if (res === Result.MRES_OK) {
+                            mainView.showChatWith(dialog.contact)
+                            return
+                        }
+
+                        root.showPopupError(qsTr("User not found"))
                     })
                 } catch (error) {
                     console.error("Cannot start initialization of device")
