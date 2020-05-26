@@ -151,7 +151,7 @@ Page {
 
             onClicked: {
                 mainView.chatWith(model.display)
-                setAsRead(model.display);
+//                setAsRead(model.display);
             }
         }
 
