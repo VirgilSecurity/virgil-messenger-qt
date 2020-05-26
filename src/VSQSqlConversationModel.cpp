@@ -136,7 +136,7 @@ VSQSqlConversationModel::sendMessage(QString recipient, QString message) {
     newRecord.setValue("recipient", recipient);
     newRecord.setValue("timestamp", timestamp);
     newRecord.setValue("message", message);
-    newRecord.setValue("is_read", true);
+    newRecord.setValue("is_read", false);
     if (!insertRecord(rowCount(), newRecord)) {
         qWarning() << "Failed to send message:" << lastError().text();
         return;
