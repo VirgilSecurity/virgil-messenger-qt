@@ -1,5 +1,7 @@
 import QtQuick 2.12
 
+import "../../theme"
+
 Column {
     anchors.centerIn: parent
     spacing: 10
@@ -16,6 +18,7 @@ Column {
         id: labelId
         textFormat: Text.RichText
         horizontalAlignment: Text.AlignHCenter
-        font.pixelSize: UiHelper.fixFontSz(15)
+        font.pointSize: UiHelper.fixFontSz(15)
+        font.family: Theme.mainFont
     }
 }

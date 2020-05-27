@@ -2,17 +2,22 @@ import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
 import QuickFuture 1.0
+import QtQuick.Window 2.12
+import QtMultimedia 5.12
 
 import "../theme"
 import "../components"
 
 Page {
 
+    property string recipient
+
     background: Rectangle {
         color: Theme.chatBackgroundColor
     }
 
     header: Control {
+        id: headerControl
         height: 60
         width: parent.width
 
@@ -38,7 +43,7 @@ Page {
             anchors.rightMargin: 10
 
             ImageButton {
-                imageSource: "../resources/icons/Arrow-Left.png"
+                image: "Arrow-Left"
                 onClicked: mainView.back()
             }
 
@@ -59,48 +64,82 @@ Page {
                     color: Theme.secondaryTextColor
                 }
             }
-
-            SettingsButton {
-                Layout.alignment: Qt.AlignRight
-                Action { text: qsTr("Item 1") }
-                Action { text: qsTr("Item 2") }
-            }
         }
     }
 
+
     ListView {
         id: listView
-
         anchors.fill: parent
         anchors.leftMargin: 20
         anchors.rightMargin: 20
-
-        verticalLayoutDirection: ListView.BottomToTop
-        spacing: 12
-        model: ConversationsModel
+        anchors.bottomMargin: 5
+        section.property: "day"
+        section.delegate: ChatDateSeporator {
+            date: section
+        }        
+        spacing: 5
+        // verticalLayoutDirection: ListView.BottomToTop
+        // model: ConversationsModel
         delegate: ChatMessage {
             text: message
-            author: model.author === "Me"
-                      ? Messenger.currentUser
-                      : model.author
+            author: model.author
             timeStamp: model.timestamp
-            variant: model.author === "Me"
-                      ? "light"
-                      : "dark"
+            variant: model.author === Messenger.currentUser ? "light" : "dark"
+            messageInARow: model.messageInARow
+            firstMessageInARow: model.firstMessageInARow
         }
 
-        ScrollBar.vertical: ScrollBar {
-            bottomPadding: 5
+        ScrollBar.vertical: ScrollBar { }
+
+        onCountChanged: {
+            positionViewAtEnd()
         }
     }
 
     footer: ChatMessageInput {
+        id: footerControl
         onMessageSending: {
             var future = Messenger.sendMessage(ConversationsModel.recipient, message)
             Future.onFinished(future, function(value) {
-              console.log("Send message result: ", Future.result(future))
-            })
+              messageSent.play()
+            })            
         }
+
+
+    }
+
+    // Component events
+
+    Component.onCompleted: {
+
+        // configure conversation model to chat with
+        // recipient provided as a parameter to this page.
+
+        ConversationsModel.recipient = recipient
+        listView.model = ConversationsModel
+    }
+
+    // Connections
+
+    Connections {
+        target: Messenger
+
+        onFireNewMessage: {
+            messageReceived.play()
+        }
+    }
+
+    // Sounds
+
+    SoundEffect {
+        id: messageReceived
+        source: "../resources/sounds/message-received.wav"
+    }
+
+    SoundEffect {
+        id: messageSent
+        source: "../resources/sounds/message-sent.wav"
     }
 }
 

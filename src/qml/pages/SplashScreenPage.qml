@@ -16,7 +16,7 @@ Page {
         interval: 1000; running: true; repeat: false;
         onTriggered: {
             if (mainView.lastSignedInUser) {
-                form.showLoading("Signing in as %1...".arg(mainView.lastSignedInUser))
+                form.showLoading("Logging In as %1...".arg(mainView.lastSignedInUser))
 
                 Future.onFinished(Messenger.signIn(mainView.lastSignedInUser), (result) => {
                     form.hideLoading()

@@ -85,6 +85,7 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
 
 HEADERS += \
         include/VSQApplication.h \
+        include/VSQClipboardProxy.h \
         include/VSQMessenger.h \
         include/VSQSqlContactModel.h \
         include/VSQSqlConversationModel.h \
@@ -97,6 +98,7 @@ HEADERS += \
 #
 
 SOURCES += \
+        src/VSQClipboardProxy.cpp \
         src/VSQMessenger.cpp \
         src/VSQSqlContactModel.cpp \
         src/VSQSqlConversationModel.cpp \
@@ -249,8 +251,28 @@ android: {
 RC_ICONS = platforms/windows/Virgil.ico
 
 DISTFILES += \
+    C:/Users/kuril/Downloads/Icon-048-mdpi.png \
+    C:/Users/kuril/Downloads/Icon-256-master.png \
     platforms/android/res/drawable-hdpi/icon.png \
+    platforms/android/res/drawable-hdpi/icon_round.png \
     platforms/android/res/drawable-ldpi/icon.png \
+    platforms/android/res/drawable-ldpi/icon_round.png \
     platforms/android/res/drawable-mdpi/icon.png \
+    platforms/android/res/drawable-mdpi/icon_round.png \
+    platforms/android/res/drawable-xhdpi/icon.png \
+    platforms/android/res/drawable-xhdpi/icon_round.png \
+    platforms/android/res/drawable-xxhdpi/icon.png \
+    platforms/android/res/drawable-xxhdpi/icon_round.png \
+    platforms/android/res/drawable-xxxhdpi/icon.png \
+    platforms/android/res/drawable-xxxhdpi/icon_round.png \
+    platforms/android/res/mipmap-hdpi/ic_launcher_round.png \
+    platforms/android/res/mipmap-mdpi/ic_launcher.png \
+    platforms/android/res/mipmap-mdpi/ic_launcher_round.png \
+    platforms/android/res/mipmap-xhdpi/ic_launcher.png \
+    platforms/android/res/mipmap-xhdpi/ic_launcher_round.png \
+    platforms/android/res/mipmap-xxhdpi/ic_launcher.png \
+    platforms/android/res/mipmap-xxhdpi/ic_launcher_round.png \
+    platforms/android/res/mipmap-xxxhdpi/ic_launcher.png \
+    platforms/android/res/mipmap-xxxhdpi/ic_launcher_round.png \
     platforms/macos/virgil-messenger.plist.in \
     platforms/windows/Virgil.ico

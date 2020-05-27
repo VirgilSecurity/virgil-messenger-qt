@@ -55,11 +55,11 @@ class VSQMessenger : public QObject {
 
     enum VSQEnvType { PROD, STG, DEV };
 
-    Q_ENUMS(VSQMessengerResult)
+    Q_ENUMS(EnResult)
 
 public:
 
-    enum VSQMessengerResult
+    enum EnResult
     {
         MRES_OK,
         MRES_ERR_NO_CRED,
@@ -88,25 +88,25 @@ public:
 
 public slots:
 
-    Q_INVOKABLE QFuture<VSQMessenger::VSQMessengerResult>
+    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     signIn(QString user);
 
-    Q_INVOKABLE QFuture<VSQMessenger::VSQMessengerResult>
+    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     signUp(QString user);
 
-    Q_INVOKABLE QFuture<VSQMessenger::VSQMessengerResult>
+    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     logout();
 
-    Q_INVOKABLE QFuture<VSQMessenger::VSQMessengerResult>
+    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     deleteUser(QString user);
 
     Q_INVOKABLE QStringList
     usersList();
 
-    Q_INVOKABLE QFuture<VSQMessenger::VSQMessengerResult>
+    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     addContact(QString contact);
 
-    Q_INVOKABLE QFuture<VSQMessenger::VSQMessengerResult>
+    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     sendMessage(QString to, QString message);
 
 signals:

@@ -38,7 +38,7 @@ ToolBar {
             enabled: showBackButton
 
             id: backButton
-            imageSource: "../resources/icons/Arrow-Left.png"
+            image: "Arrow-Left"
 
             // TODO: Componets sholdn't know about mainView
             // The logic must be as abastract as possible.
@@ -62,7 +62,7 @@ ToolBar {
             Layout.rightMargin: 12
 
             id: menuButton
-            imageSource: "../resources/icons/More.png"
+            image: "More"
             // visible: menu.length
             opacity: menu.length ? 1 : 0
             enabled: menu.length
