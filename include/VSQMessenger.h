@@ -83,6 +83,8 @@ public:
     VSQSqlConversationModel &
     modelConversations();
 
+    static QString
+    decryptMessage(const QString &sender, const QString &message);
 
 public slots:
 
@@ -161,12 +163,24 @@ private:
     static const QString kProdEnvPrefix;
     static const QString kStgEnvPrefix;
     static const QString kDevEnvPrefix;
+    static const QString kPushNotificationsProxy;
+    static const QString kPushNotificationsNode;
+    static const QString kPushNotificationsService;
+    static const QString kPushNotificationsFCM;
+    static const QString kPushNotificationsDeviceID;
+    static const QString kPushNotificationsFormType;
+    static const QString kPushNotificationsFormTypeVal;
 
     void
     _connectToDatabase();
 
     bool
     _connect(QString userWithEnv, QString userId);
+
+#if VS_PUSHNOTIFICATIONS
+    bool
+    _subscribePushNotifications();
+#endif // VS_PUSHNOTIFICATIONS
 
     QString
     _virgilURL();
@@ -191,6 +205,9 @@ private:
 
     QString
     _prepareLogin(const QString &user);
+
+    QString
+    _caBundleFile();
 };
 
 #endif // VIRGIL_IOTKIT_QT_MESSENGER_H

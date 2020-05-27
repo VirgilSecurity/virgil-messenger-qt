@@ -32,25 +32,40 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQANDROID_H
-#define VSQANDROID_H
+#ifndef FBLISTENER_H
+#define FBLISTENER_H
 
 #if (VS_ANDROID)
 
-#include <QObject>
+#include <QtCore>
 
-class VSQAndroid {
+#include <firebase/messaging.h>
+#include "firebase/app.h"
+#include "firebase/util.h"
+
+class QAndroidJniEnvironment;
+
+class VSQFirebaseListener : public ::firebase::messaging::Listener {
 public:
-    VSQAndroid() = delete;
+    VSQFirebaseListener();
 
-    static QString caBundlePath();
+    void initMessaging();
 
-    static bool prepare();
+    const QString &token() const;
+
+    virtual void OnTokenReceived(const char *token);
+
+    virtual void OnMessage(const ::firebase::messaging::Message & message);
 
 private:
-    static int runLoggingThread();
+    QAndroidJniEnvironment *_jniEnv;
+    ::firebase::App* _app;
+    ::firebase::ModuleInitializer _initializer;
+    QString m_token;
+
+    void showNotification(QString title, QString message);
 };
 
 #endif // VS_ANDROID
 
-#endif // VSQANDROID_H
+#endif // FBLISTENER_H

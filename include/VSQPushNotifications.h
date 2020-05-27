@@ -32,25 +32,26 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQANDROID_H
-#define VSQANDROID_H
+#ifndef NOTIFICATIONHANDLER_H
+#define NOTIFICATIONHANDLER_H
 
-#if (VS_ANDROID)
+#if VS_PUSHNOTIFICATIONS
 
 #include <QObject>
+#include <virgil/iot/qt/helpers/VSQSingleton.h>
+#include "android/VSQFirebaseListener.h"
 
-class VSQAndroid {
+class VSQPushNotifications : public QObject, public VSQSingleton<VSQPushNotifications>
+#if VS_ANDROID
+        , public VSQFirebaseListener
+#endif
+{
+    Q_OBJECT
 public:
-    VSQAndroid() = delete;
-
-    static QString caBundlePath();
-
-    static bool prepare();
-
-private:
-    static int runLoggingThread();
+    void startMessaging();
+    void registerToken(const void *bytes, size_t length);
 };
 
-#endif // VS_ANDROID
+#endif // VS_PUSHNOTIFICATIONS
 
-#endif // VSQANDROID_H
+#endif // NOTIFICATIONHANDLER_H

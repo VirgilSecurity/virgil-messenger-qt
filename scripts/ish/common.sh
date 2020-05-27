@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 PROJECT_DIR="${SCRIPT_FOLDER}/.."
 QT_SDK_DIR="${1:-/opt/Qt/5.12.6}"
 ANDROID_NDK="${2:-/opt/android/ndk}"
@@ -18,12 +17,11 @@ if [ -f "${PROJECT_DIR}/VERSION_MESSENGER" ]; then
     export VERSION="$(cat ${PROJECT_DIR}/VERSION_MESSENGER | tr -d '\n').${BUILD_NUMBER}"
 fi
 
-
 trap 'err_trap  $@' ERR
 
-err_trap(){
+err_trap() {
     err_code=$?
-    # ${FUNCNAME[*]} : err_trap print_message main  
+    # ${FUNCNAME[*]} : err_trap print_message main
     # call from subfunction: lenght = 3
     # ${FUNCNAME[*]} : err_trap  main
     # call from main: lenght = 2
@@ -31,14 +29,13 @@ err_trap(){
     # if arr_shift eq 0. we need to ommit FUNCTION and ARGUMENTS
     echo "##############################################################################"
     echo "### SCRIPT ERROR AT $0, IN LINE ${BASH_LINENO[$arr_shift]}"
-    [  $arr_shift -ne 0 ] && echo "### BASH FUNCTION NAME: ${FUNCNAME[$arr_shift]}"
+    [ $arr_shift -ne 0 ] && echo "### BASH FUNCTION NAME: ${FUNCNAME[$arr_shift]}"
     echo "### BASH COMMAND: ${BASH_COMMAND[*]}"
-    [  $arr_shift -ne 0 ] && echo "### COMMAND ARGUMENTS: $@"
+    [ $arr_shift -ne 0 ] && echo "### COMMAND ARGUMENTS: $@"
     echo "### ERRORCODE: $err_code"
     echo "##############################################################################"
     exit 127
 }
-
 
 function print_title() {
     echo
@@ -59,33 +56,44 @@ function print_message() {
 }
 
 #***************************************************************************************
+function prepare_firebase() {
+    FB_ARCH_NAME=firebase_cpp_sdk_6.11.0.zip
+    FB_URL="https://dl.google.com/firebase/sdk/cpp/firebase_cpp_sdk_6.11.0.zip"
+
+    pushd "${SCRIPT_FOLDER}/../ext/"
+    wget -O "${FB_ARCH_NAME}" "${FB_URL}"
+    unzip "${FB_ARCH_NAME}" -d "prebuilt"
+    rm -rf "${FB_ARCH_NAME}"
+    popd
+}
+
+#***************************************************************************************
 function prepare_libraries() {
 
-    CORE_VER=$(head -n 1 ${SCRIPT_FOLDER}/../VERSION_CORE)
-    ARCH_NAME=prebuilt-${CORE_VER}.tgz
-    PREBUILT_ARCHIVE="https://bintray.com/virgilsecurity/iotl-demo-cdn/download_file?file_path=${ARCH_NAME}"
+    # CORE_VER=$(head -n 1 ${SCRIPT_FOLDER}/../VERSION_CORE)
+    # ARCH_NAME=prebuilt-${CORE_VER}.tgz
+    # PREBUILT_ARCHIVE="https://virgilsecurity.bintray.com/iotl-demo-cdn/${ARCH_NAME}"
 
-    INSTALL_DIR="${SCRIPT_FOLDER}/../ext/"
+    # INSTALL_DIR="${SCRIPT_FOLDER}/../ext/"
 
+    # print_message "CORE VERSION = ${CORE_VER}"
 
-    print_message "CORE VERSION = ${CORE_VER}"
+    # if [ -d ${INSTALL_DIR}/prebuilt ] && [ "${PREBUILT_SKIP}" == "true" ]; then
+    #     print_message "Prebuild libraries found. Download skipped"
+    #     return 0
+    # fi
 
+    # rm -rf ${INSTALL_DIR}/prebuilt
 
-    if [ -d ${INSTALL_DIR}/prebuilt ] && [ "${PREBUILT_SKIP}" == "true" ]; then
-        print_message "Prebuild libraries found. Download skipped"
-        return 0
-    fi
+    # pushd ${INSTALL_DIR}
+    # wget -O ${ARCH_NAME} ${PREBUILT_ARCHIVE}
 
-    rm -rf ${INSTALL_DIR}/prebuilt
+    # tar -xvf ${ARCH_NAME}
 
-    pushd ${INSTALL_DIR}
-        wget -O ${ARCH_NAME} ${PREBUILT_ARCHIVE}
+    # rm ${ARCH_NAME}
+    # popd
 
-        tar -xvf ${ARCH_NAME}
-
-        rm ${ARCH_NAME}
-    popd
-
+    prepare_firebase
 }
 
 #***************************************************************************************

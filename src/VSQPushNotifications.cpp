@@ -32,74 +32,28 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#if (VS_ANDROID)
+#if VS_PUSHNOTIFICATIONS
 
-#include <QtCore>
-
-#include "android/VSQAndroid.h"
-
-#include <android/log.h>
-#include <pthread.h>
-#include <unistd.h>
-
-// TODO: Remove it
-static int pfd[2];
-static pthread_t loggingThread;
+#include "VSQPushNotifications.h"
+#include <QDebug>
 
 /******************************************************************************/
-QString VSQAndroid::caBundlePath() {
-    QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    QString certFile = appDataPath + QDir::separator() + "cert.pem";
-    return certFile;
-}
-/******************************************************************************/
-bool VSQAndroid::prepare() {
-    runLoggingThread();
-    auto certFile = caBundlePath();
-    QFile::remove(certFile);
-    QFile::copy(":qml/resources/cert.pem", certFile);
+void
+VSQPushNotifications::startMessaging() {
+#if VS_ANDROID
+    qDebug() << "Calling intializer";
+    initMessaging();
+#endif
 
-    return true;
 }
 
 /******************************************************************************/
-static void *loggingFunction(void*) {
-    ssize_t readSize;
-    char buf[128];
-
-    while((readSize = read(pfd[0], buf, sizeof buf - 1)) > 0) {
-        if(buf[readSize - 1] == '\n') {
-            --readSize;
-        }
-
-        buf[readSize] = 0;  // add null-terminator
-
-        __android_log_write(ANDROID_LOG_DEBUG, "", buf); // Set any log level you want
-    }
-
-    return nullptr;
-}
-
-/******************************************************************************/
-int VSQAndroid::runLoggingThread() { // run this function to redirect your output to android log
-    setvbuf(stdout, nullptr, _IOLBF, 0); // make stdout line-buffered
-    setvbuf(stderr, nullptr, _IONBF, 0); // make stderr unbuffered
-
-    /* create the pipe and redirect stdout and stderr */
-    pipe(pfd);
-    dup2(pfd[1], 1);
-    dup2(pfd[1], 2);
-
-    /* spawn the logging thread */
-    if(pthread_create(&loggingThread, nullptr, loggingFunction, nullptr) == -1) {
-        return -1;
-    }
-
-    pthread_detach(loggingThread);
-
-    return 0;
+void
+VSQPushNotifications::registerToken(const void *bytes, size_t length) {
+    Q_UNUSED(bytes)
+    qDebug() << "Token of length " << length << " registered";
 }
 
 /******************************************************************************/
 
-#endif // VS_ANDROID
+#endif // VS_PUSHNOTIFICATIONS

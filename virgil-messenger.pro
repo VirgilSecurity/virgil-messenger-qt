@@ -192,12 +192,33 @@ macx: {
     QMAKE_INFO_PLIST = $$PWD/platforms/macos/virgil-messenger.plist
 }
 
+#
+#   iOS specific
+#
+#ios: {
+#    OBJECTIVE_SOURCES += \
+#        src/ios/APNSApplicationDelegate.mm
+
+#    #IOS_ENTITLEMENTS.name = CODE_SIGN_ENTITLEMENTS
+#    #IOS_ENTITLEMENTS.value = ios/pushnotifications.entitlements
+#    QMAKE_MAC_XCODE_SETTINGS += IOS_ENTITLEMENTS
+#}
 
 #
 #   Android specific
 #
 android: {
-    DEFINES += ANDROID=1
+    QT += androidextras
+    DEFINES += VS_ANDROID=1 VS_PUSHNOTIFICATIONS=1
+
+    HEADERS += \
+         include/VSQPushNotifications.h \
+         include/android/VSQFirebaseListener.h
+
+    SOURCES += \
+        src/VSQPushNotifications.cpp \
+        src/android/VSQFirebaseListener.cpp
+
     LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
     ANDROID_EXTRA_LIBS = \
         $$LIBS_DIR/libvs-messenger-crypto.so \
@@ -205,17 +226,24 @@ android: {
         $$LIBS_DIR/libcrypto_1_1.so \
         $$LIBS_DIR/libssl_1_1.so
 
+    LIBS += $${LIBS_DIR}/libfirebase_messaging.a \
+        $${LIBS_DIR}/libfirebase_app.a \
+        $${LIBS_DIR}/libfirebase_auth.a
+
     ANDROID_PACKAGE_SOURCE_DIR = \
         $$PWD/platforms/android
 
     DISTFILES += \
+        platforms/android/gradle.properties \
+        platforms/android/google-services.json \
         platforms/android/AndroidManifest.xml \
         platforms/android/build.gradle \
         platforms/android/gradle/wrapper/gradle-wrapper.jar \
         platforms/android/gradle/wrapper/gradle-wrapper.properties \
         platforms/android/gradlew \
         platforms/android/gradlew.bat \
-        platforms/android/res/values/libs.xml
+        platforms/android/res/values/libs.xml \
+        platforms/android/src/org/virgil/notification/NotificationClient.java
 }
 
 RC_ICONS = platforms/windows/Virgil.ico

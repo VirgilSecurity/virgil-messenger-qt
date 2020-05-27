@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "24937544966",
+    "firebase_url": "https://virgil-stage.firebaseio.com",
+    "project_id": "virgil-stage",
+    "storage_bucket": "virgil-stage.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:24937544966:android:b5f7f5124652910bba3287",
+        "android_client_info": {
+          "package_name": "com.virgilsecurity.android.virgil.stage"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "24937544966-1vlrap0d5tv7bqr4o6il0s2s02ie6g2a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC9oVA0bLxD5oMgnM0sNDTeMx7Ii5HvKlw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "24937544966-1vlrap0d5tv7bqr4o6il0s2s02ie6g2a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

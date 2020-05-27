@@ -35,9 +35,14 @@
 #include <virgil/iot/qt/VSQIoTKit.h>
 
 #include <VSQMessenger.h>
+#include <VSQPushNotifications.h>
+
+#include <android/VSQAndroid.h>
+#include <android/VSQAndroid.h>
 
 #include <qxmpp/QXmppMessage.h>
 #include <qxmpp/QXmppUtils.h>
+#include <qxmpp/QXmppPushEnableIq.h>
 
 #include <QtConcurrent>
 #include <QStandardPaths>
@@ -46,6 +51,11 @@
 #include <QtQml>
 
 #include <QuickFuture>
+
+#ifndef USE_XMPP_LOGS
+#define USE_XMPP_LOGS 1
+#endif
+
 Q_DECLARE_METATYPE(VSQMessenger::VSQMessengerResult)
 Q_DECLARE_METATYPE(QFuture<VSQMessenger::VSQMessengerResult>)
 
@@ -55,7 +65,13 @@ const QString VSQMessenger::kUsers = "Users";
 const QString VSQMessenger::kProdEnvPrefix = "prod";
 const QString VSQMessenger::kStgEnvPrefix = "stg";
 const QString VSQMessenger::kDevEnvPrefix = "dev";
-
+const QString VSQMessenger::kPushNotificationsProxy = "push-notifications-proxy";
+const QString VSQMessenger::kPushNotificationsNode = "node";
+const QString VSQMessenger::kPushNotificationsService = "service";
+const QString VSQMessenger::kPushNotificationsFCM = "fcm";
+const QString VSQMessenger::kPushNotificationsDeviceID = "device_id";
+const QString VSQMessenger::kPushNotificationsFormType = "FORM_TYPE";
+const QString VSQMessenger::kPushNotificationsFormTypeVal = "http://jabber.org/protocol/pubsub#publish-options";
 
 /******************************************************************************/
 VSQMessenger::VSQMessenger() : m_semaphore(1) {
@@ -84,6 +100,11 @@ VSQMessenger::VSQMessenger() : m_semaphore(1) {
     connect(&m_xmpp, SIGNAL(iqReceived(const QXmppIq &)), this, SLOT(onIqReceived(const QXmppIq &)));
     connect(&m_xmpp, SIGNAL(sslErrors(const QList<QSslError> &)), this, SLOT(onSslErrors(const QList<QSslError> &)));
     connect(&m_xmpp, SIGNAL(stateChanged(QXmppClient::State)), this, SLOT(onStateChanged(QXmppClient::State)));
+
+    // Use Push notifications
+#if VS_PUSHNOTIFICATIONS
+    VSQPushNotifications::instance().startMessaging();
+#endif
 }
 
 /******************************************************************************/
@@ -161,6 +182,16 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
 
 /******************************************************************************/
 QString
+VSQMessenger::_caBundleFile() {
+#if VS_ANDROID
+    return VSQAndroid::caBundlePath();
+#else
+    return qgetenv("VS_CURL_CA_BUNDLE");
+#endif
+}
+
+/******************************************************************************/
+QString
 VSQMessenger::_prepareLogin(const QString &user) {
     QString userId = user;
     m_envType = _defaultEnv;
@@ -179,13 +210,8 @@ VSQMessenger::_prepareLogin(const QString &user) {
         }
     }
 
-    // Initialize Virgil Messenger to work with required environment
-    const char *cCABundle = NULL;
-    QString caPath = qgetenv("VS_CURL_CA_BUNDLE");
-    if (!caPath.isEmpty()) {
-        cCABundle = caPath.toStdString().c_str();
-    }
-
+    vs_messenger_virgil_logout();
+    const char *cCABundle = _caBundleFile().toStdString().c_str();
     if (VS_CODE_OK != vs_messenger_virgil_init(_virgilURL().toStdString().c_str(), cCABundle)) {
         qCritical() << "Cannot initialize low level messenger";
     }
@@ -409,7 +435,7 @@ VSQMessenger::logout() {
     return QtConcurrent::run([=]() -> VSQMessengerResult {
         qDebug() << "Logout";
         QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::BlockingQueuedConnection);
-        vs_messenger_virgil_logout();
+//        vs_messenger_virgil_logout();
         return MRES_OK;
     });
 }
@@ -437,8 +463,53 @@ VSQMessenger::modelConversations() {
 }
 
 /******************************************************************************/
+#if VS_PUSHNOTIFICATIONS
+bool
+VSQMessenger::_subscribePushNotifications() {
+
+    // Subscribe Form Type
+    QXmppDataForm::Field subscribeFormType;
+    subscribeFormType.setKey(kPushNotificationsFormType);
+    subscribeFormType.setValue(kPushNotificationsFormTypeVal);
+
+    // Subscribe service
+    QXmppDataForm::Field subscribeService;
+    subscribeService.setKey(kPushNotificationsService);
+    subscribeService.setValue(kPushNotificationsFCM);
+
+    // Subscribe device
+    QXmppDataForm::Field subscribeDevice;
+    subscribeDevice.setKey(kPushNotificationsDeviceID);
+    subscribeDevice.setValue(VSQPushNotifications::instance().token());
+
+    // Create a Data Form
+    QList<QXmppDataForm::Field> fields;
+    fields << subscribeFormType << subscribeService << subscribeDevice;
+
+    QXmppDataForm dataForm;
+    dataForm.setType(QXmppDataForm::Submit);
+    dataForm.setFields(fields);
+
+    // Create request
+    QXmppPushEnableIq xmppPushEnable;
+    xmppPushEnable.setType(QXmppIq::Set);
+    xmppPushEnable.setMode(QXmppPushEnableIq::Enable);
+    xmppPushEnable.setJid(kPushNotificationsProxy);
+    xmppPushEnable.setNode(kPushNotificationsNode);
+    xmppPushEnable.setDataForm(dataForm);
+
+    return m_xmpp.sendPacket(xmppPushEnable);
+}
+#endif // VS_PUSHNOTIFICATIONS
+
+/******************************************************************************/
 void
 VSQMessenger::onConnected() {
+
+#if VS_PUSHNOTIFICATIONS
+    _subscribePushNotifications();
+#endif
+
     emit fireReady();
     m_semaphore.release();
 }
@@ -450,7 +521,6 @@ VSQMessenger::onDisconnected() {
 #if 0
     emit fireError(tr("Disconnected ..."));
 #endif
-    m_semaphore.release();
 }
 
 /******************************************************************************/
@@ -458,19 +528,48 @@ void
 VSQMessenger::onError(QXmppClient::Error err) {
     VS_LOG_DEBUG("onError");
     qDebug() << err;
+    m_semaphore.release();
     emit fireError(tr("Connection error ..."));
+}
+
+/******************************************************************************/
+QString
+VSQMessenger::decryptMessage(const QString &sender, const QString &message) {
+    static const size_t _decryptedMsgSzMax = 10 * 1024;
+    uint8_t decryptedMessage[_decryptedMsgSzMax];
+    size_t decryptedMessageSz = 0;
+
+    qDebug() << "Sender            : " << sender;
+    qDebug() << "Encrypted message : " << message;
+
+    // Decrypt message
+    // DECRYPTED_MESSAGE_SZ_MAX - 1  - This is required for a Zero-terminated string
+    if (VS_CODE_OK !=
+            vs_messenger_virgil_decrypt_msg(
+                sender.toStdString().c_str(),
+                message.toStdString().c_str(),
+                decryptedMessage, decryptedMessageSz - 1,
+                &decryptedMessageSz)) {
+        VS_LOG_WARNING("Received message cannot be decrypted");
+        return "";
+    }
+
+    // Add Zero termination
+    decryptedMessage[decryptedMessageSz] = 0;
+
+    // Get message from JSON
+    QByteArray baDecr(reinterpret_cast<char *> (decryptedMessage), static_cast<int> (decryptedMessageSz));
+    QJsonDocument jsonMsg(QJsonDocument::fromJson(baDecr));
+    QString decryptedString = jsonMsg["payload"]["body"].toString();
+
+    VS_LOG_DEBUG("Received message: <%s>", decryptedString.toStdString().c_str());
+
+    return decryptedString;
 }
 
 /******************************************************************************/
 void
 VSQMessenger::onMessageReceived(const QXmppMessage &message) {
-
-    // TODO: Do we need a separate thread here ?
-
-    static const size_t _decryptedMsgSzMax = 10 * 1024;
-    uint8_t decryptedMessage[_decryptedMsgSzMax];
-    size_t decryptedMessageSz = 0;
-
     // Get sender
     QString from = message.from();
     QStringList pieces = from.split("@");
@@ -484,26 +583,7 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
     QString msg = message.body();
 
     // Decrypt message
-    // DECRYPTED_MESSAGE_SZ_MAX - 1  - This is required for a Zero-terminated string
-    if (VS_CODE_OK !=
-            vs_messenger_virgil_decrypt_msg(
-                sender.toStdString().c_str(),
-                msg.toStdString().c_str(),
-                decryptedMessage, decryptedMessageSz - 1,
-                &decryptedMessageSz)) {
-        VS_LOG_WARNING("Received message cannot be decrypted");
-        return;
-    }
-
-    // Add Zero termination
-    decryptedMessage[decryptedMessageSz] = 0;
-
-    // Get message from JSON
-    QByteArray baDecr(reinterpret_cast<char *> (decryptedMessage), static_cast<int> (decryptedMessageSz));
-    QJsonDocument jsonMsg(QJsonDocument::fromJson(baDecr));
-    QString decryptedString = jsonMsg["payload"]["body"].toString();
-
-    VS_LOG_DEBUG("Received message: <%s>", decryptedString.toStdString().c_str());
+    QString decryptedString = decryptMessage(sender, msg);
 
     // Add sender to contacts
     m_sqlContacts->addContact(sender);
