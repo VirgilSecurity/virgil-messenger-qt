@@ -57,6 +57,8 @@ class VSQMessenger : public QObject {
 
     Q_ENUMS(EnResult)
 
+    Q_ENUMS(EnStatus)
+
 public:
 
     enum EnResult
@@ -67,6 +69,12 @@ public:
         MRES_ERR_SIGNUP,
         MRES_ERR_USER_NOT_FOUND,
         MRES_ERR_ENCRYPTION
+    };
+
+    enum EnStatus
+    {
+        MSTATUS_ONLINE,
+        MSTATUS_UNAVAILABLE
     };
 
     Q_PROPERTY(QString currentUser READ currentUser NOTIFY fireCurrentUserChanged)
@@ -108,6 +116,9 @@ public slots:
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     sendMessage(QString to, QString message);
+
+    Q_INVOKABLE void
+    setStatus(VSQMessenger::EnStatus status);
 
 signals:
     void
@@ -153,6 +164,8 @@ private:
     VSQSqlContactModel *m_sqlContacts;
     VSQSqlConversationModel *m_sqlConversations;
     QString m_user;
+    QString m_userId;
+    QString m_xmppPass;
     VSQEnvType m_envType;
     static const VSQEnvType _defaultEnv = STG;
     QXmppConfiguration conf;
@@ -176,6 +189,9 @@ private:
 
     bool
     _connect(QString userWithEnv, QString userId);
+
+    QString
+    _xmppPass();
 
 #if VS_PUSHNOTIFICATIONS
     bool
