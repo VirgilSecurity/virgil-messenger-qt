@@ -188,6 +188,7 @@ private:
     static const QString kPushNotificationsDeviceID;
     static const QString kPushNotificationsFormType;
     static const QString kPushNotificationsFormTypeVal;
+    static const int kConnectionWaitMs;
 
     void
     _connectToDatabase();

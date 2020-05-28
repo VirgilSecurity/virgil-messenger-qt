@@ -73,6 +73,7 @@ const QString VSQMessenger::kPushNotificationsFCM = "fcm";
 const QString VSQMessenger::kPushNotificationsDeviceID = "device_id";
 const QString VSQMessenger::kPushNotificationsFormType = "FORM_TYPE";
 const QString VSQMessenger::kPushNotificationsFormTypeVal = "http://jabber.org/protocol/pubsub#publish-options";
+const int VSQMessenger::kConnectionWaitMs = 10000;
 
 /******************************************************************************/
 VSQMessenger::VSQMessenger() {
@@ -186,6 +187,18 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
     qRegisterMetaType<QXmppConfiguration>("QXmppConfiguration");
     QMetaObject::invokeMethod(&m_xmpp, "connectToServer", Qt::QueuedConnection, Q_ARG(QXmppConfiguration, conf));
 
+    // Wait for connection
+    QTimer timer;
+    timer.setSingleShot(true);
+    QEventLoop loop;
+    connect(&m_xmpp, &QXmppClient::connected, &loop, &QEventLoop::quit);
+    connect(&m_xmpp, &QXmppClient::disconnected, &loop, &QEventLoop::quit);
+    connect(&m_xmpp, &QXmppClient::error, &loop, &QEventLoop::quit);
+    connect( &timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    timer.start(kConnectionWaitMs);
+    loop.exec();
+
+    // Return connection result
     return m_xmpp.isConnected();
 }
 
