@@ -70,28 +70,28 @@ function prepare_firebase() {
 #***************************************************************************************
 function prepare_libraries() {
 
-    # CORE_VER=$(head -n 1 ${SCRIPT_FOLDER}/../VERSION_CORE)
-    # ARCH_NAME=prebuilt-${CORE_VER}.tgz
-    # PREBUILT_ARCHIVE="https://virgilsecurity.bintray.com/iotl-demo-cdn/${ARCH_NAME}"
+    CORE_VER=$(head -n 1 ${SCRIPT_FOLDER}/../VERSION_CORE)
+    ARCH_NAME=prebuilt-${CORE_VER}.tgz
+    PREBUILT_ARCHIVE="https://virgilsecurity.bintray.com/iotl-demo-cdn/${ARCH_NAME}"
 
-    # INSTALL_DIR="${SCRIPT_FOLDER}/../ext/"
+    INSTALL_DIR="${SCRIPT_FOLDER}/../ext/"
 
-    # print_message "CORE VERSION = ${CORE_VER}"
+    print_message "CORE VERSION = ${CORE_VER}"
 
-    # if [ -d ${INSTALL_DIR}/prebuilt ] && [ "${PREBUILT_SKIP}" == "true" ]; then
-    #     print_message "Prebuild libraries found. Download skipped"
-    #     return 0
-    # fi
+    if [ -d ${INSTALL_DIR}/prebuilt ] && [ "${PREBUILT_SKIP}" == "true" ]; then
+        print_message "Prebuild libraries found. Download skipped"
+        return 0
+    fi
 
-    # rm -rf ${INSTALL_DIR}/prebuilt
+    rm -rf ${INSTALL_DIR}/prebuilt
 
-    # pushd ${INSTALL_DIR}
-    # wget -O ${ARCH_NAME} ${PREBUILT_ARCHIVE}
+    pushd ${INSTALL_DIR}
+    wget -O ${ARCH_NAME} ${PREBUILT_ARCHIVE}
 
-    # tar -xvf ${ARCH_NAME}
+    tar -xvf ${ARCH_NAME}
 
-    # rm ${ARCH_NAME}
-    # popd
+    rm ${ARCH_NAME}
+    popd
 
     prepare_firebase
 }

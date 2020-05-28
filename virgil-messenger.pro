@@ -119,7 +119,8 @@ RESOURCES += src/resources.qrc
 
 
 INCLUDEPATH +=  include \
-        $${QXMPP_BUILD_PATH}/include
+        $${QXMPP_BUILD_PATH}/include \
+         $${QXMPP_BUILD_PATH}/include/qxmpp
 
 #
 #   Sparkle framework
