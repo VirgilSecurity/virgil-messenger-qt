@@ -213,6 +213,8 @@ android: {
     QT += androidextras
     DEFINES += VS_ANDROID=1 VS_PUSHNOTIFICATIONS=1
 
+    INCLUDEPATH +=  $$PWD/ext/prebuilt/firebase_cpp_sdk/include
+
     HEADERS += \
          include/VSQPushNotifications.h \
          include/android/VSQFirebaseListener.h
@@ -222,15 +224,16 @@ android: {
         src/android/VSQFirebaseListener.cpp
 
     LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
+    FIREBASE_LIBS_DIR = $$PWD/ext/prebuilt/firebase_cpp_sdk/libs/android/$$ANDROID_TARGET_ARCH/c++
     ANDROID_EXTRA_LIBS = \
         $$LIBS_DIR/libvs-messenger-crypto.so \
         $$LIBS_DIR/libvs-messenger-internal.so \
         $$LIBS_DIR/libcrypto_1_1.so \
         $$LIBS_DIR/libssl_1_1.so
 
-    LIBS += $${LIBS_DIR}/libfirebase_messaging.a \
-        $${LIBS_DIR}/libfirebase_app.a \
-        $${LIBS_DIR}/libfirebase_auth.a
+    LIBS += $${FIREBASE_LIBS_DIR}/libfirebase_messaging.a \
+        $${FIREBASE_LIBS_DIR}/libfirebase_app.a \
+        $${FIREBASE_LIBS_DIR}/libfirebase_auth.a
 
     ANDROID_PACKAGE_SOURCE_DIR = \
         $$PWD/platforms/android
