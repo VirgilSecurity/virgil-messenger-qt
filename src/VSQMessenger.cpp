@@ -75,7 +75,7 @@ const QString VSQMessenger::kPushNotificationsFormType = "FORM_TYPE";
 const QString VSQMessenger::kPushNotificationsFormTypeVal = "http://jabber.org/protocol/pubsub#publish-options";
 
 /******************************************************************************/
-VSQMessenger::VSQMessenger() : m_semaphore(1) {
+VSQMessenger::VSQMessenger() {
     // Register QML typess
     qmlRegisterType<VSQMessenger>("MesResult", 1, 0, "Result");
     QuickFuture::registerType<VSQMessenger::EnResult>([](VSQMessenger::EnResult res) -> QVariant {
@@ -90,7 +90,7 @@ VSQMessenger::VSQMessenger() : m_semaphore(1) {
 
     // Signal connection
     connect(this, SIGNAL(fireReadyToAddContact(QString)), this, SLOT(onAddContactToDB(QString)));
-//    connect(this, SIGNAL(fireError(QString)), this, SLOT(logout()));
+    connect(this, SIGNAL(fireError(QString)), this, SLOT(disconnect()));
 
     // Connect XMPP signals
     connect(&m_xmpp, SIGNAL(connected()), this, SLOT(onConnected()));
@@ -183,17 +183,8 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
 
     m_xmpp.setLogger(logger);
 #endif
-
-    m_semaphore.acquire();
-    if (m_xmpp.isConnected()) {
-        QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::BlockingQueuedConnection);
-    }
     qRegisterMetaType<QXmppConfiguration>("QXmppConfiguration");
     QMetaObject::invokeMethod(&m_xmpp, "connectToServer", Qt::QueuedConnection, Q_ARG(QXmppConfiguration, conf));
-
-    // Wait for results
-    m_semaphore.acquire();
-    m_semaphore.release();
 
     return m_xmpp.isConnected();
 }
@@ -452,8 +443,22 @@ QFuture<VSQMessenger::EnResult>
 VSQMessenger::logout() {
     return QtConcurrent::run([=]() -> EnResult {
         qDebug() << "Logout";
-//        QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::BlockingQueuedConnection);
-//        vs_messenger_virgil_logout();
+        m_user = "";
+        m_userId = "";
+        m_xmppPass = "";
+        QMetaObject::invokeMethod(this, "onSubscribePushNotifications", Qt::BlockingQueuedConnection, Q_ARG(bool, false));
+        QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::BlockingQueuedConnection);
+        vs_messenger_virgil_logout();
+        return MRES_OK;
+    });
+}
+
+/******************************************************************************/
+Q_INVOKABLE QFuture<VSQMessenger::EnResult>
+VSQMessenger::disconnect() {
+    return QtConcurrent::run([=]() -> EnResult {
+        qDebug() << "Disconnect";
+        QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::BlockingQueuedConnection);
         return MRES_OK;
     });
 }
@@ -481,9 +486,9 @@ VSQMessenger::modelConversations() {
 }
 
 /******************************************************************************/
-#if VS_PUSHNOTIFICATIONS
-bool
-VSQMessenger::_subscribePushNotifications() {
+void
+VSQMessenger::onSubscribePushNotifications(bool enable) {
+    #if VS_PUSHNOTIFICATIONS
 
     // Subscribe Form Type
     QXmppDataForm::Field subscribeFormType;
@@ -509,27 +514,24 @@ VSQMessenger::_subscribePushNotifications() {
     dataForm.setFields(fields);
 
     // Create request
-    QXmppPushEnableIq xmppPushEnable;
-    xmppPushEnable.setType(QXmppIq::Set);
-    xmppPushEnable.setMode(QXmppPushEnableIq::Enable);
-    xmppPushEnable.setJid(kPushNotificationsProxy);
-    xmppPushEnable.setNode(kPushNotificationsNode);
-    xmppPushEnable.setDataForm(dataForm);
+    QXmppPushEnableIq xmppPush;
+    xmppPush.setType(QXmppIq::Set);
+    xmppPush.setMode(enable ? QXmppPushEnableIq::Enable : QXmppPushEnableIq::Disable);
+    xmppPush.setJid(kPushNotificationsProxy);
+    xmppPush.setNode(kPushNotificationsNode);
+    xmppPush.setDataForm(dataForm);
 
-    return m_xmpp.sendPacket(xmppPushEnable);
-}
+    m_xmpp.sendPacket(xmppPush);
+#else
+    Q_UNUSED(enable)
 #endif // VS_PUSHNOTIFICATIONS
+}
 
 /******************************************************************************/
 void
 VSQMessenger::onConnected() {
-
-#if VS_PUSHNOTIFICATIONS
-    _subscribePushNotifications();
-#endif
-
+    onSubscribePushNotifications(true);
     emit fireReady();
-    m_semaphore.release();
 }
 
 /******************************************************************************/
@@ -540,9 +542,11 @@ VSQMessenger::onDisconnected() {
     emit fireError(tr("Disconnected ..."));
 #endif
     qDebug() << "onDisconnected";
-    QtConcurrent::run([=]() {
-        _connect(m_user, m_userId);
-    });
+    if (!m_user.isEmpty() && !m_userId.isEmpty()) {
+        QtConcurrent::run([=]() {
+            _connect(m_user, m_userId);
+        });
+    }
 }
 
 /******************************************************************************/
@@ -551,7 +555,6 @@ VSQMessenger::onError(QXmppClient::Error err) {
     VS_LOG_DEBUG("onError");
     qDebug() << "onError : " << err;
     emit fireError(tr("Connection error ..."));
-    m_semaphore.release();
 }
 
 /******************************************************************************/

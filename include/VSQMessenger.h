@@ -106,6 +106,9 @@ public slots:
     logout();
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
+    disconnect();
+
+    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     deleteUser(QString user);
 
     Q_INVOKABLE QStringList
@@ -158,9 +161,11 @@ private slots:
     void
     onAddContactToDB(QString contact);
 
+    Q_INVOKABLE void
+    onSubscribePushNotifications(bool enable);
+
 private:
     QXmppClient m_xmpp;
-    QSemaphore m_semaphore;
     VSQSqlContactModel *m_sqlContacts;
     VSQSqlConversationModel *m_sqlConversations;
     QString m_user;
@@ -192,11 +197,6 @@ private:
 
     QString
     _xmppPass();
-
-#if VS_PUSHNOTIFICATIONS
-    bool
-    _subscribePushNotifications();
-#endif // VS_PUSHNOTIFICATIONS
 
     QString
     _virgilURL();
