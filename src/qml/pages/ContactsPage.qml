@@ -52,6 +52,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QuickFuture 1.0
+import MesResult 1.0
 
 import "../theme"
 import "../components"
@@ -66,22 +67,33 @@ Page {
     }
 
     header: ContactsHeader {
+        description: "Virgil Server"
+        objectName: "hdrDefaultServer"
+        id: contactsHeaderId
         title: "Virgil"
-        description: "Default Server"
+        searchPlaceholder: "Search conversation"
+
+        onIsSearchOpenChanged: {
+            contactsHeaderId.isSearchOpen ? ContactsModel.setContactsFilter('') : ContactsModel.clearContactsFilter()
+        }
+
+        onSearchChanged: {
+            ContactsModel.setContactsFilter(contactsHeaderId.search)
+        }
 
         Action {
-            text: qsTr("New chat")
+            text: qsTr("New Chat")
             onTriggered: addContact()
         }
 
         Action {
-            text: qsTr("New group")
-            onTriggered: addContact()
+            text: qsTr("New Group")
+            // onTriggered: addContact()
         }
 
         Action {
-            text: qsTr("Send invite")
-            onTriggered: addContact()
+            text: qsTr("Send Invite")
+            // onTriggered: addContact()
         }
     }
 
@@ -150,18 +162,36 @@ Page {
             }
 
             onClicked: {
-                mainView.chatWith(model.display)
-//                setAsRead(model.display);
+                mainView.showChatWith(model.display)
             }
         }
 
         IconWithText {
-            visible: !ContactsModel.rowCount()
-            image.source: "../resources/icons/Chats.png"
-            label.text: qsTr("Create your first chat<br />by pressing the dots<br />button above")
-            label.color: Theme.labelColor
+            id: emptyListPlaceholderId
+            property url conversationIcon: "../resources/icons/Chats.png"
+            property url searchIcon: "../resources/icons/Search_Big.png"
+            property string conversationText: qsTr("Create your first chat<br />by pressing the dots<br />button above")
+            property string searchText: qsTr("Search results<br />will appear here")
+            property string searchEmptyText: qsTr("Nothing found")
+            visible: !listView.contentItem.children.length
+            image {
+                source: contactsHeaderId.isSearchOpen ? searchIcon : conversationIcon
+                width: 48
+                height: 48
+            }
+            label {
+                text: getSearchText()
+                color: Theme.labelColor
+            }
+
+            function getSearchText() {
+                if (!contactsHeaderId.isSearchOpen) return conversationText;
+                if (contactsHeaderId.search !== '') return searchEmptyText;
+                return searchText;
+            }
         }
     }
+
 
     //
     //  Functions
@@ -180,7 +210,13 @@ Page {
                 try {
                     var future = Messenger.addContact(dialog.contact)
                     Future.onFinished(future, function(value) {
-                      console.log("addContact result: ", Future.result(future))
+                        var res = Future.result(future)
+                        if (res === Result.MRES_OK) {
+                            mainView.showChatWith(dialog.contact)
+                            return
+                        }
+
+                        root.showPopupError(qsTr("User not found"))
                     })
                 } catch (error) {
                     console.error("Cannot start initialization of device")

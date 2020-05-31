@@ -17,9 +17,9 @@ Control {
 
         ImageButton {
             Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: 18
-            Layout.bottomMargin: 17
-            imageSource: "../resources/icons/Menu.png"
+            Layout.topMargin: 10
+            Layout.bottomMargin: 9
+            image: "Menu"
 
             onClicked: {
                 contextMenu.open()
@@ -47,9 +47,9 @@ Control {
 
         ImageButton {
             Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: 18
-            Layout.bottomMargin: 17
-            imageSource: "../resources/icons/Plus.png"
+            Layout.topMargin: 10
+            Layout.bottomMargin: 9
+            image: "Plus"
         }
 
         Item {

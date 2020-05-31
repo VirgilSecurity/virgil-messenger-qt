@@ -35,7 +35,7 @@ Column {
     Text {
         id: mainLogoDescription
         width: 180
-        text: qsTr("The most secure messenger on the market")
+        text: qsTr("Virgil Secure Communications Platform")
         lineHeight: 1
         wrapMode: Text.WordWrap
         horizontalAlignment: Text.AlignHCenter

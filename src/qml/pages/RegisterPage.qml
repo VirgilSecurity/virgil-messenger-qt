@@ -1,9 +1,12 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
+import QuickFuture 1.0
+import MesResult 1.0
 
 import "../theme"
 import "../components"
+import "../helpers/login.js" as LoginLogic
 
 Page {
     readonly property string terms:
@@ -17,17 +20,22 @@ Page {
 
     header: Header {
         title: "Register"
+        showBackButton: !form.isLoading
     }
 
     Form {
 
+        id: form
+
         FormInput {
             id: username
+            objectName: "fiRegisterUsername"
             label: "Username"
         }
 
         FormPrimaryButton {
-            onClicked: mainView.signUp(username.text)
+            onClicked: signUp(username.text)
+            objectName: "btnCreateAccount"
             text: "Create account"
         }
 
@@ -37,4 +45,28 @@ Page {
     }
 
     footer: Footer {}
+
+    function signUp(user) {
+        if (LoginLogic.validateUser(user)) {
+            form.showLoading(qsTr("Registering %1...".arg(user)))
+
+            var future = Messenger.signUp(user)
+
+            Future.onFinished(future, function(result) {
+                form.hideLoading()
+
+                console.log("registration result: %1".arg(Future.result(future)))
+                if (Future.result(future) === Result.MRES_OK) {
+                    mainView.lastSignedInUser = user
+                    mainView.navigateTo("Contacts", null, true, true)
+
+                    return
+                }
+
+                showPopupError(qsTr("Something went wrong :("))
+            })
+        } else {
+            showPopupError(qsTr("Incorrect user name"))
+        }
+    }
 }

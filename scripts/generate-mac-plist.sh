@@ -38,14 +38,17 @@ function fill_plist() {
 
 if [ z"${SUFeedURL}" == "z" ]; then
     print_usage
-exit 1
+    exit 1
+fi    
 
 if [ z"${SUPublicEDKey}" == "z" ]; then
     print_usage
-exit 1
+    exit 1
+fi    
 
 if [ z"${VERSION_PLIST}" == "z" ]; then
     print_usage
-exit 1
+    exit 1
+fi    
 
 fill_plist

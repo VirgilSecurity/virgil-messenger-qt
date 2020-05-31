@@ -85,6 +85,7 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
 
 HEADERS += \
         include/VSQApplication.h \
+        include/VSQClipboardProxy.h \
         include/VSQMessenger.h \
         include/VSQSqlContactModel.h \
         include/VSQSqlConversationModel.h \
@@ -97,6 +98,7 @@ HEADERS += \
 #
 
 SOURCES += \
+        src/VSQClipboardProxy.cpp \
         src/VSQMessenger.cpp \
         src/VSQSqlContactModel.cpp \
         src/VSQSqlConversationModel.cpp \
@@ -134,6 +136,33 @@ unix:mac: {
     sparkle.path = Contents/Frameworks
     sparkle.files = $$SPARKLE_LOCATION/Sparkle.framework
     QMAKE_BUNDLE_DATA += sparkle
+}
+
+#
+#   Qt Web Driver
+#
+isEmpty(WEBDRIVER) {
+    message("Web Driver is disabled")
+} else {
+    message("Web Driver is enabled")
+    QT += widgets
+    DEFINES += WD_ENABLE_WEB_VIEW=0 \
+           WD_ENABLE_PLAYER=0 \
+           QT_NO_SAMPLES=1 \
+           VSQ_WEBDRIVER_DEBUG=1
+    QTWEBDRIVER_LOCATION=$$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/include/qtwebdriver
+    HEADERS += $$QTWEBDRIVER_LOCATION/src/Test/Headers.h
+    INCLUDEPATH +=  $$QTWEBDRIVER_LOCATION $$QTWEBDRIVER_LOCATION/src
+    linux:!android: { 
+        LIBS += -ldl -Wl,--start-group -lchromium_base -lWebDriver_core -lWebDriver_extension_qt_base -lWebDriver_extension_qt_quick -Wl,--end-group
+    }    
+    macx: {
+        LIBS += -lchromium_base -lWebDriver_core -lWebDriver_extension_qt_base -lWebDriver_extension_qt_quick
+        LIBS += -framework Foundation
+        LIBS += -framework CoreFoundation
+        LIBS += -framework ApplicationServices
+        LIBS += -framework Security
+    }
 }
 
 
@@ -194,8 +223,28 @@ android: {
 RC_ICONS = platforms/windows/Virgil.ico
 
 DISTFILES += \
+    C:/Users/kuril/Downloads/Icon-048-mdpi.png \
+    C:/Users/kuril/Downloads/Icon-256-master.png \
     platforms/android/res/drawable-hdpi/icon.png \
+    platforms/android/res/drawable-hdpi/icon_round.png \
     platforms/android/res/drawable-ldpi/icon.png \
+    platforms/android/res/drawable-ldpi/icon_round.png \
     platforms/android/res/drawable-mdpi/icon.png \
+    platforms/android/res/drawable-mdpi/icon_round.png \
+    platforms/android/res/drawable-xhdpi/icon.png \
+    platforms/android/res/drawable-xhdpi/icon_round.png \
+    platforms/android/res/drawable-xxhdpi/icon.png \
+    platforms/android/res/drawable-xxhdpi/icon_round.png \
+    platforms/android/res/drawable-xxxhdpi/icon.png \
+    platforms/android/res/drawable-xxxhdpi/icon_round.png \
+    platforms/android/res/mipmap-hdpi/ic_launcher_round.png \
+    platforms/android/res/mipmap-mdpi/ic_launcher.png \
+    platforms/android/res/mipmap-mdpi/ic_launcher_round.png \
+    platforms/android/res/mipmap-xhdpi/ic_launcher.png \
+    platforms/android/res/mipmap-xhdpi/ic_launcher_round.png \
+    platforms/android/res/mipmap-xxhdpi/ic_launcher.png \
+    platforms/android/res/mipmap-xxhdpi/ic_launcher_round.png \
+    platforms/android/res/mipmap-xxxhdpi/ic_launcher.png \
+    platforms/android/res/mipmap-xxxhdpi/ic_launcher_round.png \
     platforms/macos/virgil-messenger.plist.in \
     platforms/windows/Virgil.ico

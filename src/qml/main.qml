@@ -10,9 +10,11 @@ import "theme"
 ApplicationWindow {
     id: root
     visible: true
-    title: qsTr("Virgil Messenger")
+    title: qsTr("Virgil Secure Communications Platform")
     minimumWidth: 320
     minimumHeight: 600
+
+
 
     //
     //  Connections
@@ -39,9 +41,7 @@ ApplicationWindow {
         onFireAddedContact: {
         }
 
-        onFireNewMessage: {
-            messageSound.play()
-            showChat(from)
+        onFireNewMessage: {            
         }
     }
 
@@ -55,12 +55,6 @@ ApplicationWindow {
     // Popup to show messages or warnings on the bottom postion of the screen
     Popup {
         id: inform
-    }
-
-    // Sound effect
-    SoundEffect {
-        id: messageSound
-        source: "resources/sounds/message.wav"
     }
 
     // Shortcuts for hackers
