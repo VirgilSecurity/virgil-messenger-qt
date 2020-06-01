@@ -69,7 +69,6 @@ VSQMessenger::VSQMessenger() : m_semaphore(1) {
     // Connect to Database
     _connectToDatabase();
 
-    m_sqlContacts = new VSQSqlContactModel(this);
     m_sqlConversations = new VSQSqlConversationModel(this);
     m_sqlChatModel = new VSQSqlChatModel(this);
 
@@ -194,7 +193,6 @@ VSQMessenger::_prepareLogin(const QString &user) {
 
     // Set current user
     m_user = userId;
-    m_sqlContacts->setUser(userId);
     m_sqlConversations->setUser(userId);
     m_sqlChatModel->init(userId);
 
@@ -426,12 +424,6 @@ VSQMessenger::deleteUser(QString user) {
         logout();
         return MRES_OK;
     });
-}
-
-/******************************************************************************/
-VSQSqlContactModel &
-VSQMessenger::modelContacts() {
-    return *m_sqlContacts;
 }
 
 /******************************************************************************/

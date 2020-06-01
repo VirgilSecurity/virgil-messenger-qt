@@ -93,7 +93,6 @@ VSQApplication::run(const QString &basePath) {
     context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
     context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
     context->setContextProperty("Messenger", &m_messenger);
-    context->setContextProperty("ContactsModel", &m_messenger.modelContacts());
     context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
     context->setContextProperty("ChatModel", &m_messenger.getChatModel());
 

@@ -47,7 +47,6 @@
 using namespace VirgilIoTKit;
 #include <virgil/iot/messenger/messenger.h>
 
-#include "VSQSqlContactModel.h"
 #include "VSQSqlConversationModel.h"
 #include "VSQSqlChatModel.h"
 
@@ -78,9 +77,6 @@ public:
 
     QString
     currentUser();
-
-    VSQSqlContactModel &
-    modelContacts();
 
     VSQSqlConversationModel &
     modelConversations();
@@ -152,7 +148,6 @@ private slots:
 private:
     QXmppClient m_xmpp;
     QSemaphore m_semaphore;
-    VSQSqlContactModel *m_sqlContacts;
     VSQSqlConversationModel *m_sqlConversations;
     VSQSqlChatModel *m_sqlChatModel;
 

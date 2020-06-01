@@ -88,7 +88,6 @@ HEADERS += \
         include/VSQClipboardProxy.h \
         include/VSQMessenger.h \
         include/VSQSqlChatModel.h \
-        include/VSQSqlContactModel.h \
         include/VSQSqlConversationModel.h \
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
@@ -102,7 +101,6 @@ SOURCES += \
         src/VSQClipboardProxy.cpp \
         src/VSQMessenger.cpp \
         src/VSQSqlChatModel.cpp \
-        src/VSQSqlContactModel.cpp \
         src/VSQSqlConversationModel.cpp \
         src/android/VSQAndroid.cpp \
         src/main.cpp \
