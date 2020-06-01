@@ -199,6 +199,9 @@ macx: {
 #   Android specific
 #
 android: {
+    ANDROID_VERSION_CODE = $$VERSION
+    ANDROID_VERSION_NAME = $$VERSION
+
     DEFINES += ANDROID=1
     LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
     ANDROID_EXTRA_LIBS = \
