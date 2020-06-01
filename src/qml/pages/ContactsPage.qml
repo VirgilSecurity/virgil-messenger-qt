@@ -100,7 +100,7 @@ Page {
     ListView {
         id: listView
         anchors.fill: parent
-        model: ContactsModel
+        model: ChatModel
         delegate: ItemDelegate {
             id: listItem
             width: parent.width
@@ -120,7 +120,7 @@ Page {
                 Loader {
                     id: avatar
                     sourceComponent: Avatar {
-                        nickname: model.display
+                        nickname: model.name
                     }
                 }
 
@@ -130,13 +130,13 @@ Page {
                     Text {
                         color: Theme.primaryTextColor
                         font.pointSize: UiHelper.fixFontSz(15)
-                        text: model.display
+                        text: model.name
                     }
 
                     Text {
                         color: Theme.secondaryTextColor
                         font.pointSize: UiHelper.fixFontSz(12)
-                        text: ConversationsModel.getLastMessage(model.display) ? ConversationsModel.getLastMessage(model.display) : "..."
+                        text: model.lastMessage ?  model.lastMessage : "..."
                         width: parent.width
                         elide: Text.ElideRight
                         textFormat: Text.RichText
@@ -148,12 +148,12 @@ Page {
                     spacing: 5
 
                     MessageCounter {
-                       count: ConversationsModel.getCountOfUnread(model.display)
+                       count: model.unreadMessageCount
                        anchors.horizontalCenter: parent.horizontalCenter
                     }
 
                     Text {
-                        text: ConversationsModel.getLastMessageTime(model.display) ? ConversationsModel.getLastMessageTime(model.display) : "..."
+                        text: model.lastMessageTime ?  model.lastMessageTime : "..."
                         color: Theme.secondaryTextColor
                         font.pointSize: UiHelper.fixFontSz(9)
                         anchors.horizontalCenter: parent.horizontalCenter
@@ -162,7 +162,7 @@ Page {
             }
 
             onClicked: {
-                mainView.showChatWith(model.display)
+                mainView.showChatWith(model.name)
             }
         }
 
@@ -197,7 +197,7 @@ Page {
     //  Functions
     //
     function setAsRead(user) {
-        ConversationsModel.setAsRead(user);
+        // ConversationsModel.setAsRead(user);
         console.log("setAsRead func");
     }
 

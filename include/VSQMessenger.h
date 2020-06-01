@@ -38,6 +38,7 @@
 
 #include <QtCore>
 #include <QFuture>
+#include <QObject>
 #include <QSemaphore>
 
 #include <virgil/iot/qt/VSQIoTKit.h>
@@ -48,6 +49,7 @@ using namespace VirgilIoTKit;
 
 #include "VSQSqlContactModel.h"
 #include "VSQSqlConversationModel.h"
+#include "VSQSqlChatModel.h"
 
 class VSQMessenger : public QObject {
 
@@ -83,6 +85,8 @@ public:
     VSQSqlConversationModel &
     modelConversations();
 
+    VSQSqlChatModel &
+    getChatModel();
 
 public slots:
 
@@ -150,6 +154,8 @@ private:
     QSemaphore m_semaphore;
     VSQSqlContactModel *m_sqlContacts;
     VSQSqlConversationModel *m_sqlConversations;
+    VSQSqlChatModel *m_sqlChatModel;
+
     QString m_user;
     VSQEnvType m_envType;
     static const VSQEnvType _defaultEnv = STG;

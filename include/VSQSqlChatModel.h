@@ -32,39 +32,19 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H
-#define VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H
+#ifndef VIRGIL_IOTKIT_QT_SQL_CHAT_MODEL_H
+#define VIRGIL_IOTKIT_QT_SQL_CHAT_MODEL_H
 
 #include <QSqlTableModel>
 
-class VSQSqlConversationModel : public QSqlTableModel
-{
+class VSQSqlChatModel : public QSqlTableModel {
     Q_OBJECT
-    Q_PROPERTY(QString recipient READ recipient WRITE setRecipient NOTIFY recipientChanged)
 
 public:
-    VSQSqlConversationModel(QObject *parent = nullptr);
+    VSQSqlChatModel(QObject *parent = nullptr);
 
-    QString
-    user() const;
-
-    Q_INVOKABLE void
-    setUser(const QString &user);
-
-    Q_INVOKABLE int
-    getCountOfUnread(const QString &user);
-
-    Q_INVOKABLE QString
-    getLastMessage(const QString &user) const;
-
-    Q_INVOKABLE QString
-    getLastMessageTime(const QString &user) const;
-
-    QString
-    recipient() const;
-
-    Q_INVOKABLE void
-    setRecipient(const QString &recipient);
+    void
+    init(const QString &userId);
 
     QVariant
     data(const QModelIndex &index, int role) const override;
@@ -72,34 +52,18 @@ public:
     QHash<int, QByteArray>
     roleNames() const override;
 
-    Q_INVOKABLE void
-    sendMessage(QString recipient, QString message);
-
-    Q_INVOKABLE void
-    receiveMessage(const QString &sender, const QString &message);
-
-    Q_INVOKABLE void
-    setAsRead(const QString &user);
-
-signals:
     void
-    recipientChanged();
+    createPrivateChat(const QString &recipientId);
+
+    Q_INVOKABLE void
+    updateLastMessage(QString chatId, QString message);
+
+    Q_INVOKABLE void
+    updateUnreadMessageCount(QString chatId);
 
 private:
-    QString m_user;
-    QString m_recipient;
-
-    void
-    _createTable();
-
-    void
-    _update();
-
-    QString
-    _tableName() const;
-
-    QString
-    _contactsTableName() const;
+    QString m_userId;
+    QString m_tableName;
 };
 
-#endif // VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H
+#endif // VIRGIL_IOTKIT_QT_SQL_CHAT_MODEL_H

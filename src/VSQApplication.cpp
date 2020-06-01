@@ -95,6 +95,7 @@ VSQApplication::run(const QString &basePath) {
     context->setContextProperty("Messenger", &m_messenger);
     context->setContextProperty("ContactsModel", &m_messenger.modelContacts());
     context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
+    context->setContextProperty("ChatModel", &m_messenger.getChatModel());
 
     QFont fon(QGuiApplication::font());
     fon.setPointSize(1.5 * QGuiApplication::font().pointSize());

@@ -71,6 +71,7 @@ VSQMessenger::VSQMessenger() : m_semaphore(1) {
 
     m_sqlContacts = new VSQSqlContactModel(this);
     m_sqlConversations = new VSQSqlConversationModel(this);
+    m_sqlChatModel = new VSQSqlChatModel(this);
 
     // Signal connection
     connect(this, SIGNAL(fireReadyToAddContact(QString)), this, SLOT(onAddContactToDB(QString)));
@@ -195,6 +196,7 @@ VSQMessenger::_prepareLogin(const QString &user) {
     m_user = userId;
     m_sqlContacts->setUser(userId);
     m_sqlConversations->setUser(userId);
+    m_sqlChatModel->init(userId);
 
     // Inform about user activation
     emit fireCurrentUserChanged();
@@ -278,7 +280,8 @@ VSQMessenger::addContact(QString contact) {
 /******************************************************************************/
 void
 VSQMessenger::onAddContactToDB(QString contact) {
-    m_sqlContacts->addContact(contact);
+    m_sqlChatModel->createPrivateChat(contact);
+    // m_sqlContacts->addContact(contact);
     emit fireAddedContact(contact);
 }
 
@@ -437,6 +440,11 @@ VSQMessenger::modelConversations() {
     return *m_sqlConversations;
 }
 
+VSQSqlChatModel &
+VSQMessenger::getChatModel() {
+    return *m_sqlChatModel;
+}
+
 /******************************************************************************/
 void
 VSQMessenger::onConnected() {
@@ -507,10 +515,13 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
     VS_LOG_DEBUG("Received message: <%s>", decryptedString.toStdString().c_str());
 
     // Add sender to contacts
-    m_sqlContacts->addContact(sender);
+    // m_sqlContacts->addContact(sender);
+    m_sqlChatModel->createPrivateChat(sender);
 
     // Save message to DB
     m_sqlConversations->receiveMessage(sender, decryptedString);
+
+    m_sqlChatModel->updateUnreadMessageCount(sender);
 
     // Inform system about new message
     emit fireNewMessage(sender, decryptedString);
@@ -526,6 +537,7 @@ VSQMessenger::sendMessage(QString to, QString message) {
 
         // Save message to DB in native thread
         QMetaObject::invokeMethod(m_sqlConversations, "sendMessage", Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message));
+        QMetaObject::invokeMethod(m_sqlChatModel, "updateLastMessage", Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message));
 
         // Create JSON-formatted message to be sent
         QJsonObject payloadObject;
@@ -555,6 +567,7 @@ VSQMessenger::sendMessage(QString to, QString message) {
         QString toJID = to + "@" + _xmppURL();
         QString encryptedStr = QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage));
         m_xmpp.sendMessage(toJID, encryptedStr);
+
         return MRES_OK;
     });
 }

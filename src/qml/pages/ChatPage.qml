@@ -105,8 +105,6 @@ Page {
               messageSent.play()
             })            
         }
-
-
     }
 
     // Component events
@@ -118,6 +116,8 @@ Page {
 
         ConversationsModel.recipient = recipient
         listView.model = ConversationsModel
+        ConversationsModel.setAsRead(recipient)
+        ChatModel.updateUnreadMessageCount(recipient)
     }
 
     // Connections
