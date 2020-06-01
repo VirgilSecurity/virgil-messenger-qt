@@ -201,7 +201,10 @@ macx: {
 
 defineReplace(AndroidVersionCode) {
         segments = $$split(1, ".")
-        for (segment, segments): vCode = "$$first(vCode)$$format_number($$segment, width=3 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,0,0), width=3 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,1,1), width=3 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,2,2), width=3 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,3,3), width=5 zeropad)"
         return($$first(vCode))
 }
 
