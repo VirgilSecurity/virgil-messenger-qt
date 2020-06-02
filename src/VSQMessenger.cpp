@@ -33,6 +33,7 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 #include <virgil/iot/qt/VSQIoTKit.h>
+#include <android/VSQAndroid.h>
 
 #include <VSQMessenger.h>
 
@@ -181,11 +182,15 @@ VSQMessenger::_prepareLogin(const QString &user) {
     }
 
     // Initialize Virgil Messenger to work with required environment
+#if (ANDROID)
+    const char *cCABundle = VSQAndroid::certFile().toStdString().c_str();
+#else
     const char *cCABundle = NULL;
     QString caPath = qgetenv("VS_CURL_CA_BUNDLE");
     if (!caPath.isEmpty()) {
         cCABundle = caPath.toStdString().c_str();
     }
+#endif
 
     if (VS_CODE_OK != vs_messenger_virgil_init(_virgilURL().toStdString().c_str(), cCABundle)) {
         qCritical() << "Cannot initialize low level messenger";
