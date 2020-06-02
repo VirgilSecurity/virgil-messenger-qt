@@ -158,12 +158,15 @@ VSQSqlChatModel::updateLastMessage(QString chatId, QString message) {
 
     QString updateQuery =
             "UPDATE '%1'"
-            "   SET last_message = '%2',"
-            "       last_message_time = '%3'"
+            "   SET last_message = ?,"
+            "       last_message_time = ?"
             " WHERE "
-            "       name = '%4'";
+            "       name = '%2'";
 
-    QSqlQuery query(updateQuery.arg(m_tableName, message, timestamp, chatId));
+    QSqlQuery query(updateQuery.arg(m_tableName, chatId));
+
+    query.bindValue(0, message);
+    query.bindValue(1, timestamp);
 
     if (!query.exec()) {
         qDebug() << query.lastQuery();
@@ -177,8 +180,6 @@ VSQSqlChatModel::updateLastMessage(QString chatId, QString message) {
 /******************************************************************************/
 Q_INVOKABLE void
 VSQSqlChatModel::updateUnreadMessageCount(QString chatId) {
-
-    // query = QString().arg(_tableName()).arg(user);
 
     QSqlQueryModel selectModel;
     QString selectQuery =

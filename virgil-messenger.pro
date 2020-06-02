@@ -32,6 +32,7 @@
 #
 #  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+QTPLUGIN += qtvirtualkeyboardplugin
 QT += core network qml quick bluetooth sql xml concurrent
 
 CONFIG += c++14
@@ -223,8 +224,6 @@ android: {
 RC_ICONS = platforms/windows/Virgil.ico
 
 DISTFILES += \
-    C:/Users/kuril/Downloads/Icon-048-mdpi.png \
-    C:/Users/kuril/Downloads/Icon-256-master.png \
     platforms/android/res/drawable-hdpi/icon.png \
     platforms/android/res/drawable-hdpi/icon_round.png \
     platforms/android/res/drawable-ldpi/icon.png \

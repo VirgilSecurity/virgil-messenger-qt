@@ -1,7 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
-import Qt.labs.platform 1.0 as Platform
 
 import "../theme"
 
@@ -62,7 +61,11 @@ Control {
 
                 TapHandler {
                     acceptedButtons: Qt.RightButton
-                    onTapped: contextMenu.open()
+                    onTapped: {
+                        contextMenu.x = eventPoint.position.x
+                        contextMenu.y = eventPoint.position.y
+                        contextMenu.open()
+                    }
                 }
 /*
                 MouseArea {
@@ -126,9 +129,9 @@ Control {
                         anchors.fill: parent
                     }
 
-                    Platform.Menu {
+                    Menu {
                         id: contextMenu
-                        Platform.MenuItem {
+                        MenuItem {
                             text: qsTr("&Copy")
                             onTriggered: {
                                 clipboard.setText(textEdit.getText(0, textEdit.length))
