@@ -198,8 +198,18 @@ macx: {
 #
 #   Android specific
 #
+
+defineReplace(AndroidVersionCode) {
+        segments = $$split(1, ".")
+        vCode = "$$first(vCode)$$format_number($$member(segments,0,0), width=3 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,1,1), width=3 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,2,2), width=3 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,3,3), width=5 zeropad)"
+        return($$first(vCode))
+}
+
 android: {
-    ANDROID_VERSION_CODE = $$VERSION
+    ANDROID_VERSION_CODE = $$AndroidVersionCode($$VERSION)
     ANDROID_VERSION_NAME = $$VERSION
 
     DEFINES += ANDROID=1
