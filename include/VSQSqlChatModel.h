@@ -61,6 +61,12 @@ public:
     Q_INVOKABLE void
     updateUnreadMessageCount(QString chatId);
 
+    Q_INVOKABLE void
+    applyFilter(const QString &filter);
+
+    Q_INVOKABLE void
+    clearFilter();
+
 private:
     QString m_userId;
     QString m_tableName;

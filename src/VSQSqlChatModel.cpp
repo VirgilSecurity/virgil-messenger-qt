@@ -103,6 +103,22 @@ VSQSqlChatModel::roleNames() const {
 
 /******************************************************************************/
 void
+VSQSqlChatModel::clearFilter() {
+    setFilter("");
+}
+
+/******************************************************************************/
+void
+VSQSqlChatModel::applyFilter(const QString &filter) {
+
+    const QString filterString = QString::fromLatin1(
+        "name LIKE '%%1%'").arg(filter);
+
+    setFilter(filterString);
+}
+
+/******************************************************************************/
+void
 VSQSqlChatModel::createPrivateChat(const QString &recipientId) {
 
     qDebug() << "Create private chat with: " << recipientId;

@@ -74,18 +74,18 @@ Page {
         searchPlaceholder: "Search conversation"
 
         onIsSearchOpenChanged: {
-            contactsHeaderId.isSearchOpen ? ContactsModel.setContactsFilter('') : ContactsModel.clearContactsFilter()
+            contactsHeaderId.isSearchOpen ? ChatModel.applyFilter('') : ChatModel.clearFilter()
         }
 
         onSearchChanged: {
-            ContactsModel.setContactsFilter(contactsHeaderId.search)
+            ChatModel.applyFilter(contactsHeaderId.search)
         }
 
         Action {
             text: qsTr("New Chat")
             onTriggered: addContact()
         }
-
+/*
         Action {
             text: qsTr("New Group")
             // onTriggered: addContact()
@@ -95,6 +95,7 @@ Page {
             text: qsTr("Send Invite")
             // onTriggered: addContact()
         }
+*/
     }
 
     ListView {
@@ -136,7 +137,7 @@ Page {
                     Text {
                         color: Theme.secondaryTextColor
                         font.pointSize: UiHelper.fixFontSz(12)
-                        text: model.lastMessage ?  model.lastMessage : "..."
+                        text: model.lastMessage ? model.lastMessage.substring(0, 30) : "..."
                         width: parent.width
                         elide: Text.ElideRight
                         textFormat: Text.RichText
@@ -153,7 +154,7 @@ Page {
                     }
 
                     Text {
-                        text: model.lastMessageTime ?  model.lastMessageTime : "..."
+                        text: model.lastMessageTime ? Qt.formatDateTime(model.lastMessageTime, "hh:mm")   : ""
                         color: Theme.secondaryTextColor
                         font.pointSize: UiHelper.fixFontSz(9)
                         anchors.horizontalCenter: parent.horizontalCenter
