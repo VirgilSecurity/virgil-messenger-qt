@@ -2,7 +2,7 @@
 
 
 PROJECT_DIR="${SCRIPT_FOLDER}/.."
-QT_SDK_DIR="${1:-/opt/Qt/5.12.6}"
+QT_SDK_DIR="${1:-/opt/Qt/5.15.0}"
 ANDROID_NDK="${2:-/opt/android/ndk}"
 export ANDROID_NDK_ROOT=${ANDROID_NDK}
 
@@ -17,7 +17,6 @@ BUILD_NUMBER="${BUILD_NUMBER:-0}"
 if [ -f "${PROJECT_DIR}/VERSION_MESSENGER" ]; then
     export VERSION="$(cat ${PROJECT_DIR}/VERSION_MESSENGER | tr -d '\n').${BUILD_NUMBER}"
 fi
-
 
 trap 'err_trap  $@' ERR
 

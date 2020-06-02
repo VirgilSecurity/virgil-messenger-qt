@@ -20,14 +20,12 @@ ANDROID_PLATFORM="android-25"
 #*************************************************************************************************************
 build_proc() {
     PLATFORM="$1"
-    LIB_ARCH="$2"
+    ANDROID_ABIS="$2"
 
     local ANDROID_QMAKE="${QT_SDK_DIR}/${PLATFORM}/bin/qmake"
     local BUILD_DIR="${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.${PLATFORM}"
     local ANDROID_DEPLOY_QT="${QT_SDK_DIR}/${PLATFORM}/bin/androiddeployqt"
     local ANDROID_DEPLOY_QT_ADD_ARGS=""
-
-    export QT_BUILD_DIR_SUFFIX=android.${LIB_ARCH}
 
     print_title
 
@@ -36,25 +34,22 @@ build_proc() {
 
     print_message "Build Messenger"
     pushd ${BUILD_DIR}
-        ${ANDROID_QMAKE} ${PROJECT_FILE} -spec android-clang CONFIG+=qtquickcompiler VERSION="${VERSION}"
+        ${ANDROID_QMAKE} ANDROID_ABIS="${ANDROID_ABIS}" -spec android-clang CONFIG+=qtquickcompiler VERSION="${VERSION}" ${PROJECT_FILE}
 
         ${ANDROID_MAKE} -j10
-
+        
+        ${ANDROID_MAKE} -j10
+        
         ${ANDROID_MAKE} INSTALL_ROOT=${BUILD_DIR}/android-build install
 
         if [[ "x$ENABLE_RELEASE" != "x" ]]; then
             ANDROID_DEPLOY_QT_ADD_ARGS="--sign ${SCRIPT_FOLDER}/../android.keystore upload --storepass ${ANDROID_STORE_PASS} --keypass ${ANDROID_KEY_PASS}"
         fi
-
-        echo "${ANDROID_DEPLOY_QT} --input ${BUILD_DIR}/android-lib${APPLICATION_NAME}.so-deployment-settings.json --output ${BUILD_DIR}/android-build --android-platform ${ANDROID_PLATFORM} ${ANDROID_DEPLOY_QT_ADD_ARGS} --gradle"
-        ${ANDROID_DEPLOY_QT} --input ${BUILD_DIR}/android-lib${APPLICATION_NAME}.so-deployment-settings.json --output ${BUILD_DIR}/android-build --android-platform ${ANDROID_PLATFORM} ${ANDROID_DEPLOY_QT_ADD_ARGS} --gradle        
+        ${ANDROID_DEPLOY_QT} --input ${BUILD_DIR}/android-${APPLICATION_NAME}-deployment-settings.json --output ${BUILD_DIR}/android-build --android-platform ${ANDROID_PLATFORM} ${ANDROID_DEPLOY_QT_ADD_ARGS} --gradle --aab
     popd
 }
 
 #*************************************************************************************************************
 
 prepare_libraries
-
-build_proc android_arm64_v8a arm64-v8a
-build_proc android_armv7 armeabi-v7a
-build_proc android_x86 x86
+build_proc android  "armeabi-v7a arm64-v8a x86"
