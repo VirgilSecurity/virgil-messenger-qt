@@ -183,7 +183,8 @@ VSQMessenger::_prepareLogin(const QString &user) {
 
     // Initialize Virgil Messenger to work with required environment
 #if (ANDROID)
-    const char *cCABundle = VSQAndroid::certFile().toStdString().c_str();
+    QString caPath = VSQAndroid::certFile();
+    const char *cCABundle = caPath.toStdString().c_str();
 #else
     const char *cCABundle = NULL;
     QString caPath = qgetenv("VS_CURL_CA_BUNDLE");
