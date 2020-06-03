@@ -33,6 +33,7 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 #include <virgil/iot/qt/VSQIoTKit.h>
+#include <android/VSQAndroid.h>
 
 #include <VSQMessenger.h>
 
@@ -69,8 +70,8 @@ VSQMessenger::VSQMessenger() : m_semaphore(1) {
     // Connect to Database
     _connectToDatabase();
 
-    m_sqlContacts = new VSQSqlContactModel(this);
     m_sqlConversations = new VSQSqlConversationModel(this);
+    m_sqlChatModel = new VSQSqlChatModel(this);
 
     // Signal connection
     connect(this, SIGNAL(fireReadyToAddContact(QString)), this, SLOT(onAddContactToDB(QString)));
@@ -181,11 +182,16 @@ VSQMessenger::_prepareLogin(const QString &user) {
     }
 
     // Initialize Virgil Messenger to work with required environment
+#if (ANDROID)
+    QString caPath = VSQAndroid::certFile();
+    const char *cCABundle = caPath.toStdString().c_str();
+#else
     const char *cCABundle = NULL;
     QString caPath = qgetenv("VS_CURL_CA_BUNDLE");
     if (!caPath.isEmpty()) {
         cCABundle = caPath.toStdString().c_str();
     }
+#endif
 
     if (VS_CODE_OK != vs_messenger_virgil_init(_virgilURL().toStdString().c_str(), cCABundle)) {
         qCritical() << "Cannot initialize low level messenger";
@@ -193,8 +199,8 @@ VSQMessenger::_prepareLogin(const QString &user) {
 
     // Set current user
     m_user = userId;
-    m_sqlContacts->setUser(userId);
     m_sqlConversations->setUser(userId);
+    m_sqlChatModel->init(userId);
 
     // Inform about user activation
     emit fireCurrentUserChanged();
@@ -278,7 +284,8 @@ VSQMessenger::addContact(QString contact) {
 /******************************************************************************/
 void
 VSQMessenger::onAddContactToDB(QString contact) {
-    m_sqlContacts->addContact(contact);
+    m_sqlChatModel->createPrivateChat(contact);
+    // m_sqlContacts->addContact(contact);
     emit fireAddedContact(contact);
 }
 
@@ -426,15 +433,14 @@ VSQMessenger::deleteUser(QString user) {
 }
 
 /******************************************************************************/
-VSQSqlContactModel &
-VSQMessenger::modelContacts() {
-    return *m_sqlContacts;
-}
-
-/******************************************************************************/
 VSQSqlConversationModel &
 VSQMessenger::modelConversations() {
     return *m_sqlConversations;
+}
+
+VSQSqlChatModel &
+VSQMessenger::getChatModel() {
+    return *m_sqlChatModel;
 }
 
 /******************************************************************************/
@@ -507,10 +513,13 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
     VS_LOG_DEBUG("Received message: <%s>", decryptedString.toStdString().c_str());
 
     // Add sender to contacts
-    m_sqlContacts->addContact(sender);
+    // m_sqlContacts->addContact(sender);
+    m_sqlChatModel->createPrivateChat(sender);
 
     // Save message to DB
     m_sqlConversations->receiveMessage(sender, decryptedString);
+
+    m_sqlChatModel->updateUnreadMessageCount(sender);
 
     // Inform system about new message
     emit fireNewMessage(sender, decryptedString);
@@ -526,6 +535,7 @@ VSQMessenger::sendMessage(QString to, QString message) {
 
         // Save message to DB in native thread
         QMetaObject::invokeMethod(m_sqlConversations, "sendMessage", Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message));
+        QMetaObject::invokeMethod(m_sqlChatModel, "updateLastMessage", Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message));
 
         // Create JSON-formatted message to be sent
         QJsonObject payloadObject;
@@ -555,6 +565,7 @@ VSQMessenger::sendMessage(QString to, QString message) {
         QString toJID = to + "@" + _xmppURL();
         QString encryptedStr = QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage));
         m_xmpp.sendMessage(toJID, encryptedStr);
+
         return MRES_OK;
     });
 }

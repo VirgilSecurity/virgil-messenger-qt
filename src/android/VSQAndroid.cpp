@@ -47,12 +47,15 @@ static int pfd[2];
 static pthread_t loggingThread;
 
 /******************************************************************************/
+QString VSQAndroid::certFile() {
+    QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    return appDataPath + QDir::separator() + "cert.pem";
+}
+/******************************************************************************/
 bool VSQAndroid::prepare() {
     runLoggingThread();
-    QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    QString certFile = appDataPath + QDir::separator() + "cert.pem";
-    QFile::remove(certFile);
-    QFile::copy(":qml/resources/cert.pem", certFile);
+    QFile::remove(certFile());
+    QFile::copy(":qml/resources/cert.pem", certFile());
 
     return true;
 }

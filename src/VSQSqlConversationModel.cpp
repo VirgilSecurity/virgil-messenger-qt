@@ -50,6 +50,7 @@ VSQSqlConversationModel::_createTable() {
         "'recipient' TEXT NOT NULL,"
         "'timestamp' TEXT NOT NULL,"
         "'message' TEXT NOT NULL,"
+        "'is_read' BOOL NOT NULL,"
         "FOREIGN KEY('author') REFERENCES %2 ( name ),"
         "FOREIGN KEY('recipient') REFERENCES %3 ( name )"
         ")")
@@ -132,7 +133,7 @@ VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
         // Check if the message was sent in last 5 min
         const bool isInFiveMinRange = prevTimestamp.toDateTime().addSecs(5 * 60) > currTimestamp.toDateTime();
 
-        // Message is considered to be first in a row when it
+        // Message is considered to be the first in a row when it
         // sends in a range of 1 min with previous message and
         // from the same author
         return isAuthor || !isInFiveMinRange;
@@ -178,6 +179,7 @@ VSQSqlConversationModel::sendMessage(QString recipient, QString message) {
     newRecord.setValue("recipient", recipient);
     newRecord.setValue("timestamp", timestamp);
     newRecord.setValue("message", message);
+    newRecord.setValue("is_read", 1);
     if (!insertRecord(rowCount(), newRecord)) {
         qWarning() << "Failed to send message:" << lastError().text();
         return;
@@ -196,10 +198,14 @@ VSQSqlConversationModel::receiveMessage(const QString &sender, const QString &me
     newRecord.setValue("recipient", user());
     newRecord.setValue("timestamp", timestamp);
     newRecord.setValue("message", message);
-    if (!insertRecord(rowCount(), newRecord)) {
+    newRecord.setValue("is_read", 0);
+
+    if (!insertRowIntoTable(newRecord)) {
         qWarning() << "Failed to save received message:" << lastError().text();
         return;
     }
+
+    // qDebug() << newRecord
 
     submitAll();
 }
@@ -222,6 +228,67 @@ VSQSqlConversationModel::setUser(const QString &user) {
 
     _createTable();
     _update();
+}
+
+/******************************************************************************/
+Q_INVOKABLE void
+VSQSqlConversationModel::setAsRead(const QString &user) {
+    QSqlQuery model;
+    QString query;
+
+    query = QString("UPDATE %1 SET is_read = 1 WHERE author = \"%2\"").arg(_tableName()).arg(user);
+
+    model.prepare(query);
+
+    qDebug() << user << query << model.exec();
+}
+
+/******************************************************************************/
+int
+VSQSqlConversationModel::getCountOfUnread(const QString &user) {
+    QSqlQueryModel model;
+    QString query;
+
+    query = QString("SELECT COUNT(*) AS C FROM %1 WHERE is_read = 0 AND recipient = \"%2\"").arg(_tableName()).arg(user);
+
+    model.setQuery(query);
+    int c = model.record(0).value("C").toInt();
+
+    qDebug() << c << user << query;
+
+    return c;
+}
+
+/******************************************************************************/
+QString
+VSQSqlConversationModel::getLastMessage(const QString &user) const {
+    QSqlQueryModel model;
+    QString query;
+
+    query = QString("SELECT * FROM %1 WHERE recipient = \"%2\" ORDER BY timestamp DESC LIMIT 1").arg(_tableName()).arg(user);
+
+    model.setQuery(query);
+    QString message = model.record(0).value("message").toString();
+
+    qDebug() << message << user << query;
+
+    return message;
+}
+
+/******************************************************************************/
+QString
+VSQSqlConversationModel::getLastMessageTime(const QString &user) const {
+    QSqlQueryModel model;
+    QString query;
+
+    query = QString("SELECT * FROM %1 WHERE recipient = \"%2\" ORDER BY timestamp DESC LIMIT 1").arg(_tableName()).arg(user);
+
+    model.setQuery(query);
+    QString timestamp = model.record(0).value("timestamp").toString();
+
+    qDebug() << timestamp << user << query;
+
+    return timestamp;
 }
 
 /******************************************************************************/
