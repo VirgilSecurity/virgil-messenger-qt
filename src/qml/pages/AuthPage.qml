@@ -36,10 +36,14 @@ Page {
             onUserSelected: {
                 form.showLoading("Logging In as %1...".arg(userName))
 
-                Future.onFinished(Messenger.signIn(userName), (result) => {
-                    form.hideLoading()
-                    lastSignedInUser = userName
-                    showContacts(true)
+                var future = Messenger.signIn(userName)
+                Future.onFinished(future, (result) => {
+                    var res = Future.result(future)
+                    if (res === Result.MRES_OK) {
+                        form.hideLoading()
+                        lastSignedInUser = userName
+                        showContacts(true)
+                    }
                 })
             }
         }

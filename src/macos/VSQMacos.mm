@@ -68,7 +68,6 @@ void VSQMacos::checkUpdatesBackground() const {
     if (FALSE == [SUUpdater sharedUpdater].updateInProgress) {
         _setURL();
         [[SUUpdater sharedUpdater] checkForUpdatesInBackground];
-        VS_LOG_DEBUG("Check for updates in background");
     }
 }
 
