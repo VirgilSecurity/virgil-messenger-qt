@@ -25,7 +25,8 @@ build_proc() {
     local ANDROID_QMAKE="${QT_SDK_DIR}/${PLATFORM}/bin/qmake"
     local BUILD_DIR="${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.${PLATFORM}"
     local ANDROID_DEPLOY_QT="${QT_SDK_DIR}/${PLATFORM}/bin/androiddeployqt"
-    local ANDROID_DEPLOY_QT_ADD_ARGS=""
+    local ANDROID_DEPLOY_QT_ADD_ARGS=" "
+    local ANDROID_BUILD_MODE="debug"    
 
     print_title
 
@@ -33,16 +34,19 @@ build_proc() {
     new_dir ${BUILD_DIR}
 
     print_message "Build Messenger"
+    
+    if [[ "x$ENABLE_RELEASE" != "x" ]]; then
+        ANDROID_DEPLOY_QT_ADD_ARGS="--sign ${SCRIPT_FOLDER}/../android.keystore upload --storepass ${ANDROID_STORE_PASS} --keypass ${ANDROID_KEY_PASS}"
+        ANDROID_BUILD_MODE="qtquickcompiler"            
+    fi
+    
     pushd ${BUILD_DIR}
-        ${ANDROID_QMAKE} ANDROID_ABIS="${ANDROID_ABIS}" -spec android-clang CONFIG+=qtquickcompiler VERSION="${VERSION}" ${PROJECT_FILE}
+        ${ANDROID_QMAKE} ANDROID_ABIS="${ANDROID_ABIS}" -spec android-clang CONFIG+=${ANDROID_BUILD_MODE} VERSION="${VERSION}" ${PROJECT_FILE}
 
         ${ANDROID_MAKE} -j10
         
         ${ANDROID_MAKE} INSTALL_ROOT=${BUILD_DIR}/android-build install
 
-        if [[ "x$ENABLE_RELEASE" != "x" ]]; then
-            ANDROID_DEPLOY_QT_ADD_ARGS="--sign ${SCRIPT_FOLDER}/../android.keystore upload --storepass ${ANDROID_STORE_PASS} --keypass ${ANDROID_KEY_PASS}"
-        fi
         ${ANDROID_DEPLOY_QT} --verbose --input ${BUILD_DIR}/android-${APPLICATION_NAME}-deployment-settings.json --output ${BUILD_DIR}/android-build --android-platform ${ANDROID_PLATFORM} ${ANDROID_DEPLOY_QT_ADD_ARGS} --aab
     popd
 }
