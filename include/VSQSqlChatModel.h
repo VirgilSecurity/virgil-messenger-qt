@@ -32,46 +32,44 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_SQL_CONTACT_MODEL_H
-#define VIRGIL_IOTKIT_QT_SQL_CONTACT_MODEL_H
+#ifndef VIRGIL_IOTKIT_QT_SQL_CHAT_MODEL_H
+#define VIRGIL_IOTKIT_QT_SQL_CHAT_MODEL_H
 
 #include <QSqlTableModel>
 
-class VSQSqlContactModel : public QSqlTableModel {
-
+class VSQSqlChatModel : public QSqlTableModel {
     Q_OBJECT
 
 public:
-    VSQSqlContactModel(QObject *parent = nullptr);
+    VSQSqlChatModel(QObject *parent = nullptr);
 
-    QString
-    user() const;
-
-    Q_INVOKABLE void
-    setUser(const QString &user);
-
-    Q_INVOKABLE void
-    setContactsFilter(const QString &filter);
-
-    Q_INVOKABLE void
-    clearContactsFilter();
-
-public slots:
     void
-    addContact(QString contact);
+    init(const QString &userId);
+
+    QVariant
+    data(const QModelIndex &index, int role) const override;
+
+    QHash<int, QByteArray>
+    roleNames() const override;
+
+    void
+    createPrivateChat(const QString &recipientId);
+
+    Q_INVOKABLE void
+    updateLastMessage(QString chatId, QString message);
+
+    Q_INVOKABLE void
+    updateUnreadMessageCount(QString chatId);
+
+    Q_INVOKABLE void
+    applyFilter(const QString &filter);
+
+    Q_INVOKABLE void
+    clearFilter();
 
 private:
-    QString m_user;
-
-    void
-    _createTable();
-
-    void
-    _update();
-
-    QString
-    _tableName() const;
-
+    QString m_userId;
+    QString m_tableName;
 };
 
-#endif // VIRGIL_IOTKIT_QT_SQL_CONTACT_MODEL_H
+#endif // VIRGIL_IOTKIT_QT_SQL_CHAT_MODEL_H

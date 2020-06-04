@@ -58,7 +58,7 @@ Page {
                 console.log("registration result: %1".arg(Future.result(future)))
                 if (Future.result(future) === Result.MRES_OK) {
                     mainView.lastSignedInUser = user
-                    mainView.navigateTo("Contacts", null, true, true)
+                    mainView.showContacts("Contacts", null, true, true)
 
                     return
                 }

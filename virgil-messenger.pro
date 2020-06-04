@@ -32,6 +32,7 @@
 #
 #  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+QTPLUGIN += qtvirtualkeyboardplugin
 QT += core network qml quick bluetooth sql xml concurrent
 
 CONFIG += c++14
@@ -87,7 +88,7 @@ HEADERS += \
         include/VSQApplication.h \
         include/VSQClipboardProxy.h \
         include/VSQMessenger.h \
-        include/VSQSqlContactModel.h \
+        include/VSQSqlChatModel.h \
         include/VSQSqlConversationModel.h \
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
@@ -100,7 +101,7 @@ HEADERS += \
 SOURCES += \
         src/VSQClipboardProxy.cpp \
         src/VSQMessenger.cpp \
-        src/VSQSqlContactModel.cpp \
+        src/VSQSqlChatModel.cpp \
         src/VSQSqlConversationModel.cpp \
         src/android/VSQAndroid.cpp \
         src/main.cpp \
@@ -210,9 +211,21 @@ macx: {
 #
 #   Android specific
 #
+
+defineReplace(AndroidVersionCode) {
+        segments = $$split(1, ".")
+        vCode = "$$first(vCode)$$format_number($$member(segments,0,0), width=3 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,1,1), width=3 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,2,2), width=3 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,3,3), width=5 zeropad)"
+        return($$first(vCode))
+}
+
 android: {
     QT += androidextras
     DEFINES += VS_ANDROID=1 VS_PUSHNOTIFICATIONS=1
+    ANDROID_VERSION_CODE = $$AndroidVersionCode($$VERSION)
+    ANDROID_VERSION_NAME = $$VERSION
 
     INCLUDEPATH +=  $$PWD/ext/prebuilt/firebase_cpp_sdk/include
 
@@ -255,8 +268,6 @@ android: {
 RC_ICONS = platforms/windows/Virgil.ico
 
 DISTFILES += \
-    C:/Users/kuril/Downloads/Icon-048-mdpi.png \
-    C:/Users/kuril/Downloads/Icon-256-master.png \
     platforms/android/res/drawable-hdpi/icon.png \
     platforms/android/res/drawable-hdpi/icon_round.png \
     platforms/android/res/drawable-ldpi/icon.png \

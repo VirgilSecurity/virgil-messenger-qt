@@ -74,18 +74,18 @@ Page {
         searchPlaceholder: "Search conversation"
 
         onIsSearchOpenChanged: {
-            contactsHeaderId.isSearchOpen ? ContactsModel.setContactsFilter('') : ContactsModel.clearContactsFilter()
+            contactsHeaderId.isSearchOpen ? ChatModel.applyFilter('') : ChatModel.clearFilter()
         }
 
         onSearchChanged: {
-            ContactsModel.setContactsFilter(contactsHeaderId.search)
+            ChatModel.applyFilter(contactsHeaderId.search)
         }
 
         Action {
             text: qsTr("New Chat")
             onTriggered: addContact()
         }
-
+/*
         Action {
             text: qsTr("New Group")
             // onTriggered: addContact()
@@ -95,12 +95,13 @@ Page {
             text: qsTr("Send Invite")
             // onTriggered: addContact()
         }
+*/
     }
 
     ListView {
         id: listView
         anchors.fill: parent
-        model: ContactsModel
+        model: ChatModel
         delegate: ItemDelegate {
             id: listItem
             width: parent.width
@@ -120,7 +121,7 @@ Page {
                 Loader {
                     id: avatar
                     sourceComponent: Avatar {
-                        nickname: model.display
+                        nickname: model.name
                     }
                 }
 
@@ -130,16 +131,16 @@ Page {
                     Text {
                         color: Theme.primaryTextColor
                         font.pointSize: UiHelper.fixFontSz(15)
-                        text: model.display
+                        text: model.name
                     }
 
                     Text {
                         color: Theme.secondaryTextColor
                         font.pointSize: UiHelper.fixFontSz(12)
-                                                // TODO: insert from model
-                        text: "latest message to be inserted and check the lenght"
+                        text: model.lastMessage ? model.lastMessage.substring(0, 30) : "..."
                         width: parent.width
                         elide: Text.ElideRight
+                        textFormat: Text.RichText
                     }
                 }
 
@@ -148,14 +149,12 @@ Page {
                     spacing: 5
 
                     MessageCounter {
-                       // TODO: Insert model
-                       count: 999
+                       count: model.unreadMessageCount
                        anchors.horizontalCenter: parent.horizontalCenter
                     }
 
                     Text {
-                        // TODO insert model
-                        text: "16:20"
+                        text: model.lastMessageTime ? Qt.formatDateTime(model.lastMessageTime, "hh:mm")   : ""
                         color: Theme.secondaryTextColor
                         font.pointSize: UiHelper.fixFontSz(9)
                         anchors.horizontalCenter: parent.horizontalCenter
@@ -164,7 +163,7 @@ Page {
             }
 
             onClicked: {
-                mainView.showChatWith(model.display)
+                mainView.showChatWith(model.name)
             }
         }
 
@@ -198,6 +197,11 @@ Page {
     //
     //  Functions
     //
+    function setAsRead(user) {
+        // ConversationsModel.setAsRead(user);
+        console.log("setAsRead func");
+    }
+
     function addContact() {
         var component = Qt.createComponent("../components/Dialogs/AddContactDialog.qml")
         if (component.status === Component.Ready) {

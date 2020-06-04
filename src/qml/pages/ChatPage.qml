@@ -16,10 +16,12 @@ Page {
         color: Theme.chatBackgroundColor
     }
 
-    header: Control {
+    Control {
         id: headerControl
-        height: 60
+        anchors.bottom: listView.top
         width: parent.width
+        height: 60
+        z: 1
 
         background: Rectangle {
             color: Theme.chatBackgroundColor
@@ -67,17 +69,21 @@ Page {
         }
     }
 
-
     ListView {
         id: listView
-        anchors.fill: parent
+        z: 0
+        height: parent.height - (Qt.inputMethod.keyboardRectangle.height / Screen.devicePixelRatio) - 58
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
         anchors.leftMargin: 20
         anchors.rightMargin: 20
-        anchors.bottomMargin: 5
+
         section.property: "day"
         section.delegate: ChatDateSeporator {
             date: section
         }        
+
         spacing: 5
         // verticalLayoutDirection: ListView.BottomToTop
         // model: ConversationsModel
@@ -103,11 +109,10 @@ Page {
             var future = Messenger.sendMessage(ConversationsModel.recipient, message)
             Future.onFinished(future, function(value) {
               messageSent.play()
-            })            
+            })
         }
-
-
     }
+
 
     // Component events
 
@@ -118,16 +123,8 @@ Page {
 
         ConversationsModel.recipient = recipient
         listView.model = ConversationsModel
-    }
-
-    // Connections
-
-    Connections {
-        target: Messenger
-
-        onFireNewMessage: {
-            messageReceived.play()
-        }
+        ConversationsModel.setAsRead(recipient)
+        ChatModel.updateUnreadMessageCount(recipient)
     }
 
     // Sounds

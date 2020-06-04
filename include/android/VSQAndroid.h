@@ -47,6 +47,8 @@ public:
 
     static bool prepare();
 
+    static QString certFile();
+
 private:
     static int runLoggingThread();
 };

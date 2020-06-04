@@ -51,6 +51,15 @@ public:
     Q_INVOKABLE void
     setUser(const QString &user);
 
+    Q_INVOKABLE int
+    getCountOfUnread(const QString &user);
+
+    Q_INVOKABLE QString
+    getLastMessage(const QString &user) const;
+
+    Q_INVOKABLE QString
+    getLastMessageTime(const QString &user) const;
+
     QString
     recipient() const;
 
@@ -68,6 +77,9 @@ public:
 
     Q_INVOKABLE void
     receiveMessage(const QString &sender, const QString &message);
+
+    Q_INVOKABLE void
+    setAsRead(const QString &user);
 
 signals:
     void

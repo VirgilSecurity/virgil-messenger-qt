@@ -38,6 +38,7 @@
 
 #include <QtCore>
 #include <QFuture>
+#include <QObject>
 #include <QSemaphore>
 
 #include <virgil/iot/qt/VSQIoTKit.h>
@@ -46,8 +47,8 @@
 using namespace VirgilIoTKit;
 #include <virgil/iot/messenger/messenger.h>
 
-#include "VSQSqlContactModel.h"
 #include "VSQSqlConversationModel.h"
+#include "VSQSqlChatModel.h"
 
 class VSQMessenger : public QObject {
 
@@ -85,12 +86,12 @@ public:
     QString
     currentUser();
 
-    VSQSqlContactModel &
-    modelContacts();
-
     VSQSqlConversationModel &
     modelConversations();
 
+    VSQSqlChatModel &
+    getChatModel();
+    
     static QString
     decryptMessage(const QString &sender, const QString &message);
 
@@ -166,13 +167,14 @@ private slots:
 
 private:
     QXmppClient m_xmpp;
-    VSQSqlContactModel *m_sqlContacts;
     VSQSqlConversationModel *m_sqlConversations;
+    VSQSqlChatModel *m_sqlChatModel;
+
     QString m_user;
     QString m_userId;
     QString m_xmppPass;
     VSQEnvType m_envType;
-    static const VSQEnvType _defaultEnv = STG;
+    static const VSQEnvType _defaultEnv = PROD;
     QXmppConfiguration conf;
 
     static const QString kOrganization;
