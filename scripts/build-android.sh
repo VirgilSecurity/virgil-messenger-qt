@@ -13,7 +13,7 @@ ANDROID_PLATFORM="android-25"
 
 #*************************************************************************************************************
 # env variables passed to build anroid release
-# $DISABLE_RELEASE                      : boolean
+# $ENABLE_RELEASE                      : boolean
 # $ANDROID_STORE_PASS                   : string
 # $ANDROID_KEY_PASS                     : string
 # {root_folder}/android.keystore        : file 
@@ -38,14 +38,12 @@ build_proc() {
 
         ${ANDROID_MAKE} -j10
         
-        ${ANDROID_MAKE} -j10
-        
         ${ANDROID_MAKE} INSTALL_ROOT=${BUILD_DIR}/android-build install
 
         if [[ "x$ENABLE_RELEASE" != "x" ]]; then
             ANDROID_DEPLOY_QT_ADD_ARGS="--sign ${SCRIPT_FOLDER}/../android.keystore upload --storepass ${ANDROID_STORE_PASS} --keypass ${ANDROID_KEY_PASS}"
         fi
-        ${ANDROID_DEPLOY_QT} --input ${BUILD_DIR}/android-${APPLICATION_NAME}-deployment-settings.json --output ${BUILD_DIR}/android-build --android-platform ${ANDROID_PLATFORM} ${ANDROID_DEPLOY_QT_ADD_ARGS} --gradle --aab
+        ${ANDROID_DEPLOY_QT} --verbose --input ${BUILD_DIR}/android-${APPLICATION_NAME}-deployment-settings.json --output ${BUILD_DIR}/android-build --android-platform ${ANDROID_PLATFORM} ${ANDROID_DEPLOY_QT_ADD_ARGS} --aab
     popd
 }
 
