@@ -45,6 +45,13 @@ ApplicationWindow {
         }
     }
 
+    onClosing: {
+        if (Qt.platform.os == "android") {
+            close.accepted = false
+            mainView.back()
+        }
+    }
+
     // THE MainView of the Application!
 
 
