@@ -1,34 +1,34 @@
 {
   "project_info": {
-    "project_number": "24937544966",
-    "firebase_url": "https://virgil-stage.firebaseio.com",
-    "project_id": "virgil-stage",
-    "storage_bucket": "virgil-stage.appspot.com"
+    "project_number": "444558413842",
+    "firebase_url": "https://virgil-9e749.firebaseio.com",
+    "project_id": "virgil-9e749",
+    "storage_bucket": "virgil-9e749.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:24937544966:android:b5f7f5124652910bba3287",
+        "mobilesdk_app_id": "1:444558413842:android:aad465cd30ffcd193dc8cb",
         "android_client_info": {
-          "package_name": "com.virgilsecurity.android.virgil.stage"
+          "package_name": "com.virgilsecurity.android.virgil"
         }
       },
       "oauth_client": [
         {
-          "client_id": "24937544966-1vlrap0d5tv7bqr4o6il0s2s02ie6g2a.apps.googleusercontent.com",
+          "client_id": "444558413842-nphg78lpnkf3og5mhs288amqb6sun18v.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyC9oVA0bLxD5oMgnM0sNDTeMx7Ii5HvKlw"
+          "current_key": "AIzaSyA1gQodDpeiaDd7pv98GpmOn9ZqisA2kQU"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "24937544966-1vlrap0d5tv7bqr4o6il0s2s02ie6g2a.apps.googleusercontent.com",
+              "client_id": "444558413842-nphg78lpnkf3og5mhs288amqb6sun18v.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

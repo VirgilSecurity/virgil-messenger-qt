@@ -236,17 +236,7 @@ VSQMessenger::_prepareLogin(const QString &user) {
     }
 
     vs_messenger_virgil_logout();
-#if (ANDROID)
-    QString caPath = VSQAndroid::certFile();
-    char *cCABundle = strdup(caPath.toStdString().c_str());
-#else
-    char *cCABundle = NULL;
-    QString caPath = qgetenv("VS_CURL_CA_BUNDLE");
-    if (!caPath.isEmpty()) {
-        cCABundle = strdup(caPath.toStdString().c_str());
-    }
-#endif
-
+    char *cCABundle = strdup(_caBundleFile().toStdString().c_str());
     if (VS_CODE_OK != vs_messenger_virgil_init(_virgilURL().toStdString().c_str(), cCABundle)) {
         qCritical() << "Cannot initialize low level messenger";
     }
