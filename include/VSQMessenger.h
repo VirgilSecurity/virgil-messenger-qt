@@ -147,7 +147,6 @@ private slots:
 
 private:
     QXmppClient m_xmpp;
-    QSemaphore m_semaphore;
     VSQSqlConversationModel *m_sqlConversations;
     VSQSqlChatModel *m_sqlChatModel;
 
@@ -162,6 +161,7 @@ private:
     static const QString kProdEnvPrefix;
     static const QString kStgEnvPrefix;
     static const QString kDevEnvPrefix;
+    static const int kConnectionWaitMs;
 
     void
     _connectToDatabase();

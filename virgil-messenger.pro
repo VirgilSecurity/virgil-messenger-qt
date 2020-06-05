@@ -45,7 +45,7 @@ QMAKE_TARGET_BUNDLE_PREFIX = com.virgilsecurity
 #   Set version
 #
 isEmpty(VERSION) {
-    VERSION = $$cat($$PWD/VERSION_MESSENGER)
+    VERSION = $$cat($$PWD/VERSION_MESSENGER).0
 }
 message("VERSION = $$VERSION")
 

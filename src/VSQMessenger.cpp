@@ -58,10 +58,10 @@ const QString VSQMessenger::kUsers = "Users";
 const QString VSQMessenger::kProdEnvPrefix = "prod";
 const QString VSQMessenger::kStgEnvPrefix = "stg";
 const QString VSQMessenger::kDevEnvPrefix = "dev";
-
+const int VSQMessenger::kConnectionWaitMs = 10000;
 
 /******************************************************************************/
-VSQMessenger::VSQMessenger() : m_semaphore(1) {
+VSQMessenger::VSQMessenger() {
 
     // Register QML typess
     qmlRegisterType<VSQMessenger>("MesResult", 1, 0, "Result");
@@ -152,13 +152,19 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
     m_xmpp.setLogger(logger);
 #endif
 
-    m_semaphore.acquire();
     qRegisterMetaType<QXmppConfiguration>("QXmppConfiguration");
     QMetaObject::invokeMethod(&m_xmpp, "connectToServer", Qt::QueuedConnection, Q_ARG(QXmppConfiguration, conf));
 
-    // Wait for results
-    m_semaphore.acquire();
-    m_semaphore.release();
+    // Wait for connection
+    QTimer timer;
+    timer.setSingleShot(true);
+    QEventLoop loop;
+    connect(&m_xmpp, &QXmppClient::connected, &loop, &QEventLoop::quit);
+    connect(&m_xmpp, &QXmppClient::disconnected, &loop, &QEventLoop::quit);
+    connect(&m_xmpp, &QXmppClient::error, &loop, &QEventLoop::quit);
+    connect( &timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    timer.start(kConnectionWaitMs);
+    loop.exec();
 
     return m_xmpp.isConnected();
 }
@@ -450,7 +456,6 @@ VSQMessenger::getChatModel() {
 void
 VSQMessenger::onConnected() {
     emit fireReady();
-    m_semaphore.release();
 }
 
 /******************************************************************************/
@@ -468,7 +473,6 @@ VSQMessenger::onError(QXmppClient::Error err) {
     VS_LOG_DEBUG("onError");
     qDebug() << err;
     emit fireError(tr("Connection error ..."));
-    m_semaphore.release();
 }
 
 /******************************************************************************/
