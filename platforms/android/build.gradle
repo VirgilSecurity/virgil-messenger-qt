@@ -30,9 +30,12 @@ project.ext {
   firebase_cpp_sdk_dir = System.getProperty('firebase_cpp_sdk.dir')
   printf('Firebase C++ SDK directory %s', firebase_cpp_sdk_dir)
   if (!(new File(firebase_cpp_sdk_dir)).exists()) {
-    throw new StopActionException(
-      sprintf('Firebase C++ SDK directory %s does not exist',
+    firebase_cpp_sdk_dir = "../../virgil-messenger-qt/" +  System.getProperty('firebase_cpp_sdk.dir')
+    if (!(new File(firebase_cpp_sdk_dir)).exists()) {
+        throw new StopActionException(
+          sprintf('Firebase C++ SDK directory %s does not exist',
               firebase_cpp_sdk_dir))
+    }
   }
 }
 
