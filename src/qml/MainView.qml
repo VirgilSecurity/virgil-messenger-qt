@@ -89,6 +89,15 @@ Control {
         })
     }
 
+    function disconnect() {
+        var future = Messenger.disconnect()
+        Future.onFinished(future, function(value) {
+          console.log("Logout result: ", Future.result(future))
+            stackView.clear()
+            showAuth(true)
+        })
+    }
+
 
 
     // Navigation

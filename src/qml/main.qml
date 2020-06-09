@@ -24,6 +24,7 @@ ApplicationWindow {
 
         onFireError: {
             showPopupError(errorText)
+            mainView.disconnect()
         }
 
         onFireInform: {
