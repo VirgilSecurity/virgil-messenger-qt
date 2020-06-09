@@ -1,3 +1,8 @@
+
+println "#####################################"
+println "### Running with Gradle: $gradle.gradleVersion"
+println "#####################################"
+
 buildscript {
     repositories {
         google()
@@ -22,7 +27,7 @@ apply plugin: 'com.android.application'
 //
 project.ext {
   // Configure the Firebase C++ SDK location.
-  firebase_cpp_sdk_dir = "${project.rootDir}/../../../" +  System.getProperty('firebase_cpp_sdk.dir')
+  firebase_cpp_sdk_dir = System.getProperty('firebase_cpp_sdk.dir')
   printf('Firebase C++ SDK directory %s', firebase_cpp_sdk_dir)
   if (!(new File(firebase_cpp_sdk_dir)).exists()) {
     throw new StopActionException(
@@ -62,8 +67,7 @@ android {
      *******************************************************/
 
     compileSdkVersion androidCompileSdkVersion.toInteger()
-
-    buildToolsVersion '28.0.3'
+    buildToolsVersion androidBuildToolsVersion.toString()
 
     sourceSets {
         main {
@@ -80,6 +84,9 @@ android {
 
     lintOptions {
         abortOnError false
+    }
+    defaultConfig {
+        minSdkVersion 25
     }
 }
 
