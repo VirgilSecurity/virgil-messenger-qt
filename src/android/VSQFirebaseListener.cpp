@@ -110,11 +110,13 @@ VSQFirebaseListener::OnMessage(const ::firebase::messaging::Message &message) {
     qDebug() << "from  : " << QString::fromStdString(mes.from);
     //qDebug() << "body  : " << QString::fromStdString(mes.notification->body);
 
+#if 0
     const QString sender = QString::fromStdString(mes.data["title"]);
     const QString ciphertext = QString::fromStdString(mes.data["ciphertext"]);
     const QString decryptedMessage = VSQMessenger::decryptMessage(sender, ciphertext);
 
     showNotification(sender, decryptedMessage);
+#endif
 }
 
 /******************************************************************************/
