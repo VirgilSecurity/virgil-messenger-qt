@@ -50,7 +50,7 @@ Page {
         if (LoginLogic.validateUser(user)) {
             form.showLoading(qsTr("Registering %1...".arg(user)))
 
-            var future = Messenger.signUp(user)
+            var future = Messenger.signUp(user.toLowerCase())
 
             Future.onFinished(future, function(result) {
                 form.hideLoading()
