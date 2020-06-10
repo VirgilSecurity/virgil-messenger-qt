@@ -188,6 +188,7 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
     m_xmpp.setLogger(logger);
 #endif
     qRegisterMetaType<QXmppConfiguration>("QXmppConfiguration");
+    QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::BlockingQueuedConnection);
     QMetaObject::invokeMethod(&m_xmpp, "connectToServer", Qt::QueuedConnection, Q_ARG(QXmppConfiguration, conf));
 
     // Wait for connection
@@ -474,9 +475,12 @@ VSQMessenger::logout() {
 /******************************************************************************/
 Q_INVOKABLE QFuture<VSQMessenger::EnResult>
 VSQMessenger::disconnect() {
+    bool connected = m_xmpp.isConnected();
     return QtConcurrent::run([=]() -> EnResult {
         qDebug() << "Disconnect";
-        QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::BlockingQueuedConnection);
+        if (connected) {
+            QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::BlockingQueuedConnection);
+        }
         return MRES_OK;
     });
 }
