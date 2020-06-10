@@ -29,6 +29,7 @@ Page {
 
         FormInput {
             id: username
+            inputHint: Qt.ImhPreferLowercase
             objectName: "fiRegisterUsername"
             label: "Username"
         }

@@ -15,6 +15,7 @@ Column {
     property alias label: formLabel.text
     property alias text: formField.text
     property alias placeholder: formField.placeholderText
+    property alias inputHint: formField.inputMethodHints
 
     FormLabel {
         id: formLabel
