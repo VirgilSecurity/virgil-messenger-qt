@@ -61,21 +61,24 @@ Control {
 
                 TapHandler {
                     acceptedButtons: Qt.RightButton
+                    onLongPressed: {
+                        if (Qt.platform.os == "android" || Qt.platform.os == "ios") {
+                            // contextMenu.x = eventPoint.position.x
+                            // contextMenu.y = eventPoint.position.y
+                            contextMenu.open()
+                        }
+                    }
                     onTapped: {
+                        if (Qt.platform.os == "android" || Qt.platform.os == "ios") {
+                            return
+                        }
+
                         contextMenu.x = eventPoint.position.x
                         contextMenu.y = eventPoint.position.y
                         contextMenu.open()
                     }
                 }
-/*
-                MouseArea {
-                    acceptedButtons: Qt.RightButton
-                    anchors.fill: parent
-                    onClicked: {
-                        tapped()
-                    }
-                }
-*/
+
                 Rectangle {
                     width: chatMessage.width
                     height: textEdit.height
