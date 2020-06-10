@@ -474,9 +474,12 @@ VSQMessenger::logout() {
 /******************************************************************************/
 Q_INVOKABLE QFuture<VSQMessenger::EnResult>
 VSQMessenger::disconnect() {
+    bool connected = m_xmpp.isConnected();
     return QtConcurrent::run([=]() -> EnResult {
         qDebug() << "Disconnect";
-        QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::BlockingQueuedConnection);
+        if (connected) {
+            QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::BlockingQueuedConnection);
+        }
         return MRES_OK;
     });
 }
