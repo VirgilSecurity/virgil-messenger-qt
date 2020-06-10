@@ -188,7 +188,11 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
     m_xmpp.setLogger(logger);
 #endif
     qRegisterMetaType<QXmppConfiguration>("QXmppConfiguration");
-    QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::BlockingQueuedConnection);
+    qDebug() << ">>>> connecting ...";
+    {
+        QMutexLocker locker(&m_connectingGuard);
+        m_connecting = true;
+    }
     QMetaObject::invokeMethod(&m_xmpp, "connectToServer", Qt::QueuedConnection, Q_ARG(QXmppConfiguration, conf));
 
     // Wait for connection
@@ -196,11 +200,14 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
     timer.setSingleShot(true);
     QEventLoop loop;
     connect(&m_xmpp, &QXmppClient::connected, &loop, &QEventLoop::quit);
-    connect(&m_xmpp, &QXmppClient::disconnected, &loop, &QEventLoop::quit);
-    connect(&m_xmpp, &QXmppClient::error, &loop, &QEventLoop::quit);
     connect( &timer, &QTimer::timeout, &loop, &QEventLoop::quit);
     timer.start(kConnectionWaitMs);
     loop.exec();
+
+    {
+        QMutexLocker locker(&m_connectingGuard);
+        m_connecting = false;
+    }
 
     // Return connection result
     return m_xmpp.isConnected();
@@ -563,11 +570,6 @@ VSQMessenger::onDisconnected() {
     emit fireError(tr("Disconnected ..."));
 #endif
     qDebug() << "onDisconnected";
-    if (!m_user.isEmpty() && !m_userId.isEmpty()) {
-        QtConcurrent::run([=]() {
-            _connect(m_user, m_userId);
-        });
-    }
 }
 
 /******************************************************************************/
@@ -575,7 +577,17 @@ void
 VSQMessenger::onError(QXmppClient::Error err) {
     VS_LOG_DEBUG("onError");
     qDebug() << "onError : " << err;
-    emit fireError(tr("Connection error ..."));
+
+    QMutexLocker locker(&m_connectingGuard);
+    if (m_connecting) {
+        if (!m_user.isEmpty() && !m_userId.isEmpty()) {
+            QtConcurrent::run([=]() {
+                _connect(m_user, m_userId);
+            });
+        }
+    } else {
+        emit fireError(tr("Connection error ..."));
+    }
 }
 
 /******************************************************************************/
