@@ -188,6 +188,7 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
     m_xmpp.setLogger(logger);
 #endif
     qRegisterMetaType<QXmppConfiguration>("QXmppConfiguration");
+    QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::BlockingQueuedConnection);
     QMetaObject::invokeMethod(&m_xmpp, "connectToServer", Qt::QueuedConnection, Q_ARG(QXmppConfiguration, conf));
 
     // Wait for connection
