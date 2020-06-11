@@ -79,7 +79,7 @@ VSQApplication::run(const QString &basePath) {
         return -1;
     }
 
-    QQmlContext *context = m_engine.rootContext();    
+    QQmlContext *context = m_engine.rootContext();
     if (basePath.isEmpty()) {
         m_engine.setBaseUrl(QUrl(QStringLiteral("qrc:/qml/")));
     } else {
@@ -100,7 +100,10 @@ VSQApplication::run(const QString &basePath) {
     fon.setPointSize(1.5 * QGuiApplication::font().pointSize());
     QGuiApplication::setFont(fon);
 
-    connect(QGuiApplication::instance(), SIGNAL(applicationStateChanged(Qt::ApplicationState)), this, SLOT(onApplicationStateChanged(Qt::ApplicationState)));
+    connect(QGuiApplication::instance(),
+            SIGNAL(applicationStateChanged(Qt::ApplicationState)),
+            this,
+            SLOT(onApplicationStateChanged(Qt::ApplicationState)));
 
     reloadQml();
 
@@ -108,7 +111,8 @@ VSQApplication::run(const QString &basePath) {
 }
 
 /******************************************************************************/
-void VSQApplication::reloadQml() {
+void
+VSQApplication::reloadQml() {
     const QUrl url(QStringLiteral("main.qml"));
     m_engine.clearComponentCache();
     m_engine.load(url);
@@ -123,7 +127,8 @@ void VSQApplication::reloadQml() {
 }
 
 /******************************************************************************/
-void VSQApplication::checkUpdates() {
+void
+VSQApplication::checkUpdates() {
 #if (MACOS)
     VSQMacos::instance().checkUpdates();
 #endif
@@ -138,7 +143,9 @@ VSQApplication::currentVersion() const {
 /******************************************************************************/
 void
 VSQApplication::sendReport() {
-    QDesktopServices::openUrl(QUrl("mailto:?to=kutashenko@gmail.com&subject=Virgil Messenger Report&body=Here is some email body text", QUrl::TolerantMode));
+    QDesktopServices::openUrl(
+            QUrl("mailto:?to=kutashenko@gmail.com&subject=Virgil Messenger Report&body=Here is some email body text",
+                 QUrl::TolerantMode));
 }
 
 /******************************************************************************/
@@ -153,7 +160,7 @@ VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
     }
 
     if (Qt::ApplicationActive == state) {
-//        m_messenger.setStatus(VSQMessenger::MSTATUS_ONLINE);
+        //        m_messenger.setStatus(VSQMessenger::MSTATUS_ONLINE);
     }
 }
 

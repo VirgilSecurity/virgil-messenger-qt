@@ -41,7 +41,7 @@
 #include <QObject>
 #include <QSemaphore>
 
-#include <virgil/iot/qt/VSQIoTKit.h>
+//#include <virgil/iot/qt/VSQIoTKit.h>
 #include <qxmpp/QXmppClient.h>
 
 using namespace VirgilIoTKit;

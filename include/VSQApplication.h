@@ -52,10 +52,12 @@ public:
     run(const QString &basePath);
 
     Q_INVOKABLE
-    void reloadQml();
+    void
+    reloadQml();
 
     Q_INVOKABLE
-    void checkUpdates();
+    void
+    checkUpdates();
 
     Q_INVOKABLE QString
     currentVersion() const;
