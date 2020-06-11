@@ -24,7 +24,6 @@ ApplicationWindow {
 
         onFireError: {
             showPopupError(errorText)
-            mainView.disconnect()
         }
 
         onFireInform: {
@@ -36,7 +35,7 @@ ApplicationWindow {
         }
 
         onFireReady: {
-            // showPopupSucces(qsTr("Ready to chat"))
+             showPopupSucces(qsTr("Ready to chat"))
         }
 
         onFireAddedContact: {
