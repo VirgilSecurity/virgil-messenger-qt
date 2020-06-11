@@ -174,7 +174,8 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
     conf.setHost(_xmppURL());
     conf.setPassword(_xmppPass());
     conf.setAutoReconnectionEnabled(false);
-    conf.setKeepAliveTimeout(kKeepAliveTimeSec);
+    conf.setKeepAliveInterval(kKeepAliveTimeSec);
+    conf.setKeepAliveTimeout(kKeepAliveTimeSec - 1);
 
     qDebug() << "SSL: " << QSslSocket::supportsSsl();
 
