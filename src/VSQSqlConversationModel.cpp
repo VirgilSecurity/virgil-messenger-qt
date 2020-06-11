@@ -50,6 +50,7 @@ VSQSqlConversationModel::_createTable() {
         "'recipient' TEXT NOT NULL,"
         "'timestamp' TEXT NOT NULL,"
         "'message' TEXT NOT NULL,"
+        "'is_read' BOOL NOT NULL,"
         "FOREIGN KEY('author') REFERENCES %2 ( name ),"
         "FOREIGN KEY('recipient') REFERENCES %3 ( name )"
         ")")
@@ -96,9 +97,12 @@ VSQSqlConversationModel::setRecipient(const QString &recipient) {
     m_recipient = recipient;
 
     const QString filterString = QString::fromLatin1(
-        "(recipient = '%1' AND author = 'Me') OR (recipient = 'Me' AND author='%1')").arg(m_recipient);
+        "(recipient = '%1' AND author = '%2') OR (recipient = '%2' AND author='%1')").arg(m_recipient, user());
+
+    setSort(2, Qt::AscendingOrder);
     setFilter(filterString);
-    select();
+
+        // select();
 
     emit recipientChanged();
 }
@@ -108,10 +112,47 @@ QVariant
 VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
     if (role < Qt::UserRole) {
         return QSqlTableModel::data(index, role);
+   }
+
+    const int firstMessageInARow = Qt::UserRole + 4;
+    const int messageInARow = Qt::UserRole + 5;
+    const int day = Qt::UserRole + 6;
+
+    const QSqlRecord currRecord = record(index.row());
+
+    if (role == firstMessageInARow) {
+        const QSqlRecord prevRecord = record(index.row() - 1);
+        const QVariant prevMsgAuthor = prevRecord.value(0);
+        const QVariant currMsgAuthor = currRecord.value(0);
+        const QVariant prevTimestamp = prevRecord.value(2);
+        const QVariant currTimestamp = currRecord.value(2);
+
+        // Check if previous message is from the same author
+        const bool isAuthor = currMsgAuthor.toString() != prevMsgAuthor.toString();
+
+        // Check if the message was sent in last 5 min
+        const bool isInFiveMinRange = prevTimestamp.toDateTime().addSecs(5 * 60) > currTimestamp.toDateTime();
+
+        // Message is considered to be the first in a row when it
+        // sends in a range of 1 min with previous message and
+        // from the same author
+        return isAuthor || !isInFiveMinRange;
     }
 
-    const QSqlRecord sqlRecord = record(index.row());
-    return sqlRecord.value(role - Qt::UserRole);
+    if (role == messageInARow) {
+        const QSqlRecord nextRecord = record(index.row() + 1);
+        const QVariant nextMsgAuthor = nextRecord.value(0);
+        const QVariant currMsgAuthor = currRecord.value(0);
+
+        return currMsgAuthor.toString() == nextMsgAuthor.toString();
+    }
+
+    if (role == day) {
+        const QVariant timestamp = currRecord.value(2);
+        return timestamp.toDate();
+    }
+
+    return currRecord.value(role - Qt::UserRole);
 }
 
 /******************************************************************************/
@@ -122,6 +163,9 @@ VSQSqlConversationModel::roleNames() const {
     names[Qt::UserRole + 1] = "recipient";
     names[Qt::UserRole + 2] = "timestamp";
     names[Qt::UserRole + 3] = "message";
+    names[Qt::UserRole + 4] = "firstMessageInARow";
+    names[Qt::UserRole + 5] = "messageInARow";
+    names[Qt::UserRole + 6] = "day";
     return names;
 }
 
@@ -131,10 +175,11 @@ VSQSqlConversationModel::sendMessage(QString recipient, QString message) {
     const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
 
     QSqlRecord newRecord = record();
-    newRecord.setValue("author", "Me");
+    newRecord.setValue("author", user());
     newRecord.setValue("recipient", recipient);
     newRecord.setValue("timestamp", timestamp);
     newRecord.setValue("message", message);
+    newRecord.setValue("is_read", 1);
     if (!insertRecord(rowCount(), newRecord)) {
         qWarning() << "Failed to send message:" << lastError().text();
         return;
@@ -150,13 +195,17 @@ VSQSqlConversationModel::receiveMessage(const QString &sender, const QString &me
 
     QSqlRecord newRecord = record();
     newRecord.setValue("author", sender);
-    newRecord.setValue("recipient", "Me");
+    newRecord.setValue("recipient", user());
     newRecord.setValue("timestamp", timestamp);
     newRecord.setValue("message", message);
-    if (!insertRecord(rowCount(), newRecord)) {
+    newRecord.setValue("is_read", 0);
+
+    if (!insertRowIntoTable(newRecord)) {
         qWarning() << "Failed to save received message:" << lastError().text();
         return;
     }
+
+    // qDebug() << newRecord
 
     submitAll();
 }
@@ -179,6 +228,67 @@ VSQSqlConversationModel::setUser(const QString &user) {
 
     _createTable();
     _update();
+}
+
+/******************************************************************************/
+Q_INVOKABLE void
+VSQSqlConversationModel::setAsRead(const QString &user) {
+    QSqlQuery model;
+    QString query;
+
+    query = QString("UPDATE %1 SET is_read = 1 WHERE author = \"%2\"").arg(_tableName()).arg(user);
+
+    model.prepare(query);
+
+    qDebug() << user << query << model.exec();
+}
+
+/******************************************************************************/
+int
+VSQSqlConversationModel::getCountOfUnread(const QString &user) {
+    QSqlQueryModel model;
+    QString query;
+
+    query = QString("SELECT COUNT(*) AS C FROM %1 WHERE is_read = 0 AND recipient = \"%2\"").arg(_tableName()).arg(user);
+
+    model.setQuery(query);
+    int c = model.record(0).value("C").toInt();
+
+    qDebug() << c << user << query;
+
+    return c;
+}
+
+/******************************************************************************/
+QString
+VSQSqlConversationModel::getLastMessage(const QString &user) const {
+    QSqlQueryModel model;
+    QString query;
+
+    query = QString("SELECT * FROM %1 WHERE recipient = \"%2\" ORDER BY timestamp DESC LIMIT 1").arg(_tableName()).arg(user);
+
+    model.setQuery(query);
+    QString message = model.record(0).value("message").toString();
+
+    qDebug() << message << user << query;
+
+    return message;
+}
+
+/******************************************************************************/
+QString
+VSQSqlConversationModel::getLastMessageTime(const QString &user) const {
+    QSqlQueryModel model;
+    QString query;
+
+    query = QString("SELECT * FROM %1 WHERE recipient = \"%2\" ORDER BY timestamp DESC LIMIT 1").arg(_tableName()).arg(user);
+
+    model.setQuery(query);
+    QString timestamp = model.record(0).value("timestamp").toString();
+
+    qDebug() << timestamp << user << query;
+
+    return timestamp;
 }
 
 /******************************************************************************/

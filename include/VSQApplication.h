@@ -64,10 +64,8 @@ public:
     sendReport();
 
 private slots:
-#if VS_IOS
     void
     onApplicationStateChanged(Qt::ApplicationState state);
-#endif // VS_IOS
 
 private:
     static const QString kVersion;

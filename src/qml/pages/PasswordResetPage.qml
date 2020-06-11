@@ -59,7 +59,7 @@ Page {
 
         TextField {
             id: registeredUsername
-            placeholderText: qsTr("User name")
+            placeholderText: qsTr("Username")
             Layout.preferredWidth: parent.width - 20
             Layout.alignment: Qt.AlignHCenter
             color: mainTextCOlor
@@ -143,7 +143,7 @@ Page {
 
         Text {
             id: helpText
-            text: qsTr("Your Password is,")
+            text: qsTr("Your Password Is,")
             font.pointSize: UiHelper.fixFontSz(16)
             Layout.preferredWidth: parent.width - 20
             Layout.alignment: Qt.AlignLeft

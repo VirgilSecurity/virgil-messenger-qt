@@ -36,6 +36,7 @@
 #include <QtQml>
 
 #include <VSQApplication.h>
+#include <VSQClipboardProxy.h>
 #include <ui/VSQUiHelper.h>
 #include <virgil/iot/logger/logger.h>
 
@@ -88,19 +89,18 @@ VSQApplication::run(const QString &basePath) {
 
     context->setContextProperty("UiHelper", &uiHelper);
     context->setContextProperty("app", this);
+    context->setContextProperty("clipboard", new VSQClipboardProxy(QGuiApplication::clipboard()));
     context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
     context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
     context->setContextProperty("Messenger", &m_messenger);
-    context->setContextProperty("ContactsModel", &m_messenger.modelContacts());
     context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
+    context->setContextProperty("ChatModel", &m_messenger.getChatModel());
 
     QFont fon(QGuiApplication::font());
     fon.setPointSize(1.5 * QGuiApplication::font().pointSize());
     QGuiApplication::setFont(fon);
 
-#if VS_IOS
     connect(QGuiApplication::instance(), SIGNAL(applicationStateChanged(Qt::ApplicationState)), this, SLOT(onApplicationStateChanged(Qt::ApplicationState)));
-#endif // VS_IOS
 
     reloadQml();
 
@@ -142,7 +142,6 @@ VSQApplication::sendReport() {
 }
 
 /******************************************************************************/
-#if VS_IOS
 void
 VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
     static bool _deactivated = false;
@@ -150,15 +149,13 @@ VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
 
     if (Qt::ApplicationInactive == state) {
         _deactivated = true;
+        m_messenger.setStatus(VSQMessenger::MSTATUS_UNAVAILABLE);
     }
 
-    if (_deactivated && Qt::ApplicationActive == state) {
-        _deactivated = false;
-        if (m_netifUDPbcast.get()) {
-            m_netifUDPbcast->restart();
-        }
+    if (Qt::ApplicationActive == state) {
+//        m_messenger.setStatus(VSQMessenger::MSTATUS_ONLINE);
     }
 }
-#endif // VS_IOS
+
 
 /******************************************************************************/

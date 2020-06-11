@@ -32,6 +32,7 @@
 #
 #  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+QTPLUGIN += qtvirtualkeyboardplugin
 QT += core network qml quick bluetooth sql xml concurrent
 
 CONFIG += c++14
@@ -44,7 +45,7 @@ QMAKE_TARGET_BUNDLE_PREFIX = com.virgilsecurity
 #   Set version
 #
 isEmpty(VERSION) {
-    VERSION = $$cat($$PWD/VERSION_MESSENGER)
+    VERSION = $$cat($$PWD/VERSION_MESSENGER).0
 }
 message("VERSION = $$VERSION")
 
@@ -85,8 +86,9 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
 
 HEADERS += \
         include/VSQApplication.h \
+        include/VSQClipboardProxy.h \
         include/VSQMessenger.h \
-        include/VSQSqlContactModel.h \
+        include/VSQSqlChatModel.h \
         include/VSQSqlConversationModel.h \
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
@@ -97,8 +99,9 @@ HEADERS += \
 #
 
 SOURCES += \
+        src/VSQClipboardProxy.cpp \
         src/VSQMessenger.cpp \
-        src/VSQSqlContactModel.cpp \
+        src/VSQSqlChatModel.cpp \
         src/VSQSqlConversationModel.cpp \
         src/android/VSQAndroid.cpp \
         src/main.cpp \
@@ -117,7 +120,8 @@ RESOURCES += src/resources.qrc
 
 
 INCLUDEPATH +=  include \
-        $${QXMPP_BUILD_PATH}/include
+        $${QXMPP_BUILD_PATH}/include \
+         $${QXMPP_BUILD_PATH}/include/qxmpp
 
 #
 #   Sparkle framework
@@ -195,6 +199,15 @@ macx: {
 #
 #   iOS specific
 #
+#ios: {
+#    OBJECTIVE_SOURCES += \
+#        src/ios/APNSApplicationDelegate.mm
+
+#    #IOS_ENTITLEMENTS.name = CODE_SIGN_ENTITLEMENTS
+#    #IOS_ENTITLEMENTS.value = ios/pushnotifications.entitlements
+#    QMAKE_MAC_XCODE_SETTINGS += IOS_ENTITLEMENTS
+#}
+
 isEqual(OS_NAME, "ios")|isEqual(OS_NAME, "ios-sim"): {
     Q_ENABLE_BITCODE.name = ENABLE_BITCODE
     Q_ENABLE_BITCODE.value = NO
@@ -213,33 +226,83 @@ isEqual(OS_NAME, "ios")|isEqual(OS_NAME, "ios-sim"): {
 #
 #   Android specific
 #
+
+defineReplace(AndroidVersionCode) {
+        segments = $$split(1, ".")
+        vCode = "$$first(vCode)$$format_number($$member(segments,0,0), width=3 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,1,1), width=3 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,2,2), width=3 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,3,3), width=5 zeropad)"
+        return($$first(vCode))
+}
+
 android: {
-    DEFINES += ANDROID=1
+    QT += androidextras
+    DEFINES += VS_ANDROID=1 VS_PUSHNOTIFICATIONS=1
+    ANDROID_VERSION_CODE = $$AndroidVersionCode($$VERSION)
+    ANDROID_VERSION_NAME = $$VERSION
+
+    INCLUDEPATH +=  $$PWD/ext/prebuilt/firebase_cpp_sdk/include
+
+    HEADERS += \
+         include/VSQPushNotifications.h \
+         include/android/VSQFirebaseListener.h
+
+    SOURCES += \
+        src/VSQPushNotifications.cpp \
+        src/android/VSQFirebaseListener.cpp
+
     LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
+    FIREBASE_LIBS_DIR = $$PWD/ext/prebuilt/firebase_cpp_sdk/libs/android/$$ANDROID_TARGET_ARCH/c++
     ANDROID_EXTRA_LIBS = \
         $$LIBS_DIR/libvs-messenger-crypto.so \
         $$LIBS_DIR/libvs-messenger-internal.so \
         $$LIBS_DIR/libcrypto_1_1.so \
         $$LIBS_DIR/libssl_1_1.so
 
+    LIBS += $${FIREBASE_LIBS_DIR}/libfirebase_messaging.a \
+        $${FIREBASE_LIBS_DIR}/libfirebase_app.a \
+        $${FIREBASE_LIBS_DIR}/libfirebase_auth.a
+
     ANDROID_PACKAGE_SOURCE_DIR = \
         $$PWD/platforms/android
 
     DISTFILES += \
+        platforms/android/gradle.properties \
+        platforms/android/google-services.json \
         platforms/android/AndroidManifest.xml \
         platforms/android/build.gradle \
         platforms/android/gradle/wrapper/gradle-wrapper.jar \
         platforms/android/gradle/wrapper/gradle-wrapper.properties \
         platforms/android/gradlew \
         platforms/android/gradlew.bat \
-        platforms/android/res/values/libs.xml
+        platforms/android/res/values/libs.xml \
+        platforms/android/src/org/virgil/notification/NotificationClient.java
 }
 
 RC_ICONS = platforms/windows/Virgil.ico
 
 DISTFILES += \
     platforms/android/res/drawable-hdpi/icon.png \
+    platforms/android/res/drawable-hdpi/icon_round.png \
     platforms/android/res/drawable-ldpi/icon.png \
+    platforms/android/res/drawable-ldpi/icon_round.png \
     platforms/android/res/drawable-mdpi/icon.png \
+    platforms/android/res/drawable-mdpi/icon_round.png \
+    platforms/android/res/drawable-xhdpi/icon.png \
+    platforms/android/res/drawable-xhdpi/icon_round.png \
+    platforms/android/res/drawable-xxhdpi/icon.png \
+    platforms/android/res/drawable-xxhdpi/icon_round.png \
+    platforms/android/res/drawable-xxxhdpi/icon.png \
+    platforms/android/res/drawable-xxxhdpi/icon_round.png \
+    platforms/android/res/mipmap-hdpi/ic_launcher_round.png \
+    platforms/android/res/mipmap-mdpi/ic_launcher.png \
+    platforms/android/res/mipmap-mdpi/ic_launcher_round.png \
+    platforms/android/res/mipmap-xhdpi/ic_launcher.png \
+    platforms/android/res/mipmap-xhdpi/ic_launcher_round.png \
+    platforms/android/res/mipmap-xxhdpi/ic_launcher.png \
+    platforms/android/res/mipmap-xxhdpi/ic_launcher_round.png \
+    platforms/android/res/mipmap-xxxhdpi/ic_launcher.png \
+    platforms/android/res/mipmap-xxxhdpi/ic_launcher_round.png \
     platforms/macos/virgil-messenger.plist.in \
     platforms/windows/Virgil.ico

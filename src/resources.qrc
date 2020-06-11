@@ -27,7 +27,6 @@
         <file>qml/resources/icons/More@2x.png</file>
         <file>qml/resources/icons/Search.png</file>
         <file>qml/resources/icons/Search@2x.png</file>
-        <file>qml/resources/sounds/message.wav</file>
         <file>qml/resources/AddAccount.png</file>
         <file>qml/resources/AppUserscreen.png</file>
         <file>qml/resources/cert.pem</file>
@@ -87,5 +86,16 @@
         <file>qml/resources/icons/Plus.png</file>
         <file>qml/resources/icons/Plus@2x.png</file>
         <file>qml/components/CommonHelpers/IconWithText.qml</file>
+        <file>qml/resources/icons/Chats.png</file>
+        <file>qml/resources/icons/Chats@2x.png</file>
+        <file>qml/components/ChatDateSeporator.qml</file>
+        <file>qml/components/Search.qml</file>
+        <file>qml/resources/icons/Search_Big.png</file>
+        <file>qml/resources/icons/Search_Big@2x.png</file>
+        <file>qml/resources/icons/Close.png</file>
+        <file>qml/resources/icons/Close@2x.png</file>
+        <file>qml/resources/sounds/notification.wav</file>
+        <file>qml/resources/sounds/message-received.wav</file>
+        <file>qml/resources/sounds/message-sent.wav</file>
     </qresource>
 </RCC>

@@ -39,9 +39,9 @@ ColumnLayout {
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
             ImageButton {
-                imageSource: "../resources/icons/Arrow-Left.png"
+                image: "Arrow-Left"
                 visible: view.currentIndex > 0
-                onPressed: view.decrementCurrentIndex()
+                onClicked: view.decrementCurrentIndex()
             }
         }
 
@@ -119,9 +119,9 @@ ColumnLayout {
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
             ImageButton {
-                imageSource: "../resources/icons/Arrow-Right.png"
-                visible: view.currentIndex == 0
-                onPressed: view.incrementCurrentIndex()
+                image: "Arrow-Right"
+                visible: view.currentIndex < view.count - 1
+                onClicked: view.incrementCurrentIndex()
             }
         }
     }

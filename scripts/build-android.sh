@@ -9,8 +9,14 @@ source ${SCRIPT_FOLDER}/ish/common.sh
 ANDOID_APP_ID="com.virgilsecurity.qtmessenger"
 PLATFORM=android-clang
 ANDROID_MAKE="${ANDROID_NDK}/prebuilt/${HOST_PLATFORM}/bin/make"
-ANDROID_PLATFORM="android-24"
+ANDROID_PLATFORM="android-28"
 
+#*************************************************************************************************************
+# env variables passed to build anroid release
+# $DISABLE_RELEASE                      : boolean
+# $ANDROID_STORE_PASS                   : string
+# $ANDROID_KEY_PASS                     : string
+# {root_folder}/android.keystore        : file 
 #*************************************************************************************************************
 build_proc() {
     PLATFORM="$1"
@@ -19,6 +25,7 @@ build_proc() {
     local ANDROID_QMAKE="${QT_SDK_DIR}/${PLATFORM}/bin/qmake"
     local BUILD_DIR="${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.${PLATFORM}"
     local ANDROID_DEPLOY_QT="${QT_SDK_DIR}/${PLATFORM}/bin/androiddeployqt"
+    local ANDROID_DEPLOY_QT_ADD_ARGS=""
 
     export QT_BUILD_DIR_SUFFIX=android.${LIB_ARCH}
 
@@ -35,7 +42,12 @@ build_proc() {
 
         ${ANDROID_MAKE} INSTALL_ROOT=${BUILD_DIR}/android-build install
 
-        ${ANDROID_DEPLOY_QT} --input ${BUILD_DIR}/android-lib${APPLICATION_NAME}.so-deployment-settings.json --output ${BUILD_DIR}/android-build --android-platform ${ANDROID_PLATFORM} --gradle
+        if [[ "x$ENABLE_RELEASE" != "x" ]]; then
+            ANDROID_DEPLOY_QT_ADD_ARGS="--sign ${SCRIPT_FOLDER}/../android.keystore upload --storepass ${ANDROID_STORE_PASS} --keypass ${ANDROID_KEY_PASS}"
+        fi
+
+        echo "${ANDROID_DEPLOY_QT} --input ${BUILD_DIR}/android-lib${APPLICATION_NAME}.so-deployment-settings.json --output ${BUILD_DIR}/android-build --android-platform ${ANDROID_PLATFORM} ${ANDROID_DEPLOY_QT_ADD_ARGS} --gradle"
+        ${ANDROID_DEPLOY_QT} --input ${BUILD_DIR}/android-lib${APPLICATION_NAME}.so-deployment-settings.json --output ${BUILD_DIR}/android-build --android-platform ${ANDROID_PLATFORM} ${ANDROID_DEPLOY_QT_ADD_ARGS} --gradle
     popd
 }
 

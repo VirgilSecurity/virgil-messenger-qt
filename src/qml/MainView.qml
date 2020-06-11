@@ -39,7 +39,7 @@ Control {
             }
 
             Action {
-                text: "Sign out"
+                text: "Sign Out"
                 onTriggered: mainView.signOut()
             }
         }
@@ -65,29 +65,14 @@ Control {
         if (LoginLogic.validateUser(user)) {
             var future = Messenger.signIn(user)
             Future.onFinished(future, function(value) {
-              console.log("SignIn result: ", Future.result(future))
+              console.log("Log In result: ", Future.result(future))
             })
 
             stackView.clear()
             lastSignedInUser = user
             showContacts()
         } else {
-            root.showPopupError(qsTr("Incorrect user name"))
-        }
-    }
-
-    function signUp(user) {
-        if (LoginLogic.validateUser(user)) {
-            var future = Messenger.signUp(user)
-            Future.onFinished(future, function(value) {
-              console.log("SignUp result: ", Future.result(future))
-            })
-
-            showPopupInform("Sign Up ...")
-            lastSignedInUser = user
-            showContacts()
-        } else {
-            showPopupError(qsTr("Incorrect user name"))
+            root.showPopupError(qsTr("Incorrect User Name"))
         }
     }
 
@@ -104,10 +89,16 @@ Control {
         })
     }
 
-    function chatWith(recipient) {
-        ConversationsModel.recipient = recipient
-        stackView.push("./pages/ChatPage.qml")
+    function disconnect() {
+        var future = Messenger.disconnect()
+        Future.onFinished(future, function(value) {
+          console.log("Logout result: ", Future.result(future))
+            stackView.clear()
+            showAuth(true)
+        })
     }
+
+
 
     // Navigation
     //
@@ -117,6 +108,8 @@ Control {
     function back() {
         stackView.pop()
     }
+
+
 
     function showSplashScreen(){
         stackView.push("./pages/SplashScreenPage.qml", StackView.Immediate)
@@ -147,14 +140,47 @@ Control {
         stackView.push("./pages/RegisterPage.qml")
     }
 
+    // Depricated method, use showChatWith instead.
+    function chatWith(recipient) {
+        ConversationsModel.recipient = recipient
+        stackView.push("./pages/ChatPage.qml")
+    }
+
+    function showChatWith(recipient) {
+        navigateTo("Chat", { recipient: recipient }, true, false)
+    }
+
     function showContacts(clear) {
         if (clear) {
             stackView.clear()
         }
+
         stackView.push("./pages/ContactsPage.qml")
     }
 
     function showAccountSettings() {
-        stackView.push("./pages/AccountSettingsPage.qml")
+        navigateTo("AccountSettings", null, true, false)
+    }
+
+    function navigateTo(page, params, animate, clearHistory) {
+
+        const pageName = "%1Page".arg(page)
+        const path = "./pages/%1.qml".arg(pageName)
+
+        // cancel navigation if the page is already shown
+        if (stackView.currentItem.toString().startsWith(pageName)){
+            return
+        }
+
+        if (clearHistory) {
+            stackView.clear()
+        }
+
+        if (animate) {
+            stackView.push(path, params)
+        }
+        else {
+            stackView.push(path, params, StackView.Immediate)
+        }
     }
 }

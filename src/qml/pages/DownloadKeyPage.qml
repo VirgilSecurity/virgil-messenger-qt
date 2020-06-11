@@ -22,12 +22,12 @@ Page {
         }
 
         FormSubtitle {
-            text: qsTr("You have backed up this account's key to Virgil Cloud. Enter the password to decrypt it:")
+            text: qsTr("Your account information is securely stored in the cloud. Please enter your security word(s) to access it:")
         }
 
         FormInput {
             label: qsTr("Password")
-            placeholder: qsTr("Enter password")
+            placeholder: qsTr("Enter Password")
         }
 
         FormPrimaryButton {

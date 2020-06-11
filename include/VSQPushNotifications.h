@@ -32,40 +32,26 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_SQL_CONTACT_MODEL_H
-#define VIRGIL_IOTKIT_QT_SQL_CONTACT_MODEL_H
+#ifndef NOTIFICATIONHANDLER_H
+#define NOTIFICATIONHANDLER_H
 
-#include <QSqlQueryModel>
+#if VS_PUSHNOTIFICATIONS
 
-class VSQSqlContactModel : public QSqlQueryModel {
+#include <QObject>
+#include <virgil/iot/qt/helpers/VSQSingleton.h>
+#include "android/VSQFirebaseListener.h"
 
+class VSQPushNotifications : public QObject, public VSQSingleton<VSQPushNotifications>
+#if VS_ANDROID
+        , public VSQFirebaseListener
+#endif
+{
     Q_OBJECT
-
 public:
-    VSQSqlContactModel(QObject *parent = nullptr);
-
-    QString
-    user() const;
-
-    Q_INVOKABLE void
-    setUser(const QString &user);
-
-public slots:
-    void
-    addContact(QString contact);
-
-private:
-    QString m_user;
-
-    void
-    _createTable();
-
-    void
-    _update();
-
-    QString
-    _tableName() const;
-
+    void startMessaging();
+    void registerToken(const void *bytes, size_t length);
 };
 
-#endif // VIRGIL_IOTKIT_QT_SQL_CONTACT_MODEL_H
+#endif // VS_PUSHNOTIFICATIONS
+
+#endif // NOTIFICATIONHANDLER_H

@@ -44,7 +44,7 @@
 int
 main(int argc, char *argv[]) {
 
-#if (ANDROID)
+#if (VS_ANDROID)
     VSQAndroid::prepare();
 #endif
 

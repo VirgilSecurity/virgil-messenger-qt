@@ -14,33 +14,51 @@ Page {
     }
 
     header: Header {
-        title: "Settings"
+        title: qsTr("Settings")
     }
 
     Form {
 
+        Avatar {
+            Layout.alignment: Qt.AlignHCenter
+            diameter: 80
+            nickname: Messenger.currentUser
+        }
+
+        Label {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.bottomMargin: 50
+            font.pointSize: UiHelper.fixFontSz(18)
+            color: Theme.primaryTextColor
+            text: Messenger.currentUser
+        }
+
+        FormLabel {
+            text: qsTr("Version: %1".arg(app.currentVersion()))
+        }
+/*
         FormPrimaryButton {
-            text: "Check updates"
+            text: "Software Update"
             onClicked: {
                 app.checkUpdates()
             }
         }
 
         FormPrimaryButton {
-            text: "Delete account"
+            text: "Delete Account"
             onClicked: {
             }
         }
-
+*/
         FormPrimaryButton {
-            text: "Send report"
+            text: "Send Report"
             onClicked: {
                 app.sendReport()
             }
         }
 
         FormPrimaryButton {
-            text: "Sign out"
+            text: "Log Out"
             onClicked: {
                 mainView.signOut()
             }
