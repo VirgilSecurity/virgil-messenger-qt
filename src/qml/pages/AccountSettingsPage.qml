@@ -36,7 +36,7 @@ Page {
         FormLabel {
             text: qsTr("Version: %1".arg(app.currentVersion()))
         }
-
+/*
         FormPrimaryButton {
             text: "Software Update"
             onClicked: {
@@ -49,7 +49,7 @@ Page {
             onClicked: {
             }
         }
-
+*/
         FormPrimaryButton {
             text: "Send Report"
             onClicked: {
