@@ -63,8 +63,9 @@ Control {
                     acceptedButtons: Qt.RightButton
                     onLongPressed: {
                         if (Qt.platform.os == "android" || Qt.platform.os == "ios") {
-                            // contextMenu.x = eventPoint.position.x
-                            // contextMenu.y = eventPoint.position.y
+                            contextMenu.x = point.position.x
+                            contextMenu.y = point.position.y - 40
+
                             contextMenu.open()
                         }
                     }
@@ -76,6 +77,7 @@ Control {
                         contextMenu.x = eventPoint.position.x
                         contextMenu.y = eventPoint.position.y
                         contextMenu.open()
+                        eventPoint.accepted = false
                     }
                 }
 
@@ -126,10 +128,6 @@ Control {
                     function isValidURL(message) {
                        var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
                        return regexp.test(message);
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
                     }
 
                     Menu {
