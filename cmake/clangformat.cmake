@@ -56,6 +56,9 @@ function(add_clangformat _targetname)
             if (_source_file_ext STREQUAL ".m")
                 continue()
             endif()
+            if (_source_file_ext STREQUAL ".mm")
+                continue()
+            endif()
 
             # remove cmake generator expressions if exists
             string(REGEX REPLACE "([^:]+:)" "" _source "${_source}")

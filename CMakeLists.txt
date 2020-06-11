@@ -98,23 +98,131 @@ endif()
 # ---------------------------------------------------------------------------
 
 #
-#   UI App
+#   Qt
 #
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/src)
+find_package(Qt5 COMPONENTS Core Widgets Sql Network Concurrent Qml Xml)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
 
 #
-#   Tests
+#   QuickFuture
 #
-#add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests)
+set(QUICKFUTURE_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/quickfuture/src")
 
 #
-#   Documentation
+#   Prebuilt folders
 #
-#add_custom_target(ovpn-firewall-documentation
-#        COMMAND rm -fR docs/doxygen
-#        COMMAND mkdir -p docs/doxygen
-#        COMMAND doxygen
-#        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+set(PREBUILT_COMMON_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt")
+set(PREBUILT_QT_DIR "${PREBUILT_COMMON_DIR}/qt")
+set(PREBUILT_BASE_DIR "${PREBUILT_COMMON_DIR}/${VS_OS}/release/installed/usr/local")
+set(PREBUILT_INCLUDE_DIR "${PREBUILT_BASE_DIR}/include")
+set(PREBUILT_LIB_DIR "${PREBUILT_BASE_DIR}/lib")
+
+#
+#   Application
+#
+if (APPLE)
+    add_executable(virgil-messenger-qt MACOSX_BUNDLE)
+    set_target_properties(virgil-messenger-qt PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_LIST_DIR}/platforms/macos/virgil-messenger.plist)
+    set(MACOSX_DEPLOYMENT_TARGET 10.14)
+#    macdeployqt(virgil-messenger-qt "${CMAKE_CURRENT_LIST_DIR}/src/qml")
+else ()
+    add_executable(virgil-messenger-qt)
+endif ()
+
+target_sources(virgil-messenger-qt
+        PRIVATE
+
+        # Headers
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQApplication.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQClipboardProxy.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQMessenger.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQPushNotifications.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQSqlChatModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQSqlConversationModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/ui/VSQUiHelper.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/macos/VSQMacos.h
+
+        #   QuickFuture
+        ${QUICKFUTURE_DIR}/qffuture.h
+        ${QUICKFUTURE_DIR}/qfvariantwrapper.h
+        ${QUICKFUTURE_DIR}/QuickFuture
+        ${QUICKFUTURE_DIR}/quickfuture.h
+
+        # Sources
+        ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQApplication.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQClipboardProxy.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQMessenger.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQPushNotifications.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQSqlChatModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQSqlConversationModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/ui/VSQUiHelper.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/macos/VSQMacos.mm
+        ${PREBUILT_QT_DIR}/default-impl/hal.cpp
+
+        #   QuickFuture
+        ${QUICKFUTURE_DIR}/qffuture.cpp
+
+        # Qt Resources
+        ${CMAKE_CURRENT_LIST_DIR}/src/resources.qrc
+        )
+
+target_link_libraries(virgil-messenger-qt
+        PUBLIC
+
+        # Qt5
+        Qt5::Core
+        Qt5::Widgets
+        Qt5::Sql
+        Qt5::Network
+        Qt5::Concurrent
+        Qt5::Qml
+        Qt5::Xml
+
+        # Other libs
+        qxmpp
+        vs-module-logger
+        vs-module-messenger
+        vs-messenger-crypto
+        vs-messenger-internal
+
+        # Compiler options
+        enable_pedantic_mode
+        )
+
+#
+#   Common include directories
+#
+target_include_directories(virgil-messenger-qt
+        PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+        $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}>
+        $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}/qxmpp>
+        $<BUILD_INTERFACE:${PREBUILT_QT_DIR}/config/pc>
+        $<BUILD_INTERFACE:${QUICKFUTURE_DIR}>
+        )
+
+#
+#   Common link directories
+#
+target_link_directories(virgil-messenger-qt
+        PRIVATE
+        $<BUILD_INTERFACE:${PREBUILT_LIB_DIR}>
+        )
+
+install(TARGETS virgil-messenger-qt
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        BUNDLE DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+        )
+
+if (COMMAND add_clangformat)
+    add_clangformat(virgil-messenger-qt)
+endif ()
 
 # ---------------------------------------------------------------------------
 #   Done
