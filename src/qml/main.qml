@@ -24,6 +24,7 @@ ApplicationWindow {
 
         onFireError: {
             showPopupError(errorText)
+            mainView.disconnect()
         }
 
         onFireInform: {
@@ -42,6 +43,13 @@ ApplicationWindow {
         }
 
         onFireNewMessage: {            
+        }
+    }
+
+    onClosing: {
+        if (Qt.platform.os == "android") {
+            close.accepted = false
+            mainView.back()
         }
     }
 

@@ -9,7 +9,7 @@ source ${SCRIPT_FOLDER}/ish/common.sh
 ANDOID_APP_ID="com.virgilsecurity.qtmessenger"
 PLATFORM=android-clang
 ANDROID_MAKE="${ANDROID_NDK}/prebuilt/${HOST_PLATFORM}/bin/make"
-ANDROID_PLATFORM="android-25"
+ANDROID_PLATFORM="android-28"
 
 #*************************************************************************************************************
 # env variables passed to build anroid release
@@ -47,7 +47,7 @@ build_proc() {
         fi
 
         echo "${ANDROID_DEPLOY_QT} --input ${BUILD_DIR}/android-lib${APPLICATION_NAME}.so-deployment-settings.json --output ${BUILD_DIR}/android-build --android-platform ${ANDROID_PLATFORM} ${ANDROID_DEPLOY_QT_ADD_ARGS} --gradle"
-        ${ANDROID_DEPLOY_QT} --input ${BUILD_DIR}/android-lib${APPLICATION_NAME}.so-deployment-settings.json --output ${BUILD_DIR}/android-build --android-platform ${ANDROID_PLATFORM} ${ANDROID_DEPLOY_QT_ADD_ARGS} --gradle        
+        ${ANDROID_DEPLOY_QT} --input ${BUILD_DIR}/android-lib${APPLICATION_NAME}.so-deployment-settings.json --output ${BUILD_DIR}/android-build --android-platform ${ANDROID_PLATFORM} ${ANDROID_DEPLOY_QT_ADD_ARGS} --gradle
     popd
 }
 

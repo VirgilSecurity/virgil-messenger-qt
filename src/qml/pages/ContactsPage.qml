@@ -209,7 +209,7 @@ Page {
             dialog.applied.connect(function()
             {
                 try {
-                    var future = Messenger.addContact(dialog.contact)
+                    var future = Messenger.addContact(dialog.contact.toLowerCase())
                     Future.onFinished(future, function(value) {
                         var res = Future.result(future)
                         if (res === Result.MRES_OK) {

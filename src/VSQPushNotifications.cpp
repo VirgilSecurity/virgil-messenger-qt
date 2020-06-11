@@ -32,65 +32,28 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#if (MACOS)
+#if VS_PUSHNOTIFICATIONS
 
-#include <QtCore>
-
-#include <Sparkle.h>
-#include <SUUpdater.h>
-
-#include "macos/VSQMacos.h"
-
-#include <virgil/iot/logger/logger.h>
+#include "VSQPushNotifications.h"
+#include <QDebug>
 
 /******************************************************************************/
-VSQMacos::~VSQMacos() {
-    _deleteTimer();
+void
+VSQPushNotifications::startMessaging() {
+#if VS_ANDROID
+    qDebug() << "Calling intializer";
+    initMessaging();
+#endif
+
 }
 
 /******************************************************************************/
-void VSQMacos::_setURL() const {
-    NSString *urlStr = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"SUFeedURL"];
-    NSURL *appcastURL = [NSURL URLWithString:[urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
-    [[SUUpdater sharedUpdater] setFeedURL:appcastURL];
-}
-
-/******************************************************************************/
-void VSQMacos::checkUpdates() const {
-    if (FALSE == [SUUpdater sharedUpdater].updateInProgress) {
-        _setURL();
-        [[SUUpdater sharedUpdater] checkForUpdates:nil];
-    }
-}
-
-/******************************************************************************/
-void VSQMacos::checkUpdatesBackground() const {
-    if (FALSE == [SUUpdater sharedUpdater].updateInProgress) {
-        _setURL();
-        [[SUUpdater sharedUpdater] checkForUpdatesInBackground];
-    }
-}
-
-/******************************************************************************/
-void VSQMacos::_deleteTimer() {
-    if (m_updateTimer) {
-        m_updateTimer->stop();
-        delete m_updateTimer;
-        m_updateTimer = nullptr;
-    }
-}
-
-/******************************************************************************/
-void VSQMacos::startUpdatesTimer() {
-    _deleteTimer();
-    m_updateTimer = new QTimer();
-    m_updateTimer->setSingleShot(false);
-    m_updateTimer->setInterval(kUpdateCheckMinutes * 60 * 1000);
-    connect(m_updateTimer, &QTimer::timeout, this, &VSQMacos::checkUpdatesBackground);
-    m_updateTimer->start();
-    checkUpdatesBackground();
+void
+VSQPushNotifications::registerToken(const void *bytes, size_t length) {
+    Q_UNUSED(bytes)
+    qDebug() << "Token of length " << length << " registered";
 }
 
 /******************************************************************************/
 
-#endif // MACOS
+#endif // VS_PUSHNOTIFICATIONS

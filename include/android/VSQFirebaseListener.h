@@ -32,37 +32,40 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <VSQApplication.h>
-#include <iostream>
-
-#include <android/VSQAndroid.h>
-
-#if (VSQ_WEBDRIVER_DEBUG)
-#include "Test/Headers.h"
-#endif
-
-int
-main(int argc, char *argv[]) {
+#ifndef FBLISTENER_H
+#define FBLISTENER_H
 
 #if (VS_ANDROID)
-    VSQAndroid::prepare();
-#endif
 
-#if (VSQ_WEBDRIVER_DEBUG)
-    wd_setup(argc, argv);
-#endif
+#include <QtCore>
 
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#include <firebase/messaging.h>
+#include "firebase/app.h"
+#include "firebase/util.h"
 
-    QGuiApplication a(argc, argv);
-    a.setOrganizationName("Virgil Security");
-    a.setOrganizationDomain("virgil.net");
+class QAndroidJniEnvironment;
 
-    QString baseUrl;
-    if (2 == argc && argv[1] && argv[1][0]) {
-        baseUrl = QString::fromLocal8Bit(argv[1]);
-        qDebug() << "QML URL: " << baseUrl;
-    }
+class VSQFirebaseListener : public ::firebase::messaging::Listener {
+public:
+    VSQFirebaseListener();
 
-    return VSQApplication().run(baseUrl);
-}
+    void initMessaging();
+
+    const QString &token() const;
+
+    virtual void OnTokenReceived(const char *token);
+
+    virtual void OnMessage(const ::firebase::messaging::Message & message);
+
+private:
+    QAndroidJniEnvironment *_jniEnv;
+    ::firebase::App* _app;
+    ::firebase::ModuleInitializer _initializer;
+    QString m_token;
+
+    void showNotification(QString title, QString message);
+};
+
+#endif // VS_ANDROID
+
+#endif // FBLISTENER_H

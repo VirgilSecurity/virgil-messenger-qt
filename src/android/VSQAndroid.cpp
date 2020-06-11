@@ -32,7 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#if (ANDROID)
+#if (VS_ANDROID)
 
 #include <QtCore>
 
@@ -41,21 +41,23 @@
 #include <android/log.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <cstdio>
 
 // TODO: Remove it
 static int pfd[2];
 static pthread_t loggingThread;
 
 /******************************************************************************/
-QString VSQAndroid::certFile() {
+QString VSQAndroid::caBundlePath() {
     QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     return appDataPath + QDir::separator() + "cert.pem";
 }
 /******************************************************************************/
 bool VSQAndroid::prepare() {
     runLoggingThread();
-    QFile::remove(certFile());
-    QFile::copy(":qml/resources/cert.pem", certFile());
+    auto certFile = caBundlePath();
+    QFile::remove(certFile);
+    QFile::copy(":qml/resources/cert.pem", certFile);
 
     return true;
 }
@@ -100,4 +102,4 @@ int VSQAndroid::runLoggingThread() { // run this function to redirect your outpu
 
 /******************************************************************************/
 
-#endif // ANDROID
+#endif // VS_ANDROID

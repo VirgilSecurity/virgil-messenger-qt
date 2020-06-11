@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QuickFuture 1.0
+import MesResult 1.0
 
 import "../theme"
 import "../components"
@@ -36,10 +37,14 @@ Page {
             onUserSelected: {
                 form.showLoading("Logging In as %1...".arg(userName))
 
-                Future.onFinished(Messenger.signIn(userName), (result) => {
-                    form.hideLoading()
-                    lastSignedInUser = userName
-                    showContacts(true)
+                var future = Messenger.signIn(userName)
+                Future.onFinished(future, (result) => {
+                    var res = Future.result(future)
+                    if (res === Result.MRES_OK) {
+                        form.hideLoading()
+                        lastSignedInUser = userName
+                        showContacts(true)
+                    }
                 })
             }
         }
@@ -49,12 +54,12 @@ Page {
             objectName: "btnRegister"
             onClicked: mainView.showRegister()
         }
-
+/*
         FormSecondaryButton {
             text: "Log In"
             onClicked: mainView.showSignIn()
         }
-
+*/
     }
 
     footer: Footer {}

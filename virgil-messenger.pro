@@ -45,7 +45,7 @@ QMAKE_TARGET_BUNDLE_PREFIX = com.virgilsecurity
 #   Set version
 #
 isEmpty(VERSION) {
-    VERSION = $$cat($$PWD/VERSION_MESSENGER)
+    VERSION = $$cat($$PWD/VERSION_MESSENGER).0
 }
 message("VERSION = $$VERSION")
 
@@ -120,7 +120,8 @@ RESOURCES += src/resources.qrc
 
 
 INCLUDEPATH +=  include \
-        $${QXMPP_BUILD_PATH}/include
+        $${QXMPP_BUILD_PATH}/include \
+         $${QXMPP_BUILD_PATH}/include/qxmpp
 
 #
 #   Sparkle framework
@@ -195,6 +196,17 @@ macx: {
     QMAKE_INFO_PLIST = $$PWD/platforms/macos/virgil-messenger.plist
 }
 
+#
+#   iOS specific
+#
+#ios: {
+#    OBJECTIVE_SOURCES += \
+#        src/ios/APNSApplicationDelegate.mm
+
+#    #IOS_ENTITLEMENTS.name = CODE_SIGN_ENTITLEMENTS
+#    #IOS_ENTITLEMENTS.value = ios/pushnotifications.entitlements
+#    QMAKE_MAC_XCODE_SETTINGS += IOS_ENTITLEMENTS
+#}
 
 #
 #   Android specific
@@ -210,28 +222,47 @@ defineReplace(AndroidVersionCode) {
 }
 
 android: {
+    QT += androidextras
+    DEFINES += VS_ANDROID=1 VS_PUSHNOTIFICATIONS=1
     ANDROID_VERSION_CODE = $$AndroidVersionCode($$VERSION)
     ANDROID_VERSION_NAME = $$VERSION
 
-    DEFINES += ANDROID=1
+    INCLUDEPATH +=  $$PWD/ext/prebuilt/firebase_cpp_sdk/include
+
+    HEADERS += \
+         include/VSQPushNotifications.h \
+         include/android/VSQFirebaseListener.h
+
+    SOURCES += \
+        src/VSQPushNotifications.cpp \
+        src/android/VSQFirebaseListener.cpp
+
     LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
+    FIREBASE_LIBS_DIR = $$PWD/ext/prebuilt/firebase_cpp_sdk/libs/android/$$ANDROID_TARGET_ARCH/c++
     ANDROID_EXTRA_LIBS = \
         $$LIBS_DIR/libvs-messenger-crypto.so \
         $$LIBS_DIR/libvs-messenger-internal.so \
         $$LIBS_DIR/libcrypto_1_1.so \
         $$LIBS_DIR/libssl_1_1.so
 
+    LIBS += $${FIREBASE_LIBS_DIR}/libfirebase_messaging.a \
+        $${FIREBASE_LIBS_DIR}/libfirebase_app.a \
+        $${FIREBASE_LIBS_DIR}/libfirebase_auth.a
+
     ANDROID_PACKAGE_SOURCE_DIR = \
         $$PWD/platforms/android
 
     DISTFILES += \
+        platforms/android/gradle.properties \
+        platforms/android/google-services.json \
         platforms/android/AndroidManifest.xml \
         platforms/android/build.gradle \
         platforms/android/gradle/wrapper/gradle-wrapper.jar \
         platforms/android/gradle/wrapper/gradle-wrapper.properties \
         platforms/android/gradlew \
         platforms/android/gradlew.bat \
-        platforms/android/res/values/libs.xml
+        platforms/android/res/values/libs.xml \
+        platforms/android/src/org/virgil/notification/NotificationClient.java
 }
 
 RC_ICONS = platforms/windows/Virgil.ico

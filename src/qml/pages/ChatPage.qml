@@ -72,7 +72,7 @@ Page {
     ListView {
         id: listView
         z: 0
-        height: parent.height - (Qt.inputMethod.keyboardRectangle.height / Screen.devicePixelRatio) - 58
+        height: parent.height - 58
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right

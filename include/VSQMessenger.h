@@ -58,6 +58,8 @@ class VSQMessenger : public QObject {
 
     Q_ENUMS(EnResult)
 
+    Q_ENUMS(EnStatus)
+
 public:
 
     enum EnResult
@@ -68,6 +70,12 @@ public:
         MRES_ERR_SIGNUP,
         MRES_ERR_USER_NOT_FOUND,
         MRES_ERR_ENCRYPTION
+    };
+
+    enum EnStatus
+    {
+        MSTATUS_ONLINE,
+        MSTATUS_UNAVAILABLE
     };
 
     Q_PROPERTY(QString currentUser READ currentUser NOTIFY fireCurrentUserChanged)
@@ -83,6 +91,9 @@ public:
 
     VSQSqlChatModel &
     getChatModel();
+    
+    static QString
+    decryptMessage(const QString &sender, const QString &message);
 
 public slots:
 
@@ -96,6 +107,9 @@ public slots:
     logout();
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
+    disconnect();
+
+    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     deleteUser(QString user);
 
     Q_INVOKABLE QStringList
@@ -106,6 +120,9 @@ public slots:
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     sendMessage(QString to, QString message);
+
+    Q_INVOKABLE void
+    setStatus(VSQMessenger::EnStatus status);
 
 signals:
     void
@@ -145,16 +162,22 @@ private slots:
     void
     onAddContactToDB(QString contact);
 
+    Q_INVOKABLE void
+    onSubscribePushNotifications(bool enable);
+
 private:
     QXmppClient m_xmpp;
-    QSemaphore m_semaphore;
     VSQSqlConversationModel *m_sqlConversations;
     VSQSqlChatModel *m_sqlChatModel;
 
     QString m_user;
+    QString m_userId;
+    QString m_xmppPass;
     VSQEnvType m_envType;
     static const VSQEnvType _defaultEnv = PROD;
     QXmppConfiguration conf;
+    QMutex m_connectingGuard;
+    bool m_connecting;
 
     static const QString kOrganization;
     static const QString kApp;
@@ -162,12 +185,23 @@ private:
     static const QString kProdEnvPrefix;
     static const QString kStgEnvPrefix;
     static const QString kDevEnvPrefix;
+    static const QString kPushNotificationsProxy;
+    static const QString kPushNotificationsNode;
+    static const QString kPushNotificationsService;
+    static const QString kPushNotificationsFCM;
+    static const QString kPushNotificationsDeviceID;
+    static const QString kPushNotificationsFormType;
+    static const QString kPushNotificationsFormTypeVal;
+    static const int kConnectionWaitMs;
 
     void
     _connectToDatabase();
 
     bool
     _connect(QString userWithEnv, QString userId);
+
+    QString
+    _xmppPass();
 
     QString
     _virgilURL();
@@ -192,6 +226,9 @@ private:
 
     QString
     _prepareLogin(const QString &user);
+
+    QString
+    _caBundleFile();
 };
 
 #endif // VIRGIL_IOTKIT_QT_MESSENGER_H
