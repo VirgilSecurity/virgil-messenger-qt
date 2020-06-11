@@ -77,6 +77,7 @@ const QString VSQMessenger::kPushNotificationsDeviceID = "device_id";
 const QString VSQMessenger::kPushNotificationsFormType = "FORM_TYPE";
 const QString VSQMessenger::kPushNotificationsFormTypeVal = "http://jabber.org/protocol/pubsub#publish-options";
 const int VSQMessenger::kConnectionWaitMs = 10000;
+const int VSQMessenger::kKeepAliveTimeSec = 5;
 
 /******************************************************************************/
 VSQMessenger::VSQMessenger() {
@@ -173,6 +174,7 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
     conf.setHost(_xmppURL());
     conf.setPassword(_xmppPass());
     conf.setAutoReconnectionEnabled(false);
+    conf.setKeepAliveTimeout(kKeepAliveTimeSec);
 
     qDebug() << "SSL: " << QSslSocket::supportsSsl();
 
