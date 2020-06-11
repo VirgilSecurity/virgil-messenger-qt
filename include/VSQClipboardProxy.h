@@ -39,23 +39,24 @@
 
 class QClipboard;
 
-class VSQClipboardProxy : public QObject
-{
+class VSQClipboardProxy : public QObject {
     Q_OBJECT
     Q_PROPERTY(QString text READ text NOTIFY textChanged)
 public:
-    explicit VSQClipboardProxy(QClipboard*);
+    explicit VSQClipboardProxy(QClipboard *);
 
-    QString text() const;
+    QString
+    text() const;
 
     Q_INVOKABLE void
     setText(const QString &text);
 
 signals:
-    void textChanged();
+    void
+    textChanged();
 
 private:
-    QClipboard* clipboard;
+    QClipboard *clipboard;
 };
 
 #endif // VSQCLIPBOARDPROXY_HPP

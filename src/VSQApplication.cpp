@@ -55,8 +55,6 @@ const QString VSQApplication::kVersion = "unknown";
 
 /******************************************************************************/
 VSQApplication::VSQApplication() {
-    m_netifUDPbcast = QSharedPointer<VSQUdpBroadcast>::create();
-
 #if (MACOS)
     VSQMacos::instance().startUpdatesTimer();
 #endif
@@ -68,16 +66,16 @@ VSQApplication::run(const QString &basePath) {
 
     VSQUiHelper uiHelper;
 
-    auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT << VSQFeatures::SNAP_SNIFFER;
-    auto impl = VSQImplementations() << m_netifUDPbcast;
-    auto roles = VSQDeviceRoles() << VirgilIoTKit::VS_SNAP_DEV_CONTROL;
-    auto appConfig = VSQAppConfig() << VSQManufactureId() << VSQDeviceType() << VSQDeviceSerial()
-                                    << VirgilIoTKit::VS_LOGLEV_DEBUG << roles << VSQSnapSnifferQmlConfig();
-
-    if (!VSQIoTKitFacade::instance().init(features, impl, appConfig)) {
-        VS_LOG_CRITICAL("Unable to initialize Virgil IoT KIT");
-        return -1;
-    }
+    //    auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT << VSQFeatures::SNAP_SNIFFER;
+    //    auto impl = VSQImplementations() << m_netifUDPbcast;
+    //    auto roles = VSQDeviceRoles() << VirgilIoTKit::VS_SNAP_DEV_CONTROL;
+    //    auto appConfig = VSQAppConfig() << VSQManufactureId() << VSQDeviceType() << VSQDeviceSerial()
+    //                                    << VirgilIoTKit::VS_LOGLEV_DEBUG << roles << VSQSnapSnifferQmlConfig();
+    //
+    //    if (!VSQIoTKitFacade::instance().init(features, impl, appConfig)) {
+    //        VS_LOG_CRITICAL("Unable to initialize Virgil IoT KIT");
+    //        return -1;
+    //    }
 
     QQmlContext *context = m_engine.rootContext();
     if (basePath.isEmpty()) {
@@ -90,8 +88,6 @@ VSQApplication::run(const QString &basePath) {
     context->setContextProperty("UiHelper", &uiHelper);
     context->setContextProperty("app", this);
     context->setContextProperty("clipboard", new VSQClipboardProxy(QGuiApplication::clipboard()));
-    context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
-    context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
     context->setContextProperty("Messenger", &m_messenger);
     context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
     context->setContextProperty("ChatModel", &m_messenger.getChatModel());

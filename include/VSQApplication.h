@@ -37,8 +37,8 @@
 
 #include <QtCore>
 #include <QGuiApplication>
+#include <QQmlApplicationEngine>
 #include <VSQMessenger.h>
-#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
 
 #include <macos/VSQMacos.h>
 
@@ -74,7 +74,6 @@ private:
 
     QQmlApplicationEngine m_engine;
     VSQMessenger m_messenger;
-    QSharedPointer<VSQUdpBroadcast> m_netifUDPbcast;
 };
 
 #endif // VSQApplication

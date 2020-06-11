@@ -40,7 +40,7 @@ project(virgil-messenger-qt VERSION 0.1.0 LANGUAGES C CXX)
 #
 #   Qt
 #
-find_package(Qt5 COMPONENTS Core Widgets Test Network Concurrent Qml)
+find_package(Qt5 COMPONENTS Core Widgets Sql Network Concurrent Qml Xml)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
@@ -49,14 +49,16 @@ set(CMAKE_AUTORCC ON)
 #
 #   QuickFuture
 #
-set (QUICKFUTURE_DIR "${CMAKE_CURRENT_LIST_DIR}/../ext/quickfuture/src")
+set(QUICKFUTURE_DIR "${CMAKE_CURRENT_LIST_DIR}/../ext/quickfuture/src")
 
 #
 #   Prebuilt folders
 #
-set (PREBUILT_BASE_DIR "${CMAKE_CURRENT_LIST_DIR}/../ext/prebuilt/${VS_OS}/usr/local")
-set (PREBUILT_INCLUDE_DIR "${PREBUILT_BASE_DIR}/include")
-set (PREBUILT_LIB_DIR "${PREBUILT_BASE_DIR}/libs")
+set(PREBUILT_COMMON_DIR "${CMAKE_CURRENT_LIST_DIR}/../ext/prebuilt")
+set(PREBUILT_QT_DIR "${PREBUILT_COMMON_DIR}/qt")
+set(PREBUILT_BASE_DIR "${PREBUILT_COMMON_DIR}/${VS_OS}/release/installed/usr/local")
+set(PREBUILT_INCLUDE_DIR "${PREBUILT_BASE_DIR}/include")
+set(PREBUILT_LIB_DIR "${PREBUILT_BASE_DIR}/lib")
 
 #
 #   Application
@@ -75,6 +77,13 @@ target_sources(virgil-messenger-qt
 
         # Headers
         ${CMAKE_CURRENT_LIST_DIR}/../include/VSQApplication.h
+        ${CMAKE_CURRENT_LIST_DIR}/../include/VSQClipboardProxy.h
+        ${CMAKE_CURRENT_LIST_DIR}/../include/VSQMessenger.h
+        ${CMAKE_CURRENT_LIST_DIR}/../include/VSQPushNotifications.h
+        ${CMAKE_CURRENT_LIST_DIR}/../include/VSQSqlChatModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/../include/VSQSqlConversationModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/../include/ui/VSQUiHelper.h
+        ${CMAKE_CURRENT_LIST_DIR}/../include/macos/VSQMacos.h
 
         #   QuickFuture
         ${QUICKFUTURE_DIR}/qffuture.h
@@ -85,6 +94,11 @@ target_sources(virgil-messenger-qt
         # Sources
         ${CMAKE_CURRENT_LIST_DIR}/main.cpp
         ${CMAKE_CURRENT_LIST_DIR}/VSQApplication.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/VSQClipboardProxy.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/VSQMessenger.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/VSQPushNotifications.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/VSQSqlChatModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/VSQSqlConversationModel.cpp
 
         #   QuickFuture
         ${QUICKFUTURE_DIR}/qffuture.cpp
@@ -99,10 +113,14 @@ target_link_libraries(virgil-messenger-qt
         # Qt5
         Qt5::Core
         Qt5::Widgets
-        Qt5::Test
+        Qt5::Sql
         Qt5::Network
         Qt5::Concurrent
         Qt5::Qml
+        Qt5::Xml
+
+        # Other libs
+        qxmpp
 
         # Compiler options
         enable_pedantic_mode
@@ -115,6 +133,17 @@ target_include_directories(virgil-messenger-qt
         PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../include>
         $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}>
+        $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}/qxmpp>
+        $<BUILD_INTERFACE:${PREBUILT_QT_DIR}/config/pc>
+        $<BUILD_INTERFACE:${QUICKFUTURE_DIR}>
+        )
+
+#
+#   Common link directories
+#
+target_link_directories(virgil-messenger-qt
+        PRIVATE
+        $<BUILD_INTERFACE:${PREBUILT_LIB_DIR}>
         )
 
 install(TARGETS virgil-messenger-qt

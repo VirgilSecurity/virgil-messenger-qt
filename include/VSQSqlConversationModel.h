@@ -37,8 +37,7 @@
 
 #include <QSqlTableModel>
 
-class VSQSqlConversationModel : public QSqlTableModel
-{
+class VSQSqlConversationModel : public QSqlTableModel {
     Q_OBJECT
     Q_PROPERTY(QString recipient READ recipient WRITE setRecipient NOTIFY recipientChanged)
 

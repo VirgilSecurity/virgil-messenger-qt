@@ -41,15 +41,19 @@
 #include <virgil/iot/qt/helpers/VSQSingleton.h>
 #include "android/VSQFirebaseListener.h"
 
-class VSQPushNotifications : public QObject, public VSQSingleton<VSQPushNotifications>
+class VSQPushNotifications : public QObject,
+                             public VSQSingleton<VSQPushNotifications>
 #if VS_ANDROID
-        , public VSQFirebaseListener
+    ,
+                             public VSQFirebaseListener
 #endif
 {
     Q_OBJECT
 public:
-    void startMessaging();
-    void registerToken(const void *bytes, size_t length);
+    void
+    startMessaging();
+    void
+    registerToken(const void *bytes, size_t length);
 };
 
 #endif // VS_PUSHNOTIFICATIONS

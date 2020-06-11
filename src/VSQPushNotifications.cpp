@@ -44,7 +44,6 @@ VSQPushNotifications::startMessaging() {
     qDebug() << "Calling intializer";
     initMessaging();
 #endif
-
 }
 
 /******************************************************************************/
