@@ -176,8 +176,6 @@ private:
     VSQEnvType m_envType;
     static const VSQEnvType _defaultEnv = PROD;
     QXmppConfiguration conf;
-    QMutex m_connectingGuard;
-    bool m_connecting;
 
     static const QString kOrganization;
     static const QString kApp;
