@@ -10,8 +10,6 @@ import "./helpers/login.js" as LoginLogic
 
 Control {
     id: mainView
-    anchors.fill: parent
-
     property string lastSignedInUser
 
     Settings {
@@ -108,8 +106,6 @@ Control {
     function back() {
         stackView.pop()
     }
-
-
 
     function showSplashScreen(){
         stackView.push("./pages/SplashScreenPage.qml", StackView.Immediate)
