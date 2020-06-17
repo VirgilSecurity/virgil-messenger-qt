@@ -72,7 +72,7 @@ ColumnLayout {
                                 width: 120
                                 height: 120
 
-                                onPressed: {
+                                onClicked: {
                                     accountSelector.userSelected(modelData)
                                 }
 
