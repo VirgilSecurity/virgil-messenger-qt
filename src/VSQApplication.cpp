@@ -152,8 +152,11 @@ VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
         m_messenger.setStatus(VSQMessenger::MSTATUS_UNAVAILABLE);
     }
 
-    if (Qt::ApplicationActive == state) {
-//        m_messenger.setStatus(VSQMessenger::MSTATUS_ONLINE);
+    if (Qt::ApplicationActive == state && _deactivated) {
+        _deactivated = false;
+        QTimer::singleShot(200, [this]() {
+            this->m_messenger.checkState();
+        });
     }
 }
 

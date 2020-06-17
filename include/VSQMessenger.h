@@ -115,6 +115,9 @@ public slots:
     Q_INVOKABLE QStringList
     usersList();
 
+    Q_INVOKABLE void
+    checkState();
+
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     addContact(QString contact);
 
@@ -210,6 +213,9 @@ private:
 
     uint16_t
     _xmppPort();
+
+    void
+    _reconnect();
 
     bool
     _saveCredentials(const QString &user, const vs_messenger_virgil_user_creds_t &creds);
