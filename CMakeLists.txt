@@ -1,0 +1,279 @@
+#   Copyright (C) 2015-2020 Virgil Security Inc.
+#
+#   All rights reserved.
+#
+#   Redistribution and use in source and binary forms, with or without
+#   modification, are permitted provided that the following conditions are
+#   met:
+#
+#       (1) Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#
+#       (2) Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in
+#       the documentation and/or other materials provided with the
+#       distribution.
+#
+#       (3) Neither the name of the copyright holder nor the names of its
+#       contributors may be used to endorse or promote products derived from
+#       this software without specific prior written permission.
+#
+#   THIS SOFTWARE IS PROVIDED BY THE AUTHOR ''AS IS'' AND ANY EXPRESS OR
+#   IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#   DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
+#   INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+#   SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+#   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+#   STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+#   IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+#   POSSIBILITY OF SUCH DAMAGE.
+#
+#   Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
+
+
+cmake_minimum_required(VERSION 3.17 FATAL_ERROR)
+
+# ---------------------------------------------------------------------------
+#   Project
+# ---------------------------------------------------------------------------
+project(virgil-messenger-qt VERSION 0.1.0 LANGUAGES C CXX)
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# ---------------------------------------------------------------------------
+#   Version
+# ---------------------------------------------------------------------------
+file(WRITE "${CMAKE_CURRENT_LIST_DIR}/VERSION_MESSENGER" "${virgil-messenger-qt_VERSION}")
+
+# ---------------------------------------------------------------------------
+#   Helper modules
+# ---------------------------------------------------------------------------
+include(GNUInstallDirs)
+include(FetchContent)
+
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake" ${CMAKE_MODULE_PATH})
+include (clangformat)
+include (helpers)
+if (APPLE)
+    include (macdeploy)
+endif()
+
+
+# ---------------------------------------------------------------------------
+#   Options
+# ---------------------------------------------------------------------------
+
+#
+# Test
+#
+option(ENABLE_TESTING "On/Off integration tests." ON)
+
+#
+#   macOS signing certificate
+#
+if (APPLE)
+    option(DMG "On/Off DMG build." OFF)
+    set(SIGN_CERT "" CACHE STRING "macOS Signing certificate")
+    set(SIGN_CERT_ID "" CACHE STRING "macOS Signing certificate ID")
+
+    if(SIGN_CERT STREQUAL "")
+        message(FATAL_ERROR "SIGN_CERT must be set. Take a look 'security find-identity -p codesigning'. You have to add something like-DSIGN_CERT=\"Apple Development: kutashenko@gmail.com (C63Q8K74TF)\"")
+    endif()
+
+    if(SIGN_CERT_ID STREQUAL "")
+        message(FATAL_ERROR "SIGN_CERT must be set. Take a look 'security find-identity -p codesigning'. You have to add -DSIGN_CERT_ID=<hex value>")
+    endif()
+endif()
+
+# ---------------------------------------------------------------------------
+#   Project targets
+# ---------------------------------------------------------------------------
+
+#
+#   Qt
+#
+find_package(Qt5 COMPONENTS Core Widgets Sql Network Concurrent Qml Xml)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
+
+#
+#   QuickFuture
+#
+set(QUICKFUTURE_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/quickfuture/src")
+
+#
+#   Check submodules
+#
+if(NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/ext/quickfuture/.git")
+    message(FATAL_ERROR
+        "Git submodule 'ext/quickfuture' is not initialized.\n"
+        " Run command 'git submodule update --init --recursive'")
+endif()
+
+if(NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/ext/quickpromise/.git")
+    message(FATAL_ERROR
+        "Git submodule 'ext/quickpromise' is not initialized.\n"
+        "Run command 'git submodule update --init --recursive'")
+endif()
+
+#
+#   Fetch prebuilt libraries
+#
+file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/VERSION_CORE" VERSION_CORE_CONTENT)
+list(GET VERSION_CORE_CONTENT 0 VERSION_CORE)
+
+FetchContent_Declare(
+    prebuilt_core
+    URL "https://virgilsecurity.bintray.com/iotl-demo-cdn/prebuilt-${VERSION_CORE}.tgz"
+    SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt"
+)
+
+FetchContent_Declare(
+    prebuilt_firebase
+    URL "https://dl.google.com/firebase/sdk/cpp/firebase_cpp_sdk_6.11.0.zip"
+    SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt/firebase_cpp_sdk"
+)
+
+if(NOT prebuilt_core_POPULATED OR NOT prebuilt_firebase_POPULATED)
+    message(STATUS "Fetching prebuild libraries...")
+endif()
+FetchContent_MakeAvailable(prebuilt_core prebuilt_firebase)
+
+#
+#   Define prebuilt folders
+#
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set(PREBUILT_PLATFORM_NAME "macos")
+
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(PREBUILT_PLATFORM_NAME "linux")
+
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(PREBUILT_PLATFORM_NAME "windows")
+
+endif()
+
+if(NOT PREBUILT_PLATFORM_NAME)
+    message(FATAL_ERROR "Build for ${CMAKE_SYSTEM_NAME} currently is not supported via CMake.")
+endif()
+
+set(PREBUILT_COMMON_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt")
+set(PREBUILT_QT_DIR "${PREBUILT_COMMON_DIR}/qt")
+set(PREBUILT_BASE_DIR "${PREBUILT_COMMON_DIR}/${PREBUILT_PLATFORM_NAME}/release/installed/usr/local")
+set(PREBUILT_INCLUDE_DIR "${PREBUILT_BASE_DIR}/include")
+set(PREBUILT_LIB_DIR "${PREBUILT_BASE_DIR}/lib")
+
+#
+#   Application
+#
+if (APPLE)
+    add_executable(virgil-messenger-qt MACOSX_BUNDLE)
+    set_target_properties(virgil-messenger-qt
+        PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/platforms/macos/virgil-messenger.plist"
+    )
+    set(MACOSX_DEPLOYMENT_TARGET 10.14)
+#    macdeployqt(virgil-messenger-qt "${CMAKE_CURRENT_LIST_DIR}/src/qml")
+else ()
+    add_executable(virgil-messenger-qt)
+endif ()
+
+target_sources(virgil-messenger-qt
+        PRIVATE
+
+        # Headers
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQApplication.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQClipboardProxy.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQMessenger.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQPushNotifications.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQSqlChatModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQSqlConversationModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/ui/VSQUiHelper.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/macos/VSQMacos.h
+
+        #   QuickFuture
+        ${QUICKFUTURE_DIR}/qffuture.h
+        ${QUICKFUTURE_DIR}/qfvariantwrapper.h
+        ${QUICKFUTURE_DIR}/QuickFuture
+        ${QUICKFUTURE_DIR}/quickfuture.h
+
+        # Sources
+        ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQApplication.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQClipboardProxy.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQMessenger.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQPushNotifications.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQSqlChatModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQSqlConversationModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/ui/VSQUiHelper.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/macos/VSQMacos.mm
+        ${PREBUILT_QT_DIR}/default-impl/hal.cpp
+
+        #   QuickFuture
+        ${QUICKFUTURE_DIR}/qffuture.cpp
+
+        # Qt Resources
+        ${CMAKE_CURRENT_LIST_DIR}/src/resources.qrc
+        )
+
+target_link_libraries(virgil-messenger-qt
+        PUBLIC
+
+        # Qt5
+        Qt5::Core
+        Qt5::Widgets
+        Qt5::Sql
+        Qt5::Network
+        Qt5::Concurrent
+        Qt5::Qml
+        Qt5::Xml
+
+        # Other libs
+        qxmpp
+        vs-module-logger
+        vs-module-messenger
+        vs-messenger-crypto
+        vs-messenger-internal
+
+        # Compiler options
+        enable_pedantic_mode
+        )
+
+#
+#   Common include directories
+#
+target_include_directories(virgil-messenger-qt
+        PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+        $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}>
+        $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}/qxmpp>
+        $<BUILD_INTERFACE:${PREBUILT_QT_DIR}/config/pc>
+        $<BUILD_INTERFACE:${QUICKFUTURE_DIR}>
+        )
+
+#
+#   Common link directories
+#
+target_link_directories(virgil-messenger-qt
+        PRIVATE
+        $<BUILD_INTERFACE:${PREBUILT_LIB_DIR}>
+        )
+
+install(TARGETS virgil-messenger-qt
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        BUNDLE DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+        )
+
+if (COMMAND add_clangformat)
+    add_clangformat(virgil-messenger-qt)
+endif ()
+
+# ---------------------------------------------------------------------------
+#   Done
+# ---------------------------------------------------------------------------
