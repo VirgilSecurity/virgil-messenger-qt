@@ -33,39 +33,34 @@
 #   Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 
-cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
-
-#
-#   Version
-#
-set (PACKAGE_VERSION "0")
-set (PACKAGE_VERSION_MAJOR "1")
-set (PACKAGE_VERSION_MINOR "0")
-
-include(GNUInstallDirs)
+cmake_minimum_required(VERSION 3.17 FATAL_ERROR)
 
 # ---------------------------------------------------------------------------
 #   Project
 # ---------------------------------------------------------------------------
-project(virgil-messenger-qt VERSION ${PACKAGE_VERSION}.${PACKAGE_VERSION_MAJOR}.${PACKAGE_VERSION_MINOR} LANGUAGES C CXX)
+project(virgil-messenger-qt VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ---------------------------------------------------------------------------
+#   Version
+# ---------------------------------------------------------------------------
+file(WRITE "${CMAKE_CURRENT_LIST_DIR}/VERSION_MESSENGER" "${virgil-messenger-qt_VERSION}")
+
+# ---------------------------------------------------------------------------
 #   Helper modules
 # ---------------------------------------------------------------------------
-set (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+include(GNUInstallDirs)
+include(FetchContent)
+
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake" ${CMAKE_MODULE_PATH})
 include (clangformat)
 include (helpers)
 if (APPLE)
     include (macdeploy)
 endif()
 
-# ---------------------------------------------------------------------------
-#   Version
-# ---------------------------------------------------------------------------
-file(WRITE "${CMAKE_CURRENT_LIST_DIR}/VERSION_MESSENGER" "${PACKAGE_VERSION}.${PACKAGE_VERSION_MAJOR}.${PACKAGE_VERSION_MINOR}")
 
 # ---------------------------------------------------------------------------
 #   Options
@@ -112,11 +107,64 @@ set(CMAKE_AUTORCC ON)
 set(QUICKFUTURE_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/quickfuture/src")
 
 #
-#   Prebuilt folders
+#   Check submodules
 #
+if(NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/ext/quickfuture/.git")
+    message(FATAL_ERROR
+        "Git submodule 'ext/quickfuture' is not initialized.\n"
+        " Run command 'git submodule update --init --recursive'")
+endif()
+
+if(NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/ext/quickpromise/.git")
+    message(FATAL_ERROR
+        "Git submodule 'ext/quickpromise' is not initialized.\n"
+        "Run command 'git submodule update --init --recursive'")
+endif()
+
+#
+#   Fetch prebuilt libraries
+#
+file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/VERSION_CORE" VERSION_CORE_CONTENT)
+list(GET VERSION_CORE_CONTENT 0 VERSION_CORE)
+
+FetchContent_Declare(
+    prebuilt_core
+    URL "https://virgilsecurity.bintray.com/iotl-demo-cdn/prebuilt-${VERSION_CORE}.tgz"
+    SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt"
+)
+
+FetchContent_Declare(
+    prebuilt_firebase
+    URL "https://dl.google.com/firebase/sdk/cpp/firebase_cpp_sdk_6.11.0.zip"
+    SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt/firebase_cpp_sdk"
+)
+
+if(NOT prebuilt_core_POPULATED OR NOT prebuilt_firebase_POPULATED)
+    message(STATUS "Fetching prebuild libraries...")
+endif()
+FetchContent_MakeAvailable(prebuilt_core prebuilt_firebase)
+
+#
+#   Define prebuilt folders
+#
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set(PREBUILT_PLATFORM_NAME "macos")
+
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(PREBUILT_PLATFORM_NAME "linux")
+
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(PREBUILT_PLATFORM_NAME "windows")
+
+endif()
+
+if(NOT PREBUILT_PLATFORM_NAME)
+    message(FATAL_ERROR "Build for ${CMAKE_SYSTEM_NAME} currently is not supported via CMake.")
+endif()
+
 set(PREBUILT_COMMON_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt")
 set(PREBUILT_QT_DIR "${PREBUILT_COMMON_DIR}/qt")
-set(PREBUILT_BASE_DIR "${PREBUILT_COMMON_DIR}/${VS_OS}/release/installed/usr/local")
+set(PREBUILT_BASE_DIR "${PREBUILT_COMMON_DIR}/${PREBUILT_PLATFORM_NAME}/release/installed/usr/local")
 set(PREBUILT_INCLUDE_DIR "${PREBUILT_BASE_DIR}/include")
 set(PREBUILT_LIB_DIR "${PREBUILT_BASE_DIR}/lib")
 
@@ -125,7 +173,9 @@ set(PREBUILT_LIB_DIR "${PREBUILT_BASE_DIR}/lib")
 #
 if (APPLE)
     add_executable(virgil-messenger-qt MACOSX_BUNDLE)
-    set_target_properties(virgil-messenger-qt PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_LIST_DIR}/platforms/macos/virgil-messenger.plist)
+    set_target_properties(virgil-messenger-qt
+        PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/platforms/macos/virgil-messenger.plist"
+    )
     set(MACOSX_DEPLOYMENT_TARGET 10.14)
 #    macdeployqt(virgil-messenger-qt "${CMAKE_CURRENT_LIST_DIR}/src/qml")
 else ()
