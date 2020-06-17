@@ -560,27 +560,38 @@ VSQMessenger::onConnected() {
 
 /******************************************************************************/
 void
+VSQMessenger::checkState() {
+    if (m_xmpp.state() == QXmppClient::DisconnectedState) {
+        _reconnect();
+    }
+}
+
+/******************************************************************************/
+void
+VSQMessenger::_reconnect() {
+    if (!m_user.isEmpty() && !m_userId.isEmpty()) {
+        QtConcurrent::run([=]() {
+            _connect(m_user, m_userId);
+        });
+    }
+}
+
+/******************************************************************************/
+void
 VSQMessenger::onDisconnected() {
     VS_LOG_DEBUG("onDisconnected");
-#if 0
+    qDebug() << "onDisconnected  state:" << m_xmpp.state();
     emit fireError(tr("Disconnected ..."));
-#endif
-    qDebug() << "onDisconnected";
 }
 
 /******************************************************************************/
 void
 VSQMessenger::onError(QXmppClient::Error err) {
     VS_LOG_DEBUG("onError");
-    qDebug() << "onError : " << err;
-
+    qDebug() << "onError : " << err << "   state:" << m_xmpp.state();
     emit fireError(tr("Connection error ..."));
 
-    if (!m_user.isEmpty() && !m_userId.isEmpty()) {
-        QtConcurrent::run([=]() {
-            _connect(m_user, m_userId);
-        });
-    }
+    _reconnect();
 }
 
 /******************************************************************************/
