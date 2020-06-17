@@ -5,6 +5,7 @@ import QtMultimedia 5.12
 import QuickFuture 1.0
 
 import "./components/Popups"
+import "./components"
 import "theme"
 
 ApplicationWindow {
@@ -14,28 +15,25 @@ ApplicationWindow {
     minimumWidth: 320
     minimumHeight: 600
 
-
-
     //
     //  Connections
     //
     Connections {
         target: Messenger
 
-        onFireError: {            
-            notification.height = 25
+        onFireError: {
+            errorStatus.show(qsTr("Network connection is unavailable"))
         }
 
         onFireInform: {
-            // showPopupInform(informText)
         }
 
         onFireConnecting: {
-            // showPopupInform(qsTr("Connecting"))
+            infoStatus.show(qsTr("Connecting..."), 2000);
         }
 
         onFireReady: {
-             notification.height = 0
+            errorStatus.hide()
         }
 
         onFireAddedContact: {
@@ -54,23 +52,24 @@ ApplicationWindow {
 
     // THE MainView of the Application!
 
-    Rectangle {
-        id: notification
+    AppStatus {
+        id: errorStatus
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        color: "red"
+        variant: "error"
+    }
 
-        Label {
-            anchors.centerIn: parent
-            color: "white"
-            font.pointSize: UiHelper.fixFontSz(12)
-            text: qsTr("Network connection is unavailable")
-        }
+    AppStatus {
+        id: infoStatus
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        variant: "info"
     }
 
     MainView {
-        anchors.top: notification.bottom
+        anchors.top: errorStatus.bottom
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom

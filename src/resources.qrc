@@ -97,5 +97,6 @@
         <file>qml/resources/sounds/notification.wav</file>
         <file>qml/resources/sounds/message-received.wav</file>
         <file>qml/resources/sounds/message-sent.wav</file>
+        <file>qml/components/AppStatus.qml</file>
     </qresource>
 </RCC>

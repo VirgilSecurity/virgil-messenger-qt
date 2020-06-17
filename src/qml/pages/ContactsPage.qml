@@ -189,6 +189,17 @@ Page {
                 if (!contactsHeaderId.isSearchOpen) return conversationText;
                 if (contactsHeaderId.search !== '') return searchEmptyText;
                 return searchText;
+            }            
+        }        
+
+        MouseArea {
+            visible: !listView.contentItem.children.length
+            anchors.fill: parent
+            onClicked: {
+                if (!listView.contentItem.children.length) {
+                    addContact()
+                    mouse.accepted = false
+                }
             }
         }
     }

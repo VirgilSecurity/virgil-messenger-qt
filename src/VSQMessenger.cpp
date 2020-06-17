@@ -561,8 +561,8 @@ VSQMessenger::onConnected() {
 /******************************************************************************/
 void
 VSQMessenger::checkState() {
-    if (m_xmpp.state() == QXmppClient::DisconnectedState) {
-        emit fireError(tr("Disconnected ..."));
+    if (m_xmpp.state() == QXmppClient::DisconnectedState) {        
+        // emit fireError(tr("Disconnected ..."));
         _reconnect();
     }
 }
