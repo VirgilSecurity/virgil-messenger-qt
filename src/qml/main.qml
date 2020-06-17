@@ -22,9 +22,8 @@ ApplicationWindow {
     Connections {
         target: Messenger
 
-        onFireError: {
-            showPopupError(errorText)
-            mainView.disconnect()
+        onFireError: {            
+            notification.height = 25
         }
 
         onFireInform: {
@@ -36,7 +35,7 @@ ApplicationWindow {
         }
 
         onFireReady: {
-            // showPopupSucces(qsTr("Ready to chat"))
+             notification.height = 0
         }
 
         onFireAddedContact: {
@@ -55,8 +54,26 @@ ApplicationWindow {
 
     // THE MainView of the Application!
 
+    Rectangle {
+        id: notification
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        color: "red"
+
+        Label {
+            anchors.centerIn: parent
+            color: "white"
+            font.pointSize: UiHelper.fixFontSz(12)
+            text: qsTr("Network connection is unavailable")
+        }
+    }
 
     MainView {
+        anchors.top: notification.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
         id: mainView
     }
 

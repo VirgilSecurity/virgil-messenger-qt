@@ -77,6 +77,7 @@ const QString VSQMessenger::kPushNotificationsDeviceID = "device_id";
 const QString VSQMessenger::kPushNotificationsFormType = "FORM_TYPE";
 const QString VSQMessenger::kPushNotificationsFormTypeVal = "http://jabber.org/protocol/pubsub#publish-options";
 const int VSQMessenger::kConnectionWaitMs = 10000;
+const int VSQMessenger::kKeepAliveTimeSec = 5;
 
 /******************************************************************************/
 VSQMessenger::VSQMessenger() {
@@ -173,6 +174,8 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
     conf.setHost(_xmppURL());
     conf.setPassword(_xmppPass());
     conf.setAutoReconnectionEnabled(false);
+    conf.setKeepAliveInterval(kKeepAliveTimeSec);
+    conf.setKeepAliveTimeout(kKeepAliveTimeSec - 1);
 
     qDebug() << "SSL: " << QSslSocket::supportsSsl();
 
@@ -189,10 +192,6 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
 #endif
     qRegisterMetaType<QXmppConfiguration>("QXmppConfiguration");
     qDebug() << ">>>> connecting ...";
-    {
-        QMutexLocker locker(&m_connectingGuard);
-        m_connecting = true;
-    }
     QMetaObject::invokeMethod(&m_xmpp, "connectToServer", Qt::QueuedConnection, Q_ARG(QXmppConfiguration, conf));
 
     // Wait for connection
@@ -200,14 +199,11 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
     timer.setSingleShot(true);
     QEventLoop loop;
     connect(&m_xmpp, &QXmppClient::connected, &loop, &QEventLoop::quit);
+    connect(&m_xmpp, &QXmppClient::disconnected, &loop, &QEventLoop::quit);
+    connect(&m_xmpp, &QXmppClient::error, &loop, &QEventLoop::quit);
     connect( &timer, &QTimer::timeout, &loop, &QEventLoop::quit);
     timer.start(kConnectionWaitMs);
     loop.exec();
-
-    {
-        QMutexLocker locker(&m_connectingGuard);
-        m_connecting = false;
-    }
 
     // Return connection result
     return m_xmpp.isConnected();
@@ -564,30 +560,38 @@ VSQMessenger::onConnected() {
 
 /******************************************************************************/
 void
+VSQMessenger::checkState() {
+    if (m_xmpp.state() == QXmppClient::DisconnectedState) {
+        emit fireError(tr("Disconnected ..."));
+        _reconnect();
+    }
+}
+
+/******************************************************************************/
+void
+VSQMessenger::_reconnect() {
+    if (!m_user.isEmpty() && !m_userId.isEmpty()) {
+        QtConcurrent::run([=]() {
+            _connect(m_user, m_userId);
+        });
+    }
+}
+
+/******************************************************************************/
+void
 VSQMessenger::onDisconnected() {
     VS_LOG_DEBUG("onDisconnected");
-#if 0
-    emit fireError(tr("Disconnected ..."));
-#endif
-    qDebug() << "onDisconnected";
+    qDebug() << "onDisconnected  state:" << m_xmpp.state();
 }
 
 /******************************************************************************/
 void
 VSQMessenger::onError(QXmppClient::Error err) {
     VS_LOG_DEBUG("onError");
-    qDebug() << "onError : " << err;
+    qDebug() << "onError : " << err << "   state:" << m_xmpp.state();
+    emit fireError(tr("Connection error ..."));
 
-    QMutexLocker locker(&m_connectingGuard);
-    if (m_connecting) {
-        if (!m_user.isEmpty() && !m_userId.isEmpty()) {
-            QtConcurrent::run([=]() {
-                _connect(m_user, m_userId);
-            });
-        }
-    } else {
-        emit fireError(tr("Connection error ..."));
-    }
+    _reconnect();
 }
 
 /******************************************************************************/

@@ -115,6 +115,9 @@ public slots:
     Q_INVOKABLE QStringList
     usersList();
 
+    Q_INVOKABLE void
+    checkState();
+
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     addContact(QString contact);
 
@@ -176,8 +179,6 @@ private:
     VSQEnvType m_envType;
     static const VSQEnvType _defaultEnv = PROD;
     QXmppConfiguration conf;
-    QMutex m_connectingGuard;
-    bool m_connecting;
 
     static const QString kOrganization;
     static const QString kApp;
@@ -193,6 +194,7 @@ private:
     static const QString kPushNotificationsFormType;
     static const QString kPushNotificationsFormTypeVal;
     static const int kConnectionWaitMs;
+    static const int kKeepAliveTimeSec;
 
     void
     _connectToDatabase();
@@ -211,6 +213,9 @@ private:
 
     uint16_t
     _xmppPort();
+
+    void
+    _reconnect();
 
     bool
     _saveCredentials(const QString &user, const vs_messenger_virgil_user_creds_t &creds);

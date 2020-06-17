@@ -16,7 +16,7 @@ Page {
         color: Theme.chatBackgroundColor
     }
 
-    Control {
+    header: Control {
         id: headerControl
         anchors.bottom: listView.top
         width: parent.width
@@ -69,20 +69,18 @@ Page {
         }
     }
 
+
     ListView {
         id: listView
-        z: 0
-        height: parent.height - 58
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
+
+        anchors.fill: parent
         anchors.leftMargin: 20
         anchors.rightMargin: 20
 
         section.property: "day"
         section.delegate: ChatDateSeporator {
             date: section
-        }        
+        }
 
         spacing: 5
         // verticalLayoutDirection: ListView.BottomToTop
@@ -96,12 +94,21 @@ Page {
             firstMessageInARow: model.firstMessageInARow
         }
 
-        ScrollBar.vertical: ScrollBar { }
-
         onCountChanged: {
             positionViewAtEnd()
         }
+
+        ScrollBar.vertical: ScrollBar { }
+
+        MouseArea {
+            anchors.fill: parent
+            onPressed: {
+                forceActiveFocus()
+                mouse.accepted = false
+            }
+        }
     }
+
 
     footer: ChatMessageInput {
         id: footerControl
