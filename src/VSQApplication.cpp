@@ -135,6 +135,7 @@ VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
     static bool _deactivated = false;
     qDebug() << state;
 
+#if VS_PUSHNOTIFICATIONS
     if (Qt::ApplicationInactive == state) {
         _deactivated = true;
         m_messenger.setStatus(VSQMessenger::MSTATUS_UNAVAILABLE);
@@ -146,6 +147,7 @@ VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
             this->m_messenger.checkState();
         });
     }
+#endif // VS_ANDROID
 }
 
 
