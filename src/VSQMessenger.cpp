@@ -32,6 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#include <virgil/iot/qt/VSQIoTKit.h>
 #include <android/VSQAndroid.h>
 #include <cstring>
 #include <cstdlib>
@@ -76,13 +77,15 @@ const QString VSQMessenger::kPushNotificationsDeviceID = "device_id";
 const QString VSQMessenger::kPushNotificationsFormType = "FORM_TYPE";
 const QString VSQMessenger::kPushNotificationsFormTypeVal = "http://jabber.org/protocol/pubsub#publish-options";
 const int VSQMessenger::kConnectionWaitMs = 10000;
+const int VSQMessenger::kKeepAliveTimeSec = 5;
 
 /******************************************************************************/
 VSQMessenger::VSQMessenger() {
     // Register QML typess
     qmlRegisterType<VSQMessenger>("MesResult", 1, 0, "Result");
-    QuickFuture::registerType<VSQMessenger::EnResult>(
-            [](VSQMessenger::EnResult res) -> QVariant { return QVariant(static_cast<int>(res)); });
+    QuickFuture::registerType<VSQMessenger::EnResult>([](VSQMessenger::EnResult res) -> QVariant {
+        return QVariant(static_cast<int>(res));
+    });
 
     // Connect to Database
     _connectToDatabase();
@@ -98,14 +101,8 @@ VSQMessenger::VSQMessenger() {
     connect(&m_xmpp, SIGNAL(connected()), this, SLOT(onConnected()));
     connect(&m_xmpp, SIGNAL(disconnected()), this, SLOT(onDisconnected()));
     connect(&m_xmpp, SIGNAL(error(QXmppClient::Error)), this, SLOT(onError(QXmppClient::Error)));
-    connect(&m_xmpp,
-            SIGNAL(messageReceived(const QXmppMessage &)),
-            this,
-            SLOT(onMessageReceived(const QXmppMessage &)));
-    connect(&m_xmpp,
-            SIGNAL(presenceReceived(const QXmppPresence &)),
-            this,
-            SLOT(onPresenceReceived(const QXmppPresence &)));
+    connect(&m_xmpp, SIGNAL(messageReceived(const QXmppMessage &)), this, SLOT(onMessageReceived(const QXmppMessage &)));
+    connect(&m_xmpp, SIGNAL(presenceReceived(const QXmppPresence &)), this, SLOT(onPresenceReceived(const QXmppPresence &)));
     connect(&m_xmpp, SIGNAL(iqReceived(const QXmppIq &)), this, SLOT(onIqReceived(const QXmppIq &)));
     connect(&m_xmpp, SIGNAL(sslErrors(const QList<QSslError> &)), this, SLOT(onSslErrors(const QList<QSslError> &)));
     connect(&m_xmpp, SIGNAL(stateChanged(QXmppClient::State)), this, SLOT(onStateChanged(QXmppClient::State)));
@@ -177,6 +174,8 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
     conf.setHost(_xmppURL());
     conf.setPassword(_xmppPass());
     conf.setAutoReconnectionEnabled(false);
+    conf.setKeepAliveInterval(kKeepAliveTimeSec);
+    conf.setKeepAliveTimeout(kKeepAliveTimeSec - 1);
 
     qDebug() << "SSL: " << QSslSocket::supportsSsl();
 
@@ -185,16 +184,14 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
     logger->setMessageTypes(QXmppLogger::AnyMessage);
 
 #if USE_XMPP_LOGS
-    connect(logger, &QXmppLogger::message, [=](QXmppLogger::MessageType, const QString &text) { qDebug() << text; });
+    connect(logger, &QXmppLogger::message, [=](QXmppLogger::MessageType, const QString &text){
+        qDebug() << text;
+    });
 
     m_xmpp.setLogger(logger);
 #endif
     qRegisterMetaType<QXmppConfiguration>("QXmppConfiguration");
     qDebug() << ">>>> connecting ...";
-    {
-        QMutexLocker locker(&m_connectingGuard);
-        m_connecting = true;
-    }
     QMetaObject::invokeMethod(&m_xmpp, "connectToServer", Qt::QueuedConnection, Q_ARG(QXmppConfiguration, conf));
 
     // Wait for connection
@@ -202,14 +199,11 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
     timer.setSingleShot(true);
     QEventLoop loop;
     connect(&m_xmpp, &QXmppClient::connected, &loop, &QEventLoop::quit);
-    connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    connect(&m_xmpp, &QXmppClient::disconnected, &loop, &QEventLoop::quit);
+    connect(&m_xmpp, &QXmppClient::error, &loop, &QEventLoop::quit);
+    connect( &timer, &QTimer::timeout, &loop, &QEventLoop::quit);
     timer.start(kConnectionWaitMs);
     loop.exec();
-
-    {
-        QMutexLocker locker(&m_connectingGuard);
-        m_connecting = false;
-    }
 
     // Return connection result
     return m_xmpp.isConnected();
@@ -239,7 +233,8 @@ VSQMessenger::_prepareLogin(const QString &user) {
             m_envType = PROD;
         } else if (kStgEnvPrefix == pieces.first()) {
             m_envType = STG;
-        } else if (kDevEnvPrefix == pieces.first()) {
+        }
+        else if (kDevEnvPrefix == pieces.first()) {
             m_envType = DEV;
         }
     }
@@ -276,7 +271,7 @@ VSQMessenger::signIn(QString user) {
         qDebug() << "Trying to Sign In: " << m_userId;
 
         vs_messenger_virgil_user_creds_t creds;
-        memset(&creds, 0, sizeof(creds));
+        memset(&creds, 0, sizeof (creds));
 
         // Load User Credentials
         if (!_loadCredentials(m_userId, creds)) {
@@ -303,7 +298,7 @@ VSQMessenger::signUp(QString user) {
         qDebug() << "Trying to Sign Up: " << m_userId;
 
         vs_messenger_virgil_user_creds_t creds;
-        memset(&creds, 0, sizeof(creds));
+        memset(&creds, 0, sizeof (creds));
 
         // Sign Up user, using Virgil Service
         if (VS_CODE_OK != vs_messenger_virgil_sign_up(m_userId.toStdString().c_str(), &creds)) {
@@ -403,11 +398,11 @@ VSQMessenger::_xmppPort() {
         bool ok;
         int port = portStr.toInt(&ok);
         if (ok) {
-            res = static_cast<uint16_t>(port);
+            res = static_cast<uint16_t> (port);
         }
     }
 
-    VS_LOG_DEBUG("XMPP PORT: %d", static_cast<int>(res));
+    VS_LOG_DEBUG("XMPP PORT: %d", static_cast<int> (res));
 
     return res;
 }
@@ -428,7 +423,7 @@ VSQMessenger::_addToUsersList(const QString &user) {
 bool
 VSQMessenger::_saveCredentials(const QString &user, const vs_messenger_virgil_user_creds_t &creds) {
     // Save credentials
-    QByteArray baCred(reinterpret_cast<const char *>(&creds), sizeof(creds));
+    QByteArray baCred(reinterpret_cast<const char*>(&creds), sizeof(creds));
     QSettings settings(kOrganization, kApp);
     settings.setValue(user, baCred.toBase64());
     return true;
@@ -447,7 +442,7 @@ VSQMessenger::_loadCredentials(const QString &user, vs_messenger_virgil_user_cre
         return false;
     }
 
-    memcpy(&creds, baCred.data(), static_cast<size_t>(baCred.size()));
+    memcpy(&creds, baCred.data(), static_cast<size_t> (baCred.size()));
     return true;
 }
 
@@ -473,8 +468,7 @@ VSQMessenger::logout() {
         m_user = "";
         m_userId = "";
         m_xmppPass = "";
-        QMetaObject::invokeMethod(
-                this, "onSubscribePushNotifications", Qt::BlockingQueuedConnection, Q_ARG(bool, false));
+        QMetaObject::invokeMethod(this, "onSubscribePushNotifications", Qt::BlockingQueuedConnection, Q_ARG(bool, false));
         QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::BlockingQueuedConnection);
         vs_messenger_virgil_logout();
         return MRES_OK;
@@ -518,7 +512,7 @@ VSQMessenger::getChatModel() {
 /******************************************************************************/
 void
 VSQMessenger::onSubscribePushNotifications(bool enable) {
-#if VS_PUSHNOTIFICATIONS
+    #if VS_PUSHNOTIFICATIONS
 
     // Subscribe Form Type
     QXmppDataForm::Field subscribeFormType;
@@ -566,28 +560,38 @@ VSQMessenger::onConnected() {
 
 /******************************************************************************/
 void
+VSQMessenger::checkState() {
+    if (m_xmpp.state() == QXmppClient::DisconnectedState) {
+        emit fireError(tr("Disconnected ..."));
+        _reconnect();
+    }
+}
+
+/******************************************************************************/
+void
+VSQMessenger::_reconnect() {
+    if (!m_user.isEmpty() && !m_userId.isEmpty()) {
+        QtConcurrent::run([=]() {
+            _connect(m_user, m_userId);
+        });
+    }
+}
+
+/******************************************************************************/
+void
 VSQMessenger::onDisconnected() {
     VS_LOG_DEBUG("onDisconnected");
-#if 0
-    emit fireError(tr("Disconnected ..."));
-#endif
-    qDebug() << "onDisconnected";
+    qDebug() << "onDisconnected  state:" << m_xmpp.state();
 }
 
 /******************************************************************************/
 void
 VSQMessenger::onError(QXmppClient::Error err) {
     VS_LOG_DEBUG("onError");
-    qDebug() << "onError : " << err;
+    qDebug() << "onError : " << err << "   state:" << m_xmpp.state();
+    emit fireError(tr("Connection error ..."));
 
-    QMutexLocker locker(&m_connectingGuard);
-    if (m_connecting) {
-        if (!m_user.isEmpty() && !m_userId.isEmpty()) {
-            QtConcurrent::run([=]() { _connect(m_user, m_userId); });
-        }
-    } else {
-        emit fireError(tr("Connection error ..."));
-    }
+    _reconnect();
 }
 
 /******************************************************************************/
@@ -602,11 +606,12 @@ VSQMessenger::decryptMessage(const QString &sender, const QString &message) {
 
     // Decrypt message
     // DECRYPTED_MESSAGE_SZ_MAX - 1  - This is required for a Zero-terminated string
-    if (VS_CODE_OK != vs_messenger_virgil_decrypt_msg(sender.toStdString().c_str(),
-                                                      message.toStdString().c_str(),
-                                                      decryptedMessage,
-                                                      decryptedMessageSz - 1,
-                                                      &decryptedMessageSz)) {
+    if (VS_CODE_OK !=
+            vs_messenger_virgil_decrypt_msg(
+                sender.toStdString().c_str(),
+                message.toStdString().c_str(),
+                decryptedMessage, decryptedMessageSz - 1,
+                &decryptedMessageSz)) {
         VS_LOG_WARNING("Received message cannot be decrypted");
         return "";
     }
@@ -615,7 +620,7 @@ VSQMessenger::decryptMessage(const QString &sender, const QString &message) {
     decryptedMessage[decryptedMessageSz] = 0;
 
     // Get message from JSON
-    QByteArray baDecr(reinterpret_cast<char *>(decryptedMessage), static_cast<int>(decryptedMessageSz));
+    QByteArray baDecr(reinterpret_cast<char *> (decryptedMessage), static_cast<int> (decryptedMessageSz));
     QJsonDocument jsonMsg(QJsonDocument::fromJson(baDecr));
     QString decryptedString = jsonMsg["payload"]["body"].toString();
 
@@ -664,10 +669,8 @@ VSQMessenger::sendMessage(QString to, QString message) {
         size_t encryptedMessageSz = 0;
 
         // Save message to DB in native thread
-        QMetaObject::invokeMethod(
-                m_sqlConversations, "sendMessage", Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message));
-        QMetaObject::invokeMethod(
-                m_sqlChatModel, "updateLastMessage", Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message));
+        QMetaObject::invokeMethod(m_sqlConversations, "sendMessage", Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message));
+        QMetaObject::invokeMethod(m_sqlChatModel, "updateLastMessage", Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message));
 
         // Create JSON-formatted message to be sent
         QJsonObject payloadObject;
@@ -683,18 +686,19 @@ VSQMessenger::sendMessage(QString to, QString message) {
         qDebug() << internalJson;
 
         // Encrypt message
-        if (VS_CODE_OK != vs_messenger_virgil_encrypt_msg(to.toStdString().c_str(),
-                                                          internalJson.toStdString().c_str(),
-                                                          encryptedMessage,
-                                                          _encryptedMsgSzMax,
-                                                          &encryptedMessageSz)) {
+        if (VS_CODE_OK != vs_messenger_virgil_encrypt_msg(
+                         to.toStdString().c_str(),
+                         internalJson.toStdString().c_str(),
+                         encryptedMessage,
+                         _encryptedMsgSzMax,
+                         &encryptedMessageSz)) {
             VS_LOG_WARNING("Cannot encrypt message to be sent");
             return MRES_ERR_ENCRYPTION;
         }
 
         // Send encrypted message
         QString toJID = to + "@" + _xmppURL();
-        QString encryptedStr = QString::fromLatin1(reinterpret_cast<char *>(encryptedMessage));
+        QString encryptedStr = QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage));
         m_xmpp.sendMessage(toJID, encryptedStr);
 
         return MRES_OK;
@@ -704,8 +708,8 @@ VSQMessenger::sendMessage(QString to, QString message) {
 /******************************************************************************/
 void
 VSQMessenger::setStatus(VSQMessenger::EnStatus status) {
-    QXmppPresence::Type presenceType =
-            VSQMessenger::MSTATUS_ONLINE == status ? QXmppPresence::Available : QXmppPresence::Unavailable;
+    QXmppPresence::Type presenceType = VSQMessenger::MSTATUS_ONLINE == status ?
+                QXmppPresence::Available : QXmppPresence::Unavailable;
     m_xmpp.setClientPresence(QXmppPresence(presenceType));
 }
 

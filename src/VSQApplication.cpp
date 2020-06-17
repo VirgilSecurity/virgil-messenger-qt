@@ -55,6 +55,8 @@ const QString VSQApplication::kVersion = "unknown";
 
 /******************************************************************************/
 VSQApplication::VSQApplication() {
+    m_netifUDPbcast = QSharedPointer<VSQUdpBroadcast>::create();
+
 #if (MACOS)
     VSQMacos::instance().startUpdatesTimer();
 #endif
@@ -66,18 +68,18 @@ VSQApplication::run(const QString &basePath) {
 
     VSQUiHelper uiHelper;
 
-    //    auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT << VSQFeatures::SNAP_SNIFFER;
-    //    auto impl = VSQImplementations() << m_netifUDPbcast;
-    //    auto roles = VSQDeviceRoles() << VirgilIoTKit::VS_SNAP_DEV_CONTROL;
-    //    auto appConfig = VSQAppConfig() << VSQManufactureId() << VSQDeviceType() << VSQDeviceSerial()
-    //                                    << VirgilIoTKit::VS_LOGLEV_DEBUG << roles << VSQSnapSnifferQmlConfig();
-    //
-    //    if (!VSQIoTKitFacade::instance().init(features, impl, appConfig)) {
-    //        VS_LOG_CRITICAL("Unable to initialize Virgil IoT KIT");
-    //        return -1;
-    //    }
+    auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT << VSQFeatures::SNAP_SNIFFER;
+    auto impl = VSQImplementations() << m_netifUDPbcast;
+    auto roles = VSQDeviceRoles() << VirgilIoTKit::VS_SNAP_DEV_CONTROL;
+    auto appConfig = VSQAppConfig() << VSQManufactureId() << VSQDeviceType() << VSQDeviceSerial()
+                                    << VirgilIoTKit::VS_LOGLEV_DEBUG << roles << VSQSnapSnifferQmlConfig();
 
-    QQmlContext *context = m_engine.rootContext();
+    if (!VSQIoTKitFacade::instance().init(features, impl, appConfig)) {
+        VS_LOG_CRITICAL("Unable to initialize Virgil IoT KIT");
+        return -1;
+    }
+
+    QQmlContext *context = m_engine.rootContext();    
     if (basePath.isEmpty()) {
         m_engine.setBaseUrl(QUrl(QStringLiteral("qrc:/qml/")));
     } else {
@@ -88,6 +90,8 @@ VSQApplication::run(const QString &basePath) {
     context->setContextProperty("UiHelper", &uiHelper);
     context->setContextProperty("app", this);
     context->setContextProperty("clipboard", new VSQClipboardProxy(QGuiApplication::clipboard()));
+    context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
+    context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
     context->setContextProperty("Messenger", &m_messenger);
     context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
     context->setContextProperty("ChatModel", &m_messenger.getChatModel());
@@ -96,10 +100,7 @@ VSQApplication::run(const QString &basePath) {
     fon.setPointSize(1.5 * QGuiApplication::font().pointSize());
     QGuiApplication::setFont(fon);
 
-    connect(QGuiApplication::instance(),
-            SIGNAL(applicationStateChanged(Qt::ApplicationState)),
-            this,
-            SLOT(onApplicationStateChanged(Qt::ApplicationState)));
+    connect(QGuiApplication::instance(), SIGNAL(applicationStateChanged(Qt::ApplicationState)), this, SLOT(onApplicationStateChanged(Qt::ApplicationState)));
 
     reloadQml();
 
@@ -107,8 +108,7 @@ VSQApplication::run(const QString &basePath) {
 }
 
 /******************************************************************************/
-void
-VSQApplication::reloadQml() {
+void VSQApplication::reloadQml() {
     const QUrl url(QStringLiteral("main.qml"));
     m_engine.clearComponentCache();
     m_engine.load(url);
@@ -123,8 +123,7 @@ VSQApplication::reloadQml() {
 }
 
 /******************************************************************************/
-void
-VSQApplication::checkUpdates() {
+void VSQApplication::checkUpdates() {
 #if (MACOS)
     VSQMacos::instance().checkUpdates();
 #endif
@@ -139,9 +138,7 @@ VSQApplication::currentVersion() const {
 /******************************************************************************/
 void
 VSQApplication::sendReport() {
-    QDesktopServices::openUrl(
-            QUrl("mailto:?to=kutashenko@gmail.com&subject=Virgil Messenger Report&body=Here is some email body text",
-                 QUrl::TolerantMode));
+    QDesktopServices::openUrl(QUrl("mailto:?to=kutashenko@gmail.com&subject=Virgil Messenger Report&body=Here is some email body text", QUrl::TolerantMode));
 }
 
 /******************************************************************************/
@@ -155,8 +152,11 @@ VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
         m_messenger.setStatus(VSQMessenger::MSTATUS_UNAVAILABLE);
     }
 
-    if (Qt::ApplicationActive == state) {
-        //        m_messenger.setStatus(VSQMessenger::MSTATUS_ONLINE);
+    if (Qt::ApplicationActive == state && _deactivated) {
+        _deactivated = false;
+        QTimer::singleShot(200, [this]() {
+            this->m_messenger.checkState();
+        });
     }
 }
 
