@@ -41,14 +41,13 @@
 #include <QObject>
 #include <QSemaphore>
 
-#include <virgil/iot/qt/VSQIoTKit.h>
 #include <qxmpp/QXmppClient.h>
-
-using namespace VirgilIoTKit;
 #include <virgil/iot/messenger/messenger.h>
 
 #include "VSQSqlConversationModel.h"
 #include "VSQSqlChatModel.h"
+
+using namespace VirgilIoTKit;
 
 class VSQMessenger : public QObject {
 

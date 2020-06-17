@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <virgil/iot/qt/VSQIoTKit.h>
 #include <android/VSQAndroid.h>
 #include <cstring>
 #include <cstdlib>
