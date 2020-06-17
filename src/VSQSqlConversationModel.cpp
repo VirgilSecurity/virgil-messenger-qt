@@ -44,18 +44,19 @@
 void
 VSQSqlConversationModel::_createTable() {
     QSqlQuery query;
-    if (!query.exec(QString("CREATE TABLE IF NOT EXISTS %1 ("
-                            "'author' TEXT NOT NULL,"
-                            "'recipient' TEXT NOT NULL,"
-                            "'timestamp' TEXT NOT NULL,"
-                            "'message' TEXT NOT NULL,"
-                            "'is_read' BOOL NOT NULL,"
-                            "FOREIGN KEY('author') REFERENCES %2 ( name ),"
-                            "FOREIGN KEY('recipient') REFERENCES %3 ( name )"
-                            ")")
-                            .arg(_tableName())
-                            .arg(_contactsTableName())
-                            .arg(_contactsTableName()))) {
+    if (!query.exec(
+        QString("CREATE TABLE IF NOT EXISTS %1 ("
+        "'author' TEXT NOT NULL,"
+        "'recipient' TEXT NOT NULL,"
+        "'timestamp' TEXT NOT NULL,"
+        "'message' TEXT NOT NULL,"
+        "'is_read' BOOL NOT NULL,"
+        "FOREIGN KEY('author') REFERENCES %2 ( name ),"
+        "FOREIGN KEY('recipient') REFERENCES %3 ( name )"
+        ")")
+                .arg(_tableName())
+                .arg(_contactsTableName())
+                .arg(_contactsTableName()))) {
         qFatal("Failed to query database: %s", qPrintable(query.lastError().text()));
     }
 }
@@ -75,7 +76,8 @@ VSQSqlConversationModel::_update() {
 }
 
 /******************************************************************************/
-VSQSqlConversationModel::VSQSqlConversationModel(QObject *parent) : QSqlTableModel(parent) {
+VSQSqlConversationModel::VSQSqlConversationModel(QObject *parent) :
+    QSqlTableModel(parent) {
 }
 
 /******************************************************************************/
@@ -94,14 +96,13 @@ VSQSqlConversationModel::setRecipient(const QString &recipient) {
     // TODO: Prevent SQL injection !!!
     m_recipient = recipient;
 
-    const QString filterString =
-            QString::fromLatin1("(recipient = '%1' AND author = '%2') OR (recipient = '%2' AND author='%1')")
-                    .arg(m_recipient, user());
+    const QString filterString = QString::fromLatin1(
+        "(recipient = '%1' AND author = '%2') OR (recipient = '%2' AND author='%1')").arg(m_recipient, user());
 
     setSort(2, Qt::AscendingOrder);
     setFilter(filterString);
 
-    // select();
+        // select();
 
     emit recipientChanged();
 }
@@ -111,7 +112,7 @@ QVariant
 VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
     if (role < Qt::UserRole) {
         return QSqlTableModel::data(index, role);
-    }
+   }
 
     const int firstMessageInARow = Qt::UserRole + 4;
     const int messageInARow = Qt::UserRole + 5;
@@ -248,9 +249,7 @@ VSQSqlConversationModel::getCountOfUnread(const QString &user) {
     QSqlQueryModel model;
     QString query;
 
-    query = QString("SELECT COUNT(*) AS C FROM %1 WHERE is_read = 0 AND recipient = \"%2\"")
-                    .arg(_tableName())
-                    .arg(user);
+    query = QString("SELECT COUNT(*) AS C FROM %1 WHERE is_read = 0 AND recipient = \"%2\"").arg(_tableName()).arg(user);
 
     model.setQuery(query);
     int c = model.record(0).value("C").toInt();
@@ -266,9 +265,7 @@ VSQSqlConversationModel::getLastMessage(const QString &user) const {
     QSqlQueryModel model;
     QString query;
 
-    query = QString("SELECT * FROM %1 WHERE recipient = \"%2\" ORDER BY timestamp DESC LIMIT 1")
-                    .arg(_tableName())
-                    .arg(user);
+    query = QString("SELECT * FROM %1 WHERE recipient = \"%2\" ORDER BY timestamp DESC LIMIT 1").arg(_tableName()).arg(user);
 
     model.setQuery(query);
     QString message = model.record(0).value("message").toString();
@@ -284,9 +281,7 @@ VSQSqlConversationModel::getLastMessageTime(const QString &user) const {
     QSqlQueryModel model;
     QString query;
 
-    query = QString("SELECT * FROM %1 WHERE recipient = \"%2\" ORDER BY timestamp DESC LIMIT 1")
-                    .arg(_tableName())
-                    .arg(user);
+    query = QString("SELECT * FROM %1 WHERE recipient = \"%2\" ORDER BY timestamp DESC LIMIT 1").arg(_tableName()).arg(user);
 
     model.setQuery(query);
     QString timestamp = model.record(0).value("timestamp").toString();

@@ -41,15 +41,14 @@
 #include <QObject>
 #include <QSemaphore>
 
-//#include <virgil/iot/qt/VSQIoTKit.h>
+#include <virgil/iot/qt/VSQIoTKit.h>
 #include <qxmpp/QXmppClient.h>
 
+using namespace VirgilIoTKit;
 #include <virgil/iot/messenger/messenger.h>
 
 #include "VSQSqlConversationModel.h"
 #include "VSQSqlChatModel.h"
-
-using namespace VirgilIoTKit;
 
 class VSQMessenger : public QObject {
 
@@ -62,7 +61,9 @@ class VSQMessenger : public QObject {
     Q_ENUMS(EnStatus)
 
 public:
-    enum EnResult {
+
+    enum EnResult
+    {
         MRES_OK,
         MRES_ERR_NO_CRED,
         MRES_ERR_SIGNIN,
@@ -71,7 +72,11 @@ public:
         MRES_ERR_ENCRYPTION
     };
 
-    enum EnStatus { MSTATUS_ONLINE, MSTATUS_UNAVAILABLE };
+    enum EnStatus
+    {
+        MSTATUS_ONLINE,
+        MSTATUS_UNAVAILABLE
+    };
 
     Q_PROPERTY(QString currentUser READ currentUser NOTIFY fireCurrentUserChanged)
 
@@ -86,7 +91,7 @@ public:
 
     VSQSqlChatModel &
     getChatModel();
-
+    
     static QString
     decryptMessage(const QString &sender, const QString &message);
 
@@ -148,21 +153,14 @@ signals:
     fireCurrentUserChanged();
 
 private slots:
-    void
-    onConnected();
-    void
-    onDisconnected();
+    void onConnected();
+    void onDisconnected();
     void onError(QXmppClient::Error);
-    void
-    onMessageReceived(const QXmppMessage &message);
-    void
-    onPresenceReceived(const QXmppPresence &presence);
-    void
-    onIqReceived(const QXmppIq &iq);
-    void
-    onSslErrors(const QList<QSslError> &errors);
-    void
-    onStateChanged(QXmppClient::State state);
+    void onMessageReceived(const QXmppMessage &message);
+    void onPresenceReceived(const QXmppPresence &presence);
+    void onIqReceived(const QXmppIq &iq);
+    void onSslErrors(const QList<QSslError> &errors);
+    void onStateChanged(QXmppClient::State state);
 
     void
     onAddContactToDB(QString contact);

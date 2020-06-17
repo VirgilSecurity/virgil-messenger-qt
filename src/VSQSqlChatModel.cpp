@@ -41,7 +41,8 @@
 #include <QDateTime>
 
 /******************************************************************************/
-VSQSqlChatModel::VSQSqlChatModel(QObject *parent) : QSqlTableModel(parent) {
+VSQSqlChatModel::VSQSqlChatModel(QObject *parent) :
+    QSqlTableModel(parent) {
 }
 
 /******************************************************************************/
@@ -81,10 +82,10 @@ QVariant
 VSQSqlChatModel::data(const QModelIndex &index, int role) const {
     if (role < Qt::UserRole) {
         return QSqlTableModel::data(index, role);
-    }
+   }
 
-    const QSqlRecord currRecord = record(index.row());
-    return currRecord.value(role - Qt::UserRole);
+   const QSqlRecord currRecord = record(index.row());
+   return currRecord.value(role - Qt::UserRole);
 }
 
 /******************************************************************************/
@@ -110,7 +111,8 @@ VSQSqlChatModel::clearFilter() {
 void
 VSQSqlChatModel::applyFilter(const QString &filter) {
 
-    const QString filterString = QString::fromLatin1("name LIKE '%%1%'").arg(filter);
+    const QString filterString = QString::fromLatin1(
+        "name LIKE '%%1%'").arg(filter);
 
     setFilter(filterString);
 }

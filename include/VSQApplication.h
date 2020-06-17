@@ -37,8 +37,8 @@
 
 #include <QtCore>
 #include <QGuiApplication>
-#include <QQmlApplicationEngine>
 #include <VSQMessenger.h>
+#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
 
 #include <macos/VSQMacos.h>
 
@@ -52,12 +52,10 @@ public:
     run(const QString &basePath);
 
     Q_INVOKABLE
-    void
-    reloadQml();
+    void reloadQml();
 
     Q_INVOKABLE
-    void
-    checkUpdates();
+    void checkUpdates();
 
     Q_INVOKABLE QString
     currentVersion() const;
@@ -74,6 +72,7 @@ private:
 
     QQmlApplicationEngine m_engine;
     VSQMessenger m_messenger;
+    QSharedPointer<VSQUdpBroadcast> m_netifUDPbcast;
 };
 
 #endif // VSQApplication
