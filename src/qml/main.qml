@@ -15,6 +15,9 @@ ApplicationWindow {
     minimumWidth: 320
     minimumHeight: 600
 
+    property int reconnectionCounter: 0
+    property bool connectionError: false
+
     //
     //  Connections
     //
@@ -22,18 +25,34 @@ ApplicationWindow {
         target: Messenger
 
         onFireError: {
-            errorStatus.show(qsTr("Network connection is unavailable"))
+            if (!connectionError) {
+                connectionError = true
+                infoStatus.show(qsTr("Connecting..."))
+            }
         }
 
         onFireInform: {
         }
 
         onFireConnecting: {
-            infoStatus.show(qsTr("Connecting..."), 2000);
+            if (connectionError && reconnectionCounter < 15) {
+                reconnectionCounter++
+                return
+            }
+
+            if (connectionError && reconnectionCounter >= 15) {
+                infoStatus.hide()
+                errorStatus.show(qsTr("Network connection is unavailable"))
+                return
+            }
+
+            infoStatus.show(qsTr("Connecting..."), 2000)
         }
 
         onFireReady: {
+            reconnectionCounter = 0
             errorStatus.hide()
+            infoStatus.hide()
         }
 
         onFireAddedContact: {

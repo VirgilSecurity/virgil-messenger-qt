@@ -77,7 +77,7 @@ const QString VSQMessenger::kPushNotificationsDeviceID = "device_id";
 const QString VSQMessenger::kPushNotificationsFormType = "FORM_TYPE";
 const QString VSQMessenger::kPushNotificationsFormTypeVal = "http://jabber.org/protocol/pubsub#publish-options";
 const int VSQMessenger::kConnectionWaitMs = 10000;
-const int VSQMessenger::kKeepAliveTimeSec = 5;
+const int VSQMessenger::kKeepAliveTimeSec = 10;
 
 /******************************************************************************/
 VSQMessenger::VSQMessenger() {
