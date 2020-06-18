@@ -58,6 +58,7 @@ ApplicationWindow {
         anchors.left: parent.left
         anchors.right: parent.right
         variant: "error"
+        z: 1
     }
 
     AppStatus {
@@ -66,6 +67,7 @@ ApplicationWindow {
         anchors.left: parent.left
         anchors.right: parent.right
         variant: "info"
+        z: 2
     }
 
     MainView {
