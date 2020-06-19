@@ -3,32 +3,14 @@ import QtQuick.Controls 2.12
 
 Rectangle {
     property string variant
+    property alias label: label.text
     color: variant === "error" ? "red" : "gray"
+    height: visible ? 25 : 0
 
     Label {
         id: label
         anchors.centerIn: parent
         color: "white"
         font.pointSize: UiHelper.fixFontSz(12)
-    }
-
-    function show(text, interval) {
-        if (interval) {
-            closeTimer.interval = interval
-            closeTimer.start()
-        }
-
-        label.text = text;
-        height = 25
-    }
-
-    function hide() {
-        height = 0
-        label.text = ""
-    }
-
-    Timer {
-        id: closeTimer
-        onTriggered: hide()
     }
 }

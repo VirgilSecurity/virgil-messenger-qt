@@ -15,7 +15,6 @@ ApplicationWindow {
     minimumWidth: 320
     minimumHeight: 600
 
-    property int reconnectionCounter: 0
     property bool connectionError: false
 
     //
@@ -25,40 +24,58 @@ ApplicationWindow {
         target: Messenger
 
         onFireError: {
-            if (!connectionError) {
-                connectionError = true
-                infoStatus.show(qsTr("Connecting..."))
+
+            // If connection error is already shown then
+            // we just skip and continue showing the error.
+            if (connectionError) {
+                return
             }
+
+            connectionError = true
+
+            // Show "Connecting..." status in order to
+            // indicate that the app is trying to connect
+            // to the server.
+
+            infoStatus.visible = true
+
+           // Start timer of showing the "Connecting..."
+           // status at the end of which we gonna show the
+           // the "Network connection is unavailable"
+
+           reconnectingTryTimer.start()
         }
 
         onFireInform: {
         }
 
         onFireConnecting: {
-            if (connectionError && reconnectionCounter < 15) {
-                reconnectionCounter++
-                return
+            if (!connectionError) {
+                infoStatus.visible = true
             }
-
-            if (connectionError && reconnectionCounter >= 15) {
-                infoStatus.hide()
-                errorStatus.show(qsTr("Network connection is unavailable"))
-                return
-            }
-
-            infoStatus.show(qsTr("Connecting..."), 2000)
         }
 
         onFireReady: {
-            reconnectionCounter = 0
-            errorStatus.hide()
-            infoStatus.hide()
+            connectionError = false
+            infoStatus.visible = false
+            errorStatus.visible = false
         }
 
         onFireAddedContact: {
         }
 
         onFireNewMessage: {            
+        }
+    }
+
+    Timer {
+        id: reconnectingTryTimer
+        interval: 10000
+        onTriggered: {
+            if (connectionError) {
+                infoStatus.visible = false
+                errorStatus.visible = true
+            }
         }
     }
 
@@ -76,7 +93,9 @@ ApplicationWindow {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
+        label: qsTr("Network connection is unavailable")
         variant: "error"
+        visible: false
         z: 1
     }
 
@@ -86,15 +105,17 @@ ApplicationWindow {
         anchors.left: parent.left
         anchors.right: parent.right
         variant: "info"
+        label: qsTr("Connecting...")
+        visible: false
         z: 2
     }
 
     MainView {
+        id: mainView
         anchors.top: errorStatus.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        id: mainView
+        anchors.bottom: parent.bottom        
     }
 
     // Popup to show messages or warnings on the bottom postion of the screen
