@@ -24,58 +24,21 @@ ApplicationWindow {
         target: Messenger
 
         onFireError: {
-
-            // If connection error is already shown then
-            // we just skip and continue showing the error.
-            if (connectionError) {
-                return
-            }
-
-            connectionError = true
-
-            // Show "Connecting..." status in order to
-            // indicate that the app is trying to connect
-            // to the server.
-
-            infoStatus.visible = true
-
-           // Start timer of showing the "Connecting..."
-           // status at the end of which we gonna show the
-           // the "Network connection is unavailable"
-
-           reconnectingTryTimer.start()
         }
 
         onFireInform: {
         }
 
         onFireConnecting: {
-            if (!connectionError) {
-                infoStatus.visible = true
-            }
         }
 
         onFireReady: {
-            connectionError = false
-            infoStatus.visible = false
-            errorStatus.visible = false
         }
 
         onFireAddedContact: {
         }
 
         onFireNewMessage: {            
-        }
-    }
-
-    Timer {
-        id: reconnectingTryTimer
-        interval: 10000
-        onTriggered: {
-            if (connectionError) {
-                infoStatus.visible = false
-                errorStatus.visible = true
-            }
         }
     }
 
@@ -86,36 +49,9 @@ ApplicationWindow {
         }
     }
 
-    // THE MainView of the Application!
-
-    AppStatus {
-        id: errorStatus
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        label: qsTr("Network connection is unavailable")
-        variant: "error"
-        visible: false
-        z: 1
-    }
-
-    AppStatus {
-        id: infoStatus
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        variant: "info"
-        label: qsTr("Connecting...")
-        visible: false
-        z: 2
-    }
-
     MainView {
         id: mainView
-        anchors.top: errorStatus.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom        
+        anchors.fill: parent
     }
 
     // Popup to show messages or warnings on the bottom postion of the screen
