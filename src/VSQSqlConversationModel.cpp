@@ -50,7 +50,7 @@ VSQSqlConversationModel::_createTable() {
         "'recipient' TEXT NOT NULL,"
         "'timestamp' TEXT NOT NULL,"
         "'message' TEXT NOT NULL,"
-        "'is_read' BOOL NOT NULL,"
+        "'status' int NOT NULL,"
         "FOREIGN KEY('author') REFERENCES %2 ( name ),"
         "FOREIGN KEY('recipient') REFERENCES %3 ( name )"
         ")")
@@ -179,7 +179,7 @@ VSQSqlConversationModel::sendMessage(QString recipient, QString message) {
     newRecord.setValue("recipient", recipient);
     newRecord.setValue("timestamp", timestamp);
     newRecord.setValue("message", message);
-    newRecord.setValue("is_read", 1);
+    newRecord.setValue("status", MST_CREATED);
     if (!insertRecord(rowCount(), newRecord)) {
         qWarning() << "Failed to send message:" << lastError().text();
         return;
@@ -198,7 +198,7 @@ VSQSqlConversationModel::receiveMessage(const QString &sender, const QString &me
     newRecord.setValue("recipient", user());
     newRecord.setValue("timestamp", timestamp);
     newRecord.setValue("message", message);
-    newRecord.setValue("is_read", 0);
+    newRecord.setValue("status", MST_RECEIVED);
 
     if (!insertRowIntoTable(newRecord)) {
         qWarning() << "Failed to save received message:" << lastError().text();
@@ -236,7 +236,20 @@ VSQSqlConversationModel::setAsRead(const QString &user) {
     QSqlQuery model;
     QString query;
 
-    query = QString("UPDATE %1 SET is_read = 1 WHERE author = \"%2\"").arg(_tableName()).arg(user);
+    query = QString("UPDATE %1 SET status = %2 WHERE author = \"%3\"").arg(_tableName()).arg(MST_READ).arg(user);
+
+    model.prepare(query);
+
+    qDebug() << user << query << model.exec();
+}
+
+/******************************************************************************/
+Q_INVOKABLE void
+VSQSqlConversationModel::setMessageStatus(const QString &user, const EnMessageStatus status) {
+    QSqlQuery model;
+    QString query;
+
+    query = QString("UPDATE %1 SET status = %2 WHERE author = \"%3\"").arg(_tableName()).arg(status).arg(user);
 
     model.prepare(query);
 
@@ -249,7 +262,24 @@ VSQSqlConversationModel::getCountOfUnread(const QString &user) {
     QSqlQueryModel model;
     QString query;
 
-    query = QString("SELECT COUNT(*) AS C FROM %1 WHERE is_read = 0 AND recipient = \"%2\"").arg(_tableName()).arg(user);
+    query = QString("SELECT COUNT(*) AS C FROM %1 WHERE status = %2 AND recipient = \"%3\"").arg(_tableName()).arg(MST_RECEIVED).arg(user);
+
+    model.setQuery(query);
+    int c = model.record(0).value("C").toInt();
+
+    qDebug() << c << user << query;
+
+    return c;
+}
+
+
+/******************************************************************************/
+int
+VSQSqlConversationModel::getMessageCount(const QString &user, const EnMessageStatus status) {
+    QSqlQueryModel model;
+    QString query;
+
+    query = QString("SELECT COUNT(*) AS C FROM %1 WHERE status = %2 AND recipient = \"%3\"").arg(_tableName()).arg(status).arg(user);
 
     model.setQuery(query);
     int c = model.record(0).value("C").toInt();

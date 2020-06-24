@@ -45,6 +45,15 @@ class VSQSqlConversationModel : public QSqlTableModel
 public:
     VSQSqlConversationModel(QObject *parent = nullptr);
 
+    enum EnMessageStatus
+    {
+        MST_CREATED,
+        MST_SENT,
+        MST_RECEIVED,
+        MST_READ,
+        MST_FAILED
+    };
+
     QString
     user() const;
 
@@ -80,6 +89,12 @@ public:
 
     Q_INVOKABLE void
     setAsRead(const QString &user);
+
+    Q_INVOKABLE void
+    setMessageStatus(const QString &user, const EnMessageStatus status);
+
+    int
+    getMessageCount(const QString &user, const EnMessageStatus status);
 
 signals:
     void
