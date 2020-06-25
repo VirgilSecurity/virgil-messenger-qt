@@ -51,13 +51,19 @@ VSQSqlConversationModel::_createTable() {
         "'timestamp' TEXT NOT NULL,"
         "'message' TEXT NOT NULL,"
         "'status' int NOT NULL,"
+        "'message_id' TEXT NOT NULL,"
         "FOREIGN KEY('author') REFERENCES %2 ( name ),"
         "FOREIGN KEY('recipient') REFERENCES %3 ( name )"
-        ")")
-                .arg(_tableName())
-                .arg(_contactsTableName())
-                .arg(_contactsTableName()))) {
+        ")").arg(_tableName())
+            .arg(_contactsTableName())
+            .arg(_contactsTableName()))) {
         qFatal("Failed to query database: %s", qPrintable(query.lastError().text()));
+    }
+
+    QSqlQuery indexQuery;
+    if (!indexQuery.exec(
+        QString("CREATE UNIQUE INDEX IF NOT EXISTS idx_%1_message_id ON %1 (message_id);").arg(_tableName()))) {
+        qFatal("Failed to query database: %s", qPrintable(indexQuery.lastError().text()));
     }
 }
 
@@ -114,9 +120,9 @@ VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
         return QSqlTableModel::data(index, role);
    }
 
-    const int firstMessageInARow = Qt::UserRole + 4;
-    const int messageInARow = Qt::UserRole + 5;
-    const int day = Qt::UserRole + 6;
+    const int firstMessageInARow = Qt::UserRole + 6;
+    const int messageInARow = Qt::UserRole + 7;
+    const int day = Qt::UserRole + 8;
 
     const QSqlRecord currRecord = record(index.row());
 
@@ -163,15 +169,17 @@ VSQSqlConversationModel::roleNames() const {
     names[Qt::UserRole + 1] = "recipient";
     names[Qt::UserRole + 2] = "timestamp";
     names[Qt::UserRole + 3] = "message";
-    names[Qt::UserRole + 4] = "firstMessageInARow";
-    names[Qt::UserRole + 5] = "messageInARow";
-    names[Qt::UserRole + 6] = "day";
+    names[Qt::UserRole + 4] = "status";
+    names[Qt::UserRole + 5] = "message_id";
+    names[Qt::UserRole + 6] = "firstMessageInARow";
+    names[Qt::UserRole + 7] = "messageInARow";
+    names[Qt::UserRole + 8] = "day";
     return names;
 }
 
 /******************************************************************************/
 void
-VSQSqlConversationModel::sendMessage(QString recipient, QString message) {
+VSQSqlConversationModel::createMessage(QString recipient, QString message, QString messageId) {
     const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
 
     QSqlRecord newRecord = record();
@@ -180,6 +188,7 @@ VSQSqlConversationModel::sendMessage(QString recipient, QString message) {
     newRecord.setValue("timestamp", timestamp);
     newRecord.setValue("message", message);
     newRecord.setValue("status", MST_CREATED);
+    newRecord.setValue("message_id", messageId);
     if (!insertRecord(rowCount(), newRecord)) {
         qWarning() << "Failed to send message:" << lastError().text();
         return;
@@ -190,15 +199,16 @@ VSQSqlConversationModel::sendMessage(QString recipient, QString message) {
 
 /******************************************************************************/
 void
-VSQSqlConversationModel::receiveMessage(const QString &sender, const QString &message) {
+VSQSqlConversationModel::receiveMessage(const QString &messageId, const QString &sender, const QString &message) {
     const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
 
     QSqlRecord newRecord = record();
     newRecord.setValue("author", sender);
     newRecord.setValue("recipient", user());
     newRecord.setValue("timestamp", timestamp);
-    newRecord.setValue("message", message);
+    newRecord.setValue("message", message);    
     newRecord.setValue("status", MST_RECEIVED);
+    newRecord.setValue("message_id", messageId);
 
     if (!insertRowIntoTable(newRecord)) {
         qWarning() << "Failed to save received message:" << lastError().text();
@@ -232,28 +242,28 @@ VSQSqlConversationModel::setUser(const QString &user) {
 
 /******************************************************************************/
 Q_INVOKABLE void
-VSQSqlConversationModel::setAsRead(const QString &user) {
+VSQSqlConversationModel::setAsRead(const QString &messageId) {
     QSqlQuery model;
     QString query;
 
-    query = QString("UPDATE %1 SET status = %2 WHERE author = \"%3\"").arg(_tableName()).arg(MST_READ).arg(user);
+    query = QString("UPDATE %1 SET status = %2 WHERE message_id = \"%3\"").arg(_tableName()).arg(MST_READ).arg(messageId);
 
     model.prepare(query);
 
-    qDebug() << user << query << model.exec();
+    qDebug() << query << model.exec();
 }
 
 /******************************************************************************/
 Q_INVOKABLE void
-VSQSqlConversationModel::setMessageStatus(const QString &user, const EnMessageStatus status) {
+VSQSqlConversationModel::setMessageStatus(const QString &message_id, const EnMessageStatus status) {
     QSqlQuery model;
     QString query;
 
-    query = QString("UPDATE %1 SET status = %2 WHERE author = \"%3\"").arg(_tableName()).arg(status).arg(user);
+    query = QString("UPDATE %1 SET status = %2 WHERE message_id = \"%3\"").arg(_tableName()).arg(status).arg(message_id);
 
     model.prepare(query);
 
-    qDebug() << user << query << model.exec();
+    qDebug() << query << model.exec();
 }
 
 /******************************************************************************/

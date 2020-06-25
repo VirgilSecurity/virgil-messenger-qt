@@ -43,6 +43,7 @@
 
 #include <virgil/iot/qt/VSQIoTKit.h>
 #include <qxmpp/QXmppClient.h>
+#include <qxmpp/QXmppMessageReceiptManager.h>
 
 using namespace VirgilIoTKit;
 #include <virgil/iot/messenger/messenger.h>
@@ -154,6 +155,7 @@ signals:
 
 private slots:
     void onConnected();
+    void onMessageDelivered(const QString&, const QString&);
     void onDisconnected();
     void onError(QXmppClient::Error);
     void onMessageReceived(const QXmppMessage &message);
@@ -170,6 +172,7 @@ private slots:
 
 private:
     QXmppClient m_xmpp;
+    QXmppMessageReceiptManager* m_xmppReceiptManager;
     VSQSqlConversationModel *m_sqlConversations;
     VSQSqlChatModel *m_sqlChatModel;
 

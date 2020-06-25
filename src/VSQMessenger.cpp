@@ -46,12 +46,14 @@
 #include <qxmpp/QXmppMessage.h>
 #include <qxmpp/QXmppUtils.h>
 #include <qxmpp/QXmppPushEnableIq.h>
+#include <qxmpp/QXmppMessageReceiptManager.h>
 
 #include <QtConcurrent>
 #include <QStandardPaths>
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QtQml>
+#include <QUuid>
 
 #include <QuickFuture>
 Q_DECLARE_METATYPE(VSQMessenger::EnStatus)
@@ -93,6 +95,10 @@ VSQMessenger::VSQMessenger() {
     m_sqlConversations = new VSQSqlConversationModel(this);
     m_sqlChatModel = new VSQSqlChatModel(this);
 
+    // Add receipt messages extension
+    m_xmppReceiptManager = new QXmppMessageReceiptManager();
+    m_xmpp.addExtension(m_xmppReceiptManager);
+
     // Signal connection
     connect(this, SIGNAL(fireReadyToAddContact(QString)), this, SLOT(onAddContactToDB(QString)));
     connect(this, SIGNAL(fireError(QString)), this, SLOT(disconnect()));
@@ -107,10 +113,24 @@ VSQMessenger::VSQMessenger() {
     connect(&m_xmpp, SIGNAL(sslErrors(const QList<QSslError> &)), this, SLOT(onSslErrors(const QList<QSslError> &)));
     connect(&m_xmpp, SIGNAL(stateChanged(QXmppClient::State)), this, SLOT(onStateChanged(QXmppClient::State)));
 
+    connect(m_xmppReceiptManager, &QXmppMessageReceiptManager::messageDelivered, this, &VSQMessenger::onMessageDelivered);
+
     // Use Push notifications
 #if VS_PUSHNOTIFICATIONS
     VSQPushNotifications::instance().startMessaging();
 #endif
+}
+
+void
+VSQMessenger::onMessageDelivered(const QString& to, const QString& messageId) {
+
+    m_sqlConversations->setMessageStatus(messageId, VSQSqlConversationModel::EnMessageStatus::MST_RECEIVED);
+
+    // QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus",
+    //                          Qt::QueuedConnection, Q_ARG(const QString &, messageId),
+    //                          Q_ARG(const VSQSqlConversationModel::EnMessageStatus, VSQSqlConversationModel::EnMessageStatus::MST_RECEIVED));
+
+    qDebug() << "Message with id: '" << messageId << "' delivered to '" << to << "'";
 }
 
 /******************************************************************************/
@@ -184,7 +204,7 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
     logger->setMessageTypes(QXmppLogger::AnyMessage);
 
 #if USE_XMPP_LOGS
-    connect(logger, &QXmppLogger::message, [=](QXmppLogger::MessageType, const QString &text){
+    connect(logger, &QXmppLogger::message, [=](QXmppLogger::MessageType, const QString &text){        
         qDebug() << text;
     });
 
@@ -202,6 +222,7 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
     connect(&m_xmpp, &QXmppClient::disconnected, &loop, &QEventLoop::quit);
     connect(&m_xmpp, &QXmppClient::error, &loop, &QEventLoop::quit);
     connect( &timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+
     timer.start(kConnectionWaitMs);
     loop.exec();
 
@@ -652,7 +673,7 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
     m_sqlChatModel->createPrivateChat(sender);
 
     // Save message to DB
-    m_sqlConversations->receiveMessage(sender, decryptedString);
+    m_sqlConversations->receiveMessage(message.id(), sender, decryptedString);
 
     m_sqlChatModel->updateUnreadMessageCount(sender);
 
@@ -667,10 +688,6 @@ VSQMessenger::sendMessage(QString to, QString message) {
         static const size_t _encryptedMsgSzMax = 20 * 1024;
         uint8_t encryptedMessage[_encryptedMsgSzMax];
         size_t encryptedMessageSz = 0;
-
-        // Save message to DB in native thread
-        QMetaObject::invokeMethod(m_sqlConversations, "sendMessage", Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message));
-        QMetaObject::invokeMethod(m_sqlChatModel, "updateLastMessage", Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message));
 
         // Create JSON-formatted message to be sent
         QJsonObject payloadObject;
@@ -698,8 +715,20 @@ VSQMessenger::sendMessage(QString to, QString message) {
 
         // Send encrypted message
         QString toJID = to + "@" + _xmppURL();
+        QString fromJID = currentUser() + "@" + _xmppURL();
         QString encryptedStr = QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage));
-        m_xmpp.sendMessage(toJID, encryptedStr);
+
+        QXmppMessage msg(fromJID, toJID, encryptedStr);
+        msg.setReceiptRequested(true);
+        msg.setId(QUuid::createUuid().toString(QUuid::WithoutBraces).toLower());
+
+        // Save message to DB in native thread
+        QMetaObject::invokeMethod(m_sqlConversations, "createMessage",
+                                  Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message), Q_ARG(QString, msg.id()));
+        QMetaObject::invokeMethod(m_sqlChatModel, "updateLastMessage",
+                                  Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message));
+
+        m_xmpp.sendPacket(msg);
 
         return MRES_OK;
     });

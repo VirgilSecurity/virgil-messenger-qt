@@ -82,16 +82,16 @@ public:
     roleNames() const override;
 
     Q_INVOKABLE void
-    sendMessage(QString recipient, QString message);
+    createMessage(QString recipient, QString message, QString externalId);
 
     Q_INVOKABLE void
-    receiveMessage(const QString &sender, const QString &message);
+    receiveMessage(const QString &messageId, const QString &sender, const QString &message);
 
     Q_INVOKABLE void
-    setAsRead(const QString &user);
+    setAsRead(const QString &messageId);
 
     Q_INVOKABLE void
-    setMessageStatus(const QString &user, const EnMessageStatus status);
+    setMessageStatus(const QString &messageId, const EnMessageStatus status);
 
     int
     getMessageCount(const QString &user, const EnMessageStatus status);
