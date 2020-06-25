@@ -91,10 +91,10 @@ public:
     setAsRead(const QString &messageId);
 
     Q_INVOKABLE void
-    setMessageStatus(const QString &messageId, const EnMessageStatus status);
+    setMessageStatus(QString messageId, VSQSqlConversationModel::EnMessageStatus status);
 
     int
-    getMessageCount(const QString &user, const EnMessageStatus status);
+    getMessageCount(const QString &user, const VSQSqlConversationModel::EnMessageStatus status);
 
 signals:
     void

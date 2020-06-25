@@ -39,6 +39,7 @@
 
 #include <VSQMessenger.h>
 #include <VSQPushNotifications.h>
+#include <VSQSqlConversationModel.h>
 
 #include <android/VSQAndroid.h>
 #include <android/VSQAndroid.h>
@@ -723,12 +724,20 @@ VSQMessenger::sendMessage(QString to, QString message) {
         msg.setId(QUuid::createUuid().toString(QUuid::WithoutBraces).toLower());
 
         // Save message to DB in native thread
-        QMetaObject::invokeMethod(m_sqlConversations, "createMessage",
-                                  Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message), Q_ARG(QString, msg.id()));
-        QMetaObject::invokeMethod(m_sqlChatModel, "updateLastMessage",
-                                  Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message));
 
-        m_xmpp.sendPacket(msg);
+        QMetaObject::invokeMethod(m_sqlConversations, "createMessage",
+            Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message), Q_ARG(QString, msg.id()));
+
+        QMetaObject::invokeMethod(m_sqlChatModel, "updateLastMessage",
+            Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message));
+
+        if (m_xmpp.sendPacket(msg)) {
+            QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus", Qt::QueuedConnection, Q_ARG(QString, msg.id()),
+                Q_ARG(VSQSqlConversationModel::EnMessageStatus, VSQSqlConversationModel::EnMessageStatus::MST_SENT));
+        } else {
+            QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus", Qt::QueuedConnection, Q_ARG(QString, msg.id()),
+                Q_ARG(VSQSqlConversationModel::EnMessageStatus, VSQSqlConversationModel::EnMessageStatus::MST_FAILED));
+        }
 
         return MRES_OK;
     });

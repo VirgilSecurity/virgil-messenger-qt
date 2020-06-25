@@ -17,6 +17,7 @@ Control {
     property bool firstMessageInARow: true
     property var variant
     property var timeStamp
+    property string status: ""
 
     Row {
         id: row
@@ -141,6 +142,27 @@ Control {
                     }
                 }
             }
+
+            Label {
+                id: statusLabel
+                height: 16
+                text: getStatusById(status)
+                color: Theme.labelColor
+                font.pixelSize: UiHelper.fixFontSz(12)
+            }
+        }
+    }
+
+    function getStatusById(statusId) {
+
+        console.log(statusId)
+
+        switch (statusId) {
+            case "0": return "sending"
+            case "1": return "sent"
+            case "2": return "delivered"
+            case "4": return "failed"
+            default: return ""
         }
     }
 

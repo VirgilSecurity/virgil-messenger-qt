@@ -92,6 +92,7 @@ Page {
             variant: model.author === Messenger.currentUser ? "light" : "dark"
             messageInARow: model.messageInARow
             firstMessageInARow: model.firstMessageInARow
+            status: model.status
         }
 
         onCountChanged: {

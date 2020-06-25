@@ -40,6 +40,8 @@
 #include <QSqlRecord>
 #include <QSqlQuery>
 
+Q_DECLARE_METATYPE(VSQSqlConversationModel::EnMessageStatus)
+
 /******************************************************************************/
 void
 VSQSqlConversationModel::_createTable() {
@@ -84,6 +86,8 @@ VSQSqlConversationModel::_update() {
 /******************************************************************************/
 VSQSqlConversationModel::VSQSqlConversationModel(QObject *parent) :
     QSqlTableModel(parent) {
+
+    qRegisterMetaType<VSQSqlConversationModel::EnMessageStatus>("VSQSqlConversationModel::EnMessageStatus");
 }
 
 /******************************************************************************/
@@ -195,6 +199,7 @@ VSQSqlConversationModel::createMessage(QString recipient, QString message, QStri
     }
 
     submitAll();
+    select();
 }
 
 /******************************************************************************/
@@ -255,15 +260,17 @@ VSQSqlConversationModel::setAsRead(const QString &messageId) {
 
 /******************************************************************************/
 Q_INVOKABLE void
-VSQSqlConversationModel::setMessageStatus(const QString &message_id, const EnMessageStatus status) {
+VSQSqlConversationModel::setMessageStatus(QString messageId, VSQSqlConversationModel::EnMessageStatus status) {
     QSqlQuery model;
     QString query;
 
-    query = QString("UPDATE %1 SET status = %2 WHERE message_id = \"%3\"").arg(_tableName()).arg(status).arg(message_id);
+    query = QString("UPDATE %1 SET status = %2 WHERE message_id = \"%3\"").arg(_tableName()).arg(status).arg(messageId);
 
     model.prepare(query);
 
     qDebug() << query << model.exec();
+
+    select();
 }
 
 /******************************************************************************/
