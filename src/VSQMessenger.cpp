@@ -577,7 +577,18 @@ VSQMessenger::onSubscribePushNotifications(bool enable) {
 void
 VSQMessenger::onConnected() {
     onSubscribePushNotifications(true);
+    _sendFailedMessages();
     emit fireReady();
+}
+
+
+/******************************************************************************/
+void
+VSQMessenger::_sendFailedMessages() {
+   QList<VSQSqlConversationModel::StMessage*> messages = m_sqlConversations->getMessages(m_user,VSQSqlConversationModel::EnMessageStatus::MST_FAILED);
+   for(int i = 0; i < messages.length(); i++){
+       sendMessage(messages[i]->message_id, messages[i]->recipient, messages[i]->message);
+   }
 }
 
 /******************************************************************************/
@@ -682,9 +693,10 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
     emit fireNewMessage(sender, decryptedString);
 }
 
+
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::sendMessage(QString to, QString message) {
+VSQMessenger::sendMessage(QString messageId, QString to, QString message) {
     return QtConcurrent::run([=]() -> EnResult {
         static const size_t _encryptedMsgSzMax = 20 * 1024;
         uint8_t encryptedMessage[_encryptedMsgSzMax];
@@ -721,7 +733,7 @@ VSQMessenger::sendMessage(QString to, QString message) {
 
         QXmppMessage msg(fromJID, toJID, encryptedStr);
         msg.setReceiptRequested(true);
-        msg.setId(QUuid::createUuid().toString(QUuid::WithoutBraces).toLower());
+        msg.setId(messageId);
 
         // Save message to DB in native thread
 
@@ -741,6 +753,12 @@ VSQMessenger::sendMessage(QString to, QString message) {
 
         return MRES_OK;
     });
+}
+
+/******************************************************************************/
+QFuture<VSQMessenger::EnResult>
+VSQMessenger::sendMessage(QString to, QString message) {
+    sendMessage(QUuid::createUuid().toString(QUuid::WithoutBraces).toLower(), to, message);
 }
 
 /******************************************************************************/

@@ -194,7 +194,7 @@ VSQSqlConversationModel::createMessage(QString recipient, QString message, QStri
     newRecord.setValue("status", MST_CREATED);
     newRecord.setValue("message_id", messageId);
     if (!insertRecord(rowCount(), newRecord)) {
-        qWarning() << "Failed to send message:" << lastError().text();
+        qWarning() << "Failed to create message:" << lastError().text();
         return;
     }
 
@@ -260,7 +260,7 @@ VSQSqlConversationModel::setAsRead(const QString &messageId) {
 
 /******************************************************************************/
 Q_INVOKABLE void
-VSQSqlConversationModel::setMessageStatus(QString messageId, VSQSqlConversationModel::EnMessageStatus status) {
+VSQSqlConversationModel::setMessageStatus(const QString &messageId, const VSQSqlConversationModel::EnMessageStatus status) {
     QSqlQuery model;
     QString query;
 
@@ -320,6 +320,36 @@ VSQSqlConversationModel::getLastMessage(const QString &user) const {
     qDebug() << message << user << query;
 
     return message;
+}
+
+/******************************************************************************/
+QList<VSQSqlConversationModel::StMessage*>
+VSQSqlConversationModel::getMessages(const QString &user, const EnMessageStatus status) {
+    QSqlQueryModel model;
+    QString query;
+
+    QList<VSQSqlConversationModel::StMessage*> messages;
+
+    query = QString("SELECT message, recipient, message_id FROM %1 WHERE status = %2 AND author = \"%3\"").arg(_tableName()).arg(status).arg(user);
+
+    model.setQuery(query);
+    int c = model.rowCount();
+
+    if (c == 0) {
+        return messages;
+    }
+
+    for (int i = 0; i < c; i++){
+        VSQSqlConversationModel::StMessage *message;
+        message->message = model.record(i).value("message").toString();
+        message->recipient = model.record(i).value("recipient").toString();
+        message->message_id = model.record(i).value("message_id").toString();
+        messages.append(message);
+    }
+
+    qDebug() << c << user << query;
+
+    return messages;
 }
 
 /******************************************************************************/

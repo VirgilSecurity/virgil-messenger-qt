@@ -125,6 +125,9 @@ public slots:
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     sendMessage(QString to, QString message);
 
+    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
+    sendMessage(QString messageId, QString to, QString message);
+
     Q_INVOKABLE void
     setStatus(VSQMessenger::EnStatus status);
 
@@ -237,6 +240,8 @@ private:
 
     QString
     _caBundleFile();
+
+    void _sendFailedMessages();
 };
 
 #endif // VIRGIL_IOTKIT_QT_MESSENGER_H

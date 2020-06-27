@@ -54,6 +54,13 @@ public:
         MST_FAILED
     };
 
+    struct StMessage
+    {
+        QString message_id;
+        QString message;
+        QString recipient;
+    };
+
     QString
     user() const;
 
@@ -91,10 +98,13 @@ public:
     setAsRead(const QString &messageId);
 
     Q_INVOKABLE void
-    setMessageStatus(QString messageId, VSQSqlConversationModel::EnMessageStatus status);
+    setMessageStatus(const QString &messageId, const VSQSqlConversationModel::EnMessageStatus status);
 
     int
     getMessageCount(const QString &user, const VSQSqlConversationModel::EnMessageStatus status);
+
+    QList<StMessage*>
+    getMessages(const QString &user, const EnMessageStatus status);
 
 signals:
     void
