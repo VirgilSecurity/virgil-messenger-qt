@@ -587,7 +587,7 @@ void
 VSQMessenger::_sendFailedMessages() {
    QList<VSQSqlConversationModel::StMessage*> messages = m_sqlConversations->getMessages(m_user,VSQSqlConversationModel::EnMessageStatus::MST_FAILED);
    for(int i = 0; i < messages.length(); i++){
-       sendMessage(messages[i]->message_id, messages[i]->recipient, messages[i]->message);
+       sendMessage(false, messages[i]->message_id, messages[i]->recipient, messages[i]->message);
    }
 }
 
@@ -696,7 +696,7 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::sendMessage(QString messageId, QString to, QString message) {
+VSQMessenger::sendMessage(bool createNew, QString messageId, QString to, QString message) {
     return QtConcurrent::run([=]() -> EnResult {
         static const size_t _encryptedMsgSzMax = 20 * 1024;
         uint8_t encryptedMessage[_encryptedMsgSzMax];
@@ -736,9 +736,10 @@ VSQMessenger::sendMessage(QString messageId, QString to, QString message) {
         msg.setId(messageId);
 
         // Save message to DB in native thread
-
-        QMetaObject::invokeMethod(m_sqlConversations, "createMessage",
-            Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message), Q_ARG(QString, msg.id()));
+        if(createNew){
+            QMetaObject::invokeMethod(m_sqlConversations, "createMessage",
+                Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message), Q_ARG(QString, msg.id()));
+        }
 
         QMetaObject::invokeMethod(m_sqlChatModel, "updateLastMessage",
             Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message));
@@ -758,7 +759,7 @@ VSQMessenger::sendMessage(QString messageId, QString to, QString message) {
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
 VSQMessenger::sendMessage(QString to, QString message) {
-    sendMessage(QUuid::createUuid().toString(QUuid::WithoutBraces).toLower(), to, message);
+    sendMessage(true, QUuid::createUuid().toString(QUuid::WithoutBraces).toLower(), to, message);
 }
 
 /******************************************************************************/

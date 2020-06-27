@@ -126,7 +126,7 @@ public slots:
     sendMessage(QString to, QString message);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    sendMessage(QString messageId, QString to, QString message);
+    sendMessage(bool createNew, QString messageId, QString to, QString message);
 
     Q_INVOKABLE void
     setStatus(VSQMessenger::EnStatus status);
