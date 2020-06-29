@@ -145,18 +145,15 @@ Control {
 
             Label {
                 id: statusLabel
-                height: 16
+                height: 12
                 text: getStatusById(status)
-                color: Theme.labelColor
-                font.pixelSize: UiHelper.fixFontSz(12)
+                color: status === "4" ? "red" : Theme.labelColor
+                font.pixelSize: UiHelper.fixFontSz(11)
             }
         }
     }
 
     function getStatusById(statusId) {
-
-        console.log(statusId)
-
         switch (statusId) {
             case "0": return "sending"
             case "1": return "sent"

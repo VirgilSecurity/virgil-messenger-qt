@@ -687,7 +687,9 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
     // Save message to DB
     m_sqlConversations->receiveMessage(message.id(), sender, decryptedString);
 
-    m_sqlChatModel->updateUnreadMessageCount(sender);
+    m_sqlChatModel->updateLastMessage(sender, decryptedString);
+
+    m_sqlChatModel->updateUnreadMessageCount(sender);    
 
     // Inform system about new message
     emit fireNewMessage(sender, decryptedString);
@@ -759,7 +761,7 @@ VSQMessenger::sendMessage(bool createNew, QString messageId, QString to, QString
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
 VSQMessenger::sendMessage(QString to, QString message) {
-    sendMessage(true, QUuid::createUuid().toString(QUuid::WithoutBraces).toLower(), to, message);
+    return sendMessage(true, QUuid::createUuid().toString(QUuid::WithoutBraces).toLower(), to, message);
 }
 
 /******************************************************************************/

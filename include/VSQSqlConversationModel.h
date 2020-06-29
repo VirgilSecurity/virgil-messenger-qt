@@ -95,7 +95,7 @@ public:
     receiveMessage(const QString &messageId, const QString &sender, const QString &message);
 
     Q_INVOKABLE void
-    setAsRead(const QString &messageId);
+    setAsRead(const QString &author);
 
     Q_INVOKABLE void
     setMessageStatus(const QString &messageId, const VSQSqlConversationModel::EnMessageStatus status);

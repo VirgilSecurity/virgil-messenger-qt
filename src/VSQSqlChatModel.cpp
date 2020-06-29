@@ -185,7 +185,7 @@ VSQSqlChatModel::updateUnreadMessageCount(QString chatId) {
     QString selectQuery =
             "SELECT COUNT(*) AS 'count' "
             "  FROM '%1' "
-            " WHERE is_read = 0 AND author = '%2'";
+            " WHERE status = 2 AND author = '%2'";
 
     QSqlQuery query1(selectQuery.arg("Conversations_" + m_userId, chatId));
     selectModel.setQuery(query1);

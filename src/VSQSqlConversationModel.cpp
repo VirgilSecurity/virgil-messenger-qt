@@ -247,11 +247,11 @@ VSQSqlConversationModel::setUser(const QString &user) {
 
 /******************************************************************************/
 Q_INVOKABLE void
-VSQSqlConversationModel::setAsRead(const QString &messageId) {
+VSQSqlConversationModel::setAsRead(const QString &author) {
     QSqlQuery model;
     QString query;
 
-    query = QString("UPDATE %1 SET status = %2 WHERE message_id = \"%3\"").arg(_tableName()).arg(MST_READ).arg(messageId);
+    query = QString("UPDATE %1 SET status = %2 WHERE author = \"%3\"").arg(_tableName()).arg(MST_READ).arg(author);
 
     model.prepare(query);
 
@@ -340,7 +340,7 @@ VSQSqlConversationModel::getMessages(const QString &user, const EnMessageStatus 
     }
 
     for (int i = 0; i < c; i++){
-        VSQSqlConversationModel::StMessage *message;
+        VSQSqlConversationModel::StMessage *message = new VSQSqlConversationModel::StMessage();
         message->message = model.record(i).value("message").toString();
         message->recipient = model.record(i).value("recipient").toString();
         message->message_id = model.record(i).value("message_id").toString();
