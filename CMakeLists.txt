@@ -134,25 +134,32 @@ endif()
 #
 #   Fetch prebuilt firebase library
 #
-set(PREBUILT_FIREBASE_SDK_VERSION "6.11.0")
-set(PREBUILT_FIREBASE_SDK_ARCHIVE
-    "${CMAKE_CURRENT_LIST_DIR}/ext/downloads/firebase_cpp_sdk_${PREBUILT_FIREBASE_SDK_VERSION}.zip"
-)
+option(PREBUILT_SKIP_FETCH "Skip fetching and installing prebilt binaries" OFF)
+if(NOT PREBUILT_SKIP_FETCH)
+    set(PREBUILT_FIREBASE_SDK_VERSION "6.11.0")
+    set(PREBUILT_FIREBASE_SDK_ARCHIVE
+        "${CMAKE_CURRENT_LIST_DIR}/ext/downloads/firebase_cpp_sdk_${PREBUILT_FIREBASE_SDK_VERSION}.zip"
+    )
 
-if(NOT EXISTS "${PREBUILT_FIREBASE_SDK_ARCHIVE}")
-    file(DOWNLOAD
-        "https://dl.google.com/firebase/sdk/cpp/firebase_cpp_sdk_${PREBUILT_FIREBASE_SDK_VERSION}.zip"
-        "${PREBUILT_FIREBASE_SDK_ARCHIVE}"
-        SHOW_PROGRESS
+    if(NOT EXISTS "${PREBUILT_FIREBASE_SDK_ARCHIVE}")
+        file(DOWNLOAD
+            "https://dl.google.com/firebase/sdk/cpp/firebase_cpp_sdk_${PREBUILT_FIREBASE_SDK_VERSION}.zip"
+            "${PREBUILT_FIREBASE_SDK_ARCHIVE}"
+            SHOW_PROGRESS
+        )
+    endif()
+
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E rm -fr -- *
+        COMMAND ${CMAKE_COMMAND} -E tar xzf "${PREBUILT_CORE_ARCHIVE}"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/ext"
+    )
+
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E tar xzf "${PREBUILT_FIREBASE_SDK_ARCHIVE}"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt"
     )
 endif()
-
-execute_process(
-    COMMAND ${CMAKE_COMMAND} -E rm -fr -- *
-    COMMAND ${CMAKE_COMMAND} -E tar xzf "${PREBUILT_CORE_ARCHIVE}"
-    COMMAND ${CMAKE_COMMAND} -E tar xzf "${PREBUILT_FIREBASE_SDK_ARCHIVE}"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/ext"
-)
 
 #
 #   Define prebuilt folders
@@ -174,7 +181,7 @@ endif()
 
 set(PREBUILT_COMMON_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt")
 set(PREBUILT_QT_DIR "${PREBUILT_COMMON_DIR}/qt")
-set(PREBUILT_BASE_DIR "${PREBUILT_COMMON_DIR}/${PREBUILT_PLATFORM_NAME}/release/installed/usr/local")
+set(PREBUILT_BASE_DIR "${PREBUILT_COMMON_DIR}/${PREBUILT_PLATFORM_NAME}/debug/installed/usr/local")
 set(PREBUILT_INCLUDE_DIR "${PREBUILT_BASE_DIR}/include")
 set(PREBUILT_LIB_DIR "${PREBUILT_BASE_DIR}/lib")
 
@@ -251,7 +258,6 @@ target_link_libraries(virgil-messenger-qt
         qxmpp
         vs-module-logger
         vs-module-messenger
-        vs-messenger-crypto
         vs-messenger-internal
 
         # Compiler options
