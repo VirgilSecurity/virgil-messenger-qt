@@ -84,7 +84,7 @@ if (APPLE)
     endif()
 
     if(SIGN_CERT_ID STREQUAL "")
-        message(FATAL_ERROR "SIGN_CERT must be set. Take a look 'security find-identity -p codesigning'. You have to add -DSIGN_CERT_ID=<hex value>")
+        message(FATAL_ERROR "SIGN_CERT_ID must be set. Take a look 'security find-identity -p codesigning'. You have to add -DSIGN_CERT_ID=<hex value>")
     endif()
 endif()
 
