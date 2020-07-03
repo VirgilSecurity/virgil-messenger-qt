@@ -98,5 +98,6 @@
         <file>qml/resources/sounds/message-received.wav</file>
         <file>qml/resources/sounds/message-sent.wav</file>
         <file>qml/components/AppStatus.qml</file>
+        <file>qml/pages/BackupKeyPage.qml</file>
     </qresource>
 </RCC>

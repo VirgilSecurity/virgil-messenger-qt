@@ -42,12 +42,8 @@
 #include <QSemaphore>
 
 #include <qxmpp/QXmppClient.h>
-<<<<<<< HEAD
 #include <qxmpp/QXmppMessageReceiptManager.h>
 
-using namespace VirgilIoTKit;
-=======
->>>>>>> cmake-crypto-c
 #include <virgil/iot/messenger/messenger.h>
 
 #include "VSQSqlConversationModel.h"
@@ -104,6 +100,12 @@ public slots:
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     signIn(QString user);
+
+    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
+    backupUserKey(QString password);
+
+    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
+    signInWithBackupKey(QString username, QString password);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     signUp(QString user);

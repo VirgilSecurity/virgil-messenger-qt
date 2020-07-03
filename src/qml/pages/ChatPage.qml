@@ -110,7 +110,6 @@ Page {
         }
     }
 
-
     footer: ChatMessageInput {
         id: footerControl
         onMessageSending: {

@@ -93,7 +93,7 @@ ApplicationWindow {
         showPopup(message, "#FFFACD", "#00", true, false)
     }
 
-    function showPopupSucces(message) {
+    function showPopupSuccess(message) {
         showPopup(message, "#66CDAA", "#00", true, false)
     }
 

@@ -16,6 +16,7 @@ Column {
     property alias text: formField.text
     property alias placeholder: formField.placeholderText
     property alias inputHint: formField.inputMethodHints
+    property bool password: false
 
     FormLabel {
         id: formLabel
@@ -27,6 +28,7 @@ Column {
         height: 40
         leftPadding: 15
         rightPadding: 15
+        echoMode: password ? TextField.Password : TextField.Normal
         font.pointSize: UiHelper.fixFontSz(15)
         color: Theme.primaryTextColor
 

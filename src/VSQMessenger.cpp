@@ -287,6 +287,50 @@ VSQMessenger::currentUser() {
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
+VSQMessenger::backupUserKey(QString password) {
+    // m_userId = _prepareLogin(user);
+    return QtConcurrent::run([=]() -> EnResult {
+
+        // Upload current user key to the cloud
+        if (VS_CODE_OK != vs_messenger_virgil_set_sign_in_password(password.toStdString().c_str())) {
+            emit fireError(tr("Cannot set sign in password"));
+            return VSQMessenger::EnResult::MRES_ERR_ENCRYPTION;
+        }
+
+        return MRES_OK;
+    });
+}
+
+/******************************************************************************/
+QFuture<VSQMessenger::EnResult>
+VSQMessenger::signInWithBackupKey(QString username, QString password) {
+    // m_userId = _prepareLogin(user);
+    return QtConcurrent::run([=]() -> EnResult {
+
+        vs_messenger_virgil_user_creds_t creds;
+        memset(&creds, 0, sizeof (creds));
+
+        // Download private key from the cloud
+        if (VS_CODE_OK != vs_messenger_virgil_sign_in_with_password(username.toStdString().c_str(), password.toStdString().c_str(), &creds)) {
+            emit fireError(tr("Cannot set sign in password"));
+            return MRES_ERR_SIGNUP;
+        }
+
+        // Save credentials
+        _saveCredentials(username, creds);
+
+        // Sign In user, using Virgil Service
+        if (VS_CODE_OK != vs_messenger_virgil_sign_in(&creds)) {
+            emit fireError(tr("Cannot Sign In user"));
+            return MRES_ERR_SIGNIN;
+        }
+
+        return _connect(m_user, m_userId) ? MRES_OK : MRES_ERR_SIGNIN;;
+    });
+}
+
+/******************************************************************************/
+QFuture<VSQMessenger::EnResult>
 VSQMessenger::signIn(QString user) {
     m_userId = _prepareLogin(user);
     return QtConcurrent::run([=]() -> EnResult {
@@ -311,6 +355,8 @@ VSQMessenger::signIn(QString user) {
         return _connect(m_user, m_userId) ? MRES_OK : MRES_ERR_SIGNIN;
     });
 }
+
+
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>

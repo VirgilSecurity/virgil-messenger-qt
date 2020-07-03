@@ -128,12 +128,16 @@ Control {
         stackView.push("./pages/SignInAsPage.qml", params)
     }
 
-    function showDownloadKey() {
-        stackView.push("./pages/DownloadKeyPage.qml")
+    function showDownloadKey(params) {
+        stackView.push("./pages/DownloadKeyPage.qml", params)
     }
 
     function showRegister() {
         stackView.push("./pages/RegisterPage.qml")
+    }
+
+    function showBackupKey() {
+        stackView.push("./pages/BackupKeyPage.qml")
     }
 
     // Depricated method, use showChatWith instead.

@@ -60,12 +60,12 @@ Page {
             objectName: "btnRegister"
             onClicked: mainView.showRegister()
         }
-/*
+
         FormSecondaryButton {
             text: "Log In"
             onClicked: mainView.showSignIn()
         }
-*/
+
     }
 
     footer: Footer {}
