@@ -91,7 +91,12 @@ function prepare_libraries() {
            rm ${ARCH_NAME}
         popd
     fi
-    prepare_firebase
+
+    if [ -d ${INSTALL_DIR}/prebuilt/firebase_cpp_sdk ]; then
+      print_message "Firebase SDK exist. skip..."
+    else
+      prepare_firebase
+    fi
 }
 
 #***************************************************************************************
