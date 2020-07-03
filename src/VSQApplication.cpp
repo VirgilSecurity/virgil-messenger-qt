@@ -55,8 +55,6 @@ const QString VSQApplication::kVersion = "unknown";
 
 /******************************************************************************/
 VSQApplication::VSQApplication() {
-    m_netifUDPbcast = QSharedPointer<VSQUdpBroadcast>::create();
-
 #if (MACOS)
     VSQMacos::instance().startUpdatesTimer();
 #endif
@@ -68,18 +66,7 @@ VSQApplication::run(const QString &basePath) {
 
     VSQUiHelper uiHelper;
 
-    auto features = VSQFeatures() << VSQFeatures::SNAP_INFO_CLIENT << VSQFeatures::SNAP_SNIFFER;
-    auto impl = VSQImplementations() << m_netifUDPbcast;
-    auto roles = VSQDeviceRoles() << VirgilIoTKit::VS_SNAP_DEV_CONTROL;
-    auto appConfig = VSQAppConfig() << VSQManufactureId() << VSQDeviceType() << VSQDeviceSerial()
-                                    << VirgilIoTKit::VS_LOGLEV_DEBUG << roles << VSQSnapSnifferQmlConfig();
-
-    if (!VSQIoTKitFacade::instance().init(features, impl, appConfig)) {
-        VS_LOG_CRITICAL("Unable to initialize Virgil IoT KIT");
-        return -1;
-    }
-
-    QQmlContext *context = m_engine.rootContext();    
+    QQmlContext *context = m_engine.rootContext();
     if (basePath.isEmpty()) {
         m_engine.setBaseUrl(QUrl(QStringLiteral("qrc:/qml/")));
     } else {
@@ -90,8 +77,6 @@ VSQApplication::run(const QString &basePath) {
     context->setContextProperty("UiHelper", &uiHelper);
     context->setContextProperty("app", this);
     context->setContextProperty("clipboard", new VSQClipboardProxy(QGuiApplication::clipboard()));
-    context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
-    context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
     context->setContextProperty("Messenger", &m_messenger);
     context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
     context->setContextProperty("ChatModel", &m_messenger.getChatModel());
@@ -100,7 +85,10 @@ VSQApplication::run(const QString &basePath) {
     fon.setPointSize(1.5 * QGuiApplication::font().pointSize());
     QGuiApplication::setFont(fon);
 
-    connect(QGuiApplication::instance(), SIGNAL(applicationStateChanged(Qt::ApplicationState)), this, SLOT(onApplicationStateChanged(Qt::ApplicationState)));
+    connect(QGuiApplication::instance(),
+            SIGNAL(applicationStateChanged(Qt::ApplicationState)),
+            this,
+            SLOT(onApplicationStateChanged(Qt::ApplicationState)));
 
     reloadQml();
 
@@ -144,8 +132,10 @@ VSQApplication::sendReport() {
 /******************************************************************************/
 void
 VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
-    static bool _deactivated = false;
     qDebug() << state;
+
+#if VS_PUSHNOTIFICATIONS
+    static bool _deactivated = false;
 
     if (Qt::ApplicationInactive == state) {
         _deactivated = true;
@@ -158,6 +148,7 @@ VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
             this->m_messenger.checkState();
         });
     }
+#endif // VS_ANDROID
 }
 
 

@@ -84,7 +84,7 @@ if (APPLE)
     endif()
 
     if(SIGN_CERT_ID STREQUAL "")
-        message(FATAL_ERROR "SIGN_CERT must be set. Take a look 'security find-identity -p codesigning'. You have to add -DSIGN_CERT_ID=<hex value>")
+        message(FATAL_ERROR "SIGN_CERT_ID must be set. Take a look 'security find-identity -p codesigning'. You have to add -DSIGN_CERT_ID=<hex value>")
     endif()
 endif()
 
@@ -102,11 +102,6 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 #
-#   QuickFuture
-#
-set(QUICKFUTURE_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/quickfuture/src")
-
-#
 #   Check submodules
 #
 if(NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/ext/quickfuture/.git")
@@ -122,27 +117,49 @@ if(NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/ext/quickpromise/.git")
 endif()
 
 #
-#   Fetch prebuilt libraries
+#   Fetch prebuilt core libraries
 #
 file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/VERSION_CORE" VERSION_CORE_CONTENT)
 list(GET VERSION_CORE_CONTENT 0 VERSION_CORE)
+set(PREBUILT_CORE_ARCHIVE "${CMAKE_CURRENT_LIST_DIR}/ext/downloads/prebuilt-${VERSION_CORE}.tgz")
 
-FetchContent_Declare(
-    prebuilt_core
-    URL "https://virgilsecurity.bintray.com/iotl-demo-cdn/prebuilt-${VERSION_CORE}.tgz"
-    SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt"
-)
-
-FetchContent_Declare(
-    prebuilt_firebase
-    URL "https://dl.google.com/firebase/sdk/cpp/firebase_cpp_sdk_6.11.0.zip"
-    SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt/firebase_cpp_sdk"
-)
-
-if(NOT prebuilt_core_POPULATED OR NOT prebuilt_firebase_POPULATED)
-    message(STATUS "Fetching prebuild libraries...")
+if(NOT EXISTS "${PREBUILT_CORE_ARCHIVE}")
+    file(DOWNLOAD
+        "https://virgilsecurity.bintray.com/iotl-demo-cdn/prebuilt-${VERSION_CORE}.tgz"
+        "${PREBUILT_CORE_ARCHIVE}"
+        SHOW_PROGRESS
+    )
 endif()
-FetchContent_MakeAvailable(prebuilt_core prebuilt_firebase)
+
+#
+#   Fetch prebuilt firebase library
+#
+option(PREBUILT_SKIP_FETCH "Skip fetching and installing prebilt binaries" OFF)
+if(NOT PREBUILT_SKIP_FETCH)
+    set(PREBUILT_FIREBASE_SDK_VERSION "6.11.0")
+    set(PREBUILT_FIREBASE_SDK_ARCHIVE
+        "${CMAKE_CURRENT_LIST_DIR}/ext/downloads/firebase_cpp_sdk_${PREBUILT_FIREBASE_SDK_VERSION}.zip"
+    )
+
+    if(NOT EXISTS "${PREBUILT_FIREBASE_SDK_ARCHIVE}")
+        file(DOWNLOAD
+            "https://dl.google.com/firebase/sdk/cpp/firebase_cpp_sdk_${PREBUILT_FIREBASE_SDK_VERSION}.zip"
+            "${PREBUILT_FIREBASE_SDK_ARCHIVE}"
+            SHOW_PROGRESS
+        )
+    endif()
+
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E rm -fr -- *
+        COMMAND ${CMAKE_COMMAND} -E tar xzf "${PREBUILT_CORE_ARCHIVE}"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/ext"
+    )
+
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E tar xzf "${PREBUILT_FIREBASE_SDK_ARCHIVE}"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt"
+    )
+endif()
 
 #
 #   Define prebuilt folders
@@ -167,6 +184,11 @@ set(PREBUILT_QT_DIR "${PREBUILT_COMMON_DIR}/qt")
 set(PREBUILT_BASE_DIR "${PREBUILT_COMMON_DIR}/${PREBUILT_PLATFORM_NAME}/release/installed/usr/local")
 set(PREBUILT_INCLUDE_DIR "${PREBUILT_BASE_DIR}/include")
 set(PREBUILT_LIB_DIR "${PREBUILT_BASE_DIR}/lib")
+
+#
+#   QuickFuture
+#
+set(QUICKFUTURE_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/quickfuture/src")
 
 #
 #   Application
@@ -236,7 +258,6 @@ target_link_libraries(virgil-messenger-qt
         qxmpp
         vs-module-logger
         vs-module-messenger
-        vs-messenger-crypto
         vs-messenger-internal
 
         # Compiler options
@@ -270,9 +291,9 @@ install(TARGETS virgil-messenger-qt
         BUNDLE DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
         )
 
-if (COMMAND add_clangformat)
-    add_clangformat(virgil-messenger-qt)
-endif ()
+# if (COMMAND add_clangformat)
+#     add_clangformat(virgil-messenger-qt)
+# endif ()
 
 # ---------------------------------------------------------------------------
 #   Done
