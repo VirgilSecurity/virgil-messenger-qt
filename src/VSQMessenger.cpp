@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <virgil/iot/qt/VSQIoTKit.h>
 #include <android/VSQAndroid.h>
 #include <cstring>
 #include <cstdlib>
@@ -195,9 +194,10 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
     conf.setHost(_xmppURL());
     conf.setPassword(_xmppPass());
     conf.setAutoReconnectionEnabled(false);
+#if VS_ANDROID
     conf.setKeepAliveInterval(kKeepAliveTimeSec);
     conf.setKeepAliveTimeout(kKeepAliveTimeSec - 1);
-
+#endif
     qDebug() << "SSL: " << QSslSocket::supportsSsl();
 
     auto logger = QXmppLogger::getLogger();
@@ -594,8 +594,10 @@ VSQMessenger::_sendFailedMessages() {
 /******************************************************************************/
 void
 VSQMessenger::checkState() {
-    if (m_xmpp.state() == QXmppClient::DisconnectedState) {        
-        // emit fireError(tr("Disconnected ..."));
+    if (m_xmpp.state() == QXmppClient::DisconnectedState) {
+#if VS_ANDROID
+        emit fireError(tr("Disconnected ..."));
+#endif
         _reconnect();
     }
 }
