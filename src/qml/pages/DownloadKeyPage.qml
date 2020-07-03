@@ -27,7 +27,16 @@ Page {
 
         FormInput {
             label: qsTr("Password")
-            placeholder: qsTr("Enter Password")
+            textField: TextField {
+                placeholderText: qsTr("Enter Password")
+
+                background: Rectangle {
+                    implicitWidth: parent.width
+                    implicitHeight: parent.height
+                    radius: 20
+                    color: Theme.inputBackgroundColor
+                }
+            }
         }
 
         FormPrimaryButton {

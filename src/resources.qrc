@@ -90,6 +90,8 @@
         <file>qml/resources/icons/Chats@2x.png</file>
         <file>qml/components/ChatDateSeporator.qml</file>
         <file>qml/components/Search.qml</file>
+        <file>qml/components/UserNameTextField.qml</file>
+        <file>qml/components/UserNameFormInput.qml</file>
         <file>qml/resources/icons/Search_Big.png</file>
         <file>qml/resources/icons/Search_Big@2x.png</file>
         <file>qml/resources/icons/Close.png</file>
