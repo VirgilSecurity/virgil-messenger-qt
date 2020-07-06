@@ -1,7 +1,7 @@
 pragma Singleton
 
-import QtQuick 2.0
-import QtQuick.Window 2.2
+import QtQuick 2.12
+import QtQuick.Window 2.12
 
 Item {
     FontLoader {
@@ -33,7 +33,6 @@ Item {
     readonly property color inputBackgroundColor: "#37474F"
     readonly property color chatBackgroundColor: "#263238"
 
-
     // sizes
     readonly property real avatarHeight: 40
     readonly property real avatarWidth: avatarHeight
@@ -49,7 +48,3 @@ Item {
     readonly property string mainFont: robotoRegular.name
     readonly property string mainFontBold: robotoBold.name
 }
-
-
-
-

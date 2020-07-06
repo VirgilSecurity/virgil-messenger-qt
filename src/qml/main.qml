@@ -5,6 +5,7 @@ import QtMultimedia 5.12
 import QuickFuture 1.0
 
 import "./components/Popups"
+import "base"
 import "theme"
 
 ApplicationWindow {
@@ -46,7 +47,7 @@ ApplicationWindow {
     }
 
     onClosing: {
-        if (Qt.platform.os == "android") {
+        if (Platform.isAndroid) {
             close.accepted = false
             mainView.back()
         }
@@ -129,4 +130,6 @@ ApplicationWindow {
 
         return root.width < root.maxMobileWidth;
     }
+
+    Component.onCompleted: Platform.detect()
 }
