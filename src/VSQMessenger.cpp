@@ -357,16 +357,19 @@ QFuture<VSQMessenger::EnResult>
 VSQMessenger::signUp(QString user) {
     m_userId = _prepareLogin(user);
     return QtConcurrent::run([=]() -> EnResult {
-        qDebug() << "Trying to Sign Up: " << m_userId;
+        qInfo() << "Trying to sign up: " << m_userId;
 
         vs_messenger_virgil_user_creds_t creds;
         memset(&creds, 0, sizeof (creds));
 
-        // Sign Up user, using Virgil Service
-        if (VS_CODE_OK != vs_messenger_virgil_sign_up(m_userId.toStdString().c_str(), &creds)) {
-            emit fireError(tr("Cannot Sign Up user"));
-            return MRES_ERR_SIGNUP;
+        VirgilIoTKit::vs_status_e status = vs_messenger_virgil_sign_up(m_userId.toStdString().c_str(), &creds);
+
+        if (status != VS_CODE_OK) {
+            emit fireError(tr("Cannot sign up user"));
+            return MRES_ERR_USER_ALREADY_EXISTS;
         }
+
+        qInfo() << "User has been successfully signed up: " << m_userId;
 
         // Save credentials
         _saveCredentials(m_userId, creds);

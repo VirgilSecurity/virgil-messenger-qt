@@ -70,6 +70,7 @@ public:
         MRES_ERR_SIGNIN,
         MRES_ERR_SIGNUP,
         MRES_ERR_USER_NOT_FOUND,
+        MRES_ERR_USER_ALREADY_EXISTS,
         MRES_ERR_ENCRYPTION
     };
 
