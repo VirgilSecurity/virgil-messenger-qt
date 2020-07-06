@@ -74,6 +74,7 @@ VSQSqlChatModel::init(const QString &userId) {
 
     setTable(m_tableName);
     setEditStrategy(EditStrategy::OnRowChange);
+    setSort(3, Qt::DescendingOrder); // last_message_time
     select();
 }
 
