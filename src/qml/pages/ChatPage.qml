@@ -18,7 +18,6 @@ Page {
 
     header: Control {
         id: headerControl
-        anchors.bottom: listView.top
         width: parent.width
         height: 60
         z: 1
