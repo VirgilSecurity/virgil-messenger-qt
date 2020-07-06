@@ -30,6 +30,7 @@ Page {
 
         UserNameFormInput {
             id: username
+            placeholderText: qsTr("Enter Username")
         }
 
         FormPrimaryButton {

@@ -4,9 +4,8 @@ import "../theme"
 
 FormInput {
     label: qsTr("Username")
-    textField: UserNameTextField {
-        placeholderText: qsTr("Enter Username")
 
+    textField: UserNameTextField {
         background: Rectangle {
             implicitWidth: parent.width
             implicitHeight: parent.height
