@@ -1,0 +1,2 @@
+module Base
+singleton Platform 1.0 Platform.qml

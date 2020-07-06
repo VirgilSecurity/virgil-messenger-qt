@@ -97,5 +97,7 @@
         <file>qml/resources/sounds/notification.wav</file>
         <file>qml/resources/sounds/message-received.wav</file>
         <file>qml/resources/sounds/message-sent.wav</file>
+        <file>qml/base/Platform.qml</file>
+        <file>qml/base/qmldir</file>
     </qresource>
 </RCC>
