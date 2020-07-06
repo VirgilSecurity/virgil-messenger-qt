@@ -36,6 +36,8 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 
+import ".."
+
 Dialog {
 
     property string contact: contact.text
@@ -50,15 +52,13 @@ Dialog {
         implicitWidth: 400
         implicitHeight: 50
 
-        TextField {
+        UserNameTextField {
             id: contact
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.topMargin: 3
 
             color: "black"
-            placeholderText: qsTr("Contact ID")
-            echoMode: TextInput.Normal
         }
     }
 }

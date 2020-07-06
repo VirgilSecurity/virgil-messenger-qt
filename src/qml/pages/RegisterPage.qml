@@ -24,14 +24,10 @@ Page {
     }
 
     Form {
-
         id: form
 
-        FormInput {
+        UserNameFormInput {
             id: username
-            inputHint: Qt.ImhPreferLowercase
-            objectName: "fiRegisterUsername"
-            label: "Username"
         }
 
         FormPrimaryButton {
