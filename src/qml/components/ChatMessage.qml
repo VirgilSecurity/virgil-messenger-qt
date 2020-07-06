@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
 
+import "../base"
 import "../theme"
 
 
@@ -63,7 +64,7 @@ Control {
                 TapHandler {
                     acceptedButtons: Qt.RightButton
                     onLongPressed: {
-                        if (Qt.platform.os == "android" || Qt.platform.os == "ios") {
+                        if (Platform.isMobile) {
                             contextMenu.x = point.position.x
                             contextMenu.y = point.position.y - 40
 
@@ -71,7 +72,7 @@ Control {
                         }
                     }
                     onTapped: {
-                        if (Qt.platform.os == "android" || Qt.platform.os == "ios") {
+                        if (Platform.isMobile) {
                             return
                         }
 

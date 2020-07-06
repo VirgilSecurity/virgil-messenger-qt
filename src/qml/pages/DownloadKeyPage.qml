@@ -33,7 +33,7 @@ Page {
         FormInput {
             id: password
             label: qsTr("Password")
-            placeholder: qsTr("Enter Password")
+            placeholder: qsTr("Enter password")
             password: true
         }
 

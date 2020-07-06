@@ -19,10 +19,9 @@ Page {
 
         id: form
 
-        FormInput {
+        UserNameFormInput {
             id: username
-            label: qsTr("Username")
-            placeholder: qsTr("Enter username")
+            placeholder: qsTr("Enter Username")
         }
 
         FormPrimaryButton {

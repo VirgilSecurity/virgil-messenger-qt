@@ -90,6 +90,8 @@
         <file>qml/resources/icons/Chats@2x.png</file>
         <file>qml/components/ChatDateSeporator.qml</file>
         <file>qml/components/Search.qml</file>
+        <file>qml/components/UserNameTextField.qml</file>
+        <file>qml/components/UserNameFormInput.qml</file>
         <file>qml/resources/icons/Search_Big.png</file>
         <file>qml/resources/icons/Search_Big@2x.png</file>
         <file>qml/resources/icons/Close.png</file>
@@ -97,6 +99,8 @@
         <file>qml/resources/sounds/notification.wav</file>
         <file>qml/resources/sounds/message-received.wav</file>
         <file>qml/resources/sounds/message-sent.wav</file>
+        <file>qml/base/Platform.qml</file>
+        <file>qml/base/qmldir</file>
         <file>qml/components/AppStatus.qml</file>
         <file>qml/pages/BackupKeyPage.qml</file>
     </qresource>

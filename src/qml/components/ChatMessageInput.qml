@@ -1,11 +1,13 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
-import Qt.labs.platform 1.0 as Platform
+import Qt.labs.platform 1.0 as Native
 
+import "../base"
 import "../theme"
 
 Control {
+    id: root
 
     signal messageSending(string message)
 
@@ -17,7 +19,6 @@ Control {
     }
 
     RowLayout {
-
         anchors.fill: parent
 
         ImageButton {
@@ -51,7 +52,7 @@ Control {
                 selectionColor: "white"
                 // textFormat: "RichText"
 
-                 background: Rectangle {
+                background: Rectangle {
                    anchors.fill: parent
                    anchors.topMargin: 10
                    anchors.bottomMargin: 10
@@ -59,50 +60,68 @@ Control {
                    color: "#37474F"
                 }
 
+                Keys.onPressed: {
+                    console.log(Platform.name)
+                    if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return) {
+                        if (!Platform.isDesktop) {
+                            return
+                        }
+                        if (event.modifiers == Qt.ShiftModifier) {
+                            // TextArea adds newline here
+                        }
+                        else if (event.modifiers == Qt.ControlModifier) {
+                            // Adds new line. Same behaviour as for Shift+Enter
+                            messageField.remove(messageField.selectionStart, selectionEnd)
+                            messageField.insert(messageField.selectionStart, "\n")
+                            event.accepted = true
+                        }
+                        else {
+                            event.accepted = true
+                            root.sendMessage()
+                        }
+                    }
+                }
+
                 MouseArea {
                     anchors.fill: parent
                     acceptedButtons: Qt.RightButton
                     hoverEnabled: true
-                    onClicked: {
-                        const selectStart = messageField.selectionStart;
-                        const selectEnd = messageField.selectionEnd;
-                        const curPos = messageField.cursorPosition;
-                        contextMenu.open();
-                        messageField.cursorPosition = curPos;
-                        messageField.select(selectStart, selectEnd);
-                    }
+                    onClicked: messageField.openContextMenu()
                     onPressAndHold: {
-                        if (mouse.source === Qt.MouseEventNotSynthesized) {
-                            const selectStart = messageField.selectionStart;
-                            const selectEnd = messageField.selectionEnd;
-                            const curPos = messageField.cursorPosition;
-                            contextMenu.open();
-                            messageField.cursorPosition = curPos;
-                            messageField.select(selectStart, selectEnd);
-                        }
+                        if (mouse.source === Qt.MouseEventNotSynthesized)
+                            messageField.openContextMenu()
                     }
 
-                    Platform.Menu {
+                    Native.Menu {
                         id: contextMenu
-                        Platform.MenuItem {
+                        Native.MenuItem {
                             text: "Cut"
                             onTriggered: {
                                 messageField.cut()
                             }
                         }
-                        Platform.MenuItem {
+                        Native.MenuItem {
                             text: "Copy"
                             onTriggered: {
                                 messageField.copy()
                             }
                         }
-                        Platform.MenuItem {
+                        Native.MenuItem {
                             text: "Paste"
                             onTriggered: {
                                 messageField.paste()
                             }
                         }
                     }
+                }
+
+                function openContextMenu() {
+                    const selStart = selectionStart;
+                    const selEnd = selectionEnd;
+                    const curPos = cursorPosition;
+                    contextMenu.open();
+                    messageField.cursorPosition = curPos;
+                    messageField.select(selStart, seltEnd);
                 }
             }
         }
@@ -116,15 +135,14 @@ Control {
             objectName: "btnSend"            
             disabled: !(messageField.text + messageField.preeditText).length
             image: "Send"
-            onClicked: {
-                const text = messageField.text + messageField.preeditText;
-
-                if (text.trim().length > 0) {
-                    messageSending(text.trim())
-                }
-
-                messageField.clear()
-            }
+            onClicked: root.sendMessage()
         }
+    }
+
+    function sendMessage() {
+        const text = (messageField.text + messageField.preeditText).trim();
+        messageField.clear()
+        if (text)
+            messageSending(text)
     }
 }
