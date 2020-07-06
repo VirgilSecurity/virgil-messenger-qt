@@ -66,7 +66,7 @@ Q_DECLARE_METATYPE(QFuture<VSQMessenger::EnResult>)
 
 
 const QString VSQMessenger::kOrganization = "VirgilSecurity";
-const QString VSQMessenger::kApp = "IoTKit Messenger";
+const QString VSQMessenger::kApp = "VirgilMessenger1";
 const QString VSQMessenger::kUsers = "Users";
 const QString VSQMessenger::kProdEnvPrefix = "prod";
 const QString VSQMessenger::kStgEnvPrefix = "stg";
@@ -304,7 +304,7 @@ VSQMessenger::backupUserKey(QString password) {
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
 VSQMessenger::signInWithBackupKey(QString username, QString password) {
-    // m_userId = _prepareLogin(user);
+    m_userId = _prepareLogin(username);
     return QtConcurrent::run([=]() -> EnResult {
 
         vs_messenger_virgil_user_creds_t creds;
@@ -318,12 +318,6 @@ VSQMessenger::signInWithBackupKey(QString username, QString password) {
 
         // Save credentials
         _saveCredentials(username, creds);
-
-        // Sign In user, using Virgil Service
-        if (VS_CODE_OK != vs_messenger_virgil_sign_in(&creds)) {
-            emit fireError(tr("Cannot Sign In user"));
-            return MRES_ERR_SIGNIN;
-        }
 
         return _connect(m_user, m_userId) ? MRES_OK : MRES_ERR_SIGNIN;;
     });
@@ -525,6 +519,7 @@ VSQMessenger::_saveUsersList(const QStringList &users) {
 QStringList
 VSQMessenger::usersList() {
     QSettings settings(kOrganization, kApp);
+    qDebug() << settings.fileName();
     return settings.value(kUsers, QStringList()).toStringList();
 }
 

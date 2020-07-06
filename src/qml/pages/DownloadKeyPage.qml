@@ -51,9 +51,7 @@ Page {
                     form.hideLoading()
 
                     if (Future.result(future) === Result.MRES_OK) {
-                        password.text = ''
-                        root.showPopupSuccess('Private key successfully restored');
-
+                        mainView.showContacts(true)
                         return
                     }
 
