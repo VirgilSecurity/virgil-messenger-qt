@@ -66,7 +66,7 @@ Q_DECLARE_METATYPE(QFuture<VSQMessenger::EnResult>)
 
 
 const QString VSQMessenger::kOrganization = "VirgilSecurity";
-const QString VSQMessenger::kApp = "VirgilMessenger1";
+const QString VSQMessenger::kApp = "VirgilMessenger";
 const QString VSQMessenger::kUsers = "Users";
 const QString VSQMessenger::kProdEnvPrefix = "prod";
 const QString VSQMessenger::kStgEnvPrefix = "stg";

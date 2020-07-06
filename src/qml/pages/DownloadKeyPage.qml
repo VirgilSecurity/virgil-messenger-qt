@@ -34,6 +34,7 @@ Page {
             id: password
             label: qsTr("Password")
             placeholder: qsTr("Enter Password")
+            password: true
         }
 
         FormPrimaryButton {
