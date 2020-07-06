@@ -31,7 +31,4 @@ pushd "${BUILD_DIR}"
     print_message "Copy libvs-messenger-internal.so "
     cp ${PROJECT_DIR}/ext/prebuilt/linux/release/installed/usr/local/lib/libvs-messenger-internal.so DistributionKit/lib
 
-    print_message "Copy libvs-messenger-crypto.so "
-    cp ${PROJECT_DIR}/ext/prebuilt/linux/release/installed/usr/local/lib/libvs-messenger-crypto.so DistributionKit/lib
-
 popd
