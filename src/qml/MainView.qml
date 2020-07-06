@@ -151,7 +151,7 @@ Control {
             stackView.clear()
         }
 
-        stackView.push("./pages/ContactsPage.qml")
+        stackView.push("./pages/ChatListPage.qml")
     }
 
     function showAccountSettings() {

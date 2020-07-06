@@ -46,7 +46,7 @@
         <file>qml/pages/SignInPage.qml</file>
         <file>qml/pages/AuthPage.qml</file>
         <file>qml/MainView.qml</file>
-        <file>qml/pages/ContactsPage.qml</file>
+        <file>qml/pages/ChatListPage.qml</file>
         <file>qml/pages/ChatPage.qml</file>
         <file>qml/resources/icons/Grid.png</file>
         <file>qml/resources/icons/Grid@2x.png</file>
