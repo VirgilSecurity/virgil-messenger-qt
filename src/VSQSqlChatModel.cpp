@@ -40,6 +40,8 @@
 #include <QSqlRecord>
 #include <QDateTime>
 
+#include "VSQSqlConversationModel.h"
+
 /******************************************************************************/
 VSQSqlChatModel::VSQSqlChatModel(QObject *parent) :
     QSqlTableModel(parent) {
@@ -152,8 +154,7 @@ VSQSqlChatModel::createPrivateChat(const QString &recipientId) {
 }
 
 /******************************************************************************/
-Q_INVOKABLE void
-VSQSqlChatModel::updateLastMessage(QString chatId, QString message) {
+void VSQSqlChatModel::updateLastMessage(QString chatId, QString message) {
 
     const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
 
@@ -174,21 +175,21 @@ VSQSqlChatModel::updateLastMessage(QString chatId, QString message) {
         qFatal("Failed to update last message: %s", qPrintable(query.lastError().text()));
     }
 
-    revertAll();
+    submitAll();
     select();
 }
 
 /******************************************************************************/
-Q_INVOKABLE void
-VSQSqlChatModel::updateUnreadMessageCount(QString chatId) {
-
+void VSQSqlChatModel::updateUnreadMessageCount(QString chatId) {
     QSqlQueryModel selectModel;
     QString selectQuery =
             "SELECT COUNT(*) AS 'count' "
             "  FROM '%1' "
-            " WHERE status = 2 AND author = '%2'";
+            " WHERE status = %3 AND author = '%2'";
 
-    QSqlQuery query1(selectQuery.arg("Conversations_" + m_userId, chatId));
+    QSqlQuery query1(selectQuery
+                     .arg("Conversations_" + m_userId, chatId)
+                     .arg(VSQSqlConversationModel::MST_RECEIVED));
     selectModel.setQuery(query1);
     int count = selectModel.record(0).value("count").toInt();
 
@@ -205,6 +206,6 @@ VSQSqlChatModel::updateUnreadMessageCount(QString chatId) {
         qFatal("Failed to update unread message count: %s", qPrintable(query.lastError().text()));
     }
 
-    revertAll();
+    submitAll();
     select();
 }

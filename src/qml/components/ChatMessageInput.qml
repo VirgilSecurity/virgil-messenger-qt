@@ -61,7 +61,6 @@ Control {
                 }
 
                 Keys.onPressed: {
-                    console.log(Platform.name)
                     if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return) {
                         if (!Platform.isDesktop) {
                             return
@@ -121,7 +120,7 @@ Control {
                     const curPos = cursorPosition;
                     contextMenu.open();
                     messageField.cursorPosition = curPos;
-                    messageField.select(selStart, seltEnd);
+                    messageField.select(selStart, selEnd);
                 }
             }
         }

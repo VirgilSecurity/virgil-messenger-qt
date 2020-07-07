@@ -118,11 +118,9 @@ Page {
                 height: avatar.height
                 spacing: 10
 
-                Loader {
+                Avatar {
                     id: avatar
-                    sourceComponent: Avatar {
-                        nickname: model.name
-                    }
+                    nickname: model.name
                 }
 
                 Column {

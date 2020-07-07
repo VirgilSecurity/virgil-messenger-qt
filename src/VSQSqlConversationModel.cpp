@@ -246,8 +246,7 @@ VSQSqlConversationModel::setUser(const QString &user) {
 }
 
 /******************************************************************************/
-Q_INVOKABLE void
-VSQSqlConversationModel::setAsRead(const QString &author) {
+void VSQSqlConversationModel::setAsRead(const QString &author) {
     QSqlQuery model;
     QString query;
 
@@ -259,8 +258,7 @@ VSQSqlConversationModel::setAsRead(const QString &author) {
 }
 
 /******************************************************************************/
-Q_INVOKABLE void
-VSQSqlConversationModel::setMessageStatus(const QString &messageId, const VSQSqlConversationModel::EnMessageStatus status) {
+void VSQSqlConversationModel::setMessageStatus(const QString &messageId, const VSQSqlConversationModel::EnMessageStatus status) {
     QSqlQuery model;
     QString query;
 
