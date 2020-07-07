@@ -87,6 +87,7 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
 HEADERS += \
         include/VSQApplication.h \
         include/VSQClipboardProxy.h \
+        include/VSQLogging.h \
         include/VSQMessenger.h \
         include/VSQSqlChatModel.h \
         include/VSQSqlConversationModel.h \
@@ -101,6 +102,7 @@ HEADERS += \
 SOURCES += \
         src/VSQClipboardProxy.cpp \
         src/VSQMessenger.cpp \
+        src/VSQLogging.cpp \
         src/VSQSqlChatModel.cpp \
         src/VSQSqlConversationModel.cpp \
         src/android/VSQAndroid.cpp \

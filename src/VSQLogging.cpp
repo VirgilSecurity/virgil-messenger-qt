@@ -32,48 +32,27 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
-#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
 
-#include <QtCore>
-#include <QGuiApplication>
-#include <QQmlApplicationEngine>
-#include <VSQMessenger.h>
-#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
+#include <VSQLogging.h>
 
-#include <macos/VSQMacos.h>
-
-class VSQApplication : public QObject {
-    Q_OBJECT
-public:
-    VSQApplication();
-    virtual ~VSQApplication() = default;
-
-    int
-    run(const QString &basePath);
-
-    Q_INVOKABLE
-    void reloadQml();
-
-    Q_INVOKABLE
-    void checkUpdates();
-
-    Q_INVOKABLE QString
-    currentVersion() const;
-
-    Q_INVOKABLE void
-    sendReport();
-
-private slots:
-    void
-    onApplicationStateChanged(Qt::ApplicationState state);
-
-private:
-    static const QString kVersion;
-
-    QQmlApplicationEngine m_engine;
-    VSQMessenger m_messenger;
-    QSharedPointer<VSQUdpBroadcast> m_netifUDPbcast;
-};
-
-#endif // VSQApplication
+void vs_logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+    QByteArray localMsg = msg.toLocal8Bit();
+     switch (type) {
+     case QtDebugMsg:
+         VS_LOG_DEBUG(localMsg.constData());
+         break;
+     case QtInfoMsg:
+         VS_LOG_INFO(localMsg.constData());
+         break;
+     case QtWarningMsg:
+         VS_LOG_WARNING(localMsg.constData());
+         break;
+     case QtCriticalMsg:
+         VS_LOG_CRITICAL(localMsg.constData());
+         break;
+     case QtFatalMsg:
+         VS_LOG_FATAL(localMsg.constData());
+         abort();
+     }
+}

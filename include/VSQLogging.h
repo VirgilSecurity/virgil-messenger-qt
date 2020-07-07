@@ -32,48 +32,15 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
-#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
 
-#include <QtCore>
-#include <QGuiApplication>
-#include <QQmlApplicationEngine>
-#include <VSQMessenger.h>
-#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
+#ifndef VSQLOGGING_H
+#define VSQLOGGING_H
 
-#include <macos/VSQMacos.h>
+#include <iostream>
+#include <string>
+#include <QCoreApplication>
+#include <virgil/iot/qt/VSQIoTKit.h>
 
-class VSQApplication : public QObject {
-    Q_OBJECT
-public:
-    VSQApplication();
-    virtual ~VSQApplication() = default;
+void vs_logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 
-    int
-    run(const QString &basePath);
-
-    Q_INVOKABLE
-    void reloadQml();
-
-    Q_INVOKABLE
-    void checkUpdates();
-
-    Q_INVOKABLE QString
-    currentVersion() const;
-
-    Q_INVOKABLE void
-    sendReport();
-
-private slots:
-    void
-    onApplicationStateChanged(Qt::ApplicationState state);
-
-private:
-    static const QString kVersion;
-
-    QQmlApplicationEngine m_engine;
-    VSQMessenger m_messenger;
-    QSharedPointer<VSQUdpBroadcast> m_netifUDPbcast;
-};
-
-#endif // VSQApplication
+#endif // VSQLOGGING_H
