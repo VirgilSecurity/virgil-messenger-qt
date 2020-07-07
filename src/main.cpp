@@ -55,7 +55,7 @@ main(int argc, char *argv[]) {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QGuiApplication a(argc, argv);
-    a.setOrganizationName("Virgil Security");
+    a.setOrganizationName("VirgilSecurity");
     a.setOrganizationDomain("virgil.net");
 
     QString baseUrl;

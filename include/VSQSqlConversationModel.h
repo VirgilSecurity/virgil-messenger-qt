@@ -111,6 +111,8 @@ signals:
     recipientChanged();
 
 private:
+    QString escapedUserName() const;
+
     QString m_user;
     QString m_recipient;
 
