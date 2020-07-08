@@ -96,8 +96,6 @@ Control {
         })
     }
 
-
-
     // Navigation
     //
     // All the app navigation must be done throught executing
@@ -105,6 +103,9 @@ Control {
 
     function back() {
         stackView.pop()
+        if (Messenger.currentRecipient()) {
+            Messenger.setCurrentRecipient("")
+        }
     }
 
     function showSplashScreen(){
@@ -140,14 +141,9 @@ Control {
         stackView.push("./pages/BackupKeyPage.qml")
     }
 
-    // Depricated method, use showChatWith instead.
-    function chatWith(recipient) {
-        ConversationsModel.recipient = recipient
-        stackView.push("./pages/ChatPage.qml")
-    }
-
     function showChatWith(recipient) {
         navigateTo("Chat", { recipient: recipient }, true, false)
+        Messenger.setCurrentRecipient(recipient)
     }
 
     function showContacts(clear) {

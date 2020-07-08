@@ -247,6 +247,7 @@ VSQMessenger::_prepareLogin(const QString &user) {
     QString userId = user;
     m_envType = _defaultEnv;
 
+    // NOTE(vova.y): deprecated logic, user can't contain @
     // Check required environment
     QStringList pieces = user.split("@");
     if (2 == pieces.size()) {
@@ -280,9 +281,13 @@ VSQMessenger::_prepareLogin(const QString &user) {
 }
 
 /******************************************************************************/
-QString
-VSQMessenger::currentUser() {
+QString VSQMessenger::currentUser() const {
     return m_user;
+}
+
+/******************************************************************************/
+QString VSQMessenger::currentRecipient() const {
+    return m_recipient;
 }
 
 /******************************************************************************/
@@ -542,8 +547,7 @@ VSQMessenger::logout() {
 }
 
 /******************************************************************************/
-Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-VSQMessenger::disconnect() {
+QFuture<VSQMessenger::EnResult> VSQMessenger::disconnect() {
     bool connected = m_xmpp.isConnected();
     return QtConcurrent::run([=]() -> EnResult {
         qDebug() << "Disconnect";
@@ -734,8 +738,8 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
     m_sqlConversations->receiveMessage(message.id(), sender, decryptedString);
 
     m_sqlChatModel->updateLastMessage(sender, decryptedString);
-
-    m_sqlChatModel->updateUnreadMessageCount(sender);    
+    if (sender != m_recipient)
+        m_sqlChatModel->updateUnreadMessageCount(sender);
 
     // Inform system about new message
     emit fireNewMessage(sender, decryptedString);
@@ -816,6 +820,12 @@ VSQMessenger::setStatus(VSQMessenger::EnStatus status) {
     QXmppPresence::Type presenceType = VSQMessenger::MSTATUS_ONLINE == status ?
                 QXmppPresence::Available : QXmppPresence::Unavailable;
     m_xmpp.setClientPresence(QXmppPresence(presenceType));
+}
+
+/******************************************************************************/
+void VSQMessenger::setCurrentRecipient(const QString &recipient)
+{
+    m_recipient = recipient;
 }
 
 /******************************************************************************/
