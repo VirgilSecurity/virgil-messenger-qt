@@ -15,31 +15,23 @@ Page {
         title: qsTr("Log In")
     }
 
-    Timer {
-        id: signInTimer
-        interval: 1000; running: false; repeat: false;
-        onTriggered: {            
-            mainView.showSignInAs({ username: username.text })
-            form.hideLoading()
-        }
-    }
-
     Form {
 
         id: form
 
         UserNameFormInput {
             id: username
-            placeholderText: qsTr("Enter Username")
+            placeholder: qsTr("Enter Username")
         }
 
         FormPrimaryButton {
             onClicked: {
-                form.showLoading(qsTr("Logging In..."))
-                signInTimer.start()
 
-                // if (Messenger.usersList().searc)
-                // mainView.signIn(username.text)
+                if (username.text === '') {
+                    root.showPopupError('Username is empty')
+                }
+
+                mainView.showSignInAs({ username: username.text })
             }
             text: qsTr("Log In")
         }

@@ -80,20 +80,23 @@ function prepare_libraries() {
 
     if [ -d ${INSTALL_DIR}/prebuilt ] && [ "${PREBUILT_SKIP}" == "true" ]; then
         print_message "Prebuild libraries found. Download skipped"
-        return 0
+    else
+        rm -rf ${INSTALL_DIR}/prebuilt
+
+        pushd ${INSTALL_DIR}
+           wget -O ${ARCH_NAME} ${PREBUILT_ARCHIVE}
+
+           tar -xvf ${ARCH_NAME}
+
+           rm ${ARCH_NAME}
+        popd
     fi
 
-    rm -rf ${INSTALL_DIR}/prebuilt
-
-    pushd ${INSTALL_DIR}
-    wget -O ${ARCH_NAME} ${PREBUILT_ARCHIVE}
-
-    tar -xvf ${ARCH_NAME}
-
-    rm ${ARCH_NAME}
-    popd
-
-    prepare_firebase
+    if [ -d ${INSTALL_DIR}/prebuilt/firebase_cpp_sdk ]; then
+      print_message "Firebase SDK exist. skip..."
+    else
+      prepare_firebase
+    fi
 }
 
 #***************************************************************************************

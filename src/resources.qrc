@@ -101,5 +101,7 @@
         <file>qml/resources/sounds/message-sent.wav</file>
         <file>qml/base/Platform.qml</file>
         <file>qml/base/qmldir</file>
+        <file>qml/components/AppStatus.qml</file>
+        <file>qml/pages/BackupKeyPage.qml</file>
     </qresource>
 </RCC>

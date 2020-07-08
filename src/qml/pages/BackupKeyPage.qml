@@ -8,60 +8,66 @@ import "../theme"
 import "../components"
 
 Page {
-
-    property string username
-
     background: Rectangle {
         color: Theme.mainBackgroundColor
     }
 
     header: Header {
-        title: qsTr("Download from the Cloud")
+        showBackButton: !form.isLoading
+        title: qsTr("Backup private key")
     }
 
     Form {
+
         id: form
-
-        FormImage {
-            source: "../resources/icons/Key.png"
-        }
-
-        FormSubtitle {
-            text: qsTr("Your account information is securely stored in the cloud. Please enter your security word(s) to access it:")
-        }
 
         FormInput {
             id: password
             label: qsTr("Password")
-            placeholder: qsTr("Enter password")
             password: true
+            placeholder: qsTr("Enter password")
+        }
+
+        FormInput {
+            id: confirmPassword
+            label: qsTr("Confirm password")
+            password: true
+            placeholder: qsTr("Enter password again")
         }
 
         FormPrimaryButton {
-            text: qsTr("Decrypt")
             onClicked: {
+
                 if (password.text === '') {
                     root.showPopupError('Password can not be empty')
                 }
 
-                form.showLoading(qsTr("Downloading your private key..."))
+                if (password.text !== confirmPassword.text) {
+                    root.showPopupError('Passwords are not match')
+                }
 
-                var future = Messenger.signInWithBackupKey(username, password.text)
+                form.showLoading(qsTr("Backing up your private key..."))
+
+                var future = Messenger.backupUserKey(password.text)
 
                 Future.onFinished(future, function(result) {
                     form.hideLoading()
 
                     if (Future.result(future) === Result.MRES_OK) {
-                        mainView.showContacts(true)
+                        password.text = ''
+                        confirmPassword.text = ''
+                        root.showPopupSuccess('Backup private key success');
                         return
                     }
 
-                    root.showPopupError("Private key download error")
+                    root.showPopupError("Backup private key error")
                 })
             }
+            text: qsTr("Backup")
         }
+
     }
 
-    footer: Footer {}
+    footer: Footer { }
 }
 

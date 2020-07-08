@@ -118,11 +118,9 @@ Page {
                 height: avatar.height
                 spacing: 10
 
-                Loader {
+                Avatar {
                     id: avatar
-                    sourceComponent: Avatar {
-                        nickname: model.name
-                    }
+                    nickname: model.name
                 }
 
                 Column {
@@ -189,6 +187,17 @@ Page {
                 if (!contactsHeaderId.isSearchOpen) return conversationText;
                 if (contactsHeaderId.search !== '') return searchEmptyText;
                 return searchText;
+            }            
+        }        
+
+        MouseArea {
+            visible: !listView.contentItem.children.length
+            anchors.fill: parent
+            onClicked: {
+                if (!listView.contentItem.children.length) {
+                    addContact()
+                    mouse.accepted = false
+                }
             }
         }
     }
@@ -206,8 +215,7 @@ Page {
         var component = Qt.createComponent("../components/Dialogs/AddContactDialog.qml")
         if (component.status === Component.Ready) {
             var dialog = component.createObject(root)
-            dialog.applied.connect(function()
-            {
+            var apply = function() {
                 try {
                     var future = Messenger.addContact(dialog.contact.toLowerCase())
                     Future.onFinished(future, function(value) {
@@ -223,7 +231,9 @@ Page {
                     console.error("Cannot start initialization of device")
                 }
                 dialog.close()
-            })
+            }
+            dialog.applied.connect(apply)
+            dialog.accepted.connect(apply)
             dialog.open()
             return dialog
         }

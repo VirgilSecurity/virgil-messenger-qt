@@ -5,6 +5,7 @@ import QtMultimedia 5.12
 import QuickFuture 1.0
 
 import "./components/Popups"
+import "./components"
 import "base"
 import "theme"
 
@@ -15,7 +16,7 @@ ApplicationWindow {
     minimumWidth: 320
     minimumHeight: 600
 
-
+    property bool connectionError: false
 
     //
     //  Connections
@@ -23,20 +24,16 @@ ApplicationWindow {
     Connections {
         target: Messenger
 
-        onFireError: {            
-            notification.height = 25
+        onFireError: {
         }
 
         onFireInform: {
-            // showPopupInform(informText)
         }
 
         onFireConnecting: {
-            // showPopupInform(qsTr("Connecting"))
         }
 
         onFireReady: {
-             notification.height = 0
         }
 
         onFireAddedContact: {
@@ -53,29 +50,9 @@ ApplicationWindow {
         }
     }
 
-    // THE MainView of the Application!
-
-    Rectangle {
-        id: notification
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        color: "red"
-
-        Label {
-            anchors.centerIn: parent
-            color: "white"
-            font.pointSize: UiHelper.fixFontSz(12)
-            text: qsTr("Network connection is unavailable")
-        }
-    }
-
     MainView {
-        anchors.top: notification.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
         id: mainView
+        anchors.fill: parent
     }
 
     // Popup to show messages or warnings on the bottom postion of the screen
@@ -117,7 +94,7 @@ ApplicationWindow {
         showPopup(message, "#FFFACD", "#00", true, false)
     }
 
-    function showPopupSucces(message) {
+    function showPopupSuccess(message) {
         showPopup(message, "#66CDAA", "#00", true, false)
     }
 

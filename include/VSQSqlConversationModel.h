@@ -45,6 +45,22 @@ class VSQSqlConversationModel : public QSqlTableModel
 public:
     VSQSqlConversationModel(QObject *parent = nullptr);
 
+    enum EnMessageStatus
+    {
+        MST_CREATED,
+        MST_SENT,
+        MST_RECEIVED,
+        MST_READ,
+        MST_FAILED
+    };
+
+    struct StMessage
+    {
+        QString message_id;
+        QString message;
+        QString recipient;
+    };
+
     QString
     user() const;
 
@@ -73,19 +89,30 @@ public:
     roleNames() const override;
 
     Q_INVOKABLE void
-    sendMessage(QString recipient, QString message);
+    createMessage(QString recipient, QString message, QString externalId);
 
     Q_INVOKABLE void
-    receiveMessage(const QString &sender, const QString &message);
+    receiveMessage(const QString &messageId, const QString &sender, const QString &message);
 
     Q_INVOKABLE void
-    setAsRead(const QString &user);
+    setAsRead(const QString &author);
+
+    Q_INVOKABLE void
+    setMessageStatus(const QString &messageId, const VSQSqlConversationModel::EnMessageStatus status);
+
+    int
+    getMessageCount(const QString &user, const VSQSqlConversationModel::EnMessageStatus status);
+
+    QList<StMessage*>
+    getMessages(const QString &user, const EnMessageStatus status);
 
 signals:
     void
     recipientChanged();
 
 private:
+    QString escapedUserName() const;
+
     QString m_user;
     QString m_recipient;
 

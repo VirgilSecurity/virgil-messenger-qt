@@ -37,16 +37,18 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 
 import ".."
+import "../../base"
 
 Dialog {
-
-    property string contact: contact.text
-
+    id: root
     x: (parent.width - width) / 2
     y: (parent.height - height) / 2
     visible: true
     title: qsTr("Add Contact")
     standardButtons: Dialog.Apply | Dialog.Cancel
+    focus: true
+
+    property string contact: contact.text
 
     contentItem: Rectangle {
         implicitWidth: 400
@@ -57,8 +59,17 @@ Dialog {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.topMargin: 3
-
             color: "black"
+            focus: true
+
+            Keys.onPressed: {
+                if (Platform.isDesktop) {
+                    if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return)
+                        root.accept();
+                    else if (event.key == Qt.Key_Escape)
+                        root.reject();
+                }
+            }
         }
     }
 }

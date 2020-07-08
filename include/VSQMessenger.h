@@ -42,6 +42,8 @@
 #include <QSemaphore>
 
 #include <qxmpp/QXmppClient.h>
+#include <qxmpp/QXmppMessageReceiptManager.h>
+
 #include <virgil/iot/messenger/messenger.h>
 
 #include "VSQSqlConversationModel.h"
@@ -68,6 +70,7 @@ public:
         MRES_ERR_SIGNIN,
         MRES_ERR_SIGNUP,
         MRES_ERR_USER_NOT_FOUND,
+        MRES_ERR_USER_ALREADY_EXISTS,
         MRES_ERR_ENCRYPTION
     };
 
@@ -82,22 +85,24 @@ public:
     VSQMessenger();
     virtual ~VSQMessenger() = default;
 
-    QString
-    currentUser();
+    Q_INVOKABLE QString currentUser() const;
+    Q_INVOKABLE QString currentRecipient() const;
 
-    VSQSqlConversationModel &
-    modelConversations();
-
-    VSQSqlChatModel &
-    getChatModel();
+    VSQSqlConversationModel &modelConversations();
+    VSQSqlChatModel &getChatModel();
     
-    static QString
-    decryptMessage(const QString &sender, const QString &message);
+    static QString decryptMessage(const QString &sender, const QString &message);
 
 public slots:
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     signIn(QString user);
+
+    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
+    backupUserKey(QString password);
+
+    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
+    signInWithBackupKey(QString username, QString password);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     signUp(QString user);
@@ -123,8 +128,13 @@ public slots:
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     sendMessage(QString to, QString message);
 
+    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
+    sendMessage(bool createNew, QString messageId, QString to, QString message);
+
     Q_INVOKABLE void
     setStatus(VSQMessenger::EnStatus status);
+
+    Q_INVOKABLE void setCurrentRecipient(const QString &recipient);
 
 signals:
     void
@@ -153,6 +163,7 @@ signals:
 
 private slots:
     void onConnected();
+    void onMessageDelivered(const QString&, const QString&);
     void onDisconnected();
     void onError(QXmppClient::Error);
     void onMessageReceived(const QXmppMessage &message);
@@ -169,11 +180,13 @@ private slots:
 
 private:
     QXmppClient m_xmpp;
+    QXmppMessageReceiptManager* m_xmppReceiptManager;
     VSQSqlConversationModel *m_sqlConversations;
     VSQSqlChatModel *m_sqlChatModel;
 
     QString m_user;
     QString m_userId;
+    QString m_recipient;
     QString m_xmppPass;
     VSQEnvType m_envType;
     static const VSQEnvType _defaultEnv = PROD;
@@ -233,6 +246,8 @@ private:
 
     QString
     _caBundleFile();
+
+    void _sendFailedMessages();
 };
 
 #endif // VIRGIL_IOTKIT_QT_MESSENGER_H

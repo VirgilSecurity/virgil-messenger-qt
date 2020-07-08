@@ -32,17 +32,20 @@ Page {
         FormPrimaryButton {
             text: qsTr("Download from the Cloud")
             onClicked: {
-                mainView.showDownloadKey()
+                mainView.showDownloadKey({ username: username })
             }
         }
 
         FormPrimaryButton {
             text: qsTr("Get from another device")
+            enabled: false
         }
 
         FormSecondaryButton {
             text: qsTr("Use local file")
+            enabled: false
         }
+
     }
 
     footer: Footer {}

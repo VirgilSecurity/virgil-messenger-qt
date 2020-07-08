@@ -1,33 +1,42 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
+
 import "../theme"
 
 Column {
-    id: root
+
     Layout.fillWidth: true
     Layout.maximumWidth: Theme.formMaximumWidth
     Layout.alignment: Qt.AlignHCenter
+
     spacing: 5
 
     property alias label: formLabel.text
+    property alias text: formField.text
+    property alias placeholder: formField.placeholderText
+    property alias inputHint: formField.inputMethodHints
+    property bool password: false
 
-    readonly property var formLabel: FormLabel {
+    FormLabel {
         id: formLabel
     }
-    property var textField: TextField {}
 
-    children: [formLabel, textField]
+    TextField {
+        id: formField
+        width: parent.width
+        height: 40
+        leftPadding: 15
+        rightPadding: 15
+        font.pointSize: UiHelper.fixFontSz(15)
+        color: Theme.primaryTextColor
+        echoMode: password ? TextField.Password : TextField.Normal
 
-    function updateTextField() {
-        textField.implicitWidth = root.width
-        textField.height = 40
-        textField.leftPadding = 15
-        textField.rightPadding = 15
-        textField.font.pointSize = UiHelper.fixFontSz(15)
-        textField.color = Theme.primaryTextColor
+        background: Rectangle {
+            implicitWidth: parent.width
+            implicitHeight: parent.height
+            radius: 20
+            color: Theme.inputBackgroundColor
+        }
     }
-
-    Component.onCompleted: updateTextField()
-    onTextFieldChanged: updateTextField()
 }
