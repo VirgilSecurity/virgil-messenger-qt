@@ -246,8 +246,7 @@ VSQSqlConversationModel::setUser(const QString &user) {
 }
 
 /******************************************************************************/
-Q_INVOKABLE void
-VSQSqlConversationModel::setAsRead(const QString &author) {
+void VSQSqlConversationModel::setAsRead(const QString &author) {
     QSqlQuery model;
     QString query;
 
@@ -259,8 +258,7 @@ VSQSqlConversationModel::setAsRead(const QString &author) {
 }
 
 /******************************************************************************/
-Q_INVOKABLE void
-VSQSqlConversationModel::setMessageStatus(const QString &messageId, const VSQSqlConversationModel::EnMessageStatus status) {
+void VSQSqlConversationModel::setMessageStatus(const QString &messageId, const VSQSqlConversationModel::EnMessageStatus status) {
     QSqlQuery model;
     QString query;
 
@@ -353,6 +351,14 @@ VSQSqlConversationModel::getMessages(const QString &user, const EnMessageStatus 
 }
 
 /******************************************************************************/
+QString VSQSqlConversationModel::escapedUserName() const
+{
+    QString name(m_user);
+    name.remove(QRegExp("[^a-z0-9_]"));
+    return name;
+}
+
+/******************************************************************************/
 QString
 VSQSqlConversationModel::getLastMessageTime(const QString &user) const {
     QSqlQueryModel model;
@@ -369,19 +375,13 @@ VSQSqlConversationModel::getLastMessageTime(const QString &user) const {
 }
 
 /******************************************************************************/
-QString
-VSQSqlConversationModel::_tableName() const {
-    QString fixedUser(m_user);
-    fixedUser.remove(QRegExp("[^a-zA-Z\\d\\s]"));
-    return QString("Conversations_") + fixedUser;
+QString VSQSqlConversationModel::_tableName() const {
+    return QString("Conversations_") + escapedUserName();
 }
 
 /******************************************************************************/
-QString
-VSQSqlConversationModel::_contactsTableName() const {
-    QString fixedUser(m_user);
-    fixedUser.remove(QRegExp("[^a-zA-Z\\d\\s]"));
-    return QString("Contacts_") + fixedUser;
+QString VSQSqlConversationModel::_contactsTableName() const {
+    return QString("Contacts_") + escapedUserName();
 }
 
 /******************************************************************************/

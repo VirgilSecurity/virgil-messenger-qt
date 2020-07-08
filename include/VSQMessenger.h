@@ -85,17 +85,13 @@ public:
     VSQMessenger();
     virtual ~VSQMessenger() = default;
 
-    QString
-    currentUser();
+    Q_INVOKABLE QString currentUser() const;
+    Q_INVOKABLE QString currentRecipient() const;
 
-    VSQSqlConversationModel &
-    modelConversations();
-
-    VSQSqlChatModel &
-    getChatModel();
+    VSQSqlConversationModel &modelConversations();
+    VSQSqlChatModel &getChatModel();
     
-    static QString
-    decryptMessage(const QString &sender, const QString &message);
+    static QString decryptMessage(const QString &sender, const QString &message);
 
 public slots:
 
@@ -137,6 +133,8 @@ public slots:
 
     Q_INVOKABLE void
     setStatus(VSQMessenger::EnStatus status);
+
+    Q_INVOKABLE void setCurrentRecipient(const QString &recipient);
 
 signals:
     void
@@ -188,6 +186,7 @@ private:
 
     QString m_user;
     QString m_userId;
+    QString m_recipient;
     QString m_xmppPass;
     VSQEnvType m_envType;
     static const VSQEnvType _defaultEnv = PROD;
