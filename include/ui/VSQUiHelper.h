@@ -38,13 +38,13 @@
 #include <QObject>
 
 class VSQUiHelper: public QObject {
+
     Q_OBJECT
 public:
-    VSQUiHelper() = default;
+    explicit VSQUiHelper(QObject *parent);
     ~VSQUiHelper() = default;
 
-    Q_INVOKABLE
-    int fixFontSz(int sz);
+    Q_INVOKABLE int fixFontSz(int sz);
 };
 
 #endif // VSQUIHELPER_H

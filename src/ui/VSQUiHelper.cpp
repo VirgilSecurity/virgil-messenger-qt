@@ -36,13 +36,15 @@
 
 #include "ui/VSQUiHelper.h"
 
-/******************************************************************************/
-int VSQUiHelper::fixFontSz(int sz) {
+VSQUiHelper::VSQUiHelper(QObject *parent)
+    : QObject(parent)
+{}
+
+int VSQUiHelper::fixFontSz(int sz)
+{
 #if defined(Q_OS_WIN)
     return sz * 96 / 128;
 #else
     return sz;
 #endif
 }
-
-/******************************************************************************/
