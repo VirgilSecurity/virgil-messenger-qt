@@ -32,30 +32,24 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <android/VSQAndroid.h>
-#include <cstring>
-#include <cstdlib>
+#include "VSQMessenger.h"
 
-#include <VSQMessenger.h>
-#include <VSQPushNotifications.h>
-#include <VSQSqlConversationModel.h>
+#include <QtConcurrent>
+#include <QSslSocket>
+#include <QSqlError>
 
-#include <android/VSQAndroid.h>
-#include <android/VSQAndroid.h>
+#include <QuickFuture>
 
 #include <qxmpp/QXmppMessage.h>
 #include <qxmpp/QXmppUtils.h>
 #include <qxmpp/QXmppPushEnableIq.h>
 #include <qxmpp/QXmppMessageReceiptManager.h>
 
-#include <QtConcurrent>
-#include <QStandardPaths>
-#include <QSqlDatabase>
-#include <QSqlError>
-#include <QtQml>
-#include <QUuid>
+#include "VSQPushNotifications.h"
+#include "VSQSettings.h"
+#include "VSQSqlConversationModel.h" // TODO(vova.y): remove
+#include "android/VSQAndroid.h"
 
-#include <QuickFuture>
 Q_DECLARE_METATYPE(VSQMessenger::EnStatus)
 Q_DECLARE_METATYPE(VSQMessenger::EnResult)
 Q_DECLARE_METATYPE(QFuture<VSQMessenger::EnResult>)
@@ -64,10 +58,6 @@ Q_DECLARE_METATYPE(QFuture<VSQMessenger::EnResult>)
 #define USE_XMPP_LOGS 1
 #endif
 
-
-const QString VSQMessenger::kOrganization = "VirgilSecurity";
-const QString VSQMessenger::kApp = "VirgilMessenger";
-const QString VSQMessenger::kUsers = "Users";
 const QString VSQMessenger::kProdEnvPrefix = "prod";
 const QString VSQMessenger::kStgEnvPrefix = "stg";
 const QString VSQMessenger::kDevEnvPrefix = "dev";
@@ -82,7 +72,10 @@ const int VSQMessenger::kConnectionWaitMs = 10000;
 const int VSQMessenger::kKeepAliveTimeSec = 10;
 
 /******************************************************************************/
-VSQMessenger::VSQMessenger() {
+VSQMessenger::VSQMessenger(VSQSettings *settings, QObject *parent)
+    : QObject(parent)
+    , m_settings(settings)
+{
     // Register QML typess
     qmlRegisterType<VSQMessenger>("MesResult", 1, 0, "Result");
     QuickFuture::registerType<VSQMessenger::EnResult>([](VSQMessenger::EnResult res) -> QVariant {
@@ -485,7 +478,7 @@ VSQMessenger::_addToUsersList(const QString &user) {
     auto knownUsers = usersList();
     knownUsers.removeAll(user);
     knownUsers.push_front(user);
-    _saveUsersList(knownUsers);
+    m_settings->setUsersList(knownUsers);
 }
 
 /******************************************************************************/
@@ -494,17 +487,15 @@ bool
 VSQMessenger::_saveCredentials(const QString &user, const vs_messenger_virgil_user_creds_t &creds) {
     // Save credentials
     QByteArray baCred(reinterpret_cast<const char*>(&creds), sizeof(creds));
-    QSettings settings(kOrganization, kApp);
-    settings.setValue(user, baCred.toBase64());
+    m_settings->setValue(user, baCred.toBase64());
+    m_settings->sync();
     return true;
 }
 
 /******************************************************************************/
 bool
 VSQMessenger::_loadCredentials(const QString &user, vs_messenger_virgil_user_creds_t &creds) {
-    QSettings settings(kOrganization, kApp);
-
-    auto credBase64 = settings.value(user, QString("")).toString();
+    auto credBase64 = m_settings->value(user, QString("")).toString();
     auto baCred = QByteArray::fromBase64(credBase64.toUtf8());
 
     if (baCred.size() != sizeof(creds)) {
@@ -517,18 +508,9 @@ VSQMessenger::_loadCredentials(const QString &user, vs_messenger_virgil_user_cre
 }
 
 /******************************************************************************/
-void
-VSQMessenger::_saveUsersList(const QStringList &users) {
-    QSettings settings(kOrganization, kApp);
-    settings.setValue(kUsers, users);
-}
-
-/******************************************************************************/
-QStringList
-VSQMessenger::usersList() {
-    QSettings settings(kOrganization, kApp);
-    qDebug() << settings.fileName();
-    return settings.value(kUsers, QStringList()).toStringList();
+QStringList VSQMessenger::usersList()
+{
+    return m_settings->usersList();
 }
 
 /******************************************************************************/

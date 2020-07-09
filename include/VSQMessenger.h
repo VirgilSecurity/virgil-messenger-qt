@@ -51,6 +51,8 @@
 
 using namespace VirgilIoTKit;
 
+class VSQSettings;
+
 class VSQMessenger : public QObject {
 
     Q_OBJECT
@@ -82,8 +84,9 @@ public:
 
     Q_PROPERTY(QString currentUser READ currentUser NOTIFY fireCurrentUserChanged)
 
-    VSQMessenger();
-    virtual ~VSQMessenger() = default;
+    explicit VSQMessenger(VSQSettings *settings, QObject *parent);
+    VSQMessenger() = default; // NOTE(vova.y): needed for QmlPrivate template
+    ~VSQMessenger() override = default;
 
     Q_INVOKABLE QString currentUser() const;
     Q_INVOKABLE QString currentRecipient() const;
@@ -179,6 +182,7 @@ private slots:
     onSubscribePushNotifications(bool enable);
 
 private:
+    VSQSettings *m_settings;
     QXmppClient m_xmpp;
     QXmppMessageReceiptManager* m_xmppReceiptManager;
     VSQSqlConversationModel *m_sqlConversations;
@@ -237,9 +241,6 @@ private:
 
     void
     _addToUsersList(const QString &user);
-
-    void
-    _saveUsersList(const QStringList &users);
 
     QString
     _prepareLogin(const QString &user);

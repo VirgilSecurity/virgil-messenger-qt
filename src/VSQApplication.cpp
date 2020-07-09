@@ -32,18 +32,16 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <QtCore>
-#include <QtQml>
+#include "VSQApplication.h"
 
-#include <VSQApplication.h>
-#include <VSQClipboardProxy.h>
-#include <macos/VSQMacos.h>
-#include <ui/VSQUiHelper.h>
-#include <virgil/iot/logger/logger.h>
-
-#include <QGuiApplication>
-#include <QFont>
 #include <QDesktopServices>
+#include <QFont>
+#include <QGuiApplication>
+#include <QQmlContext>
+
+#include "VSQClipboardProxy.h"
+#include "ui/VSQUiHelper.h"
+#include "macos/VSQMacos.h"
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
@@ -56,6 +54,9 @@ const QString VSQApplication::kVersion = "unknown";
 
 VSQApplication::VSQApplication(int &argc, char **argv)
     : QGuiApplication(argc, argv)
+    , m_engine(this)
+    , m_settings(this)
+    , m_messenger(&m_settings, this)
 {
     parseArgs(argc, argv);
     setDefaults();
@@ -63,7 +64,6 @@ VSQApplication::VSQApplication(int &argc, char **argv)
     setupContextProperties();
     setupConnections();
     reloadQml();
-
 #if (MACOS)
     VSQMacos::instance().startUpdatesTimer();
 #endif

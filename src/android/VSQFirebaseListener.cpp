@@ -32,6 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#if (VS_ANDROID)
+
 #include "android/VSQFirebaseListener.h"
 
 #include <QtAndroid>
@@ -120,3 +122,5 @@ VSQFirebaseListener::OnMessage(const ::firebase::messaging::Message &message) {
 }
 
 /******************************************************************************/
+
+#endif // VS_ANDROID

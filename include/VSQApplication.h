@@ -39,6 +39,7 @@
 #include <QQmlApplicationEngine>
 
 #include "VSQMessenger.h"
+#include "VSQSettings.h"
 
 class VSQApplication : public QGuiApplication
 {
@@ -65,6 +66,7 @@ private:
     static const QString kVersion;
 
     QQmlApplicationEngine m_engine;
+    VSQSettings m_settings;
     VSQMessenger m_messenger;
 };
 

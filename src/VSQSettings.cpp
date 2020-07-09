@@ -32,24 +32,33 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "VSQApplication.h"
-#include "android/VSQAndroid.h"
+#include "VSQSettings.h"
 
-#if (VSQ_WEBDRIVER_DEBUG)
-#include "Test/Headers.h"
-#endif
+#include <QDebug>
 
-int main(int argc, char *argv[])
+static const QString kUsers = "Users";
+
+VSQSettings::VSQSettings(QObject *parent)
+    : QSettings("VirgilSecurity", "VirgilMessenger", parent) // organization, application name
+{}
+
+VSQSettings::~VSQSettings()
+{}
+
+void VSQSettings::setUsersList(const QStringList &users)
 {
-#if (VS_ANDROID)
-    VSQAndroid::prepare();
-#endif
-
-#if (VSQ_WEBDRIVER_DEBUG)
-    wd_setup(argc, argv);
-#endif
-
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    VSQApplication a(argc, argv);
-    return a.exec();
+    setValue(kUsers, users);
+    sync();
 }
+
+QStringList VSQSettings::usersList() const
+{
+    qDebug() << "Settings filename:" << fileName();
+    return value(kUsers, QStringList()).toStringList();
+}
+
+
+
+
+
+

@@ -32,24 +32,21 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "VSQApplication.h"
-#include "android/VSQAndroid.h"
+#include <QSettings>
 
-#if (VSQ_WEBDRIVER_DEBUG)
-#include "Test/Headers.h"
-#endif
+#ifndef VSQSETTINGS_H
+#define VSQSETTINGS_H
 
-int main(int argc, char *argv[])
+class VSQSettings : public QSettings
 {
-#if (VS_ANDROID)
-    VSQAndroid::prepare();
-#endif
+    Q_OBJECT
 
-#if (VSQ_WEBDRIVER_DEBUG)
-    wd_setup(argc, argv);
-#endif
+public:
+    explicit VSQSettings(QObject *parent);
+    ~VSQSettings();
 
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    VSQApplication a(argc, argv);
-    return a.exec();
-}
+    void setUsersList(const QStringList &users);
+    QStringList usersList() const;
+};
+
+#endif // VSQSETTINGS_H
