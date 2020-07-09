@@ -47,6 +47,7 @@
 #include <qxmpp/QXmppUtils.h>
 #include <qxmpp/QXmppPushEnableIq.h>
 #include <qxmpp/QXmppMessageReceiptManager.h>
+#include <qxmpp/QXmppCarbonManager.h>
 
 #include <QtConcurrent>
 #include <QStandardPaths>
@@ -97,7 +98,9 @@ VSQMessenger::VSQMessenger() {
 
     // Add receipt messages extension
     m_xmppReceiptManager = new QXmppMessageReceiptManager();
+    m_xmppCarbonManager = new QXmppCarbonManager();
     m_xmpp.addExtension(m_xmppReceiptManager);
+    m_xmpp.addExtension(m_xmppCarbonManager);
 
     // Signal connection
     connect(this, SIGNAL(fireReadyToAddContact(QString)), this, SLOT(onAddContactToDB(QString)));
@@ -112,6 +115,11 @@ VSQMessenger::VSQMessenger() {
     connect(&m_xmpp, SIGNAL(iqReceived(const QXmppIq &)), this, SLOT(onIqReceived(const QXmppIq &)));
     connect(&m_xmpp, SIGNAL(sslErrors(const QList<QSslError> &)), this, SLOT(onSslErrors(const QList<QSslError> &)));
     connect(&m_xmpp, SIGNAL(stateChanged(QXmppClient::State)), this, SLOT(onStateChanged(QXmppClient::State)));
+
+    // messages sent to our account (forwarded from another client)
+    connect(m_xmppCarbonManager, &QXmppCarbonManager::messageReceived, &m_xmpp, &QXmppClient::messageReceived);
+    // messages sent from our account (but another client)
+    connect(m_xmppCarbonManager, &QXmppCarbonManager::messageSent, &m_xmpp, &QXmppClient::messageReceived);
 
     connect(m_xmppReceiptManager, &QXmppMessageReceiptManager::messageDelivered, this, &VSQMessenger::onMessageDelivered);
 
@@ -744,7 +752,6 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
     // Inform system about new message
     emit fireNewMessage(sender, decryptedString);
 }
-
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>

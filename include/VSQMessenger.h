@@ -40,6 +40,7 @@
 #include <QFuture>
 #include <QObject>
 #include <QSemaphore>
+#include <QXmppCarbonManager.h>
 
 #include <qxmpp/QXmppClient.h>
 #include <qxmpp/QXmppMessageReceiptManager.h>
@@ -181,6 +182,7 @@ private slots:
 private:
     QXmppClient m_xmpp;
     QXmppMessageReceiptManager* m_xmppReceiptManager;
+    QXmppCarbonManager* m_xmppCarbonManager;
     VSQSqlConversationModel *m_sqlConversations;
     VSQSqlChatModel *m_sqlChatModel;
 
