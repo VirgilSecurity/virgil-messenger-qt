@@ -32,46 +32,42 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
-#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
+#ifndef VSQAPPLICATION_H
+#define VSQAPPLICATION_H
 
-#include <QtCore>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <VSQMessenger.h>
 
-#include <macos/VSQMacos.h>
+#include "VSQMessenger.h"
+#include "VSQSettings.h"
 
-class VSQApplication : public QObject {
+class VSQApplication : public QGuiApplication
+{
     Q_OBJECT
+
 public:
-    VSQApplication();
+    VSQApplication(int &argc, char **argv);
     virtual ~VSQApplication() = default;
 
-    int
-    run(const QString &basePath);
-
-    Q_INVOKABLE
-    void reloadQml();
-
-    Q_INVOKABLE
-    void checkUpdates();
-
-    Q_INVOKABLE QString
-    currentVersion() const;
-
-    Q_INVOKABLE void
-    sendReport();
-
-private slots:
-    void
-    onApplicationStateChanged(Qt::ApplicationState state);
+    Q_INVOKABLE void reloadQml();
+    Q_INVOKABLE void checkUpdates();
+    Q_INVOKABLE QString currentVersion() const;
+    Q_INVOKABLE void sendReport();
 
 private:
+    void parseArgs(int &argc, char **argv);
+    void setDefaults();
+    void setupFonts();
+    void setupContextProperties();
+    void setupConnections();
+
+    void onApplicationStateChanged(Qt::ApplicationState state);
+
     static const QString kVersion;
 
     QQmlApplicationEngine m_engine;
+    VSQSettings m_settings;
     VSQMessenger m_messenger;
 };
 
-#endif // VSQApplication
+#endif // VSQAPPLICATION_H

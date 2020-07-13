@@ -32,19 +32,21 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <QtCore>
+#include <QSettings>
 
-#include "ui/VSQUiHelper.h"
+#ifndef VSQSETTINGS_H
+#define VSQSETTINGS_H
 
-VSQUiHelper::VSQUiHelper(QObject *parent)
-    : QObject(parent)
-{}
-
-int VSQUiHelper::fixFontSz(int sz)
+class VSQSettings : public QSettings
 {
-#if defined(Q_OS_WIN)
-    return sz * 96 / 128;
-#else
-    return sz;
-#endif
-}
+    Q_OBJECT
+
+public:
+    explicit VSQSettings(QObject *parent);
+    ~VSQSettings();
+
+    void setUsersList(const QStringList &users);
+    QStringList usersList() const;
+};
+
+#endif // VSQSETTINGS_H

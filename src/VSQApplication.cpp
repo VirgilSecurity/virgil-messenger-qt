@@ -32,17 +32,16 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <QtCore>
-#include <QtQml>
+#include "VSQApplication.h"
 
-#include <VSQApplication.h>
-#include <VSQClipboardProxy.h>
-#include <ui/VSQUiHelper.h>
-#include <virgil/iot/logger/logger.h>
-
-#include <QGuiApplication>
-#include <QFont>
 #include <QDesktopServices>
+#include <QFont>
+#include <QGuiApplication>
+#include <QQmlContext>
+
+#include "VSQClipboardProxy.h"
+#include "ui/VSQUiHelper.h"
+#include "macos/VSQMacos.h"
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
@@ -53,50 +52,25 @@ const QString VSQApplication::kVersion = QString(TOSTRING(VERSION));
 const QString VSQApplication::kVersion = "unknown";
 #endif
 
-/******************************************************************************/
-VSQApplication::VSQApplication() {
+VSQApplication::VSQApplication(int &argc, char **argv)
+    : QGuiApplication(argc, argv)
+    , m_engine(this)
+    , m_settings(this)
+    , m_messenger(&m_settings, this)
+{
+    parseArgs(argc, argv);
+    setDefaults();
+    setupFonts();
+    setupContextProperties();
+    setupConnections();
+    reloadQml();
 #if (MACOS)
     VSQMacos::instance().startUpdatesTimer();
 #endif
 }
 
-/******************************************************************************/
-int
-VSQApplication::run(const QString &basePath) {
-
-    VSQUiHelper uiHelper;
-
-    QQmlContext *context = m_engine.rootContext();
-    if (basePath.isEmpty()) {
-        m_engine.setBaseUrl(QUrl(QStringLiteral("qrc:/qml/")));
-    } else {
-        QUrl url("file://" + basePath + "/qml/");
-        m_engine.setBaseUrl(url);
-    }
-
-    context->setContextProperty("UiHelper", &uiHelper);
-    context->setContextProperty("app", this);
-    context->setContextProperty("clipboard", new VSQClipboardProxy(QGuiApplication::clipboard()));
-    context->setContextProperty("Messenger", &m_messenger);
-    context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
-    context->setContextProperty("ChatModel", &m_messenger.getChatModel());
-
-    QFont fon(QGuiApplication::font());
-    fon.setPointSize(1.5 * QGuiApplication::font().pointSize());
-    QGuiApplication::setFont(fon);
-
-    connect(QGuiApplication::instance(),
-            SIGNAL(applicationStateChanged(Qt::ApplicationState)),
-            this,
-            SLOT(onApplicationStateChanged(Qt::ApplicationState)));
-
-    reloadQml();
-
-    return QGuiApplication::instance()->exec();
-}
-
-/******************************************************************************/
-void VSQApplication::reloadQml() {
+void VSQApplication::reloadQml()
+{
     const QUrl url(QStringLiteral("main.qml"));
     m_engine.clearComponentCache();
     m_engine.load(url);
@@ -110,30 +84,70 @@ void VSQApplication::reloadQml() {
 #endif
 }
 
-/******************************************************************************/
-void VSQApplication::checkUpdates() {
+void VSQApplication::checkUpdates()
+{
 #if (MACOS)
     VSQMacos::instance().checkUpdates();
 #endif
 }
 
-/******************************************************************************/
-QString
-VSQApplication::currentVersion() const {
+QString VSQApplication::currentVersion() const
+{
     return kVersion + "-alpha";
 }
 
-/******************************************************************************/
-void
-VSQApplication::sendReport() {
+void VSQApplication::sendReport()
+{
     QDesktopServices::openUrl(QUrl("mailto:?to=kutashenko@gmail.com&subject=Virgil Messenger Report&body=Here is some email body text", QUrl::TolerantMode));
 }
 
-/******************************************************************************/
-void
-VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
-    qDebug() << state;
+void VSQApplication::parseArgs(int &argc, char **argv)
+{
+    QString basePath;
+    if (argc == 2 && argv[1] && argv[1][0]) {
+        basePath = QString::fromLocal8Bit(argv[1]);
+        qDebug() << "Custom QML base path: " << basePath;
+    }
+    if (basePath.isEmpty()) {
+        m_engine.setBaseUrl(QUrl(QLatin1String("qrc:/qml/")));
+    }
+    else {
+        m_engine.setBaseUrl(QUrl(QLatin1String("file://") + basePath + QLatin1String("/qml/")));
+    }
+}
 
+void VSQApplication::setDefaults()
+{
+    setOrganizationName("VirgilSecurity");
+    setOrganizationDomain("virgil.net");
+}
+
+void VSQApplication::setupFonts()
+{
+    QFont font(QGuiApplication::font());
+    font.setPointSize(1.5 * QGuiApplication::font().pointSize());
+    QGuiApplication::setFont(font);
+}
+
+void VSQApplication::setupContextProperties()
+{
+    QQmlContext *context = m_engine.rootContext();
+    context->setContextProperty("app", this);
+    context->setContextProperty("UiHelper", new VSQUiHelper(this));
+    context->setContextProperty("clipboard", new VSQClipboardProxy(clipboard()));
+    context->setContextProperty("Messenger", &m_messenger);
+    context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
+    context->setContextProperty("ChatModel", &m_messenger.getChatModel());
+}
+
+void VSQApplication::setupConnections()
+{
+    connect(this, &VSQApplication::applicationStateChanged, this, &VSQApplication::onApplicationStateChanged);
+}
+
+void VSQApplication::onApplicationStateChanged(Qt::ApplicationState state)
+{
+    qDebug() << "Application state:" << state;
 #if VS_PUSHNOTIFICATIONS
     static bool _deactivated = false;
 
@@ -148,8 +162,5 @@ VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
             this->m_messenger.checkState();
         });
     }
-#endif // VS_ANDROID
+#endif // VS_PUSHNOTIFICATIONS
 }
-
-
-/******************************************************************************/

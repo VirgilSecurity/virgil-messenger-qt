@@ -32,18 +32,15 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <VSQApplication.h>
-#include <iostream>
-
-#include <android/VSQAndroid.h>
+#include "VSQApplication.h"
+#include "android/VSQAndroid.h"
 
 #if (VSQ_WEBDRIVER_DEBUG)
 #include "Test/Headers.h"
 #endif
 
-int
-main(int argc, char *argv[]) {
-
+int main(int argc, char *argv[])
+{
 #if (VS_ANDROID)
     VSQAndroid::prepare();
 #endif
@@ -53,16 +50,6 @@ main(int argc, char *argv[]) {
 #endif
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-
-    QGuiApplication a(argc, argv);
-    a.setOrganizationName("VirgilSecurity");
-    a.setOrganizationDomain("virgil.net");
-
-    QString baseUrl;
-    if (2 == argc && argv[1] && argv[1][0]) {
-        baseUrl = QString::fromLocal8Bit(argv[1]);
-        qDebug() << "QML URL: " << baseUrl;
-    }
-
-    return VSQApplication().run(baseUrl);
+    VSQApplication a(argc, argv);
+    return a.exec();
 }

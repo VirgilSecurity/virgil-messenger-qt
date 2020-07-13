@@ -32,19 +32,33 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <QtCore>
+#include "VSQSettings.h"
 
-#include "ui/VSQUiHelper.h"
+#include <QDebug>
 
-VSQUiHelper::VSQUiHelper(QObject *parent)
-    : QObject(parent)
+static const QString kUsers = "Users";
+
+VSQSettings::VSQSettings(QObject *parent)
+    : QSettings("VirgilSecurity", "VirgilMessenger", parent) // organization, application name
 {}
 
-int VSQUiHelper::fixFontSz(int sz)
+VSQSettings::~VSQSettings()
+{}
+
+void VSQSettings::setUsersList(const QStringList &users)
 {
-#if defined(Q_OS_WIN)
-    return sz * 96 / 128;
-#else
-    return sz;
-#endif
+    setValue(kUsers, users);
+    sync();
 }
+
+QStringList VSQSettings::usersList() const
+{
+    qDebug() << "Settings filename:" << fileName();
+    return value(kUsers, QStringList()).toStringList();
+}
+
+
+
+
+
+

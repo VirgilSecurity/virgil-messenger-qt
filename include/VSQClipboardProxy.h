@@ -43,6 +43,7 @@ class VSQClipboardProxy : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString text READ text NOTIFY textChanged)
+
 public:
     explicit VSQClipboardProxy(QClipboard*);
 
