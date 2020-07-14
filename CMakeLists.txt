@@ -214,6 +214,7 @@ target_sources(virgil-messenger-qt
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQPushNotifications.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQSqlChatModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQSqlConversationModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQSettings.h
         ${CMAKE_CURRENT_LIST_DIR}/include/ui/VSQUiHelper.h
         ${CMAKE_CURRENT_LIST_DIR}/include/macos/VSQMacos.h
 
@@ -231,6 +232,7 @@ target_sources(virgil-messenger-qt
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQPushNotifications.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQSqlChatModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQSqlConversationModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQSettings.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/ui/VSQUiHelper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/macos/VSQMacos.mm
         ${PREBUILT_QT_DIR}/default-impl/hal.cpp
