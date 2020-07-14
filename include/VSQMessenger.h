@@ -41,6 +41,7 @@
 #include <QObject>
 #include <QSemaphore>
 #include <QXmppCarbonManager.h>
+#include <QXmppDiscoveryManager.h>
 
 #include <qxmpp/QXmppClient.h>
 #include <qxmpp/QXmppMessageReceiptManager.h>
@@ -172,6 +173,7 @@ private slots:
     void onIqReceived(const QXmppIq &iq);
     void onSslErrors(const QList<QSslError> &errors);
     void onStateChanged(QXmppClient::State state);
+    void handleDiscoInfo(const QXmppDiscoveryIq &info);
 
     void
     onAddContactToDB(QString contact);
@@ -183,11 +185,13 @@ private:
     QXmppClient m_xmpp;
     QXmppMessageReceiptManager* m_xmppReceiptManager;
     QXmppCarbonManager* m_xmppCarbonManager;
+    QXmppDiscoveryManager* m_xmppDiscoManager;
     VSQSqlConversationModel *m_sqlConversations;
     VSQSqlChatModel *m_sqlChatModel;
 
     QString m_user;
     QString m_userId;
+    QString m_deviceId;
     QString m_recipient;
     QString m_xmppPass;
     VSQEnvType m_envType;

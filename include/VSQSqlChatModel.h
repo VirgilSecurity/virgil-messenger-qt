@@ -67,6 +67,9 @@ public:
     Q_INVOKABLE void
     clearFilter();
 
+    Q_INVOKABLE void
+    refresh();
+
 private:
     QString m_userId;
     QString m_tableName;

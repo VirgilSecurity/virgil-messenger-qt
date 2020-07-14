@@ -204,11 +204,11 @@ VSQSqlConversationModel::createMessage(QString recipient, QString message, QStri
 
 /******************************************************************************/
 void
-VSQSqlConversationModel::receiveMessage(const QString &messageId, const QString &sender, const QString &message) {
+VSQSqlConversationModel::receiveMessage(const QString messageId, const QString author, const QString message) {
     const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
 
     QSqlRecord newRecord = record();
-    newRecord.setValue("author", sender);
+    newRecord.setValue("author", author);
     newRecord.setValue("recipient", user());
     newRecord.setValue("timestamp", timestamp);
     newRecord.setValue("message", message);    

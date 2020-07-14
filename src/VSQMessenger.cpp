@@ -37,6 +37,7 @@
 #include <cstdlib>
 
 #include <VSQMessenger.h>
+#include <VSQMessenger.h>
 #include <VSQPushNotifications.h>
 #include <VSQSqlConversationModel.h>
 
@@ -48,6 +49,7 @@
 #include <qxmpp/QXmppPushEnableIq.h>
 #include <qxmpp/QXmppMessageReceiptManager.h>
 #include <qxmpp/QXmppCarbonManager.h>
+#include <qxmpp/QXmppDiscoveryManager.h>\
 
 #include <QtConcurrent>
 #include <QStandardPaths>
@@ -99,8 +101,12 @@ VSQMessenger::VSQMessenger() {
     // Add receipt messages extension
     m_xmppReceiptManager = new QXmppMessageReceiptManager();
     m_xmppCarbonManager = new QXmppCarbonManager();
+    m_xmppDiscoManager = new QXmppDiscoveryManager();
+
     m_xmpp.addExtension(m_xmppReceiptManager);
     m_xmpp.addExtension(m_xmppCarbonManager);
+    m_xmpp.addExtension(m_xmppDiscoManager);
+
 
     // Signal connection
     connect(this, SIGNAL(fireReadyToAddContact(QString)), this, SLOT(onAddContactToDB(QString)));
@@ -121,6 +127,8 @@ VSQMessenger::VSQMessenger() {
     // messages sent from our account (but another client)
     connect(m_xmppCarbonManager, &QXmppCarbonManager::messageSent, &m_xmpp, &QXmppClient::messageReceived);
 
+    connect(m_xmppDiscoManager, &QXmppDiscoveryManager::infoReceived, this, &VSQMessenger::handleDiscoInfo);
+
     connect(m_xmppReceiptManager, &QXmppMessageReceiptManager::messageDelivered, this, &VSQMessenger::onMessageDelivered);
 
     // Use Push notifications
@@ -128,6 +136,21 @@ VSQMessenger::VSQMessenger() {
     VSQPushNotifications::instance().startMessaging();
 #endif
 }
+
+void
+VSQMessenger::handleDiscoInfo(const QXmppDiscoveryIq &info)
+{
+    qInfo() << info.features();
+
+    if (info.from() != m_xmpp.configuration().domain())
+        return;
+
+    // enable carbons, if feature found
+    if (info.features().contains("urn:xmpp:carbons:2")) {
+        m_xmppCarbonManager->setCarbonsEnabled(true);
+    }
+}
+
 
 void
 VSQMessenger::onMessageDelivered(const QString& to, const QString& messageId) {
@@ -197,7 +220,7 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
     // Connect to XMPP
     emit fireConnecting();
 
-    QString jid = userId + "@" + _xmppURL();
+    QString jid = userId + "@" + _xmppURL() + "/" + QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
     conf.setJid(jid);
     conf.setHost(_xmppURL());
     conf.setPassword(_xmppPass());
@@ -234,6 +257,8 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
 
     timer.start(kConnectionWaitMs);
     loop.exec();
+
+    m_xmppCarbonManager->setCarbonsEnabled(true);
 
     // Return connection result
     return m_xmpp.isConnected();
@@ -697,8 +722,7 @@ VSQMessenger::decryptMessage(const QString &sender, const QString &message) {
 
     // Decrypt message
     // DECRYPTED_MESSAGE_SZ_MAX - 1  - This is required for a Zero-terminated string
-    if (VS_CODE_OK !=
-            vs_messenger_virgil_decrypt_msg(
+    if (VS_CODE_OK != vs_messenger_virgil_decrypt_msg(
                 sender.toStdString().c_str(),
                 message.toStdString().c_str(),
                 decryptedMessage, decryptedMessageSz - 1,
@@ -723,20 +747,27 @@ VSQMessenger::decryptMessage(const QString &sender, const QString &message) {
 /******************************************************************************/
 void
 VSQMessenger::onMessageReceived(const QXmppMessage &message) {
-    // Get sender
-    QString from = message.from();
-    QStringList pieces = from.split("@");
-    if (pieces.size() < 1) {
-        VS_LOG_WARNING("Wrong sender");
-        return;
-    }
-    QString sender = pieces.first();
+
+    QString sender = message.from().split("@").first();
+    QString recipient = message.to().split("@").first();
+
+    qInfo() << "Sender: " << sender << " Recipient: " << recipient;
 
     // Get encrypted message
     QString msg = message.body();
 
     // Decrypt message
     QString decryptedString = decryptMessage(sender, msg);
+
+    if (sender == currentUser()) {
+        QString recipient = message.to().split("@").first();
+        m_sqlConversations->createMessage(recipient, decryptedString, message.id());
+        m_sqlConversations->setMessageStatus(message.id(), VSQSqlConversationModel::EnMessageStatus::MST_SENT);
+        // ensure private chat with recipient exists
+        m_sqlChatModel->createPrivateChat(recipient);
+        emit fireNewMessage(sender, decryptedString);
+        return;
+    }
 
     // Add sender to contacts
     // m_sqlContacts->addContact(sender);

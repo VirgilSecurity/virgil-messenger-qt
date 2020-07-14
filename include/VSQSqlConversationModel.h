@@ -92,7 +92,7 @@ public:
     createMessage(QString recipient, QString message, QString externalId);
 
     Q_INVOKABLE void
-    receiveMessage(const QString &messageId, const QString &sender, const QString &message);
+    receiveMessage(const QString messageId, const QString author, const QString message);
 
     Q_INVOKABLE void
     setAsRead(const QString &author);

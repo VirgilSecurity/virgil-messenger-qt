@@ -112,6 +112,12 @@ VSQSqlChatModel::clearFilter() {
 
 /******************************************************************************/
 void
+VSQSqlChatModel::refresh() {
+    select();
+}
+
+/******************************************************************************/
+void
 VSQSqlChatModel::applyFilter(const QString &filter) {
 
     const QString filterString = QString::fromLatin1(
