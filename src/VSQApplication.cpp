@@ -36,7 +36,6 @@
 
 #include <QDesktopServices>
 #include <QFont>
-#include <QGuiApplication>
 #include <QQmlContext>
 
 #include "VSQClipboardProxy.h"
@@ -53,7 +52,7 @@ const QString VSQApplication::kVersion = "unknown";
 #endif
 
 VSQApplication::VSQApplication(int &argc, char **argv)
-    : QGuiApplication(argc, argv)
+    : ApplicationBase(argc, argv)
     , m_engine(this)
     , m_settings(this)
     , m_messenger(&m_settings, this)
@@ -124,9 +123,9 @@ void VSQApplication::setDefaults()
 
 void VSQApplication::setupFonts()
 {
-    QFont font(QGuiApplication::font());
-    font.setPointSize(1.5 * QGuiApplication::font().pointSize());
-    QGuiApplication::setFont(font);
+    QFont font(ApplicationBase::font());
+    font.setPointSize(1.5 * ApplicationBase::font().pointSize());
+    setFont(font);
 }
 
 void VSQApplication::setupContextProperties()

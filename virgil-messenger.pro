@@ -191,24 +191,51 @@ DEPENDPATH += $${INCLUDEPATH}
 message("ANDROID_TARGET_ARCH = $$ANDROID_TARGET_ARCH")
 
 #
+#   Linux specific
+#
+linux {
+    DEFINES += VS_LINUX=1 VS_DESKTOP=1
+    QT += widgets
+}
+
+#
+#   Windows specific
+#
+
+win32|win64 {
+    DEFINES += VS_WINDOWS=1 VS_DESKTOP=1
+    QT += widgets
+    RC_ICONS = platforms/windows/Virgil.ico
+    DISTFILES += \
+        platforms/windows/Virgil.ico
+}
+
+#
 #   macOS specific
 #
-macx: {
+
+macx {
+    DEFINES += VS_MACOS=1 VS_DESKTOP=1
+    QT += widgets
     ICON = $$PWD/scripts/macos/pkg_resources/MyIcon.icns
     QMAKE_INFO_PLIST = $$PWD/platforms/macos/virgil-messenger.plist
+    DISTFILES += \
+        platforms/macos/virgil-messenger.plist.in
 }
 
 #
 #   iOS specific
 #
-#ios: {
+
+ios {
+    DEFINES += VS_IOS=1 VS_MOBILE=1
 #    OBJECTIVE_SOURCES += \
 #        src/ios/APNSApplicationDelegate.mm
 
 #    #IOS_ENTITLEMENTS.name = CODE_SIGN_ENTITLEMENTS
 #    #IOS_ENTITLEMENTS.value = ios/pushnotifications.entitlements
 #    QMAKE_MAC_XCODE_SETTINGS += IOS_ENTITLEMENTS
-#}
+}
 
 #
 #   Android specific
@@ -223,9 +250,10 @@ defineReplace(AndroidVersionCode) {
         return($$first(vCode))
 }
 
-android: {
+android {
     QT += androidextras
-    DEFINES += VS_ANDROID=1 VS_PUSHNOTIFICATIONS=1
+    DEFINES += VS_ANDROID=1 VS_PUSHNOTIFICATIONS=1 VS_MOBILE=1
+
     ANDROID_VERSION_CODE = $$AndroidVersionCode($$VERSION)
     ANDROID_VERSION_NAME = $$VERSION
 
@@ -263,32 +291,27 @@ android: {
         platforms/android/gradlew \
         platforms/android/gradlew.bat \
         platforms/android/res/values/libs.xml \
-        platforms/android/src/org/virgil/notification/NotificationClient.java
+        platforms/android/src/org/virgil/notification/NotificationClient.java \
+        # Resources
+        platforms/android/res/drawable-hdpi/icon.png \
+        platforms/android/res/drawable-hdpi/icon_round.png \
+        platforms/android/res/drawable-ldpi/icon.png \
+        platforms/android/res/drawable-ldpi/icon_round.png \
+        platforms/android/res/drawable-mdpi/icon.png \
+        platforms/android/res/drawable-mdpi/icon_round.png \
+        platforms/android/res/drawable-xhdpi/icon.png \
+        platforms/android/res/drawable-xhdpi/icon_round.png \
+        platforms/android/res/drawable-xxhdpi/icon.png \
+        platforms/android/res/drawable-xxhdpi/icon_round.png \
+        platforms/android/res/drawable-xxxhdpi/icon.png \
+        platforms/android/res/drawable-xxxhdpi/icon_round.png \
+        platforms/android/res/mipmap-hdpi/ic_launcher_round.png \
+        platforms/android/res/mipmap-mdpi/ic_launcher.png \
+        platforms/android/res/mipmap-mdpi/ic_launcher_round.png \
+        platforms/android/res/mipmap-xhdpi/ic_launcher.png \
+        platforms/android/res/mipmap-xhdpi/ic_launcher_round.png \
+        platforms/android/res/mipmap-xxhdpi/ic_launcher.png \
+        platforms/android/res/mipmap-xxhdpi/ic_launcher_round.png \
+        platforms/android/res/mipmap-xxxhdpi/ic_launcher.png \
+        platforms/android/res/mipmap-xxxhdpi/ic_launcher_round.png
 }
-
-RC_ICONS = platforms/windows/Virgil.ico
-
-DISTFILES += \
-    platforms/android/res/drawable-hdpi/icon.png \
-    platforms/android/res/drawable-hdpi/icon_round.png \
-    platforms/android/res/drawable-ldpi/icon.png \
-    platforms/android/res/drawable-ldpi/icon_round.png \
-    platforms/android/res/drawable-mdpi/icon.png \
-    platforms/android/res/drawable-mdpi/icon_round.png \
-    platforms/android/res/drawable-xhdpi/icon.png \
-    platforms/android/res/drawable-xhdpi/icon_round.png \
-    platforms/android/res/drawable-xxhdpi/icon.png \
-    platforms/android/res/drawable-xxhdpi/icon_round.png \
-    platforms/android/res/drawable-xxxhdpi/icon.png \
-    platforms/android/res/drawable-xxxhdpi/icon_round.png \
-    platforms/android/res/mipmap-hdpi/ic_launcher_round.png \
-    platforms/android/res/mipmap-mdpi/ic_launcher.png \
-    platforms/android/res/mipmap-mdpi/ic_launcher_round.png \
-    platforms/android/res/mipmap-xhdpi/ic_launcher.png \
-    platforms/android/res/mipmap-xhdpi/ic_launcher_round.png \
-    platforms/android/res/mipmap-xxhdpi/ic_launcher.png \
-    platforms/android/res/mipmap-xxhdpi/ic_launcher_round.png \
-    platforms/android/res/mipmap-xxxhdpi/ic_launcher.png \
-    platforms/android/res/mipmap-xxxhdpi/ic_launcher_round.png \
-    platforms/macos/virgil-messenger.plist.in \
-    platforms/windows/Virgil.ico

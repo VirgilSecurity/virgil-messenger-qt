@@ -35,13 +35,20 @@
 #ifndef VSQAPPLICATION_H
 #define VSQAPPLICATION_H
 
-#include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
 #include "VSQMessenger.h"
 #include "VSQSettings.h"
 
-class VSQApplication : public QGuiApplication
+#ifdef VS_DESKTOP
+#include <QApplication>
+#define ApplicationBase QApplication
+#else
+#include <QGuiApplication>
+#define ApplicationBase QGuiApplication
+#endif
+
+class VSQApplication : public ApplicationBase
 {
     Q_OBJECT
 

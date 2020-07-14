@@ -114,7 +114,7 @@ Page {
         onMessageSending: {
             var future = Messenger.sendMessage(ConversationsModel.recipient, message)
             Future.onFinished(future, function(value) {
-              messageSent.play()
+                messageSent.play()
             })
         }
     }

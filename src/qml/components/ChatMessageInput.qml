@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import Qt.labs.platform 1.0 as Native
+import QtQuick.Dialogs 1.2
 
 import "../base"
 import "../theme"
@@ -26,6 +27,21 @@ Control {
             Layout.rightMargin: 2
             Layout.alignment: Qt.AlignVCenter
             image: "Grid"
+            onClicked: attachmentsMenu.open()
+
+            ContextMenu {
+                id: attachmentsMenu
+
+                Action {
+                    text: qsTr("Send photo")
+                    onTriggered: selectAttachment()
+                }
+
+                Action {
+                    text: qsTr("Send audio")
+                    onTriggered: selectAttachment()
+                }
+            }
         }
 
         ScrollView {
@@ -131,11 +147,14 @@ Control {
             Layout.leftMargin: 2
             Layout.alignment: Qt.AlignVCenter            
             focusPolicy: Qt.NoFocus
-            objectName: "btnSend"            
             disabled: !(messageField.text + messageField.preeditText).length
             image: "Send"
             onClicked: root.sendMessage()
         }
+    }
+
+    SelectAttachmentsDialog {
+        id: fileDialog
     }
 
     function sendMessage() {
@@ -143,5 +162,9 @@ Control {
         messageField.clear()
         if (text)
             messageSending(text)
+    }
+
+    function selectAttachment() {
+        fileDialog.open()
     }
 }
