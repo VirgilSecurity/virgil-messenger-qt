@@ -41,6 +41,37 @@
 #include <QCoreApplication>
 #include <virgil/iot/qt/VSQIoTKit.h>
 
-void vs_logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+using namespace VirgilIoTKit;
+
+void logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+
+class VSQLogging : public QObject {
+    Q_OBJECT
+public:
+    virtual ~VSQLogging();
+    void checkAppCrash();
+    void resetRunFlag();
+    bool sendLogFiles();
+    void setVirgilUrl(QString VirgilUrl);
+    void setkVersion(QString AppVersion);
+    void setkOrganization(QString strkOrganization);
+    void setkApp(QString strkApp);
+
+private:
+    static const QString endpointSendReport;
+
+
+    bool checkRunFlag();
+    bool sendFileToBackendRequest(QByteArray fileData);
+    void setRunFlag(bool runState);
+    QString currentVirgilUrl;
+    QString kVersion;
+    QString kOrganization;
+    QString kApp;
+    QNetworkAccessManager *manager;
+
+private slots:
+    void endpointReply();
+};
 
 #endif // VSQLOGGING_H

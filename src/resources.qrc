@@ -103,5 +103,6 @@
         <file>qml/base/qmldir</file>
         <file>qml/components/AppStatus.qml</file>
         <file>qml/pages/BackupKeyPage.qml</file>
+        <file>qml/components/Dialogs/SendReportAsk.qml</file>
     </qresource>
 </RCC>

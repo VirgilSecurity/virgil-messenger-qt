@@ -49,6 +49,7 @@
 
 #include "VSQSqlConversationModel.h"
 #include "VSQSqlChatModel.h"
+#include "VSQLogging.h"
 
 using namespace VirgilIoTKit;
 
@@ -98,6 +99,8 @@ public:
     static QString
     decryptMessage(const QString &sender, const QString &message);
 
+
+
 public slots:
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
@@ -138,6 +141,8 @@ public slots:
 
     Q_INVOKABLE void
     setStatus(VSQMessenger::EnStatus status);
+
+    void setLogging(VSQLogging *loggingPtr);
 
 signals:
     void
@@ -186,14 +191,14 @@ private:
     QXmppMessageReceiptManager* m_xmppReceiptManager;
     VSQSqlConversationModel *m_sqlConversations;
     VSQSqlChatModel *m_sqlChatModel;
+    VSQLogging *m_logging;
 
     QString m_user;
     QString m_userId;
     QString m_xmppPass;
     VSQEnvType m_envType;
-    static const VSQEnvType _defaultEnv = PROD;
+    static const VSQEnvType _defaultEnv = DEV;
     QXmppConfiguration conf;
-
     static const QString kOrganization;
     static const QString kApp;
     static const QString kUsers;

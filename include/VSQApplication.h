@@ -40,6 +40,7 @@
 #include <QQmlApplicationEngine>
 #include <VSQMessenger.h>
 #include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
+#include <VSQLogging.h>
 
 #include <macos/VSQMacos.h>
 
@@ -64,16 +65,17 @@ public:
     Q_INVOKABLE void
     sendReport();
 
+
 private slots:
     void
     onApplicationStateChanged(Qt::ApplicationState state);
 
 private:
     static const QString kVersion;
-
     QQmlApplicationEngine m_engine;
     VSQMessenger m_messenger;
     QSharedPointer<VSQUdpBroadcast> m_netifUDPbcast;
+    VSQLogging m_logging;
 };
 
 #endif // VSQApplication
