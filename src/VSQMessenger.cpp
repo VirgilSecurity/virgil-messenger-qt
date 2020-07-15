@@ -49,6 +49,7 @@
 #include "VSQSettings.h"
 #include "VSQSqlConversationModel.h"
 #include "VSQSqlChatModel.h"
+#include "VSQUtils.h"
 #include "android/VSQAndroid.h"
 
 Q_DECLARE_METATYPE(VSQMessenger::EnStatus)
@@ -88,6 +89,7 @@ VSQMessenger::VSQMessenger(VSQSettings *settings, QObject *parent)
 
     m_sqlConversations = new VSQSqlConversationModel(this);
     m_sqlChatModel = new VSQSqlChatModel(this);
+    m_attachmentsManager = new VSQAttachmentsManager(settings, this);
 
     // Add receipt messages extension
     m_xmppReceiptManager = new QXmppMessageReceiptManager();
@@ -790,12 +792,14 @@ QFuture<VSQMessenger::EnResult> VSQMessenger::sendMessage(bool createNew, const 
 }
 
 /******************************************************************************/
-QFuture<VSQMessenger::EnResult> VSQMessenger::sendMessage(const QString &recipient, const QString &message,
+QFuture<VSQMessenger::EnResult> VSQMessenger::sendMessage(const QString &recipient, const QString &messageText,
                                                           const QVariant &attachmentUrl, Enums::AttachmentType attachmentType)
 {
-    const QString uuid = QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
-    const Attachment attachment(attachmentUrl.toUrl(), attachmentType);
-    const StMessage stMessage{ uuid, message, recipient, attachment };
+    Q_ASSERT_X(!messageText.isEmpty() || attachmentUrl.isValid(), "VSQMessenger::sendMessage", "Message and attachment are empty");
+    const QString uuid = Utils::createUuid();
+    const auto attachment = m_attachmentsManager->createFromLocalFile(attachmentUrl.toUrl(), attachmentType);
+    const QString text = attachment ? QString() : messageText; // text or attachment
+    const StMessage stMessage{ uuid, text, recipient, attachment };
     return sendMessage(true, stMessage);
 }
 

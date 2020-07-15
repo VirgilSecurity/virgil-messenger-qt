@@ -35,12 +35,20 @@
 #include "VSQSettings.h"
 
 #include <QDebug>
+#include <QStandardPaths>
 
 static const QString kUsers = "Users";
 
 VSQSettings::VSQSettings(QObject *parent)
     : QSettings("VirgilSecurity", "VirgilMessenger", parent) // organization, application name
-{}
+{
+    m_attachmentCacheDir = QDir(QStandardPaths::standardLocations(QStandardPaths::CacheLocation).front()).filePath("attachments");
+
+    qDebug() << "SETTINGS:";
+    qDebug() << "- settings filename:" << fileName();
+    qDebug() << "- attachment cache dir:" << attachmentCacheDir().absolutePath();
+    qDebug() << "- attachment max size:" << attachmentMaxSize();
+}
 
 VSQSettings::~VSQSettings()
 {}
@@ -53,12 +61,15 @@ void VSQSettings::setUsersList(const QStringList &users)
 
 QStringList VSQSettings::usersList() const
 {
-    qDebug() << "Settings filename:" << fileName();
     return value(kUsers, QStringList()).toStringList();
 }
 
+int VSQSettings::attachmentMaxSize() const
+{
+    return 50 * 1024 * 1024;
+}
 
-
-
-
-
+QDir VSQSettings::attachmentCacheDir() const
+{
+    return m_attachmentCacheDir;
+}

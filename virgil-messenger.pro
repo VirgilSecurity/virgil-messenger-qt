@@ -77,6 +77,7 @@ DEFINES += QT_DEPRECATED_WARNINGS \
         VERSION="$$VERSION"
 
 CONFIG(iphoneos, iphoneos | iphonesimulator) {
+    # FIXME(fpohtmeh): remove? We already have IOS section
     DEFINES += VS_IOS=1
 }
 
@@ -86,27 +87,33 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
 
 HEADERS += \
         include/VSQApplication.h \
+        include/VSQAttachmentsManager.h \
         include/VSQCommon.h \
         include/VSQClipboardProxy.h \
         include/VSQMessenger.h \
         include/VSQSqlChatModel.h \
         include/VSQSqlConversationModel.h \
         include/VSQSettings.h \
+        include/VSQUtils.h \
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
-        include/ui/VSQUiHelper.h
+        include/ui/VSQUiHelper.h \
+        # thirdparty
+        include/thirdparty/optional/optional.hpp
 
 #
 #   Sources
 #
 
 SOURCES += \
+        src/VSQAttachmentsManager.cpp \
         src/VSQCommon.cpp \
         src/VSQClipboardProxy.cpp \
         src/VSQMessenger.cpp \
         src/VSQSqlChatModel.cpp \
         src/VSQSqlConversationModel.cpp \
         src/VSQSettings.cpp \
+        src/VSQUtils.cpp \
         src/android/VSQAndroid.cpp \
         src/main.cpp \
         src/VSQApplication.cpp \
@@ -123,9 +130,11 @@ RESOURCES += src/resources.qrc
 #
 
 
-INCLUDEPATH +=  include \
-        $${QXMPP_BUILD_PATH}/include \
-         $${QXMPP_BUILD_PATH}/include/qxmpp
+INCLUDEPATH += \
+    include \
+    include/thirdparty \
+    $${QXMPP_BUILD_PATH}/include \
+    $${QXMPP_BUILD_PATH}/include/qxmpp
 
 #
 #   Sparkle framework

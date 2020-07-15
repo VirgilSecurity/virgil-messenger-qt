@@ -46,6 +46,7 @@
 #include <virgil/iot/messenger/messenger.h>
 
 #include "VSQCommon.h"
+#include "VSQAttachmentsManager.h"
 
 using namespace VirgilIoTKit;
 
@@ -85,7 +86,7 @@ public:
 
     Q_PROPERTY(QString currentUser READ currentUser NOTIFY fireCurrentUserChanged)
 
-    explicit VSQMessenger(VSQSettings *settings, QObject *parent);
+    explicit VSQMessenger(VSQSettings *settings, QObject *parent = nullptr);
     VSQMessenger() = default; // NOTE(vova.y): needed for QmlPrivate template
     ~VSQMessenger() override = default;
 
@@ -128,7 +129,7 @@ public slots:
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     addContact(QString contact);
 
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult> sendMessage(const QString &recipient, const QString &message,
+    Q_INVOKABLE QFuture<VSQMessenger::EnResult> sendMessage(const QString &recipient, const QString &messageText,
                                                             const QVariant &attachmentUrl, Enums::AttachmentType attachmentType);
     QFuture<VSQMessenger::EnResult> sendMessage(bool createNew, const StMessage &message);
 
@@ -185,6 +186,7 @@ private:
     QXmppMessageReceiptManager* m_xmppReceiptManager;
     VSQSqlConversationModel *m_sqlConversations;
     VSQSqlChatModel *m_sqlChatModel;
+    VSQAttachmentsManager *m_attachmentsManager;
 
     QString m_user;
     QString m_userId;

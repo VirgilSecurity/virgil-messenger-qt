@@ -32,63 +32,38 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQCOMMON_H
-#define VSQCOMMON_H
+#ifndef VSQATTACHMENTSMANAGER_H
+#define VSQATTACHMENTSMANAGER_H
 
-#include <memory>
+#include <QObject>
 
-#include <QtGlobal>
-#include <QUrl>
+#include "VSQCommon.h"
 
-class QLocale;
+class VSQSettings;
 
-#include <optional/optional.hpp>
-
-template <class Type>
-using Optional = tl::optional<Type>;
-using OptionalType = tl::nullopt_t;
-
-static constexpr OptionalType NullOptional(tl::nullopt);
-
-// Namespace for passing of enum values to QML
-namespace Enums {
-    Q_NAMESPACE
-
-    enum class AttachmentType
-    {
-        File,
-        Picture,
-        Video,
-        Audio
-    };
-    Q_ENUM_NS(AttachmentType)
-}
-
-enum EnMessageStatus
+// Class that handle attachments workflow
+class VSQAttachmentsManager : public QObject
 {
-    MST_CREATED,
-    MST_SENT,
-    MST_RECEIVED,
-    MST_READ,
-    MST_FAILED
+    Q_OBJECT
+
+public:
+    VSQAttachmentsManager(VSQSettings *settings, QObject *parent);
+
+    // Create attachment by local url and attachment type
+    Optional<Attachment> createFromLocalFile(const QUrl &url, const Attachment::Type type);
+
+    // Return text of last error
+    QString lastErrorText() const;
+
+private:
+    // Convenience method to update last error text
+    OptionalType setLastErrorText(const QString &text);
+
+    // Return path to file cached copy
+    Optional<QString> cachedCopy(const QUrl &url);
+
+    VSQSettings *m_settings;
+    QString m_lastErrorText;
 };
 
-struct Attachment
-{
-    using Type = Enums::AttachmentType;
-
-    QString id;
-    QUrl url;
-    Type type = Type::File;
-    QString name;
-};
-
-struct StMessage
-{
-    QString message_id;
-    QString message;
-    QString recipient;
-    Optional<Attachment> attachment;
-};
-
-#endif // VSQCOMMON_H
+#endif // VSQATTACHMENTSMANAGER_H

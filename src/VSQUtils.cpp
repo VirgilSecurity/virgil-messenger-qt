@@ -32,63 +32,18 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQCOMMON_H
-#define VSQCOMMON_H
+#include "VSQUtils.h"
 
-#include <memory>
+#include <QLocale>
+#include <QUuid>
 
-#include <QtGlobal>
-#include <QUrl>
-
-class QLocale;
-
-#include <optional/optional.hpp>
-
-template <class Type>
-using Optional = tl::optional<Type>;
-using OptionalType = tl::nullopt_t;
-
-static constexpr OptionalType NullOptional(tl::nullopt);
-
-// Namespace for passing of enum values to QML
-namespace Enums {
-    Q_NAMESPACE
-
-    enum class AttachmentType
-    {
-        File,
-        Picture,
-        Video,
-        Audio
-    };
-    Q_ENUM_NS(AttachmentType)
+QString Utils::createUuid()
+{
+    return QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
 }
 
-enum EnMessageStatus
+QString Utils::formattedFileSize(int fileSize)
 {
-    MST_CREATED,
-    MST_SENT,
-    MST_RECEIVED,
-    MST_READ,
-    MST_FAILED
-};
-
-struct Attachment
-{
-    using Type = Enums::AttachmentType;
-
-    QString id;
-    QUrl url;
-    Type type = Type::File;
-    QString name;
-};
-
-struct StMessage
-{
-    QString message_id;
-    QString message;
-    QString recipient;
-    Optional<Attachment> attachment;
-};
-
-#endif // VSQCOMMON_H
+    static QLocale locale = QLocale::system();
+    return locale.formattedDataSize(fileSize);
+}

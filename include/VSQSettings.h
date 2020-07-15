@@ -32,6 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#include <QDir>
 #include <QSettings>
 
 #ifndef VSQSETTINGS_H
@@ -47,6 +48,12 @@ public:
 
     void setUsersList(const QStringList &users);
     QStringList usersList() const;
+
+    int attachmentMaxSize() const;
+    QDir attachmentCacheDir() const;
+
+private:
+    QDir m_attachmentCacheDir;
 };
 
 #endif // VSQSETTINGS_H

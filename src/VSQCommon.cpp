@@ -34,23 +34,4 @@
 
 #include "VSQCommon.h"
 
-#include <QFile>
-#include <QFileInfo>
-
-Attachment::Attachment(const QUrl &url, Type type)
-    : Attachment()
-{
-    this->type = type;
-    if (!url.isValid() || !url.isLocalFile())
-        return;
-    QFile file(url.toLocalFile());
-    fileName = QFileInfo(file).fileName(); // fileName without path
-    valid = file.open(QFile::ReadOnly);
-    if (valid)
-        data = file.readAll();
-}
-
-int Attachment::fileSize() const
-{
-    return data.size();
-}
+// TODO(fpohtmeh): remove?
