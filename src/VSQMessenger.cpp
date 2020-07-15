@@ -117,11 +117,11 @@ VSQMessenger::VSQMessenger(VSQSettings *settings, QObject *parent)
 void
 VSQMessenger::onMessageDelivered(const QString& to, const QString& messageId) {
 
-    m_sqlConversations->setMessageStatus(messageId, VSQSqlConversationModel::EnMessageStatus::MST_RECEIVED);
+    m_sqlConversations->setMessageStatus(messageId, EnMessageStatus::MST_RECEIVED);
 
     // QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus",
     //                          Qt::QueuedConnection, Q_ARG(const QString &, messageId),
-    //                          Q_ARG(const VSQSqlConversationModel::EnMessageStatus, VSQSqlConversationModel::EnMessageStatus::MST_RECEIVED));
+    //                          Q_ARG(const EnMessageStatus, EnMessageStatus::MST_RECEIVED));
 
     qDebug() << "Message with id: '" << messageId << "' delivered to '" << to << "'";
 }
@@ -613,12 +613,11 @@ VSQMessenger::onConnected() {
 
 
 /******************************************************************************/
-void
-VSQMessenger::_sendFailedMessages() {
-   QList<VSQSqlConversationModel::StMessage*> messages = m_sqlConversations->getMessages(m_user,VSQSqlConversationModel::EnMessageStatus::MST_FAILED);
-   for(int i = 0; i < messages.length(); i++){
-       sendMessage(false, messages[i]->message_id, messages[i]->recipient, messages[i]->message);
-   }
+void VSQMessenger::_sendFailedMessages()
+{
+   auto messages = m_sqlConversations->getMessages(m_user, EnMessageStatus::MST_FAILED);
+   for (auto &msg : messages)
+       sendMessage(false, *msg);
 }
 
 /******************************************************************************/
@@ -729,8 +728,8 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
 
 
 /******************************************************************************/
-QFuture<VSQMessenger::EnResult>
-VSQMessenger::sendMessage(bool createNew, QString messageId, QString to, QString message) {
+QFuture<VSQMessenger::EnResult> VSQMessenger::sendMessage(bool createNew, const StMessage &message)
+{
     return QtConcurrent::run([=]() -> EnResult {
         static const size_t _encryptedMsgSzMax = 20 * 1024;
         uint8_t encryptedMessage[_encryptedMsgSzMax];
@@ -738,7 +737,7 @@ VSQMessenger::sendMessage(bool createNew, QString messageId, QString to, QString
 
         // Create JSON-formatted message to be sent
         QJsonObject payloadObject;
-        payloadObject.insert("body", message);
+        payloadObject.insert("body", message.message);
 
         QJsonObject mainObject;
         mainObject.insert("type", "text");
@@ -746,12 +745,11 @@ VSQMessenger::sendMessage(bool createNew, QString messageId, QString to, QString
 
         QJsonDocument doc(mainObject);
         QString internalJson = doc.toJson(QJsonDocument::Compact);
-
         qDebug() << internalJson;
 
         // Encrypt message
         if (VS_CODE_OK != vs_messenger_virgil_encrypt_msg(
-                         to.toStdString().c_str(),
+                         message.recipient.toStdString().c_str(),
                          internalJson.toStdString().c_str(),
                          encryptedMessage,
                          _encryptedMsgSzMax,
@@ -761,29 +759,29 @@ VSQMessenger::sendMessage(bool createNew, QString messageId, QString to, QString
         }
 
         // Send encrypted message
-        QString toJID = to + "@" + _xmppURL();
+        QString toJID = message.recipient + "@" + _xmppURL();
         QString fromJID = currentUser() + "@" + _xmppURL();
         QString encryptedStr = QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage));
 
         QXmppMessage msg(fromJID, toJID, encryptedStr);
         msg.setReceiptRequested(true);
-        msg.setId(messageId);
+        msg.setId(message.message_id);
 
         // Save message to DB in native thread
         if(createNew){
             QMetaObject::invokeMethod(m_sqlConversations, "createMessage",
-                Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message), Q_ARG(QString, msg.id()));
+                Qt::QueuedConnection, Q_ARG(QString, message.recipient), Q_ARG(QString, message.message), Q_ARG(QString, msg.id()));
         }
 
         QMetaObject::invokeMethod(m_sqlChatModel, "updateLastMessage",
-            Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message));
+            Qt::QueuedConnection, Q_ARG(QString, message.recipient), Q_ARG(QString, message.message));
 
         if (m_xmpp.sendPacket(msg)) {
             QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus", Qt::QueuedConnection, Q_ARG(QString, msg.id()),
-                Q_ARG(VSQSqlConversationModel::EnMessageStatus, VSQSqlConversationModel::EnMessageStatus::MST_SENT));
+                Q_ARG(EnMessageStatus, EnMessageStatus::MST_SENT));
         } else {
             QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus", Qt::QueuedConnection, Q_ARG(QString, msg.id()),
-                Q_ARG(VSQSqlConversationModel::EnMessageStatus, VSQSqlConversationModel::EnMessageStatus::MST_FAILED));
+                Q_ARG(EnMessageStatus, EnMessageStatus::MST_FAILED));
         }
 
         return MRES_OK;
@@ -791,9 +789,20 @@ VSQMessenger::sendMessage(bool createNew, QString messageId, QString to, QString
 }
 
 /******************************************************************************/
-QFuture<VSQMessenger::EnResult>
-VSQMessenger::sendMessage(QString to, QString message) {
-    return sendMessage(true, QUuid::createUuid().toString(QUuid::WithoutBraces).toLower(), to, message);
+QFuture<VSQMessenger::EnResult> VSQMessenger::sendMessage(const QString &recipient, const QString &message, const QVariant &attachmentUrl)
+{
+    const QString uuid = QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
+
+    // TODO(fpohtmeh): remove once attachments have DB support
+    Attachment attachment;
+    QString messageText = message;
+    if (attachmentUrl.isValid()) {
+        const QUrl url = attachmentUrl.value<QUrl>();
+        messageText = attachment.fileName;
+    }
+
+    StMessage stMessage{ uuid, messageText, recipient, attachment };
+    return sendMessage(true, stMessage);
 }
 
 /******************************************************************************/

@@ -1,7 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
-import Qt.labs.platform 1.0 as Native
 import QtQuick.Dialogs 1.2
 
 import "../base"
@@ -10,7 +9,7 @@ import "../theme"
 Control {
     id: root
 
-    signal messageSending(string message)
+    signal messageSending(string message, var attachmentUrl)
 
     width: parent.width
     implicitHeight: scrollView.height
@@ -97,47 +96,7 @@ Control {
                     }
                 }
 
-                MouseArea {
-                    anchors.fill: parent
-                    acceptedButtons: Qt.RightButton
-                    hoverEnabled: true
-                    onClicked: messageField.openContextMenu()
-                    onPressAndHold: {
-                        if (mouse.source === Qt.MouseEventNotSynthesized)
-                            messageField.openContextMenu()
-                    }
-
-                    Native.Menu {
-                        id: contextMenu
-                        Native.MenuItem {
-                            text: "Cut"
-                            onTriggered: {
-                                messageField.cut()
-                            }
-                        }
-                        Native.MenuItem {
-                            text: "Copy"
-                            onTriggered: {
-                                messageField.copy()
-                            }
-                        }
-                        Native.MenuItem {
-                            text: "Paste"
-                            onTriggered: {
-                                messageField.paste()
-                            }
-                        }
-                    }
-                }
-
-                function openContextMenu() {
-                    const selStart = selectionStart;
-                    const selEnd = selectionEnd;
-                    const curPos = cursorPosition;
-                    contextMenu.open();
-                    messageField.cursorPosition = curPos;
-                    messageField.select(selStart, selEnd);
-                }
+                TextInputMouseArea {}
             }
         }
 
@@ -155,13 +114,15 @@ Control {
 
     SelectAttachmentsDialog {
         id: fileDialog
+
+        onAccepted: sendMessage(fileDialog.fileUrl)
     }
 
-    function sendMessage() {
+    function sendMessage(attachmentUrl) {
         const text = (messageField.text + messageField.preeditText).trim();
         messageField.clear()
-        if (text)
-            messageSending(text)
+        if (text || attachmentUrl)
+            messageSending(text, attachmentUrl)
     }
 
     function selectAttachment() {

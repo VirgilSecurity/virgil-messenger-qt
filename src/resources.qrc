@@ -104,5 +104,6 @@
         <file>qml/components/AppStatus.qml</file>
         <file>qml/pages/BackupKeyPage.qml</file>
         <file>qml/components/SelectAttachmentsDialog.qml</file>
+        <file>qml/components/TextInputMouseArea.qml</file>
     </qresource>
 </RCC>

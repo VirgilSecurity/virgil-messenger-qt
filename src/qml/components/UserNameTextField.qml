@@ -7,4 +7,7 @@ TextField {
     // Original regexp (/(?!_)[a-z0-9_]{1,20}(?<!_)/) is replaced with equivalent.
     // Also issue can be fixed by using RegularExpressionValidator from QtQuick 2.15
     validator: RegExpValidator { regExp: /(?!_)[a-z0-9_]{0,19}[a-z0-9]/ }
+    selectByMouse: true
+
+    TextInputMouseArea {}
 }

@@ -64,7 +64,6 @@ class VSQMessenger : public QObject {
     Q_ENUMS(EnStatus)
 
 public:
-
     enum EnResult
     {
         MRES_OK,
@@ -97,7 +96,6 @@ public:
     static QString decryptMessage(const QString &sender, const QString &message);
 
 public slots:
-
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     signIn(QString user);
 
@@ -128,11 +126,8 @@ public slots:
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     addContact(QString contact);
 
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    sendMessage(QString to, QString message);
-
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    sendMessage(bool createNew, QString messageId, QString to, QString message);
+    Q_INVOKABLE QFuture<VSQMessenger::EnResult> sendMessage(const QString &recipient, const QString &message, const QVariant &attachmentUrl);
+    QFuture<VSQMessenger::EnResult> sendMessage(bool createNew, const StMessage &message);
 
     Q_INVOKABLE void
     setStatus(VSQMessenger::EnStatus status);

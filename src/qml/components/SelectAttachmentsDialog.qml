@@ -17,7 +17,7 @@ FileDialog {
         "Videos (*.mp4 *.mkv *.avi *.webm)",
         "Audio files (*.mp3 *.wav *.flac *.ogg *.m4a *.mka)",
         "Documents (*.doc *.docx *.odt)",
-        "All files (*)",
+        "All files (*)"
     ]
     readonly property var _folders: [
         shortcuts.pictures,
@@ -31,6 +31,5 @@ FileDialog {
     nameFilters: _nameFilters[type]
     folder: _folders[type]
 
-    selectMultiple: true
     sidebarVisible: false
 }
