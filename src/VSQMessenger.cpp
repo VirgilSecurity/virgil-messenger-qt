@@ -212,7 +212,7 @@ VSQMessenger::_xmppPass() {
 /******************************************************************************/
 Q_DECLARE_METATYPE(QXmppConfiguration)
 bool
-VSQMessenger::_connect(QString userWithEnv, QString userId) {
+VSQMessenger::_connect(QString userWithEnv, QString deviceId, QString userId) {
 
     // Update users list
     _addToUsersList(userWithEnv);
@@ -220,7 +220,7 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
     // Connect to XMPP
     emit fireConnecting();
 
-    QString jid = userId + "@" + _xmppURL() + "/" + QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
+    QString jid = userId + "@" + _xmppURL() + "/" + deviceId;
     conf.setJid(jid);
     conf.setHost(_xmppURL());
     conf.setPassword(_xmppPass());
@@ -354,10 +354,12 @@ VSQMessenger::signInWithBackupKey(QString username, QString password) {
             return MRES_ERR_SIGNUP;
         }
 
-        // Save credentials
-        _saveCredentials(username, creds);
+        m_deviceId = QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
 
-        return _connect(m_user, m_userId) ? MRES_OK : MRES_ERR_SIGNIN;;
+        // Save credentials
+        _saveCredentials(username, m_deviceId, creds);
+
+        return _connect(m_user, m_deviceId, m_userId) ? MRES_OK : MRES_ERR_SIGNIN;;
     });
 }
 
@@ -372,7 +374,7 @@ VSQMessenger::signIn(QString user) {
         memset(&creds, 0, sizeof (creds));
 
         // Load User Credentials
-        if (!_loadCredentials(m_userId, creds)) {
+        if (!_loadCredentials(m_userId, m_deviceId, creds)) {
             emit fireError(tr("Cannot load user credentials"));
             return MRES_ERR_NO_CRED;
         }
@@ -384,7 +386,7 @@ VSQMessenger::signIn(QString user) {
         }
 
         // Connect over XMPP
-        return _connect(m_user, m_userId) ? MRES_OK : MRES_ERR_SIGNIN;
+        return _connect(m_user, m_deviceId, m_userId) ? MRES_OK : MRES_ERR_SIGNIN;
     });
 }
 
@@ -409,11 +411,13 @@ VSQMessenger::signUp(QString user) {
 
         qInfo() << "User has been successfully signed up: " << m_userId;
 
+        m_deviceId = QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
+
         // Save credentials
-        _saveCredentials(m_userId, creds);
+        _saveCredentials(m_userId, m_deviceId, creds);
 
         // Connect over XMPP
-        return _connect(m_user, m_userId) ? MRES_OK : MRES_ERR_SIGNUP;
+        return _connect(m_user, m_deviceId, m_userId) ? MRES_OK : MRES_ERR_SIGNUP;
     });
 }
 
@@ -524,21 +528,37 @@ VSQMessenger::_addToUsersList(const QString &user) {
 /******************************************************************************/
 // TODO: Use SecBox
 bool
-VSQMessenger::_saveCredentials(const QString &user, const vs_messenger_virgil_user_creds_t &creds) {
+VSQMessenger::_saveCredentials(const QString &user, const QString &deviceId, const vs_messenger_virgil_user_creds_t &creds) {
     // Save credentials
     QByteArray baCred(reinterpret_cast<const char*>(&creds), sizeof(creds));
+
+    QJsonObject jsonObject;
+    jsonObject.insert("device_id", deviceId);
+    jsonObject.insert("creds", QJsonValue::fromVariant(baCred.toBase64()));
+
+    QJsonDocument doc(jsonObject);
+    QString json = doc.toJson(QJsonDocument::Compact);
+
+    qInfo() << "Saving user credentails: " << json;
+
     QSettings settings(kOrganization, kApp);
-    settings.setValue(user, baCred.toBase64());
+    settings.setValue(user, json);
+
+    // QJsonDocument jsonMsg(QJsonDocument::fromJson(baDecr));
+    // QString decryptedString = jsonMsg["payload"]["body"].toString();
+
     return true;
 }
 
 /******************************************************************************/
 bool
-VSQMessenger::_loadCredentials(const QString &user, vs_messenger_virgil_user_creds_t &creds) {
+VSQMessenger::_loadCredentials(const QString &user, QString &deviceId, vs_messenger_virgil_user_creds_t &creds) {
     QSettings settings(kOrganization, kApp);
 
-    auto credBase64 = settings.value(user, QString("")).toString();
-    auto baCred = QByteArray::fromBase64(credBase64.toUtf8());
+    auto settingsJson = settings.value(user, QString("")).toString();
+    QJsonDocument json(QJsonDocument::fromJson(settingsJson.toUtf8()));
+    deviceId = json["device_id"].toString();
+    auto baCred = QByteArray::fromBase64(json["creds"].toString().toUtf8());
 
     if (baCred.size() != sizeof(creds)) {
         VS_LOG_WARNING("Cannot load credentials for : %s", user.toStdString().c_str());
@@ -688,7 +708,7 @@ void
 VSQMessenger::_reconnect() {
     if (!m_user.isEmpty() && !m_userId.isEmpty()) {
         QtConcurrent::run([=]() {
-            _connect(m_user, m_userId);
+            _connect(m_user, m_deviceId, m_userId);
         });
     }
 }

@@ -218,7 +218,7 @@ private:
     _connectToDatabase();
 
     bool
-    _connect(QString userWithEnv, QString userId);
+    _connect(QString userWithEnv, QString deviceId, QString userId);
 
     QString
     _xmppPass();
@@ -236,10 +236,10 @@ private:
     _reconnect();
 
     bool
-    _saveCredentials(const QString &user, const vs_messenger_virgil_user_creds_t &creds);
+    _saveCredentials(const QString &user, const QString &deviceId, const vs_messenger_virgil_user_creds_t &creds);
 
     bool
-    _loadCredentials(const QString &user, vs_messenger_virgil_user_creds_t &creds);
+    _loadCredentials(const QString &user, QString &deviceId, vs_messenger_virgil_user_creds_t &creds);
 
     void
     _addToUsersList(const QString &user);
