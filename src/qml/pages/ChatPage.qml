@@ -112,7 +112,7 @@ Page {
     footer: ChatMessageInput {
         id: footerControl
         onMessageSending: {
-            var future = Messenger.sendMessage(ConversationsModel.recipient, message, attachmentUrl)
+            var future = Messenger.sendMessage(ConversationsModel.recipient, message, attachmentUrl, attachmentType)
             Future.onFinished(future, messageSent.play)
         }
     }

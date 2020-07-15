@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Dialogs 1.2
+import com.virgilsecurity.messenger 1.0
 
 import "../base"
 import "../theme"
@@ -9,7 +10,7 @@ import "../theme"
 Control {
     id: root
 
-    signal messageSending(string message, var attachmentUrl)
+    signal messageSending(string message, var attachmentUrl, var attachmentType)
 
     width: parent.width
     implicitHeight: scrollView.height
@@ -32,13 +33,13 @@ Control {
                 id: attachmentsMenu
 
                 Action {
-                    text: qsTr("Send photo")
-                    onTriggered: selectAttachment()
+                    text: qsTr("Send picture")
+                    onTriggered: selectAttachment(Enums.AttachmentType.Picture)
                 }
 
                 Action {
-                    text: qsTr("Send audio")
-                    onTriggered: selectAttachment()
+                    text: qsTr("Send file")
+                    onTriggered: selectAttachment(Enums.AttachmentType.File)
                 }
             }
         }
@@ -115,17 +116,18 @@ Control {
     SelectAttachmentsDialog {
         id: fileDialog
 
-        onAccepted: sendMessage(fileDialog.fileUrl)
+        onAccepted: sendMessage(fileDialog.fileUrl, fileDialog.attachmentType)
     }
 
-    function sendMessage(attachmentUrl) {
+    function sendMessage(attachmentUrl, attachmentType) {
         const text = (messageField.text + messageField.preeditText).trim();
         messageField.clear()
         if (text || attachmentUrl)
-            messageSending(text, attachmentUrl)
+            messageSending(text, attachmentUrl, attachmentType)
     }
 
-    function selectAttachment() {
+    function selectAttachment(attachmentType) {
+        fileDialog.attachmentType = attachmentType
         fileDialog.open()
     }
 }

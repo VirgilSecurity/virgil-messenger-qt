@@ -47,7 +47,8 @@
 
 #include "VSQPushNotifications.h"
 #include "VSQSettings.h"
-#include "VSQSqlConversationModel.h" // TODO(vova.y): remove
+#include "VSQSqlConversationModel.h"
+#include "VSQSqlChatModel.h"
 #include "android/VSQAndroid.h"
 
 Q_DECLARE_METATYPE(VSQMessenger::EnStatus)
@@ -789,19 +790,12 @@ QFuture<VSQMessenger::EnResult> VSQMessenger::sendMessage(bool createNew, const 
 }
 
 /******************************************************************************/
-QFuture<VSQMessenger::EnResult> VSQMessenger::sendMessage(const QString &recipient, const QString &message, const QVariant &attachmentUrl)
+QFuture<VSQMessenger::EnResult> VSQMessenger::sendMessage(const QString &recipient, const QString &message,
+                                                          const QVariant &attachmentUrl, Enums::AttachmentType attachmentType)
 {
     const QString uuid = QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
-
-    // TODO(fpohtmeh): remove once attachments have DB support
-    Attachment attachment;
-    QString messageText = message;
-    if (attachmentUrl.isValid()) {
-        const QUrl url = attachmentUrl.value<QUrl>();
-        messageText = attachment.fileName;
-    }
-
-    StMessage stMessage{ uuid, messageText, recipient, attachment };
+    const Attachment attachment(attachmentUrl.toUrl(), attachmentType);
+    const StMessage stMessage{ uuid, message, recipient, attachment };
     return sendMessage(true, stMessage);
 }
 

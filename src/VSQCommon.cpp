@@ -32,50 +32,25 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQAPPLICATION_H
-#define VSQAPPLICATION_H
+#include "VSQCommon.h"
 
-#include <QQmlApplicationEngine>
+#include <QFile>
+#include <QFileInfo>
 
-#include "VSQMessenger.h"
-#include "VSQSettings.h"
-
-#ifdef VS_DESKTOP
-#include <QApplication>
-#define ApplicationBase QApplication
-#else
-#include <QGuiApplication>
-#define ApplicationBase QGuiApplication
-#endif
-
-class VSQApplication : public ApplicationBase
+Attachment::Attachment(const QUrl &url, Type type)
+    : Attachment()
 {
-    Q_OBJECT
+    this->type = type;
+    if (!url.isValid() || !url.isLocalFile())
+        return;
+    QFile file(url.toLocalFile());
+    fileName = QFileInfo(file).fileName(); // fileName without path
+    valid = file.open(QFile::ReadOnly);
+    if (valid)
+        data = file.readAll();
+}
 
-public:
-    VSQApplication(int &argc, char **argv);
-    virtual ~VSQApplication() = default;
-
-    Q_INVOKABLE void reloadQml();
-    Q_INVOKABLE void checkUpdates();
-    Q_INVOKABLE QString currentVersion() const;
-    Q_INVOKABLE void sendReport();
-
-private:
-    void parseArgs(int &argc, char **argv);
-    void setDefaults();
-    void setupFonts();
-    void registerTypes();
-    void setupContextProperties();
-    void setupConnections();
-
-    void onApplicationStateChanged(Qt::ApplicationState state);
-
-    static const QString kVersion;
-
-    QQmlApplicationEngine m_engine;
-    VSQSettings m_settings;
-    VSQMessenger m_messenger;
-};
-
-#endif // VSQAPPLICATION_H
+int Attachment::fileSize() const
+{
+    return data.size();
+}

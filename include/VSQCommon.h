@@ -38,7 +38,22 @@
 #include <memory>
 
 #include <QByteArray>
+#include <QtGlobal>
 #include <QUrl>
+
+// Namespace for passing of enum values to QML
+namespace Enums {
+    Q_NAMESPACE
+
+    enum class AttachmentType
+    {
+        File,
+        Picture,
+        Video,
+        Audio
+    };
+    Q_ENUM_NS(AttachmentType)
+}
 
 enum EnMessageStatus
 {
@@ -51,18 +66,17 @@ enum EnMessageStatus
 
 struct Attachment
 {
-    enum Type
-    {
-        Picture,
-        Audio,
-        File,
-        //
-        Default = File
-    };
+    using Type = Enums::AttachmentType;
+
+    Attachment() = default;
+    Attachment(const QUrl &url, Type type);
+
+    int fileSize() const;
 
     QByteArray data;
     QString fileName;
-    Type type = Type::Default;
+    Type type = Type::File;
+    bool valid = false;
 };
 
 struct StMessage

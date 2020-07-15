@@ -39,6 +39,8 @@
 #include <QQmlContext>
 
 #include "VSQClipboardProxy.h"
+#include "VSQSqlChatModel.h"
+#include "VSQSqlConversationModel.h"
 #include "ui/VSQUiHelper.h"
 #include "macos/VSQMacos.h"
 
@@ -60,6 +62,7 @@ VSQApplication::VSQApplication(int &argc, char **argv)
     parseArgs(argc, argv);
     setDefaults();
     setupFonts();
+    registerTypes();
     setupContextProperties();
     setupConnections();
     reloadQml();
@@ -126,6 +129,13 @@ void VSQApplication::setupFonts()
     QFont font(ApplicationBase::font());
     font.setPointSize(1.5 * ApplicationBase::font().pointSize());
     setFont(font);
+}
+
+void VSQApplication::registerTypes()
+{
+    qRegisterMetaType<Enums::AttachmentType>();
+
+    qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");
 }
 
 void VSQApplication::setupContextProperties()

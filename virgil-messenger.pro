@@ -101,6 +101,7 @@ HEADERS += \
 #
 
 SOURCES += \
+        src/VSQCommon.cpp \
         src/VSQClipboardProxy.cpp \
         src/VSQMessenger.cpp \
         src/VSQSqlChatModel.cpp \

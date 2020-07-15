@@ -42,16 +42,18 @@
 #include <QSemaphore>
 
 #include <qxmpp/QXmppClient.h>
-#include <qxmpp/QXmppMessageReceiptManager.h>
 
 #include <virgil/iot/messenger/messenger.h>
 
-#include "VSQSqlConversationModel.h"
-#include "VSQSqlChatModel.h"
+#include "VSQCommon.h"
 
 using namespace VirgilIoTKit;
 
+class QXmppMessageReceiptManager;
+
 class VSQSettings;
+class VSQSqlChatModel;
+class VSQSqlConversationModel;
 
 class VSQMessenger : public QObject {
 
@@ -126,7 +128,8 @@ public slots:
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     addContact(QString contact);
 
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult> sendMessage(const QString &recipient, const QString &message, const QVariant &attachmentUrl);
+    Q_INVOKABLE QFuture<VSQMessenger::EnResult> sendMessage(const QString &recipient, const QString &message,
+                                                            const QVariant &attachmentUrl, Enums::AttachmentType attachmentType);
     QFuture<VSQMessenger::EnResult> sendMessage(bool createNew, const StMessage &message);
 
     Q_INVOKABLE void
