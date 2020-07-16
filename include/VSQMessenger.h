@@ -46,12 +46,12 @@
 #include <virgil/iot/messenger/messenger.h>
 
 #include "VSQCommon.h"
-#include "VSQAttachmentsManager.h"
 
 using namespace VirgilIoTKit;
 
 class QXmppMessageReceiptManager;
 
+class VSQAttachmentsModel;
 class VSQSettings;
 class VSQSqlChatModel;
 class VSQSqlConversationModel;
@@ -87,7 +87,7 @@ public:
     Q_PROPERTY(QString currentUser READ currentUser NOTIFY fireCurrentUserChanged)
 
     explicit VSQMessenger(VSQSettings *settings, QObject *parent = nullptr);
-    VSQMessenger() = default; // NOTE(vova.y): needed for QmlPrivate template
+    VSQMessenger() = default; // NOTE(fpohtmeh): needed for QmlPrivate template
     ~VSQMessenger() override = default;
 
     Q_INVOKABLE QString currentUser() const;
@@ -184,9 +184,9 @@ private:
     VSQSettings *m_settings;
     QXmppClient m_xmpp;
     QXmppMessageReceiptManager* m_xmppReceiptManager;
+    VSQAttachmentsModel *m_attachmentsModel;
     VSQSqlConversationModel *m_sqlConversations;
     VSQSqlChatModel *m_sqlChatModel;
-    VSQAttachmentsManager *m_attachmentsManager;
 
     QString m_user;
     QString m_userId;

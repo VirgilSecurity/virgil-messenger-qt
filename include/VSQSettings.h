@@ -49,10 +49,13 @@ public:
     void setUsersList(const QStringList &users);
     QStringList usersList() const;
 
+    QString databaseFileName() const;
+
     int attachmentMaxSize() const;
     QDir attachmentCacheDir() const;
 
 private:
+    QDir m_appDataDir;
     QDir m_attachmentCacheDir;
 };
 

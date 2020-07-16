@@ -40,11 +40,13 @@
 #include <QSqlRecord>
 #include <QSqlQuery>
 
+#include "VSQAttachmentsModel.h"
+#include "VSQUtils.h"
+
 Q_DECLARE_METATYPE(EnMessageStatus)
 
 /******************************************************************************/
-void
-VSQSqlConversationModel::_createTable() {
+void VSQSqlConversationModel::_createTable() {
     QSqlQuery query;
     if (!query.exec(
         QString("CREATE TABLE IF NOT EXISTS %1 ("
@@ -55,9 +57,8 @@ VSQSqlConversationModel::_createTable() {
         "'status' int NOT NULL,"
         "'message_id' TEXT NOT NULL,"
         "FOREIGN KEY('author') REFERENCES %2 ( name ),"
-        "FOREIGN KEY('recipient') REFERENCES %3 ( name )"
+        "FOREIGN KEY('recipient') REFERENCES %2 ( name )"
         ")").arg(_tableName())
-            .arg(_contactsTableName())
             .arg(_contactsTableName()))) {
         qFatal("Failed to query database: %s", qPrintable(query.lastError().text()));
     }
@@ -70,8 +71,7 @@ VSQSqlConversationModel::_createTable() {
 }
 
 /******************************************************************************/
-void
-VSQSqlConversationModel::_update() {
+void VSQSqlConversationModel::_update() {
     setTable(_tableName());
     setSort(2, Qt::DescendingOrder);
     // Ensures that the model is sorted correctly after submitting a new row.
@@ -84,8 +84,9 @@ VSQSqlConversationModel::_update() {
 }
 
 /******************************************************************************/
-VSQSqlConversationModel::VSQSqlConversationModel(QObject *parent) :
-    QSqlTableModel(parent)
+VSQSqlConversationModel::VSQSqlConversationModel(VSQAttachmentsModel *attachmentsModel, QObject *parent)
+    : QSqlTableModel(parent)
+    , m_attachmentsModel(attachmentsModel)
 {
     qRegisterMetaType<EnMessageStatus>("EnMessageStatus");
 }
@@ -235,13 +236,14 @@ VSQSqlConversationModel::user() const {
 void
 VSQSqlConversationModel::setUser(const QString &user) {
     m_recipient = "";
-    if (user == m_user) {
+    if (user == m_user)
         return;
-    }
 
     m_user = user;
-
+    // FIXME(fpohtmeh): rename
     _createTable();
+    m_attachmentsModel->createTable(user);
+
     _update();
 }
 
@@ -321,40 +323,31 @@ VSQSqlConversationModel::getLastMessage(const QString &user) const {
 }
 
 /******************************************************************************/
-std::vector<std::unique_ptr<StMessage> > VSQSqlConversationModel::getMessages(const QString &user, const EnMessageStatus status) {
+std::vector<StMessage> VSQSqlConversationModel::getMessages(const QString &user, const EnMessageStatus status)
+{
+    QString query = QString("SELECT message, recipient, message_id FROM %1 WHERE status = %2 AND author = \"%3\"").arg(_tableName()).arg(status).arg(user);
     QSqlQueryModel model;
-    QString query;
-
-    std::vector<std::unique_ptr<StMessage>> messages;
-
-    query = QString("SELECT message, recipient, message_id FROM %1 WHERE status = %2 AND author = \"%3\"").arg(_tableName()).arg(status).arg(user);
-
     model.setQuery(query);
-    int c = model.rowCount();
 
+    int c = model.rowCount();
+    std::vector<StMessage> messages;
     if (c == 0) {
         return messages;
     }
 
+    messages.resize(c);
     for (int i = 0; i < c; i++) {
-        auto message = std::make_unique<StMessage>();
-        message->message = model.record(i).value("message").toString();
-        message->recipient = model.record(i).value("recipient").toString();
-        message->message_id = model.record(i).value("message_id").toString();
-        messages.push_back(std::move(message));
+        StMessage message;
+        message.message = model.record(i).value("message").toString();
+        message.recipient = model.record(i).value("recipient").toString();
+        message.message_id = model.record(i).value("message_id").toString();
+        // FIXME(vova.y): set attachment field
+        messages[i] = message;
     }
 
     qDebug() << c << user << query;
 
     return messages;
-}
-
-/******************************************************************************/
-QString VSQSqlConversationModel::escapedUserName() const
-{
-    QString name(m_user);
-    name.remove(QRegExp("[^a-z0-9_]"));
-    return name;
 }
 
 /******************************************************************************/
@@ -375,12 +368,12 @@ VSQSqlConversationModel::getLastMessageTime(const QString &user) const {
 
 /******************************************************************************/
 QString VSQSqlConversationModel::_tableName() const {
-    return QString("Conversations_") + escapedUserName();
+    return QString("Conversations_") + Utils::escapedUserName(m_user);
 }
 
 /******************************************************************************/
 QString VSQSqlConversationModel::_contactsTableName() const {
-    return QString("Contacts_") + escapedUserName();
+    return QString("Contacts_") + Utils::escapedUserName(m_user);
 }
 
 /******************************************************************************/

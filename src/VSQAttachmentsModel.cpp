@@ -32,17 +32,45 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "VSQAttachmentsManager.h"
+#include "VSQAttachmentsModel.h"
 
-#include <VSQSettings.h>
+#include <QSqlQuery>
+
+#include "VSQSettings.h"
 #include "VSQUtils.h"
 
-VSQAttachmentsManager::VSQAttachmentsManager(VSQSettings *settings, QObject *parent)
+VSQAttachmentsModel::VSQAttachmentsModel(VSQSettings *settings, QObject *parent)
     : QObject(parent)
     , m_settings(settings)
 {}
 
-Optional<Attachment> VSQAttachmentsManager::createFromLocalFile(const QUrl &url, const Attachment::Type type)
+bool VSQAttachmentsModel::createTable(const QString &user)
+{
+    const QString attachmentsTableName = QLatin1String("Attachments_") + Utils::escapedUserName(user);
+    const QString conversationsTableName = QLatin1String("Conversations_") + Utils::escapedUserName(user);
+    const QString queryText = QString(
+        "CREATE TABLE IF NOT EXISTS %1 ("
+        "   id TEXT NOT NULL,"
+        "   message_id TEXT NOT NULL,"
+        "   name TEXT NOT NULL,"
+        "   type INTEGER NOT NULL,"
+        "   remote_file TEXT,"
+        "   local_file TEXT,"
+        "   remote_preview TEXT,"
+        "   local_preview TEXT,"
+        "   FOREIGN KEY(message_id) REFERENCES %2 (message_id)"
+        ")"
+    ).arg(attachmentsTableName, conversationsTableName);
+
+    QSqlQuery query(queryText);
+    if (!query.exec()) {
+        setLastErrorText(QString("Failed to create database: %1").arg(attachmentsTableName));
+        return false;
+    }
+    return true;
+}
+
+Optional<Attachment> VSQAttachmentsModel::createFromLocalFile(const QUrl &url, const Attachment::Type type)
 {
     Attachment attachment;
     attachment.type = type;
@@ -56,19 +84,19 @@ Optional<Attachment> VSQAttachmentsManager::createFromLocalFile(const QUrl &url,
     return attachment;
 }
 
-QString VSQAttachmentsManager::lastErrorText() const
+QString VSQAttachmentsModel::lastErrorText() const
 {
     return m_lastErrorText;
 }
 
-OptionalType VSQAttachmentsManager::setLastErrorText(const QString &text)
+OptionalType VSQAttachmentsModel::setLastErrorText(const QString &text)
 {
     m_lastErrorText = text;
     qFatal("%s", qPrintable(text));
     return NullOptional;
 }
 
-Optional<QString> VSQAttachmentsManager::cachedCopy(const QUrl &url)
+Optional<QString> VSQAttachmentsModel::cachedCopy(const QUrl &url)
 {
     QFile localFile(url.toLocalFile());
     if (!localFile.exists())

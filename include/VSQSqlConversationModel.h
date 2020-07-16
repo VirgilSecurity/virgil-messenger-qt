@@ -39,19 +39,20 @@
 
 #include "VSQCommon.h"
 
+class VSQAttachmentsModel;
+
 class VSQSqlConversationModel : public QSqlTableModel
 {
     Q_OBJECT
     Q_PROPERTY(QString recipient READ recipient WRITE setRecipient NOTIFY recipientChanged)
 
 public:
-    VSQSqlConversationModel(QObject *parent = nullptr);
+    explicit VSQSqlConversationModel(VSQAttachmentsModel *attachmentsModel, QObject *parent = nullptr);
 
     QString
     user() const;
 
-    Q_INVOKABLE void
-    setUser(const QString &user);
+    void setUser(const QString &user);
 
     Q_INVOKABLE int
     getCountOfUnread(const QString &user);
@@ -89,29 +90,24 @@ public:
     int
     getMessageCount(const QString &user, const EnMessageStatus status);
 
-    std::vector<std::unique_ptr<StMessage>> getMessages(const QString &user, const EnMessageStatus status);
+    std::vector<StMessage> getMessages(const QString &user, const EnMessageStatus status);
 
 signals:
     void
     recipientChanged();
 
 private:
-    QString escapedUserName() const;
-
+    VSQAttachmentsModel *m_attachmentsModel;
     QString m_user;
     QString m_recipient;
 
-    void
-    _createTable();
+    void _createTable();
 
-    void
-    _update();
+    void _update();
 
-    QString
-    _tableName() const;
+    QString _tableName() const;
 
-    QString
-    _contactsTableName() const;
+    QString _contactsTableName() const;
 };
 
 #endif // VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H

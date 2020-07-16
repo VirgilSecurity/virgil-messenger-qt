@@ -87,7 +87,7 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
 
 HEADERS += \
         include/VSQApplication.h \
-        include/VSQAttachmentsManager.h \
+        include/VSQAttachmentsModel.h \
         include/VSQCommon.h \
         include/VSQClipboardProxy.h \
         include/VSQMessenger.h \
@@ -106,7 +106,7 @@ HEADERS += \
 #
 
 SOURCES += \
-        src/VSQAttachmentsManager.cpp \
+        src/VSQAttachmentsModel.cpp \
         src/VSQCommon.cpp \
         src/VSQClipboardProxy.cpp \
         src/VSQMessenger.cpp \

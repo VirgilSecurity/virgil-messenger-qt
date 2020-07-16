@@ -47,3 +47,11 @@ QString Utils::formattedFileSize(int fileSize)
     static QLocale locale = QLocale::system();
     return locale.formattedDataSize(fileSize);
 }
+
+QString Utils::escapedUserName(const QString &userName)
+{
+    static QRegExp regexp("[^a-z0-9_]");
+    QString name(userName);
+    name.remove(regexp);
+    return name;
+}

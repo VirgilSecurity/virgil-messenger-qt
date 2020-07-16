@@ -42,6 +42,8 @@ namespace Utils
     QString createUuid();
 
     QString formattedFileSize(int fileSize);
+
+    QString escapedUserName(const QString &userName);
 }
 
 #endif // VSQUTILS_H

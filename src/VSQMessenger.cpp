@@ -45,6 +45,7 @@
 #include <qxmpp/QXmppPushEnableIq.h>
 #include <qxmpp/QXmppMessageReceiptManager.h>
 
+#include "VSQAttachmentsModel.h"
 #include "VSQPushNotifications.h"
 #include "VSQSettings.h"
 #include "VSQSqlConversationModel.h"
@@ -87,9 +88,9 @@ VSQMessenger::VSQMessenger(VSQSettings *settings, QObject *parent)
     // Connect to Database
     _connectToDatabase();
 
-    m_sqlConversations = new VSQSqlConversationModel(this);
+    m_attachmentsModel = new VSQAttachmentsModel(settings, this);
+    m_sqlConversations = new VSQSqlConversationModel(m_attachmentsModel, this);
     m_sqlChatModel = new VSQSqlChatModel(this);
-    m_attachmentsManager = new VSQAttachmentsManager(settings, this);
 
     // Add receipt messages extension
     m_xmppReceiptManager = new QXmppMessageReceiptManager();
@@ -139,16 +140,11 @@ VSQMessenger::_connectToDatabase() {
             qFatal("Cannot add database: %s", qPrintable(database.lastError().text()));
     }
 
-    const QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    if (!writeDir.mkpath("."))
-        qFatal("Failed to create writable directory at %s", qPrintable(writeDir.absolutePath()));
-
-    // Ensure that we have a writable location on all devices.
-    const QString fileName = writeDir.absolutePath() + "/chat-database.sqlite3";
+    const QString fileName = m_settings->databaseFileName();
     // When using the SQLite driver, open() will create the SQLite database if it doesn't exist.
     database.setDatabaseName(fileName);
     if (!database.open()) {
-        QFile::remove(fileName);
+        QFile::remove(fileName); // TODO(fpohtmeh): remove as unsafe action?
         qFatal("Cannot open database: %s", qPrintable(database.lastError().text()));
     }
 }
@@ -243,7 +239,7 @@ VSQMessenger::_prepareLogin(const QString &user) {
     QString userId = user;
     m_envType = _defaultEnv;
 
-    // NOTE(vova.y): deprecated logic, user can't contain @
+    // NOTE(fpohtmeh): deprecated logic, user can't contain @
     // Check required environment
     QStringList pieces = user.split("@");
     if (2 == pieces.size()) {
@@ -618,9 +614,8 @@ VSQMessenger::onConnected() {
 /******************************************************************************/
 void VSQMessenger::_sendFailedMessages()
 {
-   auto messages = m_sqlConversations->getMessages(m_user, EnMessageStatus::MST_FAILED);
-   for (auto &msg : messages)
-       sendMessage(false, *msg);
+   for (const auto &msg : m_sqlConversations->getMessages(m_user, EnMessageStatus::MST_FAILED))
+       sendMessage(false, msg);
 }
 
 /******************************************************************************/
@@ -797,7 +792,7 @@ QFuture<VSQMessenger::EnResult> VSQMessenger::sendMessage(const QString &recipie
 {
     Q_ASSERT_X(!messageText.isEmpty() || attachmentUrl.isValid(), "VSQMessenger::sendMessage", "Message and attachment are empty");
     const QString uuid = Utils::createUuid();
-    const auto attachment = m_attachmentsManager->createFromLocalFile(attachmentUrl.toUrl(), attachmentType);
+    const auto attachment = m_attachmentsModel->createFromLocalFile(attachmentUrl.toUrl(), attachmentType);
     const QString text = attachment ? QString() : messageText; // text or attachment
     const StMessage stMessage{ uuid, text, recipient, attachment };
     return sendMessage(true, stMessage);

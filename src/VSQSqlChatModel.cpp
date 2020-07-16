@@ -41,6 +41,7 @@
 #include <QDateTime>
 
 #include "VSQSqlConversationModel.h"
+#include "VSQUtils.h"
 
 /******************************************************************************/
 VSQSqlChatModel::VSQSqlChatModel(QObject *parent) :
@@ -58,7 +59,7 @@ VSQSqlChatModel::init(const QString &userId) {
     }
 
     m_userId = userId;
-    m_tableName = "Chats_" + userId;
+    m_tableName = "Chats_" + Utils::escapedUserName(userId);
 
     QString queryString =
             "CREATE TABLE IF NOT EXISTS '%1' ("

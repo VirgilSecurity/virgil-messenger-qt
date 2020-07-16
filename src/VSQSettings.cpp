@@ -42,10 +42,15 @@ static const QString kUsers = "Users";
 VSQSettings::VSQSettings(QObject *parent)
     : QSettings("VirgilSecurity", "VirgilMessenger", parent) // organization, application name
 {
-    m_attachmentCacheDir = QDir(QStandardPaths::standardLocations(QStandardPaths::CacheLocation).front()).filePath("attachments");
+    m_appDataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    m_attachmentCacheDir = QDir(QStandardPaths::writableLocation(QStandardPaths::CacheLocation)).filePath("attachments");
+    for (auto dir : { m_appDataDir, m_attachmentCacheDir })
+        if (!dir.exists() && !dir.mkpath(dir.absolutePath()))
+            qFatal("Failed to create writable directory at %s", qPrintable(dir.absolutePath()));
 
-    qDebug() << "SETTINGS:";
+    qDebug() << "Settings";
     qDebug() << "- settings filename:" << fileName();
+    qDebug() << "- database filename:" << databaseFileName();
     qDebug() << "- attachment cache dir:" << attachmentCacheDir().absolutePath();
     qDebug() << "- attachment max size:" << attachmentMaxSize();
 }
@@ -62,6 +67,11 @@ void VSQSettings::setUsersList(const QStringList &users)
 QStringList VSQSettings::usersList() const
 {
     return value(kUsers, QStringList()).toStringList();
+}
+
+QString VSQSettings::databaseFileName() const
+{
+    return m_appDataDir.filePath("chat-database.sqlite3");
 }
 
 int VSQSettings::attachmentMaxSize() const

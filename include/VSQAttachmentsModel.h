@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQATTACHMENTSMANAGER_H
-#define VSQATTACHMENTSMANAGER_H
+#ifndef VSQATTACHMENTSMODEL_H
+#define VSQATTACHMENTSMODEL_H
 
 #include <QObject>
 
@@ -42,12 +42,14 @@
 class VSQSettings;
 
 // Class that handle attachments workflow
-class VSQAttachmentsManager : public QObject
+class VSQAttachmentsModel : public QObject
 {
     Q_OBJECT
 
 public:
-    VSQAttachmentsManager(VSQSettings *settings, QObject *parent);
+    VSQAttachmentsModel(VSQSettings *settings, QObject *parent);
+
+    bool createTable(const QString &user);
 
     // Create attachment by local url and attachment type
     Optional<Attachment> createFromLocalFile(const QUrl &url, const Attachment::Type type);
@@ -66,4 +68,4 @@ private:
     QString m_lastErrorText;
 };
 
-#endif // VSQATTACHMENTSMANAGER_H
+#endif // VSQATTACHMENTSMODEL_H
