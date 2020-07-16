@@ -5,6 +5,7 @@ import QtMultimedia 5.12
 import QuickFuture 1.0
 
 import "./components/Popups"
+import "./components/Dialogs"
 import "./components"
 import "base"
 import "theme"
@@ -60,6 +61,10 @@ ApplicationWindow {
         id: inform
     }
 
+    SendReportAsk {
+        id: sendReportAsk
+    }
+
     // Shortcuts for hackers
     Shortcut {
         // TODO: remove on production or add conditional dev flag!
@@ -108,5 +113,8 @@ ApplicationWindow {
         return root.width < root.maxMobileWidth;
     }
 
-    Component.onCompleted: Platform.detect()
+    Component.onCompleted: {
+        Platform.detect()
+        Logging.crashReportRequested.connect(sendReportAsk.open)
+    }
 }

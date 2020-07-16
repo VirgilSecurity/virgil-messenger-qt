@@ -66,6 +66,22 @@ VSQApplication::run(const QString &basePath) {
 
     VSQUiHelper uiHelper;
 
+    auto features = VSQFeatures();
+    auto impl = VSQImplementations();
+    auto roles = VSQDeviceRoles();
+    auto appConfig = VSQAppConfig() << VirgilIoTKit::VS_LOGLEV_DEBUG;
+
+    if (!VSQIoTKitFacade::instance().init(features, impl, appConfig)) {
+        VS_LOG_CRITICAL("Unable to initialize Virgil IoT KIT");
+        return -1;
+    }
+
+    // Initialization loging
+    qInstallMessageHandler(logger_qt_redir); // Redirect standard logging
+    m_messenger.setLogging(&m_logging);
+    m_logging.setkVersion(kVersion);
+
+
     QQmlContext *context = m_engine.rootContext();
     if (basePath.isEmpty()) {
         m_engine.setBaseUrl(QUrl(QStringLiteral("qrc:/qml/")));
@@ -77,7 +93,10 @@ VSQApplication::run(const QString &basePath) {
     context->setContextProperty("UiHelper", &uiHelper);
     context->setContextProperty("app", this);
     context->setContextProperty("clipboard", new VSQClipboardProxy(QGuiApplication::clipboard()));
+    context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
+    context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
     context->setContextProperty("Messenger", &m_messenger);
+    context->setContextProperty("Logging", &m_logging);
     context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
     context->setContextProperty("ChatModel", &m_messenger.getChatModel());
 
@@ -91,7 +110,6 @@ VSQApplication::run(const QString &basePath) {
             SLOT(onApplicationStateChanged(Qt::ApplicationState)));
 
     reloadQml();
-
     return QGuiApplication::instance()->exec();
 }
 
@@ -126,7 +144,7 @@ VSQApplication::currentVersion() const {
 /******************************************************************************/
 void
 VSQApplication::sendReport() {
-    QDesktopServices::openUrl(QUrl("mailto:?to=kutashenko@gmail.com&subject=Virgil Messenger Report&body=Here is some email body text", QUrl::TolerantMode));
+    m_logging.sendLogFiles();
 }
 
 /******************************************************************************/

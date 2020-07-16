@@ -302,6 +302,10 @@ VSQMessenger::_prepareLogin(const QString &user) {
     }
     free(cCABundle);
 
+    m_logging->setVirgilUrl(_virgilURL());
+    m_logging->setkApp(kApp);
+    m_logging->setkOrganization(kOrganization);
+
     // Set current user
     m_user = userId;
     m_sqlConversations->setUser(userId);
@@ -385,6 +389,9 @@ VSQMessenger::signIn(QString user) {
             return MRES_ERR_SIGNIN;
         }
 
+        // Check previus run is crashed
+        m_logging->checkAppCrash();
+
         // Connect over XMPP
         return _connect(m_user, m_deviceId, m_userId) ? MRES_OK : MRES_ERR_SIGNIN;
     });
@@ -449,7 +456,6 @@ VSQMessenger::onAddContactToDB(QString contact) {
 QString
 VSQMessenger::_virgilURL() {
     QString res = qgetenv("VS_MSGR_VIRGIL");
-
     if (res.isEmpty()) {
         switch (m_envType) {
         case PROD:
@@ -466,7 +472,7 @@ VSQMessenger::_virgilURL() {
         }
     }
 
-    VS_LOG_DEBUG("Virgil URL: %s", res.toStdString().c_str());
+    VS_LOG_DEBUG("Virgil URL: [%s]", qPrintable(res));
     return res;
 }
 
@@ -631,6 +637,11 @@ VSQSqlChatModel &
 VSQMessenger::getChatModel() {
     return *m_sqlChatModel;
 }
+
+void VSQMessenger::setLogging(VSQLogging *loggingPtr) {
+    m_logging = loggingPtr;
+}
+
 
 /******************************************************************************/
 void

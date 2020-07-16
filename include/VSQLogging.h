@@ -32,49 +32,50 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
-#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
 
-#include <QtCore>
-#include <QGuiApplication>
-#include <QQmlApplicationEngine>
-#include <VSQMessenger.h>
-#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
-#include <VSQLogging.h>
+#ifndef VSQLOGGING_H
+#define VSQLOGGING_H
 
-#include <macos/VSQMacos.h>
+#include <iostream>
+#include <string>
+#include <QCoreApplication>
+#include <virgil/iot/qt/VSQIoTKit.h>
 
-class VSQApplication : public QObject {
+using namespace VirgilIoTKit;
+
+void logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+
+class VSQLogging : public QObject {
     Q_OBJECT
 public:
-    VSQApplication();
-    virtual ~VSQApplication() = default;
-
-    int
-    run(const QString &basePath);
-
+    virtual ~VSQLogging();
+    void checkAppCrash();
+    void resetRunFlag();
     Q_INVOKABLE
-    void reloadQml();
+    bool sendLogFiles();
+    void setVirgilUrl(QString VirgilUrl);
+    void setkVersion(QString AppVersion);
+    void setkOrganization(QString strkOrganization);
+    void setkApp(QString strkApp);
 
-    Q_INVOKABLE
-    void checkUpdates();
-
-    Q_INVOKABLE QString
-    currentVersion() const;
-
-    Q_INVOKABLE void
-    sendReport();
-
-
-private slots:
-    void
-    onApplicationStateChanged(Qt::ApplicationState state);
+signals:
+    void crashReportRequested();
 
 private:
-    static const QString kVersion;
-    QQmlApplicationEngine m_engine;
-    VSQMessenger m_messenger;
-    VSQLogging m_logging;
+    static const QString endpointSendReport;
+
+
+    bool checkRunFlag();
+    bool sendFileToBackendRequest(QByteArray fileData);
+    void setRunFlag(bool runState);
+    QString currentVirgilUrl;
+    QString kVersion;
+    QString kOrganization;
+    QString kApp;
+    QNetworkAccessManager *manager;
+
+private slots:
+    void endpointReply();
 };
 
-#endif // VSQApplication
+#endif // VSQLOGGING_H
