@@ -73,8 +73,7 @@ void VSQLogging::checkAppCrash() {
     qDebug("Checking previus run flag...");
     if(checkRunFlag()) {
         qCritical("Previus application run is crashed ! Sending log files...");
-
-        sendLogFiles();
+        emit crashReportRequested();
     } else {
         qDebug("Set run flag to true");
         setRunFlag(true); // Set run flag

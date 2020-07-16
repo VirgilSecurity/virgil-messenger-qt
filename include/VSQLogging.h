@@ -51,11 +51,15 @@ public:
     virtual ~VSQLogging();
     void checkAppCrash();
     void resetRunFlag();
+    Q_INVOKABLE
     bool sendLogFiles();
     void setVirgilUrl(QString VirgilUrl);
     void setkVersion(QString AppVersion);
     void setkOrganization(QString strkOrganization);
     void setkApp(QString strkApp);
+
+signals:
+    void crashReportRequested();
 
 private:
     static const QString endpointSendReport;

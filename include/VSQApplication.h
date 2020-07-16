@@ -74,7 +74,6 @@ private:
     static const QString kVersion;
     QQmlApplicationEngine m_engine;
     VSQMessenger m_messenger;
-    QSharedPointer<VSQUdpBroadcast> m_netifUDPbcast;
     VSQLogging m_logging;
 };
 
