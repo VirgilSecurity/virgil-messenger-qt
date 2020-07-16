@@ -16,6 +16,8 @@ MACDEPLOYQT_BIN="${QT_SDK_DIR}/clang_64/bin/macdeployqt"
 APPCAST_BIN="${PROJECT_DIR}/ext/prebuilt/macos/sparkle/bin/generate_appcast"
 QMAKE_PARAMS="${QMAKE_PARAMS:-" "}"
 
+NOTARIZATION_TIME="300"
+
 # Sparkle
 SUFeedURL="${SUFeedURL:-""}"
 SUPublicEDKey="${SUPublicEDKey:-""}"
@@ -172,8 +174,8 @@ function notarize_dmg() {
 	print_message "Get result of notarization"
 
 	NOTARIZATION_DONE="false"
-	for count in $(seq 1 120); do
-		echo "Wait .. ${count} of 120"
+	for count in $(seq 1 ${NOTARIZATION_TIME}); do
+		echo "Wait .. ${count} of ${NOTARIZATION_TIME}"
 		sleep 10s
 		INFO_OUTPUT=$(xcrun altool --notarization-info "${NOTARIZE_ID}" --username ${USER_NAME} -p ${PASS} 2>&1 | tr -d "\n")
 
