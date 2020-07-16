@@ -56,14 +56,14 @@ Page {
                 mainView.showBackupKey()
             }
         }
-
+/*
         FormPrimaryButton {
             text: "Send report"
             onClicked: {
                 app.sendReport()
             }
         }
-
+*/
         FormPrimaryButton {
             text: "Sign out"
             onClicked: {
