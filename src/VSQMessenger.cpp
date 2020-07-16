@@ -49,7 +49,7 @@
 #include <qxmpp/QXmppPushEnableIq.h>
 #include <qxmpp/QXmppMessageReceiptManager.h>
 #include <qxmpp/QXmppCarbonManager.h>
-#include <qxmpp/QXmppDiscoveryManager.h>\
+#include <qxmpp/QXmppDiscoveryManager.h>
 
 #include <QtConcurrent>
 #include <QStandardPaths>
