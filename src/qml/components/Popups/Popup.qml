@@ -16,7 +16,7 @@ Item {
 
         background: Rectangle {
             id: popupBackground
-            implicitWidth: root.width
+            implicitWidth: window.width
             implicitHeight: 25
         }
 
@@ -32,7 +32,7 @@ Item {
             popupClose.stop()
         }
 
-        y: popupOnTop ? 0 : (root.height - 25)
+        y: popupOnTop ? 0 : (window.height - 25)
         modal: popupModal
         focus: popupModal
 

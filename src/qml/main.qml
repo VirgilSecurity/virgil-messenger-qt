@@ -10,7 +10,7 @@ import "base"
 import "theme"
 
 ApplicationWindow {
-    id: root
+    id: window
     visible: true
     title: qsTr("Virgil Secure Communications Platform")
     minimumWidth: 320
@@ -70,7 +70,7 @@ ApplicationWindow {
               console.log("Logouts result: ", Future.result(future))
             })
 
-            root.close()
+            window.close()
             app.reloadQml()
         }
     }
@@ -101,11 +101,11 @@ ApplicationWindow {
     // View mode detection
     function isMobileView() {
 
-        if (root.mobileView) {
+        if (window.mobileView) {
             return true;
         }
 
-        return root.width < root.maxMobileWidth;
+        return window.width < window.maxMobileWidth;
     }
 
     Component.onCompleted: Platform.detect()

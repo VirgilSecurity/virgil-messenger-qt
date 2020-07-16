@@ -28,7 +28,7 @@ Page {
             onClicked: {
 
                 if (username.text === '') {
-                    root.showPopupError('Username is empty')
+                    window.showPopupError('Username is empty')
                 }
 
                 mainView.showSignInAs({ username: username.text })

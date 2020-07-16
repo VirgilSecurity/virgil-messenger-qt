@@ -47,7 +47,7 @@ Page {
                     }
 
                     if (res === Result.MRES_ERR_SIGNIN) {
-                        root.showPopupError("Something went wrong")
+                        window.showPopupError("Something went wrong")
                     }
 
                     form.hideLoading()

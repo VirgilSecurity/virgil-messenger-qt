@@ -27,6 +27,7 @@ Control {
 
             ContextMenu {
                 id: contextMenu
+                dropdown: true
             }
         }
 

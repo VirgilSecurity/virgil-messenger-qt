@@ -31,6 +31,7 @@ Control {
 
             ContextMenu {
                 id: attachmentsMenu
+                dropdown: true
 
                 Action {
                     text: qsTr("Send picture")

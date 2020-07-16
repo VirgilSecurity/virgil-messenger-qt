@@ -132,13 +132,12 @@ Control {
                        return regexp.test(message);
                     }
 
-                    Menu {
+                    ContextMenu {
                         id: contextMenu
-                        MenuItem {
-                            text: qsTr("&Copy")
-                            onTriggered: {
-                                clipboard.setText(textEdit.getText(0, textEdit.length))
-                            }
+
+                        Action {
+                            text: qsTr("Copy")
+                            onTriggered: clipboard.setText(textEdit.getText(0, textEdit.length))
                         }
                     }
                 }

@@ -70,7 +70,7 @@ Control {
             lastSignedInUser = user
             showContacts()
         } else {
-            root.showPopupError(qsTr("Incorrect User Name"))
+            window.showPopupError(qsTr("Incorrect User Name"))
         }
     }
 

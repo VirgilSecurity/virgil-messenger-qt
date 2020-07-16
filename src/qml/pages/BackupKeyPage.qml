@@ -39,11 +39,11 @@ Page {
             onClicked: {
 
                 if (password.text === '') {
-                    root.showPopupError('Password can not be empty')
+                    window.showPopupError('Password can not be empty')
                 }
 
                 if (password.text !== confirmPassword.text) {
-                    root.showPopupError('Passwords are not match')
+                    window.showPopupError('Passwords are not match')
                 }
 
                 form.showLoading(qsTr("Backing up your private key..."))
@@ -56,11 +56,11 @@ Page {
                     if (Future.result(future) === Result.MRES_OK) {
                         password.text = ''
                         confirmPassword.text = ''
-                        root.showPopupSuccess('Backup private key success');
+                        window.showPopupSuccess('Backup private key success');
                         return
                     }
 
-                    root.showPopupError("Backup private key error")
+                    window.showPopupError("Backup private key error")
                 })
             }
             text: qsTr("Backup")

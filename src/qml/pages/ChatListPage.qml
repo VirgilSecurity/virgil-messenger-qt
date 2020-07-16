@@ -214,7 +214,7 @@ Page {
     function addContact() {
         var component = Qt.createComponent("../components/Dialogs/AddContactDialog.qml")
         if (component.status === Component.Ready) {
-            var dialog = component.createObject(root)
+            var dialog = component.createObject(window)
             var apply = function() {
                 try {
                     var future = Messenger.addContact(dialog.contact.toLowerCase())
@@ -225,7 +225,7 @@ Page {
                             return
                         }
 
-                        root.showPopupError(qsTr("User not found"))
+                        window.showPopupError(qsTr("User not found"))
                     })
                 } catch (error) {
                     console.error("Cannot start initialization of device")

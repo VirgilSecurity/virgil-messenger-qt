@@ -41,7 +41,7 @@ Page {
             text: qsTr("Decrypt")
             onClicked: {
                 if (password.text === '') {
-                    root.showPopupError('Password can not be empty')
+                    window.showPopupError('Password can not be empty')
                 }
 
                 form.showLoading(qsTr("Downloading your private key..."))
@@ -56,7 +56,7 @@ Page {
                         return
                     }
 
-                    root.showPopupError("Private key download error")
+                    window.showPopupError("Private key download error")
                 })
             }
         }
