@@ -9,6 +9,7 @@ Dialog {
            text: "Previus run crashed. Send report ?"
     }
     modal: true
+    anchors.centerIn: parent
     standardButtons: Dialog.Yes | StandardButton.No
     onAccepted: Logging.sendLogFiles()
 }
