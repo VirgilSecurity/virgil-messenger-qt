@@ -74,8 +74,8 @@ private:
     static const QString kVersion;
 
     QQmlApplicationEngine m_engine;
-    VSQSettings m_settings;
-    VSQMessenger m_messenger;
+    VSQSettings *m_settings;
+    VSQMessenger *m_messenger;
 };
 
 #endif // VSQAPPLICATION_H

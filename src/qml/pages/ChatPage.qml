@@ -4,6 +4,7 @@ import QtQuick.Controls 2.12
 import QuickFuture 1.0
 import QtQuick.Window 2.12
 import QtMultimedia 5.12
+import com.virgilsecurity.messenger 1.0
 
 import "../theme"
 import "../components"
@@ -52,7 +53,7 @@ Page {
                 Layout.fillWidth: true
                 Layout.leftMargin: 10
                 Label {
-                    text: ConversationsModel.recipient
+                    text: Messenger.currentRecipient
                     font.pointSize: UiHelper.fixFontSz(15)
                     color: Theme.primaryTextColor
                     font.bold: true
@@ -83,15 +84,16 @@ Page {
 
         spacing: 5
         // verticalLayoutDirection: ListView.BottomToTop
-        // model: ConversationsModel
+        model: ConversationsModel
         delegate: ChatMessage {
+            readonly property bool isUser: model.author === Enums.MessageAuthor.User;
             text: message
-            author: model.author
+            nickname: isUser ? Messenger.currentUser : Messenger.currentRecipient
             timeStamp: model.timestamp
-            variant: model.author === Messenger.currentUser ? "light" : "dark"
+            variant: isUser ? "light" : "dark"
             messageInARow: model.messageInARow
             firstMessageInARow: model.firstMessageInARow
-            status: model.author !== Messenger.currentUser ? "none" : model.status
+            status: isUser ? model.status :  "none"
         }
 
         onCountChanged: {
@@ -112,22 +114,9 @@ Page {
     footer: ChatMessageInput {
         id: footerControl
         onMessageSending: {
-            var future = Messenger.sendMessage(ConversationsModel.recipient, message, attachmentUrl, attachmentType)
+            var future = Messenger.sendMessage(message, attachmentUrl, attachmentType)
             Future.onFinished(future, messageSent.play)
         }
-    }
-
-    // Component events
-
-    Component.onCompleted: {
-
-        // configure conversation model to chat with
-        // recipient provided as a parameter to this page.
-
-        ConversationsModel.recipient = recipient
-        listView.model = ConversationsModel
-        ConversationsModel.setAsRead(recipient)
-        ChatModel.updateUnreadMessageCount(recipient)
     }
 
     // Sounds

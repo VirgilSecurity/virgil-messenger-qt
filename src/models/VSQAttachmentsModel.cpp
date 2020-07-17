@@ -32,7 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "VSQAttachmentsModel.h"
+#include "models/VSQAttachmentsModel.h"
 
 #include <QSqlQuery>
 
@@ -92,7 +92,7 @@ QString VSQAttachmentsModel::lastErrorText() const
 OptionalType VSQAttachmentsModel::setLastErrorText(const QString &text)
 {
     m_lastErrorText = text;
-    qFatal("%s", qPrintable(text));
+    qCritical() << text;
     return NullOptional;
 }
 

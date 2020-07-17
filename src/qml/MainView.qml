@@ -103,8 +103,8 @@ Control {
 
     function back() {
         stackView.pop()
-        if (Messenger.currentRecipient()) {
-            Messenger.setCurrentRecipient("")
+        if (Messenger.currentRecipient) {
+            Messenger.currentRecipient = ""
         }
     }
 
@@ -143,7 +143,7 @@ Control {
 
     function showChatWith(recipient) {
         navigateTo("Chat", { recipient: recipient }, true, false)
-        Messenger.setCurrentRecipient(recipient)
+        Messenger.currentRecipient = recipient
     }
 
     function showContacts(clear) {

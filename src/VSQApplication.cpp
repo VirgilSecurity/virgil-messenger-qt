@@ -39,8 +39,8 @@
 #include <QQmlContext>
 
 #include "VSQClipboardProxy.h"
-#include "VSQSqlChatModel.h"
-#include "VSQSqlConversationModel.h"
+#include "models//VSQChatsModel.h"
+#include "models/VSQConversationsModel.h"
 #include "ui/VSQUiHelper.h"
 #include "macos/VSQMacos.h"
 
@@ -56,11 +56,13 @@ const QString VSQApplication::kVersion = "unknown";
 VSQApplication::VSQApplication(int &argc, char **argv)
     : ApplicationBase(argc, argv)
     , m_engine(this)
-    , m_settings(this)
-    , m_messenger(&m_settings, this)
 {
-    parseArgs(argc, argv);
     setDefaults();
+    // Create settings after defaults otherwise it uses wrong standard paths
+    m_settings = new VSQSettings(this);
+    m_messenger = new VSQMessenger(m_settings, this);
+
+    parseArgs(argc, argv);
     setupFonts();
     registerTypes();
     setupContextProperties();
@@ -134,6 +136,7 @@ void VSQApplication::setupFonts()
 void VSQApplication::registerTypes()
 {
     qRegisterMetaType<Enums::AttachmentType>();
+    qRegisterMetaType<Enums::MessageAuthor>();
 
     qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");
 }
@@ -144,9 +147,9 @@ void VSQApplication::setupContextProperties()
     context->setContextProperty("app", this);
     context->setContextProperty("UiHelper", new VSQUiHelper(this));
     context->setContextProperty("clipboard", new VSQClipboardProxy(clipboard()));
-    context->setContextProperty("Messenger", &m_messenger);
-    context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
-    context->setContextProperty("ChatModel", &m_messenger.getChatModel());
+    context->setContextProperty("Messenger", m_messenger);
+    context->setContextProperty("ConversationsModel", &m_messenger->modelConversations());
+    context->setContextProperty("ChatModel", &m_messenger->getChatModel());
 }
 
 void VSQApplication::setupConnections()

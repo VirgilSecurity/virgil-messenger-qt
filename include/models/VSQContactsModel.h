@@ -32,82 +32,34 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H
-#define VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H
+#ifndef VSQCONTACTSMODEL_H
+#define VSQCONTACTSMODEL_H
 
 #include <QSqlTableModel>
 
 #include "VSQCommon.h"
 
-class VSQAttachmentsModel;
-
-class VSQSqlConversationModel : public QSqlTableModel
+class VSQContactsModel : public QSqlTableModel
 {
     Q_OBJECT
-    Q_PROPERTY(QString recipient READ recipient WRITE setRecipient NOTIFY recipientChanged)
 
 public:
-    explicit VSQSqlConversationModel(VSQAttachmentsModel *attachmentsModel, QObject *parent = nullptr);
+    enum Columns
+    {
+        IdColumn = 0
+    };
 
-    QString
-    user() const;
+    explicit VSQContactsModel(QObject *parent = nullptr);
 
-    void setUser(const QString &user);
+    // Set current user
+    void setUser(const QString &userId);
 
-    Q_INVOKABLE int
-    getCountOfUnread(const QString &user);
-
-    Q_INVOKABLE QString
-    getLastMessage(const QString &user) const;
-
-    Q_INVOKABLE QString
-    getLastMessageTime(const QString &user) const;
-
-    QString
-    recipient() const;
-
-    Q_INVOKABLE void
-    setRecipient(const QString &recipient);
-
-    QVariant
-    data(const QModelIndex &index, int role) const override;
-
-    QHash<int, QByteArray>
-    roleNames() const override;
-
-    Q_INVOKABLE void
-    createMessage(QString recipient, QString message, QString externalId);
-
-    Q_INVOKABLE void
-    receiveMessage(const QString &messageId, const QString &sender, const QString &message);
-
-    Q_INVOKABLE void
-    setAsRead(const QString &author);
-
-    Q_INVOKABLE void
-    setMessageStatus(const QString &messageId, const EnMessageStatus status);
-
-    int
-    getMessageCount(const QString &user, const EnMessageStatus status);
-
-    std::vector<StMessage> getMessages(const QString &user, const EnMessageStatus status);
-
-signals:
-    void
-    recipientChanged();
+    // Create contact if it doesn't exist and return id
+    Optional<QString> create(const QString &id);
 
 private:
-    VSQAttachmentsModel *m_attachmentsModel;
-    QString m_user;
-    QString m_recipient;
-
-    void _createTable();
-
-    void _update();
-
-    QString _tableName() const;
-
-    QString _contactsTableName() const;
+    QString m_userId;
+    QString m_tableName;
 };
 
-#endif // VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H
+#endif // VSQCONTACTSMODEL_H

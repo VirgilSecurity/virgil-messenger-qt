@@ -34,7 +34,6 @@
 
 #include "VSQSettings.h"
 
-#include <QDebug>
 #include <QStandardPaths>
 
 static const QString kUsers = "Users";
@@ -43,7 +42,7 @@ VSQSettings::VSQSettings(QObject *parent)
     : QSettings("VirgilSecurity", "VirgilMessenger", parent) // organization, application name
 {
     m_appDataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    m_attachmentCacheDir = QDir(QStandardPaths::writableLocation(QStandardPaths::CacheLocation)).filePath("attachments");
+    m_attachmentCacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/attachments");
     for (auto dir : { m_appDataDir, m_attachmentCacheDir })
         if (!dir.exists() && !dir.mkpath(dir.absolutePath()))
             qFatal("Failed to create writable directory at %s", qPrintable(dir.absolutePath()));

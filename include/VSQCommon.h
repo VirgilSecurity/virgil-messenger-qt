@@ -37,6 +37,8 @@
 
 #include <memory>
 
+#include <QDateTime>
+#include <QDebug>
 #include <QtGlobal>
 #include <QUrl>
 
@@ -62,6 +64,13 @@ namespace Enums {
         Audio
     };
     Q_ENUM_NS(AttachmentType)
+
+    enum class MessageAuthor
+    {
+        User,
+        Contact
+    };
+    Q_ENUM_NS(MessageAuthor)
 }
 
 enum EnMessageStatus
@@ -85,8 +94,11 @@ struct Attachment
 
 struct StMessage
 {
+    using Author = Enums::MessageAuthor;
+
     QString message_id;
     QString message;
+    Author author;
     QString recipient;
     Optional<Attachment> attachment;
 };

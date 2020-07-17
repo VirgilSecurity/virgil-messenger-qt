@@ -12,7 +12,7 @@ Control {
     width: getControlWidth()
 
     property string text
-    property alias author: avatar.nickname
+    property alias nickname: avatar.nickname
 
     property bool messageInARow: false
     property bool firstMessageInARow: true
@@ -40,7 +40,7 @@ Control {
                 spacing: 6
 
                 Label {
-                    text: author
+                    text: nickname
                     height: 16
                     color: Theme.labelColor
                     font.pixelSize: UiHelper.fixFontSz(16)

@@ -44,6 +44,8 @@ namespace Utils
     QString formattedFileSize(int fileSize);
 
     QString escapedUserName(const QString &userName);
+
+    QString currentIsoDateTime();
 }
 
 #endif // VSQUTILS_H

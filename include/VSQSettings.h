@@ -35,6 +35,8 @@
 #include <QDir>
 #include <QSettings>
 
+#include "VSQCommon.h"
+
 #ifndef VSQSETTINGS_H
 #define VSQSETTINGS_H
 

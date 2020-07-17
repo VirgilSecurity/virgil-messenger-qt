@@ -52,19 +52,18 @@ using namespace VirgilIoTKit;
 class QXmppMessageReceiptManager;
 
 class VSQAttachmentsModel;
+class VSQContactsModel;
 class VSQSettings;
-class VSQSqlChatModel;
-class VSQSqlConversationModel;
+class VSQChatsModel;
+class VSQConversationsModel;
 
-class VSQMessenger : public QObject {
-
+class VSQMessenger : public QObject
+{
     Q_OBJECT
+    Q_PROPERTY(QString currentUser READ currentUser NOTIFY fireCurrentUserChanged)
+    Q_PROPERTY(QString currentRecipient WRITE setCurrentRecipient READ currentRecipient NOTIFY fireCurrentRecipientChanged)
 
     enum VSQEnvType { PROD, STG, DEV };
-
-    Q_ENUMS(EnResult)
-
-    Q_ENUMS(EnStatus)
 
 public:
     enum EnResult
@@ -77,26 +76,28 @@ public:
         MRES_ERR_USER_ALREADY_EXISTS,
         MRES_ERR_ENCRYPTION
     };
+    Q_ENUMS(EnResult)
 
     enum EnStatus
     {
         MSTATUS_ONLINE,
         MSTATUS_UNAVAILABLE
     };
-
-    Q_PROPERTY(QString currentUser READ currentUser NOTIFY fireCurrentUserChanged)
+    Q_ENUMS(EnStatus)
 
     explicit VSQMessenger(VSQSettings *settings, QObject *parent = nullptr);
     VSQMessenger() = default; // NOTE(fpohtmeh): needed for QmlPrivate template
     ~VSQMessenger() override = default;
 
-    Q_INVOKABLE QString currentUser() const;
-    Q_INVOKABLE QString currentRecipient() const;
+    QString currentUser() const;
+    QString currentRecipient() const;
 
-    VSQSqlConversationModel &modelConversations();
-    VSQSqlChatModel &getChatModel();
+    VSQConversationsModel &modelConversations();
+    VSQChatsModel &getChatModel();
     
     static QString decryptMessage(const QString &sender, const QString &message);
+
+    Q_INVOKABLE void markAsRead(const QString &chatId);
 
 public slots:
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
@@ -129,14 +130,11 @@ public slots:
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     addContact(QString contact);
 
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult> sendMessage(const QString &recipient, const QString &messageText,
-                                                            const QVariant &attachmentUrl, Enums::AttachmentType attachmentType);
+    Q_INVOKABLE QFuture<VSQMessenger::EnResult> sendMessage(const QString &messageText, const QVariant &attachmentUrl, Enums::AttachmentType attachmentType);
     QFuture<VSQMessenger::EnResult> sendMessage(bool createNew, const StMessage &message);
 
     Q_INVOKABLE void
     setStatus(VSQMessenger::EnStatus status);
-
-    Q_INVOKABLE void setCurrentRecipient(const QString &recipient);
 
 signals:
     void
@@ -160,8 +158,8 @@ signals:
     void
     fireNewMessage(QString from, QString message);
 
-    void
-    fireCurrentUserChanged();
+    void fireCurrentUserChanged();
+    void fireCurrentRecipientChanged();
 
 private slots:
     void onConnected();
@@ -181,12 +179,16 @@ private slots:
     onSubscribePushNotifications(bool enable);
 
 private:
+    void setCurrentRecipient(const QString &recipient);
+
     VSQSettings *m_settings;
     QXmppClient m_xmpp;
     QXmppMessageReceiptManager* m_xmppReceiptManager;
-    VSQAttachmentsModel *m_attachmentsModel;
-    VSQSqlConversationModel *m_sqlConversations;
-    VSQSqlChatModel *m_sqlChatModel;
+
+    VSQContactsModel *m_contacts;
+    VSQChatsModel *m_sqlChatModel;
+    VSQAttachmentsModel *m_attachments;
+    VSQConversationsModel *m_sqlConversations;
 
     QString m_user;
     QString m_userId;

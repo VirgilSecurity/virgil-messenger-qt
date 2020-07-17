@@ -34,6 +34,7 @@
 
 #include "VSQUtils.h"
 
+#include <QDateTime>
 #include <QLocale>
 #include <QUuid>
 
@@ -54,4 +55,9 @@ QString Utils::escapedUserName(const QString &userName)
     QString name(userName);
     name.remove(regexp);
     return name;
+}
+
+QString Utils::currentIsoDateTime()
+{
+    return QDateTime::currentDateTime().toString(Qt::ISODate);
 }

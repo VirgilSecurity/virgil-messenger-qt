@@ -32,44 +32,49 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_SQL_CHAT_MODEL_H
-#define VIRGIL_IOTKIT_QT_SQL_CHAT_MODEL_H
+#ifndef VSQCHATSMODEL_H
+#define VSQCHATSMODEL_H
 
 #include <QSqlTableModel>
 
-class VSQSqlChatModel : public QSqlTableModel {
+#include "VSQCommon.h"
+
+class VSQContactsModel;
+
+class VSQChatsModel : public QSqlTableModel
+{
     Q_OBJECT
 
 public:
-    VSQSqlChatModel(QObject *parent = nullptr);
+    enum Columns
+    {
+        IdColumn = 0,
+        ContactColumn,
+        LastMessageColumn,
+        LastMessageTimeColumn,
+        UnreadMessageCountColumn
+    };
 
-    void
-    init(const QString &userId);
+    explicit VSQChatsModel(VSQContactsModel *contacts, QObject *parent = nullptr);
 
-    QVariant
-    data(const QModelIndex &index, int role) const override;
+    void setUser(const QString &userId);
+    // Create if it doesn't exist chat and return id
+    Optional<QString> createPrivateChat(const QString &contactId);
+    void setUnreadMessageCount(const QString &chatId, int count);
 
-    QHash<int, QByteArray>
-    roleNames() const override;
+    Q_INVOKABLE void applyFilter(const QString &filter);
+    Q_INVOKABLE void clearFilter();
 
-    void
-    createPrivateChat(const QString &recipientId);
-
-    Q_INVOKABLE void
-    updateLastMessage(QString chatId, QString message);
-
-    Q_INVOKABLE void
-    updateUnreadMessageCount(QString chatId);
-
-    Q_INVOKABLE void
-    applyFilter(const QString &filter);
-
-    Q_INVOKABLE void
-    clearFilter();
+public slots:
+    void updateLastMessage(const QString &contactId, const QString &message);
 
 private:
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
+
+    VSQContactsModel *m_contacts;
     QString m_userId;
     QString m_tableName;
 };
 
-#endif // VIRGIL_IOTKIT_QT_SQL_CHAT_MODEL_H
+#endif // VSQCHATSMODEL_H

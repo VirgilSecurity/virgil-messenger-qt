@@ -32,6 +32,63 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "VSQCommon.h"
+#include "models/VSQContactsModel.h"
 
-// TODO(fpohtmeh): remove?
+#include <QSqlError>
+#include <QSqlQuery>
+#include <QSqlRecord>
+
+#include "VSQUtils.h"
+
+VSQContactsModel::VSQContactsModel(QObject *parent)
+    : QSqlTableModel(parent)
+{}
+
+void VSQContactsModel::setUser(const QString &userId)
+{
+    if (m_userId == userId)
+        return;
+    qDebug() << "Initialize contacts with user: " << userId;
+    m_userId = userId;
+
+    m_tableName = QLatin1String("Contacts_") + Utils::escapedUserName(userId);
+    const QString queryString = QString(
+        "CREATE TABLE IF NOT EXISTS %1 ("
+        "  id TEXT NOT NULL PRIMARY KEY"
+        ")"
+    ).arg(m_tableName);
+    QSqlQuery query(queryString);
+    if (!query.exec()) {
+        qCritical() << QLatin1String("Failed to create contacts table:") << query.lastError().text();
+    }
+
+    setTable(m_tableName);
+    setEditStrategy(EditStrategy::OnRowChange);
+    select();
+}
+
+Optional<QString> VSQContactsModel::create(const QString &id)
+{
+    const QString queryString = QString(
+        "SELECT id "
+        "FROM %1 "
+        "WHERE id = '%2'"
+    ).arg(m_tableName, id);
+    QSqlQuery query(queryString);
+    if (!query.exec()) {
+        qCritical() << QLatin1String("Failed to find contact:") << query.lastError().text();
+        return NullOptional;
+    }
+    if (query.next()) {
+        qInfo() << QString("Contact %1 already exists").arg(id);
+        return id;
+    }
+
+    QSqlRecord newRecord = record();
+    newRecord.setValue(IdColumn, id);
+    if (!insertRowIntoTable(newRecord)) {
+        qCritical() << QLatin1String("Failed to add contact:") << lastError().text();
+        return NullOptional;
+    }
+    return id;
+}

@@ -45,12 +45,13 @@
 #include <qxmpp/QXmppPushEnableIq.h>
 #include <qxmpp/QXmppMessageReceiptManager.h>
 
-#include "VSQAttachmentsModel.h"
 #include "VSQPushNotifications.h"
 #include "VSQSettings.h"
-#include "VSQSqlConversationModel.h"
-#include "VSQSqlChatModel.h"
 #include "VSQUtils.h"
+#include "models/VSQAttachmentsModel.h"
+#include "models/VSQContactsModel.h"
+#include "models/VSQConversationsModel.h"
+#include "models/VSQChatsModel.h"
 #include "android/VSQAndroid.h"
 
 Q_DECLARE_METATYPE(VSQMessenger::EnStatus)
@@ -74,7 +75,7 @@ const QString VSQMessenger::kPushNotificationsFormTypeVal = "http://jabber.org/p
 const int VSQMessenger::kConnectionWaitMs = 10000;
 const int VSQMessenger::kKeepAliveTimeSec = 10;
 
-/******************************************************************************/
+
 VSQMessenger::VSQMessenger(VSQSettings *settings, QObject *parent)
     : QObject(parent)
     , m_settings(settings)
@@ -88,9 +89,11 @@ VSQMessenger::VSQMessenger(VSQSettings *settings, QObject *parent)
     // Connect to Database
     _connectToDatabase();
 
-    m_attachmentsModel = new VSQAttachmentsModel(settings, this);
-    m_sqlConversations = new VSQSqlConversationModel(m_attachmentsModel, this);
-    m_sqlChatModel = new VSQSqlChatModel(this);
+    m_contacts = new VSQContactsModel(this);
+    m_sqlChatModel = new VSQChatsModel(m_contacts, this);
+    m_attachments = new VSQAttachmentsModel(settings, this);
+    m_sqlConversations = new VSQConversationsModel(m_sqlChatModel, m_attachments, this);
+
 
     // Add receipt messages extension
     m_xmppReceiptManager = new QXmppMessageReceiptManager();
@@ -118,9 +121,8 @@ VSQMessenger::VSQMessenger(VSQSettings *settings, QObject *parent)
 #endif
 }
 
-void
-VSQMessenger::onMessageDelivered(const QString& to, const QString& messageId) {
-
+void VSQMessenger::onMessageDelivered(const QString& to, const QString& messageId)
+{
     m_sqlConversations->setMessageStatus(messageId, EnMessageStatus::MST_RECEIVED);
 
     // QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus",
@@ -130,7 +132,7 @@ VSQMessenger::onMessageDelivered(const QString& to, const QString& messageId) {
     qDebug() << "Message with id: '" << messageId << "' delivered to '" << to << "'";
 }
 
-/******************************************************************************/
+
 void
 VSQMessenger::_connectToDatabase() {
     QSqlDatabase database = QSqlDatabase::database();
@@ -144,12 +146,11 @@ VSQMessenger::_connectToDatabase() {
     // When using the SQLite driver, open() will create the SQLite database if it doesn't exist.
     database.setDatabaseName(fileName);
     if (!database.open()) {
-        QFile::remove(fileName); // TODO(fpohtmeh): remove as unsafe action?
         qFatal("Cannot open database: %s", qPrintable(database.lastError().text()));
     }
 }
 
-/******************************************************************************/
+
 QString
 VSQMessenger::_xmppPass() {
     if (!m_xmppPass.isEmpty()) {
@@ -170,7 +171,7 @@ VSQMessenger::_xmppPass() {
     return m_xmppPass;
 }
 
-/******************************************************************************/
+
 Q_DECLARE_METATYPE(QXmppConfiguration)
 bool
 VSQMessenger::_connect(QString userWithEnv, QString userId) {
@@ -223,7 +224,7 @@ VSQMessenger::_connect(QString userWithEnv, QString userId) {
     return m_xmpp.isConnected();
 }
 
-/******************************************************************************/
+
 QString
 VSQMessenger::_caBundleFile() {
 #if VS_ANDROID
@@ -233,13 +234,13 @@ VSQMessenger::_caBundleFile() {
 #endif
 }
 
-/******************************************************************************/
-QString
-VSQMessenger::_prepareLogin(const QString &user) {
+
+QString VSQMessenger::_prepareLogin(const QString &user)
+{
     QString userId = user;
     m_envType = _defaultEnv;
 
-    // NOTE(fpohtmeh): deprecated logic, user can't contain @
+    // TODO(fpohtmeh): restore this logic, regexp blocks it
     // Check required environment
     QStringList pieces = user.split("@");
     if (2 == pieces.size()) {
@@ -263,8 +264,8 @@ VSQMessenger::_prepareLogin(const QString &user) {
 
     // Set current user
     m_user = userId;
+    m_sqlChatModel->setUser(userId);
     m_sqlConversations->setUser(userId);
-    m_sqlChatModel->init(userId);
 
     // Inform about user activation
     emit fireCurrentUserChanged();
@@ -272,17 +273,19 @@ VSQMessenger::_prepareLogin(const QString &user) {
     return userId;
 }
 
-/******************************************************************************/
-QString VSQMessenger::currentUser() const {
+
+QString VSQMessenger::currentUser() const
+{
     return m_user;
 }
 
-/******************************************************************************/
-QString VSQMessenger::currentRecipient() const {
+
+QString VSQMessenger::currentRecipient() const
+{
     return m_recipient;
 }
 
-/******************************************************************************/
+
 QFuture<VSQMessenger::EnResult>
 VSQMessenger::backupUserKey(QString password) {
     // m_userId = _prepareLogin(user);
@@ -298,7 +301,7 @@ VSQMessenger::backupUserKey(QString password) {
     });
 }
 
-/******************************************************************************/
+
 QFuture<VSQMessenger::EnResult>
 VSQMessenger::signInWithBackupKey(QString username, QString password) {
     m_userId = _prepareLogin(username);
@@ -320,7 +323,7 @@ VSQMessenger::signInWithBackupKey(QString username, QString password) {
     });
 }
 
-/******************************************************************************/
+
 QFuture<VSQMessenger::EnResult>
 VSQMessenger::signIn(QString user) {
     m_userId = _prepareLogin(user);
@@ -349,7 +352,7 @@ VSQMessenger::signIn(QString user) {
 
 
 
-/******************************************************************************/
+
 QFuture<VSQMessenger::EnResult>
 VSQMessenger::signUp(QString user) {
     m_userId = _prepareLogin(user);
@@ -376,7 +379,7 @@ VSQMessenger::signUp(QString user) {
     });
 }
 
-/******************************************************************************/
+
 QFuture<VSQMessenger::EnResult>
 VSQMessenger::addContact(QString contact) {
     return QtConcurrent::run([=]() -> EnResult {
@@ -392,7 +395,7 @@ VSQMessenger::addContact(QString contact) {
     });
 }
 
-/******************************************************************************/
+
 void
 VSQMessenger::onAddContactToDB(QString contact) {
     m_sqlChatModel->createPrivateChat(contact);
@@ -400,7 +403,7 @@ VSQMessenger::onAddContactToDB(QString contact) {
     emit fireAddedContact(contact);
 }
 
-/******************************************************************************/
+
 QString
 VSQMessenger::_virgilURL() {
     QString res = qgetenv("VS_MSGR_VIRGIL");
@@ -425,7 +428,7 @@ VSQMessenger::_virgilURL() {
     return res;
 }
 
-/******************************************************************************/
+
 QString
 VSQMessenger::_xmppURL() {
     QString res = qgetenv("VS_MSGR_XMPP_URL");
@@ -450,7 +453,7 @@ VSQMessenger::_xmppURL() {
     return res;
 }
 
-/******************************************************************************/
+
 uint16_t
 VSQMessenger::_xmppPort() {
     uint16_t res = 5222;
@@ -469,7 +472,7 @@ VSQMessenger::_xmppPort() {
     return res;
 }
 
-/******************************************************************************/
+
 
 void
 VSQMessenger::_addToUsersList(const QString &user) {
@@ -480,7 +483,7 @@ VSQMessenger::_addToUsersList(const QString &user) {
     m_settings->setUsersList(knownUsers);
 }
 
-/******************************************************************************/
+
 // TODO: Use SecBox
 bool
 VSQMessenger::_saveCredentials(const QString &user, const vs_messenger_virgil_user_creds_t &creds) {
@@ -491,7 +494,7 @@ VSQMessenger::_saveCredentials(const QString &user, const vs_messenger_virgil_us
     return true;
 }
 
-/******************************************************************************/
+
 bool
 VSQMessenger::_loadCredentials(const QString &user, vs_messenger_virgil_user_creds_t &creds) {
     auto credBase64 = m_settings->value(user, QString("")).toString();
@@ -506,13 +509,13 @@ VSQMessenger::_loadCredentials(const QString &user, vs_messenger_virgil_user_cre
     return true;
 }
 
-/******************************************************************************/
+
 QStringList VSQMessenger::usersList()
 {
     return m_settings->usersList();
 }
 
-/******************************************************************************/
+
 QFuture<VSQMessenger::EnResult>
 VSQMessenger::logout() {
     return QtConcurrent::run([=]() -> EnResult {
@@ -527,7 +530,7 @@ VSQMessenger::logout() {
     });
 }
 
-/******************************************************************************/
+
 QFuture<VSQMessenger::EnResult> VSQMessenger::disconnect() {
     bool connected = m_xmpp.isConnected();
     return QtConcurrent::run([=]() -> EnResult {
@@ -539,7 +542,7 @@ QFuture<VSQMessenger::EnResult> VSQMessenger::disconnect() {
     });
 }
 
-/******************************************************************************/
+
 QFuture<VSQMessenger::EnResult>
 VSQMessenger::deleteUser(QString user) {
     return QtConcurrent::run([=]() -> EnResult {
@@ -549,18 +552,18 @@ VSQMessenger::deleteUser(QString user) {
     });
 }
 
-/******************************************************************************/
-VSQSqlConversationModel &
+
+VSQConversationsModel &
 VSQMessenger::modelConversations() {
     return *m_sqlConversations;
 }
 
-VSQSqlChatModel &
+VSQChatsModel &
 VSQMessenger::getChatModel() {
     return *m_sqlChatModel;
 }
 
-/******************************************************************************/
+
 void
 VSQMessenger::onSubscribePushNotifications(bool enable) {
     #if VS_PUSHNOTIFICATIONS
@@ -602,7 +605,7 @@ VSQMessenger::onSubscribePushNotifications(bool enable) {
 #endif // VS_PUSHNOTIFICATIONS
 }
 
-/******************************************************************************/
+
 void
 VSQMessenger::onConnected() {
     onSubscribePushNotifications(true);
@@ -611,14 +614,14 @@ VSQMessenger::onConnected() {
 }
 
 
-/******************************************************************************/
+
 void VSQMessenger::_sendFailedMessages()
 {
-   for (const auto &msg : m_sqlConversations->getMessages(m_user, EnMessageStatus::MST_FAILED))
+   for (const auto msg : m_sqlConversations->getMessages(m_user, EnMessageStatus::MST_FAILED))
        sendMessage(false, msg);
 }
 
-/******************************************************************************/
+
 void
 VSQMessenger::checkState() {
     if (m_xmpp.state() == QXmppClient::DisconnectedState) {
@@ -629,7 +632,7 @@ VSQMessenger::checkState() {
     }
 }
 
-/******************************************************************************/
+
 void
 VSQMessenger::_reconnect() {
     if (!m_user.isEmpty() && !m_userId.isEmpty()) {
@@ -639,14 +642,14 @@ VSQMessenger::_reconnect() {
     }
 }
 
-/******************************************************************************/
+
 void
 VSQMessenger::onDisconnected() {
     VS_LOG_DEBUG("onDisconnected");
     qDebug() << "onDisconnected  state:" << m_xmpp.state();
 }
 
-/******************************************************************************/
+
 void
 VSQMessenger::onError(QXmppClient::Error err) {
     VS_LOG_DEBUG("onError");
@@ -656,7 +659,7 @@ VSQMessenger::onError(QXmppClient::Error err) {
     _reconnect();
 }
 
-/******************************************************************************/
+
 QString
 VSQMessenger::decryptMessage(const QString &sender, const QString &message) {
     static const size_t _decryptedMsgSzMax = 10 * 1024;
@@ -691,9 +694,13 @@ VSQMessenger::decryptMessage(const QString &sender, const QString &message) {
     return decryptedString;
 }
 
-/******************************************************************************/
-void
-VSQMessenger::onMessageReceived(const QXmppMessage &message) {
+void VSQMessenger::markAsRead(const QString &chatId)
+{
+    m_sqlConversations->markAsRead(chatId);
+    m_sqlChatModel->setUnreadMessageCount(chatId, 0);
+}
+
+void VSQMessenger::onMessageReceived(const QXmppMessage &message) {
     // Get sender
     QString from = message.from();
     QStringList pieces = from.split("@");
@@ -709,23 +716,19 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
     // Decrypt message
     QString decryptedString = decryptMessage(sender, msg);
 
-    // Add sender to contacts
-    // m_sqlContacts->addContact(sender);
-    m_sqlChatModel->createPrivateChat(sender);
-
     // Save message to DB
-    m_sqlConversations->receiveMessage(message.id(), sender, decryptedString);
-
+    m_sqlConversations->receiveMessage(message.id(), decryptedString, sender);
     m_sqlChatModel->updateLastMessage(sender, decryptedString);
-    if (sender != m_recipient)
-        m_sqlChatModel->updateUnreadMessageCount(sender);
+    if (sender != m_recipient) {
+        const auto chatId = m_sqlChatModel->createPrivateChat(sender);
+        const int unreadCount = m_sqlConversations->getMessageCount(*chatId, EnMessageStatus::MST_RECEIVED);
+        m_sqlChatModel->setUnreadMessageCount(*chatId, unreadCount);
+    }
 
     // Inform system about new message
     emit fireNewMessage(sender, decryptedString);
 }
 
-
-/******************************************************************************/
 QFuture<VSQMessenger::EnResult> VSQMessenger::sendMessage(bool createNew, const StMessage &message)
 {
     return QtConcurrent::run([=]() -> EnResult {
@@ -766,39 +769,31 @@ QFuture<VSQMessenger::EnResult> VSQMessenger::sendMessage(bool createNew, const 
         msg.setId(message.message_id);
 
         // Save message to DB in native thread
-        if(createNew){
-            QMetaObject::invokeMethod(m_sqlConversations, "createMessage",
-                Qt::QueuedConnection, Q_ARG(QString, message.recipient), Q_ARG(QString, message.message), Q_ARG(QString, msg.id()));
+        if(createNew) {
+            QMetaObject::invokeMethod(m_sqlConversations, "createMessage", Qt::QueuedConnection,
+                                      Q_ARG(QString, msg.id()), Q_ARG(QString, message.message), Q_ARG(QString, message.recipient));
         }
-
-        QMetaObject::invokeMethod(m_sqlChatModel, "updateLastMessage",
-            Qt::QueuedConnection, Q_ARG(QString, message.recipient), Q_ARG(QString, message.message));
-
-        if (m_xmpp.sendPacket(msg)) {
-            QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus", Qt::QueuedConnection, Q_ARG(QString, msg.id()),
-                Q_ARG(EnMessageStatus, EnMessageStatus::MST_SENT));
-        } else {
-            QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus", Qt::QueuedConnection, Q_ARG(QString, msg.id()),
-                Q_ARG(EnMessageStatus, EnMessageStatus::MST_FAILED));
-        }
+        QMetaObject::invokeMethod(m_sqlChatModel, "updateLastMessage", Qt::QueuedConnection, Q_ARG(QString, message.recipient),
+                                  Q_ARG(QString, message.message));
+        const auto status = m_xmpp.sendPacket(msg) ? EnMessageStatus::MST_SENT : EnMessageStatus::MST_FAILED;
+        QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus", Qt::QueuedConnection, Q_ARG(QString, msg.id()), Q_ARG(EnMessageStatus, status));
 
         return MRES_OK;
     });
 }
 
-/******************************************************************************/
-QFuture<VSQMessenger::EnResult> VSQMessenger::sendMessage(const QString &recipient, const QString &messageText,
-                                                          const QVariant &attachmentUrl, Enums::AttachmentType attachmentType)
+
+QFuture<VSQMessenger::EnResult> VSQMessenger::sendMessage(const QString &messageText, const QVariant &attachmentUrl, Enums::AttachmentType attachmentType)
 {
     Q_ASSERT_X(!messageText.isEmpty() || attachmentUrl.isValid(), "VSQMessenger::sendMessage", "Message and attachment are empty");
     const QString uuid = Utils::createUuid();
-    const auto attachment = m_attachmentsModel->createFromLocalFile(attachmentUrl.toUrl(), attachmentType);
+    const auto attachment = m_attachments->createFromLocalFile(attachmentUrl.toUrl(), attachmentType);
     const QString text = attachment ? QString() : messageText; // text or attachment
-    const StMessage stMessage{ uuid, text, recipient, attachment };
+    const StMessage stMessage{ uuid, text, StMessage::Author::User, m_recipient, attachment };
     return sendMessage(true, stMessage);
 }
 
-/******************************************************************************/
+
 void
 VSQMessenger::setStatus(VSQMessenger::EnStatus status) {
     QXmppPresence::Type presenceType = VSQMessenger::MSTATUS_ONLINE == status ?
@@ -806,37 +801,43 @@ VSQMessenger::setStatus(VSQMessenger::EnStatus status) {
     m_xmpp.setClientPresence(QXmppPresence(presenceType));
 }
 
-/******************************************************************************/
+
 void VSQMessenger::setCurrentRecipient(const QString &recipient)
 {
+    if (m_recipient == recipient)
+        return;
     m_recipient = recipient;
+    if (!m_recipient.isEmpty()) {
+        const auto chatId = m_sqlChatModel->createPrivateChat(recipient);
+        m_sqlConversations->filterByChat(*chatId);
+        markAsRead(*chatId);
+    }
+    emit fireCurrentRecipientChanged();
 }
 
-/******************************************************************************/
+
 void
 VSQMessenger::onPresenceReceived(const QXmppPresence &presence) {
     Q_UNUSED(presence)
 }
 
-/******************************************************************************/
+
 void
 VSQMessenger::onIqReceived(const QXmppIq &iq) {
     Q_UNUSED(iq)
 }
 
-/******************************************************************************/
+
 void
 VSQMessenger::onSslErrors(const QList<QSslError> &errors) {
     Q_UNUSED(errors)
     emit fireError(tr("Secure connection error ..."));
 }
 
-/******************************************************************************/
+
 void
 VSQMessenger::onStateChanged(QXmppClient::State state) {
     if (QXmppClient::ConnectingState == state) {
         emit fireConnecting();
     }
 }
-
-/******************************************************************************/

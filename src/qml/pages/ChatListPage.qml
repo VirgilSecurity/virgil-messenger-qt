@@ -120,7 +120,7 @@ Page {
 
                 Avatar {
                     id: avatar
-                    nickname: model.name
+                    nickname: model.contact
                 }
 
                 Column {
@@ -129,7 +129,7 @@ Page {
                     Text {
                         color: Theme.primaryTextColor
                         font.pointSize: UiHelper.fixFontSz(15)
-                        text: model.name
+                        text: model.contact
                     }
 
                     Text {
@@ -161,7 +161,7 @@ Page {
             }
 
             onClicked: {
-                mainView.showChatWith(model.name)
+                mainView.showChatWith(model.contact)
             }
         }
 
@@ -187,8 +187,8 @@ Page {
                 if (!contactsHeaderId.isSearchOpen) return conversationText;
                 if (contactsHeaderId.search !== '') return searchEmptyText;
                 return searchText;
-            }            
-        }        
+            }
+        }
 
         MouseArea {
             visible: !listView.contentItem.children.length
