@@ -101,11 +101,11 @@ VSQMessenger::VSQMessenger() {
     // Add receipt messages extension
     m_xmppReceiptManager = new QXmppMessageReceiptManager();
     m_xmppCarbonManager = new QXmppCarbonManager();
-    m_xmppDiscoManager = new QXmppDiscoveryManager();
+    // m_xmppDiscoManager = new QXmppDiscoveryManager();
 
     m_xmpp.addExtension(m_xmppReceiptManager);
     m_xmpp.addExtension(m_xmppCarbonManager);
-    m_xmpp.addExtension(m_xmppDiscoManager);
+    // m_xmpp.addExtension(m_xmppDiscoManager);
 
 
     // Signal connection
@@ -127,7 +127,7 @@ VSQMessenger::VSQMessenger() {
     // messages sent from our account (but another client)
     connect(m_xmppCarbonManager, &QXmppCarbonManager::messageSent, &m_xmpp, &QXmppClient::messageReceived);
 
-    connect(m_xmppDiscoManager, &QXmppDiscoveryManager::infoReceived, this, &VSQMessenger::handleDiscoInfo);
+    // connect(m_xmppDiscoManager, &QXmppDiscoveryManager::infoReceived, this, &VSQMessenger::handleDiscoInfo);
 
     connect(m_xmppReceiptManager, &QXmppMessageReceiptManager::messageDelivered, this, &VSQMessenger::onMessageDelivered);
 
@@ -260,7 +260,7 @@ VSQMessenger::_connect(QString userWithEnv, QString deviceId, QString userId) {
 
     m_xmppCarbonManager->setCarbonsEnabled(true);
 
-    // Return connection result
+    // Return connection results
     return m_xmpp.isConnected();
 }
 
@@ -550,9 +550,6 @@ VSQMessenger::_saveCredentials(const QString &user, const QString &deviceId, con
     QSettings settings(kOrganization, kApp);
     settings.setValue(user, json);
 
-    // QJsonDocument jsonMsg(QJsonDocument::fromJson(baDecr));
-    // QString decryptedString = jsonMsg["payload"]["body"].toString();
-
     return true;
 }
 
@@ -676,7 +673,9 @@ VSQMessenger::onSubscribePushNotifications(bool enable) {
     xmppPush.setType(QXmppIq::Set);
     xmppPush.setMode(enable ? QXmppPushEnableIq::Enable : QXmppPushEnableIq::Disable);
     xmppPush.setJid(kPushNotificationsProxy);
-    xmppPush.setNode(kPushNotificationsNode);
+
+    // xmppPush.setNode(kPushNotificationsNode);
+    xmppPush.setNode(currentUser() + "@" + _xmppURL() + "/" + m_deviceId);
     xmppPush.setDataForm(dataForm);
 
     m_xmpp.sendPacket(xmppPush);
@@ -800,7 +799,7 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
         return;
     }
 
-    // Add sender to contacts
+    // Add sender to contact
     // m_sqlContacts->addContact(sender);
     m_sqlChatModel->createPrivateChat(sender);
 
@@ -818,6 +817,7 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
 VSQMessenger::sendMessage(bool createNew, QString messageId, QString to, QString message) {
+    m_xmppCarbonManager->setCarbonsEnabled(true);
     return QtConcurrent::run([=]() -> EnResult {
         static const size_t _encryptedMsgSzMax = 20 * 1024;
         uint8_t encryptedMessage[_encryptedMsgSzMax];
