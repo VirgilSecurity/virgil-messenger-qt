@@ -34,13 +34,14 @@
 
 #include "models/VSQAttachmentsModel.h"
 
+#include <QPixmap>
 #include <QSqlQuery>
 
 #include "VSQSettings.h"
 #include "VSQUtils.h"
 
 VSQAttachmentsModel::VSQAttachmentsModel(VSQSettings *settings, QObject *parent)
-    : QObject(parent)
+    : QSqlTableModel(parent)
     , m_settings(settings)
 {}
 
@@ -50,63 +51,69 @@ bool VSQAttachmentsModel::createTable(const QString &user)
     const QString conversationsTableName = QLatin1String("Conversations_") + Utils::escapedUserName(user);
     const QString queryText = QString(
         "CREATE TABLE IF NOT EXISTS %1 ("
-        "   id TEXT NOT NULL,"
-        "   message_id TEXT NOT NULL,"
-        "   name TEXT NOT NULL,"
-        "   type INTEGER NOT NULL,"
-        "   remote_file TEXT,"
-        "   local_file TEXT,"
-        "   remote_preview TEXT,"
-        "   local_preview TEXT,"
-        "   FOREIGN KEY(message_id) REFERENCES %2 (message_id)"
+        "  id TEXT NOT NULL,"
+        "  message_id TEXT NOT NULL,"
+        "  type INTEGER NOT NULL,"
+        "  remote_url TEXT,"
+        "  local_url TEXT,"
+        "  local_preview TEXT,"
+        "  size INTEGER NOT NULL,"
+        "  FOREIGN KEY(message_id) REFERENCES %2 (id)"
         ")"
     ).arg(attachmentsTableName, conversationsTableName);
-
     QSqlQuery query(queryText);
     if (!query.exec()) {
-        setLastErrorText(QString("Failed to create database: %1").arg(attachmentsTableName));
+        qCritical() << (QString("Failed to create database: %1").arg(attachmentsTableName));
         return false;
     }
+
+    setTable(attachmentsTableName);
     return true;
 }
 
-Optional<Attachment> VSQAttachmentsModel::createFromLocalFile(const QUrl &url, const Attachment::Type type)
+OptionalAttachment VSQAttachmentsModel::createFromLocalFile(const QUrl &url, const Attachment::Type type)
 {
-    Attachment attachment;
-    attachment.type = type;
     if (!url.isValid() || !url.isLocalFile())
         return NullOptional;
-    const auto cachedFileName = cachedCopy(url);
-    if (!cachedFileName)
+    QFileInfo info(url.toLocalFile());
+    if (!info.exists()) {
+        qInfo() << QString("Attachment file %1 doesn't exist").arg(info.absoluteFilePath());
         return NullOptional;
-    attachment.url = QUrl::fromLocalFile(*cachedFileName);
-    attachment.name = url.fileName();
+    }
+    if (info.size() > m_settings->attachmentMaxSize()) {
+        qInfo() << QString("File size exceeds maximum limit: %1").arg(m_settings->attachmentMaxSize());
+        return NullOptional;
+    }
+    Attachment attachment;
+    attachment.id = Utils::createUuid();
+    attachment.type = type;
+    attachment.local_url = QUrl::fromLocalFile(info.absoluteFilePath());
+    if (type == Attachment::Type::Picture)
+        attachment.local_preview = createPreviewImage(info.absoluteFilePath());
+    attachment.size = info.size();
     return attachment;
 }
 
-QString VSQAttachmentsModel::lastErrorText() const
+QUrl VSQAttachmentsModel::createPreviewImage(const QString &fileName) const
 {
-    return m_lastErrorText;
-}
-
-OptionalType VSQAttachmentsModel::setLastErrorText(const QString &text)
-{
-    m_lastErrorText = text;
-    qCritical() << text;
-    return NullOptional;
-}
-
-Optional<QString> VSQAttachmentsModel::cachedCopy(const QUrl &url)
-{
-    QFile localFile(url.toLocalFile());
-    if (!localFile.exists())
-        return setLastErrorText(QString("Attachment file %1 doesn't exist").arg(localFile.fileName()));
-    if (localFile.size() > m_settings->attachmentMaxSize())
-        return setLastErrorText(QString("File size exceeds maximum limit: %1").arg(m_settings->attachmentMaxSize()));
-
-    const QString extension = QFileInfo(localFile).completeSuffix();
-    const QString cachedFileName = m_settings->attachmentCacheDir().filePath(Utils::createUuid() + QLatin1Char('.') + extension);
-    if (!localFile.copy(cachedFileName))
-        return setLastErrorText(QString("Unable to cache file as %1").arg(cachedFileName));
-    return cachedFileName;
+    QPixmap pixmap(fileName);
+    QSizeF size = pixmap.size();
+    const double ratio = size.height() / size.width();
+    const QSizeF maxSize = m_settings->previewMaxSize();
+    if (size.width() > maxSize.width())
+    {
+        size.setWidth(maxSize.width());
+        size.setHeight(maxSize.width() * ratio);
+    }
+    if (size.height() > maxSize.height())
+    {
+        size.setHeight(maxSize.height());
+        size.setWidth(maxSize.height() / ratio);
+    }
+    if (size != pixmap.size())
+        pixmap = pixmap.scaled(size.width(), size.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    const QString previewFileName = m_settings->attachmentCacheDir().filePath(Utils::createUuid() + QLatin1String(".png"));
+    pixmap.save(previewFileName);
+    qInfo() << "Created preview image:" << previewFileName;
+    return QUrl::fromLocalFile(previewFileName);
 }

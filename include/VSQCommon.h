@@ -81,26 +81,44 @@ enum EnMessageStatus
     MST_READ,
     MST_FAILED
 };
+Q_DECLARE_METATYPE(EnMessageStatus)
 
 struct Attachment
 {
     using Type = Enums::AttachmentType;
 
     QString id;
-    QUrl url;
     Type type = Type::File;
-    QString name;
+    QUrl remote_url;
+    QUrl local_url;
+    QUrl local_preview;
+    int size;
+
+    QString fileName() const
+    {
+        if (!local_url.isEmpty())
+            return local_url.fileName();
+        if (!remote_url.isEmpty())
+            return remote_url.fileName();
+        return QLatin1String();
+    }
 };
+
+using OptionalAttachment = Optional<Attachment>;
+Q_DECLARE_METATYPE(OptionalAttachment)
 
 struct StMessage
 {
     using Author = Enums::MessageAuthor;
 
-    QString message_id;
+    QString id;
     QString message;
     Author author;
     QString recipient;
-    Optional<Attachment> attachment;
+    OptionalAttachment attachment;
 };
+
+
+void registerCommonTypes();
 
 #endif // VSQCOMMON_H

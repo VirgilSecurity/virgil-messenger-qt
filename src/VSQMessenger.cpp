@@ -717,7 +717,7 @@ void VSQMessenger::onMessageReceived(const QXmppMessage &message) {
     QString decryptedString = decryptMessage(sender, msg);
 
     // Save message to DB
-    m_sqlConversations->receiveMessage(message.id(), decryptedString, sender);
+    m_sqlConversations->receiveMessage(message.id(), decryptedString, NullOptional, sender); // TODO(fpohtmeh): receive attachment
     m_sqlChatModel->updateLastMessage(sender, decryptedString);
     if (sender != m_recipient) {
         const auto chatId = m_sqlChatModel->createPrivateChat(sender);
@@ -766,12 +766,13 @@ QFuture<VSQMessenger::EnResult> VSQMessenger::sendMessage(bool createNew, const 
 
         QXmppMessage msg(fromJID, toJID, encryptedStr);
         msg.setReceiptRequested(true);
-        msg.setId(message.message_id);
+        msg.setId(message.id);
 
         // Save message to DB in native thread
         if(createNew) {
             QMetaObject::invokeMethod(m_sqlConversations, "createMessage", Qt::QueuedConnection,
-                                      Q_ARG(QString, msg.id()), Q_ARG(QString, message.message), Q_ARG(QString, message.recipient));
+                                      Q_ARG(QString, msg.id()), Q_ARG(QString, message.message), Q_ARG(OptionalAttachment, message.attachment),
+                                      Q_ARG(QString, message.recipient));
         }
         QMetaObject::invokeMethod(m_sqlChatModel, "updateLastMessage", Qt::QueuedConnection, Q_ARG(QString, message.recipient),
                                   Q_ARG(QString, message.message));
@@ -788,7 +789,9 @@ QFuture<VSQMessenger::EnResult> VSQMessenger::sendMessage(const QString &message
     Q_ASSERT_X(!messageText.isEmpty() || attachmentUrl.isValid(), "VSQMessenger::sendMessage", "Message and attachment are empty");
     const QString uuid = Utils::createUuid();
     const auto attachment = m_attachments->createFromLocalFile(attachmentUrl.toUrl(), attachmentType);
-    const QString text = attachment ? QString() : messageText; // text or attachment
+    QString text = messageText;
+    if (attachment)
+        text = attachment->fileName();
     const StMessage stMessage{ uuid, text, StMessage::Author::User, m_recipient, attachment };
     return sendMessage(true, stMessage);
 }

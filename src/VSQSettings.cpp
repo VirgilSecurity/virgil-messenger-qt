@@ -82,3 +82,8 @@ QDir VSQSettings::attachmentCacheDir() const
 {
     return m_attachmentCacheDir;
 }
+
+QSize VSQSettings::previewMaxSize() const
+{
+    return QSize(600, 400);
+}

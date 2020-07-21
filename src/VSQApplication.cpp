@@ -64,7 +64,7 @@ VSQApplication::VSQApplication(int &argc, char **argv)
 
     parseArgs(argc, argv);
     setupFonts();
-    registerTypes();
+    registerCommonTypes();
     setupContextProperties();
     setupConnections();
     reloadQml();
@@ -131,14 +131,6 @@ void VSQApplication::setupFonts()
     QFont font(ApplicationBase::font());
     font.setPointSize(1.5 * ApplicationBase::font().pointSize());
     setFont(font);
-}
-
-void VSQApplication::registerTypes()
-{
-    qRegisterMetaType<Enums::AttachmentType>();
-    qRegisterMetaType<Enums::MessageAuthor>();
-
-    qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");
 }
 
 void VSQApplication::setupContextProperties()

@@ -43,15 +43,11 @@
 #include "models/VSQAttachmentsModel.h"
 #include "models/VSQChatsModel.h"
 
-Q_DECLARE_METATYPE(EnMessageStatus) // TODO(fpohtmeh): move to application
-
-VSQConversationsModel::VSQConversationsModel(VSQChatsModel *chat, VSQAttachmentsModel *attachments, QObject *parent)
+VSQConversationsModel::VSQConversationsModel(VSQChatsModel *chats, VSQAttachmentsModel *attachments, QObject *parent)
     : QSqlQueryModel(parent)
-    , m_chat(chat)
+    , m_chats(chats)
     , m_attachments(attachments)
-{
-    qRegisterMetaType<EnMessageStatus>("EnMessageStatus");
-}
+{}
 
 QVariant VSQConversationsModel::data(const QModelIndex &index, int role) const
 {
@@ -88,6 +84,16 @@ QVariant VSQConversationsModel::data(const QModelIndex &index, int role) const
     else if (column == DayColumn) {
         return currRecord.value(TimestampColumn).toDate();
     }
+    else if (column == AttachmentIdColumn || column == AttachmentLocalUrlColumn || column == AttachmentLocalPreviewColumn) {
+        return currRecord.value(column).toString();
+    }
+    else if (column == AttachmentSizeColumn) {
+        return Utils::formattedFileSize(currRecord.value(AttachmentSizeColumn).toInt());
+    }
+    else if (column == AttachmentTypeColumn) {
+        const auto type = static_cast<Enums::AttachmentType>(currRecord.value(AttachmentTypeColumn).toInt());
+        return QVariant::fromValue(type);
+    }
     else {
         return currRecord.value(column);
     }
@@ -97,22 +103,26 @@ void VSQConversationsModel::createTable()
 {
     const QString queryString = QString(
         "CREATE TABLE IF NOT EXISTS %1 ("
+        "  id TEXT NOT NULL UNIQUE,"
         "  author INTEGER NOT NULL,"
         "  chat_id TEXT NOT NULL,"
         "  timestamp TEXT NOT NULL,"
         "  message TEXT NOT NULL,"
         "  status INTEGER NOT NULL,"
-        "  message_id TEXT NOT NULL"
+        "  FOREIGN KEY(chat_id) REFERENCES %2 (id)"
         ")"
-    );
-    QSqlQuery query(queryString.arg(m_tableName));
+    ).arg(m_tableName).arg(m_chats->tableName());
+    QSqlQuery query(queryString);
     if (!query.exec()) {
-        qFatal("Failed to query database: %s", qPrintable(query.lastError().text()));
+        qCritical() << QLatin1String("Failed to create converstations table:") << query.lastError().text();
+        return;
     }
-    QSqlQuery indexQuery;
-    if (!indexQuery.exec(
-        QString("CREATE UNIQUE INDEX IF NOT EXISTS idx_%1_message_id ON %1 (message_id);").arg(m_tableName))) {
-        qFatal("Failed to query database: %s", qPrintable(indexQuery.lastError().text()));
+    const QString indexQueryString = QString(
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_%1_id ON %1 (id);"
+    ).arg(m_tableName);
+    QSqlQuery indexQuery(indexQueryString);
+    if (!indexQuery.exec()) {
+        qCritical() << QLatin1String("Failed to create converstations indices:") << query.lastError().text();
     }
 }
 
@@ -124,65 +134,114 @@ void VSQConversationsModel::resetModel(const QString &chatId)
 
 QSqlQuery VSQConversationsModel::buildQuery(const QString &chatId, const QString &condition) const
 {
-    const QString main = QString("SELECT * FROM %1 ").arg(m_tableName);
-    QStringList whereList;
+    // body
+    const QString body = QString(
+        "SELECT "
+        "  C.id as id,"
+        "  C.author as author,"
+        "  C.chat_id as chat_id,"
+        "  C.timestamp as timestamp,"
+        "  C.message as message,"
+        "  C.status as status,"
+        "  IFNULL(A.id, '') as attachment_id,"
+        "  IFNULL(A.size, 0) as attachment_size,"
+        "  IFNULL(A.type, 0) as attachment_type,"
+        "  IFNULL(A.local_url, '') as attachment_local_url,"
+        "  IFNULL(A.local_preview, '') as attachment_local_preview "
+        "FROM %1 C "
+        "LEFT JOIN %2 A ON C.id = A.message_id "
+    ).arg(m_tableName).arg(m_attachments->tableName());
+    // condition
+    QStringList conditionList;
     if (!chatId.isEmpty())
-        whereList << QString("chat_id = '%1'").arg(chatId);
+        conditionList << QString("chat_id = '%1'").arg(chatId);
     if (!condition.isEmpty())
-        whereList << condition;
+        conditionList << condition;
+    const QString conditionString = conditionList.join(QLatin1String(" AND "));
+    // sorting
+    const QLatin1String sorting(" ORDER BY timestamp");
 
-    QString queryString = main;
-    if (!whereList.isEmpty())
-        queryString.append(QLatin1String(" WHERE ") + whereList.join(QLatin1String(" AND ")));
+    QString queryString(body);
+    if (!conditionString.isEmpty())
+        queryString.append(QLatin1String(" WHERE ") + conditionString);
+    queryString.append(sorting);
     return QSqlQuery(queryString);
 }
 
 QHash<int, QByteArray> VSQConversationsModel::roleNames() const
 {
     QHash<int, QByteArray> names;
+    names[Qt::UserRole + IdColumn] = "id";
     names[Qt::UserRole + AuthorColumn] = "author";
     names[Qt::UserRole + ChatIdColumn] = "chat_id";
     names[Qt::UserRole + TimestampColumn] = "timestamp";
     names[Qt::UserRole + MessageColumn] = "message";
     names[Qt::UserRole + StatusColumn] = "status";
-    names[Qt::UserRole + MessageIdColumn] = "message_id";
+    names[Qt::UserRole + AttachmentIdColumn] = "attachmentId";
+    names[Qt::UserRole + AttachmentSizeColumn] = "attachmentSize";
+    names[Qt::UserRole + AttachmentTypeColumn] = "attachmentType";
+    names[Qt::UserRole + AttachmentLocalUrlColumn] = "attachmentLocalUrl";
+    names[Qt::UserRole + AttachmentLocalPreviewColumn] = "attachmentLocalPreview";
     names[Qt::UserRole + FirstMessageInARowColumn] = "firstMessageInARow";
     names[Qt::UserRole + MessageInARowColumn] = "messageInARow";
     names[Qt::UserRole + DayColumn] = "day";
     return names;
 }
 
-void VSQConversationsModel::writeMessage(const QString &messageId, const QString &message, const QString &recipientId,
-                                        const StMessage::Author author, const EnMessageStatus status)
+void VSQConversationsModel::writeMessage(const QString &messageId, const QString &message, const OptionalAttachment &attachment,
+                                         const QString &recipientId, const StMessage::Author author, const EnMessageStatus status)
 {
-    const auto chatId = m_chat->createPrivateChat(recipientId);
+    const auto chatId = m_chats->createPrivateChat(recipientId);
+
+    // Write message
     const QString queryString = QString(
-        "INSERT INTO %1 (author, chat_id, timestamp, message, status, message_id)"
-        "VALUES (:author, :chat_id, :timestamp, :message, :status, :message_id)"
+        "INSERT INTO %1 (id, author, chat_id, timestamp, message, status)"
+        "VALUES (:id, :author, :chat_id, :timestamp, :message, :status)"
     ).arg(m_tableName);
     QSqlQuery query;
     query.prepare(queryString);
+    query.bindValue(QLatin1String(":id"), messageId);
     query.bindValue(QLatin1String(":author"), static_cast<int>(author));
     query.bindValue(QLatin1String(":chat_id"), *chatId);
     query.bindValue(QLatin1String(":timestamp"), Utils::currentIsoDateTime());
     query.bindValue(QLatin1String(":message"), message);
     query.bindValue(QLatin1String(":status"), status);
-    query.bindValue(QLatin1String(":message_id"), messageId);
     if (!query.exec()) {
-        qWarning() << "Failed to save received message:" << query.lastError().text();
+        qWarning() << "Failed to write messageto DB:" << query.lastError().text();
         return;
+    }
+
+    // Write attachment
+    if (attachment) {
+        const QString queryString = QString(
+            "INSERT INTO %1 (id, message_id, type, local_url, local_preview, size)"
+            "VALUES (:id, :message_id, :type, :local_url, :local_preview, :size)"
+        ).arg(m_attachments->tableName());
+        QSqlQuery query;
+        query.prepare(queryString);
+        query.bindValue(QLatin1String(":id"), attachment->id);
+        query.bindValue(QLatin1String(":message_id"), messageId);
+        query.bindValue(QLatin1String(":type"), static_cast<int>(attachment->type));
+        query.bindValue(QLatin1String(":local_url"), attachment->local_url.toString());
+        query.bindValue(QLatin1String(":local_preview"), attachment->local_preview.toString());
+        query.bindValue(QLatin1String(":size"), attachment->size);
+        if (!query.exec()) {
+            qWarning() << "Failed to write attachment to DB:" << query.lastError().text();
+            return;
+        }
+
     }
     resetModel(m_chatId);
 }
 
-void VSQConversationsModel::createMessage(const QString &messageId, const QString &message, const QString &contactId)
+void VSQConversationsModel::createMessage(const QString &messageId, const QString &message, const OptionalAttachment &attachment, const QString &contactId)
 {
-    writeMessage(messageId, message, contactId, StMessage::Author::User, EnMessageStatus::MST_CREATED);
+    writeMessage(messageId, message, attachment, contactId, StMessage::Author::User, EnMessageStatus::MST_CREATED);
 }
 
-void VSQConversationsModel::receiveMessage(const QString &messageId, const QString &message, const QString &contactId)
+void VSQConversationsModel::receiveMessage(const QString &messageId, const QString &message, const OptionalAttachment &attachment, const QString &contactId)
 {
-    writeMessage(messageId, message, contactId, StMessage::Author::Contact, EnMessageStatus::MST_RECEIVED);
+    writeMessage(messageId, message, attachment, contactId, StMessage::Author::Contact, EnMessageStatus::MST_RECEIVED);
 }
 
 QString VSQConversationsModel::user() const
@@ -248,7 +307,7 @@ void VSQConversationsModel::setMessageStatus(const QString &messageId, const EnM
     const QString queryString = QString(
         "UPDATE %1 "
         "SET status = %2 "
-        "WHERE message_id = '%3'"
+        "WHERE id = '%3'"
     ).arg(m_tableName).arg(status).arg(messageId);
 
     QSqlQuery query(queryString);
@@ -271,7 +330,7 @@ std::vector<StMessage> VSQConversationsModel::getMessages(const QString &user, c
     while (query.next()) {
         StMessage message;
         message.message = query.value(MessageColumn).toString();
-        message.message_id = query.value(MessageIdColumn).toString();
+        message.id = query.value(IdColumn).toString();
         message.author = query.value(AuthorColumn).value<StMessage::Author>();
         message.recipient = user;
         // TODO(fpohtmeh): add attachment

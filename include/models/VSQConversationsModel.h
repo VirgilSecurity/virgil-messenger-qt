@@ -49,18 +49,23 @@ class VSQConversationsModel : public QSqlQueryModel
 public:
     enum Columns
     {
-        AuthorColumn = 0,
+        IdColumn = 0,
+        AuthorColumn,
         ChatIdColumn,
         TimestampColumn,
         MessageColumn,
         StatusColumn,
-        MessageIdColumn,
+        AttachmentIdColumn,
+        AttachmentSizeColumn,
+        AttachmentTypeColumn,
+        AttachmentLocalUrlColumn,
+        AttachmentLocalPreviewColumn,
         FirstMessageInARowColumn,
         MessageInARowColumn,
         DayColumn
     };
 
-    explicit VSQConversationsModel(VSQChatsModel *chat, VSQAttachmentsModel *attachments, QObject *parent = nullptr);
+    explicit VSQConversationsModel(VSQChatsModel *chats, VSQAttachmentsModel *attachments, QObject *parent = nullptr);
 
     QString user() const;
     void setUser(const QString &userId);
@@ -68,8 +73,8 @@ public:
     void filterByChat(const QString &chatId);
 
 public slots:
-    void createMessage(const QString &messageId, const QString &message, const QString &contactId);
-    void receiveMessage(const QString &messageId, const QString &message, const QString &contactId);
+    void createMessage(const QString &messageId, const QString &message, const OptionalAttachment &attachment, const QString &contactId);
+    void receiveMessage(const QString &messageId, const QString &message, const OptionalAttachment &attachment, const QString &contactId);
     void markAsRead(const QString &chatId);
 
     int getMessageCount(const QString &chatId, const EnMessageStatus status);
@@ -84,10 +89,10 @@ private:
     void createTable();
     void resetModel(const QString &chatId);
     QSqlQuery buildQuery(const QString &chatId, const QString &condition) const;
-    void writeMessage(const QString &messageId, const QString &message, const QString &chatId,
+    void writeMessage(const QString &messageId, const QString &message, const OptionalAttachment &attachment, const QString &chatId,
                       const StMessage::Author author, const EnMessageStatus status);
 
-    VSQChatsModel *m_chat;
+    VSQChatsModel *m_chats;
     VSQAttachmentsModel *m_attachments;
 
     QString m_userId;

@@ -34,6 +34,7 @@
 
 #include <QDir>
 #include <QSettings>
+#include <QSize>
 
 #include "VSQCommon.h"
 
@@ -55,6 +56,7 @@ public:
 
     int attachmentMaxSize() const;
     QDir attachmentCacheDir() const;
+    QSize previewMaxSize() const;
 
 private:
     QDir m_appDataDir;

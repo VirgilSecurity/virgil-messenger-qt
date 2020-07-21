@@ -32,49 +32,15 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQCHATSMODEL_H
-#define VSQCHATSMODEL_H
-
-#include <QSqlTableModel>
-
 #include "VSQCommon.h"
 
-class VSQContactsModel;
+#include <QtQml>
 
-class VSQChatsModel : public QSqlTableModel
+void registerCommonTypes()
 {
-    Q_OBJECT
-
-public:
-    enum Columns
-    {
-        IdColumn = 0,
-        ContactIdColumn,
-        LastMessageColumn,
-        LastMessageTimeColumn,
-        UnreadMessageCountColumn
-    };
-
-    explicit VSQChatsModel(VSQContactsModel *contacts, QObject *parent = nullptr);
-
-    void setUser(const QString &userId);
-    // Create if it doesn't exist chat and return id
-    Optional<QString> createPrivateChat(const QString &contactId);
-    void setUnreadMessageCount(const QString &chatId, int count);
-
-    Q_INVOKABLE void applyFilter(const QString &filter);
-    Q_INVOKABLE void clearFilter();
-
-public slots:
-    void updateLastMessage(const QString &contactId, const QString &message);
-
-private:
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
-
-    VSQContactsModel *m_contacts;
-    QString m_userId;
-    QString m_tableName;
-};
-
-#endif // VSQCHATSMODEL_H
+    qRegisterMetaType<EnMessageStatus>();
+    qRegisterMetaType<Enums::AttachmentType>();
+    qRegisterMetaType<Enums::MessageAuthor>();
+    qRegisterMetaType<OptionalAttachment>();
+    qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");
+}

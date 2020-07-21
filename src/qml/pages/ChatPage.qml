@@ -83,17 +83,21 @@ Page {
         }
 
         spacing: 5
-        // verticalLayoutDirection: ListView.BottomToTop
         model: ConversationsModel
         delegate: ChatMessage {
             readonly property bool isUser: model.author === Enums.MessageAuthor.User;
-            text: message
+            text: model.message
             nickname: isUser ? Messenger.currentUser : Messenger.currentRecipient
             timeStamp: model.timestamp
             variant: isUser ? "light" : "dark"
             messageInARow: model.messageInARow
             firstMessageInARow: model.firstMessageInARow
             status: isUser ? model.status :  "none"
+            attachmentId: model.attachmentId
+            attachmentSize: model.attachmentSize
+            attachmentType: model.attachmentType
+            attachmentLocalUrl: model.attachmentLocalUrl
+            attachmentLocalPreview: model.attachmentLocalPreview
         }
 
         onCountChanged: {

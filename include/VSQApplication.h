@@ -35,6 +35,7 @@
 #ifndef VSQAPPLICATION_H
 #define VSQAPPLICATION_H
 
+#include <QMetaType>
 #include <QQmlApplicationEngine>
 
 #include "VSQMessenger.h"
@@ -65,7 +66,6 @@ private:
     void parseArgs(int &argc, char **argv);
     void setDefaults();
     void setupFonts();
-    void registerTypes();
     void setupContextProperties();
     void setupConnections();
 

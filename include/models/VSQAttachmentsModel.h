@@ -35,14 +35,14 @@
 #ifndef VSQATTACHMENTSMODEL_H
 #define VSQATTACHMENTSMODEL_H
 
-#include <QObject>
+#include <QSqlTableModel>
 
 #include "VSQCommon.h"
 
 class VSQSettings;
 
 // Class that handle attachments workflow
-class VSQAttachmentsModel : public QObject
+class VSQAttachmentsModel : public QSqlTableModel
 {
     Q_OBJECT
 
@@ -52,20 +52,13 @@ public:
     bool createTable(const QString &user);
 
     // Create attachment by local url and attachment type
-    Optional<Attachment> createFromLocalFile(const QUrl &url, const Attachment::Type type);
-
-    // Return text of last error
-    QString lastErrorText() const;
+    OptionalAttachment createFromLocalFile(const QUrl &url, const Attachment::Type type);
 
 private:
-    // Convenience method to update last error text
-    OptionalType setLastErrorText(const QString &text);
-
-    // Return path to file cached copy
-    Optional<QString> cachedCopy(const QUrl &url);
+    // Create preview image and return preview url
+    QUrl createPreviewImage(const QString &fileName) const;
 
     VSQSettings *m_settings;
-    QString m_lastErrorText;
 };
 
 #endif // VSQATTACHMENTSMODEL_H

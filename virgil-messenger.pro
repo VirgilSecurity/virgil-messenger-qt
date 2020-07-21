@@ -110,6 +110,7 @@ HEADERS += \
 
 SOURCES += \
         src/VSQClipboardProxy.cpp \
+        src/VSQCommon.cpp \
         src/VSQMessenger.cpp \
         src/VSQSettings.cpp \
         src/VSQUtils.cpp \

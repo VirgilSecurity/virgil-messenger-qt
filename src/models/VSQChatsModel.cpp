@@ -61,14 +61,16 @@ void VSQChatsModel::setUser(const QString &userId)
     const QString queryString =
         "CREATE TABLE IF NOT EXISTS '%1' ("
         "  id TEXT NOT NULL UNIQUE,"
-        "  contact TEXT NOT NULL,"
+        "  contact_id TEXT NOT NULL,"
         "  last_message TEXT,"
         "  last_message_time TEXT,"
-        "  unread_message_count INTEGER NOT NULL"
+        "  unread_message_count INTEGER NOT NULL,"
+        "  FOREIGN KEY(contact_id) REFERENCES %2 (id)"
         ")";
-    QSqlQuery query(queryString.arg(m_tableName));
+    QSqlQuery query(queryString.arg(m_tableName).arg(m_contacts->tableName()));
     if (!query.exec()) {
-        qFatal("Failed to query database: %s", qPrintable(query.lastError().text()));
+        qCritical() << QLatin1String("Failed to create chats table:") << query.lastError().text();
+        return;
     }
 
     // Set model table
@@ -90,7 +92,7 @@ QHash<int, QByteArray> VSQChatsModel::roleNames() const
 {
     QHash<int, QByteArray> names;
     names[Qt::UserRole + IdColumn] = "id";
-    names[Qt::UserRole + ContactColumn] = "contact";
+    names[Qt::UserRole + ContactIdColumn] = "contact";
     names[Qt::UserRole + LastMessageColumn] = "lastMessage";
     names[Qt::UserRole + LastMessageTimeColumn] = "lastMessageTime";
     names[Qt::UserRole + UnreadMessageCountColumn] = "unreadMessageCount";
@@ -104,7 +106,7 @@ void VSQChatsModel::clearFilter()
 
 void VSQChatsModel::applyFilter(const QString &filter)
 {
-    setFilter(QString("contact LIKE '%%1%'").arg(filter));
+    setFilter(QString("contact_id LIKE '%%1%'").arg(filter));
 }
 
 Optional<QString> VSQChatsModel::createPrivateChat(const QString &contactId)
@@ -112,7 +114,7 @@ Optional<QString> VSQChatsModel::createPrivateChat(const QString &contactId)
     m_contacts->create(contactId);
 
     const QString queryString = QString(
-        "SELECT * FROM '%1' WHERE contact = '%2'"
+        "SELECT * FROM '%1' WHERE contact_id = '%2'"
     ).arg(m_tableName, contactId);
     QSqlQuery query(queryString);
     if (!query.exec()) {
@@ -128,7 +130,7 @@ Optional<QString> VSQChatsModel::createPrivateChat(const QString &contactId)
     QSqlRecord newRecord = record();
     const auto id = Utils::createUuid();
     newRecord.setValue(IdColumn, id);
-    newRecord.setValue(ContactColumn, contactId);
+    newRecord.setValue(ContactIdColumn, contactId);
     newRecord.setValue(UnreadMessageCountColumn, 0);
     newRecord.setValue(LastMessageTimeColumn, Utils::currentIsoDateTime()); // for sorting
     if (!insertRowIntoTable(newRecord)) {
@@ -146,7 +148,7 @@ void VSQChatsModel::updateLastMessage(const QString &contactId, const QString &m
     const QString queryString = QString(
         "UPDATE '%1' "
         "SET last_message = :last_message, last_message_time = :last_message_time "
-        "WHERE contact = '%2'"
+        "WHERE contact_id = '%2'"
     ).arg(m_tableName, contactId);
 
     QSqlQuery query;
