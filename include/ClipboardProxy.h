@@ -32,33 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQATTACHMENTSMODEL_H
-#define VSQATTACHMENTSMODEL_H
+#ifndef VSQ_CLIPBOARDPROXY_H
+#define VSQ_CLIPBOARDPROXY_H
 
-#include <QSqlTableModel>
+#include <QObject>
 
-#include "VSQCommon.h"
+class QClipboard;
 
-class VSQSettings;
-
-// Class that handle attachments workflow
-class VSQAttachmentsModel : public QSqlTableModel
+class ClipboardProxy : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QString text READ text NOTIFY textChanged)
 
 public:
-    VSQAttachmentsModel(VSQSettings *settings, QObject *parent);
+    explicit ClipboardProxy(QClipboard *clipboard);
 
-    bool createTable(const QString &user);
+    QString text() const;
 
-    // Create attachment by local url and attachment type
-    OptionalAttachment createFromLocalFile(const QUrl &url, const Attachment::Type type);
+    Q_INVOKABLE void
+    setText(const QString &text);
+
+signals:
+    void textChanged();
 
 private:
-    // Create preview image and return preview url
-    QUrl createPreviewImage(const QString &fileName) const;
-
-    VSQSettings *m_settings;
+    QClipboard* clipboard;
 };
 
-#endif // VSQATTACHMENTSMODEL_H
+#endif // VSQ_CLIPBOARDPROXY_HPP

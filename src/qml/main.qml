@@ -18,6 +18,8 @@ ApplicationWindow {
 
     property bool connectionError: false
 
+    // TODO(fpohtmeh): remove
+    /*
     //
     //  Connections
     //
@@ -42,6 +44,7 @@ ApplicationWindow {
         onFireNewMessage: {            
         }
     }
+    */
 
     onClosing: {
         if (Platform.isAndroid) {
@@ -60,6 +63,8 @@ ApplicationWindow {
         id: inform
     }
 
+    // TODO(fpohtmeh): uncomment
+    /*
     // Shortcuts for hackers
     Shortcut {
         // TODO: remove on production or add conditional dev flag!
@@ -74,7 +79,7 @@ ApplicationWindow {
             app.reloadQml()
         }
     }
-
+    */
 
     // Show Popup message
     function showPopup(message, color, textColor, isOnTop, isModal) {

@@ -32,15 +32,47 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "VSQCommon.h"
+#ifndef VSQ_APPLICATION_H
+#define VSQ_APPLICATION_H
 
-#include <QtQml>
+#ifdef VS_DESKTOP
+#include <QApplication>
+#define ApplicationBase QApplication
+#else
+#include <QGuiApplication>
+#define ApplicationBase QGuiApplication
+#endif
 
-void registerCommonTypes()
+class Messenger;
+class QmlEngine;
+class Settings;
+
+class Application : public ApplicationBase
 {
-    qRegisterMetaType<EnMessageStatus>();
-    qRegisterMetaType<Enums::AttachmentType>();
-    qRegisterMetaType<Enums::MessageAuthor>();
-    qRegisterMetaType<OptionalAttachment>();
-    qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");
-}
+    Q_OBJECT
+
+public:
+    Application(int &argc, char **argv);
+    virtual ~Application() = default;
+
+    static void initialize();
+    Q_INVOKABLE void reloadQml();
+    Q_INVOKABLE void checkUpdates();
+    Q_INVOKABLE QString currentVersion() const;
+    Q_INVOKABLE void sendReport();
+
+private:
+    void setupFonts();
+    void setupConnections();
+    void setupEngine();
+
+    void onApplicationStateChanged(Qt::ApplicationState state);
+
+    static const QString kVersion;
+
+    Settings *m_settings;
+    Messenger *m_messenger;
+    QmlEngine *m_engine;
+};
+
+#endif // VSQ_APPLICATION_H

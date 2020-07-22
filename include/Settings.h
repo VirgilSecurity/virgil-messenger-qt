@@ -32,50 +32,41 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQAPPLICATION_H
-#define VSQAPPLICATION_H
+#include <QDir>
+#include <QSettings>
+#include <QSize>
 
-#include <QMetaType>
-#include <QQmlApplicationEngine>
+#include "Common.h"
 
-#include "VSQMessenger.h"
-#include "VSQSettings.h"
+#ifndef VSQ_SETTINGS_H
+#define VSQ_SETTINGS_H
 
-#ifdef VS_DESKTOP
-#include <QApplication>
-#define ApplicationBase QApplication
-#else
-#include <QGuiApplication>
-#define ApplicationBase QGuiApplication
-#endif
-
-class VSQApplication : public ApplicationBase
+class Settings : public QSettings
 {
     Q_OBJECT
+    Q_PROPERTY(QString lastSignedInUser READ lastSignedInUser WRITE setLastSignedInUser NOTIFY lastSignedInUserChanged)
 
 public:
-    VSQApplication(int &argc, char **argv);
-    virtual ~VSQApplication() = default;
+    explicit Settings(QObject *parent);
+    ~Settings();
 
-    Q_INVOKABLE void reloadQml();
-    Q_INVOKABLE void checkUpdates();
-    Q_INVOKABLE QString currentVersion() const;
-    Q_INVOKABLE void sendReport();
+    void setLastSignedInUser(const QString &user);
+    QString lastSignedInUser() const;
+    void setUsersList(const QStringList &users);
+    QStringList usersList() const;
+
+    QString databaseFileName() const;
+
+    int attachmentMaxSize() const;
+    QDir attachmentCacheDir() const;
+    QSize previewMaxSize() const;
+
+signals:
+    void lastSignedInUserChanged(const QString &);
 
 private:
-    void parseArgs(int &argc, char **argv);
-    void setDefaults();
-    void setupFonts();
-    void setupContextProperties();
-    void setupConnections();
-
-    void onApplicationStateChanged(Qt::ApplicationState state);
-
-    static const QString kVersion;
-
-    QQmlApplicationEngine m_engine;
-    VSQSettings *m_settings;
-    VSQMessenger *m_messenger;
+    QDir m_appDataDir;
+    QDir m_attachmentCacheDir;
 };
 
-#endif // VSQAPPLICATION_H
+#endif // VSQ_SETTINGS_H

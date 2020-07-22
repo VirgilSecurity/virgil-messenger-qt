@@ -32,31 +32,22 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQCLIPBOARDPROXY_H
-#define VSQCLIPBOARDPROXY_H
+#include "ClipboardProxy.h"
 
-#include <QObject>
+#include <QClipboard>
 
-class QClipboard;
-
-class VSQClipboardProxy : public QObject
+ClipboardProxy::ClipboardProxy(QClipboard *c)
+    : clipboard(c)
 {
-    Q_OBJECT
-    Q_PROPERTY(QString text READ text NOTIFY textChanged)
+    connect(c, &QClipboard::dataChanged, this, &ClipboardProxy::textChanged);
+}
 
-public:
-    explicit VSQClipboardProxy(QClipboard*);
+QString ClipboardProxy::text() const
+{
+    return clipboard->text();
+}
 
-    QString text() const;
-
-    Q_INVOKABLE void
-    setText(const QString &text);
-
-signals:
-    void textChanged();
-
-private:
-    QClipboard* clipboard;
-};
-
-#endif // VSQCLIPBOARDPROXY_HPP
+void ClipboardProxy::setText(const QString &text)
+{
+    clipboard->setText(text);
+}

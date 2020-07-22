@@ -41,7 +41,7 @@ Page {
                 Future.onFinished(future, (result) => {
                     var res = Future.result(future)
                     if (res === Result.MRES_OK) {
-                        lastSignedInUser = userName
+                        settings.lastSignedInUser = userName
                         showContacts(true)
                         return
                     }

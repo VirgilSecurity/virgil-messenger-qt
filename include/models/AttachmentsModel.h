@@ -32,24 +32,33 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "Application.h"
-#include "android/VSQAndroid.h"
+#ifndef VSQ_ATTACHMENTSMODEL_H
+#define VSQ_ATTACHMENTSMODEL_H
 
-#if (VSQ_WEBDRIVER_DEBUG)
-#include "Test/Headers.h"
-#endif
+#include <QSqlTableModel>
 
-int main(int argc, char *argv[])
+#include "Common.h"
+
+class Settings;
+
+// Class that handle attachments workflow
+class AttachmentsModel : public QSqlTableModel
 {
-#if (VS_ANDROID)
-    VSQAndroid::prepare();
-#endif
+    Q_OBJECT
 
-#if (VSQ_WEBDRIVER_DEBUG)
-    wd_setup(argc, argv);
-#endif
+public:
+    AttachmentsModel(Settings *settings, QObject *parent);
 
-    Application::initialize();
-    Application app(argc, argv);
-    return app.exec();
-}
+    bool createTable(const QString &user);
+
+    // Create attachment by local url and attachment type
+    OptionalAttachment createFromLocalFile(const QUrl &url, const Attachment::Type type);
+
+private:
+    // Create preview image and return preview url
+    QUrl createPreviewImage(const QString &fileName) const;
+
+    Settings *m_settings;
+};
+
+#endif // VSQ_ATTACHMENTSMODEL_H

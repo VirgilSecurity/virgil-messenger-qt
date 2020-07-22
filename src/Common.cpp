@@ -32,24 +32,15 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "Application.h"
-#include "android/VSQAndroid.h"
+#include "Common.h"
 
-#if (VSQ_WEBDRIVER_DEBUG)
-#include "Test/Headers.h"
-#endif
+#include <QtQml>
 
-int main(int argc, char *argv[])
+void registerCommonTypes()
 {
-#if (VS_ANDROID)
-    VSQAndroid::prepare();
-#endif
-
-#if (VSQ_WEBDRIVER_DEBUG)
-    wd_setup(argc, argv);
-#endif
-
-    Application::initialize();
-    Application app(argc, argv);
-    return app.exec();
+    qRegisterMetaType<EnMessageStatus>();
+    qRegisterMetaType<Enums::AttachmentType>();
+    qRegisterMetaType<Enums::MessageAuthor>();
+    qRegisterMetaType<OptionalAttachment>();
+    qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");
 }

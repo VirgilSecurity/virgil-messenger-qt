@@ -32,35 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <QDir>
-#include <QSettings>
-#include <QSize>
+#include "Database.h"
 
-#include "VSQCommon.h"
+#include <QSqlError>
 
-#ifndef VSQSETTINGS_H
-#define VSQSETTINGS_H
+Database::Database(const QString &fileName, QObject *parent)
+    : QObject(parent)
+    , m_connectionName(QLatin1String("VSQDatabase"))
+    , m_fileName(fileName)
+{}
 
-class VSQSettings : public QSettings
+Database::~Database()
 {
-    Q_OBJECT
+    m_db.close();
+}
 
-public:
-    explicit VSQSettings(QObject *parent);
-    ~VSQSettings();
-
-    void setUsersList(const QStringList &users);
-    QStringList usersList() const;
-
-    QString databaseFileName() const;
-
-    int attachmentMaxSize() const;
-    QDir attachmentCacheDir() const;
-    QSize previewMaxSize() const;
-
-private:
-    QDir m_appDataDir;
-    QDir m_attachmentCacheDir;
-};
-
-#endif // VSQSETTINGS_H
+void Database::open()
+{
+    m_db = QSqlDatabase::addDatabase("QSQLITE", m_connectionName);
+    if (!m_db.isValid()) {
+        qFatal("Cannot add database: %s", qPrintable(m_db.lastError().text()));
+        emit failed();
+    }
+    m_db.setDatabaseName(m_fileName);
+    if (!m_db.open()) {
+        qFatal("Cannot open database: %s", qPrintable(m_db.lastError().text()));
+        emit failed();
+    }
+    emit opened();
+}

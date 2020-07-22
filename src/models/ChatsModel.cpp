@@ -32,21 +32,21 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/VSQChatsModel.h"
+#include "models/ChatsModel.h"
 
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
 
-#include "models/VSQContactsModel.h"
-#include "VSQUtils.h"
+#include "models/ContactsModel.h"
+#include "Utils.h"
 
-VSQChatsModel::VSQChatsModel(VSQContactsModel *contacts, QObject *parent)
+ChatsModel::ChatsModel(ContactsModel *contacts, QObject *parent)
     : QSqlTableModel(parent)
     , m_contacts(contacts)
 {}
 
-void VSQChatsModel::setUser(const QString &userId)
+void ChatsModel::setUser(const QString &userId)
 {
     if (userId == m_userId)
         return;
@@ -80,7 +80,7 @@ void VSQChatsModel::setUser(const QString &userId)
     select();
 }
 
-QVariant VSQChatsModel::data(const QModelIndex &index, int role) const
+QVariant ChatsModel::data(const QModelIndex &index, int role) const
 {
     if (role < Qt::UserRole) {
         return QSqlTableModel::data(index, role);
@@ -88,7 +88,7 @@ QVariant VSQChatsModel::data(const QModelIndex &index, int role) const
     return record(index.row()).value(role - Qt::UserRole);
 }
 
-QHash<int, QByteArray> VSQChatsModel::roleNames() const
+QHash<int, QByteArray> ChatsModel::roleNames() const
 {
     QHash<int, QByteArray> names;
     names[Qt::UserRole + IdColumn] = "id";
@@ -99,17 +99,17 @@ QHash<int, QByteArray> VSQChatsModel::roleNames() const
     return names;
 }
 
-void VSQChatsModel::clearFilter()
+void ChatsModel::clearFilter()
 {
     setFilter(QLatin1String());
 }
 
-void VSQChatsModel::applyFilter(const QString &filter)
+void ChatsModel::applyFilter(const QString &filter)
 {
     setFilter(QString("contact_id LIKE '%%1%'").arg(filter));
 }
 
-Optional<QString> VSQChatsModel::createPrivateChat(const QString &contactId)
+Optional<QString> ChatsModel::createPrivateChat(const QString &contactId)
 {
     m_contacts->create(contactId);
 
@@ -143,7 +143,7 @@ Optional<QString> VSQChatsModel::createPrivateChat(const QString &contactId)
     return id;
 }
 
-void VSQChatsModel::updateLastMessage(const QString &contactId, const QString &message)
+void ChatsModel::updateLastMessage(const QString &contactId, const QString &message)
 {
     const QString queryString = QString(
         "UPDATE '%1' "
@@ -163,7 +163,7 @@ void VSQChatsModel::updateLastMessage(const QString &contactId, const QString &m
     select();
 }
 
-void VSQChatsModel::setUnreadMessageCount(const QString &chatId, int count)
+void ChatsModel::setUnreadMessageCount(const QString &chatId, int count)
 {
     const QString queryString = QString(
         "UPDATE '%1' "

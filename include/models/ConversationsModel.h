@@ -32,16 +32,17 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQCHATSMODEL_H
-#define VSQCHATSMODEL_H
+#ifndef VSQ_CONVERSATIONSMODEL_H
+#define VSQ_CONVERSATIONSMODEL_H
 
-#include <QSqlTableModel>
+#include <QSqlQueryModel>
 
-#include "VSQCommon.h"
+#include "Common.h"
 
-class VSQContactsModel;
+class AttachmentsModel;
+class ChatsModel;
 
-class VSQChatsModel : public QSqlTableModel
+class ConversationsModel : public QSqlQueryModel
 {
     Q_OBJECT
 
@@ -49,32 +50,54 @@ public:
     enum Columns
     {
         IdColumn = 0,
-        ContactIdColumn,
-        LastMessageColumn,
-        LastMessageTimeColumn,
-        UnreadMessageCountColumn
+        AuthorColumn,
+        ChatIdColumn,
+        TimestampColumn,
+        MessageColumn,
+        StatusColumn,
+        AttachmentIdColumn,
+        AttachmentSizeColumn,
+        AttachmentTypeColumn,
+        AttachmentLocalUrlColumn,
+        AttachmentLocalPreviewColumn,
+        FirstMessageInARowColumn,
+        MessageInARowColumn,
+        DayColumn
     };
 
-    explicit VSQChatsModel(VSQContactsModel *contacts, QObject *parent = nullptr);
+    explicit ConversationsModel(ChatsModel *chats, AttachmentsModel *attachments, QObject *parent = nullptr);
 
+    QString user() const;
     void setUser(const QString &userId);
-    // Create if it doesn't exist chat and return id
-    Optional<QString> createPrivateChat(const QString &contactId);
-    void setUnreadMessageCount(const QString &chatId, int count);
 
-    Q_INVOKABLE void applyFilter(const QString &filter);
-    Q_INVOKABLE void clearFilter();
+    void filterByChat(const QString &chatId);
 
 public slots:
-    void updateLastMessage(const QString &contactId, const QString &message);
+    void createMessage(const QString &messageId, const QString &message, const OptionalAttachment &attachment, const QString &contactId);
+    void receiveMessage(const QString &messageId, const QString &message, const OptionalAttachment &attachment, const QString &contactId);
+    void markAsRead(const QString &chatId);
+
+    int getMessageCount(const QString &chatId, const EnMessageStatus status);
+    void setMessageStatus(const QString &messageId, const EnMessageStatus status);
+
+    std::vector<StMessage> getMessages(const QString &user, const EnMessageStatus status);
 
 private:
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    VSQContactsModel *m_contacts;
+    void createTable();
+    void resetModel(const QString &chatId);
+    QSqlQuery buildQuery(const QString &chatId, const QString &condition) const;
+    void writeMessage(const QString &messageId, const QString &message, const OptionalAttachment &attachment, const QString &chatId,
+                      const StMessage::Author author, const EnMessageStatus status);
+
+    ChatsModel *m_chats;
+    AttachmentsModel *m_attachments;
+
     QString m_userId;
     QString m_tableName;
+    QString m_chatId;
 };
 
-#endif // VSQCHATSMODEL_H
+#endif // VSQ_CONVERSATIONSMODEL_H

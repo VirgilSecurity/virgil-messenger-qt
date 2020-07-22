@@ -32,58 +32,30 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "VSQSettings.h"
+#ifndef VSQ_DATABASE_H
+#define VSQ_DATABASE_H
 
-#include <QStandardPaths>
+#include <QObject>
+#include <QSqlDatabase>
 
-static const QString kUsers = "Users";
-
-VSQSettings::VSQSettings(QObject *parent)
-    : QSettings("VirgilSecurity", "VirgilMessenger", parent) // organization, application name
+class Database : public QObject
 {
-    m_appDataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    m_attachmentCacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/attachments");
-    for (auto dir : { m_appDataDir, m_attachmentCacheDir })
-        if (!dir.exists() && !dir.mkpath(dir.absolutePath()))
-            qFatal("Failed to create writable directory at %s", qPrintable(dir.absolutePath()));
+    Q_OBJECT
 
-    qDebug() << "Settings";
-    qDebug() << "- settings filename:" << fileName();
-    qDebug() << "- database filename:" << databaseFileName();
-    qDebug() << "- attachment cache dir:" << attachmentCacheDir().absolutePath();
-    qDebug() << "- attachment max size:" << attachmentMaxSize();
-}
+public:
+    explicit Database(const QString &fileName, QObject *parent);
+    ~Database();
 
-VSQSettings::~VSQSettings()
-{}
+    void open();
 
-void VSQSettings::setUsersList(const QStringList &users)
-{
-    setValue(kUsers, users);
-    sync();
-}
+signals:
+    void opened();
+    void failed();
 
-QStringList VSQSettings::usersList() const
-{
-    return value(kUsers, QStringList()).toStringList();
-}
+private:
+    const QString m_connectionName;
+    const QString m_fileName;
+    QSqlDatabase m_db;
+};
 
-QString VSQSettings::databaseFileName() const
-{
-    return m_appDataDir.filePath("chat-database.sqlite3");
-}
-
-int VSQSettings::attachmentMaxSize() const
-{
-    return 50 * 1024 * 1024;
-}
-
-QDir VSQSettings::attachmentCacheDir() const
-{
-    return m_attachmentCacheDir;
-}
-
-QSize VSQSettings::previewMaxSize() const
-{
-    return QSize(600, 400);
-}
+#endif // VSQ_DATABASE_H

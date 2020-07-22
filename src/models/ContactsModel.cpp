@@ -32,93 +32,63 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQCOMMON_H
-#define VSQCOMMON_H
+#include "models/ContactsModel.h"
 
-#include <memory>
+#include <QSqlError>
+#include <QSqlQuery>
+#include <QSqlRecord>
 
-#include <QDateTime>
-#include <QDebug>
-#include <QtGlobal>
-#include <QUrl>
+#include "Utils.h"
 
-class QLocale;
+ContactsModel::ContactsModel(QObject *parent)
+    : QSqlTableModel(parent)
+{}
 
-#include <optional/optional.hpp>
+void ContactsModel::setUser(const QString &userId)
+{
+    if (m_userId == userId)
+        return;
+    qDebug() << "Initialize contacts with user: " << userId;
+    m_userId = userId;
 
-template <class Type>
-using Optional = tl::optional<Type>;
-using OptionalType = tl::nullopt_t;
+    m_tableName = QLatin1String("Contacts_") + Utils::escapedUserName(userId);
+    const QString queryString = QString(
+        "CREATE TABLE IF NOT EXISTS %1 ("
+        "  id TEXT NOT NULL PRIMARY KEY"
+        ")"
+    ).arg(m_tableName);
+    QSqlQuery query(queryString);
+    if (!query.exec()) {
+        qCritical() << QLatin1String("Failed to create contacts table:") << query.lastError().text();
+    }
 
-static constexpr OptionalType NullOptional(tl::nullopt);
-
-// Namespace for passing of enum values to QML
-namespace Enums {
-    Q_NAMESPACE
-
-    enum class AttachmentType
-    {
-        File,
-        Picture,
-        Video,
-        Audio
-    };
-    Q_ENUM_NS(AttachmentType)
-
-    enum class MessageAuthor
-    {
-        User,
-        Contact
-    };
-    Q_ENUM_NS(MessageAuthor)
+    setTable(m_tableName);
+    setEditStrategy(EditStrategy::OnRowChange);
+    select();
 }
 
-enum EnMessageStatus
+Optional<QString> ContactsModel::create(const QString &id)
 {
-    MST_CREATED,
-    MST_SENT,
-    MST_RECEIVED,
-    MST_READ,
-    MST_FAILED
-};
-Q_DECLARE_METATYPE(EnMessageStatus)
-
-struct Attachment
-{
-    using Type = Enums::AttachmentType;
-
-    QString id;
-    Type type = Type::File;
-    QUrl remote_url;
-    QUrl local_url;
-    QUrl local_preview;
-    int size;
-
-    QString fileName() const
-    {
-        if (!local_url.isEmpty())
-            return local_url.fileName();
-        if (!remote_url.isEmpty())
-            return remote_url.fileName();
-        return QLatin1String();
+    const QString queryString = QString(
+        "SELECT id "
+        "FROM %1 "
+        "WHERE id = '%2'"
+    ).arg(m_tableName, id);
+    QSqlQuery query(queryString);
+    if (!query.exec()) {
+        qCritical() << QLatin1String("Failed to find contact:") << query.lastError().text();
+        return NullOptional;
     }
-};
+    if (query.next()) {
+        qInfo() << QString("Contact %1 already exists").arg(id);
+        return id;
+    }
 
-using OptionalAttachment = Optional<Attachment>;
-Q_DECLARE_METATYPE(OptionalAttachment)
-
-struct StMessage
-{
-    using Author = Enums::MessageAuthor;
-
-    QString id;
-    QString message;
-    Author author;
-    QString recipient;
-    OptionalAttachment attachment;
-};
-
-
-void registerCommonTypes();
-
-#endif // VSQCOMMON_H
+    QSqlRecord newRecord = record();
+    newRecord.setValue(IdColumn, id);
+    if (!insertRowIntoTable(newRecord)) {
+        qCritical() << QLatin1String("Failed to add contact:") << lastError().text();
+        return NullOptional;
+    }
+    return id;
+}

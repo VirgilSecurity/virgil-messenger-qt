@@ -32,24 +32,22 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "Application.h"
-#include "android/VSQAndroid.h"
+#ifndef VSQ_QMLENGINE_H
+#define VSQ_QMLENGINE_H
 
-#if (VSQ_WEBDRIVER_DEBUG)
-#include "Test/Headers.h"
-#endif
+#include <QQmlApplicationEngine>
 
-int main(int argc, char *argv[])
+class QmlEngine : public QQmlApplicationEngine
 {
-#if (VS_ANDROID)
-    VSQAndroid::prepare();
-#endif
+    Q_OBJECT
 
-#if (VSQ_WEBDRIVER_DEBUG)
-    wd_setup(argc, argv);
-#endif
+public:
+    QmlEngine(int &argc, char **argv, QObject *parent);
 
-    Application::initialize();
-    Application app(argc, argv);
-    return app.exec();
-}
+    void reloadQml();
+
+private:
+    void parseArgs(int &argc, char **argv);
+};
+
+#endif // VSQ_QMLENGINE_H

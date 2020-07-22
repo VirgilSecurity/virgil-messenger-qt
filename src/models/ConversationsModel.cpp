@@ -32,24 +32,24 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/VSQConversationsModel.h"
+#include "models/ConversationsModel.h"
 
 #include <QDateTime>
 #include <QSqlError>
 #include <QSqlRecord>
 #include <QSqlQuery>
 
-#include "VSQUtils.h"
-#include "models/VSQAttachmentsModel.h"
-#include "models/VSQChatsModel.h"
+#include "Utils.h"
+#include "models/AttachmentsModel.h"
+#include "models/ChatsModel.h"
 
-VSQConversationsModel::VSQConversationsModel(VSQChatsModel *chats, VSQAttachmentsModel *attachments, QObject *parent)
+ConversationsModel::ConversationsModel(ChatsModel *chats, AttachmentsModel *attachments, QObject *parent)
     : QSqlQueryModel(parent)
     , m_chats(chats)
     , m_attachments(attachments)
 {}
 
-QVariant VSQConversationsModel::data(const QModelIndex &index, int role) const
+QVariant ConversationsModel::data(const QModelIndex &index, int role) const
 {
     if (role < Qt::UserRole) {
         return QSqlQueryModel::data(index, role);
@@ -99,7 +99,7 @@ QVariant VSQConversationsModel::data(const QModelIndex &index, int role) const
     }
 }
 
-void VSQConversationsModel::createTable()
+void ConversationsModel::createTable()
 {
     const QString queryString = QString(
         "CREATE TABLE IF NOT EXISTS %1 ("
@@ -126,13 +126,13 @@ void VSQConversationsModel::createTable()
     }
 }
 
-void VSQConversationsModel::resetModel(const QString &chatId)
+void ConversationsModel::resetModel(const QString &chatId)
 {
     m_chatId = chatId;
     setQuery(buildQuery(chatId, QLatin1String()));
 }
 
-QSqlQuery VSQConversationsModel::buildQuery(const QString &chatId, const QString &condition) const
+QSqlQuery ConversationsModel::buildQuery(const QString &chatId, const QString &condition) const
 {
     // body
     const QString body = QString(
@@ -168,7 +168,7 @@ QSqlQuery VSQConversationsModel::buildQuery(const QString &chatId, const QString
     return QSqlQuery(queryString);
 }
 
-QHash<int, QByteArray> VSQConversationsModel::roleNames() const
+QHash<int, QByteArray> ConversationsModel::roleNames() const
 {
     QHash<int, QByteArray> names;
     names[Qt::UserRole + IdColumn] = "id";
@@ -188,7 +188,7 @@ QHash<int, QByteArray> VSQConversationsModel::roleNames() const
     return names;
 }
 
-void VSQConversationsModel::writeMessage(const QString &messageId, const QString &message, const OptionalAttachment &attachment,
+void ConversationsModel::writeMessage(const QString &messageId, const QString &message, const OptionalAttachment &attachment,
                                          const QString &recipientId, const StMessage::Author author, const EnMessageStatus status)
 {
     const auto chatId = m_chats->createPrivateChat(recipientId);
@@ -234,22 +234,22 @@ void VSQConversationsModel::writeMessage(const QString &messageId, const QString
     resetModel(m_chatId);
 }
 
-void VSQConversationsModel::createMessage(const QString &messageId, const QString &message, const OptionalAttachment &attachment, const QString &contactId)
+void ConversationsModel::createMessage(const QString &messageId, const QString &message, const OptionalAttachment &attachment, const QString &contactId)
 {
     writeMessage(messageId, message, attachment, contactId, StMessage::Author::User, EnMessageStatus::MST_CREATED);
 }
 
-void VSQConversationsModel::receiveMessage(const QString &messageId, const QString &message, const OptionalAttachment &attachment, const QString &contactId)
+void ConversationsModel::receiveMessage(const QString &messageId, const QString &message, const OptionalAttachment &attachment, const QString &contactId)
 {
     writeMessage(messageId, message, attachment, contactId, StMessage::Author::Contact, EnMessageStatus::MST_RECEIVED);
 }
 
-QString VSQConversationsModel::user() const
+QString ConversationsModel::user() const
 {
     return m_userId;
 }
 
-void VSQConversationsModel::setUser(const QString &userId)
+void ConversationsModel::setUser(const QString &userId)
 {
     if (m_userId == userId)
         return;
@@ -265,12 +265,12 @@ void VSQConversationsModel::setUser(const QString &userId)
     resetModel(QLatin1String());
 }
 
-void VSQConversationsModel::filterByChat(const QString &chatId)
+void ConversationsModel::filterByChat(const QString &chatId)
 {
     resetModel(chatId);
 }
 
-void VSQConversationsModel::markAsRead(const QString &chatId)
+void ConversationsModel::markAsRead(const QString &chatId)
 {
     const QString queryString = QString(
         "UPDATE %1 "
@@ -286,7 +286,7 @@ void VSQConversationsModel::markAsRead(const QString &chatId)
     resetModel(m_chatId);
 }
 
-int VSQConversationsModel::getMessageCount(const QString &chatId, const EnMessageStatus status)
+int ConversationsModel::getMessageCount(const QString &chatId, const EnMessageStatus status)
 {
     const QString queryString = QString(
         "SELECT COUNT(1) as count FROM '%1' WHERE status = %2 AND chat_id = '%3'"
@@ -302,7 +302,7 @@ int VSQConversationsModel::getMessageCount(const QString &chatId, const EnMessag
     return 0;
 }
 
-void VSQConversationsModel::setMessageStatus(const QString &messageId, const EnMessageStatus status)
+void ConversationsModel::setMessageStatus(const QString &messageId, const EnMessageStatus status)
 {
     const QString queryString = QString(
         "UPDATE %1 "
@@ -318,7 +318,7 @@ void VSQConversationsModel::setMessageStatus(const QString &messageId, const EnM
     resetModel(m_chatId);
 }
 
-std::vector<StMessage> VSQConversationsModel::getMessages(const QString &user, const EnMessageStatus status)
+std::vector<StMessage> ConversationsModel::getMessages(const QString &user, const EnMessageStatus status)
 {
     std::vector<StMessage> messages;
     auto query = buildQuery(QLatin1String(), QString("status = %1").arg(status));

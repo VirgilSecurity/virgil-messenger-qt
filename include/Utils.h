@@ -32,32 +32,20 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "VSQUtils.h"
+#ifndef VSQ_UTILS_H
+#define VSQ_UTILS_H
 
-#include <QDateTime>
-#include <QLocale>
-#include <QUuid>
+#include <QString>
 
-QString Utils::createUuid()
+namespace Utils
 {
-    return QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
+    QString createUuid();
+
+    QString formattedFileSize(int fileSize);
+
+    QString escapedUserName(const QString &userName);
+
+    QString currentIsoDateTime();
 }
 
-QString Utils::formattedFileSize(int fileSize)
-{
-    static QLocale locale = QLocale::system();
-    return locale.formattedDataSize(fileSize);
-}
-
-QString Utils::escapedUserName(const QString &userName)
-{
-    static QRegExp regexp("[^a-z0-9_]");
-    QString name(userName);
-    name.remove(regexp);
-    return name;
-}
-
-QString Utils::currentIsoDateTime()
-{
-    return QDateTime::currentDateTime().toString(Qt::ISODate);
-}
+#endif // VSQ_UTILS_H

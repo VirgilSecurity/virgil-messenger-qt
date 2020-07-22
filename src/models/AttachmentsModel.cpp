@@ -32,20 +32,20 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/VSQAttachmentsModel.h"
+#include "models/AttachmentsModel.h"
 
 #include <QPixmap>
 #include <QSqlQuery>
 
-#include "VSQSettings.h"
-#include "VSQUtils.h"
+#include "Settings.h"
+#include "Utils.h"
 
-VSQAttachmentsModel::VSQAttachmentsModel(VSQSettings *settings, QObject *parent)
+AttachmentsModel::AttachmentsModel(Settings *settings, QObject *parent)
     : QSqlTableModel(parent)
     , m_settings(settings)
 {}
 
-bool VSQAttachmentsModel::createTable(const QString &user)
+bool AttachmentsModel::createTable(const QString &user)
 {
     const QString attachmentsTableName = QLatin1String("Attachments_") + Utils::escapedUserName(user);
     const QString conversationsTableName = QLatin1String("Conversations_") + Utils::escapedUserName(user);
@@ -71,7 +71,7 @@ bool VSQAttachmentsModel::createTable(const QString &user)
     return true;
 }
 
-OptionalAttachment VSQAttachmentsModel::createFromLocalFile(const QUrl &url, const Attachment::Type type)
+OptionalAttachment AttachmentsModel::createFromLocalFile(const QUrl &url, const Attachment::Type type)
 {
     if (!url.isValid() || !url.isLocalFile())
         return NullOptional;
@@ -94,7 +94,7 @@ OptionalAttachment VSQAttachmentsModel::createFromLocalFile(const QUrl &url, con
     return attachment;
 }
 
-QUrl VSQAttachmentsModel::createPreviewImage(const QString &fileName) const
+QUrl AttachmentsModel::createPreviewImage(const QString &fileName) const
 {
     QPixmap pixmap(fileName);
     QSizeF size = pixmap.size();

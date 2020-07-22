@@ -32,34 +32,41 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQCONTACTSMODEL_H
-#define VSQCONTACTSMODEL_H
+#include "QmlEngine.h"
 
-#include <QSqlTableModel>
+#include "Common.h"
 
-#include "VSQCommon.h"
-
-class VSQContactsModel : public QSqlTableModel
+QmlEngine::QmlEngine(int &argc, char **argv, QObject *parent)
+    : QQmlApplicationEngine(parent)
 {
-    Q_OBJECT
+    parseArgs(argc, argv);
+    registerCommonTypes();
+}
 
-public:
-    enum Columns
+void QmlEngine::reloadQml()
+{
+    const QUrl url(QStringLiteral("main.qml"));
+    clearComponentCache();
+    load(url);
+
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_WATCHOS)
     {
-        IdColumn = 0
-    };
+        QObject *rootObject(rootObjects().first());
+        rootObject->setProperty("width", 800);
+        rootObject->setProperty("height", 640);
+    }
+#endif
+}
 
-    explicit VSQContactsModel(QObject *parent = nullptr);
-
-    // Set current user
-    void setUser(const QString &userId);
-
-    // Create contact if it doesn't exist and return id
-    Optional<QString> create(const QString &id);
-
-private:
-    QString m_userId;
-    QString m_tableName;
-};
-
-#endif // VSQCONTACTSMODEL_H
+void QmlEngine::parseArgs(int &argc, char **argv)
+{
+    QString basePath;
+    if (argc == 2 && argv[1] && argv[1][0]) {
+        basePath = QString::fromLocal8Bit(argv[1]);
+        qDebug() << "Custom QML base path: " << basePath;
+    }
+    if (basePath.isEmpty())
+        setBaseUrl(QUrl(QLatin1String("qrc:/qml/")));
+    else
+        setBaseUrl(QUrl(QLatin1String("file://") + basePath + QLatin1String("/qml/")));
+}

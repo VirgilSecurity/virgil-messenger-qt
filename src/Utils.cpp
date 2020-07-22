@@ -32,21 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "VSQClipboardProxy.h"
-#include <QClipboard>
+#include "Utils.h"
 
-VSQClipboardProxy::VSQClipboardProxy(QClipboard* c)
-    : clipboard(c)
+#include <QDateTime>
+#include <QLocale>
+#include <QUuid>
+
+QString Utils::createUuid()
 {
-    connect(c, &QClipboard::dataChanged, this, &VSQClipboardProxy::textChanged);
+    return QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
 }
 
-QString VSQClipboardProxy::text() const
+QString Utils::formattedFileSize(int fileSize)
 {
-    return clipboard->text();
+    static QLocale locale = QLocale::system();
+    return locale.formattedDataSize(fileSize);
 }
 
-void VSQClipboardProxy::setText(const QString &text)
+QString Utils::escapedUserName(const QString &userName)
 {
-    clipboard->setText(text);
+    static QRegExp regexp("[^a-z0-9_]");
+    QString name(userName);
+    name.remove(regexp);
+    return name;
+}
+
+QString Utils::currentIsoDateTime()
+{
+    return QDateTime::currentDateTime().toString(Qt::ISODate);
 }

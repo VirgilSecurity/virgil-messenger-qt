@@ -86,18 +86,20 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
 #
 
 HEADERS += \
-        include/VSQApplication.h \
-        include/VSQCommon.h \
-        include/VSQClipboardProxy.h \
-        include/VSQMessenger.h \
-        include/VSQSettings.h \
-        include/VSQUtils.h \
+        include/Application.h \
+        include/ClipboardProxy.h \
+        include/Common.h \
+        include/Database.h \
+        include/Messenger.h \
+        include/QmlEngine.h \
+        include/Settings.h \
+        include/Utils.h \
         include/ui/VSQUiHelper.h \
         # Models
-        include/models/VSQAttachmentsModel.h \
-        include/models/VSQChatsModel.h \
-        include/models/VSQContactsModel.h \
-        include/models/VSQConversationsModel.h \
+        include/models/AttachmentsModel.h \
+        include/models/ChatsModel.h \
+        include/models/ContactsModel.h \
+        include/models/ConversationsModel.h \
         # Platforms
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
@@ -109,19 +111,21 @@ HEADERS += \
 #
 
 SOURCES += \
-        src/VSQClipboardProxy.cpp \
-        src/VSQCommon.cpp \
-        src/VSQMessenger.cpp \
-        src/VSQSettings.cpp \
-        src/VSQUtils.cpp \
+        src/Application.cpp \
+        src/ClipboardProxy.cpp \
+        src/Common.cpp \
+        src/Database.cpp \
+        src/Messenger.cpp \
+        src/QmlEngine.cpp \
+        src/Settings.cpp \
+        src/Utils.cpp \
         src/main.cpp \
-        src/VSQApplication.cpp \
         src/ui/VSQUiHelper.cpp \
         # Models
-        src/models/VSQAttachmentsModel.cpp \
-        src/models/VSQChatsModel.cpp \
-        src/models/VSQConversationsModel.cpp \
-        src/models/VSQContactsModel.cpp \
+        src/models/AttachmentsModel.cpp \
+        src/models/ChatsModel.cpp \
+        src/models/ConversationsModel.cpp \
+        src/models/ContactsModel.cpp \
         # Platforms
         src/android/VSQAndroid.cpp
 

@@ -32,24 +32,34 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "Application.h"
-#include "android/VSQAndroid.h"
+#ifndef VSQ_CONTACTSMODEL_H
+#define VSQ_CONTACTSMODEL_H
 
-#if (VSQ_WEBDRIVER_DEBUG)
-#include "Test/Headers.h"
-#endif
+#include <QSqlTableModel>
 
-int main(int argc, char *argv[])
+#include "Common.h"
+
+class ContactsModel : public QSqlTableModel
 {
-#if (VS_ANDROID)
-    VSQAndroid::prepare();
-#endif
+    Q_OBJECT
 
-#if (VSQ_WEBDRIVER_DEBUG)
-    wd_setup(argc, argv);
-#endif
+public:
+    enum Columns
+    {
+        IdColumn = 0
+    };
 
-    Application::initialize();
-    Application app(argc, argv);
-    return app.exec();
-}
+    explicit ContactsModel(QObject *parent = nullptr);
+
+    // Set current user
+    void setUser(const QString &userId);
+
+    // Create contact if it doesn't exist and return id
+    Optional<QString> create(const QString &id);
+
+private:
+    QString m_userId;
+    QString m_tableName;
+};
+
+#endif // VSQ_CONTACTSMODEL_H

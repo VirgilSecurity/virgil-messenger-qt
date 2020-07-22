@@ -1,7 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
-import Qt.labs.settings 1.1
 import QuickFuture 1.0
 
 import "./theme"
@@ -10,11 +9,6 @@ import "./helpers/login.js" as LoginLogic
 
 Control {
     id: mainView
-    property string lastSignedInUser
-
-    Settings {
-        property alias lastSignedInUser: mainView.lastSignedInUser
-    }
 
     RowLayout {
         anchors.fill: parent
@@ -67,7 +61,7 @@ Control {
             })
 
             stackView.clear()
-            lastSignedInUser = user
+            settings.lastSignedInUser = user
             showContacts()
         } else {
             window.showPopupError(qsTr("Incorrect User Name"))
@@ -82,7 +76,7 @@ Control {
             // clear all pages in the stackview and push sign in page
             // as a first page in the stack
             stackView.clear()
-            lastSignedInUser = ""
+            settings.lastSignedInUser = ""
             showAuth(true)
         })
     }

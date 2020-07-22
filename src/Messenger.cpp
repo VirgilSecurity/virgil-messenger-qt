@@ -32,11 +32,27 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "VSQMessenger.h"
+#include "Messenger.h"
 
+#include <QThread>
+
+#include "Database.h"
+#include "Settings.h"
+
+Messenger::Messenger(Settings *settings, QObject *parent)
+    : QObject(parent)
+    , m_settings(settings)
+    , m_database(new Database(settings->databaseFileName(), nullptr))
+    , m_databaseThread(new QThread())
+{
+    m_database->moveToThread(m_databaseThread);
+    m_databaseThread->start();
+}
+
+// FIXME(fpohtmeh): uncomment
+/*
 #include <QtConcurrent>
 #include <QSslSocket>
-#include <QSqlError>
 
 #include <QuickFuture>
 
@@ -46,7 +62,6 @@
 #include <qxmpp/QXmppMessageReceiptManager.h>
 
 #include "VSQPushNotifications.h"
-#include "VSQSettings.h"
 #include "VSQUtils.h"
 #include "models/VSQAttachmentsModel.h"
 #include "models/VSQContactsModel.h"
@@ -86,9 +101,7 @@ VSQMessenger::VSQMessenger(VSQSettings *settings, QObject *parent)
         return QVariant(static_cast<int>(res));
     });
 
-    // Connect to Database
-    _connectToDatabase();
-
+    // FIXME(fpohtmeh): create if database is initialized
     m_contacts = new VSQContactsModel(this);
     m_sqlChatModel = new VSQChatsModel(m_contacts, this);
     m_attachments = new VSQAttachmentsModel(settings, this);
@@ -131,25 +144,6 @@ void VSQMessenger::onMessageDelivered(const QString& to, const QString& messageI
 
     qDebug() << "Message with id: '" << messageId << "' delivered to '" << to << "'";
 }
-
-
-void
-VSQMessenger::_connectToDatabase() {
-    QSqlDatabase database = QSqlDatabase::database();
-    if (!database.isValid()) {
-        database = QSqlDatabase::addDatabase("QSQLITE");
-        if (!database.isValid())
-            qFatal("Cannot add database: %s", qPrintable(database.lastError().text()));
-    }
-
-    const QString fileName = m_settings->databaseFileName();
-    // When using the SQLite driver, open() will create the SQLite database if it doesn't exist.
-    database.setDatabaseName(fileName);
-    if (!database.open()) {
-        qFatal("Cannot open database: %s", qPrintable(database.lastError().text()));
-    }
-}
-
 
 QString
 VSQMessenger::_xmppPass() {
@@ -553,13 +547,13 @@ VSQMessenger::deleteUser(QString user) {
 }
 
 
-VSQConversationsModel &
-VSQMessenger::modelConversations() {
+VSQConversationsModel &VSQMessenger::conversationsModel()
+{
     return *m_sqlConversations;
 }
 
-VSQChatsModel &
-VSQMessenger::getChatModel() {
+VSQChatsModel &VSQMessenger::chatsModel()
+{
     return *m_sqlChatModel;
 }
 
@@ -844,3 +838,4 @@ VSQMessenger::onStateChanged(QXmppClient::State state) {
         emit fireConnecting();
     }
 }
+*/

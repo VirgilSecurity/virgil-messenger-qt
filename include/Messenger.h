@@ -33,9 +33,33 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 
-#ifndef VIRGIL_IOTKIT_QT_MESSENGER_H
-#define VIRGIL_IOTKIT_QT_MESSENGER_H
+#ifndef VSQ_MESSENGER_H
+#define VSQ_MESSENGER_H
 
+#include <QObject>
+
+class QThread;
+
+class Database;
+class Settings;
+
+class Messenger : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit Messenger(Settings *settings, QObject *parent = nullptr);
+    Messenger() = default; // NOTE(fpohtmeh): needed for QmlPrivate template
+    ~Messenger() override = default;
+
+private:
+    Settings *m_settings;
+    Database *m_database;
+    QThread *m_databaseThread;
+};
+
+// FIXME(fpohtmeh): uncomment
+/*
 #include <QtCore>
 #include <QFuture>
 #include <QObject>
@@ -53,13 +77,12 @@ class QXmppMessageReceiptManager;
 
 class VSQAttachmentsModel;
 class VSQContactsModel;
-class VSQSettings;
 class VSQChatsModel;
 class VSQConversationsModel;
 
 class VSQMessenger : public QObject
 {
-    Q_OBJECT
+
     Q_PROPERTY(QString currentUser READ currentUser NOTIFY fireCurrentUserChanged)
     Q_PROPERTY(QString currentRecipient WRITE setCurrentRecipient READ currentRecipient NOTIFY fireCurrentRecipientChanged)
 
@@ -85,15 +108,11 @@ public:
     };
     Q_ENUMS(EnStatus)
 
-    explicit VSQMessenger(VSQSettings *settings, QObject *parent = nullptr);
-    VSQMessenger() = default; // NOTE(fpohtmeh): needed for QmlPrivate template
-    ~VSQMessenger() override = default;
-
     QString currentUser() const;
     QString currentRecipient() const;
 
-    VSQConversationsModel &modelConversations();
-    VSQChatsModel &getChatModel();
+    VSQConversationsModel &conversationsModel();
+    VSQChatsModel &chatsModel();
     
     static QString decryptMessage(const QString &sender, const QString &message);
 
@@ -181,7 +200,6 @@ private slots:
 private:
     void setCurrentRecipient(const QString &recipient);
 
-    VSQSettings *m_settings;
     QXmppClient m_xmpp;
     QXmppMessageReceiptManager* m_xmppReceiptManager;
 
@@ -213,9 +231,6 @@ private:
     static const QString kPushNotificationsFormTypeVal;
     static const int kConnectionWaitMs;
     static const int kKeepAliveTimeSec;
-
-    void
-    _connectToDatabase();
 
     bool
     _connect(QString userWithEnv, QString userId);
@@ -252,5 +267,6 @@ private:
 
     void _sendFailedMessages();
 };
+*/
 
-#endif // VIRGIL_IOTKIT_QT_MESSENGER_H
+#endif // VSQ_MESSENGER_H

@@ -32,20 +32,49 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQUTILS_H
-#define VSQUTILS_H
+#ifndef VSQ_CHATSMODEL_H
+#define VSQ_CHATSMODEL_H
 
-#include <QString>
+#include <QSqlTableModel>
 
-namespace Utils
+#include "Common.h"
+
+class ContactsModel;
+
+class ChatsModel : public QSqlTableModel
 {
-    QString createUuid();
+    Q_OBJECT
 
-    QString formattedFileSize(int fileSize);
+public:
+    enum Columns
+    {
+        IdColumn = 0,
+        ContactIdColumn,
+        LastMessageColumn,
+        LastMessageTimeColumn,
+        UnreadMessageCountColumn
+    };
 
-    QString escapedUserName(const QString &userName);
+    explicit ChatsModel(ContactsModel *contacts, QObject *parent = nullptr);
 
-    QString currentIsoDateTime();
-}
+    void setUser(const QString &userId);
+    // Create if it doesn't exist chat and return id
+    Optional<QString> createPrivateChat(const QString &contactId);
+    void setUnreadMessageCount(const QString &chatId, int count);
 
-#endif // VSQUTILS_H
+    Q_INVOKABLE void applyFilter(const QString &filter);
+    Q_INVOKABLE void clearFilter();
+
+public slots:
+    void updateLastMessage(const QString &contactId, const QString &message);
+
+private:
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
+
+    ContactsModel *m_contacts;
+    QString m_userId;
+    QString m_tableName;
+};
+
+#endif // VSQ_CHATSMODEL_H
