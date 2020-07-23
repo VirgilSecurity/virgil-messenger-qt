@@ -1,8 +1,3 @@
-
-println "#####################################"
-println "### Running with Gradle: $gradle.gradleVersion"
-println "#####################################"
-
 buildscript {
     repositories {
         google()
@@ -10,8 +5,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.2'
-        classpath 'com.google.gms:google-services:4.3.3'
+        classpath 'com.android.tools.build:gradle:3.6.0'
     }
 }
 
@@ -22,37 +16,8 @@ repositories {
 
 apply plugin: 'com.android.application'
 
-//
-//  Add Firebase
-//
-project.ext {
-  // Configure the Firebase C++ SDK location.
-  firebase_cpp_sdk_dir = "../../../" + System.getProperty('firebase_cpp_sdk.dir')
-  printf('Firebase C++ SDK directory %s', firebase_cpp_sdk_dir)
-  if (!(new File(firebase_cpp_sdk_dir)).exists()) {
-    firebase_cpp_sdk_dir = "../../virgil-messenger-qt/" +  System.getProperty('firebase_cpp_sdk.dir')
-    if (!(new File(firebase_cpp_sdk_dir)).exists()) {
-        throw new StopActionException(
-          sprintf('Firebase C++ SDK directory %s does not exist',
-              firebase_cpp_sdk_dir))
-    }
-  }
-}
-
-
-repositories {
-    flatDir {
-        dirs project.ext.firebase_cpp_sdk_dir + "/libs/android"
-    }
-}
-
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
-    compile 'com.google.firebase:firebase-core:15.0.2'
-    compile 'com.google.firebase:firebase-auth:19.3.1'
-    compile 'com.google.firebase:firebase-messaging:20.1.7'
-    compile 'com.google.firebase.messaging.cpp:firebase_messaging_cpp@aar'
-    compile 'com.google.android.gms:play-services-base:17.2.1'
 }
 
 android {
@@ -70,7 +35,8 @@ android {
      *******************************************************/
 
     compileSdkVersion androidCompileSdkVersion.toInteger()
-    buildToolsVersion androidBuildToolsVersion.toString()
+
+    buildToolsVersion '28.0.3'
 
     sourceSets {
         main {
@@ -78,7 +44,7 @@ android {
             java.srcDirs = [qt5AndroidDir + '/src', 'src', 'java']
             aidl.srcDirs = [qt5AndroidDir + '/src', 'src', 'aidl']
             res.srcDirs = [qt5AndroidDir + '/res', 'res']
-            resources.srcDirs = ['src']
+            resources.srcDirs = ['resources']
             renderscript.srcDirs = ['src']
             assets.srcDirs = ['assets']
             jniLibs.srcDirs = ['libs']
@@ -88,9 +54,15 @@ android {
     lintOptions {
         abortOnError false
     }
+
+    // Do not compress Qt binary resources file
+    aaptOptions {
+        noCompress 'rcc'
+    }
+
     defaultConfig {
-        minSdkVersion 25
+        resConfig "en"
+        minSdkVersion = qtMinSdkVersion
+        targetSdkVersion = qtTargetSdkVersion
     }
 }
-
-apply plugin: 'com.google.gms.google-services'

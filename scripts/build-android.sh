@@ -9,7 +9,7 @@ source ${SCRIPT_FOLDER}/ish/common.sh
 ANDOID_APP_ID="com.virgilsecurity.qtmessenger"
 PLATFORM=android-clang
 ANDROID_MAKE="${ANDROID_NDK_ROOT}/prebuilt/${HOST_PLATFORM}/bin/make"
-ANDROID_PLATFORM="android-25"
+ANDROID_PLATFORM="android-28"
 
 #*************************************************************************************************************
 # env variables passed to build anroid release
@@ -47,7 +47,7 @@ build_proc() {
 
         ${ANDROID_MAKE} INSTALL_ROOT=${BUILD_DIR}/android-build install
 
-#        ${ANDROID_DEPLOY_QT} --verbose --input ${BUILD_DIR}/android-${APPLICATION_NAME}-deployment-settings.json --output ${BUILD_DIR}/android-build --android-platform ${ANDROID_PLATFORM} ${ANDROID_DEPLOY_QT_ADD_ARGS} --aab
+        ${ANDROID_DEPLOY_QT} --verbose --input ${BUILD_DIR}/android-${APPLICATION_NAME}-deployment-settings.json --output ${BUILD_DIR}/android-build --android-platform ${ANDROID_PLATFORM} ${ANDROID_DEPLOY_QT_ADD_ARGS} --aab
     popd
 }
 
