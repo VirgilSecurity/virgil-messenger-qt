@@ -2,7 +2,6 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QuickFuture 1.0
-import MesResult 1.0
 
 import "../theme"
 import "../components"
@@ -18,18 +17,17 @@ Page {
     }
 
     Form {
-
         id: form
 
         FormInput {
-            id: password
+            id: passwordInput
             label: qsTr("Password")
             password: true
             placeholder: qsTr("Enter password")
         }
 
         FormInput {
-            id: confirmPassword
+            id: confirmPasswordInput
             label: qsTr("Confirm password")
             password: true
             placeholder: qsTr("Enter password again")
@@ -37,37 +35,36 @@ Page {
 
         FormPrimaryButton {
             onClicked: {
-
-                if (password.text === '') {
-                    window.showPopupError('Password can not be empty')
-                }
-
-                if (password.text !== confirmPassword.text) {
-                    window.showPopupError('Passwords are not match')
-                }
-
-                form.showLoading(qsTr("Backing up your private key..."))
-
-                var future = Messenger.backupUserKey(password.text)
-
-                Future.onFinished(future, function(result) {
-                    form.hideLoading()
-
-                    if (Future.result(future) === Result.MRES_OK) {
-                        password.text = ''
-                        confirmPassword.text = ''
-                        window.showPopupSuccess('Backup private key success');
-                        return
-                    }
-
-                    window.showPopupError("Backup private key error")
-                })
+                if (passwordInput.text === "")
+                    window.showPopupError("Password can not be empty")
+                else if (passwordInput.text !== confirmPasswordInput.text)
+                    window.showPopupError("Passwords don't not match")
+                else
+                    messenger.backupKey(passwordInput.text)
             }
             text: qsTr("Backup")
         }
-
     }
 
-    footer: Footer { }
+    footer: Footer {}
+
+    Connections {
+        target: messenger
+        onBackupKey: {
+            form.showLoading(qsTr("Backing up your private key..."))
+        }
+        onBackupKeySuccess: {
+            form.hideLoading();
+            passwordInput.text = ""
+            confirmPasswordInput.text = ""
+            window.showPopupSuccess("Backup private key success")
+            mainView.back() // TODO(fpohtmeh): remove main view
+        }
+        onBackupKeyError: {
+            form.hideLoading()
+            window.showPopupError(error)
+            mainView.back() // TODO(fpohtmeh): remove main view
+        }
+    }
 }
 

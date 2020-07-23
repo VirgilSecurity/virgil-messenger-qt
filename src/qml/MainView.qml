@@ -32,7 +32,7 @@ Control {
 
             Action {
                 text: "Sign Out"
-                onTriggered: mainView.signOut()
+                onTriggered: messenger.signOut()
             }
         }
 
@@ -68,19 +68,6 @@ Control {
         }
     }
 
-    function signOut() {
-        var future = Messenger.logout()
-        Future.onFinished(future, function(value) {
-          console.log("Logout result: ", Future.result(future))
-
-            // clear all pages in the stackview and push sign in page
-            // as a first page in the stack
-            stackView.clear()
-            settings.lastSignedInUser = ""
-            showAuth(true)
-        })
-    }
-
     function disconnect() {
         var future = Messenger.disconnect()
         Future.onFinished(future, function(value) {
@@ -97,8 +84,8 @@ Control {
 
     function back() {
         stackView.pop()
-        if (Messenger.currentRecipient) {
-            Messenger.currentRecipient = ""
+        if (messenger.recipient) {
+            messenger.recipient = ""
         }
     }
 
@@ -137,7 +124,7 @@ Control {
 
     function showChatWith(recipient) {
         navigateTo("Chat", { recipient: recipient }, true, false)
-        Messenger.currentRecipient = recipient
+        messenger.recipient = recipient
     }
 
     function showContacts(clear) {

@@ -1,8 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
-import QtMultimedia 5.12
-import QuickFuture 1.0
 
 import "./components/Popups"
 import "./components"
@@ -16,35 +14,13 @@ ApplicationWindow {
     minimumWidth: 320
     minimumHeight: 600
 
-    property bool connectionError: false
-
     // TODO(fpohtmeh): remove
-    /*
-    //
-    //  Connections
-    //
+    //property bool connectionError: false
+
     Connections {
-        target: Messenger
-
-        onFireError: {
-        }
-
-        onFireInform: {
-        }
-
-        onFireConnecting: {
-        }
-
-        onFireReady: {
-        }
-
-        onFireAddedContact: {
-        }
-
-        onFireNewMessage: {            
-        }
+        target: messenger
+        onCredentialsRequested: mainView.showAuth(signOut)
     }
-    */
 
     onClosing: {
         if (Platform.isAndroid) {
@@ -101,16 +77,6 @@ ApplicationWindow {
 
     function showPopupSuccess(message) {
         showPopup(message, "#66CDAA", "#00", true, false)
-    }
-
-    // View mode detection
-    function isMobileView() {
-
-        if (window.mobileView) {
-            return true;
-        }
-
-        return window.width < window.maxMobileWidth;
     }
 
     Component.onCompleted: Platform.detect()

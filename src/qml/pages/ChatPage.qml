@@ -53,7 +53,7 @@ Page {
                 Layout.fillWidth: true
                 Layout.leftMargin: 10
                 Label {
-                    text: Messenger.currentRecipient
+                    text: messenger.recipient
                     font.pointSize: UiHelper.fixFontSz(15)
                     color: Theme.primaryTextColor
                     font.bold: true
@@ -83,7 +83,8 @@ Page {
         }
 
         spacing: 5
-        model: ConversationsModel
+        // FIXME(fpohtmeh): restore
+        //model: ConversationsModel
         delegate: ChatMessage {
             readonly property bool isUser: model.author === Enums.MessageAuthor.User;
             text: model.message
@@ -117,10 +118,7 @@ Page {
 
     footer: ChatMessageInput {
         id: footerControl
-        onMessageSending: {
-            var future = Messenger.sendMessage(message, attachmentUrl, attachmentType)
-            Future.onFinished(future, messageSent.play)
-        }
+        onMessageSending: messenger.createSendMessage(message, attachmentUrl, attachmentType)
     }
 
     // Sounds
@@ -133,6 +131,12 @@ Page {
     SoundEffect {
         id: messageSent
         source: "../resources/sounds/message-sent.wav"
+    }
+
+    Connections {
+        target: messenger
+        onSendMessageSuccess: messageSent.play
+        onSendMessageError: messageSent.play
     }
 }
 

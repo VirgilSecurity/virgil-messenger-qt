@@ -32,34 +32,65 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "Database.h"
+#ifndef VSQ_VIRGILCORE_H
+#define VSQ_VIRGILCORE_H
 
-#include <QSqlError>
+#include "Common.h"
 
-#include "Settings.h"
+#include <virgil/iot/messenger/messenger.h>
 
-Database::Database(const Settings *settings, QObject *parent)
-    : QObject(parent)
-    , m_settings(settings)
-    , m_connectionName(QLatin1String("VSQDatabase"))
-{}
+class QXmppMessage;
+class Settings;
 
-Database::~Database()
+class VirgilCore
 {
-    m_db.close();
-}
+public:
+    explicit VirgilCore(Settings *settings);
 
-void Database::open()
-{
-    m_db = QSqlDatabase::addDatabase("QSQLITE", m_connectionName);
-    if (!m_db.isValid()) {
-        qFatal("Cannot add database: %s", qPrintable(m_db.lastError().text()));
-        emit failed();
-    }
-    m_db.setDatabaseName(m_settings->fileName());
-    if (!m_db.open()) {
-        qFatal("Cannot open database: %s", qPrintable(m_db.lastError().text()));
-        emit failed();
-    }
-    emit opened();
-}
+    bool signIn(const QString &userWithEnv);
+    void signOut();
+    bool signUp(const QString &userWithEnv);
+    bool backupKey(const QString &password);
+    bool signInWithKey(const QString &userWithEnv, const QString &password);
+
+    Optional<QXmppMessage> encryptMessage(const StMessage &message);
+    Optional<QString> decryptMessage(const QString &sender, const QString &message);
+    bool userExists(const QString &user) const;
+
+    QString user() const;
+    bool isSignedIn() const;
+    QString lastErrorText() const;
+
+    QString xmppJID() const;
+    QString xmppURL() const;
+    Optional<QString> xmppPassword();
+    uint16_t xmppPort() const;
+
+private:
+    enum class EnvironmentType
+    {
+        PROD,
+        STG,
+        DEV,
+        DEFAULT = PROD
+    };
+    using UserEnv = std::pair<QString, EnvironmentType>;
+    using Credentials = VirgilIoTKit::vs_messenger_virgil_user_creds_t;
+
+    void setUser(const QString &userWithEnv);
+    UserEnv parseUserWithEnv(const QString &userWithEnv) const;
+
+    bool loadCredentials(const QString &user, Credentials &creds);
+    void saveCredentials(const QString &user, const Credentials &creds);
+
+    QString caBundleFile() const;
+    QString virgilURL() const;
+
+    Settings *m_settings;
+    QString m_user;
+    EnvironmentType m_envType = EnvironmentType::DEFAULT;
+    QString m_lastErrorText;
+    QString m_xmppPassword;
+};
+
+#endif // VSQ_VIRGILCORE_H

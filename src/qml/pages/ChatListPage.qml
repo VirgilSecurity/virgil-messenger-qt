@@ -52,7 +52,6 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QuickFuture 1.0
-import MesResult 1.0
 
 import "../theme"
 import "../components"
@@ -85,30 +84,20 @@ Page {
             text: qsTr("New Chat")
             onTriggered: addContact()
         }
-/*
-        Action {
-            text: qsTr("New Group")
-            // onTriggered: addContact()
-        }
-
-        Action {
-            text: qsTr("Send Invite")
-            // onTriggered: addContact()
-        }
-*/
     }
 
     ListView {
         id: listView
         anchors.fill: parent
-        model: ChatModel
+        // FIXME(fpohtmeh): restore
+        //model: ChatModel
         delegate: ItemDelegate {
             id: listItem
             width: parent.width
             leftInset: 8
             rightInset: 8
             background: Rectangle {
-                color: listItem.down ? Theme.contactPressedColor : "Transparent"
+                color: listItem.down ? Theme.contactPressedColor : "transparent"
                 radius: 6
             }
             contentItem: RowLayout {
@@ -206,38 +195,25 @@ Page {
     //
     //  Functions
     //
-    function setAsRead(user) {
-        // ConversationsModel.setAsRead(user);
-        console.log("setAsRead func");
-    }
-
     function addContact() {
         var component = Qt.createComponent("../components/Dialogs/AddContactDialog.qml")
         if (component.status === Component.Ready) {
             var dialog = component.createObject(window)
             var apply = function() {
-                try {
-                    var future = Messenger.addContact(dialog.contact.toLowerCase())
-                    Future.onFinished(future, function(value) {
-                        var res = Future.result(future)
-                        if (res === Result.MRES_OK) {
-                            mainView.showChatWith(dialog.contact)
-                            return
-                        }
-
-                        window.showPopupError(qsTr("User not found"))
-                    })
-                } catch (error) {
-                    console.error("Cannot start initialization of device")
-                }
-                dialog.close()
+                messenger.addContact(dialog.contact.toLowerCase())
+                dialog.close() // TODO(fpohtmeh): remove?
             }
             dialog.applied.connect(apply)
             dialog.accepted.connect(apply)
             dialog.open()
-            return dialog
+            return
         }
-        console.error(component.errorString())
-        return null
+        console.error("Component error:", component.errorString())
+    }
+
+    Connections {
+        target: messenger
+        onAddContactSuccess: mainView.showChatWith(contact) // TODO(fpohtmeh): remove mainView
+        onAddContactError: window.showPopupError(error)
     }
 }

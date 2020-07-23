@@ -45,17 +45,29 @@ class Settings : public QSettings
 {
     Q_OBJECT
     Q_PROPERTY(QString lastSignedInUser READ lastSignedInUser WRITE setLastSignedInUser NOTIFY lastSignedInUserChanged)
+    Q_PROPERTY(QStringList usersList READ usersList WRITE setUsersList NOTIFY usersListChanged)
 
 public:
     explicit Settings(QObject *parent);
     ~Settings();
 
+    // Users
+
     void setLastSignedInUser(const QString &user);
     QString lastSignedInUser() const;
+
     void setUsersList(const QStringList &users);
     QStringList usersList() const;
+    void addUserToList(const QString &user);
+
+    QByteArray userCredential(const QString &user) const;
+    void setUserCredential(const QString &user, const QByteArray &userCredential);
+
+    // Database
 
     QString databaseFileName() const;
+
+    // Attachments
 
     int attachmentMaxSize() const;
     QDir attachmentCacheDir() const;
@@ -63,6 +75,7 @@ public:
 
 signals:
     void lastSignedInUserChanged(const QString &);
+    void usersListChanged(const QStringList &);
 
 private:
     QDir m_appDataDir;

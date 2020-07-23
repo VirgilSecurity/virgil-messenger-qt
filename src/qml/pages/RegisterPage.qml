@@ -2,7 +2,6 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QuickFuture 1.0
-import MesResult 1.0
 
 import "../theme"
 import "../components"
@@ -32,7 +31,7 @@ Page {
         }
 
         FormPrimaryButton {
-            onClicked: signUp(username.text)
+            onClicked: messenger.signUp(username.text)
             objectName: "btnCreateAccount"
             text: "Create account"
         }
@@ -44,31 +43,13 @@ Page {
 
     footer: Footer {}
 
-    function signUp(user) {
-        if (LoginLogic.validateUser(user)) {
-            form.showLoading(qsTr("Registering %1...".arg(user)))
-
-            var future = Messenger.signUp(user.toLowerCase())
-
-            Future.onFinished(future, function(result) {
-                form.hideLoading()
-
-                console.log("registration result: %1".arg(Future.result(future)))
-                if (Future.result(future) === Result.MRES_OK) {
-                    settings.lastSignedInUser = user
-                    mainView.showContacts("Contacts", null, true, true)
-                    return
-                }
-
-                if (Future.result(future) === Result.MRES_ERR_USER_ALREADY_EXISTS) {
-                    showPopupError(qsTr("This username is already taken"))
-                    return
-                }
-
-                showPopupError(qsTr("Something went wrong :("))
-            })
-        } else {
-            showPopupError(qsTr("Incorrect user name"))
+    Connections {
+        target: messenger
+        onSignUp: form.showLoading(qsTr("Registering %1...".arg(userWithEnv)))
+        onSignUpSuccess: {
+            form.hideLoading()
+            mainView.showContacts("Contacts", null, true, true) // TODO(fpohtmeh): rework
         }
+        onSignUpError: showPopupError(error)
     }
 }

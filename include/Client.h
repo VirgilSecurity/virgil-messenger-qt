@@ -32,36 +32,28 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_MESSENGER_H
-#define VSQ_MESSENGER_H
+#ifndef VSQ_CLIENT_H
+#define VSQ_CLIENT_H
 
 #include <QObject>
 
-#include "Common.h"
+#include <QXmppClient.h>
 
-class QThread;
+#include "VirgilCore.h"
 
-class Client;
-class Database;
-class Settings;
-
-class Messenger : public QObject
+class Client : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString user MEMBER m_user NOTIFY userChanged)
-    Q_PROPERTY(QString recipient MEMBER m_recipient NOTIFY recipientChanged)
 
 public:
-    explicit Messenger(Settings *settings, QObject *parent = nullptr);
-    Messenger() = default;
-    ~Messenger() override = default;
+    Client(Settings *settings, QObject *parent);
 
-    Q_INVOKABLE void start();
+    void start();
 
 signals:
     void signIn(const QString &userWithEnv);
     void signOut();
-    void signUp(const QString &userWithEnv);
+    void signUp(const QString &user);
     void backupKey(const QString &password);
     void signInWithKey(const QString &userWithEnv, const QString &password);
 
@@ -74,35 +66,48 @@ signals:
     void backupKeyError(const QString &password, const QString &error);
 
     void addContact(const QString &contact);
-    void createSendMessage(const QString &text, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
     void sendMessage(const StMessage &message);
-
-    void addContactSuccess(const QString &contact);
-    void addContactError(const QString &contact, const QString &error);
-    void sendMessageSuccess();
-    void sendMessageError();
-
-    void quitRequested();
-    void credentialsRequested(bool signOut);
-    void userChanged(const QString &user);
-    void recipientChanged(const QString &recipient);
-
     void checkConnectionState();
     void setOnlineStatus(bool online);
 
+    void addContactSuccess(const QString &contact);
+    void addContactError(const QString &contact, const QString &error);
+    void sendMessageSuccess(const StMessage &message);
+    void sendMessageError(const StMessage &message, const QString &error);
+    void receiveMessageError(const QString &error);
+
 private:
-    void setUser(const QString &user);
-    void setRecipient(const QString &recipient);
+    bool xmppConnect();
+    void waitForConnectionChange();
+    void xmppDisconnect();
+    void xmppReconnect();
+    void subscribeOnPushNotifications(bool enable);
 
-    void onCreateSendMessage(const QString &text, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
+    void onSignIn(const QString &userWithEnv);
+    void onSignOut();
+    void onSignUp(const QString &userWithEnv);
+    void onBackupKey(const QString &password);
+    void onSignInWithKey(const QString &user, const QString &password);
+    void onAddContact(const QString &contact);
 
-    Settings *m_settings;
-    Database *m_database;
-    QThread *m_databaseThread;
-    Client *m_client;
-    QThread *m_clientThread;
-    QString m_user;
-    QString m_recipient;
+    void onConnected();
+    void onDisconnected();
+    void onError(QXmppClient::Error error);
+    void onMessageReceived(const QXmppMessage &message);
+    void onPresenceReceived(const QXmppPresence &presence);
+    void onIqReceived(const QXmppIq &iq);
+    void onStateChanged(QXmppClient::State state);
+
+    void onSendMessage(const StMessage &message);
+    void onCheckConnectionState();
+    void onSetOnlineStatus(bool online);
+    void onMessageDelivered(const QString &jid, const QString &id);
+    void onXmppLoggerMessage(QXmppLogger::MessageType type, const QString &message);
+    void onSslErrors(const QList<QSslError> &errors);
+
+    QString m_lastErrorText;
+    VirgilCore m_core;
+    QXmppClient m_client;
 };
 
-#endif // VSQ_MESSENGER_H
+#endif // VSQ_CLIENT_H

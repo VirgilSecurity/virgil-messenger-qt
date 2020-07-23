@@ -38,12 +38,14 @@
 #include <QObject>
 #include <QSqlDatabase>
 
+class Settings;
+
 class Database : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit Database(const QString &fileName, QObject *parent);
+    explicit Database(const Settings *settings, QObject *parent);
     ~Database();
 
     void open();
@@ -53,6 +55,7 @@ signals:
     void failed();
 
 private:
+    const Settings *m_settings;
     const QString m_connectionName;
     const QString m_fileName;
     QSqlDatabase m_db;

@@ -87,12 +87,14 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
 
 HEADERS += \
         include/Application.h \
+        include/Client.h \
         include/ClipboardProxy.h \
         include/Common.h \
         include/Database.h \
         include/Messenger.h \
         include/QmlEngine.h \
         include/Settings.h \
+        include/VirgilCore.h \
         include/Utils.h \
         include/ui/VSQUiHelper.h \
         # Models
@@ -112,12 +114,14 @@ HEADERS += \
 
 SOURCES += \
         src/Application.cpp \
+        src/Client.cpp \
         src/ClipboardProxy.cpp \
         src/Common.cpp \
         src/Database.cpp \
         src/Messenger.cpp \
         src/QmlEngine.cpp \
         src/Settings.cpp \
+        src/VirgilCore.cpp \
         src/Utils.cpp \
         src/main.cpp \
         src/ui/VSQUiHelper.cpp \

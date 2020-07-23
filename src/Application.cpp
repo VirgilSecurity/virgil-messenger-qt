@@ -42,8 +42,6 @@
 #include "Messenger.h"
 #include "QmlEngine.h"
 #include "Settings.h"
-#include "models/ChatsModel.h"
-#include "models/ConversationsModel.h"
 #include "ui/VSQUiHelper.h"
 #include "macos/VSQMacos.h"
 
@@ -114,6 +112,7 @@ void Application::setupFonts()
 void Application::setupConnections()
 {
     connect(this, &Application::applicationStateChanged, this, &Application::onApplicationStateChanged);
+    connect(m_messenger, &Messenger::quitRequested, this, &Application::quit);
 }
 
 void Application::setupEngine()
@@ -122,12 +121,7 @@ void Application::setupEngine()
     context->setContextProperty("app", this);
     context->setContextProperty("UiHelper", new VSQUiHelper(this));
     context->setContextProperty("clipboard", new ClipboardProxy(clipboard()));
-    context->setContextProperty("Messenger", m_messenger);
-    // FIXME(fpohtmeh): uncomment
-    /*
-    context->setContextProperty("ConversationsModel", &m_messenger->conversationsModel());
-    context->setContextProperty("ChatModel", &m_messenger->chatsModel());
-    */
+    context->setContextProperty("messenger", m_messenger);
     context->setContextProperty("settings", m_settings);
 
     reloadQml();
@@ -141,14 +135,12 @@ void Application::onApplicationStateChanged(Qt::ApplicationState state)
 
     if (Qt::ApplicationInactive == state) {
         _deactivated = true;
-        m_messenger.setStatus(VSQMessenger::MSTATUS_UNAVAILABLE);
+        m_messenger.setOnlineStatus(false);
     }
 
     if (Qt::ApplicationActive == state && _deactivated) {
         _deactivated = false;
-        QTimer::singleShot(200, [this]() {
-            this->m_messenger.checkState();
-        });
+        QTimer::singleShot(200, m_messenger, &Messenger::checkConnectionState);
     }
 #endif // VS_PUSHNOTIFICATIONS
 }

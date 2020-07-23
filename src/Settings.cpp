@@ -75,13 +75,35 @@ QString Settings::lastSignedInUser() const
 
 void Settings::setUsersList(const QStringList &users)
 {
+    if (usersList() == users)
+        return;
     setValue(kUsers, users);
     sync();
+    emit usersListChanged(users);
 }
 
 QStringList Settings::usersList() const
 {
     return value(kUsers, QStringList()).toStringList();
+}
+
+void Settings::addUserToList(const QString &user)
+{
+    auto users = usersList();
+    if (!users.contains(user))
+        setUsersList(users << user);
+}
+
+QByteArray Settings::userCredential(const QString &user) const
+{
+    const auto credBase64 = value(user, QString()).toString();
+    return QByteArray::fromBase64(credBase64.toUtf8());
+}
+
+void Settings::setUserCredential(const QString &user, const QByteArray &credential)
+{
+    setValue(user, credential);
+    sync();
 }
 
 QString Settings::databaseFileName() const

@@ -1,8 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
-import QuickFuture 1.0
-import MesResult 1.0
 
 import "../theme"
 import "../components"
@@ -10,7 +8,7 @@ import "../components"
 Page {
     id: authenticationPage
 
-    property var userList: Messenger.usersList()
+    property var userList: settings.usersList
     property var loginPage
     property var registerPage
 
@@ -24,7 +22,6 @@ Page {
     }
 
     Form {
-
         id: form
 
         FormVendor {
@@ -34,25 +31,7 @@ Page {
 
         AccountSelection {
             visible: userList.length
-            onUserSelected: {
-                form.showLoading("Logging In as %1...".arg(userName))
-
-                var future = Messenger.signIn(userName)
-                Future.onFinished(future, (result) => {
-                    var res = Future.result(future)
-                    if (res === Result.MRES_OK) {
-                        settings.lastSignedInUser = userName
-                        showContacts(true)
-                        return
-                    }
-
-                    if (res === Result.MRES_ERR_SIGNIN) {
-                        window.showPopupError("Something went wrong")
-                    }
-
-                    form.hideLoading()
-                })
-            }
+            onUserSelected: messenger.signIn(userName)
         }
 
         FormPrimaryButton {
@@ -69,6 +48,19 @@ Page {
     }
 
     footer: Footer {}
+
+    Connections {
+        target: messenger
+        onSignIn: form.showLoading(qsTr("Logging In as %1...").arg(userWithEnv))
+        onSignInSuccess: {
+            form.hideLoading()
+            mainView.showContacts(true)
+        }
+        onSignInError: {
+            form.hideLoading()
+            window.showPopupError(qsTr("Sign-in failed. Please check username/password"))
+        }
+    }
 }
 
 
