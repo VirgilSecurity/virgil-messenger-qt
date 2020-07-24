@@ -77,6 +77,7 @@ private:
     using UserEnv = std::pair<QString, EnvironmentType>;
     using Credentials = VirgilIoTKit::vs_messenger_virgil_user_creds_t;
 
+    bool init();
     void setUser(const QString &userWithEnv);
     UserEnv parseUserWithEnv(const QString &userWithEnv) const;
 

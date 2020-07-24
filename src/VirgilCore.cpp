@@ -51,14 +51,8 @@ VirgilCore::VirgilCore(Settings *settings)
 bool VirgilCore::signIn(const QString &userWithEnv)
 {
     // Initialization
-    if (!vs_messenger_virgil_is_init()) {
-        char *cCABundle = strdup(caBundleFile().toStdString().c_str());
-        if (VS_CODE_OK != vs_messenger_virgil_init(virgilURL().toStdString().c_str(), cCABundle)) {
-            m_lastErrorText = QLatin1String("Cannot initialize low level messenger");
-            return false;
-        }
-        free(cCABundle);
-    }
+    if (!init())
+        return false;
 
     setUser(userWithEnv);
     qDebug() << "Trying to Sign In: " << m_user;
@@ -100,12 +94,16 @@ bool VirgilCore::signUp(const QString &userWithEnv)
         return false;
     }
 
+    // HACK(fpohtmeh): doesn't work without init
+    if (!init())
+        return false;
+
     Credentials creds;
     memset(&creds, 0, sizeof (creds));
 
     const auto status = vs_messenger_virgil_sign_up(m_user.toStdString().c_str(), &creds);
     if (status != VS_CODE_OK) {
-        m_lastErrorText = QLatin1String("Cannot sign up user");
+        m_lastErrorText = QLatin1String("Username is already taken");
         return false;
     }
 
@@ -290,6 +288,20 @@ uint16_t VirgilCore::xmppPort() const
     }
     VS_LOG_DEBUG("XMPP PORT: %d", static_cast<int> (res));
     return res;
+}
+
+bool VirgilCore::init()
+{
+    if (vs_messenger_virgil_is_init())
+        return true;
+
+    char *cCABundle = strdup(caBundleFile().toStdString().c_str());
+    if (VS_CODE_OK != vs_messenger_virgil_init(virgilURL().toStdString().c_str(), cCABundle)) {
+        m_lastErrorText = QLatin1String("Cannot initialize low level messenger");
+        return false;
+    }
+    free(cCABundle);
+    return true;
 }
 
 void VirgilCore::setUser(const QString &userWithEnv)
