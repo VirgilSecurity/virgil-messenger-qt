@@ -90,7 +90,6 @@ HEADERS += \
         include/Client.h \
         include/ClipboardProxy.h \
         include/Common.h \
-        include/Database.h \
         include/Messenger.h \
         include/QmlEngine.h \
         include/Settings.h \
@@ -98,10 +97,12 @@ HEADERS += \
         include/Utils.h \
         include/ui/VSQUiHelper.h \
         # Models
-        include/models/AttachmentsModel.h \
-        include/models/ChatsModel.h \
-        include/models/ContactsModel.h \
-        include/models/ConversationsModel.h \
+#        include/models/AttachmentsModel.h \
+#        include/models/ChatsModel.h \
+#        include/models/ContactsModel.h \
+#        include/models/ConversationsModel.h \
+        # Database
+        include/database/Database.h \
         # Platforms
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
@@ -117,7 +118,6 @@ SOURCES += \
         src/Client.cpp \
         src/ClipboardProxy.cpp \
         src/Common.cpp \
-        src/Database.cpp \
         src/Messenger.cpp \
         src/QmlEngine.cpp \
         src/Settings.cpp \
@@ -126,10 +126,12 @@ SOURCES += \
         src/main.cpp \
         src/ui/VSQUiHelper.cpp \
         # Models
-        src/models/AttachmentsModel.cpp \
-        src/models/ChatsModel.cpp \
-        src/models/ConversationsModel.cpp \
-        src/models/ContactsModel.cpp \
+#        src/models/AttachmentsModel.cpp \
+#        src/models/ChatsModel.cpp \
+#        src/models/ConversationsModel.cpp \
+#        src/models/ContactsModel.cpp \
+        # Database
+        src/database/Database.cpp \
         # Platforms
         src/android/VSQAndroid.cpp
 

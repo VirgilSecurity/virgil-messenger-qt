@@ -38,8 +38,8 @@
 
 void registerCommonTypes()
 {
-    qRegisterMetaType<EnMessageStatus>();
     qRegisterMetaType<Enums::AttachmentType>();
+    qRegisterMetaType<Enums::MessageStatus>();
     qRegisterMetaType<Enums::MessageAuthor>();
     qRegisterMetaType<OptionalAttachment>();
     qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");

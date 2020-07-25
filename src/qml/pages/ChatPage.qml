@@ -135,8 +135,8 @@ Page {
 
     Connections {
         target: messenger
-        onSendMessageSuccess: messageSent.play
-        onSendMessageError: messageSent.play
+        onMessageSent: messageSent.play
+        onSendMessageFailed: messageSent.play
     }
 }
 

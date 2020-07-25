@@ -67,21 +67,28 @@ namespace Enums {
 
     enum class MessageAuthor
     {
+        // User is message author
         User,
+        // Contact is message author
         Contact
     };
     Q_ENUM_NS(MessageAuthor)
+    
+    enum class MessageStatus
+    {
+        // Created by user
+        Created,
+        // Sent by user
+        Sent,
+        // Receiver by contact
+        Received,
+        // Read by contact
+        Read,
+        // Failed to send by user
+        Failed
+    };
+    Q_ENUM_NS(MessageStatus)
 }
-
-enum EnMessageStatus
-{
-    MST_CREATED,
-    MST_SENT,
-    MST_RECEIVED,
-    MST_READ,
-    MST_FAILED
-};
-Q_DECLARE_METATYPE(EnMessageStatus)
 
 struct Attachment
 {
@@ -107,15 +114,18 @@ struct Attachment
 using OptionalAttachment = Optional<Attachment>;
 Q_DECLARE_METATYPE(OptionalAttachment)
 
-struct StMessage
+struct Message
 {
     using Author = Enums::MessageAuthor;
+    using Status = Enums::MessageStatus;
 
     QString id;
-    QString message;
-    Author author;
+    QDateTime timestamp;
+    QString body;
     QString recipient;
+    Author author;    
     OptionalAttachment attachment;
+    Status status;
 };
 
 

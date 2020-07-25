@@ -137,7 +137,7 @@ bool VirgilCore::signInWithKey(const QString &userWithEnv, const QString &passwo
     return true;
 }
 
-Optional<QXmppMessage> VirgilCore::encryptMessage(const StMessage &message)
+Optional<QXmppMessage> VirgilCore::encryptMessage(const Message &message)
 {
     static const size_t _encryptedMsgSzMax = 20 * 1024;
     uint8_t encryptedMessage[_encryptedMsgSzMax];
@@ -145,7 +145,7 @@ Optional<QXmppMessage> VirgilCore::encryptMessage(const StMessage &message)
 
     // Create JSON-formatted message to be sent
     QJsonObject payloadObject;
-    payloadObject.insert("body", message.message);
+    payloadObject.insert("body", message.body);
 
     QJsonObject mainObject;
     mainObject.insert("type", "text");

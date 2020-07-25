@@ -65,22 +65,22 @@ signals:
     void backupKey(const QString &password);
     void signInWithKey(const QString &userWithEnv, const QString &password);
 
-    void signInSuccess(const QString &userWithEnv);
-    void signInError(const QString &userWithEnv, const QString &error);
-    void signOutSuccess();
-    void signUpSuccess(const QString &userWithEnv);
-    void signUpError(const QString &userWithEnv, const QString &error);
-    void backupKeySuccess(const QString &password);
-    void backupKeyError(const QString &password, const QString &error);
+    void signedIn(const QString &userWithEnv);
+    void signInFailed(const QString &userWithEnv, const QString &error);
+    void signedOut();
+    void signedUp(const QString &userWithEnv);
+    void signUpFailed(const QString &userWithEnv, const QString &error);
+    void keyBackuped(const QString &password);
+    void backupKeyFailed(const QString &password, const QString &error);
 
     void addContact(const QString &contact);
     void createSendMessage(const QString &text, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
-    void sendMessage(const StMessage &message);
+    void sendMessage(const Message &message);
 
-    void addContactSuccess(const QString &contact);
-    void addContactError(const QString &contact, const QString &error);
-    void sendMessageSuccess();
-    void sendMessageError();
+    void contactAdded(const QString &contact);
+    void addContactFailed(const QString &contact, const QString &error);
+    void messageSent();
+    void sendMessageFailed();
 
     void quitRequested();
     void credentialsRequested(bool signOut);

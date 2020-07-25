@@ -53,14 +53,14 @@ Page {
         onBackupKey: {
             form.showLoading(qsTr("Backing up your private key..."))
         }
-        onBackupKeySuccess: {
+        onKeyBackuped: {
             form.hideLoading();
             passwordInput.text = ""
             confirmPasswordInput.text = ""
             window.showPopupSuccess("Backup private key success")
             mainView.back() // TODO(fpohtmeh): remove main view
         }
-        onBackupKeyError: {
+        onBackupKeyFailed: {
             form.hideLoading()
             window.showPopupError(error)
             mainView.back() // TODO(fpohtmeh): remove main view

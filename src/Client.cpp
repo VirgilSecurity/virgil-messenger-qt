@@ -206,10 +206,10 @@ void Client::subscribeOnPushNotifications(bool enable)
 void Client::onSignIn(const QString &userWithEnv)
 {
     if (!m_core.signIn(userWithEnv))
-        emit signInError(userWithEnv, m_core.lastErrorText());
+        emit signInFailed(userWithEnv, m_core.lastErrorText());
     if (!xmppConnect())
-        emit signInError(userWithEnv, m_lastErrorText);
-    emit signInSuccess(userWithEnv);
+        emit signInFailed(userWithEnv, m_lastErrorText);
+    emit signedIn(userWithEnv);
 }
 
 void Client::onSignOut()
@@ -217,40 +217,40 @@ void Client::onSignOut()
     subscribeOnPushNotifications(false);
     xmppDisconnect();
     m_core.signOut();
-    emit signOutSuccess();
+    emit signedOut();
 }
 
 void Client::onSignUp(const QString &userWithEnv)
 {
     if (m_core.signUp(userWithEnv))
-        emit signUpSuccess(userWithEnv);
+        emit signedUp(userWithEnv);
     else
-        emit signUpError(userWithEnv, m_core.lastErrorText());
+        emit signUpFailed(userWithEnv, m_core.lastErrorText());
 }
 
 void Client::onBackupKey(const QString &password)
 {
     if (m_core.backupKey(password))
-        emit backupKeySuccess(password);
+        emit keyBackuped(password);
     else
-        emit backupKeyError(password, m_core.lastErrorText());
+        emit backupKeyFailed(password, m_core.lastErrorText());
 }
 
 void Client::onSignInWithKey(const QString &user, const QString &password)
 {
     if (!m_core.signInWithKey(user, password))
-        emit signInError(user, m_core.lastErrorText());
+        emit signInFailed(user, m_core.lastErrorText());
     if (!xmppConnect())
-        emit signInError(user, m_lastErrorText);
-    emit signInSuccess(user);
+        emit signInFailed(user, m_lastErrorText);
+    emit signedIn(user);
 }
 
 void Client::onAddContact(const QString &contact)
 {
     if (m_core.userExists(contact))
-        emit addContactSuccess(contact);
+        emit contactAdded(contact);
     else
-        emit addContactError(contact, QString("Contact %1 doesn't exist").arg(contact));
+        emit addContactFailed(contact, QString("Contact %1 doesn't exist").arg(contact));
 }
 
 void Client::onConnected()
@@ -290,7 +290,7 @@ void Client::onMessageReceived(const QXmppMessage &message)
     // Decrypt message
     const auto decryptedString = m_core.decryptMessage(sender, msg);
     if (!decryptedString) {
-        emit receiveMessageError(m_core.lastErrorText());
+        emit receiveMessageFailed(m_core.lastErrorText());
         return;
     }
     // TODO(fpohtmeh): save to db, update last message, update unread count
@@ -314,7 +314,7 @@ void Client::onStateChanged(QXmppClient::State state)
     Q_UNUSED(state)
 }
 
-void Client::onSendMessage(const StMessage &message)
+void Client::onSendMessage(const Message &message)
 {
     Q_UNUSED(message);
     // TODO(fpohtmeh): implement
@@ -364,5 +364,5 @@ void Client::onSslErrors(const QList<QSslError> &errors)
     for (auto &error : errors)
         qWarning() << QLatin1String("SSL error:") << error;
     m_lastErrorText = QLatin1String("SSL connection errors...");
-    xmppDisconnect(); // TODO(fpohtmeh): do not disconnect?
+    xmppDisconnect();
 }

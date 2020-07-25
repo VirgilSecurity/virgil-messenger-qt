@@ -53,7 +53,7 @@ public:
     bool backupKey(const QString &password);
     bool signInWithKey(const QString &userWithEnv, const QString &password);
 
-    Optional<QXmppMessage> encryptMessage(const StMessage &message);
+    Optional<QXmppMessage> encryptMessage(const Message &message);
     Optional<QString> decryptMessage(const QString &sender, const QString &message);
     bool userExists(const QString &user) const;
 

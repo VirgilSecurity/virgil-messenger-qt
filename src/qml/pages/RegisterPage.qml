@@ -46,10 +46,10 @@ Page {
     Connections {
         target: messenger
         onSignUp: form.showLoading(qsTr("Registering %1...".arg(userWithEnv)))
-        onSignUpSuccess: {
+        onSignedUp: {
             form.hideLoading()
             mainView.showContacts("Contacts", null, true, true) // TODO(fpohtmeh): rework
         }
-        onSignUpError: showPopupError(error)
+        onSignUpFailed: showPopupError(error)
     }
 }

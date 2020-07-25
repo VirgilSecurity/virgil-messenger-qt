@@ -74,29 +74,29 @@ void Messenger::start()
     connect(this, &Messenger::signInWithKey, m_client, &Client::signInWithKey);
 
     // Authorization results processing/redirection
-    connect(m_client, &Client::signInSuccess, this, &Messenger::signInSuccess);
-    connect(m_client, &Client::signInSuccess, m_settings, &Settings::addUserToList);
-    connect(m_client, &Client::signInSuccess, m_settings, &Settings::setLastSignedInUser);
-    connect(m_client, &Client::signInSuccess, this, &Messenger::setUser);
-    connect(m_client, &Client::signInError, this, &Messenger::signInError);
-    connect(m_client, &Client::signOutSuccess, this, std::bind(&Messenger::credentialsRequested, this, true));
-    connect(m_client, &Client::signOutSuccess, this, std::bind(&Messenger::setUser, this, QLatin1String()));
-    connect(m_client, &Client::signOutSuccess, this, &Messenger::signOutSuccess);
-    connect(m_client, &Client::signUpSuccess, this, &Messenger::signUpSuccess);
-    connect(m_client, &Client::signUpSuccess, m_settings, &Settings::addUserToList);
-    connect(m_client, &Client::signUpSuccess, m_settings, &Settings::setLastSignedInUser);
-    connect(m_client, &Client::signUpError, this, &Messenger::signUpError);
-    connect(m_client, &Client::backupKeySuccess, this, &Messenger::backupKeySuccess);
-    connect(m_client, &Client::backupKeyError, this, &Messenger::backupKeyError);
+    connect(m_client, &Client::signedIn, this, &Messenger::signedIn);
+    connect(m_client, &Client::signedIn, m_settings, &Settings::addUserToList);
+    connect(m_client, &Client::signedIn, m_settings, &Settings::setLastSignedInUser);
+    connect(m_client, &Client::signedIn, this, &Messenger::setUser);
+    connect(m_client, &Client::signInFailed, this, &Messenger::signInFailed);
+    connect(m_client, &Client::signedOut, this, std::bind(&Messenger::credentialsRequested, this, true));
+    connect(m_client, &Client::signedOut, this, std::bind(&Messenger::setUser, this, QLatin1String()));
+    connect(m_client, &Client::signedOut, this, &Messenger::signedOut);
+    connect(m_client, &Client::signedUp, this, &Messenger::signedUp);
+    connect(m_client, &Client::signedUp, m_settings, &Settings::addUserToList);
+    connect(m_client, &Client::signedUp, m_settings, &Settings::setLastSignedInUser);
+    connect(m_client, &Client::signUpFailed, this, &Messenger::signUpFailed);
+    connect(m_client, &Client::keyBackuped, this, &Messenger::keyBackuped);
+    connect(m_client, &Client::backupKeyFailed, this, &Messenger::backupKeyFailed);
 
     // Contacts & messages
     connect(this, &Messenger::addContact, m_client, &Client::addContact);
     connect(this, &Messenger::createSendMessage, this, &Messenger::onCreateSendMessage);
     connect(this, &Messenger::sendMessage, m_client, &Client::sendMessage);
-    connect(m_client, &Client::addContactSuccess, this, &Messenger::addContactSuccess);
-    connect(m_client, &Client::addContactError, this, &Messenger::addContactError);
-    connect(m_client, &Client::sendMessageSuccess, this, &Messenger::sendMessageSuccess);
-    connect(m_client, &Client::sendMessageError, this, &Messenger::sendMessageError);
+    connect(m_client, &Client::contactAdded, this, &Messenger::contactAdded);
+    connect(m_client, &Client::addContactFailed, this, &Messenger::addContactFailed);
+    connect(m_client, &Client::messageSent, this, &Messenger::messageSent);
+    connect(m_client, &Client::sendMessageFailed, this, &Messenger::sendMessageFailed);
 
     // Other calls
     connect(this, &Messenger::checkConnectionState, m_client, &Client::checkConnectionState);
@@ -138,7 +138,15 @@ void Messenger::onCreateSendMessage(const QString &text, const QVariant &attachm
     QString messageText = text;
     if (attachment)
         messageText = attachment->fileName();
-    const StMessage stMessage{ uuid, messageText, StMessage::Author::User, m_recipient, attachment };
+    const Message message {
+        uuid,
+        QDateTime::currentDateTime(),
+        messageText,
+        m_recipient,
+        Message::Author::User,
+        attachment,
+        Message::Status::Created
+    };
     // Emit
-    emit sendMessage(stMessage);
+    emit sendMessage(message);
 }

@@ -52,11 +52,11 @@ Page {
     Connections {
         target: messenger
         onSignIn: form.showLoading(qsTr("Logging In as %1...").arg(userWithEnv))
-        onSignInSuccess: {
+        onSignedIn: {
             form.hideLoading()
             mainView.showContacts(true)
         }
-        onSignInError: {
+        onSignInFailed: {
             form.hideLoading()
             window.showPopupError(qsTr("Sign-in failed. Please check username/password"))
         }

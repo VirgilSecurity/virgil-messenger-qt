@@ -57,24 +57,24 @@ signals:
     void backupKey(const QString &password);
     void signInWithKey(const QString &userWithEnv, const QString &password);
 
-    void signInSuccess(const QString &userWithEnv);
-    void signInError(const QString &userWithEnv, const QString &error);
-    void signOutSuccess();
-    void signUpSuccess(const QString &userWithEnv);
-    void signUpError(const QString &userWithEnv, const QString &error);
-    void backupKeySuccess(const QString &password);
-    void backupKeyError(const QString &password, const QString &error);
+    void signedIn(const QString &userWithEnv);
+    void signInFailed(const QString &userWithEnv, const QString &error);
+    void signedOut();
+    void signedUp(const QString &userWithEnv);
+    void signUpFailed(const QString &userWithEnv, const QString &error);
+    void keyBackuped(const QString &password);
+    void backupKeyFailed(const QString &password, const QString &error);
 
     void addContact(const QString &contact);
-    void sendMessage(const StMessage &message);
+    void sendMessage(const Message &message);
     void checkConnectionState();
     void setOnlineStatus(bool online);
 
-    void addContactSuccess(const QString &contact);
-    void addContactError(const QString &contact, const QString &error);
-    void sendMessageSuccess(const StMessage &message);
-    void sendMessageError(const StMessage &message, const QString &error);
-    void receiveMessageError(const QString &error);
+    void contactAdded(const QString &contact);
+    void addContactFailed(const QString &contact, const QString &error);
+    void messageSent(const Message &message);
+    void sendMessageFailed(const Message &message, const QString &error);
+    void receiveMessageFailed(const QString &error);
 
 private:
     bool xmppConnect();
@@ -98,7 +98,7 @@ private:
     void onIqReceived(const QXmppIq &iq);
     void onStateChanged(QXmppClient::State state);
 
-    void onSendMessage(const StMessage &message);
+    void onSendMessage(const Message &message);
     void onCheckConnectionState();
     void onSetOnlineStatus(bool online);
     void onMessageDelivered(const QString &jid, const QString &id);
