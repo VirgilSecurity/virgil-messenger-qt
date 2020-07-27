@@ -73,7 +73,7 @@ namespace Enums {
         Contact
     };
     Q_ENUM_NS(MessageAuthor)
-    
+
     enum class MessageStatus
     {
         // Created by user
@@ -122,12 +122,22 @@ struct Message
     QString id;
     QDateTime timestamp;
     QString body;
-    QString recipient;
-    Author author;    
+    QString contact;
+    Author author;
     OptionalAttachment attachment;
     Status status;
 };
+Q_DECLARE_METATYPE(Message);
 
+struct Chat
+{
+    QString id;
+    QString contact;
+    QString lastMessageBody;
+    QDateTime lastEventTimestamp;
+    int unreadMessageCount;
+};
+Q_DECLARE_METATYPE(Chat);
 
 void registerCommonTypes();
 

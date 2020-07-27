@@ -32,34 +32,56 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "database/Database.h"
+#ifndef VSQ_MESSAGESMODEL_H
+#define VSQ_MESSAGESMODEL_H
 
-#include <QSqlError>
+#include <QAbstractListModel>
 
-#include "Settings.h"
+#include "Common.h"
 
-Database::Database(const Settings *settings, QObject *parent)
-    : QObject(parent)
-    , m_settings(settings)
-    , m_connectionName(QLatin1String("VSQDatabase"))
-{}
-
-Database::~Database()
+class MessagesModel : public QAbstractListModel
 {
-    m_db.close();
-}
+    Q_OBJECT
 
-void Database::open()
-{
-    m_db = QSqlDatabase::addDatabase("QSQLITE", m_connectionName);
-    if (!m_db.isValid()) {
-        qFatal("Cannot add database: %s", qPrintable(m_db.lastError().text()));
-        emit failed();
-    }
-    m_db.setDatabaseName(m_settings->fileName());
-    if (!m_db.open()) {
-        qFatal("Cannot open database: %s", qPrintable(m_db.lastError().text()));
-        emit failed();
-    }
-    emit opened();
-}
+public:
+    enum Roles
+    {
+        BodyRole = Qt::UserRole,
+        TimeRole,
+        NicknameRole,
+        IsUserRoles,
+        StatusRole,
+        FailedRole,
+        InRowRole,
+        FirstInRowRole
+    };
+
+    using QAbstractListModel::QAbstractListModel;
+
+    void addMessage(const Message &message);
+
+    void setUser(const QString &user);
+    void setRecipient(const QString &recipient);
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QHash<int, QByteArray> roleNames() const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+
+    // TODO(fpohtmeh): add fetchMore functionality
+
+signals:
+    void messageAdded(const Message &message);
+    void messageStatusChanged(const Message &message);
+
+private:
+    void setMessageStatus(int row, const Message::Status status);
+
+    QString displayStatus(const Message::Status status) const;
+    bool isInRow(const Message &message, int row) const;
+    bool isFirstInRow(const Message &message, int row) const;
+
+    std::vector<Message> m_messages;
+    QString m_user;
+};
+
+#endif // VSQ_MESSAGESMODEL_H

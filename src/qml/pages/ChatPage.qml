@@ -83,22 +83,25 @@ Page {
         }
 
         spacing: 5
-        // FIXME(fpohtmeh): restore
-        //model: ConversationsModel
+        model: messenger.messages
         delegate: ChatMessage {
-            readonly property bool isUser: model.author === Enums.MessageAuthor.User;
-            text: model.message
-            nickname: isUser ? Messenger.currentUser : Messenger.currentRecipient
-            timeStamp: model.timestamp
-            variant: isUser ? "light" : "dark"
-            messageInARow: model.messageInARow
-            firstMessageInARow: model.firstMessageInARow
-            status: isUser ? model.status :  "none"
+            body: model.body
+            time: model.time
+            nickname: model.nickname
+            isUser: model.isUser
+            status: model.status
+            failed: model.failed
+
+            inRow: model.inRow
+            firstInRow: model.firstInRow
+
+            /*
             attachmentId: model.attachmentId
             attachmentSize: model.attachmentSize
             attachmentType: model.attachmentType
             attachmentLocalUrl: model.attachmentLocalUrl
             attachmentLocalPreview: model.attachmentLocalPreview
+            */
         }
 
         onCountChanged: {

@@ -37,7 +37,10 @@
 
 #include <QObject>
 
+#include "Client.h"
 #include "Common.h"
+#include "models/ChatsModel.h"
+#include "models/MessagesModel.h"
 
 class QThread;
 
@@ -50,6 +53,8 @@ class Messenger : public QObject
     Q_OBJECT
     Q_PROPERTY(QString user MEMBER m_user NOTIFY userChanged)
     Q_PROPERTY(QString recipient MEMBER m_recipient NOTIFY recipientChanged)
+    Q_PROPERTY(MessagesModel *messages READ messageModel CONSTANT)
+    Q_PROPERTY(ChatsModel *chats READ chatsModel CONSTANT)
 
 public:
     explicit Messenger(Settings *settings, QObject *parent = nullptr);
@@ -93,14 +98,20 @@ signals:
 private:
     void setUser(const QString &user);
     void setRecipient(const QString &recipient);
+    MessagesModel *messageModel();
+    ChatsModel *chatsModel();
 
     void onCreateSendMessage(const QString &text, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
 
     Settings *m_settings;
+    MessagesModel m_messageModel;
+    ChatsModel m_chatsModel;
+
     Database *m_database;
     QThread *m_databaseThread;
     Client *m_client;
     QThread *m_clientThread;
+
     QString m_user;
     QString m_recipient;
 };

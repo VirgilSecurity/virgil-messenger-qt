@@ -157,7 +157,7 @@ Optional<QXmppMessage> VirgilCore::encryptMessage(const Message &message)
 
     // Encrypt message
     if (VS_CODE_OK != vs_messenger_virgil_encrypt_msg(
-                     message.recipient.toStdString().c_str(),
+                     message.contact.toStdString().c_str(),
                      internalJson.toStdString().c_str(),
                      encryptedMessage,
                      _encryptedMsgSzMax,
@@ -168,7 +168,7 @@ Optional<QXmppMessage> VirgilCore::encryptMessage(const Message &message)
     }
 
     // Send encrypted message
-    QString toJID = message.recipient + "@" + xmppURL();
+    QString toJID = message.contact + "@" + xmppURL();
     QString fromJID = m_user + "@" + xmppURL();
     QString encryptedStr = QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage));
 
@@ -184,8 +184,9 @@ Optional<QString> VirgilCore::decryptMessage(const QString &sender, const QStrin
     uint8_t decryptedMessage[_decryptedMsgSzMax];
     size_t decryptedMessageSz = 0;
 
-    qDebug() << "Sender            : " << sender;
-    qDebug() << "Encrypted message : " << message;
+    // FIXME(fpohtmeh): restore
+    //qDebug() << "Sender            : " << sender;
+    //qDebug() << "Encrypted message : " << message;
 
     // Decrypt message
     // DECRYPTED_MESSAGE_SZ_MAX - 1  - This is required for a Zero-terminated string

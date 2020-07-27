@@ -36,15 +36,16 @@
 
 #include <QThread>
 
-#include "Client.h"
-#include "Database.h"
 #include "Settings.h"
 #include "Utils.h"
 #include "VirgilCore.h"
+#include "database/Database.h"
 
 Messenger::Messenger(Settings *settings, QObject *parent)
     : QObject(parent)
     , m_settings(settings)
+    , m_messageModel(this)
+    , m_chatsModel(this)
     , m_database(new Database(settings, nullptr))
     , m_databaseThread(new QThread())
     , m_client(new Client(settings, nullptr))
@@ -89,16 +90,25 @@ void Messenger::start()
     connect(m_client, &Client::keyBackuped, this, &Messenger::keyBackuped);
     connect(m_client, &Client::backupKeyFailed, this, &Messenger::backupKeyFailed);
 
-    // Contacts & messages
+    // Contacts, chats & messages
     connect(this, &Messenger::addContact, m_client, &Client::addContact);
     connect(this, &Messenger::createSendMessage, this, &Messenger::onCreateSendMessage);
     connect(this, &Messenger::sendMessage, m_client, &Client::sendMessage);
     connect(m_client, &Client::contactAdded, this, &Messenger::contactAdded);
+    connect(m_client, &Client::contactAdded, &m_chatsModel, &ChatsModel::processContact);
     connect(m_client, &Client::addContactFailed, this, &Messenger::addContactFailed);
     connect(m_client, &Client::messageSent, this, &Messenger::messageSent);
     connect(m_client, &Client::sendMessageFailed, this, &Messenger::sendMessageFailed);
+    connect(m_client, &Client::messageReceived, &m_messageModel, &MessagesModel::addMessage);
+
+    connect(&m_messageModel, &MessagesModel::messageAdded, &m_chatsModel, &ChatsModel::processMessage);
+    connect(&m_messageModel, &MessagesModel::messageStatusChanged, &m_chatsModel, &ChatsModel::updateMessageStatus);
 
     // Other calls
+    connect(this, &Messenger::userChanged, &m_messageModel, &MessagesModel::setUser);
+    connect(this, &Messenger::recipientChanged, &m_messageModel, &MessagesModel::setRecipient);
+    connect(this, &Messenger::recipientChanged, &m_chatsModel, &ChatsModel::setRecipient);
+
     connect(this, &Messenger::checkConnectionState, m_client, &Client::checkConnectionState);
     connect(this, &Messenger::setOnlineStatus, m_client, &Client::setOnlineStatus);
 
@@ -127,11 +137,21 @@ void Messenger::setRecipient(const QString &recipient)
     emit recipientChanged(recipient);
 }
 
+MessagesModel *Messenger::messageModel()
+{
+    return &m_messageModel;
+}
+
+ChatsModel *Messenger::chatsModel()
+{
+    return &m_chatsModel;
+}
+
 void Messenger::onCreateSendMessage(const QString &text, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
 {
     // TODO(fpohtmeh): create from atttachment
-    (void) attachmentUrl;
-    (void) attachmentType;
+    Q_UNUSED(attachmentUrl);
+    Q_UNUSED(attachmentType);
     Optional<Attachment> attachment;
     // Create message
     const QString uuid = Utils::createUuid();

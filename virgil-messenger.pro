@@ -97,6 +97,8 @@ HEADERS += \
         include/Utils.h \
         include/ui/VSQUiHelper.h \
         # Models
+        include/models/ChatsModel.h \
+        include/models/MessagesModel.h \
 #        include/models/AttachmentsModel.h \
 #        include/models/ChatsModel.h \
 #        include/models/ContactsModel.h \
@@ -126,6 +128,8 @@ SOURCES += \
         src/main.cpp \
         src/ui/VSQUiHelper.cpp \
         # Models
+        src/models/ChatsModel.cpp \
+        src/models/MessagesModel.cpp \
 #        src/models/AttachmentsModel.cpp \
 #        src/models/ChatsModel.cpp \
 #        src/models/ConversationsModel.cpp \
@@ -184,9 +188,9 @@ isEmpty(WEBDRIVER) {
     QTWEBDRIVER_LOCATION=$$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/include/qtwebdriver
     HEADERS += $$QTWEBDRIVER_LOCATION/src/Test/Headers.h
     INCLUDEPATH +=  $$QTWEBDRIVER_LOCATION $$QTWEBDRIVER_LOCATION/src
-    linux:!android: { 
+    linux:!android: {
         LIBS += -ldl -Wl,--start-group -lchromium_base -lWebDriver_core -lWebDriver_extension_qt_base -lWebDriver_extension_qt_quick -Wl,--end-group
-    }    
+    }
     macx: {
         LIBS += -lchromium_base -lWebDriver_core -lWebDriver_extension_qt_base -lWebDriver_extension_qt_quick
         LIBS += -framework Foundation

@@ -95,7 +95,7 @@ QHash<int, QByteArray> ChatsModel::roleNames() const
     names[Qt::UserRole + ContactIdColumn] = "contact";
     names[Qt::UserRole + LastMessageColumn] = "lastMessage";
     names[Qt::UserRole + LastMessageTimeColumn] = "lastMessageTime";
-    names[Qt::UserRole + UnreadMessageCountColumn] = "unreadMessageCount";
+    names[Qt::UserRole + UnreadMessagesCountRole] = "unreadMessageCount";
     return names;
 }
 
@@ -131,7 +131,7 @@ Optional<QString> ChatsModel::createPrivateChat(const QString &contactId)
     const auto id = Utils::createUuid();
     newRecord.setValue(IdColumn, id);
     newRecord.setValue(ContactIdColumn, contactId);
-    newRecord.setValue(UnreadMessageCountColumn, 0);
+    newRecord.setValue(UnreadMessagesCountRole, 0);
     newRecord.setValue(LastMessageTimeColumn, Utils::currentIsoDateTime()); // for sorting
     if (!insertRowIntoTable(newRecord)) {
         qCritical() << QLatin1String("Failed to create private chat:") << lastError().text();

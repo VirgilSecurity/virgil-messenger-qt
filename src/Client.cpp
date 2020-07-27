@@ -44,6 +44,8 @@
 #include <QXmppMessageReceiptManager.h>
 #include <QXmppPushEnableIq.h>
 
+#include "Utils.h"
+
 #ifndef USE_XMPP_LOGS
 #define USE_XMPP_LOGS 1
 #endif
@@ -94,6 +96,7 @@ void Client::start()
     connect(this, &Client::sendMessage, this, &Client::onSendMessage);
     connect(this, &Client::checkConnectionState, this, &Client::onCheckConnectionState);
     connect(this, &Client::setOnlineStatus, this, &Client::onSetOnlineStatus);
+
     // XMPP receipt manager
     auto receiptManager = new QXmppMessageReceiptManager();
     m_client.addExtension(receiptManager);
@@ -103,7 +106,8 @@ void Client::start()
     logger->setLoggingType(QXmppLogger::SignalLogging);
     logger->setMessageTypes(QXmppLogger::AnyMessage);
 #if USE_XMPP_LOGS
-    connect(logger, &QXmppLogger::message, this, &Client::onXmppLoggerMessage);
+    // FIXME(fpohtmeh): restore
+    //connect(logger, &QXmppLogger::message, this, &Client::onXmppLoggerMessage);
     m_client.setLogger(logger);
 #endif
 }
@@ -270,7 +274,7 @@ void Client::onDisconnected()
 void Client::onError(QXmppClient::Error error)
 {
     VS_LOG_DEBUG("onError");
-    qDebug() << "onError : " << error << "   state:" << m_client.state();
+    qDebug() << "onError:" << error << "state:" << m_client.state();
     xmppReconnect();
 }
 
@@ -286,13 +290,24 @@ void Client::onMessageReceived(const QXmppMessage &message)
     }
     QString sender = pieces.first();
     // Get encrypted message
-    QString msg = message.body();
+    QString encryptedBody = message.body();
     // Decrypt message
-    const auto decryptedString = m_core.decryptMessage(sender, msg);
-    if (!decryptedString) {
+    const auto body = m_core.decryptMessage(sender, encryptedBody);
+    if (!body) {
         emit receiveMessageFailed(m_core.lastErrorText());
         return;
     }
+    // Build message
+    Message msg;
+    msg.id = Utils::createUuid();
+    msg.timestamp = QDateTime::currentDateTime();
+    msg.body = *body;
+    msg.contact = sender;
+    msg.author = Message::Author::Contact;
+    // TODO(fpohtmeh): get attachment
+    msg.status = Message::Status::Received; // TODO(fpohtmeh): use another status?
+    //
+    emit messageReceived(msg);
     // TODO(fpohtmeh): save to db, update last message, update unread count
 }
 
@@ -317,7 +332,7 @@ void Client::onStateChanged(QXmppClient::State state)
 void Client::onSendMessage(const Message &message)
 {
     Q_UNUSED(message);
-    // TODO(fpohtmeh): implement
+    // TODO(fpohtmeh): remove?
     // add to DB, update last message, setMessageStatus
     // use sendMessageSuccess, sendMessageError
     /*

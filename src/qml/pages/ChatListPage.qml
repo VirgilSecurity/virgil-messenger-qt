@@ -89,8 +89,7 @@ Page {
     ListView {
         id: listView
         anchors.fill: parent
-        // FIXME(fpohtmeh): restore
-        //model: ChatModel
+        model: messenger.chats
         delegate: ItemDelegate {
             id: listItem
             width: parent.width
@@ -109,7 +108,7 @@ Page {
 
                 Avatar {
                     id: avatar
-                    nickname: model.contact
+                    nickname: model.nickname
                 }
 
                 Column {
@@ -118,13 +117,13 @@ Page {
                     Text {
                         color: Theme.primaryTextColor
                         font.pointSize: UiHelper.fixFontSz(15)
-                        text: model.contact
+                        text: model.nickname
                     }
 
                     Text {
                         color: Theme.secondaryTextColor
                         font.pointSize: UiHelper.fixFontSz(12)
-                        text: model.lastMessage ? model.lastMessage.substring(0, 30) : "..."
+                        text: model.lastMessageBody
                         width: parent.width
                         elide: Text.ElideRight
                         textFormat: Text.RichText
@@ -136,12 +135,12 @@ Page {
                     spacing: 5
 
                     MessageCounter {
-                       count: model.unreadMessageCount
+                       count: model.unreadMessagesCount
                        anchors.horizontalCenter: parent.horizontalCenter
                     }
 
                     Text {
-                        text: model.lastMessageTime ? Qt.formatDateTime(model.lastMessageTime, "hh:mm")   : ""
+                        text: model.lastEventTime
                         color: Theme.secondaryTextColor
                         font.pointSize: UiHelper.fixFontSz(9)
                         anchors.horizontalCenter: parent.horizontalCenter
@@ -150,7 +149,7 @@ Page {
             }
 
             onClicked: {
-                mainView.showChatWith(model.contact)
+                mainView.showChatWith(model.nickname) // TODO(fpohtmeh): remove mainView
             }
         }
 

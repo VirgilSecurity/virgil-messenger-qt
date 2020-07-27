@@ -74,6 +74,7 @@ signals:
     void addContactFailed(const QString &contact, const QString &error);
     void messageSent(const Message &message);
     void sendMessageFailed(const Message &message, const QString &error);
+    void messageReceived(const Message &message);
     void receiveMessageFailed(const QString &error);
 
 private:

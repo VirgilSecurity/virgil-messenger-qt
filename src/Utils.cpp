@@ -57,6 +57,7 @@ QString Utils::escapedUserName(const QString &userName)
     return name;
 }
 
+// TODO(fpohtmeh): remove
 QString Utils::currentIsoDateTime()
 {
     return QDateTime::currentDateTime().toString(Qt::ISODate);

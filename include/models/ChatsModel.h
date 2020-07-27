@@ -32,34 +32,47 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "database/Database.h"
+#ifndef VSQ_CHATSMODEL_H
+#define VSQ_CHATSMODEL_H
 
-#include <QSqlError>
+#include <QAbstractListModel>
 
-#include "Settings.h"
+#include "Common.h"
 
-Database::Database(const Settings *settings, QObject *parent)
-    : QObject(parent)
-    , m_settings(settings)
-    , m_connectionName(QLatin1String("VSQDatabase"))
-{}
-
-Database::~Database()
+class ChatsModel : public QAbstractListModel
 {
-    m_db.close();
-}
+    Q_OBJECT
 
-void Database::open()
-{
-    m_db = QSqlDatabase::addDatabase("QSQLITE", m_connectionName);
-    if (!m_db.isValid()) {
-        qFatal("Cannot add database: %s", qPrintable(m_db.lastError().text()));
-        emit failed();
-    }
-    m_db.setDatabaseName(m_settings->fileName());
-    if (!m_db.open()) {
-        qFatal("Cannot open database: %s", qPrintable(m_db.lastError().text()));
-        emit failed();
-    }
-    emit opened();
-}
+public:
+    enum Columns
+    {
+        NicknameRole = Qt::UserRole,
+        LastMessageBodyRole,
+        LastEventTimeRole,
+        UnreadMessagesCountRole
+    };
+
+    using QAbstractListModel::QAbstractListModel;
+
+    void processMessage(const Message &message);
+    void processContact(const QString &contact);
+    void updateMessageStatus(const Message &message);
+
+    void setRecipient(const QString &recipient);
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QHash<int, QByteArray> roleNames() const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+
+private:
+    Optional<int> findChatIndex(const QString &contact) const;
+    void addChat(const QString &contact, const QString &messageBody, const QDateTime &eventTimestamp,
+                 const Optional<Message::Status> status);
+    void updateChat(const QString &contact, const QString &messageBody, const QDateTime &eventTimestamp,
+                    const Optional<Message::Status> status);
+
+    std::vector<Chat> m_chats;
+    QString m_recipient;
+};
+
+#endif // VSQ_CHATSMODEL_H
