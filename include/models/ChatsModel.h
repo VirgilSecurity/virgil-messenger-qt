@@ -65,7 +65,7 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
 
 private:
-    Optional<int> findChatIndex(const QString &contact) const;
+    Optional<int> findChatRow(const QString &contact) const;
     void addChat(const QString &contact, const QString &messageBody, const QDateTime &eventTimestamp,
                  const Optional<Message::Status> status);
     void updateChat(const QString &contact, const QString &messageBody, const QDateTime &eventTimestamp,

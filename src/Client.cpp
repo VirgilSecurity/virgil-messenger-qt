@@ -280,7 +280,8 @@ void Client::onError(QXmppClient::Error error)
 
 void Client::onMessageReceived(const QXmppMessage &message)
 {
-    qDebug() << "Message received:" << message.from() << message.body();
+    // FIXME(fpohtmeh): restore
+    //qDebug() << "Message received:" << message.from() << message.body();
     // Get sender
     QString from = message.from();
     QStringList pieces = from.split("@");
@@ -304,11 +305,10 @@ void Client::onMessageReceived(const QXmppMessage &message)
     msg.body = *body;
     msg.contact = sender;
     msg.author = Message::Author::Contact;
-    // TODO(fpohtmeh): get attachment
-    msg.status = Message::Status::Received; // TODO(fpohtmeh): use another status?
+    // FIXME(fpohtmeh): get attachment
+    msg.status = Message::Status::Received;
     //
     emit messageReceived(msg);
-    // TODO(fpohtmeh): save to db, update last message, update unread count
 }
 
 void Client::onPresenceReceived(const QXmppPresence &presence)
@@ -331,15 +331,13 @@ void Client::onStateChanged(QXmppClient::State state)
 
 void Client::onSendMessage(const Message &message)
 {
-    Q_UNUSED(message);
-    // TODO(fpohtmeh): remove?
-    // add to DB, update last message, setMessageStatus
-    // use sendMessageSuccess, sendMessageError
-    /*
-
-    return sendMessage(true, stMessage);
-    const auto status = m_client.sendPacket(message) ? EnMessageStatus::MST_SENT : EnMessageStatus::MST_FAILED;
-    */
+    auto msg = m_core.encryptMessage(message);
+    if (!msg)
+        emit sendMessageFailed(message, m_core.lastErrorText());
+    else if (m_client.sendPacket(*msg))
+        emit messageSent(message);
+    else
+        emit sendMessageFailed(message, QLatin1String("Message sending failed"));
 }
 
 void Client::onCheckConnectionState()
@@ -359,10 +357,12 @@ void Client::onSetOnlineStatus(bool online)
     m_client.setClientPresence(QXmppPresence(presenceType));
 }
 
-void Client::onMessageDelivered(const QString &jid, const QString &id)
+void Client::onMessageDelivered(const QString &jid, const QString &messageId)
 {
-    // TODO(fpohtmeh): set message status to EnMessageStatus::MST_RECEIVED
-    qDebug() << QString("Message with id: %1 delivered to %2").arg(jid, id);
+    // FIXME(fpohtmeh): restore
+    Q_UNUSED(jid);
+    //qDebug() << QString("Message with id: %1 delivered to %2").arg(jid, messageId);
+    emit messageDelivered(messageId);
 }
 
 void Client::onXmppLoggerMessage(QXmppLogger::MessageType type, const QString &message)

@@ -48,12 +48,12 @@ void ChatsModel::processContact(const QString &contact)
 
 void ChatsModel::updateMessageStatus(const Message &message)
 {
-    auto chatIndex = findChatIndex(message.contact);
-    if (!chatIndex) {
+    auto chatRow = findChatRow(message.contact);
+    if (!chatRow) {
         qCritical() << "Message status changed but chat doesn't exist:" << message.contact;
     }
     else if (message.status == Message::Status::Read) {
-        const int row = *chatIndex;
+        const int row = *chatRow;
         m_chats[row].unreadMessageCount--;
         emit dataChanged(index(row), index(row), { UnreadMessagesCountRole });
     }
@@ -97,7 +97,7 @@ QVariant ChatsModel::data(const QModelIndex &index, int role) const
     }
 }
 
-Optional<int> ChatsModel::findChatIndex(const QString &contact) const
+Optional<int> ChatsModel::findChatRow(const QString &contact) const
 {
     int row = -1;
     for (auto &chat : m_chats) {
@@ -125,7 +125,7 @@ void ChatsModel::addChat(const QString &contact, const QString &messageBody, con
 void ChatsModel::updateChat(const QString &contact, const QString &messageBody, const QDateTime &eventTimestamp,
                             const Optional<Message::Status> status)
 {
-    const auto chatIndex = findChatIndex(contact);
+    const auto chatIndex = findChatRow(contact);
     if (!chatIndex) {
         addChat(contact, messageBody, eventTimestamp, status);
     }

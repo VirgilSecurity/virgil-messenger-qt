@@ -59,6 +59,8 @@ public:
     using QAbstractListModel::QAbstractListModel;
 
     void addMessage(const Message &message);
+    void setMessageStatus(const Message &message, const Message::Status status);
+    void setMessageStatusById(const QString &messageId, const Message::Status status);
 
     void setUser(const QString &user);
     void setRecipient(const QString &recipient);
@@ -74,7 +76,8 @@ signals:
     void messageStatusChanged(const Message &message);
 
 private:
-    void setMessageStatus(int row, const Message::Status status);
+    void setMessageStatusByRow(int row, const Message::Status status);
+    Optional<int> findMessageRow(const QString &id) const;
 
     QString displayStatus(const Message::Status status) const;
     bool isInRow(const Message &message, int row) const;

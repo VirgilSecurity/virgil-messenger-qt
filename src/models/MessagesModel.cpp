@@ -42,14 +42,35 @@ void MessagesModel::addMessage(const Message &message)
     emit messageAdded(message);
 }
 
+void MessagesModel::setMessageStatus(const Message &message, const Message::Status status)
+{
+    setMessageStatusById(message.id, status);
+}
+
+void MessagesModel::setMessageStatusById(const QString &messageId, const Message::Status status)
+{
+    const auto row = findMessageRow(messageId);
+    if (!row)
+        qCritical() << "Message status can't be changed for missing message";
+    else
+        setMessageStatusByRow(*row, status);
+}
+
 void MessagesModel::setUser(const QString &user)
 {
+    if (m_user == user)
+        return;
     m_user = user;
+
+    beginResetModel();
+    m_messages.clear();
+    endResetModel();
 }
 
 void MessagesModel::setRecipient(const QString &recipient)
 {
-    // Marks recipient messages as read
+    // TODO(fpohtmeh): load from database
+    // Marks all unread messages as read
     int row = -1;
     for (auto &message : m_messages) {
         ++row;
@@ -57,7 +78,7 @@ void MessagesModel::setRecipient(const QString &recipient)
             continue;
         if (message.author == Message::Author::User)
             continue;
-        setMessageStatus(row, Message::Status::Read);
+        setMessageStatusByRow(row, Message::Status::Read);
     }
 }
 
@@ -106,7 +127,7 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
     }
 }
 
-void MessagesModel::setMessageStatus(int row, const Message::Status status)
+void MessagesModel::setMessageStatusByRow(int row, const Message::Status status)
 {
     auto &message = m_messages[row];
     if (message.status == status)
@@ -114,6 +135,14 @@ void MessagesModel::setMessageStatus(int row, const Message::Status status)
     message.status = status;
     emit dataChanged(index(row), index(row), { StatusRole });
     emit messageStatusChanged(message);
+}
+
+Optional<int> MessagesModel::findMessageRow(const QString &id) const
+{
+    for (int i = m_messages.size() - 1; i >= 0; --i)
+        if (m_messages[i].id == id)
+            return i;
+    return NullOptional;
 }
 
 QString MessagesModel::displayStatus(const Message::Status status) const

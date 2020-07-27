@@ -65,37 +65,41 @@ public:
 
 signals:
     void signIn(const QString &userWithEnv);
-    void signOut();
-    void signUp(const QString &userWithEnv);
-    void backupKey(const QString &password);
     void signInWithKey(const QString &userWithEnv, const QString &password);
-
     void signedIn(const QString &userWithEnv);
     void signInFailed(const QString &userWithEnv, const QString &error);
+
+    void signOut();
     void signedOut();
+
+    void signUp(const QString &userWithEnv);
     void signedUp(const QString &userWithEnv);
     void signUpFailed(const QString &userWithEnv, const QString &error);
+
+    void backupKey(const QString &password);
     void keyBackuped(const QString &password);
     void backupKeyFailed(const QString &password, const QString &error);
 
     void addContact(const QString &contact);
-    void createSendMessage(const QString &text, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
-    void sendMessage(const Message &message);
-
     void contactAdded(const QString &contact);
     void addContactFailed(const QString &contact, const QString &error);
+
+    void createSendMessage(const QString &text, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
+    void sendMessage(const Message &message);
     void messageSent();
     void sendMessageFailed();
 
     void quitRequested();
     void credentialsRequested(bool signOut);
-    void userChanged(const QString &user);
-    void recipientChanged(const QString &recipient);
-
     void checkConnectionState();
     void setOnlineStatus(bool online);
 
+    void userChanged(const QString &user);
+    void recipientChanged(const QString &recipient);
+
 private:
+    void setupConnections();
+
     void setUser(const QString &user);
     void setRecipient(const QString &recipient);
     MessagesModel *messageModel();

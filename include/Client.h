@@ -76,6 +76,7 @@ signals:
     void sendMessageFailed(const Message &message, const QString &error);
     void messageReceived(const Message &message);
     void receiveMessageFailed(const QString &error);
+    void messageDelivered(const QString &messageId);
 
 private:
     bool xmppConnect();
@@ -102,7 +103,7 @@ private:
     void onSendMessage(const Message &message);
     void onCheckConnectionState();
     void onSetOnlineStatus(bool online);
-    void onMessageDelivered(const QString &jid, const QString &id);
+    void onMessageDelivered(const QString &jid, const QString &messageId);
     void onXmppLoggerMessage(QXmppLogger::MessageType type, const QString &message);
     void onSslErrors(const QList<QSslError> &errors);
 

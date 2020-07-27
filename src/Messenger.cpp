@@ -67,56 +67,75 @@ Messenger::Messenger(Settings *settings, QObject *parent)
 
 void Messenger::start()
 {
-    // Authorization calls
-    connect(this, &Messenger::signIn, m_client, &Client::signIn);
-    connect(this, &Messenger::signOut, m_client, &Client::signOut);
-    connect(this, &Messenger::signUp, m_client, &Client::signUp);
-    connect(this, &Messenger::backupKey, m_client, &Client::backupKey);
-    connect(this, &Messenger::signInWithKey, m_client, &Client::signInWithKey);
-
-    // Authorization results processing/redirection
-    connect(m_client, &Client::signedIn, this, &Messenger::signedIn);
-    connect(m_client, &Client::signedIn, m_settings, &Settings::addUserToList);
-    connect(m_client, &Client::signedIn, m_settings, &Settings::setLastSignedInUser);
-    connect(m_client, &Client::signedIn, this, &Messenger::setUser);
-    connect(m_client, &Client::signInFailed, this, &Messenger::signInFailed);
-    connect(m_client, &Client::signedOut, this, std::bind(&Messenger::credentialsRequested, this, true));
-    connect(m_client, &Client::signedOut, this, std::bind(&Messenger::setUser, this, QLatin1String()));
-    connect(m_client, &Client::signedOut, this, &Messenger::signedOut);
-    connect(m_client, &Client::signedUp, this, &Messenger::signedUp);
-    connect(m_client, &Client::signedUp, m_settings, &Settings::addUserToList);
-    connect(m_client, &Client::signedUp, m_settings, &Settings::setLastSignedInUser);
-    connect(m_client, &Client::signUpFailed, this, &Messenger::signUpFailed);
-    connect(m_client, &Client::keyBackuped, this, &Messenger::keyBackuped);
-    connect(m_client, &Client::backupKeyFailed, this, &Messenger::backupKeyFailed);
-
-    // Contacts, chats & messages
-    connect(this, &Messenger::addContact, m_client, &Client::addContact);
-    connect(this, &Messenger::createSendMessage, this, &Messenger::onCreateSendMessage);
-    connect(this, &Messenger::sendMessage, m_client, &Client::sendMessage);
-    connect(m_client, &Client::contactAdded, this, &Messenger::contactAdded);
-    connect(m_client, &Client::contactAdded, &m_chatsModel, &ChatsModel::processContact);
-    connect(m_client, &Client::addContactFailed, this, &Messenger::addContactFailed);
-    connect(m_client, &Client::messageSent, this, &Messenger::messageSent);
-    connect(m_client, &Client::sendMessageFailed, this, &Messenger::sendMessageFailed);
-    connect(m_client, &Client::messageReceived, &m_messageModel, &MessagesModel::addMessage);
-
-    connect(&m_messageModel, &MessagesModel::messageAdded, &m_chatsModel, &ChatsModel::processMessage);
-    connect(&m_messageModel, &MessagesModel::messageStatusChanged, &m_chatsModel, &ChatsModel::updateMessageStatus);
-
-    // Other calls
-    connect(this, &Messenger::userChanged, &m_messageModel, &MessagesModel::setUser);
-    connect(this, &Messenger::recipientChanged, &m_messageModel, &MessagesModel::setRecipient);
-    connect(this, &Messenger::recipientChanged, &m_chatsModel, &ChatsModel::setRecipient);
-
-    connect(this, &Messenger::checkConnectionState, m_client, &Client::checkConnectionState);
-    connect(this, &Messenger::setOnlineStatus, m_client, &Client::setOnlineStatus);
+    setupConnections();
 
     // Sign-in or request credentials
     if (m_settings->lastSignedInUser().isEmpty())
         emit credentialsRequested(false);
     else
         signIn(m_settings->lastSignedInUser());
+}
+
+void Messenger::setupConnections()
+{
+    // Authorization: messenger-to-client
+    connect(this, &Messenger::signIn, m_client, &Client::signIn);
+    connect(this, &Messenger::signInWithKey, m_client, &Client::signInWithKey);
+    connect(this, &Messenger::signOut, m_client, &Client::signOut);
+    connect(this, &Messenger::signUp, m_client, &Client::signUp);
+    connect(this, &Messenger::backupKey, m_client, &Client::backupKey);
+    // Authorization status: client-to-messenger
+    connect(m_client, &Client::signedIn, this, &Messenger::signedIn);
+    connect(m_client, &Client::signedIn, this, &Messenger::setUser);
+    connect(m_client, &Client::signInFailed, this, &Messenger::signInFailed);
+    connect(m_client, &Client::signedOut, this, std::bind(&Messenger::credentialsRequested, this, true));
+    connect(m_client, &Client::signedOut, this, std::bind(&Messenger::setUser, this, QLatin1String()));
+    connect(m_client, &Client::signedOut, this, &Messenger::signedOut);
+    connect(m_client, &Client::signedUp, this, &Messenger::signedUp);
+    connect(m_client, &Client::signUpFailed, this, &Messenger::signUpFailed);
+    connect(m_client, &Client::keyBackuped, this, &Messenger::keyBackuped);
+    connect(m_client, &Client::backupKeyFailed, this, &Messenger::backupKeyFailed);
+    // Signed users: client-to-settings
+    connect(m_client, &Client::signedIn, m_settings, &Settings::addUserToList);
+    connect(m_client, &Client::signedIn, m_settings, &Settings::setLastSignedInUser);
+    connect(m_client, &Client::signedUp, m_settings, &Settings::addUserToList);
+    connect(m_client, &Client::signedUp, m_settings, &Settings::setLastSignedInUser);
+
+    // Contacts: messenger-to-client
+    connect(this, &Messenger::addContact, m_client, &Client::addContact);
+    // Contacts status: client-to-messenger
+    connect(m_client, &Client::contactAdded, this, &Messenger::contactAdded);
+    connect(m_client, &Client::addContactFailed, this, &Messenger::addContactFailed);
+    // Contacts status: client-to-models
+    connect(m_client, &Client::contactAdded, &m_chatsModel, &ChatsModel::processContact);
+
+    // Messages: messenger-to-client
+    connect(this, &Messenger::createSendMessage, this, &Messenger::onCreateSendMessage);
+    connect(this, &Messenger::sendMessage, m_client, &Client::sendMessage);
+    // Messages status: client-to-messenger
+    connect(m_client, &Client::messageSent, this, &Messenger::messageSent);
+    connect(m_client, &Client::sendMessageFailed, this, &Messenger::sendMessageFailed);
+    // Messages: messenger-to-models
+    connect(this, &Messenger::sendMessage, &m_messageModel, &MessagesModel::addMessage);
+    // Messages status: client-to-model
+    connect(m_client, &Client::messageReceived, &m_messageModel, &MessagesModel::addMessage);
+    connect(m_client, &Client::messageSent, &m_messageModel,
+        std::bind(&MessagesModel::setMessageStatus, &m_messageModel, std::placeholders::_1, Message::Status::Sent));
+    connect(m_client, &Client::sendMessageFailed, &m_messageModel,
+        std::bind(&MessagesModel::setMessageStatus, &m_messageModel, std::placeholders::_1, Message::Status::Failed));
+    connect(m_client, &Client::messageDelivered, &m_messageModel,
+        std::bind(&MessagesModel::setMessageStatusById, &m_messageModel, std::placeholders::_1, Message::Status::Received));
+    // Messages status: model-to-model
+    connect(&m_messageModel, &MessagesModel::messageAdded, &m_chatsModel, &ChatsModel::processMessage);
+    connect(&m_messageModel, &MessagesModel::messageStatusChanged, &m_chatsModel, &ChatsModel::updateMessageStatus);
+
+    // Other connections: messenger-to-client
+    connect(this, &Messenger::checkConnectionState, m_client, &Client::checkConnectionState);
+    connect(this, &Messenger::setOnlineStatus, m_client, &Client::setOnlineStatus);
+    // Other connections: messenger-to-models
+    connect(this, &Messenger::userChanged, &m_messageModel, &MessagesModel::setUser);
+    connect(this, &Messenger::recipientChanged, &m_messageModel, &MessagesModel::setRecipient);
+    connect(this, &Messenger::recipientChanged, &m_chatsModel, &ChatsModel::setRecipient);
 }
 
 void Messenger::setUser(const QString &user)
