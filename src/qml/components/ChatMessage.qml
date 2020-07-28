@@ -22,7 +22,6 @@ Control {
     property bool inRow: false
     property bool firstInRow: true
 
-    // TODO(fpohtmeh): implement
     property string attachmentId
     property string attachmentSize
     property var attachmentType
@@ -242,17 +241,6 @@ Control {
                 color: chatMessage.failed ? "red" : Theme.labelColor
                 font.pixelSize: UiHelper.fixFontSz(11)
             }
-        }
-    }
-
-    function getStatusById(statusId) {
-        switch (statusId) {
-            // TODO(fpohtmeh): get from model
-            case "0": return "sending"
-            case "1": return "sent"
-            case "2": return "delivered"
-            case "4": return "failed"
-            default: return ""
         }
     }
 }

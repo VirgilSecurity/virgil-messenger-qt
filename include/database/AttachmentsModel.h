@@ -51,13 +51,7 @@ public:
 
     bool createTable(const QString &user);
 
-    // Create attachment by local url and attachment type
-    OptionalAttachment createFromLocalFile(const QUrl &url, const Attachment::Type type);
-
 private:
-    // Create preview image and return preview url
-    QUrl createPreviewImage(const QString &fileName) const;
-
     Settings *m_settings;
 };
 

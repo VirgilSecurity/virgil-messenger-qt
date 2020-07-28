@@ -153,7 +153,8 @@ Optional<QXmppMessage> VirgilCore::encryptMessage(const Message &message)
 
     QJsonDocument doc(mainObject);
     QString internalJson = doc.toJson(QJsonDocument::Compact);
-    qDebug() << internalJson;
+    // FIXME(fpohtmeh): restore
+    //qDebug() << internalJson;
 
     // Encrypt message
     if (VS_CODE_OK != vs_messenger_virgil_encrypt_msg(

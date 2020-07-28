@@ -34,9 +34,9 @@
 
 #include "Client.h"
 
+#include <QDeadlineTimer>
 #include <QEventLoop>
 #include <QSslSocket>
-#include <QTimer>
 
 #include <QXmppConfiguration.h>
 #include <QXmppLogger.h>
@@ -70,6 +70,8 @@ Client::Client(Settings *settings, QObject *parent)
     : QObject(parent)
     , m_core(settings)
     , m_client(this)
+    , m_lastErrorText()
+    , m_waitingForConnection(false)
 {}
 
 void Client::start()
@@ -110,6 +112,11 @@ void Client::start()
     //connect(logger, &QXmppLogger::message, this, &Client::onXmppLoggerMessage);
     m_client.setLogger(logger);
 #endif
+
+    // Connection timer
+    connect(&m_client, &QXmppClient::connected, this, &Client::stopWaitForConnection);
+    connect(&m_client, &QXmppClient::disconnected, this, &Client::stopWaitForConnection);
+    connect(&m_client, &QXmppClient::error, this, &Client::stopWaitForConnection);
 }
 
 bool Client::xmppConnect()
@@ -132,18 +139,8 @@ bool Client::xmppConnect()
     qDebug() << QLatin1String("SSL: ") << QSslSocket::supportsSsl();
     qDebug() << QLatin1String(">>>> Connecting...");
     m_client.connectToServer(config);
-    waitForConnectionChange();
+    waitForConnection();
     return m_client.isConnected();
-}
-
-void Client::waitForConnectionChange()
-{
-    QEventLoop loop;
-    connect(&m_client, &QXmppClient::connected, &loop, &QEventLoop::quit);
-    connect(&m_client, &QXmppClient::disconnected, &loop, &QEventLoop::quit); // TODO(fpohtmeh): is disconnect signal needed here?
-    connect(&m_client, &QXmppClient::error, &loop, &QEventLoop::quit);
-    QTimer::singleShot(kConnectionWaitMs, &loop, &QEventLoop::quit);
-    loop.exec();
 }
 
 void Client::xmppDisconnect()
@@ -153,7 +150,7 @@ void Client::xmppDisconnect()
     }
     else {
         m_client.disconnectFromServer();
-        waitForConnectionChange();
+        waitForConnection();
     }
 }
 
@@ -165,6 +162,23 @@ void Client::xmppReconnect()
         qWarning() << "Client is already connected. Reconnect was skipped";
     else
         xmppConnect();
+}
+
+void Client::waitForConnection()
+{
+    QDeadlineTimer timer(kConnectionWaitMs);
+    QEventLoop loop;
+    m_waitingForConnection = true;
+    do {
+        loop.processEvents();
+    }
+    while (m_waitingForConnection && !timer.hasExpired());
+    m_waitingForConnection = false;
+}
+
+void Client::stopWaitForConnection()
+{
+    m_waitingForConnection = false;
 }
 
 void Client::subscribeOnPushNotifications(bool enable)

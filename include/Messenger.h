@@ -39,6 +39,7 @@
 
 #include "Client.h"
 #include "Common.h"
+#include "models/AttachmentBuilder.h"
 #include "models/ChatsModel.h"
 #include "models/MessagesModel.h"
 
@@ -108,6 +109,7 @@ private:
     void onCreateSendMessage(const QString &text, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
 
     Settings *m_settings;
+    AttachmentBuilder m_attachmentBuilder;
     MessagesModel m_messageModel;
     ChatsModel m_chatsModel;
 

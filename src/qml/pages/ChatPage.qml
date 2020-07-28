@@ -31,7 +31,7 @@ Page {
             Rectangle {
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
-                anchors.right: parent.right                
+                anchors.right: parent.right
                 anchors.leftMargin: 20
                 anchors.rightMargin: 20
                 height: 1
@@ -95,13 +95,11 @@ Page {
             inRow: model.inRow
             firstInRow: model.firstInRow
 
-            /*
             attachmentId: model.attachmentId
             attachmentSize: model.attachmentSize
             attachmentType: model.attachmentType
             attachmentLocalUrl: model.attachmentLocalUrl
             attachmentLocalPreview: model.attachmentLocalPreview
-            */
         }
 
         onCountChanged: {

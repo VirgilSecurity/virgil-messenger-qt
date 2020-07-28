@@ -80,9 +80,11 @@ signals:
 
 private:
     bool xmppConnect();
-    void waitForConnectionChange();
     void xmppDisconnect();
     void xmppReconnect();
+
+    void waitForConnection();
+    void stopWaitForConnection();
     void subscribeOnPushNotifications(bool enable);
 
     void onSignIn(const QString &userWithEnv);
@@ -107,9 +109,10 @@ private:
     void onXmppLoggerMessage(QXmppLogger::MessageType type, const QString &message);
     void onSslErrors(const QList<QSslError> &errors);
 
-    QString m_lastErrorText;
     VirgilCore m_core;
     QXmppClient m_client;
+    QString m_lastErrorText;
+    bool m_waitingForConnection;
 };
 
 #endif // VSQ_CLIENT_H

@@ -32,13 +32,11 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/AttachmentsModel.h"
+#include "database/AttachmentsModel.h"
 
-#include <QPixmap>
 #include <QSqlQuery>
 
 #include "Settings.h"
-#include "Utils.h"
 
 AttachmentsModel::AttachmentsModel(Settings *settings, QObject *parent)
     : QSqlTableModel(parent)
@@ -69,51 +67,4 @@ bool AttachmentsModel::createTable(const QString &user)
 
     setTable(attachmentsTableName);
     return true;
-}
-
-OptionalAttachment AttachmentsModel::createFromLocalFile(const QUrl &url, const Attachment::Type type)
-{
-    if (!url.isValid() || !url.isLocalFile())
-        return NullOptional;
-    QFileInfo info(url.toLocalFile());
-    if (!info.exists()) {
-        qInfo() << QString("Attachment file %1 doesn't exist").arg(info.absoluteFilePath());
-        return NullOptional;
-    }
-    if (info.size() > m_settings->attachmentMaxSize()) {
-        qInfo() << QString("File size exceeds maximum limit: %1").arg(m_settings->attachmentMaxSize());
-        return NullOptional;
-    }
-    Attachment attachment;
-    attachment.id = Utils::createUuid();
-    attachment.type = type;
-    attachment.local_url = QUrl::fromLocalFile(info.absoluteFilePath());
-    if (type == Attachment::Type::Picture)
-        attachment.local_preview = createPreviewImage(info.absoluteFilePath());
-    attachment.size = info.size();
-    return attachment;
-}
-
-QUrl AttachmentsModel::createPreviewImage(const QString &fileName) const
-{
-    QPixmap pixmap(fileName);
-    QSizeF size = pixmap.size();
-    const double ratio = size.height() / size.width();
-    const QSizeF maxSize = m_settings->previewMaxSize();
-    if (size.width() > maxSize.width())
-    {
-        size.setWidth(maxSize.width());
-        size.setHeight(maxSize.width() * ratio);
-    }
-    if (size.height() > maxSize.height())
-    {
-        size.setHeight(maxSize.height());
-        size.setWidth(maxSize.height() / ratio);
-    }
-    if (size != pixmap.size())
-        pixmap = pixmap.scaled(size.width(), size.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    const QString previewFileName = m_settings->attachmentCacheDir().filePath(Utils::createUuid() + QLatin1String(".png"));
-    pixmap.save(previewFileName);
-    qInfo() << "Created preview image:" << previewFileName;
-    return QUrl::fromLocalFile(previewFileName);
 }

@@ -97,6 +97,7 @@ HEADERS += \
         include/Utils.h \
         include/ui/VSQUiHelper.h \
         # Models
+        include/models/AttachmentBuilder.h \
         include/models/ChatsModel.h \
         include/models/MessagesModel.h \
 #        include/models/AttachmentsModel.h \
@@ -128,6 +129,7 @@ SOURCES += \
         src/main.cpp \
         src/ui/VSQUiHelper.cpp \
         # Models
+        src/models/AttachmentBuilder.cpp \
         src/models/ChatsModel.cpp \
         src/models/MessagesModel.cpp \
 #        src/models/AttachmentsModel.cpp \

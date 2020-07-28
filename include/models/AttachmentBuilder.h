@@ -32,64 +32,26 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_MESSAGESMODEL_H
-#define VSQ_MESSAGESMODEL_H
-
-#include <QAbstractListModel>
+#ifndef VSQ_ATTACHMENT_BUILDER
+#define VSQ_ATTACHMENT_BUILDER
 
 #include "Common.h"
 
-class MessagesModel : public QAbstractListModel
+class Settings;
+
+class AttachmentBuilder
 {
-    Q_OBJECT
-
 public:
-    enum Roles
-    {
-        BodyRole = Qt::UserRole,
-        TimeRole,
-        NicknameRole,
-        IsUserRoles,
-        StatusRole,
-        FailedRole,
-        InRowRole,
-        FirstInRowRole,
-        AttachmentIdRole,
-        AttachmentSizeRole,
-        AttachmentTypeRole,
-        AttachmentLocalUrlRole,
-        AttachmentLocalPreviewRole
-    };
+    explicit AttachmentBuilder(Settings *settings);
 
-    using QAbstractListModel::QAbstractListModel;
-
-    void addMessage(const Message &message);
-    void setMessageStatus(const Message &message, const Message::Status status);
-    void setMessageStatusById(const QString &messageId, const Message::Status status);
-
-    void setUser(const QString &user);
-    void setRecipient(const QString &recipient);
-
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QHash<int, QByteArray> roleNames() const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-
-    // TODO(fpohtmeh): add fetchMore functionality
-
-signals:
-    void messageAdded(const Message &message);
-    void messageStatusChanged(const Message &message);
+    // Build attachment by local url and attachment type
+    OptionalAttachment build(const QUrl &url, const Attachment::Type type);
 
 private:
-    void setMessageStatusByRow(int row, const Message::Status status);
-    Optional<int> findMessageRow(const QString &id) const;
+    // Create preview image and return preview url
+    QUrl createPreviewImage(const QString &fileName) const;
 
-    QString displayStatus(const Message::Status status) const;
-    bool isInRow(const Message &message, int row) const;
-    bool isFirstInRow(const Message &message, int row) const;
-
-    std::vector<Message> m_messages;
-    QString m_user;
+    Settings *m_settings;
 };
 
-#endif // VSQ_MESSAGESMODEL_H
+#endif // VSQ_ATTACHMENT_BUILDER

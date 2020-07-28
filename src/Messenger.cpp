@@ -44,6 +44,7 @@
 Messenger::Messenger(Settings *settings, QObject *parent)
     : QObject(parent)
     , m_settings(settings)
+    , m_attachmentBuilder(settings)
     , m_messageModel(this)
     , m_chatsModel(this)
     , m_database(new Database(settings, nullptr))
@@ -168,13 +169,10 @@ ChatsModel *Messenger::chatsModel()
 
 void Messenger::onCreateSendMessage(const QString &text, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
 {
-    // TODO(fpohtmeh): create from atttachment
-    Q_UNUSED(attachmentUrl);
-    Q_UNUSED(attachmentType);
-    Optional<Attachment> attachment;
     // Create message
     const QString uuid = Utils::createUuid();
     QString messageText = text;
+    const auto attachment = m_attachmentBuilder.build(attachmentUrl.toUrl(), attachmentType);
     if (attachment)
         messageText = attachment->fileName();
     const Message message {

@@ -34,6 +34,8 @@
 
 #include "models/MessagesModel.h"
 
+#include "Utils.h"
+
 void MessagesModel::addMessage(const Message &message)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
@@ -99,6 +101,11 @@ QHash<int, QByteArray> MessagesModel::roleNames() const
     names[FailedRole] = "failed";
     names[InRowRole] = "inRow";
     names[FirstInRowRole] = "firstInRow";
+    names[AttachmentIdRole] = "attachmentId";
+    names[AttachmentSizeRole] = "attachmentSize";
+    names[AttachmentTypeRole] = "attachmentType";
+    names[AttachmentLocalUrlRole] = "attachmentLocalUrl";
+    names[AttachmentLocalPreviewRole] = "attachmentLocalPreview";
     return names;
 }
 
@@ -122,6 +129,16 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
         return isInRow(message, index.row());
     case FirstInRowRole:
         return isFirstInRow(message, index.row());
+    case AttachmentIdRole:
+        return message.attachment ? message.attachment->id : QString();
+    case AttachmentSizeRole:
+        return Utils::formattedFileSize(message.attachment ? message.attachment->size : 0);
+    case AttachmentTypeRole:
+        return QVariant::fromValue(message.attachment ? message.attachment->type : Attachment::Type::File);
+    case AttachmentLocalUrlRole:
+        return message.attachment ? message.attachment->local_url : QString();
+    case AttachmentLocalPreviewRole:
+        return message.attachment ? message.attachment->local_preview : QString();
     default:
         return QVariant();
     }
