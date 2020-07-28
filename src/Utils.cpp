@@ -43,7 +43,7 @@ QString Utils::createUuid()
     return QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
 }
 
-QString Utils::formattedFileSize(int fileSize)
+QString Utils::formattedDataSize(DataSize fileSize)
 {
     static QLocale locale = QLocale::system();
     return locale.formattedDataSize(fileSize);

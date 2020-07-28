@@ -32,60 +32,38 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SETTINGS_H
-#define VSQ_SETTINGS_H
+#include "client/Uploader.h"
 
-#include <QDir>
-#include <QSettings>
-#include <QSize>
+#include <QXmppClient.h>
 
-#include "Common.h"
+#include <QThread> // FIXME(fpohtmeh): remove upload emulation code
 
-Q_DECLARE_LOGGING_CATEGORY(settings)
-
-class Settings : public QSettings
+Uploader::Uploader(QXmppClient *client, QObject *parent)
+    : QObject(parent)
+    , m_client(client)
 {
-    Q_OBJECT
-    Q_PROPERTY(QString lastSignedInUser READ lastSignedInUser WRITE setLastSignedInUser NOTIFY lastSignedInUserChanged)
-    Q_PROPERTY(QStringList usersList READ usersList WRITE setUsersList NOTIFY usersListChanged)
-    Q_PROPERTY(bool devMode READ devMode CONSTANT)
+    // FIXME(fpohtmeh): finish uploader initialization
+    client->addExtension(&m_manager);
+}
 
-public:
-    explicit Settings(QObject *parent);
-    ~Settings();
+void Uploader::upload(const ExtMessage &message)
+{
+    const auto id = message.id;
+    const DataSize total = 1000;
 
-    // Users
-
-    void setLastSignedInUser(const QString &user);
-    QString lastSignedInUser() const;
-
-    void setUsersList(const QStringList &users);
-    QStringList usersList() const;
-    void addUserToList(const QString &user);
-
-    QByteArray userCredential(const QString &user) const;
-    void setUserCredential(const QString &user, const QByteArray &userCredential);
-
-    // Database
-
-    QString databaseFileName() const;
-
-    // Attachments
-
-    int attachmentMaxSize() const;
-    QDir attachmentCacheDir() const;
-    QSize previewMaxSize() const;
-
-    // Dev mode
-    bool devMode() const;
-
-signals:
-    void lastSignedInUserChanged(const QString &);
-    void usersListChanged(const QStringList &);
-
-private:
-    QDir m_appDataDir;
-    QDir m_attachmentCacheDir;
-};
-
-#endif // VSQ_SETTINGS_H
+    emit uploadStarted(message);
+    DataSize uploaded = 0;
+    for (; uploaded <= total; uploaded += total / 30) {
+        emit uploadProgressChanged(message, uploaded, total);
+        QThread::currentThread()->msleep(100);
+    }
+    if (uploaded != total)
+        emit uploadProgressChanged(message, total, total);
+    // FIXME(fpohtmeh): implement real upload
+    emit uploadCompleted(message);
+    // FIXME(fpohtmeh): remove upload emulation code
+    if (m_client->sendPacket(message.xmpp))
+        emit messageSent(message);
+    else
+        emit sendMessageFailed(message, QLatin1String("Message sending failed"));
+}

@@ -32,7 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "Client.h"
+#include "client/Client.h"
 
 #include <QDeadlineTimer>
 #include <QEventLoop>
@@ -66,10 +66,14 @@ const QString kPushNotificationsDeviceID = "device_id";
 const QString kPushNotificationsFormType = "FORM_TYPE";
 const QString kPushNotificationsFormTypeVal = "http://jabber.org/protocol/pubsub#publish-options";
 
+Q_LOGGING_CATEGORY(client, "client")
+Q_LOGGING_CATEGORY(xmpp, "xmpp")
+
 Client::Client(Settings *settings, QObject *parent)
     : QObject(parent)
     , m_core(settings)
     , m_client(this)
+    , m_uploader(&m_client, this)
     , m_lastErrorText()
     , m_waitingForConnection(false)
 {}
@@ -84,7 +88,7 @@ void Client::start()
     connect(this, &Client::signUp, this, &Client::onSignUp);
     connect(this, &Client::backupKey, this, &Client::onBackupKey);
     connect(this, &Client::signInWithKey, this, &Client::onSignInWithKey);
-    // XMPP signals
+    // XMPP connections
     connect(&m_client, &QXmppClient::connected, this, &Client::onConnected);
     connect(&m_client, &QXmppClient::disconnected, this, &Client::onDisconnected);
     connect(&m_client, &QXmppClient::error, this, &Client::onError);
@@ -93,7 +97,7 @@ void Client::start()
     connect(&m_client, &QXmppClient::iqReceived, this, &Client::onIqReceived);
     connect(&m_client, &QXmppClient::stateChanged, this, &Client::onStateChanged);
     connect(&m_client, &QXmppClient::sslErrors, this, &Client::onSslErrors);
-    // Other signals
+    // Other connections
     connect(this, &Client::addContact, this, &Client::onAddContact);
     connect(this, &Client::sendMessage, this, &Client::onSendMessage);
     connect(this, &Client::checkConnectionState, this, &Client::onCheckConnectionState);
@@ -108,15 +112,30 @@ void Client::start()
     logger->setLoggingType(QXmppLogger::SignalLogging);
     logger->setMessageTypes(QXmppLogger::AnyMessage);
 #if USE_XMPP_LOGS
-    // FIXME(fpohtmeh): restore
-    //connect(logger, &QXmppLogger::message, this, &Client::onXmppLoggerMessage);
+    connect(logger, &QXmppLogger::message, this, &Client::onXmppLoggerMessage);
     m_client.setLogger(logger);
 #endif
 
-    // Connection timer
+    // Wait for connection "connections"
     connect(&m_client, &QXmppClient::connected, this, &Client::stopWaitForConnection);
     connect(&m_client, &QXmppClient::disconnected, this, &Client::stopWaitForConnection);
     connect(&m_client, &QXmppClient::error, this, &Client::stopWaitForConnection);
+
+    // Uploading: uploader-to-client
+    connect(&m_uploader, &Uploader::messageSent, this, &Client::messageSent);
+    connect(&m_uploader, &Uploader::sendMessageFailed, this, &Client::sendMessageFailed);
+    connect(&m_uploader, &Uploader::uploadStarted, this, [](){
+        qCDebug(client) << "Upload started...";
+    });
+    connect(&m_uploader, &Uploader::uploadProgressChanged, this, [](const Message &, DataSize uploaded, DataSize total) {
+        qCDebug(client) << QString("Upload progress changed: %1 / %2").arg(uploaded).arg(total);
+    });
+    connect(&m_uploader, &Uploader::uploadCompleted, this, [](){
+        qCDebug(client) << "Upload completed :)";
+    });
+    connect(&m_uploader, &Uploader::uploadFailed, this, [](){
+        qCDebug(client) << "Upload failed :(";
+    });
 }
 
 bool Client::xmppConnect()
@@ -136,8 +155,8 @@ bool Client::xmppConnect()
     config.setKeepAliveInterval(kKeepAliveTimeSec);
     config.setKeepAliveTimeout(kKeepAliveTimeSec - 1);
 #endif
-    qDebug() << QLatin1String("SSL: ") << QSslSocket::supportsSsl();
-    qDebug() << QLatin1String(">>>> Connecting...");
+    qCDebug(client) << "SSL: " << QSslSocket::supportsSsl();
+    qCDebug(client) << ">>>> Connecting...";
     m_client.connectToServer(config);
     waitForConnection();
     return m_client.isConnected();
@@ -146,7 +165,7 @@ bool Client::xmppConnect()
 void Client::xmppDisconnect()
 {
     if (!m_client.isConnected()) {
-        qDebug() << "Client is already disconnected";
+        qCDebug(client) << "Client is already disconnected";
     }
     else {
         m_client.disconnectFromServer();
@@ -221,6 +240,26 @@ void Client::subscribeOnPushNotifications(bool enable)
 #endif // VS_PUSHNOTIFICATIONS
 }
 
+Optional<ExtMessage> Client::createExtMessage(const Message &message)
+{
+    auto encryptedBody = m_core.encryptMessageBody(message.contact, message.body);
+    if (!encryptedBody) {
+        m_lastErrorText = m_core.lastErrorText();
+        return NullOptional;
+    }
+
+    QXmppMessage xmppMessage;
+    xmppMessage.setFrom(m_core.user() + "@" + m_core.xmppURL());
+    xmppMessage.setTo(message.contact + "@" + m_core.xmppURL()); // TODO(fpohtmeh): eliminate m_core
+    xmppMessage.setBody(*encryptedBody);
+    xmppMessage.setId(message.id);
+    xmppMessage.setReceiptRequested(true);
+
+    ExtMessage extMessage(message);
+    extMessage.xmpp = xmppMessage;
+    return extMessage;
+}
+
 void Client::onSignIn(const QString &userWithEnv)
 {
     if (!m_core.signIn(userWithEnv))
@@ -274,7 +313,7 @@ void Client::onAddContact(const QString &contact)
 void Client::onConnected()
 {
     VS_LOG_DEBUG("onConnected");
-    qDebug() << "onConnected";
+    qCDebug(client) << "onConnected";
     subscribeOnPushNotifications(true); // TODO(fpohtmeh): why subscription is here?
     // TODO(fpohtmeh): send all messages with status failed
 }
@@ -282,20 +321,19 @@ void Client::onConnected()
 void Client::onDisconnected()
 {
     VS_LOG_DEBUG("onDisconnected");
-    qDebug() << "onDisconnected state:" << m_client.state();
+    qCDebug(client) << "onDisconnected state:" << m_client.state();
 }
 
 void Client::onError(QXmppClient::Error error)
 {
     VS_LOG_DEBUG("onError");
-    qDebug() << "onError:" << error << "state:" << m_client.state();
+    qCDebug(client) << "onError:" << error << "state:" << m_client.state();
     xmppReconnect();
 }
 
 void Client::onMessageReceived(const QXmppMessage &message)
 {
-    // FIXME(fpohtmeh): restore
-    //qDebug() << "Message received:" << message.from() << message.body();
+    qCDebug(client) << "Message received:" << message.from() << message.body();
     // Get sender
     QString from = message.from();
     QStringList pieces = from.split("@");
@@ -307,7 +345,7 @@ void Client::onMessageReceived(const QXmppMessage &message)
     // Get encrypted message
     QString encryptedBody = message.body();
     // Decrypt message
-    const auto body = m_core.decryptMessage(sender, encryptedBody);
+    const auto body = m_core.decryptMessageBody(sender, encryptedBody);
     if (!body) {
         emit receiveMessageFailed(m_core.lastErrorText());
         return;
@@ -319,7 +357,7 @@ void Client::onMessageReceived(const QXmppMessage &message)
     msg.body = *body;
     msg.contact = sender;
     msg.author = Message::Author::Contact;
-    // FIXME(fpohtmeh): get attachment
+    // FIXME(fpohtmeh): get attachment from xmpp message?
     msg.status = Message::Status::Received;
     //
     emit messageReceived(msg);
@@ -345,10 +383,14 @@ void Client::onStateChanged(QXmppClient::State state)
 
 void Client::onSendMessage(const Message &message)
 {
-    auto msg = m_core.encryptMessage(message);
-    if (!msg)
+    auto msg = createExtMessage(message);
+    if (!msg) {
         emit sendMessageFailed(message, m_core.lastErrorText());
-    else if (m_client.sendPacket(*msg))
+        return;
+    }
+    if (message.attachment)
+        m_uploader.upload(*msg); // FIXME(fpohtmeh): handle uploader signals
+    else if (m_client.sendPacket(msg->xmpp))
         emit messageSent(message);
     else
         emit sendMessageFailed(message, QLatin1String("Message sending failed"));
@@ -358,8 +400,7 @@ void Client::onCheckConnectionState()
 {
     if (m_client.state() == QXmppClient::DisconnectedState) {
 #if VS_ANDROID
-        // TODO(fpohtmeh): remove this warning
-        qWarning() << QLatin1String("Disconnected ...");
+        qCWarning(client) << "Disconnected ...";
 #endif
         xmppReconnect();
     }
@@ -373,25 +414,22 @@ void Client::onSetOnlineStatus(bool online)
 
 void Client::onMessageDelivered(const QString &jid, const QString &messageId)
 {
-    // FIXME(fpohtmeh): restore
-    Q_UNUSED(jid);
-    //qDebug() << QString("Message with id: %1 delivered to %2").arg(jid, messageId);
+    qCDebug(client) << QString("Message with id: %1 delivered to %2").arg(jid, messageId);
     emit messageDelivered(messageId);
 }
 
 void Client::onXmppLoggerMessage(QXmppLogger::MessageType type, const QString &message)
 {
-    const auto msg = QString("XMPP log: %1").arg(message);
     if (type == QXmppLogger::WarningMessage)
-        qWarning().noquote() << msg;
+        qCWarning(xmpp).noquote() << message;
     else
-        qDebug().noquote() << msg;
+        qCDebug(xmpp).noquote() << message;
 }
 
 void Client::onSslErrors(const QList<QSslError> &errors)
 {
     for (auto &error : errors)
-        qWarning() << QLatin1String("SSL error:") << error;
+        qCWarning(client) << "SSL error:" << error;
     m_lastErrorText = QLatin1String("SSL connection errors...");
     xmppDisconnect();
 }

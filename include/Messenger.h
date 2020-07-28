@@ -37,8 +37,8 @@
 
 #include <QObject>
 
-#include "Client.h"
 #include "Common.h"
+#include "client/Client.h"
 #include "models/AttachmentBuilder.h"
 #include "models/ChatsModel.h"
 #include "models/MessagesModel.h"
@@ -59,7 +59,6 @@ class Messenger : public QObject
 
 public:
     explicit Messenger(Settings *settings, QObject *parent = nullptr);
-    Messenger() = default;
     ~Messenger() override = default;
 
     Q_INVOKABLE void start();

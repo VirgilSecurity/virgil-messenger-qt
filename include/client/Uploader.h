@@ -32,60 +32,39 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SETTINGS_H
-#define VSQ_SETTINGS_H
+#ifndef VSQ_UPLOADER_H
+#define VSQ_UPLOADER_H
 
-#include <QDir>
-#include <QSettings>
-#include <QSize>
+#include <QObject>
+
+#include <QXmppUploadRequestManager.h>
 
 #include "Common.h"
 
-Q_DECLARE_LOGGING_CATEGORY(settings)
+class QXmppClient;
 
-class Settings : public QSettings
+class Uploader : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString lastSignedInUser READ lastSignedInUser WRITE setLastSignedInUser NOTIFY lastSignedInUserChanged)
-    Q_PROPERTY(QStringList usersList READ usersList WRITE setUsersList NOTIFY usersListChanged)
-    Q_PROPERTY(bool devMode READ devMode CONSTANT)
 
 public:
-    explicit Settings(QObject *parent);
-    ~Settings();
+    explicit Uploader(QXmppClient *client, QObject *parent);
 
-    // Users
-
-    void setLastSignedInUser(const QString &user);
-    QString lastSignedInUser() const;
-
-    void setUsersList(const QStringList &users);
-    QStringList usersList() const;
-    void addUserToList(const QString &user);
-
-    QByteArray userCredential(const QString &user) const;
-    void setUserCredential(const QString &user, const QByteArray &userCredential);
-
-    // Database
-
-    QString databaseFileName() const;
-
-    // Attachments
-
-    int attachmentMaxSize() const;
-    QDir attachmentCacheDir() const;
-    QSize previewMaxSize() const;
-
-    // Dev mode
-    bool devMode() const;
+    void upload(const ExtMessage &message);
 
 signals:
-    void lastSignedInUserChanged(const QString &);
-    void usersListChanged(const QStringList &);
+    void uploadStarted(const Message &message);
+    void uploadProgressChanged(const Message &message, DataSize uploaded, DataSize total);
+    void uploadCompleted(const Message &message);
+    void uploadFailed(const Message &message, const QString &error);
+
+    // FIXME(fpohtmeh): remove upload emulation code
+    void messageSent(const Message &message);
+    void sendMessageFailed(const Message &message, const QString &error);
 
 private:
-    QDir m_appDataDir;
-    QDir m_attachmentCacheDir;
+    QXmppUploadRequestManager m_manager;
+    QXmppClient *m_client; // FIXME(fpohtmeh): remove upload emulation code
 };
 
-#endif // VSQ_SETTINGS_H
+#endif // VSQ_UPLOADER_H

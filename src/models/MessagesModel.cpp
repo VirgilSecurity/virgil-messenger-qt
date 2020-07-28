@@ -132,7 +132,7 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
     case AttachmentIdRole:
         return message.attachment ? message.attachment->id : QString();
     case AttachmentSizeRole:
-        return Utils::formattedFileSize(message.attachment ? message.attachment->size : 0);
+        return message.attachment ? Utils::formattedDataSize(message.attachment->size) : QString();
     case AttachmentTypeRole:
         return QVariant::fromValue(message.attachment ? message.attachment->type : Attachment::Type::File);
     case AttachmentLocalUrlRole:

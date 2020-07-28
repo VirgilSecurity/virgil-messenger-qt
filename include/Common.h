@@ -35,16 +35,23 @@
 #ifndef VSQ_COMMON_H
 #define VSQ_COMMON_H
 
+#include <functional>
 #include <memory>
 
 #include <QDateTime>
-#include <QDebug>
+#include <QLoggingCategory>
 #include <QtGlobal>
 #include <QUrl>
 
-class QLocale;
+#include <QXmppMessage.h>
 
 #include <optional/optional.hpp>
+
+namespace args {
+    using namespace std::placeholders;
+}
+
+using DataSize = unsigned int;
 
 template <class Type>
 using Optional = tl::optional<Type>;
@@ -99,7 +106,7 @@ struct Attachment
     QUrl remote_url;
     QUrl local_url;
     QUrl local_preview;
-    int size;
+    DataSize size;
 
     QString fileName() const
     {
@@ -138,6 +145,16 @@ struct Chat
     int unreadMessageCount;
 };
 Q_DECLARE_METATYPE(Chat);
+
+// FIXME(fpohtmeh): remove
+struct ExtMessage : Message
+{
+    ExtMessage() : Message() {}
+    explicit ExtMessage(const Message &message) : Message((message)) {}
+
+    QXmppMessage xmpp;
+};
+Q_DECLARE_METATYPE(ExtMessage);
 
 void registerCommonTypes();
 

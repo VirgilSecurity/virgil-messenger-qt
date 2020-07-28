@@ -39,7 +39,11 @@
 
 #include <QXmppClient.h>
 
+#include "Uploader.h"
 #include "VirgilCore.h"
+
+Q_DECLARE_LOGGING_CATEGORY(client)
+Q_DECLARE_LOGGING_CATEGORY(xmpp)
 
 class Client : public QObject
 {
@@ -87,6 +91,8 @@ private:
     void stopWaitForConnection();
     void subscribeOnPushNotifications(bool enable);
 
+    Optional<ExtMessage> createExtMessage(const Message &message);
+
     void onSignIn(const QString &userWithEnv);
     void onSignOut();
     void onSignUp(const QString &userWithEnv);
@@ -111,6 +117,8 @@ private:
 
     VirgilCore m_core;
     QXmppClient m_client;
+    Uploader m_uploader;
+
     QString m_lastErrorText;
     bool m_waitingForConnection;
 };

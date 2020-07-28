@@ -35,13 +35,13 @@
 #ifndef VSQ_UTILS_H
 #define VSQ_UTILS_H
 
-#include <QString>
+#include "Common.h"
 
 namespace Utils
 {
     QString createUuid();
 
-    QString formattedFileSize(int fileSize);
+    QString formattedDataSize(DataSize fileSize);
 
     QString escapedUserName(const QString &userName);
 

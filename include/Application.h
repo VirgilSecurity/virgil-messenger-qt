@@ -43,6 +43,10 @@
 #define ApplicationBase QGuiApplication
 #endif
 
+#include "Common.h"
+
+Q_DECLARE_LOGGING_CATEGORY(application)
+
 class Messenger;
 class QmlEngine;
 class Settings;

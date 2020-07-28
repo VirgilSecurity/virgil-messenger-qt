@@ -39,8 +39,9 @@
 
 #include <virgil/iot/messenger/messenger.h>
 
-class QXmppMessage;
 class Settings;
+
+Q_DECLARE_LOGGING_CATEGORY(core)
 
 class VirgilCore
 {
@@ -53,8 +54,9 @@ public:
     bool backupKey(const QString &password);
     bool signInWithKey(const QString &userWithEnv, const QString &password);
 
-    Optional<QXmppMessage> encryptMessage(const Message &message);
-    Optional<QString> decryptMessage(const QString &sender, const QString &message);
+    Optional<QString> encryptMessageBody(const QString &contact, const QString &body);
+    Optional<QString> decryptMessageBody(const QString &contact, const QString &encrypedBody);
+
     bool userExists(const QString &user) const;
 
     QString user() const;
@@ -77,7 +79,7 @@ private:
     using UserEnv = std::pair<QString, EnvironmentType>;
     using Credentials = VirgilIoTKit::vs_messenger_virgil_user_creds_t;
 
-    bool init();
+    bool initialize();
     void setUser(const QString &userWithEnv);
     UserEnv parseUserWithEnv(const QString &userWithEnv) const;
 

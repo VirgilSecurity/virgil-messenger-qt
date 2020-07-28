@@ -37,10 +37,10 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include <QXmppMessage.h>
-
 #include "Settings.h"
 #include "android/VSQAndroid.h"
+
+Q_LOGGING_CATEGORY(core, "core")
 
 using namespace VirgilIoTKit;
 
@@ -51,11 +51,11 @@ VirgilCore::VirgilCore(Settings *settings)
 bool VirgilCore::signIn(const QString &userWithEnv)
 {
     // Initialization
-    if (!init())
+    if (!initialize())
         return false;
 
     setUser(userWithEnv);
-    qDebug() << "Trying to Sign In: " << m_user;
+    qCDebug(core) << "Trying to Sign In: " << m_user;
 
     Credentials creds;
     memset(&creds, 0, sizeof (creds));
@@ -95,7 +95,7 @@ bool VirgilCore::signUp(const QString &userWithEnv)
     }
 
     // HACK(fpohtmeh): doesn't work without init
-    if (!init())
+    if (!initialize())
         return false;
 
     Credentials creds;
@@ -137,7 +137,7 @@ bool VirgilCore::signInWithKey(const QString &userWithEnv, const QString &passwo
     return true;
 }
 
-Optional<QXmppMessage> VirgilCore::encryptMessage(const Message &message)
+Optional<QString> VirgilCore::encryptMessageBody(const QString &contact, const QString &body)
 {
     static const size_t _encryptedMsgSzMax = 20 * 1024;
     uint8_t encryptedMessage[_encryptedMsgSzMax];
@@ -145,7 +145,7 @@ Optional<QXmppMessage> VirgilCore::encryptMessage(const Message &message)
 
     // Create JSON-formatted message to be sent
     QJsonObject payloadObject;
-    payloadObject.insert("body", message.body);
+    payloadObject.insert("body", body);
 
     QJsonObject mainObject;
     mainObject.insert("type", "text");
@@ -153,12 +153,11 @@ Optional<QXmppMessage> VirgilCore::encryptMessage(const Message &message)
 
     QJsonDocument doc(mainObject);
     QString internalJson = doc.toJson(QJsonDocument::Compact);
-    // FIXME(fpohtmeh): restore
-    //qDebug() << internalJson;
+    qCDebug(core) << internalJson;
 
     // Encrypt message
     if (VS_CODE_OK != vs_messenger_virgil_encrypt_msg(
-                     message.contact.toStdString().c_str(),
+                     contact.toStdString().c_str(),
                      internalJson.toStdString().c_str(),
                      encryptedMessage,
                      _encryptedMsgSzMax,
@@ -167,46 +166,36 @@ Optional<QXmppMessage> VirgilCore::encryptMessage(const Message &message)
         m_lastErrorText = QLatin1String("Cannot encrypt message to be sent");
         return NullOptional;
     }
-
-    // Send encrypted message
-    QString toJID = message.contact + "@" + xmppURL();
-    QString fromJID = m_user + "@" + xmppURL();
-    QString encryptedStr = QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage));
-
-    QXmppMessage msg(fromJID, toJID, encryptedStr);
-    msg.setReceiptRequested(true);
-    msg.setId(message.id);
-    return msg;
+    return QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage));
 }
 
-Optional<QString> VirgilCore::decryptMessage(const QString &sender, const QString &message)
+Optional<QString> VirgilCore::decryptMessageBody(const QString &contact, const QString &encrypedBody)
 {
-    static const size_t _decryptedMsgSzMax = 10 * 1024;
-    uint8_t decryptedMessage[_decryptedMsgSzMax];
-    size_t decryptedMessageSz = 0;
+    static const size_t decryptedBodyMaxSize = 10 * 1024;
+    uint8_t decryptedBody[decryptedBodyMaxSize];
+    size_t decryptedBodySize = 0;
 
-    // FIXME(fpohtmeh): restore
-    //qDebug() << "Sender            : " << sender;
-    //qDebug() << "Encrypted message : " << message;
+    qCDebug(core) << "Sender         :" << contact;
+    qCDebug(core) << "Encrypted body :" << encrypedBody;
 
     // Decrypt message
     // DECRYPTED_MESSAGE_SZ_MAX - 1  - This is required for a Zero-terminated string
     if (VS_CODE_OK !=
             vs_messenger_virgil_decrypt_msg(
-                sender.toStdString().c_str(),
-                message.toStdString().c_str(),
-                decryptedMessage, decryptedMessageSz - 1,
-                &decryptedMessageSz)) {
+                contact.toStdString().c_str(),
+                encrypedBody.toStdString().c_str(),
+                decryptedBody, decryptedBodySize - 1,
+                &decryptedBodySize)) {
         VS_LOG_WARNING("Received message cannot be decrypted");
         m_lastErrorText = QLatin1String("Received message cannot be decrypted");
         return NullOptional;
     }
 
     // Add Zero termination
-    decryptedMessage[decryptedMessageSz] = 0;
+    decryptedBody[decryptedBodySize] = 0;
 
     // Get message from JSON
-    QByteArray baDecr(reinterpret_cast<char *> (decryptedMessage), static_cast<int> (decryptedMessageSz));
+    QByteArray baDecr(reinterpret_cast<char *> (decryptedBody), static_cast<int> (decryptedBodySize));
     QJsonDocument jsonMsg(QJsonDocument::fromJson(baDecr));
     QString decryptedString = jsonMsg["payload"]["body"].toString();
 
@@ -292,7 +281,7 @@ uint16_t VirgilCore::xmppPort() const
     return res;
 }
 
-bool VirgilCore::init()
+bool VirgilCore::initialize()
 {
     if (vs_messenger_virgil_is_init())
         return true;

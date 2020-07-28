@@ -121,11 +121,11 @@ void Messenger::setupConnections()
     // Messages status: client-to-model
     connect(m_client, &Client::messageReceived, &m_messageModel, &MessagesModel::addMessage);
     connect(m_client, &Client::messageSent, &m_messageModel,
-        std::bind(&MessagesModel::setMessageStatus, &m_messageModel, std::placeholders::_1, Message::Status::Sent));
+        std::bind(&MessagesModel::setMessageStatus, &m_messageModel, args::_1, Message::Status::Sent));
     connect(m_client, &Client::sendMessageFailed, &m_messageModel,
-        std::bind(&MessagesModel::setMessageStatus, &m_messageModel, std::placeholders::_1, Message::Status::Failed));
+        std::bind(&MessagesModel::setMessageStatus, &m_messageModel, args::_1, Message::Status::Failed));
     connect(m_client, &Client::messageDelivered, &m_messageModel,
-        std::bind(&MessagesModel::setMessageStatusById, &m_messageModel, std::placeholders::_1, Message::Status::Received));
+        std::bind(&MessagesModel::setMessageStatusById, &m_messageModel, args::_1, Message::Status::Received));
     // Messages status: model-to-model
     connect(&m_messageModel, &MessagesModel::messageAdded, &m_chatsModel, &ChatsModel::processMessage);
     connect(&m_messageModel, &MessagesModel::messageStatusChanged, &m_chatsModel, &ChatsModel::updateMessageStatus);

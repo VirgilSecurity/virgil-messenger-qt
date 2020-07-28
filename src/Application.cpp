@@ -54,6 +54,8 @@ const QString Application::kVersion = QString(TOSTRING(VERSION));
 const QString Application::kVersion = "unknown";
 #endif
 
+Q_LOGGING_CATEGORY(application, "application")
+
 Application::Application(int &argc, char **argv)
     : ApplicationBase(argc, argv)
     , m_settings(new Settings(this))
@@ -78,6 +80,10 @@ void Application::initialize()
     // Attributes
     ApplicationBase::setAttribute(Qt::AA_EnableHighDpiScaling);
     ApplicationBase::setAttribute(Qt::AA_UseHighDpiPixmaps);
+
+#ifdef VS_DEVMODE
+    qSetMessagePattern("[%{category}.%{type}]: %{message} [at %{file} #%{line}]");
+#endif
 }
 
 void Application::reloadQml()
@@ -129,7 +135,7 @@ void Application::setupEngine()
 
 void Application::onApplicationStateChanged(Qt::ApplicationState state)
 {
-    qDebug() << "Application state:" << state;
+    qCDebug(application) << "Application state:" << state;
 #if VS_PUSHNOTIFICATIONS
     static bool _deactivated = false;
 

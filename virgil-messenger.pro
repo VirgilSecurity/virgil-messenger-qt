@@ -87,7 +87,6 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
 
 HEADERS += \
         include/Application.h \
-        include/Client.h \
         include/ClipboardProxy.h \
         include/Common.h \
         include/Messenger.h \
@@ -96,14 +95,13 @@ HEADERS += \
         include/VirgilCore.h \
         include/Utils.h \
         include/ui/VSQUiHelper.h \
+        # Client
+        include/client/Client.h \
+        include/client/Uploader.h \
         # Models
         include/models/AttachmentBuilder.h \
         include/models/ChatsModel.h \
         include/models/MessagesModel.h \
-#        include/models/AttachmentsModel.h \
-#        include/models/ChatsModel.h \
-#        include/models/ContactsModel.h \
-#        include/models/ConversationsModel.h \
         # Database
         include/database/Database.h \
         # Platforms
@@ -118,7 +116,6 @@ HEADERS += \
 
 SOURCES += \
         src/Application.cpp \
-        src/Client.cpp \
         src/ClipboardProxy.cpp \
         src/Common.cpp \
         src/Messenger.cpp \
@@ -128,14 +125,13 @@ SOURCES += \
         src/Utils.cpp \
         src/main.cpp \
         src/ui/VSQUiHelper.cpp \
+        # Client
+        src/client/Client.cpp \
+        src/client/Uploader.cpp \
         # Models
         src/models/AttachmentBuilder.cpp \
         src/models/ChatsModel.cpp \
         src/models/MessagesModel.cpp \
-#        src/models/AttachmentsModel.cpp \
-#        src/models/ChatsModel.cpp \
-#        src/models/ConversationsModel.cpp \
-#        src/models/ContactsModel.cpp \
         # Database
         src/database/Database.cpp \
         # Platforms

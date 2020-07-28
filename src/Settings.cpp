@@ -39,6 +39,8 @@
 static const QString kLastSignedInUser = "LastSignedInUser";
 static const QString kUsers = "Users";
 
+Q_LOGGING_CATEGORY(settings, "settings")
+
 Settings::Settings(QObject *parent)
     : QSettings("VirgilSecurity", "VirgilMessenger", parent) // organization, application name
 {
@@ -48,12 +50,12 @@ Settings::Settings(QObject *parent)
         if (!dir.exists() && !dir.mkpath(dir.absolutePath()))
             qFatal("Failed to create writable directory at %s", qPrintable(dir.absolutePath()));
 
-    qDebug() << "Settings";
-    qDebug() << "- settings filename:" << fileName();
-    qDebug() << "- database filename:" << databaseFileName();
-    qDebug() << "- last signed-in user:" << lastSignedInUser();
-    qDebug() << "- attachment cache dir:" << attachmentCacheDir().absolutePath();
-    qDebug() << "- attachment max size:" << attachmentMaxSize();
+    qCDebug(settings) << "Settings";
+    qCDebug(settings) << "- settings filename:" << fileName();
+    qCDebug(settings) << "- database filename:" << databaseFileName();
+    qCDebug(settings) << "- last signed-in user:" << lastSignedInUser();
+    qCDebug(settings) << "- attachment cache dir:" << attachmentCacheDir().absolutePath();
+    qCDebug(settings) << "- attachment max size:" << attachmentMaxSize();
 }
 
 Settings::~Settings()
@@ -124,4 +126,13 @@ QDir Settings::attachmentCacheDir() const
 QSize Settings::previewMaxSize() const
 {
     return QSize(600, 400);
+}
+
+bool Settings::devMode() const
+{
+#ifdef VS_DEVMODE
+    return true;
+#else
+    return false;
+#endif // VS_DEVMODE
 }

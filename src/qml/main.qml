@@ -10,7 +10,7 @@ import "theme"
 ApplicationWindow {
     id: window
     visible: true
-    title: qsTr("Virgil Secure Communications Platform")
+    title: qsTr("Virgil Secure Communications Platform") + (settings.devMode && messenger.user ? " - [%1]".arg(messenger.user) : "")
     minimumWidth: 320
     minimumHeight: 600
 
@@ -39,23 +39,16 @@ ApplicationWindow {
         id: inform
     }
 
-    // TODO(fpohtmeh): uncomment
-    /*
     // Shortcuts for hackers
     Shortcut {
-        // TODO: remove on production or add conditional dev flag!
         sequence: StandardKey.Refresh
+        enabled: settings.devMode
         onActivated: {
-            var future = Messenger.logout()
-            Future.onFinished(future, function(value) {
-              console.log("Logouts result: ", Future.result(future))
-            })
-
+            //messenger.signOut()
             window.close()
             app.reloadQml()
         }
     }
-    */
 
     // Show Popup message
     function showPopup(message, color, textColor, isOnTop, isModal) {
