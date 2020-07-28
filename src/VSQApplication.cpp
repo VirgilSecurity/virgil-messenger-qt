@@ -122,8 +122,9 @@ void VSQApplication::reloadQml() {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_WATCHOS)
     {
         QObject *rootObject(m_engine.rootObjects().first());
-        rootObject->setProperty("width", 800);
-        rootObject->setProperty("height", 640);
+// ERROR NULL POINTER !!!
+//        rootObject->setProperty("width", 800);
+//        rootObject->setProperty("height", 640);
     }
 #endif
 }
