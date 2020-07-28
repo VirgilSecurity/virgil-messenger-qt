@@ -154,7 +154,8 @@ isEmpty(WEBDRIVER) {
            WD_ENABLE_PLAYER=0 \
            QT_NO_SAMPLES=1 \
            VSQ_WEBDRIVER_DEBUG=1
-    QTWEBDRIVER_LOCATION=$$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/include/qtwebdriver
+    release:QTWEBDRIVER_LOCATION=$$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/include/qtwebdriver
+    debug:QTWEBDRIVER_LOCATION=$$PWD/ext/prebuilt/$${OS_NAME}/debug/installed/usr/local/include/qtwebdriver
     HEADERS += $$QTWEBDRIVER_LOCATION/src/Test/Headers.h
     INCLUDEPATH +=  $$QTWEBDRIVER_LOCATION $$QTWEBDRIVER_LOCATION/src
     linux:!android: { 
@@ -239,7 +240,8 @@ android: {
         src/VSQPushNotifications.cpp \
         src/android/VSQFirebaseListener.cpp
 
-    LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
+    release:LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
+    debug:LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
     FIREBASE_LIBS_DIR = $$PWD/ext/prebuilt/firebase_cpp_sdk/libs/android/$$ANDROID_TARGET_ARCH/c++
     ANDROID_EXTRA_LIBS = \
         $$LIBS_DIR/libvs-messenger-internal.so \

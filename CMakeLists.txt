@@ -95,7 +95,7 @@ endif()
 #
 #   Qt
 #
-find_package(Qt5 COMPONENTS Core Widgets Sql Network Concurrent Qml Xml)
+find_package(Qt5 COMPONENTS Core Widgets Sql Network Concurrent Qml Xml Bluetooth WebSockets)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
@@ -181,7 +181,14 @@ endif()
 
 set(PREBUILT_COMMON_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt")
 set(PREBUILT_QT_DIR "${PREBUILT_COMMON_DIR}/qt")
-set(PREBUILT_BASE_DIR "${PREBUILT_COMMON_DIR}/${PREBUILT_PLATFORM_NAME}/release/installed/usr/local")
+
+string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
+if(CMAKE_BUILD_TYPE_LOWER STREQUAL "debug")
+    set(PREBUILT_BASE_DIR "${PREBUILT_COMMON_DIR}/${PREBUILT_PLATFORM_NAME}/debug/installed/usr/local")
+else()
+    set(PREBUILT_BASE_DIR "${PREBUILT_COMMON_DIR}/${PREBUILT_PLATFORM_NAME}/release/installed/usr/local")
+endif()
+
 set(PREBUILT_INCLUDE_DIR "${PREBUILT_BASE_DIR}/include")
 set(PREBUILT_LIB_DIR "${PREBUILT_BASE_DIR}/lib")
 
@@ -189,6 +196,105 @@ set(PREBUILT_LIB_DIR "${PREBUILT_BASE_DIR}/lib")
 #   QuickFuture
 #
 set(QUICKFUTURE_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/quickfuture/src")
+
+#
+#   QT HAL for IotKit
+#
+add_library(qt-iot-hal)
+target_sources(qt-iot-hal
+        PRIVATE
+
+        # Headers
+        "${PREBUILT_QT_DIR}/config/pc/stdlib-config.h"
+        "${PREBUILT_QT_DIR}/config/pc/endian-config.h"
+        "${PREBUILT_QT_DIR}/config/pc/global-hal.h"
+        "${PREBUILT_QT_DIR}/config/pc/logger-config.h"
+        "${PREBUILT_QT_DIR}/config/pc/trust_list-config.h"
+        "${PREBUILT_QT_DIR}/config/pc/update-config.h"
+        "${PREBUILT_QT_DIR}/default-impl/netif/websocket/include/virgil/iot/qt/netif/VSQNetifWebsocket.h"
+        "${PREBUILT_QT_DIR}/default-impl/netif/ble/include/virgil/iot/qt/netif/VSQNetifBLEEnumerator.h"
+        "${PREBUILT_QT_DIR}/default-impl/netif/ble/include/virgil/iot/qt/netif/VSQNetifBLE.h"
+        "${PREBUILT_QT_DIR}/default-impl/netif/udp-broadcast/include/virgil/iot/qt/netif/VSQUdpBroadcast.h"
+        "${PREBUILT_QT_DIR}/facade/include/virgil/iot/qt/VSQIoTKit.h"
+        "${PREBUILT_QT_DIR}/facade/include/virgil/iot/qt/protocols/snap/VSQSnapCFGClient.h"
+        "${PREBUILT_QT_DIR}/facade/include/virgil/iot/qt/protocols/snap/VSQSnapServiceBase.h"
+        "${PREBUILT_QT_DIR}/facade/include/virgil/iot/qt/protocols/snap/VSQSnapINFOClientQml.h"
+        "${PREBUILT_QT_DIR}/facade/include/virgil/iot/qt/protocols/snap/VSQSnapINFOClient.h"
+        "${PREBUILT_QT_DIR}/facade/include/virgil/iot/qt/protocols/snap/VSQSnapSnifferQml.h"
+        "${PREBUILT_QT_DIR}/facade/include/virgil/iot/qt/protocols/snap/VSQNetifBase.h"
+        "${PREBUILT_QT_DIR}/facade/include/virgil/iot/qt/helpers/VSQSingleton.h"
+        "${PREBUILT_QT_DIR}/facade/include/virgil/iot/qt/helpers/VSQImplementations.h"
+        "${PREBUILT_QT_DIR}/facade/include/virgil/iot/qt/helpers/VSQManufactureId.h"
+        "${PREBUILT_QT_DIR}/facade/include/virgil/iot/qt/helpers/VSQFeatures.h"
+        "${PREBUILT_QT_DIR}/facade/include/virgil/iot/qt/helpers/VSQDeviceRoles.h"
+        "${PREBUILT_QT_DIR}/facade/include/virgil/iot/qt/helpers/VSQDeviceSerial.h"
+        "${PREBUILT_QT_DIR}/facade/include/virgil/iot/qt/helpers/VSQFileVersion.h"
+        "${PREBUILT_QT_DIR}/facade/include/virgil/iot/qt/helpers/VSQDeviceType.h"
+        "${PREBUILT_QT_DIR}/facade/include/virgil/iot/qt/helpers/VSQAppConfig.h"
+        "${PREBUILT_QT_DIR}/facade/include/virgil/iot/qt/helpers/VSQMac.h"
+        "${PREBUILT_QT_DIR}/facade/include/virgil/iot/qt/helpers/VSQIoTKitFacade.h"
+        "${PREBUILT_QT_DIR}/facade/include/virgil/iot/qt/helpers/VSQHelpers.h"
+
+        # Sources
+        "${PREBUILT_QT_DIR}/default-impl/hal.cpp"
+        "${PREBUILT_QT_DIR}/default-impl/netif/websocket/src/VSQNetifWebsocket.cpp"
+        "${PREBUILT_QT_DIR}/default-impl/netif/ble/src/VSQNetifBLEEnumerator.cpp"
+        "${PREBUILT_QT_DIR}/default-impl/netif/ble/src/VSQNetifBLE.cpp"
+        "${PREBUILT_QT_DIR}/default-impl/netif/udp-broadcast/src/VSQUdpBroadcast.cpp"
+        "${PREBUILT_QT_DIR}/facade/src/VSQSnapSnifferQml.cpp"
+        "${PREBUILT_QT_DIR}/facade/src/VSQSnapINFOClient.cpp"
+        "${PREBUILT_QT_DIR}/facade/src/VSQNetifBase.cpp"
+        "${PREBUILT_QT_DIR}/facade/src/helpers/VSQDeviceType.cpp"
+        "${PREBUILT_QT_DIR}/facade/src/helpers/VSQDeviceRoles.cpp"
+        "${PREBUILT_QT_DIR}/facade/src/helpers/VSQMac.cpp"
+        "${PREBUILT_QT_DIR}/facade/src/helpers/VSQManufactureId.cpp"
+        "${PREBUILT_QT_DIR}/facade/src/helpers/VSQIoTKitFacade.cpp"
+        "${PREBUILT_QT_DIR}/facade/src/helpers/VSQFileVersion.cpp"
+        "${PREBUILT_QT_DIR}/facade/src/helpers/VSQDeviceSerial.cpp"
+        "${PREBUILT_QT_DIR}/facade/src/VSQSnapCFGClient.cpp"
+        "${PREBUILT_QT_DIR}/facade/src/VSQSnapINFOClientQml.cpp"
+        )
+
+target_include_directories(qt-iot-hal
+        PUBLIC
+        $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}>
+        $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}/qxmpp>
+
+        $<BUILD_INTERFACE:${PREBUILT_QT_DIR}>
+        $<BUILD_INTERFACE:${PREBUILT_QT_DIR}/config/pc>
+        $<BUILD_INTERFACE:${PREBUILT_QT_DIR}/facade/include>
+        $<BUILD_INTERFACE:${PREBUILT_QT_DIR}/default-impl/netif/ble/include>
+        $<BUILD_INTERFACE:${PREBUILT_QT_DIR}/default-impl/netif/udp-broadcast/include>
+        $<BUILD_INTERFACE:${PREBUILT_QT_DIR}/default-impl/netif/websocket/include>
+        )
+
+
+target_compile_definitions(qt-iot-hal
+        PUBLIC
+        $<BUILD_INTERFACE:INFO_CLIENT=1>
+        $<BUILD_INTERFACE:CFG_CLIENT=1>
+        )
+
+target_link_libraries(qt-iot-hal
+        PUBLIC
+
+        # Qt5
+        Qt5::Core
+        Qt5::Network
+        Qt::Bluetooth
+        Qt::WebSockets
+        Qt::Qml
+
+        # IotKit
+        vs-module-logger
+        vs-module-provision
+        vs-module-snap-control
+        vs-module-secbox
+        vs-module-messenger
+
+        # Compiler options
+        enable_sanitizers
+        )
 
 #
 #   Application
@@ -214,6 +320,7 @@ target_sources(virgil-messenger-qt
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQPushNotifications.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQSqlChatModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQSqlConversationModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQLogging.h
         ${CMAKE_CURRENT_LIST_DIR}/include/ui/VSQUiHelper.h
         ${CMAKE_CURRENT_LIST_DIR}/include/macos/VSQMacos.h
 
@@ -231,6 +338,7 @@ target_sources(virgil-messenger-qt
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQPushNotifications.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQSqlChatModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQSqlConversationModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/VSQLogging.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/ui/VSQUiHelper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/macos/VSQMacos.mm
         ${PREBUILT_QT_DIR}/default-impl/hal.cpp
@@ -260,8 +368,11 @@ target_link_libraries(virgil-messenger-qt
         vs-module-messenger
         vs-messenger-internal
 
+        qt-iot-hal
+
         # Compiler options
         enable_pedantic_mode
+        enable_sanitizers
         )
 
 #
@@ -272,9 +383,14 @@ target_include_directories(virgil-messenger-qt
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
         $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}>
         $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}/qxmpp>
-        $<BUILD_INTERFACE:${PREBUILT_QT_DIR}/config/pc>
         $<BUILD_INTERFACE:${QUICKFUTURE_DIR}>
         )
+
+target_compile_definitions(virgil-messenger-qt
+    PRIVATE
+    $<BUILD_INTERFACE:INFO_CLIENT=1>
+    $<BUILD_INTERFACE:CFG_CLIENT=1>
+)
 
 #
 #   Common link directories
