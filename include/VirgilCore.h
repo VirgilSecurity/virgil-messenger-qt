@@ -37,6 +37,7 @@
 
 #include "Common.h"
 
+// TODO(fpohtmeh): replace include with forward declaration
 #include <virgil/iot/messenger/messenger.h>
 
 class Settings;
@@ -67,6 +68,8 @@ public:
     QString xmppURL() const;
     Optional<QString> xmppPassword();
     uint16_t xmppPort() const;
+    // FIXME(fpohtmeh): move to private
+    QString virgilURL() const;
 
 private:
     enum class EnvironmentType
@@ -87,11 +90,11 @@ private:
     void saveCredentials(const QString &user, const Credentials &creds);
 
     QString caBundleFile() const;
-    QString virgilURL() const;
 
     Settings *m_settings;
     QString m_user;
     EnvironmentType m_envType = EnvironmentType::DEFAULT;
+    QString m_deviceId;
     QString m_lastErrorText;
     QString m_xmppPassword;
 };

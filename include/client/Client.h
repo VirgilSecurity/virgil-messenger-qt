@@ -42,6 +42,8 @@
 #include "Uploader.h"
 #include "VirgilCore.h"
 
+class QXmppCarbonManager;
+
 Q_DECLARE_LOGGING_CATEGORY(client)
 Q_DECLARE_LOGGING_CATEGORY(xmpp)
 
@@ -53,6 +55,9 @@ public:
     Client(Settings *settings, QObject *parent);
 
     void start();
+
+    // FIXME(fpohtmeh): remove this workaround
+    QString virgilUrl() const;
 
 signals:
     void signIn(const QString &userWithEnv);
@@ -117,11 +122,13 @@ private:
     void onCheckConnectionState();
     void onSetOnlineStatus(bool online);
     void onMessageDelivered(const QString &jid, const QString &messageId);
+    void onDiscoveryInfoReceived(const QXmppDiscoveryIq &info);
     void onXmppLoggerMessage(QXmppLogger::MessageType type, const QString &message);
     void onSslErrors(const QList<QSslError> &errors);
 
     VirgilCore m_core;
     QXmppClient m_client;
+    QXmppCarbonManager *m_carbonManager;
     Uploader m_uploader;
 
     QString m_lastErrorText;

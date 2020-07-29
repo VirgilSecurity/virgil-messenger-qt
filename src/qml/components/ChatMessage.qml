@@ -58,11 +58,6 @@ Control {
             text: chatMessage.body
             visible: !d.hasAttachment
 
-            onLinkActivated: {
-                // TODO(fpohtmeh): implement
-                Qt.openUrlExternally(message)
-            }
-
             property var contextMenu: ContextMenu {
                 Action {
                     text: qsTr("Copy")

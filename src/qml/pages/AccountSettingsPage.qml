@@ -36,14 +36,7 @@ Page {
         FormLabel {
             text: qsTr("Version: %1".arg(app.currentVersion()))
         }
-/*
-        FormPrimaryButton {
-            text: "Software Update"
-            onClicked: {
-                app.checkUpdates()
-            }
-        }
-*/
+
         FormPrimaryButton {
             text: "Backup private key"
             onClicked: mainView.showBackupKey()

@@ -39,6 +39,7 @@
 #include "Settings.h"
 #include "Utils.h"
 #include "VirgilCore.h"
+#include "VSQLogging.h"
 #include "database/Database.h"
 
 Messenger::Messenger(Settings *settings, QObject *parent)
@@ -77,6 +78,11 @@ void Messenger::start()
         signIn(m_settings->lastSignedInUser());
 }
 
+void Messenger::setLogging(VSQLogging *logging)
+{
+    m_logging = logging;
+}
+
 void Messenger::setupConnections()
 {
     // Authorization: messenger-to-client
@@ -101,6 +107,8 @@ void Messenger::setupConnections()
     connect(m_client, &Client::signedIn, m_settings, &Settings::setLastSignedInUser);
     connect(m_client, &Client::signedUp, m_settings, &Settings::addUserToList);
     connect(m_client, &Client::signedUp, m_settings, &Settings::setLastSignedInUser);
+    // Sign-in: client-to-logging
+    connect(m_client, &Client::signedIn, m_logging, &VSQLogging::checkAppCrash);
 
     // Contacts: messenger-to-client
     connect(this, &Messenger::addContact, m_client, &Client::addContact);
@@ -154,6 +162,7 @@ void Messenger::setUser(const QString &user)
     m_user = user;
     emit userChanged(user);
 
+    m_logging->setVirgilUrl(m_client->virgilUrl());
     setRecipient(QString());
 }
 

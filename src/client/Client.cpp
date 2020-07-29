@@ -38,7 +38,9 @@
 #include <QEventLoop>
 #include <QSslSocket>
 
+#include <QXmppCarbonManager.h>
 #include <QXmppConfiguration.h>
+#include <QXmppDiscoveryManager.h>
 #include <QXmppLogger.h>
 #include <QXmppMessage.h>
 #include <QXmppMessageReceiptManager.h>
@@ -104,9 +106,21 @@ void Client::start()
     connect(this, &Client::setOnlineStatus, this, &Client::onSetOnlineStatus);
 
     // XMPP receipt manager
-    auto receiptManager = new QXmppMessageReceiptManager();
+    auto receiptManager = new QXmppMessageReceiptManager(); // TODO(fpohtmeh): set parent?
     m_client.addExtension(receiptManager);
     connect(receiptManager, &QXmppMessageReceiptManager::messageDelivered, this, &Client::onMessageDelivered);
+    // XMPP carbon manager
+    m_carbonManager = new QXmppCarbonManager(); // TODO(fpohtmeh): set parent?
+    m_client.addExtension(m_carbonManager);
+    // messages sent to our account (forwarded from another client)
+    connect(m_carbonManager, &QXmppCarbonManager::messageReceived, &m_client, &QXmppClient::messageReceived);
+    // messages sent from our account (but another client)
+    connect(m_carbonManager, &QXmppCarbonManager::messageSent, &m_client, &QXmppClient::messageReceived);
+    // XMPP discovery manager
+    // TODO(fpohtmeh): remove discover routines
+    //auto discoveryManager = new QXmppDiscoveryManager();
+    //connect(discoveryManager, &QXmppDiscoveryManager::infoReceived, this, &Client::onDiscoveryInfoReceived);
+
     // XMPP logger
     auto logger = QXmppLogger::getLogger();
     logger->setLoggingType(QXmppLogger::SignalLogging);
@@ -130,6 +144,11 @@ void Client::start()
     connect(&m_uploader, &Uploader::uploadFailed, this, &Client::uploadFailed);
 }
 
+QString Client::virgilUrl() const
+{
+    return m_core.virgilURL();
+}
+
 bool Client::xmppConnect()
 {
     const auto password = m_core.xmppPassword();
@@ -151,6 +170,7 @@ bool Client::xmppConnect()
     qCDebug(client) << ">>>> Connecting...";
     m_client.connectToServer(config);
     waitForConnection();
+    m_carbonManager->setCarbonsEnabled(true);
     return m_client.isConnected();
 }
 
@@ -241,8 +261,8 @@ Optional<ExtMessage> Client::createExtMessage(const Message &message)
     }
 
     QXmppMessage xmppMessage;
-    xmppMessage.setFrom(m_core.user() + "@" + m_core.xmppURL());
-    xmppMessage.setTo(message.contact + "@" + m_core.xmppURL()); // TODO(fpohtmeh): eliminate m_core
+    xmppMessage.setFrom(m_core.xmppJID());
+    xmppMessage.setTo(message.contact + QLatin1Char('@') + m_core.xmppURL());
     xmppMessage.setBody(*encryptedBody);
     xmppMessage.setId(message.id);
     xmppMessage.setReceiptRequested(true);
@@ -325,15 +345,10 @@ void Client::onError(QXmppClient::Error error)
 
 void Client::onMessageReceived(const QXmppMessage &message)
 {
-    qCDebug(client) << "Message received from:" << message.from();
-    // Get sender
-    QString from = message.from();
-    QStringList pieces = from.split("@");
-    if (pieces.size() < 1) {
-        VS_LOG_WARNING("Wrong sender");
-        return;
-    }
-    QString sender = pieces.first();
+    QString sender = message.from().split("@").first();
+    QString recipient = message.to().split("@").first();
+    qCInfo(client) << "Sender: " << sender << " Recipient: " << recipient;
+
     // Get encrypted message
     QString encryptedBody = message.body();
     // Decrypt message
@@ -342,16 +357,24 @@ void Client::onMessageReceived(const QXmppMessage &message)
         emit receiveMessageFailed(m_core.lastErrorText());
         return;
     }
-    // Build message
+
     Message msg;
     msg.id = Utils::createUuid();
     msg.timestamp = QDateTime::currentDateTime();
     msg.body = *body;
-    msg.contact = sender;
-    msg.author = Message::Author::Contact;
     // FIXME(fpohtmeh): get attachment from xmpp message?
-    msg.status = Message::Status::Received;
-    //
+    if (sender == m_core.user()) {
+        // Message from self sent from another device
+        msg.contact = recipient;
+        msg.author = Message::Author::User;
+        msg.status = Message::Status::Sent;
+    }
+    else {
+        // Receive message from other user
+        msg.contact = sender;
+        msg.author = Message::Author::Contact;
+        msg.status = Message::Status::Received;
+    }
     emit messageReceived(msg);
 }
 
@@ -381,7 +404,7 @@ void Client::onSendMessage(const Message &message)
         return;
     }
     if (message.attachment)
-        m_uploader.upload(*msg); // FIXME(fpohtmeh): handle uploader signals
+        m_uploader.upload(*msg);
     else if (m_client.sendPacket(msg->xmpp))
         emit messageSent(message);
     else
@@ -408,6 +431,16 @@ void Client::onMessageDelivered(const QString &jid, const QString &messageId)
 {
     qCDebug(client) << QString("Message with id: %1 delivered to %2").arg(jid, messageId);
     emit messageDelivered(messageId);
+}
+
+void Client::onDiscoveryInfoReceived(const QXmppDiscoveryIq &info)
+{
+    qCInfo(client) << info.features();
+    if (info.from() != m_client.configuration().domain())
+        return;
+    // enable carbons, if feature found
+    if (info.features().contains("urn:xmpp:carbons:2"))
+        m_carbonManager->setCarbonsEnabled(true);
 }
 
 void Client::onXmppLoggerMessage(QXmppLogger::MessageType type, const QString &message)

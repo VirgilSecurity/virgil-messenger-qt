@@ -50,6 +50,7 @@ Q_DECLARE_LOGGING_CATEGORY(application)
 class Messenger;
 class QmlEngine;
 class Settings;
+class VSQLogging;
 
 class Application : public ApplicationBase
 {
@@ -66,6 +67,8 @@ public:
     Q_INVOKABLE void sendReport();
 
 private:
+    void setupCore();
+    void setupLogging();
     void setupFonts();
     void setupConnections();
     void setupEngine();
@@ -77,6 +80,7 @@ private:
     Settings *m_settings;
     Messenger *m_messenger;
     QmlEngine *m_engine;
+    VSQLogging *m_logging;
 };
 
 #endif // VSQ_APPLICATION_H

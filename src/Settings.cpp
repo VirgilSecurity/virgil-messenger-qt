@@ -96,13 +96,12 @@ void Settings::addUserToList(const QString &user)
         setUsersList(users << user);
 }
 
-QByteArray Settings::userCredential(const QString &user) const
+QString Settings::userCredential(const QString &user) const
 {
-    const auto credBase64 = value(user, QString()).toString();
-    return QByteArray::fromBase64(credBase64.toUtf8());
+    return value(user, QString()).toString();
 }
 
-void Settings::setUserCredential(const QString &user, const QByteArray &credential)
+void Settings::setUserCredential(const QString &user, const QString &credential)
 {
     setValue(user, credential);
     sync();

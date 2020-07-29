@@ -38,6 +38,7 @@
 #include <QJsonObject>
 
 #include "Settings.h"
+#include "Utils.h"
 #include "android/VSQAndroid.h"
 
 Q_LOGGING_CATEGORY(core, "core")
@@ -46,6 +47,7 @@ using namespace VirgilIoTKit;
 
 VirgilCore::VirgilCore(Settings *settings)
     : m_settings(settings)
+    , m_deviceId(Utils::createUuid())
 {}
 
 bool VirgilCore::signIn(const QString &userWithEnv)
@@ -227,7 +229,7 @@ QString VirgilCore::lastErrorText() const
 
 QString VirgilCore::xmppJID() const
 {
-    return m_user + QLatin1Char('@') + xmppURL();
+    return m_user + QLatin1Char('@') + xmppURL() + QLatin1Char('/') + m_deviceId;
 }
 
 QString VirgilCore::xmppURL() const
@@ -324,20 +326,31 @@ VirgilCore::UserEnv VirgilCore::parseUserWithEnv(const QString &userWithEnv) con
 
 bool VirgilCore::loadCredentials(const QString &user, Credentials &creds)
 {
-    const auto baCred = m_settings->userCredential(user);
+    const auto settingsJson = m_settings->userCredential(user).toUtf8();
+    const auto json = QJsonDocument::fromJson(settingsJson);
+    const auto deviceId = json["device_id"].toString();
+    const auto baCred = QByteArray::fromBase64(json["creds"].toString().toUtf8());
     if (baCred.size() != sizeof(creds)) {
         VS_LOG_WARNING("Cannot load credentials for : %s", user.toStdString().c_str());
         return false;
     }
+    m_deviceId = deviceId;
     memcpy(&creds, baCred.data(), static_cast<size_t> (baCred.size()));
     return true;
 }
 
-void VirgilCore::saveCredentials(const QString &user, const VirgilCore::Credentials &creds)
+void VirgilCore::saveCredentials(const QString &user, const Credentials &creds)
 {
+    // TODO(fpohtmeh): save one device id for all users
     // TODO: Use SecBox
     QByteArray baCred(reinterpret_cast<const char*>(&creds), sizeof(creds));
-    m_settings->setUserCredential(user, baCred.toBase64());
+    QJsonObject jsonObject;
+    jsonObject.insert("device_id", m_deviceId);
+    jsonObject.insert("creds", QJsonValue::fromVariant(baCred.toBase64()));
+
+    QString json = QJsonDocument(jsonObject).toJson(QJsonDocument::Compact);
+    qCInfo(core) << "Saving user credentails: " << json;
+    m_settings->setUserCredential(user, json);
 }
 
 QString VirgilCore::caBundleFile() const
@@ -365,6 +378,6 @@ QString VirgilCore::virgilURL() const
             break;
         }
     }
-    VS_LOG_DEBUG("Virgil URL: %s", res.toStdString().c_str());
+    VS_LOG_DEBUG("Virgil URL: %s", qPrintable(res));
     return res;
 }

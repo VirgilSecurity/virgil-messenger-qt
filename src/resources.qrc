@@ -105,5 +105,6 @@
         <file>qml/pages/BackupKeyPage.qml</file>
         <file>qml/components/SelectAttachmentsDialog.qml</file>
         <file>qml/components/TextInputMouseArea.qml</file>
+        <file>qml/components/Dialogs/SendReportAsk.qml</file>
     </qresource>
 </RCC>

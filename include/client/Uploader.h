@@ -62,6 +62,9 @@ signals:
     void messageSent(const Message &message);
     void sendMessageFailed(const Message &message, const QString &error);
 
+    Q_INVOKABLE void
+    refresh();
+
 private:
     QXmppUploadRequestManager m_manager;
     QXmppClient *m_client; // FIXME(fpohtmeh): remove upload emulation code

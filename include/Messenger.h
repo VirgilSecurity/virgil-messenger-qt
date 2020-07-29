@@ -48,6 +48,7 @@ class QThread;
 class Client;
 class Database;
 class Settings;
+class VSQLogging;
 
 class Messenger : public QObject
 {
@@ -62,6 +63,8 @@ public:
     ~Messenger() override = default;
 
     Q_INVOKABLE void start();
+
+    void setLogging(VSQLogging *logging);
 
 signals:
     void signIn(const QString &userWithEnv);
@@ -102,6 +105,7 @@ private:
 
     void setUser(const QString &user);
     void setRecipient(const QString &recipient);
+
     MessagesModel *messageModel();
     ChatsModel *chatsModel();
 
@@ -111,6 +115,7 @@ private:
     AttachmentBuilder m_attachmentBuilder;
     MessagesModel m_messageModel;
     ChatsModel m_chatsModel;
+    VSQLogging *m_logging = nullptr;
 
     Database *m_database;
     QThread *m_databaseThread;
@@ -119,6 +124,7 @@ private:
 
     QString m_user;
     QString m_recipient;
+    QString m_deviceId;
 };
 
 #endif // VSQ_MESSENGER_H

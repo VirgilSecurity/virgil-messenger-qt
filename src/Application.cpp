@@ -42,17 +42,13 @@
 #include "Messenger.h"
 #include "QmlEngine.h"
 #include "Settings.h"
+#include "VSQLogging.h"
 #include "ui/VSQUiHelper.h"
 #include "macos/VSQMacos.h"
+#include <virgil/iot/qt/VSQIoTKit.h>
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
-
-#if defined(VERSION)
-const QString Application::kVersion = QString(TOSTRING(VERSION));
-#else
-const QString Application::kVersion = "unknown";
-#endif
 
 Q_LOGGING_CATEGORY(application, "application")
 
@@ -61,7 +57,10 @@ Application::Application(int &argc, char **argv)
     , m_settings(new Settings(this))
     , m_messenger(new Messenger(m_settings, this))
     , m_engine(new QmlEngine(argc, argv, this))
+    , m_logging(new VSQLogging(this))
 {
+    setupCore();
+    setupLogging();
     setupFonts();
     setupConnections();
     setupEngine();
@@ -73,10 +72,15 @@ Application::Application(int &argc, char **argv)
 
 void Application::initialize()
 {
-    // TODO(fpohtmeh): add application name, display name and version
     // Organization params
+    ApplicationBase::setApplicationName("VirgilMessenger");
     ApplicationBase::setOrganizationName("VirgilSecurity");
     ApplicationBase::setOrganizationDomain("virgil.net");
+#if defined(VERSION)
+    ApplicationBase::setApplicationVersion(TOSTRING(VERSION));
+#else
+    ApplicationBase::setApplicationVersion("unknown");
+#endif
     // Attributes
     ApplicationBase::setAttribute(Qt::AA_EnableHighDpiScaling);
     ApplicationBase::setAttribute(Qt::AA_UseHighDpiPixmaps);
@@ -100,12 +104,30 @@ void Application::checkUpdates()
 
 QString Application::currentVersion() const
 {
-    return kVersion + "-alpha";
+    return applicationVersion() + "-alpha";
 }
 
 void Application::sendReport()
 {
-    QDesktopServices::openUrl(QUrl("mailto:?to=kutashenko@gmail.com&subject=Virgil Messenger Report&body=Here is some email body text", QUrl::TolerantMode));
+    m_logging->sendLogFiles();
+}
+
+void Application::setupCore()
+{
+    // TODO(fpohtmeh): refactor
+    const auto features = VSQFeatures();
+    const auto impl = VSQImplementations();
+    const auto appConfig = VSQAppConfig() << VirgilIoTKit::VS_LOGLEV_DEBUG;
+    if (!VSQIoTKitFacade::instance().init(features, impl, appConfig))
+        VS_LOG_CRITICAL("Unable to initialize Virgil IoT KIT");
+}
+
+void Application::setupLogging()
+{
+    m_messenger->setLogging(m_logging);
+    m_logging->setkApp(applicationName());
+    m_logging->setkOrganization(organizationName());
+    m_logging->setkVersion(applicationVersion());
 }
 
 void Application::setupFonts()
@@ -127,8 +149,11 @@ void Application::setupEngine()
     context->setContextProperty("app", this);
     context->setContextProperty("UiHelper", new VSQUiHelper(this));
     context->setContextProperty("clipboard", new ClipboardProxy(clipboard()));
+    context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
+    context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
     context->setContextProperty("messenger", m_messenger);
     context->setContextProperty("settings", m_settings);
+    context->setContextProperty("logging", m_logging);
 
     reloadQml();
 }

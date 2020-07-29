@@ -32,60 +32,52 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SETTINGS_H
-#define VSQ_SETTINGS_H
 
-#include <QDir>
-#include <QSettings>
-#include <QSize>
+#ifndef VSQLOGGING_H
+#define VSQLOGGING_H
+
+#include <QObject>
 
 #include "Common.h"
 
-Q_DECLARE_LOGGING_CATEGORY(settings)
+class QNetworkAccessManager;
 
-class Settings : public QSettings
+class VSQLogging : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString lastSignedInUser READ lastSignedInUser WRITE setLastSignedInUser NOTIFY lastSignedInUserChanged)
-    Q_PROPERTY(QStringList usersList READ usersList WRITE setUsersList NOTIFY usersListChanged)
-    Q_PROPERTY(bool devMode READ devMode CONSTANT)
 
 public:
-    explicit Settings(QObject *parent);
-    ~Settings();
+    explicit VSQLogging(QObject *parent);
+    virtual ~VSQLogging();
 
-    // Users
-
-    void setLastSignedInUser(const QString &user);
-    QString lastSignedInUser() const;
-
-    void setUsersList(const QStringList &users);
-    QStringList usersList() const;
-    void addUserToList(const QString &user);
-
-    QString userCredential(const QString &user) const;
-    void setUserCredential(const QString &user, const QString &userCredential);
-
-    // Database
-
-    QString databaseFileName() const;
-
-    // Attachments
-
-    int attachmentMaxSize() const;
-    QDir attachmentCacheDir() const;
-    QSize previewMaxSize() const;
-
-    // Dev mode
-    bool devMode() const;
+    void checkAppCrash();
+    void resetRunFlag();
+    bool sendLogFiles();
+    void setVirgilUrl(QString VirgilUrl);
+    void setkVersion(QString AppVersion);
+    void setkOrganization(QString strkOrganization);
+    void setkApp(QString strkApp);
 
 signals:
-    void lastSignedInUserChanged(const QString &);
-    void usersListChanged(const QStringList &);
+    void crashReportRequested();
 
 private:
-    QDir m_appDataDir;
-    QDir m_attachmentCacheDir;
+    static const QString endpointSendReport;
+
+    static void logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+
+    bool checkRunFlag();
+    bool sendFileToBackendRequest(QByteArray fileData);
+    void setRunFlag(bool runState);
+
+    QString currentVirgilUrl;
+    QString kVersion;
+    QString kOrganization;
+    QString kApp;
+    QNetworkAccessManager *manager;
+
+private slots:
+    void endpointReply();
 };
 
-#endif // VSQ_SETTINGS_H
+#endif // VSQLOGGING_H

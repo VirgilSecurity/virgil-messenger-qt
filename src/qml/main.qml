@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 
+import "./components/Dialogs"
 import "./components/Popups"
 import "./components"
 import "base"
@@ -39,6 +40,10 @@ ApplicationWindow {
         id: inform
     }
 
+    SendReportAsk {
+        id: sendReportAsk
+    }
+
     // Shortcuts for hackers
     Shortcut {
         sequence: StandardKey.Refresh
@@ -72,5 +77,8 @@ ApplicationWindow {
         showPopup(message, "#66CDAA", "#00", true, false)
     }
 
-    Component.onCompleted: Platform.detect()
+    Component.onCompleted: {
+        Platform.detect()
+        logging.crashReportRequested.connect(sendReportAsk.open)
+    }
 }
