@@ -24,9 +24,12 @@ Control {
 
     property string attachmentId
     property string attachmentSize
+    property string attachmentDisplaySize
     property var attachmentType
     property string attachmentLocalUrl
     property string attachmentLocalPreview
+    property int attachmentUploaded
+    property bool attachmentLoadingFailed
 
     QtObject {
         id: d
@@ -116,11 +119,45 @@ Control {
                     }
 
                     Label {
-                        text: attachmentSize
+                        text: attachmentDisplaySize
                         color: "white"
                         font.pixelSize: UiHelper.fixFontSz(10)
                         Layout.maximumWidth: Math.min(implicitWidth, column.maxWidth)
                         elide: "ElideMiddle"
+                    }
+                }
+            }
+
+            ProgressBar {
+                id: progressBar
+                anchors.verticalCenter: d.isPicture ? undefined : parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: d.isPicture ? parent.bottom : undefined
+                anchors.bottomMargin: d.isPicture ? 15 : 0
+
+                padding: 2
+                width: 0.95 * row.width
+                visible: attachmentUploaded < attachmentSize
+                from: 0
+                to: attachmentSize
+                value: attachmentUploaded
+
+                background: Rectangle {
+                    implicitWidth: progressBar.width
+                    implicitHeight: 6
+                    color: "#e6e6e6"
+                    radius: 3
+                }
+
+                contentItem: Item {
+                    implicitWidth: progressBar.width
+                    implicitHeight: 4
+
+                    Rectangle {
+                        width: progressBar.visualPosition * parent.width
+                        height: parent.height
+                        radius: 2
+                        color: "#17a81a"
                     }
                 }
             }

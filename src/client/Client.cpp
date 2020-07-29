@@ -116,7 +116,7 @@ void Client::start()
     m_client.setLogger(logger);
 #endif
 
-    // Wait for connection "connections"
+    // Wait for connection connections
     connect(&m_client, &QXmppClient::connected, this, &Client::stopWaitForConnection);
     connect(&m_client, &QXmppClient::disconnected, this, &Client::stopWaitForConnection);
     connect(&m_client, &QXmppClient::error, this, &Client::stopWaitForConnection);
@@ -124,18 +124,10 @@ void Client::start()
     // Uploading: uploader-to-client
     connect(&m_uploader, &Uploader::messageSent, this, &Client::messageSent);
     connect(&m_uploader, &Uploader::sendMessageFailed, this, &Client::sendMessageFailed);
-    connect(&m_uploader, &Uploader::uploadStarted, this, [](){
-        qCDebug(client) << "Upload started...";
-    });
-    connect(&m_uploader, &Uploader::uploadProgressChanged, this, [](const Message &, DataSize uploaded, DataSize total) {
-        qCDebug(client) << QString("Upload progress changed: %1 / %2").arg(uploaded).arg(total);
-    });
-    connect(&m_uploader, &Uploader::uploadCompleted, this, [](){
-        qCDebug(client) << "Upload completed :)";
-    });
-    connect(&m_uploader, &Uploader::uploadFailed, this, [](){
-        qCDebug(client) << "Upload failed :(";
-    });
+    connect(&m_uploader, &Uploader::uploadStarted, this, &Client::uploadStarted);
+    connect(&m_uploader, &Uploader::uploadProgressChanged, this, &Client::uploadProgressChanged);
+    connect(&m_uploader, &Uploader::uploaded, this, &Client::uploaded);
+    connect(&m_uploader, &Uploader::uploadFailed, this, &Client::uploadFailed);
 }
 
 bool Client::xmppConnect()
@@ -333,7 +325,7 @@ void Client::onError(QXmppClient::Error error)
 
 void Client::onMessageReceived(const QXmppMessage &message)
 {
-    qCDebug(client) << "Message received:" << message.from() << message.body();
+    qCDebug(client) << "Message received from:" << message.from();
     // Get sender
     QString from = message.from();
     QStringList pieces = from.split("@");

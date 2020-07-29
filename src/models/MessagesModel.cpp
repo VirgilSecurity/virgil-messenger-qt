@@ -36,6 +36,8 @@
 
 #include "Utils.h"
 
+Q_LOGGING_CATEGORY(messagesModel, "messagesModel")
+
 void MessagesModel::addMessage(const Message &message)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
@@ -53,9 +55,47 @@ void MessagesModel::setMessageStatusById(const QString &messageId, const Message
 {
     const auto row = findMessageRow(messageId);
     if (!row)
-        qCritical() << "Message status can't be changed for missing message";
+        qCCritical(messagesModel) << "Message status can't be changed, message doesn't exist";
     else
         setMessageStatusByRow(*row, status);
+}
+
+void MessagesModel::setUploadProgress(const Message &message, DataSize uploaded)
+{
+    const auto messageRow = findMessageRow(message.id);
+    if (!messageRow) {
+        qCCritical(messagesModel) << "Upload progress can't be changed, message doesn't exist";
+        return;
+    }
+    const int row = *messageRow;
+    auto &msg = m_messages[row];
+    if (!msg.attachment) {
+        qCCritical(messagesModel) << "Upload progress can't be set, attachment is empty";
+        return;
+    }
+    if (msg.attachment->uploaded == uploaded)
+        return;
+    msg.attachment->uploaded = uploaded;
+    emit dataChanged(index(row), index(row), { AttachmentUploadedRole });
+}
+
+void MessagesModel::setUploadFailed(const Message &message, bool failed)
+{
+    const auto messageRow = findMessageRow(message.id);
+    if (!messageRow) {
+        qCCritical(messagesModel) << "Upload failed flag can't be changed, message doesn't exist";
+        return;
+    }
+    const int row = *messageRow;
+    auto &msg = m_messages[row];
+    if (!msg.attachment) {
+        qCCritical(messagesModel) << "Upload failed flag can't be set, attachment is empty";
+        return;
+    }
+    if (msg.attachment->loadingFailed == failed)
+        return;
+    msg.attachment->loadingFailed = failed;
+    emit dataChanged(index(row), index(row), { AttachmentLoadingFailedRole });
 }
 
 void MessagesModel::setUser(const QString &user)
@@ -103,9 +143,12 @@ QHash<int, QByteArray> MessagesModel::roleNames() const
     names[FirstInRowRole] = "firstInRow";
     names[AttachmentIdRole] = "attachmentId";
     names[AttachmentSizeRole] = "attachmentSize";
+    names[AttachmentDisplaySizeRole] = "attachmentDisplaySize";
     names[AttachmentTypeRole] = "attachmentType";
     names[AttachmentLocalUrlRole] = "attachmentLocalUrl";
     names[AttachmentLocalPreviewRole] = "attachmentLocalPreview";
+    names[AttachmentUploadedRole] = "attachmentUploaded";
+    names[AttachmentLoadingFailedRole] = "attachmentLoadingFailed";
     return names;
 }
 
@@ -132,6 +175,8 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
     case AttachmentIdRole:
         return message.attachment ? message.attachment->id : QString();
     case AttachmentSizeRole:
+        return message.attachment ? message.attachment->size : 0;
+    case AttachmentDisplaySizeRole:
         return message.attachment ? Utils::formattedDataSize(message.attachment->size) : QString();
     case AttachmentTypeRole:
         return QVariant::fromValue(message.attachment ? message.attachment->type : Attachment::Type::File);
@@ -139,9 +184,22 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
         return message.attachment ? message.attachment->local_url : QString();
     case AttachmentLocalPreviewRole:
         return message.attachment ? message.attachment->local_preview : QString();
+    case AttachmentUploadedRole:
+        return message.attachment ? message.attachment->uploaded : 0;
+    case AttachmentLoadingFailedRole:
+        return message.attachment ? message.attachment->loadingFailed : 0;
     default:
         return QVariant();
     }
+}
+
+Optional<int> MessagesModel::findMessageRow(const QString &id) const
+{
+    // TODO(fpohtmeh): add caching
+    for (int i = m_messages.size() - 1; i >= 0; --i)
+        if (m_messages[i].id == id)
+            return i;
+    return NullOptional;
 }
 
 void MessagesModel::setMessageStatusByRow(int row, const Message::Status status)
@@ -152,14 +210,6 @@ void MessagesModel::setMessageStatusByRow(int row, const Message::Status status)
     message.status = status;
     emit dataChanged(index(row), index(row), { StatusRole });
     emit messageStatusChanged(message);
-}
-
-Optional<int> MessagesModel::findMessageRow(const QString &id) const
-{
-    for (int i = m_messages.size() - 1; i >= 0; --i)
-        if (m_messages[i].id == id)
-            return i;
-    return NullOptional;
 }
 
 QString MessagesModel::displayStatus(const Message::Status status) const

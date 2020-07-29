@@ -38,6 +38,7 @@
 
 void registerCommonTypes()
 {
+    qRegisterMetaType<DataSize>("DataSize");
     qRegisterMetaType<Enums::AttachmentType>();
     qRegisterMetaType<Enums::MessageStatus>();
     qRegisterMetaType<Enums::MessageAuthor>();

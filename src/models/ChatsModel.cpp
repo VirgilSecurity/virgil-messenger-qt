@@ -99,7 +99,7 @@ QVariant ChatsModel::data(const QModelIndex &index, int role) const
 
 Optional<int> ChatsModel::findChatRow(const QString &contact) const
 {
-    // TODO(fpohtmeh): add some caching?
+    // TODO(fpohtmeh): add caching
     int row = -1;
     for (auto &chat : m_chats) {
         ++row;

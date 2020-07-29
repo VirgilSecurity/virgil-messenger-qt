@@ -36,6 +36,7 @@
 
 #include <QXmppClient.h>
 
+#include <QEventLoop> // FIXME(fpohtmeh): remove upload emulation code
 #include <QThread> // FIXME(fpohtmeh): remove upload emulation code
 
 Uploader::Uploader(QXmppClient *client, QObject *parent)
@@ -49,18 +50,23 @@ Uploader::Uploader(QXmppClient *client, QObject *parent)
 void Uploader::upload(const ExtMessage &message)
 {
     const auto id = message.id;
-    const DataSize total = 1000;
+    const DataSize total = message.attachment->size;
 
     emit uploadStarted(message);
-    DataSize uploaded = 0;
-    for (; uploaded <= total; uploaded += total / 30) {
-        emit uploadProgressChanged(message, uploaded, total);
+    QEventLoop loop;
+    DataSize u = 0;
+    for (; u <= total; u += total / 30) {
+        emit uploadProgressChanged(message, u, total);
+        loop.processEvents();
         QThread::currentThread()->msleep(100);
     }
-    if (uploaded != total)
+    if (u != total) {
         emit uploadProgressChanged(message, total, total);
+        loop.processEvents();
+    }
     // FIXME(fpohtmeh): implement real upload
-    emit uploadCompleted(message);
+    emit uploaded(message);
+    loop.processEvents();
     // FIXME(fpohtmeh): remove upload emulation code
     if (m_client->sendPacket(message.xmpp))
         emit messageSent(message);

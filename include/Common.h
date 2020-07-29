@@ -52,6 +52,7 @@ namespace args {
 }
 
 using DataSize = unsigned int;
+Q_DECLARE_METATYPE(DataSize);
 
 template <class Type>
 using Optional = tl::optional<Type>;
@@ -106,7 +107,9 @@ struct Attachment
     QUrl remote_url;
     QUrl local_url;
     QUrl local_preview;
-    DataSize size;
+    DataSize size = 0;
+    DataSize uploaded = 0;
+    bool loadingFailed = false;
 
     QString fileName() const
     {

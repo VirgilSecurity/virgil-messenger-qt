@@ -126,6 +126,14 @@ void Messenger::setupConnections()
         std::bind(&MessagesModel::setMessageStatus, &m_messageModel, args::_1, Message::Status::Failed));
     connect(m_client, &Client::messageDelivered, &m_messageModel,
         std::bind(&MessagesModel::setMessageStatusById, &m_messageModel, args::_1, Message::Status::Received));
+    // Upload status: client-to-model
+    connect(m_client, &Client::uploadStarted, &m_messageModel,
+        std::bind(&MessagesModel::setUploadFailed, &m_messageModel, args::_1, false));
+    connect(m_client, &Client::uploadProgressChanged, &m_messageModel, &MessagesModel::setUploadProgress);
+    connect(m_client, &Client::uploaded, &m_messageModel,
+        std::bind(&MessagesModel::setUploadFailed, &m_messageModel, args::_1, false));
+    connect(m_client, &Client::uploadFailed, &m_messageModel,
+        std::bind(&MessagesModel::setUploadFailed, &m_messageModel, args::_1, true));
     // Messages status: model-to-model
     connect(&m_messageModel, &MessagesModel::messageAdded, &m_chatsModel, &ChatsModel::processMessage);
     connect(&m_messageModel, &MessagesModel::messageStatusChanged, &m_chatsModel, &ChatsModel::updateMessageStatus);

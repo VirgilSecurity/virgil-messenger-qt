@@ -82,6 +82,11 @@ signals:
     void receiveMessageFailed(const QString &error);
     void messageDelivered(const QString &messageId);
 
+    void uploadStarted(const Message &message);
+    void uploadProgressChanged(const Message &message, DataSize uploaded, DataSize total);
+    void uploaded(const Message &message);
+    void uploadFailed(const Message &message, const QString &error);
+
 private:
     bool xmppConnect();
     void xmppDisconnect();

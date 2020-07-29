@@ -55,7 +55,7 @@ public:
 signals:
     void uploadStarted(const Message &message);
     void uploadProgressChanged(const Message &message, DataSize uploaded, DataSize total);
-    void uploadCompleted(const Message &message);
+    void uploaded(const Message &message);
     void uploadFailed(const Message &message, const QString &error);
 
     // FIXME(fpohtmeh): remove upload emulation code

@@ -97,9 +97,12 @@ Page {
 
             attachmentId: model.attachmentId
             attachmentSize: model.attachmentSize
+            attachmentDisplaySize: model.attachmentDisplaySize
             attachmentType: model.attachmentType
             attachmentLocalUrl: model.attachmentLocalUrl
             attachmentLocalPreview: model.attachmentLocalPreview
+            attachmentUploaded: model.attachmentUploaded
+            attachmentLoadingFailed: model.attachmentLoadingFailed
         }
 
         onCountChanged: {

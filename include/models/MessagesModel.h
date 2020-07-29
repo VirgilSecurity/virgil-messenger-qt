@@ -39,6 +39,8 @@
 
 #include "Common.h"
 
+Q_DECLARE_LOGGING_CATEGORY(messagesModel)
+
 class MessagesModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -56,9 +58,12 @@ public:
         FirstInRowRole,
         AttachmentIdRole,
         AttachmentSizeRole,
+        AttachmentDisplaySizeRole,
         AttachmentTypeRole,
         AttachmentLocalUrlRole,
-        AttachmentLocalPreviewRole
+        AttachmentLocalPreviewRole,
+        AttachmentUploadedRole,
+        AttachmentLoadingFailedRole
     };
 
     using QAbstractListModel::QAbstractListModel;
@@ -66,6 +71,9 @@ public:
     void addMessage(const Message &message);
     void setMessageStatus(const Message &message, const Message::Status status);
     void setMessageStatusById(const QString &messageId, const Message::Status status);
+
+    void setUploadProgress(const Message &message, DataSize uploaded);
+    void setUploadFailed(const Message &message, bool failed);
 
     void setUser(const QString &user);
     void setRecipient(const QString &recipient);
@@ -81,8 +89,8 @@ signals:
     void messageStatusChanged(const Message &message);
 
 private:
-    void setMessageStatusByRow(int row, const Message::Status status);
     Optional<int> findMessageRow(const QString &id) const;
+    void setMessageStatusByRow(int row, const Message::Status status);
 
     QString displayStatus(const Message::Status status) const;
     bool isInRow(const Message &message, int row) const;
