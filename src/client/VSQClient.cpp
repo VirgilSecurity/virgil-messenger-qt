@@ -32,7 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "client/Client.h"
+#include "client/VSQClient.h"
 
 #include <QDeadlineTimer>
 #include <QEventLoop>
@@ -46,7 +46,8 @@
 #include <QXmppMessageReceiptManager.h>
 #include <QXmppPushEnableIq.h>
 
-#include "Utils.h"
+#include "VSQPushNotifications.h"
+#include "VSQUtils.h"
 
 #ifndef USE_XMPP_LOGS
 #define USE_XMPP_LOGS 1
@@ -56,8 +57,6 @@
 const int kKeepAliveTimeSec = 10;
 #endif
 const int kConnectionWaitMs = 10000;
-
-#include "PushNotifications.h"
 
 // TODO(fpohtmeh): refactor
 const QString kPushNotificationsProxy = "push-notifications-proxy";
@@ -71,7 +70,7 @@ const QString kPushNotificationsFormTypeVal = "http://jabber.org/protocol/pubsub
 Q_LOGGING_CATEGORY(client, "client")
 Q_LOGGING_CATEGORY(xmpp, "xmpp")
 
-Client::Client(Settings *settings, QObject *parent)
+VSQClient::VSQClient(VSQSettings *settings, QObject *parent)
     : QObject(parent)
     , m_core(settings)
     , m_client(this)
@@ -80,35 +79,35 @@ Client::Client(Settings *settings, QObject *parent)
     , m_waitingForConnection(false)
 {}
 
-void Client::start()
+void VSQClient::start()
 {
     // Register types
     qRegisterMetaType<QAbstractSocket::SocketState>();
     // Sign-in connections
-    connect(this, &Client::signIn, this, &Client::onSignIn);
-    connect(this, &Client::signOut, this, &Client::onSignOut);
-    connect(this, &Client::signUp, this, &Client::onSignUp);
-    connect(this, &Client::backupKey, this, &Client::onBackupKey);
-    connect(this, &Client::signInWithKey, this, &Client::onSignInWithKey);
+    connect(this, &VSQClient::signIn, this, &VSQClient::onSignIn);
+    connect(this, &VSQClient::signOut, this, &VSQClient::onSignOut);
+    connect(this, &VSQClient::signUp, this, &VSQClient::onSignUp);
+    connect(this, &VSQClient::backupKey, this, &VSQClient::onBackupKey);
+    connect(this, &VSQClient::signInWithKey, this, &VSQClient::onSignInWithKey);
     // XMPP connections
-    connect(&m_client, &QXmppClient::connected, this, &Client::onConnected);
-    connect(&m_client, &QXmppClient::disconnected, this, &Client::onDisconnected);
-    connect(&m_client, &QXmppClient::error, this, &Client::onError);
-    connect(&m_client, &QXmppClient::messageReceived, this, &Client::onMessageReceived);
-    connect(&m_client, &QXmppClient::presenceReceived, this, &Client::onPresenceReceived);
-    connect(&m_client, &QXmppClient::iqReceived, this, &Client::onIqReceived);
-    connect(&m_client, &QXmppClient::stateChanged, this, &Client::onStateChanged);
-    connect(&m_client, &QXmppClient::sslErrors, this, &Client::onSslErrors);
+    connect(&m_client, &QXmppClient::connected, this, &VSQClient::onConnected);
+    connect(&m_client, &QXmppClient::disconnected, this, &VSQClient::onDisconnected);
+    connect(&m_client, &QXmppClient::error, this, &VSQClient::onError);
+    connect(&m_client, &QXmppClient::messageReceived, this, &VSQClient::onMessageReceived);
+    connect(&m_client, &QXmppClient::presenceReceived, this, &VSQClient::onPresenceReceived);
+    connect(&m_client, &QXmppClient::iqReceived, this, &VSQClient::onIqReceived);
+    connect(&m_client, &QXmppClient::stateChanged, this, &VSQClient::onStateChanged);
+    connect(&m_client, &QXmppClient::sslErrors, this, &VSQClient::onSslErrors);
     // Other connections
-    connect(this, &Client::addContact, this, &Client::onAddContact);
-    connect(this, &Client::sendMessage, this, &Client::onSendMessage);
-    connect(this, &Client::checkConnectionState, this, &Client::onCheckConnectionState);
-    connect(this, &Client::setOnlineStatus, this, &Client::onSetOnlineStatus);
+    connect(this, &VSQClient::addContact, this, &VSQClient::onAddContact);
+    connect(this, &VSQClient::sendMessage, this, &VSQClient::onSendMessage);
+    connect(this, &VSQClient::checkConnectionState, this, &VSQClient::onCheckConnectionState);
+    connect(this, &VSQClient::setOnlineStatus, this, &VSQClient::onSetOnlineStatus);
 
     // XMPP receipt manager
     auto receiptManager = new QXmppMessageReceiptManager(); // TODO(fpohtmeh): set parent?
     m_client.addExtension(receiptManager);
-    connect(receiptManager, &QXmppMessageReceiptManager::messageDelivered, this, &Client::onMessageDelivered);
+    connect(receiptManager, &QXmppMessageReceiptManager::messageDelivered, this, &VSQClient::onMessageDelivered);
     // XMPP carbon manager
     m_carbonManager = new QXmppCarbonManager(); // TODO(fpohtmeh): set parent?
     m_client.addExtension(m_carbonManager);
@@ -126,30 +125,30 @@ void Client::start()
     logger->setLoggingType(QXmppLogger::SignalLogging);
     logger->setMessageTypes(QXmppLogger::AnyMessage);
 #if USE_XMPP_LOGS
-    connect(logger, &QXmppLogger::message, this, &Client::onXmppLoggerMessage);
+    connect(logger, &QXmppLogger::message, this, &VSQClient::onXmppLoggerMessage);
     m_client.setLogger(logger);
 #endif
 
     // Wait for connection connections
-    connect(&m_client, &QXmppClient::connected, this, &Client::stopWaitForConnection);
-    connect(&m_client, &QXmppClient::disconnected, this, &Client::stopWaitForConnection);
-    connect(&m_client, &QXmppClient::error, this, &Client::stopWaitForConnection);
+    connect(&m_client, &QXmppClient::connected, this, &VSQClient::stopWaitForConnection);
+    connect(&m_client, &QXmppClient::disconnected, this, &VSQClient::stopWaitForConnection);
+    connect(&m_client, &QXmppClient::error, this, &VSQClient::stopWaitForConnection);
 
     // Uploading: uploader-to-client
-    connect(&m_uploader, &Uploader::messageSent, this, &Client::messageSent);
-    connect(&m_uploader, &Uploader::sendMessageFailed, this, &Client::sendMessageFailed);
-    connect(&m_uploader, &Uploader::uploadStarted, this, &Client::uploadStarted);
-    connect(&m_uploader, &Uploader::uploadProgressChanged, this, &Client::uploadProgressChanged);
-    connect(&m_uploader, &Uploader::uploaded, this, &Client::uploaded);
-    connect(&m_uploader, &Uploader::uploadFailed, this, &Client::uploadFailed);
+    connect(&m_uploader, &VSQUploader::messageSent, this, &VSQClient::messageSent);
+    connect(&m_uploader, &VSQUploader::sendMessageFailed, this, &VSQClient::sendMessageFailed);
+    connect(&m_uploader, &VSQUploader::uploadStarted, this, &VSQClient::uploadStarted);
+    connect(&m_uploader, &VSQUploader::uploadProgressChanged, this, &VSQClient::uploadProgressChanged);
+    connect(&m_uploader, &VSQUploader::uploaded, this, &VSQClient::uploaded);
+    connect(&m_uploader, &VSQUploader::uploadFailed, this, &VSQClient::uploadFailed);
 }
 
-QString Client::virgilUrl() const
+QString VSQClient::virgilUrl() const
 {
     return m_core.virgilURL();
 }
 
-bool Client::xmppConnect()
+bool VSQClient::xmppConnect()
 {
     const auto password = m_core.xmppPassword();
     if (!password) {
@@ -174,7 +173,7 @@ bool Client::xmppConnect()
     return m_client.isConnected();
 }
 
-void Client::xmppDisconnect()
+void VSQClient::xmppDisconnect()
 {
     if (!m_client.isConnected()) {
         qCDebug(client) << "Client is already disconnected";
@@ -185,7 +184,7 @@ void Client::xmppDisconnect()
     }
 }
 
-void Client::xmppReconnect()
+void VSQClient::xmppReconnect()
 {
     if (!m_core.isSignedIn())
         qWarning() << "User is not signed in";
@@ -195,7 +194,7 @@ void Client::xmppReconnect()
         xmppConnect();
 }
 
-void Client::waitForConnection()
+void VSQClient::waitForConnection()
 {
     QDeadlineTimer timer(kConnectionWaitMs);
     QEventLoop loop;
@@ -207,12 +206,12 @@ void Client::waitForConnection()
     m_waitingForConnection = false;
 }
 
-void Client::stopWaitForConnection()
+void VSQClient::stopWaitForConnection()
 {
     m_waitingForConnection = false;
 }
 
-void Client::subscribeOnPushNotifications(bool enable)
+void VSQClient::subscribeOnPushNotifications(bool enable)
 {
 #if VS_PUSHNOTIFICATIONS
     // Subscribe Form Type
@@ -252,7 +251,7 @@ void Client::subscribeOnPushNotifications(bool enable)
 #endif // VS_PUSHNOTIFICATIONS
 }
 
-Optional<ExtMessage> Client::createExtMessage(const Message &message)
+Optional<ExtMessage> VSQClient::createExtMessage(const Message &message)
 {
     auto encryptedBody = m_core.encryptMessageBody(message.contact, message.body);
     if (!encryptedBody) {
@@ -272,7 +271,7 @@ Optional<ExtMessage> Client::createExtMessage(const Message &message)
     return extMessage;
 }
 
-void Client::onSignIn(const QString &userWithEnv)
+void VSQClient::onSignIn(const QString &userWithEnv)
 {
     if (!m_core.signIn(userWithEnv))
         emit signInFailed(userWithEnv, m_core.lastErrorText());
@@ -281,7 +280,7 @@ void Client::onSignIn(const QString &userWithEnv)
     emit signedIn(userWithEnv);
 }
 
-void Client::onSignOut()
+void VSQClient::onSignOut()
 {
     subscribeOnPushNotifications(false);
     xmppDisconnect();
@@ -289,7 +288,7 @@ void Client::onSignOut()
     emit signedOut();
 }
 
-void Client::onSignUp(const QString &userWithEnv)
+void VSQClient::onSignUp(const QString &userWithEnv)
 {
     if (m_core.signUp(userWithEnv))
         emit signedUp(userWithEnv);
@@ -297,7 +296,7 @@ void Client::onSignUp(const QString &userWithEnv)
         emit signUpFailed(userWithEnv, m_core.lastErrorText());
 }
 
-void Client::onBackupKey(const QString &password)
+void VSQClient::onBackupKey(const QString &password)
 {
     if (m_core.backupKey(password))
         emit keyBackuped(password);
@@ -305,7 +304,7 @@ void Client::onBackupKey(const QString &password)
         emit backupKeyFailed(password, m_core.lastErrorText());
 }
 
-void Client::onSignInWithKey(const QString &user, const QString &password)
+void VSQClient::onSignInWithKey(const QString &user, const QString &password)
 {
     if (!m_core.signInWithKey(user, password))
         emit signInFailed(user, m_core.lastErrorText());
@@ -314,7 +313,7 @@ void Client::onSignInWithKey(const QString &user, const QString &password)
     emit signedIn(user);
 }
 
-void Client::onAddContact(const QString &contact)
+void VSQClient::onAddContact(const QString &contact)
 {
     if (m_core.userExists(contact))
         emit contactAdded(contact);
@@ -322,7 +321,7 @@ void Client::onAddContact(const QString &contact)
         emit addContactFailed(contact, QString("Contact %1 doesn't exist").arg(contact));
 }
 
-void Client::onConnected()
+void VSQClient::onConnected()
 {
     VS_LOG_DEBUG("onConnected");
     qCDebug(client) << "onConnected";
@@ -330,20 +329,20 @@ void Client::onConnected()
     // TODO(fpohtmeh): send all messages with status failed
 }
 
-void Client::onDisconnected()
+void VSQClient::onDisconnected()
 {
     VS_LOG_DEBUG("onDisconnected");
     qCDebug(client) << "onDisconnected state:" << m_client.state();
 }
 
-void Client::onError(QXmppClient::Error error)
+void VSQClient::onError(QXmppClient::Error error)
 {
     VS_LOG_DEBUG("onError");
     qCDebug(client) << "onError:" << error << "state:" << m_client.state();
     xmppReconnect();
 }
 
-void Client::onMessageReceived(const QXmppMessage &message)
+void VSQClient::onMessageReceived(const QXmppMessage &message)
 {
     QString sender = message.from().split("@").first();
     QString recipient = message.to().split("@").first();
@@ -359,7 +358,7 @@ void Client::onMessageReceived(const QXmppMessage &message)
     }
 
     Message msg;
-    msg.id = Utils::createUuid();
+    msg.id = VSQUtils::createUuid();
     msg.timestamp = QDateTime::currentDateTime();
     msg.body = *body;
     // FIXME(fpohtmeh): get attachment from xmpp message?
@@ -378,25 +377,25 @@ void Client::onMessageReceived(const QXmppMessage &message)
     emit messageReceived(msg);
 }
 
-void Client::onPresenceReceived(const QXmppPresence &presence)
+void VSQClient::onPresenceReceived(const QXmppPresence &presence)
 {
     // TODO(fpohtmeh): remove?
     Q_UNUSED(presence)
 }
 
-void Client::onIqReceived(const QXmppIq &iq)
+void VSQClient::onIqReceived(const QXmppIq &iq)
 {
     // TODO(fpohtmeh): remove?
     Q_UNUSED(iq)
 }
 
-void Client::onStateChanged(QXmppClient::State state)
+void VSQClient::onStateChanged(QXmppClient::State state)
 {
     // TODO(fpohtmeh): remove?
     Q_UNUSED(state)
 }
 
-void Client::onSendMessage(const Message &message)
+void VSQClient::onSendMessage(const Message &message)
 {
     auto msg = createExtMessage(message);
     if (!msg) {
@@ -411,7 +410,7 @@ void Client::onSendMessage(const Message &message)
         emit sendMessageFailed(message, QLatin1String("Message sending failed"));
 }
 
-void Client::onCheckConnectionState()
+void VSQClient::onCheckConnectionState()
 {
     if (m_client.state() == QXmppClient::DisconnectedState) {
 #if VS_ANDROID
@@ -421,19 +420,19 @@ void Client::onCheckConnectionState()
     }
 }
 
-void Client::onSetOnlineStatus(bool online)
+void VSQClient::onSetOnlineStatus(bool online)
 {
     const auto presenceType = online ? QXmppPresence::Available : QXmppPresence::Unavailable;
     m_client.setClientPresence(QXmppPresence(presenceType));
 }
 
-void Client::onMessageDelivered(const QString &jid, const QString &messageId)
+void VSQClient::onMessageDelivered(const QString &jid, const QString &messageId)
 {
     qCDebug(client) << QString("Message with id: %1 delivered to %2").arg(jid, messageId);
     emit messageDelivered(messageId);
 }
 
-void Client::onDiscoveryInfoReceived(const QXmppDiscoveryIq &info)
+void VSQClient::onDiscoveryInfoReceived(const QXmppDiscoveryIq &info)
 {
     qCInfo(client) << info.features();
     if (info.from() != m_client.configuration().domain())
@@ -443,7 +442,7 @@ void Client::onDiscoveryInfoReceived(const QXmppDiscoveryIq &info)
         m_carbonManager->setCarbonsEnabled(true);
 }
 
-void Client::onXmppLoggerMessage(QXmppLogger::MessageType type, const QString &message)
+void VSQClient::onXmppLoggerMessage(QXmppLogger::MessageType type, const QString &message)
 {
     if (type == QXmppLogger::WarningMessage)
         qCWarning(xmpp).noquote() << message;
@@ -451,7 +450,7 @@ void Client::onXmppLoggerMessage(QXmppLogger::MessageType type, const QString &m
         qCDebug(xmpp).noquote() << message;
 }
 
-void Client::onSslErrors(const QList<QSslError> &errors)
+void VSQClient::onSslErrors(const QList<QSslError> &errors)
 {
     for (auto &error : errors)
         qCWarning(client) << "SSL error:" << error;

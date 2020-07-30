@@ -32,7 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "Application.h"
+#include "VSQApplication.h"
 #include "android/VSQAndroid.h"
 
 #if (VSQ_WEBDRIVER_DEBUG)
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     wd_setup(argc, argv);
 #endif
 
-    Application::initialize();
-    Application app(argc, argv);
+    VSQApplication::initialize();
+    VSQApplication app(argc, argv);
     return app.exec();
 }

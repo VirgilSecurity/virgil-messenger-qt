@@ -32,22 +32,22 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_VIRGILCORE_H
-#define VSQ_VIRGILCORE_H
+#ifndef VSQ_CORE_H
+#define VSQ_CORE_H
 
-#include "Common.h"
+#include "VSQCommon.h"
 
 // TODO(fpohtmeh): replace include with forward declaration
 #include <virgil/iot/messenger/messenger.h>
 
-class Settings;
+class VSQSettings;
 
 Q_DECLARE_LOGGING_CATEGORY(core)
 
-class VirgilCore
+class VSQCore
 {
 public:
-    explicit VirgilCore(Settings *settings);
+    explicit VSQCore(VSQSettings *settings);
 
     bool signIn(const QString &userWithEnv);
     void signOut();
@@ -91,7 +91,7 @@ private:
 
     QString caBundleFile() const;
 
-    Settings *m_settings;
+    VSQSettings *m_settings;
     QString m_user;
     EnvironmentType m_envType = EnvironmentType::DEFAULT;
     QString m_deviceId;
@@ -99,4 +99,4 @@ private:
     QString m_xmppPassword;
 };
 
-#endif // VSQ_VIRGILCORE_H
+#endif // VSQ_CORE_H

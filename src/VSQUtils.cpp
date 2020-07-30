@@ -32,60 +32,26 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SETTINGS_H
-#define VSQ_SETTINGS_H
+#include "VSQUtils.h"
 
-#include <QDir>
-#include <QSettings>
-#include <QSize>
+#include <QLocale>
+#include <QUuid>
 
-#include "Common.h"
-
-Q_DECLARE_LOGGING_CATEGORY(settings)
-
-class Settings : public QSettings
+QString VSQUtils::createUuid()
 {
-    Q_OBJECT
-    Q_PROPERTY(QString lastSignedInUser READ lastSignedInUser WRITE setLastSignedInUser NOTIFY lastSignedInUserChanged)
-    Q_PROPERTY(QStringList usersList READ usersList WRITE setUsersList NOTIFY usersListChanged)
-    Q_PROPERTY(bool devMode READ devMode CONSTANT)
+    return QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
+}
 
-public:
-    explicit Settings(QObject *parent);
-    ~Settings();
+QString VSQUtils::formattedDataSize(DataSize fileSize)
+{
+    static QLocale locale = QLocale::system();
+    return locale.formattedDataSize(fileSize);
+}
 
-    // Users
-
-    void setLastSignedInUser(const QString &user);
-    QString lastSignedInUser() const;
-
-    void setUsersList(const QStringList &users);
-    QStringList usersList() const;
-    void addUserToList(const QString &user);
-
-    QString userCredential(const QString &user) const;
-    void setUserCredential(const QString &user, const QString &userCredential);
-
-    // Database
-
-    QString databaseFileName() const;
-
-    // Attachments
-
-    int attachmentMaxSize() const;
-    QDir attachmentCacheDir() const;
-    QSize previewMaxSize() const;
-
-    // Dev mode
-    bool devMode() const;
-
-signals:
-    void lastSignedInUserChanged(const QString &);
-    void usersListChanged(const QStringList &);
-
-private:
-    QDir m_appDataDir;
-    QDir m_attachmentCacheDir;
-};
-
-#endif // VSQ_SETTINGS_H
+QString VSQUtils::escapedUserName(const QString &userName)
+{
+    static QRegExp regexp("[^a-z0-9_]");
+    QString name(userName);
+    name.remove(regexp);
+    return name;
+}

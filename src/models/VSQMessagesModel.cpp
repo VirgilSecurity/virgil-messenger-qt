@@ -32,13 +32,13 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/MessagesModel.h"
+#include "models/VSQMessagesModel.h"
 
-#include "Utils.h"
+#include "VSQUtils.h"
 
 Q_LOGGING_CATEGORY(messagesModel, "messagesModel")
 
-void MessagesModel::addMessage(const Message &message)
+void VSQMessagesModel::addMessage(const Message &message)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     m_messages.push_back(message);
@@ -46,12 +46,12 @@ void MessagesModel::addMessage(const Message &message)
     emit messageAdded(message);
 }
 
-void MessagesModel::setMessageStatus(const Message &message, const Message::Status status)
+void VSQMessagesModel::setMessageStatus(const Message &message, const Message::Status status)
 {
     setMessageStatusById(message.id, status);
 }
 
-void MessagesModel::setMessageStatusById(const QString &messageId, const Message::Status status)
+void VSQMessagesModel::setMessageStatusById(const QString &messageId, const Message::Status status)
 {
     const auto row = findMessageRow(messageId);
     if (!row)
@@ -60,7 +60,7 @@ void MessagesModel::setMessageStatusById(const QString &messageId, const Message
         setMessageStatusByRow(*row, status);
 }
 
-void MessagesModel::setUploadProgress(const Message &message, DataSize uploaded)
+void VSQMessagesModel::setUploadProgress(const Message &message, DataSize uploaded)
 {
     const auto messageRow = findMessageRow(message.id);
     if (!messageRow) {
@@ -79,7 +79,7 @@ void MessagesModel::setUploadProgress(const Message &message, DataSize uploaded)
     emit dataChanged(index(row), index(row), { AttachmentUploadedRole });
 }
 
-void MessagesModel::setUploadFailed(const Message &message, bool failed)
+void VSQMessagesModel::setUploadFailed(const Message &message, bool failed)
 {
     const auto messageRow = findMessageRow(message.id);
     if (!messageRow) {
@@ -98,7 +98,7 @@ void MessagesModel::setUploadFailed(const Message &message, bool failed)
     emit dataChanged(index(row), index(row), { AttachmentLoadingFailedRole });
 }
 
-void MessagesModel::setUser(const QString &user)
+void VSQMessagesModel::setUser(const QString &user)
 {
     if (m_user == user)
         return;
@@ -109,7 +109,7 @@ void MessagesModel::setUser(const QString &user)
     endResetModel();
 }
 
-void MessagesModel::setRecipient(const QString &recipient)
+void VSQMessagesModel::setRecipient(const QString &recipient)
 {
     // TODO(fpohtmeh): load from database
     // Marks all unread messages as read
@@ -124,13 +124,13 @@ void MessagesModel::setRecipient(const QString &recipient)
     }
 }
 
-int MessagesModel::rowCount(const QModelIndex &parent) const
+int VSQMessagesModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
     return m_messages.size();
 }
 
-QHash<int, QByteArray> MessagesModel::roleNames() const
+QHash<int, QByteArray> VSQMessagesModel::roleNames() const
 {
     QHash<int, QByteArray> names;
     names[BodyRole] = "body";
@@ -152,7 +152,7 @@ QHash<int, QByteArray> MessagesModel::roleNames() const
     return names;
 }
 
-QVariant MessagesModel::data(const QModelIndex &index, int role) const
+QVariant VSQMessagesModel::data(const QModelIndex &index, int role) const
 {
     const auto &message = m_messages[index.row()];
     switch (role) {
@@ -177,7 +177,7 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
     case AttachmentSizeRole:
         return message.attachment ? message.attachment->size : 0;
     case AttachmentDisplaySizeRole:
-        return message.attachment ? Utils::formattedDataSize(message.attachment->size) : QString();
+        return message.attachment ? VSQUtils::formattedDataSize(message.attachment->size) : QString();
     case AttachmentTypeRole:
         return QVariant::fromValue(message.attachment ? message.attachment->type : Attachment::Type::File);
     case AttachmentLocalUrlRole:
@@ -193,7 +193,7 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
     }
 }
 
-Optional<int> MessagesModel::findMessageRow(const QString &id) const
+Optional<int> VSQMessagesModel::findMessageRow(const QString &id) const
 {
     // TODO(fpohtmeh): add caching
     for (int i = m_messages.size() - 1; i >= 0; --i)
@@ -202,7 +202,7 @@ Optional<int> MessagesModel::findMessageRow(const QString &id) const
     return NullOptional;
 }
 
-void MessagesModel::setMessageStatusByRow(int row, const Message::Status status)
+void VSQMessagesModel::setMessageStatusByRow(int row, const Message::Status status)
 {
     auto &message = m_messages[row];
     if (message.status == status)
@@ -212,7 +212,7 @@ void MessagesModel::setMessageStatusByRow(int row, const Message::Status status)
     emit messageStatusChanged(message);
 }
 
-QString MessagesModel::displayStatus(const Message::Status status) const
+QString VSQMessagesModel::displayStatus(const Message::Status status) const
 {
     switch (status) {
     case Message::Status::Created:
@@ -231,14 +231,14 @@ QString MessagesModel::displayStatus(const Message::Status status) const
     }
 }
 
-bool MessagesModel::isInRow(const Message &message, int row) const
+bool VSQMessagesModel::isInRow(const Message &message, int row) const
 {
     if (row == 0)
         return false;
     return m_messages[row - 1].author == message.author;
 }
 
-bool MessagesModel::isFirstInRow(const Message &message, int row) const
+bool VSQMessagesModel::isFirstInRow(const Message &message, int row) const
 {
     if (row == 0)
         return true;

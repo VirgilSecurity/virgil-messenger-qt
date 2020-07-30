@@ -39,20 +39,20 @@
 
 #include <QXmppClient.h>
 
-#include "Uploader.h"
-#include "VirgilCore.h"
+#include "VSQCore.h"
+#include "VSQUploader.h"
 
 class QXmppCarbonManager;
 
 Q_DECLARE_LOGGING_CATEGORY(client)
 Q_DECLARE_LOGGING_CATEGORY(xmpp)
 
-class Client : public QObject
+class VSQClient : public QObject
 {
     Q_OBJECT
 
 public:
-    Client(Settings *settings, QObject *parent);
+    VSQClient(VSQSettings *settings, QObject *parent);
 
     void start();
 
@@ -126,10 +126,10 @@ private:
     void onXmppLoggerMessage(QXmppLogger::MessageType type, const QString &message);
     void onSslErrors(const QList<QSslError> &errors);
 
-    VirgilCore m_core;
+    VSQCore m_core;
     QXmppClient m_client;
     QXmppCarbonManager *m_carbonManager;
-    Uploader m_uploader;
+    VSQUploader m_uploader;
 
     QString m_lastErrorText;
     bool m_waitingForConnection;

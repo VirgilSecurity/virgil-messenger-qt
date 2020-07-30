@@ -32,26 +32,41 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_ATTACHMENT_BUILDER
-#define VSQ_ATTACHMENT_BUILDER
+#include "VSQQmlEngine.h"
 
-#include "Common.h"
+#include "VSQCommon.h"
 
-class Settings;
-
-class AttachmentBuilder
+VSQQmlEngine::VSQQmlEngine(int &argc, char **argv, QObject *parent)
+    : QQmlApplicationEngine(parent)
 {
-public:
-    explicit AttachmentBuilder(Settings *settings);
+    parseArgs(argc, argv);
+    registerCommonTypes();
+}
 
-    // Build attachment by local url and attachment type
-    OptionalAttachment build(const QUrl &url, const Attachment::Type type);
+void VSQQmlEngine::reloadQml()
+{
+    const QUrl url(QStringLiteral("main.qml"));
+    clearComponentCache();
+    load(url);
 
-private:
-    // Create preview image and return preview url
-    QUrl createPreviewImage(const QString &fileName) const;
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_WATCHOS)
+    {
+        QObject *rootObject(rootObjects().first());
+        rootObject->setProperty("width", 800);
+        rootObject->setProperty("height", 640);
+    }
+#endif
+}
 
-    Settings *m_settings;
-};
-
-#endif // VSQ_ATTACHMENT_BUILDER
+void VSQQmlEngine::parseArgs(int &argc, char **argv)
+{
+    QString basePath;
+    if (argc == 2 && argv[1] && argv[1][0]) {
+        basePath = QString::fromLocal8Bit(argv[1]);
+        qDebug() << "Custom QML base path: " << basePath;
+    }
+    if (basePath.isEmpty())
+        setBaseUrl(QUrl(QLatin1String("qrc:/qml/")));
+    else
+        setBaseUrl(QUrl(QLatin1String("file://") + basePath + QLatin1String("/qml/")));
+}

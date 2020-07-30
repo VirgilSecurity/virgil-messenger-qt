@@ -32,18 +32,60 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_UTILS_H
-#define VSQ_UTILS_H
+#ifndef VSQ_SETTINGS_H
+#define VSQ_SETTINGS_H
 
-#include "Common.h"
+#include <QDir>
+#include <QSettings>
+#include <QSize>
 
-namespace Utils
+#include "VSQCommon.h"
+
+Q_DECLARE_LOGGING_CATEGORY(settings)
+
+class VSQSettings : public QSettings
 {
-    QString createUuid();
+    Q_OBJECT
+    Q_PROPERTY(QString lastSignedInUser READ lastSignedInUser WRITE setLastSignedInUser NOTIFY lastSignedInUserChanged)
+    Q_PROPERTY(QStringList usersList READ usersList WRITE setUsersList NOTIFY usersListChanged)
+    Q_PROPERTY(bool devMode READ devMode CONSTANT)
 
-    QString formattedDataSize(DataSize fileSize);
+public:
+    explicit VSQSettings(QObject *parent);
+    ~VSQSettings();
 
-    QString escapedUserName(const QString &userName);
-}
+    // Users
 
-#endif // VSQ_UTILS_H
+    void setLastSignedInUser(const QString &user);
+    QString lastSignedInUser() const;
+
+    void setUsersList(const QStringList &users);
+    QStringList usersList() const;
+    void addUserToList(const QString &user);
+
+    QString userCredential(const QString &user) const;
+    void setUserCredential(const QString &user, const QString &userCredential);
+
+    // Database
+
+    QString databaseFileName() const;
+
+    // Attachments
+
+    int attachmentMaxSize() const;
+    QDir attachmentCacheDir() const;
+    QSize previewMaxSize() const;
+
+    // Dev mode
+    bool devMode() const;
+
+signals:
+    void lastSignedInUserChanged(const QString &);
+    void usersListChanged(const QStringList &);
+
+private:
+    QDir m_appDataDir;
+    QDir m_attachmentCacheDir;
+};
+
+#endif // VSQ_SETTINGS_H

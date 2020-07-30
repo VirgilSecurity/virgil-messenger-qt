@@ -32,24 +32,24 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "database/Database.h"
+#include "database/VSQDatabase.h"
 
 #include <QSqlError>
 
-#include "Settings.h"
+#include "VSQSettings.h"
 
-Database::Database(const Settings *settings, QObject *parent)
+VSQDatabase::VSQDatabase(const VSQSettings *settings, QObject *parent)
     : QObject(parent)
     , m_settings(settings)
     , m_connectionName(QLatin1String("VSQDatabase"))
 {}
 
-Database::~Database()
+VSQDatabase::~VSQDatabase()
 {
     m_db.close();
 }
 
-void Database::open()
+void VSQDatabase::open()
 {
     m_db = QSqlDatabase::addDatabase("QSQLITE", m_connectionName);
     if (!m_db.isValid()) {

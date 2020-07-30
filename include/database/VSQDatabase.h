@@ -32,22 +32,33 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "ClipboardProxy.h"
+#ifndef VSQ_DATABASE_H
+#define VSQ_DATABASE_H
 
-#include <QClipboard>
+#include <QObject>
+#include <QSqlDatabase>
 
-ClipboardProxy::ClipboardProxy(QClipboard *c)
-    : clipboard(c)
+class VSQSettings;
+
+class VSQDatabase : public QObject
 {
-    connect(c, &QClipboard::dataChanged, this, &ClipboardProxy::textChanged);
-}
+    Q_OBJECT
 
-QString ClipboardProxy::text() const
-{
-    return clipboard->text();
-}
+public:
+    explicit VSQDatabase(const VSQSettings *settings, QObject *parent);
+    ~VSQDatabase();
 
-void ClipboardProxy::setText(const QString &text)
-{
-    clipboard->setText(text);
-}
+    void open();
+
+signals:
+    void opened();
+    void failed();
+
+private:
+    const VSQSettings *m_settings;
+    const QString m_connectionName;
+    const QString m_fileName;
+    QSqlDatabase m_db;
+};
+
+#endif // VSQ_DATABASE_H

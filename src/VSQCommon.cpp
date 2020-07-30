@@ -32,33 +32,17 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_DATABASE_H
-#define VSQ_DATABASE_H
+#include "VSQCommon.h"
 
-#include <QObject>
-#include <QSqlDatabase>
+#include <QtQml>
 
-class Settings;
-
-class Database : public QObject
+void registerCommonTypes()
 {
-    Q_OBJECT
-
-public:
-    explicit Database(const Settings *settings, QObject *parent);
-    ~Database();
-
-    void open();
-
-signals:
-    void opened();
-    void failed();
-
-private:
-    const Settings *m_settings;
-    const QString m_connectionName;
-    const QString m_fileName;
-    QSqlDatabase m_db;
-};
-
-#endif // VSQ_DATABASE_H
+    qRegisterMetaType<DataSize>("DataSize");
+    qRegisterMetaType<Enums::AttachmentType>();
+    qRegisterMetaType<Enums::MessageStatus>();
+    qRegisterMetaType<Enums::MessageAuthor>();
+    qRegisterMetaType<OptionalAttachment>();
+    qRegisterMetaType<Message>();
+    qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");
+}

@@ -32,25 +32,25 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "VirgilCore.h"
+#include "VSQCore.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "Settings.h"
-#include "Utils.h"
+#include "VSQSettings.h"
+#include "VSQUtils.h"
 #include "android/VSQAndroid.h"
 
 Q_LOGGING_CATEGORY(core, "core")
 
 using namespace VirgilIoTKit;
 
-VirgilCore::VirgilCore(Settings *settings)
+VSQCore::VSQCore(VSQSettings *settings)
     : m_settings(settings)
-    , m_deviceId(Utils::createUuid())
+    , m_deviceId(VSQUtils::createUuid())
 {}
 
-bool VirgilCore::signIn(const QString &userWithEnv)
+bool VSQCore::signIn(const QString &userWithEnv)
 {
     // Initialization
     if (!initialize())
@@ -75,7 +75,7 @@ bool VirgilCore::signIn(const QString &userWithEnv)
     return true;
 }
 
-void VirgilCore::signOut()
+void VSQCore::signOut()
 {
     m_user.clear();
     m_envType = EnvironmentType::DEFAULT;
@@ -83,7 +83,7 @@ void VirgilCore::signOut()
     vs_messenger_virgil_logout();
 }
 
-bool VirgilCore::signUp(const QString &userWithEnv)
+bool VSQCore::signUp(const QString &userWithEnv)
 {
     if (userWithEnv.isEmpty()) {
         m_lastErrorText = QLatin1String("Empty username");
@@ -114,7 +114,7 @@ bool VirgilCore::signUp(const QString &userWithEnv)
     return true;
 }
 
-bool VirgilCore::backupKey(const QString &password)
+bool VSQCore::backupKey(const QString &password)
 {
     // Upload current user key to the cloud
     if (VS_CODE_OK != vs_messenger_virgil_set_sign_in_password(password.toStdString().c_str())) {
@@ -124,7 +124,7 @@ bool VirgilCore::backupKey(const QString &password)
     return true;
 }
 
-bool VirgilCore::signInWithKey(const QString &userWithEnv, const QString &password)
+bool VSQCore::signInWithKey(const QString &userWithEnv, const QString &password)
 {
     setUser(userWithEnv);
     Credentials creds;
@@ -139,7 +139,7 @@ bool VirgilCore::signInWithKey(const QString &userWithEnv, const QString &passwo
     return true;
 }
 
-Optional<QString> VirgilCore::encryptMessageBody(const QString &contact, const QString &body)
+Optional<QString> VSQCore::encryptMessageBody(const QString &contact, const QString &body)
 {
     static const size_t _encryptedMsgSzMax = 20 * 1024;
     uint8_t encryptedMessage[_encryptedMsgSzMax];
@@ -171,7 +171,7 @@ Optional<QString> VirgilCore::encryptMessageBody(const QString &contact, const Q
     return QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage));
 }
 
-Optional<QString> VirgilCore::decryptMessageBody(const QString &contact, const QString &encrypedBody)
+Optional<QString> VSQCore::decryptMessageBody(const QString &contact, const QString &encrypedBody)
 {
     static const size_t decryptedBodyMaxSize = 10 * 1024;
     uint8_t decryptedBody[decryptedBodyMaxSize];
@@ -205,34 +205,34 @@ Optional<QString> VirgilCore::decryptMessageBody(const QString &contact, const Q
     return decryptedString;
 }
 
-bool VirgilCore::userExists(const QString &user) const
+bool VSQCore::userExists(const QString &user) const
 {
     if (VS_CODE_OK != vs_messenger_virgil_search(user.toStdString().c_str()))
         return false;
     return true;
 }
 
-QString VirgilCore::user() const
+QString VSQCore::user() const
 {
     return m_user;
 }
 
-bool VirgilCore::isSignedIn() const
+bool VSQCore::isSignedIn() const
 {
     return vs_messenger_virgil_is_signed_in();
 }
 
-QString VirgilCore::lastErrorText() const
+QString VSQCore::lastErrorText() const
 {
     return m_lastErrorText;
 }
 
-QString VirgilCore::xmppJID() const
+QString VSQCore::xmppJID() const
 {
     return m_user + QLatin1Char('@') + xmppURL() + QLatin1Char('/') + m_deviceId;
 }
 
-QString VirgilCore::xmppURL() const
+QString VSQCore::xmppURL() const
 {
     QString res = qgetenv("VS_MSGR_XMPP_URL");
     if (res.isEmpty()) {
@@ -252,7 +252,7 @@ QString VirgilCore::xmppURL() const
     return res;
 }
 
-Optional<QString> VirgilCore::xmppPassword()
+Optional<QString> VSQCore::xmppPassword()
 {
     if (!m_xmppPassword.isEmpty())
         return m_xmppPassword;
@@ -268,7 +268,7 @@ Optional<QString> VirgilCore::xmppPassword()
     return m_xmppPassword;
 }
 
-uint16_t VirgilCore::xmppPort() const
+uint16_t VSQCore::xmppPort() const
 {
     uint16_t res = 5222;
     QString portStr = qgetenv("VS_MSGR_XMPP_PORT");
@@ -283,7 +283,7 @@ uint16_t VirgilCore::xmppPort() const
     return res;
 }
 
-bool VirgilCore::initialize()
+bool VSQCore::initialize()
 {
     if (vs_messenger_virgil_is_init())
         return true;
@@ -297,14 +297,14 @@ bool VirgilCore::initialize()
     return true;
 }
 
-void VirgilCore::setUser(const QString &userWithEnv)
+void VSQCore::setUser(const QString &userWithEnv)
 {
     const UserEnv userEnv = parseUserWithEnv(userWithEnv);
     m_user = userEnv.first;
     m_envType = userEnv.second;
 }
 
-VirgilCore::UserEnv VirgilCore::parseUserWithEnv(const QString &userWithEnv) const
+VSQCore::UserEnv VSQCore::parseUserWithEnv(const QString &userWithEnv) const
 {
     UserEnv userEnv;
     const QStringList pieces = userWithEnv.split("@");
@@ -324,7 +324,7 @@ VirgilCore::UserEnv VirgilCore::parseUserWithEnv(const QString &userWithEnv) con
     return userEnv;
 }
 
-bool VirgilCore::loadCredentials(const QString &user, Credentials &creds)
+bool VSQCore::loadCredentials(const QString &user, Credentials &creds)
 {
     const auto settingsJson = m_settings->userCredential(user).toUtf8();
     const auto json = QJsonDocument::fromJson(settingsJson);
@@ -339,7 +339,7 @@ bool VirgilCore::loadCredentials(const QString &user, Credentials &creds)
     return true;
 }
 
-void VirgilCore::saveCredentials(const QString &user, const Credentials &creds)
+void VSQCore::saveCredentials(const QString &user, const Credentials &creds)
 {
     // TODO(fpohtmeh): save one device id for all users
     // TODO: Use SecBox
@@ -353,7 +353,7 @@ void VirgilCore::saveCredentials(const QString &user, const Credentials &creds)
     m_settings->setUserCredential(user, json);
 }
 
-QString VirgilCore::caBundleFile() const
+QString VSQCore::caBundleFile() const
 {
 #if VS_ANDROID
     return VSQAndroid::caBundlePath();
@@ -362,7 +362,7 @@ QString VirgilCore::caBundleFile() const
 #endif
 }
 
-QString VirgilCore::virgilURL() const
+QString VSQCore::virgilURL() const
 {
     QString res = qgetenv("VS_MSGR_VIRGIL");
     if (res.isEmpty()) {

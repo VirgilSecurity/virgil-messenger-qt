@@ -32,7 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "Settings.h"
+#include "VSQSettings.h"
 
 #include <QStandardPaths>
 
@@ -41,7 +41,7 @@ static const QString kUsers = "Users";
 
 Q_LOGGING_CATEGORY(settings, "settings")
 
-Settings::Settings(QObject *parent)
+VSQSettings::VSQSettings(QObject *parent)
     : QSettings("VirgilSecurity", "VirgilMessenger", parent) // organization, application name
 {
     m_appDataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
@@ -58,10 +58,10 @@ Settings::Settings(QObject *parent)
     qCDebug(settings) << "- attachment max size:" << attachmentMaxSize();
 }
 
-Settings::~Settings()
+VSQSettings::~VSQSettings()
 {}
 
-void Settings::setLastSignedInUser(const QString &user)
+void VSQSettings::setLastSignedInUser(const QString &user)
 {
     if (lastSignedInUser() == user)
         return;
@@ -70,12 +70,12 @@ void Settings::setLastSignedInUser(const QString &user)
     emit lastSignedInUserChanged(user);
 }
 
-QString Settings::lastSignedInUser() const
+QString VSQSettings::lastSignedInUser() const
 {
     return value(kLastSignedInUser).toString();
 }
 
-void Settings::setUsersList(const QStringList &users)
+void VSQSettings::setUsersList(const QStringList &users)
 {
     if (usersList() == users)
         return;
@@ -84,50 +84,50 @@ void Settings::setUsersList(const QStringList &users)
     emit usersListChanged(users);
 }
 
-QStringList Settings::usersList() const
+QStringList VSQSettings::usersList() const
 {
     return value(kUsers, QStringList()).toStringList();
 }
 
-void Settings::addUserToList(const QString &user)
+void VSQSettings::addUserToList(const QString &user)
 {
     auto users = usersList();
     if (!users.contains(user))
         setUsersList(users << user);
 }
 
-QString Settings::userCredential(const QString &user) const
+QString VSQSettings::userCredential(const QString &user) const
 {
     return value(user, QString()).toString();
 }
 
-void Settings::setUserCredential(const QString &user, const QString &credential)
+void VSQSettings::setUserCredential(const QString &user, const QString &credential)
 {
     setValue(user, credential);
     sync();
 }
 
-QString Settings::databaseFileName() const
+QString VSQSettings::databaseFileName() const
 {
     return m_appDataDir.filePath("chat-database.sqlite3");
 }
 
-int Settings::attachmentMaxSize() const
+int VSQSettings::attachmentMaxSize() const
 {
     return 50 * 1024 * 1024;
 }
 
-QDir Settings::attachmentCacheDir() const
+QDir VSQSettings::attachmentCacheDir() const
 {
     return m_attachmentCacheDir;
 }
 
-QSize Settings::previewMaxSize() const
+QSize VSQSettings::previewMaxSize() const
 {
     return QSize(600, 400);
 }
 
-bool Settings::devMode() const
+bool VSQSettings::devMode() const
 {
 #ifdef VS_DEVMODE
     return true;

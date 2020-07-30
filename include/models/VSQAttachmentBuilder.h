@@ -32,17 +32,26 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "Common.h"
+#ifndef VSQ_ATTACHMENT_BUILDER
+#define VSQ_ATTACHMENT_BUILDER
 
-#include <QtQml>
+#include "VSQCommon.h"
 
-void registerCommonTypes()
+class VSQSettings;
+
+class VSQAttachmentBuilder
 {
-    qRegisterMetaType<DataSize>("DataSize");
-    qRegisterMetaType<Enums::AttachmentType>();
-    qRegisterMetaType<Enums::MessageStatus>();
-    qRegisterMetaType<Enums::MessageAuthor>();
-    qRegisterMetaType<OptionalAttachment>();
-    qRegisterMetaType<Message>();
-    qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");
-}
+public:
+    explicit VSQAttachmentBuilder(VSQSettings *settings);
+
+    // Build attachment by local url and attachment type
+    OptionalAttachment build(const QUrl &url, const Attachment::Type type);
+
+private:
+    // Create preview image and return preview url
+    QUrl createPreviewImage(const QString &fileName) const;
+
+    VSQSettings *m_settings;
+};
+
+#endif // VSQ_ATTACHMENT_BUILDER

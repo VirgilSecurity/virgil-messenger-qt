@@ -32,21 +32,21 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/ChatsModel.h"
+#include "models/VSQChatsModel.h"
 
-#include "Utils.h"
+#include "VSQUtils.h"
 
-void ChatsModel::processMessage(const Message &message)
+void VSQChatsModel::processMessage(const Message &message)
 {
     updateChat(message.contact, message.body, message.timestamp, message.status);
 }
 
-void ChatsModel::processContact(const QString &contact)
+void VSQChatsModel::processContact(const QString &contact)
 {
     addChat(contact, QLatin1String(), QDateTime::currentDateTime(), NullOptional);
 }
 
-void ChatsModel::updateMessageStatus(const Message &message)
+void VSQChatsModel::updateMessageStatus(const Message &message)
 {
     auto chatRow = findChatRow(message.contact);
     if (!chatRow) {
@@ -59,18 +59,18 @@ void ChatsModel::updateMessageStatus(const Message &message)
     }
 }
 
-void ChatsModel::setRecipient(const QString &recipient)
+void VSQChatsModel::setRecipient(const QString &recipient)
 {
     m_recipient = recipient;
 }
 
-int ChatsModel::rowCount(const QModelIndex &parent) const
+int VSQChatsModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
     return m_chats.size();
 }
 
-QHash<int, QByteArray> ChatsModel::roleNames() const
+QHash<int, QByteArray> VSQChatsModel::roleNames() const
 {
     QHash<int, QByteArray> names;
     names[NicknameRole] = "nickname";
@@ -80,7 +80,7 @@ QHash<int, QByteArray> ChatsModel::roleNames() const
     return names;
 }
 
-QVariant ChatsModel::data(const QModelIndex &index, int role) const
+QVariant VSQChatsModel::data(const QModelIndex &index, int role) const
 {
     const auto &chat = m_chats[index.row()];
     switch (role) {
@@ -97,7 +97,7 @@ QVariant ChatsModel::data(const QModelIndex &index, int role) const
     }
 }
 
-Optional<int> ChatsModel::findChatRow(const QString &contact) const
+Optional<int> VSQChatsModel::findChatRow(const QString &contact) const
 {
     // TODO(fpohtmeh): add caching
     int row = -1;
@@ -109,12 +109,12 @@ Optional<int> ChatsModel::findChatRow(const QString &contact) const
     return NullOptional;
 }
 
-void ChatsModel::addChat(const QString &contact, const QString &messageBody, const QDateTime &eventTimestamp,
+void VSQChatsModel::addChat(const QString &contact, const QString &messageBody, const QDateTime &eventTimestamp,
                          const Optional<Message::Status> status)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     Chat chat;
-    chat.id = Utils::createUuid();
+    chat.id = VSQUtils::createUuid();
     chat.contact = contact;
     chat.lastMessageBody = messageBody;
     chat.lastEventTimestamp = eventTimestamp;
@@ -123,7 +123,7 @@ void ChatsModel::addChat(const QString &contact, const QString &messageBody, con
     endInsertRows();
 }
 
-void ChatsModel::updateChat(const QString &contact, const QString &messageBody, const QDateTime &eventTimestamp,
+void VSQChatsModel::updateChat(const QString &contact, const QString &messageBody, const QDateTime &eventTimestamp,
                             const Optional<Message::Status> status)
 {
     const auto chatIndex = findChatRow(contact);

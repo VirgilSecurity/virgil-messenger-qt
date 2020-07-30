@@ -38,7 +38,7 @@
 
 #include <QObject>
 
-#include "Common.h"
+#include "VSQCommon.h"
 
 class QNetworkAccessManager;
 

@@ -86,25 +86,25 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
 #
 
 HEADERS += \
-        include/Application.h \
-        include/ClipboardProxy.h \
-        include/Common.h \
-        include/Messenger.h \
-        include/QmlEngine.h \
-        include/Settings.h \
-        include/VirgilCore.h \
-        include/Utils.h \
+        include/VSQApplication.h \
+        include/VSQClipboardProxy.h \
+        include/VSQCommon.h \
+        include/VSQCore.h \
         include/VSQLogging.h \
+        include/VSQMessenger.h \
+        include/VSQQmlEngine.h \
+        include/VSQSettings.h \
+        include/VSQUtils.h \
         include/ui/VSQUiHelper.h \
         # Client
-        include/client/Client.h \
-        include/client/Uploader.h \
+        include/client/VSQClient.h \
+        include/client/VSQUploader.h \
         # Models
-        include/models/AttachmentBuilder.h \
-        include/models/ChatsModel.h \
-        include/models/MessagesModel.h \
+        include/models/VSQAttachmentBuilder.h \
+        include/models/VSQChatsModel.h \
+        include/models/VSQMessagesModel.h \
         # Database
-        include/database/Database.h \
+        include/database/VSQDatabase.h \
         # Platforms
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
@@ -116,26 +116,26 @@ HEADERS += \
 #
 
 SOURCES += \
-        src/Application.cpp \
-        src/ClipboardProxy.cpp \
-        src/Common.cpp \
-        src/Messenger.cpp \
-        src/QmlEngine.cpp \
-        src/Settings.cpp \
-        src/VirgilCore.cpp \
-        src/Utils.cpp \
-        src/VSQLogging.cpp \
         src/main.cpp \
+        src/VSQApplication.cpp \
+        src/VSQClipboardProxy.cpp \
+        src/VSQCommon.cpp \
+        src/VSQCore.cpp \
+        src/VSQMessenger.cpp \
+        src/VSQQmlEngine.cpp \
+        src/VSQSettings.cpp \
+        src/VSQUtils.cpp \
+        src/VSQLogging.cpp \
         src/ui/VSQUiHelper.cpp \
         # Client
-        src/client/Client.cpp \
-        src/client/Uploader.cpp \
+        src/client/VSQClient.cpp \
+        src/client/VSQUploader.cpp \
         # Models
-        src/models/AttachmentBuilder.cpp \
-        src/models/ChatsModel.cpp \
-        src/models/MessagesModel.cpp \
+        src/models/VSQAttachmentBuilder.cpp \
+        src/models/VSQChatsModel.cpp \
+        src/models/VSQMessagesModel.cpp \
         # Database
-        src/database/Database.cpp \
+        src/database/VSQDatabase.cpp \
         # Platforms
         src/android/VSQAndroid.cpp
 

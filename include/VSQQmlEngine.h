@@ -32,42 +32,22 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_UPLOADER_H
-#define VSQ_UPLOADER_H
+#ifndef VSQ_QMLENGINE_H
+#define VSQ_QMLENGINE_H
 
-#include <QObject>
+#include <QQmlApplicationEngine>
 
-#include <QXmppUploadRequestManager.h>
-
-#include "Common.h"
-
-class QXmppClient;
-
-class Uploader : public QObject
+class VSQQmlEngine : public QQmlApplicationEngine
 {
     Q_OBJECT
 
 public:
-    explicit Uploader(QXmppClient *client, QObject *parent);
+    VSQQmlEngine(int &argc, char **argv, QObject *parent);
 
-    void upload(const ExtMessage &message);
-
-signals:
-    void uploadStarted(const Message &message);
-    void uploadProgressChanged(const Message &message, DataSize uploaded, DataSize total);
-    void uploaded(const Message &message);
-    void uploadFailed(const Message &message, const QString &error);
-
-    // FIXME(fpohtmeh): remove upload emulation code
-    void messageSent(const Message &message);
-    void sendMessageFailed(const Message &message, const QString &error);
-
-    Q_INVOKABLE void
-    refresh();
+    void reloadQml();
 
 private:
-    QXmppUploadRequestManager m_manager;
-    QXmppClient *m_client; // FIXME(fpohtmeh): remove upload emulation code
+    void parseArgs(int &argc, char **argv);
 };
 
-#endif // VSQ_UPLOADER_H
+#endif // VSQ_QMLENGINE_H

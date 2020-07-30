@@ -43,22 +43,22 @@
 #define ApplicationBase QGuiApplication
 #endif
 
-#include "Common.h"
+#include "VSQCommon.h"
 
 Q_DECLARE_LOGGING_CATEGORY(application)
 
-class Messenger;
-class QmlEngine;
-class Settings;
+class VSQMessenger;
+class VSQQmlEngine;
+class VSQSettings;
 class VSQLogging;
 
-class Application : public ApplicationBase
+class VSQApplication : public ApplicationBase
 {
     Q_OBJECT
 
 public:
-    Application(int &argc, char **argv);
-    virtual ~Application() = default;
+    VSQApplication(int &argc, char **argv);
+    virtual ~VSQApplication() = default;
 
     static void initialize();
     Q_INVOKABLE void reloadQml();
@@ -77,9 +77,9 @@ private:
 
     static const QString kVersion;
 
-    Settings *m_settings;
-    Messenger *m_messenger;
-    QmlEngine *m_engine;
+    VSQSettings *m_settings;
+    VSQMessenger *m_messenger;
+    VSQQmlEngine *m_engine;
     VSQLogging *m_logging;
 };
 

@@ -32,19 +32,19 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/AttachmentBuilder.h"
+#include "models/VSQAttachmentBuilder.h"
 
 #include <QPixmap>
 
-#include "Settings.h"
-#include "Utils.h"
+#include "VSQSettings.h"
+#include "VSQUtils.h"
 
-AttachmentBuilder::AttachmentBuilder(Settings *settings)
+VSQAttachmentBuilder::VSQAttachmentBuilder(VSQSettings *settings)
     : m_settings(settings)
 {}
 
 
-OptionalAttachment AttachmentBuilder::build(const QUrl &url, const Attachment::Type type)
+OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment::Type type)
 {
     if (!url.isValid() || !url.isLocalFile())
         return NullOptional;
@@ -58,7 +58,7 @@ OptionalAttachment AttachmentBuilder::build(const QUrl &url, const Attachment::T
         return NullOptional;
     }
     Attachment attachment;
-    attachment.id = Utils::createUuid();
+    attachment.id = VSQUtils::createUuid();
     attachment.type = type;
     attachment.local_url = QUrl::fromLocalFile(info.absoluteFilePath());
     if (type == Attachment::Type::Picture)
@@ -67,7 +67,7 @@ OptionalAttachment AttachmentBuilder::build(const QUrl &url, const Attachment::T
     return attachment;
 }
 
-QUrl AttachmentBuilder::createPreviewImage(const QString &fileName) const
+QUrl VSQAttachmentBuilder::createPreviewImage(const QString &fileName) const
 {
     QPixmap pixmap(fileName);
     QSizeF size = pixmap.size();
@@ -85,7 +85,7 @@ QUrl AttachmentBuilder::createPreviewImage(const QString &fileName) const
     }
     if (size != pixmap.size())
         pixmap = pixmap.scaled(size.width(), size.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    const QString previewFileName = m_settings->attachmentCacheDir().filePath(Utils::createUuid() + QLatin1String(".png"));
+    const QString previewFileName = m_settings->attachmentCacheDir().filePath(VSQUtils::createUuid() + QLatin1String(".png"));
     pixmap.save(previewFileName);
     qInfo() << "Created preview image:" << previewFileName;
     return QUrl::fromLocalFile(previewFileName);

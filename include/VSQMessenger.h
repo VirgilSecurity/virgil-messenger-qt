@@ -32,234 +32,99 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#ifndef VSQ_MESSENGER_H
+#define VSQ_MESSENGER_H
 
-#ifndef VIRGIL_IOTKIT_QT_MESSENGER_H
-#define VIRGIL_IOTKIT_QT_MESSENGER_H
-
-#include <QtCore>
-#include <QFuture>
 #include <QObject>
-#include <QSemaphore>
-#include <QXmppCarbonManager.h>
-#include <QXmppDiscoveryManager.h>
 
-#include <virgil/iot/qt/VSQIoTKit.h>
-#include <qxmpp/QXmppClient.h>
-#include <qxmpp/QXmppMessageReceiptManager.h>
+#include "VSQCommon.h"
+#include "client/VSQClient.h"
+#include "models/VSQAttachmentBuilder.h"
+#include "models/VSQChatsModel.h"
+#include "models/VSQMessagesModel.h"
 
-#include <virgil/iot/messenger/messenger.h>
+class QThread;
 
-#include "VSQSqlConversationModel.h"
-#include "VSQSqlChatModel.h"
-#include "VSQLogging.h"
+class VSQClient;
+class VSQDatabase;
+class VSQSettings;
+class VSQLogging;
 
-using namespace VirgilIoTKit;
-
-class VSQMessenger : public QObject {
-
+class VSQMessenger : public QObject
+{
     Q_OBJECT
-
-    enum VSQEnvType { PROD, STG, DEV };
-
-    Q_ENUMS(EnResult)
-
-    Q_ENUMS(EnStatus)
+    Q_PROPERTY(QString user MEMBER m_user NOTIFY userChanged)
+    Q_PROPERTY(QString recipient MEMBER m_recipient NOTIFY recipientChanged)
+    Q_PROPERTY(VSQMessagesModel *messages READ messageModel CONSTANT)
+    Q_PROPERTY(VSQChatsModel *chats READ chatsModel CONSTANT)
 
 public:
+    explicit VSQMessenger(VSQSettings *settings, QObject *parent = nullptr);
+    ~VSQMessenger() override = default;
 
-    enum EnResult
-    {
-        MRES_OK,
-        MRES_ERR_NO_CRED,
-        MRES_ERR_SIGNIN,
-        MRES_ERR_SIGNUP,
-        MRES_ERR_USER_NOT_FOUND,
-        MRES_ERR_USER_ALREADY_EXISTS,
-        MRES_ERR_ENCRYPTION
-    };
+    Q_INVOKABLE void start();
 
-    enum EnStatus
-    {
-        MSTATUS_ONLINE,
-        MSTATUS_UNAVAILABLE
-    };
-
-    Q_PROPERTY(QString currentUser READ currentUser NOTIFY fireCurrentUserChanged)
-
-    VSQMessenger();
-    virtual ~VSQMessenger() = default;
-
-    Q_INVOKABLE QString currentUser() const;
-    Q_INVOKABLE QString currentRecipient() const;
-
-    VSQSqlConversationModel &modelConversations();
-    VSQSqlChatModel &getChatModel();
-    
-    static QString decryptMessage(const QString &sender, const QString &message);
-
-
-
-public slots:
-
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    signIn(QString user);
-
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    backupUserKey(QString password);
-
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    signInWithBackupKey(QString username, QString password);
-
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    signUp(QString user);
-
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    logout();
-
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    disconnect();
-
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    deleteUser(QString user);
-
-    Q_INVOKABLE QStringList
-    usersList();
-
-    Q_INVOKABLE void
-    checkState();
-
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    addContact(QString contact);
-
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    sendMessage(QString to, QString message);
-
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    sendMessage(bool createNew, QString messageId, QString to, QString message);
-
-    Q_INVOKABLE void
-    setStatus(VSQMessenger::EnStatus status);
-
-    void setLogging(VSQLogging *loggingPtr);
-
-    Q_INVOKABLE void setCurrentRecipient(const QString &recipient);
+    void setLogging(VSQLogging *logging);
 
 signals:
-    void
-    fireError(QString errorText);
+    void signIn(const QString &userWithEnv);
+    void signInWithKey(const QString &userWithEnv, const QString &password);
+    void signedIn(const QString &userWithEnv);
+    void signInFailed(const QString &userWithEnv, const QString &error);
 
-    void
-    fireInform(QString informText);
+    void signOut();
+    void signedOut();
 
-    void
-    fireConnecting();
+    void signUp(const QString &userWithEnv);
+    void signedUp(const QString &userWithEnv);
+    void signUpFailed(const QString &userWithEnv, const QString &error);
 
-    void
-    fireReady();
+    void backupKey(const QString &password);
+    void keyBackuped(const QString &password);
+    void backupKeyFailed(const QString &password, const QString &error);
 
-    void
-    fireAddedContact(QString contact);
+    void addContact(const QString &contact);
+    void contactAdded(const QString &contact);
+    void addContactFailed(const QString &contact, const QString &error);
 
-    void
-    fireReadyToAddContact(QString contact);
+    void createSendMessage(const QString &text, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
+    void sendMessage(const Message &message);
+    void messageSent();
+    void sendMessageFailed();
 
-    void
-    fireNewMessage(QString from, QString message);
+    void quitRequested();
+    void credentialsRequested(bool signOut);
+    void checkConnectionState();
+    void setOnlineStatus(bool online);
 
-    void
-    fireCurrentUserChanged();
-
-private slots:
-    void onConnected();
-    void onMessageDelivered(const QString&, const QString&);
-    void onDisconnected();
-    void onError(QXmppClient::Error);
-    void onMessageReceived(const QXmppMessage &message);
-    void onPresenceReceived(const QXmppPresence &presence);
-    void onIqReceived(const QXmppIq &iq);
-    void onSslErrors(const QList<QSslError> &errors);
-    void onStateChanged(QXmppClient::State state);
-    void handleDiscoInfo(const QXmppDiscoveryIq &info);
-
-    void
-    onAddContactToDB(QString contact);
-
-    Q_INVOKABLE void
-    onSubscribePushNotifications(bool enable);
+    void userChanged(const QString &user);
+    void recipientChanged(const QString &recipient);
 
 private:
-    QXmppClient m_xmpp;
-    QXmppMessageReceiptManager* m_xmppReceiptManager;
-    QXmppCarbonManager* m_xmppCarbonManager;
-    QXmppDiscoveryManager* m_xmppDiscoManager;
-    VSQSqlConversationModel *m_sqlConversations;
-    VSQSqlChatModel *m_sqlChatModel;
-    VSQLogging *m_logging;
+    void setupConnections();
+
+    void setUser(const QString &user);
+    void setRecipient(const QString &recipient);
+
+    VSQMessagesModel *messageModel();
+    VSQChatsModel *chatsModel();
+
+    void onCreateSendMessage(const QString &text, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
+
+    VSQSettings *m_settings;
+    VSQAttachmentBuilder m_attachmentBuilder;
+    VSQMessagesModel m_messageModel;
+    VSQChatsModel m_chatsModel;
+    VSQLogging *m_logging = nullptr;
+
+    VSQDatabase *m_database;
+    QThread *m_databaseThread;
+    VSQClient *m_client;
+    QThread *m_clientThread;
 
     QString m_user;
-    QString m_userId;
-    QString m_deviceId;
     QString m_recipient;
-    QString m_xmppPass;
-    VSQEnvType m_envType;
-    static const VSQEnvType _defaultEnv = PROD;
-    QXmppConfiguration conf;
-    static const QString kOrganization;
-    static const QString kApp;
-    static const QString kUsers;
-    static const QString kProdEnvPrefix;
-    static const QString kStgEnvPrefix;
-    static const QString kDevEnvPrefix;
-    static const QString kPushNotificationsProxy;
-    static const QString kPushNotificationsNode;
-    static const QString kPushNotificationsService;
-    static const QString kPushNotificationsFCM;
-    static const QString kPushNotificationsDeviceID;
-    static const QString kPushNotificationsFormType;
-    static const QString kPushNotificationsFormTypeVal;
-    static const int kConnectionWaitMs;
-    static const int kKeepAliveTimeSec;
-
-    void
-    _connectToDatabase();
-
-    bool
-    _connect(QString userWithEnv, QString deviceId, QString userId);
-
-    QString
-    _xmppPass();
-
-    QString
-    _virgilURL();
-
-    QString
-    _xmppURL();
-
-    uint16_t
-    _xmppPort();
-
-    void
-    _reconnect();
-
-    bool
-    _saveCredentials(const QString &user, const QString &deviceId, const vs_messenger_virgil_user_creds_t &creds);
-
-    bool
-    _loadCredentials(const QString &user, QString &deviceId, vs_messenger_virgil_user_creds_t &creds);
-
-    void
-    _addToUsersList(const QString &user);
-
-    void
-    _saveUsersList(const QStringList &users);
-
-    QString
-    _prepareLogin(const QString &user);
-
-    QString
-    _caBundleFile();
-
-    void _sendFailedMessages();
+    QString m_deviceId;
 };
 
-#endif // VIRGIL_IOTKIT_QT_MESSENGER_H
+#endif // VSQ_MESSENGER_H

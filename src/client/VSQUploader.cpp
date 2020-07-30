@@ -32,27 +32,44 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "Utils.h"
+#include "client/VSQUploader.h"
 
-#include <QDateTime>
-#include <QLocale>
-#include <QUuid>
+#include <QXmppClient.h>
 
-QString Utils::createUuid()
+#include <QEventLoop> // FIXME(fpohtmeh): remove upload emulation code
+#include <QThread> // FIXME(fpohtmeh): remove upload emulation code
+
+VSQUploader::VSQUploader(QXmppClient *client, QObject *parent)
+    : QObject(parent)
+    , m_client(client)
 {
-    return QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
+    // FIXME(fpohtmeh): finish uploader initialization
+    client->addExtension(&m_manager);
 }
 
-QString Utils::formattedDataSize(DataSize fileSize)
+void VSQUploader::upload(const ExtMessage &message)
 {
-    static QLocale locale = QLocale::system();
-    return locale.formattedDataSize(fileSize);
-}
+    const auto id = message.id;
+    const DataSize total = message.attachment->size;
 
-QString Utils::escapedUserName(const QString &userName)
-{
-    static QRegExp regexp("[^a-z0-9_]");
-    QString name(userName);
-    name.remove(regexp);
-    return name;
+    emit uploadStarted(message);
+    QEventLoop loop;
+    DataSize u = 0;
+    for (; u <= total; u += total / 30) {
+        emit uploadProgressChanged(message, u, total);
+        loop.processEvents();
+        QThread::currentThread()->msleep(100);
+    }
+    if (u != total) {
+        emit uploadProgressChanged(message, total, total);
+        loop.processEvents();
+    }
+    // FIXME(fpohtmeh): implement real upload
+    emit uploaded(message);
+    loop.processEvents();
+    // FIXME(fpohtmeh): remove upload emulation code
+    if (m_client->sendPacket(message.xmpp))
+        emit messageSent(message);
+    else
+        emit sendMessageFailed(message, QLatin1String("Message sending failed"));
 }

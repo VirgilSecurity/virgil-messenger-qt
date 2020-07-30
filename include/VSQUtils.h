@@ -32,41 +32,18 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "QmlEngine.h"
+#ifndef VSQ_UTILS_H
+#define VSQ_UTILS_H
 
-#include "Common.h"
+#include "VSQCommon.h"
 
-QmlEngine::QmlEngine(int &argc, char **argv, QObject *parent)
-    : QQmlApplicationEngine(parent)
+namespace VSQUtils
 {
-    parseArgs(argc, argv);
-    registerCommonTypes();
+    QString createUuid();
+
+    QString formattedDataSize(DataSize fileSize);
+
+    QString escapedUserName(const QString &userName);
 }
 
-void QmlEngine::reloadQml()
-{
-    const QUrl url(QStringLiteral("main.qml"));
-    clearComponentCache();
-    load(url);
-
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_WATCHOS)
-    {
-        QObject *rootObject(rootObjects().first());
-        rootObject->setProperty("width", 800);
-        rootObject->setProperty("height", 640);
-    }
-#endif
-}
-
-void QmlEngine::parseArgs(int &argc, char **argv)
-{
-    QString basePath;
-    if (argc == 2 && argv[1] && argv[1][0]) {
-        basePath = QString::fromLocal8Bit(argv[1]);
-        qDebug() << "Custom QML base path: " << basePath;
-    }
-    if (basePath.isEmpty())
-        setBaseUrl(QUrl(QLatin1String("qrc:/qml/")));
-    else
-        setBaseUrl(QUrl(QLatin1String("file://") + basePath + QLatin1String("/qml/")));
-}
+#endif // VSQ_UTILS_H

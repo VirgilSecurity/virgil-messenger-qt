@@ -32,31 +32,47 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_CLIPBOARDPROXY_H
-#define VSQ_CLIPBOARDPROXY_H
+#ifndef VSQ_CHATSMODEL_H
+#define VSQ_CHATSMODEL_H
 
-#include <QObject>
+#include <QAbstractListModel>
 
-class QClipboard;
+#include "VSQCommon.h"
 
-class ClipboardProxy : public QObject
+class VSQChatsModel : public QAbstractListModel
 {
     Q_OBJECT
-    Q_PROPERTY(QString text READ text NOTIFY textChanged)
 
 public:
-    explicit ClipboardProxy(QClipboard *clipboard);
+    enum Columns
+    {
+        NicknameRole = Qt::UserRole,
+        LastMessageBodyRole,
+        LastEventTimeRole,
+        UnreadMessagesCountRole
+    };
 
-    QString text() const;
+    using QAbstractListModel::QAbstractListModel;
 
-    Q_INVOKABLE void
-    setText(const QString &text);
+    void processMessage(const Message &message);
+    void processContact(const QString &contact);
+    void updateMessageStatus(const Message &message);
 
-signals:
-    void textChanged();
+    void setRecipient(const QString &recipient);
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QHash<int, QByteArray> roleNames() const override;
+    QVariant data(const QModelIndex &index, int role) const override;
 
 private:
-    QClipboard* clipboard;
+    Optional<int> findChatRow(const QString &contact) const;
+    void addChat(const QString &contact, const QString &messageBody, const QDateTime &eventTimestamp,
+                 const Optional<Message::Status> status);
+    void updateChat(const QString &contact, const QString &messageBody, const QDateTime &eventTimestamp,
+                    const Optional<Message::Status> status);
+
+    std::vector<Chat> m_chats;
+    QString m_recipient;
 };
 
-#endif // VSQ_CLIPBOARDPROXY_HPP
+#endif // VSQ_CHATSMODEL_H

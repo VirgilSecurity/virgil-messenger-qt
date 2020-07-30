@@ -32,44 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "client/Uploader.h"
+#ifndef VSQ_CLIPBOARDPROXY_H
+#define VSQ_CLIPBOARDPROXY_H
 
-#include <QXmppClient.h>
+#include <QObject>
 
-#include <QEventLoop> // FIXME(fpohtmeh): remove upload emulation code
-#include <QThread> // FIXME(fpohtmeh): remove upload emulation code
+class QClipboard;
 
-Uploader::Uploader(QXmppClient *client, QObject *parent)
-    : QObject(parent)
-    , m_client(client)
+class VSQClipboardProxy : public QObject
 {
-    // FIXME(fpohtmeh): finish uploader initialization
-    client->addExtension(&m_manager);
-}
+    Q_OBJECT
+    Q_PROPERTY(QString text READ text NOTIFY textChanged)
 
-void Uploader::upload(const ExtMessage &message)
-{
-    const auto id = message.id;
-    const DataSize total = message.attachment->size;
+public:
+    explicit VSQClipboardProxy(QClipboard *clipboard);
 
-    emit uploadStarted(message);
-    QEventLoop loop;
-    DataSize u = 0;
-    for (; u <= total; u += total / 30) {
-        emit uploadProgressChanged(message, u, total);
-        loop.processEvents();
-        QThread::currentThread()->msleep(100);
-    }
-    if (u != total) {
-        emit uploadProgressChanged(message, total, total);
-        loop.processEvents();
-    }
-    // FIXME(fpohtmeh): implement real upload
-    emit uploaded(message);
-    loop.processEvents();
-    // FIXME(fpohtmeh): remove upload emulation code
-    if (m_client->sendPacket(message.xmpp))
-        emit messageSent(message);
-    else
-        emit sendMessageFailed(message, QLatin1String("Message sending failed"));
-}
+    QString text() const;
+
+    Q_INVOKABLE void
+    setText(const QString &text);
+
+signals:
+    void textChanged();
+
+private:
+    QClipboard* clipboard;
+};
+
+#endif // VSQ_CLIPBOARDPROXY_HPP

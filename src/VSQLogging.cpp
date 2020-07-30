@@ -32,11 +32,11 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <qlogging.h>
-#include <VSQLogging.h>
-#include <Messenger.h>
+#include "VSQLogging.h"
+
 #include <virgil/iot/qt/VSQIoTKit.h>
 #include <virgil/iot/logger/logger.h>
+#include <virgil/iot/messenger/messenger.h>
 #include <virgil/iot/qt/VSQIoTKit.h>
 
 using namespace VirgilIoTKit;

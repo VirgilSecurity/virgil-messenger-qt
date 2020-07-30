@@ -37,11 +37,11 @@
 
 #include <QAbstractListModel>
 
-#include "Common.h"
+#include "VSQCommon.h"
 
 Q_DECLARE_LOGGING_CATEGORY(messagesModel)
 
-class MessagesModel : public QAbstractListModel
+class VSQMessagesModel : public QAbstractListModel
 {
     Q_OBJECT
 
