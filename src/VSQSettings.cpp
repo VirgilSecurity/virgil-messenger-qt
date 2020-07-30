@@ -36,26 +36,31 @@
 
 #include <QStandardPaths>
 
+#include "VSQUtils.h"
+
 static const QString kLastSignedInUser = "LastSignedInUser";
 static const QString kUsers = "Users";
+static const QString kSavedSessionId = "SavedSessionId";
 
-Q_LOGGING_CATEGORY(settings, "settings")
+Q_LOGGING_CATEGORY(lcSettings, "settings")
 
 VSQSettings::VSQSettings(QObject *parent)
     : QSettings("VirgilSecurity", "VirgilMessenger", parent) // organization, application name
 {
+    m_sessionId = VSQUtils::createUuid();
     m_appDataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     m_attachmentCacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/attachments");
     for (auto dir : { m_appDataDir, m_attachmentCacheDir })
         if (!dir.exists() && !dir.mkpath(dir.absolutePath()))
             qFatal("Failed to create writable directory at %s", qPrintable(dir.absolutePath()));
 
-    qCDebug(settings) << "Settings";
-    qCDebug(settings) << "- settings filename:" << fileName();
-    qCDebug(settings) << "- database filename:" << databaseFileName();
-    qCDebug(settings) << "- last signed-in user:" << lastSignedInUser();
-    qCDebug(settings) << "- attachment cache dir:" << attachmentCacheDir().absolutePath();
-    qCDebug(settings) << "- attachment max size:" << attachmentMaxSize();
+    qCDebug(lcSettings) << "Settings";
+    qCDebug(lcSettings) << "- session id:" << m_sessionId;
+    qCDebug(lcSettings) << "- settings filename:" << fileName();
+    qCDebug(lcSettings) << "- database filename:" << databaseFileName();
+    qCDebug(lcSettings) << "- last signed-in user:" << lastSignedInUser();
+    qCDebug(lcSettings) << "- attachment cache dir:" << attachmentCacheDir().absolutePath();
+    qCDebug(lcSettings) << "- attachment max size:" << attachmentMaxSize();
 }
 
 VSQSettings::~VSQSettings()
@@ -134,4 +139,22 @@ bool VSQSettings::devMode() const
 #else
     return false;
 #endif // VS_DEVMODE
+}
+
+bool VSQSettings::runFlag() const
+{
+    auto savedSessionId = value(kSavedSessionId).toString();
+    return !savedSessionId.isEmpty() && savedSessionId != m_sessionId;
+}
+
+void VSQSettings::setRunFlag(bool flag)
+{
+    if (flag) {
+        qCDebug(lcSettings) << "Save session id" << m_sessionId;
+        setValue(kSavedSessionId, m_sessionId);
+    }
+    else {
+        qCDebug(lcSettings) << "Reset session id";
+        remove(kSavedSessionId);
+    }
 }

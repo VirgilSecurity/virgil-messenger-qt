@@ -67,8 +67,8 @@ const QString kPushNotificationsDeviceID = "device_id";
 const QString kPushNotificationsFormType = "FORM_TYPE";
 const QString kPushNotificationsFormTypeVal = "http://jabber.org/protocol/pubsub#publish-options";
 
-Q_LOGGING_CATEGORY(client, "client")
-Q_LOGGING_CATEGORY(xmpp, "xmpp")
+Q_LOGGING_CATEGORY(lcClient, "client")
+Q_LOGGING_CATEGORY(lcXmpp, "xmpp")
 
 VSQClient::VSQClient(VSQSettings *settings, QObject *parent)
     : QObject(parent)
@@ -89,6 +89,7 @@ void VSQClient::start()
     connect(this, &VSQClient::signUp, this, &VSQClient::onSignUp);
     connect(this, &VSQClient::backupKey, this, &VSQClient::onBackupKey);
     connect(this, &VSQClient::signInWithKey, this, &VSQClient::onSignInWithKey);
+    connect(this, &VSQClient::signedIn, this, &VSQClient::updateVirgilUrl);
     // XMPP connections
     connect(&m_client, &QXmppClient::connected, this, &VSQClient::onConnected);
     connect(&m_client, &QXmppClient::disconnected, this, &VSQClient::onDisconnected);
@@ -143,11 +144,6 @@ void VSQClient::start()
     connect(&m_uploader, &VSQUploader::uploadFailed, this, &VSQClient::uploadFailed);
 }
 
-QString VSQClient::virgilUrl() const
-{
-    return m_core.virgilURL();
-}
-
 bool VSQClient::xmppConnect()
 {
     const auto password = m_core.xmppPassword();
@@ -165,8 +161,8 @@ bool VSQClient::xmppConnect()
     config.setKeepAliveInterval(kKeepAliveTimeSec);
     config.setKeepAliveTimeout(kKeepAliveTimeSec - 1);
 #endif
-    qCDebug(client) << "SSL: " << QSslSocket::supportsSsl();
-    qCDebug(client) << ">>>> Connecting...";
+    qCDebug(lcClient) << "SSL:" << QSslSocket::supportsSsl();
+    qCDebug(lcClient) << ">>>> Connecting...";
     m_client.connectToServer(config);
     waitForConnection();
     m_carbonManager->setCarbonsEnabled(true);
@@ -176,7 +172,7 @@ bool VSQClient::xmppConnect()
 void VSQClient::xmppDisconnect()
 {
     if (!m_client.isConnected()) {
-        qCDebug(client) << "Client is already disconnected";
+        qCDebug(lcClient) << "Client is already disconnected";
     }
     else {
         m_client.disconnectFromServer();
@@ -275,9 +271,10 @@ void VSQClient::onSignIn(const QString &userWithEnv)
 {
     if (!m_core.signIn(userWithEnv))
         emit signInFailed(userWithEnv, m_core.lastErrorText());
-    if (!xmppConnect())
+    else if (!xmppConnect())
         emit signInFailed(userWithEnv, m_lastErrorText);
-    emit signedIn(userWithEnv);
+    else
+        emit signedIn(userWithEnv);
 }
 
 void VSQClient::onSignOut()
@@ -308,9 +305,10 @@ void VSQClient::onSignInWithKey(const QString &user, const QString &password)
 {
     if (!m_core.signInWithKey(user, password))
         emit signInFailed(user, m_core.lastErrorText());
-    if (!xmppConnect())
+    else if (!xmppConnect())
         emit signInFailed(user, m_lastErrorText);
-    emit signedIn(user);
+    else
+        emit signedIn(user);
 }
 
 void VSQClient::onAddContact(const QString &contact)
@@ -323,22 +321,19 @@ void VSQClient::onAddContact(const QString &contact)
 
 void VSQClient::onConnected()
 {
-    VS_LOG_DEBUG("onConnected");
-    qCDebug(client) << "onConnected";
+    qCDebug(lcClient) << "onConnected";
     subscribeOnPushNotifications(true); // TODO(fpohtmeh): why subscription is here?
     // TODO(fpohtmeh): send all messages with status failed
 }
 
 void VSQClient::onDisconnected()
 {
-    VS_LOG_DEBUG("onDisconnected");
-    qCDebug(client) << "onDisconnected state:" << m_client.state();
+    qCDebug(lcClient) << "onDisconnected state:" << m_client.state();
 }
 
 void VSQClient::onError(QXmppClient::Error error)
 {
-    VS_LOG_DEBUG("onError");
-    qCDebug(client) << "onError:" << error << "state:" << m_client.state();
+    qCDebug(lcClient) << "onError:" << error << "state:" << m_client.state();
     xmppReconnect();
 }
 
@@ -346,7 +341,7 @@ void VSQClient::onMessageReceived(const QXmppMessage &message)
 {
     QString sender = message.from().split("@").first();
     QString recipient = message.to().split("@").first();
-    qCInfo(client) << "Sender: " << sender << " Recipient: " << recipient;
+    qCInfo(lcClient) << "Sender:" << sender << " Recipient:" << recipient;
 
     // Get encrypted message
     QString encryptedBody = message.body();
@@ -414,7 +409,7 @@ void VSQClient::onCheckConnectionState()
 {
     if (m_client.state() == QXmppClient::DisconnectedState) {
 #if VS_ANDROID
-        qCWarning(client) << "Disconnected ...";
+        qCWarning(lcClient) << "Disconnected ...";
 #endif
         xmppReconnect();
     }
@@ -428,13 +423,13 @@ void VSQClient::onSetOnlineStatus(bool online)
 
 void VSQClient::onMessageDelivered(const QString &jid, const QString &messageId)
 {
-    qCDebug(client) << QString("Message with id: %1 delivered to %2").arg(jid, messageId);
+    qCDebug(lcClient) << QString("Message with id: %1 delivered to %2").arg(jid, messageId);
     emit messageDelivered(messageId);
 }
 
 void VSQClient::onDiscoveryInfoReceived(const QXmppDiscoveryIq &info)
 {
-    qCInfo(client) << info.features();
+    qCInfo(lcClient) << info.features();
     if (info.from() != m_client.configuration().domain())
         return;
     // enable carbons, if feature found
@@ -445,15 +440,24 @@ void VSQClient::onDiscoveryInfoReceived(const QXmppDiscoveryIq &info)
 void VSQClient::onXmppLoggerMessage(QXmppLogger::MessageType type, const QString &message)
 {
     if (type == QXmppLogger::WarningMessage)
-        qCWarning(xmpp).noquote() << message;
+        qCWarning(lcXmpp).noquote() << message;
     else
-        qCDebug(xmpp).noquote() << message;
+        qCDebug(lcXmpp).noquote() << message;
 }
 
 void VSQClient::onSslErrors(const QList<QSslError> &errors)
 {
     for (auto &error : errors)
-        qCWarning(client) << "SSL error:" << error;
+        qCWarning(lcClient) << "SSL error:" << error;
     m_lastErrorText = QLatin1String("SSL connection errors...");
     xmppDisconnect();
+}
+
+void VSQClient::updateVirgilUrl()
+{
+    const auto url = m_core.virgilURL();
+    if (url != m_virgilUrl) {
+        m_virgilUrl = url;
+        emit virgilUrlChanged(url);
+    }
 }

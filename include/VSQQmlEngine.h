@@ -37,6 +37,10 @@
 
 #include <QQmlApplicationEngine>
 
+#include "VSQCommon.h"
+
+Q_DECLARE_LOGGING_CATEGORY(lcQmlengine)
+
 class VSQQmlEngine : public QQmlApplicationEngine
 {
     Q_OBJECT

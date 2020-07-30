@@ -39,7 +39,7 @@
 
 #include "VSQCommon.h"
 
-Q_DECLARE_LOGGING_CATEGORY(messagesModel)
+Q_DECLARE_LOGGING_CATEGORY(lcMessagesModel)
 
 class VSQMessagesModel : public QAbstractListModel
 {

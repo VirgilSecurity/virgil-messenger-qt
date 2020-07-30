@@ -37,12 +37,12 @@
 
 #include "VSQCommon.h"
 
-// TODO(fpohtmeh): replace include with forward declaration
+// FIXME(fpohtmeh): replace include with forward declaration
 #include <virgil/iot/messenger/messenger.h>
 
 class VSQSettings;
 
-Q_DECLARE_LOGGING_CATEGORY(core)
+Q_DECLARE_LOGGING_CATEGORY(lcCore)
 
 class VSQCore
 {
@@ -68,7 +68,6 @@ public:
     QString xmppURL() const;
     Optional<QString> xmppPassword();
     uint16_t xmppPort() const;
-    // FIXME(fpohtmeh): move to private
     QString virgilURL() const;
 
 private:

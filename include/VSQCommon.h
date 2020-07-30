@@ -149,7 +149,7 @@ struct Chat
 };
 Q_DECLARE_METATYPE(Chat);
 
-// FIXME(fpohtmeh): remove
+// FIXME(fpohtmeh): remove this workaround
 struct ExtMessage : Message
 {
     ExtMessage() : Message() {}

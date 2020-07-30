@@ -32,7 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "VSQCore.h"
+#include "client/VSQCore.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -41,7 +41,7 @@
 #include "VSQUtils.h"
 #include "android/VSQAndroid.h"
 
-Q_LOGGING_CATEGORY(core, "core")
+Q_LOGGING_CATEGORY(lcCore, "core")
 
 using namespace VirgilIoTKit;
 
@@ -57,7 +57,7 @@ bool VSQCore::signIn(const QString &userWithEnv)
         return false;
 
     setUser(userWithEnv);
-    qCDebug(core) << "Trying to Sign In: " << m_user;
+    qCDebug(lcCore) << "Trying to Sign In:" << m_user;
 
     Credentials creds;
     memset(&creds, 0, sizeof (creds));
@@ -90,7 +90,7 @@ bool VSQCore::signUp(const QString &userWithEnv)
         return false;
     }
     setUser(userWithEnv);
-    qInfo() << "Trying to sign up: " << userWithEnv;
+    qInfo() << "Trying to sign up:" << userWithEnv;
     if (m_user.isEmpty()) {
         m_lastErrorText = QLatin1String("Incorrect username");
         return false;
@@ -109,7 +109,7 @@ bool VSQCore::signUp(const QString &userWithEnv)
         return false;
     }
 
-    qInfo() << "User has been successfully signed up: " << userWithEnv;
+    qInfo() << "User has been successfully signed up:" << userWithEnv;
     saveCredentials(m_user, creds);
     return true;
 }
@@ -155,7 +155,7 @@ Optional<QString> VSQCore::encryptMessageBody(const QString &contact, const QStr
 
     QJsonDocument doc(mainObject);
     QString internalJson = doc.toJson(QJsonDocument::Compact);
-    qCDebug(core) << internalJson;
+    qCDebug(lcCore) << internalJson;
 
     // Encrypt message
     if (VS_CODE_OK != vs_messenger_virgil_encrypt_msg(
@@ -164,8 +164,8 @@ Optional<QString> VSQCore::encryptMessageBody(const QString &contact, const QStr
                      encryptedMessage,
                      _encryptedMsgSzMax,
                      &encryptedMessageSz)) {
-        VS_LOG_WARNING("Cannot encrypt message to be sent");
         m_lastErrorText = QLatin1String("Cannot encrypt message to be sent");
+        qCWarning(lcCore) << m_lastErrorText;
         return NullOptional;
     }
     return QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage));
@@ -177,8 +177,8 @@ Optional<QString> VSQCore::decryptMessageBody(const QString &contact, const QStr
     uint8_t decryptedBody[decryptedBodyMaxSize];
     size_t decryptedBodySize = 0;
 
-    qCDebug(core) << "Sender         :" << contact;
-    qCDebug(core) << "Encrypted body :" << encrypedBody;
+    qCDebug(lcCore) << "Sender         :" << contact;
+    qCDebug(lcCore) << "Encrypted body :" << encrypedBody;
 
     // Decrypt message
     // DECRYPTED_MESSAGE_SZ_MAX - 1  - This is required for a Zero-terminated string
@@ -188,8 +188,8 @@ Optional<QString> VSQCore::decryptMessageBody(const QString &contact, const QStr
                 encrypedBody.toStdString().c_str(),
                 decryptedBody, decryptedBodySize - 1,
                 &decryptedBodySize)) {
-        VS_LOG_WARNING("Received message cannot be decrypted");
         m_lastErrorText = QLatin1String("Received message cannot be decrypted");
+        qCWarning(lcCore) << m_lastErrorText;
         return NullOptional;
     }
 
@@ -201,7 +201,7 @@ Optional<QString> VSQCore::decryptMessageBody(const QString &contact, const QStr
     QJsonDocument jsonMsg(QJsonDocument::fromJson(baDecr));
     QString decryptedString = jsonMsg["payload"]["body"].toString();
 
-    VS_LOG_DEBUG("Received message: <%s>", decryptedString.toStdString().c_str());
+    qCWarning(lcCore) << "Received message:" << decryptedString;
     return decryptedString;
 }
 
@@ -248,7 +248,7 @@ QString VSQCore::xmppURL() const
             break;
         }
     }
-    VS_LOG_DEBUG("XMPP URL: %s", res.toStdString().c_str());
+    qCDebug(lcCore) << "XMPP URL:" << res;
     return res;
 }
 
@@ -279,7 +279,7 @@ uint16_t VSQCore::xmppPort() const
             res = static_cast<uint16_t> (port);
         }
     }
-    VS_LOG_DEBUG("XMPP PORT: %d", static_cast<int> (res));
+    qCDebug(lcCore) << "XMPP PORT:" << res;
     return res;
 }
 
@@ -331,7 +331,7 @@ bool VSQCore::loadCredentials(const QString &user, Credentials &creds)
     const auto deviceId = json["device_id"].toString();
     const auto baCred = QByteArray::fromBase64(json["creds"].toString().toUtf8());
     if (baCred.size() != sizeof(creds)) {
-        VS_LOG_WARNING("Cannot load credentials for : %s", user.toStdString().c_str());
+        qCWarning(lcCore) << "Cannot load credentials for:" << user;
         return false;
     }
     m_deviceId = deviceId;
@@ -349,7 +349,7 @@ void VSQCore::saveCredentials(const QString &user, const Credentials &creds)
     jsonObject.insert("creds", QJsonValue::fromVariant(baCred.toBase64()));
 
     QString json = QJsonDocument(jsonObject).toJson(QJsonDocument::Compact);
-    qCInfo(core) << "Saving user credentails: " << json;
+    qCInfo(lcCore) << "Saving user credentails:" << json;
     m_settings->setUserCredential(user, json);
 }
 
@@ -378,6 +378,6 @@ QString VSQCore::virgilURL() const
             break;
         }
     }
-    VS_LOG_DEBUG("Virgil URL: %s", qPrintable(res));
+    qCDebug(lcCore) << "Virgil URL:" << res;
     return res;
 }

@@ -40,8 +40,8 @@ ApplicationWindow {
         id: inform
     }
 
-    SendReportAsk {
-        id: sendReportAsk
+    SendCrashReportDialog {
+        id: sendCrashReportDialog
     }
 
     // Shortcuts for hackers
@@ -79,6 +79,6 @@ ApplicationWindow {
 
     Component.onCompleted: {
         Platform.detect()
-        logging.crashReportRequested.connect(sendReportAsk.open)
+        logging.crashReportFound.connect(sendCrashReportDialog.open)
     }
 }

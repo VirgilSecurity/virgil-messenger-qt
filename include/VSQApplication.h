@@ -45,12 +45,12 @@
 
 #include "VSQCommon.h"
 
-Q_DECLARE_LOGGING_CATEGORY(application)
+Q_DECLARE_LOGGING_CATEGORY(lcApplication)
 
+class VSQLogging;
 class VSQMessenger;
 class VSQQmlEngine;
 class VSQSettings;
-class VSQLogging;
 
 class VSQApplication : public ApplicationBase
 {
@@ -58,29 +58,25 @@ class VSQApplication : public ApplicationBase
 
 public:
     VSQApplication(int &argc, char **argv);
-    virtual ~VSQApplication() = default;
+    virtual ~VSQApplication();
 
     static void initialize();
     Q_INVOKABLE void reloadQml();
     Q_INVOKABLE void checkUpdates();
     Q_INVOKABLE QString currentVersion() const;
-    Q_INVOKABLE void sendReport();
 
 private:
     void setupCore();
-    void setupLogging();
     void setupFonts();
     void setupConnections();
     void setupEngine();
 
     void onApplicationStateChanged(Qt::ApplicationState state);
 
-    static const QString kVersion;
-
     VSQSettings *m_settings;
+    VSQLogging *m_logging;
     VSQMessenger *m_messenger;
     VSQQmlEngine *m_engine;
-    VSQLogging *m_logging;
 };
 
 #endif // VSQ_APPLICATION_H

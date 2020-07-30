@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VSQLOGGING_H
 #define VSQLOGGING_H
 
@@ -40,44 +39,39 @@
 
 #include "VSQCommon.h"
 
+Q_DECLARE_LOGGING_CATEGORY(lcCrashReport)
+
 class QNetworkAccessManager;
+
+class VSQSettings;
 
 class VSQLogging : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit VSQLogging(QObject *parent);
+    VSQLogging(VSQSettings *settings, QObject *parent);
     virtual ~VSQLogging();
 
-    void checkAppCrash();
-    void resetRunFlag();
+    static void initialize();
+
+    void checkCrashReport();
     bool sendLogFiles();
-    void setVirgilUrl(QString VirgilUrl);
-    void setkVersion(QString AppVersion);
-    void setkOrganization(QString strkOrganization);
-    void setkApp(QString strkApp);
+    void setVirgilUrl(const QString &url);
 
 signals:
-    void crashReportRequested();
+    void crashReportFound();
+    void crashReportChecked();
+    void sendCrashReport();
 
 private:
-    static const QString endpointSendReport;
-
-    static void logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg);
-
-    bool checkRunFlag();
-    bool sendFileToBackendRequest(QByteArray fileData);
-    void setRunFlag(bool runState);
-
-    QString currentVirgilUrl;
-    QString kVersion;
-    QString kOrganization;
-    QString kApp;
-    QNetworkAccessManager *manager;
-
-private slots:
+    static void handler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+    bool sendFileToBackendRequest(const QByteArray &fileData);
     void endpointReply();
+
+    VSQSettings *m_settings;
+    QNetworkAccessManager *m_manager;
+    QString m_virgilUrl;
 };
 
 #endif // VSQLOGGING_H

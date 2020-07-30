@@ -36,6 +36,8 @@
 
 #include "VSQCommon.h"
 
+Q_LOGGING_CATEGORY(lcQmlengine, "qmlengine")
+
 VSQQmlEngine::VSQQmlEngine(int &argc, char **argv, QObject *parent)
     : QQmlApplicationEngine(parent)
 {
@@ -63,7 +65,7 @@ void VSQQmlEngine::parseArgs(int &argc, char **argv)
     QString basePath;
     if (argc == 2 && argv[1] && argv[1][0]) {
         basePath = QString::fromLocal8Bit(argv[1]);
-        qDebug() << "Custom QML base path: " << basePath;
+        qCDebug(lcQmlengine) << "Custom QML base path:" << basePath;
     }
     if (basePath.isEmpty())
         setBaseUrl(QUrl(QLatin1String("qrc:/qml/")));

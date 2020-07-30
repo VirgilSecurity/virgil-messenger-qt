@@ -44,7 +44,7 @@ Page {
 
         FormPrimaryButton {
             text: "Send report"
-            onClicked: app.sendReport()
+            onClicked: logging.sendCrashReport()
         }
 
         FormPrimaryButton {

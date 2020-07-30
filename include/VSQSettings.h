@@ -41,7 +41,7 @@
 
 #include "VSQCommon.h"
 
-Q_DECLARE_LOGGING_CATEGORY(settings)
+Q_DECLARE_LOGGING_CATEGORY(lcSettings)
 
 class VSQSettings : public QSettings
 {
@@ -79,11 +79,16 @@ public:
     // Dev mode
     bool devMode() const;
 
+    // Run flags
+    bool runFlag() const;
+    void setRunFlag(bool flag);
+
 signals:
     void lastSignedInUserChanged(const QString &);
     void usersListChanged(const QStringList &);
 
 private:
+    QString m_sessionId;
     QDir m_appDataDir;
     QDir m_attachmentCacheDir;
 };

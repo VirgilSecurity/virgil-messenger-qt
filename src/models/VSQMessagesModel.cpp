@@ -36,7 +36,7 @@
 
 #include "VSQUtils.h"
 
-Q_LOGGING_CATEGORY(messagesModel, "messagesModel")
+Q_LOGGING_CATEGORY(lcMessagesModel, "messagesModel")
 
 void VSQMessagesModel::addMessage(const Message &message)
 {
@@ -55,7 +55,7 @@ void VSQMessagesModel::setMessageStatusById(const QString &messageId, const Mess
 {
     const auto row = findMessageRow(messageId);
     if (!row)
-        qCCritical(messagesModel) << "Message status can't be changed, message doesn't exist";
+        qCCritical(lcMessagesModel) << "Message status can't be changed, message doesn't exist";
     else
         setMessageStatusByRow(*row, status);
 }
@@ -64,13 +64,13 @@ void VSQMessagesModel::setUploadProgress(const Message &message, DataSize upload
 {
     const auto messageRow = findMessageRow(message.id);
     if (!messageRow) {
-        qCCritical(messagesModel) << "Upload progress can't be changed, message doesn't exist";
+        qCCritical(lcMessagesModel) << "Upload progress can't be changed, message doesn't exist";
         return;
     }
     const int row = *messageRow;
     auto &msg = m_messages[row];
     if (!msg.attachment) {
-        qCCritical(messagesModel) << "Upload progress can't be set, attachment is empty";
+        qCCritical(lcMessagesModel) << "Upload progress can't be set, attachment is empty";
         return;
     }
     if (msg.attachment->uploaded == uploaded)
@@ -83,13 +83,13 @@ void VSQMessagesModel::setUploadFailed(const Message &message, bool failed)
 {
     const auto messageRow = findMessageRow(message.id);
     if (!messageRow) {
-        qCCritical(messagesModel) << "Upload failed flag can't be changed, message doesn't exist";
+        qCCritical(lcMessagesModel) << "Upload failed flag can't be changed, message doesn't exist";
         return;
     }
     const int row = *messageRow;
     auto &msg = m_messages[row];
     if (!msg.attachment) {
-        qCCritical(messagesModel) << "Upload failed flag can't be set, attachment is empty";
+        qCCritical(lcMessagesModel) << "Upload failed flag can't be set, attachment is empty";
         return;
     }
     if (msg.attachment->loadingFailed == failed)

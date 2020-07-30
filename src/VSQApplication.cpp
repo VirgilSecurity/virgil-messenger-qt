@@ -51,17 +51,16 @@
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
-Q_LOGGING_CATEGORY(application, "application")
+Q_LOGGING_CATEGORY(lcApplication, "application")
 
 VSQApplication::VSQApplication(int &argc, char **argv)
     : ApplicationBase(argc, argv)
     , m_settings(new VSQSettings(this))
-    , m_messenger(new VSQMessenger(m_settings, this))
+    , m_logging(new VSQLogging(m_settings, this))
+    , m_messenger(new VSQMessenger(m_settings, m_logging, this))
     , m_engine(new VSQQmlEngine(argc, argv, this))
-    , m_logging(new VSQLogging(this))
 {
     setupCore();
-    setupLogging();
     setupFonts();
     setupConnections();
     setupEngine();
@@ -69,6 +68,11 @@ VSQApplication::VSQApplication(int &argc, char **argv)
 #if (MACOS)
     VSQMacos::instance().startUpdatesTimer();
 #endif
+}
+
+VSQApplication::~VSQApplication()
+{
+    m_settings->setRunFlag(false);
 }
 
 void VSQApplication::initialize()
@@ -85,10 +89,8 @@ void VSQApplication::initialize()
     // Attributes
     ApplicationBase::setAttribute(Qt::AA_EnableHighDpiScaling);
     ApplicationBase::setAttribute(Qt::AA_UseHighDpiPixmaps);
-
-#ifdef VS_DEVMODE
-    qSetMessagePattern("[%{category}.%{type}]: %{message} [at %{file} #%{line}]");
-#endif
+    //
+    VSQLogging::initialize();
 }
 
 void VSQApplication::reloadQml()
@@ -108,11 +110,6 @@ QString VSQApplication::currentVersion() const
     return applicationVersion() + "-alpha";
 }
 
-void VSQApplication::sendReport()
-{
-    m_logging->sendLogFiles();
-}
-
 void VSQApplication::setupCore()
 {
     // TODO(fpohtmeh): refactor
@@ -120,15 +117,7 @@ void VSQApplication::setupCore()
     const auto impl = VSQImplementations();
     const auto appConfig = VSQAppConfig() << VirgilIoTKit::VS_LOGLEV_DEBUG;
     if (!VSQIoTKitFacade::instance().init(features, impl, appConfig))
-        VS_LOG_CRITICAL("Unable to initialize Virgil IoT KIT");
-}
-
-void VSQApplication::setupLogging()
-{
-    m_messenger->setLogging(m_logging);
-    m_logging->setkApp(applicationName());
-    m_logging->setkOrganization(organizationName());
-    m_logging->setkVersion(applicationVersion());
+        qCCritical(lcApplication) << "Unable to initialize Virgil IoT KIT";
 }
 
 void VSQApplication::setupFonts()
@@ -142,6 +131,8 @@ void VSQApplication::setupConnections()
 {
     connect(this, &VSQApplication::applicationStateChanged, this, &VSQApplication::onApplicationStateChanged);
     connect(m_messenger, &VSQMessenger::quitRequested, this, &VSQApplication::quit);
+    connect(m_messenger, &VSQMessenger::signedIn, m_logging, &VSQLogging::checkCrashReport);
+    connect(m_logging, &VSQLogging::crashReportChecked, m_settings, std::bind(&VSQSettings::setRunFlag, m_settings, true));
 }
 
 void VSQApplication::setupEngine()
@@ -161,7 +152,7 @@ void VSQApplication::setupEngine()
 
 void VSQApplication::onApplicationStateChanged(Qt::ApplicationState state)
 {
-    qCDebug(application) << "Application state:" << state;
+    qCDebug(lcApplication) << "Application state:" << state;
 #if VS_PUSHNOTIFICATIONS
     static bool _deactivated = false;
 

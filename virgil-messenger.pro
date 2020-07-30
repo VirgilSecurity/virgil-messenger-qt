@@ -89,7 +89,6 @@ HEADERS += \
         include/VSQApplication.h \
         include/VSQClipboardProxy.h \
         include/VSQCommon.h \
-        include/VSQCore.h \
         include/VSQLogging.h \
         include/VSQMessenger.h \
         include/VSQQmlEngine.h \
@@ -98,6 +97,7 @@ HEADERS += \
         include/ui/VSQUiHelper.h \
         # Client
         include/client/VSQClient.h \
+        include/client/VSQCore.h \
         include/client/VSQUploader.h \
         # Models
         include/models/VSQAttachmentBuilder.h \
@@ -120,15 +120,15 @@ SOURCES += \
         src/VSQApplication.cpp \
         src/VSQClipboardProxy.cpp \
         src/VSQCommon.cpp \
-        src/VSQCore.cpp \
+        src/VSQLogging.cpp \
         src/VSQMessenger.cpp \
         src/VSQQmlEngine.cpp \
         src/VSQSettings.cpp \
         src/VSQUtils.cpp \
-        src/VSQLogging.cpp \
         src/ui/VSQUiHelper.cpp \
         # Client
         src/client/VSQClient.cpp \
+        src/client/VSQCore.cpp \
         src/client/VSQUploader.cpp \
         # Models
         src/models/VSQAttachmentBuilder.cpp \

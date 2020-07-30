@@ -59,12 +59,10 @@ class VSQMessenger : public QObject
     Q_PROPERTY(VSQChatsModel *chats READ chatsModel CONSTANT)
 
 public:
-    explicit VSQMessenger(VSQSettings *settings, QObject *parent = nullptr);
+    explicit VSQMessenger(VSQSettings *settings, VSQLogging *logging, QObject *parent = nullptr);
     ~VSQMessenger() override = default;
 
     Q_INVOKABLE void start();
-
-    void setLogging(VSQLogging *logging);
 
 signals:
     void signIn(const QString &userWithEnv);
@@ -112,10 +110,10 @@ private:
     void onCreateSendMessage(const QString &text, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
 
     VSQSettings *m_settings;
+    VSQLogging *m_logging;
     VSQAttachmentBuilder m_attachmentBuilder;
     VSQMessagesModel m_messageModel;
     VSQChatsModel m_chatsModel;
-    VSQLogging *m_logging = nullptr;
 
     VSQDatabase *m_database;
     QThread *m_databaseThread;

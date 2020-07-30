@@ -44,8 +44,8 @@
 
 class QXmppCarbonManager;
 
-Q_DECLARE_LOGGING_CATEGORY(client)
-Q_DECLARE_LOGGING_CATEGORY(xmpp)
+Q_DECLARE_LOGGING_CATEGORY(lcClient)
+Q_DECLARE_LOGGING_CATEGORY(lcXmpp)
 
 class VSQClient : public QObject
 {
@@ -55,9 +55,6 @@ public:
     VSQClient(VSQSettings *settings, QObject *parent);
 
     void start();
-
-    // FIXME(fpohtmeh): remove this workaround
-    QString virgilUrl() const;
 
 signals:
     void signIn(const QString &userWithEnv);
@@ -78,6 +75,7 @@ signals:
     void sendMessage(const Message &message);
     void checkConnectionState();
     void setOnlineStatus(bool online);
+    void virgilUrlChanged(const QString &url);
 
     void contactAdded(const QString &contact);
     void addContactFailed(const QString &contact, const QString &error);
@@ -107,7 +105,7 @@ private:
     void onSignOut();
     void onSignUp(const QString &userWithEnv);
     void onBackupKey(const QString &password);
-    void onSignInWithKey(const QString &user, const QString &password);
+    void onSignInWithKey(const QString &userWithEnv, const QString &password);
     void onAddContact(const QString &contact);
 
     void onConnected();
@@ -125,6 +123,7 @@ private:
     void onDiscoveryInfoReceived(const QXmppDiscoveryIq &info);
     void onXmppLoggerMessage(QXmppLogger::MessageType type, const QString &message);
     void onSslErrors(const QList<QSslError> &errors);
+    void updateVirgilUrl();
 
     VSQCore m_core;
     QXmppClient m_client;
@@ -133,6 +132,7 @@ private:
 
     QString m_lastErrorText;
     bool m_waitingForConnection;
+    QString m_virgilUrl;
 };
 
 #endif // VSQ_CLIENT_H

@@ -36,15 +36,16 @@
 
 #include <QThread>
 
-#include "VSQCore.h"
 #include "VSQLogging.h"
 #include "VSQSettings.h"
 #include "VSQUtils.h"
+#include "client/VSQCore.h"
 #include "database/VSQDatabase.h"
 
-VSQMessenger::VSQMessenger(VSQSettings *settings, QObject *parent)
+VSQMessenger::VSQMessenger(VSQSettings *settings, VSQLogging *logging, QObject *parent)
     : QObject(parent)
     , m_settings(settings)
+    , m_logging(logging)
     , m_attachmentBuilder(settings)
     , m_messageModel(this)
     , m_chatsModel(this)
@@ -78,11 +79,6 @@ void VSQMessenger::start()
         signIn(m_settings->lastSignedInUser());
 }
 
-void VSQMessenger::setLogging(VSQLogging *logging)
-{
-    m_logging = logging;
-}
-
 void VSQMessenger::setupConnections()
 {
     // Authorization: messenger-to-client
@@ -107,8 +103,6 @@ void VSQMessenger::setupConnections()
     connect(m_client, &VSQClient::signedIn, m_settings, &VSQSettings::setLastSignedInUser);
     connect(m_client, &VSQClient::signedUp, m_settings, &VSQSettings::addUserToList);
     connect(m_client, &VSQClient::signedUp, m_settings, &VSQSettings::setLastSignedInUser);
-    // Sign-in: client-to-logging
-    connect(m_client, &VSQClient::signedIn, m_logging, &VSQLogging::checkAppCrash);
 
     // Contacts: messenger-to-client
     connect(this, &VSQMessenger::addContact, m_client, &VSQClient::addContact);
@@ -134,6 +128,7 @@ void VSQMessenger::setupConnections()
         std::bind(&VSQMessagesModel::setMessageStatus, &m_messageModel, args::_1, Message::Status::Failed));
     connect(m_client, &VSQClient::messageDelivered, &m_messageModel,
         std::bind(&VSQMessagesModel::setMessageStatusById, &m_messageModel, args::_1, Message::Status::Received));
+
     // Upload status: client-to-model
     connect(m_client, &VSQClient::uploadStarted, &m_messageModel,
         std::bind(&VSQMessagesModel::setUploadFailed, &m_messageModel, args::_1, false));
@@ -146,6 +141,8 @@ void VSQMessenger::setupConnections()
     connect(&m_messageModel, &VSQMessagesModel::messageAdded, &m_chatsModel, &VSQChatsModel::processMessage);
     connect(&m_messageModel, &VSQMessagesModel::messageStatusChanged, &m_chatsModel, &VSQChatsModel::updateMessageStatus);
 
+    // Other connections: client-to-logging
+    connect(m_client, &VSQClient::virgilUrlChanged, m_logging, &VSQLogging::setVirgilUrl);
     // Other connections: messenger-to-client
     connect(this, &VSQMessenger::checkConnectionState, m_client, &VSQClient::checkConnectionState);
     connect(this, &VSQMessenger::setOnlineStatus, m_client, &VSQClient::setOnlineStatus);
@@ -162,7 +159,6 @@ void VSQMessenger::setUser(const QString &user)
     m_user = user;
     emit userChanged(user);
 
-    m_logging->setVirgilUrl(m_client->virgilUrl());
     setRecipient(QString());
 }
 
