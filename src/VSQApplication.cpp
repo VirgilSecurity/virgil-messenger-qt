@@ -41,6 +41,7 @@
 #include <virgil/iot/qt/VSQIoTKit.h>
 
 #include "VSQClipboardProxy.h"
+#include "VSQCrashReporter.h"
 #include "VSQLogging.h"
 #include "VSQMessenger.h"
 #include "VSQQmlEngine.h"
@@ -55,12 +56,14 @@ Q_LOGGING_CATEGORY(lcApplication, "application")
 
 VSQApplication::VSQApplication(int &argc, char **argv)
     : ApplicationBase(argc, argv)
-    , m_settings(new VSQSettings(this))
-    , m_logging(new VSQLogging(m_settings, this))
-    , m_messenger(new VSQMessenger(m_settings, m_logging, this))
-    , m_engine(new VSQQmlEngine(argc, argv, this))
 {
     setupCore();
+
+    m_settings = new VSQSettings(this);
+    m_crashReporter = new VSQCrashReporter(m_settings, this);
+    m_messenger = new VSQMessenger(m_settings, m_crashReporter, this);
+    m_engine = new VSQQmlEngine(argc, argv, this);
+
     setupFonts();
     setupConnections();
     setupEngine();
@@ -72,7 +75,15 @@ VSQApplication::VSQApplication(int &argc, char **argv)
 
 VSQApplication::~VSQApplication()
 {
-    m_settings->setRunFlag(false);
+    // Delete objects in another order, so settings can be used in destructors
+    delete m_engine;
+    delete m_messenger;
+    delete m_crashReporter;
+    delete m_settings;
+
+#ifdef VS_DEVMODE
+    qCDebug(lcDev) << "~Application";
+#endif
 }
 
 void VSQApplication::initialize()
@@ -89,8 +100,6 @@ void VSQApplication::initialize()
     // Attributes
     ApplicationBase::setAttribute(Qt::AA_EnableHighDpiScaling);
     ApplicationBase::setAttribute(Qt::AA_UseHighDpiPixmaps);
-    //
-    VSQLogging::initialize();
 }
 
 void VSQApplication::reloadQml()
@@ -112,12 +121,11 @@ QString VSQApplication::currentVersion() const
 
 void VSQApplication::setupCore()
 {
-    // TODO(fpohtmeh): refactor
-    const auto features = VSQFeatures();
-    const auto impl = VSQImplementations();
     const auto appConfig = VSQAppConfig() << VirgilIoTKit::VS_LOGLEV_DEBUG;
-    if (!VSQIoTKitFacade::instance().init(features, impl, appConfig))
+    if (!VSQIoTKitFacade::instance().init(VSQFeatures(), VSQImplementations(), appConfig))
         qCCritical(lcApplication) << "Unable to initialize Virgil IoT KIT";
+
+    VSQLogging::instance()->installMessageHandler();
 }
 
 void VSQApplication::setupFonts()
@@ -131,8 +139,8 @@ void VSQApplication::setupConnections()
 {
     connect(this, &VSQApplication::applicationStateChanged, this, &VSQApplication::onApplicationStateChanged);
     connect(m_messenger, &VSQMessenger::quitRequested, this, &VSQApplication::quit);
-    connect(m_messenger, &VSQMessenger::signedIn, m_logging, &VSQLogging::checkCrashReport);
-    connect(m_logging, &VSQLogging::crashReportChecked, m_settings, std::bind(&VSQSettings::setRunFlag, m_settings, true));
+    connect(m_messenger, &VSQMessenger::signedIn, m_crashReporter, &VSQCrashReporter::check);
+    connect(m_crashReporter, &VSQCrashReporter::checked, m_settings, std::bind(&VSQSettings::setRunFlag, m_settings, true));
 }
 
 void VSQApplication::setupEngine()
@@ -145,7 +153,7 @@ void VSQApplication::setupEngine()
     context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
     context->setContextProperty("messenger", m_messenger);
     context->setContextProperty("settings", m_settings);
-    context->setContextProperty("logging", m_logging);
+    context->setContextProperty("crashReporter", m_crashReporter);
 
     reloadQml();
 }

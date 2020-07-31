@@ -45,6 +45,13 @@ VSQQmlEngine::VSQQmlEngine(int &argc, char **argv, QObject *parent)
     registerCommonTypes();
 }
 
+VSQQmlEngine::~VSQQmlEngine()
+{
+#ifdef VS_DEVMODE
+    qCDebug(lcDev) << "~QmlEngine";
+#endif
+}
+
 void VSQQmlEngine::reloadQml()
 {
     const QUrl url(QStringLiteral("main.qml"));

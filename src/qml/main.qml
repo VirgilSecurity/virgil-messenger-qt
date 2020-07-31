@@ -15,9 +15,6 @@ ApplicationWindow {
     minimumWidth: 320
     minimumHeight: 600
 
-    // TODO(fpohtmeh): remove
-    //property bool connectionError: false
-
     Connections {
         target: messenger
         onCredentialsRequested: mainView.showAuth(signOut)
@@ -49,7 +46,6 @@ ApplicationWindow {
         sequence: StandardKey.Refresh
         enabled: settings.devMode
         onActivated: {
-            //messenger.signOut()
             window.close()
             app.reloadQml()
         }
@@ -79,6 +75,6 @@ ApplicationWindow {
 
     Component.onCompleted: {
         Platform.detect()
-        logging.crashReportFound.connect(sendCrashReportDialog.open)
+        crashReporter.requested.connect(sendCrashReportDialog.open)
     }
 }

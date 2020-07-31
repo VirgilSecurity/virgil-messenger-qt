@@ -36,16 +36,16 @@
 
 #include <QThread>
 
-#include "VSQLogging.h"
+#include "VSQCrashReporter.h"
 #include "VSQSettings.h"
 #include "VSQUtils.h"
 #include "client/VSQCore.h"
 #include "database/VSQDatabase.h"
 
-VSQMessenger::VSQMessenger(VSQSettings *settings, VSQLogging *logging, QObject *parent)
+VSQMessenger::VSQMessenger(VSQSettings *settings, VSQCrashReporter *crashReporter, QObject *parent)
     : QObject(parent)
     , m_settings(settings)
-    , m_logging(logging)
+    , m_crashReporter(crashReporter)
     , m_attachmentBuilder(settings)
     , m_messageModel(this)
     , m_chatsModel(this)
@@ -65,6 +65,23 @@ VSQMessenger::VSQMessenger(VSQSettings *settings, VSQLogging *logging, QObject *
 
 #if VS_PUSHNOTIFICATIONS
     VSQPushNotifications::instance().startMessaging();
+#endif
+}
+
+VSQMessenger::~VSQMessenger()
+{
+    m_clientThread->quit();
+    m_clientThread->wait();
+    delete m_client;
+    delete m_clientThread;
+
+    m_databaseThread->quit();
+    m_databaseThread->wait();
+    delete m_database;
+    delete m_databaseThread;
+
+#ifdef VS_DEVMODE
+    qCDebug(lcDev) << "~Messenger";
 #endif
 }
 
@@ -141,8 +158,8 @@ void VSQMessenger::setupConnections()
     connect(&m_messageModel, &VSQMessagesModel::messageAdded, &m_chatsModel, &VSQChatsModel::processMessage);
     connect(&m_messageModel, &VSQMessagesModel::messageStatusChanged, &m_chatsModel, &VSQChatsModel::updateMessageStatus);
 
-    // Other connections: client-to-logging
-    connect(m_client, &VSQClient::virgilUrlChanged, m_logging, &VSQLogging::setVirgilUrl);
+    // Other connections: client-to-crash reporter
+    connect(m_client, &VSQClient::virgilUrlChanged, m_crashReporter, &VSQCrashReporter::setUrl);
     // Other connections: messenger-to-client
     connect(this, &VSQMessenger::checkConnectionState, m_client, &VSQClient::checkConnectionState);
     connect(this, &VSQMessenger::setOnlineStatus, m_client, &VSQClient::setOnlineStatus);

@@ -32,52 +32,43 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_APPLICATION_H
-#define VSQ_APPLICATION_H
+#ifndef VSQ_CRASHREPORTER_H
+#define VSQ_CRASHREPORTER_H
 
-#ifdef VS_DESKTOP
-#include <QApplication>
-#define ApplicationBase QApplication
-#else
-#include <QGuiApplication>
-#define ApplicationBase QGuiApplication
-#endif
+#include <QObject>
 
 #include "VSQCommon.h"
 
-Q_DECLARE_LOGGING_CATEGORY(lcApplication)
+class QNetworkAccessManager;
 
-class VSQCrashReporter;
-class VSQMessenger;
-class VSQQmlEngine;
 class VSQSettings;
 
-class VSQApplication : public ApplicationBase
+Q_DECLARE_LOGGING_CATEGORY(lcCrashReporter)
+
+class VSQCrashReporter : public QObject
 {
     Q_OBJECT
 
 public:
-    VSQApplication(int &argc, char **argv);
-    virtual ~VSQApplication();
+    VSQCrashReporter(VSQSettings *settings, QObject *parent);
+    ~VSQCrashReporter() override;
 
-    static void initialize();
+    void check();
+    void setUrl(const QString &url);
 
-    Q_INVOKABLE void reloadQml();
-    Q_INVOKABLE void checkUpdates();
-    Q_INVOKABLE QString currentVersion() const;
+signals:
+    void requested();
+    void checked();
+    void send();
 
 private:
-    void setupCore();
-    void setupFonts();
-    void setupConnections();
-    void setupEngine();
-
-    void onApplicationStateChanged(Qt::ApplicationState state);
+    bool sendLogFiles();
+    bool sendFileToBackendRequest(const QByteArray &fileData);
+    void endpointReply();
 
     VSQSettings *m_settings;
-    VSQCrashReporter *m_crashReporter;
-    VSQMessenger *m_messenger;
-    VSQQmlEngine *m_engine;
+    QNetworkAccessManager *m_manager;
+    QString m_url;
 };
 
-#endif // VSQ_APPLICATION_H
+#endif // VSQ_CRASHREPORTER_H

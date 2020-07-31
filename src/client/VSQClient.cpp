@@ -79,10 +79,15 @@ VSQClient::VSQClient(VSQSettings *settings, QObject *parent)
     , m_waitingForConnection(false)
 {}
 
+VSQClient::~VSQClient()
+{
+#ifdef VS_DEVMODE
+    qCDebug(lcDev) << "~Client";
+#endif
+}
+
 void VSQClient::start()
 {
-    // Register types
-    qRegisterMetaType<QAbstractSocket::SocketState>();
     // Sign-in connections
     connect(this, &VSQClient::signIn, this, &VSQClient::onSignIn);
     connect(this, &VSQClient::signOut, this, &VSQClient::onSignOut);
@@ -106,11 +111,13 @@ void VSQClient::start()
     connect(this, &VSQClient::setOnlineStatus, this, &VSQClient::onSetOnlineStatus);
 
     // XMPP receipt manager
-    auto receiptManager = new QXmppMessageReceiptManager(); // TODO(fpohtmeh): set parent?
+    auto receiptManager = new QXmppMessageReceiptManager();
+    receiptManager->setParent(this);
     m_client.addExtension(receiptManager);
     connect(receiptManager, &QXmppMessageReceiptManager::messageDelivered, this, &VSQClient::onMessageDelivered);
     // XMPP carbon manager
-    m_carbonManager = new QXmppCarbonManager(); // TODO(fpohtmeh): set parent?
+    m_carbonManager = new QXmppCarbonManager();
+    m_carbonManager->setParent(this);
     m_client.addExtension(m_carbonManager);
     // messages sent to our account (forwarded from another client)
     connect(m_carbonManager, &QXmppCarbonManager::messageReceived, &m_client, &QXmppClient::messageReceived);

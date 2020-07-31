@@ -34,112 +34,49 @@
 
 #include "VSQLogging.h"
 
-#include <QCoreApplication>
+#include <QMutex>
 
-#include <virgil/iot/qt/VSQIoTKit.h>
 #include <virgil/iot/logger/logger.h>
-#include <virgil/iot/messenger/messenger.h>
-#include <virgil/iot/qt/VSQIoTKit.h>
-
-#include "VSQSettings.h"
-
-Q_LOGGING_CATEGORY(lcCrashReport, "crashreport")
 
 using namespace VirgilIoTKit;
 
-VSQLogging::VSQLogging(VSQSettings *settings, QObject *parent)
-    : QObject(parent)
-    , m_settings(settings)
+VSQLogging *VSQLogging::m_instance = nullptr;
+
+VSQLogging::VSQLogging()
 {
-    connect(this, &VSQLogging::sendCrashReport, this, &VSQLogging::sendLogFiles);
+    if (m_instance) {
+        qFatal("Instance of logging already exists!");
+    }
+    else {
+        m_instance = this;
+    }
 }
 
 VSQLogging::~VSQLogging()
 {
+    m_instance = nullptr;
 }
 
-void VSQLogging::initialize()
+VSQLogging *VSQLogging::instance()
 {
-    qInstallMessageHandler(&VSQLogging::handler);
+    if (!m_instance)
+        qFatal("Instance of logging doesn't exist!");
+    return m_instance;
 }
 
-void VSQLogging::checkCrashReport()
+void VSQLogging::installMessageHandler()
 {
-    qCDebug(lcCrashReport) << "Checking previous run flag...";
-    if (m_settings->runFlag()) {
-        qCritical(lcCrashReport) << "Previous application run is crashed! Sending log files...";
-        emit crashReportFound();
-    }
-    emit crashReportChecked();
+    qInstallMessageHandler(&VSQLogging::staticHandler);
+#ifdef VS_DEVMODE
+    qCDebug(lcDev) << "Installed message handler";
+#endif
 }
 
-bool VSQLogging::sendLogFiles()
+void VSQLogging::staticHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-    QByteArray fileData;
-    const QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    if (!writeDir.exists()) {
-        qFatal("Directory [%s] doesn't exist.", qPrintable(writeDir.absolutePath()));
-        return false;
-    }
+    static QMutex mutex;
+    QMutexLocker locker(&mutex);
 
-    QDirIterator fileIterator(writeDir.absolutePath(), QStringList() << "virgil-messenger.log*");
-    while (fileIterator.hasNext()) {
-        QFile readFile(fileIterator.next());
-        if (readFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            qCDebug(lcCrashReport) << "Read file:" << readFile.fileName() << endl;
-            fileData.append(readFile.readAll());
-        }
-        else {
-            qCDebug(lcCrashReport) << "Can't open " << readFile.fileName() << readFile.errorString() << endl;
-        }
-    }
-
-    return sendFileToBackendRequest(fileData);
-}
-
-void VSQLogging::setVirgilUrl(const QString &url)
-{
-    m_virgilUrl = url;
-    qCDebug(lcCrashReport) << "Virgil url changed to:" << url;
-}
-
-bool VSQLogging::sendFileToBackendRequest(const QByteArray &fileData)
-{
-    char *buffBearer = (char *) malloc(1024);
-    size_t sizeBearer = 1024;
-    vs_messenger_virgil_get_auth_token(buffBearer, sizeBearer);
-    qCDebug(lcCrashReport) << "Backend token:" << buffBearer;
-
-    if (!m_manager)
-        m_manager = new QNetworkAccessManager(this);
-
-    QNetworkRequest request;
-    QUrl strEndpoint(m_virgilUrl + QLatin1String("/send-logs"));
-    request.setUrl(strEndpoint);
-    qCDebug(lcCrashReport) << "Send report to endpoint:" << strEndpoint;
-    request.setHeader(QNetworkRequest::ContentTypeHeader,  QString("application/json"));
-    request.setRawHeader("Authorization", buffBearer);
-    request.setRawHeader("Version", QCoreApplication::applicationVersion().toUtf8());
-    request.setRawHeader("Platform", QSysInfo::kernelType().toUtf8());
-    QNetworkReply* reply = m_manager->post(request, fileData);
-    connect(reply, &QNetworkReply::finished, this, &VSQLogging::endpointReply);
-
-    return true;
-}
-
-void VSQLogging::endpointReply()
-{
-    QNetworkReply *reply= qobject_cast<QNetworkReply *>(sender());
-    if (reply->error() == QNetworkReply::NoError)
-        qCDebug(lcCrashReport) << "Send report OK";
-    else
-        qCDebug(lcCrashReport) << "Error sending report:" << reply->errorString();
-    reply->deleteLater();
-    qCDebug(lcCrashReport) << "Sending finished";
-}
-
-void VSQLogging::handler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
-{
     const QByteArray localMsg = msg.toLocal8Bit();
     switch (type) {
     case QtDebugMsg:

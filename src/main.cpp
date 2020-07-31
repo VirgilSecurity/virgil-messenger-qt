@@ -33,6 +33,7 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 #include "VSQApplication.h"
+#include "VSQLogging.h"
 #include "android/VSQAndroid.h"
 
 #if (VSQ_WEBDRIVER_DEBUG)
@@ -49,6 +50,7 @@ int main(int argc, char *argv[])
     wd_setup(argc, argv);
 #endif
 
+    VSQLogging logging;
     VSQApplication::initialize();
     VSQApplication app(argc, argv);
     return app.exec();

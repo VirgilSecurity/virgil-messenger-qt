@@ -47,6 +47,13 @@ VSQUploader::VSQUploader(QXmppClient *client, QObject *parent)
     client->addExtension(&m_manager);
 }
 
+VSQUploader::~VSQUploader()
+{
+#ifdef VS_DEVMODE
+    qCDebug(lcDev) << "~Uploader";
+#endif
+}
+
 void VSQUploader::upload(const ExtMessage &message)
 {
     const auto id = message.id;

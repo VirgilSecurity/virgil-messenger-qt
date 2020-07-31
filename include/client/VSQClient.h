@@ -53,6 +53,7 @@ class VSQClient : public QObject
 
 public:
     VSQClient(VSQSettings *settings, QObject *parent);
+    ~VSQClient() override;
 
     void start();
 

@@ -47,6 +47,7 @@ class VSQQmlEngine : public QQmlApplicationEngine
 
 public:
     VSQQmlEngine(int &argc, char **argv, QObject *parent);
+    ~VSQQmlEngine();
 
     void reloadQml();
 

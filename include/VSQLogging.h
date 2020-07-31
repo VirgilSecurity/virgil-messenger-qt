@@ -35,43 +35,21 @@
 #ifndef VSQLOGGING_H
 #define VSQLOGGING_H
 
-#include <QObject>
-
 #include "VSQCommon.h"
 
-Q_DECLARE_LOGGING_CATEGORY(lcCrashReport)
-
-class QNetworkAccessManager;
-
-class VSQSettings;
-
-class VSQLogging : public QObject
+class VSQLogging
 {
-    Q_OBJECT
-
 public:
-    VSQLogging(VSQSettings *settings, QObject *parent);
-    virtual ~VSQLogging();
+    VSQLogging();
+    ~VSQLogging();
 
-    static void initialize();
-
-    void checkCrashReport();
-    bool sendLogFiles();
-    void setVirgilUrl(const QString &url);
-
-signals:
-    void crashReportFound();
-    void crashReportChecked();
-    void sendCrashReport();
+    static VSQLogging *instance();
+    void installMessageHandler();
 
 private:
-    static void handler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
-    bool sendFileToBackendRequest(const QByteArray &fileData);
-    void endpointReply();
+    static void staticHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 
-    VSQSettings *m_settings;
-    QNetworkAccessManager *m_manager;
-    QString m_virgilUrl;
+    static VSQLogging *m_instance;
 };
 
 #endif // VSQLOGGING_H

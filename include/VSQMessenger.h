@@ -46,9 +46,9 @@
 class QThread;
 
 class VSQClient;
+class VSQCrashReporter;
 class VSQDatabase;
 class VSQSettings;
-class VSQLogging;
 
 class VSQMessenger : public QObject
 {
@@ -59,8 +59,8 @@ class VSQMessenger : public QObject
     Q_PROPERTY(VSQChatsModel *chats READ chatsModel CONSTANT)
 
 public:
-    explicit VSQMessenger(VSQSettings *settings, VSQLogging *logging, QObject *parent = nullptr);
-    ~VSQMessenger() override = default;
+    explicit VSQMessenger(VSQSettings *settings, VSQCrashReporter *crashReporter, QObject *parent = nullptr);
+    ~VSQMessenger() override;
 
     Q_INVOKABLE void start();
 
@@ -110,7 +110,7 @@ private:
     void onCreateSendMessage(const QString &text, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
 
     VSQSettings *m_settings;
-    VSQLogging *m_logging;
+    VSQCrashReporter *m_crashReporter;
     VSQAttachmentBuilder m_attachmentBuilder;
     VSQMessagesModel m_messageModel;
     VSQChatsModel m_chatsModel;
@@ -122,7 +122,6 @@ private:
 
     QString m_user;
     QString m_recipient;
-    QString m_deviceId;
 };
 
 #endif // VSQ_MESSENGER_H

@@ -49,6 +49,7 @@ class VSQUploader : public QObject
 
 public:
     explicit VSQUploader(QXmppClient *client, QObject *parent);
+    ~VSQUploader() override;
 
     void upload(const ExtMessage &message);
 

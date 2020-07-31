@@ -50,6 +50,13 @@ VSQCore::VSQCore(VSQSettings *settings)
     , m_deviceId(VSQUtils::createUuid())
 {}
 
+VSQCore::~VSQCore()
+{
+#ifdef VS_DEVMODE
+    qCDebug(lcDev) << "~Core";
+#endif
+}
+
 bool VSQCore::signIn(const QString &userWithEnv)
 {
     // Initialization

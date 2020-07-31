@@ -36,6 +36,8 @@
 
 #include <QtQml>
 
+Q_LOGGING_CATEGORY(lcDev, "dev");
+
 void registerCommonTypes()
 {
     qRegisterMetaType<DataSize>("DataSize");

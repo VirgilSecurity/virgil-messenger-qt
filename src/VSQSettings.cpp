@@ -64,7 +64,11 @@ VSQSettings::VSQSettings(QObject *parent)
 }
 
 VSQSettings::~VSQSettings()
-{}
+{
+#ifdef VS_DEVMODE
+    qCDebug(lcDev) << "~Settings";
+#endif
+}
 
 void VSQSettings::setLastSignedInUser(const QString &user)
 {

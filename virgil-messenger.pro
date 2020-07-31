@@ -89,6 +89,7 @@ HEADERS += \
         include/VSQApplication.h \
         include/VSQClipboardProxy.h \
         include/VSQCommon.h \
+        include/VSQCrashReporter.h \
         include/VSQLogging.h \
         include/VSQMessenger.h \
         include/VSQQmlEngine.h \
@@ -120,6 +121,7 @@ SOURCES += \
         src/VSQApplication.cpp \
         src/VSQClipboardProxy.cpp \
         src/VSQCommon.cpp \
+        src/VSQCrashReporter.cpp \
         src/VSQLogging.cpp \
         src/VSQMessenger.cpp \
         src/VSQQmlEngine.cpp \

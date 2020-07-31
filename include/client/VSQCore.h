@@ -37,7 +37,6 @@
 
 #include "VSQCommon.h"
 
-// FIXME(fpohtmeh): replace include with forward declaration
 #include <virgil/iot/messenger/messenger.h>
 
 class VSQSettings;
@@ -48,6 +47,7 @@ class VSQCore
 {
 public:
     explicit VSQCore(VSQSettings *settings);
+    ~VSQCore();
 
     bool signIn(const QString &userWithEnv);
     void signOut();

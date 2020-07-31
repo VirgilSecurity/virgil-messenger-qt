@@ -60,6 +60,10 @@ using OptionalType = tl::nullopt_t;
 
 static constexpr OptionalType NullOptional(tl::nullopt);
 
+#ifdef VS_DEVMODE
+Q_DECLARE_LOGGING_CATEGORY(lcDev);
+#endif
+
 // Namespace for passing of enum values to QML
 namespace Enums {
     Q_NAMESPACE

@@ -47,6 +47,9 @@ VSQDatabase::VSQDatabase(const VSQSettings *settings, QObject *parent)
 VSQDatabase::~VSQDatabase()
 {
     m_db.close();
+#ifdef VS_DEVMODE
+    qCDebug(lcDev) << "~Database";
+#endif
 }
 
 void VSQDatabase::open()
