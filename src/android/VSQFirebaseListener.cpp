@@ -42,7 +42,7 @@
 
 #include <QDebug>
 
-#include <Messenger.h>
+#include <VSQMessenger.h>
 
 /******************************************************************************/
 VSQFirebaseListener::VSQFirebaseListener() {

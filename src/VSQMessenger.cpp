@@ -37,6 +37,7 @@
 #include <QThread>
 
 #include "VSQCrashReporter.h"
+#include "VSQPushNotifications.h"
 #include "VSQSettings.h"
 #include "VSQUtils.h"
 #include "client/VSQCore.h"

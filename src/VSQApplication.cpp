@@ -166,12 +166,12 @@ void VSQApplication::onApplicationStateChanged(Qt::ApplicationState state)
 
     if (Qt::ApplicationInactive == state) {
         _deactivated = true;
-        m_messenger.setOnlineStatus(false);
+        m_messenger->setOnlineStatus(false);
     }
 
     if (Qt::ApplicationActive == state && _deactivated) {
         _deactivated = false;
-        QTimer::singleShot(200, m_messenger, &Messenger::checkConnectionState);
+        QTimer::singleShot(200, m_messenger, &VSQMessenger::checkConnectionState);
     }
 #endif // VS_PUSHNOTIFICATIONS
 }
