@@ -43,6 +43,7 @@ using namespace VirgilIoTKit;
 VSQLogging *VSQLogging::m_instance = nullptr;
 
 VSQLogging::VSQLogging()
+    : QObject()
 {
     if (m_instance) {
         qFatal("Instance of logging already exists!");
@@ -77,6 +78,10 @@ void VSQLogging::staticHandler(QtMsgType type, const QMessageLogContext &context
     static QMutex mutex;
     QMutexLocker locker(&mutex);
 
+#ifdef VS_DEVMODE
+    emit m_instance->newMessage(QString("[%1] %2").arg(context.category).arg(msg));
+#endif
+
     const QByteArray localMsg = msg.toLocal8Bit();
     switch (type) {
     case QtDebugMsg:
@@ -93,6 +98,7 @@ void VSQLogging::staticHandler(QtMsgType type, const QMessageLogContext &context
         break;
     case QtFatalMsg:
         vs_logger_message(VS_LOGLEV_FATAL, context.file, context.line, localMsg.constData());
-        abort();
+        emit m_instance->fatal();
+        break;
     }
 }

@@ -32,7 +32,6 @@ ApplicationWindow {
         anchors.fill: parent
     }
 
-    // Popup to show messages or warnings on the bottom postion of the screen
     Popup {
         id: inform
     }
@@ -41,7 +40,6 @@ ApplicationWindow {
         id: sendCrashReportDialog
     }
 
-    // Shortcuts for hackers
     Shortcut {
         sequence: StandardKey.Refresh
         enabled: settings.devMode
@@ -51,7 +49,6 @@ ApplicationWindow {
         }
     }
 
-    // Show Popup message
     function showPopup(message, color, textColor, isOnTop, isModal) {
         inform.popupColor = color
         inform.popupColorText = textColor

@@ -35,16 +35,24 @@
 #ifndef VSQLOGGING_H
 #define VSQLOGGING_H
 
+#include <QObject>
+
 #include "VSQCommon.h"
 
-class VSQLogging
+class VSQLogging : public QObject
 {
+    Q_OBJECT
+
 public:
     VSQLogging();
-    ~VSQLogging();
+    ~VSQLogging() override;
 
     static VSQLogging *instance();
     void installMessageHandler();
+
+signals:
+    void newMessage(const QString &);
+    void fatal();
 
 private:
     static void staticHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);

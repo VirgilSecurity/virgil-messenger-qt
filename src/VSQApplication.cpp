@@ -126,6 +126,7 @@ void VSQApplication::setupCore()
         qCCritical(lcApplication) << "Unable to initialize Virgil IoT KIT";
 
     VSQLogging::instance()->installMessageHandler();
+    connect(VSQLogging::instance(), &VSQLogging::fatal, this, &VSQApplication::quit);
 }
 
 void VSQApplication::setupFonts()
@@ -154,6 +155,7 @@ void VSQApplication::setupEngine()
     context->setContextProperty("messenger", m_messenger);
     context->setContextProperty("settings", m_settings);
     context->setContextProperty("crashReporter", m_crashReporter);
+    context->setContextProperty("logging", VSQLogging::instance());
 
     reloadQml();
 }
