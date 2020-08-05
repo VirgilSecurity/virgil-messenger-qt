@@ -35,4 +35,4 @@ print_message "Build iphonesimulator"
 ios_build "iphonesimulator simulator" "ios-sim"
 
 print_message "Build iphoneos"
-ios_build "release iphoneos device" "ios"
+ios_build "release iphoneos device qtquickcompiler" "ios"
