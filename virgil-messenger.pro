@@ -32,7 +32,6 @@
 #
 #  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-QTPLUGIN += qtvirtualkeyboardplugin
 QT += core network qml quick bluetooth sql xml concurrent
 
 CONFIG += c++14
@@ -128,7 +127,7 @@ INCLUDEPATH +=  include \
 #
 #   Sparkle framework
 #
-unix:mac: {
+unix:mac:!ios {
     OBJECTIVE_SOURCES += src/macos/VSQMacos.mm
     DEFINES += MACOS=1
     SPARKLE_LOCATION=$$PREBUILT_PATH/$${OS_NAME}/sparkle
@@ -210,6 +209,21 @@ macx: {
 #    #IOS_ENTITLEMENTS.value = ios/pushnotifications.entitlements
 #    QMAKE_MAC_XCODE_SETTINGS += IOS_ENTITLEMENTS
 #}
+
+isEqual(OS_NAME, "ios")|isEqual(OS_NAME, "ios-sim"): {
+    Q_ENABLE_BITCODE.name = ENABLE_BITCODE
+    Q_ENABLE_BITCODE.value = NO
+    QMAKE_MAC_XCODE_SETTINGS += Q_ENABLE_BITCODE
+
+    LIBS_DIR = $$PWD/ext/prebuilt/$$OS_NAME/release/installed/usr/local/lib
+    QMAKE_RPATHDIR = @executable_path/Frameworks
+
+    IOS_DYLIBS.files = \
+    $$LIBS_DIR/libvs-messenger-internal.dylib
+    IOS_DYLIBS.path = Frameworks
+    QMAKE_BUNDLE_DATA += IOS_DYLIBS
+}
+
 
 #
 #   Android specific

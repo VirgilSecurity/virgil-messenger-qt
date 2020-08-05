@@ -17,7 +17,7 @@ if [ -f "${PROJECT_DIR}/VERSION_MESSENGER" ]; then
     export VERSION="$(cat ${PROJECT_DIR}/VERSION_MESSENGER | tr -d '\n').${BUILD_NUMBER}"
 fi
 
-#trap 'err_trap  $@' ERR
+trap 'err_trap  $@' ERR
 
 err_trap(){
     err_code=$?
