@@ -37,6 +37,7 @@
 #include <QDeadlineTimer>
 #include <QEventLoop>
 #include <QSslSocket>
+#include <QTimer>
 
 #include <QXmppCarbonManager.h>
 #include <QXmppConfiguration.h>
@@ -77,6 +78,7 @@ VSQClient::VSQClient(VSQSettings *settings, QObject *parent)
     , m_uploader(&m_client, this)
     , m_lastErrorText()
     , m_waitingForConnection(false)
+    , m_needReconnection(false)
 {}
 
 VSQClient::~VSQClient()
@@ -170,9 +172,34 @@ bool VSQClient::xmppConnect()
 #endif
     qCDebug(lcClient) << "SSL:" << QSslSocket::supportsSsl();
     qCDebug(lcClient) << ">>>> Connecting...";
+
+    // Activate reconnections during wait
+    bool needReconnectionPrev;
+    needReconnectionPrev = m_needReconnection;
+    m_needReconnection = true;
+
+    // Start waiting for connection
+    m_waitingForConnection = true;
+
+    // Start connection
     m_client.connectToServer(config);
+
+    // Wait until connected or timed out
     waitForConnection();
+
+    // Stop waiting for connection
+    m_waitingForConnection = false;
+
+    // TODO: Is it correct ?
     m_carbonManager->setCarbonsEnabled(true);
+
+    // Set up need in reconnections
+    if (m_client.isConnected()) {
+        m_needReconnection = true;
+    } else {
+         m_needReconnection = needReconnectionPrev;
+    }
+
     return m_client.isConnected();
 }
 
@@ -201,12 +228,10 @@ void VSQClient::waitForConnection()
 {
     QDeadlineTimer timer(kConnectionWaitMs);
     QEventLoop loop;
-    m_waitingForConnection = true;
     do {
         loop.processEvents();
     }
     while (m_waitingForConnection && !timer.hasExpired());
-    m_waitingForConnection = false;
 }
 
 void VSQClient::stopWaitForConnection()
@@ -341,7 +366,18 @@ void VSQClient::onDisconnected()
 void VSQClient::onError(QXmppClient::Error error)
 {
     qCDebug(lcClient) << "onError:" << error << "state:" << m_client.state();
-    xmppReconnect();
+
+    if (!m_needReconnection) {
+        qCDebug(lcClient) << "Do not try to reconnect because there is no need in it.";
+    }
+
+    if (m_waitingForConnection) {
+        qCDebug(lcClient) << "Delayed check of connection because we're connecting now.";
+        QTimer::singleShot(1000, this, &VSQClient::checkConnectionState);
+    } else {
+        qCDebug(lcClient) << "Attempt to reconnect";
+        xmppReconnect();
+    }
 }
 
 void VSQClient::onMessageReceived(const QXmppMessage &message)

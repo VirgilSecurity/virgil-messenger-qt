@@ -133,6 +133,7 @@ private:
 
     QString m_lastErrorText;
     bool m_waitingForConnection;
+    bool m_needReconnection;
     QString m_virgilUrl;
 };
 
