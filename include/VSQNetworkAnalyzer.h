@@ -63,6 +63,9 @@ signals:
     void
     fireStateChanged(bool online);
 
+    void
+    fireHeartBeat();
+
 protected slots:
     void
     onUpdateCompleted();

@@ -64,7 +64,7 @@ Q_DECLARE_METATYPE(VSQMessenger::EnResult)
 Q_DECLARE_METATYPE(QFuture<VSQMessenger::EnResult>)
 
 #ifndef USE_XMPP_LOGS
-#define USE_XMPP_LOGS 1
+#define USE_XMPP_LOGS 0
 #endif
 
 
@@ -130,6 +130,10 @@ VSQMessenger::VSQMessenger() {
     // connect(m_xmppDiscoManager, &QXmppDiscoveryManager::infoReceived, this, &VSQMessenger::handleDiscoInfo);
 
     connect(m_xmppReceiptManager, &QXmppMessageReceiptManager::messageDelivered, this, &VSQMessenger::onMessageDelivered);
+
+    // Network Analyzer
+    connect(&m_networkAnalyzer, &VSQNetworkAnalyzer::fireStateChanged, this, &VSQMessenger::onProcessNetworkState, Qt::QueuedConnection);
+    connect(&m_networkAnalyzer, &VSQNetworkAnalyzer::fireHeartBeat, this, &VSQMessenger::checkState, Qt::QueuedConnection);
 
     // Use Push notifications
 #if VS_PUSHNOTIFICATIONS
@@ -213,6 +217,15 @@ VSQMessenger::_xmppPass() {
 Q_DECLARE_METATYPE(QXmppConfiguration)
 bool
 VSQMessenger::_connect(QString userWithEnv, QString deviceId, QString userId) {
+    if (!m_connectGuard.tryLock()) {
+        return false;
+    }
+
+    static int cnt = 0;
+
+    const int cur_val = cnt++;
+
+    qDebug() << ">>>>>>>>>>> _connect: START " << cur_val;
 
     // Update users list
     _addToUsersList(userWithEnv);
@@ -242,9 +255,21 @@ VSQMessenger::_connect(QString userWithEnv, QString deviceId, QString userId) {
 
     m_xmpp.setLogger(logger);
 #endif
-    qRegisterMetaType<QXmppConfiguration>("QXmppConfiguration");
-    qDebug() << ">>>> connecting ...";
-    QMetaObject::invokeMethod(&m_xmpp, "connectToServer", Qt::QueuedConnection, Q_ARG(QXmppConfiguration, conf));
+    if (m_xmpp.isConnected()) {
+        // Wait for disconnection
+        QTimer timer;
+        timer.setSingleShot(true);
+        QEventLoop loop;
+        connect(&m_xmpp, &QXmppClient::connected, &loop, &QEventLoop::quit);
+        connect(&m_xmpp, &QXmppClient::disconnected, &loop, &QEventLoop::quit);
+        connect(&m_xmpp, &QXmppClient::error, &loop, &QEventLoop::quit);
+        connect( &timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+
+        QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::QueuedConnection);
+
+        timer.start(2000);
+        loop.exec();
+    }
 
     // Wait for connection
     QTimer timer;
@@ -255,13 +280,29 @@ VSQMessenger::_connect(QString userWithEnv, QString deviceId, QString userId) {
     connect(&m_xmpp, &QXmppClient::error, &loop, &QEventLoop::quit);
     connect( &timer, &QTimer::timeout, &loop, &QEventLoop::quit);
 
+    qRegisterMetaType<QXmppConfiguration>("QXmppConfiguration");
+    QMetaObject::invokeMethod(&m_xmpp, "connectToServer", Qt::QueuedConnection, Q_ARG(QXmppConfiguration, conf));
+
     timer.start(kConnectionWaitMs);
     loop.exec();
 
     m_xmppCarbonManager->setCarbonsEnabled(true);
 
-    // Return connection results
-    return m_xmpp.isConnected();
+    const bool connected = m_xmpp.isConnected();
+    qDebug() << "<<<<<<<<<<< _connect: FINISH connected = " << connected << "  " << cur_val;
+
+    m_connectGuard.unlock();
+    return connected;
+}
+
+/******************************************************************************/
+void
+VSQMessenger::onProcessNetworkState(bool online) {
+    if (online) {
+        _reconnect();
+    } else {
+        emit fireError("No internet connection");
+    }
 }
 
 /******************************************************************************/
@@ -706,10 +747,13 @@ VSQMessenger::_sendFailedMessages() {
 void
 VSQMessenger::checkState() {
     if (m_xmpp.state() == QXmppClient::DisconnectedState) {
+        qDebug() << "We should be connected, but it's not so. Let's try to reconnect.";
 #if VS_ANDROID
         emit fireError(tr("Disconnected ..."));
 #endif
         _reconnect();
+    } else {
+        qDebug() << "Connection is ok";
     }
 }
 
@@ -737,7 +781,7 @@ VSQMessenger::onError(QXmppClient::Error err) {
     qDebug() << "onError : " << err << "   state:" << m_xmpp.state();
     emit fireError(tr("Connection error ..."));
 
-    _reconnect();
+//    _reconnect();
 }
 
 /******************************************************************************/

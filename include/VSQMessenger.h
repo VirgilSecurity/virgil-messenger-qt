@@ -52,6 +52,7 @@
 #include "VSQSqlConversationModel.h"
 #include "VSQSqlChatModel.h"
 #include "VSQLogging.h"
+#include <VSQNetworkAnalyzer.h>
 
 using namespace VirgilIoTKit;
 
@@ -179,6 +180,7 @@ private slots:
     void onIqReceived(const QXmppIq &iq);
     void onSslErrors(const QList<QSslError> &errors);
     void onStateChanged(QXmppClient::State state);
+    void onProcessNetworkState(bool online);
     void handleDiscoInfo(const QXmppDiscoveryIq &info);
 
     void
@@ -195,7 +197,9 @@ private:
     VSQSqlConversationModel *m_sqlConversations;
     VSQSqlChatModel *m_sqlChatModel;
     VSQLogging *m_logging;
+    VSQNetworkAnalyzer m_networkAnalyzer;
 
+    QMutex m_connectGuard;
     QString m_user;
     QString m_userId;
     QString m_deviceId;

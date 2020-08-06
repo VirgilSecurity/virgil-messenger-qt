@@ -41,7 +41,6 @@
 #include <VSQMessenger.h>
 #include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
 #include <VSQLogging.h>
-#include <VSQNetworkAnalyzer.h>
 
 #include <macos/VSQMacos.h>
 
@@ -76,7 +75,6 @@ private:
     QQmlApplicationEngine m_engine;
     VSQMessenger m_messenger;
     VSQLogging m_logging;
-    VSQNetworkAnalyzer m_networkAnalyzer;
 };
 
 #endif // VSQApplication

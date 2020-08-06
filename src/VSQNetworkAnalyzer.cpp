@@ -116,6 +116,7 @@ void
 VSQNetworkAnalyzer::onAnalyzeNetwork() {
     bool currentState = false;
     static bool initialized = false;
+    bool stateChanged = false;
 
     VSQNetworkInterfaceData currenNetworkInterfaceData;
     QList<QNetworkConfiguration> networkConfigurations = m_nwManager.allConfigurations();
@@ -175,6 +176,8 @@ VSQNetworkAnalyzer::onAnalyzeNetwork() {
 
     if (currenNetworkInterfaceData.isEmpty()) {
         qDebug().noquote().nospace() << "NetworkAnalyzer: Network is not ready";
+        stateChanged = true;
+        emit fireStateChanged(false);
         m_networkInterfaceData.clear();
         checkIsNeedStop();
         return;
@@ -184,6 +187,7 @@ VSQNetworkAnalyzer::onAnalyzeNetwork() {
         m_connectedState = currentState;
         initialized = true;
 
+        stateChanged = true;
         emit fireStateChanged(m_connectedState);
 
         qDebug().noquote().nospace() << "NetworkAnalyzer: Online status: " << m_connectedState;
@@ -202,7 +206,12 @@ VSQNetworkAnalyzer::onAnalyzeNetwork() {
         printMap(currenNetworkInterfaceData);
 
         m_networkInterfaceData = currenNetworkInterfaceData;
+        stateChanged = true;
         emit fireStateChanged(m_connectedState);
+    }
+
+    if (!stateChanged && m_connectedState) {
+        emit fireHeartBeat();
     }
 
     checkIsNeedStop();
