@@ -32,51 +32,78 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
-#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
+#ifndef VSQNETWORKANALYZER_H
+#define VSQNETWORKANALYZER_H
 
-#include <QtCore>
-#include <QGuiApplication>
-#include <QQmlApplicationEngine>
-#include <VSQMessenger.h>
-#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
-#include <VSQLogging.h>
-#include <VSQNetworkAnalyzer.h>
+#include <QObject>
+#include <QNetworkConfigurationManager>
+#include <QNetworkSession>
+#include <QMap>
+#include <QTimer>
 
-#include <macos/VSQMacos.h>
+#ifdef Q_OS_MACOS
+// TODO: Remove after fixing of deprecated functionality
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 
-class VSQApplication : public QObject {
+class VSQNetworkAnalyzer : public QObject {
     Q_OBJECT
+
+    typedef QMap<int, QString> VSQNetworkInterfaceData;
+
 public:
-    VSQApplication();
-    virtual ~VSQApplication() = default;
+    VSQNetworkAnalyzer(QObject *parent = nullptr);
+    virtual ~VSQNetworkAnalyzer();
 
-    int
-    run(const QString &basePath);
+    bool
+    isOnline() const;
 
-    Q_INVOKABLE
-    void reloadQml();
+signals:
+    void
+    fireStateChanged(bool online);
 
-    Q_INVOKABLE
-    void checkUpdates();
+protected slots:
+    void
+    onUpdateCompleted();
 
-    Q_INVOKABLE QString
-    currentVersion() const;
+    void
+    onAnalyzeNetwork();
 
-    Q_INVOKABLE void
-    sendReport();
+protected:
+    void
+    printConfiguration(const QNetworkConfiguration &configuration) const;
 
+    void
+    printSession(const QNetworkSession &session) const;
+
+    void
+    printNetworkInterface(const QNetworkInterface &interface) const;
+
+    void
+    printMap(const VSQNetworkInterfaceData &networkInterfaceData) const;
+
+    static const int kTimerInterval = 5000;
+    static const int kSessionTimeoutMs = 1000;
+
+    QNetworkConfigurationManager m_nwManager;
+    bool m_connectedState;
+    VSQNetworkInterfaceData m_networkInterfaceData;
+    QTimer m_timer;
 
 private slots:
     void
-    onApplicationStateChanged(Qt::ApplicationState state);
+    onStart();
 
 private:
-    static const QString kVersion;
-    QQmlApplicationEngine m_engine;
-    VSQMessenger m_messenger;
-    VSQLogging m_logging;
-    VSQNetworkAnalyzer m_networkAnalyzer;
+    QThread *m_thread;
+
+    bool
+    checkIsNeedStop();
 };
 
-#endif // VSQApplication
+#ifdef Q_OS_MACOS
+#pragma GCC diagnostic pop
+#endif
+
+#endif // VSQNETWORKANALYZER_H

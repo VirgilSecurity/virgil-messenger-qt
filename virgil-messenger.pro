@@ -90,6 +90,7 @@ HEADERS += \
         include/VSQMessenger.h \
         include/VSQSqlChatModel.h \
         include/VSQSqlConversationModel.h \
+        include/VSQNetworkAnalyzer.h \
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
         include/ui/VSQUiHelper.h
@@ -104,6 +105,7 @@ SOURCES += \
         src/VSQLogging.cpp \
         src/VSQSqlChatModel.cpp \
         src/VSQSqlConversationModel.cpp \
+        src/VSQNetworkAnalyzer.cpp \
         src/android/VSQAndroid.cpp \
         src/main.cpp \
         src/VSQApplication.cpp \
