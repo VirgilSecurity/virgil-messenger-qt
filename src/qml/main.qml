@@ -116,5 +116,7 @@ ApplicationWindow {
     Component.onCompleted: {
         Platform.detect()
         Logging.crashReportRequested.connect(sendReportAsk.open)
+        Logging.reportSent.connect(showPopupSuccess)
+        Logging.reportSentErr.connect(showPopupError)
     }
 }

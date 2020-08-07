@@ -152,9 +152,11 @@ void VSQLogging::endpointReply(){
     if (reply->error() == QNetworkReply::NoError)
       {
         qDebug("Send report OK");
+        emit reportSent("Report send OK");
       }
       else {
         qDebug("Error sending report [%s]", qPrintable(reply->errorString()));
+        emit reportSentErr("Report send error: [" + reply->errorString() + "]" );
       }
     reply->deleteLater();
     qDebug("Sending finished");

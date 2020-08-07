@@ -60,6 +60,9 @@ public:
 
 signals:
     void crashReportRequested();
+    void reportSent(QString msg);
+    void reportSentErr(QString msg);
+
 
 private:
     static const QString endpointSendReport;
