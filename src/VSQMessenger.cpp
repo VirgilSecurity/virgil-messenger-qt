@@ -286,11 +286,11 @@ VSQMessenger::_connect(QString userWithEnv, QString deviceId, QString userId) {
     timer.start(kConnectionWaitMs);
     loop.exec();
 
-    m_xmppCarbonManager->setCarbonsEnabled(true);
-
     const bool connected = m_xmpp.isConnected();
     qDebug() << "<<<<<<<<<<< _connect: FINISH connected = " << connected << "  " << cur_val;
 
+    qDebug() << "Carbons " << (connected ? "enable" : "disable");
+    m_xmppCarbonManager->setCarbonsEnabled(connected);
     m_connectGuard.unlock();
     return connected;
 }
@@ -770,8 +770,10 @@ VSQMessenger::_reconnect() {
 /******************************************************************************/
 void
 VSQMessenger::onDisconnected() {
-    VS_LOG_DEBUG("onDisconnected");
     qDebug() << "onDisconnected  state:" << m_xmpp.state();
+
+    qDebug() << "Carbons disable";
+    m_xmppCarbonManager->setCarbonsEnabled(false);
 }
 
 /******************************************************************************/
@@ -861,7 +863,6 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
 VSQMessenger::sendMessage(bool createNew, QString messageId, QString to, QString message) {
-    m_xmppCarbonManager->setCarbonsEnabled(true);
     return QtConcurrent::run([=]() -> EnResult {
         static const size_t _encryptedMsgSzMax = 20 * 1024;
         uint8_t encryptedMessage[_encryptedMsgSzMax];
