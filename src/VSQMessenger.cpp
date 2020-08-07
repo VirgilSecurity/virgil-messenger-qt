@@ -760,7 +760,7 @@ VSQMessenger::checkState() {
 /******************************************************************************/
 void
 VSQMessenger::_reconnect() {
-    if (!m_user.isEmpty() && !m_userId.isEmpty()) {
+    if (!m_user.isEmpty() && !m_userId.isEmpty() && vs_messenger_virgil_is_signed_in()) {
         QtConcurrent::run([=]() {
             _connect(m_user, m_deviceId, m_userId);
         });
