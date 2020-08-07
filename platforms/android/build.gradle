@@ -5,6 +5,7 @@ buildscript {
     }
 
     dependencies {
+        classpath 'com.google.gms:google-services:4.3.3'
         classpath 'com.android.tools.build:gradle:3.6.0'
     }
 }
@@ -16,8 +17,37 @@ repositories {
 
 apply plugin: 'com.android.application'
 
+//
+//  Add Firebase
+//
+project.ext {
+  // Configure the Firebase C++ SDK location.
+  firebase_cpp_sdk_dir = "../../../" + System.getProperty('firebase_cpp_sdk.dir')
+  printf('Firebase C++ SDK directory %s', firebase_cpp_sdk_dir)
+  if (!(new File(firebase_cpp_sdk_dir)).exists()) {
+    firebase_cpp_sdk_dir = "../../virgil-messenger-qt/" +  System.getProperty('firebase_cpp_sdk.dir')
+    if (!(new File(firebase_cpp_sdk_dir)).exists()) {
+        throw new StopActionException(
+          sprintf('Firebase C++ SDK directory %s does not exist',
+              firebase_cpp_sdk_dir))
+    }
+  }
+}
+
+
+repositories {
+    flatDir {
+        dirs project.ext.firebase_cpp_sdk_dir + "/libs/android"
+    }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+    compile 'com.google.firebase:firebase-core:15.0.2'
+    compile 'com.google.firebase:firebase-auth:19.3.1'
+    compile 'com.google.firebase:firebase-messaging:20.1.7'
+    compile 'com.google.firebase.messaging.cpp:firebase_messaging_cpp@aar'
+    compile 'com.google.android.gms:play-services-base:17.2.1'
 }
 
 android {
@@ -66,3 +96,5 @@ android {
         targetSdkVersion = qtTargetSdkVersion
     }
 }
+
+apply plugin: 'com.google.gms.google-services'

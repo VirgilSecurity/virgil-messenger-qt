@@ -311,4 +311,5 @@ DISTFILES += \
     platforms/macos/virgil-messenger.plist.in \
     platforms/windows/Virgil.ico
 
-ANDROID_EXTRA_LIBS = $$PWD/ext/prebuilt/android.x86/debug/installed/usr/local/lib/libvs-messenger-internal.so $$PWD/ext/prebuilt/android.x86/debug/installed/usr/local/lib/libssl_1_1.so $$PWD/ext/prebuilt/android.x86/debug/installed/usr/local/lib/libcrypto_1_1.so
+ANDROID_EXTRA_LIBS = /Users/kutashenko/Work/virgil/messenger/virgil-messenger-qt/ext/prebuilt/android.x86/debug/installed/usr/local/lib/libvs-messenger-internal.so
+android: include(/opt/android/sdk/android_openssl/openssl.pri)
