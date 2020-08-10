@@ -103,7 +103,7 @@ public:
     int
     getMessageCount(const QString &user, const VSQSqlConversationModel::EnMessageStatus status);
 
-    QList<StMessage*>
+    QList<StMessage>
     getMessages(const QString &user, const EnMessageStatus status);
 
 signals:

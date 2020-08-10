@@ -113,7 +113,7 @@ VSQMessenger::VSQMessenger() {
     connect(this, SIGNAL(fireError(QString)), this, SLOT(disconnect()));
 
     // Connect XMPP signals
-    connect(&m_xmpp, SIGNAL(connected()), this, SLOT(onConnected()));
+    connect(&m_xmpp, SIGNAL(connected()), this, SLOT(onConnected()), Qt::QueuedConnection);
     connect(&m_xmpp, SIGNAL(disconnected()), this, SLOT(onDisconnected()));
     connect(&m_xmpp, SIGNAL(error(QXmppClient::Error)), this, SLOT(onError(QXmppClient::Error)));
     connect(&m_xmpp, SIGNAL(messageReceived(const QXmppMessage &)), this, SLOT(onMessageReceived(const QXmppMessage &)));
@@ -741,10 +741,14 @@ VSQMessenger::onConnected() {
 /******************************************************************************/
 void
 VSQMessenger::_sendFailedMessages() {
-   QList<VSQSqlConversationModel::StMessage*> messages = m_sqlConversations->getMessages(m_user,VSQSqlConversationModel::EnMessageStatus::MST_FAILED);
-   for(int i = 0; i < messages.length(); i++){
-       sendMessage(false, messages[i]->message_id, messages[i]->recipient, messages[i]->message);
-   }
+   auto messages = m_sqlConversations->getMessages(m_user,VSQSqlConversationModel::EnMessageStatus::MST_FAILED);
+   QtConcurrent::run([=]() {
+       for (int i = 0; i < messages.length(); i++) {
+           if (MRES_OK != _sendMessageInternal(false, messages[i].message_id, messages[i].recipient, messages[i].message)) {
+               break;
+           }
+       }
+   });
 }
 
 /******************************************************************************/
@@ -865,64 +869,71 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
 }
 
 /******************************************************************************/
+VSQMessenger::EnResult
+VSQMessenger::_sendMessageInternal(bool createNew, QString messageId, QString to, QString message) {
+    QMutexLocker _guard(&m_messageGuard);
+    static const size_t _encryptedMsgSzMax = 20 * 1024;
+    uint8_t encryptedMessage[_encryptedMsgSzMax];
+    size_t encryptedMessageSz = 0;
+
+    // Create JSON-formatted message to be sent
+    QJsonObject payloadObject;
+    payloadObject.insert("body", message);
+
+    QJsonObject mainObject;
+    mainObject.insert("type", "text");
+    mainObject.insert("payload", payloadObject);
+
+    QJsonDocument doc(mainObject);
+    QString internalJson = doc.toJson(QJsonDocument::Compact);
+
+    qDebug() << internalJson;
+
+    // Encrypt message
+    if (VS_CODE_OK != vs_messenger_virgil_encrypt_msg(
+                     to.toStdString().c_str(),
+                     internalJson.toStdString().c_str(),
+                     encryptedMessage,
+                     _encryptedMsgSzMax,
+                     &encryptedMessageSz)) {
+        VS_LOG_WARNING("Cannot encrypt message to be sent");
+        return MRES_ERR_ENCRYPTION;
+    }
+
+    // Send encrypted message
+    QString toJID = to + "@" + _xmppURL();
+    QString fromJID = currentUser() + "@" + _xmppURL();
+    QString encryptedStr = QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage));
+
+    QXmppMessage msg(fromJID, toJID, encryptedStr);
+    msg.setReceiptRequested(true);
+    msg.setId(messageId);
+
+    // Save message to DB in native thread
+    if(createNew){
+        QMetaObject::invokeMethod(m_sqlConversations, "createMessage",
+            Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message), Q_ARG(QString, msg.id()));
+    }
+
+    QMetaObject::invokeMethod(m_sqlChatModel, "updateLastMessage",
+        Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message));
+
+    if (m_xmpp.sendPacket(msg)) {
+        QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus", Qt::QueuedConnection, Q_ARG(QString, msg.id()),
+            Q_ARG(VSQSqlConversationModel::EnMessageStatus, VSQSqlConversationModel::EnMessageStatus::MST_SENT));
+    } else {
+        QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus", Qt::QueuedConnection, Q_ARG(QString, msg.id()),
+            Q_ARG(VSQSqlConversationModel::EnMessageStatus, VSQSqlConversationModel::EnMessageStatus::MST_FAILED));
+    }
+
+    return MRES_OK;
+}
+
+/******************************************************************************/
 QFuture<VSQMessenger::EnResult>
 VSQMessenger::sendMessage(bool createNew, QString messageId, QString to, QString message) {
     return QtConcurrent::run([=]() -> EnResult {
-        static const size_t _encryptedMsgSzMax = 20 * 1024;
-        uint8_t encryptedMessage[_encryptedMsgSzMax];
-        size_t encryptedMessageSz = 0;
-
-        // Create JSON-formatted message to be sent
-        QJsonObject payloadObject;
-        payloadObject.insert("body", message);
-
-        QJsonObject mainObject;
-        mainObject.insert("type", "text");
-        mainObject.insert("payload", payloadObject);
-
-        QJsonDocument doc(mainObject);
-        QString internalJson = doc.toJson(QJsonDocument::Compact);
-
-        qDebug() << internalJson;
-
-        // Encrypt message
-        if (VS_CODE_OK != vs_messenger_virgil_encrypt_msg(
-                         to.toStdString().c_str(),
-                         internalJson.toStdString().c_str(),
-                         encryptedMessage,
-                         _encryptedMsgSzMax,
-                         &encryptedMessageSz)) {
-            VS_LOG_WARNING("Cannot encrypt message to be sent");
-            return MRES_ERR_ENCRYPTION;
-        }
-
-        // Send encrypted message
-        QString toJID = to + "@" + _xmppURL();
-        QString fromJID = currentUser() + "@" + _xmppURL();
-        QString encryptedStr = QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage));
-
-        QXmppMessage msg(fromJID, toJID, encryptedStr);
-        msg.setReceiptRequested(true);
-        msg.setId(messageId);
-
-        // Save message to DB in native thread
-        if(createNew){
-            QMetaObject::invokeMethod(m_sqlConversations, "createMessage",
-                Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message), Q_ARG(QString, msg.id()));
-        }
-
-        QMetaObject::invokeMethod(m_sqlChatModel, "updateLastMessage",
-            Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message));
-
-        if (m_xmpp.sendPacket(msg)) {
-            QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus", Qt::QueuedConnection, Q_ARG(QString, msg.id()),
-                Q_ARG(VSQSqlConversationModel::EnMessageStatus, VSQSqlConversationModel::EnMessageStatus::MST_SENT));
-        } else {
-            QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus", Qt::QueuedConnection, Q_ARG(QString, msg.id()),
-                Q_ARG(VSQSqlConversationModel::EnMessageStatus, VSQSqlConversationModel::EnMessageStatus::MST_FAILED));
-        }
-
-        return MRES_OK;
+        return _sendMessageInternal(createNew, messageId, to, message);
     });
 }
 
