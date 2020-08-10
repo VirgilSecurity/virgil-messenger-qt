@@ -159,11 +159,11 @@ VSQMessenger::handleDiscoInfo(const QXmppDiscoveryIq &info)
 void
 VSQMessenger::onMessageDelivered(const QString& to, const QString& messageId) {
 
-    m_sqlConversations->setMessageStatus(messageId, VSQSqlConversationModel::EnMessageStatus::MST_RECEIVED);
+    m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_RECEIVED);
 
     // QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus",
     //                          Qt::QueuedConnection, Q_ARG(const QString &, messageId),
-    //                          Q_ARG(const VSQSqlConversationModel::EnMessageStatus, VSQSqlConversationModel::EnMessageStatus::MST_RECEIVED));
+    //                          Q_ARG(const StMessage::Status, StMessage::Status::MST_RECEIVED));
 
     qDebug() << "Message with id: '" << messageId << "' delivered to '" << to << "'";
 }
@@ -251,7 +251,7 @@ VSQMessenger::_connect(QString userWithEnv, QString deviceId, QString userId, bo
     logger->setMessageTypes(QXmppLogger::AnyMessage);
 
 #if USE_XMPP_LOGS
-    connect(logger, &QXmppLogger::message, [=](QXmppLogger::MessageType, const QString &text){        
+    connect(logger, &QXmppLogger::message, [=](QXmppLogger::MessageType, const QString &text){
         qDebug() << text;
     });
 
@@ -741,7 +741,7 @@ VSQMessenger::onConnected() {
 /******************************************************************************/
 void
 VSQMessenger::_sendFailedMessages() {
-   QList<VSQSqlConversationModel::StMessage*> messages = m_sqlConversations->getMessages(m_user,VSQSqlConversationModel::EnMessageStatus::MST_FAILED);
+   QList<StMessage*> messages = m_sqlConversations->getMessages(m_user,StMessage::Status::MST_FAILED);
    for(int i = 0; i < messages.length(); i++){
        sendMessage(false, messages[i]->message_id, messages[i]->recipient, messages[i]->message);
    }
@@ -842,7 +842,7 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
     if (sender == currentUser()) {
         QString recipient = message.to().split("@").first();
         m_sqlConversations->createMessage(recipient, decryptedString, message.id());
-        m_sqlConversations->setMessageStatus(message.id(), VSQSqlConversationModel::EnMessageStatus::MST_SENT);
+        m_sqlConversations->setMessageStatus(message.id(), StMessage::Status::MST_SENT);
         // ensure private chat with recipient exists
         m_sqlChatModel->createPrivateChat(recipient);
         emit fireNewMessage(sender, decryptedString);
@@ -916,10 +916,10 @@ VSQMessenger::sendMessage(bool createNew, QString messageId, QString to, QString
 
         if (m_xmpp.sendPacket(msg)) {
             QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus", Qt::QueuedConnection, Q_ARG(QString, msg.id()),
-                Q_ARG(VSQSqlConversationModel::EnMessageStatus, VSQSqlConversationModel::EnMessageStatus::MST_SENT));
+                Q_ARG(StMessage::Status, StMessage::Status::MST_SENT));
         } else {
             QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus", Qt::QueuedConnection, Q_ARG(QString, msg.id()),
-                Q_ARG(VSQSqlConversationModel::EnMessageStatus, VSQSqlConversationModel::EnMessageStatus::MST_FAILED));
+                Q_ARG(StMessage::Status, StMessage::Status::MST_FAILED));
         }
 
         return MRES_OK;
@@ -928,8 +928,28 @@ VSQMessenger::sendMessage(bool createNew, QString messageId, QString to, QString
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::sendMessage(QString to, QString message) {
-    return sendMessage(true, QUuid::createUuid().toString(QUuid::WithoutBraces).toLower(), to, message);
+VSQMessenger::sendMessage(const QString &recipient, const QString &text, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
+{
+    // FIXME(fpohtmeh): implement
+    return QtConcurrent::run([=]() -> EnResult {
+        return MRES_OK;
+    });
+    /*
+    const QString uuid = VSQUtils::createUuid();
+    QString messageText = text;
+    const auto attachment = m_attachmentBuilder.build(attachmentUrl.toUrl(), attachmentType);
+    const StMessage message {
+        uuid,
+        QDateTime::currentDateTime(),
+        messageText,
+        m_recipient,
+        Message::Author::User,
+        attachment,
+        Message::Status::Created
+    };
+
+    emit sendMessage(message);
+    */
 }
 
 /******************************************************************************/

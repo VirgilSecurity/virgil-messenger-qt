@@ -95,7 +95,7 @@ public:
 
     VSQSqlConversationModel &modelConversations();
     VSQSqlChatModel &getChatModel();
-    
+
     static QString decryptMessage(const QString &sender, const QString &message);
 
 
@@ -133,7 +133,7 @@ public slots:
     addContact(QString contact);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    sendMessage(QString to, QString message);
+    sendMessage(const QString &recipient, const QString &text, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     sendMessage(bool createNew, QString messageId, QString to, QString message);

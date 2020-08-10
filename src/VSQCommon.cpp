@@ -32,41 +32,33 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <VSQApplication.h>
-#include <iostream>
+#include "VSQCommon.h"
 
-#include <android/VSQAndroid.h>
+#include <QtQml>
 
-#if (VSQ_WEBDRIVER_DEBUG)
-#include "Test/Headers.h"
-#endif
+Q_LOGGING_CATEGORY(lcDev, "dev");
 
-int
-main(int argc, char *argv[]) {
+void registerCommonTypes()
+{
+    qRegisterMetaType<DataSize>("DataSize");
+    qRegisterMetaType<Enums::AttachmentType>();
+    qRegisterMetaType<Enums::MessageStatus>();
+    qRegisterMetaType<Enums::MessageAuthor>();
+    qRegisterMetaType<OptionalAttachment>();
+    qRegisterMetaType<StMessage>();
+    qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");
+}
 
-#if (VS_ANDROID)
-    VSQAndroid::prepare();
-#endif
+QString Attachment::filePath() const
+{
+    return local_url.toString();
+}
 
-#if (VSQ_WEBDRIVER_DEBUG)
-    wd_setup(argc, argv);
-#endif
-
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-
-#ifdef VS_MOBILE
-    QGuiApplication a(argc, argv);
-#else
-    QApplication a(argc, argv);
-#endif
-    a.setOrganizationName("VirgilSecurity");
-    a.setOrganizationDomain("virgil.net");
-
-    QString baseUrl;
-    if (2 == argc && argv[1] && argv[1][0]) {
-        baseUrl = QString::fromLocal8Bit(argv[1]);
-        qDebug() << "QML URL: " << baseUrl;
-    }
-
-    return VSQApplication().run(baseUrl);
+QString Attachment::fileName() const
+{
+    if (!local_url.isEmpty())
+        return local_url.fileName();
+    if (!remote_url.isEmpty())
+        return remote_url.fileName();
+    return QLatin1String();
 }

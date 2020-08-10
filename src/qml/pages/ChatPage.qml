@@ -30,7 +30,7 @@ Page {
             Rectangle {
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
-                anchors.right: parent.right                
+                anchors.right: parent.right
                 anchors.leftMargin: 20
                 anchors.rightMargin: 20
                 height: 1
@@ -112,9 +112,9 @@ Page {
     footer: ChatMessageInput {
         id: footerControl
         onMessageSending: {
-            var future = Messenger.sendMessage(ConversationsModel.recipient, message)
+            var future = Messenger.sendMessage(ConversationsModel.recipient, message, attachmentUrl, attachmentType)
             Future.onFinished(future, function(value) {
-              messageSent.play()
+                messageSent.play()
             })
         }
     }

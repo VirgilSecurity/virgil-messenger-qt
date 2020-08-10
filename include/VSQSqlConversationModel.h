@@ -37,6 +37,8 @@
 
 #include <QSqlTableModel>
 
+#include "VSQCommon.h"
+
 class VSQSqlConversationModel : public QSqlTableModel
 {
     Q_OBJECT
@@ -44,22 +46,6 @@ class VSQSqlConversationModel : public QSqlTableModel
 
 public:
     VSQSqlConversationModel(QObject *parent = nullptr);
-
-    enum EnMessageStatus
-    {
-        MST_CREATED,
-        MST_SENT,
-        MST_RECEIVED,
-        MST_READ,
-        MST_FAILED
-    };
-
-    struct StMessage
-    {
-        QString message_id;
-        QString message;
-        QString recipient;
-    };
 
     QString
     user() const;
@@ -98,13 +84,13 @@ public:
     setAsRead(const QString &author);
 
     Q_INVOKABLE void
-    setMessageStatus(const QString &messageId, const VSQSqlConversationModel::EnMessageStatus status);
+    setMessageStatus(const QString &messageId, const StMessage::Status status);
 
     int
-    getMessageCount(const QString &user, const VSQSqlConversationModel::EnMessageStatus status);
+    getMessageCount(const QString &user, const StMessage::Status status);
 
     QList<StMessage*>
-    getMessages(const QString &user, const EnMessageStatus status);
+    getMessages(const QString &user, const StMessage::Status status);
 
 signals:
     void

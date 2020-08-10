@@ -195,7 +195,7 @@ void VSQSqlChatModel::updateUnreadMessageCount(QString chatId) {
 
     QSqlQuery query1(selectQuery
                      .arg("Conversations_" + m_userId, chatId)
-                     .arg(VSQSqlConversationModel::MST_RECEIVED));
+                     .arg(static_cast<int>(StMessage::Status::MST_RECEIVED)));
     selectModel.setQuery(query1);
     int count = selectModel.record(0).value("count").toInt();
 

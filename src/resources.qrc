@@ -104,5 +104,6 @@
         <file>qml/components/AppStatus.qml</file>
         <file>qml/pages/BackupKeyPage.qml</file>
         <file>qml/components/Dialogs/SendReportAsk.qml</file>
+        <file>qml/components/SelectAttachmentsDialog.qml</file>
     </qresource>
 </RCC>

@@ -36,6 +36,7 @@
 #include <QtQml>
 
 #include <VSQApplication.h>
+#include <VSQCommon.h>
 #include <VSQClipboardProxy.h>
 #include <ui/VSQUiHelper.h>
 #include <virgil/iot/logger/logger.h>
@@ -58,6 +59,7 @@ VSQApplication::VSQApplication() {
 #if (MACOS)
     VSQMacos::instance().startUpdatesTimer();
 #endif
+    registerCommonTypes();
 }
 
 /******************************************************************************/
@@ -81,8 +83,6 @@ VSQApplication::run(const QString &basePath) {
     m_messenger.setLogging(&m_logging);
     m_logging.setkVersion(kVersion);
 
-
-    QQmlContext *context = m_engine.rootContext();
     if (basePath.isEmpty()) {
         m_engine.setBaseUrl(QUrl(QStringLiteral("qrc:/qml/")));
     } else {
@@ -90,6 +90,7 @@ VSQApplication::run(const QString &basePath) {
         m_engine.setBaseUrl(url);
     }
 
+    QQmlContext *context = m_engine.rootContext();
     context->setContextProperty("UiHelper", &uiHelper);
     context->setContextProperty("app", this);
     context->setContextProperty("clipboard", new VSQClipboardProxy(QGuiApplication::clipboard()));
