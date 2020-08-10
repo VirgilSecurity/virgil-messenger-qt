@@ -119,8 +119,9 @@ VSQNetworkAnalyzer::onAnalyzeNetwork() {
     bool stateChanged = false;
 
     VSQNetworkInterfaceData currenNetworkInterfaceData;
-    QList<QNetworkConfiguration> networkConfigurations = m_nwManager.allConfigurations();
 
+#if !VS_ANDROID
+    QList<QNetworkConfiguration> networkConfigurations = m_nwManager.allConfigurations();
     for (const QNetworkConfiguration &configuration : networkConfigurations) {
 
         if (checkIsNeedStop()) {
@@ -150,15 +151,6 @@ VSQNetworkAnalyzer::onAnalyzeNetwork() {
                 printNetworkInterface(networkInterface);
 
                 QString ipV4Address;
-#if !VS_ANDROID
-                QList<QNetworkAddressEntry> networkAddressEntries = networkInterface.addressEntries();
-                for (const QNetworkAddressEntry &entry : networkAddressEntries) {
-                    if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol) {
-                        ipV4Address = entry.ip().toString();
-                        break;
-                    }
-                }
-#else
                 auto networkAddresses = networkInterface.allAddresses();
                 for (const auto &entry : networkAddresses) {
                     if (entry.isLoopback() || entry.isBroadcast() || entry.isLinkLocal() ||
@@ -168,7 +160,6 @@ VSQNetworkAnalyzer::onAnalyzeNetwork() {
                     ipV4Address = entry.toString();
                     break;
                 }
-#endif
 
 #if DEBUG_NETWORK
                 qDebug().noquote().nospace() << "NetworkAnalyzer: QNetworkAddressEntry, Ip: " << ipV4Address;
@@ -183,6 +174,26 @@ VSQNetworkAnalyzer::onAnalyzeNetwork() {
             currentState = true;
         }
     }
+
+#else
+    auto networkAddresses = QNetworkInterface::allAddresses();
+    currentState = true;
+    int i = 0;
+    for (const auto &entry : networkAddresses) {
+        if (entry.isLoopback() || entry.isBroadcast() || entry.isLinkLocal() ||
+            entry.protocol() != QAbstractSocket::IPv4Protocol) {
+            continue;
+        }
+        QString ipV4Address = entry.toString();
+#if DEBUG_NETWORK
+        qDebug().noquote().nospace() << "NetworkAnalyzer: QNetworkAddressEntry, Ip: " << ipV4Address;
+#endif
+        if (!ipV4Address.isEmpty()) {
+            currenNetworkInterfaceData.insert(i++, ipV4Address);
+        }
+    }
+
+#endif
 
     if (currenNetworkInterfaceData.isEmpty()) {
         qDebug().noquote().nospace() << "NetworkAnalyzer: Network is not ready";
