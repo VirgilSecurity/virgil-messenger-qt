@@ -88,6 +88,7 @@ HEADERS += \
         include/VSQClipboardProxy.h \
         include/VSQLogging.h \
         include/VSQMessenger.h \
+        include/VSQSettings.h \
         include/VSQSqlChatModel.h \
         include/VSQSqlConversationModel.h \
         include/VSQNetworkAnalyzer.h \
@@ -103,6 +104,7 @@ SOURCES += \
         src/VSQClipboardProxy.cpp \
         src/VSQMessenger.cpp \
         src/VSQLogging.cpp \
+        src/VSQSettings.cpp \
         src/VSQSqlChatModel.cpp \
         src/VSQSqlConversationModel.cpp \
         src/VSQNetworkAnalyzer.cpp \
@@ -159,9 +161,9 @@ isEmpty(WEBDRIVER) {
     debug:QTWEBDRIVER_LOCATION=$$PWD/ext/prebuilt/$${OS_NAME}/debug/installed/usr/local/include/qtwebdriver
     HEADERS += $$QTWEBDRIVER_LOCATION/src/Test/Headers.h
     INCLUDEPATH +=  $$QTWEBDRIVER_LOCATION $$QTWEBDRIVER_LOCATION/src
-    linux:!android: { 
+    linux:!android: {
         LIBS += -ldl -Wl,--start-group -lchromium_base -lWebDriver_core -lWebDriver_extension_qt_base -lWebDriver_extension_qt_quick -Wl,--end-group
-    }    
+    }
     macx: {
         LIBS += -lchromium_base -lWebDriver_core -lWebDriver_extension_qt_base -lWebDriver_extension_qt_quick
         LIBS += -framework Foundation

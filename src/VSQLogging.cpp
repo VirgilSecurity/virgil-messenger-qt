@@ -43,10 +43,23 @@
 // Private variables
 const QString VSQLogging::endpointSendReport = "/send-logs";
 
+VSQLogging *VSQLogging::m_instance = nullptr;
+
 // Public methods
 //***********************************************************************************************************
+VSQLogging::VSQLogging() : QObject(nullptr)
+{
+    if (m_instance) {
+        qFatal("Instance of logging already exists!");
+    }
+    else {
+        m_instance = this;
+    }
+}
+
 VSQLogging::~VSQLogging() {
     resetRunFlag();
+    m_instance = nullptr;
 }
 //***********************************************************************************************************
 void VSQLogging::setVirgilUrl(QString VirgilUrl) {
@@ -166,9 +179,12 @@ void VSQLogging::endpointReply(){
 
 // Functions
 //***********************************************************************************************************
-void logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+void VSQLogging::logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     QByteArray localMsg = msg.toLocal8Bit();
+#ifdef VS_DEVMODE
+    emit VSQLogging::m_instance->newMessage(msg);
+#endif
     switch (type) {
     case QtDebugMsg:
         vs_logger_message(VS_LOG_MAKE_LEVEL(VS_LOGLEV_DEBUG), context.file, context.line,localMsg.constData());

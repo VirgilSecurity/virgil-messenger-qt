@@ -17,8 +17,12 @@ Control {
     }
 
     RowLayout {
-        anchors.fill: parent
+        anchors {
+            fill: parent
+            bottomMargin: logControl.visible ? logControl.height : 0
+        }
         spacing: 0
+        clip: logControl.visible
 
         ServersPanel {
             id: serversPanel
@@ -55,8 +59,27 @@ Control {
         }
     }
 
-    Component.onCompleted: {        
+    ScrollView {
+        id: logControl
+        anchors {
+            topMargin: 0.75 * mainView.height
+            fill: parent
+        }
+        visible: settings.devMode
+
+        TextArea {
+            id: logTextControl
+            width: mainView.width
+            wrapMode: Text.WordWrap
+            readOnly: true
+            font.pointSize: 9
+        }
+    }
+
+    Component.onCompleted: {
         showSplashScreen()
+        if (logControl.visible)
+            Logging.newMessage.connect(logTextControl.append)
     }
 
     function signIn(user) {

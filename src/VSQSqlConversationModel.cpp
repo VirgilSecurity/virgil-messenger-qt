@@ -211,7 +211,7 @@ VSQSqlConversationModel::receiveMessage(const QString messageId, const QString a
     newRecord.setValue("author", author);
     newRecord.setValue("recipient", user());
     newRecord.setValue("timestamp", timestamp);
-    newRecord.setValue("message", message);    
+    newRecord.setValue("message", message);
     newRecord.setValue("status", MST_RECEIVED);
     newRecord.setValue("message_id", messageId);
 
