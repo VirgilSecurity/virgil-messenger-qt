@@ -40,6 +40,7 @@
 #include <VSQMessenger.h>
 #include <VSQPushNotifications.h>
 #include <VSQSqlConversationModel.h>
+#include <VSQUtils.h>
 
 #include <android/VSQAndroid.h>
 #include <android/VSQAndroid.h>
@@ -85,7 +86,10 @@ const int VSQMessenger::kConnectionWaitMs = 10000;
 const int VSQMessenger::kKeepAliveTimeSec = 10;
 
 /******************************************************************************/
-VSQMessenger::VSQMessenger() {
+VSQMessenger::VSQMessenger()
+    : m_settings(this)
+    , m_attachmentBuilder(&m_settings)
+{
     // Register QML typess
     qmlRegisterType<VSQMessenger>("MesResult", 1, 0, "Result");
     QuickFuture::registerType<VSQMessenger::EnResult>([](VSQMessenger::EnResult res) -> QVariant {
@@ -743,7 +747,10 @@ void
 VSQMessenger::_sendFailedMessages() {
    QList<StMessage*> messages = m_sqlConversations->getMessages(m_user,StMessage::Status::MST_FAILED);
    for(int i = 0; i < messages.length(); i++){
-       sendMessage(false, messages[i]->message_id, messages[i]->recipient, messages[i]->message);
+       const auto &msg = messages[i];
+       sendMessage(false, msg->message_id, msg->recipient, msg->message,
+                   msg->attachment ? QVariant(msg->attachment->local_url) : QVariant(),
+                   msg->attachment ? msg->attachment->type : Enums::AttachmentType::File);
    }
 }
 
@@ -866,7 +873,8 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::sendMessage(bool createNew, QString messageId, QString to, QString message) {
+VSQMessenger::sendMessage(bool createNew, QString messageId, const QString &to, const QString &message,
+                          const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType) {
     return QtConcurrent::run([=]() -> EnResult {
         static const size_t _encryptedMsgSzMax = 20 * 1024;
         uint8_t encryptedMessage[_encryptedMsgSzMax];
@@ -928,28 +936,9 @@ VSQMessenger::sendMessage(bool createNew, QString messageId, QString to, QString
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::sendMessage(const QString &recipient, const QString &text, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
+VSQMessenger::sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
 {
-    // FIXME(fpohtmeh): implement
-    return QtConcurrent::run([=]() -> EnResult {
-        return MRES_OK;
-    });
-    /*
-    const QString uuid = VSQUtils::createUuid();
-    QString messageText = text;
-    const auto attachment = m_attachmentBuilder.build(attachmentUrl.toUrl(), attachmentType);
-    const StMessage message {
-        uuid,
-        QDateTime::currentDateTime(),
-        messageText,
-        m_recipient,
-        Message::Author::User,
-        attachment,
-        Message::Status::Created
-    };
-
-    emit sendMessage(message);
-    */
+    return sendMessage(true, VSQUtils::createUuid(), to, message, attachmentUrl, attachmentType);
 }
 
 /******************************************************************************/

@@ -54,6 +54,10 @@ VSQSqlConversationModel::_createTable() {
         "'message' TEXT NOT NULL,"
         "'status' int NOT NULL,"
         "'message_id' TEXT NOT NULL,"
+//        "attachment_id TEXT,"
+//        "attachment_type INTEGER,"
+//        "attachment_local_url TEXT,"
+//        "attachment_size INTEGER,"
         "FOREIGN KEY('author') REFERENCES %2 ( name ),"
         "FOREIGN KEY('recipient') REFERENCES %3 ( name )"
         ")").arg(_tableName())

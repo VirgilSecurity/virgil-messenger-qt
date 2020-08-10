@@ -85,13 +85,16 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
 
 HEADERS += \
         include/VSQApplication.h \
+        include/VSQAttachmentBuilder.h \
         include/VSQClipboardProxy.h \
         include/VSQCommon.h \
         include/VSQLogging.h \
         include/VSQMessenger.h \
+        include/VSQSettings.h \
         include/VSQSqlChatModel.h \
         include/VSQSqlConversationModel.h \
         include/VSQNetworkAnalyzer.h \
+        include/VSQUtils.h \
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
         include/ui/VSQUiHelper.h \
@@ -102,13 +105,16 @@ HEADERS += \
 #
 
 SOURCES += \
+        src/VSQAttachmentBuilder.cpp \
         src/VSQClipboardProxy.cpp \
         src/VSQCommon.cpp \
         src/VSQMessenger.cpp \
         src/VSQLogging.cpp \
         src/VSQSqlChatModel.cpp \
         src/VSQSqlConversationModel.cpp \
+        src/VSQSettings.cpp \
         src/VSQNetworkAnalyzer.cpp \
+        src/VSQUtils.cpp \
         src/android/VSQAndroid.cpp \
         src/main.cpp \
         src/VSQApplication.cpp \

@@ -53,6 +53,8 @@
 #include "VSQSqlChatModel.h"
 #include "VSQLogging.h"
 #include <VSQNetworkAnalyzer.h>
+#include <VSQAttachmentBuilder.h>
+#include <VSQSettings.h>
 
 using namespace VirgilIoTKit;
 
@@ -133,10 +135,11 @@ public slots:
     addContact(QString contact);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    sendMessage(const QString &recipient, const QString &text, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
+    sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    sendMessage(bool createNew, QString messageId, QString to, QString message);
+    sendMessage(bool createNew, QString messageId, const QString &to, const QString &text,
+                const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
 
     Q_INVOKABLE void
     setStatus(VSQMessenger::EnStatus status);
@@ -198,6 +201,8 @@ private:
     VSQSqlChatModel *m_sqlChatModel;
     VSQLogging *m_logging;
     VSQNetworkAnalyzer m_networkAnalyzer;
+    VSQSettings m_settings;
+    VSQAttachmentBuilder m_attachmentBuilder;
 
     QMutex m_connectGuard;
     QString m_user;

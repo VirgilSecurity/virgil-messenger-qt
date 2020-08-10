@@ -1,15 +1,15 @@
 import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
+import com.virgilsecurity.messenger 1.0
 
 import "../base"
 import "../theme"
 
-
 Control {
     id: chatMessage
     height: row.implicitHeight
-    width: getControlWidth()
+    width: loader.item.width
 
     property string text
     property alias author: avatar.nickname
@@ -19,6 +19,156 @@ Control {
     property var variant
     property var timeStamp
     property string status: ""
+
+    property string attachmentId
+    property string attachmentSize
+    property string attachmentDisplaySize
+    property var attachmentType
+    property string attachmentLocalUrl
+    property string attachmentLocalPreview
+    property int attachmentUploaded
+    property bool attachmentLoadingFailed
+
+    readonly property bool isUser: author === Messenger.currentUser
+
+    QtObject {
+        id: d
+        readonly property bool hasAttachment: attachmentId.length > 0
+        readonly property color background: isUser ? "#59717D" : Theme.mainBackgroundColor
+        readonly property double maxWidth: chatMessage.parent.width - 40
+        readonly property bool isPicture: attachmentType == Enums.AttachmentType.Picture
+        readonly property double defaultRadius: 4
+    }
+
+    Component {
+        id: textEditComponent
+
+        TextEdit {
+            id: textEdit
+            topPadding: 12
+            bottomPadding: 12
+            leftPadding: 15
+            rightPadding: 15
+            textFormat: Text.RichText
+            width: Math.min(implicitWidth,  d.maxWidth)
+            color: Theme.primaryTextColor
+            font.pointSize: UiHelper.fixFontSz(15)
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            readOnly: true
+            text: chatMessage.text
+            visible: !d.hasAttachment
+
+            property var contextMenu: ContextMenu {
+                compact: true
+
+                Action {
+                    text: qsTr("Copy")
+                    onTriggered: clipboard.setText(textEdit.getText(0, textEdit.length))
+                }
+            }
+        }
+    }
+
+    Component {
+        id: attachmentComponent
+
+        Item {
+            height: row.height + topPadding + bottomPadding
+            width: row.width + leftPadding + rightPadding
+
+            readonly property double topPadding: d.isPicture ? d.defaultRadius : 6
+            readonly property double bottomPadding: d.isPicture ? d.defaultRadius : 6
+            readonly property double leftPadding: d.isPicture ? d.defaultRadius : 4
+            readonly property double rightPadding: d.isPicture ? d.defaultRadius : 10
+
+            RowLayout {
+                id: row
+                spacing: 4
+                x: leftPadding
+                y: topPadding
+
+                Rectangle {
+                    width: image.width
+                    height: image.height
+                    color: d.isPicture ? "white" : "transparent"
+
+                    Image {
+                        id: image
+                        width: sourceSize.width
+                        height: sourceSize.height
+                        fillMode: Image.PreserveAspectFit
+                        source: d.isPicture ? attachmentLocalPreview : "../resources/icons/Logo.png"
+                    }
+                }
+
+                ColumnLayout {
+                    id: column
+                    spacing: 4
+                    visible: !d.isPicture
+                    readonly property double maxWidth: d.maxWidth - row.spacing - image.width - leftPadding - rightPadding
+
+                    Label {
+                        text: chatMessage.text
+                        color: "white"
+                        font.pixelSize: UiHelper.fixFontSz(16)
+                        Layout.maximumWidth: Math.min(implicitWidth, column.maxWidth)
+                        elide: "ElideMiddle"
+                    }
+
+                    Label {
+                        text: attachmentDisplaySize
+                        color: "white"
+                        font.pixelSize: UiHelper.fixFontSz(10)
+                        Layout.maximumWidth: Math.min(implicitWidth, column.maxWidth)
+                        elide: "ElideMiddle"
+                    }
+                }
+            }
+
+            ProgressBar {
+                id: progressBar
+                anchors.verticalCenter: d.isPicture ? undefined : parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: d.isPicture ? parent.bottom : undefined
+                anchors.bottomMargin: d.isPicture ? 15 : 0
+
+                padding: 2
+                width: 0.95 * row.width
+                visible: attachmentUploaded < attachmentSize
+                from: 0
+                to: attachmentSize
+                value: attachmentUploaded
+
+                background: Rectangle {
+                    implicitWidth: progressBar.width
+                    implicitHeight: 6
+                    color: "#e6e6e6"
+                    radius: 3
+                }
+
+                contentItem: Item {
+                    implicitWidth: progressBar.width
+                    implicitHeight: 4
+
+                    Rectangle {
+                        width: progressBar.visualPosition * parent.width
+                        height: parent.height
+                        radius: 2
+                        color: "#17a81a"
+                    }
+                }
+            }
+
+            property var contextMenu: ContextMenu {
+                compact: true
+
+                Action {
+                    text: qsTr("Save as...")
+                    onTriggered: console.log("Feature is not implemented")
+                }
+            }
+        }
+    }
 
     Row {
         id: row
@@ -35,6 +185,7 @@ Control {
         Column {
             spacing: 4
 
+            // Nickname + timestamp
             RowLayout {
                 visible: firstMessageInARow
                 spacing: 6
@@ -55,19 +206,20 @@ Control {
                 }
             }
 
+            // Message or attachment
             Rectangle {
                 width: chatMessage.width
-                height: textEdit.height
-
+                height: loader.item.height
                 color: "transparent"
 
                 TapHandler {
                     acceptedButtons: Qt.RightButton
+                    property var contextMenu: loader.item.contextMenu
+
                     onLongPressed: {
                         if (Platform.isMobile) {
                             contextMenu.x = point.position.x
                             contextMenu.y = point.position.y - 40
-
                             contextMenu.open()
                         }
                     }
@@ -75,7 +227,6 @@ Control {
                         if (Platform.isMobile) {
                             return
                         }
-
                         contextMenu.x = eventPoint.position.x
                         contextMenu.y = eventPoint.position.y
                         contextMenu.open()
@@ -85,17 +236,17 @@ Control {
 
                 Rectangle {
                     width: chatMessage.width
-                    height: textEdit.height
-                    color: chatMessage.variant === "dark" ? Theme.mainBackgroundColor : "#59717D"
-                    radius: 20
+                    height: loader.item.height
+                    color: d.background
+                    radius: d.isPicture ? 4 : 20
                 }
 
                 Rectangle {
                     anchors.top: parent.top
                     height: 22
                     width: 22
-                    radius: 4
-                    color: chatMessage.variant === "dark" ? Theme.mainBackgroundColor : "#59717D"
+                    radius: d.defaultRadius
+                    color: d.background
                 }
 
                 Rectangle {
@@ -103,72 +254,29 @@ Control {
                     anchors.bottom: parent.bottom
                     height: 22
                     width: 22
-                    radius: 4
-                    color: chatMessage.variant === "dark" ? Theme.mainBackgroundColor : "#59717D"
+                    radius: d.defaultRadius
+                    color: d.background
                 }
 
-                TextEdit {
-                    id: textEdit
-                    topPadding: 12
-                    leftPadding: 15
-                    rightPadding: 15
-                    bottomPadding: 12
-                    enabled: false
-                    textFormat: Text.RichText
-                    width: chatMessage.width
-                    color: Theme.primaryTextColor
-                    font.pointSize: UiHelper.fixFontSz(15)
-                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                    text: chatMessage.text.split("\n").join("<br />")
-                    // text: isValidURL(message) ? ("<a href='"+message+"'>"+message+"</a>") : message
-                    onLinkActivated:{
-                        if (isValidURL(message)){
-                           Qt.openUrlExternally(message)
-                        }
-                    }
+                Loader {
+                    id: loader
+                    sourceComponent: d.hasAttachment ? attachmentComponent : textEditComponent
+                }
 
-                    function isValidURL(message) {
-                       var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
-                       return regexp.test(message);
-                    }
-
-                    Menu {
-                        id: contextMenu
-                        MenuItem {
-                            text: qsTr("&Copy")
-                            onTriggered: {
-                                clipboard.setText(textEdit.getText(0, textEdit.length))
-                            }
-                        }
-                    }
+                Rectangle {
+                    color: "transparent"
+                    visible: d.hasAttachment
                 }
             }
 
+            // Status label
             Label {
                 id: statusLabel
                 height: 12
-                text: getStatusById(status)
-                color: status === "4" ? "red" : Theme.labelColor
+                text: isUser ? "" : chatMessage.status
+                color: chatMessage.failed ? "red" : Theme.labelColor
                 font.pixelSize: UiHelper.fixFontSz(11)
             }
         }
-    }
-
-    function getStatusById(statusId) {
-        switch (statusId) {
-            case "0": return "sending"
-            case "1": return "sent"
-            case "2": return "delivered"
-            case "4": return "failed"
-            default: return ""
-        }
-    }
-
-    function getControlWidth() {
-        if ((textEdit.implicitWidth + 40) > parent.width) {
-            return parent.width - 40
-        }
-
-        return textEdit.implicitWidth
     }
 }
