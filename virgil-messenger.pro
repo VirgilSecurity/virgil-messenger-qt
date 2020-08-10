@@ -273,10 +273,10 @@ android: {
         $$LIBS_DIR_PREFIX/android.arm64-v8a/$$LIBS_DIR_SUFFIX/libvs-messenger-internal.so \
         $$PWD/platforms/android/lib/x86/libcrypto_1_1.so \
         $$PWD/platforms/android/lib/x86/libssl_1_1.so \
-        $$PWD/platforms/android/lib/armeabi-v7a/libcrypto_1_1.so \
-        $$PWD/platforms/android/lib/armeabi-v7a/libssl_1_1.so \
-        $$PWD/platforms/android/lib/arm64-v8a/libcrypto_1_1.so \
-        $$PWD/platforms/android/lib/arm64-v8a/libssl_1_1.so
+        $$PWD/platforms/android/lib/arm/libcrypto_1_1.so \
+        $$PWD/platforms/android/lib/arm/libssl_1_1.so \
+        $$PWD/platforms/android/lib/arm64/libcrypto_1_1.so \
+        $$PWD/platforms/android/lib/arm64/libssl_1_1.so
 
 
 #
