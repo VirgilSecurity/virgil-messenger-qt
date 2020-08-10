@@ -79,6 +79,8 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
     DEFINES += VS_IOS=1
 }
 
+debug: DEFINES += VS_DEVMODE=1
+
 #
 #   Headers
 #
