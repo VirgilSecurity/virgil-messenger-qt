@@ -216,8 +216,10 @@ VSQMessenger::_xmppPass() {
 /******************************************************************************/
 Q_DECLARE_METATYPE(QXmppConfiguration)
 bool
-VSQMessenger::_connect(QString userWithEnv, QString deviceId, QString userId) {
-    if (!m_connectGuard.tryLock()) {
+VSQMessenger::_connect(QString userWithEnv, QString deviceId, QString userId, bool forced) {
+    if (forced) {
+        m_connectGuard.lock();
+    } else if (!m_connectGuard.tryLock()) {
         return false;
     }
 
@@ -404,7 +406,7 @@ VSQMessenger::signInWithBackupKey(QString username, QString password) {
         // Save credentials
         _saveCredentials(username, m_deviceId, creds);
 
-        return _connect(m_user, m_deviceId, m_userId) ? MRES_OK : MRES_ERR_SIGNIN;;
+        return _connect(m_user, m_deviceId, m_userId, true) ? MRES_OK : MRES_ERR_SIGNIN;;
     });
 }
 
@@ -421,12 +423,14 @@ VSQMessenger::signIn(QString user) {
         // Load User Credentials
         if (!_loadCredentials(m_userId, m_deviceId, creds)) {
             emit fireError(tr("Cannot load user credentials"));
+            qDebug() << "Cannot load user credentials";
             return MRES_ERR_NO_CRED;
         }
 
         // Sign In user, using Virgil Service
         if (VS_CODE_OK != vs_messenger_virgil_sign_in(&creds)) {
             emit fireError(tr("Cannot Sign In user"));
+            qDebug() << "Cannot Sign In user";
             return MRES_ERR_SIGNIN;
         }
 
@@ -434,7 +438,7 @@ VSQMessenger::signIn(QString user) {
         m_logging->checkAppCrash();
 
         // Connect over XMPP
-        return _connect(m_user, m_deviceId, m_userId) ? MRES_OK : MRES_ERR_SIGNIN;
+        return _connect(m_user, m_deviceId, m_userId, true) ? MRES_OK : MRES_ERR_SIGNIN;
     });
 }
 
@@ -465,7 +469,7 @@ VSQMessenger::signUp(QString user) {
         _saveCredentials(m_userId, m_deviceId, creds);
 
         // Connect over XMPP
-        return _connect(m_user, m_deviceId, m_userId) ? MRES_OK : MRES_ERR_SIGNUP;
+        return _connect(m_user, m_deviceId, m_userId, true) ? MRES_OK : MRES_ERR_SIGNUP;
     });
 }
 

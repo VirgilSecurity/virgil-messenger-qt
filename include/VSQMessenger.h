@@ -228,7 +228,7 @@ private:
     _connectToDatabase();
 
     bool
-    _connect(QString userWithEnv, QString deviceId, QString userId);
+    _connect(QString userWithEnv, QString deviceId, QString userId, bool forced = false);
 
     QString
     _xmppPass();
