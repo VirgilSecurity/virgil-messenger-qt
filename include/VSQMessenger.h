@@ -200,6 +200,7 @@ private:
     VSQNetworkAnalyzer m_networkAnalyzer;
 
     QMutex m_connectGuard;
+    QMutex m_messageGuard;
     QString m_user;
     QString m_userId;
     QString m_deviceId;
@@ -264,6 +265,9 @@ private:
     _caBundleFile();
 
     void _sendFailedMessages();
+
+    VSQMessenger::EnResult
+    _sendMessageInternal(bool createNew, QString messageId, QString to, QString message);
 };
 
 #endif // VIRGIL_IOTKIT_QT_MESSENGER_H
