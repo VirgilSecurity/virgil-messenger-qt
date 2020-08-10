@@ -245,7 +245,6 @@ android: {
     DEFINES += VS_ANDROID=1 VS_PUSHNOTIFICATIONS=1
     ANDROID_VERSION_CODE = $$AndroidVersionCode($$VERSION)
     ANDROID_VERSION_NAME = $$VERSION
-    $$(ANDROID_SDK_ROOT)/android_openssl/openssl.pri
     include($$(ANDROID_SDK_ROOT)/android_openssl/openssl.pri)
 
     INCLUDEPATH +=  $$PWD/ext/prebuilt/firebase_cpp_sdk/include
@@ -261,10 +260,8 @@ android: {
     release:LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
     debug:LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
     FIREBASE_LIBS_DIR = $$PWD/ext/prebuilt/firebase_cpp_sdk/libs/android/$$ANDROID_TARGET_ARCH/c++
-    ANDROID_EXTRA_LIBS = \
+    ANDROID_EXTRA_LIBS += \
         $$LIBS_DIR/libvs-messenger-internal.so
-#        $$LIBS_DIR/libcrypto_1_1.so \
-#        $$LIBS_DIR/libssl_1_1.so
 
     LIBS += $${FIREBASE_LIBS_DIR}/libfirebase_messaging.a \
         $${FIREBASE_LIBS_DIR}/libfirebase_app.a \

@@ -150,19 +150,29 @@ VSQNetworkAnalyzer::onAnalyzeNetwork() {
                 printNetworkInterface(networkInterface);
 
                 QString ipV4Address;
-
+#if !VS_ANDROID
                 QList<QNetworkAddressEntry> networkAddressEntries = networkInterface.addressEntries();
-
                 for (const QNetworkAddressEntry &entry : networkAddressEntries) {
                     if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol) {
                         ipV4Address = entry.ip().toString();
-#if DEBUG_NETWORK
-                        qDebug().noquote().nospace()
-                                << "NetworkAnalyzer: QNetworkAddressEntry, Ip: " << entry.ip().toString();
-#endif
+                        break;
                     }
                 }
+#else
+                auto networkAddresses = networkInterface.allAddresses();
+                for (const auto &entry : networkAddresses) {
+                    if (entry.isLoopback() || entry.isBroadcast() || entry.isLinkLocal() ||
+                        entry.protocol() != QAbstractSocket::IPv4Protocol) {
+                        continue;
+                    }
+                    ipV4Address = entry.toString();
+                    break;
+                }
+#endif
 
+#if DEBUG_NETWORK
+                qDebug().noquote().nospace() << "NetworkAnalyzer: QNetworkAddressEntry, Ip: " << ipV4Address;
+#endif
                 if (!ipV4Address.isEmpty()) {
                     currenNetworkInterfaceData.insert(networkInterface.index(), ipV4Address);
                 }
@@ -193,7 +203,7 @@ VSQNetworkAnalyzer::onAnalyzeNetwork() {
         qDebug().noquote().nospace() << "NetworkAnalyzer: Online status: " << m_connectedState;
     }
 
-#if 1 //DEBUG_NETWORK
+#if 1 // DEBUG_NETWORK
     qDebug() << "currenNetworkInterfaceData : " << currenNetworkInterfaceData;
     qDebug() << "m_networkInterfaceData : " << m_networkInterfaceData;
 #endif
