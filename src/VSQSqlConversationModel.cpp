@@ -321,12 +321,12 @@ VSQSqlConversationModel::getLastMessage(const QString &user) const {
 }
 
 /******************************************************************************/
-QList<VSQSqlConversationModel::StMessage*>
+QList<VSQSqlConversationModel::StMessage>
 VSQSqlConversationModel::getMessages(const QString &user, const EnMessageStatus status) {
     QSqlQueryModel model;
     QString query;
 
-    QList<VSQSqlConversationModel::StMessage*> messages;
+    QList<VSQSqlConversationModel::StMessage> messages;
 
     query = QString("SELECT message, recipient, message_id FROM %1 WHERE status = %2 AND author = \"%3\"").arg(_tableName()).arg(status).arg(user);
 
@@ -338,10 +338,10 @@ VSQSqlConversationModel::getMessages(const QString &user, const EnMessageStatus 
     }
 
     for (int i = 0; i < c; i++){
-        VSQSqlConversationModel::StMessage *message = new VSQSqlConversationModel::StMessage();
-        message->message = model.record(i).value("message").toString();
-        message->recipient = model.record(i).value("recipient").toString();
-        message->message_id = model.record(i).value("message_id").toString();
+        VSQSqlConversationModel::StMessage message;
+        message.message = model.record(i).value("message").toString();
+        message.recipient = model.record(i).value("recipient").toString();
+        message.message_id = model.record(i).value("message_id").toString();
         messages.append(message);
     }
 
