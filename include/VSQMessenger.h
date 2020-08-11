@@ -55,8 +55,11 @@
 #include <VSQNetworkAnalyzer.h>
 #include <VSQAttachmentBuilder.h>
 #include <VSQSettings.h>
+#include <VSQUploader.h>
 
 using namespace VirgilIoTKit;
+
+class QJsonDocument;
 
 class VSQMessenger : public QObject {
 
@@ -90,7 +93,7 @@ public:
     Q_PROPERTY(QString currentUser READ currentUser NOTIFY fireCurrentUserChanged)
 
     VSQMessenger();
-    virtual ~VSQMessenger() = default;
+    virtual ~VSQMessenger();
 
     Q_INVOKABLE QString currentUser() const;
     Q_INVOKABLE QString currentRecipient() const;
@@ -98,9 +101,7 @@ public:
     VSQSqlConversationModel &modelConversations();
     VSQSqlChatModel &getChatModel();
 
-    static QString decryptMessage(const QString &sender, const QString &message);
-
-
+    Optional<StMessage> decryptMessage(const QString &sender, const QString &message);
 
 public slots:
 
@@ -203,6 +204,8 @@ private:
     VSQNetworkAnalyzer m_networkAnalyzer;
     VSQSettings m_settings;
     VSQAttachmentBuilder m_attachmentBuilder;
+    VSQUploader *m_uploader;
+    QThread *m_transferThread;
 
     QMutex m_connectGuard;
     QString m_user;
@@ -269,6 +272,11 @@ private:
     _caBundleFile();
 
     void _sendFailedMessages();
+
+    QString createJson(const QString &messageId, const QString &message, const OptionalAttachment &attachment);
+    StMessage parseJson(const QJsonDocument &json);
+
+    EnResult sendXmppMessage(const QXmppMessage &msg);
 };
 
 #endif // VIRGIL_IOTKIT_QT_MESSENGER_H

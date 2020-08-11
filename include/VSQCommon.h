@@ -75,6 +75,15 @@ namespace Enums {
     };
     Q_ENUM_NS(AttachmentType)
 
+    enum class AttachmentStatus
+    {
+        Created,
+        Loading,
+        LoadingFailed,
+        Loaded
+    };
+    Q_ENUM_NS(AttachmentStatus)
+
     enum class MessageAuthor
     {
         // User is message author
@@ -103,19 +112,21 @@ namespace Enums {
 struct Attachment
 {
     using Type = Enums::AttachmentType;
+    using Status = Enums::AttachmentStatus;
 
     QString id;
     Type type = Type::File;
     QUrl remote_url;
     QUrl local_url;
     QUrl local_preview;
-    DataSize size = 0;
-    DataSize bytesUploaded = 0;
-    bool loadingFailed = false;
+    DataSize bytesTotal = 0;
+    DataSize bytesLoaded = 0;
+    Status status = Status::Created;
 
     QString filePath() const;
     QString fileName() const;
 };
+Q_DECLARE_METATYPE(Attachment)
 
 using OptionalAttachment = Optional<Attachment>;
 Q_DECLARE_METATYPE(OptionalAttachment)

@@ -32,34 +32,43 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "VSQCommon.h"
+#include "VSQUploader.h"
 
-#include <QtQml>
+#include <QXmppClient.h>
+#include <QXmppUploadRequestManager.h>
 
-Q_LOGGING_CATEGORY(lcDev, "dev");
+Q_LOGGING_CATEGORY(lcUploader, "uploader");
 
-void registerCommonTypes()
+VSQUploader::VSQUploader(QXmppClient *client, QObject *parent)
+    : QObject(parent)
+    , m_xmppManager(new QXmppUploadRequestManager())
 {
-    qRegisterMetaType<DataSize>("DataSize");
-    qRegisterMetaType<Enums::AttachmentType>();
-    qRegisterMetaType<Enums::MessageStatus>();
-    qRegisterMetaType<Enums::MessageAuthor>();
-    qRegisterMetaType<Attachment>();
-    qRegisterMetaType<OptionalAttachment>();
-    qRegisterMetaType<StMessage>();
-    qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");
+    connect(this, &VSQUploader::upload, this, &VSQUploader::onUpload);
+
+    client->addExtension(m_xmppManager);
+    connect(m_xmppManager, &QXmppUploadRequestManager::slotReceived, this, &VSQUploader::onSlotReceived);
+    connect(m_xmppManager, &QXmppUploadRequestManager::requestFailed, this, &VSQUploader::onRequestFailed);
 }
 
-QString Attachment::filePath() const
+VSQUploader::~VSQUploader()
 {
-    return local_url.toString();
+    delete m_xmppManager;
 }
 
-QString Attachment::fileName() const
+void VSQUploader::onUpload(const QString &messageId, const Attachment &attachment)
 {
-    if (!local_url.isEmpty())
-        return local_url.fileName();
-    if (!remote_url.isEmpty())
-        return remote_url.fileName();
-    return QLatin1String();
+    // FIXME(fpohtmeh): finish
+    //m_xmppManager->requestUploadSlot();
+    QUrl url("https://raw.githubusercontent.com/VirgilSecurity/virgil-messenger-qt/develop/src/qml/resources/icons/Logo.png");
+    emit uploadUrlReceived(messageId, url);
+}
+
+void VSQUploader::onSlotReceived(const QXmppHttpUploadSlotIq &slot)
+{
+    qDebug() << "onSlotReceived";
+}
+
+void VSQUploader::onRequestFailed(const QXmppHttpUploadRequestIq &request)
+{
+    qDebug() << "onRequestFailed";
 }

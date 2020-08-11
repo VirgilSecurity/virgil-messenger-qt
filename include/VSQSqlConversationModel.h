@@ -54,17 +54,17 @@ class VSQSqlConversationModel : public QSqlTableModel
         MessageIdRole,
 
         AttachmentIdRole,
-        AttachmentSizeRole,
+        AttachmentBytesTotalRole,
         AttachmentTypeRole,
         AttachmentLocalUrlRole,
         AttachmentLocalPreviewRole,
-        AttachmentUploadedRole,
-        AttachmentLoadingFailedRole,
+        AttachmentStatusRole,
 
         FirstInRowRole,
         InRowRole,
         DayRole,
         AttachmentDisplaySizeRole,
+        AttachmentBytesLoadedRole,
     };
 
 public:
@@ -108,7 +108,7 @@ public:
 
 signals:
     void createMessage(const QString &recipient, const QString &message, const QString &messageId, const OptionalAttachment &attachment);
-    void receiveMessage(const QString &messageId, const QString &author, const QString &message);
+    void receiveMessage(const QString &messageId, const QString &author, const QString &message, const OptionalAttachment &attachment);
     void setMessageStatus(const QString &messageId, const StMessage::Status status);
 
     void recipientChanged();
@@ -132,7 +132,7 @@ private:
     _contactsTableName() const;
 
     void onCreateMessage(const QString &recipient, const QString &message, const QString &messageId, const OptionalAttachment &attachment);
-    void onReceiveMessage(const QString &messageId, const QString &author, const QString &message);
+    void onReceiveMessage(const QString &messageId, const QString &author, const QString &message, const OptionalAttachment &attachment);
     void onSetMessageStatus(const QString &messageId, const StMessage::Status status);
 };
 

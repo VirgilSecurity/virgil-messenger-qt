@@ -95,13 +95,13 @@ Page {
             firstInRow: model.firstMessageInARow
 
             attachmentId: model.attachmentId
-            attachmentSize: model.attachmentSize
+            attachmentBytesTotal: model.attachmentBytesTotal
             attachmentDisplaySize: model.attachmentDisplaySize
             attachmentType: model.attachmentType
             attachmentLocalUrl: model.attachmentLocalUrl
             attachmentLocalPreview: model.attachmentLocalPreview
-            attachmentUploaded: model.attachmentUploaded
-            attachmentLoadingFailed: model.attachmentLoadingFailed
+            attachmentBytesLoaded: model.attachmentBytesLoaded
+            attachmentStatus: model.attachmentStatus
         }
 
         onCountChanged: {

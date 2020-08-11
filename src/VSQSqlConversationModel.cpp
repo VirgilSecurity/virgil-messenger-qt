@@ -58,12 +58,11 @@ VSQSqlConversationModel::_createTable() {
         "'message_id' TEXT NOT NULL,"
         ""
         "attachment_id TEXT,"
-        "attachment_size INTEGER,"
+        "attachment_bytes_total INTEGER,"
         "attachment_type INTEGER,"
         "attachment_local_url TEXT,"
         "attachment_local_preview TEXT,"
-        "attachment_uploaded INTEGER,"
-        "attachment_loading_failed INTEGER,"
+        "attachment_status INT,"
         ""
         "FOREIGN KEY('author') REFERENCES %2 ( name ),"
         "FOREIGN KEY('recipient') REFERENCES %3 ( name )"
@@ -180,7 +179,12 @@ VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
         if (attachmentId.isEmpty()) {
             return QString();
         }
-        return VSQUtils::formattedDataSize(currRecord.value(AttachmentSizeRole - Qt::UserRole).toInt());
+        return VSQUtils::formattedDataSize(currRecord.value(AttachmentBytesTotalRole - Qt::UserRole).toInt());
+    }
+
+    if (role == AttachmentBytesLoadedRole) {
+        // FIXME(fpohtmheh): get value from uploader
+        return 0;
     }
 
     return currRecord.value(role - Qt::UserRole);
@@ -200,13 +204,13 @@ VSQSqlConversationModel::roleNames() const {
     names[InRowRole] = "messageInARow";
     names[DayRole] = "day";
     names[AttachmentIdRole] = "attachmentId";
-    names[AttachmentSizeRole] = "attachmentSize";
-    names[AttachmentDisplaySizeRole] = "attachmentDisplaySize";
+    names[AttachmentBytesTotalRole] = "attachmentBytesTotal";
     names[AttachmentTypeRole] = "attachmentType";
     names[AttachmentLocalUrlRole] = "attachmentLocalUrl";
     names[AttachmentLocalPreviewRole] = "attachmentLocalPreview";
-    names[AttachmentUploadedRole] = "attachmentUploaded";
-    names[AttachmentLoadingFailedRole] = "attachmentLoadingFailed";
+    names[AttachmentStatusRole] = "attachmentStatus";
+    names[AttachmentDisplaySizeRole] = "attachmentDisplaySize";
+    names[AttachmentBytesLoadedRole] = "attachmentBytesLoaded";
     return names;
 }
 
@@ -373,12 +377,10 @@ void VSQSqlConversationModel::onCreateMessage(const QString &recipient, const QS
     newRecord.setValue("message_id", messageId);
     if (attachment) {
         newRecord.setValue("attachment_id", attachment->id);
-        newRecord.setValue("attachment_size", attachment->size);
+        newRecord.setValue("attachment_bytes_total", attachment->bytesTotal);
         newRecord.setValue("attachment_type", static_cast<int>(attachment->type));
         newRecord.setValue("attachment_local_url", attachment->local_url);
         newRecord.setValue("attachment_local_preview", attachment->local_preview);
-        newRecord.setValue("attachment_uploaded", attachment->bytesUploaded);
-        newRecord.setValue("attachment_loading_failed", attachment->loadingFailed);
     }
     if (!insertRecord(rowCount(), newRecord)) {
         qWarning() << "Failed to create message:" << lastError().text();
@@ -389,7 +391,7 @@ void VSQSqlConversationModel::onCreateMessage(const QString &recipient, const QS
     select();
 }
 
-void VSQSqlConversationModel::onReceiveMessage(const QString &messageId, const QString &author, const QString &message)
+void VSQSqlConversationModel::onReceiveMessage(const QString &messageId, const QString &author, const QString &message, const OptionalAttachment &attachment)
 {
     const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
 
@@ -400,7 +402,13 @@ void VSQSqlConversationModel::onReceiveMessage(const QString &messageId, const Q
     newRecord.setValue("message", message);
     newRecord.setValue("status", static_cast<int>(StMessage::Status::MST_RECEIVED));
     newRecord.setValue("message_id", messageId);
-
+    if (attachment) {
+        newRecord.setValue("attachment_id", attachment->id);
+        newRecord.setValue("attachment_bytes_total", attachment->bytesTotal);
+        newRecord.setValue("attachment_type", static_cast<int>(attachment->type));
+        newRecord.setValue("attachment_local_url", attachment->local_url);
+        newRecord.setValue("attachment_local_preview", attachment->local_preview);
+    }
     if (!insertRowIntoTable(newRecord)) {
         qWarning() << "Failed to save received message:" << lastError().text();
         return;

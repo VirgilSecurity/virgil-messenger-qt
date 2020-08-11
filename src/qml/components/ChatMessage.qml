@@ -23,13 +23,13 @@ Control {
     property bool firstInRow: true
 
     property string attachmentId
-    property string attachmentSize
+    property string attachmentBytesTotal
     property string attachmentDisplaySize
     property var attachmentType
     property string attachmentLocalUrl
     property string attachmentLocalPreview
-    property int attachmentUploaded
-    property bool attachmentLoadingFailed
+    property int attachmentBytesLoaded
+    property int attachmentStatus
 
     QtObject {
         id: d
@@ -134,10 +134,10 @@ Control {
 
                 padding: 2
                 width: 0.95 * row.width
-                visible: attachmentUploaded < attachmentSize
+                visible: attachmentStatus == Enums.AttachmentStatus.Loading
                 from: 0
-                to: attachmentSize
-                value: attachmentUploaded
+                to: attachmentBytesTotal
+                value: attachmentBytesLoaded
 
                 background: Rectangle {
                     implicitWidth: progressBar.width

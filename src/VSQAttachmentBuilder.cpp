@@ -63,7 +63,7 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
     attachment.local_url = QUrl::fromLocalFile(info.absoluteFilePath());
     if (type == Attachment::Type::Picture)
         attachment.local_preview = createPreviewImage(info.absoluteFilePath());
-    attachment.size = info.size();
+    attachment.bytesTotal = info.size();
     return attachment;
 }
 

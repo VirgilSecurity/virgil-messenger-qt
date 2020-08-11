@@ -34,10 +34,11 @@ Control {
                 id: attachmentsMenu
                 dropdown: true
 
-                Action {
-                    text: qsTr("Send picture")
-                    onTriggered: selectAttachment(Enums.AttachmentType.Picture)
-                }
+// FIXME(fpohtmeh): restore
+//                Action {
+//                    text: qsTr("Send picture")
+//                    onTriggered: selectAttachment(Enums.AttachmentType.Picture)
+//                }
 
                 Action {
                     text: qsTr("Send file")

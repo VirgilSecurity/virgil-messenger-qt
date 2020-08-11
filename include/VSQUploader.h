@@ -32,34 +32,41 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#ifndef VSQ_UPLOADER_H
+#define VSQ_UPLOADER_H
+
+#include <QObject>
+
 #include "VSQCommon.h"
 
-#include <QtQml>
+class QXmppClient;
+class QXmppHttpUploadRequestIq;
+class QXmppHttpUploadSlotIq;
+class QXmppUploadRequestManager;
 
-Q_LOGGING_CATEGORY(lcDev, "dev");
+Q_DECLARE_LOGGING_CATEGORY(lcUploader);
 
-void registerCommonTypes()
+class VSQUploader : public QObject
 {
-    qRegisterMetaType<DataSize>("DataSize");
-    qRegisterMetaType<Enums::AttachmentType>();
-    qRegisterMetaType<Enums::MessageStatus>();
-    qRegisterMetaType<Enums::MessageAuthor>();
-    qRegisterMetaType<Attachment>();
-    qRegisterMetaType<OptionalAttachment>();
-    qRegisterMetaType<StMessage>();
-    qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");
-}
+    Q_OBJECT
 
-QString Attachment::filePath() const
-{
-    return local_url.toString();
-}
+public:
+    VSQUploader(QXmppClient *client, QObject *parent);
+    ~VSQUploader() override;
 
-QString Attachment::fileName() const
-{
-    if (!local_url.isEmpty())
-        return local_url.fileName();
-    if (!remote_url.isEmpty())
-        return remote_url.fileName();
-    return QLatin1String();
-}
+signals:
+    void upload(const QString &messageId, const Attachment &attachment);
+
+    void uploadUrlReceived(const QString &messageId, const QUrl &url);
+    void uploadProgressChanged(const QString &messageId, const DataSize bytesUploaded);
+    void uploadStatusChanged(const QString &messageId, const Attachment::Status status);
+
+private:
+    void onUpload(const QString &messageId, const Attachment &attachment);
+    void onSlotReceived(const QXmppHttpUploadSlotIq &slot);
+    void onRequestFailed(const QXmppHttpUploadRequestIq &request);
+
+    QXmppUploadRequestManager *m_xmppManager;
+};
+
+#endif // VSQ_UPLOADER_H
