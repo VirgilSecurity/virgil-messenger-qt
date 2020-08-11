@@ -273,12 +273,17 @@ Control {
             Label {
                 id: statusLabel
                 height: 12
-                text: switch (status) {
-                    case "0": return "sending"
-                    case "1": return "sent"
-                    case "2": return "delivered"
-                    case "4": return "failed"
-                    default: return ""
+                text: {
+                    if (chatMessage.failed) {
+                        return "failed"
+                    }
+                    switch (status) {
+                        case "0": return "sending"
+                        case "1": return "sent"
+                        case "2": return "delivered"
+                        case "4": return "failed"
+                        default: return ""
+                    }
                 }
                 color: chatMessage.failed ? "red" : Theme.labelColor
                 font.pixelSize: UiHelper.fixFontSz(11)

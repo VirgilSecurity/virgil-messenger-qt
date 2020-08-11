@@ -88,6 +88,7 @@ HEADERS += \
         include/VSQAttachmentBuilder.h \
         include/VSQClipboardProxy.h \
         include/VSQCommon.h \
+        include/VSQDiscoveryManager.h \
         include/VSQLogging.h \
         include/VSQMessenger.h \
         include/VSQSettings.h \
@@ -109,6 +110,7 @@ SOURCES += \
         src/VSQAttachmentBuilder.cpp \
         src/VSQClipboardProxy.cpp \
         src/VSQCommon.cpp \
+        src/VSQDiscoveryManager.cpp \
         src/VSQMessenger.cpp \
         src/VSQLogging.cpp \
         src/VSQSettings.cpp \

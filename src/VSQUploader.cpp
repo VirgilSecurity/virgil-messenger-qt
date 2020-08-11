@@ -34,6 +34,9 @@
 
 #include "VSQUploader.h"
 
+#include <QFileInfo>
+#include <QThread> // TODO(fpohtmeh): remove
+
 #include <QXmppClient.h>
 #include <QXmppUploadRequestManager.h>
 
@@ -48,6 +51,11 @@ VSQUploader::VSQUploader(QXmppClient *client, QObject *parent)
     client->addExtension(m_xmppManager);
     connect(m_xmppManager, &QXmppUploadRequestManager::slotReceived, this, &VSQUploader::onSlotReceived);
     connect(m_xmppManager, &QXmppUploadRequestManager::requestFailed, this, &VSQUploader::onRequestFailed);
+
+    qCDebug(lcUploader) << "Service found:" << m_xmppManager->serviceFound();
+    connect(m_xmppManager, &QXmppUploadRequestManager::serviceFoundChanged, this, [&](){
+        qCDebug(lcUploader) << "Service found changed:" << m_xmppManager->serviceFound();
+    });
 }
 
 VSQUploader::~VSQUploader()
@@ -57,10 +65,27 @@ VSQUploader::~VSQUploader()
 
 void VSQUploader::onUpload(const QString &messageId, const Attachment &attachment)
 {
-    // FIXME(fpohtmeh): finish
-    //m_xmppManager->requestUploadSlot();
+    // FIXME(fpohtmeh): implement
+    if (m_xmppManager->serviceFound()) {
+        auto slotId = m_xmppManager->requestUploadSlot(QFileInfo(attachment.filePath()));
+        qCDebug(lcUploader) << "Slot id:" << slotId;
+    }
+    else {
+        qCDebug(lcUploader) << "Upload service was not found";
+    }
     QUrl url("https://raw.githubusercontent.com/VirgilSecurity/virgil-messenger-qt/develop/src/qml/resources/icons/Logo.png");
     emit uploadUrlReceived(messageId, url);
+
+    const auto total = attachment.bytesTotal;
+    DataSize u = 0;
+    emit uploadStatusChanged(messageId, Attachment::Status::Loading);
+    emit uploadProgressChanged(messageId, 0);
+    for (; u <= total; u += total / 30) {
+        emit uploadProgressChanged(messageId, u);
+        QThread::currentThread()->msleep(100);
+    }
+    emit uploadProgressChanged(messageId, total);
+    emit uploadStatusChanged(messageId, Attachment::Status::Loaded);
 }
 
 void VSQUploader::onSlotReceived(const QXmppHttpUploadSlotIq &slot)

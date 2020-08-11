@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.12
 import Qt.labs.settings 1.1
 import QuickFuture 1.0
 
+import "./base"
 import "./theme"
 import "./components"
 import "./helpers/login.js" as LoginLogic
@@ -60,21 +61,53 @@ Control {
     }
 
     ScrollView {
-        id: logControl
-        anchors {
-            topMargin: 0.75 * mainView.height
-            fill: parent
-        }
-        visible: settings.devMode
+            id: logControl
+            anchors {
+                topMargin: 0.75 * mainView.height
+                fill: parent
+            }
+            visible: settings.devMode
 
-        TextArea {
-            id: logTextControl
-            width: mainView.width
-            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-            readOnly: true
-            font.pointSize: 9
+            ContextMenu {
+                id: logContextMenu
+                compact: true
+
+                Action {
+                    text: qsTr("Clear")
+                    onTriggered: logTextControl.clear()
+                }
+            }
+
+            TextArea {
+                id: logTextControl
+                width: mainView.width
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                readOnly: true
+                font.pointSize: 9
+
+                TapHandler {
+                    acceptedButtons: Qt.RightButton
+                    property var contextMenu: logContextMenu
+
+                    onLongPressed: {
+                        if (Platform.isMobile) {
+                            contextMenu.x = point.position.x
+                            contextMenu.y = point.position.y - 40
+                            contextMenu.open()
+                        }
+                    }
+                    onTapped: {
+                        if (Platform.isMobile) {
+                            return
+                        }
+                        contextMenu.x = eventPoint.position.x
+                        contextMenu.y = eventPoint.position.y
+                        contextMenu.open()
+                        eventPoint.accepted = false
+                    }
+                }
+            }
         }
-    }
 
     Component.onCompleted: {
         showSplashScreen()

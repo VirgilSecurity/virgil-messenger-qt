@@ -32,35 +32,27 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#ifndef VSQ_DISCOVERYMANAGER_H
+#define VSQ_DISCOVERYMANAGER_H
+
+#include <qxmpp/QXmppDiscoveryManager.h>
+
 #include "VSQCommon.h"
 
-#include <QtQml>
+Q_DECLARE_LOGGING_CATEGORY(lcDiscoveryManager);
 
-Q_LOGGING_CATEGORY(lcDev, "dev");
-
-void registerCommonTypes()
+class VSQDiscoveryManager : public QXmppDiscoveryManager
 {
-    qRegisterMetaType<DataSize>("DataSize");
-    qRegisterMetaType<Enums::AttachmentType>();
-    qRegisterMetaType<Enums::AttachmentStatus>();
-    qRegisterMetaType<Enums::MessageStatus>();
-    qRegisterMetaType<Enums::MessageAuthor>();
-    qRegisterMetaType<Attachment>();
-    qRegisterMetaType<OptionalAttachment>();
-    qRegisterMetaType<StMessage>();
-    qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");
-}
+public:
+    explicit VSQDiscoveryManager(QXmppClient *client, QObject *parent = nullptr);
+    ~VSQDiscoveryManager() override;
 
-QString Attachment::filePath() const
-{
-    return local_url.toString();
-}
+private:
+    void onClientConnected();
+    void onInfoReceived(const QXmppDiscoveryIq &info);
+    void onItemsReceived(const QXmppDiscoveryIq &info);
 
-QString Attachment::fileName() const
-{
-    if (!local_url.isEmpty())
-        return local_url.fileName();
-    if (!remote_url.isEmpty())
-        return remote_url.fileName();
-    return QLatin1String();
-}
+    QXmppClient *m_client;
+};
+
+#endif // VSQ_DISCOVERYMANAGER_H

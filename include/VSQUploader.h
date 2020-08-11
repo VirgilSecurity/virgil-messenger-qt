@@ -59,7 +59,7 @@ signals:
 
     void uploadUrlReceived(const QString &messageId, const QUrl &url);
     void uploadProgressChanged(const QString &messageId, const DataSize bytesUploaded);
-    void uploadStatusChanged(const QString &messageId, const Attachment::Status status);
+    void uploadStatusChanged(const QString &messageId, const Enums::AttachmentStatus status);
 
 private:
     void onUpload(const QString &messageId, const Attachment &attachment);

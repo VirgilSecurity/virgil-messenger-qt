@@ -79,7 +79,7 @@ namespace Enums {
     {
         Created,
         Loading,
-        LoadingFailed,
+        Failed,
         Loaded
     };
     Q_ENUM_NS(AttachmentStatus)

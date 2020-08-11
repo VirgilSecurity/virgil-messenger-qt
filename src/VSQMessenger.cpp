@@ -50,7 +50,6 @@
 #include <qxmpp/QXmppPushEnableIq.h>
 #include <qxmpp/QXmppMessageReceiptManager.h>
 #include <qxmpp/QXmppCarbonManager.h>
-#include <qxmpp/QXmppDiscoveryManager.h>
 
 #include <QtConcurrent>
 #include <QStandardPaths>
@@ -90,8 +89,6 @@ VSQMessenger::VSQMessenger(VSQSettings *settings)
     : QObject()
     , m_settings(settings)
     , m_attachmentBuilder(settings)
-    , m_uploader(new VSQUploader(&m_xmpp, nullptr))
-    , m_transferThread(new QThread())
 {
     // Register QML typess
     qmlRegisterType<VSQMessenger>("MesResult", 1, 0, "Result");
@@ -108,12 +105,16 @@ VSQMessenger::VSQMessenger(VSQSettings *settings)
     // Add receipt messages extension
     m_xmppReceiptManager = new QXmppMessageReceiptManager();
     m_xmppCarbonManager = new QXmppCarbonManager();
-    // m_xmppDiscoManager = new QXmppDiscoveryManager();
+    m_xmppDiscoveryManager = new VSQDiscoveryManager(&m_xmpp, this);
 
     m_xmpp.addExtension(m_xmppReceiptManager);
     m_xmpp.addExtension(m_xmppCarbonManager);
-    // m_xmpp.addExtension(m_xmppDiscoManager);
+    m_xmpp.addExtension(m_xmppDiscoveryManager);
 
+    // Create uploader after discovery manager
+    m_uploader = new VSQUploader(&m_xmpp, nullptr);
+    m_transferThread = new QThread();
+    m_sqlConversations->connectUploader(m_uploader);
 
     // Signal connection
     connect(this, SIGNAL(fireReadyToAddContact(QString)), this, SLOT(onAddContactToDB(QString)));
@@ -133,9 +134,6 @@ VSQMessenger::VSQMessenger(VSQSettings *settings)
     connect(m_xmppCarbonManager, &QXmppCarbonManager::messageReceived, &m_xmpp, &QXmppClient::messageReceived);
     // messages sent from our account (but another client)
     connect(m_xmppCarbonManager, &QXmppCarbonManager::messageSent, &m_xmpp, &QXmppClient::messageReceived);
-
-    // connect(m_xmppDiscoManager, &QXmppDiscoveryManager::infoReceived, this, &VSQMessenger::handleDiscoInfo);
-
     connect(m_xmppReceiptManager, &QXmppMessageReceiptManager::messageDelivered, this, &VSQMessenger::onMessageDelivered);
 
     // Network Analyzer
@@ -159,21 +157,6 @@ VSQMessenger::~VSQMessenger()
     delete m_uploader;
     delete m_transferThread;
 }
-
-void
-VSQMessenger::handleDiscoInfo(const QXmppDiscoveryIq &info)
-{
-    qInfo() << info.features();
-
-    if (info.from() != m_xmpp.configuration().domain())
-        return;
-
-    // enable carbons, if feature found
-    if (info.features().contains("urn:xmpp:carbons:2")) {
-        m_xmppCarbonManager->setCarbonsEnabled(true);
-    }
-}
-
 
 void
 VSQMessenger::onMessageDelivered(const QString& to, const QString& messageId) {
@@ -782,7 +765,7 @@ QString VSQMessenger::createJson(const QString &messageId, const QString &messag
     else {
         m_uploader->upload(messageId, *attachment);
         QUrl attachmentUrl;
-        // FIXME(fpohtmeh): refactor
+        // FIXME(fpohtmeh): remove
         {
             QEventLoop loop;
             connect(m_uploader, &VSQUploader::uploadUrlReceived, &loop, [&](const QString &msgId, const QUrl &url) {
@@ -822,7 +805,7 @@ StMessage VSQMessenger::parseJson(const QJsonDocument &json)
         attachment.id = VSQUtils::createUuid();
         attachment.type = Attachment::Type::File;
         attachment.remote_url = payload["url"].toString();
-        attachment.bytesTotal = payload["bytesTotal"].toInt(); // FIXME(fpohtmeh): get qint64
+        attachment.bytesTotal = payload["bytesTotal"].toInt(); // TODO(fpohtmeh): get qint64
         message.attachment = attachment;
         message.message = attachment.fileName();
     }
@@ -1006,7 +989,7 @@ VSQMessenger::sendMessage(const QString &to, const QString &message,
     const auto attachment = m_attachmentBuilder.build(attachmentUrl.toUrl(), attachmentType);
     auto msg = message;
     if (msg.isEmpty()) {
-        msg = attachment->fileName(); // FIXME(fpohtmeh): remove
+        msg = attachment->fileName(); // TODO(fpohtmeh): remove?
     }
     return createSendMessage(true, VSQUtils::createUuid(), to, msg, attachment);
 }

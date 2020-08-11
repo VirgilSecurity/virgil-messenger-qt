@@ -4,6 +4,7 @@ import QtQuick.Controls 2.12
 import QuickFuture 1.0
 import QtQuick.Window 2.12
 import QtMultimedia 5.12
+import com.virgilsecurity.messenger 1.0
 
 import "../theme"
 import "../components"
@@ -89,7 +90,7 @@ Page {
             nickname: model.author
             isUser: model.author === Messenger.currentUser
             status: isUser ? model.status : "none"
-            failed: model.status === "4"
+            failed: model.status == 4 || model.attachmentStatus == Enums.AttachmentStatus.Failed
 
             inRow: model.messageInARow
             firstInRow: model.firstMessageInARow

@@ -41,7 +41,6 @@
 #include <QObject>
 #include <QSemaphore>
 #include <QXmppCarbonManager.h>
-#include <QXmppDiscoveryManager.h>
 
 #include <virgil/iot/qt/VSQIoTKit.h>
 #include <qxmpp/QXmppClient.h>
@@ -55,6 +54,7 @@
 #include <VSQNetworkAnalyzer.h>
 #include <VSQAttachmentBuilder.h>
 #include <VSQUploader.h>
+#include <VSQDiscoveryManager.h>
 
 using namespace VirgilIoTKit;
 
@@ -183,7 +183,6 @@ private slots:
     void onSslErrors(const QList<QSslError> &errors);
     void onStateChanged(QXmppClient::State state);
     void onProcessNetworkState(bool online);
-    void handleDiscoInfo(const QXmppDiscoveryIq &info);
 
     void
     onAddContactToDB(QString contact);
@@ -195,7 +194,7 @@ private:
     QXmppClient m_xmpp;
     QXmppMessageReceiptManager* m_xmppReceiptManager;
     QXmppCarbonManager* m_xmppCarbonManager;
-    QXmppDiscoveryManager* m_xmppDiscoManager;
+    VSQDiscoveryManager* m_xmppDiscoveryManager;
     VSQSqlConversationModel *m_sqlConversations;
     VSQSqlChatModel *m_sqlChatModel;
     VSQLogging *m_logging;
