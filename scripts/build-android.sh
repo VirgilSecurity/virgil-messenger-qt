@@ -54,4 +54,4 @@ build_proc() {
 #*************************************************************************************************************
 
 prepare_libraries
-build_proc android  "armeabi-v7a arm64-v8a x86"
+build_proc android  "armeabi-v7a arm64-v8a"
