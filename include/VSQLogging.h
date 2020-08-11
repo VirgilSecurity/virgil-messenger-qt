@@ -43,12 +43,12 @@
 
 using namespace VirgilIoTKit;
 
-void logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg);
-
 class VSQLogging : public QObject {
     Q_OBJECT
 public:
+    VSQLogging();
     virtual ~VSQLogging();
+
     void checkAppCrash();
     void resetRunFlag();
     Q_INVOKABLE
@@ -58,15 +58,16 @@ public:
     void setkOrganization(QString strkOrganization);
     void setkApp(QString strkApp);
 
+    static void logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+
 signals:
     void crashReportRequested();
     void reportSent(QString msg);
     void reportSentErr(QString msg);
-
+    void newMessage(const QString &message);
 
 private:
     static const QString endpointSendReport;
-
 
     bool checkRunFlag();
     bool sendFileToBackendRequest(QByteArray fileData);
@@ -76,6 +77,7 @@ private:
     QString kOrganization;
     QString kApp;
     QNetworkAccessManager *manager;
+    static VSQLogging *m_instance;
 
 private slots:
     void endpointReply();

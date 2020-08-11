@@ -55,7 +55,11 @@ const QString VSQApplication::kVersion = "unknown";
 #endif
 
 /******************************************************************************/
-VSQApplication::VSQApplication() {
+VSQApplication::VSQApplication()
+    : m_settings(this)
+    , m_engine()
+    , m_messenger(&m_settings)
+{
 #if (MACOS)
     VSQMacos::instance().startUpdatesTimer();
 #endif
@@ -79,7 +83,7 @@ VSQApplication::run(const QString &basePath) {
     }
 
     // Initialization loging
-//    qInstallMessageHandler(logger_qt_redir); // Redirect standard logging
+    //qInstallMessageHandler(&VSQLogging::logger_qt_redir); // Redirect standard logging
     m_messenger.setLogging(&m_logging);
     m_logging.setkVersion(kVersion);
 
@@ -100,6 +104,7 @@ VSQApplication::run(const QString &basePath) {
     context->setContextProperty("Logging", &m_logging);
     context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
     context->setContextProperty("ChatModel", &m_messenger.getChatModel());
+    context->setContextProperty("settings", &m_settings);
 
     QFont fon(QGuiApplication::font());
     fon.setPointSize(1.5 * QGuiApplication::font().pointSize());

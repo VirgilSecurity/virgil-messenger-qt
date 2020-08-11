@@ -78,3 +78,12 @@ QSize VSQSettings::previewMaxSize() const
 {
     return QSize(600, 400);
 }
+
+bool VSQSettings::devMode() const
+{
+#ifdef VS_DEVMODE
+    return true;
+#else
+    return false;
+#endif // VS_DEVMODE
+}

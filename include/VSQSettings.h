@@ -47,6 +47,7 @@ Q_DECLARE_LOGGING_CATEGORY(lcSettings)
 class VSQSettings : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(bool devMode READ devMode CONSTANT)
 
 public:
     explicit VSQSettings(QObject *parent);
@@ -57,6 +58,9 @@ public:
     int attachmentMaxSize() const;
     QDir attachmentCacheDir() const;
     QSize previewMaxSize() const;
+
+    // Dev mode
+    bool devMode() const;
 
 private:
     QDir m_attachmentCacheDir;

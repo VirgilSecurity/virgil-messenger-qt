@@ -54,7 +54,6 @@
 #include "VSQLogging.h"
 #include <VSQNetworkAnalyzer.h>
 #include <VSQAttachmentBuilder.h>
-#include <VSQSettings.h>
 #include <VSQUploader.h>
 
 using namespace VirgilIoTKit;
@@ -92,7 +91,7 @@ public:
 
     Q_PROPERTY(QString currentUser READ currentUser NOTIFY fireCurrentUserChanged)
 
-    VSQMessenger();
+    explicit VSQMessenger(VSQSettings *settings = nullptr);
     virtual ~VSQMessenger();
 
     Q_INVOKABLE QString currentUser() const;
@@ -201,7 +200,7 @@ private:
     VSQSqlChatModel *m_sqlChatModel;
     VSQLogging *m_logging;
     VSQNetworkAnalyzer m_networkAnalyzer;
-    VSQSettings m_settings;
+    VSQSettings *m_settings;
     VSQAttachmentBuilder m_attachmentBuilder;
     VSQUploader *m_uploader;
     QThread *m_transferThread;

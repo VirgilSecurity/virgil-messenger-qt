@@ -86,9 +86,10 @@ const int VSQMessenger::kConnectionWaitMs = 10000;
 const int VSQMessenger::kKeepAliveTimeSec = 10;
 
 /******************************************************************************/
-VSQMessenger::VSQMessenger()
-    : m_settings(this)
-    , m_attachmentBuilder(&m_settings)
+VSQMessenger::VSQMessenger(VSQSettings *settings)
+    : QObject()
+    , m_settings(settings)
+    , m_attachmentBuilder(settings)
     , m_uploader(new VSQUploader(&m_xmpp, nullptr))
     , m_transferThread(new QThread())
 {

@@ -41,6 +41,7 @@
 #include <VSQMessenger.h>
 #include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
 #include <VSQLogging.h>
+#include <VSQSettings.h>
 
 #include <macos/VSQMacos.h>
 
@@ -72,6 +73,7 @@ private slots:
 
 private:
     static const QString kVersion;
+    VSQSettings m_settings;
     QQmlApplicationEngine m_engine;
     VSQMessenger m_messenger;
     VSQLogging m_logging;
