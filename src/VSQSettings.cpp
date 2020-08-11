@@ -45,7 +45,7 @@ static const QString kSavedSessionId = "SavedSessionId";
 Q_LOGGING_CATEGORY(lcSettings, "settings")
 
 VSQSettings::VSQSettings(QObject *parent)
-    : QObject(parent) // organization, application name
+    : QObject(parent)
 {
     m_attachmentCacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/attachments");
     for (auto dir : { m_attachmentCacheDir })

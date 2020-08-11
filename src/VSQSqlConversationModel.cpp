@@ -215,6 +215,7 @@ VSQSqlConversationModel::roleNames() const {
 }
 
 /******************************************************************************/
+
 QString
 VSQSqlConversationModel::user() const {
     return m_user;

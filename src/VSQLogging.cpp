@@ -185,6 +185,9 @@ void VSQLogging::logger_qt_redir(QtMsgType type, const QMessageLogContext &conte
     emit VSQLogging::m_instance->newMessage(msg);
 #endif
     QByteArray localMsg = msg.toLocal8Bit();
+#ifdef VS_DEVMODE
+    emit VSQLogging::m_instance->newMessage(msg);
+#endif
     switch (type) {
     case QtDebugMsg:
         vs_logger_message(VS_LOG_MAKE_LEVEL(VS_LOGLEV_DEBUG), context.file, context.line,localMsg.constData());

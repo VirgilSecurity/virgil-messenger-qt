@@ -22,6 +22,7 @@ Control {
             bottomMargin: logControl.visible ? logControl.height : 0
         }
         spacing: 0
+        clip: logControl.visible
 
         ServersPanel {
             id: serversPanel

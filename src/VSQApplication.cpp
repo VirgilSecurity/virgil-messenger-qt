@@ -83,7 +83,7 @@ VSQApplication::run(const QString &basePath) {
     }
 
     // Initialization loging
-    //qInstallMessageHandler(&VSQLogging::logger_qt_redir); // Redirect standard logging
+    qInstallMessageHandler(&VSQLogging::logger_qt_redir); // Redirect standard logging
     m_messenger.setLogging(&m_logging);
     m_logging.setkVersion(kVersion);
 
@@ -102,9 +102,9 @@ VSQApplication::run(const QString &basePath) {
     context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
     context->setContextProperty("Messenger", &m_messenger);
     context->setContextProperty("Logging", &m_logging);
+    context->setContextProperty("settings", &m_settings);
     context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
     context->setContextProperty("ChatModel", &m_messenger.getChatModel());
-    context->setContextProperty("settings", &m_settings);
 
     QFont fon(QGuiApplication::font());
     fon.setPointSize(1.5 * QGuiApplication::font().pointSize());
