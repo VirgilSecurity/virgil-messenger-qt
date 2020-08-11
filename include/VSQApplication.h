@@ -36,7 +36,7 @@
 #define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
 
 #include <QtCore>
-#include <QApplication>
+#include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <VSQMessenger.h>
 #include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
