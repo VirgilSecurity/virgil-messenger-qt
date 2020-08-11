@@ -44,7 +44,9 @@
 
 /******************************************************************************/
 VSQSqlChatModel::VSQSqlChatModel(QObject *parent) :
-    QSqlTableModel(parent) {
+    QSqlTableModel(parent)
+{
+    connect(this, &VSQSqlChatModel::updateLastMessage, this, &VSQSqlChatModel::onUpdateLastMessage);
 }
 
 /******************************************************************************/
@@ -160,7 +162,7 @@ VSQSqlChatModel::createPrivateChat(const QString &recipientId) {
 }
 
 /******************************************************************************/
-void VSQSqlChatModel::updateLastMessage(QString chatId, QString message) {
+void VSQSqlChatModel::onUpdateLastMessage(QString chatId, QString message) {
 
     const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
 

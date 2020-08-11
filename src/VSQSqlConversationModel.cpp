@@ -40,6 +40,8 @@
 #include <QSqlRecord>
 #include <QSqlQuery>
 
+#include "VSQUtils.h"
+
 Q_DECLARE_METATYPE(StMessage::Status)
 
 /******************************************************************************/
@@ -54,10 +56,15 @@ VSQSqlConversationModel::_createTable() {
         "'message' TEXT NOT NULL,"
         "'status' int NOT NULL,"
         "'message_id' TEXT NOT NULL,"
-//        "attachment_id TEXT,"
-//        "attachment_type INTEGER,"
-//        "attachment_local_url TEXT,"
-//        "attachment_size INTEGER,"
+        ""
+        "attachment_id TEXT,"
+        "attachment_size INTEGER,"
+        "attachment_type INTEGER,"
+        "attachment_local_url TEXT,"
+        "attachment_local_preview TEXT,"
+        "attachment_uploaded INTEGER,"
+        "attachment_loading_failed INTEGER,"
+        ""
         "FOREIGN KEY('author') REFERENCES %2 ( name ),"
         "FOREIGN KEY('recipient') REFERENCES %3 ( name )"
         ")").arg(_tableName())
@@ -92,6 +99,10 @@ VSQSqlConversationModel::VSQSqlConversationModel(QObject *parent) :
     QSqlTableModel(parent) {
 
     qRegisterMetaType<StMessage::Status>("StMessage::Status");
+
+    connect(this, &VSQSqlConversationModel::createMessage, this, &VSQSqlConversationModel::onCreateMessage);
+    connect(this, &VSQSqlConversationModel::receiveMessage, this, &VSQSqlConversationModel::onReceiveMessage);
+    connect(this, &VSQSqlConversationModel::setMessageStatus, this, &VSQSqlConversationModel::onSetMessageStatus);
 }
 
 /******************************************************************************/
@@ -128,18 +139,16 @@ VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
         return QSqlTableModel::data(index, role);
    }
 
-    const int firstMessageInARow = Qt::UserRole + 6;
-    const int messageInARow = Qt::UserRole + 7;
-    const int day = Qt::UserRole + 8;
-
     const QSqlRecord currRecord = record(index.row());
+    const int authorColumn = AuthorRole - Qt::UserRole;
+    const int timestampColumn = TimestampRole - Qt::UserRole;
 
-    if (role == firstMessageInARow) {
+    if (role == FirstInRowRole) {
         const QSqlRecord prevRecord = record(index.row() - 1);
-        const QVariant prevMsgAuthor = prevRecord.value(0);
-        const QVariant currMsgAuthor = currRecord.value(0);
-        const QVariant prevTimestamp = prevRecord.value(2);
-        const QVariant currTimestamp = currRecord.value(2);
+        const QVariant prevMsgAuthor = prevRecord.value(authorColumn);
+        const QVariant currMsgAuthor = currRecord.value(authorColumn);
+        const QVariant prevTimestamp = prevRecord.value(timestampColumn);
+        const QVariant currTimestamp = currRecord.value(timestampColumn);
 
         // Check if previous message is from the same author
         const bool isAuthor = currMsgAuthor.toString() != prevMsgAuthor.toString();
@@ -153,17 +162,25 @@ VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
         return isAuthor || !isInFiveMinRange;
     }
 
-    if (role == messageInARow) {
+    if (role == InRowRole) {
         const QSqlRecord nextRecord = record(index.row() + 1);
-        const QVariant nextMsgAuthor = nextRecord.value(0);
-        const QVariant currMsgAuthor = currRecord.value(0);
+        const QVariant nextMsgAuthor = nextRecord.value(authorColumn);
+        const QVariant currMsgAuthor = currRecord.value(authorColumn);
 
         return currMsgAuthor.toString() == nextMsgAuthor.toString();
     }
 
-    if (role == day) {
-        const QVariant timestamp = currRecord.value(2);
+    if (role == DayRole) {
+        const QVariant timestamp = currRecord.value(timestampColumn);
         return timestamp.toDate();
+    }
+
+    if (role == AttachmentDisplaySizeRole) {
+        const QString attachmentId = currRecord.value(AttachmentIdRole - Qt::UserRole).toString();
+        if (attachmentId.isEmpty()) {
+            return QString();
+        }
+        return VSQUtils::formattedDataSize(currRecord.value(AttachmentSizeRole - Qt::UserRole).toInt());
     }
 
     return currRecord.value(role - Qt::UserRole);
@@ -173,60 +190,24 @@ VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
 QHash<int, QByteArray>
 VSQSqlConversationModel::roleNames() const {
     QHash<int, QByteArray> names;
-    names[Qt::UserRole] = "author";
-    names[Qt::UserRole + 1] = "recipient";
-    names[Qt::UserRole + 2] = "timestamp";
-    names[Qt::UserRole + 3] = "message";
-    names[Qt::UserRole + 4] = "status";
-    names[Qt::UserRole + 5] = "message_id";
-    names[Qt::UserRole + 6] = "firstMessageInARow";
-    names[Qt::UserRole + 7] = "messageInARow";
-    names[Qt::UserRole + 8] = "day";
+    names[AuthorRole] = "author";
+    names[RecipientRole] = "recipient";
+    names[TimestampRole] = "timestamp";
+    names[MessageRole] = "message";
+    names[StatusRole] = "status";
+    names[MessageIdRole] = "message_id";
+    names[FirstInRowRole] = "firstMessageInARow";
+    names[InRowRole] = "messageInARow";
+    names[DayRole] = "day";
+    names[AttachmentIdRole] = "attachmentId";
+    names[AttachmentSizeRole] = "attachmentSize";
+    names[AttachmentDisplaySizeRole] = "attachmentDisplaySize";
+    names[AttachmentTypeRole] = "attachmentType";
+    names[AttachmentLocalUrlRole] = "attachmentLocalUrl";
+    names[AttachmentLocalPreviewRole] = "attachmentLocalPreview";
+    names[AttachmentUploadedRole] = "attachmentUploaded";
+    names[AttachmentLoadingFailedRole] = "attachmentLoadingFailed";
     return names;
-}
-
-/******************************************************************************/
-void
-VSQSqlConversationModel::createMessage(QString recipient, QString message, QString messageId) {
-    const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
-
-    QSqlRecord newRecord = record();
-    newRecord.setValue("author", user());
-    newRecord.setValue("recipient", recipient);
-    newRecord.setValue("timestamp", timestamp);
-    newRecord.setValue("message", message);
-    newRecord.setValue("status", static_cast<int>(StMessage::Status::MST_CREATED));
-    newRecord.setValue("message_id", messageId);
-    if (!insertRecord(rowCount(), newRecord)) {
-        qWarning() << "Failed to create message:" << lastError().text();
-        return;
-    }
-
-    submitAll();
-    select();
-}
-
-/******************************************************************************/
-void
-VSQSqlConversationModel::receiveMessage(const QString messageId, const QString author, const QString message) {
-    const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
-
-    QSqlRecord newRecord = record();
-    newRecord.setValue("author", author);
-    newRecord.setValue("recipient", user());
-    newRecord.setValue("timestamp", timestamp);
-    newRecord.setValue("message", message);
-    newRecord.setValue("status", static_cast<int>(StMessage::Status::MST_RECEIVED));
-    newRecord.setValue("message_id", messageId);
-
-    if (!insertRowIntoTable(newRecord)) {
-        qWarning() << "Failed to save received message:" << lastError().text();
-        return;
-    }
-
-    // qDebug() << newRecord
-
-    submitAll();
 }
 
 /******************************************************************************/
@@ -260,21 +241,6 @@ void VSQSqlConversationModel::setAsRead(const QString &author) {
     model.prepare(query);
 
     qDebug() << query << model.exec();
-}
-
-/******************************************************************************/
-void VSQSqlConversationModel::setMessageStatus(const QString &messageId, const StMessage::Status status) {
-    QSqlQuery model;
-    QString query;
-
-    query = QString("UPDATE %1 SET status = %2 WHERE message_id = \"%3\"")
-            .arg(_tableName()).arg(static_cast<int>(status)).arg(messageId);
-
-    model.prepare(query);
-
-    qDebug() << query << model.exec();
-
-    select();
 }
 
 /******************************************************************************/
@@ -391,4 +357,71 @@ QString VSQSqlConversationModel::_tableName() const {
 /******************************************************************************/
 QString VSQSqlConversationModel::_contactsTableName() const {
     return QString("Contacts_") + escapedUserName();
+}
+
+void VSQSqlConversationModel::onCreateMessage(const QString &recipient, const QString &message, const QString &messageId,
+                                              const OptionalAttachment &attachment)
+{
+    const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
+
+    QSqlRecord newRecord = record();
+    newRecord.setValue("author", user());
+    newRecord.setValue("recipient", recipient);
+    newRecord.setValue("timestamp", timestamp);
+    newRecord.setValue("message", message);
+    newRecord.setValue("status", static_cast<int>(StMessage::Status::MST_CREATED));
+    newRecord.setValue("message_id", messageId);
+    if (attachment) {
+        newRecord.setValue("attachment_id", attachment->id);
+        newRecord.setValue("attachment_size", attachment->size);
+        newRecord.setValue("attachment_type", static_cast<int>(attachment->type));
+        newRecord.setValue("attachment_local_url", attachment->local_url);
+        newRecord.setValue("attachment_local_preview", attachment->local_preview);
+        newRecord.setValue("attachment_uploaded", attachment->bytesUploaded);
+        newRecord.setValue("attachment_loading_failed", attachment->loadingFailed);
+    }
+    if (!insertRecord(rowCount(), newRecord)) {
+        qWarning() << "Failed to create message:" << lastError().text();
+        return;
+    }
+
+    submitAll();
+    select();
+}
+
+void VSQSqlConversationModel::onReceiveMessage(const QString &messageId, const QString &author, const QString &message)
+{
+    const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
+
+    QSqlRecord newRecord = record();
+    newRecord.setValue("author", author);
+    newRecord.setValue("recipient", user());
+    newRecord.setValue("timestamp", timestamp);
+    newRecord.setValue("message", message);
+    newRecord.setValue("status", static_cast<int>(StMessage::Status::MST_RECEIVED));
+    newRecord.setValue("message_id", messageId);
+
+    if (!insertRowIntoTable(newRecord)) {
+        qWarning() << "Failed to save received message:" << lastError().text();
+        return;
+    }
+
+    // qDebug() << newRecord
+
+    submitAll();
+}
+
+void VSQSqlConversationModel::onSetMessageStatus(const QString &messageId, const StMessage::Status status)
+{
+    QSqlQuery model;
+    QString query;
+
+    query = QString("UPDATE %1 SET status = %2 WHERE message_id = \"%3\"")
+            .arg(_tableName()).arg(static_cast<int>(status)).arg(messageId);
+
+    model.prepare(query);
+
+    qDebug() << query << model.exec();
+
+    select();
 }

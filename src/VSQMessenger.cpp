@@ -748,9 +748,7 @@ VSQMessenger::_sendFailedMessages() {
    QList<StMessage*> messages = m_sqlConversations->getMessages(m_user,StMessage::Status::MST_FAILED);
    for(int i = 0; i < messages.length(); i++){
        const auto &msg = messages[i];
-       sendMessage(false, msg->message_id, msg->recipient, msg->message,
-                   msg->attachment ? QVariant(msg->attachment->local_url) : QVariant(),
-                   msg->attachment ? msg->attachment->type : Enums::AttachmentType::File);
+       createSendMessage(false, msg->message_id, msg->recipient, msg->message, msg->attachment);
    }
 }
 
@@ -848,7 +846,7 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
 
     if (sender == currentUser()) {
         QString recipient = message.to().split("@").first();
-        m_sqlConversations->createMessage(recipient, decryptedString, message.id());
+        m_sqlConversations->createMessage(recipient, decryptedString, message.id(), NullOptional); // FIXME(fpohtmeh): attachment?
         m_sqlConversations->setMessageStatus(message.id(), StMessage::Status::MST_SENT);
         // ensure private chat with recipient exists
         m_sqlChatModel->createPrivateChat(recipient);
@@ -873,8 +871,7 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::sendMessage(bool createNew, QString messageId, const QString &to, const QString &message,
-                          const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType) {
+VSQMessenger::createSendMessage(bool createNew, QString messageId, const QString &to, const QString &message, const OptionalAttachment &attachment) {
     return QtConcurrent::run([=]() -> EnResult {
         static const size_t _encryptedMsgSzMax = 20 * 1024;
         uint8_t encryptedMessage[_encryptedMsgSzMax];
@@ -913,21 +910,15 @@ VSQMessenger::sendMessage(bool createNew, QString messageId, const QString &to, 
         msg.setReceiptRequested(true);
         msg.setId(messageId);
 
-        // Save message to DB in native thread
-        if(createNew){
-            QMetaObject::invokeMethod(m_sqlConversations, "createMessage",
-                Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message), Q_ARG(QString, msg.id()));
+        if(createNew) {
+            m_sqlConversations->createMessage(to, message, messageId, attachment);
         }
 
-        QMetaObject::invokeMethod(m_sqlChatModel, "updateLastMessage",
-            Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message));
-
+        m_sqlChatModel->updateLastMessage(to, message);
         if (m_xmpp.sendPacket(msg)) {
-            QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus", Qt::QueuedConnection, Q_ARG(QString, msg.id()),
-                Q_ARG(StMessage::Status, StMessage::Status::MST_SENT));
+            m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_SENT);
         } else {
-            QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus", Qt::QueuedConnection, Q_ARG(QString, msg.id()),
-                Q_ARG(StMessage::Status, StMessage::Status::MST_FAILED));
+            m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
         }
 
         return MRES_OK;
@@ -936,9 +927,15 @@ VSQMessenger::sendMessage(bool createNew, QString messageId, const QString &to, 
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
+VSQMessenger::sendMessage(const QString &to, const QString &message,
+                          const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
 {
-    return sendMessage(true, VSQUtils::createUuid(), to, message, attachmentUrl, attachmentType);
+    const auto attachment = m_attachmentBuilder.build(attachmentUrl.toUrl(), attachmentType);
+    auto msg = message;
+    if (msg.isEmpty()) {
+        msg = attachment->fileName(); // FIXME(fpohtmeh): remove
+    }
+    return createSendMessage(true, VSQUtils::createUuid(), to, msg, attachment);
 }
 
 /******************************************************************************/

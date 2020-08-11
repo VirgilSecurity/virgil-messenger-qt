@@ -6,19 +6,21 @@ import com.virgilsecurity.messenger 1.0
 import "../base"
 import "../theme"
 
+
 Control {
     id: chatMessage
     height: row.implicitHeight
     width: loader.item.width
 
-    property string text
-    property alias author: avatar.nickname
-
-    property bool messageInARow: false
-    property bool firstMessageInARow: true
-    property var variant
-    property var timeStamp
+    property string body
+    property string time: ""
+    property alias nickname: avatar.nickname
+    property bool isUser: false
     property string status: ""
+    property bool failed: false
+
+    property bool inRow: false
+    property bool firstInRow: true
 
     property string attachmentId
     property string attachmentSize
@@ -29,13 +31,11 @@ Control {
     property int attachmentUploaded
     property bool attachmentLoadingFailed
 
-    readonly property bool isUser: author === Messenger.currentUser
-
     QtObject {
         id: d
         readonly property bool hasAttachment: attachmentId.length > 0
         readonly property color background: isUser ? "#59717D" : Theme.mainBackgroundColor
-        readonly property double maxWidth: chatMessage.parent.width - 40
+        readonly property double maxWidth: chatPage.width - 40
         readonly property bool isPicture: attachmentType == Enums.AttachmentType.Picture
         readonly property double defaultRadius: 4
     }
@@ -55,7 +55,7 @@ Control {
             font.pointSize: UiHelper.fixFontSz(15)
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             readOnly: true
-            text: chatMessage.text
+            text: chatMessage.body
             visible: !d.hasAttachment
 
             property var contextMenu: ContextMenu {
@@ -108,7 +108,7 @@ Control {
                     readonly property double maxWidth: d.maxWidth - row.spacing - image.width - leftPadding - rightPadding
 
                     Label {
-                        text: chatMessage.text
+                        text: chatMessage.body
                         color: "white"
                         font.pixelSize: UiHelper.fixFontSz(16)
                         Layout.maximumWidth: Math.min(implicitWidth, column.maxWidth)
@@ -177,7 +177,7 @@ Control {
         Avatar {
             id: avatar
             width: 30
-            opacity: firstMessageInARow ? 1 : 0
+            opacity: firstInRow ? 1 : 0
             diameter: 30
             pointSize: UiHelper.fixFontSz(15)
         }
@@ -187,11 +187,11 @@ Control {
 
             // Nickname + timestamp
             RowLayout {
-                visible: firstMessageInARow
+                visible: firstInRow
                 spacing: 6
 
                 Label {
-                    text: author
+                    text: nickname
                     height: 16
                     color: Theme.labelColor
                     font.pixelSize: UiHelper.fixFontSz(16)
@@ -199,7 +199,7 @@ Control {
 
                 Label {
                     Layout.alignment: Qt.AlignBottom
-                    text: "•  %1".arg(Qt.formatDateTime(timeStamp, "hh:mm"))
+                    text: "•  %1".arg(time)
                     color: Theme.labelColor
 
                     font.pixelSize: UiHelper.fixFontSz(11)
@@ -250,7 +250,7 @@ Control {
                 }
 
                 Rectangle {
-                    visible: messageInARow
+                    visible: inRow
                     anchors.bottom: parent.bottom
                     height: 22
                     width: 22
@@ -273,7 +273,13 @@ Control {
             Label {
                 id: statusLabel
                 height: 12
-                text: isUser ? "" : chatMessage.status
+                text: switch (status) {
+                    case "0": return "sending"
+                    case "1": return "sent"
+                    case "2": return "delivered"
+                    case "4": return "failed"
+                    default: return ""
+                }
                 color: chatMessage.failed ? "red" : Theme.labelColor
                 font.pixelSize: UiHelper.fixFontSz(11)
             }

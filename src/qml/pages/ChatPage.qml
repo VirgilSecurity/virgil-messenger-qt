@@ -9,6 +9,7 @@ import "../theme"
 import "../components"
 
 Page {
+    id: chatPage
 
     property string recipient
 
@@ -82,16 +83,25 @@ Page {
         }
 
         spacing: 5
-        // verticalLayoutDirection: ListView.BottomToTop
-        // model: ConversationsModel
         delegate: ChatMessage {
-            text: message
-            author: model.author
-            timeStamp: model.timestamp
-            variant: model.author === Messenger.currentUser ? "light" : "dark"
-            messageInARow: model.messageInARow
-            firstMessageInARow: model.firstMessageInARow
-            status: (model.author === Messenger.currentUser) ? model.status : ""
+            body: model.message
+            time: Qt.formatDateTime(model.timestamp, "hh:mm")
+            nickname: model.author
+            isUser: model.author === Messenger.currentUser
+            status: isUser ? model.status : "none"
+            failed: model.status === "4"
+
+            inRow: model.messageInARow
+            firstInRow: model.firstMessageInARow
+
+            attachmentId: model.attachmentId
+            attachmentSize: model.attachmentSize
+            attachmentDisplaySize: model.attachmentDisplaySize
+            attachmentType: model.attachmentType
+            attachmentLocalUrl: model.attachmentLocalUrl
+            attachmentLocalPreview: model.attachmentLocalPreview
+            attachmentUploaded: model.attachmentUploaded
+            attachmentLoadingFailed: model.attachmentLoadingFailed
         }
 
         onCountChanged: {

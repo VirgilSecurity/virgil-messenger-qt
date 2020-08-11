@@ -44,6 +44,29 @@ class VSQSqlConversationModel : public QSqlTableModel
     Q_OBJECT
     Q_PROPERTY(QString recipient READ recipient WRITE setRecipient NOTIFY recipientChanged)
 
+    enum Roles
+    {
+        AuthorRole = Qt::UserRole,
+        RecipientRole,
+        TimestampRole,
+        MessageRole,
+        StatusRole,
+        MessageIdRole,
+
+        AttachmentIdRole,
+        AttachmentSizeRole,
+        AttachmentTypeRole,
+        AttachmentLocalUrlRole,
+        AttachmentLocalPreviewRole,
+        AttachmentUploadedRole,
+        AttachmentLoadingFailedRole,
+
+        FirstInRowRole,
+        InRowRole,
+        DayRole,
+        AttachmentDisplaySizeRole,
+    };
+
 public:
     VSQSqlConversationModel(QObject *parent = nullptr);
 
@@ -75,16 +98,7 @@ public:
     roleNames() const override;
 
     Q_INVOKABLE void
-    createMessage(QString recipient, QString message, QString externalId);
-
-    Q_INVOKABLE void
-    receiveMessage(const QString messageId, const QString author, const QString message);
-
-    Q_INVOKABLE void
     setAsRead(const QString &author);
-
-    Q_INVOKABLE void
-    setMessageStatus(const QString &messageId, const StMessage::Status status);
 
     int
     getMessageCount(const QString &user, const StMessage::Status status);
@@ -93,8 +107,11 @@ public:
     getMessages(const QString &user, const StMessage::Status status);
 
 signals:
-    void
-    recipientChanged();
+    void createMessage(const QString &recipient, const QString &message, const QString &messageId, const OptionalAttachment &attachment);
+    void receiveMessage(const QString &messageId, const QString &author, const QString &message);
+    void setMessageStatus(const QString &messageId, const StMessage::Status status);
+
+    void recipientChanged();
 
 private:
     QString escapedUserName() const;
@@ -113,6 +130,10 @@ private:
 
     QString
     _contactsTableName() const;
+
+    void onCreateMessage(const QString &recipient, const QString &message, const QString &messageId, const OptionalAttachment &attachment);
+    void onReceiveMessage(const QString &messageId, const QString &author, const QString &message);
+    void onSetMessageStatus(const QString &messageId, const StMessage::Status status);
 };
 
 #endif // VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H

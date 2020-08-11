@@ -135,11 +135,11 @@ public slots:
     addContact(QString contact);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
+    sendMessage(const QString &to, const QString &message,
+                const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    sendMessage(bool createNew, QString messageId, const QString &to, const QString &text,
-                const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
+    createSendMessage(bool createNew, QString messageId, const QString &to, const QString &text, const OptionalAttachment &attachment);
 
     Q_INVOKABLE void
     setStatus(VSQMessenger::EnStatus status);
