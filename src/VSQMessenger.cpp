@@ -119,7 +119,7 @@ VSQMessenger::VSQMessenger()
     connect(this, SIGNAL(fireError(QString)), this, SLOT(disconnect()));
 
     // Connect XMPP signals
-    connect(&m_xmpp, SIGNAL(connected()), this, SLOT(onConnected()));
+    connect(&m_xmpp, SIGNAL(connected()), this, SLOT(onConnected()), Qt::QueuedConnection);
     connect(&m_xmpp, SIGNAL(disconnected()), this, SLOT(onDisconnected()));
     connect(&m_xmpp, SIGNAL(error(QXmppClient::Error)), this, SLOT(onError(QXmppClient::Error)));
     connect(&m_xmpp, SIGNAL(messageReceived(const QXmppMessage &)), this, SLOT(onMessageReceived(const QXmppMessage &)));
@@ -759,11 +759,15 @@ VSQMessenger::onConnected() {
 /******************************************************************************/
 void
 VSQMessenger::_sendFailedMessages() {
-   QList<StMessage*> messages = m_sqlConversations->getMessages(m_user,StMessage::Status::MST_FAILED);
-   for(int i = 0; i < messages.length(); i++){
-       const auto &msg = messages[i];
-       createSendMessage(false, msg->message_id, msg->recipient, msg->message, msg->attachment);
-   }
+   auto messages = m_sqlConversations->getMessages(m_user, StMessage::Status::MST_FAILED);
+   QtConcurrent::run([=]() {
+       for (int i = 0; i < messages.length(); i++) {
+           const auto &msg = messages[i];
+           if (MRES_OK != _sendMessageInternal(false, msg.message_id, msg.recipient, msg.message, msg.attachment)) {
+               break;
+           }
+       }
+   });
 }
 
 QString VSQMessenger::createJson(const QString &messageId, const QString &message, const OptionalAttachment &attachment)
@@ -822,16 +826,6 @@ StMessage VSQMessenger::parseJson(const QJsonDocument &json)
         message.message = attachment.fileName();
     }
     return message;
-}
-
-VSQMessenger::EnResult VSQMessenger::sendXmppMessage(const QXmppMessage &msg)
-{
-    if (m_xmpp.sendPacket(msg)) {
-        m_sqlConversations->setMessageStatus(msg.id(), StMessage::Status::MST_SENT);
-    } else {
-        m_sqlConversations->setMessageStatus(msg.id(), StMessage::Status::MST_FAILED);
-    }
-    return MRES_OK;
 }
 
 /******************************************************************************/
@@ -949,43 +943,57 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
 }
 
 /******************************************************************************/
+
+VSQMessenger::EnResult
+VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, const QString &to, const QString &message, const OptionalAttachment &attachment)
+{
+    QMutexLocker _guard(&m_messageGuard);
+    static const size_t _encryptedMsgSzMax = 20 * 1024;
+    uint8_t encryptedMessage[_encryptedMsgSzMax];
+    size_t encryptedMessageSz = 0;
+
+    // Create JSON-formatted message to be sent
+    const QString internalJson = createJson(messageId, message, attachment);
+    qDebug() << internalJson;
+
+    // Encrypt message
+    if (VS_CODE_OK != vs_messenger_virgil_encrypt_msg(
+                     to.toStdString().c_str(),
+                     internalJson.toStdString().c_str(),
+                     encryptedMessage,
+                     _encryptedMsgSzMax,
+                     &encryptedMessageSz)) {
+        VS_LOG_WARNING("Cannot encrypt message to be sent");
+        return MRES_ERR_ENCRYPTION;
+    }
+
+    // Send encrypted message
+    QString toJID = to + "@" + _xmppURL();
+    QString fromJID = currentUser() + "@" + _xmppURL();
+    QString encryptedStr = QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage));
+
+    QXmppMessage msg(fromJID, toJID, encryptedStr);
+    msg.setReceiptRequested(true);
+    msg.setId(messageId);
+
+    if(createNew) {
+        m_sqlConversations->createMessage(to, message, messageId, attachment);
+    }
+    m_sqlChatModel->updateLastMessage(to, message);
+
+    if (m_xmpp.sendPacket(msg)) {
+        m_sqlConversations->setMessageStatus(msg.id(), StMessage::Status::MST_SENT);
+    } else {
+        m_sqlConversations->setMessageStatus(msg.id(), StMessage::Status::MST_FAILED);
+    }
+    return MRES_OK;
+}
+
+/******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::createSendMessage(bool createNew, QString messageId, const QString &to, const QString &message, const OptionalAttachment &attachment) {
+VSQMessenger::createSendMessage(bool createNew, const QString &messageId, const QString &to, const QString &message, const OptionalAttachment &attachment) {
     return QtConcurrent::run([=]() -> EnResult {
-        static const size_t _encryptedMsgSzMax = 20 * 1024;
-        uint8_t encryptedMessage[_encryptedMsgSzMax];
-        size_t encryptedMessageSz = 0;
-
-        // Create JSON-formatted message to be sent
-        const QString internalJson = createJson(messageId, message, attachment);
-        qDebug() << internalJson;
-
-        // Encrypt message
-        if (VS_CODE_OK != vs_messenger_virgil_encrypt_msg(
-                         to.toStdString().c_str(),
-                         internalJson.toStdString().c_str(),
-                         encryptedMessage,
-                         _encryptedMsgSzMax,
-                         &encryptedMessageSz)) {
-            VS_LOG_WARNING("Cannot encrypt message to be sent");
-            return MRES_ERR_ENCRYPTION;
-        }
-
-        // Send encrypted message
-        QString toJID = to + "@" + _xmppURL();
-        QString fromJID = currentUser() + "@" + _xmppURL();
-        QString encryptedStr = QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage));
-
-        QXmppMessage msg(fromJID, toJID, encryptedStr);
-        msg.setReceiptRequested(true);
-        msg.setId(messageId);
-
-        if(createNew) {
-            m_sqlConversations->createMessage(to, message, messageId, attachment);
-        }
-        m_sqlChatModel->updateLastMessage(to, message);
-
-       return sendXmppMessage(msg);
+        return _sendMessageInternal(createNew, messageId, to, message, attachment);
     });
 }
 

@@ -136,11 +136,10 @@ public slots:
     addContact(QString contact);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    sendMessage(const QString &to, const QString &message,
-                const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
+    sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    createSendMessage(bool createNew, QString messageId, const QString &to, const QString &text, const OptionalAttachment &attachment);
+    createSendMessage(bool createNew, const QString &messageId, const QString &to, const QString &text, const OptionalAttachment &attachment);
 
     Q_INVOKABLE void
     setStatus(VSQMessenger::EnStatus status);
@@ -208,6 +207,7 @@ private:
     QThread *m_transferThread;
 
     QMutex m_connectGuard;
+    QMutex m_messageGuard;
     QString m_user;
     QString m_userId;
     QString m_deviceId;
@@ -274,9 +274,10 @@ private:
     void _sendFailedMessages();
 
     QString createJson(const QString &messageId, const QString &message, const OptionalAttachment &attachment);
+
     StMessage parseJson(const QJsonDocument &json);
 
-    EnResult sendXmppMessage(const QXmppMessage &msg);
+    VSQMessenger::EnResult _sendMessageInternal(bool createNew, const QString &messageId, const QString &to, const QString &message, const OptionalAttachment &attachment);
 };
 
 #endif // VIRGIL_IOTKIT_QT_MESSENGER_H

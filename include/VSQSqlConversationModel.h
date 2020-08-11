@@ -103,8 +103,7 @@ public:
     int
     getMessageCount(const QString &user, const StMessage::Status status);
 
-    QList<StMessage*>
-    getMessages(const QString &user, const StMessage::Status status);
+    QList<StMessage> getMessages(const QString &user, const StMessage::Status status);
 
 signals:
     void createMessage(const QString &recipient, const QString &message, const QString &messageId, const OptionalAttachment &attachment);

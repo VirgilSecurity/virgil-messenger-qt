@@ -298,13 +298,11 @@ VSQSqlConversationModel::getLastMessage(const QString &user) const {
     return message;
 }
 
-/******************************************************************************/
-QList<StMessage*>
-VSQSqlConversationModel::getMessages(const QString &user, const StMessage::Status status) {
+QList<StMessage> VSQSqlConversationModel::getMessages(const QString &user, const StMessage::Status status) {
     QSqlQueryModel model;
     QString query;
 
-    QList<StMessage*> messages;
+    QList<StMessage> messages;
 
     query = QString("SELECT message, recipient, message_id FROM %1 WHERE status = %2 AND author = \"%3\"")
             .arg(_tableName()).arg(static_cast<int>(status)).arg(user);
@@ -316,11 +314,11 @@ VSQSqlConversationModel::getMessages(const QString &user, const StMessage::Statu
         return messages;
     }
 
-    for (int i = 0; i < c; i++){
-        StMessage *message = new StMessage();
-        message->message = model.record(i).value("message").toString();
-        message->recipient = model.record(i).value("recipient").toString();
-        message->message_id = model.record(i).value("message_id").toString();
+    for (int i = 0; i < c; i++) {
+        StMessage message;
+        message.message = model.record(i).value("message").toString();
+        message.recipient = model.record(i).value("recipient").toString();
+        message.message_id = model.record(i).value("message_id").toString();
         messages.append(message);
     }
 
