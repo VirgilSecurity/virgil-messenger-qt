@@ -942,7 +942,8 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
     // Encrypt message
     if (VS_CODE_OK != vs_messenger_virgil_encrypt_msg(
                      to.toStdString().c_str(),
-                     internalJson.toStdString().c_str(),
+                     reinterpret_cast<const uint8_t*>(internalJson.toStdString().c_str()),
+                     internalJson.length(),
                      encryptedMessage,
                      _encryptedMsgSzMax,
                      &encryptedMessageSz)) {
