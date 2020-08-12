@@ -31,6 +31,8 @@ ApplicationWindow {
         onFireInform: {
         }
 
+        onFireWarning: showPopupError(warningText);
+
         onFireConnecting: {
         }
 
@@ -40,7 +42,7 @@ ApplicationWindow {
         onFireAddedContact: {
         }
 
-        onFireNewMessage: {            
+        onFireNewMessage: {
         }
     }
 

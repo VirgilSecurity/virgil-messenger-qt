@@ -37,6 +37,8 @@
 
 #include "VSQCommon.h"
 
+Q_DECLARE_LOGGING_CATEGORY(lcAttachment);
+
 class VSQSettings;
 
 class VSQAttachmentBuilder
@@ -44,12 +46,14 @@ class VSQAttachmentBuilder
 public:
     explicit VSQAttachmentBuilder(VSQSettings *settings);
 
-    // Build attachment by local url and attachment type
-    OptionalAttachment build(const QUrl &url, const Attachment::Type type);
+    bool isValidUrl(const QUrl &url) const;
+
+    // Build encoded attachment by local url, attachment type and recipient
+    OptionalAttachment build(const QUrl &localUrl, const Attachment::Type type, const QString &recipient);
 
 private:
-    // Create preview image and return preview url
-    QUrl createPreviewImage(const QString &fileName) const;
+    QString createEncryptedFile(const QString &filePath, const QString &recipient) const;
+    QString createThumbnailFile(const QString &filePath) const;
 
     VSQSettings *m_settings;
 };

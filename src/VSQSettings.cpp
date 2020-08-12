@@ -48,9 +48,11 @@ VSQSettings::VSQSettings(QObject *parent)
     : QObject(parent)
 {
     m_attachmentCacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/attachments");
-    for (auto dir : { m_attachmentCacheDir })
-        if (!dir.exists() && !dir.mkpath(dir.absolutePath()))
+    for (auto dir : { m_attachmentCacheDir }) {
+        if (!dir.exists() && !dir.mkpath(dir.absolutePath())) {
             qFatal("Failed to create writable directory at %s", qPrintable(dir.absolutePath()));
+        }
+    }
 
     qCDebug(lcSettings) << "Settings";
     qCDebug(lcSettings) << "Attachment cache dir:" << attachmentCacheDir().absolutePath();
@@ -66,7 +68,7 @@ VSQSettings::~VSQSettings()
 
 int VSQSettings::attachmentMaxSize() const
 {
-    return 50 * 1024 * 1024;
+    return 25 * 1024 * 1024;
 }
 
 QDir VSQSettings::attachmentCacheDir() const
@@ -74,7 +76,7 @@ QDir VSQSettings::attachmentCacheDir() const
     return m_attachmentCacheDir;
 }
 
-QSize VSQSettings::previewMaxSize() const
+QSize VSQSettings::thumbnailMaxSize() const
 {
     return QSize(600, 400);
 }

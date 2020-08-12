@@ -56,7 +56,7 @@ public:
 
     int attachmentMaxSize() const;
     QDir attachmentCacheDir() const;
-    QSize previewMaxSize() const;
+    QSize thumbnailMaxSize() const;
 
     // Dev mode
     bool devMode() const;

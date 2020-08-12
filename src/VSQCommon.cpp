@@ -53,14 +53,14 @@ void registerCommonTypes()
 
 QString Attachment::filePath() const
 {
-    return local_url.toString();
+    return localUrl.toString();
 }
 
 QString Attachment::fileName() const
 {
-    if (!local_url.isEmpty())
-        return local_url.fileName();
-    if (!remote_url.isEmpty())
-        return remote_url.fileName();
+    if (!localUrl.isEmpty())
+        return localUrl.fileName();
+    if (!remoteUrl.isEmpty())
+        return remoteUrl.fileName();
     return QLatin1String();
 }

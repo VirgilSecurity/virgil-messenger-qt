@@ -39,6 +39,7 @@
 #include <memory>
 
 #include <QDateTime>
+#include <QFileInfo>
 #include <QLoggingCategory>
 #include <QtGlobal>
 #include <QUrl>
@@ -116,11 +117,12 @@ struct Attachment
 
     QString id;
     Type type = Type::File;
-    QUrl remote_url;
-    QUrl local_url;
-    QUrl local_preview;
-    DataSize bytesTotal = 0;
-    DataSize bytesLoaded = 0;
+    QUrl localUrl; // raw
+    QUrl encLocalUrl;
+    QUrl remoteUrl; // encrypted
+    QUrl thumbnailUrl; // local raw
+    DataSize bytesTotal = 0; // encrypted
+    DataSize bytesLoaded = 0; // encrypted
     Status status = Status::Created;
 
     QString filePath() const;

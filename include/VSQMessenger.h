@@ -155,6 +155,9 @@ signals:
     fireInform(QString informText);
 
     void
+    fireWarning(QString warningText);
+
+    void
     fireConnecting();
 
     void

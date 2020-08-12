@@ -59,7 +59,7 @@ class VSQSqlConversationModel : public QSqlTableModel
         AttachmentBytesTotalRole,
         AttachmentTypeRole,
         AttachmentLocalUrlRole,
-        AttachmentLocalPreviewRole,
+        attachmentThumbnailUrlRole,
         AttachmentStatusRole,
 
         FirstInRowRole,

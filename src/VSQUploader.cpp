@@ -86,6 +86,7 @@ void VSQUploader::onUpload(const QString &messageId, const Attachment &attachmen
     }
     emit uploadProgressChanged(messageId, total);
     emit uploadStatusChanged(messageId, Attachment::Status::Loaded);
+    // TODO(fpohtmeh): remove encrypted local file finally
 }
 
 void VSQUploader::onSlotReceived(const QXmppHttpUploadSlotIq &slot)

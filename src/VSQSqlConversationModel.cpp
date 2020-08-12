@@ -62,7 +62,9 @@ VSQSqlConversationModel::_createTable() {
         "attachment_bytes_total INTEGER,"
         "attachment_type INTEGER,"
         "attachment_local_url TEXT,"
-        "attachment_local_preview TEXT,"
+        "attachment_enc_local_url TEXT,"
+        "attachment_remote_url TEXT,"
+        "attachment_thumbnail_url TEXT,"
         "attachment_status INT,"
         ""
         "FOREIGN KEY('author') REFERENCES %2 ( name ),"
@@ -216,7 +218,7 @@ VSQSqlConversationModel::roleNames() const {
     names[AttachmentBytesTotalRole] = "attachmentBytesTotal";
     names[AttachmentTypeRole] = "attachmentType";
     names[AttachmentLocalUrlRole] = "attachmentLocalUrl";
-    names[AttachmentLocalPreviewRole] = "attachmentLocalPreview";
+    names[attachmentThumbnailUrlRole] = "attachmentThumbnailUrl";
     names[AttachmentStatusRole] = "attachmentStatus";
     names[AttachmentDisplaySizeRole] = "attachmentDisplaySize";
     names[AttachmentBytesLoadedRole] = "attachmentBytesLoaded";
@@ -393,8 +395,9 @@ void VSQSqlConversationModel::onCreateMessage(const QString &recipient, const QS
         newRecord.setValue("attachment_id", attachment->id);
         newRecord.setValue("attachment_bytes_total", attachment->bytesTotal);
         newRecord.setValue("attachment_type", static_cast<int>(attachment->type));
-        newRecord.setValue("attachment_local_url", attachment->local_url);
-        newRecord.setValue("attachment_local_preview", attachment->local_preview);
+        newRecord.setValue("attachment_local_url", attachment->localUrl);
+        newRecord.setValue("attachment_enc_local_url", attachment->encLocalUrl);
+        newRecord.setValue("attachment_thumbnail_url", attachment->thumbnailUrl);
     }
     if (!insertRecord(rowCount(), newRecord)) {
         qWarning() << "Failed to create message:" << lastError().text();
@@ -420,8 +423,7 @@ void VSQSqlConversationModel::onReceiveMessage(const QString &messageId, const Q
         newRecord.setValue("attachment_id", attachment->id);
         newRecord.setValue("attachment_bytes_total", attachment->bytesTotal);
         newRecord.setValue("attachment_type", static_cast<int>(attachment->type));
-        newRecord.setValue("attachment_local_url", attachment->local_url);
-        newRecord.setValue("attachment_local_preview", attachment->local_preview);
+        newRecord.setValue("attachment_remove_url", attachment->remoteUrl);
     }
     if (!insertRowIntoTable(newRecord)) {
         qWarning() << "Failed to save received message:" << lastError().text();

@@ -27,7 +27,7 @@ Control {
     property string attachmentDisplaySize
     property var attachmentType
     property string attachmentLocalUrl
-    property string attachmentLocalPreview
+    property string attachmentThumbnailUrl
     property int attachmentBytesLoaded
     property int attachmentStatus
 
@@ -97,7 +97,7 @@ Control {
                         width: sourceSize.width
                         height: sourceSize.height
                         fillMode: Image.PreserveAspectFit
-                        source: d.isPicture ? attachmentLocalPreview : "../resources/icons/Logo.png"
+                        source: d.isPicture ? attachmentThumbnailUrl : "../resources/icons/Logo.png"
                     }
                 }
 

@@ -100,7 +100,7 @@ Page {
             attachmentDisplaySize: model.attachmentDisplaySize
             attachmentType: model.attachmentType
             attachmentLocalUrl: model.attachmentLocalUrl
-            attachmentLocalPreview: model.attachmentLocalPreview
+            attachmentThumbnailUrl: model.attachmentThumbnailUrl
             attachmentBytesLoaded: model.attachmentBytesLoaded
             attachmentStatus: model.attachmentStatus
         }

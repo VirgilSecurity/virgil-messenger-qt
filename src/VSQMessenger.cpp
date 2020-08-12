@@ -804,7 +804,7 @@ StMessage VSQMessenger::parseJson(const QJsonDocument &json)
         Attachment attachment;
         attachment.id = VSQUtils::createUuid();
         attachment.type = Attachment::Type::File;
-        attachment.remote_url = payload["url"].toString();
+        attachment.remoteUrl = payload["url"].toString();
         attachment.bytesTotal = payload["bytesTotal"].toInt(); // TODO(fpohtmeh): get qint64
         message.attachment = attachment;
         message.message = attachment.fileName();
@@ -986,11 +986,13 @@ QFuture<VSQMessenger::EnResult>
 VSQMessenger::sendMessage(const QString &to, const QString &message,
                           const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
 {
-    const auto attachment = m_attachmentBuilder.build(attachmentUrl.toUrl(), attachmentType);
-    auto msg = message;
-    if (msg.isEmpty()) {
-        msg = attachment->fileName(); // TODO(fpohtmeh): remove?
+    const auto url = attachmentUrl.toUrl();
+    const auto attachment = m_attachmentBuilder.build(url, attachmentType, m_recipient);
+    if (!attachment && m_attachmentBuilder.isValidUrl(url)) {
+        fireWarning("Unsupported media file");
+        return QFuture<VSQMessenger::EnResult>();
     }
+    auto msg = attachment ? attachment->fileName() : message; // Display fileName as last message
     return createSendMessage(true, VSQUtils::createUuid(), to, msg, attachment);
 }
 
