@@ -452,7 +452,7 @@ void VSQSqlConversationModel::onSetMessageStatus(const QString &messageId, const
 
 void VSQSqlConversationModel::onUploadProgressChanged(const QString &messageId, const DataSize bytesUploaded)
 {
-    qCDebug(lcUploader) << "Upload progress" << bytesUploaded << messageId;
+    //qCDebug(lcUploader) << "Upload progress" << bytesUploaded << messageId;
     auto it = m_uploadInfos.find(messageId);
     if (it != m_uploadInfos.end()) {
         it->second.bytesUploaded = bytesUploaded;

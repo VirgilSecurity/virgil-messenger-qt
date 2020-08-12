@@ -36,7 +36,6 @@
 
 #include <QPixmap>
 
-#include <virgil/iot/qt/VSQIoTKit.h>
 #include <virgil/iot/messenger/messenger.h>
 
 #include "VSQSettings.h"
@@ -105,7 +104,8 @@ QString VSQAttachmentBuilder::createEncryptedFile(const QString &filePath, const
     }
     qCDebug(lcAttachment) << "Input size:" << bytes.size();
 
-    const size_t encryptedMaxSize = 2 * bytes.size();
+    // Encrypt
+    const size_t encryptedMaxSize = 10 * bytes.size();
     std::vector<uint8_t> encryptedBytes(encryptedMaxSize);
     size_t encryptedSize = 0;
     if (VS_CODE_OK != vs_messenger_virgil_encrypt_msg(
@@ -118,7 +118,23 @@ QString VSQAttachmentBuilder::createEncryptedFile(const QString &filePath, const
         return QString();
     }
     encryptedBytes.resize(encryptedSize);
-    qCWarning(lcAttachment) << "Output size:" << encryptedBytes.size();
+    qCDebug(lcAttachment) << "Encrypted size:" << encryptedSize;
+
+    // Decrypt
+    const size_t decryptedMaxSize = 10 * encryptedSize;
+    std::vector<uint8_t> decryptedBytes(decryptedMaxSize);
+    size_t decryptedSize = 0;
+    if (VS_CODE_OK != vs_messenger_virgil_decrypt_msg(
+                recipient.toStdString().c_str(),
+                reinterpret_cast<const char *>(encryptedBytes.data()),
+                decryptedBytes.data(),
+                decryptedSize - 1,
+                &decryptedSize)) {
+        qCWarning(lcAttachment) << "Cannot decrypt attachment:" << filePath;
+        return QString();
+    }
+    decryptedBytes.resize(decryptedSize);
+    qCDebug(lcAttachment) << "Decrypted size:" << decryptedSize;
     */
     return filePath;
 }

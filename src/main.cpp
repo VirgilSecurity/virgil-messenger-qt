@@ -32,9 +32,13 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <VSQApplication.h>
 #include <iostream>
-
+#include <VSQApplication.h>
+#ifdef VS_MOBILE
+#include <QGuiApplication>
+#else
+#include <QApplication>
+#endif
 #include <android/VSQAndroid.h>
 
 #if (VSQ_WEBDRIVER_DEBUG)

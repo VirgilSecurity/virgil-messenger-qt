@@ -109,7 +109,6 @@ VSQMessenger::VSQMessenger(VSQSettings *settings)
 
     m_xmpp.addExtension(m_xmppReceiptManager);
     m_xmpp.addExtension(m_xmppCarbonManager);
-    m_xmpp.addExtension(m_xmppDiscoveryManager);
 
     // Create uploader after discovery manager
     m_uploader = new VSQUploader(&m_xmpp, nullptr);

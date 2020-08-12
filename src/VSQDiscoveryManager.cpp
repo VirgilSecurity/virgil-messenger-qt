@@ -40,13 +40,14 @@
 Q_LOGGING_CATEGORY(lcDiscoveryManager, "discoman");
 
 VSQDiscoveryManager::VSQDiscoveryManager(QXmppClient *client, QObject *parent)
-    : QXmppDiscoveryManager()
+    : QObject()
     , m_client(client)
+    , m_discoveryManager(client->findExtension<QXmppDiscoveryManager>())
 {
     setParent(parent);
     connect(client, &QXmppClient::connected, this, &VSQDiscoveryManager::onClientConnected);
-    connect(this, &QXmppDiscoveryManager::infoReceived, this, &VSQDiscoveryManager::onInfoReceived);
-    connect(this, &QXmppDiscoveryManager::itemsReceived, this, &VSQDiscoveryManager::onItemsReceived);
+    connect(m_discoveryManager, &QXmppDiscoveryManager::infoReceived, this, &VSQDiscoveryManager::onInfoReceived);
+    connect(m_discoveryManager, &QXmppDiscoveryManager::itemsReceived, this, &VSQDiscoveryManager::onItemsReceived);
 }
 
 VSQDiscoveryManager::~VSQDiscoveryManager()
@@ -55,37 +56,37 @@ VSQDiscoveryManager::~VSQDiscoveryManager()
 void VSQDiscoveryManager::onClientConnected()
 {
     const auto domain = m_client->configuration().domain();
-    auto infoId = requestInfo(domain);
+    auto infoId = m_discoveryManager->requestInfo(domain);
     qCDebug(lcDiscoveryManager) << "Discovery manager info requested" << domain << "id:" << infoId;
-
-    auto itemsId = requestItems(domain);
+    auto itemsId = m_discoveryManager->requestItems(domain);
     qCDebug(lcDiscoveryManager) << "Discovery manager items requested" << domain << "id:" << itemsId;
 }
 
 void VSQDiscoveryManager::onInfoReceived(const QXmppDiscoveryIq &info)
 {
-    qCInfo(lcDiscoveryManager) << "onInfoReceived";
     if (info.from() != m_client->configuration().domain())
         return;
 
     if (info.features().contains("urn:xmpp:carbons:2")) {
         auto carbonManager = m_client->findExtension<QXmppCarbonManager>();
-        if (!carbonManager)
+        if (!carbonManager) {
             qCDebug(lcDiscoveryManager) << "Carbon manager is not found";
-        else
+        }
+        else {
+            qCDebug(lcDiscoveryManager) << "Set carbon manager enabled";
             carbonManager->setCarbonsEnabled(true);
+        }
     }
 }
 
 void VSQDiscoveryManager::onItemsReceived(const QXmppDiscoveryIq &info)
 {
-    qCInfo(lcDiscoveryManager) << "onItemsReceived";
     const auto domain = m_client->configuration().domain();
     const QList<QXmppDiscoveryIq::Item> items = info.items();
     for (const QXmppDiscoveryIq::Item &item : items) {
         if (item.jid() == domain)
             continue;
         qCDebug(lcDiscoveryManager) << "Discovery manager items requested" << item.jid();
-        requestInfo(item.jid());
+        m_discoveryManager->requestInfo(item.jid());
     }
 }

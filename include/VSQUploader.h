@@ -37,11 +37,11 @@
 
 #include <QObject>
 
+#include <QXmppHttpUploadIq.h>
+
 #include "VSQCommon.h"
 
 class QXmppClient;
-class QXmppHttpUploadRequestIq;
-class QXmppHttpUploadSlotIq;
 class QXmppUploadRequestManager;
 
 Q_DECLARE_LOGGING_CATEGORY(lcUploader);
@@ -68,5 +68,7 @@ private:
 
     QXmppUploadRequestManager *m_xmppManager;
 };
+
+Q_DECLARE_METATYPE(QXmppHttpUploadSlotIq);
 
 #endif // VSQ_UPLOADER_H
