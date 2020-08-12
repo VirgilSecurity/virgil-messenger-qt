@@ -41,6 +41,10 @@
 #include <QMap>
 #include <QTimer>
 
+#include "VSQCommon.h"
+
+Q_DECLARE_LOGGING_CATEGORY(lcNetwork);
+
 #ifdef Q_OS_MACOS
 // TODO: Remove after fixing of deprecated functionality
 #pragma GCC diagnostic push

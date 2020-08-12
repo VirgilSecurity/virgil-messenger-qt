@@ -62,13 +62,21 @@ signals:
     void uploadStatusChanged(const QString &messageId, const Enums::AttachmentStatus status);
 
 private:
+    struct Item
+    {
+        QString messageId;
+        QString slotId;
+    };
+
     void onUpload(const QString &messageId, const Attachment &attachment);
     void onSlotReceived(const QXmppHttpUploadSlotIq &slot);
     void onRequestFailed(const QXmppHttpUploadRequestIq &request);
 
     QXmppUploadRequestManager *m_xmppManager;
+    QVector<Item> m_items;
 };
 
 Q_DECLARE_METATYPE(QXmppHttpUploadSlotIq);
+Q_DECLARE_METATYPE(QXmppHttpUploadRequestIq);
 
 #endif // VSQ_UPLOADER_H

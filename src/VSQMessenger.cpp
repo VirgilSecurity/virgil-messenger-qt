@@ -815,13 +815,13 @@ StMessage VSQMessenger::parseJson(const QJsonDocument &json)
 void
 VSQMessenger::checkState() {
     if (m_xmpp.state() == QXmppClient::DisconnectedState) {
-        qDebug() << "We should be connected, but it's not so. Let's try to reconnect.";
+        qCDebug(lcNetwork) << "We should be connected, but it's not so. Let's try to reconnect.";
 #if VS_ANDROID
         emit fireError(tr("Disconnected ..."));
 #endif
         _reconnect();
     } else {
-        qDebug() << "Connection is ok";
+        qCDebug(lcNetwork) << "Connection is ok";
     }
 }
 

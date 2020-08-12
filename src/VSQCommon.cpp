@@ -53,7 +53,7 @@ void registerCommonTypes()
 
 QString Attachment::filePath() const
 {
-    return localUrl.toString();
+    return encLocalUrl.toLocalFile();
 }
 
 QString Attachment::fileName() const
