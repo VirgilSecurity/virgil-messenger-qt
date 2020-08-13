@@ -31,6 +31,8 @@ Control {
     property int attachmentBytesLoaded
     property int attachmentStatus
 
+    signal saveAttachmentAs()
+
     QtObject {
         id: d
         readonly property bool hasAttachment: attachmentId.length > 0
@@ -163,8 +165,8 @@ Control {
                 compact: true
 
                 Action {
-                    text: qsTr("Save as...")
-                    onTriggered: console.log("Feature is not implemented")
+                    text: qsTr("Save As...")
+                    onTriggered: chatMessage.saveAttachmentAs()
                 }
             }
         }
@@ -232,6 +234,12 @@ Control {
                         contextMenu.open()
                         eventPoint.accepted = false
                     }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.LeftButton
+                    onClicked: chatMessage.saveAttachmentAs()
                 }
 
                 Rectangle {

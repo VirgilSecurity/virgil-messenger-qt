@@ -64,3 +64,8 @@ QString Attachment::fileName() const
         return remoteUrl.fileName();
     return QLatin1String();
 }
+
+QString Attachment::fileExtension() const
+{
+    return QFileInfo(fileName()).completeSuffix();
+}

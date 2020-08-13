@@ -46,6 +46,7 @@ class QNetworkAccessManager;
 class QXmppClient;
 class QXmppUploadRequestManager;
 
+class VSQSettings;
 class VSQTransfer;
 
 Q_DECLARE_LOGGING_CATEGORY(lcTransferManager);
@@ -55,7 +56,7 @@ class VSQTransferManager : public QObject
     Q_OBJECT
 
 public:
-    VSQTransferManager(QXmppClient *client, QNetworkAccessManager *networkAccessManager, QObject *parent);
+    VSQTransferManager(QXmppClient *client, QNetworkAccessManager *networkAccessManager, VSQSettings *settings, QObject *parent);
     ~VSQTransferManager() override;
 
 signals:
@@ -64,21 +65,28 @@ signals:
     void uploadUrlErrorOccured(const QString &messageId);
 
     void startUpload(const QString &messageId, const Attachment &attachment);
+    void startDownload(const QString &messageId, const Attachment &attachment);
+
     void progressChanged(const QString &messageId, const DataSize bytesReceived, const DataSize bytesTotal);
     void statusChanged(const QString &messageId, const Enums::AttachmentStatus status);
+    void fileDownloaded(const QString &messageId, const QUrl &localUrl);
 
 private:
     VSQTransfer *findUploadBySlotId(const QString &slotId);
     VSQTransfer *findTransferByMessageId(const QString &messageId);
     void removeTransfer(VSQTransfer *transfer);
     void abortTransfer(VSQTransfer *transfer);
+    void startTransfer(VSQTransfer *transfer);
 
     void onRequestUploadUrl(const QString &messageId, const QString &fileName);
     void onSlotReceived(const QXmppHttpUploadSlotIq &slot);
     void onRequestFailed(const QXmppHttpUploadRequestIq &request);
+
     void onStartUpload(const QString &messageId, const Attachment &attachment);
+    void onStartDownload(const QString &messageId, const Attachment &attachment);
 
     QNetworkAccessManager *m_networkAccessManager;
+    VSQSettings *m_settings;
     QXmppUploadRequestManager *m_xmppManager;
     QVector<VSQTransfer *> m_transfers; // FIXME(fpohtmeh): add mutex?
 };

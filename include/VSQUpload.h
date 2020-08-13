@@ -35,8 +35,6 @@
 #ifndef VSQ_UPLOAD_H
 #define VSQ_UPLOAD_H
 
-#include <QNetworkReply>
-
 #include "VSQTransfer.h"
 
 class VSQUpload : public VSQTransfer
@@ -44,23 +42,15 @@ class VSQUpload : public VSQTransfer
     Q_OBJECT
 
 public:
-    VSQUpload(QNetworkAccessManager *networkAccessManager, const QString &messageId, const QString &slotId, const QString &fileName, QObject *parent);
+    VSQUpload(QNetworkAccessManager *networkAccessManager, const QString &messageId, const QString &slotId, QObject *parent);
     ~VSQUpload() override;
 
     QString slotId() const;
 
-    void setAttachment(const Attachment &attachment);
-
     void start() override;
-    void abort() override;
 
 private:
-    void onNetworkReplyError(QNetworkReply::NetworkError error, QNetworkReply *reply);
-    void cleanupReply(QNetworkReply *reply);
-
     QString m_slotId;
-    QString m_fileName;
-    Attachment m_attachment;
 };
 
 #endif // VSQ_UPLOAD_H

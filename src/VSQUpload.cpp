@@ -37,20 +37,15 @@
 #include <QMimeDatabase>
 #include <QNetworkReply>
 
-VSQUpload::VSQUpload(QNetworkAccessManager *networkAccessManager, const QString &messageId, const QString &slotId, const QString &fileName, QObject *parent)
+VSQUpload::VSQUpload(QNetworkAccessManager *networkAccessManager, const QString &messageId, const QString &slotId, QObject *parent)
     : VSQTransfer(networkAccessManager, messageId, parent)
     , m_slotId(slotId)
-    , m_fileName(fileName)
-{
-    qCDebug(lcTransferManager) << "Created upload. Filename:" << m_fileName
-                        << "message id:" << messageId << "slot id:" << slotId;
-}
+{}
 
 VSQUpload::~VSQUpload()
 {
-    // FIXME(fpohtmeh): remove encrypted local file on success
 #ifdef VS_DEVMODE
-    qCDebug(lcDev) << "~Upload";
+    qCDebug(lcDev) << "~Upload" << messageId();
 #endif
 }
 
@@ -59,27 +54,18 @@ QString VSQUpload::slotId() const
     return m_slotId;
 }
 
-void VSQUpload::setAttachment(const Attachment &attachment)
-{
-    const auto fileName = attachment.localUrl.toLocalFile();
-    if (fileName != m_fileName) {
-        qFatal("Attachment has different filename: %s -> %s", qPrintable(fileName), qPrintable(m_fileName));
-    }
-    m_attachment = attachment;
-}
-
 void VSQUpload::start()
 {
     if (m_running) {
-        qCWarning(lcTransferManager) << "Started again a running upload";
+        qCWarning(lcTransferManager) << "Cannot start again a running upload";
         return;
     }
-    qCDebug(lcTransferManager) << QString("Started upload %1 / %2 / %3").arg(messageId(), m_fileName, m_attachment.remoteUrl.toString());
+    qCDebug(lcTransferManager) << QString("Started upload %1 / %2 / %3")
+                                  .arg(messageId(), m_attachment.filePath(), m_attachment.remoteUrl.toString());
     m_running = true;
 
-    auto file = new QFile(m_attachment.filePath(), this);
-    connect(this, &VSQUpload::finished, file, &QFile::deleteLater);
-    connect(this, &VSQUpload::failed, file, &QFile::deleteLater);
+    // Check file for reading
+    auto file = getAttachmentFile();
     if (!file->open(QFile::ReadOnly)) {
         emit failed(QString("Unable to open for reading:").arg(m_attachment.filePath()));
         return;
@@ -93,38 +79,5 @@ void VSQUpload::start()
     request.setHeader(QNetworkRequest::ContentLengthHeader, m_attachment.bytesTotal);
     // Create & connect reply
     auto reply = m_networkAccessManager->put(request, file);
-#ifdef VS_DEVMODE
-    qCDebug(lcDev) << "Created reply:" << reply;
-#endif
-    connect(reply, &QNetworkReply::uploadProgress, this, &VSQUpload::progressChanged);
-    connect(reply, &QNetworkReply::finished, this, &VSQUpload::finished);
-    connect(reply, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error),
-            this, std::bind(&VSQUpload::onNetworkReplyError, this, args::_1, reply));
-    connect(this, &VSQUpload::finished, reply, std::bind(&VSQUpload::cleanupReply, this, reply));
-    connect(this, &VSQUpload::failed, reply, std::bind(&VSQUpload::cleanupReply, this, reply));
-}
-
-void VSQUpload::abort()
-{
-    if (!m_running) {
-        return;
-    }
-    m_running = false;
-    const QString message = QString("Aborted upload %1 / %2 / %3").arg(messageId(), m_fileName, m_attachment.remoteUrl.toString());
-    qCDebug(lcTransferManager) << message;
-    emit failed(message);
-}
-
-void VSQUpload::onNetworkReplyError(QNetworkReply::NetworkError error, QNetworkReply *reply)
-{
-    emit failed(QString("Network error (code %1): %2").arg(error).arg(reply->errorString()));
-}
-
-void VSQUpload::cleanupReply(QNetworkReply *reply)
-{
-    m_running = false;
-    reply->deleteLater();
-#ifdef VS_DEVMODE
-    qCDebug(lcDev) << "Cleanuped reply:" << reply;
-#endif
+    connectReply(reply);
 }

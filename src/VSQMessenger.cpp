@@ -111,7 +111,7 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSetti
     m_xmpp.addExtension(m_xmppCarbonManager);
 
     // Create transferManager after discovery manager
-    m_transferManager = new VSQTransferManager(&m_xmpp, networkAccessManager, this);
+    m_transferManager = new VSQTransferManager(&m_xmpp, networkAccessManager, m_settings, this);
     m_sqlConversations->connectTransferManager(m_transferManager);
 
     // Signal connection
@@ -121,7 +121,7 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSetti
     // Connect XMPP signals
     connect(&m_xmpp, SIGNAL(connected()), this, SLOT(onConnected()), Qt::QueuedConnection);
     connect(&m_xmpp, SIGNAL(disconnected()), this, SLOT(onDisconnected()));
-    connect(&m_xmpp, SIGNAL(error(QXmppClient::Error)), this, SLOT(onError(QXmppClient::Error)));
+    connect(&m_xmpp, &QXmppClient::error, this, &VSQMessenger::onError);
     connect(&m_xmpp, SIGNAL(messageReceived(const QXmppMessage &)), this, SLOT(onMessageReceived(const QXmppMessage &)));
     connect(&m_xmpp, SIGNAL(presenceReceived(const QXmppPresence &)), this, SLOT(onPresenceReceived(const QXmppPresence &)));
     connect(&m_xmpp, SIGNAL(iqReceived(const QXmppIq &)), this, SLOT(onIqReceived(const QXmppIq &)));
@@ -219,7 +219,7 @@ VSQMessenger::_connect(QString userWithEnv, QString deviceId, QString userId, bo
 
     const int cur_val = cnt++;
 
-    qDebug() << ">>>>>>>>>>> _connect: START " << cur_val;
+    qCDebug(lcNetwork) << ">>>>>>>>>>> _connect: START " << cur_val;
 
     // Update users list
     _addToUsersList(userWithEnv);
@@ -775,7 +775,7 @@ StMessage VSQMessenger::parseJson(const QJsonDocument &json)
         attachment.id = VSQUtils::createUuid();
         attachment.type = Attachment::Type::File;
         attachment.remoteUrl = payload["url"].toString();
-        attachment.bytesTotal = payload["bytesTotal"].toInt(); // TODO(fpohtmeh): get qint64
+        attachment.bytesTotal = static_cast<qint64>(payload["bytesTotal"].toDouble());
         message.attachment = attachment;
         message.message = attachment.fileName();
     }
@@ -884,13 +884,16 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
     // Add sender to contact
     // m_sqlContacts->addContact(sender);
     m_sqlChatModel->createPrivateChat(sender);
-
     // Save message to DB
     m_sqlConversations->receiveMessage(message.id(), sender, msg->message, msg->attachment);
-
     m_sqlChatModel->updateLastMessage(sender, msg->message);
     if (sender != m_recipient)
         m_sqlChatModel->updateUnreadMessageCount(sender);
+
+    // Download attachment
+    if (msg->attachment) {
+        m_transferManager->startDownload(message.id(), *msg->attachment);
+    }
 
     // Inform system about new message
     emit fireNewMessage(sender, msg->message);
@@ -984,7 +987,7 @@ VSQMessenger::createSendAttachment(bool createNew, const QString &messageId, con
                     loop.quit();
                 }
             });
-            m_transferManager->requestUploadUrl(messageId, attachment->encLocalUrl.toLocalFile());
+            m_transferManager->requestUploadUrl(messageId, attachment->filePath());
             timer.start(1000);
             loop.exec();
         }

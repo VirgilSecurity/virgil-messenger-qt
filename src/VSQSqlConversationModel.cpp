@@ -210,7 +210,7 @@ VSQSqlConversationModel::roleNames() const {
     names[TimestampRole] = "timestamp";
     names[MessageRole] = "message";
     names[StatusRole] = "status";
-    names[MessageIdRole] = "message_id";
+    names[MessageIdRole] = "messageId";
     names[FirstInRowRole] = "firstMessageInARow";
     names[InRowRole] = "messageInARow";
     names[DayRole] = "day";
@@ -343,6 +343,33 @@ void VSQSqlConversationModel::connectTransferManager(VSQTransferManager *manager
 {
     connect(manager, &VSQTransferManager::statusChanged, this, &VSQSqlConversationModel::onAttachmentStatusChanged);
     connect(manager, &VSQTransferManager::progressChanged, this, &VSQSqlConversationModel::onAttachmentProgressChanged);
+    connect(manager, &VSQTransferManager::fileDownloaded, this, &VSQSqlConversationModel::onAttachmentFileDownloaded);
+}
+
+void VSQSqlConversationModel::saveAttachmentAs(const QString &messageId, const QVariant &fileUrl)
+{
+    // Get attachment info
+    QSqlQueryModel model;
+    model.setQuery(QString("SELECT * FROM %1 WHERE message_id = \"%2\"").arg(_tableName()).arg(messageId));
+    const auto record = model.record(0);
+    const auto attachmentId = record.value("attachment_id").toString();
+    if (attachmentId.isEmpty()) {
+        qWarning() << "There is no attachment for message:" << messageId;
+        return;
+    }
+    const auto encLocalUrl = QUrl(record.value("attachment_enc_local_url").toString());
+    const auto localUrl = QUrl(record.value("attachment_local_url").toString());
+    qDebug() << "Attachment found! Message id:" << messageId
+             << "local path:"  << localUrl << "enc local path:" << encLocalUrl;
+    if (localUrl.isEmpty()) {
+        qWarning() << "Attachment local url is empty!";
+    }
+    else {
+        qDebug() << "Copying" << localUrl.toLocalFile() << fileUrl.toString();
+        auto destUrl = QUrl(fileUrl.toString());
+        QFile::copy(localUrl.toLocalFile(), destUrl.toLocalFile());
+        emit attachmentSaved(QLatin1String("Attachment was saved as: ") + destUrl.fileName());
+    }
 }
 
 /******************************************************************************/
@@ -476,10 +503,24 @@ void VSQSqlConversationModel::onAttachmentStatusChanged(const QString &messageId
         }
         // Write status to DB
         QSqlQuery model;
-        auto query = QString("UPDATE %1 SET attachment_status = %2 WHERE message_id = \"%3\"")
+        auto query = QString("UPDATE %1 SET attachment_status = %2 WHERE message_id = '%3'")
                 .arg(_tableName()).arg(static_cast<int>(status)).arg(messageId);
         model.prepare(query);
         model.exec();
         select();
     }
+}
+
+void VSQSqlConversationModel::onAttachmentFileDownloaded(const QString &messageId, const QUrl &encLocalUrl)
+{
+    qCDebug(lcTransferManager) << "Attacment file downloaded:" << messageId << encLocalUrl.toLocalFile();
+    // FIXME(fpohtmeh): encode attachment here
+    const auto localUrl = encLocalUrl;
+    // Write url to DB
+    QSqlQuery model;
+    auto query = QString("UPDATE %1 SET attachment_enc_local_url = '%2', attachment_local_url = '%3' WHERE message_id = '%4'")
+            .arg(_tableName(), encLocalUrl.toString(), localUrl.toString(), messageId);
+    model.prepare(query);
+    model.exec();
+    select();
 }

@@ -127,6 +127,7 @@ struct Attachment
 
     QString filePath() const;
     QString fileName() const;
+    QString fileExtension() const;
 };
 Q_DECLARE_METATYPE(Attachment)
 

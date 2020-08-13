@@ -103,6 +103,12 @@ Page {
             attachmentThumbnailUrl: model.attachmentThumbnailUrl
             attachmentBytesLoaded: model.attachmentBytesLoaded
             attachmentStatus: model.attachmentStatus
+
+            onSaveAttachmentAs: {
+                saveAttachmentAsDialog.messageId = model.messageId
+                saveAttachmentAsDialog.attachmentType = attachmentType
+                saveAttachmentAsDialog.open()
+            }
         }
 
         onCountChanged: {
@@ -130,11 +136,18 @@ Page {
         }
     }
 
+    SelectAttachmentsDialog {
+        id: saveAttachmentAsDialog
+        selectExisting: false
+
+        property string messageId: ""
+
+        onAccepted: ConversationsModel.saveAttachmentAs(messageId, fileUrl)
+    }
 
     // Component events
 
     Component.onCompleted: {
-
         // configure conversation model to chat with
         // recipient provided as a parameter to this page.
 

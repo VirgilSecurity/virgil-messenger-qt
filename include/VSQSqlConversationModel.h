@@ -109,12 +109,15 @@ public:
 
     void connectTransferManager(VSQTransferManager *manager);
 
+    Q_INVOKABLE void saveAttachmentAs(const QString &messageId, const QVariant &fileUrl);
+
 signals:
     void createMessage(const QString &recipient, const QString &message, const QString &messageId, const OptionalAttachment &attachment);
     void receiveMessage(const QString &messageId, const QString &author, const QString &message, const OptionalAttachment &attachment);
     void setMessageStatus(const QString &messageId, const StMessage::Status status);
 
     void recipientChanged();
+    void attachmentSaved(const QString &message);
 
 private:
     struct TransferInfo
@@ -147,6 +150,7 @@ private:
 
     void onAttachmentProgressChanged(const QString &messageId, const DataSize bytesReceived);
     void onAttachmentStatusChanged(const QString &messageId, const Enums::AttachmentStatus status);
+    void onAttachmentFileDownloaded(const QString &messageId, const QUrl &encLocalUrl);
 };
 
 #endif // VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H

@@ -35,6 +35,7 @@
 #ifndef VSQ_TRANSFER_H
 #define VSQ_TRANSFER_H
 
+#include <QNetworkReply>
 #include <QObject>
 
 #include "VSQCommon.h"
@@ -53,6 +54,9 @@ public:
 
     QString messageId() const;
 
+    virtual void setAttachment(const Attachment &attachment);
+    const Attachment attachment() const;
+
     virtual void start();
     virtual void abort();
 
@@ -62,8 +66,14 @@ signals:
     void failed(const QString &errorText);
 
 protected:
+    void connectReply(QNetworkReply *reply);
+    void onNetworkReplyError(QNetworkReply::NetworkError error, QNetworkReply *reply);
+    void cleanupReply(QNetworkReply *reply);
+    QFile *getAttachmentFile();
+
     QNetworkAccessManager *m_networkAccessManager;
     bool m_running;
+    Attachment m_attachment;
 
 private:
     QString m_messageId;

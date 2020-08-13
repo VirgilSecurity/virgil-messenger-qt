@@ -117,6 +117,7 @@ ApplicationWindow {
 
     Component.onCompleted: {
         Platform.detect()
+        ConversationsModel.attachmentSaved.connect(showPopupInform)
 //        Logging.crashReportRequested.connect(sendReportAsk.open)
 //        Logging.reportSent.connect(showPopupSuccess)
 //        Logging.reportSentErr.connect(showPopupError)

@@ -37,13 +37,16 @@
 #include <QXmppClient.h>
 #include <QXmppUploadRequestManager.h>
 
+#include "VSQDownload.h"
+#include "VSQSettings.h"
 #include "VSQUpload.h"
 
 Q_LOGGING_CATEGORY(lcTransferManager, "transferman");
 
-VSQTransferManager::VSQTransferManager(QXmppClient *client, QNetworkAccessManager *networkAccessManager, QObject *parent)
+VSQTransferManager::VSQTransferManager(QXmppClient *client, QNetworkAccessManager *networkAccessManager, VSQSettings *settings, QObject *parent)
     : QObject(parent)
     , m_networkAccessManager(networkAccessManager)
+    , m_settings(settings)
     , m_xmppManager(new QXmppUploadRequestManager())
 {
     qRegisterMetaType<QXmppHttpUploadSlotIq>();
@@ -51,6 +54,7 @@ VSQTransferManager::VSQTransferManager(QXmppClient *client, QNetworkAccessManage
 
     connect(this, &VSQTransferManager::requestUploadUrl, this, &VSQTransferManager::onRequestUploadUrl);
     connect(this, &VSQTransferManager::startUpload, this, &VSQTransferManager::onStartUpload);
+    connect(this, &VSQTransferManager::startDownload, this, &VSQTransferManager::onStartDownload);
 
     m_xmppManager->setParent(this);
     client->addExtension(m_xmppManager);
@@ -105,11 +109,26 @@ void VSQTransferManager::abortTransfer(VSQTransfer *transfer)
     removeTransfer(transfer);
 }
 
+void VSQTransferManager::startTransfer(VSQTransfer *transfer)
+{
+    connect(transfer, &VSQTransfer::progressChanged, this,
+            std::bind(&VSQTransferManager::progressChanged, this, transfer->messageId(), args::_1, args::_2));
+    connect(transfer, &VSQTransfer::finished, this,
+            std::bind(&VSQTransferManager::statusChanged, this, transfer->messageId(), Attachment::Status::Loaded));
+    connect(transfer, &VSQTransfer::failed, this,
+            std::bind(&VSQTransferManager::statusChanged, this, transfer->messageId(), Attachment::Status::Failed));
+    if (auto download = qobject_cast<VSQDownload *>(transfer)) {
+        connect(download, &VSQDownload::finished, this,
+                std::bind(&VSQTransferManager::fileDownloaded, this, download->messageId(), download->attachment().encLocalUrl));
+    }
+    transfer->start();
+}
+
 void VSQTransferManager::onRequestUploadUrl(const QString &messageId, const QString &fileName)
 {
     if (m_xmppManager->serviceFound()) {
         auto slotId = m_xmppManager->requestUploadSlot(QFileInfo(fileName));
-        m_transfers.push_back(new VSQUpload(m_networkAccessManager, messageId, slotId, fileName, this));
+        m_transfers.push_back(new VSQUpload(m_networkAccessManager, messageId, slotId, this));
     }
     else {
         qCDebug(lcTransferManager) << "Upload service was not found";
@@ -137,6 +156,7 @@ void VSQTransferManager::onRequestFailed(const QXmppHttpUploadRequestIq &request
 
 void VSQTransferManager::onStartUpload(const QString &messageId, const Attachment &attachment)
 {
+    // Upload was added in url request
     if (auto transfer = findTransferByMessageId(messageId)) {
         auto upload = qobject_cast<VSQUpload *>(transfer);
         if (!upload) {
@@ -144,9 +164,17 @@ void VSQTransferManager::onStartUpload(const QString &messageId, const Attachmen
             return;
         }
         upload->setAttachment(attachment);
-        connect(upload, &VSQUpload::progressChanged, this, std::bind(&VSQTransferManager::progressChanged, this, messageId, args::_1, args::_2));
-        connect(upload, &VSQUpload::finished, this, std::bind(&VSQTransferManager::statusChanged, this, messageId, Attachment::Status::Loaded));
-        connect(upload, &VSQUpload::failed, this, std::bind(&VSQTransferManager::statusChanged, this, messageId, Attachment::Status::Failed));
-        upload->start();
+        startTransfer(upload);
     }
+    else {
+        qCWarning(lcTransferManager) << "Message" << messageId << "has no upload";
+    }
+}
+
+void VSQTransferManager::onStartDownload(const QString &messageId, const Attachment &attachment)
+{
+    auto download = new VSQDownload(m_networkAccessManager, messageId, m_settings->attachmentCacheDir(), this);
+    m_transfers.push_back(download);
+    download->setAttachment(attachment);
+    startTransfer(download);
 }

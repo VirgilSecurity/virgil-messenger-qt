@@ -158,9 +158,9 @@ Control {
     }
 
     SelectAttachmentsDialog {
-        id: fileDialog
+        id: selectAttachmentDialog
 
-        onAccepted: sendMessage(fileDialog.fileUrl, fileDialog.attachmentType)
+        onAccepted: sendMessage(selectAttachmentDialog.fileUrl, selectAttachmentDialog.attachmentType)
     }
 
     function sendMessage(attachmentUrl, attachmentType) {
@@ -171,7 +171,7 @@ Control {
     }
 
     function selectAttachment(attachmentType) {
-        fileDialog.attachmentType = attachmentType
-        fileDialog.open()
+        selectAttachmentDialog.attachmentType = attachmentType
+        selectAttachmentDialog.open()
     }
 }
