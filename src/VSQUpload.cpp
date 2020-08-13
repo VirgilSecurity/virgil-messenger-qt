@@ -38,14 +38,11 @@
 #include <QNetworkReply>
 
 VSQUpload::VSQUpload(QNetworkAccessManager *networkAccessManager, const QString &messageId, const QString &slotId, const QString &fileName, QObject *parent)
-    : QObject(parent)
-    , m_networkAccessManager(networkAccessManager)
-    , m_messageId(messageId)
+    : VSQTransfer(networkAccessManager, messageId, parent)
     , m_slotId(slotId)
     , m_fileName(fileName)
-    , m_running(false)
 {
-    qCDebug(lcUploader) << "Created upload. Filename:" << m_fileName
+    qCDebug(lcTransferManager) << "Created upload. Filename:" << m_fileName
                         << "message id:" << messageId << "slot id:" << slotId;
 }
 
@@ -55,11 +52,6 @@ VSQUpload::~VSQUpload()
 #ifdef VS_DEVMODE
     qCDebug(lcDev) << "~Upload";
 #endif
-}
-
-QString VSQUpload::messageId() const
-{
-    return m_messageId;
 }
 
 QString VSQUpload::slotId() const
@@ -79,10 +71,10 @@ void VSQUpload::setAttachment(const Attachment &attachment)
 void VSQUpload::start()
 {
     if (m_running) {
-        qCWarning(lcUploader) << "Started again a running upload";
+        qCWarning(lcTransferManager) << "Started again a running upload";
         return;
     }
-    qCDebug(lcUploader) << QString("Started upload %1 / %2 / %3").arg(m_messageId, m_fileName, m_attachment.remoteUrl.toString());
+    qCDebug(lcTransferManager) << QString("Started upload %1 / %2 / %3").arg(messageId(), m_fileName, m_attachment.remoteUrl.toString());
     m_running = true;
 
     auto file = new QFile(m_attachment.filePath(), this);
@@ -115,12 +107,11 @@ void VSQUpload::start()
 void VSQUpload::abort()
 {
     if (!m_running) {
-        qCWarning(lcUploader) << "Stopped not-running upload";
         return;
     }
     m_running = false;
-    const QString message = QString("Aborted upload %1 / %2 / %3").arg(m_messageId, m_fileName, m_attachment.remoteUrl.toString());
-    qCDebug(lcUploader) << message;
+    const QString message = QString("Aborted upload %1 / %2 / %3").arg(messageId(), m_fileName, m_attachment.remoteUrl.toString());
+    qCDebug(lcTransferManager) << message;
     emit failed(message);
 }
 

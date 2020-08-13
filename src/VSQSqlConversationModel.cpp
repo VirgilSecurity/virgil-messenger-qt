@@ -40,7 +40,7 @@
 #include <QSqlRecord>
 #include <QSqlQuery>
 
-#include "VSQUploader.h"
+#include "VSQTransferManager.h"
 #include "VSQUtils.h"
 
 Q_DECLARE_METATYPE(StMessage::Status)
@@ -186,16 +186,16 @@ VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
     }
 
     if (role == AttachmentStatusRole) {
-        auto it = m_uploadInfos.find(currRecord.value(MessageIdRole - Qt::UserRole).toString());
-        if (it == m_uploadInfos.end())
+        auto it = m_transferMap.find(currRecord.value(MessageIdRole - Qt::UserRole).toString());
+        if (it == m_transferMap.end())
             return currRecord.value(AttachmentStatusRole - Qt::UserRole).toInt();
         else
             return static_cast<int>(it->second.status);
     }
 
     if (role == AttachmentBytesLoadedRole) {
-        auto it = m_uploadInfos.find(currRecord.value(MessageIdRole - Qt::UserRole).toString());
-        return (it == m_uploadInfos.end()) ? 0 : it->second.bytesUploaded;
+        auto it = m_transferMap.find(currRecord.value(MessageIdRole - Qt::UserRole).toString());
+        return (it == m_transferMap.end()) ? 0 : it->second.bytesReceived;
     }
 
     return currRecord.value(role - Qt::UserRole);
@@ -339,10 +339,10 @@ QList<StMessage> VSQSqlConversationModel::getMessages(const QString &user, const
     return messages;
 }
 
-void VSQSqlConversationModel::connectUploader(VSQUploader *uploader)
+void VSQSqlConversationModel::connectTransferManager(VSQTransferManager *manager)
 {
-    connect(uploader, &VSQUploader::statusChanged, this, &VSQSqlConversationModel::onUploadStatusChanged);
-    connect(uploader, &VSQUploader::progressChanged, this, &VSQSqlConversationModel::onUploadProgressChanged);
+    connect(manager, &VSQTransferManager::statusChanged, this, &VSQSqlConversationModel::onAttachmentStatusChanged);
+    connect(manager, &VSQTransferManager::progressChanged, this, &VSQSqlConversationModel::onAttachmentProgressChanged);
 }
 
 /******************************************************************************/
@@ -450,27 +450,29 @@ void VSQSqlConversationModel::onSetMessageStatus(const QString &messageId, const
     select();
 }
 
-void VSQSqlConversationModel::onUploadProgressChanged(const QString &messageId, const DataSize bytesUploaded)
+void VSQSqlConversationModel::onAttachmentProgressChanged(const QString &messageId, const DataSize bytesReceived)
 {
-    //qCDebug(lcUploader) << "Upload progress" << bytesUploaded << messageId;
-    auto it = m_uploadInfos.find(messageId);
-    if (it != m_uploadInfos.end()) {
-        it->second.bytesUploaded = bytesUploaded;
+#ifdef VS_DEVMODE
+    qCDebug(lcTransferManager) << "Transfer progress" << bytesReceived << messageId;
+#endif
+    auto it = m_transferMap.find(messageId);
+    if (it != m_transferMap.end()) {
+        it->second.bytesReceived = bytesReceived;
         emit dataChanged(index(0, 0), index(rowCount() - 1, 0), { AttachmentBytesLoadedRole });
     }
 }
 
-void VSQSqlConversationModel::onUploadStatusChanged(const QString &messageId, const Enums::AttachmentStatus status)
+void VSQSqlConversationModel::onAttachmentStatusChanged(const QString &messageId, const Enums::AttachmentStatus status)
 {
-    qCDebug(lcUploader) << "Upload status" << status << messageId;
+    qCDebug(lcTransferManager) << "Transfer status" << status << messageId;
     if (status == Attachment::Status::Loading) {
-        m_uploadInfos[messageId] = UploadInfo();
+        m_transferMap[messageId] = TransferInfo();
         emit dataChanged(index(0, 0), index(rowCount() - 1, 0), { AttachmentStatusRole });
     }
     else if (status == Attachment::Status::Loaded || status == Attachment::Status::Failed) {
-        auto it = m_uploadInfos.find(messageId);
-        if (it != m_uploadInfos.end()) {
-            m_uploadInfos.erase(it);
+        auto it = m_transferMap.find(messageId);
+        if (it != m_transferMap.end()) {
+            m_transferMap.erase(it);
         }
         // Write status to DB
         QSqlQuery model;

@@ -53,7 +53,7 @@
 #include "VSQLogging.h"
 #include <VSQNetworkAnalyzer.h>
 #include <VSQAttachmentBuilder.h>
-#include <VSQUploader.h>
+#include <VSQTransferManager.h>
 #include <VSQDiscoveryManager.h>
 
 using namespace VirgilIoTKit;
@@ -82,7 +82,7 @@ public:
         MRES_ERR_USER_ALREADY_EXISTS,
         MRES_ERR_ENCRYPTION,
         MRES_ERR_BAD_ATTACHMENT,
-        MRES_ERR_UPLOAD_FAIL
+        MRES_ERR_TRANSFER_FAIL
     };
 
     enum EnStatus
@@ -210,7 +210,7 @@ private:
     VSQNetworkAnalyzer m_networkAnalyzer;
     VSQSettings *m_settings;
     VSQAttachmentBuilder m_attachmentBuilder;
-    VSQUploader *m_uploader;
+    VSQTransferManager *m_transferManager;
 
     QMutex m_connectGuard;
     QMutex m_messageGuard;

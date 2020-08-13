@@ -110,9 +110,9 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSetti
     m_xmpp.addExtension(m_xmppReceiptManager);
     m_xmpp.addExtension(m_xmppCarbonManager);
 
-    // Create uploader after discovery manager
-    m_uploader = new VSQUploader(&m_xmpp, networkAccessManager, this);
-    m_sqlConversations->connectUploader(m_uploader);
+    // Create transferManager after discovery manager
+    m_transferManager = new VSQTransferManager(&m_xmpp, networkAccessManager, this);
+    m_sqlConversations->connectTransferManager(m_transferManager);
 
     // Signal connection
     connect(this, SIGNAL(fireReadyToAddContact(QString)), this, SLOT(onAddContactToDB(QString)));
@@ -973,27 +973,27 @@ VSQMessenger::createSendAttachment(bool createNew, const QString &messageId, con
             connect(&m_xmpp, &QXmppClient::disconnected, &loop, &QEventLoop::quit);
             connect(&m_xmpp, &QXmppClient::error, &loop, &QEventLoop::quit);
             connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
-            connect(m_uploader, &VSQUploader::urlReceived, &loop, [&](const QString &urlMessageId, const QUrl &url) {
+            connect(m_transferManager, &VSQTransferManager::uploadUrlReceived, &loop, [&](const QString &urlMessageId, const QUrl &url) {
                 if (urlMessageId == messageId) {
                     remoteUrl = url;
                     loop.quit();
                 }
             });
-            connect(m_uploader, &VSQUploader::urlErrorOccured, &loop, [&](const QString &urlMessageId) {
+            connect(m_transferManager, &VSQTransferManager::uploadUrlErrorOccured, &loop, [&](const QString &urlMessageId) {
                 if (urlMessageId == messageId) {
                     loop.quit();
                 }
             });
-            m_uploader->requestUrl(messageId, attachment->encLocalUrl.toLocalFile());
+            m_transferManager->requestUploadUrl(messageId, attachment->encLocalUrl.toLocalFile());
             timer.start(1000);
             loop.exec();
         }
         if (remoteUrl.isEmpty()) {
             fireWarning("Unknown upload error");
-            return MRES_ERR_UPLOAD_FAIL;
+            return MRES_ERR_TRANSFER_FAIL;
         }
         attachment->remoteUrl = remoteUrl;
-        m_uploader->startUpload(messageId, *attachment);
+        m_transferManager->startUpload(messageId, *attachment);
         return _sendMessageInternal(createNew, messageId, to, attachment->fileName(), attachment);
     });
 }

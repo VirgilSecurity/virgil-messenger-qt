@@ -89,14 +89,16 @@ HEADERS += \
         include/VSQClipboardProxy.h \
         include/VSQCommon.h \
         include/VSQDiscoveryManager.h \
+        include/VSQDownload.h \
         include/VSQLogging.h \
         include/VSQMessenger.h \
         include/VSQSettings.h \
         include/VSQSqlChatModel.h \
         include/VSQSqlConversationModel.h \
         include/VSQNetworkAnalyzer.h \
+        include/VSQTransfer.h \
+        include/VSQTransferManager.h \
         include/VSQUpload.h \
-        include/VSQUploader.h \
         include/VSQUtils.h \
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
@@ -112,14 +114,16 @@ SOURCES += \
         src/VSQClipboardProxy.cpp \
         src/VSQCommon.cpp \
         src/VSQDiscoveryManager.cpp \
+        src/VSQDownload.cpp \
         src/VSQMessenger.cpp \
         src/VSQLogging.cpp \
         src/VSQSettings.cpp \
         src/VSQSqlChatModel.cpp \
         src/VSQSqlConversationModel.cpp \
         src/VSQNetworkAnalyzer.cpp \
+        src/VSQTransfer.cpp \
+        src/VSQTransferManager.cpp \
         src/VSQUpload.cpp \
-        src/VSQUploader.cpp \
         src/VSQUtils.cpp \
         src/android/VSQAndroid.cpp \
         src/main.cpp \

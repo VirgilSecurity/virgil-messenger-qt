@@ -32,35 +32,42 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_UPLOAD_H
-#define VSQ_UPLOAD_H
+#ifndef VSQ_TRANSFER_H
+#define VSQ_TRANSFER_H
 
-#include <QNetworkReply>
+#include <QObject>
 
-#include "VSQTransfer.h"
+#include "VSQCommon.h"
 
-class VSQUpload : public VSQTransfer
+class QNetworkAccessManager;
+
+Q_DECLARE_LOGGING_CATEGORY(lcTransferManager);
+
+class VSQTransfer : public QObject
 {
     Q_OBJECT
 
 public:
-    VSQUpload(QNetworkAccessManager *networkAccessManager, const QString &messageId, const QString &slotId, const QString &fileName, QObject *parent);
-    ~VSQUpload() override;
+    VSQTransfer(QNetworkAccessManager *networkAccessManager, const QString &messageId, QObject *parent);
+    virtual ~VSQTransfer();
 
-    QString slotId() const;
+    QString messageId() const;
 
-    void setAttachment(const Attachment &attachment);
+    virtual void start();
+    virtual void abort();
 
-    void start() override;
-    void abort() override;
+signals:
+    void progressChanged(DataSize bytesReceived, DataSize bytesTotal);
+    void finished();
+    void failed(const QString &errorText);
+
+protected:
+    QNetworkAccessManager *m_networkAccessManager;
+    bool m_running;
 
 private:
-    void onNetworkReplyError(QNetworkReply::NetworkError error, QNetworkReply *reply);
-    void cleanupReply(QNetworkReply *reply);
-
-    QString m_slotId;
-    QString m_fileName;
-    Attachment m_attachment;
+    QString m_messageId;
 };
 
-#endif // VSQ_UPLOAD_H
+#endif // VSQ_TRANSFER_H
+

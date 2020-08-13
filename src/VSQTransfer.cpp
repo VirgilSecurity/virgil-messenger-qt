@@ -32,35 +32,25 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_UPLOAD_H
-#define VSQ_UPLOAD_H
-
-#include <QNetworkReply>
-
 #include "VSQTransfer.h"
 
-class VSQUpload : public VSQTransfer
+VSQTransfer::VSQTransfer(QNetworkAccessManager *networkAccessManager, const QString &messageId, QObject *parent)
+    : QObject(parent)
+    , m_networkAccessManager(networkAccessManager)
+    , m_running(false)
+    , m_messageId(messageId)
+{}
+
+VSQTransfer::~VSQTransfer()
+{}
+
+QString VSQTransfer::messageId() const
 {
-    Q_OBJECT
+    return m_messageId;
+}
 
-public:
-    VSQUpload(QNetworkAccessManager *networkAccessManager, const QString &messageId, const QString &slotId, const QString &fileName, QObject *parent);
-    ~VSQUpload() override;
+void VSQTransfer::start()
+{}
 
-    QString slotId() const;
-
-    void setAttachment(const Attachment &attachment);
-
-    void start() override;
-    void abort() override;
-
-private:
-    void onNetworkReplyError(QNetworkReply::NetworkError error, QNetworkReply *reply);
-    void cleanupReply(QNetworkReply *reply);
-
-    QString m_slotId;
-    QString m_fileName;
-    Attachment m_attachment;
-};
-
-#endif // VSQ_UPLOAD_H
+void VSQTransfer::abort()
+{}

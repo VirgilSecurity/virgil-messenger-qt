@@ -39,7 +39,7 @@
 
 #include "VSQCommon.h"
 
-class VSQUploader;
+class VSQTransferManager;
 
 class VSQSqlConversationModel : public QSqlTableModel
 {
@@ -107,7 +107,7 @@ public:
 
     QList<StMessage> getMessages(const QString &user, const StMessage::Status status);
 
-    void connectUploader(VSQUploader *uploader);
+    void connectTransferManager(VSQTransferManager *manager);
 
 signals:
     void createMessage(const QString &recipient, const QString &message, const QString &messageId, const OptionalAttachment &attachment);
@@ -117,9 +117,9 @@ signals:
     void recipientChanged();
 
 private:
-    struct UploadInfo
+    struct TransferInfo
     {
-        DataSize bytesUploaded = 0;
+        DataSize bytesReceived = 0;
         Attachment::Status status = Attachment::Status::Loading;
     };
 
@@ -127,7 +127,7 @@ private:
 
     QString m_user;
     QString m_recipient;
-    std::map<QString, UploadInfo> m_uploadInfos;
+    std::map<QString, TransferInfo> m_transferMap;
 
     void
     _createTable();
@@ -145,8 +145,8 @@ private:
     void onReceiveMessage(const QString &messageId, const QString &author, const QString &message, const OptionalAttachment &attachment);
     void onSetMessageStatus(const QString &messageId, const StMessage::Status status);
 
-    void onUploadProgressChanged(const QString &messageId, const DataSize bytesUploaded);
-    void onUploadStatusChanged(const QString &messageId, const Enums::AttachmentStatus status);
+    void onAttachmentProgressChanged(const QString &messageId, const DataSize bytesReceived);
+    void onAttachmentStatusChanged(const QString &messageId, const Enums::AttachmentStatus status);
 };
 
 #endif // VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H

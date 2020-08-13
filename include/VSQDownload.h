@@ -32,58 +32,17 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_UPLOADER_H
-#define VSQ_UPLOADER_H
+#ifndef VSQ_DOWNLOAD_H
+#define VSQ_DOWNLOAD_H
 
-#include <QObject>
+#include "VSQTransfer.h"
 
-#include <QXmppHttpUploadIq.h>
-
-#include "VSQCommon.h"
-
-class QNetworkAccessManager;
-
-class QXmppClient;
-class QXmppUploadRequestManager;
-
-class VSQUpload;
-
-Q_DECLARE_LOGGING_CATEGORY(lcUploader);
-
-class VSQUploader : public QObject
+class VSQDownload : public VSQTransfer
 {
     Q_OBJECT
 
 public:
-    VSQUploader(QXmppClient *client, QNetworkAccessManager *networkAccessManager, QObject *parent);
-    ~VSQUploader() override;
-
-signals:
-    void requestUrl(const QString &messageId, const QString &fileName);
-    void urlReceived(const QString &messageId, const QUrl &url);
-    void urlErrorOccured(const QString &messageId);
-
-    void startUpload(const QString &messageId, const Attachment &attachment);
-    void progressChanged(const QString &messageId, const DataSize bytesReceived, const DataSize bytesTotal);
-    void statusChanged(const QString &messageId, const Enums::AttachmentStatus status);
-
-private:
-    VSQUpload *findUploadBySlotId(const QString &slotId);
-    VSQUpload *findUploadByMessageId(const QString &messageId);
-    void removeUpload(VSQUpload *upload);
-    void abortUpload(VSQUpload *upload);
-
-    void onRequestUrl(const QString &messageId, const QString &fileName);
-    void onSlotReceived(const QXmppHttpUploadSlotIq &slot);
-    void onRequestFailed(const QXmppHttpUploadRequestIq &request);
-    void onStartUpload(const QString &messageId, const Attachment &attachment);
-
-    QNetworkAccessManager *m_networkAccessManager;
-    QXmppUploadRequestManager *m_xmppManager;
-    QVector<VSQUpload *> m_uploads; // FIXME(fpohtmeh): add mutex
+    using VSQTransfer::VSQTransfer;
 };
 
-Q_DECLARE_METATYPE(QXmppHttpUploadSlotIq);
-Q_DECLARE_METATYPE(QXmppHttpUploadRequestIq);
-
-#endif // VSQ_UPLOADER_H
+#endif // VSQ_DOWNLOAD_H
