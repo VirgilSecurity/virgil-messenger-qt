@@ -85,7 +85,7 @@ VSQApplication::run(const QString &basePath) {
     }
 
     // Initialization loging
-    qInstallMessageHandler(&VSQLogging::logger_qt_redir); // Redirect standard logging
+//    qInstallMessageHandler(&VSQLogging::logger_qt_redir); // Redirect standard logging
     m_messenger.setLogging(&m_logging);
     m_logging.setkVersion(kVersion);
 
