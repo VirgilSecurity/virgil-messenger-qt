@@ -47,7 +47,7 @@ VSQLogging *VSQLogging::m_instance = nullptr;
 
 // Public methods
 //***********************************************************************************************************
-VSQLogging::VSQLogging() : QObject(nullptr)
+VSQLogging::VSQLogging(QNetworkAccessManager *networkAccessManager) : QObject(nullptr), manager(networkAccessManager)
 {
     if (m_instance) {
         qFatal("Instance of logging already exists!");
@@ -143,8 +143,6 @@ bool VSQLogging::sendFileToBackendRequest(QByteArray fileData) {
 
     vs_messenger_virgil_get_auth_token(buffBearer ,sizeBearer);
     qDebug("Backend token [%s]", buffBearer);
-
-    manager = new QNetworkAccessManager();
 
     QString strEndpoint = currentVirgilUrl + endpointSendReport;
     req.setUrl(QUrl(strEndpoint));

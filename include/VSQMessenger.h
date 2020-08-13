@@ -80,7 +80,9 @@ public:
         MRES_ERR_SIGNUP,
         MRES_ERR_USER_NOT_FOUND,
         MRES_ERR_USER_ALREADY_EXISTS,
-        MRES_ERR_ENCRYPTION
+        MRES_ERR_ENCRYPTION,
+        MRES_ERR_BAD_ATTACHMENT,
+        MRES_ERR_UPLOAD_FAIL
     };
 
     enum EnStatus
@@ -91,7 +93,8 @@ public:
 
     Q_PROPERTY(QString currentUser READ currentUser NOTIFY fireCurrentUserChanged)
 
-    explicit VSQMessenger(VSQSettings *settings = nullptr);
+    VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSettings *settings);
+    VSQMessenger() = default; // QML engine requires default constructor
     virtual ~VSQMessenger();
 
     Q_INVOKABLE QString currentUser() const;
@@ -137,8 +140,11 @@ public slots:
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
 
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    createSendMessage(bool createNew, const QString &messageId, const QString &to, const QString &text, const OptionalAttachment &attachment);
+    QFuture<VSQMessenger::EnResult>
+    createSendMessage(bool createNew, const QString &messageId, const QString &to, const QString &text);
+
+    QFuture<VSQMessenger::EnResult>
+    createSendAttachment(bool createNew, const QString &messageId, const QString &to, const QUrl &url, const Enums::AttachmentType attachmentType);
 
     Q_INVOKABLE void
     setStatus(VSQMessenger::EnStatus status);
@@ -205,7 +211,6 @@ private:
     VSQSettings *m_settings;
     VSQAttachmentBuilder m_attachmentBuilder;
     VSQUploader *m_uploader;
-    QThread *m_transferThread;
 
     QMutex m_connectGuard;
     QMutex m_messageGuard;
@@ -274,7 +279,7 @@ private:
 
     void _sendFailedMessages();
 
-    QString createJson(const QString &messageId, const QString &message, const OptionalAttachment &attachment);
+    QString createJson(const QString &message, const OptionalAttachment &attachment);
 
     StMessage parseJson(const QJsonDocument &json);
 

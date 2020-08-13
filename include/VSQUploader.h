@@ -41,8 +41,12 @@
 
 #include "VSQCommon.h"
 
+class QNetworkAccessManager;
+
 class QXmppClient;
 class QXmppUploadRequestManager;
+
+class VSQUpload;
 
 Q_DECLARE_LOGGING_CATEGORY(lcUploader);
 
@@ -51,29 +55,32 @@ class VSQUploader : public QObject
     Q_OBJECT
 
 public:
-    VSQUploader(QXmppClient *client, QObject *parent);
+    VSQUploader(QXmppClient *client, QNetworkAccessManager *networkAccessManager, QObject *parent);
     ~VSQUploader() override;
 
 signals:
-    void upload(const QString &messageId, const Attachment &attachment);
+    void requestUrl(const QString &messageId, const QString &fileName);
+    void urlReceived(const QString &messageId, const QUrl &url);
+    void urlErrorOccured(const QString &messageId);
 
-    void uploadUrlReceived(const QString &messageId, const QUrl &url);
-    void uploadProgressChanged(const QString &messageId, const DataSize bytesUploaded);
-    void uploadStatusChanged(const QString &messageId, const Enums::AttachmentStatus status);
+    void startUpload(const QString &messageId, const Attachment &attachment);
+    void progressChanged(const QString &messageId, const DataSize bytesReceived, const DataSize bytesTotal);
+    void statusChanged(const QString &messageId, const Enums::AttachmentStatus status);
 
 private:
-    struct Item
-    {
-        QString messageId;
-        QString slotId;
-    };
+    VSQUpload *findUploadBySlotId(const QString &slotId);
+    VSQUpload *findUploadByMessageId(const QString &messageId);
+    void removeUpload(VSQUpload *upload);
+    void abortUpload(VSQUpload *upload);
 
-    void onUpload(const QString &messageId, const Attachment &attachment);
+    void onRequestUrl(const QString &messageId, const QString &fileName);
     void onSlotReceived(const QXmppHttpUploadSlotIq &slot);
     void onRequestFailed(const QXmppHttpUploadRequestIq &request);
+    void onStartUpload(const QString &messageId, const Attachment &attachment);
 
+    QNetworkAccessManager *m_networkAccessManager;
     QXmppUploadRequestManager *m_xmppManager;
-    QVector<Item> m_items;
+    QVector<VSQUpload *> m_uploads; // FIXME(fpohtmeh): add mutex
 };
 
 Q_DECLARE_METATYPE(QXmppHttpUploadSlotIq);

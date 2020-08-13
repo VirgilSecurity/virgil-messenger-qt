@@ -95,6 +95,7 @@ HEADERS += \
         include/VSQSqlChatModel.h \
         include/VSQSqlConversationModel.h \
         include/VSQNetworkAnalyzer.h \
+        include/VSQUpload.h \
         include/VSQUploader.h \
         include/VSQUtils.h \
         include/android/VSQAndroid.h \
@@ -117,6 +118,7 @@ SOURCES += \
         src/VSQSqlChatModel.cpp \
         src/VSQSqlConversationModel.cpp \
         src/VSQNetworkAnalyzer.cpp \
+        src/VSQUpload.cpp \
         src/VSQUploader.cpp \
         src/VSQUtils.cpp \
         src/android/VSQAndroid.cpp \

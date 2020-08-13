@@ -32,59 +32,50 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#ifndef VSQ_UPLOAD_H
+#define VSQ_UPLOAD_H
 
-#ifndef VSQLOGGING_H
-#define VSQLOGGING_H
+#include <QObject>
+#include <QNetworkReply>
 
-#include <iostream>
-#include <string>
-#include <QCoreApplication>
-#include <virgil/iot/qt/VSQIoTKit.h>
+#include "VSQCommon.h"
 
 class QNetworkAccessManager;
 
-using namespace VirgilIoTKit;
+Q_DECLARE_LOGGING_CATEGORY(lcUploader);
 
-class VSQLogging : public QObject {
+class VSQUpload : public QObject
+{
     Q_OBJECT
+
 public:
-    explicit VSQLogging(QNetworkAccessManager *networkAccessManager);
-    virtual ~VSQLogging();
+    VSQUpload(QNetworkAccessManager *networkAccessManager, const QString &messageId, const QString &slotId, const QString &fileName, QObject *parent);
+    ~VSQUpload() override;
 
-    void checkAppCrash();
-    void resetRunFlag();
-    Q_INVOKABLE
-    bool sendLogFiles();
-    void setVirgilUrl(QString VirgilUrl);
-    void setkVersion(QString AppVersion);
-    void setkOrganization(QString strkOrganization);
-    void setkApp(QString strkApp);
+    QString messageId() const;
+    QString slotId() const;
 
-    static void logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+    void setAttachment(const Attachment &attachment);
+
+    void start();
+    void abort();
 
 signals:
-    void crashReportRequested();
-    void reportSent(QString msg);
-    void reportSentErr(QString msg);
-    void newMessage(const QString &message);
+    void progressChanged(DataSize bytesReceived, DataSize bytesTotal);
+    void finished();
+    void failed(const QString &errorText);
 
 private:
-    static const QString endpointSendReport;
+    void onNetworkReplyError(QNetworkReply::NetworkError error, QNetworkReply *reply);
+    void cleanupReply(QNetworkReply *reply);
 
-    bool checkRunFlag();
-    bool sendFileToBackendRequest(QByteArray fileData);
-    void setRunFlag(bool runState);
+    QNetworkAccessManager *m_networkAccessManager;
 
-    QNetworkAccessManager *manager;
-    QString currentVirgilUrl;
-    QString kVersion;
-    QString kOrganization;
-    QString kApp;
-
-    static VSQLogging *m_instance;
-
-private slots:
-    void endpointReply();
+    QString m_messageId;
+    QString m_slotId;
+    QString m_fileName;
+    Attachment m_attachment;
+    bool m_running;
 };
 
-#endif // VSQLOGGING_H
+#endif // VSQ_UPLOAD_H

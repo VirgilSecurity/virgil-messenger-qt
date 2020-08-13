@@ -57,8 +57,10 @@ const QString VSQApplication::kVersion = "unknown";
 /******************************************************************************/
 VSQApplication::VSQApplication()
     : m_settings(this)
+    , m_networkAccessManager(new QNetworkAccessManager(this))
     , m_engine()
-    , m_messenger(&m_settings)
+    , m_messenger(m_networkAccessManager, &m_settings)
+    , m_logging(m_networkAccessManager)
 {
 #if (MACOS)
     VSQMacos::instance().startUpdatesTimer();

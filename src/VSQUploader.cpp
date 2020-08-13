@@ -34,22 +34,23 @@
 
 #include "VSQUploader.h"
 
-#include <QFileInfo>
-#include <QThread> // TODO(fpohtmeh): remove
-
 #include <QXmppClient.h>
 #include <QXmppUploadRequestManager.h>
 
+#include "VSQUpload.h"
+
 Q_LOGGING_CATEGORY(lcUploader, "uploader");
 
-VSQUploader::VSQUploader(QXmppClient *client, QObject *parent)
+VSQUploader::VSQUploader(QXmppClient *client, QNetworkAccessManager *networkAccessManager, QObject *parent)
     : QObject(parent)
+    , m_networkAccessManager(networkAccessManager)
     , m_xmppManager(new QXmppUploadRequestManager())
 {
     qRegisterMetaType<QXmppHttpUploadSlotIq>();
     qRegisterMetaType<QXmppHttpUploadRequestIq>();
 
-    connect(this, &VSQUploader::upload, this, &VSQUploader::onUpload);
+    connect(this, &VSQUploader::requestUrl, this, &VSQUploader::onRequestUrl);
+    connect(this, &VSQUploader::startUpload, this, &VSQUploader::onStartUpload);
 
     client->addExtension(m_xmppManager);
     connect(m_xmppManager, &QXmppUploadRequestManager::slotReceived, this, &VSQUploader::onSlotReceived);
@@ -63,60 +64,83 @@ VSQUploader::VSQUploader(QXmppClient *client, QObject *parent)
 
 VSQUploader::~VSQUploader()
 {
+    while (!m_uploads.empty()) {
+        abortUpload(m_uploads.first());
+    }
     delete m_xmppManager;
 }
 
-void VSQUploader::onUpload(const QString &messageId, const Attachment &attachment)
+VSQUpload *VSQUploader::findUploadBySlotId(const QString &slotId)
 {
-    // FIXME(fpohtmeh): implement
+    for (auto upload : m_uploads) {
+        if (upload->slotId() == slotId) {
+            return upload;
+        }
+    }
+    qCWarning(lcUploader) << "Upload wasn't found. Slot id:" << slotId;
+    return nullptr;
+}
+
+VSQUpload *VSQUploader::findUploadByMessageId(const QString &messageId)
+{
+    for (auto upload : m_uploads) {
+        if (upload->messageId() == messageId) {
+            return upload;
+        }
+    }
+    qCWarning(lcUploader) << "Upload wasn't found. Message id:" << messageId;
+    return nullptr;
+}
+
+void VSQUploader::removeUpload(VSQUpload *upload)
+{
+    m_uploads.removeOne(upload);
+    upload->deleteLater();
+}
+
+void VSQUploader::abortUpload(VSQUpload *upload)
+{
+    upload->abort();
+    removeUpload(upload);
+}
+
+void VSQUploader::onRequestUrl(const QString &messageId, const QString &fileName)
+{
     if (m_xmppManager->serviceFound()) {
-        auto slotId = m_xmppManager->requestUploadSlot(QFileInfo(attachment.filePath()));
-        qCDebug(lcUploader) << "Slot id:" << slotId << "message id:" << messageId;
-        m_items.push_back({ messageId, slotId });
+        auto slotId = m_xmppManager->requestUploadSlot(QFileInfo(fileName));
+        m_uploads.push_back(new VSQUpload(m_networkAccessManager, messageId, slotId, fileName, this));
     }
     else {
         qCDebug(lcUploader) << "Upload service was not found";
-        emit uploadStatusChanged(messageId, Attachment::Status::Failed);
+        emit statusChanged(messageId, Attachment::Status::Failed);
     }
-    /*
-    QUrl url("https://raw.githubusercontent.com/VirgilSecurity/virgil-messenger-qt/develop/src/qml/resources/icons/Logo.png");
-    emit uploadUrlReceived(messageId, url);
-
-    const auto total = attachment.bytesTotal;
-    DataSize u = 0;
-    emit uploadStatusChanged(messageId, Attachment::Status::Loading);
-    emit uploadProgressChanged(messageId, 0);
-    for (; u <= total; u += total / 30) {
-        emit uploadProgressChanged(messageId, u);
-        QThread::currentThread()->msleep(100);
-    }
-    emit uploadProgressChanged(messageId, total);
-    emit uploadStatusChanged(messageId, Attachment::Status::Loaded);
-    */
-    // TODO(fpohtmeh): remove encrypted local file finally
 }
 
 void VSQUploader::onSlotReceived(const QXmppHttpUploadSlotIq &slot)
 {
-    qCDebug(lcUploader) << "onSlotReceived";
-    for (auto &item : m_items) {
-        if (item.slotId != slot.id())
-            continue;
-        emit uploadUrlReceived(item.messageId, slot.putUrl());
-        emit uploadStatusChanged(item.messageId, Attachment::Status::Loading);
-        return;
+    qCDebug(lcUploader) << "VSQUploader::onSlotReceived";
+    if (auto upload = findUploadBySlotId(slot.id())) {
+        emit urlReceived(upload->messageId(), slot.putUrl());
+        emit statusChanged(upload->messageId(), Attachment::Status::Loading);
     }
-    qCWarning(lcUploader) << "Slot wasn't found:" << slot.id();
 }
 
 void VSQUploader::onRequestFailed(const QXmppHttpUploadRequestIq &request)
 {
-    qCDebug(lcUploader) << "onRequestFailed" << request.error().text();
-    for (auto &item : m_items) {
-        if (item.slotId != request.id())
-            continue;
-        emit uploadStatusChanged(item.messageId, Attachment::Status::Failed);
-        return;
+    qCDebug(lcUploader) << "VSQUploader::onRequestFailed" << request.error().text();
+    if (auto upload = findUploadBySlotId(request.id())) {
+        emit urlErrorOccured(upload->messageId());
+        removeUpload(upload);
     }
-    qCWarning(lcUploader) << "Request wasn't found:" << request.id();
+}
+
+void VSQUploader::onStartUpload(const QString &messageId, const Attachment &attachment)
+{
+    if (auto upload = findUploadByMessageId(messageId)) {
+        upload->setAttachment(attachment);
+        connect(upload, &VSQUpload::progressChanged, this, std::bind(&VSQUploader::progressChanged, this, messageId, args::_1, args::_2));
+        connect(upload, &VSQUpload::finished, this, std::bind(&VSQUploader::statusChanged, this, messageId, Attachment::Status::Loaded));
+        connect(upload, &VSQUpload::failed, this, std::bind(&VSQUploader::statusChanged, this, messageId, Attachment::Status::Failed));
+        upload->start();
+    }
 }

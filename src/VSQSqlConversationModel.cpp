@@ -341,8 +341,8 @@ QList<StMessage> VSQSqlConversationModel::getMessages(const QString &user, const
 
 void VSQSqlConversationModel::connectUploader(VSQUploader *uploader)
 {
-    connect(uploader, &VSQUploader::uploadStatusChanged, this, &VSQSqlConversationModel::onUploadStatusChanged);
-    connect(uploader, &VSQUploader::uploadProgressChanged, this, &VSQSqlConversationModel::onUploadProgressChanged);
+    connect(uploader, &VSQUploader::statusChanged, this, &VSQSqlConversationModel::onUploadStatusChanged);
+    connect(uploader, &VSQUploader::progressChanged, this, &VSQSqlConversationModel::onUploadProgressChanged);
 }
 
 /******************************************************************************/

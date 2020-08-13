@@ -45,6 +45,7 @@ class VSQAttachmentBuilder
 {
 public:
     explicit VSQAttachmentBuilder(VSQSettings *settings);
+    VSQAttachmentBuilder() = default; // QML engine requires default constructor
 
     bool isValidUrl(const QUrl &url) const;
 
