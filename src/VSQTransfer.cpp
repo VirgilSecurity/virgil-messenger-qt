@@ -78,7 +78,9 @@ void VSQTransfer::abort()
 
 void VSQTransfer::connectReply(QNetworkReply *reply)
 {
+#ifdef VS_DEVMODE
     qCDebug(lcDev) << "Connected to reply:" << reply;
+#endif
     connect(reply, &QNetworkReply::uploadProgress, this, &VSQTransfer::progressChanged);
     connect(reply, &QNetworkReply::finished, this, &VSQTransfer::finished);
     connect(reply, &QNetworkReply::errorOccurred, this, std::bind(&VSQTransfer::onNetworkReplyError, this, args::_1, reply));
