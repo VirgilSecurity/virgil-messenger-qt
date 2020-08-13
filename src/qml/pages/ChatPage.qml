@@ -103,6 +103,7 @@ Page {
             attachmentThumbnailUrl: model.attachmentThumbnailUrl
             attachmentBytesLoaded: model.attachmentBytesLoaded
             attachmentStatus: model.attachmentStatus
+            attachmentDownloaded: model.attachmentDownloaded
 
             onSaveAttachmentAs: {
                 saveAttachmentAsDialog.messageId = model.messageId

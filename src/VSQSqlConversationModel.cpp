@@ -198,6 +198,11 @@ VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
         return (it == m_transferMap.end()) ? 0 : it->second.bytesReceived;
     }
 
+    if (role == AttachmentDownloadedRole) {
+        auto filePath = data(index, AttachmentLocalUrlRole).toString();
+        return QFile::exists(filePath);
+    }
+
     return currRecord.value(role - Qt::UserRole);
 }
 
@@ -222,6 +227,7 @@ VSQSqlConversationModel::roleNames() const {
     names[AttachmentStatusRole] = "attachmentStatus";
     names[AttachmentDisplaySizeRole] = "attachmentDisplaySize";
     names[AttachmentBytesLoadedRole] = "attachmentBytesLoaded";
+    names[AttachmentDownloadedRole] = "attachmentDownloaded";
     return names;
 }
 
@@ -368,7 +374,7 @@ void VSQSqlConversationModel::saveAttachmentAs(const QString &messageId, const Q
         qDebug() << "Copying" << localUrl.toLocalFile() << fileUrl.toString();
         auto destUrl = QUrl(fileUrl.toString());
         QFile::copy(localUrl.toLocalFile(), destUrl.toLocalFile());
-        emit attachmentSaved(QLatin1String("Attachment was saved as: ") + destUrl.fileName());
+        emit attachmentSaved(tr("Attachment was saved"));
     }
 }
 
@@ -513,7 +519,9 @@ void VSQSqlConversationModel::onAttachmentStatusChanged(const QString &messageId
 
 void VSQSqlConversationModel::onAttachmentFileDownloaded(const QString &messageId, const QUrl &encLocalUrl)
 {
+#ifdef VS_DEVMODE
     qCDebug(lcTransferManager) << "Attacment file downloaded:" << messageId << encLocalUrl.toLocalFile();
+#endif
     // FIXME(fpohtmeh): encode attachment here
     const auto localUrl = encLocalUrl;
     // Write url to DB

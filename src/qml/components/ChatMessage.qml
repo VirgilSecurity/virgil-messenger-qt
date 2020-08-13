@@ -30,6 +30,7 @@ Control {
     property string attachmentThumbnailUrl
     property int attachmentBytesLoaded
     property int attachmentStatus
+    property bool attachmentDownloaded
 
     signal saveAttachmentAs()
 
@@ -38,7 +39,7 @@ Control {
         readonly property bool hasAttachment: attachmentId.length > 0
         readonly property color background: isUser ? "#59717D" : Theme.mainBackgroundColor
         readonly property double maxWidth: chatPage.width - 40
-        readonly property bool isPicture: attachmentType == Enums.AttachmentType.Picture
+        readonly property bool isPicture: hasAttachment && attachmentType == Enums.AttachmentType.Picture
         readonly property double defaultRadius: 4
     }
 
@@ -78,14 +79,14 @@ Control {
             height: row.height + topPadding + bottomPadding
             width: row.width + leftPadding + rightPadding
 
-            readonly property double topPadding: d.isPicture ? d.defaultRadius : 6
-            readonly property double bottomPadding: d.isPicture ? d.defaultRadius : 6
-            readonly property double leftPadding: d.isPicture ? d.defaultRadius : 4
-            readonly property double rightPadding: d.isPicture ? d.defaultRadius : 10
+            readonly property double topPadding: d.isPicture ? d.defaultRadius : 12
+            readonly property double bottomPadding: d.isPicture ? d.defaultRadius : 12
+            readonly property double leftPadding: d.isPicture ? d.defaultRadius : 12
+            readonly property double rightPadding: d.isPicture ? d.defaultRadius : 12
 
             RowLayout {
                 id: row
-                spacing: 4
+                spacing: 10
                 x: leftPadding
                 y: topPadding
 
@@ -98,8 +99,26 @@ Control {
                         id: image
                         width: sourceSize.width
                         height: sourceSize.height
+                        visible: d.isPicture ? true : !progressBar.visible
                         fillMode: Image.PreserveAspectFit
-                        source: d.isPicture ? attachmentThumbnailUrl : "../resources/icons/Logo.png"
+                        source: {
+                            if (d.isPicture) {
+                                return attachmentThumbnailUrl;
+                            }
+                            if (attachmentDownloaded) {
+                                return "../resources/icons/File Selected Big.png"
+                            }
+                            return "../resources/icons/File Download Big.png"
+                        }
+                    }
+
+                    CircleProgressBar {
+                        id: progressBar
+                        anchors.centerIn: parent
+                        size: 40
+                        visible: attachmentStatus == Enums.AttachmentStatus.Loading
+                        maxValue: attachmentBytesTotal
+                        value: attachmentBytesLoaded
                     }
                 }
 
@@ -123,40 +142,6 @@ Control {
                         font.pixelSize: UiHelper.fixFontSz(10)
                         Layout.maximumWidth: Math.min(implicitWidth, column.maxWidth)
                         elide: "ElideMiddle"
-                    }
-                }
-            }
-
-            ProgressBar {
-                id: progressBar
-                anchors.verticalCenter: d.isPicture ? undefined : parent.verticalCenter
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.bottom: d.isPicture ? parent.bottom : undefined
-                anchors.bottomMargin: d.isPicture ? 15 : 0
-
-                padding: 2
-                width: 0.95 * row.width
-                visible: attachmentStatus == Enums.AttachmentStatus.Loading
-                from: 0
-                to: attachmentBytesTotal
-                value: attachmentBytesLoaded
-
-                background: Rectangle {
-                    implicitWidth: progressBar.width
-                    implicitHeight: 6
-                    color: "#e6e6e6"
-                    radius: 3
-                }
-
-                contentItem: Item {
-                    implicitWidth: progressBar.width
-                    implicitHeight: 4
-
-                    Rectangle {
-                        width: progressBar.visualPosition * parent.width
-                        height: parent.height
-                        radius: 2
-                        color: "#17a81a"
                     }
                 }
             }
@@ -246,7 +231,7 @@ Control {
                     width: chatMessage.width
                     height: loader.item.height
                     color: d.background
-                    radius: d.isPicture ? 4 : 20
+                    radius: d.isPicture ? d.defaultRadius : 20
                 }
 
                 Rectangle {
@@ -269,11 +254,6 @@ Control {
                 Loader {
                     id: loader
                     sourceComponent: d.hasAttachment ? attachmentComponent : textEditComponent
-                }
-
-                Rectangle {
-                    color: "transparent"
-                    visible: d.hasAttachment
                 }
             }
 

@@ -67,6 +67,7 @@ class VSQSqlConversationModel : public QSqlTableModel
         DayRole,
         AttachmentDisplaySizeRole,
         AttachmentBytesLoadedRole,
+        AttachmentDownloadedRole
     };
 
 public:
