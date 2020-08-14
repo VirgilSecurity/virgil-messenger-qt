@@ -35,6 +35,7 @@
 #include "VSQUtils.h"
 
 #include <QLocale>
+#include <QDir>
 #include <QUuid>
 
 QString VSQUtils::createUuid()
@@ -54,4 +55,22 @@ QString VSQUtils::escapedUserName(const QString &userName)
     QString name(userName);
     name.remove(regexp);
     return name;
+}
+
+QString VSQUtils::findUniqueFileName(const QString &fileName)
+{
+    QFileInfo info(fileName);
+    if (!info.exists()) {
+        return fileName;
+    }
+    auto dir = info.absoluteDir();
+    auto baseName = info.baseName();
+    auto suffix = info.completeSuffix();
+    for(;;) {
+        auto uuid = createUuid().remove('-').left(6);
+        auto newFileName = dir.filePath(QString("%1-%2.%3").arg(baseName, uuid, suffix));
+        if (!QFile::exists(newFileName)) {
+            return newFileName;
+        }
+    }
 }

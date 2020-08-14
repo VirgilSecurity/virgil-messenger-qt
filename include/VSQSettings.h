@@ -54,8 +54,10 @@ public:
 
     // Attachments
 
-    int attachmentMaxSize() const;
+    DataSize attachmentMaxFileSize() const;
     QDir attachmentCacheDir() const;
+    QDir thumbnailsDir() const;
+    QDir downloadsDir() const;
     QSize thumbnailMaxSize() const;
 
     // Dev mode
@@ -63,6 +65,8 @@ public:
 
 private:
     QDir m_attachmentCacheDir;
+    QDir m_thumbnaisDir;
+    QDir m_downloadsDir;
 };
 
 #endif // VSQ_SETTINGS_H

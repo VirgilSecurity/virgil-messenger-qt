@@ -40,7 +40,7 @@
 #include <QSqlRecord>
 #include <QSqlQuery>
 
-#include "VSQTransferManager.h"
+#include "VSQCryptoTransferManager.h"
 #include "VSQUtils.h"
 
 Q_DECLARE_METATYPE(StMessage::Status)
@@ -61,10 +61,10 @@ VSQSqlConversationModel::_createTable() {
         "attachment_id TEXT,"
         "attachment_bytes_total INTEGER,"
         "attachment_type INTEGER,"
-        "attachment_local_url TEXT,"
-        "attachment_enc_local_url TEXT,"
+        "attachment_file_path TEXT,"
         "attachment_remote_url TEXT,"
-        "attachment_thumbnail_url TEXT,"
+        "attachment_thumbnail_path TEXT,"
+        "attachment_remote_thumbnail_url TEXT,"
         "attachment_status INT,"
         ""
         "FOREIGN KEY('author') REFERENCES %2 ( name ),"
@@ -186,21 +186,25 @@ VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
     }
 
     if (role == AttachmentStatusRole) {
-        auto it = m_transferMap.find(currRecord.value(MessageIdRole - Qt::UserRole).toString());
-        if (it == m_transferMap.end())
-            return currRecord.value(AttachmentStatusRole - Qt::UserRole).toInt();
-        else
-            return static_cast<int>(it->second.status);
+        const auto messageId = currRecord.value(MessageIdRole - Qt::UserRole).toString();
+        const auto it = m_transferMap.find(messageId);
+        return static_cast<int>((it == m_transferMap.end()) ? Attachment::Status::Created : it->second.status);
     }
 
     if (role == AttachmentBytesLoadedRole) {
-        auto it = m_transferMap.find(currRecord.value(MessageIdRole - Qt::UserRole).toString());
+        const auto messageId = currRecord.value(MessageIdRole - Qt::UserRole).toString();
+        const auto it = m_transferMap.find(messageId);
         return (it == m_transferMap.end()) ? 0 : it->second.bytesReceived;
     }
 
     if (role == AttachmentDownloadedRole) {
-        auto filePath = data(index, AttachmentLocalUrlRole).toString();
+        const auto filePath = currRecord.value(AttachmentFilePathRole - Qt::UserRole).toString();
         return QFile::exists(filePath);
+    }
+
+    if (role == AttachmentFilePathRole || role == attachmentThumbnailPathRole) {
+        const auto filePath = currRecord.value(role - Qt::UserRole).toString();
+        return QUrl::fromLocalFile(filePath);
     }
 
     return currRecord.value(role - Qt::UserRole);
@@ -222,8 +226,8 @@ VSQSqlConversationModel::roleNames() const {
     names[AttachmentIdRole] = "attachmentId";
     names[AttachmentBytesTotalRole] = "attachmentBytesTotal";
     names[AttachmentTypeRole] = "attachmentType";
-    names[AttachmentLocalUrlRole] = "attachmentLocalUrl";
-    names[attachmentThumbnailUrlRole] = "attachmentThumbnailUrl";
+    names[AttachmentFilePathRole] = "attachmentFilePath";
+    names[attachmentThumbnailPathRole] = "attachmentThumbnailPath";
     names[AttachmentStatusRole] = "attachmentStatus";
     names[AttachmentDisplaySizeRole] = "attachmentDisplaySize";
     names[AttachmentBytesLoadedRole] = "attachmentBytesLoaded";
@@ -336,7 +340,7 @@ QList<StMessage> VSQSqlConversationModel::getMessages(const QString &user, const
         StMessage message;
         message.message = model.record(i).value("message").toString();
         message.recipient = model.record(i).value("recipient").toString();
-        message.message_id = model.record(i).value("message_id").toString();
+        message.messageId = model.record(i).value("message_id").toString();
         messages.append(message);
     }
 
@@ -345,37 +349,37 @@ QList<StMessage> VSQSqlConversationModel::getMessages(const QString &user, const
     return messages;
 }
 
-void VSQSqlConversationModel::connectTransferManager(VSQTransferManager *manager)
+void VSQSqlConversationModel::connectTransferManager(VSQCryptoTransferManager *manager)
 {
-    connect(manager, &VSQTransferManager::statusChanged, this, &VSQSqlConversationModel::onAttachmentStatusChanged);
-    connect(manager, &VSQTransferManager::progressChanged, this, &VSQSqlConversationModel::onAttachmentProgressChanged);
-    connect(manager, &VSQTransferManager::fileDownloaded, this, &VSQSqlConversationModel::onAttachmentFileDownloaded);
+    connect(manager, &VSQCryptoTransferManager::statusChanged, this, &VSQSqlConversationModel::setAttachmentStatus);
+    connect(manager, &VSQCryptoTransferManager::progressChanged, this, &VSQSqlConversationModel::setAttachmentProgress);
+    connect(manager, &VSQCryptoTransferManager::fileDownloadedAndDecrypted, this, &VSQSqlConversationModel::setAttachmentFilePath);
 }
 
-void VSQSqlConversationModel::saveAttachmentAs(const QString &messageId, const QVariant &fileUrl)
+Optional<StMessage> VSQSqlConversationModel::getMessage(const QString &messageId) const
 {
-    // Get attachment info
     QSqlQueryModel model;
     model.setQuery(QString("SELECT * FROM %1 WHERE message_id = \"%2\"").arg(_tableName()).arg(messageId));
     const auto record = model.record(0);
+    StMessage message;
+    message.messageId = messageId;
+    message.message = record.value("message").toString();
+    message.recipient = record.value("recipient").toString();
     const auto attachmentId = record.value("attachment_id").toString();
-    if (attachmentId.isEmpty()) {
-        qWarning() << "There is no attachment for message:" << messageId;
-        return;
+    if (!attachmentId.isEmpty()) {
+        Attachment attachment;
+        attachment.id = attachmentId;
+        attachment.bytesTotal = record.value("attachment_bytes_total").toInt();
+        attachment.type = static_cast<Attachment::Type>(record.value("attachment_type").toInt());
+        attachment.filePath = record.value("attachment_file_path").toString();
+        attachment.remoteUrl = record.value("attachment_remote_url").toString();
+        attachment.thumbnailPath = record.value("attachment_thumbnail_path").toString();
+        attachment.remoteThumbnailUrl = record.value("attachment_remote_thumbnail_url").toString();
+        attachment.status = static_cast<Attachment::Status>(record.value("attachment_status").toInt());
+        attachment.displayName = message.message;
+        message.attachment = attachment;
     }
-    const auto encLocalUrl = QUrl(record.value("attachment_enc_local_url").toString());
-    const auto localUrl = QUrl(record.value("attachment_local_url").toString());
-    qDebug() << "Attachment found! Message id:" << messageId
-             << "local path:"  << localUrl << "enc local path:" << encLocalUrl;
-    if (localUrl.isEmpty()) {
-        qWarning() << "Attachment local url is empty!";
-    }
-    else {
-        qDebug() << "Copying" << localUrl.toLocalFile() << fileUrl.toString();
-        auto destUrl = QUrl(fileUrl.toString());
-        QFile::copy(localUrl.toLocalFile(), destUrl.toLocalFile());
-        emit attachmentSaved(tr("Attachment was saved"));
-    }
+    return message;
 }
 
 /******************************************************************************/
@@ -428,9 +432,11 @@ void VSQSqlConversationModel::onCreateMessage(const QString &recipient, const QS
         newRecord.setValue("attachment_id", attachment->id);
         newRecord.setValue("attachment_bytes_total", attachment->bytesTotal);
         newRecord.setValue("attachment_type", static_cast<int>(attachment->type));
-        newRecord.setValue("attachment_local_url", attachment->localUrl);
-        newRecord.setValue("attachment_enc_local_url", attachment->encLocalUrl);
-        newRecord.setValue("attachment_thumbnail_url", attachment->thumbnailUrl);
+        newRecord.setValue("attachment_file_path", attachment->filePath);
+        newRecord.setValue("attachment_remote_url", attachment->remoteUrl.toString());
+        newRecord.setValue("attachment_thumbnail_path", attachment->thumbnailPath);
+        newRecord.setValue("attachment_remote_thumbnail_url", attachment->remoteThumbnailUrl.toString());
+        newRecord.setValue("attachment_status", static_cast<int>(attachment->status));
     }
     if (!insertRecord(rowCount(), newRecord)) {
         qWarning() << "Failed to create message:" << lastError().text();
@@ -453,10 +459,15 @@ void VSQSqlConversationModel::onReceiveMessage(const QString &messageId, const Q
     newRecord.setValue("status", static_cast<int>(StMessage::Status::MST_RECEIVED));
     newRecord.setValue("message_id", messageId);
     if (attachment) {
+        // TODO(fpohtmeh): merge with onCreateMessage
         newRecord.setValue("attachment_id", attachment->id);
         newRecord.setValue("attachment_bytes_total", attachment->bytesTotal);
         newRecord.setValue("attachment_type", static_cast<int>(attachment->type));
-        newRecord.setValue("attachment_remove_url", attachment->remoteUrl);
+        newRecord.setValue("attachment_file_path", attachment->filePath);
+        newRecord.setValue("attachment_remote_url", attachment->remoteUrl.toString());
+        newRecord.setValue("attachment_thumbnail_path", attachment->thumbnailPath);
+        newRecord.setValue("attachment_remote_thumbnail_url", attachment->remoteThumbnailUrl.toString());
+        newRecord.setValue("attachment_status", static_cast<int>(attachment->status));
     }
     if (!insertRowIntoTable(newRecord)) {
         qWarning() << "Failed to save received message:" << lastError().text();
@@ -470,65 +481,59 @@ void VSQSqlConversationModel::onReceiveMessage(const QString &messageId, const Q
 
 void VSQSqlConversationModel::onSetMessageStatus(const QString &messageId, const StMessage::Status status)
 {
-    QSqlQuery model;
-    QString query;
-
-    query = QString("UPDATE %1 SET status = %2 WHERE message_id = \"%3\"")
+    QString query = QString("UPDATE %1 SET status = %2 WHERE message_id = '%3'")
             .arg(_tableName()).arg(static_cast<int>(status)).arg(messageId);
-
-    model.prepare(query);
-
-    qDebug() << query << model.exec();
-
+    QSqlQuery().exec(query);
     select();
+    qDebug() << "SQL message status:" << messageId << "=>" << status;
 }
 
-void VSQSqlConversationModel::onAttachmentProgressChanged(const QString &messageId, const DataSize bytesReceived)
+void VSQSqlConversationModel::setAttachmentStatus(const QString &messageId, const Attachment::Status status)
 {
-#ifdef VS_DEVMODE
+    QString query = QString("UPDATE %1 SET attachment_status = %2 WHERE message_id = '%3'")
+            .arg(_tableName()).arg(static_cast<int>(status)).arg(messageId);
+    QSqlQuery().exec(query);
+    select();
+    qDebug() << "SQL attachment status:" << messageId << "=>" << status;
+
+    if (status == Attachment::Status::Loading) {
+        m_transferMap[messageId] = TransferInfo();
+    }
+    else if (status == Attachment::Status::Failed || status == Attachment::Status::Loaded) {
+        const auto it = m_transferMap.find(messageId);
+        if (it != m_transferMap.end()) {
+            m_transferMap.erase(it);
+        }
+    }
+    emit dataChanged(index(0, 0), index(rowCount() - 1, 0), { AttachmentBytesLoadedRole, AttachmentStatusRole });
+}
+
+void VSQSqlConversationModel::setAttachmentFilePath(const QString &messageId, const QString &filePath)
+{
+    QString query = QString("UPDATE %1 SET attachment_file_path = '%2' WHERE message_id = '%3'")
+            .arg(_tableName()).arg(filePath).arg(messageId);
+    QSqlQuery().exec(query);
+    select();
+    qDebug() << "SQL attachment filePath:" << messageId << "=>" << filePath;
+    emit dataChanged(index(0, 0), index(rowCount() - 1, 0), { AttachmentDownloadedRole });
+}
+
+void VSQSqlConversationModel::setAttachmentProgress(const QString &messageId, const DataSize bytesReceived)
+{
     qCDebug(lcTransferManager) << "Transfer progress" << bytesReceived << messageId;
-#endif
-    auto it = m_transferMap.find(messageId);
+    const auto it = m_transferMap.find(messageId);
     if (it != m_transferMap.end()) {
         it->second.bytesReceived = bytesReceived;
         emit dataChanged(index(0, 0), index(rowCount() - 1, 0), { AttachmentBytesLoadedRole });
     }
 }
 
-void VSQSqlConversationModel::onAttachmentStatusChanged(const QString &messageId, const Enums::AttachmentStatus status)
+void VSQSqlConversationModel::setAttachmentThumbnailPath(const QString &messageId, const QString &filePath)
 {
-    qCDebug(lcTransferManager) << "Transfer status" << status << messageId;
-    if (status == Attachment::Status::Loading) {
-        m_transferMap[messageId] = TransferInfo();
-        emit dataChanged(index(0, 0), index(rowCount() - 1, 0), { AttachmentStatusRole });
-    }
-    else if (status == Attachment::Status::Loaded || status == Attachment::Status::Failed) {
-        auto it = m_transferMap.find(messageId);
-        if (it != m_transferMap.end()) {
-            m_transferMap.erase(it);
-        }
-        // Write status to DB
-        QSqlQuery model;
-        auto query = QString("UPDATE %1 SET attachment_status = %2 WHERE message_id = '%3'")
-                .arg(_tableName()).arg(static_cast<int>(status)).arg(messageId);
-        model.prepare(query);
-        model.exec();
-        select();
-    }
-}
-
-void VSQSqlConversationModel::onAttachmentFileDownloaded(const QString &messageId, const QUrl &encLocalUrl)
-{
-#ifdef VS_DEVMODE
-    qCDebug(lcTransferManager) << "Attacment file downloaded:" << messageId << encLocalUrl.toLocalFile();
-#endif
-    // FIXME(fpohtmeh): encode attachment here
-    const auto localUrl = encLocalUrl;
-    // Write url to DB
-    QSqlQuery model;
-    auto query = QString("UPDATE %1 SET attachment_enc_local_url = '%2', attachment_local_url = '%3' WHERE message_id = '%4'")
-            .arg(_tableName(), encLocalUrl.toString(), localUrl.toString(), messageId);
-    model.prepare(query);
-    model.exec();
+    QString query = QString("UPDATE %1 SET attachment_thumbnail_path = '%2' WHERE message_id = '%3'")
+            .arg(_tableName()).arg(filePath).arg(messageId);
+    QSqlQuery().exec(query);
     select();
+    qDebug() << "SQL attachment thumbnail path:" << messageId << "=>" << filePath;
+    emit dataChanged(index(0, 0), index(rowCount() - 1, 0), { attachmentThumbnailPathRole });
 }

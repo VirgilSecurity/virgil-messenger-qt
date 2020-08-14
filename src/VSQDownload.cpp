@@ -39,50 +39,42 @@
 
 #include "VSQUtils.h"
 
-VSQDownload::VSQDownload(QNetworkAccessManager *networkAccessManager, const QString &messageId,
-                         const QDir &downloadDir, QObject *parent)
-    : VSQTransfer(networkAccessManager, messageId, parent)
-    , m_downloadDir(downloadDir)
+VSQDownload::VSQDownload(QNetworkAccessManager *networkAccessManager, const QString &id,
+                         const QUrl &remoteUrl, const QString &filePath, QObject *parent)
+    : VSQTransfer(networkAccessManager, id, parent)
+    , m_remoteUrl(remoteUrl)
+    , m_filePath(filePath)
 {}
 
 VSQDownload::~VSQDownload()
 {
 #ifdef VS_DEVMODE
-    qCDebug(lcDev) << "~Download" << messageId();
+    qCDebug(lcDev) << "~Download" << m_filePath;
 #endif
 }
 
 void VSQDownload::start()
 {
-    if (m_running) {
+    if (isRunning()) {
         qCWarning(lcTransferManager) << "Cannot start again a running download";
         return;
     }
-    qCDebug(lcTransferManager) << QString("Started download %1 / %2 / %3")
-                                  .arg(messageId(), m_attachment.filePath(), m_attachment.remoteUrl.toString());
+    qCDebug(lcTransferManager) << QString("Started download: %1").arg(id());
+    VSQTransfer::start();
 
     // Check file for writing
-    auto file = getAttachmentFile();
+    auto file = fileHandle(m_filePath);
     if (!file->open(QFile::WriteOnly)) {
-        emit failed(QString("Unable to open for writing:").arg(m_attachment.localUrl.toString()));
+        emit statusChanged(Attachment::Status::Failed);
         return;
     }
 
     // Create request
-    QNetworkRequest request(m_attachment.remoteUrl);
-    auto reply = m_networkAccessManager->get(request);
+    QNetworkRequest request(m_remoteUrl);
+    auto reply = networkAccessManager()->get(request);
     connectReply(reply);
+    connect(reply, &QNetworkReply::downloadProgress, this, &VSQTransfer::progressChanged);
     connect(reply, &QNetworkReply::readyRead, this, [=]() {
         file->write(reply->readAll());
     });
-}
-
-void VSQDownload::setAttachment(const Attachment &attachment)
-{
-    VSQTransfer::setAttachment(attachment);
-    auto encFilePath = m_downloadDir.filePath(VSQUtils::createUuid()) + QLatin1Char('.') + m_attachment.fileExtension();
-#ifdef VS_DEVMODE
-    qCDebug(lcTransferManager) << "Encrypted file path:" << encFilePath;
-#endif
-    m_attachment.encLocalUrl = QUrl::fromLocalFile(encFilePath);
 }

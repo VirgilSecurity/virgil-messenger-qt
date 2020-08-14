@@ -53,7 +53,7 @@
 #include "VSQLogging.h"
 #include <VSQNetworkAnalyzer.h>
 #include <VSQAttachmentBuilder.h>
-#include <VSQTransferManager.h>
+#include <VSQCryptoTransferManager.h>
 #include <VSQDiscoveryManager.h>
 
 using namespace VirgilIoTKit;
@@ -81,8 +81,7 @@ public:
         MRES_ERR_USER_NOT_FOUND,
         MRES_ERR_USER_ALREADY_EXISTS,
         MRES_ERR_ENCRYPTION,
-        MRES_ERR_BAD_ATTACHMENT,
-        MRES_ERR_TRANSFER_FAIL
+        MRES_ERR_ATTACHMENT
     };
 
     enum EnStatus
@@ -153,6 +152,12 @@ public slots:
 
     Q_INVOKABLE void setCurrentRecipient(const QString &recipient);
 
+    Q_INVOKABLE void saveAttachmentAs(const QString &messageId, const QVariant &fileUrl);
+
+    Q_INVOKABLE void downloadAttachment(const QString &messageId);
+
+    Q_INVOKABLE void openAttachment(const QString &messageId);
+
 signals:
     void
     fireError(QString errorText);
@@ -180,6 +185,8 @@ signals:
 
     void
     fireCurrentUserChanged();
+
+    void openUrlExternallyRequested(const QString &url);
 
 private slots:
     void onConnected();
@@ -209,8 +216,8 @@ private:
     VSQLogging *m_logging;
     VSQNetworkAnalyzer m_networkAnalyzer;
     VSQSettings *m_settings;
+    VSQCryptoTransferManager *m_transferManager;
     VSQAttachmentBuilder m_attachmentBuilder;
-    VSQTransferManager *m_transferManager;
 
     QMutex m_connectGuard;
     QMutex m_messageGuard;
@@ -283,7 +290,11 @@ private:
 
     StMessage parseJson(const QJsonDocument &json);
 
-    VSQMessenger::EnResult _sendMessageInternal(bool createNew, const QString &messageId, const QString &to, const QString &message, const OptionalAttachment &attachment);
+    VSQMessenger::EnResult _sendMessageInternal(bool createNew, const QString &messageId, const QString &to, const QString &message,
+                                                const OptionalAttachment &attachment);
+
+    using Function = std::function<void (const StMessage &message)>;
+    void downloadAndProcess(StMessage message, const Function &func);
 };
 
 #endif // VIRGIL_IOTKIT_QT_MESSENGER_H

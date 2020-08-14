@@ -14,8 +14,8 @@ ApplicationWindow {
     id: root
     visible: true
     title: qsTr("Virgil Secure Communications Platform")
-    minimumWidth: 320
-    minimumHeight: 600
+    minimumWidth: Platform.isMobile ? 320 : 1000
+    minimumHeight: Platform.isMobile ? 600 : 800
 
     property bool connectionError: false
 
@@ -117,7 +117,7 @@ ApplicationWindow {
 
     Component.onCompleted: {
         Platform.detect()
-        ConversationsModel.attachmentSaved.connect(showPopupInform)
+        Messenger.openUrlExternallyRequested.connect(Qt.openUrlExternally)
 //        Logging.crashReportRequested.connect(sendReportAsk.open)
 //        Logging.reportSent.connect(showPopupSuccess)
 //        Logging.reportSentErr.connect(showPopupError)

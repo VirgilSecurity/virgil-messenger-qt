@@ -34,35 +34,41 @@
 
 #include "VSQTransfer.h"
 
-VSQTransfer::VSQTransfer(QNetworkAccessManager *networkAccessManager, const QString &messageId, QObject *parent)
+VSQTransfer::VSQTransfer(QNetworkAccessManager *networkAccessManager, const QString &id, QObject *parent)
     : QObject(parent)
     , m_networkAccessManager(networkAccessManager)
+    , m_id(id)
     , m_running(false)
-    , m_messageId(messageId)
-{}
+{
+    connect(this, &VSQTransfer::statusChanged, [=](const Enums::AttachmentStatus status){
+        if (status == Attachment::Status::Loaded || status == Attachment::Status::Failed) {
+            emit ended(status == Attachment::Status::Failed);
+        }
+    });
+}
 
 VSQTransfer::~VSQTransfer()
 {
-    // FIXME(fpohtmeh): remove encrypted local file on success
+#ifdef VS_DEVMODE
+    qCDebug(lcTransferManager) << "Deletion of transfer:" << id();
+#endif
 }
 
-QString VSQTransfer::messageId() const
+QString VSQTransfer::id() const
 {
-    return m_messageId;
+    return m_id;
 }
 
-void VSQTransfer::setAttachment(const Attachment &attachment)
+bool VSQTransfer::isRunning() const
 {
-    m_attachment = attachment;
-}
-
-const Attachment VSQTransfer::attachment() const
-{
-    return m_attachment;
+    return m_running;
 }
 
 void VSQTransfer::start()
-{}
+{
+    m_running = true;
+    emit statusChanged(Attachment::Status::Loading);
+}
 
 void VSQTransfer::abort()
 {
@@ -70,10 +76,8 @@ void VSQTransfer::abort()
         return;
     }
     m_running = false;
-    const QString message = QString("Aborted transfer %1 / %2 / %3").arg(
-                messageId(), m_attachment.localUrl.toLocalFile(), m_attachment.remoteUrl.toString());
-    qCDebug(lcTransferManager) << message;
-    emit failed(message);
+    qCDebug(lcTransferManager) << QString("Aborted transfer %1").arg(id());
+    emit statusChanged(Attachment::Status::Failed);
 }
 
 void VSQTransfer::connectReply(QNetworkReply *reply)
@@ -81,31 +85,31 @@ void VSQTransfer::connectReply(QNetworkReply *reply)
 #ifdef VS_DEVMODE
     qCDebug(lcDev) << "Connected to reply:" << reply;
 #endif
-    connect(reply, &QNetworkReply::uploadProgress, this, &VSQTransfer::progressChanged);
-    connect(reply, &QNetworkReply::finished, this, &VSQTransfer::finished);
-    connect(reply, &QNetworkReply::errorOccurred, this, std::bind(&VSQTransfer::onNetworkReplyError, this, args::_1, reply));
-    connect(this, &VSQTransfer::finished, reply, std::bind(&VSQTransfer::cleanupReply, this, reply));
-    connect(this, &VSQTransfer::failed, reply, std::bind(&VSQTransfer::cleanupReply, this, reply));
+    connect(reply, &QNetworkReply::finished, [=]() {
+        emit statusChanged(Attachment::Status::Loaded);
+    });
+    connect(reply, &QNetworkReply::errorOccurred, [=](QNetworkReply::NetworkError error) {
+        qCDebug(lcTransferManager) << QString("Network error (code %1): %2").arg(error).arg(reply->errorString());
+        emit statusChanged(Attachment::Status::Failed);
+    });
+    connect(reply, &QNetworkReply::sslErrors, [=]() {
+        qCDebug(lcTransferManager) << "SSL errors";
+        emit statusChanged(Attachment::Status::Failed);
+    });
+    connect(this, &VSQTransfer::ended, [=]() {
+        m_running = false;
+    });
 }
 
-void VSQTransfer::onNetworkReplyError(QNetworkReply::NetworkError error, QNetworkReply *reply)
+QNetworkAccessManager *VSQTransfer::networkAccessManager()
 {
-    emit failed(QString("Network error (code %1): %2").arg(error).arg(reply->errorString()));
+    return m_networkAccessManager;
 }
 
-void VSQTransfer::cleanupReply(QNetworkReply *reply)
+QFile *VSQTransfer::fileHandle(const QString &filePath)
 {
-    m_running = false;
-    reply->deleteLater();
-#ifdef VS_DEVMODE
-    qCDebug(lcDev) << "Cleanuped reply:" << reply;
-#endif
-}
-
-QFile *VSQTransfer::getAttachmentFile()
-{
-    auto file = new QFile(m_attachment.filePath(), this);
-    connect(this, &VSQTransfer::finished, file, &QFile::close);
-    connect(this, &VSQTransfer::failed, file, &QFile::close);
+    auto file = new QFile(filePath);
+    connect(this, &VSQTransfer::ended, file, &QFile::close);
+    connect(this, &VSQTransfer::ended, file, &QFile::deleteLater);
     return file;
 }

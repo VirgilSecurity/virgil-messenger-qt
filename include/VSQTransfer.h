@@ -49,34 +49,31 @@ class VSQTransfer : public QObject
     Q_OBJECT
 
 public:
-    VSQTransfer(QNetworkAccessManager *networkAccessManager, const QString &messageId, QObject *parent);
+    VSQTransfer(QNetworkAccessManager *networkAccessManager, const QString &id, QObject *parent);
     virtual ~VSQTransfer();
 
-    QString messageId() const;
-
-    virtual void setAttachment(const Attachment &attachment);
-    const Attachment attachment() const;
+    QString id() const;
+    bool isRunning() const;
 
     virtual void start();
     virtual void abort();
 
 signals:
     void progressChanged(DataSize bytesReceived, DataSize bytesTotal);
-    void finished();
-    void failed(const QString &errorText);
+    void statusChanged(const Enums::AttachmentStatus status);
+    void ended(bool failed);
+    void connectionChanged();
 
 protected:
     void connectReply(QNetworkReply *reply);
-    void onNetworkReplyError(QNetworkReply::NetworkError error, QNetworkReply *reply);
-    void cleanupReply(QNetworkReply *reply);
-    QFile *getAttachmentFile();
 
-    QNetworkAccessManager *m_networkAccessManager;
-    bool m_running;
-    Attachment m_attachment;
+    QNetworkAccessManager *networkAccessManager();
+    QFile *fileHandle(const QString &filePath);
 
 private:
-    QString m_messageId;
+    QNetworkAccessManager *m_networkAccessManager;
+    QString m_id;
+    bool m_running;
 };
 
 #endif // VSQ_TRANSFER_H

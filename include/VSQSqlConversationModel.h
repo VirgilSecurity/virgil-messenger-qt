@@ -39,7 +39,7 @@
 
 #include "VSQCommon.h"
 
-class VSQTransferManager;
+class VSQCryptoTransferManager;
 
 class VSQSqlConversationModel : public QSqlTableModel
 {
@@ -58,8 +58,10 @@ class VSQSqlConversationModel : public QSqlTableModel
         AttachmentIdRole,
         AttachmentBytesTotalRole,
         AttachmentTypeRole,
-        AttachmentLocalUrlRole,
-        attachmentThumbnailUrlRole,
+        AttachmentFilePathRole,
+        AttachmentRemoteUrlRole,
+        attachmentThumbnailPathRole,
+        AttachmentRemoteThumbnailUrlRole,
         AttachmentStatusRole,
 
         FirstInRowRole,
@@ -108,17 +110,23 @@ public:
 
     QList<StMessage> getMessages(const QString &user, const StMessage::Status status);
 
-    void connectTransferManager(VSQTransferManager *manager);
+    void connectTransferManager(VSQCryptoTransferManager *manager);
 
-    Q_INVOKABLE void saveAttachmentAs(const QString &messageId, const QVariant &fileUrl);
+    Optional<StMessage> getMessage(const QString &messageId) const;
+
+    void setAttachmentStatus(const QString &messageId, const Attachment::Status status);
+    void setAttachmentFilePath(const QString &messageId, const QString &filePath);
+    void setAttachmentProgress(const QString &messageId, const DataSize bytesReceived);
+    void setAttachmentThumbnailPath(const QString &messageId, const QString &filePath);
 
 signals:
     void createMessage(const QString &recipient, const QString &message, const QString &messageId, const OptionalAttachment &attachment);
     void receiveMessage(const QString &messageId, const QString &author, const QString &message, const OptionalAttachment &attachment);
     void setMessageStatus(const QString &messageId, const StMessage::Status status);
 
+    void requestThumbnail(const QString &messageId);
+
     void recipientChanged();
-    void attachmentSaved(const QString &message);
 
 private:
     struct TransferInfo
@@ -148,10 +156,6 @@ private:
     void onCreateMessage(const QString &recipient, const QString &message, const QString &messageId, const OptionalAttachment &attachment);
     void onReceiveMessage(const QString &messageId, const QString &author, const QString &message, const OptionalAttachment &attachment);
     void onSetMessageStatus(const QString &messageId, const StMessage::Status status);
-
-    void onAttachmentProgressChanged(const QString &messageId, const DataSize bytesReceived);
-    void onAttachmentStatusChanged(const QString &messageId, const Enums::AttachmentStatus status);
-    void onAttachmentFileDownloaded(const QString &messageId, const QUrl &encLocalUrl);
 };
 
 #endif // VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H

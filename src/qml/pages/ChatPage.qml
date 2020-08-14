@@ -91,6 +91,7 @@ Page {
             isUser: model.author === Messenger.currentUser
             status: isUser ? model.status : "none"
             failed: model.status == 4 || model.attachmentStatus == Enums.AttachmentStatus.Failed
+            messageId: model.messageId
 
             inRow: model.messageInARow
             firstInRow: model.firstMessageInARow
@@ -99,14 +100,14 @@ Page {
             attachmentBytesTotal: model.attachmentBytesTotal
             attachmentDisplaySize: model.attachmentDisplaySize
             attachmentType: model.attachmentType
-            attachmentLocalUrl: model.attachmentLocalUrl
-            attachmentThumbnailUrl: model.attachmentThumbnailUrl
+            attachmentFilePath: model.attachmentFilePath
+            attachmentThumbnailPath: model.attachmentThumbnailPath
             attachmentBytesLoaded: model.attachmentBytesLoaded
             attachmentStatus: model.attachmentStatus
             attachmentDownloaded: model.attachmentDownloaded
 
-            onSaveAttachmentAs: {
-                saveAttachmentAsDialog.messageId = model.messageId
+            onSaveAttachmentAs: function(messageId) {
+                saveAttachmentAsDialog.messageId = messageId
                 saveAttachmentAsDialog.attachmentType = attachmentType
                 saveAttachmentAsDialog.open()
             }
@@ -143,7 +144,7 @@ Page {
 
         property string messageId: ""
 
-        onAccepted: ConversationsModel.saveAttachmentAs(messageId, fileUrl)
+        onAccepted: Messenger.saveAttachmentAs(messageId, fileUrl)
     }
 
     // Component events

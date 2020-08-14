@@ -7,8 +7,8 @@ Item {
 
     property int size: 100
     property int lineWidth: 4
-    property real maxValue: 0
     property real value: 0
+    property real maxValue: 0
 
     property color primaryColor: "#29b6f6"
     property color secondaryColor: "#ffffff"
@@ -19,7 +19,7 @@ Item {
     readonly property real ratio: value / maxValue
 
     onRatioChanged: {
-        canvas.degree = value / maxValue * 360;
+        canvas.degree = ratio * 360;
     }
 
     Canvas {

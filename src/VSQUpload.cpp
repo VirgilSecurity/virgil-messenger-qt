@@ -34,19 +34,86 @@
 
 #include "VSQUpload.h"
 
+#include <QEventLoop>
 #include <QMimeDatabase>
 #include <QNetworkReply>
+#include <QTimer>
 
-VSQUpload::VSQUpload(QNetworkAccessManager *networkAccessManager, const QString &messageId, const QString &slotId, QObject *parent)
-    : VSQTransfer(networkAccessManager, messageId, parent)
-    , m_slotId(slotId)
+VSQUpload::VSQUpload(QNetworkAccessManager *networkAccessManager, const QString &id, const QString &filePath, QObject *parent)
+    : VSQTransfer(networkAccessManager, id, parent)
+    , m_filePath(filePath)
 {}
 
 VSQUpload::~VSQUpload()
 {
 #ifdef VS_DEVMODE
-    qCDebug(lcDev) << "~Upload" << messageId();
+    qCDebug(lcDev) << "~Upload" << m_filePath;
 #endif
+}
+
+void VSQUpload::start()
+{
+    if (isRunning()) {
+        qCWarning(lcTransferManager) << "Cannot start again a running upload";
+        return;
+    }
+    qCDebug(lcTransferManager) << QString("Started upload: %1").arg(id());
+    VSQTransfer::start();
+
+    // Encrypt file
+    auto file = fileHandle(m_filePath);
+    if (!file->open(QFile::ReadOnly)) {
+        emit statusChanged(Attachment::Status::Failed);
+        return;
+    }
+
+    // Create request
+    auto url = remoteUrl();
+    if (!url) {
+        emit statusChanged(Attachment::Status::Failed);
+        return;
+    }
+    QNetworkRequest request(*url);
+    auto mimeType = QMimeDatabase().mimeTypeForUrl(m_filePath);
+    if (mimeType.isValid()) {
+        request.setHeader(QNetworkRequest::ContentTypeHeader, mimeType.name());
+    }
+    request.setHeader(QNetworkRequest::ContentLengthHeader, QFileInfo(m_filePath).size());
+    // Create & connect reply
+    auto reply = networkAccessManager()->put(request, file);
+    connectReply(reply);
+    connect(reply, &QNetworkReply::uploadProgress, this, &VSQTransfer::progressChanged);
+}
+
+QString VSQUpload::filePath() const
+{
+    return m_filePath;
+}
+
+Optional<QUrl> VSQUpload::remoteUrl()
+{
+    if (!m_remoteUrl && !m_remoteUrlError) {
+        QTimer timer;
+        timer.setSingleShot(true);
+        QEventLoop loop;
+
+        connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+        connect(this, &VSQUpload::remoteUrlReceived, &loop, [&](const QUrl &url) {
+            m_remoteUrl = url;
+            loop.quit();
+        });
+        connect(this, &VSQUpload::remoteUrlErrorOccured, &loop, &QEventLoop::quit);
+        connect(this, &VSQUpload::connectionChanged, &loop, &QEventLoop::quit);
+
+        timer.start(1000);
+        loop.exec();
+    }
+    if (m_remoteUrl) {
+        qCDebug(lcTransferManager) << "Remote url:" << *m_remoteUrl;
+        return m_remoteUrl;
+    }
+    m_remoteUrlError = true;
+    return NullOptional;
 }
 
 QString VSQUpload::slotId() const
@@ -54,30 +121,7 @@ QString VSQUpload::slotId() const
     return m_slotId;
 }
 
-void VSQUpload::start()
+void VSQUpload::setSlotId(const QString &id)
 {
-    if (m_running) {
-        qCWarning(lcTransferManager) << "Cannot start again a running upload";
-        return;
-    }
-    qCDebug(lcTransferManager) << QString("Started upload %1 / %2 / %3")
-                                  .arg(messageId(), m_attachment.filePath(), m_attachment.remoteUrl.toString());
-    m_running = true;
-
-    // Check file for reading
-    auto file = getAttachmentFile();
-    if (!file->open(QFile::ReadOnly)) {
-        emit failed(QString("Unable to open for reading:").arg(m_attachment.filePath()));
-        return;
-    }
-
-    // Create request
-    QNetworkRequest request(m_attachment.remoteUrl);
-    auto mimeType = QMimeDatabase().mimeTypeForUrl(m_attachment.encLocalUrl);
-    if (mimeType.isValid())
-        request.setHeader(QNetworkRequest::ContentTypeHeader, mimeType.name());
-    request.setHeader(QNetworkRequest::ContentLengthHeader, m_attachment.bytesTotal);
-    // Create & connect reply
-    auto reply = m_networkAccessManager->put(request, file);
-    connectReply(reply);
+    m_slotId = id;
 }

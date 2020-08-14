@@ -61,53 +61,33 @@ Control {
     }
 
     ScrollView {
-            id: logControl
-            anchors {
-                topMargin: 0.75 * mainView.height
-                fill: parent
-            }
-            visible: settings.devMode
-
-            ContextMenu {
-                id: logContextMenu
-                compact: true
-
-                Action {
-                    text: qsTr("Clear")
-                    onTriggered: logTextControl.clear()
-                }
-            }
-
-            TextArea {
-                id: logTextControl
-                width: mainView.width
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                readOnly: true
-                font.pointSize: 9
-
-                TapHandler {
-                    acceptedButtons: Qt.RightButton
-                    property var contextMenu: logContextMenu
-
-                    onLongPressed: {
-                        if (Platform.isMobile) {
-                            contextMenu.x = point.position.x
-                            contextMenu.y = point.position.y - 40
-                            contextMenu.open()
-                        }
-                    }
-                    onTapped: {
-                        if (Platform.isMobile) {
-                            return
-                        }
-                        contextMenu.x = eventPoint.position.x
-                        contextMenu.y = eventPoint.position.y
-                        contextMenu.open()
-                        eventPoint.accepted = false
-                    }
-                }
-            }
+        id: logControl
+        anchors {
+            topMargin: 0.75 * mainView.height
+            fill: parent
         }
+        visible: settings.devMode
+
+        TextArea {
+            id: logTextControl
+            width: mainView.width
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            readOnly: true
+            font.pointSize: 9
+            selectByMouse: true
+        }
+    }
+
+    Button {
+        id: clearLogButton
+        visible: logControl.visible
+        anchors.right: logControl.right
+        anchors.top: logControl.top
+        text: "x"
+        width: 20
+        height: width
+        onClicked: logTextControl.clear()
+    }
 
     Component.onCompleted: {
         showSplashScreen()

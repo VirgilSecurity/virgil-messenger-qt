@@ -117,17 +117,14 @@ struct Attachment
 
     QString id;
     Type type = Type::File;
-    QUrl localUrl; // raw
-    QUrl encLocalUrl;
+    QString filePath; // raw
+    QString displayName;
     QUrl remoteUrl; // encrypted
-    QUrl thumbnailUrl; // local raw
+    QString thumbnailPath; // raw
+    QUrl remoteThumbnailUrl; // encrypted
     DataSize bytesTotal = 0; // encrypted
     DataSize bytesLoaded = 0; // encrypted
     Status status = Status::Created;
-
-    QString filePath() const;
-    QString fileName() const;
-    QString fileExtension() const;
 };
 Q_DECLARE_METATYPE(Attachment)
 
@@ -139,7 +136,7 @@ struct StMessage
     using Author = Enums::MessageAuthor;
     using Status = Enums::MessageStatus;
 
-    QString message_id;
+    QString messageId;
     QString message;
     QString recipient;
     OptionalAttachment attachment;

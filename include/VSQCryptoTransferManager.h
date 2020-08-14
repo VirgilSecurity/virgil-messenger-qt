@@ -32,20 +32,30 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_UTILS_H
-#define VSQ_UTILS_H
+#ifndef VSQ_CRYPTOTRANSFERMANAGER_H
+#define VSQ_CRYPTOTRANSFERMANAGER_H
 
-#include "VSQCommon.h"
+#include "VSQTransferManager.h"
 
-namespace VSQUtils
+class VSQCryptoTransferManager : public VSQTransferManager
 {
-    QString createUuid();
+    Q_OBJECT
 
-    QString formattedDataSize(DataSize fileSize);
+public:
+    VSQCryptoTransferManager(QXmppClient *client, QNetworkAccessManager *networkAccessManager, VSQSettings *settings, QObject *parent);
+    virtual ~VSQCryptoTransferManager();
 
-    QString escapedUserName(const QString &userName);
+    VSQUpload *startCryptoUpload(const QString &id, const QString &filePath, const QString &recipient);
+    VSQDownload *startCryptoDownload(const QString &id, const QUrl &url, const QString &filePath, const QString &recipient);
 
-    QString findUniqueFileName(const QString &fileName);
-}
+signals:
+    void fileDownloadedAndDecrypted(const QString &id, const QString &filePath);
 
-#endif // VSQ_UTILS_H
+private:
+    QString getCacheNewFilePath();
+
+    bool ecnryptFile(const QString &path, const QString &encPath,  const QString &recipient);
+    bool decryptFile(const QString &encPath, const QString &path, const QString &recipient);
+};
+
+#endif // VSQ_CRYPTOTRANSFERMANAGER_H

@@ -18,6 +18,7 @@ Control {
     property bool isUser: false
     property string status: ""
     property bool failed: false
+    property string messageId
 
     property bool inRow: false
     property bool firstInRow: true
@@ -26,13 +27,13 @@ Control {
     property string attachmentBytesTotal
     property string attachmentDisplaySize
     property var attachmentType
-    property string attachmentLocalUrl
-    property string attachmentThumbnailUrl
+    property string attachmentFilePath
+    property string attachmentThumbnailPath
     property int attachmentBytesLoaded
     property int attachmentStatus
     property bool attachmentDownloaded
 
-    signal saveAttachmentAs()
+    signal saveAttachmentAs(string messageId)
 
     QtObject {
         id: d
@@ -103,9 +104,9 @@ Control {
                         fillMode: Image.PreserveAspectFit
                         source: {
                             if (d.isPicture) {
-                                return attachmentThumbnailUrl;
+                                return attachmentThumbnailPath;
                             }
-                            if (attachmentDownloaded) {
+                            if (chatMessage.attachmentDownloaded) {
                                 return "../resources/icons/File Selected Big.png"
                             }
                             return "../resources/icons/File Download Big.png"
@@ -116,9 +117,9 @@ Control {
                         id: progressBar
                         anchors.centerIn: parent
                         size: 40
-                        visible: attachmentStatus == Enums.AttachmentStatus.Loading
-                        maxValue: attachmentBytesTotal
-                        value: attachmentBytesLoaded
+                        visible: chatMessage.attachmentStatus == Enums.AttachmentStatus.Loading
+                        maxValue: chatMessage.attachmentBytesTotal
+                        value: chatMessage.attachmentBytesLoaded
                     }
                 }
 
@@ -150,8 +151,8 @@ Control {
                 compact: true
 
                 Action {
-                    text: qsTr("Save As...")
-                    onTriggered: chatMessage.saveAttachmentAs()
+                    text: Platform.isMobile ? qsTr("Save to downloads") : qsTr("Save As...")
+                    onTriggered: (Platform.isMobile ? Messenger.downloadAttachment : chatMessage.saveAttachmentAs)(messageId)
                 }
             }
         }
@@ -200,16 +201,22 @@ Control {
                 color: "transparent"
 
                 TapHandler {
+                    onTapped: (chatMessage.attachmentDownloaded ? Messenger.openAttachment : Messenger.downloadAttachment)(messageId)
+                }
+
+                TapHandler {
                     acceptedButtons: Qt.RightButton
                     property var contextMenu: loader.item.contextMenu
 
                     onLongPressed: {
-                        if (Platform.isMobile) {
-                            contextMenu.x = point.position.x
-                            contextMenu.y = point.position.y - 40
-                            contextMenu.open()
+                        if (!Platform.isMobile) {
+                            return
                         }
+                        contextMenu.x = point.position.x
+                        contextMenu.y = point.position.y - 40
+                        contextMenu.open()
                     }
+
                     onTapped: {
                         if (Platform.isMobile) {
                             return
@@ -219,12 +226,6 @@ Control {
                         contextMenu.open()
                         eventPoint.accepted = false
                     }
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    acceptedButtons: Qt.LeftButton
-                    onClicked: chatMessage.saveAttachmentAs()
                 }
 
                 Rectangle {

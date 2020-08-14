@@ -37,22 +37,20 @@
 
 #include "VSQTransfer.h"
 
-#include <QDir>
-
 class VSQDownload : public VSQTransfer
 {
     Q_OBJECT
 
 public:
-    VSQDownload(QNetworkAccessManager *networkAccessManager, const QString &messageId, const QDir &downloadDir, QObject *parent);
+    VSQDownload(QNetworkAccessManager *networkAccessManager, const QString &id,
+                const QUrl &remoteUrl, const QString &filePath, QObject *parent);
     ~VSQDownload() override;
 
     void start() override;
 
-    void setAttachment(const Attachment &attachment) override;
-
 private:
-    QDir m_downloadDir;
+    QUrl m_remoteUrl;
+    QString m_filePath;
 };
 
 #endif // VSQ_DOWNLOAD_H

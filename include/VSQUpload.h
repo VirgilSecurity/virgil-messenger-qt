@@ -42,14 +42,25 @@ class VSQUpload : public VSQTransfer
     Q_OBJECT
 
 public:
-    VSQUpload(QNetworkAccessManager *networkAccessManager, const QString &messageId, const QString &slotId, QObject *parent);
+    VSQUpload(QNetworkAccessManager *networkAccessManager, const QString &id, const QString &filePath, QObject *parent);
     ~VSQUpload() override;
-
-    QString slotId() const;
 
     void start() override;
 
+    QString filePath() const;
+    Optional<QUrl> remoteUrl();
+
+    QString slotId() const;
+    void setSlotId(const QString &id);
+
+signals:
+    void remoteUrlReceived(const QUrl &url);
+    void remoteUrlErrorOccured();
+
 private:
+    QString m_filePath;
+    Optional<QUrl> m_remoteUrl;
+    bool m_remoteUrlError = false;
     QString m_slotId;
 };
 

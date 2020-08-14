@@ -50,22 +50,3 @@ void registerCommonTypes()
     qRegisterMetaType<StMessage>();
     qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");
 }
-
-QString Attachment::filePath() const
-{
-    return encLocalUrl.toLocalFile();
-}
-
-QString Attachment::fileName() const
-{
-    if (!localUrl.isEmpty())
-        return localUrl.fileName();
-    if (!remoteUrl.isEmpty())
-        return remoteUrl.fileName();
-    return QLatin1String();
-}
-
-QString Attachment::fileExtension() const
-{
-    return QFileInfo(fileName()).completeSuffix();
-}

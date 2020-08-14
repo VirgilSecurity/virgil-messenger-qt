@@ -35,27 +35,34 @@
 #ifndef VSQ_ATTACHMENT_BUILDER
 #define VSQ_ATTACHMENT_BUILDER
 
+#include <QObject>
+
 #include "VSQCommon.h"
 
 Q_DECLARE_LOGGING_CATEGORY(lcAttachment);
 
 class VSQSettings;
+class VSQCryptoTransferManager;
 
-class VSQAttachmentBuilder
+class VSQAttachmentBuilder : public QObject
 {
 public:
-    explicit VSQAttachmentBuilder(VSQSettings *settings);
+    VSQAttachmentBuilder(VSQCryptoTransferManager *transferManager, QObject *parent);
     VSQAttachmentBuilder() = default; // QML engine requires default constructor
 
     bool isValidUrl(const QUrl &url) const;
 
     // Build encoded attachment by local url, attachment type and recipient
-    OptionalAttachment build(const QUrl &localUrl, const Attachment::Type type, const QString &recipient);
+    // Start thumbnail/file uploads
+    OptionalAttachment build(const QUrl &localUrl, const Attachment::Type type, const QString &messageId, const QString &recipient,
+                             QString &errorText);
+
+    QString generateThumbnailFileName() const;
 
 private:
-    QString createEncryptedFile(const QString &filePath, const QString &recipient) const;
     QString createThumbnailFile(const QString &filePath) const;
 
+    VSQCryptoTransferManager *m_transferManager;
     VSQSettings *m_settings;
 };
 

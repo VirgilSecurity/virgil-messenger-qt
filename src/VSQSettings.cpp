@@ -47,8 +47,10 @@ Q_LOGGING_CATEGORY(lcSettings, "settings")
 VSQSettings::VSQSettings(QObject *parent)
     : QObject(parent)
 {
-    m_attachmentCacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/attachments");
-    for (auto dir : { m_attachmentCacheDir }) {
+    m_attachmentCacheDir.setPath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/attachments"));
+    m_thumbnaisDir.setPath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/thumbnails"));
+    m_downloadsDir.setPath(QStandardPaths::writableLocation(QStandardPaths::DownloadLocation) + QLatin1String("/Virgil"));
+    for (auto dir : { m_attachmentCacheDir, m_thumbnaisDir, m_downloadsDir }) {
         if (!dir.exists() && !dir.mkpath(dir.absolutePath())) {
             qFatal("Failed to create writable directory at %s", qPrintable(dir.absolutePath()));
         }
@@ -56,7 +58,13 @@ VSQSettings::VSQSettings(QObject *parent)
 
     qCDebug(lcSettings) << "Settings";
     qCDebug(lcSettings) << "Attachment cache dir:" << attachmentCacheDir().absolutePath();
-    qCDebug(lcSettings) << "Attachment max size:" << attachmentMaxSize();
+    qCDebug(lcSettings) << "Attachment max file size:" << attachmentMaxFileSize();
+    qCDebug(lcSettings) << "Thumbnails dir:" << thumbnailsDir().absolutePath();
+    qCDebug(lcSettings) << "Thumbnail max size:" << attachmentMaxFileSize();
+    qCDebug(lcSettings) << "Downloads dir:" << downloadsDir();
+    if (devMode()) {
+        qCDebug(lcSettings) << "Dev mode:" << true;
+    }
 }
 
 VSQSettings::~VSQSettings()
@@ -66,7 +74,7 @@ VSQSettings::~VSQSettings()
 #endif
 }
 
-int VSQSettings::attachmentMaxSize() const
+DataSize VSQSettings::attachmentMaxFileSize() const
 {
     return 25 * 1024 * 1024;
 }
@@ -76,9 +84,19 @@ QDir VSQSettings::attachmentCacheDir() const
     return m_attachmentCacheDir;
 }
 
+QDir VSQSettings::thumbnailsDir() const
+{
+    return m_thumbnaisDir;
+}
+
+QDir VSQSettings::downloadsDir() const
+{
+    return m_downloadsDir;
+}
+
 QSize VSQSettings::thumbnailMaxSize() const
 {
-    return QSize(600, 400);
+    return QSize(400, 320);
 }
 
 bool VSQSettings::devMode() const

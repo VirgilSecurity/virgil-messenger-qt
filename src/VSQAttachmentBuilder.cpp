@@ -36,17 +36,23 @@
 
 #include <QPixmap>
 
+#include <QXmppClient.h>
+
 #include <virgil/iot/messenger/messenger.h>
 
+#include "VSQCryptoTransferManager.h"
 #include "VSQSettings.h"
+#include "VSQUpload.h"
 #include "VSQUtils.h"
 
 using namespace VirgilIoTKit;
 
 Q_LOGGING_CATEGORY(lcAttachment, "attachment");
 
-VSQAttachmentBuilder::VSQAttachmentBuilder(VSQSettings *settings)
-    : m_settings(settings)
+VSQAttachmentBuilder::VSQAttachmentBuilder(VSQCryptoTransferManager *transferManager, QObject *parent)
+    : QObject(parent)
+    , m_transferManager(transferManager)
+    , m_settings(transferManager->settings())
 {}
 
 bool VSQAttachmentBuilder::isValidUrl(const QUrl &url) const
@@ -54,89 +60,58 @@ bool VSQAttachmentBuilder::isValidUrl(const QUrl &url) const
     return url.isValid() && url.isLocalFile();
 }
 
-OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment::Type type, const QString &recipient)
+OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment::Type type, const QString &messageId, const QString &recipient,
+                                               QString &errorText)
 {
     if (!isValidUrl(url)) {
+        errorText = tr("Invalid attachment URL");
         return NullOptional;
     }
-
     QFileInfo localInfo(url.toLocalFile());
     if (!localInfo.exists()) {
-        qCInfo(lcAttachment) << QString("Attachment file %1 doesn't exist").arg(localInfo.absoluteFilePath());
+        errorText = tr("File doesn't exist");
         return NullOptional;
     }
-    if (localInfo.size() > m_settings->attachmentMaxSize()) {
-        qCInfo(lcAttachment) << QString("File size exceeds maximum limit: %1").arg(m_settings->attachmentMaxSize());
+    if (localInfo.size() > m_settings->attachmentMaxFileSize()) {
+        errorText = tr("File size limit: %1").arg(VSQUtils::formattedDataSize(m_settings->attachmentMaxFileSize()));
         return NullOptional;
     }
-    const QString localFilePath = localInfo.absoluteFilePath();
-
-    const QString encryptedFilePath = createEncryptedFile(localFilePath, recipient);
-    if (encryptedFilePath.isEmpty()) {
-        return NullOptional;
-    }
-    QFileInfo encryptedInfo(encryptedFilePath);
 
     Attachment attachment;
     attachment.id = VSQUtils::createUuid();
     attachment.type = type;
-    attachment.localUrl = QUrl::fromLocalFile(localFilePath);
-    attachment.encLocalUrl = QUrl::fromLocalFile(encryptedFilePath);
-    if (type == Attachment::Type::Picture) {
-        attachment.thumbnailUrl = QUrl::fromLocalFile(createThumbnailFile(localFilePath));
+    attachment.displayName = localInfo.fileName();
+    attachment.filePath = localInfo.absoluteFilePath();
+    const QString uploadErrorText = tr("Upload error");
+    const bool isPicture = type == Attachment::Type::Picture;
+
+    // Thumbnail processing
+    if (isPicture) {
+        attachment.thumbnailPath = createThumbnailFile(attachment.filePath);
+        const auto id = messageId + QLatin1String("-thumb");
+        auto upload = m_transferManager->startCryptoUpload(id, attachment.thumbnailPath, recipient);
+        if (!upload) {
+            errorText = uploadErrorText;
+            return NullOptional;
+        }
+        attachment.remoteThumbnailUrl = *upload->remoteUrl();
     }
-    attachment.bytesTotal = encryptedInfo.size();
+
+    // File processing
+    auto upload = m_transferManager->startCryptoUpload(messageId, attachment.filePath, recipient);
+    if (!upload) {
+        errorText = uploadErrorText;
+        return NullOptional;
+    }
+    attachment.remoteUrl = *upload->remoteUrl();
+    attachment.bytesTotal = QFileInfo(upload->filePath()).size();
+
     return attachment;
 }
 
-QString VSQAttachmentBuilder::createEncryptedFile(const QString &filePath, const QString &recipient) const
+QString VSQAttachmentBuilder::generateThumbnailFileName() const
 {
-    // FIXME(fpohtmeh): implement
-    /*
-    QByteArray bytes;
-    {
-        QFile file(filePath);
-        if (!file.open(QFile::ReadOnly)) {
-            qCWarning(lcAttachment) << "Cannot open attachment for reading:" << filePath;
-            return QString();
-        }
-        bytes = file.readAll();
-    }
-    qCDebug(lcAttachment) << "Input size:" << bytes.size();
-
-    // Encrypt
-    const size_t encryptedMaxSize = 10 * bytes.size();
-    std::vector<uint8_t> encryptedBytes(encryptedMaxSize);
-    size_t encryptedSize = 0;
-    if (VS_CODE_OK != vs_messenger_virgil_encrypt_msg(
-                recipient.toStdString().c_str(),
-                bytes.data(),
-                encryptedBytes.data(),
-                encryptedMaxSize,
-                &encryptedSize)) {
-        qCWarning(lcAttachment) << "Cannot encrypt attachment:" << filePath;
-        return QString();
-    }
-    encryptedBytes.resize(encryptedSize);
-    qCDebug(lcAttachment) << "Encrypted size:" << encryptedSize;
-
-    // Decrypt
-    const size_t decryptedMaxSize = 10 * encryptedSize;
-    std::vector<uint8_t> decryptedBytes(decryptedMaxSize);
-    size_t decryptedSize = 0;
-    if (VS_CODE_OK != vs_messenger_virgil_decrypt_msg(
-                recipient.toStdString().c_str(),
-                reinterpret_cast<const char *>(encryptedBytes.data()),
-                decryptedBytes.data(),
-                decryptedSize - 1,
-                &decryptedSize)) {
-        qCWarning(lcAttachment) << "Cannot decrypt attachment:" << filePath;
-        return QString();
-    }
-    decryptedBytes.resize(decryptedSize);
-    qCDebug(lcAttachment) << "Decrypted size:" << decryptedSize;
-    */
-    return filePath;
+    return m_settings->thumbnailsDir().filePath(VSQUtils::createUuid() + QLatin1String(".png"));
 }
 
 QString VSQAttachmentBuilder::createThumbnailFile(const QString &filePath) const
@@ -156,7 +131,7 @@ QString VSQAttachmentBuilder::createThumbnailFile(const QString &filePath) const
     if (size != pixmap.size()) {
         pixmap = pixmap.scaled(size.width(), size.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
     }
-    const QString thumbnailFileName = m_settings->attachmentCacheDir().filePath(VSQUtils::createUuid() + QLatin1String(".png"));
+    const QString thumbnailFileName = generateThumbnailFileName();
     pixmap.save(thumbnailFileName);
     qCInfo(lcAttachment) << "Created thumbnail:" << thumbnailFileName;
     return thumbnailFileName;
