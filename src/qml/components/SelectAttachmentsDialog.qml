@@ -22,12 +22,14 @@ FileDialog {
         shortcuts.home,
         shortcuts.pictures,
         shortcuts.movies,
-        shortcuts.music
+        shortcuts.music,
+        shortcuts.documents,
+        shortcuts.desktop
     ]
 
     title: _titles[attachmentType]
     nameFilters: _nameFilters[attachmentType]
     folder: _folders[attachmentType]
 
-    sidebarVisible: false
+    sidebarVisible: true
 }
