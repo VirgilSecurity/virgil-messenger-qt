@@ -416,8 +416,8 @@ QString VSQSqlConversationModel::_contactsTableName() const {
     return QString("Contacts_") + escapedUserName();
 }
 
-void VSQSqlConversationModel::onCreateMessage(const QString &recipient, const QString &message, const QString &messageId,
-                                              const OptionalAttachment &attachment)
+void VSQSqlConversationModel::onCreateMessage(const QString recipient, const QString message, const QString messageId,
+                                              const OptionalAttachment attachment)
 {
     const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
 
@@ -447,7 +447,7 @@ void VSQSqlConversationModel::onCreateMessage(const QString &recipient, const QS
     select();
 }
 
-void VSQSqlConversationModel::onReceiveMessage(const QString &messageId, const QString &author, const QString &message, const OptionalAttachment &attachment)
+void VSQSqlConversationModel::onReceiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachment attachment)
 {
     const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
 
@@ -479,7 +479,7 @@ void VSQSqlConversationModel::onReceiveMessage(const QString &messageId, const Q
     submitAll();
 }
 
-void VSQSqlConversationModel::onSetMessageStatus(const QString &messageId, const StMessage::Status status)
+void VSQSqlConversationModel::onSetMessageStatus(const QString messageId, const StMessage::Status status)
 {
     QString query = QString("UPDATE %1 SET status = %2 WHERE message_id = '%3'")
             .arg(_tableName()).arg(static_cast<int>(status)).arg(messageId);

@@ -120,9 +120,9 @@ public:
     void setAttachmentThumbnailPath(const QString &messageId, const QString &filePath);
 
 signals:
-    void createMessage(const QString &recipient, const QString &message, const QString &messageId, const OptionalAttachment &attachment);
-    void receiveMessage(const QString &messageId, const QString &author, const QString &message, const OptionalAttachment &attachment);
-    void setMessageStatus(const QString &messageId, const StMessage::Status status);
+    void createMessage(const QString recipient, const QString message, const QString messageId, const OptionalAttachment attachment);
+    void receiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachment attachment);
+    void setMessageStatus(const QString messageId, const StMessage::Status status);
 
     void requestThumbnail(const QString &messageId);
 
@@ -153,9 +153,9 @@ private:
     QString
     _contactsTableName() const;
 
-    void onCreateMessage(const QString &recipient, const QString &message, const QString &messageId, const OptionalAttachment &attachment);
-    void onReceiveMessage(const QString &messageId, const QString &author, const QString &message, const OptionalAttachment &attachment);
-    void onSetMessageStatus(const QString &messageId, const StMessage::Status status);
+    void onCreateMessage(const QString recipient, const QString message, const QString messageId, const OptionalAttachment attachment);
+    void onReceiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachment attachment);
+    void onSetMessageStatus(const QString messageId, const StMessage::Status status);
 };
 
 #endif // VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H
