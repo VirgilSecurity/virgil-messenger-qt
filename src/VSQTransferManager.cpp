@@ -172,6 +172,7 @@ void VSQTransferManager::removeTransfer(VSQTransfer *transfer, bool lock)
 void VSQTransferManager::abortTransfer(VSQTransfer *transfer, bool lock)
 {
     transfer->abort();
+#if 0 // TODO: Chech for deadlock
     if (!lock) {
         removeTransfer(transfer, true);
     }
@@ -179,6 +180,9 @@ void VSQTransferManager::abortTransfer(VSQTransfer *transfer, bool lock)
         QMutexLocker locker(&m_transfersMutex);
         removeTransfer(transfer, false);
     }
+#else
+    removeTransfer(transfer, false);
+#endif
 }
 
 void VSQTransferManager::onStartTransfer(VSQTransfer *transfer)
