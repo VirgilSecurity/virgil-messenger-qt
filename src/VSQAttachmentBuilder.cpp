@@ -57,7 +57,11 @@ VSQAttachmentBuilder::VSQAttachmentBuilder(VSQCryptoTransferManager *transferMan
 
 bool VSQAttachmentBuilder::isValidUrl(const QUrl &url) const
 {
-    return url.isValid() && url.isLocalFile();
+    bool isValid = url.isValid();
+#if !defined(Q_OS_ANDROID)
+    isValid = isValid && url.isLocalFile();
+#endif
+    return isValid;
 }
 
 OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment::Type type, const QString &messageId, const QString &recipient,
@@ -67,7 +71,11 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
         errorText = tr("Invalid attachment URL");
         return NullOptional;
     }
+#if defined (Q_OS_ANDROID)
+     QFileInfo localInfo(url.toString());
+#else
     QFileInfo localInfo(url.toLocalFile());
+#endif
     if (!localInfo.exists()) {
         errorText = tr("File doesn't exist");
         return NullOptional;
