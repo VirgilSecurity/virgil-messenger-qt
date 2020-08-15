@@ -168,7 +168,7 @@ bool VSQCryptoTransferManager::decryptFile(const QString &encPath, const QString
     if (!file.open(QFile::WriteOnly)) {
         return false;
     }
-    file.write(bytes.data());
+    file.write(bytes.data(), bytesSize);
     file.close();
     qCDebug(lcTransferManager) << "File decrypted:" << path << "size:" << QFileInfo(file).size();
     return true;
