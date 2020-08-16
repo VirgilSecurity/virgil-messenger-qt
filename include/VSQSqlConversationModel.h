@@ -61,6 +61,8 @@ class VSQSqlConversationModel : public QSqlTableModel
         AttachmentFilePathRole,
         AttachmentRemoteUrlRole,
         attachmentThumbnailPathRole,
+        attachmentThumbnailWidthRole,
+        attachmentThumbnailHeightRole,
         AttachmentRemoteThumbnailUrlRole,
         AttachmentStatusRole,
 
@@ -116,7 +118,7 @@ public:
 
     void setAttachmentStatus(const QString &messageId, const Attachment::Status status);
     void setAttachmentFilePath(const QString &messageId, const QString &filePath);
-    void setAttachmentProgress(const QString &messageId, const DataSize bytesReceived);
+    void setAttachmentProgress(const QString &messageId, const DataSize bytesReceived, const DataSize bytesTotal);
     void setAttachmentThumbnailPath(const QString &messageId, const QString &filePath);
 
 signals:

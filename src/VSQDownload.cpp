@@ -65,7 +65,7 @@ void VSQDownload::start()
     // Check file for writing
     auto file = fileHandle(m_filePath);
     if (!file->open(QFile::WriteOnly)) {
-        emit statusChanged(Attachment::Status::Failed);
+        setStatus(Attachment::Status::Failed);
         return;
     }
 
@@ -73,7 +73,9 @@ void VSQDownload::start()
     QNetworkRequest request(m_remoteUrl);
     auto reply = networkAccessManager()->get(request);
     connectReply(reply);
-    connect(reply, &QNetworkReply::downloadProgress, this, &VSQTransfer::progressChanged);
+    connect(reply, &QNetworkReply::downloadProgress, [=](qint64 bytesReceived, qint64 bytesTotal) {
+        emit progressChanged(bytesReceived, bytesTotal);
+    });
     connect(reply, &QNetworkReply::readyRead, this, [=]() {
         file->write(reply->readAll());
     });

@@ -281,7 +281,7 @@ VSQMessenger::_connect(QString userWithEnv, QString deviceId, QString userId, bo
     loop.exec();
 
     const bool connected = m_xmpp.isConnected();
-    qDebug() << "<<<<<<<<<<< _connect: FINISH connected = " << connected << "  " << cur_val;
+    qCDebug(lcNetwork) << "<<<<<<<<<<< _connect: FINISH connected = " << connected << "  " << cur_val;
 
     qDebug() << "Carbons " << (connected ? "enable" : "disable");
     m_xmppCarbonManager->setCarbonsEnabled(connected);
@@ -757,6 +757,8 @@ QString VSQMessenger::createJson(const QString &message, const OptionalAttachmen
         payloadObject.insert("url", attachment->remoteUrl.toString());
         payloadObject.insert("displayName", attachment->displayName);
         payloadObject.insert("thumbnailUrl", attachment->remoteThumbnailUrl.toString());
+        payloadObject.insert("thumbnailWidth", attachment->thumbnailSize.width());
+        payloadObject.insert("thumbnailHeight", attachment->thumbnailSize.height());
         payloadObject.insert("bytesTotal", attachment->bytesTotal);
     }
     else {
@@ -789,6 +791,7 @@ StMessage VSQMessenger::parseJson(const QJsonDocument &json)
     if (type == QLatin1String("picture")) {
         attachment.type = Attachment::Type::Picture;
         attachment.remoteThumbnailUrl = payload["thumbnailUrl"].toString();
+        attachment.thumbnailSize = QSize(payload["thumbnailWidth"].toInt(), payload["thumbnailHeight"].toInt());
     }
     else {
         attachment.type = Attachment::Type::File;

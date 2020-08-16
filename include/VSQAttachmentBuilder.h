@@ -41,6 +41,8 @@
 
 Q_DECLARE_LOGGING_CATEGORY(lcAttachment);
 
+class QPixmap;
+
 class VSQSettings;
 class VSQCryptoTransferManager;
 
@@ -60,7 +62,8 @@ public:
     QString generateThumbnailFileName() const;
 
 private:
-    QString createThumbnailFile(const QString &filePath) const;
+    QPixmap generateThumbnail(const QPixmap &pixmap) const;
+    void saveThumbnailFile(const QPixmap &pixmap, const QString &fileName) const;
 
     VSQCryptoTransferManager *m_transferManager;
     VSQSettings *m_settings;

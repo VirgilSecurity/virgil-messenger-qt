@@ -59,21 +59,23 @@ public:
     virtual void abort();
 
 signals:
-    void progressChanged(DataSize bytesReceived, DataSize bytesTotal);
+    void progressChanged(const DataSize bytesReceived, const DataSize bytesTotal);
     void statusChanged(const Enums::AttachmentStatus status);
     void ended(bool failed);
     void connectionChanged();
 
 protected:
     void connectReply(QNetworkReply *reply);
+    void setStatus(const Attachment::Status status);
 
     QNetworkAccessManager *networkAccessManager();
     QFile *fileHandle(const QString &filePath);
 
 private:
+
     QNetworkAccessManager *m_networkAccessManager;
     QString m_id;
-    bool m_running;
+    Attachment::Status m_status;
 };
 
 #endif // VSQ_TRANSFER_H

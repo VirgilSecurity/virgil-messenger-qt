@@ -102,6 +102,8 @@ Page {
             attachmentType: model.attachmentType
             attachmentFilePath: model.attachmentFilePath
             attachmentThumbnailPath: model.attachmentThumbnailPath
+            attachmentThumbnailWidth: model.attachmentThumbnailWidth
+            attachmentThumbnailHeight: model.attachmentThumbnailHeight
             attachmentBytesLoaded: model.attachmentBytesLoaded
             attachmentStatus: model.attachmentStatus
             attachmentDownloaded: model.attachmentDownloaded

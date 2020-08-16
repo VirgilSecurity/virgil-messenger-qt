@@ -95,14 +95,21 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
 
     // Thumbnail processing
     if (isPicture) {
-        attachment.thumbnailPath = createThumbnailFile(attachment.filePath);
+        const auto pixmap = generateThumbnail(QPixmap(attachment.filePath));
+        attachment.thumbnailSize = pixmap.size();
+        attachment.thumbnailPath = generateThumbnailFileName();
+        saveThumbnailFile(pixmap, attachment.thumbnailPath);
         const auto id = messageId + QLatin1String("-thumb");
-        auto upload = m_transferManager->startCryptoUpload(id, attachment.thumbnailPath, recipient);
+        const auto upload = m_transferManager->startCryptoUpload(id, attachment.thumbnailPath, recipient);
         if (!upload) {
             errorText = uploadErrorText;
             return NullOptional;
         }
-        attachment.remoteThumbnailUrl = *upload->remoteUrl();
+        const auto remoteThumbnailUrl = upload->remoteUrl();
+        if (!remoteThumbnailUrl) {
+            return NullOptional;
+        }
+        attachment.remoteThumbnailUrl = *remoteThumbnailUrl;
     }
 
     // File processing
@@ -111,7 +118,11 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
         errorText = uploadErrorText;
         return NullOptional;
     }
-    attachment.remoteUrl = *upload->remoteUrl();
+    const auto remoteUrl = upload->remoteUrl();
+    if (!remoteUrl) {
+        return NullOptional;
+    }
+    attachment.remoteUrl = *remoteUrl;
     attachment.bytesTotal = QFileInfo(upload->filePath()).size();
 
     return attachment;
@@ -122,9 +133,8 @@ QString VSQAttachmentBuilder::generateThumbnailFileName() const
     return m_settings->thumbnailsDir().filePath(VSQUtils::createUuid() + QLatin1String(".png"));
 }
 
-QString VSQAttachmentBuilder::createThumbnailFile(const QString &filePath) const
+QPixmap VSQAttachmentBuilder::generateThumbnail(const QPixmap &pixmap) const
 {
-    QPixmap pixmap(filePath);
     QSizeF size = pixmap.size();
     const double ratio = size.height() / size.width();
     const QSizeF maxSize = m_settings->thumbnailMaxSize();
@@ -136,11 +146,14 @@ QString VSQAttachmentBuilder::createThumbnailFile(const QString &filePath) const
         size.setHeight(maxSize.height());
         size.setWidth(maxSize.height() / ratio);
     }
-    if (size != pixmap.size()) {
-        pixmap = pixmap.scaled(size.width(), size.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    if (size == pixmap.size()) {
+        return pixmap;
     }
-    const QString thumbnailFileName = generateThumbnailFileName();
-    pixmap.save(thumbnailFileName);
-    qCInfo(lcAttachment) << "Created thumbnail:" << thumbnailFileName;
-    return thumbnailFileName;
+    return pixmap.scaled(size.width(), size.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+}
+
+void VSQAttachmentBuilder::saveThumbnailFile(const QPixmap &pixmap, const QString &fileName) const
+{
+    pixmap.save(fileName);
+    qCInfo(lcAttachment) << "Created thumbnail:" << fileName;
 }

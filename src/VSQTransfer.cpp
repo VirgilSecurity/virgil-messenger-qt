@@ -38,8 +38,13 @@ VSQTransfer::VSQTransfer(QNetworkAccessManager *networkAccessManager, const QStr
     : QObject(parent)
     , m_networkAccessManager(networkAccessManager)
     , m_id(id)
-    , m_running(false)
+    , m_status(Attachment::Status::Created)
 {
+    connect(this, &VSQTransfer::progressChanged, [=](const DataSize bytesReceived, const DataSize bytesTotal) {
+        if (bytesReceived == bytesTotal) {
+            setStatus(Attachment::Status::Loaded);
+        }
+    });
     connect(this, &VSQTransfer::statusChanged, [=](const Enums::AttachmentStatus status){
         if (status == Attachment::Status::Loaded || status == Attachment::Status::Failed) {
             emit ended(status == Attachment::Status::Failed);
@@ -61,23 +66,21 @@ QString VSQTransfer::id() const
 
 bool VSQTransfer::isRunning() const
 {
-    return m_running;
+    return m_status == Attachment::Status::Loading;
 }
 
 void VSQTransfer::start()
 {
-    m_running = true;
-    emit statusChanged(Attachment::Status::Loading);
+    setStatus(Attachment::Status::Loading);
 }
 
 void VSQTransfer::abort()
 {
-    if (!m_running) {
+    if (!isRunning()) {
         return;
     }
-    m_running = false;
     qCDebug(lcTransferManager) << QString("Aborted transfer %1").arg(id());
-    emit statusChanged(Attachment::Status::Failed);
+    setStatus(Attachment::Status::Failed);
 }
 
 void VSQTransfer::connectReply(QNetworkReply *reply)
@@ -86,19 +89,25 @@ void VSQTransfer::connectReply(QNetworkReply *reply)
     qCDebug(lcDev) << "Connected to reply:" << reply;
 #endif
     connect(reply, &QNetworkReply::finished, [=]() {
-        emit statusChanged(Attachment::Status::Loaded);
+        setStatus(Attachment::Status::Loaded);
     });
     connect(reply, &QNetworkReply::errorOccurred, [=](QNetworkReply::NetworkError error) {
         qCDebug(lcTransferManager) << QString("Network error (code %1): %2").arg(error).arg(reply->errorString());
-        emit statusChanged(Attachment::Status::Failed);
+        setStatus(Attachment::Status::Failed);
     });
     connect(reply, &QNetworkReply::sslErrors, [=]() {
         qCDebug(lcTransferManager) << "SSL errors";
-        emit statusChanged(Attachment::Status::Failed);
+        setStatus(Attachment::Status::Failed);
     });
-    connect(this, &VSQTransfer::ended, [=]() {
-        m_running = false;
-    });
+}
+
+void VSQTransfer::setStatus(const Attachment::Status status)
+{
+    if (status == m_status) {
+        return;
+    }
+    m_status = status;
+    emit statusChanged(status);
 }
 
 QNetworkAccessManager *VSQTransfer::networkAccessManager()

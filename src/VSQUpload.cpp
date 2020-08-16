@@ -63,14 +63,14 @@ void VSQUpload::start()
     // Encrypt file
     auto file = fileHandle(m_filePath);
     if (!file->open(QFile::ReadOnly)) {
-        emit statusChanged(Attachment::Status::Failed);
+        setStatus(Attachment::Status::Failed);
         return;
     }
 
     // Create request
     auto url = remoteUrl();
     if (!url) {
-        emit statusChanged(Attachment::Status::Failed);
+        setStatus(Attachment::Status::Failed);
         return;
     }
     QNetworkRequest request(*url);
@@ -82,7 +82,9 @@ void VSQUpload::start()
     // Create & connect reply
     auto reply = networkAccessManager()->put(request, file);
     connectReply(reply);
-    connect(reply, &QNetworkReply::uploadProgress, this, &VSQTransfer::progressChanged);
+    connect(reply, &QNetworkReply::uploadProgress, [=](qint64 bytesSent, qint64 bytesTotal) {
+        emit progressChanged(bytesSent, bytesTotal);
+    });
 }
 
 QString VSQUpload::filePath() const

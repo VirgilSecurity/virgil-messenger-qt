@@ -23,15 +23,17 @@ Control {
     property bool inRow: false
     property bool firstInRow: true
 
-    property string attachmentId
-    property string attachmentBytesTotal
-    property string attachmentDisplaySize
-    property var attachmentType
-    property string attachmentFilePath
-    property string attachmentThumbnailPath
-    property int attachmentBytesLoaded
-    property int attachmentStatus
-    property bool attachmentDownloaded
+    property string attachmentId: ""
+    property int attachmentBytesTotal: 0
+    property string attachmentDisplaySize: ""
+    property var attachmentType: undefined
+    property string attachmentFilePath: ""
+    property string attachmentThumbnailPath: ""
+    property int attachmentThumbnailWidth: 0
+    property int attachmentThumbnailHeight: 0
+    property int attachmentBytesLoaded: 0
+    property int attachmentStatus: 0
+    property bool attachmentDownloaded: false
 
     signal saveAttachmentAs(string messageId)
 
@@ -87,7 +89,7 @@ Control {
 
             RowLayout {
                 id: row
-                spacing: 10
+                spacing: 14
                 x: leftPadding
                 y: topPadding
 
@@ -98,18 +100,34 @@ Control {
 
                     Image {
                         id: image
-                        width: sourceSize.width
-                        height: sourceSize.height
-                        visible: d.isPicture ? true : !progressBar.visible
+                        width: d.isPicture ? 3 * attachmentThumbnailWidth : sourceSize.width
+                        height: d.isPicture ? 3 * attachmentThumbnailHeight : sourceSize.height
+                        visible: d.isPicture ? true : attachmentDownloaded && !progressBar.visible
                         fillMode: Image.PreserveAspectFit
                         source: {
                             if (d.isPicture) {
-                                return attachmentThumbnailPath;
-                            }
-                            if (chatMessage.attachmentDownloaded) {
+                                return chatMessage.attachmentDownloaded  ? attachmentFilePath : attachmentThumbnailPath;
+                            } else {
                                 return "../resources/icons/File Selected Big.png"
                             }
-                            return "../resources/icons/File Download Big.png"
+                        }
+                    }
+
+                    Rectangle {
+                        id: downloadImageRect
+                        visible: !attachmentDownloaded && !progressBar.visible
+                        anchors.centerIn: parent
+                        width: 1.3333 * downloadImage.width
+                        height: width
+                        radius: 0.5 * width
+                        color: "#364542"
+
+                        Image {
+                            id: downloadImage
+                            anchors.centerIn: parent
+                            width: sourceSize.width
+                            height: sourceSize.height
+                            source: "../resources/icons/File Download Big.png"
                         }
                     }
 
@@ -120,6 +138,10 @@ Control {
                         visible: chatMessage.attachmentStatus == Enums.AttachmentStatus.Loading
                         maxValue: chatMessage.attachmentBytesTotal
                         value: chatMessage.attachmentBytesLoaded
+                    }
+
+                    TapHandler {
+                        onTapped: Messenger.openAttachment(messageId)
                     }
                 }
 
@@ -199,10 +221,6 @@ Control {
                 width: chatMessage.width
                 height: loader.item.height
                 color: "transparent"
-
-                TapHandler {
-                    onTapped: (chatMessage.attachmentDownloaded ? Messenger.openAttachment : Messenger.downloadAttachment)(messageId)
-                }
 
                 TapHandler {
                     acceptedButtons: Qt.RightButton

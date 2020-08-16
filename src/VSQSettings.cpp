@@ -96,7 +96,7 @@ QDir VSQSettings::downloadsDir() const
 
 QSize VSQSettings::thumbnailMaxSize() const
 {
-    return QSize(400, 320);
+    return QSize(100, 80);
 }
 
 bool VSQSettings::devMode() const
