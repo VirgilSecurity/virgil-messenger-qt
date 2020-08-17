@@ -377,10 +377,12 @@ Optional<StMessage> VSQSqlConversationModel::getMessage(const QString &messageId
         attachment.type = static_cast<Attachment::Type>(record.value("attachment_type").toInt());
         attachment.filePath = record.value("attachment_file_path").toString();
         attachment.remoteUrl = record.value("attachment_remote_url").toString();
-        attachment.thumbnailPath = record.value("attachment_thumbnail_path").toString();
-        attachment.thumbnailSize.setWidth(record.value("attachment_thumbnail_width").toInt());
-        attachment.thumbnailSize.setHeight(record.value("attachment_thumbnail_height").toInt());
-        attachment.remoteThumbnailUrl = record.value("attachment_remote_thumbnail_url").toString();
+        if (attachment.type == Attachment::Type::Picture) {
+            attachment.thumbnailPath = record.value("attachment_thumbnail_path").toString();
+            attachment.thumbnailSize.setWidth(record.value("attachment_thumbnail_width").toInt());
+            attachment.thumbnailSize.setHeight(record.value("attachment_thumbnail_height").toInt());
+            attachment.remoteThumbnailUrl = record.value("attachment_remote_thumbnail_url").toString();
+        }
         attachment.status = static_cast<Attachment::Status>(record.value("attachment_status").toInt());
         attachment.displayName = message.message;
         message.attachment = attachment;
@@ -440,10 +442,12 @@ void VSQSqlConversationModel::onCreateMessage(const QString recipient, const QSt
         newRecord.setValue("attachment_type", static_cast<int>(attachment->type));
         newRecord.setValue("attachment_file_path", attachment->filePath);
         newRecord.setValue("attachment_remote_url", attachment->remoteUrl.toString());
-        newRecord.setValue("attachment_thumbnail_path", attachment->thumbnailPath);
-        newRecord.setValue("attachment_thumbnail_width", attachment->thumbnailSize.width());
-        newRecord.setValue("attachment_thumbnail_height", attachment->thumbnailSize.height());
-        newRecord.setValue("attachment_remote_thumbnail_url", attachment->remoteThumbnailUrl.toString());
+        if (attachment->type == Attachment::Type::Picture) {
+            newRecord.setValue("attachment_thumbnail_path", attachment->thumbnailPath);
+            newRecord.setValue("attachment_thumbnail_width", attachment->thumbnailSize.width());
+            newRecord.setValue("attachment_thumbnail_height", attachment->thumbnailSize.height());
+            newRecord.setValue("attachment_remote_thumbnail_url", attachment->remoteThumbnailUrl.toString());
+        }
         newRecord.setValue("attachment_status", static_cast<int>(attachment->status));
     }
     if (!insertRowIntoTable(newRecord)) {
@@ -473,10 +477,12 @@ void VSQSqlConversationModel::onReceiveMessage(const QString messageId, const QS
         newRecord.setValue("attachment_type", static_cast<int>(attachment->type));
         newRecord.setValue("attachment_file_path", attachment->filePath);
         newRecord.setValue("attachment_remote_url", attachment->remoteUrl.toString());
-        newRecord.setValue("attachment_thumbnail_path", attachment->thumbnailPath);
-        newRecord.setValue("attachment_thumbnail_width", attachment->thumbnailSize.width());
-        newRecord.setValue("attachment_thumbnail_height", attachment->thumbnailSize.height());
-        newRecord.setValue("attachment_remote_thumbnail_url", attachment->remoteThumbnailUrl.toString());
+        if (attachment->type == Attachment::Type::Picture) {
+            newRecord.setValue("attachment_thumbnail_path", attachment->thumbnailPath);
+            newRecord.setValue("attachment_thumbnail_width", attachment->thumbnailSize.width());
+            newRecord.setValue("attachment_thumbnail_height", attachment->thumbnailSize.height());
+            newRecord.setValue("attachment_remote_thumbnail_url", attachment->remoteThumbnailUrl.toString());
+        }
         newRecord.setValue("attachment_status", static_cast<int>(attachment->status));
     }
     if (!insertRowIntoTable(newRecord)) {
