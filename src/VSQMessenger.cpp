@@ -138,6 +138,9 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSetti
     connect(&m_networkAnalyzer, &VSQNetworkAnalyzer::fireStateChanged, this, &VSQMessenger::onProcessNetworkState, Qt::QueuedConnection);
     connect(&m_networkAnalyzer, &VSQNetworkAnalyzer::fireHeartBeat, this, &VSQMessenger::checkState, Qt::QueuedConnection);
 
+    // Uploader
+    connect(m_transferManager, &VSQCryptoTransferManager::fireReadyToUpload, this,  &VSQMessenger::onReadyToUpload, Qt::QueuedConnection);
+
     // Use Push notifications
 #if VS_PUSHNOTIFICATIONS
     VSQPushNotifications::instance().startMessaging();
@@ -725,10 +728,19 @@ VSQMessenger::onSubscribePushNotifications(bool enable) {
 void
 VSQMessenger::onConnected() {
     onSubscribePushNotifications(true);
+//#if !defined (Q_OS_ANDROID)
     _sendFailedMessages();
+//#endif
     emit fireReady();
 }
 
+/******************************************************************************/
+void
+VSQMessenger::onReadyToUpload() {
+//#if defined (Q_OS_ANDROID)
+//    _sendFailedMessages();
+//#endif
+}
 
 /******************************************************************************/
 void

@@ -58,6 +58,7 @@ VSQAttachmentBuilder::VSQAttachmentBuilder(VSQCryptoTransferManager *transferMan
 bool VSQAttachmentBuilder::isValidUrl(const QUrl &url) const
 {
     bool isValid = url.isValid();
+    qDebug() << ">>> URL: " << url.toString();
 #if !defined(Q_OS_ANDROID)
     isValid = isValid && url.isLocalFile();
 #endif

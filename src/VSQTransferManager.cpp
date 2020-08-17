@@ -41,6 +41,9 @@
 #include "VSQSettings.h"
 #include "VSQUpload.h"
 
+#include <QTimer>
+#include <QEventLoop>
+
 Q_LOGGING_CATEGORY(lcTransferManager, "transferman");
 
 VSQTransferManager::VSQTransferManager(QXmppClient *client, QNetworkAccessManager *networkAccessManager, VSQSettings *settings, QObject *parent)
@@ -66,7 +69,11 @@ VSQTransferManager::VSQTransferManager(QXmppClient *client, QNetworkAccessManage
 
     qCDebug(lcTransferManager) << "Service found:" << m_xmppManager->serviceFound();
     connect(m_xmppManager, &QXmppUploadRequestManager::serviceFoundChanged, this, [=]() {
-        qCDebug(lcTransferManager) << "Upload service found:" << m_xmppManager->serviceFound();
+        bool ready = m_xmppManager->serviceFound();
+        qCDebug(lcTransferManager) << "Upload service found:" << ready;
+        if (ready) {
+            emit fireReadyToUpload();
+        }
     });
 }
 
@@ -78,6 +85,11 @@ VSQTransferManager::~VSQTransferManager()
     }
 }
 
+bool
+VSQTransferManager::isReady() {
+    return m_xmppManager->serviceFound();
+}
+
 VSQUpload *VSQTransferManager::startUpload(const QString &id, const QString &filePath)
 {
     auto upload = new VSQUpload(m_networkAccessManager, id, filePath, nullptr);
@@ -85,7 +97,14 @@ VSQUpload *VSQTransferManager::startUpload(const QString &id, const QString &fil
         QMutexLocker locker(&m_transfersMutex);
         m_transfers.push_back(upload);
     }
+#if 0
     requestUploadUrl(upload);
+#else
+    if (!requestUploadUrl(upload)) {
+        delete upload;
+        return nullptr;
+    }
+#endif
     startTransfer(upload, QPrivateSignal());
     return upload;
 }
@@ -101,21 +120,42 @@ VSQDownload *VSQTransferManager::startDownload(const QString &id, const QUrl &re
     return download;
 }
 
-void VSQTransferManager::requestUploadUrl(VSQUpload *upload)
+bool VSQTransferManager::requestUploadUrl(VSQUpload *upload)
 {
     const auto filePath = upload->filePath();
     if (!QFile::exists(filePath)) {
         qCCritical(lcTransferManager) << "Uploaded file doesn't exist:" << filePath;
         emit statusChanged(upload->id(), Attachment::Status::Failed);
     }
-    else if (m_xmppManager->serviceFound()) {
-        auto slotId = m_xmppManager->requestUploadSlot(QFileInfo(filePath));
-        upload->setSlotId(slotId);
-    }
     else {
-        qCDebug(lcTransferManager) << "Upload service was not found";
-        emit statusChanged(upload->id(), Attachment::Status::Failed);
+#if defined (Q_OS_ANDROID)
+        // Wait for possibility to upload
+        // TODO: Fix it !
+        if (!m_xmppManager->serviceFound()) {
+            qCDebug(lcTransferManager) << "Upload service was not found, start waiting for it.";
+            QTimer timer;
+            timer.setSingleShot(true);
+            QEventLoop loop;
+            connect(this, &VSQTransferManager::fireReadyToUpload, &loop, &QEventLoop::quit);
+            connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+            timer.start(10000);
+            loop.exec();
+        }
+        qCDebug(lcTransferManager) << "Wait for upload service is finished. Service is present: " << m_xmppManager->serviceFound();
+        // TODO: ~ Fix it !
+        // ~ Wait for possibility to upload
+#endif // Q_OS_ANDROID
+        if (m_xmppManager->serviceFound()) {
+            auto slotId = m_xmppManager->requestUploadSlot(QFileInfo(filePath));
+            upload->setSlotId(slotId);
+            return true;
+        } else {
+            qCDebug(lcTransferManager) << "Upload service was not found";
+            emit statusChanged(upload->id(), Attachment::Status::Failed);
+        }
     }
+
+    return false;
 }
 
 QXmppClient *VSQTransferManager::client()

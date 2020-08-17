@@ -199,6 +199,7 @@ private slots:
     void onSslErrors(const QList<QSslError> &errors);
     void onStateChanged(QXmppClient::State state);
     void onProcessNetworkState(bool online);
+    void onReadyToUpload();
 
     void
     onAddContactToDB(QString contact);
