@@ -58,6 +58,10 @@ VSQUpload *VSQCryptoTransferManager::startCryptoUpload(const QString &id, const 
         return nullptr;
     }
     auto upload = startUpload(id, encFilePath);
+    if (!upload) {
+        QFile::remove(encFilePath);
+        return nullptr;
+    }
     connect(upload, &VSQUpload::ended, this, [=]() {
 #ifdef VS_DEVMODE
         qCDebug(lcTransferManager) << "Removing of:" << encFilePath;

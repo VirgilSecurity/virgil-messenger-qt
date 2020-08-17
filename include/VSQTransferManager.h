@@ -67,6 +67,7 @@ public:
 
     VSQUpload *startUpload(const QString &id, const QString &filePath);
     VSQDownload *startDownload(const QString &id, const QUrl &remoteUrl, const QString &filePath);
+    bool isReady();
 
 signals:
     void progressChanged(const QString &id, const DataSize bytesReceived, const DataSize bytesTotal);
@@ -75,8 +76,10 @@ signals:
 
     void startTransfer(VSQTransfer *transfer, QPrivateSignal);
 
+    void fireReadyToUpload();
+
 private:
-    void requestUploadUrl(VSQUpload *upload);
+    bool requestUploadUrl(VSQUpload *upload);
 
     VSQUpload *findUploadBySlotId(const QString &slotId);
     VSQTransfer *findTransfer(const QString &id);
