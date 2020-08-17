@@ -56,8 +56,7 @@ public:
 
     // Build encoded attachment by local url, attachment type and recipient
     // Start thumbnail/file uploads
-    OptionalAttachment build(const QUrl &localUrl, const Attachment::Type type, const QString &messageId, const QString &recipient,
-                             QString &errorText);
+    OptionalAttachment build(const QUrl &localUrl, const Attachment::Type type, QString &errorText);
 
     QString generateThumbnailFileName() const;
 

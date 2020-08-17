@@ -58,16 +58,15 @@ VSQAttachmentBuilder::VSQAttachmentBuilder(VSQCryptoTransferManager *transferMan
 bool VSQAttachmentBuilder::isValidUrl(const QUrl &url) const
 {
     bool isValid = url.isValid();
-    qDebug() << ">>> URL: " << url.toString();
 #if !defined(Q_OS_ANDROID)
     isValid = isValid && url.isLocalFile();
 #endif
     return isValid;
 }
 
-OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment::Type type, const QString &messageId, const QString &recipient,
-                                               QString &errorText)
+OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment::Type type, QString &errorText)
 {
+    qCDebug(lcAttachment) << ">>> URL: " << url.toString();
     if (!isValidUrl(url)) {
         errorText = tr("Invalid attachment URL");
         return NullOptional;
@@ -81,6 +80,10 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
         errorText = tr("File doesn't exist");
         return NullOptional;
     }
+    if (localInfo.size() == 0) {
+        errorText = tr("File is empty");
+        return NullOptional;
+    }
     if (localInfo.size() > m_settings->attachmentMaxFileSize()) {
         errorText = tr("File size limit: %1").arg(VSQUtils::formattedDataSize(m_settings->attachmentMaxFileSize()));
         return NullOptional;
@@ -91,41 +94,14 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
     attachment.type = type;
     attachment.displayName = localInfo.fileName();
     attachment.filePath = localInfo.absoluteFilePath();
-    const QString uploadErrorText = tr("Upload error");
-    const bool isPicture = type == Attachment::Type::Picture;
 
     // Thumbnail processing
-    if (isPicture) {
+    if (type == Attachment::Type::Picture) {
         const auto pixmap = generateThumbnail(QPixmap(attachment.filePath));
         attachment.thumbnailSize = pixmap.size();
         attachment.thumbnailPath = generateThumbnailFileName();
         saveThumbnailFile(pixmap, attachment.thumbnailPath);
-        const auto id = messageId + QLatin1String("-thumb");
-        const auto upload = m_transferManager->startCryptoUpload(id, attachment.thumbnailPath, recipient);
-        if (!upload) {
-            errorText = uploadErrorText;
-            return NullOptional;
-        }
-        const auto remoteThumbnailUrl = upload->remoteUrl();
-        if (!remoteThumbnailUrl) {
-            return NullOptional;
-        }
-        attachment.remoteThumbnailUrl = *remoteThumbnailUrl;
     }
-
-    // File processing
-    auto upload = m_transferManager->startCryptoUpload(messageId, attachment.filePath, recipient);
-    if (!upload) {
-        errorText = uploadErrorText;
-        return NullOptional;
-    }
-    const auto remoteUrl = upload->remoteUrl();
-    if (!remoteUrl) {
-        return NullOptional;
-    }
-    attachment.remoteUrl = *remoteUrl;
-    attachment.bytesTotal = QFileInfo(upload->filePath()).size();
-
     return attachment;
 }
 

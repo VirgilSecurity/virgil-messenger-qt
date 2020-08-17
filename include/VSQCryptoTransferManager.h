@@ -49,6 +49,7 @@ public:
     VSQDownload *startCryptoDownload(const QString &id, const QUrl &url, const QString &filePath, const QString &recipient);
 
 signals:
+    void fileEncrypted(const QString &id, const QString &encryptedFileName);
     void fileDownloadedAndDecrypted(const QString &id, const QString &filePath);
 
 private:

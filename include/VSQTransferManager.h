@@ -69,6 +69,8 @@ public:
     VSQDownload *startDownload(const QString &id, const QUrl &remoteUrl, const QString &filePath);
     bool isReady();
 
+    bool hasTransfer(const QString &id) const;
+
 signals:
     void progressChanged(const QString &id, const DataSize bytesReceived, const DataSize bytesTotal);
     void statusChanged(const QString &id, const Enums::AttachmentStatus status);
@@ -81,8 +83,8 @@ signals:
 private:
     bool requestUploadUrl(VSQUpload *upload);
 
-    VSQUpload *findUploadBySlotId(const QString &slotId);
-    VSQTransfer *findTransfer(const QString &id);
+    VSQUpload *findUploadBySlotId(const QString &slotId) const;
+    VSQTransfer *findTransfer(const QString &id, bool showWarning = true) const;
 
     void removeTransfer(VSQTransfer *transfer, bool lock);
     void abortTransfer(VSQTransfer *transfer, bool lock);
@@ -97,7 +99,7 @@ private:
     QXmppUploadRequestManager *m_xmppManager;
 
     QVector<VSQTransfer *> m_transfers;
-    QMutex m_transfersMutex;
+    mutable QMutex m_transfersMutex;
 };
 
 Q_DECLARE_METATYPE(QXmppHttpUploadSlotIq);

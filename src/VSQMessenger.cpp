@@ -40,6 +40,7 @@
 #include <VSQMessenger.h>
 #include <VSQPushNotifications.h>
 #include <VSQSqlConversationModel.h>
+#include <VSQUpload.h>
 #include <VSQUtils.h>
 #include <VSQSettings.h>
 
@@ -728,18 +729,13 @@ VSQMessenger::onSubscribePushNotifications(bool enable) {
 void
 VSQMessenger::onConnected() {
     onSubscribePushNotifications(true);
-//#if !defined (Q_OS_ANDROID)
-    _sendFailedMessages();
-//#endif
-    emit fireReady();
 }
 
 /******************************************************************************/
 void
 VSQMessenger::onReadyToUpload() {
-//#if defined (Q_OS_ANDROID)
-//    _sendFailedMessages();
-//#endif
+    emit fireReady();
+    _sendFailedMessages();
 }
 
 /******************************************************************************/
@@ -810,6 +806,49 @@ StMessage VSQMessenger::parseJson(const QJsonDocument &json)
     }
     message.attachment = attachment;
     return message;
+}
+
+Attachment::Status VSQMessenger::checkStartUploads(const QString &messageId, const QString &recipient, const Attachment &attachment)
+{
+    // Thumbnail
+    bool thumbnailNeeded = attachment.type == Attachment::Type::Picture && attachment.remoteThumbnailUrl.isEmpty();
+    if (thumbnailNeeded) {
+        const auto uploadId = messageId + QLatin1String("-thumb");
+        if (!m_transferManager->hasTransfer(uploadId)) {
+            if (auto upload = m_transferManager->startCryptoUpload(uploadId, attachment.thumbnailPath, recipient)) {
+                connect(upload, &VSQUpload::ended, [=](bool failed) {
+                    if (failed) {
+                        m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
+                    }
+                    else {
+                        m_sqlConversations->setAttachmentThumbnailRemoteUrl(messageId, *upload->remoteUrl());
+                    }
+                });
+            }
+        }
+    }
+
+    // Attachment
+    if (!thumbnailNeeded && !attachment.remoteUrl.isEmpty()) {
+        return Attachment::Status::Loaded;
+    }
+    if (m_transferManager->hasTransfer(messageId)) {
+        return Attachment::Status::Loading;
+    }
+    auto upload = m_transferManager->startCryptoUpload(messageId, attachment.filePath, recipient);
+    if (!upload) {
+        return Attachment::Status::Failed;
+    }
+    connect(upload, &VSQUpload::ended, [=](bool failed) {
+        if (failed) {
+            m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
+        }
+        else {
+            m_sqlConversations->setAttachmentRemoteUrl(messageId, *upload->remoteUrl());
+            m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_SENT);
+        }
+    });
+    return Attachment::Status::Loading;
 }
 
 /******************************************************************************/
@@ -929,9 +968,11 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
                 attachment.thumbnailPath = m_attachmentBuilder.generateThumbnailFileName();
             }
             const auto id = message.id() + QLatin1String("-thumb");
-            auto dl = m_transferManager->startCryptoDownload(id, attachment.remoteThumbnailUrl, attachment.thumbnailPath, sender);
-            connect(dl, &VSQDownload::ended, [=]() {
-                m_sqlConversations->setAttachmentThumbnailPath(message.id(), attachment.thumbnailPath);
+            auto download = m_transferManager->startCryptoDownload(id, attachment.remoteThumbnailUrl, attachment.thumbnailPath, sender);
+            connect(download, &VSQDownload::ended, [=](bool failed) {
+                if (!failed) {
+                    m_sqlConversations->setAttachmentThumbnailPath(message.id(), attachment.thumbnailPath);
+                }
             });
         }
     }
@@ -945,6 +986,23 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
 VSQMessenger::EnResult
 VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, const QString &to, const QString &message, const OptionalAttachment &attachment)
 {
+    // Write to database
+    if(createNew) {
+        m_sqlConversations->createMessage(to, message, messageId, attachment);
+    }
+    m_sqlChatModel->updateLastMessage(to, message);
+
+    if (attachment) {
+        const auto uploadsStatus = checkStartUploads(messageId, to, *attachment);
+        if (uploadsStatus != Attachment::Status::Loaded) {
+            if (uploadsStatus == Attachment::Status::Failed) {
+                m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
+                m_sqlConversations->setAttachmentStatus(messageId, Attachment::Status::Failed);
+            }
+            return MRES_OK;
+        }
+    }
+
     QMutexLocker _guard(&m_messageGuard);
     static const size_t _encryptedMsgSzMax = 20 * 1024;
     uint8_t encryptedMessage[_encryptedMsgSzMax];
@@ -976,11 +1034,6 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
     msg.setReceiptRequested(true);
     msg.setId(messageId);
 
-    if(createNew) {
-        m_sqlConversations->createMessage(to, message, messageId, attachment);
-    }
-    m_sqlChatModel->updateLastMessage(to, message);
-
     if (m_xmpp.sendPacket(msg)) {
         m_sqlConversations->setMessageStatus(msg.id(), StMessage::Status::MST_SENT);
     } else {
@@ -996,17 +1049,17 @@ void VSQMessenger::downloadAndProcess(StMessage msg, const Function &func)
         return;
     }
     auto &attachment = *msg.attachment;
-    if (QFile::exists(attachment.filePath)) {
+    auto &filePath = attachment.filePath;
+    if (QFile::exists(filePath)) {
         func(msg);
         return;
     }
     // Update attachment filePath
-    auto &filePath = attachment.filePath;
-    if (filePath.isEmpty() || QFile::exists(filePath)) {
+    if (filePath.isEmpty()) {
         filePath = VSQUtils::findUniqueFileName(m_settings->downloadsDir().filePath(attachment.displayName));
     }
-    auto upload = m_transferManager->startCryptoDownload(msg.messageId, attachment.remoteUrl, filePath, msg.recipient);
-    connect(m_transferManager, &VSQCryptoTransferManager::fileDownloadedAndDecrypted, upload, [=](const QString &id, const QString &filePath) {
+    auto download = m_transferManager->startCryptoDownload(msg.messageId, attachment.remoteUrl, filePath, msg.recipient);
+    connect(m_transferManager, &VSQCryptoTransferManager::fileDownloadedAndDecrypted, download, [=](const QString &id, const QString &) {
         if (id == msg.messageId) {
             func(msg);
         }
@@ -1015,25 +1068,25 @@ void VSQMessenger::downloadAndProcess(StMessage msg, const Function &func)
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::createSendMessage(bool createNew, const QString &messageId, const QString &to, const QString &message) {
+VSQMessenger::createSendMessage(const QString &messageId, const QString &to, const QString &message) {
     return QtConcurrent::run([=]() -> EnResult {
-        return _sendMessageInternal(createNew, messageId, to, message, NullOptional);
+        return _sendMessageInternal(true, messageId, to, message, NullOptional);
     });
 }
 
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::createSendAttachment(bool createNew, const QString &messageId, const QString &to,
+VSQMessenger::createSendAttachment(const QString &messageId, const QString &to,
                                    const QUrl &url, const Enums::AttachmentType attachmentType)
 {
     return QtConcurrent::run([=]() -> EnResult {
         QString warningText;
-        auto attachment = m_attachmentBuilder.build(url, attachmentType, messageId, to, warningText);
+        auto attachment = m_attachmentBuilder.build(url, attachmentType, warningText);
         if (!attachment) {
             qCWarning(lcAttachment) << warningText;
             fireWarning(warningText);
             return MRES_ERR_ATTACHMENT;
         }
-        return _sendMessageInternal(createNew, messageId, to, attachment->displayName, attachment);
+        return _sendMessageInternal(true, messageId, to, attachment->displayName, attachment);
     });
 }
 
@@ -1044,13 +1097,11 @@ VSQMessenger::sendMessage(const QString &to, const QString &message,
 {
     const auto url = attachmentUrl.toUrl();
     if (m_attachmentBuilder.isValidUrl(url)) {
-        return createSendAttachment(true, VSQUtils::createUuid(), to, url, attachmentType);
+        return createSendAttachment(VSQUtils::createUuid(), to, url, attachmentType);
     }
     else {
-        return createSendMessage(true, VSQUtils::createUuid(), to, message);
+        return createSendMessage(VSQUtils::createUuid(), to, message);
     }
-    QFuture<VSQMessenger::EnResult> future;
-    return future;
 }
 
 /******************************************************************************/

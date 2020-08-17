@@ -115,8 +115,8 @@ public:
     void connectTransferManager(VSQCryptoTransferManager *manager);
 
     Optional<StMessage> getMessage(const QString &messageId) const;
+    StMessage getMessage(const QSqlRecord &record) const;
 
-    void setAttachmentStatus(const QString &messageId, const Attachment::Status status);
     void setAttachmentFilePath(const QString &messageId, const QString &filePath);
     void setAttachmentProgress(const QString &messageId, const DataSize bytesReceived, const DataSize bytesTotal);
     void setAttachmentThumbnailPath(const QString &messageId, const QString &filePath);
@@ -125,6 +125,9 @@ signals:
     void createMessage(const QString recipient, const QString message, const QString messageId, const OptionalAttachment attachment);
     void receiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachment attachment);
     void setMessageStatus(const QString messageId, const StMessage::Status status);
+    void setAttachmentStatus(const QString &messageId, const Attachment::Status status);
+    void setAttachmentRemoteUrl(const QString &messageId, const QUrl &url);
+    void setAttachmentThumbnailRemoteUrl(const QString &messageId, const QUrl &url);
 
     void requestThumbnail(const QString &messageId);
 
@@ -158,6 +161,10 @@ private:
     void onCreateMessage(const QString recipient, const QString message, const QString messageId, const OptionalAttachment attachment);
     void onReceiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachment attachment);
     void onSetMessageStatus(const QString messageId, const StMessage::Status status);
+    void onSetAttachmentStatus(const QString &messageId, const Attachment::Status status);
+    void onSetAttachmentRemoteUrl(const QString &messageId, const QUrl &url);
+    void onSetAttachmentThumbnailRemoteUrl(const QString &messageId, const QUrl &url);
+    void onAttachmentFileEncrypted(const QString &messageId, const QString &encryptedFileName);
 };
 
 #endif // VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H

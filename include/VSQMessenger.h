@@ -140,10 +140,10 @@ public slots:
     sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
 
     QFuture<VSQMessenger::EnResult>
-    createSendMessage(bool createNew, const QString &messageId, const QString &to, const QString &text);
+    createSendMessage(const QString &messageId, const QString &to, const QString &text);
 
     QFuture<VSQMessenger::EnResult>
-    createSendAttachment(bool createNew, const QString &messageId, const QString &to, const QUrl &url, const Enums::AttachmentType attachmentType);
+    createSendAttachment(const QString &messageId, const QString &to, const QUrl &url, const Enums::AttachmentType attachmentType);
 
     Q_INVOKABLE void
     setStatus(VSQMessenger::EnStatus status);
@@ -290,6 +290,8 @@ private:
     QString createJson(const QString &message, const OptionalAttachment &attachment);
 
     StMessage parseJson(const QJsonDocument &json);
+
+    Attachment::Status checkStartUploads(const QString &messageId, const QString &recipient, const Attachment &attachment);
 
     VSQMessenger::EnResult _sendMessageInternal(bool createNew, const QString &messageId, const QString &to, const QString &message,
                                                 const OptionalAttachment &attachment);

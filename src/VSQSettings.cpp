@@ -61,7 +61,7 @@ VSQSettings::VSQSettings(QObject *parent)
     qCDebug(lcSettings) << "Attachment max file size:" << attachmentMaxFileSize();
     qCDebug(lcSettings) << "Thumbnails dir:" << thumbnailsDir().absolutePath();
     qCDebug(lcSettings) << "Thumbnail max size:" << attachmentMaxFileSize();
-    qCDebug(lcSettings) << "Downloads dir:" << downloadsDir();
+    qCDebug(lcSettings) << "Downloads dir:" << downloadsDir().absolutePath();
     if (devMode()) {
         qCDebug(lcSettings) << "Dev mode:" << true;
     }

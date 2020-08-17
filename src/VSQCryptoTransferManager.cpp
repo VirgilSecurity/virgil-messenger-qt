@@ -57,6 +57,7 @@ VSQUpload *VSQCryptoTransferManager::startCryptoUpload(const QString &id, const 
     if (!ecnryptFile(filePath, encFilePath, recipient)) {
         return nullptr;
     }
+    emit fileEncrypted(id, encFilePath);
     auto upload = startUpload(id, encFilePath);
     if (!upload) {
         QFile::remove(encFilePath);
@@ -96,6 +97,7 @@ bool VSQCryptoTransferManager::ecnryptFile(const QString &path, const QString &e
 {
     qCDebug(lcTransferManager) << "File encryption:" << path << "=>" << encPath << "Recipient:" << recipient;
 #ifdef VS_DEVMODE_BAD_DECRYPT
+    qCWarning(lcTransferManager) << "ENCRYPTION IS DISABLED";
     return QFile::copy(path, encPath);
 #endif
     // Read
@@ -139,8 +141,10 @@ bool VSQCryptoTransferManager::decryptFile(const QString &encPath, const QString
 {
     qCDebug(lcTransferManager) << "File decryption:" << encPath << "=>" << path << "Recipient:" << recipient;
 #ifdef VS_DEVMODE_BAD_DECRYPT
+    qCWarning(lcTransferManager) << "DECRYPTION IS DISABLED";
     return QFile::copy(encPath, path);
 #endif
+
     // Read
     QFile encFile(encPath);
     if (!encFile.open(QFile::ReadOnly)) {

@@ -41,7 +41,7 @@ VSQTransfer::VSQTransfer(QNetworkAccessManager *networkAccessManager, const QStr
     , m_status(Attachment::Status::Created)
 {
     connect(this, &VSQTransfer::progressChanged, [=](const DataSize bytesReceived, const DataSize bytesTotal) {
-        if (bytesReceived == bytesTotal) {
+        if (!bytesReceived && bytesReceived == bytesTotal) {
             setStatus(Attachment::Status::Loaded);
         }
     });

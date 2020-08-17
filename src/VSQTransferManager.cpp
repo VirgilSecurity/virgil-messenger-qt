@@ -90,6 +90,11 @@ VSQTransferManager::isReady() {
     return m_xmppManager->serviceFound();
 }
 
+bool VSQTransferManager::hasTransfer(const QString &id) const
+{
+    return findTransfer(id, false) != nullptr;
+}
+
 VSQUpload *VSQTransferManager::startUpload(const QString &id, const QString &filePath)
 {
     auto upload = new VSQUpload(m_networkAccessManager, id, filePath, nullptr);
@@ -97,14 +102,10 @@ VSQUpload *VSQTransferManager::startUpload(const QString &id, const QString &fil
         QMutexLocker locker(&m_transfersMutex);
         m_transfers.push_back(upload);
     }
-#if 0
-    requestUploadUrl(upload);
-#else
     if (!requestUploadUrl(upload)) {
-        delete upload;
+        removeTransfer(upload, true);
         return nullptr;
     }
-#endif
     startTransfer(upload, QPrivateSignal());
     return upload;
 }
@@ -129,8 +130,7 @@ bool VSQTransferManager::requestUploadUrl(VSQUpload *upload)
     }
     else {
 #if defined (Q_OS_ANDROID)
-        // Wait for possibility to upload
-        // TODO: Fix it !
+        // FIXME(fpohtmeh): implement retry
         if (!m_xmppManager->serviceFound()) {
             qCDebug(lcTransferManager) << "Upload service was not found, start waiting for it.";
             QTimer timer;
@@ -142,8 +142,6 @@ bool VSQTransferManager::requestUploadUrl(VSQUpload *upload)
             loop.exec();
         }
         qCDebug(lcTransferManager) << "Wait for upload service is finished. Service is present: " << m_xmppManager->serviceFound();
-        // TODO: ~ Fix it !
-        // ~ Wait for possibility to upload
 #endif // Q_OS_ANDROID
         if (m_xmppManager->serviceFound()) {
             auto slotId = m_xmppManager->requestUploadSlot(QFileInfo(filePath));
@@ -168,7 +166,7 @@ VSQSettings *VSQTransferManager::settings()
     return m_settings;
 }
 
-VSQUpload *VSQTransferManager::findUploadBySlotId(const QString &slotId)
+VSQUpload *VSQTransferManager::findUploadBySlotId(const QString &slotId) const
 {
     {
         QMutexLocker locker(&m_transfersMutex);
@@ -183,7 +181,7 @@ VSQUpload *VSQTransferManager::findUploadBySlotId(const QString &slotId)
     return nullptr;
 }
 
-VSQTransfer *VSQTransferManager::findTransfer(const QString &id)
+VSQTransfer *VSQTransferManager::findTransfer(const QString &id, bool showWarning) const
 {
     {
         QMutexLocker locker(&m_transfersMutex);
@@ -193,7 +191,9 @@ VSQTransfer *VSQTransferManager::findTransfer(const QString &id)
             }
         }
     }
-    qCWarning(lcTransferManager) << "Transfer wasn't found:" << id;
+    if (showWarning) {
+        qCWarning(lcTransferManager) << "Transfer wasn't found:" << id;
+    }
     return nullptr;
 }
 
@@ -212,17 +212,13 @@ void VSQTransferManager::removeTransfer(VSQTransfer *transfer, bool lock)
 void VSQTransferManager::abortTransfer(VSQTransfer *transfer, bool lock)
 {
     transfer->abort();
-#if 0 // TODO: Chech for deadlock
     if (!lock) {
-        removeTransfer(transfer, true);
+        removeTransfer(transfer, false);
     }
     else {
         QMutexLocker locker(&m_transfersMutex);
         removeTransfer(transfer, false);
     }
-#else
-    removeTransfer(transfer, false);
-#endif
 }
 
 void VSQTransferManager::onStartTransfer(VSQTransfer *transfer)
