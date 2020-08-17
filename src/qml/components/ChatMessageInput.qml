@@ -159,7 +159,10 @@ Control {
     SelectAttachmentsDialog {
         id: selectAttachmentDialog
 
-        onAccepted: sendMessage(selectAttachmentDialog.fileUrl, selectAttachmentDialog.attachmentType)
+        onAccepted: {
+            var pos = selectAttachmentDialog.fileUrls.length - 1
+            sendMessage(selectAttachmentDialog.fileUrls[pos], selectAttachmentDialog.attachmentType)
+        }
     }
 
     function sendMessage(attachmentUrl, attachmentType) {
