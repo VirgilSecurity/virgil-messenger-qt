@@ -216,7 +216,7 @@ VSQNetworkAnalyzer::onAnalyzeNetwork() {
         qCDebug(lcNetwork).noquote().nospace() << "NetworkAnalyzer: Online status: " << m_connectedState;
     }
 
-#if 1 // DEBUG_NETWORK
+#if DEBUG_NETWORK
     qCDebug(lcNetwork) << "currenNetworkInterfaceData : " << currenNetworkInterfaceData;
     qCDebug(lcNetwork) << "m_networkInterfaceData : " << m_networkInterfaceData;
 #endif
