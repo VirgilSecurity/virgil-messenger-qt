@@ -103,7 +103,13 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
             errorText = uploadErrorText;
             return NullOptional;
         }
-        attachment.remoteThumbnailUrl = *upload->remoteUrl();
+        auto remoteThumbnailUrl = upload->remoteUrl();
+        if (remoteThumbnailUrl) {
+            attachment.remoteThumbnailUrl = *remoteThumbnailUrl;
+        } else {
+            errorText = uploadErrorText;
+            return NullOptional;
+        }
     }
 
     // File processing
@@ -112,7 +118,15 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
         errorText = uploadErrorText;
         return NullOptional;
     }
-    attachment.remoteUrl = *upload->remoteUrl();
+
+    auto remoteUrl = upload->remoteUrl();
+    if (remoteUrl) {
+        attachment.remoteUrl = *remoteUrl;
+    } else {
+        errorText = uploadErrorText;
+        return NullOptional;
+    }
+
     attachment.bytesTotal = QFileInfo(upload->filePath()).size();
 
     return attachment;

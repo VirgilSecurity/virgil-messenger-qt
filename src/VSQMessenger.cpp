@@ -1017,15 +1017,15 @@ void VSQMessenger::downloadAndProcess(StMessage msg, const Function &func)
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::createSendMessage(bool createNew, const QString &messageId, const QString &to, const QString &message) {
+VSQMessenger::createSendMessage(bool createNew, const QString messageId, const QString to, const QString message) {
     return QtConcurrent::run([=]() -> EnResult {
         return _sendMessageInternal(createNew, messageId, to, message, NullOptional);
     });
 }
 
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::createSendAttachment(bool createNew, const QString &messageId, const QString &to,
-                                   const QUrl &url, const Enums::AttachmentType attachmentType)
+VSQMessenger::createSendAttachment(bool createNew, const QString messageId, const QString to,
+                                   const QUrl url, const Enums::AttachmentType attachmentType)
 {
     return QtConcurrent::run([=]() -> EnResult {
         QString warningText;
