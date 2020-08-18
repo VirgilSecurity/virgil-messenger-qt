@@ -945,6 +945,12 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
     uint8_t encryptedMessage[_encryptedMsgSzMax];
     size_t encryptedMessageSz = 0;
 
+    // Save message to DB
+    if(createNew) {
+        m_sqlConversations->createMessage(to, message, messageId, attachment);
+    }
+    m_sqlChatModel->updateLastMessage(to, message);
+
     // Create JSON-formatted message to be sent
     const QString internalJson = createJson(message, attachment);
     qDebug() << "json for encryption:" << internalJson;
@@ -959,6 +965,9 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
                      _encryptedMsgSzMax,
                      &encryptedMessageSz)) {
         VS_LOG_WARNING("Cannot encrypt message to be sent");
+
+        // Mark message as failed
+        m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
         return MRES_ERR_ENCRYPTION;
     }
 
@@ -971,15 +980,11 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
     msg.setReceiptRequested(true);
     msg.setId(messageId);
 
-    if(createNew) {
-        m_sqlConversations->createMessage(to, message, messageId, attachment);
-    }
-    m_sqlChatModel->updateLastMessage(to, message);
-
+    // Send message and update status
     if (m_xmpp.sendPacket(msg)) {
-        m_sqlConversations->setMessageStatus(msg.id(), StMessage::Status::MST_SENT);
+        m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_SENT);
     } else {
-        m_sqlConversations->setMessageStatus(msg.id(), StMessage::Status::MST_FAILED);
+        m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
     }
     return MRES_OK;
 }
