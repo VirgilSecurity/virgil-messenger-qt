@@ -304,6 +304,8 @@ android: {
     release:LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
     debug:LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
 
+
+
 #
 #   Messenger Internal
 #
@@ -341,6 +343,41 @@ android: {
         platforms/android/src/org/virgil/notification/NotificationClient.java
 }
 
+#
+#   Enable Address Sanitizer if required
+#
+message(">>> ENABLE ADDRESS SANITIZER: $$USE_ASAN")
+equals(USE_ASAN, "yes") {
+    CONFIG += sanitizer sanitize_address
+}
+
+#
+#   Enable Undefined behavior Sanitizer if required
+#
+message(">>> ENABLE UNDEFINED BEHAVIOR SANITIZER: $$USE_UBSAN")
+equals(USE_UBSAN, "yes") {
+    CONFIG += sanitizer sanitize_undefined
+}
+
+#
+#   Enable Memory Sanitizer if required
+#
+message(">>> ENABLE MEMORY SANITIZER: $$USE_MSAN")
+equals(USE_MSAN, "yes") {
+    CONFIG += sanitizer sanitize_memory
+}
+
+#
+#   Enable Thread Sanitizer if required
+#
+message(">>> ENABLE THREAD SANITIZER: $$USE_TSAN")
+equals(USE_TSAN, "yes") {
+    CONFIG += sanitizer sanitize_thread
+}
+
+#
+#   Assets
+#
 RC_ICONS = platforms/windows/Virgil.ico
 
 DISTFILES += \
