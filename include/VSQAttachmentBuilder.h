@@ -32,59 +32,38 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#ifndef VSQ_ATTACHMENT_BUILDER
+#define VSQ_ATTACHMENT_BUILDER
 
-#ifndef VSQLOGGING_H
-#define VSQLOGGING_H
+#include <QObject>
 
-#include <iostream>
-#include <string>
-#include <QCoreApplication>
-#include <virgil/iot/qt/VSQIoTKit.h>
+#include "VSQCommon.h"
 
-class QNetworkAccessManager;
+Q_DECLARE_LOGGING_CATEGORY(lcAttachment);
 
-using namespace VirgilIoTKit;
+class VSQSettings;
+class VSQCryptoTransferManager;
 
-class VSQLogging : public QObject {
-    Q_OBJECT
+class VSQAttachmentBuilder : public QObject
+{
 public:
-    explicit VSQLogging(QNetworkAccessManager *networkAccessManager);
-    virtual ~VSQLogging();
+    VSQAttachmentBuilder(VSQCryptoTransferManager *transferManager, QObject *parent);
+    VSQAttachmentBuilder() = default; // QML engine requires default constructor
 
-    void checkAppCrash();
-    void resetRunFlag();
-    Q_INVOKABLE
-    bool sendLogFiles();
-    void setVirgilUrl(QString VirgilUrl);
-    void setkVersion(QString AppVersion);
-    void setkOrganization(QString strkOrganization);
-    void setkApp(QString strkApp);
+    bool isValidUrl(const QUrl &url) const;
 
-    static void logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+    // Build encoded attachment by local url, attachment type and recipient
+    // Start thumbnail/file uploads
+    OptionalAttachment build(const QUrl &localUrl, const Attachment::Type type, const QString &messageId, const QString &recipient,
+                             QString &errorText);
 
-signals:
-    void crashReportRequested();
-    void reportSent(QString msg);
-    void reportSentErr(QString msg);
-    void newMessage(const QString &message);
+    QString generateThumbnailFileName() const;
 
 private:
-    static const QString endpointSendReport;
+    QString createThumbnailFile(const QString &filePath) const;
 
-    bool checkRunFlag();
-    bool sendFileToBackendRequest(QByteArray fileData);
-    void setRunFlag(bool runState);
-
-    QNetworkAccessManager *manager;
-    QString currentVirgilUrl;
-    QString kVersion;
-    QString kOrganization;
-    QString kApp;
-
-    static VSQLogging *m_instance;
-
-private slots:
-    void endpointReply();
+    VSQCryptoTransferManager *m_transferManager;
+    VSQSettings *m_settings;
 };
 
-#endif // VSQLOGGING_H
+#endif // VSQ_ATTACHMENT_BUILDER

@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import Qt.labs.platform 1.0 as Native
+import com.virgilsecurity.messenger 1.0
 
 import "../base"
 import "../theme"
@@ -9,7 +10,7 @@ import "../theme"
 Control {
     id: root
 
-    signal messageSending(string message)
+    signal messageSending(string message, var attachmentUrl, var attachmentType)
 
     width: parent.width
     implicitHeight: scrollView.height
@@ -26,6 +27,23 @@ Control {
             Layout.rightMargin: 2
             Layout.alignment: Qt.AlignVCenter
             image: "Grid"
+
+            onClicked: attachmentsMenu.open()
+
+            ContextMenu {
+                id: attachmentsMenu
+                dropdown: true
+
+                Action {
+                    text: qsTr("Send picture")
+                    onTriggered: selectAttachment(Enums.AttachmentType.Picture)
+                }
+
+                Action {
+                    text: qsTr("Send file")
+                    onTriggered: selectAttachment(Enums.AttachmentType.File)
+                }
+            }
         }
 
         ScrollView {
@@ -129,19 +147,33 @@ Control {
             id: sendButton
             Layout.rightMargin: 12
             Layout.leftMargin: 2
-            Layout.alignment: Qt.AlignVCenter            
+            Layout.alignment: Qt.AlignVCenter
             focusPolicy: Qt.NoFocus
-            objectName: "btnSend"            
+            objectName: "btnSend"
             disabled: !(messageField.text + messageField.preeditText).length
             image: "Send"
             onClicked: root.sendMessage()
         }
     }
 
-    function sendMessage() {
+    SelectAttachmentsDialog {
+        id: selectAttachmentDialog
+
+        onAccepted: {
+            var pos = selectAttachmentDialog.fileUrls.length - 1
+            sendMessage(selectAttachmentDialog.fileUrls[pos], selectAttachmentDialog.attachmentType)
+        }
+    }
+
+    function sendMessage(attachmentUrl, attachmentType) {
         const text = (messageField.text + messageField.preeditText).trim();
         messageField.clear()
-        if (text)
-            messageSending(text)
+        if (text || attachmentUrl)
+            messageSending(text, attachmentUrl, attachmentType)
+    }
+
+    function selectAttachment(attachmentType) {
+        selectAttachmentDialog.attachmentType = attachmentType
+        selectAttachmentDialog.open()
     }
 }

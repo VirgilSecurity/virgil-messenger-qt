@@ -56,9 +56,6 @@ public:
     createPrivateChat(const QString &recipientId);
 
     Q_INVOKABLE void
-    updateLastMessage(QString chatId, QString message);
-
-    Q_INVOKABLE void
     updateUnreadMessageCount(QString chatId);
 
     Q_INVOKABLE void
@@ -70,7 +67,12 @@ public:
     Q_INVOKABLE void
     refresh();
 
+signals:
+    void updateLastMessage(QString chatId, QString message);
+
 private:
+    void onUpdateLastMessage(QString chatId, QString message);
+
     QString m_userId;
     QString m_tableName;
 };

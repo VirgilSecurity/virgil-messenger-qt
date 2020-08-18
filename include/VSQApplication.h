@@ -41,8 +41,11 @@
 #include <VSQMessenger.h>
 #include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
 #include <VSQLogging.h>
+#include <VSQSettings.h>
 
 #include <macos/VSQMacos.h>
+
+class QNetworkAccessManager;
 
 class VSQApplication : public QObject {
     Q_OBJECT
@@ -72,6 +75,8 @@ private slots:
 
 private:
     static const QString kVersion;
+    VSQSettings m_settings;
+    QNetworkAccessManager *m_networkAccessManager;
     QQmlApplicationEngine m_engine;
     VSQMessenger m_messenger;
     VSQLogging m_logging;

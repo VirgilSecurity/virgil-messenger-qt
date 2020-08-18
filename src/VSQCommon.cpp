@@ -32,59 +32,21 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#include "VSQCommon.h"
 
-#ifndef VSQLOGGING_H
-#define VSQLOGGING_H
+#include <QtQml>
 
-#include <iostream>
-#include <string>
-#include <QCoreApplication>
-#include <virgil/iot/qt/VSQIoTKit.h>
+Q_LOGGING_CATEGORY(lcDev, "dev");
 
-class QNetworkAccessManager;
-
-using namespace VirgilIoTKit;
-
-class VSQLogging : public QObject {
-    Q_OBJECT
-public:
-    explicit VSQLogging(QNetworkAccessManager *networkAccessManager);
-    virtual ~VSQLogging();
-
-    void checkAppCrash();
-    void resetRunFlag();
-    Q_INVOKABLE
-    bool sendLogFiles();
-    void setVirgilUrl(QString VirgilUrl);
-    void setkVersion(QString AppVersion);
-    void setkOrganization(QString strkOrganization);
-    void setkApp(QString strkApp);
-
-    static void logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg);
-
-signals:
-    void crashReportRequested();
-    void reportSent(QString msg);
-    void reportSentErr(QString msg);
-    void newMessage(const QString &message);
-
-private:
-    static const QString endpointSendReport;
-
-    bool checkRunFlag();
-    bool sendFileToBackendRequest(QByteArray fileData);
-    void setRunFlag(bool runState);
-
-    QNetworkAccessManager *manager;
-    QString currentVirgilUrl;
-    QString kVersion;
-    QString kOrganization;
-    QString kApp;
-
-    static VSQLogging *m_instance;
-
-private slots:
-    void endpointReply();
-};
-
-#endif // VSQLOGGING_H
+void registerCommonTypes()
+{
+    qRegisterMetaType<DataSize>("DataSize");
+    qRegisterMetaType<Enums::AttachmentType>();
+    qRegisterMetaType<Enums::AttachmentStatus>();
+    qRegisterMetaType<Enums::MessageStatus>();
+    qRegisterMetaType<Enums::MessageAuthor>();
+    qRegisterMetaType<Attachment>();
+    qRegisterMetaType<OptionalAttachment>();
+    qRegisterMetaType<StMessage>();
+    qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");
+}

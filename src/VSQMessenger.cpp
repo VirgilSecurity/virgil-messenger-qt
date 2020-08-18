@@ -36,10 +36,12 @@
 #include <cstring>
 #include <cstdlib>
 
-#include <VSQMessenger.h>
+#include <VSQDownload.h>
 #include <VSQMessenger.h>
 #include <VSQPushNotifications.h>
 #include <VSQSqlConversationModel.h>
+#include <VSQUtils.h>
+#include <VSQSettings.h>
 
 #include <android/VSQAndroid.h>
 #include <android/VSQAndroid.h>
@@ -49,7 +51,6 @@
 #include <qxmpp/QXmppPushEnableIq.h>
 #include <qxmpp/QXmppMessageReceiptManager.h>
 #include <qxmpp/QXmppCarbonManager.h>
-#include <qxmpp/QXmppDiscoveryManager.h>
 
 #include <QtConcurrent>
 #include <QStandardPaths>
@@ -85,7 +86,13 @@ const int VSQMessenger::kConnectionWaitMs = 10000;
 const int VSQMessenger::kKeepAliveTimeSec = 10;
 
 /******************************************************************************/
-VSQMessenger::VSQMessenger() {
+VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSettings *settings)
+    : QObject()
+    , m_xmpp()
+    , m_settings(settings)
+    , m_transferManager(new VSQCryptoTransferManager(&m_xmpp, networkAccessManager, m_settings, this))
+    , m_attachmentBuilder(m_transferManager, this)
+{
     // Register QML typess
     qmlRegisterType<VSQMessenger>("MesResult", 1, 0, "Result");
     QuickFuture::registerType<VSQMessenger::EnResult>([](VSQMessenger::EnResult res) -> QVariant {
@@ -96,17 +103,16 @@ VSQMessenger::VSQMessenger() {
     _connectToDatabase();
 
     m_sqlConversations = new VSQSqlConversationModel(this);
+    m_sqlConversations->connectTransferManager(m_transferManager);
     m_sqlChatModel = new VSQSqlChatModel(this);
 
     // Add receipt messages extension
     m_xmppReceiptManager = new QXmppMessageReceiptManager();
     m_xmppCarbonManager = new QXmppCarbonManager();
-    // m_xmppDiscoManager = new QXmppDiscoveryManager();
+    m_xmppDiscoveryManager = new VSQDiscoveryManager(&m_xmpp, this);
 
     m_xmpp.addExtension(m_xmppReceiptManager);
     m_xmpp.addExtension(m_xmppCarbonManager);
-    // m_xmpp.addExtension(m_xmppDiscoManager);
-
 
     // Signal connection
     connect(this, SIGNAL(fireReadyToAddContact(QString)), this, SLOT(onAddContactToDB(QString)));
@@ -115,7 +121,7 @@ VSQMessenger::VSQMessenger() {
     // Connect XMPP signals
     connect(&m_xmpp, SIGNAL(connected()), this, SLOT(onConnected()), Qt::QueuedConnection);
     connect(&m_xmpp, SIGNAL(disconnected()), this, SLOT(onDisconnected()));
-    connect(&m_xmpp, SIGNAL(error(QXmppClient::Error)), this, SLOT(onError(QXmppClient::Error)));
+    connect(&m_xmpp, &QXmppClient::error, this, &VSQMessenger::onError);
     connect(&m_xmpp, SIGNAL(messageReceived(const QXmppMessage &)), this, SLOT(onMessageReceived(const QXmppMessage &)));
     connect(&m_xmpp, SIGNAL(presenceReceived(const QXmppPresence &)), this, SLOT(onPresenceReceived(const QXmppPresence &)));
     connect(&m_xmpp, SIGNAL(iqReceived(const QXmppIq &)), this, SLOT(onIqReceived(const QXmppIq &)));
@@ -126,14 +132,14 @@ VSQMessenger::VSQMessenger() {
     connect(m_xmppCarbonManager, &QXmppCarbonManager::messageReceived, &m_xmpp, &QXmppClient::messageReceived);
     // messages sent from our account (but another client)
     connect(m_xmppCarbonManager, &QXmppCarbonManager::messageSent, &m_xmpp, &QXmppClient::messageReceived);
-
-    // connect(m_xmppDiscoManager, &QXmppDiscoveryManager::infoReceived, this, &VSQMessenger::handleDiscoInfo);
-
     connect(m_xmppReceiptManager, &QXmppMessageReceiptManager::messageDelivered, this, &VSQMessenger::onMessageDelivered);
 
     // Network Analyzer
     connect(&m_networkAnalyzer, &VSQNetworkAnalyzer::fireStateChanged, this, &VSQMessenger::onProcessNetworkState, Qt::QueuedConnection);
     connect(&m_networkAnalyzer, &VSQNetworkAnalyzer::fireHeartBeat, this, &VSQMessenger::checkState, Qt::QueuedConnection);
+
+    // Uploader
+    connect(m_transferManager, &VSQCryptoTransferManager::fireReadyToUpload, this,  &VSQMessenger::onReadyToUpload, Qt::QueuedConnection);
 
     // Use Push notifications
 #if VS_PUSHNOTIFICATIONS
@@ -141,29 +147,18 @@ VSQMessenger::VSQMessenger() {
 #endif
 }
 
-void
-VSQMessenger::handleDiscoInfo(const QXmppDiscoveryIq &info)
+VSQMessenger::~VSQMessenger()
 {
-    qInfo() << info.features();
-
-    if (info.from() != m_xmpp.configuration().domain())
-        return;
-
-    // enable carbons, if feature found
-    if (info.features().contains("urn:xmpp:carbons:2")) {
-        m_xmppCarbonManager->setCarbonsEnabled(true);
-    }
 }
-
 
 void
 VSQMessenger::onMessageDelivered(const QString& to, const QString& messageId) {
 
-    m_sqlConversations->setMessageStatus(messageId, VSQSqlConversationModel::EnMessageStatus::MST_RECEIVED);
+    m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_RECEIVED);
 
     // QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus",
     //                          Qt::QueuedConnection, Q_ARG(const QString &, messageId),
-    //                          Q_ARG(const VSQSqlConversationModel::EnMessageStatus, VSQSqlConversationModel::EnMessageStatus::MST_RECEIVED));
+    //                          Q_ARG(const StMessage::Status, StMessage::Status::MST_RECEIVED));
 
     qDebug() << "Message with id: '" << messageId << "' delivered to '" << to << "'";
 }
@@ -227,7 +222,7 @@ VSQMessenger::_connect(QString userWithEnv, QString deviceId, QString userId, bo
 
     const int cur_val = cnt++;
 
-    qDebug() << ">>>>>>>>>>> _connect: START " << cur_val;
+    qCDebug(lcNetwork) << ">>>>>>>>>>> _connect: START " << cur_val;
 
     // Update users list
     _addToUsersList(userWithEnv);
@@ -251,7 +246,7 @@ VSQMessenger::_connect(QString userWithEnv, QString deviceId, QString userId, bo
     logger->setMessageTypes(QXmppLogger::AnyMessage);
 
 #if USE_XMPP_LOGS
-    connect(logger, &QXmppLogger::message, [=](QXmppLogger::MessageType, const QString &text){        
+    connect(logger, &QXmppLogger::message, [=](QXmppLogger::MessageType, const QString &text){
         qDebug() << text;
     });
 
@@ -733,35 +728,100 @@ VSQMessenger::onSubscribePushNotifications(bool enable) {
 void
 VSQMessenger::onConnected() {
     onSubscribePushNotifications(true);
+//#if !defined (Q_OS_ANDROID)
     _sendFailedMessages();
+//#endif
     emit fireReady();
 }
 
+/******************************************************************************/
+void
+VSQMessenger::onReadyToUpload() {
+//#if defined (Q_OS_ANDROID)
+//    _sendFailedMessages();
+//#endif
+}
 
 /******************************************************************************/
 void
 VSQMessenger::_sendFailedMessages() {
-   auto messages = m_sqlConversations->getMessages(m_user,VSQSqlConversationModel::EnMessageStatus::MST_FAILED);
+   auto messages = m_sqlConversations->getMessages(m_user, StMessage::Status::MST_FAILED);
    QtConcurrent::run([=]() {
        for (int i = 0; i < messages.length(); i++) {
-           if (MRES_OK != _sendMessageInternal(false, messages[i].message_id, messages[i].recipient, messages[i].message)) {
+           const auto &msg = messages[i];
+           if (MRES_OK != _sendMessageInternal(false, msg.messageId, msg.recipient, msg.message, msg.attachment)) {
                break;
            }
        }
    });
 }
 
+QString VSQMessenger::createJson(const QString &message, const OptionalAttachment &attachment)
+{
+    QJsonObject mainObject;
+    QJsonObject payloadObject;
+    if (!attachment) {
+        mainObject.insert("type", "text");
+        payloadObject.insert("body", message);
+    }
+    else if (attachment->type == Attachment::Type::Picture) {
+        mainObject.insert("type", "picture");
+        payloadObject.insert("url", attachment->remoteUrl.toString());
+        payloadObject.insert("displayName", attachment->displayName);
+        payloadObject.insert("thumbnailUrl", attachment->remoteThumbnailUrl.toString());
+        payloadObject.insert("bytesTotal", attachment->bytesTotal);
+    }
+    else {
+        mainObject.insert("type", "file");
+        payloadObject.insert("url", attachment->remoteUrl.toString());
+        payloadObject.insert("displayName", attachment->displayName);
+        payloadObject.insert("bytesTotal", attachment->bytesTotal);
+    }
+    mainObject.insert("payload", payloadObject);
+
+    QJsonDocument doc(mainObject);
+    return doc.toJson(QJsonDocument::Compact);
+}
+
+StMessage VSQMessenger::parseJson(const QJsonDocument &json)
+{
+    const auto type = json["type"].toString();
+    const auto payload = json["payload"];
+    StMessage message;
+    if (type == QLatin1String("text")) {
+        message.message = payload["body"].toString();
+        return message;
+    }
+    Attachment attachment;
+    attachment.id = VSQUtils::createUuid();
+    attachment.remoteUrl = payload["url"].toString();
+    attachment.displayName = payload["displayName"].toString();
+    attachment.bytesTotal = static_cast<qint64>(payload["bytesTotal"].toDouble());
+    message.message = attachment.displayName;
+    if (type == QLatin1String("picture")) {
+        attachment.type = Attachment::Type::Picture;
+        attachment.remoteThumbnailUrl = payload["thumbnailUrl"].toString();
+    }
+    else {
+        attachment.type = Attachment::Type::File;
+    }
+    message.attachment = attachment;
+    return message;
+}
+
 /******************************************************************************/
 void
 VSQMessenger::checkState() {
     if (m_xmpp.state() == QXmppClient::DisconnectedState) {
-        qDebug() << "We should be connected, but it's not so. Let's try to reconnect.";
+        qCDebug(lcNetwork) << "We should be connected, but it's not so. Let's try to reconnect.";
 #if VS_ANDROID
         emit fireError(tr("Disconnected ..."));
 #endif
         _reconnect();
     } else {
-        qDebug() << "Connection is ok";
+#if 0
+        qCDebug(lcNetwork) << "Connection is ok";
+#endif
     }
 }
 
@@ -790,19 +850,16 @@ VSQMessenger::onError(QXmppClient::Error err) {
     VS_LOG_DEBUG("onError");
     qDebug() << "onError : " << err << "   state:" << m_xmpp.state();
     emit fireError(tr("Connection error ..."));
-
-//    _reconnect();
 }
 
 /******************************************************************************/
-QString
-VSQMessenger::decryptMessage(const QString &sender, const QString &message) {
+Optional<StMessage> VSQMessenger::decryptMessage(const QString &sender, const QString &message) {
     static const size_t _decryptedMsgSzMax = 10 * 1024;
     uint8_t decryptedMessage[_decryptedMsgSzMax];
     size_t decryptedMessageSz = 0;
 
     qDebug() << "Sender            : " << sender;
-    qDebug() << "Encrypted message : " << message;
+    qDebug() << "Encrypted message : " << message.length() << " bytes";
 
     // Decrypt message
     // DECRYPTED_MESSAGE_SZ_MAX - 1  - This is required for a Zero-terminated string
@@ -812,7 +869,7 @@ VSQMessenger::decryptMessage(const QString &sender, const QString &message) {
                 decryptedMessage, decryptedMessageSz - 1,
                 &decryptedMessageSz)) {
         VS_LOG_WARNING("Received message cannot be decrypted");
-        return "";
+        return NullOptional;
     }
 
     // Add Zero termination
@@ -821,11 +878,10 @@ VSQMessenger::decryptMessage(const QString &sender, const QString &message) {
     // Get message from JSON
     QByteArray baDecr(reinterpret_cast<char *> (decryptedMessage), static_cast<int> (decryptedMessageSz));
     QJsonDocument jsonMsg(QJsonDocument::fromJson(baDecr));
-    QString decryptedString = jsonMsg["payload"]["body"].toString();
 
-    VS_LOG_DEBUG("Received message: <%s>", decryptedString.toStdString().c_str());
-
-    return decryptedString;
+    auto msg = parseJson(jsonMsg);
+    VS_LOG_DEBUG("Received message: <%s>", msg.message.toStdString().c_str());
+    return msg;
 }
 
 /******************************************************************************/
@@ -837,110 +893,166 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
 
     qInfo() << "Sender: " << sender << " Recipient: " << recipient;
 
-    // Get encrypted message
-    QString msg = message.body();
-
     // Decrypt message
-    QString decryptedString = decryptMessage(sender, msg);
+    auto msg = decryptMessage(sender, message.body());
+    if (!msg)
+        return;
 
     if (sender == currentUser()) {
         QString recipient = message.to().split("@").first();
-        m_sqlConversations->createMessage(recipient, decryptedString, message.id());
-        m_sqlConversations->setMessageStatus(message.id(), VSQSqlConversationModel::EnMessageStatus::MST_SENT);
+        m_sqlConversations->createMessage(recipient, msg->message, message.id(), msg->attachment);
+        m_sqlConversations->setMessageStatus(message.id(), StMessage::Status::MST_SENT);
         // ensure private chat with recipient exists
         m_sqlChatModel->createPrivateChat(recipient);
-        emit fireNewMessage(sender, decryptedString);
+        emit fireNewMessage(sender, msg->message);
         return;
     }
 
     // Add sender to contact
     // m_sqlContacts->addContact(sender);
     m_sqlChatModel->createPrivateChat(sender);
-
     // Save message to DB
-    m_sqlConversations->receiveMessage(message.id(), sender, decryptedString);
-
-    m_sqlChatModel->updateLastMessage(sender, decryptedString);
-    if (sender != m_recipient)
+    m_sqlConversations->receiveMessage(message.id(), sender, msg->message, msg->attachment);
+    m_sqlChatModel->updateLastMessage(sender, msg->message);
+    if (sender != m_recipient) {
         m_sqlChatModel->updateUnreadMessageCount(sender);
+    }
+
+    if (msg->attachment) {
+        auto &attachment = *msg->attachment;
+        if (attachment.type == Attachment::Type::Picture) {
+            qCDebug(lcTransferManager) << "Thumbnail downloading for message:" << message.id();
+            if (attachment.thumbnailPath.isEmpty()) {
+                attachment.thumbnailPath = m_attachmentBuilder.generateThumbnailFileName();
+            }
+            const auto id = message.id() + QLatin1String("-thumb");
+            auto dl = m_transferManager->startCryptoDownload(id, attachment.remoteThumbnailUrl, attachment.thumbnailPath, sender);
+            connect(dl, &VSQDownload::ended, [=]() {
+                m_sqlConversations->setAttachmentThumbnailPath(message.id(), attachment.thumbnailPath);
+            });
+        }
+    }
 
     // Inform system about new message
-    emit fireNewMessage(sender, decryptedString);
+    emit fireNewMessage(sender, msg->message);
 }
 
 /******************************************************************************/
+
 VSQMessenger::EnResult
-VSQMessenger::_sendMessageInternal(bool createNew, QString messageId, QString to, QString message) {
+VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, const QString &to, const QString &message, const OptionalAttachment &attachment)
+{
     QMutexLocker _guard(&m_messageGuard);
     static const size_t _encryptedMsgSzMax = 20 * 1024;
     uint8_t encryptedMessage[_encryptedMsgSzMax];
     size_t encryptedMessageSz = 0;
 
+    // Save message to DB
+    if(createNew) {
+        m_sqlConversations->createMessage(to, message, messageId, attachment);
+    }
+    m_sqlChatModel->updateLastMessage(to, message);
+
     // Create JSON-formatted message to be sent
-    QJsonObject payloadObject;
-    payloadObject.insert("body", message);
-
-    QJsonObject mainObject;
-    mainObject.insert("type", "text");
-    mainObject.insert("payload", payloadObject);
-
-    QJsonDocument doc(mainObject);
-    QString internalJson = doc.toJson(QJsonDocument::Compact);
-
-    qDebug() << internalJson;
+    const QString internalJson = createJson(message, attachment);
+    qDebug() << "json for encryption:" << internalJson;
 
     // Encrypt message
+    auto plaintext = internalJson.toStdString();
     if (VS_CODE_OK != vs_messenger_virgil_encrypt_msg(
                      to.toStdString().c_str(),
-                     internalJson.toStdString().c_str(),
+                     reinterpret_cast<const uint8_t*>(plaintext.c_str()),
+                     plaintext.length(),
                      encryptedMessage,
                      _encryptedMsgSzMax,
                      &encryptedMessageSz)) {
         VS_LOG_WARNING("Cannot encrypt message to be sent");
+
+        // Mark message as failed
+        m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
         return MRES_ERR_ENCRYPTION;
     }
 
     // Send encrypted message
     QString toJID = to + "@" + _xmppURL();
     QString fromJID = currentUser() + "@" + _xmppURL();
-    QString encryptedStr = QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage));
+    QString encryptedStr = QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage), encryptedMessageSz);
 
     QXmppMessage msg(fromJID, toJID, encryptedStr);
     msg.setReceiptRequested(true);
     msg.setId(messageId);
 
-    // Save message to DB in native thread
-    if(createNew){
-        QMetaObject::invokeMethod(m_sqlConversations, "createMessage",
-            Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message), Q_ARG(QString, msg.id()));
-    }
-
-    QMetaObject::invokeMethod(m_sqlChatModel, "updateLastMessage",
-        Qt::QueuedConnection, Q_ARG(QString, to), Q_ARG(QString, message));
-
+    // Send message and update status
     if (m_xmpp.sendPacket(msg)) {
-        QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus", Qt::QueuedConnection, Q_ARG(QString, msg.id()),
-            Q_ARG(VSQSqlConversationModel::EnMessageStatus, VSQSqlConversationModel::EnMessageStatus::MST_SENT));
+        m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_SENT);
     } else {
-        QMetaObject::invokeMethod(m_sqlConversations, "setMessageStatus", Qt::QueuedConnection, Q_ARG(QString, msg.id()),
-            Q_ARG(VSQSqlConversationModel::EnMessageStatus, VSQSqlConversationModel::EnMessageStatus::MST_FAILED));
+        m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
     }
-
     return MRES_OK;
 }
 
-/******************************************************************************/
-QFuture<VSQMessenger::EnResult>
-VSQMessenger::sendMessage(bool createNew, QString messageId, QString to, QString message) {
-    return QtConcurrent::run([=]() -> EnResult {
-        return _sendMessageInternal(createNew, messageId, to, message);
+void VSQMessenger::downloadAndProcess(StMessage msg, const Function &func)
+{
+    if (!msg.attachment) {
+        qCDebug(lcTransferManager) << "Message has no attachment:" << msg.messageId;
+        return;
+    }
+    auto &attachment = *msg.attachment;
+    if (QFile::exists(attachment.filePath)) {
+        func(msg);
+        return;
+    }
+    // Update attachment filePath
+    auto &filePath = attachment.filePath;
+    if (filePath.isEmpty() || QFile::exists(filePath)) {
+        filePath = VSQUtils::findUniqueFileName(m_settings->downloadsDir().filePath(attachment.displayName));
+    }
+    auto upload = m_transferManager->startCryptoDownload(msg.messageId, attachment.remoteUrl, filePath, msg.recipient);
+    connect(m_transferManager, &VSQCryptoTransferManager::fileDownloadedAndDecrypted, upload, [=](const QString &id, const QString &filePath) {
+        if (id == msg.messageId) {
+            func(msg);
+        }
     });
 }
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::sendMessage(QString to, QString message) {
-    return sendMessage(true, QUuid::createUuid().toString(QUuid::WithoutBraces).toLower(), to, message);
+VSQMessenger::createSendMessage(bool createNew, const QString messageId, const QString to, const QString message) {
+    return QtConcurrent::run([=]() -> EnResult {
+        return _sendMessageInternal(createNew, messageId, to, message, NullOptional);
+    });
+}
+
+QFuture<VSQMessenger::EnResult>
+VSQMessenger::createSendAttachment(bool createNew, const QString messageId, const QString to,
+                                   const QUrl url, const Enums::AttachmentType attachmentType)
+{
+    return QtConcurrent::run([=]() -> EnResult {
+        QString warningText;
+        auto attachment = m_attachmentBuilder.build(url, attachmentType, messageId, to, warningText);
+        if (!attachment) {
+            qCWarning(lcAttachment) << warningText;
+            fireWarning(warningText);
+            return MRES_ERR_ATTACHMENT;
+        }
+        return _sendMessageInternal(createNew, messageId, to, attachment->displayName, attachment);
+    });
+}
+
+/******************************************************************************/
+QFuture<VSQMessenger::EnResult>
+VSQMessenger::sendMessage(const QString &to, const QString &message,
+                          const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
+{
+    const auto url = attachmentUrl.toUrl();
+    if (m_attachmentBuilder.isValidUrl(url)) {
+        return createSendAttachment(true, VSQUtils::createUuid(), to, url, attachmentType);
+    }
+    else {
+        return createSendMessage(true, VSQUtils::createUuid(), to, message);
+    }
+    QFuture<VSQMessenger::EnResult> future;
+    return future;
 }
 
 /******************************************************************************/
@@ -955,6 +1067,46 @@ VSQMessenger::setStatus(VSQMessenger::EnStatus status) {
 void VSQMessenger::setCurrentRecipient(const QString &recipient)
 {
     m_recipient = recipient;
+}
+
+void VSQMessenger::saveAttachmentAs(const QString &messageId, const QVariant &fileUrl)
+{
+    auto message = m_sqlConversations->getMessage(messageId);
+    if (!message) {
+        return;
+    }
+    const auto dest = fileUrl.toUrl().toLocalFile();
+    qCDebug(lcTransferManager) << "Saving of attachment as" << dest;
+    downloadAndProcess(*message, [=](const StMessage &msg) {
+        qCDebug(lcTransferManager) << "Message attachment saved as:" << dest;
+        QFile::copy(msg.attachment->filePath, dest);
+    });
+}
+
+void VSQMessenger::downloadAttachment(const QString &messageId)
+{
+    auto message = m_sqlConversations->getMessage(messageId);
+    if (!message) {
+        return;
+    }
+    qCDebug(lcTransferManager) << "Downloading of attachment:" << messageId;
+    downloadAndProcess(*message, [](const StMessage &msg) {
+        qCDebug(lcTransferManager) << QString("Message '%1' attachment was downloaded to: %2").arg(msg.messageId, msg.attachment->filePath);
+    });
+}
+
+void VSQMessenger::openAttachment(const QString &messageId)
+{
+    auto message = m_sqlConversations->getMessage(messageId);
+    if (!message) {
+        return;
+    }
+    qCDebug(lcTransferManager) << "Opening of attachment:" << messageId;
+    downloadAndProcess(*message, [this](const StMessage &msg) {
+        const auto url = QUrl::fromLocalFile(msg.attachment->filePath).toString();
+        qCDebug(lcTransferManager) << "Opening of message attachment:" << url;
+        emit openUrlExternallyRequested(url);
+    });
 }
 
 /******************************************************************************/

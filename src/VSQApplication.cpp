@@ -36,6 +36,7 @@
 #include <QtQml>
 
 #include <VSQApplication.h>
+#include <VSQCommon.h>
 #include <VSQClipboardProxy.h>
 #include <ui/VSQUiHelper.h>
 #include <virgil/iot/logger/logger.h>
@@ -54,10 +55,18 @@ const QString VSQApplication::kVersion = "unknown";
 #endif
 
 /******************************************************************************/
-VSQApplication::VSQApplication() {
+VSQApplication::VSQApplication()
+    : m_settings(this)
+    , m_networkAccessManager(new QNetworkAccessManager(this))
+    , m_engine()
+    , m_messenger(m_networkAccessManager, &m_settings)
+    , m_logging(m_networkAccessManager)
+{
+    m_networkAccessManager->setAutoDeleteReplies(true);
 #if (MACOS)
     VSQMacos::instance().startUpdatesTimer();
 #endif
+    registerCommonTypes();
 }
 
 /******************************************************************************/
@@ -77,12 +86,12 @@ VSQApplication::run(const QString &basePath) {
     }
 
     // Initialization loging
-//    qInstallMessageHandler(logger_qt_redir); // Redirect standard logging
+#ifdef VS_DEVMODE
+    qInstallMessageHandler(&VSQLogging::logger_qt_redir); // Redirect standard logging
+#endif
     m_messenger.setLogging(&m_logging);
     m_logging.setkVersion(kVersion);
 
-
-    QQmlContext *context = m_engine.rootContext();
     if (basePath.isEmpty()) {
         m_engine.setBaseUrl(QUrl(QStringLiteral("qrc:/qml/")));
     } else {
@@ -90,6 +99,7 @@ VSQApplication::run(const QString &basePath) {
         m_engine.setBaseUrl(url);
     }
 
+    QQmlContext *context = m_engine.rootContext();
     context->setContextProperty("UiHelper", &uiHelper);
     context->setContextProperty("app", this);
     context->setContextProperty("clipboard", new VSQClipboardProxy(QGuiApplication::clipboard()));
@@ -97,6 +107,7 @@ VSQApplication::run(const QString &basePath) {
     context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
     context->setContextProperty("Messenger", &m_messenger);
     context->setContextProperty("Logging", &m_logging);
+    context->setContextProperty("settings", &m_settings);
     context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
     context->setContextProperty("ChatModel", &m_messenger.getChatModel());
 

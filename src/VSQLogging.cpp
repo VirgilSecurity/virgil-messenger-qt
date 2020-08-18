@@ -43,10 +43,23 @@
 // Private variables
 const QString VSQLogging::endpointSendReport = "/send-logs";
 
+VSQLogging *VSQLogging::m_instance = nullptr;
+
 // Public methods
 //***********************************************************************************************************
+VSQLogging::VSQLogging(QNetworkAccessManager *networkAccessManager) : QObject(nullptr), manager(networkAccessManager)
+{
+    if (m_instance) {
+        qFatal("Instance of logging already exists!");
+    }
+    else {
+        m_instance = this;
+    }
+}
+
 VSQLogging::~VSQLogging() {
     resetRunFlag();
+    m_instance = nullptr;
 }
 //***********************************************************************************************************
 void VSQLogging::setVirgilUrl(QString VirgilUrl) {
@@ -131,8 +144,6 @@ bool VSQLogging::sendFileToBackendRequest(QByteArray fileData) {
     vs_messenger_virgil_get_auth_token(buffBearer ,sizeBearer);
     qDebug("Backend token [%s]", buffBearer);
 
-    manager = new QNetworkAccessManager();
-
     QString strEndpoint = currentVirgilUrl + endpointSendReport;
     req.setUrl(QUrl(strEndpoint));
     qDebug("Send report to endpoint : [%s]",qPrintable(strEndpoint));
@@ -166,8 +177,11 @@ void VSQLogging::endpointReply(){
 
 // Functions
 //***********************************************************************************************************
-void logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+void VSQLogging::logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+#ifdef VS_DEVMODE
+    emit VSQLogging::m_instance->newMessage(QString("[%1]: %2").arg(context.category, msg));
+#endif
     QByteArray localMsg = msg.toLocal8Bit();
     switch (type) {
     case QtDebugMsg:

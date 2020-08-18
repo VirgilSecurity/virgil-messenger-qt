@@ -32,59 +32,41 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#ifndef VSQ_SETTINGS_H
+#define VSQ_SETTINGS_H
 
-#ifndef VSQLOGGING_H
-#define VSQLOGGING_H
+#include <QDir>
+#include <QSettings>
+#include <QSize>
 
-#include <iostream>
-#include <string>
-#include <QCoreApplication>
-#include <virgil/iot/qt/VSQIoTKit.h>
+#include "VSQCommon.h"
 
-class QNetworkAccessManager;
+Q_DECLARE_LOGGING_CATEGORY(lcSettings)
 
-using namespace VirgilIoTKit;
-
-class VSQLogging : public QObject {
+class VSQSettings : public QObject
+{
     Q_OBJECT
+    Q_PROPERTY(bool devMode READ devMode CONSTANT)
+
 public:
-    explicit VSQLogging(QNetworkAccessManager *networkAccessManager);
-    virtual ~VSQLogging();
+    explicit VSQSettings(QObject *parent);
+    ~VSQSettings();
 
-    void checkAppCrash();
-    void resetRunFlag();
-    Q_INVOKABLE
-    bool sendLogFiles();
-    void setVirgilUrl(QString VirgilUrl);
-    void setkVersion(QString AppVersion);
-    void setkOrganization(QString strkOrganization);
-    void setkApp(QString strkApp);
+    // Attachments
 
-    static void logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+    DataSize attachmentMaxFileSize() const;
+    QDir attachmentCacheDir() const;
+    QDir thumbnailsDir() const;
+    QDir downloadsDir() const;
+    QSize thumbnailMaxSize() const;
 
-signals:
-    void crashReportRequested();
-    void reportSent(QString msg);
-    void reportSentErr(QString msg);
-    void newMessage(const QString &message);
+    // Dev mode
+    bool devMode() const;
 
 private:
-    static const QString endpointSendReport;
-
-    bool checkRunFlag();
-    bool sendFileToBackendRequest(QByteArray fileData);
-    void setRunFlag(bool runState);
-
-    QNetworkAccessManager *manager;
-    QString currentVirgilUrl;
-    QString kVersion;
-    QString kOrganization;
-    QString kApp;
-
-    static VSQLogging *m_instance;
-
-private slots:
-    void endpointReply();
+    QDir m_attachmentCacheDir;
+    QDir m_thumbnaisDir;
+    QDir m_downloadsDir;
 };
 
-#endif // VSQLOGGING_H
+#endif // VSQ_SETTINGS_H

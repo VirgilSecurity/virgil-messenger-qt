@@ -32,59 +32,28 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#ifndef VSQ_DISCOVERYMANAGER_H
+#define VSQ_DISCOVERYMANAGER_H
 
-#ifndef VSQLOGGING_H
-#define VSQLOGGING_H
+#include <qxmpp/QXmppDiscoveryManager.h>
 
-#include <iostream>
-#include <string>
-#include <QCoreApplication>
-#include <virgil/iot/qt/VSQIoTKit.h>
+#include "VSQCommon.h"
 
-class QNetworkAccessManager;
+Q_DECLARE_LOGGING_CATEGORY(lcDiscoveryManager);
 
-using namespace VirgilIoTKit;
-
-class VSQLogging : public QObject {
-    Q_OBJECT
+class VSQDiscoveryManager : public QObject
+{
 public:
-    explicit VSQLogging(QNetworkAccessManager *networkAccessManager);
-    virtual ~VSQLogging();
-
-    void checkAppCrash();
-    void resetRunFlag();
-    Q_INVOKABLE
-    bool sendLogFiles();
-    void setVirgilUrl(QString VirgilUrl);
-    void setkVersion(QString AppVersion);
-    void setkOrganization(QString strkOrganization);
-    void setkApp(QString strkApp);
-
-    static void logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg);
-
-signals:
-    void crashReportRequested();
-    void reportSent(QString msg);
-    void reportSentErr(QString msg);
-    void newMessage(const QString &message);
+    explicit VSQDiscoveryManager(QXmppClient *client, QObject *parent = nullptr);
+    ~VSQDiscoveryManager() override;
 
 private:
-    static const QString endpointSendReport;
+    void onClientConnected();
+    void onInfoReceived(const QXmppDiscoveryIq &info);
+    void onItemsReceived(const QXmppDiscoveryIq &info);
 
-    bool checkRunFlag();
-    bool sendFileToBackendRequest(QByteArray fileData);
-    void setRunFlag(bool runState);
-
-    QNetworkAccessManager *manager;
-    QString currentVirgilUrl;
-    QString kVersion;
-    QString kOrganization;
-    QString kApp;
-
-    static VSQLogging *m_instance;
-
-private slots:
-    void endpointReply();
+    QXmppClient *m_client;
+    QXmppDiscoveryManager *m_discoveryManager;
 };
 
-#endif // VSQLOGGING_H
+#endif // VSQ_DISCOVERYMANAGER_H

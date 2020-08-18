@@ -32,59 +32,45 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#include "VSQUtils.h"
 
-#ifndef VSQLOGGING_H
-#define VSQLOGGING_H
+#include <QLocale>
+#include <QDir>
+#include <QUuid>
 
-#include <iostream>
-#include <string>
-#include <QCoreApplication>
-#include <virgil/iot/qt/VSQIoTKit.h>
+QString VSQUtils::createUuid()
+{
+    return QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
+}
 
-class QNetworkAccessManager;
+QString VSQUtils::formattedDataSize(DataSize fileSize)
+{
+    static QLocale locale = QLocale::system();
+    return locale.formattedDataSize(fileSize);
+}
 
-using namespace VirgilIoTKit;
+QString VSQUtils::escapedUserName(const QString &userName)
+{
+    static QRegExp regexp("[^a-z0-9_]");
+    QString name(userName);
+    name.remove(regexp);
+    return name;
+}
 
-class VSQLogging : public QObject {
-    Q_OBJECT
-public:
-    explicit VSQLogging(QNetworkAccessManager *networkAccessManager);
-    virtual ~VSQLogging();
-
-    void checkAppCrash();
-    void resetRunFlag();
-    Q_INVOKABLE
-    bool sendLogFiles();
-    void setVirgilUrl(QString VirgilUrl);
-    void setkVersion(QString AppVersion);
-    void setkOrganization(QString strkOrganization);
-    void setkApp(QString strkApp);
-
-    static void logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg);
-
-signals:
-    void crashReportRequested();
-    void reportSent(QString msg);
-    void reportSentErr(QString msg);
-    void newMessage(const QString &message);
-
-private:
-    static const QString endpointSendReport;
-
-    bool checkRunFlag();
-    bool sendFileToBackendRequest(QByteArray fileData);
-    void setRunFlag(bool runState);
-
-    QNetworkAccessManager *manager;
-    QString currentVirgilUrl;
-    QString kVersion;
-    QString kOrganization;
-    QString kApp;
-
-    static VSQLogging *m_instance;
-
-private slots:
-    void endpointReply();
-};
-
-#endif // VSQLOGGING_H
+QString VSQUtils::findUniqueFileName(const QString &fileName)
+{
+    QFileInfo info(fileName);
+    if (!info.exists()) {
+        return fileName;
+    }
+    auto dir = info.absoluteDir();
+    auto baseName = info.baseName();
+    auto suffix = info.completeSuffix();
+    for(;;) {
+        auto uuid = createUuid().remove('-').left(6);
+        auto newFileName = dir.filePath(QString("%1-%2.%3").arg(baseName, uuid, suffix));
+        if (!QFile::exists(newFileName)) {
+            return newFileName;
+        }
+    }
+}

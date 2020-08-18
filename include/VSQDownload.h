@@ -32,59 +32,25 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#ifndef VSQ_DOWNLOAD_H
+#define VSQ_DOWNLOAD_H
 
-#ifndef VSQLOGGING_H
-#define VSQLOGGING_H
+#include "VSQTransfer.h"
 
-#include <iostream>
-#include <string>
-#include <QCoreApplication>
-#include <virgil/iot/qt/VSQIoTKit.h>
-
-class QNetworkAccessManager;
-
-using namespace VirgilIoTKit;
-
-class VSQLogging : public QObject {
+class VSQDownload : public VSQTransfer
+{
     Q_OBJECT
+
 public:
-    explicit VSQLogging(QNetworkAccessManager *networkAccessManager);
-    virtual ~VSQLogging();
+    VSQDownload(QNetworkAccessManager *networkAccessManager, const QString &id,
+                const QUrl &remoteUrl, const QString &filePath, QObject *parent);
+    ~VSQDownload() override;
 
-    void checkAppCrash();
-    void resetRunFlag();
-    Q_INVOKABLE
-    bool sendLogFiles();
-    void setVirgilUrl(QString VirgilUrl);
-    void setkVersion(QString AppVersion);
-    void setkOrganization(QString strkOrganization);
-    void setkApp(QString strkApp);
-
-    static void logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg);
-
-signals:
-    void crashReportRequested();
-    void reportSent(QString msg);
-    void reportSentErr(QString msg);
-    void newMessage(const QString &message);
+    void start() override;
 
 private:
-    static const QString endpointSendReport;
-
-    bool checkRunFlag();
-    bool sendFileToBackendRequest(QByteArray fileData);
-    void setRunFlag(bool runState);
-
-    QNetworkAccessManager *manager;
-    QString currentVirgilUrl;
-    QString kVersion;
-    QString kOrganization;
-    QString kApp;
-
-    static VSQLogging *m_instance;
-
-private slots:
-    void endpointReply();
+    QUrl m_remoteUrl;
+    QString m_filePath;
 };
 
-#endif // VSQLOGGING_H
+#endif // VSQ_DOWNLOAD_H

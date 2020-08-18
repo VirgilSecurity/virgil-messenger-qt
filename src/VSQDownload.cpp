@@ -32,59 +32,49 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#include "VSQDownload.h"
 
-#ifndef VSQLOGGING_H
-#define VSQLOGGING_H
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
 
-#include <iostream>
-#include <string>
-#include <QCoreApplication>
-#include <virgil/iot/qt/VSQIoTKit.h>
+#include "VSQUtils.h"
 
-class QNetworkAccessManager;
+VSQDownload::VSQDownload(QNetworkAccessManager *networkAccessManager, const QString &id,
+                         const QUrl &remoteUrl, const QString &filePath, QObject *parent)
+    : VSQTransfer(networkAccessManager, id, parent)
+    , m_remoteUrl(remoteUrl)
+    , m_filePath(filePath)
+{}
 
-using namespace VirgilIoTKit;
+VSQDownload::~VSQDownload()
+{
+#ifdef VS_DEVMODE
+    qCDebug(lcDev) << "~Download" << m_filePath;
+#endif
+}
 
-class VSQLogging : public QObject {
-    Q_OBJECT
-public:
-    explicit VSQLogging(QNetworkAccessManager *networkAccessManager);
-    virtual ~VSQLogging();
+void VSQDownload::start()
+{
+    if (isRunning()) {
+        qCWarning(lcTransferManager) << "Cannot start again a running download";
+        return;
+    }
+    qCDebug(lcTransferManager) << QString("Started download: %1").arg(id());
+    VSQTransfer::start();
 
-    void checkAppCrash();
-    void resetRunFlag();
-    Q_INVOKABLE
-    bool sendLogFiles();
-    void setVirgilUrl(QString VirgilUrl);
-    void setkVersion(QString AppVersion);
-    void setkOrganization(QString strkOrganization);
-    void setkApp(QString strkApp);
+    // Check file for writing
+    auto file = fileHandle(m_filePath);
+    if (!file->open(QFile::WriteOnly)) {
+        emit statusChanged(Attachment::Status::Failed);
+        return;
+    }
 
-    static void logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg);
-
-signals:
-    void crashReportRequested();
-    void reportSent(QString msg);
-    void reportSentErr(QString msg);
-    void newMessage(const QString &message);
-
-private:
-    static const QString endpointSendReport;
-
-    bool checkRunFlag();
-    bool sendFileToBackendRequest(QByteArray fileData);
-    void setRunFlag(bool runState);
-
-    QNetworkAccessManager *manager;
-    QString currentVirgilUrl;
-    QString kVersion;
-    QString kOrganization;
-    QString kApp;
-
-    static VSQLogging *m_instance;
-
-private slots:
-    void endpointReply();
-};
-
-#endif // VSQLOGGING_H
+    // Create request
+    QNetworkRequest request(m_remoteUrl);
+    auto reply = networkAccessManager()->get(request);
+    connectReply(reply);
+    connect(reply, &QNetworkReply::downloadProgress, this, &VSQTransfer::progressChanged);
+    connect(reply, &QNetworkReply::readyRead, this, [=]() {
+        file->write(reply->readAll());
+    });
+}

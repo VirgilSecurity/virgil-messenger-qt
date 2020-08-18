@@ -46,6 +46,8 @@
 #define DEBUG_NETWORK 0
 #endif
 
+Q_LOGGING_CATEGORY(lcNetwork, "network");
+
 #ifdef Q_OS_MACOS
 // TODO: Remove after fixing of deprecated functionality
 #pragma GCC diagnostic push
@@ -137,7 +139,7 @@ VSQNetworkAnalyzer::onAnalyzeNetwork() {
         }
 
         if (!configuration.isValid()) {
-            qDebug().noquote() << "NetworkAnalyzer: Network configuration is not valid, skipped...";
+            qCDebug(lcNetwork).noquote() << "NetworkAnalyzer: Network configuration is not valid, skipped...";
             continue;
         }
 
@@ -162,7 +164,7 @@ VSQNetworkAnalyzer::onAnalyzeNetwork() {
                 }
 
 #if DEBUG_NETWORK
-                qDebug().noquote().nospace() << "NetworkAnalyzer: QNetworkAddressEntry, Ip: " << ipV4Address;
+                qCDebug(lcNetwork).noquote().nospace() << "NetworkAnalyzer: QNetworkAddressEntry, Ip: " << ipV4Address;
 #endif
                 if (!ipV4Address.isEmpty()) {
                     currenNetworkInterfaceData.insert(networkInterface.index(), ipV4Address);
@@ -186,7 +188,7 @@ VSQNetworkAnalyzer::onAnalyzeNetwork() {
         }
         QString ipV4Address = entry.toString();
 #if DEBUG_NETWORK
-        qDebug().noquote().nospace() << "NetworkAnalyzer: QNetworkAddressEntry, Ip: " << ipV4Address;
+        qCDebug(lcNetwork).noquote().nospace() << "NetworkAnalyzer: QNetworkAddressEntry, Ip: " << ipV4Address;
 #endif
         if (!ipV4Address.isEmpty()) {
             currenNetworkInterfaceData.insert(i++, ipV4Address);
@@ -196,7 +198,7 @@ VSQNetworkAnalyzer::onAnalyzeNetwork() {
 #endif
 
     if (currenNetworkInterfaceData.isEmpty()) {
-        qDebug().noquote().nospace() << "NetworkAnalyzer: Network is not ready";
+        qCDebug(lcNetwork).noquote().nospace() << "NetworkAnalyzer: Network is not ready";
         stateChanged = true;
         emit fireStateChanged(false);
         m_networkInterfaceData.clear();
@@ -211,17 +213,17 @@ VSQNetworkAnalyzer::onAnalyzeNetwork() {
         stateChanged = true;
         emit fireStateChanged(m_connectedState);
 
-        qDebug().noquote().nospace() << "NetworkAnalyzer: Online status: " << m_connectedState;
+        qCDebug(lcNetwork).noquote().nospace() << "NetworkAnalyzer: Online status: " << m_connectedState;
     }
 
-#if 1 // DEBUG_NETWORK
-    qDebug() << "currenNetworkInterfaceData : " << currenNetworkInterfaceData;
-    qDebug() << "m_networkInterfaceData : " << m_networkInterfaceData;
+#if DEBUG_NETWORK
+    qCDebug(lcNetwork) << "currenNetworkInterfaceData : " << currenNetworkInterfaceData;
+    qCDebug(lcNetwork) << "m_networkInterfaceData : " << m_networkInterfaceData;
 #endif
 
     if (currenNetworkInterfaceData != m_networkInterfaceData) {
 
-        qDebug().noquote().nospace() << "NetworkAnalyzer: Network changed";
+        qCDebug(lcNetwork).noquote().nospace() << "NetworkAnalyzer: Network changed";
 
         printMap(m_networkInterfaceData);
         printMap(currenNetworkInterfaceData);
@@ -241,7 +243,7 @@ VSQNetworkAnalyzer::onAnalyzeNetwork() {
 void
 VSQNetworkAnalyzer::printNetworkInterface(const QNetworkInterface &interface) const {
 #if DEBUG_NETWORK
-    qDebug().noquote().nospace() << QString("\tIndex: %1, HW address: %2, name: %3, valid: %4, type: %5, flags: %6")
+    qCDebug(lcNetwork).noquote().nospace() << QString("\tIndex: %1, HW address: %2, name: %3, valid: %4, type: %5, flags: %6")
                                             .arg(interface.index())
                                             .arg(interface.hardwareAddress())
                                             .arg(interface.humanReadableName())
@@ -259,7 +261,7 @@ VSQNetworkAnalyzer::printMap(const VSQNetworkInterfaceData &nid) const {
     QMapIterator<int, QString> i(nid);
     while (i.hasNext()) {
         i.next();
-        qDebug().noquote() << "VSQNetworkInterfaceData: Key: " << i.key() << ", value: " << i.value();
+        qCDebug(lcNetwork).noquote() << "VSQNetworkInterfaceData: Key: " << i.key() << ", value: " << i.value();
     }
 #else
     Q_UNUSED(nid)
@@ -271,7 +273,7 @@ VSQNetworkAnalyzer::printSession(const QNetworkSession &session) const {
 #if DEBUG_NETWORK
     bool sessionConnected = session.state() == QNetworkSession::Connected ? true : false;
 
-    qDebug().noquote().nospace() << QString("NetworkAnalyzer: Network session, identifier: %1 (%2, %3), activeTime: "
+    qCDebug(lcNetwork).noquote().nospace() << QString("NetworkAnalyzer: Network session, identifier: %1 (%2, %3), activeTime: "
                                             "%4, error: %5, state: %6")
                                             .arg(session.sessionProperty("ActiveConfiguration").toString())
                                             .arg((session.isOpen() ? "Opened" : "Closed"))
@@ -287,7 +289,7 @@ VSQNetworkAnalyzer::printSession(const QNetworkSession &session) const {
 void
 VSQNetworkAnalyzer::printConfiguration(const QNetworkConfiguration &configuration) const {
 #if DEBUG_NETWORK
-    qDebug().noquote().nospace()
+    qCDebug(lcNetwork).noquote().nospace()
             << QString("NetworkAnalyzer: Network configuration: identifier: %1, name: %2, bearerTypeName: %3, valid: "
                        "%4, timeout: %5, roaming: %6, state: %7, type: %8, children: %9")
                        .arg(configuration.identifier())

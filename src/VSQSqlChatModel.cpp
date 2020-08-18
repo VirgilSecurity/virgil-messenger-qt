@@ -44,7 +44,9 @@
 
 /******************************************************************************/
 VSQSqlChatModel::VSQSqlChatModel(QObject *parent) :
-    QSqlTableModel(parent) {
+    QSqlTableModel(parent)
+{
+    connect(this, &VSQSqlChatModel::updateLastMessage, this, &VSQSqlChatModel::onUpdateLastMessage);
 }
 
 /******************************************************************************/
@@ -160,7 +162,7 @@ VSQSqlChatModel::createPrivateChat(const QString &recipientId) {
 }
 
 /******************************************************************************/
-void VSQSqlChatModel::updateLastMessage(QString chatId, QString message) {
+void VSQSqlChatModel::onUpdateLastMessage(QString chatId, QString message) {
 
     const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
 
@@ -195,7 +197,7 @@ void VSQSqlChatModel::updateUnreadMessageCount(QString chatId) {
 
     QSqlQuery query1(selectQuery
                      .arg("Conversations_" + m_userId, chatId)
-                     .arg(VSQSqlConversationModel::MST_RECEIVED));
+                     .arg(static_cast<int>(StMessage::Status::MST_RECEIVED)));
     selectModel.setQuery(query1);
     int count = selectModel.record(0).value("count").toInt();
 

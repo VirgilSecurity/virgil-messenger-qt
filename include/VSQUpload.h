@@ -32,59 +32,36 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#ifndef VSQ_UPLOAD_H
+#define VSQ_UPLOAD_H
 
-#ifndef VSQLOGGING_H
-#define VSQLOGGING_H
+#include "VSQTransfer.h"
 
-#include <iostream>
-#include <string>
-#include <QCoreApplication>
-#include <virgil/iot/qt/VSQIoTKit.h>
-
-class QNetworkAccessManager;
-
-using namespace VirgilIoTKit;
-
-class VSQLogging : public QObject {
+class VSQUpload : public VSQTransfer
+{
     Q_OBJECT
+
 public:
-    explicit VSQLogging(QNetworkAccessManager *networkAccessManager);
-    virtual ~VSQLogging();
+    VSQUpload(QNetworkAccessManager *networkAccessManager, const QString &id, const QString &filePath, QObject *parent);
+    ~VSQUpload() override;
 
-    void checkAppCrash();
-    void resetRunFlag();
-    Q_INVOKABLE
-    bool sendLogFiles();
-    void setVirgilUrl(QString VirgilUrl);
-    void setkVersion(QString AppVersion);
-    void setkOrganization(QString strkOrganization);
-    void setkApp(QString strkApp);
+    void start() override;
 
-    static void logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+    QString filePath() const;
+    Optional<QUrl> remoteUrl();
+
+    QString slotId() const;
+    void setSlotId(const QString &id);
 
 signals:
-    void crashReportRequested();
-    void reportSent(QString msg);
-    void reportSentErr(QString msg);
-    void newMessage(const QString &message);
+    void remoteUrlReceived(const QUrl &url);
+    void remoteUrlErrorOccured();
 
 private:
-    static const QString endpointSendReport;
-
-    bool checkRunFlag();
-    bool sendFileToBackendRequest(QByteArray fileData);
-    void setRunFlag(bool runState);
-
-    QNetworkAccessManager *manager;
-    QString currentVirgilUrl;
-    QString kVersion;
-    QString kOrganization;
-    QString kApp;
-
-    static VSQLogging *m_instance;
-
-private slots:
-    void endpointReply();
+    QString m_filePath;
+    Optional<QUrl> m_remoteUrl;
+    bool m_remoteUrlError = false;
+    QString m_slotId;
 };
 
-#endif // VSQLOGGING_H
+#endif // VSQ_UPLOAD_H

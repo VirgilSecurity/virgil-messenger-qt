@@ -32,59 +32,30 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#ifndef VSQ_CRYPTOTRANSFERMANAGER_H
+#define VSQ_CRYPTOTRANSFERMANAGER_H
 
-#ifndef VSQLOGGING_H
-#define VSQLOGGING_H
+#include "VSQTransferManager.h"
 
-#include <iostream>
-#include <string>
-#include <QCoreApplication>
-#include <virgil/iot/qt/VSQIoTKit.h>
-
-class QNetworkAccessManager;
-
-using namespace VirgilIoTKit;
-
-class VSQLogging : public QObject {
+class VSQCryptoTransferManager : public VSQTransferManager
+{
     Q_OBJECT
+
 public:
-    explicit VSQLogging(QNetworkAccessManager *networkAccessManager);
-    virtual ~VSQLogging();
+    VSQCryptoTransferManager(QXmppClient *client, QNetworkAccessManager *networkAccessManager, VSQSettings *settings, QObject *parent);
+    virtual ~VSQCryptoTransferManager();
 
-    void checkAppCrash();
-    void resetRunFlag();
-    Q_INVOKABLE
-    bool sendLogFiles();
-    void setVirgilUrl(QString VirgilUrl);
-    void setkVersion(QString AppVersion);
-    void setkOrganization(QString strkOrganization);
-    void setkApp(QString strkApp);
-
-    static void logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+    VSQUpload *startCryptoUpload(const QString &id, const QString &filePath, const QString &recipient);
+    VSQDownload *startCryptoDownload(const QString &id, const QUrl &url, const QString &filePath, const QString &recipient);
 
 signals:
-    void crashReportRequested();
-    void reportSent(QString msg);
-    void reportSentErr(QString msg);
-    void newMessage(const QString &message);
+    void fileDownloadedAndDecrypted(const QString &id, const QString &filePath);
 
 private:
-    static const QString endpointSendReport;
+    QString getCacheNewFilePath();
 
-    bool checkRunFlag();
-    bool sendFileToBackendRequest(QByteArray fileData);
-    void setRunFlag(bool runState);
-
-    QNetworkAccessManager *manager;
-    QString currentVirgilUrl;
-    QString kVersion;
-    QString kOrganization;
-    QString kApp;
-
-    static VSQLogging *m_instance;
-
-private slots:
-    void endpointReply();
+    bool ecnryptFile(const QString &path, const QString &encPath,  const QString &recipient);
+    bool decryptFile(const QString &encPath, const QString &path, const QString &recipient);
 };
 
-#endif // VSQLOGGING_H
+#endif // VSQ_CRYPTOTRANSFERMANAGER_H

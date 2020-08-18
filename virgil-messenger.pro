@@ -76,7 +76,7 @@ DEFINES += QT_DEPRECATED_WARNINGS \
         VERSION="$$VERSION"
 
 CONFIG(iphoneos, iphoneos | iphonesimulator) {
-    DEFINES += VS_IOS=1
+    DEFINES += VS_IOS=1 VS_MOBILE=1
 }
 
 #
@@ -85,27 +85,48 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
 
 HEADERS += \
         include/VSQApplication.h \
+        include/VSQAttachmentBuilder.h \
         include/VSQClipboardProxy.h \
+        include/VSQCommon.h \
+        include/VSQCryptoTransferManager.h \
+        include/VSQDiscoveryManager.h \
+        include/VSQDownload.h \
         include/VSQLogging.h \
         include/VSQMessenger.h \
+        include/VSQSettings.h \
         include/VSQSqlChatModel.h \
         include/VSQSqlConversationModel.h \
         include/VSQNetworkAnalyzer.h \
+        include/VSQTransfer.h \
+        include/VSQTransferManager.h \
+        include/VSQUpload.h \
+        include/VSQUtils.h \
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
-        include/ui/VSQUiHelper.h
+        include/ui/VSQUiHelper.h \
+        include/thirdparty/optional/optional.hpp
 
 #
 #   Sources
 #
 
 SOURCES += \
+        src/VSQAttachmentBuilder.cpp \
         src/VSQClipboardProxy.cpp \
+        src/VSQCommon.cpp \
+        src/VSQCryptoTransferManager.cpp \
+        src/VSQDiscoveryManager.cpp \
+        src/VSQDownload.cpp \
         src/VSQMessenger.cpp \
         src/VSQLogging.cpp \
+        src/VSQSettings.cpp \
         src/VSQSqlChatModel.cpp \
         src/VSQSqlConversationModel.cpp \
         src/VSQNetworkAnalyzer.cpp \
+        src/VSQTransfer.cpp \
+        src/VSQTransferManager.cpp \
+        src/VSQUpload.cpp \
+        src/VSQUtils.cpp \
         src/android/VSQAndroid.cpp \
         src/main.cpp \
         src/VSQApplication.cpp \
@@ -159,9 +180,9 @@ isEmpty(WEBDRIVER) {
     debug:QTWEBDRIVER_LOCATION=$$PWD/ext/prebuilt/$${OS_NAME}/debug/installed/usr/local/include/qtwebdriver
     HEADERS += $$QTWEBDRIVER_LOCATION/src/Test/Headers.h
     INCLUDEPATH +=  $$QTWEBDRIVER_LOCATION $$QTWEBDRIVER_LOCATION/src
-    linux:!android: { 
+    linux:!android: {
         LIBS += -ldl -Wl,--start-group -lchromium_base -lWebDriver_core -lWebDriver_extension_qt_base -lWebDriver_extension_qt_quick -Wl,--end-group
-    }    
+    }
     macx: {
         LIBS += -lchromium_base -lWebDriver_core -lWebDriver_extension_qt_base -lWebDriver_extension_qt_quick
         LIBS += -framework Foundation
@@ -193,11 +214,32 @@ DEPENDPATH += $${INCLUDEPATH}
 message("ANDROID_TARGET_ARCH = $$ANDROID_TARGET_ARCH")
 
 #
+#   Linux specific
+#
+
+linux:!android {
+    DEFINES += VS_DESKTOP=1
+    QT += widgets
+}
+
+#
+#   Windows specific
+#
+
+win32|win64 {
+    DEFINES += VS_DESKTOP=1
+    QT += widgets
+}
+
+#
 #   macOS specific
 #
+
 macx: {
     ICON = $$PWD/scripts/macos/pkg_resources/MyIcon.icns
     QMAKE_INFO_PLIST = $$PWD/platforms/macos/virgil-messenger.plist
+    DEFINES += VS_DESKTOP=1
+    QT += widgets
 }
 
 #
@@ -242,10 +284,10 @@ defineReplace(AndroidVersionCode) {
 
 android: {
     QT += androidextras
-    DEFINES += VS_ANDROID=1 VS_PUSHNOTIFICATIONS=1
+    DEFINES += VS_ANDROID=1 VS_PUSHNOTIFICATIONS=1 VS_MOBILE=1
     ANDROID_VERSION_CODE = $$AndroidVersionCode($$VERSION)
     ANDROID_VERSION_NAME = $$VERSION
-    
+
     include($$(ANDROID_SDK_ROOT)/android_openssl/openssl.pri)
 
     INCLUDEPATH +=  $$PWD/ext/prebuilt/firebase_cpp_sdk/include
@@ -261,6 +303,8 @@ android: {
 
     release:LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
     debug:LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
+
+
 
 #
 #   Messenger Internal
@@ -299,6 +343,41 @@ android: {
         platforms/android/src/org/virgil/notification/NotificationClient.java
 }
 
+#
+#   Enable Address Sanitizer if required
+#
+message(">>> ENABLE ADDRESS SANITIZER: $$USE_ASAN")
+equals(USE_ASAN, "yes") {
+    CONFIG += sanitizer sanitize_address
+}
+
+#
+#   Enable Undefined behavior Sanitizer if required
+#
+message(">>> ENABLE UNDEFINED BEHAVIOR SANITIZER: $$USE_UBSAN")
+equals(USE_UBSAN, "yes") {
+    CONFIG += sanitizer sanitize_undefined
+}
+
+#
+#   Enable Memory Sanitizer if required
+#
+message(">>> ENABLE MEMORY SANITIZER: $$USE_MSAN")
+equals(USE_MSAN, "yes") {
+    CONFIG += sanitizer sanitize_memory
+}
+
+#
+#   Enable Thread Sanitizer if required
+#
+message(">>> ENABLE THREAD SANITIZER: $$USE_TSAN")
+equals(USE_TSAN, "yes") {
+    CONFIG += sanitizer sanitize_thread
+}
+
+#
+#   Assets
+#
 RC_ICONS = platforms/windows/Virgil.ico
 
 DISTFILES += \
