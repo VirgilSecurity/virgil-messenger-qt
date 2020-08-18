@@ -90,7 +90,7 @@ Page {
             nickname: model.author
             isUser: model.author === Messenger.currentUser
             status: isUser ? model.status : "none"
-            failed: model.status == 4
+            failed: (model.status == 4) && (!attachmentId || attachmentStatus == Enums.AttachmentStatus.Failed)
             messageId: model.messageId
 
             inRow: model.messageInARow

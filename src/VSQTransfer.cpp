@@ -40,8 +40,13 @@ VSQTransfer::VSQTransfer(QNetworkAccessManager *networkAccessManager, const QStr
     , m_id(id)
     , m_status(Attachment::Status::Created)
 {
-    connect(this, &VSQTransfer::progressChanged, [=](const DataSize bytesReceived, const DataSize bytesTotal) {
-        if (!bytesReceived && bytesReceived == bytesTotal) {
+    connect(this, &VSQTransfer::progressChanged, [&](const DataSize bytesReceived, const DataSize bytesTotal) {
+        if (bytesTotal == 0) {
+            return; // HACK(fpohtmeh): reply sends zeros finally, ignore it
+        }
+        m_bytesReceived = bytesReceived;
+        m_bytesTotal = bytesTotal;
+        if (m_bytesTotal > 0 && m_bytesReceived >= m_bytesTotal) {
             setStatus(Attachment::Status::Loaded);
         }
     });
@@ -69,6 +74,11 @@ bool VSQTransfer::isRunning() const
     return m_status == Attachment::Status::Loading;
 }
 
+bool VSQTransfer::isFailed() const
+{
+    return m_status == Attachment::Status::Failed;
+}
+
 void VSQTransfer::start()
 {
     setStatus(Attachment::Status::Loading);
@@ -89,7 +99,12 @@ void VSQTransfer::connectReply(QNetworkReply *reply)
     qCDebug(lcDev) << "Connected to reply:" << reply;
 #endif
     connect(reply, &QNetworkReply::finished, [=]() {
-        setStatus(Attachment::Status::Loaded);
+        if (m_bytesTotal > 0 && m_bytesReceived >= m_bytesTotal) {
+            setStatus(Attachment::Status::Loaded);
+        }
+        else {
+            setStatus(Attachment::Status::Failed);
+        }
     });
     connect(reply, &QNetworkReply::errorOccurred, [=](QNetworkReply::NetworkError error) {
         qCDebug(lcTransferManager) << QString("Network error (code %1): %2").arg(error).arg(reply->errorString());
@@ -106,6 +121,7 @@ void VSQTransfer::setStatus(const Attachment::Status status)
     if (status == m_status) {
         return;
     }
+    qCDebug(lcTransferManager) << "Transfer" << id() << "status:" << status;
     m_status = status;
     emit statusChanged(status);
 }

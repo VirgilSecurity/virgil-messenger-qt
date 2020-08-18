@@ -125,7 +125,7 @@ signals:
     void createMessage(const QString recipient, const QString message, const QString messageId, const OptionalAttachment attachment);
     void receiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachment attachment);
     void setMessageStatus(const QString messageId, const StMessage::Status status);
-    void setAttachmentStatus(const QString &messageId, const Attachment::Status status);
+    void setAttachmentStatus(const QString &messageId, const Enums::AttachmentStatus status);
     void setAttachmentRemoteUrl(const QString &messageId, const QUrl &url);
     void setAttachmentThumbnailRemoteUrl(const QString &messageId, const QUrl &url);
 
@@ -161,7 +161,7 @@ private:
     void onCreateMessage(const QString recipient, const QString message, const QString messageId, const OptionalAttachment attachment);
     void onReceiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachment attachment);
     void onSetMessageStatus(const QString messageId, const StMessage::Status status);
-    void onSetAttachmentStatus(const QString &messageId, const Attachment::Status status);
+    void onSetAttachmentStatus(const QString &messageId, const Enums::AttachmentStatus status);
     void onSetAttachmentRemoteUrl(const QString &messageId, const QUrl &url);
     void onSetAttachmentThumbnailRemoteUrl(const QString &messageId, const QUrl &url);
     void onAttachmentFileEncrypted(const QString &messageId, const QString &encryptedFileName);

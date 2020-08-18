@@ -99,22 +99,30 @@ Optional<QUrl> VSQUpload::remoteUrl()
         timer.setSingleShot(true);
         QEventLoop loop;
 
-        connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+        auto remoteUrlError = [&]() {
+            m_remoteUrlError = true;
+            loop.quit();
+        };
+
+        connect(&timer, &QTimer::timeout, &loop, remoteUrlError);
         connect(this, &VSQUpload::remoteUrlReceived, &loop, [&](const QUrl &url) {
             m_remoteUrl = url;
             loop.quit();
         });
-        connect(this, &VSQUpload::remoteUrlErrorOccured, &loop, &QEventLoop::quit);
-        connect(this, &VSQUpload::connectionChanged, &loop, &QEventLoop::quit);
+        connect(this, &VSQUpload::remoteUrlErrorOccured, &loop, remoteUrlError);
+        connect(this, &VSQUpload::connectionChanged, &loop, remoteUrlError);
 
         timer.start(1000);
         loop.exec();
+    }
+    if (m_remoteUrlError) {
+        qCDebug(lcTransferManager) << "Remote url error";
+        return NullOptional;
     }
     if (m_remoteUrl) {
         qCDebug(lcTransferManager) << "Remote url:" << *m_remoteUrl;
         return m_remoteUrl;
     }
-    m_remoteUrlError = true;
     return NullOptional;
 }
 

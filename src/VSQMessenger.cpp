@@ -139,7 +139,7 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSetti
     connect(&m_networkAnalyzer, &VSQNetworkAnalyzer::fireStateChanged, this, &VSQMessenger::onProcessNetworkState, Qt::QueuedConnection);
     connect(&m_networkAnalyzer, &VSQNetworkAnalyzer::fireHeartBeat, this, &VSQMessenger::checkState, Qt::QueuedConnection);
 
-    // Uploader
+    // Uploading
     connect(m_transferManager, &VSQCryptoTransferManager::fireReadyToUpload, this,  &VSQMessenger::onReadyToUpload, Qt::QueuedConnection);
 
     // Use Push notifications
@@ -808,47 +808,82 @@ StMessage VSQMessenger::parseJson(const QJsonDocument &json)
     return message;
 }
 
-Attachment::Status VSQMessenger::checkStartUploads(const QString &messageId, const QString &recipient, const Attachment &attachment)
+OptionalAttachment VSQMessenger::uploadAttachment(const QString &messageId, const QString &recipient, const Attachment &attachment)
 {
-    // Thumbnail
-    bool thumbnailNeeded = attachment.type == Attachment::Type::Picture && attachment.remoteThumbnailUrl.isEmpty();
-    if (thumbnailNeeded) {
+    Attachment uploadedAttachment = attachment;
+
+    bool thumbnailUploadNeeded = attachment.type == Attachment::Type::Picture && attachment.remoteThumbnailUrl.isEmpty();
+    if (thumbnailUploadNeeded) {
         const auto uploadId = messageId + QLatin1String("-thumb");
-        if (!m_transferManager->hasTransfer(uploadId)) {
-            if (auto upload = m_transferManager->startCryptoUpload(uploadId, attachment.thumbnailPath, recipient)) {
-                connect(upload, &VSQUpload::ended, [=](bool failed) {
-                    if (failed) {
-                        m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
-                    }
-                    else {
-                        m_sqlConversations->setAttachmentThumbnailRemoteUrl(messageId, *upload->remoteUrl());
-                    }
-                });
-            }
+        if (m_transferManager->hasTransfer(uploadId)) {
+            qCCritical(lcTransferManager) << "Thumbnail upload for" << messageId << "already exists";
+            return NullOptional;
+        }
+        else if (auto upload = m_transferManager->startCryptoUpload(uploadId, attachment.thumbnailPath, recipient)) {
+            m_sqlConversations->setAttachmentStatus(messageId, Attachment::Status::Loading);
+            QEventLoop loop;
+            connect(upload, &VSQUpload::ended, [&](bool failed) {
+                if (failed) {
+                    m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
+                    m_sqlConversations->setAttachmentStatus(messageId, Attachment::Status::Failed);
+                }
+                else {
+                    m_sqlConversations->setAttachmentThumbnailRemoteUrl(messageId, *upload->remoteUrl());
+                    uploadedAttachment.remoteThumbnailUrl = *upload->remoteUrl();
+                    thumbnailUploadNeeded = false;
+                }
+                loop.quit();
+            });
+            connect(upload, &VSQUpload::connectionChanged, &loop, &QEventLoop::quit);
+            qCDebug(lcTransferManager) << "Loop started";
+            loop.exec();
+            qCDebug(lcTransferManager) << "Loop exited";
+        }
+        else  {
+            m_sqlConversations->setAttachmentStatus(messageId, Attachment::Status::Failed);
+            return NullOptional;
         }
     }
 
-    // Attachment
-    if (!thumbnailNeeded && !attachment.remoteUrl.isEmpty()) {
-        return Attachment::Status::Loaded;
-    }
-    if (m_transferManager->hasTransfer(messageId)) {
-        return Attachment::Status::Loading;
-    }
-    auto upload = m_transferManager->startCryptoUpload(messageId, attachment.filePath, recipient);
-    if (!upload) {
-        return Attachment::Status::Failed;
-    }
-    connect(upload, &VSQUpload::ended, [=](bool failed) {
-        if (failed) {
-            m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
+    bool attachmentUploadNeeded = attachment.remoteUrl.isEmpty();
+    if (attachmentUploadNeeded) {
+        if (m_transferManager->hasTransfer(messageId)) {
+            qCCritical(lcTransferManager) << "Upload for" << messageId << "already exists";
+            return NullOptional;
+        }
+        else if (auto upload = m_transferManager->startCryptoUpload(messageId, attachment.filePath, recipient)) {
+            m_sqlConversations->setAttachmentStatus(messageId, Attachment::Status::Loading);
+            QEventLoop loop;
+            connect(upload, &VSQUpload::ended, [&](bool failed) {
+                if (failed) {
+                    m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
+                    m_sqlConversations->setAttachmentStatus(messageId, Attachment::Status::Failed);
+                }
+                else {
+                    m_sqlConversations->setAttachmentRemoteUrl(messageId, *upload->remoteUrl());
+                    uploadedAttachment.remoteUrl = *upload->remoteUrl();
+                    attachmentUploadNeeded = false;
+                }
+                loop.quit();
+            });
+            connect(upload, &VSQUpload::connectionChanged, &loop, &QEventLoop::quit);
+            qCDebug(lcTransferManager) << "Loop started";
+            loop.exec();
+            qCDebug(lcTransferManager) << "Loop exited";
         }
         else {
-            m_sqlConversations->setAttachmentRemoteUrl(messageId, *upload->remoteUrl());
-            m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_SENT);
+            m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
+            m_sqlConversations->setAttachmentStatus(messageId, Attachment::Status::Failed);
+            return NullOptional;
         }
-    });
-    return Attachment::Status::Loading;
+    }
+
+    if (thumbnailUploadNeeded || attachmentUploadNeeded) {
+        return NullOptional;
+    }
+    m_sqlConversations->setAttachmentStatus(messageId, Attachment::Status::Loaded);
+    uploadedAttachment.status = Attachment::Status::Loaded;
+    return uploadedAttachment;
 }
 
 /******************************************************************************/
@@ -992,14 +1027,11 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
     }
     m_sqlChatModel->updateLastMessage(to, message);
 
+    OptionalAttachment updloadedAttacment;
     if (attachment) {
-        const auto uploadsStatus = checkStartUploads(messageId, to, *attachment);
-        if (uploadsStatus != Attachment::Status::Loaded) {
-            if (uploadsStatus == Attachment::Status::Failed) {
-                m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
-                m_sqlConversations->setAttachmentStatus(messageId, Attachment::Status::Failed);
-            }
-            return MRES_OK;
+        updloadedAttacment = uploadAttachment(messageId, to, *attachment);
+        if (!updloadedAttacment) {
+            return MRES_OK; // don't send message
         }
     }
 
@@ -1010,12 +1042,12 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
 
     // Save message to DB
     if(createNew) {
-        m_sqlConversations->createMessage(to, message, messageId, attachment);
+        m_sqlConversations->createMessage(to, message, messageId, updloadedAttacment);
     }
     m_sqlChatModel->updateLastMessage(to, message);
 
     // Create JSON-formatted message to be sent
-    const QString internalJson = createJson(message, attachment);
+    const QString internalJson = createJson(message, updloadedAttacment);
     qDebug() << "json for encryption:" << internalJson;
 
     // Encrypt message

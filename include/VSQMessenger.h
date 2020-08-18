@@ -291,7 +291,8 @@ private:
 
     StMessage parseJson(const QJsonDocument &json);
 
-    Attachment::Status checkStartUploads(const QString &messageId, const QString &recipient, const Attachment &attachment);
+    OptionalAttachment uploadAttachment(const QString &messageId, const QString &recipient, const Attachment &attachment);
+
 
     VSQMessenger::EnResult _sendMessageInternal(bool createNew, const QString &messageId, const QString &to, const QString &message,
                                                 const OptionalAttachment &attachment);

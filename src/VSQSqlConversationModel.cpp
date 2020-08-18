@@ -497,20 +497,20 @@ void VSQSqlConversationModel::onReceiveMessage(const QString messageId, const QS
 
 void VSQSqlConversationModel::onSetMessageStatus(const QString messageId, const StMessage::Status status)
 {
+    qDebug() << "SQL message status:" << messageId << "=>" << status;
     QString query = QString("UPDATE %1 SET status = %2 WHERE message_id = '%3'")
             .arg(_tableName()).arg(static_cast<int>(status)).arg(messageId);
     QSqlQuery().exec(query);
     select();
-    qDebug() << "SQL message status:" << messageId << "=>" << status;
 }
 
-void VSQSqlConversationModel::onSetAttachmentStatus(const QString &messageId, const Attachment::Status status)
+void VSQSqlConversationModel::onSetAttachmentStatus(const QString &messageId, const Enums::AttachmentStatus status)
 {
+    qDebug() << "SQL attachment status:" << messageId << "=>" << status;
     QString query = QString("UPDATE %1 SET attachment_status = %2 WHERE message_id = '%3'")
             .arg(_tableName()).arg(static_cast<int>(status)).arg(messageId);
     QSqlQuery().exec(query);
     select();
-    qDebug() << "SQL attachment status:" << messageId << "=>" << status;
 
     if (status == Attachment::Status::Loading) {
         m_transferMap[messageId] = TransferInfo();

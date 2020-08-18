@@ -199,6 +199,7 @@ VSQTransfer *VSQTransferManager::findTransfer(const QString &id, bool showWarnin
 
 void VSQTransferManager::removeTransfer(VSQTransfer *transfer, bool lock)
 {
+    qCDebug(lcTransferManager) << "Removing of transfer" << transfer->id();
     if (!lock) {
         m_transfers.removeOne(transfer);
     }
@@ -206,11 +207,12 @@ void VSQTransferManager::removeTransfer(VSQTransfer *transfer, bool lock)
         QMutexLocker locker(&m_transfersMutex);
         m_transfers.removeOne(transfer);
     }
-    transfer->deleteLater();
+    QTimer::singleShot(1000, transfer, &VSQTransfer::deleteLater); // HACK(fpohtmeh): remove transfer later
 }
 
 void VSQTransferManager::abortTransfer(VSQTransfer *transfer, bool lock)
 {
+    qCDebug(lcTransferManager) << "Aborting of transfer" << transfer->id();
     transfer->abort();
     if (!lock) {
         removeTransfer(transfer, false);
@@ -227,6 +229,8 @@ void VSQTransferManager::onStartTransfer(VSQTransfer *transfer)
             std::bind(&VSQTransferManager::progressChanged, this, transfer->id(), args::_1, args::_2));
     connect(transfer, &VSQTransfer::statusChanged, this,
             std::bind(&VSQTransferManager::statusChanged, this, transfer->id(), args::_1));
+    connect(transfer, &VSQTransfer::ended, this,
+            std::bind(&VSQTransferManager::removeTransfer, this, transfer, true));
     connect(this, &VSQTransferManager::connectionChanged, transfer, &VSQTransfer::connectionChanged);
     transfer->start();
 }

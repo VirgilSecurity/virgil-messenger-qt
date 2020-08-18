@@ -54,6 +54,7 @@ public:
 
     QString id() const;
     bool isRunning() const;
+    bool isFailed() const;
 
     virtual void start();
     virtual void abort();
@@ -76,6 +77,8 @@ private:
     QNetworkAccessManager *m_networkAccessManager;
     QString m_id;
     Attachment::Status m_status;
+    DataSize m_bytesReceived = 0;
+    DataSize m_bytesTotal = 0;
 };
 
 #endif // VSQ_TRANSFER_H
