@@ -848,8 +848,6 @@ VSQMessenger::onError(QXmppClient::Error err) {
     VS_LOG_DEBUG("onError");
     qDebug() << "onError : " << err << "   state:" << m_xmpp.state();
     emit fireError(tr("Connection error ..."));
-
-//    _reconnect();
 }
 
 /******************************************************************************/
@@ -859,7 +857,7 @@ Optional<StMessage> VSQMessenger::decryptMessage(const QString &sender, const QS
     size_t decryptedMessageSz = 0;
 
     qDebug() << "Sender            : " << sender;
-    qDebug() << "Encrypted message : " << message;
+    qDebug() << "Encrypted message : " << message.length() << " bytes";
 
     // Decrypt message
     // DECRYPTED_MESSAGE_SZ_MAX - 1  - This is required for a Zero-terminated string
