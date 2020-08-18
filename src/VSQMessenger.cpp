@@ -819,7 +819,9 @@ VSQMessenger::checkState() {
 #endif
         _reconnect();
     } else {
+#if 0
         qCDebug(lcNetwork) << "Connection is ok";
+#endif
     }
 }
 
