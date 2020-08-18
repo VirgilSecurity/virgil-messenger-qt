@@ -861,7 +861,9 @@ VSQMessenger::checkState() {
 #endif
         _reconnect();
     } else {
+#if 0
         qCDebug(lcNetwork) << "Connection is ok";
+#endif
     }
 }
 
@@ -890,8 +892,6 @@ VSQMessenger::onError(QXmppClient::Error err) {
     VS_LOG_DEBUG("onError");
     qDebug() << "onError : " << err << "   state:" << m_xmpp.state();
     emit fireError(tr("Connection error ..."));
-
-//    _reconnect();
 }
 
 /******************************************************************************/
@@ -901,7 +901,7 @@ Optional<StMessage> VSQMessenger::decryptMessage(const QString &sender, const QS
     size_t decryptedMessageSz = 0;
 
     qDebug() << "Sender            : " << sender;
-    qDebug() << "Encrypted message : " << message;
+    qDebug() << "Encrypted message : " << message.length() << " bytes";
 
     // Decrypt message
     // DECRYPTED_MESSAGE_SZ_MAX - 1  - This is required for a Zero-terminated string
@@ -1008,6 +1008,12 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
     uint8_t encryptedMessage[_encryptedMsgSzMax];
     size_t encryptedMessageSz = 0;
 
+    // Save message to DB
+    if(createNew) {
+        m_sqlConversations->createMessage(to, message, messageId, attachment);
+    }
+    m_sqlChatModel->updateLastMessage(to, message);
+
     // Create JSON-formatted message to be sent
     const QString internalJson = createJson(message, attachment);
     qDebug() << "json for encryption:" << internalJson;
@@ -1022,22 +1028,26 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
                      _encryptedMsgSzMax,
                      &encryptedMessageSz)) {
         VS_LOG_WARNING("Cannot encrypt message to be sent");
+
+        // Mark message as failed
+        m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
         return MRES_ERR_ENCRYPTION;
     }
 
     // Send encrypted message
     QString toJID = to + "@" + _xmppURL();
     QString fromJID = currentUser() + "@" + _xmppURL();
-    QString encryptedStr = QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage));
+    QString encryptedStr = QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage), encryptedMessageSz);
 
     QXmppMessage msg(fromJID, toJID, encryptedStr);
     msg.setReceiptRequested(true);
     msg.setId(messageId);
 
+    // Send message and update status
     if (m_xmpp.sendPacket(msg)) {
-        m_sqlConversations->setMessageStatus(msg.id(), StMessage::Status::MST_SENT);
+        m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_SENT);
     } else {
-        m_sqlConversations->setMessageStatus(msg.id(), StMessage::Status::MST_FAILED);
+        m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
     }
     return MRES_OK;
 }

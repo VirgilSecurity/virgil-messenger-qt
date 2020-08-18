@@ -131,7 +131,7 @@ bool VSQCryptoTransferManager::ecnryptFile(const QString &path, const QString &e
     if (!encFile.open(QFile::WriteOnly)) {
         return false;
     }
-    encFile.write(encBytes.data());
+    encFile.write(encBytes.data(), encBytesSize);
     encFile.close();
     qCDebug(lcTransferManager) << "File encrypted:" << encPath << "size:" << QFileInfo(encFile).size();
     return true;
