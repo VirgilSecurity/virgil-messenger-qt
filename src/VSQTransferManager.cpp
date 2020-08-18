@@ -101,7 +101,7 @@ VSQUpload *VSQTransferManager::startUpload(const QString &id, const QString &fil
     requestUploadUrl(upload);
 #else
     if (!requestUploadUrl(upload)) {
-        delete upload;
+        removeTransfer(upload, true);
         return nullptr;
     }
 #endif
