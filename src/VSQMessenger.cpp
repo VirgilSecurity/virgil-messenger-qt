@@ -967,7 +967,7 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
     // Send encrypted message
     QString toJID = to + "@" + _xmppURL();
     QString fromJID = currentUser() + "@" + _xmppURL();
-    QString encryptedStr = QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage));
+    QString encryptedStr = QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage), encryptedMessageSz);
 
     QXmppMessage msg(fromJID, toJID, encryptedStr);
     msg.setReceiptRequested(true);
