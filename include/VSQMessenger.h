@@ -303,4 +303,6 @@ private:
     void downloadAndProcess(StMessage message, const Function &func);
 };
 
+Q_DECLARE_METATYPE(QXmppClient::Error)
+
 #endif // VIRGIL_IOTKIT_QT_MESSENGER_H

@@ -101,6 +101,8 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSetti
         return QVariant(static_cast<int>(res));
     });
 
+    qRegisterMetaType<QXmppClient::Error>();
+
     // Connect to Database
     _connectToDatabase();
 
@@ -503,14 +505,16 @@ void VSQMessenger::onDownloadThumbnail(const StMessage message, const QString se
         attachment.thumbnailPath = m_attachmentBuilder.generateThumbnailFileName();
     }
     const auto id = message.messageId + QLatin1String("-thumb");
-    auto download = m_transferManager->startCryptoDownload(id, attachment.remoteThumbnailUrl, attachment.thumbnailPath, sender);
-    connect(download, &VSQDownload::ended, [=](bool failed) {
-        if (failed) {
-            qCDebug(lcMessenger) << "Thumnbail download was failed:" << message.messageId;
-        }
-        else {
-            m_sqlConversations->setAttachmentThumbnailPath(message.messageId, attachment.thumbnailPath);
-        }
+    auto future = QtConcurrent::run([=]() {
+        auto download = m_transferManager->startCryptoDownload(id, attachment.remoteThumbnailUrl, attachment.thumbnailPath, sender);
+        connect(download, &VSQDownload::ended, [=](bool failed) {
+            if (failed) {
+                qCDebug(lcMessenger) << "Thumnbail download was failed:" << message.messageId;
+            }
+            else {
+                m_sqlConversations->setAttachmentThumbnailPath(message.messageId, attachment.thumbnailPath);
+            }
+        });
     });
 }
 
@@ -1038,7 +1042,7 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
     }
 
     if (msg->attachment && msg->attachment->type == Attachment::Type::Picture) {
-        emit downloadThumbnail(msg, sender, QPrivateSignal());
+        emit downloadThumbnail(*msg, sender, QPrivateSignal());
     }
 
     // Inform system about new message
@@ -1116,27 +1120,30 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
     return MRES_OK;
 }
 
-void VSQMessenger::downloadAndProcess(StMessage msg, const Function &func)
+void VSQMessenger::downloadAndProcess(StMessage message, const Function &func)
 {
-    if (!msg.attachment) {
-        qCDebug(lcTransferManager) << "Message has no attachment:" << msg.messageId;
+    if (!message.attachment) {
+        qCDebug(lcTransferManager) << "Message has no attachment:" << message.messageId;
         return;
     }
-    auto &attachment = *msg.attachment;
-    auto &filePath = attachment.filePath;
-    if (QFile::exists(filePath)) {
-        func(msg);
-        return;
-    }
-    // Update attachment filePath
-    if (filePath.isEmpty()) {
-        filePath = VSQUtils::findUniqueFileName(m_settings->downloadsDir().filePath(attachment.displayName));
-    }
-    auto download = m_transferManager->startCryptoDownload(msg.messageId, attachment.remoteUrl, filePath, msg.recipient);
-    connect(m_transferManager, &VSQCryptoTransferManager::fileDownloadedAndDecrypted, download, [=](const QString &id, const QString &) {
-        if (id == msg.messageId) {
+    auto future = QtConcurrent::run([=]() {
+        auto msg = message;
+        auto &attachment = *msg.attachment;
+        auto &filePath = attachment.filePath;
+        if (QFile::exists(filePath)) {
             func(msg);
+            return;
         }
+        // Update attachment filePath
+        if (filePath.isEmpty()) {
+            filePath = VSQUtils::findUniqueFileName(m_settings->downloadsDir().filePath(attachment.displayName));
+        }
+        auto download = m_transferManager->startCryptoDownload(msg.messageId, attachment.remoteUrl, filePath, msg.recipient);
+        connect(m_transferManager, &VSQCryptoTransferManager::fileDownloadedAndDecrypted, download, [=](const QString &id, const QString &) {
+            if (id == msg.messageId) {
+                func(message);
+            }
+        });
     });
 }
 
