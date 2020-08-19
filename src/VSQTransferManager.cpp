@@ -85,8 +85,21 @@ VSQTransferManager::~VSQTransferManager()
     }
 }
 
-bool
-VSQTransferManager::isReady() {
+bool VSQTransferManager::isReady() const
+{
+    if (m_xmppManager->serviceFound()) {
+        return true;
+    }
+
+    qCDebug(lcTransferManager) << "Upload service was not found, start waiting for it.";
+    QTimer timer;
+    timer.setSingleShot(true);
+    QEventLoop loop;
+    connect(this, &VSQTransferManager::fireReadyToUpload, &loop, &QEventLoop::quit);
+    connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    timer.start(10000);
+    loop.exec();
+    qCDebug(lcTransferManager) << "Upload service found:" << m_xmppManager->serviceFound();
     return m_xmppManager->serviceFound();
 }
 
@@ -129,21 +142,7 @@ bool VSQTransferManager::requestUploadUrl(VSQUpload *upload)
         emit statusChanged(upload->id(), Attachment::Status::Failed);
     }
     else {
-#if defined (Q_OS_ANDROID)
-        // FIXME(fpohtmeh): implement retry
-        if (!m_xmppManager->serviceFound()) {
-            qCDebug(lcTransferManager) << "Upload service was not found, start waiting for it.";
-            QTimer timer;
-            timer.setSingleShot(true);
-            QEventLoop loop;
-            connect(this, &VSQTransferManager::fireReadyToUpload, &loop, &QEventLoop::quit);
-            connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
-            timer.start(10000);
-            loop.exec();
-        }
-        qCDebug(lcTransferManager) << "Wait for upload service is finished. Service is present: " << m_xmppManager->serviceFound();
-#endif // Q_OS_ANDROID
-        if (m_xmppManager->serviceFound()) {
+        if (isReady()) {
             auto slotId = m_xmppManager->requestUploadSlot(QFileInfo(filePath));
             upload->setSlotId(slotId);
             return true;

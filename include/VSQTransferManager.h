@@ -67,18 +67,17 @@ public:
 
     VSQUpload *startUpload(const QString &id, const QString &filePath);
     VSQDownload *startDownload(const QString &id, const QUrl &remoteUrl, const QString &filePath);
-    bool isReady();
 
+    bool isReady() const;
     bool hasTransfer(const QString &id) const;
 
 signals:
     void progressChanged(const QString &id, const DataSize bytesReceived, const DataSize bytesTotal);
     void statusChanged(const QString &id, const Enums::AttachmentStatus status);
     void connectionChanged();
+    void fireReadyToUpload();
 
     void startTransfer(VSQTransfer *transfer, QPrivateSignal);
-
-    void fireReadyToUpload();
 
 private:
     bool requestUploadUrl(VSQUpload *upload);

@@ -810,6 +810,11 @@ StMessage VSQMessenger::parseJson(const QJsonDocument &json)
 
 OptionalAttachment VSQMessenger::uploadAttachment(const QString &messageId, const QString &recipient, const Attachment &attachment)
 {
+    if (!m_transferManager->isReady()) {
+        setFailedAttachmentStatus(messageId);
+        return NullOptional;
+    }
+
     Attachment uploadedAttachment = attachment;
 
     bool thumbnailUploadNeeded = attachment.type == Attachment::Type::Picture && attachment.remoteThumbnailUrl.isEmpty();
@@ -824,8 +829,7 @@ OptionalAttachment VSQMessenger::uploadAttachment(const QString &messageId, cons
             QEventLoop loop;
             connect(upload, &VSQUpload::ended, [&](bool failed) {
                 if (failed) {
-                    m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
-                    m_sqlConversations->setAttachmentStatus(messageId, Attachment::Status::Failed);
+                    setFailedAttachmentStatus(messageId);
                 }
                 else {
                     m_sqlConversations->setAttachmentThumbnailRemoteUrl(messageId, *upload->remoteUrl());
@@ -840,7 +844,7 @@ OptionalAttachment VSQMessenger::uploadAttachment(const QString &messageId, cons
             qCDebug(lcTransferManager) << "Loop exited";
         }
         else  {
-            m_sqlConversations->setAttachmentStatus(messageId, Attachment::Status::Failed);
+            setFailedAttachmentStatus(messageId);
             return NullOptional;
         }
     }
@@ -856,8 +860,7 @@ OptionalAttachment VSQMessenger::uploadAttachment(const QString &messageId, cons
             QEventLoop loop;
             connect(upload, &VSQUpload::ended, [&](bool failed) {
                 if (failed) {
-                    m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
-                    m_sqlConversations->setAttachmentStatus(messageId, Attachment::Status::Failed);
+                    setFailedAttachmentStatus(messageId);
                 }
                 else {
                     m_sqlConversations->setAttachmentRemoteUrl(messageId, *upload->remoteUrl());
@@ -872,8 +875,7 @@ OptionalAttachment VSQMessenger::uploadAttachment(const QString &messageId, cons
             qCDebug(lcTransferManager) << "Loop exited";
         }
         else {
-            m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
-            m_sqlConversations->setAttachmentStatus(messageId, Attachment::Status::Failed);
+            setFailedAttachmentStatus(messageId);
             return NullOptional;
         }
     }
@@ -884,6 +886,12 @@ OptionalAttachment VSQMessenger::uploadAttachment(const QString &messageId, cons
     m_sqlConversations->setAttachmentStatus(messageId, Attachment::Status::Loaded);
     uploadedAttachment.status = Attachment::Status::Loaded;
     return uploadedAttachment;
+}
+
+void VSQMessenger::setFailedAttachmentStatus(const QString &messageId)
+{
+    m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
+    m_sqlConversations->setAttachmentStatus(messageId, Attachment::Status::Failed);
 }
 
 /******************************************************************************/
