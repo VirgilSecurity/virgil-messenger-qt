@@ -1135,9 +1135,9 @@ void VSQMessenger::downloadAndProcess(StMessage msg, const Function &func)
     });
 }
 
-/******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::createSendMessage(const QString &messageId, const QString &to, const QString &message) {
+VSQMessenger::createSendMessage(const QString &messageId, const QString &to, const QString &message)
+{
     return QtConcurrent::run([=]() -> EnResult {
         return _sendMessageInternal(true, messageId, to, message, NullOptional);
     });
