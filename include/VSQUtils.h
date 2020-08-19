@@ -46,6 +46,8 @@ namespace VSQUtils
     QString escapedUserName(const QString &userName);
 
     QString findUniqueFileName(const QString &fileName);
+
+    QFileInfo urlToFileInfo(const QUrl &url);
 }
 
 #endif // VSQ_UTILS_H

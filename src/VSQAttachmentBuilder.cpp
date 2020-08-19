@@ -71,11 +71,7 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
         errorText = tr("Invalid attachment URL");
         return NullOptional;
     }
-#if defined (Q_OS_ANDROID)
-     QFileInfo localInfo(url.toString());
-#else
-    QFileInfo localInfo(url.toLocalFile());
-#endif
+    auto localInfo = VSQUtils::urlToFileInfo(url);
     if (!localInfo.exists()) {
         errorText = tr("File doesn't exist");
         return NullOptional;

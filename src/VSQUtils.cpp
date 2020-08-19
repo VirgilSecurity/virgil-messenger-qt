@@ -74,3 +74,15 @@ QString VSQUtils::findUniqueFileName(const QString &fileName)
         }
     }
 }
+
+QFileInfo VSQUtils::urlToFileInfo(const QUrl &url)
+{
+#if defined (Q_OS_ANDROID)
+    qDebug() << "Android encoded file url:" << url.toString();
+    auto res = QUrl::fromPercentEncoding(url.toString().toUtf8());
+    qDebug() << "Android decoded file path:" << res;
+    return QFileInfo(res);
+#else
+    return QFileInfo(url.toLocalFile());
+#endif
+}
