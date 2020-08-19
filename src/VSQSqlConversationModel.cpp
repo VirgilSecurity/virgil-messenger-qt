@@ -113,6 +113,7 @@ VSQSqlConversationModel::VSQSqlConversationModel(QObject *parent) :
     connect(this, &VSQSqlConversationModel::setAttachmentThumbnailPath, this, &VSQSqlConversationModel::onSetAttachmentThumbnailPath);
     connect(this, &VSQSqlConversationModel::setAttachmentRemoteUrl, this, &VSQSqlConversationModel::onSetAttachmentRemoteUrl);
     connect(this, &VSQSqlConversationModel::setAttachmentThumbnailRemoteUrl, this, &VSQSqlConversationModel::onSetAttachmentThumbnailRemoteUrl);
+    connect(this, &VSQSqlConversationModel::setAttachmentBytesTotal, this, &VSQSqlConversationModel::onSetAttachmentBytesTotal);
 }
 
 /******************************************************************************/
@@ -197,7 +198,7 @@ VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
 
     if (role == AttachmentStatusRole) {
         if (attachmentId.isEmpty()) {
-            return QVariant();
+            return 0;
         }
         const auto messageId = currRecord.value(MessageIdRole - Qt::UserRole).toString();
         const auto it = m_transferMap.find(messageId);
@@ -361,14 +362,6 @@ QList<StMessage> VSQSqlConversationModel::getMessages(const QString &user, const
         messages.append(getMessage(model.record(i)));
     }
     return messages;
-}
-
-void VSQSqlConversationModel::connectTransferManager(VSQCryptoTransferManager *manager)
-{
-    connect(manager, &VSQCryptoTransferManager::statusChanged, this, &VSQSqlConversationModel::setAttachmentStatus);
-    connect(manager, &VSQCryptoTransferManager::progressChanged, this, &VSQSqlConversationModel::setAttachmentProgress);
-    connect(manager, &VSQCryptoTransferManager::fileDownloadedAndDecrypted, this, &VSQSqlConversationModel::setAttachmentFilePath);
-    connect(manager, &VSQCryptoTransferManager::fileEncrypted, this, &VSQSqlConversationModel::onAttachmentFileEncrypted);
 }
 
 Optional<StMessage> VSQSqlConversationModel::getMessage(const QString &messageId) const
@@ -559,10 +552,8 @@ void VSQSqlConversationModel::onSetAttachmentThumbnailRemoteUrl(const QString me
     qDebug() << "SQL attachment remote thumbnail url:" << messageId << "=>" << url.toString();
 }
 
-void VSQSqlConversationModel::onAttachmentFileEncrypted(const QString messageId, const QString encryptedFileName)
+void VSQSqlConversationModel::onSetAttachmentBytesTotal(const QString messageId, const DataSize size)
 {
-    auto size = QFileInfo(encryptedFileName).size();
-
     QString query = QString("UPDATE %1 SET attachment_bytes_total = %2 WHERE message_id = '%3'")
             .arg(_tableName()).arg(size).arg(messageId);
     QSqlQuery().exec(query);

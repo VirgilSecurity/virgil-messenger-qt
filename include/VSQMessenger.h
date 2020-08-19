@@ -206,6 +206,9 @@ private slots:
     void onReadyToUpload();
     void onAddContactToDB(QString contact);
     void onDownloadThumbnail(const StMessage message, const QString sender);
+    void onAttachmentStatusChanged(const QString &uploadId, const Enums::AttachmentStatus status);
+    void onAttachmentProgressChanged(const QString &uploadId, const DataSize bytesReceived, const DataSize bytesTotal);
+    void onAttachmentDecrypted(const QString &uploadId, const QString &filePath);
 
     Q_INVOKABLE void onSubscribePushNotifications(bool enable);
 

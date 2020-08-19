@@ -103,7 +103,6 @@ Control {
                         width: d.isPicture ? 3 * attachmentThumbnailWidth : sourceSize.width
                         height: d.isPicture ? 3 * attachmentThumbnailHeight : sourceSize.height
                         visible: d.isPicture ? true : attachmentDownloaded && !progressBar.visible
-                        fillMode: Image.PreserveAspectFit
                         source: {
                             if (d.isPicture) {
                                 return chatMessage.attachmentDownloaded  ? attachmentFilePath : attachmentThumbnailPath;
@@ -141,7 +140,7 @@ Control {
                     }
 
                     TapHandler {
-                        onTapped: Messenger.openAttachment(messageId)
+                        onTapped: (attachmentDownloaded ? Messenger.openAttachment(messageId) : Messenger.downloadAttachment)(messageId)
                     }
                 }
 

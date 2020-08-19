@@ -48,6 +48,8 @@ namespace VSQUtils
     QString findUniqueFileName(const QString &fileName);
 
     QFileInfo urlToFileInfo(const QUrl &url);
+
+    bool forceCreateDir(const QString &absolutePath);
 }
 
 #endif // VSQ_UTILS_H

@@ -67,8 +67,8 @@ VSQUpload *VSQCryptoTransferManager::startCryptoUpload(const QString id, const Q
         if (failed) {
             qCWarning(lcTransferManager) << "Crypt upload was failed";
         }
-        qCDebug(lcTransferManager) << "Removing of:" << encFilePath;
         // TODO(fpohtmeh): remove
+        //qCDebug(lcTransferManager) << "Removing of:" << encFilePath;
         //QFile::remove(encFilePath);
     });
     return upload;
@@ -83,10 +83,10 @@ VSQDownload *VSQCryptoTransferManager::startCryptoDownload(const QString id, con
             qCWarning(lcTransferManager) << "Crypt download was failed";
         }
         else if (decryptFile(decFilePath, filePath, recipient)) {
-            emit fileDownloadedAndDecrypted(id, filePath);
+            emit fileDecrypted(id, filePath);
         }
-        qCDebug(lcTransferManager) << "Removing of:" << decFilePath;
         // TODO(fpohtmeh): remove
+        //qCDebug(lcTransferManager) << "Removing of:" << decFilePath;
         //QFile::remove(decFilePath);
     });
     return download;

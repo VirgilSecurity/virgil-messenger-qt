@@ -40,7 +40,6 @@
 
 #include <virgil/iot/messenger/messenger.h>
 
-#include "VSQCryptoTransferManager.h"
 #include "VSQSettings.h"
 #include "VSQUpload.h"
 #include "VSQUtils.h"
@@ -49,10 +48,9 @@ using namespace VirgilIoTKit;
 
 Q_LOGGING_CATEGORY(lcAttachment, "attachment");
 
-VSQAttachmentBuilder::VSQAttachmentBuilder(VSQCryptoTransferManager *transferManager, QObject *parent)
+VSQAttachmentBuilder::VSQAttachmentBuilder(VSQSettings *settings, QObject *parent)
     : QObject(parent)
-    , m_transferManager(transferManager)
-    , m_settings(transferManager->settings())
+    , m_settings(settings)
 {}
 
 bool VSQAttachmentBuilder::isValidUrl(const QUrl &url) const

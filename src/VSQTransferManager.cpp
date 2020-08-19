@@ -108,6 +108,11 @@ bool VSQTransferManager::hasTransfer(const QString &id) const
     return findTransfer(id, false) != nullptr;
 }
 
+VSQSettings *VSQTransferManager::settings()
+{
+    return m_settings;
+}
+
 VSQUpload *VSQTransferManager::startUpload(const QString &id, const QString &filePath)
 {
     auto upload = new VSQUpload(m_networkAccessManager, id, filePath, nullptr);
@@ -139,30 +144,18 @@ bool VSQTransferManager::requestUploadUrl(VSQUpload *upload)
     const auto filePath = upload->filePath();
     if (!QFile::exists(filePath)) {
         qCCritical(lcTransferManager) << "Uploaded file doesn't exist:" << filePath;
-        emit statusChanged(upload->id(), Attachment::Status::Failed);
+        upload->setStatus(Attachment::Status::Failed);
     }
-    else {
-        if (isReady()) {
-            auto slotId = m_xmppManager->requestUploadSlot(QFileInfo(filePath));
-            upload->setSlotId(slotId);
-            return true;
-        } else {
-            qCDebug(lcTransferManager) << "Upload service was not found";
-            emit statusChanged(upload->id(), Attachment::Status::Failed);
-        }
+    else if (isReady()) {
+        auto slotId = m_xmppManager->requestUploadSlot(QFileInfo(filePath));
+        upload->setSlotId(slotId);
+        return true;
+    } else {
+        qCDebug(lcTransferManager) << "Upload service was not found";
+        upload->setStatus(Attachment::Status::Failed);
     }
 
     return false;
-}
-
-QXmppClient *VSQTransferManager::client()
-{
-    return m_client;
-}
-
-VSQSettings *VSQTransferManager::settings()
-{
-    return m_settings;
 }
 
 VSQUpload *VSQTransferManager::findUploadBySlotId(const QString &slotId) const

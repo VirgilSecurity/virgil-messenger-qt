@@ -53,6 +53,8 @@ public:
     QString slotId() const;
     void setSlotId(const QString &id);
 
+    DataSize fileSize() const;
+
 signals:
     void remoteUrlReceived(const QUrl &url);
     void remoteUrlErrorOccured();

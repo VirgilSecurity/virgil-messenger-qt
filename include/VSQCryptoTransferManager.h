@@ -50,7 +50,7 @@ public:
 
 signals:
     void fileEncrypted(const QString &id, const QString &encryptedFileName);
-    void fileDownloadedAndDecrypted(const QString &id, const QString &filePath);
+    void fileDecrypted(const QString &id, const QString &filePath);
 
 private:
     QString getCacheNewFilePath();

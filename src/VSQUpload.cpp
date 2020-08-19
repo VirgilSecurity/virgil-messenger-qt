@@ -78,7 +78,7 @@ void VSQUpload::start()
     if (mimeType.isValid()) {
         request.setHeader(QNetworkRequest::ContentTypeHeader, mimeType.name());
     }
-    request.setHeader(QNetworkRequest::ContentLengthHeader, QFileInfo(m_filePath).size());
+    request.setHeader(QNetworkRequest::ContentLengthHeader, fileSize());
     // Create & connect reply
     auto reply = networkAccessManager()->put(request, file);
     connectReply(reply);
@@ -136,4 +136,9 @@ QString VSQUpload::slotId() const
 void VSQUpload::setSlotId(const QString &id)
 {
     m_slotId = id;
+}
+
+DataSize VSQUpload::fileSize() const
+{
+    return QFileInfo(filePath()).size();
 }

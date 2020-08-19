@@ -59,6 +59,8 @@ public:
     virtual void start();
     virtual void abort();
 
+    void setStatus(const Attachment::Status status);
+
 signals:
     void progressChanged(const DataSize bytesReceived, const DataSize bytesTotal);
     void statusChanged(const Enums::AttachmentStatus status);
@@ -67,7 +69,6 @@ signals:
 
 protected:
     void connectReply(QNetworkReply *reply);
-    void setStatus(const Attachment::Status status);
 
     QNetworkAccessManager *networkAccessManager();
     QFile *createFileHandle(const QString &filePath);

@@ -87,3 +87,21 @@ QFileInfo VSQUtils::urlToFileInfo(const QUrl &url)
     return QFileInfo(url.toLocalFile());
 #endif
 }
+
+bool VSQUtils::forceCreateDir(const QString &absolutePath)
+{
+    const QFileInfo info(absolutePath);
+    if (info.exists()) {
+        if (info.isDir()) {
+            return true;
+        }
+        else {
+            QFile::remove(absolutePath);
+        }
+    }
+    if (QDir().mkpath(absolutePath)) {
+        return true;
+    }
+    qFatal("Unable to create directory: %s", qPrintable(absolutePath));
+    return false;
+}

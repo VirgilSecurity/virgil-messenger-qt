@@ -112,8 +112,6 @@ public:
 
     QList<StMessage> getMessages(const QString &user, const StMessage::Status status);
 
-    void connectTransferManager(VSQCryptoTransferManager *manager);
-
     Optional<StMessage> getMessage(const QString &messageId) const;
     StMessage getMessage(const QSqlRecord &record) const;
 
@@ -127,6 +125,7 @@ signals:
     void setAttachmentStatus(const QString messageId, const Enums::AttachmentStatus status);
     void setAttachmentRemoteUrl(const QString messageId, const QUrl url);
     void setAttachmentThumbnailRemoteUrl(const QString messageId, const QUrl url);
+    void setAttachmentBytesTotal(const QString messageId, const DataSize size);
 
     void recipientChanged();
 
@@ -164,7 +163,7 @@ private:
     void onSetAttachmentThumbnailPath(const QString messageId, const QString filePath);
     void onSetAttachmentRemoteUrl(const QString messageId, const QUrl url);
     void onSetAttachmentThumbnailRemoteUrl(const QString messageId, const QUrl url);
-    void onAttachmentFileEncrypted(const QString messageId, const QString encryptedFileName);
+    void onSetAttachmentBytesTotal(const QString messageId, const DataSize size);
 };
 
 #endif // VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H
