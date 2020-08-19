@@ -63,7 +63,7 @@ void VSQDownload::start()
     VSQTransfer::start();
 
     // Check file for writing
-    auto file = fileHandle(m_filePath);
+    auto file = createFileHandle(m_filePath);
     if (!file->open(QFile::WriteOnly)) {
         setStatus(Attachment::Status::Failed);
         return;
@@ -76,7 +76,10 @@ void VSQDownload::start()
     connect(reply, &QNetworkReply::downloadProgress, [=](qint64 bytesReceived, qint64 bytesTotal) {
         emit progressChanged(bytesReceived, bytesTotal);
     });
-    connect(reply, &QNetworkReply::readyRead, this, [=]() {
-        file->write(reply->readAll());
+    connect(reply, &QNetworkReply::readyRead, [=]() {
+        const auto bytes = reply->readAll();
+        qCDebug(lcTransferManager()) << "Wrote bytes:" << bytes.size();
+        file->write(bytes);
+        file->flush();
     });
 }

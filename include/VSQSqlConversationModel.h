@@ -60,9 +60,9 @@ class VSQSqlConversationModel : public QSqlTableModel
         AttachmentTypeRole,
         AttachmentFilePathRole,
         AttachmentRemoteUrlRole,
-        attachmentThumbnailPathRole,
-        attachmentThumbnailWidthRole,
-        attachmentThumbnailHeightRole,
+        AttachmentThumbnailPathRole,
+        AttachmentThumbnailWidthRole,
+        AttachmentThumbnailHeightRole,
         AttachmentRemoteThumbnailUrlRole,
         AttachmentStatusRole,
 
@@ -117,19 +117,16 @@ public:
     Optional<StMessage> getMessage(const QString &messageId) const;
     StMessage getMessage(const QSqlRecord &record) const;
 
-    void setAttachmentFilePath(const QString &messageId, const QString &filePath);
-    void setAttachmentProgress(const QString &messageId, const DataSize bytesReceived, const DataSize bytesTotal);
-    void setAttachmentThumbnailPath(const QString &messageId, const QString &filePath);
-
 signals:
     void createMessage(const QString recipient, const QString message, const QString messageId, const OptionalAttachment attachment);
     void receiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachment attachment);
     void setMessageStatus(const QString messageId, const StMessage::Status status);
-    void setAttachmentStatus(const QString &messageId, const Enums::AttachmentStatus status);
-    void setAttachmentRemoteUrl(const QString &messageId, const QUrl &url);
-    void setAttachmentThumbnailRemoteUrl(const QString &messageId, const QUrl &url);
-
-    void requestThumbnail(const QString &messageId);
+    void setAttachmentFilePath(const QString &messageId, const QString &filePath);
+    void setAttachmentProgress(const QString &messageId, const DataSize bytesReceived, const DataSize bytesTotal);
+    void setAttachmentThumbnailPath(const QString messageId, const QString filePath);
+    void setAttachmentStatus(const QString messageId, const Enums::AttachmentStatus status);
+    void setAttachmentRemoteUrl(const QString messageId, const QUrl url);
+    void setAttachmentThumbnailRemoteUrl(const QString messageId, const QUrl url);
 
     void recipientChanged();
 
@@ -161,10 +158,13 @@ private:
     void onCreateMessage(const QString recipient, const QString message, const QString messageId, const OptionalAttachment attachment);
     void onReceiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachment attachment);
     void onSetMessageStatus(const QString messageId, const StMessage::Status status);
-    void onSetAttachmentStatus(const QString &messageId, const Enums::AttachmentStatus status);
-    void onSetAttachmentRemoteUrl(const QString &messageId, const QUrl &url);
-    void onSetAttachmentThumbnailRemoteUrl(const QString &messageId, const QUrl &url);
-    void onAttachmentFileEncrypted(const QString &messageId, const QString &encryptedFileName);
+    void onSetAttachmentStatus(const QString messageId, const Enums::AttachmentStatus status);
+    void onSetAttachmentFilePath(const QString messageId, const QString filePath);
+    void onSetAttachmentProgress(const QString messageId, const DataSize bytesReceived, const DataSize bytesTotal);
+    void onSetAttachmentThumbnailPath(const QString messageId, const QString filePath);
+    void onSetAttachmentRemoteUrl(const QString messageId, const QUrl url);
+    void onSetAttachmentThumbnailRemoteUrl(const QString messageId, const QUrl url);
+    void onAttachmentFileEncrypted(const QString messageId, const QString encryptedFileName);
 };
 
 #endif // VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H

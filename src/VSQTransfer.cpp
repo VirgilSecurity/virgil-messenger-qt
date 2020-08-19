@@ -48,11 +48,13 @@ VSQTransfer::VSQTransfer(QNetworkAccessManager *networkAccessManager, const QStr
         m_bytesTotal = bytesTotal;
         if (m_bytesTotal > 0 && m_bytesReceived >= m_bytesTotal) {
             qCDebug(lcTransferManager) << "All bytes were processed, mark transfer as completed";
+            closeFileHandle();
             setStatus(Attachment::Status::Loaded);
         }
     });
     connect(this, &VSQTransfer::statusChanged, [=](const Enums::AttachmentStatus status){
         if (status == Attachment::Status::Loaded || status == Attachment::Status::Failed) {
+            closeFileHandle();
             emit ended(status == Attachment::Status::Failed);
         }
     });
@@ -60,6 +62,7 @@ VSQTransfer::VSQTransfer(QNetworkAccessManager *networkAccessManager, const QStr
 
 VSQTransfer::~VSQTransfer()
 {
+    closeFileHandle();
 #ifdef VS_DEVMODE
     qCDebug(lcTransferManager) << "Deletion of transfer:" << id();
 #endif
@@ -134,10 +137,24 @@ QNetworkAccessManager *VSQTransfer::networkAccessManager()
     return m_networkAccessManager;
 }
 
-QFile *VSQTransfer::fileHandle(const QString &filePath)
+QFile *VSQTransfer::createFileHandle(const QString &filePath)
 {
-    auto file = new QFile(filePath);
-    connect(this, &VSQTransfer::ended, file, &QFile::close);
-    connect(this, &VSQTransfer::ended, file, &QFile::deleteLater);
-    return file;
+    if (m_fileHandle) {
+        qCWarning(lcTransferManager) << "File handle already exists for:" << filePath;
+        return nullptr;
+    }
+    m_fileHandle = new QFile(filePath);
+    return m_fileHandle;
+}
+
+void VSQTransfer::closeFileHandle()
+{
+    if (!m_fileHandle) {
+        return;
+    }
+    const auto fileName = m_fileHandle->fileName();
+    m_fileHandle->close();
+    m_fileHandle->deleteLater();
+    m_fileHandle = nullptr;
+    qCDebug(lcTransferManager) << "Closed file handle:" << fileName << "size:" << QFileInfo(fileName).size();
 }

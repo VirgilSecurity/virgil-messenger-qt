@@ -63,12 +63,13 @@ VSQUpload *VSQCryptoTransferManager::startCryptoUpload(const QString id, const Q
         QFile::remove(encFilePath);
         return nullptr;
     }
-    connect(upload, &VSQUpload::ended, this, [=](bool failed) {
+    connect(upload, &VSQUpload::ended, [=](bool failed) {
         if (failed) {
             qCWarning(lcTransferManager) << "Crypt upload was failed";
         }
         qCDebug(lcTransferManager) << "Removing of:" << encFilePath;
-        QFile::remove(encFilePath);
+        // TODO(fpohtmeh): remove
+        //QFile::remove(encFilePath);
     });
     return upload;
 }
@@ -81,11 +82,12 @@ VSQDownload *VSQCryptoTransferManager::startCryptoDownload(const QString id, con
         if (failed) {
             qCWarning(lcTransferManager) << "Crypt download was failed";
         }
-        if (!failed && decryptFile(decFilePath, filePath, recipient)) {
+        else if (decryptFile(decFilePath, filePath, recipient)) {
             emit fileDownloadedAndDecrypted(id, filePath);
-            qCDebug(lcTransferManager) << "Removing of:" << decFilePath;
-            QFile::remove(decFilePath);
         }
+        qCDebug(lcTransferManager) << "Removing of:" << decFilePath;
+        // TODO(fpohtmeh): remove
+        //QFile::remove(decFilePath);
     });
     return download;
 }
@@ -104,6 +106,10 @@ bool VSQCryptoTransferManager::ecnryptFile(const QString &path, const QString &e
 #endif
     // Read
     QFile file(path);
+    if (!file.exists()) {
+        qCCritical(lcTransferManager) << "Source file doesn't exist";
+        return false;
+    }
     if (!file.open(QFile::ReadOnly)) {
         qCCritical(lcTransferManager) << "Source file can't be opened";
         return false;
@@ -117,7 +123,7 @@ bool VSQCryptoTransferManager::ecnryptFile(const QString &path, const QString &e
     file.close();
 
     // Encrypt
-    std::vector<char> encBytes(5 * bytes.size());
+    std::vector<char> encBytes(5 * bytes.size() + 5000);
     size_t encBytesSize = 0;
     const auto code = vs_messenger_virgil_encrypt_msg(
                 recipient.toStdString().c_str(),
@@ -152,6 +158,10 @@ bool VSQCryptoTransferManager::decryptFile(const QString &encPath, const QString
 
     // Read
     QFile encFile(encPath);
+    if (!encFile.exists()) {
+        qCCritical(lcTransferManager) << "Source file doesn't exist";
+        return false;
+    }
     if (!encFile.open(QFile::ReadOnly)) {
         qCCritical(lcTransferManager) << "Source file can't be opened";
         return false;
@@ -165,7 +175,7 @@ bool VSQCryptoTransferManager::decryptFile(const QString &encPath, const QString
     }
 
     // Decrypt
-    std::vector<char> bytes(5 * encBytes.size());
+    std::vector<char> bytes(encBytes.size());
     size_t bytesSize = 0;
     const auto code = vs_messenger_virgil_decrypt_msg(
                 recipient.toStdString().c_str(),

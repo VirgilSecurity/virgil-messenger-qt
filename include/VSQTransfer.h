@@ -70,15 +70,17 @@ protected:
     void setStatus(const Attachment::Status status);
 
     QNetworkAccessManager *networkAccessManager();
-    QFile *fileHandle(const QString &filePath);
+    QFile *createFileHandle(const QString &filePath);
 
 private:
+    void closeFileHandle();
 
     QNetworkAccessManager *m_networkAccessManager;
     QString m_id;
     Attachment::Status m_status;
     DataSize m_bytesReceived = 0;
     DataSize m_bytesTotal = 0;
+    QFile *m_fileHandle = nullptr;
 };
 
 #endif // VSQ_TRANSFER_H

@@ -1022,10 +1022,11 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
     if (!msg)
         return;
 
+    msg->messageId = message.id();
     if (sender == currentUser()) {
         QString recipient = message.to().split("@").first();
-        m_sqlConversations->createMessage(recipient, msg->message, message.id(), msg->attachment);
-        m_sqlConversations->setMessageStatus(message.id(), StMessage::Status::MST_SENT);
+        m_sqlConversations->createMessage(recipient, msg->message, msg->messageId, msg->attachment);
+        m_sqlConversations->setMessageStatus(msg->messageId, StMessage::Status::MST_SENT);
         // ensure private chat with recipient exists
         m_sqlChatModel->createPrivateChat(recipient);
         emit fireNewMessage(sender, msg->message);
@@ -1035,7 +1036,7 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
     // Add sender to contact
     m_sqlChatModel->createPrivateChat(sender);
     // Save message to DB
-    m_sqlConversations->receiveMessage(message.id(), sender, msg->message, msg->attachment);
+    m_sqlConversations->receiveMessage(msg->messageId, sender, msg->message, msg->attachment);
     m_sqlChatModel->updateLastMessage(sender, msg->message);
     if (sender != m_recipient) {
         m_sqlChatModel->updateUnreadMessageCount(sender);
@@ -1068,7 +1069,7 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
             qCDebug(lcMessenger) << "Attachment was NOT uploaded";
             return MRES_OK; // don't send message
         }
-        qCDebug(lcMessenger) << "Attachment was uploaded. Continue to send message";
+        qCDebug(lcMessenger) << "Everything was uploaded. Continue to send message";
     }
 
     QMutexLocker _guard(&m_messageGuard);

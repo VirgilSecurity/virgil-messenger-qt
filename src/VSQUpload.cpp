@@ -61,7 +61,7 @@ void VSQUpload::start()
     VSQTransfer::start();
 
     // Encrypt file
-    auto file = fileHandle(m_filePath);
+    auto file = createFileHandle(m_filePath);
     if (!file->open(QFile::ReadOnly)) {
         setStatus(Attachment::Status::Failed);
         return;
