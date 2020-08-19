@@ -119,6 +119,7 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSetti
     // Signal connection
     connect(this, SIGNAL(fireReadyToAddContact(QString)), this, SLOT(onAddContactToDB(QString)));
     connect(this, SIGNAL(fireError(QString)), this, SLOT(disconnect()));
+    connect(this, &VSQMessenger::downloadThumbnail, this, &VSQMessenger::onDownloadThumbnail);
 
     // Connect XMPP signals
     connect(&m_xmpp, SIGNAL(connected()), this, SLOT(onConnected()), Qt::QueuedConnection);
@@ -492,6 +493,25 @@ VSQMessenger::onAddContactToDB(QString contact) {
     m_sqlChatModel->createPrivateChat(contact);
     // m_sqlContacts->addContact(contact);
     emit fireAddedContact(contact);
+}
+
+void VSQMessenger::onDownloadThumbnail(const StMessage message, const QString sender)
+{
+    qCDebug(lcTransferManager) << "Downloading of thumbnail for message:" << message.messageId;
+    auto attachment = *message.attachment;
+    if (attachment.thumbnailPath.isEmpty()) {
+        attachment.thumbnailPath = m_attachmentBuilder.generateThumbnailFileName();
+    }
+    const auto id = message.messageId + QLatin1String("-thumb");
+    auto download = m_transferManager->startCryptoDownload(id, attachment.remoteThumbnailUrl, attachment.thumbnailPath, sender);
+    connect(download, &VSQDownload::ended, [=](bool failed) {
+        if (failed) {
+            qCDebug(lcMessenger) << "Thumnbail download was failed:" << message.messageId;
+        }
+        else {
+            m_sqlConversations->setAttachmentThumbnailPath(message.messageId, attachment.thumbnailPath);
+        }
+    });
 }
 
 /******************************************************************************/
@@ -1009,7 +1029,6 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
     }
 
     // Add sender to contact
-    // m_sqlContacts->addContact(sender);
     m_sqlChatModel->createPrivateChat(sender);
     // Save message to DB
     m_sqlConversations->receiveMessage(message.id(), sender, msg->message, msg->attachment);
@@ -1018,22 +1037,8 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
         m_sqlChatModel->updateUnreadMessageCount(sender);
     }
 
-    // TODO(fpohtmeh): improve
-    if (msg->attachment) {
-        auto &attachment = *msg->attachment;
-        if (attachment.type == Attachment::Type::Picture) {
-            qCDebug(lcTransferManager) << "Downloading of thumbnail for message:" << message.id();
-            if (attachment.thumbnailPath.isEmpty()) {
-                attachment.thumbnailPath = m_attachmentBuilder.generateThumbnailFileName();
-            }
-            const auto id = message.id() + QLatin1String("-thumb");
-            auto download = m_transferManager->startCryptoDownload(id, attachment.remoteThumbnailUrl, attachment.thumbnailPath, sender);
-            connect(download, &VSQDownload::ended, [=](bool failed) {
-                if (!failed) {
-                    m_sqlConversations->setAttachmentThumbnailPath(message.id(), attachment.thumbnailPath);
-                }
-            });
-        }
+    if (msg->attachment && msg->attachment->type == Attachment::Type::Picture) {
+        emit downloadThumbnail(msg, sender, QPrivateSignal());
     }
 
     // Inform system about new message
@@ -1136,7 +1141,7 @@ void VSQMessenger::downloadAndProcess(StMessage msg, const Function &func)
 }
 
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::createSendMessage(const QString &messageId, const QString &to, const QString &message)
+VSQMessenger::createSendMessage(const QString messageId, const QString to, const QString message)
 {
     return QtConcurrent::run([=]() -> EnResult {
         return _sendMessageInternal(true, messageId, to, message, NullOptional);
@@ -1144,8 +1149,8 @@ VSQMessenger::createSendMessage(const QString &messageId, const QString &to, con
 }
 
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::createSendAttachment(const QString &messageId, const QString &to,
-                                   const QUrl &url, const Enums::AttachmentType attachmentType)
+VSQMessenger::createSendAttachment(const QString messageId, const QString to,
+                                   const QUrl url, const Enums::AttachmentType attachmentType)
 {
     return QtConcurrent::run([=]() -> EnResult {
         QString warningText;

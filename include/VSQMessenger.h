@@ -142,10 +142,10 @@ public slots:
     sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
 
     QFuture<VSQMessenger::EnResult>
-    createSendMessage(const QString &messageId, const QString &to, const QString &text);
+    createSendMessage(const QString messageId, const QString to, const QString text);
 
     QFuture<VSQMessenger::EnResult>
-    createSendAttachment(const QString &messageId, const QString &to, const QUrl &url, const Enums::AttachmentType attachmentType);
+    createSendAttachment(const QString messageId, const QString to, const QUrl url, const Enums::AttachmentType attachmentType);
 
     Q_INVOKABLE void
     setStatus(VSQMessenger::EnStatus status);
@@ -190,6 +190,8 @@ signals:
 
     void openUrlExternallyRequested(const QString &url);
 
+    void downloadThumbnail(const StMessage message, const QString sender, QPrivateSignal);
+
 private slots:
     void onConnected();
     void onMessageDelivered(const QString&, const QString&);
@@ -202,12 +204,10 @@ private slots:
     void onStateChanged(QXmppClient::State state);
     void onProcessNetworkState(bool online);
     void onReadyToUpload();
+    void onAddContactToDB(QString contact);
+    void onDownloadThumbnail(const StMessage message, const QString sender);
 
-    void
-    onAddContactToDB(QString contact);
-
-    Q_INVOKABLE void
-    onSubscribePushNotifications(bool enable);
+    Q_INVOKABLE void onSubscribePushNotifications(bool enable);
 
 private:
     QXmppClient m_xmpp;
