@@ -51,7 +51,7 @@ VSQCryptoTransferManager::VSQCryptoTransferManager(QXmppClient *client, QNetwork
 VSQCryptoTransferManager::~VSQCryptoTransferManager()
 {}
 
-VSQUpload *VSQCryptoTransferManager::startCryptoUpload(const QString &id, const QString &filePath, const QString &recipient)
+VSQUpload *VSQCryptoTransferManager::startCryptoUpload(const QString id, const QString filePath, const QString &recipient)
 {
     auto encFilePath = getCacheNewFilePath();
     if (!ecnryptFile(filePath, encFilePath, recipient)) {
@@ -117,7 +117,7 @@ bool VSQCryptoTransferManager::ecnryptFile(const QString &path, const QString &e
     file.close();
 
     // Encrypt
-    std::vector<char> encBytes(2 * bytes.size());
+    std::vector<char> encBytes(5 * bytes.size());
     size_t encBytesSize = 0;
     const auto code = vs_messenger_virgil_encrypt_msg(
                 recipient.toStdString().c_str(),
@@ -165,7 +165,7 @@ bool VSQCryptoTransferManager::decryptFile(const QString &encPath, const QString
     }
 
     // Decrypt
-    std::vector<char> bytes(2 * encBytes.size());
+    std::vector<char> bytes(5 * encBytes.size());
     size_t bytesSize = 0;
     const auto code = vs_messenger_virgil_decrypt_msg(
                 recipient.toStdString().c_str(),
