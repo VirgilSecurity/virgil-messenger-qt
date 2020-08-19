@@ -51,7 +51,7 @@ VSQCryptoTransferManager::VSQCryptoTransferManager(QXmppClient *client, QNetwork
 VSQCryptoTransferManager::~VSQCryptoTransferManager()
 {}
 
-VSQUpload *VSQCryptoTransferManager::startCryptoUpload(const QString id, const QString filePath, const QString &recipient)
+VSQUpload *VSQCryptoTransferManager::startCryptoUpload(const QString id, const QString filePath, const QString recipient)
 {
     auto encFilePath = getCacheNewFilePath();
     if (!ecnryptFile(filePath, encFilePath, recipient)) {
@@ -73,7 +73,7 @@ VSQUpload *VSQCryptoTransferManager::startCryptoUpload(const QString id, const Q
     return upload;
 }
 
-VSQDownload *VSQCryptoTransferManager::startCryptoDownload(const QString &id, const QUrl &url, const QString &filePath, const QString &recipient)
+VSQDownload *VSQCryptoTransferManager::startCryptoDownload(const QString id, const QUrl url, const QString filePath, const QString recipient)
 {
     auto decFilePath = getCacheNewFilePath();
     auto download = startDownload(id, url, decFilePath);
