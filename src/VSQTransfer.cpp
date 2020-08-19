@@ -47,6 +47,7 @@ VSQTransfer::VSQTransfer(QNetworkAccessManager *networkAccessManager, const QStr
         m_bytesReceived = bytesReceived;
         m_bytesTotal = bytesTotal;
         if (m_bytesTotal > 0 && m_bytesReceived >= m_bytesTotal) {
+            qCDebug(lcTransferManager) << "All bytes were processed, mark transfer as completed";
             setStatus(Attachment::Status::Loaded);
         }
     });
@@ -87,6 +88,7 @@ void VSQTransfer::start()
 void VSQTransfer::abort()
 {
     if (!isRunning()) {
+        qCDebug(lcTransferManager) << "Can't abort not running transfer";
         return;
     }
     qCDebug(lcTransferManager) << QString("Aborted transfer %1").arg(id());
@@ -103,6 +105,7 @@ void VSQTransfer::connectReply(QNetworkReply *reply)
             setStatus(Attachment::Status::Loaded);
         }
         else {
+            qCDebug(lcTransferManager) << "Failed. File was processed partially";
             setStatus(Attachment::Status::Failed);
         }
     });

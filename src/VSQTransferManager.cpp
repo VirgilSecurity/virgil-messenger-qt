@@ -238,6 +238,7 @@ void VSQTransferManager::onSlotReceived(const QXmppHttpUploadSlotIq &slot)
 {
     qCDebug(lcTransferManager) << "VSQUploader::onSlotReceived";
     if (auto upload = findUploadBySlotId(slot.id())) {
+        qCDebug(lcTransferManager) << "Remote url was received for" << upload->id();
         upload->remoteUrlReceived(slot.putUrl());
     }
 }
@@ -246,6 +247,7 @@ void VSQTransferManager::onRequestFailed(const QXmppHttpUploadRequestIq &request
 {
     qCDebug(lcTransferManager) << "VSQUploader::onRequestFailed" << request.error().text();
     if (auto upload = findUploadBySlotId(request.id())) {
+        qCWarning(lcTransferManager) << "Remote url error occured for" << upload->id();
         upload->remoteUrlErrorOccured();
         removeTransfer(upload, true);
     }

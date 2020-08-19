@@ -69,7 +69,6 @@ Q_DECLARE_METATYPE(QFuture<VSQMessenger::EnResult>)
 #define USE_XMPP_LOGS 0
 #endif
 
-
 const QString VSQMessenger::kOrganization = "VirgilSecurity";
 const QString VSQMessenger::kApp = "VirgilMessenger";
 const QString VSQMessenger::kUsers = "Users";
@@ -85,6 +84,8 @@ const QString VSQMessenger::kPushNotificationsFormType = "FORM_TYPE";
 const QString VSQMessenger::kPushNotificationsFormTypeVal = "http://jabber.org/protocol/pubsub#publish-options";
 const int VSQMessenger::kConnectionWaitMs = 10000;
 const int VSQMessenger::kKeepAliveTimeSec = 10;
+
+Q_LOGGING_CATEGORY(lcMessenger, "messenger")
 
 /******************************************************************************/
 VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSettings *settings)
@@ -811,6 +812,7 @@ StMessage VSQMessenger::parseJson(const QJsonDocument &json)
 OptionalAttachment VSQMessenger::uploadAttachment(const QString &messageId, const QString &recipient, const Attachment &attachment)
 {
     if (!m_transferManager->isReady()) {
+        qCDebug(lcMessenger) << "Transfer manager is not ready";
         setFailedAttachmentStatus(messageId);
         return NullOptional;
     }
@@ -819,9 +821,10 @@ OptionalAttachment VSQMessenger::uploadAttachment(const QString &messageId, cons
 
     bool thumbnailUploadNeeded = attachment.type == Attachment::Type::Picture && attachment.remoteThumbnailUrl.isEmpty();
     if (thumbnailUploadNeeded) {
+        qCDebug(lcMessenger) << "Thumbnail uploading...";
         const auto uploadId = messageId + QLatin1String("-thumb");
         if (m_transferManager->hasTransfer(uploadId)) {
-            qCCritical(lcTransferManager) << "Thumbnail upload for" << messageId << "already exists";
+            qCCritical(lcMessenger) << "Thumbnail upload for" << messageId << "already exists";
             return NullOptional;
         }
         else if (auto upload = m_transferManager->startCryptoUpload(uploadId, attachment.thumbnailPath, recipient)) {
@@ -839,11 +842,15 @@ OptionalAttachment VSQMessenger::uploadAttachment(const QString &messageId, cons
                 loop.quit();
             });
             connect(upload, &VSQUpload::connectionChanged, &loop, &QEventLoop::quit);
-            qCDebug(lcTransferManager) << "Loop started";
+            qCDebug(lcMessenger) << "Upload waiting: start";
             loop.exec();
-            qCDebug(lcTransferManager) << "Loop exited";
+            qCDebug(lcMessenger) << "Upload waiting: end";
+            if (!thumbnailUploadNeeded) {
+                qCDebug(lcMessenger) << "Thumbnail was uploaded";
+            }
         }
         else  {
+            qCDebug(lcMessenger) << "Unable to start upload";
             setFailedAttachmentStatus(messageId);
             return NullOptional;
         }
@@ -851,8 +858,9 @@ OptionalAttachment VSQMessenger::uploadAttachment(const QString &messageId, cons
 
     bool attachmentUploadNeeded = attachment.remoteUrl.isEmpty();
     if (attachmentUploadNeeded) {
+        qCDebug(lcMessenger) << "Attachment uploading...";
         if (m_transferManager->hasTransfer(messageId)) {
-            qCCritical(lcTransferManager) << "Upload for" << messageId << "already exists";
+            qCCritical(lcMessenger) << "Upload for" << messageId << "already exists";
             return NullOptional;
         }
         else if (auto upload = m_transferManager->startCryptoUpload(messageId, attachment.filePath, recipient)) {
@@ -870,19 +878,25 @@ OptionalAttachment VSQMessenger::uploadAttachment(const QString &messageId, cons
                 loop.quit();
             });
             connect(upload, &VSQUpload::connectionChanged, &loop, &QEventLoop::quit);
-            qCDebug(lcTransferManager) << "Loop started";
+            qCDebug(lcMessenger) << "Upload waiting: start";
             loop.exec();
-            qCDebug(lcTransferManager) << "Loop exited";
+            qCDebug(lcMessenger) << "Upload waiting: end";
+            if (!attachmentUploadNeeded) {
+                qCDebug(lcMessenger) << "Attachment was uploaded";
+            }
         }
         else {
+            qCDebug(lcMessenger) << "Unable to start upload";
             setFailedAttachmentStatus(messageId);
             return NullOptional;
         }
     }
 
     if (thumbnailUploadNeeded || attachmentUploadNeeded) {
+        qCDebug(lcMessenger) << "Thumbnail or/and attachment were not uploaded";
         return NullOptional;
     }
+    qCDebug(lcMessenger) << "Everything was uploaded";
     m_sqlConversations->setAttachmentStatus(messageId, Attachment::Status::Loaded);
     uploadedAttachment.status = Attachment::Status::Loaded;
     return uploadedAttachment;
@@ -964,8 +978,9 @@ Optional<StMessage> VSQMessenger::decryptMessage(const QString &sender, const QS
     QByteArray baDecr(reinterpret_cast<char *> (decryptedMessage), static_cast<int> (decryptedMessageSz));
     QJsonDocument jsonMsg(QJsonDocument::fromJson(baDecr));
 
+    qCDebug(lcMessenger) << "JSON for parsing:" << jsonMsg;
     auto msg = parseJson(jsonMsg);
-    VS_LOG_DEBUG("Received message: <%s>", msg.message.toStdString().c_str());
+    qCDebug(lcMessenger) << "Received message: " << msg.message;
     return msg;
 }
 
@@ -1003,10 +1018,11 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
         m_sqlChatModel->updateUnreadMessageCount(sender);
     }
 
+    // TODO(fpohtmeh): improve
     if (msg->attachment) {
         auto &attachment = *msg->attachment;
         if (attachment.type == Attachment::Type::Picture) {
-            qCDebug(lcTransferManager) << "Thumbnail downloading for message:" << message.id();
+            qCDebug(lcTransferManager) << "Downloading of thumbnail for message:" << message.id();
             if (attachment.thumbnailPath.isEmpty()) {
                 attachment.thumbnailPath = m_attachmentBuilder.generateThumbnailFileName();
             }
@@ -1037,10 +1053,13 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
 
     OptionalAttachment updloadedAttacment;
     if (attachment) {
+        qCDebug(lcMessenger) << "Trying to upload the attachment";
         updloadedAttacment = uploadAttachment(messageId, to, *attachment);
         if (!updloadedAttacment) {
+            qCDebug(lcMessenger) << "Attachment was NOT uploaded";
             return MRES_OK; // don't send message
         }
+        qCDebug(lcMessenger) << "Attachment was uploaded. Continue to send message";
     }
 
     QMutexLocker _guard(&m_messageGuard);
@@ -1056,7 +1075,7 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
 
     // Create JSON-formatted message to be sent
     const QString internalJson = createJson(message, updloadedAttacment);
-    qDebug() << "json for encryption:" << internalJson;
+    qDebug() << "Json for encryption:" << internalJson;
 
     // Encrypt message
     auto plaintext = internalJson.toStdString();

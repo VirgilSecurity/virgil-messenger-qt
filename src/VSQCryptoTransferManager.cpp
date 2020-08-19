@@ -63,10 +63,11 @@ VSQUpload *VSQCryptoTransferManager::startCryptoUpload(const QString &id, const 
         QFile::remove(encFilePath);
         return nullptr;
     }
-    connect(upload, &VSQUpload::ended, this, [=]() {
-#ifdef VS_DEVMODE
+    connect(upload, &VSQUpload::ended, this, [=](bool failed) {
+        if (failed) {
+            qCWarning(lcTransferManager) << "Crypt upload was failed";
+        }
         qCDebug(lcTransferManager) << "Removing of:" << encFilePath;
-#endif
         QFile::remove(encFilePath);
     });
     return upload;
@@ -77,11 +78,12 @@ VSQDownload *VSQCryptoTransferManager::startCryptoDownload(const QString &id, co
     auto decFilePath = getCacheNewFilePath();
     auto download = startDownload(id, url, decFilePath);
     connect(download, &VSQDownload::ended, [=](bool failed) {
+        if (failed) {
+            qCWarning(lcTransferManager) << "Crypt download was failed";
+        }
         if (!failed && decryptFile(decFilePath, filePath, recipient)) {
             emit fileDownloadedAndDecrypted(id, filePath);
-#ifdef VS_DEVMODE
             qCDebug(lcTransferManager) << "Removing of:" << decFilePath;
-#endif
             QFile::remove(decFilePath);
         }
     });
@@ -103,11 +105,13 @@ bool VSQCryptoTransferManager::ecnryptFile(const QString &path, const QString &e
     // Read
     QFile file(path);
     if (!file.open(QFile::ReadOnly)) {
+        qCCritical(lcTransferManager) << "Source file can't be opened";
         return false;
     }
     const auto bytes = file.readAll();
     qCDebug(lcTransferManager) << "Read" << bytes.size() << "bytes";
     if (bytes.size() == 0) {
+        qCDebug(lcTransferManager) << "Empty file was skipped";
         return false;
     }
     file.close();
@@ -129,6 +133,7 @@ bool VSQCryptoTransferManager::ecnryptFile(const QString &path, const QString &e
     // Write
     QFile encFile(encPath);
     if (!encFile.open(QFile::WriteOnly)) {
+        qCCritical(lcTransferManager) << "Destination file can't be opened";
         return false;
     }
     encFile.write(encBytes.data(), encBytesSize);
@@ -148,12 +153,14 @@ bool VSQCryptoTransferManager::decryptFile(const QString &encPath, const QString
     // Read
     QFile encFile(encPath);
     if (!encFile.open(QFile::ReadOnly)) {
+        qCCritical(lcTransferManager) << "Source file can't be opened";
         return false;
     }
     const auto encBytes = encFile.readAll();
     qCDebug(lcTransferManager) << "Read" << encBytes.size() << "bytes";
     encFile.close();
     if (encBytes.size() == 0) {
+        qCDebug(lcTransferManager) << "Empty file was skipped";
         return false;
     }
 
@@ -174,6 +181,7 @@ bool VSQCryptoTransferManager::decryptFile(const QString &encPath, const QString
     // Write
     QFile file(path);
     if (!file.open(QFile::WriteOnly)) {
+        qCCritical(lcTransferManager) << "Destination file can't be opened";
         return false;
     }
     file.write(bytes.data(), bytesSize);

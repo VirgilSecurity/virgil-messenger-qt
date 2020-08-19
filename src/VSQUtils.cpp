@@ -83,6 +83,7 @@ QFileInfo VSQUtils::urlToFileInfo(const QUrl &url)
     qDebug() << "Android decoded file path:" << res;
     return QFileInfo(res);
 #else
+    qDebug() << "File url:" << url.toLocalFile();
     return QFileInfo(url.toLocalFile());
 #endif
 }

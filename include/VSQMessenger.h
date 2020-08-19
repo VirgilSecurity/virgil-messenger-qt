@@ -60,6 +60,8 @@ using namespace VirgilIoTKit;
 
 class QJsonDocument;
 
+Q_DECLARE_LOGGING_CATEGORY(lcMessenger)
+
 class VSQMessenger : public QObject {
 
     Q_OBJECT

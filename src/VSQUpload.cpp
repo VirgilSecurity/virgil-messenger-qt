@@ -113,7 +113,9 @@ Optional<QUrl> VSQUpload::remoteUrl()
         connect(this, &VSQUpload::connectionChanged, &loop, remoteUrlError);
 
         timer.start(1000);
+        qCDebug(lcTransferManager) << "Upload url waiting: start";
         loop.exec();
+        qCDebug(lcTransferManager) << "Upload url waiting: end";
     }
     if (m_remoteUrlError) {
         qCDebug(lcTransferManager) << "Remote url error";
