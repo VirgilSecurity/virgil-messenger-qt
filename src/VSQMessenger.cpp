@@ -1076,12 +1076,6 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
     uint8_t encryptedMessage[_encryptedMsgSzMax];
     size_t encryptedMessageSz = 0;
 
-    // Save message to DB
-    if(createNew) {
-        m_sqlConversations->createMessage(to, message, messageId, updloadedAttacment);
-    }
-    m_sqlChatModel->updateLastMessage(to, message);
-
     // Create JSON-formatted message to be sent
     const QString internalJson = createJson(message, updloadedAttacment);
     qDebug() << "Json for encryption:" << internalJson;
