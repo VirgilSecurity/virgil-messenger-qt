@@ -833,7 +833,7 @@ StMessage VSQMessenger::parseJson(const QJsonDocument &json)
     return message;
 }
 
-OptionalAttachment VSQMessenger::uploadAttachment(const QString &messageId, const QString &recipient, const Attachment &attachment)
+OptionalAttachment VSQMessenger::uploadAttachment(const QString messageId, const QString recipient, const Attachment &attachment)
 {
     if (!m_transferManager->isReady()) {
         qCDebug(lcMessenger) << "Transfer manager is not ready";
@@ -863,7 +863,7 @@ OptionalAttachment VSQMessenger::uploadAttachment(const QString &messageId, cons
                     uploadedAttachment.remoteThumbnailUrl = *upload->remoteUrl();
                     thumbnailUploadNeeded = false;
                 }
-                loop.quit();
+                QMetaObject::invokeMethod(&loop, "quit", Qt::QueuedConnection);
             });
             connect(upload, &VSQUpload::connectionChanged, &loop, &QEventLoop::quit);
             qCDebug(lcMessenger) << "Upload waiting: start";
