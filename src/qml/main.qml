@@ -115,9 +115,58 @@ ApplicationWindow {
         return root.width < root.maxMobileWidth;
     }
 
+    function openPreview(filePath) {
+        console.log("Open preview:", filePath)
+        preview.filePath = filePath
+        preview.visible = true
+    }
+
+    Item {
+        id: preview
+        anchors.fill: parent
+        visible: false
+
+        property alias filePath: previewImage.source
+
+        MouseArea {
+            // grab all mouse events
+            anchors.fill: parent
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            color: "black"
+            opacity: 0.5
+        }
+
+        Image {
+            id: previewImage
+            anchors.fill: parent
+            fillMode: Image.PreserveAspectFit
+        }
+
+        Label {
+            anchors {
+                top: parent.top
+                right: parent.right
+                topMargin: 15
+                rightMargin: 15
+            }
+            text: qsTr("Close")
+            color: "white"
+            font.bold: true
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: preview.visible = false
+            }
+        }
+    }
+
     Component.onCompleted: {
         Platform.detect()
-        Messenger.openUrlExternallyRequested.connect(Qt.openUrlExternally)
+        Messenger.openPreviewRequested.connect(openPreview)
+        Messenger.informationRequested.connect(showPopupInform)
 //        Logging.crashReportRequested.connect(sendReportAsk.open)
 //        Logging.reportSent.connect(showPopupSuccess)
 //        Logging.reportSentErr.connect(showPopupError)

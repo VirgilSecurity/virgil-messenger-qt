@@ -1196,8 +1196,9 @@ void VSQMessenger::downloadAndProcess(StMessage message, const Function &func)
             return;
         }
         // Update attachment filePath
-        if (filePath.isEmpty()) {
-            filePath = VSQUtils::findUniqueFileName(m_settings->downloadsDir().filePath(attachment.displayName));
+        const auto downloads = m_settings->downloadsDir();
+        if (filePath.isEmpty() || QFileInfo(filePath).dir() != downloads) {
+            filePath = VSQUtils::findUniqueFileName(downloads.filePath(attachment.displayName));
         }
         const TransferId id(msg.messageId, TransferId::Type::File);
         auto download = m_transferManager->startCryptoDownload(id, attachment.remoteUrl, filePath, msg.sender);
@@ -1292,8 +1293,9 @@ void VSQMessenger::downloadAttachment(const QString &messageId)
         return;
     }
     qCDebug(lcTransferManager) << "Downloading of attachment:" << messageId;
-    downloadAndProcess(*message, [](const StMessage &msg) {
+    downloadAndProcess(*message, [this](const StMessage &msg) {
         qCDebug(lcTransferManager) << QString("Message '%1' attachment was downloaded").arg(msg.messageId);
+        emit informationRequested("Saved to downloads");
     });
 }
 
@@ -1307,7 +1309,7 @@ void VSQMessenger::openAttachment(const QString &messageId)
     downloadAndProcess(*message, [this](const StMessage &msg) {
         const auto url = QUrl::fromLocalFile(msg.attachment->filePath).toString();
         qCDebug(lcTransferManager) << "Opening of message attachment:" << url;
-        emit openUrlExternallyRequested(url);
+        emit openPreviewRequested(url);
     });
 }
 

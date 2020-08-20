@@ -78,7 +78,7 @@ void VSQDownload::start()
     });
     connect(reply, &QNetworkReply::readyRead, [=]() {
         const auto bytes = reply->readAll();
-        qCDebug(lcTransferManager()) << "Wrote bytes:" << bytes.size();
+        //qCDebug(lcTransferManager()) << "Wrote bytes:" << bytes.size();
         file->write(bytes);
         file->flush();
     });

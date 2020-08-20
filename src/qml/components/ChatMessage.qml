@@ -140,7 +140,7 @@ Control {
                     }
 
                     TapHandler {
-                        onTapped: (attachmentDownloaded ? Messenger.openAttachment(messageId) : Messenger.downloadAttachment)(messageId)
+                        onTapped: (d.isPicture ? Messenger.openAttachment : Messenger.downloadAttachment)(messageId)
                     }
                 }
 
