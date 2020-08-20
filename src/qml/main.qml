@@ -49,7 +49,12 @@ ApplicationWindow {
     onClosing: {
         if (Platform.isAndroid) {
             close.accepted = false
-            mainView.back()
+            if (preview.visible) {
+                preview.visible = false
+            }
+            else {
+                mainView.back()
+            }
         }
     }
 

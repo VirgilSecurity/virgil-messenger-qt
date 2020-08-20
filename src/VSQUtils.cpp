@@ -75,16 +75,25 @@ QString VSQUtils::findUniqueFileName(const QString &fileName)
     }
 }
 
-QFileInfo VSQUtils::urlToFileInfo(const QUrl &url)
+bool VSQUtils::isValidUrl(const QUrl &url)
+{
+    bool isValid = url.isValid();
+#if !defined(Q_OS_ANDROID)
+    isValid = isValid && url.isLocalFile();
+#endif
+    return isValid;
+}
+
+QString VSQUtils::urlToLocalFile(const QUrl &url)
 {
 #if defined (Q_OS_ANDROID)
-    qDebug() << "Android encoded file url:" << url.toString();
+    qDebug() << "Android file url (before encoding):" << url.toString();
     auto res = QUrl::fromPercentEncoding(url.toString().toUtf8());
-    qDebug() << "Android decoded file path:" << res;
-    return QFileInfo(res);
+    qDebug() << "Android file url:" << res;
+    return res;
 #else
     qDebug() << "File url:" << url.toLocalFile();
-    return QFileInfo(url.toLocalFile());
+    return url.toLocalFile();
 #endif
 }
 
@@ -104,4 +113,17 @@ bool VSQUtils::forceCreateDir(const QString &absolutePath)
     }
     qFatal("Unable to create directory: %s", qPrintable(absolutePath));
     return false;
+}
+
+QUrl VSQUtils::localFileToUrl(const QString &filePath)
+{
+#if defined (Q_OS_ANDROID)
+    QUrl url(filePath);
+    if (url.scheme().isEmpty()) {
+        return QUrl::fromLocalFile(filePath);
+    }
+    return url;
+#else
+    return QUrl::fromLocalFile(filePath);
+#endif
 }

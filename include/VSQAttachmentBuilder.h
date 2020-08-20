@@ -51,8 +51,6 @@ public:
     VSQAttachmentBuilder(VSQSettings *settings, QObject *parent);
     VSQAttachmentBuilder() = default; // QML engine requires default constructor
 
-    bool isValidUrl(const QUrl &url) const;
-
     // Build encoded attachment by local url, attachment type and recipient
     // Start thumbnail/file uploads
     OptionalAttachment build(const QUrl &localUrl, const Attachment::Type type, QString &errorText);

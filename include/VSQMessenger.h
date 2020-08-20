@@ -188,7 +188,7 @@ signals:
     void
     fireCurrentUserChanged();
 
-    void openPreviewRequested(const QString &url);
+    void openPreviewRequested(const QUrl &url);
     void informationRequested(const QString &message);
 
     void downloadThumbnail(const StMessage message, const QString sender, QPrivateSignal);

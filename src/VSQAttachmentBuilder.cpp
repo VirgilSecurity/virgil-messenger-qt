@@ -53,23 +53,14 @@ VSQAttachmentBuilder::VSQAttachmentBuilder(VSQSettings *settings, QObject *paren
     , m_settings(settings)
 {}
 
-bool VSQAttachmentBuilder::isValidUrl(const QUrl &url) const
-{
-    bool isValid = url.isValid();
-#if !defined(Q_OS_ANDROID)
-    isValid = isValid && url.isLocalFile();
-#endif
-    return isValid;
-}
-
 OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment::Type type, QString &errorText)
 {
-    qCDebug(lcAttachment) << ">>> URL: " << url.toString();
-    if (!isValidUrl(url)) {
+    qCDebug(lcAttachment) << "Attachment input url:" << VSQUtils::urlToLocalFile(url);
+    if (!VSQUtils::isValidUrl(url)) {
         errorText = tr("Invalid attachment URL");
         return NullOptional;
     }
-    auto localInfo = VSQUtils::urlToFileInfo(url);
+    QFileInfo localInfo(VSQUtils::urlToLocalFile(url));
     if (!localInfo.exists()) {
         errorText = tr("File doesn't exist");
         return NullOptional;

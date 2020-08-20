@@ -1209,6 +1209,7 @@ void VSQMessenger::downloadAndProcess(StMessage message, const Function &func)
             loop.quit();
         });
         connect(m_transferManager, &VSQCryptoTransferManager::fileDecrypted, download, [=](const QString &id, const QString &) {
+            qCDebug(lcTransferManager) << "Comparing of downloaded file with requested...";
             if (TransferId::parse(id).messageId == msg.messageId) {
                 func(message);
             }
@@ -1250,7 +1251,7 @@ VSQMessenger::sendMessage(const QString &to, const QString &message,
                           const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
 {
     const auto url = attachmentUrl.toUrl();
-    if (m_attachmentBuilder.isValidUrl(url)) {
+    if (VSQUtils::isValidUrl(url)) {
         return createSendAttachment(VSQUtils::createUuid(), to, url, attachmentType);
     }
     else {
@@ -1278,11 +1279,12 @@ void VSQMessenger::saveAttachmentAs(const QString &messageId, const QVariant &fi
     if (!message) {
         return;
     }
-    const auto dest = fileUrl.toUrl().toLocalFile();
+    const auto dest = VSQUtils::urlToLocalFile(fileUrl.toUrl());
     qCDebug(lcTransferManager) << "Saving of attachment as" << dest;
     downloadAndProcess(*message, [=](const StMessage &msg) {
         qCDebug(lcTransferManager) << "Message attachment saved as:" << dest;
-        QFile::copy(msg.attachment->filePath, dest);
+        const auto src = msg.attachment->filePath;
+        QFile::copy(src, dest);
     });
 }
 
@@ -1307,7 +1309,7 @@ void VSQMessenger::openAttachment(const QString &messageId)
     }
     qCDebug(lcTransferManager) << "Opening of attachment:" << messageId;
     downloadAndProcess(*message, [this](const StMessage &msg) {
-        const auto url = QUrl::fromLocalFile(msg.attachment->filePath).toString();
+        const auto url = VSQUtils::localFileToUrl(msg.attachment->filePath);
         qCDebug(lcTransferManager) << "Opening of message attachment:" << url;
         emit openPreviewRequested(url);
     });
