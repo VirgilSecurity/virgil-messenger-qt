@@ -170,7 +170,6 @@ ApplicationWindow {
 
     Component.onCompleted: {
         Platform.detect()
-        Messenger.openPreviewRequested.connect(openPreview)
         Messenger.informationRequested.connect(showPopupInform)
 //        Logging.crashReportRequested.connect(sendReportAsk.open)
 //        Logging.reportSent.connect(showPopupSuccess)

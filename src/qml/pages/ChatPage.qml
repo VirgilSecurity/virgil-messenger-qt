@@ -159,6 +159,12 @@ Page {
         listView.model = ConversationsModel
         ConversationsModel.setAsRead(recipient)
         ChatModel.updateUnreadMessageCount(recipient)
+
+        Messenger.openPreviewRequested.connect(openPreview)
+    }
+
+    Component.onDestruction: {
+        Messenger.openPreviewRequested.disconnect(openPreview)
     }
 
     // Sounds
