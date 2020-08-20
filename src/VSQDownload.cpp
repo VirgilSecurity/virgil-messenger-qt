@@ -72,7 +72,7 @@ void VSQDownload::start()
     // Create request
     QNetworkRequest request(m_remoteUrl);
     auto reply = networkAccessManager()->get(request);
-    connectReply(reply);
+    connectReply(reply, &m_guard);
     connect(reply, &QNetworkReply::downloadProgress, [=](qint64 bytesReceived, qint64 bytesTotal) {
         emit progressChanged(bytesReceived, bytesTotal);
     });

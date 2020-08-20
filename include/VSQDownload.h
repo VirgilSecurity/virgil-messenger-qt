@@ -51,6 +51,7 @@ public:
 private:
     QUrl m_remoteUrl;
     QString m_filePath;
+    QMutex m_guard;
 };
 
 #endif // VSQ_DOWNLOAD_H

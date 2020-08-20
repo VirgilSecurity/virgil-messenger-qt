@@ -36,6 +36,7 @@
 #define VSQ_UPLOAD_H
 
 #include "VSQTransfer.h"
+#include <QMutex>
 
 class VSQUpload : public VSQTransfer
 {
@@ -64,6 +65,8 @@ private:
     Optional<QUrl> m_remoteUrl;
     bool m_remoteUrlError = false;
     QString m_slotId;
+    QMutex m_guard;
+    QList<QMetaObject::Connection> m_connections;
 };
 
 #endif // VSQ_UPLOAD_H

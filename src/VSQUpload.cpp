@@ -46,6 +46,10 @@ VSQUpload::VSQUpload(QNetworkAccessManager *networkAccessManager, const QString 
 
 VSQUpload::~VSQUpload()
 {
+    for (auto &con: m_connections) {
+        QObject::disconnect(con);
+    }
+    QMutexLocker locker(&m_guard);
 #ifdef VS_DEVMODE
     qCDebug(lcDev) << "~Upload" << m_filePath;
 #endif
@@ -81,8 +85,9 @@ void VSQUpload::start()
     request.setHeader(QNetworkRequest::ContentLengthHeader, fileSize());
     // Create & connect reply
     auto reply = networkAccessManager()->put(request, file);
-    connectReply(reply);
-    connect(reply, &QNetworkReply::uploadProgress, [=](qint64 bytesSent, qint64 bytesTotal) {
+    m_connections = connectReply(reply, &m_guard);
+    m_connections << connect(reply, &QNetworkReply::uploadProgress, [=](qint64 bytesSent, qint64 bytesTotal) {
+        QMutexLocker locker(&m_guard);
         emit progressChanged(bytesSent, bytesTotal);
     });
 }

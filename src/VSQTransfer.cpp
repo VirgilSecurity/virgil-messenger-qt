@@ -98,12 +98,14 @@ void VSQTransfer::abort()
     setStatus(Attachment::Status::Failed);
 }
 
-void VSQTransfer::connectReply(QNetworkReply *reply)
+QList<QMetaObject::Connection> VSQTransfer::connectReply(QNetworkReply *reply, QMutex *guard)
 {
+    QList<QMetaObject::Connection> res;
 #ifdef VS_DEVMODE
     qCDebug(lcDev) << "Connected to reply:" << reply;
 #endif
-    connect(reply, &QNetworkReply::finished, [=]() {
+    res << connect(reply, &QNetworkReply::finished, [=]() {
+        QMutexLocker l(guard);
         if (m_bytesTotal > 0 && m_bytesReceived >= m_bytesTotal) {
             setStatus(Attachment::Status::Loaded);
         }
@@ -112,14 +114,18 @@ void VSQTransfer::connectReply(QNetworkReply *reply)
             setStatus(Attachment::Status::Failed);
         }
     });
-    connect(reply, &QNetworkReply::errorOccurred, [=](QNetworkReply::NetworkError error) {
+    res << connect(reply, &QNetworkReply::errorOccurred, [=](QNetworkReply::NetworkError error) {
+        QMutexLocker l(guard);
         qCDebug(lcTransferManager) << QString("Network error (code %1): %2").arg(error).arg(reply->errorString());
         setStatus(Attachment::Status::Failed);
     });
-    connect(reply, &QNetworkReply::sslErrors, [=]() {
+    res << connect(reply, &QNetworkReply::sslErrors, [=]() {
+        QMutexLocker l(guard);
         qCDebug(lcTransferManager) << "SSL errors";
         setStatus(Attachment::Status::Failed);
     });
+
+    return res;
 }
 
 void VSQTransfer::setStatus(const Attachment::Status status)

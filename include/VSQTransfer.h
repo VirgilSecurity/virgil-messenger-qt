@@ -37,6 +37,7 @@
 
 #include <QNetworkReply>
 #include <QObject>
+#include <QMutex>
 
 #include "VSQCommon.h"
 
@@ -68,7 +69,7 @@ signals:
     void connectionChanged();
 
 protected:
-    void connectReply(QNetworkReply *reply);
+    QList<QMetaObject::Connection> connectReply(QNetworkReply *reply, QMutex *guard);
 
     QNetworkAccessManager *networkAccessManager();
     QFile *createFileHandle(const QString &filePath);
