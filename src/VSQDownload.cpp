@@ -48,6 +48,10 @@ VSQDownload::VSQDownload(QNetworkAccessManager *networkAccessManager, const QStr
 
 VSQDownload::~VSQDownload()
 {
+    for (auto &con: m_connections) {
+        QObject::disconnect(con);
+    }
+    QMutexLocker locker(&m_guard);
 #ifdef VS_DEVMODE
     qCDebug(lcDev) << "~Download" << m_filePath;
 #endif
@@ -72,11 +76,11 @@ void VSQDownload::start()
     // Create request
     QNetworkRequest request(m_remoteUrl);
     auto reply = networkAccessManager()->get(request);
-    connectReply(reply, &m_guard);
-    connect(reply, &QNetworkReply::downloadProgress, [=](qint64 bytesReceived, qint64 bytesTotal) {
+    m_connections = connectReply(reply, &m_guard);
+    m_connections << connect(reply, &QNetworkReply::downloadProgress, [=](qint64 bytesReceived, qint64 bytesTotal) {
         emit progressChanged(bytesReceived, bytesTotal);
     });
-    connect(reply, &QNetworkReply::readyRead, [=]() {
+    m_connections << connect(reply, &QNetworkReply::readyRead, [=]() {
         const auto bytes = reply->readAll();
         //qCDebug(lcTransferManager()) << "Wrote bytes:" << bytes.size();
         file->write(bytes);

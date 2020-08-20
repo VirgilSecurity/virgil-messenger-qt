@@ -36,6 +36,7 @@
 #define VSQ_DOWNLOAD_H
 
 #include "VSQTransfer.h"
+#include <QMutex>
 
 class VSQDownload : public VSQTransfer
 {
@@ -52,6 +53,7 @@ private:
     QUrl m_remoteUrl;
     QString m_filePath;
     QMutex m_guard;
+    QList<QMetaObject::Connection> m_connections;
 };
 
 #endif // VSQ_DOWNLOAD_H
