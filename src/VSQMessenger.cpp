@@ -917,7 +917,9 @@ OptionalAttachment VSQMessenger::uploadAttachment(const QString messageId, const
         else if (auto upload = m_transferManager->startCryptoUpload(uploadId, attachment.thumbnailPath, recipient)) {
             m_sqlConversations->setAttachmentStatus(messageId, Attachment::Status::Loading);
             QEventLoop loop;
-            connect(upload, &VSQUpload::ended, [&](bool failed) {
+            QMutex guard;
+            auto con = connect(upload, &VSQUpload::ended, [&](bool failed) {
+                QMutexLocker l(&guard);
                 if (failed) {
                     setFailedAttachmentStatus(messageId);
                 }
@@ -931,6 +933,8 @@ OptionalAttachment VSQMessenger::uploadAttachment(const QString messageId, const
             connect(upload, &VSQUpload::connectionChanged, &loop, &QEventLoop::quit);
             qCDebug(lcMessenger) << "Upload waiting: start";
             loop.exec();
+            QObject::disconnect(con);
+            QMutexLocker l(&guard);
             qCDebug(lcMessenger) << "Upload waiting: end";
             if (!thumbnailUploadNeeded) {
                 qCDebug(lcMessenger) << "Thumbnail was uploaded";
@@ -1208,7 +1212,9 @@ void VSQMessenger::downloadAndProcess(StMessage message, const Function &func)
         auto download = m_transferManager->startCryptoDownload(id, attachment.remoteUrl, filePath, msg.sender);
         bool success = false;
         QEventLoop loop;
-        connect(download, &VSQDownload::ended, [&](bool failed) {
+        QMutex guard;
+        auto con = connect(download, &VSQDownload::ended, [&](bool failed) {
+            QMutexLocker l(&guard);
             success = !failed;
             loop.quit();
         });
@@ -1221,6 +1227,9 @@ void VSQMessenger::downloadAndProcess(StMessage message, const Function &func)
             }
         });
         loop.exec();
+        QObject::disconnect(con);
+        QMutexLocker l(&guard);
+
         if(!success) {
             m_sqlConversations->setAttachmentStatus(message.messageId, Attachment::Status::Created);
         }
