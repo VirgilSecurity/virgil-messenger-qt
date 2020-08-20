@@ -545,7 +545,7 @@ void VSQMessenger::onDownloadThumbnail(const StMessage message, const QString se
         QEventLoop loop;
         connect(download, &VSQDownload::ended, [&](bool failed) {
             success = !failed;
-            loop.quit();
+            QMetaObject::invokeMethod(&loop, "quit", Qt::QueuedConnection);
         });
         loop.exec();
         if(!success) {
@@ -965,7 +965,7 @@ OptionalAttachment VSQMessenger::uploadAttachment(const QString messageId, const
                     uploadedAttachment.remoteUrl = *upload->remoteUrl();
                     attachmentUploadNeeded = false;
                 }
-                loop.quit();
+                QMetaObject::invokeMethod(&loop, "quit", Qt::QueuedConnection);
             });
             connect(upload, &VSQUpload::connectionChanged, &loop, &QEventLoop::quit);
             qCDebug(lcMessenger) << "Upload waiting: start";
@@ -1206,7 +1206,7 @@ void VSQMessenger::downloadAndProcess(StMessage message, const Function &func)
         QEventLoop loop;
         connect(download, &VSQDownload::ended, [&](bool failed) {
             success = !failed;
-            loop.quit();
+            QMetaObject::invokeMethod(&loop, "quit", Qt::QueuedConnection);
         });
         connect(m_transferManager, &VSQCryptoTransferManager::fileDecrypted, download, [=](const QString &id, const QString &filePath) {
             qCDebug(lcTransferManager) << "Comparing of downloaded file with requested..." << filePath;
