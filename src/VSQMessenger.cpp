@@ -1311,18 +1311,6 @@ void VSQMessenger::openAttachment(const QString &messageId)
     });
 }
 
-void VSQMessenger::close()
-{
-    emit closing();
-
-    QTimer timer;
-    timer.setSingleShot(true);
-    QEventLoop loop;
-    connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
-    timer.start(500);
-    loop.exec();
-}
-
 /******************************************************************************/
 void
 VSQMessenger::onPresenceReceived(const QXmppPresence &presence) {
