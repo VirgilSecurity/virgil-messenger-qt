@@ -1133,7 +1133,7 @@ void VSQMessenger::downloadAndProcess(StMessage message, const Function &func)
         if (filePath.isEmpty()) {
             filePath = VSQUtils::findUniqueFileName(m_settings->downloadsDir().filePath(attachment.displayName));
         }
-        auto download = m_transferManager->startCryptoDownload(msg.messageId, attachment.remoteUrl, filePath, msg.recipient);
+        auto download = m_transferManager->startCryptoDownload(msg.messageId, attachment.remoteUrl, filePath, msg.sender);
         connect(m_transferManager, &VSQCryptoTransferManager::fileDownloadedAndDecrypted, download, [=](const QString &id, const QString &) {
             if (id == msg.messageId) {
                 func(message);

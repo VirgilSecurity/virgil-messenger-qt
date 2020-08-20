@@ -142,6 +142,7 @@ struct StMessage
 
     QString messageId;
     QString message;
+    QString sender;
     QString recipient;
     OptionalAttachment attachment;
 };

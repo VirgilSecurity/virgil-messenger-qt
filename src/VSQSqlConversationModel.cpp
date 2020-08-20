@@ -386,6 +386,7 @@ StMessage VSQSqlConversationModel::getMessage(const QSqlRecord &record) const
     StMessage message;
     message.messageId = record.value("message_id").toString();
     message.message = record.value("message").toString();
+    message.sender = record.value("author").toString();
     message.recipient = record.value("recipient").toString();
     const auto attachmentId = record.value("attachment_id").toString();
     if (!attachmentId.isEmpty()) {
