@@ -1208,10 +1208,12 @@ void VSQMessenger::downloadAndProcess(StMessage message, const Function &func)
             success = !failed;
             loop.quit();
         });
-        connect(m_transferManager, &VSQCryptoTransferManager::fileDecrypted, download, [=](const QString &id, const QString &) {
-            qCDebug(lcTransferManager) << "Comparing of downloaded file with requested...";
+        connect(m_transferManager, &VSQCryptoTransferManager::fileDecrypted, download, [=](const QString &id, const QString &filePath) {
+            qCDebug(lcTransferManager) << "Comparing of downloaded file with requested..." << filePath;
             if (TransferId::parse(id).messageId == msg.messageId) {
-                func(message);
+                auto msgWithPath = msg;
+                msgWithPath.attachment->filePath = filePath;
+                func(msgWithPath);
             }
         });
         loop.exec();
