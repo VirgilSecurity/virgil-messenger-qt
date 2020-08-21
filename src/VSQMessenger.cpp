@@ -601,7 +601,7 @@ VSQMessenger::_virgilURL() {
         }
     }
 
-    VS_LOG_DEBUG("Virgil URL: [%s]", qPrintable(res));
+    VS_LOG_DEBUG("Area52 URL: [%s]", qPrintable(res));
     return res;
 }
 
