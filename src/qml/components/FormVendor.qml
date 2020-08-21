@@ -35,7 +35,7 @@ Column {
     Text {
         id: mainLogoDescription
         width: 180
-        text: qsTr("Area52 Messenger")
+        text: settings.applicationDisplayName
         lineHeight: 1
         wrapMode: Text.WordWrap
         horizontalAlignment: Text.AlignHCenter

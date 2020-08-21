@@ -79,6 +79,11 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
     DEFINES += VS_IOS=1 VS_MOBILE=1
 }
 
+isEmpty(VS_CUSTOMER) {
+    VS_CUSTOMER=Virgil
+    # Available customers: Virgil, Area52
+}
+
 #
 #   Headers
 #
@@ -104,6 +109,9 @@ HEADERS += \
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
         include/ui/VSQUiHelper.h \
+        # Customers
+        customers/$${VS_CUSTOMER}/include/VSQCustomer.h \
+        # Thirdparty
         include/thirdparty/optional/optional.hpp
 
 #
@@ -144,8 +152,9 @@ RESOURCES += src/resources.qrc
 
 
 INCLUDEPATH +=  include \
-        $${QXMPP_BUILD_PATH}/include \
-         $${QXMPP_BUILD_PATH}/include/qxmpp
+    $${QXMPP_BUILD_PATH}/include \
+    $${QXMPP_BUILD_PATH}/include/qxmpp \
+    customers/$${VS_CUSTOMER}/include
 
 #
 #   Sparkle framework

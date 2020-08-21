@@ -32,48 +32,22 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SETTINGS_H
-#define VSQ_SETTINGS_H
+#ifndef VSQ_CUSTOMER_H
+#define VSQ_CUSTOMER_H
 
-#include <QDir>
-#include <QSettings>
-#include <QSize>
+#include <QString>
 
-#include "VSQCommon.h"
-
-Q_DECLARE_LOGGING_CATEGORY(lcSettings)
-
-class VSQSettings : public QObject
+namespace Customer
 {
-    Q_OBJECT
-    Q_PROPERTY(bool devMode READ devMode CONSTANT)
-    Q_PROPERTY(QString organizationDisplayName READ organizationDisplayName CONSTANT)
-    Q_PROPERTY(QString applicationDisplayName READ applicationDisplayName CONSTANT)
+    static QString OrganizationName = "VirgilSecurity";
+    static QString OrganizationDisplayName = "Virgil";
 
-public:
-    explicit VSQSettings(QObject *parent);
-    ~VSQSettings();
+    static QString ApplicationName = "VirgilMessenger";
+    static QString ApplicationDisplayName = "Virgil Secure Communications Platform";
 
-    // Attachments
+    static QString OrganizationDomain = "virgil.net";
+    static QString MessengerUrlTemplate = "https://messenger%1.virgilsecurity.com";
+    static QString XmppUrlTemplate = "xmpp%1.virgilsecurity.com";
+}
 
-    DataSize attachmentMaxFileSize() const;
-    QDir attachmentCacheDir() const;
-    QDir thumbnailsDir() const;
-    QDir downloadsDir() const;
-    QSize thumbnailMaxSize() const;
-
-    // Application/organization
-
-    QString organizationDisplayName() const;
-    QString applicationDisplayName() const;
-
-    // Dev mode
-    bool devMode() const;
-
-private:
-    QDir m_attachmentCacheDir;
-    QDir m_thumbnaisDir;
-    QDir m_downloadsDir;
-};
-
-#endif // VSQ_SETTINGS_H
+#endif // VSQ_CUSTOMER_H

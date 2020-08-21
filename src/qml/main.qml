@@ -13,7 +13,7 @@ import "theme"
 ApplicationWindow {
     id: root
     visible: true
-    title: qsTr("Area52 Messenger")
+    title: settings.applicationDisplayName
     minimumWidth: Platform.isMobile ? 320 : 1000
     minimumHeight: Platform.isMobile ? 600 : 800
 

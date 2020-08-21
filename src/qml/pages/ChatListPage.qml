@@ -67,10 +67,10 @@ Page {
     }
 
     header: ContactsHeader {
-        description: "Area52 Server"
+        description: "%1 Server".arg(settings.organizationDisplayName)
         objectName: "hdrDefaultServer"
         id: contactsHeaderId
-        title: "Area52"
+        title: settings.organizationDisplayName
         searchPlaceholder: "Search conversation"
 
         onIsSearchOpenChanged: {
