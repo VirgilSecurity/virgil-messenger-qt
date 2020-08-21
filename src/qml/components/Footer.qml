@@ -10,7 +10,7 @@ Item {
 
     Text {
         anchors.centerIn: parent
-        text: qsTr("Powered by Area52")
+        text: qsTr("Powered by Virgil Security, Inc.")
         font.letterSpacing: 0.23
         verticalAlignment: Text.AlignBottom
         color: Theme.labelColor

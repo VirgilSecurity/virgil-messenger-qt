@@ -588,15 +588,15 @@ VSQMessenger::_virgilURL() {
     if (res.isEmpty()) {
         switch (m_envType) {
         case PROD:
-            res = "https://messenger.virgilsecurity.com";
+            res = "https://messenger.area52.virgil.net";
             break;
 
         case STG:
-            res = "https://messenger-stg.virgilsecurity.com";
+            res = "https://messenger-stg.area52.virgil.net";
             break;
 
         case DEV:
-            res = "https://messenger-dev.virgilsecurity.com";
+            res = "https://messenger-dev.area52.virgil.net";
             break;
         }
     }
@@ -613,15 +613,15 @@ VSQMessenger::_xmppURL() {
     if (res.isEmpty()) {
         switch (m_envType) {
         case PROD:
-            res = "xmpp.virgilsecurity.com";
+            res = "xmpp.area52.virgil.net";
             break;
 
         case STG:
-            res = "xmpp-stg.virgilsecurity.com";
+            res = "xmpp-stg.area52.virgil.net";
             break;
 
         case DEV:
-            res = "xmpp-dev.virgilsecurity.com";
+            res = "xmpp-dev.area52.virgil.net";
             break;
         }
     }
