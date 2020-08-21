@@ -7,4 +7,5 @@ Image {
     Layout.preferredHeight: 48
     Layout.preferredWidth: 48
     Layout.bottomMargin: 5
+    fillMode: Image.PreserveAspectFit
 }

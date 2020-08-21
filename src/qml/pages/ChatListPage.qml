@@ -67,10 +67,10 @@ Page {
     }
 
     header: ContactsHeader {
-        description: "Virgil Server"
+        description: "Area52 Server"
         objectName: "hdrDefaultServer"
         id: contactsHeaderId
-        title: "Virgil"
+        title: "Area52"
         searchPlaceholder: "Search conversation"
 
         onIsSearchOpenChanged: {

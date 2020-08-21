@@ -13,7 +13,7 @@ import "theme"
 ApplicationWindow {
     id: root
     visible: true
-    title: qsTr("Virgil Secure Communications Platform")
+    title: qsTr("Area52 Messenger")
     minimumWidth: Platform.isMobile ? 320 : 1000
     minimumHeight: Platform.isMobile ? 600 : 800
 

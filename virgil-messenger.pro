@@ -378,7 +378,7 @@ equals(USE_TSAN, "yes") {
 #
 #   Assets
 #
-RC_ICONS = platforms/windows/Virgil.ico
+RC_ICONS = platforms/windows/Logo.ico
 
 DISTFILES += \
     platforms/android/res/drawable-hdpi/icon.png \
@@ -403,4 +403,4 @@ DISTFILES += \
     platforms/android/res/mipmap-xxxhdpi/ic_launcher.png \
     platforms/android/res/mipmap-xxxhdpi/ic_launcher_round.png \
     platforms/macos/virgil-messenger.plist.in \
-    platforms/windows/Virgil.ico
+    platforms/windows/Logo.ico

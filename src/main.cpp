@@ -63,7 +63,7 @@ main(int argc, char *argv[]) {
 #else
     QApplication a(argc, argv);
 #endif
-    a.setOrganizationName("VirgilSecurity");
+    a.setOrganizationName("Area52");
     a.setOrganizationDomain("virgil.net");
 
     QString baseUrl;

@@ -34,7 +34,7 @@ Control {
             Layout.alignment: Qt.AlignHCenter
             implicitHeight: 36
             implicitWidth: 36
-            color: "white"
+            color: "transparent"
             radius: 9
 
             Image {
@@ -42,6 +42,7 @@ Control {
                 width: 28
                 height: 28
                 source: "../resources/icons/Logo.png"
+                fillMode: Image.PreserveAspectFit
             }
         }
 
