@@ -85,9 +85,32 @@ VSQTransferManager::~VSQTransferManager()
     }
 }
 
-bool
-VSQTransferManager::isReady() {
+bool VSQTransferManager::isReady() const
+{
+    if (m_xmppManager->serviceFound()) {
+        return true;
+    }
+
+    qCDebug(lcTransferManager) << "Upload service was not found, start waiting for it.";
+    QTimer timer;
+    timer.setSingleShot(true);
+    QEventLoop loop;
+    connect(this, &VSQTransferManager::fireReadyToUpload, &loop, &QEventLoop::quit);
+    connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    timer.start(10000);
+    loop.exec();
+    qCDebug(lcTransferManager) << "Upload service found:" << m_xmppManager->serviceFound();
     return m_xmppManager->serviceFound();
+}
+
+bool VSQTransferManager::hasTransfer(const QString &id) const
+{
+    return findTransfer(id, false) != nullptr;
+}
+
+VSQSettings *VSQTransferManager::settings()
+{
+    return m_settings;
 }
 
 VSQUpload *VSQTransferManager::startUpload(const QString &id, const QString &filePath)
@@ -97,14 +120,10 @@ VSQUpload *VSQTransferManager::startUpload(const QString &id, const QString &fil
         QMutexLocker locker(&m_transfersMutex);
         m_transfers.push_back(upload);
     }
-#if 0
-    requestUploadUrl(upload);
-#else
     if (!requestUploadUrl(upload)) {
         removeTransfer(upload, true);
         return nullptr;
     }
-#endif
     startTransfer(upload, QPrivateSignal());
     return upload;
 }
@@ -125,50 +144,21 @@ bool VSQTransferManager::requestUploadUrl(VSQUpload *upload)
     const auto filePath = upload->filePath();
     if (!QFile::exists(filePath)) {
         qCCritical(lcTransferManager) << "Uploaded file doesn't exist:" << filePath;
-        emit statusChanged(upload->id(), Attachment::Status::Failed);
+        upload->setStatus(Attachment::Status::Failed);
     }
-    else {
-#if defined (Q_OS_ANDROID)
-        // Wait for possibility to upload
-        // TODO: Fix it !
-        if (!m_xmppManager->serviceFound()) {
-            qCDebug(lcTransferManager) << "Upload service was not found, start waiting for it.";
-            QTimer timer;
-            timer.setSingleShot(true);
-            QEventLoop loop;
-            connect(this, &VSQTransferManager::fireReadyToUpload, &loop, &QEventLoop::quit);
-            connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
-            timer.start(10000);
-            loop.exec();
-        }
-        qCDebug(lcTransferManager) << "Wait for upload service is finished. Service is present: " << m_xmppManager->serviceFound();
-        // TODO: ~ Fix it !
-        // ~ Wait for possibility to upload
-#endif // Q_OS_ANDROID
-        if (m_xmppManager->serviceFound()) {
-            auto slotId = m_xmppManager->requestUploadSlot(QFileInfo(filePath));
-            upload->setSlotId(slotId);
-            return true;
-        } else {
-            qCDebug(lcTransferManager) << "Upload service was not found";
-            emit statusChanged(upload->id(), Attachment::Status::Failed);
-        }
+    else if (isReady()) {
+        auto slotId = m_xmppManager->requestUploadSlot(QFileInfo(filePath));
+        upload->setSlotId(slotId);
+        return true;
+    } else {
+        qCDebug(lcTransferManager) << "Upload service was not found";
+        upload->setStatus(Attachment::Status::Failed);
     }
 
     return false;
 }
 
-QXmppClient *VSQTransferManager::client()
-{
-    return m_client;
-}
-
-VSQSettings *VSQTransferManager::settings()
-{
-    return m_settings;
-}
-
-VSQUpload *VSQTransferManager::findUploadBySlotId(const QString &slotId)
+VSQUpload *VSQTransferManager::findUploadBySlotId(const QString &slotId) const
 {
     {
         QMutexLocker locker(&m_transfersMutex);
@@ -183,7 +173,7 @@ VSQUpload *VSQTransferManager::findUploadBySlotId(const QString &slotId)
     return nullptr;
 }
 
-VSQTransfer *VSQTransferManager::findTransfer(const QString &id)
+VSQTransfer *VSQTransferManager::findTransfer(const QString &id, bool showWarning) const
 {
     {
         QMutexLocker locker(&m_transfersMutex);
@@ -193,12 +183,15 @@ VSQTransfer *VSQTransferManager::findTransfer(const QString &id)
             }
         }
     }
-    qCWarning(lcTransferManager) << "Transfer wasn't found:" << id;
+    if (showWarning) {
+        qCWarning(lcTransferManager) << "Transfer wasn't found:" << id;
+    }
     return nullptr;
 }
 
 void VSQTransferManager::removeTransfer(VSQTransfer *transfer, bool lock)
 {
+    qCDebug(lcTransferManager) << "Removing of transfer" << transfer->id();
     if (!lock) {
         m_transfers.removeOne(transfer);
     }
@@ -206,23 +199,20 @@ void VSQTransferManager::removeTransfer(VSQTransfer *transfer, bool lock)
         QMutexLocker locker(&m_transfersMutex);
         m_transfers.removeOne(transfer);
     }
-    transfer->deleteLater();
+    QTimer::singleShot(1000, transfer, &VSQTransfer::deleteLater); // HACK(fpohtmeh): remove transfer later
 }
 
 void VSQTransferManager::abortTransfer(VSQTransfer *transfer, bool lock)
 {
+    qCDebug(lcTransferManager) << "Aborting of transfer" << transfer->id();
     transfer->abort();
-#if 0 // TODO: Chech for deadlock
     if (!lock) {
-        removeTransfer(transfer, true);
+        removeTransfer(transfer, false);
     }
     else {
         QMutexLocker locker(&m_transfersMutex);
         removeTransfer(transfer, false);
     }
-#else
-    removeTransfer(transfer, false);
-#endif
 }
 
 void VSQTransferManager::onStartTransfer(VSQTransfer *transfer)
@@ -231,6 +221,8 @@ void VSQTransferManager::onStartTransfer(VSQTransfer *transfer)
             std::bind(&VSQTransferManager::progressChanged, this, transfer->id(), args::_1, args::_2));
     connect(transfer, &VSQTransfer::statusChanged, this,
             std::bind(&VSQTransferManager::statusChanged, this, transfer->id(), args::_1));
+    connect(transfer, &VSQTransfer::ended, this,
+            std::bind(&VSQTransferManager::removeTransfer, this, transfer, true));
     connect(this, &VSQTransferManager::connectionChanged, transfer, &VSQTransfer::connectionChanged);
     transfer->start();
 }
@@ -239,6 +231,7 @@ void VSQTransferManager::onSlotReceived(const QXmppHttpUploadSlotIq &slot)
 {
     qCDebug(lcTransferManager) << "VSQUploader::onSlotReceived";
     if (auto upload = findUploadBySlotId(slot.id())) {
+        qCDebug(lcTransferManager) << "Remote url was received for" << upload->id();
         upload->remoteUrlReceived(slot.putUrl());
     }
 }
@@ -247,6 +240,7 @@ void VSQTransferManager::onRequestFailed(const QXmppHttpUploadRequestIq &request
 {
     qCDebug(lcTransferManager) << "VSQUploader::onRequestFailed" << request.error().text();
     if (auto upload = findUploadBySlotId(request.id())) {
+        qCWarning(lcTransferManager) << "Remote url error occured for" << upload->id();
         upload->remoteUrlErrorOccured();
         removeTransfer(upload, true);
     }

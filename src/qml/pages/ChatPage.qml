@@ -90,7 +90,7 @@ Page {
             nickname: model.author
             isUser: model.author === Messenger.currentUser
             status: isUser ? model.status : "none"
-            failed: model.status == 4 || model.attachmentStatus == Enums.AttachmentStatus.Failed
+            failed: (model.status == 4) && (!attachmentId || attachmentStatus == Enums.AttachmentStatus.Failed)
             messageId: model.messageId
 
             inRow: model.messageInARow
@@ -102,6 +102,8 @@ Page {
             attachmentType: model.attachmentType
             attachmentFilePath: model.attachmentFilePath
             attachmentThumbnailPath: model.attachmentThumbnailPath
+            attachmentThumbnailWidth: model.attachmentThumbnailWidth
+            attachmentThumbnailHeight: model.attachmentThumbnailHeight
             attachmentBytesLoaded: model.attachmentBytesLoaded
             attachmentStatus: model.attachmentStatus
             attachmentDownloaded: model.attachmentDownloaded
@@ -157,6 +159,12 @@ Page {
         listView.model = ConversationsModel
         ConversationsModel.setAsRead(recipient)
         ChatModel.updateUnreadMessageCount(recipient)
+
+        Messenger.openPreviewRequested.connect(openPreview)
+    }
+
+    Component.onDestruction: {
+        Messenger.openPreviewRequested.disconnect(openPreview)
     }
 
     // Sounds

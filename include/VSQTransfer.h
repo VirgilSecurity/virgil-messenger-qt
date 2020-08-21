@@ -37,6 +37,7 @@
 
 #include <QNetworkReply>
 #include <QObject>
+#include <QMutex>
 
 #include "VSQCommon.h"
 
@@ -54,26 +55,34 @@ public:
 
     QString id() const;
     bool isRunning() const;
+    bool isFailed() const;
 
     virtual void start();
     virtual void abort();
 
+    void setStatus(const Attachment::Status status);
+
 signals:
-    void progressChanged(DataSize bytesReceived, DataSize bytesTotal);
+    void progressChanged(const DataSize bytesReceived, const DataSize bytesTotal);
     void statusChanged(const Enums::AttachmentStatus status);
     void ended(bool failed);
     void connectionChanged();
 
 protected:
-    void connectReply(QNetworkReply *reply);
+    QList<QMetaObject::Connection> connectReply(QNetworkReply *reply, QMutex *guard);
 
     QNetworkAccessManager *networkAccessManager();
-    QFile *fileHandle(const QString &filePath);
+    QFile *createFileHandle(const QString &filePath);
 
 private:
+    void closeFileHandle();
+
     QNetworkAccessManager *m_networkAccessManager;
     QString m_id;
-    bool m_running;
+    Attachment::Status m_status;
+    DataSize m_bytesReceived = 0;
+    DataSize m_bytesTotal = 0;
+    QFile *m_fileHandle = nullptr;
 };
 
 #endif // VSQ_TRANSFER_H

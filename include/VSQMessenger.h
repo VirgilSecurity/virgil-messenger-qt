@@ -60,6 +60,8 @@ using namespace VirgilIoTKit;
 
 class QJsonDocument;
 
+Q_DECLARE_LOGGING_CATEGORY(lcMessenger)
+
 class VSQMessenger : public QObject {
 
     Q_OBJECT
@@ -140,10 +142,10 @@ public slots:
     sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
 
     QFuture<VSQMessenger::EnResult>
-    createSendMessage(bool createNew, const QString messageId, const QString to, const QString text);
+    createSendMessage(const QString messageId, const QString to, const QString text);
 
     QFuture<VSQMessenger::EnResult>
-    createSendAttachment(bool createNew, const QString messageId, const QString to, const QUrl url, const Enums::AttachmentType attachmentType);
+    createSendAttachment(const QString messageId, const QString to, const QUrl url, const Enums::AttachmentType attachmentType);
 
     Q_INVOKABLE void
     setStatus(VSQMessenger::EnStatus status);
@@ -186,7 +188,10 @@ signals:
     void
     fireCurrentUserChanged();
 
-    void openUrlExternallyRequested(const QString &url);
+    void openPreviewRequested(const QUrl &url);
+    void informationRequested(const QString &message);
+
+    void downloadThumbnail(const StMessage message, const QString sender, QPrivateSignal);
 
 private slots:
     void onConnected();
@@ -200,12 +205,13 @@ private slots:
     void onStateChanged(QXmppClient::State state);
     void onProcessNetworkState(bool online);
     void onReadyToUpload();
+    void onAddContactToDB(QString contact);
+    void onDownloadThumbnail(const StMessage message, const QString sender);
+    void onAttachmentStatusChanged(const QString &uploadId, const Enums::AttachmentStatus status);
+    void onAttachmentProgressChanged(const QString &uploadId, const DataSize bytesReceived, const DataSize bytesTotal);
+    void onAttachmentDecrypted(const QString &uploadId, const QString &filePath);
 
-    void
-    onAddContactToDB(QString contact);
-
-    Q_INVOKABLE void
-    onSubscribePushNotifications(bool enable);
+    Q_INVOKABLE void onSubscribePushNotifications(bool enable);
 
 private:
     QXmppClient m_xmpp;
@@ -291,11 +297,16 @@ private:
 
     StMessage parseJson(const QJsonDocument &json);
 
+    OptionalAttachment uploadAttachment(const QString messageId, const QString recipient, const Attachment &attachment);
+    void setFailedAttachmentStatus(const QString &messageId);
+
     VSQMessenger::EnResult _sendMessageInternal(bool createNew, const QString &messageId, const QString &to, const QString &message,
                                                 const OptionalAttachment &attachment);
 
     using Function = std::function<void (const StMessage &message)>;
     void downloadAndProcess(StMessage message, const Function &func);
 };
+
+Q_DECLARE_METATYPE(QXmppClient::Error)
 
 #endif // VIRGIL_IOTKIT_QT_MESSENGER_H

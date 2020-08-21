@@ -73,7 +73,7 @@ Control {
             width: mainView.width
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             readOnly: true
-            font.pointSize: 9
+            font.pointSize: Platform.isMobile ? 12 : 9
             selectByMouse: true
         }
     }

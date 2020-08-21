@@ -48,6 +48,10 @@ VSQDownload::VSQDownload(QNetworkAccessManager *networkAccessManager, const QStr
 
 VSQDownload::~VSQDownload()
 {
+    for (auto &con: m_connections) {
+        QObject::disconnect(con);
+    }
+    QMutexLocker locker(&m_guard);
 #ifdef VS_DEVMODE
     qCDebug(lcDev) << "~Download" << m_filePath;
 #endif
@@ -63,18 +67,23 @@ void VSQDownload::start()
     VSQTransfer::start();
 
     // Check file for writing
-    auto file = fileHandle(m_filePath);
+    auto file = createFileHandle(m_filePath);
     if (!file->open(QFile::WriteOnly)) {
-        emit statusChanged(Attachment::Status::Failed);
+        setStatus(Attachment::Status::Failed);
         return;
     }
 
     // Create request
     QNetworkRequest request(m_remoteUrl);
     auto reply = networkAccessManager()->get(request);
-    connectReply(reply);
-    connect(reply, &QNetworkReply::downloadProgress, this, &VSQTransfer::progressChanged);
-    connect(reply, &QNetworkReply::readyRead, this, [=]() {
-        file->write(reply->readAll());
+    m_connections = connectReply(reply, &m_guard);
+    m_connections << connect(reply, &QNetworkReply::downloadProgress, [=](qint64 bytesReceived, qint64 bytesTotal) {
+        emit progressChanged(bytesReceived, bytesTotal);
+    });
+    m_connections << connect(reply, &QNetworkReply::readyRead, [=]() {
+        const auto bytes = reply->readAll();
+        //qCDebug(lcTransferManager()) << "Wrote bytes:" << bytes.size();
+        file->write(bytes);
+        file->flush();
     });
 }

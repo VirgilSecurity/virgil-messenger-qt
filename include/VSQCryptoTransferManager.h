@@ -45,11 +45,12 @@ public:
     VSQCryptoTransferManager(QXmppClient *client, QNetworkAccessManager *networkAccessManager, VSQSettings *settings, QObject *parent);
     virtual ~VSQCryptoTransferManager();
 
-    VSQUpload *startCryptoUpload(const QString &id, const QString &filePath, const QString &recipient);
-    VSQDownload *startCryptoDownload(const QString &id, const QUrl &url, const QString &filePath, const QString &recipient);
+    VSQUpload *startCryptoUpload(const QString id, const QString filePath, const QString recipient);
+    VSQDownload *startCryptoDownload(const QString id, const QUrl url, const QString filePath, const QString recipient);
 
 signals:
-    void fileDownloadedAndDecrypted(const QString &id, const QString &filePath);
+    void fileEncrypted(const QString &id, const QString &encryptedFileName);
+    void fileDecrypted(const QString &id, const QString &filePath);
 
 private:
     QString getCacheNewFilePath();

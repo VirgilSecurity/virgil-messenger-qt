@@ -41,6 +41,7 @@
 #include <QDateTime>
 #include <QFileInfo>
 #include <QLoggingCategory>
+#include <QSize>
 #include <QtGlobal>
 #include <QUrl>
 
@@ -120,8 +121,11 @@ struct Attachment
     QString filePath; // raw
     QString displayName;
     QUrl remoteUrl; // encrypted
+    // Thumbnail
     QString thumbnailPath; // raw
     QUrl remoteThumbnailUrl; // encrypted
+    QSize thumbnailSize;
+    // Status
     DataSize bytesTotal = 0; // encrypted
     DataSize bytesLoaded = 0; // encrypted
     Status status = Status::Created;
@@ -138,6 +142,7 @@ struct StMessage
 
     QString messageId;
     QString message;
+    QString sender;
     QString recipient;
     OptionalAttachment attachment;
 };

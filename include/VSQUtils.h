@@ -46,6 +46,14 @@ namespace VSQUtils
     QString escapedUserName(const QString &userName);
 
     QString findUniqueFileName(const QString &fileName);
+
+    bool forceCreateDir(const QString &absolutePath);
+
+    bool isValidUrl(const QUrl &url);
+
+    QString urlToLocalFile(const QUrl &url);
+
+    QUrl localFileToUrl(const QString &filePath);
 }
 
 #endif // VSQ_UTILS_H

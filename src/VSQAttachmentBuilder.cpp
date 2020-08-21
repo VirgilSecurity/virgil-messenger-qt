@@ -40,7 +40,6 @@
 
 #include <virgil/iot/messenger/messenger.h>
 
-#include "VSQCryptoTransferManager.h"
 #include "VSQSettings.h"
 #include "VSQUpload.h"
 #include "VSQUtils.h"
@@ -49,36 +48,25 @@ using namespace VirgilIoTKit;
 
 Q_LOGGING_CATEGORY(lcAttachment, "attachment");
 
-VSQAttachmentBuilder::VSQAttachmentBuilder(VSQCryptoTransferManager *transferManager, QObject *parent)
+VSQAttachmentBuilder::VSQAttachmentBuilder(VSQSettings *settings, QObject *parent)
     : QObject(parent)
-    , m_transferManager(transferManager)
-    , m_settings(transferManager->settings())
+    , m_settings(settings)
 {}
 
-bool VSQAttachmentBuilder::isValidUrl(const QUrl &url) const
+OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment::Type type, QString &errorText)
 {
-    bool isValid = url.isValid();
-    qDebug() << ">>> URL: " << url.toString();
-#if !defined(Q_OS_ANDROID)
-    isValid = isValid && url.isLocalFile();
-#endif
-    return isValid;
-}
-
-OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment::Type type, const QString &messageId, const QString &recipient,
-                                               QString &errorText)
-{
-    if (!isValidUrl(url)) {
+    qCDebug(lcAttachment) << "Attachment input url:" << VSQUtils::urlToLocalFile(url);
+    if (!VSQUtils::isValidUrl(url)) {
         errorText = tr("Invalid attachment URL");
         return NullOptional;
     }
-#if defined (Q_OS_ANDROID)
-     QFileInfo localInfo(url.toString());
-#else
-    QFileInfo localInfo(url.toLocalFile());
-#endif
+    QFileInfo localInfo(VSQUtils::urlToLocalFile(url));
     if (!localInfo.exists()) {
         errorText = tr("File doesn't exist");
+        return NullOptional;
+    }
+    if (localInfo.size() == 0) {
+        errorText = tr("File is empty");
         return NullOptional;
     }
     if (localInfo.size() > m_settings->attachmentMaxFileSize()) {
@@ -91,44 +79,14 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
     attachment.type = type;
     attachment.displayName = localInfo.fileName();
     attachment.filePath = localInfo.absoluteFilePath();
-    const QString uploadErrorText = tr("Upload error");
-    const bool isPicture = type == Attachment::Type::Picture;
 
     // Thumbnail processing
-    if (isPicture) {
-        attachment.thumbnailPath = createThumbnailFile(attachment.filePath);
-        const auto id = messageId + QLatin1String("-thumb");
-        auto upload = m_transferManager->startCryptoUpload(id, attachment.thumbnailPath, recipient);
-        if (!upload) {
-            errorText = uploadErrorText;
-            return NullOptional;
-        }
-        auto remoteThumbnailUrl = upload->remoteUrl();
-        if (remoteThumbnailUrl) {
-            attachment.remoteThumbnailUrl = *remoteThumbnailUrl;
-        } else {
-            errorText = uploadErrorText;
-            return NullOptional;
-        }
+    if (type == Attachment::Type::Picture) {
+        const auto pixmap = generateThumbnail(QPixmap(attachment.filePath));
+        attachment.thumbnailSize = pixmap.size();
+        attachment.thumbnailPath = generateThumbnailFileName();
+        saveThumbnailFile(pixmap, attachment.thumbnailPath);
     }
-
-    // File processing
-    auto upload = m_transferManager->startCryptoUpload(messageId, attachment.filePath, recipient);
-    if (!upload) {
-        errorText = uploadErrorText;
-        return NullOptional;
-    }
-
-    auto remoteUrl = upload->remoteUrl();
-    if (remoteUrl) {
-        attachment.remoteUrl = *remoteUrl;
-    } else {
-        errorText = uploadErrorText;
-        return NullOptional;
-    }
-
-    attachment.bytesTotal = QFileInfo(upload->filePath()).size();
-
     return attachment;
 }
 
@@ -137,9 +95,8 @@ QString VSQAttachmentBuilder::generateThumbnailFileName() const
     return m_settings->thumbnailsDir().filePath(VSQUtils::createUuid() + QLatin1String(".png"));
 }
 
-QString VSQAttachmentBuilder::createThumbnailFile(const QString &filePath) const
+QPixmap VSQAttachmentBuilder::generateThumbnail(const QPixmap &pixmap) const
 {
-    QPixmap pixmap(filePath);
     QSizeF size = pixmap.size();
     const double ratio = size.height() / size.width();
     const QSizeF maxSize = m_settings->thumbnailMaxSize();
@@ -151,11 +108,14 @@ QString VSQAttachmentBuilder::createThumbnailFile(const QString &filePath) const
         size.setHeight(maxSize.height());
         size.setWidth(maxSize.height() / ratio);
     }
-    if (size != pixmap.size()) {
-        pixmap = pixmap.scaled(size.width(), size.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    if (size == pixmap.size()) {
+        return pixmap;
     }
-    const QString thumbnailFileName = generateThumbnailFileName();
-    pixmap.save(thumbnailFileName);
-    qCInfo(lcAttachment) << "Created thumbnail:" << thumbnailFileName;
-    return thumbnailFileName;
+    return pixmap.scaled(size.width(), size.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+}
+
+void VSQAttachmentBuilder::saveThumbnailFile(const QPixmap &pixmap, const QString &fileName) const
+{
+    pixmap.save(fileName);
+    qCInfo(lcAttachment) << "Created thumbnail:" << fileName;
 }

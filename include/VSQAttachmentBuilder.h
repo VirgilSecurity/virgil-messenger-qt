@@ -41,28 +41,26 @@
 
 Q_DECLARE_LOGGING_CATEGORY(lcAttachment);
 
+class QPixmap;
+
 class VSQSettings;
-class VSQCryptoTransferManager;
 
 class VSQAttachmentBuilder : public QObject
 {
 public:
-    VSQAttachmentBuilder(VSQCryptoTransferManager *transferManager, QObject *parent);
+    VSQAttachmentBuilder(VSQSettings *settings, QObject *parent);
     VSQAttachmentBuilder() = default; // QML engine requires default constructor
-
-    bool isValidUrl(const QUrl &url) const;
 
     // Build encoded attachment by local url, attachment type and recipient
     // Start thumbnail/file uploads
-    OptionalAttachment build(const QUrl &localUrl, const Attachment::Type type, const QString &messageId, const QString &recipient,
-                             QString &errorText);
+    OptionalAttachment build(const QUrl &localUrl, const Attachment::Type type, QString &errorText);
 
     QString generateThumbnailFileName() const;
 
 private:
-    QString createThumbnailFile(const QString &filePath) const;
+    QPixmap generateThumbnail(const QPixmap &pixmap) const;
+    void saveThumbnailFile(const QPixmap &pixmap, const QString &fileName) const;
 
-    VSQCryptoTransferManager *m_transferManager;
     VSQSettings *m_settings;
 };
 

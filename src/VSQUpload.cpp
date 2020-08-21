@@ -46,6 +46,10 @@ VSQUpload::VSQUpload(QNetworkAccessManager *networkAccessManager, const QString 
 
 VSQUpload::~VSQUpload()
 {
+    for (auto &con: m_connections) {
+        QObject::disconnect(con);
+    }
+    QMutexLocker locker(&m_guard);
 #ifdef VS_DEVMODE
     qCDebug(lcDev) << "~Upload" << m_filePath;
 #endif
@@ -61,16 +65,16 @@ void VSQUpload::start()
     VSQTransfer::start();
 
     // Encrypt file
-    auto file = fileHandle(m_filePath);
+    auto file = createFileHandle(m_filePath);
     if (!file->open(QFile::ReadOnly)) {
-        emit statusChanged(Attachment::Status::Failed);
+        setStatus(Attachment::Status::Failed);
         return;
     }
 
     // Create request
     auto url = remoteUrl();
     if (!url) {
-        emit statusChanged(Attachment::Status::Failed);
+        setStatus(Attachment::Status::Failed);
         return;
     }
     QNetworkRequest request(*url);
@@ -78,11 +82,14 @@ void VSQUpload::start()
     if (mimeType.isValid()) {
         request.setHeader(QNetworkRequest::ContentTypeHeader, mimeType.name());
     }
-    request.setHeader(QNetworkRequest::ContentLengthHeader, QFileInfo(m_filePath).size());
+    request.setHeader(QNetworkRequest::ContentLengthHeader, fileSize());
     // Create & connect reply
     auto reply = networkAccessManager()->put(request, file);
-    connectReply(reply);
-    connect(reply, &QNetworkReply::uploadProgress, this, &VSQTransfer::progressChanged);
+    m_connections = connectReply(reply, &m_guard);
+    m_connections << connect(reply, &QNetworkReply::uploadProgress, [=](qint64 bytesSent, qint64 bytesTotal) {
+        QMutexLocker locker(&m_guard);
+        emit progressChanged(bytesSent, bytesTotal);
+    });
 }
 
 QString VSQUpload::filePath() const
@@ -97,22 +104,32 @@ Optional<QUrl> VSQUpload::remoteUrl()
         timer.setSingleShot(true);
         QEventLoop loop;
 
-        connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+        auto remoteUrlError = [&]() {
+            m_remoteUrlError = true;
+            loop.quit();
+        };
+
+        connect(&timer, &QTimer::timeout, &loop, remoteUrlError);
         connect(this, &VSQUpload::remoteUrlReceived, &loop, [&](const QUrl &url) {
             m_remoteUrl = url;
             loop.quit();
         });
-        connect(this, &VSQUpload::remoteUrlErrorOccured, &loop, &QEventLoop::quit);
-        connect(this, &VSQUpload::connectionChanged, &loop, &QEventLoop::quit);
+        connect(this, &VSQUpload::remoteUrlErrorOccured, &loop, remoteUrlError);
+        connect(this, &VSQUpload::connectionChanged, &loop, remoteUrlError);
 
         timer.start(1000);
+        qCDebug(lcTransferManager) << "Upload url waiting: start";
         loop.exec();
+        qCDebug(lcTransferManager) << "Upload url waiting: end";
+    }
+    if (m_remoteUrlError) {
+        qCDebug(lcTransferManager) << "Remote url error";
+        return NullOptional;
     }
     if (m_remoteUrl) {
         qCDebug(lcTransferManager) << "Remote url:" << *m_remoteUrl;
         return m_remoteUrl;
     }
-    m_remoteUrlError = true;
     return NullOptional;
 }
 
@@ -124,4 +141,9 @@ QString VSQUpload::slotId() const
 void VSQUpload::setSlotId(const QString &id)
 {
     m_slotId = id;
+}
+
+DataSize VSQUpload::fileSize() const
+{
+    return QFileInfo(filePath()).size();
 }
