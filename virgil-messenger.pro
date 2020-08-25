@@ -79,10 +79,7 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
     DEFINES += VS_IOS=1 VS_MOBILE=1
 }
 
-isEmpty(VS_CUSTOMER) {
-    VS_CUSTOMER=Virgil
-    # Available customers: Virgil, Area52
-}
+include(customers/customers.pri)
 
 #
 #   Headers
@@ -109,8 +106,8 @@ HEADERS += \
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
         include/ui/VSQUiHelper.h \
-        # Customers
-        customers/$${VS_CUSTOMER}/include/VSQCustomer.h \
+        # Generated
+        generated/include/VSQCustomer.h
         # Thirdparty
         include/thirdparty/optional/optional.hpp
 
@@ -144,7 +141,9 @@ SOURCES += \
 #   Resources
 #
 
-RESOURCES += src/resources.qrc
+RESOURCES += \
+    src/resources.qrc \
+    generated/src/customer.qrc
 
 #
 #   Include path
@@ -154,7 +153,7 @@ RESOURCES += src/resources.qrc
 INCLUDEPATH +=  include \
     $${QXMPP_BUILD_PATH}/include \
     $${QXMPP_BUILD_PATH}/include/qxmpp \
-    customers/$${VS_CUSTOMER}/include
+    generated/include
 
 #
 #   Sparkle framework
@@ -215,7 +214,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 #
-#   Depencies
+#   Dependencies
 #
 
 DEPENDPATH += $${INCLUDEPATH}
@@ -238,6 +237,10 @@ linux:!android {
 win32|win64 {
     DEFINES += VS_DESKTOP=1
     QT += widgets
+
+    # Assets
+    RC_ICONS = $$VS_PLATFORMS_PATH/windows/Logo.ico
+    DISTFILES += $$VS_PLATFORMS_PATH/windows/Logo.ico
 }
 
 #
@@ -245,10 +248,12 @@ win32|win64 {
 #
 
 macx: {
-    ICON = $$PWD/scripts/macos/pkg_resources/MyIcon.icns
-    QMAKE_INFO_PLIST = $$PWD/platforms/macos/virgil-messenger.plist
+    ICON = generated/scripts/macos/pkg_resources/MyIcon.icns
+    QMAKE_INFO_PLIST = $$VS_PLATFORMS_PATH/macos/virgil-messenger.plist
     DEFINES += VS_DESKTOP=1
     QT += widgets
+
+    DISTFILES += $$VS_PLATFORMS_PATH/macos/virgil-messenger.plist.in
 }
 
 #
@@ -336,80 +341,45 @@ android: {
         $${FIREBASE_LIBS_DIR}/libfirebase_app.a \
         $${FIREBASE_LIBS_DIR}/libfirebase_auth.a
 
-    ANDROID_PACKAGE_SOURCE_DIR = \
-        $$PWD/platforms/android
+    ANDROID_PACKAGE_SOURCE_DIR = $$VS_PLATFORMS_PATH/android
 
     DISTFILES += \
-        platforms/android/gradle.properties \
-        platforms/android/google-services.json \
-        platforms/android/AndroidManifest.xml \
-        platforms/android/build.gradle \
-        platforms/android/gradle/wrapper/gradle-wrapper.jar \
-        platforms/android/gradle/wrapper/gradle-wrapper.properties \
-        platforms/android/gradlew \
-        platforms/android/gradlew.bat \
-        platforms/android/res/values/libs.xml \
-        platforms/android/src/org/virgil/notification/NotificationClient.java
+        $$ANDROID_PACKAGE_SOURCE_DIR/gradle.properties \
+        $$ANDROID_PACKAGE_SOURCE_DIR/google-services.json \
+        $$ANDROID_PACKAGE_SOURCE_DIR/AndroidManifest.xml \
+        $$ANDROID_PACKAGE_SOURCE_DIR/build.gradle \
+        $$ANDROID_PACKAGE_SOURCE_DIR/gradle/wrapper/gradle-wrapper.jar \
+        $$ANDROID_PACKAGE_SOURCE_DIR/gradle/wrapper/gradle-wrapper.properties \
+        $$ANDROID_PACKAGE_SOURCE_DIR/gradlew \
+        $$ANDROID_PACKAGE_SOURCE_DIR/gradlew.bat \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/values/libs.xml \
+        $$ANDROID_PACKAGE_SOURCE_DIR/src/org/virgil/notification/NotificationClient.java \
+        # Assets
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-hdpi/icon.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-hdpi/icon_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-ldpi/icon.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-ldpi/icon_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-mdpi/icon.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-mdpi/icon_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-xhdpi/icon.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-xhdpi/icon_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-xxhdpi/icon.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-xxhdpi/icon_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-xxxhdpi/icon.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-xxxhdpi/icon_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-hdpi/ic_launcher_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-mdpi/ic_launcher.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-mdpi/ic_launcher_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xhdpi/ic_launcher.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xhdpi/ic_launcher_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xxhdpi/ic_launcher.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xxhdpi/ic_launcher_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xxxhdpi/ic_launcher.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xxxhdpi/ic_launcher_round.png
 }
 
-#
-#   Enable Address Sanitizer if required
-#
-message(">>> ENABLE ADDRESS SANITIZER: $$USE_ASAN")
-equals(USE_ASAN, "yes") {
-    CONFIG += sanitizer sanitize_address
-}
-
-#
-#   Enable Undefined behavior Sanitizer if required
-#
-message(">>> ENABLE UNDEFINED BEHAVIOR SANITIZER: $$USE_UBSAN")
-equals(USE_UBSAN, "yes") {
-    CONFIG += sanitizer sanitize_undefined
-}
-
-#
-#   Enable Memory Sanitizer if required
-#
-message(">>> ENABLE MEMORY SANITIZER: $$USE_MSAN")
-equals(USE_MSAN, "yes") {
-    CONFIG += sanitizer sanitize_memory
-}
-
-#
-#   Enable Thread Sanitizer if required
-#
-message(">>> ENABLE THREAD SANITIZER: $$USE_TSAN")
-equals(USE_TSAN, "yes") {
-    CONFIG += sanitizer sanitize_thread
-}
-
-#
-#   Assets
-#
-RC_ICONS = platforms/windows/Logo.ico
+include(ext/sanitizer.pri)
 
 DISTFILES += \
-    platforms/android/res/drawable-hdpi/icon.png \
-    platforms/android/res/drawable-hdpi/icon_round.png \
-    platforms/android/res/drawable-ldpi/icon.png \
-    platforms/android/res/drawable-ldpi/icon_round.png \
-    platforms/android/res/drawable-mdpi/icon.png \
-    platforms/android/res/drawable-mdpi/icon_round.png \
-    platforms/android/res/drawable-xhdpi/icon.png \
-    platforms/android/res/drawable-xhdpi/icon_round.png \
-    platforms/android/res/drawable-xxhdpi/icon.png \
-    platforms/android/res/drawable-xxhdpi/icon_round.png \
-    platforms/android/res/drawable-xxxhdpi/icon.png \
-    platforms/android/res/drawable-xxxhdpi/icon_round.png \
-    platforms/android/res/mipmap-hdpi/ic_launcher_round.png \
-    platforms/android/res/mipmap-mdpi/ic_launcher.png \
-    platforms/android/res/mipmap-mdpi/ic_launcher_round.png \
-    platforms/android/res/mipmap-xhdpi/ic_launcher.png \
-    platforms/android/res/mipmap-xhdpi/ic_launcher_round.png \
-    platforms/android/res/mipmap-xxhdpi/ic_launcher.png \
-    platforms/android/res/mipmap-xxhdpi/ic_launcher_round.png \
-    platforms/android/res/mipmap-xxxhdpi/ic_launcher.png \
-    platforms/android/res/mipmap-xxxhdpi/ic_launcher_round.png \
-    platforms/macos/virgil-messenger.plist.in \
-    platforms/windows/Logo.ico
+    .gitignore \
+    generated/src/qml/customer/qmldir

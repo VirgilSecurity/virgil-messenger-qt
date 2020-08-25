@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/resources/icons/Logo-Big.png</file>
+        <file>qml/resources/icons/Logo-Big@2x.png</file>
+        <file>qml/resources/icons/Logo-Big@3x.png</file>
+        <file>qml/resources/icons/Logo.png</file>
+        <file>qml/resources/icons/Logo@2x.png</file>
+    </qresource>
+</RCC>

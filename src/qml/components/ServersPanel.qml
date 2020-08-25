@@ -34,7 +34,7 @@ Control {
             Layout.alignment: Qt.AlignHCenter
             implicitHeight: 36
             implicitWidth: 36
-            color: "transparent" // FIXME(fpohtmeh): set white for Virgil color
+            color: "transparent"
             radius: 9
 
             Image {

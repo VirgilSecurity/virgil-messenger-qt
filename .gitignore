@@ -51,6 +51,7 @@ Makefile
 
 ####
 # macOS
-platforms/macos/virgil-messenger.plist
-
 !scripts/macos/pkg_resources/bin
+
+####
+generated

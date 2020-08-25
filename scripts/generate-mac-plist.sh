@@ -23,7 +23,7 @@ function print_usage() {
 
 #***************************************************************************************
 function fill_plist() {
-    local PLIST_DIR="${SCRIPT_FOLDER}/../platforms/macos"
+    local PLIST_DIR="${SCRIPT_FOLDER}/../generated/platforms/macos"
     local TEMPLATE_PLIST="${PLIST_DIR}/virgil-messenger.plist.in"
     local DST_PLIST="${PLIST_DIR}/virgil-messenger.plist"
 
