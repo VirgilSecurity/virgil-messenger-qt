@@ -47,7 +47,7 @@ namespace Customer
 
     static QString OrganizationDomain = "virgil.net";
     static QString MessengerUrlTemplate = "https://messenger%1.area52.virgil.net";
-    static QString XmppUrlTemplate = "xmpp%1.virgilsecurity.com";
+    static QString XmppUrlTemplate = "xmpp%1.area52.virgil.net";
 }
 
 #endif // VSQ_CUSTOMER_H
