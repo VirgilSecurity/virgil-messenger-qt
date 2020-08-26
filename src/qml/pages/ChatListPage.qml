@@ -75,6 +75,8 @@ Page {
 
         onIsSearchOpenChanged: {
             contactsHeaderId.isSearchOpen ? ChatModel.applyFilter('') : ChatModel.clearFilter()
+            focus = false
+            parent.focus = true
         }
 
         onSearchChanged: {

@@ -170,4 +170,8 @@ ApplicationWindow {
 //        Logging.reportSent.connect(showPopupSuccess)
 //        Logging.reportSentErr.connect(showPopupError)
     }
+
+    onActiveFocusItemChanged: {
+//        console.log(activeFocusItem, activeFocusItem ? activeFocusItem.objectName : undefined)
+    }
 }
