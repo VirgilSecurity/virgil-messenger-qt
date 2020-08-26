@@ -81,6 +81,8 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
 
 include(customers/customers.pri)
 
+VS_PLATFORMS_PATH=$$absolute_path(generated/platforms)
+
 #
 #   Headers
 #

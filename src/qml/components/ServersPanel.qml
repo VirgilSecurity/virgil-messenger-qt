@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
+import Customers 1.0
 
 import "../theme"
 
@@ -34,7 +35,7 @@ Control {
             Layout.alignment: Qt.AlignHCenter
             implicitHeight: 36
             implicitWidth: 36
-            color: "transparent"
+            color: Customer.serverIconBackgroundColor
             radius: 9
 
             Image {

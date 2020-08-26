@@ -5,5 +5,7 @@
         <file>qml/resources/icons/Logo-Big@3x.png</file>
         <file>qml/resources/icons/Logo.png</file>
         <file>qml/resources/icons/Logo@2x.png</file>
+        <file>qml/Customers/Customer.qml</file>
+        <file>qml/Customers/qmldir</file>
     </qresource>
 </RCC>
