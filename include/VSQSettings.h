@@ -32,21 +32,41 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#ifndef VSQ_SETTINGS_H
+#define VSQ_SETTINGS_H
+
+#include <QDir>
 #include <QSettings>
+#include <QSize>
 
-#ifndef VSQSETTINGS_H
-#define VSQSETTINGS_H
+#include "VSQCommon.h"
 
-class VSQSettings : public QSettings
+Q_DECLARE_LOGGING_CATEGORY(lcSettings)
+
+class VSQSettings : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(bool devMode READ devMode CONSTANT)
 
 public:
     explicit VSQSettings(QObject *parent);
     ~VSQSettings();
 
-    void setUsersList(const QStringList &users);
-    QStringList usersList() const;
+    // Attachments
+
+    DataSize attachmentMaxFileSize() const;
+    QDir attachmentCacheDir() const;
+    QDir thumbnailsDir() const;
+    QDir downloadsDir() const;
+    QSize thumbnailMaxSize() const;
+
+    // Dev mode
+    bool devMode() const;
+
+private:
+    QDir m_attachmentCacheDir;
+    QDir m_thumbnaisDir;
+    QDir m_downloadsDir;
 };
 
-#endif // VSQSETTINGS_H
+#endif // VSQ_SETTINGS_H

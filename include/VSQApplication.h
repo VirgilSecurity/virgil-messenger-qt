@@ -32,42 +32,54 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQAPPLICATION_H
-#define VSQAPPLICATION_H
+#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
+#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
 
+#include <QtCore>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <VSQMessenger.h>
+#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
+#include <VSQLogging.h>
+#include <VSQSettings.h>
 
-#include "VSQMessenger.h"
-#include "VSQSettings.h"
+#include <macos/VSQMacos.h>
 
-class VSQApplication : public QGuiApplication
-{
+class QNetworkAccessManager;
+
+class VSQApplication : public QObject {
     Q_OBJECT
-
 public:
-    VSQApplication(int &argc, char **argv);
+    VSQApplication();
     virtual ~VSQApplication() = default;
 
-    Q_INVOKABLE void reloadQml();
-    Q_INVOKABLE void checkUpdates();
-    Q_INVOKABLE QString currentVersion() const;
-    Q_INVOKABLE void sendReport();
+    int
+    run(const QString &basePath);
+
+    Q_INVOKABLE
+    void reloadQml();
+
+    Q_INVOKABLE
+    void checkUpdates();
+
+    Q_INVOKABLE QString
+    currentVersion() const;
+
+    Q_INVOKABLE void
+    sendReport();
+
+
+private slots:
+    void
+    onApplicationStateChanged(Qt::ApplicationState state);
 
 private:
-    void parseArgs(int &argc, char **argv);
-    void setDefaults();
-    void setupFonts();
-    void setupContextProperties();
-    void setupConnections();
-
-    void onApplicationStateChanged(Qt::ApplicationState state);
-
     static const QString kVersion;
-
-    QQmlApplicationEngine m_engine;
     VSQSettings m_settings;
+    QNetworkAccessManager *m_networkAccessManager;
+    QQmlApplicationEngine m_engine;
     VSQMessenger m_messenger;
+    VSQLogging m_logging;
 };
 
-#endif // VSQAPPLICATION_H
+#endif // VSQApplication

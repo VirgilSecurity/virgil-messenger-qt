@@ -40,7 +40,9 @@
 #include <QFuture>
 #include <QObject>
 #include <QSemaphore>
+#include <QXmppCarbonManager.h>
 
+#include <virgil/iot/qt/VSQIoTKit.h>
 #include <qxmpp/QXmppClient.h>
 #include <qxmpp/QXmppMessageReceiptManager.h>
 
@@ -48,10 +50,17 @@
 
 #include "VSQSqlConversationModel.h"
 #include "VSQSqlChatModel.h"
+#include "VSQLogging.h"
+#include <VSQNetworkAnalyzer.h>
+#include <VSQAttachmentBuilder.h>
+#include <VSQCryptoTransferManager.h>
+#include <VSQDiscoveryManager.h>
 
 using namespace VirgilIoTKit;
 
-class VSQSettings;
+class QJsonDocument;
+
+Q_DECLARE_LOGGING_CATEGORY(lcMessenger)
 
 class VSQMessenger : public QObject {
 
@@ -73,7 +82,8 @@ public:
         MRES_ERR_SIGNUP,
         MRES_ERR_USER_NOT_FOUND,
         MRES_ERR_USER_ALREADY_EXISTS,
-        MRES_ERR_ENCRYPTION
+        MRES_ERR_ENCRYPTION,
+        MRES_ERR_ATTACHMENT
     };
 
     enum EnStatus
@@ -84,17 +94,17 @@ public:
 
     Q_PROPERTY(QString currentUser READ currentUser NOTIFY fireCurrentUserChanged)
 
-    explicit VSQMessenger(VSQSettings *settings, QObject *parent);
-    VSQMessenger() = default; // NOTE(vova.y): needed for QmlPrivate template
-    ~VSQMessenger() override = default;
+    VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSettings *settings);
+    VSQMessenger() = default; // QML engine requires default constructor
+    virtual ~VSQMessenger();
 
     Q_INVOKABLE QString currentUser() const;
     Q_INVOKABLE QString currentRecipient() const;
 
     VSQSqlConversationModel &modelConversations();
     VSQSqlChatModel &getChatModel();
-    
-    static QString decryptMessage(const QString &sender, const QString &message);
+
+    Optional<StMessage> decryptMessage(const QString &sender, const QString &message);
 
 public slots:
 
@@ -129,15 +139,26 @@ public slots:
     addContact(QString contact);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    sendMessage(QString to, QString message);
+    sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
 
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    sendMessage(bool createNew, QString messageId, QString to, QString message);
+    QFuture<VSQMessenger::EnResult>
+    createSendMessage(const QString messageId, const QString to, const QString text);
+
+    QFuture<VSQMessenger::EnResult>
+    createSendAttachment(const QString messageId, const QString to, const QUrl url, const Enums::AttachmentType attachmentType);
 
     Q_INVOKABLE void
     setStatus(VSQMessenger::EnStatus status);
 
+    void setLogging(VSQLogging *loggingPtr);
+
     Q_INVOKABLE void setCurrentRecipient(const QString &recipient);
+
+    Q_INVOKABLE void saveAttachmentAs(const QString &messageId, const QVariant &fileUrl);
+
+    Q_INVOKABLE void downloadAttachment(const QString &messageId);
+
+    Q_INVOKABLE void openAttachment(const QString &messageId);
 
 signals:
     void
@@ -145,6 +166,9 @@ signals:
 
     void
     fireInform(QString informText);
+
+    void
+    fireWarning(QString warningText);
 
     void
     fireConnecting();
@@ -164,6 +188,11 @@ signals:
     void
     fireCurrentUserChanged();
 
+    void openPreviewRequested(const QUrl &url);
+    void informationRequested(const QString &message);
+
+    void downloadThumbnail(const StMessage message, const QString sender, QPrivateSignal);
+
 private slots:
     void onConnected();
     void onMessageDelivered(const QString&, const QString&);
@@ -174,28 +203,39 @@ private slots:
     void onIqReceived(const QXmppIq &iq);
     void onSslErrors(const QList<QSslError> &errors);
     void onStateChanged(QXmppClient::State state);
+    void onProcessNetworkState(bool online);
+    void onReadyToUpload();
+    void onAddContactToDB(QString contact);
+    void onDownloadThumbnail(const StMessage message, const QString sender);
+    void onAttachmentStatusChanged(const QString &uploadId, const Enums::AttachmentStatus status);
+    void onAttachmentProgressChanged(const QString &uploadId, const DataSize bytesReceived, const DataSize bytesTotal);
+    void onAttachmentDecrypted(const QString &uploadId, const QString &filePath);
 
-    void
-    onAddContactToDB(QString contact);
-
-    Q_INVOKABLE void
-    onSubscribePushNotifications(bool enable);
+    Q_INVOKABLE void onSubscribePushNotifications(bool enable);
 
 private:
-    VSQSettings *m_settings;
     QXmppClient m_xmpp;
     QXmppMessageReceiptManager* m_xmppReceiptManager;
+    QXmppCarbonManager* m_xmppCarbonManager;
+    VSQDiscoveryManager* m_xmppDiscoveryManager;
     VSQSqlConversationModel *m_sqlConversations;
     VSQSqlChatModel *m_sqlChatModel;
+    VSQLogging *m_logging;
+    VSQNetworkAnalyzer m_networkAnalyzer;
+    VSQSettings *m_settings;
+    VSQCryptoTransferManager *m_transferManager;
+    VSQAttachmentBuilder m_attachmentBuilder;
 
+    QMutex m_connectGuard;
+    QMutex m_messageGuard;
     QString m_user;
     QString m_userId;
+    QString m_deviceId;
     QString m_recipient;
     QString m_xmppPass;
     VSQEnvType m_envType;
     static const VSQEnvType _defaultEnv = PROD;
     QXmppConfiguration conf;
-
     static const QString kOrganization;
     static const QString kApp;
     static const QString kUsers;
@@ -216,7 +256,7 @@ private:
     _connectToDatabase();
 
     bool
-    _connect(QString userWithEnv, QString userId);
+    _connect(QString userWithEnv, QString deviceId, QString userId, bool forced = false);
 
     QString
     _xmppPass();
@@ -234,13 +274,16 @@ private:
     _reconnect();
 
     bool
-    _saveCredentials(const QString &user, const vs_messenger_virgil_user_creds_t &creds);
+    _saveCredentials(const QString &user, const QString &deviceId, const vs_messenger_virgil_user_creds_t &creds);
 
     bool
-    _loadCredentials(const QString &user, vs_messenger_virgil_user_creds_t &creds);
+    _loadCredentials(const QString &user, QString &deviceId, vs_messenger_virgil_user_creds_t &creds);
 
     void
     _addToUsersList(const QString &user);
+
+    void
+    _saveUsersList(const QStringList &users);
 
     QString
     _prepareLogin(const QString &user);
@@ -249,6 +292,21 @@ private:
     _caBundleFile();
 
     void _sendFailedMessages();
+
+    QString createJson(const QString &message, const OptionalAttachment &attachment);
+
+    StMessage parseJson(const QJsonDocument &json);
+
+    OptionalAttachment uploadAttachment(const QString messageId, const QString recipient, const Attachment &attachment);
+    void setFailedAttachmentStatus(const QString &messageId);
+
+    VSQMessenger::EnResult _sendMessageInternal(bool createNew, const QString &messageId, const QString &to, const QString &message,
+                                                const OptionalAttachment &attachment);
+
+    using Function = std::function<void (const StMessage &message)>;
+    void downloadAndProcess(StMessage message, const Function &func);
 };
+
+Q_DECLARE_METATYPE(QXmppClient::Error)
 
 #endif // VIRGIL_IOTKIT_QT_MESSENGER_H

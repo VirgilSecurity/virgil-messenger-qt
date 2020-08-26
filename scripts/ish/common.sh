@@ -1,9 +1,9 @@
 #!/bin/bash
 
+
 PROJECT_DIR="${SCRIPT_FOLDER}/.."
-QT_SDK_DIR="${1:-/opt/Qt/5.12.6}"
-ANDROID_NDK="${2:-/opt/android/ndk}"
-export ANDROID_NDK_ROOT=${ANDROID_NDK}
+QT_SDK_DIR="${QT_SDK_ROOT:-/opt/Qt/5.15.0}"
+export ANDROID_NDK_ROOT=${ANDROID_NDK_ROOT:-/opt/Android/Sdk/ndk/21.1.6352462}
 
 BUILD_TYPE=release
 APPLICATION_NAME=virgil-messenger
@@ -19,9 +19,9 @@ fi
 
 trap 'err_trap  $@' ERR
 
-err_trap() {
+err_trap(){
     err_code=$?
-    # ${FUNCNAME[*]} : err_trap print_message main
+    # ${FUNCNAME[*]} : err_trap print_message main  
     # call from subfunction: lenght = 3
     # ${FUNCNAME[*]} : err_trap  main
     # call from main: lenght = 2
@@ -29,13 +29,14 @@ err_trap() {
     # if arr_shift eq 0. we need to ommit FUNCTION and ARGUMENTS
     echo "##############################################################################"
     echo "### SCRIPT ERROR AT $0, IN LINE ${BASH_LINENO[$arr_shift]}"
-    [ $arr_shift -ne 0 ] && echo "### BASH FUNCTION NAME: ${FUNCNAME[$arr_shift]}"
+    [  $arr_shift -ne 0 ] && echo "### BASH FUNCTION NAME: ${FUNCNAME[$arr_shift]}"
     echo "### BASH COMMAND: ${BASH_COMMAND[*]}"
-    [ $arr_shift -ne 0 ] && echo "### COMMAND ARGUMENTS: $@"
+    [  $arr_shift -ne 0 ] && echo "### COMMAND ARGUMENTS: $@"
     echo "### ERRORCODE: $err_code"
     echo "##############################################################################"
     exit 127
 }
+
 
 function print_title() {
     echo
@@ -97,6 +98,7 @@ function prepare_libraries() {
     else
       prepare_firebase
     fi
+
 }
 
 #***************************************************************************************

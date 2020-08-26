@@ -37,29 +37,45 @@
 
 #include <QSqlTableModel>
 
+#include "VSQCommon.h"
+
+class VSQCryptoTransferManager;
+
 class VSQSqlConversationModel : public QSqlTableModel
 {
     Q_OBJECT
     Q_PROPERTY(QString recipient READ recipient WRITE setRecipient NOTIFY recipientChanged)
 
+    enum Roles
+    {
+        AuthorRole = Qt::UserRole,
+        RecipientRole,
+        TimestampRole,
+        MessageRole,
+        StatusRole,
+        MessageIdRole,
+
+        AttachmentIdRole,
+        AttachmentBytesTotalRole,
+        AttachmentTypeRole,
+        AttachmentFilePathRole,
+        AttachmentRemoteUrlRole,
+        AttachmentThumbnailPathRole,
+        AttachmentThumbnailWidthRole,
+        AttachmentThumbnailHeightRole,
+        AttachmentRemoteThumbnailUrlRole,
+        AttachmentStatusRole,
+
+        FirstInRowRole,
+        InRowRole,
+        DayRole,
+        AttachmentDisplaySizeRole,
+        AttachmentBytesLoadedRole,
+        AttachmentDownloadedRole
+    };
+
 public:
     VSQSqlConversationModel(QObject *parent = nullptr);
-
-    enum EnMessageStatus
-    {
-        MST_CREATED,
-        MST_SENT,
-        MST_RECEIVED,
-        MST_READ,
-        MST_FAILED
-    };
-
-    struct StMessage
-    {
-        QString message_id;
-        QString message;
-        QString recipient;
-    };
 
     QString
     user() const;
@@ -89,32 +105,42 @@ public:
     roleNames() const override;
 
     Q_INVOKABLE void
-    createMessage(QString recipient, QString message, QString externalId);
-
-    Q_INVOKABLE void
-    receiveMessage(const QString &messageId, const QString &sender, const QString &message);
-
-    Q_INVOKABLE void
     setAsRead(const QString &author);
 
-    Q_INVOKABLE void
-    setMessageStatus(const QString &messageId, const VSQSqlConversationModel::EnMessageStatus status);
-
     int
-    getMessageCount(const QString &user, const VSQSqlConversationModel::EnMessageStatus status);
+    getMessageCount(const QString &user, const StMessage::Status status);
 
-    QList<StMessage*>
-    getMessages(const QString &user, const EnMessageStatus status);
+    QList<StMessage> getMessages(const QString &user, const StMessage::Status status);
+
+    Optional<StMessage> getMessage(const QString &messageId) const;
+    StMessage getMessage(const QSqlRecord &record) const;
 
 signals:
-    void
-    recipientChanged();
+    void createMessage(const QString recipient, const QString message, const QString messageId, const OptionalAttachment attachment);
+    void receiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachment attachment);
+    void setMessageStatus(const QString messageId, const StMessage::Status status);
+    void setAttachmentFilePath(const QString &messageId, const QString &filePath);
+    void setAttachmentProgress(const QString &messageId, const DataSize bytesReceived, const DataSize bytesTotal);
+    void setAttachmentThumbnailPath(const QString messageId, const QString filePath);
+    void setAttachmentStatus(const QString messageId, const Enums::AttachmentStatus status);
+    void setAttachmentRemoteUrl(const QString messageId, const QUrl url);
+    void setAttachmentThumbnailRemoteUrl(const QString messageId, const QUrl url);
+    void setAttachmentBytesTotal(const QString messageId, const DataSize size);
+
+    void recipientChanged();
 
 private:
+    struct TransferInfo
+    {
+        DataSize bytesReceived = 0;
+        Attachment::Status status = Attachment::Status::Loading;
+    };
+
     QString escapedUserName() const;
 
     QString m_user;
     QString m_recipient;
+    std::map<QString, TransferInfo> m_transferMap;
 
     void
     _createTable();
@@ -127,6 +153,17 @@ private:
 
     QString
     _contactsTableName() const;
+
+    void onCreateMessage(const QString recipient, const QString message, const QString messageId, const OptionalAttachment attachment);
+    void onReceiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachment attachment);
+    void onSetMessageStatus(const QString messageId, const StMessage::Status status);
+    void onSetAttachmentStatus(const QString messageId, const Enums::AttachmentStatus status);
+    void onSetAttachmentFilePath(const QString messageId, const QString filePath);
+    void onSetAttachmentProgress(const QString messageId, const DataSize bytesReceived, const DataSize bytesTotal);
+    void onSetAttachmentThumbnailPath(const QString messageId, const QString filePath);
+    void onSetAttachmentRemoteUrl(const QString messageId, const QUrl url);
+    void onSetAttachmentThumbnailRemoteUrl(const QString messageId, const QUrl url);
+    void onSetAttachmentBytesTotal(const QString messageId, const DataSize size);
 };
 
 #endif // VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H

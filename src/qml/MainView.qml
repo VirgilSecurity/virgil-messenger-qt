@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.12
 import Qt.labs.settings 1.1
 import QuickFuture 1.0
 
+import "./base"
 import "./theme"
 import "./components"
 import "./helpers/login.js" as LoginLogic
@@ -17,8 +18,12 @@ Control {
     }
 
     RowLayout {
-        anchors.fill: parent
+        anchors {
+            fill: parent
+            bottomMargin: logControl.visible ? logControl.height : 0
+        }
         spacing: 0
+        clip: logControl.visible
 
         ServersPanel {
             id: serversPanel
@@ -55,8 +60,40 @@ Control {
         }
     }
 
-    Component.onCompleted: {        
+    ScrollView {
+        id: logControl
+        anchors {
+            topMargin: 0.75 * mainView.height
+            fill: parent
+        }
+        visible: settings.devMode
+
+        TextArea {
+            id: logTextControl
+            width: mainView.width
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            readOnly: true
+            font.pointSize: Platform.isMobile ? 12 : 9
+            selectByMouse: true
+        }
+    }
+
+    Button {
+        id: clearLogButton
+        visible: logControl.visible
+        anchors.right: logControl.right
+        anchors.top: logControl.top
+        text: "x"
+        width: 20
+        height: width
+        onClicked: logTextControl.clear()
+    }
+
+    Component.onCompleted: {
         showSplashScreen()
+        if (logControl.visible) {
+            Logging.newMessage.connect(logTextControl.append)
+        }
     }
 
     function signIn(user) {

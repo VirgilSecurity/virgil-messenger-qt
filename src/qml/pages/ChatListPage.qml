@@ -104,7 +104,7 @@ Page {
         model: ChatModel
         delegate: ItemDelegate {
             id: listItem
-            width: parent.width
+            width: listView.width
             leftInset: 8
             rightInset: 8
             background: Rectangle {
@@ -187,8 +187,8 @@ Page {
                 if (!contactsHeaderId.isSearchOpen) return conversationText;
                 if (contactsHeaderId.search !== '') return searchEmptyText;
                 return searchText;
-            }            
-        }        
+            }
+        }
 
         MouseArea {
             visible: !listView.contentItem.children.length

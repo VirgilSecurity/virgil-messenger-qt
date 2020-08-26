@@ -34,31 +34,80 @@
 
 #include "VSQSettings.h"
 
-#include <QDebug>
+#include <QStandardPaths>
 
+#include "VSQUtils.h"
+
+static const QString kLastSignedInUser = "LastSignedInUser";
 static const QString kUsers = "Users";
+static const QString kSavedSessionId = "SavedSessionId";
+
+Q_LOGGING_CATEGORY(lcSettings, "settings")
 
 VSQSettings::VSQSettings(QObject *parent)
-    : QSettings("VirgilSecurity", "VirgilMessenger", parent) // organization, application name
-{}
+    : QObject(parent)
+{
+    m_attachmentCacheDir.setPath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/attachments"));
+    m_thumbnaisDir.setPath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/thumbnails"));
+    m_downloadsDir.setPath(QStandardPaths::writableLocation(QStandardPaths::DownloadLocation) + QLatin1String("/Virgil"));
+
+    qCDebug(lcSettings) << "Settings";
+    qCDebug(lcSettings) << "Attachment cache dir:" << attachmentCacheDir().absolutePath();
+    qCDebug(lcSettings) << "Attachment max file size:" << attachmentMaxFileSize();
+    qCDebug(lcSettings) << "Thumbnails dir:" << thumbnailsDir().absolutePath();
+    qCDebug(lcSettings) << "Thumbnail max size:" << attachmentMaxFileSize();
+    qCDebug(lcSettings) << "Downloads dir:" << downloadsDir().absolutePath();
+    if (devMode()) {
+        qCDebug(lcSettings) << "Dev mode:" << true;
+    }
+}
 
 VSQSettings::~VSQSettings()
-{}
-
-void VSQSettings::setUsersList(const QStringList &users)
 {
-    setValue(kUsers, users);
-    sync();
+#ifdef VS_DEVMODE
+    qCDebug(lcDev) << "~Settings";
+#endif
 }
 
-QStringList VSQSettings::usersList() const
+DataSize VSQSettings::attachmentMaxFileSize() const
 {
-    qDebug() << "Settings filename:" << fileName();
-    return value(kUsers, QStringList()).toStringList();
+    return 25 * 1024 * 1024;
 }
 
+QDir VSQSettings::attachmentCacheDir() const
+{
+    if(!m_attachmentCacheDir.exists()) {
+        VSQUtils::forceCreateDir(m_attachmentCacheDir.absolutePath());
+    }
+    return m_attachmentCacheDir;
+}
 
+QDir VSQSettings::thumbnailsDir() const
+{
+    if(!m_thumbnaisDir.exists()) {
+        VSQUtils::forceCreateDir(m_thumbnaisDir.absolutePath());
+    }
+    return m_thumbnaisDir;
+}
 
+QDir VSQSettings::downloadsDir() const
+{
+    if(!m_downloadsDir.exists()) {
+        VSQUtils::forceCreateDir(m_downloadsDir.absolutePath());
+    }
+    return m_downloadsDir;
+}
 
+QSize VSQSettings::thumbnailMaxSize() const
+{
+    return QSize(100, 80);
+}
 
-
+bool VSQSettings::devMode() const
+{
+#ifdef VS_DEVMODE
+    return true;
+#else
+    return false;
+#endif // VS_DEVMODE
+}

@@ -62,8 +62,14 @@ function check_env() {
 
 #***************************************************************************************
 function sign_file() {
-	echo "${1}"
-	codesign --force --deep --timestamp --options runtime -s "${CERT_ID}" "${1}"
+        echo "#--------------------------------------------"
+	echo "# Signing [${1}]"
+	codesign --display --verbose=4 --force --deep --timestamp --options runtime -s "${CERT_ID}" "${1}"
+	if [ "${?}" != "0" ]; then
+          echo "# ERROR SIGNING [${1}]"
+          exit 127
+	fi
+        echo "# Signing OK"	
 }
 #***************************************************************************************
 function sign_bundle() {
@@ -73,7 +79,12 @@ function sign_bundle() {
 	find  ${BUNDLE} -type f -name "*.dSYM" -delete
 
 	print_message "Sign bundle"
-	codesign --deep --force --verify --verbose --sign "${CERT_ID}" --options runtime "${BUNDLE}"
+	codesign --display --verbose=4 --deep --force --verify --sign "${CERT_ID}" --options runtime "${BUNDLE}"
+	if [ "${?}" != "0" ]; then
+          echo "# ERROR SIGNING BUNDLE"
+          exit 127
+	fi
+        echo "# Signing OK"		
 }
 
 #***************************************************************************************
@@ -172,8 +183,8 @@ function notarize_dmg() {
 	print_message "Get result of notarization"
 
 	NOTARIZATION_DONE="false"
-	for count in $(seq 1 120); do
-		echo "Wait .. ${count} of 120"
+	for count in $(seq 1 300); do
+		echo "Wait .. ${count} of 300"
 		sleep 10s
 		INFO_OUTPUT=$(xcrun altool --notarization-info "${NOTARIZE_ID}" --username ${USER_NAME} -p ${PASS} 2>&1 | tr -d "\n")
 
