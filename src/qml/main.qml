@@ -133,11 +133,6 @@ ApplicationWindow {
 
         property alias filePath: previewImage.source
 
-        MouseArea {
-            // grab all mouse events
-            anchors.fill: parent
-        }
-
         Rectangle {
             anchors.fill: parent
             color: "black"
@@ -160,11 +155,11 @@ ApplicationWindow {
             text: qsTr("Close")
             color: "white"
             font.bold: true
+        }
 
-            MouseArea {
-                anchors.fill: parent
-                onClicked: preview.visible = false
-            }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: preview.visible = false
         }
     }
 
