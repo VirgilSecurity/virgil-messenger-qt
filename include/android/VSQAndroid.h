@@ -35,7 +35,7 @@
 #ifndef VSQANDROID_H
 #define VSQANDROID_H
 
-#if (ANDROID)
+#if (VS_ANDROID)
 
 #include <QObject>
 
@@ -43,12 +43,16 @@ class VSQAndroid {
 public:
     VSQAndroid() = delete;
 
+    static QString caBundlePath();
+
     static bool prepare();
+
+    static QString certFile();
 
 private:
     static int runLoggingThread();
 };
 
-#endif // ANDROID
+#endif // VS_ANDROID
 
 #endif // VSQANDROID_H

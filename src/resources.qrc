@@ -1,63 +1,119 @@
 <RCC>
     <qresource prefix="/">
-        <file>qml/Main.qml</file>
-        <file>qml/login/Login.qml</file>
-        <file>qml/login/PasswordResetPage.qml</file>
-        <file>qml/login/login.js</file>
-        <file>qml/settings/SettingsPage.qml</file>
-        <file>qml/helpers/ui/PrimaryButton.qml</file>
-        <file>qml/helpers/ui/CIcon.qml</file>
-        <file>qml/resources/User.png</file>
-        <file>qml/resources/PoweredBy.png</file>
-        <file>qml/resources/Settings.png</file>
-        <file>qml/resources/Plus.png</file>
-        <file>qml/resources/Contacts.png</file>
-        <file>qml/resources/Chats.png</file>
-        <file>qml/resources/AppUserscreen.png</file>
-        <file>qml/resources/AddAccount.png</file>
-        <file>qml/resources/Group.png</file>
-        <file>qml/chat/ContactPage.qml</file>
-        <file>qml/chat/ConversationPage.qml</file>
-        <file>qml/helpers/ui/Progress.qml</file>
-        <file>qml/helpers/ui/Popup.qml</file>
-        <file>qml/chat/AddContactDialog.qml</file>
-        <file>qml/iot/Main1.qml</file>
+        <file>qml/components/CommonHelpers/TextInCircle.qml</file>
+        <file>qml/components/Dialogs/AddContactDialog.qml</file>
+        <file>qml/components/Popups/Popup.qml</file>
+        <file>qml/components/Progress/Progress.qml</file>
         <file>qml/iot/DevicesList.qml</file>
-        <file>qml/iot/Title.qml</file>
+        <file>qml/iot/Main1.qml</file>
         <file>qml/iot/Sniffer.qml</file>
-        <file>qml/MobileView.qml</file>
-        <file>qml/DesktopView.qml</file>
-        <file>qml/chat/ConversationToolBar.qml</file>
-        <file>qml/resources/sounds/message.wav</file>
-        <file>qml/resources/cert.pem</file>
-        <file>qml/theme/Theme.qml</file>
-        <file>qml/theme/qmldir</file>
-        <file>qml/helpers/ui/OutlineButton.qml</file>
-        <file>qml/login/Authentication.qml</file>
-        <file>qml/js/strings.js</file>
-        <file>qml/components/AvatarPlaceholder.qml</file>
-        <file>qml/chat/components/MessageCounter.qml</file>
-        <file>qml/chat/components/ChatToolBar.qml</file>
-        <file>qml/components/TextInCircle.qml</file>
-        <file>qml/login/Register.qml</file>
-        <file>qml/login/components/CenteredAuthLayout.qml</file>
-        <file>qml/resources/icons/Arrow-Left@2x.png</file>
-        <file>qml/resources/icons/Arrow-Left.png</file>
-        <file>qml/resources/icons/Search.png</file>
-        <file>qml/resources/icons/Search@2x.png</file>
-        <file>qml/resources/icons/Logo-Big@2x.png</file>
-        <file>qml/resources/icons/Logo-Big@3x.png</file>
-        <file>qml/resources/icons/Logo-Big.png</file>
+        <file>qml/iot/Title.qml</file>
+        <file>qml/pages/AccountSettingsPage.qml</file>
+        <file>qml/pages/GlobalSettingsPage.qml</file>
+        <file>qml/pages/PasswordResetPage.qml</file>
+        <file>qml/pages/RegisterPage.qml</file>
+        <file>qml/resources/ca/curl-ca-bundle-win.crt</file>
         <file>qml/resources/fonts/Roboto-Bold.ttf</file>
         <file>qml/resources/fonts/Roboto-Medium.ttf</file>
         <file>qml/resources/fonts/Roboto-Regular.ttf</file>
-        <file>qml/login/components/UserSelection.qml</file>
-        <file>qml/login/components/MainLogo.qml</file>
+        <file>qml/resources/icons/Arrow-Left.png</file>
+        <file>qml/resources/icons/Arrow-Left@2x.png</file>
         <file>qml/resources/icons/Arrow-Right.png</file>
         <file>qml/resources/icons/Arrow-Right@2x.png</file>
-        <file>qml/login/components/HeaderToolbar.qml</file>
+        <file>qml/resources/icons/Logo-Big.png</file>
+        <file>qml/resources/icons/Logo-Big@2x.png</file>
+        <file>qml/resources/icons/Logo-Big@3x.png</file>
         <file>qml/resources/icons/More.png</file>
         <file>qml/resources/icons/More@2x.png</file>
-        <file>qml/helpers/ui/SettingsButton.qml</file>
+        <file>qml/resources/icons/Search.png</file>
+        <file>qml/resources/icons/Search@2x.png</file>
+        <file>qml/resources/AddAccount.png</file>
+        <file>qml/resources/AppUserscreen.png</file>
+        <file>qml/resources/cert.pem</file>
+        <file>qml/resources/Chats.png</file>
+        <file>qml/resources/Contacts.png</file>
+        <file>qml/resources/Group.png</file>
+        <file>qml/resources/Plus.png</file>
+        <file>qml/resources/PoweredBy.png</file>
+        <file>qml/resources/Settings.png</file>
+        <file>qml/resources/User.png</file>
+        <file>qml/theme/qmldir</file>
+        <file>qml/theme/Theme.qml</file>
+        <file>qml/main.qml</file>
+        <file>qml/pages/SplashScreenPage.qml</file>
+        <file>qml/helpers/chat.js</file>
+        <file>qml/helpers/login.js</file>
+        <file>qml/pages/SignInPage.qml</file>
+        <file>qml/pages/AuthPage.qml</file>
+        <file>qml/MainView.qml</file>
+        <file>qml/pages/ChatListPage.qml</file>
+        <file>qml/pages/ChatPage.qml</file>
+        <file>qml/resources/icons/Grid.png</file>
+        <file>qml/resources/icons/Grid@2x.png</file>
+        <file>qml/resources/icons/Send.png</file>
+        <file>qml/resources/icons/Send@2x.png</file>
+        <file>qml/components/Form.qml</file>
+        <file>qml/components/FormLabel.qml</file>
+        <file>qml/components/FormInput.qml</file>
+        <file>qml/components/FormPrimaryButton.qml</file>
+        <file>qml/components/Footer.qml</file>
+        <file>qml/components/FormSecondaryButton.qml</file>
+        <file>qml/components/FormVendor.qml</file>
+        <file>qml/components/AccountSelection.qml</file>
+        <file>qml/components/ChatMessageInput.qml</file>
+        <file>qml/components/Avatar.qml</file>
+        <file>qml/components/ChatMessage.qml</file>
+        <file>qml/components/MessageCounter.qml</file>
+        <file>qml/components/ContactsHeader.qml</file>
+        <file>qml/components/Header.qml</file>
+        <file>qml/components/ContextMenu.qml</file>
+        <file>qml/components/ImageButton.qml</file>
+        <file>qml/components/SettingsButton.qml</file>
+        <file>qml/pages/SignInAsPage.qml</file>
+        <file>qml/components/FormImage.qml</file>
+        <file>qml/resources/icons/Lock.png</file>
+        <file>qml/resources/icons/Lock@2x.png</file>
+        <file>qml/components/FormSubtitle.qml</file>
+        <file>qml/pages/DownloadKeyPage.qml</file>
+        <file>qml/resources/icons/Key.png</file>
+        <file>qml/resources/icons/Key@2x.png</file>
+        <file>qml/resources/icons/Logo.png</file>
+        <file>qml/resources/icons/Logo@2x.png</file>
+        <file>qml/components/ServersPanel.qml</file>
+        <file>qml/resources/icons/Menu.png</file>
+        <file>qml/resources/icons/Menu@2x.png</file>
+        <file>qml/components/ServerButton.qml</file>
+        <file>qml/resources/icons/Plus.png</file>
+        <file>qml/resources/icons/Plus@2x.png</file>
+        <file>qml/components/CommonHelpers/IconWithText.qml</file>
+        <file>qml/resources/icons/Chats.png</file>
+        <file>qml/resources/icons/Chats@2x.png</file>
+        <file>qml/components/ChatDateSeporator.qml</file>
+        <file>qml/components/Search.qml</file>
+        <file>qml/components/UserNameTextField.qml</file>
+        <file>qml/components/UserNameFormInput.qml</file>
+        <file>qml/resources/icons/Search_Big.png</file>
+        <file>qml/resources/icons/Search_Big@2x.png</file>
+        <file>qml/resources/icons/Close.png</file>
+        <file>qml/resources/icons/Close@2x.png</file>
+        <file>qml/resources/sounds/notification.wav</file>
+        <file>qml/resources/sounds/message-received.wav</file>
+        <file>qml/resources/sounds/message-sent.wav</file>
+        <file>qml/base/Platform.qml</file>
+        <file>qml/base/qmldir</file>
+        <file>qml/components/AppStatus.qml</file>
+        <file>qml/pages/BackupKeyPage.qml</file>
+        <file>qml/components/Dialogs/SendReportAsk.qml</file>
+        <file>qml/components/SelectAttachmentsDialog.qml</file>
+        <file>qml/resources/icons/Camera Selected.png</file>
+        <file>qml/resources/icons/Camera Selected@2x.png</file>
+        <file>qml/resources/icons/File Selected Big.png</file>
+        <file>qml/resources/icons/File Selected Big@2x.png</file>
+        <file>qml/resources/icons/File Selected.png</file>
+        <file>qml/resources/icons/File Selected@2x.png</file>
+        <file>qml/resources/icons/Mic Selected.png</file>
+        <file>qml/resources/icons/Mic Selected@2x.png</file>
+        <file>qml/resources/icons/File Download Big.png</file>
+        <file>qml/components/CircleProgressBar.qml</file>
     </qresource>
 </RCC>

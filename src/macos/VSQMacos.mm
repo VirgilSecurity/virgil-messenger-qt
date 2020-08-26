@@ -41,19 +41,54 @@
 
 #include "macos/VSQMacos.h"
 
+#include <virgil/iot/logger/logger.h>
+
 /******************************************************************************/
-void VSQMacos::checkUpdates() {
-    [[SUUpdater sharedUpdater] checkForUpdates:nil];
+VSQMacos::~VSQMacos() {
+    _deleteTimer();
 }
 
 /******************************************************************************/
-void VSQMacos::checkUpdatesBackground() {
+void VSQMacos::_setURL() const {
     NSString *urlStr = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"SUFeedURL"];
     NSURL *appcastURL = [NSURL URLWithString:[urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
     [[SUUpdater sharedUpdater] setFeedURL:appcastURL];
-    [[SUUpdater sharedUpdater] setUpdateCheckInterval:3600];
-    [[SUUpdater sharedUpdater] setAutomaticallyChecksForUpdates:TRUE];
-    [[SUUpdater sharedUpdater] checkForUpdatesInBackground];
+}
+
+/******************************************************************************/
+void VSQMacos::checkUpdates() const {
+    if (FALSE == [SUUpdater sharedUpdater].updateInProgress) {
+        _setURL();
+        [[SUUpdater sharedUpdater] checkForUpdates:nil];
+    }
+}
+
+/******************************************************************************/
+void VSQMacos::checkUpdatesBackground() const {
+    if (FALSE == [SUUpdater sharedUpdater].updateInProgress) {
+        _setURL();
+        [[SUUpdater sharedUpdater] checkForUpdatesInBackground];
+    }
+}
+
+/******************************************************************************/
+void VSQMacos::_deleteTimer() {
+    if (m_updateTimer) {
+        m_updateTimer->stop();
+        delete m_updateTimer;
+        m_updateTimer = nullptr;
+    }
+}
+
+/******************************************************************************/
+void VSQMacos::startUpdatesTimer() {
+    _deleteTimer();
+    m_updateTimer = new QTimer();
+    m_updateTimer->setSingleShot(false);
+    m_updateTimer->setInterval(kUpdateCheckMinutes * 60 * 1000);
+    connect(m_updateTimer, &QTimer::timeout, this, &VSQMacos::checkUpdatesBackground);
+    m_updateTimer->start();
+    checkUpdatesBackground();
 }
 
 /******************************************************************************/

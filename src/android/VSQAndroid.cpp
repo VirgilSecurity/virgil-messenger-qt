@@ -32,25 +32,52 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#if (ANDROID)
+#if (VS_ANDROID)
 
 #include <QtCore>
+#include <QtAndroid>
 
 #include "android/VSQAndroid.h"
 
 #include <android/log.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <cstdio>
 
 // TODO: Remove it
 static int pfd[2];
 static pthread_t loggingThread;
 
 /******************************************************************************/
-bool VSQAndroid::prepare() {
-    runLoggingThread();
+QString VSQAndroid::caBundlePath() {
     QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    QString certFile = appDataPath + QDir::separator() + "cert.pem";
+    return appDataPath + QDir::separator() + "cert.pem";
+}
+
+/******************************************************************************/
+static bool
+_checkPermissions() {
+    const QVector<QString> permissions({
+                                        "android.permission.WRITE_EXTERNAL_STORAGE",
+                                        "android.permission.READ_EXTERNAL_STORAGE"});
+
+    for(const QString &permission : permissions){
+        auto result = QtAndroid::checkPermission(permission);
+        if(result == QtAndroid::PermissionResult::Denied){
+            auto resultHash = QtAndroid::requestPermissionsSync(QStringList({permission}));
+            if(resultHash[permission] == QtAndroid::PermissionResult::Denied)
+                return false;
+        }
+    }
+
+    return true;
+}
+
+/******************************************************************************/
+bool VSQAndroid::prepare() {
+    _checkPermissions();
+    runLoggingThread();
+    auto certFile = caBundlePath();
     QFile::remove(certFile);
     QFile::copy(":qml/resources/cert.pem", certFile);
 
@@ -97,4 +124,4 @@ int VSQAndroid::runLoggingThread() { // run this function to redirect your outpu
 
 /******************************************************************************/
 
-#endif // ANDROID
+#endif // VS_ANDROID

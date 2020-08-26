@@ -38,14 +38,27 @@
 #if (MACOS)
 
 #include <QObject>
+#include <QTimer>
+#include <virgil/iot/qt/helpers/VSQSingleton.h>
 
-class VSQMacos {
+class VSQMacos: public QObject, public VSQSingleton<VSQMacos> {
+    Q_OBJECT
 public:
-    VSQMacos() = delete;
+    virtual ~VSQMacos();
 
-    static void checkUpdatesBackground();
+public slots:
+    void checkUpdatesBackground() const;
 
-    static void checkUpdates();
+    void checkUpdates() const;
+
+    void startUpdatesTimer();
+
+private:
+    QTimer *m_updateTimer = nullptr;
+    const int kUpdateCheckMinutes = 5;
+
+    void _setURL() const;
+    void _deleteTimer();
 };
 
 #endif // MACOS

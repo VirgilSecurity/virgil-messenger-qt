@@ -37,10 +37,15 @@
 
 #include <QtCore>
 #include <QGuiApplication>
+#include <QQmlApplicationEngine>
 #include <VSQMessenger.h>
 #include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
+#include <VSQLogging.h>
+#include <VSQSettings.h>
 
 #include <macos/VSQMacos.h>
+
+class QNetworkAccessManager;
 
 class VSQApplication : public QObject {
     Q_OBJECT
@@ -63,18 +68,18 @@ public:
     Q_INVOKABLE void
     sendReport();
 
+
 private slots:
-#if VS_IOS
     void
     onApplicationStateChanged(Qt::ApplicationState state);
-#endif // VS_IOS
 
 private:
     static const QString kVersion;
-
+    VSQSettings m_settings;
+    QNetworkAccessManager *m_networkAccessManager;
     QQmlApplicationEngine m_engine;
     VSQMessenger m_messenger;
-    QSharedPointer<VSQUdpBroadcast> m_netifUDPbcast;
+    VSQLogging m_logging;
 };
 
 #endif // VSQApplication
