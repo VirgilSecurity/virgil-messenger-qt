@@ -41,7 +41,7 @@ Control {
         id: d
         readonly property bool hasAttachment: attachmentId.length > 0
         readonly property color background: isUser ? "#59717D" : Theme.mainBackgroundColor
-        readonly property double maxWidth: chatPage.width - 40
+        readonly property double maxWidth: chatPage.width - 180
         readonly property bool isPicture: hasAttachment && attachmentType == Enums.AttachmentType.Picture
         readonly property double defaultRadius: 4
     }
@@ -56,10 +56,10 @@ Control {
             leftPadding: 15
             rightPadding: 15
             textFormat: Text.RichText
-            width: Math.min(implicitWidth,  d.maxWidth)
+            width: Math.min(implicitWidth, d.maxWidth)
             color: Theme.primaryTextColor
             font.pointSize: UiHelper.fixFontSz(15)
-            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            wrapMode: Text.Wrap
             readOnly: true
             text: chatMessage.body.split("\n").join("<br/>")
             visible: !d.hasAttachment
