@@ -35,6 +35,8 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
+import QuickFuture 1.0
+import MesResult 1.0
 
 import ".."
 import "../../base"
@@ -48,14 +50,14 @@ Dialog {
     standardButtons: Dialog.Apply | Dialog.Cancel
     focus: true
 
-    property string contact: contact.text
+    property string contact: contactTextField.text.toLowerCase()
 
     contentItem: Rectangle {
         implicitWidth: 400
         implicitHeight: 50
 
         UserNameTextField {
-            id: contact
+            id: contactTextField
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.topMargin: 3
@@ -72,5 +74,28 @@ Dialog {
             }
         }
     }
-}
 
+    function apply() {
+        try {
+            var future = Messenger.addContact(contact)
+            Future.onFinished(future, function(value) {
+                var res = Future.result(future)
+                if (res === Result.MRES_OK) {
+                    root.close()
+                    mainView.showChatWith(contact)
+                }
+                else {
+                    showPopupError(qsTr("User not found"))
+                    contactTextField.focus = true
+                }
+            })
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    Component.onCompleted: {
+        applied.connect(apply)
+        accepted.connect(apply)
+    }
+}

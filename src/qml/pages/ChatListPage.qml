@@ -51,8 +51,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
-import QuickFuture 1.0
-import MesResult 1.0
 
 import "../theme"
 import "../components"
@@ -217,29 +215,10 @@ Page {
         var component = Qt.createComponent("../components/Dialogs/AddContactDialog.qml")
         if (component.status === Component.Ready) {
             var dialog = component.createObject(root)
-            var apply = function() {
-                try {
-                    var future = Messenger.addContact(dialog.contact.toLowerCase())
-                    Future.onFinished(future, function(value) {
-                        var res = Future.result(future)
-                        if (res === Result.MRES_OK) {
-                            mainView.showChatWith(dialog.contact)
-                            return
-                        }
-
-                        root.showPopupError(qsTr("User not found"))
-                    })
-                } catch (error) {
-                    console.error("Cannot start initialization of device")
-                }
-                dialog.close()
-            }
-            dialog.applied.connect(apply)
-            dialog.accepted.connect(apply)
             dialog.open()
-            return dialog
         }
-        console.error(component.errorString())
-        return null
+        else {
+            console.error(component.errorString())
+        }
     }
 }
