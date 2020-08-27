@@ -36,16 +36,25 @@ QT += core network qml quick bluetooth sql xml concurrent
 
 CONFIG += c++14
 
-TARGET = virgil-messenger
+ios {
+    TARGET = VirgilMessenger
+    QMAKE_TARGET_BUNDLE_PREFIX = com.virgil
+    VERSION = 3.4.0.0
+} else {
+    TARGET = virgil-messenger
+    QMAKE_TARGET_BUNDLE_PREFIX = com.virgilsecurity
 
-QMAKE_TARGET_BUNDLE_PREFIX = com.virgilsecurity
-
-#
-#   Set version
-#
-isEmpty(VERSION) {
-    VERSION = $$cat($$PWD/VERSION_MESSENGER).0
+    #
+    #   Set version
+    #
+    isEmpty(VERSION) {
+        VERSION = $$cat($$PWD/VERSION_MESSENGER).0
+    }
 }
+
+
+
+
 message("VERSION = $$VERSION")
 
 #
@@ -75,7 +84,7 @@ DEFINES += QT_DEPRECATED_WARNINGS \
         CFG_CLIENT=1 \
         VERSION="$$VERSION"
 
-CONFIG(iphoneos, iphoneos | iphonesimulator) {
+ios: {
     DEFINES += VS_IOS=1 VS_MOBILE=1
 }
 
@@ -261,14 +270,15 @@ macx: {
 #
 #   iOS specific
 #
-#ios: {
+ios: {
+    QMAKE_ASSET_CATALOGS += platforms/ios/Assets.xcassets
 #    OBJECTIVE_SOURCES += \
 #        src/ios/APNSApplicationDelegate.mm
 
 #    #IOS_ENTITLEMENTS.name = CODE_SIGN_ENTITLEMENTS
 #    #IOS_ENTITLEMENTS.value = ios/pushnotifications.entitlements
 #    QMAKE_MAC_XCODE_SETTINGS += IOS_ENTITLEMENTS
-#}
+}
 
 isEqual(OS_NAME, "ios")|isEqual(OS_NAME, "ios-sim"): {
     Q_ENABLE_BITCODE.name = ENABLE_BITCODE

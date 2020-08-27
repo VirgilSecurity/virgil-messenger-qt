@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>728078967974-7ctup0nu9otgd9bpr6bt6k37r1ufrav0.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.728078967974-7ctup0nu9otgd9bpr6bt6k37r1ufrav0</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCIZhb6xUR3fxSqoySdJMUQ4PU7K7xFdvs</string>
+	<key>GCM_SENDER_ID</key>
+	<string>728078967974</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.virgil.VirgilMessenger-stg</string>
+	<key>PROJECT_ID</key>
+	<string>virgil-messenger-dfb2c</string>
+	<key>STORAGE_BUCKET</key>
+	<string>virgil-messenger-dfb2c.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:728078967974:ios:a9079069ffe7b4976f4067</string>
+	<key>DATABASE_URL</key>
+	<string>https://virgil-messenger-dfb2c.firebaseio.com</string>
+</dict>
+</plist>

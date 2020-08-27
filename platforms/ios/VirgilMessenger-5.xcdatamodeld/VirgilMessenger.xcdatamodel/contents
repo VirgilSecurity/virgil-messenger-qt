@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="15702" systemVersion="19D76" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Account" representedClassName="Account" syncable="YES">
+        <attribute name="identity" attributeType="String" minValueString="1"/>
+        <attribute name="numColorPair" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="orderedChannels" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="Channel" inverseName="account" inverseEntity="Channel"/>
+    </entity>
+    <entity name="Channel" representedClassName="Channel" syncable="YES">
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="initiator" optional="YES" attributeType="String"/>
+        <attribute name="name" attributeType="String" minValueString="1"/>
+        <attribute name="numColorPair" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="rawCards" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromData" customClassName="[String]"/>
+        <attribute name="rawType" attributeType="String" minValueString="1"/>
+        <attribute name="sid" attributeType="String"/>
+        <relationship name="account" maxCount="1" deletionRule="Nullify" destinationEntity="Account" inverseName="orderedChannels" inverseEntity="Account"/>
+        <relationship name="orderedMessages" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="Message" inverseName="channel" inverseEntity="Message"/>
+    </entity>
+    <entity name="Message" representedClassName="Message" syncable="YES">
+        <attribute name="body" optional="YES" attributeType="String"/>
+        <attribute name="date" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="isHidden" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="isIncoming" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="mediaHash" optional="YES" attributeType="String"/>
+        <attribute name="mediaUrl" optional="YES" attributeType="URI"/>
+        <attribute name="rawType" attributeType="String"/>
+        <relationship name="channel" maxCount="1" deletionRule="Nullify" destinationEntity="Channel" inverseName="orderedMessages" inverseEntity="Channel"/>
+    </entity>
+    <elements>
+        <element name="Account" positionX="-450" positionY="45" width="128" height="90"/>
+        <element name="Channel" positionX="-407" positionY="243" width="128" height="178"/>
+        <element name="Message" positionX="-128" positionY="198" width="128" height="163"/>
+    </elements>
+</model>
