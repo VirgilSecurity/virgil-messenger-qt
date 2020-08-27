@@ -188,7 +188,6 @@ Control {
             width: 30
             opacity: firstInRow ? 1 : 0
             diameter: 30
-            pointSize: UiHelper.fixFontSz(15)
         }
 
         Column {

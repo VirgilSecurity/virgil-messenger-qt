@@ -10,7 +10,7 @@ TextInCircle {
     color: Theme.avatarBgColor // intToHexColor(hashCode(nickname))
     diameter: Theme.avatarHeight
     content: ChatLogic.getPersonInitialis(nickname)
-    pointSize: UiHelper.fixFontSz(20)
+    pointSize: UiHelper.fixFontSz(0.4 * diameter)
 
     // Hash any string into an integer value
     // Then we'll use the int and convert to hex.
