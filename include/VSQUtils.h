@@ -45,15 +45,25 @@ namespace VSQUtils
 
     QString escapedUserName(const QString &userName);
 
+    // File functions
+
     QString findUniqueFileName(const QString &fileName);
 
     bool forceCreateDir(const QString &absolutePath);
+
+    // Url functions
 
     bool isValidUrl(const QUrl &url);
 
     QString urlToLocalFile(const QUrl &url);
 
     QUrl localFileToUrl(const QString &filePath);
+
+    // Crypto functions
+
+    int bufferSizeForEncryption(const int rawSize);
+
+    int bufferSizeForDecryption(const int encryptedSize);
 }
 
 #endif // VSQ_UTILS_H

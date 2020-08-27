@@ -127,3 +127,14 @@ QUrl VSQUtils::localFileToUrl(const QString &filePath)
     return QUrl::fromLocalFile(filePath);
 #endif
 }
+
+int VSQUtils::bufferSizeForEncryption(const int rawSize)
+{
+    // TODO(fpohtmeh): use function rawSize * 3 + 2180
+    return 5 * rawSize + 5000;
+}
+
+int VSQUtils::bufferSizeForDecryption(const int encryptedSize)
+{
+    return encryptedSize;
+}

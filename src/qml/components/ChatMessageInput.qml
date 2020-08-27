@@ -74,16 +74,18 @@ Control {
                         topMargin: 10
                         bottomMargin: 10
                         leftMargin: 15
-                        rightMargin: 15 - scrollBarWidth
+                        rightMargin: 15 - scrollBar.width
                     }
 
-                    readonly property real scrollBarWidth: ScrollBar.vertical.width
+                    ScrollBar.vertical: ScrollBar {
+                        id: scrollBar
+                    }
 
                     TextArea {
                         id: messageField
                         width: scrollView.width
                         padding: 0
-                        rightPadding: scrollView.scrollBarWidth
+                        rightPadding: scrollBar.width
                         placeholderText: qsTr("Message")
                         placeholderTextColor: "#59717D"
                         wrapMode: TextArea.Wrap
@@ -94,6 +96,9 @@ Control {
                         selectByMouse: true
                         selectedTextColor: "black"
                         selectionColor: "white"
+
+                        readonly property int maximumLength: 4096
+                        property string previousText: text
 
 //                        Rectangle {
 //                            anchors.fill: parent
@@ -159,13 +164,29 @@ Control {
                             }
                         }
 
+                        function stateSaver(func, offset=0) {
+                            const selStart = selectionStart + offset
+                            const selEnd = selectionEnd + offset
+                            const curPos = cursorPosition + offset
+                            const scrollPos = scrollBar.position
+                            func()
+                            messageField.cursorPosition = curPos
+                            messageField.select(selStart, selEnd)
+                            scrollBar.position = scrollPos
+                        }
+
                         function openContextMenu() {
-                            const selStart = selectionStart;
-                            const selEnd = selectionEnd;
-                            const curPos = cursorPosition;
-                            contextMenu.open();
-                            messageField.cursorPosition = curPos;
-                            messageField.select(selStart, selEnd);
+                            stateSaver(contextMenu.open)
+                        }
+
+                        onTextChanged: {
+                            if (text.length > maximumLength) {
+                                stateSaver(function() {
+                                    text = previousText
+                                    showPopupInform("Message length limit: %1".arg(maximumLength))
+                                }, previousText.length - text.length)
+                            }
+                            previousText = text
                         }
                     }
                 }

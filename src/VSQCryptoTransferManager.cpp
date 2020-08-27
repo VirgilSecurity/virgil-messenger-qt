@@ -123,7 +123,7 @@ bool VSQCryptoTransferManager::ecnryptFile(const QString &path, const QString &e
     file.close();
 
     // Encrypt
-    std::vector<char> encBytes(5 * bytes.size() + 5000);
+    std::vector<char> encBytes(VSQUtils::bufferSizeForEncryption(bytes.size()));
     size_t encBytesSize = 0;
     const auto code = vs_messenger_virgil_encrypt_msg(
                 recipient.toStdString().c_str(),

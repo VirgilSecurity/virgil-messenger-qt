@@ -1052,7 +1052,7 @@ VSQMessenger::onError(QXmppClient::Error err) {
 
 /******************************************************************************/
 Optional<StMessage> VSQMessenger::decryptMessage(const QString &sender, const QString &message) {
-    static const size_t _decryptedMsgSzMax = 10 * 1024;
+    const size_t _decryptedMsgSzMax = VSQUtils::bufferSizeForDecryption(message.size());
     uint8_t decryptedMessage[_decryptedMsgSzMax];
     size_t decryptedMessageSz = 0;
 
@@ -1147,17 +1147,17 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
         qCDebug(lcMessenger) << "Everything was uploaded. Continue to send message";
     }
 
-    QMutexLocker _guard(&m_messageGuard);
-    static const size_t _encryptedMsgSzMax = 20 * 1024;
-    uint8_t encryptedMessage[_encryptedMsgSzMax];
-    size_t encryptedMessageSz = 0;
-
     // Create JSON-formatted message to be sent
     const QString internalJson = createJson(message, updloadedAttacment);
     qDebug() << "Json for encryption:" << internalJson;
 
     // Encrypt message
-    auto plaintext = internalJson.toStdString();
+    QMutexLocker _guard(&m_messageGuard);
+    const auto plaintext = internalJson.toStdString();
+    const size_t _encryptedMsgSzMax = VSQUtils::bufferSizeForEncryption(plaintext.size());
+    uint8_t encryptedMessage[_encryptedMsgSzMax];
+    size_t encryptedMessageSz = 0;
+
     if (VS_CODE_OK != vs_messenger_virgil_encrypt_msg(
                      to.toStdString().c_str(),
                      reinterpret_cast<const uint8_t*>(plaintext.c_str()),
