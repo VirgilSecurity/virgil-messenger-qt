@@ -61,7 +61,7 @@ Control {
             font.pointSize: UiHelper.fixFontSz(15)
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             readOnly: true
-            text: chatMessage.body
+            text: chatMessage.body.split("\n").join("<br/>")
             visible: !d.hasAttachment
 
             property var contextMenu: ContextMenu {
