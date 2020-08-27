@@ -41,10 +41,16 @@ Page {
                 Future.onFinished(future, (result) => {
                     var res = Future.result(future)
                     if (res === Result.MRES_OK) {
-                        form.hideLoading()
                         lastSignedInUser = userName
                         showContacts(true)
+                        return
                     }
+
+                    if (res === Result.MRES_ERR_SIGNIN) {
+                        root.showPopupError("Something went wrong")
+                    }
+
+                    form.hideLoading()
                 })
             }
         }
@@ -54,12 +60,12 @@ Page {
             objectName: "btnRegister"
             onClicked: mainView.showRegister()
         }
-/*
+
         FormSecondaryButton {
             text: "Log In"
             onClicked: mainView.showSignIn()
         }
-*/
+
     }
 
     footer: Footer {}

@@ -47,9 +47,11 @@ format_list.txt
 moc_*.h
 qrc_resources.cpp
 Makefile
+*.autosave
 
 ####
 # macOS
-platforms/macos/virgil-messenger.plist
-
 !scripts/macos/pkg_resources/bin
+
+####
+generated

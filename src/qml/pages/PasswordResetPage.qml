@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 
+import "../components"
 import "../components/Buttons"
 
 Page {
@@ -57,14 +58,14 @@ Page {
         anchors.topMargin: 30
         spacing: 20
 
-        TextField {
+        UserNameTextField {
             id: registeredUsername
-            placeholderText: qsTr("Username")
             Layout.preferredWidth: parent.width - 20
             Layout.alignment: Qt.AlignHCenter
             color: mainTextCOlor
             font.pointSize: UiHelper.fixFontSz(14)
             leftPadding: 30
+
             background: Rectangle {
                 implicitWidth: 200
                 implicitHeight: 50

@@ -4,11 +4,13 @@ import QtQuick.Controls 2.12
 import QuickFuture 1.0
 import QtQuick.Window 2.12
 import QtMultimedia 5.12
+import com.virgilsecurity.messenger 1.0
 
 import "../theme"
 import "../components"
 
 Page {
+    id: chatPage
 
     property string recipient
 
@@ -16,9 +18,8 @@ Page {
         color: Theme.chatBackgroundColor
     }
 
-    Control {
+    header: Control {
         id: headerControl
-        anchors.bottom: listView.top
         width: parent.width
         height: 60
         z: 1
@@ -31,7 +32,7 @@ Page {
             Rectangle {
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
-                anchors.right: parent.right                
+                anchors.right: parent.right
                 anchors.leftMargin: 20
                 anchors.rightMargin: 20
                 height: 1
@@ -69,55 +70,88 @@ Page {
         }
     }
 
+
     ListView {
         id: listView
-        z: 0
-        height: parent.height - 58
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
+
+        anchors.fill: parent
         anchors.leftMargin: 20
         anchors.rightMargin: 20
 
         section.property: "day"
         section.delegate: ChatDateSeporator {
             date: section
-        }        
+        }
 
         spacing: 5
-        // verticalLayoutDirection: ListView.BottomToTop
-        // model: ConversationsModel
         delegate: ChatMessage {
-            text: message
-            author: model.author
-            timeStamp: model.timestamp
-            variant: model.author === Messenger.currentUser ? "light" : "dark"
-            messageInARow: model.messageInARow
-            firstMessageInARow: model.firstMessageInARow
+            body: model.message
+            time: Qt.formatDateTime(model.timestamp, "hh:mm")
+            nickname: model.author
+            isUser: model.author === Messenger.currentUser
+            status: isUser ? model.status : "none"
+            failed: (model.status == 4) && (!attachmentId || attachmentStatus == Enums.AttachmentStatus.Failed)
+            messageId: model.messageId
+
+            inRow: model.messageInARow
+            firstInRow: model.firstMessageInARow
+
+            attachmentId: model.attachmentId
+            attachmentBytesTotal: model.attachmentBytesTotal
+            attachmentDisplaySize: model.attachmentDisplaySize
+            attachmentType: model.attachmentType
+            attachmentFilePath: model.attachmentFilePath
+            attachmentThumbnailPath: model.attachmentThumbnailPath
+            attachmentThumbnailWidth: model.attachmentThumbnailWidth
+            attachmentThumbnailHeight: model.attachmentThumbnailHeight
+            attachmentBytesLoaded: model.attachmentBytesLoaded
+            attachmentStatus: model.attachmentStatus
+            attachmentDownloaded: model.attachmentDownloaded
+
+            onSaveAttachmentAs: function(messageId) {
+                saveAttachmentAsDialog.messageId = messageId
+                saveAttachmentAsDialog.attachmentType = attachmentType
+                saveAttachmentAsDialog.open()
+            }
+        }
+
+        onCountChanged: {
+            positionViewAtEnd()
         }
 
         ScrollBar.vertical: ScrollBar { }
 
-        onCountChanged: {
-            positionViewAtEnd()
+        MouseArea {
+            anchors.fill: parent
+            onPressed: {
+                forceActiveFocus()
+                mouse.accepted = false
+            }
         }
     }
 
     footer: ChatMessageInput {
         id: footerControl
         onMessageSending: {
-            var future = Messenger.sendMessage(ConversationsModel.recipient, message)
+            var future = Messenger.sendMessage(ConversationsModel.recipient, message, attachmentUrl, attachmentType)
             Future.onFinished(future, function(value) {
-              messageSent.play()
+                messageSent.play()
             })
         }
     }
 
+    SelectAttachmentsDialog {
+        id: saveAttachmentAsDialog
+        selectExisting: false
+
+        property string messageId: ""
+
+        onAccepted: Messenger.saveAttachmentAs(messageId, fileUrl)
+    }
 
     // Component events
 
     Component.onCompleted: {
-
         // configure conversation model to chat with
         // recipient provided as a parameter to this page.
 
@@ -125,6 +159,12 @@ Page {
         listView.model = ConversationsModel
         ConversationsModel.setAsRead(recipient)
         ChatModel.updateUnreadMessageCount(recipient)
+
+        Messenger.openPreviewRequested.connect(openPreview)
+    }
+
+    Component.onDestruction: {
+        Messenger.openPreviewRequested.disconnect(openPreview)
     }
 
     // Sounds

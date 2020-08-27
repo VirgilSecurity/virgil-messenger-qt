@@ -24,14 +24,11 @@ Page {
     }
 
     Form {
-
         id: form
 
-        FormInput {
+        UserNameFormInput {
             id: username
-            inputHint: Qt.ImhPreferLowercase
-            objectName: "fiRegisterUsername"
-            label: "Username"
+            placeholder: qsTr('Username')
         }
 
         FormPrimaryButton {
@@ -60,7 +57,11 @@ Page {
                 if (Future.result(future) === Result.MRES_OK) {
                     mainView.lastSignedInUser = user
                     mainView.showContacts("Contacts", null, true, true)
+                    return
+                }
 
+                if (Future.result(future) === Result.MRES_ERR_USER_ALREADY_EXISTS) {
+                    showPopupError(qsTr("This username is already taken"))
                     return
                 }
 

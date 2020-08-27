@@ -17,7 +17,7 @@ Item {
         background: Rectangle {
             id: popupBackground
             implicitWidth: root.width
-            implicitHeight: 60
+            implicitHeight: 25
         }
 
         enter: Transition {
@@ -32,7 +32,7 @@ Item {
             popupClose.stop()
         }
 
-        y: popupOnTop ? 0 : (root.height - 60)
+        y: popupOnTop ? 0 : (root.height - 25)
         modal: popupModal
         focus: popupModal
 
@@ -41,6 +41,7 @@ Item {
         Text {
             id: message
             anchors.centerIn: parent
+            font.pointSize: UiHelper.fixFontSz(12)
         }
         onOpened: popupClose.start()
     }

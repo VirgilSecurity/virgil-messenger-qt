@@ -35,7 +35,7 @@ Column {
     Text {
         id: mainLogoDescription
         width: 180
-        text: qsTr("Virgil Secure Communications Platform")
+        text: settings.applicationDisplayName
         lineHeight: 1
         wrapMode: Text.WordWrap
         horizontalAlignment: Text.AlignHCenter

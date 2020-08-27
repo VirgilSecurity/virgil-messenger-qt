@@ -4,14 +4,13 @@ import QtQuick.Layouts 1.12
 import Qt.labs.settings 1.1
 import QuickFuture 1.0
 
+import "./base"
 import "./theme"
 import "./components"
 import "./helpers/login.js" as LoginLogic
 
 Control {
     id: mainView
-    anchors.fill: parent
-
     property string lastSignedInUser
 
     Settings {
@@ -19,8 +18,12 @@ Control {
     }
 
     RowLayout {
-        anchors.fill: parent
+        anchors {
+            fill: parent
+            bottomMargin: logControl.visible ? logControl.height : 0
+        }
         spacing: 0
+        clip: logControl.visible
 
         ServersPanel {
             id: serversPanel
@@ -57,8 +60,40 @@ Control {
         }
     }
 
-    Component.onCompleted: {        
+    ScrollView {
+        id: logControl
+        anchors {
+            topMargin: 0.75 * mainView.height
+            fill: parent
+        }
+        visible: settings.devMode
+
+        TextArea {
+            id: logTextControl
+            width: mainView.width
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            readOnly: true
+            font.pointSize: Platform.isMobile ? 12 : 9
+            selectByMouse: true
+        }
+    }
+
+    Button {
+        id: clearLogButton
+        visible: logControl.visible
+        anchors.right: logControl.right
+        anchors.top: logControl.top
+        text: "x"
+        width: 20
+        height: width
+        onClicked: logTextControl.clear()
+    }
+
+    Component.onCompleted: {
         showSplashScreen()
+        if (logControl.visible) {
+            Logging.newMessage.connect(logTextControl.append)
+        }
     }
 
     function signIn(user) {
@@ -98,8 +133,6 @@ Control {
         })
     }
 
-
-
     // Navigation
     //
     // All the app navigation must be done throught executing
@@ -107,9 +140,10 @@ Control {
 
     function back() {
         stackView.pop()
+        if (Messenger.currentRecipient()) {
+            Messenger.setCurrentRecipient("")
+        }
     }
-
-
 
     function showSplashScreen(){
         stackView.push("./pages/SplashScreenPage.qml", StackView.Immediate)
@@ -132,22 +166,21 @@ Control {
         stackView.push("./pages/SignInAsPage.qml", params)
     }
 
-    function showDownloadKey() {
-        stackView.push("./pages/DownloadKeyPage.qml")
+    function showDownloadKey(params) {
+        stackView.push("./pages/DownloadKeyPage.qml", params)
     }
 
     function showRegister() {
         stackView.push("./pages/RegisterPage.qml")
     }
 
-    // Depricated method, use showChatWith instead.
-    function chatWith(recipient) {
-        ConversationsModel.recipient = recipient
-        stackView.push("./pages/ChatPage.qml")
+    function showBackupKey() {
+        stackView.push("./pages/BackupKeyPage.qml")
     }
 
     function showChatWith(recipient) {
         navigateTo("Chat", { recipient: recipient }, true, false)
+        Messenger.setCurrentRecipient(recipient)
     }
 
     function showContacts(clear) {
@@ -155,7 +188,7 @@ Control {
             stackView.clear()
         }
 
-        stackView.push("./pages/ContactsPage.qml")
+        stackView.push("./pages/ChatListPage.qml")
     }
 
     function showAccountSettings() {

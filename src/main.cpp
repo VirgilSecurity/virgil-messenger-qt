@@ -32,14 +32,20 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <VSQApplication.h>
 #include <iostream>
-
+#include <VSQApplication.h>
+#ifdef VS_MOBILE
+#include <QGuiApplication>
+#else
+#include <QApplication>
+#endif
 #include <android/VSQAndroid.h>
 
 #if (VSQ_WEBDRIVER_DEBUG)
 #include "Test/Headers.h"
 #endif
+
+#include <VSQCustomer.h>
 
 int
 main(int argc, char *argv[]) {
@@ -54,9 +60,14 @@ main(int argc, char *argv[]) {
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
+#ifdef VS_MOBILE
     QGuiApplication a(argc, argv);
-    a.setOrganizationName("Virgil Security");
-    a.setOrganizationDomain("virgil.net");
+#else
+    QApplication a(argc, argv);
+#endif
+    a.setOrganizationName(Customer::OrganizationName);
+    a.setOrganizationDomain(Customer::OrganizationDomain);
+    a.setApplicationDisplayName(Customer::ApplicationDisplayName);
 
     QString baseUrl;
     if (2 == argc && argv[1] && argv[1][0]) {

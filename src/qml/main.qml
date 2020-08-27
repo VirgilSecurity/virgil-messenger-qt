@@ -5,16 +5,19 @@ import QtMultimedia 5.12
 import QuickFuture 1.0
 
 import "./components/Popups"
+import "./components/Dialogs"
+import "./components"
+import "base"
 import "theme"
 
 ApplicationWindow {
     id: root
     visible: true
-    title: qsTr("Virgil Secure Communications Platform")
-    minimumWidth: 320
-    minimumHeight: 600
+    title: settings.applicationDisplayName
+    minimumWidth: Platform.isMobile ? 320 : 1000
+    minimumHeight: Platform.isMobile ? 600 : 800
 
-
+    property bool connectionError: false
 
     //
     //  Connections
@@ -23,46 +26,50 @@ ApplicationWindow {
         target: Messenger
 
         onFireError: {
-            showPopupError(errorText)
-            mainView.disconnect()
         }
 
         onFireInform: {
-            // showPopupInform(informText)
         }
 
+        onFireWarning: showPopupError(warningText);
+
         onFireConnecting: {
-            // showPopupInform(qsTr("Connecting"))
         }
 
         onFireReady: {
-            // showPopupSucces(qsTr("Ready to chat"))
         }
 
         onFireAddedContact: {
         }
 
-        onFireNewMessage: {            
+        onFireNewMessage: {
         }
     }
 
     onClosing: {
-        if (Qt.platform.os == "android") {
+        if (Platform.isAndroid) {
             close.accepted = false
-            mainView.back()
+            if (preview.visible) {
+                preview.visible = false
+            }
+            else {
+                mainView.back()
+            }
         }
     }
 
-    // THE MainView of the Application!
-
-
     MainView {
         id: mainView
+        anchors.fill: parent
     }
 
     // Popup to show messages or warnings on the bottom postion of the screen
     Popup {
         id: inform
+    }
+
+    SendReportAsk {
+        id: sendReportAsk
     }
 
     // Shortcuts for hackers
@@ -99,7 +106,7 @@ ApplicationWindow {
         showPopup(message, "#FFFACD", "#00", true, false)
     }
 
-    function showPopupSucces(message) {
+    function showPopupSuccess(message) {
         showPopup(message, "#66CDAA", "#00", true, false)
     }
 
@@ -111,5 +118,61 @@ ApplicationWindow {
         }
 
         return root.width < root.maxMobileWidth;
+    }
+
+    function openPreview(filePath) {
+        console.log("Open preview:", filePath)
+        preview.filePath = filePath
+        preview.visible = true
+    }
+
+    Item {
+        id: preview
+        anchors.fill: parent
+        visible: false
+
+        property alias filePath: previewImage.source
+
+        MouseArea {
+            // grab all mouse events
+            anchors.fill: parent
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            color: "black"
+            opacity: 0.5
+        }
+
+        Image {
+            id: previewImage
+            anchors.fill: parent
+            fillMode: Image.PreserveAspectFit
+        }
+
+        Label {
+            anchors {
+                top: parent.top
+                right: parent.right
+                topMargin: 15
+                rightMargin: 15
+            }
+            text: qsTr("Close")
+            color: "white"
+            font.bold: true
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: preview.visible = false
+            }
+        }
+    }
+
+    Component.onCompleted: {
+        Platform.detect()
+        Messenger.informationRequested.connect(showPopupInform)
+//        Logging.crashReportRequested.connect(sendReportAsk.open)
+//        Logging.reportSent.connect(showPopupSuccess)
+//        Logging.reportSentErr.connect(showPopupError)
     }
 }
