@@ -92,12 +92,14 @@ VSQApplication::run(const QString &basePath) {
     m_messenger.setLogging(&m_logging);
     m_logging.setkVersion(kVersion);
 
+    QUrl url;
     if (basePath.isEmpty()) {
-        m_engine.setBaseUrl(QUrl(QStringLiteral("qrc:/qml/")));
+        url = QStringLiteral("qrc:/qml/");
     } else {
-        QUrl url("file://" + basePath + "/qml/");
-        m_engine.setBaseUrl(url);
+        url = "file://" + basePath + "/qml/";
     }
+    m_engine.setBaseUrl(url);
+    m_engine.addImportPath(url.toString());
 
     QQmlContext *context = m_engine.rootContext();
     context->setContextProperty("UiHelper", &uiHelper);

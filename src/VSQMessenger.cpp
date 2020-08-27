@@ -36,6 +36,7 @@
 #include <cstring>
 #include <cstdlib>
 
+#include <VSQCustomer.h>
 #include <VSQDownload.h>
 #include <VSQMessenger.h>
 #include <VSQPushNotifications.h>
@@ -69,8 +70,8 @@ Q_DECLARE_METATYPE(QFuture<VSQMessenger::EnResult>)
 #define USE_XMPP_LOGS 0
 #endif
 
-const QString VSQMessenger::kOrganization = "VirgilSecurity";
-const QString VSQMessenger::kApp = "VirgilMessenger";
+const QString VSQMessenger::kOrganization = Customer::OrganizationName;
+const QString VSQMessenger::kApp = Customer::ApplicationName;
 const QString VSQMessenger::kUsers = "Users";
 const QString VSQMessenger::kProdEnvPrefix = "prod";
 const QString VSQMessenger::kStgEnvPrefix = "stg";
@@ -588,20 +589,20 @@ VSQMessenger::_virgilURL() {
     if (res.isEmpty()) {
         switch (m_envType) {
         case PROD:
-            res = "https://messenger.virgilsecurity.com";
+            res = Customer::MessengerUrlTemplate.arg(QString());
             break;
 
         case STG:
-            res = "https://messenger-stg.virgilsecurity.com";
+            res = Customer::MessengerUrlTemplate.arg(QLatin1String("-stg"));
             break;
 
         case DEV:
-            res = "https://messenger-dev.virgilsecurity.com";
+            res = Customer::MessengerUrlTemplate.arg(QLatin1String("-dev"));
             break;
         }
     }
 
-    VS_LOG_DEBUG("Virgil URL: [%s]", qPrintable(res));
+    VS_LOG_DEBUG("%s URL: [%s]", qPrintable(Customer::OrganizationName), qPrintable(res));
     return res;
 }
 
@@ -613,15 +614,15 @@ VSQMessenger::_xmppURL() {
     if (res.isEmpty()) {
         switch (m_envType) {
         case PROD:
-            res = "xmpp.virgilsecurity.com";
+            res = Customer::XmppUrlTemplate.arg(QString());;
             break;
 
         case STG:
-            res = "xmpp-stg.virgilsecurity.com";
+            res = Customer::XmppUrlTemplate.arg(QLatin1String("-stg"));
             break;
 
         case DEV:
-            res = "xmpp-dev.virgilsecurity.com";
+            res = Customer::XmppUrlTemplate.arg(QLatin1String("-dev"));
             break;
         }
     }

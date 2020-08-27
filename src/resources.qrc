@@ -20,9 +20,6 @@
         <file>qml/resources/icons/Arrow-Left@2x.png</file>
         <file>qml/resources/icons/Arrow-Right.png</file>
         <file>qml/resources/icons/Arrow-Right@2x.png</file>
-        <file>qml/resources/icons/Logo-Big.png</file>
-        <file>qml/resources/icons/Logo-Big@2x.png</file>
-        <file>qml/resources/icons/Logo-Big@3x.png</file>
         <file>qml/resources/icons/More.png</file>
         <file>qml/resources/icons/More@2x.png</file>
         <file>qml/resources/icons/Search.png</file>
@@ -77,8 +74,6 @@
         <file>qml/pages/DownloadKeyPage.qml</file>
         <file>qml/resources/icons/Key.png</file>
         <file>qml/resources/icons/Key@2x.png</file>
-        <file>qml/resources/icons/Logo.png</file>
-        <file>qml/resources/icons/Logo@2x.png</file>
         <file>qml/components/ServersPanel.qml</file>
         <file>qml/resources/icons/Menu.png</file>
         <file>qml/resources/icons/Menu@2x.png</file>
