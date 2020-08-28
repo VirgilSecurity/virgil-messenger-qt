@@ -32,42 +32,51 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_UTILS_H
-#define VSQ_UTILS_H
+#ifndef VSQ_LASTACTIVITYMANAGER_H
+#define VSQ_LASTACTIVITYMANAGER_H
 
-#include "VSQCommon.h"
+#include <qxmpp/QXmppClientExtension.h>
 
-namespace VSQUtils
+#include "VSQLastActivityIq.h"
+
+class VSQSettings;
+
+class VSQLastActivityManager : public QXmppClientExtension
 {
-    QString createUuid();
+    Q_OBJECT
 
-    // String processing/format
+public:
+    VSQLastActivityManager(VSQSettings *settings, QObject *parent);
+    ~VSQLastActivityManager() override;
 
-    QString formattedDataSize(DataSize fileSize);
+    void setCurrentJid(const QString &jid);
+    void setEnabled(bool enabled);
 
-    QString escapedUserName(const QString &userName);
+    QStringList discoveryFeatures() const override;
+    bool handleStanza(const QDomElement &element) override;
 
-    QString formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval);
+signals:
+    void lastActivityDetected(const Seconds &seconds);
+    void lastActivityMissing(const QString &reason);
+    void lastActivityTextChanged(const QString &text);
+    void errorOccured(const QString &errorText);
 
-    // File functions
+private:
+    void timerEvent(QTimerEvent *) override;
 
-    QString findUniqueFileName(const QString &fileName);
+    QString requestInfo();
+    bool canStart() const;
 
-    bool forceCreateDir(const QString &absolutePath);
+    void startUpdates(bool reset);
+    void stopUpdates(bool reset);
 
-    // Url functions
+    void onErrorOccured(const QString &errorText);
 
-    bool isValidUrl(const QUrl &url);
+    VSQSettings *m_settings;
+    bool m_enabled = true;
+    QString m_jid;
+    int m_timerId = 0;
+    int m_debugCounter = 0;
+};
 
-    QString urlToLocalFile(const QUrl &url);
-
-    QUrl localFileToUrl(const QString &filePath);
-
-    // Crypto functions
-
-    int bufferSizeForEncryption(const int rawSize);
-
-    int bufferSizeForDecryption(const int encryptedSize);
-}
-
-#endif // VSQ_UTILS_H
+#endif // VSQ_LASTACTIVITYMANAGER_H

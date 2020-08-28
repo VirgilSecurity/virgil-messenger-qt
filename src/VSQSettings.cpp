@@ -122,3 +122,8 @@ bool VSQSettings::devMode() const
     return false;
 #endif // VS_DEVMODE
 }
+
+Seconds VSQSettings::lastSeenActivityInterval() const
+{
+    return 5;
+}

@@ -92,9 +92,12 @@ HEADERS += \
         include/VSQAttachmentBuilder.h \
         include/VSQClipboardProxy.h \
         include/VSQCommon.h \
+        include/VSQContactManager.h \
         include/VSQCryptoTransferManager.h \
         include/VSQDiscoveryManager.h \
         include/VSQDownload.h \
+        include/VSQLastActivityIq.h \
+        include/VSQLastActivityManager.h \
         include/VSQLogging.h \
         include/VSQMessenger.h \
         include/VSQSettings.h \
@@ -121,10 +124,13 @@ SOURCES += \
         src/VSQAttachmentBuilder.cpp \
         src/VSQClipboardProxy.cpp \
         src/VSQCommon.cpp \
+        src/VSQContactManager.cpp \
         src/VSQCryptoTransferManager.cpp \
         src/VSQDiscoveryManager.cpp \
         src/VSQDownload.cpp \
         src/VSQMessenger.cpp \
+        src/VSQLastActivityIq.cpp \
+        src/VSQLastActivityManager.cpp \
         src/VSQLogging.cpp \
         src/VSQSettings.cpp \
         src/VSQSqlChatModel.cpp \

@@ -54,11 +54,14 @@
 #include <VSQNetworkAnalyzer.h>
 #include <VSQAttachmentBuilder.h>
 #include <VSQCryptoTransferManager.h>
-#include <VSQDiscoveryManager.h>
 
 using namespace VirgilIoTKit;
 
 class QJsonDocument;
+
+class VSQContactManager;
+class VSQDiscoveryManager;
+class VSQLastActivityManager;
 
 Q_DECLARE_LOGGING_CATEGORY(lcMessenger)
 
@@ -105,6 +108,8 @@ public:
     VSQSqlChatModel &getChatModel();
 
     Optional<StMessage> decryptMessage(const QString &sender, const QString &message);
+
+    void setApplicationActive(bool active);
 
 public slots:
 
@@ -190,6 +195,7 @@ signals:
 
     void openPreviewRequested(const QUrl &url);
     void informationRequested(const QString &message);
+    void lastActivityTextChanged(const QString &text);
 
     void downloadThumbnail(const StMessage message, const QString sender, QPrivateSignal);
 
@@ -217,7 +223,10 @@ private:
     QXmppClient m_xmpp;
     QXmppMessageReceiptManager* m_xmppReceiptManager;
     QXmppCarbonManager* m_xmppCarbonManager;
-    VSQDiscoveryManager* m_xmppDiscoveryManager;
+    VSQDiscoveryManager* m_discoveryManager;
+    VSQContactManager *m_contactManager;
+    VSQLastActivityManager* m_lastActivityManager;
+
     VSQSqlConversationModel *m_sqlConversations;
     VSQSqlChatModel *m_sqlChatModel;
     VSQLogging *m_logging;
@@ -235,7 +244,7 @@ private:
     QString m_xmppPass;
     VSQEnvType m_envType;
     static const VSQEnvType _defaultEnv = PROD;
-    QXmppConfiguration conf;
+    QXmppConfiguration m_conf;
     static const QString kOrganization;
     static const QString kApp;
     static const QString kUsers;

@@ -36,8 +36,11 @@
 #include <cstring>
 #include <cstdlib>
 
+#include <VSQContactManager.h>
 #include <VSQCustomer.h>
+#include <VSQDiscoveryManager.h>
 #include <VSQDownload.h>
+#include <VSQLastActivityManager.h>
 #include <VSQMessenger.h>
 #include <VSQPushNotifications.h>
 #include <VSQSqlConversationModel.h>
@@ -144,16 +147,21 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSetti
     // Add receipt messages extension
     m_xmppReceiptManager = new QXmppMessageReceiptManager();
     m_xmppCarbonManager = new QXmppCarbonManager();
-    m_xmppDiscoveryManager = new VSQDiscoveryManager(&m_xmpp, this);
+    m_discoveryManager = new VSQDiscoveryManager(&m_xmpp, this);
+    m_contactManager = new VSQContactManager(&m_xmpp, this);
+    m_lastActivityManager = new VSQLastActivityManager(m_settings, this);
 
     m_xmpp.addExtension(m_xmppReceiptManager);
     m_xmpp.addExtension(m_xmppCarbonManager);
+    m_xmpp.addExtension(m_lastActivityManager);
 
     // Signal connection
     connect(this, SIGNAL(fireReadyToAddContact(QString)), this, SLOT(onAddContactToDB(QString)));
     connect(this, SIGNAL(fireError(QString)), this, SLOT(disconnect()));
     connect(this, &VSQMessenger::downloadThumbnail, this, &VSQMessenger::onDownloadThumbnail);
 
+    // Uploading
+    connect(m_transferManager, &VSQCryptoTransferManager::fireReadyToUpload, this,  &VSQMessenger::onReadyToUpload, Qt::QueuedConnection);
     connect(m_transferManager, &VSQCryptoTransferManager::statusChanged, this, &VSQMessenger::onAttachmentStatusChanged);
     connect(m_transferManager, &VSQCryptoTransferManager::progressChanged, this, &VSQMessenger::onAttachmentProgressChanged);
     connect(m_transferManager, &VSQCryptoTransferManager::fileDecrypted, this, &VSQMessenger::onAttachmentDecrypted);
@@ -174,12 +182,12 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSetti
     connect(m_xmppCarbonManager, &QXmppCarbonManager::messageSent, &m_xmpp, &QXmppClient::messageReceived);
     connect(m_xmppReceiptManager, &QXmppMessageReceiptManager::messageDelivered, this, &VSQMessenger::onMessageDelivered);
 
+    // last activity
+    connect(m_lastActivityManager, &VSQLastActivityManager::lastActivityTextChanged, this, &VSQMessenger::lastActivityTextChanged);
+
     // Network Analyzer
     connect(&m_networkAnalyzer, &VSQNetworkAnalyzer::fireStateChanged, this, &VSQMessenger::onProcessNetworkState, Qt::QueuedConnection);
     connect(&m_networkAnalyzer, &VSQNetworkAnalyzer::fireHeartBeat, this, &VSQMessenger::checkState, Qt::QueuedConnection);
-
-    // Uploading
-    connect(m_transferManager, &VSQCryptoTransferManager::fireReadyToUpload, this,  &VSQMessenger::onReadyToUpload, Qt::QueuedConnection);
 
     // Use Push notifications
 #if VS_PUSHNOTIFICATIONS
@@ -271,13 +279,14 @@ VSQMessenger::_connect(QString userWithEnv, QString deviceId, QString userId, bo
     emit fireConnecting();
 
     QString jid = userId + "@" + _xmppURL() + "/" + deviceId;
-    conf.setJid(jid);
-    conf.setHost(_xmppURL());
-    conf.setPassword(_xmppPass());
-    conf.setAutoReconnectionEnabled(false);
+    m_conf.setJid(jid);
+    m_conf.setHost(_xmppURL());
+    m_conf.setPassword(_xmppPass());
+    m_conf.setAutoReconnectionEnabled(false);
+    m_conf.setAutoAcceptSubscriptions(true);
 #if VS_ANDROID
-    conf.setKeepAliveInterval(kKeepAliveTimeSec);
-    conf.setKeepAliveTimeout(kKeepAliveTimeSec - 1);
+    m_conf.setKeepAliveInterval(kKeepAliveTimeSec);
+    m_conf.setKeepAliveTimeout(kKeepAliveTimeSec - 1);
 #endif
     qDebug() << "SSL: " << QSslSocket::supportsSsl();
 
@@ -318,7 +327,7 @@ VSQMessenger::_connect(QString userWithEnv, QString deviceId, QString userId, bo
     connect( &timer, &QTimer::timeout, &loop, &QEventLoop::quit);
 
     qRegisterMetaType<QXmppConfiguration>("QXmppConfiguration");
-    QMetaObject::invokeMethod(&m_xmpp, "connectToServer", Qt::QueuedConnection, Q_ARG(QXmppConfiguration, conf));
+    QMetaObject::invokeMethod(&m_xmpp, "connectToServer", Qt::QueuedConnection, Q_ARG(QXmppConfiguration, m_conf));
 
     timer.start(kConnectionWaitMs);
     loop.exec();
@@ -527,9 +536,13 @@ VSQMessenger::addContact(QString contact) {
 /******************************************************************************/
 void
 VSQMessenger::onAddContactToDB(QString contact) {
-    m_sqlChatModel->createPrivateChat(contact);
-    // m_sqlContacts->addContact(contact);
-    emit fireAddedContact(contact);
+    if (!m_contactManager->addContact(contact + "@" + _xmppURL(), contact, QString())) {
+        emit fireError(m_contactManager->lastErrorText());
+    }
+    else {
+        m_sqlChatModel->createPrivateChat(contact);
+        emit fireAddedContact(contact);
+    }
 }
 
 void VSQMessenger::onDownloadThumbnail(const StMessage message, const QString sender)
@@ -1083,6 +1096,11 @@ Optional<StMessage> VSQMessenger::decryptMessage(const QString &sender, const QS
     return msg;
 }
 
+void VSQMessenger::setApplicationActive(bool active)
+{
+    m_lastActivityManager->setEnabled(active);
+}
+
 /******************************************************************************/
 void
 VSQMessenger::onMessageReceived(const QXmppMessage &message) {
@@ -1287,6 +1305,7 @@ VSQMessenger::setStatus(VSQMessenger::EnStatus status) {
 void VSQMessenger::setCurrentRecipient(const QString &recipient)
 {
     m_recipient = recipient;
+    m_lastActivityManager->setCurrentJid(recipient + "@" + _xmppURL());
 }
 
 void VSQMessenger::saveAttachmentAs(const QString &messageId, const QVariant &fileUrl)

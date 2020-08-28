@@ -117,10 +117,8 @@ VSQApplication::run(const QString &basePath) {
     fon.setPointSize(1.5 * QGuiApplication::font().pointSize());
     QGuiApplication::setFont(fon);
 
-    connect(QGuiApplication::instance(),
-            SIGNAL(applicationStateChanged(Qt::ApplicationState)),
-            this,
-            SLOT(onApplicationStateChanged(Qt::ApplicationState)));
+    connect(qApp, &QGuiApplication::applicationStateChanged, this, &VSQApplication::onApplicationStateChanged);
+    connect(qApp, &QGuiApplication::aboutToQuit, std::bind(&VSQMessenger::setStatus, &m_messenger, VSQMessenger::EnStatus::MSTATUS_UNAVAILABLE));
 
     reloadQml();
     return QGuiApplication::instance()->exec();
@@ -165,6 +163,7 @@ VSQApplication::sendReport() {
 void
 VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
     qDebug() << state;
+    m_messenger.setApplicationActive(state == Qt::ApplicationState::ApplicationActive);
 
 #if VS_PUSHNOTIFICATIONS
     static bool _deactivated = false;

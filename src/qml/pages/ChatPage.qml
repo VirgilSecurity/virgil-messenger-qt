@@ -61,8 +61,9 @@ Page {
                 }
 
                 Label {
+                    id: lastActivityLabel
                     topPadding: 2
-                    text: qsTr("Last seen yesterday")
+                    text: " "
                     font.pointSize: UiHelper.fixFontSz(12)
                     color: Theme.secondaryTextColor
                 }
@@ -165,6 +166,11 @@ Page {
 
     Component.onDestruction: {
         Messenger.openPreviewRequested.disconnect(openPreview)
+    }
+
+    Connections {
+        target: Messenger
+        onLastActivityTextChanged: lastActivityLabel.text = text
     }
 
     // Sounds

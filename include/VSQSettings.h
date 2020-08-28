@@ -70,6 +70,9 @@ public:
     // Dev mode
     bool devMode() const;
 
+    // Last seen activity interval (seconds)
+    Seconds lastSeenActivityInterval() const;
+
 private:
     QDir m_attachmentCacheDir;
     QDir m_thumbnaisDir;

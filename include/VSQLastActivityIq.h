@@ -32,42 +32,38 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_UTILS_H
-#define VSQ_UTILS_H
+#ifndef VSQ_LASTACTIVITYIQ_H
+#define VSQ_LASTACTIVITYIQ_H
+
+#include <qxmpp/QXmppIq.h>
 
 #include "VSQCommon.h"
 
-namespace VSQUtils
+Q_DECLARE_LOGGING_CATEGORY(lcLastActivity)
+
+class VSQLastActivityIq : public QXmppIq
 {
-    QString createUuid();
+public:
+    VSQLastActivityIq() = default;
+    explicit VSQLastActivityIq(bool debug);
+    ~VSQLastActivityIq() = default;
 
-    // String processing/format
+    bool isValid() const;
+    Seconds seconds() const;
 
-    QString formattedDataSize(DataSize fileSize);
+    bool needSubscription() const;
 
-    QString escapedUserName(const QString &userName);
+    static bool isLastActivityId(const QDomElement &element);
+    static QStringList discoveryFeatures();
 
-    QString formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval);
+protected:
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
 
-    // File functions
+private:
+    bool m_debug = true;
+    bool m_valid = false;
+    Seconds m_seconds = 0;
+};
 
-    QString findUniqueFileName(const QString &fileName);
-
-    bool forceCreateDir(const QString &absolutePath);
-
-    // Url functions
-
-    bool isValidUrl(const QUrl &url);
-
-    QString urlToLocalFile(const QUrl &url);
-
-    QUrl localFileToUrl(const QString &filePath);
-
-    // Crypto functions
-
-    int bufferSizeForEncryption(const int rawSize);
-
-    int bufferSizeForDecryption(const int encryptedSize);
-}
-
-#endif // VSQ_UTILS_H
+#endif // VSQ_LASTACTIVITYIQ_H

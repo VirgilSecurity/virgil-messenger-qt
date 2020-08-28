@@ -32,42 +32,44 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_UTILS_H
-#define VSQ_UTILS_H
+#ifndef VSQ_CONTACTMANAGER_H
+#define VSQ_CONTACTMANAGER_H
+
+#include <qxmpp/QXmppRosterManager.h>
 
 #include "VSQCommon.h"
 
-namespace VSQUtils
+Q_DECLARE_LOGGING_CATEGORY(lcContactManager);
+
+class VSQContactManager : public QObject
 {
-    QString createUuid();
+    Q_OBJECT
 
-    // String processing/format
+public:
+    explicit VSQContactManager(QXmppClient *client, QObject *parent = nullptr);
+    ~VSQContactManager() override;
 
-    QString formattedDataSize(DataSize fileSize);
+    bool addContact(const QString &jid, const QString &name, const QString &reason);
+    bool removeContact(const QString &jid);
+    bool renameContact(const QString &jid, const QString &newName);
 
-    QString escapedUserName(const QString &userName);
+    QString lastErrorText() const;
 
-    QString formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval);
+private:
+    using SubscriptionType = QXmppRosterIq::Item::SubscriptionType;
 
-    // File functions
+    struct ContactInfo
+    {
+        bool exists = false;
+        SubscriptionType subscriptionType = SubscriptionType::None;
+    };
 
-    QString findUniqueFileName(const QString &fileName);
+    ContactInfo find(const QString &jid) const;
+    bool setLastErrorText(const QString &text);
 
-    bool forceCreateDir(const QString &absolutePath);
+    QXmppClient *m_client;
+    QXmppRosterManager *m_manager;
+    QString m_lastErrorText;
+};
 
-    // Url functions
-
-    bool isValidUrl(const QUrl &url);
-
-    QString urlToLocalFile(const QUrl &url);
-
-    QUrl localFileToUrl(const QString &filePath);
-
-    // Crypto functions
-
-    int bufferSizeForEncryption(const int rawSize);
-
-    int bufferSizeForDecryption(const int encryptedSize);
-}
-
-#endif // VSQ_UTILS_H
+#endif // VSQ_CONTACTMANAGER_H
