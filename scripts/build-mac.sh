@@ -101,6 +101,9 @@ function build_project() {
 
 		${QMAKE_BIN} -config ${BUILD_TYPE} ${PROJECT_DIR} ${QMAKE_PARAMS} VERSION="${VERSION}"
 
+		#	Generate Plist file
+		"${SCRIPT_FOLDER}/generate-mac-plist.sh" "${SUFeedURL}" "${SUPublicEDKey}" "${VERSION}"
+
 		make clean
 
 		make -j10
@@ -231,7 +234,6 @@ function prepare_update() {
 #***************************************************************************************
 
 check_env
-"${SCRIPT_FOLDER}/generate-mac-plist.sh" "${SUFeedURL}" "${SUPublicEDKey}" "${VERSION}"
 build_project
 create_dmg
 notarize_dmg
