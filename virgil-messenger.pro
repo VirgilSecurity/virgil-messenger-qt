@@ -63,8 +63,10 @@ include($$PWD/ext/quickfuture/quickfuture.pri)
 #
 #   QXMPP
 #
-QXMPP_BUILD_PATH = $$PREBUILT_SYSROOT
-message("QXMPP location : $${QXMPP_BUILD_PATH}")
+isEmpty(QXMPP_BUILD_PATH) {
+    QXMPP_BUILD_PATH=$$PREBUILT_SYSROOT
+}
+message("QXMPP location: $${QXMPP_BUILD_PATH}")
 
 #
 #   Defines
