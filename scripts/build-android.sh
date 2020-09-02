@@ -4,12 +4,11 @@ set -o errtrace
 #   Global variables
 #
 SCRIPT_FOLDER="$(cd "$(dirname "$0")" && pwd)"
-source ${SCRIPT_FOLDER}/ish/common.sh
 
-ANDOID_APP_ID="com.virgilsecurity.qtmessenger"
+# Include common function
+source ${SCRIPT_FOLDER}/ish/common.sh
 PLATFORM=android-clang
 ANDROID_MAKE="${ANDROID_NDK_ROOT}/prebuilt/${HOST_PLATFORM}/bin/make"
-ANDROID_PLATFORM="android-28"
 
 #*************************************************************************************************************
 # env variables passed to build anroid release
@@ -41,7 +40,7 @@ build_proc() {
     fi
 
     pushd ${BUILD_DIR}
-        ${ANDROID_QMAKE} ANDROID_ABIS="${ANDROID_ABIS}" -spec android-clang CONFIG+=${ANDROID_BUILD_MODE} VERSION="${VERSION}" ${PROJECT_FILE}
+        ${ANDROID_QMAKE} ANDROID_ABIS="${ANDROID_ABIS}" -spec android-clang CONFIG+=${ANDROID_BUILD_MODE} VERSION="${VERSION}" VS_CUSTOMER="${PARAM_CUSTOMER}" ${PROJECT_FILE} 
 
         ${ANDROID_MAKE} -j10
 

@@ -6,8 +6,8 @@ QT_SDK_DIR="${QT_SDK_ROOT:-/opt/Qt/5.15.0}"
 export ANDROID_NDK_ROOT=${ANDROID_NDK_ROOT:-/opt/Android/Sdk/ndk/21.1.6352462}
 
 BUILD_TYPE=release
-APPLICATION_NAME=virgil-messenger
-PROJECT_FILE=${PROJECT_DIR}/${APPLICATION_NAME}.pro
+#/# APPLICATION_NAME=virgil-messenger
+#/# PROJECT_FILE=${PROJECT_DIR}/${APPLICATION_NAME}.pro
 TOOL_NAME=qmake
 
 export QT_INSTALL_DIR_BASE=${PROJECT_DIR}/ext/prebuilt
@@ -17,8 +17,65 @@ if [ -f "${PROJECT_DIR}/VERSION_MESSENGER" ]; then
     export VERSION="$(cat ${PROJECT_DIR}/VERSION_MESSENGER | tr -d '\n').${BUILD_NUMBER}"
 fi
 
-trap 'err_trap  $@' ERR
+#trap 'err_trap  $@' ERR
 
+############################################################################################
+print_usage() {
+  pushd "${PROJECT_DIR}/customers" 2>&1 > /dev/null
+   for customer in */; do
+     customer=${customer::(-1)}
+     [ "$customer" == "common" ] && continue
+     if [ -z $CUSTOMER_LIST ]; then
+          CUSTOMER_LIST="$customer"
+     else
+         CUSTOMER_LIST="${CUSTOMER_LIST}|$customer"
+     fi
+   done
+  popd  2>&1 > /dev/null
+  echo
+  echo "$(basename ${0})"
+  echo
+  echo "  -c <${CUSTOMER_LIST}>   - Build for customer         [default: Virgil]"
+  echo "  -h                      - Print help"
+  exit 0
+}
+
+############################################################################################
+#
+#  Script parameters
+#
+############################################################################################
+
+# Default customer
+PARAM_CUSTOMER="${VS_CUSTOMER:-Virgil}"
+
+while [ -n "$1" ]
+ do
+   case "$1" in
+     -h) print_usage
+         shift;;
+     -c) PARAM_CUSTOMER="$2"
+         shift ;;
+     --) shift
+         break
+         ;;
+     *) print_usage;;
+   esac
+   shift
+ done
+
+#***************************************************************************************
+include_customer() {
+   local CUSTOMER_DIRECTORY="${PROJECT_DIR}/customers/${PARAM_CUSTOMER}/scripts"
+   pushd "${CUSTOMER_DIRECTORY}" 2>&1 > /dev/null
+     for inc_file in *.ish; do
+        source ${CUSTOMER_DIRECTORY}/${inc_file}
+     done
+   popd  2>&1 > /dev/null
+
+}
+
+#***************************************************************************************
 err_trap(){
     err_code=$?
     # ${FUNCNAME[*]} : err_trap print_message main  
@@ -37,7 +94,7 @@ err_trap(){
     exit 127
 }
 
-
+#***************************************************************************************
 function print_title() {
     echo
     echo "===================================="
@@ -45,10 +102,12 @@ function print_title() {
     echo "=== Build type : ${BUILD_TYPE}"
     echo "=== Tool name : ${TOOL_NAME}"
     echo "=== Output directory : ${BUILD_DIR}"
+    echo "=== Customer : ${PARAM_CUSTOMER}"    
     echo "===================================="
     echo
 }
 
+#***************************************************************************************
 function print_message() {
     echo
     echo "===================================="
@@ -130,5 +189,6 @@ function new_dir() {
     mkdir -p "${1}"
 }
 
-export -f new_dir
 #***************************************************************************************
+# Include customer settings
+include_customer

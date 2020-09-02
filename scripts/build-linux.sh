@@ -4,6 +4,7 @@ set -o errtrace
 #   Global variables
 #
 SCRIPT_FOLDER="$(cd "$(dirname "$0")" && pwd)"
+# Include common function
 source ${SCRIPT_FOLDER}/ish/common.sh
 
 PLATFORM=linux-g++
@@ -13,6 +14,7 @@ QMAKE_PARAMS="${QMAKE_PARAMS:-" "}"
 
 #***************************************************************************************
 
+############################################################################################
 print_title
 
 prepare_libraries
@@ -22,7 +24,7 @@ new_dir ${BUILD_DIR}
 print_message "Build application bundle"
 
 pushd "${BUILD_DIR}"
-    ${LINUX_QMAKE} -config ${BUILD_TYPE} ${PROJECT_DIR} ${QMAKE_PARAMS} VERSION="${VERSION}" 
+    ${LINUX_QMAKE} -config ${BUILD_TYPE} ${PROJECT_DIR} ${QMAKE_PARAMS} VERSION="${VERSION}" VS_CUSTOMER="${PARAM_CUSTOMER}"
 
     make -j10
 
