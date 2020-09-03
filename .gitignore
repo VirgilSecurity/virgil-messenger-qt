@@ -32,7 +32,6 @@ release*/
 Debug*/
 gcc*
 obj/
-bin/
 .vs/
 
 Carthage
