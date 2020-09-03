@@ -32,14 +32,14 @@
 #
 #  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-QT += core network qml quick bluetooth sql xml concurrent
+QT += core network qml quick sql xml concurrent
 
 CONFIG += c++14
 
 ios {
     TARGET = VirgilMessenger
     QMAKE_TARGET_BUNDLE_PREFIX = com.virgil
-    VERSION = 3.4.0.0
+    VERSION = 3.4.11.0
 } else {
     TARGET = virgil-messenger
     QMAKE_TARGET_BUNDLE_PREFIX = com.virgilsecurity
@@ -57,11 +57,16 @@ ios {
 
 message("VERSION = $$VERSION")
 
+
 #
-#   Include IoTKit Qt wrapper
+#   Directory with precompiled dependencies
 #
 PREBUILT_PATH = $$PWD/ext/prebuilt
-include($${PREBUILT_PATH}/qt/iotkit.pri)
+
+#
+#   Include Virgil CommKit
+#
+include($$PWD/ext/commkit.pri)
 
 #
 #   Include QML QFuture
@@ -116,6 +121,7 @@ HEADERS += \
         include/VSQUtils.h \
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
+        include/helpers/VSQSingleton.h \
         include/ui/VSQUiHelper.h \
         # Generated
         generated/include/VSQCustomer.h
@@ -146,7 +152,8 @@ SOURCES += \
         src/android/VSQAndroid.cpp \
         src/main.cpp \
         src/VSQApplication.cpp \
-        src/ui/VSQUiHelper.cpp
+        src/ui/VSQUiHelper.cpp \
+        src/hal.cpp
 
 #
 #   Resources
@@ -272,8 +279,8 @@ macx: {
 #
 ios: {
     QMAKE_ASSET_CATALOGS += platforms/ios/Assets.xcassets
-#    OBJECTIVE_SOURCES += \
-#        src/ios/APNSApplicationDelegate.mm
+    OBJECTIVE_SOURCES += \
+        src/ios/APNSApplicationDelegate.mm
 
 #    #IOS_ENTITLEMENTS.name = CODE_SIGN_ENTITLEMENTS
 #    #IOS_ENTITLEMENTS.value = ios/pushnotifications.entitlements
@@ -287,26 +294,6 @@ isEqual(OS_NAME, "ios")|isEqual(OS_NAME, "ios-sim"): {
 
     LIBS_DIR = $$PWD/ext/prebuilt/$$OS_NAME/release/installed/usr/local/lib
     QMAKE_RPATHDIR = @executable_path/Frameworks
-
-    IOS_DYLIBS.files = \
-    $$LIBS_DIR/libvs-messenger-crypto.dylib \
-    $$LIBS_DIR/libvs-messenger-internal.dylib
-    IOS_DYLIBS.path = Frameworks
-    QMAKE_BUNDLE_DATA += IOS_DYLIBS
-}
-
-isEqual(OS_NAME, "ios")|isEqual(OS_NAME, "ios-sim"): {
-    Q_ENABLE_BITCODE.name = ENABLE_BITCODE
-    Q_ENABLE_BITCODE.value = NO
-    QMAKE_MAC_XCODE_SETTINGS += Q_ENABLE_BITCODE
-
-    LIBS_DIR = $$PWD/ext/prebuilt/$$OS_NAME/release/installed/usr/local/lib
-    QMAKE_RPATHDIR = @executable_path/Frameworks
-
-    IOS_DYLIBS.files = \
-    $$LIBS_DIR/libvs-messenger-internal.dylib
-    IOS_DYLIBS.path = Frameworks
-    QMAKE_BUNDLE_DATA += IOS_DYLIBS
 }
 
 
