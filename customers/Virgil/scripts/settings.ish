@@ -7,3 +7,5 @@ ANDROID_PLATFORM="android-28"
 
 # MacOS parameters
 MACOS_NAME="${APPLICATION_NAME}"
+SUFeedURL="https://virgilsecurity.bintray.com/messenger/macos/nightly/appcast.xml"
+SUPublicEDKey="44RVxRhV4h4Hlw+VOeXvCj78Z5NUhJ2Qi5N+kpu8KxI="

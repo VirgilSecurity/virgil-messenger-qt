@@ -224,7 +224,7 @@ function notarize_dmg() {
 function prepare_update() {
 	new_dir "${UPDATE_DIR}"
 
-	cp "${RELEASE_NOTES}" "${UPDATE_DIR}/${APPLICATION_NAME}-${VERSION}.html"
+	cp "${RELEASE_NOTES}" "${UPDATE_DIR}/${MACOS_NAME}-${VERSION}.html"
 	cp "${BUILD_DIR}/${MACOS_NAME}.dmg" "${UPDATE_DIR}/${MACOS_NAME}-${VERSION}.dmg"
 
 	rm -rf "${HOME}/Library/Caches/Sparkle_generate_appcast"
