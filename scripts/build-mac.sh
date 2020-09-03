@@ -23,7 +23,7 @@ SUPublicEDKey="${SUPublicEDKey:-""}"
 #
 #	Resources
 #
-IMAGES_FOLDER="${SCRIPT_FOLDER}/macos/pkg_resources"
+IMAGES_FOLDER="${PROJECT_DIR}/customers/${PARAM_CUSTOMER}/scripts/macos/pkg_resources"
 BACKGROUND_FILE="Background.png"
 DMG_ICON="Installer.icns"
 APP_ICON="MyIcon.icns"
