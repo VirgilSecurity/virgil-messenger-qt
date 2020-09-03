@@ -94,7 +94,7 @@ bool VSQLastActivityManager::handleStanza(const QDomElement &element)
             emit lastActivityDetected(lastActivityIq.seconds());
         }
         else if (lastActivityIq.needSubscription()) {
-            emit lastActivityMissing(tr("Offline"));
+            emit lastActivityMissing(VSQUtils::formattedLastSeenNoActivity());
         }
         else {
             emit errorOccured(tr("Failed to find last activity"));

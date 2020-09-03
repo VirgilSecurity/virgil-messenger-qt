@@ -143,7 +143,7 @@ QString VSQUtils::formattedLastSeenActivity(const Seconds &seconds, const Second
 {
     const auto preffix = QObject::tr("Last seen %1");
     if (seconds < updateInterval) {
-        return preffix.arg(QObject::tr("now"));
+        return QObject::tr("Online");
     }
     if (seconds <= 3 * updateInterval) {
         return preffix.arg(QObject::tr("few seconds ago"));
@@ -181,4 +181,9 @@ QString VSQUtils::formattedLastSeenActivity(const Seconds &seconds, const Second
         return preffix.arg(QObject::tr("year ago"));
     }
     return preffix.arg(QObject::tr("%1 years ago").arg(seconds / year));
+}
+
+QString VSQUtils::formattedLastSeenNoActivity()
+{
+    return QObject::tr("Offline");
 }
