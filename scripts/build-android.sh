@@ -36,7 +36,10 @@ build_proc() {
 
     if [[ "x$ENABLE_RELEASE" != "x" ]]; then
         ANDROID_DEPLOY_QT_ADD_ARGS="--sign ${SCRIPT_FOLDER}/../android.keystore upload --storepass ${ANDROID_STORE_PASS} --keypass ${ANDROID_KEY_PASS}"
-        ANDROID_BUILD_MODE="qtquickcompiler"            
+        ANDROID_BUILD_MODE="qtquickcompiler"
+        ANDROID_BUILD_TYPE="release"
+    else
+        ANDROID_BUILD_TYPE="debug"    
     fi
 
     pushd ${BUILD_DIR}
@@ -48,6 +51,14 @@ build_proc() {
 
         ${ANDROID_DEPLOY_QT} --verbose --input ${BUILD_DIR}/android-${APPLICATION_NAME}-deployment-settings.json --output ${BUILD_DIR}/android-build --android-platform ${ANDROID_PLATFORM} ${ANDROID_DEPLOY_QT_ADD_ARGS} --aab
     popd
+
+   print_message "Rename ${APPLICATION_NAME} => ${ANDROID_NAME}-${VERSION}"
+   pushd "${BUILD_DIR}/android-build/build/outputs/apk/${ANDROID_BUILD_TYPE}"
+    mv -f *.apk     "${ANDROID_NAME}-${VERSION}.apk"
+   popd
+   pushd "${BUILD_DIR}/android-build/build/outputs/bundle/${ANDROID_BUILD_TYPE}"
+    mv -f *.aab  "${ANDROID_NAME}-${VERSION}.aab"
+   popd
 }
 
 #*************************************************************************************************************
