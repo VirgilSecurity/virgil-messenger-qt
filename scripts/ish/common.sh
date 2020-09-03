@@ -76,6 +76,13 @@ include_customer() {
 }
 
 #***************************************************************************************
+remove_generated() {
+   print_message "Remove generated...."
+   rm -rf "${PROJECT_DIR}/generated"
+}
+
+
+#***************************************************************************************
 err_trap(){
     err_code=$?
     # ${FUNCNAME[*]} : err_trap print_message main  
@@ -192,3 +199,4 @@ function new_dir() {
 #***************************************************************************************
 # Include customer settings
 include_customer
+remove_generated
