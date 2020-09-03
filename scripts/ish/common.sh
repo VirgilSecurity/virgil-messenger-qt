@@ -23,7 +23,7 @@ trap 'err_trap  $@' ERR
 print_usage() {
   pushd "${PROJECT_DIR}/customers" 2>&1 > /dev/null
    for customer in */; do
-     customer=${customer::(-1)}
+     customer=${customer%?}
      [ "$customer" == "common" ] && continue
      if [ -z $CUSTOMER_LIST ]; then
           CUSTOMER_LIST="$customer"
