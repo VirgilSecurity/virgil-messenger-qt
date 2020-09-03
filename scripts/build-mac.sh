@@ -15,6 +15,8 @@ QMAKE_BIN="${QT_SDK_DIR}/clang_64/bin/qmake"
 MACDEPLOYQT_BIN="${QT_SDK_DIR}/clang_64/bin/macdeployqt"
 APPCAST_BIN="${PROJECT_DIR}/ext/prebuilt/macos/sparkle/bin/generate_appcast"
 QMAKE_PARAMS="${QMAKE_PARAMS:-" "}"
+SETICON_BIN="${SCRIPT_FOLDER}/macos/bin/seticon"
+
 
 # Sparkle
 SUFeedURL="${SUFeedURL:-""}"
@@ -160,7 +162,7 @@ function setIcon() {
 	local FILE_TO_APPLY="${3}"
 
 	pushd "${ICON_FOLDER}"
-		./bin/seticon "${ICON_FILE}" "${FILE_TO_APPLY}"
+		${SETICON_BIN} "${ICON_FILE}" "${FILE_TO_APPLY}"
 	popd
 }
 
