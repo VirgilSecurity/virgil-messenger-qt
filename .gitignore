@@ -7,7 +7,7 @@ codegen/test/gsl/
 ext/*
 docs/doxygen
 Deploy/
-
+generated/
 #####
 # OS X temporary files that should never be committed
 
