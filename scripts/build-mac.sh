@@ -101,7 +101,7 @@ function build_project() {
 
 	pushd ${BUILD_DIR}
 
-		${QMAKE_BIN} -config ${BUILD_TYPE} ${PROJECT_DIR} ${QMAKE_PARAMS} VERSION="${VERSION}"
+		${QMAKE_BIN} -config ${BUILD_TYPE} ${PROJECT_DIR} ${QMAKE_PARAMS} VERSION="${VERSION}" VS_CUSTOMER="${PARAM_CUSTOMER}"
 
 		make clean
 

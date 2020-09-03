@@ -48,22 +48,22 @@ print_usage() {
 
 # Default customer
 PARAM_CUSTOMER="${VS_CUSTOMER:-Virgil}"
-
-while [ -n "$1" ]
- do
-   case "$1" in
-     -h) print_usage
-         shift;;
-     -c) PARAM_CUSTOMER="$2"
-         shift ;;
-     --) shift
-         break
-         ;;
-     *) print_usage;;
-   esac
-   shift
- done
-
+if [ "$IGNORE_PARAMS" != "1" ]; then 
+ while [ -n "$1" ]
+  do
+    case "$1" in
+      -h) print_usage
+          shift;;
+      -c) PARAM_CUSTOMER="$2"
+          shift ;;
+      --) shift
+          break
+          ;;
+      *) print_usage;;
+    esac
+    shift
+  done
+fi
 #***************************************************************************************
 include_customer() {
    local CUSTOMER_DIRECTORY="${PROJECT_DIR}/customers/${PARAM_CUSTOMER}/scripts"
