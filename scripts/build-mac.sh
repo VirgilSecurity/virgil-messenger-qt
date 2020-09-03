@@ -19,8 +19,8 @@ SETICON_BIN="${SCRIPT_FOLDER}/macos/bin/seticon"
 
 
 # Sparkle
-SUFeedURL="${SUFeedURL:-""}"
-SUPublicEDKey="${SUPublicEDKey:-""}"
+# SUFeedURL="${SUFeedURL:-""}"
+# SUPublicEDKey="${SUPublicEDKey:-""}"
 
 #
 #	Resources
@@ -42,7 +42,7 @@ PKG_IDENTIFIER="com.virgilsecurity.messenger"
 APP_BUNDLE="${APPLICATION_NAME}.app"
 DMG_FILE="${BUILD_DIR}/virgil-messenger.dmg"
 UPDATE_DIR="${BUILD_DIR}/update"
-RELEASE_NOTES="${PROJECT_DIR}/release-notes.html"
+RELEASE_NOTES="${PROJECT_DIR}/generated/release-notes.html"
 
 #***************************************************************************************
 function check_env() {
