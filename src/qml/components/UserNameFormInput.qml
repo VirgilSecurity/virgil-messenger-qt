@@ -5,7 +5,6 @@ import QtQuick.Layouts 1.12
 import "../theme"
 
 Column {
-
     Layout.fillWidth: true
     Layout.maximumWidth: Theme.formMaximumWidth
     Layout.alignment: Qt.AlignHCenter

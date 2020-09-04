@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>qml/components/CommonHelpers/TextInCircle.qml</file>
-        <file>qml/components/Dialogs/AddContactDialog.qml</file>
         <file>qml/components/Popups/Popup.qml</file>
         <file>qml/components/Progress/Progress.qml</file>
         <file>qml/iot/DevicesList.qml</file>
@@ -98,6 +97,7 @@
         <file>qml/base/qmldir</file>
         <file>qml/components/AppStatus.qml</file>
         <file>qml/pages/BackupKeyPage.qml</file>
+        <file>qml/pages/AddPersonPage.qml</file>
         <file>qml/components/Dialogs/SendReportAsk.qml</file>
         <file>qml/components/SelectAttachmentsDialog.qml</file>
         <file>qml/resources/icons/Camera Selected.png</file>

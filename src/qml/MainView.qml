@@ -178,7 +178,10 @@ Control {
         stackView.push("./pages/BackupKeyPage.qml")
     }
 
-    function showChatWith(recipient) {
+    function showChatWith(recipient, popCurrent) {
+        if (popCurrent) {
+            stackView.pop(StackView.Immediate)
+        }
         navigateTo("Chat", { recipient: recipient }, true, false)
         Messenger.setCurrentRecipient(recipient)
     }
@@ -189,6 +192,10 @@ Control {
         }
 
         stackView.push("./pages/ChatListPage.qml")
+    }
+
+    function showAddPerson() {
+        stackView.push("./pages/AddPersonPage.qml")
     }
 
     function showAccountSettings() {
