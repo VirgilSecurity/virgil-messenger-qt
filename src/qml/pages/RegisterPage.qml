@@ -32,6 +32,7 @@ Page {
         }
 
         FormPrimaryButton {
+            enabled: username.acceptableInput
             onClicked: signUp(username.text)
             objectName: "btnCreateAccount"
             text: "Create account"

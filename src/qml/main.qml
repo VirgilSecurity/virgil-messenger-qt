@@ -25,24 +25,26 @@ ApplicationWindow {
     Connections {
         target: Messenger
 
-        onFireError: {
+        function onFireError() {
         }
 
-        onFireInform: {
+        function onFireInform() {
         }
 
-        onFireWarning: showPopupError(warningText);
-
-        onFireConnecting: {
+        function onFireWarning(text) {
+            showPopupError(text);
         }
 
-        onFireReady: {
+        function onFireConnecting() {
         }
 
-        onFireAddedContact: {
+        function onFireReady() {
         }
 
-        onFireNewMessage: {
+        function onFireAddedContact() {
+        }
+
+        function onFireNewMessage() {
         }
     }
 

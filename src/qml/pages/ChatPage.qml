@@ -170,7 +170,9 @@ Page {
 
     Connections {
         target: Messenger
-        onLastActivityTextChanged: lastActivityLabel.text = text
+        function onLastActivityTextChanged(text) {
+            lastActivityLabel.text = text
+        }
     }
 
     // Sounds

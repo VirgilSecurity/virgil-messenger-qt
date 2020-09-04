@@ -1305,7 +1305,12 @@ VSQMessenger::setStatus(VSQMessenger::EnStatus status) {
 void VSQMessenger::setCurrentRecipient(const QString &recipient)
 {
     m_recipient = recipient;
-    m_lastActivityManager->setCurrentJid(recipient + "@" + _xmppURL());
+    if (recipient.isEmpty()) {
+        m_lastActivityManager->setCurrentJid(QString());
+    }
+    else {
+        m_lastActivityManager->setCurrentJid(recipient + "@" + _xmppURL());
+    }
 }
 
 void VSQMessenger::saveAttachmentAs(const QString &messageId, const QVariant &fileUrl)

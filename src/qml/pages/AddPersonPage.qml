@@ -67,7 +67,7 @@ Page {
 
         FormPrimaryButton {
             text: qsTr("Add to contacts")
-            enabled: username.text.length > 0
+            enabled: username.acceptableInput
             onClicked: accept()
         }
     }
