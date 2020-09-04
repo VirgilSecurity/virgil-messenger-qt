@@ -391,5 +391,4 @@ android: {
 include(ext/sanitizer.pri)
 
 DISTFILES += \
-    .gitignore \
-    generated/src/qml/customer/qmldir
+    .gitignore
