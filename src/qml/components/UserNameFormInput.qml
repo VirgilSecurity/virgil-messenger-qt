@@ -31,6 +31,7 @@ Column {
         rightPadding: 15
         font.pointSize: UiHelper.fixFontSz(15)
         color: Theme.primaryTextColor
+        focus: Platform.isDesktop
 
         background: Rectangle {
             implicitWidth: parent.width

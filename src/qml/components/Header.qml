@@ -63,9 +63,9 @@ ToolBar {
 
             id: menuButton
             image: "More"
-            // visible: menu.length
-            opacity: menu.length ? 1 : 0
-            enabled: menu.length
+             // TODO(fpohtmeh): try with visibility
+            opacity: contextMenu.length ? 1 : 0
+            enabled: contextMenu.length
             onClicked: {
                 contextMenu.open()
             }

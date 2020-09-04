@@ -24,17 +24,21 @@ Page {
     Form {
         id: form
         formSpacing: 25
+        focus: true
 
         UserNameFormInput {
             id: username
             label: qsTr("Username")
+            focus: true
 
             Keys.onPressed: {
                 if (Platform.isDesktop) {
-                    if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return)
+                    if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return) {
                         accept();
-                    else if (event.key == Qt.Key_Escape)
+                    }
+                    else if (event.key == Qt.Key_Escape) {
                         reject();
+                    }
                 }
             }
         }
