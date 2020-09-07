@@ -82,7 +82,7 @@ Page {
         }
 
         Action {
-            text: qsTr("Add person")
+            text: qsTr("New Chat")
             onTriggered: mainView.showAddPerson()
         }
     }
