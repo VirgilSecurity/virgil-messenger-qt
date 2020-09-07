@@ -170,7 +170,7 @@ function setIcon() {
 function create_dmg() {
 	create_appdmg_spec
 
-	[ "${APP_BUNDLE}" != "${MACOS_NAME}" ] && mv -f "${BUILD_DIR}/${APP_BUNDLE}" "${BUILD_DIR}/${MACOS_NAME}.app"
+	[ "${APP_BUNDLE}" != "${MACOS_NAME}.app" ] && mv -f "${BUILD_DIR}/${APP_BUNDLE}" "${BUILD_DIR}/${MACOS_NAME}.app"
 
 	appdmg ${APPDMG_SPEC} "${BUILD_DIR}/${MACOS_NAME}.dmg"
 
