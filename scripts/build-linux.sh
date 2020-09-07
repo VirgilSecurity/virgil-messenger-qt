@@ -34,3 +34,20 @@ pushd "${BUILD_DIR}"
     cp ${PROJECT_DIR}/ext/prebuilt/linux/release/installed/usr/local/lib/libvs-messenger-internal.so DistributionKit/lib
 
 popd
+
+
+pushd "${BUILD_DIR}/DistributionKit"
+ sed -i 's/#!\/bin\/sh/#!\/bin\/bash/g'  virgil-messenger.sh
+ if [ "${LINUX_NAME}" != "${APPLICATION_NAME}" ]; then    
+   echo "Rename virgil-messenger.sh => ${LINUX_NAME}.sh"
+   mv -f virgil-messenger.sh "${LINUX_NAME}.sh"
+ fi    
+popd
+
+
+if [ "${PARAM_BUILD_PKG}" == "1" ]; then
+ build_linux_deb
+ build_linux_rpm
+fi
+
+print_message "All operation finished"

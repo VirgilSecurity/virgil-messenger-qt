@@ -35,7 +35,8 @@ print_usage() {
   echo
   echo "$(basename ${0})"
   echo
-  echo "  -c <${CUSTOMER_LIST}>   - Build for customer         [default: Virgil]"
+  echo "  -c <${CUSTOMER_LIST}>   - Build for customer                            [default: Virgil]"
+  echo "  -b                      - Build Linux packages (Required: docker)       [default: no]"  
   echo "  -h                      - Print help"
   exit 0
 }
@@ -48,22 +49,30 @@ print_usage() {
 
 # Default customer
 PARAM_CUSTOMER="${VS_CUSTOMER:-Virgil}"
+PARAM_BUILD_PKG="0"
 if [ "$IGNORE_PARAMS" != "1" ]; then 
  while [ -n "$1" ]
   do
     case "$1" in
       -h) print_usage
-          shift;;
+          exit 0
+          ;;
+      -p) PARAM_BUILD_PKG="1"
+          ;;          
       -c) PARAM_CUSTOMER="$2"
-          shift ;;
-      --) shift
-          break
+          shift 
           ;;
       *) print_usage;;
     esac
     shift
   done
 fi
+
+# Include packaging 
+if [ "${PARAM_BUILD_PKG}" == "1" ]; then 
+  source ${PROJECT_DIR}/customers/${PARAM_CUSTOMER}/scripts/packaging.ish
+fi
+
 #***************************************************************************************
 include_customer() {
    local CUSTOMER_DIRECTORY="${PROJECT_DIR}/customers/${PARAM_CUSTOMER}/scripts"
