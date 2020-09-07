@@ -24,8 +24,14 @@ Page {
         }
 
         FormPrimaryButton {
-            enabled: username.acceptableInput
-            onClicked: mainView.showSignInAs({ username: username.text })
+            onClicked: {
+                if (username.text === "") {
+                    showPopupError("Username is empty")
+                }
+                else {
+                    mainView.showSignInAs({ username: username.text })
+                }
+            }
             text: qsTr("Log In")
         }
 

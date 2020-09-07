@@ -16,8 +16,6 @@ Column {
     property alias text: formField.text
     property alias placeholder: formField.placeholderText
     property alias inputHint: formField.inputMethodHints
-    // TODO(fpohtmeh): fix mobile
-    readonly property var acceptableInput: Platform.isDesktop ? formField.acceptableInput : (formField.text.length > 0)
 
     FormLabel {
         id: formLabel
