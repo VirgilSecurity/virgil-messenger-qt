@@ -52,9 +52,6 @@ ios {
     }
 }
 
-
-
-
 message("VERSION = $$VERSION")
 
 
@@ -280,7 +277,20 @@ macx: {
 ios: {
     QMAKE_ASSET_CATALOGS += platforms/ios/Assets.xcassets
     OBJECTIVE_SOURCES += \
-        src/ios/APNSApplicationDelegate.mm
+        src/ios/APNSApplicationDelegate.mm \
+        src/ios/test-swift.swift \
+
+    HEADERS += \
+        include/ios/VirgilMessenger-Bridging-Header.h \
+
+    BridgingHeader.name = SWIFT_OBJC_BRIDGING_HEADER
+    BridgingHeader.value = $$PWD/include/ios/VirgilMessenger-Bridging-Header.h
+    QMAKE_MAC_XCODE_SETTINGS += BridgingHeader
+
+    SwiftVersion.name = SWIFT_VERSION
+    SwiftVersion.value = 5.0
+    QMAKE_MAC_XCODE_SETTINGS += SwiftVersion
+
 
 #    #IOS_ENTITLEMENTS.name = CODE_SIGN_ENTITLEMENTS
 #    #IOS_ENTITLEMENTS.value = ios/pushnotifications.entitlements
