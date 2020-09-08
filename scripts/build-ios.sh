@@ -21,6 +21,8 @@ ios_build () {
    new_dir ${BUILD_DIR}
    pushd "${BUILD_DIR}"
        ${IOS_QMAKE} -config macx-ios-clang ${PROJECT_DIR} ${QMAKE_PARAMS} VERSION="${VERSION}" CONFIG+="${IOS_BUILD_CONFIG}"
+       print_message "Prepare XCode project"
+       ${PROJECT_DIR}/tools/xcode-parser-2 "${BUILD_DIR}/VirgilMessenger.xcodeproj/project.pbxproj"
        make -j10
    popd
 
