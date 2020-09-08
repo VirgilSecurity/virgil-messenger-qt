@@ -408,7 +408,6 @@ android: {
         $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xxxhdpi/ic_launcher_round.png
 }
 
-include(ext/sanitizer.pri)
 
 DISTFILES += \
     .gitignore \

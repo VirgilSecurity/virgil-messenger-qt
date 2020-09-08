@@ -168,3 +168,17 @@ build_linux_rpm() {
   prepare_linux_rpm  
   _build_rpm
 }
+
+#********************************************************************
+build_ios_pkg() {
+   pushd "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios/Release-iphoneos"
+     zip "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios/${IOS_NAME}.zip" *.app
+   popd
+}
+
+#********************************************************************
+build_iossim_pkg() {
+   pushd "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios-sim/Debug-iphonesimulator"
+     zip "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios-sim/${IOS_NAME}.zip" *.app
+   popd
+}
