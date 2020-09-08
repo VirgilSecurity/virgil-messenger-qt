@@ -15,15 +15,17 @@ QMAKE_BIN="${QT_SDK_DIR}/clang_64/bin/qmake"
 MACDEPLOYQT_BIN="${QT_SDK_DIR}/clang_64/bin/macdeployqt"
 APPCAST_BIN="${PROJECT_DIR}/ext/prebuilt/macos/sparkle/bin/generate_appcast"
 QMAKE_PARAMS="${QMAKE_PARAMS:-" "}"
+SETICON_BIN="${SCRIPT_FOLDER}/macos/bin/seticon"
+
 
 # Sparkle
-SUFeedURL="${SUFeedURL:-""}"
-SUPublicEDKey="${SUPublicEDKey:-""}"
+# SUFeedURL="${SUFeedURL:-""}"
+# SUPublicEDKey="${SUPublicEDKey:-""}"
 
 #
 #	Resources
 #
-IMAGES_FOLDER="${SCRIPT_FOLDER}/macos/pkg_resources"
+IMAGES_FOLDER="${PROJECT_DIR}/generated/scripts/macos/pkg_resources"
 BACKGROUND_FILE="Background.png"
 DMG_ICON="Installer.icns"
 APP_ICON="MyIcon.icns"
@@ -38,9 +40,9 @@ PKG_IDENTIFIER="com.virgilsecurity.messenger"
 #	Results
 #
 APP_BUNDLE="${APPLICATION_NAME}.app"
-DMG_FILE="${BUILD_DIR}/${APPLICATION_NAME}.dmg"
+DMG_FILE="${BUILD_DIR}/virgil-messenger.dmg"
 UPDATE_DIR="${BUILD_DIR}/update"
-RELEASE_NOTES="${PROJECT_DIR}/release-notes.html"
+RELEASE_NOTES="${PROJECT_DIR}/generated/release-notes.html"
 
 #***************************************************************************************
 function check_env() {
@@ -99,10 +101,7 @@ function build_project() {
 
 	pushd ${BUILD_DIR}
 
-		${QMAKE_BIN} -config ${BUILD_TYPE} ${PROJECT_DIR} ${QMAKE_PARAMS} VERSION="${VERSION}"
-
-		#	Generate Plist file
-		"${SCRIPT_FOLDER}/generate-mac-plist.sh" "${SUFeedURL}" "${SUPublicEDKey}" "${VERSION}"
+		${QMAKE_BIN} -config ${BUILD_TYPE} ${PROJECT_DIR} ${QMAKE_PARAMS} VERSION="${VERSION}" VS_CUSTOMER="${PARAM_CUSTOMER}"
 
 		make clean
 
@@ -135,7 +134,7 @@ function build_project() {
 function create_appdmg_spec() {
 	cat <<EOT >"${APPDMG_SPEC}"
 {
-	"title": "Virgil Messenger ${VERSION}",
+	"title": "${MACOS_NAME} ${VERSION}",
 	"icon": "${IMAGES_FOLDER}/${DMG_ICON}",
 	"background": "${IMAGES_FOLDER}/${BACKGROUND_FILE}",
 	"icon-size": 90,
@@ -144,7 +143,7 @@ function create_appdmg_spec() {
 		"identifier": "${PKG_IDENTIFIER}"	
 	},
 	"contents": [
-		{ "x": 180, "y": 200, "type": "file", "path": "${BUILD_DIR}/${APP_BUNDLE}" },
+		{ "x": 180, "y": 200, "type": "file", "path": "${BUILD_DIR}/${MACOS_NAME}.app" },
 		{ "x": 460, "y": 200, "type": "link", "path": "/Applications" }
 	]
 }
@@ -163,22 +162,26 @@ function setIcon() {
 	local FILE_TO_APPLY="${3}"
 
 	pushd "${ICON_FOLDER}"
-		./bin/seticon "${ICON_FILE}" "${FILE_TO_APPLY}"
+		${SETICON_BIN} "${ICON_FILE}" "${FILE_TO_APPLY}"
 	popd
 }
 
 #***************************************************************************************
 function create_dmg() {
 	create_appdmg_spec
-	appdmg ${APPDMG_SPEC} ${DMG_FILE}
 
-	setIcon "${IMAGES_FOLDER}" "${DMG_ICON}" "${DMG_FILE}"
+	[ "${APP_BUNDLE}" != "${MACOS_NAME}.app" ] && mv -f "${BUILD_DIR}/${APP_BUNDLE}" "${BUILD_DIR}/${MACOS_NAME}.app"
+
+	appdmg ${APPDMG_SPEC} "${BUILD_DIR}/${MACOS_NAME}.dmg"
+
+	setIcon "${IMAGES_FOLDER}" "${DMG_ICON}" "${BUILD_DIR}/${MACOS_NAME}.dmg"
+
 }
 #***************************************************************************************
 function notarize_dmg() {
 	print_message "Send Application for Apple's notarization"
 
-	NOTARIZE_OUTPUT=$(xcrun altool -t osx -f "${DMG_FILE}" --primary-bundle-id "${PKG_IDENTIFIER}" --notarize-app --username ${USER_NAME} -p ${PASS} 2>&1)
+	NOTARIZE_OUTPUT=$(xcrun altool -t osx -f "${BUILD_DIR}/${MACOS_NAME}.dmg" --primary-bundle-id "${PKG_IDENTIFIER}" --notarize-app --username ${USER_NAME} -p ${PASS} 2>&1)
 	NOTARIZE_ID=$(echo ${NOTARIZE_OUTPUT} | tr -d "\n" | grep -F 'No errors uploading' | awk -F 'RequestUUID' '{print $2}' | awk -F ' ' '{print $2}')
 
 	echo "NOTARIZE_ID = ${NOTARIZE_ID}"
@@ -209,7 +212,7 @@ function notarize_dmg() {
 
 	print_message "Staple result of the notarization"
 
-	STAMPLE_OUTPUT=$(xcrun stapler staple -v "${DMG_FILE}" 2>&1 | tr -d "\n")
+	STAMPLE_OUTPUT=$(xcrun stapler staple -v "${BUILD_DIR}/${MACOS_NAME}.dmg" 2>&1 | tr -d "\n")
 
 	if echo ${STAMPLE_OUTPUT} | grep -q -F 'The staple and validate action worked!'; then
 		echo ""
@@ -223,8 +226,8 @@ function notarize_dmg() {
 function prepare_update() {
 	new_dir "${UPDATE_DIR}"
 
-	cp "${RELEASE_NOTES}" "${UPDATE_DIR}/${APPLICATION_NAME}-${VERSION}.html"
-	cp "${DMG_FILE}" "${UPDATE_DIR}/${APPLICATION_NAME}-${VERSION}.dmg"
+	cp "${RELEASE_NOTES}" "${UPDATE_DIR}/${MACOS_NAME}-${VERSION}.html"
+	cp "${BUILD_DIR}/${MACOS_NAME}.dmg" "${UPDATE_DIR}/${MACOS_NAME}-${VERSION}.dmg"
 
 	rm -rf "${HOME}/Library/Caches/Sparkle_generate_appcast"
 
@@ -234,6 +237,7 @@ function prepare_update() {
 #***************************************************************************************
 
 check_env
+"${SCRIPT_FOLDER}/generate-mac-plist.sh" "${SUFeedURL}" "${SUPublicEDKey}" "${VERSION}"
 build_project
 create_dmg
 notarize_dmg

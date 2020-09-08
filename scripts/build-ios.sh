@@ -6,8 +6,6 @@ set -o errtrace
 SCRIPT_FOLDER="$(cd "$(dirname "$0")" && pwd)"
 source ${SCRIPT_FOLDER}/ish/common.sh
 
-#export PREBUILT_SKIP="true"
-
 PLATFORM=linux-g++
 BUILD_DIR=${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.${PLATFORM}/
 IOS_QMAKE="${QT_SDK_DIR}/ios/bin/qmake"
@@ -20,12 +18,11 @@ ios_build () {
    BUILD_DIR=${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.${PLATFORM}/
    new_dir ${BUILD_DIR}
    pushd "${BUILD_DIR}"
-       ${IOS_QMAKE} -config macx-ios-clang ${PROJECT_DIR} ${QMAKE_PARAMS} VERSION="${VERSION}" CONFIG+="${IOS_BUILD_CONFIG}"
+       ${IOS_QMAKE} -config macx-ios-clang ${PROJECT_DIR} ${QMAKE_PARAMS} VERSION="${VERSION}" VS_CUSTOMER="${PARAM_CUSTOMER}" CONFIG+="${IOS_BUILD_CONFIG}"
        make -j10
    popd
 
 }
-
 
 print_title
 

@@ -1,0 +1,39 @@
+%global debug_package %{nil}
+
+Summary:          Virgil messenger
+Name:             virgil-messenger
+Version:          {{MAJOR_VER}}.{{MINOR_VER}}.{{SUB_VER}}
+Release:          {{BUILD_VER}}
+Group:            Internet
+License:          BSD-3-Clause
+URL:              https://virgilsecurity.com/
+Source0:         %{name}-%{version}.tgz
+
+%description
+Virgil messenger
+
+%prep
+%setup -q -n %{name}-%{version}
+
+%build
+
+%install
+
+install -d                                                                                                       %{buildroot}%{_datarootdir}/virgil-messenger
+install -d                                                                                                       %{buildroot}%{_bindir}
+install -d                                                                                                       %{buildroot}%{_datadir}/applications
+install -d                                                                                                       %{buildroot}%{_datadir}/icons/hicolor/scalable/apps
+
+cp -rf ./*                                                                                                       %{buildroot}%{_datarootdir}/virgil-messenger
+ln -s %{_datarootdir}/virgil-messenger/virgil-messenger.sh                                                       %{buildroot}%{_bindir}/virgil-messenger
+install -p -m 644 virgil-messenger.desktop                                                                       %{buildroot}%{_datadir}/applications/
+install -p -m 644 virgil-messenger.png                            		  				 %{buildroot}%{_datadir}/icons/hicolor/scalable/apps
+
+%files
+%doc VERSION_MESSENGER
+%{_datarootdir}/virgil-messenger
+%{_bindir}/virgil-messenger
+%{_datadir}/applications
+%{_datadir}/icons/hicolor/scalable/apps
+
+%changelog

@@ -4,6 +4,7 @@ set -o errtrace
 #   Global variables
 #
 SCRIPT_FOLDER="$(cd "$(dirname "$0")" && pwd)"
+IGNORE_PARAMS="1"
 source ${SCRIPT_FOLDER}/ish/common.sh
 
 
@@ -23,7 +24,7 @@ function print_usage() {
 
 #***************************************************************************************
 function fill_plist() {
-    local PLIST_DIR="${SCRIPT_FOLDER}/../generated/platforms/macos"
+    local PLIST_DIR="${SCRIPT_FOLDER}/../platforms/macos"
     local TEMPLATE_PLIST="${PLIST_DIR}/virgil-messenger.plist.in"
     local DST_PLIST="${PLIST_DIR}/virgil-messenger.plist"
 
