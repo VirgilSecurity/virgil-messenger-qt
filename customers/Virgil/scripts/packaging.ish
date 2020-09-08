@@ -40,7 +40,7 @@ prepare_linux_deb() {
   export MAJOR_VER=$(echo "$VERSION"| cut -d'.' -f1)
   export MINOR_VER=$(echo "$VERSION"| cut -d'.' -f2)
   export SUB_VER=$(echo "$VERSION"| cut -d'.' -f3)
-  export BUILD_VER="${BUILD_VER:-0}"
+  export BUILD_VER="${BUILD_NUMBER:-0}"
 
   rm -rf "${PKG_BUILD_DIR}" || true 
   mkdir -p "${PKG_BUILD_DIR}/${LINUX_NAME}"
