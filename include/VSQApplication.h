@@ -39,7 +39,6 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <VSQMessenger.h>
-#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
 #include <VSQLogging.h>
 #include <VSQSettings.h>
 
