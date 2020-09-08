@@ -1121,12 +1121,14 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
         m_sqlConversations->createMessage(recipient, msg->message, msg->messageId, msg->attachment);
         m_sqlConversations->setMessageStatus(msg->messageId, StMessage::Status::MST_SENT);
         // ensure private chat with recipient exists
+        m_contactManager->addContact(recipient + "@" + _xmppURL(), recipient, QString());
         m_sqlChatModel->createPrivateChat(recipient);
         emit fireNewMessage(sender, msg->message);
         return;
     }
 
     // Add sender to contact
+    m_contactManager->addContact(sender + "@" + _xmppURL(), sender, QString());
     m_sqlChatModel->createPrivateChat(sender);
     // Save message to DB
     m_sqlConversations->receiveMessage(msg->messageId, sender, msg->message, msg->attachment);

@@ -184,7 +184,7 @@ Page {
             anchors.fill: parent
             onClicked: {
                 if (!listView.contentItem.children.length) {
-                    addContact()
+                    mainView.showAddPerson()
                     mouse.accepted = false
                 }
             }
