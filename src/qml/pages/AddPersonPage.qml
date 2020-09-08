@@ -18,7 +18,7 @@ Page {
 
     header: Header {
         showBackButton: !form.isLoading
-        title: qsTr("Add person")
+        title: qsTr("New chat")
     }
 
     Form {
