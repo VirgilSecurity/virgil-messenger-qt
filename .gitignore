@@ -55,3 +55,6 @@ Makefile
 
 ####
 generated
+
+
+!ext/commkit.pri
