@@ -10,15 +10,17 @@ Menu {
     property bool dropdown: false
     property bool compact: false
 
-    readonly property real menuWidth: compact ? 150 : 200
-    readonly property real menuPadding: compact ? 5 : 10
-    readonly property real menuItemHeight: compact ? 30 : 40
-    readonly property real menuItemPadding: compact ? 10 : 20
-
     QtObject {
-        readonly property int spacing: 5
+        id: d
 
-        Component.onCompleted: root.visibleChanged.connect(function() {
+        readonly property real spacing: 5
+        readonly property real menuWidth: calculateWidth(compact ? 150 : 200)
+        readonly property real vPadding: compact ? 5 : 10
+        readonly property real hPadding: 0
+        readonly property real itemHeight: compact ? 30 : 40
+        readonly property real itemPadding: compact ? 10 : 20
+
+        function updatePosition() {
             if (!dropdown || !root.visible)
                 return;
             var window = mainView.parent
@@ -28,12 +30,16 @@ Menu {
             var centerY = coord.y + 0.5 * button.height
             root.x = (centerX > 0.5 * window.width) ? (button.width - root.width) : 0
             root.y = (centerY > 0.5 * window.height) ? (-spacing - root.height) : (button.height + spacing)
-        })
+        }
+
+        Component.onCompleted: root.visibleChanged.connect(updatePosition)
     }
 
-    implicitWidth: menuWidth
-    topPadding: menuPadding
-    bottomPadding: menuPadding
+    implicitWidth: d.menuWidth
+    topPadding: d.vPadding
+    bottomPadding: d.vPadding
+    leftPadding: d.hPadding
+    rightPadding: d.hPadding
 
     background: Rectangle {
         color: Theme.menuBackgroundColor
@@ -43,12 +49,12 @@ Menu {
     delegate: MenuItem {
         id: menuItem
         implicitWidth: parent.width
-        implicitHeight: menuItemHeight
+        implicitHeight: d.itemHeight
         font.pointSize: UiHelper.fixFontSz(15)
 
         contentItem: Text {
-            leftPadding: menuItemPadding
-            rightPadding: menuItemPadding
+            leftPadding: d.itemPadding
+            rightPadding: d.itemPadding
             text: menuItem.text
             font: menuItem.font
             color: Theme.primaryTextColor
@@ -62,5 +68,16 @@ Menu {
             implicitHeight: parent.implicitHeight
             color: menuItem.highlighted ? "#59717D" : root.background.color
         }
+    }
+
+    function calculateWidth(maxWidth) {
+        var width = 0;
+        var padding = 0;
+        for (var i = 0; i < count; ++i) {
+            var item = itemAt(i);
+            width = Math.max(item.contentItem.implicitWidth, width);
+            padding = Math.max(item.padding, padding);
+        }
+        return Math.min(maxWidth, width + (padding + d.hPadding) * 2);
     }
 }

@@ -220,30 +220,6 @@ Control {
                 height: loader.item.height
                 color: "transparent"
 
-                TapHandler {
-                    acceptedButtons: Qt.RightButton
-                    property var contextMenu: loader.item.contextMenu
-
-                    onLongPressed: {
-                        if (!Platform.isMobile) {
-                            return
-                        }
-                        contextMenu.x = point.position.x
-                        contextMenu.y = point.position.y - 40
-                        contextMenu.open()
-                    }
-
-                    onTapped: {
-                        if (Platform.isMobile) {
-                            return
-                        }
-                        contextMenu.x = eventPoint.position.x
-                        contextMenu.y = eventPoint.position.y
-                        contextMenu.open()
-                        eventPoint.accepted = false
-                    }
-                }
-
                 Rectangle {
                     width: chatMessage.width
                     height: loader.item.height
@@ -271,6 +247,29 @@ Control {
                 Loader {
                     id: loader
                     sourceComponent: d.hasAttachment ? attachmentComponent : textEditComponent
+
+                    property var contextMenu: item.contextMenu
+                    function openContextMenu(mouse) {
+                        contextMenu.x = mouse.x
+                        contextMenu.y = mouse.y
+                        contextMenu.open()
+                    }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Platform.isDesktop ? Qt.RightButton : Qt.LeftButton
+
+                    onClicked: {
+                        if (Platform.isDesktop) {
+                            loader.openContextMenu(mouse)
+                        }
+                    }
+                    onPressAndHold: {
+                        if (Platform.isMobile) {
+                            loader.openContextMenu(mouse)
+                        }
+                    }
                 }
             }
 

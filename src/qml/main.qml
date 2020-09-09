@@ -14,8 +14,11 @@ ApplicationWindow {
     id: root
     visible: true
     title: settings.applicationDisplayName
-    minimumWidth: Platform.isMobile ? 320 : 1000
-    minimumHeight: Platform.isMobile ? 600 : 800
+
+    Binding on height { when: Platform.isDesktop; value: 800 }
+    Binding on width { when: Platform.isDesktop; value: 600 }
+    Binding on minimumHeight { when: Platform.isDesktop; value: 500 }
+    Binding on minimumWidth { when: Platform.isDesktop; value: 300 }
 
     property bool connectionError: false
 
@@ -25,24 +28,26 @@ ApplicationWindow {
     Connections {
         target: Messenger
 
-        onFireError: {
+        function onFireError() {
         }
 
-        onFireInform: {
+        function onFireInform() {
         }
 
-        onFireWarning: showPopupError(warningText);
-
-        onFireConnecting: {
+        function onFireWarning(text) {
+            showPopupError(text);
         }
 
-        onFireReady: {
+        function onFireConnecting() {
         }
 
-        onFireAddedContact: {
+        function onFireReady() {
         }
 
-        onFireNewMessage: {
+        function onFireAddedContact() {
+        }
+
+        function onFireNewMessage() {
         }
     }
 

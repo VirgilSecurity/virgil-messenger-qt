@@ -6,6 +6,7 @@ import QtQuick.Window 2.12
 import QtMultimedia 5.12
 import com.virgilsecurity.messenger 1.0
 
+import "../base"
 import "../theme"
 import "../components"
 
@@ -75,6 +76,8 @@ Page {
     ListView {
         id: listView
 
+        property real previousHeight: 0.0
+
         anchors.fill: parent
         anchors.leftMargin: 20
         anchors.rightMargin: 20
@@ -121,6 +124,13 @@ Page {
         }
 
         ScrollBar.vertical: ScrollBar { }
+
+        onHeightChanged: {
+            if (height < previousHeight) {
+                positionViewAtEnd()
+            }
+            previousHeight = height
+        }
 
         MouseArea {
             anchors.fill: parent
@@ -170,7 +180,9 @@ Page {
 
     Connections {
         target: Messenger
-        onLastActivityTextChanged: lastActivityLabel.text = text
+        function onLastActivityTextChanged(text) {
+            lastActivityLabel.text = text
+        }
     }
 
     // Sounds

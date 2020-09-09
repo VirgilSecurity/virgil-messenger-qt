@@ -49,6 +49,8 @@ namespace VSQUtils
 
     QString formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval);
 
+    QString formattedLastSeenNoActivity();
+
     // File functions
 
     QString findUniqueFileName(const QString &fileName);

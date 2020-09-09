@@ -13,14 +13,18 @@ Control {
     signal messageSending(string message, var attachmentUrl, var attachmentType)
 
     width: parent.width
-    implicitHeight: inputItem.height
+    implicitHeight: row.height
+
+    readonly property real defaultMargin: 10
 
     background: Rectangle {
         color: Theme.chatBackgroundColor
     }
 
     RowLayout {
-        anchors.fill: parent
+        id: row
+        anchors.left: parent.left
+        anchors.right: parent.right
 
         ImageButton {
             Layout.leftMargin: 12
@@ -46,148 +50,115 @@ Control {
             }
         }
 
-        Item {
-            id: inputItem
+        Rectangle {
+            id: inputRect
             Layout.fillWidth: true
-            Layout.maximumHeight: 100
-            Layout.preferredHeight: messageField.implicitHeight + 40 // 2 * (margin + padding)
+            Layout.preferredHeight: scrollView.height + defaultMargin
+            Layout.topMargin: defaultMargin
+            Layout.bottomMargin: defaultMargin
+            radius: 20
+            color: "#37474F"
 
-            Rectangle {
-                id: inputRect
+            ScrollView {
+                id: scrollView
+                clip: true
+                height: Math.min(100, messageField.implicitHeight)
                 anchors {
-                    fill: parent
-                    topMargin: 10
-                    bottomMargin: 10
+                    left: parent.left
+                    right: parent.right
+                    top: parent.top
+                    margins: 0.5 * defaultMargin
+                    leftMargin: defaultMargin
                 }
-                radius: 20
-                color: "#37474F"
 
-//                border {
-//                    color: "cyan"
-//                    width: 1
-//                }
+                TextArea {
+                    id: messageField
+                    placeholderText: qsTr("Message")
+                    placeholderTextColor: "#59717D"
+                    wrapMode: TextArea.Wrap
+                    font.family: Theme.mainFont
+                    font.pixelSize: 15
+                    color: Theme.primaryTextColor
+                    verticalAlignment: TextEdit.AlignVCenter
+                    selectByMouse: true
+                    selectedTextColor: "black"
+                    selectionColor: "white"
 
-                ScrollView {
-                    id: scrollView
-                    anchors {
-                        fill: parent
-                        topMargin: 10
-                        bottomMargin: 10
-                        leftMargin: 15
-                        rightMargin: 15 - scrollBar.width
+                    readonly property int maximumLength: 4096
+                    property string previousText: text
+
+                    Keys.onPressed: {
+                        if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return) {
+                            if (!Platform.isDesktop) {
+                                return
+                            }
+                            if (event.modifiers == Qt.ShiftModifier) {
+                                // TextArea adds newline here
+                            }
+                            else if (event.modifiers == Qt.ControlModifier) {
+                                // Adds new line. Same behaviour as for Shift+Enter
+                                messageField.remove(messageField.selectionStart, selectionEnd)
+                                messageField.insert(messageField.selectionStart, "\n")
+                                event.accepted = true
+                            }
+                            else {
+                                event.accepted = true
+                                root.sendMessage()
+                            }
+                        }
                     }
 
-                    ScrollBar.vertical: ScrollBar {
-                        id: scrollBar
+                    onTextChanged: {
+                        if (text.length > maximumLength) {
+                            stateSaver(function() {
+                                text = previousText
+                                showPopupInform("Message length limit: %1".arg(maximumLength))
+                            }, previousText.length - text.length)
+                        }
+                        previousText = text
                     }
 
-                    TextArea {
-                        id: messageField
-                        width: scrollView.width
-                        padding: 0
-                        rightPadding: scrollBar.width
-                        placeholderText: qsTr("Message")
-                        placeholderTextColor: "#59717D"
-                        wrapMode: TextArea.Wrap
-                        font.family: Theme.mainFont
-                        font.pixelSize: 15
-                        color: Theme.primaryTextColor
-                        verticalAlignment: TextEdit.AlignVCenter
-                        selectByMouse: true
-                        selectedTextColor: "black"
-                        selectionColor: "white"
+                    function stateSaver(func, offset=0) {
+                        const selStart = selectionStart + offset
+                        const selEnd = selectionEnd + offset
+                        const curPos = cursorPosition + offset
+                        var scroll = scrollView.ScrollBar.vertical
+                        const scrollPos = scroll.position
+                        func()
+                        messageField.cursorPosition = curPos
+                        messageField.select(selStart, selEnd)
+                        scroll.position = scrollPos
+                    }
 
-                        readonly property int maximumLength: 4096
-                        property string previousText: text
+                    function openContextMenu() {
+                        stateSaver(contextMenu.open)
+                    }
+                }
+            }
 
-//                        Rectangle {
-//                            anchors.fill: parent
-//                            color: "transparent"
-//                            enabled: false
-//                            border {
-//                                color: "red"
-//                                width: 1
-//                            }
-//                        }
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.RightButton
+                onClicked: messageField.openContextMenu()
+                onPressAndHold: {
+                    if (mouse.source === Qt.MouseEventNotSynthesized) {
+                        messageField.openContextMenu()
+                    }
+                }
 
-                        Keys.onPressed: {
-                            if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return) {
-                                if (!Platform.isDesktop) {
-                                    return
-                                }
-                                if (event.modifiers == Qt.ShiftModifier) {
-                                    // TextArea adds newline here
-                                }
-                                else if (event.modifiers == Qt.ControlModifier) {
-                                    // Adds new line. Same behaviour as for Shift+Enter
-                                    messageField.remove(messageField.selectionStart, selectionEnd)
-                                    messageField.insert(messageField.selectionStart, "\n")
-                                    event.accepted = true
-                                }
-                                else {
-                                    event.accepted = true
-                                    root.sendMessage()
-                                }
-                            }
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            acceptedButtons: Qt.RightButton
-                            hoverEnabled: true
-                            onClicked: messageField.openContextMenu()
-                            onPressAndHold: {
-                                if (mouse.source === Qt.MouseEventNotSynthesized)
-                                    messageField.openContextMenu()
-                            }
-
-                            Native.Menu {
-                                id: contextMenu
-                                Native.MenuItem {
-                                    text: "Cut"
-                                    onTriggered: {
-                                        messageField.cut()
-                                    }
-                                }
-                                Native.MenuItem {
-                                    text: "Copy"
-                                    onTriggered: {
-                                        messageField.copy()
-                                    }
-                                }
-                                Native.MenuItem {
-                                    text: "Paste"
-                                    onTriggered: {
-                                        messageField.paste()
-                                    }
-                                }
-                            }
-                        }
-
-                        function stateSaver(func, offset=0) {
-                            const selStart = selectionStart + offset
-                            const selEnd = selectionEnd + offset
-                            const curPos = cursorPosition + offset
-                            const scrollPos = scrollBar.position
-                            func()
-                            messageField.cursorPosition = curPos
-                            messageField.select(selStart, selEnd)
-                            scrollBar.position = scrollPos
-                        }
-
-                        function openContextMenu() {
-                            stateSaver(contextMenu.open)
-                        }
-
-                        onTextChanged: {
-                            if (text.length > maximumLength) {
-                                stateSaver(function() {
-                                    text = previousText
-                                    showPopupInform("Message length limit: %1".arg(maximumLength))
-                                }, previousText.length - text.length)
-                            }
-                            previousText = text
-                        }
+                Native.Menu {
+                    id: contextMenu
+                    Native.MenuItem {
+                        text: qsTr("Cut")
+                        onTriggered: messageField.cut()
+                    }
+                    Native.MenuItem {
+                        text: qsTr("Copy")
+                        onTriggered: messageField.copy()
+                    }
+                    Native.MenuItem {
+                        text: qsTr("Paste")
+                        onTriggered: messageField.paste()
                     }
                 }
             }
@@ -227,5 +198,9 @@ Control {
         selectAttachmentDialog.open()
     }
 
-    Component.onCompleted: messageField.forceActiveFocus()
+    Component.onCompleted: {
+        if (Platform.isDesktop) {
+            messageField.forceActiveFocus();
+        }
+    }
 }

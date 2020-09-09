@@ -16,7 +16,6 @@ Page {
     }
 
     Form {
-
         id: form
 
         UserNameFormInput {
@@ -26,12 +25,12 @@ Page {
 
         FormPrimaryButton {
             onClicked: {
-
-                if (username.text === '') {
-                    root.showPopupError('Username is empty')
+                if (username.text === "") {
+                    showPopupError("Username is empty")
                 }
-
-                mainView.showSignInAs({ username: username.text })
+                else {
+                    mainView.showSignInAs({ username: username.text })
+                }
             }
             text: qsTr("Log In")
         }

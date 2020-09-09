@@ -82,20 +82,9 @@ Page {
         }
 
         Action {
-            text: qsTr("New Chat")
-            onTriggered: addContact()
+            text: qsTr("New chat")
+            onTriggered: mainView.showAddPerson()
         }
-/*
-        Action {
-            text: qsTr("New Group")
-            // onTriggered: addContact()
-        }
-
-        Action {
-            text: qsTr("Send Invite")
-            // onTriggered: addContact()
-        }
-*/
     }
 
     ListView {
@@ -195,7 +184,7 @@ Page {
             anchors.fill: parent
             onClicked: {
                 if (!listView.contentItem.children.length) {
-                    addContact()
+                    mainView.showAddPerson()
                     mouse.accepted = false
                 }
             }
@@ -209,16 +198,5 @@ Page {
     function setAsRead(user) {
         // ConversationsModel.setAsRead(user);
         console.log("setAsRead func");
-    }
-
-    function addContact() {
-        var component = Qt.createComponent("../components/Dialogs/AddContactDialog.qml")
-        if (component.status === Component.Ready) {
-            var dialog = component.createObject(root)
-            dialog.open()
-        }
-        else {
-            console.error(component.errorString())
-        }
     }
 }
