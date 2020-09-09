@@ -38,7 +38,7 @@
 #if VS_PUSHNOTIFICATIONS
 
 #include <QObject>
-#include <virgil/iot/qt/helpers/VSQSingleton.h>
+#include <helpers/VSQSingleton.h>
 #include "android/VSQFirebaseListener.h"
 
 class VSQPushNotifications : public QObject, public VSQSingleton<VSQPushNotifications>
