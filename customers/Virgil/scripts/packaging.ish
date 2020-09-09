@@ -171,14 +171,25 @@ build_linux_rpm() {
 
 #********************************************************************
 build_ios_pkg() {
+   MAJOR_VER=$(echo "$VERSION"| cut -d'.' -f1)
+   MINOR_VER=$(echo "$VERSION"| cut -d'.' -f2)
+   SUB_VER=$(echo "$VERSION"| cut -d'.' -f3)
+   BUILD_VER="${BUILD_NUMBER:-0}"
+
    pushd "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios/Release-iphoneos"
-     zip "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios/${IOS_NAME}.zip" *.app
+     mv -f *.app "${IOS_NAME}-${MAJOR_VER}.${MINOR_VER}.${SUB_VER}-${BUILD_VER}.app"
+     zip "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios/${IOS_NAME}-${MAJOR_VER}.${MINOR_VER}.${SUB_VER}-${BUILD_VER}.zip" *.app
    popd
 }
 
 #********************************************************************
 build_iossim_pkg() {
+   MAJOR_VER=$(echo "$VERSION"| cut -d'.' -f1)
+   MINOR_VER=$(echo "$VERSION"| cut -d'.' -f2)
+   SUB_VER=$(echo "$VERSION"| cut -d'.' -f3)
+   BUILD_VER="${BUILD_NUMBER:-0}"
    pushd "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios-sim/Debug-iphonesimulator"
-     zip "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios-sim/${IOS_NAME}.zip" *.app
+     mv -f *.app "${IOS_NAME}${MAJOR_VER}.${MINOR_VER}.${SUB_VER}-${BUILD_VER}.app"
+     zip "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios-sim/${IOS_NAME}-${MAJOR_VER}.${MINOR_VER}.${SUB_VER}-${BUILD_VER}.zip" *.app
    popd
 }
