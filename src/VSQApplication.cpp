@@ -38,6 +38,7 @@
 #include <VSQApplication.h>
 #include <VSQCommon.h>
 #include <VSQClipboardProxy.h>
+#include <android/VSQAndroid.h>
 #include <ui/VSQUiHelper.h>
 #include <virgil/iot/logger/logger.h>
 
@@ -157,6 +158,13 @@ VSQApplication::currentVersion() const {
 void
 VSQApplication::sendReport() {
     m_logging.sendLogFiles();
+}
+
+void VSQApplication::hideSplashScreen()
+{
+#ifdef VS_ANDROID
+    VSQAndroid::hideSplashScreen();
+#endif
 }
 
 /******************************************************************************/
