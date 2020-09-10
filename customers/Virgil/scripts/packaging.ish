@@ -180,7 +180,7 @@ build_ios_pkg() {
 
    pushd "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios/Release-iphoneos"
      mv -f *.app "${IOS_NAME}-${MAJOR_VER}.${MINOR_VER}.${SUB_VER}-${BUILD_VER}.app"
-     zip "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios/${IOS_NAME}-${MAJOR_VER}.${MINOR_VER}.${SUB_VER}-${BUILD_VER}.zip" *.app
+     zip -r "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios/${IOS_NAME}-${MAJOR_VER}.${MINOR_VER}.${SUB_VER}-${BUILD_VER}.zip" *.app
    popd
 }
 
@@ -192,6 +192,6 @@ build_iossim_pkg() {
    BUILD_VER="${BUILD_NUMBER:-0}"
    pushd "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios-sim/Debug-iphonesimulator"
      mv -f *.app "${IOS_NAME}${MAJOR_VER}.${MINOR_VER}.${SUB_VER}-${BUILD_VER}.app"
-     zip "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios-sim/${IOS_NAME}-${MAJOR_VER}.${MINOR_VER}.${SUB_VER}-${BUILD_VER}.zip" *.app
+     zip -r "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios-sim/${IOS_NAME}-${MAJOR_VER}.${MINOR_VER}.${SUB_VER}-${BUILD_VER}.zip" *.app
    popd
 }
