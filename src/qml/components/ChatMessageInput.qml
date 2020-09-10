@@ -80,7 +80,7 @@ Control {
                     font.pixelSize: 15
                     color: Theme.primaryTextColor
                     verticalAlignment: TextEdit.AlignVCenter
-                    selectByMouse: true
+                    selectByMouse: Platform.isDesktop
                     selectedTextColor: "black"
                     selectionColor: "white"
 
