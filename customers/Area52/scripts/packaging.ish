@@ -141,6 +141,8 @@ _build_deb() {
      print_message "Copy deb to build directory"     
      cp -f ${PKG_BUILD_DIR}/sdeb/*.deb "${BUILD_DIR}"
 
+     docker_exec "rm -rf /var/cache/pbuilder/result/*"
+     
      print_message "Stop docker container"
      docker_stop
  popd
@@ -149,9 +151,9 @@ _build_deb() {
 #********************************************************************
 _build_rpm() {
   print_message "Run mock for building SRPM"
-  sudo mock  -r epel-8-x86_64 --buildsrpm --spec ${PKG_BUILD_DIR}/srpm/${LINUX_NAME}.spec --sources ${PKG_BUILD_DIR}/srpm  --resultdir=${PKG_BUILD_DIR}/srpm
+  mock  -r epel-8-x86_64 --buildsrpm --spec ${PKG_BUILD_DIR}/srpm/${LINUX_NAME}.spec --sources ${PKG_BUILD_DIR}/srpm  --resultdir=${PKG_BUILD_DIR}/srpm
   print_message "Run mock for building binary RPM"  
-  sudo mock -r epel-8-x86_64 -n ${PKG_BUILD_DIR}/srpm/${LINUX_NAME}-*.src.rpm --resultdir=${PKG_BUILD_DIR}/srpm
+  mock -r epel-8-x86_64 -n ${PKG_BUILD_DIR}/srpm/${LINUX_NAME}-*.src.rpm --resultdir=${PKG_BUILD_DIR}/srpm
   cp -f ${PKG_BUILD_DIR}/srpm/*.x86_64.rpm "${BUILD_DIR}"
 }
 
@@ -168,3 +170,29 @@ build_linux_rpm() {
   prepare_linux_rpm  
   _build_rpm
 }
+
+#********************************************************************
+build_ios_pkg() {
+   MAJOR_VER=$(echo "$VERSION"| cut -d'.' -f1)
+   MINOR_VER=$(echo "$VERSION"| cut -d'.' -f2)
+   SUB_VER=$(echo "$VERSION"| cut -d'.' -f3)
+   BUILD_VER="${BUILD_NUMBER:-0}"
+
+   pushd "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios/Release-iphoneos"
+     mv -f *.app "${IOS_NAME}-${MAJOR_VER}.${MINOR_VER}.${SUB_VER}-${BUILD_VER}.app"
+     zip -r "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios/${IOS_NAME}-${MAJOR_VER}.${MINOR_VER}.${SUB_VER}-${BUILD_VER}.zip" *.app
+   popd
+}
+
+#********************************************************************
+build_iossim_pkg() {
+   MAJOR_VER=$(echo "$VERSION"| cut -d'.' -f1)
+   MINOR_VER=$(echo "$VERSION"| cut -d'.' -f2)
+   SUB_VER=$(echo "$VERSION"| cut -d'.' -f3)
+   BUILD_VER="${BUILD_NUMBER:-0}"
+   pushd "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios-sim/Debug-iphonesimulator"
+     mv -f *.app "${IOS_NAME}${MAJOR_VER}.${MINOR_VER}.${SUB_VER}-${BUILD_VER}.app"
+     zip -r "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios-sim/${IOS_NAME}-${MAJOR_VER}.${MINOR_VER}.${SUB_VER}-${BUILD_VER}.zip" *.app
+   popd
+}
+

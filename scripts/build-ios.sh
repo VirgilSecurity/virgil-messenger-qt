@@ -18,10 +18,11 @@ ios_build () {
    BUILD_DIR=${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.${PLATFORM}/
    new_dir ${BUILD_DIR}
    pushd "${BUILD_DIR}"
-       ${IOS_QMAKE} -config macx-ios-clang ${PROJECT_DIR} ${QMAKE_PARAMS} VERSION="${VERSION}" VS_CUSTOMER="${PARAM_CUSTOMER}" CONFIG+="${IOS_BUILD_CONFIG}"
+       ${IOS_QMAKE} -config macx-ios-clang ${PROJECT_DIR} ${QMAKE_PARAMS} VERSION="${VERSION}" CONFIG+="${IOS_BUILD_CONFIG}" VS_CUSTOMER="${PARAM_CUSTOMER}"
+       print_message "Prepare XCode project"
+       ${PROJECT_DIR}/tools/xcode-parser-2 "${BUILD_DIR}/VirgilMessenger.xcodeproj/project.pbxproj"
        make -j10
    popd
-
 }
 
 print_title
@@ -33,3 +34,22 @@ ios_build "iphonesimulator simulator" "ios-sim"
 
 print_message "Build iphoneos"
 ios_build "release iphoneos device qtquickcompiler" "ios"
+
+if [ "${IOS_NAME}" != "${APPLICATION_NAME}" ]; then
+   echo "Rename VirgilMessenger.app => ${IOS_NAME}.app"
+
+   pushd "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios/Release-iphoneos"   
+     mv -f *.app "${IOS_NAME}.app"
+   popd
+
+   pushd "${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.ios-sim/Debug-iphonesimulator"   
+     mv -f *.app "${IOS_NAME}.app"
+   popd   
+fi
+
+if [ "${PARAM_BUILD_PKG}" == "1" ]; then
+ build_ios_pkg
+ build_iossim_pkg
+fi
+
+print_message "All operation finished"

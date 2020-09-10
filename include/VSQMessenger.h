@@ -42,7 +42,6 @@
 #include <QSemaphore>
 #include <QXmppCarbonManager.h>
 
-#include <virgil/iot/qt/VSQIoTKit.h>
 #include <qxmpp/QXmppClient.h>
 #include <qxmpp/QXmppMessageReceiptManager.h>
 

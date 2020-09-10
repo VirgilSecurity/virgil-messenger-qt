@@ -32,27 +32,38 @@
 #
 #  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-QT += core network qml quick bluetooth sql xml concurrent
+QT += core network qml quick sql xml concurrent
 
 CONFIG += c++14
 
-TARGET = virgil-messenger
+ios {
+    TARGET = VirgilMessenger
+    QMAKE_TARGET_BUNDLE_PREFIX = com.virgil
+    VERSION = 3.4.11.0
+} else {
+    TARGET = virgil-messenger
+    QMAKE_TARGET_BUNDLE_PREFIX = com.virgilsecurity
 
-QMAKE_TARGET_BUNDLE_PREFIX = com.virgilsecurity
-
-#
-#   Set version
-#
-isEmpty(VERSION) {
-    VERSION = $$cat($$PWD/VERSION_MESSENGER).0
+    #
+    #   Set version
+    #
+    isEmpty(VERSION) {
+        VERSION = $$cat($$PWD/VERSION_MESSENGER).0
+    }
 }
+
 message("VERSION = $$VERSION")
 
+
 #
-#   Include IoTKit Qt wrapper
+#   Directory with precompiled dependencies
 #
 PREBUILT_PATH = $$PWD/ext/prebuilt
-include($${PREBUILT_PATH}/qt/iotkit.pri)
+
+#
+#   Include Virgil CommKit
+#
+include($$PWD/ext/commkit.pri)
 
 #
 #   Include QML QFuture
@@ -77,7 +88,7 @@ DEFINES += QT_DEPRECATED_WARNINGS \
         CFG_CLIENT=1 \
         VERSION="$$VERSION"
 
-CONFIG(iphoneos, iphoneos | iphonesimulator) {
+ios: {
     DEFINES += VS_IOS=1 VS_MOBILE=1
 }
 
@@ -112,6 +123,7 @@ HEADERS += \
         include/VSQUtils.h \
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
+        include/helpers/VSQSingleton.h \
         include/ui/VSQUiHelper.h \
         # Generated
         generated/include/VSQCustomer.h
@@ -145,7 +157,8 @@ SOURCES += \
         src/android/VSQAndroid.cpp \
         src/main.cpp \
         src/VSQApplication.cpp \
-        src/ui/VSQUiHelper.cpp
+        src/ui/VSQUiHelper.cpp \
+        src/hal.cpp
 
 #
 #   Resources
@@ -168,7 +181,7 @@ INCLUDEPATH +=  include \
 #
 #   Sparkle framework
 #
-unix:mac:!ios {
+isEqual(OS_NAME, "macos"): {
     OBJECTIVE_SOURCES += src/macos/VSQMacos.mm
     DEFINES += MACOS=1
     SPARKLE_LOCATION=$$PREBUILT_PATH/$${OS_NAME}/sparkle
@@ -269,14 +282,28 @@ macx: {
 #
 #   iOS specific
 #
-#ios: {
-#    OBJECTIVE_SOURCES += \
-#        src/ios/APNSApplicationDelegate.mm
+ios: {
+    QMAKE_ASSET_CATALOGS += platforms/ios/Assets.xcassets
+    OBJECTIVE_SOURCES += \
+        src/ios/APNSApplicationDelegate.mm \
+        src/ios/test-swift.swift \
+
+    HEADERS += \
+        include/ios/VirgilMessenger-Bridging-Header.h \
+
+    BridgingHeader.name = SWIFT_OBJC_BRIDGING_HEADER
+    BridgingHeader.value = $$PWD/include/ios/VirgilMessenger-Bridging-Header.h
+    QMAKE_MAC_XCODE_SETTINGS += BridgingHeader
+
+    SwiftVersion.name = SWIFT_VERSION
+    SwiftVersion.value = 5.0
+    QMAKE_MAC_XCODE_SETTINGS += SwiftVersion
+
 
 #    #IOS_ENTITLEMENTS.name = CODE_SIGN_ENTITLEMENTS
 #    #IOS_ENTITLEMENTS.value = ios/pushnotifications.entitlements
 #    QMAKE_MAC_XCODE_SETTINGS += IOS_ENTITLEMENTS
-#}
+}
 
 isEqual(OS_NAME, "ios")|isEqual(OS_NAME, "ios-sim"): {
     Q_ENABLE_BITCODE.name = ENABLE_BITCODE
@@ -285,11 +312,6 @@ isEqual(OS_NAME, "ios")|isEqual(OS_NAME, "ios-sim"): {
 
     LIBS_DIR = $$PWD/ext/prebuilt/$$OS_NAME/release/installed/usr/local/lib
     QMAKE_RPATHDIR = @executable_path/Frameworks
-
-    IOS_DYLIBS.files = \
-    $$LIBS_DIR/libvs-messenger-internal.dylib
-    IOS_DYLIBS.path = Frameworks
-    QMAKE_BUNDLE_DATA += IOS_DYLIBS
 }
 
 
@@ -392,7 +414,6 @@ android: {
         platforms/android/res/values/apptheme.xml
 }
 
-include(ext/sanitizer.pri)
 
 DISTFILES += \
     .gitignore

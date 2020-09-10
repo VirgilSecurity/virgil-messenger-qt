@@ -39,7 +39,7 @@
 
 #include <QObject>
 #include <QTimer>
-#include <virgil/iot/qt/helpers/VSQSingleton.h>
+#include "helpers/VSQSingleton.h"
 
 class VSQMacos: public QObject, public VSQSingleton<VSQMacos> {
     Q_OBJECT
