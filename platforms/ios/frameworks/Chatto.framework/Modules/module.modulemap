@@ -1,0 +1,11 @@
+framework module Chatto {
+  umbrella header "Chatto.h"
+
+  export *
+  module * { export * }
+}
+
+module Chatto.Swift {
+    header "Chatto-Swift.h"
+    requires objc
+}
