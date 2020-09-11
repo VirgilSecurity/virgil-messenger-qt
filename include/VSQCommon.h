@@ -54,6 +54,9 @@ namespace args {
 using DataSize = qint64;
 Q_DECLARE_METATYPE(DataSize);
 
+using Seconds = quint64;
+Q_DECLARE_METATYPE(Seconds);
+
 template <class Type>
 using Optional = tl::optional<Type>;
 using OptionalType = tl::nullopt_t;

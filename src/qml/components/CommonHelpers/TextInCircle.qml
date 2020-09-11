@@ -3,7 +3,7 @@ import QtQuick 2.12
 Rectangle {
     property alias content: label.text
     property real diameter
-    property real pointSize
+    property alias pointSize: label.font.pointSize
 
     width: diameter
     height: diameter

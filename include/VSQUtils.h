@@ -41,19 +41,35 @@ namespace VSQUtils
 {
     QString createUuid();
 
+    // String processing/format
+
     QString formattedDataSize(DataSize fileSize);
 
     QString escapedUserName(const QString &userName);
 
+    QString formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval);
+
+    QString formattedLastSeenNoActivity();
+
+    // File functions
+
     QString findUniqueFileName(const QString &fileName);
 
     bool forceCreateDir(const QString &absolutePath);
+
+    // Url functions
 
     bool isValidUrl(const QUrl &url);
 
     QString urlToLocalFile(const QUrl &url);
 
     QUrl localFileToUrl(const QString &filePath);
+
+    // Crypto functions
+
+    int bufferSizeForEncryption(const int rawSize);
+
+    int bufferSizeForDecryption(const int encryptedSize);
 }
 
 #endif // VSQ_UTILS_H

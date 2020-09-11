@@ -41,7 +41,7 @@ Control {
         id: d
         readonly property bool hasAttachment: attachmentId.length > 0
         readonly property color background: isUser ? "#59717D" : Theme.mainBackgroundColor
-        readonly property double maxWidth: chatPage.width - 40
+        readonly property double maxWidth: chatPage.width - 180
         readonly property bool isPicture: hasAttachment && attachmentType == Enums.AttachmentType.Picture
         readonly property double defaultRadius: 4
     }
@@ -56,12 +56,12 @@ Control {
             leftPadding: 15
             rightPadding: 15
             textFormat: Text.RichText
-            width: Math.min(implicitWidth,  d.maxWidth)
+            width: Math.min(implicitWidth, d.maxWidth)
             color: Theme.primaryTextColor
             font.pointSize: UiHelper.fixFontSz(15)
-            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            wrapMode: Text.Wrap
             readOnly: true
-            text: chatMessage.body
+            text: chatMessage.body.split("\n").join("<br/>")
             visible: !d.hasAttachment
 
             property var contextMenu: ContextMenu {
@@ -188,7 +188,6 @@ Control {
             width: 30
             opacity: firstInRow ? 1 : 0
             diameter: 30
-            pointSize: UiHelper.fixFontSz(15)
         }
 
         Column {
@@ -221,30 +220,6 @@ Control {
                 height: loader.item.height
                 color: "transparent"
 
-                TapHandler {
-                    acceptedButtons: Qt.RightButton
-                    property var contextMenu: loader.item.contextMenu
-
-                    onLongPressed: {
-                        if (!Platform.isMobile) {
-                            return
-                        }
-                        contextMenu.x = point.position.x
-                        contextMenu.y = point.position.y - 40
-                        contextMenu.open()
-                    }
-
-                    onTapped: {
-                        if (Platform.isMobile) {
-                            return
-                        }
-                        contextMenu.x = eventPoint.position.x
-                        contextMenu.y = eventPoint.position.y
-                        contextMenu.open()
-                        eventPoint.accepted = false
-                    }
-                }
-
                 Rectangle {
                     width: chatMessage.width
                     height: loader.item.height
@@ -272,6 +247,29 @@ Control {
                 Loader {
                     id: loader
                     sourceComponent: d.hasAttachment ? attachmentComponent : textEditComponent
+
+                    property var contextMenu: item.contextMenu
+                    function openContextMenu(mouse) {
+                        contextMenu.x = mouse.x
+                        contextMenu.y = mouse.y
+                        contextMenu.open()
+                    }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Platform.isDesktop ? Qt.RightButton : Qt.LeftButton
+
+                    onClicked: {
+                        if (Platform.isDesktop) {
+                            loader.openContextMenu(mouse)
+                        }
+                    }
+                    onPressAndHold: {
+                        if (Platform.isMobile) {
+                            loader.openContextMenu(mouse)
+                        }
+                    }
                 }
             }
 

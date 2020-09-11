@@ -39,11 +39,8 @@
 #include <iostream>
 #include <string>
 #include <QCoreApplication>
-#include <virgil/iot/qt/VSQIoTKit.h>
 
 class QNetworkAccessManager;
-
-using namespace VirgilIoTKit;
 
 class VSQLogging : public QObject {
     Q_OBJECT

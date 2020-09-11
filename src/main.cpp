@@ -45,6 +45,8 @@
 #include "Test/Headers.h"
 #endif
 
+#include <VSQCustomer.h>
+
 int
 main(int argc, char *argv[]) {
 
@@ -63,8 +65,9 @@ main(int argc, char *argv[]) {
 #else
     QApplication a(argc, argv);
 #endif
-    a.setOrganizationName("VirgilSecurity");
-    a.setOrganizationDomain("virgil.net");
+    a.setOrganizationName(Customer::OrganizationName);
+    a.setOrganizationDomain(Customer::OrganizationDomain);
+    a.setApplicationDisplayName(Customer::ApplicationDisplayName);
 
     QString baseUrl;
     if (2 == argc && argv[1] && argv[1][0]) {

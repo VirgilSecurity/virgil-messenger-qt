@@ -39,7 +39,6 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <VSQMessenger.h>
-#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
 #include <VSQLogging.h>
 #include <VSQSettings.h>
 
@@ -68,6 +67,7 @@ public:
     Q_INVOKABLE void
     sendReport();
 
+    Q_INVOKABLE void hideSplashScreen();
 
 private slots:
     void

@@ -40,6 +40,7 @@ Q_LOGGING_CATEGORY(lcDev, "dev");
 
 void registerCommonTypes()
 {
+    qRegisterMetaType<Seconds>("Seconds");
     qRegisterMetaType<DataSize>("DataSize");
     qRegisterMetaType<Enums::AttachmentType>();
     qRegisterMetaType<Enums::AttachmentStatus>();

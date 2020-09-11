@@ -43,6 +43,8 @@ Q_DECLARE_LOGGING_CATEGORY(lcDiscoveryManager);
 
 class VSQDiscoveryManager : public QObject
 {
+    Q_OBJECT
+
 public:
     explicit VSQDiscoveryManager(QXmppClient *client, QObject *parent = nullptr);
     ~VSQDiscoveryManager() override;
@@ -53,7 +55,7 @@ private:
     void onItemsReceived(const QXmppDiscoveryIq &info);
 
     QXmppClient *m_client;
-    QXmppDiscoveryManager *m_discoveryManager;
+    QXmppDiscoveryManager *m_manager;
 };
 
 #endif // VSQ_DISCOVERYMANAGER_H

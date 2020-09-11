@@ -47,6 +47,8 @@ class VSQSettings : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(bool devMode READ devMode CONSTANT)
+    Q_PROPERTY(QString organizationDisplayName READ organizationDisplayName CONSTANT)
+    Q_PROPERTY(QString applicationDisplayName READ applicationDisplayName CONSTANT)
 
 public:
     explicit VSQSettings(QObject *parent);
@@ -60,8 +62,16 @@ public:
     QDir downloadsDir() const;
     QSize thumbnailMaxSize() const;
 
+    // Application/organization
+
+    QString organizationDisplayName() const;
+    QString applicationDisplayName() const;
+
     // Dev mode
     bool devMode() const;
+
+    // Last seen activity interval (seconds)
+    Seconds lastSeenActivityInterval() const;
 
 private:
     QDir m_attachmentCacheDir;

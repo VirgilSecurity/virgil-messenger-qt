@@ -36,6 +36,7 @@
 
 #include <QStandardPaths>
 
+#include "VSQCustomer.h"
 #include "VSQUtils.h"
 
 static const QString kLastSignedInUser = "LastSignedInUser";
@@ -103,6 +104,16 @@ QSize VSQSettings::thumbnailMaxSize() const
     return QSize(100, 80);
 }
 
+QString VSQSettings::organizationDisplayName() const
+{
+    return Customer::OrganizationDisplayName;
+}
+
+QString VSQSettings::applicationDisplayName() const
+{
+    return Customer::ApplicationDisplayName;
+}
+
 bool VSQSettings::devMode() const
 {
 #ifdef VS_DEVMODE
@@ -110,4 +121,9 @@ bool VSQSettings::devMode() const
 #else
     return false;
 #endif // VS_DEVMODE
+}
+
+Seconds VSQSettings::lastSeenActivityInterval() const
+{
+    return 5;
 }

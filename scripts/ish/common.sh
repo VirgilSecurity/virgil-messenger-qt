@@ -6,8 +6,8 @@ QT_SDK_DIR="${QT_SDK_ROOT:-/opt/Qt/5.15.0}"
 export ANDROID_NDK_ROOT=${ANDROID_NDK_ROOT:-/opt/Android/Sdk/ndk/21.1.6352462}
 
 BUILD_TYPE=release
-APPLICATION_NAME=virgil-messenger
-PROJECT_FILE=${PROJECT_DIR}/${APPLICATION_NAME}.pro
+#/# APPLICATION_NAME=virgil-messenger
+#/# PROJECT_FILE=${PROJECT_DIR}/${APPLICATION_NAME}.pro
 TOOL_NAME=qmake
 
 export QT_INSTALL_DIR_BASE=${PROJECT_DIR}/ext/prebuilt
@@ -19,6 +19,79 @@ fi
 
 trap 'err_trap  $@' ERR
 
+############################################################################################
+print_usage() {
+  pushd "${PROJECT_DIR}/customers" 2>&1 > /dev/null
+   for customer in */; do
+     customer=${customer%?}
+     [ "$customer" == "common" ] && continue
+     if [ -z $CUSTOMER_LIST ]; then
+          CUSTOMER_LIST="$customer"
+     else
+         CUSTOMER_LIST="${CUSTOMER_LIST}|$customer"
+     fi
+   done
+  popd  2>&1 > /dev/null
+  echo
+  echo "$(basename ${0})"
+  echo
+  echo "  -c <${CUSTOMER_LIST}>   - Build for customer                            [default: Virgil]"
+  echo "  -b                      - Build Linux packages (Required: docker)       [default: no]"  
+  echo "  -h                      - Print help"
+  exit 0
+}
+
+############################################################################################
+#
+#  Script parameters
+#
+############################################################################################
+
+# Default customer
+PARAM_CUSTOMER="${VS_CUSTOMER:-Virgil}"
+PARAM_BUILD_PKG="0"
+if [ "$IGNORE_PARAMS" != "1" ]; then 
+ while [ -n "$1" ]
+  do
+    case "$1" in
+      -h) print_usage
+          exit 0
+          ;;
+      -p) PARAM_BUILD_PKG="1"
+          ;;          
+      -c) PARAM_CUSTOMER="$2"
+          shift 
+          ;;
+      *) print_usage;;
+    esac
+    shift
+  done
+fi
+
+# Include packaging 
+if [ "${PARAM_BUILD_PKG}" == "1" ]; then 
+  source ${PROJECT_DIR}/customers/${PARAM_CUSTOMER}/scripts/packaging.ish
+fi
+
+#***************************************************************************************
+include_customer() {
+   local CUSTOMER_DIRECTORY="${PROJECT_DIR}/customers/${PARAM_CUSTOMER}/scripts"
+   pushd "${CUSTOMER_DIRECTORY}" 2>&1 > /dev/null
+     for inc_file in *.ish; do
+        source ${CUSTOMER_DIRECTORY}/${inc_file}
+     done
+   popd  2>&1 > /dev/null
+
+}
+
+#***************************************************************************************
+remove_generated() {
+   print_message "Remove generated...."
+   rm -rf "${PROJECT_DIR}/generated"
+}
+
+
+#***************************************************************************************
 err_trap(){
     err_code=$?
     # ${FUNCNAME[*]} : err_trap print_message main  
@@ -37,7 +110,7 @@ err_trap(){
     exit 127
 }
 
-
+#***************************************************************************************
 function print_title() {
     echo
     echo "===================================="
@@ -45,10 +118,12 @@ function print_title() {
     echo "=== Build type : ${BUILD_TYPE}"
     echo "=== Tool name : ${TOOL_NAME}"
     echo "=== Output directory : ${BUILD_DIR}"
+    echo "=== Customer : ${PARAM_CUSTOMER}"    
     echo "===================================="
     echo
 }
 
+#***************************************************************************************
 function print_message() {
     echo
     echo "===================================="
@@ -130,5 +205,7 @@ function new_dir() {
     mkdir -p "${1}"
 }
 
-export -f new_dir
 #***************************************************************************************
+# Include customer settings
+include_customer
+remove_generated

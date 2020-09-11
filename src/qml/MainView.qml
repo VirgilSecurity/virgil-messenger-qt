@@ -178,8 +178,8 @@ Control {
         stackView.push("./pages/BackupKeyPage.qml")
     }
 
-    function showChatWith(recipient) {
-        navigateTo("Chat", { recipient: recipient }, true, false)
+    function showChatWith(recipient, replace) {
+        navigateTo("Chat", { recipient: recipient }, true, false, replace)
         Messenger.setCurrentRecipient(recipient)
     }
 
@@ -191,29 +191,26 @@ Control {
         stackView.push("./pages/ChatListPage.qml")
     }
 
+    function showAddPerson() {
+        stackView.push("./pages/AddPersonPage.qml")
+    }
+
     function showAccountSettings() {
         navigateTo("AccountSettings", null, true, false)
     }
 
-    function navigateTo(page, params, animate, clearHistory) {
-
+    function navigateTo(page, params, animate, clearHistory, replace) {
         const pageName = "%1Page".arg(page)
-        const path = "./pages/%1.qml".arg(pageName)
-
         // cancel navigation if the page is already shown
-        if (stackView.currentItem.toString().startsWith(pageName)){
+        if (stackView.currentItem.toString().startsWith(pageName)) {
             return
         }
-
         if (clearHistory) {
             stackView.clear()
         }
 
-        if (animate) {
-            stackView.push(path, params)
-        }
-        else {
-            stackView.push(path, params, StackView.Immediate)
-        }
+        var push = replace ? stackView.replace : stackView.push
+        const path = "./pages/%1.qml".arg(pageName)
+        push(path, params, animate ? StackView.Transition : StackView.Immediate)
     }
 }

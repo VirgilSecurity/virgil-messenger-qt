@@ -32,27 +32,38 @@
 #
 #  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-QT += core network qml quick bluetooth sql xml concurrent
+QT += core network qml quick sql xml concurrent
 
 CONFIG += c++14
 
-TARGET = virgil-messenger
+ios {
+    TARGET = VirgilMessenger
+    QMAKE_TARGET_BUNDLE_PREFIX = com.virgil
+    VERSION = 3.4.11.0
+} else {
+    TARGET = virgil-messenger
+    QMAKE_TARGET_BUNDLE_PREFIX = com.virgilsecurity
 
-QMAKE_TARGET_BUNDLE_PREFIX = com.virgilsecurity
-
-#
-#   Set version
-#
-isEmpty(VERSION) {
-    VERSION = $$cat($$PWD/VERSION_MESSENGER).0
+    #
+    #   Set version
+    #
+    isEmpty(VERSION) {
+        VERSION = $$cat($$PWD/VERSION_MESSENGER).0
+    }
 }
+
 message("VERSION = $$VERSION")
 
+
 #
-#   Include IoTKit Qt wrapper
+#   Directory with precompiled dependencies
 #
 PREBUILT_PATH = $$PWD/ext/prebuilt
-include($${PREBUILT_PATH}/qt/iotkit.pri)
+
+#
+#   Include Virgil CommKit
+#
+include($$PWD/ext/commkit.pri)
 
 #
 #   Include QML QFuture
@@ -63,8 +74,10 @@ include($$PWD/ext/quickfuture/quickfuture.pri)
 #
 #   QXMPP
 #
-QXMPP_BUILD_PATH = $$PREBUILT_SYSROOT
-message("QXMPP location : $${QXMPP_BUILD_PATH}")
+isEmpty(QXMPP_BUILD_PATH) {
+    QXMPP_BUILD_PATH=$$PREBUILT_SYSROOT
+}
+message("QXMPP location: $${QXMPP_BUILD_PATH}")
 
 #
 #   Defines
@@ -75,9 +88,13 @@ DEFINES += QT_DEPRECATED_WARNINGS \
         CFG_CLIENT=1 \
         VERSION="$$VERSION"
 
-CONFIG(iphoneos, iphoneos | iphonesimulator) {
+ios: {
     DEFINES += VS_IOS=1 VS_MOBILE=1
 }
+
+include(customers/customers.pri)
+
+VS_PLATFORMS_PATH=$$absolute_path(generated/platforms)
 
 #
 #   Headers
@@ -88,9 +105,12 @@ HEADERS += \
         include/VSQAttachmentBuilder.h \
         include/VSQClipboardProxy.h \
         include/VSQCommon.h \
+        include/VSQContactManager.h \
         include/VSQCryptoTransferManager.h \
         include/VSQDiscoveryManager.h \
         include/VSQDownload.h \
+        include/VSQLastActivityIq.h \
+        include/VSQLastActivityManager.h \
         include/VSQLogging.h \
         include/VSQMessenger.h \
         include/VSQSettings.h \
@@ -103,7 +123,11 @@ HEADERS += \
         include/VSQUtils.h \
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
+        include/helpers/VSQSingleton.h \
         include/ui/VSQUiHelper.h \
+        # Generated
+        generated/include/VSQCustomer.h
+        # Thirdparty
         include/thirdparty/optional/optional.hpp
 
 #
@@ -114,10 +138,13 @@ SOURCES += \
         src/VSQAttachmentBuilder.cpp \
         src/VSQClipboardProxy.cpp \
         src/VSQCommon.cpp \
+        src/VSQContactManager.cpp \
         src/VSQCryptoTransferManager.cpp \
         src/VSQDiscoveryManager.cpp \
         src/VSQDownload.cpp \
         src/VSQMessenger.cpp \
+        src/VSQLastActivityIq.cpp \
+        src/VSQLastActivityManager.cpp \
         src/VSQLogging.cpp \
         src/VSQSettings.cpp \
         src/VSQSqlChatModel.cpp \
@@ -130,13 +157,16 @@ SOURCES += \
         src/android/VSQAndroid.cpp \
         src/main.cpp \
         src/VSQApplication.cpp \
-        src/ui/VSQUiHelper.cpp
+        src/ui/VSQUiHelper.cpp \
+        src/hal.cpp
 
 #
 #   Resources
 #
 
-RESOURCES += src/resources.qrc
+RESOURCES += \
+    src/resources.qrc \
+    generated/src/customer.qrc
 
 #
 #   Include path
@@ -144,13 +174,14 @@ RESOURCES += src/resources.qrc
 
 
 INCLUDEPATH +=  include \
-        $${QXMPP_BUILD_PATH}/include \
-         $${QXMPP_BUILD_PATH}/include/qxmpp
+    $${QXMPP_BUILD_PATH}/include \
+    $${QXMPP_BUILD_PATH}/include/qxmpp \
+    generated/include
 
 #
 #   Sparkle framework
 #
-unix:mac:!ios {
+isEqual(OS_NAME, "macos"): {
     OBJECTIVE_SOURCES += src/macos/VSQMacos.mm
     DEFINES += MACOS=1
     SPARKLE_LOCATION=$$PREBUILT_PATH/$${OS_NAME}/sparkle
@@ -206,7 +237,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 #
-#   Depencies
+#   Dependencies
 #
 
 DEPENDPATH += $${INCLUDEPATH}
@@ -229,6 +260,10 @@ linux:!android {
 win32|win64 {
     DEFINES += VS_DESKTOP=1
     QT += widgets
+
+    # Assets
+    RC_ICONS = $$VS_PLATFORMS_PATH/windows/Logo.ico
+    DISTFILES += $$VS_PLATFORMS_PATH/windows/Logo.ico
 }
 
 #
@@ -236,23 +271,39 @@ win32|win64 {
 #
 
 macx: {
-    ICON = $$PWD/scripts/macos/pkg_resources/MyIcon.icns
-    QMAKE_INFO_PLIST = $$PWD/platforms/macos/virgil-messenger.plist
+    ICON = generated/scripts/macos/pkg_resources/MyIcon.icns
+    QMAKE_INFO_PLIST = $$VS_PLATFORMS_PATH/macos/virgil-messenger.plist
     DEFINES += VS_DESKTOP=1
     QT += widgets
+
+    DISTFILES += $$VS_PLATFORMS_PATH/macos/virgil-messenger.plist.in
 }
 
 #
 #   iOS specific
 #
-#ios: {
-#    OBJECTIVE_SOURCES += \
-#        src/ios/APNSApplicationDelegate.mm
+ios: {
+    QMAKE_ASSET_CATALOGS += platforms/ios/Assets.xcassets
+    OBJECTIVE_SOURCES += \
+        src/ios/APNSApplicationDelegate.mm \
+        src/ios/test-swift.swift \
+
+    HEADERS += \
+        include/ios/VirgilMessenger-Bridging-Header.h \
+
+    BridgingHeader.name = SWIFT_OBJC_BRIDGING_HEADER
+    BridgingHeader.value = $$PWD/include/ios/VirgilMessenger-Bridging-Header.h
+    QMAKE_MAC_XCODE_SETTINGS += BridgingHeader
+
+    SwiftVersion.name = SWIFT_VERSION
+    SwiftVersion.value = 5.0
+    QMAKE_MAC_XCODE_SETTINGS += SwiftVersion
+
 
 #    #IOS_ENTITLEMENTS.name = CODE_SIGN_ENTITLEMENTS
 #    #IOS_ENTITLEMENTS.value = ios/pushnotifications.entitlements
 #    QMAKE_MAC_XCODE_SETTINGS += IOS_ENTITLEMENTS
-#}
+}
 
 isEqual(OS_NAME, "ios")|isEqual(OS_NAME, "ios-sim"): {
     Q_ENABLE_BITCODE.name = ENABLE_BITCODE
@@ -261,11 +312,6 @@ isEqual(OS_NAME, "ios")|isEqual(OS_NAME, "ios-sim"): {
 
     LIBS_DIR = $$PWD/ext/prebuilt/$$OS_NAME/release/installed/usr/local/lib
     QMAKE_RPATHDIR = @executable_path/Frameworks
-
-    IOS_DYLIBS.files = \
-    $$LIBS_DIR/libvs-messenger-internal.dylib
-    IOS_DYLIBS.path = Frameworks
-    QMAKE_BUNDLE_DATA += IOS_DYLIBS
 }
 
 
@@ -327,80 +373,47 @@ android: {
         $${FIREBASE_LIBS_DIR}/libfirebase_app.a \
         $${FIREBASE_LIBS_DIR}/libfirebase_auth.a
 
-    ANDROID_PACKAGE_SOURCE_DIR = \
-        $$PWD/platforms/android
+    ANDROID_PACKAGE_SOURCE_DIR = $$VS_PLATFORMS_PATH/android
 
     DISTFILES += \
-        platforms/android/gradle.properties \
-        platforms/android/google-services.json \
-        platforms/android/AndroidManifest.xml \
-        platforms/android/build.gradle \
-        platforms/android/gradle/wrapper/gradle-wrapper.jar \
-        platforms/android/gradle/wrapper/gradle-wrapper.properties \
-        platforms/android/gradlew \
-        platforms/android/gradlew.bat \
-        platforms/android/res/values/libs.xml \
-        platforms/android/src/org/virgil/notification/NotificationClient.java
+        $$ANDROID_PACKAGE_SOURCE_DIR/gradle.properties \
+        $$ANDROID_PACKAGE_SOURCE_DIR/google-services.json \
+        $$ANDROID_PACKAGE_SOURCE_DIR/AndroidManifest.xml \
+        $$ANDROID_PACKAGE_SOURCE_DIR/build.gradle \
+        $$ANDROID_PACKAGE_SOURCE_DIR/gradle/wrapper/gradle-wrapper.jar \
+        $$ANDROID_PACKAGE_SOURCE_DIR/gradle/wrapper/gradle-wrapper.properties \
+        $$ANDROID_PACKAGE_SOURCE_DIR/gradlew \
+        $$ANDROID_PACKAGE_SOURCE_DIR/gradlew.bat \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/values/libs.xml \
+        # Java
+        $$ANDROID_PACKAGE_SOURCE_DIR/src/org/virgil/notification/NotificationClient.java \
+        # Assets
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-hdpi/icon.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-hdpi/icon_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-ldpi/icon.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-ldpi/icon_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-mdpi/icon.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-mdpi/icon_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-xhdpi/icon.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-xhdpi/icon_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-xxhdpi/icon.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-xxhdpi/icon_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-xxxhdpi/icon.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-xxxhdpi/icon_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-hdpi/ic_launcher_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-mdpi/ic_launcher.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-mdpi/ic_launcher_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xhdpi/ic_launcher.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xhdpi/ic_launcher_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xxhdpi/ic_launcher.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xxhdpi/ic_launcher_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xxxhdpi/ic_launcher.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xxxhdpi/ic_launcher_round.png
+
+    OTHER_FILES += \
+        platforms/android/res/values/apptheme.xml
 }
 
-#
-#   Enable Address Sanitizer if required
-#
-message(">>> ENABLE ADDRESS SANITIZER: $$USE_ASAN")
-equals(USE_ASAN, "yes") {
-    CONFIG += sanitizer sanitize_address
-}
-
-#
-#   Enable Undefined behavior Sanitizer if required
-#
-message(">>> ENABLE UNDEFINED BEHAVIOR SANITIZER: $$USE_UBSAN")
-equals(USE_UBSAN, "yes") {
-    CONFIG += sanitizer sanitize_undefined
-}
-
-#
-#   Enable Memory Sanitizer if required
-#
-message(">>> ENABLE MEMORY SANITIZER: $$USE_MSAN")
-equals(USE_MSAN, "yes") {
-    CONFIG += sanitizer sanitize_memory
-}
-
-#
-#   Enable Thread Sanitizer if required
-#
-message(">>> ENABLE THREAD SANITIZER: $$USE_TSAN")
-equals(USE_TSAN, "yes") {
-    CONFIG += sanitizer sanitize_thread
-}
-
-#
-#   Assets
-#
-RC_ICONS = platforms/windows/Virgil.ico
 
 DISTFILES += \
-    platforms/android/res/drawable-hdpi/icon.png \
-    platforms/android/res/drawable-hdpi/icon_round.png \
-    platforms/android/res/drawable-ldpi/icon.png \
-    platforms/android/res/drawable-ldpi/icon_round.png \
-    platforms/android/res/drawable-mdpi/icon.png \
-    platforms/android/res/drawable-mdpi/icon_round.png \
-    platforms/android/res/drawable-xhdpi/icon.png \
-    platforms/android/res/drawable-xhdpi/icon_round.png \
-    platforms/android/res/drawable-xxhdpi/icon.png \
-    platforms/android/res/drawable-xxhdpi/icon_round.png \
-    platforms/android/res/drawable-xxxhdpi/icon.png \
-    platforms/android/res/drawable-xxxhdpi/icon_round.png \
-    platforms/android/res/mipmap-hdpi/ic_launcher_round.png \
-    platforms/android/res/mipmap-mdpi/ic_launcher.png \
-    platforms/android/res/mipmap-mdpi/ic_launcher_round.png \
-    platforms/android/res/mipmap-xhdpi/ic_launcher.png \
-    platforms/android/res/mipmap-xhdpi/ic_launcher_round.png \
-    platforms/android/res/mipmap-xxhdpi/ic_launcher.png \
-    platforms/android/res/mipmap-xxhdpi/ic_launcher_round.png \
-    platforms/android/res/mipmap-xxxhdpi/ic_launcher.png \
-    platforms/android/res/mipmap-xxxhdpi/ic_launcher_round.png \
-    platforms/macos/virgil-messenger.plist.in \
-    platforms/windows/Virgil.ico
+    .gitignore

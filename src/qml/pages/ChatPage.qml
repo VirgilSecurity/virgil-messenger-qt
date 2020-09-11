@@ -6,6 +6,7 @@ import QtQuick.Window 2.12
 import QtMultimedia 5.12
 import com.virgilsecurity.messenger 1.0
 
+import "../base"
 import "../theme"
 import "../components"
 
@@ -61,8 +62,9 @@ Page {
                 }
 
                 Label {
+                    id: lastActivityLabel
                     topPadding: 2
-                    text: qsTr("Last seen yesterday")
+                    text: " "
                     font.pointSize: UiHelper.fixFontSz(12)
                     color: Theme.secondaryTextColor
                 }
@@ -73,6 +75,8 @@ Page {
 
     ListView {
         id: listView
+
+        property real previousHeight: 0.0
 
         anchors.fill: parent
         anchors.leftMargin: 20
@@ -121,6 +125,13 @@ Page {
 
         ScrollBar.vertical: ScrollBar { }
 
+        onHeightChanged: {
+            if (height < previousHeight) {
+                positionViewAtEnd()
+            }
+            previousHeight = height
+        }
+
         MouseArea {
             anchors.fill: parent
             onPressed: {
@@ -165,6 +176,13 @@ Page {
 
     Component.onDestruction: {
         Messenger.openPreviewRequested.disconnect(openPreview)
+    }
+
+    Connections {
+        target: Messenger
+        function onLastActivityTextChanged(text) {
+            lastActivityLabel.text = text
+        }
     }
 
     // Sounds

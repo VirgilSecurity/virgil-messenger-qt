@@ -38,6 +38,7 @@
 #include <VSQApplication.h>
 #include <VSQCommon.h>
 #include <VSQClipboardProxy.h>
+#include <android/VSQAndroid.h>
 #include <ui/VSQUiHelper.h>
 #include <virgil/iot/logger/logger.h>
 
@@ -75,15 +76,7 @@ VSQApplication::run(const QString &basePath) {
 
     VSQUiHelper uiHelper;
 
-    auto features = VSQFeatures();
-    auto impl = VSQImplementations();
-    auto roles = VSQDeviceRoles();
-    auto appConfig = VSQAppConfig() << VirgilIoTKit::VS_LOGLEV_DEBUG;
-
-    if (!VSQIoTKitFacade::instance().init(features, impl, appConfig)) {
-        VS_LOG_CRITICAL("Unable to initialize Virgil IoT KIT");
-        return -1;
-    }
+    vs_logger_init(VirgilIoTKit::VS_LOGLEV_DEBUG);
 
     // Initialization loging
 #ifdef VS_DEVMODE
@@ -92,19 +85,19 @@ VSQApplication::run(const QString &basePath) {
     m_messenger.setLogging(&m_logging);
     m_logging.setkVersion(kVersion);
 
+    QUrl url;
     if (basePath.isEmpty()) {
-        m_engine.setBaseUrl(QUrl(QStringLiteral("qrc:/qml/")));
+        url = QStringLiteral("qrc:/qml/");
     } else {
-        QUrl url("file://" + basePath + "/qml/");
-        m_engine.setBaseUrl(url);
+        url = "file://" + basePath + "/qml/";
     }
+    m_engine.setBaseUrl(url);
+    m_engine.addImportPath(url.toString());
 
     QQmlContext *context = m_engine.rootContext();
     context->setContextProperty("UiHelper", &uiHelper);
     context->setContextProperty("app", this);
     context->setContextProperty("clipboard", new VSQClipboardProxy(QGuiApplication::clipboard()));
-    context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
-    context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
     context->setContextProperty("Messenger", &m_messenger);
     context->setContextProperty("Logging", &m_logging);
     context->setContextProperty("settings", &m_settings);
@@ -115,10 +108,8 @@ VSQApplication::run(const QString &basePath) {
     fon.setPointSize(1.5 * QGuiApplication::font().pointSize());
     QGuiApplication::setFont(fon);
 
-    connect(QGuiApplication::instance(),
-            SIGNAL(applicationStateChanged(Qt::ApplicationState)),
-            this,
-            SLOT(onApplicationStateChanged(Qt::ApplicationState)));
+    connect(qApp, &QGuiApplication::applicationStateChanged, this, &VSQApplication::onApplicationStateChanged);
+    connect(qApp, &QGuiApplication::aboutToQuit, std::bind(&VSQMessenger::setStatus, &m_messenger, VSQMessenger::EnStatus::MSTATUS_UNAVAILABLE));
 
     reloadQml();
     return QGuiApplication::instance()->exec();
@@ -159,10 +150,18 @@ VSQApplication::sendReport() {
     m_logging.sendLogFiles();
 }
 
+void VSQApplication::hideSplashScreen()
+{
+#ifdef VS_ANDROID
+    VSQAndroid::hideSplashScreen();
+#endif
+}
+
 /******************************************************************************/
 void
 VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
     qDebug() << state;
+    m_messenger.setApplicationActive(state == Qt::ApplicationState::ApplicationActive);
 
 #if VS_PUSHNOTIFICATIONS
     static bool _deactivated = false;

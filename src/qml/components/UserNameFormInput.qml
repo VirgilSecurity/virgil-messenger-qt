@@ -2,10 +2,10 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 
+import "../base"
 import "../theme"
 
 Column {
-
     Layout.fillWidth: true
     Layout.maximumWidth: Theme.formMaximumWidth
     Layout.alignment: Qt.AlignHCenter
@@ -29,6 +29,7 @@ Column {
         rightPadding: 15
         font.pointSize: UiHelper.fixFontSz(15)
         color: Theme.primaryTextColor
+        focus: Platform.isDesktop
 
         background: Rectangle {
             implicitWidth: parent.width

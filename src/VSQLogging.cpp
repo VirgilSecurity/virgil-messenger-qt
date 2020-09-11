@@ -35,7 +35,6 @@
 #include <qlogging.h>
 #include <VSQLogging.h>
 #include <VSQMessenger.h>
-#include <virgil/iot/qt/VSQIoTKit.h>
 #include <virgil/iot/logger/logger.h>
 
 //using namespace VirgilIoTKit;
