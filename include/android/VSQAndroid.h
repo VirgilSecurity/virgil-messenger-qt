@@ -51,6 +51,8 @@ public:
 
     static void hideSplashScreen();
 
+    static QString getDisplayName(const QUrl &url);
+
 private:
     static int runLoggingThread();
 };

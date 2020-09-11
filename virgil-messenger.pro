@@ -411,9 +411,10 @@ android: {
         $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xxxhdpi/ic_launcher_round.png
 
     OTHER_FILES += \
-        platforms/android/res/values/apptheme.xml
+        platforms/android/res/values/apptheme.xml \
+        platforms/android/src/org/virgil/utils/Utils.java
 }
 
 
-DISTFILES += \
+OTHER_FILES += \
     .gitignore

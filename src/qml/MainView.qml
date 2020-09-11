@@ -74,7 +74,7 @@ Control {
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             readOnly: true
             font.pointSize: Platform.isMobile ? 12 : 9
-            selectByMouse: true
+            selectByMouse: Platform.isDesktop
         }
     }
 

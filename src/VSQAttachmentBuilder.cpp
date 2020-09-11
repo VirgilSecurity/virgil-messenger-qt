@@ -43,6 +43,7 @@
 #include "VSQSettings.h"
 #include "VSQUpload.h"
 #include "VSQUtils.h"
+#include "android/VSQAndroid.h"
 
 using namespace VirgilIoTKit;
 
@@ -77,7 +78,12 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
     Attachment attachment;
     attachment.id = VSQUtils::createUuid();
     attachment.type = type;
-    attachment.displayName = localInfo.fileName();
+#ifdef VS_ANDROID
+    attachment.displayName = VSQAndroid::getDisplayName(url);
+#endif
+    if (attachment.displayName.isEmpty()) {
+        attachment.displayName = localInfo.fileName();
+    }
     attachment.filePath = localInfo.absoluteFilePath();
 
     // Thumbnail processing

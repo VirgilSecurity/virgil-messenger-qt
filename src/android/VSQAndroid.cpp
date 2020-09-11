@@ -130,4 +130,18 @@ int VSQAndroid::runLoggingThread() { // run this function to redirect your outpu
 
 /******************************************************************************/
 
+QString VSQAndroid::getDisplayName(const QUrl &url)
+{
+    const QString urlString = url.toString();
+    const auto javaUrl = QAndroidJniObject::fromString(urlString);
+    const auto javaDisplayName = QAndroidJniObject::callStaticObjectMethod(
+        "org/virgil/utils/Utils",
+        "getDisplayName",
+        "(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;",
+        QtAndroid::androidContext().object(),
+        javaUrl.object<jstring>()
+    );
+    return javaDisplayName.toString();
+}
+
 #endif // VS_ANDROID

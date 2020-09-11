@@ -6,9 +6,12 @@ isEmpty(VS_CUSTOMER) {
 message("Customer:" $$VS_CUSTOMER)
 
 android: {
+    ANDROID_DIR = $$PWD/$$VS_CUSTOMER/platforms/android
+
     OTHER_FILES += \
-        $$PWD/$$VS_CUSTOMER/platforms/android/AndroidManifest.xml \
-        $$PWD/$$VS_CUSTOMER/platforms/android/res/drawable/splash.xml
+        $$ANDROID_DIR/AndroidManifest.xml \
+        $$ANDROID_DIR/res/drawable/splash.xml \
+        $$ANDROID_DIR/src/org/virgil/notification/NotificationClient.java
 }
 
 mkpath(../generated)
