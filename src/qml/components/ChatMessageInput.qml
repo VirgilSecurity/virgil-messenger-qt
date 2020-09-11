@@ -36,7 +36,16 @@ Control {
 
                 Action {
                     text: qsTr("Send picture")
-                    onTriggered: selectAttachment(Enums.AttachmentType.Picture)
+                    onTriggered: {
+                        if (Qt.platform.os === "ios") {
+                            var res = Messenger.pickImage()
+                            if (res !== "") {
+                                sendMessage(res, Enums.AttachmentType.Picture)
+                            }
+                        } else {
+                            selectAttachment(Enums.AttachmentType.Picture)
+                        }
+                    }
                 }
 
                 Action {

@@ -61,6 +61,10 @@
 #include <QtQml>
 #include <QUuid>
 
+#if VS_IOS
+    #include "ios/VSQIOSApplicationDelegate.h"
+#endif
+
 #include <QuickFuture>
 Q_DECLARE_METATYPE(VSQMessenger::EnStatus)
 Q_DECLARE_METATYPE(VSQMessenger::EnResult)
@@ -1259,6 +1263,16 @@ VSQMessenger::createSendAttachment(const QString messageId, const QString to,
         }
         return _sendMessageInternal(true, messageId, to, attachment->displayName, attachment);
     });
+}
+
+/******************************************************************************/
+QString
+VSQMessenger::pickImage() {
+#if VS_IOS
+    return iosShowImagePicker();
+#else
+    return "";
+#endif
 }
 
 /******************************************************************************/

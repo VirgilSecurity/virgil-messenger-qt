@@ -86,10 +86,6 @@ DEFINES += QT_DEPRECATED_WARNINGS \
         CFG_CLIENT=1 \
         VERSION="$$VERSION"
 
-ios: {
-    DEFINES += VS_IOS=1 VS_MOBILE=1
-}
-
 include(customers/customers.pri)
 
 VS_PLATFORMS_PATH=$$absolute_path(generated/platforms)
@@ -275,26 +271,43 @@ macx: {
 #   iOS specific
 #
 ios: {
-    QMAKE_ASSET_CATALOGS += platforms/ios/Assets.xcassets
-    OBJECTIVE_SOURCES += \
-        src/ios/APNSApplicationDelegate.mm \
-        src/ios/test-swift.swift \
+    #   GUI private for iOS. Required to inject native UI
+    QT += gui-private
 
+    #   Set Assets
+    QMAKE_ASSET_CATALOGS += platforms/ios/Assets.xcassets
+
+    #   Add iOS-specific sources
+    OBJECTIVE_SOURCES += \
+        src/ios/VSQIOSApplicationDelegate.mm \
+        src/ios/ios-native.swift
+
+    #   Add iOS-specific header
     HEADERS += \
         include/ios/VirgilMessenger-Bridging-Header.h \
+        include/ios/VSQIOSApplicationDelegate.h \
 
+    #   iOS defines
+    DEFINES += VS_IOS=1 VS_MOBILE=1
+
+    #   Add UI framework
+    QMAKE_LFLAGS  += -F$$PWD/platforms/ios/frameworks
+    LIBS += -framework ChattoAdditions
+
+    #   Add bridging header for Objective-C
     BridgingHeader.name = SWIFT_OBJC_BRIDGING_HEADER
     BridgingHeader.value = $$PWD/include/ios/VirgilMessenger-Bridging-Header.h
     QMAKE_MAC_XCODE_SETTINGS += BridgingHeader
 
+    #   Set Swift version
     SwiftVersion.name = SWIFT_VERSION
     SwiftVersion.value = 5.0
     QMAKE_MAC_XCODE_SETTINGS += SwiftVersion
 
-
-#    #IOS_ENTITLEMENTS.name = CODE_SIGN_ENTITLEMENTS
-#    #IOS_ENTITLEMENTS.value = ios/pushnotifications.entitlements
-#    QMAKE_MAC_XCODE_SETTINGS += IOS_ENTITLEMENTS
+    #   Push notifications
+    IOS_ENTITLEMENTS.name = CODE_SIGN_ENTITLEMENTS
+    IOS_ENTITLEMENTS.value = $$absolute_path($$PWD/platforms/ios/pushnotification.entitlements)
+    QMAKE_MAC_XCODE_SETTINGS += IOS_ENTITLEMENTS
 }
 
 isEqual(OS_NAME, "ios")|isEqual(OS_NAME, "ios-sim"): {

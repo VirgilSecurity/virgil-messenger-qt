@@ -133,6 +133,7 @@ void VSQApplication::reloadQml() {
 }
 
 /******************************************************************************/
+
 void VSQApplication::checkUpdates() {
 #if (MACOS)
     VSQMacos::instance().checkUpdates();

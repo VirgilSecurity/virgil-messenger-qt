@@ -127,6 +127,9 @@ public slots:
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     deleteUser(QString user);
+    
+    Q_INVOKABLE QString
+    pickImage();
 
     Q_INVOKABLE QStringList
     usersList();
