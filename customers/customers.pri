@@ -5,7 +5,13 @@ isEmpty(VS_CUSTOMER) {
 
 message("Customer:" $$VS_CUSTOMER)
 
-mkpath(                 ../generated)
-system($$QMAKE_COPY_DIR ../platforms    ../generated/)
-system($$QMAKE_COPY_DIR common/*        ../generated/)
+android: {
+    OTHER_FILES += \
+        $$PWD/$$VS_CUSTOMER/platforms/android/AndroidManifest.xml \
+        $$PWD/$$VS_CUSTOMER/platforms/android/res/drawable/splash.xml
+}
+
+mkpath(../generated)
+system($$QMAKE_COPY_DIR ../platforms ../generated/)
+system($$QMAKE_COPY_DIR common/* ../generated/)
 system($$QMAKE_COPY_DIR $$VS_CUSTOMER/* ../generated/)

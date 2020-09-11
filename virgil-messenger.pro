@@ -385,6 +385,7 @@ android: {
         $$ANDROID_PACKAGE_SOURCE_DIR/gradlew \
         $$ANDROID_PACKAGE_SOURCE_DIR/gradlew.bat \
         $$ANDROID_PACKAGE_SOURCE_DIR/res/values/libs.xml \
+        # Java
         $$ANDROID_PACKAGE_SOURCE_DIR/src/org/virgil/notification/NotificationClient.java \
         # Assets
         $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-hdpi/icon.png \
@@ -408,6 +409,9 @@ android: {
         $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xxhdpi/ic_launcher_round.png \
         $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xxxhdpi/ic_launcher.png \
         $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xxxhdpi/ic_launcher_round.png
+
+    OTHER_FILES += \
+        platforms/android/res/values/apptheme.xml
 }
 
 

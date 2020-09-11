@@ -85,6 +85,12 @@ bool VSQAndroid::prepare() {
 }
 
 /******************************************************************************/
+void VSQAndroid::hideSplashScreen()
+{
+    QtAndroid::hideSplashScreen();
+}
+
+/******************************************************************************/
 static void *loggingFunction(void*) {
     ssize_t readSize;
     char buf[128];

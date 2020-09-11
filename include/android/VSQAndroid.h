@@ -49,6 +49,8 @@ public:
 
     static QString certFile();
 
+    static void hideSplashScreen();
+
 private:
     static int runLoggingThread();
 };
