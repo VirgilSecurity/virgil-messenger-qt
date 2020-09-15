@@ -139,10 +139,6 @@ Control {
                         maxValue: chatMessage.attachmentBytesTotal
                         value: chatMessage.attachmentBytesLoaded
                     }
-
-                    TapHandler {
-                        onTapped: (d.isPicture ? Messenger.openAttachment : Messenger.downloadAttachment)(messageId)
-                    }
                 }
 
                 ColumnLayout {
@@ -255,6 +251,10 @@ Control {
                         contextMenu.y = mouse.y
                         contextMenu.open()
                     }
+
+                    function downloadOpen(messageId) {
+                        onTapped: (d.isPicture ? Messenger.openAttachment : Messenger.downloadAttachment)(messageId)
+                    }
                 }
 
                 MouseArea {
@@ -262,9 +262,7 @@ Control {
                     acceptedButtons: Platform.isDesktop ? Qt.RightButton : Qt.LeftButton
 
                     onClicked: {
-                        if (Platform.isDesktop) {
-                            loader.openContextMenu(mouse)
-                        }
+                        Platform.isDesktop ? loader.openContextMenu(mouse) : loader.downloadOpen(messageId)
                     }
                     onPressAndHold: {
                         if (Platform.isMobile) {
