@@ -148,6 +148,7 @@ ApplicationWindow {
             id: previewImage
             anchors.fill: parent
             fillMode: Image.PreserveAspectFit
+            autoTransform: true
         }
 
         Label {

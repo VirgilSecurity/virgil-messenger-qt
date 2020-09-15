@@ -34,6 +34,7 @@
 
 #include "VSQAttachmentBuilder.h"
 
+#include <QImageReader>
 #include <QPixmap>
 
 #include <QXmppClient.h>
@@ -88,7 +89,7 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
 
     // Thumbnail processing
     if (type == Attachment::Type::Picture) {
-        const auto pixmap = generateThumbnail(QPixmap(attachment.filePath));
+        const auto pixmap = generateThumbnail(attachment.filePath);
         attachment.thumbnailSize = pixmap.size();
         attachment.thumbnailPath = generateThumbnailFileName();
         saveThumbnailFile(pixmap, attachment.thumbnailPath);
@@ -101,9 +102,31 @@ QString VSQAttachmentBuilder::generateThumbnailFileName() const
     return m_settings->thumbnailsDir().filePath(VSQUtils::createUuid() + QLatin1String(".png"));
 }
 
-QPixmap VSQAttachmentBuilder::generateThumbnail(const QPixmap &pixmap) const
+QImage VSQAttachmentBuilder::applyImageOrientation(const QImage &image, const QImageIOHandler::Transformations transformations) const
 {
-    QSizeF size = pixmap.size();
+    auto result = image;
+    const bool horizontally = transformations & QImageIOHandler::TransformationMirror;
+    const bool vertically = transformations & QImageIOHandler::TransformationFlip;
+    if (horizontally || vertically) {
+        result = result.mirrored(horizontally, vertically);
+    }
+    if (transformations & QImageIOHandler::TransformationRotate90) {
+        result = result.transformed(QTransform().rotate(90.0));
+    }
+    return result;
+}
+
+QPixmap VSQAttachmentBuilder::generateThumbnail(const QString &fileName) const
+{
+    QImageReader reader(fileName);
+    const auto originalImage = reader.read();
+    if (originalImage.isNull()) {
+        qCWarning(lcAttachment) << "Unable to generate image preview";
+        return QPixmap();
+    }
+
+    const auto image = applyImageOrientation(originalImage, reader.transformation());
+    QSizeF size = image.size();
     const double ratio = size.height() / size.width();
     const QSizeF maxSize = m_settings->thumbnailMaxSize();
     if (size.width() > maxSize.width()) {
@@ -114,7 +137,8 @@ QPixmap VSQAttachmentBuilder::generateThumbnail(const QPixmap &pixmap) const
         size.setHeight(maxSize.height());
         size.setWidth(maxSize.height() / ratio);
     }
-    if (size == pixmap.size()) {
+    const auto pixmap = QPixmap::fromImage(image);
+    if (size == image.size()) {
         return pixmap;
     }
     return pixmap.scaled(size.width(), size.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
