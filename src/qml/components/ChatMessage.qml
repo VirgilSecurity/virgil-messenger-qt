@@ -41,7 +41,7 @@ Control {
         id: d
         readonly property bool hasAttachment: attachmentId.length > 0
         readonly property color background: isUser ? "#59717D" : Theme.mainBackgroundColor
-        readonly property double maxWidth: chatPage.width - 180
+        readonly property double maxWidth: Math.min(800, chatPage.width - 180)
         readonly property bool isPicture: hasAttachment && attachmentType == Enums.AttachmentType.Picture
         readonly property double defaultRadius: 4
     }
