@@ -22,6 +22,7 @@ class UIPhotosChatInputItem: PhotosChatInputItem {
 @objc class System : NSObject {
     
     var chatInputPresenter: BasicChatInputBarPresenter!
+    let qtController = UIViewController()
 
     @objc func printSome() {
         print("Print line System")
@@ -29,12 +30,36 @@ class UIPhotosChatInputItem: PhotosChatInputItem {
     
     @objc func openImagePicker(qtView: UIView) {
         let imageInput = self.createPhotoInputItem(qtView: qtView);
-        qtView.addSubview(imageInput.inputView!);
-        var frame = qtView.frame;
-        let dy = frame.size.height / 3;
-        frame.size.height -= dy;
-        frame.origin.y = frame.origin.y + dy;
-        imageInput.inputView!.frame = frame;
+        
+        let qtController = qtView.window?.rootViewController;
+        
+        qtController?.present(imageInput.presentingController!, animated: true, completion: {
+            var frameStart = CGRect();
+            frameStart.size.width = qtView.frame.width
+            frameStart.size.height = 0
+            frameStart.origin.x = 0
+            frameStart.origin.y = qtView.frame.height
+            imageInput.inputView!.frame = frameStart;
+
+            var frame = qtView.frame;
+            let dy = frame.size.height / 3;
+            frame.size.height -= dy;
+            frame.origin.y = frame.origin.y + dy;
+
+            UIView.animate(withDuration: 0.7,
+                           delay: 0.0,
+                           options: [.curveEaseInOut , .allowUserInteraction],
+                           animations: {
+                                imageInput.inputView!.frame = frame
+            },
+                           completion: { finished in
+                            print("Bug moved left!")
+            })
+        })
+
+        imageInput.photoInputHandler = { image in
+            print(">>>>>")
+        }
     }
     
     class UIPhotosChatInputItem: PhotosChatInputItem {
@@ -46,13 +71,12 @@ class UIPhotosChatInputItem: PhotosChatInputItem {
             }
             return super.inputView
         }
+        
+        func 
     }
     
     func createPhotoInputItem(qtView: UIView) -> UIPhotosChatInputItem {
-        let qtController = qtView.window?.rootViewController;
-        print(qtController)
-        print(qtView.frame.size.width)
-        print(qtView.frame.size.height)
+//        let qtController = qtView.window?.rootViewController;
         
         var liveCamaraAppearence = LiveCameraCellAppearance.createDefaultAppearance()
         liveCamaraAppearence.backgroundColor = .appThemeForegroundColor
@@ -60,10 +84,7 @@ class UIPhotosChatInputItem: PhotosChatInputItem {
         let item = UIPhotosChatInputItem(presentingController: qtController,
                                          tabInputButtonAppearance: PhotosChatInputItem.createDefaultButtonAppearance(),
                                          inputViewAppearance: photosAppearence)
-
-        item.photoInputHandler = { [weak self] image in
-            print(image)
-        }
+        qtController.view.addSubview(item.inputView!)
         
         return item
     }
