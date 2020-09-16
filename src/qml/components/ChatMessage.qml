@@ -79,29 +79,28 @@ Control {
         id: attachmentComponent
 
         Item {
-            height: row.height + topPadding + bottomPadding
-            width: row.width + leftPadding + rightPadding
+            height: row.height + 2 * offset
+            width: row.width + 2 * offset
 
-            readonly property double topPadding: d.isPicture ? d.defaultRadius : 12
-            readonly property double bottomPadding: d.isPicture ? d.defaultRadius : 12
-            readonly property double leftPadding: d.isPicture ? d.defaultRadius : 12
-            readonly property double rightPadding: d.isPicture ? d.defaultRadius : 12
+            readonly property double offset: d.isPicture ? d.defaultRadius : 12
 
-            RowLayout {
+            Row {
                 id: row
                 spacing: 14
-                x: leftPadding
-                y: topPadding
+                x: offset
+                y: offset
 
                 Rectangle {
+                    id: imageRect
+                    y: 0.5 * (row.height - height)
                     width: image.width
                     height: image.height
                     color: d.isPicture ? "white" : "transparent"
 
                     Image {
                         id: image
-                        width: d.isPicture ? 3 * attachmentThumbnailWidth : sourceSize.width
-                        height: d.isPicture ? 3 * attachmentThumbnailHeight : sourceSize.height
+                        width: d.isPicture ? Math.min(3 * attachmentThumbnailWidth, d.maxWidth - 2 * offset) : sourceSize.width
+                        height: d.isPicture ? width * (attachmentThumbnailHeight / attachmentThumbnailWidth) : sourceSize.height
                         visible: d.isPicture ? true : attachmentDownloaded && !progressBar.visible
                         autoTransform: true
                         source: {
@@ -114,7 +113,6 @@ Control {
                     }
 
                     Rectangle {
-                        id: downloadImageRect
                         visible: !attachmentDownloaded && !progressBar.visible
                         anchors.centerIn: parent
                         width: 1.3333 * downloadImage.width
@@ -125,8 +123,6 @@ Control {
                         Image {
                             id: downloadImage
                             anchors.centerIn: parent
-                            width: sourceSize.width
-                            height: sourceSize.height
                             source: "../resources/icons/File Download Big.png"
                         }
                     }
@@ -145,22 +141,22 @@ Control {
                     id: column
                     spacing: 4
                     visible: !d.isPicture
-                    readonly property double maxWidth: d.maxWidth - row.spacing - image.width - leftPadding - rightPadding
+                    readonly property double maxWidth: d.maxWidth - imageRect.width - row.spacing - 2 * offset
 
                     Label {
+                        Layout.fillHeight: true
+                        Layout.maximumWidth: column.maxWidth
                         text: chatMessage.body
                         color: "white"
                         font.pixelSize: UiHelper.fixFontSz(16)
-                        Layout.maximumWidth: Math.min(implicitWidth, column.maxWidth)
-                        elide: "ElideMiddle"
+                        wrapMode: Text.Wrap
                     }
 
                     Label {
+                        Layout.maximumWidth: column.maxWidth
                         text: attachmentDisplaySize
                         color: "white"
                         font.pixelSize: UiHelper.fixFontSz(10)
-                        Layout.maximumWidth: Math.min(implicitWidth, column.maxWidth)
-                        elide: "ElideMiddle"
                     }
                 }
             }
@@ -213,13 +209,13 @@ Control {
 
             // Message or attachment
             Rectangle {
-                width: chatMessage.width
+                width: loader.item.width
                 height: loader.item.height
                 color: "transparent"
 
                 Rectangle {
-                    width: chatMessage.width
-                    height: loader.item.height
+                    width: parent.width
+                    height: parent.height
                     color: d.background
                     radius: d.isPicture ? d.defaultRadius : 20
                 }
@@ -253,16 +249,21 @@ Control {
                     }
 
                     function downloadOpen(messageId) {
-                        onTapped: (d.isPicture ? Messenger.openAttachment : Messenger.downloadAttachment)(messageId)
+                        (d.isPicture ? Messenger.openAttachment : Messenger.downloadAttachment)(messageId)
                     }
                 }
 
                 MouseArea {
                     anchors.fill: parent
-                    acceptedButtons: Platform.isDesktop ? Qt.RightButton : Qt.LeftButton
+                    acceptedButtons: Platform.isDesktop ? (Qt.LeftButton | Qt.RightButton) : Qt.LeftButton
 
-                    onClicked: {
-                        Platform.isDesktop ? loader.openContextMenu(mouse) : loader.downloadOpen(messageId)
+                    onClicked: function(mouse) {
+                        if (Platform.isDesktop && mouse.button == Qt.RightButton) {
+                            loader.openContextMenu(mouse)
+                        }
+                        else {
+                            loader.downloadOpen(messageId)
+                        }
                     }
                     onPressAndHold: {
                         if (Platform.isMobile) {
