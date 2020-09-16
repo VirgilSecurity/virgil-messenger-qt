@@ -99,10 +99,16 @@ Control {
 
                     Image {
                         id: image
-                        width: d.isPicture ? Math.min(3 * attachmentThumbnailWidth, d.maxWidth - 2 * offset) : sourceSize.width
-                        height: d.isPicture ? width * (attachmentThumbnailHeight / attachmentThumbnailWidth) : sourceSize.height
-                        visible: d.isPicture ? true : attachmentDownloaded && !progressBar.visible
+                        Binding on width {
+                            when: d.isPicture
+                            value: Math.min(3 * attachmentThumbnailWidth, d.maxWidth - 2 * offset)
+                        }
+                        Binding on height {
+                            when: d.isPicture
+                            value: width * attachmentThumbnailHeight / attachmentThumbnailWidth
+                        }
                         autoTransform: true
+                        visible: d.isPicture ? true : attachmentDownloaded && !progressBar.visible
                         source: {
                             if (d.isPicture) {
                                 return chatMessage.attachmentDownloaded  ? attachmentFilePath : attachmentThumbnailPath;
