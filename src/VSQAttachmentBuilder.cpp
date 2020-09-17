@@ -79,11 +79,12 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
     Attachment attachment;
     attachment.id = VSQUtils::createUuid();
     attachment.type = type;
+    const int maxLength = 50;
 #ifdef VS_ANDROID
-    attachment.displayName = VSQAndroid::getDisplayName(url);
+    attachment.displayName = VSQUtils::elidedText(VSQAndroid::getDisplayName(url), maxLength);
 #endif
     if (attachment.displayName.isEmpty()) {
-        attachment.displayName = localInfo.fileName();
+        attachment.displayName = VSQUtils::elidedText(localInfo.fileName(), maxLength);
     }
     attachment.filePath = localInfo.absoluteFilePath();
 
