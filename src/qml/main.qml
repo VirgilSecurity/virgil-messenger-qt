@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
+import QtQuick.Window 2.15
 import QtMultimedia 5.12
 import QuickFuture 1.0
 
@@ -15,12 +16,26 @@ ApplicationWindow {
     visible: true
     title: settings.applicationDisplayName
 
-    Binding on height { when: Platform.isDesktop; value: 800 }
-    Binding on width { when: Platform.isDesktop; value: 600 }
+    Binding on x {
+        when: Platform.isDesktop;
+        value: restoreGeometry ? settings.windowGeometry.x : 0.5 * (Screen.width - width)
+    }
+    Binding on y {
+        when: Platform.isDesktop;
+        value: restoreGeometry ? settings.windowGeometry.y : 0.5 * (Screen.height - height)
+    }
+    Binding on height {
+        when: Platform.isDesktop;
+        value: restoreGeometry ? settings.windowGeometry.height : 800
+    }
+    Binding on width {
+        when: Platform.isDesktop;
+        value: restoreGeometry ? settings.windowGeometry.width : 600
+    }
     Binding on minimumHeight { when: Platform.isDesktop; value: 500 }
     Binding on minimumWidth { when: Platform.isDesktop; value: 300 }
 
-    property bool connectionError: false
+    readonly property bool restoreGeometry: settings.windowGeometry.width > 0 && settings.windowGeometry.height > 0
 
     //
     //  Connections
@@ -60,6 +75,9 @@ ApplicationWindow {
             else {
                 mainView.back()
             }
+        }
+        else if (Platform.isDesktop) {
+            settings.windowGeometry = Qt.rect(x, y, width, height)
         }
     }
 

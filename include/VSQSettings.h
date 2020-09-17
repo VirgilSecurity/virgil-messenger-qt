@@ -37,6 +37,7 @@
 
 #include <QDir>
 #include <QSettings>
+#include <QRect>
 #include <QSize>
 
 #include "VSQCommon.h"
@@ -49,6 +50,7 @@ class VSQSettings : public QObject
     Q_PROPERTY(bool devMode READ devMode CONSTANT)
     Q_PROPERTY(QString organizationDisplayName READ organizationDisplayName CONSTANT)
     Q_PROPERTY(QString applicationDisplayName READ applicationDisplayName CONSTANT)
+    Q_PROPERTY(QRect windowGeometry READ windowGeometry WRITE setWindowGeometry NOTIFY windowGeometryChanged)
 
 public:
     explicit VSQSettings(QObject *parent);
@@ -70,10 +72,18 @@ public:
     // Dev mode
     bool devMode() const;
 
+    // Window
+    QRect windowGeometry() const;
+    void setWindowGeometry(const QRect &geometry);
+
     // Last seen activity interval (seconds)
     Seconds lastSeenActivityInterval() const;
 
+signals:
+    void windowGeometryChanged(const QRect &rect); // Required by QML, not used
+
 private:
+    QSettings m_settings;
     QDir m_attachmentCacheDir;
     QDir m_thumbnaisDir;
     QDir m_downloadsDir;
