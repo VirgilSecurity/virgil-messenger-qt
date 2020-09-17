@@ -36,6 +36,8 @@ Control {
     property bool attachmentDownloaded: false
 
     signal saveAttachmentAs(string messageId)
+    signal downloadOpenAttachment(string messageId, bool isPicture)
+    signal openContextMenu(string messageId, var mouse, var contextMenu)
 
     QtObject {
         id: d
@@ -246,17 +248,6 @@ Control {
                 Loader {
                     id: loader
                     sourceComponent: d.hasAttachment ? attachmentComponent : textEditComponent
-
-                    property var contextMenu: item.contextMenu
-                    function openContextMenu(mouse) {
-                        contextMenu.x = mouse.x
-                        contextMenu.y = mouse.y
-                        contextMenu.open()
-                    }
-
-                    function downloadOpen(messageId) {
-                        (d.isPicture ? Messenger.openAttachment : Messenger.downloadAttachment)(messageId)
-                    }
                 }
 
                 MouseArea {
@@ -265,15 +256,17 @@ Control {
 
                     onClicked: function(mouse) {
                         if (Platform.isDesktop && mouse.button == Qt.RightButton) {
-                            loader.openContextMenu(mouse)
+                            var coord = mapToItem(chatMessage, mouse.x, mouse.y)
+                            openContextMenu(messageId, coord, loader.item.contextMenu)
                         }
                         else {
-                            loader.downloadOpen(messageId)
+                            downloadOpenAttachment(messageId, d.isPicture)
                         }
                     }
                     onPressAndHold: {
                         if (Platform.isMobile) {
-                            loader.openContextMenu(mouse)
+                            var coord = mapToItem(chatMessage, mouse.x, mouse.y)
+                            openContextMenu(messageId, coord, loader.item.contextMenu)
                         }
                     }
                 }
