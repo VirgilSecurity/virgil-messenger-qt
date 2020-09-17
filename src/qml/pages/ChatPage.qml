@@ -133,11 +133,9 @@ Page {
             }
         }
 
-        onCountChanged: {
-            positionViewAtEnd()
-        }
-
         ScrollBar.vertical: ScrollBar { }
+
+        onCountChanged: positionViewAtEnd()
 
         onHeightChanged: {
             if (height < previousHeight) {

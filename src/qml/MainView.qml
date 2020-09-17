@@ -60,7 +60,7 @@ Control {
         }
     }
 
-    ScrollView {
+    TextScrollView {
         id: logControl
         anchors {
             topMargin: 0.75 * mainView.height
