@@ -71,7 +71,13 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
         errorText = tr("File is empty");
         return NullOptional;
     }
-    if (localInfo.size() > m_settings->attachmentMaxFileSize()) {
+#ifdef VS_ANDROID
+    const DataSize fileSize = VSQAndroid::getFileSize(url);
+#else
+    const DataSize fileSize = localInfo.size();
+#endif
+    qCDebug(lcAttachment) << "Attachment file size:" << fileSize;
+    if (fileSize > m_settings->attachmentMaxFileSize()) {
         errorText = tr("File size limit: %1").arg(VSQUtils::formattedDataSize(m_settings->attachmentMaxFileSize()));
         return NullOptional;
     }

@@ -144,4 +144,18 @@ QString VSQAndroid::getDisplayName(const QUrl &url)
     return javaDisplayName.toString();
 }
 
+DataSize VSQAndroid::getFileSize(const QUrl &url)
+{
+    const QString urlString = url.toString();
+    const auto javaUrl = QAndroidJniObject::fromString(urlString);
+    const auto javaFileSize = QAndroidJniObject::callStaticMethod<jint>(
+        "org/virgil/utils/Utils",
+        "getFileSize",
+        "(Landroid/content/Context;Ljava/lang/String;)I",
+        QtAndroid::androidContext().object(),
+        javaUrl.object<jstring>()
+    );
+    return static_cast<DataSize>(javaFileSize);
+}
+
 #endif // VS_ANDROID

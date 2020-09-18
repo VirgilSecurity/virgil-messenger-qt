@@ -24,4 +24,22 @@ public class Utils
 
         return (nativeFileName == null) ? "" : nativeFileName;
     }
+
+    public static int getFileSize(Context context, String url)
+    {
+        int fileSize = 0;
+
+        Uri uri = Uri.parse(url);
+        try {
+            Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                fileSize = cursor.getInt(cursor.getColumnIndex(OpenableColumns.SIZE));
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return fileSize;
+    }
 }
