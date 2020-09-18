@@ -186,6 +186,16 @@ VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
         return timestamp.toDate();
     }
 
+    if (role == StatusRole) {
+        const int statusColumn = StatusRole - Qt::UserRole;
+        const QVariant status = currRecord.value(statusColumn);
+        const QSqlRecord nextRecord = record(index.row() + 1);
+        if (currRecord.value(authorColumn) == nextRecord.value(authorColumn) && status == nextRecord.value(statusColumn)) {
+            return QString();
+        }
+        return status;
+    }
+
     const auto attachmentId = currRecord.value(AttachmentIdRole - Qt::UserRole).toString();
 
     if (role == AttachmentDisplaySizeRole) {

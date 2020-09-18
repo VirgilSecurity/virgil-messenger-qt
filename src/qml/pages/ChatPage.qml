@@ -41,6 +41,11 @@ Page {
             }
         }
 
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.AllButtons
+        }
+
         RowLayout {
             anchors.fill: parent
             anchors.leftMargin: 10
