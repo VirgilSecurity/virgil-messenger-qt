@@ -18,24 +18,29 @@ ApplicationWindow {
 
     Binding on x {
         when: Platform.isDesktop;
-        value: restoreGeometry ? settings.windowGeometry.x : 0.5 * (Screen.width - width)
+        value: d.restore ? settings.windowGeometry.x : 0.5 * (Screen.width - d.width)
     }
     Binding on y {
         when: Platform.isDesktop;
-        value: restoreGeometry ? settings.windowGeometry.y : 0.5 * (Screen.height - height)
-    }
-    Binding on height {
-        when: Platform.isDesktop;
-        value: restoreGeometry ? settings.windowGeometry.height : 800
+        value: d.restore ? settings.windowGeometry.y : 0.5 * (Screen.height - d.height)
     }
     Binding on width {
         when: Platform.isDesktop;
-        value: restoreGeometry ? settings.windowGeometry.width : 600
+        value: d.restore ? settings.windowGeometry.width : d.width
+    }
+    Binding on height {
+        when: Platform.isDesktop;
+        value: d.restore ? settings.windowGeometry.height : d.height
     }
     Binding on minimumHeight { when: Platform.isDesktop; value: 500 }
     Binding on minimumWidth { when: Platform.isDesktop; value: 300 }
 
-    readonly property bool restoreGeometry: settings.windowGeometry.width > 0 && settings.windowGeometry.height > 0
+    QtObject {
+        id: d
+        readonly property int height: 800
+        readonly property int width: 600
+        readonly property bool restore: settings.windowGeometry.width > 0 && settings.windowGeometry.height > 0
+    }
 
     //
     //  Connections
