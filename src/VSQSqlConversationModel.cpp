@@ -361,7 +361,7 @@ VSQSqlConversationModel::getLastMessage(const QString &user) const {
 QList<StMessage> VSQSqlConversationModel::getMessages(const QString &user, const StMessage::Status status) {
     QSqlQueryModel model;
     QString query;
-    query = QString("SELECT * FROM %1 WHERE status = %2 AND author = \"%3\"")
+    query = QString("SELECT * FROM %1 WHERE status = %2 AND author = '%3' ORDER BY timestamp")
             .arg(_tableName()).arg(static_cast<int>(status)).arg(user);
     model.setQuery(query);
     int c = model.rowCount();
