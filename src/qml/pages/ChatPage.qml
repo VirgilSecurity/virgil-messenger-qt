@@ -81,6 +81,7 @@ Page {
     ListView {
         id: listView
 
+        property bool viewLoaded: false
         property real previousHeight: 0.0
         property var contextMenu: null
 
@@ -95,6 +96,8 @@ Page {
 
         spacing: 5
         delegate: ChatMessage {
+            maxWidth: Math.min(root.width - 220, 800)
+
             body: model.message
             time: Qt.formatDateTime(model.timestamp, "hh:mm")
             nickname: model.author
@@ -140,11 +143,16 @@ Page {
 
         ScrollBar.vertical: ScrollBar { }
 
-        onCountChanged: positionViewAtEnd()
+        Component.onCompleted: {
+            viewLoaded = true
+            positionLoadedViewAtEnd()
+        }
+
+        onCountChanged: positionLoadedViewAtEnd()
 
         onHeightChanged: {
             if (height < previousHeight) {
-                positionViewAtEnd()
+                positionLoadedViewAtEnd()
             }
             previousHeight = height
         }
@@ -160,6 +168,12 @@ Page {
                     listView.contextMenu.visible = false
                 }
                 wheel.accepted = false
+            }
+        }
+
+        function positionLoadedViewAtEnd() {
+            if (viewLoaded) {
+                positionViewAtEnd()
             }
         }
     }
