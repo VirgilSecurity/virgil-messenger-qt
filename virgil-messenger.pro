@@ -287,7 +287,6 @@ ios: {
     QMAKE_ASSET_CATALOGS += platforms/ios/Assets.xcassets
     QMAKE_TARGET_BUNDLE_PREFIX = com.virgilsecurity
     QMAKE_IOS_DEPLOYMENT_TARGET = 10.0
-    QMAKE_SHORT_VERSION = 3.2.3
     QMAKE_INFO_PLIST = platforms/ios/Info.plist
 
     LIBS_DIR = $$PWD/ext/prebuilt/$$OS_NAME/release/installed/usr/local/lib
