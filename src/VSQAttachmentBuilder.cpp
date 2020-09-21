@@ -93,7 +93,7 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
 #ifdef VS_ANDROID
     attachment.fileName = VSQAndroid::getDisplayName(url);
 #elif defined(VS_IOS)
-    const QUrlQuery query(url.query());
+    const QUrlQuery query(url.adjusted(QUrl::RemoveScheme).query());
     attachment.fileName = query.queryItemValue("id") + QChar('.') + query.queryItemValue("ext").toLower();
 #endif
     if (attachment.fileName.isEmpty()) {
