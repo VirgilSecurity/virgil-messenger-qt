@@ -36,6 +36,7 @@
 
 #include <QImageReader>
 #include <QPixmap>
+#include <QUrlQuery>
 
 #include <QXmppClient.h>
 
@@ -86,11 +87,20 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
     attachment.id = VSQUtils::createUuid();
     attachment.type = type;
     const int maxLength = 50;
+    if (type == Attachment::Type::Picture) {
+        attachment.displayName = tr("picture");
+    }
 #ifdef VS_ANDROID
-    attachment.displayName = VSQUtils::elidedText(VSQAndroid::getDisplayName(url), maxLength);
+    attachment.fileName = VSQAndroid::getDisplayName(url);
+#elif defined(VS_IOS)
+    const QUrlQuery query(url.query());
+    attachment.fileName = query.queryItemValue("id") + QChar('.') + query.queryItemValue("ext").toLower();
 #endif
+    if (attachment.fileName.isEmpty()) {
+        attachment.fileName = localInfo.fileName();
+    }
     if (attachment.displayName.isEmpty()) {
-        attachment.displayName = VSQUtils::elidedText(localInfo.fileName(), maxLength);
+        attachment.displayName = VSQUtils::elidedText(attachment.fileName, maxLength);
     }
     attachment.filePath = localInfo.absoluteFilePath();
 

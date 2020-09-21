@@ -1225,7 +1225,7 @@ void VSQMessenger::downloadAndProcess(StMessage message, const Function &func)
         // Update attachment filePath
         const auto downloads = m_settings->downloadsDir();
         if (filePath.isEmpty() || QFileInfo(filePath).dir() != downloads) {
-            filePath = VSQUtils::findUniqueFileName(downloads.filePath(attachment.displayName));
+            filePath = VSQUtils::findUniqueFileName(downloads.filePath(attachment.fileName));
         }
         const TransferId id(msg.messageId, TransferId::Type::File);
         auto download = m_transferManager->startCryptoDownload(id, attachment.remoteUrl, filePath, msg.sender);
