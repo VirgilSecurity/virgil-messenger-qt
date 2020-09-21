@@ -94,7 +94,9 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
     attachment.fileName = VSQAndroid::getDisplayName(url);
 #elif defined(VS_IOS)
     if (type == Attachment::Type::Picture) {
-        const QUrlQuery query(url.adjusted(QUrl::RemoveScheme).query());
+        // Build file name from url, i.e. "file:assets-library://asset/asset.PNG?id=7CE20DC4-89A8-4079-88DC-AD37920581B5&ext=PNG"
+        QUrl urlWithoutFileScheme{url.toLocalFile()};
+        const QUrlQuery query(urlWithoutFileScheme.query());
         attachment.fileName = query.queryItemValue("id") + QChar('.') + query.queryItemValue("ext").toLower();
     }
 #endif
