@@ -85,7 +85,7 @@ unix:mac: {
 LIBS += -L$${PREBUILT_SYSROOT}/lib
 LIBS += -lvs-module-logger
 LIBS += -lvs-module-messenger
-LIBS += -lvscryptoc
+#LIBS += -lvscryptoc
 !mac: {
   LIBS += -lcurl
 }
