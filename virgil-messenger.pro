@@ -282,36 +282,20 @@ macx: {
 #
 #   iOS specific
 #
+
 ios: {
     QMAKE_ASSET_CATALOGS += platforms/ios/Assets.xcassets
-    OBJECTIVE_SOURCES += \
-        src/ios/APNSApplicationDelegate.mm \
-        src/ios/test-swift.swift \
-
-    HEADERS += \
-        include/ios/VirgilMessenger-Bridging-Header.h \
-
-    BridgingHeader.name = SWIFT_OBJC_BRIDGING_HEADER
-    BridgingHeader.value = $$PWD/include/ios/VirgilMessenger-Bridging-Header.h
-    QMAKE_MAC_XCODE_SETTINGS += BridgingHeader
-
-    SwiftVersion.name = SWIFT_VERSION
-    SwiftVersion.value = 5.0
-    QMAKE_MAC_XCODE_SETTINGS += SwiftVersion
-
-
-#    #IOS_ENTITLEMENTS.name = CODE_SIGN_ENTITLEMENTS
-#    #IOS_ENTITLEMENTS.value = ios/pushnotifications.entitlements
-#    QMAKE_MAC_XCODE_SETTINGS += IOS_ENTITLEMENTS
-}
-
-isEqual(OS_NAME, "ios")|isEqual(OS_NAME, "ios-sim"): {
-    Q_ENABLE_BITCODE.name = ENABLE_BITCODE
-    Q_ENABLE_BITCODE.value = NO
-    QMAKE_MAC_XCODE_SETTINGS += Q_ENABLE_BITCODE
+    QMAKE_TARGET_BUNDLE_PREFIX = com.virgilsecurity
+    QMAKE_IOS_DEPLOYMENT_TARGET = 10.0
+    QMAKE_SHORT_VERSION = 3.2.3
+    QMAKE_INFO_PLIST = platforms/ios/Info.plist
 
     LIBS_DIR = $$PWD/ext/prebuilt/$$OS_NAME/release/installed/usr/local/lib
     QMAKE_RPATHDIR = @executable_path/Frameworks
+
+    mylib.files = $${LIBS_DIR}/libvs-messenger-internal.dylib
+    mylib.path = Frameworks
+    QMAKE_BUNDLE_DATA += mylib
 }
 
 
