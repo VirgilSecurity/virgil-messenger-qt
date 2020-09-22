@@ -40,12 +40,12 @@ Control {
 
                 Action {
                     text: qsTr("Send picture")
-                    onTriggered: selectAttachment(Enums.AttachmentType.Picture)
+                    onTriggered: picker.open(Enums.AttachmentType.Picture)
                 }
 
                 Action {
                     text: qsTr("Send file")
-                    onTriggered: selectAttachment(Enums.AttachmentType.File)
+                    onTriggered: picker.open(Enums.AttachmentType.File)
                 }
             }
         }
@@ -176,16 +176,9 @@ Control {
         }
     }
 
-    SelectAttachmentsDialog {
-        id: selectFileDialog
-        attachmentType: Enums.AttachmentType.File
-        onAccepted: sendAttachment(selectFileDialog)
-    }
-
-    SelectAttachmentsDialog {
-        id: selectPictureDialog
-        attachmentType: Enums.AttachmentType.Picture
-        onAccepted: sendAttachment(selectPictureDialog)
+    AttachmentPicker {
+        id: picker
+        onPicked: sendMessage(fileUrls[fileUrls.length - 1], attachmentType)
     }
 
     function sendMessage(attachmentUrl, attachmentType) {
@@ -194,16 +187,6 @@ Control {
         if (text || attachmentUrl) {
             messageSending(text, attachmentUrl, attachmentType)
         }
-    }
-
-    function selectAttachment(attachmentType) {
-        var dialog = (attachmentType == Enums.AttachmentType.Picture) ? selectPictureDialog : selectFileDialog
-        dialog.open()
-    }
-
-    function sendAttachment(fileDialog) {
-        var pos = fileDialog.fileUrls.length - 1
-        sendMessage(fileDialog.fileUrls[pos], fileDialog.attachmentType)
     }
 
     Component.onCompleted: {
