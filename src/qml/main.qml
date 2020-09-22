@@ -190,6 +190,7 @@ ApplicationWindow {
             acceptedButtons: Qt.AllButtons
             anchors.fill: parent
             onClicked: preview.visible = false
+            onWheel: wheel.accepted = true
         }
     }
 
