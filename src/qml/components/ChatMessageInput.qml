@@ -59,9 +59,8 @@ Control {
             radius: 20
             color: "#37474F"
 
-            ScrollView {
+            TextScrollView {
                 id: scrollView
-                clip: true
                 height: Math.min(100, messageField.implicitHeight)
                 anchors {
                     left: parent.left

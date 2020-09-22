@@ -36,6 +36,7 @@
 
 #include <QImageReader>
 #include <QPixmap>
+#include <QUrlQuery>
 
 #include <QXmppClient.h>
 
@@ -71,7 +72,13 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
         errorText = tr("File is empty");
         return NullOptional;
     }
-    if (localInfo.size() > m_settings->attachmentMaxFileSize()) {
+#ifdef VS_ANDROID
+    const DataSize fileSize = VSQAndroid::getFileSize(url);
+#else
+    const DataSize fileSize = localInfo.size();
+#endif
+    qCDebug(lcAttachment) << "Attachment file size:" << fileSize;
+    if (fileSize > m_settings->attachmentMaxFileSize()) {
         errorText = tr("File size limit: %1").arg(VSQUtils::formattedDataSize(m_settings->attachmentMaxFileSize()));
         return NullOptional;
     }
@@ -80,11 +87,24 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
     attachment.id = VSQUtils::createUuid();
     attachment.type = type;
     const int maxLength = 50;
+    if (type == Attachment::Type::Picture) {
+        attachment.displayName = tr("picture");
+    }
 #ifdef VS_ANDROID
-    attachment.displayName = VSQUtils::elidedText(VSQAndroid::getDisplayName(url), maxLength);
+    attachment.fileName = VSQAndroid::getDisplayName(url);
+#elif defined(VS_IOS)
+    if (type == Attachment::Type::Picture) {
+        // Build file name from url, i.e. "file:assets-library://asset/asset.PNG?id=7CE20DC4-89A8-4079-88DC-AD37920581B5&ext=PNG"
+        QUrl urlWithoutFileScheme{url.toLocalFile()};
+        const QUrlQuery query(urlWithoutFileScheme.query());
+        attachment.fileName = query.queryItemValue("id") + QChar('.') + query.queryItemValue("ext").toLower();
+    }
 #endif
+    if (attachment.fileName.isEmpty()) {
+        attachment.fileName = localInfo.fileName();
+    }
     if (attachment.displayName.isEmpty()) {
-        attachment.displayName = VSQUtils::elidedText(localInfo.fileName(), maxLength);
+        attachment.displayName = VSQUtils::elidedText(attachment.fileName, maxLength);
     }
     attachment.filePath = localInfo.absoluteFilePath();
 

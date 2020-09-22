@@ -111,5 +111,6 @@
         <file>qml/resources/icons/File Download Big.png</file>
         <file>qml/resources/icons/File Download Big@2x.png</file>
         <file>qml/components/CircleProgressBar.qml</file>
+        <file>qml/components/TextScrollView.qml</file>
     </qresource>
 </RCC>

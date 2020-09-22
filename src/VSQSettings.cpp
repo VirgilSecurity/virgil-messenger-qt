@@ -42,11 +42,13 @@
 static const QString kLastSignedInUser = "LastSignedInUser";
 static const QString kUsers = "Users";
 static const QString kSavedSessionId = "SavedSessionId";
+static const QString kWindowGeometryId = "WindowGeometry";
 
 Q_LOGGING_CATEGORY(lcSettings, "settings")
 
 VSQSettings::VSQSettings(QObject *parent)
     : QObject(parent)
+    , m_settings(Customer::OrganizationName, Customer::ApplicationName)
 {
     m_attachmentCacheDir.setPath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/attachments"));
     m_thumbnaisDir.setPath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/thumbnails"));
@@ -121,6 +123,17 @@ bool VSQSettings::devMode() const
 #else
     return false;
 #endif // VS_DEVMODE
+}
+
+QRect VSQSettings::windowGeometry() const
+{
+    return m_settings.value(kWindowGeometryId).toRect();
+}
+
+void VSQSettings::setWindowGeometry(const QRect &geometry)
+{
+    m_settings.setValue(kWindowGeometryId, geometry);
+    m_settings.sync();
 }
 
 Seconds VSQSettings::lastSeenActivityInterval() const

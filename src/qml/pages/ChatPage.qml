@@ -41,6 +41,11 @@ Page {
             }
         }
 
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.AllButtons
+        }
+
         RowLayout {
             anchors.fill: parent
             anchors.leftMargin: 10
@@ -76,7 +81,9 @@ Page {
     ListView {
         id: listView
 
+        property bool viewLoaded: false
         property real previousHeight: 0.0
+        property var contextMenu: null
 
         anchors.fill: parent
         anchors.leftMargin: 20
@@ -89,6 +96,8 @@ Page {
 
         spacing: 5
         delegate: ChatMessage {
+            maxWidth: Math.min(root.width - 220, 800)
+
             body: model.message
             time: Qt.formatDateTime(model.timestamp, "hh:mm")
             nickname: model.author
@@ -117,17 +126,33 @@ Page {
                 saveAttachmentAsDialog.attachmentType = attachmentType
                 saveAttachmentAsDialog.open()
             }
-        }
 
-        onCountChanged: {
-            positionViewAtEnd()
+            onDownloadOpenAttachment: function(messageId, isPicture) {
+                (isPicture ? Messenger.openAttachment : Messenger.downloadAttachment)(messageId)
+            }
+
+            onOpenContextMenu: function(messageId, mouse, contextMenu) {
+                listView.contextMenu = contextMenu
+                var coord = mapToItem(listView, mouse.x, mouse.y)
+                contextMenu.x = coord.x - (Platform.isMobile ? contextMenu.width : 0)
+                contextMenu.y = coord.y
+                contextMenu.parent = listView
+                contextMenu.open()
+            }
         }
 
         ScrollBar.vertical: ScrollBar { }
 
+        Component.onCompleted: {
+            viewLoaded = true
+            positionLoadedViewAtEnd()
+        }
+
+        onCountChanged: positionLoadedViewAtEnd()
+
         onHeightChanged: {
             if (height < previousHeight) {
-                positionViewAtEnd()
+                positionLoadedViewAtEnd()
             }
             previousHeight = height
         }
@@ -137,6 +162,18 @@ Page {
             onPressed: {
                 forceActiveFocus()
                 mouse.accepted = false
+            }
+            onWheel: {
+                if (listView.contextMenu) {
+                    listView.contextMenu.visible = false
+                }
+                wheel.accepted = false
+            }
+        }
+
+        function positionLoadedViewAtEnd() {
+            if (viewLoaded) {
+                positionViewAtEnd()
             }
         }
     }
