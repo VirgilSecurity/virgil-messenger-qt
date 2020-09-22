@@ -36,20 +36,19 @@ QT += core network qml quick sql xml concurrent
 
 CONFIG += c++14
 
+#
+#   Set version
+#
+isEmpty(VERSION) {
+    VERSION = $$cat($$PWD/VERSION_MESSENGER).0
+}
+
 ios {
     TARGET = VirgilMessenger
     QMAKE_TARGET_BUNDLE_PREFIX = com.virgil
-    VERSION = 3.4.11.0
 } else {
     TARGET = virgil-messenger
     QMAKE_TARGET_BUNDLE_PREFIX = com.virgilsecurity
-
-    #
-    #   Set version
-    #
-    isEmpty(VERSION) {
-        VERSION = $$cat($$PWD/VERSION_MESSENGER).0
-    }
 }
 
 message("VERSION = $$VERSION")

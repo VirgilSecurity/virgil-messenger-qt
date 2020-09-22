@@ -14,6 +14,7 @@ export QT_INSTALL_DIR_BASE=${PROJECT_DIR}/ext/prebuilt
 
 BUILD_NUMBER="${BUILD_NUMBER:-0}"
 if [ -f "${PROJECT_DIR}/VERSION_MESSENGER" ]; then
+    export ORIG_VERSION="$(cat ${PROJECT_DIR}/VERSION_MESSENGER | tr -d '\n')"
     export VERSION="$(cat ${PROJECT_DIR}/VERSION_MESSENGER | tr -d '\n').${BUILD_NUMBER}"
 fi
 

@@ -101,7 +101,7 @@ function build_project() {
 
 	pushd ${BUILD_DIR}
 
-		${QMAKE_BIN} -config ${BUILD_TYPE} ${PROJECT_DIR} ${QMAKE_PARAMS} VERSION="${VERSION}" VS_CUSTOMER="${PARAM_CUSTOMER}"
+		${QMAKE_BIN} -config ${BUILD_TYPE} ${PROJECT_DIR} ${QMAKE_PARAMS} VERSION="${ORIG_VERSION}" VS_CUSTOMER="${PARAM_CUSTOMER}"
 
 		make clean
 
@@ -134,7 +134,7 @@ function build_project() {
 function create_appdmg_spec() {
 	cat <<EOT >"${APPDMG_SPEC}"
 {
-	"title": "${MACOS_NAME} ${VERSION}",
+	"title": "${MACOS_NAME} ${ORIG_VERSION}",
 	"icon": "${IMAGES_FOLDER}/${DMG_ICON}",
 	"background": "${IMAGES_FOLDER}/${BACKGROUND_FILE}",
 	"icon-size": 90,
@@ -226,8 +226,8 @@ function notarize_dmg() {
 function prepare_update() {
 	new_dir "${UPDATE_DIR}"
 
-	cp "${RELEASE_NOTES}" "${UPDATE_DIR}/${MACOS_NAME}-${VERSION}.html"
-	cp "${BUILD_DIR}/${MACOS_NAME}.dmg" "${UPDATE_DIR}/${MACOS_NAME}-${VERSION}.dmg"
+	cp "${RELEASE_NOTES}" "${UPDATE_DIR}/${MACOS_NAME}-${ORIG_VERSION}.html"
+	cp "${BUILD_DIR}/${MACOS_NAME}.dmg" "${UPDATE_DIR}/${MACOS_NAME}-${ORIG_VERSION}.dmg"
 
 	rm -rf "${HOME}/Library/Caches/Sparkle_generate_appcast"
 
@@ -237,7 +237,7 @@ function prepare_update() {
 #***************************************************************************************
 
 check_env
-"${SCRIPT_FOLDER}/generate-mac-plist.sh" "${SUFeedURL}" "${SUPublicEDKey}" "${VERSION}"
+"${SCRIPT_FOLDER}/generate-mac-plist.sh" "${SUFeedURL}" "${SUPublicEDKey}" "${ORIG_VERSION}"
 build_project
 create_dmg
 notarize_dmg
