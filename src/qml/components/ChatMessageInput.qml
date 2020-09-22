@@ -177,24 +177,33 @@ Control {
     }
 
     SelectAttachmentsDialog {
-        id: selectAttachmentDialog
+        id: selectFileDialog
+        attachmentType: Enums.AttachmentType.File
+        onAccepted: sendAttachment(selectFileDialog)
+    }
 
-        onAccepted: {
-            var pos = selectAttachmentDialog.fileUrls.length - 1
-            sendMessage(selectAttachmentDialog.fileUrls[pos], selectAttachmentDialog.attachmentType)
-        }
+    SelectAttachmentsDialog {
+        id: selectPictureDialog
+        attachmentType: Enums.AttachmentType.Picture
+        onAccepted: sendAttachment(selectPictureDialog)
     }
 
     function sendMessage(attachmentUrl, attachmentType) {
         const text = (messageField.text + messageField.preeditText).trim();
         messageField.clear()
-        if (text || attachmentUrl)
+        if (text || attachmentUrl) {
             messageSending(text, attachmentUrl, attachmentType)
+        }
     }
 
     function selectAttachment(attachmentType) {
-        selectAttachmentDialog.attachmentType = attachmentType
-        selectAttachmentDialog.open()
+        var dialog = (attachmentType == Enums.AttachmentType.Picture) ? selectPictureDialog : selectFileDialog
+        dialog.open()
+    }
+
+    function sendAttachment(fileDialog) {
+        var pos = fileDialog.fileUrls.length - 1
+        sendMessage(fileDialog.fileUrls[pos], fileDialog.attachmentType)
     }
 
     Component.onCompleted: {
