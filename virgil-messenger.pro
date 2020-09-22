@@ -36,20 +36,14 @@ QT += core network qml quick sql xml concurrent
 
 CONFIG += c++14
 
+VERSION = 3.4.12
+
 ios {
     TARGET = VirgilMessenger
     QMAKE_TARGET_BUNDLE_PREFIX = com.virgil
-    VERSION = 3.4.11.0
 } else {
     TARGET = virgil-messenger
     QMAKE_TARGET_BUNDLE_PREFIX = com.virgilsecurity
-
-    #
-    #   Set version
-    #
-    isEmpty(VERSION) {
-        VERSION = $$cat($$PWD/VERSION_MESSENGER).0
-    }
 }
 
 message("VERSION = $$VERSION")
@@ -285,7 +279,6 @@ macx: {
 
 ios: {
     QMAKE_ASSET_CATALOGS += platforms/ios/Assets.xcassets
-    QMAKE_TARGET_BUNDLE_PREFIX = com.virgilsecurity
     QMAKE_IOS_DEPLOYMENT_TARGET = 10.0
     QMAKE_INFO_PLIST = platforms/ios/Info.plist
 
