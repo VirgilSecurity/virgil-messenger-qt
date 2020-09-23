@@ -112,5 +112,6 @@
         <file>qml/resources/icons/File Download Big@2x.png</file>
         <file>qml/components/CircleProgressBar.qml</file>
         <file>qml/components/TextScrollView.qml</file>
+        <file>qml/components/AttachmentPicker.qml</file>
     </qresource>
 </RCC>
