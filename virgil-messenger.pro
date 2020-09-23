@@ -40,7 +40,7 @@ CONFIG += c++14
 #   Set version
 #
 isEmpty(VERSION) {
-    VERSION = $$cat($$PWD/VERSION_MESSENGER).0
+    VERSION = $$cat($$PWD/VERSION_MESSENGER)
 }
 
 ios {
