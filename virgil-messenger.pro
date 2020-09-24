@@ -86,10 +86,6 @@ DEFINES += QT_DEPRECATED_WARNINGS \
         CFG_CLIENT=1 \
         VERSION="$$VERSION"
 
-ios: {
-    DEFINES += VS_IOS=1 VS_MOBILE=1
-}
-
 include(customers/customers.pri)
 
 VS_PLATFORMS_PATH=$$absolute_path(generated/platforms)
@@ -179,7 +175,7 @@ INCLUDEPATH +=  include \
 #
 #   Sparkle framework
 #
-isEqual(OS_NAME, "macos"): {
+macx: {
     OBJECTIVE_SOURCES += src/macos/VSQMacos.mm
     DEFINES += MACOS=1
     SPARKLE_LOCATION=$$PREBUILT_PATH/$${OS_NAME}/sparkle
@@ -226,6 +222,7 @@ isEmpty(WEBDRIVER) {
 #   Libraries
 #
 LIBS += $${QXMPP_BUILD_PATH}/lib/libqxmpp.a
+!mac: LIBS += -lcurl
 
 #
 #   Default rules for deployment
@@ -285,13 +282,8 @@ ios: {
     QMAKE_ASSET_CATALOGS += platforms/ios/Assets.xcassets
     QMAKE_IOS_DEPLOYMENT_TARGET = 10.0
     QMAKE_INFO_PLIST = platforms/ios/Info.plist
-
-    LIBS_DIR = $$PWD/ext/prebuilt/$$OS_NAME/release/installed/usr/local/lib
-    QMAKE_RPATHDIR = @executable_path/Frameworks
-
-    mylib.files = $${LIBS_DIR}/libvs-messenger-internal.dylib
-    mylib.path = Frameworks
-    QMAKE_BUNDLE_DATA += mylib
+    DEFINES += VS_IOS=1 VS_MOBILE=1
+    LIBS += -framework Foundation
 }
 
 
