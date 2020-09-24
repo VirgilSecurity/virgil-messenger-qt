@@ -29,19 +29,15 @@ pushd "${BUILD_DIR}"
     make -j10
 
     cqtdeployer -bin ${APPLICATION_NAME} -qmlDir ${PROJECT_DIR}/src/qml -qmake ${LINUX_QMAKE} clear
-
-    print_message "Copy libvs-messenger-internal.so "
-    cp ${PROJECT_DIR}/ext/prebuilt/linux/release/installed/usr/local/lib/libvs-messenger-internal.so DistributionKit/lib
-
 popd
 
 
 pushd "${BUILD_DIR}/DistributionKit"
  sed -i 's/#!\/bin\/sh/#!\/bin\/bash/g'  virgil-messenger.sh
- if [ "${LINUX_NAME}" != "${APPLICATION_NAME}" ]; then    
+ if [ "${LINUX_NAME}" != "${APPLICATION_NAME}" ]; then
    echo "Rename virgil-messenger.sh => ${LINUX_NAME}.sh"
    mv -f virgil-messenger.sh "${LINUX_NAME}.sh"
- fi    
+ fi
 popd
 
 
