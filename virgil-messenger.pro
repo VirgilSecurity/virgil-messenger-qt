@@ -280,7 +280,7 @@ macx: {
 
 ios: {
     QMAKE_ASSET_CATALOGS += platforms/ios/Assets.xcassets
-    QMAKE_IOS_DEPLOYMENT_TARGET = 10.0
+    QMAKE_IOS_DEPLOYMENT_TARGET = 9.0
     QMAKE_INFO_PLIST = platforms/ios/Info.plist
     DEFINES += VS_IOS=1 VS_MOBILE=1
     LIBS += -framework Foundation
