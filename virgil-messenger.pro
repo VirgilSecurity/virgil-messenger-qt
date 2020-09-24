@@ -222,7 +222,6 @@ isEmpty(WEBDRIVER) {
 #   Libraries
 #
 LIBS += $${QXMPP_BUILD_PATH}/lib/libqxmpp.a
-!mac: LIBS += -lcurl
 
 #
 #   Default rules for deployment

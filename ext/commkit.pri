@@ -85,6 +85,9 @@ LIBS += -led25519
 LIBS += -lrelic_s
 LIBS += -ljson-c
 
+linux: LIBS += -lcurl
+android: LIBS += -lcrypto
+
 #
 #   Include path
 #
