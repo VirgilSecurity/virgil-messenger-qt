@@ -36,7 +36,12 @@ QT += core network qml quick sql xml concurrent
 
 CONFIG += c++14
 
-VERSION = 3.4.12
+#
+#   Set version
+#
+isEmpty(VERSION) {
+    VERSION = $$cat($$PWD/VERSION_MESSENGER)
+}
 
 ios {
     TARGET = VirgilMessenger
@@ -47,7 +52,6 @@ ios {
 }
 
 message("VERSION = $$VERSION")
-
 
 #
 #   Directory with precompiled dependencies
