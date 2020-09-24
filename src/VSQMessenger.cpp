@@ -860,18 +860,18 @@ QString VSQMessenger::createJson(const QString &message, const OptionalAttachmen
         mainObject.insert("type", "text");
         payloadObject.insert("body", message);
     }
-    else if (attachment->type == Attachment::Type::Picture) {
-        mainObject.insert("type", "picture");
-        payloadObject.insert("url", attachment->remoteUrl.toString());
-        payloadObject.insert("displayName", attachment->displayName);
-        payloadObject.insert("thumbnailUrl", attachment->remoteThumbnailUrl.toString());
-        payloadObject.insert("thumbnailWidth", attachment->thumbnailSize.width());
-        payloadObject.insert("thumbnailHeight", attachment->thumbnailSize.height());
-        payloadObject.insert("bytesTotal", attachment->bytesTotal);
-    }
     else {
-        mainObject.insert("type", "file");
+        if (attachment->type == Attachment::Type::Picture) {
+            mainObject.insert("type", "picture");
+            payloadObject.insert("thumbnailUrl", attachment->remoteThumbnailUrl.toString());
+            payloadObject.insert("thumbnailWidth", attachment->thumbnailSize.width());
+            payloadObject.insert("thumbnailHeight", attachment->thumbnailSize.height());
+        }
+        else {
+            mainObject.insert("type", "file");
+        }
         payloadObject.insert("url", attachment->remoteUrl.toString());
+        payloadObject.insert("fileName", attachment->fileName);
         payloadObject.insert("displayName", attachment->displayName);
         payloadObject.insert("bytesTotal", attachment->bytesTotal);
     }
@@ -893,6 +893,7 @@ StMessage VSQMessenger::parseJson(const QJsonDocument &json)
     Attachment attachment;
     attachment.id = VSQUtils::createUuid();
     attachment.remoteUrl = payload["url"].toString();
+    attachment.fileName = payload["fileName"].toString();
     attachment.displayName = payload["displayName"].toString();
     attachment.bytesTotal = payload["bytesTotal"].toInt();
     message.message = attachment.displayName;

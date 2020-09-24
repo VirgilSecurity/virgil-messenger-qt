@@ -62,6 +62,7 @@ VSQSqlConversationModel::_createTable() {
         "attachment_bytes_total INTEGER,"
         "attachment_type INTEGER,"
         "attachment_file_path TEXT,"
+        "attachment_file_name TEXT,"
         "attachment_remote_url TEXT,"
         "attachment_thumbnail_path TEXT,"
         "attachment_thumbnail_width INTEGER,"
@@ -263,6 +264,7 @@ VSQSqlConversationModel::roleNames() const {
     names[AttachmentBytesTotalRole] = "attachmentBytesTotal";
     names[AttachmentTypeRole] = "attachmentType";
     names[AttachmentFilePathRole] = "attachmentFilePath";
+    names[AttachmentFileNameRole] = "attachmentFileName";
     names[AttachmentThumbnailPathRole] = "attachmentThumbnailPath";
     names[AttachmentThumbnailWidthRole] = "attachmentThumbnailWidth";
     names[AttachmentThumbnailHeightRole] = "attachmentThumbnailHeight";
@@ -398,6 +400,7 @@ StMessage VSQSqlConversationModel::getMessage(const QSqlRecord &record) const
         attachment.bytesTotal = record.value("attachment_bytes_total").toInt();
         attachment.type = static_cast<Attachment::Type>(record.value("attachment_type").toInt());
         attachment.filePath = record.value("attachment_file_path").toString();
+        attachment.fileName = record.value("attachment_file_name").toString();
         attachment.remoteUrl = record.value("attachment_remote_url").toString();
         if (attachment.type == Attachment::Type::Picture) {
             attachment.thumbnailPath = record.value("attachment_thumbnail_path").toString();
@@ -463,6 +466,7 @@ void VSQSqlConversationModel::onCreateMessage(const QString recipient, const QSt
         newRecord.setValue("attachment_bytes_total", attachment->bytesTotal);
         newRecord.setValue("attachment_type", static_cast<int>(attachment->type));
         newRecord.setValue("attachment_file_path", attachment->filePath);
+        newRecord.setValue("attachment_file_name", attachment->fileName);
         newRecord.setValue("attachment_remote_url", attachment->remoteUrl.toString());
         if (attachment->type == Attachment::Type::Picture) {
             newRecord.setValue("attachment_thumbnail_path", attachment->thumbnailPath);
@@ -498,6 +502,7 @@ void VSQSqlConversationModel::onReceiveMessage(const QString messageId, const QS
         newRecord.setValue("attachment_bytes_total", attachment->bytesTotal);
         newRecord.setValue("attachment_type", static_cast<int>(attachment->type));
         newRecord.setValue("attachment_file_path", attachment->filePath);
+        newRecord.setValue("attachment_file_name", attachment->fileName);
         newRecord.setValue("attachment_remote_url", attachment->remoteUrl.toString());
         if (attachment->type == Attachment::Type::Picture) {
             newRecord.setValue("attachment_thumbnail_path", attachment->thumbnailPath);
