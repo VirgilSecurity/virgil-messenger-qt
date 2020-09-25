@@ -330,10 +330,6 @@ android: {
     release:LIBS_DIR_SUFFIX = release/installed/usr/local/lib
     debug:LIBS_DIR_SUFFIX = debug/installed/usr/local/lib
     FIREBASE_LIBS_DIR = $$PWD/ext/prebuilt/firebase_cpp_sdk/libs/android/$$ANDROID_TARGET_ARCH/c++
-    ANDROID_EXTRA_LIBS += \
-        $$LIBS_DIR_PREFIX/android.x86/$$LIBS_DIR_SUFFIX/libvs-messenger-internal.so \
-        $$LIBS_DIR_PREFIX/android.armeabi-v7a/$$LIBS_DIR_SUFFIX/libvs-messenger-internal.so \
-        $$LIBS_DIR_PREFIX/android.arm64-v8a/$$LIBS_DIR_SUFFIX/libvs-messenger-internal.so
 
 #
 #   ~ Messenger Internal
@@ -389,3 +385,5 @@ android: {
 
 OTHER_FILES += \
     .gitignore
+
+ANDROID_ABIS = armeabi-v7a
