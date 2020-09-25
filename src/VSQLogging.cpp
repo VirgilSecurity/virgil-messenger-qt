@@ -48,7 +48,7 @@ VSQLogging::VSQLogging() : QObject()
     }
 
     vs_logger_init(VirgilIoTKit::VS_LOGLEV_DEBUG);
-    qInstallMessageHandler(&VSQLogging::logger_qt_redir);
+    qInstallMessageHandler(&VSQLogging::messageHandler);
 }
 
 VSQLogging::~VSQLogging()
@@ -56,12 +56,26 @@ VSQLogging::~VSQLogging()
     m_instance = nullptr;
 }
 
-void VSQLogging::logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+void VSQLogging::messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message)
 {
-#ifdef VS_DEVMODE
-    emit VSQLogging::m_instance->newMessage(QString("[%1]: %2").arg(context.category, msg));
+    consoleMessageHandler(type, context, message);
+#ifdef QT_NO_DEBUG // release
+    fileMessageHandler(type, context, message);
 #endif
-    QByteArray localMsg = msg.toLocal8Bit();
+#ifdef VS_DEVMODE
+    signalMessageHandler(type, context, msg);
+#endif
+}
+
+void VSQLogging::signalMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message)
+{
+    Q_UNUSED(type)
+    emit VSQLogging::m_instance->newMessage(QString("[%1] %2").arg(context.category, message));
+}
+
+void VSQLogging::fileMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message)
+{
+    const QByteArray localMsg = message.toLocal8Bit();
     switch (type) {
     case QtDebugMsg:
         vs_logger_message(VS_LOG_MAKE_LEVEL(VS_LOGLEV_DEBUG), context.file, context.line,localMsg.constData());
@@ -79,4 +93,10 @@ void VSQLogging::logger_qt_redir(QtMsgType type, const QMessageLogContext &conte
         vs_logger_message(VS_LOG_MAKE_LEVEL(VS_LOGLEV_FATAL), context.file, context.line,localMsg.constData());
         abort();
     }
+}
+
+void VSQLogging::consoleMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message)
+{
+    Q_UNUSED(type)
+    fprintf(stderr, "[%s] %s\n", context.category, qPrintable(message));
 }

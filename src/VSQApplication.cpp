@@ -64,6 +64,7 @@ VSQApplication::VSQApplication()
     , m_engine()
     , m_messenger(m_networkAccessManager, &m_settings)
 {
+    m_settings.print();
     m_networkAccessManager->setAutoDeleteReplies(true);
 #if (MACOS)
     VSQMacos::instance().startUpdatesTimer();

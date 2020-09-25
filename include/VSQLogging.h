@@ -49,7 +49,10 @@ signals:
     void newMessage(const QString &message);
 
 private:
-    static void logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+    static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
+    static void signalMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
+    static void fileMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
+    static void consoleMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
 
     static VSQLogging *m_instance;
 };

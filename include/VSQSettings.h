@@ -56,6 +56,8 @@ public:
     explicit VSQSettings(QObject *parent);
     ~VSQSettings();
 
+    void print();
+
     // Attachments
 
     DataSize attachmentMaxFileSize() const;

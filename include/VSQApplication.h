@@ -79,8 +79,8 @@ private:
     static const QString kVersion;
     VSQSettings m_settings;
     QNetworkAccessManager *m_networkAccessManager;
-    VSQCrashReporter m_crashReporter;
     VSQLogging m_logging;
+    VSQCrashReporter m_crashReporter;
     QQmlApplicationEngine m_engine;
     VSQMessenger m_messenger;
 };

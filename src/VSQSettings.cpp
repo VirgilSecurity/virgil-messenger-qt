@@ -53,7 +53,17 @@ VSQSettings::VSQSettings(QObject *parent)
     m_attachmentCacheDir.setPath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/attachments"));
     m_thumbnaisDir.setPath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/thumbnails"));
     m_downloadsDir.setPath(QStandardPaths::writableLocation(QStandardPaths::DownloadLocation) + QLatin1String("/Virgil"));
+}
 
+VSQSettings::~VSQSettings()
+{
+#ifdef VS_DEVMODE
+    qCDebug(lcDev) << "~Settings";
+#endif
+}
+
+void VSQSettings::print()
+{
     qCDebug(lcSettings) << "Settings";
     qCDebug(lcSettings) << "Attachment cache dir:" << attachmentCacheDir().absolutePath();
     qCDebug(lcSettings) << "Attachment max file size:" << attachmentMaxFileSize();
@@ -63,13 +73,6 @@ VSQSettings::VSQSettings(QObject *parent)
     if (devMode()) {
         qCDebug(lcSettings) << "Dev mode:" << true;
     }
-}
-
-VSQSettings::~VSQSettings()
-{
-#ifdef VS_DEVMODE
-    qCDebug(lcDev) << "~Settings";
-#endif
 }
 
 DataSize VSQSettings::attachmentMaxFileSize() const
