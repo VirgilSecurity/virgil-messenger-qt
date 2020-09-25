@@ -49,7 +49,7 @@
 
 #include "VSQSqlConversationModel.h"
 #include "VSQSqlChatModel.h"
-#include "VSQLogging.h"
+#include "VSQCrashReporter.h"
 #include <VSQNetworkAnalyzer.h>
 #include <VSQAttachmentBuilder.h>
 #include <VSQCryptoTransferManager.h>
@@ -154,7 +154,7 @@ public slots:
     Q_INVOKABLE void
     setStatus(VSQMessenger::EnStatus status);
 
-    void setLogging(VSQLogging *loggingPtr);
+    void setCrashReporter(VSQCrashReporter *crashReporter);
 
     Q_INVOKABLE void setCurrentRecipient(const QString &recipient);
 
@@ -228,7 +228,7 @@ private:
 
     VSQSqlConversationModel *m_sqlConversations;
     VSQSqlChatModel *m_sqlChatModel;
-    VSQLogging *m_logging;
+    VSQCrashReporter *m_crashReporter;
     VSQNetworkAnalyzer m_networkAnalyzer;
     VSQSettings *m_settings;
     VSQCryptoTransferManager *m_transferManager;

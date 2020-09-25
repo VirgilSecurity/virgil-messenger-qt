@@ -100,6 +100,7 @@ HEADERS += \
         include/VSQClipboardProxy.h \
         include/VSQCommon.h \
         include/VSQContactManager.h \
+        include/VSQCrashReporter.h \
         include/VSQCryptoTransferManager.h \
         include/VSQDiscoveryManager.h \
         include/VSQDownload.h \
@@ -133,6 +134,7 @@ SOURCES += \
         src/VSQClipboardProxy.cpp \
         src/VSQCommon.cpp \
         src/VSQContactManager.cpp \
+        src/VSQCrashReporter.cpp \
         src/VSQCryptoTransferManager.cpp \
         src/VSQDiscoveryManager.cpp \
         src/VSQDownload.cpp \

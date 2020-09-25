@@ -59,9 +59,10 @@ const QString VSQApplication::kVersion = "unknown";
 VSQApplication::VSQApplication()
     : m_settings(this)
     , m_networkAccessManager(new QNetworkAccessManager(this))
+    , m_logging()
+    , m_crashReporter(m_networkAccessManager)
     , m_engine()
     , m_messenger(m_networkAccessManager, &m_settings)
-    , m_logging(m_networkAccessManager)
 {
     m_networkAccessManager->setAutoDeleteReplies(true);
 #if (MACOS)
@@ -76,14 +77,8 @@ VSQApplication::run(const QString &basePath) {
 
     VSQUiHelper uiHelper;
 
-    vs_logger_init(VirgilIoTKit::VS_LOGLEV_DEBUG);
-
-    // Initialization loging
-#ifdef VS_DEVMODE
-    qInstallMessageHandler(&VSQLogging::logger_qt_redir); // Redirect standard logging
-#endif
-    m_messenger.setLogging(&m_logging);
-    m_logging.setkVersion(kVersion);
+    m_messenger.setCrashReporter(&m_crashReporter);
+    m_crashReporter.setkVersion(kVersion);
 
     QUrl url;
     if (basePath.isEmpty()) {
@@ -100,6 +95,7 @@ VSQApplication::run(const QString &basePath) {
     context->setContextProperty("clipboard", new VSQClipboardProxy(QGuiApplication::clipboard()));
     context->setContextProperty("Messenger", &m_messenger);
     context->setContextProperty("Logging", &m_logging);
+    context->setContextProperty("crashReporter", &m_crashReporter);
     context->setContextProperty("settings", &m_settings);
     context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
     context->setContextProperty("ChatModel", &m_messenger.getChatModel());
@@ -147,7 +143,7 @@ VSQApplication::currentVersion() const {
 /******************************************************************************/
 void
 VSQApplication::sendReport() {
-    m_logging.sendLogFiles();
+    m_crashReporter.sendLogFiles();
 }
 
 void VSQApplication::hideSplashScreen()
@@ -179,6 +175,5 @@ VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
     }
 #endif // VS_ANDROID
 }
-
 
 /******************************************************************************/

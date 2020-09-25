@@ -32,21 +32,13 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <qlogging.h>
 #include <VSQLogging.h>
-#include <VSQMessenger.h>
+
 #include <virgil/iot/logger/logger.h>
-
-//using namespace VirgilIoTKit;
-
-// Private variables
-const QString VSQLogging::endpointSendReport = "/send-logs";
 
 VSQLogging *VSQLogging::m_instance = nullptr;
 
-// Public methods
-//***********************************************************************************************************
-VSQLogging::VSQLogging(QNetworkAccessManager *networkAccessManager) : QObject(nullptr), manager(networkAccessManager)
+VSQLogging::VSQLogging() : QObject()
 {
     if (m_instance) {
         qFatal("Instance of logging already exists!");
@@ -54,128 +46,16 @@ VSQLogging::VSQLogging(QNetworkAccessManager *networkAccessManager) : QObject(nu
     else {
         m_instance = this;
     }
+
+    vs_logger_init(VirgilIoTKit::VS_LOGLEV_DEBUG);
+    qInstallMessageHandler(&VSQLogging::logger_qt_redir);
 }
 
-VSQLogging::~VSQLogging() {
-    resetRunFlag();
+VSQLogging::~VSQLogging()
+{
     m_instance = nullptr;
 }
-//***********************************************************************************************************
-void VSQLogging::setVirgilUrl(QString VirgilUrl) {
-    currentVirgilUrl = VirgilUrl;
-    qDebug("Send report URL set to [%s]", qPrintable(currentVirgilUrl));
-}
-//***********************************************************************************************************
-void VSQLogging::setkVersion(QString AppVersion){
-    kVersion = AppVersion;
-}
 
-//***********************************************************************************************************
-void VSQLogging::setkOrganization(QString strkOrganization) {
-    kOrganization = strkOrganization;
-}
-
-//***********************************************************************************************************
-void VSQLogging::setkApp(QString strkApp) {
-    kApp = strkApp;
-}
-
-//***********************************************************************************************************
-void VSQLogging::checkAppCrash() {
-    qDebug("Checking previus run flag...");
-    if(checkRunFlag()) {
-        qCritical("Previus application run is crashed ! Sending log files...");
-        emit crashReportRequested();
-    } else {
-        qDebug("Set run flag to true");
-        setRunFlag(true); // Set run flag
-    }
-}
-
-//***********************************************************************************************************
-void VSQLogging::resetRunFlag() {
-    qDebug("Reset run flag");
-    setRunFlag(false); // Reset run flag
-}
-
-// Private methods
-//***********************************************************************************************************
-bool VSQLogging::checkRunFlag() {
-    QSettings settings(kOrganization, kApp);
-    return settings.value("RunFlag", false).toBool();
-}
-
-//***********************************************************************************************************
-void VSQLogging::setRunFlag(bool runState) {
-    QSettings settings(kOrganization, kApp);
-    settings.setValue("RunFlag", runState);
-}
-
-//***********************************************************************************************************
-bool VSQLogging::sendLogFiles() {
-    QByteArray fileData;
-    const QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    if (!writeDir.exists()) {
-        qFatal("Directory [%s] not exist.", qPrintable(writeDir.absolutePath()));
-        return false;
-    }
-
-    QDirIterator fileIterator(writeDir.absolutePath(), QStringList() << "virgil-messenger.log*");
-    while (fileIterator.hasNext()) {
-        QFile readFile(fileIterator.next());
-        if ( readFile.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
-            qDebug() << "Read file:" << readFile.fileName() << endl;
-            fileData.append(readFile.readAll());
-        }
-        else
-            qDebug() << "Can't open " << readFile.fileName() << readFile.errorString() << endl;
-    }
-
-    sendFileToBackendRequest(fileData);
-    return true;
-}
-//***********************************************************************************************************
-bool VSQLogging::sendFileToBackendRequest(QByteArray fileData) {
-    QNetworkRequest req;
-    char *buffBearer = (char *) malloc(1024);
-    size_t sizeBearer = 1024;
-
-    vs_messenger_virgil_get_auth_token(buffBearer ,sizeBearer);
-    qDebug("Backend token [%s]", buffBearer);
-
-    QString strEndpoint = currentVirgilUrl + endpointSendReport;
-    req.setUrl(QUrl(strEndpoint));
-    qDebug("Send report to endpoint : [%s]",qPrintable(strEndpoint));
-    req.setHeader(QNetworkRequest::ContentTypeHeader,  QString("application/json"));
-    req.setRawHeader(QString("Authorization").toUtf8(), buffBearer);
-    req.setRawHeader(QString("Version").toUtf8(), qPrintable(kVersion));
-    req.setRawHeader(QString("Platform").toUtf8(), qPrintable(QSysInfo::kernelType()));
-    QNetworkReply* reply = manager->post(req, fileData);
-    connect(reply, SIGNAL(finished()), this, SLOT(endpointReply()));
-
-    return true;
-}
-// Slots
-//***********************************************************************************************************
-void VSQLogging::endpointReply(){
-    QNetworkReply *reply= qobject_cast<QNetworkReply *>(sender());
-    if (reply->error() == QNetworkReply::NoError)
-      {
-        qDebug("Send report OK");
-        emit reportSent("Report send OK");
-      }
-      else {
-        qDebug("Error sending report [%s]", qPrintable(reply->errorString()));
-        emit reportSentErr("Report send error: [" + reply->errorString() + "]" );
-      }
-    reply->deleteLater();
-    qDebug("Sending finished");
-}
-// End class VSQLogging
-//***********************************************************************************************************
-
-// Functions
-//***********************************************************************************************************
 void VSQLogging::logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
 #ifdef VS_DEVMODE
@@ -185,24 +65,18 @@ void VSQLogging::logger_qt_redir(QtMsgType type, const QMessageLogContext &conte
     switch (type) {
     case QtDebugMsg:
         vs_logger_message(VS_LOG_MAKE_LEVEL(VS_LOGLEV_DEBUG), context.file, context.line,localMsg.constData());
-        //VS_LOG_DEBUG(localMsg.constData());
         break;
     case QtInfoMsg:
         vs_logger_message(VS_LOG_MAKE_LEVEL(VS_LOGLEV_INFO), context.file, context.line,localMsg.constData());
-        //VS_LOG_INFO(localMsg.constData());
         break;
     case QtWarningMsg:
         vs_logger_message(VS_LOG_MAKE_LEVEL(VS_LOGLEV_WARNING), context.file, context.line,localMsg.constData());
-        //VS_LOG_WARNING(localMsg.constData());
         break;
     case QtCriticalMsg:
         vs_logger_message(VS_LOG_MAKE_LEVEL(VS_LOGLEV_CRITICAL), context.file, context.line,localMsg.constData());
-        //VS_LOG_CRITICAL(localMsg.constData());
         break;
     case QtFatalMsg:
         vs_logger_message(VS_LOG_MAKE_LEVEL(VS_LOGLEV_FATAL), context.file, context.line,localMsg.constData());
-        //VS_LOG_FATAL(localMsg.constData());
         abort();
     }
 }
-

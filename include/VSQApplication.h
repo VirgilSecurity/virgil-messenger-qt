@@ -38,6 +38,8 @@
 #include <QtCore>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+
+#include <VSQCrashReporter.h>
 #include <VSQMessenger.h>
 #include <VSQLogging.h>
 #include <VSQSettings.h>
@@ -77,9 +79,10 @@ private:
     static const QString kVersion;
     VSQSettings m_settings;
     QNetworkAccessManager *m_networkAccessManager;
+    VSQCrashReporter m_crashReporter;
+    VSQLogging m_logging;
     QQmlApplicationEngine m_engine;
     VSQMessenger m_messenger;
-    VSQLogging m_logging;
 };
 
 #endif // VSQApplication

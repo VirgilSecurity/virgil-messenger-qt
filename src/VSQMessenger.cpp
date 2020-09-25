@@ -387,9 +387,9 @@ VSQMessenger::_prepareLogin(const QString &user) {
     }
     free(cCABundle);
 
-    m_logging->setVirgilUrl(_virgilURL());
-    m_logging->setkApp(Customer::ApplicationName);
-    m_logging->setkOrganization(Customer::OrganizationName);
+    m_crashReporter->setVirgilUrl(_virgilURL());
+    m_crashReporter->setkApp(Customer::ApplicationName);
+    m_crashReporter->setkOrganization(Customer::OrganizationName);
 
     // Set current user
     m_user = userId;
@@ -477,7 +477,7 @@ VSQMessenger::signIn(QString user) {
         }
 
         // Check previus run is crashed
-        m_logging->checkAppCrash();
+        m_crashReporter->checkAppCrash();
 
         // Connect over XMPP
         return _connect(m_user, m_deviceId, m_userId, true) ? MRES_OK : MRES_ERR_SIGNIN;
@@ -776,8 +776,9 @@ VSQMessenger::getChatModel() {
     return *m_sqlChatModel;
 }
 
-void VSQMessenger::setLogging(VSQLogging *loggingPtr) {
-    m_logging = loggingPtr;
+void VSQMessenger::setCrashReporter(VSQCrashReporter *crashReporter)
+{
+    m_crashReporter = crashReporter;
 }
 
 
