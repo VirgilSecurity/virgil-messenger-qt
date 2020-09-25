@@ -61,41 +61,32 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
     OS_NAME = ios
 }
 
-PREBUILT_SYSROOT = $$PREBUILT_PATH/$${OS_NAME}/release/installed/usr/local
+release:PREBUILT_SYSROOT = $$PREBUILT_PATH/$${OS_NAME}/release/installed/usr/local
+debug:PREBUILT_SYSROOT = $$PREBUILT_PATH/$${OS_NAME}/debug/installed/usr/local
 message("PREBUILT_SYSROOT : $${PREBUILT_SYSROOT}")
 
-
-#
-#   Copy shared libraries
-#
-unix:mac: {
-    isEqual(OS_NAME, "ios")|isEqual(OS_NAME, "ios-sim"): {
-        message("No need to copy vs-messenger-internal")
-    } else {
-        DST_DLL = $${OUT_PWD}/$${TARGET}.app/Contents/Frameworks
-        MESSENGER_INTERNAL_DLL = $${PREBUILT_SYSROOT}/lib/libvs-messenger-internal.$${DLL_EXT}
-        QMAKE_POST_LINK += $$quote(mkdir -p $${DST_DLL}/$$escape_expand(\n\t))
-        QMAKE_POST_LINK += $$quote(cp $${MESSENGER_INTERNAL_DLL} $${DST_DLL}/$$escape_expand(\n\t))
-    }
-}
 
 #
 #   Libraries
 #
 LIBS += -L$${PREBUILT_SYSROOT}/lib
 LIBS += -lvs-module-logger
-LIBS += -lvs-module-messenger
-#LIBS += -lvscryptoc
-!mac: {
-  LIBS += -lcurl
-}
+LIBS += -lvs-messenger-internal
+LIBS += -lvsc_keyknox_sdk
+LIBS += -lvsc_pythia_sdk
+LIBS += -lvsc_core_sdk
+LIBS += -lvsc_foundation
+LIBS += -lvsc_foundation_pb
+LIBS += -lvsc_pythia
+LIBS += -lvsc_common
+LIBS += -lprotobuf-nanopb
+LIBS += -lmbedcrypto
+LIBS += -led25519
+LIBS += -lrelic_s
+LIBS += -ljson-c
 
-win32: {
-	LIBS += -lws2_32
-        LIBS += $${PREBUILT_SYSROOT}/lib/libvs-messenger-internal.dll.a
-} else: {
-        LIBS += -lvs-messenger-internal
-}
+linux: LIBS += -lcurl
+android: LIBS += -lcrypto
 
 #
 #   Include path

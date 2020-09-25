@@ -27,32 +27,25 @@ pushd ${BUILD_DIR}
 
     print_message "Deploying application"
     echo ${LINUX_QMAKE}
-    echo 
+    echo
     echo
     cqtdeployer -bin ${BUILD_DIR}/release/${APPLICATION_NAME}.exe -qmlDir ${PROJECT_DIR}/src/qml  -qmake ${LINUX_QMAKE} clear
 popd
 
 pushd ${PROJECT_DIR}/ext/prebuilt/windows/release/installed/usr/local/lib
-
-    echo "=== Copy libvs-messenger-internal.dll "
-    cp libvs-messenger-internal.dll           ${BUILD_DIR}/DistributionKit/lib
-
-    echo "=== Copy libvs-messenger-crypto.dll "
-    cp libvs-messenger-crypto.dll             ${BUILD_DIR}/DistributionKit/lib
-
     echo "=== Copy openssl libraries"
 
     flist="capi.dll padlock.dll libcrypto-1_1-x64.dll libssl-1_1-x64.dll libssl-10.dll"
     for ff in $flist; do
         cp ${ff} ${BUILD_DIR}/DistributionKit/lib
-    done 
+    done
 
     echo "=== Copy depends libraries"
 
     flist="libcurl-4.dll libssh2-1.dll libidn2-0.dll zlib1.dll libgcc_s_seh-1.dll libcrypto-10.dll"
     for ff in $flist; do
         cp ${ff} ${BUILD_DIR}/DistributionKit/lib
-    done 
+    done
 
 popd
 
