@@ -294,15 +294,14 @@ defineReplace(AndroidVersionCode) {
         segments = $$split(1, ".")
         vCode = "$$first(vCode)$$format_number($$member(segments,0,0), width=3 zeropad)"
         vCode = "$$first(vCode)$$format_number($$member(segments,1,1), width=3 zeropad)"
-        vCode = "$$first(vCode)$$format_number($$member(segments,2,2), width=3 zeropad)"
-        vCode = "$$first(vCode)$$format_number($$member(segments,3,3), width=5 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,2,2), width=4 zeropad)"
         return($$first(vCode))
 }
 
 android: {
     QT += androidextras
     DEFINES += VS_ANDROID=1 VS_PUSHNOTIFICATIONS=1 VS_MOBILE=1
-    ANDROID_VERSION_CODE = $$AndroidVersionCode($${VERSION}.0)
+    ANDROID_VERSION_CODE = $$AndroidVersionCode($${VERSION})
     ANDROID_VERSION_NAME = $$VERSION
 
     include($$(ANDROID_SDK_ROOT)/android_openssl/openssl.pri)
