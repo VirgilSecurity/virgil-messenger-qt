@@ -40,12 +40,12 @@ Control {
 
                 Action {
                     text: qsTr("Send picture")
-                    onTriggered: selectAttachment(Enums.AttachmentType.Picture)
+                    onTriggered: picker.open(Enums.AttachmentType.Picture)
                 }
 
                 Action {
                     text: qsTr("Send file")
-                    onTriggered: selectAttachment(Enums.AttachmentType.File)
+                    onTriggered: picker.open(Enums.AttachmentType.File)
                 }
             }
         }
@@ -59,9 +59,8 @@ Control {
             radius: 20
             color: "#37474F"
 
-            ScrollView {
+            TextScrollView {
                 id: scrollView
-                clip: true
                 height: Math.min(100, messageField.implicitHeight)
                 anchors {
                     left: parent.left
@@ -177,25 +176,17 @@ Control {
         }
     }
 
-    SelectAttachmentsDialog {
-        id: selectAttachmentDialog
-
-        onAccepted: {
-            var pos = selectAttachmentDialog.fileUrls.length - 1
-            sendMessage(selectAttachmentDialog.fileUrls[pos], selectAttachmentDialog.attachmentType)
-        }
+    AttachmentPicker {
+        id: picker
+        onPicked: sendMessage(fileUrls[fileUrls.length - 1], attachmentType)
     }
 
     function sendMessage(attachmentUrl, attachmentType) {
         const text = (messageField.text + messageField.preeditText).trim();
         messageField.clear()
-        if (text || attachmentUrl)
+        if (text || attachmentUrl) {
             messageSending(text, attachmentUrl, attachmentType)
-    }
-
-    function selectAttachment(attachmentType) {
-        selectAttachmentDialog.attachmentType = attachmentType
-        selectAttachmentDialog.open()
+        }
     }
 
     Component.onCompleted: {

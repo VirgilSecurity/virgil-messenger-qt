@@ -109,6 +109,9 @@
         <file>qml/resources/icons/Mic Selected.png</file>
         <file>qml/resources/icons/Mic Selected@2x.png</file>
         <file>qml/resources/icons/File Download Big.png</file>
+        <file>qml/resources/icons/File Download Big@2x.png</file>
         <file>qml/components/CircleProgressBar.qml</file>
+        <file>qml/components/TextScrollView.qml</file>
+        <file>qml/components/AttachmentPicker.qml</file>
     </qresource>
 </RCC>

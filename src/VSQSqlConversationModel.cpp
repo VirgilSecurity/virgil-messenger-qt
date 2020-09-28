@@ -186,6 +186,16 @@ VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
         return timestamp.toDate();
     }
 
+    if (role == StatusRole) {
+        const int statusColumn = StatusRole - Qt::UserRole;
+        const QVariant status = currRecord.value(statusColumn);
+        const QSqlRecord nextRecord = record(index.row() + 1);
+        if (currRecord.value(authorColumn) == nextRecord.value(authorColumn) && status == nextRecord.value(statusColumn)) {
+            return QString();
+        }
+        return status;
+    }
+
     const auto attachmentId = currRecord.value(AttachmentIdRole - Qt::UserRole).toString();
 
     if (role == AttachmentDisplaySizeRole) {
@@ -351,7 +361,7 @@ VSQSqlConversationModel::getLastMessage(const QString &user) const {
 QList<StMessage> VSQSqlConversationModel::getMessages(const QString &user, const StMessage::Status status) {
     QSqlQueryModel model;
     QString query;
-    query = QString("SELECT * FROM %1 WHERE status = %2 AND author = \"%3\"")
+    query = QString("SELECT * FROM %1 WHERE status = %2 AND author = '%3' ORDER BY timestamp")
             .arg(_tableName()).arg(static_cast<int>(status)).arg(user);
     model.setQuery(query);
     int c = model.rowCount();

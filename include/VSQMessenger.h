@@ -244,8 +244,6 @@ private:
     VSQEnvType m_envType;
     static const VSQEnvType _defaultEnv = PROD;
     QXmppConfiguration m_conf;
-    static const QString kOrganization;
-    static const QString kApp;
     static const QString kUsers;
     static const QString kProdEnvPrefix;
     static const QString kStgEnvPrefix;

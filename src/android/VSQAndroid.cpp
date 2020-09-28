@@ -130,4 +130,32 @@ int VSQAndroid::runLoggingThread() { // run this function to redirect your outpu
 
 /******************************************************************************/
 
+QString VSQAndroid::getDisplayName(const QUrl &url)
+{
+    const QString urlString = url.toString();
+    const auto javaUrl = QAndroidJniObject::fromString(urlString);
+    const auto javaDisplayName = QAndroidJniObject::callStaticObjectMethod(
+        "org/virgil/utils/Utils",
+        "getDisplayName",
+        "(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;",
+        QtAndroid::androidContext().object(),
+        javaUrl.object<jstring>()
+    );
+    return javaDisplayName.toString();
+}
+
+DataSize VSQAndroid::getFileSize(const QUrl &url)
+{
+    const QString urlString = url.toString();
+    const auto javaUrl = QAndroidJniObject::fromString(urlString);
+    const auto javaFileSize = QAndroidJniObject::callStaticMethod<jint>(
+        "org/virgil/utils/Utils",
+        "getFileSize",
+        "(Landroid/content/Context;Ljava/lang/String;)I",
+        QtAndroid::androidContext().object(),
+        javaUrl.object<jstring>()
+    );
+    return static_cast<DataSize>(javaFileSize);
+}
+
 #endif // VS_ANDROID

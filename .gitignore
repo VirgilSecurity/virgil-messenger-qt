@@ -1,4 +1,5 @@
 #####
+transitive-args.cmake
 build*/
 install*/
 .depends_cache/

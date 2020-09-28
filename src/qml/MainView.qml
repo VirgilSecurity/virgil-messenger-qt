@@ -60,7 +60,7 @@ Control {
         }
     }
 
-    ScrollView {
+    TextScrollView {
         id: logControl
         anchors {
             topMargin: 0.75 * mainView.height
@@ -74,7 +74,7 @@ Control {
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             readOnly: true
             font.pointSize: Platform.isMobile ? 12 : 9
-            selectByMouse: true
+            selectByMouse: Platform.isDesktop
         }
     }
 

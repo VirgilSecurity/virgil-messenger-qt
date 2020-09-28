@@ -122,6 +122,7 @@ struct Attachment
     QString id;
     Type type = Type::File;
     QString filePath; // raw
+    QString fileName;
     QString displayName;
     QUrl remoteUrl; // encrypted
     // Thumbnail

@@ -51,6 +51,8 @@ namespace VSQUtils
 
     QString formattedLastSeenNoActivity();
 
+    QString elidedText(const QString &text, const int maxLength);
+
     // File functions
 
     QString findUniqueFileName(const QString &fileName);

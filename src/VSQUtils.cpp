@@ -187,3 +187,14 @@ QString VSQUtils::formattedLastSeenNoActivity()
 {
     return QObject::tr("Offline");
 }
+
+QString VSQUtils::elidedText(const QString &text, const int maxLength)
+{
+    const int max = qMax(5, maxLength);
+    if (text.size() <= max) {
+        return text;
+    }
+    const int half = (max - 1) / 2;
+    const QChar ellipsisChar(0x2026);
+    return text.left(half) + ellipsisChar + text.right(max - 1 - half);
+}

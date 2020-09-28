@@ -73,8 +73,6 @@ Q_DECLARE_METATYPE(QFuture<VSQMessenger::EnResult>)
 #define USE_XMPP_LOGS 0
 #endif
 
-const QString VSQMessenger::kOrganization = Customer::OrganizationName;
-const QString VSQMessenger::kApp = Customer::ApplicationName;
 const QString VSQMessenger::kUsers = "Users";
 const QString VSQMessenger::kProdEnvPrefix = "prod";
 const QString VSQMessenger::kStgEnvPrefix = "stg";
@@ -390,8 +388,8 @@ VSQMessenger::_prepareLogin(const QString &user) {
     free(cCABundle);
 
     m_logging->setVirgilUrl(_virgilURL());
-    m_logging->setkApp(kApp);
-    m_logging->setkOrganization(kOrganization);
+    m_logging->setkApp(Customer::ApplicationName);
+    m_logging->setkOrganization(Customer::OrganizationName);
 
     // Set current user
     m_user = userId;
@@ -690,7 +688,7 @@ VSQMessenger::_saveCredentials(const QString &user, const QString &deviceId, con
 
     qInfo() << "Saving user credentails: " << json;
 
-    QSettings settings(kOrganization, kApp);
+    QSettings settings(Customer::OrganizationName, Customer::ApplicationName);
     settings.setValue(user, json);
 
     return true;
@@ -699,7 +697,7 @@ VSQMessenger::_saveCredentials(const QString &user, const QString &deviceId, con
 /******************************************************************************/
 bool
 VSQMessenger::_loadCredentials(const QString &user, QString &deviceId, vs_messenger_virgil_user_creds_t &creds) {
-    QSettings settings(kOrganization, kApp);
+    QSettings settings(Customer::OrganizationName, Customer::ApplicationName);
 
     auto settingsJson = settings.value(user, QString("")).toString();
     QJsonDocument json(QJsonDocument::fromJson(settingsJson.toUtf8()));
@@ -718,14 +716,14 @@ VSQMessenger::_loadCredentials(const QString &user, QString &deviceId, vs_messen
 /******************************************************************************/
 void
 VSQMessenger::_saveUsersList(const QStringList &users) {
-    QSettings settings(kOrganization, kApp);
+    QSettings settings(Customer::OrganizationName, Customer::ApplicationName);
     settings.setValue(kUsers, users);
 }
 
 /******************************************************************************/
 QStringList
 VSQMessenger::usersList() {
-    QSettings settings(kOrganization, kApp);
+    QSettings settings(Customer::OrganizationName, Customer::ApplicationName);
     qDebug() << settings.fileName();
     return settings.value(kUsers, QStringList()).toStringList();
 }
@@ -1227,7 +1225,7 @@ void VSQMessenger::downloadAndProcess(StMessage message, const Function &func)
         // Update attachment filePath
         const auto downloads = m_settings->downloadsDir();
         if (filePath.isEmpty() || QFileInfo(filePath).dir() != downloads) {
-            filePath = VSQUtils::findUniqueFileName(downloads.filePath(attachment.displayName));
+            filePath = VSQUtils::findUniqueFileName(downloads.filePath(attachment.fileName));
         }
         const TransferId id(msg.messageId, TransferId::Type::File);
         auto download = m_transferManager->startCryptoDownload(id, attachment.remoteUrl, filePath, msg.sender);
