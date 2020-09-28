@@ -53,40 +53,37 @@ bool vs_logger_rotate(QString FileName, int LogNums) {
     QFile HLogFile;
     HLogFile.remove(NewFilePath);
     for(int TmpLogNum = LogNums; TmpLogNum >= 0; TmpLogNum--) {
-        if(TmpLogNum > 0 ) HLogFile.setFileName(FileName + "." + QString::number(TmpLogNum));
-                else HLogFile.setFileName(FileName);
+        if(TmpLogNum > 0 ) {
+            HLogFile.setFileName(FileName + "." + QString::number(TmpLogNum));
+        }
+        else {
+            HLogFile.setFileName(FileName);
+        }
         NewFilePath = FileName + "." + QString::number(TmpLogNum + 1);
         if(HLogFile.exists()) {
-            qDebug("Rename  %s -> %s", qPrintable(HLogFile.fileName()),qPrintable(NewFilePath));
             if(!HLogFile.rename(NewFilePath)) {
-                qWarning("ERROR rename");
                 return false;
             }
         }
-
     }
     return true;
 }
 
 bool vs_logger_check_file() {
 
-    if(VsLogErr)
+    if(VsLogErr) {
         return false;
+    }
 
     if(!VsLogFile.isOpen()) {
         const QDir AppDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-        qDebug("Create app data dir [%s]", qPrintable(AppDir.absolutePath()));
         if (!AppDir.mkpath(".")) {
-            qFatal("Failed to create writable directory at %s", qPrintable(AppDir.absolutePath()));
             VsLogErr=true;
             return false;
         }
         VsLogFile.setFileName(AppDir.absolutePath() + "/" + QCoreApplication::applicationName() + ".log");
-        qDebug("Rotate logs");
         vs_logger_rotate(VsLogFile.fileName(),LOG_ROTATE_LEVEL);
-        qDebug("Create log file [%s]", qPrintable(VsLogFile.fileName()));
-        if (!VsLogFile.open(QIODevice::WriteOnly | QIODevice::Text))
-            qFatal("Error create log file [%s]", qPrintable(VsLogFile.fileName()));
+        VsLogFile.open(QIODevice::WriteOnly | QIODevice::Text);
         VsLogErr=true;
         return false;
     }
@@ -98,10 +95,10 @@ extern "C" bool
 vs_logger_output_hal(const char *buffer) {
     (void)buffer;
     if(!vs_logger_check_file()) {
-      VsLogFile.write(buffer,strlen(buffer));
-      VsLogFile.flush();
+        VsLogFile.write(buffer,strlen(buffer));
+        VsLogFile.flush();
     } else {
-      std::cout << buffer << std::flush;
+        std::cout << buffer << std::flush;
     }
     return true;
 }
