@@ -384,5 +384,3 @@ android: {
 
 OTHER_FILES += \
     .gitignore
-
-ANDROID_ABIS = armeabi-v7a
