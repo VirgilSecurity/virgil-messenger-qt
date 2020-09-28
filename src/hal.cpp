@@ -44,9 +44,12 @@
 #ifndef LOG_ROTATE_LEVEL
 #define LOG_ROTATE_LEVEL 0     // Log rotate num (num -1)
 #endif
+#ifndef LOG_MAX_FILESIZE
+#define LOG_MAX_FILESIZE 20 * 1024 * 1024
+#endif
 
-QFile VsLogFile;
-bool VsLogErr=false;
+QFile vsLogFile;
+bool vsLogOpeningFailed = false;
 
 bool vs_logger_rotate(QString FileName, int LogNums) {
     QString NewFilePath = FileName + "." + QString::number(LogNums + 1);
@@ -69,23 +72,32 @@ bool vs_logger_rotate(QString FileName, int LogNums) {
     return true;
 }
 
-bool vs_logger_check_file() {
+bool vs_logger_rotate_active_file() {
+    vsLogFile.close();
+    vs_logger_rotate(vsLogFile.fileName(), LOG_ROTATE_LEVEL);
+    return vsLogFile.open(QIODevice::WriteOnly | QIODevice::Text);
+}
 
-    if(VsLogErr) {
+bool vs_logger_file_opened() {
+    if (vsLogOpeningFailed) {
         return false;
     }
 
-    if(!VsLogFile.isOpen()) {
-        const QDir AppDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-        if (!AppDir.mkpath(".")) {
-            VsLogErr=true;
+    if (!vsLogFile.isOpen()) {
+        // First run
+        if (vsLogFile.fileName().isEmpty()) {
+            const QDir appDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+            if (!appDir.mkpath(".")) {
+                vsLogOpeningFailed = true;
+                return false;
+            }
+            vsLogFile.setFileName(appDir.absolutePath() + '/' + QCoreApplication::applicationName() + ".log");
+        }
+        // Rotation
+        if (!vs_logger_rotate_active_file()) {
+            vsLogOpeningFailed = true;
             return false;
         }
-        VsLogFile.setFileName(AppDir.absolutePath() + "/" + QCoreApplication::applicationName() + ".log");
-        vs_logger_rotate(VsLogFile.fileName(),LOG_ROTATE_LEVEL);
-        VsLogFile.open(QIODevice::WriteOnly | QIODevice::Text);
-        VsLogErr=true;
-        return false;
     }
 
     return true;
@@ -94,9 +106,13 @@ bool vs_logger_check_file() {
 extern "C" bool
 vs_logger_output_hal(const char *buffer) {
     (void)buffer;
-    if(!vs_logger_check_file()) {
-        VsLogFile.write(buffer,strlen(buffer));
-        VsLogFile.flush();
+    if(vs_logger_file_opened()) {
+        vsLogFile.write(buffer,strlen(buffer));
+        vsLogFile.flush();
+        const bool isEOL = buffer[0] != 0 && strlen(buffer) && buffer[strlen(buffer) - 1] == '\n';
+        if (isEOL && vsLogFile.size() >= LOG_MAX_FILESIZE && !vs_logger_rotate_active_file()) {
+            vsLogOpeningFailed = true;
+        }
     } else {
         std::cout << buffer << std::flush;
     }

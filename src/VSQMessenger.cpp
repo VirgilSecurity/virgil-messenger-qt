@@ -613,7 +613,7 @@ VSQMessenger::_virgilURL() {
         }
     }
 
-    VS_LOG_DEBUG("%s URL: [%s]", qPrintable(Customer::OrganizationName), qPrintable(res));
+    qDebug("%s URL: [%s]", qPrintable(Customer::OrganizationName), qPrintable(res));
     return res;
 }
 
@@ -638,7 +638,7 @@ VSQMessenger::_xmppURL() {
         }
     }
 
-    VS_LOG_DEBUG("XMPP URL: %s", res.toStdString().c_str());
+    qDebug("XMPP URL: %s", res.toStdString().c_str());
     return res;
 }
 
@@ -656,7 +656,7 @@ VSQMessenger::_xmppPort() {
         }
     }
 
-    VS_LOG_DEBUG("XMPP PORT: %d", static_cast<int> (res));
+    qDebug("XMPP PORT: %d", static_cast<int> (res));
 
     return res;
 }
@@ -705,7 +705,7 @@ VSQMessenger::_loadCredentials(const QString &user, QString &deviceId, vs_messen
     auto baCred = QByteArray::fromBase64(json["creds"].toString().toUtf8());
 
     if (baCred.size() != sizeof(creds)) {
-        VS_LOG_WARNING("Cannot load credentials for : %s", user.toStdString().c_str());
+        qWarning("Cannot load credentials for : %s", user.toStdString().c_str());
         return false;
     }
 
@@ -1058,7 +1058,7 @@ VSQMessenger::onDisconnected() {
 /******************************************************************************/
 void
 VSQMessenger::onError(QXmppClient::Error err) {
-    VS_LOG_DEBUG("onError");
+    qDebug("onError");
     qDebug() << "onError : " << err << "   state:" << m_xmpp.state();
     emit fireError(tr("Connection error ..."));
 }
@@ -1079,7 +1079,7 @@ Optional<StMessage> VSQMessenger::decryptMessage(const QString &sender, const QS
                 message.toStdString().c_str(),
                 decryptedMessage, decryptedMessageSz - 1,
                 &decryptedMessageSz)) {
-        VS_LOG_WARNING("Received message cannot be decrypted");
+        qWarning("Received message cannot be decrypted");
         return NullOptional;
     }
 
@@ -1185,7 +1185,7 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
                      encryptedMessage,
                      _encryptedMsgSzMax,
                      &encryptedMessageSz)) {
-        VS_LOG_WARNING("Cannot encrypt message to be sent");
+        qWarning("Cannot encrypt message to be sent");
 
         // Mark message as failed
         m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
