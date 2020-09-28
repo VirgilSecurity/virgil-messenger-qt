@@ -92,7 +92,7 @@ Control {
     Component.onCompleted: {
         showSplashScreen()
         if (logControl.visible) {
-            Logging.newMessage.connect(logTextControl.append)
+            Logging.formattedMessageCreated.connect(logTextControl.append)
         }
     }
 

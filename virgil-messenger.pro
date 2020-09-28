@@ -106,7 +106,6 @@ HEADERS += \
         include/VSQDownload.h \
         include/VSQLastActivityIq.h \
         include/VSQLastActivityManager.h \
-        include/VSQLogging.h \
         include/VSQMessenger.h \
         include/VSQSettings.h \
         include/VSQSqlChatModel.h \
@@ -120,8 +119,12 @@ HEADERS += \
         include/macos/VSQMacos.h \
         include/helpers/VSQSingleton.h \
         include/ui/VSQUiHelper.h \
+        # Logging
+        include/logging/VSQLogging.h \
+        include/logging/VSQLogWorker.h \
+        include/logging/VSQMessageLogContext.h \
         # Generated
-        generated/include/VSQCustomer.h
+        generated/include/VSQCustomer.h \
         # Thirdparty
         include/thirdparty/optional/optional.hpp
 
@@ -141,7 +144,6 @@ SOURCES += \
         src/VSQMessenger.cpp \
         src/VSQLastActivityIq.cpp \
         src/VSQLastActivityManager.cpp \
-        src/VSQLogging.cpp \
         src/VSQSettings.cpp \
         src/VSQSqlChatModel.cpp \
         src/VSQSqlConversationModel.cpp \
@@ -154,7 +156,10 @@ SOURCES += \
         src/main.cpp \
         src/VSQApplication.cpp \
         src/ui/VSQUiHelper.cpp \
-        src/hal.cpp
+        src/hal.cpp \
+        # Logging
+        src/logging/VSQLogging.cpp \
+        src/logging/VSQLogWorker.cpp
 
 #
 #   Resources

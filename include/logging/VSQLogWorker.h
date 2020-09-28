@@ -32,29 +32,29 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQLOGGING_H
-#define VSQLOGGING_H
+#ifndef VSQLOGWORKER_H
+#define VSQLOGWORKER_H
 
 #include <QObject>
 
-class VSQLogging : public QObject
+#include "VSQMessageLogContext.h"
+
+class VSQLogWorker : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit VSQLogging();
-    virtual ~VSQLogging();
+    explicit VSQLogWorker(QObject *parent = nullptr);
+    ~VSQLogWorker() override;
 
-signals:
-    void newMessage(const QString &message);
+    void start();
+    void processMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
 
 private:
-    static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
-    static void signalMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
-    static void fileMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
-    static void consoleMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
+    void fileMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
+    void consoleMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
 
-    static VSQLogging *m_instance;
+    bool m_logToFile = false;
 };
 
-#endif // VSQLOGGING_H
+#endif // VSQLOGGWORKER_H

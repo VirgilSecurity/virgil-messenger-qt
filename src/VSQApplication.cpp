@@ -69,7 +69,7 @@ VSQApplication::VSQApplication()
 #if (MACOS)
     VSQMacos::instance().startUpdatesTimer();
 #endif
-    registerCommonTypes();
+    registerMetaTypes();
 }
 
 /******************************************************************************/

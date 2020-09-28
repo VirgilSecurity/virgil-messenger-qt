@@ -32,56 +32,39 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
-#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
+#ifndef VSQLOGGING_H
+#define VSQLOGGING_H
 
-#include <QtCore>
-#include <QGuiApplication>
-#include <QQmlApplicationEngine>
+#include <QObject>
 
-#include <VSQCrashReporter.h>
-#include <VSQMessenger.h>
-#include <VSQSettings.h>
-#include <logging/VSQLogging.h>
-#include <macos/VSQMacos.h>
+#include "VSQMessageLogContext.h"
 
-class QNetworkAccessManager;
+class QThread;
 
-class VSQApplication : public QObject {
+class VSQLogging : public QObject
+{
     Q_OBJECT
+
 public:
-    VSQApplication();
-    virtual ~VSQApplication() = default;
+    explicit VSQLogging();
+    virtual ~VSQLogging();
 
-    int
-    run(const QString &basePath);
-
-    Q_INVOKABLE
-    void reloadQml();
-
-    Q_INVOKABLE
-    void checkUpdates();
-
-    Q_INVOKABLE QString
-    currentVersion() const;
-
-    Q_INVOKABLE void
-    sendReport();
-
-    Q_INVOKABLE void hideSplashScreen();
-
-private slots:
-    void
-    onApplicationStateChanged(Qt::ApplicationState state);
+signals:
+    void messageCreated(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
+    void formattedMessageCreated(const QString &message);
 
 private:
-    static const QString kVersion;
-    VSQSettings m_settings;
-    QNetworkAccessManager *m_networkAccessManager;
-    VSQLogging m_logging;
-    VSQCrashReporter m_crashReporter;
-    QQmlApplicationEngine m_engine;
-    VSQMessenger m_messenger;
+    void registerMetaTypes();
+    void formatMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
+
+    static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
+
+    static VSQLogging *m_instance;
+
+    std::unique_ptr<QThread> m_workerThread;
 };
 
-#endif // VSQApplication
+Q_DECLARE_METATYPE(QtMsgType)
+Q_DECLARE_METATYPE(VSQMessageLogContext)
+
+#endif // VSQLOGGING_H

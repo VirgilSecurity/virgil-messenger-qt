@@ -32,56 +32,17 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
-#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
+#ifndef VSQMESSAGELOGCONTEXT_H
+#define VSQMESSAGELOGCONTEXT_H
 
-#include <QtCore>
-#include <QGuiApplication>
-#include <QQmlApplicationEngine>
+#include "VSQCommon.h"
 
-#include <VSQCrashReporter.h>
-#include <VSQMessenger.h>
-#include <VSQSettings.h>
-#include <logging/VSQLogging.h>
-#include <macos/VSQMacos.h>
-
-class QNetworkAccessManager;
-
-class VSQApplication : public QObject {
-    Q_OBJECT
-public:
-    VSQApplication();
-    virtual ~VSQApplication() = default;
-
-    int
-    run(const QString &basePath);
-
-    Q_INVOKABLE
-    void reloadQml();
-
-    Q_INVOKABLE
-    void checkUpdates();
-
-    Q_INVOKABLE QString
-    currentVersion() const;
-
-    Q_INVOKABLE void
-    sendReport();
-
-    Q_INVOKABLE void hideSplashScreen();
-
-private slots:
-    void
-    onApplicationStateChanged(Qt::ApplicationState state);
-
-private:
-    static const QString kVersion;
-    VSQSettings m_settings;
-    QNetworkAccessManager *m_networkAccessManager;
-    VSQLogging m_logging;
-    VSQCrashReporter m_crashReporter;
-    QQmlApplicationEngine m_engine;
-    VSQMessenger m_messenger;
+// Copyable alternative of QMessageLogContext
+struct VSQMessageLogContext
+{
+    QString category;
+    QString fileName;
+    int line = 0;
 };
 
-#endif // VSQApplication
+#endif // VSQMESSAGELOGCONTEXT_H
