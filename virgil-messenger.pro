@@ -304,8 +304,6 @@ android: {
     ANDROID_VERSION_CODE = $$AndroidVersionCode($${VERSION})
     ANDROID_VERSION_NAME = $$VERSION
 
-    include($$(ANDROID_SDK_ROOT)/android_openssl/openssl.pri)
-
     INCLUDEPATH +=  $$PWD/ext/prebuilt/firebase_cpp_sdk/include
 
     HEADERS += \
@@ -316,11 +314,8 @@ android: {
         src/VSQPushNotifications.cpp \
         src/android/VSQFirebaseListener.cpp
 
-
     release:LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
     debug:LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
-
-
 
 #
 #   Messenger Internal
