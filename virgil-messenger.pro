@@ -301,18 +301,15 @@ defineReplace(AndroidVersionCode) {
         segments = $$split(1, ".")
         vCode = "$$first(vCode)$$format_number($$member(segments,0,0), width=3 zeropad)"
         vCode = "$$first(vCode)$$format_number($$member(segments,1,1), width=3 zeropad)"
-        vCode = "$$first(vCode)$$format_number($$member(segments,2,2), width=3 zeropad)"
-        vCode = "$$first(vCode)$$format_number($$member(segments,3,3), width=5 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,2,2), width=4 zeropad)"
         return($$first(vCode))
 }
 
 android: {
     QT += androidextras
     DEFINES += VS_ANDROID=1 VS_PUSHNOTIFICATIONS=1 VS_MOBILE=1
-    ANDROID_VERSION_CODE = $$AndroidVersionCode($$VERSION)
+    ANDROID_VERSION_CODE = $$AndroidVersionCode($${VERSION})
     ANDROID_VERSION_NAME = $$VERSION
-
-    include($$(ANDROID_SDK_ROOT)/android_openssl/openssl.pri)
 
     INCLUDEPATH +=  $$PWD/ext/prebuilt/firebase_cpp_sdk/include
 
@@ -324,11 +321,8 @@ android: {
         src/VSQPushNotifications.cpp \
         src/android/VSQFirebaseListener.cpp
 
-
     release:LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
     debug:LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
-
-
 
 #
 #   Messenger Internal
@@ -337,10 +331,6 @@ android: {
     release:LIBS_DIR_SUFFIX = release/installed/usr/local/lib
     debug:LIBS_DIR_SUFFIX = debug/installed/usr/local/lib
     FIREBASE_LIBS_DIR = $$PWD/ext/prebuilt/firebase_cpp_sdk/libs/android/$$ANDROID_TARGET_ARCH/c++
-    ANDROID_EXTRA_LIBS += \
-        $$LIBS_DIR_PREFIX/android.x86/$$LIBS_DIR_SUFFIX/libvs-messenger-internal.so \
-        $$LIBS_DIR_PREFIX/android.armeabi-v7a/$$LIBS_DIR_SUFFIX/libvs-messenger-internal.so \
-        $$LIBS_DIR_PREFIX/android.arm64-v8a/$$LIBS_DIR_SUFFIX/libvs-messenger-internal.so
 
 #
 #   ~ Messenger Internal
