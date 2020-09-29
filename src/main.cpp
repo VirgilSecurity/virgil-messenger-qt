@@ -40,6 +40,7 @@
 #include <QApplication>
 #endif
 #include <android/VSQAndroid.h>
+#include <logging/VSQLogging.h>
 
 #if (VSQ_WEBDRIVER_DEBUG)
 #include "Test/Headers.h"
@@ -69,11 +70,13 @@ main(int argc, char *argv[]) {
     a.setOrganizationDomain(Customer::OrganizationDomain);
     a.setApplicationDisplayName(Customer::ApplicationDisplayName);
 
+    VSQLogging logging;
+
     QString baseUrl;
     if (2 == argc && argv[1] && argv[1][0]) {
         baseUrl = QString::fromLocal8Bit(argv[1]);
         qDebug() << "QML URL: " << baseUrl;
     }
 
-    return VSQApplication().run(baseUrl);
+    return VSQApplication().run(baseUrl, &logging);
 }

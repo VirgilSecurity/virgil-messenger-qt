@@ -42,7 +42,8 @@
 
 VSQLogging *VSQLogging::m_instance = nullptr;
 
-VSQLogging::VSQLogging() : QObject()
+VSQLogging::VSQLogging(QObject *parent)
+    : QObject(parent)
 {
     // Set instance
     if (m_instance) {

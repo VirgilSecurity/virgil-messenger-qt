@@ -42,19 +42,20 @@
 #include <VSQCrashReporter.h>
 #include <VSQMessenger.h>
 #include <VSQSettings.h>
-#include <logging/VSQLogging.h>
 #include <macos/VSQMacos.h>
 
 class QNetworkAccessManager;
 
+class VSQLogging;
+
 class VSQApplication : public QObject {
     Q_OBJECT
+
 public:
     VSQApplication();
     virtual ~VSQApplication() = default;
 
-    int
-    run(const QString &basePath);
+    int run(const QString &basePath, VSQLogging *logging);
 
     Q_INVOKABLE
     void reloadQml();
@@ -78,7 +79,6 @@ private:
     static const QString kVersion;
     VSQSettings m_settings;
     QNetworkAccessManager *m_networkAccessManager;
-    VSQLogging m_logging;
     VSQCrashReporter m_crashReporter;
     QQmlApplicationEngine m_engine;
     VSQMessenger m_messenger;

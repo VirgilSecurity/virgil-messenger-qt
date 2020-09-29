@@ -39,8 +39,8 @@
 #include <VSQCommon.h>
 #include <VSQClipboardProxy.h>
 #include <android/VSQAndroid.h>
+#include <logging/VSQLogging.h>
 #include <ui/VSQUiHelper.h>
-#include <virgil/iot/logger/logger.h>
 
 #include <QGuiApplication>
 #include <QFont>
@@ -59,7 +59,6 @@ const QString VSQApplication::kVersion = "unknown";
 VSQApplication::VSQApplication()
     : m_settings(this)
     , m_networkAccessManager(new QNetworkAccessManager(this))
-    , m_logging()
     , m_crashReporter(m_networkAccessManager)
     , m_engine()
     , m_messenger(m_networkAccessManager, &m_settings)
@@ -74,7 +73,7 @@ VSQApplication::VSQApplication()
 
 /******************************************************************************/
 int
-VSQApplication::run(const QString &basePath) {
+VSQApplication::run(const QString &basePath, VSQLogging *logging) {
 
     VSQUiHelper uiHelper;
 
@@ -95,7 +94,7 @@ VSQApplication::run(const QString &basePath) {
     context->setContextProperty("app", this);
     context->setContextProperty("clipboard", new VSQClipboardProxy(QGuiApplication::clipboard()));
     context->setContextProperty("Messenger", &m_messenger);
-    context->setContextProperty("Logging", &m_logging);
+    context->setContextProperty("logging", logging);
     context->setContextProperty("crashReporter", &m_crashReporter);
     context->setContextProperty("settings", &m_settings);
     context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
