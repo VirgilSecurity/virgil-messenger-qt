@@ -60,7 +60,7 @@ const QString VSQApplication::kVersion = "unknown";
 VSQApplication::VSQApplication()
     : m_settings(this)
     , m_networkAccessManager(new QNetworkAccessManager(this))
-    , m_crashReporter(m_networkAccessManager)
+    , m_crashReporter(&m_settings, m_networkAccessManager, this)
     , m_engine()
     , m_messenger(m_networkAccessManager, &m_settings)
 {

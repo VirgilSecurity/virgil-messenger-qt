@@ -48,21 +48,23 @@ static const QString kDeviceId = "DeviceId";
 
 static const QString kLastSessionGroup = "LastSession";
 static const QString kWindowGeometryId = "WindowGeometry";
+static const QString kSessionId = "SessionId";
 
 Q_LOGGING_CATEGORY(lcSettings, "settings")
 
 VSQSettings::VSQSettings(QObject *parent)
     : QSettings(Customer::OrganizationName, Customer::ApplicationName, parent)
+    , m_sessionId(VSQUtils::createUuid())
 {
-    m_attachmentCacheDir.setPath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/attachments"));
-    m_thumbnaisDir.setPath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/thumbnails"));
-    m_downloadsDir.setPath(QStandardPaths::writableLocation(QStandardPaths::DownloadLocation) + QLatin1String("/Virgil"));
-
     if (deviceId().isEmpty()) {
         createDeviceId();
         removeGroup(kUsersGroup);
         removeGroup(kCredenitalsGroup);
     }
+
+    m_attachmentCacheDir.setPath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/attachments"));
+    m_thumbnaisDir.setPath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/thumbnails"));
+    m_downloadsDir.setPath(QStandardPaths::writableLocation(QStandardPaths::DownloadLocation) + QLatin1String("/Virgil"));
 }
 
 VSQSettings::~VSQSettings()
@@ -139,6 +141,24 @@ QString VSQSettings::deviceId() const
     return value(kDeviceId).toString();
 }
 
+bool VSQSettings::runFlag() const
+{
+    auto lastSessionId = groupValue(kLastSessionGroup, kSessionId).toString();
+    return !lastSessionId.isEmpty() && lastSessionId != m_sessionId;
+}
+
+void VSQSettings::setRunFlag(bool run)
+{
+    if (run) {
+        qCDebug(lcSettings) << "Save session id" << m_sessionId;
+        setGroupValue(kLastSessionGroup, kSessionId, m_sessionId);
+    }
+    else {
+        qCDebug(lcSettings) << "Reset session id";
+        removeGroupKey(kLastSessionGroup, kSessionId);
+    }
+}
+
 DataSize VSQSettings::attachmentMaxFileSize() const
 {
     return 25 * 1024 * 1024;
@@ -208,16 +228,25 @@ Seconds VSQSettings::lastSeenActivityInterval() const
     return 5;
 }
 
+QString VSQSettings::makeGroupKey(const QString &group, const QString &key) const
+{
+    return group + '/' + key;
+}
+
 void VSQSettings::setGroupValue(const QString &group, const QString &key, const QVariant &value)
 {
-    const QString groupKey(group + '/' + key);
-    setValue(groupKey, value);
+    setValue(makeGroupKey(group, key), value);
+    sync();
 }
 
 QVariant VSQSettings::groupValue(const QString &group, const QString &key, const QVariant &defaultValue) const
 {
-    const QString groupKey(group + '/' + key);
-    return value(groupKey, defaultValue);
+    return value(makeGroupKey(group, key), defaultValue);
+}
+
+void VSQSettings::removeGroupKey(const QString &group, const QString &key)
+{
+    remove(makeGroupKey(group, key));
 }
 
 void VSQSettings::removeGroup(const QString &group)
@@ -225,7 +254,6 @@ void VSQSettings::removeGroup(const QString &group)
     beginGroup(group);
     remove(QString());
     endGroup();
-    sync();
 }
 
 void VSQSettings::createDeviceId()

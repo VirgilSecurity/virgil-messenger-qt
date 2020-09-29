@@ -235,7 +235,6 @@ private:
     QMutex m_messageGuard;
     QString m_user;
     QString m_userId;
-    QString m_deviceId;
     QString m_recipient;
     QString m_xmppPass;
     VSQEnvType m_envType;
@@ -276,10 +275,10 @@ private:
     _reconnect();
 
     bool
-    _saveCredentials(const QString &user, const QString &deviceId, const vs_messenger_virgil_user_creds_t &creds);
+    _saveCredentials(const QString &user, const vs_messenger_virgil_user_creds_t &creds);
 
     bool
-    _loadCredentials(const QString &user, QString &deviceId, vs_messenger_virgil_user_creds_t &creds);
+    _loadCredentials(const QString &user, vs_messenger_virgil_user_creds_t &creds);
 
     QString
     _prepareLogin(const QString &user);

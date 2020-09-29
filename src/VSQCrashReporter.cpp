@@ -37,21 +37,23 @@
 #include <QDirIterator>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
-#include <QSettings>
 #include <QStandardPaths>
+
+#include "VSQSettings.h"
 
 #include <virgil/iot/messenger/internal/virgil.h>
 
 const QString VSQCrashReporter::s_endpointSendReport = "/send-logs";
 
-VSQCrashReporter::VSQCrashReporter(QNetworkAccessManager *networkAccessManager)
-    : QObject()
+VSQCrashReporter::VSQCrashReporter(VSQSettings *settings, QNetworkAccessManager *networkAccessManager, QObject *parent)
+    : QObject(parent)
+    , m_settings(settings)
     , m_manager(networkAccessManager)
 {}
 
 VSQCrashReporter::~VSQCrashReporter()
 {
-    resetRunFlag();
+    m_settings->setRunFlag(false);
 }
 
 void VSQCrashReporter::setVirgilUrl(QString VirgilUrl) {
@@ -73,28 +75,13 @@ void VSQCrashReporter::setkApp(QString strkApp) {
 
 void VSQCrashReporter::checkAppCrash() {
     qDebug("Checking previus run flag...");
-    if(checkRunFlag()) {
+    if(m_settings->runFlag()) {
         qCritical("Previus application run is crashed ! Sending log files...");
         emit crashReportRequested();
     } else {
         qDebug("Set run flag to true");
-        setRunFlag(true); // Set run flag
+        m_settings->setRunFlag(true);
     }
-}
-
-void VSQCrashReporter::resetRunFlag() {
-    qDebug("Reset run flag");
-    setRunFlag(false); // Reset run flag
-}
-
-bool VSQCrashReporter::checkRunFlag() {
-    QSettings settings(m_organization, m_app);
-    return settings.value("RunFlag", false).toBool();
-}
-
-void VSQCrashReporter::setRunFlag(bool runState) {
-    QSettings settings(m_organization, m_app);
-    settings.setValue("RunFlag", runState);
 }
 
 bool VSQCrashReporter::sendLogFiles() {

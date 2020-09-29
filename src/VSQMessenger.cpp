@@ -442,12 +442,10 @@ VSQMessenger::signInWithBackupKey(QString username, QString password) {
             return MRES_ERR_SIGNUP;
         }
 
-        m_deviceId = QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
-
         // Save credentials
-        _saveCredentials(username, m_deviceId, creds);
+        _saveCredentials(username, creds);
 
-        return _connect(m_user, m_deviceId, m_userId, true) ? MRES_OK : MRES_ERR_SIGNIN;;
+        return _connect(m_user, m_settings->deviceId(), m_userId, true) ? MRES_OK : MRES_ERR_SIGNIN;;
     });
 }
 
@@ -462,7 +460,7 @@ VSQMessenger::signIn(QString user) {
         memset(&creds, 0, sizeof (creds));
 
         // Load User Credentials
-        if (!_loadCredentials(m_userId, m_deviceId, creds)) {
+        if (!_loadCredentials(m_userId, creds)) {
             emit fireError(tr("Cannot load user credentials"));
             qDebug() << "Cannot load user credentials";
             return MRES_ERR_NO_CRED;
@@ -479,7 +477,7 @@ VSQMessenger::signIn(QString user) {
         m_crashReporter->checkAppCrash();
 
         // Connect over XMPP
-        return _connect(m_user, m_deviceId, m_userId, true) ? MRES_OK : MRES_ERR_SIGNIN;
+        return _connect(m_user, m_settings->deviceId(), m_userId, true) ? MRES_OK : MRES_ERR_SIGNIN;
     });
 }
 
@@ -504,13 +502,11 @@ VSQMessenger::signUp(QString user) {
 
         qInfo() << "User has been successfully signed up: " << m_userId;
 
-        m_deviceId = QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
-
         // Save credentials
-        _saveCredentials(m_userId, m_deviceId, creds);
+        _saveCredentials(m_userId, creds);
 
         // Connect over XMPP
-        return _connect(m_user, m_deviceId, m_userId, true) ? MRES_OK : MRES_ERR_SIGNUP;
+        return _connect(m_user, m_settings->deviceId(), m_userId, true) ? MRES_OK : MRES_ERR_SIGNUP;
     });
 }
 
@@ -663,12 +659,11 @@ VSQMessenger::_xmppPort() {
 /******************************************************************************/
 // TODO: Use SecBox
 bool
-VSQMessenger::_saveCredentials(const QString &user, const QString &deviceId, const vs_messenger_virgil_user_creds_t &creds) {
+VSQMessenger::_saveCredentials(const QString &user, const vs_messenger_virgil_user_creds_t &creds) {
     // Save credentials
     const QByteArray baCred(reinterpret_cast<const char*>(&creds), sizeof(creds));
 
     QJsonObject jsonObject;
-    jsonObject.insert("device_id", deviceId);
     jsonObject.insert("creds", QJsonValue::fromVariant(baCred.toBase64()));
 
     const QJsonDocument doc(jsonObject);
@@ -683,10 +678,9 @@ VSQMessenger::_saveCredentials(const QString &user, const QString &deviceId, con
 
 /******************************************************************************/
 bool
-VSQMessenger::_loadCredentials(const QString &user, QString &deviceId, vs_messenger_virgil_user_creds_t &creds) {
+VSQMessenger::_loadCredentials(const QString &user, vs_messenger_virgil_user_creds_t &creds) {
     const auto settingsJson = m_settings->userCredential(user);
     const QJsonDocument json(QJsonDocument::fromJson(settingsJson.toUtf8()));
-    deviceId = json["device_id"].toString();
     const auto baCred = QByteArray::fromBase64(json["creds"].toString().toUtf8());
 
     if (baCred.size() != sizeof(creds)) {
@@ -787,7 +781,7 @@ VSQMessenger::onSubscribePushNotifications(bool enable) {
     xmppPush.setJid(kPushNotificationsProxy);
 
     // xmppPush.setNode(kPushNotificationsNode);
-    xmppPush.setNode(currentUser() + "@" + _xmppURL() + "/" + m_deviceId);
+    xmppPush.setNode(currentUser() + "@" + _xmppURL() + "/" + m_settings->deviceId());
     xmppPush.setDataForm(dataForm);
 
     m_xmpp.sendPacket(xmppPush);
@@ -1011,7 +1005,7 @@ void
 VSQMessenger::_reconnect() {
     if (!m_user.isEmpty() && !m_userId.isEmpty() && vs_messenger_virgil_is_signed_in()) {
         QtConcurrent::run([=]() {
-            _connect(m_user, m_deviceId, m_userId);
+            _connect(m_user, m_settings->deviceId(), m_userId);
         });
     }
 }

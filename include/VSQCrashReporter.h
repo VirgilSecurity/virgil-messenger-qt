@@ -39,16 +39,17 @@
 
 class QNetworkAccessManager;
 
+class VSQSettings;
+
 class VSQCrashReporter : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit VSQCrashReporter(QNetworkAccessManager *networkAccessManager);
+    VSQCrashReporter(VSQSettings *settings, QNetworkAccessManager *networkAccessManager, QObject *parent);
     virtual ~VSQCrashReporter();
 
     void checkAppCrash();
-    void resetRunFlag();
     Q_INVOKABLE bool sendLogFiles();
     void setVirgilUrl(QString VirgilUrl);
     void setkVersion(QString AppVersion);
@@ -61,11 +62,10 @@ signals:
     void reportSentErr(QString msg);
 
 private:
-    bool checkRunFlag();
     bool sendFileToBackendRequest(QByteArray fileData);
-    void setRunFlag(bool runState);
     void endpointReply();
 
+    VSQSettings *m_settings;
     QNetworkAccessManager *m_manager;
     QString m_currentVirgilUrl;
     QString m_version;

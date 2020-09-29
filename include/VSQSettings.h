@@ -72,8 +72,10 @@ public:
     QString userCredential(const QString &user) const;
     void setUserCredential(const QString &user, const QString &userCredential);
 
-    // Device id, run flag
+    // Device id, run flags
     QString deviceId() const;
+    bool runFlag() const;
+    void setRunFlag(bool run);
 
     // Attachments
 
@@ -104,12 +106,15 @@ signals:
     void windowGeometryChanged(const QRect &); // Required by QML, not used
 
 private:
+    QString makeGroupKey(const QString &group, const QString &key) const;
     void setGroupValue(const QString &group, const QString &key, const QVariant &value);
     QVariant groupValue(const QString &group, const QString &key, const QVariant &defaultValue = QVariant()) const;
+    void removeGroupKey(const QString &group, const QString &key);
     void removeGroup(const QString &group);
 
     void createDeviceId();
 
+    QString m_sessionId;
     QDir m_attachmentCacheDir;
     QDir m_thumbnaisDir;
     QDir m_downloadsDir;
