@@ -82,9 +82,12 @@ void VSQApplication::initialize()
     // Organization params
     QCoreApplication::setOrganizationName(Customer::OrganizationName);
     QCoreApplication::setOrganizationDomain(Customer::OrganizationDomain);
+
+    // Application params
+    QCoreApplication::setApplicationName(Customer::ApplicationName);
     QGuiApplication::setApplicationDisplayName(Customer::ApplicationDisplayName);
 
-    // TODO(fpohtmeh): set version
+    // TODO(fpohtmeh): set version, use in currentVersion()
 }
 
 /******************************************************************************/
@@ -167,6 +170,16 @@ void VSQApplication::hideSplashScreen()
 #ifdef VS_ANDROID
     VSQAndroid::hideSplashScreen();
 #endif
+}
+
+QString VSQApplication::organizationDisplayName() const
+{
+    return Customer::OrganizationDisplayName;
+}
+
+QString VSQApplication::applicationDisplayName() const
+{
+    return Customer::ApplicationDisplayName;
 }
 
 /******************************************************************************/

@@ -50,8 +50,6 @@ class VSQSettings : public QSettings
     Q_PROPERTY(QString lastSignedInUser READ lastSignedInUser WRITE setLastSignedInUser NOTIFY lastSignedInUserChanged)
     Q_PROPERTY(QStringList usersList READ usersList WRITE setUsersList NOTIFY usersListChanged)
     Q_PROPERTY(bool devMode READ devMode CONSTANT)
-    Q_PROPERTY(QString organizationDisplayName READ organizationDisplayName CONSTANT)
-    Q_PROPERTY(QString applicationDisplayName READ applicationDisplayName CONSTANT)
     Q_PROPERTY(QRect windowGeometry READ windowGeometry WRITE setWindowGeometry NOTIFY windowGeometryChanged)
 
 public:
@@ -84,11 +82,6 @@ public:
     QDir thumbnailsDir() const;
     QDir downloadsDir() const;
     QSize thumbnailMaxSize() const;
-
-    // Application/organization
-
-    QString organizationDisplayName() const;
-    QString applicationDisplayName() const;
 
     // Dev mode
     bool devMode() const;

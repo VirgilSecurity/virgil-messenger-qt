@@ -14,7 +14,7 @@ import "theme"
 ApplicationWindow {
     id: root
     visible: true
-    title: settings.applicationDisplayName
+    title: app.applicationDisplayName
 
     Binding on x {
         when: Platform.isDesktop;

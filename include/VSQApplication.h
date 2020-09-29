@@ -48,8 +48,11 @@ class QNetworkAccessManager;
 
 class VSQLogging;
 
-class VSQApplication : public QObject {
+class VSQApplication : public QObject
+{
     Q_OBJECT
+    Q_PROPERTY(QString organizationDisplayName READ organizationDisplayName CONSTANT)
+    Q_PROPERTY(QString applicationDisplayName READ applicationDisplayName CONSTANT)
 
 public:
     VSQApplication();
@@ -72,6 +75,11 @@ public:
     sendReport();
 
     Q_INVOKABLE void hideSplashScreen();
+
+    // Names
+
+    QString organizationDisplayName() const;
+    QString applicationDisplayName() const;
 
 private slots:
     void

@@ -77,6 +77,7 @@ VSQSettings::~VSQSettings()
 void VSQSettings::print()
 {
     qCDebug(lcSettings) << "Settings";
+    qCDebug(lcSettings) << "Device id:" << deviceId();
     qCDebug(lcSettings) << "Attachment cache dir:" << attachmentCacheDir().absolutePath();
     qCDebug(lcSettings) << "Attachment max file size:" << attachmentMaxFileSize();
     qCDebug(lcSettings) << "Thumbnails dir:" << thumbnailsDir().absolutePath();
@@ -191,16 +192,6 @@ QDir VSQSettings::downloadsDir() const
 QSize VSQSettings::thumbnailMaxSize() const
 {
     return QSize(100, 80);
-}
-
-QString VSQSettings::organizationDisplayName() const
-{
-    return Customer::OrganizationDisplayName;
-}
-
-QString VSQSettings::applicationDisplayName() const
-{
-    return Customer::ApplicationDisplayName;
 }
 
 bool VSQSettings::devMode() const

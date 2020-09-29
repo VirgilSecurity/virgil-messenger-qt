@@ -65,10 +65,10 @@ Page {
     }
 
     header: ContactsHeader {
-        description: "%1 Server".arg(settings.organizationDisplayName)
+        description: "%1 Server".arg(app.organizationDisplayName)
         objectName: "hdrDefaultServer"
         id: contactsHeaderId
-        title: settings.organizationDisplayName
+        title: app.organizationDisplayName
         searchPlaceholder: "Search conversation"
 
         onIsSearchOpenChanged: {
