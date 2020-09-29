@@ -46,7 +46,7 @@ class VSQLogging : public QObject
     Q_OBJECT
 
 public:
-    explicit VSQLogging();
+    explicit VSQLogging(QObject *parent = nullptr);
     virtual ~VSQLogging();
 
 signals:

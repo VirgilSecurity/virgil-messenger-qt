@@ -55,6 +55,8 @@ public:
     VSQApplication();
     virtual ~VSQApplication() = default;
 
+    static void initialize();
+
     int run(const QString &basePath, VSQLogging *logging);
 
     Q_INVOKABLE

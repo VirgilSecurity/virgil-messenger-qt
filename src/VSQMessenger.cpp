@@ -73,7 +73,6 @@ Q_DECLARE_METATYPE(QFuture<VSQMessenger::EnResult>)
 #define USE_XMPP_LOGS 0
 #endif
 
-const QString VSQMessenger::kUsers = "Users";
 const QString VSQMessenger::kProdEnvPrefix = "prod";
 const QString VSQMessenger::kStgEnvPrefix = "stg";
 const QString VSQMessenger::kDevEnvPrefix = "dev";
@@ -271,7 +270,7 @@ VSQMessenger::_connect(QString userWithEnv, QString deviceId, QString userId, bo
     qCDebug(lcNetwork) << ">>>>>>>>>>> _connect: START " << cur_val;
 
     // Update users list
-    _addToUsersList(userWithEnv);
+    m_settings->addUserToList(userWithEnv);
 
     // Connect to XMPP
     emit fireConnecting();
@@ -662,34 +661,22 @@ VSQMessenger::_xmppPort() {
 }
 
 /******************************************************************************/
-
-void
-VSQMessenger::_addToUsersList(const QString &user) {
-    // Save known users
-    auto knownUsers = usersList();
-    knownUsers.removeAll(user);
-    knownUsers.push_front(user);
-    _saveUsersList(knownUsers);
-}
-
-/******************************************************************************/
 // TODO: Use SecBox
 bool
 VSQMessenger::_saveCredentials(const QString &user, const QString &deviceId, const vs_messenger_virgil_user_creds_t &creds) {
     // Save credentials
-    QByteArray baCred(reinterpret_cast<const char*>(&creds), sizeof(creds));
+    const QByteArray baCred(reinterpret_cast<const char*>(&creds), sizeof(creds));
 
     QJsonObject jsonObject;
     jsonObject.insert("device_id", deviceId);
     jsonObject.insert("creds", QJsonValue::fromVariant(baCred.toBase64()));
 
-    QJsonDocument doc(jsonObject);
-    QString json = doc.toJson(QJsonDocument::Compact);
+    const QJsonDocument doc(jsonObject);
+    const QString json = doc.toJson(QJsonDocument::Compact);
 
     qInfo() << "Saving user credentails: " << json;
 
-    QSettings settings(Customer::OrganizationName, Customer::ApplicationName);
-    settings.setValue(user, json);
+    m_settings->setUserCredential(user, json);
 
     return true;
 }
@@ -697,12 +684,10 @@ VSQMessenger::_saveCredentials(const QString &user, const QString &deviceId, con
 /******************************************************************************/
 bool
 VSQMessenger::_loadCredentials(const QString &user, QString &deviceId, vs_messenger_virgil_user_creds_t &creds) {
-    QSettings settings(Customer::OrganizationName, Customer::ApplicationName);
-
-    auto settingsJson = settings.value(user, QString("")).toString();
-    QJsonDocument json(QJsonDocument::fromJson(settingsJson.toUtf8()));
+    const auto settingsJson = m_settings->userCredential(user);
+    const QJsonDocument json(QJsonDocument::fromJson(settingsJson.toUtf8()));
     deviceId = json["device_id"].toString();
-    auto baCred = QByteArray::fromBase64(json["creds"].toString().toUtf8());
+    const auto baCred = QByteArray::fromBase64(json["creds"].toString().toUtf8());
 
     if (baCred.size() != sizeof(creds)) {
         qWarning("Cannot load credentials for : %s", user.toStdString().c_str());
@@ -711,21 +696,6 @@ VSQMessenger::_loadCredentials(const QString &user, QString &deviceId, vs_messen
 
     memcpy(&creds, baCred.data(), static_cast<size_t> (baCred.size()));
     return true;
-}
-
-/******************************************************************************/
-void
-VSQMessenger::_saveUsersList(const QStringList &users) {
-    QSettings settings(Customer::OrganizationName, Customer::ApplicationName);
-    settings.setValue(kUsers, users);
-}
-
-/******************************************************************************/
-QStringList
-VSQMessenger::usersList() {
-    QSettings settings(Customer::OrganizationName, Customer::ApplicationName);
-    qDebug() << settings.fileName();
-    return settings.value(kUsers, QStringList()).toStringList();
 }
 
 /******************************************************************************/

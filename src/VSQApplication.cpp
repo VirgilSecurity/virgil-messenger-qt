@@ -38,6 +38,7 @@
 #include <VSQApplication.h>
 #include <VSQCommon.h>
 #include <VSQClipboardProxy.h>
+#include <VSQCustomer.h>
 #include <android/VSQAndroid.h>
 #include <logging/VSQLogging.h>
 #include <ui/VSQUiHelper.h>
@@ -69,6 +70,21 @@ VSQApplication::VSQApplication()
     VSQMacos::instance().startUpdatesTimer();
 #endif
     registerMetaTypes();
+}
+
+/******************************************************************************/
+void VSQApplication::initialize()
+{
+    // Attributes
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+
+    // Organization params
+    QCoreApplication::setOrganizationName(Customer::OrganizationName);
+    QCoreApplication::setOrganizationDomain(Customer::OrganizationDomain);
+    QGuiApplication::setApplicationDisplayName(Customer::ApplicationDisplayName);
+
+    // TODO(fpohtmeh): set version
 }
 
 /******************************************************************************/

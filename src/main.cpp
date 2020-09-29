@@ -46,8 +46,6 @@
 #include "Test/Headers.h"
 #endif
 
-#include <VSQCustomer.h>
-
 int
 main(int argc, char *argv[]) {
 
@@ -59,17 +57,12 @@ main(int argc, char *argv[]) {
     wd_setup(argc, argv);
 #endif
 
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-
+    VSQApplication::initialize();
 #ifdef VS_MOBILE
     QGuiApplication a(argc, argv);
 #else
     QApplication a(argc, argv);
 #endif
-    a.setOrganizationName(Customer::OrganizationName);
-    a.setOrganizationDomain(Customer::OrganizationDomain);
-    a.setApplicationDisplayName(Customer::ApplicationDisplayName);
-
     VSQLogging logging;
 
     QString baseUrl;

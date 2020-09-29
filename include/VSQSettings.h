@@ -44,9 +44,11 @@
 
 Q_DECLARE_LOGGING_CATEGORY(lcSettings)
 
-class VSQSettings : public QObject
+class VSQSettings : public QSettings
 {
     Q_OBJECT
+    Q_PROPERTY(QString lastSignedInUser READ lastSignedInUser WRITE setLastSignedInUser NOTIFY lastSignedInUserChanged)
+    Q_PROPERTY(QStringList usersList READ usersList WRITE setUsersList NOTIFY usersListChanged)
     Q_PROPERTY(bool devMode READ devMode CONSTANT)
     Q_PROPERTY(QString organizationDisplayName READ organizationDisplayName CONSTANT)
     Q_PROPERTY(QString applicationDisplayName READ applicationDisplayName CONSTANT)
@@ -57,6 +59,21 @@ public:
     ~VSQSettings();
 
     void print();
+
+    // Users
+
+    void setLastSignedInUser(const QString &user);
+    QString lastSignedInUser() const;
+
+    void setUsersList(const QStringList &users);
+    QStringList usersList() const;
+    void addUserToList(const QString &user);
+
+    QString userCredential(const QString &user) const;
+    void setUserCredential(const QString &user, const QString &userCredential);
+
+    // Device id, run flag
+    QString deviceId() const;
 
     // Attachments
 
@@ -82,10 +99,17 @@ public:
     Seconds lastSeenActivityInterval() const;
 
 signals:
-    void windowGeometryChanged(const QRect &rect); // Required by QML, not used
+    void lastSignedInUserChanged(const QString &);
+    void usersListChanged(const QStringList &);
+    void windowGeometryChanged(const QRect &); // Required by QML, not used
 
 private:
-    QSettings m_settings;
+    void setGroupValue(const QString &group, const QString &key, const QVariant &value);
+    QVariant groupValue(const QString &group, const QString &key, const QVariant &defaultValue = QVariant()) const;
+    void removeGroup(const QString &group);
+
+    void createDeviceId();
+
     QDir m_attachmentCacheDir;
     QDir m_thumbnaisDir;
     QDir m_downloadsDir;

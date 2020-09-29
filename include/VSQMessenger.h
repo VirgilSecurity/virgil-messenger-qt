@@ -133,9 +133,6 @@ public slots:
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     deleteUser(QString user);
 
-    Q_INVOKABLE QStringList
-    usersList();
-
     Q_INVOKABLE void
     checkState();
 
@@ -244,7 +241,6 @@ private:
     VSQEnvType m_envType;
     static const VSQEnvType _defaultEnv = PROD;
     QXmppConfiguration m_conf;
-    static const QString kUsers;
     static const QString kProdEnvPrefix;
     static const QString kStgEnvPrefix;
     static const QString kDevEnvPrefix;
@@ -284,12 +280,6 @@ private:
 
     bool
     _loadCredentials(const QString &user, QString &deviceId, vs_messenger_virgil_user_creds_t &creds);
-
-    void
-    _addToUsersList(const QString &user);
-
-    void
-    _saveUsersList(const QStringList &users);
 
     QString
     _prepareLogin(const QString &user);
