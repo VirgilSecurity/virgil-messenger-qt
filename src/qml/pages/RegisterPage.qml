@@ -55,7 +55,7 @@ Page {
 
                 console.log("registration result: %1".arg(Future.result(future)))
                 if (Future.result(future) === Result.MRES_OK) {
-                    settings.lastSignedInUser = user
+                    settings.lastSignedInUserId = user
                     mainView.showContacts("Contacts", null, true, true)
                     return
                 }

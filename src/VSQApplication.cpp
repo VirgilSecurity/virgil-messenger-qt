@@ -39,7 +39,6 @@
 #include <VSQCommon.h>
 #include <VSQClipboardProxy.h>
 #include <VSQCustomer.h>
-#include <android/VSQAndroid.h>
 #include <logging/VSQLogging.h>
 #include <ui/VSQUiHelper.h>
 
@@ -63,6 +62,7 @@ VSQApplication::VSQApplication()
     , m_crashReporter(&m_settings, m_networkAccessManager, this)
     , m_engine()
     , m_messenger(m_networkAccessManager, &m_settings)
+    , m_applicationStateManager(&m_messenger, &m_settings, this)
 {
     m_settings.print();
     m_networkAccessManager->setAutoDeleteReplies(true);
@@ -165,13 +165,6 @@ VSQApplication::sendReport() {
     m_crashReporter.sendLogFiles();
 }
 
-void VSQApplication::hideSplashScreen()
-{
-#ifdef VS_ANDROID
-    VSQAndroid::hideSplashScreen();
-#endif
-}
-
 QString VSQApplication::organizationDisplayName() const
 {
     return Customer::OrganizationDisplayName;
@@ -205,4 +198,4 @@ VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
 #endif // VS_ANDROID
 }
 
-/******************************************************************************/
+ApplicationStateManager *VSQApplication::stateManager() { return &m_applicationStateManager; }

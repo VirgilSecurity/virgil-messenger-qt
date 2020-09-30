@@ -32,38 +32,26 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQLOGGING_H
-#define VSQLOGGING_H
+#ifndef VSQ_STATE_H
+#define VSQ_STATE_H
 
-#include <QObject>
+#include <QState>
 
-#include "VSQMessageLogContext.h"
+class VSQSettings;
 
-class QThread;
-
-class VSQLogging : public QObject
+namespace VSQ
+{
+// FIXME(fpohtmeh): remove class
+class State: public QState
 {
     Q_OBJECT
 
 public:
-    explicit VSQLogging(QObject *parent = nullptr);
-    virtual ~VSQLogging();
+    explicit State(VSQSettings *settings, QState *parent = nullptr);
 
-signals:
-    void messageCreated(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
-    void formattedMessageCreated(const QString &message);
-
-private:
-    void formatMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
-
-    static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
-
-    static VSQLogging *m_instance;
-
-    std::unique_ptr<QThread> m_workerThread;
+protected:
+    VSQSettings *m_settings;
 };
+}
 
-Q_DECLARE_METATYPE(QtMsgType)
-Q_DECLARE_METATYPE(VSQMessageLogContext)
-
-#endif // VSQLOGGING_H
+#endif // VSQ_STATE_H

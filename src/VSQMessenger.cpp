@@ -196,6 +196,16 @@ VSQMessenger::~VSQMessenger()
 {
 }
 
+void VSQMessenger::signIn(const QString &userId)
+{
+    // FIXME(fpohtmeh): implement
+    Q_UNUSED(userId)
+    QTimer::singleShot(500, this, [this]() {
+        m_settings->setLastSignedInUserId(QString());
+        emit signInErrorOccured(tr("Feature is not implemented"));
+    });
+}
+
 void
 VSQMessenger::onMessageDelivered(const QString& to, const QString& messageId) {
 
@@ -451,7 +461,7 @@ VSQMessenger::signInWithBackupKey(QString username, QString password) {
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::signIn(QString user) {
+VSQMessenger::signInAsync(QString user) {
     m_userId = _prepareLogin(user);
     return QtConcurrent::run([=]() -> EnResult {
         qDebug() << "Trying to Sign In: " << m_userId;

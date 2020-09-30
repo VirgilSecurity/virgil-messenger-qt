@@ -119,6 +119,18 @@ HEADERS += \
         include/macos/VSQMacos.h \
         include/helpers/VSQSingleton.h \
         include/ui/VSQUiHelper.h \
+        # Applications states
+        include/states/AccountSelectionState.h \
+        include/states/ApplicationStateManager.h \
+        include/states/AttachmentPreviewState.h \
+        include/states/BackupKeyState.h \
+        include/states/ChatListState.h \
+        include/states/ChatState.h \
+        include/states/NewChatState.h \
+        include/states/SettingsState.h \
+        include/states/SplashScreenState.h \
+        include/states/StartState.h \
+        include/states/State.h \
         # Logging
         include/logging/VSQLogging.h \
         include/logging/VSQLogWorker.h \
@@ -156,8 +168,12 @@ SOURCES += \
         src/main.cpp \
         src/VSQApplication.cpp \
         src/ui/VSQUiHelper.cpp \
-        src/hal.cpp \
+        # Applications states
+        src/states/ApplicationStateManager.cpp \
+        src/states/SplashScreenState.cpp \
+        src/states/State.cpp \
         # Logging
+        src/hal.cpp \
         src/logging/VSQLogging.cpp \
         src/logging/VSQLogWorker.cpp
 

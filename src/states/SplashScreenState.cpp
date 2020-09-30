@@ -32,38 +32,56 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQLOGGING_H
-#define VSQLOGGING_H
+#include "states/SplashScreenState.h"
 
-#include <QObject>
+#include <QTimer>
 
-#include "VSQMessageLogContext.h"
+#include "VSQMessenger.h"
+#include "VSQSettings.h"
+#include "android/VSQAndroid.h"
 
-class QThread;
+using namespace VSQ;
 
-class VSQLogging : public QObject
+SplashScreenState::SplashScreenState(VSQMessenger *messenger, VSQSettings *settings, QState *parent)
+    : QState(parent)
+    , m_messenger(messenger)
+    , m_settings(settings)
 {
-    Q_OBJECT
+    connect(m_messenger, &VSQMessenger::signedIn, this, &SplashScreenState::signInFinished);
+    connect(m_messenger, &VSQMessenger::signInErrorOccured, this, &SplashScreenState::signInErrorOccurred);
+}
 
-public:
-    explicit VSQLogging(QObject *parent = nullptr);
-    virtual ~VSQLogging();
+void SplashScreenState::onEntry(QEvent *)
+{
+    // Schedule sign-in
+#ifdef VS_ANDROID
+    const auto interval = 100;
+#else
+    const auto interval = 1000;
+#endif
+    QTimer::singleShot(interval, this, &SplashScreenState::signIn);
+}
 
-signals:
-    void messageCreated(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
-    void formattedMessageCreated(const QString &message);
+void SplashScreenState::onExit(QEvent *)
+{
+    hideNativeSplashScreen();
+}
 
-private:
-    void formatMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
+void SplashScreenState::signIn()
+{
+    const auto userId = m_settings->lastSignedInUserId();
+    if (userId.isEmpty()) {
+        emit signInUserNotSelected();
+    }
+    else {
+        emit signInStarted(userId);
+        m_messenger->signIn(userId);
+    }
+}
 
-    static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
-
-    static VSQLogging *m_instance;
-
-    std::unique_ptr<QThread> m_workerThread;
-};
-
-Q_DECLARE_METATYPE(QtMsgType)
-Q_DECLARE_METATYPE(VSQMessageLogContext)
-
-#endif // VSQLOGGING_H
+void SplashScreenState::hideNativeSplashScreen()
+{
+#ifdef VS_ANDROID
+    VSQAndroid::hideSplashScreen();
+#endif
+}

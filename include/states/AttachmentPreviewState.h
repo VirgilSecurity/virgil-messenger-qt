@@ -32,38 +32,11 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQLOGGING_H
-#define VSQLOGGING_H
+#ifndef VSQ_ATTACHMENTPREVIEWSTATE_H
+#define VSQ_ATTACHMENTPREVIEWSTATE_H
 
-#include <QObject>
+#include "State.h"
 
-#include "VSQMessageLogContext.h"
+using AttachmentPreviewState = State;
 
-class QThread;
-
-class VSQLogging : public QObject
-{
-    Q_OBJECT
-
-public:
-    explicit VSQLogging(QObject *parent = nullptr);
-    virtual ~VSQLogging();
-
-signals:
-    void messageCreated(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
-    void formattedMessageCreated(const QString &message);
-
-private:
-    void formatMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
-
-    static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
-
-    static VSQLogging *m_instance;
-
-    std::unique_ptr<QThread> m_workerThread;
-};
-
-Q_DECLARE_METATYPE(QtMsgType)
-Q_DECLARE_METATYPE(VSQMessageLogContext)
-
-#endif // VSQLOGGING_H
+#endif // VSQ_ATTACHMENTPREVIEWSTATE_H

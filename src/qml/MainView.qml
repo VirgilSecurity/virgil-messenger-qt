@@ -84,21 +84,25 @@ Control {
     }
 
     Component.onCompleted: {
-        showSplashScreen()
+        app.stateManager.splashScreenState.entered.connect(pushSplashScreenPage)
+        app.stateManager.accountSelectionState.entered.connect(pushAuthPage)
+        app.stateManager.chatListState.entered.connect(setContactsPage)
         if (logControl.visible) {
             logging.formattedMessageCreated.connect(logTextControl.append)
         }
     }
 
+    // FIXME(fpohtmeh): refactor
+    /*
     function signIn(user) {
         if (LoginLogic.validateUser(user)) {
-            var future = Messenger.signIn(user)
+            var future = Messenger.signInAsync(user)
             Future.onFinished(future, function(value) {
               console.log("Log In result: ", Future.result(future))
             })
 
             stackView.clear()
-            settings.lastSignedInUser = user
+            settings.lastSignedInUserId = user
             showContacts()
         } else {
             root.showPopupError(qsTr("Incorrect User Name"))
@@ -113,7 +117,7 @@ Control {
             // clear all pages in the stackview and push sign in page
             // as a first page in the stack
             stackView.clear()
-            settings.lastSignedInUser = ""
+            settings.lastSignedInUserId = ""
             showAuth(true)
         })
     }
@@ -138,20 +142,27 @@ Control {
             Messenger.setCurrentRecipient("")
         }
     }
+    */
 
-    function showSplashScreen(){
+    function pushSplashScreenPage() {
         stackView.push("./pages/SplashScreenPage.qml", StackView.Immediate)
     }
 
-    function showAuth(animate) {
-        if (animate) {
-            stackView.push("./pages/AuthPage.qml")
-            return
-        }
-
-        stackView.push("./pages/AuthPage.qml", StackView.Immediate)
+    function pushAuthPage(animate) {
+        stackView.push("./pages/AuthPage.qml", animate ? StackView.Transition : StackView.Immediate)
     }
 
+    function pushContactsPage() {
+        stackView.push("./pages/ChatListPage.qml")
+    }
+
+    function setContactsPage() {
+        stackView.clear()
+        pushContactsPage()
+    }
+
+    // FIXME(fpohtmeh): refactor
+    /*
     function showSignIn() {
         stackView.push("./pages/SignInPage.qml")
     }
@@ -177,13 +188,7 @@ Control {
         Messenger.setCurrentRecipient(recipient)
     }
 
-    function showContacts(clear) {
-        if (clear) {
-            stackView.clear()
-        }
 
-        stackView.push("./pages/ChatListPage.qml")
-    }
 
     function showAddPerson() {
         stackView.push("./pages/AddPersonPage.qml")
@@ -207,4 +212,5 @@ Control {
         const path = "./pages/%1.qml".arg(pageName)
         push(path, params, animate ? StackView.Transition : StackView.Immediate)
     }
+    */
 }

@@ -1,43 +1,13 @@
 import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
-import QuickFuture 1.0
-import MesResult 1.0
 
-import "../base"
 import "../theme"
 import "../components"
 
 Page {
     background: Rectangle {
         color: Theme.mainBackgroundColor
-    }
-
-    Timer {
-        interval: Platform.isAndroid ? 100 : 1000;
-        running: true;
-        repeat: false;
-        onTriggered: {
-            if (!settings.lastSignedInUser) {
-                showAuth()
-                app.hideSplashScreen()
-            }
-            else {
-                form.showLoading("Logging In as %1...".arg(settings.lastSignedInUser))
-
-                var future = Messenger.signIn(settings.lastSignedInUser)
-                Future.onFinished(future, function(res) {
-                    if (res === Result.MRES_OK) {
-                        form.hideLoading()
-                        showContacts(true)
-                    } else {
-                        settings.lastSignedInUser = ""
-                        showAuth()
-                    }
-                    app.hideSplashScreen()
-                })
-            }
-        }
     }
 
     Form {
@@ -49,4 +19,21 @@ Page {
     }
 
     footer: Footer {}
+
+    Connections {
+        target: app.stateManager.splashScreenState
+
+        function onSignInStarted(userId) {
+            form.showLoading("Sign in as %1...".arg(userId))
+        }
+
+        function onSignInFinished() {
+            form.hideLoading()
+        }
+
+        function onSignInErrorOccurred(errorText) {
+            form.hideLoading()
+            showPopupError(errorText) // TODO(fpohtmeh): don't use parent method directly
+        }
+    }
 }

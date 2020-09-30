@@ -75,7 +75,6 @@ class VSQMessenger : public QObject {
     Q_ENUMS(EnStatus)
 
 public:
-
     enum EnResult
     {
         MRES_OK,
@@ -100,6 +99,8 @@ public:
     VSQMessenger() = default; // QML engine requires default constructor
     virtual ~VSQMessenger();
 
+    void signIn(const QString &userId);
+
     Q_INVOKABLE QString currentUser() const;
     Q_INVOKABLE QString currentRecipient() const;
 
@@ -111,9 +112,8 @@ public:
     void setApplicationActive(bool active);
 
 public slots:
-
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    signIn(QString user);
+    signInAsync(QString user);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     backupUserKey(QString password);
@@ -188,6 +188,9 @@ signals:
 
     void
     fireCurrentUserChanged();
+
+    void signedIn();
+    void signInErrorOccured(const QString &errorText);
 
     void openPreviewRequested(const QUrl &url);
     void informationRequested(const QString &message);

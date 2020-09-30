@@ -40,7 +40,6 @@
 #include "VSQUtils.h"
 
 static const QString kUsersGroup = "Users";
-static const QString kLastSignedInUser = "LastSignedInUser";
 static const QString kUsersList = "UsersList";
 static const QString kCredenitalsGroup = "Credentials";
 
@@ -49,6 +48,7 @@ static const QString kDeviceId = "DeviceId";
 static const QString kLastSessionGroup = "LastSession";
 static const QString kWindowGeometryId = "WindowGeometry";
 static const QString kSessionId = "SessionId";
+static const QString kSignedInUserId = "SignedInUserId";
 
 Q_LOGGING_CATEGORY(lcSettings, "settings")
 
@@ -88,19 +88,19 @@ void VSQSettings::print()
     }
 }
 
-void VSQSettings::setLastSignedInUser(const QString &user)
+void VSQSettings::setLastSignedInUserId(const QString &userId)
 {
-    if (lastSignedInUser() == user) {
+    if (lastSignedInUserId() == userId) {
         return;
     }
-    setGroupValue(kUsersGroup, kLastSignedInUser, user);
+    setGroupValue(kLastSessionGroup, kSignedInUserId, userId);
     sync();
-    emit lastSignedInUserChanged(user);
+    emit lastSignedInUserIdChanged(userId);
 }
 
-QString VSQSettings::lastSignedInUser() const
+QString VSQSettings::lastSignedInUserId() const
 {
-    return groupValue(kUsersGroup, kLastSignedInUser).toString();
+    return groupValue(kLastSessionGroup, kSignedInUserId).toString();
 }
 
 void VSQSettings::setUsersList(const QStringList &users)

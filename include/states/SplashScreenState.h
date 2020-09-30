@@ -32,38 +32,39 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQLOGGING_H
-#define VSQLOGGING_H
+#ifndef VSQ_SPLASHSCREENSTATE_H
+#define VSQ_SPLASHSCREENSTATE_H
 
-#include <QObject>
+#include <QState>
 
-#include "VSQMessageLogContext.h"
+class VSQMessenger;
+class VSQSettings;
 
-class QThread;
-
-class VSQLogging : public QObject
+namespace VSQ
+{
+class SplashScreenState : public QState
 {
     Q_OBJECT
 
 public:
-    explicit VSQLogging(QObject *parent = nullptr);
-    virtual ~VSQLogging();
+    explicit SplashScreenState(VSQMessenger *messenger, VSQSettings *settings, QState *parent = nullptr);
 
 signals:
-    void messageCreated(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
-    void formattedMessageCreated(const QString &message);
+    void signInUserNotSelected();
+    void signInStarted(const QString &userId);
+    void signInFinished();
+    void signInErrorOccurred(const QString &errorText);
 
 private:
-    void formatMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
+    void onEntry(QEvent *) override;
+    void onExit(QEvent *) override;
 
-    static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
+    void signIn();
+    void hideNativeSplashScreen();
 
-    static VSQLogging *m_instance;
-
-    std::unique_ptr<QThread> m_workerThread;
+    VSQMessenger *m_messenger;
+    VSQSettings *m_settings;
 };
+}
 
-Q_DECLARE_METATYPE(QtMsgType)
-Q_DECLARE_METATYPE(VSQMessageLogContext)
-
-#endif // VSQLOGGING_H
+#endif // VSQ_SPLASHSCREENSTATE_H

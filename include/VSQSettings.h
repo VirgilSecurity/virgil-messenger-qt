@@ -47,7 +47,7 @@ Q_DECLARE_LOGGING_CATEGORY(lcSettings)
 class VSQSettings : public QSettings
 {
     Q_OBJECT
-    Q_PROPERTY(QString lastSignedInUser READ lastSignedInUser WRITE setLastSignedInUser NOTIFY lastSignedInUserChanged)
+    Q_PROPERTY(QString lastSignedInUserId READ lastSignedInUserId WRITE setLastSignedInUserId NOTIFY lastSignedInUserIdChanged)
     Q_PROPERTY(QStringList usersList READ usersList WRITE setUsersList NOTIFY usersListChanged)
     Q_PROPERTY(bool devMode READ devMode CONSTANT)
     Q_PROPERTY(QRect windowGeometry READ windowGeometry WRITE setWindowGeometry NOTIFY windowGeometryChanged)
@@ -60,8 +60,8 @@ public:
 
     // Users
 
-    void setLastSignedInUser(const QString &user);
-    QString lastSignedInUser() const;
+    void setLastSignedInUserId(const QString &userId);
+    QString lastSignedInUserId() const;
 
     void setUsersList(const QStringList &users);
     QStringList usersList() const;
@@ -94,7 +94,7 @@ public:
     Seconds lastSeenActivityInterval() const;
 
 signals:
-    void lastSignedInUserChanged(const QString &);
+    void lastSignedInUserIdChanged(const QString &);
     void usersListChanged(const QStringList &);
     void windowGeometryChanged(const QRect &); // Required by QML, not used
 

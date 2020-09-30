@@ -36,19 +36,17 @@ Page {
             onUserSelected: {
                 form.showLoading("Logging In as %1...".arg(userName))
 
-                var future = Messenger.signIn(userName)
+                var future = Messenger.signInAsync(userName)
                 Future.onFinished(future, (result) => {
                     var res = Future.result(future)
                     if (res === Result.MRES_OK) {
-                        settings.lastSignedInUser = userName
-                        showContacts(true)
+                        settings.lastSignedInUserId = userName
+                        setContactsPage()
                         return
                     }
-
-                    if (res === Result.MRES_ERR_SIGNIN) {
+                    else if (res === Result.MRES_ERR_SIGNIN) {
                         root.showPopupError("Something went wrong")
                     }
-
                     form.hideLoading()
                 })
             }

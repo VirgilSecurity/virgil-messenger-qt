@@ -74,12 +74,15 @@ ApplicationWindow {
     onClosing: {
         if (Platform.isAndroid) {
             close.accepted = false
+            // FIXME(fpohtmeh): refactor
+            /*
             if (preview.visible) {
                 preview.visible = false
             }
             else {
                 mainView.back()
             }
+            */
         }
         else if (Platform.isDesktop) {
             settings.windowGeometry = Qt.rect(x, y, width, height)
@@ -91,11 +94,12 @@ ApplicationWindow {
         anchors.fill: parent
     }
 
-    // Popup to show messages or warnings on the bottom postion of the screen
     Popup {
         id: inform
     }
 
+    // FIXME(fpohtmeh): refactor
+    /*
     SendReportAsk {
         id: sendReportAsk
     }
@@ -114,7 +118,7 @@ ApplicationWindow {
             app.reloadQml()
         }
     }
-
+    */
 
     // Show Popup message
     function showPopup(message, color, textColor, isOnTop, isModal) {
@@ -138,6 +142,8 @@ ApplicationWindow {
         showPopup(message, "#66CDAA", "#00", true, false)
     }
 
+    // FIXME(fpohtmeh): refactor
+    /*
     // View mode detection
     function isMobileView() {
 
@@ -193,9 +199,11 @@ ApplicationWindow {
             onWheel: wheel.accepted = true
         }
     }
+    */
 
     Component.onCompleted: {
         Platform.detect()
+        app.stateManager.setUiState()
         Messenger.informationRequested.connect(showPopupInform)
 //        crashReporter.crashReportRequested.connect(sendReportAsk.open)
 //        crashReporter.reportSent.connect(showPopupSuccess)
