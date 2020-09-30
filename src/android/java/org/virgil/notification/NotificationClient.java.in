@@ -1,6 +1,6 @@
 package org.virgil.notification;
 
-import com.virgilsecurity.android.virgil.R;
+import @VS_ANDROID_PACKAGE_NAME@.R;
 
 import android.app.Notification;
 import android.app.NotificationManager;

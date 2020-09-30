@@ -39,15 +39,15 @@
 
 namespace Customer
 {
-    static QString OrganizationName = "VirgilSecurity";
-    static QString OrganizationDisplayName = "Virgil";
+    static QString OrganizationName = "@VS_ORGANIZATION_NAME@";
+    static QString OrganizationDisplayName = "@VS_ORGANIZATION_DISPLAYNAME@";
 
-    static QString ApplicationName = "VirgilMessenger";
-    static QString ApplicationDisplayName = "Virgil Secure Communications Platform";
+    static QString ApplicationName = "@VS_APPLICATION_NAME@";
+    static QString ApplicationDisplayName = "@VS_APPLICATION_DISPLAY_NAME@";
 
-    static QString OrganizationDomain = "virgil.net";
-    static QString MessengerUrlTemplate = "https://messenger%1.virgilsecurity.com";
-    static QString XmppUrlTemplate = "xmpp%1.virgilsecurity.com";
+    static QString OrganizationDomain = "@VS_ORGANIATION_DOMAIN@";
+    static QString MessengerUrlTemplate = "@VS_MESSANGER_URL_TEMPLATE@";
+    static QString XmppUrlTemplate = "@VS_XMPP_URL_TEMPLATE@";
 }
 
 #endif // VSQ_CUSTOMER_H

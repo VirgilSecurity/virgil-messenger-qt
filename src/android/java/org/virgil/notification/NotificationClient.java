@@ -1,5 +1,7 @@
 package org.virgil.notification;
 
+import com.virgilsecurity.android.virgil.R;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -13,11 +15,19 @@ public class NotificationClient
 {
     private static NotificationManager m_notificationManager;
     private static Notification.Builder m_builder;
+    private static int notificationId = 0;
 
     public NotificationClient() {}
 
-    public static void notify(Context context, String message) {
+    public static void notify(Context context, String title, String message) {
         try {
+
+            Intent notificationIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            PendingIntent intent = PendingIntent.getActivity(context, 0,
+                        notificationIntent, 0);
+
             m_notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -29,20 +39,13 @@ public class NotificationClient
                 m_builder = new Notification.Builder(context);
             }
 
-//            m_builder.setSmallIcon(R.drawable.icon)
-//                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.icon))
-//                    .setContentTitle("A message from Qt!")
-//                    .setContentText(message)
-//                    .setDefaults(Notification.DEFAULT_SOUND)
-//                    .setColor(Color.GREEN)
-//                    .setAutoCancel(true);
-
-            m_builder.setContentTitle("A message from Qt!")
+            m_builder.setSmallIcon(R.drawable.icon)
+                    .setContentTitle(title)
                     .setContentText(message)
-                    .setDefaults(Notification.DEFAULT_SOUND)
-                    .setColor(Color.GREEN)
+                    .setContentIntent(intent)
                     .setAutoCancel(true);
 
+            notificationId += 2;
             m_notificationManager.notify(0, m_builder.build());
         } catch (Exception e) {
             e.printStackTrace();

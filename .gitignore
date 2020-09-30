@@ -1,5 +1,7 @@
 #####
 transitive-args.cmake
+downloads/
+prebuilt/
 build*/
 install*/
 .depends_cache/

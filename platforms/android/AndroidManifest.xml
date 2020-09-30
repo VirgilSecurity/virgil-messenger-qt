@@ -10,7 +10,7 @@
     <application
         android:hardwareAccelerated="true"
         android:name="org.qtproject.qt5.android.bindings.QtApplication"
-        android:label="Virgil Messenger"
+        android:label="Virgil Secure messenger"
         android:extractNativeLibs="true"
         android:theme="@style/AppTheme"
         android:icon="@drawable/icon"
@@ -18,7 +18,7 @@
         <activity
             android:configChanges="orientation|keyboardHidden"
             android:name="org.qtproject.qt5.android.bindings.QtActivity"
-            android:label="Virgil Messenger"
+            android:label="Virgil Secure messenger"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
             android:launchMode="singleTop"

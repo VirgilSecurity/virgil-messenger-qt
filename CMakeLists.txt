@@ -36,10 +36,11 @@ cmake_minimum_required(VERSION 3.17 FATAL_ERROR)
 # ---------------------------------------------------------------------------
 # Include Cmake helpers
 # ---------------------------------------------------------------------------
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake" ${CMAKE_MODULE_PATH})
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include(vsplatforms)
 include(varpadding)
 include(getprebuild)
+include(customers)
 
 # Target name and version
 set(VS_TARGET_NAME "virgil-messenger")
@@ -74,7 +75,7 @@ elseif(VS_PLATFORM STREQUAL "android")
     # Android QT Extra
     string(APPEND VS_QT_EXTRA "AndroidExtras")
     # Android gradle path
-    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android")    
+    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/platforms/android")    
 endif()    
 
 project(${VS_TARGET_NAME} VERSION ${VS_TARGET_VERSION} LANGUAGES C CXX)
@@ -127,9 +128,14 @@ message(STATUS "Setting prebuild library directory:	[${PREBUILT_LIB_DIR}]")
 #   Customers selection
 # ---------------------------------------------------------------------------
 
-if(NOT VS_CUSTOMER)
-    set(VS_CUSTOMER "Virgil")
-endif()
+set(VS_CUSTOMER "Virgil" CACHE "STRING" "Customer for build")
+set(VS_CUSTOMER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/customers/${VS_CUSTOMER}")
+message(STATUS "Current customer : [${VS_CUSTOMER}]")
+message(STATUS "Current customer directory: [${VS_CUSTOMER_DIR}]")
+message(STATUS "Include customer cmake profile: [customer.cmake]")
+include("${VS_CUSTOMER_DIR}/customer.cmake")
+
+vs_customer_prepare()
 
 # ---------------------------------------------------------------------------
 #   Build system type
@@ -138,40 +144,6 @@ endif()
 if(VS_PLATFORM STREQUAL "android")
     message("-- Prepare sources for Android ...")
     add_library(${VS_TARGET_NAME} SHARED)
-    set(QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android")    
-    string(APPEND DISTFILES  
-        "${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/gradle.properties \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/google-services.json \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/AndroidManifest.xml \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/build.gradle \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/gradle/wrapper/gradle-wrapper.jar \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/gradle/wrapper/gradle-wrapper.properties \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/gradlew \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/gradlew.bat \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/values/libs.xml \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/src/org/virgil/notification/NotificationClient.java \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/drawable-hdpi/icon.png \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/drawable-hdpi/icon_round.png \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/drawable-ldpi/icon.png \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/drawable-ldpi/icon_round.png \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/drawable-mdpi/icon.png \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/drawable-mdpi/icon_round.png \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/drawable-xhdpi/icon.png \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/drawable-xhdpi/icon_round.png \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/drawable-xxhdpi/icon.png \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/drawable-xxhdpi/icon_round.png \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/drawable-xxxhdpi/icon.png \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/drawable-xxxhdpi/icon_round.png \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/mipmap-hdpi/ic_launcher_round.png \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/mipmap-mdpi/ic_launcher.png \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/mipmap-mdpi/ic_launcher_round.png \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/mipmap-xhdpi/ic_launcher.png \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/mipmap-xhdpi/ic_launcher_round.png \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/mipmap-xxhdpi/ic_launcher.png \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/mipmap-xxhdpi/ic_launcher_round.png \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/mipmap-xxxhdpi/ic_launcher.png \
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/platforms/android/res/mipmap-xxxhdpi/ic_launcher_round.png"
-        )
     
 elseif(VS_PLATFORM STREQUAL "macos")
     add_executable(${VS_TARGET_NAME} MACOSX_BUNDLE)
@@ -187,15 +159,15 @@ endif()
 # ---------------------------------------------------------------------------
 #   Target sources and libraries
 # ---------------------------------------------------------------------------
-
 target_sources(${VS_TARGET_NAME}
 
         PRIVATE
-        # Includes
+        # -- Includes
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQApplication.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQAttachmentBuilder.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQClipboardProxy.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQCommon.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/VSQCustomer.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQContactManager.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQCryptoTransferManager.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQDiscoveryManager.h
@@ -216,13 +188,13 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/macos/VSQMacos.h
         ${CMAKE_CURRENT_LIST_DIR}/include/helpers/VSQSingleton.h
         ${CMAKE_CURRENT_LIST_DIR}/include/ui/VSQUiHelper.h
-        # Generated
-        ${CMAKE_CURRENT_LIST_DIR}/generated/include/VSQCustomer.h
         # Thirdparty
         ${CMAKE_CURRENT_LIST_DIR}/include/thirdparty/optional/optional.hpp
-        # Push notification
+        # Push notification (Android)
         $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/VSQPushNotifications.h>
         $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/android/VSQFirebaseListener.h>
+        # Customer includes
+        ${VS_CUSTOMER_INCLUDES}
         
 	# Sources
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQAttachmentBuilder.cpp
@@ -259,7 +231,8 @@ target_sources(${VS_TARGET_NAME}
 
         # Qt Resources
         ${CMAKE_CURRENT_LIST_DIR}/src/resources.qrc
-        ${CMAKE_CURRENT_LIST_DIR}/generated/src/customer.qrc
+        # Customer sources
+        ${VS_CUSTOMER_SOURCES}
         )
 
 target_link_directories(${VS_TARGET_NAME}
@@ -313,6 +286,7 @@ target_link_libraries(${VS_TARGET_NAME}
         $<$<STREQUAL:"${VS_PLATFORM}","android">:crypto>        		
         
         $<$<STREQUAL:"${VS_PLATFORM}","linux">:curl>        
+        
         $<$<STREQUAL:"${VS_PLATFORM}","windows">:curl>                
         )
 
@@ -326,7 +300,7 @@ target_include_directories(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:${PREBUILT_QT_DIR}/config/pc>
         $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}/qxmpp>
         $<BUILD_INTERFACE:${QUICKFUTURE_DIR}>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/generated/include>
+        $<BUILD_INTERFACE:${VS_CUSTOMER_INCLUDE_DIR}>
 	$<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${PREBUILT_DIR}/firebase_cpp_sdk/include>>        
         
         )
@@ -335,6 +309,7 @@ target_compile_definitions(${VS_TARGET_NAME}
     PRIVATE
     $<BUILD_INTERFACE:INFO_CLIENT=1>
     $<BUILD_INTERFACE:CFG_CLIENT=1>
+    $<BUILD_INTERFACE:VS_CUSTOMER=${VS_CUSTOMER}>
 
     $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:VS_ANDROID=1>>
     $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:VS_MOBILE=1>>
