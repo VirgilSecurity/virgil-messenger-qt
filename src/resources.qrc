@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>qml/components/CommonHelpers/TextInCircle.qml</file>
-        <file>qml/components/Dialogs/AddContactDialog.qml</file>
         <file>qml/components/Popups/Popup.qml</file>
         <file>qml/components/Progress/Progress.qml</file>
         <file>qml/iot/DevicesList.qml</file>
@@ -20,9 +19,6 @@
         <file>qml/resources/icons/Arrow-Left@2x.png</file>
         <file>qml/resources/icons/Arrow-Right.png</file>
         <file>qml/resources/icons/Arrow-Right@2x.png</file>
-        <file>qml/resources/icons/Logo-Big.png</file>
-        <file>qml/resources/icons/Logo-Big@2x.png</file>
-        <file>qml/resources/icons/Logo-Big@3x.png</file>
         <file>qml/resources/icons/More.png</file>
         <file>qml/resources/icons/More@2x.png</file>
         <file>qml/resources/icons/Search.png</file>
@@ -77,8 +73,6 @@
         <file>qml/pages/DownloadKeyPage.qml</file>
         <file>qml/resources/icons/Key.png</file>
         <file>qml/resources/icons/Key@2x.png</file>
-        <file>qml/resources/icons/Logo.png</file>
-        <file>qml/resources/icons/Logo@2x.png</file>
         <file>qml/components/ServersPanel.qml</file>
         <file>qml/resources/icons/Menu.png</file>
         <file>qml/resources/icons/Menu@2x.png</file>
@@ -103,6 +97,7 @@
         <file>qml/base/qmldir</file>
         <file>qml/components/AppStatus.qml</file>
         <file>qml/pages/BackupKeyPage.qml</file>
+        <file>qml/pages/AddPersonPage.qml</file>
         <file>qml/components/Dialogs/SendReportAsk.qml</file>
         <file>qml/components/SelectAttachmentsDialog.qml</file>
         <file>qml/resources/icons/Camera Selected.png</file>
@@ -114,6 +109,9 @@
         <file>qml/resources/icons/Mic Selected.png</file>
         <file>qml/resources/icons/Mic Selected@2x.png</file>
         <file>qml/resources/icons/File Download Big.png</file>
+        <file>qml/resources/icons/File Download Big@2x.png</file>
         <file>qml/components/CircleProgressBar.qml</file>
+        <file>qml/components/TextScrollView.qml</file>
+        <file>qml/components/AttachmentPicker.qml</file>
     </qresource>
 </RCC>

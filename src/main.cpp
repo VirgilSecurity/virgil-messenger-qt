@@ -40,6 +40,7 @@
 #include <QApplication>
 #endif
 #include <android/VSQAndroid.h>
+#include <logging/VSQLogging.h>
 
 #if (VSQ_WEBDRIVER_DEBUG)
 #include "Test/Headers.h"
@@ -56,15 +57,13 @@ main(int argc, char *argv[]) {
     wd_setup(argc, argv);
 #endif
 
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-
+    VSQApplication::initialize();
 #ifdef VS_MOBILE
     QGuiApplication a(argc, argv);
 #else
     QApplication a(argc, argv);
 #endif
-    a.setOrganizationName("VirgilSecurity");
-    a.setOrganizationDomain("virgil.net");
+    VSQLogging logging;
 
     QString baseUrl;
     if (2 == argc && argv[1] && argv[1][0]) {
@@ -72,5 +71,5 @@ main(int argc, char *argv[]) {
         qDebug() << "QML URL: " << baseUrl;
     }
 
-    return VSQApplication().run(baseUrl);
+    return VSQApplication().run(baseUrl, &logging);
 }

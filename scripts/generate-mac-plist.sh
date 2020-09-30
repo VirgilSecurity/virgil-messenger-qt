@@ -4,6 +4,7 @@ set -o errtrace
 #   Global variables
 #
 SCRIPT_FOLDER="$(cd "$(dirname "$0")" && pwd)"
+IGNORE_PARAMS="1"
 source ${SCRIPT_FOLDER}/ish/common.sh
 
 

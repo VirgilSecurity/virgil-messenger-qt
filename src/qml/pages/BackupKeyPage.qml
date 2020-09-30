@@ -37,31 +37,27 @@ Page {
 
         FormPrimaryButton {
             onClicked: {
-
-                if (password.text === '') {
-                    root.showPopupError('Password can not be empty')
+                if (password.text === "") {
+                    root.showPopupError(qsTr("Password can not be empty"))
                 }
-
-                if (password.text !== confirmPassword.text) {
-                    root.showPopupError('Passwords are not match')
+                else if (password.text !== confirmPassword.text) {
+                    root.showPopupError(qsTr("Passwords don't not match"))
                 }
-
-                form.showLoading(qsTr("Backing up your private key..."))
-
-                var future = Messenger.backupUserKey(password.text)
-
-                Future.onFinished(future, function(result) {
-                    form.hideLoading()
-
-                    if (Future.result(future) === Result.MRES_OK) {
-                        password.text = ''
-                        confirmPassword.text = ''
-                        root.showPopupSuccess('Backup private key success');
-                        return
-                    }
-
-                    root.showPopupError("Backup private key error")
-                })
+                else {
+                    form.showLoading(qsTr("Backing up your private key..."))
+                    var future = Messenger.backupUserKey(password.text)
+                    Future.onFinished(future, function(result) {
+                        form.hideLoading()
+                        if (Future.result(future) === Result.MRES_OK) {
+                            password.text = ''
+                            confirmPassword.text = ''
+                            root.showPopupSuccess(qsTr("Backup private key success"));
+                        }
+                        else {
+                            root.showPopupError(qsTr("Backup private key error"))
+                        }
+                    })
+                }
             }
             text: qsTr("Backup")
         }

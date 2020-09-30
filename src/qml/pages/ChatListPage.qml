@@ -51,8 +51,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
-import QuickFuture 1.0
-import MesResult 1.0
 
 import "../theme"
 import "../components"
@@ -67,14 +65,16 @@ Page {
     }
 
     header: ContactsHeader {
-        description: "Virgil Server"
+        description: "%1 Server".arg(app.organizationDisplayName)
         objectName: "hdrDefaultServer"
         id: contactsHeaderId
-        title: "Virgil"
+        title: app.organizationDisplayName
         searchPlaceholder: "Search conversation"
 
         onIsSearchOpenChanged: {
             contactsHeaderId.isSearchOpen ? ChatModel.applyFilter('') : ChatModel.clearFilter()
+            focus = false
+            parent.focus = true
         }
 
         onSearchChanged: {
@@ -82,20 +82,9 @@ Page {
         }
 
         Action {
-            text: qsTr("New Chat")
-            onTriggered: addContact()
+            text: qsTr("New chat")
+            onTriggered: mainView.showAddPerson()
         }
-/*
-        Action {
-            text: qsTr("New Group")
-            // onTriggered: addContact()
-        }
-
-        Action {
-            text: qsTr("Send Invite")
-            // onTriggered: addContact()
-        }
-*/
     }
 
     ListView {
@@ -195,7 +184,7 @@ Page {
             anchors.fill: parent
             onClicked: {
                 if (!listView.contentItem.children.length) {
-                    addContact()
+                    mainView.showAddPerson()
                     mouse.accepted = false
                 }
             }
@@ -209,35 +198,5 @@ Page {
     function setAsRead(user) {
         // ConversationsModel.setAsRead(user);
         console.log("setAsRead func");
-    }
-
-    function addContact() {
-        var component = Qt.createComponent("../components/Dialogs/AddContactDialog.qml")
-        if (component.status === Component.Ready) {
-            var dialog = component.createObject(root)
-            var apply = function() {
-                try {
-                    var future = Messenger.addContact(dialog.contact.toLowerCase())
-                    Future.onFinished(future, function(value) {
-                        var res = Future.result(future)
-                        if (res === Result.MRES_OK) {
-                            mainView.showChatWith(dialog.contact)
-                            return
-                        }
-
-                        root.showPopupError(qsTr("User not found"))
-                    })
-                } catch (error) {
-                    console.error("Cannot start initialization of device")
-                }
-                dialog.close()
-            }
-            dialog.applied.connect(apply)
-            dialog.accepted.connect(apply)
-            dialog.open()
-            return dialog
-        }
-        console.error(component.errorString())
-        return null
     }
 }

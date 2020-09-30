@@ -140,7 +140,7 @@ Item {
 
         onClicked: {
             containerId.state = "open"
-            searchField.focus = true
+            searchField.forceActiveFocus()
         }
     }
 }

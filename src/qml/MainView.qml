@@ -1,7 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
-import Qt.labs.settings 1.1
 import QuickFuture 1.0
 
 import "./base"
@@ -11,11 +10,6 @@ import "./helpers/login.js" as LoginLogic
 
 Control {
     id: mainView
-    property string lastSignedInUser
-
-    Settings {
-        property alias lastSignedInUser: mainView.lastSignedInUser
-    }
 
     RowLayout {
         anchors {
@@ -60,7 +54,7 @@ Control {
         }
     }
 
-    ScrollView {
+    TextScrollView {
         id: logControl
         anchors {
             topMargin: 0.75 * mainView.height
@@ -74,7 +68,7 @@ Control {
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             readOnly: true
             font.pointSize: Platform.isMobile ? 12 : 9
-            selectByMouse: true
+            selectByMouse: Platform.isDesktop
         }
     }
 
@@ -92,7 +86,7 @@ Control {
     Component.onCompleted: {
         showSplashScreen()
         if (logControl.visible) {
-            Logging.newMessage.connect(logTextControl.append)
+            logging.formattedMessageCreated.connect(logTextControl.append)
         }
     }
 
@@ -104,7 +98,7 @@ Control {
             })
 
             stackView.clear()
-            lastSignedInUser = user
+            settings.lastSignedInUser = user
             showContacts()
         } else {
             root.showPopupError(qsTr("Incorrect User Name"))
@@ -119,7 +113,7 @@ Control {
             // clear all pages in the stackview and push sign in page
             // as a first page in the stack
             stackView.clear()
-            lastSignedInUser = ""
+            settings.lastSignedInUser = ""
             showAuth(true)
         })
     }
@@ -178,8 +172,8 @@ Control {
         stackView.push("./pages/BackupKeyPage.qml")
     }
 
-    function showChatWith(recipient) {
-        navigateTo("Chat", { recipient: recipient }, true, false)
+    function showChatWith(recipient, replace) {
+        navigateTo("Chat", { recipient: recipient }, true, false, replace)
         Messenger.setCurrentRecipient(recipient)
     }
 
@@ -191,29 +185,26 @@ Control {
         stackView.push("./pages/ChatListPage.qml")
     }
 
+    function showAddPerson() {
+        stackView.push("./pages/AddPersonPage.qml")
+    }
+
     function showAccountSettings() {
         navigateTo("AccountSettings", null, true, false)
     }
 
-    function navigateTo(page, params, animate, clearHistory) {
-
+    function navigateTo(page, params, animate, clearHistory, replace) {
         const pageName = "%1Page".arg(page)
-        const path = "./pages/%1.qml".arg(pageName)
-
         // cancel navigation if the page is already shown
-        if (stackView.currentItem.toString().startsWith(pageName)){
+        if (stackView.currentItem.toString().startsWith(pageName)) {
             return
         }
-
         if (clearHistory) {
             stackView.clear()
         }
 
-        if (animate) {
-            stackView.push(path, params)
-        }
-        else {
-            stackView.push(path, params, StackView.Immediate)
-        }
+        var push = replace ? stackView.replace : stackView.push
+        const path = "./pages/%1.qml".arg(pageName)
+        push(path, params, animate ? StackView.Transition : StackView.Immediate)
     }
 }

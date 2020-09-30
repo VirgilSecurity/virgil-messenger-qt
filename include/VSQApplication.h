@@ -38,23 +38,29 @@
 #include <QtCore>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <VSQMessenger.h>
-#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
-#include <VSQLogging.h>
-#include <VSQSettings.h>
 
+#include <VSQCrashReporter.h>
+#include <VSQMessenger.h>
+#include <VSQSettings.h>
 #include <macos/VSQMacos.h>
 
 class QNetworkAccessManager;
 
-class VSQApplication : public QObject {
+class VSQLogging;
+
+class VSQApplication : public QObject
+{
     Q_OBJECT
+    Q_PROPERTY(QString organizationDisplayName READ organizationDisplayName CONSTANT)
+    Q_PROPERTY(QString applicationDisplayName READ applicationDisplayName CONSTANT)
+
 public:
     VSQApplication();
     virtual ~VSQApplication() = default;
 
-    int
-    run(const QString &basePath);
+    static void initialize();
+
+    int run(const QString &basePath, VSQLogging *logging);
 
     Q_INVOKABLE
     void reloadQml();
@@ -68,6 +74,12 @@ public:
     Q_INVOKABLE void
     sendReport();
 
+    Q_INVOKABLE void hideSplashScreen();
+
+    // Names
+
+    QString organizationDisplayName() const;
+    QString applicationDisplayName() const;
 
 private slots:
     void
@@ -77,9 +89,9 @@ private:
     static const QString kVersion;
     VSQSettings m_settings;
     QNetworkAccessManager *m_networkAccessManager;
+    VSQCrashReporter m_crashReporter;
     QQmlApplicationEngine m_engine;
     VSQMessenger m_messenger;
-    VSQLogging m_logging;
 };
 
 #endif // VSQApplication

@@ -54,6 +54,9 @@ namespace args {
 using DataSize = qint64;
 Q_DECLARE_METATYPE(DataSize);
 
+using Seconds = quint64;
+Q_DECLARE_METATYPE(Seconds);
+
 template <class Type>
 using Optional = tl::optional<Type>;
 using OptionalType = tl::nullopt_t;
@@ -119,6 +122,7 @@ struct Attachment
     QString id;
     Type type = Type::File;
     QString filePath; // raw
+    QString fileName;
     QString displayName;
     QUrl remoteUrl; // encrypted
     // Thumbnail
@@ -148,6 +152,6 @@ struct StMessage
 };
 Q_DECLARE_METATYPE(StMessage);
 
-void registerCommonTypes();
+void registerMetaTypes();
 
 #endif // VSQ_COMMON_H

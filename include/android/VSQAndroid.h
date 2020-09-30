@@ -39,6 +39,8 @@
 
 #include <QObject>
 
+#include "VSQCommon.h"
+
 class VSQAndroid {
 public:
     VSQAndroid() = delete;
@@ -48,6 +50,12 @@ public:
     static bool prepare();
 
     static QString certFile();
+
+    static void hideSplashScreen();
+
+    static QString getDisplayName(const QUrl &url);
+
+    static DataSize getFileSize(const QUrl &url);
 
 private:
     static int runLoggingThread();

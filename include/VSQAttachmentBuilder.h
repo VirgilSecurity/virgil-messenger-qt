@@ -36,6 +36,7 @@
 #define VSQ_ATTACHMENT_BUILDER
 
 #include <QObject>
+#include <QImageIOHandler>
 
 #include "VSQCommon.h"
 
@@ -58,7 +59,8 @@ public:
     QString generateThumbnailFileName() const;
 
 private:
-    QPixmap generateThumbnail(const QPixmap &pixmap) const;
+    QImage applyImageOrientation(const QImage &image, const QImageIOHandler::Transformations transformations) const;
+    QPixmap generateThumbnail(const QString &fileName) const;
     void saveThumbnailFile(const QPixmap &pixmap, const QString &fileName) const;
 
     VSQSettings *m_settings;

@@ -53,7 +53,7 @@ ColumnLayout {
             width: 240
             height: 240
 
-            property var userChunks: LoginLogic.chunk(authenticationPage.userList, 4)
+            property var userChunks: LoginLogic.chunk(settings.usersList, 4)
 
             Repeater {
                 model: view.userChunks

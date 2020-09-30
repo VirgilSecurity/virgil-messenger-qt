@@ -10,7 +10,6 @@ import "../components"
 Page {
     id: authenticationPage
 
-    property var userList: Messenger.usersList()
     property var loginPage
     property var registerPage
 
@@ -28,12 +27,12 @@ Page {
         id: form
 
         FormVendor {
-            visible: !userList.length
+            visible: !settings.usersList.length
             Layout.bottomMargin: 35
         }
 
         AccountSelection {
-            visible: userList.length
+            visible: settings.usersList.length
             onUserSelected: {
                 form.showLoading("Logging In as %1...".arg(userName))
 
@@ -41,7 +40,7 @@ Page {
                 Future.onFinished(future, (result) => {
                     var res = Future.result(future)
                     if (res === Result.MRES_OK) {
-                        lastSignedInUser = userName
+                        settings.lastSignedInUser = userName
                         showContacts(true)
                         return
                     }

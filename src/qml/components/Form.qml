@@ -3,12 +3,12 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 
 Item {
-
     anchors.fill: parent
 
     property bool isLoading: false
 
     default property alias children: formContainer.children
+    property alias formSpacing: formContainer.spacing
 
     ColumnLayout {
         id: formContainer

@@ -34,7 +34,9 @@
 
 #include "VSQAttachmentBuilder.h"
 
+#include <QImageReader>
 #include <QPixmap>
+#include <QUrlQuery>
 
 #include <QXmppClient.h>
 
@@ -43,6 +45,7 @@
 #include "VSQSettings.h"
 #include "VSQUpload.h"
 #include "VSQUtils.h"
+#include "android/VSQAndroid.h"
 
 using namespace VirgilIoTKit;
 
@@ -69,7 +72,13 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
         errorText = tr("File is empty");
         return NullOptional;
     }
-    if (localInfo.size() > m_settings->attachmentMaxFileSize()) {
+#ifdef VS_ANDROID
+    const DataSize fileSize = VSQAndroid::getFileSize(url);
+#else
+    const DataSize fileSize = localInfo.size();
+#endif
+    qCDebug(lcAttachment) << "Attachment file size:" << fileSize;
+    if (fileSize > m_settings->attachmentMaxFileSize()) {
         errorText = tr("File size limit: %1").arg(VSQUtils::formattedDataSize(m_settings->attachmentMaxFileSize()));
         return NullOptional;
     }
@@ -77,12 +86,31 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
     Attachment attachment;
     attachment.id = VSQUtils::createUuid();
     attachment.type = type;
-    attachment.displayName = localInfo.fileName();
+    const int maxLength = 50;
+    if (type == Attachment::Type::Picture) {
+        attachment.displayName = tr("picture");
+    }
+#ifdef VS_ANDROID
+    attachment.fileName = VSQAndroid::getDisplayName(url);
+#elif defined(VS_IOS)
+    if (type == Attachment::Type::Picture) {
+        // Build file name from url, i.e. "file:assets-library://asset/asset.PNG?id=7CE20DC4-89A8-4079-88DC-AD37920581B5&ext=PNG"
+        QUrl urlWithoutFileScheme{url.toLocalFile()};
+        const QUrlQuery query(urlWithoutFileScheme.query());
+        attachment.fileName = query.queryItemValue("id") + QChar('.') + query.queryItemValue("ext").toLower();
+    }
+#endif
+    if (attachment.fileName.isEmpty()) {
+        attachment.fileName = localInfo.fileName();
+    }
+    if (attachment.displayName.isEmpty()) {
+        attachment.displayName = VSQUtils::elidedText(attachment.fileName, maxLength);
+    }
     attachment.filePath = localInfo.absoluteFilePath();
 
     // Thumbnail processing
     if (type == Attachment::Type::Picture) {
-        const auto pixmap = generateThumbnail(QPixmap(attachment.filePath));
+        const auto pixmap = generateThumbnail(attachment.filePath);
         attachment.thumbnailSize = pixmap.size();
         attachment.thumbnailPath = generateThumbnailFileName();
         saveThumbnailFile(pixmap, attachment.thumbnailPath);
@@ -95,9 +123,31 @@ QString VSQAttachmentBuilder::generateThumbnailFileName() const
     return m_settings->thumbnailsDir().filePath(VSQUtils::createUuid() + QLatin1String(".png"));
 }
 
-QPixmap VSQAttachmentBuilder::generateThumbnail(const QPixmap &pixmap) const
+QImage VSQAttachmentBuilder::applyImageOrientation(const QImage &image, const QImageIOHandler::Transformations transformations) const
 {
-    QSizeF size = pixmap.size();
+    auto result = image;
+    const bool horizontally = transformations & QImageIOHandler::TransformationMirror;
+    const bool vertically = transformations & QImageIOHandler::TransformationFlip;
+    if (horizontally || vertically) {
+        result = result.mirrored(horizontally, vertically);
+    }
+    if (transformations & QImageIOHandler::TransformationRotate90) {
+        result = result.transformed(QTransform().rotate(90.0));
+    }
+    return result;
+}
+
+QPixmap VSQAttachmentBuilder::generateThumbnail(const QString &fileName) const
+{
+    QImageReader reader(fileName);
+    const auto originalImage = reader.read();
+    if (originalImage.isNull()) {
+        qCWarning(lcAttachment) << "Unable to generate image preview";
+        return QPixmap();
+    }
+
+    const auto image = applyImageOrientation(originalImage, reader.transformation());
+    QSizeF size = image.size();
     const double ratio = size.height() / size.width();
     const QSizeF maxSize = m_settings->thumbnailMaxSize();
     if (size.width() > maxSize.width()) {
@@ -108,7 +158,8 @@ QPixmap VSQAttachmentBuilder::generateThumbnail(const QPixmap &pixmap) const
         size.setHeight(maxSize.height());
         size.setWidth(maxSize.height() / ratio);
     }
-    if (size == pixmap.size()) {
+    const auto pixmap = QPixmap::fromImage(image);
+    if (size == image.size()) {
         return pixmap;
     }
     return pixmap.scaled(size.width(), size.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);

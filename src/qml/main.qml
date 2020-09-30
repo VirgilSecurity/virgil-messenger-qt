@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
+import QtQuick.Window 2.15
 import QtMultimedia 5.12
 import QuickFuture 1.0
 
@@ -13,11 +14,33 @@ import "theme"
 ApplicationWindow {
     id: root
     visible: true
-    title: qsTr("Virgil Secure Communications Platform")
-    minimumWidth: Platform.isMobile ? 320 : 1000
-    minimumHeight: Platform.isMobile ? 600 : 800
+    title: app.applicationDisplayName
 
-    property bool connectionError: false
+    Binding on x {
+        when: Platform.isDesktop;
+        value: d.restore ? settings.windowGeometry.x : 0.5 * (Screen.width - d.width)
+    }
+    Binding on y {
+        when: Platform.isDesktop;
+        value: d.restore ? settings.windowGeometry.y : 0.5 * (Screen.height - d.height)
+    }
+    Binding on width {
+        when: Platform.isDesktop;
+        value: d.restore ? settings.windowGeometry.width : d.width
+    }
+    Binding on height {
+        when: Platform.isDesktop;
+        value: d.restore ? settings.windowGeometry.height : d.height
+    }
+    Binding on minimumHeight { when: Platform.isDesktop; value: 500 }
+    Binding on minimumWidth { when: Platform.isDesktop; value: 300 }
+
+    QtObject {
+        id: d
+        readonly property int height: 800
+        readonly property int width: 600
+        readonly property bool restore: settings.windowGeometry.width > 0 && settings.windowGeometry.height > 0
+    }
 
     //
     //  Connections
@@ -25,24 +48,26 @@ ApplicationWindow {
     Connections {
         target: Messenger
 
-        onFireError: {
+        function onFireError() {
         }
 
-        onFireInform: {
+        function onFireInform() {
         }
 
-        onFireWarning: showPopupError(warningText);
-
-        onFireConnecting: {
+        function onFireWarning(text) {
+            showPopupError(text);
         }
 
-        onFireReady: {
+        function onFireConnecting() {
         }
 
-        onFireAddedContact: {
+        function onFireReady() {
         }
 
-        onFireNewMessage: {
+        function onFireAddedContact() {
+        }
+
+        function onFireNewMessage() {
         }
     }
 
@@ -55,6 +80,9 @@ ApplicationWindow {
             else {
                 mainView.back()
             }
+        }
+        else if (Platform.isDesktop) {
+            settings.windowGeometry = Qt.rect(x, y, width, height)
         }
     }
 
@@ -133,11 +161,6 @@ ApplicationWindow {
 
         property alias filePath: previewImage.source
 
-        MouseArea {
-            // grab all mouse events
-            anchors.fill: parent
-        }
-
         Rectangle {
             anchors.fill: parent
             color: "black"
@@ -148,6 +171,7 @@ ApplicationWindow {
             id: previewImage
             anchors.fill: parent
             fillMode: Image.PreserveAspectFit
+            autoTransform: true
         }
 
         Label {
@@ -160,19 +184,25 @@ ApplicationWindow {
             text: qsTr("Close")
             color: "white"
             font.bold: true
+        }
 
-            MouseArea {
-                anchors.fill: parent
-                onClicked: preview.visible = false
-            }
+        MouseArea {
+            acceptedButtons: Qt.AllButtons
+            anchors.fill: parent
+            onClicked: preview.visible = false
+            onWheel: wheel.accepted = true
         }
     }
 
     Component.onCompleted: {
         Platform.detect()
         Messenger.informationRequested.connect(showPopupInform)
-//        Logging.crashReportRequested.connect(sendReportAsk.open)
-//        Logging.reportSent.connect(showPopupSuccess)
-//        Logging.reportSentErr.connect(showPopupError)
+//        crashReporter.crashReportRequested.connect(sendReportAsk.open)
+//        crashReporter.reportSent.connect(showPopupSuccess)
+//        crashReporter.reportSentErr.connect(showPopupError)
+    }
+
+    onActiveFocusItemChanged: {
+//        console.log(activeFocusItem, activeFocusItem ? activeFocusItem.objectName : undefined)
     }
 }

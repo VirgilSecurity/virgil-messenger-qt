@@ -34,8 +34,8 @@
 
 #include "VSQUtils.h"
 
-#include <QLocale>
 #include <QDir>
+#include <QLocale>
 #include <QUuid>
 
 QString VSQUtils::createUuid()
@@ -126,4 +126,75 @@ QUrl VSQUtils::localFileToUrl(const QString &filePath)
 #else
     return QUrl::fromLocalFile(filePath);
 #endif
+}
+
+int VSQUtils::bufferSizeForEncryption(const int rawSize)
+{
+    // TODO(fpohtmeh): use function rawSize * 3 + 2180
+    return 5 * rawSize + 5000;
+}
+
+int VSQUtils::bufferSizeForDecryption(const int encryptedSize)
+{
+    return encryptedSize;
+}
+
+QString VSQUtils::formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval)
+{
+    const auto preffix = QObject::tr("Last seen %1");
+    if (seconds < updateInterval) {
+        return QObject::tr("Online");
+    }
+    if (seconds <= 3 * updateInterval) {
+        return preffix.arg(QObject::tr("few seconds ago"));
+    }
+    const Seconds minute(60);
+    if (seconds < minute) {
+        return preffix.arg(QObject::tr("recently"));
+    }
+    if (seconds < 2 * minute) {
+        return preffix.arg(QObject::tr("a minute ago"));
+    }
+    if (seconds < 50 * minute) {
+        return preffix.arg(QObject::tr("%1 minutes ago").arg(seconds / minute));
+    }
+    const Seconds hour(60 * minute);
+    if (seconds < 2 * hour) {
+        return preffix.arg(QObject::tr("an hour ago"));
+    }
+    const Seconds day(24 * hour);
+    if (seconds < day) {
+        return preffix.arg(QObject::tr("%1 hours ago").arg(seconds / hour));
+    }
+    if (seconds < 2 * day) {
+        return preffix.arg(QObject::tr("yesterday"));
+    }
+    const Seconds month(30 * day);
+    if (seconds < month) {
+        return preffix.arg(QObject::tr("%1 days ago").arg(seconds / day));
+    }
+    const Seconds year(12 * month);
+    if (seconds < year) {
+        return preffix.arg(QObject::tr("%1 months ago").arg(seconds / month));
+    }
+    if (seconds < 2 * year) {
+        return preffix.arg(QObject::tr("year ago"));
+    }
+    return preffix.arg(QObject::tr("%1 years ago").arg(seconds / year));
+}
+
+QString VSQUtils::formattedLastSeenNoActivity()
+{
+    return QObject::tr("Offline");
+}
+
+QString VSQUtils::elidedText(const QString &text, const int maxLength)
+{
+    const int max = qMax(5, maxLength);
+    if (text.size() <= max) {
+        return text;
+    }
+    const int half = (max - 1) / 2;
+    const QChar ellipsisChar(0x2026);
+    return text.left(half) + ellipsisChar + text.right(max - 1 - half);
 }
