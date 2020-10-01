@@ -100,6 +100,7 @@ public:
     virtual ~VSQMessenger();
 
     void signIn(const QString &userId);
+    void signOut();
 
     Q_INVOKABLE QString currentUser() const;
     Q_INVOKABLE QString currentRecipient() const;
@@ -125,13 +126,10 @@ public slots:
     signUp(QString user);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    logout();
+    logoutAsync();
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     disconnect();
-
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    deleteUser(QString user);
 
     Q_INVOKABLE void
     checkState();
@@ -189,8 +187,9 @@ signals:
     void
     fireCurrentUserChanged();
 
-    void signedIn();
+    void signedIn(const QString &userId);
     void signInErrorOccured(const QString &errorText);
+    void signedOut();
 
     void openPreviewRequested(const QUrl &url);
     void informationRequested(const QString &message);

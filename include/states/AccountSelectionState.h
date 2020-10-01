@@ -35,11 +35,17 @@
 #ifndef VSQ_ACCOUNTSELECTIONSTATE_H
 #define VSQ_ACCOUNTSELECTIONSTATE_H
 
-#include <QState>
+#include "AuthorizationState.h"
 
 namespace VSQ
 {
-using AccountSelectionState = QState;
+class AccountSelectionState : public AuthorizationState
+{
+    Q_OBJECT
+
+public:
+    using AuthorizationState::AuthorizationState;
+};
 }
 
 #endif // VSQ_ACCOUNTSELECTIONSTATE_H

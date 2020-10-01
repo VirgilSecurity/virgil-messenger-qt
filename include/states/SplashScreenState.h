@@ -35,34 +35,30 @@
 #ifndef VSQ_SPLASHSCREENSTATE_H
 #define VSQ_SPLASHSCREENSTATE_H
 
-#include <QState>
+#include "AuthorizationState.h"
 
-class VSQMessenger;
 class VSQSettings;
 
 namespace VSQ
 {
-class SplashScreenState : public QState
+class SplashScreenState : public AuthorizationState
 {
     Q_OBJECT
 
 public:
-    explicit SplashScreenState(VSQMessenger *messenger, VSQSettings *settings, QState *parent = nullptr);
+    SplashScreenState(VSQMessenger *messenger, VSQSettings *settings, QState *parent = nullptr);
+
+    void trySignIn();
 
 signals:
     void signInUserNotSelected();
-    void signInStarted(const QString &userId);
-    void signInFinished();
-    void signInErrorOccurred(const QString &errorText);
 
 private:
     void onEntry(QEvent *) override;
     void onExit(QEvent *) override;
 
-    void signIn();
     void hideNativeSplashScreen();
 
-    VSQMessenger *m_messenger;
     VSQSettings *m_settings;
 };
 }

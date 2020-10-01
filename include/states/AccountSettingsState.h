@@ -32,14 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SETTINGSSTATE_H
-#define VSQ_SETTINGSSTATE_H
+#ifndef VSQ_ACCOUNTSETTINGSSTATE_H
+#define VSQ_ACCOUNTSETTINGSSTATE_H
 
-#include "State.h"
+#include <QState>
 
 namespace VSQ
 {
-using SettingsState = State;
+using AccountSettingsState = QState;
 }
 
-#endif // VSQ_SETTINGSSTATE_H
+#endif // VSQ_ACCOUNTSETTINGSSTATE_H

@@ -121,13 +121,14 @@ HEADERS += \
         include/ui/VSQUiHelper.h \
         # Applications states
         include/states/AccountSelectionState.h \
+        include/states/AccountSettingsState.h \
         include/states/ApplicationStateManager.h \
         include/states/AttachmentPreviewState.h \
+        include/states/AuthorizationState.h \
         include/states/BackupKeyState.h \
         include/states/ChatListState.h \
         include/states/ChatState.h \
         include/states/NewChatState.h \
-        include/states/SettingsState.h \
         include/states/SplashScreenState.h \
         include/states/StartState.h \
         include/states/State.h \
@@ -170,6 +171,7 @@ SOURCES += \
         src/ui/VSQUiHelper.cpp \
         # Applications states
         src/states/ApplicationStateManager.cpp \
+        src/states/AuthorizationState.cpp \
         src/states/SplashScreenState.cpp \
         src/states/State.cpp \
         # Logging

@@ -1,6 +1,8 @@
 // login.js
 .pragma library
 
+// TODO(fpohtmeh): remove library
+
 /*
   Validate the input of User
   Return values are..

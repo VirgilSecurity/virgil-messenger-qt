@@ -53,7 +53,7 @@ Page {
 
             ImageButton {
                 image: "Arrow-Left"
-                onClicked: mainView.back()
+                onClicked: app.stateManager.setPreviousState()
             }
 
             Column {

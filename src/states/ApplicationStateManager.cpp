@@ -34,21 +34,25 @@
 
 #include "states/ApplicationStateManager.h"
 
+#include "VSQMessenger.h"
+
 using namespace VSQ;
 
 ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, VSQSettings *settings, QObject *parent)
     : QStateMachine(parent)
+    , m_messenger(messenger)
     , m_settings(settings)
     , m_startState(new StartState(this))
     , m_splashScreenState(new SplashScreenState(messenger, settings, this))
-    , m_accountSelectionState(new AccountSelectionState(this))
+    , m_accountSelectionState(new AccountSelectionState(messenger, this))
     , m_chatListState(new ChatListState(this))
     , m_chatState(new ChatState(settings, this))
     , m_newChatState(new NewChatState(settings, this))
-    , m_settingsState(new SettingsState(settings, this))
+    , m_accountSettingsState(new AccountSettingsState(this))
     , m_backupKeyState(new BackupKeyState(settings, this))
 {
     registerStatesMetaTypes();
+    setupConnections();
     addTransitions();
     setInitialState(m_startState);
     start();
@@ -66,17 +70,26 @@ void ApplicationStateManager::registerStatesMetaTypes()
     qRegisterMetaType<ChatListState *>("ChatListState*");
     qRegisterMetaType<ChatState *>("ChatState*");
     qRegisterMetaType<NewChatState *>("NewChatState*");
-    qRegisterMetaType<SettingsState *>("SettingsState*");
+    qRegisterMetaType<AccountSettingsState *>("AccountSettingsState*");
     qRegisterMetaType<BackupKeyState *>("BackupKeyState*");
+}
+
+void ApplicationStateManager::setupConnections()
+{
+    // Queued connection is needed for correct transition
+    connect(this, &ApplicationStateManager::setUiState, this, std::bind(&ApplicationStateManager::splashScreenRequested, this, QPrivateSignal()), Qt::QueuedConnection);
+    connect(this, &ApplicationStateManager::setSignOutState, m_messenger, &VSQMessenger::signOut);
 }
 
 void ApplicationStateManager::addTransitions()
 {
-    // Queued connection is needed for correct transition
-    connect(this, &ApplicationStateManager::setUiState, this, std::bind(&ApplicationStateManager::splashScreenRequested, this, QPrivateSignal()), Qt::QueuedConnection);
-
     m_startState->addTransition(this, &ApplicationStateManager::splashScreenRequested, m_splashScreenState);
     m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::signInUserNotSelected, m_accountSelectionState);
     m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::signInErrorOccurred, m_accountSelectionState);
     m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::signInFinished, m_chatListState);
+    m_accountSelectionState->addTransition(m_accountSelectionState, &AccountSelectionState::signInFinished, m_chatListState);
+    m_chatListState->addTransition(m_messenger, &VSQMessenger::signedOut, m_accountSelectionState);
+    m_chatListState->addTransition(this, &ApplicationStateManager::setAccountSettingsState, m_accountSettingsState);
+    m_accountSettingsState->addTransition(m_messenger, &VSQMessenger::signedOut, m_accountSelectionState);
+    m_accountSettingsState->addTransition(this, &ApplicationStateManager::setPreviousState, m_chatListState);
 }

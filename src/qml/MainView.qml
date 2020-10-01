@@ -11,6 +11,8 @@ import "./helpers/login.js" as LoginLogic
 Control {
     id: mainView
 
+    property var chatListPushed: false
+
     RowLayout {
         anchors {
             fill: parent
@@ -28,7 +30,7 @@ Control {
 
             Action {
                 text: qsTr("Settings")
-                onTriggered: mainView.showAccountSettings()
+                onTriggered: app.stateManager.setAccountSettingsState()
             }
 
             MenuSeparator {
@@ -36,8 +38,8 @@ Control {
             }
 
             Action {
-                text: "Sign Out"
-                onTriggered: mainView.signOut()
+                text: qsTr("Sign Out")
+                onTriggered: app.stateManager.setSignOutState()
             }
         }
 
@@ -85,8 +87,10 @@ Control {
 
     Component.onCompleted: {
         app.stateManager.splashScreenState.entered.connect(pushSplashScreenPage)
-        app.stateManager.accountSelectionState.entered.connect(pushAuthPage)
-        app.stateManager.chatListState.entered.connect(setContactsPage)
+        app.stateManager.accountSelectionState.entered.connect(pushAccountSelectionPage)
+        app.stateManager.chatListState.entered.connect(pushChatListPage)
+        app.stateManager.accountSettingsState.entered.connect(pushAccountSettingsPage)
+        app.stateManager.setPreviousState.connect(stackView.pop)
         if (logControl.visible) {
             logging.formattedMessageCreated.connect(logTextControl.append)
         }
@@ -94,34 +98,6 @@ Control {
 
     // FIXME(fpohtmeh): refactor
     /*
-    function signIn(user) {
-        if (LoginLogic.validateUser(user)) {
-            var future = Messenger.signInAsync(user)
-            Future.onFinished(future, function(value) {
-              console.log("Log In result: ", Future.result(future))
-            })
-
-            stackView.clear()
-            settings.lastSignedInUserId = user
-            showContacts()
-        } else {
-            root.showPopupError(qsTr("Incorrect User Name"))
-        }
-    }
-
-    function signOut() {
-        var future = Messenger.logout()
-        Future.onFinished(future, function(value) {
-          console.log("Logout result: ", Future.result(future))
-
-            // clear all pages in the stackview and push sign in page
-            // as a first page in the stack
-            stackView.clear()
-            settings.lastSignedInUserId = ""
-            showAuth(true)
-        })
-    }
-
     function disconnect() {
         var future = Messenger.disconnect()
         Future.onFinished(future, function(value) {
@@ -130,35 +106,26 @@ Control {
             showAuth(true)
         })
     }
-
-    // Navigation
-    //
-    // All the app navigation must be done throught executing
-    // the functions below.
-
-    function back() {
-        stackView.pop()
-        if (Messenger.currentRecipient()) {
-            Messenger.setCurrentRecipient("")
-        }
-    }
     */
 
     function pushSplashScreenPage() {
         stackView.push("./pages/SplashScreenPage.qml", StackView.Immediate)
     }
 
-    function pushAuthPage(animate) {
-        stackView.push("./pages/AuthPage.qml", animate ? StackView.Transition : StackView.Immediate)
+    function pushAccountSelectionPage(animate) {
+        stackView.push("./pages/AccountSelectionPage.qml", animate ? StackView.Transition : StackView.Immediate)
     }
 
-    function pushContactsPage() {
-        stackView.push("./pages/ChatListPage.qml")
+    function pushChatListPage() {
+        if (!chatListPushed) {
+            stackView.clear()
+            stackView.push("./pages/ChatListPage.qml")
+            chatListPushed = true
+        }
     }
 
-    function setContactsPage() {
-        stackView.clear()
-        pushContactsPage()
+    function pushAccountSettingsPage() {
+        navigateTo("AccountSettings", null, true, false)
     }
 
     // FIXME(fpohtmeh): refactor
@@ -188,29 +155,18 @@ Control {
         Messenger.setCurrentRecipient(recipient)
     }
 
-
-
     function showAddPerson() {
         stackView.push("./pages/AddPersonPage.qml")
     }
-
-    function showAccountSettings() {
-        navigateTo("AccountSettings", null, true, false)
-    }
+    */
 
     function navigateTo(page, params, animate, clearHistory, replace) {
         const pageName = "%1Page".arg(page)
-        // cancel navigation if the page is already shown
-        if (stackView.currentItem.toString().startsWith(pageName)) {
-            return
-        }
         if (clearHistory) {
             stackView.clear()
         }
-
         var push = replace ? stackView.replace : stackView.push
         const path = "./pages/%1.qml".arg(pageName)
         push(path, params, animate ? StackView.Transition : StackView.Immediate)
     }
-    */
 }

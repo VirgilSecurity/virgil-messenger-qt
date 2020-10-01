@@ -32,52 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "states/SplashScreenState.h"
+#ifndef VSQ_AUTHORIZATIONSTATE_H
+#define VSQ_AUTHORIZATIONSTATE_H
 
-#include <QTimer>
+#include <QState>
 
-#include "VSQMessenger.h"
-#include "VSQSettings.h"
-#include "android/VSQAndroid.h"
+class VSQMessenger;
 
-using namespace VSQ;
-
-SplashScreenState::SplashScreenState(VSQMessenger *messenger, VSQSettings *settings, QState *parent)
-    : AuthorizationState(messenger, parent)
-    , m_settings(settings)
+namespace VSQ
 {
+class AuthorizationState : public QState
+{
+    Q_OBJECT
+
+public:
+    AuthorizationState(VSQMessenger *messenger, QState *parent = nullptr);
+
+    Q_INVOKABLE void signIn(const QString &userId);
+
+signals:
+    void signInStarted(const QString &userId);
+    void signInFinished();
+    void signInErrorOccurred(const QString &errorText);
+
+private:
+    VSQMessenger *m_messenger;
+};
 }
 
-void SplashScreenState::trySignIn()
-{
-    const auto userId = m_settings->lastSignedInUserId();
-    if (userId.isEmpty()) {
-        emit signInUserNotSelected();
-    }
-    else {
-        signIn(userId);
-    }
-}
-
-void SplashScreenState::onEntry(QEvent *)
-{
-    // Schedule sign-in
-#ifdef VS_ANDROID
-    const auto interval = 100;
-#else
-    const auto interval = 1000;
-#endif
-    QTimer::singleShot(interval, this, &SplashScreenState::trySignIn);
-}
-
-void SplashScreenState::onExit(QEvent *)
-{
-    hideNativeSplashScreen();
-}
-
-void SplashScreenState::hideNativeSplashScreen()
-{
-#ifdef VS_ANDROID
-    VSQAndroid::hideSplashScreen();
-#endif
-}
+#endif // VSQ_AUTHORIZATIONSTATE_H

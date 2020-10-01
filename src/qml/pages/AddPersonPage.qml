@@ -98,7 +98,7 @@ Page {
     }
 
     function reject() {
-        mainView.back()
+        app.stateManager.setPreviousState()
     }
 }
 

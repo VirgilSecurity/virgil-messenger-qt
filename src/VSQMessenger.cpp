@@ -198,11 +198,50 @@ VSQMessenger::~VSQMessenger()
 
 void VSQMessenger::signIn(const QString &userId)
 {
-    // FIXME(fpohtmeh): implement
-    Q_UNUSED(userId)
-    QTimer::singleShot(500, this, [this]() {
+    auto notifySignInErrorOccured = [=](const QString &errorText)
+    {
         m_settings->setLastSignedInUserId(QString());
-        emit signInErrorOccured(tr("Feature is not implemented"));
+        emit signInErrorOccured(errorText);
+    };
+
+    if (userId.isEmpty()) {
+        notifySignInErrorOccured(tr("User name can't be empty"));
+        // TODO(fpohtmeh): check regexp
+    }
+    else {
+        auto futureWatcher = new QFutureWatcher<EnResult>();
+        const auto future = signInAsync(userId);
+        futureWatcher->setFuture(future);
+        connect(futureWatcher, &QFutureWatcher<EnResult>::finished, this, [=]() {
+            futureWatcher->deleteLater();
+            switch (future.result()) {
+            case MRES_OK:
+                m_settings->setLastSignedInUserId(userId);
+                emit signedIn(userId);
+                break;
+            case MRES_ERR_NO_CRED:
+                notifySignInErrorOccured(tr("Cannot load credentials"));
+                break;
+            case MRES_ERR_SIGNIN:
+                notifySignInErrorOccured(tr("Cannot sign-in user"));
+                break;
+            default:
+                notifySignInErrorOccured(tr("Unknown sign-in error"));
+                break;
+            }
+        });
+    }
+}
+
+void VSQMessenger::signOut()
+{
+    auto futureWatcher = new QFutureWatcher<EnResult>();
+    const auto future = logoutAsync();
+    futureWatcher->setFuture(future);
+    connect(futureWatcher, &QFutureWatcher<EnResult>::finished, this, [=]() {
+        futureWatcher->deleteLater();
+        m_settings->setLastSignedInUserId(QString());
+        emit signedOut();
     });
 }
 
@@ -464,22 +503,20 @@ QFuture<VSQMessenger::EnResult>
 VSQMessenger::signInAsync(QString user) {
     m_userId = _prepareLogin(user);
     return QtConcurrent::run([=]() -> EnResult {
-        qDebug() << "Trying to Sign In: " << m_userId;
+        qDebug() << "Trying to sign in: " << m_userId;
 
         vs_messenger_virgil_user_creds_t creds;
         memset(&creds, 0, sizeof (creds));
 
         // Load User Credentials
         if (!_loadCredentials(m_userId, creds)) {
-            emit fireError(tr("Cannot load user credentials"));
-            qDebug() << "Cannot load user credentials";
+            qDebug() << "Sign-in error, code" << MRES_ERR_NO_CRED;
             return MRES_ERR_NO_CRED;
         }
 
         // Sign In user, using Virgil Service
         if (VS_CODE_OK != vs_messenger_virgil_sign_in(&creds)) {
-            emit fireError(tr("Cannot Sign In user"));
-            qDebug() << "Cannot Sign In user";
+            qDebug() << "Sign-in error, code:" << MRES_ERR_SIGNIN;
             return MRES_ERR_SIGNIN;
         }
 
@@ -704,7 +741,7 @@ VSQMessenger::_loadCredentials(const QString &user, vs_messenger_virgil_user_cre
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::logout() {
+VSQMessenger::logoutAsync() {
     return QtConcurrent::run([=]() -> EnResult {
         qDebug() << "Logout";
         m_user = "";
@@ -725,16 +762,6 @@ QFuture<VSQMessenger::EnResult> VSQMessenger::disconnect() {
         if (connected) {
             QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::BlockingQueuedConnection);
         }
-        return MRES_OK;
-    });
-}
-
-/******************************************************************************/
-QFuture<VSQMessenger::EnResult>
-VSQMessenger::deleteUser(QString user) {
-    return QtConcurrent::run([=]() -> EnResult {
-        Q_UNUSED(user)
-        logout();
         return MRES_OK;
     });
 }

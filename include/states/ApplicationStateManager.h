@@ -39,11 +39,11 @@
 #include <QTimer>
 
 #include "AccountSelectionState.h"
+#include "AccountSettingsState.h"
 #include "BackupKeyState.h"
 #include "ChatListState.h"
 #include "ChatState.h"
 #include "NewChatState.h"
-#include "SettingsState.h"
 #include "SplashScreenState.h"
 #include "StartState.h"
 
@@ -58,7 +58,7 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(ChatListState *chatListState MEMBER m_chatListState CONSTANT)
     Q_PROPERTY(ChatState *chatState MEMBER m_chatState CONSTANT)
     Q_PROPERTY(NewChatState *newChatState MEMBER m_newChatState CONSTANT)
-    Q_PROPERTY(SettingsState *settingsState MEMBER m_settingsState CONSTANT)
+    Q_PROPERTY(AccountSettingsState *accountSettingsState MEMBER m_accountSettingsState CONSTANT)
     Q_PROPERTY(BackupKeyState *backupKeyState MEMBER m_backupKeyState CONSTANT)
 
 public:
@@ -67,20 +67,27 @@ public:
 
 signals:
     void setUiState();
+    void setSignOutState();
+    void setAccountSettingsState();
+    void setPreviousState();
+
     void splashScreenRequested(QPrivateSignal);
 
 private:
     void registerStatesMetaTypes();
+    void setupConnections();
     void addTransitions();
 
+    VSQMessenger *m_messenger;
     VSQSettings *m_settings;
+
     StartState *m_startState;
     SplashScreenState *m_splashScreenState;
     AccountSelectionState *m_accountSelectionState;
     ChatListState *m_chatListState;
     ChatState *m_chatState;
     NewChatState *m_newChatState;
-    SettingsState *m_settingsState;
+    AccountSettingsState *m_accountSettingsState;
     BackupKeyState *m_backupKeyState;
 };
 }
