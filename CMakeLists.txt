@@ -32,7 +32,7 @@
 #
 #   Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-cmake_minimum_required(VERSION 3.17 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 # ---------------------------------------------------------------------------
 # Include Cmake helpers
 # ---------------------------------------------------------------------------
@@ -244,6 +244,12 @@ target_link_directories(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${PREBUILT_DIR}/firebase_cpp_sdk/libs/android/${ANDROID_ABI}/c++>>        
         )
 
+if(VS_PLATFORM STREQUAL "macos")
+	set_target_properties(${VS_TARGET_NAME} 
+	    PROPERTIES LINK_FLAGS "-F${PREBUILT_DIR}/${VS_PLATFORM}/sparkle -framework Sparkle -framework CoreFoundation -framework Foundation"
+	)
+endif()
+
 target_link_libraries(${VS_TARGET_NAME}
         PUBLIC
 
@@ -251,6 +257,7 @@ target_link_libraries(${VS_TARGET_NAME}
         Qt5::Core
         Qt5::Quick
         $<$<STREQUAL:"${VS_PLATFORM}","linux">:Qt5::Widgets>                
+        $<$<STREQUAL:"${VS_PLATFORM}","macos">:Qt5::Widgets>                        
         $<$<STREQUAL:"${VS_PLATFORM}","android">:Qt5::Widgets>                        
         $<$<STREQUAL:"${VS_PLATFORM}","android">:Qt5::AndroidExtras>        
         $<$<STREQUAL:"${VS_PLATFORM}","android">:log>        
@@ -280,11 +287,6 @@ target_link_libraries(${VS_TARGET_NAME}
 	relic_s
 	json-c
 	
-	# MacOS
-	$<$<STREQUAL:"${VS_PLATFORM}","macos">:-framework Sparkle>
-	$<$<STREQUAL:"${VS_PLATFORM}","macos">:-framework CoreFoundation>
-	$<$<STREQUAL:"${VS_PLATFORM}","macos">:-framework Foundation>
-
         $<$<STREQUAL:"${VS_PLATFORM}","android">:firebase_messaging>
         $<$<STREQUAL:"${VS_PLATFORM}","android">:firebase_app>        
         $<$<STREQUAL:"${VS_PLATFORM}","android">:firebase_auth> 

@@ -33,8 +33,6 @@
 #   Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 
-cmake_minimum_required(VERSION 3.17 FATAL_ERROR)
-
 #
 #   Fetch prebuilt core libraries
 #

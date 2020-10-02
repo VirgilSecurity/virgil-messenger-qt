@@ -32,7 +32,6 @@
 #
 #   Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-cmake_minimum_required(VERSION 3.17 FATAL_ERROR)
 
 function(vs_customer_prepare)
     message(STATUS "Prepare confuiguration from templates...")
