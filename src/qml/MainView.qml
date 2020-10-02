@@ -12,6 +12,7 @@ Control {
     id: mainView
 
     property var attachmentPreview: undefined
+    readonly property var manager: app.stateManager
 
     RowLayout {
         anchors {
@@ -30,7 +31,7 @@ Control {
 
             Action {
                 text: qsTr("Settings")
-                onTriggered: app.stateManager.openAccountSettings()
+                onTriggered: manager.openAccountSettings()
             }
 
             MenuSeparator {
@@ -39,7 +40,7 @@ Control {
 
             Action {
                 text: qsTr("Sign Out")
-                onTriggered: app.stateManager.signOut()
+                onTriggered: manager.signOut()
             }
         }
 
@@ -87,109 +88,96 @@ Control {
 
     QtObject {
         id: d
-        property bool chatListPushed: false
-        property bool addNewChatOpened: false
-        property bool attachmentPreviewOpened: false
+
+        function goBack() {
+            if (attachmentPreview.visible) {
+                attachmentPreview.visible = false
+            }
+            else {
+                stackView.pop()
+            }
+        }
+
+        function openSplashScreenPage() {
+            stackView.push("./pages/SplashScreenPage.qml", StackView.Immediate)
+        }
+
+        function openAccountSelectionPage(animate) {
+            stackView.push("./pages/AccountSelectionPage.qml", animate ? StackView.Transition : StackView.Immediate)
+        }
+
+        function openChatListPage() {
+            if (manager.previousState !== manager.splashScreenState) {
+                return
+            }
+            stackView.clear()
+            stackView.push("./pages/ChatListPage.qml")
+        }
+
+        function openAccountSettingsPage() {
+            if (manager.previousState !== manager.chatListState) {
+                return
+            }
+            stackView.push("./pages/AccountSettingsPage.qml", StackView.Transition)
+        }
+
+        function openAddNewChatPage() {
+            stackView.push("./pages/NewChatPage.qml")
+        }
+
+        function openChatPage() {
+            if (manager.previousState === manager.attachmentPreviewState) {
+                return
+            }
+            const replace = manager.previousState === manager.newChatState
+            var push = replace ? stackView.replace : stackView.push
+            stackView.push("./pages/ChatPage.qml", StackView.Transition)
+        }
+
+        function showAttachmentPreview() {
+            attachmentPreview.visible = true
+        }
+
+        function openBackupKeyPage() {
+            if (manager.previousState !== manager.accountSettingsState) {
+                return
+            }
+            stackView.push("./pages/BackupKeyPage.qml")
+        }
+
+        // FIXME(fpohtmeh): refactor
+        /*
+        function showSignIn() {
+            stackView.push("./pages/SignInPage.qml")
+        }
+
+        function showSignInAs(params) {
+            stackView.push("./pages/SignInAsPage.qml", params)
+        }
+
+        function showDownloadKey(params) {
+            stackView.push("./pages/DownloadKeyPage.qml", params)
+        }
+
+        function showRegister() {
+            stackView.push("./pages/RegisterPage.qml")
+        }
+        */
     }
 
     Component.onCompleted: {
-        app.stateManager.goBack.connect(goBack)
-        app.stateManager.splashScreenState.entered.connect(openSplashScreenPage)
-        app.stateManager.accountSelectionState.entered.connect(openAccountSelectionPage)
-        app.stateManager.chatListState.entered.connect(openChatListPage)
-        app.stateManager.accountSettingsState.entered.connect(openAccountSettingsPage)
-        app.stateManager.newChatState.entered.connect(openAddNewChatPage)
-        app.stateManager.chatState.entered.connect(openChatPage)
-        app.stateManager.attachmentPreviewState.entered.connect(showAttachmentPreview)
+        manager.goBack.connect(d.goBack)
+        manager.splashScreenState.entered.connect(d.openSplashScreenPage)
+        manager.accountSelectionState.entered.connect(d.openAccountSelectionPage)
+        manager.chatListState.entered.connect(d.openChatListPage)
+        manager.accountSettingsState.entered.connect(d.openAccountSettingsPage)
+        manager.newChatState.entered.connect(d.openAddNewChatPage)
+        manager.chatState.entered.connect(d.openChatPage)
+        manager.attachmentPreviewState.entered.connect(d.showAttachmentPreview)
+        manager.backupKeyState.entered.connect(d.openBackupKeyPage)
 
         if (logControl.visible) {
             logging.formattedMessageCreated.connect(logTextControl.append)
         }
-    }
-
-    function goBack() {
-        if (attachmentPreview.visible) {
-            attachmentPreview.visible = false
-        }
-        else {
-            stackView.pop()
-        }
-    }
-
-    function openSplashScreenPage() {
-        stackView.push("./pages/SplashScreenPage.qml", StackView.Immediate)
-    }
-
-    function openAccountSelectionPage(animate) {
-        stackView.push("./pages/AccountSelectionPage.qml", animate ? StackView.Transition : StackView.Immediate)
-    }
-
-    function openChatListPage() {
-        if (!d.chatListPushed) {
-            stackView.clear()
-            stackView.push("./pages/ChatListPage.qml")
-            d.chatListPushed = true
-        }
-        d.addNewChatOpened = false
-    }
-
-    function openAccountSettingsPage() {
-        navigateTo("AccountSettings", null, true, false)
-    }
-
-    function openAddNewChatPage() {
-        d.addNewChatOpened = true
-        stackView.push("./pages/AddPersonPage.qml")
-    }
-
-    function openChatPage() {
-        if (!d.attachmentPreviewOpened) {
-            navigateTo("Chat", null, true, false, d.addNewChatOpened)
-        }
-        d.addNewChatOpened = false
-        d.attachmentPreviewOpened = false
-    }
-
-    function showAttachmentPreview() {
-        attachmentPreview.visible = true
-        d.attachmentPreviewOpened = true
-    }
-
-    // FIXME(fpohtmeh): refactor
-    /*
-    function showSignIn() {
-        stackView.push("./pages/SignInPage.qml")
-    }
-
-    function showSignInAs(params) {
-        stackView.push("./pages/SignInAsPage.qml", params)
-    }
-
-    function showDownloadKey(params) {
-        stackView.push("./pages/DownloadKeyPage.qml", params)
-    }
-
-    function showRegister() {
-        stackView.push("./pages/RegisterPage.qml")
-    }
-
-    function showBackupKey() {
-        stackView.push("./pages/BackupKeyPage.qml")
-    }
-
-    function showChatWith(recipient, replace) {
-        navigateTo("Chat", { recipient: recipient }, true, false, replace)
-        Messenger.setCurrentRecipient(recipient)
-    }
-    */
-
-    function navigateTo(page, params, animate, clearHistory, replace) {
-        const pageName = "%1Page".arg(page)
-        if (clearHistory) {
-            stackView.clear()
-        }
-        var push = replace ? stackView.replace : stackView.push
-        const path = "./pages/%1.qml".arg(pageName)
-        push(path, params, animate ? StackView.Transition : StackView.Immediate)
     }
 }

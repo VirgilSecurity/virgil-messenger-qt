@@ -99,10 +99,6 @@ public:
     VSQMessenger() = default; // QML engine requires default constructor
     virtual ~VSQMessenger();
 
-    void signIn(const QString &userId);
-    void signOut();
-    void addContact(const QString &userId);
-
     Q_INVOKABLE QString currentUser() const;
     Q_INVOKABLE QString currentRecipient() const;
 
@@ -113,12 +109,19 @@ public:
 
     void setApplicationActive(bool active);
 
+    // New methods
+
+    void signIn(const QString &userId);
+    void signOut();
+    void addContact(const QString &userId);
+    void backupKey(const QString &password, const QString &confirmedPassword);
+
 public slots:
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     signInAsync(QString user);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    backupUserKey(QString password);
+    backupKeyAsync(QString password);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     signInWithBackupKey(QString username, QString password);
@@ -202,6 +205,9 @@ signals:
 
     void contactAdded(const QString &userId);
     void addContactErrorOccured(const QString &errorText);
+
+    void keyBackuped();
+    void backupKeyFailed(const QString &errorText);
 
 private slots:
     void onConnected();

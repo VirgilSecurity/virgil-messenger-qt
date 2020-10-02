@@ -88,15 +88,15 @@ Page {
     Connections {
         target: app.stateManager.newChatState
 
-        function addContactStarted(userId) {
+        function onAddContactStarted(userId) {
             form.showLoading(qsTr("Adding of contact..."))
         }
 
-        function addContactFinished() {
+        function onAddContactFinished() {
             form.hideLoading();
         }
 
-        function addContactErrorOccurred(errorText) {
+        function onAddContactErrorOccurred(errorText) {
             form.hideLoading();
             showPopupError(errorText) // TODO(fpohtmeh): don't use parent method directly
         }

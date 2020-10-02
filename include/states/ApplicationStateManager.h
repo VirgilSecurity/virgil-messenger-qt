@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+﻿//  Copyright (C) 2015-2020 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -47,6 +47,9 @@
 #include "NewChatState.h"
 #include "SplashScreenState.h"
 #include "StartState.h"
+#include "VSQCommon.h"
+
+Q_DECLARE_LOGGING_CATEGORY(lcState);
 
 namespace VSQ
 {
@@ -63,19 +66,26 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(BackupKeyState *backupKeyState MEMBER m_backupKeyState CONSTANT)
     Q_PROPERTY(AttachmentPreviewState *attachmentPreviewState MEMBER m_attachmentPreviewState CONSTANT)
 
+    Q_PROPERTY(QState *currentState MEMBER m_currentState NOTIFY currentStateChanged)
+    Q_PROPERTY(QState *previousState MEMBER m_previousState NOTIFY previousStateChanged)
+
 public:
     explicit ApplicationStateManager(VSQMessenger *messenger, VSQSettings *settings, QObject *parent);
     ~ApplicationStateManager() override;
 
 signals:
     void setUiState();
-
     void goBack();
     void signOut();
-    void addContact(const QString &contactId);
     void openAddContact();
+    void addContact(const QString &contactId);
     void openChat(const QString &contactId);
     void openAccountSettings();
+    void openBackupKey();
+    void backupKey(const QString &password, const QString &confirmedPassword);
+
+    void currentStateChanged(QState *);
+    void previousStateChanged(QState *);
 
     void splashScreenRequested(QPrivateSignal);
     void chatRequested(QPrivateSignal);
@@ -85,6 +95,8 @@ private:
     void registerStatesMetaTypes();
     void setupConnections();
     void addTransitions();
+    void setCurrentState(QState *state);
+    void setPreviousState(QState *state);
 
     void onOpenChat(const QString &contactId);
     void onOpenPreview(const QUrl &url);
@@ -101,6 +113,9 @@ private:
     AccountSettingsState *m_accountSettingsState;
     BackupKeyState *m_backupKeyState;
     AttachmentPreviewState *m_attachmentPreviewState;
+
+    QState *m_currentState = nullptr;
+    QState *m_previousState = nullptr;
 };
 }
 

@@ -39,7 +39,13 @@
 
 namespace VSQ
 {
-using ChatListState = QState;
+class ChatListState : public QState
+{
+    Q_OBJECT
+
+public:
+    using QState::QState;
+};
 }
 
 #endif // VSQ_CHATLISTSTATE_H

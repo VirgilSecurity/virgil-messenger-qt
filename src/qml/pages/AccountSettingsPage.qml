@@ -6,7 +6,6 @@ import "../theme"
 import "../components"
 
 Page {
-
     property bool showServersPanel: true
 
     background: Rectangle {
@@ -18,7 +17,6 @@ Page {
     }
 
     Form {
-
         Avatar {
             Layout.alignment: Qt.AlignHCenter
             diameter: 80
@@ -34,34 +32,14 @@ Page {
         }
 
         FormLabel {
-            text: qsTr("Version: %1".arg(app.currentVersion()))
-        }
-/*
-        FormPrimaryButton {
-            text: "Software Update"
-            onClicked: {
-                app.checkUpdates()
-            }
+            text: qsTr("Version: %1").arg(app.currentVersion())
         }
 
         FormPrimaryButton {
-            text: "Delete Account"
-            onClicked: {
-            }
-        }
-*/
-        FormPrimaryButton {
             text: qsTr("Backup private key")
-            onClicked: mainView.showBackupKey()
+            onClicked: app.stateManager.openBackupKey()
         }
-/*
-        FormPrimaryButton {
-            text: "Send report"
-            onClicked: {
-                app.sendReport()
-            }
-        }
-*/
+
         FormPrimaryButton {
             text: qsTr("Sign out")
             onClicked: app.stateManager.signOut()

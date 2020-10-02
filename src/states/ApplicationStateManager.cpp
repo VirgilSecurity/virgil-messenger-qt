@@ -36,6 +36,8 @@
 
 #include "VSQMessenger.h"
 
+Q_LOGGING_CATEGORY(lcState, "state");
+
 using namespace VSQ;
 
 ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, VSQSettings *settings, QObject *parent)
@@ -49,7 +51,7 @@ ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, VSQSet
     , m_chatState(new ChatState(this))
     , m_newChatState(new NewChatState(messenger, this))
     , m_accountSettingsState(new AccountSettingsState(this))
-    , m_backupKeyState(new BackupKeyState(settings, this))
+    , m_backupKeyState(new BackupKeyState(m_messenger, this))
     , m_attachmentPreviewState(new AttachmentPreviewState(this))
 {
     registerStatesMetaTypes();
@@ -78,11 +80,17 @@ void ApplicationStateManager::registerStatesMetaTypes()
 
 void ApplicationStateManager::setupConnections()
 {
-    // NOTE: Queued connection is needed for correct transition
+    for (auto state : findChildren<QState *>()) {
+        connect(state, &QState::entered, this, std::bind(&ApplicationStateManager::setCurrentState, this, state));
+        connect(state, &QState::exited, this, std::bind(&ApplicationStateManager::setPreviousState, this, state));
+    }
+
+    // NOTE: Queued connection is needed for correct state transition
     connect(this, &ApplicationStateManager::setUiState, this, std::bind(&ApplicationStateManager::splashScreenRequested, this, QPrivateSignal()), Qt::QueuedConnection);
     connect(this, &ApplicationStateManager::signOut, m_messenger, &VSQMessenger::signOut);
     connect(this, &ApplicationStateManager::openChat, this, &ApplicationStateManager::onOpenChat);
     connect(this, &ApplicationStateManager::addContact, m_newChatState, &NewChatState::addContact);
+    connect(this, &ApplicationStateManager::backupKey, m_backupKeyState, &BackupKeyState::backupKey);
     connect(m_newChatState, &NewChatState::addContactFinished, this, &ApplicationStateManager::openChat);
     connect(m_messenger, &VSQMessenger::openPreviewRequested, this, &ApplicationStateManager::onOpenPreview);
 }
@@ -98,13 +106,28 @@ void ApplicationStateManager::addTransitions()
     m_chatListState->addTransition(this, &ApplicationStateManager::openAccountSettings, m_accountSettingsState);
     m_chatListState->addTransition(this, &ApplicationStateManager::openAddContact, m_newChatState);
     m_chatListState->addTransition(this, &ApplicationStateManager::chatRequested, m_chatState);
-    m_accountSettingsState->addTransition(m_messenger, &VSQMessenger::signedOut, m_accountSelectionState);
     m_accountSettingsState->addTransition(this, &ApplicationStateManager::goBack, m_chatListState);
+    m_accountSettingsState->addTransition(this, &ApplicationStateManager::openBackupKey, m_backupKeyState);
+    m_accountSettingsState->addTransition(m_messenger, &VSQMessenger::signedOut, m_accountSelectionState);
     m_newChatState->addTransition(this, &ApplicationStateManager::goBack, m_chatListState);
     m_newChatState->addTransition(this, &ApplicationStateManager::chatRequested, m_chatState);
     m_chatState->addTransition(this, &ApplicationStateManager::goBack, m_chatListState);
     m_chatState->addTransition(this, &ApplicationStateManager::openPreviewRequested, m_attachmentPreviewState);
     m_attachmentPreviewState->addTransition(this, &ApplicationStateManager::goBack, m_chatState);
+    m_backupKeyState->addTransition(this, &ApplicationStateManager::goBack, m_accountSettingsState);
+}
+
+void ApplicationStateManager::setCurrentState(QState *state)
+{
+    qCDebug(lcState) << "Current state:" << state;
+    m_currentState = state;
+    emit currentStateChanged(state);
+}
+
+void ApplicationStateManager::setPreviousState(QState *state)
+{
+    m_previousState = state;
+    emit previousStateChanged(state);
 }
 
 void ApplicationStateManager::onOpenChat(const QString &contactId)

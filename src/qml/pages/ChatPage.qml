@@ -209,6 +209,7 @@ Page {
 
     Connections {
         target: Messenger
+
         function onLastActivityTextChanged(text) {
             lastActivityLabel.text = text
         }

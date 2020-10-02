@@ -263,6 +263,32 @@ void VSQMessenger::addContact(const QString &userId)
     });
 }
 
+void VSQMessenger::backupKey(const QString &password, const QString &confirmedPassword)
+{
+    if (password.isEmpty()) {
+        emit backupKeyFailed(tr("Password cannot be empty"));
+    }
+    else if (password != confirmedPassword) {
+        emit backupKeyFailed(tr("Passwords do not match"));
+    }
+    else {
+        auto futureWatcher = new QFutureWatcher<EnResult>();
+        const auto future = backupKeyAsync(password);
+        futureWatcher->setFuture(future);
+        connect(futureWatcher, &QFutureWatcher<EnResult>::finished, this, [=]() {
+            futureWatcher->deleteLater();
+            switch (future.result()) {
+            case MRES_OK:
+                emit keyBackuped();
+                break;
+            default:
+                emit backupKeyFailed(tr("Backup private key error"));
+                break;
+            }
+        });
+    }
+}
+
 void
 VSQMessenger::onMessageDelivered(const QString& to, const QString& messageId) {
 
@@ -480,7 +506,7 @@ QString VSQMessenger::currentRecipient() const {
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::backupUserKey(QString password) {
+VSQMessenger::backupKeyAsync(QString password) {
     // m_userId = _prepareLogin(user);
     return QtConcurrent::run([=]() -> EnResult {
 

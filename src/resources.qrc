@@ -12,7 +12,7 @@
         <file>qml/pages/RegisterPage.qml</file>
         <file>qml/pages/SplashScreenPage.qml</file>
         <file>qml/pages/BackupKeyPage.qml</file>
-        <file>qml/pages/AddPersonPage.qml</file>
+        <file>qml/pages/NewChatPage.qml</file>
         <file>qml/pages/SignInAsPage.qml</file>
         <file>qml/pages/DownloadKeyPage.qml</file>
         <!-- Others -->

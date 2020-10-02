@@ -39,7 +39,13 @@
 
 namespace VSQ
 {
-using StartState = QState;
+class StartState : public QState
+{
+    Q_OBJECT
+
+public:
+    using QState::QState;
+};
 }
 
 #endif // VSQ_STARTSTATE_H

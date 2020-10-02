@@ -172,6 +172,7 @@ SOURCES += \
         src/states/ApplicationStateManager.cpp \
         src/states/AttachmentPreviewState.cpp \
         src/states/AuthorizationState.cpp \
+        src/states/BackupKeyState.cpp \
         src/states/ChatState.cpp \
         src/states/NewChatState.cpp \
         src/states/SplashScreenState.cpp \
