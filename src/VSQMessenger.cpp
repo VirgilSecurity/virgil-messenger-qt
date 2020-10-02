@@ -303,7 +303,7 @@ VSQMessenger::_connect(QString userWithEnv, QString deviceId, QString userId, bo
 
         QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::QueuedConnection);
 
-        timer.start(2000);
+        timer.start(5000);
         loop.exec();
     }
 
