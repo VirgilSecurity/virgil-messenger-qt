@@ -101,6 +101,7 @@ public:
 
     void signIn(const QString &userId);
     void signOut();
+    void addContact(const QString &userId);
 
     Q_INVOKABLE QString currentUser() const;
     Q_INVOKABLE QString currentRecipient() const;
@@ -135,7 +136,7 @@ public slots:
     checkState();
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    addContact(QString contact);
+    addContactAsync(QString contact);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
@@ -187,15 +188,20 @@ signals:
     void
     fireCurrentUserChanged();
 
-    void signedIn(const QString &userId);
-    void signInErrorOccured(const QString &errorText);
-    void signedOut();
-
     void openPreviewRequested(const QUrl &url);
     void informationRequested(const QString &message);
     void lastActivityTextChanged(const QString &text);
 
     void downloadThumbnail(const StMessage message, const QString sender, QPrivateSignal);
+
+    // New signals
+
+    void signedIn(const QString &userId);
+    void signInErrorOccured(const QString &errorText);
+    void signedOut();
+
+    void contactAdded(const QString &userId);
+    void addContactErrorOccured(const QString &errorText);
 
 private slots:
     void onConnected();

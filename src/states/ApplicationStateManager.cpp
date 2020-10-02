@@ -46,8 +46,8 @@ ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, VSQSet
     , m_splashScreenState(new SplashScreenState(messenger, settings, this))
     , m_accountSelectionState(new AccountSelectionState(messenger, this))
     , m_chatListState(new ChatListState(this))
-    , m_chatState(new ChatState(settings, this))
-    , m_newChatState(new NewChatState(settings, this))
+    , m_chatState(new ChatState(this))
+    , m_newChatState(new NewChatState(messenger, this))
     , m_accountSettingsState(new AccountSettingsState(this))
     , m_backupKeyState(new BackupKeyState(settings, this))
 {
@@ -76,9 +76,12 @@ void ApplicationStateManager::registerStatesMetaTypes()
 
 void ApplicationStateManager::setupConnections()
 {
-    // Queued connection is needed for correct transition
+    // NOTE: Queued connection is needed for correct transition
     connect(this, &ApplicationStateManager::setUiState, this, std::bind(&ApplicationStateManager::splashScreenRequested, this, QPrivateSignal()), Qt::QueuedConnection);
-    connect(this, &ApplicationStateManager::setSignOutState, m_messenger, &VSQMessenger::signOut);
+    connect(this, &ApplicationStateManager::signOut, m_messenger, &VSQMessenger::signOut);
+    connect(this, &ApplicationStateManager::openChat, this, &ApplicationStateManager::onOpenChat);
+    connect(this, &ApplicationStateManager::addContact, m_newChatState, &NewChatState::addContact);
+    connect(m_newChatState, &NewChatState::addContactFinished, this, &ApplicationStateManager::openChat);
 }
 
 void ApplicationStateManager::addTransitions()
@@ -89,7 +92,18 @@ void ApplicationStateManager::addTransitions()
     m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::signInFinished, m_chatListState);
     m_accountSelectionState->addTransition(m_accountSelectionState, &AccountSelectionState::signInFinished, m_chatListState);
     m_chatListState->addTransition(m_messenger, &VSQMessenger::signedOut, m_accountSelectionState);
-    m_chatListState->addTransition(this, &ApplicationStateManager::setAccountSettingsState, m_accountSettingsState);
+    m_chatListState->addTransition(this, &ApplicationStateManager::openAccountSettings, m_accountSettingsState);
+    m_chatListState->addTransition(this, &ApplicationStateManager::openAddContact, m_newChatState);
+    m_chatListState->addTransition(this, &ApplicationStateManager::chatRequested, m_chatState);
     m_accountSettingsState->addTransition(m_messenger, &VSQMessenger::signedOut, m_accountSelectionState);
-    m_accountSettingsState->addTransition(this, &ApplicationStateManager::setPreviousState, m_chatListState);
+    m_accountSettingsState->addTransition(this, &ApplicationStateManager::goBack, m_chatListState);
+    m_newChatState->addTransition(this, &ApplicationStateManager::goBack, m_chatListState);
+    m_newChatState->addTransition(this, &ApplicationStateManager::chatRequested, m_chatState);
+    m_chatState->addTransition(this, &ApplicationStateManager::goBack, m_chatListState);
+}
+
+void ApplicationStateManager::onOpenChat(const QString &contactId)
+{
+    m_chatState->setContactId(contactId);
+    emit chatRequested(QPrivateSignal());
 }

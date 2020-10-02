@@ -67,16 +67,23 @@ public:
 
 signals:
     void setUiState();
-    void setSignOutState();
-    void setAccountSettingsState();
-    void setPreviousState();
+
+    void goBack();
+    void signOut();
+    void addContact(const QString &contactId);
+    void openAddContact();
+    void openChat(const QString &contactId);
+    void openAccountSettings();
 
     void splashScreenRequested(QPrivateSignal);
+    void chatRequested(QPrivateSignal);
 
 private:
     void registerStatesMetaTypes();
     void setupConnections();
     void addTransitions();
+
+    void onOpenChat(const QString &contactId);
 
     VSQMessenger *m_messenger;
     VSQSettings *m_settings;

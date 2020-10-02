@@ -39,7 +39,7 @@ ToolBar {
             id: backButton
             image: "Arrow-Left"
 
-            onClicked: app.stateManager.setPreviousState()
+            onClicked: app.stateManager.goBack()
         }
 
         Label {

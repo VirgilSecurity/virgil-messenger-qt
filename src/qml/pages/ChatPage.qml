@@ -13,7 +13,7 @@ import "../components"
 Page {
     id: chatPage
 
-    property string recipient
+    readonly property var contactId: app.stateManager.chatState.contactId
 
     background: Rectangle {
         color: Theme.chatBackgroundColor
@@ -53,14 +53,14 @@ Page {
 
             ImageButton {
                 image: "Arrow-Left"
-                onClicked: app.stateManager.setPreviousState()
+                onClicked: app.stateManager.goBack()
             }
 
             Column {
                 Layout.fillWidth: true
                 Layout.leftMargin: 10
                 Label {
-                    text: ConversationsModel.recipient
+                    text: contactId
                     font.pointSize: UiHelper.fixFontSz(15)
                     color: Theme.primaryTextColor
                     font.bold: true
@@ -93,6 +93,8 @@ Page {
         section.delegate: ChatDateSeporator {
             date: section
         }
+
+        model: ConversationsModel
 
         spacing: 5
         delegate: ChatMessage {
@@ -181,7 +183,7 @@ Page {
     footer: ChatMessageInput {
         id: footerControl
         onMessageSending: {
-            var future = Messenger.sendMessage(ConversationsModel.recipient, message, attachmentUrl, attachmentType)
+            var future = Messenger.sendMessage(contactId, message, attachmentUrl, attachmentType)
             Future.onFinished(future, function(value) {
                 messageSent.play()
             })
@@ -197,22 +199,26 @@ Page {
         onAccepted: Messenger.saveAttachmentAs(messageId, fileUrl)
     }
 
+    // FIXME(fpohtmeh): refactor
+    /*
     // Component events
 
     Component.onCompleted: {
-        // configure conversation model to chat with
-        // recipient provided as a parameter to this page.
-
-        ConversationsModel.recipient = recipient
-        listView.model = ConversationsModel
-        ConversationsModel.setAsRead(recipient)
-        ChatModel.updateUnreadMessageCount(recipient)
-
         Messenger.openPreviewRequested.connect(openPreview)
     }
 
     Component.onDestruction: {
+        // FIXME(fpohtmeh): refactor
         Messenger.openPreviewRequested.disconnect(openPreview)
+    }
+    */
+
+    onContactIdChanged: {
+        ConversationsModel.recipient = contactId
+        if (contactId) {
+            ConversationsModel.setAsRead(contactId)
+            ChatModel.updateUnreadMessageCount(contactId)
+        }
     }
 
     Connections {

@@ -172,6 +172,8 @@ SOURCES += \
         # Applications states
         src/states/ApplicationStateManager.cpp \
         src/states/AuthorizationState.cpp \
+        src/states/ChatState.cpp \
+        src/states/NewChatState.cpp \
         src/states/SplashScreenState.cpp \
         src/states/State.cpp \
         # Logging

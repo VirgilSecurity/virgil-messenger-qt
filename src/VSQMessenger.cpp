@@ -245,6 +245,24 @@ void VSQMessenger::signOut()
     });
 }
 
+void VSQMessenger::addContact(const QString &userId)
+{
+    auto futureWatcher = new QFutureWatcher<EnResult>();
+    const auto future = addContactAsync(userId);
+    futureWatcher->setFuture(future);
+    connect(futureWatcher, &QFutureWatcher<EnResult>::finished, this, [=]() {
+        futureWatcher->deleteLater();
+        switch (future.result()) {
+        case MRES_OK:
+            emit contactAdded(userId);
+            break;
+        default:
+            emit addContactErrorOccured(tr("Contact not found"));
+            break;
+        }
+    });
+}
+
 void
 VSQMessenger::onMessageDelivered(const QString& to, const QString& messageId) {
 
@@ -559,7 +577,7 @@ VSQMessenger::signUp(QString user) {
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::addContact(QString contact) {
+VSQMessenger::addContactAsync(QString contact) {
     return QtConcurrent::run([=]() -> EnResult {
         // Sign Up user, using Virgil Service
         if (VS_CODE_OK != vs_messenger_virgil_search(contact.toStdString().c_str())) {

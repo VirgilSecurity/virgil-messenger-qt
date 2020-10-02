@@ -57,7 +57,6 @@ import "../components"
 import "../components/CommonHelpers"
 
 Page {
-
     property bool showServersPanel: true
 
     background: Rectangle {
@@ -83,7 +82,7 @@ Page {
 
         Action {
             text: qsTr("New chat")
-            onTriggered: mainView.showAddPerson()
+            onTriggered: app.stateManager.openAddContact()
         }
     }
 
@@ -149,9 +148,7 @@ Page {
                 }
             }
 
-            onClicked: {
-                mainView.showChatWith(model.name)
-            }
+            onClicked: app.stateManager.openChat(model.name)
         }
 
         IconWithText {
@@ -183,20 +180,9 @@ Page {
             visible: !listView.contentItem.children.length
             anchors.fill: parent
             onClicked: {
-                if (!listView.contentItem.children.length) {
-                    mainView.showAddPerson()
-                    mouse.accepted = false
-                }
+                app.stateManager.openAddContact()
+                mouse.accepted = false
             }
         }
-    }
-
-
-    //
-    //  Functions
-    //
-    function setAsRead(user) {
-        // ConversationsModel.setAsRead(user);
-        console.log("setAsRead func");
     }
 }

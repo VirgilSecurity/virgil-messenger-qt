@@ -39,7 +39,25 @@
 
 namespace VSQ
 {
-using ChatState = State;
+class ChatState : public QState
+{
+    Q_OBJECT
+    Q_PROPERTY(QString contactId READ contactId WRITE setContactId NOTIFY contactIdChanged)
+
+public:
+    using QState::QState;
+
+    QString contactId() const;
+    void setContactId(const QString &contactId);
+
+signals:
+    void contactIdChanged(const QString &);
+
+private:
+    void onExit(QEvent *) override;
+
+    QString m_contactId;
+};
 }
 
 #endif // VSQ_CHATSTATE_H

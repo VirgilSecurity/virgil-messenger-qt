@@ -11,7 +11,8 @@ import "./helpers/login.js" as LoginLogic
 Control {
     id: mainView
 
-    property var chatListPushed: false
+    property bool chatListPushed: false
+    property bool addNewChatOpened: false
 
     RowLayout {
         anchors {
@@ -30,7 +31,7 @@ Control {
 
             Action {
                 text: qsTr("Settings")
-                onTriggered: app.stateManager.setAccountSettingsState()
+                onTriggered: app.stateManager.openAccountSettings()
             }
 
             MenuSeparator {
@@ -39,7 +40,7 @@ Control {
 
             Action {
                 text: qsTr("Sign Out")
-                onTriggered: app.stateManager.setSignOutState()
+                onTriggered: app.stateManager.signOut()
             }
         }
 
@@ -86,46 +87,48 @@ Control {
     }
 
     Component.onCompleted: {
-        app.stateManager.splashScreenState.entered.connect(pushSplashScreenPage)
-        app.stateManager.accountSelectionState.entered.connect(pushAccountSelectionPage)
-        app.stateManager.chatListState.entered.connect(pushChatListPage)
-        app.stateManager.accountSettingsState.entered.connect(pushAccountSettingsPage)
-        app.stateManager.setPreviousState.connect(stackView.pop)
+        app.stateManager.goBack.connect(stackView.pop)
+        app.stateManager.splashScreenState.entered.connect(openSplashScreenPage)
+        app.stateManager.accountSelectionState.entered.connect(openAccountSelectionPage)
+        app.stateManager.chatListState.entered.connect(openChatListPage)
+        app.stateManager.accountSettingsState.entered.connect(openAccountSettingsPage)
+        app.stateManager.newChatState.entered.connect(openAddNewChatPage)
+        app.stateManager.chatState.entered.connect(openChatPage)
+
         if (logControl.visible) {
             logging.formattedMessageCreated.connect(logTextControl.append)
         }
     }
 
-    // FIXME(fpohtmeh): refactor
-    /*
-    function disconnect() {
-        var future = Messenger.disconnect()
-        Future.onFinished(future, function(value) {
-          console.log("Logout result: ", Future.result(future))
-            stackView.clear()
-            showAuth(true)
-        })
-    }
-    */
-
-    function pushSplashScreenPage() {
+    function openSplashScreenPage() {
         stackView.push("./pages/SplashScreenPage.qml", StackView.Immediate)
     }
 
-    function pushAccountSelectionPage(animate) {
+    function openAccountSelectionPage(animate) {
         stackView.push("./pages/AccountSelectionPage.qml", animate ? StackView.Transition : StackView.Immediate)
     }
 
-    function pushChatListPage() {
+    function openChatListPage() {
         if (!chatListPushed) {
             stackView.clear()
             stackView.push("./pages/ChatListPage.qml")
             chatListPushed = true
         }
+        addNewChatOpened = false
     }
 
-    function pushAccountSettingsPage() {
+    function openAccountSettingsPage() {
         navigateTo("AccountSettings", null, true, false)
+    }
+
+    function openAddNewChatPage() {
+        addNewChatOpened = true
+        stackView.push("./pages/AddPersonPage.qml")
+    }
+
+    function openChatPage() {
+        navigateTo("Chat", null, true, false, addNewChatOpened)
+        addNewChatOpened = false
     }
 
     // FIXME(fpohtmeh): refactor
@@ -153,10 +156,6 @@ Control {
     function showChatWith(recipient, replace) {
         navigateTo("Chat", { recipient: recipient }, true, false, replace)
         Messenger.setCurrentRecipient(recipient)
-    }
-
-    function showAddPerson() {
-        stackView.push("./pages/AddPersonPage.qml")
     }
     */
 

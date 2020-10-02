@@ -51,10 +51,8 @@ Page {
         }
 */
         FormPrimaryButton {
-            text: "Backup private key"
-            onClicked: {
-                mainView.showBackupKey()
-            }
+            text: qsTr("Backup private key")
+            onClicked: mainView.showBackupKey()
         }
 /*
         FormPrimaryButton {
@@ -65,10 +63,8 @@ Page {
         }
 */
         FormPrimaryButton {
-            text: "Sign out"
-            onClicked: {
-                mainView.signOut()
-            }
+            text: qsTr("Sign out")
+            onClicked: app.stateManager.signOut()
         }
     }
 }

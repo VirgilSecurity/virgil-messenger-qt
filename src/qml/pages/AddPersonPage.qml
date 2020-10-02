@@ -78,27 +78,28 @@ Page {
     footer: Footer { }
 
     function accept() {
-        try {
-            form.showLoading(qsTr("Adding of contact..."))
-            var future = Messenger.addContact(contact)
-            Future.onFinished(future, function(value) {
-                form.hideLoading();
-
-                if (Future.result(future) === Result.MRES_OK) {
-                    mainView.showChatWith(contact, true)
-                }
-                else {
-                    showPopupError(qsTr("User not found"))
-                }
-            })
-        } catch (error) {
-            form.hideLoading();
-            console.error(error)
-        }
+        app.stateManager.addContact(contact)
     }
 
     function reject() {
-        app.stateManager.setPreviousState()
+        app.stateManager.goBack()
+    }
+
+    Connections {
+        target: app.stateManager.newChatState
+
+        function addContactStarted(userId) {
+            form.showLoading(qsTr("Adding of contact..."))
+        }
+
+        function addContactFinished() {
+            form.hideLoading();
+        }
+
+        function addContactErrorOccurred(errorText) {
+            form.hideLoading();
+            showPopupError(errorText) // TODO(fpohtmeh): don't use parent method directly
+        }
     }
 }
 
