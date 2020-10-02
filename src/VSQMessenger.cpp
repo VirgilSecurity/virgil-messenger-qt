@@ -235,22 +235,15 @@ VSQMessenger::_connectToDatabase() {
 /******************************************************************************/
 QString
 VSQMessenger::_xmppPass() {
-    if (!m_xmppPass.isEmpty()) {
-        return m_xmppPass;
-    }
-
-    const size_t _pass_buf_sz = 512;
-    char pass[_pass_buf_sz];
+    char pass[VS_MESSENGER_VIRGIL_TOKEN_SZ_MAX];
 
     // Get XMPP password
-    if (VS_CODE_OK != vs_messenger_virgil_get_xmpp_pass(pass, _pass_buf_sz)) {
+    if (VS_CODE_OK != vs_messenger_virgil_get_xmpp_pass(pass, VS_MESSENGER_VIRGIL_TOKEN_SZ_MAX)) {
         emit fireError(tr("Cannot get XMPP password"));
         return "";
     }
 
-    m_xmppPass = QString::fromLatin1(pass);
-
-    return m_xmppPass;
+    return QString::fromLatin1(pass);
 }
 
 /******************************************************************************/
@@ -699,7 +692,6 @@ VSQMessenger::logout() {
         qDebug() << "Logout";
         m_user = "";
         m_userId = "";
-        m_xmppPass = "";
         QMetaObject::invokeMethod(this, "onSubscribePushNotifications", Qt::BlockingQueuedConnection, Q_ARG(bool, false));
         QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::BlockingQueuedConnection);
         vs_messenger_virgil_logout();

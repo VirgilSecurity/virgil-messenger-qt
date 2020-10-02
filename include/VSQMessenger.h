@@ -236,7 +236,6 @@ private:
     QString m_user;
     QString m_userId;
     QString m_recipient;
-    QString m_xmppPass;
     VSQEnvType m_envType;
     static const VSQEnvType _defaultEnv = PROD;
     QXmppConfiguration m_conf;
