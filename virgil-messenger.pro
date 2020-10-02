@@ -131,7 +131,6 @@ HEADERS += \
         include/states/NewChatState.h \
         include/states/SplashScreenState.h \
         include/states/StartState.h \
-        include/states/State.h \
         # Logging
         include/logging/VSQLogging.h \
         include/logging/VSQLogWorker.h \
@@ -171,11 +170,11 @@ SOURCES += \
         src/ui/VSQUiHelper.cpp \
         # Applications states
         src/states/ApplicationStateManager.cpp \
+        src/states/AttachmentPreviewState.cpp \
         src/states/AuthorizationState.cpp \
         src/states/ChatState.cpp \
         src/states/NewChatState.cpp \
         src/states/SplashScreenState.cpp \
-        src/states/State.cpp \
         # Logging
         src/hal.cpp \
         src/logging/VSQLogging.cpp \

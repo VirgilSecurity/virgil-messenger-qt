@@ -49,8 +49,3 @@ void ChatState::setContactId(const QString &contactId)
     m_contactId = contactId;
     emit contactIdChanged(contactId);
 }
-
-void ChatState::onExit(QEvent *)
-{
-    setContactId(QString());
-}

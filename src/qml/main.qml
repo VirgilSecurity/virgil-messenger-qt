@@ -74,15 +74,7 @@ ApplicationWindow {
     onClosing: {
         if (Platform.isAndroid) {
             close.accepted = false
-            // FIXME(fpohtmeh): refactor
-            /*
-            if (preview.visible) {
-                preview.visible = false
-            }
-            else {
-                mainView.back()
-            }
-            */
+            app.stateManager.goBack()
         }
         else if (Platform.isDesktop) {
             settings.windowGeometry = Qt.rect(x, y, width, height)
@@ -92,33 +84,26 @@ ApplicationWindow {
     MainView {
         id: mainView
         anchors.fill: parent
+        attachmentPreview: attachmentPreview
     }
 
-    Popup {
-        id: inform
-    }
+    Item {
+        anchors.fill: parent
 
-    // FIXME(fpohtmeh): refactor
-    /*
-    SendReportAsk {
-        id: sendReportAsk
-    }
+        Popup {
+            id: inform
+        }
 
-    // Shortcuts for hackers
-    Shortcut {
-        // TODO: remove on production or add conditional dev flag!
-        sequence: StandardKey.Refresh
-        onActivated: {
-            var future = Messenger.logout()
-            Future.onFinished(future, function(value) {
-              console.log("Logouts result: ", Future.result(future))
-            })
+        AttachmentPreview {
+            id: attachmentPreview
+            anchors.fill: parent
+            visible: false
+        }
 
-            root.close()
-            app.reloadQml()
+        SendReportAsk {
+            id: sendReportAsk
         }
     }
-    */
 
     // Show Popup message
     function showPopup(message, color, textColor, isOnTop, isModal) {
@@ -142,69 +127,10 @@ ApplicationWindow {
         showPopup(message, "#66CDAA", "#00", true, false)
     }
 
-    // FIXME(fpohtmeh): refactor
-    /*
-    // View mode detection
-    function isMobileView() {
-
-        if (root.mobileView) {
-            return true;
-        }
-
-        return root.width < root.maxMobileWidth;
-    }
-
-    function openPreview(filePath) {
-        console.log("Open preview:", filePath)
-        preview.filePath = filePath
-        preview.visible = true
-    }
-
-    Item {
-        id: preview
-        anchors.fill: parent
-        visible: false
-
-        property alias filePath: previewImage.source
-
-        Rectangle {
-            anchors.fill: parent
-            color: "black"
-            opacity: 0.5
-        }
-
-        Image {
-            id: previewImage
-            anchors.fill: parent
-            fillMode: Image.PreserveAspectFit
-            autoTransform: true
-        }
-
-        Label {
-            anchors {
-                top: parent.top
-                right: parent.right
-                topMargin: 15
-                rightMargin: 15
-            }
-            text: qsTr("Close")
-            color: "white"
-            font.bold: true
-        }
-
-        MouseArea {
-            acceptedButtons: Qt.AllButtons
-            anchors.fill: parent
-            onClicked: preview.visible = false
-            onWheel: wheel.accepted = true
-        }
-    }
-    */
-
     Component.onCompleted: {
         Platform.detect()
-        app.stateManager.setUiState()
         Messenger.informationRequested.connect(showPopupInform)
+        app.stateManager.setUiState()
 //        crashReporter.crashReportRequested.connect(sendReportAsk.open)
 //        crashReporter.reportSent.connect(showPopupSuccess)
 //        crashReporter.reportSentErr.connect(showPopupError)

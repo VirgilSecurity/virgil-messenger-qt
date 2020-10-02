@@ -35,7 +35,7 @@
 #ifndef VSQ_CHATSTATE_H
 #define VSQ_CHATSTATE_H
 
-#include "State.h"
+#include <QState>
 
 namespace VSQ
 {
@@ -54,8 +54,6 @@ signals:
     void contactIdChanged(const QString &);
 
 private:
-    void onExit(QEvent *) override;
-
     QString m_contactId;
 };
 }

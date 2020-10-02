@@ -32,11 +32,25 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "states/State.h"
+#include "states/AttachmentPreviewState.h"
 
 using namespace VSQ;
 
-State::State(VSQSettings *settings, QState *parent)
-    : QState(parent)
-    , m_settings(settings)
-{}
+QUrl AttachmentPreviewState::url() const
+{
+    return m_url;
+}
+
+void AttachmentPreviewState::setUrl(const QUrl &filePath)
+{
+    if (m_url == filePath) {
+        return;
+    }
+    m_url = filePath;
+    emit urlChanged(filePath);
+}
+
+void AttachmentPreviewState::onExit(QEvent *)
+{
+    setUrl(QUrl());
+}

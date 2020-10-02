@@ -199,20 +199,6 @@ Page {
         onAccepted: Messenger.saveAttachmentAs(messageId, fileUrl)
     }
 
-    // FIXME(fpohtmeh): refactor
-    /*
-    // Component events
-
-    Component.onCompleted: {
-        Messenger.openPreviewRequested.connect(openPreview)
-    }
-
-    Component.onDestruction: {
-        // FIXME(fpohtmeh): refactor
-        Messenger.openPreviewRequested.disconnect(openPreview)
-    }
-    */
-
     onContactIdChanged: {
         ConversationsModel.recipient = contactId
         if (contactId) {

@@ -11,8 +11,7 @@ import "./helpers/login.js" as LoginLogic
 Control {
     id: mainView
 
-    property bool chatListPushed: false
-    property bool addNewChatOpened: false
+    property var attachmentPreview: undefined
 
     RowLayout {
         anchors {
@@ -86,17 +85,34 @@ Control {
         onClicked: logTextControl.clear()
     }
 
+    QtObject {
+        id: d
+        property bool chatListPushed: false
+        property bool addNewChatOpened: false
+        property bool attachmentPreviewOpened: false
+    }
+
     Component.onCompleted: {
-        app.stateManager.goBack.connect(stackView.pop)
+        app.stateManager.goBack.connect(goBack)
         app.stateManager.splashScreenState.entered.connect(openSplashScreenPage)
         app.stateManager.accountSelectionState.entered.connect(openAccountSelectionPage)
         app.stateManager.chatListState.entered.connect(openChatListPage)
         app.stateManager.accountSettingsState.entered.connect(openAccountSettingsPage)
         app.stateManager.newChatState.entered.connect(openAddNewChatPage)
         app.stateManager.chatState.entered.connect(openChatPage)
+        app.stateManager.attachmentPreviewState.entered.connect(showAttachmentPreview)
 
         if (logControl.visible) {
             logging.formattedMessageCreated.connect(logTextControl.append)
+        }
+    }
+
+    function goBack() {
+        if (attachmentPreview.visible) {
+            attachmentPreview.visible = false
+        }
+        else {
+            stackView.pop()
         }
     }
 
@@ -109,12 +125,12 @@ Control {
     }
 
     function openChatListPage() {
-        if (!chatListPushed) {
+        if (!d.chatListPushed) {
             stackView.clear()
             stackView.push("./pages/ChatListPage.qml")
-            chatListPushed = true
+            d.chatListPushed = true
         }
-        addNewChatOpened = false
+        d.addNewChatOpened = false
     }
 
     function openAccountSettingsPage() {
@@ -122,13 +138,21 @@ Control {
     }
 
     function openAddNewChatPage() {
-        addNewChatOpened = true
+        d.addNewChatOpened = true
         stackView.push("./pages/AddPersonPage.qml")
     }
 
     function openChatPage() {
-        navigateTo("Chat", null, true, false, addNewChatOpened)
-        addNewChatOpened = false
+        if (!d.attachmentPreviewOpened) {
+            navigateTo("Chat", null, true, false, d.addNewChatOpened)
+        }
+        d.addNewChatOpened = false
+        d.attachmentPreviewOpened = false
+    }
+
+    function showAttachmentPreview() {
+        attachmentPreview.visible = true
+        d.attachmentPreviewOpened = true
     }
 
     // FIXME(fpohtmeh): refactor

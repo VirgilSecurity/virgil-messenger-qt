@@ -35,8 +35,30 @@
 #ifndef VSQ_ATTACHMENTPREVIEWSTATE_H
 #define VSQ_ATTACHMENTPREVIEWSTATE_H
 
-#include "State.h"
+#include <QState>
+#include <QUrl>
 
-using AttachmentPreviewState = State;
+namespace VSQ
+{
+class AttachmentPreviewState : public QState
+{
+    Q_OBJECT
+    Q_PROPERTY(QUrl url READ url WRITE setUrl NOTIFY urlChanged)
+
+public:
+    using QState::QState;
+
+    QUrl url() const;
+    void setUrl(const QUrl &filePath);
+
+signals:
+    void urlChanged(const QUrl &);
+
+private:
+    void onExit(QEvent *) override;
+
+    QUrl m_url;
+};
+}
 
 #endif // VSQ_ATTACHMENTPREVIEWSTATE_H

@@ -50,6 +50,7 @@ ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, VSQSet
     , m_newChatState(new NewChatState(messenger, this))
     , m_accountSettingsState(new AccountSettingsState(this))
     , m_backupKeyState(new BackupKeyState(settings, this))
+    , m_attachmentPreviewState(new AttachmentPreviewState(this))
 {
     registerStatesMetaTypes();
     setupConnections();
@@ -72,6 +73,7 @@ void ApplicationStateManager::registerStatesMetaTypes()
     qRegisterMetaType<NewChatState *>("NewChatState*");
     qRegisterMetaType<AccountSettingsState *>("AccountSettingsState*");
     qRegisterMetaType<BackupKeyState *>("BackupKeyState*");
+    qRegisterMetaType<AttachmentPreviewState *>("AttachmentPreviewState*");
 }
 
 void ApplicationStateManager::setupConnections()
@@ -82,6 +84,7 @@ void ApplicationStateManager::setupConnections()
     connect(this, &ApplicationStateManager::openChat, this, &ApplicationStateManager::onOpenChat);
     connect(this, &ApplicationStateManager::addContact, m_newChatState, &NewChatState::addContact);
     connect(m_newChatState, &NewChatState::addContactFinished, this, &ApplicationStateManager::openChat);
+    connect(m_messenger, &VSQMessenger::openPreviewRequested, this, &ApplicationStateManager::onOpenPreview);
 }
 
 void ApplicationStateManager::addTransitions()
@@ -100,10 +103,18 @@ void ApplicationStateManager::addTransitions()
     m_newChatState->addTransition(this, &ApplicationStateManager::goBack, m_chatListState);
     m_newChatState->addTransition(this, &ApplicationStateManager::chatRequested, m_chatState);
     m_chatState->addTransition(this, &ApplicationStateManager::goBack, m_chatListState);
+    m_chatState->addTransition(this, &ApplicationStateManager::openPreviewRequested, m_attachmentPreviewState);
+    m_attachmentPreviewState->addTransition(this, &ApplicationStateManager::goBack, m_chatState);
 }
 
 void ApplicationStateManager::onOpenChat(const QString &contactId)
 {
     m_chatState->setContactId(contactId);
     emit chatRequested(QPrivateSignal());
+}
+
+void ApplicationStateManager::onOpenPreview(const QUrl &url)
+{
+    m_attachmentPreviewState->setUrl(url);
+    emit openPreviewRequested(QPrivateSignal());
 }

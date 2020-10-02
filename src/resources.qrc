@@ -16,6 +16,7 @@
         <file>qml/pages/SignInAsPage.qml</file>
         <file>qml/pages/DownloadKeyPage.qml</file>
         <!-- Others -->
+        <file>qml/components/AttachmentPreview.qml</file>
         <file>qml/components/CommonHelpers/TextInCircle.qml</file>
         <file>qml/components/Popups/Popup.qml</file>
         <file>qml/components/Progress/Progress.qml</file>

@@ -35,11 +35,11 @@
 #ifndef VSQ_BACKUPKEYSTATE_H
 #define VSQ_BACKUPKEYSTATE_H
 
-#include "State.h"
+#include <QState>
 
 namespace VSQ
 {
-using BackupKeyState = State;
+using BackupKeyState = QState;
 }
 
 #endif // VSQ_BACKUPKEYSTATE_H

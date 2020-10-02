@@ -40,6 +40,7 @@
 
 #include "AccountSelectionState.h"
 #include "AccountSettingsState.h"
+#include "AttachmentPreviewState.h"
 #include "BackupKeyState.h"
 #include "ChatListState.h"
 #include "ChatState.h"
@@ -60,6 +61,7 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(NewChatState *newChatState MEMBER m_newChatState CONSTANT)
     Q_PROPERTY(AccountSettingsState *accountSettingsState MEMBER m_accountSettingsState CONSTANT)
     Q_PROPERTY(BackupKeyState *backupKeyState MEMBER m_backupKeyState CONSTANT)
+    Q_PROPERTY(AttachmentPreviewState *attachmentPreviewState MEMBER m_attachmentPreviewState CONSTANT)
 
 public:
     explicit ApplicationStateManager(VSQMessenger *messenger, VSQSettings *settings, QObject *parent);
@@ -77,6 +79,7 @@ signals:
 
     void splashScreenRequested(QPrivateSignal);
     void chatRequested(QPrivateSignal);
+    void openPreviewRequested(QPrivateSignal);
 
 private:
     void registerStatesMetaTypes();
@@ -84,6 +87,7 @@ private:
     void addTransitions();
 
     void onOpenChat(const QString &contactId);
+    void onOpenPreview(const QUrl &url);
 
     VSQMessenger *m_messenger;
     VSQSettings *m_settings;
@@ -96,6 +100,7 @@ private:
     NewChatState *m_newChatState;
     AccountSettingsState *m_accountSettingsState;
     BackupKeyState *m_backupKeyState;
+    AttachmentPreviewState *m_attachmentPreviewState;
 };
 }
 
