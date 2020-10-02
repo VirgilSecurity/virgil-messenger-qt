@@ -228,6 +228,9 @@ target_sources(${VS_TARGET_NAME}
         # Push notification
         $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/VSQPushNotifications.cpp>
         $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/android/VSQFirebaseListener.cpp>
+        
+        # MacOS
+        $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/src/macos/VSQMacos.mm>
 
         # Qt Resources
         ${CMAKE_CURRENT_LIST_DIR}/src/resources.qrc
@@ -276,7 +279,11 @@ target_link_libraries(${VS_TARGET_NAME}
 	ed25519
 	relic_s
 	json-c
-
+	
+	# MacOS
+	$<$<STREQUAL:"${VS_PLATFORM}","macos">:-framework Sparkle>
+	$<$<STREQUAL:"${VS_PLATFORM}","macos">:-framework CoreFoundation>
+	$<$<STREQUAL:"${VS_PLATFORM}","macos">:-framework Foundation>
 
         $<$<STREQUAL:"${VS_PLATFORM}","android">:firebase_messaging>
         $<$<STREQUAL:"${VS_PLATFORM}","android">:firebase_app>        
@@ -301,8 +308,8 @@ target_include_directories(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}/qxmpp>
         $<BUILD_INTERFACE:${QUICKFUTURE_DIR}>
         $<BUILD_INTERFACE:${VS_CUSTOMER_INCLUDE_DIR}>
-	$<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${PREBUILT_DIR}/firebase_cpp_sdk/include>>        
-        
+	$<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${PREBUILT_DIR}/firebase_cpp_sdk/include>>    
+        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","macos">:${PREBUILT_DIR}/${VS_PLATFORM}/sparkle/Sparkle.framework/Headers>>        
         )
 
 target_compile_definitions(${VS_TARGET_NAME}

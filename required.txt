@@ -1,0 +1,22 @@
+
+# Required for build
+# Example:
+
+    export ANDROID_NDK=/opt/android/sdk/ndk/21.1.6352462
+    export ANDROID_SDK=/opt/android/sdk
+    export QTDIR=/opt/Qt/5.15.0/android
+
+# Android build
+
+    mkdir -p build
+    cd build
+    cmake -DVS_PLATFORM="android" -DVS_CUSTOMER="Virgil" ..
+    make
+    make apk
+
+# Linux build:
+
+    mkdir -p build
+    cd build
+    cmake -DVS_PLATFORM="linux" -DVS_CUSTOMER="Virgil" ..
+    make
