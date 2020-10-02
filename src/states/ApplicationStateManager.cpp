@@ -36,7 +36,7 @@
 
 #include "VSQMessenger.h"
 
-Q_LOGGING_CATEGORY(lcState, "state");
+Q_LOGGING_CATEGORY(lcAppState, "appState");
 
 using namespace VSQ;
 
@@ -87,6 +87,7 @@ void ApplicationStateManager::setupConnections()
 
     // NOTE: Queued connection is needed for correct state transition
     connect(this, &ApplicationStateManager::setUiState, this, std::bind(&ApplicationStateManager::splashScreenRequested, this, QPrivateSignal()), Qt::QueuedConnection);
+    connect(this, &ApplicationStateManager::signIn, this, &ApplicationStateManager::onSignIn);
     connect(this, &ApplicationStateManager::signOut, m_messenger, &VSQMessenger::signOut);
     connect(this, &ApplicationStateManager::openChat, this, &ApplicationStateManager::onOpenChat);
     connect(this, &ApplicationStateManager::addContact, m_newChatState, &NewChatState::addContact);
@@ -119,7 +120,7 @@ void ApplicationStateManager::addTransitions()
 
 void ApplicationStateManager::setCurrentState(QState *state)
 {
-    qCDebug(lcState) << "Current state:" << state;
+    qCDebug(lcAppState) << "Current state:" << state;
     m_currentState = state;
     emit currentStateChanged(state);
 }
@@ -128,6 +129,14 @@ void ApplicationStateManager::setPreviousState(QState *state)
 {
     m_previousState = state;
     emit previousStateChanged(state);
+}
+
+void ApplicationStateManager::onSignIn(const QString &userId)
+{
+    const auto authorizationState = dynamic_cast<AuthorizationState *>(m_currentState);
+    if (authorizationState) {
+        authorizationState->signIn(userId);
+    }
 }
 
 void ApplicationStateManager::onOpenChat(const QString &contactId)

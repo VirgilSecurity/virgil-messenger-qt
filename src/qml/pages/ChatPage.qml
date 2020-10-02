@@ -77,7 +77,6 @@ Page {
         }
     }
 
-
     ListView {
         id: listView
 
@@ -182,21 +181,28 @@ Page {
 
     footer: ChatMessageInput {
         id: footerControl
-        onMessageSending: {
-            var future = Messenger.sendMessage(contactId, message, attachmentUrl, attachmentType)
-            Future.onFinished(future, function(value) {
-                messageSent.play()
-            })
-        }
+        onMessageSending: Messenger.sendMessage(contactId, message, attachmentUrl, attachmentType)
     }
 
-    SelectAttachmentsDialog {
-        id: saveAttachmentAsDialog
-        selectExisting: false
+    Item {
+        SelectAttachmentsDialog {
+            id: saveAttachmentAsDialog
+            selectExisting: false
 
-        property string messageId: ""
+            property string messageId: ""
 
-        onAccepted: Messenger.saveAttachmentAs(messageId, fileUrl)
+            onAccepted: Messenger.saveAttachmentAs(messageId, fileUrl)
+        }
+
+        SoundEffect {
+            id: messageReceived
+            source: "../resources/sounds/message-received.wav"
+        }
+
+        SoundEffect {
+            id: messageSent
+            source: "../resources/sounds/message-sent.wav"
+        }
     }
 
     onContactIdChanged: {
@@ -210,21 +216,13 @@ Page {
     Connections {
         target: Messenger
 
+        function onMessageSent() {
+            messageSent.play()
+        }
+
         function onLastActivityTextChanged(text) {
             lastActivityLabel.text = text
         }
-    }
-
-    // Sounds
-
-    SoundEffect {
-        id: messageReceived
-        source: "../resources/sounds/message-received.wav"
-    }
-
-    SoundEffect {
-        id: messageSent
-        source: "../resources/sounds/message-sent.wav"
     }
 }
 

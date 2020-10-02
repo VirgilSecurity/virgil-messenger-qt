@@ -32,32 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_AUTHORIZATIONSTATE_H
-#define VSQ_AUTHORIZATIONSTATE_H
+#ifndef VSQ_FUTUREWORKER_H
+#define VSQ_FUTUREWORKER_H
 
-#include <QState>
+#include <QFutureWatcher>
 
-class VSQMessenger;
+#include "VSQMessenger.h"
 
 namespace VSQ
 {
-class AuthorizationState : public QState
+using FutureResult = VSQMessenger::EnResult;
+using Future = QFuture<FutureResult>;
+using FutureWatcher = QFutureWatcher<FutureResult>;
+
+class FutureWorker
 {
-    Q_OBJECT
-
 public:
-    AuthorizationState(VSQMessenger *messenger, QState *parent = nullptr);
-
-    void signIn(const QString &userId);
-
-signals:
-    void signInStarted(const QString &userId);
-    void signInFinished();
-    void signInErrorOccurred(const QString &errorText);
-
-private:
-    VSQMessenger *m_messenger;
+    static void run(const Future &future, const std::function<void(FutureResult)> &resultHandler)
+    {
+        auto futureWatcher = new FutureWatcher();
+        futureWatcher->setFuture(future);
+        QObject::connect(futureWatcher, &FutureWatcher::finished, [=]() {
+            futureWatcher->deleteLater();
+            resultHandler(future.result());
+        });
+    }
 };
 }
 
-#endif // VSQ_AUTHORIZATIONSTATE_H
+#endif // VSQ_FUTUREWORKER_H

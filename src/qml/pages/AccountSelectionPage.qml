@@ -24,12 +24,12 @@ AuthorizationPage {
         AccountSelection {
             id: accountSelection
             visible: settings.usersList.length
-            onUserSelected: authorizationState.signIn(userName)
+            onUserSelected: app.stateManager.signIn(userName)
         }
 
         FormPrimaryButton {
             text: qsTr("Sign Up")
-            onClicked: mainView.showRegister()
+            onClicked: app.stateManager.signUp()
         }
 
         FormSecondaryButton {

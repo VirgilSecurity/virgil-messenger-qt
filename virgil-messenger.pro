@@ -117,8 +117,10 @@ HEADERS += \
         include/VSQUtils.h \
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
-        include/helpers/VSQSingleton.h \
         include/ui/VSQUiHelper.h \
+        # Helpers
+        include/helpers/VSQSingleton.h \
+        include/helpers/FutureWorker.h \
         # Applications states
         include/states/AccountSelectionState.h \
         include/states/AccountSettingsState.h \

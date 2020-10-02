@@ -116,6 +116,8 @@ public:
     void addContact(const QString &userId);
     void backupKey(const QString &password, const QString &confirmedPassword);
 
+    Q_INVOKABLE void sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
+
 public slots:
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     signInAsync(QString user);
@@ -142,7 +144,7 @@ public slots:
     addContactAsync(QString contact);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
+    sendMessageAsync(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
 
     QFuture<VSQMessenger::EnResult>
     createSendMessage(const QString messageId, const QString to, const QString text);
@@ -208,6 +210,8 @@ signals:
 
     void keyBackuped();
     void backupKeyFailed(const QString &errorText);
+
+    void messageSent();
 
 private slots:
     void onConnected();

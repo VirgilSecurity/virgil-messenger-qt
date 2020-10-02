@@ -49,7 +49,7 @@
 #include "StartState.h"
 #include "VSQCommon.h"
 
-Q_DECLARE_LOGGING_CATEGORY(lcState);
+Q_DECLARE_LOGGING_CATEGORY(lcAppState);
 
 namespace VSQ
 {
@@ -76,6 +76,8 @@ public:
 signals:
     void setUiState();
     void goBack();
+    void signIn(const QString &userId);
+    void signUp();
     void signOut();
     void openAddContact();
     void addContact(const QString &contactId);
@@ -95,9 +97,10 @@ private:
     void registerStatesMetaTypes();
     void setupConnections();
     void addTransitions();
+
     void setCurrentState(QState *state);
     void setPreviousState(QState *state);
-
+    void onSignIn(const QString &userId);
     void onOpenChat(const QString &contactId);
     void onOpenPreview(const QUrl &url);
 

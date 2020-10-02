@@ -47,7 +47,7 @@
 #include <VSQUpload.h>
 #include <VSQUtils.h>
 #include <VSQSettings.h>
-
+#include <helpers/FutureWorker.h>
 #include <android/VSQAndroid.h>
 #include <android/VSQAndroid.h>
 
@@ -87,6 +87,8 @@ const int VSQMessenger::kConnectionWaitMs = 10000;
 const int VSQMessenger::kKeepAliveTimeSec = 10;
 
 Q_LOGGING_CATEGORY(lcMessenger, "messenger")
+
+using namespace VSQ;
 
 // Helper struct to categorize transfers
 struct TransferId
@@ -209,12 +211,8 @@ void VSQMessenger::signIn(const QString &userId)
         // TODO(fpohtmeh): check regexp
     }
     else {
-        auto futureWatcher = new QFutureWatcher<EnResult>();
-        const auto future = signInAsync(userId);
-        futureWatcher->setFuture(future);
-        connect(futureWatcher, &QFutureWatcher<EnResult>::finished, this, [=]() {
-            futureWatcher->deleteLater();
-            switch (future.result()) {
+        FutureWorker::run(signInAsync(userId), [=](const FutureResult &result) {
+            switch (result) {
             case MRES_OK:
                 m_settings->setLastSignedInUserId(userId);
                 emit signedIn(userId);
@@ -235,11 +233,7 @@ void VSQMessenger::signIn(const QString &userId)
 
 void VSQMessenger::signOut()
 {
-    auto futureWatcher = new QFutureWatcher<EnResult>();
-    const auto future = logoutAsync();
-    futureWatcher->setFuture(future);
-    connect(futureWatcher, &QFutureWatcher<EnResult>::finished, this, [=]() {
-        futureWatcher->deleteLater();
+    FutureWorker::run(logoutAsync(), [=](const FutureResult &) {
         m_settings->setLastSignedInUserId(QString());
         emit signedOut();
     });
@@ -247,18 +241,12 @@ void VSQMessenger::signOut()
 
 void VSQMessenger::addContact(const QString &userId)
 {
-    auto futureWatcher = new QFutureWatcher<EnResult>();
-    const auto future = addContactAsync(userId);
-    futureWatcher->setFuture(future);
-    connect(futureWatcher, &QFutureWatcher<EnResult>::finished, this, [=]() {
-        futureWatcher->deleteLater();
-        switch (future.result()) {
-        case MRES_OK:
+    FutureWorker::run(addContactAsync(userId), [=](const FutureResult &result) {
+        if (result == MRES_OK) {
             emit contactAdded(userId);
-            break;
-        default:
+        }
+        else {
             emit addContactErrorOccured(tr("Contact not found"));
-            break;
         }
     });
 }
@@ -272,21 +260,24 @@ void VSQMessenger::backupKey(const QString &password, const QString &confirmedPa
         emit backupKeyFailed(tr("Passwords do not match"));
     }
     else {
-        auto futureWatcher = new QFutureWatcher<EnResult>();
-        const auto future = backupKeyAsync(password);
-        futureWatcher->setFuture(future);
-        connect(futureWatcher, &QFutureWatcher<EnResult>::finished, this, [=]() {
-            futureWatcher->deleteLater();
-            switch (future.result()) {
-            case MRES_OK:
+        FutureWorker::run(backupKeyAsync(password), [=](const FutureResult &result) {
+            if (result == MRES_OK) {
                 emit keyBackuped();
-                break;
-            default:
+            }
+            else {
                 emit backupKeyFailed(tr("Backup private key error"));
-                break;
             }
         });
     }
+}
+
+void VSQMessenger::sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
+{
+    FutureWorker::run(sendMessageAsync(to, message, attachmentUrl, attachmentType), [=](const FutureResult &result) {
+        if (result == MRES_OK) {
+            emit messageSent();
+        }
+    });
 }
 
 void
@@ -1328,8 +1319,8 @@ VSQMessenger::createSendAttachment(const QString messageId, const QString to,
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::sendMessage(const QString &to, const QString &message,
-                          const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
+VSQMessenger::sendMessageAsync(const QString &to, const QString &message,
+                               const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
 {
     const auto url = attachmentUrl.toUrl();
     if (VSQUtils::isValidUrl(url)) {
