@@ -6,7 +6,6 @@ import QuickFuture 1.0
 import "./base"
 import "./theme"
 import "./components"
-import "./helpers/login.js" as LoginLogic
 
 Control {
     id: mainView
@@ -24,7 +23,7 @@ Control {
 
         ServersPanel {
             id: serversPanel
-            visible: stackView.currentItem && typeof(stackView.currentItem.showServersPanel) !== "undefined" && stackView.currentItem.showServersPanel
+            visible: [manager.chatListState, manager.newChatState, manager.accountSettingsState].includes(manager.currentState)
             z: 2
             Layout.preferredWidth: 60
             Layout.fillHeight: true
@@ -102,16 +101,18 @@ Control {
             stackView.push("./pages/SplashScreenPage.qml", StackView.Immediate)
         }
 
-        function openAccountSelectionPage(animate) {
-            stackView.push("./pages/AccountSelectionPage.qml", animate ? StackView.Transition : StackView.Immediate)
+        function openAccountSelectionPage() {
+            if ([manager.signUpState, manager.signInState].includes(manager.previousState)) {
+                return
+            }
+            stackView.push("./pages/AccountSelectionPage.qml", StackView.Immediate)
         }
 
         function openChatListPage() {
-            if (manager.previousState !== manager.splashScreenState) {
-                return
+            if ([manager.splashScreenState, manager.accountSelectionState, manager.signUpState].includes(manager.previousState)) {
+                stackView.clear()
+                stackView.push("./pages/ChatListPage.qml")
             }
-            stackView.clear()
-            stackView.push("./pages/ChatListPage.qml")
         }
 
         function openAccountSettingsPage() {
@@ -145,22 +146,26 @@ Control {
             stackView.push("./pages/BackupKeyPage.qml")
         }
 
+        function openSignInAsPage() {
+            stackView.push("./pages/SignInAsPage.qml")
+        }
+
+        function openSignInPage() {
+            if (manager.previousState === manager.accountSelectionState) {
+                stackView.push("./pages/SignInPage.qml")
+            }
+        }
+
+        function openSignUpPage() {
+            if (manager.previousState === manager.accountSelectionState) {
+                stackView.push("./pages/SignUpPage.qml")
+            }
+        }
+
         // FIXME(fpohtmeh): refactor
         /*
-        function showSignIn() {
-            stackView.push("./pages/SignInPage.qml")
-        }
-
-        function showSignInAs(params) {
-            stackView.push("./pages/SignInAsPage.qml", params)
-        }
-
         function showDownloadKey(params) {
             stackView.push("./pages/DownloadKeyPage.qml", params)
-        }
-
-        function showRegister() {
-            stackView.push("./pages/RegisterPage.qml")
         }
         */
     }
@@ -175,6 +180,9 @@ Control {
         manager.chatState.entered.connect(d.openChatPage)
         manager.attachmentPreviewState.entered.connect(d.showAttachmentPreview)
         manager.backupKeyState.entered.connect(d.openBackupKeyPage)
+        manager.signInAsState.entered.connect(d.openSignInAsPage)
+        manager.signInState.entered.connect(d.openSignInPage)
+        manager.signUpState.entered.connect(d.openSignUpPage)
 
         if (logControl.visible) {
             logging.formattedMessageCreated.connect(logTextControl.append)

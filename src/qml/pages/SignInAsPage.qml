@@ -18,7 +18,6 @@ Page {
     }
 
     Form {
-
         id: form
 
         FormImage {
@@ -45,7 +44,6 @@ Page {
             text: qsTr("Use local file")
             enabled: false
         }
-
     }
 
     footer: Footer {}

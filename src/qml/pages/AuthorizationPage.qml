@@ -29,5 +29,18 @@ Page {
             form.hideLoading()
             showPopupError(errorText) // TODO(fpohtmeh): don't use parent method directly
         }
+
+        function onSignUpStarted(userId) {
+            form.showLoading("Registering %1...".arg(userId))
+        }
+
+        function onSignUpFinished() {
+            form.hideLoading()
+        }
+
+        function onSignUpErrorOccurred(errorText) {
+            form.hideLoading()
+            showPopupError(errorText) // TODO(fpohtmeh): don't use parent method directly
+        }
     }
 }

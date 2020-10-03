@@ -32,48 +32,20 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_UTILS_H
-#define VSQ_UTILS_H
+#ifndef VSQ_SIGNUPSTATE_H
+#define VSQ_SIGNUPSTATE_H
 
-#include "VSQCommon.h"
+#include "AuthorizationState.h"
 
-namespace VSQUtils
+namespace VSQ
 {
-    QString createUuid();
+class SignUpState : public AuthorizationState
+{
+    Q_OBJECT
 
-    bool validateUserId(const QString &userId, QString *errorText = 0);
-
-    // String processing/format
-
-    QString formattedDataSize(DataSize fileSize);
-
-    QString escapedUserName(const QString &userName);
-
-    QString formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval);
-
-    QString formattedLastSeenNoActivity();
-
-    QString elidedText(const QString &text, const int maxLength);
-
-    // File functions
-
-    QString findUniqueFileName(const QString &fileName);
-
-    bool forceCreateDir(const QString &absolutePath);
-
-    // Url functions
-
-    bool isValidUrl(const QUrl &url);
-
-    QString urlToLocalFile(const QUrl &url);
-
-    QUrl localFileToUrl(const QString &filePath);
-
-    // Crypto functions
-
-    int bufferSizeForEncryption(const int rawSize);
-
-    int bufferSizeForDecryption(const int encryptedSize);
+public:
+    using AuthorizationState::AuthorizationState;
+};
 }
 
-#endif // VSQ_UTILS_H
+#endif // VSQ_SIGNUPSTATE_H

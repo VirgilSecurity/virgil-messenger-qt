@@ -206,9 +206,9 @@ void VSQMessenger::signIn(const QString &userId)
         emit signInErrorOccured(errorText);
     };
 
-    if (userId.isEmpty()) {
-        notifySignInErrorOccured(tr("User name can't be empty"));
-        // TODO(fpohtmeh): check regexp
+    QString errorText;
+    if (!VSQUtils::validateUserId(userId, &errorText)) {
+        notifySignInErrorOccured(errorText);
     }
     else {
         FutureWorker::run(signInAsync(userId), [=](const FutureResult &result) {
@@ -237,6 +237,30 @@ void VSQMessenger::signOut()
         m_settings->setLastSignedInUserId(QString());
         emit signedOut();
     });
+}
+
+void VSQMessenger::signUp(const QString &userId)
+{
+    QString errorText;
+    if (!VSQUtils::validateUserId(userId, &errorText)) {
+        emit signUpErrorOccured(errorText);
+    }
+    else {
+        FutureWorker::run(signUpAsync(userId), [=](const FutureResult &result) {
+            switch (result) {
+            case MRES_OK:
+                m_settings->setLastSignedInUserId(userId);
+                emit signedUp(userId);
+                break;
+            case MRES_ERR_USER_ALREADY_EXISTS:
+                emit signUpErrorOccured(tr("Username is already taken"));
+                break;
+            default:
+                emit signUpErrorOccured(tr("Unknown sign-up error"));
+                break;
+            }
+        });
+    }
 }
 
 void VSQMessenger::addContact(const QString &userId)
@@ -567,7 +591,7 @@ VSQMessenger::signInAsync(QString user) {
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::signUp(QString user) {
+VSQMessenger::signUpAsync(QString user) {
     m_userId = _prepareLogin(user);
     return QtConcurrent::run([=]() -> EnResult {
         qInfo() << "Trying to sign up: " << m_userId;

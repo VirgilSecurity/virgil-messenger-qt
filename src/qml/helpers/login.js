@@ -1,7 +1,7 @@
 // login.js
 .pragma library
 
-// TODO(fpohtmeh): remove library
+// FIXME(fpohtmeh): remove library
 
 /*
   Validate the input of User

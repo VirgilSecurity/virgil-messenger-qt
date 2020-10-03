@@ -44,10 +44,18 @@ AuthorizationState::AuthorizationState(VSQMessenger *messenger, QState *parent)
 {
     connect(m_messenger, &VSQMessenger::signedIn, this, &AuthorizationState::signInFinished);
     connect(m_messenger, &VSQMessenger::signInErrorOccured, this, &AuthorizationState::signInErrorOccurred);
+    connect(m_messenger, &VSQMessenger::signedUp, this, &AuthorizationState::signUpFinished);
+    connect(m_messenger, &VSQMessenger::signUpErrorOccured, this, &AuthorizationState::signUpErrorOccurred);
 }
 
 void AuthorizationState::signIn(const QString &userId)
 {
     emit signInStarted(userId);
     m_messenger->signIn(userId);
+}
+
+void AuthorizationState::signUp(const QString &userId)
+{
+    emit signUpStarted(userId);
+    m_messenger->signUp(userId);
 }

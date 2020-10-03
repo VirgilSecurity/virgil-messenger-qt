@@ -6,8 +6,6 @@ import "../theme"
 import "../components"
 
 Page {
-    property bool showServersPanel: true
-
     background: Rectangle {
         color: Theme.contactsBackgroundColor
     }

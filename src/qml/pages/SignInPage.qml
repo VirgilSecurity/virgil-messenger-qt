@@ -5,14 +5,12 @@ import QtQuick.Layouts 1.12
 import "../theme"
 import "../components"
 
-Page {
-    background: Rectangle {
-        color: Theme.mainBackgroundColor
-    }
+AuthorizationPage {
+    authorizationState: app.stateManager.signInState
 
     header: Header {
         showBackButton: !form.isLoading
-        title: qsTr("Log In")
+        title: qsTr("Sign In")
     }
 
     Form {
@@ -24,18 +22,8 @@ Page {
         }
 
         FormPrimaryButton {
-            onClicked: {
-                if (username.text === "") {
-                    showPopupError("Username is empty")
-                }
-                else {
-                    mainView.showSignInAs({ username: username.text })
-                }
-            }
-            text: qsTr("Log In")
+            onClicked: app.stateManager.openSignInAs(username.text)
+            text: qsTr("Sign In")
         }
-
     }
-
-    footer: Footer { }
 }

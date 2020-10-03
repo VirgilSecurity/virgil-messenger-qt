@@ -9,7 +9,6 @@ import "../theme"
 import "../components"
 
 Page {
-    property bool showServersPanel: true
     readonly property string contact: username.text.toLowerCase()
 
     background: Rectangle {

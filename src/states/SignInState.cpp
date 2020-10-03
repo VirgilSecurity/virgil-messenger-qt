@@ -32,48 +32,20 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_UTILS_H
-#define VSQ_UTILS_H
+#include "states/SignInState.h"
 
-#include "VSQCommon.h"
+#include "VSQUtils.h"
 
-namespace VSQUtils
+using namespace VSQ;
+
+void SignInState::signIn(const QString &userId)
 {
-    QString createUuid();
-
-    bool validateUserId(const QString &userId, QString *errorText = 0);
-
-    // String processing/format
-
-    QString formattedDataSize(DataSize fileSize);
-
-    QString escapedUserName(const QString &userName);
-
-    QString formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval);
-
-    QString formattedLastSeenNoActivity();
-
-    QString elidedText(const QString &text, const int maxLength);
-
-    // File functions
-
-    QString findUniqueFileName(const QString &fileName);
-
-    bool forceCreateDir(const QString &absolutePath);
-
-    // Url functions
-
-    bool isValidUrl(const QUrl &url);
-
-    QString urlToLocalFile(const QUrl &url);
-
-    QUrl localFileToUrl(const QString &filePath);
-
-    // Crypto functions
-
-    int bufferSizeForEncryption(const int rawSize);
-
-    int bufferSizeForDecryption(const int encryptedSize);
+    emit signInStarted(userId);
+    QString errorText;
+    if (VSQUtils::validateUserId(userId, &errorText)) {
+        emit signInFinished();
+    }
+    else {
+        emit signInErrorOccurred(errorText);
+    }
 }
-
-#endif // VSQ_UTILS_H

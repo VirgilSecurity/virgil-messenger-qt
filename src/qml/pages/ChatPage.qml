@@ -181,7 +181,7 @@ Page {
 
     footer: ChatMessageInput {
         id: footerControl
-        onMessageSending: Messenger.sendMessage(contactId, message, attachmentUrl, attachmentType)
+        onMessageSending: app.stateManager.sendMessage(contactId, message, attachmentUrl, attachmentType)
     }
 
     Item {

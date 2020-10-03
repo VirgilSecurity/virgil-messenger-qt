@@ -44,15 +44,18 @@ ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, VSQSet
     : QStateMachine(parent)
     , m_messenger(messenger)
     , m_settings(settings)
-    , m_startState(new StartState(this))
-    , m_splashScreenState(new SplashScreenState(messenger, settings, this))
     , m_accountSelectionState(new AccountSelectionState(messenger, this))
+    , m_accountSettingsState(new AccountSettingsState(this))
+    , m_attachmentPreviewState(new AttachmentPreviewState(this))
+    , m_backupKeyState(new BackupKeyState(m_messenger, this))
     , m_chatListState(new ChatListState(this))
     , m_chatState(new ChatState(this))
     , m_newChatState(new NewChatState(messenger, this))
-    , m_accountSettingsState(new AccountSettingsState(this))
-    , m_backupKeyState(new BackupKeyState(m_messenger, this))
-    , m_attachmentPreviewState(new AttachmentPreviewState(this))
+    , m_signInAsState(new SignInAsState(messenger, this))
+    , m_signInState(new SignInState(messenger, this))
+    , m_signUpState(new SignUpState(messenger, this))
+    , m_splashScreenState(new SplashScreenState(messenger, settings, this))
+    , m_startState(new StartState(this))
 {
     registerStatesMetaTypes();
     setupConnections();
@@ -67,15 +70,18 @@ ApplicationStateManager::~ApplicationStateManager()
 void ApplicationStateManager::registerStatesMetaTypes()
 {
     // Qt requires registering to avoid namespace issues
-    qRegisterMetaType<StartState *>("StartState*");
-    qRegisterMetaType<SplashScreenState *>("SplashScreenState*");
     qRegisterMetaType<AccountSelectionState *>("AccountSelectionState*");
+    qRegisterMetaType<AccountSettingsState *>("AccountSettingsState*");
+    qRegisterMetaType<AttachmentPreviewState *>("AttachmentPreviewState*");
+    qRegisterMetaType<BackupKeyState *>("BackupKeyState*");
     qRegisterMetaType<ChatListState *>("ChatListState*");
     qRegisterMetaType<ChatState *>("ChatState*");
     qRegisterMetaType<NewChatState *>("NewChatState*");
-    qRegisterMetaType<AccountSettingsState *>("AccountSettingsState*");
-    qRegisterMetaType<BackupKeyState *>("BackupKeyState*");
-    qRegisterMetaType<AttachmentPreviewState *>("AttachmentPreviewState*");
+    qRegisterMetaType<SignInAsState *>("SignInAsState*");
+    qRegisterMetaType<SignInState *>("SignInState*");
+    qRegisterMetaType<SignUpState *>("SignUpState*");
+    qRegisterMetaType<SplashScreenState *>("SplashScreenState*");
+    qRegisterMetaType<StartState *>("StartState*");
 }
 
 void ApplicationStateManager::setupConnections()
@@ -88,7 +94,10 @@ void ApplicationStateManager::setupConnections()
     // NOTE: Queued connection is needed for correct state transition
     connect(this, &ApplicationStateManager::setUiState, this, std::bind(&ApplicationStateManager::splashScreenRequested, this, QPrivateSignal()), Qt::QueuedConnection);
     connect(this, &ApplicationStateManager::signIn, this, &ApplicationStateManager::onSignIn);
+    connect(this, &ApplicationStateManager::signUp, this, &ApplicationStateManager::onSignUp);
     connect(this, &ApplicationStateManager::signOut, m_messenger, &VSQMessenger::signOut);
+    connect(this, &ApplicationStateManager::sendMessage, m_messenger, &VSQMessenger::sendMessage);
+    connect(this, &ApplicationStateManager::openSignInAs, m_signInState, &SignInState::signIn);
     connect(this, &ApplicationStateManager::openChat, this, &ApplicationStateManager::onOpenChat);
     connect(this, &ApplicationStateManager::addContact, m_newChatState, &NewChatState::addContact);
     connect(this, &ApplicationStateManager::backupKey, m_backupKeyState, &BackupKeyState::backupKey);
@@ -103,19 +112,18 @@ void ApplicationStateManager::addTransitions()
     m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::signInErrorOccurred, m_accountSelectionState);
     m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::signInFinished, m_chatListState);
     m_accountSelectionState->addTransition(m_accountSelectionState, &AccountSelectionState::signInFinished, m_chatListState);
+    addTwoSideTransition(m_accountSelectionState, this, &ApplicationStateManager::openSignIn, m_signInState);
+    addTwoSideTransition(m_accountSelectionState, this, &ApplicationStateManager::openSignUp, m_signUpState);
     m_chatListState->addTransition(m_messenger, &VSQMessenger::signedOut, m_accountSelectionState);
-    m_chatListState->addTransition(this, &ApplicationStateManager::openAccountSettings, m_accountSettingsState);
-    m_chatListState->addTransition(this, &ApplicationStateManager::openAddContact, m_newChatState);
-    m_chatListState->addTransition(this, &ApplicationStateManager::chatRequested, m_chatState);
-    m_accountSettingsState->addTransition(this, &ApplicationStateManager::goBack, m_chatListState);
-    m_accountSettingsState->addTransition(this, &ApplicationStateManager::openBackupKey, m_backupKeyState);
+    addTwoSideTransition(m_chatListState, this, &ApplicationStateManager::openAccountSettings, m_accountSettingsState);
+    addTwoSideTransition(m_chatListState, this, &ApplicationStateManager::openAddContact, m_newChatState);
+    addTwoSideTransition(m_chatListState, this, &ApplicationStateManager::chatRequested, m_chatState);
+    addTwoSideTransition(m_accountSettingsState, this, &ApplicationStateManager::openBackupKey, m_backupKeyState);
     m_accountSettingsState->addTransition(m_messenger, &VSQMessenger::signedOut, m_accountSelectionState);
-    m_newChatState->addTransition(this, &ApplicationStateManager::goBack, m_chatListState);
     m_newChatState->addTransition(this, &ApplicationStateManager::chatRequested, m_chatState);
-    m_chatState->addTransition(this, &ApplicationStateManager::goBack, m_chatListState);
-    m_chatState->addTransition(this, &ApplicationStateManager::openPreviewRequested, m_attachmentPreviewState);
-    m_attachmentPreviewState->addTransition(this, &ApplicationStateManager::goBack, m_chatState);
-    m_backupKeyState->addTransition(this, &ApplicationStateManager::goBack, m_accountSettingsState);
+    addTwoSideTransition(m_chatState, this, &ApplicationStateManager::openPreviewRequested, m_attachmentPreviewState);
+    m_signUpState->addTransition(m_signUpState, &SignUpState::signUpFinished, m_chatListState);
+    addTwoSideTransition(m_signInState, m_signInState, &SignInState::signInFinished, m_signInAsState);
 }
 
 void ApplicationStateManager::setCurrentState(QState *state)
@@ -136,6 +144,14 @@ void ApplicationStateManager::onSignIn(const QString &userId)
     const auto authorizationState = dynamic_cast<AuthorizationState *>(m_currentState);
     if (authorizationState) {
         authorizationState->signIn(userId);
+    }
+}
+
+void ApplicationStateManager::onSignUp(const QString &userId)
+{
+    const auto authorizationState = dynamic_cast<AuthorizationState *>(m_currentState);
+    if (authorizationState) {
+        authorizationState->signUp(userId);
     }
 }
 

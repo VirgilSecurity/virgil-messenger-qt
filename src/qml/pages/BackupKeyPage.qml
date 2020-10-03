@@ -49,6 +49,9 @@ Page {
 
         function onBackupKeyFinished() {
             form.hideLoading()
+            showPopupSuccess(qsTr("Backup private key success"))
+            password.text = ""
+            confirmPassword.text = ""
         }
 
         function onBackupKeyErrorOccurred(errorText) {

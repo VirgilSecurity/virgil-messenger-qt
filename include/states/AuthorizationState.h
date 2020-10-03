@@ -48,12 +48,16 @@ class AuthorizationState : public QState
 public:
     AuthorizationState(VSQMessenger *messenger, QState *parent = nullptr);
 
-    void signIn(const QString &userId);
+    virtual void signIn(const QString &userId);
+    virtual void signUp(const QString &userId);
 
 signals:
     void signInStarted(const QString &userId);
     void signInFinished();
     void signInErrorOccurred(const QString &errorText);
+    void signUpStarted(const QString &userId);
+    void signUpFinished();
+    void signUpErrorOccurred(const QString &errorText);
 
 private:
     VSQMessenger *m_messenger;

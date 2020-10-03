@@ -131,6 +131,9 @@ HEADERS += \
         include/states/ChatListState.h \
         include/states/ChatState.h \
         include/states/NewChatState.h \
+        include/states/SignInAsState.h \
+        include/states/SignInState.h \
+        include/states/SignUpState.h \
         include/states/SplashScreenState.h \
         include/states/StartState.h \
         # Logging
@@ -177,6 +180,7 @@ SOURCES += \
         src/states/BackupKeyState.cpp \
         src/states/ChatState.cpp \
         src/states/NewChatState.cpp \
+        src/states/SignInState.cpp \
         src/states/SplashScreenState.cpp \
         # Logging
         src/hal.cpp \

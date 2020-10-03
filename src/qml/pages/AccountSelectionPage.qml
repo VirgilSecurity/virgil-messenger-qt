@@ -29,12 +29,12 @@ AuthorizationPage {
 
         FormPrimaryButton {
             text: qsTr("Sign Up")
-            onClicked: app.stateManager.signUp()
+            onClicked: app.stateManager.openSignUp()
         }
 
         FormSecondaryButton {
-            text: qsTr("Log In")
-            onClicked: mainView.showSignIn()
+            text: qsTr("Sign In")
+            onClicked: app.stateManager.openSignIn()
         }
     }
 }
