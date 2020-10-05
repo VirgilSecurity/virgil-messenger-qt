@@ -32,30 +32,20 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_CONTACTSTATE_H
-#define VSQ_CONTACTSTATE_H
+#include "states/ChatState.h"
 
-#include <QState>
+using namespace VSQ;
 
-namespace VSQ
+QString ChatState::contactId() const
 {
-class ContactState : public QState
-{
-    Q_OBJECT
-    Q_PROPERTY(QString contactId READ contactId WRITE setContactId NOTIFY contactIdChanged)
-
-public:
-    using QState::QState;
-
-    QString contactId() const;
-    void setContactId(const QString &contactId);
-
-signals:
-    void contactIdChanged(const QString &);
-
-private:
-    QString m_contactId;
-};
+    return m_contactId;
 }
 
-#endif // VSQ_CONTACTSTATE_H
+void ChatState::setContactId(const QString &contactId)
+{
+    if (m_contactId == contactId) {
+        return;
+    }
+    m_contactId = contactId;
+    emit contactIdChanged(contactId);
+}

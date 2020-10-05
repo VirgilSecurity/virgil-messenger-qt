@@ -131,7 +131,6 @@ HEADERS += \
         include/states/BackupKeyState.h \
         include/states/ChatListState.h \
         include/states/ChatState.h \
-        include/states/ContactState.h \
         include/states/DownloadKeyState.h \
         include/states/NewChatState.h \
         include/states/SignInAsState.h \
@@ -183,7 +182,7 @@ SOURCES += \
         src/states/AttachmentPreviewState.cpp \
         src/states/AuthorizationState.cpp \
         src/states/BackupKeyState.cpp \
-        src/states/ContactState.cpp \
+        src/states/ChatState.cpp \
         src/states/DownloadKeyState.cpp \
         src/states/NewChatState.cpp \
         src/states/SignInState.cpp \

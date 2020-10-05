@@ -39,11 +39,25 @@
 using namespace VSQ;
 
 DownloadKeyState::DownloadKeyState(VSQMessenger *messenger, QState *parent)
-    : ContactState(parent)
+    : QState(parent)
     , m_messenger(messenger)
 {
     connect(m_messenger, &VSQMessenger::keyDownloaded, this, &DownloadKeyState::downloadKeyFinished);
     connect(m_messenger, &VSQMessenger::downloadKeyFailed, this, &DownloadKeyState::downloadKeyErrorOccurred);
+}
+
+QString DownloadKeyState::contactId() const
+{
+    return m_contactId;
+}
+
+void DownloadKeyState::setContactId(const QString &contactId)
+{
+    if (m_contactId == contactId) {
+        return;
+    }
+    m_contactId = contactId;
+    emit contactIdChanged(contactId);
 }
 
 void DownloadKeyState::downloadKey(const QString &contactId, const QString &password)
