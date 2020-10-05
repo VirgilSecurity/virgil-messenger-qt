@@ -134,7 +134,7 @@ Control {
             if (manager.previousState === manager.attachmentPreviewState) {
                 return
             }
-            const replace = [manager.newChatState, manager.downloadKeyState].include(manager.previousState)
+            const replace = [manager.newChatState, manager.downloadKeyState].includes(manager.previousState)
             var push = replace ? stackView.replace : stackView.push
             push(page("Chat"), StackView.Transition)
         }

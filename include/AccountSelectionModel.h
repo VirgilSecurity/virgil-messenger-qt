@@ -32,25 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_ACCOUNTSELECTIONSTATE_H
-#define VSQ_ACCOUNTSELECTIONSTATE_H
+#ifndef VSQ_ACCOUNTSELECTIONMODEL_H
+#define VSQ_ACCOUNTSELECTIONMODEL_H
 
-#include "AuthorizationState.h"
-#include "AccountSelectionModel.h"
+#include <QAbstractListModel>
+
+class VSQSettings;
 
 namespace VSQ
 {
-class AccountSelectionState : public AuthorizationState
+class AccountSelectionModel : public QAbstractListModel
 {
     Q_OBJECT
-    Q_PROPERTY(AccountSelectionModel *model MEMBER m_model CONSTANT)
 
 public:
-    AccountSelectionState(VSQMessenger *messenger, VSQSettings *settings, QState *parent);
+    AccountSelectionModel(VSQSettings *settings, QObject *parent);
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QHash<int, QByteArray> roleNames() const override;
 
 private:
-    AccountSelectionModel *m_model;
+    void reload();
+
+    VSQSettings *m_settings;
+    const int m_chunkSize = 4;
 };
 }
 
-#endif // VSQ_ACCOUNTSELECTIONSTATE_H
+#endif // VSQ_ACCOUNTSELECTIONMODEL_H

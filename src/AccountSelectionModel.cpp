@@ -32,25 +32,45 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_ACCOUNTSELECTIONSTATE_H
-#define VSQ_ACCOUNTSELECTIONSTATE_H
-
-#include "AuthorizationState.h"
 #include "AccountSelectionModel.h"
 
-namespace VSQ
-{
-class AccountSelectionState : public AuthorizationState
-{
-    Q_OBJECT
-    Q_PROPERTY(AccountSelectionModel *model MEMBER m_model CONSTANT)
+#include "VSQSettings.h"
 
-public:
-    AccountSelectionState(VSQMessenger *messenger, VSQSettings *settings, QState *parent);
+using namespace VSQ;
 
-private:
-    AccountSelectionModel *m_model;
-};
+AccountSelectionModel::AccountSelectionModel(VSQSettings *settings, QObject *parent)
+    : QAbstractListModel(parent)
+    , m_settings(settings)
+{
+    connect(m_settings, &VSQSettings::usersListChanged, this, &AccountSelectionModel::reload);
 }
 
-#endif // VSQ_ACCOUNTSELECTIONSTATE_H
+int AccountSelectionModel::rowCount(const QModelIndex &parent) const
+{
+    Q_UNUSED(parent)
+    const auto usersList = m_settings->usersList();
+    return (usersList.size() + m_chunkSize - 1) / m_chunkSize;
+}
+
+QVariant AccountSelectionModel::data(const QModelIndex &index, int role) const
+{
+    Q_UNUSED(role)
+    const auto usersList = m_settings->usersList();
+    const auto group = index.row();
+    const auto start(m_chunkSize * group);
+    const auto end(qMin(m_chunkSize * (group + 1), usersList.size()));
+    return QStringList(usersList.cbegin() + start, usersList.cbegin() + end);
+}
+
+QHash<int, QByteArray> AccountSelectionModel::roleNames() const
+{
+    QHash<int, QByteArray> names;
+    names[Qt::DisplayRole] = "modelData";
+    return names;
+}
+
+void AccountSelectionModel::reload()
+{
+    beginResetModel();
+    endResetModel();
+}

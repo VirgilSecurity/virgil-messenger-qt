@@ -32,25 +32,11 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_ACCOUNTSELECTIONSTATE_H
-#define VSQ_ACCOUNTSELECTIONSTATE_H
+#include "states/AccountSelectionState.h"
 
-#include "AuthorizationState.h"
-#include "AccountSelectionModel.h"
+using namespace VSQ;
 
-namespace VSQ
-{
-class AccountSelectionState : public AuthorizationState
-{
-    Q_OBJECT
-    Q_PROPERTY(AccountSelectionModel *model MEMBER m_model CONSTANT)
-
-public:
-    AccountSelectionState(VSQMessenger *messenger, VSQSettings *settings, QState *parent);
-
-private:
-    AccountSelectionModel *m_model;
-};
-}
-
-#endif // VSQ_ACCOUNTSELECTIONSTATE_H
+AccountSelectionState::AccountSelectionState(VSQMessenger *messenger, VSQSettings *settings, QState *parent)
+    : AuthorizationState(messenger, parent)
+    , m_model(new AccountSelectionModel(settings, parent))
+{}

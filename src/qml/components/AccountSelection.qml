@@ -52,20 +52,8 @@ ColumnLayout {
             width: 240
             height: 240
 
-            // FIXME(fpohtmeh): use C++ model?
-            property var userChunks: settings.usersList.reduce(function(storage, curr, index) {
-                const size = 4
-                const currentChunk = Math.floor(index / size)
-                const indexInGroup = index % size
-                if (!storage[currentChunk]) {
-                    storage[currentChunk] = []
-                }
-                storage[currentChunk][indexInGroup] = curr
-                return storage
-            }, [])
-
             Repeater {
-                model: view.userChunks
+                model: app.stateManager.accountSelectionState.model
 
                 Item {
                     id: firstPage

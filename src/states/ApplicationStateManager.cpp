@@ -44,7 +44,7 @@ ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, VSQSet
     : QStateMachine(parent)
     , m_messenger(messenger)
     , m_settings(settings)
-    , m_accountSelectionState(new AccountSelectionState(messenger, this))
+    , m_accountSelectionState(new AccountSelectionState(messenger, settings, this))
     , m_accountSettingsState(new AccountSettingsState(this))
     , m_attachmentPreviewState(new AttachmentPreviewState(this))
     , m_backupKeyState(new BackupKeyState(m_messenger, this))

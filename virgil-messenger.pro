@@ -97,6 +97,7 @@ VS_PLATFORMS_PATH=$$absolute_path(generated/platforms)
 HEADERS += \
         include/VSQApplication.h \
         include/VSQAttachmentBuilder.h \
+        include/AccountSelectionModel.h \
         include/VSQClipboardProxy.h \
         include/VSQCommon.h \
         include/VSQContactManager.h \
@@ -153,6 +154,7 @@ HEADERS += \
 
 SOURCES += \
         src/VSQAttachmentBuilder.cpp \
+        src/AccountSelectionModel.cpp \
         src/VSQClipboardProxy.cpp \
         src/VSQCommon.cpp \
         src/VSQContactManager.cpp \
@@ -176,6 +178,7 @@ SOURCES += \
         src/VSQApplication.cpp \
         src/ui/VSQUiHelper.cpp \
         # Applications states
+        src/states/AccountSelectionState.cpp \
         src/states/ApplicationStateManager.cpp \
         src/states/AttachmentPreviewState.cpp \
         src/states/AuthorizationState.cpp \
