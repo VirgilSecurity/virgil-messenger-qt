@@ -46,7 +46,7 @@ class BackupKeyState : public QState
     Q_OBJECT
 
 public:
-    BackupKeyState(VSQMessenger *messenger, QState *parent = nullptr);
+    BackupKeyState(VSQMessenger *messenger, QState *parent);
 
     void backupKey(const QString &password, const QString &confirmedPassword);
 

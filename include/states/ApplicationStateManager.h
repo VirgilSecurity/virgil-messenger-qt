@@ -44,6 +44,7 @@
 #include "BackupKeyState.h"
 #include "ChatListState.h"
 #include "ChatState.h"
+#include "DownloadKeyState.h"
 #include "NewChatState.h"
 #include "SignInAsState.h"
 #include "SignInState.h"
@@ -65,6 +66,7 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(BackupKeyState *backupKeyState MEMBER m_backupKeyState CONSTANT)
     Q_PROPERTY(ChatListState *chatListState MEMBER m_chatListState CONSTANT)
     Q_PROPERTY(ChatState *chatState MEMBER m_chatState CONSTANT)
+    Q_PROPERTY(DownloadKeyState *downloadKeyState MEMBER m_downloadKeyState CONSTANT)
     Q_PROPERTY(NewChatState *newChatState MEMBER m_newChatState CONSTANT)
     Q_PROPERTY(SignInAsState *signInAsState MEMBER m_signInAsState CONSTANT)
     Q_PROPERTY(SignInState *signInState MEMBER m_signInState CONSTANT)
@@ -90,17 +92,20 @@ signals:
     void openSignInAs(const QString &userId);
     void openSignUp();
     void openAddContact();
-    void addContact(const QString &contactId);
-    void openChat(const QString &contactId);
+    void addContact(const QString &userId);
+    void openChat(const QString &userId);
     void openAccountSettings();
     void openBackupKey();
+    void openDownloadKey(const QString &userId);
     void backupKey(const QString &password, const QString &confirmedPassword);
+    void downloadKey(const QString &userId, const QString &password);
 
     void currentStateChanged(QState *);
     void previousStateChanged(QState *);
 
     void splashScreenRequested(QPrivateSignal);
     void chatRequested(QPrivateSignal);
+    void keyDownloadRequested(QPrivateSignal);
     void openPreviewRequested(QPrivateSignal);
 
 private:
@@ -119,8 +124,9 @@ private:
     void setPreviousState(QState *state);
     void onSignIn(const QString &userId);
     void onSignUp(const QString &userId);
-    void onOpenChat(const QString &contactId);
+    void onOpenChat(const QString &userId);
     void onOpenPreview(const QUrl &url);
+    void onOpenDownloadKey(const QString &userId);
 
     VSQMessenger *m_messenger;
     VSQSettings *m_settings;
@@ -131,6 +137,7 @@ private:
     BackupKeyState *m_backupKeyState;
     ChatListState *m_chatListState;
     ChatState *m_chatState;
+    DownloadKeyState *m_downloadKeyState;
     NewChatState *m_newChatState;
     SignInAsState *m_signInAsState;
     SignInState *m_signInState;

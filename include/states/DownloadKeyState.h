@@ -32,35 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SPLASHSCREENSTATE_H
-#define VSQ_SPLASHSCREENSTATE_H
+#ifndef VSQ_DOWNLOADKEYSTATE_H
+#define VSQ_DOWNLOADKEYSTATE_H
 
-#include "AuthorizationState.h"
+#include "ContactState.h"
 
-class VSQSettings;
+class VSQMessenger;
 
 namespace VSQ
 {
-class SplashScreenState : public AuthorizationState
+class DownloadKeyState : public ContactState
 {
     Q_OBJECT
 
 public:
-    SplashScreenState(VSQMessenger *messenger, VSQSettings *settings, QState *parent);
+    DownloadKeyState(VSQMessenger *messenger, QState *parent);
 
-    void trySignIn();
+    void downloadKey(const QString &contactId, const QString &password);
 
 signals:
-    void signInUserNotSelected();
+    void downloadKeyStarted();
+    void downloadKeyFinished();
+    void downloadKeyErrorOccurred(const QString &errorText);
 
 private:
-    void onEntry(QEvent *) override;
-    void onExit(QEvent *) override;
-
-    void hideNativeSplashScreen();
-
-    VSQSettings *m_settings;
+    VSQMessenger *m_messenger;
 };
 }
 
-#endif // VSQ_SPLASHSCREENSTATE_H
+#endif // VSQ_DOWNLOADKEYSTATE_H

@@ -32,35 +32,20 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SPLASHSCREENSTATE_H
-#define VSQ_SPLASHSCREENSTATE_H
+#include "states/ContactState.h"
 
-#include "AuthorizationState.h"
+using namespace VSQ;
 
-class VSQSettings;
-
-namespace VSQ
+QString ContactState::contactId() const
 {
-class SplashScreenState : public AuthorizationState
-{
-    Q_OBJECT
-
-public:
-    SplashScreenState(VSQMessenger *messenger, VSQSettings *settings, QState *parent);
-
-    void trySignIn();
-
-signals:
-    void signInUserNotSelected();
-
-private:
-    void onEntry(QEvent *) override;
-    void onExit(QEvent *) override;
-
-    void hideNativeSplashScreen();
-
-    VSQSettings *m_settings;
-};
+    return m_contactId;
 }
 
-#endif // VSQ_SPLASHSCREENSTATE_H
+void ContactState::setContactId(const QString &contactId)
+{
+    if (m_contactId == contactId) {
+        return;
+    }
+    m_contactId = contactId;
+    emit contactIdChanged(contactId);
+}

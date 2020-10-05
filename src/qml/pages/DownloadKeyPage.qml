@@ -8,8 +8,7 @@ import "../theme"
 import "../components"
 
 Page {
-
-    property string username
+    readonly property variant state: app.stateManager.downloadKeyState
 
     background: Rectangle {
         color: Theme.mainBackgroundColor
@@ -39,26 +38,24 @@ Page {
 
         FormPrimaryButton {
             text: qsTr("Decrypt")
-            onClicked: {
-                if (password.text === '') {
-                    root.showPopupError('Password can not be empty')
-                }
+            onClicked: app.stateManager.downloadKey(state.contactId, password.text)
+        }
+    }
 
-                form.showLoading(qsTr("Downloading your private key..."))
+    Connections {
+        target: state
 
-                var future = Messenger.signInWithBackupKey(username, password.text)
+        function onBackupKeyStarted() {
+            form.showLoading(qsTr("Downloading up your private key..."))
+        }
 
-                Future.onFinished(future, function(result) {
-                    form.hideLoading()
+        function onBackupKeyFinished() {
+            form.hideLoading()
+        }
 
-                    if (Future.result(future) === Result.MRES_OK) {
-                        mainView.showContacts(true)
-                        return
-                    }
-
-                    root.showPopupError("Private key download error")
-                })
-            }
+        function onBackupKeyErrorOccurred(errorText) {
+            form.hideLoading()
+            showPopupError(errorText) // TODO(fpohtmeh): don't use parent method directly
         }
     }
 

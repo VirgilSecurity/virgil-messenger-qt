@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <!-- Pages -->
         <file>qml/pages/AccountSelectionPage.qml</file>
         <file>qml/pages/AccountSettingsPage.qml</file>
         <file>qml/pages/AuthorizationPage.qml</file>
@@ -15,7 +14,6 @@
         <file>qml/pages/SignInPage.qml</file>
         <file>qml/pages/SignUpPage.qml</file>
         <file>qml/pages/SplashScreenPage.qml</file>
-        <!-- Others -->
         <file>qml/components/AttachmentPreview.qml</file>
         <file>qml/components/CommonHelpers/TextInCircle.qml</file>
         <file>qml/components/Popups/Popup.qml</file>
@@ -50,7 +48,6 @@
         <file>qml/theme/Theme.qml</file>
         <file>qml/main.qml</file>
         <file>qml/helpers/chat.js</file>
-        <file>qml/helpers/login.js</file>
         <file>qml/MainView.qml</file>
         <file>qml/resources/icons/Grid.png</file>
         <file>qml/resources/icons/Grid@2x.png</file>

@@ -3,7 +3,6 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 
 import "../theme"
-import "../helpers/login.js" as LoginLogic
 
 ColumnLayout {
 
@@ -53,7 +52,17 @@ ColumnLayout {
             width: 240
             height: 240
 
-            property var userChunks: LoginLogic.chunk(settings.usersList, 4)
+            // FIXME(fpohtmeh): use C++ model?
+            property var userChunks: settings.usersList.reduce(function(storage, curr, index) {
+                const size = 4
+                const currentChunk = Math.floor(index / size)
+                const indexInGroup = index % size
+                if (!storage[currentChunk]) {
+                    storage[currentChunk] = []
+                }
+                storage[currentChunk][indexInGroup] = curr
+                return storage
+            }, [])
 
             Repeater {
                 model: view.userChunks

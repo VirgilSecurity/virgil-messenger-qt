@@ -88,6 +88,10 @@ Control {
     QtObject {
         id: d
 
+        function page(name) {
+            return "./pages/%1Page.qml".arg(name)
+        }
+
         function goBack() {
             if (attachmentPreview.visible) {
                 attachmentPreview.visible = false
@@ -98,20 +102,20 @@ Control {
         }
 
         function openSplashScreenPage() {
-            stackView.push("./pages/SplashScreenPage.qml", StackView.Immediate)
+            stackView.push(page("SplashScreen"), StackView.Immediate)
         }
 
         function openAccountSelectionPage() {
             if ([manager.signUpState, manager.signInState].includes(manager.previousState)) {
                 return
             }
-            stackView.push("./pages/AccountSelectionPage.qml", StackView.Immediate)
+            stackView.push(page("AccountSelection"), StackView.Immediate)
         }
 
         function openChatListPage() {
             if ([manager.splashScreenState, manager.accountSelectionState, manager.signUpState].includes(manager.previousState)) {
                 stackView.clear()
-                stackView.push("./pages/ChatListPage.qml")
+                stackView.push(page("ChatList"))
             }
         }
 
@@ -119,20 +123,20 @@ Control {
             if (manager.previousState !== manager.chatListState) {
                 return
             }
-            stackView.push("./pages/AccountSettingsPage.qml", StackView.Transition)
+            stackView.push(page("AccountSettings"), StackView.Transition)
         }
 
         function openAddNewChatPage() {
-            stackView.push("./pages/NewChatPage.qml")
+            stackView.push(page("NewChat"))
         }
 
         function openChatPage() {
             if (manager.previousState === manager.attachmentPreviewState) {
                 return
             }
-            const replace = manager.previousState === manager.newChatState
+            const replace = [manager.newChatState, manager.downloadKeyState].include(manager.previousState)
             var push = replace ? stackView.replace : stackView.push
-            stackView.push("./pages/ChatPage.qml", StackView.Transition)
+            push(page("Chat"), StackView.Transition)
         }
 
         function showAttachmentPreview() {
@@ -143,31 +147,30 @@ Control {
             if (manager.previousState !== manager.accountSettingsState) {
                 return
             }
-            stackView.push("./pages/BackupKeyPage.qml")
+            stackView.push(page("BackupKey"))
         }
 
         function openSignInAsPage() {
-            stackView.push("./pages/SignInAsPage.qml")
+            if (manager.previousState !== manager.downloadKeyState) {
+                stackView.push(page("SignInAs"))
+            }
         }
 
         function openSignInPage() {
             if (manager.previousState === manager.accountSelectionState) {
-                stackView.push("./pages/SignInPage.qml")
+                stackView.push(page("SignIn"))
             }
         }
 
         function openSignUpPage() {
             if (manager.previousState === manager.accountSelectionState) {
-                stackView.push("./pages/SignUpPage.qml")
+                stackView.push(page("SignUp"))
             }
         }
 
-        // FIXME(fpohtmeh): refactor
-        /*
-        function showDownloadKey(params) {
-            stackView.push("./pages/DownloadKeyPage.qml", params)
+        function openDownloadKeyPage() {
+            stackView.push(page("DownloadKey"))
         }
-        */
     }
 
     Component.onCompleted: {
@@ -183,6 +186,7 @@ Control {
         manager.signInAsState.entered.connect(d.openSignInAsPage)
         manager.signInState.entered.connect(d.openSignInPage)
         manager.signUpState.entered.connect(d.openSignUpPage)
+        manager.downloadKeyState.entered.connect(d.openDownloadKeyPage)
 
         if (logControl.visible) {
             logging.formattedMessageCreated.connect(logTextControl.append)

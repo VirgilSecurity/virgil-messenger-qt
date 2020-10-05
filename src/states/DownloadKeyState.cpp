@@ -32,20 +32,22 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "states/ChatState.h"
+#include "states/DownloadKeyState.h"
+
+#include "VSQMessenger.h"
 
 using namespace VSQ;
 
-QString ChatState::contactId() const
+DownloadKeyState::DownloadKeyState(VSQMessenger *messenger, QState *parent)
+    : ContactState(parent)
+    , m_messenger(messenger)
 {
-    return m_contactId;
+    connect(m_messenger, &VSQMessenger::keyDownloaded, this, &DownloadKeyState::downloadKeyFinished);
+    connect(m_messenger, &VSQMessenger::downloadKeyFailed, this, &DownloadKeyState::downloadKeyErrorOccurred);
 }
 
-void ChatState::setContactId(const QString &contactId)
+void DownloadKeyState::downloadKey(const QString &contactId, const QString &password)
 {
-    if (m_contactId == contactId) {
-        return;
-    }
-    m_contactId = contactId;
-    emit contactIdChanged(contactId);
+    emit downloadKeyStarted();
+    m_messenger->downloadKey(contactId, password);
 }

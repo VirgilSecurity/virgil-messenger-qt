@@ -46,7 +46,7 @@ class NewChatState : public QState
     Q_OBJECT
 
 public:
-    NewChatState(VSQMessenger *messenger, QState *parent = nullptr);
+    NewChatState(VSQMessenger *messenger, QState *parent);
 
     void addContact(const QString &userId);
 

@@ -295,6 +295,23 @@ void VSQMessenger::backupKey(const QString &password, const QString &confirmedPa
     }
 }
 
+void VSQMessenger::downloadKey(const QString &userId, const QString &password)
+{
+    if (password.isEmpty()) {
+        emit downloadKeyFailed(tr("Password cannot be empty"));
+    }
+    else {
+        FutureWorker::run(signInWithBackupKeyAsync(userId, password), [=](const FutureResult &result) {
+            if (result == MRES_OK) {
+                emit keyDownloaded();
+            }
+            else {
+                emit downloadKeyFailed(tr("Private key download error"));
+            }
+        });
+    }
+}
+
 void VSQMessenger::sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
 {
     FutureWorker::run(sendMessageAsync(to, message, attachmentUrl, attachmentType), [=](const FutureResult &result) {
@@ -537,7 +554,7 @@ VSQMessenger::backupKeyAsync(QString password) {
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::signInWithBackupKey(QString username, QString password) {
+VSQMessenger::signInWithBackupKeyAsync(QString username, QString password) {
     m_userId = _prepareLogin(username);
     return QtConcurrent::run([=]() -> EnResult {
 

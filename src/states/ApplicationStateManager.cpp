@@ -50,6 +50,7 @@ ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, VSQSet
     , m_backupKeyState(new BackupKeyState(m_messenger, this))
     , m_chatListState(new ChatListState(this))
     , m_chatState(new ChatState(this))
+    , m_downloadKeyState(new DownloadKeyState(m_messenger, this))
     , m_newChatState(new NewChatState(messenger, this))
     , m_signInAsState(new SignInAsState(messenger, this))
     , m_signInState(new SignInState(messenger, this))
@@ -76,6 +77,7 @@ void ApplicationStateManager::registerStatesMetaTypes()
     qRegisterMetaType<BackupKeyState *>("BackupKeyState*");
     qRegisterMetaType<ChatListState *>("ChatListState*");
     qRegisterMetaType<ChatState *>("ChatState*");
+    qRegisterMetaType<DownloadKeyState *>("DownloadKeyState*");
     qRegisterMetaType<NewChatState *>("NewChatState*");
     qRegisterMetaType<SignInAsState *>("SignInAsState*");
     qRegisterMetaType<SignInState *>("SignInState*");
@@ -99,8 +101,10 @@ void ApplicationStateManager::setupConnections()
     connect(this, &ApplicationStateManager::sendMessage, m_messenger, &VSQMessenger::sendMessage);
     connect(this, &ApplicationStateManager::openSignInAs, m_signInState, &SignInState::signIn);
     connect(this, &ApplicationStateManager::openChat, this, &ApplicationStateManager::onOpenChat);
+    connect(this, &ApplicationStateManager::openDownloadKey, this, &ApplicationStateManager::onOpenDownloadKey);
     connect(this, &ApplicationStateManager::addContact, m_newChatState, &NewChatState::addContact);
     connect(this, &ApplicationStateManager::backupKey, m_backupKeyState, &BackupKeyState::backupKey);
+    connect(this, &ApplicationStateManager::downloadKey, m_downloadKeyState, &DownloadKeyState::downloadKey);
     connect(m_newChatState, &NewChatState::addContactFinished, this, &ApplicationStateManager::openChat);
     connect(m_messenger, &VSQMessenger::openPreviewRequested, this, &ApplicationStateManager::onOpenPreview);
 }
@@ -124,6 +128,8 @@ void ApplicationStateManager::addTransitions()
     addTwoSideTransition(m_chatState, this, &ApplicationStateManager::openPreviewRequested, m_attachmentPreviewState);
     m_signUpState->addTransition(m_signUpState, &SignUpState::signUpFinished, m_chatListState);
     addTwoSideTransition(m_signInState, m_signInState, &SignInState::signInFinished, m_signInAsState);
+    addTwoSideTransition(m_signInAsState, this, &ApplicationStateManager::keyDownloadRequested, m_downloadKeyState);
+    m_downloadKeyState->addTransition(m_downloadKeyState, &DownloadKeyState::downloadKeyFinished, m_chatListState);
 }
 
 void ApplicationStateManager::setCurrentState(QState *state)
@@ -155,9 +161,9 @@ void ApplicationStateManager::onSignUp(const QString &userId)
     }
 }
 
-void ApplicationStateManager::onOpenChat(const QString &contactId)
+void ApplicationStateManager::onOpenChat(const QString &userId)
 {
-    m_chatState->setContactId(contactId);
+    m_chatState->setContactId(userId);
     emit chatRequested(QPrivateSignal());
 }
 
@@ -165,4 +171,10 @@ void ApplicationStateManager::onOpenPreview(const QUrl &url)
 {
     m_attachmentPreviewState->setUrl(url);
     emit openPreviewRequested(QPrivateSignal());
+}
+
+void ApplicationStateManager::onOpenDownloadKey(const QString &userId)
+{
+    m_downloadKeyState->setContactId(userId);
+    emit keyDownloadRequested(QPrivateSignal());
 }

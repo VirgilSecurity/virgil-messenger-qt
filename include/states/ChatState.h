@@ -35,26 +35,16 @@
 #ifndef VSQ_CHATSTATE_H
 #define VSQ_CHATSTATE_H
 
-#include <QState>
+#include "ContactState.h"
 
 namespace VSQ
 {
-class ChatState : public QState
+class ChatState : public ContactState
 {
     Q_OBJECT
-    Q_PROPERTY(QString contactId READ contactId WRITE setContactId NOTIFY contactIdChanged)
 
 public:
-    using QState::QState;
-
-    QString contactId() const;
-    void setContactId(const QString &contactId);
-
-signals:
-    void contactIdChanged(const QString &);
-
-private:
-    QString m_contactId;
+    using ContactState::ContactState;
 };
 }
 

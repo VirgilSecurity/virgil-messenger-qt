@@ -46,7 +46,7 @@ class AuthorizationState : public QState
     Q_OBJECT
 
 public:
-    AuthorizationState(VSQMessenger *messenger, QState *parent = nullptr);
+    AuthorizationState(VSQMessenger *messenger, QState *parent);
 
     virtual void signIn(const QString &userId);
     virtual void signUp(const QString &userId);

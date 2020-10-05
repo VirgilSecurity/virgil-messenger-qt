@@ -14,7 +14,7 @@ Page {
     }
 
     header: Header {
-        title: qsTr("Sign in as %1".arg(username))
+        title: qsTr("Sign in as %1").arg(username)
     }
 
     Form {
@@ -30,9 +30,7 @@ Page {
 
         FormPrimaryButton {
             text: qsTr("Download from the Cloud")
-            onClicked: {
-                mainView.showDownloadKey({ username: username })
-            }
+            onClicked: app.stateManager.openDownloadKey(username)
         }
 
         FormPrimaryButton {
