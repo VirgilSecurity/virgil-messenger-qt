@@ -87,7 +87,7 @@ void VSQApplication::initialize()
     QCoreApplication::setApplicationName(Customer::ApplicationName);
     QGuiApplication::setApplicationDisplayName(Customer::ApplicationDisplayName);
 
-    // TODO(fpohtmeh): set version, use in currentVersion()
+    // TODO(fpohtmeh): set version, use in currentVersion()    
 }
 
 /******************************************************************************/
@@ -127,6 +127,13 @@ VSQApplication::run(const QString &basePath, VSQLogging *logging) {
     connect(qApp, &QGuiApplication::aboutToQuit, std::bind(&VSQMessenger::setStatus, &m_messenger, VSQMessenger::EnStatus::MSTATUS_UNAVAILABLE));
 
     reloadQml();
+
+#if VS_PUSHNOTIFICATIONS
+#if defined(VS_ANDROID) && VS_ANDROID
+    PushNotifications::instance().startMessaging();
+#endif
+#endif
+
     return QGuiApplication::instance()->exec();
 }
 

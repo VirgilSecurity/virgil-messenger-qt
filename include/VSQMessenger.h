@@ -213,7 +213,10 @@ private slots:
     void onAttachmentProgressChanged(const QString &uploadId, const DataSize bytesReceived, const DataSize bytesTotal);
     void onAttachmentDecrypted(const QString &uploadId, const QString &filePath);
 
-    Q_INVOKABLE void onSubscribePushNotifications(bool enable);
+    void registerForNotifications();
+    void deregisterFromNotifications();
+    void onPushNotificationTokenUpdate();
+
 
 private:
     QXmppClient m_xmpp;

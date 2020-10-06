@@ -32,7 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "android/VSQFirebaseListener.h"
+#include "FirebaseListener.h"
 
 #include <QtAndroid>
 #include <QAndroidJniEnvironment>
@@ -40,75 +40,69 @@
 
 #include <QDebug>
 
-#include <VSQMessenger.h>
 
-/******************************************************************************/
+static firebase::InitResult
+_InitializeMessaging(firebase::App *app, void *context) {
+    return firebase::messaging::Initialize(*app, static_cast<firebase::messaging::Listener *>(context));
+}
+
 VSQFirebaseListener::VSQFirebaseListener() {
     qDebug() << "PushDelegate. Creating JNI Env";
-    _jniEnv = new QAndroidJniEnvironment();
+    m_jniEnv = new QAndroidJniEnvironment();
 
     qDebug() << "Getting Android Activity";
     QAndroidJniObject jniObject = QtAndroid::androidActivity();
 
     qDebug() << "Creating Firebase App";
-    ::firebase::App *instance = ::firebase::App::GetInstance();
+    firebase::App *instance = firebase::App::GetInstance();
 
     if (instance) {
         qDebug() << "App instance already exists";
-        _app = instance;
+        m_app = instance;
     } else {
         qDebug() << "Creating app instance";
-        _app = ::firebase::App::Create(*_jniEnv, jniObject.object<jobject>());
+        m_app = firebase::App::Create(*m_jniEnv, jniObject.object<jobject>());
     }
 }
 
-/******************************************************************************/
-static ::firebase::InitResult _InitializeMessaging(::firebase::App *app, void *context) {
-    return ::firebase::messaging::Initialize(*app, static_cast<::firebase::messaging::Listener *>(context));
-}
 
-/******************************************************************************/
 void
-VSQFirebaseListener::initMessaging() {
+VSQFirebaseListener::init() {
     qDebug() << "Initializing Firebase module";
-    _initializer.Initialize(_app, this, _InitializeMessaging);
+    m_initializer.Initialize(m_app, this, _InitializeMessaging);
     qDebug() << "Module initialized. Waiting on messaging initialization";
 }
 
-/******************************************************************************/
 void
 VSQFirebaseListener::showNotification(QString title, QString message) {
     QAndroidJniObject javaNotificationTitle = QAndroidJniObject::fromString(title);
     QAndroidJniObject javaNotificationMessage = QAndroidJniObject::fromString(message);
-    QAndroidJniObject::callStaticMethod<void>(
-            "org/virgil/notification/NotificationClient",
-            "notify",
-            "(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V",
-            QtAndroid::androidContext().object(),
-            javaNotificationTitle.object<jstring>(),
-            javaNotificationMessage.object<jstring>());
+    QAndroidJniObject::callStaticMethod<void>("org/virgil/notification/NotificationClient",
+                                              "notify",
+                                              "(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V",
+                                              QtAndroid::androidContext().object(),
+                                              javaNotificationTitle.object<jstring>(),
+                                              javaNotificationMessage.object<jstring>());
 }
 
-/******************************************************************************/
 void
 VSQFirebaseListener::OnTokenReceived(const char *token) {
     qDebug() << "Token received: [" << token << "]";
     m_token = QString::fromUtf8(token);
 }
 
-/******************************************************************************/
-const QString &VSQFirebaseListener::token() const {
+const QString &
+VSQFirebaseListener::token() const {
     return m_token;
 }
 
-/******************************************************************************/
 void
-VSQFirebaseListener::OnMessage(const ::firebase::messaging::Message &message) {
-    ::firebase::messaging::Message mes = message;
+VSQFirebaseListener::OnMessage(const firebase::messaging::Message &message) {
+    firebase::messaging::Message mes = message;
     qDebug() << "Received message: ";
     qDebug() << "to    : " << QString::fromStdString(mes.to);
     qDebug() << "from  : " << QString::fromStdString(mes.from);
-    //qDebug() << "body  : " << QString::fromStdString(mes.notification->body);
+    // qDebug() << "body  : " << QString::fromStdString(mes.notification->body);
 
 #if 0
     const QString sender = QString::fromStdString(mes.data["title"]);
@@ -118,5 +112,3 @@ VSQFirebaseListener::OnMessage(const ::firebase::messaging::Message &message) {
     showNotification(sender, decryptedMessage);
 #endif
 }
-
-/******************************************************************************/

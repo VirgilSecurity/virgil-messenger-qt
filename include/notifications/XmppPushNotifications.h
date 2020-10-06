@@ -32,28 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#if VS_PUSHNOTIFICATIONS
+#ifndef VIRGIL_MESSENGER_NOTIFICATIONS_XMPP_PUSH_NOTIFICATIONS_H_INCLUDED
+#define VIRGIL_MESSENGER_NOTIFICATIONS_XMPP_PUSH_NOTIFICATIONS_H_INCLUDED
 
-#include "VSQPushNotifications.h"
-#include <QDebug>
+#include <qxmpp/QXmppPushEnableIq.h>
 
-/******************************************************************************/
-void
-VSQPushNotifications::startMessaging() {
-#if VS_ANDROID
-    qDebug() << "Calling intializer";
-    initMessaging();
-#endif
+namespace notifications {
+namespace xmpp {
 
-}
+class XmppPushNotifications {
+public:
+    static XmppPushNotifications &
+    instance();
 
-/******************************************************************************/
-void
-VSQPushNotifications::registerToken(const void *bytes, size_t length) {
-    Q_UNUSED(bytes)
-    qDebug() << "Token of length " << length << " registered";
-}
+    QXmppPushEnableIq
+    buildEnableIq() const;
 
-/******************************************************************************/
+    QXmppPushEnableIq
+    buildDisableIq() const;
 
-#endif // VS_PUSHNOTIFICATIONS
+private:
+    XmppPushNotifications() = default;
+    ~XmppPushNotifications() noexcept = default;
+};
+
+} // namespace xmpp
+} // namespace notifications
+
+#endif // VIRGIL_MESSENGER_NOTIFICATIONS_XMPP_PUSH_NOTIFICATIONS_H_INCLUDED

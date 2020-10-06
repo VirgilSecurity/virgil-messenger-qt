@@ -32,40 +32,17 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef FBLISTENER_H
-#define FBLISTENER_H
+#ifndef VIRGIL_MESSENGER_NOTIFICATIONS_PUSH_NOTIFICATIONS_IOS_H_INCLUDED
+#define VIRGIL_MESSENGER_NOTIFICATIONS_PUSH_NOTIFICATIONS_IOS_H_INCLUDED
 
-#if (VS_ANDROID)
+#include "PushNotifications.h"
 
-#include <QtCore>
+namespace notifications {
 
-#include <firebase/messaging.h>
-#include "firebase/app.h"
-#include "firebase/util.h"
-
-class QAndroidJniEnvironment;
-
-class VSQFirebaseListener : public ::firebase::messaging::Listener {
-public:
-    VSQFirebaseListener();
-
-    void initMessaging();
-
-    const QString &token() const;
-
-    virtual void OnTokenReceived(const char *token);
-
-    virtual void OnMessage(const ::firebase::messaging::Message & message);
-
-private:
-    QAndroidJniEnvironment *_jniEnv;
-    ::firebase::App* _app;
-    ::firebase::ModuleInitializer _initializer;
-    QString m_token;
-
-    void showNotification(QString title, QString message);
+class PushNotificationsIOS : public PushNotifications {
+    Q_OBJECT
 };
 
-#endif // VS_ANDROID
+} // namespace notifications
 
-#endif // FBLISTENER_H
+#endif // VIRGIL_MESSENGER_NOTIFICATIONS_PUSH_NOTIFICATIONS_IOS_H_INCLUDED

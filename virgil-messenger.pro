@@ -174,7 +174,9 @@ RESOURCES += \
 #
 
 
-INCLUDEPATH +=  include \
+INCLUDEPATH += \
+    include \
+    include/notifications \
     $${QXMPP_BUILD_PATH}/include \
     $${QXMPP_BUILD_PATH}/include/qxmpp \
     generated/include
@@ -288,8 +290,23 @@ ios: {
     QMAKE_ASSET_CATALOGS += platforms/ios/Assets.xcassets
     QMAKE_IOS_DEPLOYMENT_TARGET = 9.0
     QMAKE_INFO_PLIST = platforms/ios/Info.plist
-    DEFINES += VS_IOS=1 VS_MOBILE=1
-    LIBS += -framework Foundation
+    DEFINES += VS_IOS=1 VS_PUSHNOTIFICATIONS=1 VS_MOBILE=1
+    LIBS += -framework Foundation -framework UserNotifications
+    OBJECTIVE_SOURCES += platforms/ios/AppDelegate.mm
+
+    HEADERS += \
+         include/notifications/PushNotifications.h \
+         include/notifications/XmppPushNotifications.h
+
+    SOURCES += \
+         src/notifications/PushNotifications.cpp \
+         src/notifications/XmppPushNotifications.cpp
+
+    PUSH_NOTIFICATIONS_ENTITLEMENTS.name = CODE_SIGN_ENTITLEMENTS
+    PUSH_NOTIFICATIONS_ENTITLEMENTS.value = $$PWD/platforms/ios/Entitlements/VirgilMessenger.entitlements
+    QMAKE_MAC_XCODE_SETTINGS += PUSH_NOTIFICATIONS_ENTITLEMENTS
+
+    DISTFILES += platforms/ios/Entitlements/VirgilMessenger.entitlements
 }
 
 
