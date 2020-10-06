@@ -979,7 +979,7 @@ void VSQMessenger::setFailedAttachmentStatus(const QString &messageId)
 /******************************************************************************/
 void
 VSQMessenger::checkState() {
-    if (m_xmpp.state() == QXmppClient::DisconnectedState) {
+    if (vs_messenger_virgil_is_signed_in() && (m_xmpp.state() == QXmppClient::DisconnectedState)) {
         qCDebug(lcNetwork) << "We should be connected, but it's not so. Let's try to reconnect.";
 #if VS_ANDROID
         emit fireError(tr("Disconnected ..."));
