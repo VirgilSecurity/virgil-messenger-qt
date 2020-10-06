@@ -688,11 +688,11 @@ QFuture<VSQMessenger::EnResult>
 VSQMessenger::logout() {
     return QtConcurrent::run([=]() -> EnResult {
         qDebug() << "Logout";
-        m_user = "";
-        m_userId = "";
         QMetaObject::invokeMethod(this, "deregisterFromNotifications", Qt::BlockingQueuedConnection);
         QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::BlockingQueuedConnection);
         vs_messenger_virgil_logout();
+        m_user = "";
+        m_userId = "";
         return MRES_OK;
     });
 }

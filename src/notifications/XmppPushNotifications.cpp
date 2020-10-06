@@ -48,7 +48,6 @@ using Self = XmppPushNotifications;
 
 
 static const QString kPushNotificationsProxy = "push-notifications-proxy";
-static const QString kPushNotificationsNode = "node";
 static const QString kPushNotificationsDeviceID = "device_id";
 static const QString kPushNotificationsFormType = "FORM_TYPE";
 static const QString kPushNotificationsFormTypeVal = "http://jabber.org/protocol/pubsub#publish-options";
@@ -79,7 +78,6 @@ Self::buildEnableIq() const {
     xmppPush.setType(QXmppIq::Set);
     xmppPush.setMode(QXmppPushEnableIq::Enable);
     xmppPush.setJid(kPushNotificationsProxy);
-    xmppPush.setNode(kPushNotificationsNode);
 
     // Create a Data Form fields
     QList<QXmppDataForm::Field> fields;
@@ -140,7 +138,6 @@ Self::buildDisableIq() const {
     xmppPush.setType(QXmppIq::Set);
     xmppPush.setMode(QXmppPushEnableIq::Disable);
     xmppPush.setJid(kPushNotificationsProxy);
-    xmppPush.setNode(kPushNotificationsNode);
 
     return xmppPush;
 }
