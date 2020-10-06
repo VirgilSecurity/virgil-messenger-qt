@@ -34,6 +34,8 @@
 
 #include "FirebaseListener.h"
 
+#include "PushNotifications.h"
+
 #include <QtAndroid>
 #include <QAndroidJniEnvironment>
 #include <QAndroidJniObject>
@@ -41,40 +43,53 @@
 #include <QDebug>
 
 
+Q_DECLARE_LOGGING_CATEGORY(lcFirebaseListener);
+Q_LOGGING_CATEGORY(lcFirebaseListener, "firebase");
+
+
+using namespace notifications::android;
+using Self = FirebaseListener;
+
 static firebase::InitResult
 _InitializeMessaging(firebase::App *app, void *context) {
     return firebase::messaging::Initialize(*app, static_cast<firebase::messaging::Listener *>(context));
 }
 
-VSQFirebaseListener::VSQFirebaseListener() {
-    qDebug() << "PushDelegate. Creating JNI Env";
+Self&
+Self::instance() {
+    static Self instance;
+    return instance;
+}
+
+Self::FirebaseListener() {
+    qCDebug(lcFirebaseListener) << "PushDelegate. Creating JNI Env";
     m_jniEnv = new QAndroidJniEnvironment();
 
-    qDebug() << "Getting Android Activity";
+    qCDebug(lcFirebaseListener) << "Getting Android Activity";
     QAndroidJniObject jniObject = QtAndroid::androidActivity();
 
-    qDebug() << "Creating Firebase App";
+    qCDebug(lcFirebaseListener) << "Creating Firebase App";
     firebase::App *instance = firebase::App::GetInstance();
 
     if (instance) {
-        qDebug() << "App instance already exists";
+        qCDebug(lcFirebaseListener) << "App instance already exists";
         m_app = instance;
     } else {
-        qDebug() << "Creating app instance";
+        qCDebug(lcFirebaseListener) << "Creating app instance";
         m_app = firebase::App::Create(*m_jniEnv, jniObject.object<jobject>());
     }
 }
 
 
 void
-VSQFirebaseListener::init() {
-    qDebug() << "Initializing Firebase module";
+Self::init() {
+    qCDebug(lcFirebaseListener) << "Initializing Firebase module";
     m_initializer.Initialize(m_app, this, _InitializeMessaging);
-    qDebug() << "Module initialized. Waiting on messaging initialization";
+    qCDebug(lcFirebaseListener) << "Module initialized. Waiting on messaging initialization";
 }
 
 void
-VSQFirebaseListener::showNotification(QString title, QString message) {
+Self::showNotification(QString title, QString message) {
     QAndroidJniObject javaNotificationTitle = QAndroidJniObject::fromString(title);
     QAndroidJniObject javaNotificationMessage = QAndroidJniObject::fromString(message);
     QAndroidJniObject::callStaticMethod<void>("org/virgil/notification/NotificationClient",
@@ -86,23 +101,19 @@ VSQFirebaseListener::showNotification(QString title, QString message) {
 }
 
 void
-VSQFirebaseListener::OnTokenReceived(const char *token) {
-    qDebug() << "Token received: [" << token << "]";
-    m_token = QString::fromUtf8(token);
-}
-
-const QString &
-VSQFirebaseListener::token() const {
-    return m_token;
+Self::OnTokenReceived(const char *token) {
+    qCDebug(lcFirebaseListener) << "Token received: [" << token << "]";
+    auto deviceToken = QString::fromUtf8(token);
+    PushNotifications::instance().registerToken(deviceToken);
 }
 
 void
-VSQFirebaseListener::OnMessage(const firebase::messaging::Message &message) {
+Self::OnMessage(const firebase::messaging::Message &message) {
     firebase::messaging::Message mes = message;
-    qDebug() << "Received message: ";
-    qDebug() << "to    : " << QString::fromStdString(mes.to);
-    qDebug() << "from  : " << QString::fromStdString(mes.from);
-    // qDebug() << "body  : " << QString::fromStdString(mes.notification->body);
+    qCDebug(lcFirebaseListener) << "Received message: ";
+    qCDebug(lcFirebaseListener) << "to    : " << QString::fromStdString(mes.to);
+    qCDebug(lcFirebaseListener) << "from  : " << QString::fromStdString(mes.from);
+    // qCDebug(lcFirebaseListener) << "body  : " << QString::fromStdString(mes.notification->body);
 
 #if 0
     const QString sender = QString::fromStdString(mes.data["title"]);

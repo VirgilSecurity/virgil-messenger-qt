@@ -43,6 +43,8 @@
 #include <logging/VSQLogging.h>
 #include <ui/VSQUiHelper.h>
 
+#include "FirebaseListener.h"
+
 #include <QGuiApplication>
 #include <QFont>
 #include <QDesktopServices>
@@ -128,10 +130,8 @@ VSQApplication::run(const QString &basePath, VSQLogging *logging) {
 
     reloadQml();
 
-#if VS_PUSHNOTIFICATIONS
 #if defined(VS_ANDROID) && VS_ANDROID
-    PushNotifications::instance().startMessaging();
-#endif
+    notifications::android::FirebaseListener::instance().init();
 #endif
 
     return QGuiApplication::instance()->exec();

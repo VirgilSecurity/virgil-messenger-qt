@@ -120,8 +120,9 @@ Self::buildEnableIq() const {
 #else
     pushModeField.setValue("prod");
 #endif // QT_DEBUG
-#endif // VS_IOS
+
     fields << pushModeField;
+#endif // VS_IOS
 
     QXmppDataForm dataForm;
     dataForm.setType(QXmppDataForm::Submit);

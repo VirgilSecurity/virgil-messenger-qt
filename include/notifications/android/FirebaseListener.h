@@ -47,9 +47,9 @@ class QAndroidJniEnvironment;
 namespace notifications {
 namespace android {
 
-class VSQFirebaseListener : public firebase::messaging::Listener {
+class FirebaseListener : public firebase::messaging::Listener {
 public:
-    VSQFirebaseListener();
+    static FirebaseListener& instance();
 
     void
     init();
@@ -61,6 +61,8 @@ public:
     OnMessage(const firebase::messaging::Message &message);
 
 private:
+    FirebaseListener();
+
     void
     showNotification(QString title, QString message);
 

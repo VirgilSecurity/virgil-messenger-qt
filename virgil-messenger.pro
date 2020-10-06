@@ -328,12 +328,14 @@ android: {
     ANDROID_VERSION_CODE = $$AndroidVersionCode($${VERSION})
     ANDROID_VERSION_NAME = $$VERSION
 
-    INCLUDEPATH +=  $$PWD/ext/prebuilt/firebase_cpp_sdk/include
-    
+    INCLUDEPATH +=  \
+        include/notifications/android \
+        $$PWD/ext/prebuilt/firebase_cpp_sdk/include
+
     # OpenSSL
     INCLUDEPATH += $$(ANDROID_SDK_ROOT)/android_openssl/static/include
     include($$(ANDROID_SDK_ROOT)/android_openssl/openssl.pri)
-    
+
     equals(ANDROID_TARGET_ARCH, armeabi-v7a) {
         LIBS += -L$$SSL_PATH/latest/arm/
     }
@@ -349,14 +351,17 @@ android: {
     equals(ANDROID_TARGET_ARCH, x86_64) {
         LIBS += -L$$SSL_PATH/latest/x86_64
     }
-    
+
     HEADERS += \
-         include/VSQPushNotifications.h \
-         include/android/VSQFirebaseListener.h
+        include/notifications/PushNotifications.h \
+        include/notifications/XmppPushNotifications.h \
+        include/notifications/android/FirebaseListener.h
 
     SOURCES += \
-        src/VSQPushNotifications.cpp \
-        src/android/VSQFirebaseListener.cpp
+        src/notifications/PushNotifications.cpp \
+        src/notifications/XmppPushNotifications.cpp \
+        src/notifications/android/FirebaseListener.cpp
+
 
     release:LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
     debug:LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
@@ -423,3 +428,5 @@ android: {
 
 OTHER_FILES += \
     .gitignore
+
+ANDROID_ABIS = armeabi-v7a
