@@ -329,7 +329,27 @@ android: {
     ANDROID_VERSION_NAME = $$VERSION
 
     INCLUDEPATH +=  $$PWD/ext/prebuilt/firebase_cpp_sdk/include
+    
+    # OpenSSL
+    INCLUDEPATH += $$(ANDROID_SDK_ROOT)/android_openssl/static/include
+    include($$(ANDROID_SDK_ROOT)/android_openssl/openssl.pri)
+    
+    equals(ANDROID_TARGET_ARCH, armeabi-v7a) {
+        LIBS += -L$$SSL_PATH/latest/arm/
+    }
 
+    equals(ANDROID_TARGET_ARCH, arm64-v8a) {
+        LIBS += -L$$SSL_PATH/latest/arm64
+    }
+
+    equals(ANDROID_TARGET_ARCH, x86) {
+        LIBS += -L$$SSL_PATH/latest/x86
+    }
+
+    equals(ANDROID_TARGET_ARCH, x86_64) {
+        LIBS += -L$$SSL_PATH/latest/x86_64
+    }
+    
     HEADERS += \
          include/VSQPushNotifications.h \
          include/android/VSQFirebaseListener.h
