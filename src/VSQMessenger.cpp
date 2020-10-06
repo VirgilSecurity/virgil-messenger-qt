@@ -755,6 +755,14 @@ VSQMessenger::registerForNotifications() {
 
     xmppPush.setNode(currentUser() + "@" + _xmppURL() + "/" + m_settings->deviceId());
 
+#ifdef QT_DEBUG
+    QString xml;
+    QXmlStreamWriter xmlWriter(&xml);
+    xmlWriter.setAutoFormatting(true);
+    xmppPush.toXml(&xmlWriter);
+    qDebug().noquote() << "Subscribe XMPP request:" << xml;
+#endif
+
     const bool sentStatus = m_xmpp.sendPacket(xmppPush);
 
     qInfo() << "Subscribe for push notifications status: " << (sentStatus ? "sucess" : "failed");
@@ -773,6 +781,14 @@ VSQMessenger::deregisterFromNotifications() {
     auto xmppPush = XmppPushNotifications::instance().buildDisableIq();
 
     xmppPush.setNode(currentUser() + "@" + _xmppURL() + "/" + m_settings->deviceId());
+
+#ifdef QT_DEBUG
+    QString xml;
+    QXmlStreamWriter xmlWriter(&xml);
+    xmlWriter.setAutoFormatting(true);
+    xmppPush.toXml(&xmlWriter);
+    qDebug().noquote() << "Unsubscribe XMPP request:" << xml;
+#endif
 
     const bool sentStatus = m_xmpp.sendPacket(xmppPush);
 
