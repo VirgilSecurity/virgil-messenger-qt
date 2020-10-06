@@ -43,7 +43,9 @@
 #include <logging/VSQLogging.h>
 #include <ui/VSQUiHelper.h>
 
+#if defined(VS_ANDROID) && VS_ANDROID
 #include "FirebaseListener.h"
+#endif // VS_ANDROID
 
 #include <QGuiApplication>
 #include <QFont>
@@ -89,7 +91,7 @@ void VSQApplication::initialize()
     QCoreApplication::setApplicationName(Customer::ApplicationName);
     QGuiApplication::setApplicationDisplayName(Customer::ApplicationDisplayName);
 
-    // TODO(fpohtmeh): set version, use in currentVersion()    
+    // TODO(fpohtmeh): set version, use in currentVersion()
 }
 
 /******************************************************************************/
