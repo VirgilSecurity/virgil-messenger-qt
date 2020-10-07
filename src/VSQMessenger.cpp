@@ -42,7 +42,6 @@
 #include <VSQUpload.h>
 #include <VSQUtils.h>
 #include <VSQSettings.h>
-
 #include <android/VSQAndroid.h>
 
 #if VS_PUSHNOTIFICATIONS
@@ -1324,6 +1323,13 @@ void VSQMessenger::openAttachment(const QString &messageId)
         qCDebug(lcTransferManager) << "Opening of message attachment:" << url;
         emit openPreviewRequested(url);
     });
+}
+
+void VSQMessenger::hideSplashScreen()
+{
+#ifdef VS_ANDROID
+    VSQAndroid::hideSplashScreen();
+#endif
 }
 
 /******************************************************************************/

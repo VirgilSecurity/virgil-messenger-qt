@@ -39,7 +39,6 @@
 #include <VSQCommon.h>
 #include <VSQClipboardProxy.h>
 #include <VSQCustomer.h>
-#include <android/VSQAndroid.h>
 #include <logging/VSQLogging.h>
 #include <ui/VSQUiHelper.h>
 
@@ -172,13 +171,6 @@ VSQApplication::currentVersion() const {
 void
 VSQApplication::sendReport() {
     m_crashReporter.sendLogFiles();
-}
-
-void VSQApplication::hideSplashScreen()
-{
-#ifdef VS_ANDROID
-    VSQAndroid::hideSplashScreen();
-#endif
 }
 
 QString VSQApplication::organizationDisplayName() const

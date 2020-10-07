@@ -161,6 +161,8 @@ public slots:
 
     Q_INVOKABLE void openAttachment(const QString &messageId);
 
+    Q_INVOKABLE void hideSplashScreen();
+
 signals:
     void
     fireError(QString errorText);

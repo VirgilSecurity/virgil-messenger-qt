@@ -74,8 +74,6 @@ public:
     Q_INVOKABLE void
     sendReport();
 
-    Q_INVOKABLE void hideSplashScreen();
-
     // Names
 
     QString organizationDisplayName() const;

@@ -20,21 +20,21 @@ Page {
         onTriggered: {
             if (!settings.lastSignedInUser) {
                 showAuth()
-                app.hideSplashScreen()
+                Messenger.hideSplashScreen()
             }
             else {
                 form.showLoading("Logging In as %1...".arg(settings.lastSignedInUser))
 
                 var future = Messenger.signIn(settings.lastSignedInUser)
                 Future.onFinished(future, function(res) {
-                    if (res === Result.MRES_OK) {
+                    if (res == Result.MRES_OK) {
                         form.hideLoading()
                         showContacts(true)
                     } else {
                         settings.lastSignedInUser = ""
                         showAuth()
                     }
-                    app.hideSplashScreen()
+                    Messenger.hideSplashScreen()
                 })
             }
         }
