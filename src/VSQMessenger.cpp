@@ -360,22 +360,15 @@ VSQMessenger::_connectToDatabase() {
 /******************************************************************************/
 QString
 VSQMessenger::_xmppPass() {
-    if (!m_xmppPass.isEmpty()) {
-        return m_xmppPass;
-    }
-
-    const size_t _pass_buf_sz = 512;
-    char pass[_pass_buf_sz];
+    char pass[VS_MESSENGER_VIRGIL_TOKEN_SZ_MAX];
 
     // Get XMPP password
-    if (VS_CODE_OK != vs_messenger_virgil_get_xmpp_pass(pass, _pass_buf_sz)) {
+    if (VS_CODE_OK != vs_messenger_virgil_get_xmpp_pass(pass, VS_MESSENGER_VIRGIL_TOKEN_SZ_MAX)) {
         emit fireError(tr("Cannot get XMPP password"));
         return "";
     }
 
-    m_xmppPass = QString::fromLatin1(pass);
-
-    return m_xmppPass;
+    return QString::fromLatin1(pass);
 }
 
 /******************************************************************************/
@@ -435,7 +428,7 @@ VSQMessenger::_connect(QString userWithEnv, QString deviceId, QString userId, bo
 
         QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::QueuedConnection);
 
-        timer.start(2000);
+        timer.start(5000);
         loop.exec();
     }
 
@@ -822,7 +815,6 @@ VSQMessenger::logoutAsync() {
         qDebug() << "Logout";
         m_user = "";
         m_userId = "";
-        m_xmppPass = "";
         QMetaObject::invokeMethod(this, "onSubscribePushNotifications", Qt::BlockingQueuedConnection, Q_ARG(bool, false));
         QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::BlockingQueuedConnection);
         vs_messenger_virgil_logout();
@@ -1100,7 +1092,7 @@ void VSQMessenger::setFailedAttachmentStatus(const QString &messageId)
 /******************************************************************************/
 void
 VSQMessenger::checkState() {
-    if (m_xmpp.state() == QXmppClient::DisconnectedState) {
+    if (vs_messenger_virgil_is_signed_in() && (m_xmpp.state() == QXmppClient::DisconnectedState)) {
         qCDebug(lcNetwork) << "We should be connected, but it's not so. Let's try to reconnect.";
 #if VS_ANDROID
         emit fireError(tr("Disconnected ..."));
