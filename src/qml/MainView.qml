@@ -1,7 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
-import QuickFuture 1.0
 
 import "./base"
 import "./theme"
@@ -56,33 +55,13 @@ Control {
         }
     }
 
-    TextScrollView {
+    LogControl {
         id: logControl
         anchors {
-            topMargin: 0.75 * mainView.height
             fill: parent
+            topMargin: 0.75 * mainView.height
         }
         visible: settings.devMode
-
-        TextArea {
-            id: logTextControl
-            width: mainView.width
-            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-            readOnly: true
-            font.pointSize: Platform.isMobile ? 12 : 9
-            selectByMouse: Platform.isDesktop
-        }
-    }
-
-    Button {
-        id: clearLogButton
-        visible: logControl.visible
-        anchors.right: logControl.right
-        anchors.top: logControl.top
-        text: "x"
-        width: 20
-        height: width
-        onClicked: logTextControl.clear()
     }
 
     QtObject {
@@ -187,9 +166,5 @@ Control {
         manager.signInState.entered.connect(d.openSignInPage)
         manager.signUpState.entered.connect(d.openSignUpPage)
         manager.downloadKeyState.entered.connect(d.openDownloadKeyPage)
-
-        if (logControl.visible) {
-            logging.formattedMessageCreated.connect(logTextControl.append)
-        }
     }
 }

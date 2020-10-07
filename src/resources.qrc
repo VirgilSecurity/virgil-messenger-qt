@@ -115,5 +115,6 @@
         <file>qml/components/CircleProgressBar.qml</file>
         <file>qml/components/TextScrollView.qml</file>
         <file>qml/components/AttachmentPicker.qml</file>
+        <file>qml/components/LogControl.qml</file>
     </qresource>
 </RCC>
