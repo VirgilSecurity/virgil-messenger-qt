@@ -42,6 +42,10 @@
 #include <logging/VSQLogging.h>
 #include <ui/VSQUiHelper.h>
 
+#if defined(VS_ANDROID) && VS_ANDROID
+#include "FirebaseListener.h"
+#endif // VS_ANDROID
+
 #include <QGuiApplication>
 #include <QFont>
 #include <QDesktopServices>
@@ -127,6 +131,11 @@ VSQApplication::run(const QString &basePath, VSQLogging *logging) {
     connect(qApp, &QGuiApplication::aboutToQuit, std::bind(&VSQMessenger::setStatus, &m_messenger, VSQMessenger::EnStatus::MSTATUS_UNAVAILABLE));
 
     reloadQml();
+
+#if defined(VS_ANDROID) && VS_ANDROID
+    notifications::android::FirebaseListener::instance().init();
+#endif
+
     return QGuiApplication::instance()->exec();
 }
 

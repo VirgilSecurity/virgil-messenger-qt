@@ -32,24 +32,25 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <android/VSQAndroid.h>
-#include <cstring>
-#include <cstdlib>
-
 #include <VSQContactManager.h>
 #include <VSQCustomer.h>
 #include <VSQDiscoveryManager.h>
 #include <VSQDownload.h>
 #include <VSQLastActivityManager.h>
 #include <VSQMessenger.h>
-#include <VSQPushNotifications.h>
 #include <VSQSqlConversationModel.h>
 #include <VSQUpload.h>
 #include <VSQUtils.h>
 #include <VSQSettings.h>
 #include <helpers/FutureWorker.h>
 #include <android/VSQAndroid.h>
-#include <android/VSQAndroid.h>
+
+#if VS_PUSHNOTIFICATIONS
+#include "PushNotifications.h"
+#include "XmppPushNotifications.h"
+using namespace notifications;
+using namespace notifications::xmpp;
+#endif // VS_PUSHNOTIFICATIONS
 
 #include <qxmpp/QXmppMessage.h>
 #include <qxmpp/QXmppUtils.h>
@@ -69,6 +70,9 @@ Q_DECLARE_METATYPE(VSQMessenger::EnStatus)
 Q_DECLARE_METATYPE(VSQMessenger::EnResult)
 Q_DECLARE_METATYPE(QFuture<VSQMessenger::EnResult>)
 
+#include <cstring>
+#include <cstdlib>
+
 #ifndef USE_XMPP_LOGS
 #define USE_XMPP_LOGS 0
 #endif
@@ -76,13 +80,6 @@ Q_DECLARE_METATYPE(QFuture<VSQMessenger::EnResult>)
 const QString VSQMessenger::kProdEnvPrefix = "prod";
 const QString VSQMessenger::kStgEnvPrefix = "stg";
 const QString VSQMessenger::kDevEnvPrefix = "dev";
-const QString VSQMessenger::kPushNotificationsProxy = "push-notifications-proxy";
-const QString VSQMessenger::kPushNotificationsNode = "node";
-const QString VSQMessenger::kPushNotificationsService = "service";
-const QString VSQMessenger::kPushNotificationsFCM = "fcm";
-const QString VSQMessenger::kPushNotificationsDeviceID = "device_id";
-const QString VSQMessenger::kPushNotificationsFormType = "FORM_TYPE";
-const QString VSQMessenger::kPushNotificationsFormTypeVal = "http://jabber.org/protocol/pubsub#publish-options";
 const int VSQMessenger::kConnectionWaitMs = 10000;
 const int VSQMessenger::kKeepAliveTimeSec = 10;
 
@@ -188,10 +185,11 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSetti
     connect(&m_networkAnalyzer, &VSQNetworkAnalyzer::fireStateChanged, this, &VSQMessenger::onProcessNetworkState, Qt::QueuedConnection);
     connect(&m_networkAnalyzer, &VSQNetworkAnalyzer::fireHeartBeat, this, &VSQMessenger::checkState, Qt::QueuedConnection);
 
-    // Use Push notifications
+    // Push notifications
 #if VS_PUSHNOTIFICATIONS
-    VSQPushNotifications::instance().startMessaging();
-#endif
+    auto& pushNotifications  = PushNotifications::instance();
+    connect(&pushNotifications, &PushNotifications::tokenUpdated, this, &VSQMessenger::onPushNotificationTokenUpdate);
+#endif // VS_PUSHNOTIFICATIONS
 }
 
 VSQMessenger::~VSQMessenger()
@@ -813,11 +811,11 @@ QFuture<VSQMessenger::EnResult>
 VSQMessenger::logoutAsync() {
     return QtConcurrent::run([=]() -> EnResult {
         qDebug() << "Logout";
-        m_user = "";
-        m_userId = "";
-        QMetaObject::invokeMethod(this, "onSubscribePushNotifications", Qt::BlockingQueuedConnection, Q_ARG(bool, false));
+        QMetaObject::invokeMethod(this, "deregisterFromNotifications", Qt::BlockingQueuedConnection);
         QMetaObject::invokeMethod(&m_xmpp, "disconnectFromServer", Qt::BlockingQueuedConnection);
         vs_messenger_virgil_logout();
+        m_user = "";
+        m_userId = "";
         return MRES_OK;
     });
 }
@@ -853,52 +851,68 @@ void VSQMessenger::setCrashReporter(VSQCrashReporter *crashReporter)
 
 /******************************************************************************/
 void
-VSQMessenger::onSubscribePushNotifications(bool enable) {
-    #if VS_PUSHNOTIFICATIONS
+VSQMessenger::onPushNotificationTokenUpdate() {
+    registerForNotifications();
+}
 
-    // Subscribe Form Type
-    QXmppDataForm::Field subscribeFormType;
-    subscribeFormType.setKey(kPushNotificationsFormType);
-    subscribeFormType.setValue(kPushNotificationsFormTypeVal);
+void
+VSQMessenger::registerForNotifications() {
+#if VS_PUSHNOTIFICATIONS
 
-    // Subscribe service
-    QXmppDataForm::Field subscribeService;
-    subscribeService.setKey(kPushNotificationsService);
-    subscribeService.setValue(kPushNotificationsFCM);
+    if (!m_xmpp.isConnected()) {
+        qInfo() << "Can not subscribe for push notifications, no connection. Will try it later.";
+        return;
+    }
 
-    // Subscribe device
-    QXmppDataForm::Field subscribeDevice;
-    subscribeDevice.setKey(kPushNotificationsDeviceID);
-    subscribeDevice.setValue(VSQPushNotifications::instance().token());
+    auto xmppPush = XmppPushNotifications::instance().buildEnableIq();
 
-    // Create a Data Form
-    QList<QXmppDataForm::Field> fields;
-    fields << subscribeFormType << subscribeService << subscribeDevice;
-
-    QXmppDataForm dataForm;
-    dataForm.setType(QXmppDataForm::Submit);
-    dataForm.setFields(fields);
-
-    // Create request
-    QXmppPushEnableIq xmppPush;
-    xmppPush.setType(QXmppIq::Set);
-    xmppPush.setMode(enable ? QXmppPushEnableIq::Enable : QXmppPushEnableIq::Disable);
-    xmppPush.setJid(kPushNotificationsProxy);
-
-    // xmppPush.setNode(kPushNotificationsNode);
     xmppPush.setNode(currentUser() + "@" + _xmppURL() + "/" + m_settings->deviceId());
-    xmppPush.setDataForm(dataForm);
 
-    m_xmpp.sendPacket(xmppPush);
-#else
-    Q_UNUSED(enable)
+#ifdef QT_DEBUG
+    QString xml;
+    QXmlStreamWriter xmlWriter(&xml);
+    xmlWriter.setAutoFormatting(true);
+    xmppPush.toXml(&xmlWriter);
+    qDebug().noquote() << "Subscribe XMPP request:" << xml;
+#endif
+
+    const bool sentStatus = m_xmpp.sendPacket(xmppPush);
+
+    qInfo() << "Subscribe for push notifications status: " << (sentStatus ? "sucess" : "failed");
+#endif // VS_PUSHNOTIFICATIONS
+}
+
+void
+VSQMessenger::deregisterFromNotifications() {
+#if VS_PUSHNOTIFICATIONS
+
+    if (!m_xmpp.isConnected()) {
+        qInfo() << "Can not unsubscribe from push notifications, no connection.";
+        return;
+    }
+
+    auto xmppPush = XmppPushNotifications::instance().buildDisableIq();
+
+    xmppPush.setNode(currentUser() + "@" + _xmppURL() + "/" + m_settings->deviceId());
+
+#ifdef QT_DEBUG
+    QString xml;
+    QXmlStreamWriter xmlWriter(&xml);
+    xmlWriter.setAutoFormatting(true);
+    xmppPush.toXml(&xmlWriter);
+    qDebug().noquote() << "Unsubscribe XMPP request:" << xml;
+#endif
+
+    const bool sentStatus = m_xmpp.sendPacket(xmppPush);
+
+    qInfo() << "Unsubscribe from push notifications status: " << (sentStatus ? "sucess" : "failed");
 #endif // VS_PUSHNOTIFICATIONS
 }
 
 /******************************************************************************/
 void
 VSQMessenger::onConnected() {
-    onSubscribePushNotifications(true);
+    registerForNotifications();
 }
 
 /******************************************************************************/
@@ -1119,7 +1133,6 @@ VSQMessenger::_reconnect() {
 void
 VSQMessenger::onDisconnected() {
     qDebug() << "onDisconnected  state:" << m_xmpp.state();
-
     qDebug() << "Carbons disable";
     m_xmppCarbonManager->setCarbonsEnabled(false);
 }
