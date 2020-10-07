@@ -43,6 +43,7 @@
 #include <VSQUtils.h>
 #include <VSQSettings.h>
 #include <android/VSQAndroid.h>
+#include <helpers/FutureWorker.h>
 
 #if VS_PUSHNOTIFICATIONS
 #include "PushNotifications.h"
@@ -81,6 +82,8 @@ const QString VSQMessenger::kStgEnvPrefix = "stg";
 const QString VSQMessenger::kDevEnvPrefix = "dev";
 const int VSQMessenger::kConnectionWaitMs = 10000;
 const int VSQMessenger::kKeepAliveTimeSec = 10;
+
+using namespace VSQ;
 
 Q_LOGGING_CATEGORY(lcMessenger, "messenger")
 
@@ -441,7 +444,7 @@ VSQMessenger::signInWithBackupKey(QString username, QString password) {
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::signIn(QString user) {
+VSQMessenger::signInAsync(QString user) {
     m_userId = _prepareLogin(user);
     return QtConcurrent::run([=]() -> EnResult {
         qDebug() << "Trying to Sign In: " << m_userId;
@@ -1067,6 +1070,33 @@ Optional<StMessage> VSQMessenger::decryptMessage(const QString &sender, const QS
 void VSQMessenger::setApplicationActive(bool active)
 {
     m_lastActivityManager->setEnabled(active);
+}
+
+void VSQMessenger::signIn(const QString &userId)
+{
+    if (userId.isEmpty()) {
+        emit signInUserEmpty();
+    }
+    else {
+        emit signInStarted(userId);
+        FutureWorker::run(signInAsync(userId), [=](const FutureResult &result) {
+            switch (result) {
+            case MRES_OK:
+                m_settings->setLastSignedInUser(userId);
+                emit signedIn(userId);
+                break;
+            case MRES_ERR_NO_CRED:
+                emit signInErrorOccured(tr("Cannot load credentials"));
+                break;
+            case MRES_ERR_SIGNIN:
+                emit signInErrorOccured(tr("Cannot sign-in user"));
+                break;
+            default:
+                emit signInErrorOccured(tr("Unknown sign-in error"));
+                break;
+            }
+        });
+    }
 }
 
 /******************************************************************************/

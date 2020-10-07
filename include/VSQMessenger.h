@@ -110,10 +110,14 @@ public:
 
     void setApplicationActive(bool active);
 
+    // New methods
+
+    Q_INVOKABLE void signIn(const QString &userId);
+
 public slots:
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    signIn(QString user);
+    signInAsync(QString user);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     backupUserKey(QString password);
@@ -197,6 +201,13 @@ signals:
 
     void downloadThumbnail(const StMessage message, const QString sender, QPrivateSignal);
 
+    // New signals
+
+    void signInUserEmpty();
+    void signInStarted(const QString &userId);
+    void signedIn(const QString &userId);
+    void signInErrorOccured(const QString &errorText);
+
 private slots:
     void onConnected();
     void onMessageDelivered(const QString&, const QString&);
@@ -218,7 +229,6 @@ private slots:
     void registerForNotifications();
     void deregisterFromNotifications();
     void onPushNotificationTokenUpdate();
-
 
 private:
     QXmppClient m_xmpp;

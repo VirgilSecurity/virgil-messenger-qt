@@ -118,6 +118,7 @@ HEADERS += \
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
         include/helpers/VSQSingleton.h \
+        include/helpers/FutureWorker.h \
         include/ui/VSQUiHelper.h \
         # Logging
         include/logging/VSQLogging.h \
