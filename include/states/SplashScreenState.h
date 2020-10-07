@@ -48,15 +48,12 @@ class SplashScreenState : public AuthorizationState
 public:
     SplashScreenState(VSQMessenger *messenger, VSQSettings *settings, QState *parent);
 
-    void trySignIn();
-
 signals:
     void signInUserNotSelected();
 
-private:
+private:    
     void onEntry(QEvent *) override;
-    void onExit(QEvent *) override;
-
+    void trySignIn();
     void hideNativeSplashScreen();
 
     VSQSettings *m_settings;

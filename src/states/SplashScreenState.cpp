@@ -50,6 +50,7 @@ SplashScreenState::SplashScreenState(VSQMessenger *messenger, VSQSettings *setti
 
 void SplashScreenState::trySignIn()
 {
+    hideNativeSplashScreen();
     const auto userId = m_settings->lastSignedInUserId();
     if (userId.isEmpty()) {
         emit signInUserNotSelected();
@@ -68,11 +69,6 @@ void SplashScreenState::onEntry(QEvent *)
     const auto interval = 1000;
 #endif
     QTimer::singleShot(interval, this, &SplashScreenState::trySignIn);
-}
-
-void SplashScreenState::onExit(QEvent *)
-{
-    hideNativeSplashScreen();
 }
 
 void SplashScreenState::hideNativeSplashScreen()

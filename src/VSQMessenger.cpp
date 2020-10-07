@@ -42,8 +42,8 @@
 #include <VSQUpload.h>
 #include <VSQUtils.h>
 #include <VSQSettings.h>
-#include <helpers/FutureWorker.h>
 #include <android/VSQAndroid.h>
+#include <helpers/FutureWorker.h>
 
 #if VS_PUSHNOTIFICATIONS
 #include "PushNotifications.h"
@@ -82,6 +82,8 @@ const QString VSQMessenger::kStgEnvPrefix = "stg";
 const QString VSQMessenger::kDevEnvPrefix = "dev";
 const int VSQMessenger::kConnectionWaitMs = 10000;
 const int VSQMessenger::kKeepAliveTimeSec = 10;
+
+using namespace VSQ;
 
 Q_LOGGING_CATEGORY(lcMessenger, "messenger")
 
@@ -198,15 +200,9 @@ VSQMessenger::~VSQMessenger()
 
 void VSQMessenger::signIn(const QString &userId)
 {
-    auto notifySignInErrorOccured = [=](const QString &errorText)
-    {
-        m_settings->setLastSignedInUserId(QString());
-        emit signInErrorOccured(errorText);
-    };
-
     QString errorText;
     if (!VSQUtils::validateUserId(userId, &errorText)) {
-        notifySignInErrorOccured(errorText);
+        emit signInErrorOccured(errorText);
     }
     else {
         FutureWorker::run(signInAsync(userId), [=](const FutureResult &result) {
@@ -216,13 +212,13 @@ void VSQMessenger::signIn(const QString &userId)
                 emit signedIn(userId);
                 break;
             case MRES_ERR_NO_CRED:
-                notifySignInErrorOccured(tr("Cannot load credentials"));
+                emit signInErrorOccured(tr("Cannot load credentials"));
                 break;
             case MRES_ERR_SIGNIN:
-                notifySignInErrorOccured(tr("Cannot sign-in user"));
+                emit signInErrorOccured(tr("Cannot sign-in user"));
                 break;
             default:
-                notifySignInErrorOccured(tr("Unknown sign-in error"));
+                emit signInErrorOccured(tr("Unknown sign-in error"));
                 break;
             }
         });
@@ -1437,6 +1433,13 @@ void VSQMessenger::openAttachment(const QString &messageId)
         qCDebug(lcTransferManager) << "Opening of message attachment:" << url;
         emit openPreviewRequested(url);
     });
+}
+
+void VSQMessenger::hideSplashScreen()
+{
+#ifdef VS_ANDROID
+    VSQAndroid::hideSplashScreen();
+#endif
 }
 
 /******************************************************************************/
