@@ -1,12 +1,10 @@
 import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
 
-import "../theme"
 import "../components"
 
-AuthorizationPage {
-    authorizationState: app.stateManager.signUpState
+OperationPage {
+    state: app.stateManager.signUpState
+    loadingText: qsTr("Registering %1...").arg(state.userId)
 
     readonly property string terms:
         "By creating an account, you agree to Virgil's " +
@@ -14,7 +12,7 @@ AuthorizationPage {
         "and <a style='text-decoration: none; color: %1' href='https://virgilsecurity.com/privacy-policy/'>Privacy Policy</a>"
 
     header: Header {
-        title: "Register"
+        title: qsTr("Register")
         showBackButton: !form.isLoading
     }
 

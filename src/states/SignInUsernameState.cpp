@@ -32,30 +32,20 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "states/AuthorizationState.h"
+#include "states/SignInUsernameState.h"
 
-#include "VSQMessenger.h"
+#include "VSQUtils.h"
 
 using namespace VSQ;
 
-AuthorizationState::AuthorizationState(VSQMessenger *messenger, QState *parent)
-    : QState(parent)
-    , m_messenger(messenger)
+void SignInUsernameState::checkUsername(const QString &userId)
 {
-    connect(m_messenger, &VSQMessenger::signedIn, this, &AuthorizationState::signInFinished);
-    connect(m_messenger, &VSQMessenger::signInErrorOccured, this, &AuthorizationState::signInErrorOccurred);
-    connect(m_messenger, &VSQMessenger::signedUp, this, &AuthorizationState::signUpFinished);
-    connect(m_messenger, &VSQMessenger::signUpErrorOccured, this, &AuthorizationState::signUpErrorOccurred);
-}
-
-void AuthorizationState::signIn(const QString &userId)
-{
-    emit signInStarted(userId);
-    m_messenger->signIn(userId);
-}
-
-void AuthorizationState::signUp(const QString &userId)
-{
-    emit signUpStarted(userId);
-    m_messenger->signUp(userId);
+    emit operationStarted();
+    QString errorText;
+    if (VSQUtils::validateUserId(userId, &errorText)) {
+        emit operationFinished();
+    }
+    else {
+        emit operationErrorOccurred(errorText);
+    }
 }

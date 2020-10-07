@@ -35,25 +35,20 @@
 #ifndef VSQ_NEWCHATSTATE_H
 #define VSQ_NEWCHATSTATE_H
 
-#include <QState>
+#include "OperationState.h"
 
 class VSQMessenger;
 
 namespace VSQ
 {
-class NewChatState : public QState
+class NewChatState : public OperationState
 {
     Q_OBJECT
 
 public:
     NewChatState(VSQMessenger *messenger, QState *parent);
 
-    void addContact(const QString &userId);
-
-signals:
-    void addContactStarted(const QString &userId);
-    void addContactFinished(const QString &userId);
-    void addContactErrorOccurred(const QString &errorText);
+    void addContact(const QString &contactId);
 
 private:
     VSQMessenger *m_messenger;

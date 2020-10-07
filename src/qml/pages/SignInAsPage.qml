@@ -6,7 +6,6 @@ import "../theme"
 import "../components"
 
 Page {
-
     property string username
 
     background: Rectangle {

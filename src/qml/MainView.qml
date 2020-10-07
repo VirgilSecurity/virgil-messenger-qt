@@ -135,9 +135,9 @@ Control {
             }
         }
 
-        function openSignInPage() {
+        function openSignInUsernamePage() {
             if (manager.previousState === manager.accountSelectionState) {
-                stackView.push(page("SignIn"))
+                stackView.push(page("SignInUsername"))
             }
         }
 
@@ -163,7 +163,7 @@ Control {
         manager.attachmentPreviewState.entered.connect(d.showAttachmentPreview)
         manager.backupKeyState.entered.connect(d.openBackupKeyPage)
         manager.signInAsState.entered.connect(d.openSignInAsPage)
-        manager.signInState.entered.connect(d.openSignInPage)
+        manager.signInUsernameState.entered.connect(d.openSignInUsernamePage)
         manager.signUpState.entered.connect(d.openSignUpPage)
         manager.downloadKeyState.entered.connect(d.openDownloadKeyPage)
     }

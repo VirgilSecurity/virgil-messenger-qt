@@ -35,16 +35,16 @@
 #ifndef VSQ_SIGNINASSTATE_H
 #define VSQ_SIGNINASSTATE_H
 
-#include "AuthorizationState.h"
+#include <QState>
 
 namespace VSQ
 {
-class SignInAsState : public AuthorizationState
+class SignInAsState : public QState
 {
     Q_OBJECT
 
 public:
-    using AuthorizationState::AuthorizationState;
+    using QState::QState;
 };
 }
 

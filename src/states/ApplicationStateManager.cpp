@@ -52,8 +52,8 @@ ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, VSQSet
     , m_chatState(new ChatState(this))
     , m_downloadKeyState(new DownloadKeyState(m_messenger, this))
     , m_newChatState(new NewChatState(messenger, this))
-    , m_signInAsState(new SignInAsState(messenger, this))
-    , m_signInState(new SignInState(messenger, this))
+    , m_signInAsState(new SignInAsState(this))
+    , m_signInUsernameState(new SignInUsernameState(this))
     , m_signUpState(new SignUpState(messenger, this))
     , m_splashScreenState(new SplashScreenState(messenger, settings, this))
     , m_startState(new StartState(this))
@@ -80,7 +80,7 @@ void ApplicationStateManager::registerStatesMetaTypes()
     qRegisterMetaType<DownloadKeyState *>("DownloadKeyState*");
     qRegisterMetaType<NewChatState *>("NewChatState*");
     qRegisterMetaType<SignInAsState *>("SignInAsState*");
-    qRegisterMetaType<SignInState *>("SignInState*");
+    qRegisterMetaType<SignInUsernameState *>("SignInUsernameState*");
     qRegisterMetaType<SignUpState *>("SignUpState*");
     qRegisterMetaType<SplashScreenState *>("SplashScreenState*");
     qRegisterMetaType<StartState *>("StartState*");
@@ -99,24 +99,24 @@ void ApplicationStateManager::setupConnections()
     connect(this, &ApplicationStateManager::signUp, this, &ApplicationStateManager::onSignUp);
     connect(this, &ApplicationStateManager::signOut, m_messenger, &VSQMessenger::signOut);
     connect(this, &ApplicationStateManager::sendMessage, m_messenger, &VSQMessenger::sendMessage);
-    connect(this, &ApplicationStateManager::openSignInAs, m_signInState, &SignInState::signIn);
+    connect(this, &ApplicationStateManager::openSignInAs, m_signInUsernameState, &SignInUsernameState::checkUsername);
     connect(this, &ApplicationStateManager::openChat, this, &ApplicationStateManager::onOpenChat);
     connect(this, &ApplicationStateManager::openDownloadKey, this, &ApplicationStateManager::onOpenDownloadKey);
     connect(this, &ApplicationStateManager::addContact, m_newChatState, &NewChatState::addContact);
     connect(this, &ApplicationStateManager::backupKey, m_backupKeyState, &BackupKeyState::backupKey);
     connect(this, &ApplicationStateManager::downloadKey, m_downloadKeyState, &DownloadKeyState::downloadKey);
-    connect(m_newChatState, &NewChatState::addContactFinished, this, &ApplicationStateManager::openChat);
+    connect(m_messenger, &VSQMessenger::contactAdded, this, &ApplicationStateManager::openChat);
     connect(m_messenger, &VSQMessenger::openPreviewRequested, this, &ApplicationStateManager::onOpenPreview);
 }
 
 void ApplicationStateManager::addTransitions()
 {
     m_startState->addTransition(this, &ApplicationStateManager::splashScreenRequested, m_splashScreenState);
-    m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::signInUserNotSelected, m_accountSelectionState);
-    m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::signInErrorOccurred, m_accountSelectionState);
-    m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::signInFinished, m_chatListState);
-    m_accountSelectionState->addTransition(m_accountSelectionState, &AccountSelectionState::signInFinished, m_chatListState);
-    addTwoSideTransition(m_accountSelectionState, this, &ApplicationStateManager::openSignIn, m_signInState);
+    m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::userNotSelected, m_accountSelectionState);
+    m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::operationErrorOccurred, m_accountSelectionState);
+    m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::operationFinished, m_chatListState);
+    m_accountSelectionState->addTransition(m_accountSelectionState, &AccountSelectionState::operationFinished, m_chatListState);
+    addTwoSideTransition(m_accountSelectionState, this, &ApplicationStateManager::openSignIn, m_signInUsernameState);
     addTwoSideTransition(m_accountSelectionState, this, &ApplicationStateManager::openSignUp, m_signUpState);
     m_chatListState->addTransition(m_messenger, &VSQMessenger::signedOut, m_accountSelectionState);
     addTwoSideTransition(m_chatListState, this, &ApplicationStateManager::openAccountSettings, m_accountSettingsState);
@@ -126,10 +126,10 @@ void ApplicationStateManager::addTransitions()
     m_accountSettingsState->addTransition(m_messenger, &VSQMessenger::signedOut, m_accountSelectionState);
     m_newChatState->addTransition(this, &ApplicationStateManager::chatRequested, m_chatState);
     addTwoSideTransition(m_chatState, this, &ApplicationStateManager::openPreviewRequested, m_attachmentPreviewState);
-    m_signUpState->addTransition(m_signUpState, &SignUpState::signUpFinished, m_chatListState);
-    addTwoSideTransition(m_signInState, m_signInState, &SignInState::signInFinished, m_signInAsState);
+    m_signUpState->addTransition(m_signUpState, &SignUpState::operationFinished, m_chatListState);
+    addTwoSideTransition(m_signInUsernameState, m_signInUsernameState, &SignInUsernameState::operationFinished, m_signInAsState);
     addTwoSideTransition(m_signInAsState, this, &ApplicationStateManager::keyDownloadRequested, m_downloadKeyState);
-    m_downloadKeyState->addTransition(m_downloadKeyState, &DownloadKeyState::downloadKeyFinished, m_chatListState);
+    m_downloadKeyState->addTransition(m_downloadKeyState, &DownloadKeyState::operationFinished, m_chatListState);
 }
 
 void ApplicationStateManager::setCurrentState(QState *state)
@@ -147,17 +147,16 @@ void ApplicationStateManager::setPreviousState(QState *state)
 
 void ApplicationStateManager::onSignIn(const QString &userId)
 {
-    const auto authorizationState = dynamic_cast<AuthorizationState *>(m_currentState);
-    if (authorizationState) {
-        authorizationState->signIn(userId);
+    const auto state = dynamic_cast<SignInState *>(m_currentState);
+    if (state) {
+        state->signIn(userId);
     }
 }
 
 void ApplicationStateManager::onSignUp(const QString &userId)
 {
-    const auto authorizationState = dynamic_cast<AuthorizationState *>(m_currentState);
-    if (authorizationState) {
-        authorizationState->signUp(userId);
+    if (m_currentState == m_signUpState) {
+        m_signUpState->signUp(userId);
     }
 }
 

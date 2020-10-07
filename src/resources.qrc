@@ -3,16 +3,16 @@
         <!-- Pages -->
         <file>qml/pages/AccountSelectionPage.qml</file>
         <file>qml/pages/AccountSettingsPage.qml</file>
-        <file>qml/pages/AuthorizationPage.qml</file>
         <file>qml/pages/BackupKeyPage.qml</file>
         <file>qml/pages/ChatListPage.qml</file>
         <file>qml/pages/ChatPage.qml</file>
         <file>qml/pages/DownloadKeyPage.qml</file>
-        <file>qml/pages/GlobalSettingsPage.qml</file>
         <file>qml/pages/NewChatPage.qml</file>
+        <file>qml/pages/OperationPage.qml</file>
         <file>qml/pages/PasswordResetPage.qml</file>
         <file>qml/pages/SignInAsPage.qml</file>
         <file>qml/pages/SignInPage.qml</file>
+        <file>qml/pages/SignInUsernamePage.qml</file>
         <file>qml/pages/SignUpPage.qml</file>
         <file>qml/pages/SplashScreenPage.qml</file>
         <!-- Others -->

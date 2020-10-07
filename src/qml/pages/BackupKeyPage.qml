@@ -1,14 +1,10 @@
 import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
 
-import "../theme"
 import "../components"
 
-Page {
-    background: Rectangle {
-        color: Theme.mainBackgroundColor
-    }
+OperationPage {
+    state: app.stateManager.backupKeyState
+    loadingText: qsTr("Backing up your private key...")
 
     header: Header {
         showBackButton: !form.isLoading
@@ -38,26 +34,13 @@ Page {
         }
     }
 
-    footer: Footer { }
-
     Connections {
-        target: app.stateManager.backupKeyState
+        target: state
 
-        function onBackupKeyStarted() {
-            form.showLoading(qsTr("Backing up your private key..."))
-        }
-
-        function onBackupKeyFinished() {
-            form.hideLoading()
+        function onOperationFinished() {
             showPopupSuccess(qsTr("Backup private key success"))
             password.text = ""
             confirmPassword.text = ""
         }
-
-        function onBackupKeyErrorOccurred(errorText) {
-            form.hideLoading()
-            showPopupError(errorText) // TODO(fpohtmeh): don't use parent method directly
-        }
     }
 }
-

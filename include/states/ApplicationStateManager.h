@@ -36,7 +36,6 @@
 #define VSQ_APPLICATIONSTATEMANAGER_H
 
 #include <QStateMachine>
-#include <QTimer>
 
 #include "AccountSelectionState.h"
 #include "AccountSettingsState.h"
@@ -47,7 +46,7 @@
 #include "DownloadKeyState.h"
 #include "NewChatState.h"
 #include "SignInAsState.h"
-#include "SignInState.h"
+#include "SignInUsernameState.h"
 #include "SignUpState.h"
 #include "SplashScreenState.h"
 #include "StartState.h"
@@ -69,7 +68,7 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(DownloadKeyState *downloadKeyState MEMBER m_downloadKeyState CONSTANT)
     Q_PROPERTY(NewChatState *newChatState MEMBER m_newChatState CONSTANT)
     Q_PROPERTY(SignInAsState *signInAsState MEMBER m_signInAsState CONSTANT)
-    Q_PROPERTY(SignInState *signInState MEMBER m_signInState CONSTANT)
+    Q_PROPERTY(SignInUsernameState *signInUsernameState MEMBER m_signInUsernameState CONSTANT)
     Q_PROPERTY(SignUpState *signUpState MEMBER m_signUpState CONSTANT)
     Q_PROPERTY(SplashScreenState *splashScreenState MEMBER m_splashScreenState CONSTANT)
     Q_PROPERTY(StartState *startState MEMBER m_startState CONSTANT)
@@ -140,7 +139,7 @@ private:
     DownloadKeyState *m_downloadKeyState;
     NewChatState *m_newChatState;
     SignInAsState *m_signInAsState;
-    SignInState *m_signInState;
+    SignInUsernameState *m_signInUsernameState;
     SignUpState *m_signUpState;
     SplashScreenState *m_splashScreenState;
     StartState *m_startState;

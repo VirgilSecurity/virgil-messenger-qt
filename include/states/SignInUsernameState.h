@@ -32,22 +32,22 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "states/BackupKeyState.h"
+#ifndef VSQ_SIGNINUSERNAMESTATE_H
+#define VSQ_SIGNINUSERNAMESTATE_H
 
-#include "VSQMessenger.h"
+#include "OperationState.h"
 
-using namespace VSQ;
-
-BackupKeyState::BackupKeyState(VSQMessenger *messenger, QState *parent)
-    : OperationState(parent)
-    , m_messenger(messenger)
+namespace VSQ
 {
-    connect(m_messenger, &VSQMessenger::keyBackuped, this, &BackupKeyState::operationFinished);
-    connect(m_messenger, &VSQMessenger::backupKeyFailed, this, &BackupKeyState::operationErrorOccurred);
+class SignInUsernameState : public OperationState
+{
+    Q_OBJECT
+
+public:
+    using OperationState::OperationState;
+
+    void checkUsername(const QString &userId);
+};
 }
 
-void BackupKeyState::backupKey(const QString &password, const QString &confirmedPassword)
-{
-    emit operationStarted();
-    m_messenger->backupKey(password, confirmedPassword);
-}
+#endif // VSQ_SIGNINUSERNAMESTATE_H

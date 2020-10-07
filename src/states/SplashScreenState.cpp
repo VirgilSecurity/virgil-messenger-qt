@@ -43,7 +43,7 @@
 using namespace VSQ;
 
 SplashScreenState::SplashScreenState(VSQMessenger *messenger, VSQSettings *settings, QState *parent)
-    : AuthorizationState(messenger, parent)
+    : SignInState(messenger, parent)
     , m_settings(settings)
 {
 }
@@ -53,7 +53,7 @@ void SplashScreenState::trySignIn()
     hideNativeSplashScreen();
     const auto userId = m_settings->lastSignedInUserId();
     if (userId.isEmpty()) {
-        emit signInUserNotSelected();
+        emit userNotSelected();
     }
     else {
         signIn(userId);

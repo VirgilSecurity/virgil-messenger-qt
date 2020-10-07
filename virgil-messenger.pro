@@ -127,14 +127,15 @@ HEADERS += \
         include/states/AccountSettingsState.h \
         include/states/ApplicationStateManager.h \
         include/states/AttachmentPreviewState.h \
-        include/states/AuthorizationState.h \
         include/states/BackupKeyState.h \
         include/states/ChatListState.h \
         include/states/ChatState.h \
         include/states/DownloadKeyState.h \
+        include/states/OperationState.h \
         include/states/NewChatState.h \
         include/states/SignInAsState.h \
         include/states/SignInState.h \
+        include/states/SignInUsernameState.h \
         include/states/SignUpState.h \
         include/states/SplashScreenState.h \
         include/states/StartState.h \
@@ -180,12 +181,13 @@ SOURCES += \
         src/states/AccountSelectionState.cpp \
         src/states/ApplicationStateManager.cpp \
         src/states/AttachmentPreviewState.cpp \
-        src/states/AuthorizationState.cpp \
         src/states/BackupKeyState.cpp \
         src/states/ChatState.cpp \
         src/states/DownloadKeyState.cpp \
         src/states/NewChatState.cpp \
         src/states/SignInState.cpp \
+        src/states/SignInUsernameState.cpp \
+        src/states/SignUpState.cpp \
         src/states/SplashScreenState.cpp \
         # Logging
         src/hal.cpp \

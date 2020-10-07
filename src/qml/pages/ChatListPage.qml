@@ -63,10 +63,9 @@ Page {
 
     header: ContactsHeader {
         description: "%1 Server".arg(app.organizationDisplayName)
-        objectName: "hdrDefaultServer"
         id: contactsHeaderId
         title: app.organizationDisplayName
-        searchPlaceholder: "Search conversation"
+        searchPlaceholder: qsTr("Search conversation")
 
         onIsSearchOpenChanged: {
             contactsHeaderId.isSearchOpen ? ChatModel.applyFilter('') : ChatModel.clearFilter()

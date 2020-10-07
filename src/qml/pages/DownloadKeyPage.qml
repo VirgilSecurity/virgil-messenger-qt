@@ -1,18 +1,10 @@
 import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
-import QuickFuture 1.0
-import MesResult 1.0
 
-import "../theme"
 import "../components"
 
-Page {
-    readonly property variant state: app.stateManager.downloadKeyState
-
-    background: Rectangle {
-        color: Theme.mainBackgroundColor
-    }
+OperationPage {
+    state: app.stateManager.downloadKeyState
+    loadingText: qsTr("Downloading up your private key...")
 
     header: Header {
         title: qsTr("Download from the Cloud")
@@ -41,24 +33,5 @@ Page {
             onClicked: app.stateManager.downloadKey(state.contactId, password.text)
         }
     }
-
-    Connections {
-        target: state
-
-        function onBackupKeyStarted() {
-            form.showLoading(qsTr("Downloading up your private key..."))
-        }
-
-        function onBackupKeyFinished() {
-            form.hideLoading()
-        }
-
-        function onBackupKeyErrorOccurred(errorText) {
-            form.hideLoading()
-            showPopupError(errorText) // TODO(fpohtmeh): don't use parent method directly
-        }
-    }
-
-    footer: Footer {}
 }
 

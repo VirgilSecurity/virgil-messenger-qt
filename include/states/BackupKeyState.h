@@ -35,13 +35,13 @@
 #ifndef VSQ_BACKUPKEYSTATE_H
 #define VSQ_BACKUPKEYSTATE_H
 
-#include <QState>
+#include "OperationState.h"
 
 class VSQMessenger;
 
 namespace VSQ
 {
-class BackupKeyState : public QState
+class BackupKeyState : public OperationState
 {
     Q_OBJECT
 
@@ -49,11 +49,6 @@ public:
     BackupKeyState(VSQMessenger *messenger, QState *parent);
 
     void backupKey(const QString &password, const QString &confirmedPassword);
-
-signals:
-    void backupKeyStarted();
-    void backupKeyFinished();
-    void backupKeyErrorOccurred(const QString &errorText);
 
 private:
     VSQMessenger *m_messenger;

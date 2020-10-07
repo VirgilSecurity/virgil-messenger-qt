@@ -35,12 +35,12 @@
 #ifndef VSQ_ACCOUNTSELECTIONSTATE_H
 #define VSQ_ACCOUNTSELECTIONSTATE_H
 
-#include "AuthorizationState.h"
+#include "SignInState.h"
 #include "AccountSelectionModel.h"
 
 namespace VSQ
 {
-class AccountSelectionState : public AuthorizationState
+class AccountSelectionState : public SignInState
 {
     Q_OBJECT
     Q_PROPERTY(AccountSelectionModel *model MEMBER m_model CONSTANT)

@@ -35,13 +35,13 @@
 #ifndef VSQ_DOWNLOADKEYSTATE_H
 #define VSQ_DOWNLOADKEYSTATE_H
 
-#include <QState>
+#include "OperationState.h"
 
 class VSQMessenger;
 
 namespace VSQ
 {
-class DownloadKeyState : public QState
+class DownloadKeyState : public OperationState
 {
     Q_OBJECT
     Q_PROPERTY(QString contactId READ contactId WRITE setContactId NOTIFY contactIdChanged)
@@ -56,9 +56,6 @@ public:
 
 signals:
     void contactIdChanged(const QString &);
-    void downloadKeyStarted();
-    void downloadKeyFinished();
-    void downloadKeyErrorOccurred(const QString &errorText);
 
 private:
     VSQMessenger *m_messenger;

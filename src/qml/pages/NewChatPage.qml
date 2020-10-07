@@ -1,19 +1,15 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
-import QuickFuture 1.0
-import MesResult 1.0
 
 import "../base"
-import "../theme"
 import "../components"
+import "../theme"
 
-Page {
+OperationPage {
+    state: app.stateManager.newChatState
+    loadingText: qsTr("Adding of contact...")
     readonly property string contact: username.text.toLowerCase()
-
-    background: Rectangle {
-        color: Theme.mainBackgroundColor
-    }
 
     header: Header {
         showBackButton: !form.isLoading
@@ -74,31 +70,12 @@ Page {
         }
     }
 
-    footer: Footer { }
-
     function accept() {
         app.stateManager.addContact(contact)
     }
 
     function reject() {
         app.stateManager.goBack()
-    }
-
-    Connections {
-        target: app.stateManager.newChatState
-
-        function onAddContactStarted(userId) {
-            form.showLoading(qsTr("Adding of contact..."))
-        }
-
-        function onAddContactFinished() {
-            form.hideLoading();
-        }
-
-        function onAddContactErrorOccurred(errorText) {
-            form.hideLoading();
-            showPopupError(errorText) // TODO(fpohtmeh): don't use parent method directly
-        }
     }
 }
 

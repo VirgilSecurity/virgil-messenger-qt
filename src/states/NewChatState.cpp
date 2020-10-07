@@ -39,15 +39,15 @@
 using namespace VSQ;
 
 NewChatState::NewChatState(VSQMessenger *messenger, QState *parent)
-    : QState(parent)
+    : OperationState(parent)
     , m_messenger(messenger)
 {
-    connect(m_messenger, &VSQMessenger::contactAdded, this, &NewChatState::addContactFinished);
-    connect(m_messenger, &VSQMessenger::signInErrorOccured, this, &NewChatState::addContactErrorOccurred);
+    connect(m_messenger, &VSQMessenger::contactAdded, this, &NewChatState::operationFinished);
+    connect(m_messenger, &VSQMessenger::addContactErrorOccured, this, &NewChatState::operationErrorOccurred);
 }
 
-void NewChatState::addContact(const QString &userId)
+void NewChatState::addContact(const QString &contactId)
 {
-    emit addContactStarted(userId);
-    m_messenger->addContact(userId);
+    emit operationStarted();
+    m_messenger->addContact(contactId);
 }

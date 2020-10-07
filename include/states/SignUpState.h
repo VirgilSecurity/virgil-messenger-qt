@@ -35,16 +35,28 @@
 #ifndef VSQ_SIGNUPSTATE_H
 #define VSQ_SIGNUPSTATE_H
 
-#include "AuthorizationState.h"
+#include "OperationState.h"
+
+class VSQMessenger;
 
 namespace VSQ
 {
-class SignUpState : public AuthorizationState
+class SignUpState : public OperationState
 {
     Q_OBJECT
+    Q_PROPERTY(QString userId MEMBER m_userId NOTIFY userIdChanged)
 
 public:
-    using AuthorizationState::AuthorizationState;
+    SignUpState(VSQMessenger *messenger, QState *parent);
+
+    void signUp(const QString &userId);
+
+signals:
+    void userIdChanged(const QString &);
+
+private:
+    VSQMessenger *m_messenger;
+    QString m_userId;
 };
 }
 

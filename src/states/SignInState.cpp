@@ -34,18 +34,22 @@
 
 #include "states/SignInState.h"
 
-#include "VSQUtils.h"
+#include "VSQMessenger.h"
 
 using namespace VSQ;
 
+SignInState::SignInState(VSQMessenger *messenger, QState *parent)
+    : OperationState(parent)
+    , m_messenger(messenger)
+{
+    connect(m_messenger, &VSQMessenger::signedIn, this, &OperationState::operationFinished);
+    connect(m_messenger, &VSQMessenger::signInErrorOccured, this, &OperationState::operationErrorOccurred);
+}
+
 void SignInState::signIn(const QString &userId)
 {
-    emit signInStarted(userId);
-    QString errorText;
-    if (VSQUtils::validateUserId(userId, &errorText)) {
-        emit signInFinished();
-    }
-    else {
-        emit signInErrorOccurred(errorText);
-    }
+    m_userId = userId;
+    emit userIdChanged(userId);
+    emit operationStarted();
+    m_messenger->signIn(userId);
 }
