@@ -63,13 +63,18 @@ static const QString kPushNotificationsServiceVal = "fcm";
 static const QString kPushNotificationsServiceVal = "apns";
 #endif
 
+#ifdef QT_DEBUG
+static const QString kPushNotificationsPushModeVal = "dev";
+#else
+static const QString kPushNotificationsPushModeVal = "prod";
+#endif // QT_DEBUG
+
 
 Self &
 Self::instance() {
     static Self instance;
     return instance;
 }
-
 
 QXmppPushEnableIq
 Self::buildEnableIq() const {
@@ -82,44 +87,43 @@ Self::buildEnableIq() const {
     // Create a Data Form fields
     QList<QXmppDataForm::Field> fields;
 
-    // Subscribe Form Type
-    QXmppDataForm::Field subscribeFormType;
-    subscribeFormType.setKey(kPushNotificationsFormType);
-    subscribeFormType.setValue(kPushNotificationsFormTypeVal);
-    fields << subscribeFormType;
-
-    // Subscribe service
-    QXmppDataForm::Field subscribeService;
-    subscribeService.setKey(kPushNotificationsService);
-    subscribeService.setValue(kPushNotificationsServiceVal);
-    fields << subscribeService;
-
-    // Subscribe device
-    QXmppDataForm::Field subscribeDevice;
-    subscribeDevice.setKey(kPushNotificationsDeviceID);
-    subscribeDevice.setValue(PushNotifications::instance().token());
-    fields << subscribeDevice;
-
+    { // Subscribe Form Type
+        QXmppDataForm::Field field;
+        field.setKey(kPushNotificationsFormType);
+        field.setValue(kPushNotificationsFormTypeVal);
+        fields << field;
+    }
+    { // Subscribe service
+        QXmppDataForm::Field field;
+        field.setKey(kPushNotificationsService);
+        field.setValue(kPushNotificationsServiceVal);
+        fields << field;
+    }
+    { // Subscribe device
+        QXmppDataForm::Field field;
+        field.setKey(kPushNotificationsDeviceID);
+        field.setValue(PushNotifications::instance().token());
+        fields << field;
+    }
 #ifdef VS_IOS
-    QXmppDataForm::Field topicField;
-    topicField.setKey("topic");
-    topicField.setValue("com.virgil.VirgilMessenger"); // FIXME: Retore ENV functionlity ".stg", ".dev"
-    fields << topicField;
-
-    QXmppDataForm::Field soundField;
-    soundField.setKey("sound");
-    soundField.setValue("default");
-    fields << soundField;
-
-    QXmppDataForm::Field pushModeField;
-    pushModeField.setKey("push_mode");
-#ifdef QT_DEBUG
-    pushModeField.setValue("dev");
-#else
-    pushModeField.setValue("prod");
-#endif // QT_DEBUG
-
-    fields << pushModeField;
+    {
+        QXmppDataForm::Field field;
+        field.setKey("topic");
+        field.setValue("com.virgil.VirgilMessenger"); // FIXME: Retore ENV functionlity ".stg", ".dev"
+        fields << field;
+    }
+    {
+        QXmppDataForm::Field field;
+        field.setKey("sound");
+        field.setValue("default");
+        fields << field;
+    }
+    {
+        QXmppDataForm::Field field;
+        field.setKey("push_mode");
+        field.setValue(kPushNotificationsPushModeVal);
+        fields << field;
+    }
 #endif // VS_IOS
 
     QXmppDataForm dataForm;
