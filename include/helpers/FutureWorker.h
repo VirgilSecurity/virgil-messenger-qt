@@ -32,64 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
-#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
+#ifndef VSQ_FUTUREWORKER_H
+#define VSQ_FUTUREWORKER_H
 
-#include <QtCore>
-#include <QGuiApplication>
-#include <QQmlApplicationEngine>
+#include <QFutureWatcher>
 
-#include <VSQCrashReporter.h>
-#include <VSQMessenger.h>
-#include <VSQSettings.h>
-#include <macos/VSQMacos.h>
+#include "VSQMessenger.h"
 
-class QNetworkAccessManager;
-
-class VSQLogging;
-
-class VSQApplication : public QObject
+namespace VSQ
 {
-    Q_OBJECT
-    Q_PROPERTY(QString organizationDisplayName READ organizationDisplayName CONSTANT)
-    Q_PROPERTY(QString applicationDisplayName READ applicationDisplayName CONSTANT)
+using FutureResult = VSQMessenger::EnResult;
+using Future = QFuture<FutureResult>;
+using FutureWatcher = QFutureWatcher<FutureResult>;
 
+class FutureWorker
+{
 public:
-    VSQApplication();
-    virtual ~VSQApplication() = default;
-
-    static void initialize();
-
-    int run(const QString &basePath, VSQLogging *logging);
-
-    Q_INVOKABLE
-    void reloadQml();
-
-    Q_INVOKABLE
-    void checkUpdates();
-
-    Q_INVOKABLE QString
-    currentVersion() const;
-
-    Q_INVOKABLE void
-    sendReport();
-
-    // Names
-
-    QString organizationDisplayName() const;
-    QString applicationDisplayName() const;
-
-private slots:
-    void
-    onApplicationStateChanged(Qt::ApplicationState state);
-
-private:
-    static const QString kVersion;
-    VSQSettings m_settings;
-    QNetworkAccessManager *m_networkAccessManager;
-    VSQCrashReporter m_crashReporter;
-    QQmlApplicationEngine m_engine;
-    VSQMessenger m_messenger;
+    static void run(const Future &future, const std::function<void(FutureResult)> &resultHandler)
+    {
+        auto futureWatcher = new FutureWatcher();
+        futureWatcher->setFuture(future);
+        QObject::connect(futureWatcher, &FutureWatcher::finished, [=]() {
+            futureWatcher->deleteLater();
+            resultHandler(future.result());
+        });
+    }
 };
+}
 
-#endif // VSQApplication
+#endif // VSQ_FUTUREWORKER_H

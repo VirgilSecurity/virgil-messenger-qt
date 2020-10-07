@@ -92,7 +92,7 @@ Control {
 
     function signIn(user) {
         if (LoginLogic.validateUser(user)) {
-            var future = Messenger.signIn(user)
+            var future = Messenger.signInAsync(user)
             Future.onFinished(future, function(value) {
               console.log("Log In result: ", Future.result(future))
             })
