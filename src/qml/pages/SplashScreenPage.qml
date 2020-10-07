@@ -45,6 +45,7 @@ Page {
         function onSignedIn(userId) {
             form.hideLoading()
             showContacts(true)
+            Messenger.hideSplashScreen()
         }
 
         function onSignInErrorOccured(errorText) {
