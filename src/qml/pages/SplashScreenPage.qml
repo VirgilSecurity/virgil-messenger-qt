@@ -34,23 +34,22 @@ Page {
         target: Messenger
 
         function onSignInStarted(userId) {
+            Messenger.hideSplashScreen()
             form.showLoading("Logging in as %1...".arg(userId))
         }
 
         function onSignInUserEmpty() {
-            showAuth()
             Messenger.hideSplashScreen()
+            showAuth()
         }
 
         function onSignedIn(userId) {
             form.hideLoading()
             showContacts(true)
-            Messenger.hideSplashScreen()
         }
 
         function onSignInErrorOccured(errorText) {
             showAuth()
-            Messenger.hideSplashScreen()
         }
     }
 }
