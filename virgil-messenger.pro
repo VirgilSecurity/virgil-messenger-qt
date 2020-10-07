@@ -318,8 +318,9 @@ ios: {
 defineReplace(AndroidVersionCode) {
         segments = $$split(1, ".")
         vCode = "$$first(vCode)$$format_number($$member(segments,0,0), width=3 zeropad)"
-        vCode = "$$first(vCode)$$format_number($$member(segments,1,1), width=3 zeropad)"
-        vCode = "$$first(vCode)$$format_number($$member(segments,2,2), width=4 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,1,1), width=2 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,2,2), width=2 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,3,3), width=3 zeropad)"
         return($$first(vCode))
 }
 
