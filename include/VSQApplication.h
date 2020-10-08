@@ -75,9 +75,6 @@ public:
     Q_INVOKABLE QString
     currentVersion() const;
 
-    Q_INVOKABLE void
-    sendReport();
-
     // Names
 
     QString organizationDisplayName() const;

@@ -37,9 +37,14 @@
 
 #include <QObject>
 
+#include "VSQCommon.h"
+
 class QNetworkAccessManager;
+class QNetworkReply;
 
 class VSQSettings;
+
+Q_DECLARE_LOGGING_CATEGORY(lcCrashReporter)
 
 class VSQCrashReporter : public QObject
 {
@@ -51,6 +56,7 @@ public:
 
     void checkAppCrash();
     Q_INVOKABLE bool sendLogFiles();
+
     void setVirgilUrl(QString VirgilUrl);
     void setkVersion(QString AppVersion);
     void setkOrganization(QString strkOrganization);
@@ -58,12 +64,12 @@ public:
 
 signals:
     void crashReportRequested();
-    void reportSent(QString msg);
-    void reportSentErr(QString msg);
+    void reportSent(const QString &msg);
+    void reportErrorOccurred(const QString &msg);
 
 private:
     bool sendFileToBackendRequest(QByteArray fileData);
-    void endpointReply();
+    void endpointReply(QNetworkReply *reply);
 
     VSQSettings *m_settings;
     QNetworkAccessManager *m_manager;

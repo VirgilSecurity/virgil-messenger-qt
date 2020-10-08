@@ -45,6 +45,8 @@
 
 const QString VSQCrashReporter::s_endpointSendReport = "/send-logs";
 
+Q_LOGGING_CATEGORY(lcCrashReporter, "crashReporter")
+
 VSQCrashReporter::VSQCrashReporter(VSQSettings *settings, QNetworkAccessManager *networkAccessManager, QObject *parent)
     : QObject(parent)
     , m_settings(settings)
@@ -56,89 +58,94 @@ VSQCrashReporter::~VSQCrashReporter()
     m_settings->setRunFlag(false);
 }
 
-void VSQCrashReporter::setVirgilUrl(QString VirgilUrl) {
+void VSQCrashReporter::setVirgilUrl(QString VirgilUrl)
+{
     m_currentVirgilUrl = VirgilUrl;
-    qDebug("Send report URL set to [%s]", qPrintable(m_currentVirgilUrl));
+    qCDebug(lcCrashReporter) << "Send report URL set to" << m_currentVirgilUrl;
 }
 
-void VSQCrashReporter::setkVersion(QString AppVersion){
+void VSQCrashReporter::setkVersion(QString AppVersion)
+{
     m_version = AppVersion;
 }
 
-void VSQCrashReporter::setkOrganization(QString strkOrganization) {
+void VSQCrashReporter::setkOrganization(QString strkOrganization)
+{
     m_organization = strkOrganization;
 }
 
-void VSQCrashReporter::setkApp(QString strkApp) {
+void VSQCrashReporter::setkApp(QString strkApp)
+{
     m_app = strkApp;
 }
 
-void VSQCrashReporter::checkAppCrash() {
-    qDebug("Checking previus run flag...");
+void VSQCrashReporter::checkAppCrash()
+{
+    qCDebug(lcCrashReporter) << "Checking previus run flag...";
     if(m_settings->runFlag()) {
-        qCritical("Previus application run is crashed ! Sending log files...");
+        qCCritical(lcCrashReporter) << "Previous application run is crashed ! Sending log files...";
         emit crashReportRequested();
     } else {
-        qDebug("Set run flag to true");
+        qCDebug(lcCrashReporter) << "Set run flag to true";
         m_settings->setRunFlag(true);
     }
 }
 
-bool VSQCrashReporter::sendLogFiles() {
-    QByteArray fileData;
+bool VSQCrashReporter::sendLogFiles()
+{
     const QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (!writeDir.exists()) {
         qFatal("Directory [%s] not exist.", qPrintable(writeDir.absolutePath()));
         return false;
     }
 
+    QByteArray fileData;
     QDirIterator fileIterator(writeDir.absolutePath(), QStringList() << "virgil-messenger.log*");
     while (fileIterator.hasNext()) {
         QFile readFile(fileIterator.next());
         if ( readFile.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
-            qDebug() << "Read file:" << readFile.fileName() << endl;
+            qCDebug(lcCrashReporter) << "Read file:" << readFile.fileName();
             fileData.append(readFile.readAll());
         }
-        else
-            qDebug() << "Can't open " << readFile.fileName() << readFile.errorString() << endl;
+        else {
+            qCDebug(lcCrashReporter) << "Can't open " << readFile.fileName() << readFile.errorString();
+        }
     }
 
     sendFileToBackendRequest(fileData);
     return true;
 }
 
-bool VSQCrashReporter::sendFileToBackendRequest(QByteArray fileData) {
-    QNetworkRequest req;
-    char *buffBearer = (char *) malloc(1024);
+bool VSQCrashReporter::sendFileToBackendRequest(QByteArray fileData)
+{
+    char *buffBearer = (char *)malloc(1024);
     size_t sizeBearer = 1024;
 
-    //vs_messenger_virgil_get_auth_token(buffBearer ,sizeBearer);
-    //qDebug("Backend token [%s]", buffBearer);
+    VirgilIoTKit::vs_messenger_virgil_get_auth_token(buffBearer, sizeBearer);
+    qCDebug(lcCrashReporter) << "Backend token:" << buffBearer;
 
     QString strEndpoint = m_currentVirgilUrl + s_endpointSendReport;
-    req.setUrl(QUrl(strEndpoint));
-    qDebug("Send report to endpoint : [%s]",qPrintable(strEndpoint));
-    req.setHeader(QNetworkRequest::ContentTypeHeader,  QString("application/json"));
+    QNetworkRequest req(strEndpoint);
+    qCDebug(lcCrashReporter) << "Send report to endpoint:" << strEndpoint;
+    req.setHeader(QNetworkRequest::ContentTypeHeader, QString("application/json"));
     req.setRawHeader(QString("Authorization").toUtf8(), buffBearer);
     req.setRawHeader(QString("Version").toUtf8(), qPrintable(m_version));
     req.setRawHeader(QString("Platform").toUtf8(), qPrintable(QSysInfo::kernelType()));
-    QNetworkReply* reply = m_manager->post(req, fileData);
-    connect(reply, SIGNAL(finished()), this, SLOT(endpointReply()));
+    auto reply = m_manager->post(req, fileData);
+    connect(reply, &QNetworkReply::finished, this, std::bind(&VSQCrashReporter::endpointReply, this, reply));
 
     return true;
 }
 
-void VSQCrashReporter::endpointReply(){
-    QNetworkReply *reply= qobject_cast<QNetworkReply *>(sender());
-    if (reply->error() == QNetworkReply::NoError)
-      {
-        qDebug("Send report OK");
+void VSQCrashReporter::endpointReply(QNetworkReply *reply)
+{
+    if (reply->error() == QNetworkReply::NoError) {
+        qCDebug(lcCrashReporter) << "Send report OK";
         emit reportSent("Report send OK");
-      }
-      else {
-        qDebug("Error sending report [%s]", qPrintable(reply->errorString()));
-        emit reportSentErr("Report send error: [" + reply->errorString() + "]" );
-      }
-    reply->deleteLater();
-    qDebug("Sending finished");
+    }
+    else {
+        qCDebug(lcCrashReporter) << "Error sending report:" << reply->errorString();
+        emit reportErrorOccurred("Report send error");
+    }
+    qCDebug(lcCrashReporter) << "Sending finished";
 }

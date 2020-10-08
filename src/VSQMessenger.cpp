@@ -583,7 +583,7 @@ VSQMessenger::signInAsync(QString user) {
             return MRES_ERR_SIGNIN;
         }
 
-        // Check previus run is crashed
+        // Check previous run is crashed
         m_crashReporter->checkAppCrash();
 
         // Connect over XMPP

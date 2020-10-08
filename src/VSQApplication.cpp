@@ -168,12 +168,6 @@ VSQApplication::currentVersion() const {
     return kVersion + "-alpha";
 }
 
-/******************************************************************************/
-void
-VSQApplication::sendReport() {
-    m_crashReporter.sendLogFiles();
-}
-
 QString VSQApplication::organizationDisplayName() const
 {
     return Customer::OrganizationDisplayName;

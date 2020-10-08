@@ -128,12 +128,13 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
-        Platform.detect()
         Messenger.informationRequested.connect(showPopupInform)
+        crashReporter.crashReportRequested.connect(sendReportAsk.open)
+        crashReporter.reportSent.connect(showPopupSuccess)
+        crashReporter.reportErrorOccurred.connect(showPopupError)
+
+        Platform.detect()
         app.stateManager.setUiState()
-//        crashReporter.crashReportRequested.connect(sendReportAsk.open)
-//        crashReporter.reportSent.connect(showPopupSuccess)
-//        crashReporter.reportSentErr.connect(showPopupError)
     }
 
     onActiveFocusItemChanged: {
