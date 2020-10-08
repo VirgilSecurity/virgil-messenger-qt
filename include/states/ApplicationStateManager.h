@@ -72,7 +72,6 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(SignUpState *signUpState MEMBER m_signUpState CONSTANT)
     Q_PROPERTY(SplashScreenState *splashScreenState MEMBER m_splashScreenState CONSTANT)
     Q_PROPERTY(StartState *startState MEMBER m_startState CONSTANT)
-
     Q_PROPERTY(QState *currentState MEMBER m_currentState NOTIFY currentStateChanged)
     Q_PROPERTY(QState *previousState MEMBER m_previousState NOTIFY previousStateChanged)
 
@@ -87,24 +86,29 @@ signals:
     void signUp(const QString &userId);
     void signOut();
     void sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
+    void addContact(const QString &userId);
+    void backupKey(const QString &password, const QString &confirmedPassword);
+    void downloadKey(const QString &password);
     void openSignIn();
     void openSignInAs(const QString &userId);
     void openSignUp();
     void openAddContact();
-    void addContact(const QString &userId);
-    void openChat(const QString &userId);
-    void openAccountSettings();
-    void openBackupKey();
+    void openChat(const QString &contactId);
+    void openChatList(const QString &userId);
+    void openAccountSettings(const QString &userId);
+    void openBackupKey(const QString &userId);
     void openDownloadKey(const QString &userId);
-    void backupKey(const QString &password, const QString &confirmedPassword);
-    void downloadKey(const QString &userId, const QString &password);
 
     void currentStateChanged(QState *);
     void previousStateChanged(QState *);
 
     void splashScreenRequested(QPrivateSignal);
     void chatRequested(QPrivateSignal);
+    void chatListRequested(QPrivateSignal);
     void keyDownloadRequested(QPrivateSignal);
+    void signInAsRequested(QPrivateSignal);
+    void openAccountSettingsRequested(QPrivateSignal);
+    void openBackupKeyRequested(QPrivateSignal);
     void openPreviewRequested(QPrivateSignal);
 
 private:
@@ -123,9 +127,17 @@ private:
     void setPreviousState(QState *state);
     void onSignIn(const QString &userId);
     void onSignUp(const QString &userId);
-    void onOpenChat(const QString &userId);
+    void onAddContact(const QString &contactId);
+    void onBackupKey(const QString &password, const QString &confirmedPassword);
+    void onDownloadKey(const QString &password);
+    void onOpenSignInAs(const QString &userId);
+    void onOpenChat(const QString &contactId);
+    void onOpenChatList(const QString &userId);
     void onOpenPreview(const QUrl &url);
     void onOpenDownloadKey(const QString &userId);
+    void onOpenAccountSettings(const QString &userId);
+    void onOpenBackupKey(const QString &userId);
+    void onSignInUsernameValidated(const QString &userId);
 
     VSQMessenger *m_messenger;
     VSQSettings *m_settings;

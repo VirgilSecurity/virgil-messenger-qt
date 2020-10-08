@@ -214,7 +214,7 @@ signals:
     void contactAdded(const QString &userId);
     void addContactErrorOccured(const QString &errorText);
 
-    void keyBackuped();
+    void keyBackuped(const QString &userId);
     void backupKeyFailed(const QString &errorText);
     void keyDownloaded();
     void downloadKeyFailed(const QString &errorText);

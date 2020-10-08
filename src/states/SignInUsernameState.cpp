@@ -38,12 +38,13 @@
 
 using namespace VSQ;
 
-void SignInUsernameState::checkUsername(const QString &userId)
+void SignInUsernameState::validateUsername(const QString &userId)
 {
     emit operationStarted();
     QString errorText;
     if (VSQUtils::validateUserId(userId, &errorText)) {
         emit operationFinished();
+        emit usernameValidated(userId);
     }
     else {
         emit operationErrorOccurred(errorText);

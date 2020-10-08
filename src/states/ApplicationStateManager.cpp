@@ -99,14 +99,21 @@ void ApplicationStateManager::setupConnections()
     connect(this, &ApplicationStateManager::signUp, this, &ApplicationStateManager::onSignUp);
     connect(this, &ApplicationStateManager::signOut, m_messenger, &VSQMessenger::signOut);
     connect(this, &ApplicationStateManager::sendMessage, m_messenger, &VSQMessenger::sendMessage);
-    connect(this, &ApplicationStateManager::openSignInAs, m_signInUsernameState, &SignInUsernameState::checkUsername);
+    connect(this, &ApplicationStateManager::addContact, this, &ApplicationStateManager::onAddContact);
+    connect(this, &ApplicationStateManager::backupKey, this, &ApplicationStateManager::onBackupKey);
+    connect(this, &ApplicationStateManager::downloadKey, this, &ApplicationStateManager::onDownloadKey);
+    connect(this, &ApplicationStateManager::openSignInAs, this, &ApplicationStateManager::onOpenSignInAs);
     connect(this, &ApplicationStateManager::openChat, this, &ApplicationStateManager::onOpenChat);
+    connect(this, &ApplicationStateManager::openChatList, this, &ApplicationStateManager::onOpenChatList);
     connect(this, &ApplicationStateManager::openDownloadKey, this, &ApplicationStateManager::onOpenDownloadKey);
-    connect(this, &ApplicationStateManager::addContact, m_newChatState, &NewChatState::addContact);
-    connect(this, &ApplicationStateManager::backupKey, m_backupKeyState, &BackupKeyState::backupKey);
-    connect(this, &ApplicationStateManager::downloadKey, m_downloadKeyState, &DownloadKeyState::downloadKey);
+    connect(this, &ApplicationStateManager::openAccountSettings, this, &ApplicationStateManager::onOpenAccountSettings);
+    connect(this, &ApplicationStateManager::openBackupKey, this, &ApplicationStateManager::onOpenBackupKey);
+    connect(m_messenger, &VSQMessenger::signedIn, this, &ApplicationStateManager::openChatList);
+    connect(m_messenger, &VSQMessenger::signedUp, this, &ApplicationStateManager::openChatList);
+    connect(m_messenger, &VSQMessenger::keyBackuped, this, &ApplicationStateManager::openChatList);
     connect(m_messenger, &VSQMessenger::contactAdded, this, &ApplicationStateManager::openChat);
     connect(m_messenger, &VSQMessenger::openPreviewRequested, this, &ApplicationStateManager::onOpenPreview);
+    connect(m_signInUsernameState, &SignInUsernameState::usernameValidated, this, &ApplicationStateManager::onSignInUsernameValidated);
 }
 
 void ApplicationStateManager::addTransitions()
@@ -114,22 +121,21 @@ void ApplicationStateManager::addTransitions()
     m_startState->addTransition(this, &ApplicationStateManager::splashScreenRequested, m_splashScreenState);
     m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::userNotSelected, m_accountSelectionState);
     m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::operationErrorOccurred, m_accountSelectionState);
-    m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::operationFinished, m_chatListState);
-    m_accountSelectionState->addTransition(m_accountSelectionState, &AccountSelectionState::operationFinished, m_chatListState);
+    m_splashScreenState->addTransition(this, &ApplicationStateManager::chatListRequested, m_chatListState);
+    m_accountSelectionState->addTransition(this, &ApplicationStateManager::chatListRequested, m_chatListState);
     addTwoSideTransition(m_accountSelectionState, this, &ApplicationStateManager::openSignIn, m_signInUsernameState);
     addTwoSideTransition(m_accountSelectionState, this, &ApplicationStateManager::openSignUp, m_signUpState);
     m_chatListState->addTransition(m_messenger, &VSQMessenger::signedOut, m_accountSelectionState);
-    addTwoSideTransition(m_chatListState, this, &ApplicationStateManager::openAccountSettings, m_accountSettingsState);
+    addTwoSideTransition(m_chatListState, this, &ApplicationStateManager::openAccountSettingsRequested, m_accountSettingsState);
     addTwoSideTransition(m_chatListState, this, &ApplicationStateManager::openAddContact, m_newChatState);
     addTwoSideTransition(m_chatListState, this, &ApplicationStateManager::chatRequested, m_chatState);
-    addTwoSideTransition(m_accountSettingsState, this, &ApplicationStateManager::openBackupKey, m_backupKeyState);
+    addTwoSideTransition(m_accountSettingsState, this, &ApplicationStateManager::openBackupKeyRequested, m_backupKeyState);
     m_accountSettingsState->addTransition(m_messenger, &VSQMessenger::signedOut, m_accountSelectionState);
     m_newChatState->addTransition(this, &ApplicationStateManager::chatRequested, m_chatState);
     addTwoSideTransition(m_chatState, this, &ApplicationStateManager::openPreviewRequested, m_attachmentPreviewState);
-    m_signUpState->addTransition(m_signUpState, &SignUpState::operationFinished, m_chatListState);
-    addTwoSideTransition(m_signInUsernameState, m_signInUsernameState, &SignInUsernameState::operationFinished, m_signInAsState);
+    m_signUpState->addTransition(this, &ApplicationStateManager::chatListRequested, m_chatListState);
+    addTwoSideTransition(m_signInUsernameState, this, &ApplicationStateManager::signInAsRequested, m_signInAsState);
     addTwoSideTransition(m_signInAsState, this, &ApplicationStateManager::keyDownloadRequested, m_downloadKeyState);
-    m_downloadKeyState->addTransition(m_downloadKeyState, &DownloadKeyState::operationFinished, m_chatListState);
 }
 
 void ApplicationStateManager::setCurrentState(QState *state)
@@ -160,20 +166,86 @@ void ApplicationStateManager::onSignUp(const QString &userId)
     }
 }
 
-void ApplicationStateManager::onOpenChat(const QString &userId)
+void ApplicationStateManager::onAddContact(const QString &contactId)
 {
-    m_chatState->setContactId(userId);
-    emit chatRequested(QPrivateSignal());
+    if (m_currentState == m_newChatState) {
+        m_newChatState->addContact(contactId);
+    }
+}
+
+void ApplicationStateManager::onBackupKey(const QString &password, const QString &confirmedPassword)
+{
+    if (m_currentState == m_backupKeyState) {
+        m_backupKeyState->backupKey(password, confirmedPassword);
+    }
+}
+
+void ApplicationStateManager::onDownloadKey(const QString &password)
+{
+    if (m_currentState == m_downloadKeyState) {
+        m_downloadKeyState->downloadKey(password);
+    }
+}
+
+void ApplicationStateManager::onOpenSignInAs(const QString &userId)
+{
+    if (m_currentState == m_signInUsernameState) {
+        m_signInUsernameState->validateUsername(userId);
+    }
+}
+
+void ApplicationStateManager::onOpenChat(const QString &contactId)
+{
+    if (m_currentState == m_chatListState || m_currentState == m_newChatState) {
+        m_chatState->setContactId(contactId);
+        emit chatRequested(QPrivateSignal());
+    }
+}
+
+void ApplicationStateManager::onOpenChatList(const QString &userId)
+{
+    if (m_currentState == m_splashScreenState || m_currentState == m_accountSelectionState || m_currentState == m_signUpState) {
+        m_chatListState->setUserId(userId);
+        emit chatListRequested(QPrivateSignal());
+    }
 }
 
 void ApplicationStateManager::onOpenPreview(const QUrl &url)
 {
-    m_attachmentPreviewState->setUrl(url);
-    emit openPreviewRequested(QPrivateSignal());
+    if (m_currentState == m_chatState) {
+        m_attachmentPreviewState->setUrl(url);
+        emit openPreviewRequested(QPrivateSignal());
+    }
 }
 
 void ApplicationStateManager::onOpenDownloadKey(const QString &userId)
 {
-    m_downloadKeyState->setContactId(userId);
-    emit keyDownloadRequested(QPrivateSignal());
+    if (m_currentState == m_signInAsState) {
+        m_downloadKeyState->setUserId(userId);
+        emit keyDownloadRequested(QPrivateSignal());
+    }
+}
+
+void ApplicationStateManager::onOpenAccountSettings(const QString &userId)
+{
+    if (m_currentState == m_chatListState) {
+        m_accountSettingsState->setUserId(userId);
+        emit openAccountSettingsRequested(QPrivateSignal());
+    }
+}
+
+void ApplicationStateManager::onOpenBackupKey(const QString &userId)
+{
+    if (m_currentState == m_accountSettingsState) {
+        m_backupKeyState->setUserId(userId);
+        emit openBackupKeyRequested(QPrivateSignal());
+    }
+}
+
+void ApplicationStateManager::onSignInUsernameValidated(const QString &userId)
+{
+    if (m_currentState == m_signInUsernameState) {
+        m_signInAsState->setUserId(userId);
+        emit signInAsRequested(QPrivateSignal());
+    }
 }

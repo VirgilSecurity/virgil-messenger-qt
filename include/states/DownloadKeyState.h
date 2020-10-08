@@ -44,22 +44,22 @@ namespace VSQ
 class DownloadKeyState : public OperationState
 {
     Q_OBJECT
-    Q_PROPERTY(QString contactId READ contactId WRITE setContactId NOTIFY contactIdChanged)
+    Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
 
 public:
     DownloadKeyState(VSQMessenger *messenger, QState *parent);
 
-    QString contactId() const;
-    void setContactId(const QString &contactId);
+    QString userId() const;
+    void setUserId(const QString &userId);
 
-    void downloadKey(const QString &contactId, const QString &password);
+    void downloadKey(const QString &password);
 
 signals:
-    void contactIdChanged(const QString &);
+    void userIdChanged(const QString &);
 
 private:
     VSQMessenger *m_messenger;
-    QString m_contactId;
+    QString m_userId;
 };
 }
 

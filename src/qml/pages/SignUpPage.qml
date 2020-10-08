@@ -1,5 +1,6 @@
 import QtQuick 2.12
 
+import "../theme"
 import "../components"
 
 OperationPage {

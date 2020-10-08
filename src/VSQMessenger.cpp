@@ -280,7 +280,7 @@ void VSQMessenger::backupKey(const QString &password, const QString &confirmedPa
     else {
         FutureWorker::run(backupKeyAsync(password), [=](const FutureResult &result) {
             if (result == MRES_OK) {
-                emit keyBackuped();
+                emit keyBackuped(m_userId);
             }
             else {
                 emit backupKeyFailed(tr("Backup private key error"));

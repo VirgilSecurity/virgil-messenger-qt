@@ -46,22 +46,22 @@ DownloadKeyState::DownloadKeyState(VSQMessenger *messenger, QState *parent)
     connect(m_messenger, &VSQMessenger::downloadKeyFailed, this, &DownloadKeyState::operationErrorOccurred);
 }
 
-QString DownloadKeyState::contactId() const
+QString DownloadKeyState::userId() const
 {
-    return m_contactId;
+    return m_userId;
 }
 
-void DownloadKeyState::setContactId(const QString &contactId)
+void DownloadKeyState::setUserId(const QString &userId)
 {
-    if (m_contactId == contactId) {
+    if (m_userId == userId) {
         return;
     }
-    m_contactId = contactId;
-    emit contactIdChanged(contactId);
+    m_userId = userId;
+    emit userIdChanged(userId);
 }
 
-void DownloadKeyState::downloadKey(const QString &contactId, const QString &password)
+void DownloadKeyState::downloadKey(const QString &password)
 {
     emit operationStarted();
-    m_messenger->downloadKey(contactId, password);
+    m_messenger->downloadKey(m_userId, password);
 }

@@ -6,6 +6,8 @@ import "../theme"
 import "../components"
 
 Page {
+    property var state: app.stateManager.accountSettingsState
+
     background: Rectangle {
         color: Theme.contactsBackgroundColor
     }
@@ -35,7 +37,7 @@ Page {
 
         FormPrimaryButton {
             text: qsTr("Backup private key")
-            onClicked: app.stateManager.openBackupKey()
+            onClicked: app.stateManager.openBackupKey(state.userId)
         }
 
         FormPrimaryButton {

@@ -42,9 +42,19 @@ namespace VSQ
 class AccountSettingsState : public QState
 {
     Q_OBJECT
+    Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
 
 public:
     using QState::QState;
+
+    QString userId() const;
+    void setUserId(const QString &userId);
+
+signals:
+    void userIdChanged(const QString &);
+
+private:
+    QString m_userId;
 };
 }
 

@@ -46,7 +46,10 @@ class SignInUsernameState : public OperationState
 public:
     using OperationState::OperationState;
 
-    void checkUsername(const QString &userId);
+    void validateUsername(const QString &userId);
+
+signals:
+    void usernameValidated(const QString &);
 };
 }
 

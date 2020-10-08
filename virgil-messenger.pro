@@ -179,12 +179,15 @@ SOURCES += \
         src/ui/VSQUiHelper.cpp \
         # Applications states
         src/states/AccountSelectionState.cpp \
+        src/states/AccountSettingsState.cpp \
         src/states/ApplicationStateManager.cpp \
         src/states/AttachmentPreviewState.cpp \
         src/states/BackupKeyState.cpp \
+        src/states/ChatListState.cpp \
         src/states/ChatState.cpp \
         src/states/DownloadKeyState.cpp \
         src/states/NewChatState.cpp \
+        src/states/SignInAsState.cpp \
         src/states/SignInState.cpp \
         src/states/SignInUsernameState.cpp \
         src/states/SignUpState.cpp \

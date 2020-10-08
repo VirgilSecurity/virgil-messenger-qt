@@ -32,30 +32,20 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SIGNINASSTATE_H
-#define VSQ_SIGNINASSTATE_H
+#include "states/SignInAsState.h"
 
-#include <QState>
+using namespace VSQ;
 
-namespace VSQ
+QString SignInAsState::userId() const
 {
-class SignInAsState : public QState
-{
-    Q_OBJECT
-    Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
-
-public:
-    using QState::QState;
-
-    QString userId() const;
-    void setUserId(const QString &userId);
-
-signals:
-    void userIdChanged(const QString &);
-
-private:
-    QString m_userId;
-};
+    return m_userId;
 }
 
-#endif // VSQ_SIGNINASSTATE_H
+void SignInAsState::setUserId(const QString &userId)
+{
+    if (m_userId == userId) {
+        return;
+    }
+    m_userId = userId;
+    emit userIdChanged(userId);
+}

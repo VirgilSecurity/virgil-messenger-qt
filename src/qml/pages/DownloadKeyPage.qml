@@ -30,7 +30,7 @@ OperationPage {
 
         FormPrimaryButton {
             text: qsTr("Decrypt")
-            onClicked: app.stateManager.downloadKey(state.contactId, password.text)
+            onClicked: app.stateManager.downloadKey(password.text)
         }
     }
 }

@@ -44,14 +44,22 @@ namespace VSQ
 class BackupKeyState : public OperationState
 {
     Q_OBJECT
+    Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
 
 public:
     BackupKeyState(VSQMessenger *messenger, QState *parent);
 
+    QString userId() const;
+    void setUserId(const QString &userId);
+
     void backupKey(const QString &password, const QString &confirmedPassword);
+
+signals:
+    void userIdChanged(const QString &);
 
 private:
     VSQMessenger *m_messenger;
+    QString m_userId;
 };
 }
 

@@ -29,7 +29,7 @@ Control {
 
             Action {
                 text: qsTr("Settings")
-                onTriggered: manager.openAccountSettings()
+                onTriggered: manager.openAccountSettings(Messenger.currentUser)
             }
 
             MenuSeparator {
