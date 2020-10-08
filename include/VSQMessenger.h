@@ -104,6 +104,7 @@ public:
 
     VSQSqlConversationModel &modelConversations();
     VSQSqlChatModel &getChatModel();
+    VSQLastActivityManager *lastActivityManager();
 
     Optional<StMessage> decryptMessage(const QString &sender, const QString &message);
 
@@ -199,7 +200,6 @@ signals:
 
     void openPreviewRequested(const QUrl &url);
     void informationRequested(const QString &message);
-    void lastActivityTextChanged(const QString &text);
 
     void downloadThumbnail(const StMessage message, const QString sender, QPrivateSignal);
 
