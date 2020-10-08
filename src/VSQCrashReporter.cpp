@@ -81,7 +81,7 @@ void VSQCrashReporter::setkApp(QString strkApp)
 
 void VSQCrashReporter::checkAppCrash()
 {
-    qCDebug(lcCrashReporter) << "Checking previus run flag...";
+    qCDebug(lcCrashReporter) << "Checking previous run flag...";
     if(m_settings->runFlag()) {
         qCCritical(lcCrashReporter) << "Previous application run is crashed ! Sending log files...";
         emit crashReportRequested();
@@ -99,8 +99,9 @@ bool VSQCrashReporter::sendLogFiles()
         return false;
     }
 
+    qCDebug(lcCrashReporter) << "Collecting of logs:" << writeDir.absolutePath();
     QByteArray fileData;
-    QDirIterator fileIterator(writeDir.absolutePath(), QStringList() << "virgil-messenger.log*");
+    QDirIterator fileIterator(writeDir.absolutePath(), QStringList() << "VirgilMessenger.log*");
     while (fileIterator.hasNext()) {
         QFile readFile(fileIterator.next());
         if ( readFile.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
@@ -126,12 +127,16 @@ bool VSQCrashReporter::sendFileToBackendRequest(QByteArray fileData)
 
     QString strEndpoint = m_currentVirgilUrl + s_endpointSendReport;
     QNetworkRequest req(strEndpoint);
-    qCDebug(lcCrashReporter) << "Send report to endpoint:" << strEndpoint;
     req.setHeader(QNetworkRequest::ContentTypeHeader, QString("application/json"));
     req.setRawHeader(QString("Authorization").toUtf8(), buffBearer);
     req.setRawHeader(QString("Version").toUtf8(), qPrintable(m_version));
     req.setRawHeader(QString("Platform").toUtf8(), qPrintable(QSysInfo::kernelType()));
     auto reply = m_manager->post(req, fileData);
+    qCDebug(lcCrashReporter) << "Send report to endpoint:" << strEndpoint;
+    for (auto name : req.rawHeaderList()) {
+        qCDebug(lcCrashReporter) << "Request header" << name << ':' << req.rawHeader(name);
+    }
+    qCDebug(lcCrashReporter) << "File data empty:" << fileData.isEmpty();
     connect(reply, &QNetworkReply::finished, this, std::bind(&VSQCrashReporter::endpointReply, this, reply));
 
     return true;
@@ -141,11 +146,13 @@ void VSQCrashReporter::endpointReply(QNetworkReply *reply)
 {
     if (reply->error() == QNetworkReply::NoError) {
         qCDebug(lcCrashReporter) << "Send report OK";
-        emit reportSent("Report send OK");
+        emit reportSent(tr("Report send OK"));
     }
     else {
-        qCDebug(lcCrashReporter) << "Error sending report:" << reply->errorString();
-        emit reportErrorOccurred("Report send error");
+        qCDebug(lcCrashReporter) << "Error sending report. Code:" << static_cast<int>(reply->error())
+                                 << ". Name:" << reply->error()
+                                 << ". Message:" << reply->errorString();
+        emit reportErrorOccurred(tr("Report send error"));
     }
     qCDebug(lcCrashReporter) << "Sending finished";
 }

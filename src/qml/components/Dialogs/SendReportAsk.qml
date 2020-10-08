@@ -10,7 +10,7 @@ Dialog {
     standardButtons: Dialog.Yes | StandardButton.No
 
     Label {
-        text: qsTr("Previus run crashed. Send report?")
+        text: qsTr("Previous run crashed. Send report?")
     }
 
     onAccepted: crashReporter.sendLogFiles()
