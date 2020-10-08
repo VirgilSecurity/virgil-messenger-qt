@@ -32,64 +32,47 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
-#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
+#ifndef VIRGIL_MESSENGER_NOTIFICATIONS_ANDROID_FIREBASE_LISTENER_H_INCLUDED
+#define VIRGIL_MESSENGER_NOTIFICATIONS_ANDROID_FIREBASE_LISTENER_H_INCLUDED
+
+#include <firebase/messaging.h>
+#include <firebase/app.h>
+#include <firebase/util.h>
 
 #include <QtCore>
-#include <QGuiApplication>
-#include <QQmlApplicationEngine>
 
-#include <VSQCrashReporter.h>
-#include <VSQMessenger.h>
-#include <VSQSettings.h>
-#include <macos/VSQMacos.h>
+class QAndroidJniEnvironment;
 
-class QNetworkAccessManager;
 
-class VSQLogging;
+namespace notifications {
+namespace android {
 
-class VSQApplication : public QObject
-{
-    Q_OBJECT
-    Q_PROPERTY(QString organizationDisplayName READ organizationDisplayName CONSTANT)
-    Q_PROPERTY(QString applicationDisplayName READ applicationDisplayName CONSTANT)
-
+class FirebaseListener : public firebase::messaging::Listener {
 public:
-    VSQApplication();
-    virtual ~VSQApplication() = default;
+    static FirebaseListener& instance();
 
-    static void initialize();
-
-    int run(const QString &basePath, VSQLogging *logging);
-
-    Q_INVOKABLE
-    void reloadQml();
-
-    Q_INVOKABLE
-    void checkUpdates();
-
-    Q_INVOKABLE QString
-    currentVersion() const;
-
-    Q_INVOKABLE void
-    sendReport();
-
-    // Names
-
-    QString organizationDisplayName() const;
-    QString applicationDisplayName() const;
-
-private slots:
     void
-    onApplicationStateChanged(Qt::ApplicationState state);
+    init();
+
+    virtual void
+    OnTokenReceived(const char *token);
+
+    virtual void
+    OnMessage(const firebase::messaging::Message &message);
 
 private:
-    static const QString kVersion;
-    VSQSettings m_settings;
-    QNetworkAccessManager *m_networkAccessManager;
-    VSQCrashReporter m_crashReporter;
-    QQmlApplicationEngine m_engine;
-    VSQMessenger m_messenger;
+    FirebaseListener();
+
+    void
+    showNotification(QString title, QString message);
+
+private:
+    QAndroidJniEnvironment *m_jniEnv;
+    firebase::App *m_app;
+    firebase::ModuleInitializer m_initializer;
 };
 
-#endif // VSQApplication
+} // namespace android
+} // namespace notifications
+
+#endif // VIRGIL_MESSENGER_NOTIFICATIONS_ANDROID_FIREBASE_LISTENER_H_INCLUDED

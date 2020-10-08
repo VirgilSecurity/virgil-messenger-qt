@@ -110,10 +110,14 @@ public:
 
     void setApplicationActive(bool active);
 
+    // New methods
+
+    Q_INVOKABLE void signIn(const QString &userId);
+
 public slots:
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    signIn(QString user);
+    signInAsync(QString user);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     backupUserKey(QString password);
@@ -161,6 +165,8 @@ public slots:
 
     Q_INVOKABLE void openAttachment(const QString &messageId);
 
+    Q_INVOKABLE void hideSplashScreen();
+
 signals:
     void
     fireError(QString errorText);
@@ -195,6 +201,13 @@ signals:
 
     void downloadThumbnail(const StMessage message, const QString sender, QPrivateSignal);
 
+    // New signals
+
+    void signInUserEmpty();
+    void signInStarted(const QString &userId);
+    void signedIn(const QString &userId);
+    void signInErrorOccured(const QString &errorText);
+
 private slots:
     void onConnected();
     void onMessageDelivered(const QString&, const QString&);
@@ -213,7 +226,9 @@ private slots:
     void onAttachmentProgressChanged(const QString &uploadId, const DataSize bytesReceived, const DataSize bytesTotal);
     void onAttachmentDecrypted(const QString &uploadId, const QString &filePath);
 
-    Q_INVOKABLE void onSubscribePushNotifications(bool enable);
+    void registerForNotifications();
+    void deregisterFromNotifications();
+    void onPushNotificationTokenUpdate();
 
 private:
     QXmppClient m_xmpp;
@@ -236,7 +251,6 @@ private:
     QString m_user;
     QString m_userId;
     QString m_recipient;
-    QString m_xmppPass;
     VSQEnvType m_envType;
     static const VSQEnvType _defaultEnv = PROD;
     QXmppConfiguration m_conf;

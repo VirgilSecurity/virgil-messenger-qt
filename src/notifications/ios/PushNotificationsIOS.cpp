@@ -32,64 +32,15 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
-#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
+#include "PushNotificationsIOS.h"
 
-#include <QtCore>
-#include <QGuiApplication>
-#include <QQmlApplicationEngine>
+using namespace notifications;
 
-#include <VSQCrashReporter.h>
-#include <VSQMessenger.h>
-#include <VSQSettings.h>
-#include <macos/VSQMacos.h>
+using Parent = PushNotifications;
+using Self = PushNotificationsIOS;
 
-class QNetworkAccessManager;
-
-class VSQLogging;
-
-class VSQApplication : public QObject
-{
-    Q_OBJECT
-    Q_PROPERTY(QString organizationDisplayName READ organizationDisplayName CONSTANT)
-    Q_PROPERTY(QString applicationDisplayName READ applicationDisplayName CONSTANT)
-
-public:
-    VSQApplication();
-    virtual ~VSQApplication() = default;
-
-    static void initialize();
-
-    int run(const QString &basePath, VSQLogging *logging);
-
-    Q_INVOKABLE
-    void reloadQml();
-
-    Q_INVOKABLE
-    void checkUpdates();
-
-    Q_INVOKABLE QString
-    currentVersion() const;
-
-    Q_INVOKABLE void
-    sendReport();
-
-    // Names
-
-    QString organizationDisplayName() const;
-    QString applicationDisplayName() const;
-
-private slots:
-    void
-    onApplicationStateChanged(Qt::ApplicationState state);
-
-private:
-    static const QString kVersion;
-    VSQSettings m_settings;
-    QNetworkAccessManager *m_networkAccessManager;
-    VSQCrashReporter m_crashReporter;
-    QQmlApplicationEngine m_engine;
-    VSQMessenger m_messenger;
-};
-
-#endif // VSQApplication
+Parent &
+Parent::instance() {
+    static Self instance;
+    return instance;
+}

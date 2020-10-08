@@ -36,7 +36,7 @@ Page {
             onUserSelected: {
                 form.showLoading("Logging In as %1...".arg(userName))
 
-                var future = Messenger.signIn(userName)
+                var future = Messenger.signInAsync(userName)
                 Future.onFinished(future, (result) => {
                     var res = Future.result(future)
                     if (res === Result.MRES_OK) {

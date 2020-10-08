@@ -39,9 +39,12 @@
 #include <VSQCommon.h>
 #include <VSQClipboardProxy.h>
 #include <VSQCustomer.h>
-#include <android/VSQAndroid.h>
 #include <logging/VSQLogging.h>
 #include <ui/VSQUiHelper.h>
+
+#if defined(VS_ANDROID) && VS_ANDROID
+#include "FirebaseListener.h"
+#endif // VS_ANDROID
 
 #include <QGuiApplication>
 #include <QFont>
@@ -127,6 +130,11 @@ VSQApplication::run(const QString &basePath, VSQLogging *logging) {
     connect(qApp, &QGuiApplication::aboutToQuit, std::bind(&VSQMessenger::setStatus, &m_messenger, VSQMessenger::EnStatus::MSTATUS_UNAVAILABLE));
 
     reloadQml();
+
+#if defined(VS_ANDROID) && VS_ANDROID
+    notifications::android::FirebaseListener::instance().init();
+#endif
+
     return QGuiApplication::instance()->exec();
 }
 
@@ -163,13 +171,6 @@ VSQApplication::currentVersion() const {
 void
 VSQApplication::sendReport() {
     m_crashReporter.sendLogFiles();
-}
-
-void VSQApplication::hideSplashScreen()
-{
-#ifdef VS_ANDROID
-    VSQAndroid::hideSplashScreen();
-#endif
 }
 
 QString VSQApplication::organizationDisplayName() const

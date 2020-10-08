@@ -17,27 +17,7 @@ Page {
         interval: Platform.isAndroid ? 100 : 1000;
         running: true;
         repeat: false;
-        onTriggered: {
-            if (!settings.lastSignedInUser) {
-                showAuth()
-                app.hideSplashScreen()
-            }
-            else {
-                form.showLoading("Logging In as %1...".arg(settings.lastSignedInUser))
-
-                var future = Messenger.signIn(settings.lastSignedInUser)
-                Future.onFinished(future, function(res) {
-                    if (res === Result.MRES_OK) {
-                        form.hideLoading()
-                        showContacts(true)
-                    } else {
-                        settings.lastSignedInUser = ""
-                        showAuth()
-                    }
-                    app.hideSplashScreen()
-                })
-            }
-        }
+        onTriggered: Messenger.signIn(settings.lastSignedInUser)
     }
 
     Form {
@@ -49,4 +29,27 @@ Page {
     }
 
     footer: Footer {}
+
+    Connections {
+        target: Messenger
+
+        function onSignInStarted(userId) {
+            Messenger.hideSplashScreen()
+            form.showLoading("Logging in as %1...".arg(userId))
+        }
+
+        function onSignInUserEmpty() {
+            Messenger.hideSplashScreen()
+            showAuth()
+        }
+
+        function onSignedIn(userId) {
+            form.hideLoading()
+            showContacts(true)
+        }
+
+        function onSignInErrorOccured(errorText) {
+            showAuth()
+        }
+    }
 }
