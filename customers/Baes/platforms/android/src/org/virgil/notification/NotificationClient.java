@@ -1,6 +1,6 @@
 package org.virgil.notification;
 
-import com.virgilsecurity.baes.messenger.R;
+import com.baes.baesmessenger.R;
 
 import android.app.Notification;
 import android.app.NotificationManager;

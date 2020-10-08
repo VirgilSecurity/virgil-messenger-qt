@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <manifest
-    package="com.virgilsecurity.baes.messenger"
+    package="com.baes.baesmessenger"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:versionName="-- %%INSERT_VERSION_NAME%% --"
     android:versionCode="-- %%INSERT_VERSION_CODE%% --"
