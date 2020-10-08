@@ -49,7 +49,7 @@ ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, VSQSet
     , m_attachmentPreviewState(new AttachmentPreviewState(this))
     , m_backupKeyState(new BackupKeyState(m_messenger, this))
     , m_chatListState(new ChatListState(this))
-    , m_chatState(new ChatState(this))
+    , m_chatState(new ChatState(m_messenger, this))
     , m_downloadKeyState(new DownloadKeyState(m_messenger, this))
     , m_newChatState(new NewChatState(messenger, this))
     , m_signInAsState(new SignInAsState(this))

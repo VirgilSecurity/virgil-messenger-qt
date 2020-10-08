@@ -37,24 +37,33 @@
 
 #include <QState>
 
+class VSQMessenger;
+
 namespace VSQ
 {
 class ChatState : public QState
 {
     Q_OBJECT
     Q_PROPERTY(QString contactId READ contactId WRITE setContactId NOTIFY contactIdChanged)
+    Q_PROPERTY(QString lastActivityText READ lastActivityText WRITE setLastActivityText NOTIFY lastActivityTextChanged)
 
 public:
-    using QState::QState;
+    ChatState(VSQMessenger *messenger, QState *parent);
 
     QString contactId() const;
     void setContactId(const QString &contactId);
 
+    QString lastActivityText() const;
+    void setLastActivityText(const QString &text);
+
 signals:
     void contactIdChanged(const QString &);
+    void lastActivityTextChanged(const QString &);
 
 private:
+    VSQMessenger *m_messenger;
     QString m_contactId;
+    QString m_lastActivityText;
 };
 }
 

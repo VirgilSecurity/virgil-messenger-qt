@@ -180,9 +180,6 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSetti
     connect(m_xmppCarbonManager, &QXmppCarbonManager::messageSent, &m_xmpp, &QXmppClient::messageReceived);
     connect(m_xmppReceiptManager, &QXmppMessageReceiptManager::messageDelivered, this, &VSQMessenger::onMessageDelivered);
 
-    // last activity
-    connect(m_lastActivityManager, &VSQLastActivityManager::lastActivityTextChanged, this, &VSQMessenger::lastActivityTextChanged);
-
     // Network Analyzer
     connect(&m_networkAnalyzer, &VSQNetworkAnalyzer::fireStateChanged, this, &VSQMessenger::onProcessNetworkState, Qt::QueuedConnection);
     connect(&m_networkAnalyzer, &VSQNetworkAnalyzer::fireHeartBeat, this, &VSQMessenger::checkState, Qt::QueuedConnection);
@@ -839,11 +836,15 @@ VSQMessenger::getChatModel() {
     return *m_sqlChatModel;
 }
 
+VSQLastActivityManager *VSQMessenger::lastActivityManager()
+{
+    return m_lastActivityManager;
+}
+
 void VSQMessenger::setCrashReporter(VSQCrashReporter *crashReporter)
 {
     m_crashReporter = crashReporter;
 }
-
 
 /******************************************************************************/
 void

@@ -67,9 +67,8 @@ Page {
                 }
 
                 Label {
-                    id: lastActivityLabel
                     topPadding: 2
-                    text: " "
+                    text: app.stateManager.chatState.lastActivityText
                     font.pointSize: UiHelper.fixFontSz(12)
                     color: Theme.secondaryTextColor
                 }
@@ -218,10 +217,6 @@ Page {
 
         function onMessageSent() {
             messageSent.play()
-        }
-
-        function onLastActivityTextChanged(text) {
-            lastActivityLabel.text = text
         }
     }
 }

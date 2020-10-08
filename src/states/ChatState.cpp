@@ -34,7 +34,17 @@
 
 #include "states/ChatState.h"
 
+#include "VSQLastActivityManager.h"
+#include "VSQMessenger.h"
+
 using namespace VSQ;
+
+ChatState::ChatState(VSQMessenger *messenger, QState *parent)
+    : QState(parent)
+    , m_messenger(messenger)
+{
+    connect(m_messenger->lastActivityManager(), &VSQLastActivityManager::lastActivityTextChanged, this, &ChatState::setLastActivityText);
+}
 
 QString ChatState::contactId() const
 {
@@ -48,4 +58,20 @@ void ChatState::setContactId(const QString &contactId)
     }
     m_contactId = contactId;
     emit contactIdChanged(contactId);
+
+    m_messenger->setCurrentRecipient(contactId);
+}
+
+QString ChatState::lastActivityText() const
+{
+    return m_lastActivityText;
+}
+
+void ChatState::setLastActivityText(const QString &text)
+{
+    if (text == m_lastActivityText) {
+        return;
+    }
+    m_lastActivityText = text;
+    emit lastActivityTextChanged(text);
 }
