@@ -32,6 +32,8 @@
 #
 #   Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
+
 include_guard()
 
 # Solution taken from https://www.linkedin.com/pulse/simple-elegant-wrong-how-integrate-clang-format-friends-brendan-drew/

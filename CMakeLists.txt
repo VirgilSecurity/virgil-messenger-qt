@@ -42,6 +42,7 @@ include(varpadding)
 include(getprebuild)
 include(customers)
 
+
 # Target name and version
 set(VS_TARGET_NAME "virgil-messenger")
 set(VS_TARGET_VERSION "3.4.18")
@@ -140,18 +141,39 @@ vs_customer_prepare()
 # ---------------------------------------------------------------------------
 #   Build system type
 # ---------------------------------------------------------------------------
-
+# Android
 if(VS_PLATFORM STREQUAL "android")
     message("-- Prepare sources for Android ...")
     add_library(${VS_TARGET_NAME} SHARED)
-    
+
+# MacOS    
 elseif(VS_PLATFORM STREQUAL "macos")
-    add_executable(${VS_TARGET_NAME} MACOSX_BUNDLE)
-    set_target_properties(${VS_TARGET_NAME}
-        PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/platforms/macos/virgil-messenger.plist"
+
+    set(App_ICON "${VS_CUSTOMER_DIR}/platforms/macos/pkg_resources/${MACOSX_BUNDLE_ICON_FILE}.icns")
+    set_source_files_properties(${App_ICON} 
+	PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+
+    # Sparkle	
+#    file(GLOB_RECURSE SPARKLE_FRAMEWORK LIST_DIRECTORIES true FOLLOW_SYMLINKS "${PREBUILT_DIR}/${VS_PLATFORM}/sparkle/Sparkle.framework/*" )
+#    message(STATUS "### FILES ${SPARKLE_FRAMEWORK}")
+#    find_library(SPARKLE_FRAMEWORK Sparkle "${PREBUILT_DIR}/${VS_PLATFORM}/sparkle")
+#    set_source_files_properties(${SPARKLE_FRAMEWORK} 
+#	PROPERTIES MACOSX_PACKAGE_LOCATION "Frameworks/Sparkle.framework")
+
+    message(STATUS "### ${MACOSX_PACKAGE_LOCATION}")
+    add_executable(${VS_TARGET_NAME} MACOSX_BUNDLE ${App_ICON} )
+    
+    set_target_properties(${VS_TARGET_NAME} 
+	PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/platforms/macos/Info.plist.in" 
     )
-    set(MACOSX_DEPLOYMENT_TARGET 10.14)
+    set_target_properties(${VS_TARGET_NAME} 
+        PROPERTIES LINK_FLAGS "-F${PREBUILT_DIR}/${VS_PLATFORM}/sparkle -framework Sparkle -framework CoreFoundation -framework Foundation"
+    )    
+
+
 #    macdeployqt(${VS_TARGET_NAME} "${CMAKE_CURRENT_LIST_DIR}/src/qml")
+# Other
+
 else()
     add_executable(${VS_TARGET_NAME})
 endif()
@@ -243,12 +265,6 @@ target_link_directories(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:${PREBUILT_LIB_DIR}>
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${PREBUILT_DIR}/firebase_cpp_sdk/libs/android/${ANDROID_ABI}/c++>>        
         )
-
-if(VS_PLATFORM STREQUAL "macos")
-	set_target_properties(${VS_TARGET_NAME} 
-	    PROPERTIES LINK_FLAGS "-F${PREBUILT_DIR}/${VS_PLATFORM}/sparkle -framework Sparkle -framework CoreFoundation -framework Foundation"
-	)
-endif()
 
 target_link_libraries(${VS_TARGET_NAME}
         PUBLIC
@@ -345,4 +361,9 @@ target_compile_options(${VS_TARGET_NAME}
 target_compile_definitions(${VS_TARGET_NAME}
   PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>
   )
+#set(CPACK_PRODUCTBUILD_KEYCHAIN_PATH "sdfdsf")
+#set(CPACK_PRODUCTBUILD_IDENTITY_NAME "68125DC3B6986E51D7702695CD4CA6A7C2058FA4")
+#set(CPACK_GENERATOR "productbuild")
+#set(CPACK_DMG_VOLUME_NAME "test")
+#include(CPack)
 

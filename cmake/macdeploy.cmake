@@ -32,6 +32,7 @@
 #
 #   Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
 find_package(Qt5Core REQUIRED)
 

@@ -12,7 +12,7 @@ set(VS_APPLICATION_DISPLAY_NAME "Virgil Secure messenger")
 set(VS_ORGANIATION_DOMAIN "virgil.net")
 set(VS_MESSANGER_URL_TEMPLATE "https://messenger%1.virgilsecurity.com")
 set(VS_XMPP_URL_TEMPLATE "xmpp%1.virgilsecurity.com")
-set(VS_ANDROID_PACKAGE_NAME "com.virgilsecurity.android.virgil")
+
 
 # -- Sources and includes
 # Custom customer sources and includes
@@ -26,13 +26,31 @@ set(VS_FIREBASE_DIR "${PREBUILT_DIR}/firebase_cpp_sdk")
 
 # Templates
 list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/include/VSQCustomer.h.in=${PROJECT_SOURCE_DIR}/include/VSQCustomer.h")
+# Android
 if(VS_PLATFORM STREQUAL "android")
+    set(VS_ANDROID_PACKAGE_NAME "com.virgilsecurity.android.virgil")
     list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/src/android/java/org/virgil/notification/NotificationClient.java.in=${PROJECT_SOURCE_DIR}/src/android/java/org/virgil/notification/NotificationClient.java")
     list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/platforms/android/AndroidManifest.xml.in=${PROJECT_SOURCE_DIR}/platforms/android/AndroidManifest.xml")
     list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/platforms/android/google-services.json.in=${PROJECT_SOURCE_DIR}/platforms/android/google-services.json")
     list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/platforms/android/gradle.properties.in=${PROJECT_SOURCE_DIR}/platforms/android/gradle.properties")
-elseif(VS_PLATFORM STREQUAL "macos")    
+# MacOS    
+elseif(VS_PLATFORM STREQUAL "macos")
+    # Sparkle data
+    set(SU_FEED_URL "https://virgilsecurity.bintray.com/messenger/macos/nightly/appcast.xml")
+    set(SU_PUBLIC_ED_KEY "44RVxRhV4h4Hlw+VOeXvCj78Z5NUhJ2Qi5N+kpu8KxI=")
+    # Version
+    set(MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+    set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
+    
+    set(MACOSX_BUNDLE_ICON_FILE "MyIcon")    
+    set(MACOSX_DEPLOYMENT_TARGET 10.14)
+    set(VS_BUNDLE_PREFIX "com.virgilsecurity")
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER "${VS_BUNDLE_PREFIX}.${VS_TARGET_NAME}")        
     list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/platforms/macos/release-notes.html.in=${PROJECT_SOURCE_DIR}/platforms/macos/release-notes.html")
+# IOS    
+elseif(VS_PLATFORM STREQUAL "ios" OR VS_PLATFORM STREQUAL "iossim")        
+    set(VS_BUNDLE_PREFIX "com.virgil")
+    set(MACOSX_BUNDLE_BUNDLE_NAME "${VS_BUNDLE_PREFIX}.${VS_TARGET_NAME}")
 endif()    
 
 # Files
@@ -56,6 +74,5 @@ list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-ldpi/ico
 list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-ldpi/icon.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-ldpi/icon.png")
 list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-ldpi/splashscreen.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-ldpi/splashscreen.png")
 list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable/splash.xml=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable/splash.xml")
-
 
 message(STATUS "[End] customer.cmake")

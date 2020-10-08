@@ -32,6 +32,7 @@
 #
 #   Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
 #
 #   Fetch prebuilt core libraries
@@ -47,9 +48,9 @@ function(get_prebuild)
             "${PREBUILT_CORE_ARCHIVE}"
             SHOW_PROGRESS
         )
-
+	message(STATUS "Unpacking ...")
 	execute_process(
-            COMMAND ${CMAKE_COMMAND} -E rm -fr -- *
+            COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_LIST_DIR}/ext/prebuild 
             COMMAND ${CMAKE_COMMAND} -E tar xzf "${PREBUILT_CORE_ARCHIVE}"
             WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/ext"
         )        
