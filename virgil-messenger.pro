@@ -288,7 +288,7 @@ macx: {
 #
 
 ios: {
-    QMAKE_ASSET_CATALOGS += platforms/ios/Assets.xcassets
+    QMAKE_ASSET_CATALOGS += generated/platforms/ios/Assets.xcassets
     QMAKE_IOS_DEPLOYMENT_TARGET = 9.0
     QMAKE_INFO_PLIST = platforms/ios/Info.plist
     DEFINES += VS_IOS=1 VS_PUSHNOTIFICATIONS=1 VS_MOBILE=1
@@ -304,10 +304,10 @@ ios: {
          src/notifications/XmppPushNotifications.cpp
 
     PUSH_NOTIFICATIONS_ENTITLEMENTS.name = CODE_SIGN_ENTITLEMENTS
-    PUSH_NOTIFICATIONS_ENTITLEMENTS.value = $$PWD/platforms/ios/Entitlements/VirgilMessenger.entitlements
+    PUSH_NOTIFICATIONS_ENTITLEMENTS.value = $$VS_PLATFORMS_PATH/ios/Entitlements/VirgilMessenger.entitlements
     QMAKE_MAC_XCODE_SETTINGS += PUSH_NOTIFICATIONS_ENTITLEMENTS
 
-    DISTFILES += platforms/ios/Entitlements/VirgilMessenger.entitlements
+    DISTFILES += generated/platforms/ios/Entitlements/VirgilMessenger.entitlements
 }
 
 
