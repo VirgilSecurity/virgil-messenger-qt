@@ -10,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:444558413842:android:aad465cd30ffcd193dc8cb",
         "android_client_info": {
-          "package_name": "com.virgilsecurity.android.virgil"
+          "package_name": "com.virgilsecurity.baes.messenger"
         }
       },
       "oauth_client": [

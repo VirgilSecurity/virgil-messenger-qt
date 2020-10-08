@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <manifest
-    package="com.virgilsecurity.android.virgil"
+    package="com.virgilsecurity.baes.messenger"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:versionName="-- %%INSERT_VERSION_NAME%% --"
     android:versionCode="-- %%INSERT_VERSION_CODE%% --"
@@ -10,7 +10,7 @@
     <application
         android:hardwareAccelerated="true"
         android:name="org.qtproject.qt5.android.bindings.QtApplication"
-        android:label="Virgil Messenger"
+        android:label="Baes Messenger"
         android:extractNativeLibs="true"
         android:theme="@style/AppTheme"
         android:icon="@drawable/icon"
@@ -18,7 +18,7 @@
         <activity
             android:configChanges="orientation|keyboardHidden"
             android:name="org.qtproject.qt5.android.bindings.QtActivity"
-            android:label="Virgil Messenger"
+            android:label="Baes Messenger"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
             android:launchMode="singleTop"

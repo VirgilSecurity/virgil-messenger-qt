@@ -1,7 +1,7 @@
 %global debug_package %{nil}
 
-Summary:          Virgil messenger
-Name:             virgil-messenger
+Summary:          Ифуы messenger
+Name:             ифуы-messenger
 Version:          {{MAJOR_VER}}.{{MINOR_VER}}.{{SUB_VER}}
 Release:          {{BUILD_VER}}
 Group:            Internet
@@ -10,7 +10,7 @@ URL:              https://virgilsecurity.com/
 Source0:         %{name}-%{version}.tgz
 
 %description
-Virgil messenger
+Ифуы messenger
 
 %prep
 %setup -q -n %{name}-%{version}
@@ -19,20 +19,20 @@ Virgil messenger
 
 %install
 
-install -d                                                                                                       %{buildroot}%{_datarootdir}/virgil-messenger
+install -d                                                                                                       %{buildroot}%{_datarootdir}/ифуы-messenger
 install -d                                                                                                       %{buildroot}%{_bindir}
 install -d                                                                                                       %{buildroot}%{_datadir}/applications
 install -d                                                                                                       %{buildroot}%{_datadir}/icons/hicolor/scalable/apps
 
-cp -rf ./*                                                                                                       %{buildroot}%{_datarootdir}/virgil-messenger
-ln -s %{_datarootdir}/virgil-messenger/virgil-messenger.sh                                                       %{buildroot}%{_bindir}/virgil-messenger
-install -p -m 644 virgil-messenger.desktop                                                                       %{buildroot}%{_datadir}/applications/
-install -p -m 644 virgil-messenger.png                            		  				 %{buildroot}%{_datadir}/icons/hicolor/scalable/apps
+cp -rf ./*                                                                                                       %{buildroot}%{_datarootdir}/ифуы-messenger
+ln -s %{_datarootdir}/baes-messenger/baes-messenger.sh                                                       %{buildroot}%{_bindir}/baes-messenger
+install -p -m 644 baes-messenger.desktop                                                                       %{buildroot}%{_datadir}/applications/
+install -p -m 644 baes-messenger.png                            		  				 %{buildroot}%{_datadir}/icons/hicolor/scalable/apps
 
 %files
 %doc VERSION_MESSENGER
-%{_datarootdir}/virgil-messenger
-%{_bindir}/virgil-messenger
+%{_datarootdir}/baes-messenger
+%{_bindir}/baes-messenger
 %{_datadir}/applications
 %{_datadir}/icons/hicolor/scalable/apps
 
