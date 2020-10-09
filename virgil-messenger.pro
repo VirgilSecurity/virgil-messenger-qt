@@ -45,6 +45,9 @@ isEmpty(VERSION) {
 
 ios {
     TARGET = VirgilMessenger
+    isEmpty(TARGET) {
+        TARGET = VirgilMessenger
+    }
     QMAKE_TARGET_BUNDLE_PREFIX = com.virgil
 } else {
     TARGET = virgil-messenger

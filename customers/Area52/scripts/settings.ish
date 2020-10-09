@@ -16,4 +16,4 @@ SUFeedURL="https://virgilsecurity.bintray.com/area52/macos/nightly/appcast.xml"
 SUPublicEDKey="44RVxRhV4h4Hlw+VOeXvCj78Z5NUhJ2Qi5N+kpu8KxI="
 
 # IOS
-IOS_NAME="${MACOS_NAME}"
+IOS_NAME=""Area52Messenger"
