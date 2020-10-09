@@ -35,5 +35,9 @@
 	</array>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need this so that you can share photos</string>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>	
 </dict>
 </plist>

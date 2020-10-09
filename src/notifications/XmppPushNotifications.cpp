@@ -39,15 +39,15 @@
 #include <qxmpp/QXmppMessage.h>
 #include <qxmpp/QXmppPushEnableIq.h>
 #include <qxmpp/QXmppDataForm.h>
+#include "VSQCustomer.h"
 
 
 using namespace notifications;
 using namespace notifications::xmpp;
+using namespace Customer;
 
 using Self = XmppPushNotifications;
 
-
-static const QString kPushNotificationsProxy = "push-notifications-proxy";
 static const QString kPushNotificationsDeviceID = "device_id";
 static const QString kPushNotificationsFormType = "FORM_TYPE";
 static const QString kPushNotificationsFormTypeVal = "http://jabber.org/protocol/pubsub#publish-options";
@@ -109,7 +109,7 @@ Self::buildEnableIq() const {
     {
         QXmppDataForm::Field field;
         field.setKey("topic");
-        field.setValue("com.virgil.VirgilMessenger"); // FIXME: Retore ENV functionlity ".stg", ".dev"
+        field.setValue(kPushNotificationsTopic); // FIXME: Retore ENV functionlity ".stg", ".dev"
         fields << field;
     }
     {
