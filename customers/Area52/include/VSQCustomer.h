@@ -50,7 +50,7 @@ namespace Customer
     static QString XmppUrlTemplate = "xmpp%1.area52.virgil.net";
 
     static const QString kPushNotificationsProxy = "push-notifications-proxy";
-    static const QString kPushNotificationsTopic = "com.virgil.VirgilMessenger";
+    static const QString kPushNotificationsTopic = "com.virgil.Area52Messenger";
 
 }
 
