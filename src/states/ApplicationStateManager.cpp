@@ -111,6 +111,7 @@ void ApplicationStateManager::setupConnections()
     connect(m_messenger, &VSQMessenger::signedIn, this, &ApplicationStateManager::openChatList);
     connect(m_messenger, &VSQMessenger::signedUp, this, &ApplicationStateManager::openChatList);
     connect(m_messenger, &VSQMessenger::keyBackuped, this, &ApplicationStateManager::openChatList);
+    connect(m_messenger, &VSQMessenger::keyDownloaded, this, &ApplicationStateManager::openChatList);
     connect(m_messenger, &VSQMessenger::contactAdded, this, &ApplicationStateManager::openChat);
     connect(m_messenger, &VSQMessenger::openPreviewRequested, this, &ApplicationStateManager::onOpenPreview);
     connect(m_signInUsernameState, &SignInUsernameState::usernameValidated, this, &ApplicationStateManager::onSignInUsernameValidated);
@@ -136,6 +137,7 @@ void ApplicationStateManager::addTransitions()
     m_signUpState->addTransition(this, &ApplicationStateManager::chatListRequested, m_chatListState);
     addTwoSideTransition(m_signInUsernameState, this, &ApplicationStateManager::signInAsRequested, m_signInAsState);
     addTwoSideTransition(m_signInAsState, this, &ApplicationStateManager::keyDownloadRequested, m_downloadKeyState);
+    m_downloadKeyState->addTransition(this, &ApplicationStateManager::chatListRequested, m_chatListState);
 }
 
 void ApplicationStateManager::setCurrentState(QState *state)
@@ -204,7 +206,8 @@ void ApplicationStateManager::onOpenChat(const QString &contactId)
 
 void ApplicationStateManager::onOpenChatList(const QString &userId)
 {
-    if (m_currentState == m_splashScreenState || m_currentState == m_accountSelectionState || m_currentState == m_signUpState) {
+    if (m_currentState == m_splashScreenState || m_currentState == m_accountSelectionState ||
+            m_currentState == m_signUpState || m_currentState == m_downloadKeyState) {
         m_chatListState->setUserId(userId);
         emit chatListRequested(QPrivateSignal());
     }

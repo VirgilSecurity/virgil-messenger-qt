@@ -294,7 +294,7 @@ void VSQMessenger::downloadKey(const QString &userId, const QString &password)
     else {
         FutureWorker::run(signInWithBackupKeyAsync(userId, password), [=](const FutureResult &result) {
             if (result == MRES_OK) {
-                emit keyDownloaded();
+                emit keyDownloaded(userId);
             }
             else {
                 emit downloadKeyFailed(tr("Private key download error"));

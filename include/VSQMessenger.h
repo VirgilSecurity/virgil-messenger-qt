@@ -216,7 +216,7 @@ signals:
 
     void keyBackuped(const QString &userId);
     void backupKeyFailed(const QString &errorText);
-    void keyDownloaded();
+    void keyDownloaded(const QString &userId);
     void downloadKeyFailed(const QString &errorText);
 
     void messageSent();

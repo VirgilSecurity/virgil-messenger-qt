@@ -6,14 +6,14 @@ import "../theme"
 import "../components"
 
 Page {
-    property string username
+    property var appState: app.stateManager.signInAsState
 
     background: Rectangle {
         color: Theme.mainBackgroundColor
     }
 
     header: Header {
-        title: qsTr("Sign in as %1").arg(username)
+        title: qsTr("Sign in as %1").arg(appState.userId)
     }
 
     Form {
@@ -29,7 +29,7 @@ Page {
 
         FormPrimaryButton {
             text: qsTr("Download from the Cloud")
-            onClicked: app.stateManager.openDownloadKey(username)
+            onClicked: app.stateManager.openDownloadKey(appState.userId)
         }
 
         FormPrimaryButton {

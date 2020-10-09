@@ -92,7 +92,8 @@ Control {
         }
 
         function openChatListPage() {
-            if ([manager.splashScreenState, manager.accountSelectionState, manager.signUpState].includes(manager.previousState)) {
+            if ([manager.splashScreenState, manager.accountSelectionState,
+                 manager.signUpState, manager.downloadKeyState].includes(manager.previousState)) {
                 stackView.clear()
                 stackView.push(page("ChatList"))
             }
