@@ -18,7 +18,7 @@ ios_build () {
    BUILD_DIR=${PROJECT_DIR}/${BUILD_TYPE}/${TOOL_NAME}.${PLATFORM}/
    new_dir ${BUILD_DIR}
    pushd "${BUILD_DIR}"
-       ${IOS_QMAKE} -config macx-ios-clang ${PROJECT_DIR} ${QMAKE_PARAMS} VERSION="${ORIG_VERSION}" CONFIG+="${IOS_BUILD_CONFIG}" VS_CUSTOMER="${PARAM_CUSTOMER}" TARGET="${IOS_NAME}"
+       ${IOS_QMAKE} -config macx-ios-clang ${PROJECT_DIR} ${QMAKE_PARAMS} VERSION="${ORIG_VERSION}" CONFIG+="${IOS_BUILD_CONFIG}" VS_CUSTOMER="${PARAM_CUSTOMER}" VS_TARGET="${IOS_NAME}"
        make -j10
    popd
 }

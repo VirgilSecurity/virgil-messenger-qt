@@ -44,16 +44,18 @@ isEmpty(VERSION) {
 }
 
 ios {
-    TARGET = VirgilMessenger
-    isEmpty(TARGET) {
+    isEmpty(VS_TARGET) {
         TARGET = VirgilMessenger
+    } else
+    {
+        TARGET = $$VS_TARGET
     }
     QMAKE_TARGET_BUNDLE_PREFIX = com.virgil
 } else {
     TARGET = virgil-messenger
     QMAKE_TARGET_BUNDLE_PREFIX = com.virgilsecurity
 }
-
+message("TARGET = $$TARGET")
 message("VERSION = $$VERSION")
 
 #
