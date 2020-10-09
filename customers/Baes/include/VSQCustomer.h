@@ -49,8 +49,8 @@ namespace Customer
     static QString MessengerUrlTemplate = "https://messenger%1.virgilsecurity.com";
     static QString XmppUrlTemplate = "xmpp%1.virgilsecurity.com";
     
-    static const QString kPushNotificationsProxy = "push-notifications-proxy";
-    static const QString kPushNotificationsTopic = "com.virgil.VirgilMessenger";
+    static const QString kPushNotificationsProxy = "baes-push-notifications-proxy";
+    static const QString kPushNotificationsTopic = "com.virgil.BaesMessenger";
     
 }
 
