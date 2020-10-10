@@ -48,9 +48,13 @@ class NewChatState : public OperationState
 public:
     NewChatState(VSQMessenger *messenger, QState *parent);
 
-    void addContact(const QString &contactId);
+signals:
+    void addNewChat(const QString &contactId);
+    void requestChat(const QString &contactId);
 
 private:
+    void processAddNewChat(const QString &contactId);
+
     VSQMessenger *m_messenger;
 };
 }

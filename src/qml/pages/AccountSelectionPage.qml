@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.12
 import "../components"
 
 SignInPage {
-    state: app.stateManager.accountSelectionState
+    appState: app.stateManager.accountSelectionState
 
     header: Header {
         showBackButton: false
@@ -22,17 +22,17 @@ SignInPage {
         AccountSelection {
             id: accountSelection
             visible: settings.usersList.length
-            onUserSelected: app.stateManager.signIn(userName)
+            onUserSelected: appState.signIn(userName)
         }
 
         FormPrimaryButton {
             text: qsTr("Sign Up")
-            onClicked: app.stateManager.openSignUp()
+            onClicked: appState.requestSignUp()
         }
 
         FormSecondaryButton {
             text: qsTr("Sign In")
-            onClicked: app.stateManager.openSignIn()
+            onClicked: appState.requestSignInUsername()
         }
     }
 }

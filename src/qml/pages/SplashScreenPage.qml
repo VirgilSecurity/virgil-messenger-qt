@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.12
 import "../components"
 
 SignInPage {
-    state: app.stateManager.splashScreenState
+    appState: app.stateManager.splashScreenState
 
     Form {
         id: form

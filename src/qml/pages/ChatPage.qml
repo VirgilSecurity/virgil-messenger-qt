@@ -13,7 +13,8 @@ import "../components"
 Page {
     id: chatPage
 
-    readonly property var contactId: app.stateManager.chatState.contactId
+    readonly property var appState: app.stateManager.chatState
+    readonly property var contactId: appState.contactId
 
     background: Rectangle {
         color: Theme.chatBackgroundColor
@@ -68,7 +69,7 @@ Page {
 
                 Label {
                     topPadding: 2
-                    text: app.stateManager.chatState.lastActivityText
+                    text: appState.lastActivityText
                     font.pointSize: UiHelper.fixFontSz(12)
                     color: Theme.secondaryTextColor
                 }
@@ -101,7 +102,7 @@ Page {
             body: model.message
             time: Qt.formatDateTime(model.timestamp, "hh:mm")
             nickname: model.author
-            isUser: model.author === Messenger.currentUser
+            isUser: model.author === appState.userId
             status: isUser ? model.status : "none"
             failed: (model.status == 4) && (!attachmentId || attachmentStatus == Enums.AttachmentStatus.Failed)
             messageId: model.messageId
@@ -128,7 +129,7 @@ Page {
             }
 
             onDownloadOpenAttachment: function(messageId, isPicture) {
-                (isPicture ? Messenger.openAttachment : Messenger.downloadAttachment)(messageId)
+                (isPicture ? appState.openAttachment : appState.downloadAttachment)(messageId)
             }
 
             onOpenContextMenu: function(messageId, mouse, contextMenu) {
@@ -180,7 +181,7 @@ Page {
 
     footer: ChatMessageInput {
         id: footerControl
-        onMessageSending: app.stateManager.sendMessage(contactId, message, attachmentUrl, attachmentType)
+        onMessageSending: appState.sendMessage(contactId, message, attachmentUrl, attachmentType)
     }
 
     Item {
@@ -190,7 +191,7 @@ Page {
 
             property string messageId: ""
 
-            onAccepted: Messenger.saveAttachmentAs(messageId, fileUrl)
+            onAccepted: appState.saveAttachmentAs(messageId, fileUrl)
         }
 
         SoundEffect {
@@ -213,7 +214,7 @@ Page {
     }
 
     Connections {
-        target: Messenger
+        target: appState
 
         function onMessageSent() {
             messageSent.play()

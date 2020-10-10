@@ -52,12 +52,14 @@ public:
     QString userId() const;
     void setUserId(const QString &userId);
 
-    void backupKey(const QString &password, const QString &confirmedPassword);
-
 signals:
-    void userIdChanged(const QString &);
+    void backupKey(const QString &password, const QString &confirmedPassword);
+    void keyBackuped(const QString &userId);
+    void userIdChanged(const QString &userId);
 
 private:
+    void processBackupKey(const QString &password, const QString &confirmedPassword);
+
     VSQMessenger *m_messenger;
     QString m_userId;
 };

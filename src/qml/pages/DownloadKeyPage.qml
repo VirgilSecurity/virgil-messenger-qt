@@ -3,7 +3,7 @@ import QtQuick 2.12
 import "../components"
 
 OperationPage {
-    state: app.stateManager.downloadKeyState
+    appState: app.stateManager.downloadKeyState
     loadingText: qsTr("Downloading up your private key...")
 
     header: Header {
@@ -30,7 +30,7 @@ OperationPage {
 
         FormPrimaryButton {
             text: qsTr("Decrypt")
-            onClicked: app.stateManager.downloadKey(password.text)
+            onClicked: appState.downloadKey(password.text)
         }
     }
 }

@@ -7,7 +7,7 @@ import "../components"
 import "../theme"
 
 OperationPage {
-    state: app.stateManager.newChatState
+    appState: app.stateManager.newChatState
     loadingText: qsTr("Adding of contact...")
     readonly property string contact: username.text.toLowerCase()
 
@@ -71,7 +71,7 @@ OperationPage {
     }
 
     function accept() {
-        app.stateManager.addContact(contact)
+        appState.addNewChat(contact)
     }
 
     function reject() {

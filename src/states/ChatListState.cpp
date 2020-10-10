@@ -34,7 +34,17 @@
 
 #include "states/ChatListState.h"
 
+#include "VSQMessenger.h"
+
 using namespace VSQ;
+
+ChatListState::ChatListState(VSQMessenger *messenger, QState *parent)
+    : QState(parent)
+    , m_messenger(messenger)
+{
+    connect(this, &ChatListState::signOut, m_messenger, &VSQMessenger::signOut);
+    connect(m_messenger, &VSQMessenger::signedOut, this, &ChatListState::signedOut);
+}
 
 QString ChatListState::userId() const
 {

@@ -29,7 +29,7 @@ Control {
 
             Action {
                 text: qsTr("Settings")
-                onTriggered: manager.openAccountSettings(Messenger.currentUser)
+                onTriggered: manager.chatListState.requestAccountSettings(manager.chatListState.userId)
             }
 
             MenuSeparator {
@@ -38,7 +38,7 @@ Control {
 
             Action {
                 text: qsTr("Sign Out")
-                onTriggered: manager.signOut()
+                onTriggered: manager.chatListState.signOut()
             }
         }
 

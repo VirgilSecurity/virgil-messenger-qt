@@ -38,7 +38,13 @@
 
 using namespace VSQ;
 
-void SignInUsernameState::validateUsername(const QString &userId)
+SignInUsernameState::SignInUsernameState(QState *parent)
+    : OperationState(parent)
+{
+    connect(this, &SignInUsernameState::validateUsername, this, &SignInUsernameState::processValidateUsername);
+}
+
+void SignInUsernameState::processValidateUsername(const QString &userId)
 {
     emit operationStarted();
     QString errorText;

@@ -4,8 +4,8 @@ import "../theme"
 import "../components"
 
 OperationPage {
-    state: app.stateManager.signUpState
-    loadingText: qsTr("Registering %1...").arg(state.userId)
+    appState: app.stateManager.signUpState
+    loadingText: qsTr("Registering %1...").arg(appState.userId)
 
     readonly property string terms:
         "By creating an account, you agree to Virgil's " +
@@ -26,7 +26,7 @@ OperationPage {
         }
 
         FormPrimaryButton {
-            onClicked: app.stateManager.signUp(username.text)
+            onClicked: appState.signUp(username.text)
             text: qsTr("Create account")
         }
 

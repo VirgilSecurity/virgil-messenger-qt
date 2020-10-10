@@ -3,7 +3,7 @@ import QtQuick 2.12
 import "../components"
 
 OperationPage {
-    state: app.stateManager.signInUsernameState
+    appState: app.stateManager.signInUsernameState
     loadingText: qsTr("Loading...")
 
     header: Header {
@@ -20,7 +20,7 @@ OperationPage {
         }
 
         FormPrimaryButton {
-            onClicked: app.stateManager.openSignInAs(username.text)
+            onClicked: appState.validateUsername(username.text)
             text: qsTr("Sign In")
         }
     }

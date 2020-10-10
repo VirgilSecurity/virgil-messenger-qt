@@ -44,6 +44,8 @@ DownloadKeyState::DownloadKeyState(VSQMessenger *messenger, QState *parent)
 {
     connect(m_messenger, &VSQMessenger::keyDownloaded, this, &DownloadKeyState::operationFinished);
     connect(m_messenger, &VSQMessenger::downloadKeyFailed, this, &DownloadKeyState::operationErrorOccurred);
+    connect(m_messenger, &VSQMessenger::keyDownloaded, this, &DownloadKeyState::keyDownloaded);
+    connect(this, &DownloadKeyState::downloadKey, this, &DownloadKeyState::processDownloadKey);
 }
 
 QString DownloadKeyState::userId() const
@@ -60,7 +62,7 @@ void DownloadKeyState::setUserId(const QString &userId)
     emit userIdChanged(userId);
 }
 
-void DownloadKeyState::downloadKey(const QString &password)
+void DownloadKeyState::processDownloadKey(const QString &password)
 {
     emit operationStarted();
     m_messenger->downloadKey(m_userId, password);

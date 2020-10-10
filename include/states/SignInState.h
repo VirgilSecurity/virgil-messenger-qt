@@ -49,12 +49,14 @@ class SignInState : public OperationState
 public:
     SignInState(VSQMessenger *messenger, QState *parent);
 
-    void signIn(const QString &userId);
-
 signals:
-    void userIdChanged(const QString &);
+    void signIn(const QString &userId);
+    void signedIn(const QString &userId);
+    void userIdChanged(const QString &userId);
 
 private:
+    void processSignIn(const QString &userId);
+
     VSQMessenger *m_messenger;
     QString m_userId;
 };

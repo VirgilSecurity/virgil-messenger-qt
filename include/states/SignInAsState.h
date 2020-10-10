@@ -51,7 +51,8 @@ public:
     void setUserId(const QString &userId);
 
 signals:
-    void userIdChanged(const QString &);
+    void requestDownloadKey(const QString &userId);
+    void userIdChanged(const QString &userId);
 
 private:
     QString m_userId;

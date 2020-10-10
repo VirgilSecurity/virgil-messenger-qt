@@ -52,11 +52,9 @@ public:
     void setUrl(const QUrl &filePath);
 
 signals:
-    void urlChanged(const QUrl &);
+    void urlChanged(const QUrl &url);
 
 private:
-    void onExit(QEvent *) override;
-
     QUrl m_url;
 };
 }

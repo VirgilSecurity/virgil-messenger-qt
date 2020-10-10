@@ -3,7 +3,7 @@ import QtQuick 2.12
 import "../components"
 
 OperationPage {
-    state: app.stateManager.backupKeyState
+    appState: app.stateManager.backupKeyState
     loadingText: qsTr("Backing up your private key...")
 
     header: Header {
@@ -29,13 +29,13 @@ OperationPage {
         }
 
         FormPrimaryButton {
-            onClicked: app.stateManager.backupKey(password.text, confirmPassword.text)
+            onClicked: appState.backupKey(password.text, confirmPassword.text)
             text: qsTr("Backup")
         }
     }
 
     Connections {
-        target: state
+        target: appState
 
         function onOperationFinished() {
             showPopupSuccess(qsTr("Backup private key success"))

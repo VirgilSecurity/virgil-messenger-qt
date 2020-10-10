@@ -5,7 +5,7 @@ import "../theme"
 import "../components"
 
 Page {
-    property var state
+    property var appState
     property bool loadingUsed: true
     property string loadingText: ""
 
@@ -16,7 +16,7 @@ Page {
     footer: Footer {}
 
     Connections {
-        target: state
+        target: appState
 
         function onOperationStarted() {
             if (loadingUsed) {

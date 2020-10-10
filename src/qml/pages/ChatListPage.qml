@@ -57,6 +57,8 @@ import "../components"
 import "../components/CommonHelpers"
 
 Page {
+    readonly property var appState: app.stateManager.chatListState
+
     background: Rectangle {
         color: Theme.contactsBackgroundColor
     }
@@ -79,7 +81,7 @@ Page {
 
         Action {
             text: qsTr("New chat")
-            onTriggered: app.stateManager.openAddContact()
+            onTriggered: appState.requestNewChat()
         }
     }
 
@@ -145,7 +147,7 @@ Page {
                 }
             }
 
-            onClicked: app.stateManager.openChat(model.name)
+            onClicked: appState.requestChat(model.name)
         }
 
         IconWithText {
@@ -177,7 +179,7 @@ Page {
             visible: !listView.contentItem.children.length
             anchors.fill: parent
             onClicked: {
-                app.stateManager.openAddContact()
+                appState.requestNewContact()
                 mouse.accepted = false
             }
         }

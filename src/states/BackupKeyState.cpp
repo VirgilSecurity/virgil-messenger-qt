@@ -44,6 +44,8 @@ BackupKeyState::BackupKeyState(VSQMessenger *messenger, QState *parent)
 {
     connect(m_messenger, &VSQMessenger::keyBackuped, this, &BackupKeyState::operationFinished);
     connect(m_messenger, &VSQMessenger::backupKeyFailed, this, &BackupKeyState::operationErrorOccurred);
+    connect(m_messenger, &VSQMessenger::keyBackuped, this, &BackupKeyState::keyBackuped);
+    connect(this, &BackupKeyState::backupKey, this, &BackupKeyState::processBackupKey);
 }
 
 QString BackupKeyState::userId() const
@@ -60,7 +62,7 @@ void BackupKeyState::setUserId(const QString &userId)
     emit userIdChanged(userId);
 }
 
-void BackupKeyState::backupKey(const QString &password, const QString &confirmedPassword)
+void BackupKeyState::processBackupKey(const QString &password, const QString &confirmedPassword)
 {
     emit operationStarted();
     m_messenger->backupKey(password, confirmedPassword);

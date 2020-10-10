@@ -114,6 +114,7 @@ bool VSQCrashReporter::sendLogFiles()
     }
 
     sendFileToBackendRequest(fileData);
+    m_settings->setRunFlag(false);
     return true;
 }
 

@@ -42,14 +42,18 @@ SignInState::SignInState(VSQMessenger *messenger, QState *parent)
     : OperationState(parent)
     , m_messenger(messenger)
 {
-    connect(m_messenger, &VSQMessenger::signedIn, this, &OperationState::operationFinished);
-    connect(m_messenger, &VSQMessenger::signInErrorOccured, this, &OperationState::operationErrorOccurred);
+    connect(m_messenger, &VSQMessenger::signedIn, this, &SignInState::operationFinished);
+    connect(m_messenger, &VSQMessenger::signInErrorOccured, this, &SignInState::operationErrorOccurred);
+    connect(m_messenger, &VSQMessenger::signedIn, this, &SignInState::signedIn);
+    connect(this, &SignInState::signIn, this, &SignInState::processSignIn);
 }
 
-void SignInState::signIn(const QString &userId)
+void SignInState::processSignIn(const QString &userId)
 {
-    m_userId = userId;
-    emit userIdChanged(userId);
+    if (m_userId != userId) {
+        m_userId = userId;
+        emit userIdChanged(userId);
+    }
     emit operationStarted();
     m_messenger->signIn(userId);
 }

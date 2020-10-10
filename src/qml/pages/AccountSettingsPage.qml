@@ -6,7 +6,7 @@ import "../theme"
 import "../components"
 
 Page {
-    property var state: app.stateManager.accountSettingsState
+    property var appState: app.stateManager.accountSettingsState
 
     background: Rectangle {
         color: Theme.contactsBackgroundColor
@@ -20,7 +20,7 @@ Page {
         Avatar {
             Layout.alignment: Qt.AlignHCenter
             diameter: 80
-            nickname: Messenger.currentUser
+            nickname: appState.userId
         }
 
         Label {
@@ -28,7 +28,7 @@ Page {
             Layout.bottomMargin: 50
             font.pointSize: UiHelper.fixFontSz(18)
             color: Theme.primaryTextColor
-            text: Messenger.currentUser
+            text: appState.userId
         }
 
         FormLabel {
@@ -37,12 +37,12 @@ Page {
 
         FormPrimaryButton {
             text: qsTr("Backup private key")
-            onClicked: app.stateManager.openBackupKey(state.userId)
+            onClicked: appState.requestBackupKey(appState.userId)
         }
 
         FormPrimaryButton {
             text: qsTr("Sign out")
-            onClicked: app.stateManager.signOut()
+            onClicked: appState.signOut()
         }
     }
 }

@@ -29,7 +29,7 @@ Page {
 
         FormPrimaryButton {
             text: qsTr("Download from the Cloud")
-            onClicked: app.stateManager.openDownloadKey(appState.userId)
+            onClicked: appState.requestDownloadKey(appState.userId)
         }
 
         FormPrimaryButton {

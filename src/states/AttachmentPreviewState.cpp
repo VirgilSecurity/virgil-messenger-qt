@@ -49,8 +49,3 @@ void AttachmentPreviewState::setUrl(const QUrl &filePath)
     m_url = filePath;
     emit urlChanged(filePath);
 }
-
-void AttachmentPreviewState::onExit(QEvent *)
-{
-    setUrl(QUrl());
-}

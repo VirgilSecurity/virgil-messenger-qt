@@ -44,12 +44,14 @@ class SignInUsernameState : public OperationState
     Q_OBJECT
 
 public:
-    using OperationState::OperationState;
-
-    void validateUsername(const QString &userId);
+    SignInUsernameState(QState *parent);
 
 signals:
-    void usernameValidated(const QString &);
+    void validateUsername(const QString &userId);
+    void usernameValidated(const QString &username);
+
+private:
+    void processValidateUsername(const QString &userId);
 };
 }
 

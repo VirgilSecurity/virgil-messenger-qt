@@ -44,9 +44,11 @@ NewChatState::NewChatState(VSQMessenger *messenger, QState *parent)
 {
     connect(m_messenger, &VSQMessenger::contactAdded, this, &NewChatState::operationFinished);
     connect(m_messenger, &VSQMessenger::addContactErrorOccured, this, &NewChatState::operationErrorOccurred);
+    connect(m_messenger, &VSQMessenger::contactAdded, this, &NewChatState::requestChat);
+    connect(this, &NewChatState::addNewChat, this, &NewChatState::processAddNewChat);
 }
 
-void NewChatState::addContact(const QString &contactId)
+void NewChatState::processAddNewChat(const QString &contactId)
 {
     emit operationStarted();
     m_messenger->addContact(contactId);

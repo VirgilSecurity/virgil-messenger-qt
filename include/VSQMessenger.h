@@ -160,15 +160,13 @@ public slots:
 
     void setCrashReporter(VSQCrashReporter *crashReporter);
 
-    Q_INVOKABLE void setCurrentRecipient(const QString &recipient);
+    void setCurrentRecipient(const QString &recipient);
 
-    Q_INVOKABLE void saveAttachmentAs(const QString &messageId, const QVariant &fileUrl);
+    void saveAttachmentAs(const QString &messageId, const QVariant &fileUrl);
 
-    Q_INVOKABLE void downloadAttachment(const QString &messageId);
+    void downloadAttachment(const QString &messageId);
 
-    Q_INVOKABLE void openAttachment(const QString &messageId);
-
-    Q_INVOKABLE void hideSplashScreen();
+    void openAttachment(const QString &messageId);
 
 signals:
     void

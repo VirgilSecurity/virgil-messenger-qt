@@ -48,6 +48,10 @@ class AccountSelectionState : public SignInState
 public:
     AccountSelectionState(VSQMessenger *messenger, VSQSettings *settings, QState *parent);
 
+signals:
+    void requestSignInUsername();
+    void requestSignUp();
+
 private:
     AccountSelectionModel *m_model;
 };
