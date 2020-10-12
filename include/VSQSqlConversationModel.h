@@ -84,12 +84,15 @@ public:
     Q_INVOKABLE void
     setUser(const QString &user);
 
+    // FIXME(fpohtmeh): remove as unused
     Q_INVOKABLE int
     getCountOfUnread(const QString &user);
 
+    // FIXME(fpohtmeh): remove as unused
     Q_INVOKABLE QString
     getLastMessage(const QString &user) const;
 
+    // FIXME(fpohtmeh): remove as unused
     Q_INVOKABLE QString
     getLastMessageTime(const QString &user) const;
 
@@ -108,6 +111,7 @@ public:
     Q_INVOKABLE void
     setAsRead(const QString &author);
 
+    // FIXME(fpohtmeh): remove as unused
     int
     getMessageCount(const QString &user, const StMessage::Status status);
 

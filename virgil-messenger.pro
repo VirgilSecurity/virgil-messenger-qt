@@ -139,6 +139,14 @@ HEADERS += \
         include/states/SignUpState.h \
         include/states/SplashScreenState.h \
         include/states/StartState.h \
+        # Database
+        include/database/AttachmentsTable.h \
+        include/database/ContactsTable.h \
+        include/database/ChatsTable.h \
+        include/database/Database.h \
+        include/database/DatabaseTable.h \
+        include/database/MessagesTable.h \
+        include/database/MessengerDatabase.h \
         # Logging
         include/logging/VSQLogging.h \
         include/logging/VSQLogWorker.h \
@@ -192,6 +200,10 @@ SOURCES += \
         src/states/SignInUsernameState.cpp \
         src/states/SignUpState.cpp \
         src/states/SplashScreenState.cpp \
+        # Database
+        src/database/Database.cpp \
+        src/database/DatabaseTable.cpp \
+        src/database/MessengerDatabase.cpp \
         # Logging
         src/hal.cpp \
         src/logging/VSQLogging.cpp \
