@@ -42,6 +42,7 @@
 #include <VSQUpload.h>
 #include <VSQUtils.h>
 #include <VSQSettings.h>
+#include <android/VSQAndroid.h>
 #include <helpers/FutureWorker.h>
 
 #if VS_PUSHNOTIFICATIONS
