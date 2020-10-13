@@ -37,6 +37,11 @@
 
 #include "DatabaseTable.h"
 
+#include <QSqlDatabase>
+#include <QSqlQuery>
+
+Q_DECLARE_LOGGING_CATEGORY(lcDatabase)
+
 namespace VSQ
 {
 class Database
@@ -48,15 +53,15 @@ public:
     using TablePointer = std::unique_ptr<DatabaseTable>;
     using Tables = std::vector<TablePointer>;
 
-    Database(const QString &connectionName, const QString &connectionString);
+    explicit Database(const Version &version);
     virtual ~Database();
 
-    Version version() const;
+    bool open(const QString &databaseFileName, const QString &connectionName);
 
-    bool setup();
+    bool openConnection();
+    void closeConnection();
 
-    bool connect();
-    bool disconnect();
+    QSqlQuery createQuery() const;
 
     bool startTransaction();
     bool commitTransaction();
@@ -70,14 +75,20 @@ public:
     const DatabaseTable *table(int index) const;
 
 protected:
-    bool readVersion();
+    virtual bool create();
     virtual bool performMigration();
 
 private:
+    void close();
+
+    bool readVersion();
+    bool writeVersion();
+
     const QLatin1String m_type = QLatin1String("QSQLITE");
-    const QString m_connectionName;
-    const QString m_connectionString;
     const Version m_version = 0;
+    QString m_connectionName;
+    Version m_databaseVersion = 0;
+    QSqlDatabase m_connection;
     Tables m_tables;
 };
 }

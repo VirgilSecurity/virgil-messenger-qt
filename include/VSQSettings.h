@@ -77,6 +77,7 @@ public:
 
     // Attachments
 
+    QDir databaseDir() const;
     DataSize attachmentMaxFileSize() const;
     QDir attachmentCacheDir() const;
     QDir thumbnailsDir() const;
@@ -108,6 +109,7 @@ private:
     void createDeviceId();
 
     QString m_sessionId;
+    QDir m_databaseDir;
     QDir m_attachmentCacheDir;
     QDir m_thumbnaisDir;
     QDir m_downloadsDir;

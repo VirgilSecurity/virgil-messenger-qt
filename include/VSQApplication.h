@@ -43,6 +43,7 @@
 #include <VSQMessenger.h>
 #include <VSQSettings.h>
 #include <macos/VSQMacos.h>
+#include <database/UserDatabase.h>
 #include <states/ApplicationStateManager.h>
 
 class QNetworkAccessManager;
@@ -93,6 +94,7 @@ private:
     VSQCrashReporter m_crashReporter;
     QQmlApplicationEngine m_engine;
     VSQMessenger m_messenger;
+    UserDatabase m_userDatabase;
     ApplicationStateManager m_applicationStateManager;
 };
 

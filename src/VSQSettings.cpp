@@ -62,6 +62,7 @@ VSQSettings::VSQSettings(QObject *parent)
         removeGroup(kCredenitalsGroup);
     }
 
+    m_databaseDir.setPath(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QLatin1String("/database"));
     m_attachmentCacheDir.setPath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/attachments"));
     m_thumbnaisDir.setPath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/thumbnails"));
     m_downloadsDir.setPath(QStandardPaths::writableLocation(QStandardPaths::DownloadLocation) + QLatin1String("/Virgil"));
@@ -78,6 +79,7 @@ void VSQSettings::print()
 {
     qCDebug(lcSettings) << "Settings";
     qCDebug(lcSettings) << "Device id:" << deviceId();
+    qCDebug(lcSettings) << "Database dir:" << databaseDir().absolutePath();
     qCDebug(lcSettings) << "Attachment cache dir:" << attachmentCacheDir().absolutePath();
     qCDebug(lcSettings) << "Attachment max file size:" << attachmentMaxFileSize();
     qCDebug(lcSettings) << "Thumbnails dir:" << thumbnailsDir().absolutePath();
@@ -158,6 +160,14 @@ void VSQSettings::setRunFlag(bool run)
         qCDebug(lcSettings) << "Reset session id";
         removeGroupKey(kLastSessionGroup, kSessionId);
     }
+}
+
+QDir VSQSettings::databaseDir() const
+{
+    if (!m_databaseDir.exists()) {
+        VSQUtils::forceCreateDir(m_databaseDir.absolutePath());
+    }
+    return m_databaseDir;
 }
 
 DataSize VSQSettings::attachmentMaxFileSize() const

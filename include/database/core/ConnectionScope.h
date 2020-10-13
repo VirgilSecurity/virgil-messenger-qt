@@ -32,18 +32,22 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_ATTACHMENTSTABLE_H
-#define VSQ_ATTACHMENTSTABLE_H
-
-#include "core/DatabaseTable.h"
+#ifndef VSQ_CONNECTIONSCOPE_H
+#define VSQ_CONNECTIONSCOPE_H
 
 namespace VSQ
 {
-class AttachmentsTable : public DatabaseTable
+class Database;
+
+class ConnectionScope
 {
 public:
-    using DatabaseTable::DatabaseTable;
+    explicit ConnectionScope(Database *database);
+    ~ConnectionScope();
+
+private:
+    Database *m_database = nullptr;
 };
 }
 
-#endif // VSQ_ATTACHMENTSTABLE_H
+#endif // VSQ_CONNECTIONSCOPE_H

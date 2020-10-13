@@ -43,6 +43,10 @@ isEmpty(VERSION) {
     VERSION = $$cat($$PWD/VERSION_MESSENGER)
 }
 
+isEmpty(DATABASE_SCHEME_VERSION) {
+    DATABASE_SCHEME_VERSION = $$cat($$PWD/VERSION_DATABASE_SCHEME)
+}
+
 ios {
     TARGET = VirgilMessenger
     QMAKE_TARGET_BUNDLE_PREFIX = com.virgil
@@ -52,6 +56,7 @@ ios {
 }
 
 message("VERSION = $$VERSION")
+message("DATABASE_SCHEME_VERSION = $$DATABASE_SCHEME_VERSION")
 
 #
 #   Directory with precompiled dependencies
@@ -84,7 +89,8 @@ message("QXMPP location: $${QXMPP_BUILD_PATH}")
 DEFINES += QT_DEPRECATED_WARNINGS \
         INFO_CLIENT=1 \
         CFG_CLIENT=1 \
-        VERSION="$$VERSION"
+        VERSION="$$VERSION" \
+        DATABASE_SCHEME_VERSION="$$DATABASE_SCHEME_VERSION"
 
 include(customers/customers.pri)
 
@@ -140,13 +146,15 @@ HEADERS += \
         include/states/SplashScreenState.h \
         include/states/StartState.h \
         # Database
+        include/database/core/ConnectionScope.h \
+        include/database/core/Database.h \
+        include/database/core/DatabaseTable.h \
+        include/database/core/TransactionScope.h \
         include/database/AttachmentsTable.h \
         include/database/ContactsTable.h \
         include/database/ChatsTable.h \
-        include/database/Database.h \
-        include/database/DatabaseTable.h \
         include/database/MessagesTable.h \
-        include/database/MessengerDatabase.h \
+        include/database/UserDatabase.h \
         # Logging
         include/logging/VSQLogging.h \
         include/logging/VSQLogWorker.h \
@@ -201,9 +209,11 @@ SOURCES += \
         src/states/SignUpState.cpp \
         src/states/SplashScreenState.cpp \
         # Database
-        src/database/Database.cpp \
-        src/database/DatabaseTable.cpp \
-        src/database/MessengerDatabase.cpp \
+        src/database/core/ConnectionScope.cpp \
+        src/database/core/Database.cpp \
+        src/database/core/DatabaseTable.cpp \
+        src/database/core/TransactionScope.cpp \
+        src/database/UserDatabase.cpp \
         # Logging
         src/hal.cpp \
         src/logging/VSQLogging.cpp \

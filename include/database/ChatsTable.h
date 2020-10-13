@@ -35,12 +35,14 @@
 #ifndef VSQ_CHATSTABLE_H
 #define VSQ_CHATSTABLE_H
 
-#include "DatabaseTable.h"
+#include "core/DatabaseTable.h"
 
 namespace VSQ
 {
 class ChatsTable : public DatabaseTable
 {
+public:
+    using DatabaseTable::DatabaseTable;
 };
 }
 

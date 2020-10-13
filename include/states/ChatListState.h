@@ -41,13 +41,15 @@ class VSQMessenger;
 
 namespace VSQ
 {
+class UserDatabase;
+
 class ChatListState : public QState
 {
     Q_OBJECT
     Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
 
 public:
-    ChatListState(VSQMessenger *messenger, QState *parent);
+    ChatListState(VSQMessenger *messenger, UserDatabase *userDatabase, QState *parent);
 
     QString userId() const;
     void setUserId(const QString &userId);
@@ -62,6 +64,7 @@ signals:
 
 private:
     VSQMessenger *m_messenger;
+    UserDatabase *m_userDatabase;
     QString m_userId;
 };
 }

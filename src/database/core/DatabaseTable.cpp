@@ -32,18 +32,25 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_ATTACHMENTSTABLE_H
-#define VSQ_ATTACHMENTSTABLE_H
+#include "database/core/DatabaseTable.h"
 
-#include "core/DatabaseTable.h"
+using namespace VSQ;
 
-namespace VSQ
+DatabaseTable::DatabaseTable(const QString &name)
+    : m_name(name)
+{}
+
+DatabaseTable::~DatabaseTable()
 {
-class AttachmentsTable : public DatabaseTable
-{
-public:
-    using DatabaseTable::DatabaseTable;
-};
 }
 
-#endif // VSQ_ATTACHMENTSTABLE_H
+QString DatabaseTable::name() const
+{
+    return m_name;
+}
+
+bool DatabaseTable::create(Database *database)
+{
+    Q_UNUSED(database)
+    return false;
+}

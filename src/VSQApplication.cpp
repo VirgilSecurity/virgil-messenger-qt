@@ -66,7 +66,8 @@ VSQApplication::VSQApplication()
     , m_crashReporter(&m_settings, m_networkAccessManager, this)
     , m_engine()
     , m_messenger(m_networkAccessManager, &m_settings)
-    , m_applicationStateManager(&m_messenger, &m_settings, this)
+    , m_userDatabase(&m_settings)
+    , m_applicationStateManager(&m_messenger, &m_userDatabase, &m_settings, this)
 {
     m_settings.print();
     m_networkAccessManager->setAutoDeleteReplies(true);

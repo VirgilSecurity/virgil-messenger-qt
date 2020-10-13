@@ -32,15 +32,48 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "database/DatabaseTable.h"
+#ifndef VSQ_USERDATABASE_H
+#define VSQ_USERDATABASE_H
 
-using namespace VSQ;
+#include "core/Database.h"
 
-DatabaseTable::DatabaseTable(const QString &name)
-    : m_name(name)
-{}
+class VSQSettings;
 
-QString DatabaseTable::name() const
+namespace VSQ
 {
-    return m_name;
+class AttachmentsTable;
+class ChatsTable;
+class ContactsTable;
+class MessagesTable;
+
+class UserDatabase : public Database
+{
+public:
+    explicit UserDatabase(const VSQSettings *settings);
+    ~UserDatabase() override;
+
+    bool open(const QString &userId);
+
+    const AttachmentsTable *attachmentsTable() const;
+    AttachmentsTable *attachmentsTable();
+    const ChatsTable *chatsTable() const;
+    ChatsTable *chatsTable();
+    const ContactsTable *contactsTable() const;
+    ContactsTable *contactsTable();
+    const MessagesTable *messagesTable() const;
+    MessagesTable *messagesTable();
+
+private:
+    bool create() override;
+
+    const VSQSettings *m_settings;
+    QString m_userId;
+
+    int m_attachmentsTableIndex;
+    int m_chatsTableIndex;
+    int m_contactsTableIndex;
+    int m_messagesTableIndex;
+};
 }
+
+#endif // VSQ_USERDATABASE_H

@@ -32,75 +32,97 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "database/Database.h"
+#include "database/core/Database.h"
+
+#include <QSqlError>
+
+#include "database/core/ConnectionScope.h"
+#include "database/core/TransactionScope.h"
+
+Q_LOGGING_CATEGORY(lcDatabase, "database")
 
 using namespace VSQ;
 
-Database::Database(const QString &connectionName, const QString &connectionString)
-    : m_connectionName(connectionName)
-    , m_connectionString(connectionString)
+Database::Database(const Version &version)
+    : m_version(version)
 {
 }
 
 Database::~Database()
 {
-    disconnect();
+    close();
 }
 
-Database::Version Database::version() const
+bool Database::open(const QString &databaseFileName, const QString &connectionName)
 {
-    return m_version;
-}
+    close();
 
-bool Database::setup()
-{
-    return readVersion() && performMigration();
-}
+    qCDebug(lcDatabase) << "Opening of database:" << databaseFileName;
+    m_connectionName = connectionName;
+    m_connection = QSqlDatabase::addDatabase(m_type, m_connectionName);
+    m_connection.setDatabaseName(databaseFileName);
 
-bool Database::connect()
-{
-    // TODO(fpohtmeh): implement
+    ConnectionScope connection(this);
+    {
+        TransactionScope transaction(this);
+        if (!transaction.addResult(create())) {
+            return false;
+        }
+    }
+    if (!readVersion()) {
+        return false;
+    }
+    if (m_version > m_databaseVersion) {
+        TransactionScope transaction(this);
+        return transaction.addResult(performMigration() && writeVersion());
+    }
     return true;
 }
 
-bool Database::disconnect()
+bool Database::openConnection()
 {
-    // TODO(fpohtmeh): implement
+    if (!m_connection.open()) {
+        qCCritical(lcDatabase) << "Connection databaseName:" << m_connection.databaseName();
+        qCCritical(lcDatabase) << "Connection error:" << m_connection.lastError().databaseText();
+        return false;
+    }
     return true;
+}
+
+void Database::closeConnection()
+{
+    m_connection.close();
+}
+
+QSqlQuery Database::createQuery() const
+{
+    return QSqlQuery(m_connection);
 }
 
 bool Database::startTransaction()
 {
-    // TODO(fpohtmeh): implement
-    return true;
+    return m_connection.transaction();
 }
 
 bool Database::commitTransaction()
 {
-    // TODO(fpohtmeh): implement
-    return true;
+    return m_connection.commit();
 }
 
 bool Database::rollbackTransaction()
 {
-    // TODO(fpohtmeh): implement
-    return true;
+    return m_connection.rollback();
 }
 
 bool Database::tableExists(const QString &tableName) const
 {
-    for (auto &table : m_tables) {
-        if (table->name() == tableName) {
-            return true;
-        }
-    }
-    return false;
+    return m_connection.tables().contains(tableName);
 }
 
 bool Database::addTable(TablePointer table)
 {
     if (tableExists(table->name())) {
-        return true;
+        return false;
     }
     if (!table->create(this)) {
         return false;
@@ -129,14 +151,34 @@ const DatabaseTable *Database::table(int index) const
     return m_tables[index].get();
 }
 
-bool Database::readVersion()
+bool Database::create()
 {
-    // TODO(fpohtmeh): implement
     return true;
 }
 
 bool Database::performMigration()
 {
-    // TODO(fpohtmeh): implement
+    return true;
+}
+
+void Database::close()
+{
+    if (m_connection.isOpen()) {
+        closeConnection();
+    }
+    if (!m_connectionName.isEmpty()) {
+        QSqlDatabase::removeDatabase(m_connectionName);
+    }
+}
+
+bool Database::readVersion()
+{
+    // TODO(fpohtmeh): read to m_databaseVersion
+    return true;
+}
+
+bool Database::writeVersion()
+{
+    // TODO(fpohtmeh): write version to database
     return true;
 }

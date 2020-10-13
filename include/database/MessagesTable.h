@@ -35,12 +35,14 @@
 #ifndef VSQ_MESSAGESTABLE_H
 #define VSQ_MESSAGESTABLE_H
 
-#include "DatabaseTable.h"
+#include "core/DatabaseTable.h"
 
 namespace VSQ
 {
 class MessagesTable : public DatabaseTable
 {
+public:
+    using DatabaseTable::DatabaseTable;
 };
 }
 

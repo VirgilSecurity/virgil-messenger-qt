@@ -32,18 +32,47 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_ATTACHMENTSTABLE_H
-#define VSQ_ATTACHMENTSTABLE_H
+#include "database/core/TransactionScope.h"
 
-#include "core/DatabaseTable.h"
+#include "database/core/Database.h"
 
-namespace VSQ
+using namespace VSQ;
+
+TransactionScope::TransactionScope(Database *database)
+    : m_database(database)
 {
-class AttachmentsTable : public DatabaseTable
-{
-public:
-    using DatabaseTable::DatabaseTable;
-};
+    m_database->startTransaction();
 }
 
-#endif // VSQ_ATTACHMENTSTABLE_H
+TransactionScope::~TransactionScope()
+{
+    finish();
+}
+
+bool TransactionScope::addResult(bool result)
+{
+    if (m_result) {
+        m_result = result;
+    }
+    return m_result;
+}
+
+bool TransactionScope::result()
+{
+    finish();
+    return m_result;
+}
+
+void TransactionScope::finish()
+{
+    if (m_finished) {
+        return;
+    }
+    if (m_result) {
+        m_result = m_database->commitTransaction();
+    }
+    else {
+        m_database->rollbackTransaction();
+    }
+    m_finished = true;
+}

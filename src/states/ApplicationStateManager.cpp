@@ -40,15 +40,16 @@ Q_LOGGING_CATEGORY(lcAppState, "appState");
 
 using namespace VSQ;
 
-ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, VSQSettings *settings, QObject *parent)
+ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, UserDatabase *userDatabase, VSQSettings *settings, QObject *parent)
     : QStateMachine(parent)
     , m_messenger(messenger)
+    , m_userDatabase(userDatabase)
     , m_settings(settings)
     , m_accountSelectionState(new AccountSelectionState(messenger, settings, this))
     , m_accountSettingsState(new AccountSettingsState(messenger, this))
     , m_attachmentPreviewState(new AttachmentPreviewState(this))
     , m_backupKeyState(new BackupKeyState(m_messenger, this))
-    , m_chatListState(new ChatListState(messenger, this))
+    , m_chatListState(new ChatListState(messenger, userDatabase, this))
     , m_chatState(new ChatState(m_messenger, this))
     , m_downloadKeyState(new DownloadKeyState(m_messenger, this))
     , m_newChatState(new NewChatState(messenger, this))

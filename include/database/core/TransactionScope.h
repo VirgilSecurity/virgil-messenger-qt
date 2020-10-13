@@ -32,44 +32,29 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_MESSENGERDATABASE_H
-#define VSQ_MESSENGERDATABASE_H
-
-#include "Database.h"
+#ifndef VSQ_TRANSACTION_H
+#define VSQ_TRANSACTION_H
 
 namespace VSQ
 {
-class AttachmentsTable;
-class ChatsTable;
-class ContactsTable;
-class MessagesTable;
+class Database;
 
-class MessengerDatabase : public Database
+class TransactionScope
 {
 public:
-    explicit MessengerDatabase(const QString &filePath);
-    ~MessengerDatabase() override;
+    explicit TransactionScope(Database *database);
+    ~TransactionScope();
 
-    bool setup(const QString &userId);
-
-    const AttachmentsTable *attachmentsTable() const;
-    AttachmentsTable *attachmentsTable();
-    const ChatsTable *chatsTable() const;
-    ChatsTable *chatsTable();
-    const ContactsTable *contactsTable() const;
-    ContactsTable *contactsTable();
-    const MessagesTable *messagesTable() const;
-    MessagesTable *messagesTable();
+    bool addResult(bool result);
+    bool result();
 
 private:
-    bool setupTables();
+    void finish();
 
-    QString m_userId;
-    int m_attachmentsTableIndex;
-    int m_chatsTableIndex = 0;
-    int m_contactsTableIndex = 0;
-    int m_messagesTableIndex = 0;
+    Database *m_database = nullptr;
+    bool m_finished = false;
+    bool m_result = true;
 };
 }
 
-#endif // VSQ_MESSENGERDATABASE_H
+#endif // VSQ_TRANSACTION_H

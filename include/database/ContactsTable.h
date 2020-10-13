@@ -35,12 +35,14 @@
 #ifndef VSQ_CONTACTSTABLE_H
 #define VSQ_CONTACTSTABLE_H
 
-#include "DatabaseTable.h"
+#include "core/DatabaseTable.h"
 
 namespace VSQ
 {
 class ContactsTable : public DatabaseTable
 {
+public:
+    using DatabaseTable::DatabaseTable;
 };
 }
 

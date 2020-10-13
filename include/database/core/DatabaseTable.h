@@ -47,11 +47,11 @@ class DatabaseTable
 
 public:
     explicit DatabaseTable(const QString &name);
-    virtual ~DatabaseTable() = 0;
+    virtual ~DatabaseTable();
 
     QString name() const;
 
-    virtual bool create(Database *database) = 0;
+    virtual bool create(Database *database);
 
 private:
     QString m_name;

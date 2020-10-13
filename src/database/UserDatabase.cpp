@@ -32,8 +32,9 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "database/MessengerDatabase.h"
+#include "database/UserDatabase.h"
 
+#include "VSQSettings.h"
 #include "database/AttachmentsTable.h"
 #include "database/ChatsTable.h"
 #include "database/ContactsTable.h"
@@ -41,63 +42,61 @@
 
 using namespace VSQ;
 
-MessengerDatabase::MessengerDatabase(const QString &filePath)
-    : Database(QLatin1String("MESSENGER"), filePath)
+UserDatabase::UserDatabase(const VSQSettings *settings)
+    : Database(DATABASE_SCHEME_VERSION)
+    , m_settings(settings)
 {}
 
-MessengerDatabase::~MessengerDatabase()
+UserDatabase::~UserDatabase()
 {}
 
-bool MessengerDatabase::setup(const QString &userId)
+bool UserDatabase::open(const QString &userId)
 {
-    if (m_userId == userId) {
-        return true;
-    }
-    m_userId = userId;
-    return Database::setup() && setupTables();
+    const QString filePath(m_settings->databaseDir().filePath(userId + QLatin1String(".sqlite3")));
+    return Database::open(filePath, userId + QLatin1String("-messenger"));
 }
 
-const AttachmentsTable *MessengerDatabase::attachmentsTable() const
+const AttachmentsTable *UserDatabase::attachmentsTable() const
 {
     return static_cast<const AttachmentsTable *>(table(m_attachmentsTableIndex));
 }
 
-AttachmentsTable *MessengerDatabase::attachmentsTable()
+AttachmentsTable *UserDatabase::attachmentsTable()
 {
     return static_cast<AttachmentsTable *>(table(m_attachmentsTableIndex));
 }
 
-const ChatsTable *MessengerDatabase::chatsTable() const
+const ChatsTable *UserDatabase::chatsTable() const
 {
     return static_cast<const ChatsTable *>(table(m_chatsTableIndex));
 }
 
-ChatsTable *MessengerDatabase::chatsTable()
+ChatsTable *UserDatabase::chatsTable()
 {
     return static_cast<ChatsTable *>(table(m_chatsTableIndex));
 }
 
-const ContactsTable *MessengerDatabase::contactsTable() const
+const ContactsTable *UserDatabase::contactsTable() const
 {
     return static_cast<const ContactsTable *>(table(m_contactsTableIndex));
 }
 
-ContactsTable *MessengerDatabase::contactsTable()
+ContactsTable *UserDatabase::contactsTable()
 {
     return static_cast<ContactsTable *>(table(m_contactsTableIndex));
 }
 
-const MessagesTable *MessengerDatabase::messagesTable() const
+const MessagesTable *UserDatabase::messagesTable() const
 {
     return static_cast<const MessagesTable *>(table(m_messagesTableIndex));
 }
 
-MessagesTable *MessengerDatabase::messagesTable()
+MessagesTable *UserDatabase::messagesTable()
 {
     return static_cast<MessagesTable *>(table(m_messagesTableIndex));
 }
 
-bool MessengerDatabase::setupTables()
+bool UserDatabase::create()
 {
     tables().clear();
     int counter = -1;
