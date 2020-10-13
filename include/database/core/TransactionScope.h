@@ -45,7 +45,12 @@ public:
     explicit TransactionScope(Database *database);
     ~TransactionScope();
 
-    bool addResult(bool result);
+    // Adds sub-result and returns result
+    bool add(bool result);
+    // Adds sub-result, finishes transaction and returns result
+    bool addAndFinish(bool result);
+
+    // Finishes transaction and returns result
     bool result();
 
 private:

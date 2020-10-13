@@ -46,15 +46,30 @@ TransactionScope::TransactionScope(Database *database)
 
 TransactionScope::~TransactionScope()
 {
+    if (!m_finished) {
+        qCWarning(lcDatabase) << "Transaction result wasn't used. Use result(), addAndFinish() to check result";
+    }
     finish();
 }
 
-bool TransactionScope::addResult(bool result)
+bool TransactionScope::add(bool result)
 {
-    if (m_result) {
-        m_result = result;
+    if (m_finished) {
+        qCCritical(lcDatabase) << "Transaction is already finished";
+        m_result = false;
+    }
+    else if (m_result && !result) {
+        m_result = false;
     }
     return m_result;
+}
+
+bool TransactionScope::addAndFinish(bool result)
+{
+    if (!add(result)) {
+        return false;
+    }
+    return this->result();
 }
 
 bool TransactionScope::result()

@@ -71,7 +71,7 @@ bool Database::open(const QString &databaseFileName, const QString &connectionNa
     // Create table
     {
         TransactionScope transaction(this);
-        if (!transaction.addResult(create())) {
+        if (!transaction.addAndFinish(create())) {
             return false;
         }
     }
@@ -83,10 +83,13 @@ bool Database::open(const QString &databaseFileName, const QString &connectionNa
     else if (m_latestVersion > m_version) {
         qCDebug(lcDatabase) << "Database migration:" << m_version << "=>" << m_latestVersion;
         TransactionScope transaction(this);
-        if (m_migration && !transaction.addResult(m_migration->run(this))) {
+        if (m_migration && !transaction.add(m_migration->run(this))) {
             return false;
         }
         if (!writeVersion()) {
+            return false;
+        }
+        if (!transaction.result()) {
             return false;
         }
     }

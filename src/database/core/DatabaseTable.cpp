@@ -54,6 +54,6 @@ QString DatabaseTable::name() const
 bool DatabaseTable::create(Database *database)
 {
     Q_UNUSED(database)
-    qCCritical(lcDatabase) << "Unable to create database table:" << m_name;
+    qCCritical(lcDatabase) << "Database table creation is not implemented:" << m_name;
     return false;
 }

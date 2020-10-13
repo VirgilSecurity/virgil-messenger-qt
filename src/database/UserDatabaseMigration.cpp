@@ -39,5 +39,5 @@ using namespace VSQ;
 UserDatabaseMigration::UserDatabaseMigration()
     : Migration()
 {
-    // Add patches here
+    // Add patches here in the order of execution
 }
