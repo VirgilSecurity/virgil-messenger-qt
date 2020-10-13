@@ -32,20 +32,18 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_MESSAGESTABLE_H
-#define VSQ_MESSAGESTABLE_H
+#include "database/AttachmentsTable.h"
 
-#include "core/DatabaseTable.h"
+#include "database/core/Database.h"
+#include "database/core/DatabaseUtils.h"
 
-namespace VSQ
+using namespace VSQ;
+
+bool AttachmentsTable::create(Database *database)
 {
-class MessagesTable : public DatabaseTable
-{
-public:
-    using DatabaseTable::DatabaseTable;
-
-    bool create(Database *database) override;
-};
+    if (DatabaseUtils::runQueries(database, QLatin1String(":/resources/database/create_attachments.sql"))) {
+        return true;
+    }
+    qCCritical(lcDatabase) << "Unable to create attachments table";
+    return false;
 }
-
-#endif // VSQ_MESSAGESTABLE_H

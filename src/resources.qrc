@@ -116,5 +116,10 @@
         <file>qml/components/TextScrollView.qml</file>
         <file>qml/components/AttachmentPicker.qml</file>
         <file>qml/components/LogControl.qml</file>
+        <!-- Database -->
+        <file>resources/database/create_attachments.sql</file>
+        <file>resources/database/create_chats.sql</file>
+        <file>resources/database/create_contacts.sql</file>
+        <file>resources/database/create_messages.sql</file>
     </qresource>
 </RCC>

@@ -61,5 +61,5 @@ void ChatListState::setUserId(const QString &userId)
     m_userId = userId;
     emit userIdChanged(userId);
 
-    m_userDatabase->open(userId);
+    m_userDatabase->open(userId); // TODO(fpohtmeh): check if failed
 }

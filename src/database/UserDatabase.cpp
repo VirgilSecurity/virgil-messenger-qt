@@ -35,6 +35,8 @@
 #include "database/UserDatabase.h"
 
 #include "VSQSettings.h"
+#include "VSQUtils.h"
+#include "database/core/DatabaseUtils.h"
 #include "database/AttachmentsTable.h"
 #include "database/ChatsTable.h"
 #include "database/ContactsTable.h"
@@ -52,7 +54,12 @@ UserDatabase::~UserDatabase()
 
 bool UserDatabase::open(const QString &userId)
 {
-    const QString filePath(m_settings->databaseDir().filePath(userId + QLatin1String(".sqlite3")));
+    if (!DatabaseUtils::isValidName(userId)) {
+        qCCritical(lcDatabase) << "Invalid database id:" << userId;
+        return false;
+    }
+    const QString fileName = QString("user-%1.sqlite3").arg(userId);
+    const QString filePath(m_settings->databaseDir().filePath(fileName));
     return Database::open(filePath, userId + QLatin1String("-messenger"));
 }
 
@@ -100,19 +107,19 @@ bool UserDatabase::create()
 {
     tables().clear();
     int counter = -1;
-    if (!addTable(std::make_unique<ChatsTable>("attachments_" + m_userId))) {
+    if (!addTable(std::make_unique<AttachmentsTable>(QLatin1String("attachments")))) {
         return false;
     }
     m_attachmentsTableIndex = ++counter;
-    if (!addTable(std::make_unique<ChatsTable>("chats_" + m_userId))) {
+    if (!addTable(std::make_unique<ChatsTable>(QLatin1String("chats")))) {
         return false;
     }
     m_chatsTableIndex = ++counter;
-    if (!addTable(std::make_unique<ChatsTable>("contacts_" + m_userId))) {
+    if (!addTable(std::make_unique<ContactsTable>(QLatin1String("contacts")))) {
         return false;
     }
     m_contactsTableIndex = ++counter;
-    if (!addTable(std::make_unique<MessagesTable>("messages_" + m_userId))) {
+    if (!addTable(std::make_unique<MessagesTable>(QLatin1String("messages")))) {
         return false;
     }
     m_messagesTableIndex = ++counter;

@@ -34,6 +34,8 @@
 
 #include "database/core/DatabaseTable.h"
 
+#include "database/core/Database.h"
+
 using namespace VSQ;
 
 DatabaseTable::DatabaseTable(const QString &name)
@@ -52,5 +54,6 @@ QString DatabaseTable::name() const
 bool DatabaseTable::create(Database *database)
 {
     Q_UNUSED(database)
+    qCCritical(lcDatabase) << "Unable to create database table:" << m_name;
     return false;
 }

@@ -210,3 +210,12 @@ bool VSQUtils::validateUserId(const QString &userId, QString *errorText)
     // TODO(fpohtmeh): add regexp check
     return true;
 }
+
+Optional<QString> VSQUtils::readTextFile(const QString &filePath)
+{
+    QFile file(filePath);
+    if (!file.open(QFile::Text | QFile::ReadOnly)) {
+        return NullOptional;
+    }
+    return file.readAll();
+}

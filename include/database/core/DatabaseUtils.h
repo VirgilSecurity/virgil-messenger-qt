@@ -32,20 +32,23 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_MESSAGESTABLE_H
-#define VSQ_MESSAGESTABLE_H
+#ifndef VSQ_DATABASEUTILS_H
+#define VSQ_DATABASEUTILS_H
 
-#include "core/DatabaseTable.h"
+#include "VSQCommon.h"
 
 namespace VSQ
 {
-class MessagesTable : public DatabaseTable
-{
-public:
-    using DatabaseTable::DatabaseTable;
+class Database;
 
-    bool create(Database *database) override;
-};
+namespace DatabaseUtils
+{
+    bool isValidName(const QString &id);
+
+    Optional<QStringList> readQueries(const QString &filePath);
+
+    bool runQueries(Database *database, const QString &filePath);
+}
 }
 
-#endif // VSQ_MESSAGESTABLE_H
+#endif // VSQ_DATABASEUTILS_H

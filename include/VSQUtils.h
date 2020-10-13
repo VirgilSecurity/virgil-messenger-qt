@@ -61,6 +61,8 @@ namespace VSQUtils
 
     bool forceCreateDir(const QString &absolutePath);
 
+    Optional<QString> readTextFile(const QString &filePath);
+
     // Url functions
 
     bool isValidUrl(const QUrl &url);

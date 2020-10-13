@@ -43,6 +43,8 @@ class ContactsTable : public DatabaseTable
 {
 public:
     using DatabaseTable::DatabaseTable;
+
+    bool create(Database *database) override;
 };
 }
 

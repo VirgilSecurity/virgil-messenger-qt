@@ -149,6 +149,7 @@ HEADERS += \
         include/database/core/ConnectionScope.h \
         include/database/core/Database.h \
         include/database/core/DatabaseTable.h \
+        include/database/core/DatabaseUtils.h \
         include/database/core/TransactionScope.h \
         include/database/AttachmentsTable.h \
         include/database/ContactsTable.h \
@@ -212,7 +213,12 @@ SOURCES += \
         src/database/core/ConnectionScope.cpp \
         src/database/core/Database.cpp \
         src/database/core/DatabaseTable.cpp \
+        src/database/core/DatabaseUtils.cpp \
         src/database/core/TransactionScope.cpp \
+        src/database/AttachmentsTable.cpp \
+        src/database/ContactsTable.cpp \
+        src/database/ChatsTable.cpp \
+        src/database/MessagesTable.cpp \
         src/database/UserDatabase.cpp \
         # Logging
         src/hal.cpp \

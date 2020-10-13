@@ -74,8 +74,11 @@ bool Database::open(const QString &databaseFileName, const QString &connectionNa
     }
     if (m_version > m_databaseVersion) {
         TransactionScope transaction(this);
-        return transaction.addResult(performMigration() && writeVersion());
+        if (!transaction.addResult(performMigration() && writeVersion())) {
+            return false;
+        }
     }
+    qCDebug(lcDatabase) << "Database was opened";
     return true;
 }
 

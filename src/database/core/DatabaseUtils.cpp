@@ -32,20 +32,47 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_MESSAGESTABLE_H
-#define VSQ_MESSAGESTABLE_H
+#include "database/core/DatabaseUtils.h"
 
-#include "core/DatabaseTable.h"
+#include <QSqlQuery>
 
-namespace VSQ
+#include "VSQUtils.h"
+#include "database/core/Database.h"
+
+using namespace VSQ;
+
+bool DatabaseUtils::isValidName(const QString &id)
 {
-class MessagesTable : public DatabaseTable
-{
-public:
-    using DatabaseTable::DatabaseTable;
-
-    bool create(Database *database) override;
-};
+    // TODO(fpohtmeh): add regexp check
+    return !id.isEmpty();
 }
 
-#endif // VSQ_MESSAGESTABLE_H
+Optional<QStringList> DatabaseUtils::readQueries(const QString &filePath)
+{
+    const auto text = VSQUtils::readTextFile(filePath);
+    QStringList queries;
+    const auto texts = text->split(";");
+    for (auto text : texts) {
+        auto query = text.trimmed();
+        if (!query.isEmpty()) {
+            queries << query;
+        }
+    }
+    return queries;
+}
+
+bool DatabaseUtils::runQueries(Database *database, const QString &filePath)
+{
+    const auto texts = readQueries(filePath);
+    if (!texts) {
+        return false;
+    }
+    for (auto text : *texts) {
+        auto query = database->createQuery();
+        if (!query.exec(text)) {
+            qCCritical(lcDatabase) << "Failed to run query:" << text;
+            return false;
+        }
+    }
+    return true;
+}
