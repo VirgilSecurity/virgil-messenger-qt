@@ -32,19 +32,25 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "database/ChatsTable.h"
+#ifndef VSQ_MIGRATION_H
+#define VSQ_MIGRATION_H
 
-#include "database/core/Database.h"
-#include "database/core/DatabaseUtils.h"
+#include "database/core/Patch.h"
 
-using namespace VSQ;
-
-bool ChatsTable::create(Database *database)
+namespace VSQ
 {
-    if (DatabaseUtils::runQueries(database, QLatin1String(":/resources/database/create_chats.sql"))) {
-        qCDebug(lcDatabase) << "Chats table was created";
-        return true;
-    }
-    qCCritical(lcDatabase) << "Unable to create chats table";
-    return false;
+class Migration
+{
+public:
+    using PatchPointer = std::unique_ptr<Patch>;
+
+    bool run(Database *database);
+
+    void addPatch(PatchPointer patch);
+
+private:
+    std::vector<PatchPointer> m_patches;
+};
 }
+
+#endif // VSQ_MIGRATION_H

@@ -32,19 +32,18 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "database/ChatsTable.h"
+#ifndef VSQ_USERDATABASEMIGRATION_H
+#define VSQ_USERDATABASEMIGRATION_H
 
-#include "database/core/Database.h"
-#include "database/core/DatabaseUtils.h"
+#include "database/core/Migration.h"
 
-using namespace VSQ;
-
-bool ChatsTable::create(Database *database)
+namespace VSQ
 {
-    if (DatabaseUtils::runQueries(database, QLatin1String(":/resources/database/create_chats.sql"))) {
-        qCDebug(lcDatabase) << "Chats table was created";
-        return true;
-    }
-    qCCritical(lcDatabase) << "Unable to create chats table";
-    return false;
+class UserDatabaseMigration : public Migration
+{
+public:
+    UserDatabaseMigration();
+};
 }
+
+#endif // VSQ_USERDATABASEMIGRATION_H

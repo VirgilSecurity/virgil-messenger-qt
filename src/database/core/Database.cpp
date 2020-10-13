@@ -43,9 +43,10 @@ Q_LOGGING_CATEGORY(lcDatabase, "database")
 
 using namespace VSQ;
 
-Database::Database(const Version &version)
-    : m_version(version)
+Database::Database(const Version &latestVersion)
+    : m_latestVersion(latestVersion)
 {
+    qCDebug(lcDatabase) << "Database latest version:" << latestVersion;
 }
 
 Database::~Database()
@@ -63,18 +64,29 @@ bool Database::open(const QString &databaseFileName, const QString &connectionNa
     m_connection.setDatabaseName(databaseFileName);
 
     ConnectionScope connection(this);
+    // Read version
+    if (!readVersion()) {
+        return false;
+    }
+    // Create table
     {
         TransactionScope transaction(this);
         if (!transaction.addResult(create())) {
             return false;
         }
     }
-    if (!readVersion()) {
-        return false;
+    // Ignore downgrade
+    if (m_latestVersion < m_version) {
+        qCWarning(lcDatabase) << "Database can't be downgraded";
     }
-    if (m_version > m_databaseVersion) {
+    // Perform migration (upgrade)
+    else if (m_latestVersion > m_version) {
+        qCDebug(lcDatabase) << "Database migration:" << m_version << "=>" << m_latestVersion;
         TransactionScope transaction(this);
-        if (!transaction.addResult(performMigration() && writeVersion())) {
+        if (m_migration && !transaction.addResult(m_migration->run(this))) {
+            return false;
+        }
+        if (!writeVersion()) {
             return false;
         }
     }
@@ -125,7 +137,7 @@ bool Database::tableExists(const QString &tableName) const
 bool Database::addTable(TablePointer table)
 {
     if (tableExists(table->name())) {
-        return false;
+        return true;
     }
     if (!table->create(this)) {
         return false;
@@ -154,12 +166,17 @@ const DatabaseTable *Database::table(int index) const
     return m_tables[index].get();
 }
 
-bool Database::create()
+Database::Version Database::version() const
 {
-    return true;
+    return m_version;
 }
 
-bool Database::performMigration()
+void Database::setMigration(std::unique_ptr<Migration> migration)
+{
+    m_migration = std::move(migration);
+}
+
+bool Database::create()
 {
     return true;
 }
@@ -176,12 +193,26 @@ void Database::close()
 
 bool Database::readVersion()
 {
-    // TODO(fpohtmeh): read to m_databaseVersion
+    auto query = createQuery();
+    const auto queryText = QLatin1String("PRAGMA user_version;");
+    if (!query.exec(queryText)) {
+        qCCritical(lcDatabase) << "Failed to read database version";
+        return false;
+    }
+    m_version = query.next() ? query.value(0).toULongLong() : 0;
+    qCDebug(lcDatabase) << "Database version:" << m_version;
     return true;
 }
 
 bool Database::writeVersion()
 {
-    // TODO(fpohtmeh): write version to database
+    auto query = createQuery();
+    const auto queryText = QString("PRAGMA user_version(%1);").arg(m_latestVersion);
+    if (!query.exec(queryText)) {
+        qCCritical(lcDatabase) << "Failed to write database version";
+        return false;
+    }
+    m_version = m_latestVersion;
+    qCDebug(lcDatabase) << "Database version was updated:" << m_latestVersion;
     return true;
 }

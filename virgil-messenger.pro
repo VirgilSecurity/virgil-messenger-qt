@@ -43,8 +43,8 @@ isEmpty(VERSION) {
     VERSION = $$cat($$PWD/VERSION_MESSENGER)
 }
 
-isEmpty(DATABASE_SCHEME_VERSION) {
-    DATABASE_SCHEME_VERSION = $$cat($$PWD/VERSION_DATABASE_SCHEME)
+isEmpty(VERSION_DATABASE_SCHEME) {
+    VERSION_DATABASE_SCHEME = $$cat($$PWD/VERSION_DATABASE_SCHEME)
 }
 
 ios {
@@ -56,7 +56,7 @@ ios {
 }
 
 message("VERSION = $$VERSION")
-message("DATABASE_SCHEME_VERSION = $$DATABASE_SCHEME_VERSION")
+message("VERSION_DATABASE_SCHEME = $$VERSION_DATABASE_SCHEME")
 
 #
 #   Directory with precompiled dependencies
@@ -90,7 +90,7 @@ DEFINES += QT_DEPRECATED_WARNINGS \
         INFO_CLIENT=1 \
         CFG_CLIENT=1 \
         VERSION="$$VERSION" \
-        DATABASE_SCHEME_VERSION="$$DATABASE_SCHEME_VERSION"
+        VERSION_DATABASE_SCHEME="$$VERSION_DATABASE_SCHEME"
 
 include(customers/customers.pri)
 
@@ -150,12 +150,15 @@ HEADERS += \
         include/database/core/Database.h \
         include/database/core/DatabaseTable.h \
         include/database/core/DatabaseUtils.h \
+        include/database/core/Migration.h \
+        include/database/core/Patch.h \
         include/database/core/TransactionScope.h \
         include/database/AttachmentsTable.h \
         include/database/ContactsTable.h \
         include/database/ChatsTable.h \
         include/database/MessagesTable.h \
         include/database/UserDatabase.h \
+        include/database/UserDatabaseMigration.h \
         # Logging
         include/logging/VSQLogging.h \
         include/logging/VSQLogWorker.h \
@@ -214,12 +217,15 @@ SOURCES += \
         src/database/core/Database.cpp \
         src/database/core/DatabaseTable.cpp \
         src/database/core/DatabaseUtils.cpp \
+        src/database/core/Migration.cpp \
+        src/database/core/Patch.cpp \
         src/database/core/TransactionScope.cpp \
         src/database/AttachmentsTable.cpp \
         src/database/ContactsTable.cpp \
         src/database/ChatsTable.cpp \
         src/database/MessagesTable.cpp \
         src/database/UserDatabase.cpp \
+        src/database/UserDatabaseMigration.cpp \
         # Logging
         src/hal.cpp \
         src/logging/VSQLogging.cpp \
@@ -491,4 +497,7 @@ android: {
 
 
 OTHER_FILES += \
-    .gitignore
+    .gitignore \
+    VERSION_CORE \
+    VERSION_MESSENGER \
+    VERSION_DATABASE_SCHEME

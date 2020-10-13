@@ -35,10 +35,11 @@
 #ifndef VSQ_DATABASE_H
 #define VSQ_DATABASE_H
 
-#include "DatabaseTable.h"
-
 #include <QSqlDatabase>
 #include <QSqlQuery>
+
+#include "DatabaseTable.h"
+#include "Migration.h"
 
 Q_DECLARE_LOGGING_CATEGORY(lcDatabase)
 
@@ -49,11 +50,11 @@ class Database
     Q_DISABLE_COPY(Database)
 
 public:
-    using Version = qint64;
+    using Version = Patch::Version;
     using TablePointer = std::unique_ptr<DatabaseTable>;
     using Tables = std::vector<TablePointer>;
 
-    explicit Database(const Version &version);
+    explicit Database(const Version &latestVersion);
     virtual ~Database();
 
     bool open(const QString &databaseFileName, const QString &connectionName);
@@ -74,9 +75,11 @@ public:
     DatabaseTable *table(int index);
     const DatabaseTable *table(int index) const;
 
+    Version version() const;
+    void setMigration(std::unique_ptr<Migration> migration);
+
 protected:
     virtual bool create();
-    virtual bool performMigration();
 
 private:
     void close();
@@ -85,9 +88,10 @@ private:
     bool writeVersion();
 
     const QLatin1String m_type = QLatin1String("QSQLITE");
-    const Version m_version = 0;
+    const Version m_latestVersion = 0;
     QString m_connectionName;
-    Version m_databaseVersion = 0;
+    Version m_version = 0;
+    std::unique_ptr<Migration> m_migration;
     QSqlDatabase m_connection;
     Tables m_tables;
 };

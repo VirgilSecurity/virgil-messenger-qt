@@ -41,13 +41,16 @@
 #include "database/ChatsTable.h"
 #include "database/ContactsTable.h"
 #include "database/MessagesTable.h"
+#include "database/UserDatabaseMigration.h"
 
 using namespace VSQ;
 
 UserDatabase::UserDatabase(const VSQSettings *settings)
-    : Database(DATABASE_SCHEME_VERSION)
+    : Database(VERSION_DATABASE_SCHEME)
     , m_settings(settings)
-{}
+{
+    setMigration(std::make_unique<UserDatabaseMigration>());
+}
 
 UserDatabase::~UserDatabase()
 {}

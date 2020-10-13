@@ -32,19 +32,28 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "database/ChatsTable.h"
+#include "database/core/Patch.h"
 
 #include "database/core/Database.h"
-#include "database/core/DatabaseUtils.h"
 
 using namespace VSQ;
 
-bool ChatsTable::create(Database *database)
+Patch::Patch(const Patch::Version &version)
+    : m_version(version)
 {
-    if (DatabaseUtils::runQueries(database, QLatin1String(":/resources/database/create_chats.sql"))) {
-        qCDebug(lcDatabase) << "Chats table was created";
-        return true;
-    }
-    qCCritical(lcDatabase) << "Unable to create chats table";
+}
+
+Patch::~Patch()
+{
+}
+
+bool Patch::isOutdated(Database *database) const
+{
+    return m_version < database->version();
+}
+
+bool Patch::apply(Database *database)
+{
+    Q_UNUSED(database)
     return false;
 }

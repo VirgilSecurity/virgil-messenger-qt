@@ -42,6 +42,7 @@ using namespace VSQ;
 bool AttachmentsTable::create(Database *database)
 {
     if (DatabaseUtils::runQueries(database, QLatin1String(":/resources/database/create_attachments.sql"))) {
+        qCDebug(lcDatabase) << "Attachments table was created";
         return true;
     }
     qCCritical(lcDatabase) << "Unable to create attachments table";

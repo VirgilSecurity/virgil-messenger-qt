@@ -42,6 +42,7 @@ using namespace VSQ;
 bool MessagesTable::create(Database *database)
 {
     if (DatabaseUtils::runQueries(database, QLatin1String(":/resources/database/create_messages.sql"))) {
+        qCDebug(lcDatabase) << "Messages table was created";
         return true;
     }
     qCCritical(lcDatabase) << "Unable to create messages table";
