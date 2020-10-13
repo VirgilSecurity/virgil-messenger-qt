@@ -146,13 +146,13 @@ HEADERS += \
         include/states/SplashScreenState.h \
         include/states/StartState.h \
         # Database
-        include/database/core/ConnectionScope.h \
         include/database/core/Database.h \
         include/database/core/DatabaseTable.h \
         include/database/core/DatabaseUtils.h \
         include/database/core/Migration.h \
         include/database/core/Patch.h \
-        include/database/core/TransactionScope.h \
+        include/database/core/ScopedConnection.h \
+        include/database/core/ScopedTransaction.h \
         include/database/AttachmentsTable.h \
         include/database/ContactsTable.h \
         include/database/ChatsTable.h \
@@ -213,13 +213,13 @@ SOURCES += \
         src/states/SignUpState.cpp \
         src/states/SplashScreenState.cpp \
         # Database
-        src/database/core/ConnectionScope.cpp \
         src/database/core/Database.cpp \
         src/database/core/DatabaseTable.cpp \
         src/database/core/DatabaseUtils.cpp \
         src/database/core/Migration.cpp \
         src/database/core/Patch.cpp \
-        src/database/core/TransactionScope.cpp \
+        src/database/core/ScopedConnection.cpp \
+        src/database/core/ScopedTransaction.cpp \
         src/database/AttachmentsTable.cpp \
         src/database/ContactsTable.cpp \
         src/database/ChatsTable.cpp \

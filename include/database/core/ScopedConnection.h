@@ -32,62 +32,23 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "database/core/TransactionScope.h"
+#ifndef VSQ_SCOPEDCONNECTION_H
+#define VSQ_SCOPEDCONNECTION_H
 
-#include "database/core/Database.h"
+#include <QSqlDatabase>
 
-using namespace VSQ;
-
-TransactionScope::TransactionScope(Database *database)
-    : m_database(database)
+namespace VSQ
 {
-    m_database->startTransaction();
+class ScopedConnection
+{
+public:
+    explicit ScopedConnection(QSqlDatabase qtDatabase);
+    ~ScopedConnection();
+
+private:
+    QSqlDatabase m_qtDatabase;
+    bool m_isActive = true;
+};
 }
 
-TransactionScope::~TransactionScope()
-{
-    if (!m_finished) {
-        qCWarning(lcDatabase) << "Transaction result wasn't used. Use result(), addAndFinish() to check result";
-    }
-    finish();
-}
-
-bool TransactionScope::add(bool result)
-{
-    if (m_finished) {
-        qCCritical(lcDatabase) << "Transaction is already finished";
-        m_result = false;
-    }
-    else if (m_result && !result) {
-        m_result = false;
-    }
-    return m_result;
-}
-
-bool TransactionScope::addAndFinish(bool result)
-{
-    if (!add(result)) {
-        return false;
-    }
-    return this->result();
-}
-
-bool TransactionScope::result()
-{
-    finish();
-    return m_result;
-}
-
-void TransactionScope::finish()
-{
-    if (m_finished) {
-        return;
-    }
-    if (m_result) {
-        m_result = m_database->commitTransaction();
-    }
-    else {
-        m_database->rollbackTransaction();
-    }
-    m_finished = true;
-}
+#endif // VSQ_SCOPEDCONNECTION_H

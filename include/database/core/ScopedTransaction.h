@@ -32,22 +32,26 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_CONNECTIONSCOPE_H
-#define VSQ_CONNECTIONSCOPE_H
+#ifndef VSQ_SCOPEDTRANSACTION_H
+#define VSQ_SCOPEDTRANSACTION_H
+
+#include <QSqlDatabase>
 
 namespace VSQ
 {
-class Database;
-
-class ConnectionScope
+class ScopedTransaction
 {
 public:
-    explicit ConnectionScope(Database *database);
-    ~ConnectionScope();
+    explicit ScopedTransaction(QSqlDatabase qtDatabase);
+    ~ScopedTransaction();
+
+    bool isActive() const;
+    bool rollback();
 
 private:
-    Database *m_database = nullptr;
+    QSqlDatabase m_qtDatabase;
+    bool m_isActive = true;
 };
 }
 
-#endif // VSQ_CONNECTIONSCOPE_H
+#endif // VSQ_SCOPEDTRANSACTION_H

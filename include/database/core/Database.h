@@ -40,6 +40,8 @@
 
 #include "DatabaseTable.h"
 #include "Migration.h"
+#include "ScopedConnection.h"
+#include "ScopedTransaction.h"
 
 Q_DECLARE_LOGGING_CATEGORY(lcDatabase)
 
@@ -58,15 +60,7 @@ public:
     virtual ~Database();
 
     bool open(const QString &databaseFileName, const QString &connectionName);
-
-    bool openConnection();
-    void closeConnection();
-
     QSqlQuery createQuery() const;
-
-    bool startTransaction();
-    bool commitTransaction();
-    bool rollbackTransaction();
 
     bool tableExists(const QString &tableName) const;
     bool addTable(TablePointer table);
@@ -77,6 +71,8 @@ public:
 
     Version version() const;
     void setMigration(std::unique_ptr<Migration> migration);
+
+    operator QSqlDatabase() const;
 
 protected:
     virtual bool create();
@@ -92,7 +88,7 @@ private:
     QString m_connectionName;
     Version m_version = 0;
     std::unique_ptr<Migration> m_migration;
-    QSqlDatabase m_connection;
+    QSqlDatabase m_qtDatabase;
     Tables m_tables;
 };
 }

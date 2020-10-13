@@ -36,9 +36,6 @@
 
 #include <QSqlError>
 
-#include "database/core/ConnectionScope.h"
-#include "database/core/TransactionScope.h"
-
 Q_LOGGING_CATEGORY(lcDatabase, "database")
 
 using namespace VSQ;
@@ -60,19 +57,19 @@ bool Database::open(const QString &databaseFileName, const QString &connectionNa
 
     qCDebug(lcDatabase) << "Opening of database:" << databaseFileName;
     m_connectionName = connectionName;
-    m_connection = QSqlDatabase::addDatabase(m_type, m_connectionName);
-    m_connection.setDatabaseName(databaseFileName);
+    m_qtDatabase = QSqlDatabase::addDatabase(m_type, m_connectionName);
+    m_qtDatabase.setDatabaseName(databaseFileName);
 
-    ConnectionScope connection(this);
+    ScopedConnection connection(*this);
     // Read version
     if (!readVersion()) {
         return false;
     }
     // Create table
     {
-        TransactionScope transaction(this);
-        if (!transaction.addAndFinish(create())) {
-            return false;
+        ScopedTransaction transaction(*this);
+        if (!create()) {
+            return transaction.rollback();
         }
     }
     // Ignore downgrade
@@ -82,59 +79,26 @@ bool Database::open(const QString &databaseFileName, const QString &connectionNa
     // Perform migration (upgrade)
     else if (m_latestVersion > m_version) {
         qCDebug(lcDatabase) << "Database migration:" << m_version << "=>" << m_latestVersion;
-        TransactionScope transaction(this);
-        if (m_migration && !transaction.add(m_migration->run(this))) {
-            return false;
+        ScopedTransaction transaction(*this);
+        if (m_migration && !m_migration->run(this)) {
+            return transaction.rollback();
         }
         if (!writeVersion()) {
-            return false;
-        }
-        if (!transaction.result()) {
-            return false;
+            return transaction.rollback();
         }
     }
     qCDebug(lcDatabase) << "Database was opened";
     return true;
 }
 
-bool Database::openConnection()
-{
-    if (!m_connection.open()) {
-        qCCritical(lcDatabase) << "Connection databaseName:" << m_connection.databaseName();
-        qCCritical(lcDatabase) << "Connection error:" << m_connection.lastError().databaseText();
-        return false;
-    }
-    return true;
-}
-
-void Database::closeConnection()
-{
-    m_connection.close();
-}
-
 QSqlQuery Database::createQuery() const
 {
-    return QSqlQuery(m_connection);
-}
-
-bool Database::startTransaction()
-{
-    return m_connection.transaction();
-}
-
-bool Database::commitTransaction()
-{
-    return m_connection.commit();
-}
-
-bool Database::rollbackTransaction()
-{
-    return m_connection.rollback();
+    return QSqlQuery(m_qtDatabase);
 }
 
 bool Database::tableExists(const QString &tableName) const
 {
-    return m_connection.tables().contains(tableName);
+    return m_qtDatabase.tables().contains(tableName);
 }
 
 bool Database::addTable(TablePointer table)
@@ -179,6 +143,11 @@ void Database::setMigration(std::unique_ptr<Migration> migration)
     m_migration = std::move(migration);
 }
 
+VSQ::Database::operator QSqlDatabase() const
+{
+    return m_qtDatabase;
+}
+
 bool Database::create()
 {
     return true;
@@ -186,12 +155,9 @@ bool Database::create()
 
 void Database::close()
 {
-    if (m_connection.isOpen()) {
-        closeConnection();
-    }
-    if (!m_connectionName.isEmpty()) {
-        QSqlDatabase::removeDatabase(m_connectionName);
-    }
+    m_qtDatabase.close();
+    QSqlDatabase::removeDatabase(m_connectionName);
+    qCDebug(lcDatabase) << "Database was closed";
 }
 
 bool Database::readVersion()

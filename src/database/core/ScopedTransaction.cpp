@@ -32,34 +32,42 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_TRANSACTION_H
-#define VSQ_TRANSACTION_H
+#include "database/core/ScopedTransaction.h"
 
-namespace VSQ
+#include "database/core/Database.h"
+
+using namespace VSQ;
+
+ScopedTransaction::ScopedTransaction(QSqlDatabase qtDatabase)
+    : m_qtDatabase(qtDatabase)
 {
-class Database;
-
-class TransactionScope
-{
-public:
-    explicit TransactionScope(Database *database);
-    ~TransactionScope();
-
-    // Adds sub-result and returns result
-    bool add(bool result);
-    // Adds sub-result, finishes transaction and returns result
-    bool addAndFinish(bool result);
-
-    // Finishes transaction and returns result
-    bool result();
-
-private:
-    void finish();
-
-    Database *m_database = nullptr;
-    bool m_finished = false;
-    bool m_result = true;
-};
+    if (qtDatabase.isOpen()) {
+        m_isActive = qtDatabase.transaction();
+    }
+    else {
+        qCCritical(lcDatabase) << "Connection databaseName:" << qtDatabase.databaseName();
+        qCCritical(lcDatabase) << "Connection is not opened";
+        m_isActive = false;
+    }
 }
 
-#endif // VSQ_TRANSACTION_H
+ScopedTransaction::~ScopedTransaction()
+{
+    if (m_isActive) {
+        m_qtDatabase.commit();
+    }
+}
+
+bool ScopedTransaction::isActive() const
+{
+    return m_isActive;
+}
+
+bool ScopedTransaction::rollback()
+{
+    if (m_isActive) {
+        m_qtDatabase.rollback();
+        m_isActive = false;
+    }
+    return m_isActive;
+}

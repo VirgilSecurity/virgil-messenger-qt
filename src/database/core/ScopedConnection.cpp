@@ -32,19 +32,33 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "database/core/ConnectionScope.h"
+#include "database/core/ScopedConnection.h"
+
+#include <QSqlError>
 
 #include "database/core/Database.h"
 
 using namespace VSQ;
 
-ConnectionScope::ConnectionScope(Database *database)
-    : m_database(database)
+ScopedConnection::ScopedConnection(QSqlDatabase qtDatabase)
+    : m_qtDatabase(qtDatabase)
 {
-    m_database->openConnection();
+    const bool opened = qtDatabase.isOpen();
+    if (opened || !qtDatabase.open()) {
+        m_isActive = false;
+        qCCritical(lcDatabase) << "Connection databaseName:" << qtDatabase.databaseName();
+        if (opened) {
+            qCCritical(lcDatabase) << "Connection is already opened";
+        }
+        else {
+            qCCritical(lcDatabase) << "Connection error:" << qtDatabase.lastError().databaseText();
+        }
+    }
 }
 
-ConnectionScope::~ConnectionScope()
+ScopedConnection::~ScopedConnection()
 {
-    m_database->closeConnection();
+    if (m_isActive) {
+        m_qtDatabase.close();
+    }
 }
