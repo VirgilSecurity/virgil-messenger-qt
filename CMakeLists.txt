@@ -154,13 +154,12 @@ elseif(VS_PLATFORM STREQUAL "macos")
 	PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
     # Sparkle	
-#    file(GLOB_RECURSE SPARKLE_FRAMEWORK LIST_DIRECTORIES true FOLLOW_SYMLINKS "${PREBUILT_DIR}/${VS_PLATFORM}/sparkle/Sparkle.framework/*" )
-#    message(STATUS "### FILES ${SPARKLE_FRAMEWORK}")
-#    find_library(SPARKLE_FRAMEWORK Sparkle "${PREBUILT_DIR}/${VS_PLATFORM}/sparkle")
-#    set_source_files_properties(${SPARKLE_FRAMEWORK} 
-#	PROPERTIES MACOSX_PACKAGE_LOCATION "Frameworks/Sparkle.framework")
+    message(STATUS "Copy Sparkle framework")
+    execute_process(
+        COMMAND mkdir -p ${CMAKE_BINARY_DIR}/${VS_TARGET_NAME}.app/Contents/Frameworks 
+        COMMAND cp -Rf ${PREBUILT_DIR}/${VS_PLATFORM}/sparkle/Sparkle.framework ${CMAKE_BINARY_DIR}/${VS_TARGET_NAME}.app/Contents/Frameworks 
+    )
 
-    message(STATUS "### ${MACOSX_PACKAGE_LOCATION}")
     add_executable(${VS_TARGET_NAME} MACOSX_BUNDLE ${App_ICON} )
     
     set_target_properties(${VS_TARGET_NAME} 
