@@ -10,7 +10,7 @@
 	</array>
 	<key>keychain-access-groups</key>
 	<array>
-		<string>$(AppIdentifierPrefix)group.com.virgil.BraesMessenger</string>
+		<string>$(AppIdentifierPrefix)com.virgil.BraesMessenger</string>
 	</array>
 </dict>
 </plist>
