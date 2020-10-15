@@ -37,7 +37,7 @@ print_usage() {
   echo "$(basename ${0})"
   echo
   echo "  -c <${CUSTOMER_LIST}>   - Build for customer                            [default: Virgil]"
-  echo "  -b                      - Build Linux packages (Required: docker)       [default: no]"  
+  echo "  -p                      - Build Linux packages (Required: docker)       [default: no]"  
   echo "  -h                      - Print help"
   exit 0
 }
