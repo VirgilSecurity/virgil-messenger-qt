@@ -40,12 +40,12 @@ Rectangle {
 
             PropertyChanges {
                 target: searchButtonId
-                width: 20
-                height: 20
+                width: 24
+                height: 24
                 icon.color: "white"
                 anchors {
                     left: parent.left
-                    leftMargin: 11
+                    leftMargin: 10
                 }
             }
         },
