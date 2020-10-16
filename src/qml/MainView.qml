@@ -71,6 +71,10 @@ Control {
             readOnly: true
             font.pointSize: Platform.isMobile ? 12 : 9
             selectByMouse: Platform.isDesktop
+
+            background: Rectangle {
+                color: "white"
+            }
         }
     }
 
