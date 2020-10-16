@@ -11,10 +11,12 @@ import "./helpers/login.js" as LoginLogic
 Control {
     id: mainView
 
+    property int keyboardHeight: 0
+
     RowLayout {
         anchors {
             fill: parent
-            bottomMargin: logControl.visible ? logControl.height : 0
+            bottomMargin: (logControl.visible ? logControl.height : 0) + keyboardHeight
         }
         spacing: 0
         clip: logControl.visible
@@ -87,6 +89,11 @@ Control {
         showSplashScreen()
         if (logControl.visible) {
             logging.formattedMessageCreated.connect(logTextControl.append)
+        }
+        if (Platform.isIos) {
+            app.keyboardEventFilter.keyboardRectangleChanged.connect(function(rect) {
+                keyboardHeight = Math.max(0, root.height - rect.y)
+            })
         }
     }
 
