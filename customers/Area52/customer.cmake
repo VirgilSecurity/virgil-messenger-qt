@@ -30,7 +30,7 @@ list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/include/VSQCustomer.h.in=${PROJE
 if(VS_PLATFORM STREQUAL "android")
     list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/src/android/java/org/virgil/notification/NotificationClient.java.in=${PROJECT_SOURCE_DIR}/src/android/java/org/virgil/notification/NotificationClient.java")
     list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/platforms/android/AndroidManifest.xml.in=${PROJECT_SOURCE_DIR}/platforms/android/AndroidManifest.xml")
-    list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/platforms/android/google-services.json.in=${PROJECT_SOURCE_DIR}/platforms/android/google-services.json")
+    list(APPEND VS_TEMPLATES "${VS_CUSTOMER_DIR}/platforms/android/google-services.json.in=${PROJECT_SOURCE_DIR}/platforms/android/google-services.json")
     list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/platforms/android/gradle.properties.in=${PROJECT_SOURCE_DIR}/platforms/android/gradle.properties")
 elseif(VS_PLATFORM STREQUAL "macos")    
     list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/platforms/macos/release-notes.html.in=${PROJECT_SOURCE_DIR}/platforms/macos/release-notes.html")
