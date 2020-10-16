@@ -3,37 +3,34 @@ import QtQuick.Controls 2.12
 
 import "../theme"
 
-Item {
+Rectangle {
     id: containerId
     anchors.centerIn: parent
     height: parent.height
+    color: Theme.inputBackgroundColor
+    radius: 20
+
+    Behavior on width {
+        NumberAnimation {
+            id: widthAnimation
+            duration: 200
+            easing.type: Easing.InOutQuad
+        }
+    }
 
     property alias searchPlaceholder: searchField.placeholderText
     property alias search: searchField.text
     property bool isSearchOpen: state === "open"
-
-    Behavior on width {
-        NumberAnimation { duration: 200; easing.type: Easing.InOutQuad }
-    }
+    property alias isAnimationRunning: widthAnimation.running
 
     state: "closed"
     states: [
         State {
             name: "open"
 
-            ParentChange {
-                target: searchButtonId
-                parent: searchField
-            }
-
             PropertyChanges {
                 target: containerId
                 width: parent.width
-            }
-
-            PropertyChanges {
-                target: backgroundId
-                color: Theme.inputBackgroundColor
             }
 
             PropertyChanges {
@@ -49,22 +46,11 @@ Item {
                 anchors {
                     left: parent.left
                     leftMargin: 11
-                    horizontalCenter: undefined
                 }
             }
         },
         State {
             name: "closed"
-
-            ParentChange {
-                target: searchButtonId
-                parent: containerId
-            }
-
-            PropertyChanges {
-                target: containerId
-                width: 48
-            }
 
             PropertyChanges {
                 target: closeButtonId
@@ -83,8 +69,6 @@ Item {
                 height: 24
                 icon.color: "transparent"
                 anchors {
-                    horizontalCenter: parent.horizontalCenter
-                    // clear previous anchor
                     left: undefined
                     leftMargin: undefined
                 }
@@ -95,23 +79,21 @@ Item {
     TextField {
         id: searchField
 
-        anchors.fill: parent;
+        anchors {
+            fill: parent
+            leftMargin: 30
+            rightMargin: 30
+        }
         activeFocusOnPress: true
-        leftPadding: 38
-        rightPadding: 30
         font.pixelSize: UiHelper.fixFontSz(15)
         placeholderTextColor: "#59717D"
-
         color: "white"
 
-        background: Rectangle {
-            id: backgroundId
-            radius: 20
-            color: "transparent"
+        background: Item {
         }
 
         Keys.onPressed: {
-            if (containerId.state === "open" && (event.key === Qt.Key_Back || event.key === Qt.Key_Escape)) {
+            if (isSearchOpen && (event.key === Qt.Key_Back || event.key === Qt.Key_Escape)) {
                 containerId.state = "closed"
                 event.accepted = true;
             }
@@ -120,9 +102,10 @@ Item {
 
     ImageButton {
         id: searchButtonId
-        image: "Search"
         anchors.verticalCenter: parent.verticalCenter
+        image: "Search"
         enabled: !isSearchOpen || !searchField.activeFocus
+        visible: isSearchOpen || !isAnimationRunning
 
         onClicked: {
             containerId.state = "open"
@@ -132,11 +115,11 @@ Item {
 
     ImageButton {
         id: closeButtonId
-        image: "Close"
         anchors {
             verticalCenter: parent.verticalCenter
             right: parent.right
         }
+        image: "Close"
 
         onClicked: {
             containerId.state = "closed"
