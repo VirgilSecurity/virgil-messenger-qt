@@ -5,9 +5,8 @@ import "../theme"
 
 Item {
     id: containerId
-    height: parent.height
-
     anchors.centerIn: parent
+    height: parent.height
 
     property alias searchPlaceholder: searchField.placeholderText
     property alias search: searchField.text
@@ -17,7 +16,7 @@ Item {
         NumberAnimation { duration: 200; easing.type: Easing.InOutQuad }
     }
 
-    state: 'closed'
+    state: "closed"
     states: [
         State {
             name: "open"
@@ -39,7 +38,7 @@ Item {
 
             PropertyChanges {
                 target: searchField
-                text: ''
+                text: ""
             }
 
             PropertyChanges {
@@ -55,7 +54,7 @@ Item {
             }
         },
         State {
-            name: 'closed'
+            name: "closed"
 
             ParentChange {
                 target: searchButtonId
@@ -75,7 +74,7 @@ Item {
             PropertyChanges {
                 target: searchField
                 visible: false
-                text: ''
+                text: ""
             }
 
             PropertyChanges {
@@ -111,19 +110,6 @@ Item {
             color: "transparent"
         }
 
-        ImageButton {
-            id: closeButtonId
-            image: "Close"
-            anchors {
-                verticalCenter: parent.verticalCenter
-                right: parent.right
-                rightMargin: 6
-            }
-            onClicked: {
-                containerId.state = 'closed'
-            }
-        }
-
         Keys.onPressed: {
             if (containerId.state === "open" && (event.key === Qt.Key_Back || event.key === Qt.Key_Escape)) {
                 containerId.state = "closed"
@@ -134,13 +120,26 @@ Item {
 
     ImageButton {
         id: searchButtonId
-        anchors.verticalCenter: parent.verticalCenter
-
         image: "Search"
+        anchors.verticalCenter: parent.verticalCenter
+        enabled: !isSearchOpen || !searchField.activeFocus
 
         onClicked: {
             containerId.state = "open"
             searchField.forceActiveFocus()
+        }
+    }
+
+    ImageButton {
+        id: closeButtonId
+        image: "Close"
+        anchors {
+            verticalCenter: parent.verticalCenter
+            right: parent.right
+        }
+
+        onClicked: {
+            containerId.state = "closed"
         }
     }
 }
