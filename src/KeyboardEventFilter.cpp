@@ -32,69 +32,47 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
-#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
+#include "KeyboardEventFilter.h"
 
-#include <QtCore>
 #include <QGuiApplication>
-#include <QQmlApplicationEngine>
-
-#include <KeyboardEventFilter.h>
-#include <VSQCrashReporter.h>
-#include <VSQMessenger.h>
-#include <VSQSettings.h>
-#include <macos/VSQMacos.h>
-
-class QNetworkAccessManager;
-
-class VSQLogging;
+#include <QQuickItem>
 
 using namespace VSQ;
 
-class VSQApplication : public QObject
+KeyboardEventFilter::KeyboardEventFilter(QObject *parent)
+    : QObject(parent)
+    , m_inputMethod(qApp->inputMethod())
 {
-    Q_OBJECT
-    Q_PROPERTY(QString organizationDisplayName READ organizationDisplayName CONSTANT)
-    Q_PROPERTY(QString applicationDisplayName READ applicationDisplayName CONSTANT)
-    Q_PROPERTY(KeyboardEventFilter *keyboardEventFilter MEMBER m_keyboardEventFilter CONSTANT)
+    connect(m_inputMethod, &QInputMethod::keyboardRectangleChanged, this, &KeyboardEventFilter::updateKeyboardRectangle);
+}
 
-public:
-    VSQApplication();
-    virtual ~VSQApplication() = default;
+KeyboardEventFilter::~KeyboardEventFilter()
+{}
 
-    static void initialize();
+void KeyboardEventFilter::install(QQuickItem *item)
+{
+    item->installEventFilter(this);
+}
 
-    int run(const QString &basePath, VSQLogging *logging);
+bool KeyboardEventFilter::eventFilter(QObject *obj, QEvent *event)
+{
+#ifdef VS_IOS
+    if (event->type() == QEvent::InputMethodQuery) {
+        // HACK(fpohtmeh): Qt scrolls up entire root view if input item is overlapped by keyboard.
+        // Set empty cursor rectangle to avoid scrolling.
+        auto imEvent = static_cast<QInputMethodQueryEvent *>(event);
+        if (imEvent->queries() == Qt::ImCursorRectangle) {
+            imEvent->setValue(Qt::ImCursorRectangle, QRectF());
+            return true;
+        }
+    }
+#endif
+    return QObject::eventFilter(obj, event);
+}
 
-    Q_INVOKABLE
-    void reloadQml();
-
-    Q_INVOKABLE
-    void checkUpdates();
-
-    Q_INVOKABLE QString
-    currentVersion() const;
-
-    Q_INVOKABLE void
-    sendReport();
-
-    // Names
-
-    QString organizationDisplayName() const;
-    QString applicationDisplayName() const;
-
-private slots:
-    void
-    onApplicationStateChanged(Qt::ApplicationState state);
-
-private:
-    static const QString kVersion;
-    VSQSettings m_settings;
-    QNetworkAccessManager *m_networkAccessManager;
-    VSQCrashReporter m_crashReporter;
-    QQmlApplicationEngine m_engine;
-    VSQMessenger m_messenger;
-    KeyboardEventFilter *m_keyboardEventFilter;
-};
-
-#endif // VSQApplication
+void KeyboardEventFilter::updateKeyboardRectangle()
+{
+    const auto rect = m_inputMethod->keyboardRectangle();
+    m_keyboardRectangle = rect;
+    emit keyboardRectangleChanged(rect);
+}

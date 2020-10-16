@@ -66,6 +66,7 @@ VSQApplication::VSQApplication()
     , m_crashReporter(&m_settings, m_networkAccessManager, this)
     , m_engine()
     , m_messenger(m_networkAccessManager, &m_settings)
+    , m_keyboardEventFilter(new KeyboardEventFilter(this))
 {
     m_settings.print();
     m_networkAccessManager->setAutoDeleteReplies(true);
@@ -73,6 +74,7 @@ VSQApplication::VSQApplication()
     VSQMacos::instance().startUpdatesTimer();
 #endif
     registerMetaTypes();
+    qRegisterMetaType<KeyboardEventFilter *>("KeyboardEventFilter*");
 }
 
 /******************************************************************************/

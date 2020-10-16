@@ -32,69 +32,39 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
-#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
+#ifndef VSQ_KEYBOARDEVENTFILTER_H
+#define VSQ_KEYBOARDEVENTFILTER_H
 
-#include <QtCore>
-#include <QGuiApplication>
-#include <QQmlApplicationEngine>
+#include <QObject>
+#include <QRectF>
 
-#include <KeyboardEventFilter.h>
-#include <VSQCrashReporter.h>
-#include <VSQMessenger.h>
-#include <VSQSettings.h>
-#include <macos/VSQMacos.h>
+class QInputMethod;
+class QQuickItem;
 
-class QNetworkAccessManager;
-
-class VSQLogging;
-
-using namespace VSQ;
-
-class VSQApplication : public QObject
+namespace VSQ
+{
+class KeyboardEventFilter : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString organizationDisplayName READ organizationDisplayName CONSTANT)
-    Q_PROPERTY(QString applicationDisplayName READ applicationDisplayName CONSTANT)
-    Q_PROPERTY(KeyboardEventFilter *keyboardEventFilter MEMBER m_keyboardEventFilter CONSTANT)
+    Q_PROPERTY(QRectF keyboardRectangle MEMBER m_keyboardRectangle NOTIFY keyboardRectangleChanged)
 
 public:
-    VSQApplication();
-    virtual ~VSQApplication() = default;
+    explicit KeyboardEventFilter(QObject *parent);
+    ~KeyboardEventFilter() override;
 
-    static void initialize();
+    Q_INVOKABLE void install(QQuickItem *item);
 
-    int run(const QString &basePath, VSQLogging *logging);
-
-    Q_INVOKABLE
-    void reloadQml();
-
-    Q_INVOKABLE
-    void checkUpdates();
-
-    Q_INVOKABLE QString
-    currentVersion() const;
-
-    Q_INVOKABLE void
-    sendReport();
-
-    // Names
-
-    QString organizationDisplayName() const;
-    QString applicationDisplayName() const;
-
-private slots:
-    void
-    onApplicationStateChanged(Qt::ApplicationState state);
+signals:
+    void keyboardRectangleChanged(const QRectF &);
 
 private:
-    static const QString kVersion;
-    VSQSettings m_settings;
-    QNetworkAccessManager *m_networkAccessManager;
-    VSQCrashReporter m_crashReporter;
-    QQmlApplicationEngine m_engine;
-    VSQMessenger m_messenger;
-    KeyboardEventFilter *m_keyboardEventFilter;
-};
+    bool eventFilter(QObject *obj, QEvent *evt) override;
 
-#endif // VSQApplication
+    void updateKeyboardRectangle();
+
+    QInputMethod *m_inputMethod;
+    QRectF m_keyboardRectangle;
+};
+}
+
+#endif // VSQ_KEYBOARDEVENTFILTER_H

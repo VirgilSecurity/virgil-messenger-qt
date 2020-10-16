@@ -120,6 +120,7 @@ HEADERS += \
         include/helpers/VSQSingleton.h \
         include/helpers/FutureWorker.h \
         include/ui/VSQUiHelper.h \
+        include/KeyboardEventFilter.h \
         # Logging
         include/logging/VSQLogging.h \
         include/logging/VSQLogWorker.h \
@@ -158,6 +159,7 @@ SOURCES += \
         src/VSQApplication.cpp \
         src/ui/VSQUiHelper.cpp \
         src/hal.cpp \
+        src/KeyboardEventFilter.cpp \
         # Logging
         src/logging/VSQLogging.cpp \
         src/logging/VSQLogWorker.cpp
