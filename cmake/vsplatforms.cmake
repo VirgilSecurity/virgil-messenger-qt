@@ -116,11 +116,16 @@ endif()
 # ---------------------------------------------------------------------------
 # Set CMAKE_FIND_ROOT_PATH for QT cmake include directory
 # ---------------------------------------------------------------------------
-if (NOT CMAKE_FIND_ROOT_PATH AND NOT CMAKE_PREFIX_PATH AND DEFINED ENV{QTDIR})
+if (NOT CMAKE_PREFIX_PATH AND DEFINED ENV{QTDIR})
     get_filename_component(QT_RELATIVE_PATH "$ENV{QTDIR}/../" ABSOLUTE)
     list(APPEND CMAKE_FIND_ROOT_PATH "${QT_RELATIVE_PATH}/${QT_PREFIX_PATH}")
     list(APPEND CMAKE_PREFIX_PATH "${QT_RELATIVE_PATH}/${QT_PREFIX_PATH}")
-    message("-- Set CMAKE_FIND_ROOT_PATH from QTDIR enviroment value: [ ${CMAKE_FIND_ROOT_PATH} ]")
+    message(STATUS "Set CMAKE_FIND_ROOT_PATH from QTDIR enviroment value: [ ${CMAKE_FIND_ROOT_PATH} ]")
+elseif(CMAKE_PREFIX_PATH)
+    list(APPEND CMAKE_FIND_ROOT_PATH "${CMAKE_PREFIX_PATH}")
+    message(STATUS "Set CMAKE_FIND_ROOT_PATH from CMAKE_PREFIX_PATH: [ ${CMAKE_FIND_ROOT_PATH} ]")    
+else()    
+    message(FATAL_ERROR "CMAKE_PREFIX_PATH or ENV:QTDIR not set !!!")    
 endif()
 
 # ---------------------------------------------------------------------------
