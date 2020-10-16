@@ -14,7 +14,7 @@ import "theme"
 ApplicationWindow {
     id: root
     visible: true
-    title: settings.applicationDisplayName
+    title: app.applicationDisplayName
 
     Binding on x {
         when: Platform.isDesktop;
@@ -197,9 +197,9 @@ ApplicationWindow {
     Component.onCompleted: {
         Platform.detect()
         Messenger.informationRequested.connect(showPopupInform)
-//        Logging.crashReportRequested.connect(sendReportAsk.open)
-//        Logging.reportSent.connect(showPopupSuccess)
-//        Logging.reportSentErr.connect(showPopupError)
+//        crashReporter.crashReportRequested.connect(sendReportAsk.open)
+//        crashReporter.reportSent.connect(showPopupSuccess)
+//        crashReporter.reportSentErr.connect(showPopupError)
     }
 
     onActiveFocusItemChanged: {

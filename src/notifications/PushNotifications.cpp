@@ -32,44 +32,25 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <iostream>
-#include <VSQApplication.h>
-#ifdef VS_MOBILE
-#include <QGuiApplication>
-#else
-#include <QApplication>
-#endif
-#include <android/VSQAndroid.h>
-#include <logging/VSQLogging.h>
+#include "PushNotifications.h"
 
-#if (VSQ_WEBDRIVER_DEBUG)
-#include "Test/Headers.h"
-#endif
+using namespace notifications;
 
-int
-main(int argc, char *argv[]) {
+using Self = PushNotifications;
 
-#if (VS_ANDROID)
-    VSQAndroid::prepare();
-#endif
+Self &
+Self::instance() {
+    static Self instance;
+    return instance;
+}
 
-#if (VSQ_WEBDRIVER_DEBUG)
-    wd_setup(argc, argv);
-#endif
+void
+Self::registerToken(QString token) {
+    m_token = token;
+    emit tokenUpdated();
+}
 
-    VSQApplication::initialize();
-#ifdef VS_MOBILE
-    QGuiApplication a(argc, argv);
-#else
-    QApplication a(argc, argv);
-#endif
-    VSQLogging logging;
-
-    QString baseUrl;
-    if (2 == argc && argv[1] && argv[1][0]) {
-        baseUrl = QString::fromLocal8Bit(argv[1]);
-        qDebug() << "QML URL: " << baseUrl;
-    }
-
-    return VSQApplication().run(baseUrl, &logging);
+const QString &
+Self::token() const noexcept {
+    return m_token;
 }

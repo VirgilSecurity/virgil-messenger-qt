@@ -38,7 +38,7 @@
 
 Q_LOGGING_CATEGORY(lcDev, "dev");
 
-void registerCommonTypes()
+void registerMetaTypes()
 {
     qRegisterMetaType<Seconds>("Seconds");
     qRegisterMetaType<DataSize>("DataSize");

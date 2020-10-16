@@ -44,7 +44,7 @@ Item {
     readonly property url mainLogo: "../resources/icons/Logo-Big.png"
 
     // texts
-    readonly property string mainLogoText: settings.organizationDisplayName
+    readonly property string mainLogoText: app.organizationDisplayName
     readonly property string mainFont: robotoRegular.name
     readonly property string mainFontBold: robotoBold.name
 }

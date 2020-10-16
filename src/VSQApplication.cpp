@@ -38,9 +38,13 @@
 #include <VSQApplication.h>
 #include <VSQCommon.h>
 #include <VSQClipboardProxy.h>
-#include <android/VSQAndroid.h>
+#include <VSQCustomer.h>
+#include <logging/VSQLogging.h>
 #include <ui/VSQUiHelper.h>
-#include <virgil/iot/logger/logger.h>
+
+#if defined(VS_ANDROID) && VS_ANDROID
+#include "FirebaseListener.h"
+#endif // VS_ANDROID
 
 #include <QGuiApplication>
 #include <QFont>
@@ -59,31 +63,44 @@ const QString VSQApplication::kVersion = "unknown";
 VSQApplication::VSQApplication()
     : m_settings(this)
     , m_networkAccessManager(new QNetworkAccessManager(this))
+    , m_crashReporter(&m_settings, m_networkAccessManager, this)
     , m_engine()
     , m_messenger(m_networkAccessManager, &m_settings)
-    , m_logging(m_networkAccessManager)
 {
+    m_settings.print();
     m_networkAccessManager->setAutoDeleteReplies(true);
 #if (MACOS)
     VSQMacos::instance().startUpdatesTimer();
 #endif
-    registerCommonTypes();
+    registerMetaTypes();
+}
+
+/******************************************************************************/
+void VSQApplication::initialize()
+{
+    // Attributes
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+
+    // Organization params
+    QCoreApplication::setOrganizationName(Customer::OrganizationName);
+    QCoreApplication::setOrganizationDomain(Customer::OrganizationDomain);
+
+    // Application params
+    QCoreApplication::setApplicationName(Customer::ApplicationName);
+    QGuiApplication::setApplicationDisplayName(Customer::ApplicationDisplayName);
+
+    // TODO(fpohtmeh): set version, use in currentVersion()
 }
 
 /******************************************************************************/
 int
-VSQApplication::run(const QString &basePath) {
+VSQApplication::run(const QString &basePath, VSQLogging *logging) {
 
     VSQUiHelper uiHelper;
 
-    vs_logger_init(VirgilIoTKit::VS_LOGLEV_DEBUG);
-
-    // Initialization loging
-#ifdef VS_DEVMODE
-    qInstallMessageHandler(&VSQLogging::logger_qt_redir); // Redirect standard logging
-#endif
-    m_messenger.setLogging(&m_logging);
-    m_logging.setkVersion(kVersion);
+    m_messenger.setCrashReporter(&m_crashReporter);
+    m_crashReporter.setkVersion(kVersion);
 
     QUrl url;
     if (basePath.isEmpty()) {
@@ -99,7 +116,8 @@ VSQApplication::run(const QString &basePath) {
     context->setContextProperty("app", this);
     context->setContextProperty("clipboard", new VSQClipboardProxy(QGuiApplication::clipboard()));
     context->setContextProperty("Messenger", &m_messenger);
-    context->setContextProperty("Logging", &m_logging);
+    context->setContextProperty("logging", logging);
+    context->setContextProperty("crashReporter", &m_crashReporter);
     context->setContextProperty("settings", &m_settings);
     context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
     context->setContextProperty("ChatModel", &m_messenger.getChatModel());
@@ -112,6 +130,11 @@ VSQApplication::run(const QString &basePath) {
     connect(qApp, &QGuiApplication::aboutToQuit, std::bind(&VSQMessenger::setStatus, &m_messenger, VSQMessenger::EnStatus::MSTATUS_UNAVAILABLE));
 
     reloadQml();
+
+#if defined(VS_ANDROID) && VS_ANDROID
+    notifications::android::FirebaseListener::instance().init();
+#endif
+
     return QGuiApplication::instance()->exec();
 }
 
@@ -147,14 +170,17 @@ VSQApplication::currentVersion() const {
 /******************************************************************************/
 void
 VSQApplication::sendReport() {
-    m_logging.sendLogFiles();
+    m_crashReporter.sendLogFiles();
 }
 
-void VSQApplication::hideSplashScreen()
+QString VSQApplication::organizationDisplayName() const
 {
-#ifdef VS_ANDROID
-    VSQAndroid::hideSplashScreen();
-#endif
+    return Customer::OrganizationDisplayName;
+}
+
+QString VSQApplication::applicationDisplayName() const
+{
+    return Customer::ApplicationDisplayName;
 }
 
 /******************************************************************************/
@@ -179,6 +205,5 @@ VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
     }
 #endif // VS_ANDROID
 }
-
 
 /******************************************************************************/

@@ -32,44 +32,47 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <iostream>
-#include <VSQApplication.h>
-#ifdef VS_MOBILE
-#include <QGuiApplication>
-#else
-#include <QApplication>
-#endif
-#include <android/VSQAndroid.h>
-#include <logging/VSQLogging.h>
+#ifndef VIRGIL_MESSENGER_NOTIFICATIONS_ANDROID_FIREBASE_LISTENER_H_INCLUDED
+#define VIRGIL_MESSENGER_NOTIFICATIONS_ANDROID_FIREBASE_LISTENER_H_INCLUDED
 
-#if (VSQ_WEBDRIVER_DEBUG)
-#include "Test/Headers.h"
-#endif
+#include <firebase/messaging.h>
+#include <firebase/app.h>
+#include <firebase/util.h>
 
-int
-main(int argc, char *argv[]) {
+#include <QtCore>
 
-#if (VS_ANDROID)
-    VSQAndroid::prepare();
-#endif
+class QAndroidJniEnvironment;
 
-#if (VSQ_WEBDRIVER_DEBUG)
-    wd_setup(argc, argv);
-#endif
 
-    VSQApplication::initialize();
-#ifdef VS_MOBILE
-    QGuiApplication a(argc, argv);
-#else
-    QApplication a(argc, argv);
-#endif
-    VSQLogging logging;
+namespace notifications {
+namespace android {
 
-    QString baseUrl;
-    if (2 == argc && argv[1] && argv[1][0]) {
-        baseUrl = QString::fromLocal8Bit(argv[1]);
-        qDebug() << "QML URL: " << baseUrl;
-    }
+class FirebaseListener : public firebase::messaging::Listener {
+public:
+    static FirebaseListener& instance();
 
-    return VSQApplication().run(baseUrl, &logging);
-}
+    void
+    init();
+
+    virtual void
+    OnTokenReceived(const char *token);
+
+    virtual void
+    OnMessage(const firebase::messaging::Message &message);
+
+private:
+    FirebaseListener();
+
+    void
+    showNotification(QString title, QString message);
+
+private:
+    QAndroidJniEnvironment *m_jniEnv;
+    firebase::App *m_app;
+    firebase::ModuleInitializer m_initializer;
+};
+
+} // namespace android
+} // namespace notifications
+
+#endif // VIRGIL_MESSENGER_NOTIFICATIONS_ANDROID_FIREBASE_LISTENER_H_INCLUDED

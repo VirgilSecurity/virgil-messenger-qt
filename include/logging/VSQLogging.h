@@ -32,56 +32,39 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VSQLOGGING_H
 #define VSQLOGGING_H
 
-#include <iostream>
-#include <string>
-#include <QCoreApplication>
+#include <QObject>
 
-class QNetworkAccessManager;
+#include "VSQMessageLogContext.h"
 
-class VSQLogging : public QObject {
+class QThread;
+
+class VSQLogging : public QObject
+{
     Q_OBJECT
+
 public:
-    explicit VSQLogging(QNetworkAccessManager *networkAccessManager);
+    explicit VSQLogging(QObject *parent = nullptr);
     virtual ~VSQLogging();
 
-    void checkAppCrash();
-    void resetRunFlag();
-    Q_INVOKABLE
-    bool sendLogFiles();
-    void setVirgilUrl(QString VirgilUrl);
-    void setkVersion(QString AppVersion);
-    void setkOrganization(QString strkOrganization);
-    void setkApp(QString strkApp);
-
-    static void logger_qt_redir(QtMsgType type, const QMessageLogContext &context, const QString &msg);
-
 signals:
-    void crashReportRequested();
-    void reportSent(QString msg);
-    void reportSentErr(QString msg);
-    void newMessage(const QString &message);
+    void messageCreated(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
+    void formattedMessageCreated(const QString &message);
 
 private:
-    static const QString endpointSendReport;
+    void registerMetaTypes();
+    void formatMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
 
-    bool checkRunFlag();
-    bool sendFileToBackendRequest(QByteArray fileData);
-    void setRunFlag(bool runState);
-
-    QNetworkAccessManager *manager;
-    QString currentVirgilUrl;
-    QString kVersion;
-    QString kOrganization;
-    QString kApp;
+    static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
 
     static VSQLogging *m_instance;
 
-private slots:
-    void endpointReply();
+    std::unique_ptr<QThread> m_workerThread;
 };
+
+Q_DECLARE_METATYPE(QtMsgType)
+Q_DECLARE_METATYPE(VSQMessageLogContext)
 
 #endif // VSQLOGGING_H

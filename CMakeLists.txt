@@ -37,11 +37,11 @@ cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 # Include Cmake helpers
 # ---------------------------------------------------------------------------
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+
 include(vsplatforms)
 include(varpadding)
 include(getprebuild)
 include(customers)
-
 
 # Target name and version
 set(VS_TARGET_NAME "virgil-messenger")
@@ -50,11 +50,15 @@ set(VS_TARGET_VERSION "3.4.18")
 get_prebuild()
 
 set(VS_QT_EXTRA "")
+# ---------------
 # IOS, IOS_SIM
+# ---------------
 if(VS_PLATFORM STREQUAL "ios" OR VS_PLATFORM STREQUAL "ios-sim")
     set(VS_TARGET_NAME "VirgilMessenger")
 
+# ---------------
 # Android
+# ---------------
 elseif(VS_PLATFORM STREQUAL "android")
     # Get firebase
     get_firebase()
@@ -141,12 +145,29 @@ vs_customer_prepare()
 # ---------------------------------------------------------------------------
 #   Build system type
 # ---------------------------------------------------------------------------
+# ---------------
 # Android
+# ---------------
 if(VS_PLATFORM STREQUAL "android")
     message("-- Prepare sources for Android ...")
     add_library(${VS_TARGET_NAME} SHARED)
-
+    include(${ANDROID_SDK}/android_openssl/CMakeLists.txt)
+    
+    if (ANDROID_ABI STREQUAL "armeabi-v7a")
+        set(VS_ANDROID_SSL_DIR "${SSL_ROOT_PATH}/latest/arm/")
+    elseif (ANDROID_ABI STREQUAL "arm64-v8a")
+	set(VS_ANDROID_SSL_DIR "${SSL_ROOT_PATH}/latest/arm64/")
+    elseif (ANDROID_ABI STREQUAL "x86")
+	set(VS_ANDROID_SSL_DIR "${SSL_ROOT_PATH}/latest/x86/")
+    elseif (ANDROID_ABI STREQUAL "x86_64")
+	set(VS_ANDROID_SSL_DIR "${SSL_ROOT_PATH}/latest/x86_64/")
+    endif()
+    
+    message(STATUS "Android OpenSSL root path:    [${SSL_ROOT_PATH}]")    
+    message(STATUS "Android OpenSSL library path: [${VS_ANDROID_SSL_DIR}]")
+# ---------------
 # MacOS    
+# ---------------
 elseif(VS_PLATFORM STREQUAL "macos")
 
     set(App_ICON "${VS_CUSTOMER_DIR}/platforms/macos/pkg_resources/${MACOSX_BUNDLE_ICON_FILE}.icns")
@@ -183,78 +204,101 @@ endif()
 target_sources(${VS_TARGET_NAME}
 
         PRIVATE
-        # -- Includes
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQApplication.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQAttachmentBuilder.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQClipboardProxy.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQCommon.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQCustomer.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQContactManager.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQCryptoTransferManager.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQDiscoveryManager.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQDownload.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQLastActivityIq.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQLastActivityManager.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQLogging.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQMessenger.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQSettings.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQSqlChatModel.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQSqlConversationModel.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQNetworkAnalyzer.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQTransfer.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQTransferManager.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQUpload.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQUtils.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/android/VSQAndroid.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/macos/VSQMacos.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/helpers/VSQSingleton.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/ui/VSQUiHelper.h
-        # Thirdparty
-        ${CMAKE_CURRENT_LIST_DIR}/include/thirdparty/optional/optional.hpp
-        # Push notification (Android)
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/VSQPushNotifications.h>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/android/VSQFirebaseListener.h>
-        # Customer includes
-        ${VS_CUSTOMER_INCLUDES}
-        
-	# Sources
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQAttachmentBuilder.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQClipboardProxy.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQCommon.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQContactManager.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQCryptoTransferManager.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQDiscoveryManager.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQDownload.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQMessenger.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQLastActivityIq.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQLastActivityManager.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQLogging.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQSettings.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQSqlChatModel.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQSqlConversationModel.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQNetworkAnalyzer.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQTransfer.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQTransferManager.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQUpload.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQUtils.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/android/VSQAndroid.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQApplication.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/ui/VSQUiHelper.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/hal.cpp
+	# -- Headers
+	${CMAKE_CURRENT_LIST_DIR}/include/VSQApplication.h
+	${CMAKE_CURRENT_LIST_DIR}/include/VSQAttachmentBuilder.h
+	${CMAKE_CURRENT_LIST_DIR}/include/VSQClipboardProxy.h
+	${CMAKE_CURRENT_LIST_DIR}/include/VSQCommon.h
+	${CMAKE_CURRENT_LIST_DIR}/include/VSQContactManager.h
+	${CMAKE_CURRENT_LIST_DIR}/include/VSQCrashReporter.h
+	${CMAKE_CURRENT_LIST_DIR}/include/VSQCryptoTransferManager.h
+	${CMAKE_CURRENT_LIST_DIR}/include/VSQDiscoveryManager.h
+	${CMAKE_CURRENT_LIST_DIR}/include/VSQDownload.h
+	${CMAKE_CURRENT_LIST_DIR}/include/VSQLastActivityIq.h
+	${CMAKE_CURRENT_LIST_DIR}/include/VSQLastActivityManager.h
+	${CMAKE_CURRENT_LIST_DIR}/include/VSQMessenger.h
+	${CMAKE_CURRENT_LIST_DIR}/include/VSQSettings.h
+	${CMAKE_CURRENT_LIST_DIR}/include/VSQSqlChatModel.h
+	${CMAKE_CURRENT_LIST_DIR}/include/VSQSqlConversationModel.h
+	${CMAKE_CURRENT_LIST_DIR}/include/VSQNetworkAnalyzer.h
+	${CMAKE_CURRENT_LIST_DIR}/include/VSQTransfer.h
+	${CMAKE_CURRENT_LIST_DIR}/include/VSQTransferManager.h
+	${CMAKE_CURRENT_LIST_DIR}/include/VSQUpload.h
+	${CMAKE_CURRENT_LIST_DIR}/include/VSQUtils.h
+	${CMAKE_CURRENT_LIST_DIR}/include/android/VSQAndroid.h
+	$<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/include/macos/VSQMacos.h>
+	${CMAKE_CURRENT_LIST_DIR}/include/helpers/VSQSingleton.h
+	${CMAKE_CURRENT_LIST_DIR}/include/helpers/FutureWorker.h
+	${CMAKE_CURRENT_LIST_DIR}/include/ui/VSQUiHelper.h
+	# Logging
+	${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogging.h
+	${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogWorker.h
+	${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQMessageLogContext.h
+	# Generated
+	${CMAKE_CURRENT_LIST_DIR}/include/VSQCustomer.h
+	# Thirdparty
+	${CMAKE_CURRENT_LIST_DIR}/include/thirdparty/optional/optional.hpp
+
+	# IOS
+	$<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/PushNotifications.h>
+	$<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/XmppPushNotifications.h>
+
+	# Android
+	$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/PushNotifications.h>
+	$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/XmppPushNotifications.h>
+	$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/android/FirebaseListener.h>
+
+	# Customer includes
+	${VS_CUSTOMER_INCLUDES}        
+
+	# -- Sources
+	${CMAKE_CURRENT_LIST_DIR}/src/VSQAttachmentBuilder.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/VSQClipboardProxy.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/VSQCommon.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/VSQContactManager.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/VSQCrashReporter.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/VSQCryptoTransferManager.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/VSQDiscoveryManager.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/VSQDownload.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/VSQMessenger.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/VSQLastActivityIq.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/VSQLastActivityManager.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/VSQSettings.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/VSQSqlChatModel.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/VSQSqlConversationModel.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/VSQNetworkAnalyzer.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/VSQTransfer.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/VSQTransferManager.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/VSQUpload.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/VSQUtils.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/android/VSQAndroid.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/VSQApplication.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/ui/VSQUiHelper.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/hal.cpp
+	# Logging
+	${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogging.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogWorker.cpp
+	# QT QRC
+	${CMAKE_CURRENT_LIST_DIR}/src/resources.qrc
+	${VS_CUSTOMER_DIR}/src/customer.qrc
+
+	# MACOS
+	$<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/src/macos/VSQMacos.mm>
+
+	# IOS
+	$<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/AppDelegate.mm>
+	$<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/PushNotifications.cpp>
+	$<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/XmppPushNotifications.cpp>
+
+	# Android
+	$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/PushNotifications.cpp>
+	$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/XmppPushNotifications.cpp>
+	$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/android/FirebaseListener.cpp>
         
         #   QuickFuture
         ${QUICKFUTURE_DIR}/qffuture.cpp
         
-        # Push notification
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/VSQPushNotifications.cpp>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/android/VSQFirebaseListener.cpp>
-        
-        # MacOS
-        $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/src/macos/VSQMacos.mm>
-
-        # Qt Resources
-        ${CMAKE_CURRENT_LIST_DIR}/src/resources.qrc
         # Customer sources
         ${VS_CUSTOMER_SOURCES}
         )
@@ -263,6 +307,7 @@ target_link_directories(${VS_TARGET_NAME}
         PRIVATE
         $<BUILD_INTERFACE:${PREBUILT_LIB_DIR}>
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${PREBUILT_DIR}/firebase_cpp_sdk/libs/android/${ANDROID_ABI}/c++>>        
+        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${VS_ANDROID_SSL_DIR}>>
         )
 
 target_link_libraries(${VS_TARGET_NAME}
@@ -306,9 +351,9 @@ target_link_libraries(${VS_TARGET_NAME}
         $<$<STREQUAL:"${VS_PLATFORM}","android">:firebase_app>        
         $<$<STREQUAL:"${VS_PLATFORM}","android">:firebase_auth> 
         $<$<STREQUAL:"${VS_PLATFORM}","android">:curl>                
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:ssl>        	               
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:crypto>        		
-        
+        $<$<STREQUAL:"${VS_PLATFORM}","android">:ssl_1_1>        	               
+        $<$<STREQUAL:"${VS_PLATFORM}","android">:crypto_1_1>        		
+
         $<$<STREQUAL:"${VS_PLATFORM}","linux">:curl>        
         
         $<$<STREQUAL:"${VS_PLATFORM}","windows">:curl>                
@@ -325,7 +370,9 @@ target_include_directories(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}/qxmpp>
         $<BUILD_INTERFACE:${QUICKFUTURE_DIR}>
         $<BUILD_INTERFACE:${VS_CUSTOMER_INCLUDE_DIR}>
-	$<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${PREBUILT_DIR}/firebase_cpp_sdk/include>>    
+	$<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications>>    
+	$<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/android>>
+	$<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${PREBUILT_DIR}/firebase_cpp_sdk/include>>    	
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","macos">:${PREBUILT_DIR}/${VS_PLATFORM}/sparkle/Sparkle.framework/Headers>>        
         )
 

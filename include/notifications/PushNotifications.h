@@ -32,26 +32,38 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef NOTIFICATIONHANDLER_H
-#define NOTIFICATIONHANDLER_H
-
-#if VS_PUSHNOTIFICATIONS
+#ifndef VIRGIL_MESSENGER_NOTIFICATIONS_PUSH_NOTIFICATIONS_H_INCLUDED
+#define VIRGIL_MESSENGER_NOTIFICATIONS_PUSH_NOTIFICATIONS_H_INCLUDED
 
 #include <QObject>
-#include <helpers/VSQSingleton.h>
-#include "android/VSQFirebaseListener.h"
 
-class VSQPushNotifications : public QObject, public VSQSingleton<VSQPushNotifications>
-#if VS_ANDROID
-        , public VSQFirebaseListener
-#endif
-{
+namespace notifications {
+
+class PushNotifications : public QObject {
     Q_OBJECT
+
+signals:
+    void
+    tokenUpdated();
+
 public:
-    void startMessaging();
-    void registerToken(const void *bytes, size_t length);
+    static PushNotifications &
+    instance();
+
+    void
+    registerToken(QString token);
+
+    const QString &
+    token() const noexcept;
+
+protected:
+    PushNotifications() = default;
+    virtual ~PushNotifications() noexcept = default;
+
+private:
+    QString m_token;
 };
 
-#endif // VS_PUSHNOTIFICATIONS
+} // namespace notifications
 
-#endif // NOTIFICATIONHANDLER_H
+#endif // VIRGIL_MESSENGER_NOTIFICATIONS_PUSH_NOTIFICATIONS_H_INCLUDED

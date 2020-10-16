@@ -152,6 +152,6 @@ struct StMessage
 };
 Q_DECLARE_METATYPE(StMessage);
 
-void registerCommonTypes();
+void registerMetaTypes();
 
 #endif // VSQ_COMMON_H

@@ -32,44 +32,29 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <iostream>
-#include <VSQApplication.h>
-#ifdef VS_MOBILE
-#include <QGuiApplication>
-#else
-#include <QApplication>
-#endif
-#include <android/VSQAndroid.h>
-#include <logging/VSQLogging.h>
+#ifndef VSQLOGWORKER_H
+#define VSQLOGWORKER_H
 
-#if (VSQ_WEBDRIVER_DEBUG)
-#include "Test/Headers.h"
-#endif
+#include <QObject>
 
-int
-main(int argc, char *argv[]) {
+#include "VSQMessageLogContext.h"
 
-#if (VS_ANDROID)
-    VSQAndroid::prepare();
-#endif
+class VSQLogWorker : public QObject
+{
+    Q_OBJECT
 
-#if (VSQ_WEBDRIVER_DEBUG)
-    wd_setup(argc, argv);
-#endif
+public:
+    explicit VSQLogWorker(QObject *parent = nullptr);
+    ~VSQLogWorker() override;
 
-    VSQApplication::initialize();
-#ifdef VS_MOBILE
-    QGuiApplication a(argc, argv);
-#else
-    QApplication a(argc, argv);
-#endif
-    VSQLogging logging;
+    void start();
+    void processMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
 
-    QString baseUrl;
-    if (2 == argc && argv[1] && argv[1][0]) {
-        baseUrl = QString::fromLocal8Bit(argv[1]);
-        qDebug() << "QML URL: " << baseUrl;
-    }
+private:
+    void fileMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
+    void consoleMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
 
-    return VSQApplication().run(baseUrl, &logging);
-}
+    bool m_logToFile = false;
+};
+
+#endif // VSQLOGGWORKER_H

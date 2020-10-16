@@ -11,5 +11,5 @@ Dialog {
     modal: true
     anchors.centerIn: parent
     standardButtons: Dialog.Yes | StandardButton.No
-    onAccepted: Logging.sendLogFiles()
+    onAccepted: crashReporter.sendLogFiles()
 }

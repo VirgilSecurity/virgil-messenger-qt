@@ -49,7 +49,7 @@
 
 #include "VSQSqlConversationModel.h"
 #include "VSQSqlChatModel.h"
-#include "VSQLogging.h"
+#include "VSQCrashReporter.h"
 #include <VSQNetworkAnalyzer.h>
 #include <VSQAttachmentBuilder.h>
 #include <VSQCryptoTransferManager.h>
@@ -110,10 +110,14 @@ public:
 
     void setApplicationActive(bool active);
 
+    // New methods
+
+    Q_INVOKABLE void signIn(const QString &userId);
+
 public slots:
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    signIn(QString user);
+    signInAsync(QString user);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     backupUserKey(QString password);
@@ -133,9 +137,6 @@ public slots:
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     deleteUser(QString user);
 
-    Q_INVOKABLE QStringList
-    usersList();
-
     Q_INVOKABLE void
     checkState();
 
@@ -154,7 +155,7 @@ public slots:
     Q_INVOKABLE void
     setStatus(VSQMessenger::EnStatus status);
 
-    void setLogging(VSQLogging *loggingPtr);
+    void setCrashReporter(VSQCrashReporter *crashReporter);
 
     Q_INVOKABLE void setCurrentRecipient(const QString &recipient);
 
@@ -163,6 +164,8 @@ public slots:
     Q_INVOKABLE void downloadAttachment(const QString &messageId);
 
     Q_INVOKABLE void openAttachment(const QString &messageId);
+
+    Q_INVOKABLE void hideSplashScreen();
 
 signals:
     void
@@ -198,6 +201,13 @@ signals:
 
     void downloadThumbnail(const StMessage message, const QString sender, QPrivateSignal);
 
+    // New signals
+
+    void signInUserEmpty();
+    void signInStarted(const QString &userId);
+    void signedIn(const QString &userId);
+    void signInErrorOccured(const QString &errorText);
+
 private slots:
     void onConnected();
     void onMessageDelivered(const QString&, const QString&);
@@ -216,7 +226,9 @@ private slots:
     void onAttachmentProgressChanged(const QString &uploadId, const DataSize bytesReceived, const DataSize bytesTotal);
     void onAttachmentDecrypted(const QString &uploadId, const QString &filePath);
 
-    Q_INVOKABLE void onSubscribePushNotifications(bool enable);
+    void registerForNotifications();
+    void deregisterFromNotifications();
+    void onPushNotificationTokenUpdate();
 
 private:
     QXmppClient m_xmpp;
@@ -228,7 +240,7 @@ private:
 
     VSQSqlConversationModel *m_sqlConversations;
     VSQSqlChatModel *m_sqlChatModel;
-    VSQLogging *m_logging;
+    VSQCrashReporter *m_crashReporter;
     VSQNetworkAnalyzer m_networkAnalyzer;
     VSQSettings *m_settings;
     VSQCryptoTransferManager *m_transferManager;
@@ -238,13 +250,10 @@ private:
     QMutex m_messageGuard;
     QString m_user;
     QString m_userId;
-    QString m_deviceId;
     QString m_recipient;
-    QString m_xmppPass;
     VSQEnvType m_envType;
     static const VSQEnvType _defaultEnv = PROD;
     QXmppConfiguration m_conf;
-    static const QString kUsers;
     static const QString kProdEnvPrefix;
     static const QString kStgEnvPrefix;
     static const QString kDevEnvPrefix;
@@ -280,16 +289,10 @@ private:
     _reconnect();
 
     bool
-    _saveCredentials(const QString &user, const QString &deviceId, const vs_messenger_virgil_user_creds_t &creds);
+    _saveCredentials(const QString &user, const vs_messenger_virgil_user_creds_t &creds);
 
     bool
-    _loadCredentials(const QString &user, QString &deviceId, vs_messenger_virgil_user_creds_t &creds);
-
-    void
-    _addToUsersList(const QString &user);
-
-    void
-    _saveUsersList(const QStringList &users);
+    _loadCredentials(const QString &user, vs_messenger_virgil_user_creds_t &creds);
 
     QString
     _prepareLogin(const QString &user);

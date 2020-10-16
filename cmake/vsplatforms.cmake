@@ -104,6 +104,9 @@ elseif(VS_PLATFORM STREQUAL "macos")
 # -- IOS
 elseif(VS_PLATFORM STREQUAL "ios")
     set(QT_PREFIX_PATH "ios")
+    set(CMAKE_SYSTEM_NAME "iOS")
+    set(CMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH NO)
+    set(CMAKE_IOS_INSTALL_COMBINED YES)
 
 # -- Windows
 elseif(VS_PLATFORM STREQUAL "windows")

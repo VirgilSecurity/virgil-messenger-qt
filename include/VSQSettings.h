@@ -36,25 +36,44 @@
 #define VSQ_SETTINGS_H
 
 #include <QDir>
-#include <QSettings>
 #include <QRect>
+#include <QSettings>
 #include <QSize>
 
 #include "VSQCommon.h"
 
 Q_DECLARE_LOGGING_CATEGORY(lcSettings)
 
-class VSQSettings : public QObject
+class VSQSettings : public QSettings
 {
     Q_OBJECT
+    Q_PROPERTY(QString lastSignedInUser READ lastSignedInUser WRITE setLastSignedInUser NOTIFY lastSignedInUserChanged)
+    Q_PROPERTY(QStringList usersList READ usersList WRITE setUsersList NOTIFY usersListChanged)
     Q_PROPERTY(bool devMode READ devMode CONSTANT)
-    Q_PROPERTY(QString organizationDisplayName READ organizationDisplayName CONSTANT)
-    Q_PROPERTY(QString applicationDisplayName READ applicationDisplayName CONSTANT)
     Q_PROPERTY(QRect windowGeometry READ windowGeometry WRITE setWindowGeometry NOTIFY windowGeometryChanged)
 
 public:
     explicit VSQSettings(QObject *parent);
     ~VSQSettings();
+
+    void print();
+
+    // Users
+
+    void setLastSignedInUser(const QString &user);
+    QString lastSignedInUser() const;
+
+    void setUsersList(const QStringList &users);
+    QStringList usersList() const;
+    void addUserToList(const QString &user);
+
+    QString userCredential(const QString &user) const;
+    void setUserCredential(const QString &user, const QString &userCredential);
+
+    // Device id, run flags
+    QString deviceId() const;
+    bool runFlag() const;
+    void setRunFlag(bool run);
 
     // Attachments
 
@@ -63,11 +82,6 @@ public:
     QDir thumbnailsDir() const;
     QDir downloadsDir() const;
     QSize thumbnailMaxSize() const;
-
-    // Application/organization
-
-    QString organizationDisplayName() const;
-    QString applicationDisplayName() const;
 
     // Dev mode
     bool devMode() const;
@@ -80,10 +94,20 @@ public:
     Seconds lastSeenActivityInterval() const;
 
 signals:
-    void windowGeometryChanged(const QRect &rect); // Required by QML, not used
+    void lastSignedInUserChanged(const QString &);
+    void usersListChanged(const QStringList &);
+    void windowGeometryChanged(const QRect &); // Required by QML, not used
 
 private:
-    QSettings m_settings;
+    QString makeGroupKey(const QString &group, const QString &key) const;
+    void setGroupValue(const QString &group, const QString &key, const QVariant &value);
+    QVariant groupValue(const QString &group, const QString &key, const QVariant &defaultValue = QVariant()) const;
+    void removeGroupKey(const QString &group, const QString &key);
+    void removeGroup(const QString &group);
+
+    void createDeviceId();
+
+    QString m_sessionId;
     QDir m_attachmentCacheDir;
     QDir m_thumbnaisDir;
     QDir m_downloadsDir;

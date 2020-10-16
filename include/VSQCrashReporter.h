@@ -32,44 +32,47 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <iostream>
-#include <VSQApplication.h>
-#ifdef VS_MOBILE
-#include <QGuiApplication>
-#else
-#include <QApplication>
-#endif
-#include <android/VSQAndroid.h>
-#include <logging/VSQLogging.h>
+#ifndef VSQCRASHREPORTER_H
+#define VSQCRASHREPORTER_H
 
-#if (VSQ_WEBDRIVER_DEBUG)
-#include "Test/Headers.h"
-#endif
+#include <QObject>
 
-int
-main(int argc, char *argv[]) {
+class QNetworkAccessManager;
 
-#if (VS_ANDROID)
-    VSQAndroid::prepare();
-#endif
+class VSQSettings;
 
-#if (VSQ_WEBDRIVER_DEBUG)
-    wd_setup(argc, argv);
-#endif
+class VSQCrashReporter : public QObject
+{
+    Q_OBJECT
 
-    VSQApplication::initialize();
-#ifdef VS_MOBILE
-    QGuiApplication a(argc, argv);
-#else
-    QApplication a(argc, argv);
-#endif
-    VSQLogging logging;
+public:
+    VSQCrashReporter(VSQSettings *settings, QNetworkAccessManager *networkAccessManager, QObject *parent);
+    virtual ~VSQCrashReporter();
 
-    QString baseUrl;
-    if (2 == argc && argv[1] && argv[1][0]) {
-        baseUrl = QString::fromLocal8Bit(argv[1]);
-        qDebug() << "QML URL: " << baseUrl;
-    }
+    void checkAppCrash();
+    Q_INVOKABLE bool sendLogFiles();
+    void setVirgilUrl(QString VirgilUrl);
+    void setkVersion(QString AppVersion);
+    void setkOrganization(QString strkOrganization);
+    void setkApp(QString strkApp);
 
-    return VSQApplication().run(baseUrl, &logging);
-}
+signals:
+    void crashReportRequested();
+    void reportSent(QString msg);
+    void reportSentErr(QString msg);
+
+private:
+    bool sendFileToBackendRequest(QByteArray fileData);
+    void endpointReply();
+
+    VSQSettings *m_settings;
+    QNetworkAccessManager *m_manager;
+    QString m_currentVirgilUrl;
+    QString m_version;
+    QString m_organization;
+    QString m_app;
+
+    static const QString s_endpointSendReport;
+};
+
+#endif // VSQCRASHREPORTER_H

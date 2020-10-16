@@ -48,6 +48,10 @@ namespace Customer
     static QString OrganizationDomain = "@VS_ORGANIATION_DOMAIN@";
     static QString MessengerUrlTemplate = "@VS_MESSANGER_URL_TEMPLATE@";
     static QString XmppUrlTemplate = "@VS_XMPP_URL_TEMPLATE@";
+
+    static const QString kPushNotificationsProxy = "VS_PUSH_PROXY@";
+    static const QString kPushNotificationsTopic = "VS_PUSH_TOPIC@";
+    
 }
 
 #endif // VSQ_CUSTOMER_H

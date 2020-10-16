@@ -32,44 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <iostream>
-#include <VSQApplication.h>
-#ifdef VS_MOBILE
-#include <QGuiApplication>
-#else
-#include <QApplication>
-#endif
-#include <android/VSQAndroid.h>
-#include <logging/VSQLogging.h>
+#ifndef VSQ_FUTUREWORKER_H
+#define VSQ_FUTUREWORKER_H
 
-#if (VSQ_WEBDRIVER_DEBUG)
-#include "Test/Headers.h"
-#endif
+#include <QFutureWatcher>
 
-int
-main(int argc, char *argv[]) {
+#include "VSQMessenger.h"
 
-#if (VS_ANDROID)
-    VSQAndroid::prepare();
-#endif
+namespace VSQ
+{
+using FutureResult = VSQMessenger::EnResult;
+using Future = QFuture<FutureResult>;
+using FutureWatcher = QFutureWatcher<FutureResult>;
 
-#if (VSQ_WEBDRIVER_DEBUG)
-    wd_setup(argc, argv);
-#endif
-
-    VSQApplication::initialize();
-#ifdef VS_MOBILE
-    QGuiApplication a(argc, argv);
-#else
-    QApplication a(argc, argv);
-#endif
-    VSQLogging logging;
-
-    QString baseUrl;
-    if (2 == argc && argv[1] && argv[1][0]) {
-        baseUrl = QString::fromLocal8Bit(argv[1]);
-        qDebug() << "QML URL: " << baseUrl;
+class FutureWorker
+{
+public:
+    static void run(const Future &future, const std::function<void(FutureResult)> &resultHandler)
+    {
+        auto futureWatcher = new FutureWatcher();
+        futureWatcher->setFuture(future);
+        QObject::connect(futureWatcher, &FutureWatcher::finished, [=]() {
+            futureWatcher->deleteLater();
+            resultHandler(future.result());
+        });
     }
-
-    return VSQApplication().run(baseUrl, &logging);
+};
 }
+
+#endif // VSQ_FUTUREWORKER_H

@@ -32,44 +32,17 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <iostream>
-#include <VSQApplication.h>
-#ifdef VS_MOBILE
-#include <QGuiApplication>
-#else
-#include <QApplication>
-#endif
-#include <android/VSQAndroid.h>
-#include <logging/VSQLogging.h>
+#ifndef VSQMESSAGELOGCONTEXT_H
+#define VSQMESSAGELOGCONTEXT_H
 
-#if (VSQ_WEBDRIVER_DEBUG)
-#include "Test/Headers.h"
-#endif
+#include "VSQCommon.h"
 
-int
-main(int argc, char *argv[]) {
+// Copyable alternative of QMessageLogContext
+struct VSQMessageLogContext
+{
+    QString category;
+    QString fileName;
+    int line = 0;
+};
 
-#if (VS_ANDROID)
-    VSQAndroid::prepare();
-#endif
-
-#if (VSQ_WEBDRIVER_DEBUG)
-    wd_setup(argc, argv);
-#endif
-
-    VSQApplication::initialize();
-#ifdef VS_MOBILE
-    QGuiApplication a(argc, argv);
-#else
-    QApplication a(argc, argv);
-#endif
-    VSQLogging logging;
-
-    QString baseUrl;
-    if (2 == argc && argv[1] && argv[1][0]) {
-        baseUrl = QString::fromLocal8Bit(argv[1]);
-        qDebug() << "QML URL: " << baseUrl;
-    }
-
-    return VSQApplication().run(baseUrl, &logging);
-}
+#endif // VSQMESSAGELOGCONTEXT_H
