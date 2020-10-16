@@ -67,16 +67,29 @@ elseif(VS_PLATFORM STREQUAL "android")
     set(ANDROID_VERSION_NAME "${VS_TARGET_VERSION}")
     # Fill Android version code
     string(REPLACE "." ";" VS_VERSION_LIST ${VS_TARGET_VERSION})
+
     list(GET VS_VERSION_LIST 0 TMP_VERS)
+    PAD_STRING(ANDROID_VERSION_CODE 3 "0" "1${TMP_VERS}")
     
-    PAD_STRING(ANDROID_VERSION_CODE 3 "0" "${TMP_VERS}")
     list(GET VS_VERSION_LIST 1 TMP_VERS)    
-    PAD_STRING(TMP_VERS 3 "0" "${TMP_VERS}")
+    PAD_STRING(TMP_VERS 2 "0" "${TMP_VERS}")
     string(APPEND ANDROID_VERSION_CODE "${TMP_VERS}")
     
     list(GET VS_VERSION_LIST 2 TMP_VERS)        
-    PAD_STRING(TMP_VERS 4 "0" "${TMP_VERS}")    
+    PAD_STRING(TMP_VERS 2 "0" "${TMP_VERS}")    
     string(APPEND ANDROID_VERSION_CODE "${TMP_VERS}")    
+    
+    # Get build number ( or zero)
+    if (DEFINED ENV{BUILD_NUMBER})
+        set(VS_BUILD_NUMBER "$ENV{BUILD_NUMBER}")
+    else()
+        set(VS_BUILD_NUMBER "0")    
+    endif()
+    PAD_STRING(TMP_VERS 3 "0" "${VS_BUILD_NUMBER}")
+    string(APPEND ANDROID_VERSION_CODE "${TMP_VERS}")
+    message(STATUS "Android version name: [${ANDROID_VERSION_NAME}]")
+    message(STATUS "Android version code: [${ANDROID_VERSION_CODE}]")    
+
     # Android QT Extra
     string(APPEND VS_QT_EXTRA "AndroidExtras")
     # Android gradle path
