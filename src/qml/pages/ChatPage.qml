@@ -143,17 +143,15 @@ Page {
         ScrollBar.vertical: ScrollBar { }
 
         Component.onCompleted: {
-            countChanged.connect(positionViewAtEnd)
+            countChanged.connect(showLastMessage)
             heightChanged.connect(function() {
                 if (height < previousHeight) {
-                    positionViewAtEnd()
+                    showLastMessage()
                 }
                 previousHeight = height
             })
-            positionViewAtEnd()
-            if (Platform.isIos) {
-                positionViewAtEnd() // HACK(fpohtmeh): fix initial positioning in IOS
-            }
+            previousHeight = height
+            showLastMessage()
         }
 
         MouseArea {
@@ -167,6 +165,13 @@ Page {
                     listView.contextMenu.visible = false
                 }
                 wheel.accepted = false
+            }
+        }
+
+        function showLastMessage() {
+            positionViewAtEnd()
+            if (Platform.isIos) {
+                positionViewAtEnd() // HACK(fpohtmeh): fix positioning in IOS
             }
         }
     }
@@ -227,4 +232,3 @@ Page {
         source: "../resources/sounds/message-sent.wav"
     }
 }
-
