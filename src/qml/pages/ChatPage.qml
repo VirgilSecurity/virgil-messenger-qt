@@ -81,7 +81,6 @@ Page {
     ListView {
         id: listView
 
-        property bool viewLoaded: false
         property real previousHeight: 0.0
         property var contextMenu: null
 
@@ -144,17 +143,17 @@ Page {
         ScrollBar.vertical: ScrollBar { }
 
         Component.onCompleted: {
-            viewLoaded = true
-            positionLoadedViewAtEnd()
-        }
-
-        onCountChanged: positionLoadedViewAtEnd()
-
-        onHeightChanged: {
-            if (height < previousHeight) {
-                positionLoadedViewAtEnd()
+            countChanged.connect(positionViewAtEnd)
+            heightChanged.connect(function() {
+                if (height < previousHeight) {
+                    positionViewAtEnd()
+                }
+                previousHeight = height
+            })
+            positionViewAtEnd()
+            if (Platform.isIos) {
+                positionViewAtEnd() // HACK(fpohtmeh): fix initial positioning in IOS
             }
-            previousHeight = height
         }
 
         MouseArea {
@@ -168,12 +167,6 @@ Page {
                     listView.contextMenu.visible = false
                 }
                 wheel.accepted = false
-            }
-        }
-
-        function positionLoadedViewAtEnd() {
-            if (viewLoaded) {
-                positionViewAtEnd()
             }
         }
     }
