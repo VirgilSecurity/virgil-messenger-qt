@@ -309,57 +309,6 @@ void VSQSqlConversationModel::setAsRead(const QString &author) {
     qDebug() << query << model.exec();
 }
 
-/******************************************************************************/
-int
-VSQSqlConversationModel::getCountOfUnread(const QString &user) {
-    QSqlQueryModel model;
-    QString query;
-
-    query = QString("SELECT COUNT(*) AS C FROM %1 WHERE status = %2 AND recipient = \"%3\"")
-            .arg(_tableName()).arg(static_cast<int>(StMessage::Status::MST_RECEIVED)).arg(user);
-
-    model.setQuery(query);
-    int c = model.record(0).value("C").toInt();
-
-    qDebug() << c << user << query;
-
-    return c;
-}
-
-
-/******************************************************************************/
-int
-VSQSqlConversationModel::getMessageCount(const QString &user, const StMessage::Status status) {
-    QSqlQueryModel model;
-    QString query;
-
-    query = QString("SELECT COUNT(*) AS C FROM %1 WHERE status = %2 AND recipient = \"%3\"")
-            .arg(_tableName()).arg(static_cast<int>(status)).arg(user);
-
-    model.setQuery(query);
-    int c = model.record(0).value("C").toInt();
-
-    qDebug() << c << user << query;
-
-    return c;
-}
-
-/******************************************************************************/
-QString
-VSQSqlConversationModel::getLastMessage(const QString &user) const {
-    QSqlQueryModel model;
-    QString query;
-
-    query = QString("SELECT * FROM %1 WHERE recipient = \"%2\" ORDER BY timestamp DESC LIMIT 1").arg(_tableName()).arg(user);
-
-    model.setQuery(query);
-    QString message = model.record(0).value("message").toString();
-
-    qDebug() << message << user << query;
-
-    return message;
-}
-
 QList<StMessage> VSQSqlConversationModel::getMessages(const QString &user, const StMessage::Status status) {
     QSqlQueryModel model;
     QString query;
@@ -421,22 +370,6 @@ QString VSQSqlConversationModel::escapedUserName() const
     QString name(m_user);
     name.remove(QRegExp("[^a-z0-9_]"));
     return name;
-}
-
-/******************************************************************************/
-QString
-VSQSqlConversationModel::getLastMessageTime(const QString &user) const {
-    QSqlQueryModel model;
-    QString query;
-
-    query = QString("SELECT * FROM %1 WHERE recipient = \"%2\" ORDER BY timestamp DESC LIMIT 1").arg(_tableName()).arg(user);
-
-    model.setQuery(query);
-    QString timestamp = model.record(0).value("timestamp").toString();
-
-    qDebug() << timestamp << user << query;
-
-    return timestamp;
 }
 
 /******************************************************************************/
