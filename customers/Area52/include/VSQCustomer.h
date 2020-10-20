@@ -48,6 +48,10 @@ namespace Customer
     static QString OrganizationDomain = "virgil.net";
     static QString MessengerUrlTemplate = "https://messenger%1.area52.virgil.net";
     static QString XmppUrlTemplate = "xmpp%1.area52.virgil.net";
+
+    static const QString kPushNotificationsProxy = "push-notifications-proxy";
+    static const QString kPushNotificationsTopic = "com.virgil.Area52Messenger";
+
 }
 
 #endif // VSQ_CUSTOMER_H
