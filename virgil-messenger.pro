@@ -102,6 +102,7 @@ VS_PLATFORMS_PATH=$$absolute_path(generated/platforms)
 HEADERS += \
         include/VSQApplication.h \
         include/VSQAttachmentBuilder.h \
+        include/AccountSelectionModel.h \
         include/VSQClipboardProxy.h \
         include/VSQCommon.h \
         include/VSQContactManager.h \
@@ -122,9 +123,27 @@ HEADERS += \
         include/VSQUtils.h \
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
+        include/ui/VSQUiHelper.h \
+        # Helpers
         include/helpers/VSQSingleton.h \
         include/helpers/FutureWorker.h \
-        include/ui/VSQUiHelper.h \
+        # Applications states
+        include/states/AccountSelectionState.h \
+        include/states/AccountSettingsState.h \
+        include/states/ApplicationStateManager.h \
+        include/states/AttachmentPreviewState.h \
+        include/states/BackupKeyState.h \
+        include/states/ChatListState.h \
+        include/states/ChatState.h \
+        include/states/DownloadKeyState.h \
+        include/states/OperationState.h \
+        include/states/NewChatState.h \
+        include/states/SignInAsState.h \
+        include/states/SignInState.h \
+        include/states/SignInUsernameState.h \
+        include/states/SignUpState.h \
+        include/states/SplashScreenState.h \
+        include/states/StartState.h \
         # Logging
         include/logging/VSQLogging.h \
         include/logging/VSQLogWorker.h \
@@ -140,6 +159,7 @@ HEADERS += \
 
 SOURCES += \
         src/VSQAttachmentBuilder.cpp \
+        src/AccountSelectionModel.cpp \
         src/VSQClipboardProxy.cpp \
         src/VSQCommon.cpp \
         src/VSQContactManager.cpp \
@@ -162,8 +182,23 @@ SOURCES += \
         src/main.cpp \
         src/VSQApplication.cpp \
         src/ui/VSQUiHelper.cpp \
-        src/hal.cpp \
+        # Applications states
+        src/states/AccountSelectionState.cpp \
+        src/states/AccountSettingsState.cpp \
+        src/states/ApplicationStateManager.cpp \
+        src/states/AttachmentPreviewState.cpp \
+        src/states/BackupKeyState.cpp \
+        src/states/ChatListState.cpp \
+        src/states/ChatState.cpp \
+        src/states/DownloadKeyState.cpp \
+        src/states/NewChatState.cpp \
+        src/states/SignInAsState.cpp \
+        src/states/SignInState.cpp \
+        src/states/SignInUsernameState.cpp \
+        src/states/SignUpState.cpp \
+        src/states/SplashScreenState.cpp \
         # Logging
+        src/hal.cpp \
         src/logging/VSQLogging.cpp \
         src/logging/VSQLogWorker.cpp
 

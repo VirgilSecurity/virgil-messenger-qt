@@ -6,19 +6,17 @@ import "../theme"
 import "../components"
 
 Page {
-
-    property string username
+    property var appState: app.stateManager.signInAsState
 
     background: Rectangle {
         color: Theme.mainBackgroundColor
     }
 
     header: Header {
-        title: qsTr("Sign in as %1".arg(username))
+        title: qsTr("Sign in as %1").arg(appState.userId)
     }
 
     Form {
-
         id: form
 
         FormImage {
@@ -31,9 +29,7 @@ Page {
 
         FormPrimaryButton {
             text: qsTr("Download from the Cloud")
-            onClicked: {
-                mainView.showDownloadKey({ username: username })
-            }
+            onClicked: appState.requestDownloadKey(appState.userId)
         }
 
         FormPrimaryButton {
@@ -45,7 +41,6 @@ Page {
             text: qsTr("Use local file")
             enabled: false
         }
-
     }
 
     footer: Footer {}

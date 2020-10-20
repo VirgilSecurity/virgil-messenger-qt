@@ -9,7 +9,7 @@ ToolBar {
     id: toolbarId
     property alias title: titleLabel.text
     property alias description: descriptionLabel.text
-    property alias showSeporator: seporator.visible
+    property alias showSeparator: separator.visible
     // search
     property alias search: searchId.search
     property alias isSearchOpen: searchId.isSearchOpen
@@ -22,7 +22,7 @@ ToolBar {
         color: Theme.contactsBackgroundColor
 
         Rectangle {
-            id: seporator
+            id: separator
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.leftMargin: 20

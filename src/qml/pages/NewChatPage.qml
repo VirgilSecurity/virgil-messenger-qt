@@ -1,20 +1,15 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
-import QuickFuture 1.0
-import MesResult 1.0
 
 import "../base"
-import "../theme"
 import "../components"
+import "../theme"
 
-Page {
-    property bool showServersPanel: true
+OperationPage {
+    appState: app.stateManager.newChatState
+    loadingText: qsTr("Adding of contact...")
     readonly property string contact: username.text.toLowerCase()
-
-    background: Rectangle {
-        color: Theme.mainBackgroundColor
-    }
 
     header: Header {
         showBackButton: !form.isLoading
@@ -75,30 +70,12 @@ Page {
         }
     }
 
-    footer: Footer { }
-
     function accept() {
-        try {
-            form.showLoading(qsTr("Adding of contact..."))
-            var future = Messenger.addContact(contact)
-            Future.onFinished(future, function(value) {
-                form.hideLoading();
-
-                if (Future.result(future) === Result.MRES_OK) {
-                    mainView.showChatWith(contact, true)
-                }
-                else {
-                    showPopupError(qsTr("User not found"))
-                }
-            })
-        } catch (error) {
-            form.hideLoading();
-            console.error(error)
-        }
+        appState.addNewChat(contact)
     }
 
     function reject() {
-        mainView.back()
+        app.stateManager.goBack()
     }
 }
 

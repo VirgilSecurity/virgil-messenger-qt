@@ -6,8 +6,7 @@ import "../theme"
 import "../components"
 
 Page {
-
-    property bool showServersPanel: true
+    property var appState: app.stateManager.accountSettingsState
 
     background: Rectangle {
         color: Theme.contactsBackgroundColor
@@ -18,11 +17,10 @@ Page {
     }
 
     Form {
-
         Avatar {
             Layout.alignment: Qt.AlignHCenter
             diameter: 80
-            nickname: Messenger.currentUser
+            nickname: appState.userId
         }
 
         Label {
@@ -30,45 +28,21 @@ Page {
             Layout.bottomMargin: 50
             font.pointSize: UiHelper.fixFontSz(18)
             color: Theme.primaryTextColor
-            text: Messenger.currentUser
+            text: appState.userId
         }
 
         FormLabel {
-            text: qsTr("Version: %1".arg(app.currentVersion()))
-        }
-/*
-        FormPrimaryButton {
-            text: "Software Update"
-            onClicked: {
-                app.checkUpdates()
-            }
+            text: qsTr("Version: %1").arg(app.currentVersion())
         }
 
         FormPrimaryButton {
-            text: "Delete Account"
-            onClicked: {
-            }
+            text: qsTr("Backup private key")
+            onClicked: appState.requestBackupKey(appState.userId)
         }
-*/
+
         FormPrimaryButton {
-            text: "Backup private key"
-            onClicked: {
-                mainView.showBackupKey()
-            }
-        }
-/*
-        FormPrimaryButton {
-            text: "Send report"
-            onClicked: {
-                app.sendReport()
-            }
-        }
-*/
-        FormPrimaryButton {
-            text: "Sign out"
-            onClicked: {
-                mainView.signOut()
-            }
+            text: qsTr("Sign out")
+            onClicked: appState.signOut()
         }
     }
 }

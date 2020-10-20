@@ -66,6 +66,7 @@ VSQApplication::VSQApplication()
     , m_crashReporter(&m_settings, m_networkAccessManager, this)
     , m_engine()
     , m_messenger(m_networkAccessManager, &m_settings)
+    , m_applicationStateManager(&m_messenger, &m_settings, this)
 {
     m_settings.print();
     m_networkAccessManager->setAutoDeleteReplies(true);
@@ -167,12 +168,6 @@ VSQApplication::currentVersion() const {
     return kVersion + "-alpha";
 }
 
-/******************************************************************************/
-void
-VSQApplication::sendReport() {
-    m_crashReporter.sendLogFiles();
-}
-
 QString VSQApplication::organizationDisplayName() const
 {
     return Customer::OrganizationDisplayName;
@@ -206,4 +201,4 @@ VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
 #endif // VS_ANDROID
 }
 
-/******************************************************************************/
+ApplicationStateManager *VSQApplication::stateManager() { return &m_applicationStateManager; }
