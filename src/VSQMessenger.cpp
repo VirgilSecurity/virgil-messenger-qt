@@ -122,10 +122,11 @@ struct TransferId
 
 
 /******************************************************************************/
-VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSettings *settings)
+VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSettings *settings, Validator *validator)
     : QObject()
     , m_xmpp()
     , m_settings(settings)
+    , m_validator(validator)
     , m_transferManager(new VSQCryptoTransferManager(&m_xmpp, networkAccessManager, m_settings, this))
     , m_attachmentBuilder(settings, this)
 {
@@ -139,7 +140,7 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSetti
 
     // Connect to Database
     _connectToDatabase();
-    m_sqlConversations = new VSQSqlConversationModel(this);
+    m_sqlConversations = new VSQSqlConversationModel(validator, this);
     m_sqlChatModel = new VSQSqlChatModel(this);
 
     // Add receipt messages extension
@@ -197,29 +198,23 @@ VSQMessenger::~VSQMessenger()
 
 void VSQMessenger::signIn(const QString &userId)
 {
-    QString errorText;
-    if (!VSQUtils::validateUserId(userId, &errorText)) {
-        emit signInErrorOccured(errorText);
-    }
-    else {
-        FutureWorker::run(signInAsync(userId), [=](const FutureResult &result) {
-            switch (result) {
-            case MRES_OK:
-                m_settings->setLastSignedInUserId(userId);
-                emit signedIn(userId);
-                break;
-            case MRES_ERR_NO_CRED:
-                emit signInErrorOccured(tr("Cannot load credentials"));
-                break;
-            case MRES_ERR_SIGNIN:
-                emit signInErrorOccured(tr("Cannot sign-in user"));
-                break;
-            default:
-                emit signInErrorOccured(tr("Unknown sign-in error"));
-                break;
-            }
-        });
-    }
+    FutureWorker::run(signInAsync(userId), [=](const FutureResult &result) {
+        switch (result) {
+        case MRES_OK:
+            m_settings->setLastSignedInUserId(userId);
+            emit signedIn(userId);
+            break;
+        case MRES_ERR_NO_CRED:
+            emit signInErrorOccured(tr("Cannot load credentials"));
+            break;
+        case MRES_ERR_SIGNIN:
+            emit signInErrorOccured(tr("Cannot sign-in user"));
+            break;
+        default:
+            emit signInErrorOccured(tr("Unknown sign-in error"));
+            break;
+        }
+    });
 }
 
 void VSQMessenger::signOut()
@@ -232,26 +227,20 @@ void VSQMessenger::signOut()
 
 void VSQMessenger::signUp(const QString &userId)
 {
-    QString errorText;
-    if (!VSQUtils::validateUserId(userId, &errorText)) {
-        emit signUpErrorOccured(errorText);
-    }
-    else {
-        FutureWorker::run(signUpAsync(userId), [=](const FutureResult &result) {
-            switch (result) {
-            case MRES_OK:
-                m_settings->setLastSignedInUserId(userId);
-                emit signedUp(userId);
-                break;
-            case MRES_ERR_USER_ALREADY_EXISTS:
-                emit signUpErrorOccured(tr("Username is already taken"));
-                break;
-            default:
-                emit signUpErrorOccured(tr("Unknown sign-up error"));
-                break;
-            }
-        });
-    }
+    FutureWorker::run(signUpAsync(userId), [=](const FutureResult &result) {
+        switch (result) {
+        case MRES_OK:
+            m_settings->setLastSignedInUserId(userId);
+            emit signedUp(userId);
+            break;
+        case MRES_ERR_USER_ALREADY_EXISTS:
+            emit signUpErrorOccured(tr("Username is already taken"));
+            break;
+        default:
+            emit signUpErrorOccured(tr("Unknown sign-up error"));
+            break;
+        }
+    });
 }
 
 void VSQMessenger::addContact(const QString &userId)
@@ -776,7 +765,7 @@ VSQMessenger::_saveCredentials(const QString &user, const vs_messenger_virgil_us
     const QJsonDocument doc(jsonObject);
     const QString json = doc.toJson(QJsonDocument::Compact);
 
-    qInfo() << "Saving user credentails: " << json;
+    qDebug() << "Saving user credentails: " << json;
 
     m_settings->setUserCredential(user, json);
 

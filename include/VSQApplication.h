@@ -40,6 +40,7 @@
 #include <QQmlApplicationEngine>
 
 #include <KeyboardEventFilter.h>
+#include <Validator.h>
 #include <VSQCrashReporter.h>
 #include <VSQMessenger.h>
 #include <VSQSettings.h>
@@ -59,6 +60,7 @@ class VSQApplication : public QObject
     Q_PROPERTY(QString organizationDisplayName READ organizationDisplayName CONSTANT)
     Q_PROPERTY(QString applicationDisplayName READ applicationDisplayName CONSTANT)
     Q_PROPERTY(KeyboardEventFilter *keyboardEventFilter MEMBER m_keyboardEventFilter CONSTANT)
+    Q_PROPERTY(Validator *validator MEMBER m_validator CONSTANT)
 
 public:
     VSQApplication();
@@ -94,6 +96,7 @@ private:
     QNetworkAccessManager *m_networkAccessManager;
     VSQCrashReporter m_crashReporter;
     QQmlApplicationEngine m_engine;
+    Validator *m_validator;
     VSQMessenger m_messenger;
     KeyboardEventFilter *m_keyboardEventFilter;
     ApplicationStateManager m_applicationStateManager;

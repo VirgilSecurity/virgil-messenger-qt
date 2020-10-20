@@ -100,9 +100,10 @@ VSQSqlConversationModel::_update() {
 }
 
 /******************************************************************************/
-VSQSqlConversationModel::VSQSqlConversationModel(QObject *parent) :
-    QSqlTableModel(parent) {
-
+VSQSqlConversationModel::VSQSqlConversationModel(Validator *validator, QObject *parent)
+    : QSqlTableModel(parent)
+    , m_validator(validator)
+{
     qRegisterMetaType<StMessage::Status>("StMessage::Status");
 
     connect(this, &VSQSqlConversationModel::createMessage, this, &VSQSqlConversationModel::onCreateMessage);
@@ -416,14 +417,6 @@ StMessage VSQSqlConversationModel::getMessage(const QSqlRecord &record) const
 }
 
 /******************************************************************************/
-QString VSQSqlConversationModel::escapedUserName() const
-{
-    QString name(m_user);
-    name.remove(QRegExp("[^a-z0-9_]"));
-    return name;
-}
-
-/******************************************************************************/
 QString
 VSQSqlConversationModel::getLastMessageTime(const QString &user) const {
     QSqlQueryModel model;
@@ -441,12 +434,12 @@ VSQSqlConversationModel::getLastMessageTime(const QString &user) const {
 
 /******************************************************************************/
 QString VSQSqlConversationModel::_tableName() const {
-    return QString("Conversations_") + escapedUserName();
+    return QString("Conversations_") + m_validator->databaseUsername(m_user);
 }
 
 /******************************************************************************/
 QString VSQSqlConversationModel::_contactsTableName() const {
-    return QString("Contacts_") + escapedUserName();
+    return QString("Contacts_") + m_validator->databaseUsername(m_user);
 }
 
 void VSQSqlConversationModel::onCreateMessage(const QString recipient, const QString message, const QString messageId,

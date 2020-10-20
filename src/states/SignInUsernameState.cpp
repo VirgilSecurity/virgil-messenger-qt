@@ -38,21 +38,24 @@
 
 using namespace VSQ;
 
-SignInUsernameState::SignInUsernameState(QState *parent)
+SignInUsernameState::SignInUsernameState(Validator *validator, QState *parent)
     : OperationState(parent)
+    , m_validator(validator)
 {
-    connect(this, &SignInUsernameState::validateUsername, this, &SignInUsernameState::processValidateUsername);
+    connect(this, &SignInUsernameState::validate, this, &SignInUsernameState::processValidation);
 }
 
-void SignInUsernameState::processValidateUsername(const QString &userId)
+void SignInUsernameState::processValidation(const QString &username)
 {
-    emit operationStarted();
     QString errorText;
-    if (VSQUtils::validateUserId(userId, &errorText)) {
-        emit operationFinished();
-        emit usernameValidated(userId);
+    const auto validUsername = m_validator->validatedUsername(username, &errorText);
+
+    emit operationStarted();
+    if (!validUsername) {
+        emit operationErrorOccurred(errorText);
     }
     else {
-        emit operationErrorOccurred(errorText);
+        emit operationFinished();
+        emit validated(*validUsername);
     }
 }

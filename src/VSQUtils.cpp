@@ -49,14 +49,6 @@ QString VSQUtils::formattedDataSize(DataSize fileSize)
     return locale.formattedDataSize(fileSize);
 }
 
-QString VSQUtils::escapedUserName(const QString &userName)
-{
-    static QRegExp regexp("[^a-z0-9_]");
-    QString name(userName);
-    name.remove(regexp);
-    return name;
-}
-
 QString VSQUtils::findUniqueFileName(const QString &fileName)
 {
     QFileInfo info(fileName);
@@ -197,16 +189,4 @@ QString VSQUtils::elidedText(const QString &text, const int maxLength)
     const int half = (max - 1) / 2;
     const QChar ellipsisChar(0x2026);
     return text.left(half) + ellipsisChar + text.right(max - 1 - half);
-}
-
-bool VSQUtils::validateUserId(const QString &userId, QString *errorText)
-{
-    if (userId.isEmpty()) {
-        if (errorText) {
-            *errorText = QObject::tr("Username can't be empty");
-        }
-        return false;
-    }
-    // TODO(fpohtmeh): add regexp check
-    return true;
 }

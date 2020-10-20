@@ -125,6 +125,7 @@ HEADERS += \
         include/macos/VSQMacos.h \
         include/ui/VSQUiHelper.h \
         include/KeyboardEventFilter.h \
+        include/Validator.h \
         # Helpers
         include/helpers/VSQSingleton.h \
         include/helpers/FutureWorker.h \
@@ -184,6 +185,7 @@ SOURCES += \
         src/VSQApplication.cpp \
         src/ui/VSQUiHelper.cpp \
         src/KeyboardEventFilter.cpp \
+        src/Validator.cpp \
         # Applications states
         src/states/AccountSelectionState.cpp \
         src/states/AccountSettingsState.cpp \

@@ -32,37 +32,42 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SIGNUPSTATE_H
-#define VSQ_SIGNUPSTATE_H
+#include "Validator.h"
 
-#include "OperationState.h"
+using namespace VSQ;
 
-class VSQMessenger;
-
-namespace VSQ
+Validator::Validator(QObject *parent)
+    : QObject(parent)
+    // HACK(vova.y): lookbehind doesn't work in RegExpValidator.
+    // Original regexp (/(?!_)[a-zA-Z0-9_]{1,20}(?<!_)/) is replaced with equivalent.
+    // Issue can be fixed by using RegularExpressionValidator from Qt 5.15
+    , m_reUsername(new QRegExpValidator(QRegExp("(?!_)[a-zA-Z0-9_]{0,19}[a-zA-Z0-9]"), this))
 {
-class Validator;
-
-class SignUpState : public OperationState
-{
-    Q_OBJECT
-    Q_PROPERTY(QString userId MEMBER m_userId NOTIFY userIdChanged)
-
-public:
-    SignUpState(VSQMessenger *messenger, Validator *validator, QState *parent);
-
-signals:
-    void signUp(const QString &username);
-    void signedUp(const QString &userId);
-    void userIdChanged(const QString &userId);
-
-private:
-    void processSignUp(const QString &username);
-
-    VSQMessenger *m_messenger;
-    Validator *m_validator;
-    QString m_userId;
-};
 }
 
-#endif // VSQ_SIGNUPSTATE_H
+Validator::~Validator()
+{
+}
+
+Optional<QString> Validator::validatedUsername(const QString &username, QString *errorText)
+{
+    if (username.isEmpty()) {
+        if (errorText) {
+            *errorText = QObject::tr("Username can't be empty");
+        }
+        return NullOptional;
+    }
+    if (!m_reUsername->regExp().exactMatch(username)) {
+        if (errorText) {
+            *errorText = QObject::tr("Username is not valid");
+        }
+        return NullOptional;
+    }
+    return username.toLower();
+}
+
+QString Validator::databaseUsername(const QString &username)
+{
+    static QRegExp regexp("[^a-zA-Z0-9_]");
+    return QString(username).remove(regexp);
+}

@@ -20,7 +20,7 @@ OperationPage {
         }
 
         FormPrimaryButton {
-            onClicked: appState.validateUsername(username.text)
+            onClicked: appState.validate(username.text)
             text: qsTr("Sign In")
         }
     }

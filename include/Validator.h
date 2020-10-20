@@ -32,37 +32,34 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SIGNUPSTATE_H
-#define VSQ_SIGNUPSTATE_H
+#ifndef VSQ_VALIDATOR_H
+#define VSQ_VALIDATOR_H
 
-#include "OperationState.h"
+#include <QObject>
+#include <QRegExpValidator>
 
-class VSQMessenger;
+#include "VSQCommon.h"
 
 namespace VSQ
 {
-class Validator;
-
-class SignUpState : public OperationState
+class Validator : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString userId MEMBER m_userId NOTIFY userIdChanged)
+    Q_PROPERTY(QRegExpValidator *reUsername MEMBER m_reUsername CONSTANT)
 
 public:
-    SignUpState(VSQMessenger *messenger, Validator *validator, QState *parent);
+    explicit Validator(QObject *parent);
+    ~Validator() override;
 
-signals:
-    void signUp(const QString &username);
-    void signedUp(const QString &userId);
-    void userIdChanged(const QString &userId);
+    // Returns username if it's valid or corrected version of username if it exists
+    Optional<QString> validatedUsername(const QString &username, QString *errorText = 0);
+
+    // TODO(fpohtmeh): remove this method finally
+    QString databaseUsername(const QString &username);
 
 private:
-    void processSignUp(const QString &username);
-
-    VSQMessenger *m_messenger;
-    Validator *m_validator;
-    QString m_userId;
+    QRegExpValidator *m_reUsername;
 };
 }
 
-#endif // VSQ_SIGNUPSTATE_H
+#endif // VSQ_VALIDATOR_H

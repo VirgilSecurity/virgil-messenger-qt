@@ -37,7 +37,10 @@
 
 #include <QSqlTableModel>
 
+#include "Validator.h"
 #include "VSQCommon.h"
+
+using namespace VSQ;
 
 class VSQCryptoTransferManager;
 
@@ -76,7 +79,7 @@ class VSQSqlConversationModel : public QSqlTableModel
     };
 
 public:
-    VSQSqlConversationModel(QObject *parent = nullptr);
+    explicit VSQSqlConversationModel(Validator *validator, QObject *parent = nullptr);
 
     QString
     user() const;
@@ -137,8 +140,7 @@ private:
         Attachment::Status status = Attachment::Status::Loading;
     };
 
-    QString escapedUserName() const;
-
+    Validator *m_validator;
     QString m_user;
     QString m_recipient;
     std::map<QString, TransferInfo> m_transferMap;
