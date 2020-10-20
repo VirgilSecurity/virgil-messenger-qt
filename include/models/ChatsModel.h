@@ -32,74 +32,34 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
-#define VIRGIL_IOTKIT_QT_DEMO_VSQAPP_H
+#ifndef VSQ_CHATSMODEL_H
+#define VSQ_CHATSMODEL_H
 
-#include <QtCore>
-#include <QGuiApplication>
-#include <QQmlApplicationEngine>
+#include <QAbstractListModel>
 
-#include <VSQCrashReporter.h>
-#include <VSQMessenger.h>
-#include <VSQSettings.h>
-#include <macos/VSQMacos.h>
-#include <database/UserDatabase.h>
-#include <models/ChatsModel.h>
-#include <models/MessagesModel.h>
-#include <states/ApplicationStateManager.h>
+#include "VSQCommon.h"
 
-class QNetworkAccessManager;
+namespace VSQ
+{
+class UserDatabase;
 
-class VSQLogging;
-
-using namespace VSQ;
-
-class VSQApplication : public QObject
+class ChatsModel : public QAbstractListModel
 {
     Q_OBJECT
-    Q_PROPERTY(ApplicationStateManager *stateManager READ stateManager CONSTANT)
-    Q_PROPERTY(QString organizationDisplayName READ organizationDisplayName CONSTANT)
-    Q_PROPERTY(QString applicationDisplayName READ applicationDisplayName CONSTANT)
 
 public:
-    VSQApplication();
-    virtual ~VSQApplication() = default;
-
-    static void initialize();
-
-    int run(const QString &basePath, VSQLogging *logging);
-
-    Q_INVOKABLE
-    void reloadQml();
-
-    Q_INVOKABLE
-    void checkUpdates();
-
-    Q_INVOKABLE QString
-    currentVersion() const;
-
-    // Names
-
-    QString organizationDisplayName() const;
-    QString applicationDisplayName() const;
-
-private slots:
-    void
-    onApplicationStateChanged(Qt::ApplicationState state);
+    explicit ChatsModel(UserDatabase *userDatabase, QObject *parent = nullptr);
+    ~ChatsModel() override;
 
 private:
-    ApplicationStateManager *stateManager();
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
 
-    static const QString kVersion;
-    VSQSettings m_settings;
-    QNetworkAccessManager *m_networkAccessManager;
-    VSQCrashReporter m_crashReporter;
-    QQmlApplicationEngine m_engine;
-    VSQMessenger m_messenger;
-    UserDatabase m_userDatabase;
-    ChatsModel m_chatsModel;
-    MessagesModel m_messagesModel;
-    ApplicationStateManager m_applicationStateManager;
+    QHash<int, QByteArray> roleNames() const override;
+
+    UserDatabase *m_userDatabase;
+    std::vector<Chat> m_chats;
 };
+}
 
-#endif // VSQApplication
+#endif // VSQ_CHATSMODEL_H

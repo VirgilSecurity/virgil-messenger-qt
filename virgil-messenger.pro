@@ -163,6 +163,9 @@ HEADERS += \
         include/logging/VSQLogging.h \
         include/logging/VSQLogWorker.h \
         include/logging/VSQMessageLogContext.h \
+        # Models
+        include/models/ChatsModel.h \
+        include/models/MessagesModel.h \
         # Generated
         generated/include/VSQCustomer.h \
         # Thirdparty
@@ -229,7 +232,10 @@ SOURCES += \
         # Logging
         src/hal.cpp \
         src/logging/VSQLogging.cpp \
-        src/logging/VSQLogWorker.cpp
+        src/logging/VSQLogWorker.cpp \
+        # Models
+        src/models/ChatsModel.cpp \
+        src/models/MessagesModel.cpp
 
 #
 #   Resources

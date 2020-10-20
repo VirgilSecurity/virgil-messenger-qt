@@ -663,7 +663,7 @@ void VSQMessenger::onDownloadThumbnail(const StMessage message, const QString se
         });
         loop.exec();
         if(!success) {
-            m_sqlConversations->setAttachmentStatus(message.messageId, Attachment::Status::Created);
+            m_sqlConversations->setAttachmentStatus(message.messageId, ::Attachment::Status::Created);
         }
     });
 }
@@ -942,7 +942,7 @@ QString VSQMessenger::createJson(const QString &message, const OptionalAttachmen
         payloadObject.insert("body", message);
     }
     else {
-        if (attachment->type == Attachment::Type::Picture) {
+        if (attachment->type == ::Attachment::Type::Picture) {
             mainObject.insert("type", "picture");
             payloadObject.insert("thumbnailUrl", attachment->remoteThumbnailUrl.toString());
             payloadObject.insert("thumbnailWidth", attachment->thumbnailSize.width());
@@ -971,7 +971,7 @@ StMessage VSQMessenger::parseJson(const QJsonDocument &json)
         message.message = payload["body"].toString();
         return message;
     }
-    Attachment attachment;
+    ::Attachment attachment;
     attachment.id = VSQUtils::createUuid();
     attachment.remoteUrl = payload["url"].toString();
     attachment.fileName = payload["fileName"].toString();
@@ -979,18 +979,18 @@ StMessage VSQMessenger::parseJson(const QJsonDocument &json)
     attachment.bytesTotal = payload["bytesTotal"].toInt();
     message.message = attachment.displayName;
     if (type == QLatin1String("picture")) {
-        attachment.type = Attachment::Type::Picture;
+        attachment.type = ::Attachment::Type::Picture;
         attachment.remoteThumbnailUrl = payload["thumbnailUrl"].toString();
         attachment.thumbnailSize = QSize(payload["thumbnailWidth"].toInt(), payload["thumbnailHeight"].toInt());
     }
     else {
-        attachment.type = Attachment::Type::File;
+        attachment.type = ::Attachment::Type::File;
     }
     message.attachment = attachment;
     return message;
 }
 
-OptionalAttachment VSQMessenger::uploadAttachment(const QString messageId, const QString recipient, const Attachment &attachment)
+OptionalAttachment VSQMessenger::uploadAttachment(const QString messageId, const QString recipient, const ::Attachment &attachment)
 {
     if (!m_transferManager->isReady()) {
         qCDebug(lcMessenger) << "Transfer manager is not ready";
@@ -998,9 +998,9 @@ OptionalAttachment VSQMessenger::uploadAttachment(const QString messageId, const
         return NullOptional;
     }
 
-    Attachment uploadedAttachment = attachment;
+    ::Attachment uploadedAttachment = attachment;
 
-    bool thumbnailUploadNeeded = attachment.type == Attachment::Type::Picture && attachment.remoteThumbnailUrl.isEmpty();
+    bool thumbnailUploadNeeded = attachment.type == ::Attachment::Type::Picture && attachment.remoteThumbnailUrl.isEmpty();
     if (thumbnailUploadNeeded) {
         qCDebug(lcMessenger) << "Thumbnail uploading...";
         const TransferId uploadId(messageId, TransferId::Type::Thumbnail);
@@ -1009,7 +1009,7 @@ OptionalAttachment VSQMessenger::uploadAttachment(const QString messageId, const
             return NullOptional;
         }
         else if (auto upload = m_transferManager->startCryptoUpload(uploadId, attachment.thumbnailPath, recipient)) {
-            m_sqlConversations->setAttachmentStatus(messageId, Attachment::Status::Loading);
+            m_sqlConversations->setAttachmentStatus(messageId, ::Attachment::Status::Loading);
             QEventLoop loop;
             QMutex guard;
             auto con = connect(upload, &VSQUpload::ended, [&](bool failed) {
@@ -1050,7 +1050,7 @@ OptionalAttachment VSQMessenger::uploadAttachment(const QString messageId, const
             return NullOptional;
         }
         else if (auto upload = m_transferManager->startCryptoUpload(id, attachment.filePath, recipient)) {
-            m_sqlConversations->setAttachmentStatus(messageId, Attachment::Status::Loading);
+            m_sqlConversations->setAttachmentStatus(messageId, ::Attachment::Status::Loading);
             uploadedAttachment.bytesTotal = upload->fileSize();
             m_sqlConversations->setAttachmentBytesTotal(messageId, upload->fileSize());
             QEventLoop loop;
@@ -1089,15 +1089,15 @@ OptionalAttachment VSQMessenger::uploadAttachment(const QString messageId, const
         return NullOptional;
     }
     qCDebug(lcMessenger) << "Everything was uploaded";
-    m_sqlConversations->setAttachmentStatus(messageId, Attachment::Status::Loaded);
-    uploadedAttachment.status = Attachment::Status::Loaded;
+    m_sqlConversations->setAttachmentStatus(messageId, ::Attachment::Status::Loaded);
+    uploadedAttachment.status = ::Attachment::Status::Loaded;
     return uploadedAttachment;
 }
 
 void VSQMessenger::setFailedAttachmentStatus(const QString &messageId)
 {
     m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
-    m_sqlConversations->setAttachmentStatus(messageId, Attachment::Status::Failed);
+    m_sqlConversations->setAttachmentStatus(messageId, ::Attachment::Status::Failed);
 }
 
 /******************************************************************************/
@@ -1216,7 +1216,7 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
         m_sqlChatModel->updateUnreadMessageCount(sender);
     }
 
-    if (msg->attachment && msg->attachment->type == Attachment::Type::Picture) {
+    if (msg->attachment && msg->attachment->type == ::Attachment::Type::Picture) {
         emit downloadThumbnail(*msg, sender, QPrivateSignal());
     }
 
@@ -1331,7 +1331,7 @@ void VSQMessenger::downloadAndProcess(StMessage message, const Function &func)
         QMutexLocker l(&guard);
 
         if(!success) {
-            m_sqlConversations->setAttachmentStatus(message.messageId, Attachment::Status::Created);
+            m_sqlConversations->setAttachmentStatus(message.messageId, ::Attachment::Status::Created);
         }
     });
 }

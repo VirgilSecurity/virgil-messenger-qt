@@ -1,5 +1,5 @@
 CREATE TABLE chats (
-	id INT NOT NULL PRIMARY KEY,
+        id TEXT NOT NULL PRIMARY KEY,
 	timestamp TEXT NOT NULL,
 	contact_id TEXT NOT NULL,
 	last_message_id TEXT,

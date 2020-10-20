@@ -114,6 +114,7 @@ namespace Enums {
     Q_ENUM_NS(MessageStatus)
 }
 
+// TODO(fpohtmeh): remove this old class
 struct Attachment
 {
     using Type = Enums::AttachmentType;
@@ -139,6 +140,7 @@ Q_DECLARE_METATYPE(Attachment)
 using OptionalAttachment = Optional<Attachment>;
 Q_DECLARE_METATYPE(OptionalAttachment)
 
+// TODO(fpohtmeh): remove this old class
 struct StMessage
 {
     using Author = Enums::MessageAuthor;
@@ -151,6 +153,88 @@ struct StMessage
     OptionalAttachment attachment;
 };
 Q_DECLARE_METATYPE(StMessage);
+
+namespace VSQ
+{
+struct Contact
+{
+    enum class Type
+    {
+        Person,
+        Group
+    };
+
+    using Id = QString;
+
+    Id id;
+    Type type = Type::Person;
+    QString name;
+    QUrl avatarUrl;
+};
+
+struct Message
+{
+    enum class Status
+    {
+        Created,
+        Sent,
+        Received,
+        Read,
+        Failed
+    };
+
+    using Id = QString;
+
+    Id id;
+    QDateTime timestamp;
+    Contact::Id authorId;
+    Status status = Status::Created;
+    QString body;
+};
+
+struct Chat
+{
+    using Id = QString;
+
+    Id id;
+    QDateTime timestamp;
+    Contact::Id contactId;
+    Message::Id lastMessageId;
+    int unreadMessageCount = 0;
+};
+
+struct Attachment
+{
+    using Id = QString;
+
+    enum class Type
+    {
+        File,
+        Picture
+    };
+
+    enum class Status
+    {
+        Created,
+        Processing,
+        Loading,
+        Loaded,
+        Failed,
+        Invalid
+    };
+
+    Id id;
+    Message::Id messageId;
+    Type type = Type::File;
+    Status status = Status::Created;
+    QString fileName;
+    DataSize size = 0;
+    QString localPath;
+    QUrl url;
+    QString extras;
+};
+
+}
 
 void registerMetaTypes();
 

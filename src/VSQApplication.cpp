@@ -67,6 +67,8 @@ VSQApplication::VSQApplication()
     , m_engine()
     , m_messenger(m_networkAccessManager, &m_settings)
     , m_userDatabase(&m_settings)
+    , m_chatsModel(&m_userDatabase, this)
+    , m_messagesModel(&m_userDatabase, this)
     , m_applicationStateManager(&m_messenger, &m_userDatabase, &m_settings, this)
 {
     m_settings.print();

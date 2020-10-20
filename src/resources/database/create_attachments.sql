@@ -1,4 +1,5 @@
 CREATE TABLE attachments (
+        id TEXT NOT NULL,
 	message_id TEXT NOT NULL,
 	type INT NOT NULL,
 	status INT NOT NULL,
