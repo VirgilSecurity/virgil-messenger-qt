@@ -87,6 +87,8 @@ using namespace VSQ;
 
 Q_LOGGING_CATEGORY(lcMessenger, "messenger")
 
+using namespace VSQ;
+
 // Helper struct to categorize transfers
 struct TransferId
 {
@@ -178,9 +180,6 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSetti
     connect(m_xmppCarbonManager, &QXmppCarbonManager::messageSent, &m_xmpp, &QXmppClient::messageReceived);
     connect(m_xmppReceiptManager, &QXmppMessageReceiptManager::messageDelivered, this, &VSQMessenger::onMessageDelivered);
 
-    // last activity
-    connect(m_lastActivityManager, &VSQLastActivityManager::lastActivityTextChanged, this, &VSQMessenger::lastActivityTextChanged);
-
     // Network Analyzer
     connect(&m_networkAnalyzer, &VSQNetworkAnalyzer::fireStateChanged, this, &VSQMessenger::onProcessNetworkState, Qt::QueuedConnection);
     connect(&m_networkAnalyzer, &VSQNetworkAnalyzer::fireHeartBeat, this, &VSQMessenger::checkState, Qt::QueuedConnection);
@@ -194,6 +193,123 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSetti
 
 VSQMessenger::~VSQMessenger()
 {
+}
+
+void VSQMessenger::signIn(const QString &userId)
+{
+    QString errorText;
+    if (!VSQUtils::validateUserId(userId, &errorText)) {
+        emit signInErrorOccured(errorText);
+    }
+    else {
+        FutureWorker::run(signInAsync(userId), [=](const FutureResult &result) {
+            switch (result) {
+            case MRES_OK:
+                m_settings->setLastSignedInUserId(userId);
+                emit signedIn(userId);
+                break;
+            case MRES_ERR_NO_CRED:
+                emit signInErrorOccured(tr("Cannot load credentials"));
+                break;
+            case MRES_ERR_SIGNIN:
+                emit signInErrorOccured(tr("Cannot sign-in user"));
+                break;
+            default:
+                emit signInErrorOccured(tr("Unknown sign-in error"));
+                break;
+            }
+        });
+    }
+}
+
+void VSQMessenger::signOut()
+{
+    FutureWorker::run(logoutAsync(), [=](const FutureResult &) {
+        m_settings->setLastSignedInUserId(QString());
+        emit signedOut();
+    });
+}
+
+void VSQMessenger::signUp(const QString &userId)
+{
+    QString errorText;
+    if (!VSQUtils::validateUserId(userId, &errorText)) {
+        emit signUpErrorOccured(errorText);
+    }
+    else {
+        FutureWorker::run(signUpAsync(userId), [=](const FutureResult &result) {
+            switch (result) {
+            case MRES_OK:
+                m_settings->setLastSignedInUserId(userId);
+                emit signedUp(userId);
+                break;
+            case MRES_ERR_USER_ALREADY_EXISTS:
+                emit signUpErrorOccured(tr("Username is already taken"));
+                break;
+            default:
+                emit signUpErrorOccured(tr("Unknown sign-up error"));
+                break;
+            }
+        });
+    }
+}
+
+void VSQMessenger::addContact(const QString &userId)
+{
+    FutureWorker::run(addContactAsync(userId), [=](const FutureResult &result) {
+        if (result == MRES_OK) {
+            emit contactAdded(userId);
+        }
+        else {
+            emit addContactErrorOccured(tr("Contact not found"));
+        }
+    });
+}
+
+void VSQMessenger::backupKey(const QString &password, const QString &confirmedPassword)
+{
+    if (password.isEmpty()) {
+        emit backupKeyFailed(tr("Password cannot be empty"));
+    }
+    else if (password != confirmedPassword) {
+        emit backupKeyFailed(tr("Passwords do not match"));
+    }
+    else {
+        FutureWorker::run(backupKeyAsync(password), [=](const FutureResult &result) {
+            if (result == MRES_OK) {
+                emit keyBackuped(m_userId);
+            }
+            else {
+                emit backupKeyFailed(tr("Backup private key error"));
+            }
+        });
+    }
+}
+
+void VSQMessenger::downloadKey(const QString &userId, const QString &password)
+{
+    if (password.isEmpty()) {
+        emit downloadKeyFailed(tr("Password cannot be empty"));
+    }
+    else {
+        FutureWorker::run(signInWithBackupKeyAsync(userId, password), [=](const FutureResult &result) {
+            if (result == MRES_OK) {
+                emit keyDownloaded(userId);
+            }
+            else {
+                emit downloadKeyFailed(tr("Private key download error"));
+            }
+        });
+    }
+}
+
+void VSQMessenger::sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
+{
+    FutureWorker::run(sendMessageAsync(to, message, attachmentUrl, attachmentType), [=](const FutureResult &result) {
+        if (result == MRES_OK) {
+            emit messageSent();
+        }
+    });
 }
 
 void
@@ -406,7 +522,7 @@ QString VSQMessenger::currentRecipient() const {
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::backupUserKey(QString password) {
+VSQMessenger::backupKeyAsync(QString password) {
     // m_userId = _prepareLogin(user);
     return QtConcurrent::run([=]() -> EnResult {
 
@@ -422,7 +538,7 @@ VSQMessenger::backupUserKey(QString password) {
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::signInWithBackupKey(QString username, QString password) {
+VSQMessenger::signInWithBackupKeyAsync(QString username, QString password) {
     m_userId = _prepareLogin(username);
     return QtConcurrent::run([=]() -> EnResult {
 
@@ -447,26 +563,24 @@ QFuture<VSQMessenger::EnResult>
 VSQMessenger::signInAsync(QString user) {
     m_userId = _prepareLogin(user);
     return QtConcurrent::run([=]() -> EnResult {
-        qDebug() << "Trying to Sign In: " << m_userId;
+        qDebug() << "Trying to sign in: " << m_userId;
 
         vs_messenger_virgil_user_creds_t creds;
         memset(&creds, 0, sizeof (creds));
 
         // Load User Credentials
         if (!_loadCredentials(m_userId, creds)) {
-            emit fireError(tr("Cannot load user credentials"));
-            qDebug() << "Cannot load user credentials";
+            qDebug() << "Sign-in error, code" << MRES_ERR_NO_CRED;
             return MRES_ERR_NO_CRED;
         }
 
         // Sign In user, using Virgil Service
         if (VS_CODE_OK != vs_messenger_virgil_sign_in(&creds)) {
-            emit fireError(tr("Cannot Sign In user"));
-            qDebug() << "Cannot Sign In user";
+            qDebug() << "Sign-in error, code:" << MRES_ERR_SIGNIN;
             return MRES_ERR_SIGNIN;
         }
 
-        // Check previus run is crashed
+        // Check previous run is crashed
         m_crashReporter->checkAppCrash();
 
         // Connect over XMPP
@@ -478,7 +592,7 @@ VSQMessenger::signInAsync(QString user) {
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::signUp(QString user) {
+VSQMessenger::signUpAsync(QString user) {
     m_userId = _prepareLogin(user);
     return QtConcurrent::run([=]() -> EnResult {
         qInfo() << "Trying to sign up: " << m_userId;
@@ -505,7 +619,7 @@ VSQMessenger::signUp(QString user) {
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::addContact(QString contact) {
+VSQMessenger::addContactAsync(QString contact) {
     return QtConcurrent::run([=]() -> EnResult {
         // Sign Up user, using Virgil Service
         if (VS_CODE_OK != vs_messenger_virgil_search(contact.toStdString().c_str())) {
@@ -687,7 +801,7 @@ VSQMessenger::_loadCredentials(const QString &user, vs_messenger_virgil_user_cre
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::logout() {
+VSQMessenger::logoutAsync() {
     return QtConcurrent::run([=]() -> EnResult {
         qDebug() << "Logout";
         QMetaObject::invokeMethod(this, "deregisterFromNotifications", Qt::BlockingQueuedConnection);
@@ -712,16 +826,6 @@ QFuture<VSQMessenger::EnResult> VSQMessenger::disconnect() {
 }
 
 /******************************************************************************/
-QFuture<VSQMessenger::EnResult>
-VSQMessenger::deleteUser(QString user) {
-    return QtConcurrent::run([=]() -> EnResult {
-        Q_UNUSED(user)
-        logout();
-        return MRES_OK;
-    });
-}
-
-/******************************************************************************/
 VSQSqlConversationModel &
 VSQMessenger::modelConversations() {
     return *m_sqlConversations;
@@ -732,11 +836,15 @@ VSQMessenger::getChatModel() {
     return *m_sqlChatModel;
 }
 
+VSQLastActivityManager *VSQMessenger::lastActivityManager()
+{
+    return m_lastActivityManager;
+}
+
 void VSQMessenger::setCrashReporter(VSQCrashReporter *crashReporter)
 {
     m_crashReporter = crashReporter;
 }
-
 
 /******************************************************************************/
 void
@@ -1072,33 +1180,6 @@ void VSQMessenger::setApplicationActive(bool active)
     m_lastActivityManager->setEnabled(active);
 }
 
-void VSQMessenger::signIn(const QString &userId)
-{
-    if (userId.isEmpty()) {
-        emit signInUserEmpty();
-    }
-    else {
-        emit signInStarted(userId);
-        FutureWorker::run(signInAsync(userId), [=](const FutureResult &result) {
-            switch (result) {
-            case MRES_OK:
-                m_settings->setLastSignedInUser(userId);
-                emit signedIn(userId);
-                break;
-            case MRES_ERR_NO_CRED:
-                emit signInErrorOccured(tr("Cannot load credentials"));
-                break;
-            case MRES_ERR_SIGNIN:
-                emit signInErrorOccured(tr("Cannot sign-in user"));
-                break;
-            default:
-                emit signInErrorOccured(tr("Unknown sign-in error"));
-                break;
-            }
-        });
-    }
-}
-
 /******************************************************************************/
 void
 VSQMessenger::onMessageReceived(const QXmppMessage &message) {
@@ -1281,8 +1362,8 @@ VSQMessenger::createSendAttachment(const QString messageId, const QString to,
 
 /******************************************************************************/
 QFuture<VSQMessenger::EnResult>
-VSQMessenger::sendMessage(const QString &to, const QString &message,
-                          const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
+VSQMessenger::sendMessageAsync(const QString &to, const QString &message,
+                               const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
 {
     const auto url = attachmentUrl.toUrl();
     if (VSQUtils::isValidUrl(url)) {
@@ -1353,13 +1434,6 @@ void VSQMessenger::openAttachment(const QString &messageId)
         qCDebug(lcTransferManager) << "Opening of message attachment:" << url;
         emit openPreviewRequested(url);
     });
-}
-
-void VSQMessenger::hideSplashScreen()
-{
-#ifdef VS_ANDROID
-    VSQAndroid::hideSplashScreen();
-#endif
 }
 
 /******************************************************************************/

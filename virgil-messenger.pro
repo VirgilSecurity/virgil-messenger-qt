@@ -44,13 +44,18 @@ isEmpty(VERSION) {
 }
 
 ios {
-    TARGET = VirgilMessenger
+    isEmpty(VS_TARGET) {
+        TARGET = VirgilMessenger
+    } else
+    {
+        TARGET = $$VS_TARGET
+    }
     QMAKE_TARGET_BUNDLE_PREFIX = com.virgil
 } else {
     TARGET = virgil-messenger
     QMAKE_TARGET_BUNDLE_PREFIX = com.virgilsecurity
 }
-
+message("TARGET = $$TARGET")
 message("VERSION = $$VERSION")
 
 #
@@ -97,6 +102,7 @@ VS_PLATFORMS_PATH=$$absolute_path(generated/platforms)
 HEADERS += \
         include/VSQApplication.h \
         include/VSQAttachmentBuilder.h \
+        include/AccountSelectionModel.h \
         include/VSQClipboardProxy.h \
         include/VSQCommon.h \
         include/VSQContactManager.h \
@@ -117,10 +123,28 @@ HEADERS += \
         include/VSQUtils.h \
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
-        include/helpers/VSQSingleton.h \
-        include/helpers/FutureWorker.h \
         include/ui/VSQUiHelper.h \
         include/KeyboardEventFilter.h \
+        # Helpers
+        include/helpers/VSQSingleton.h \
+        include/helpers/FutureWorker.h \
+        # Applications states
+        include/states/AccountSelectionState.h \
+        include/states/AccountSettingsState.h \
+        include/states/ApplicationStateManager.h \
+        include/states/AttachmentPreviewState.h \
+        include/states/BackupKeyState.h \
+        include/states/ChatListState.h \
+        include/states/ChatState.h \
+        include/states/DownloadKeyState.h \
+        include/states/OperationState.h \
+        include/states/NewChatState.h \
+        include/states/SignInAsState.h \
+        include/states/SignInState.h \
+        include/states/SignInUsernameState.h \
+        include/states/SignUpState.h \
+        include/states/SplashScreenState.h \
+        include/states/StartState.h \
         # Logging
         include/logging/VSQLogging.h \
         include/logging/VSQLogWorker.h \
@@ -136,6 +160,7 @@ HEADERS += \
 
 SOURCES += \
         src/VSQAttachmentBuilder.cpp \
+        src/AccountSelectionModel.cpp \
         src/VSQClipboardProxy.cpp \
         src/VSQCommon.cpp \
         src/VSQContactManager.cpp \
@@ -158,9 +183,24 @@ SOURCES += \
         src/main.cpp \
         src/VSQApplication.cpp \
         src/ui/VSQUiHelper.cpp \
-        src/hal.cpp \
         src/KeyboardEventFilter.cpp \
+        # Applications states
+        src/states/AccountSelectionState.cpp \
+        src/states/AccountSettingsState.cpp \
+        src/states/ApplicationStateManager.cpp \
+        src/states/AttachmentPreviewState.cpp \
+        src/states/BackupKeyState.cpp \
+        src/states/ChatListState.cpp \
+        src/states/ChatState.cpp \
+        src/states/DownloadKeyState.cpp \
+        src/states/NewChatState.cpp \
+        src/states/SignInAsState.cpp \
+        src/states/SignInState.cpp \
+        src/states/SignInUsernameState.cpp \
+        src/states/SignUpState.cpp \
+        src/states/SplashScreenState.cpp \
         # Logging
+        src/hal.cpp \
         src/logging/VSQLogging.cpp \
         src/logging/VSQLogWorker.cpp
 
@@ -290,7 +330,7 @@ macx: {
 #
 
 ios: {
-    QMAKE_ASSET_CATALOGS += platforms/ios/Assets.xcassets
+    QMAKE_ASSET_CATALOGS += generated/platforms/ios/Assets.xcassets
     QMAKE_IOS_DEPLOYMENT_TARGET = 9.0
     QMAKE_INFO_PLIST = platforms/ios/Info.plist
     DEFINES += VS_IOS=1 VS_PUSHNOTIFICATIONS=1 VS_MOBILE=1
@@ -306,10 +346,10 @@ ios: {
          src/notifications/XmppPushNotifications.cpp
 
     PUSH_NOTIFICATIONS_ENTITLEMENTS.name = CODE_SIGN_ENTITLEMENTS
-    PUSH_NOTIFICATIONS_ENTITLEMENTS.value = $$PWD/platforms/ios/Entitlements/VirgilMessenger.entitlements
+    PUSH_NOTIFICATIONS_ENTITLEMENTS.value = $$VS_PLATFORMS_PATH/ios/Entitlements/VirgilMessenger.entitlements
     QMAKE_MAC_XCODE_SETTINGS += PUSH_NOTIFICATIONS_ENTITLEMENTS
 
-    DISTFILES += platforms/ios/Entitlements/VirgilMessenger.entitlements
+    DISTFILES += generated/platforms/ios/Entitlements/VirgilMessenger.entitlements
 }
 
 

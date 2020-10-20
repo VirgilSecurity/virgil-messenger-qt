@@ -16,4 +16,4 @@ SUFeedURL="https://virgilsecurity.bintray.com/messenger/macos/nightly/appcast.xm
 SUPublicEDKey="44RVxRhV4h4Hlw+VOeXvCj78Z5NUhJ2Qi5N+kpu8KxI="
 
 # IOS
-IOS_NAME="${APPLICATION_NAME}"
+IOS_NAME="VirgilMessenger"

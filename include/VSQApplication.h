@@ -44,6 +44,7 @@
 #include <VSQMessenger.h>
 #include <VSQSettings.h>
 #include <macos/VSQMacos.h>
+#include <states/ApplicationStateManager.h>
 
 class QNetworkAccessManager;
 
@@ -54,6 +55,7 @@ using namespace VSQ;
 class VSQApplication : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(ApplicationStateManager *stateManager READ stateManager CONSTANT)
     Q_PROPERTY(QString organizationDisplayName READ organizationDisplayName CONSTANT)
     Q_PROPERTY(QString applicationDisplayName READ applicationDisplayName CONSTANT)
     Q_PROPERTY(KeyboardEventFilter *keyboardEventFilter MEMBER m_keyboardEventFilter CONSTANT)
@@ -75,9 +77,6 @@ public:
     Q_INVOKABLE QString
     currentVersion() const;
 
-    Q_INVOKABLE void
-    sendReport();
-
     // Names
 
     QString organizationDisplayName() const;
@@ -88,6 +87,8 @@ private slots:
     onApplicationStateChanged(Qt::ApplicationState state);
 
 private:
+    ApplicationStateManager *stateManager();
+
     static const QString kVersion;
     VSQSettings m_settings;
     QNetworkAccessManager *m_networkAccessManager;
@@ -95,6 +96,7 @@ private:
     QQmlApplicationEngine m_engine;
     VSQMessenger m_messenger;
     KeyboardEventFilter *m_keyboardEventFilter;
+    ApplicationStateManager m_applicationStateManager;
 };
 
 #endif // VSQApplication

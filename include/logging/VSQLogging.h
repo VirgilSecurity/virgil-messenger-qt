@@ -54,7 +54,6 @@ signals:
     void formattedMessageCreated(const QString &message);
 
 private:
-    void registerMetaTypes();
     void formatMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
 
     static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);

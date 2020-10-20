@@ -9,7 +9,7 @@ ToolBar {
     id: toolbarId
     property alias title: titleLabel.text
     property alias description: descriptionLabel.text
-    property alias showSeporator: separator.visible
+    property alias showSeparator: separator.visible
     // search
     property alias search: searchId.search
     property alias isSearchOpen: searchId.isSearchOpen

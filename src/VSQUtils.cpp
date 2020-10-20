@@ -198,3 +198,15 @@ QString VSQUtils::elidedText(const QString &text, const int maxLength)
     const QChar ellipsisChar(0x2026);
     return text.left(half) + ellipsisChar + text.right(max - 1 - half);
 }
+
+bool VSQUtils::validateUserId(const QString &userId, QString *errorText)
+{
+    if (userId.isEmpty()) {
+        if (errorText) {
+            *errorText = QObject::tr("Username can't be empty");
+        }
+        return false;
+    }
+    // TODO(fpohtmeh): add regexp check
+    return true;
+}

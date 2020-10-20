@@ -75,7 +75,6 @@ class VSQMessenger : public QObject {
     Q_ENUMS(EnStatus)
 
 public:
-
     enum EnResult
     {
         MRES_OK,
@@ -105,6 +104,7 @@ public:
 
     VSQSqlConversationModel &modelConversations();
     VSQSqlChatModel &getChatModel();
+    VSQLastActivityManager *lastActivityManager();
 
     Optional<StMessage> decryptMessage(const QString &sender, const QString &message);
 
@@ -112,39 +112,42 @@ public:
 
     // New methods
 
-    Q_INVOKABLE void signIn(const QString &userId);
+    void signIn(const QString &userId);
+    void signOut();
+    void signUp(const QString &userId);
+    void addContact(const QString &userId);
+    void backupKey(const QString &password, const QString &confirmedPassword);
+    void downloadKey(const QString &userId, const QString &password);
+
+    void sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
 
 public slots:
-
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     signInAsync(QString user);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    backupUserKey(QString password);
+    backupKeyAsync(QString password);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    signInWithBackupKey(QString username, QString password);
+    signInWithBackupKeyAsync(QString username, QString password);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    signUp(QString user);
+    signUpAsync(QString user);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    logout();
+    logoutAsync();
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     disconnect();
-
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    deleteUser(QString user);
 
     Q_INVOKABLE void
     checkState();
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    addContact(QString contact);
+    addContactAsync(QString contact);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
+    sendMessageAsync(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
 
     QFuture<VSQMessenger::EnResult>
     createSendMessage(const QString messageId, const QString to, const QString text);
@@ -157,15 +160,13 @@ public slots:
 
     void setCrashReporter(VSQCrashReporter *crashReporter);
 
-    Q_INVOKABLE void setCurrentRecipient(const QString &recipient);
+    void setCurrentRecipient(const QString &recipient);
 
-    Q_INVOKABLE void saveAttachmentAs(const QString &messageId, const QVariant &fileUrl);
+    void saveAttachmentAs(const QString &messageId, const QVariant &fileUrl);
 
-    Q_INVOKABLE void downloadAttachment(const QString &messageId);
+    void downloadAttachment(const QString &messageId);
 
-    Q_INVOKABLE void openAttachment(const QString &messageId);
-
-    Q_INVOKABLE void hideSplashScreen();
+    void openAttachment(const QString &messageId);
 
 signals:
     void
@@ -197,16 +198,26 @@ signals:
 
     void openPreviewRequested(const QUrl &url);
     void informationRequested(const QString &message);
-    void lastActivityTextChanged(const QString &text);
 
     void downloadThumbnail(const StMessage message, const QString sender, QPrivateSignal);
 
     // New signals
 
-    void signInUserEmpty();
-    void signInStarted(const QString &userId);
     void signedIn(const QString &userId);
     void signInErrorOccured(const QString &errorText);
+    void signedUp(const QString &userId);
+    void signUpErrorOccured(const QString &errorText);
+    void signedOut();
+
+    void contactAdded(const QString &userId);
+    void addContactErrorOccured(const QString &errorText);
+
+    void keyBackuped(const QString &userId);
+    void backupKeyFailed(const QString &errorText);
+    void keyDownloaded(const QString &userId);
+    void downloadKeyFailed(const QString &errorText);
+
+    void messageSent();
 
 private slots:
     void onConnected();

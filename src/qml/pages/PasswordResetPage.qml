@@ -6,6 +6,7 @@ import "../components"
 import "../components/Buttons"
 
 Page {
+    // TODO(fpohtmeh): remove as unused
     id: passswordPage
 
     background: Rectangle {

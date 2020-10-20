@@ -2,14 +2,13 @@ import QtQuick 2.12
 
 import "../theme"
 import "./CommonHelpers"
-import "../helpers/chat.js" as ChatLogic
 
 TextInCircle {
     property string nickname
 
     color: Theme.avatarBgColor // intToHexColor(hashCode(nickname))
     diameter: Theme.avatarHeight
-    content: ChatLogic.getPersonInitialis(nickname)
+    content: nickname.replace("_", "").substring(0, 2).toUpperCase()
     pointSize: UiHelper.fixFontSz(0.4 * diameter)
 
     // Hash any string into an integer value
