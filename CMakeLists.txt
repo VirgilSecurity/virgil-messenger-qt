@@ -43,22 +43,98 @@ include(varpadding)
 include(getprebuild)
 include(customers)
 
-# Target name and version
-set(VS_TARGET_NAME "virgil-messenger")
+# ---------------------------------------------------------------------------
+# Project version
+# ---------------------------------------------------------------------------
 set(VS_TARGET_VERSION "3.4.18")
 
+# ---------------------------------------------------------------------------
+#   Customers selection
+# ---------------------------------------------------------------------------
+set(VS_CUSTOMER "Virgil" CACHE "STRING" "Customer for build")
+set(VS_CUSTOMER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/customers/${VS_CUSTOMER}")
+message(STATUS "Current customer : [${VS_CUSTOMER}]")
+message(STATUS "Current customer directory: [${VS_CUSTOMER_DIR}]")
+message(STATUS "Include customer cmake target name: [customer-target.cmake]")
+# Include customer file for project target name
+include("${VS_CUSTOMER_DIR}/customer.cmake")
+
+# ---------------------------------------------------------------------------
+# Define project
+# ---------------------------------------------------------------------------
+project(${VS_TARGET_NAME} VERSION ${VS_TARGET_VERSION} LANGUAGES C CXX)
+
+# ---------------------------------------------------------------------------
+# Detecting platform if VS_PLATFORM not specified
+# ---------------------------------------------------------------------------
+if(NOT VS_PLATFORM)
+    if(ANDROID)
+        message(STATUS "Detected target platform: [Android]")
+        set(VS_PLATFORM "android")
+    elseif(UNIX)
+        message(STATUS "Detected target platform: [Unix]")
+        set(VS_PLATFORM "linux")
+    elseif(MACOS)
+        message(STATUS "Detected target platform: [MacOS]")
+        set(VS_PLATFORM "macos")
+    elseif(IOS)
+        message(STATUS "Detected target platform: [IOS]")
+        set(VS_PLATFORM "ios")
+    elseif(MINGW32)
+        message(STATUS "Detected target platform: [Windows]")
+        set(VS_PLATFORM "windows")
+    endif()
+endif()
+
+# ---------------------------------------------------------------------------
+# Get prebuild core libraries
+# ---------------------------------------------------------------------------
 get_prebuild()
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Debug")
+endif()
+string( TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER )
+message("-- Build type: [${CMAKE_BUILD_TYPE}]")
+
+if(CMAKE_BUILD_TYPE_LOWER STREQUAL "minsizerel" OR CMAKE_BUILD_TYPE_LOWER STREQUAL "relwithdebinfo")
+    set(CMAKE_BUILD_TYPE_LOWER "release")
+endif()
+
+set(PREBUILT_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt")
+set(PREBUILT_QT_DIR "${PREBUILT_DIR}/qt")
+
+if(VS_PLATFORM STREQUAL "android")
+    set(PREBUILT_BASE_DIR "${PREBUILT_DIR}/${VS_PLATFORM}.${ANDROID_ABI}/${CMAKE_BUILD_TYPE_LOWER}/installed/usr/local")    
+else()
+    set(PREBUILT_BASE_DIR "${PREBUILT_DIR}/${VS_PLATFORM}/${CMAKE_BUILD_TYPE_LOWER}/installed/usr/local")
+endif()
+
+set(PREBUILT_INCLUDE_DIR "${PREBUILT_BASE_DIR}/include")
+set(PREBUILT_LIB_DIR "${PREBUILT_BASE_DIR}/lib")
+set(QUICKFUTURE_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/quickfuture/src")
+
+message(STATUS "Setting prebuild QT directory:	        [${PREBUILT_QT_DIR}]")
+message(STATUS "Setting prebuild directory:		[${PREBUILT_BASE_DIR}]")
+message(STATUS "Setting prebuild include directory:	[${PREBUILT_INCLUDE_DIR}]")
+message(STATUS "Setting prebuild library directory:	[${PREBUILT_LIB_DIR}]")
+
+# ---------------------------------------------------------------------------
+# Include customer file and prepare data
+# ---------------------------------------------------------------------------
+include("${VS_CUSTOMER_DIR}/customer.cmake")
+vs_customer_prepare()
+
+# ---------------------------------------------------------------------------
+# Prepare platform depends
+# ---------------------------------------------------------------------------
 set(VS_QT_EXTRA "")
-# ---------------
+
 # IOS, IOS_SIM
-# ---------------
-if(VS_PLATFORM STREQUAL "ios" OR VS_PLATFORM STREQUAL "ios-sim")
+if(VS_PLATFORM STREQUAL "ios")
     set(VS_TARGET_NAME "VirgilMessenger")
 
-# ---------------
 # Android
-# ---------------
 elseif(VS_PLATFORM STREQUAL "android")
     # Get firebase
     get_firebase()
@@ -96,8 +172,6 @@ elseif(VS_PLATFORM STREQUAL "android")
     set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/platforms/android")    
 endif()    
 
-project(${VS_TARGET_NAME} VERSION ${VS_TARGET_VERSION} LANGUAGES C CXX)
-
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -111,56 +185,11 @@ include(FetchContent)
 
 find_package(Qt5 COMPONENTS Core Widgets Quick Sql Network Concurrent Qml Xml ${VS_QT_EXTRA} REQUIRED)
 
-# ---------------------------------------------------------------------------
-#   Define prebuilt folders
-# ---------------------------------------------------------------------------
-
-# Default build type is Debug
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Debug")
-endif()
-string( TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER )
-message("-- Build type: [${CMAKE_BUILD_TYPE}]")
-
-set(PREBUILT_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt")
-set(PREBUILT_QT_DIR "${PREBUILT_DIR}/qt")
-
-if(VS_PLATFORM STREQUAL "android")
-    message(STATUS "ANDROID_VERSION_CODE=${ANDROID_VERSION_CODE}")
-    message(STATUS "ANDROID_VERSION_NAME=${ANDROID_VERSION_NAME}")
-    set(PREBUILT_BASE_DIR "${PREBUILT_DIR}/${VS_PLATFORM}.${ANDROID_ABI}/${CMAKE_BUILD_TYPE_LOWER}/installed/usr/local")    
-else()
-    set(PREBUILT_BASE_DIR "${PREBUILT_DIR}/${VS_PLATFORM}/${CMAKE_BUILD_TYPE_LOWER}/installed/usr/local")
-endif()
-
-set(PREBUILT_INCLUDE_DIR "${PREBUILT_BASE_DIR}/include")
-set(PREBUILT_LIB_DIR "${PREBUILT_BASE_DIR}/lib")
-set(QUICKFUTURE_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/quickfuture/src")
-
-message(STATUS "Setting prebuild QT directory:	        [${PREBUILT_QT_DIR}]")
-message(STATUS "Setting prebuild directory:		[${PREBUILT_BASE_DIR}]")
-message(STATUS "Setting prebuild include directory:	[${PREBUILT_INCLUDE_DIR}]")
-message(STATUS "Setting prebuild library directory:	[${PREBUILT_LIB_DIR}]")
 
 # ---------------------------------------------------------------------------
-#   Customers selection
+#   Prepare for build target
 # ---------------------------------------------------------------------------
-
-set(VS_CUSTOMER "Virgil" CACHE "STRING" "Customer for build")
-set(VS_CUSTOMER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/customers/${VS_CUSTOMER}")
-message(STATUS "Current customer : [${VS_CUSTOMER}]")
-message(STATUS "Current customer directory: [${VS_CUSTOMER_DIR}]")
-message(STATUS "Include customer cmake profile: [customer.cmake]")
-include("${VS_CUSTOMER_DIR}/customer.cmake")
-
-vs_customer_prepare()
-
-# ---------------------------------------------------------------------------
-#   Build system type
-# ---------------------------------------------------------------------------
-# ---------------
 # Android
-# ---------------
 if(VS_PLATFORM STREQUAL "android")
     message("-- Prepare sources for Android ...")
     add_library(${VS_TARGET_NAME} SHARED)
@@ -178,9 +207,8 @@ if(VS_PLATFORM STREQUAL "android")
     
     message(STATUS "Android OpenSSL root path:    [${SSL_ROOT_PATH}]")    
     message(STATUS "Android OpenSSL library path: [${VS_ANDROID_SSL_DIR}]")
-# ---------------
+
 # MacOS    
-# ---------------
 elseif(VS_PLATFORM STREQUAL "macos")
 
     set(App_ICON "${VS_CUSTOMER_DIR}/platforms/macos/pkg_resources/${MACOSX_BUNDLE_ICON_FILE}.icns")
@@ -206,7 +234,6 @@ elseif(VS_PLATFORM STREQUAL "macos")
 
 #    macdeployqt(${VS_TARGET_NAME} "${CMAKE_CURRENT_LIST_DIR}/src/qml")
 # Other
-
 else()
     add_executable(${VS_TARGET_NAME})
 endif()
@@ -420,9 +447,3 @@ target_compile_options(${VS_TARGET_NAME}
 target_compile_definitions(${VS_TARGET_NAME}
   PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>
   )
-#set(CPACK_PRODUCTBUILD_KEYCHAIN_PATH "sdfdsf")
-#set(CPACK_PRODUCTBUILD_IDENTITY_NAME "68125DC3B6986E51D7702695CD4CA6A7C2058FA4")
-#set(CPACK_GENERATOR "productbuild")
-#set(CPACK_DMG_VOLUME_NAME "test")
-#include(CPack)
-

@@ -1,0 +1,17 @@
+- Build debug version:
+
+    mkdir -p build
+    cd build
+    cmake -DVS_PLATFORM="android" ..
+    make
+    make apk
+
+- Build release version:
+
+    mkdir -p build
+    cd build
+    cmake -DVS_PLATFORM="android" -DCMAKE_BUILD_TYPE="MinSizeRel" ..
+    make
+    make apk
+
+Signing release APK or Bundle AAB

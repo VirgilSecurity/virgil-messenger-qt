@@ -1,0 +1,14 @@
+- Build debug version:
+
+    mkdir -p build
+    cd build
+    cmake -DVS_PLATFORM="android" ..
+    make
+
+- Build release version:
+
+    mkdir -p build
+    cd build
+    cmake -DVS_PLATFORM="android" -DCMAKE_BUILD_TYPE="Release" ..
+    make
+

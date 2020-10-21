@@ -35,109 +35,115 @@
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
 # ---------------------------------------------------------------------------
-# Check target platform variable
+# Set CMAKE_FIND_ROOT_PATH for QT cmake include directory
 # ---------------------------------------------------------------------------
-list(APPEND VS_PLATFORM_LIST "linux" "android" "ios" "ios-sim" "macos" "windows")
+function(PREPARE_QT_SDK CMAKE_PREFIX_PATH_OUT CMAKE_FIND_ROOT_PATH_OUT)
+    if (DEFINED ENV{QTDIR})
+        get_filename_component(QT_RELATIVE_PATH "$ENV{QTDIR}/../" ABSOLUTE)
+        set(${CMAKE_FIND_ROOT_PATH_OUT} "${QT_RELATIVE_PATH}/${QT_PREFIX_PATH}" PARENT_SCOPE)
+        set(${CMAKE_PREFIX_PATH_OUT} "${QT_RELATIVE_PATH}/${QT_PREFIX_PATH}" PARENT_SCOPE)        
+        message(STATUS "CMAKE_FIND_ROOT_PATH = ${CMAKE_FIND_ROOT_PATH}")
+        message(STATUS "CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")
+    else()
+        message(FATAL_ERROR "Error detecting QT SDK (Env QTDIR not set)")    
+    endif()
+endfunction()    
+
+# ---------------------------------------------------------------------------
+# Check target platform and customer variable
+# ---------------------------------------------------------------------------
 
 if(VS_PLATFORM)
-    file(WRITE "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake" "set(VS_PLATFORM \"${VS_PLATFORM}\" CACHE \"STRING\" \"Target build platform\")")
-    message(STATUS "Create transitive-args.cmake") 
-else()
+    file(APPEND "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake" "set(VS_PLATFORM \"${VS_PLATFORM}\" CACHE \"STRING\" \"Target build platform\")\n")
+    message(STATUS "Create transitive-args.cmake")     
+endif()
+
+if(VS_CUSTOMER)
+    file(APPEND "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake" "set(VS_CUSTOMER \"${VS_CUSTOMER}\" CACHE \"STRING\" \"Customer name\")\n")
+    message(STATUS "Create transitive-args.cmake")     
+endif()
+
+if(NOT VS_PLATFORM OR NOT VS_CUSTOMER)
     if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake")
 	include("${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake")
 	message(STATUS "Set VS_PLATFORM from  transitive-args.cmake") 
     endif()
 endif()    
 
-if(VS_PLATFORM)
-    if(NOT VS_PLATFORM IN_LIST VS_PLATFORM_LIST)
-	message(FATAL_ERROR "-- Target platform if wrong. Set VS_PLATFORM to [ ${VS_PLATFORM_LIST} ]")
-    endif()
-else()
-    message(FATAL_ERROR "-- Target platform not set. Set VS_PLATFORM to [ ${VS_PLATFORM_LIST} ]")
-endif()
-message("-- Target platform VS_PLATFORM = ${VS_PLATFORM}")
-
 # ---------------------------------------------------------------------------
 # Prepare target platform
 # ---------------------------------------------------------------------------
 
-# -- Linux
-if(VS_PLATFORM STREQUAL "linux")
-    set(QT_PREFIX_PATH "gcc_64")
 
-# -- Android
-elseif(VS_PLATFORM STREQUAL "android")
-    set(QT_PREFIX_PATH "android")
-    #   Android NDK ABIs    
-    set(ANDROID_NATIVE_API_LEVEL "28" CACHE "STRING" "Android API level")
-    set(ANDROID_ABI "x86" CACHE "STRING" "Android default ABI")
-    set(ANDROID_BUILD_ABI_arm64-v8a ON CACHE "BOOL" "Build arm64-v8a architecture")
-    set(ANDROID_BUILD_ABI_armeabi-v7a ON CACHE "BOOL" "Build armeabi-v7a architecture")
-    set(ANDROID_BUILD_ABI_x86 ON CACHE "BOOL" "Build x86 architecture")
-    set(ANDROID_BUILD_ABI_x86_64 ON CACHE "BOOL" "Build x86_64 architecture")
-
-    message(STATUS "Android API level: [${ANDROID_NATIVE_API_LEVEL}]")    
-    message(STATUS "Android default ABI: [${ANDROID_ABI}]")    
-    message(STATUS "ANDROID_BUILD_ABI_arm64-v8a: ${ANDROID_BUILD_ABI_arm64-v8a}")		
-    message(STATUS "ANDROID_BUILD_ABI_armeabi-v7a: ${ANDROID_BUILD_ABI_armeabi-v7a}")		    	
-    message(STATUS "ANDROID_BUILD_ABI_x86: ${ANDROID_BUILD_ABI_x86}")		    	
-    message(STATUS "ANDROID_BUILD_ABI_x86_64: ${ANDROID_BUILD_ABI_x86_64}")		    	
-    #  Android NDK
-    if(CMAKE_TOOLCHAIN_FILE)
-	set(VS_CMAKE_TOOLCHAIN_FILE "${CMAKE_TOOLCHAIN_FILE}")	
-    elseif(ANDROID_NDK)
-	set(VS_CMAKE_TOOLCHAIN_FILE "${ANDROID_NDK}/build/cmake/android.toolchain.cmake")
-    elseif (DEFINED ENV{ANDROID_NDK})    
-	set(VS_CMAKE_TOOLCHAIN_FILE "$ENV{ANDROID_NDK}/build/cmake/android.toolchain.cmake")    
-    else()
-	message(FATAL_ERROR "-- Enviroment variable ANDROID_NDK not set")        	
+# Autodetect sdk, ndk for specified platform
+list(APPEND VS_PLATFORM_LIST "linux" "android" "ios" "ios-sim" "macos" "windows")
+if(VS_PLATFORM)
+    message(STATUS "Autodetecting enviroment for target platform: [${VS_PLATFORM}]")
+    # Check platform name
+    if(NOT VS_PLATFORM IN_LIST VS_PLATFORM_LIST)
+	message(FATAL_ERROR "-- Target platform if wrong. Set VS_PLATFORM to [ ${VS_PLATFORM_LIST} ]")
     endif()
-    #  Android SDK
-    if(ANDROID_SDK)
-	message(STATUS "ANDROID_SDK: [${ANDROID_SDK}]")
-    elseif(DEFINED ENV{ANDROID_SDK})
-        set(ANDROID_SDK "$ENV{ANDROID_SDK}")
-	message(STATUS "Set ANDROID_SDK from enviroment value: [ ${ANDROID_SDK} ]")
-    else()
-	message(FATAL_ERROR "-- Enviroment variable ANDROID_SDK not set")    
-    endif()    
+    # -- Linux
+    if(VS_PLATFORM STREQUAL "linux")
+        set(QT_PREFIX_PATH "gcc_64")
+        prepare_qt_sdk()    
 
-# -- MacOS
-elseif(VS_PLATFORM STREQUAL "macos")
-    set(QT_PREFIX_PATH "clang_64")
+    # -- Android
+    elseif(VS_PLATFORM STREQUAL "android")
+        set(QT_PREFIX_PATH "android")
+        #   Android NDK ABIs    
+        set(ANDROID_ABI "x86" CACHE "STRING" "Android default ABI")
+        set(ANDROID_BUILD_ABI_arm64-v8a ON CACHE "BOOL" "Build arm64-v8a architecture")
+        set(ANDROID_BUILD_ABI_armeabi-v7a ON CACHE "BOOL" "Build armeabi-v7a architecture")
+        set(ANDROID_BUILD_ABI_x86 ON CACHE "BOOL" "Build x86 architecture")
+        set(ANDROID_BUILD_ABI_x86_64 ON CACHE "BOOL" "Build x86_64 architecture")
+    
+        message(STATUS "Android default ABI: [${ANDROID_ABI}]")    
+        message(STATUS "ANDROID_BUILD_ABI_arm64-v8a: ${ANDROID_BUILD_ABI_arm64-v8a}")		
+        message(STATUS "ANDROID_BUILD_ABI_armeabi-v7a: ${ANDROID_BUILD_ABI_armeabi-v7a}")		    	
+        message(STATUS "ANDROID_BUILD_ABI_x86: ${ANDROID_BUILD_ABI_x86}")		    	
+        message(STATUS "ANDROID_BUILD_ABI_x86_64: ${ANDROID_BUILD_ABI_x86_64}")		    	
+        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH)
 
-# -- IOS
-elseif(VS_PLATFORM STREQUAL "ios")
-    set(QT_PREFIX_PATH "ios")
-    set(CMAKE_SYSTEM_NAME "iOS")
-    set(CMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH NO)
-    set(CMAKE_IOS_INSTALL_COMBINED YES)
-
-# -- Windows
-elseif(VS_PLATFORM STREQUAL "windows")
-    set(QT_PREFIX_PATH "mingw32")
+        #  Android NDK
+        if(NOT CMAKE_TOOLCHAIN_FILE)
+            if(ANDROID_NDK)
+        	set(CMAKE_TOOLCHAIN_FILE "${ANDROID_NDK}/build/cmake/android.toolchain.cmake")
+            elseif(DEFINED ENV{ANDROID_NDK})
+        	set(CMAKE_TOOLCHAIN_FILE "$ENV{ANDROID_NDK}/build/cmake/android.toolchain.cmake")
+    	    else()
+        	message(FATAL_ERROR "-- Enviroment variable ANDROID_NDK not set")
+    	    endif()
+        endif()
+        message(STATUS "Android toolchain file: [${CMAKE_TOOLCHAIN_FILE}]")
+        #  Android SDK
+        if(ANDROID_SDK)
+    	    message(STATUS "ANDROID_SDK: [${ANDROID_SDK}]")
+        elseif(DEFINED ENV{ANDROID_SDK})
+            set(ANDROID_SDK "$ENV{ANDROID_SDK}")
+    	    message(STATUS "Set ANDROID_SDK from enviroment value: [ ${ANDROID_SDK} ]")
+        else()
+    	    message(FATAL_ERROR "-- Enviroment variable ANDROID_SDK not set")    
+        endif()    
+        
+    # -- MacOS
+    elseif(VS_PLATFORM STREQUAL "macos")
+        set(QT_PREFIX_PATH "clang_64")
+        prepare_qt_sdk()    
+    
+    # -- IOS
+    elseif(VS_PLATFORM STREQUAL "ios")
+        set(QT_PREFIX_PATH "ios")
+        set(CMAKE_SYSTEM_NAME "iOS")
+        set(CMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH NO)
+        set(CMAKE_IOS_INSTALL_COMBINED YES)
+        prepare_qt_sdk()
+    
+    # -- Windows
+    elseif(VS_PLATFORM STREQUAL "windows")
+        set(QT_PREFIX_PATH "mingw32")
+        prepare_qt_sdk()    
+    endif()
 endif()
 
-# ---------------------------------------------------------------------------
-# Set CMAKE_FIND_ROOT_PATH for QT cmake include directory
-# ---------------------------------------------------------------------------
-if (NOT CMAKE_PREFIX_PATH AND DEFINED ENV{QTDIR})
-    get_filename_component(QT_RELATIVE_PATH "$ENV{QTDIR}/../" ABSOLUTE)
-    list(APPEND CMAKE_FIND_ROOT_PATH "${QT_RELATIVE_PATH}/${QT_PREFIX_PATH}")
-    list(APPEND CMAKE_PREFIX_PATH "${QT_RELATIVE_PATH}/${QT_PREFIX_PATH}")
-    message(STATUS "Set CMAKE_FIND_ROOT_PATH from QTDIR enviroment value: [ ${CMAKE_FIND_ROOT_PATH} ]")
-elseif(CMAKE_PREFIX_PATH)
-    list(APPEND CMAKE_FIND_ROOT_PATH "${CMAKE_PREFIX_PATH}")
-    message(STATUS "Set CMAKE_FIND_ROOT_PATH from CMAKE_PREFIX_PATH: [ ${CMAKE_FIND_ROOT_PATH} ]")    
-else()    
-    message(FATAL_ERROR "CMAKE_PREFIX_PATH or ENV:QTDIR not set !!!")    
-endif()
 
-# ---------------------------------------------------------------------------
-# Set build toolchain
-# ---------------------------------------------------------------------------
-if(VS_CMAKE_TOOLCHAIN_FILE)
-    set(CMAKE_TOOLCHAIN_FILE "${VS_CMAKE_TOOLCHAIN_FILE}")
-    message("-- Set CMAKE_TOOLCHAIN_FILE from ANDROID_NDK enviroment value: [ ${CMAKE_TOOLCHAIN_FILE} ]")
-endif()	

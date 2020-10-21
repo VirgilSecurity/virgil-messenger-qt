@@ -61,3 +61,5 @@ generated
 
 
 !ext/commkit.pri
+transitive-args.cmake
+CMakeLists.txt.user
