@@ -1133,30 +1133,30 @@ VSQMessenger::onError(QXmppClient::Error err) {
 
 /******************************************************************************/
 Optional<StMessage> VSQMessenger::decryptMessage(const QString &sender, const QString &message) {
-    const size_t _decryptedMsgSzMax = VSQUtils::bufferSizeForDecryption(message.size());
-    uint8_t decryptedMessage[_decryptedMsgSzMax];
+    const int decryptedMsgSzMax = VSQUtils::bufferSizeForDecryption(message.size());
+    
+    QByteArray decryptedMessage = QByteArray(decryptedMsgSzMax + 1, 0x00);
+    
     size_t decryptedMessageSz = 0;
 
     qDebug() << "Sender            : " << sender;
     qDebug() << "Encrypted message : " << message.length() << " bytes";
 
     // Decrypt message
-    // DECRYPTED_MESSAGE_SZ_MAX - 1  - This is required for a Zero-terminated string
     if (VS_CODE_OK != vs_messenger_virgil_decrypt_msg(
                 sender.toStdString().c_str(),
                 message.toStdString().c_str(),
-                decryptedMessage, decryptedMessageSz - 1,
+                (uint8_t *)decryptedMessage.data(), decryptedMsgSzMax,
                 &decryptedMessageSz)) {
         qWarning("Received message cannot be decrypted");
         return NullOptional;
     }
 
-    // Add Zero termination
-    decryptedMessage[decryptedMessageSz] = 0;
+    // Adjust buffer with a decrypted data
+    decryptedMessage.resize((int)decryptedMessageSz);
 
     // Get message from JSON
-    QByteArray baDecr(reinterpret_cast<char *> (decryptedMessage), static_cast<int> (decryptedMessageSz));
-    QJsonDocument jsonMsg(QJsonDocument::fromJson(baDecr));
+    QJsonDocument jsonMsg(QJsonDocument::fromJson(decryptedMessage));
 
     qCDebug(lcMessenger) << "JSON for parsing:" << jsonMsg;
     auto msg = parseJson(jsonMsg);
