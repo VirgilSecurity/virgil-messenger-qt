@@ -157,6 +157,8 @@ private:
     QString
     _contactsTableName() const;
 
+    void invalidateRoles(const QVector<int> &roles);
+
     void onCreateMessage(const QString recipient, const QString message, const QString messageId, const OptionalAttachment attachment);
     void onReceiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachment attachment);
     void onSetMessageStatus(const QString messageId, const StMessage::Status status);

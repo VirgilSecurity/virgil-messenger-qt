@@ -140,8 +140,6 @@ VSQSqlConversationModel::setRecipient(const QString &recipient) {
     setSort(2, Qt::AscendingOrder);
     setFilter(filterString);
 
-        // select();
-
     emit recipientChanged();
 }
 
@@ -447,6 +445,11 @@ QString VSQSqlConversationModel::_contactsTableName() const {
     return QString("Contacts_") + m_validator->databaseUsername(m_user);
 }
 
+void VSQSqlConversationModel::invalidateRoles(const QVector<int> &roles)
+{
+    emit dataChanged(index(0, 0), index(rowCount() - 1, 0), roles);
+}
+
 void VSQSqlConversationModel::onCreateMessage(const QString recipient, const QString message, const QString messageId,
                                               const OptionalAttachment attachment)
 {
@@ -524,7 +527,7 @@ void VSQSqlConversationModel::onSetMessageStatus(const QString messageId, const 
     QString query = QString("UPDATE %1 SET status = %2 WHERE message_id = '%3'")
             .arg(_tableName()).arg(static_cast<int>(status)).arg(messageId);
     QSqlQuery().exec(query);
-    select();
+    invalidateRoles({ StatusRole });
 }
 
 void VSQSqlConversationModel::onSetAttachmentStatus(const QString messageId, const Enums::AttachmentStatus status)
@@ -533,7 +536,6 @@ void VSQSqlConversationModel::onSetAttachmentStatus(const QString messageId, con
     QString query = QString("UPDATE %1 SET attachment_status = %2 WHERE message_id = '%3'")
             .arg(_tableName()).arg(static_cast<int>(status)).arg(messageId);
     QSqlQuery().exec(query);
-    select();
 
     if (status == Attachment::Status::Loading) {
         m_transferMap[messageId] = TransferInfo();
@@ -544,7 +546,7 @@ void VSQSqlConversationModel::onSetAttachmentStatus(const QString messageId, con
             m_transferMap.erase(it);
         }
     }
-    emit dataChanged(index(0, 0), index(rowCount() - 1, 0), { AttachmentBytesLoadedRole, AttachmentStatusRole });
+    invalidateRoles({ AttachmentBytesLoadedRole, AttachmentStatusRole });
 }
 
 void VSQSqlConversationModel::onSetAttachmentRemoteUrl(const QString messageId, const QUrl url)
@@ -552,8 +554,8 @@ void VSQSqlConversationModel::onSetAttachmentRemoteUrl(const QString messageId, 
     QString query = QString("UPDATE %1 SET attachment_remote_url = '%2' WHERE message_id = '%3'")
             .arg(_tableName()).arg(url.toString()).arg(messageId);
     QSqlQuery().exec(query);
-    select();
     qDebug() << "SQL attachment remote url:" << messageId << "=>" << url.toString();
+    invalidateRoles({ AttachmentRemoteUrlRole });
 }
 
 void VSQSqlConversationModel::onSetAttachmentThumbnailRemoteUrl(const QString messageId, const QUrl url)
@@ -561,8 +563,8 @@ void VSQSqlConversationModel::onSetAttachmentThumbnailRemoteUrl(const QString me
     QString query = QString("UPDATE %1 SET attachment_remote_thumbnail_url = '%2' WHERE message_id = '%3'")
             .arg(_tableName()).arg(url.toString()).arg(messageId);
     QSqlQuery().exec(query);
-    select();
     qDebug() << "SQL attachment remote thumbnail url:" << messageId << "=>" << url.toString();
+    invalidateRoles({ AttachmentRemoteThumbnailUrlRole });
 }
 
 void VSQSqlConversationModel::onSetAttachmentBytesTotal(const QString messageId, const DataSize size)
@@ -570,8 +572,8 @@ void VSQSqlConversationModel::onSetAttachmentBytesTotal(const QString messageId,
     QString query = QString("UPDATE %1 SET attachment_bytes_total = %2 WHERE message_id = '%3'")
             .arg(_tableName()).arg(size).arg(messageId);
     QSqlQuery().exec(query);
-    select();
     qDebug() << "SQL attachment filesize:" << messageId << "=>" << size;
+    invalidateRoles({ AttachmentBytesTotalRole, AttachmentDisplaySizeRole });
 }
 
 void VSQSqlConversationModel::onSetAttachmentFilePath(const QString messageId, const QString filePath)
@@ -579,9 +581,8 @@ void VSQSqlConversationModel::onSetAttachmentFilePath(const QString messageId, c
     QString query = QString("UPDATE %1 SET attachment_file_path = '%2' WHERE message_id = '%3'")
             .arg(_tableName()).arg(filePath).arg(messageId);
     QSqlQuery().exec(query);
-    select();
     qDebug() << "SQL attachment filePath:" << messageId << "=>" << filePath;
-    emit dataChanged(index(0, 0), index(rowCount() - 1, 0), { AttachmentDownloadedRole });
+    invalidateRoles({ AttachmentDownloadedRole });
 }
 
 void VSQSqlConversationModel::onSetAttachmentProgress(const QString messageId, const DataSize bytesReceived, const DataSize bytesTotal)
@@ -592,7 +593,7 @@ void VSQSqlConversationModel::onSetAttachmentProgress(const QString messageId, c
     if (it != m_transferMap.end()) {
         it->second.bytesReceived = bytesReceived;
     }
-    emit dataChanged(index(0, 0), index(rowCount() - 1, 0), { AttachmentBytesLoadedRole });
+    invalidateRoles({ AttachmentBytesLoadedRole });
 }
 
 void VSQSqlConversationModel::onSetAttachmentThumbnailPath(const QString messageId, const QString filePath)
@@ -600,7 +601,6 @@ void VSQSqlConversationModel::onSetAttachmentThumbnailPath(const QString message
     QString query = QString("UPDATE %1 SET attachment_thumbnail_path = '%2' WHERE message_id = '%3'")
             .arg(_tableName()).arg(filePath).arg(messageId);
     QSqlQuery().exec(query);
-    select();
     qDebug() << "SQL attachment thumbnail path:" << messageId << "=>" << filePath;
-    emit dataChanged(index(0, 0), index(rowCount() - 1, 0), { AttachmentThumbnailPathRole });
+    invalidateRoles({ AttachmentThumbnailPathRole });
 }
