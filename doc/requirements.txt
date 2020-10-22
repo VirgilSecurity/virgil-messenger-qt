@@ -5,6 +5,10 @@ Pltaform independ:
 2. Set system enviroments variable for QT framework:
     
     export QTDIR=/opt/Qt/5.15.0/android
+3. QT 5.15 QTCreator bug (QTBUG-87125): "zipalign tool not found: C:/Android/Sdk/build-tools//zipalign.exe"
+   Temporary solving:
+   
+    ln -s [android sdk path]/build-tools/[last version of build tools]/zipalign ../zipalign
 
 Android:
 1. Android SDK with QT prebuild OpenSSL library on path [$ANDROID_SDK/android_openssl]

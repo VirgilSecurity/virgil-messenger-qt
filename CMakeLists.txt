@@ -43,6 +43,7 @@ include(varpadding)
 include(getprebuild)
 include(customers)
 
+
 # ---------------------------------------------------------------------------
 # Project version
 # ---------------------------------------------------------------------------
@@ -132,13 +133,12 @@ set(VS_QT_EXTRA "")
 
 # IOS, IOS_SIM
 if(VS_PLATFORM STREQUAL "ios")
-    set(VS_TARGET_NAME "VirgilMessenger")
 
 # Android
 elseif(VS_PLATFORM STREQUAL "android")
     # Get firebase
     get_firebase()
-    
+    include(deployers)    
     # Set Android version name
     set(ANDROID_VERSION_NAME "${VS_TARGET_VERSION}")
     # Fill Android version code
@@ -194,7 +194,7 @@ if(VS_PLATFORM STREQUAL "android")
     message("-- Prepare sources for Android ...")
     add_library(${VS_TARGET_NAME} SHARED)
     include(${ANDROID_SDK}/android_openssl/CMakeLists.txt)
-    
+
     if (ANDROID_ABI STREQUAL "armeabi-v7a")
         set(VS_ANDROID_SSL_DIR "${SSL_ROOT_PATH}/latest/arm/")
     elseif (ANDROID_ABI STREQUAL "arm64-v8a")
