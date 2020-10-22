@@ -150,7 +150,12 @@ QVariant
 VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
     if (role < Qt::UserRole) {
         return QSqlTableModel::data(index, role);
-   }
+    }
+
+    static int reloadCounter = 0;
+    if (role == AttachmentIdRole) {
+        qWarning() << "Full model reload:" << ++reloadCounter;
+    }
 
     const QSqlRecord currRecord = record(index.row());
     const int authorColumn = AuthorRole - Qt::UserRole;

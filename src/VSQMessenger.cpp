@@ -1275,6 +1275,7 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
     } else {
         m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
     }
+    qCDebug(lcMessenger) << "Message sent:" << messageId;
     return MRES_OK;
 }
 
@@ -1329,6 +1330,7 @@ QFuture<VSQMessenger::EnResult>
 VSQMessenger::createSendMessage(const QString messageId, const QString to, const QString message)
 {
     return QtConcurrent::run([=]() -> EnResult {
+        qCDebug(lcMessenger) << "Message creation started:" << messageId;
         return _sendMessageInternal(true, messageId, to, message, NullOptional);
     });
 }
@@ -1338,6 +1340,7 @@ VSQMessenger::createSendAttachment(const QString messageId, const QString to,
                                    const QUrl url, const Enums::AttachmentType attachmentType)
 {
     return QtConcurrent::run([=]() -> EnResult {
+        qCDebug(lcMessenger) << "Message creation started:" << messageId << "Attachment type:" << attachmentType;
         QString warningText;
         auto attachment = m_attachmentBuilder.build(url, attachmentType, warningText);
         if (!attachment) {
