@@ -42,8 +42,8 @@
 
 using namespace VSQ;
 
-SplashScreenState::SplashScreenState(VSQMessenger *messenger, VSQSettings *settings, QState *parent)
-    : SignInState(messenger, parent)
+SplashScreenState::SplashScreenState(VSQMessenger *messenger, Validator *validator, VSQSettings *settings, QState *parent)
+    : SignInState(messenger, validator, parent)
     , m_settings(settings)
 {
 }

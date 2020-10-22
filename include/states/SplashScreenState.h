@@ -46,7 +46,7 @@ class SplashScreenState : public SignInState
     Q_OBJECT
 
 public:
-    SplashScreenState(VSQMessenger *messenger, VSQSettings *settings, QState *parent);
+    SplashScreenState(VSQMessenger *messenger, Validator *validator, VSQSettings *settings, QState *parent);
 
 signals:
     void userNotSelected();

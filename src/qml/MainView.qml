@@ -10,12 +10,13 @@ Control {
     id: mainView
 
     property var attachmentPreview: undefined
+    property int keyboardHeight: 0
     readonly property var manager: app.stateManager
 
     RowLayout {
         anchors {
             fill: parent
-            bottomMargin: logControl.visible ? logControl.height : 0
+            bottomMargin: (logControl.visible ? logControl.height : 0) + keyboardHeight
         }
         spacing: 0
         clip: logControl.visible

@@ -32,37 +32,39 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SIGNUPSTATE_H
-#define VSQ_SIGNUPSTATE_H
+#ifndef VSQ_KEYBOARDEVENTFILTER_H
+#define VSQ_KEYBOARDEVENTFILTER_H
 
-#include "OperationState.h"
+#include <QObject>
+#include <QRectF>
 
-class VSQMessenger;
+class QInputMethod;
+class QQuickItem;
 
 namespace VSQ
 {
-class Validator;
-
-class SignUpState : public OperationState
+class KeyboardEventFilter : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString userId MEMBER m_userId NOTIFY userIdChanged)
+    Q_PROPERTY(QRectF keyboardRectangle MEMBER m_keyboardRectangle NOTIFY keyboardRectangleChanged)
 
 public:
-    SignUpState(VSQMessenger *messenger, Validator *validator, QState *parent);
+    explicit KeyboardEventFilter(QObject *parent);
+    ~KeyboardEventFilter() override;
+
+    Q_INVOKABLE void install(QQuickItem *item);
 
 signals:
-    void signUp(const QString &username);
-    void signedUp(const QString &userId);
-    void userIdChanged(const QString &userId);
+    void keyboardRectangleChanged(const QRectF &);
 
 private:
-    void processSignUp(const QString &username);
+    bool eventFilter(QObject *obj, QEvent *evt) override;
 
-    VSQMessenger *m_messenger;
-    Validator *m_validator;
-    QString m_userId;
+    void updateKeyboardRectangle();
+
+    QInputMethod *m_inputMethod;
+    QRectF m_keyboardRectangle;
 };
 }
 
-#endif // VSQ_SIGNUPSTATE_H
+#endif // VSQ_KEYBOARDEVENTFILTER_H

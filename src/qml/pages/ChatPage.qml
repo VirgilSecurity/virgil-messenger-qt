@@ -80,7 +80,6 @@ Page {
     ListView {
         id: listView
 
-        property bool viewLoaded: false
         property real previousHeight: 0.0
         property var contextMenu: null
 
@@ -145,17 +144,15 @@ Page {
         ScrollBar.vertical: ScrollBar { }
 
         Component.onCompleted: {
-            viewLoaded = true
-            positionLoadedViewAtEnd()
-        }
-
-        onCountChanged: positionLoadedViewAtEnd()
-
-        onHeightChanged: {
-            if (height < previousHeight) {
-                positionLoadedViewAtEnd()
-            }
+            countChanged.connect(showLastMessage)
+            heightChanged.connect(function() {
+                if (height < previousHeight) {
+                    showLastMessage()
+                }
+                previousHeight = height
+            })
             previousHeight = height
+            showLastMessage()
         }
 
         MouseArea {
@@ -172,9 +169,10 @@ Page {
             }
         }
 
-        function positionLoadedViewAtEnd() {
-            if (viewLoaded) {
-                positionViewAtEnd()
+        function showLastMessage() {
+            positionViewAtEnd()
+            if (Platform.isIos || Platform.isLinux) {
+                positionViewAtEnd() // HACK(fpohtmeh): fix positioning
             }
         }
     }
@@ -221,4 +219,3 @@ Page {
         }
     }
 }
-

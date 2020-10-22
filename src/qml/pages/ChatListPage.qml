@@ -179,7 +179,7 @@ Page {
             visible: !listView.contentItem.children.length
             anchors.fill: parent
             onClicked: {
-                appState.requestNewContact()
+                appState.requestNewChat()
                 mouse.accepted = false
             }
         }

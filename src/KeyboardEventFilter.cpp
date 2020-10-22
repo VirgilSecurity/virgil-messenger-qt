@@ -32,37 +32,47 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SIGNUPSTATE_H
-#define VSQ_SIGNUPSTATE_H
+#include "KeyboardEventFilter.h"
 
-#include "OperationState.h"
+#include <QGuiApplication>
+#include <QQuickItem>
 
-class VSQMessenger;
+using namespace VSQ;
 
-namespace VSQ
+KeyboardEventFilter::KeyboardEventFilter(QObject *parent)
+    : QObject(parent)
+    , m_inputMethod(qApp->inputMethod())
 {
-class Validator;
-
-class SignUpState : public OperationState
-{
-    Q_OBJECT
-    Q_PROPERTY(QString userId MEMBER m_userId NOTIFY userIdChanged)
-
-public:
-    SignUpState(VSQMessenger *messenger, Validator *validator, QState *parent);
-
-signals:
-    void signUp(const QString &username);
-    void signedUp(const QString &userId);
-    void userIdChanged(const QString &userId);
-
-private:
-    void processSignUp(const QString &username);
-
-    VSQMessenger *m_messenger;
-    Validator *m_validator;
-    QString m_userId;
-};
+    connect(m_inputMethod, &QInputMethod::keyboardRectangleChanged, this, &KeyboardEventFilter::updateKeyboardRectangle);
 }
 
-#endif // VSQ_SIGNUPSTATE_H
+KeyboardEventFilter::~KeyboardEventFilter()
+{}
+
+void KeyboardEventFilter::install(QQuickItem *item)
+{
+    item->installEventFilter(this);
+}
+
+bool KeyboardEventFilter::eventFilter(QObject *obj, QEvent *event)
+{
+#ifdef VS_IOS
+    if (event->type() == QEvent::InputMethodQuery) {
+        // HACK(fpohtmeh): Qt scrolls up entire root view if input item is overlapped by keyboard.
+        // Set empty cursor rectangle to avoid scrolling.
+        auto imEvent = static_cast<QInputMethodQueryEvent *>(event);
+        if (imEvent->queries() == Qt::ImCursorRectangle) {
+            imEvent->setValue(Qt::ImCursorRectangle, QRectF());
+            return true;
+        }
+    }
+#endif
+    return QObject::eventFilter(obj, event);
+}
+
+void KeyboardEventFilter::updateKeyboardRectangle()
+{
+    const auto rect = m_inputMethod->keyboardRectangle();
+    m_keyboardRectangle = rect;
+    emit keyboardRectangleChanged(rect);
+}

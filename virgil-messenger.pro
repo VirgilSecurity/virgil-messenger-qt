@@ -46,8 +46,7 @@ isEmpty(VERSION) {
 ios {
     isEmpty(VS_TARGET) {
         TARGET = VirgilMessenger
-    } else
-    {
+    } else {
         TARGET = $$VS_TARGET
     }
     QMAKE_TARGET_BUNDLE_PREFIX = com.virgil
@@ -124,6 +123,8 @@ HEADERS += \
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
         include/ui/VSQUiHelper.h \
+        include/KeyboardEventFilter.h \
+        include/Validator.h \
         # Helpers
         include/helpers/VSQSingleton.h \
         include/helpers/FutureWorker.h \
@@ -182,6 +183,8 @@ SOURCES += \
         src/main.cpp \
         src/VSQApplication.cpp \
         src/ui/VSQUiHelper.cpp \
+        src/KeyboardEventFilter.cpp \
+        src/Validator.cpp \
         # Applications states
         src/states/AccountSelectionState.cpp \
         src/states/AccountSettingsState.cpp \

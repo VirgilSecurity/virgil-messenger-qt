@@ -41,7 +41,7 @@ ToolBar {
 
         Column {
             Layout.fillWidth: !isSearchOpen
-            visible: !isSearchOpen
+            visible: !isSearchOpen && !searchId.isAnimationRunning
 
             Label {
                 id: titleLabel
@@ -67,9 +67,8 @@ ToolBar {
             }
         }
 
-
         Item {
-            Layout.fillWidth: isSearchOpen
+            Layout.fillWidth: isSearchOpen || searchId.isAnimationRunning
             Layout.preferredWidth: 48
             height: 40
 
@@ -79,11 +78,10 @@ ToolBar {
         }
 
         ImageButton {
-            visible: !isSearchOpen
+            visible: !isSearchOpen && !searchId.isAnimationRunning
 
             id: menuButton
             image: "More"
-            // visible: menu.length
             opacity: menu.length ? 1 : 0
             enabled: menu.length
             onClicked: {

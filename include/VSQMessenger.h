@@ -47,14 +47,13 @@
 
 #include <virgil/iot/messenger/messenger.h>
 
+#include "Validator.h"
 #include "VSQSqlConversationModel.h"
 #include "VSQSqlChatModel.h"
 #include "VSQCrashReporter.h"
 #include <VSQNetworkAnalyzer.h>
 #include <VSQAttachmentBuilder.h>
 #include <VSQCryptoTransferManager.h>
-
-using namespace VirgilIoTKit;
 
 class QJsonDocument;
 
@@ -63,6 +62,9 @@ class VSQDiscoveryManager;
 class VSQLastActivityManager;
 
 Q_DECLARE_LOGGING_CATEGORY(lcMessenger)
+
+using namespace VirgilIoTKit;
+using namespace VSQ;
 
 class VSQMessenger : public QObject {
 
@@ -95,7 +97,7 @@ public:
 
     Q_PROPERTY(QString currentUser READ currentUser NOTIFY fireCurrentUserChanged)
 
-    VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSettings *settings);
+    VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSettings *settings, Validator *validator);
     VSQMessenger() = default; // QML engine requires default constructor
     virtual ~VSQMessenger();
 
@@ -254,6 +256,7 @@ private:
     VSQCrashReporter *m_crashReporter;
     VSQNetworkAnalyzer m_networkAnalyzer;
     VSQSettings *m_settings;
+    Validator *m_validator;
     VSQCryptoTransferManager *m_transferManager;
     VSQAttachmentBuilder m_attachmentBuilder;
 

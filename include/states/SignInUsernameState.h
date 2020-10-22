@@ -36,6 +36,7 @@
 #define VSQ_SIGNINUSERNAMESTATE_H
 
 #include "OperationState.h"
+#include "Validator.h"
 
 namespace VSQ
 {
@@ -44,14 +45,16 @@ class SignInUsernameState : public OperationState
     Q_OBJECT
 
 public:
-    SignInUsernameState(QState *parent);
+    SignInUsernameState(Validator *validator, QState *parent);
 
 signals:
-    void validateUsername(const QString &userId);
-    void usernameValidated(const QString &username);
+    void validate(const QString &username);
+    void validated(const QString &username);
 
 private:
-    void processValidateUsername(const QString &userId);
+    void processValidation(const QString &username);
+
+    Validator *m_validator;
 };
 }
 
