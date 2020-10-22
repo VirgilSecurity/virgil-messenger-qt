@@ -116,6 +116,11 @@ VSQSqlConversationModel::VSQSqlConversationModel(Validator *validator, QObject *
     connect(this, &VSQSqlConversationModel::setAttachmentRemoteUrl, this, &VSQSqlConversationModel::onSetAttachmentRemoteUrl);
     connect(this, &VSQSqlConversationModel::setAttachmentThumbnailRemoteUrl, this, &VSQSqlConversationModel::onSetAttachmentThumbnailRemoteUrl);
     connect(this, &VSQSqlConversationModel::setAttachmentBytesTotal, this, &VSQSqlConversationModel::onSetAttachmentBytesTotal);
+
+    connect(this, &VSQSqlConversationModel::modelReset, this, []() {
+        static int reloadCounter = 0;
+        qWarning() << "Full model reset" << ++reloadCounter;
+    });
 }
 
 /******************************************************************************/
@@ -150,9 +155,9 @@ VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
         return QSqlTableModel::data(index, role);
     }
 
-    static int reloadCounter = 0;
     if (role == AttachmentIdRole) {
-        qWarning() << "Full model reload:" << ++reloadCounter;
+        static int reloadCounter = 0;
+        qDebug() << "Re-loading of message" << ++reloadCounter << "model row" << index.row();
     }
 
     const QSqlRecord currRecord = record(index.row());
