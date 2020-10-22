@@ -488,7 +488,6 @@ void VSQSqlConversationModel::onCreateMessage(const QString recipient, const QSt
     }
 
     submitAll();
-    select();
 }
 
 void VSQSqlConversationModel::onReceiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachment attachment)
