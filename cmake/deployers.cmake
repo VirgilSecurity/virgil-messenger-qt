@@ -91,4 +91,18 @@ if(VS_PLATFORM STREQUAL "android")
       --no-gdbserver      
    VERBATIM)
 
+elseif(VS_PLATFORM STREQUAL "linux")
+
+  find_program(LINUX_DEPLOY_QT cqtdeployer)
+
+  add_custom_target(deploy
+    COMMAND ${LINUX_DEPLOY_QT}
+       -bin ${PROJECT_NAME} 
+       -qmlDir ${PROJECT_SOURCE_DIR}/src/qml 
+       -targetDir ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist
+       -qmake ${QT_QMAKE_EXECUTABLE} clear
+    VERBATIM)
+
+elseif(VS_PLATFORM STREQUAL "macos")
+
 endif()

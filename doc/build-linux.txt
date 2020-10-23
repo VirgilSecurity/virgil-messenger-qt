@@ -4,6 +4,7 @@
     cd build
     cmake -DVS_PLATFORM="android" ..
     make
+    make deploy_linux
 
 - Build release version:
 
@@ -11,4 +12,5 @@
     cd build
     cmake -DVS_PLATFORM="android" -DCMAKE_BUILD_TYPE="Release" ..
     make
+    make deploy
 

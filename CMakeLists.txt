@@ -138,6 +138,7 @@ if(VS_PLATFORM STREQUAL "ios")
 elseif(VS_PLATFORM STREQUAL "android")
     # Get firebase
     get_firebase()
+    # Add deployers targets
     include(deployers)    
     # Set Android version name
     set(ANDROID_VERSION_NAME "${VS_TARGET_VERSION}")
@@ -208,6 +209,12 @@ if(VS_PLATFORM STREQUAL "android")
     message(STATUS "Android OpenSSL root path:    [${SSL_ROOT_PATH}]")    
     message(STATUS "Android OpenSSL library path: [${VS_ANDROID_SSL_DIR}]")
 
+# Linux
+elseif(VS_PLATFORM STREQUAL "linux")
+    add_executable(${VS_TARGET_NAME})
+    # Add deployers targets
+    include(deployers)    
+
 # MacOS    
 elseif(VS_PLATFORM STREQUAL "macos")
 
@@ -241,6 +248,7 @@ endif()
 # ---------------------------------------------------------------------------
 #   Target sources and libraries
 # ---------------------------------------------------------------------------
+message(STATUS "###### VS_TARGET_NAME [${VS_TARGET_NAME}]")
 target_sources(${VS_TARGET_NAME}
 
         PRIVATE
