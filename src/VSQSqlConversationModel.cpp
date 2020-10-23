@@ -121,6 +121,10 @@ VSQSqlConversationModel::VSQSqlConversationModel(Validator *validator, QObject *
         static int reloadCounter = 0;
         qWarning() << "Full model reset" << ++reloadCounter;
     });
+
+    m_selectTimer.setSingleShot(true);
+    m_selectTimer.setInterval(1000);
+    connect(&m_selectTimer, &QTimer::timeout, this, &VSQSqlConversationModel::performSelect);
 }
 
 /******************************************************************************/
@@ -450,11 +454,6 @@ QString VSQSqlConversationModel::_contactsTableName() const {
     return QString("Contacts_") + m_validator->databaseUsername(m_user);
 }
 
-void VSQSqlConversationModel::invalidateRoles(const QVector<int> &roles)
-{
-    emit dataChanged(index(0, 0), index(rowCount() - 1, 0), roles);
-}
-
 void VSQSqlConversationModel::onCreateMessage(const QString recipient, const QString message, const QString messageId,
                                               const OptionalAttachment attachment)
 {
@@ -488,6 +487,8 @@ void VSQSqlConversationModel::onCreateMessage(const QString recipient, const QSt
     }
 
     submitAll();
+    qDebug() << "Submitted!";
+    scheduleSelect({});
 }
 
 void VSQSqlConversationModel::onReceiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachment attachment)
@@ -523,6 +524,8 @@ void VSQSqlConversationModel::onReceiveMessage(const QString messageId, const QS
     }
 
     submitAll();
+    qDebug() << "Submitted!";
+    scheduleSelect({});
 }
 
 void VSQSqlConversationModel::onSetMessageStatus(const QString messageId, const StMessage::Status status)
@@ -531,8 +534,7 @@ void VSQSqlConversationModel::onSetMessageStatus(const QString messageId, const 
     QString query = QString("UPDATE %1 SET status = %2 WHERE message_id = '%3'")
             .arg(_tableName()).arg(static_cast<int>(status)).arg(messageId);
     QSqlQuery().exec(query);
-    select();
-    invalidateRoles({ StatusRole });
+    scheduleSelect({ StatusRole });
 }
 
 void VSQSqlConversationModel::onSetAttachmentStatus(const QString messageId, const Enums::AttachmentStatus status)
@@ -551,7 +553,7 @@ void VSQSqlConversationModel::onSetAttachmentStatus(const QString messageId, con
             m_transferMap.erase(it);
         }
     }
-    invalidateRoles({ AttachmentBytesLoadedRole, AttachmentStatusRole });
+    scheduleSelect({ AttachmentBytesLoadedRole, AttachmentStatusRole });
 }
 
 void VSQSqlConversationModel::onSetAttachmentRemoteUrl(const QString messageId, const QUrl url)
@@ -560,7 +562,7 @@ void VSQSqlConversationModel::onSetAttachmentRemoteUrl(const QString messageId, 
             .arg(_tableName()).arg(url.toString()).arg(messageId);
     QSqlQuery().exec(query);
     qDebug() << "SQL attachment remote url:" << messageId << "=>" << url.toString();
-    invalidateRoles({ AttachmentRemoteUrlRole });
+    scheduleSelect({ AttachmentRemoteUrlRole });
 }
 
 void VSQSqlConversationModel::onSetAttachmentThumbnailRemoteUrl(const QString messageId, const QUrl url)
@@ -569,7 +571,7 @@ void VSQSqlConversationModel::onSetAttachmentThumbnailRemoteUrl(const QString me
             .arg(_tableName()).arg(url.toString()).arg(messageId);
     QSqlQuery().exec(query);
     qDebug() << "SQL attachment remote thumbnail url:" << messageId << "=>" << url.toString();
-    invalidateRoles({ AttachmentRemoteThumbnailUrlRole });
+    scheduleSelect({ AttachmentRemoteThumbnailUrlRole });
 }
 
 void VSQSqlConversationModel::onSetAttachmentBytesTotal(const QString messageId, const DataSize size)
@@ -578,7 +580,7 @@ void VSQSqlConversationModel::onSetAttachmentBytesTotal(const QString messageId,
             .arg(_tableName()).arg(size).arg(messageId);
     QSqlQuery().exec(query);
     qDebug() << "SQL attachment filesize:" << messageId << "=>" << size;
-    invalidateRoles({ AttachmentBytesTotalRole, AttachmentDisplaySizeRole });
+    scheduleSelect({ AttachmentBytesTotalRole, AttachmentDisplaySizeRole });
 }
 
 void VSQSqlConversationModel::onSetAttachmentFilePath(const QString messageId, const QString filePath)
@@ -587,7 +589,7 @@ void VSQSqlConversationModel::onSetAttachmentFilePath(const QString messageId, c
             .arg(_tableName()).arg(filePath).arg(messageId);
     QSqlQuery().exec(query);
     qDebug() << "SQL attachment filePath:" << messageId << "=>" << filePath;
-    invalidateRoles({ AttachmentDownloadedRole });
+    scheduleSelect({ AttachmentDownloadedRole });
 }
 
 void VSQSqlConversationModel::onSetAttachmentProgress(const QString messageId, const DataSize bytesReceived, const DataSize bytesTotal)
@@ -598,7 +600,7 @@ void VSQSqlConversationModel::onSetAttachmentProgress(const QString messageId, c
     if (it != m_transferMap.end()) {
         it->second.bytesReceived = bytesReceived;
     }
-    invalidateRoles({ AttachmentBytesLoadedRole });
+    scheduleSelect({ AttachmentBytesLoadedRole });
 }
 
 void VSQSqlConversationModel::onSetAttachmentThumbnailPath(const QString messageId, const QString filePath)
@@ -607,5 +609,26 @@ void VSQSqlConversationModel::onSetAttachmentThumbnailPath(const QString message
             .arg(_tableName()).arg(filePath).arg(messageId);
     QSqlQuery().exec(query);
     qDebug() << "SQL attachment thumbnail path:" << messageId << "=>" << filePath;
-    invalidateRoles({ AttachmentThumbnailPathRole });
+    scheduleSelect({ AttachmentThumbnailPathRole });
+}
+
+void VSQSqlConversationModel::scheduleSelect(const QVector<int> &roles)
+{
+    for (auto role : roles) {
+        if (!m_selectRoles.contains(role)) {
+            m_selectRoles << role;
+        }
+    }
+    if (!m_selectTimer.isActive()) {
+        m_selectTimer.start();
+    }
+}
+
+void VSQSqlConversationModel::performSelect()
+{
+    qDebug() << "Performing of select. Roles:" << m_selectRoles;
+    m_selectTimer.stop();
+    select();
+    emit dataChanged(index(0, 0), index(0, rowCount() - 1), m_selectRoles);
+    m_selectRoles.clear();
 }

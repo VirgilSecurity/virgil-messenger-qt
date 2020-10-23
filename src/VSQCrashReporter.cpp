@@ -85,10 +85,9 @@ void VSQCrashReporter::checkAppCrash()
     if(m_settings->runFlag()) {
         qCCritical(lcCrashReporter) << "Previous application run is crashed ! Sending log files...";
         emit crashReportRequested();
-    } else {
-        qCDebug(lcCrashReporter) << "Set run flag to true";
-        m_settings->setRunFlag(true);
     }
+    qCDebug(lcCrashReporter) << "Set run flag to true";
+    m_settings->setRunFlag(true);
 }
 
 bool VSQCrashReporter::sendLogFiles()
@@ -114,7 +113,6 @@ bool VSQCrashReporter::sendLogFiles()
     }
 
     sendFileToBackendRequest(fileData);
-    m_settings->setRunFlag(false);
     return true;
 }
 
