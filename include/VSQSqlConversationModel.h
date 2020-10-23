@@ -36,6 +36,7 @@
 #define VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H
 
 #include <QSqlTableModel>
+#include <QTimer>
 
 #include "Validator.h"
 #include "VSQCommon.h"
@@ -157,8 +158,6 @@ private:
     QString
     _contactsTableName() const;
 
-    void invalidateRoles(const QVector<int> &roles);
-
     void onCreateMessage(const QString recipient, const QString message, const QString messageId, const OptionalAttachment attachment);
     void onReceiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachment attachment);
     void onSetMessageStatus(const QString messageId, const StMessage::Status status);
@@ -169,6 +168,12 @@ private:
     void onSetAttachmentRemoteUrl(const QString messageId, const QUrl url);
     void onSetAttachmentThumbnailRemoteUrl(const QString messageId, const QUrl url);
     void onSetAttachmentBytesTotal(const QString messageId, const DataSize size);
+
+    void scheduleSelect(const QVector<int> &roles);
+    void performSelect();
+
+    QVector<int> m_selectRoles;
+    QTimer m_selectTimer;
 };
 
 #endif // VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H
