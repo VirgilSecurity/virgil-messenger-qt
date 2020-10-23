@@ -168,5 +168,11 @@ Control {
         manager.signInUsernameState.entered.connect(d.openSignInUsernamePage)
         manager.signUpState.entered.connect(d.openSignUpPage)
         manager.downloadKeyState.entered.connect(d.openDownloadKeyPage)
+
+        if (Platform.isIos) {
+            app.keyboardEventFilter.keyboardRectangleChanged.connect(function(rect) {
+                keyboardHeight = Math.max(0, root.height - rect.y)
+            })
+        }
     }
 }
