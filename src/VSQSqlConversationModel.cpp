@@ -531,7 +531,6 @@ void VSQSqlConversationModel::onSetMessageStatus(const QString messageId, const 
     QString query = QString("UPDATE %1 SET status = %2 WHERE message_id = '%3'")
             .arg(_tableName()).arg(static_cast<int>(status)).arg(messageId);
     QSqlQuery().exec(query);
-    select();
     invalidateRoles({ StatusRole });
 }
 
