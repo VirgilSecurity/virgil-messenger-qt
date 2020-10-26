@@ -41,10 +41,30 @@ namespace vm
 {
 class ChatsTable : public DatabaseTable
 {
-public:
-    using DatabaseTable::DatabaseTable;
+    Q_OBJECT
 
-    bool create(Database *database) override;
+public:
+    explicit ChatsTable(Database *database);
+
+    bool create() override;
+
+signals:
+    void fetch();
+    void fetchErrorOccurred(const QString &errorText);
+    void fetched(const Chats &chats);
+
+    void createChat(const Contact::Id &contactId);
+    void createChatErrorOccurred(const QString &errorText);
+    void chatCreated(const Contact::Id &contactId);
+
+    void resetUnreadCount(const Contact::Id &contactId);
+    void unreadCountReset(const Contact::Id &contactId);
+    void resetUnreadCountErrorOccurred(const QString &errorText);
+
+private:
+    void processFetch();
+    void processCreateChat(const Contact::Id &contactId);
+    void processResetUnreadCount(const Contact::Id &contactId);
 };
 }
 

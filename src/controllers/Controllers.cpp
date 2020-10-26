@@ -43,16 +43,23 @@ using namespace vm;
 
 Controllers::Controllers(VSQMessenger *messenger, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
-    , m_userDatabase(userDatabase)
-    , m_chats(new ChatsController(this))
+    , m_users(new UsersController(messenger, userDatabase, this))
+    , m_chats(new ChatsController(messenger, userDatabase, this))
     , m_messages(new MessagesController(this))
-    , m_users(new UsersController(messenger, this))
 {
-    connect(m_users, &UsersController::usernameChanged, m_userDatabase, &UserDatabase::open);
-
     qRegisterMetaType<ChatsController *>("ChatsController*");
     qRegisterMetaType<MessagesController *>("MessagesController*");
     qRegisterMetaType<UsersController *>("UsersController*");
+}
+
+const UsersController *Controllers::users() const
+{
+    return m_users;
+}
+
+UsersController *Controllers::users()
+{
+    return m_users;
 }
 
 const ChatsController *Controllers::chats() const
@@ -73,14 +80,4 @@ const MessagesController *Controllers::messages() const
 MessagesController *Controllers::messages()
 {
     return m_messages;
-}
-
-const UsersController *Controllers::users() const
-{
-    return m_users;
-}
-
-UsersController *Controllers::users()
-{
-    return m_users;
 }

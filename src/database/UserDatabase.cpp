@@ -50,21 +50,13 @@ UserDatabase::UserDatabase(const VSQSettings *settings, QObject *parent)
     , m_settings(settings)
 {
     setMigration(std::make_unique<UserDatabaseMigration>());
+
+    connect(this, &UserDatabase::requestOpen, &UserDatabase::openByUsername);
+    connect(this, &UserDatabase::requestClose, &UserDatabase::close);
 }
 
 UserDatabase::~UserDatabase()
 {}
-
-bool UserDatabase::open(const QString &username)
-{
-    if (!DatabaseUtils::isValidName(username)) {
-        qCCritical(lcDatabase) << "Invalid database id:" << username;
-        return false;
-    }
-    const QString fileName = QString("user-%1.sqlite3").arg(username);
-    const QString filePath(m_settings->databaseDir().filePath(fileName));
-    return Database::open(filePath, username + QLatin1String("-messenger"));
-}
 
 const AttachmentsTable *UserDatabase::attachmentsTable() const
 {
@@ -110,21 +102,35 @@ bool UserDatabase::create()
 {
     tables().clear();
     int counter = -1;
-    if (!addTable(std::make_unique<AttachmentsTable>(QLatin1String("attachments")))) {
+    if (!addTable(std::make_unique<AttachmentsTable>(QLatin1String("attachments"), this))) {
         return false;
     }
     m_attachmentsTableIndex = ++counter;
-    if (!addTable(std::make_unique<ChatsTable>(QLatin1String("chats")))) {
+    if (!addTable(std::make_unique<ChatsTable>(this))) {
         return false;
     }
     m_chatsTableIndex = ++counter;
-    if (!addTable(std::make_unique<ContactsTable>(QLatin1String("contacts")))) {
+    if (!addTable(std::make_unique<ContactsTable>(QLatin1String("contacts"), this))) {
         return false;
     }
     m_contactsTableIndex = ++counter;
-    if (!addTable(std::make_unique<MessagesTable>(QLatin1String("messages")))) {
+    if (!addTable(std::make_unique<MessagesTable>(QLatin1String("messages"), this))) {
         return false;
     }
     m_messagesTableIndex = ++counter;
+
     return true;
+}
+
+void UserDatabase::openByUsername(const QString &username)
+{
+    if (!DatabaseUtils::isValidName(username)) {
+        qCCritical(lcDatabase) << "Invalid database id:" << username;
+        emit errorOccurred(tr("Invalid database id"));
+    }
+    else {
+        const QString fileName = QString("user-%1.sqlite3").arg(username);
+        const QString filePath(m_settings->databaseDir().filePath(fileName));
+        Database::open(filePath, username + QLatin1String("-messenger"));
+    }
 }

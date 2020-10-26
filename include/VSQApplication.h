@@ -47,8 +47,7 @@
 #include <macos/VSQMacos.h>
 #include "controllers/Controllers.h"
 #include <database/UserDatabase.h>
-#include <models/ChatsModel.h>
-#include <models/MessagesModel.h>
+#include <models/Models.h>
 #include <states/ApplicationStateManager.h>
 
 class QNetworkAccessManager;
@@ -102,8 +101,7 @@ private:
     VSQMessenger m_messenger;
     UserDatabase m_userDatabase;
     Controllers m_controllers;
-    ChatsModel m_chatsModel;
-    MessagesModel m_messagesModel;
+    Models m_models;
     KeyboardEventFilter *m_keyboardEventFilter;
     ApplicationStateManager m_applicationStateManager;
 };

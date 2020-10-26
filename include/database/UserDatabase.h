@@ -48,11 +48,11 @@ class MessagesTable;
 
 class UserDatabase : public Database
 {
+    Q_OBJECT
+
 public:
     explicit UserDatabase(const VSQSettings *settings, QObject *parent);
     ~UserDatabase() override;
-
-    bool open(const QString &username);
 
     const AttachmentsTable *attachmentsTable() const;
     AttachmentsTable *attachmentsTable();
@@ -63,8 +63,13 @@ public:
     const MessagesTable *messagesTable() const;
     MessagesTable *messagesTable();
 
+signals:
+    void requestOpen(const QString &username);
+    void requestClose();
+
 private:
     bool create() override;
+    void openByUsername(const QString &username);
 
     const VSQSettings *m_settings;
 

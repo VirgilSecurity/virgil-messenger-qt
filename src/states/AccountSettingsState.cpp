@@ -34,13 +34,10 @@
 
 #include "states/AccountSettingsState.h"
 
-#include "VSQMessenger.h"
-
 using namespace vm;
 
-AccountSettingsState::AccountSettingsState(VSQMessenger *messenger, QState *parent)
+AccountSettingsState::AccountSettingsState(QState *parent)
     : QState(parent)
-    , m_messenger(messenger)
 {}
 
 QString AccountSettingsState::userId() const

@@ -37,8 +37,6 @@
 
 #include <QState>
 
-class VSQMessenger;
-
 namespace vm
 {
 class AccountSettingsState : public QState
@@ -47,7 +45,7 @@ class AccountSettingsState : public QState
     Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
 
 public:
-    AccountSettingsState(VSQMessenger *messenger, QState *parent);
+    explicit AccountSettingsState(QState *parent);
 
     QString userId() const;
     void setUserId(const QString &userId);
@@ -57,7 +55,6 @@ signals:
     void userIdChanged(const QString &);
 
 private:
-    VSQMessenger *m_messenger;
     QString m_userId;
 };
 }

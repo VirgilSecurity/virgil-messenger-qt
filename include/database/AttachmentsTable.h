@@ -44,7 +44,7 @@ class AttachmentsTable : public DatabaseTable
 public:
     using DatabaseTable::DatabaseTable;
 
-    bool create(Database *database) override;
+    bool create() override;
 };
 }
 

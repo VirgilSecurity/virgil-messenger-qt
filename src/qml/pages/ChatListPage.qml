@@ -70,13 +70,13 @@ Page {
         searchPlaceholder: qsTr("Search conversation")
 
         onIsSearchOpenChanged: {
-            contactsHeaderId.isSearchOpen ? ChatModel.applyFilter('') : ChatModel.clearFilter()
+            models.chats.filter = ""
             focus = false
             parent.focus = true
         }
 
         onSearchChanged: {
-            ChatModel.applyFilter(contactsHeaderId.search)
+            models.chats.filter = contactsHeaderId.search
         }
 
         Action {
@@ -88,7 +88,7 @@ Page {
     ListView {
         id: listView
         anchors.fill: parent
-        model: ChatModel
+        model: models.chats.proxy
         delegate: ItemDelegate {
             id: listItem
             width: listView.width

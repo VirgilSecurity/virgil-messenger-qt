@@ -34,9 +34,44 @@
 
 #include "controllers/ChatsController.h"
 
+#include "VSQMessenger.h"
+#include "database/ChatsTable.h"
+#include "database/UserDatabase.h"
+
 using namespace vm;
 
-void ChatsController::createChat(const QString &contactId)
+ChatsController::ChatsController(VSQMessenger *messenger, UserDatabase *userDatabase, QObject *parent)
+    : QObject(parent)
+    , m_messenger(messenger)
+    , m_userDatabase(userDatabase)
 {
-    Q_UNUSED(contactId);
+    connect(userDatabase, &UserDatabase::opened, this, &ChatsController::setupTableConnections);
+
+    connect(m_messenger, &VSQMessenger::contactAdded, this, &ChatsController::chatCreated);
+    connect(m_messenger, &VSQMessenger::addContactErrorOccured, this, &ChatsController::createChatErrorOccured);
+}
+
+void ChatsController::fetchChats()
+{
+    m_userDatabase->chatsTable()->fetch();
+}
+
+void ChatsController::createChat(const Contact::Id &contactId)
+{
+    m_messenger->addContact(contactId);
+}
+
+void ChatsController::resetUnreadCount(const Contact::Id &contactId)
+{
+    m_userDatabase->chatsTable()->resetUnreadCount(contactId);
+}
+
+void ChatsController::setupTableConnections()
+{
+    auto table = m_userDatabase->chatsTable();
+    connect(table, &ChatsTable::fetched, this, &ChatsController::chatsFetched);
+    connect(table, &ChatsTable::fetchErrorOccurred, this, &ChatsController::chatsFetchErrorOccurred);
+    connect(m_messenger, &VSQMessenger::chatEntryRequested, table, &ChatsTable::createChat);
+    connect(table, &ChatsTable::unreadCountReset, this, &ChatsController::unreadCountReset);
+    connect(table, &ChatsTable::resetUnreadCountErrorOccurred, this, &ChatsController::resetUnreadCountErrorOccurred);
 }

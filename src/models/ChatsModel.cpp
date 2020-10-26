@@ -34,12 +34,25 @@
 
 #include "models/ChatsModel.h"
 
+#include <QSortFilterProxyModel>
+
+#include "controllers/Controllers.h"
+#include "controllers/ChatsController.h"
+
 using namespace vm;
 
-ChatsModel::ChatsModel(UserDatabase *userDatabase, QObject *parent)
+ChatsModel::ChatsModel(Controllers *controllers, QObject *parent)
     : QAbstractListModel(parent)
-    , m_userDatabase(userDatabase)
-{}
+    , m_proxy(new QSortFilterProxyModel(this))
+{
+    m_proxy->setSourceModel(this);
+    m_proxy->setSortRole(LastEventTimestampRole);
+    m_proxy->sort(0, Qt::DescendingOrder);
+    m_proxy->setFilterKeyColumn(0);
+    m_proxy->setFilterRole(ContactNameRole);
+
+    connect(controllers->chats(), &ChatsController::chatsFetched, this, &ChatsModel::setChats);
+}
 
 ChatsModel::~ChatsModel()
 {}
@@ -52,13 +65,45 @@ int ChatsModel::rowCount(const QModelIndex &parent) const
 
 QVariant ChatsModel::data(const QModelIndex &index, int role) const
 {
-    Q_UNUSED(index)
-    Q_UNUSED(role)
-    return QVariant();
+    const auto &chat = m_chats[index.row()];
+    switch (role) {
+    case ContactNameRole:
+        return chat.contact.name;
+    case LastEventTimestampRole:
+        return chat.lastMessage ? qMax(chat.lastMessage->timestamp, chat.timestamp) : chat.timestamp;
+    case LastMessageBodyRole:
+        return chat.lastMessage ? chat.lastMessage->body : QString();
+    case UnreadMessagesCountRole:
+        return chat.unreadMessageCount;
+    default:
+        return QVariant();
+    }
 }
 
 QHash<int, QByteArray> ChatsModel::roleNames() const
 {
-    QHash<int, QByteArray> names;
-    return names;
+    // NOTE(fpohtmeh): used old names to minimize UI changes
+    return {
+        { ContactNameRole, "name" },
+        { LastMessageBodyRole, "lastMessage" },
+        { LastEventTimestampRole, "lastMessageTime" },
+        { UnreadMessagesCountRole, "unreadMessageCount" }
+    };
+}
+
+void ChatsModel::setChats(const Chats &chats)
+{
+    beginResetModel();
+    m_chats = chats;
+    endResetModel();
+}
+
+void ChatsModel::setFilter(const QString &filter)
+{
+    if (m_filter == filter) {
+        return;
+    }
+    m_proxy->setFilterFixedString(filter);
+    m_filter = filter;
+    emit filterChanged(filter);
 }

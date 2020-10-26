@@ -121,5 +121,9 @@
         <file>resources/database/create_chats.sql</file>
         <file>resources/database/create_contacts.sql</file>
         <file>resources/database/create_messages.sql</file>
+        <file>resources/database/check_chat_by_contact.sql</file>
+        <file>resources/database/insert_chat.sql</file>
+        <file>resources/database/select_chats.sql</file>
+        <file>resources/database/reset_unread_count.sql</file>
     </qresource>
 </RCC>

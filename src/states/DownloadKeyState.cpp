@@ -34,16 +34,16 @@
 
 #include "states/DownloadKeyState.h"
 
-#include "VSQMessenger.h"
+#include "controllers/UsersController.h"
 
 using namespace vm;
 
-DownloadKeyState::DownloadKeyState(VSQMessenger *messenger, QState *parent)
+DownloadKeyState::DownloadKeyState(UsersController *usersController, QState *parent)
     : OperationState(parent)
-    , m_messenger(messenger)
+    , m_usersController(usersController)
 {
-    connect(m_messenger, &VSQMessenger::keyDownloaded, this, &DownloadKeyState::operationFinished);
-    connect(m_messenger, &VSQMessenger::downloadKeyFailed, this, &DownloadKeyState::operationErrorOccurred);
+    connect(usersController, &UsersController::keyDownloaded, this, &DownloadKeyState::operationFinished);
+    connect(usersController, &UsersController::downloadKeyFailed, this, &DownloadKeyState::operationErrorOccurred);
     connect(this, &DownloadKeyState::downloadKey, this, &DownloadKeyState::processDownloadKey);
 }
 
@@ -64,5 +64,5 @@ void DownloadKeyState::setUserId(const QString &userId)
 void DownloadKeyState::processDownloadKey(const QString &password)
 {
     emit operationStarted();
-    m_messenger->downloadKey(m_userId, password);
+    m_usersController->downloadKey(m_userId, password);
 }

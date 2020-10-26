@@ -37,16 +37,16 @@
 
 #include "OperationState.h"
 
-class VSQMessenger;
-
 namespace vm
 {
+class ChatsController;
+
 class NewChatState : public OperationState
 {
     Q_OBJECT
 
 public:
-    NewChatState(VSQMessenger *messenger, QState *parent);
+    NewChatState(ChatsController *chatsController, QState *parent);
 
 signals:
     void addNewChat(const QString &contactId);
@@ -55,7 +55,7 @@ signals:
 private:
     void processAddNewChat(const QString &contactId);
 
-    VSQMessenger *m_messenger;
+    ChatsController *m_chatsController;
 };
 }
 

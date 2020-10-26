@@ -49,25 +49,24 @@ class UsersController;
 class Controllers : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(UsersController *users READ users CONSTANT)
     Q_PROPERTY(ChatsController *chats READ chats CONSTANT)
     Q_PROPERTY(MessagesController *messages READ messages CONSTANT)
-    Q_PROPERTY(UsersController *users READ users CONSTANT)
 
 public:
     Controllers(VSQMessenger *messenger, UserDatabase *userDatabase, QObject *parent);
 
+    const UsersController *users() const;
+    UsersController *users();
     const ChatsController *chats() const;
     ChatsController *chats();
     const MessagesController *messages() const;
     MessagesController *messages();
-    const UsersController *users() const;
-    UsersController *users();
 
 private:
-    UserDatabase *m_userDatabase;
+    UsersController *m_users;
     ChatsController *m_chats;
     MessagesController *m_messages;
-    UsersController *m_users;
 };
 }
 

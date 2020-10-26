@@ -37,17 +37,17 @@
 
 #include "OperationState.h"
 
-class VSQMessenger;
-
 namespace vm
 {
+class UsersController;
+
 class DownloadKeyState : public OperationState
 {
     Q_OBJECT
     Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
 
 public:
-    DownloadKeyState(VSQMessenger *messenger, QState *parent);
+    DownloadKeyState(UsersController *usersController, QState *parent);
 
     QString userId() const;
     void setUserId(const QString &userId);
@@ -59,7 +59,7 @@ signals:
 private:
     void processDownloadKey(const QString &password);
 
-    VSQMessenger *m_messenger;
+    UsersController *m_usersController;
     QString m_userId;
 };
 }

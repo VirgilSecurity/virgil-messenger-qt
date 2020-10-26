@@ -39,16 +39,38 @@
 
 #include "VSQCommon.h"
 
+class VSQMessenger;
+
 namespace vm
 {
+class UserDatabase;
+
 class ChatsController : public QObject
 {
     Q_OBJECT
 
 public:
-    using QObject::QObject;
+    explicit ChatsController(VSQMessenger *messenger, UserDatabase *database, QObject *parent);
 
-    void createChat(const QString &contactId);
+    void fetchChats();
+    void createChat(const Contact::Id &contactId);
+    void resetUnreadCount(const Contact::Id &contactId);
+
+signals:
+    void chatsFetched(const Chats &);
+    void chatsFetchErrorOccurred(const QString &errorText);
+
+    void chatCreated(const Contact::Id &contactId);
+    void createChatErrorOccured(const QString &errorText);
+
+    void unreadCountReset(const Contact::Id &contactId);
+    void resetUnreadCountErrorOccurred(const QString &errorText);
+
+private:
+    void setupTableConnections();
+
+    VSQMessenger *m_messenger;
+    UserDatabase *m_userDatabase;
 };
 }
 

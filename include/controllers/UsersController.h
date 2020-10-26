@@ -43,17 +43,21 @@ class VSQMessenger;
 
 namespace vm
 {
+class UserDatabase;
+
 class UsersController : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString username MEMBER m_username NOTIFY usernameChanged);
 
 public:
-    UsersController(VSQMessenger *messenger, QObject *parent);
+    UsersController(VSQMessenger *messenger, UserDatabase *userDatabase, QObject *parent);
 
-    Q_INVOKABLE void signIn(const QString &username);
+    QString username() const;
+
+    void signIn(const QString &username);
+    void signUp(const QString &username);
     Q_INVOKABLE void signOut();
-    Q_INVOKABLE void signUp(const QString &username);
 
     void downloadKey(const QString &username, const QString &password);
 
@@ -70,10 +74,23 @@ signals:
     void usernameChanged(const QString &);
 
 private:
-    void setUsername(const QString &username);
+    // legacy
+    enum class Operation
+    {
+        SignIn,
+        SignUp,
+        SignOut,
+        DownloadKey
+    };
+
+    void processMessengerOperation(const QString &username, const Operation operation);
+    void processDatabaseOperation(const QString &username, const Operation operation);
 
     VSQMessenger *m_messenger;
+    UserDatabase *m_userDatabase;
     QString m_username;
+
+    QMetaObject::Connection m_databaseConnection;
 };
 }
 

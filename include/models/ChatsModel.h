@@ -39,26 +39,44 @@
 
 #include "VSQCommon.h"
 
+class QSortFilterProxyModel;
+
 namespace vm
 {
-class UserDatabase;
+class Controllers;
 
 class ChatsModel : public QAbstractListModel
 {
     Q_OBJECT
+    Q_PROPERTY(QSortFilterProxyModel *proxy MEMBER m_proxy CONSTANT)
+    Q_PROPERTY(QString filter MEMBER m_filter WRITE setFilter NOTIFY filterChanged)
 
 public:
-    explicit ChatsModel(UserDatabase *userDatabase, QObject *parent = nullptr);
+    explicit ChatsModel(Controllers *controllers, QObject *parent);
     ~ChatsModel() override;
 
+signals:
+    void filterChanged(const QString &);
+
 private:
+    enum Columns
+    {
+        ContactNameRole = Qt::UserRole,
+        LastEventTimestampRole,
+        LastMessageBodyRole,
+        UnreadMessagesCountRole
+    };
+
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
-
     QHash<int, QByteArray> roleNames() const override;
 
-    UserDatabase *m_userDatabase;
-    std::vector<Chat> m_chats;
+    void setChats(const Chats &chats);
+    void setFilter(const QString &filter);
+
+    Chats m_chats;
+    QSortFilterProxyModel *m_proxy;
+    QString m_filter;
 };
 }
 

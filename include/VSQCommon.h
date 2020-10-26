@@ -192,16 +192,20 @@ struct Message
     QString body;
 };
 
+using Messages = std::vector<Message>;
+
 struct Chat
 {
     using Id = QString;
 
     Id id;
     QDateTime timestamp;
-    Contact::Id contactId;
-    Message::Id lastMessageId;
-    int unreadMessageCount = 0;
+    Contact contact;
+    Optional<Message> lastMessage;
+    uint unreadMessageCount = 0;
 };
+
+using Chats = std::vector<Chat>;
 
 struct Attachment
 {
@@ -233,8 +237,9 @@ struct Attachment
     QUrl url;
     QString extras;
 };
-
 }
+Q_DECLARE_METATYPE(vm::Contact::Type)
+Q_DECLARE_METATYPE(vm::Message::Status)
 
 void registerMetaTypes();
 

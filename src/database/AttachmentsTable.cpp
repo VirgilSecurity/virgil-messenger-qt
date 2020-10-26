@@ -39,9 +39,9 @@
 
 using namespace vm;
 
-bool AttachmentsTable::create(Database *database)
+bool AttachmentsTable::create()
 {
-    if (DatabaseUtils::runQueries(database, QLatin1String(":/resources/database/create_attachments.sql"))) {
+    if (DatabaseUtils::runQueries(database(), DatabaseUtils::resourcePath("create_attachments"))) {
         qCDebug(lcDatabase) << "Attachments table was created";
         return true;
     }

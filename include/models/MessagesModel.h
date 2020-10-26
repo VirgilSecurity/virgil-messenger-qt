@@ -41,14 +41,14 @@
 
 namespace vm
 {
-class UserDatabase;
+class Controllers;
 
 class MessagesModel : public QAbstractListModel
 {
     Q_OBJECT
 
 public:
-    explicit MessagesModel(UserDatabase *userDatabase, QObject *parent = nullptr);
+    explicit MessagesModel(Controllers *controllers, QObject *parent);
     ~MessagesModel() override;
 
 private:
@@ -60,8 +60,8 @@ private:
     void fetchMore(const QModelIndex &parent) override;
     bool canFetchMore(const QModelIndex &parent) const override;
 
-    UserDatabase *m_userDatabase;
-    std::vector<Message> m_messages;
+    Controllers *m_controllers;
+    Messages m_messages;
 };
 }
 

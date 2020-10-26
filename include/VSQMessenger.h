@@ -186,8 +186,7 @@ signals:
     void
     fireReady();
 
-    void
-    fireAddedContact(QString contact);
+    void chatEntryRequested(const QString &contact);
 
     void
     fireReadyToAddContact(QString contact);
@@ -233,7 +232,7 @@ private slots:
     void onStateChanged(QXmppClient::State state);
     void onProcessNetworkState(bool online);
     void onReadyToUpload();
-    void onAddContactToDB(QString contact);
+    void onAddContact(QString contact);
     void onDownloadThumbnail(const StMessage message, const QString sender);
     void onAttachmentStatusChanged(const QString &uploadId, const Enums::AttachmentStatus status);
     void onAttachmentProgressChanged(const QString &uploadId, const DataSize bytesReceived, const DataSize bytesTotal);

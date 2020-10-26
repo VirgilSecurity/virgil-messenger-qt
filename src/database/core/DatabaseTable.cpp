@@ -38,8 +38,9 @@
 
 using namespace vm;
 
-DatabaseTable::DatabaseTable(const QString &name)
+DatabaseTable::DatabaseTable(const QString &name, Database *database)
     : m_name(name)
+    , m_database(database)
 {}
 
 DatabaseTable::~DatabaseTable()
@@ -51,9 +52,18 @@ QString DatabaseTable::name() const
     return m_name;
 }
 
-bool DatabaseTable::create(Database *database)
+const Database *DatabaseTable::database() const
 {
-    Q_UNUSED(database)
+    return m_database;
+}
+
+Database *DatabaseTable::database()
+{
+    return m_database;
+}
+
+bool DatabaseTable::create()
+{
     qCCritical(lcDatabase) << "Database table creation is not implemented:" << m_name;
     return false;
 }

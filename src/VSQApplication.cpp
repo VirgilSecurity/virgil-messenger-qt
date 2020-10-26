@@ -69,8 +69,7 @@ VSQApplication::VSQApplication()
     , m_messenger(m_networkAccessManager, &m_settings, m_validator)
     , m_userDatabase(&m_settings, this)
     , m_controllers(&m_messenger, &m_userDatabase, this)
-    , m_chatsModel(&m_userDatabase, this)
-    , m_messagesModel(&m_userDatabase, this)
+    , m_models(&m_controllers, this)
     , m_keyboardEventFilter(new KeyboardEventFilter(this))
     , m_applicationStateManager(&m_messenger, &m_controllers, m_validator, &m_settings, this)
 {
@@ -128,8 +127,8 @@ VSQApplication::run(const QString &basePath, VSQLogging *logging) {
     context->setContextProperty("crashReporter", &m_crashReporter);
     context->setContextProperty("settings", &m_settings);
     context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
-    context->setContextProperty("ChatModel", &m_messenger.getChatModel());
     context->setContextProperty("controllers", &m_controllers);
+    context->setContextProperty("models", &m_models);
 
     QFont fon(QGuiApplication::font());
     fon.setPointSize(1.5 * QGuiApplication::font().pointSize());

@@ -155,7 +155,7 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSetti
     m_xmpp.addExtension(m_lastActivityManager);
 
     // Signal connection
-    connect(this, SIGNAL(fireReadyToAddContact(QString)), this, SLOT(onAddContactToDB(QString)));
+    connect(this, SIGNAL(fireReadyToAddContact(QString)), this, SLOT(onAddContact(QString)));
     connect(this, SIGNAL(fireError(QString)), this, SLOT(disconnect()));
     connect(this, &VSQMessenger::downloadThumbnail, this, &VSQMessenger::onDownloadThumbnail);
 
@@ -624,13 +624,12 @@ VSQMessenger::addContactAsync(QString contact) {
 
 /******************************************************************************/
 void
-VSQMessenger::onAddContactToDB(QString contact) {
+VSQMessenger::onAddContact(QString contact) {
     if (!m_contactManager->addContact(contact + "@" + _xmppURL(), contact, QString())) {
         emit fireError(m_contactManager->lastErrorText());
     }
     else {
-        m_sqlChatModel->createPrivateChat(contact);
-        emit fireAddedContact(contact);
+        emit chatEntryRequested(contact);
     }
 }
 

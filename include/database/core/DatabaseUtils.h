@@ -37,17 +37,25 @@
 
 #include "VSQCommon.h"
 
+class QSqlQuery;
+
 namespace vm
 {
 class Database;
 
 namespace DatabaseUtils
 {
+    using BindValues = std::vector<std::pair<QString, QVariant>>;
+
     bool isValidName(const QString &id);
+    QString currentTimestamp();
 
-    Optional<QStringList> readQueries(const QString &filePath);
-
+    Optional<QStringList> readQueryTexts(const QString &filePath);
     bool runQueries(Database *database, const QString &filePath);
+    Optional<QSqlQuery> readBindQuery(Database *database, const QString &filePath, const BindValues &values = {});
+
+    QString resourcePath(const QString &fileName);
+    QString errorText(const Optional<QSqlQuery> &query);
 }
 }
 

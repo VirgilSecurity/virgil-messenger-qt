@@ -49,6 +49,8 @@ namespace vm
 {
 class Database : public QObject
 {
+    Q_OBJECT
+
 public:
     using Version = Patch::Version;
     using TablePointer = std::unique_ptr<DatabaseTable>;
@@ -58,6 +60,7 @@ public:
     virtual ~Database();
 
     bool open(const QString &databaseFileName, const QString &connectionName);
+    void close();
     QSqlQuery createQuery() const;
 
     bool tableExists(const QString &tableName) const;
@@ -72,18 +75,20 @@ public:
 
     operator QSqlDatabase() const;
 
+signals:
+    void opened();
+    void closed();
+    void errorOccurred(const QString &errorText);
+
 protected:
     virtual bool create();
 
 private:
-    void close();
-
     bool readVersion();
     bool writeVersion();
 
     const QLatin1String m_type = QLatin1String("QSQLITE");
     const Version m_latestVersion = 0;
-    QString m_connectionName;
     Version m_version = 0;
     std::unique_ptr<Migration> m_migration;
     QSqlDatabase m_qtDatabase;

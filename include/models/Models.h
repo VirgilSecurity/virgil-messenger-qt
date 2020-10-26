@@ -32,44 +32,35 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/MessagesModel.h"
+#ifndef VM_MODELS_H
+#define VM_MODELS_H
 
-using namespace vm;
+#include <QObject>
 
-MessagesModel::MessagesModel(Controllers *controllers, QObject *parent)
-    : QAbstractListModel(parent)
-    , m_controllers(controllers)
-{}
-
-MessagesModel::~MessagesModel()
-{}
-
-int MessagesModel::rowCount(const QModelIndex &parent) const
+namespace vm
 {
-    Q_UNUSED(parent);
-    return m_messages.size();
+class ChatsModel;
+class Controllers;
+class MessagesModel;
+
+class Models : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(ChatsModel *chats READ chats CONSTANT)
+    Q_PROPERTY(MessagesModel *messages READ messages CONSTANT)
+
+public:
+    explicit Models(Controllers *controllers, QObject *parent);
+
+    const ChatsModel *chats() const;
+    ChatsModel *chats();
+    const MessagesModel *messages() const;
+    MessagesModel *messages();
+
+private:
+    ChatsModel *m_chats;
+    MessagesModel *m_messages;
+};
 }
 
-QVariant MessagesModel::data(const QModelIndex &index, int role) const
-{
-    Q_UNUSED(index)
-    Q_UNUSED(role)
-    return QVariant();
-}
-
-QHash<int, QByteArray> MessagesModel::roleNames() const
-{
-    QHash<int, QByteArray> names;
-    return names;
-}
-
-void MessagesModel::fetchMore(const QModelIndex &parent)
-{
-    Q_UNUSED(parent)
-}
-
-bool MessagesModel::canFetchMore(const QModelIndex &parent) const
-{
-    Q_UNUSED(parent)
-    return false;
-}
+#endif // VM_MODELS_H

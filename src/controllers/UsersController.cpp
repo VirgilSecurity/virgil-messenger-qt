@@ -35,25 +35,28 @@
 #include "controllers/UsersController.h"
 
 #include "VSQMessenger.h"
+#include "database/UserDatabase.h"
 
 using namespace vm;
 
-UsersController::UsersController(VSQMessenger *messenger, QObject *parent)
+UsersController::UsersController(VSQMessenger *messenger, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
     , m_messenger(messenger)
+    , m_userDatabase(userDatabase)
 {
-    connect(m_messenger, &VSQMessenger::signedIn, this, &UsersController::signedIn);
-    connect(m_messenger, &VSQMessenger::signInErrorOccured, this, &UsersController::signInErrorOccured);
-    connect(m_messenger, &VSQMessenger::signedUp, this, &UsersController::signedUp);
-    connect(m_messenger, &VSQMessenger::signUpErrorOccured, this, &UsersController::signUpErrorOccured);
-    connect(m_messenger, &VSQMessenger::signedOut, this, &UsersController::signedOut);
+    connect(messenger, &VSQMessenger::signedIn, this, std::bind(&UsersController::processMessengerOperation, this, args::_1, Operation::SignIn));
+    connect(messenger, &VSQMessenger::signInErrorOccured, this, &UsersController::signInErrorOccured);
+    connect(messenger, &VSQMessenger::signedUp, this, std::bind(&UsersController::processMessengerOperation, this, args::_1, Operation::SignUp));
+    connect(messenger, &VSQMessenger::signUpErrorOccured, this, &UsersController::signUpErrorOccured);
+    connect(messenger, &VSQMessenger::signedOut, this, std::bind(&UsersController::processMessengerOperation, this, QString(), Operation::SignOut));
 
-    connect(m_messenger, &VSQMessenger::keyDownloaded, this, &UsersController::keyDownloaded);
-    connect(m_messenger, &VSQMessenger::downloadKeyFailed, this, &UsersController::downloadKeyFailed);
+    connect(messenger, &VSQMessenger::keyDownloaded, this, std::bind(&UsersController::processMessengerOperation, this, args::_1, Operation::DownloadKey));
+    connect(messenger, &VSQMessenger::downloadKeyFailed, this, &UsersController::downloadKeyFailed);
+}
 
-    connect(this, &UsersController::signedIn, this, &UsersController::setUsername);
-    connect(this, &UsersController::signedUp, this, &UsersController::setUsername);
-    connect(this, &UsersController::keyDownloaded, this, &UsersController::setUsername);
+QString UsersController::username() const
+{
+    return m_username;
 }
 
 void UsersController::signIn(const QString &username)
@@ -61,14 +64,14 @@ void UsersController::signIn(const QString &username)
     m_messenger->signIn(username);
 }
 
-void UsersController::signOut()
-{
-    m_messenger->signOut();
-}
-
 void UsersController::signUp(const QString &username)
 {
     m_messenger->signUp(username);
+}
+
+void UsersController::signOut()
+{
+    m_messenger->signOut();
 }
 
 void UsersController::downloadKey(const QString &username, const QString &password)
@@ -76,11 +79,40 @@ void UsersController::downloadKey(const QString &username, const QString &passwo
     m_messenger->downloadKey(username, password);
 }
 
-void UsersController::setUsername(const QString &username)
+void UsersController::processMessengerOperation(const QString &username, const Operation operation)
 {
-    if (m_username == username) {
-        return;
+    disconnect(m_databaseConnection);
+    auto slot = std::bind(&UsersController::processDatabaseOperation, this, username, operation);
+    if (operation == Operation::SignOut) {
+        m_databaseConnection = connect(m_userDatabase, &UserDatabase::closed, this, slot);
+        m_userDatabase->requestClose();
     }
-    m_username = username;
-    emit usernameChanged(username);
+    else {
+        m_databaseConnection = connect(m_userDatabase, &UserDatabase::opened, this, slot);
+        m_userDatabase->requestOpen(username);
+    }
+}
+
+void UsersController::processDatabaseOperation(const QString &username, const Operation operation)
+{
+    if (m_username != username) {
+        m_username = username;
+        emit usernameChanged(username);
+    }
+
+    switch (operation) {
+    case Operation::SignIn:
+        emit signedIn(username);
+        break;
+    case Operation::SignUp:
+        emit signedUp(username);
+        break;
+    case Operation::SignOut:
+        emit signedOut();
+        break;
+    case Operation::DownloadKey:
+        emit keyDownloaded(username);
+    default:
+        break;
+    }
 }

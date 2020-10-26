@@ -34,6 +34,7 @@
 
 #include "database/core/DatabaseUtils.h"
 
+#include <QSqlError>
 #include <QSqlQuery>
 
 #include "Utils.h"
@@ -47,7 +48,12 @@ bool DatabaseUtils::isValidName(const QString &id)
     return !id.isEmpty();
 }
 
-Optional<QStringList> DatabaseUtils::readQueries(const QString &filePath)
+QString DatabaseUtils::currentTimestamp()
+{
+    return QDateTime::currentDateTime().toString(Qt::ISODate);
+}
+
+Optional<QStringList> DatabaseUtils::readQueryTexts(const QString &filePath)
 {
     const auto text = Utils::readTextFile(filePath);
     QStringList queries;
@@ -63,7 +69,7 @@ Optional<QStringList> DatabaseUtils::readQueries(const QString &filePath)
 
 bool DatabaseUtils::runQueries(Database *database, const QString &filePath)
 {
-    const auto texts = readQueries(filePath);
+    const auto texts = readQueryTexts(filePath);
     if (!texts) {
         return false;
     }
@@ -75,4 +81,30 @@ bool DatabaseUtils::runQueries(Database *database, const QString &filePath)
         }
     }
     return true;
+}
+
+Optional<QSqlQuery> DatabaseUtils::readBindQuery(Database *database, const QString &filePath, const BindValues &values)
+{
+    const auto text = Utils::readTextFile(filePath);
+    if (!text) {
+        return NullOptional;
+    }
+    auto query = database->createQuery();
+    if (!query.prepare(*text)) {
+        return NullOptional;
+    }
+    for (auto &v : values) {
+        query.bindValue(v.first, v.second);
+    }
+    return query;
+}
+
+QString DatabaseUtils::resourcePath(const QString &fileName)
+{
+    return QString(":/resources/database/%1.sql").arg(fileName);
+}
+
+QString DatabaseUtils::errorText(const Optional<QSqlQuery> &query)
+{
+    return query ? query->lastError().databaseText() : QLatin1String("Query wasn't created");
 }

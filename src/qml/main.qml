@@ -68,12 +68,11 @@ ApplicationWindow {
         function onFireReady() {
         }
 
-        function onFireAddedContact() {
-        }
-
         function onFireNewMessage() {
         }
     }
+
+    // FIXME(fpohtmeh): display database errors
 
     onClosing: {
         if (Platform.isAndroid) {

@@ -35,26 +35,31 @@
 #ifndef VM_DATABASETABLE_H
 #define VM_DATABASETABLE_H
 
+#include <QObject>
+
 #include "VSQCommon.h"
 
 namespace vm
 {
 class Database;
 
-class DatabaseTable
+class DatabaseTable : public QObject
 {
-    Q_DISABLE_COPY(DatabaseTable)
+    Q_OBJECT
 
 public:
-    explicit DatabaseTable(const QString &name);
+    DatabaseTable(const QString &name, Database *database);
     virtual ~DatabaseTable();
 
     QString name() const;
+    const Database *database() const;
+    Database *database();
 
-    virtual bool create(Database *database);
+    virtual bool create();
 
 private:
     QString m_name;
+    Database *m_database;
 };
 }
 

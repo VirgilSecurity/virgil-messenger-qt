@@ -57,8 +57,7 @@ bool Database::open(const QString &databaseFileName, const QString &connectionNa
     close();
 
     qCDebug(lcDatabase) << "Opening of database:" << databaseFileName;
-    m_connectionName = connectionName;
-    m_qtDatabase = QSqlDatabase::addDatabase(m_type, m_connectionName);
+    m_qtDatabase = QSqlDatabase::addDatabase(m_type, connectionName);
     m_qtDatabase.setDatabaseName(databaseFileName);
 
     ScopedConnection connection(*this);
@@ -70,6 +69,8 @@ bool Database::open(const QString &databaseFileName, const QString &connectionNa
     {
         ScopedTransaction transaction(*this);
         if (!create()) {
+            emit errorOccurred(tr("Failed to create database"));
+            qCCritical(lcDatabase) << "Database::create error";
             return transaction.rollback();
         }
     }
@@ -82,6 +83,8 @@ bool Database::open(const QString &databaseFileName, const QString &connectionNa
         qCDebug(lcDatabase) << "Database migration:" << m_version << "=>" << m_latestVersion;
         ScopedTransaction transaction(*this);
         if (m_migration && !m_migration->run(this)) {
+            emit errorOccurred(tr("Database migration failed"));
+            qCCritical(lcDatabase) << "Database migration error";
             return transaction.rollback();
         }
         if (!writeVersion()) {
@@ -89,7 +92,20 @@ bool Database::open(const QString &databaseFileName, const QString &connectionNa
         }
     }
     qCDebug(lcDatabase) << "Database was opened";
+    emit opened();
     return true;
+}
+
+void Database::close()
+{
+    const auto connectionName = m_qtDatabase.connectionName();
+    if (!QSqlDatabase::contains(connectionName)) {
+        return;
+    }
+    m_qtDatabase = {};
+    QSqlDatabase::removeDatabase(connectionName);
+    qCDebug(lcDatabase) << "Database was closed";
+    emit closed();
 }
 
 QSqlQuery Database::createQuery() const
@@ -104,10 +120,7 @@ bool Database::tableExists(const QString &tableName) const
 
 bool Database::addTable(TablePointer table)
 {
-    if (tableExists(table->name())) {
-        return true;
-    }
-    if (!table->create(this)) {
+    if (!tableExists(table->name()) && !table->create()) {
         return false;
     }
     m_tables.push_back(std::move(table));
@@ -154,19 +167,13 @@ bool Database::create()
     return true;
 }
 
-void Database::close()
-{
-    m_qtDatabase.close();
-    QSqlDatabase::removeDatabase(m_connectionName);
-    qCDebug(lcDatabase) << "Database was closed";
-}
-
 bool Database::readVersion()
 {
     auto query = createQuery();
     const auto queryText = QLatin1String("PRAGMA user_version;");
     if (!query.exec(queryText)) {
-        qCCritical(lcDatabase) << "Failed to read database version";
+        emit errorOccurred(tr("Failed to read database version"));
+        qCCritical(lcDatabase) << "Database::readVersion error";
         return false;
     }
     m_version = query.next() ? query.value(0).toULongLong() : 0;
@@ -179,7 +186,8 @@ bool Database::writeVersion()
     auto query = createQuery();
     const auto queryText = QString("PRAGMA user_version(%1);").arg(m_latestVersion);
     if (!query.exec(queryText)) {
-        qCCritical(lcDatabase) << "Failed to write database version";
+        emit errorOccurred(tr("Failed to write database version"));
+        qCCritical(lcDatabase) << "Database::writeVersion error";
         return false;
     }
     m_version = m_latestVersion;

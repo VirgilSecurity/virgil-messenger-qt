@@ -39,9 +39,9 @@
 
 using namespace vm;
 
-bool MessagesTable::create(Database *database)
+bool MessagesTable::create()
 {
-    if (DatabaseUtils::runQueries(database, QLatin1String(":/resources/database/create_messages.sql"))) {
+    if (DatabaseUtils::runQueries(database(), DatabaseUtils::resourcePath("create_messages"))) {
         qCDebug(lcDatabase) << "Messages table was created";
         return true;
     }

@@ -36,7 +36,6 @@
 
 #include <QTimer>
 
-#include "VSQMessenger.h"
 #include "Settings.h"
 #include "android/VSQAndroid.h"
 

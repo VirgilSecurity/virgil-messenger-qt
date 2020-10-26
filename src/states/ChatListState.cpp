@@ -34,14 +34,19 @@
 
 #include "states/ChatListState.h"
 
-#include "VSQMessenger.h"
 #include "controllers/Controllers.h"
-#include "controllers/UsersController.h"
+#include "controllers/ChatsController.h"
 
 using namespace vm;
 
-ChatListState::ChatListState(QState *parent)
+ChatListState::ChatListState(Controllers *controllers, QState *parent)
     : QState(parent)
+    , m_controllers(controllers)
 {
-    // TODO(fpohtmeh): remove cpp file?
+    connect(this, &ChatListState::requestChat, controllers->chats(), &ChatsController::resetUnreadCount);
+}
+
+void ChatListState::onEntry(QEvent *)
+{
+    m_controllers->chats()->fetchChats();
 }

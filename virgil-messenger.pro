@@ -177,6 +177,7 @@ HEADERS += \
         # Models
         include/models/ChatsModel.h \
         include/models/MessagesModel.h \
+        include/models/Models.h \
         # Generated
         generated/include/VSQCustomer.h \
         # Thirdparty
@@ -253,7 +254,8 @@ SOURCES += \
         src/logging/VSQLogWorker.cpp \
         # Models
         src/models/ChatsModel.cpp \
-        src/models/MessagesModel.cpp
+        src/models/MessagesModel.cpp \
+        src/models/Models.cpp
 
 #
 #   Resources

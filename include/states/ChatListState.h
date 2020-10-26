@@ -39,17 +39,24 @@
 
 namespace vm
 {
+class Controllers;
+
 class ChatListState : public QState
 {
     Q_OBJECT
 
 public:
-    explicit ChatListState(QState *parent);
+    ChatListState(Controllers *controllers, QState *parent);
 
 signals:
     void requestAccountSettings(const QString &userId);
     void requestNewChat();
     void requestChat(const QString &contactId);
+
+private:
+    void onEntry(QEvent *) override;
+
+    Controllers *m_controllers;
 };
 }
 

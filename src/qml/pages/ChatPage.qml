@@ -207,7 +207,6 @@ Page {
         ConversationsModel.recipient = contactId
         if (contactId) {
             ConversationsModel.setAsRead(contactId)
-            ChatModel.updateUnreadMessageCount(contactId)
         }
     }
 
