@@ -34,13 +34,15 @@
 
 #include "states/SignUpState.h"
 
+#include "Validator.h"
 #include "VSQMessenger.h"
 
 using namespace VSQ;
 
-SignUpState::SignUpState(VSQMessenger *messenger, QState *parent)
+SignUpState::SignUpState(VSQMessenger *messenger, Validator *validator, QState *parent)
     : OperationState(parent)
     , m_messenger(messenger)
+    , m_validator(validator)
 {
     connect(m_messenger, &VSQMessenger::signedUp, this, &SignUpState::operationFinished);
     connect(m_messenger, &VSQMessenger::signUpErrorOccured, this, &SignUpState::operationErrorOccurred);
@@ -48,12 +50,21 @@ SignUpState::SignUpState(VSQMessenger *messenger, QState *parent)
     connect(this, &SignUpState::signUp, this, &SignUpState::processSignUp);
 }
 
-void SignUpState::processSignUp(const QString &userId)
+void SignUpState::processSignUp(const QString &username)
 {
-    if (m_userId != userId) {
-        m_userId = userId;
-        emit userIdChanged(userId);
+    QString errorText;
+    const auto validUsername = m_validator->validatedUsername(username);
+
+    if (!validUsername) {
+        emit operationStarted();
+        emit operationErrorOccurred(errorText);
     }
-    emit operationStarted();
-    m_messenger->signUp(userId);
+    else {
+        if (m_userId != *validUsername) {
+            m_userId = *validUsername;
+            emit userIdChanged(m_userId);
+        }
+        emit operationStarted();
+        m_messenger->signUp(m_userId);
+    }
 }

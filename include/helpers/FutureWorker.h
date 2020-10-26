@@ -51,11 +51,11 @@ public:
     static void run(const Future &future, const std::function<void(FutureResult)> &resultHandler)
     {
         auto futureWatcher = new FutureWatcher();
-        futureWatcher->setFuture(future);
         QObject::connect(futureWatcher, &FutureWatcher::finished, [=]() {
             futureWatcher->deleteLater();
             resultHandler(future.result());
         });
+        futureWatcher->setFuture(future);
     }
 };
 }

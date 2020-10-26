@@ -40,12 +40,13 @@ Q_LOGGING_CATEGORY(lcAppState, "appState");
 
 using namespace VSQ;
 
-ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, UserDatabase *userDatabase, VSQSettings *settings, QObject *parent)
+ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, UserDatabase *userDatabase, Validator *validator, VSQSettings *settings, QObject *parent)
     : QStateMachine(parent)
     , m_messenger(messenger)
     , m_userDatabase(userDatabase)
+    , m_validator(validator)
     , m_settings(settings)
-    , m_accountSelectionState(new AccountSelectionState(messenger, settings, this))
+    , m_accountSelectionState(new AccountSelectionState(messenger, validator, settings, this))
     , m_accountSettingsState(new AccountSettingsState(messenger, this))
     , m_attachmentPreviewState(new AttachmentPreviewState(this))
     , m_backupKeyState(new BackupKeyState(m_messenger, this))
@@ -54,9 +55,9 @@ ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, UserDa
     , m_downloadKeyState(new DownloadKeyState(m_messenger, this))
     , m_newChatState(new NewChatState(messenger, this))
     , m_signInAsState(new SignInAsState(this))
-    , m_signInUsernameState(new SignInUsernameState(this))
-    , m_signUpState(new SignUpState(messenger, this))
-    , m_splashScreenState(new SplashScreenState(messenger, settings, this))
+    , m_signInUsernameState(new SignInUsernameState(validator, this))
+    , m_signUpState(new SignUpState(messenger, validator, this))
+    , m_splashScreenState(new SplashScreenState(messenger, validator, settings, this))
     , m_startState(new StartState(this))
 {
     registerStatesMetaTypes();
@@ -127,8 +128,8 @@ void ApplicationStateManager::addTransitions()
     m_signUpState->addTransition(m_signUpState, &SignUpState::signedUp, m_chatListState);
     connect(m_signUpState, &SignUpState::signedUp, m_chatListState, &ChatListState::setUserId);
 
-    addTwoSideTransition(m_signInUsernameState, m_signInUsernameState, &SignInUsernameState::usernameValidated, m_signInAsState);
-    connect(m_signInUsernameState, &SignInUsernameState::usernameValidated, m_signInAsState, &SignInAsState::setUserId);
+    addTwoSideTransition(m_signInUsernameState, m_signInUsernameState, &SignInUsernameState::validated, m_signInAsState);
+    connect(m_signInUsernameState, &SignInUsernameState::validated, m_signInAsState, &SignInAsState::setUserId);
 
     addTwoSideTransition(m_signInAsState, m_signInAsState, &SignInAsState::requestDownloadKey, m_downloadKeyState);
     connect(m_signInAsState, &SignInAsState::requestDownloadKey, m_downloadKeyState, &DownloadKeyState::setUserId);

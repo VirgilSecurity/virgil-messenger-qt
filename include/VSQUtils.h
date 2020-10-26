@@ -41,13 +41,9 @@ namespace VSQUtils
 {
     QString createUuid();
 
-    bool validateUserId(const QString &userId, QString *errorText = 0);
-
     // String processing/format
 
     QString formattedDataSize(DataSize fileSize);
-
-    QString escapedUserName(const QString &userName);
 
     QString formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval);
 

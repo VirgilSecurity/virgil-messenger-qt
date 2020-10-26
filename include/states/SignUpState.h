@@ -41,23 +41,26 @@ class VSQMessenger;
 
 namespace VSQ
 {
+class Validator;
+
 class SignUpState : public OperationState
 {
     Q_OBJECT
     Q_PROPERTY(QString userId MEMBER m_userId NOTIFY userIdChanged)
 
 public:
-    SignUpState(VSQMessenger *messenger, QState *parent);
+    SignUpState(VSQMessenger *messenger, Validator *validator, QState *parent);
 
 signals:
-    void signUp(const QString &userId);
+    void signUp(const QString &username);
     void signedUp(const QString &userId);
     void userIdChanged(const QString &userId);
 
 private:
-    void processSignUp(const QString &userId);
+    void processSignUp(const QString &username);
 
     VSQMessenger *m_messenger;
+    Validator *m_validator;
     QString m_userId;
 };
 }

@@ -65,11 +65,13 @@ VSQApplication::VSQApplication()
     , m_networkAccessManager(new QNetworkAccessManager(this))
     , m_crashReporter(&m_settings, m_networkAccessManager, this)
     , m_engine()
-    , m_messenger(m_networkAccessManager, &m_settings)
+    , m_validator(new Validator(this))
+    , m_messenger(m_networkAccessManager, &m_settings, m_validator)
     , m_userDatabase(&m_settings)
     , m_chatsModel(&m_userDatabase, this)
     , m_messagesModel(&m_userDatabase, this)
-    , m_applicationStateManager(&m_messenger, &m_userDatabase, &m_settings, this)
+    , m_keyboardEventFilter(new KeyboardEventFilter(this))
+    , m_applicationStateManager(&m_messenger, &m_userDatabase, m_validator, &m_settings, this)
 {
     m_settings.print();
     m_networkAccessManager->setAutoDeleteReplies(true);
@@ -77,6 +79,7 @@ VSQApplication::VSQApplication()
     VSQMacos::instance().startUpdatesTimer();
 #endif
     registerMetaTypes();
+    qRegisterMetaType<KeyboardEventFilter *>("KeyboardEventFilter*");
 }
 
 /******************************************************************************/

@@ -65,7 +65,7 @@ VSQSettings::VSQSettings(QObject *parent)
     m_databaseDir.setPath(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QLatin1String("/database"));
     m_attachmentCacheDir.setPath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/attachments"));
     m_thumbnaisDir.setPath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/thumbnails"));
-    m_downloadsDir.setPath(QStandardPaths::writableLocation(QStandardPaths::DownloadLocation) + QLatin1String("/Virgil"));
+    m_downloadsDir.setPath(QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
 }
 
 VSQSettings::~VSQSettings()

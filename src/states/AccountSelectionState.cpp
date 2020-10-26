@@ -36,7 +36,7 @@
 
 using namespace VSQ;
 
-AccountSelectionState::AccountSelectionState(VSQMessenger *messenger, VSQSettings *settings, QState *parent)
-    : SignInState(messenger, parent)
+AccountSelectionState::AccountSelectionState(VSQMessenger *messenger, Validator *validator, VSQSettings *settings, QState *parent)
+    : SignInState(messenger, validator, parent)
     , m_model(new AccountSelectionModel(settings, parent))
 {}

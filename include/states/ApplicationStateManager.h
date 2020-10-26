@@ -50,6 +50,7 @@
 #include "SignUpState.h"
 #include "SplashScreenState.h"
 #include "StartState.h"
+#include "Validator.h"
 #include "VSQCommon.h"
 
 Q_DECLARE_LOGGING_CATEGORY(lcAppState);
@@ -78,7 +79,7 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(QState *previousState MEMBER m_previousState NOTIFY previousStateChanged)
 
 public:
-    ApplicationStateManager(VSQMessenger *messenger, UserDatabase *userDatabase, VSQSettings *settings, QObject *parent);
+    ApplicationStateManager(VSQMessenger *messenger, UserDatabase *userDatabase, Validator *validator, VSQSettings *settings, QObject *parent);
     ~ApplicationStateManager() override;
 
 signals:
@@ -106,6 +107,7 @@ private:
 
     VSQMessenger *m_messenger;
     UserDatabase *m_userDatabase;
+    Validator *m_validator;
     VSQSettings *m_settings;
 
     AccountSelectionState *m_accountSelectionState;

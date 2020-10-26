@@ -48,13 +48,17 @@ isEmpty(VERSION_DATABASE_SCHEME) {
 }
 
 ios {
-    TARGET = VirgilMessenger
+    isEmpty(VS_TARGET) {
+        TARGET = VirgilMessenger
+    } else {
+        TARGET = $$VS_TARGET
+    }
     QMAKE_TARGET_BUNDLE_PREFIX = com.virgil
 } else {
     TARGET = virgil-messenger
     QMAKE_TARGET_BUNDLE_PREFIX = com.virgilsecurity
 }
-
+message("TARGET = $$TARGET")
 message("VERSION = $$VERSION")
 message("VERSION_DATABASE_SCHEME = $$VERSION_DATABASE_SCHEME")
 
@@ -125,6 +129,8 @@ HEADERS += \
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
         include/ui/VSQUiHelper.h \
+        include/KeyboardEventFilter.h \
+        include/Validator.h \
         # Helpers
         include/helpers/VSQSingleton.h \
         include/helpers/FutureWorker.h \
@@ -200,6 +206,8 @@ SOURCES += \
         src/main.cpp \
         src/VSQApplication.cpp \
         src/ui/VSQUiHelper.cpp \
+        src/KeyboardEventFilter.cpp \
+        src/Validator.cpp \
         # Applications states
         src/states/AccountSelectionState.cpp \
         src/states/AccountSettingsState.cpp \
@@ -363,7 +371,7 @@ macx: {
 #
 
 ios: {
-    QMAKE_ASSET_CATALOGS += platforms/ios/Assets.xcassets
+    QMAKE_ASSET_CATALOGS += generated/platforms/ios/Assets.xcassets
     QMAKE_IOS_DEPLOYMENT_TARGET = 9.0
     QMAKE_INFO_PLIST = platforms/ios/Info.plist
     DEFINES += VS_IOS=1 VS_PUSHNOTIFICATIONS=1 VS_MOBILE=1
@@ -379,10 +387,10 @@ ios: {
          src/notifications/XmppPushNotifications.cpp
 
     PUSH_NOTIFICATIONS_ENTITLEMENTS.name = CODE_SIGN_ENTITLEMENTS
-    PUSH_NOTIFICATIONS_ENTITLEMENTS.value = $$PWD/platforms/ios/Entitlements/VirgilMessenger.entitlements
+    PUSH_NOTIFICATIONS_ENTITLEMENTS.value = $$VS_PLATFORMS_PATH/ios/Entitlements/VirgilMessenger.entitlements
     QMAKE_MAC_XCODE_SETTINGS += PUSH_NOTIFICATIONS_ENTITLEMENTS
 
-    DISTFILES += platforms/ios/Entitlements/VirgilMessenger.entitlements
+    DISTFILES += generated/platforms/ios/Entitlements/VirgilMessenger.entitlements
 }
 
 
@@ -393,8 +401,9 @@ ios: {
 defineReplace(AndroidVersionCode) {
         segments = $$split(1, ".")
         vCode = "$$first(vCode)$$format_number($$member(segments,0,0), width=3 zeropad)"
-        vCode = "$$first(vCode)$$format_number($$member(segments,1,1), width=3 zeropad)"
-        vCode = "$$first(vCode)$$format_number($$member(segments,2,2), width=4 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,1,1), width=2 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,2,2), width=2 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,3,3), width=3 zeropad)"
         return($$first(vCode))
 }
 

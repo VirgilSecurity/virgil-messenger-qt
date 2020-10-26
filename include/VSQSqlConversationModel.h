@@ -36,7 +36,9 @@
 #define VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H
 
 #include <QSqlTableModel>
+#include <QTimer>
 
+#include "Validator.h"
 #include "VSQCommon.h"
 
 class VSQCryptoTransferManager;
@@ -76,7 +78,7 @@ class VSQSqlConversationModel : public QSqlTableModel
     };
 
 public:
-    VSQSqlConversationModel(QObject *parent = nullptr);
+    explicit VSQSqlConversationModel(VSQ::Validator *validator, QObject *parent = nullptr);
 
     QString
     user() const;
@@ -125,8 +127,7 @@ private:
         Attachment::Status status = Attachment::Status::Loading;
     };
 
-    QString escapedUserName() const;
-
+    VSQ::Validator *m_validator;
     QString m_user;
     QString m_recipient;
     std::map<QString, TransferInfo> m_transferMap;
@@ -153,6 +154,12 @@ private:
     void onSetAttachmentRemoteUrl(const QString messageId, const QUrl url);
     void onSetAttachmentThumbnailRemoteUrl(const QString messageId, const QUrl url);
     void onSetAttachmentBytesTotal(const QString messageId, const DataSize size);
+
+    void scheduleSelect(const QVector<int> &roles);
+    void performSelect();
+
+    QVector<int> m_selectRoles;
+    QTimer m_selectTimer;
 };
 
 #endif // VIRGIL_IOTKIT_QT_SQL_CONVERSATION_MODEL_H

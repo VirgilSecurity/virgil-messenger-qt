@@ -35,6 +35,10 @@ ApplicationWindow {
     Binding on minimumHeight { when: Platform.isDesktop; value: 500 }
     Binding on minimumWidth { when: Platform.isDesktop; value: 300 }
 
+    background: Rectangle {
+        color: Theme.chatBackgroundColor
+    }
+
     QtObject {
         id: d
         readonly property int height: 800

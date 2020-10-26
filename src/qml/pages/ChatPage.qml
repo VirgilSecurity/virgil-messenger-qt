@@ -80,7 +80,6 @@ Page {
     ListView {
         id: listView
 
-        property bool viewLoaded: false
         property real previousHeight: 0.0
         property var contextMenu: null
 
@@ -102,7 +101,7 @@ Page {
             body: model.message
             time: Qt.formatDateTime(model.timestamp, "hh:mm")
             nickname: model.author
-            isUser: model.author === appState.userId
+            isUser: model.author === app.stateManager.chatListState.userId // FIXME(fpohtmeh); use chat state
             status: isUser ? model.status : "none"
             failed: (model.status == 4) && (!attachmentId || attachmentStatus == Enums.AttachmentStatus.Failed)
             messageId: model.messageId
@@ -145,17 +144,15 @@ Page {
         ScrollBar.vertical: ScrollBar { }
 
         Component.onCompleted: {
-            viewLoaded = true
-            positionLoadedViewAtEnd()
-        }
-
-        onCountChanged: positionLoadedViewAtEnd()
-
-        onHeightChanged: {
-            if (height < previousHeight) {
-                positionLoadedViewAtEnd()
-            }
+            countChanged.connect(showLastMessage)
+            heightChanged.connect(function() {
+                if (height < previousHeight) {
+                    showLastMessage()
+                }
+                previousHeight = height
+            })
             previousHeight = height
+            showLastMessage()
         }
 
         MouseArea {
@@ -172,9 +169,10 @@ Page {
             }
         }
 
-        function positionLoadedViewAtEnd() {
-            if (viewLoaded) {
-                positionViewAtEnd()
+        function showLastMessage() {
+            positionViewAtEnd()
+            if (Platform.isIos || Platform.isLinux) {
+                positionViewAtEnd() // HACK(fpohtmeh): fix positioning
             }
         }
     }
@@ -221,4 +219,3 @@ Page {
         }
     }
 }
-

@@ -122,10 +122,11 @@ struct TransferId
 
 
 /******************************************************************************/
-VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSettings *settings)
+VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSettings *settings, Validator *validator)
     : QObject()
     , m_xmpp()
     , m_settings(settings)
+    , m_validator(validator)
     , m_transferManager(new VSQCryptoTransferManager(&m_xmpp, networkAccessManager, m_settings, this))
     , m_attachmentBuilder(settings, this)
 {
@@ -139,7 +140,7 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSetti
 
     // Connect to Database
     _connectToDatabase();
-    m_sqlConversations = new VSQSqlConversationModel(this);
+    m_sqlConversations = new VSQSqlConversationModel(validator, this);
     m_sqlChatModel = new VSQSqlChatModel(this);
 
     // Add receipt messages extension
@@ -197,29 +198,23 @@ VSQMessenger::~VSQMessenger()
 
 void VSQMessenger::signIn(const QString &userId)
 {
-    QString errorText;
-    if (!VSQUtils::validateUserId(userId, &errorText)) {
-        emit signInErrorOccured(errorText);
-    }
-    else {
-        FutureWorker::run(signInAsync(userId), [=](const FutureResult &result) {
-            switch (result) {
-            case MRES_OK:
-                m_settings->setLastSignedInUserId(userId);
-                emit signedIn(userId);
-                break;
-            case MRES_ERR_NO_CRED:
-                emit signInErrorOccured(tr("Cannot load credentials"));
-                break;
-            case MRES_ERR_SIGNIN:
-                emit signInErrorOccured(tr("Cannot sign-in user"));
-                break;
-            default:
-                emit signInErrorOccured(tr("Unknown sign-in error"));
-                break;
-            }
-        });
-    }
+    FutureWorker::run(signInAsync(userId), [=](const FutureResult &result) {
+        switch (result) {
+        case MRES_OK:
+            m_settings->setLastSignedInUserId(userId);
+            emit signedIn(userId);
+            break;
+        case MRES_ERR_NO_CRED:
+            emit signInErrorOccured(tr("Cannot load credentials"));
+            break;
+        case MRES_ERR_SIGNIN:
+            emit signInErrorOccured(tr("Cannot sign-in user"));
+            break;
+        default:
+            emit signInErrorOccured(tr("Unknown sign-in error"));
+            break;
+        }
+    });
 }
 
 void VSQMessenger::signOut()
@@ -232,26 +227,20 @@ void VSQMessenger::signOut()
 
 void VSQMessenger::signUp(const QString &userId)
 {
-    QString errorText;
-    if (!VSQUtils::validateUserId(userId, &errorText)) {
-        emit signUpErrorOccured(errorText);
-    }
-    else {
-        FutureWorker::run(signUpAsync(userId), [=](const FutureResult &result) {
-            switch (result) {
-            case MRES_OK:
-                m_settings->setLastSignedInUserId(userId);
-                emit signedUp(userId);
-                break;
-            case MRES_ERR_USER_ALREADY_EXISTS:
-                emit signUpErrorOccured(tr("Username is already taken"));
-                break;
-            default:
-                emit signUpErrorOccured(tr("Unknown sign-up error"));
-                break;
-            }
-        });
-    }
+    FutureWorker::run(signUpAsync(userId), [=](const FutureResult &result) {
+        switch (result) {
+        case MRES_OK:
+            m_settings->setLastSignedInUserId(userId);
+            emit signedUp(userId);
+            break;
+        case MRES_ERR_USER_ALREADY_EXISTS:
+            emit signUpErrorOccured(tr("Username is already taken"));
+            break;
+        default:
+            emit signUpErrorOccured(tr("Unknown sign-up error"));
+            break;
+        }
+    });
 }
 
 void VSQMessenger::addContact(const QString &userId)
@@ -776,7 +765,7 @@ VSQMessenger::_saveCredentials(const QString &user, const vs_messenger_virgil_us
     const QJsonDocument doc(jsonObject);
     const QString json = doc.toJson(QJsonDocument::Compact);
 
-    qInfo() << "Saving user credentails: " << json;
+    qDebug() << "Saving user credentails: " << json;
 
     m_settings->setUserCredential(user, json);
 
@@ -1144,30 +1133,30 @@ VSQMessenger::onError(QXmppClient::Error err) {
 
 /******************************************************************************/
 Optional<StMessage> VSQMessenger::decryptMessage(const QString &sender, const QString &message) {
-    const size_t _decryptedMsgSzMax = VSQUtils::bufferSizeForDecryption(message.size());
-    uint8_t decryptedMessage[_decryptedMsgSzMax];
+    const int decryptedMsgSzMax = VSQUtils::bufferSizeForDecryption(message.size());
+    
+    QByteArray decryptedMessage = QByteArray(decryptedMsgSzMax + 1, 0x00);
+    
     size_t decryptedMessageSz = 0;
 
     qDebug() << "Sender            : " << sender;
     qDebug() << "Encrypted message : " << message.length() << " bytes";
 
     // Decrypt message
-    // DECRYPTED_MESSAGE_SZ_MAX - 1  - This is required for a Zero-terminated string
     if (VS_CODE_OK != vs_messenger_virgil_decrypt_msg(
                 sender.toStdString().c_str(),
                 message.toStdString().c_str(),
-                decryptedMessage, decryptedMessageSz - 1,
+                (uint8_t *)decryptedMessage.data(), decryptedMsgSzMax,
                 &decryptedMessageSz)) {
         qWarning("Received message cannot be decrypted");
         return NullOptional;
     }
 
-    // Add Zero termination
-    decryptedMessage[decryptedMessageSz] = 0;
+    // Adjust buffer with a decrypted data
+    decryptedMessage.resize((int)decryptedMessageSz);
 
     // Get message from JSON
-    QByteArray baDecr(reinterpret_cast<char *> (decryptedMessage), static_cast<int> (decryptedMessageSz));
-    QJsonDocument jsonMsg(QJsonDocument::fromJson(baDecr));
+    QJsonDocument jsonMsg(QJsonDocument::fromJson(decryptedMessage));
 
     qCDebug(lcMessenger) << "JSON for parsing:" << jsonMsg;
     auto msg = parseJson(jsonMsg);
@@ -1286,6 +1275,7 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
     } else {
         m_sqlConversations->setMessageStatus(messageId, StMessage::Status::MST_FAILED);
     }
+    qCDebug(lcMessenger) << "Message sent:" << messageId;
     return MRES_OK;
 }
 
@@ -1340,6 +1330,7 @@ QFuture<VSQMessenger::EnResult>
 VSQMessenger::createSendMessage(const QString messageId, const QString to, const QString message)
 {
     return QtConcurrent::run([=]() -> EnResult {
+        qCDebug(lcMessenger) << "Message creation started:" << messageId;
         return _sendMessageInternal(true, messageId, to, message, NullOptional);
     });
 }
@@ -1349,6 +1340,7 @@ VSQMessenger::createSendAttachment(const QString messageId, const QString to,
                                    const QUrl url, const Enums::AttachmentType attachmentType)
 {
     return QtConcurrent::run([=]() -> EnResult {
+        qCDebug(lcMessenger) << "Message creation started:" << messageId << "Attachment type:" << attachmentType;
         QString warningText;
         auto attachment = m_attachmentBuilder.build(url, attachmentType, warningText);
         if (!attachment) {

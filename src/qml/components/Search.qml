@@ -3,29 +3,30 @@ import QtQuick.Controls 2.12
 
 import "../theme"
 
-Item {
+Rectangle {
     id: containerId
-    height: parent.height
-
     anchors.centerIn: parent
+    height: parent.height
+    color: Theme.inputBackgroundColor
+    radius: 20
+
+    Behavior on width {
+        NumberAnimation {
+            id: widthAnimation
+            duration: 200
+            easing.type: Easing.InOutQuad
+        }
+    }
 
     property alias searchPlaceholder: searchField.placeholderText
     property alias search: searchField.text
     property bool isSearchOpen: state === "open"
+    property alias isAnimationRunning: widthAnimation.running
 
-    Behavior on width {
-        NumberAnimation { duration: 200; easing.type: Easing.InOutQuad }
-    }
-
-    state: 'closed'
+    state: "closed"
     states: [
         State {
             name: "open"
-
-            ParentChange {
-                target: searchButtonId
-                parent: searchField
-            }
 
             PropertyChanges {
                 target: containerId
@@ -33,39 +34,23 @@ Item {
             }
 
             PropertyChanges {
-                target: backgroundId
-                color: Theme.inputBackgroundColor
-            }
-
-            PropertyChanges {
                 target: searchField
-                text: ''
+                text: ""
             }
 
             PropertyChanges {
                 target: searchButtonId
-                width: 20
-                height: 20
+                width: 24
+                height: 24
                 icon.color: "white"
                 anchors {
                     left: parent.left
-                    leftMargin: 11
-                    horizontalCenter: undefined
+                    leftMargin: 10
                 }
             }
         },
         State {
-            name: 'closed'
-
-            ParentChange {
-                target: searchButtonId
-                parent: containerId
-            }
-
-            PropertyChanges {
-                target: containerId
-                width: 48
-            }
+            name: "closed"
 
             PropertyChanges {
                 target: closeButtonId
@@ -75,7 +60,7 @@ Item {
             PropertyChanges {
                 target: searchField
                 visible: false
-                text: ''
+                text: ""
             }
 
             PropertyChanges {
@@ -84,8 +69,6 @@ Item {
                 height: 24
                 icon.color: "transparent"
                 anchors {
-                    horizontalCenter: parent.horizontalCenter
-                    // clear previous anchor
                     left: undefined
                     leftMargin: undefined
                 }
@@ -96,36 +79,21 @@ Item {
     TextField {
         id: searchField
 
-        anchors.fill: parent;
+        anchors {
+            fill: parent
+            leftMargin: 30
+            rightMargin: 30
+        }
         activeFocusOnPress: true
-        leftPadding: 38
-        rightPadding: 30
         font.pixelSize: UiHelper.fixFontSz(15)
         placeholderTextColor: "#59717D"
-
         color: "white"
 
-        background: Rectangle {
-            id: backgroundId
-            radius: 20
-            color: "transparent"
-        }
-
-        ImageButton {
-            id: closeButtonId
-            image: "Close"
-            anchors {
-                verticalCenter: parent.verticalCenter
-                right: parent.right
-                rightMargin: 6
-            }
-            onClicked: {
-                containerId.state = 'closed'
-            }
+        background: Item {
         }
 
         Keys.onPressed: {
-            if (containerId.state === "open" && (event.key === Qt.Key_Back || event.key === Qt.Key_Escape)) {
+            if (isSearchOpen && (event.key === Qt.Key_Back || event.key === Qt.Key_Escape)) {
                 containerId.state = "closed"
                 event.accepted = true;
             }
@@ -135,12 +103,26 @@ Item {
     ImageButton {
         id: searchButtonId
         anchors.verticalCenter: parent.verticalCenter
-
         image: "Search"
+        enabled: !isSearchOpen || !searchField.activeFocus
+        visible: isSearchOpen || !isAnimationRunning
 
         onClicked: {
             containerId.state = "open"
             searchField.forceActiveFocus()
+        }
+    }
+
+    ImageButton {
+        id: closeButtonId
+        anchors {
+            verticalCenter: parent.verticalCenter
+            right: parent.right
+        }
+        image: "Close"
+
+        onClicked: {
+            containerId.state = "closed"
         }
     }
 }

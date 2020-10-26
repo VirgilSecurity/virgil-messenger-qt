@@ -262,7 +262,7 @@ Control {
                             var coord = mapToItem(chatMessage, mouse.x, mouse.y)
                             openContextMenu(messageId, coord, loader.item.contextMenu)
                         }
-                        else {
+                        else if (d.hasAttachment) {
                             downloadOpenAttachment(messageId, d.isPicture)
                         }
                     }
