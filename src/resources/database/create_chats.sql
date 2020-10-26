@@ -11,3 +11,5 @@ CREATE TABLE chats (
 CREATE INDEX chats_idx_contact_id ON chats(contact_id);
 
 CREATE INDEX chats_idx_last_message_id ON chats(last_message_id);
+
+CREATE INDEX chats_idx_unread_message_count ON chats(unread_message_count);
