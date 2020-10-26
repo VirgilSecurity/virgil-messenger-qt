@@ -34,9 +34,9 @@
 
 #include "states/SignInUsernameState.h"
 
-#include "VSQUtils.h"
+#include "Utils.h"
 
-using namespace VSQ;
+using namespace vm;
 
 SignInUsernameState::SignInUsernameState(QState *parent)
     : OperationState(parent)
@@ -48,7 +48,7 @@ void SignInUsernameState::processValidateUsername(const QString &userId)
 {
     emit operationStarted();
     QString errorText;
-    if (VSQUtils::validateUserId(userId, &errorText)) {
+    if (Utils::validateUserId(userId, &errorText)) {
         emit operationFinished();
         emit usernameValidated(userId);
     }

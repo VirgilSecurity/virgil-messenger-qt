@@ -32,14 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_DOWNLOADKEYSTATE_H
-#define VSQ_DOWNLOADKEYSTATE_H
+#ifndef VM_DOWNLOADKEYSTATE_H
+#define VM_DOWNLOADKEYSTATE_H
 
 #include "OperationState.h"
 
 class VSQMessenger;
 
-namespace VSQ
+namespace vm
 {
 class DownloadKeyState : public OperationState
 {
@@ -65,4 +65,4 @@ private:
 };
 }
 
-#endif // VSQ_DOWNLOADKEYSTATE_H
+#endif // VM_DOWNLOADKEYSTATE_H

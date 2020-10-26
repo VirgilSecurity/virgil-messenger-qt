@@ -36,7 +36,7 @@
 
 #include "VSQMessenger.h"
 
-using namespace VSQ;
+using namespace vm;
 
 AccountSettingsState::AccountSettingsState(VSQMessenger *messenger, QState *parent)
     : QState(parent)

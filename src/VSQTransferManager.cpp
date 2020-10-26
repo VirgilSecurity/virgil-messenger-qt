@@ -38,7 +38,7 @@
 #include <QXmppUploadRequestManager.h>
 
 #include "VSQDownload.h"
-#include "VSQSettings.h"
+#include "Settings.h"
 #include "VSQUpload.h"
 
 #include <QTimer>

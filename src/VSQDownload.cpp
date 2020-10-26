@@ -37,7 +37,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 
-#include "VSQUtils.h"
+#include "Utils.h"
 
 VSQDownload::VSQDownload(QNetworkAccessManager *networkAccessManager, const QString &id,
                          const QUrl &remoteUrl, const QString &filePath, QObject *parent)

@@ -32,14 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SIGNUPSTATE_H
-#define VSQ_SIGNUPSTATE_H
+#ifndef VM_SIGNUPSTATE_H
+#define VM_SIGNUPSTATE_H
 
 #include "OperationState.h"
 
 class VSQMessenger;
 
-namespace VSQ
+namespace vm
 {
 class SignUpState : public OperationState
 {
@@ -62,4 +62,4 @@ private:
 };
 }
 
-#endif // VSQ_SIGNUPSTATE_H
+#endif // VM_SIGNUPSTATE_H

@@ -42,9 +42,9 @@
 
 #include <virgil/iot/messenger/messenger.h>
 
-#include "VSQSettings.h"
+#include "Settings.h"
 #include "VSQUpload.h"
-#include "VSQUtils.h"
+#include "Utils.h"
 #include "android/VSQAndroid.h"
 
 using namespace VirgilIoTKit;
@@ -58,12 +58,12 @@ VSQAttachmentBuilder::VSQAttachmentBuilder(VSQSettings *settings, QObject *paren
 
 OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment::Type type, QString &errorText)
 {
-    qCDebug(lcAttachment) << "Attachment input url:" << VSQUtils::urlToLocalFile(url);
-    if (!VSQUtils::isValidUrl(url)) {
+    qCDebug(lcAttachment) << "Attachment input url:" << vm::Utils::urlToLocalFile(url);
+    if (!vm::Utils::isValidUrl(url)) {
         errorText = tr("Invalid attachment URL");
         return NullOptional;
     }
-    QFileInfo localInfo(VSQUtils::urlToLocalFile(url));
+    QFileInfo localInfo(vm::Utils::urlToLocalFile(url));
     if (!localInfo.exists()) {
         errorText = tr("File doesn't exist");
         return NullOptional;
@@ -79,12 +79,12 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
 #endif
     qCDebug(lcAttachment) << "Attachment file size:" << fileSize;
     if (fileSize > m_settings->attachmentMaxFileSize()) {
-        errorText = tr("File size limit: %1").arg(VSQUtils::formattedDataSize(m_settings->attachmentMaxFileSize()));
+        errorText = tr("File size limit: %1").arg(vm::Utils::formattedDataSize(m_settings->attachmentMaxFileSize()));
         return NullOptional;
     }
 
     Attachment attachment;
-    attachment.id = VSQUtils::createUuid();
+    attachment.id = vm::Utils::createUuid();
     attachment.type = type;
     const int maxLength = 50;
     if (type == Attachment::Type::Picture) {
@@ -104,7 +104,7 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
         attachment.fileName = localInfo.fileName();
     }
     if (attachment.displayName.isEmpty()) {
-        attachment.displayName = VSQUtils::elidedText(attachment.fileName, maxLength);
+        attachment.displayName = vm::Utils::elidedText(attachment.fileName, maxLength);
     }
     attachment.filePath = localInfo.absoluteFilePath();
 
@@ -120,7 +120,7 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
 
 QString VSQAttachmentBuilder::generateThumbnailFileName() const
 {
-    return m_settings->thumbnailsDir().filePath(VSQUtils::createUuid() + QLatin1String(".png"));
+    return m_settings->thumbnailsDir().filePath(vm::Utils::createUuid() + QLatin1String(".png"));
 }
 
 QImage VSQAttachmentBuilder::applyImageOrientation(const QImage &image, const QImageIOHandler::Transformations transformations) const

@@ -32,12 +32,12 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_MIGRATION_H
-#define VSQ_MIGRATION_H
+#ifndef VM_MIGRATION_H
+#define VM_MIGRATION_H
 
 #include "database/core/Patch.h"
 
-namespace VSQ
+namespace vm
 {
 class Migration
 {
@@ -53,4 +53,4 @@ private:
 };
 }
 
-#endif // VSQ_MIGRATION_H
+#endif // VM_MIGRATION_H

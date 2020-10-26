@@ -34,7 +34,7 @@
 
 #include "models/MessagesModel.h"
 
-using namespace VSQ;
+using namespace vm;
 
 MessagesModel::MessagesModel(UserDatabase *userDatabase, QObject *parent)
     : QAbstractListModel(parent)

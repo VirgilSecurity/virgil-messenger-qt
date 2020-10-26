@@ -36,7 +36,7 @@
 
 #include "database/core/Database.h"
 
-using namespace VSQ;
+using namespace vm;
 
 ScopedTransaction::ScopedTransaction(QSqlDatabase qtDatabase)
     : m_qtDatabase(qtDatabase)

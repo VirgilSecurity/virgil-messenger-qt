@@ -41,7 +41,7 @@
 #include <QSqlQuery>
 
 #include "VSQCryptoTransferManager.h"
-#include "VSQUtils.h"
+#include "Utils.h"
 
 Q_DECLARE_METATYPE(StMessage::Status)
 
@@ -204,7 +204,7 @@ VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
             return QString();
         }
         const auto bytesTotal = currRecord.value(AttachmentBytesTotalRole - Qt::UserRole).toInt();
-        return (bytesTotal > 0) ? VSQUtils::formattedDataSize(bytesTotal) : " ";
+        return (bytesTotal > 0) ? vm::Utils::formattedDataSize(bytesTotal) : " ";
     }
 
     if (role == AttachmentStatusRole) {

@@ -32,14 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_ACCOUNTSELECTIONMODEL_H
-#define VSQ_ACCOUNTSELECTIONMODEL_H
+#ifndef VM_ACCOUNTSELECTIONMODEL_H
+#define VM_ACCOUNTSELECTIONMODEL_H
 
 #include <QAbstractListModel>
 
 class VSQSettings;
 
-namespace VSQ
+namespace vm
 {
 class AccountSelectionModel : public QAbstractListModel
 {
@@ -60,4 +60,4 @@ private:
 };
 }
 
-#endif // VSQ_ACCOUNTSELECTIONMODEL_H
+#endif // VM_ACCOUNTSELECTIONMODEL_H

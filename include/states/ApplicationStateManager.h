@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_APPLICATIONSTATEMANAGER_H
-#define VSQ_APPLICATIONSTATEMANAGER_H
+#ifndef VM_APPLICATIONSTATEMANAGER_H
+#define VM_APPLICATIONSTATEMANAGER_H
 
 #include <QStateMachine>
 
@@ -54,7 +54,7 @@
 
 Q_DECLARE_LOGGING_CATEGORY(lcAppState);
 
-namespace VSQ
+namespace vm
 {
 class UserDatabase;
 
@@ -127,4 +127,4 @@ private:
 };
 }
 
-#endif // VSQ_APPLICATIONSTATEMANAGER_H
+#endif // VM_APPLICATIONSTATEMANAGER_H

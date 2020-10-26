@@ -36,7 +36,7 @@
 
 #include "VSQMessenger.h"
 
-using namespace VSQ;
+using namespace vm;
 
 SignUpState::SignUpState(VSQMessenger *messenger, QState *parent)
     : OperationState(parent)

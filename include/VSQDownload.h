@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_DOWNLOAD_H
-#define VSQ_DOWNLOAD_H
+#ifndef VM_DOWNLOAD_H
+#define VM_DOWNLOAD_H
 
 #include "VSQTransfer.h"
 #include <QMutex>
@@ -56,4 +56,4 @@ private:
     QList<QMetaObject::Connection> m_connections;
 };
 
-#endif // VSQ_DOWNLOAD_H
+#endif // VM_DOWNLOAD_H

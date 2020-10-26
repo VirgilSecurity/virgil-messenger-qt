@@ -32,14 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_USERDATABASE_H
-#define VSQ_USERDATABASE_H
+#ifndef VM_USERDATABASE_H
+#define VM_USERDATABASE_H
 
 #include "core/Database.h"
 
 class VSQSettings;
 
-namespace VSQ
+namespace vm
 {
 class AttachmentsTable;
 class ChatsTable;
@@ -76,4 +76,4 @@ private:
 };
 }
 
-#endif // VSQ_USERDATABASE_H
+#endif // VM_USERDATABASE_H

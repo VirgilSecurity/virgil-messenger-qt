@@ -34,7 +34,7 @@
 
 #include "database/core/Migration.h"
 
-using namespace VSQ;
+using namespace vm;
 
 bool Migration::run(Database *database)
 {

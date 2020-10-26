@@ -32,12 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_UTILS_H
-#define VSQ_UTILS_H
+#ifndef VM_UTILS_H
+#define VM_UTILS_H
 
 #include "VSQCommon.h"
 
-namespace VSQUtils
+namespace vm
+{
+namespace Utils
 {
     QString createUuid();
 
@@ -77,5 +79,6 @@ namespace VSQUtils
 
     int bufferSizeForDecryption(const int encryptedSize);
 }
+}
 
-#endif // VSQ_UTILS_H
+#endif // VM_UTILS_H

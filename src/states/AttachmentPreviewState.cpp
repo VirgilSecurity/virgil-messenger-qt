@@ -34,7 +34,7 @@
 
 #include "states/AttachmentPreviewState.h"
 
-using namespace VSQ;
+using namespace vm;
 
 QUrl AttachmentPreviewState::url() const
 {

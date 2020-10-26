@@ -32,12 +32,12 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_ATTACHMENTSTABLE_H
-#define VSQ_ATTACHMENTSTABLE_H
+#ifndef VM_ATTACHMENTSTABLE_H
+#define VM_ATTACHMENTSTABLE_H
 
 #include "core/DatabaseTable.h"
 
-namespace VSQ
+namespace vm
 {
 class AttachmentsTable : public DatabaseTable
 {
@@ -48,4 +48,4 @@ public:
 };
 }
 
-#endif // VSQ_ATTACHMENTSTABLE_H
+#endif // VM_ATTACHMENTSTABLE_H

@@ -32,24 +32,26 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "VSQUtils.h"
+#include "Utils.h"
 
 #include <QDir>
 #include <QLocale>
 #include <QUuid>
 
-QString VSQUtils::createUuid()
+using namespace vm;
+
+QString Utils::createUuid()
 {
     return QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
 }
 
-QString VSQUtils::formattedDataSize(DataSize fileSize)
+QString Utils::formattedDataSize(DataSize fileSize)
 {
     static QLocale locale = QLocale::system();
     return locale.formattedDataSize(fileSize);
 }
 
-QString VSQUtils::escapedUserName(const QString &userName)
+QString Utils::escapedUserName(const QString &userName)
 {
     static QRegExp regexp("[^a-z0-9_]");
     QString name(userName);
@@ -57,7 +59,7 @@ QString VSQUtils::escapedUserName(const QString &userName)
     return name;
 }
 
-QString VSQUtils::findUniqueFileName(const QString &fileName)
+QString Utils::findUniqueFileName(const QString &fileName)
 {
     QFileInfo info(fileName);
     if (!info.exists()) {
@@ -75,7 +77,7 @@ QString VSQUtils::findUniqueFileName(const QString &fileName)
     }
 }
 
-bool VSQUtils::isValidUrl(const QUrl &url)
+bool Utils::isValidUrl(const QUrl &url)
 {
     bool isValid = url.isValid();
 #if !defined(Q_OS_ANDROID)
@@ -84,7 +86,7 @@ bool VSQUtils::isValidUrl(const QUrl &url)
     return isValid;
 }
 
-QString VSQUtils::urlToLocalFile(const QUrl &url)
+QString Utils::urlToLocalFile(const QUrl &url)
 {
 #if defined (Q_OS_ANDROID)
     qDebug() << "Android file url (before encoding):" << url.toString();
@@ -97,7 +99,7 @@ QString VSQUtils::urlToLocalFile(const QUrl &url)
 #endif
 }
 
-bool VSQUtils::forceCreateDir(const QString &absolutePath)
+bool Utils::forceCreateDir(const QString &absolutePath)
 {
     const QFileInfo info(absolutePath);
     if (info.exists()) {
@@ -115,7 +117,7 @@ bool VSQUtils::forceCreateDir(const QString &absolutePath)
     return false;
 }
 
-QUrl VSQUtils::localFileToUrl(const QString &filePath)
+QUrl Utils::localFileToUrl(const QString &filePath)
 {
 #if defined (Q_OS_ANDROID)
     QUrl url(filePath);
@@ -128,18 +130,18 @@ QUrl VSQUtils::localFileToUrl(const QString &filePath)
 #endif
 }
 
-int VSQUtils::bufferSizeForEncryption(const int rawSize)
+int Utils::bufferSizeForEncryption(const int rawSize)
 {
     // TODO(fpohtmeh): use function rawSize * 3 + 2180
     return 5 * rawSize + 5000;
 }
 
-int VSQUtils::bufferSizeForDecryption(const int encryptedSize)
+int Utils::bufferSizeForDecryption(const int encryptedSize)
 {
     return encryptedSize;
 }
 
-QString VSQUtils::formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval)
+QString Utils::formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval)
 {
     const auto preffix = QObject::tr("Last seen %1");
     if (seconds < updateInterval) {
@@ -183,12 +185,12 @@ QString VSQUtils::formattedLastSeenActivity(const Seconds &seconds, const Second
     return preffix.arg(QObject::tr("%1 years ago").arg(seconds / year));
 }
 
-QString VSQUtils::formattedLastSeenNoActivity()
+QString Utils::formattedLastSeenNoActivity()
 {
     return QObject::tr("Offline");
 }
 
-QString VSQUtils::elidedText(const QString &text, const int maxLength)
+QString Utils::elidedText(const QString &text, const int maxLength)
 {
     const int max = qMax(5, maxLength);
     if (text.size() <= max) {
@@ -199,7 +201,7 @@ QString VSQUtils::elidedText(const QString &text, const int maxLength)
     return text.left(half) + ellipsisChar + text.right(max - 1 - half);
 }
 
-bool VSQUtils::validateUserId(const QString &userId, QString *errorText)
+bool Utils::validateUserId(const QString &userId, QString *errorText)
 {
     if (userId.isEmpty()) {
         if (errorText) {
@@ -211,7 +213,7 @@ bool VSQUtils::validateUserId(const QString &userId, QString *errorText)
     return true;
 }
 
-Optional<QString> VSQUtils::readTextFile(const QString &filePath)
+Optional<QString> Utils::readTextFile(const QString &filePath)
 {
     QFile file(filePath);
     if (!file.open(QFile::Text | QFile::ReadOnly)) {

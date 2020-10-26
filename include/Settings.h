@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SETTINGS_H
-#define VSQ_SETTINGS_H
+#ifndef VM_SETTINGS_H
+#define VM_SETTINGS_H
 
 #include <QDir>
 #include <QRect>
@@ -115,4 +115,4 @@ private:
     QDir m_downloadsDir;
 };
 
-#endif // VSQ_SETTINGS_H
+#endif // VM_SETTINGS_H

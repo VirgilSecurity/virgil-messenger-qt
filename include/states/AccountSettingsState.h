@@ -32,14 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_ACCOUNTSETTINGSSTATE_H
-#define VSQ_ACCOUNTSETTINGSSTATE_H
+#ifndef VM_ACCOUNTSETTINGSSTATE_H
+#define VM_ACCOUNTSETTINGSSTATE_H
 
 #include <QState>
 
 class VSQMessenger;
 
-namespace VSQ
+namespace vm
 {
 class AccountSettingsState : public QState
 {
@@ -64,4 +64,4 @@ private:
 };
 }
 
-#endif // VSQ_ACCOUNTSETTINGSSTATE_H
+#endif // VM_ACCOUNTSETTINGSSTATE_H

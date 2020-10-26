@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_TRANSFER_H
-#define VSQ_TRANSFER_H
+#ifndef VM_TRANSFER_H
+#define VM_TRANSFER_H
 
 #include <QNetworkReply>
 #include <QObject>
@@ -85,5 +85,5 @@ private:
     QFile *m_fileHandle = nullptr;
 };
 
-#endif // VSQ_TRANSFER_H
+#endif // VM_TRANSFER_H
 

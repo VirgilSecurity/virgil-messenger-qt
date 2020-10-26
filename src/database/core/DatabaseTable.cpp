@@ -36,7 +36,7 @@
 
 #include "database/core/Database.h"
 
-using namespace VSQ;
+using namespace vm;
 
 DatabaseTable::DatabaseTable(const QString &name)
     : m_name(name)

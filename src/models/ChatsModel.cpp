@@ -34,7 +34,7 @@
 
 #include "models/ChatsModel.h"
 
-using namespace VSQ;
+using namespace vm;
 
 ChatsModel::ChatsModel(UserDatabase *userDatabase, QObject *parent)
     : QAbstractListModel(parent)

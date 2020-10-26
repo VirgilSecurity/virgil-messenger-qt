@@ -40,8 +40,8 @@
 #include <VSQMessenger.h>
 #include <VSQSqlConversationModel.h>
 #include <VSQUpload.h>
-#include <VSQUtils.h>
-#include <VSQSettings.h>
+#include <Utils.h>
+#include <Settings.h>
 #include <android/VSQAndroid.h>
 #include <helpers/FutureWorker.h>
 
@@ -83,11 +83,11 @@ const QString VSQMessenger::kDevEnvPrefix = "dev";
 const int VSQMessenger::kConnectionWaitMs = 10000;
 const int VSQMessenger::kKeepAliveTimeSec = 10;
 
-using namespace VSQ;
+using namespace vm;
 
 Q_LOGGING_CATEGORY(lcMessenger, "messenger")
 
-using namespace VSQ;
+using namespace vm;
 
 // Helper struct to categorize transfers
 struct TransferId
@@ -198,7 +198,7 @@ VSQMessenger::~VSQMessenger()
 void VSQMessenger::signIn(const QString &userId)
 {
     QString errorText;
-    if (!VSQUtils::validateUserId(userId, &errorText)) {
+    if (!Utils::validateUserId(userId, &errorText)) {
         emit signInErrorOccured(errorText);
     }
     else {
@@ -233,7 +233,7 @@ void VSQMessenger::signOut()
 void VSQMessenger::signUp(const QString &userId)
 {
     QString errorText;
-    if (!VSQUtils::validateUserId(userId, &errorText)) {
+    if (!Utils::validateUserId(userId, &errorText)) {
         emit signUpErrorOccured(errorText);
     }
     else {
@@ -972,7 +972,7 @@ StMessage VSQMessenger::parseJson(const QJsonDocument &json)
         return message;
     }
     ::Attachment attachment;
-    attachment.id = VSQUtils::createUuid();
+    attachment.id = Utils::createUuid();
     attachment.remoteUrl = payload["url"].toString();
     attachment.fileName = payload["fileName"].toString();
     attachment.displayName = payload["displayName"].toString();
@@ -1144,7 +1144,7 @@ VSQMessenger::onError(QXmppClient::Error err) {
 
 /******************************************************************************/
 Optional<StMessage> VSQMessenger::decryptMessage(const QString &sender, const QString &message) {
-    const size_t _decryptedMsgSzMax = VSQUtils::bufferSizeForDecryption(message.size());
+    const size_t _decryptedMsgSzMax = Utils::bufferSizeForDecryption(message.size());
     uint8_t decryptedMessage[_decryptedMsgSzMax];
     size_t decryptedMessageSz = 0;
 
@@ -1253,7 +1253,7 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
     // Encrypt message
     QMutexLocker _guard(&m_messageGuard);
     const auto plaintext = internalJson.toStdString();
-    const size_t _encryptedMsgSzMax = VSQUtils::bufferSizeForEncryption(plaintext.size());
+    const size_t _encryptedMsgSzMax = Utils::bufferSizeForEncryption(plaintext.size());
     uint8_t encryptedMessage[_encryptedMsgSzMax];
     size_t encryptedMessageSz = 0;
 
@@ -1306,7 +1306,7 @@ void VSQMessenger::downloadAndProcess(StMessage message, const Function &func)
         // Update attachment filePath
         const auto downloads = m_settings->downloadsDir();
         if (filePath.isEmpty() || QFileInfo(filePath).dir() != downloads) {
-            filePath = VSQUtils::findUniqueFileName(downloads.filePath(attachment.fileName));
+            filePath = Utils::findUniqueFileName(downloads.filePath(attachment.fileName));
         }
         const TransferId id(msg.messageId, TransferId::Type::File);
         auto download = m_transferManager->startCryptoDownload(id, attachment.remoteUrl, filePath, msg.sender);
@@ -1366,11 +1366,11 @@ VSQMessenger::sendMessageAsync(const QString &to, const QString &message,
                                const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
 {
     const auto url = attachmentUrl.toUrl();
-    if (VSQUtils::isValidUrl(url)) {
-        return createSendAttachment(VSQUtils::createUuid(), to, url, attachmentType);
+    if (Utils::isValidUrl(url)) {
+        return createSendAttachment(Utils::createUuid(), to, url, attachmentType);
     }
     else {
-        return createSendMessage(VSQUtils::createUuid(), to, message);
+        return createSendMessage(Utils::createUuid(), to, message);
     }
 }
 
@@ -1400,7 +1400,7 @@ void VSQMessenger::saveAttachmentAs(const QString &messageId, const QVariant &fi
     if (!message) {
         return;
     }
-    const auto dest = VSQUtils::urlToLocalFile(fileUrl.toUrl());
+    const auto dest = Utils::urlToLocalFile(fileUrl.toUrl());
     qCDebug(lcTransferManager) << "Saving of attachment as" << dest;
     downloadAndProcess(*message, [=](const StMessage &msg) {
         qCDebug(lcTransferManager) << "Message attachment saved as:" << dest;
@@ -1430,7 +1430,7 @@ void VSQMessenger::openAttachment(const QString &messageId)
     }
     qCDebug(lcTransferManager) << "Opening of attachment:" << messageId;
     downloadAndProcess(*message, [this](const StMessage &msg) {
-        const auto url = VSQUtils::localFileToUrl(msg.attachment->filePath);
+        const auto url = Utils::localFileToUrl(msg.attachment->filePath);
         qCDebug(lcTransferManager) << "Opening of message attachment:" << url;
         emit openPreviewRequested(url);
     });

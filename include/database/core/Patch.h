@@ -32,12 +32,12 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_PATCH_H
-#define VSQ_PATCH_H
+#ifndef VM_PATCH_H
+#define VM_PATCH_H
 
 #include "VSQCommon.h"
 
-namespace VSQ
+namespace vm
 {
 class Database;
 
@@ -58,4 +58,4 @@ private:
 };
 }
 
-#endif // VSQ_PATCH_H
+#endif // VM_PATCH_H

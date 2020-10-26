@@ -32,14 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_FUTUREWORKER_H
-#define VSQ_FUTUREWORKER_H
+#ifndef VM_FUTUREWORKER_H
+#define VM_FUTUREWORKER_H
 
 #include <QFutureWatcher>
 
 #include "VSQMessenger.h"
 
-namespace VSQ
+namespace vm
 {
 using FutureResult = VSQMessenger::EnResult;
 using Future = QFuture<FutureResult>;
@@ -60,4 +60,4 @@ public:
 };
 }
 
-#endif // VSQ_FUTUREWORKER_H
+#endif // VM_FUTUREWORKER_H

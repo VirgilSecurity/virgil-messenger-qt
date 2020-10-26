@@ -32,12 +32,12 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_MESSAGESTABLE_H
-#define VSQ_MESSAGESTABLE_H
+#ifndef VM_MESSAGESTABLE_H
+#define VM_MESSAGESTABLE_H
 
 #include "core/DatabaseTable.h"
 
-namespace VSQ
+namespace vm
 {
 class MessagesTable : public DatabaseTable
 {
@@ -48,4 +48,4 @@ public:
 };
 }
 
-#endif // VSQ_MESSAGESTABLE_H
+#endif // VM_MESSAGESTABLE_H

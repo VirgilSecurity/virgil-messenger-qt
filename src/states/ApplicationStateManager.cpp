@@ -38,7 +38,7 @@
 
 Q_LOGGING_CATEGORY(lcAppState, "appState");
 
-using namespace VSQ;
+using namespace vm;
 
 ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, UserDatabase *userDatabase, VSQSettings *settings, QObject *parent)
     : QStateMachine(parent)
