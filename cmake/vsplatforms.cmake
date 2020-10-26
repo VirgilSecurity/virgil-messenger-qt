@@ -90,9 +90,6 @@ if(VS_PLATFORM)
     if(VS_PLATFORM STREQUAL "linux")
         set(QT_PREFIX_PATH "gcc_64")
         prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE)    
-        message(STATUS "CMAKE_FIND_ROOT_PATH = ${CMAKE_FIND_ROOT_PATH}")
-        message(STATUS "CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")            
-        message(STATUS "QT_QMAKE_EXECUTABLE = ${QT_QMAKE_EXECUTABLE}")
 
     # -- Android
     elseif(VS_PLATFORM STREQUAL "android")
@@ -109,10 +106,7 @@ if(VS_PLATFORM)
         message(STATUS "ANDROID_BUILD_ABI_armeabi-v7a: ${ANDROID_BUILD_ABI_armeabi-v7a}")		    	
         message(STATUS "ANDROID_BUILD_ABI_x86: ${ANDROID_BUILD_ABI_x86}")		    	
         message(STATUS "ANDROID_BUILD_ABI_x86_64: ${ANDROID_BUILD_ABI_x86_64}")		    	
-        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH)
-        message(STATUS "CMAKE_FIND_ROOT_PATH = ${CMAKE_FIND_ROOT_PATH}")
-        message(STATUS "CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")
-
+        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE)            
 
         #  Android NDK
         if(NOT CMAKE_TOOLCHAIN_FILE)
@@ -138,7 +132,7 @@ if(VS_PLATFORM)
     # -- MacOS
     elseif(VS_PLATFORM STREQUAL "macos")
         set(QT_PREFIX_PATH "clang_64")
-        prepare_qt_sdk()    
+        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE)            
     
     # -- IOS
     elseif(VS_PLATFORM STREQUAL "ios")
@@ -146,13 +140,12 @@ if(VS_PLATFORM)
         set(CMAKE_SYSTEM_NAME "iOS")
         set(CMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH NO)
         set(CMAKE_IOS_INSTALL_COMBINED YES)
-        prepare_qt_sdk()
+        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE)            
     
     # -- Windows
     elseif(VS_PLATFORM STREQUAL "windows")
         set(QT_PREFIX_PATH "mingw32")
-        prepare_qt_sdk()    
+        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE)            
     endif()
 endif()
-
 

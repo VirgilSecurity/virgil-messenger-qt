@@ -72,15 +72,15 @@ if(NOT VS_PLATFORM)
     if(ANDROID)
         message(STATUS "Detected target platform: [Android]")
         set(VS_PLATFORM "android")
+    elseif(IOS)
+        message(STATUS "Detected target platform: [IOS]")
+        set(VS_PLATFORM "ios")        
+    elseif(APPLE)
+        message(STATUS "Detected target platform: [MacOS]")
+        set(VS_PLATFORM "macos")        
     elseif(UNIX)
         message(STATUS "Detected target platform: [Unix]")
         set(VS_PLATFORM "linux")
-    elseif(MACOS)
-        message(STATUS "Detected target platform: [MacOS]")
-        set(VS_PLATFORM "macos")
-    elseif(IOS)
-        message(STATUS "Detected target platform: [IOS]")
-        set(VS_PLATFORM "ios")
     elseif(MINGW32)
         message(STATUS "Detected target platform: [Windows]")
         set(VS_PLATFORM "windows")
@@ -234,10 +234,15 @@ elseif(VS_PLATFORM STREQUAL "macos")
     set_target_properties(${VS_TARGET_NAME} 
 	PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/platforms/macos/Info.plist.in" 
     )
+
+    add_custom_command(TARGET ${VS_TARGET_NAME}
+       POST_BUILD COMMAND 
+       ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/../Frameworks/"
+       $<TARGET_FILE:${VS_TARGET_NAME}>)
+    
     set_target_properties(${VS_TARGET_NAME} 
         PROPERTIES LINK_FLAGS "-F${PREBUILT_DIR}/${VS_PLATFORM}/sparkle -framework Sparkle -framework CoreFoundation -framework Foundation"
     )    
-
 
 #    macdeployqt(${VS_TARGET_NAME} "${CMAKE_CURRENT_LIST_DIR}/src/qml")
 # Other
