@@ -46,7 +46,7 @@ class AccountSelectionState : public SignInState
     Q_PROPERTY(AccountSelectionModel *model MEMBER m_model CONSTANT)
 
 public:
-    AccountSelectionState(VSQMessenger *messenger, Validator *validator, VSQSettings *settings, QState *parent);
+    AccountSelectionState(UsersController *usersController, Validator *validator, VSQSettings *settings, QState *parent);
 
 signals:
     void requestSignInUsername();

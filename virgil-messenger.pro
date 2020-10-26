@@ -131,6 +131,11 @@ HEADERS += \
         include/ui/VSQUiHelper.h \
         include/KeyboardEventFilter.h \
         include/Validator.h \
+        # Controllers
+        include/controllers/ChatsController.h \
+        include/controllers/Controllers.h \
+        include/controllers/MessagesController.h \
+        include/controllers/UsersController.h \
         # Helpers
         include/helpers/VSQSingleton.h \
         include/helpers/FutureWorker.h \
@@ -208,6 +213,11 @@ SOURCES += \
         src/ui/VSQUiHelper.cpp \
         src/KeyboardEventFilter.cpp \
         src/Validator.cpp \
+        # Controllers
+        src/controllers/ChatsController.cpp \
+        src/controllers/Controllers.cpp \
+        src/controllers/MessagesController.cpp \
+        src/controllers/UsersController.cpp \
         # Applications states
         src/states/AccountSelectionState.cpp \
         src/states/AccountSettingsState.cpp \

@@ -44,7 +44,6 @@ DownloadKeyState::DownloadKeyState(VSQMessenger *messenger, QState *parent)
 {
     connect(m_messenger, &VSQMessenger::keyDownloaded, this, &DownloadKeyState::operationFinished);
     connect(m_messenger, &VSQMessenger::downloadKeyFailed, this, &DownloadKeyState::operationErrorOccurred);
-    connect(m_messenger, &VSQMessenger::keyDownloaded, this, &DownloadKeyState::keyDownloaded);
     connect(this, &DownloadKeyState::downloadKey, this, &DownloadKeyState::processDownloadKey);
 }
 

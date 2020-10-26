@@ -32,36 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_DOWNLOADKEYSTATE_H
-#define VM_DOWNLOADKEYSTATE_H
+#include "controllers/MessagesController.h"
 
-#include "OperationState.h"
-
-class VSQMessenger;
-
-namespace vm
-{
-class DownloadKeyState : public OperationState
-{
-    Q_OBJECT
-    Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
-
-public:
-    DownloadKeyState(VSQMessenger *messenger, QState *parent);
-
-    QString userId() const;
-    void setUserId(const QString &userId);
-
-signals:
-    void downloadKey(const QString &password);
-    void userIdChanged(const QString &userId);
-
-private:
-    void processDownloadKey(const QString &password);
-
-    VSQMessenger *m_messenger;
-    QString m_userId;
-};
-}
-
-#endif // VM_DOWNLOADKEYSTATE_H
+using namespace vm;

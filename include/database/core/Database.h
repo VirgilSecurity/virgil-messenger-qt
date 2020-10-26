@@ -47,16 +47,14 @@ Q_DECLARE_LOGGING_CATEGORY(lcDatabase)
 
 namespace vm
 {
-class Database
+class Database : public QObject
 {
-    Q_DISABLE_COPY(Database)
-
 public:
     using Version = Patch::Version;
     using TablePointer = std::unique_ptr<DatabaseTable>;
     using Tables = std::vector<TablePointer>;
 
-    explicit Database(const Version &latestVersion);
+    Database(const Version &latestVersion, QObject *parent);
     virtual ~Database();
 
     bool open(const QString &databaseFileName, const QString &connectionName);

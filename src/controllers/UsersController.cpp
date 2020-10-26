@@ -32,38 +32,55 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "states/SignUpState.h"
-
-#include "Validator.h"
 #include "controllers/UsersController.h"
+
+#include "VSQMessenger.h"
 
 using namespace vm;
 
-SignUpState::SignUpState(UsersController *usersController, Validator *validator, QState *parent)
-    : OperationState(parent)
-    , m_usersController(usersController)
-    , m_validator(validator)
+UsersController::UsersController(VSQMessenger *messenger, QObject *parent)
+    : QObject(parent)
+    , m_messenger(messenger)
 {
-    connect(usersController, &UsersController::signedUp, this, &SignUpState::operationFinished);
-    connect(usersController, &UsersController::signUpErrorOccured, this, &SignUpState::operationErrorOccurred);
-    connect(this, &SignUpState::signUp, this, &SignUpState::processSignUp);
+    connect(m_messenger, &VSQMessenger::signedIn, this, &UsersController::signedIn);
+    connect(m_messenger, &VSQMessenger::signInErrorOccured, this, &UsersController::signInErrorOccured);
+    connect(m_messenger, &VSQMessenger::signedUp, this, &UsersController::signedUp);
+    connect(m_messenger, &VSQMessenger::signUpErrorOccured, this, &UsersController::signUpErrorOccured);
+    connect(m_messenger, &VSQMessenger::signedOut, this, &UsersController::signedOut);
+
+    connect(m_messenger, &VSQMessenger::keyDownloaded, this, &UsersController::keyDownloaded);
+    connect(m_messenger, &VSQMessenger::downloadKeyFailed, this, &UsersController::downloadKeyFailed);
+
+    connect(this, &UsersController::signedIn, this, &UsersController::setUsername);
+    connect(this, &UsersController::signedUp, this, &UsersController::setUsername);
+    connect(this, &UsersController::keyDownloaded, this, &UsersController::setUsername);
 }
 
-void SignUpState::processSignUp(const QString &username)
+void UsersController::signIn(const QString &username)
 {
-    QString errorText;
-    const auto validUsername = m_validator->validatedUsername(username);
+    m_messenger->signIn(username);
+}
 
-    if (!validUsername) {
-        emit operationStarted();
-        emit operationErrorOccurred(errorText);
+void UsersController::signOut()
+{
+    m_messenger->signOut();
+}
+
+void UsersController::signUp(const QString &username)
+{
+    m_messenger->signUp(username);
+}
+
+void UsersController::downloadKey(const QString &username, const QString &password)
+{
+    m_messenger->downloadKey(username, password);
+}
+
+void UsersController::setUsername(const QString &username)
+{
+    if (m_username == username) {
+        return;
     }
-    else {
-        if (m_userId != *validUsername) {
-            m_userId = *validUsername;
-            emit userIdChanged(m_userId);
-        }
-        emit operationStarted();
-        m_usersController->signUp(m_userId);
-    }
+    m_username = username;
+    emit usernameChanged(username);
 }

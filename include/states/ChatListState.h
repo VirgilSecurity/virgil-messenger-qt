@@ -37,35 +37,19 @@
 
 #include <QState>
 
-class VSQMessenger;
-
 namespace vm
 {
-class UserDatabase;
-
 class ChatListState : public QState
 {
     Q_OBJECT
-    Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
 
 public:
-    ChatListState(VSQMessenger *messenger, UserDatabase *userDatabase, QState *parent);
-
-    QString userId() const;
-    void setUserId(const QString &userId);
+    explicit ChatListState(QState *parent);
 
 signals:
-    void signOut();
     void requestAccountSettings(const QString &userId);
     void requestNewChat();
     void requestChat(const QString &contactId);
-    void signedOut();
-    void userIdChanged(const QString &userId);
-
-private:
-    VSQMessenger *m_messenger;
-    UserDatabase *m_userDatabase;
-    QString m_userId;
 };
 }
 

@@ -30,7 +30,7 @@ Control {
 
             Action {
                 text: qsTr("Settings")
-                onTriggered: manager.chatListState.requestAccountSettings(manager.chatListState.userId)
+                onTriggered: manager.chatListState.requestAccountSettings(controllers.users.username)
             }
 
             MenuSeparator {
@@ -39,7 +39,7 @@ Control {
 
             Action {
                 text: qsTr("Sign Out")
-                onTriggered: manager.chatListState.signOut()
+                onTriggered: controllers.users.signOut()
             }
         }
 

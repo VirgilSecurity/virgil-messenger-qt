@@ -35,31 +35,13 @@
 #include "states/ChatListState.h"
 
 #include "VSQMessenger.h"
-#include "database/UserDatabase.h"
+#include "controllers/Controllers.h"
+#include "controllers/UsersController.h"
 
 using namespace vm;
 
-ChatListState::ChatListState(VSQMessenger *messenger, UserDatabase *userDatabase, QState *parent)
+ChatListState::ChatListState(QState *parent)
     : QState(parent)
-    , m_messenger(messenger)
-    , m_userDatabase(userDatabase)
 {
-    connect(this, &ChatListState::signOut, m_messenger, &VSQMessenger::signOut);
-    connect(m_messenger, &VSQMessenger::signedOut, this, &ChatListState::signedOut);
-}
-
-QString ChatListState::userId() const
-{
-    return m_userId;
-}
-
-void ChatListState::setUserId(const QString &userId)
-{
-    if (m_userId == userId) {
-        return;
-    }
-    m_userId = userId;
-    emit userIdChanged(userId);
-
-    m_userDatabase->open(userId); // TODO(fpohtmeh): check if failed
+    // TODO(fpohtmeh): remove cpp file?
 }

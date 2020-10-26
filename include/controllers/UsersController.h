@@ -32,36 +32,49 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_DOWNLOADKEYSTATE_H
-#define VM_DOWNLOADKEYSTATE_H
+#ifndef VM_USERSCONTROLLER_H
+#define VM_USERSCONTROLLER_H
 
-#include "OperationState.h"
+#include <QObject>
+
+#include "VSQCommon.h"
 
 class VSQMessenger;
 
 namespace vm
 {
-class DownloadKeyState : public OperationState
+class UsersController : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
+    Q_PROPERTY(QString username MEMBER m_username NOTIFY usernameChanged);
 
 public:
-    DownloadKeyState(VSQMessenger *messenger, QState *parent);
+    UsersController(VSQMessenger *messenger, QObject *parent);
 
-    QString userId() const;
-    void setUserId(const QString &userId);
+    Q_INVOKABLE void signIn(const QString &username);
+    Q_INVOKABLE void signOut();
+    Q_INVOKABLE void signUp(const QString &username);
+
+    void downloadKey(const QString &username, const QString &password);
 
 signals:
-    void downloadKey(const QString &password);
-    void userIdChanged(const QString &userId);
+    void signedIn(const QString &username);
+    void signInErrorOccured(const QString &errorText);
+    void signedUp(const QString &username);
+    void signUpErrorOccured(const QString &errorText);
+    void signedOut();
+
+    void keyDownloaded(const QString &username);
+    void downloadKeyFailed(const QString &errorText);
+
+    void usernameChanged(const QString &);
 
 private:
-    void processDownloadKey(const QString &password);
+    void setUsername(const QString &username);
 
     VSQMessenger *m_messenger;
-    QString m_userId;
+    QString m_username;
 };
 }
 
-#endif // VM_DOWNLOADKEYSTATE_H
+#endif // VM_USERSCONTROLLER_H

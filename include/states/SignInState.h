@@ -37,11 +37,10 @@
 
 #include "OperationState.h"
 
-class VSQMessenger;
-
 namespace vm
 {
 class Validator;
+class UsersController;
 
 class SignInState : public OperationState
 {
@@ -49,17 +48,16 @@ class SignInState : public OperationState
     Q_PROPERTY(QString userId MEMBER m_userId NOTIFY userIdChanged)
 
 public:
-    SignInState(VSQMessenger *messenger, Validator *validator, QState *parent);
+    SignInState(UsersController *usersController, Validator *validator, QState *parent);
 
 signals:
     void signIn(const QString &username);
-    void signedIn(const QString &userId);
     void userIdChanged(const QString &userId);
 
 private:
     void processSignIn(const QString &username);
 
-    VSQMessenger *m_messenger;
+    UsersController *m_usersController;
     Validator *m_validator;
     QString m_userId;
 };

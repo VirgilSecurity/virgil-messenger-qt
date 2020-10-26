@@ -35,29 +35,31 @@
 #include "states/ApplicationStateManager.h"
 
 #include "VSQMessenger.h"
+#include "controllers/Controllers.h"
+#include "controllers/UsersController.h"
 
 Q_LOGGING_CATEGORY(lcAppState, "appState");
 
 using namespace vm;
 
-ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, UserDatabase *userDatabase, Validator *validator, VSQSettings *settings, QObject *parent)
+ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, Controllers *controllers, Validator *validator, VSQSettings *settings, QObject *parent)
     : QStateMachine(parent)
     , m_messenger(messenger)
-    , m_userDatabase(userDatabase)
+    , m_controllers(controllers)
     , m_validator(validator)
     , m_settings(settings)
-    , m_accountSelectionState(new AccountSelectionState(messenger, validator, settings, this))
+    , m_accountSelectionState(new AccountSelectionState(controllers->users(), validator, settings, this))
     , m_accountSettingsState(new AccountSettingsState(messenger, this))
     , m_attachmentPreviewState(new AttachmentPreviewState(this))
     , m_backupKeyState(new BackupKeyState(m_messenger, this))
-    , m_chatListState(new ChatListState(messenger, userDatabase, this))
+    , m_chatListState(new ChatListState(this))
     , m_chatState(new ChatState(m_messenger, this))
     , m_downloadKeyState(new DownloadKeyState(m_messenger, this))
     , m_newChatState(new NewChatState(messenger, this))
     , m_signInAsState(new SignInAsState(this))
     , m_signInUsernameState(new SignInUsernameState(validator, this))
-    , m_signUpState(new SignUpState(messenger, validator, this))
-    , m_splashScreenState(new SplashScreenState(messenger, validator, settings, this))
+    , m_signUpState(new SignUpState(controllers->users(), validator, this))
+    , m_splashScreenState(new SplashScreenState(controllers->users(), validator, settings, this))
     , m_startState(new StartState(this))
 {
     registerStatesMetaTypes();
@@ -100,15 +102,13 @@ void ApplicationStateManager::addTransitions()
 
     m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::userNotSelected, m_accountSelectionState);
     m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::operationErrorOccurred, m_accountSelectionState);
-    m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::signedIn, m_chatListState);
-    connect(m_splashScreenState, &SplashScreenState::signedIn, m_chatListState, &ChatListState::setUserId);
+    m_splashScreenState->addTransition(m_controllers->users(), &UsersController::signedIn, m_chatListState);
 
-    m_accountSelectionState->addTransition(m_accountSelectionState, &AccountSelectionState::signedIn, m_chatListState);
-    connect(m_accountSelectionState, &AccountSelectionState::signedIn, m_chatListState, &ChatListState::setUserId);
+    m_accountSelectionState->addTransition(m_controllers->users(), &UsersController::signedIn, m_chatListState);
     addTwoSideTransition(m_accountSelectionState, m_accountSelectionState, &AccountSelectionState::requestSignInUsername, m_signInUsernameState);
     addTwoSideTransition(m_accountSelectionState, m_accountSelectionState, &AccountSelectionState::requestSignUp, m_signUpState);
 
-    m_chatListState->addTransition(m_chatListState, &ChatListState::signedOut, m_accountSelectionState);
+    m_chatListState->addTransition(m_controllers->users(), &UsersController::signedOut, m_accountSelectionState);
     addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestAccountSettings, m_accountSettingsState);
     connect(m_chatListState, &ChatListState::requestAccountSettings, m_accountSettingsState, &AccountSettingsState::setUserId);
     addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestNewChat, m_newChatState);
@@ -117,7 +117,7 @@ void ApplicationStateManager::addTransitions()
 
     addTwoSideTransition(m_accountSettingsState, m_accountSettingsState, &AccountSettingsState::requestBackupKey, m_backupKeyState);
     connect(m_accountSettingsState, &AccountSettingsState::requestBackupKey, m_backupKeyState, &BackupKeyState::setUserId);
-    m_accountSettingsState->addTransition(m_accountSettingsState, &AccountSettingsState::signedOut, m_accountSelectionState);
+    m_accountSettingsState->addTransition(m_controllers->users(), &UsersController::signedOut, m_accountSelectionState);
 
     m_newChatState->addTransition(m_newChatState, &NewChatState::requestChat, m_chatState);
     connect(m_newChatState, &NewChatState::requestChat, m_chatState, &ChatState::setContactId);
@@ -125,8 +125,7 @@ void ApplicationStateManager::addTransitions()
     addTwoSideTransition(m_chatState, m_chatState, &ChatState::requestPreview, m_attachmentPreviewState);
     connect(m_chatState, &ChatState::requestPreview, m_attachmentPreviewState, &AttachmentPreviewState::setUrl);
 
-    m_signUpState->addTransition(m_signUpState, &SignUpState::signedUp, m_chatListState);
-    connect(m_signUpState, &SignUpState::signedUp, m_chatListState, &ChatListState::setUserId);
+    m_signUpState->addTransition(m_controllers->users(), &UsersController::signedUp, m_chatListState);
 
     addTwoSideTransition(m_signInUsernameState, m_signInUsernameState, &SignInUsernameState::validated, m_signInAsState);
     connect(m_signInUsernameState, &SignInUsernameState::validated, m_signInAsState, &SignInAsState::setUserId);
@@ -134,8 +133,7 @@ void ApplicationStateManager::addTransitions()
     addTwoSideTransition(m_signInAsState, m_signInAsState, &SignInAsState::requestDownloadKey, m_downloadKeyState);
     connect(m_signInAsState, &SignInAsState::requestDownloadKey, m_downloadKeyState, &DownloadKeyState::setUserId);
 
-    m_downloadKeyState->addTransition(m_downloadKeyState, &DownloadKeyState::keyDownloaded, m_chatListState);
-    connect(m_downloadKeyState, &DownloadKeyState::keyDownloaded, m_chatListState, &ChatListState::setUserId);
+    m_downloadKeyState->addTransition(m_controllers->users(), &UsersController::keyDownloaded, m_chatListState);
 }
 
 void ApplicationStateManager::setCurrentState(QState *state)

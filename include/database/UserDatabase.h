@@ -49,10 +49,10 @@ class MessagesTable;
 class UserDatabase : public Database
 {
 public:
-    explicit UserDatabase(const VSQSettings *settings);
+    explicit UserDatabase(const VSQSettings *settings, QObject *parent);
     ~UserDatabase() override;
 
-    bool open(const QString &userId);
+    bool open(const QString &username);
 
     const AttachmentsTable *attachmentsTable() const;
     AttachmentsTable *attachmentsTable();
@@ -67,7 +67,6 @@ private:
     bool create() override;
 
     const VSQSettings *m_settings;
-    QString m_userId;
 
     int m_attachmentsTableIndex;
     int m_chatsTableIndex;

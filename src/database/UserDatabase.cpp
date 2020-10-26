@@ -45,8 +45,8 @@
 
 using namespace vm;
 
-UserDatabase::UserDatabase(const VSQSettings *settings)
-    : Database(VERSION_DATABASE_SCHEME)
+UserDatabase::UserDatabase(const VSQSettings *settings, QObject *parent)
+    : Database(VERSION_DATABASE_SCHEME, parent)
     , m_settings(settings)
 {
     setMigration(std::make_unique<UserDatabaseMigration>());
@@ -55,15 +55,15 @@ UserDatabase::UserDatabase(const VSQSettings *settings)
 UserDatabase::~UserDatabase()
 {}
 
-bool UserDatabase::open(const QString &userId)
+bool UserDatabase::open(const QString &username)
 {
-    if (!DatabaseUtils::isValidName(userId)) {
-        qCCritical(lcDatabase) << "Invalid database id:" << userId;
+    if (!DatabaseUtils::isValidName(username)) {
+        qCCritical(lcDatabase) << "Invalid database id:" << username;
         return false;
     }
-    const QString fileName = QString("user-%1.sqlite3").arg(userId);
+    const QString fileName = QString("user-%1.sqlite3").arg(username);
     const QString filePath(m_settings->databaseDir().filePath(fileName));
-    return Database::open(filePath, userId + QLatin1String("-messenger"));
+    return Database::open(filePath, username + QLatin1String("-messenger"));
 }
 
 const AttachmentsTable *UserDatabase::attachmentsTable() const

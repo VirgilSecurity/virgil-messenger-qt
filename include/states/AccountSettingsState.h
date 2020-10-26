@@ -53,9 +53,7 @@ public:
     void setUserId(const QString &userId);
 
 signals:
-    void signOut();
     void requestBackupKey(const QString &userId);
-    void signedOut();
     void userIdChanged(const QString &);
 
 private:

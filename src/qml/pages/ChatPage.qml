@@ -101,7 +101,7 @@ Page {
             body: model.message
             time: Qt.formatDateTime(model.timestamp, "hh:mm")
             nickname: model.author
-            isUser: model.author === app.stateManager.chatListState.userId // FIXME(fpohtmeh); use chat state
+            isUser: model.author === controllers.users.username
             status: isUser ? model.status : "none"
             failed: (model.status == 4) && (!attachmentId || attachmentStatus == Enums.AttachmentStatus.Failed)
             messageId: model.messageId

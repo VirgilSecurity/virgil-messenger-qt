@@ -32,36 +32,55 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_DOWNLOADKEYSTATE_H
-#define VM_DOWNLOADKEYSTATE_H
+#include "controllers/Controllers.h"
 
-#include "OperationState.h"
+#include "controllers/ChatsController.h"
+#include "controllers/MessagesController.h"
+#include "controllers/UsersController.h"
+#include "database/UserDatabase.h"
 
-class VSQMessenger;
+using namespace vm;
 
-namespace vm
+Controllers::Controllers(VSQMessenger *messenger, UserDatabase *userDatabase, QObject *parent)
+    : QObject(parent)
+    , m_userDatabase(userDatabase)
+    , m_chats(new ChatsController(this))
+    , m_messages(new MessagesController(this))
+    , m_users(new UsersController(messenger, this))
 {
-class DownloadKeyState : public OperationState
-{
-    Q_OBJECT
-    Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
+    connect(m_users, &UsersController::usernameChanged, m_userDatabase, &UserDatabase::open);
 
-public:
-    DownloadKeyState(VSQMessenger *messenger, QState *parent);
-
-    QString userId() const;
-    void setUserId(const QString &userId);
-
-signals:
-    void downloadKey(const QString &password);
-    void userIdChanged(const QString &userId);
-
-private:
-    void processDownloadKey(const QString &password);
-
-    VSQMessenger *m_messenger;
-    QString m_userId;
-};
+    qRegisterMetaType<ChatsController *>("ChatsController*");
+    qRegisterMetaType<MessagesController *>("MessagesController*");
+    qRegisterMetaType<UsersController *>("UsersController*");
 }
 
-#endif // VM_DOWNLOADKEYSTATE_H
+const ChatsController *Controllers::chats() const
+{
+    return m_chats;
+}
+
+ChatsController *Controllers::chats()
+{
+    return m_chats;
+}
+
+const MessagesController *Controllers::messages() const
+{
+    return m_messages;
+}
+
+MessagesController *Controllers::messages()
+{
+    return m_messages;
+}
+
+const UsersController *Controllers::users() const
+{
+    return m_users;
+}
+
+UsersController *Controllers::users()
+{
+    return m_users;
+}

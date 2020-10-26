@@ -45,6 +45,7 @@
 #include <VSQMessenger.h>
 #include <Settings.h>
 #include <macos/VSQMacos.h>
+#include "controllers/Controllers.h"
 #include <database/UserDatabase.h>
 #include <models/ChatsModel.h>
 #include <models/MessagesModel.h>
@@ -53,8 +54,6 @@
 class QNetworkAccessManager;
 
 class VSQLogging;
-
-using namespace vm;
 
 class VSQApplication : public QObject
 {
@@ -102,6 +101,7 @@ private:
     Validator *m_validator;
     VSQMessenger m_messenger;
     UserDatabase m_userDatabase;
+    Controllers m_controllers;
     ChatsModel m_chatsModel;
     MessagesModel m_messagesModel;
     KeyboardEventFilter *m_keyboardEventFilter;

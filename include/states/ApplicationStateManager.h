@@ -57,7 +57,7 @@ Q_DECLARE_LOGGING_CATEGORY(lcAppState);
 
 namespace vm
 {
-class UserDatabase;
+class Controllers;
 
 class ApplicationStateManager : public QStateMachine
 {
@@ -79,7 +79,7 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(QState *previousState MEMBER m_previousState NOTIFY previousStateChanged)
 
 public:
-    ApplicationStateManager(VSQMessenger *messenger, UserDatabase *userDatabase, Validator *validator, VSQSettings *settings, QObject *parent);
+    ApplicationStateManager(VSQMessenger *messenger, Controllers *controllers, Validator *validator, VSQSettings *settings, QObject *parent);
     ~ApplicationStateManager() override;
 
 signals:
@@ -106,7 +106,7 @@ private:
     void setPreviousState(QState *state);
 
     VSQMessenger *m_messenger;
-    UserDatabase *m_userDatabase;
+    Controllers *m_controllers;
     Validator *m_validator;
     VSQSettings *m_settings;
 

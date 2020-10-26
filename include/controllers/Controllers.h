@@ -32,36 +32,43 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_DOWNLOADKEYSTATE_H
-#define VM_DOWNLOADKEYSTATE_H
+#ifndef VM_CONTROLLERS_H
+#define VM_CONTROLLERS_H
 
-#include "OperationState.h"
+#include <QObject>
 
 class VSQMessenger;
 
 namespace vm
 {
-class DownloadKeyState : public OperationState
+class ChatsController;
+class MessagesController;
+class UserDatabase;
+class UsersController;
+
+class Controllers : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
+    Q_PROPERTY(ChatsController *chats READ chats CONSTANT)
+    Q_PROPERTY(MessagesController *messages READ messages CONSTANT)
+    Q_PROPERTY(UsersController *users READ users CONSTANT)
 
 public:
-    DownloadKeyState(VSQMessenger *messenger, QState *parent);
+    Controllers(VSQMessenger *messenger, UserDatabase *userDatabase, QObject *parent);
 
-    QString userId() const;
-    void setUserId(const QString &userId);
-
-signals:
-    void downloadKey(const QString &password);
-    void userIdChanged(const QString &userId);
+    const ChatsController *chats() const;
+    ChatsController *chats();
+    const MessagesController *messages() const;
+    MessagesController *messages();
+    const UsersController *users() const;
+    UsersController *users();
 
 private:
-    void processDownloadKey(const QString &password);
-
-    VSQMessenger *m_messenger;
-    QString m_userId;
+    UserDatabase *m_userDatabase;
+    ChatsController *m_chats;
+    MessagesController *m_messages;
+    UsersController *m_users;
 };
 }
 
-#endif // VM_DOWNLOADKEYSTATE_H
+#endif // VM_CONTROLLERS_H

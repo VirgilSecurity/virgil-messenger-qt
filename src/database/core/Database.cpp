@@ -40,8 +40,9 @@ Q_LOGGING_CATEGORY(lcDatabase, "database")
 
 using namespace vm;
 
-Database::Database(const Version &latestVersion)
-    : m_latestVersion(latestVersion)
+Database::Database(const Version &latestVersion, QObject *parent)
+    : QObject(parent)
+    , m_latestVersion(latestVersion)
 {
     qCDebug(lcDatabase) << "Database latest version:" << latestVersion;
 }
