@@ -43,7 +43,7 @@
 #include <Validator.h>
 #include <VSQCrashReporter.h>
 #include <VSQMessenger.h>
-#include <VSQSettings.h>
+#include <Settings.h>
 #include <macos/VSQMacos.h>
 #include <database/UserDatabase.h>
 #include <models/ChatsModel.h>
@@ -54,7 +54,7 @@ class QNetworkAccessManager;
 
 class VSQLogging;
 
-using namespace VSQ;
+using namespace vm;
 
 class VSQApplication : public QObject
 {

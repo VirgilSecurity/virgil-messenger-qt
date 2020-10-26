@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_COMMON_H
-#define VSQ_COMMON_H
+#ifndef VM_COMMON_H
+#define VM_COMMON_H
 
 #include <functional>
 #include <memory>
@@ -154,7 +154,7 @@ struct StMessage
 };
 Q_DECLARE_METATYPE(StMessage);
 
-namespace VSQ
+namespace vm
 {
 struct Contact
 {
@@ -238,4 +238,4 @@ struct Attachment
 
 void registerMetaTypes();
 
-#endif // VSQ_COMMON_H
+#endif // VM_COMMON_H

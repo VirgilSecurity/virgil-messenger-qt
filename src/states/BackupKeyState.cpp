@@ -36,7 +36,7 @@
 
 #include "VSQMessenger.h"
 
-using namespace VSQ;
+using namespace vm;
 
 BackupKeyState::BackupKeyState(VSQMessenger *messenger, QState *parent)
     : OperationState(parent)

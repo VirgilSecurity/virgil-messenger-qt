@@ -32,12 +32,12 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SCOPEDCONNECTION_H
-#define VSQ_SCOPEDCONNECTION_H
+#ifndef VM_SCOPEDCONNECTION_H
+#define VM_SCOPEDCONNECTION_H
 
 #include <QSqlDatabase>
 
-namespace VSQ
+namespace vm
 {
 class ScopedConnection
 {
@@ -51,4 +51,4 @@ private:
 };
 }
 
-#endif // VSQ_SCOPEDCONNECTION_H
+#endif // VM_SCOPEDCONNECTION_H

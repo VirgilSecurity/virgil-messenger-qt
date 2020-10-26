@@ -37,10 +37,10 @@
 #include <QTimer>
 
 #include "VSQMessenger.h"
-#include "VSQSettings.h"
+#include "Settings.h"
 #include "android/VSQAndroid.h"
 
-using namespace VSQ;
+using namespace vm;
 
 SplashScreenState::SplashScreenState(VSQMessenger *messenger, Validator *validator, VSQSettings *settings, QState *parent)
     : SignInState(messenger, validator, parent)

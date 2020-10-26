@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_ATTACHMENT_BUILDER
-#define VSQ_ATTACHMENT_BUILDER
+#ifndef VM_ATTACHMENT_BUILDER
+#define VM_ATTACHMENT_BUILDER
 
 #include <QObject>
 #include <QImageIOHandler>
@@ -66,4 +66,4 @@ private:
     VSQSettings *m_settings;
 };
 
-#endif // VSQ_ATTACHMENT_BUILDER
+#endif // VM_ATTACHMENT_BUILDER

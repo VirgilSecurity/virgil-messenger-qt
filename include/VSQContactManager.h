@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_CONTACTMANAGER_H
-#define VSQ_CONTACTMANAGER_H
+#ifndef VM_CONTACTMANAGER_H
+#define VM_CONTACTMANAGER_H
 
 #include <qxmpp/QXmppRosterManager.h>
 
@@ -72,4 +72,4 @@ private:
     QString m_lastErrorText;
 };
 
-#endif // VSQ_CONTACTMANAGER_H
+#endif // VM_CONTACTMANAGER_H

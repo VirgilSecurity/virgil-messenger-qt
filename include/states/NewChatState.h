@@ -32,14 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_NEWCHATSTATE_H
-#define VSQ_NEWCHATSTATE_H
+#ifndef VM_NEWCHATSTATE_H
+#define VM_NEWCHATSTATE_H
 
 #include "OperationState.h"
 
 class VSQMessenger;
 
-namespace VSQ
+namespace vm
 {
 class NewChatState : public OperationState
 {
@@ -59,4 +59,4 @@ private:
 };
 }
 
-#endif // VSQ_NEWCHATSTATE_H
+#endif // VM_NEWCHATSTATE_H

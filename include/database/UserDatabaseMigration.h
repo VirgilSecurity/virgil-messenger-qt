@@ -32,12 +32,12 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_USERDATABASEMIGRATION_H
-#define VSQ_USERDATABASEMIGRATION_H
+#ifndef VM_USERDATABASEMIGRATION_H
+#define VM_USERDATABASEMIGRATION_H
 
 #include "database/core/Migration.h"
 
-namespace VSQ
+namespace vm
 {
 class UserDatabaseMigration : public Migration
 {
@@ -46,4 +46,4 @@ public:
 };
 }
 
-#endif // VSQ_USERDATABASEMIGRATION_H
+#endif // VM_USERDATABASEMIGRATION_H

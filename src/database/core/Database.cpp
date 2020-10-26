@@ -38,7 +38,7 @@
 
 Q_LOGGING_CATEGORY(lcDatabase, "database")
 
-using namespace VSQ;
+using namespace vm;
 
 Database::Database(const Version &latestVersion)
     : m_latestVersion(latestVersion)
@@ -143,7 +143,7 @@ void Database::setMigration(std::unique_ptr<Migration> migration)
     m_migration = std::move(migration);
 }
 
-VSQ::Database::operator QSqlDatabase() const
+Database::operator QSqlDatabase() const
 {
     return m_qtDatabase;
 }

@@ -32,12 +32,12 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_DATABASEUTILS_H
-#define VSQ_DATABASEUTILS_H
+#ifndef VM_DATABASEUTILS_H
+#define VM_DATABASEUTILS_H
 
 #include "VSQCommon.h"
 
-namespace VSQ
+namespace vm
 {
 class Database;
 
@@ -51,4 +51,4 @@ namespace DatabaseUtils
 }
 }
 
-#endif // VSQ_DATABASEUTILS_H
+#endif // VM_DATABASEUTILS_H

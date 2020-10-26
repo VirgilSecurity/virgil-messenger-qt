@@ -118,14 +118,14 @@ HEADERS += \
         include/VSQLastActivityIq.h \
         include/VSQLastActivityManager.h \
         include/VSQMessenger.h \
-        include/VSQSettings.h \
+        include/Settings.h \
         include/VSQSqlChatModel.h \
         include/VSQSqlConversationModel.h \
         include/VSQNetworkAnalyzer.h \
         include/VSQTransfer.h \
         include/VSQTransferManager.h \
         include/VSQUpload.h \
-        include/VSQUtils.h \
+        include/Utils.h \
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
         include/ui/VSQUiHelper.h \
@@ -194,14 +194,14 @@ SOURCES += \
         src/VSQMessenger.cpp \
         src/VSQLastActivityIq.cpp \
         src/VSQLastActivityManager.cpp \
-        src/VSQSettings.cpp \
+        src/Settings.cpp \
         src/VSQSqlChatModel.cpp \
         src/VSQSqlConversationModel.cpp \
         src/VSQNetworkAnalyzer.cpp \
         src/VSQTransfer.cpp \
         src/VSQTransferManager.cpp \
         src/VSQUpload.cpp \
-        src/VSQUtils.cpp \
+        src/Utils.cpp \
         src/android/VSQAndroid.cpp \
         src/main.cpp \
         src/VSQApplication.cpp \

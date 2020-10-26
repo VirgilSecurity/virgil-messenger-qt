@@ -41,7 +41,7 @@
 #include <QSqlQuery>
 
 #include "VSQCryptoTransferManager.h"
-#include "VSQUtils.h"
+#include "Utils.h"
 
 Q_DECLARE_METATYPE(StMessage::Status)
 
@@ -100,7 +100,7 @@ VSQSqlConversationModel::_update() {
 }
 
 /******************************************************************************/
-VSQSqlConversationModel::VSQSqlConversationModel(VSQ::Validator *validator, QObject *parent)
+VSQSqlConversationModel::VSQSqlConversationModel(vm::Validator *validator, QObject *parent)
     : QSqlTableModel(parent)
     , m_validator(validator)
 {
@@ -217,7 +217,7 @@ VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
             return QString();
         }
         const auto bytesTotal = currRecord.value(AttachmentBytesTotalRole - Qt::UserRole).toInt();
-        return (bytesTotal > 0) ? VSQUtils::formattedDataSize(bytesTotal) : " ";
+        return (bytesTotal > 0) ? vm::Utils::formattedDataSize(bytesTotal) : " ";
     }
 
     if (role == AttachmentStatusRole) {

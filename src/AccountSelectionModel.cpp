@@ -34,9 +34,9 @@
 
 #include "AccountSelectionModel.h"
 
-#include "VSQSettings.h"
+#include "Settings.h"
 
-using namespace VSQ;
+using namespace vm;
 
 AccountSelectionModel::AccountSelectionModel(VSQSettings *settings, QObject *parent)
     : QAbstractListModel(parent)

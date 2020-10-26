@@ -32,12 +32,12 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SCOPEDTRANSACTION_H
-#define VSQ_SCOPEDTRANSACTION_H
+#ifndef VM_SCOPEDTRANSACTION_H
+#define VM_SCOPEDTRANSACTION_H
 
 #include <QSqlDatabase>
 
-namespace VSQ
+namespace vm
 {
 class ScopedTransaction
 {
@@ -54,4 +54,4 @@ private:
 };
 }
 
-#endif // VSQ_SCOPEDTRANSACTION_H
+#endif // VM_SCOPEDTRANSACTION_H

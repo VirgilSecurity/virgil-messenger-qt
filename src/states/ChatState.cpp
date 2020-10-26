@@ -37,7 +37,7 @@
 #include "VSQLastActivityManager.h"
 #include "VSQMessenger.h"
 
-using namespace VSQ;
+using namespace vm;
 
 ChatState::ChatState(VSQMessenger *messenger, QState *parent)
     : QState(parent)

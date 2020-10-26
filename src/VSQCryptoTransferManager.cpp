@@ -34,14 +34,15 @@
 
 #include "VSQCryptoTransferManager.h"
 
+#include <Settings.h>
 #include <VSQDownload.h>
-#include <VSQSettings.h>
 #include <VSQTransfer.h>
 #include <VSQUpload.h>
-#include <VSQUtils.h>
+#include <Utils.h>
 
 #include <virgil/iot/messenger/messenger.h>
 
+using namespace vm;
 using namespace VirgilIoTKit;
 
 VSQCryptoTransferManager::VSQCryptoTransferManager(QXmppClient *client, QNetworkAccessManager *networkAccessManager, VSQSettings *settings, QObject *parent)
@@ -94,7 +95,7 @@ VSQDownload *VSQCryptoTransferManager::startCryptoDownload(const QString id, con
 
 QString VSQCryptoTransferManager::getCacheNewFilePath()
 {
-    return settings()->attachmentCacheDir().filePath(VSQUtils::createUuid());
+    return settings()->attachmentCacheDir().filePath(Utils::createUuid());
 }
 
 bool VSQCryptoTransferManager::ecnryptFile(const QString &path, const QString &encPath, const QString &recipient)
@@ -123,7 +124,7 @@ bool VSQCryptoTransferManager::ecnryptFile(const QString &path, const QString &e
     file.close();
 
     // Encrypt
-    std::vector<char> encBytes(VSQUtils::bufferSizeForEncryption(bytes.size()));
+    std::vector<char> encBytes(vm::Utils::bufferSizeForEncryption(bytes.size()));
     size_t encBytesSize = 0;
     const auto code = vs_messenger_virgil_encrypt_msg(
                 recipient.toStdString().c_str(),

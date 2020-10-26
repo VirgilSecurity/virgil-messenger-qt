@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_CHATSTATE_H
-#define VSQ_CHATSTATE_H
+#ifndef VM_CHATSTATE_H
+#define VM_CHATSTATE_H
 
 #include <QState>
 
@@ -41,7 +41,7 @@
 
 class VSQMessenger;
 
-namespace VSQ
+namespace vm
 {
 class ChatState : public QState
 {
@@ -75,4 +75,4 @@ private:
 };
 }
 
-#endif // VSQ_CHATSTATE_H
+#endif // VM_CHATSTATE_H

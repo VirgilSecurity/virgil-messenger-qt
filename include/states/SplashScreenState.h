@@ -32,14 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SPLASHSCREENSTATE_H
-#define VSQ_SPLASHSCREENSTATE_H
+#ifndef VM_SPLASHSCREENSTATE_H
+#define VM_SPLASHSCREENSTATE_H
 
 #include "SignInState.h"
 
 class VSQSettings;
 
-namespace VSQ
+namespace vm
 {
 class SplashScreenState : public SignInState
 {
@@ -60,4 +60,4 @@ private:
 };
 }
 
-#endif // VSQ_SPLASHSCREENSTATE_H
+#endif // VM_SPLASHSCREENSTATE_H

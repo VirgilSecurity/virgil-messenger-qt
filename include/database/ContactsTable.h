@@ -32,12 +32,12 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_CONTACTSTABLE_H
-#define VSQ_CONTACTSTABLE_H
+#ifndef VM_CONTACTSTABLE_H
+#define VM_CONTACTSTABLE_H
 
 #include "core/DatabaseTable.h"
 
-namespace VSQ
+namespace vm
 {
 class ContactsTable : public DatabaseTable
 {
@@ -48,4 +48,4 @@ public:
 };
 }
 
-#endif // VSQ_CONTACTSTABLE_H
+#endif // VM_CONTACTSTABLE_H

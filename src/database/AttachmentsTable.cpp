@@ -37,7 +37,7 @@
 #include "database/core/Database.h"
 #include "database/core/DatabaseUtils.h"
 
-using namespace VSQ;
+using namespace vm;
 
 bool AttachmentsTable::create(Database *database)
 {

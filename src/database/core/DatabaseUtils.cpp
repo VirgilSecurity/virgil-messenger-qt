@@ -36,10 +36,10 @@
 
 #include <QSqlQuery>
 
-#include "VSQUtils.h"
+#include "Utils.h"
 #include "database/core/Database.h"
 
-using namespace VSQ;
+using namespace vm;
 
 bool DatabaseUtils::isValidName(const QString &id)
 {
@@ -49,7 +49,7 @@ bool DatabaseUtils::isValidName(const QString &id)
 
 Optional<QStringList> DatabaseUtils::readQueries(const QString &filePath)
 {
-    const auto text = VSQUtils::readTextFile(filePath);
+    const auto text = Utils::readTextFile(filePath);
     QStringList queries;
     const auto texts = text->split(";");
     for (auto text : texts) {

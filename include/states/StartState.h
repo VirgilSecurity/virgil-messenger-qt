@@ -32,12 +32,12 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_STARTSTATE_H
-#define VSQ_STARTSTATE_H
+#ifndef VM_STARTSTATE_H
+#define VM_STARTSTATE_H
 
 #include <QState>
 
-namespace VSQ
+namespace vm
 {
 class StartState : public QState
 {
@@ -48,4 +48,4 @@ public:
 };
 }
 
-#endif // VSQ_STARTSTATE_H
+#endif // VM_STARTSTATE_H

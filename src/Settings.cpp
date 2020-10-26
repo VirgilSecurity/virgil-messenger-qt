@@ -32,12 +32,12 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "VSQSettings.h"
+#include "Settings.h"
 
 #include <QStandardPaths>
 
 #include "VSQCustomer.h"
-#include "VSQUtils.h"
+#include "Utils.h"
 
 static const QString kUsersGroup = "Users";
 static const QString kUsersList = "UsersList";
@@ -50,11 +50,13 @@ static const QString kWindowGeometryId = "WindowGeometry";
 static const QString kSessionId = "SessionId";
 static const QString kSignedInUserId = "SignedInUserId";
 
+using namespace vm;
+
 Q_LOGGING_CATEGORY(lcSettings, "settings")
 
 VSQSettings::VSQSettings(QObject *parent)
     : QSettings(Customer::OrganizationName, Customer::ApplicationName, parent)
-    , m_sessionId(VSQUtils::createUuid())
+    , m_sessionId(Utils::createUuid())
 {
     if (deviceId().isEmpty()) {
         createDeviceId();
@@ -165,7 +167,7 @@ void VSQSettings::setRunFlag(bool run)
 QDir VSQSettings::databaseDir() const
 {
     if (!m_databaseDir.exists()) {
-        VSQUtils::forceCreateDir(m_databaseDir.absolutePath());
+        Utils::forceCreateDir(m_databaseDir.absolutePath());
     }
     return m_databaseDir;
 }
@@ -178,7 +180,7 @@ DataSize VSQSettings::attachmentMaxFileSize() const
 QDir VSQSettings::attachmentCacheDir() const
 {
     if(!m_attachmentCacheDir.exists()) {
-        VSQUtils::forceCreateDir(m_attachmentCacheDir.absolutePath());
+        Utils::forceCreateDir(m_attachmentCacheDir.absolutePath());
     }
     return m_attachmentCacheDir;
 }
@@ -186,7 +188,7 @@ QDir VSQSettings::attachmentCacheDir() const
 QDir VSQSettings::thumbnailsDir() const
 {
     if(!m_thumbnaisDir.exists()) {
-        VSQUtils::forceCreateDir(m_thumbnaisDir.absolutePath());
+        Utils::forceCreateDir(m_thumbnaisDir.absolutePath());
     }
     return m_thumbnaisDir;
 }
@@ -194,7 +196,7 @@ QDir VSQSettings::thumbnailsDir() const
 QDir VSQSettings::downloadsDir() const
 {
     if(!m_downloadsDir.exists()) {
-        VSQUtils::forceCreateDir(m_downloadsDir.absolutePath());
+        Utils::forceCreateDir(m_downloadsDir.absolutePath());
     }
     return m_downloadsDir;
 }
@@ -259,6 +261,6 @@ void VSQSettings::removeGroup(const QString &group)
 
 void VSQSettings::createDeviceId()
 {
-    setValue(kDeviceId, VSQUtils::createUuid());
+    setValue(kDeviceId, Utils::createUuid());
     sync();
 }

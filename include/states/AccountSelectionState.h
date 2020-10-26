@@ -32,13 +32,13 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_ACCOUNTSELECTIONSTATE_H
-#define VSQ_ACCOUNTSELECTIONSTATE_H
+#ifndef VM_ACCOUNTSELECTIONSTATE_H
+#define VM_ACCOUNTSELECTIONSTATE_H
 
 #include "SignInState.h"
 #include "AccountSelectionModel.h"
 
-namespace VSQ
+namespace vm
 {
 class AccountSelectionState : public SignInState
 {
@@ -57,4 +57,4 @@ private:
 };
 }
 
-#endif // VSQ_ACCOUNTSELECTIONSTATE_H
+#endif // VM_ACCOUNTSELECTIONSTATE_H

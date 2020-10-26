@@ -38,7 +38,7 @@
 
 #include "database/core/Database.h"
 
-using namespace VSQ;
+using namespace vm;
 
 ScopedConnection::ScopedConnection(QSqlDatabase qtDatabase)
     : m_qtDatabase(qtDatabase)

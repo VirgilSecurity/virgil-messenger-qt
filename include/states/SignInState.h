@@ -32,14 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SIGNINSTATE_H
-#define VSQ_SIGNINSTATE_H
+#ifndef VM_SIGNINSTATE_H
+#define VM_SIGNINSTATE_H
 
 #include "OperationState.h"
 
 class VSQMessenger;
 
-namespace VSQ
+namespace vm
 {
 class Validator;
 
@@ -65,4 +65,4 @@ private:
 };
 }
 
-#endif // VSQ_SIGNINSTATE_H
+#endif // VM_SIGNINSTATE_H

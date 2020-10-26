@@ -36,7 +36,7 @@
 
 #include "database/core/Database.h"
 
-using namespace VSQ;
+using namespace vm;
 
 Patch::Patch(const Patch::Version &version)
     : m_version(version)

@@ -32,12 +32,12 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_OPERATIONSTATE_H
-#define VSQ_OPERATIONSTATE_H
+#ifndef VM_OPERATIONSTATE_H
+#define VM_OPERATIONSTATE_H
 
 #include <QState>
 
-namespace VSQ
+namespace vm
 {
 class OperationState : public QState
 {
@@ -53,4 +53,4 @@ signals:
 };
 }
 
-#endif // VSQ_OPERATIONSTATE_H
+#endif // VM_OPERATIONSTATE_H

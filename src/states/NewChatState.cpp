@@ -36,7 +36,7 @@
 
 #include "VSQMessenger.h"
 
-using namespace VSQ;
+using namespace vm;
 
 NewChatState::NewChatState(VSQMessenger *messenger, QState *parent)
     : OperationState(parent)

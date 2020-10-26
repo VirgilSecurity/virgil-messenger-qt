@@ -32,12 +32,12 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_CHATSTABLE_H
-#define VSQ_CHATSTABLE_H
+#ifndef VM_CHATSTABLE_H
+#define VM_CHATSTABLE_H
 
 #include "core/DatabaseTable.h"
 
-namespace VSQ
+namespace vm
 {
 class ChatsTable : public DatabaseTable
 {
@@ -48,4 +48,4 @@ public:
 };
 }
 
-#endif // VSQ_CHATSTABLE_H
+#endif // VM_CHATSTABLE_H

@@ -34,7 +34,7 @@
 
 #include "database/UserDatabaseMigration.h"
 
-using namespace VSQ;
+using namespace vm;
 
 UserDatabaseMigration::UserDatabaseMigration()
     : Migration()

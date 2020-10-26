@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_LASTACTIVITYIQ_H
-#define VSQ_LASTACTIVITYIQ_H
+#ifndef VM_LASTACTIVITYIQ_H
+#define VM_LASTACTIVITYIQ_H
 
 #include <qxmpp/QXmppIq.h>
 
@@ -66,4 +66,4 @@ private:
     Seconds m_seconds = 0;
 };
 
-#endif // VSQ_LASTACTIVITYIQ_H
+#endif // VM_LASTACTIVITYIQ_H

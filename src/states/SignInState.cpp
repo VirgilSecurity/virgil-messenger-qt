@@ -37,7 +37,7 @@
 #include "Validator.h"
 #include "VSQMessenger.h"
 
-using namespace VSQ;
+using namespace vm;
 
 SignInState::SignInState(VSQMessenger *messenger, Validator *validator, QState *parent)
     : OperationState(parent)

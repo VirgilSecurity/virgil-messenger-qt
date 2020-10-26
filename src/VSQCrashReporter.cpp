@@ -39,11 +39,13 @@
 #include <QNetworkReply>
 #include <QStandardPaths>
 
-#include "VSQSettings.h"
+#include "Settings.h"
 
 #include <virgil/iot/messenger/internal/virgil.h>
 
 const QString VSQCrashReporter::s_endpointSendReport = "/send-logs";
+
+using namespace vm;
 
 Q_LOGGING_CATEGORY(lcCrashReporter, "crashReporter")
 

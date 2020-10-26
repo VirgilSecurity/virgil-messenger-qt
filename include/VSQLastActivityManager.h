@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_LASTACTIVITYMANAGER_H
-#define VSQ_LASTACTIVITYMANAGER_H
+#ifndef VM_LASTACTIVITYMANAGER_H
+#define VM_LASTACTIVITYMANAGER_H
 
 #include <qxmpp/QXmppClientExtension.h>
 
@@ -79,4 +79,4 @@ private:
     int m_debugCounter = 0;
 };
 
-#endif // VSQ_LASTACTIVITYMANAGER_H
+#endif // VM_LASTACTIVITYMANAGER_H

@@ -37,7 +37,7 @@
 #include "VSQMessenger.h"
 #include "database/UserDatabase.h"
 
-using namespace VSQ;
+using namespace vm;
 
 ChatListState::ChatListState(VSQMessenger *messenger, UserDatabase *userDatabase, QState *parent)
     : QState(parent)

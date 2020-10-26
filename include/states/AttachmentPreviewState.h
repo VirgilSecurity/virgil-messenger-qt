@@ -32,13 +32,13 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_ATTACHMENTPREVIEWSTATE_H
-#define VSQ_ATTACHMENTPREVIEWSTATE_H
+#ifndef VM_ATTACHMENTPREVIEWSTATE_H
+#define VM_ATTACHMENTPREVIEWSTATE_H
 
 #include <QState>
 #include <QUrl>
 
-namespace VSQ
+namespace vm
 {
 class AttachmentPreviewState : public QState
 {
@@ -59,4 +59,4 @@ private:
 };
 }
 
-#endif // VSQ_ATTACHMENTPREVIEWSTATE_H
+#endif // VM_ATTACHMENTPREVIEWSTATE_H

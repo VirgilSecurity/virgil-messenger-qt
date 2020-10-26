@@ -32,14 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_BACKUPKEYSTATE_H
-#define VSQ_BACKUPKEYSTATE_H
+#ifndef VM_BACKUPKEYSTATE_H
+#define VM_BACKUPKEYSTATE_H
 
 #include "OperationState.h"
 
 class VSQMessenger;
 
-namespace VSQ
+namespace vm
 {
 class BackupKeyState : public OperationState
 {
@@ -65,4 +65,4 @@ private:
 };
 }
 
-#endif // VSQ_BACKUPKEYSTATE_H
+#endif // VM_BACKUPKEYSTATE_H

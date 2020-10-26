@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_CRYPTOTRANSFERMANAGER_H
-#define VSQ_CRYPTOTRANSFERMANAGER_H
+#ifndef VM_CRYPTOTRANSFERMANAGER_H
+#define VM_CRYPTOTRANSFERMANAGER_H
 
 #include "VSQTransferManager.h"
 
@@ -59,4 +59,4 @@ private:
     bool decryptFile(const QString &encPath, const QString &path, const QString &recipient);
 };
 
-#endif // VSQ_CRYPTOTRANSFERMANAGER_H
+#endif // VM_CRYPTOTRANSFERMANAGER_H

@@ -34,7 +34,7 @@
 
 #include "states/AccountSelectionState.h"
 
-using namespace VSQ;
+using namespace vm;
 
 AccountSelectionState::AccountSelectionState(VSQMessenger *messenger, Validator *validator, VSQSettings *settings, QState *parent)
     : SignInState(messenger, validator, parent)

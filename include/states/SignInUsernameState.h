@@ -32,13 +32,13 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SIGNINUSERNAMESTATE_H
-#define VSQ_SIGNINUSERNAMESTATE_H
+#ifndef VM_SIGNINUSERNAMESTATE_H
+#define VM_SIGNINUSERNAMESTATE_H
 
 #include "OperationState.h"
 #include "Validator.h"
 
-namespace VSQ
+namespace vm
 {
 class SignInUsernameState : public OperationState
 {
@@ -58,4 +58,4 @@ private:
 };
 }
 
-#endif // VSQ_SIGNINUSERNAMESTATE_H
+#endif // VM_SIGNINUSERNAMESTATE_H

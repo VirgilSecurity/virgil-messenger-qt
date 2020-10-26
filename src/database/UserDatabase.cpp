@@ -34,8 +34,8 @@
 
 #include "database/UserDatabase.h"
 
-#include "VSQSettings.h"
-#include "VSQUtils.h"
+#include "Settings.h"
+#include "Utils.h"
 #include "database/core/DatabaseUtils.h"
 #include "database/AttachmentsTable.h"
 #include "database/ChatsTable.h"
@@ -43,7 +43,7 @@
 #include "database/MessagesTable.h"
 #include "database/UserDatabaseMigration.h"
 
-using namespace VSQ;
+using namespace vm;
 
 UserDatabase::UserDatabase(const VSQSettings *settings)
     : Database(VERSION_DATABASE_SCHEME)

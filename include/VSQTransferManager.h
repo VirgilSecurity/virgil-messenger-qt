@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_TRANSFERMANAGER_H
-#define VSQ_TRANSFERMANAGER_H
+#ifndef VM_TRANSFERMANAGER_H
+#define VM_TRANSFERMANAGER_H
 
 #include <QObject>
 #include <QMutex>
@@ -104,4 +104,4 @@ private:
 Q_DECLARE_METATYPE(QXmppHttpUploadSlotIq);
 Q_DECLARE_METATYPE(QXmppHttpUploadRequestIq);
 
-#endif // VSQ_TRANSFERMANAGER_H
+#endif // VM_TRANSFERMANAGER_H

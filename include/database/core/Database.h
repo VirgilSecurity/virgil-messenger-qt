@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_DATABASE_H
-#define VSQ_DATABASE_H
+#ifndef VM_DATABASE_H
+#define VM_DATABASE_H
 
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -45,7 +45,7 @@
 
 Q_DECLARE_LOGGING_CATEGORY(lcDatabase)
 
-namespace VSQ
+namespace vm
 {
 class Database
 {
@@ -93,4 +93,4 @@ private:
 };
 }
 
-#endif // VSQ_DATABASE_H
+#endif // VM_DATABASE_H

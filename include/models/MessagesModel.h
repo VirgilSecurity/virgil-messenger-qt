@@ -32,14 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_MESSAGESMODEL_H
-#define VSQ_MESSAGESMODEL_H
+#ifndef VM_MESSAGESMODEL_H
+#define VM_MESSAGESMODEL_H
 
 #include <QAbstractListModel>
 
 #include "VSQCommon.h"
 
-namespace VSQ
+namespace vm
 {
 class UserDatabase;
 
@@ -65,4 +65,4 @@ private:
 };
 }
 
-#endif // VSQ_MESSAGESMODEL_H
+#endif // VM_MESSAGESMODEL_H

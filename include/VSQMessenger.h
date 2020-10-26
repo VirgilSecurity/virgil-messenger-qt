@@ -64,7 +64,7 @@ class VSQLastActivityManager;
 Q_DECLARE_LOGGING_CATEGORY(lcMessenger)
 
 using namespace VirgilIoTKit;
-using namespace VSQ;
+using namespace vm;
 
 class VSQMessenger : public QObject {
 
