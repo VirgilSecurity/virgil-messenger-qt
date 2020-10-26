@@ -105,4 +105,12 @@ elseif(VS_PLATFORM STREQUAL "linux")
 
 elseif(VS_PLATFORM STREQUAL "macos")
 
+  find_program(MAC_DEPLOY_QT macdeployqt)
+
+  add_custom_target(deploy
+    COMMAND ${MAC_DEPLOY_QT}
+       ${PROJECT_NAME}
+       -qmlDir ${PROJECT_SOURCE_DIR}/src/qml        
+    VERBATIM)
+
 endif()
