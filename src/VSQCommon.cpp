@@ -38,7 +38,7 @@
 
 Q_LOGGING_CATEGORY(lcDev, "dev");
 
-void registerMetaTypes()
+void registerCommonMetaTypes()
 {
     qRegisterMetaType<Seconds>("Seconds");
     qRegisterMetaType<DataSize>("DataSize");
@@ -49,5 +49,7 @@ void registerMetaTypes()
     qRegisterMetaType<Attachment>();
     qRegisterMetaType<OptionalAttachment>();
     qRegisterMetaType<StMessage>();
+    qRegisterMetaType<vm::Chats>("Chats");
+
     qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");
 }

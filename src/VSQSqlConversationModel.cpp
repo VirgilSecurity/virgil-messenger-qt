@@ -119,7 +119,7 @@ VSQSqlConversationModel::VSQSqlConversationModel(vm::Validator *validator, QObje
 
     connect(this, &VSQSqlConversationModel::modelReset, this, []() {
         static int reloadCounter = 0;
-        qWarning() << "Full model reset" << ++reloadCounter;
+        qDebug() << "Full model reset" << ++reloadCounter;
     });
 
     m_selectTimer.setSingleShot(true);

@@ -238,9 +238,11 @@ struct Attachment
     QString extras;
 };
 }
+
 Q_DECLARE_METATYPE(vm::Contact::Type)
 Q_DECLARE_METATYPE(vm::Message::Status)
+Q_DECLARE_METATYPE(vm::Chats)
 
-void registerMetaTypes();
+void registerCommonMetaTypes();
 
 #endif // VM_COMMON_H

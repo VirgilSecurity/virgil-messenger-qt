@@ -37,7 +37,7 @@
 
 #include "core/Database.h"
 
-class VSQSettings;
+#include <QDir>
 
 namespace vm
 {
@@ -51,7 +51,7 @@ class UserDatabase : public Database
     Q_OBJECT
 
 public:
-    explicit UserDatabase(const VSQSettings *settings, QObject *parent);
+    explicit UserDatabase(const QDir &databaseDir, QObject *parent);
     ~UserDatabase() override;
 
     const AttachmentsTable *attachmentsTable() const;
@@ -71,7 +71,7 @@ private:
     bool create() override;
     void openByUsername(const QString &username);
 
-    const VSQSettings *m_settings;
+    const QDir m_databaseDir;
 
     int m_attachmentsTableIndex;
     int m_chatsTableIndex;

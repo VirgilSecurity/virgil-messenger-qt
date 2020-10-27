@@ -65,7 +65,7 @@ class VSQApplication : public QObject
 
 public:
     VSQApplication();
-    virtual ~VSQApplication() = default;
+    ~VSQApplication() override;
 
     static void initialize();
 
@@ -99,7 +99,8 @@ private:
     QQmlApplicationEngine m_engine;
     Validator *m_validator;
     VSQMessenger m_messenger;
-    UserDatabase m_userDatabase;
+    UserDatabase *m_userDatabase;
+    QThread *m_databaseThread;
     Controllers m_controllers;
     Models m_models;
     KeyboardEventFilter *m_keyboardEventFilter;

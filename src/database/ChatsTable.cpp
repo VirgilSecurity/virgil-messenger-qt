@@ -43,9 +43,9 @@ using namespace vm;
 ChatsTable::ChatsTable(Database *database)
     : DatabaseTable(QLatin1String("chats"), database)
 {
-    connect(this, &ChatsTable::fetch, &ChatsTable::processFetch);
-    connect(this, &ChatsTable::createChat, &ChatsTable::processCreateChat);
-    connect(this, &ChatsTable::resetUnreadCount, &ChatsTable::processResetUnreadCount);
+    connect(this, &ChatsTable::fetch, this, &ChatsTable::processFetch);
+    connect(this, &ChatsTable::createChat, this, &ChatsTable::processCreateChat);
+    connect(this, &ChatsTable::resetUnreadCount, this, &ChatsTable::processResetUnreadCount);
 }
 
 bool ChatsTable::create()
@@ -121,7 +121,7 @@ void ChatsTable::processCreateChat(const Contact::Id &contactId)
         { ":lastMessageId", QVariant() },
         { ":unreadMessageCount", 0 }
     };
-    auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertChat"), values);
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertChat"), values);
     if (!query) {
         qCCritical(lcDatabase) << "ChatsTable::processAddChat insertion error";
         emit createChatErrorOccurred(tr("Failed to insert chat"));
@@ -135,7 +135,7 @@ void ChatsTable::processResetUnreadCount(const Contact::Id &contactId)
 {
     ScopedConnection connection(*database());
     const DatabaseUtils::BindValues values{{ ":contactId", contactId }};
-    auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("resetUnreadCount"), values);
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("resetUnreadCount"), values);
     if (!query) {
         qCCritical(lcDatabase) << "ChatsTable::processResetUnreadCount error";
         emit createChatErrorOccurred(tr("Failed to reset unread count"));

@@ -39,6 +39,7 @@
 #include <VSQCommon.h>
 #include <VSQClipboardProxy.h>
 #include <VSQCustomer.h>
+#include <Utils.h>
 #include <logging/VSQLogging.h>
 #include <ui/VSQUiHelper.h>
 
@@ -67,19 +68,35 @@ VSQApplication::VSQApplication()
     , m_engine()
     , m_validator(new Validator(this))
     , m_messenger(m_networkAccessManager, &m_settings, m_validator)
-    , m_userDatabase(&m_settings, this)
-    , m_controllers(&m_messenger, &m_userDatabase, this)
+    , m_userDatabase(new UserDatabase(m_settings.databaseDir(), nullptr))
+    , m_databaseThread(new QThread())
+    , m_controllers(&m_messenger, m_userDatabase, this)
     , m_models(&m_controllers, this)
     , m_keyboardEventFilter(new KeyboardEventFilter(this))
     , m_applicationStateManager(&m_messenger, &m_controllers, m_validator, &m_settings, this)
 {
     m_settings.print();
     m_networkAccessManager->setAutoDeleteReplies(true);
+
+    registerCommonMetaTypes();
+    qRegisterMetaType<KeyboardEventFilter *>("KeyboardEventFilter*");
+
+    QThread::currentThread()->setObjectName("MainThread");
+    m_userDatabase->moveToThread(m_databaseThread);
+    m_databaseThread->setObjectName("DatabaseThread");
+    m_databaseThread->start();
+
 #if (MACOS)
     VSQMacos::instance().startUpdatesTimer();
 #endif
-    registerMetaTypes();
-    qRegisterMetaType<KeyboardEventFilter *>("KeyboardEventFilter*");
+}
+
+VSQApplication::~VSQApplication()
+{
+    m_databaseThread->quit();
+    m_databaseThread->wait();
+    delete m_userDatabase;
+    delete m_databaseThread;
 }
 
 /******************************************************************************/

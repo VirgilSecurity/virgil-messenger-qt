@@ -74,6 +74,10 @@ namespace Utils
     int bufferSizeForEncryption(const int rawSize);
 
     int bufferSizeForDecryption(const int encryptedSize);
+
+    // Debug
+
+    void printThreadId(const QString &message);
 }
 }
 

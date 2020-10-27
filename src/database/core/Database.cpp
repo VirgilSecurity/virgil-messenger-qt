@@ -36,7 +36,7 @@
 
 #include <QSqlError>
 
-Q_LOGGING_CATEGORY(lcDatabase, "database")
+Q_LOGGING_CATEGORY(lcDatabase, "db")
 
 using namespace vm;
 

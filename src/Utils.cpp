@@ -36,6 +36,7 @@
 
 #include <QDir>
 #include <QLocale>
+#include <QThread>
 #include <QUuid>
 
 using namespace vm;
@@ -200,4 +201,11 @@ Optional<QString> Utils::readTextFile(const QString &filePath)
         return NullOptional;
     }
     return file.readAll();
+}
+
+void Utils::printThreadId(const QString &message)
+{
+    qDebug(lcDev).noquote().nospace()
+            << "Thread " << QThread::currentThread()->objectName() << "(" << QThread::currentThreadId() << "): "
+            << message;
 }

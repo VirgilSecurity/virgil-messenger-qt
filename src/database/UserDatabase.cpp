@@ -45,14 +45,14 @@
 
 using namespace vm;
 
-UserDatabase::UserDatabase(const VSQSettings *settings, QObject *parent)
+UserDatabase::UserDatabase(const QDir &databaseDir, QObject *parent)
     : Database(VERSION_DATABASE_SCHEME, parent)
-    , m_settings(settings)
+    , m_databaseDir(databaseDir)
 {
     setMigration(std::make_unique<UserDatabaseMigration>());
 
-    connect(this, &UserDatabase::requestOpen, &UserDatabase::openByUsername);
-    connect(this, &UserDatabase::requestClose, &UserDatabase::close);
+    connect(this, &UserDatabase::requestOpen, this, &UserDatabase::openByUsername);
+    connect(this, &UserDatabase::requestClose, this, &UserDatabase::close);
 }
 
 UserDatabase::~UserDatabase()
@@ -130,7 +130,7 @@ void UserDatabase::openByUsername(const QString &username)
     }
     else {
         const QString fileName = QString("user-%1.sqlite3").arg(username);
-        const QString filePath(m_settings->databaseDir().filePath(fileName));
+        const QString filePath(m_databaseDir.filePath(fileName));
         Database::open(filePath, username + QLatin1String("-messenger"));
     }
 }
