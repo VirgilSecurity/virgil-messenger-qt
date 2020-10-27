@@ -50,7 +50,7 @@ ChatsTable::ChatsTable(Database *database)
 
 bool ChatsTable::create()
 {
-    if (DatabaseUtils::runQueries(database(), DatabaseUtils::resourcePath("create_chats"))) {
+    if (DatabaseUtils::readExecQueries(database(), QLatin1String("createChats"))) {
         qCDebug(lcDatabase) << "Chats table was created";
         return true;
     }
@@ -58,13 +58,12 @@ bool ChatsTable::create()
     return false;
 }
 
-#include <QSqlRecord>
 void ChatsTable::processFetch()
 {
     ScopedConnection connection(*database());
-    auto query = DatabaseUtils::readBindQuery(database(), DatabaseUtils::resourcePath("select_chats"));
-    if (!query || !query->exec()) {
-        qCCritical(lcDatabase) << "ChatsTable::processFetch error" << DatabaseUtils::errorText(query);
+    auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectChats"));
+    if (!query) {
+        qCCritical(lcDatabase) << "ChatsTable::processFetch error";
         emit fetchErrorOccurred(tr("Failed to fetch chats"));
         return;
     }
@@ -74,21 +73,21 @@ void ChatsTable::processFetch()
         Chat chat;
         chat.id = q.value("id").value<Chat::Id>();
         chat.timestamp = q.value("timestamp").toDateTime();
-        chat.unreadMessageCount = q.value("unread_message_count").toUInt();
+        chat.unreadMessageCount = q.value("unreadMessageCount").toUInt();
         // contact
-        chat.contact.id = q.value("contact_id").value<Contact::Id>();
-        chat.contact.type = q.value("contact_type").value<Contact::Type>();
-        chat.contact.name = q.value("contact_name").toString();
-        chat.contact.avatarUrl = q.value("contact_avatar_url").toUrl();
+        chat.contact.id = q.value("contactId").value<Contact::Id>();
+        chat.contact.type = q.value("contactType").value<Contact::Type>();
+        chat.contact.name = q.value("contactName").toString();
+        chat.contact.avatarUrl = q.value("contactAvatarUrl").toUrl();
         // message
-        const auto messageId = q.value("last_message_id").value<Message::Id>();
+        const auto messageId = q.value("lastMessageId").value<Message::Id>();
         if (!messageId.isEmpty()) {
             Message message;
             message.id = messageId;
-            message.timestamp = q.value("message_timestamp").toDateTime();
-            message.authorId = q.value("message_author_id").toString();
-            message.status = q.value("message_status").value<Message::Status>();
-            message.body = q.value("message_body").toString();
+            message.timestamp = q.value("messageTimestamp").toDateTime();
+            message.authorId = q.value("messageAuthorId").toString();
+            message.status = q.value("messageStatus").value<Message::Status>();
+            message.body = q.value("messageBody").toString();
             chat.lastMessage = message;
         }
         chats.push_back(chat);
@@ -98,14 +97,13 @@ void ChatsTable::processFetch()
 
 void ChatsTable::processCreateChat(const Contact::Id &contactId)
 {
-    // FIXME(fpohtmeh): check contactId validness
     ScopedConnection connection(*database());
     // Check if chat exists
     {
-        const DatabaseUtils::BindValues values{{ ":contact_id", contactId }};
-        auto query = DatabaseUtils::readBindQuery(database(), DatabaseUtils::resourcePath("check_chat_by_contact"), values);
-        if (!query || !query->exec()) {
-            qCCritical(lcDatabase) << "ChatsTable::processAddChat check error" << DatabaseUtils::errorText(query);
+        const DatabaseUtils::BindValues values{{ ":contactId", contactId }};
+        auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("checkChatByContact"), values);
+        if (!query) {
+            qCCritical(lcDatabase) << "ChatsTable::processAddChat check error";
             emit createChatErrorOccurred(tr("Failed to find chat"));
             return;
         }
@@ -119,13 +117,13 @@ void ChatsTable::processCreateChat(const Contact::Id &contactId)
     const DatabaseUtils::BindValues values{
         { ":id", Utils::createUuid() },
         { ":timestamp", DatabaseUtils::currentTimestamp() },
-        { ":contact_id", contactId },
-        { ":last_message_id", QVariant() },
-        { ":unread_message_count", 0 }
+        { ":contactId", contactId },
+        { ":lastMessageId", QVariant() },
+        { ":unreadMessageCount", 0 }
     };
-    auto query = DatabaseUtils::readBindQuery(database(), DatabaseUtils::resourcePath("insert_chat"), values);
-    if (!query || !query->exec()) {
-        qCCritical(lcDatabase) << "ChatsTable::processAddChat insertion error" << DatabaseUtils::errorText(query);
+    auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertChat"), values);
+    if (!query) {
+        qCCritical(lcDatabase) << "ChatsTable::processAddChat insertion error";
         emit createChatErrorOccurred(tr("Failed to insert chat"));
         return;
     }
@@ -136,10 +134,10 @@ void ChatsTable::processCreateChat(const Contact::Id &contactId)
 void ChatsTable::processResetUnreadCount(const Contact::Id &contactId)
 {
     ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues values{{ ":contact_id", contactId }};
-    auto query = DatabaseUtils::readBindQuery(database(), DatabaseUtils::resourcePath("reset_unread_count"), values);
-    if (!query || !query->exec()) {
-        qCCritical(lcDatabase) << "ChatsTable::processResetUnreadCount error" << DatabaseUtils::errorText(query);
+    const DatabaseUtils::BindValues values{{ ":contactId", contactId }};
+    auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("resetUnreadCount"), values);
+    if (!query) {
+        qCCritical(lcDatabase) << "ChatsTable::processResetUnreadCount error";
         emit createChatErrorOccurred(tr("Failed to reset unread count"));
     }
     else {

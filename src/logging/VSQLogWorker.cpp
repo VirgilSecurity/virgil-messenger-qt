@@ -87,6 +87,21 @@ void VSQLogWorker::fileMessageHandler(QtMsgType type, const VSQMessageLogContext
 
 void VSQLogWorker::consoleMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
 {
-    Q_UNUSED(type)
-    fprintf(stderr, "[%s] %s\n", qPrintable(context.category), qPrintable(message));
+    switch (type) {
+    case QtDebugMsg:
+        fprintf(stderr, "D: [%s] %s\n", qPrintable(context.category), qPrintable(message));
+        break;
+    case QtInfoMsg:
+        fprintf(stderr, "I: [%s] %s\n", qPrintable(context.category), qPrintable(message));
+        break;
+    case QtWarningMsg:
+        fprintf(stderr, "W: [%s] %s\n", qPrintable(context.category), qPrintable(message));
+        break;
+    case QtCriticalMsg:
+        fprintf(stderr, "C: [%s] %s\n", qPrintable(context.category), qPrintable(message));
+        break;
+    case QtFatalMsg:
+        fprintf(stderr, "F: [%s] %s\n", qPrintable(context.category), qPrintable(message));
+        break;
+    }
 }

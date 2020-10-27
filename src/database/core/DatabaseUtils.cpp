@@ -42,6 +42,28 @@
 
 using namespace vm;
 
+namespace
+{
+    QString queryPath(const QString &fileName)
+    {
+        return QString(":/resources/database/%1.sql").arg(fileName);
+    }
+
+    Optional<QStringList> readQueryTexts(const QString &queryId)
+    {
+        const auto text = Utils::readTextFile(queryPath(queryId));
+        QStringList queries;
+        const auto texts = text->split(";");
+        for (auto text : texts) {
+            auto query = text.trimmed();
+            if (!query.isEmpty()) {
+                queries << query;
+            }
+        }
+        return queries;
+    }
+}
+
 bool DatabaseUtils::isValidName(const QString &id)
 {
     // TODO(fpohtmeh): add regexp check
@@ -53,23 +75,11 @@ QString DatabaseUtils::currentTimestamp()
     return QDateTime::currentDateTime().toString(Qt::ISODate);
 }
 
-Optional<QStringList> DatabaseUtils::readQueryTexts(const QString &filePath)
-{
-    const auto text = Utils::readTextFile(filePath);
-    QStringList queries;
-    const auto texts = text->split(";");
-    for (auto text : texts) {
-        auto query = text.trimmed();
-        if (!query.isEmpty()) {
-            queries << query;
-        }
-    }
-    return queries;
-}
 
-bool DatabaseUtils::runQueries(Database *database, const QString &filePath)
+
+bool DatabaseUtils::readExecQueries(Database *database, const QString &queryId)
 {
-    const auto texts = readQueryTexts(filePath);
+    const auto texts = readQueryTexts(queryId);
     if (!texts) {
         return false;
     }
@@ -83,28 +93,23 @@ bool DatabaseUtils::runQueries(Database *database, const QString &filePath)
     return true;
 }
 
-Optional<QSqlQuery> DatabaseUtils::readBindQuery(Database *database, const QString &filePath, const BindValues &values)
+Optional<QSqlQuery> DatabaseUtils::readExecQuery(Database *database, const QString &queryId, const BindValues &values)
 {
-    const auto text = Utils::readTextFile(filePath);
+    const auto text = Utils::readTextFile(queryPath(queryId));
     if (!text) {
         return NullOptional;
     }
     auto query = database->createQuery();
     if (!query.prepare(*text)) {
+        qCCritical(lcDatabase) << "Failed to prepare query:" << query.lastError().databaseText();
         return NullOptional;
     }
     for (auto &v : values) {
         query.bindValue(v.first, v.second);
     }
+    if (!query.exec()) {
+        qCCritical(lcDatabase) << "Failed to exec query:" << query.lastError().databaseText();
+        return NullOptional;
+    }
     return query;
-}
-
-QString DatabaseUtils::resourcePath(const QString &fileName)
-{
-    return QString(":/resources/database/%1.sql").arg(fileName);
-}
-
-QString DatabaseUtils::errorText(const Optional<QSqlQuery> &query)
-{
-    return query ? query->lastError().databaseText() : QLatin1String("Query wasn't created");
 }

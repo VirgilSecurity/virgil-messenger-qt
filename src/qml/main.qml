@@ -72,7 +72,7 @@ ApplicationWindow {
         }
     }
 
-    // FIXME(fpohtmeh): display database errors
+    // TODO(fpohtmeh): display controller/database errors?
 
     onClosing: {
         if (Platform.isAndroid) {

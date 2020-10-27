@@ -117,13 +117,13 @@
         <file>qml/components/AttachmentPicker.qml</file>
         <file>qml/components/LogControl.qml</file>
         <!-- Database -->
-        <file>resources/database/create_attachments.sql</file>
-        <file>resources/database/create_chats.sql</file>
-        <file>resources/database/create_contacts.sql</file>
-        <file>resources/database/create_messages.sql</file>
-        <file>resources/database/check_chat_by_contact.sql</file>
-        <file>resources/database/insert_chat.sql</file>
-        <file>resources/database/select_chats.sql</file>
-        <file>resources/database/reset_unread_count.sql</file>
+        <file>resources/database/createAttachments.sql</file>
+        <file>resources/database/createChats.sql</file>
+        <file>resources/database/createContacts.sql</file>
+        <file>resources/database/createMessages.sql</file>
+        <file>resources/database/checkChatByContact.sql</file>
+        <file>resources/database/insertChat.sql</file>
+        <file>resources/database/selectChats.sql</file>
+        <file>resources/database/resetUnreadCount.sql</file>
     </qresource>
 </RCC>

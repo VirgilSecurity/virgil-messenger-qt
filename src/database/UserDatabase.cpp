@@ -102,7 +102,7 @@ bool UserDatabase::create()
 {
     tables().clear();
     int counter = -1;
-    if (!addTable(std::make_unique<AttachmentsTable>(QLatin1String("attachments"), this))) {
+    if (!addTable(std::make_unique<AttachmentsTable>(this))) {
         return false;
     }
     m_attachmentsTableIndex = ++counter;
@@ -110,11 +110,11 @@ bool UserDatabase::create()
         return false;
     }
     m_chatsTableIndex = ++counter;
-    if (!addTable(std::make_unique<ContactsTable>(QLatin1String("contacts"), this))) {
+    if (!addTable(std::make_unique<ContactsTable>(this))) {
         return false;
     }
     m_contactsTableIndex = ++counter;
-    if (!addTable(std::make_unique<MessagesTable>(QLatin1String("messages"), this))) {
+    if (!addTable(std::make_unique<MessagesTable>(this))) {
         return false;
     }
     m_messagesTableIndex = ++counter;

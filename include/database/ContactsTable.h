@@ -42,7 +42,7 @@ namespace vm
 class ContactsTable : public DatabaseTable
 {
 public:
-    using DatabaseTable::DatabaseTable;
+    explicit ContactsTable(Database *database);
 
     bool create() override;
 };

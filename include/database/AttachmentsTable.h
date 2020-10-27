@@ -42,7 +42,7 @@ namespace vm
 class AttachmentsTable : public DatabaseTable
 {
 public:
-    using DatabaseTable::DatabaseTable;
+    explicit AttachmentsTable(Database *database);
 
     bool create() override;
 };

@@ -39,9 +39,14 @@
 
 using namespace vm;
 
+ContactsTable::ContactsTable(Database *database)
+    : DatabaseTable(QLatin1String("contacts"), database)
+{
+}
+
 bool ContactsTable::create()
 {
-    if (DatabaseUtils::runQueries(database(), DatabaseUtils::resourcePath("create_contacts"))) {
+    if (DatabaseUtils::readExecQueries(database(), QLatin1String("createContacts"))) {
         qCDebug(lcDatabase) << "Contacts table was created";
         return true;
     }

@@ -42,7 +42,7 @@ namespace vm
 class MessagesTable : public DatabaseTable
 {
 public:
-    using DatabaseTable::DatabaseTable;
+    explicit MessagesTable(Database *database);
 
     bool create() override;
 };

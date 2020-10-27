@@ -50,12 +50,8 @@ namespace DatabaseUtils
     bool isValidName(const QString &id);
     QString currentTimestamp();
 
-    Optional<QStringList> readQueryTexts(const QString &filePath);
-    bool runQueries(Database *database, const QString &filePath);
-    Optional<QSqlQuery> readBindQuery(Database *database, const QString &filePath, const BindValues &values = {});
-
-    QString resourcePath(const QString &fileName);
-    QString errorText(const Optional<QSqlQuery> &query);
+    bool readExecQueries(Database *database, const QString &queryId);
+    Optional<QSqlQuery> readExecQuery(Database *database, const QString &queryId, const BindValues &values = {});
 }
 }
 
