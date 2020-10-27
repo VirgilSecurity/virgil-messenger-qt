@@ -109,7 +109,11 @@ elseif(VS_PLATFORM STREQUAL "macos")
   find_program(MAC_CODESIGN codesign)  
   find_program(MAC_APPDMG appdmg)    
   
+<<<<<<< HEAD
+  add_custom_target(dmg_release
+=======
   add_custom_target(deploy
+>>>>>>> 230c4a071432d17ce3c1df60f8235adc9039d14b
     COMMAND echo "Deploy MacOS bundle data..."
     COMMAND ${MAC_DEPLOY_QT}
        ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app
@@ -137,4 +141,16 @@ elseif(VS_PLATFORM STREQUAL "macos")
 	"${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dmg"
     VERBATIM)
 
+  add_custom_target(dmg_debug
+    COMMAND echo "Deploy MacOS bundle data (without signing)..."
+    COMMAND ${MAC_DEPLOY_QT}
+       ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app
+       -qmldir=${PROJECT_SOURCE_DIR}/src/qml        
+       -verbose=1  
+       -dmg
+    COMMAND
+	${PROJECT_SOURCE_DIR}/platforms/macos/tools/seticon
+	${VS_CUSTOMER_DIR}/platforms/macos/pkg_resources/${MACOSX_BUNDLE_ICON_FILE}
+	"${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dmg"       
+    VERBATIM)
 endif()
