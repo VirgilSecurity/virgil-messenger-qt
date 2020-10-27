@@ -106,11 +106,35 @@ elseif(VS_PLATFORM STREQUAL "linux")
 elseif(VS_PLATFORM STREQUAL "macos")
 
   find_program(MAC_DEPLOY_QT macdeployqt)
-
+  find_program(MAC_CODESIGN codesign)  
+  find_program(MAC_APPDMG appdmg)    
+  
   add_custom_target(deploy
+    COMMAND echo "Deploy MacOS bundle data..."
     COMMAND ${MAC_DEPLOY_QT}
-       ${PROJECT_NAME}
-       -qmlDir ${PROJECT_SOURCE_DIR}/src/qml        
+       ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app
+       -qmldir=${PROJECT_SOURCE_DIR}/src/qml        
+       -verbose=1  
+    COMMAND echo "Signing bundle..."       
+    COMMAND ${MAC_CODESIGN}
+	--display
+	--verbose=4
+	--force
+	--deep
+	--timestamp
+	--options runtime
+	-s "${VS_MACOS_IDENT}"
+	"${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app"
+    COMMAND echo "Create DMG..."       	
+    COMMAND ${MAC_APPDMG} 
+	"${CMAKE_BINARY_DIR}/dmg.json"
+	"${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dmg"
+	-v
+    COMMAND echo "Set DMG icon..."	
+    COMMAND
+	${PROJECT_SOURCE_DIR}/platforms/macos/tools/seticon
+	${VS_CUSTOMER_DIR}/platforms/macos/pkg_resources/${MACOSX_BUNDLE_ICON_FILE}
+	"${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dmg"
     VERBATIM)
 
 endif()

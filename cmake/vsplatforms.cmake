@@ -56,6 +56,10 @@ endfunction()
 # Check target platform and customer variable
 # ---------------------------------------------------------------------------
 
+if(VS_PLATFORM OR VS_CUSTOMER AND EXISTS "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake")
+    file(REMOVE "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake")
+endif()
+    
 if(VS_PLATFORM)
     file(APPEND "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake" "set(VS_PLATFORM \"${VS_PLATFORM}\" CACHE \"STRING\" \"Target build platform\")\n")
     message(STATUS "Create transitive-args.cmake")     

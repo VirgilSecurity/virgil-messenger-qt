@@ -10,8 +10,9 @@ pushd ${PROJECT_FOLDER}
   rm -rf build
   mkdir -p build
   pushd build
-   cmake -DVS_PLATFORM="macos" -DVS_CUSTOMER="Virgil" ..
+   cmake -DVS_PLATFORM="macos" -DVS_CUSTOMER="Virgil" -DVS_MACOS_IDENT="68125DC3B6986E51D7702695CD4CA6A7C2058FA4" ..
    make
+   make deploy
   popd
 
 popd  

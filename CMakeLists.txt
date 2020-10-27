@@ -217,8 +217,8 @@ elseif(VS_PLATFORM STREQUAL "linux")
 
 # MacOS    
 elseif(VS_PLATFORM STREQUAL "macos")
-
-    set(App_ICON "${VS_CUSTOMER_DIR}/platforms/macos/pkg_resources/${MACOSX_BUNDLE_ICON_FILE}.icns")
+    include(deployers)    
+    set(App_ICON "${VS_CUSTOMER_DIR}/platforms/macos/pkg_resources/${MACOSX_BUNDLE_ICON_FILE}")
     set_source_files_properties(${App_ICON} 
 	PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
@@ -229,7 +229,7 @@ elseif(VS_PLATFORM STREQUAL "macos")
         COMMAND cp -Rf ${PREBUILT_DIR}/${VS_PLATFORM}/sparkle/Sparkle.framework ${CMAKE_BINARY_DIR}/${VS_TARGET_NAME}.app/Contents/Frameworks 
     )
 
-    add_executable(${VS_TARGET_NAME} MACOSX_BUNDLE ${App_ICON} )
+    add_executable(${VS_TARGET_NAME} MACOSX_BUNDLE ${App_ICON})
     
     set_target_properties(${VS_TARGET_NAME} 
 	PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/platforms/macos/Info.plist.in" 
@@ -253,7 +253,6 @@ endif()
 # ---------------------------------------------------------------------------
 #   Target sources and libraries
 # ---------------------------------------------------------------------------
-message(STATUS "###### VS_TARGET_NAME [${VS_TARGET_NAME}]")
 target_sources(${VS_TARGET_NAME}
 
         PRIVATE
