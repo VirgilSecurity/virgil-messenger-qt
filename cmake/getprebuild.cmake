@@ -38,13 +38,11 @@ cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 #   Fetch prebuilt core libraries
 #
 function(get_prebuild)
-    file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/VERSION_CORE" VERSION_CORE_CONTENT)
-    list(GET VERSION_CORE_CONTENT 0 VERSION_CORE)
-    set(PREBUILT_CORE_ARCHIVE "${CMAKE_CURRENT_LIST_DIR}/ext/downloads/prebuilt-${VERSION_CORE}.tgz")
-    message(STATUS "Get prebuild libraries [https://virgilsecurity.bintray.com/iotl-demo-cdn/prebuilt-${VERSION_CORE}.tgz]...")
+    set(PREBUILT_CORE_ARCHIVE "${CMAKE_CURRENT_LIST_DIR}/ext/downloads/prebuilt-${VS_CORE_VERSION}.tgz")
+    message(STATUS "Get prebuild libraries [https://virgilsecurity.bintray.com/iotl-demo-cdn/prebuilt-${VS_CORE_VERSION}.tgz]...")
     if(NOT EXISTS "${PREBUILT_CORE_ARCHIVE}")
 	file(DOWNLOAD
-            "https://virgilsecurity.bintray.com/iotl-demo-cdn/prebuilt-${VERSION_CORE}.tgz"
+            "https://virgilsecurity.bintray.com/iotl-demo-cdn/prebuilt-${VS_CORE_VERSION}.tgz"
             "${PREBUILT_CORE_ARCHIVE}"
             SHOW_PROGRESS
         )

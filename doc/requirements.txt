@@ -36,7 +36,7 @@ Linux:
 
 MacOS:
 
-1. Install appdmg [https://github.com/LinusU/node-appdmg]
+1. Install appdmg [https://github.com/LinusU/node-appdmg] (Required for signed release only)
 
     npm install -g appdmg
     

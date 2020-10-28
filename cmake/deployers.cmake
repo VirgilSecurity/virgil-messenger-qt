@@ -109,11 +109,7 @@ elseif(VS_PLATFORM STREQUAL "macos")
   find_program(MAC_CODESIGN codesign)  
   find_program(MAC_APPDMG appdmg)    
   
-<<<<<<< HEAD
   add_custom_target(dmg_release
-=======
-  add_custom_target(deploy
->>>>>>> 230c4a071432d17ce3c1df60f8235adc9039d14b
     COMMAND echo "Deploy MacOS bundle data..."
     COMMAND ${MAC_DEPLOY_QT}
        ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app

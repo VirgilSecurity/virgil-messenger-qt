@@ -39,15 +39,16 @@ cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 include(vsplatforms)
+include(clangformat)
 include(varpadding)
 include(getprebuild)
 include(customers)
-
 
 # ---------------------------------------------------------------------------
 # Project version
 # ---------------------------------------------------------------------------
 set(VS_TARGET_VERSION "3.4.18")
+set(VS_CORE_VERSION "0.1.3.134")
 
 # ---------------------------------------------------------------------------
 #   Customers selection
@@ -138,8 +139,7 @@ if(VS_PLATFORM STREQUAL "ios")
 elseif(VS_PLATFORM STREQUAL "android")
     # Get firebase
     get_firebase()
-    # Add deployers targets
-    include(deployers)    
+
     # Set Android version name
     set(ANDROID_VERSION_NAME "${VS_TARGET_VERSION}")
     # Fill Android version code
@@ -190,6 +190,9 @@ find_package(Qt5 COMPONENTS Core Widgets Quick Sql Network Concurrent Qml Xml ${
 # ---------------------------------------------------------------------------
 #   Prepare for build target
 # ---------------------------------------------------------------------------
+# Add deployers targets
+include(deployers)    
+
 # Android
 if(VS_PLATFORM STREQUAL "android")
     message("-- Prepare sources for Android ...")
@@ -212,12 +215,9 @@ if(VS_PLATFORM STREQUAL "android")
 # Linux
 elseif(VS_PLATFORM STREQUAL "linux")
     add_executable(${VS_TARGET_NAME})
-    # Add deployers targets
-    include(deployers)    
 
 # MacOS    
 elseif(VS_PLATFORM STREQUAL "macos")
-    include(deployers)    
     set(App_ICON "${VS_CUSTOMER_DIR}/platforms/macos/pkg_resources/${MACOSX_BUNDLE_ICON_FILE}")
     set_source_files_properties(${App_ICON} 
 	PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
