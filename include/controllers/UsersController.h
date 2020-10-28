@@ -53,7 +53,7 @@ class UsersController : public QObject
 public:
     UsersController(VSQMessenger *messenger, UserDatabase *userDatabase, QObject *parent);
 
-    QString username() const;
+    QString username() const; // FIXME(fpohtmeh): use userId instead of username
 
     void signIn(const QString &username);
     void signUp(const QString &username);

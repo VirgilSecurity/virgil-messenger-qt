@@ -357,20 +357,20 @@ StMessage VSQSqlConversationModel::getMessage(const QSqlRecord &record) const
     message.recipient = record.value("recipient").toString();
     const auto attachmentId = record.value("attachment_id").toString();
     if (!attachmentId.isEmpty()) {
-        Attachment attachment;
+        AttachmentV0 attachment;
         attachment.id = attachmentId;
         attachment.bytesTotal = record.value("attachment_bytes_total").toInt();
-        attachment.type = static_cast<Attachment::Type>(record.value("attachment_type").toInt());
+        attachment.type = static_cast<AttachmentV0::Type>(record.value("attachment_type").toInt());
         attachment.filePath = record.value("attachment_file_path").toString();
         attachment.fileName = record.value("attachment_file_name").toString();
         attachment.remoteUrl = record.value("attachment_remote_url").toString();
-        if (attachment.type == Attachment::Type::Picture) {
+        if (attachment.type == AttachmentV0::Type::Picture) {
             attachment.thumbnailPath = record.value("attachment_thumbnail_path").toString();
             attachment.thumbnailSize.setWidth(record.value("attachment_thumbnail_width").toInt());
             attachment.thumbnailSize.setHeight(record.value("attachment_thumbnail_height").toInt());
             attachment.remoteThumbnailUrl = record.value("attachment_remote_thumbnail_url").toString();
         }
-        attachment.status = static_cast<Attachment::Status>(record.value("attachment_status").toInt());
+        attachment.status = static_cast<AttachmentV0::Status>(record.value("attachment_status").toInt());
         attachment.displayName = message.message;
         message.attachment = attachment;
     }
@@ -406,7 +406,7 @@ void VSQSqlConversationModel::onCreateMessage(const QString recipient, const QSt
         newRecord.setValue("attachment_file_path", attachment->filePath);
         newRecord.setValue("attachment_file_name", attachment->fileName);
         newRecord.setValue("attachment_remote_url", attachment->remoteUrl.toString());
-        if (attachment->type == Attachment::Type::Picture) {
+        if (attachment->type == AttachmentV0::Type::Picture) {
             newRecord.setValue("attachment_thumbnail_path", attachment->thumbnailPath);
             newRecord.setValue("attachment_thumbnail_width", attachment->thumbnailSize.width());
             newRecord.setValue("attachment_thumbnail_height", attachment->thumbnailSize.height());
@@ -443,7 +443,7 @@ void VSQSqlConversationModel::onReceiveMessage(const QString messageId, const QS
         newRecord.setValue("attachment_file_path", attachment->filePath);
         newRecord.setValue("attachment_file_name", attachment->fileName);
         newRecord.setValue("attachment_remote_url", attachment->remoteUrl.toString());
-        if (attachment->type == Attachment::Type::Picture) {
+        if (attachment->type == AttachmentV0::Type::Picture) {
             newRecord.setValue("attachment_thumbnail_path", attachment->thumbnailPath);
             newRecord.setValue("attachment_thumbnail_width", attachment->thumbnailSize.width());
             newRecord.setValue("attachment_thumbnail_height", attachment->thumbnailSize.height());
@@ -477,10 +477,10 @@ void VSQSqlConversationModel::onSetAttachmentStatus(const QString messageId, con
             .arg(_tableName()).arg(static_cast<int>(status)).arg(messageId);
     QSqlQuery().exec(query);
 
-    if (status == Attachment::Status::Loading) {
+    if (status == AttachmentV0::Status::Loading) {
         m_transferMap[messageId] = TransferInfo();
     }
-    else if (status == Attachment::Status::Failed || status == Attachment::Status::Loaded) {
+    else if (status == AttachmentV0::Status::Failed || status == AttachmentV0::Status::Loaded) {
         const auto it = m_transferMap.find(messageId);
         if (it != m_transferMap.end()) {
             m_transferMap.erase(it);

@@ -10,8 +10,6 @@ import "../theme"
 Control {
     id: root
 
-    signal messageSending(string message, var attachmentUrl, var attachmentType)
-
     width: parent.width
     implicitHeight: row.height
 
@@ -185,7 +183,7 @@ Control {
         const text = (messageField.text + messageField.preeditText).trim();
         messageField.clear()
         if (text || attachmentUrl) {
-            messageSending(text, attachmentUrl, attachmentType)
+            controllers.messages.sendMessage(text, attachmentUrl, attachmentType)
         }
     }
 

@@ -56,7 +56,7 @@ VSQAttachmentBuilder::VSQAttachmentBuilder(VSQSettings *settings, QObject *paren
     , m_settings(settings)
 {}
 
-OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment::Type type, QString &errorText)
+OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const AttachmentV0::Type type, QString &errorText)
 {
     qCDebug(lcAttachment) << "Attachment input url:" << vm::Utils::urlToLocalFile(url);
     if (!vm::Utils::isValidUrl(url)) {
@@ -83,11 +83,11 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
         return NullOptional;
     }
 
-    Attachment attachment;
+    AttachmentV0 attachment;
     attachment.id = vm::Utils::createUuid();
     attachment.type = type;
     const int maxLength = 50;
-    if (type == Attachment::Type::Picture) {
+    if (type == AttachmentV0::Type::Picture) {
         attachment.displayName = tr("picture");
     }
 #ifdef VS_ANDROID
@@ -109,7 +109,7 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
     attachment.filePath = localInfo.absoluteFilePath();
 
     // Thumbnail processing
-    if (type == Attachment::Type::Picture) {
+    if (type == AttachmentV0::Type::Picture) {
         const auto pixmap = generateThumbnail(attachment.filePath);
         attachment.thumbnailSize = pixmap.size();
         attachment.thumbnailPath = generateThumbnailFileName();

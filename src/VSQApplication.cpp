@@ -143,7 +143,6 @@ VSQApplication::run(const QString &basePath, VSQLogging *logging) {
     context->setContextProperty("logging", logging);
     context->setContextProperty("crashReporter", &m_crashReporter);
     context->setContextProperty("settings", &m_settings);
-    context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
     context->setContextProperty("controllers", &m_controllers);
     context->setContextProperty("models", &m_models);
 

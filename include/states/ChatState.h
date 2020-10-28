@@ -55,7 +55,6 @@ public:
     void setLastActivityText(const QString &text);
 
 signals:
-    void sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
     void downloadAttachment(const QString &messageId);
     void openAttachment(const QString &messageId);
     void saveAttachmentAs(const QString &messageId, const QVariant &fileUrl);

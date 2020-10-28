@@ -39,24 +39,29 @@
 
 namespace vm
 {
+class AttachmentsModel;
 class ChatsModel;
 class MessagesModel;
 
 class Models : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(AttachmentsModel *attachments READ attachments CONSTANT)
     Q_PROPERTY(ChatsModel *chats READ chats CONSTANT)
     Q_PROPERTY(MessagesModel *messages READ messages CONSTANT)
 
 public:
     explicit Models(QObject *parent);
 
+    const AttachmentsModel *attachments() const;
+    AttachmentsModel *attachments();
     const ChatsModel *chats() const;
     ChatsModel *chats();
     const MessagesModel *messages() const;
     MessagesModel *messages();
 
 private:
+    AttachmentsModel *m_attachments;
     ChatsModel *m_chats;
     MessagesModel *m_messages;
 };

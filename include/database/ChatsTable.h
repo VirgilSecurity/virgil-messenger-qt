@@ -46,20 +46,23 @@ class ChatsTable : public DatabaseTable
 public:
     explicit ChatsTable(Database *database);
 
-    bool create() override;
-
 signals:
     void fetch();
-    void createChat(const Contact::Id &contactId);
-    void resetUnreadCount(const Contact::Id &contactId);
+    void createChat(const Chat &chat);
+
+    void resetUnreadCount(const Chat::Id &chatId);
+    void updateLastMessage(const Message &message);
 
     void errorOccurred(const QString &errorText);
     void fetched(const Chats &chats);
 
 private:
+    bool create() override;
+
     void processFetch();
-    void processCreateChat(const Contact::Id &contactId);
-    void processResetUnreadCount(const Contact::Id &contactId);
+    void processCreateChat(const Chat &chat);
+    void processResetUnreadCount(const Chat::Id &chatId);
+    void processUpdateLastMessage(const Message &message);
 };
 }
 

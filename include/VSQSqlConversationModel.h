@@ -124,7 +124,7 @@ private:
     struct TransferInfo
     {
         DataSize bytesReceived = 0;
-        Attachment::Status status = Attachment::Status::Loading;
+        AttachmentV0::Status status = AttachmentV0::Status::Loading;
     };
 
     vm::Validator *m_validator;

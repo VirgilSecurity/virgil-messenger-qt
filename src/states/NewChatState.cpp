@@ -50,5 +50,5 @@ NewChatState::NewChatState(ChatsController *chatsController, QState *parent)
 void NewChatState::processAddNewChat(const Contact::Id &contactId)
 {
     emit operationStarted();
-    m_chatsController->openChat(contactId);
+    m_chatsController->createChat(contactId);
 }

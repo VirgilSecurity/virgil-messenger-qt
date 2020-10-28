@@ -67,12 +67,16 @@ signals:
     void requestOpen(const QString &username);
     void requestClose();
 
+    void writeMessage(const Message &message);
+
     void usernameChanged(const QString &username);
 
 private:
     bool create() override;
     void openByUsername(const QString &username);
     void close();
+
+    void processWriteMessage(const Message &message);
 
     const QDir m_databaseDir;
     int m_attachmentsTableIndex;

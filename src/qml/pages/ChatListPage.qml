@@ -107,7 +107,7 @@ Page {
 
                 Avatar {
                     id: avatar
-                    nickname: model.name
+                    nickname: model.contactId
                 }
 
                 Column {
@@ -116,13 +116,13 @@ Page {
                     Text {
                         color: Theme.primaryTextColor
                         font.pointSize: UiHelper.fixFontSz(15)
-                        text: model.name
+                        text: model.contactId
                     }
 
                     Text {
                         color: Theme.secondaryTextColor
                         font.pointSize: UiHelper.fixFontSz(12)
-                        text: model.lastMessage ? model.lastMessage.substring(0, 30) : "..."
+                        text: model.lastMessageBody
                         width: parent.width
                         elide: Text.ElideRight
                         textFormat: Text.RichText
@@ -139,7 +139,7 @@ Page {
                     }
 
                     Text {
-                        text: model.lastMessageTime ? Qt.formatDateTime(model.lastMessageTime, "hh:mm")   : ""
+                        text: model.lastEventTime
                         color: Theme.secondaryTextColor
                         font.pointSize: UiHelper.fixFontSz(9)
                         anchors.horizontalCenter: parent.horizontalCenter
@@ -147,7 +147,7 @@ Page {
                 }
             }
 
-            onClicked: controllers.chats.openChat(model.name)
+            onClicked: controllers.chats.openChatById(model.id)
         }
 
         IconWithText {

@@ -75,8 +75,6 @@ QString DatabaseUtils::currentTimestamp()
     return QDateTime::currentDateTime().toString(Qt::ISODate);
 }
 
-
-
 bool DatabaseUtils::readExecQueries(Database *database, const QString &queryId)
 {
     const auto texts = readQueryTexts(queryId);

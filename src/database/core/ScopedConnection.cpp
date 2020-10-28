@@ -44,15 +44,13 @@ ScopedConnection::ScopedConnection(QSqlDatabase qtDatabase)
     : m_qtDatabase(qtDatabase)
 {
     const bool opened = qtDatabase.isOpen();
-    if (opened || !qtDatabase.open()) {
+    if (opened) {
+        m_isActive = false;
+    }
+    else if (!qtDatabase.open()) {
         m_isActive = false;
         qCCritical(lcDatabase) << "Connection databaseName:" << qtDatabase.databaseName();
-        if (opened) {
-            qCCritical(lcDatabase) << "Connection is already opened";
-        }
-        else {
-            qCCritical(lcDatabase) << "Connection error:" << qtDatabase.lastError().databaseText();
-        }
+        qCCritical(lcDatabase) << "Connection error:" << qtDatabase.lastError().databaseText();
     }
 }
 

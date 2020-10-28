@@ -34,6 +34,8 @@
 
 #include "models/MessagesModel.h"
 
+#include "Utils.h"
+
 using namespace vm;
 
 MessagesModel::MessagesModel(QObject *parent)
@@ -43,6 +45,28 @@ MessagesModel::MessagesModel(QObject *parent)
 MessagesModel::~MessagesModel()
 {}
 
+void MessagesModel::setMessages(const Messages &messages)
+{
+    beginResetModel();
+    m_messages = messages;
+    endResetModel();
+}
+
+Message MessagesModel::createMessage(const Chat::Id &chatId, const Contact::Id &authorId, const QString &body, const Optional<Attachment> &attachment)
+{
+    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+    Message message;
+    message.id = Utils::createUuid();
+    message.timestamp = QDateTime::currentDateTime();
+    message.chatId = chatId;
+    message.authorId = authorId;
+    message.body = body;
+    message.attachment = attachment;
+    m_messages.push_back(message);
+    endInsertRows();
+    return message;
+}
+
 int MessagesModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
@@ -51,24 +75,124 @@ int MessagesModel::rowCount(const QModelIndex &parent) const
 
 QVariant MessagesModel::data(const QModelIndex &index, int role) const
 {
-    Q_UNUSED(index)
-    Q_UNUSED(role)
-    return QVariant();
+    const auto row = index.row();
+    const auto &message = m_messages[row];
+    switch (role) {
+    case IdRole:
+        return message.id;
+    case DayRole:
+        return message.timestamp.date();
+    case DisplayTimeRole:
+        return message.timestamp.toString("• hh:mm");
+    case AuthorIdRole:
+        return message.authorId;
+    case StatusRole:
+    {
+        const auto nextMessage = (row + 1 == rowCount()) ? nullptr : &m_messages[row + 1];
+        if (nextMessage && nextMessage->authorId == message.authorId && nextMessage->status == message.status) {
+            return QString();
+        }
+        return QVariant::fromValue(message.status);
+    }
+    case BodyRole:
+        return message.body.split('\n').join("<br/>");
+    case AttachmentIdRole:
+    {
+        if (message.attachment) {
+            return message.attachment->id;
+        }
+        return QString();
+    }
+    case AttachmentTypeRole:
+    {
+        if (message.attachment) {
+            return QVariant::fromValue(message.attachment->type);
+        }
+        return QVariant();
+    }
+    case AttachmentStatusRole:
+    {
+        if (message.attachment) {
+            return QVariant::fromValue(message.attachment->status);
+        }
+        return QVariant();
+    }
+    case AttachmentImageRole:
+    {
+        // TODO(fpohtmeh): implement
+        return QVariant();
+    }
+    case AttachmentImageSizeRole:
+    {
+        // TODO(fpohtmeh): implement
+        return QVariant();
+    }
+    case AttachmentDisplaySizeRole:
+    {
+        // TODO(fpohtmeh): implement
+        return QVariant();
+    }
+    case AttachmentBytesTotalRole:
+    {
+        // TODO(fpohtmeh): implement
+        return QVariant();
+    }
+    case AttachmentBytesLoadedRole:
+    {
+        // TODO(fpohtmeh): implement
+        return QVariant();
+    }
+    case AttachmentFileExistsRole:
+    {
+        // TODO(fpohtmeh): implement
+        return QVariant();
+    }
+    case FailedRole:
+    {
+        if (message.status == Message::Status::Failed) {
+            return true;
+        }
+        if (message.attachment) {
+            const auto &status = message.attachment->status;
+            return status == Attachment::Status::Failed || status == Attachment::Status::Invalid;
+        }
+        return false;
+    }
+    case FirstInRowRole:
+    {
+        const auto prevMessage = (row == 0) ? nullptr : &m_messages[row - 1];
+        return !prevMessage || prevMessage->authorId != message.authorId || prevMessage->timestamp.addSecs(5 * 60) <= message.timestamp;
+    }
+    case InRowRole:
+    {
+        const auto nextMessage = (row + 1 == rowCount()) ? nullptr : &m_messages[row + 1];
+        return nextMessage && message.authorId == nextMessage->authorId;
+    }
+    default:
+        return QVariant();
+    }
 }
 
 QHash<int, QByteArray> MessagesModel::roleNames() const
 {
-    QHash<int, QByteArray> names;
-    return names;
-}
-
-void MessagesModel::fetchMore(const QModelIndex &parent)
-{
-    Q_UNUSED(parent)
-}
-
-bool MessagesModel::canFetchMore(const QModelIndex &parent) const
-{
-    Q_UNUSED(parent)
-    return false;
+    return {
+        { IdRole, "id" },
+        { DayRole, "day" },
+        { DisplayTimeRole, "displayTime" },
+        { AuthorIdRole, "authorId" },
+        { StatusRole, "status" },
+        { BodyRole, "body" },
+        { AttachmentIdRole, "attachmentId" },
+        { AttachmentTypeRole, "attachmentType" },
+        { AttachmentStatusRole, "attachmentStatus" },
+        { AttachmentImageRole, "attachmentImage" },
+        { AttachmentImageSizeRole, "attachmentImageSize" },
+        { AttachmentDisplaySizeRole, "attachmentDisplaySize" },
+        { AttachmentBytesTotalRole, "attachmentBytesTotal" },
+        { AttachmentBytesLoadedRole, "attachmentBytesLoaded" },
+        { AttachmentFileExistsRole, "attachmentFileExists" },
+        { FailedRole, "failed" },
+        { FirstInRowRole, "firstInRow" },
+        { InRowRole, "inRow" },
+    };
 }

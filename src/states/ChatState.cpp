@@ -43,7 +43,6 @@ ChatState::ChatState(VSQMessenger *messenger, QState *parent)
     : QState(parent)
     , m_messenger(messenger)
 {
-    connect(this, &ChatState::sendMessage, m_messenger, &VSQMessenger::sendMessage);
     connect(this, &ChatState::downloadAttachment, m_messenger, &VSQMessenger::downloadAttachment);
     connect(this, &ChatState::openAttachment, m_messenger, &VSQMessenger::openAttachment);
     connect(this, &ChatState::saveAttachmentAs, m_messenger, &VSQMessenger::saveAttachmentAs);

@@ -74,9 +74,7 @@ namespace Enums {
     enum class AttachmentType
     {
         File,
-        Picture,
-        Video,
-        Audio
+        Picture
     };
     Q_ENUM_NS(AttachmentType)
 
@@ -115,7 +113,7 @@ namespace Enums {
 }
 
 // TODO(fpohtmeh): remove this old class
-struct Attachment
+struct AttachmentV0
 {
     using Type = Enums::AttachmentType;
     using Status = Enums::AttachmentStatus;
@@ -135,9 +133,9 @@ struct Attachment
     DataSize bytesLoaded = 0; // encrypted
     Status status = Status::Created;
 };
-Q_DECLARE_METATYPE(Attachment)
+Q_DECLARE_METATYPE(AttachmentV0)
 
-using OptionalAttachment = Optional<Attachment>;
+using OptionalAttachment = Optional<AttachmentV0>;
 Q_DECLARE_METATYPE(OptionalAttachment)
 
 // TODO(fpohtmeh): remove this old class
@@ -172,6 +170,36 @@ struct Contact
     QUrl avatarUrl;
 };
 
+using MessageId = QString;
+using ChatId = QString;
+
+struct Attachment
+{
+    using Id = QString;
+    using Type = Enums::AttachmentType;
+
+    enum class Status
+    {
+        Created,
+        Preloading,
+        Loading,
+        Postloading,
+        Loaded,
+        Failed,
+        Invalid
+    };
+
+    Id id;
+    MessageId messageId;
+    Type type = Type::File;
+    Status status = Status::Created;
+    QString fileName;
+    DataSize size = 0;
+    QString localPath;
+    QUrl url;
+    QString extras;
+};
+
 struct Message
 {
     enum class Status
@@ -183,13 +211,15 @@ struct Message
         Failed
     };
 
-    using Id = QString;
+    using Id = MessageId;
 
     Id id;
     QDateTime timestamp;
+    ChatId chatId;
     Contact::Id authorId;
     Status status = Status::Created;
     QString body;
+    Optional<Attachment> attachment;
 };
 
 using Messages = std::vector<Message>;
@@ -200,48 +230,21 @@ struct Chat
 
     Id id;
     QDateTime timestamp;
-    Contact contact;
+    Contact::Id contactId;
     Optional<Message> lastMessage;
     uint unreadMessageCount = 0;
 };
 
 using Chats = std::vector<Chat>;
-
-struct Attachment
-{
-    using Id = QString;
-
-    enum class Type
-    {
-        File,
-        Picture
-    };
-
-    enum class Status
-    {
-        Created,
-        Processing,
-        Loading,
-        Loaded,
-        Failed,
-        Invalid
-    };
-
-    Id id;
-    Message::Id messageId;
-    Type type = Type::File;
-    Status status = Status::Created;
-    QString fileName;
-    DataSize size = 0;
-    QString localPath;
-    QUrl url;
-    QString extras;
-};
 }
 
-Q_DECLARE_METATYPE(vm::Contact::Id)
 Q_DECLARE_METATYPE(vm::Contact::Type)
+Q_DECLARE_METATYPE(vm::Attachment::Type)
+Q_DECLARE_METATYPE(vm::Attachment::Status)
 Q_DECLARE_METATYPE(vm::Message::Status)
+Q_DECLARE_METATYPE(vm::Message)
+Q_DECLARE_METATYPE(vm::Messages)
+Q_DECLARE_METATYPE(vm::Chat)
 Q_DECLARE_METATYPE(vm::Chats)
 
 void registerCommonMetaTypes();

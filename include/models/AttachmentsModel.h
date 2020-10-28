@@ -32,57 +32,29 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHATSCONTROLLER_H
-#define VM_CHATSCONTROLLER_H
+#ifndef VM_ATTACHMENTSMODEL_H
+#define VM_ATTACHMENTSMODEL_H
 
-#include <QObject>
+#include <QAbstractListModel>
 
 #include "VSQCommon.h"
 
 namespace vm
 {
-class Models;
-class UserDatabase;
-
-class ChatsController : public QObject
+class AttachmentsModel : public QAbstractListModel
 {
     Q_OBJECT
-    Q_PROPERTY(Contact::Id currentContactId MEMBER m_currentContactId NOTIFY currentContactIdChanged)
-    Q_PROPERTY(Chat::Id currentChatId MEMBER m_currentChatId NOTIFY currentChatIdChanged)
 
 public:
-    ChatsController(Models *models, UserDatabase *userDatabase, QObject *parent);
+    explicit AttachmentsModel(QObject *parent);
+    ~AttachmentsModel() override;
 
-    Contact::Id currentContactId() const;
-
-    void loadChats(const QString &username);
-
-    void createChat(const Contact::Id &contactId);
-    void openChat(const Chat &chat);
-    Q_INVOKABLE void openChatById(const Chat::Id &chatId);
-    void closeChat();
-
-signals:
-    void errorOccurred(const QString &errorText); // FIXME(fpohtmeh): remove this signal everywhere?
-    void chatOpened(const Chat::Id &chatId);
-    void chatClosed();
-    void currentContactIdChanged(const Contact::Id &contactId);
-    void currentChatIdChanged(const Chat::Id &chatId);
-
-    void contactFound(const Contact::Id &contactId, QPrivateSignal);
+    Optional<Attachment> createAttachment(const QVariant &attachmentUrl, const Attachment::Type attachmentType);
 
 private:
-    void setupTableConnections();
-    void setCurrentContactId(const Contact::Id &contactId);
-    void setCurrentChatId(const Chat::Id &chatId);
-
-    void onContactFound(const Contact::Id &contactId);
-
-    Models *m_models;
-    UserDatabase *m_userDatabase;
-    Contact::Id m_currentContactId;
-    Chat::Id m_currentChatId;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
 };
 }
 
-#endif // VM_CHATSSCONTROLLER_H
+#endif // VM_ATTACHMENTSMODEL_H

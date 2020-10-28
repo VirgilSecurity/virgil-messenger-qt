@@ -42,6 +42,8 @@ using namespace vm;
 MessagesTable::MessagesTable(Database *database)
     : DatabaseTable(QLatin1String("messages"), database)
 {
+    connect(this, &MessagesTable::fetch, this, &MessagesTable::processFetch);
+    connect(this, &MessagesTable::createMessage, this, &MessagesTable::processCreateMessage);
 }
 
 bool MessagesTable::create()
@@ -52,4 +54,62 @@ bool MessagesTable::create()
     }
     qCCritical(lcDatabase) << "Unable to create messages table";
     return false;
+}
+
+void MessagesTable::processFetch(const Chat::Id &chatId)
+{
+    ScopedConnection connection(*database());
+    const DatabaseUtils::BindValues values{{":chatId", chatId }};
+    auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectMessages"), values);
+    if (!query) {
+        qCCritical(lcDatabase) << "MessagesTable::processFetch error";
+        emit errorOccurred(tr("Failed to fetch messages"));
+        return;
+    }
+    auto q = *query;
+    Messages messages;
+    while (q.next()) {
+        Message message;
+        message.id = q.value("id").value<Message::Id>();
+        message.timestamp = q.value("timestamp").toDateTime();
+        message.authorId = q.value("authorId").value<Contact::Id>();
+        message.status = q.value("status").value<Message::Status>();
+        message.body = q.value("body").toString();
+        // attachment
+        const auto attachmentId = q.value("attachmentId").value<Attachment::Id>();
+        if (!attachmentId.isEmpty()) {
+            Attachment attachment;
+            attachment.id = attachmentId;
+            attachment.type = q.value("attachmentType").value<Attachment::Type>();
+            attachment.status = q.value("attachmentStatus").value<Attachment::Status>();
+            attachment.fileName = q.value("attachmentFilename").toString();
+            attachment.size = q.value("attachmentSize").value<DataSize>();
+            attachment.localPath = q.value("attachmentLocalPath").toString();
+            attachment.url = q.value("attachmentUrl").toUrl();
+            attachment.extras = q.value("attachmentExtras").toString();
+            message.attachment = attachment;
+        }
+        messages.push_back(message);
+    }
+    emit fetched(messages);
+}
+
+void MessagesTable::processCreateMessage(const Message &message)
+{
+    ScopedConnection connection(*database());
+    const DatabaseUtils::BindValues values {
+        { ":id", message.id },
+        { ":timestamp", message.timestamp },
+        { ":chatId", message.chatId },
+        { ":authorId", message.authorId },
+        { ":status", QVariant::fromValue(message.status) },
+        { ":body", message.body }
+    };
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertMessage"), values);
+    if (!query) {
+        qCCritical(lcDatabase) << "MessagesTable::processCreateMessage insertion error";
+        emit errorOccurred(tr("Failed to insert message"));
+        return;
+    }
+    qCDebug(lcDatabase) << "Message was inserted into table" << message.body.left(30);
 }

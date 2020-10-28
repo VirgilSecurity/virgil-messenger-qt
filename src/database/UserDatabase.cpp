@@ -53,6 +53,7 @@ UserDatabase::UserDatabase(const QDir &databaseDir, QObject *parent)
 
     connect(this, &UserDatabase::requestOpen, this, &UserDatabase::openByUsername);
     connect(this, &UserDatabase::requestClose, this, &UserDatabase::close);
+    connect(this, &UserDatabase::writeMessage, this, &UserDatabase::processWriteMessage);
 }
 
 UserDatabase::~UserDatabase()
@@ -140,4 +141,13 @@ void UserDatabase::close()
 {
     Database::close();
     emit usernameChanged(QString());
+}
+
+void UserDatabase::processWriteMessage(const Message &message)
+{
+    ScopedConnection connection(*this);
+    ScopedTransaction transaction(*this);
+    messagesTable()->createMessage(message);
+    chatsTable()->updateLastMessage(message);
+    // FIXME(fpohtmeh): write attachment
 }

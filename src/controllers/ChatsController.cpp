@@ -50,10 +50,12 @@ ChatsController::ChatsController(Models *models, UserDatabase *userDatabase, QOb
     , m_userDatabase(userDatabase)
 {
     connect(userDatabase, &UserDatabase::opened, this, &ChatsController::setupTableConnections);
-    connect(this, &ChatsController::chatOpened, models->chats(), &ChatsModel::addChat);
-    connect(this, &ChatsController::chatOpened, this, &ChatsController::resetUnreadCount);
-    connect(this, &ChatsController::chatOpened, this, &ChatsController::setChatContact);
-    connect(this, &ChatsController::chatClosed, this, std::bind(&ChatsController::setChatContact, this, QString()));
+    connect(this, &ChatsController::contactFound, this, &ChatsController::onContactFound);
+}
+
+Contact::Id ChatsController::currentContactId() const
+{
+    return m_currentContactId;
 }
 
 void ChatsController::loadChats(const QString &username)
@@ -66,10 +68,11 @@ void ChatsController::loadChats(const QString &username)
     }
 }
 
-void ChatsController::openChat(const Contact::Id &contactId)
+void ChatsController::createChat(const Contact::Id &contactId)
 {
-    if (m_models->chats()->hasChat(contactId)) {
-        emit chatOpened(contactId);
+    auto chat = m_models->chats()->findByContact(contactId);
+    if (chat) {
+        openChat(*chat);
     }
     else {
         // TODO(fpohtmeh): check if online?
@@ -78,23 +81,35 @@ void ChatsController::openChat(const Contact::Id &contactId)
                 emit errorOccurred(tr("Contact not found"));
             }
             else {
-                emit chatOpened(contactId);
+                emit contactFound(contactId, QPrivateSignal());
             }
         });
     }
 }
 
-void ChatsController::closeChat()
+void ChatsController::openChat(const Chat &chat)
 {
-    if (!m_chatContact.isEmpty()) {
-        emit chatClosed();
+    if (chat.unreadMessageCount > 0) {
+        m_models->chats()->resetUnreadCount(chat.id);
+        m_userDatabase->chatsTable()->resetUnreadCount(chat.id);
     }
+    setCurrentChatId(chat.id);
+    setCurrentContactId(chat.contactId);
+    emit chatOpened(chat.id);
 }
 
-void ChatsController::resetUnreadCount(const Contact::Id &contactId)
+void ChatsController::openChatById(const Chat::Id &chatId)
 {
-    m_models->chats()->resetUnreadCount(contactId);
-    m_userDatabase->chatsTable()->resetUnreadCount(contactId);
+    openChat(*m_models->chats()->find(chatId));
+}
+
+void ChatsController::closeChat()
+{
+    if (!m_currentContactId.isEmpty()) {
+        setCurrentChatId(QString());
+        setCurrentContactId(QString());
+        emit chatClosed();
+    }
 }
 
 void ChatsController::setupTableConnections()
@@ -102,14 +117,31 @@ void ChatsController::setupTableConnections()
     auto table = m_userDatabase->chatsTable();
     connect(table, &ChatsTable::errorOccurred, this, &ChatsController::errorOccurred);
     connect(table, &ChatsTable::fetched, m_models->chats(), &ChatsModel::setChats);
-    connect(this, &ChatsController::chatOpened, table, &ChatsTable::createChat);
 }
 
-void ChatsController::setChatContact(const Contact::Id &contactId)
+void ChatsController::setCurrentContactId(const Contact::Id &contactId)
 {
-    if (m_chatContact == contactId) {
+    if (m_currentContactId == contactId) {
         return;
     }
-    m_chatContact = contactId;
-    emit chatContactChanged(contactId);
+    m_currentContactId = contactId;
+    emit currentContactIdChanged(contactId);
+}
+
+void ChatsController::setCurrentChatId(const Chat::Id &chatId)
+{
+    if (m_currentChatId == chatId) {
+        return;
+    }
+    m_currentChatId = chatId;
+    emit currentChatIdChanged(chatId);
+}
+
+void ChatsController::onContactFound(const Contact::Id &contactId)
+{
+    const auto chat = m_models->chats()->createChat(contactId);
+    m_userDatabase->chatsTable()->createChat(chat);
+    setCurrentChatId(chat.id);
+    setCurrentContactId(contactId);
+    emit chatOpened(chat.id);
 }

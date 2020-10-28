@@ -36,6 +36,7 @@
 
 #include <QSortFilterProxyModel>
 
+#include "models/AttachmentsModel.h"
 #include "models/ChatsModel.h"
 #include "models/MessagesModel.h"
 
@@ -43,12 +44,24 @@ using namespace vm;
 
 Models::Models(QObject *parent)
     : QObject(parent)
+    , m_attachments(new AttachmentsModel(this))
     , m_chats(new ChatsModel(this))
     , m_messages(new MessagesModel(this))
 {
+    qRegisterMetaType<AttachmentsModel *>("AttachmentsModel*");
     qRegisterMetaType<ChatsModel *>("ChatsModel*");
     qRegisterMetaType<MessagesModel *>("MessagesModel*");
     qRegisterMetaType<QSortFilterProxyModel *>("QSortFilterProxyModel*");
+}
+
+const AttachmentsModel *Models::attachments() const
+{
+    return m_attachments;
+}
+
+AttachmentsModel *Models::attachments()
+{
+    return m_attachments;
 }
 
 const ChatsModel *Models::chats() const

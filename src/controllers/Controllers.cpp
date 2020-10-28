@@ -46,11 +46,13 @@ Controllers::Controllers(VSQMessenger *messenger, Models *models, UserDatabase *
     : QObject(parent)
     , m_users(new UsersController(messenger, userDatabase, this))
     , m_chats(new ChatsController(models, userDatabase, this))
-    , m_messages(new MessagesController(this))
+    , m_messages(new MessagesController(messenger, models, userDatabase, this))
 {
     connect(m_users, &UsersController::usernameChanged, m_chats, &ChatsController::loadChats);
     connect(m_chats, &ChatsController::chatOpened, m_users, &UsersController::subscribeToContact);
-    connect(m_chats, &ChatsController::chatContactChanged, messenger, &VSQMessenger::setCurrentRecipient);
+    connect(m_chats, &ChatsController::currentContactIdChanged, messenger, &VSQMessenger::setCurrentRecipient); // TODO(fpohtmeh): remove connection
+    connect(m_chats, &ChatsController::currentContactIdChanged, m_messages, &MessagesController::setRecipientId);
+    connect(m_chats, &ChatsController::currentChatIdChanged, m_messages, &MessagesController::loadMessages);
 
     qRegisterMetaType<ChatsController *>("ChatsController*");
     qRegisterMetaType<MessagesController *>("MessagesController*");

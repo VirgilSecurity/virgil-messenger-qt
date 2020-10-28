@@ -176,6 +176,7 @@ HEADERS += \
         include/logging/VSQLogWorker.h \
         include/logging/VSQMessageLogContext.h \
         # Models
+        include/models/AttachmentsModel.h \
         include/models/ChatsModel.h \
         include/models/MessagesModel.h \
         include/models/Models.h \
@@ -255,6 +256,7 @@ SOURCES += \
         src/logging/VSQLogging.cpp \
         src/logging/VSQLogWorker.cpp \
         # Models
+        src/models/AttachmentsModel.cpp \
         src/models/ChatsModel.cpp \
         src/models/MessagesModel.cpp \
         src/models/Models.cpp

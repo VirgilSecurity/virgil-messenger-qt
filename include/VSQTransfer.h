@@ -60,7 +60,7 @@ public:
     virtual void start();
     virtual void abort();
 
-    void setStatus(const Attachment::Status status);
+    void setStatus(const AttachmentV0::Status status);
 
 signals:
     void progressChanged(const DataSize bytesReceived, const DataSize bytesTotal);
@@ -79,7 +79,7 @@ private:
 
     QNetworkAccessManager *m_networkAccessManager;
     QString m_id;
-    Attachment::Status m_status;
+    AttachmentV0::Status m_status;
     DataSize m_bytesReceived = 0;
     DataSize m_bytesTotal = 0;
     QFile *m_fileHandle = nullptr;

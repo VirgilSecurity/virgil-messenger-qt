@@ -1,13 +1,13 @@
 CREATE TABLE attachments (
         id TEXT NOT NULL,
         messageId TEXT NOT NULL,
-	type INT NOT NULL,
-	status INT NOT NULL,
-	filename TEXT NOT NULL,
-	size INT NOT NULL,
-	local_path TEXT,
-	url TEXT,
-	extras TEXT,
+        type INT NOT NULL,
+        status INT NOT NULL,
+        filename TEXT NOT NULL,
+        size INT NOT NULL,
+        localPath TEXT,
+        url TEXT,
+        extras TEXT,
         FOREIGN KEY(messageId) REFERENCES messages(id)
 );
 

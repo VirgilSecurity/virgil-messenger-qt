@@ -39,17 +39,37 @@
 
 #include "VSQCommon.h"
 
+class VSQMessenger;
+
 namespace vm
 {
+class Models;
+class UserDatabase;
+
 class MessagesController : public QObject
 {
     Q_OBJECT
 
 public:
-    using QObject::QObject;
+    MessagesController(VSQMessenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
-    void setChat(const QString &chatId)
-    {}
+    void loadMessages(const Chat::Id &chatId);
+    Q_INVOKABLE void sendMessage(const QString &body, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
+
+    void setRecipientId(const Contact::Id &recipientId);
+
+signals:
+    void errorOccurred(const QString &errorText);
+
+private:
+    void setupTableConnections();
+
+    VSQMessenger *m_messenger;
+    Models *m_models;
+    UserDatabase *m_userDatabase;
+
+    Chat::Id m_chatId;
+    Contact::Id m_recipientId;
 };
 }
 

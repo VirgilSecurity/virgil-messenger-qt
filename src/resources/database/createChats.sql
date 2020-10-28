@@ -3,8 +3,7 @@ CREATE TABLE chats (
 	timestamp TEXT NOT NULL,
 	contactId TEXT NOT NULL,
 	lastMessageId TEXT,
-	unreadMessageCount INT NOT NULL,
-	FOREIGN KEY(contactId) REFERENCES contacts(id),
+        unreadMessageCount INT NOT NULL,
 	FOREIGN KEY(lastMessageId) REFERENCES messages(id)
 );
 

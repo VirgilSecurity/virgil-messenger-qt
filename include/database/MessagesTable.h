@@ -41,10 +41,23 @@ namespace vm
 {
 class MessagesTable : public DatabaseTable
 {
+    Q_OBJECT
+
 public:
     explicit MessagesTable(Database *database);
 
+signals:
+    void fetch(const Chat::Id &chatId);
+    void createMessage(const Message &message);
+
+    void errorOccurred(const QString &errorText);
+    void fetched(const Messages &messages);
+
+private:
     bool create() override;
+
+    void processFetch(const Chat::Id &chatId);
+    void processCreateMessage(const Message &message);
 };
 }
 

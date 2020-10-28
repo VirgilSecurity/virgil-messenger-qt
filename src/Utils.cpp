@@ -194,7 +194,9 @@ Optional<QString> Utils::readTextFile(const QString &filePath)
 
 void Utils::printThreadId(const QString &message)
 {
+#ifdef VS_DEVMODE
     qDebug(lcDev).noquote().nospace()
             << "Thread " << QThread::currentThread()->objectName() << "(" << QThread::currentThreadId() << "): "
             << message;
+#endif
 }

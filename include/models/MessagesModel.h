@@ -49,14 +49,38 @@ public:
     explicit MessagesModel(QObject *parent);
     ~MessagesModel() override;
 
+    void setMessages(const Messages &messages);
+    Message createMessage(const Chat::Id &chatId, const Contact::Id &authorId, const QString &body, const Optional<Attachment> &attachment);
+
 private:
+    enum Roles
+    {
+        IdRole = Qt::UserRole,
+        DayRole,
+        DisplayTimeRole,
+        AuthorIdRole,
+        StatusRole,
+        BodyRole,
+        // Attachment
+        AttachmentIdRole,
+        AttachmentTypeRole,
+        AttachmentStatusRole,
+        AttachmentImageRole,
+        AttachmentImageSizeRole,
+        AttachmentDisplaySizeRole,
+        // Loading
+        AttachmentBytesTotalRole,
+        AttachmentBytesLoadedRole,
+        AttachmentFileExistsRole,
+        //
+        FailedRole,
+        FirstInRowRole,
+        InRowRole,
+    };
+
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
-
     QHash<int, QByteArray> roleNames() const override;
-
-    void fetchMore(const QModelIndex &parent) override;
-    bool canFetchMore(const QModelIndex &parent) const override;
 
     Messages m_messages;
 };

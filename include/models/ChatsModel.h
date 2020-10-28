@@ -54,19 +54,25 @@ public:
     ~ChatsModel() override;
 
     void setChats(const Chats &chats);
-    void addChat(const Contact::Id &contactId);
-    void resetUnreadCount(const Contact::Id &contactId);
+    Chat createChat(const Contact::Id &contactId);
 
-    bool hasChat(const Contact::Id &contactId) const;
+    void resetUnreadCount(const Chat::Id &chatId);
+    void updateLastMessage(const Message &message);
+
+    Optional<Chat> find(const Chat::Id &chatId) const;
+    Optional<Chat> findByContact(const Contact::Id &contactId) const;
+    bool hasChat(const Chat::Id &chatId) const;
+    bool hasChatWithContact(const Contact::Id &contactId) const;
 
 signals:
     void filterChanged(const QString &);
 
 private:
-    enum Columns
+    enum Roles
     {
-        ContactNameRole = Qt::UserRole,
-        LastEventTimestampRole,
+        IdRole = Qt::UserRole,
+        ContactIdRole,
+        LastEventTimeRole,
         LastMessageBodyRole,
         UnreadMessagesCountRole
     };
@@ -77,7 +83,8 @@ private:
 
     void setFilter(const QString &filter);
 
-    Optional<int> findChatRow(const Contact::Id &contactId) const;
+    Optional<int> findRowById(const Chat::Id &chatId) const;
+    Optional<int> findRowByContact(const Contact::Id &contactId) const;
 
     Chats m_chats;
     QSortFilterProxyModel *m_proxy;

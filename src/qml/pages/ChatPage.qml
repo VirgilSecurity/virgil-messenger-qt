@@ -14,7 +14,7 @@ Page {
     id: chatPage
 
     readonly property var appState: app.stateManager.chatState
-    readonly property var contactId: controllers.chats.chatContact
+    readonly property var contactId: controllers.chats.currentContactId
 
     background: Rectangle {
         color: Theme.chatBackgroundColor
@@ -92,35 +92,38 @@ Page {
             date: section
         }
 
-        model: ConversationsModel
+        model: models.messages
 
         spacing: 5
         delegate: ChatMessage {
             maxWidth: Math.min(root.width - 220, 800)
 
-            body: model.message
-            time: Qt.formatDateTime(model.timestamp, "hh:mm")
-            nickname: model.author
-            isUser: model.author === controllers.users.username
-            status: isUser ? model.status : "none"
-            failed: (model.status == 4) && (!attachmentId || attachmentStatus == Enums.AttachmentStatus.Failed)
-            messageId: model.messageId
-
-            inRow: model.messageInARow
-            firstInRow: model.firstMessageInARow
+            body: model.body
+            displayTime: model.displayTime
+            nickname: model.authorId
+            isOwnMessage: model.authorId === controllers.users.username
+            status: isOwnMessage ? model.status : "none"
+            messageId: model.id
+            inRow: model.inRow
+            firstInRow: model.firstInRow
+            failed: model.failed
 
             attachmentId: model.attachmentId
-            attachmentBytesTotal: model.attachmentBytesTotal
-            attachmentDisplaySize: model.attachmentDisplaySize
             attachmentType: model.attachmentType
+            attachmentStatus: model.attachmentStatus
+            attachmentDisplaySize: model.attachmentDisplaySize
+            attachmentBytesTotal: model.attachmentBytesTotal
+            attachmentBytesLoaded: model.attachmentBytesLoaded
+            // FIXME(fpohtmeh): finish
+            /*
             attachmentFilePath: model.attachmentFilePath
             attachmentThumbnailPath: model.attachmentThumbnailPath
             attachmentThumbnailWidth: model.attachmentThumbnailWidth
             attachmentThumbnailHeight: model.attachmentThumbnailHeight
-            attachmentBytesLoaded: model.attachmentBytesLoaded
-            attachmentStatus: model.attachmentStatus
             attachmentDownloaded: model.attachmentDownloaded
+            */
 
+            // TODO(fpohtmeh): refactor slots
             onSaveAttachmentAs: function(messageId) {
                 saveAttachmentAsDialog.messageId = messageId
                 saveAttachmentAsDialog.attachmentType = attachmentType
@@ -179,7 +182,6 @@ Page {
 
     footer: ChatMessageInput {
         id: footerControl
-        onMessageSending: appState.sendMessage(contactId, message, attachmentUrl, attachmentType)
     }
 
     Item {
@@ -200,13 +202,6 @@ Page {
         SoundEffect {
             id: messageSent
             source: "../resources/sounds/message-sent.wav"
-        }
-    }
-
-    onContactIdChanged: {
-        ConversationsModel.recipient = contactId
-        if (contactId) {
-            ConversationsModel.setAsRead(contactId)
         }
     }
 
