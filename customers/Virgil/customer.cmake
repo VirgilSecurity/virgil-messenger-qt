@@ -66,7 +66,7 @@ else()
         set(MACOSX_DEPLOYMENT_TARGET 10.14)
         set(VS_BUNDLE_PREFIX "com.virgilsecurity")
         set(MACOSX_BUNDLE_GUI_IDENTIFIER "${VS_BUNDLE_PREFIX}.${PROJECT_NAME}")        
-        list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/platforms/macos/release-notes.html.in=${PROJECT_SOURCE_DIR}/platforms/macos/release-notes.html")
+        list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/platforms/macos/release-notes.html.in=${CMAKE_CURRENT_BINARY_DIR}/update/release-notes.html")
         list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/platforms/macos/dmg.json.in=${CMAKE_CURRENT_BINARY_DIR}/dmg.json")
     # ----------    
     # IOS    

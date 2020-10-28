@@ -14,3 +14,5 @@
     make
     make dmg_release
 
+    # Create sparkle update
+    make dmg_update

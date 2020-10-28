@@ -149,4 +149,11 @@ elseif(VS_PLATFORM STREQUAL "macos")
 	${VS_CUSTOMER_DIR}/platforms/macos/pkg_resources/${MACOSX_BUNDLE_ICON_FILE}
 	"${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dmg"       
     VERBATIM)
+    
+  add_custom_target(dmg_update
+    COMMAND echo "Creating sparkle update files..."
+    COMMAND cp -f "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dmg" "${CMAKE_BINARY_DIR}/update/${PROJECT_NAME}-${PROJECT_VERSION}.dmg"
+    COMMAND ${PROJECT_SOURCE_DIR}/ext/prebuilt/macos/sparkle/bin/generate_appcast "${CMAKE_BINARY_DIR}/update"
+    VERBATIM)
+    
 endif()
