@@ -300,9 +300,6 @@ target_sources(${VS_TARGET_NAME}
 	$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/XmppPushNotifications.h>
 	$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/android/FirebaseListener.h>
 
-	# Customer includes
-	${VS_CUSTOMER_INCLUDES}        
-
 	# -- Sources
 	${CMAKE_CURRENT_LIST_DIR}/src/VSQAttachmentBuilder.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/VSQClipboardProxy.cpp

@@ -1,4 +1,3 @@
-
 message(STATUS "[Begin] customer.cmake")
 
 # Set project target name and variables before define project in main Cmake file
@@ -21,11 +20,9 @@ else()
     set(VS_MESSANGER_URL_TEMPLATE "https://messenger%1.virgilsecurity.com")
     set(VS_XMPP_URL_TEMPLATE "xmpp%1.virgilsecurity.com")
 
-
     # -- Sources and includes
     # Custom customer sources and includes
     #set(VS_CUSTOMER_INCLUDE_DIR "${VS_CUSTOMER_DIR}/includes")
-    #set(VS_CUSTOMER_INCLUDES "${VS_CUSTOMER_DIR}/${VS_CUSTOMER_INCLUDE_DIR}/Example.hpp")
     #set(VS_CUSTOMER_SOURCES "${VS_CUSTOMER_DIR}/src/Example.cpp")
 
     # ----------
@@ -44,11 +41,32 @@ else()
         set(VS_ANDROID_PACKAGE_NAME "com.virgilsecurity.android.virgil")
         set(VS_PUSH_PROXY "push-notifications-proxy")
         set(VS_PUSH_TOPIC "com.virgil.VirgilMessenger")
+        # Templates
         list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/src/android/java/org/virgil/notification/NotificationClient.java.in=${PROJECT_SOURCE_DIR}/src/android/java/org/virgil/notification/NotificationClient.java")
         list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/platforms/android/AndroidManifest.xml.in=${PROJECT_SOURCE_DIR}/platforms/android/AndroidManifest.xml")
         list(APPEND VS_TEMPLATES "${VS_CUSTOMER_DIR}/platforms/android/google-services.json.in=${PROJECT_SOURCE_DIR}/platforms/android/google-services.json")
         list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/platforms/android/gradle.properties.in=${PROJECT_SOURCE_DIR}/platforms/android/gradle.properties")
-
+        # Files
+        list(APPEND VS_FILES "")
+        list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-xhdpi/icon_round.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-xhdpi/icon_round.png")
+        list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-xhdpi/icon.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-xhdpi/icon.png")
+        list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-xhdpi/splashscreen.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-xhdpi/splashscreen.png")
+        list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-hdpi/icon_round.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-hdpi/icon_round.png")
+        list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-hdpi/icon.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-hdpi/icon.png")
+        list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-hdpi/splashscreen.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-hdpi/splashscreen.png")
+        list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-xxhdpi/icon_round.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-xxhdpi/icon_round.png")
+        list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-xxhdpi/icon.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-xxhdpi/icon.png")
+        list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-xxhdpi/splashscreen.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-xxhdpi/splashscreen.png")
+        list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-xxxhdpi/icon_round.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-xxxhdpi/icon_round.png")
+        list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-xxxhdpi/icon.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-xxxhdpi/icon.png")
+        list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-xxxhdpi/splashscreen.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-xxxhdpi/splashscreen.png")
+        list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-mdpi/icon_round.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-mdpi/icon_round.png")
+        list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-mdpi/icon.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-mdpi/icon.png")
+        list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-mdpi/splashscreen.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-mdpi/splashscreen.png")
+        list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-ldpi/icon_round.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-ldpi/icon_round.png")
+        list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-ldpi/icon.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-ldpi/icon.png")
+        list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-ldpi/splashscreen.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-ldpi/splashscreen.png")
+        list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable/splash.xml=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable/splash.xml")
     # ----------
     # MacOS    
     # ----------
@@ -78,31 +96,7 @@ else()
         set(MACOSX_BUNDLE_GUI_IDENTIFIER "${VS_BUNDLE_PREFIX}.${PROJECT_NAME}")            
     endif()    
 
-    # ----------
-    # Files
-    # ----------
-    # ***********************************************************************************
-    list(APPEND VS_FILES "")
-    list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-xhdpi/icon_round.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-xhdpi/icon_round.png")
-    list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-xhdpi/icon.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-xhdpi/icon.png")
-    list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-xhdpi/splashscreen.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-xhdpi/splashscreen.png")
-    list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-hdpi/icon_round.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-hdpi/icon_round.png")
-    list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-hdpi/icon.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-hdpi/icon.png")
-    list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-hdpi/splashscreen.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-hdpi/splashscreen.png")
-    list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-xxhdpi/icon_round.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-xxhdpi/icon_round.png")
-    list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-xxhdpi/icon.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-xxhdpi/icon.png")
-    list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-xxhdpi/splashscreen.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-xxhdpi/splashscreen.png")
-    list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-xxxhdpi/icon_round.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-xxxhdpi/icon_round.png")
-    list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-xxxhdpi/icon.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-xxxhdpi/icon.png")
-    list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-xxxhdpi/splashscreen.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-xxxhdpi/splashscreen.png")
-    list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-mdpi/icon_round.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-mdpi/icon_round.png")
-    list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-mdpi/icon.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-mdpi/icon.png")
-    list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-mdpi/splashscreen.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-mdpi/splashscreen.png")
-    list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-ldpi/icon_round.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-ldpi/icon_round.png")
-    list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-ldpi/icon.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-ldpi/icon.png")
-    list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-ldpi/splashscreen.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-ldpi/splashscreen.png")
-    list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable/splash.xml=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable/splash.xml")
-    
+
 endif()
 
 message(STATUS "[End] customer.cmake")
