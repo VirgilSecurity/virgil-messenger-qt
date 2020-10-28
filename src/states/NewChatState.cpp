@@ -42,14 +42,13 @@ NewChatState::NewChatState(ChatsController *chatsController, QState *parent)
     : OperationState(parent)
     , m_chatsController(chatsController)
 {
-    connect(chatsController, &ChatsController::chatCreated, this, &NewChatState::operationFinished);
-    connect(chatsController, &ChatsController::createChatErrorOccured, this, &NewChatState::operationErrorOccurred);
-    connect(chatsController, &ChatsController::chatCreated, this, &NewChatState::requestChat);
+    connect(chatsController, &ChatsController::chatOpened, this, &NewChatState::operationFinished);
+    connect(chatsController, &ChatsController::errorOccurred, this, &NewChatState::operationErrorOccurred);
     connect(this, &NewChatState::addNewChat, this, &NewChatState::processAddNewChat);
 }
 
-void NewChatState::processAddNewChat(const QString &contactId)
+void NewChatState::processAddNewChat(const Contact::Id &contactId)
 {
     emit operationStarted();
-    m_chatsController->createChat(contactId);
+    m_chatsController->openChat(contactId);
 }

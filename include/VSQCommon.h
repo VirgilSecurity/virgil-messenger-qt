@@ -239,6 +239,7 @@ struct Attachment
 };
 }
 
+Q_DECLARE_METATYPE(vm::Contact::Id)
 Q_DECLARE_METATYPE(vm::Contact::Type)
 Q_DECLARE_METATYPE(vm::Message::Status)
 Q_DECLARE_METATYPE(vm::Chats)

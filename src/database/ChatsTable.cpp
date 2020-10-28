@@ -64,7 +64,7 @@ void ChatsTable::processFetch()
     auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectChats"));
     if (!query) {
         qCCritical(lcDatabase) << "ChatsTable::processFetch error";
-        emit fetchErrorOccurred(tr("Failed to fetch chats"));
+        emit errorOccurred(tr("Failed to fetch chats"));
         return;
     }
     auto q = *query;
@@ -104,12 +104,11 @@ void ChatsTable::processCreateChat(const Contact::Id &contactId)
         auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("checkChatByContact"), values);
         if (!query) {
             qCCritical(lcDatabase) << "ChatsTable::processAddChat check error";
-            emit createChatErrorOccurred(tr("Failed to find chat"));
+            emit errorOccurred(tr("Failed to find chat"));
             return;
         }
         if (query->next()) {
             qCInfo(lcDatabase) << "Chat already exists:" << contactId;
-            emit chatCreated(contactId);
             return;
         }
     }
@@ -124,11 +123,10 @@ void ChatsTable::processCreateChat(const Contact::Id &contactId)
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertChat"), values);
     if (!query) {
         qCCritical(lcDatabase) << "ChatsTable::processAddChat insertion error";
-        emit createChatErrorOccurred(tr("Failed to insert chat"));
+        emit errorOccurred(tr("Failed to insert chat"));
         return;
     }
     qCDebug(lcDatabase) << "Chat was inserted into table" << contactId;
-    emit chatCreated(contactId);
 }
 
 void ChatsTable::processResetUnreadCount(const Contact::Id &contactId)
@@ -138,10 +136,9 @@ void ChatsTable::processResetUnreadCount(const Contact::Id &contactId)
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("resetUnreadCount"), values);
     if (!query) {
         qCCritical(lcDatabase) << "ChatsTable::processResetUnreadCount error";
-        emit createChatErrorOccurred(tr("Failed to reset unread count"));
+        emit errorOccurred(tr("Failed to reset unread count"));
     }
     else {
         qCDebug(lcDatabase) << "Chat unread count was reset" << contactId;
-        emit unreadCountReset(contactId);
     }
 }

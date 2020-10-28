@@ -159,10 +159,10 @@ VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
         return QSqlTableModel::data(index, role);
     }
 
-    if (role == AttachmentIdRole) {
-        static int reloadCounter = 0;
-        qDebug() << "Re-loading of message" << ++reloadCounter << "model row" << index.row();
-    }
+//    if (role == AttachmentIdRole) {
+//        static int reloadCounter = 0;
+//        qDebug() << "Re-loading of message" << ++reloadCounter << "model row" << index.row();
+//    }
 
     const QSqlRecord currRecord = record(index.row());
     const int authorColumn = AuthorRole - Qt::UserRole;

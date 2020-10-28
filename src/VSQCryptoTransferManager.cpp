@@ -34,6 +34,7 @@
 
 #include "VSQCryptoTransferManager.h"
 
+#include <Core.h>
 #include <Settings.h>
 #include <VSQDownload.h>
 #include <VSQTransfer.h>
@@ -124,7 +125,7 @@ bool VSQCryptoTransferManager::ecnryptFile(const QString &path, const QString &e
     file.close();
 
     // Encrypt
-    std::vector<char> encBytes(vm::Utils::bufferSizeForEncryption(bytes.size()));
+    std::vector<char> encBytes(Core::bufferSizeForEncryption(bytes.size()));
     size_t encBytesSize = 0;
     const auto code = vs_messenger_virgil_encrypt_msg(
                 recipient.toStdString().c_str(),
@@ -177,7 +178,7 @@ bool VSQCryptoTransferManager::decryptFile(const QString &encPath, const QString
     }
 
     // Decrypt
-    std::vector<char> bytes(encBytes.size());
+    std::vector<char> bytes(Core::bufferSizeForDecryption(encBytes.size()));
     size_t bytesSize = 0;
     const auto code = vs_messenger_virgil_decrypt_msg(
                 recipient.toStdString().c_str(),

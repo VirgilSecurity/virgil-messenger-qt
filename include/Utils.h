@@ -69,12 +69,6 @@ namespace Utils
 
     QUrl localFileToUrl(const QString &filePath);
 
-    // Crypto functions
-
-    int bufferSizeForEncryption(const int rawSize);
-
-    int bufferSizeForDecryption(const int encryptedSize);
-
     // Debug
 
     void printThreadId(const QString &message);

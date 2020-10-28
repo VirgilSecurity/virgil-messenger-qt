@@ -40,7 +40,6 @@
 namespace vm
 {
 class ChatsModel;
-class Controllers;
 class MessagesModel;
 
 class Models : public QObject
@@ -50,7 +49,7 @@ class Models : public QObject
     Q_PROPERTY(MessagesModel *messages READ messages CONSTANT)
 
 public:
-    explicit Models(Controllers *controllers, QObject *parent);
+    explicit Models(QObject *parent);
 
     const ChatsModel *chats() const;
     ChatsModel *chats();

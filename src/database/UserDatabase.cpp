@@ -132,5 +132,12 @@ void UserDatabase::openByUsername(const QString &username)
         const QString fileName = QString("user-%1.sqlite3").arg(username);
         const QString filePath(m_databaseDir.filePath(fileName));
         Database::open(filePath, username + QLatin1String("-messenger"));
+        emit usernameChanged(username);
     }
+}
+
+void UserDatabase::close()
+{
+    Database::close();
+    emit usernameChanged(QString());
 }

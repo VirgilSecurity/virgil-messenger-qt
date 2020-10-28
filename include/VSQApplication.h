@@ -99,10 +99,10 @@ private:
     QQmlApplicationEngine m_engine;
     Validator *m_validator;
     VSQMessenger m_messenger;
+    Models m_models;
     UserDatabase *m_userDatabase;
     QThread *m_databaseThread;
     Controllers m_controllers;
-    Models m_models;
     KeyboardEventFilter *m_keyboardEventFilter;
     ApplicationStateManager m_applicationStateManager;
 };

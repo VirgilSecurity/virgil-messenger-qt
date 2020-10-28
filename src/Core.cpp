@@ -32,41 +32,25 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHATSTATE_H
-#define VM_CHATSTATE_H
+#include "Core.h"
 
-#include <QState>
+#include <virgil/iot/messenger/messenger.h>
 
-#include "VSQCommon.h"
+using namespace vm;
+using namespace VirgilIoTKit;
 
-class VSQMessenger;
-
-namespace vm
+bool Core::findContact(const Contact::Id &contactId)
 {
-class ChatState : public QState
-{
-    Q_OBJECT
-    Q_PROPERTY(QString lastActivityText READ lastActivityText WRITE setLastActivityText NOTIFY lastActivityTextChanged)
-
-public:
-    ChatState(VSQMessenger *messenger, QState *parent);
-
-    QString lastActivityText() const;
-    void setLastActivityText(const QString &text);
-
-signals:
-    void sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
-    void downloadAttachment(const QString &messageId);
-    void openAttachment(const QString &messageId);
-    void saveAttachmentAs(const QString &messageId, const QVariant &fileUrl);
-    void requestPreview(const QUrl &url);
-    void lastActivityTextChanged(const QString &text);
-    void messageSent();
-
-private:
-    VSQMessenger *m_messenger;
-    QString m_lastActivityText;
-};
+    return VS_CODE_OK == vs_messenger_virgil_search(contactId.toStdString().c_str());
 }
 
-#endif // VM_CHATSTATE_H
+int Core::bufferSizeForEncryption(const int rawSize)
+{
+    // TODO(fpohtmeh): use function rawSize * 3 + 2180
+    return 5 * rawSize + 5000;
+}
+
+int Core::bufferSizeForDecryption(const int encryptedSize)
+{
+    return encryptedSize;
+}

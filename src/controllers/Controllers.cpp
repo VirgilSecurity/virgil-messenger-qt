@@ -34,6 +34,7 @@
 
 #include "controllers/Controllers.h"
 
+#include "VSQMessenger.h"
 #include "controllers/ChatsController.h"
 #include "controllers/MessagesController.h"
 #include "controllers/UsersController.h"
@@ -41,12 +42,16 @@
 
 using namespace vm;
 
-Controllers::Controllers(VSQMessenger *messenger, UserDatabase *userDatabase, QObject *parent)
+Controllers::Controllers(VSQMessenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
     , m_users(new UsersController(messenger, userDatabase, this))
-    , m_chats(new ChatsController(messenger, userDatabase, this))
+    , m_chats(new ChatsController(models, userDatabase, this))
     , m_messages(new MessagesController(this))
 {
+    connect(m_users, &UsersController::usernameChanged, m_chats, &ChatsController::loadChats);
+    connect(m_chats, &ChatsController::chatOpened, m_users, &UsersController::subscribeToContact);
+    connect(m_chats, &ChatsController::chatContactChanged, messenger, &VSQMessenger::setCurrentRecipient);
+
     qRegisterMetaType<ChatsController *>("ChatsController*");
     qRegisterMetaType<MessagesController *>("MessagesController*");
     qRegisterMetaType<UsersController *>("UsersController*");

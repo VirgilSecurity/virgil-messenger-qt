@@ -41,10 +41,10 @@
 
 using namespace vm;
 
-Models::Models(Controllers *controllers, QObject *parent)
+Models::Models(QObject *parent)
     : QObject(parent)
-    , m_chats(new ChatsModel(controllers, this))
-    , m_messages(new MessagesModel(controllers, this))
+    , m_chats(new ChatsModel(this))
+    , m_messages(new MessagesModel(this))
 {
     qRegisterMetaType<ChatsModel *>("ChatsModel*");
     qRegisterMetaType<MessagesModel *>("MessagesModel*");

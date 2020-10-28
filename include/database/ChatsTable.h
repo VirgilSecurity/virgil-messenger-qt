@@ -50,16 +50,11 @@ public:
 
 signals:
     void fetch();
-    void fetchErrorOccurred(const QString &errorText);
-    void fetched(const Chats &chats);
-
     void createChat(const Contact::Id &contactId);
-    void createChatErrorOccurred(const QString &errorText);
-    void chatCreated(const Contact::Id &contactId);
-
     void resetUnreadCount(const Contact::Id &contactId);
-    void unreadCountReset(const Contact::Id &contactId);
-    void resetUnreadCountErrorOccurred(const QString &errorText);
+
+    void errorOccurred(const QString &errorText);
+    void fetched(const Chats &chats);
 
 private:
     void processFetch();

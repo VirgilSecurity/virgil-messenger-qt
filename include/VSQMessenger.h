@@ -105,7 +105,7 @@ public:
     Q_INVOKABLE QString currentRecipient() const;
 
     VSQSqlConversationModel &modelConversations();
-    VSQSqlChatModel &getChatModel();
+    //VSQSqlChatModel &getChatModel();
     VSQLastActivityManager *lastActivityManager();
 
     Optional<StMessage> decryptMessage(const QString &sender, const QString &message);
@@ -117,7 +117,6 @@ public:
     void signIn(const QString &userId);
     void signOut();
     void signUp(const QString &userId);
-    void addContact(const QString &userId);
     void backupKey(const QString &password, const QString &confirmedPassword);
     void downloadKey(const QString &userId, const QString &password);
 
@@ -146,9 +145,6 @@ public slots:
     checkState();
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    addContactAsync(QString contact);
-
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     sendMessageAsync(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
 
     QFuture<VSQMessenger::EnResult>
@@ -170,6 +166,8 @@ public slots:
 
     void openAttachment(const QString &messageId);
 
+    bool subscribeToContact(const Contact::Id &contactId);
+
 signals:
     void
     fireError(QString errorText);
@@ -187,9 +185,6 @@ signals:
     fireReady();
 
     void chatEntryRequested(const QString &contact);
-
-    void
-    fireReadyToAddContact(QString contact);
 
     void
     fireNewMessage(QString from, QString message);
@@ -210,9 +205,6 @@ signals:
     void signUpErrorOccured(const QString &errorText);
     void signedOut();
 
-    void contactAdded(const QString &userId);
-    void addContactErrorOccured(const QString &errorText);
-
     void keyBackuped(const QString &userId);
     void backupKeyFailed(const QString &errorText);
     void keyDownloaded(const QString &userId);
@@ -232,7 +224,6 @@ private slots:
     void onStateChanged(QXmppClient::State state);
     void onProcessNetworkState(bool online);
     void onReadyToUpload();
-    void onAddContact(QString contact);
     void onDownloadThumbnail(const StMessage message, const QString sender);
     void onAttachmentStatusChanged(const QString &uploadId, const Enums::AttachmentStatus status);
     void onAttachmentProgressChanged(const QString &uploadId, const DataSize bytesReceived, const DataSize bytesTotal);
@@ -251,7 +242,7 @@ private:
     VSQLastActivityManager* m_lastActivityManager;
 
     VSQSqlConversationModel *m_sqlConversations;
-    VSQSqlChatModel *m_sqlChatModel;
+    //VSQSqlChatModel *m_sqlChatModel;
     VSQCrashReporter *m_crashReporter;
     VSQNetworkAnalyzer m_networkAnalyzer;
     VSQSettings *m_settings;

@@ -147,7 +147,7 @@ Page {
                 }
             }
 
-            onClicked: appState.requestChat(model.name)
+            onClicked: controllers.chats.openChat(model.name)
         }
 
         IconWithText {

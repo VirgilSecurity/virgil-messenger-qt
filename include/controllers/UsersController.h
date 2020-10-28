@@ -61,6 +61,8 @@ public:
 
     void downloadKey(const QString &username, const QString &password);
 
+    void subscribeToContact(const Contact::Id &contactId);
+
 signals:
     void signedIn(const QString &username);
     void signInErrorOccured(const QString &errorText);
@@ -71,10 +73,9 @@ signals:
     void keyDownloaded(const QString &username);
     void downloadKeyFailed(const QString &errorText);
 
-    void usernameChanged(const QString &);
+    void usernameChanged(const QString &username);
 
 private:
-    // legacy
     enum class Operation
     {
         SignIn,
@@ -83,14 +84,13 @@ private:
         DownloadKey
     };
 
-    void processMessengerOperation(const QString &username, const Operation operation);
-    void processDatabaseOperation(const QString &username, const Operation operation);
+    void openDatabase(const QString &username, const Operation operation);
+    void processDatabaseUsername(const QString &username);
 
     VSQMessenger *m_messenger;
     UserDatabase *m_userDatabase;
+    Operation m_operation = Operation::SignIn;
     QString m_username;
-
-    QMetaObject::Connection m_databaseConnection;
 };
 }
 

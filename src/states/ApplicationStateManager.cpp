@@ -36,6 +36,7 @@
 
 #include "VSQMessenger.h"
 #include "controllers/Controllers.h"
+#include "controllers/ChatsController.h"
 #include "controllers/UsersController.h"
 
 Q_LOGGING_CATEGORY(lcAppState, "appState");
@@ -52,7 +53,7 @@ ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, Contro
     , m_accountSettingsState(new AccountSettingsState(this))
     , m_attachmentPreviewState(new AttachmentPreviewState(this))
     , m_backupKeyState(new BackupKeyState(m_messenger, this))
-    , m_chatListState(new ChatListState(controllers, this))
+    , m_chatListState(new ChatListState(controllers->chats(), this))
     , m_chatState(new ChatState(m_messenger, this))
     , m_downloadKeyState(new DownloadKeyState(controllers->users(), this))
     , m_newChatState(new NewChatState(controllers->chats(), this))
@@ -96,36 +97,37 @@ void ApplicationStateManager::addTransitions()
         connect(state, &QState::exited, this, std::bind(&ApplicationStateManager::setPreviousState, this, state));
     }
 
+    auto users = m_controllers->users();
+    auto chats = m_controllers->chats();
+
     m_startState->addTransition(this, &ApplicationStateManager::splashScreenRequested, m_splashScreenState);
     // NOTE: Queued connection is a workaround for working state transition
     connect(this, &ApplicationStateManager::setUiState, this, std::bind(&ApplicationStateManager::splashScreenRequested, this, QPrivateSignal()), Qt::QueuedConnection);
 
     m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::userNotSelected, m_accountSelectionState);
     m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::operationErrorOccurred, m_accountSelectionState);
-    m_splashScreenState->addTransition(m_controllers->users(), &UsersController::signedIn, m_chatListState);
+    m_splashScreenState->addTransition(users, &UsersController::signedIn, m_chatListState);
 
-    m_accountSelectionState->addTransition(m_controllers->users(), &UsersController::signedIn, m_chatListState);
+    m_accountSelectionState->addTransition(users, &UsersController::signedIn, m_chatListState);
     addTwoSideTransition(m_accountSelectionState, m_accountSelectionState, &AccountSelectionState::requestSignInUsername, m_signInUsernameState);
     addTwoSideTransition(m_accountSelectionState, m_accountSelectionState, &AccountSelectionState::requestSignUp, m_signUpState);
 
-    m_chatListState->addTransition(m_controllers->users(), &UsersController::signedOut, m_accountSelectionState);
+    m_chatListState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
     addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestAccountSettings, m_accountSettingsState);
     connect(m_chatListState, &ChatListState::requestAccountSettings, m_accountSettingsState, &AccountSettingsState::setUserId);
     addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestNewChat, m_newChatState);
-    addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestChat, m_chatState);
-    connect(m_chatListState, &ChatListState::requestChat, m_chatState, &ChatState::setContactId);
+    addTwoSideTransition(m_chatListState, chats, &ChatsController::chatOpened, m_chatState);
 
     addTwoSideTransition(m_accountSettingsState, m_accountSettingsState, &AccountSettingsState::requestBackupKey, m_backupKeyState);
     connect(m_accountSettingsState, &AccountSettingsState::requestBackupKey, m_backupKeyState, &BackupKeyState::setUserId);
-    m_accountSettingsState->addTransition(m_controllers->users(), &UsersController::signedOut, m_accountSelectionState);
+    m_accountSettingsState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
 
-    m_newChatState->addTransition(m_newChatState, &NewChatState::requestChat, m_chatState);
-    connect(m_newChatState, &NewChatState::requestChat, m_chatState, &ChatState::setContactId);
+    m_newChatState->addTransition(chats, &ChatsController::chatOpened, m_chatState);
 
     addTwoSideTransition(m_chatState, m_chatState, &ChatState::requestPreview, m_attachmentPreviewState);
     connect(m_chatState, &ChatState::requestPreview, m_attachmentPreviewState, &AttachmentPreviewState::setUrl);
 
-    m_signUpState->addTransition(m_controllers->users(), &UsersController::signedUp, m_chatListState);
+    m_signUpState->addTransition(users, &UsersController::signedUp, m_chatListState);
 
     addTwoSideTransition(m_signInUsernameState, m_signInUsernameState, &SignInUsernameState::validated, m_signInAsState);
     connect(m_signInUsernameState, &SignInUsernameState::validated, m_signInAsState, &SignInAsState::setUserId);
@@ -133,7 +135,7 @@ void ApplicationStateManager::addTransitions()
     addTwoSideTransition(m_signInAsState, m_signInAsState, &SignInAsState::requestDownloadKey, m_downloadKeyState);
     connect(m_signInAsState, &SignInAsState::requestDownloadKey, m_downloadKeyState, &DownloadKeyState::setUserId);
 
-    m_downloadKeyState->addTransition(m_controllers->users(), &UsersController::keyDownloaded, m_chatListState);
+    m_downloadKeyState->addTransition(users, &UsersController::keyDownloaded, m_chatListState);
 }
 
 void ApplicationStateManager::setCurrentState(QState *state)

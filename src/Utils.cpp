@@ -123,17 +123,6 @@ QUrl Utils::localFileToUrl(const QString &filePath)
 #endif
 }
 
-int Utils::bufferSizeForEncryption(const int rawSize)
-{
-    // TODO(fpohtmeh): use function rawSize * 3 + 2180
-    return 5 * rawSize + 5000;
-}
-
-int Utils::bufferSizeForDecryption(const int encryptedSize)
-{
-    return encryptedSize;
-}
-
 QString Utils::formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval)
 {
     const auto preffix = QObject::tr("Last seen %1");

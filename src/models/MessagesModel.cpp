@@ -36,9 +36,8 @@
 
 using namespace vm;
 
-MessagesModel::MessagesModel(Controllers *controllers, QObject *parent)
+MessagesModel::MessagesModel(QObject *parent)
     : QAbstractListModel(parent)
-    , m_controllers(controllers)
 {}
 
 MessagesModel::~MessagesModel()

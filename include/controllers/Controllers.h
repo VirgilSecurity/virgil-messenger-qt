@@ -43,6 +43,7 @@ namespace vm
 {
 class ChatsController;
 class MessagesController;
+class Models;
 class UserDatabase;
 class UsersController;
 
@@ -54,7 +55,7 @@ class Controllers : public QObject
     Q_PROPERTY(MessagesController *messages READ messages CONSTANT)
 
 public:
-    Controllers(VSQMessenger *messenger, UserDatabase *userDatabase, QObject *parent);
+    Controllers(VSQMessenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
     const UsersController *users() const;
     UsersController *users();

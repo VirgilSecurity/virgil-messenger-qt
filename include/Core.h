@@ -32,41 +32,26 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHATSTATE_H
-#define VM_CHATSTATE_H
-
-#include <QState>
+#ifndef VM_CORE_H
+#define VM_CORE_H
 
 #include "VSQCommon.h"
 
-class VSQMessenger;
-
 namespace vm
 {
-class ChatState : public QState
+class Core
 {
-    Q_OBJECT
-    Q_PROPERTY(QString lastActivityText READ lastActivityText WRITE setLastActivityText NOTIFY lastActivityTextChanged)
-
 public:
-    ChatState(VSQMessenger *messenger, QState *parent);
+    // Contacts/users
 
-    QString lastActivityText() const;
-    void setLastActivityText(const QString &text);
+    static bool findContact(const Contact::Id &contactId);
 
-signals:
-    void sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
-    void downloadAttachment(const QString &messageId);
-    void openAttachment(const QString &messageId);
-    void saveAttachmentAs(const QString &messageId, const QVariant &fileUrl);
-    void requestPreview(const QUrl &url);
-    void lastActivityTextChanged(const QString &text);
-    void messageSent();
+    // Encryption/decryption
 
-private:
-    VSQMessenger *m_messenger;
-    QString m_lastActivityText;
+    static int bufferSizeForEncryption(const int rawSize);
+
+    static int bufferSizeForDecryption(const int encryptedSize);
 };
 }
 
-#endif // VM_CHATSTATE_H
+#endif // VM_CORE_H

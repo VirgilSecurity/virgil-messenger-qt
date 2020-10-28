@@ -14,7 +14,7 @@ Page {
     id: chatPage
 
     readonly property var appState: app.stateManager.chatState
-    readonly property var contactId: appState.contactId
+    readonly property var contactId: controllers.chats.chatContact
 
     background: Rectangle {
         color: Theme.chatBackgroundColor

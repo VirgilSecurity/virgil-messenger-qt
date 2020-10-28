@@ -67,12 +67,14 @@ signals:
     void requestOpen(const QString &username);
     void requestClose();
 
+    void usernameChanged(const QString &username);
+
 private:
     bool create() override;
     void openByUsername(const QString &username);
+    void close();
 
     const QDir m_databaseDir;
-
     int m_attachmentsTableIndex;
     int m_chatsTableIndex;
     int m_contactsTableIndex;

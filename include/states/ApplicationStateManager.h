@@ -93,6 +93,7 @@ signals:
 
 private:
     void registerStatesMetaTypes();
+    void addConnections();
     void addTransitions();
 
     template <typename Func>

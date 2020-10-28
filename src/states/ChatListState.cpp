@@ -34,19 +34,17 @@
 
 #include "states/ChatListState.h"
 
-#include "controllers/Controllers.h"
 #include "controllers/ChatsController.h"
 
 using namespace vm;
 
-ChatListState::ChatListState(Controllers *controllers, QState *parent)
+ChatListState::ChatListState(ChatsController *chatsController, QState *parent)
     : QState(parent)
-    , m_controllers(controllers)
+    , m_chatsController(chatsController)
 {
-    connect(this, &ChatListState::requestChat, controllers->chats(), &ChatsController::resetUnreadCount);
 }
 
 void ChatListState::onEntry(QEvent *)
 {
-    m_controllers->chats()->fetchChats();
+    m_chatsController->closeChat();
 }

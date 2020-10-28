@@ -52,22 +52,6 @@ ChatState::ChatState(VSQMessenger *messenger, QState *parent)
     connect(m_messenger->lastActivityManager(), &VSQLastActivityManager::lastActivityTextChanged, this, &ChatState::setLastActivityText);
 }
 
-QString ChatState::contactId() const
-{
-    return m_contactId;
-}
-
-void ChatState::setContactId(const QString &contactId)
-{
-    if (m_contactId == contactId) {
-        return;
-    }
-    m_contactId = contactId;
-    emit contactIdChanged(contactId);
-
-    m_messenger->setCurrentRecipient(contactId);
-}
-
 QString ChatState::lastActivityText() const
 {
     return m_lastActivityText;

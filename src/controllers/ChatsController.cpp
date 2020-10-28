@@ -34,44 +34,82 @@
 
 #include "controllers/ChatsController.h"
 
-#include "VSQMessenger.h"
+#include <QtConcurrent>
+
+#include "Core.h"
 #include "database/ChatsTable.h"
 #include "database/UserDatabase.h"
+#include "models/ChatsModel.h"
+#include "models/Models.h"
 
 using namespace vm;
 
-ChatsController::ChatsController(VSQMessenger *messenger, UserDatabase *userDatabase, QObject *parent)
+ChatsController::ChatsController(Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
-    , m_messenger(messenger)
+    , m_models(models)
     , m_userDatabase(userDatabase)
 {
     connect(userDatabase, &UserDatabase::opened, this, &ChatsController::setupTableConnections);
-
-    connect(m_messenger, &VSQMessenger::contactAdded, this, &ChatsController::chatCreated);
-    connect(m_messenger, &VSQMessenger::addContactErrorOccured, this, &ChatsController::createChatErrorOccured);
+    connect(this, &ChatsController::chatOpened, models->chats(), &ChatsModel::addChat);
+    connect(this, &ChatsController::chatOpened, this, &ChatsController::resetUnreadCount);
+    connect(this, &ChatsController::chatOpened, this, &ChatsController::setChatContact);
+    connect(this, &ChatsController::chatClosed, this, std::bind(&ChatsController::setChatContact, this, QString()));
 }
 
-void ChatsController::fetchChats()
+void ChatsController::loadChats(const QString &username)
 {
-    m_userDatabase->chatsTable()->fetch();
+    if (username.isEmpty()) {
+        m_models->chats()->setChats({});
+    }
+    else {
+        m_userDatabase->chatsTable()->fetch();
+    }
 }
 
-void ChatsController::createChat(const Contact::Id &contactId)
+void ChatsController::openChat(const Contact::Id &contactId)
 {
-    m_messenger->addContact(contactId);
+    if (m_models->chats()->hasChat(contactId)) {
+        emit chatOpened(contactId);
+    }
+    else {
+        // TODO(fpohtmeh): check if online?
+        QtConcurrent::run([=]() {
+            if (!Core::findContact(contactId)) {
+                emit errorOccurred(tr("Contact not found"));
+            }
+            else {
+                emit chatOpened(contactId);
+            }
+        });
+    }
+}
+
+void ChatsController::closeChat()
+{
+    if (!m_chatContact.isEmpty()) {
+        emit chatClosed();
+    }
 }
 
 void ChatsController::resetUnreadCount(const Contact::Id &contactId)
 {
+    m_models->chats()->resetUnreadCount(contactId);
     m_userDatabase->chatsTable()->resetUnreadCount(contactId);
 }
 
 void ChatsController::setupTableConnections()
 {
     auto table = m_userDatabase->chatsTable();
-    connect(table, &ChatsTable::fetched, this, &ChatsController::chatsFetched);
-    connect(table, &ChatsTable::fetchErrorOccurred, this, &ChatsController::chatsFetchErrorOccurred);
-    connect(m_messenger, &VSQMessenger::chatEntryRequested, table, &ChatsTable::createChat);
-    connect(table, &ChatsTable::unreadCountReset, this, &ChatsController::unreadCountReset);
-    connect(table, &ChatsTable::resetUnreadCountErrorOccurred, this, &ChatsController::resetUnreadCountErrorOccurred);
+    connect(table, &ChatsTable::errorOccurred, this, &ChatsController::errorOccurred);
+    connect(table, &ChatsTable::fetched, m_models->chats(), &ChatsModel::setChats);
+    connect(this, &ChatsController::chatOpened, table, &ChatsTable::createChat);
+}
+
+void ChatsController::setChatContact(const Contact::Id &contactId)
+{
+    if (m_chatContact == contactId) {
+        return;
+    }
+    m_chatContact = contactId;
+    emit chatContactChanged(contactId);
 }

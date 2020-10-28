@@ -32,6 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#include <Core.h>
 #include <VSQContactManager.h>
 #include <VSQCustomer.h>
 #include <VSQDiscoveryManager.h>
@@ -141,7 +142,7 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSetti
     // Connect to Database
     _connectToDatabase();
     m_sqlConversations = new VSQSqlConversationModel(validator, this);
-    m_sqlChatModel = new VSQSqlChatModel(this);
+    //m_sqlChatModel = new VSQSqlChatModel(this);
 
     // Add receipt messages extension
     m_xmppReceiptManager = new QXmppMessageReceiptManager();
@@ -155,7 +156,6 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSetti
     m_xmpp.addExtension(m_lastActivityManager);
 
     // Signal connection
-    connect(this, SIGNAL(fireReadyToAddContact(QString)), this, SLOT(onAddContact(QString)));
     connect(this, SIGNAL(fireError(QString)), this, SLOT(disconnect()));
     connect(this, &VSQMessenger::downloadThumbnail, this, &VSQMessenger::onDownloadThumbnail);
 
@@ -239,18 +239,6 @@ void VSQMessenger::signUp(const QString &userId)
         default:
             emit signUpErrorOccured(tr("Unknown sign-up error"));
             break;
-        }
-    });
-}
-
-void VSQMessenger::addContact(const QString &userId)
-{
-    FutureWorker::run(addContactAsync(userId), [=](const FutureResult &result) {
-        if (result == MRES_OK) {
-            emit contactAdded(userId);
-        }
-        else {
-            emit addContactErrorOccured(tr("Contact not found"));
         }
     });
 }
@@ -491,7 +479,7 @@ VSQMessenger::_prepareLogin(const QString &user) {
     // Set current user
     m_user = userId;
     m_sqlConversations->setUser(userId);
-    m_sqlChatModel->init(userId);
+    //m_sqlChatModel->init(userId);
 
     // Inform about user activation
     emit fireCurrentUserChanged();
@@ -607,30 +595,9 @@ VSQMessenger::signUpAsync(QString user) {
 }
 
 /******************************************************************************/
-QFuture<VSQMessenger::EnResult>
-VSQMessenger::addContactAsync(QString contact) {
-    return QtConcurrent::run([=]() -> EnResult {
-        // Sign Up user, using Virgil Service
-        if (VS_CODE_OK != vs_messenger_virgil_search(contact.toStdString().c_str())) {
-            auto errorText = tr("User is not registered : ") + contact;
-            emit fireInform(errorText);
-            return MRES_ERR_USER_NOT_FOUND;
-        }
-
-        emit fireReadyToAddContact(contact);
-        return MRES_OK;
-    });
-}
-
-/******************************************************************************/
-void
-VSQMessenger::onAddContact(QString contact) {
-    if (!m_contactManager->addContact(contact + "@" + _xmppURL(), contact, QString())) {
-        emit fireError(m_contactManager->lastErrorText());
-    }
-    else {
-        emit chatEntryRequested(contact);
-    }
+bool VSQMessenger::subscribeToContact(const Contact::Id &contactId)
+{
+    return m_contactManager->addContact(contactId + "@" + _xmppURL(), contactId, QString());
 }
 
 void VSQMessenger::onDownloadThumbnail(const StMessage message, const QString sender)
@@ -819,10 +786,10 @@ VSQMessenger::modelConversations() {
     return *m_sqlConversations;
 }
 
-VSQSqlChatModel &
-VSQMessenger::getChatModel() {
-    return *m_sqlChatModel;
-}
+//VSQSqlChatModel &
+//VSQMessenger::getChatModel() {
+//    return *m_sqlChatModel;
+//}
 
 VSQLastActivityManager *VSQMessenger::lastActivityManager()
 {
@@ -1132,7 +1099,7 @@ VSQMessenger::onError(QXmppClient::Error err) {
 
 /******************************************************************************/
 Optional<StMessage> VSQMessenger::decryptMessage(const QString &sender, const QString &message) {
-    const int decryptedMsgSzMax = Utils::bufferSizeForDecryption(message.size());
+    const int decryptedMsgSzMax = Core::bufferSizeForDecryption(message.size());
     QByteArray decryptedMessage = QByteArray(decryptedMsgSzMax + 1, 0x00);
     size_t decryptedMessageSz = 0;
 
@@ -1187,19 +1154,19 @@ VSQMessenger::onMessageReceived(const QXmppMessage &message) {
         m_sqlConversations->setMessageStatus(msg->messageId, StMessage::Status::MST_SENT);
         // ensure private chat with recipient exists
         m_contactManager->addContact(recipient + "@" + _xmppURL(), recipient, QString());
-        m_sqlChatModel->createPrivateChat(recipient);
+        //m_sqlChatModel->createPrivateChat(recipient);
         emit fireNewMessage(sender, msg->message);
         return;
     }
 
     // Add sender to contact
     m_contactManager->addContact(sender + "@" + _xmppURL(), sender, QString());
-    m_sqlChatModel->createPrivateChat(sender);
+    //m_sqlChatModel->createPrivateChat(sender);
     // Save message to DB
     m_sqlConversations->receiveMessage(msg->messageId, sender, msg->message, msg->attachment);
-    m_sqlChatModel->updateLastMessage(sender, msg->message);
+    //m_sqlChatModel->updateLastMessage(sender, msg->message);
     if (sender != m_recipient) {
-        m_sqlChatModel->updateUnreadMessageCount(sender);
+        //m_sqlChatModel->updateUnreadMessageCount(sender);
     }
 
     if (msg->attachment && msg->attachment->type == ::Attachment::Type::Picture) {
@@ -1219,7 +1186,7 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
     if(createNew) {
         m_sqlConversations->createMessage(to, message, messageId, attachment);
     }
-    m_sqlChatModel->updateLastMessage(to, message);
+    //m_sqlChatModel->updateLastMessage(to, message);
 
     OptionalAttachment updloadedAttacment;
     if (attachment) {
@@ -1239,7 +1206,7 @@ VSQMessenger::_sendMessageInternal(bool createNew, const QString &messageId, con
     // Encrypt message
     QMutexLocker _guard(&m_messageGuard);
     const auto plaintext = internalJson.toStdString();
-    const size_t _encryptedMsgSzMax = Utils::bufferSizeForEncryption(plaintext.size());
+    const size_t _encryptedMsgSzMax = Core::bufferSizeForEncryption(plaintext.size());
     uint8_t encryptedMessage[_encryptedMsgSzMax];
     size_t encryptedMessageSz = 0;
 

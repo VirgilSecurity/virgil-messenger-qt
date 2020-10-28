@@ -41,14 +41,12 @@
 
 namespace vm
 {
-class Controllers;
-
 class MessagesModel : public QAbstractListModel
 {
     Q_OBJECT
 
 public:
-    explicit MessagesModel(Controllers *controllers, QObject *parent);
+    explicit MessagesModel(QObject *parent);
     ~MessagesModel() override;
 
 private:
@@ -60,7 +58,6 @@ private:
     void fetchMore(const QModelIndex &parent) override;
     bool canFetchMore(const QModelIndex &parent) const override;
 
-    Controllers *m_controllers;
     Messages m_messages;
 };
 }

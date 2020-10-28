@@ -44,14 +44,16 @@ UsersController::UsersController(VSQMessenger *messenger, UserDatabase *userData
     , m_messenger(messenger)
     , m_userDatabase(userDatabase)
 {
-    connect(messenger, &VSQMessenger::signedIn, this, std::bind(&UsersController::processMessengerOperation, this, args::_1, Operation::SignIn));
+    connect(messenger, &VSQMessenger::signedIn, this, std::bind(&UsersController::openDatabase, this, args::_1, Operation::SignIn));
     connect(messenger, &VSQMessenger::signInErrorOccured, this, &UsersController::signInErrorOccured);
-    connect(messenger, &VSQMessenger::signedUp, this, std::bind(&UsersController::processMessengerOperation, this, args::_1, Operation::SignUp));
+    connect(messenger, &VSQMessenger::signedUp, this, std::bind(&UsersController::openDatabase, this, args::_1, Operation::SignUp));
     connect(messenger, &VSQMessenger::signUpErrorOccured, this, &UsersController::signUpErrorOccured);
-    connect(messenger, &VSQMessenger::signedOut, this, std::bind(&UsersController::processMessengerOperation, this, QString(), Operation::SignOut));
+    connect(messenger, &VSQMessenger::signedOut, this, std::bind(&UsersController::openDatabase, this, QString(), Operation::SignOut));
 
-    connect(messenger, &VSQMessenger::keyDownloaded, this, std::bind(&UsersController::processMessengerOperation, this, args::_1, Operation::DownloadKey));
+    connect(messenger, &VSQMessenger::keyDownloaded, this, std::bind(&UsersController::openDatabase, this, args::_1, Operation::DownloadKey));
     connect(messenger, &VSQMessenger::downloadKeyFailed, this, &UsersController::downloadKeyFailed);
+
+    connect(userDatabase, &UserDatabase::usernameChanged, this, &UsersController::processDatabaseUsername);
 }
 
 QString UsersController::username() const
@@ -79,28 +81,31 @@ void UsersController::downloadKey(const QString &username, const QString &passwo
     m_messenger->downloadKey(username, password);
 }
 
-void UsersController::processMessengerOperation(const QString &username, const Operation operation)
+void UsersController::subscribeToContact(const Contact::Id &contactId)
 {
-    disconnect(m_databaseConnection);
-    auto slot = std::bind(&UsersController::processDatabaseOperation, this, username, operation);
-    if (operation == Operation::SignOut) {
-        m_databaseConnection = connect(m_userDatabase, &UserDatabase::closed, this, slot);
+    // TODO(fpohtmeh): use subscription result and error text
+    m_messenger->subscribeToContact(contactId);
+}
+
+void UsersController::openDatabase(const QString &username, const Operation operation)
+{
+    m_operation = operation;
+    if (username.isEmpty()) {
         m_userDatabase->requestClose();
     }
     else {
-        m_databaseConnection = connect(m_userDatabase, &UserDatabase::opened, this, slot);
         m_userDatabase->requestOpen(username);
     }
 }
 
-void UsersController::processDatabaseOperation(const QString &username, const Operation operation)
+void UsersController::processDatabaseUsername(const QString &username)
 {
     if (m_username != username) {
         m_username = username;
         emit usernameChanged(username);
     }
 
-    switch (operation) {
+    switch (m_operation) {
     case Operation::SignIn:
         emit signedIn(username);
         break;

@@ -36,12 +36,11 @@
 
 #include <QSortFilterProxyModel>
 
-#include "controllers/Controllers.h"
-#include "controllers/ChatsController.h"
+#include "Utils.h"
 
 using namespace vm;
 
-ChatsModel::ChatsModel(Controllers *controllers, QObject *parent)
+ChatsModel::ChatsModel(QObject *parent)
     : QAbstractListModel(parent)
     , m_proxy(new QSortFilterProxyModel(this))
 {
@@ -50,12 +49,50 @@ ChatsModel::ChatsModel(Controllers *controllers, QObject *parent)
     m_proxy->sort(0, Qt::DescendingOrder);
     m_proxy->setFilterKeyColumn(0);
     m_proxy->setFilterRole(ContactNameRole);
-
-    connect(controllers->chats(), &ChatsController::chatsFetched, this, &ChatsModel::setChats);
 }
 
 ChatsModel::~ChatsModel()
 {}
+
+void ChatsModel::setChats(const Chats &chats)
+{
+    beginResetModel();
+    m_chats = chats;
+    endResetModel();
+}
+
+void ChatsModel::addChat(const Contact::Id &contactId)
+{
+    if (hasChat(contactId)) {
+        return;
+    }
+    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+    Chat chat;
+    chat.id = Utils::createUuid();
+    chat.timestamp = QDateTime::currentDateTime();
+    // TODO(fpohtmeh): get contact by id from ContactsController
+    chat.contact.id = contactId;
+    chat.contact.name = contactId;
+    m_chats.push_back(chat);
+    endInsertRows();
+}
+
+void ChatsModel::resetUnreadCount(const Contact::Id &contactId)
+{
+    const auto chatRow = findChatRow(contactId);
+    if (!chatRow) {
+        return;
+    }
+    auto &chat = m_chats[*chatRow];
+    chat.unreadMessageCount = 0;
+    const auto chatIndex = index(*chatRow);
+    emit dataChanged(chatIndex, chatIndex, { UnreadMessagesCountRole });
+}
+
+bool ChatsModel::hasChat(const Contact::Id &contactId) const
+{
+    return bool(findChatRow(contactId));
+}
 
 int ChatsModel::rowCount(const QModelIndex &parent) const
 {
@@ -91,13 +128,6 @@ QHash<int, QByteArray> ChatsModel::roleNames() const
     };
 }
 
-void ChatsModel::setChats(const Chats &chats)
-{
-    beginResetModel();
-    m_chats = chats;
-    endResetModel();
-}
-
 void ChatsModel::setFilter(const QString &filter)
 {
     if (m_filter == filter) {
@@ -106,4 +136,16 @@ void ChatsModel::setFilter(const QString &filter)
     m_proxy->setFilterFixedString(filter);
     m_filter = filter;
     emit filterChanged(filter);
+}
+
+Optional<int> ChatsModel::findChatRow(const Contact::Id &contactId) const
+{
+    int i = 0;
+    for (auto &c : m_chats) {
+        if (c.contact.id == contactId) {
+            return i;
+        }
+        ++i;
+    }
+    return NullOptional;
 }

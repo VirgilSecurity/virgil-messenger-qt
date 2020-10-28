@@ -43,8 +43,6 @@ class QSortFilterProxyModel;
 
 namespace vm
 {
-class Controllers;
-
 class ChatsModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -52,8 +50,14 @@ class ChatsModel : public QAbstractListModel
     Q_PROPERTY(QString filter MEMBER m_filter WRITE setFilter NOTIFY filterChanged)
 
 public:
-    explicit ChatsModel(Controllers *controllers, QObject *parent);
+    explicit ChatsModel(QObject *parent);
     ~ChatsModel() override;
+
+    void setChats(const Chats &chats);
+    void addChat(const Contact::Id &contactId);
+    void resetUnreadCount(const Contact::Id &contactId);
+
+    bool hasChat(const Contact::Id &contactId) const;
 
 signals:
     void filterChanged(const QString &);
@@ -71,8 +75,9 @@ private:
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    void setChats(const Chats &chats);
     void setFilter(const QString &filter);
+
+    Optional<int> findChatRow(const Contact::Id &contactId) const;
 
     Chats m_chats;
     QSortFilterProxyModel *m_proxy;

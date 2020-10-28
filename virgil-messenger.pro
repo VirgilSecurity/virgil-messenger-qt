@@ -131,6 +131,7 @@ HEADERS += \
         include/ui/VSQUiHelper.h \
         include/KeyboardEventFilter.h \
         include/Validator.h \
+        include/Core.h \
         # Controllers
         include/controllers/ChatsController.h \
         include/controllers/Controllers.h \
@@ -214,6 +215,7 @@ SOURCES += \
         src/ui/VSQUiHelper.cpp \
         src/KeyboardEventFilter.cpp \
         src/Validator.cpp \
+        src/Core.cpp \
         # Controllers
         src/controllers/ChatsController.cpp \
         src/controllers/Controllers.cpp \
