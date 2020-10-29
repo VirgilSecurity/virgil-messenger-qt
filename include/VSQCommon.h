@@ -44,6 +44,7 @@
 #include <QSize>
 #include <QtGlobal>
 #include <QUrl>
+#include <QVariant>
 
 #include <thirdparty/optional/optional.hpp>
 
@@ -81,9 +82,12 @@ namespace Enums {
     enum class AttachmentStatus
     {
         Created,
+        Preloading,
         Loading,
+        Postloading,
+        Loaded,
         Failed, // must be re-loaded
-        Loaded
+        Invalid
     };
     Q_ENUM_NS(AttachmentStatus)
 
@@ -173,21 +177,20 @@ struct Contact
 using MessageId = QString;
 using ChatId = QString;
 
+struct PictureExtras
+{
+    QSize size;
+    int orientation; // same as QImageIOHandler::Transformation
+    QSize thumbnailSize;
+    QString thumbnailPath;
+    QString previewPath;
+};
+
 struct Attachment
 {
     using Id = QString;
     using Type = Enums::AttachmentType;
-
-    enum class Status
-    {
-        Created,
-        Preloading,
-        Loading,
-        Postloading,
-        Loaded,
-        Failed,
-        Invalid
-    };
+    using Status = Enums::AttachmentStatus;
 
     Id id;
     MessageId messageId;
@@ -195,9 +198,11 @@ struct Attachment
     Status status = Status::Created;
     QString fileName;
     DataSize size = 0;
+    DataSize bytesTotal = 0; // after encryption
+    DataSize bytesLoaded = 0;
     QString localPath;
     QUrl url;
-    QString extras;
+    QVariant extras;
 };
 
 struct Message
@@ -239,6 +244,7 @@ using Chats = std::vector<Chat>;
 }
 
 Q_DECLARE_METATYPE(vm::Contact::Type)
+Q_DECLARE_METATYPE(vm::PictureExtras)
 Q_DECLARE_METATYPE(vm::Attachment::Type)
 Q_DECLARE_METATYPE(vm::Attachment::Status)
 Q_DECLARE_METATYPE(vm::Message::Status)

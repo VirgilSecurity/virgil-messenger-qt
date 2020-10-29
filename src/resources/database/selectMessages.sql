@@ -1,5 +1,9 @@
 SELECT
-    messages.*,
+    messages.id AS messageId,
+    messages.timestamp AS messageTimestamp,
+    messages.authorId AS messageAuthorId,
+    messages.status AS messageStatus,
+    messages.body AS messageBody,
     attachments.id AS attachmentId,
     attachments.type AS attachmentType,
     attachments.status AS attachmentStatus,

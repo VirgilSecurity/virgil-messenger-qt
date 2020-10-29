@@ -35,6 +35,8 @@
 #include "Utils.h"
 
 #include <QDir>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QLocale>
 #include <QThread>
 #include <QUuid>
@@ -183,6 +185,16 @@ QString Utils::elidedText(const QString &text, const int maxLength)
     return text.left(half) + ellipsisChar + text.right(max - 1 - half);
 }
 
+QString Utils::attachmentDisplayText(const Attachment &attachment)
+{
+    if (attachment.type == Attachment::Type::Picture) {
+        return QObject::tr("picture");
+    }
+    else {
+        return Utils::elidedText(attachment.fileName, 50); // TODO(fpohtmeh): move to settings?
+    }
+}
+
 Optional<QString> Utils::readTextFile(const QString &filePath)
 {
     QFile file(filePath);
@@ -199,4 +211,38 @@ void Utils::printThreadId(const QString &message)
             << "Thread " << QThread::currentThread()->objectName() << "(" << QThread::currentThreadId() << "): "
             << message;
 #endif
+}
+
+QString Utils::extrasToJson(const QVariant &extras, const Attachment::Type type)
+{
+    if (type != Attachment::Type::Picture) {
+        return QString();
+    }
+    const auto e = extras.value<PictureExtras>();
+    QJsonObject obj;
+    obj.insert("width", e.size.width());
+    obj.insert("height", e.size.height());
+    obj.insert("orientation", e.orientation);
+    obj.insert("thumbnailWidth", e.thumbnailSize.width());
+    obj.insert("thumbnailHeight", e.thumbnailSize.height());
+    obj.insert("thumbnailPath", e.thumbnailPath);
+    obj.insert("previewPath", e.previewPath);
+    return QJsonDocument(obj).toJson(QJsonDocument::Compact);
+}
+
+QVariant Utils::extrasFromJson(const QString &json, const Attachment::Type type)
+{
+    if (type != Attachment::Type::Picture) {
+        return QVariant();
+    }
+    auto doc = QJsonDocument::fromJson(json.toUtf8());
+    PictureExtras extras;
+    extras.size.setWidth(doc["width"].toInt());
+    extras.size.setHeight(doc["height"].toInt());
+    extras.orientation = doc["orientation"].toInt();
+    extras.thumbnailSize.setWidth(doc["thumbnailWidth"].toInt());
+    extras.thumbnailSize.setHeight(doc["thumbnailHeight"].toInt());
+    extras.thumbnailPath = doc["thumbnailPath"].toString();
+    extras.previewPath = doc["previewPath"].toString();
+    return QVariant::fromValue(extras);
 }

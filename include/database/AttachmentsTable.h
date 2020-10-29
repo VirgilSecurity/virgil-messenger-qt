@@ -41,10 +41,20 @@ namespace vm
 {
 class AttachmentsTable : public DatabaseTable
 {
+    Q_OBJECT
+
 public:
     explicit AttachmentsTable(Database *database);
 
+signals:
+    void createAttachment(const Attachment &attachment);
+
+    void errorOccurred(const QString &errorText);
+
+private:
     bool create() override;
+
+    void processCreateAttachment(const Attachment &attachment);
 };
 }
 

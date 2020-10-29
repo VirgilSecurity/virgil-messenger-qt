@@ -67,8 +67,12 @@ void MessagesController::loadMessages(const Contact::Id &chatId)
 
 void MessagesController::sendMessage(const QString &body, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
 {
-    const auto attachment = m_models->attachments()->createAttachment(attachmentUrl, attachmentType); // TODO(fpohtmeh) validate if attachment and text are empty?
-    const auto message = m_models->messages()->createMessage(m_chatId, m_recipientId, body, attachment);
+    if (body.isEmpty() && !attachmentUrl.isValid()) {
+        qDebug() << "Text and attachment are empty";
+        return;
+    }
+    const auto attachment = m_models->attachments()->createAttachment(attachmentUrl.toUrl(), attachmentType);
+    auto message = m_models->messages()->createMessage(m_chatId, m_recipientId, body, attachment);
     m_models->chats()->updateLastMessage(message);
     m_userDatabase->writeMessage(message);
     // FIXME(fpohtmeh): implement

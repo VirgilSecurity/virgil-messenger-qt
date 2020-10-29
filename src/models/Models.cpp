@@ -42,9 +42,9 @@
 
 using namespace vm;
 
-Models::Models(QObject *parent)
+Models::Models(VSQSettings *settings, QObject *parent)
     : QObject(parent)
-    , m_attachments(new AttachmentsModel(this))
+    , m_attachments(new AttachmentsModel(settings, this))
     , m_chats(new ChatsModel(this))
     , m_messages(new MessagesModel(this))
 {

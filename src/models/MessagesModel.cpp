@@ -56,7 +56,7 @@ Message MessagesModel::createMessage(const Chat::Id &chatId, const Contact::Id &
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     Message message;
-    message.id = Utils::createUuid();
+    message.id = attachment ? attachment->messageId : Utils::createUuid();
     message.timestamp = QDateTime::currentDateTime();
     message.chatId = chatId;
     message.authorId = authorId;
@@ -77,6 +77,8 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
 {
     const auto row = index.row();
     const auto &message = m_messages[row];
+    const auto &attachment = message.attachment;
+
     switch (role) {
     case IdRole:
         return message.id;
@@ -92,68 +94,88 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
         if (nextMessage && nextMessage->authorId == message.authorId && nextMessage->status == message.status) {
             return QString();
         }
-        return QVariant::fromValue(message.status);
+        return static_cast<int>(message.status);
     }
     case BodyRole:
         return message.body.split('\n').join("<br/>");
     case AttachmentIdRole:
     {
-        if (message.attachment) {
-            return message.attachment->id;
+        if (attachment) {
+            return attachment->id;
         }
         return QString();
     }
     case AttachmentTypeRole:
     {
-        if (message.attachment) {
-            return QVariant::fromValue(message.attachment->type);
+        if (attachment) {
+            return QVariant::fromValue(attachment->type);
         }
         return QVariant();
     }
     case AttachmentStatusRole:
     {
-        if (message.attachment) {
-            return QVariant::fromValue(message.attachment->status);
+        if (attachment) {
+            return QVariant::fromValue(attachment->status);
         }
         return QVariant();
     }
-    case AttachmentImageRole:
+    case AttachmentImagePathRole:
     {
-        // TODO(fpohtmeh): implement
-        return QVariant();
+        if (attachment) {
+            if (attachment->type == Attachment::Type::File) {
+                return QLatin1String("../resources/icons/File Selected Big.png");
+            }
+            else if (attachment->type == Attachment::Type::Picture) {
+                switch (attachment->status) {
+                case Attachment::Status::Loading:
+                case Attachment::Status::Postloading:
+                    return attachment->extras.value<PictureExtras>().thumbnailPath;
+                case Attachment::Status::Loaded:
+                    return attachment->extras.value<PictureExtras>().previewPath;
+                default:
+                    return QString();
+                }
+            }
+        }
+        return QString();
     }
     case AttachmentImageSizeRole:
     {
-        // TODO(fpohtmeh): implement
-        return QVariant();
+        if (attachment && attachment->type == Attachment::Type::Picture) {
+            return attachment->extras.value<PictureExtras>().thumbnailSize;
+        }
+        return QSize();
     }
     case AttachmentDisplaySizeRole:
     {
-        // TODO(fpohtmeh): implement
-        return QVariant();
+        if (attachment) {
+            return (attachment->size > 0) ? Utils::formattedDataSize(attachment->size) : QLatin1String("...");
+        }
+        return QString();
+    }
+    case AttachmentDisplayTextRole:
+    {
+        return attachment ? Utils::attachmentDisplayText(*attachment) : QString();
     }
     case AttachmentBytesTotalRole:
     {
-        // TODO(fpohtmeh): implement
-        return QVariant();
+        return attachment ? qMax(attachment->size, attachment->bytesTotal) : 0;
     }
     case AttachmentBytesLoadedRole:
     {
-        // TODO(fpohtmeh): implement
-        return QVariant();
+        return attachment ? attachment->bytesLoaded : 0;
     }
     case AttachmentFileExistsRole:
     {
-        // TODO(fpohtmeh): implement
-        return QVariant();
+        return attachment ? QFile::exists(attachment->localPath) : false;
     }
     case FailedRole:
     {
         if (message.status == Message::Status::Failed) {
             return true;
         }
-        if (message.attachment) {
-            const auto &status = message.attachment->status;
+        if (attachment) {
+            const auto &status = attachment->status;
             return status == Attachment::Status::Failed || status == Attachment::Status::Invalid;
         }
         return false;
@@ -185,9 +207,10 @@ QHash<int, QByteArray> MessagesModel::roleNames() const
         { AttachmentIdRole, "attachmentId" },
         { AttachmentTypeRole, "attachmentType" },
         { AttachmentStatusRole, "attachmentStatus" },
-        { AttachmentImageRole, "attachmentImage" },
+        { AttachmentImagePathRole, "attachmentImagePath" },
         { AttachmentImageSizeRole, "attachmentImageSize" },
         { AttachmentDisplaySizeRole, "attachmentDisplaySize" },
+        { AttachmentDisplayTextRole, "attachmentDisplayText" },
         { AttachmentBytesTotalRole, "attachmentBytesTotal" },
         { AttachmentBytesLoadedRole, "attachmentBytesLoaded" },
         { AttachmentFileExistsRole, "attachmentFileExists" },

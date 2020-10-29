@@ -96,7 +96,7 @@ private:
     VSQSettings m_settings;
     QNetworkAccessManager *m_networkAccessManager;
     VSQCrashReporter m_crashReporter;
-    QQmlApplicationEngine m_engine;
+    QScopedPointer<QQmlApplicationEngine> m_engine;
     Validator *m_validator;
     VSQMessenger m_messenger;
     Models m_models;

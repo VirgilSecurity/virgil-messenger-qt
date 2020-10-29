@@ -37,6 +37,8 @@
 
 #include <QObject>
 
+class VSQSettings;
+
 namespace vm
 {
 class AttachmentsModel;
@@ -51,7 +53,7 @@ class Models : public QObject
     Q_PROPERTY(MessagesModel *messages READ messages CONSTANT)
 
 public:
-    explicit Models(QObject *parent);
+    Models(VSQSettings *settings, QObject *parent);
 
     const AttachmentsModel *attachments() const;
     AttachmentsModel *attachments();

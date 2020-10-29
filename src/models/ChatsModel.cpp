@@ -140,7 +140,15 @@ QVariant ChatsModel::data(const QModelIndex &index, int role) const
     case LastEventTimeRole:
         return (chat.lastMessage ? qMax(chat.lastMessage->timestamp, chat.timestamp) : chat.timestamp).toString("hh:mm");
     case LastMessageBodyRole:
-        return chat.lastMessage ? chat.lastMessage->body.left(30) : QLatin1String("...");
+        if (!chat.lastMessage) {
+            return QLatin1String("...");
+        }
+        else if (chat.lastMessage->attachment) {
+            return Utils::attachmentDisplayText(*chat.lastMessage->attachment);
+        }
+        else {
+            return chat.lastMessage->body.left(30);
+        }
     case UnreadMessagesCountRole:
         return chat.unreadMessageCount;
     default:

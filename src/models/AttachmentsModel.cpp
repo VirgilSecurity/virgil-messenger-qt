@@ -34,18 +34,79 @@
 
 #include "models/AttachmentsModel.h"
 
+#include <QImageReader>
+
+#include "Settings.h"
+#include "Utils.h"
+
 using namespace vm;
 
-AttachmentsModel::AttachmentsModel(QObject *parent)
+AttachmentsModel::AttachmentsModel(VSQSettings *settings, QObject *parent)
     : QAbstractListModel(parent)
+    , m_settings(settings)
 {}
 
 AttachmentsModel::~AttachmentsModel()
 {}
 
-Optional<Attachment> AttachmentsModel::createAttachment(const QVariant &attachmentUrl, const Attachment::Type attachmentType)
+Optional<Attachment> AttachmentsModel::createAttachment(const QUrl &url, const Attachment::Type type)
 {
-    return NullOptional;
+    // Check file
+    if (!Utils::isValidUrl(url)) {
+        return NullOptional;
+    }
+    QFileInfo localInfo(Utils::urlToLocalFile(url));
+    if (!localInfo.exists()) {
+        qWarning() << tr("File doesn't exist"); // TODO(fpohtmeh): forward error to UI
+        return NullOptional;
+    }
+
+    // Check file size
+    if (localInfo.size() == 0) {
+        qWarning() << tr("File is empty");
+        return NullOptional;
+    }
+#ifdef VS_ANDROID
+    const DataSize fileSize = VSQAndroid::getFileSize(url);
+#else
+    const DataSize fileSize = localInfo.size();
+#endif
+    if (fileSize > m_settings->attachmentMaxFileSize()) {
+        qWarning() << tr("File exceeds size limit");
+        return NullOptional;
+    }
+
+    // Create attachment
+    Attachment attachment;
+    attachment.id = Utils::createUuid();
+    attachment.type = type;
+    attachment.size = fileSize; // FIXME(fpohtmeh): use size after encryption?
+
+    // Filename
+#ifdef VS_ANDROID
+    attachment.fileName = VSQAndroid::getDisplayName(url);
+#elif defined(VS_IOS)
+    if (type == Attachment::Type::Picture) {
+        // Build file name from url, i.e. "file:assets-library://asset/asset.PNG?id=7CE20DC4-89A8-4079-88DC-AD37920581B5&ext=PNG"
+        QUrl urlWithoutFileScheme{url.toLocalFile()};
+        const QUrlQuery query(urlWithoutFileScheme.query());
+        attachment.fileName = query.queryItemValue("id") + QChar('.') + query.queryItemValue("ext").toLower();
+    }
+#endif
+    if (attachment.fileName.isEmpty()) {
+        attachment.fileName = localInfo.fileName();
+    }
+    attachment.localPath = localInfo.absoluteFilePath();
+
+    // Picture
+    if (type == Attachment::Type::Picture) {
+        attachment.extras.setValue(createPictureExtras(attachment.localPath));
+    }
+
+    // Message id
+    attachment.messageId = Utils::createUuid();
+
+    return attachment;
 }
 
 int AttachmentsModel::rowCount(const QModelIndex &parent) const
@@ -59,4 +120,45 @@ QVariant AttachmentsModel::data(const QModelIndex &index, int role) const
     Q_UNUSED(index)
     Q_UNUSED(role)
     return QVariant();
+}
+
+PictureExtras AttachmentsModel::createPictureExtras(const QString &localPath) const
+{
+    PictureExtras extras;
+    QImageReader reader(localPath);
+    extras.size = reader.size();
+    extras.orientation = reader.transformation();
+    extras.thumbnailSize = calculateThumbnailSize(extras.size, extras.orientation);
+    extras.thumbnailPath = generateThumbnailPath();
+    extras.previewPath = generateThumbnailPath();
+    return extras;
+}
+
+QString AttachmentsModel::generateThumbnailPath() const
+{
+    return m_settings->thumbnailsDir().filePath(Utils::createUuid() + QLatin1String(".png"));
+}
+
+QSize AttachmentsModel::applyOrientation(const QSize &size, int orientation) const
+{
+    if (orientation & QImageIOHandler::TransformationRotate90) {
+        return QSize(size.height(), size.width());
+    }
+    return size;
+}
+
+QSize AttachmentsModel::calculateThumbnailSize(const QSize &size, int orientation) const
+{
+    QSizeF s = applyOrientation(size, orientation);
+    const double ratio = s.height() / s.width();
+    const QSizeF maxSize = m_settings->thumbnailMaxSize();
+    if (s.width() > maxSize.width()) {
+        s.setWidth(maxSize.width());
+        s.setHeight(maxSize.width() * ratio);
+    }
+    if (s.height() > maxSize.height()) {
+        s.setHeight(maxSize.height());
+        s.setWidth(maxSize.height() / ratio);
+    }
+    return s.toSize();
 }

@@ -29,12 +29,12 @@ Control {
     property var attachmentStatus: undefined
     property int attachmentBytesTotal: 0
     property string attachmentDisplaySize: ""
-    property string attachmentFilePath: ""
-    property string attachmentThumbnailPath: ""
+    property string attachmentDisplayText: ""
+    property string attachmentImagePath: ""
     property int attachmentThumbnailWidth: 0
     property int attachmentThumbnailHeight: 0
     property int attachmentBytesLoaded: 0
-    property bool attachmentDownloaded: false
+    property bool attachmentFileExists: false
 
     signal saveAttachmentAs(string messageId)
     signal downloadOpenAttachment(string messageId, bool isPicture)
@@ -97,7 +97,7 @@ Control {
                     y: 0.5 * (row.height - height)
                     width: image.width
                     height: image.height
-                    color: d.isPicture ? "white" : "transparent"
+                    color: d.isPicture && attachmentImagePath ? "white" : "transparent"
 
                     Image {
                         id: image
@@ -110,20 +110,14 @@ Control {
                             value: image.pictureWidth * attachmentThumbnailHeight / attachmentThumbnailWidth
                         }
                         autoTransform: true
-                        visible: d.isPicture ? true : attachmentDownloaded && !progressBar.visible
-                        source: {
-                            if (d.isPicture) {
-                                return chatMessage.attachmentDownloaded  ? attachmentFilePath : attachmentThumbnailPath;
-                            } else {
-                                return "../resources/icons/File Selected Big.png"
-                            }
-                        }
+                        visible: d.isPicture ? true : attachmentFileExists && !progressBar.visible
+                        source: chatMessage.attachmentImagePath
 
                         readonly property double pictureWidth: d.isPicture ? Math.min(3 * attachmentThumbnailWidth, maxWidth - 2 * offset) : 0
                     }
 
                     Rectangle {
-                        visible: !attachmentDownloaded && !progressBar.visible
+                        visible: !attachmentFileExists && !progressBar.visible
                         anchors.centerIn: parent
                         width: 1.3333 * downloadImage.width
                         height: width
@@ -141,9 +135,11 @@ Control {
                         id: progressBar
                         anchors.centerIn: parent
                         size: 40
-                        visible: chatMessage.attachmentStatus == Enums.AttachmentStatus.Loading
+                        visible: chatMessage.attachmentStatus == Enums.AttachmentStatus.Created || chatMessage.attachmentStatus == Enums.AttachmentStatus.Preloading ||
+                                 chatMessage.attachmentStatus == Enums.AttachmentStatus.Loading || chatMessage.attachmentStatus == Enums.AttachmentStatus.Postloading
                         maxValue: chatMessage.attachmentBytesTotal
-                        value: chatMessage.attachmentBytesLoaded
+                        value: Math.min(0.99 * maxValue, Math.max(0.01 * maxValue, chatMessage.attachmentBytesLoaded))
+                        animated: visible
                     }
                 }
 
@@ -156,7 +152,7 @@ Control {
                     Label {
                         Layout.fillHeight: true
                         Layout.maximumWidth: column.maxWidth
-                        text: chatMessage.body
+                        text: chatMessage.attachmentDisplayText
                         color: "white"
                         font.pixelSize: UiHelper.fixFontSz(16)
                         wrapMode: Text.Wrap
@@ -177,6 +173,7 @@ Control {
                 Action {
                     text: Platform.isMobile ? qsTr("Save to downloads") : qsTr("Save As...")
                     onTriggered: (Platform.isMobile ? Messenger.downloadAttachment : chatMessage.saveAttachmentAs)(messageId)
+                    // TODO(fpohtmeh): disable for not loaded attachments
                 }
             }
         }

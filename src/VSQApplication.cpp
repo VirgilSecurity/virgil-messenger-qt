@@ -65,10 +65,10 @@ VSQApplication::VSQApplication()
     : m_settings(this)
     , m_networkAccessManager(new QNetworkAccessManager(this))
     , m_crashReporter(&m_settings, m_networkAccessManager, this)
-    , m_engine()
+    , m_engine(new QQmlApplicationEngine(this))
     , m_validator(new Validator(this))
     , m_messenger(m_networkAccessManager, &m_settings, m_validator)
-    , m_models(this)
+    , m_models(&m_settings, this)
     , m_userDatabase(new UserDatabase(m_settings.databaseDir(), nullptr))
     , m_databaseThread(new QThread())
     , m_controllers(&m_messenger, &m_models, m_userDatabase, this)
@@ -132,10 +132,10 @@ VSQApplication::run(const QString &basePath, VSQLogging *logging) {
     } else {
         url = "file://" + basePath + "/qml/";
     }
-    m_engine.setBaseUrl(url);
-    m_engine.addImportPath(url.toString());
+    m_engine->setBaseUrl(url);
+    m_engine->addImportPath(url.toString());
 
-    QQmlContext *context = m_engine.rootContext();
+    QQmlContext *context = m_engine->rootContext();
     context->setContextProperty("UiHelper", &uiHelper);
     context->setContextProperty("app", this);
     context->setContextProperty("clipboard", new VSQClipboardProxy(QGuiApplication::clipboard()));
@@ -159,23 +159,16 @@ VSQApplication::run(const QString &basePath, VSQLogging *logging) {
     notifications::android::FirebaseListener::instance().init();
 #endif
 
-    return QGuiApplication::instance()->exec();
+    const auto result = QGuiApplication::instance()->exec();
+    m_engine.reset(); // Engine must be deleted first since it uses most classes
+    return result;
 }
 
 /******************************************************************************/
 void VSQApplication::reloadQml() {
     const QUrl url(QStringLiteral("main.qml"));
-    m_engine.clearComponentCache();
-    m_engine.load(url);
-
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_WATCHOS)
-    {
-        QObject *rootObject(m_engine.rootObjects().first());
-// ERROR NULL POINTER !!!
-//        rootObject->setProperty("width", 800);
-//        rootObject->setProperty("height", 640);
-    }
-#endif
+    m_engine->clearComponentCache();
+    m_engine->load(url);
 }
 
 /******************************************************************************/

@@ -76,17 +76,7 @@ void ChatsTable::processFetch()
         chat.timestamp = q.value("timestamp").toDateTime();
         chat.unreadMessageCount = q.value("unreadMessageCount").toUInt();
         chat.contactId = q.value("contactId").value<Contact::Id>();
-        // message
-        const auto messageId = q.value("lastMessageId").value<Message::Id>();
-        if (!messageId.isEmpty()) {
-            Message message;
-            message.id = messageId;
-            message.timestamp = q.value("messageTimestamp").toDateTime();
-            message.authorId = q.value("messageAuthorId").toString();
-            message.status = q.value("messageStatus").value<Message::Status>();
-            message.body = q.value("messageBody").toString();
-            chat.lastMessage = message;
-        }
+        chat.lastMessage = DatabaseUtils::readMessage(q, QLatin1String("lastMessageId"));
         chats.push_back(chat);
     }
     emit fetched(chats);

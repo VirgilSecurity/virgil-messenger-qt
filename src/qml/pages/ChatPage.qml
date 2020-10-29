@@ -112,18 +112,14 @@ Page {
             attachmentType: model.attachmentType
             attachmentStatus: model.attachmentStatus
             attachmentDisplaySize: model.attachmentDisplaySize
+            attachmentDisplayText: model.attachmentDisplayText
             attachmentBytesTotal: model.attachmentBytesTotal
             attachmentBytesLoaded: model.attachmentBytesLoaded
-            // FIXME(fpohtmeh): finish
-            /*
-            attachmentFilePath: model.attachmentFilePath
-            attachmentThumbnailPath: model.attachmentThumbnailPath
-            attachmentThumbnailWidth: model.attachmentThumbnailWidth
-            attachmentThumbnailHeight: model.attachmentThumbnailHeight
-            attachmentDownloaded: model.attachmentDownloaded
-            */
+            attachmentImagePath: model.attachmentImagePath
+            attachmentThumbnailWidth: model.attachmentImageSize.width
+            attachmentThumbnailHeight: model.attachmentImageSize.height
+            attachmentFileExists: model.attachmentFileExists
 
-            // TODO(fpohtmeh): refactor slots
             onSaveAttachmentAs: function(messageId) {
                 saveAttachmentAsDialog.messageId = messageId
                 saveAttachmentAsDialog.attachmentType = attachmentType

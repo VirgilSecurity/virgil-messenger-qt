@@ -34,6 +34,7 @@
 
 #include "database/AttachmentsTable.h"
 
+#include "Utils.h"
 #include "database/core/Database.h"
 #include "database/core/DatabaseUtils.h"
 
@@ -41,7 +42,9 @@ using namespace vm;
 
 AttachmentsTable::AttachmentsTable(Database *database)
     : DatabaseTable(QLatin1String("attachments"), database)
-{}
+{
+    connect(this, &AttachmentsTable::createAttachment, this, &AttachmentsTable::processCreateAttachment);
+}
 
 bool AttachmentsTable::create()
 {
@@ -51,4 +54,27 @@ bool AttachmentsTable::create()
     }
     qCCritical(lcDatabase) << "Unable to create attachments table";
     return false;
+}
+
+void AttachmentsTable::processCreateAttachment(const Attachment &attachment)
+{
+    ScopedConnection connection(*database());
+    const DatabaseUtils::BindValues values {
+        { ":id", attachment.id },
+        { ":messageId", attachment.messageId },
+        { ":type", static_cast<int>(attachment.type) },
+        { ":status", static_cast<int>(attachment.status) },
+        { ":filename", attachment.fileName },
+        { ":size", attachment.size },
+        { ":localPath", attachment.localPath },
+        { ":url", attachment.url },
+        { ":extras", Utils::extrasToJson(attachment.extras, attachment.type) }
+    };
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertAttachment"), values);
+    if (!query) {
+        qCCritical(lcDatabase) << "AttachmentsTable::processCreateAttachment error";
+        emit errorOccurred(tr("Failed to insert attachment"));
+        return;
+    }
+    qCDebug(lcDatabase) << "Attachment was inserted into table" << attachment.localPath;
 }

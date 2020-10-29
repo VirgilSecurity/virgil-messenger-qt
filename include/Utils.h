@@ -53,6 +53,8 @@ namespace Utils
 
     QString elidedText(const QString &text, const int maxLength);
 
+    QString attachmentDisplayText(const Attachment &attachment);
+
     // File functions
 
     QString findUniqueFileName(const QString &fileName);
@@ -72,6 +74,12 @@ namespace Utils
     // Debug
 
     void printThreadId(const QString &message);
+
+    // JSON functions
+
+    QString extrasToJson(const QVariant &extras, const Attachment::Type type);
+
+    QVariant extrasFromJson(const QString &json, const Attachment::Type type);
 }
 }
 

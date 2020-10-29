@@ -34,6 +34,7 @@
 
 #include "database/MessagesTable.h"
 
+#include "Utils.h"
 #include "database/core/Database.h"
 #include "database/core/DatabaseUtils.h"
 
@@ -69,27 +70,7 @@ void MessagesTable::processFetch(const Chat::Id &chatId)
     auto q = *query;
     Messages messages;
     while (q.next()) {
-        Message message;
-        message.id = q.value("id").value<Message::Id>();
-        message.timestamp = q.value("timestamp").toDateTime();
-        message.authorId = q.value("authorId").value<Contact::Id>();
-        message.status = q.value("status").value<Message::Status>();
-        message.body = q.value("body").toString();
-        // attachment
-        const auto attachmentId = q.value("attachmentId").value<Attachment::Id>();
-        if (!attachmentId.isEmpty()) {
-            Attachment attachment;
-            attachment.id = attachmentId;
-            attachment.type = q.value("attachmentType").value<Attachment::Type>();
-            attachment.status = q.value("attachmentStatus").value<Attachment::Status>();
-            attachment.fileName = q.value("attachmentFilename").toString();
-            attachment.size = q.value("attachmentSize").value<DataSize>();
-            attachment.localPath = q.value("attachmentLocalPath").toString();
-            attachment.url = q.value("attachmentUrl").toUrl();
-            attachment.extras = q.value("attachmentExtras").toString();
-            message.attachment = attachment;
-        }
-        messages.push_back(message);
+        messages.push_back(*DatabaseUtils::readMessage(q));
     }
     emit fetched(messages);
 }
@@ -102,14 +83,14 @@ void MessagesTable::processCreateMessage(const Message &message)
         { ":timestamp", message.timestamp },
         { ":chatId", message.chatId },
         { ":authorId", message.authorId },
-        { ":status", QVariant::fromValue(message.status) },
+        { ":status", static_cast<int>(message.status) },
         { ":body", message.body }
     };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertMessage"), values);
     if (!query) {
-        qCCritical(lcDatabase) << "MessagesTable::processCreateMessage insertion error";
+        qCCritical(lcDatabase) << "MessagesTable::processCreateMessage error";
         emit errorOccurred(tr("Failed to insert message"));
         return;
     }
-    qCDebug(lcDatabase) << "Message was inserted into table" << message.body.left(30);
+    qCDebug(lcDatabase) << "Message was inserted into table" << message.id;
 }

@@ -48,10 +48,12 @@ namespace DatabaseUtils
     using BindValues = std::vector<std::pair<QString, QVariant>>;
 
     bool isValidName(const QString &id);
-    QString currentTimestamp();
 
     bool readExecQueries(Database *database, const QString &queryId);
     Optional<QSqlQuery> readExecQuery(Database *database, const QString &queryId, const BindValues &values = {});
+
+    Optional<Attachment> readAttachment(const QSqlQuery &query);
+    Optional<Message> readMessage(const QSqlQuery &query, const QString &idColumn = QString());
 }
 }
 

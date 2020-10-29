@@ -39,6 +39,8 @@
 
 #include "VSQCommon.h"
 
+class VSQSettings;
+
 namespace vm
 {
 class AttachmentsModel : public QAbstractListModel
@@ -46,14 +48,21 @@ class AttachmentsModel : public QAbstractListModel
     Q_OBJECT
 
 public:
-    explicit AttachmentsModel(QObject *parent);
+    AttachmentsModel(VSQSettings *settings, QObject *parent);
     ~AttachmentsModel() override;
 
-    Optional<Attachment> createAttachment(const QVariant &attachmentUrl, const Attachment::Type attachmentType);
+    Optional<Attachment> createAttachment(const QUrl &url, const Attachment::Type type);
 
 private:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
+
+    PictureExtras createPictureExtras(const QString &localPath) const;
+    QString generateThumbnailPath() const;
+    QSize applyOrientation(const QSize &size, int orientation) const;
+    QSize calculateThumbnailSize(const QSize &size, int orientation) const;
+
+    VSQSettings *m_settings;
 };
 }
 

@@ -65,9 +65,10 @@ private:
         AttachmentIdRole,
         AttachmentTypeRole,
         AttachmentStatusRole,
-        AttachmentImageRole,
+        AttachmentImagePathRole,
         AttachmentImageSizeRole,
         AttachmentDisplaySizeRole,
+        AttachmentDisplayTextRole,
         // Loading
         AttachmentBytesTotalRole,
         AttachmentBytesLoadedRole,

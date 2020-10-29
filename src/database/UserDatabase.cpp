@@ -148,6 +148,8 @@ void UserDatabase::processWriteMessage(const Message &message)
     ScopedConnection connection(*this);
     ScopedTransaction transaction(*this);
     messagesTable()->createMessage(message);
+    if (message.attachment) {
+        attachmentsTable()->createAttachment(*message.attachment);
+    }
     chatsTable()->updateLastMessage(message);
-    // FIXME(fpohtmeh): write attachment
 }

@@ -70,11 +70,6 @@ bool DatabaseUtils::isValidName(const QString &id)
     return !id.isEmpty();
 }
 
-QString DatabaseUtils::currentTimestamp()
-{
-    return QDateTime::currentDateTime().toString(Qt::ISODate);
-}
-
 bool DatabaseUtils::readExecQueries(Database *database, const QString &queryId)
 {
     const auto texts = readQueryTexts(queryId);
@@ -110,4 +105,39 @@ Optional<QSqlQuery> DatabaseUtils::readExecQuery(Database *database, const QStri
         return NullOptional;
     }
     return query;
+}
+
+Optional<Attachment> DatabaseUtils::readAttachment(const QSqlQuery &query)
+{
+    const auto attachmentId = query.value("attachmentId").value<Attachment::Id>();
+    if (attachmentId.isEmpty()) {
+        return NullOptional;
+    }
+    Attachment attachment;
+    attachment.id = attachmentId;
+    attachment.type = static_cast<Attachment::Type>(query.value("attachmentType").toInt());
+    attachment.status = static_cast<Attachment::Status>(query.value("attachmentStatus").toInt());
+    attachment.fileName = query.value("attachmentFilename").toString();
+    attachment.size = query.value("attachmentSize").value<DataSize>();
+    attachment.localPath = query.value("attachmentLocalPath").toString();
+    attachment.url = query.value("attachmentUrl").toUrl();
+    attachment.extras = Utils::extrasFromJson(query.value("attachmentExtras").toString(), attachment.type);
+    return attachment;
+}
+
+Optional<Message> DatabaseUtils::readMessage(const QSqlQuery &q, const QString &idColumn)
+{
+    const auto idc = idColumn.isEmpty() ? QLatin1String("messageId") : idColumn;
+    const auto messageId = q.value(idc).value<Message::Id>();
+    if (messageId.isEmpty()) {
+        return NullOptional;
+    }
+    Message message;
+    message.id = messageId;
+    message.timestamp = q.value("messageTimestamp").toDateTime();
+    message.authorId = q.value("messageAuthorId").value<Contact::Id>();
+    message.status = static_cast<Message::Status>(q.value("messageStatus").toInt());
+    message.body = q.value("messageBody").toString();
+    message.attachment = DatabaseUtils::readAttachment(q);
+    return message;
 }
