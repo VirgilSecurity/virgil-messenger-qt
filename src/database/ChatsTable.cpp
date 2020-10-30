@@ -66,20 +66,21 @@ void ChatsTable::processFetch()
     if (!query) {
         qCCritical(lcDatabase) << "ChatsTable::processFetch error";
         emit errorOccurred(tr("Failed to fetch chats"));
-        return;
     }
-    auto q = *query;
-    Chats chats;
-    while (q.next()) {
-        Chat chat;
-        chat.id = q.value("id").value<Chat::Id>();
-        chat.timestamp = q.value("timestamp").toDateTime();
-        chat.unreadMessageCount = q.value("unreadMessageCount").toUInt();
-        chat.contactId = q.value("contactId").value<Contact::Id>();
-        chat.lastMessage = DatabaseUtils::readMessage(q, QLatin1String("lastMessageId"));
-        chats.push_back(chat);
+    else {
+        auto q = *query;
+        Chats chats;
+        while (q.next()) {
+            Chat chat;
+            chat.id = q.value("id").value<Chat::Id>();
+            chat.timestamp = q.value("timestamp").toDateTime();
+            chat.unreadMessageCount = q.value("unreadMessageCount").toUInt();
+            chat.contactId = q.value("contactId").value<Contact::Id>();
+            chat.lastMessage = DatabaseUtils::readMessage(q, QLatin1String("lastMessageId"));
+            chats.push_back(chat);
+        }
+        emit fetched(chats);
     }
-    emit fetched(chats);
 }
 
 void ChatsTable::processCreateChat(const Chat &chat)
@@ -109,12 +110,14 @@ void ChatsTable::processCreateChat(const Chat &chat)
         { ":unreadMessageCount", chat.unreadMessageCount }
     };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertChat"), values);
-    if (!query) {
+    if (query) {
+        qCDebug(lcDatabase) << "Chat was inserted into table" << chat.contactId;
+    }
+    else {
         qCCritical(lcDatabase) << "ChatsTable::processCreateChat insertion error";
         emit errorOccurred(tr("Failed to insert chat"));
         return;
     }
-    qCDebug(lcDatabase) << "Chat was inserted into table" << chat.contactId;
 }
 
 void ChatsTable::processResetUnreadCount(const Contact::Id &chatId)
@@ -122,12 +125,12 @@ void ChatsTable::processResetUnreadCount(const Contact::Id &chatId)
     ScopedConnection connection(*database());
     const DatabaseUtils::BindValues values{{ ":id", chatId }};
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("resetUnreadCount"), values);
-    if (!query) {
-        qCCritical(lcDatabase) << "ChatsTable::processResetUnreadCount error";
-        emit errorOccurred(tr("Failed to reset unread count"));
+    if (query) {
+        qCDebug(lcDatabase) << "Chat unread count was reset" << chatId;
     }
     else {
-        qCDebug(lcDatabase) << "Chat unread count was reset" << chatId;
+        qCCritical(lcDatabase) << "ChatsTable::processResetUnreadCount error";
+        emit errorOccurred(tr("Failed to reset unread count"));
     }
 }
 
@@ -139,10 +142,11 @@ void ChatsTable::processUpdateLastMessage(const Message &message)
         { ":lastMessageId", message.id }
     };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateLastMessage"), values);
-    if (!query) {
+    if (query) {
+        qCDebug(lcDatabase) << "Last message was updated for chat" << message.chatId;
+    }
+    else {
         qCCritical(lcDatabase) << "ChatsTable::processUpdateLastMessage error";
         emit errorOccurred(tr("Failed to update last message"));
-        return;
     }
-    qCDebug(lcDatabase) << "Last message was updated for chat" << message.chatId;
 }

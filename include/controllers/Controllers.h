@@ -41,6 +41,7 @@ class VSQMessenger;
 
 namespace vm
 {
+class AttachmentsController;
 class ChatsController;
 class MessagesController;
 class Models;
@@ -50,6 +51,7 @@ class UsersController;
 class Controllers : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(AttachmentsController *attachments READ attachments CONSTANT)
     Q_PROPERTY(UsersController *users READ users CONSTANT)
     Q_PROPERTY(ChatsController *chats READ chats CONSTANT)
     Q_PROPERTY(MessagesController *messages READ messages CONSTANT)
@@ -57,6 +59,8 @@ class Controllers : public QObject
 public:
     Controllers(VSQMessenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
+    const AttachmentsController *attachments() const;
+    AttachmentsController *attachments();
     const UsersController *users() const;
     UsersController *users();
     const ChatsController *chats() const;
@@ -65,6 +69,7 @@ public:
     MessagesController *messages();
 
 private:
+    AttachmentsController *m_attachments;
     UsersController *m_users;
     ChatsController *m_chats;
     MessagesController *m_messages;

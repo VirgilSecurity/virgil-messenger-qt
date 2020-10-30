@@ -63,20 +63,21 @@ public:
     void closeChat();
 
 signals:
-    void errorOccurred(const QString &errorText); // FIXME(fpohtmeh): remove this signal everywhere?
+    void errorOccurred(const QString &errorText); // TODO(fpohtmeh): remove this signal everywhere?
     void chatOpened(const Chat::Id &chatId);
     void chatClosed();
     void currentContactIdChanged(const Contact::Id &contactId);
     void currentChatIdChanged(const Chat::Id &chatId);
 
-    void contactFound(const Contact::Id &contactId, QPrivateSignal);
+    void newContactFound(const Contact::Id &contactId, QPrivateSignal);
 
 private:
     void setupTableConnections();
     void setCurrentContactId(const Contact::Id &contactId);
     void setCurrentChatId(const Chat::Id &chatId);
 
-    void onContactFound(const Contact::Id &contactId);
+    void processNewContact(const Contact::Id &contactId);
+    void processUpdatedMessage(const Message &message);
 
     Models *m_models;
     UserDatabase *m_userDatabase;

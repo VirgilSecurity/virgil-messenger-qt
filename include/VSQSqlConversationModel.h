@@ -101,15 +101,15 @@ public:
     Q_INVOKABLE void
     setAsRead(const QString &author);
 
-    QList<StMessage> getMessages(const QString &user, const StMessage::Status status);
+    QList<MessageV0> getMessages(const QString &user, const MessageV0::Status status);
 
-    Optional<StMessage> getMessage(const QString &messageId) const;
-    StMessage getMessage(const QSqlRecord &record) const;
+    Optional<MessageV0> getMessage(const QString &messageId) const;
+    MessageV0 getMessage(const QSqlRecord &record) const;
 
 signals:
-    void createMessage(const QString recipient, const QString message, const QString messageId, const OptionalAttachment attachment);
-    void receiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachment attachment);
-    void setMessageStatus(const QString messageId, const StMessage::Status status);
+    void createMessage(const QString recipient, const QString message, const QString messageId, const OptionalAttachmentV0 attachment);
+    void receiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachmentV0 attachment);
+    void setMessageStatus(const QString messageId, const MessageV0::Status status);
     void setAttachmentFilePath(const QString &messageId, const QString &filePath);
     void setAttachmentProgress(const QString &messageId, const DataSize bytesReceived, const DataSize bytesTotal);
     void setAttachmentThumbnailPath(const QString messageId, const QString filePath);
@@ -144,9 +144,9 @@ private:
     QString
     _contactsTableName() const;
 
-    void onCreateMessage(const QString recipient, const QString message, const QString messageId, const OptionalAttachment attachment);
-    void onReceiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachment attachment);
-    void onSetMessageStatus(const QString messageId, const StMessage::Status status);
+    void onCreateMessage(const QString recipient, const QString message, const QString messageId, const OptionalAttachmentV0 attachment);
+    void onReceiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachmentV0 attachment);
+    void onSetMessageStatus(const QString messageId, const MessageV0::Status status);
     void onSetAttachmentStatus(const QString messageId, const Enums::AttachmentStatus status);
     void onSetAttachmentFilePath(const QString messageId, const QString filePath);
     void onSetAttachmentProgress(const QString messageId, const DataSize bytesReceived, const DataSize bytesTotal);

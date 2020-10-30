@@ -53,9 +53,9 @@ VSQTransfer::VSQTransfer(QNetworkAccessManager *networkAccessManager, const QStr
         }
     });
     connect(this, &VSQTransfer::statusChanged, [=](const Enums::AttachmentStatus status){
-        if (status == AttachmentV0::Status::Loaded || status == AttachmentV0::Status::Failed) {
+        if (status == AttachmentV0::Status::Loaded || status == AttachmentV0::Status::Interrupted) {
             closeFileHandle();
-            emit ended(status == AttachmentV0::Status::Failed);
+            emit ended(status == AttachmentV0::Status::Interrupted);
         }
     });
 }
@@ -78,11 +78,6 @@ bool VSQTransfer::isRunning() const
     return m_status == AttachmentV0::Status::Loading;
 }
 
-bool VSQTransfer::isFailed() const
-{
-    return m_status == AttachmentV0::Status::Failed;
-}
-
 void VSQTransfer::start()
 {
     setStatus(AttachmentV0::Status::Loading);
@@ -95,7 +90,7 @@ void VSQTransfer::abort()
         return;
     }
     qCDebug(lcTransferManager) << QString("Aborted transfer %1").arg(id());
-    setStatus(AttachmentV0::Status::Failed);
+    setStatus(AttachmentV0::Status::Interrupted);
 }
 
 QList<QMetaObject::Connection> VSQTransfer::connectReply(QNetworkReply *reply, QMutex *guard)
@@ -111,18 +106,18 @@ QList<QMetaObject::Connection> VSQTransfer::connectReply(QNetworkReply *reply, Q
         }
         else {
             qCDebug(lcTransferManager) << "Failed. File was processed partially";
-            setStatus(AttachmentV0::Status::Failed);
+            setStatus(AttachmentV0::Status::Interrupted);
         }
     });
     res << connect(reply, &QNetworkReply::errorOccurred, [=](QNetworkReply::NetworkError error) {
         QMutexLocker l(guard);
         qCDebug(lcTransferManager) << QString("Network error (code %1): %2").arg(error).arg(reply->errorString());
-        setStatus(AttachmentV0::Status::Failed);
+        setStatus(AttachmentV0::Status::Interrupted);
     });
     res << connect(reply, &QNetworkReply::sslErrors, [=]() {
         QMutexLocker l(guard);
         qCDebug(lcTransferManager) << "SSL errors";
-        setStatus(AttachmentV0::Status::Failed);
+        setStatus(AttachmentV0::Status::Interrupted);
     });
 
     return res;

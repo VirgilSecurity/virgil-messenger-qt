@@ -104,11 +104,9 @@ public:
     Q_INVOKABLE QString currentUser() const;
     Q_INVOKABLE QString currentRecipient() const;
 
-    VSQSqlConversationModel &modelConversations();
-    //VSQSqlChatModel &getChatModel();
+    QXmppClient *xmpp();
+    QString xmppURL() const;
     VSQLastActivityManager *lastActivityManager();
-
-    Optional<StMessage> decryptMessage(const QString &sender, const QString &message);
 
     void setApplicationActive(bool active);
 
@@ -119,8 +117,6 @@ public:
     void signUp(const QString &userId);
     void backupKey(const QString &password, const QString &confirmedPassword);
     void downloadKey(const QString &userId, const QString &password);
-
-    void sendMessage(const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
 
 public slots:
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
@@ -143,15 +139,6 @@ public slots:
 
     Q_INVOKABLE void
     checkState();
-
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    sendMessageAsync(const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
-
-    QFuture<VSQMessenger::EnResult>
-    createSendMessage(const QString messageId, const QString text);
-
-    QFuture<VSQMessenger::EnResult>
-    createSendAttachment(const QString messageId, const QUrl url, const Enums::AttachmentType attachmentType);
 
     Q_INVOKABLE void
     setStatus(VSQMessenger::EnStatus status);
@@ -195,7 +182,7 @@ signals:
     void openPreviewRequested(const QUrl &url);
     void informationRequested(const QString &message);
 
-    void downloadThumbnail(const StMessage message, const QString sender, QPrivateSignal);
+    void downloadThumbnail(const MessageV0 message, const QString sender, QPrivateSignal);
 
     // New signals
 
@@ -210,21 +197,18 @@ signals:
     void keyDownloaded(const QString &userId);
     void downloadKeyFailed(const QString &errorText);
 
-    void messageSent();
+    void messageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);
 
 private slots:
     void onConnected();
-    void onMessageDelivered(const QString&, const QString&);
     void onDisconnected();
     void onError(QXmppClient::Error);
-    void onMessageReceived(const QXmppMessage &message);
     void onPresenceReceived(const QXmppPresence &presence);
     void onIqReceived(const QXmppIq &iq);
     void onSslErrors(const QList<QSslError> &errors);
     void onStateChanged(QXmppClient::State state);
     void onProcessNetworkState(bool online);
-    void onReadyToUpload();
-    void onDownloadThumbnail(const StMessage message, const QString sender);
+    void onDownloadThumbnail(const MessageV0 message, const QString sender);
     void onAttachmentStatusChanged(const QString &uploadId, const Enums::AttachmentStatus status);
     void onAttachmentProgressChanged(const QString &uploadId, const DataSize bytesReceived, const DataSize bytesTotal);
     void onAttachmentDecrypted(const QString &uploadId, const QString &filePath);
@@ -251,7 +235,6 @@ private:
     VSQAttachmentBuilder m_attachmentBuilder;
 
     QMutex m_connectGuard;
-    QMutex m_messageGuard;
     QString m_user;
     QString m_userId;
     QString m_recipient;
@@ -283,9 +266,6 @@ private:
     QString
     _virgilURL();
 
-    QString
-    _xmppURL();
-
     uint16_t
     _xmppPort();
 
@@ -304,20 +284,8 @@ private:
     QString
     _caBundleFile();
 
-    void _sendFailedMessages();
-
-    QString createJson(const QString &message, const OptionalAttachment &attachment);
-
-    StMessage parseJson(const QJsonDocument &json);
-
-    OptionalAttachment uploadAttachment(const QString messageId, const QString recipient, const AttachmentV0 &attachment);
-    void setFailedAttachmentStatus(const QString &messageId);
-
-    VSQMessenger::EnResult _sendMessageInternal(bool createNew, const QString &messageId, const QString &to, const QString &message,
-                                                const OptionalAttachment &attachment);
-
-    using Function = std::function<void (const StMessage &message)>;
-    void downloadAndProcess(StMessage message, const Function &func);
+    using Function = std::function<void (const MessageV0 &message)>;
+    void downloadAndProcess(MessageV0 message, const Function &func);
 };
 
 Q_DECLARE_METATYPE(QXmppClient::Error)

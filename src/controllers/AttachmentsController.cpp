@@ -32,42 +32,28 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHATSTATE_H
-#define VM_CHATSTATE_H
+#include "controllers/AttachmentsController.h"
 
-#include <QState>
+#include "models/MessagesModel.h"
+#include "models/Models.h"
 
-#include "VSQCommon.h"
+using namespace vm;
 
-class VSQMessenger;
-
-namespace vm
+AttachmentsController::AttachmentsController(Models *models, QObject *parent)
+    : QObject(parent)
 {
-class ChatState : public QState
-{
-    Q_OBJECT
-    Q_PROPERTY(QString lastActivityText READ lastActivityText WRITE setLastActivityText NOTIFY lastActivityTextChanged)
-
-public:
-    ChatState(VSQMessenger *messenger, QState *parent);
-
-    QString lastActivityText() const;
-    void setLastActivityText(const QString &text);
-
-signals:
-    void downloadAttachment(const QString &messageId);
-    void openAttachment(const QString &messageId);
-    void saveAttachmentAs(const QString &messageId, const QVariant &fileUrl);
-    void requestPreview(const QUrl &url);
-    void lastActivityTextChanged(const QString &text);
-    void messageSent();
-
-private:
-    void onMessageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);
-
-    VSQMessenger *m_messenger;
-    QString m_lastActivityText;
-};
+    connect(models->messages(), &MessagesModel::messageAdded, this, &AttachmentsController::preloadAttachment);
 }
 
-#endif // VM_CHATSTATE_H
+void AttachmentsController::preloadAttachment(const Message &message)
+{
+    if (!message.attachment) {
+        return;
+    }
+    const auto attachment = *message.attachment;
+    if (attachment.type != Attachment::Type::Picture) {
+        return;
+    }
+    qDebug() << "Preloading of attachment for message:" << message.id;
+    // FIXME(fpohtmeh): implement
+}

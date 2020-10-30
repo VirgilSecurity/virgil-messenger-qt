@@ -43,6 +43,7 @@ class VSQMessenger;
 
 namespace vm
 {
+class Models;
 class UserDatabase;
 
 class UsersController : public QObject
@@ -51,7 +52,7 @@ class UsersController : public QObject
     Q_PROPERTY(QString username MEMBER m_username NOTIFY usernameChanged);
 
 public:
-    UsersController(VSQMessenger *messenger, UserDatabase *userDatabase, QObject *parent);
+    UsersController(VSQMessenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
     QString username() const; // TODO(fpohtmeh): use userId instead of username
 
@@ -60,8 +61,6 @@ public:
     Q_INVOKABLE void signOut();
 
     void downloadKey(const QString &username, const QString &password);
-
-    void subscribeToContact(const Contact::Id &contactId);
 
 signals:
     void signedIn(const QString &username);
@@ -86,6 +85,8 @@ private:
 
     void openDatabase(const QString &username, const Operation operation);
     void processDatabaseUsername(const QString &username);
+
+    void subscribeByChat(const Chat &chat);
 
     VSQMessenger *m_messenger;
     UserDatabase *m_userDatabase;

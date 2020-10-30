@@ -43,7 +43,7 @@
 #include "VSQCryptoTransferManager.h"
 #include "Utils.h"
 
-Q_DECLARE_METATYPE(StMessage::Status)
+Q_DECLARE_METATYPE(MessageV0::Status)
 
 /******************************************************************************/
 void
@@ -104,7 +104,7 @@ VSQSqlConversationModel::VSQSqlConversationModel(vm::Validator *validator, QObje
     : QSqlTableModel(parent)
     , m_validator(validator)
 {
-    qRegisterMetaType<StMessage::Status>("StMessage::Status");
+    qRegisterMetaType<MessageV0::Status>("StMessage::Status");
 
     connect(this, &VSQSqlConversationModel::createMessage, this, &VSQSqlConversationModel::onCreateMessage);
     connect(this, &VSQSqlConversationModel::receiveMessage, this, &VSQSqlConversationModel::onReceiveMessage);
@@ -315,14 +315,14 @@ void VSQSqlConversationModel::setAsRead(const QString &author) {
     QString query;
 
     query = QString("UPDATE %1 SET status = %2 WHERE author = \"%3\"")
-            .arg(_tableName()).arg(static_cast<int>(StMessage::Status::MST_READ)).arg(author);
+            .arg(_tableName()).arg(static_cast<int>(MessageV0::Status::MST_READ)).arg(author);
 
     model.prepare(query);
 
     qDebug() << query << model.exec();
 }
 
-QList<StMessage> VSQSqlConversationModel::getMessages(const QString &user, const StMessage::Status status) {
+QList<MessageV0> VSQSqlConversationModel::getMessages(const QString &user, const MessageV0::Status status) {
     QSqlQueryModel model;
     QString query;
     query = QString("SELECT * FROM %1 WHERE status = %2 AND author = '%3' ORDER BY timestamp")
@@ -331,14 +331,14 @@ QList<StMessage> VSQSqlConversationModel::getMessages(const QString &user, const
     int c = model.rowCount();
     qDebug() << c << user << query;
 
-    QList<StMessage> messages;
+    QList<MessageV0> messages;
     for (int i = 0; i < c; i++) {
         messages.append(getMessage(model.record(i)));
     }
     return messages;
 }
 
-Optional<StMessage> VSQSqlConversationModel::getMessage(const QString &messageId) const
+Optional<MessageV0> VSQSqlConversationModel::getMessage(const QString &messageId) const
 {
     QSqlQueryModel model;
     model.setQuery(QString("SELECT * FROM %1 WHERE message_id = \"%2\"").arg(_tableName()).arg(messageId));
@@ -348,9 +348,9 @@ Optional<StMessage> VSQSqlConversationModel::getMessage(const QString &messageId
     return getMessage(model.record(0));
 }
 
-StMessage VSQSqlConversationModel::getMessage(const QSqlRecord &record) const
+MessageV0 VSQSqlConversationModel::getMessage(const QSqlRecord &record) const
 {
-    StMessage message;
+    MessageV0 message;
     message.messageId = record.value("message_id").toString();
     message.message = record.value("message").toString();
     message.sender = record.value("author").toString();
@@ -388,7 +388,7 @@ QString VSQSqlConversationModel::_contactsTableName() const {
 }
 
 void VSQSqlConversationModel::onCreateMessage(const QString recipient, const QString message, const QString messageId,
-                                              const OptionalAttachment attachment)
+                                              const OptionalAttachmentV0 attachment)
 {
     const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
 
@@ -397,7 +397,7 @@ void VSQSqlConversationModel::onCreateMessage(const QString recipient, const QSt
     newRecord.setValue("recipient", recipient);
     newRecord.setValue("timestamp", timestamp);
     newRecord.setValue("message", message);
-    newRecord.setValue("status", static_cast<int>(StMessage::Status::MST_CREATED));
+    newRecord.setValue("status", static_cast<int>(MessageV0::Status::MST_CREATED));
     newRecord.setValue("message_id", messageId);
     if (attachment) {
         newRecord.setValue("attachment_id", attachment->id);
@@ -424,7 +424,7 @@ void VSQSqlConversationModel::onCreateMessage(const QString recipient, const QSt
     scheduleSelect({});
 }
 
-void VSQSqlConversationModel::onReceiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachment attachment)
+void VSQSqlConversationModel::onReceiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachmentV0 attachment)
 {
     const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
 
@@ -433,7 +433,7 @@ void VSQSqlConversationModel::onReceiveMessage(const QString messageId, const QS
     newRecord.setValue("recipient", user());
     newRecord.setValue("timestamp", timestamp);
     newRecord.setValue("message", message);
-    newRecord.setValue("status", static_cast<int>(StMessage::Status::MST_RECEIVED));
+    newRecord.setValue("status", static_cast<int>(MessageV0::Status::MST_RECEIVED));
     newRecord.setValue("message_id", messageId);
     if (attachment) {
         // TODO(fpohtmeh): merge with onCreateMessage
@@ -461,7 +461,7 @@ void VSQSqlConversationModel::onReceiveMessage(const QString messageId, const QS
     scheduleSelect({});
 }
 
-void VSQSqlConversationModel::onSetMessageStatus(const QString messageId, const StMessage::Status status)
+void VSQSqlConversationModel::onSetMessageStatus(const QString messageId, const MessageV0::Status status)
 {
     qDebug() << "SQL message status:" << messageId << "=>" << status;
     QString query = QString("UPDATE %1 SET status = %2 WHERE message_id = '%3'")
@@ -480,7 +480,7 @@ void VSQSqlConversationModel::onSetAttachmentStatus(const QString messageId, con
     if (status == AttachmentV0::Status::Loading) {
         m_transferMap[messageId] = TransferInfo();
     }
-    else if (status == AttachmentV0::Status::Failed || status == AttachmentV0::Status::Loaded) {
+    else if (status == AttachmentV0::Status::Interrupted || status == AttachmentV0::Status::Loaded) {
         const auto it = m_transferMap.find(messageId);
         if (it != m_transferMap.end()) {
             m_transferMap.erase(it);

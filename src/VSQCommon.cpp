@@ -45,18 +45,18 @@ void registerCommonMetaTypes()
     qRegisterMetaType<Seconds>("Seconds");
     qRegisterMetaType<DataSize>("DataSize");
     qRegisterMetaType<Enums::AttachmentType>("Enums::AttachmentType");
-    qRegisterMetaType<Enums::AttachmentStatus>();
-    qRegisterMetaType<Enums::MessageStatus>();
-    qRegisterMetaType<Enums::MessageAuthor>();
-    qRegisterMetaType<AttachmentV0>("Attachment");
-    qRegisterMetaType<OptionalAttachment>();
-    qRegisterMetaType<StMessage>();
+    qRegisterMetaType<Enums::AttachmentStatus>("Enums::AttachmentStatus");
+    qRegisterMetaType<Enums::MessageStatus>("Enums::MessageStatus");
 
+    qRegisterMetaType<vm::UserId>("UserId");
+    qRegisterMetaType<vm::Jid>("Jid");
     qRegisterMetaType<vm::Contact::Id>("Contact::Id");
-    qRegisterMetaType<vm::Chat::Id>("Chat::Id");
     qRegisterMetaType<vm::Message>("Message");
+    qRegisterMetaType<vm::Message::Id>("Message::Id");
+    qRegisterMetaType<vm::Message::Status>("Message::Status");
     qRegisterMetaType<vm::Messages>("Messages");
     qRegisterMetaType<vm::Chat>("Chat");
+    qRegisterMetaType<vm::Chat::Id>("Chat::Id");
     qRegisterMetaType<vm::Chats>("Chats");
 
     qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");

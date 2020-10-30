@@ -39,6 +39,9 @@
 
 #include "VSQCommon.h"
 
+#include <QMutex>
+
+class QXmppMessage;
 class VSQMessenger;
 
 namespace vm
@@ -54,22 +57,34 @@ public:
     MessagesController(VSQMessenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
     void loadMessages(const Chat::Id &chatId);
-    Q_INVOKABLE void sendMessage(const QString &body, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
+    Q_INVOKABLE void createSendMessage(const QString &body, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
 
     void setRecipientId(const Contact::Id &recipientId);
 
 signals:
     void errorOccurred(const QString &errorText);
 
+    void messageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status, QPrivateSignal); // TODO(fpohtmeh): remove this workaround
+
 private:
     void setupTableConnections();
+    void setUserId(const UserId &userId);
+
+    void setMessageStatus(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);
+    void setDeliveredStatus(const Jid &jid, const Message::Id &messageId);
+    void receiveMessage(const QXmppMessage &msg);
+    void sendMessage(const Message &message);
+    void sendNotSentMessages();
 
     VSQMessenger *m_messenger;
     Models *m_models;
     UserDatabase *m_userDatabase;
 
+    UserId m_userId;
     Chat::Id m_chatId;
     Contact::Id m_recipientId;
+
+    QMutex m_messageGuard; // TODO(fpohtmeh): remove this workaround and mutex include
 };
 }
 

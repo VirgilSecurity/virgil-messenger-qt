@@ -38,8 +38,10 @@
 
 #include "Core.h"
 #include "database/ChatsTable.h"
+#include "database/MessagesTable.h"
 #include "database/UserDatabase.h"
 #include "models/ChatsModel.h"
+#include "models/MessagesModel.h"
 #include "models/Models.h"
 
 using namespace vm;
@@ -50,7 +52,8 @@ ChatsController::ChatsController(Models *models, UserDatabase *userDatabase, QOb
     , m_userDatabase(userDatabase)
 {
     connect(userDatabase, &UserDatabase::opened, this, &ChatsController::setupTableConnections);
-    connect(this, &ChatsController::contactFound, this, &ChatsController::onContactFound);
+    connect(models->messages(), &MessagesModel::messageAdded, m_models->chats(), &ChatsModel::updateLastMessage);
+    connect(this, &ChatsController::newContactFound, this, &ChatsController::processNewContact);
 }
 
 Contact::Id ChatsController::currentContactId() const
@@ -81,7 +84,7 @@ void ChatsController::createChat(const Contact::Id &contactId)
                 emit errorOccurred(tr("Contact not found"));
             }
             else {
-                emit contactFound(contactId, QPrivateSignal());
+                emit newContactFound(contactId, QPrivateSignal());
             }
         });
     }
@@ -117,6 +120,7 @@ void ChatsController::setupTableConnections()
     auto table = m_userDatabase->chatsTable();
     connect(table, &ChatsTable::errorOccurred, this, &ChatsController::errorOccurred);
     connect(table, &ChatsTable::fetched, m_models->chats(), &ChatsModel::setChats);
+    connect(m_userDatabase->messagesTable(), &MessagesTable::messageUpdated, this, &ChatsController::processUpdatedMessage);
 }
 
 void ChatsController::setCurrentContactId(const Contact::Id &contactId)
@@ -137,11 +141,20 @@ void ChatsController::setCurrentChatId(const Chat::Id &chatId)
     emit currentChatIdChanged(chatId);
 }
 
-void ChatsController::onContactFound(const Contact::Id &contactId)
+void ChatsController::processNewContact(const Contact::Id &contactId)
 {
     const auto chat = m_models->chats()->createChat(contactId);
     m_userDatabase->chatsTable()->createChat(chat);
     setCurrentChatId(chat.id);
     setCurrentContactId(contactId);
     emit chatOpened(chat.id);
+}
+
+void ChatsController::processUpdatedMessage(const Message &message)
+{
+    auto chats = m_models->chats();
+    auto chat = chats->find(message.chatId);
+    if (chat && chat->lastMessage->id == message.id) {
+        chats->updateLastMessage(message);
+    }
 }

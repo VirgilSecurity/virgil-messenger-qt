@@ -70,6 +70,7 @@ Chat ChatsModel::createChat(const Contact::Id &contactId)
     chat.contactId = contactId;
     m_chats.push_back(chat);
     endInsertRows();
+    emit chatAdded(chat);
     return chat;
 }
 
@@ -179,24 +180,20 @@ void ChatsModel::setFilter(const QString &filter)
 
 Optional<int> ChatsModel::findRowById(const Chat::Id &chatId) const
 {
-    int i = 0;
-    for (auto &c : m_chats) {
-        if (c.id == chatId) {
+    for (int i = 0, s = m_chats.size(); i < s; ++i) {
+        if (m_chats[i].id == chatId) {
             return i;
         }
-        ++i;
     }
     return NullOptional;
 }
 
 Optional<int> ChatsModel::findRowByContact(const Contact::Id &contactId) const
 {
-    int i = 0;
-    for (auto &c : m_chats) {
-        if (c.contactId == contactId) {
+    for (int i = 0, s = m_chats.size(); i < s; ++i) {
+        if (m_chats[i].contactId == contactId) {
             return i;
         }
-        ++i;
     }
     return NullOptional;
 }

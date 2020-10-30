@@ -133,6 +133,7 @@ HEADERS += \
         include/Validator.h \
         include/Core.h \
         # Controllers
+        include/controllers/AttachmentsController.h \
         include/controllers/ChatsController.h \
         include/controllers/Controllers.h \
         include/controllers/MessagesController.h \
@@ -218,6 +219,7 @@ SOURCES += \
         src/Validator.cpp \
         src/Core.cpp \
         # Controllers
+        src/controllers/AttachmentsController.cpp \
         src/controllers/ChatsController.cpp \
         src/controllers/Controllers.cpp \
         src/controllers/MessagesController.cpp \

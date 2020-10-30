@@ -65,6 +65,7 @@ public:
     bool hasChatWithContact(const Contact::Id &contactId) const;
 
 signals:
+    void chatAdded(const Chat &chat);
     void filterChanged(const QString &);
 
 private:

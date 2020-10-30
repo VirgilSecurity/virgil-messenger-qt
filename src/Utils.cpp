@@ -195,6 +195,16 @@ QString Utils::attachmentDisplayText(const Attachment &attachment)
     }
 }
 
+Contact::Id Utils::contactIdFromJid(const Jid &jid)
+{
+    return jid.split('@').front();
+}
+
+Jid Utils::createJid(const Contact::Id &contactId, const QString &xmppUrl)
+{
+    return contactId + '@' + xmppUrl;
+}
+
 Optional<QString> Utils::readTextFile(const QString &filePath)
 {
     QFile file(filePath);
@@ -245,4 +255,73 @@ QVariant Utils::extrasFromJson(const QString &json, const Attachment::Type type)
     extras.thumbnailPath = doc["thumbnailPath"].toString();
     extras.previewPath = doc["previewPath"].toString();
     return QVariant::fromValue(extras);
+}
+
+Message Utils::messageFromJson(const QByteArray &json)
+{
+    // Get message from JSON
+    auto doc = QJsonDocument::fromJson(json);
+    qDebug() << "JSON for parsing:" << doc;
+    const auto type = doc["type"].toString();
+    const auto payload = doc["payload"];
+
+    Message message;
+    if (type == QLatin1String("text")) {
+        message.body = payload["body"].toString();
+        return message;
+    }
+    // FIXME(fpohtmeh): implement
+    /*
+    AttachmentV0 attachment;
+    attachment.id = Utils::createUuid();
+    attachment.remoteUrl = payload["url"].toString();
+    attachment.fileName = payload["fileName"].toString();
+    attachment.displayName = payload["displayName"].toString();
+    attachment.bytesTotal = payload["bytesTotal"].toInt();
+    message.message = attachment.displayName;
+    if (type == QLatin1String("picture")) {
+    attachment.type = AttachmentV0::Type::Picture;
+    attachment.remoteThumbnailUrl = payload["thumbnailUrl"].toString();
+    attachment.thumbnailSize = QSize(payload["thumbnailWidth"].toInt(), payload["thumbnailHeight"].toInt());
+    }
+    else {
+    attachment.type = AttachmentV0::Type::File;
+    }
+    message.attachment = attachment;
+    return message;
+    */
+    qDebug() << "Received message: " << message.body;
+    return message;
+}
+
+QByteArray Utils::messageToJson(const Message &message)
+{
+    QJsonObject mainObject;
+    QJsonObject payloadObject;
+    const auto &attachment = message.attachment;
+    if (!attachment) {
+        mainObject.insert("type", "text");
+        payloadObject.insert("body", message.body);
+    }
+    else {
+        if (attachment->type == AttachmentV0::Type::Picture) {
+            mainObject.insert("type", "picture");
+// FIXME(fpohtmeh): implement
+//            payloadObject.insert("thumbnailUrl", attachment->remoteThumbnailUrl.toString());
+//            payloadObject.insert("thumbnailWidth", attachment->thumbnailSize.width());
+//            payloadObject.insert("thumbnailHeight", attachment->thumbnailSize.height());
+        }
+        else {
+            mainObject.insert("type", "file");
+        }
+        // FIXME(fpohtmeh): implement
+//        payloadObject.insert("url", attachment->remoteUrl.toString());
+//        payloadObject.insert("fileName", attachment->fileName);
+//        payloadObject.insert("displayName", attachment->displayName);
+//        payloadObject.insert("bytesTotal", attachment->bytesTotal);
+    }
+    mainObject.insert("payload", payloadObject);
+
+    QJsonDocument doc(mainObject);
+    return doc.toJson(QJsonDocument::Compact);
 }

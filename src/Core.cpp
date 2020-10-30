@@ -36,6 +36,8 @@
 
 #include <virgil/iot/messenger/messenger.h>
 
+#include "Utils.h"
+
 using namespace vm;
 using namespace VirgilIoTKit;
 
@@ -53,4 +55,56 @@ int Core::bufferSizeForEncryption(const int rawSize)
 int Core::bufferSizeForDecryption(const int encryptedSize)
 {
     return encryptedSize;
+}
+
+Optional<Message> Core::decryptMessage(const Message::Id &id, const Contact::Id &sender, const QString &message)
+{
+    const int decryptedMsgSzMax = bufferSizeForDecryption(message.size());
+    QByteArray decryptedMessage = QByteArray(decryptedMsgSzMax + 1, 0x00);
+    size_t decryptedMessageSz = 0;
+
+    qDebug() << "Sender:" << sender;
+    qDebug() << "Encrypted message:" << message.length() << "bytes";
+
+    // Decrypt message
+    if (VS_CODE_OK != vs_messenger_virgil_decrypt_msg(
+                sender.toStdString().c_str(),
+                message.toStdString().c_str(),
+                (uint8_t *)decryptedMessage.data(), decryptedMsgSzMax,
+                &decryptedMessageSz)) {
+        qWarning("Received message cannot be decrypted");
+        return NullOptional;
+    }
+
+    // Adjust buffer with a decrypted data
+    decryptedMessage.resize((int)decryptedMessageSz);
+
+    Message msg = Utils::messageFromJson(decryptedMessage);
+    msg.id = id;
+    return msg;
+}
+
+Optional<QString> Core::encryptMessage(const Message &message, const Contact::Id &recipient)
+{
+    // Create JSON-formatted message to be sent
+    const QString internalJson = Utils::messageToJson(message);
+    qDebug() << "Json for encryption:" << internalJson;
+
+    // Encrypt message
+    const auto plaintext = internalJson.toStdString();
+    const size_t _encryptedMsgSzMax = Core::bufferSizeForEncryption(plaintext.size());
+    uint8_t encryptedMessage[_encryptedMsgSzMax];
+    size_t encryptedMessageSz = 0;
+
+    if (VS_CODE_OK != vs_messenger_virgil_encrypt_msg(
+                     recipient.toStdString().c_str(),
+                     reinterpret_cast<const uint8_t*>(plaintext.c_str()),
+                     plaintext.length(),
+                     encryptedMessage,
+                     _encryptedMsgSzMax,
+                     &encryptedMessageSz)) {
+        qWarning("Cannot encrypt message to be sent");
+        return NullOptional;
+    }
+    return QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage), encryptedMessageSz);
 }

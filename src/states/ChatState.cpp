@@ -47,7 +47,7 @@ ChatState::ChatState(VSQMessenger *messenger, QState *parent)
     connect(this, &ChatState::openAttachment, m_messenger, &VSQMessenger::openAttachment);
     connect(this, &ChatState::saveAttachmentAs, m_messenger, &VSQMessenger::saveAttachmentAs);
     connect(m_messenger, &VSQMessenger::openPreviewRequested, this, &ChatState::requestPreview);
-    connect(m_messenger, &VSQMessenger::messageSent, this, &ChatState::messageSent);
+    connect(m_messenger, &VSQMessenger::messageStatusChanged, this, &ChatState::onMessageStatusChanged);
     connect(m_messenger->lastActivityManager(), &VSQLastActivityManager::lastActivityTextChanged, this, &ChatState::setLastActivityText);
 }
 
@@ -63,4 +63,12 @@ void ChatState::setLastActivityText(const QString &text)
     }
     m_lastActivityText = text;
     emit lastActivityTextChanged(text);
+}
+
+void ChatState::onMessageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status)
+{
+    Q_UNUSED(messageId)
+    if (status == Message::Status::Sent && contactId == m_messenger->currentRecipient()) {
+        emit messageSent();
+    }
 }

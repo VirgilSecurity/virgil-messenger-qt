@@ -56,7 +56,7 @@ VSQAttachmentBuilder::VSQAttachmentBuilder(VSQSettings *settings, QObject *paren
     , m_settings(settings)
 {}
 
-OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const AttachmentV0::Type type, QString &errorText)
+OptionalAttachmentV0 VSQAttachmentBuilder::build(const QUrl &url, const AttachmentV0::Type type, QString &errorText)
 {
     qCDebug(lcAttachment) << "Attachment input url:" << vm::Utils::urlToLocalFile(url);
     if (!vm::Utils::isValidUrl(url)) {

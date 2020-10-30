@@ -36,10 +36,13 @@
 
 #include "VSQMessenger.h"
 #include "database/UserDatabase.h"
+#include "models/Models.h"
+#include "models/ChatsModel.h"
+#include "models/MessagesModel.h"
 
 using namespace vm;
 
-UsersController::UsersController(VSQMessenger *messenger, UserDatabase *userDatabase, QObject *parent)
+UsersController::UsersController(VSQMessenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
     , m_messenger(messenger)
     , m_userDatabase(userDatabase)
@@ -54,6 +57,7 @@ UsersController::UsersController(VSQMessenger *messenger, UserDatabase *userData
     connect(messenger, &VSQMessenger::downloadKeyFailed, this, &UsersController::downloadKeyFailed);
 
     connect(userDatabase, &UserDatabase::usernameChanged, this, &UsersController::processDatabaseUsername);
+    connect(models->chats(), &ChatsModel::chatAdded, this, &UsersController::subscribeByChat);
 }
 
 QString UsersController::username() const
@@ -79,12 +83,6 @@ void UsersController::signOut()
 void UsersController::downloadKey(const QString &username, const QString &password)
 {
     m_messenger->downloadKey(username, password);
-}
-
-void UsersController::subscribeToContact(const Contact::Id &contactId)
-{
-    // TODO(fpohtmeh): use subscription result and error text
-    m_messenger->subscribeToContact(contactId);
 }
 
 void UsersController::openDatabase(const QString &username, const Operation operation)
@@ -120,4 +118,9 @@ void UsersController::processDatabaseUsername(const QString &username)
     default:
         break;
     }
+}
+
+void UsersController::subscribeByChat(const Chat &chat)
+{
+    m_messenger->subscribeToContact(chat.contactId);
 }

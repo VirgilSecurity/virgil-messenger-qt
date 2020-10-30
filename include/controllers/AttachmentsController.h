@@ -32,42 +32,27 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHATSTATE_H
-#define VM_CHATSTATE_H
+#ifndef VM_ATTACHMENTSCONTROLLER_H
+#define VM_ATTACHMENTSCONTROLLER_H
 
-#include <QState>
+#include <QObject>
 
 #include "VSQCommon.h"
 
-class VSQMessenger;
-
 namespace vm
 {
-class ChatState : public QState
+class Models;
+
+class AttachmentsController : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString lastActivityText READ lastActivityText WRITE setLastActivityText NOTIFY lastActivityTextChanged)
 
 public:
-    ChatState(VSQMessenger *messenger, QState *parent);
-
-    QString lastActivityText() const;
-    void setLastActivityText(const QString &text);
-
-signals:
-    void downloadAttachment(const QString &messageId);
-    void openAttachment(const QString &messageId);
-    void saveAttachmentAs(const QString &messageId, const QVariant &fileUrl);
-    void requestPreview(const QUrl &url);
-    void lastActivityTextChanged(const QString &text);
-    void messageSent();
+    explicit AttachmentsController(Models *models, QObject *parent);
 
 private:
-    void onMessageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);
-
-    VSQMessenger *m_messenger;
-    QString m_lastActivityText;
+    void preloadAttachment(const Message &message);
 };
 }
 
-#endif // VM_CHATSTATE_H
+#endif // VM_ATTACHMENTSCONTROLLER_H

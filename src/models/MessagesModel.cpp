@@ -54,7 +54,6 @@ void MessagesModel::setMessages(const Messages &messages)
 
 Message MessagesModel::createMessage(const Chat::Id &chatId, const Contact::Id &authorId, const QString &body, const Optional<Attachment> &attachment)
 {
-    beginInsertRows(QModelIndex(), rowCount(), rowCount());
     Message message;
     message.id = attachment ? attachment->messageId : Utils::createUuid();
     message.timestamp = QDateTime::currentDateTime();
@@ -62,9 +61,32 @@ Message MessagesModel::createMessage(const Chat::Id &chatId, const Contact::Id &
     message.authorId = authorId;
     message.body = body;
     message.attachment = attachment;
+    writeMessage(message);
+    return message;
+}
+
+void MessagesModel::writeMessage(const Message &message)
+{
+    beginInsertRows(QModelIndex(), rowCount(), rowCount());
     m_messages.push_back(message);
     endInsertRows();
-    return message;
+    emit messageAdded(message);
+}
+
+bool MessagesModel::setMessageStatus(const Message::Id &messageId, const Message::Status &status)
+{
+    const auto messageRow = findRowById(messageId);
+    if (!messageRow) {
+        return true;
+    }
+    auto &message = m_messages[*messageRow];
+    if (message.status == status) {
+        return false;
+    }
+    message.status = status;
+    const auto messageIndex = index(*messageRow);
+    emit dataChanged(messageIndex, messageIndex, { StatusRole, FailedRole });
+    return true;
 }
 
 int MessagesModel::rowCount(const QModelIndex &parent) const
@@ -176,7 +198,7 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
         }
         if (attachment) {
             const auto &status = attachment->status;
-            return status == Attachment::Status::Failed || status == Attachment::Status::Invalid;
+            return status == Attachment::Status::Interrupted || status == Attachment::Status::Invalid;
         }
         return false;
     }
@@ -218,4 +240,14 @@ QHash<int, QByteArray> MessagesModel::roleNames() const
         { FirstInRowRole, "firstInRow" },
         { InRowRole, "inRow" },
     };
+}
+
+Optional<int> MessagesModel::findRowById(const Message::Id &messageId) const
+{
+    for (int i = m_messages.size() - 1; i >= 0; --i) {
+        if (m_messages[i].id == messageId) {
+            return i;
+        }
+    }
+    return NullOptional;
 }

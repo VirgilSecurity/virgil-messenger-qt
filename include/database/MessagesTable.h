@@ -49,15 +49,18 @@ public:
 signals:
     void fetch(const Chat::Id &chatId);
     void createMessage(const Message &message);
+    void updateStatus(const Message::Id &messageId, const Message::Status &status);
 
     void errorOccurred(const QString &errorText);
     void fetched(const Messages &messages);
+    void messageUpdated(const Message &message);
 
 private:
     bool create() override;
 
     void processFetch(const Chat::Id &chatId);
     void processCreateMessage(const Message &message);
+    void processUpdateStatus(const Message::Id &messageId, const Message::Status &status);
 };
 }
 

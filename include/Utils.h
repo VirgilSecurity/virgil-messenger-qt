@@ -55,6 +55,10 @@ namespace Utils
 
     QString attachmentDisplayText(const Attachment &attachment);
 
+    Contact::Id contactIdFromJid(const Jid &jid);
+
+    Jid createJid(const Contact::Id &contactId, const QString &xmppUrl);
+
     // File functions
 
     QString findUniqueFileName(const QString &fileName);
@@ -80,6 +84,10 @@ namespace Utils
     QString extrasToJson(const QVariant &extras, const Attachment::Type type);
 
     QVariant extrasFromJson(const QString &json, const Attachment::Type type);
+
+    Message messageFromJson(const QByteArray &json);
+
+    QByteArray messageToJson(const Message &message);
 }
 }
 

@@ -55,7 +55,6 @@ public:
 
     QString id() const;
     bool isRunning() const;
-    bool isFailed() const;
 
     virtual void start();
     virtual void abort();

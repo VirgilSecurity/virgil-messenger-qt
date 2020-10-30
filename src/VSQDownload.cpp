@@ -69,7 +69,7 @@ void VSQDownload::start()
     // Check file for writing
     auto file = createFileHandle(m_filePath);
     if (!file->open(QFile::WriteOnly)) {
-        setStatus(AttachmentV0::Status::Failed);
+        setStatus(AttachmentV0::Status::Interrupted);
         return;
     }
 

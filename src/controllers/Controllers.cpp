@@ -35,6 +35,7 @@
 #include "controllers/Controllers.h"
 
 #include "VSQMessenger.h"
+#include "controllers/AttachmentsController.h"
 #include "controllers/ChatsController.h"
 #include "controllers/MessagesController.h"
 #include "controllers/UsersController.h"
@@ -44,19 +45,30 @@ using namespace vm;
 
 Controllers::Controllers(VSQMessenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
-    , m_users(new UsersController(messenger, userDatabase, this))
+    , m_attachments(new AttachmentsController(models, this))
+    , m_users(new UsersController(messenger, models, userDatabase, this))
     , m_chats(new ChatsController(models, userDatabase, this))
     , m_messages(new MessagesController(messenger, models, userDatabase, this))
 {
     connect(m_users, &UsersController::usernameChanged, m_chats, &ChatsController::loadChats);
-    connect(m_chats, &ChatsController::chatOpened, m_users, &UsersController::subscribeToContact);
     connect(m_chats, &ChatsController::currentContactIdChanged, messenger, &VSQMessenger::setCurrentRecipient); // TODO(fpohtmeh): remove connection
     connect(m_chats, &ChatsController::currentContactIdChanged, m_messages, &MessagesController::setRecipientId);
     connect(m_chats, &ChatsController::currentChatIdChanged, m_messages, &MessagesController::loadMessages);
 
+    qRegisterMetaType<AttachmentsController *>("AttachmentsController*");
     qRegisterMetaType<ChatsController *>("ChatsController*");
     qRegisterMetaType<MessagesController *>("MessagesController*");
     qRegisterMetaType<UsersController *>("UsersController*");
+}
+
+const AttachmentsController *Controllers::attachments() const
+{
+    return m_attachments;
+}
+
+AttachmentsController *Controllers::attachments()
+{
+    return m_attachments;
 }
 
 const UsersController *Controllers::users() const

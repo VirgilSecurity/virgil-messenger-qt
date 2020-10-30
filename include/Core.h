@@ -51,6 +51,10 @@ public:
     static int bufferSizeForEncryption(const int rawSize);
 
     static int bufferSizeForDecryption(const int encryptedSize);
+
+    static Optional<Message> decryptMessage(const Message::Id &id, const Contact::Id &sender, const QString &message);
+
+    static Optional<QString> encryptMessage(const Message &message, const Contact::Id &recipient);
 };
 }
 

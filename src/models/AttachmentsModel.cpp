@@ -80,7 +80,7 @@ Optional<Attachment> AttachmentsModel::createAttachment(const QUrl &url, const A
     Attachment attachment;
     attachment.id = Utils::createUuid();
     attachment.type = type;
-    attachment.size = fileSize; // FIXME(fpohtmeh): use size after encryption?
+    attachment.size = fileSize; // TODO(fpohtmeh): use size after encryption?
 
     // Filename
 #ifdef VS_ANDROID

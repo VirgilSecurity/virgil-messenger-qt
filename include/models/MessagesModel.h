@@ -51,6 +51,12 @@ public:
 
     void setMessages(const Messages &messages);
     Message createMessage(const Chat::Id &chatId, const Contact::Id &authorId, const QString &body, const Optional<Attachment> &attachment);
+    void writeMessage(const Message &message);
+    // Sets message status. Returns false if message had the same status
+    bool setMessageStatus(const Message::Id &messageId, const Message::Status &status);
+
+signals:
+    void messageAdded(const Message &message);
 
 private:
     enum Roles
@@ -82,6 +88,8 @@ private:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
+
+    Optional<int> findRowById(const Message::Id &messageId) const;
 
     Messages m_messages;
 };

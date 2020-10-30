@@ -182,7 +182,7 @@ Control {
     function sendMessage(attachmentUrl, attachmentType) {
         const text = (messageField.text + messageField.preeditText).trim();
         messageField.clear()
-        controllers.messages.sendMessage(text, attachmentUrl, attachmentType)
+        controllers.messages.createSendMessage(text, attachmentUrl, attachmentType)
     }
 
     Component.onCompleted: {

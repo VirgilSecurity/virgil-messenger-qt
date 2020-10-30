@@ -67,14 +67,14 @@ void VSQUpload::start()
     // Encrypt file
     auto file = createFileHandle(m_filePath);
     if (!file->open(QFile::ReadOnly)) {
-        setStatus(AttachmentV0::Status::Failed);
+        setStatus(AttachmentV0::Status::Interrupted);
         return;
     }
 
     // Create request
     auto url = remoteUrl();
     if (!url) {
-        setStatus(AttachmentV0::Status::Failed);
+        setStatus(AttachmentV0::Status::Interrupted);
         return;
     }
     QNetworkRequest request(*url);

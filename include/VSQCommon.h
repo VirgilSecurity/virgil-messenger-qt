@@ -86,21 +86,21 @@ namespace Enums {
         Loading,
         Postloading,
         Loaded,
-        Failed, // must be re-loaded
-        Invalid
+        Interrupted, // must be re-loaded
+        Invalid // Can't be processed
     };
     Q_ENUM_NS(AttachmentStatus)
 
-    enum class MessageAuthor
+    enum class MessageAuthorV0
     {
         // User is message author
         User,
         // Contact is message author
         Contact
     };
-    Q_ENUM_NS(MessageAuthor)
+    Q_ENUM_NS(MessageAuthorV0)
 
-    enum class MessageStatus
+    enum class MessageStatusV0
     {
         // Created by user
         MST_CREATED,
@@ -112,6 +112,17 @@ namespace Enums {
         MST_READ,
         // Failed to send by user
         MST_FAILED
+    };
+    Q_ENUM_NS(MessageStatusV0)
+
+    enum class MessageStatus
+    {
+        Created, // Created by user
+        Sent, // Sent by user
+        Delivered, // Delivered to contact / Sent by contact
+        Read, // Read by contact
+        Failed, // Failed to send by user
+        Invalid // Can't be sent
     };
     Q_ENUM_NS(MessageStatus)
 }
@@ -139,22 +150,21 @@ struct AttachmentV0
 };
 Q_DECLARE_METATYPE(AttachmentV0)
 
-using OptionalAttachment = Optional<AttachmentV0>;
-Q_DECLARE_METATYPE(OptionalAttachment)
+using OptionalAttachmentV0 = Optional<AttachmentV0>;
+Q_DECLARE_METATYPE(OptionalAttachmentV0)
 
-// TODO(fpohtmeh): remove this old class
-struct StMessage
+struct MessageV0
 {
-    using Author = Enums::MessageAuthor;
-    using Status = Enums::MessageStatus;
+    using Author = Enums::MessageAuthorV0;
+    using Status = Enums::MessageStatusV0;
 
     QString messageId;
     QString message;
     QString sender;
     QString recipient;
-    OptionalAttachment attachment;
+    OptionalAttachmentV0 attachment;
 };
-Q_DECLARE_METATYPE(StMessage);
+Q_DECLARE_METATYPE(MessageV0);
 
 namespace vm
 {
@@ -174,8 +184,10 @@ struct Contact
     QUrl avatarUrl;
 };
 
+using UserId = QString;
 using MessageId = QString;
 using ChatId = QString;
+using Jid = QString;
 
 struct PictureExtras
 {
@@ -207,16 +219,8 @@ struct Attachment
 
 struct Message
 {
-    enum class Status
-    {
-        Created,
-        Sent,
-        Received,
-        Read,
-        Failed
-    };
-
     using Id = MessageId;
+    using Status = Enums::MessageStatus;
 
     Id id;
     QDateTime timestamp;
