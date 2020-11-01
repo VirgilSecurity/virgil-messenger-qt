@@ -70,7 +70,7 @@ Chat ChatsModel::createChat(const Contact::Id &contactId)
     chat.contactId = contactId;
     m_chats.push_back(chat);
     endInsertRows();
-    emit chatAdded(chat);
+    emit chatCreated(chat);
     return chat;
 }
 
@@ -78,24 +78,53 @@ void ChatsModel::resetUnreadCount(const Chat::Id &chatId)
 {
     const auto chatRow = findRowById(chatId);
     if (!chatRow) {
+        qWarning() << "Chat not found! Id" << chatId;
         return;
     }
     auto &chat = m_chats[*chatRow];
     chat.unreadMessageCount = 0;
+    qDebug() << "Unread message count was reset";
     const auto chatIndex = index(*chatRow);
     emit dataChanged(chatIndex, chatIndex, { UnreadMessagesCountRole });
+    emit chatUpdated(chat);
 }
 
-void ChatsModel::updateLastMessage(const Message &message)
+void ChatsModel::updateLastMessage(const Message &message, const Chat::UnreadCount &unreadMessageCount)
 {
     const auto chatRow = findRowById(message.chatId);
     if (!chatRow) {
+        qWarning() << "Chat not found! Id" << message.chatId;
         return;
     }
+
     auto &chat = m_chats[*chatRow];
+    qDebug() << "Last message was set to" << message.id;
     chat.lastMessage = message;
+    QVector<int> roles{ LastMessageBodyRole, LastEventTimeRole };
+    if (unreadMessageCount != chat.unreadMessageCount) {
+        chat.unreadMessageCount = unreadMessageCount;
+        qDebug() << "Unread message count was set to" << unreadMessageCount;
+        roles << UnreadMessagesCountRole;
+    }
     const auto chatIndex = index(*chatRow);
-    emit dataChanged(chatIndex, chatIndex, { LastMessageBodyRole, LastEventTimeRole });
+    emit dataChanged(chatIndex, chatIndex, roles);
+    emit chatUpdated(chat);
+}
+
+void ChatsModel::updateLastMessageStatus(const Message::Id &messageId, const Message::Status &status)
+{
+    for (int i = 0, s = m_chats.size(); i < s; ++i) {
+        auto &chat = m_chats[i];
+        if (!chat.lastMessage) {
+            continue;
+        }
+        auto &m = *chat.lastMessage;
+        if (m.id != messageId || m.status == status) {
+            continue;
+        }
+        m.status = status;
+        updateLastMessage(m, chat.unreadMessageCount);
+    }
 }
 
 Optional<Chat> ChatsModel::find(const Chat::Id &chatId) const

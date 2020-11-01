@@ -45,15 +45,14 @@ using namespace vm;
 
 Controllers::Controllers(VSQMessenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
-    , m_attachments(new AttachmentsController(models, this))
+    , m_attachments(new AttachmentsController(this))
     , m_users(new UsersController(messenger, models, userDatabase, this))
     , m_chats(new ChatsController(models, userDatabase, this))
     , m_messages(new MessagesController(messenger, models, userDatabase, this))
 {
     connect(m_users, &UsersController::usernameChanged, m_chats, &ChatsController::loadChats);
-    connect(m_chats, &ChatsController::currentContactIdChanged, messenger, &VSQMessenger::setCurrentRecipient); // TODO(fpohtmeh): remove connection
-    connect(m_chats, &ChatsController::currentContactIdChanged, m_messages, &MessagesController::setRecipientId);
-    connect(m_chats, &ChatsController::currentChatIdChanged, m_messages, &MessagesController::loadMessages);
+    connect(m_chats, &ChatsController::chatOpened, m_messages, &MessagesController::loadMessages);
+    connect(m_messages, &MessagesController::messageAdded, m_attachments, &AttachmentsController::preloadAttachment);
 
     qRegisterMetaType<AttachmentsController *>("AttachmentsController*");
     qRegisterMetaType<ChatsController *>("ChatsController*");

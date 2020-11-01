@@ -52,13 +52,22 @@ ChatsController::ChatsController(Models *models, UserDatabase *userDatabase, QOb
     , m_userDatabase(userDatabase)
 {
     connect(userDatabase, &UserDatabase::opened, this, &ChatsController::setupTableConnections);
-    connect(models->messages(), &MessagesModel::messageAdded, m_models->chats(), &ChatsModel::updateLastMessage);
     connect(this, &ChatsController::newContactFound, this, &ChatsController::processNewContact);
+}
+
+Chat ChatsController::currentChat() const
+{
+    return m_currentChat;
 }
 
 Contact::Id ChatsController::currentContactId() const
 {
-    return m_currentContactId;
+    return m_currentChat.contactId;
+}
+
+Chat::Id ChatsController::currentChatId() const
+{
+    return m_currentChat.id;
 }
 
 void ChatsController::loadChats(const QString &username)
@@ -92,13 +101,13 @@ void ChatsController::createChat(const Contact::Id &contactId)
 
 void ChatsController::openChat(const Chat &chat)
 {
+    qDebug() << "Opening chat" << chat.id << "contact" << chat.contactId << "unread" << chat.unreadMessageCount;
+    setCurrentChat(chat);
     if (chat.unreadMessageCount > 0) {
         m_models->chats()->resetUnreadCount(chat.id);
-        m_userDatabase->chatsTable()->resetUnreadCount(chat.id);
+        m_models->messages()->markAllAsRead();
+        m_userDatabase->resetUnreadCount(chat);
     }
-    setCurrentChatId(chat.id);
-    setCurrentContactId(chat.contactId);
-    emit chatOpened(chat.id);
 }
 
 void ChatsController::openChatById(const Chat::Id &chatId)
@@ -108,11 +117,7 @@ void ChatsController::openChatById(const Chat::Id &chatId)
 
 void ChatsController::closeChat()
 {
-    if (!m_currentContactId.isEmpty()) {
-        setCurrentChatId(QString());
-        setCurrentContactId(QString());
-        emit chatClosed();
-    }
+    setCurrentChat({});
 }
 
 void ChatsController::setupTableConnections()
@@ -120,41 +125,24 @@ void ChatsController::setupTableConnections()
     auto table = m_userDatabase->chatsTable();
     connect(table, &ChatsTable::errorOccurred, this, &ChatsController::errorOccurred);
     connect(table, &ChatsTable::fetched, m_models->chats(), &ChatsModel::setChats);
-    connect(m_userDatabase->messagesTable(), &MessagesTable::messageUpdated, this, &ChatsController::processUpdatedMessage);
 }
 
-void ChatsController::setCurrentContactId(const Contact::Id &contactId)
+void ChatsController::setCurrentChat(const Chat &chat)
 {
-    if (m_currentContactId == contactId) {
+    if (m_currentChat.id == chat.id) {
         return;
     }
-    m_currentContactId = contactId;
-    emit currentContactIdChanged(contactId);
-}
+    m_currentChat = chat;
 
-void ChatsController::setCurrentChatId(const Chat::Id &chatId)
-{
-    if (m_currentChatId == chatId) {
-        return;
-    }
-    m_currentChatId = chatId;
-    emit currentChatIdChanged(chatId);
+    emit currentChatIdChanged(chat.id);
+    emit currentContactIdChanged(chat.contactId);
+    emit currentChatChanged(chat);
+    emit chat.id.isEmpty() ? chatClosed() : chatOpened(chat);
 }
 
 void ChatsController::processNewContact(const Contact::Id &contactId)
 {
     const auto chat = m_models->chats()->createChat(contactId);
     m_userDatabase->chatsTable()->createChat(chat);
-    setCurrentChatId(chat.id);
-    setCurrentContactId(contactId);
-    emit chatOpened(chat.id);
-}
-
-void ChatsController::processUpdatedMessage(const Message &message)
-{
-    auto chats = m_models->chats();
-    auto chat = chats->find(message.chatId);
-    if (chat && chat->lastMessage->id == message.id) {
-        chats->updateLastMessage(message);
-    }
+    openChat(chat);
 }

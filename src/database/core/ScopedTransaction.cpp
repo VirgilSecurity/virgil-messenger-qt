@@ -41,8 +41,12 @@ using namespace vm;
 ScopedTransaction::ScopedTransaction(QSqlDatabase qtDatabase)
     : m_qtDatabase(qtDatabase)
 {
+    // TODO(fpohtmeh): check for transaction inside transaction?
     if (qtDatabase.isOpen()) {
         m_isActive = qtDatabase.transaction();
+        if (m_isActive) {
+            qCDebug(lcDatabase) << "Transaction start";
+        }
     }
     else {
         qCCritical(lcDatabase) << "Connection databaseName:" << qtDatabase.databaseName();
@@ -55,6 +59,7 @@ ScopedTransaction::~ScopedTransaction()
 {
     if (m_isActive) {
         m_qtDatabase.commit();
+        qCDebug(lcDatabase) << "Transaction commit";
     }
 }
 
@@ -68,6 +73,7 @@ bool ScopedTransaction::rollback()
     if (m_isActive) {
         m_qtDatabase.rollback();
         m_isActive = false;
+        qCDebug(lcDatabase) << "Transaction rollback";
     }
     return m_isActive;
 }

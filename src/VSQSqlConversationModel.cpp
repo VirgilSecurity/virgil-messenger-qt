@@ -43,9 +43,6 @@
 #include "VSQCryptoTransferManager.h"
 #include "Utils.h"
 
-Q_DECLARE_METATYPE(MessageV0::Status)
-
-/******************************************************************************/
 void
 VSQSqlConversationModel::_createTable() {
     QSqlQuery query;
@@ -315,7 +312,7 @@ void VSQSqlConversationModel::setAsRead(const QString &author) {
     QString query;
 
     query = QString("UPDATE %1 SET status = %2 WHERE author = \"%3\"")
-            .arg(_tableName()).arg(static_cast<int>(MessageV0::Status::MST_READ)).arg(author);
+            .arg(_tableName()).arg(static_cast<int>(vm::Message::Status::Read)).arg(author);
 
     model.prepare(query);
 
@@ -397,7 +394,7 @@ void VSQSqlConversationModel::onCreateMessage(const QString recipient, const QSt
     newRecord.setValue("recipient", recipient);
     newRecord.setValue("timestamp", timestamp);
     newRecord.setValue("message", message);
-    newRecord.setValue("status", static_cast<int>(MessageV0::Status::MST_CREATED));
+    newRecord.setValue("status", static_cast<int>(vm::Message::Status::Created));
     newRecord.setValue("message_id", messageId);
     if (attachment) {
         newRecord.setValue("attachment_id", attachment->id);
@@ -433,7 +430,7 @@ void VSQSqlConversationModel::onReceiveMessage(const QString messageId, const QS
     newRecord.setValue("recipient", user());
     newRecord.setValue("timestamp", timestamp);
     newRecord.setValue("message", message);
-    newRecord.setValue("status", static_cast<int>(MessageV0::Status::MST_RECEIVED));
+    newRecord.setValue("status", static_cast<int>(vm::Message::Status::Delivered));
     newRecord.setValue("message_id", messageId);
     if (attachment) {
         // TODO(fpohtmeh): merge with onCreateMessage

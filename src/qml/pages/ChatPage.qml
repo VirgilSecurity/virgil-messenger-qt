@@ -168,11 +168,15 @@ Page {
             }
         }
 
+        Timer {
+            id: scrollTimer
+            repeat: false
+            interval: 50
+            onTriggered: listView.positionViewAtEnd()
+        }
+
         function showLastMessage() {
-            positionViewAtEnd()
-            if (Platform.isIos || Platform.isLinux) {
-                positionViewAtEnd() // HACK(fpohtmeh): fix positioning
-            }
+            scrollTimer.start()
         }
     }
 

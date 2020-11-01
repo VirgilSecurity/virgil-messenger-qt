@@ -230,13 +230,14 @@ QString Utils::extrasToJson(const QVariant &extras, const Attachment::Type type)
     }
     const auto e = extras.value<PictureExtras>();
     QJsonObject obj;
-    obj.insert("width", e.size.width());
-    obj.insert("height", e.size.height());
-    obj.insert("orientation", e.orientation);
-    obj.insert("thumbnailWidth", e.thumbnailSize.width());
-    obj.insert("thumbnailHeight", e.thumbnailSize.height());
-    obj.insert("thumbnailPath", e.thumbnailPath);
-    obj.insert("previewPath", e.previewPath);
+    // FIXME(fpohtmeh): refine properties
+//    obj.insert("width", e.size.width());
+//    obj.insert("height", e.size.height());
+//    obj.insert("orientation", e.orientation);
+//    obj.insert("thumbnailWidth", e.thumbnailSize.width());
+//    obj.insert("thumbnailHeight", e.thumbnailSize.height());
+//    obj.insert("thumbnailPath", e.thumbnailPath);
+//    obj.insert("previewPath", e.previewPath);
     return QJsonDocument(obj).toJson(QJsonDocument::Compact);
 }
 
@@ -247,13 +248,14 @@ QVariant Utils::extrasFromJson(const QString &json, const Attachment::Type type)
     }
     auto doc = QJsonDocument::fromJson(json.toUtf8());
     PictureExtras extras;
-    extras.size.setWidth(doc["width"].toInt());
-    extras.size.setHeight(doc["height"].toInt());
-    extras.orientation = doc["orientation"].toInt();
-    extras.thumbnailSize.setWidth(doc["thumbnailWidth"].toInt());
-    extras.thumbnailSize.setHeight(doc["thumbnailHeight"].toInt());
-    extras.thumbnailPath = doc["thumbnailPath"].toString();
-    extras.previewPath = doc["previewPath"].toString();
+    // FIXME(fpohtmeh): refine properties
+//    extras.size.setWidth(doc["width"].toInt());
+//    extras.size.setHeight(doc["height"].toInt());
+//    extras.orientation = doc["orientation"].toInt();
+//    extras.thumbnailSize.setWidth(doc["thumbnailWidth"].toInt());
+//    extras.thumbnailSize.setHeight(doc["thumbnailHeight"].toInt());
+//    extras.thumbnailPath = doc["thumbnailPath"].toString();
+//    extras.previewPath = doc["previewPath"].toString();
     return QVariant::fromValue(extras);
 }
 

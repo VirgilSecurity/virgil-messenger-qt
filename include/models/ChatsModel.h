@@ -57,7 +57,8 @@ public:
     Chat createChat(const Contact::Id &contactId);
 
     void resetUnreadCount(const Chat::Id &chatId);
-    void updateLastMessage(const Message &message);
+    void updateLastMessage(const Message &message, const Chat::UnreadCount &unreadMessageCount);
+    void updateLastMessageStatus(const Message::Id &messageId, const Message::Status &status);
 
     Optional<Chat> find(const Chat::Id &chatId) const;
     Optional<Chat> findByContact(const Contact::Id &contactId) const;
@@ -65,7 +66,10 @@ public:
     bool hasChatWithContact(const Contact::Id &contactId) const;
 
 signals:
-    void chatAdded(const Chat &chat);
+    // FIXME(fpohtmeh): redirect signals to controller
+    void chatCreated(const Chat &chat);
+    void chatUpdated(const Chat &chat);
+
     void filterChanged(const QString &);
 
 private:

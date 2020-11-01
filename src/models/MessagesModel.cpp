@@ -67,16 +67,18 @@ Message MessagesModel::createMessage(const Chat::Id &chatId, const Contact::Id &
 
 void MessagesModel::writeMessage(const Message &message)
 {
-    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+    const auto count = rowCount();
+    beginInsertRows(QModelIndex(), count, count);
     m_messages.push_back(message);
     endInsertRows();
-    emit messageAdded(message);
+    invalidateRow(count);
 }
 
 bool MessagesModel::setMessageStatus(const Message::Id &messageId, const Message::Status &status)
 {
     const auto messageRow = findRowById(messageId);
     if (!messageRow) {
+        qWarning() << "Message not found! Id" << messageId;
         return true;
     }
     auto &message = m_messages[*messageRow];
@@ -84,9 +86,19 @@ bool MessagesModel::setMessageStatus(const Message::Id &messageId, const Message
         return false;
     }
     message.status = status;
-    const auto messageIndex = index(*messageRow);
-    emit dataChanged(messageIndex, messageIndex, { StatusRole, FailedRole });
+    invalidateRow(*messageRow, { StatusRole });
     return true;
+}
+
+void MessagesModel::markAllAsRead()
+{
+    for (int i = 0, s = m_messages.size(); i < s; ++i) {
+        auto &message = m_messages[i];
+        if (message.status != Message::Status::Read) {
+            message.status = Message::Status::Read;
+            invalidateRow(i, { StatusRole });
+        }
+    }
 }
 
 int MessagesModel::rowCount(const QModelIndex &parent) const
@@ -250,4 +262,26 @@ Optional<int> MessagesModel::findRowById(const Message::Id &messageId) const
         }
     }
     return NullOptional;
+}
+
+void MessagesModel::invalidateRow(const int row, const QVector<int> &roles)
+{
+    auto allRoles = roles;
+    if (allRoles.contains(StatusRole) || allRoles.contains(AttachmentStatusRole)) {
+        allRoles << FailedRole;
+    }
+    if (!allRoles.empty()) {
+        const auto rowIndex = index(row);
+        emit dataChanged(rowIndex, rowIndex, allRoles);
+    }
+    if (allRoles.isEmpty() || allRoles.contains(StatusRole)) {
+        if (row > 0) {
+            const auto rowIndex = index(row - 1);
+            emit dataChanged(rowIndex, rowIndex, { StatusRole, InRowRole });
+        }
+        if (row < rowCount() - 1) {
+            const auto rowIndex = index(row + 1);
+            emit dataChanged(rowIndex, rowIndex, { FirstInRowRole });
+        }
+    }
 }

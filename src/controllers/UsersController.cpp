@@ -57,7 +57,8 @@ UsersController::UsersController(VSQMessenger *messenger, Models *models, UserDa
     connect(messenger, &VSQMessenger::downloadKeyFailed, this, &UsersController::downloadKeyFailed);
 
     connect(userDatabase, &UserDatabase::usernameChanged, this, &UsersController::processDatabaseUsername);
-    connect(models->chats(), &ChatsModel::chatAdded, this, &UsersController::subscribeByChat);
+
+    connect(models->chats(), &ChatsModel::chatCreated, this, &UsersController::subscribeByChat);
 }
 
 QString UsersController::username() const
@@ -122,5 +123,6 @@ void UsersController::processDatabaseUsername(const QString &username)
 
 void UsersController::subscribeByChat(const Chat &chat)
 {
+    // TODO(fpohtmeh): move to contact manager/controller
     m_messenger->subscribeToContact(chat.contactId);
 }

@@ -52,11 +52,10 @@ public:
     void setMessages(const Messages &messages);
     Message createMessage(const Chat::Id &chatId, const Contact::Id &authorId, const QString &body, const Optional<Attachment> &attachment);
     void writeMessage(const Message &message);
+
     // Sets message status. Returns false if message had the same status
     bool setMessageStatus(const Message::Id &messageId, const Message::Status &status);
-
-signals:
-    void messageAdded(const Message &message);
+    void markAllAsRead();
 
 private:
     enum Roles
@@ -90,6 +89,7 @@ private:
     QHash<int, QByteArray> roleNames() const override;
 
     Optional<int> findRowById(const Message::Id &messageId) const;
+    void invalidateRow(const int row, const QVector<int> &roles = {});
 
     Messages m_messages;
 };

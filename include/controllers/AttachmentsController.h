@@ -41,16 +41,13 @@
 
 namespace vm
 {
-class Models;
-
 class AttachmentsController : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit AttachmentsController(Models *models, QObject *parent);
+    explicit AttachmentsController(QObject *parent);
 
-private:
     void preloadAttachment(const Message &message);
 };
 }

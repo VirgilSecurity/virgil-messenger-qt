@@ -67,7 +67,9 @@ signals:
     void requestOpen(const QString &username);
     void requestClose();
 
-    void writeMessage(const Message &message);
+    void writeMessage(const Message &message, const Chat::UnreadCount &unreadCount);
+    void writeChatAndLastMessage(const Chat &chat);
+    void resetUnreadCount(const Chat &chat);
 
     void usernameChanged(const QString &username);
 
@@ -76,7 +78,9 @@ private:
     void openByUsername(const QString &username);
     void close();
 
-    void processWriteMessage(const Message &message);
+    void processWriteMessage(const Message &message, const Chat::UnreadCount &unreadCount);
+    void processWriteChatAndLastMessage(const Chat &chat);
+    void processResetUnreadCount(const Chat &chat);
 
     const QDir m_databaseDir;
     int m_attachmentsTableIndex;

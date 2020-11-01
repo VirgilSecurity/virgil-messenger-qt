@@ -57,6 +57,7 @@ void registerCommonMetaTypes()
     qRegisterMetaType<vm::Messages>("Messages");
     qRegisterMetaType<vm::Chat>("Chat");
     qRegisterMetaType<vm::Chat::Id>("Chat::Id");
+    qRegisterMetaType<vm::Chat::UnreadCount>("Chat::UnreadCount");
     qRegisterMetaType<vm::Chats>("Chats");
 
     qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");

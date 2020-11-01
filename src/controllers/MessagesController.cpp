@@ -60,12 +60,15 @@ MessagesController::MessagesController(VSQMessenger *messenger, Models *models, 
     , m_models(models)
     , m_userDatabase(userDatabase)
 {
+    // User database
     connect(userDatabase, &UserDatabase::opened, this, &MessagesController::setupTableConnections);
     connect(userDatabase, &UserDatabase::usernameChanged, this, &MessagesController::setUserId);
-    connect(messenger, &VSQMessenger::messageStatusChanged, this, &MessagesController::setMessageStatus);
+    // Chat
+    connect(m_models->chats(), &ChatsModel::chatUpdated, this, &MessagesController::processUpdatedChat);
+    // Status
+    connect(this, &MessagesController::setMessageStatus, this, &MessagesController::processSetMessageStatus);
+    // Network
     connect(messenger, &VSQMessenger::fireReady, this, &MessagesController::sendNotSentMessages);
-    //
-    connect(this, &MessagesController::messageStatusChanged, this, &MessagesController::setMessageStatus);
     // Xmpp connections
     auto xmpp = messenger->xmpp();
     connect(xmpp, &QXmppClient::messageReceived, this, &MessagesController::receiveMessage);
@@ -76,14 +79,15 @@ MessagesController::MessagesController(VSQMessenger *messenger, Models *models, 
     connect(carbon, &QXmppCarbonManager::messageSent, xmpp, &QXmppClient::messageReceived); // sent from our account (but another client)
 }
 
-void MessagesController::loadMessages(const Contact::Id &chatId)
+void MessagesController::loadMessages(const Chat &chat)
 {
-    m_chatId = chatId;
-    if (chatId.isEmpty()) {
+    m_chat = chat;
+    m_messenger->setCurrentRecipient(chat.contactId);
+    if (chat.id.isEmpty()) {
         m_models->messages()->setMessages({});
     }
     else {
-        m_userDatabase->messagesTable()->fetch(chatId);
+        m_userDatabase->messagesTable()->fetch(chat.id);
     }
 }
 
@@ -94,14 +98,12 @@ void MessagesController::createSendMessage(const QString &body, const QVariant &
         return;
     }
     const auto attachment = m_models->attachments()->createAttachment(attachmentUrl.toUrl(), attachmentType);
-    auto message = m_models->messages()->createMessage(m_chatId, m_recipientId, body, attachment);
-    m_userDatabase->writeMessage(message);
+    auto message = m_models->messages()->createMessage(m_chat.id, m_userId, body, attachment);
+    const Chat::UnreadCount unreadCount = 0; // message can be created in current chat only
+    m_models->chats()->updateLastMessage(message, unreadCount);
+    m_userDatabase->writeMessage(message, unreadCount);
     sendMessage(message);
-}
-
-void MessagesController::setRecipientId(const Contact::Id &recipientId)
-{
-    m_recipientId = recipientId;
+    emit messageAdded(message);
 }
 
 void MessagesController::setupTableConnections()
@@ -116,50 +118,101 @@ void MessagesController::setUserId(const UserId &userId)
     m_userId = userId;
 }
 
-void MessagesController::setMessageStatus(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status)
+void MessagesController::processUpdatedChat(const Chat &chat)
 {
-    qDebug() << "Set message status:" << messageId << contactId << status;
-    if (contactId == m_recipientId) {
-        if (!m_models->messages()->setMessageStatus(messageId, status)) {
-            return;
-        }
+    if (chat.id == m_chat.id) {
+        m_chat = chat;
     }
-    m_userDatabase->messagesTable()->updateStatus(messageId, status);
+}
+
+void MessagesController::processSetMessageStatus(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status)
+{
+    qDebug() << "Set message status:" << messageId << "contact" << contactId << "status" << status;
+    if (status == Message::Status::Read) {
+        qWarning() << "Marking of single message as read isn't supported yet";
+    }
+    else if (status == Message::Status::Created) {
+        qWarning() << "Set message status to created isn't allowed";
+    }
+    else {
+        if (contactId == m_chat.contactId) {
+            m_models->messages()->setMessageStatus(messageId, status);
+        }
+        m_models->chats()->updateLastMessageStatus(messageId, status);
+        m_userDatabase->messagesTable()->updateStatus(messageId, status);
+        emit messageStatusChanged(messageId, contactId, status);
+    }
 }
 
 void MessagesController::setDeliveredStatus(const Jid &jid, const Message::Id &messageId)
 {
-    const auto contactId = Utils::contactIdFromJid(jid);
-    qDebug() << "Message with id:" << messageId << "delivered to" << contactId;
-    setMessageStatus(messageId, contactId, Message::Status::Delivered);
+    setMessageStatus(messageId, Utils::contactIdFromJid(jid), Message::Status::Delivered, QPrivateSignal());
 }
 
 void MessagesController::receiveMessage(const QXmppMessage &msg)
 {
     const auto senderId = Utils::contactIdFromJid(msg.from());
     const auto recipientId = Utils::contactIdFromJid(msg.to());
+    const auto timestamp = QDateTime::currentDateTime();
     qInfo() << "Received message from:" << senderId << "recipient:" << recipientId;
     // Decrypt message
-    auto message = Core::decryptMessage(msg.id(), senderId, msg.body());
-    // FIXME(fpohtmeh): add chatId, senderId, timestamp
-    if (!message) {
+    auto decryptedMessage = Core::decryptMessage(senderId, msg.body());
+    if (!decryptedMessage) {
         return;
     }
+    auto message = *decryptedMessage;
+    message.id = msg.id();
+    message.timestamp = timestamp;
 
+    const auto messages = m_models->messages();
+    const auto chats = m_models->chats();
+    auto chat = m_chat;
+    bool isNewChat = false;
     if (senderId == m_userId) {
-        message->status = Message::Status::Sent; // FIXME(fpohtmeh): need this?
-        m_models->messages()->writeMessage(*message);
-        m_userDatabase->writeMessage(*message);
+        message.status = Message::Status::Sent;
+        if (recipientId == m_chat.contactId) {
+            qDebug() << "Received carbon message to current chat";
+        }
+        else {
+            qDebug() << "Received carbon message to not current chat";
+            auto senderChat = chats->findByContact(recipientId);
+            if (senderChat) {
+                chat = *senderChat;
+            }
+            else {
+                chat = chats->createChat(recipientId);
+                isNewChat = true;
+            }
+        }
     }
     else {
-        // FIXME(fpohtmeh): change unread count
-        // senderId != m_recipientId;
-        if (!m_models->chats()->hasChatWithContact(senderId)) {
-            m_models->chats()->createChat(senderId);
+        if (senderId == m_chat.contactId) {
+            qDebug() << "Received a message to current chat";
         }
-        m_models->messages()->writeMessage(*message);
-        m_userDatabase->writeMessage(*message);
+        else {
+            qDebug() << "Received a message to not current chat";
+            auto senderChat = chats->findByContact(senderId);
+            if (senderChat) {
+                chat = *senderChat;
+            }
+            else {
+                chat = chats->createChat(senderId);
+                isNewChat = true;
+            }
+            ++chat.unreadMessageCount;
+        }
     }
+    message.chatId = chat.id;
+    messages->writeMessage(message);
+    chats->updateLastMessage(message, chat.unreadMessageCount);
+    if (isNewChat) {
+        chat.lastMessage = message;
+        m_userDatabase->writeChatAndLastMessage(chat);
+    }
+    else {
+        m_userDatabase->writeMessage(message, chat.unreadMessageCount);
+    }
+    emit messageAdded(message);
 }
 
 void MessagesController::sendMessage(const Message &message)
@@ -169,23 +222,17 @@ void MessagesController::sendMessage(const Message &message)
         auto m = message;
         if (m.attachment) {
             qCDebug(lcMessenger) << "Trying to upload the attachment";
-// TODO(fpohtmeh): fix logic below
-//            m.attachment = uploadAttachment(m);
-//            if (!m.attachment) {
-//                qCDebug(lcMessenger) << "Attachment was NOT uploaded";
-//                emit messageStatusChanged(message.id, m_recipientId, Message::Status::Sent, QPrivateSignal());
-//                return true;
-//            }
+            // TODO(fpohtmeh): uploadAttachment() here
             qCDebug(lcMessenger) << "Everything was uploaded. Continue to send message";
         }
 
         QMutexLocker _guard(&m_messageGuard);
-        const auto encryptedStr = Core::encryptMessage(message, m_recipientId);
+        const auto encryptedStr = Core::encryptMessage(message, m_chat.contactId);
         if (!encryptedStr) {
-            emit messageStatusChanged(message.id, m_recipientId, Message::Status::Invalid, QPrivateSignal());
+            emit setMessageStatus(message.id, m_chat.contactId, Message::Status::InvalidM, QPrivateSignal());
         }
         else {
-            const auto toJID = Utils::createJid(m_recipientId, m_messenger->xmppURL());
+            const auto toJID = Utils::createJid(m_chat.contactId, m_messenger->xmppURL());
             const auto fromJID = Utils::createJid(m_userId, m_messenger->xmppURL());
 
             QXmppMessage msg(fromJID, toJID, *encryptedStr);
@@ -195,9 +242,9 @@ void MessagesController::sendMessage(const Message &message)
             // Send message and update status
             if (m_messenger->xmpp()->sendPacket(msg)) {
                 qCDebug(lcMessenger) << "Message sent:" << message.id;
-                emit messageStatusChanged(message.id, m_recipientId, Message::Status::Sent, QPrivateSignal());
+                emit setMessageStatus(message.id, m_chat.contactId, Message::Status::Sent, QPrivateSignal());
             } else {
-                emit messageStatusChanged(message.id, m_recipientId, Message::Status::Failed, QPrivateSignal());
+                emit setMessageStatus(message.id, m_chat.contactId, Message::Status::Failed, QPrivateSignal());
             }
         }
     });

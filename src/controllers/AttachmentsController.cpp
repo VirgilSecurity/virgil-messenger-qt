@@ -39,11 +39,9 @@
 
 using namespace vm;
 
-AttachmentsController::AttachmentsController(Models *models, QObject *parent)
+AttachmentsController::AttachmentsController(QObject *parent)
     : QObject(parent)
-{
-    connect(models->messages(), &MessagesModel::messageAdded, this, &AttachmentsController::preloadAttachment);
-}
+{}
 
 void AttachmentsController::preloadAttachment(const Message &message)
 {

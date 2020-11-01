@@ -57,7 +57,7 @@ int Core::bufferSizeForDecryption(const int encryptedSize)
     return encryptedSize;
 }
 
-Optional<Message> Core::decryptMessage(const Message::Id &id, const Contact::Id &sender, const QString &message)
+Optional<Message> Core::decryptMessage(const Contact::Id &sender, const QString &message)
 {
     const int decryptedMsgSzMax = bufferSizeForDecryption(message.size());
     QByteArray decryptedMessage = QByteArray(decryptedMsgSzMax + 1, 0x00);
@@ -80,7 +80,7 @@ Optional<Message> Core::decryptMessage(const Message::Id &id, const Contact::Id 
     decryptedMessage.resize((int)decryptedMessageSz);
 
     Message msg = Utils::messageFromJson(decryptedMessage);
-    msg.id = id;
+    msg.authorId = sender;
     return msg;
 }
 
@@ -88,6 +88,7 @@ Optional<QString> Core::encryptMessage(const Message &message, const Contact::Id
 {
     // Create JSON-formatted message to be sent
     const QString internalJson = Utils::messageToJson(message);
+    qDebug() << "Recipient:" << recipient;
     qDebug() << "Json for encryption:" << internalJson;
 
     // Encrypt message

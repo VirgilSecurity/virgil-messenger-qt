@@ -58,7 +58,7 @@ private:
     QVariant data(const QModelIndex &index, int role) const override;
 
     PictureExtras createPictureExtras(const QString &localPath) const;
-    QString generateThumbnailPath() const;
+    QString generateThumbnailPath(const QString &attachmentId, const QString &suffix) const;
     QSize applyOrientation(const QSize &size, int orientation) const;
     QSize calculateThumbnailSize(const QSize &size, int orientation) const;
 

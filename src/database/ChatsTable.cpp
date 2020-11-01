@@ -74,7 +74,7 @@ void ChatsTable::processFetch()
             Chat chat;
             chat.id = q.value("id").value<Chat::Id>();
             chat.timestamp = q.value("timestamp").toDateTime();
-            chat.unreadMessageCount = q.value("unreadMessageCount").toUInt();
+            chat.unreadMessageCount = q.value("unreadMessageCount").value<Chat::UnreadCount>();
             chat.contactId = q.value("contactId").value<Contact::Id>();
             chat.lastMessage = DatabaseUtils::readMessage(q, QLatin1String("lastMessageId"));
             chats.push_back(chat);
@@ -87,6 +87,7 @@ void ChatsTable::processCreateChat(const Chat &chat)
 {
     ScopedConnection connection(*database());
     // Check if chat exists
+    // TODO(fpohtmeh): remove check and query?
     {
         const DatabaseUtils::BindValues values{{ ":contactId", chat.contactId }};
         auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("checkChatByContact"), values);
@@ -120,13 +121,13 @@ void ChatsTable::processCreateChat(const Chat &chat)
     }
 }
 
-void ChatsTable::processResetUnreadCount(const Contact::Id &chatId)
+void ChatsTable::processResetUnreadCount(const Chat &chat)
 {
     ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues values{{ ":id", chatId }};
+    const DatabaseUtils::BindValues values{{ ":id", chat.id }};
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("resetUnreadCount"), values);
     if (query) {
-        qCDebug(lcDatabase) << "Chat unread count was reset" << chatId;
+        qCDebug(lcDatabase) << "Chat unread count was reset" << chat.id;
     }
     else {
         qCCritical(lcDatabase) << "ChatsTable::processResetUnreadCount error";
@@ -134,16 +135,17 @@ void ChatsTable::processResetUnreadCount(const Contact::Id &chatId)
     }
 }
 
-void ChatsTable::processUpdateLastMessage(const Message &message)
+void ChatsTable::processUpdateLastMessage(const Message &message, const Chat::UnreadCount &unreadMessageCount)
 {
     ScopedConnection connection(*database());
     const DatabaseUtils::BindValues values {
         { ":id", message.chatId },
-        { ":lastMessageId", message.id }
+        { ":lastMessageId", message.id },
+        { ":unreadMessageCount", unreadMessageCount }
     };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateLastMessage"), values);
     if (query) {
-        qCDebug(lcDatabase) << "Last message was updated for chat" << message.chatId;
+        qCDebug(lcDatabase) << "Last message was updated for chat" << message.chatId << "unread" << unreadMessageCount;
     }
     else {
         qCCritical(lcDatabase) << "ChatsTable::processUpdateLastMessage error";

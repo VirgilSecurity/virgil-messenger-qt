@@ -46,6 +46,7 @@ MessagesTable::MessagesTable(Database *database)
     connect(this, &MessagesTable::fetch, this, &MessagesTable::processFetch);
     connect(this, &MessagesTable::createMessage, this, &MessagesTable::processCreateMessage);
     connect(this, &MessagesTable::updateStatus, this, &MessagesTable::processUpdateStatus);
+    connect(this, &MessagesTable::markAllAsRead, this, &MessagesTable::processMarkAllAsRead);
 }
 
 bool MessagesTable::create()
@@ -79,6 +80,7 @@ void MessagesTable::processFetch(const Chat::Id &chatId)
 
 void MessagesTable::processCreateMessage(const Message &message)
 {
+    // FIXME(fpohtmeh): check that chat exists?
     ScopedConnection connection(*database());
     const DatabaseUtils::BindValues values {
         { ":id", message.id },
@@ -115,6 +117,7 @@ void MessagesTable::processUpdateStatus(const Message::Id &messageId, const Mess
                 return;
             }
             if (message->status == status) {
+                qCWarning(lcDatabase) << "Message has the same status. Nothing is updated";
                 return;
             }
         }
@@ -126,12 +129,27 @@ void MessagesTable::processUpdateStatus(const Message::Id &messageId, const Mess
     };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateMessageStatus"), values);
     if (query) {
-        qCDebug(lcDatabase) << "Message status was updated" << messageId;
-        message->status = status;
-        emit messageUpdated(*message);
+        qCDebug(lcDatabase) << "Message status was updated" << messageId << "status" << status;
     }
     else {
         qCCritical(lcDatabase) << "MessagesTable::processUpdateStatus error";
         emit errorOccurred(tr("Failed to update message status"));
+    }
+}
+
+void MessagesTable::processMarkAllAsRead(const Chat &chat)
+{
+    ScopedConnection connection(*database());
+    const DatabaseUtils::BindValues values{
+        { ":chatId", chat.id },
+        { ":authorId", chat.contactId }
+    };
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("markMessagesAsRead"), values);
+    if (query) {
+        qCDebug(lcDatabase) << "All messages in chat marked as read" << chat.id << "contact" << chat.contactId;
+    }
+    else {
+        qCCritical(lcDatabase) << "MessagesTable::processMarkAllAsRead error";
+        emit errorOccurred(tr("Failed to mark messages as read"));
     }
 }

@@ -54,6 +54,8 @@ UserDatabase::UserDatabase(const QDir &databaseDir, QObject *parent)
     connect(this, &UserDatabase::requestOpen, this, &UserDatabase::openByUsername);
     connect(this, &UserDatabase::requestClose, this, &UserDatabase::close);
     connect(this, &UserDatabase::writeMessage, this, &UserDatabase::processWriteMessage);
+    connect(this, &UserDatabase::writeChatAndLastMessage, this, &UserDatabase::processWriteChatAndLastMessage);
+    connect(this, &UserDatabase::resetUnreadCount, this, &UserDatabase::processResetUnreadCount);
 }
 
 UserDatabase::~UserDatabase()
@@ -143,7 +145,7 @@ void UserDatabase::close()
     emit usernameChanged(QString());
 }
 
-void UserDatabase::processWriteMessage(const Message &message)
+void UserDatabase::processWriteMessage(const Message &message, const Chat::UnreadCount &unreadCount)
 {
     ScopedConnection connection(*this);
     ScopedTransaction transaction(*this);
@@ -151,5 +153,31 @@ void UserDatabase::processWriteMessage(const Message &message)
     if (message.attachment) {
         attachmentsTable()->createAttachment(*message.attachment);
     }
-    chatsTable()->updateLastMessage(message);
+    chatsTable()->updateLastMessage(message, unreadCount);
+}
+
+void UserDatabase::processWriteChatAndLastMessage(const Chat &chat)
+{
+    ScopedConnection connection(*this);
+    ScopedTransaction transaction(*this);
+    // Create chat without last message
+    auto c = chat;
+    c.lastMessage = NullOptional;
+    chatsTable()->createChat(c);
+    // Create message & attachment
+    const auto message = *chat.lastMessage;
+    messagesTable()->createMessage(message);
+    if (message.attachment) {
+        attachmentsTable()->createAttachment(*message.attachment);
+    }
+    // Update last message
+    chatsTable()->updateLastMessage(message, chat.unreadMessageCount);
+}
+
+void UserDatabase::processResetUnreadCount(const Chat &chat)
+{
+    ScopedConnection connection(*this);
+    ScopedTransaction transaction(*this);
+    chatsTable()->resetUnreadCount(chat);
+    messagesTable()->markAllAsRead(chat);
 }

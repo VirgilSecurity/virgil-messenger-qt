@@ -56,21 +56,23 @@ class MessagesController : public QObject
 public:
     MessagesController(VSQMessenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
-    void loadMessages(const Chat::Id &chatId);
+    void loadMessages(const Chat &chat);
     Q_INVOKABLE void createSendMessage(const QString &body, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
-
-    void setRecipientId(const Contact::Id &recipientId);
 
 signals:
     void errorOccurred(const QString &errorText);
 
-    void messageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status, QPrivateSignal); // TODO(fpohtmeh): remove this workaround
+    void messageAdded(const Message &message);
+
+    void setMessageStatus(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status, QPrivateSignal);
+    void messageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);
 
 private:
     void setupTableConnections();
     void setUserId(const UserId &userId);
 
-    void setMessageStatus(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);
+    void processUpdatedChat(const Chat &chat);
+    void processSetMessageStatus(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);
     void setDeliveredStatus(const Jid &jid, const Message::Id &messageId);
     void receiveMessage(const QXmppMessage &msg);
     void sendMessage(const Message &message);
@@ -81,8 +83,7 @@ private:
     UserDatabase *m_userDatabase;
 
     UserId m_userId;
-    Chat::Id m_chatId;
-    Contact::Id m_recipientId;
+    Chat m_chat;
 
     QMutex m_messageGuard; // TODO(fpohtmeh): remove this workaround and mutex include
 };

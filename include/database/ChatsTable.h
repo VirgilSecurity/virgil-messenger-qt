@@ -50,8 +50,8 @@ signals:
     void fetch();
     void createChat(const Chat &chat);
 
-    void resetUnreadCount(const Chat::Id &chatId);
-    void updateLastMessage(const Message &message);
+    void resetUnreadCount(const Chat &chat);
+    void updateLastMessage(const Message &message, const Chat::UnreadCount &unreadMessageCount);
 
     void errorOccurred(const QString &errorText);
     void fetched(const Chats &chats);
@@ -61,8 +61,8 @@ private:
 
     void processFetch();
     void processCreateChat(const Chat &chat);
-    void processResetUnreadCount(const Chat::Id &chatId);
-    void processUpdateLastMessage(const Message &message);
+    void processResetUnreadCount(const Chat &chat);
+    void processUpdateLastMessage(const Message &message, const Chat::UnreadCount &unreadMessageCount);
 };
 }
 

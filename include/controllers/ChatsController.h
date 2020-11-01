@@ -47,13 +47,16 @@ class UserDatabase;
 class ChatsController : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(Contact::Id currentContactId MEMBER m_currentContactId NOTIFY currentContactIdChanged)
-    Q_PROPERTY(Chat::Id currentChatId MEMBER m_currentChatId NOTIFY currentChatIdChanged)
+    Q_PROPERTY(Chat currentChat READ currentChat NOTIFY currentChatChanged)
+    Q_PROPERTY(Contact::Id currentContactId READ currentContactId NOTIFY currentContactIdChanged)
+    Q_PROPERTY(Chat::Id currentChatId READ currentChatId NOTIFY currentChatIdChanged)
 
 public:
     ChatsController(Models *models, UserDatabase *userDatabase, QObject *parent);
 
+    Chat currentChat() const;
     Contact::Id currentContactId() const;
+    Chat::Id currentChatId() const;
 
     void loadChats(const QString &username);
 
@@ -64,25 +67,25 @@ public:
 
 signals:
     void errorOccurred(const QString &errorText); // TODO(fpohtmeh): remove this signal everywhere?
-    void chatOpened(const Chat::Id &chatId);
-    void chatClosed();
+
+    void currentChatChanged(const Chat &chat);
     void currentContactIdChanged(const Contact::Id &contactId);
     void currentChatIdChanged(const Chat::Id &chatId);
+
+    void chatOpened(const Chat &chat);
+    void chatClosed();
 
     void newContactFound(const Contact::Id &contactId, QPrivateSignal);
 
 private:
     void setupTableConnections();
-    void setCurrentContactId(const Contact::Id &contactId);
-    void setCurrentChatId(const Chat::Id &chatId);
+    void setCurrentChat(const Chat &chat);
 
     void processNewContact(const Contact::Id &contactId);
-    void processUpdatedMessage(const Message &message);
 
     Models *m_models;
     UserDatabase *m_userDatabase;
-    Contact::Id m_currentContactId;
-    Chat::Id m_currentChatId;
+    Chat m_currentChat;
 };
 }
 

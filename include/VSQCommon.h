@@ -40,6 +40,7 @@
 
 #include <QDateTime>
 #include <QFileInfo>
+#include <QImageIOHandler>
 #include <QLoggingCategory>
 #include <QSize>
 #include <QtGlobal>
@@ -100,21 +101,8 @@ namespace Enums {
     };
     Q_ENUM_NS(MessageAuthorV0)
 
-    enum class MessageStatusV0
-    {
-        // Created by user
-        MST_CREATED,
-        // Sent by user
-        MST_SENT,
-        // Receiver by contact
-        MST_RECEIVED,
-        // Read by contact
-        MST_READ,
-        // Failed to send by user
-        MST_FAILED
-    };
-    Q_ENUM_NS(MessageStatusV0)
-
+    // NOTE(fpohtmeh): some statuses have suffix M to avoid QML collisions
+    // with AttachmentStatus
     enum class MessageStatus
     {
         Created, // Created by user
@@ -122,7 +110,7 @@ namespace Enums {
         Delivered, // Delivered to contact / Sent by contact
         Read, // Read by contact
         Failed, // Failed to send by user
-        Invalid // Can't be sent
+        InvalidM // Can't be sent
     };
     Q_ENUM_NS(MessageStatus)
 }
@@ -156,7 +144,7 @@ Q_DECLARE_METATYPE(OptionalAttachmentV0)
 struct MessageV0
 {
     using Author = Enums::MessageAuthorV0;
-    using Status = Enums::MessageStatusV0;
+    using Status = Enums::MessageStatus;
 
     QString messageId;
     QString message;
@@ -192,7 +180,7 @@ using Jid = QString;
 struct PictureExtras
 {
     QSize size;
-    int orientation; // same as QImageIOHandler::Transformation
+    int orientation = 0; // same as QImageIOHandler::Transformations
     QSize thumbnailSize;
     QString thumbnailPath;
     QString previewPath;
@@ -236,12 +224,13 @@ using Messages = std::vector<Message>;
 struct Chat
 {
     using Id = QString;
+    using UnreadCount = quint32;
 
     Id id;
     QDateTime timestamp;
     Contact::Id contactId;
     Optional<Message> lastMessage;
-    uint unreadMessageCount = 0;
+    UnreadCount unreadMessageCount = 0;
 };
 
 using Chats = std::vector<Chat>;

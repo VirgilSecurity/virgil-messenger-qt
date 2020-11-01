@@ -38,6 +38,7 @@
 
 #include "Settings.h"
 #include "Utils.h"
+#include "android/VSQAndroid.h"
 
 using namespace vm;
 
@@ -126,17 +127,18 @@ PictureExtras AttachmentsModel::createPictureExtras(const QString &localPath) co
 {
     PictureExtras extras;
     QImageReader reader(localPath);
-    extras.size = reader.size();
     extras.orientation = reader.transformation();
-    extras.thumbnailSize = calculateThumbnailSize(extras.size, extras.orientation);
-    extras.thumbnailPath = generateThumbnailPath();
-    extras.previewPath = generateThumbnailPath();
+    extras.thumbnailSize = calculateThumbnailSize(reader.size(), extras.orientation);
+// TODO(fpohtmeh): remove unused fields from VSQCommon too
+//    extras.size = reader.size();
+//    extras.thumbnailPath = generateThumbnailPath();
+//    extras.previewPath = generateThumbnailPath();
     return extras;
 }
 
-QString AttachmentsModel::generateThumbnailPath() const
+QString AttachmentsModel::generateThumbnailPath(const QString &attachmentId, const QString &suffix) const
 {
-    return m_settings->thumbnailsDir().filePath(Utils::createUuid() + QLatin1String(".png"));
+    return m_settings->thumbnailsDir().filePath(attachmentId + QLatin1Char('-') + suffix + QLatin1String(".png"));
 }
 
 QSize AttachmentsModel::applyOrientation(const QSize &size, int orientation) const
