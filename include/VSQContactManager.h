@@ -41,31 +41,35 @@
 
 Q_DECLARE_LOGGING_CATEGORY(lcContactManager);
 
-class VSQContactManager : public QObject
-{
+class VSQContactManager : public QObject {
     Q_OBJECT
 
 public:
     explicit VSQContactManager(QXmppClient *client, QObject *parent = nullptr);
     ~VSQContactManager() override;
 
-    bool addContact(const QString &jid, const QString &name, const QString &reason);
-    bool removeContact(const QString &jid);
-    bool renameContact(const QString &jid, const QString &newName);
+    bool
+    addContact(const QString &jid, const QString &name, const QString &reason);
+    bool
+    removeContact(const QString &jid);
+    bool
+    renameContact(const QString &jid, const QString &newName);
 
-    QString lastErrorText() const;
+    QString
+    lastErrorText() const;
 
 private:
     using SubscriptionType = QXmppRosterIq::Item::SubscriptionType;
 
-    struct ContactInfo
-    {
+    struct ContactInfo {
         bool exists = false;
         SubscriptionType subscriptionType = SubscriptionType::None;
     };
 
-    ContactInfo find(const QString &jid) const;
-    bool setLastErrorText(const QString &text);
+    ContactInfo
+    find(const QString &jid) const;
+    bool
+    setLastErrorText(const QString &text);
 
     QXmppClient *m_client;
     QXmppRosterManager *m_manager;

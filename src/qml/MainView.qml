@@ -1,34 +1,36 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
-import QuickFuture 1.0
 
 import "./base"
 import "./theme"
 import "./components"
-import "./helpers/login.js" as LoginLogic
 
 Control {
     id: mainView
 
+    property var attachmentPreview: undefined
+    property int keyboardHeight: 0
+    readonly property var manager: app.stateManager
+
     RowLayout {
         anchors {
             fill: parent
-            bottomMargin: logControl.visible ? logControl.height : 0
+            bottomMargin: (logControl.visible ? logControl.height : 0) + keyboardHeight
         }
         spacing: 0
         clip: logControl.visible
 
         ServersPanel {
             id: serversPanel
-            visible: stackView.currentItem && typeof(stackView.currentItem.showServersPanel) !== "undefined" && stackView.currentItem.showServersPanel
+            visible: [manager.chatListState, manager.newChatState, manager.accountSettingsState].includes(manager.currentState)
             z: 2
             Layout.preferredWidth: 60
             Layout.fillHeight: true
 
             Action {
                 text: qsTr("Settings")
-                onTriggered: mainView.showAccountSettings()
+                onTriggered: manager.chatListState.requestAccountSettings(manager.chatListState.userId)
             }
 
             MenuSeparator {
@@ -36,8 +38,8 @@ Control {
             }
 
             Action {
-                text: "Sign Out"
-                onTriggered: mainView.signOut()
+                text: qsTr("Sign Out")
+                onTriggered: manager.chatListState.signOut()
             }
         }
 
@@ -54,157 +56,123 @@ Control {
         }
     }
 
-    TextScrollView {
+    LogControl {
         id: logControl
         anchors {
-            topMargin: 0.75 * mainView.height
             fill: parent
+            topMargin: 0.75 * mainView.height
         }
         visible: settings.devMode
-
-        TextArea {
-            id: logTextControl
-            width: mainView.width
-            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-            readOnly: true
-            font.pointSize: Platform.isMobile ? 12 : 9
-            selectByMouse: Platform.isDesktop
-        }
     }
 
-    Button {
-        id: clearLogButton
-        visible: logControl.visible
-        anchors.right: logControl.right
-        anchors.top: logControl.top
-        text: "x"
-        width: 20
-        height: width
-        onClicked: logTextControl.clear()
+    QtObject {
+        id: d
+
+        function page(name) {
+            return "./pages/%1Page.qml".arg(name)
+        }
+
+        function goBack() {
+            if (attachmentPreview.visible) {
+                attachmentPreview.visible = false
+            }
+            else {
+                stackView.pop()
+            }
+        }
+
+        function openSplashScreenPage() {
+            stackView.push(page("SplashScreen"), StackView.Immediate)
+        }
+
+        function openAccountSelectionPage() {
+            if ([manager.signUpState, manager.signInState].includes(manager.previousState)) {
+                return
+            }
+            stackView.push(page("AccountSelection"), StackView.Immediate)
+        }
+
+        function openChatListPage() {
+            if ([manager.splashScreenState, manager.accountSelectionState,
+                 manager.signUpState, manager.downloadKeyState].includes(manager.previousState)) {
+                stackView.clear()
+                stackView.push(page("ChatList"))
+            }
+        }
+
+        function openAccountSettingsPage() {
+            if (manager.previousState !== manager.chatListState) {
+                return
+            }
+            stackView.push(page("AccountSettings"), StackView.Transition)
+        }
+
+        function openAddNewChatPage() {
+            stackView.push(page("NewChat"))
+        }
+
+        function openChatPage() {
+            if (manager.previousState === manager.attachmentPreviewState) {
+                return
+            }
+            const replace = [manager.newChatState, manager.downloadKeyState].includes(manager.previousState)
+            var push = replace ? stackView.replace : stackView.push
+            push(page("Chat"), StackView.Transition)
+        }
+
+        function showAttachmentPreview() {
+            attachmentPreview.visible = true
+        }
+
+        function openBackupKeyPage() {
+            if (manager.previousState !== manager.accountSettingsState) {
+                return
+            }
+            stackView.push(page("BackupKey"))
+        }
+
+        function openSignInAsPage() {
+            if (manager.previousState !== manager.downloadKeyState) {
+                stackView.push(page("SignInAs"))
+            }
+        }
+
+        function openSignInUsernamePage() {
+            if (manager.previousState === manager.accountSelectionState) {
+                stackView.push(page("SignInUsername"))
+            }
+        }
+
+        function openSignUpPage() {
+            if (manager.previousState === manager.accountSelectionState) {
+                stackView.push(page("SignUp"))
+            }
+        }
+
+        function openDownloadKeyPage() {
+            stackView.push(page("DownloadKey"))
+        }
     }
 
     Component.onCompleted: {
-        showSplashScreen()
-        if (logControl.visible) {
-            logging.formattedMessageCreated.connect(logTextControl.append)
-        }
-    }
+        manager.goBack.connect(d.goBack)
+        manager.splashScreenState.entered.connect(d.openSplashScreenPage)
+        manager.accountSelectionState.entered.connect(d.openAccountSelectionPage)
+        manager.chatListState.entered.connect(d.openChatListPage)
+        manager.accountSettingsState.entered.connect(d.openAccountSettingsPage)
+        manager.newChatState.entered.connect(d.openAddNewChatPage)
+        manager.chatState.entered.connect(d.openChatPage)
+        manager.attachmentPreviewState.entered.connect(d.showAttachmentPreview)
+        manager.backupKeyState.entered.connect(d.openBackupKeyPage)
+        manager.signInAsState.entered.connect(d.openSignInAsPage)
+        manager.signInUsernameState.entered.connect(d.openSignInUsernamePage)
+        manager.signUpState.entered.connect(d.openSignUpPage)
+        manager.downloadKeyState.entered.connect(d.openDownloadKeyPage)
 
-    function signIn(user) {
-        if (LoginLogic.validateUser(user)) {
-            var future = Messenger.signInAsync(user)
-            Future.onFinished(future, function(value) {
-              console.log("Log In result: ", Future.result(future))
+        if (Platform.isIos) {
+            app.keyboardEventFilter.keyboardRectangleChanged.connect(function(rect) {
+                keyboardHeight = Math.max(0, root.height - rect.y)
             })
-
-            stackView.clear()
-            settings.lastSignedInUser = user
-            showContacts()
-        } else {
-            root.showPopupError(qsTr("Incorrect User Name"))
         }
-    }
-
-    function signOut() {
-        var future = Messenger.logout()
-        Future.onFinished(future, function(value) {
-          console.log("Logout result: ", Future.result(future))
-
-            // clear all pages in the stackview and push sign in page
-            // as a first page in the stack
-            stackView.clear()
-            settings.lastSignedInUser = ""
-            showAuth(true)
-        })
-    }
-
-    function disconnect() {
-        var future = Messenger.disconnect()
-        Future.onFinished(future, function(value) {
-          console.log("Logout result: ", Future.result(future))
-            stackView.clear()
-            showAuth(true)
-        })
-    }
-
-    // Navigation
-    //
-    // All the app navigation must be done throught executing
-    // the functions below.
-
-    function back() {
-        stackView.pop()
-        if (Messenger.currentRecipient()) {
-            Messenger.setCurrentRecipient("")
-        }
-    }
-
-    function showSplashScreen(){
-        stackView.push("./pages/SplashScreenPage.qml", StackView.Immediate)
-    }
-
-    function showAuth(animate) {
-        if (animate) {
-            stackView.push("./pages/AuthPage.qml")
-            return
-        }
-
-        stackView.push("./pages/AuthPage.qml", StackView.Immediate)
-    }
-
-    function showSignIn() {
-        stackView.push("./pages/SignInPage.qml")
-    }
-
-    function showSignInAs(params) {
-        stackView.push("./pages/SignInAsPage.qml", params)
-    }
-
-    function showDownloadKey(params) {
-        stackView.push("./pages/DownloadKeyPage.qml", params)
-    }
-
-    function showRegister() {
-        stackView.push("./pages/RegisterPage.qml")
-    }
-
-    function showBackupKey() {
-        stackView.push("./pages/BackupKeyPage.qml")
-    }
-
-    function showChatWith(recipient, replace) {
-        navigateTo("Chat", { recipient: recipient }, true, false, replace)
-        Messenger.setCurrentRecipient(recipient)
-    }
-
-    function showContacts(clear) {
-        if (clear) {
-            stackView.clear()
-        }
-
-        stackView.push("./pages/ChatListPage.qml")
-    }
-
-    function showAddPerson() {
-        stackView.push("./pages/AddPersonPage.qml")
-    }
-
-    function showAccountSettings() {
-        navigateTo("AccountSettings", null, true, false)
-    }
-
-    function navigateTo(page, params, animate, clearHistory, replace) {
-        const pageName = "%1Page".arg(page)
-        // cancel navigation if the page is already shown
-        if (stackView.currentItem.toString().startsWith(pageName)) {
-            return
-        }
-        if (clearHistory) {
-            stackView.clear()
-        }
-
-        var push = replace ? stackView.replace : stackView.push
-        const path = "./pages/%1.qml".arg(pageName)
-        push(path, params, animate ? StackView.Transition : StackView.Immediate)
     }
 }

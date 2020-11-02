@@ -52,12 +52,11 @@ using namespace VirgilIoTKit;
 Q_LOGGING_CATEGORY(lcAttachment, "attachment");
 
 VSQAttachmentBuilder::VSQAttachmentBuilder(VSQSettings *settings, QObject *parent)
-    : QObject(parent)
-    , m_settings(settings)
-{}
+    : QObject(parent), m_settings(settings) {
+}
 
-OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment::Type type, QString &errorText)
-{
+OptionalAttachment
+VSQAttachmentBuilder::build(const QUrl &url, const Attachment::Type type, QString &errorText) {
     qCDebug(lcAttachment) << "Attachment input url:" << VSQUtils::urlToLocalFile(url);
     if (!VSQUtils::isValidUrl(url)) {
         errorText = tr("Invalid attachment URL");
@@ -94,7 +93,8 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
     attachment.fileName = VSQAndroid::getDisplayName(url);
 #elif defined(VS_IOS)
     if (type == Attachment::Type::Picture) {
-        // Build file name from url, i.e. "file:assets-library://asset/asset.PNG?id=7CE20DC4-89A8-4079-88DC-AD37920581B5&ext=PNG"
+        // Build file name from url, i.e.
+        // "file:assets-library://asset/asset.PNG?id=7CE20DC4-89A8-4079-88DC-AD37920581B5&ext=PNG"
         QUrl urlWithoutFileScheme{url.toLocalFile()};
         const QUrlQuery query(urlWithoutFileScheme.query());
         attachment.fileName = query.queryItemValue("id") + QChar('.') + query.queryItemValue("ext").toLower();
@@ -118,13 +118,14 @@ OptionalAttachment VSQAttachmentBuilder::build(const QUrl &url, const Attachment
     return attachment;
 }
 
-QString VSQAttachmentBuilder::generateThumbnailFileName() const
-{
+QString
+VSQAttachmentBuilder::generateThumbnailFileName() const {
     return m_settings->thumbnailsDir().filePath(VSQUtils::createUuid() + QLatin1String(".png"));
 }
 
-QImage VSQAttachmentBuilder::applyImageOrientation(const QImage &image, const QImageIOHandler::Transformations transformations) const
-{
+QImage
+VSQAttachmentBuilder::applyImageOrientation(const QImage &image,
+                                            const QImageIOHandler::Transformations transformations) const {
     auto result = image;
     const bool horizontally = transformations & QImageIOHandler::TransformationMirror;
     const bool vertically = transformations & QImageIOHandler::TransformationFlip;
@@ -137,8 +138,8 @@ QImage VSQAttachmentBuilder::applyImageOrientation(const QImage &image, const QI
     return result;
 }
 
-QPixmap VSQAttachmentBuilder::generateThumbnail(const QString &fileName) const
-{
+QPixmap
+VSQAttachmentBuilder::generateThumbnail(const QString &fileName) const {
     QImageReader reader(fileName);
     const auto originalImage = reader.read();
     if (originalImage.isNull()) {
@@ -165,8 +166,8 @@ QPixmap VSQAttachmentBuilder::generateThumbnail(const QString &fileName) const
     return pixmap.scaled(size.width(), size.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 }
 
-void VSQAttachmentBuilder::saveThumbnailFile(const QPixmap &pixmap, const QString &fileName) const
-{
+void
+VSQAttachmentBuilder::saveThumbnailFile(const QPixmap &pixmap, const QString &fileName) const {
     pixmap.save(fileName);
     qCInfo(lcAttachment) << "Created thumbnail:" << fileName;
 }

@@ -38,27 +38,19 @@
 #include <QLocale>
 #include <QUuid>
 
-QString VSQUtils::createUuid()
-{
+QString
+VSQUtils::createUuid() {
     return QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
 }
 
-QString VSQUtils::formattedDataSize(DataSize fileSize)
-{
+QString
+VSQUtils::formattedDataSize(DataSize fileSize) {
     static QLocale locale = QLocale::system();
     return locale.formattedDataSize(fileSize);
 }
 
-QString VSQUtils::escapedUserName(const QString &userName)
-{
-    static QRegExp regexp("[^a-z0-9_]");
-    QString name(userName);
-    name.remove(regexp);
-    return name;
-}
-
-QString VSQUtils::findUniqueFileName(const QString &fileName)
-{
+QString
+VSQUtils::findUniqueFileName(const QString &fileName) {
     QFileInfo info(fileName);
     if (!info.exists()) {
         return fileName;
@@ -66,7 +58,7 @@ QString VSQUtils::findUniqueFileName(const QString &fileName)
     auto dir = info.absoluteDir();
     auto baseName = info.baseName();
     auto suffix = info.completeSuffix();
-    for(;;) {
+    for (;;) {
         auto uuid = createUuid().remove('-').left(6);
         auto newFileName = dir.filePath(QString("%1-%2.%3").arg(baseName, uuid, suffix));
         if (!QFile::exists(newFileName)) {
@@ -75,8 +67,8 @@ QString VSQUtils::findUniqueFileName(const QString &fileName)
     }
 }
 
-bool VSQUtils::isValidUrl(const QUrl &url)
-{
+bool
+VSQUtils::isValidUrl(const QUrl &url) {
     bool isValid = url.isValid();
 #if !defined(Q_OS_ANDROID)
     isValid = isValid && url.isLocalFile();
@@ -84,9 +76,9 @@ bool VSQUtils::isValidUrl(const QUrl &url)
     return isValid;
 }
 
-QString VSQUtils::urlToLocalFile(const QUrl &url)
-{
-#if defined (Q_OS_ANDROID)
+QString
+VSQUtils::urlToLocalFile(const QUrl &url) {
+#if defined(Q_OS_ANDROID)
     qDebug() << "Android file url (before encoding):" << url.toString();
     auto res = QUrl::fromPercentEncoding(url.toString().toUtf8());
     qDebug() << "Android file url:" << res;
@@ -97,14 +89,13 @@ QString VSQUtils::urlToLocalFile(const QUrl &url)
 #endif
 }
 
-bool VSQUtils::forceCreateDir(const QString &absolutePath)
-{
+bool
+VSQUtils::forceCreateDir(const QString &absolutePath) {
     const QFileInfo info(absolutePath);
     if (info.exists()) {
         if (info.isDir()) {
             return true;
-        }
-        else {
+        } else {
             QFile::remove(absolutePath);
         }
     }
@@ -115,9 +106,9 @@ bool VSQUtils::forceCreateDir(const QString &absolutePath)
     return false;
 }
 
-QUrl VSQUtils::localFileToUrl(const QString &filePath)
-{
-#if defined (Q_OS_ANDROID)
+QUrl
+VSQUtils::localFileToUrl(const QString &filePath) {
+#if defined(Q_OS_ANDROID)
     QUrl url(filePath);
     if (url.scheme().isEmpty()) {
         return QUrl::fromLocalFile(filePath);
@@ -128,19 +119,19 @@ QUrl VSQUtils::localFileToUrl(const QString &filePath)
 #endif
 }
 
-int VSQUtils::bufferSizeForEncryption(const int rawSize)
-{
+int
+VSQUtils::bufferSizeForEncryption(const int rawSize) {
     // TODO(fpohtmeh): use function rawSize * 3 + 2180
     return 5 * rawSize + 5000;
 }
 
-int VSQUtils::bufferSizeForDecryption(const int encryptedSize)
-{
+int
+VSQUtils::bufferSizeForDecryption(const int encryptedSize) {
     return encryptedSize;
 }
 
-QString VSQUtils::formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval)
-{
+QString
+VSQUtils::formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval) {
     const auto preffix = QObject::tr("Last seen %1");
     if (seconds < updateInterval) {
         return QObject::tr("Online");
@@ -183,13 +174,13 @@ QString VSQUtils::formattedLastSeenActivity(const Seconds &seconds, const Second
     return preffix.arg(QObject::tr("%1 years ago").arg(seconds / year));
 }
 
-QString VSQUtils::formattedLastSeenNoActivity()
-{
+QString
+VSQUtils::formattedLastSeenNoActivity() {
     return QObject::tr("Offline");
 }
 
-QString VSQUtils::elidedText(const QString &text, const int maxLength)
-{
+QString
+VSQUtils::elidedText(const QString &text, const int maxLength) {
     const int max = qMax(5, maxLength);
     if (text.size() <= max) {
         return text;

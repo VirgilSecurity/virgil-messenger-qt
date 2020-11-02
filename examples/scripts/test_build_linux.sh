@@ -9,7 +9,7 @@ pushd ${PROJECT_FOLDER}
   mkdir -p build 
 
   pushd build
-   cmake -DVS_PLATFORM="linux" .. 
+   cmake -DVS_PLATFORM="linux" -DVS_CUSTOMER="Braes" .. 
    make 
    make deploy
   popd

@@ -13,7 +13,8 @@ import "../components"
 Page {
     id: chatPage
 
-    property string recipient
+    readonly property var appState: app.stateManager.chatState
+    readonly property var contactId: appState.contactId
 
     background: Rectangle {
         color: Theme.chatBackgroundColor
@@ -53,23 +54,22 @@ Page {
 
             ImageButton {
                 image: "Arrow-Left"
-                onClicked: mainView.back()
+                onClicked: app.stateManager.goBack()
             }
 
             Column {
                 Layout.fillWidth: true
                 Layout.leftMargin: 10
                 Label {
-                    text: ConversationsModel.recipient
+                    text: contactId
                     font.pointSize: UiHelper.fixFontSz(15)
                     color: Theme.primaryTextColor
                     font.bold: true
                 }
 
                 Label {
-                    id: lastActivityLabel
                     topPadding: 2
-                    text: " "
+                    text: appState.lastActivityText
                     font.pointSize: UiHelper.fixFontSz(12)
                     color: Theme.secondaryTextColor
                 }
@@ -77,11 +77,9 @@ Page {
         }
     }
 
-
     ListView {
         id: listView
 
-        property bool viewLoaded: false
         property real previousHeight: 0.0
         property var contextMenu: null
 
@@ -94,6 +92,8 @@ Page {
             date: section
         }
 
+        model: ConversationsModel
+
         spacing: 5
         delegate: ChatMessage {
             maxWidth: Math.min(root.width - 220, 800)
@@ -101,7 +101,7 @@ Page {
             body: model.message
             time: Qt.formatDateTime(model.timestamp, "hh:mm")
             nickname: model.author
-            isUser: model.author === Messenger.currentUser
+            isUser: model.author === app.stateManager.chatListState.userId // FIXME(fpohtmeh); use chat state
             status: isUser ? model.status : "none"
             failed: (model.status == 4) && (!attachmentId || attachmentStatus == Enums.AttachmentStatus.Failed)
             messageId: model.messageId
@@ -128,7 +128,7 @@ Page {
             }
 
             onDownloadOpenAttachment: function(messageId, isPicture) {
-                (isPicture ? Messenger.openAttachment : Messenger.downloadAttachment)(messageId)
+                (isPicture ? appState.openAttachment : appState.downloadAttachment)(messageId)
             }
 
             onOpenContextMenu: function(messageId, mouse, contextMenu) {
@@ -144,17 +144,15 @@ Page {
         ScrollBar.vertical: ScrollBar { }
 
         Component.onCompleted: {
-            viewLoaded = true
-            positionLoadedViewAtEnd()
-        }
-
-        onCountChanged: positionLoadedViewAtEnd()
-
-        onHeightChanged: {
-            if (height < previousHeight) {
-                positionLoadedViewAtEnd()
-            }
+            countChanged.connect(showLastMessage)
+            heightChanged.connect(function() {
+                if (height < previousHeight) {
+                    showLastMessage()
+                }
+                previousHeight = height
+            })
             previousHeight = height
+            showLastMessage()
         }
 
         MouseArea {
@@ -171,67 +169,53 @@ Page {
             }
         }
 
-        function positionLoadedViewAtEnd() {
-            if (viewLoaded) {
-                positionViewAtEnd()
+        function showLastMessage() {
+            positionViewAtEnd()
+            if (Platform.isIos || Platform.isLinux) {
+                positionViewAtEnd() // HACK(fpohtmeh): fix positioning
             }
         }
     }
 
     footer: ChatMessageInput {
         id: footerControl
-        onMessageSending: {
-            var future = Messenger.sendMessage(ConversationsModel.recipient, message, attachmentUrl, attachmentType)
-            Future.onFinished(future, function(value) {
-                messageSent.play()
-            })
+        onMessageSending: appState.sendMessage(contactId, message, attachmentUrl, attachmentType)
+    }
+
+    Item {
+        SelectAttachmentsDialog {
+            id: saveAttachmentAsDialog
+            selectExisting: false
+
+            property string messageId: ""
+
+            onAccepted: appState.saveAttachmentAs(messageId, fileUrl)
+        }
+
+        SoundEffect {
+            id: messageReceived
+            source: "../resources/sounds/message-received.wav"
+        }
+
+        SoundEffect {
+            id: messageSent
+            source: "../resources/sounds/message-sent.wav"
         }
     }
 
-    SelectAttachmentsDialog {
-        id: saveAttachmentAsDialog
-        selectExisting: false
-
-        property string messageId: ""
-
-        onAccepted: Messenger.saveAttachmentAs(messageId, fileUrl)
-    }
-
-    // Component events
-
-    Component.onCompleted: {
-        // configure conversation model to chat with
-        // recipient provided as a parameter to this page.
-
-        ConversationsModel.recipient = recipient
-        listView.model = ConversationsModel
-        ConversationsModel.setAsRead(recipient)
-        ChatModel.updateUnreadMessageCount(recipient)
-
-        Messenger.openPreviewRequested.connect(openPreview)
-    }
-
-    Component.onDestruction: {
-        Messenger.openPreviewRequested.disconnect(openPreview)
+    onContactIdChanged: {
+        ConversationsModel.recipient = contactId
+        if (contactId) {
+            ConversationsModel.setAsRead(contactId)
+            ChatModel.updateUnreadMessageCount(contactId)
+        }
     }
 
     Connections {
-        target: Messenger
-        function onLastActivityTextChanged(text) {
-            lastActivityLabel.text = text
+        target: appState
+
+        function onMessageSent() {
+            messageSent.play()
         }
     }
-
-    // Sounds
-
-    SoundEffect {
-        id: messageReceived
-        source: "../resources/sounds/message-received.wav"
-    }
-
-    SoundEffect {
-        id: messageSent
-        source: "../resources/sounds/message-sent.wav"
-    }
 }
-

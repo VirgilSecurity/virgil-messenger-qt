@@ -37,41 +37,50 @@
 
 #include "VSQCommon.h"
 
-namespace VSQUtils
-{
-    QString createUuid();
+namespace VSQUtils {
+QString
+createUuid();
 
-    // String processing/format
+// String processing/format
 
-    QString formattedDataSize(DataSize fileSize);
+QString
+formattedDataSize(DataSize fileSize);
 
-    QString escapedUserName(const QString &userName);
+QString
+formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval);
 
-    QString formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval);
+QString
+formattedLastSeenNoActivity();
 
-    QString formattedLastSeenNoActivity();
+QString
+elidedText(const QString &text, const int maxLength);
 
-    QString elidedText(const QString &text, const int maxLength);
+// File functions
 
-    // File functions
+QString
+findUniqueFileName(const QString &fileName);
 
-    QString findUniqueFileName(const QString &fileName);
+bool
+forceCreateDir(const QString &absolutePath);
 
-    bool forceCreateDir(const QString &absolutePath);
+// Url functions
 
-    // Url functions
+bool
+isValidUrl(const QUrl &url);
 
-    bool isValidUrl(const QUrl &url);
+QString
+urlToLocalFile(const QUrl &url);
 
-    QString urlToLocalFile(const QUrl &url);
+QUrl
+localFileToUrl(const QString &filePath);
 
-    QUrl localFileToUrl(const QString &filePath);
+// Crypto functions
 
-    // Crypto functions
+int
+bufferSizeForEncryption(const int rawSize);
 
-    int bufferSizeForEncryption(const int rawSize);
-
-    int bufferSizeForDecryption(const int encryptedSize);
-}
+int
+bufferSizeForDecryption(const int encryptedSize);
+} // namespace VSQUtils
 
 #endif // VSQ_UTILS_H

@@ -44,6 +44,12 @@ include(varpadding)
 include(getprebuild)
 include(customers)
 
+#
+# Code formatting
+#
+option(ENABLE_CLANGFORMAT "On/Off formatting source code with clangformat." ON)
+
+
 # ---------------------------------------------------------------------------
 # Project version
 # ---------------------------------------------------------------------------
@@ -55,11 +61,13 @@ set(VS_CORE_VERSION "0.1.3.134")
 # ---------------------------------------------------------------------------
 set(VS_CUSTOMER "Virgil" CACHE "STRING" "Customer for build")
 set(VS_CUSTOMER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/customers/${VS_CUSTOMER}")
+set(VS_CUSTOMER_COMMON_DIR "${CMAKE_CURRENT_SOURCE_DIR}/customers/Common")
 message(STATUS "Current customer : [${VS_CUSTOMER}]")
 message(STATUS "Current customer directory: [${VS_CUSTOMER_DIR}]")
 message(STATUS "Include customer cmake target name: [customer-target.cmake]")
 # Include customer file for project target name
 include("${VS_CUSTOMER_DIR}/customer.cmake")
+include("${VS_CUSTOMER_COMMON_DIR}/customer_common.cmake")
 
 # ---------------------------------------------------------------------------
 # Define project
@@ -125,6 +133,7 @@ message(STATUS "Setting prebuild library directory:	[${PREBUILT_LIB_DIR}]")
 # Include customer file and prepare data
 # ---------------------------------------------------------------------------
 include("${VS_CUSTOMER_DIR}/customer.cmake")
+include("${VS_CUSTOMER_COMMON_DIR}/customer_common.cmake")
 vs_customer_prepare()
 
 # ---------------------------------------------------------------------------
@@ -242,12 +251,27 @@ elseif(VS_PLATFORM STREQUAL "macos")
     
     set_target_properties(${VS_TARGET_NAME} 
         PROPERTIES LINK_FLAGS "-F${PREBUILT_DIR}/${VS_PLATFORM}/sparkle -framework Sparkle -framework CoreFoundation -framework Foundation"
-    )    
+    )
+# IOS    
+elseif(VS_PLATFORM STREQUAL "ios")    
+    set(CMAKE_XCODE_EFFECTIVE_PLATFORMS "-iphoneos;-iphonesimulator")
+    add_executable(${VS_TARGET_NAME} MACOSX_BUNDLE)
+    set_target_properties(${VS_TARGET_NAME}
+        PROPERTIES 
+    	    MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/platforms/ios/Info.plist.in"
+	    LINK_FLAGS "-framework Foundation -framework UserNotifications"        
+    )
 
-#    macdeployqt(${VS_TARGET_NAME} "${CMAKE_CURRENT_LIST_DIR}/src/qml")
-# Other
+    SET_XCODE_PROPERTY(${VS_TARGET_NAME} CODE_SIGN_ENTITLEMENTS "${VS_CUSTOMER_DIR}/platforms/ios/Entitlements/VirgilMessenger.entitlements")
+    
+    target_sources(${VS_TARGET_NAME} PRIVATE "${VS_CUSTOMER_DIR}/platforms/ios/Assets.xcassets")
+    set_source_files_properties("${VS_CUSTOMER_DIR}/platforms/ios/Assets.xcassets" 
+	PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"
+    )
+    source_group("Resources" FILES "${VS_CUSTOMER_DIR}/platforms/ios/Assets.xcassets")
+
 else()
-    add_executable(${VS_TARGET_NAME})
+    message(FATAL_ERROR "Unknown target platform")
 endif()
 
 # ---------------------------------------------------------------------------
@@ -257,6 +281,9 @@ target_sources(${VS_TARGET_NAME}
 
         PRIVATE
 	# -- Headers
+	${CMAKE_CURRENT_LIST_DIR}/include/AccountSelectionModel.h
+	${CMAKE_CURRENT_LIST_DIR}/include/KeyboardEventFilter.h
+	${CMAKE_CURRENT_LIST_DIR}/include/Validator.h
 	${CMAKE_CURRENT_LIST_DIR}/include/VSQApplication.h
 	${CMAKE_CURRENT_LIST_DIR}/include/VSQAttachmentBuilder.h
 	${CMAKE_CURRENT_LIST_DIR}/include/VSQClipboardProxy.h
@@ -282,6 +309,23 @@ target_sources(${VS_TARGET_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/include/helpers/VSQSingleton.h
 	${CMAKE_CURRENT_LIST_DIR}/include/helpers/FutureWorker.h
 	${CMAKE_CURRENT_LIST_DIR}/include/ui/VSQUiHelper.h
+	${CMAKE_CURRENT_LIST_DIR}/include/states/AccountSelectionState.h
+	${CMAKE_CURRENT_LIST_DIR}/include/states/AccountSettingsState.h
+	${CMAKE_CURRENT_LIST_DIR}/include/states/ApplicationStateManager.h
+	${CMAKE_CURRENT_LIST_DIR}/include/states/AttachmentPreviewState.h
+	${CMAKE_CURRENT_LIST_DIR}/include/states/BackupKeyState.h
+	${CMAKE_CURRENT_LIST_DIR}/include/states/ChatListState.h
+	${CMAKE_CURRENT_LIST_DIR}/include/states/ChatState.h
+	${CMAKE_CURRENT_LIST_DIR}/include/states/DownloadKeyState.h
+	${CMAKE_CURRENT_LIST_DIR}/include/states/NewChatState.h
+	${CMAKE_CURRENT_LIST_DIR}/include/states/OperationState.h
+	${CMAKE_CURRENT_LIST_DIR}/include/states/SignInAsState.h
+	${CMAKE_CURRENT_LIST_DIR}/include/states/SignInState.h
+	${CMAKE_CURRENT_LIST_DIR}/include/states/SignInUsernameState.h
+	${CMAKE_CURRENT_LIST_DIR}/include/states/SignUpState.h
+	${CMAKE_CURRENT_LIST_DIR}/include/states/SplashScreenState.h
+	${CMAKE_CURRENT_LIST_DIR}/include/states/StartState.h
+                         
 	# Logging
 	${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogging.h
 	${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogWorker.h
@@ -301,6 +345,9 @@ target_sources(${VS_TARGET_NAME}
 	$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/android/FirebaseListener.h>
 
 	# -- Sources
+	${CMAKE_CURRENT_LIST_DIR}/src/AccountSelectionModel.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/KeyboardEventFilter.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/Validator.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/VSQAttachmentBuilder.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/VSQClipboardProxy.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/VSQCommon.cpp
@@ -325,6 +372,21 @@ target_sources(${VS_TARGET_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/VSQApplication.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/ui/VSQUiHelper.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/hal.cpp
+	# State
+	${CMAKE_CURRENT_LIST_DIR}/src/states/AccountSelectionState.cpp  
+	${CMAKE_CURRENT_LIST_DIR}/src/states/AccountSettingsState.cpp   
+	${CMAKE_CURRENT_LIST_DIR}/src/states/ApplicationStateManager.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/states/AttachmentPreviewState.cpp 
+	${CMAKE_CURRENT_LIST_DIR}/src/states/BackupKeyState.cpp         
+	${CMAKE_CURRENT_LIST_DIR}/src/states/ChatListState.cpp          
+	${CMAKE_CURRENT_LIST_DIR}/src/states/ChatState.cpp              
+	${CMAKE_CURRENT_LIST_DIR}/src/states/DownloadKeyState.cpp       
+	${CMAKE_CURRENT_LIST_DIR}/src/states/NewChatState.cpp           
+	${CMAKE_CURRENT_LIST_DIR}/src/states/SignInAsState.cpp          
+	${CMAKE_CURRENT_LIST_DIR}/src/states/SignInState.cpp            
+	${CMAKE_CURRENT_LIST_DIR}/src/states/SignInUsernameState.cpp    
+	${CMAKE_CURRENT_LIST_DIR}/src/states/SignUpState.cpp            
+	${CMAKE_CURRENT_LIST_DIR}/src/states/SplashScreenState.cpp      
 	# Logging
 	${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogging.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogWorker.cpp
@@ -414,6 +476,7 @@ target_link_libraries(${VS_TARGET_NAME}
 target_include_directories(${VS_TARGET_NAME}
         PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/notifications>        
         $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}>
         $<BUILD_INTERFACE:${PREBUILT_QT_DIR}/config/pc>
         $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}/qxmpp>
@@ -456,3 +519,12 @@ target_compile_options(${VS_TARGET_NAME}
 target_compile_definitions(${VS_TARGET_NAME}
   PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>
   )
+
+#if(COMMAND add_clangformat AND ENABLE_CLANGFORMAT)
+#    add_clangformat(${VS_TARGET_NAME})
+#endif()
+
+
+#SET_XCODE_PROPERTY(${VS_TARGET_NAME} CODE_SIGN_IDENTITY "")
+#SET_XCODE_PROPERTY(MyTarget DEVELOPMENT_TEAM ${DEVELOPMENT_TEAM_ID})
+#SET_XCODE_PROPERTY(MyTarget PROVISIONING_PROFILE_SPECIFIER ${PROVISIONING_PROFILE_NAME})

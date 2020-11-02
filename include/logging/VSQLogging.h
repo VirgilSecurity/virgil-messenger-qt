@@ -41,8 +41,7 @@
 
 class QThread;
 
-class VSQLogging : public QObject
-{
+class VSQLogging : public QObject {
     Q_OBJECT
 
 public:
@@ -50,14 +49,17 @@ public:
     virtual ~VSQLogging();
 
 signals:
-    void messageCreated(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
-    void formattedMessageCreated(const QString &message);
+    void
+    messageCreated(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
+    void
+    formattedMessageCreated(const QString &message);
 
 private:
-    void registerMetaTypes();
-    void formatMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
+    void
+    formatMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
 
-    static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
+    static void
+    messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
 
     static VSQLogging *m_instance;
 

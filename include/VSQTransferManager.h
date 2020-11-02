@@ -54,43 +54,63 @@ class VSQUpload;
 
 Q_DECLARE_LOGGING_CATEGORY(lcTransferManager);
 
-class VSQTransferManager : public QObject
-{
+class VSQTransferManager : public QObject {
     Q_OBJECT
 
 public:
-    VSQTransferManager(QXmppClient *client, QNetworkAccessManager *networkAccessManager, VSQSettings *settings, QObject *parent);
+    VSQTransferManager(QXmppClient *client,
+                       QNetworkAccessManager *networkAccessManager,
+                       VSQSettings *settings,
+                       QObject *parent);
     virtual ~VSQTransferManager();
 
-    VSQUpload *startUpload(const QString &id, const QString &filePath);
-    VSQDownload *startDownload(const QString &id, const QUrl &remoteUrl, const QString &filePath);
+    VSQUpload *
+    startUpload(const QString &id, const QString &filePath);
+    VSQDownload *
+    startDownload(const QString &id, const QUrl &remoteUrl, const QString &filePath);
 
-    bool isReady() const;
-    bool hasTransfer(const QString &id) const;
+    bool
+    isReady() const;
+    bool
+    hasTransfer(const QString &id) const;
 
 signals:
-    void progressChanged(const QString id, const DataSize bytesReceived, const DataSize bytesTotal);
-    void statusChanged(const QString id, const Enums::AttachmentStatus status);
-    void connectionChanged();
-    void fireReadyToUpload();
+    void
+    progressChanged(const QString id, const DataSize bytesReceived, const DataSize bytesTotal);
+    void
+    statusChanged(const QString id, const Enums::AttachmentStatus status);
+    void
+    connectionChanged();
+    void
+    fireReadyToUpload();
 
-    void startTransfer(VSQTransfer *transfer, QPrivateSignal);
+    void
+    startTransfer(VSQTransfer *transfer, QPrivateSignal);
 
 protected:
-    VSQSettings *settings();
+    VSQSettings *
+    settings();
 
 private:
-    bool requestUploadUrl(VSQUpload *upload);
+    bool
+    requestUploadUrl(VSQUpload *upload);
 
-    VSQUpload *findUploadBySlotId(const QString &slotId) const;
-    VSQTransfer *findTransfer(const QString &id, bool showWarning = true) const;
+    VSQUpload *
+    findUploadBySlotId(const QString &slotId) const;
+    VSQTransfer *
+    findTransfer(const QString &id, bool showWarning = true) const;
 
-    void removeTransfer(VSQTransfer *transfer, bool lock);
-    void abortTransfer(VSQTransfer *transfer, bool lock);
-    void onStartTransfer(VSQTransfer *transfer);
+    void
+    removeTransfer(VSQTransfer *transfer, bool lock);
+    void
+    abortTransfer(VSQTransfer *transfer, bool lock);
+    void
+    onStartTransfer(VSQTransfer *transfer);
 
-    void onSlotReceived(const QXmppHttpUploadSlotIq &slot);
-    void onRequestFailed(const QXmppHttpUploadRequestIq &request);
+    void
+    onSlotReceived(const QXmppHttpUploadSlotIq &slot);
+    void
+    onRequestFailed(const QXmppHttpUploadRequestIq &request);
 
     QXmppClient *m_client;
     QNetworkAccessManager *m_networkAccessManager;

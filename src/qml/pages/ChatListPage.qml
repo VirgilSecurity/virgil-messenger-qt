@@ -57,8 +57,7 @@ import "../components"
 import "../components/CommonHelpers"
 
 Page {
-
-    property bool showServersPanel: true
+    readonly property var appState: app.stateManager.chatListState
 
     background: Rectangle {
         color: Theme.contactsBackgroundColor
@@ -66,10 +65,9 @@ Page {
 
     header: ContactsHeader {
         description: "%1 Server".arg(app.organizationDisplayName)
-        objectName: "hdrDefaultServer"
         id: contactsHeaderId
         title: app.organizationDisplayName
-        searchPlaceholder: "Search conversation"
+        searchPlaceholder: qsTr("Search conversation")
 
         onIsSearchOpenChanged: {
             contactsHeaderId.isSearchOpen ? ChatModel.applyFilter('') : ChatModel.clearFilter()
@@ -83,7 +81,7 @@ Page {
 
         Action {
             text: qsTr("New chat")
-            onTriggered: mainView.showAddPerson()
+            onTriggered: appState.requestNewChat()
         }
     }
 
@@ -149,9 +147,7 @@ Page {
                 }
             }
 
-            onClicked: {
-                mainView.showChatWith(model.name)
-            }
+            onClicked: appState.requestChat(model.name)
         }
 
         IconWithText {
@@ -183,20 +179,9 @@ Page {
             visible: !listView.contentItem.children.length
             anchors.fill: parent
             onClicked: {
-                if (!listView.contentItem.children.length) {
-                    mainView.showAddPerson()
-                    mouse.accepted = false
-                }
+                appState.requestNewChat()
+                mouse.accepted = false
             }
         }
-    }
-
-
-    //
-    //  Functions
-    //
-    function setAsRead(user) {
-        // ConversationsModel.setAsRead(user);
-        console.log("setAsRead func");
     }
 }

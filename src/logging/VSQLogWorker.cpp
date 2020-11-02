@@ -36,57 +36,61 @@
 
 #include <virgil/iot/logger/logger.h>
 
-VSQLogWorker::VSQLogWorker(QObject *parent)
-    : QObject(parent)
-{
+VSQLogWorker::VSQLogWorker(QObject *parent) : QObject(parent) {
 #ifdef QT_NO_DEBUG // release
     m_logToFile = true;
 #endif
 }
 
-VSQLogWorker::~VSQLogWorker()
-{
+VSQLogWorker::~VSQLogWorker() {
 }
 
-void VSQLogWorker::start()
-{
+void
+VSQLogWorker::start() {
     if (m_logToFile) {
         vs_logger_init(VirgilIoTKit::VS_LOGLEV_DEBUG);
     }
 }
 
-void VSQLogWorker::processMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
-{
+void
+VSQLogWorker::processMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message) {
     consoleMessageHandler(type, context, message);
     if (m_logToFile) {
         fileMessageHandler(type, context, message);
     }
 }
 
-void VSQLogWorker::fileMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
-{
+void
+VSQLogWorker::fileMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message) {
     const QByteArray localMsg = message.toLocal8Bit();
     switch (type) {
     case QtDebugMsg:
-        vs_logger_message(VS_LOG_MAKE_LEVEL(VS_LOGLEV_DEBUG), qPrintable(context.fileName), context.line, qPrintable(localMsg));
+        vs_logger_message(
+                VS_LOG_MAKE_LEVEL(VS_LOGLEV_DEBUG), qPrintable(context.fileName), context.line, qPrintable(localMsg));
         break;
     case QtInfoMsg:
-        vs_logger_message(VS_LOG_MAKE_LEVEL(VS_LOGLEV_INFO), qPrintable(context.fileName), context.line, qPrintable(localMsg));
+        vs_logger_message(
+                VS_LOG_MAKE_LEVEL(VS_LOGLEV_INFO), qPrintable(context.fileName), context.line, qPrintable(localMsg));
         break;
     case QtWarningMsg:
-        vs_logger_message(VS_LOG_MAKE_LEVEL(VS_LOGLEV_WARNING), qPrintable(context.fileName), context.line, qPrintable(localMsg));
+        vs_logger_message(
+                VS_LOG_MAKE_LEVEL(VS_LOGLEV_WARNING), qPrintable(context.fileName), context.line, qPrintable(localMsg));
         break;
     case QtCriticalMsg:
-        vs_logger_message(VS_LOG_MAKE_LEVEL(VS_LOGLEV_CRITICAL), qPrintable(context.fileName), context.line, qPrintable(localMsg));
+        vs_logger_message(VS_LOG_MAKE_LEVEL(VS_LOGLEV_CRITICAL),
+                          qPrintable(context.fileName),
+                          context.line,
+                          qPrintable(localMsg));
         break;
     case QtFatalMsg:
-        vs_logger_message(VS_LOG_MAKE_LEVEL(VS_LOGLEV_FATAL), qPrintable(context.fileName), context.line, qPrintable(localMsg));
+        vs_logger_message(
+                VS_LOG_MAKE_LEVEL(VS_LOGLEV_FATAL), qPrintable(context.fileName), context.line, qPrintable(localMsg));
         abort();
     }
 }
 
-void VSQLogWorker::consoleMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
-{
+void
+VSQLogWorker::consoleMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message) {
     Q_UNUSED(type)
     fprintf(stderr, "[%s] %s\n", qPrintable(context.category), qPrintable(message));
 }

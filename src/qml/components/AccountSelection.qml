@@ -3,7 +3,6 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 
 import "../theme"
-import "../helpers/login.js" as LoginLogic
 
 ColumnLayout {
 
@@ -53,10 +52,8 @@ ColumnLayout {
             width: 240
             height: 240
 
-            property var userChunks: LoginLogic.chunk(settings.usersList, 4)
-
             Repeater {
-                model: view.userChunks
+                model: app.stateManager.accountSelectionState.model
 
                 Item {
                     id: firstPage

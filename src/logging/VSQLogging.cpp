@@ -42,14 +42,11 @@
 
 VSQLogging *VSQLogging::m_instance = nullptr;
 
-VSQLogging::VSQLogging(QObject *parent)
-    : QObject(parent)
-{
+VSQLogging::VSQLogging(QObject *parent) : QObject(parent) {
     // Set instance
     if (m_instance) {
         qFatal("Instance of logger worker already exists!");
-    }
-    else {
+    } else {
         m_instance = this;
     }
 
@@ -73,8 +70,7 @@ VSQLogging::VSQLogging(QObject *parent)
     qInstallMessageHandler(&VSQLogging::messageHandler);
 }
 
-VSQLogging::~VSQLogging()
-{
+VSQLogging::~VSQLogging() {
     // Unset handler
     qInstallMessageHandler(0);
 
@@ -86,14 +82,14 @@ VSQLogging::~VSQLogging()
     m_instance = nullptr;
 }
 
-void VSQLogging::formatMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
-{
+void
+VSQLogging::formatMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message) {
     Q_UNUSED(type)
     emit formattedMessageCreated(QString("[%1] %2").arg(context.category, message));
 }
 
-void VSQLogging::messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message)
-{
-    VSQMessageLogContext logContext { context.category, context.file, context.line };
+void
+VSQLogging::messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message) {
+    VSQMessageLogContext logContext{context.category, context.file, context.line};
     emit m_instance->messageCreated(type, logContext, message);
 }

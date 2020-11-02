@@ -9,7 +9,7 @@ ToolBar {
     id: toolbarId
     property alias title: titleLabel.text
     property alias description: descriptionLabel.text
-    property alias showSeporator: seporator.visible
+    property alias showSeparator: separator.visible
     // search
     property alias search: searchId.search
     property alias isSearchOpen: searchId.isSearchOpen
@@ -22,7 +22,7 @@ ToolBar {
         color: Theme.contactsBackgroundColor
 
         Rectangle {
-            id: seporator
+            id: separator
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.leftMargin: 20
@@ -41,7 +41,7 @@ ToolBar {
 
         Column {
             Layout.fillWidth: !isSearchOpen
-            visible: !isSearchOpen
+            visible: !isSearchOpen && !searchId.isAnimationRunning
 
             Label {
                 id: titleLabel
@@ -67,9 +67,8 @@ ToolBar {
             }
         }
 
-
         Item {
-            Layout.fillWidth: isSearchOpen
+            Layout.fillWidth: isSearchOpen || searchId.isAnimationRunning
             Layout.preferredWidth: 48
             height: 40
 
@@ -79,11 +78,10 @@ ToolBar {
         }
 
         ImageButton {
-            visible: !isSearchOpen
+            visible: !isSearchOpen && !searchId.isAnimationRunning
 
             id: menuButton
             image: "More"
-            // visible: menu.length
             opacity: menu.length ? 1 : 0
             enabled: menu.length
             onClicked: {

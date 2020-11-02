@@ -39,14 +39,15 @@
 #include <QNetworkReply>
 #include <QTimer>
 
-VSQUpload::VSQUpload(QNetworkAccessManager *networkAccessManager, const QString &id, const QString &filePath, QObject *parent)
-    : VSQTransfer(networkAccessManager, id, parent)
-    , m_filePath(filePath)
-{}
+VSQUpload::VSQUpload(QNetworkAccessManager *networkAccessManager,
+                     const QString &id,
+                     const QString &filePath,
+                     QObject *parent)
+    : VSQTransfer(networkAccessManager, id, parent), m_filePath(filePath) {
+}
 
-VSQUpload::~VSQUpload()
-{
-    for (auto &con: m_connections) {
+VSQUpload::~VSQUpload() {
+    for (auto &con : m_connections) {
         QObject::disconnect(con);
     }
     QMutexLocker locker(&m_guard);
@@ -55,8 +56,8 @@ VSQUpload::~VSQUpload()
 #endif
 }
 
-void VSQUpload::start()
-{
+void
+VSQUpload::start() {
     if (isRunning()) {
         qCWarning(lcTransferManager) << "Cannot start again a running upload";
         return;
@@ -92,13 +93,13 @@ void VSQUpload::start()
     });
 }
 
-QString VSQUpload::filePath() const
-{
+QString
+VSQUpload::filePath() const {
     return m_filePath;
 }
 
-Optional<QUrl> VSQUpload::remoteUrl()
-{
+Optional<QUrl>
+VSQUpload::remoteUrl() {
     if (!m_remoteUrl && !m_remoteUrlError) {
         QTimer timer;
         timer.setSingleShot(true);
@@ -133,17 +134,17 @@ Optional<QUrl> VSQUpload::remoteUrl()
     return NullOptional;
 }
 
-QString VSQUpload::slotId() const
-{
+QString
+VSQUpload::slotId() const {
     return m_slotId;
 }
 
-void VSQUpload::setSlotId(const QString &id)
-{
+void
+VSQUpload::setSlotId(const QString &id) {
     m_slotId = id;
 }
 
-DataSize VSQUpload::fileSize() const
-{
+DataSize
+VSQUpload::fileSize() const {
     return QFileInfo(filePath()).size();
 }

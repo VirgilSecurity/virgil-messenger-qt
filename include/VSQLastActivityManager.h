@@ -41,36 +41,49 @@
 
 class VSQSettings;
 
-class VSQLastActivityManager : public QXmppClientExtension
-{
+class VSQLastActivityManager : public QXmppClientExtension {
     Q_OBJECT
 
 public:
     VSQLastActivityManager(VSQSettings *settings, QObject *parent);
     ~VSQLastActivityManager() override;
 
-    void setCurrentJid(const QString &jid);
-    void setEnabled(bool enabled);
+    void
+    setCurrentJid(const QString &jid);
+    void
+    setEnabled(bool enabled);
 
-    QStringList discoveryFeatures() const override;
-    bool handleStanza(const QDomElement &element) override;
+    QStringList
+    discoveryFeatures() const override;
+    bool
+    handleStanza(const QDomElement &element) override;
 
 signals:
-    void lastActivityDetected(const Seconds &seconds);
-    void lastActivityMissing(const QString &reason);
-    void lastActivityTextChanged(const QString &text);
-    void errorOccured(const QString &errorText);
+    void
+    lastActivityDetected(const Seconds &seconds);
+    void
+    lastActivityMissing(const QString &reason);
+    void
+    lastActivityTextChanged(const QString &text);
+    void
+    errorOccured(const QString &errorText);
 
 private:
-    void timerEvent(QTimerEvent *) override;
+    void
+    timerEvent(QTimerEvent *) override;
 
-    QString requestInfo();
-    bool canStart() const;
+    QString
+    requestInfo();
+    bool
+    canStart() const;
 
-    void startUpdates(bool reset);
-    void stopUpdates(bool reset);
+    void
+    startUpdates(bool reset);
+    void
+    stopUpdates(bool reset);
 
-    void onErrorOccured(const QString &errorText);
+    void
+    onErrorOccured(const QString &errorText);
 
     VSQSettings *m_settings;
     bool m_enabled = true;

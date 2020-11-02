@@ -39,57 +39,73 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
+#include <KeyboardEventFilter.h>
+#include <Validator.h>
 #include <VSQCrashReporter.h>
 #include <VSQMessenger.h>
 #include <VSQSettings.h>
 #include <macos/VSQMacos.h>
+#include <states/ApplicationStateManager.h>
 
 class QNetworkAccessManager;
 
 class VSQLogging;
 
-class VSQApplication : public QObject
-{
+using namespace VSQ;
+
+class VSQApplication : public QObject {
     Q_OBJECT
+    Q_PROPERTY(ApplicationStateManager *stateManager READ stateManager CONSTANT)
     Q_PROPERTY(QString organizationDisplayName READ organizationDisplayName CONSTANT)
     Q_PROPERTY(QString applicationDisplayName READ applicationDisplayName CONSTANT)
+    Q_PROPERTY(KeyboardEventFilter *keyboardEventFilter MEMBER m_keyboardEventFilter CONSTANT)
+    Q_PROPERTY(Validator *validator MEMBER m_validator CONSTANT)
 
 public:
     VSQApplication();
     virtual ~VSQApplication() = default;
 
-    static void initialize();
+    static void
+    initialize();
 
-    int run(const QString &basePath, VSQLogging *logging);
+    int
+    run(const QString &basePath, VSQLogging *logging);
 
     Q_INVOKABLE
-    void reloadQml();
+    void
+    reloadQml();
 
     Q_INVOKABLE
-    void checkUpdates();
+    void
+    checkUpdates();
 
     Q_INVOKABLE QString
     currentVersion() const;
 
-    Q_INVOKABLE void
-    sendReport();
-
     // Names
 
-    QString organizationDisplayName() const;
-    QString applicationDisplayName() const;
+    QString
+    organizationDisplayName() const;
+    QString
+    applicationDisplayName() const;
 
 private slots:
     void
     onApplicationStateChanged(Qt::ApplicationState state);
 
 private:
+    ApplicationStateManager *
+    stateManager();
+
     static const QString kVersion;
     VSQSettings m_settings;
     QNetworkAccessManager *m_networkAccessManager;
     VSQCrashReporter m_crashReporter;
     QQmlApplicationEngine m_engine;
+    Validator *m_validator;
     VSQMessenger m_messenger;
+    KeyboardEventFilter *m_keyboardEventFilter;
+    ApplicationStateManager m_applicationStateManager;
 };
 
 #endif // VSQApplication

@@ -35,13 +35,12 @@
 #include "VSQClipboardProxy.h"
 #include <QClipboard>
 
-VSQClipboardProxy::VSQClipboardProxy(QClipboard* c) : clipboard(c)
-{
+VSQClipboardProxy::VSQClipboardProxy(QClipboard *c) : clipboard(c) {
     connect(c, &QClipboard::dataChanged, this, &VSQClipboardProxy::textChanged);
 }
 
-QString VSQClipboardProxy::text() const
-{
+QString
+VSQClipboardProxy::text() const {
     return clipboard->text();
 }
 

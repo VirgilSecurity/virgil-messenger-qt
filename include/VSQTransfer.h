@@ -45,37 +45,50 @@ class QNetworkAccessManager;
 
 Q_DECLARE_LOGGING_CATEGORY(lcTransferManager);
 
-class VSQTransfer : public QObject
-{
+class VSQTransfer : public QObject {
     Q_OBJECT
 
 public:
     VSQTransfer(QNetworkAccessManager *networkAccessManager, const QString &id, QObject *parent);
     virtual ~VSQTransfer();
 
-    QString id() const;
-    bool isRunning() const;
-    bool isFailed() const;
+    QString
+    id() const;
+    bool
+    isRunning() const;
+    bool
+    isFailed() const;
 
-    virtual void start();
-    virtual void abort();
+    virtual void
+    start();
+    virtual void
+    abort();
 
-    void setStatus(const Attachment::Status status);
+    void
+    setStatus(const Attachment::Status status);
 
 signals:
-    void progressChanged(const DataSize bytesReceived, const DataSize bytesTotal);
-    void statusChanged(const Enums::AttachmentStatus status);
-    void ended(bool failed);
-    void connectionChanged();
+    void
+    progressChanged(const DataSize bytesReceived, const DataSize bytesTotal);
+    void
+    statusChanged(const Enums::AttachmentStatus status);
+    void
+    ended(bool failed);
+    void
+    connectionChanged();
 
 protected:
-    QList<QMetaObject::Connection> connectReply(QNetworkReply *reply, QMutex *guard);
+    QList<QMetaObject::Connection>
+    connectReply(QNetworkReply *reply, QMutex *guard);
 
-    QNetworkAccessManager *networkAccessManager();
-    QFile *createFileHandle(const QString &filePath);
+    QNetworkAccessManager *
+    networkAccessManager();
+    QFile *
+    createFileHandle(const QString &filePath);
 
 private:
-    void closeFileHandle();
+    void
+    closeFileHandle();
 
     QNetworkAccessManager *m_networkAccessManager;
     QString m_id;
@@ -86,4 +99,3 @@ private:
 };
 
 #endif // VSQ_TRANSFER_H
-

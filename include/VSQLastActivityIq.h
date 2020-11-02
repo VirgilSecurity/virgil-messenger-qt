@@ -41,24 +41,30 @@
 
 Q_DECLARE_LOGGING_CATEGORY(lcLastActivity)
 
-class VSQLastActivityIq : public QXmppIq
-{
+class VSQLastActivityIq : public QXmppIq {
 public:
     VSQLastActivityIq() = default;
     explicit VSQLastActivityIq(bool debug);
     ~VSQLastActivityIq() = default;
 
-    bool isValid() const;
-    Seconds seconds() const;
+    bool
+    isValid() const;
+    Seconds
+    seconds() const;
 
-    bool needSubscription() const;
+    bool
+    needSubscription() const;
 
-    static bool isLastActivityId(const QDomElement &element);
-    static QStringList discoveryFeatures();
+    static bool
+    isLastActivityId(const QDomElement &element);
+    static QStringList
+    discoveryFeatures();
 
 protected:
-    void parseElementFromChild(const QDomElement &element) override;
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
+    void
+    parseElementFromChild(const QDomElement &element) override;
+    void
+    toXmlElementFromChild(QXmlStreamWriter *writer) const override;
 
 private:
     bool m_debug = true;

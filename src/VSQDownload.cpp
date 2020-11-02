@@ -39,16 +39,16 @@
 
 #include "VSQUtils.h"
 
-VSQDownload::VSQDownload(QNetworkAccessManager *networkAccessManager, const QString &id,
-                         const QUrl &remoteUrl, const QString &filePath, QObject *parent)
-    : VSQTransfer(networkAccessManager, id, parent)
-    , m_remoteUrl(remoteUrl)
-    , m_filePath(filePath)
-{}
+VSQDownload::VSQDownload(QNetworkAccessManager *networkAccessManager,
+                         const QString &id,
+                         const QUrl &remoteUrl,
+                         const QString &filePath,
+                         QObject *parent)
+    : VSQTransfer(networkAccessManager, id, parent), m_remoteUrl(remoteUrl), m_filePath(filePath) {
+}
 
-VSQDownload::~VSQDownload()
-{
-    for (auto &con: m_connections) {
+VSQDownload::~VSQDownload() {
+    for (auto &con : m_connections) {
         QObject::disconnect(con);
     }
     QMutexLocker locker(&m_guard);
@@ -57,8 +57,8 @@ VSQDownload::~VSQDownload()
 #endif
 }
 
-void VSQDownload::start()
-{
+void
+VSQDownload::start() {
     if (isRunning()) {
         qCWarning(lcTransferManager) << "Cannot start again a running download";
         return;
@@ -82,7 +82,7 @@ void VSQDownload::start()
     });
     m_connections << connect(reply, &QNetworkReply::readyRead, [=]() {
         const auto bytes = reply->readAll();
-        //qCDebug(lcTransferManager()) << "Wrote bytes:" << bytes.size();
+        // qCDebug(lcTransferManager()) << "Wrote bytes:" << bytes.size();
         file->write(bytes);
         file->flush();
     });

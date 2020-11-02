@@ -38,16 +38,19 @@
 #include "VSQTransfer.h"
 #include <QMutex>
 
-class VSQDownload : public VSQTransfer
-{
+class VSQDownload : public VSQTransfer {
     Q_OBJECT
 
 public:
-    VSQDownload(QNetworkAccessManager *networkAccessManager, const QString &id,
-                const QUrl &remoteUrl, const QString &filePath, QObject *parent);
+    VSQDownload(QNetworkAccessManager *networkAccessManager,
+                const QString &id,
+                const QUrl &remoteUrl,
+                const QString &filePath,
+                QObject *parent);
     ~VSQDownload() override;
 
-    void start() override;
+    void
+    start() override;
 
 private:
     QUrl m_remoteUrl;

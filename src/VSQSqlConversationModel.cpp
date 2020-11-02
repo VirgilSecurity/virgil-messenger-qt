@@ -49,38 +49,38 @@ Q_DECLARE_METATYPE(StMessage::Status)
 void
 VSQSqlConversationModel::_createTable() {
     QSqlQuery query;
-    if (!query.exec(
-        QString("CREATE TABLE IF NOT EXISTS %1 ("
-        "'author' TEXT NOT NULL,"
-        "'recipient' TEXT NOT NULL,"
-        "'timestamp' TEXT NOT NULL,"
-        "'message' TEXT NOT NULL,"
-        "'status' int NOT NULL,"
-        "'message_id' TEXT NOT NULL,"
-        ""
-        "attachment_id TEXT,"
-        "attachment_bytes_total INTEGER,"
-        "attachment_type INTEGER,"
-        "attachment_file_path TEXT,"
-        "attachment_file_name TEXT,"
-        "attachment_remote_url TEXT,"
-        "attachment_thumbnail_path TEXT,"
-        "attachment_thumbnail_width INTEGER,"
-        "attachment_thumbnail_height INTEGER,"
-        "attachment_remote_thumbnail_url TEXT,"
-        "attachment_status INT,"
-        ""
-        "FOREIGN KEY('author') REFERENCES %2 ( name ),"
-        "FOREIGN KEY('recipient') REFERENCES %3 ( name )"
-        ")").arg(_tableName())
-            .arg(_contactsTableName())
-            .arg(_contactsTableName()))) {
+    if (!query.exec(QString("CREATE TABLE IF NOT EXISTS %1 ("
+                            "'author' TEXT NOT NULL,"
+                            "'recipient' TEXT NOT NULL,"
+                            "'timestamp' TEXT NOT NULL,"
+                            "'message' TEXT NOT NULL,"
+                            "'status' int NOT NULL,"
+                            "'message_id' TEXT NOT NULL,"
+                            ""
+                            "attachment_id TEXT,"
+                            "attachment_bytes_total INTEGER,"
+                            "attachment_type INTEGER,"
+                            "attachment_file_path TEXT,"
+                            "attachment_file_name TEXT,"
+                            "attachment_remote_url TEXT,"
+                            "attachment_thumbnail_path TEXT,"
+                            "attachment_thumbnail_width INTEGER,"
+                            "attachment_thumbnail_height INTEGER,"
+                            "attachment_remote_thumbnail_url TEXT,"
+                            "attachment_status INT,"
+                            ""
+                            "FOREIGN KEY('author') REFERENCES %2 ( name ),"
+                            "FOREIGN KEY('recipient') REFERENCES %3 ( name )"
+                            ")")
+                            .arg(_tableName())
+                            .arg(_contactsTableName())
+                            .arg(_contactsTableName()))) {
         qFatal("Failed to query database: %s", qPrintable(query.lastError().text()));
     }
 
     QSqlQuery indexQuery;
     if (!indexQuery.exec(
-        QString("CREATE UNIQUE INDEX IF NOT EXISTS idx_%1_message_id ON %1 (message_id);").arg(_tableName()))) {
+                QString("CREATE UNIQUE INDEX IF NOT EXISTS idx_%1_message_id ON %1 (message_id);").arg(_tableName()))) {
         qFatal("Failed to query database: %s", qPrintable(indexQuery.lastError().text()));
     }
 }
@@ -100,21 +100,47 @@ VSQSqlConversationModel::_update() {
 }
 
 /******************************************************************************/
-VSQSqlConversationModel::VSQSqlConversationModel(QObject *parent) :
-    QSqlTableModel(parent) {
-
+VSQSqlConversationModel::VSQSqlConversationModel(Validator *validator, QObject *parent)
+    : QSqlTableModel(parent), m_validator(validator) {
     qRegisterMetaType<StMessage::Status>("StMessage::Status");
 
     connect(this, &VSQSqlConversationModel::createMessage, this, &VSQSqlConversationModel::onCreateMessage);
     connect(this, &VSQSqlConversationModel::receiveMessage, this, &VSQSqlConversationModel::onReceiveMessage);
     connect(this, &VSQSqlConversationModel::setMessageStatus, this, &VSQSqlConversationModel::onSetMessageStatus);
     connect(this, &VSQSqlConversationModel::setAttachmentStatus, this, &VSQSqlConversationModel::onSetAttachmentStatus);
-    connect(this, &VSQSqlConversationModel::setAttachmentFilePath, this, &VSQSqlConversationModel::onSetAttachmentFilePath);
-    connect(this, &VSQSqlConversationModel::setAttachmentProgress, this, &VSQSqlConversationModel::onSetAttachmentProgress);
-    connect(this, &VSQSqlConversationModel::setAttachmentThumbnailPath, this, &VSQSqlConversationModel::onSetAttachmentThumbnailPath);
-    connect(this, &VSQSqlConversationModel::setAttachmentRemoteUrl, this, &VSQSqlConversationModel::onSetAttachmentRemoteUrl);
-    connect(this, &VSQSqlConversationModel::setAttachmentThumbnailRemoteUrl, this, &VSQSqlConversationModel::onSetAttachmentThumbnailRemoteUrl);
-    connect(this, &VSQSqlConversationModel::setAttachmentBytesTotal, this, &VSQSqlConversationModel::onSetAttachmentBytesTotal);
+    connect(this,
+            &VSQSqlConversationModel::setAttachmentFilePath,
+            this,
+            &VSQSqlConversationModel::onSetAttachmentFilePath);
+    connect(this,
+            &VSQSqlConversationModel::setAttachmentProgress,
+            this,
+            &VSQSqlConversationModel::onSetAttachmentProgress);
+    connect(this,
+            &VSQSqlConversationModel::setAttachmentThumbnailPath,
+            this,
+            &VSQSqlConversationModel::onSetAttachmentThumbnailPath);
+    connect(this,
+            &VSQSqlConversationModel::setAttachmentRemoteUrl,
+            this,
+            &VSQSqlConversationModel::onSetAttachmentRemoteUrl);
+    connect(this,
+            &VSQSqlConversationModel::setAttachmentThumbnailRemoteUrl,
+            this,
+            &VSQSqlConversationModel::onSetAttachmentThumbnailRemoteUrl);
+    connect(this,
+            &VSQSqlConversationModel::setAttachmentBytesTotal,
+            this,
+            &VSQSqlConversationModel::onSetAttachmentBytesTotal);
+
+    connect(this, &VSQSqlConversationModel::modelReset, this, []() {
+        static int reloadCounter = 0;
+        qWarning() << "Full model reset" << ++reloadCounter;
+    });
+
+    m_selectTimer.setSingleShot(true);
+    m_selectTimer.setInterval(1000);
+    connect(&m_selectTimer, &QTimer::timeout, this, &VSQSqlConversationModel::performSelect);
 }
 
 /******************************************************************************/
@@ -133,13 +159,12 @@ VSQSqlConversationModel::setRecipient(const QString &recipient) {
     // TODO: Prevent SQL injection !!!
     m_recipient = recipient;
 
-    const QString filterString = QString::fromLatin1(
-        "(recipient = '%1' AND author = '%2') OR (recipient = '%2' AND author='%1')").arg(m_recipient, user());
+    const QString filterString =
+            QString::fromLatin1("(recipient = '%1' AND author = '%2') OR (recipient = '%2' AND author='%1')")
+                    .arg(m_recipient, user());
 
     setSort(2, Qt::AscendingOrder);
     setFilter(filterString);
-
-        // select();
 
     emit recipientChanged();
 }
@@ -149,7 +174,12 @@ QVariant
 VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
     if (role < Qt::UserRole) {
         return QSqlTableModel::data(index, role);
-   }
+    }
+
+    if (role == AttachmentIdRole) {
+        static int reloadCounter = 0;
+        qDebug() << "Re-loading of message" << ++reloadCounter << "model row" << index.row();
+    }
 
     const QSqlRecord currRecord = record(index.row());
     const int authorColumn = AuthorRole - Qt::UserRole;
@@ -191,7 +221,8 @@ VSQSqlConversationModel::data(const QModelIndex &index, int role) const {
         const int statusColumn = StatusRole - Qt::UserRole;
         const QVariant status = currRecord.value(statusColumn);
         const QSqlRecord nextRecord = record(index.row() + 1);
-        if (currRecord.value(authorColumn) == nextRecord.value(authorColumn) && status == nextRecord.value(statusColumn)) {
+        if (currRecord.value(authorColumn) == nextRecord.value(authorColumn) &&
+            status == nextRecord.value(statusColumn)) {
             return QString();
         }
         return status;
@@ -297,12 +328,15 @@ VSQSqlConversationModel::setUser(const QString &user) {
 }
 
 /******************************************************************************/
-void VSQSqlConversationModel::setAsRead(const QString &author) {
+void
+VSQSqlConversationModel::setAsRead(const QString &author) {
     QSqlQuery model;
     QString query;
 
     query = QString("UPDATE %1 SET status = %2 WHERE author = \"%3\"")
-            .arg(_tableName()).arg(static_cast<int>(StMessage::Status::MST_READ)).arg(author);
+                    .arg(_tableName())
+                    .arg(static_cast<int>(StMessage::Status::MST_READ))
+                    .arg(author);
 
     model.prepare(query);
 
@@ -316,7 +350,9 @@ VSQSqlConversationModel::getCountOfUnread(const QString &user) {
     QString query;
 
     query = QString("SELECT COUNT(*) AS C FROM %1 WHERE status = %2 AND recipient = \"%3\"")
-            .arg(_tableName()).arg(static_cast<int>(StMessage::Status::MST_RECEIVED)).arg(user);
+                    .arg(_tableName())
+                    .arg(static_cast<int>(StMessage::Status::MST_RECEIVED))
+                    .arg(user);
 
     model.setQuery(query);
     int c = model.record(0).value("C").toInt();
@@ -334,7 +370,9 @@ VSQSqlConversationModel::getMessageCount(const QString &user, const StMessage::S
     QString query;
 
     query = QString("SELECT COUNT(*) AS C FROM %1 WHERE status = %2 AND recipient = \"%3\"")
-            .arg(_tableName()).arg(static_cast<int>(status)).arg(user);
+                    .arg(_tableName())
+                    .arg(static_cast<int>(status))
+                    .arg(user);
 
     model.setQuery(query);
     int c = model.record(0).value("C").toInt();
@@ -350,7 +388,9 @@ VSQSqlConversationModel::getLastMessage(const QString &user) const {
     QSqlQueryModel model;
     QString query;
 
-    query = QString("SELECT * FROM %1 WHERE recipient = \"%2\" ORDER BY timestamp DESC LIMIT 1").arg(_tableName()).arg(user);
+    query = QString("SELECT * FROM %1 WHERE recipient = \"%2\" ORDER BY timestamp DESC LIMIT 1")
+                    .arg(_tableName())
+                    .arg(user);
 
     model.setQuery(query);
     QString message = model.record(0).value("message").toString();
@@ -360,11 +400,14 @@ VSQSqlConversationModel::getLastMessage(const QString &user) const {
     return message;
 }
 
-QList<StMessage> VSQSqlConversationModel::getMessages(const QString &user, const StMessage::Status status) {
+QList<StMessage>
+VSQSqlConversationModel::getMessages(const QString &user, const StMessage::Status status) {
     QSqlQueryModel model;
     QString query;
     query = QString("SELECT * FROM %1 WHERE status = %2 AND author = '%3' ORDER BY timestamp")
-            .arg(_tableName()).arg(static_cast<int>(status)).arg(user);
+                    .arg(_tableName())
+                    .arg(static_cast<int>(status))
+                    .arg(user);
     model.setQuery(query);
     int c = model.rowCount();
     qDebug() << c << user << query;
@@ -376,8 +419,8 @@ QList<StMessage> VSQSqlConversationModel::getMessages(const QString &user, const
     return messages;
 }
 
-Optional<StMessage> VSQSqlConversationModel::getMessage(const QString &messageId) const
-{
+Optional<StMessage>
+VSQSqlConversationModel::getMessage(const QString &messageId) const {
     QSqlQueryModel model;
     model.setQuery(QString("SELECT * FROM %1 WHERE message_id = \"%2\"").arg(_tableName()).arg(messageId));
     if (model.rowCount() == 0) {
@@ -386,8 +429,8 @@ Optional<StMessage> VSQSqlConversationModel::getMessage(const QString &messageId
     return getMessage(model.record(0));
 }
 
-StMessage VSQSqlConversationModel::getMessage(const QSqlRecord &record) const
-{
+StMessage
+VSQSqlConversationModel::getMessage(const QSqlRecord &record) const {
     StMessage message;
     message.messageId = record.value("message_id").toString();
     message.message = record.value("message").toString();
@@ -416,20 +459,14 @@ StMessage VSQSqlConversationModel::getMessage(const QSqlRecord &record) const
 }
 
 /******************************************************************************/
-QString VSQSqlConversationModel::escapedUserName() const
-{
-    QString name(m_user);
-    name.remove(QRegExp("[^a-z0-9_]"));
-    return name;
-}
-
-/******************************************************************************/
 QString
 VSQSqlConversationModel::getLastMessageTime(const QString &user) const {
     QSqlQueryModel model;
     QString query;
 
-    query = QString("SELECT * FROM %1 WHERE recipient = \"%2\" ORDER BY timestamp DESC LIMIT 1").arg(_tableName()).arg(user);
+    query = QString("SELECT * FROM %1 WHERE recipient = \"%2\" ORDER BY timestamp DESC LIMIT 1")
+                    .arg(_tableName())
+                    .arg(user);
 
     model.setQuery(query);
     QString timestamp = model.record(0).value("timestamp").toString();
@@ -440,18 +477,22 @@ VSQSqlConversationModel::getLastMessageTime(const QString &user) const {
 }
 
 /******************************************************************************/
-QString VSQSqlConversationModel::_tableName() const {
-    return QString("Conversations_") + escapedUserName();
+QString
+VSQSqlConversationModel::_tableName() const {
+    return QString("Conversations_") + m_validator->databaseUsername(m_user);
 }
 
 /******************************************************************************/
-QString VSQSqlConversationModel::_contactsTableName() const {
-    return QString("Contacts_") + escapedUserName();
+QString
+VSQSqlConversationModel::_contactsTableName() const {
+    return QString("Contacts_") + m_validator->databaseUsername(m_user);
 }
 
-void VSQSqlConversationModel::onCreateMessage(const QString recipient, const QString message, const QString messageId,
-                                              const OptionalAttachment attachment)
-{
+void
+VSQSqlConversationModel::onCreateMessage(const QString recipient,
+                                         const QString message,
+                                         const QString messageId,
+                                         const OptionalAttachment attachment) {
     const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
 
     QSqlRecord newRecord = record();
@@ -482,11 +523,15 @@ void VSQSqlConversationModel::onCreateMessage(const QString recipient, const QSt
     }
 
     submitAll();
-    select();
+    qDebug() << "Submitted!";
+    scheduleSelect({});
 }
 
-void VSQSqlConversationModel::onReceiveMessage(const QString messageId, const QString author, const QString message, const OptionalAttachment attachment)
-{
+void
+VSQSqlConversationModel::onReceiveMessage(const QString messageId,
+                                          const QString author,
+                                          const QString message,
+                                          const OptionalAttachment attachment) {
     const QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
 
     QSqlRecord newRecord = record();
@@ -518,91 +563,126 @@ void VSQSqlConversationModel::onReceiveMessage(const QString messageId, const QS
     }
 
     submitAll();
+    qDebug() << "Submitted!";
+    scheduleSelect({});
 }
 
-void VSQSqlConversationModel::onSetMessageStatus(const QString messageId, const StMessage::Status status)
-{
+void
+VSQSqlConversationModel::onSetMessageStatus(const QString messageId, const StMessage::Status status) {
     qDebug() << "SQL message status:" << messageId << "=>" << status;
     QString query = QString("UPDATE %1 SET status = %2 WHERE message_id = '%3'")
-            .arg(_tableName()).arg(static_cast<int>(status)).arg(messageId);
+                            .arg(_tableName())
+                            .arg(static_cast<int>(status))
+                            .arg(messageId);
     QSqlQuery().exec(query);
-    select();
+    scheduleSelect({StatusRole});
 }
 
-void VSQSqlConversationModel::onSetAttachmentStatus(const QString messageId, const Enums::AttachmentStatus status)
-{
+void
+VSQSqlConversationModel::onSetAttachmentStatus(const QString messageId, const Enums::AttachmentStatus status) {
     qDebug() << "SQL attachment status:" << messageId << "=>" << status;
     QString query = QString("UPDATE %1 SET attachment_status = %2 WHERE message_id = '%3'")
-            .arg(_tableName()).arg(static_cast<int>(status)).arg(messageId);
+                            .arg(_tableName())
+                            .arg(static_cast<int>(status))
+                            .arg(messageId);
     QSqlQuery().exec(query);
-    select();
 
     if (status == Attachment::Status::Loading) {
         m_transferMap[messageId] = TransferInfo();
-    }
-    else if (status == Attachment::Status::Failed || status == Attachment::Status::Loaded) {
+    } else if (status == Attachment::Status::Failed || status == Attachment::Status::Loaded) {
         const auto it = m_transferMap.find(messageId);
         if (it != m_transferMap.end()) {
             m_transferMap.erase(it);
         }
     }
-    emit dataChanged(index(0, 0), index(rowCount() - 1, 0), { AttachmentBytesLoadedRole, AttachmentStatusRole });
+    scheduleSelect({AttachmentBytesLoadedRole, AttachmentStatusRole});
 }
 
-void VSQSqlConversationModel::onSetAttachmentRemoteUrl(const QString messageId, const QUrl url)
-{
+void
+VSQSqlConversationModel::onSetAttachmentRemoteUrl(const QString messageId, const QUrl url) {
     QString query = QString("UPDATE %1 SET attachment_remote_url = '%2' WHERE message_id = '%3'")
-            .arg(_tableName()).arg(url.toString()).arg(messageId);
+                            .arg(_tableName())
+                            .arg(url.toString())
+                            .arg(messageId);
     QSqlQuery().exec(query);
-    select();
     qDebug() << "SQL attachment remote url:" << messageId << "=>" << url.toString();
+    scheduleSelect({AttachmentRemoteUrlRole});
 }
 
-void VSQSqlConversationModel::onSetAttachmentThumbnailRemoteUrl(const QString messageId, const QUrl url)
-{
+void
+VSQSqlConversationModel::onSetAttachmentThumbnailRemoteUrl(const QString messageId, const QUrl url) {
     QString query = QString("UPDATE %1 SET attachment_remote_thumbnail_url = '%2' WHERE message_id = '%3'")
-            .arg(_tableName()).arg(url.toString()).arg(messageId);
+                            .arg(_tableName())
+                            .arg(url.toString())
+                            .arg(messageId);
     QSqlQuery().exec(query);
-    select();
     qDebug() << "SQL attachment remote thumbnail url:" << messageId << "=>" << url.toString();
+    scheduleSelect({AttachmentRemoteThumbnailUrlRole});
 }
 
-void VSQSqlConversationModel::onSetAttachmentBytesTotal(const QString messageId, const DataSize size)
-{
+void
+VSQSqlConversationModel::onSetAttachmentBytesTotal(const QString messageId, const DataSize size) {
     QString query = QString("UPDATE %1 SET attachment_bytes_total = %2 WHERE message_id = '%3'")
-            .arg(_tableName()).arg(size).arg(messageId);
+                            .arg(_tableName())
+                            .arg(size)
+                            .arg(messageId);
     QSqlQuery().exec(query);
-    select();
     qDebug() << "SQL attachment filesize:" << messageId << "=>" << size;
+    scheduleSelect({AttachmentBytesTotalRole, AttachmentDisplaySizeRole});
 }
 
-void VSQSqlConversationModel::onSetAttachmentFilePath(const QString messageId, const QString filePath)
-{
+void
+VSQSqlConversationModel::onSetAttachmentFilePath(const QString messageId, const QString filePath) {
     QString query = QString("UPDATE %1 SET attachment_file_path = '%2' WHERE message_id = '%3'")
-            .arg(_tableName()).arg(filePath).arg(messageId);
+                            .arg(_tableName())
+                            .arg(filePath)
+                            .arg(messageId);
     QSqlQuery().exec(query);
-    select();
     qDebug() << "SQL attachment filePath:" << messageId << "=>" << filePath;
-    emit dataChanged(index(0, 0), index(rowCount() - 1, 0), { AttachmentDownloadedRole });
+    scheduleSelect({AttachmentDownloadedRole});
 }
 
-void VSQSqlConversationModel::onSetAttachmentProgress(const QString messageId, const DataSize bytesReceived, const DataSize bytesTotal)
-{
+void
+VSQSqlConversationModel::onSetAttachmentProgress(const QString messageId,
+                                                 const DataSize bytesReceived,
+                                                 const DataSize bytesTotal) {
     Q_UNUSED(bytesTotal)
-    //qCDebug(lcTransferManager) << "Transfer progress" << bytesReceived << bytesTotal << messageId;
+    // qCDebug(lcTransferManager) << "Transfer progress" << bytesReceived << bytesTotal << messageId;
     const auto it = m_transferMap.find(messageId);
     if (it != m_transferMap.end()) {
         it->second.bytesReceived = bytesReceived;
     }
-    emit dataChanged(index(0, 0), index(rowCount() - 1, 0), { AttachmentBytesLoadedRole });
+    scheduleSelect({AttachmentBytesLoadedRole});
 }
 
-void VSQSqlConversationModel::onSetAttachmentThumbnailPath(const QString messageId, const QString filePath)
-{
+void
+VSQSqlConversationModel::onSetAttachmentThumbnailPath(const QString messageId, const QString filePath) {
     QString query = QString("UPDATE %1 SET attachment_thumbnail_path = '%2' WHERE message_id = '%3'")
-            .arg(_tableName()).arg(filePath).arg(messageId);
+                            .arg(_tableName())
+                            .arg(filePath)
+                            .arg(messageId);
     QSqlQuery().exec(query);
-    select();
     qDebug() << "SQL attachment thumbnail path:" << messageId << "=>" << filePath;
-    emit dataChanged(index(0, 0), index(rowCount() - 1, 0), { AttachmentThumbnailPathRole });
+    scheduleSelect({AttachmentThumbnailPathRole});
+}
+
+void
+VSQSqlConversationModel::scheduleSelect(const QVector<int> &roles) {
+    for (auto role : roles) {
+        if (!m_selectRoles.contains(role)) {
+            m_selectRoles << role;
+        }
+    }
+    if (!m_selectTimer.isActive()) {
+        m_selectTimer.start();
+    }
+}
+
+void
+VSQSqlConversationModel::performSelect() {
+    qDebug() << "Performing of select. Roles:" << m_selectRoles;
+    m_selectTimer.stop();
+    select();
+    emit dataChanged(index(0, 0), index(0, rowCount() - 1), m_selectRoles);
+    m_selectRoles.clear();
 }

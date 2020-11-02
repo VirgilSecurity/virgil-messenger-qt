@@ -45,20 +45,27 @@ class VSQAndroid {
 public:
     VSQAndroid() = delete;
 
-    static QString caBundlePath();
+    static QString
+    caBundlePath();
 
-    static bool prepare();
+    static bool
+    prepare();
 
-    static QString certFile();
+    static QString
+    certFile();
 
-    static void hideSplashScreen();
+    static void
+    hideSplashScreen();
 
-    static QString getDisplayName(const QUrl &url);
+    static QString
+    getDisplayName(const QUrl &url);
 
-    static DataSize getFileSize(const QUrl &url);
+    static DataSize
+    getFileSize(const QUrl &url);
 
 private:
-    static int runLoggingThread();
+    static int
+    runLoggingThread();
 };
 
 #endif // VS_ANDROID

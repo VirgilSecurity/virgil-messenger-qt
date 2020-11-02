@@ -49,7 +49,8 @@ namespace android {
 
 class FirebaseListener : public firebase::messaging::Listener {
 public:
-    static FirebaseListener& instance();
+    static FirebaseListener &
+    instance();
 
     void
     init();

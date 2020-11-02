@@ -193,5 +193,8 @@ Control {
         if (Platform.isDesktop) {
             messageField.forceActiveFocus();
         }
+        else if (Platform.isIos) {
+            app.keyboardEventFilter.install(messageField)
+        }
     }
 }

@@ -38,27 +38,34 @@
 #include "VSQTransfer.h"
 #include <QMutex>
 
-class VSQUpload : public VSQTransfer
-{
+class VSQUpload : public VSQTransfer {
     Q_OBJECT
 
 public:
     VSQUpload(QNetworkAccessManager *networkAccessManager, const QString &id, const QString &filePath, QObject *parent);
     ~VSQUpload() override;
 
-    void start() override;
+    void
+    start() override;
 
-    QString filePath() const;
-    Optional<QUrl> remoteUrl();
+    QString
+    filePath() const;
+    Optional<QUrl>
+    remoteUrl();
 
-    QString slotId() const;
-    void setSlotId(const QString &id);
+    QString
+    slotId() const;
+    void
+    setSlotId(const QString &id);
 
-    DataSize fileSize() const;
+    DataSize
+    fileSize() const;
 
 signals:
-    void remoteUrlReceived(const QUrl &url);
-    void remoteUrlErrorOccured();
+    void
+    remoteUrlReceived(const QUrl &url);
+    void
+    remoteUrlErrorOccured();
 
 private:
     QString m_filePath;

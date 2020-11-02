@@ -4,12 +4,14 @@ import QtQuick.Controls 2.5
 
 Dialog {
     id: sendReportAsk
-    title: "Send report ?"
-    Label {
-           text: "Previus run crashed. Send report ?"
-    }
+    title: qsTr("Send report")
     modal: true
     anchors.centerIn: parent
     standardButtons: Dialog.Yes | StandardButton.No
+
+    Label {
+        text: qsTr("Previous run crashed. Send report?")
+    }
+
     onAccepted: crashReporter.sendLogFiles()
 }

@@ -48,7 +48,7 @@
 #include <thirdparty/optional/optional.hpp>
 
 namespace args {
-    using namespace std::placeholders;
+using namespace std::placeholders;
 }
 
 using DataSize = qint64;
@@ -57,8 +57,7 @@ Q_DECLARE_METATYPE(DataSize);
 using Seconds = quint64;
 Q_DECLARE_METATYPE(Seconds);
 
-template <class Type>
-using Optional = tl::optional<Type>;
+template <class Type> using Optional = tl::optional<Type>;
 using OptionalType = tl::nullopt_t;
 
 static constexpr OptionalType NullOptional(tl::nullopt);
@@ -69,53 +68,43 @@ Q_DECLARE_LOGGING_CATEGORY(lcDev);
 
 // Namespace for passing of enum values to QML
 namespace Enums {
-    Q_NAMESPACE
+Q_NAMESPACE
 
-    enum class AttachmentType
-    {
-        File,
-        Picture,
-        Video,
-        Audio
-    };
-    Q_ENUM_NS(AttachmentType)
+enum class AttachmentType { File, Picture, Video, Audio };
+Q_ENUM_NS(AttachmentType)
 
-    enum class AttachmentStatus
-    {
-        Created,
-        Loading,
-        Failed, // must be re-loaded
-        Loaded
-    };
-    Q_ENUM_NS(AttachmentStatus)
+enum class AttachmentStatus {
+    Created,
+    Loading,
+    Failed, // must be re-loaded
+    Loaded
+};
+Q_ENUM_NS(AttachmentStatus)
 
-    enum class MessageAuthor
-    {
-        // User is message author
-        User,
-        // Contact is message author
-        Contact
-    };
-    Q_ENUM_NS(MessageAuthor)
+enum class MessageAuthor {
+    // User is message author
+    User,
+    // Contact is message author
+    Contact
+};
+Q_ENUM_NS(MessageAuthor)
 
-    enum class MessageStatus
-    {
-        // Created by user
-        MST_CREATED,
-        // Sent by user
-        MST_SENT,
-        // Receiver by contact
-        MST_RECEIVED,
-        // Read by contact
-        MST_READ,
-        // Failed to send by user
-        MST_FAILED
-    };
-    Q_ENUM_NS(MessageStatus)
-}
+enum class MessageStatus {
+    // Created by user
+    MST_CREATED,
+    // Sent by user
+    MST_SENT,
+    // Receiver by contact
+    MST_RECEIVED,
+    // Read by contact
+    MST_READ,
+    // Failed to send by user
+    MST_FAILED
+};
+Q_ENUM_NS(MessageStatus)
+} // namespace Enums
 
-struct Attachment
-{
+struct Attachment {
     using Type = Enums::AttachmentType;
     using Status = Enums::AttachmentStatus;
 
@@ -126,11 +115,11 @@ struct Attachment
     QString displayName;
     QUrl remoteUrl; // encrypted
     // Thumbnail
-    QString thumbnailPath; // raw
+    QString thumbnailPath;   // raw
     QUrl remoteThumbnailUrl; // encrypted
     QSize thumbnailSize;
     // Status
-    DataSize bytesTotal = 0; // encrypted
+    DataSize bytesTotal = 0;  // encrypted
     DataSize bytesLoaded = 0; // encrypted
     Status status = Status::Created;
 };
@@ -139,8 +128,7 @@ Q_DECLARE_METATYPE(Attachment)
 using OptionalAttachment = Optional<Attachment>;
 Q_DECLARE_METATYPE(OptionalAttachment)
 
-struct StMessage
-{
+struct StMessage {
     using Author = Enums::MessageAuthor;
     using Status = Enums::MessageStatus;
 
@@ -152,6 +140,7 @@ struct StMessage
 };
 Q_DECLARE_METATYPE(StMessage);
 
-void registerMetaTypes();
+void
+registerMetaTypes();
 
 #endif // VSQ_COMMON_H

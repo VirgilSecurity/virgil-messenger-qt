@@ -44,10 +44,10 @@
 
 Q_DECLARE_LOGGING_CATEGORY(lcSettings)
 
-class VSQSettings : public QSettings
-{
+class VSQSettings : public QSettings {
     Q_OBJECT
-    Q_PROPERTY(QString lastSignedInUser READ lastSignedInUser WRITE setLastSignedInUser NOTIFY lastSignedInUserChanged)
+    Q_PROPERTY(QString lastSignedInUserId READ lastSignedInUserId WRITE setLastSignedInUserId NOTIFY
+                       lastSignedInUserIdChanged)
     Q_PROPERTY(QStringList usersList READ usersList WRITE setUsersList NOTIFY usersListChanged)
     Q_PROPERTY(bool devMode READ devMode CONSTANT)
     Q_PROPERTY(QRect windowGeometry READ windowGeometry WRITE setWindowGeometry NOTIFY windowGeometryChanged)
@@ -56,56 +56,85 @@ public:
     explicit VSQSettings(QObject *parent);
     ~VSQSettings();
 
-    void print();
+    void
+    print();
 
     // Users
 
-    void setLastSignedInUser(const QString &user);
-    QString lastSignedInUser() const;
+    void
+    setLastSignedInUserId(const QString &userId);
+    QString
+    lastSignedInUserId() const;
 
-    void setUsersList(const QStringList &users);
-    QStringList usersList() const;
-    void addUserToList(const QString &user);
+    void
+    setUsersList(const QStringList &users);
+    QStringList
+    usersList() const;
+    void
+    addUserToList(const QString &user);
 
-    QString userCredential(const QString &user) const;
-    void setUserCredential(const QString &user, const QString &userCredential);
+    QString
+    userCredential(const QString &user) const;
+    void
+    setUserCredential(const QString &user, const QString &userCredential);
 
     // Device id, run flags
-    QString deviceId() const;
-    bool runFlag() const;
-    void setRunFlag(bool run);
+    QString
+    deviceId() const;
+    bool
+    runFlag() const;
+    void
+    setRunFlag(bool run);
 
     // Attachments
 
-    DataSize attachmentMaxFileSize() const;
-    QDir attachmentCacheDir() const;
-    QDir thumbnailsDir() const;
-    QDir downloadsDir() const;
-    QSize thumbnailMaxSize() const;
+    DataSize
+    attachmentMaxFileSize() const;
+    QDir
+    attachmentCacheDir() const;
+    QDir
+    thumbnailsDir() const;
+    QDir
+    downloadsDir() const;
+    QSize
+    thumbnailMaxSize() const;
 
     // Dev mode
-    bool devMode() const;
+    bool
+    devMode() const;
 
     // Window
-    QRect windowGeometry() const;
-    void setWindowGeometry(const QRect &geometry);
+    QRect
+    windowGeometry() const;
+    void
+    setWindowGeometry(const QRect &geometry);
 
     // Last seen activity interval (seconds)
-    Seconds lastSeenActivityInterval() const;
+    Seconds
+    lastSeenActivityInterval() const;
 
 signals:
-    void lastSignedInUserChanged(const QString &);
-    void usersListChanged(const QStringList &);
-    void windowGeometryChanged(const QRect &); // Required by QML, not used
+    void
+    lastSignedInUserIdChanged(const QString &);
+    void
+    usersListChanged(const QStringList &);
+    void
+    windowGeometryChanged(const QRect &); // Required by QML, not used
 
 private:
-    QString makeGroupKey(const QString &group, const QString &key) const;
-    void setGroupValue(const QString &group, const QString &key, const QVariant &value);
-    QVariant groupValue(const QString &group, const QString &key, const QVariant &defaultValue = QVariant()) const;
-    void removeGroupKey(const QString &group, const QString &key);
-    void removeGroup(const QString &group);
+    QString
+    makeGroupKey(const QString &group, const QString &key) const;
+    void
+    setGroupValue(const QString &group, const QString &key, const QVariant &value);
+    QVariant
+    groupValue(const QString &group, const QString &key, const QVariant &defaultValue = QVariant()) const;
+    void
+    removeGroupKey(const QString &group, const QString &key);
+    void
+    removeGroup(const QString &group);
 
-    void createDeviceId();
+    void
+    createDeviceId();
 
     QString m_sessionId;
     QDir m_attachmentCacheDir;

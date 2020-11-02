@@ -35,6 +35,13 @@
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
 # ---------------------------------------------------------------------------
+# This little macro lets you set any XCode specific property
+# ---------------------------------------------------------------------------
+macro (set_xcode_property TARGET XCODE_PROPERTY XCODE_VALUE)
+    set_property (TARGET ${TARGET} PROPERTY XCODE_ATTRIBUTE_${XCODE_PROPERTY} ${XCODE_VALUE})
+endmacro (set_xcode_property)
+
+# ---------------------------------------------------------------------------
 # Set CMAKE_FIND_ROOT_PATH for QT cmake include directory
 # ---------------------------------------------------------------------------
 function(PREPARE_QT_SDK CMAKE_PREFIX_PATH_OUT CMAKE_FIND_ROOT_PATH_OUT QT_QMAKE_EXECUTABLE_OUT)
@@ -138,8 +145,8 @@ if(VS_PLATFORM)
     elseif(VS_PLATFORM STREQUAL "ios")
         set(QT_PREFIX_PATH "ios")
         set(CMAKE_SYSTEM_NAME "iOS")
-        set(CMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH NO)
-        set(CMAKE_IOS_INSTALL_COMBINED YES)
+#        set(CMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH NO)
+#        set(CMAKE_IOS_INSTALL_COMBINED YES)
         prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE)            
     
     # -- Windows

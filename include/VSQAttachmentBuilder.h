@@ -46,22 +46,26 @@ class QPixmap;
 
 class VSQSettings;
 
-class VSQAttachmentBuilder : public QObject
-{
+class VSQAttachmentBuilder : public QObject {
 public:
     VSQAttachmentBuilder(VSQSettings *settings, QObject *parent);
     VSQAttachmentBuilder() = default; // QML engine requires default constructor
 
     // Build encoded attachment by local url, attachment type and recipient
     // Start thumbnail/file uploads
-    OptionalAttachment build(const QUrl &localUrl, const Attachment::Type type, QString &errorText);
+    OptionalAttachment
+    build(const QUrl &localUrl, const Attachment::Type type, QString &errorText);
 
-    QString generateThumbnailFileName() const;
+    QString
+    generateThumbnailFileName() const;
 
 private:
-    QImage applyImageOrientation(const QImage &image, const QImageIOHandler::Transformations transformations) const;
-    QPixmap generateThumbnail(const QString &fileName) const;
-    void saveThumbnailFile(const QPixmap &pixmap, const QString &fileName) const;
+    QImage
+    applyImageOrientation(const QImage &image, const QImageIOHandler::Transformations transformations) const;
+    QPixmap
+    generateThumbnail(const QString &fileName) const;
+    void
+    saveThumbnailFile(const QPixmap &pixmap, const QString &fileName) const;
 
     VSQSettings *m_settings;
 };

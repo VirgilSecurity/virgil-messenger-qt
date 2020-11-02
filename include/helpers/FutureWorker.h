@@ -39,25 +39,23 @@
 
 #include "VSQMessenger.h"
 
-namespace VSQ
-{
+namespace VSQ {
 using FutureResult = VSQMessenger::EnResult;
 using Future = QFuture<FutureResult>;
 using FutureWatcher = QFutureWatcher<FutureResult>;
 
-class FutureWorker
-{
+class FutureWorker {
 public:
-    static void run(const Future &future, const std::function<void(FutureResult)> &resultHandler)
-    {
+    static void
+    run(const Future &future, const std::function<void(FutureResult)> &resultHandler) {
         auto futureWatcher = new FutureWatcher();
-        futureWatcher->setFuture(future);
         QObject::connect(futureWatcher, &FutureWatcher::finished, [=]() {
             futureWatcher->deleteLater();
             resultHandler(future.result());
         });
+        futureWatcher->setFuture(future);
     }
 };
-}
+} // namespace VSQ
 
 #endif // VSQ_FUTUREWORKER_H

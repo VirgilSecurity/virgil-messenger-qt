@@ -47,14 +47,13 @@
 
 #include <virgil/iot/messenger/messenger.h>
 
+#include "Validator.h"
 #include "VSQSqlConversationModel.h"
 #include "VSQSqlChatModel.h"
 #include "VSQCrashReporter.h"
 #include <VSQNetworkAnalyzer.h>
 #include <VSQAttachmentBuilder.h>
 #include <VSQCryptoTransferManager.h>
-
-using namespace VirgilIoTKit;
 
 class QJsonDocument;
 
@@ -63,6 +62,9 @@ class VSQDiscoveryManager;
 class VSQLastActivityManager;
 
 Q_DECLARE_LOGGING_CATEGORY(lcMessenger)
+
+using namespace VirgilIoTKit;
+using namespace VSQ;
 
 class VSQMessenger : public QObject {
 
@@ -75,9 +77,7 @@ class VSQMessenger : public QObject {
     Q_ENUMS(EnStatus)
 
 public:
-
-    enum EnResult
-    {
+    enum EnResult {
         MRES_OK,
         MRES_ERR_NO_CRED,
         MRES_ERR_SIGNIN,
@@ -88,84 +88,110 @@ public:
         MRES_ERR_ATTACHMENT
     };
 
-    enum EnStatus
-    {
-        MSTATUS_ONLINE,
-        MSTATUS_UNAVAILABLE
-    };
+    enum EnStatus { MSTATUS_ONLINE, MSTATUS_UNAVAILABLE };
 
     Q_PROPERTY(QString currentUser READ currentUser NOTIFY fireCurrentUserChanged)
 
-    VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSettings *settings);
+    VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSettings *settings, Validator *validator);
     VSQMessenger() = default; // QML engine requires default constructor
     virtual ~VSQMessenger();
 
-    Q_INVOKABLE QString currentUser() const;
-    Q_INVOKABLE QString currentRecipient() const;
+    Q_INVOKABLE QString
+    currentUser() const;
+    Q_INVOKABLE QString
+    currentRecipient() const;
 
-    VSQSqlConversationModel &modelConversations();
-    VSQSqlChatModel &getChatModel();
+    VSQSqlConversationModel &
+    modelConversations();
+    VSQSqlChatModel &
+    getChatModel();
+    VSQLastActivityManager *
+    lastActivityManager();
 
-    Optional<StMessage> decryptMessage(const QString &sender, const QString &message);
+    Optional<StMessage>
+    decryptMessage(const QString &sender, const QString &message);
 
-    void setApplicationActive(bool active);
+    void
+    setApplicationActive(bool active);
 
     // New methods
 
-    Q_INVOKABLE void signIn(const QString &userId);
+    void
+    signIn(const QString &userId);
+    void
+    signOut();
+    void
+    signUp(const QString &userId);
+    void
+    addContact(const QString &userId);
+    void
+    backupKey(const QString &password, const QString &confirmedPassword);
+    void
+    downloadKey(const QString &userId, const QString &password);
+
+    void
+    sendMessage(const QString &to,
+                const QString &message,
+                const QVariant &attachmentUrl,
+                const Enums::AttachmentType attachmentType);
 
 public slots:
-
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     signInAsync(QString user);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    backupUserKey(QString password);
+    backupKeyAsync(QString password);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    signInWithBackupKey(QString username, QString password);
+    signInWithBackupKeyAsync(QString username, QString password);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    signUp(QString user);
+    signUpAsync(QString user);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    logout();
+    logoutAsync();
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
     disconnect();
-
-    Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    deleteUser(QString user);
 
     Q_INVOKABLE void
     checkState();
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    addContact(QString contact);
+    addContactAsync(QString contact);
 
     Q_INVOKABLE QFuture<VSQMessenger::EnResult>
-    sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
+    sendMessageAsync(const QString &to,
+                     const QString &message,
+                     const QVariant &attachmentUrl,
+                     const Enums::AttachmentType attachmentType);
 
     QFuture<VSQMessenger::EnResult>
     createSendMessage(const QString messageId, const QString to, const QString text);
 
     QFuture<VSQMessenger::EnResult>
-    createSendAttachment(const QString messageId, const QString to, const QUrl url, const Enums::AttachmentType attachmentType);
+    createSendAttachment(const QString messageId,
+                         const QString to,
+                         const QUrl url,
+                         const Enums::AttachmentType attachmentType);
 
     Q_INVOKABLE void
     setStatus(VSQMessenger::EnStatus status);
 
-    void setCrashReporter(VSQCrashReporter *crashReporter);
+    void
+    setCrashReporter(VSQCrashReporter *crashReporter);
 
-    Q_INVOKABLE void setCurrentRecipient(const QString &recipient);
+    void
+    setCurrentRecipient(const QString &recipient);
 
-    Q_INVOKABLE void saveAttachmentAs(const QString &messageId, const QVariant &fileUrl);
+    void
+    saveAttachmentAs(const QString &messageId, const QVariant &fileUrl);
 
-    Q_INVOKABLE void downloadAttachment(const QString &messageId);
+    void
+    downloadAttachment(const QString &messageId);
 
-    Q_INVOKABLE void openAttachment(const QString &messageId);
-
-    Q_INVOKABLE void hideSplashScreen();
+    void
+    openAttachment(const QString &messageId);
 
 signals:
     void
@@ -195,54 +221,98 @@ signals:
     void
     fireCurrentUserChanged();
 
-    void openPreviewRequested(const QUrl &url);
-    void informationRequested(const QString &message);
-    void lastActivityTextChanged(const QString &text);
+    void
+    openPreviewRequested(const QUrl &url);
+    void
+    informationRequested(const QString &message);
 
-    void downloadThumbnail(const StMessage message, const QString sender, QPrivateSignal);
+    void
+    downloadThumbnail(const StMessage message, const QString sender, QPrivateSignal);
 
     // New signals
 
-    void signInUserEmpty();
-    void signInStarted(const QString &userId);
-    void signedIn(const QString &userId);
-    void signInErrorOccured(const QString &errorText);
+    void
+    signedIn(const QString &userId);
+    void
+    signInErrorOccured(const QString &errorText);
+    void
+    signedUp(const QString &userId);
+    void
+    signUpErrorOccured(const QString &errorText);
+    void
+    signedOut();
+
+    void
+    contactAdded(const QString &userId);
+    void
+    addContactErrorOccured(const QString &errorText);
+
+    void
+    keyBackuped(const QString &userId);
+    void
+    backupKeyFailed(const QString &errorText);
+    void
+    keyDownloaded(const QString &userId);
+    void
+    downloadKeyFailed(const QString &errorText);
+
+    void
+    messageSent();
 
 private slots:
-    void onConnected();
-    void onMessageDelivered(const QString&, const QString&);
-    void onDisconnected();
+    void
+    onConnected();
+    void
+    onMessageDelivered(const QString &, const QString &);
+    void
+    onDisconnected();
     void onError(QXmppClient::Error);
-    void onMessageReceived(const QXmppMessage &message);
-    void onPresenceReceived(const QXmppPresence &presence);
-    void onIqReceived(const QXmppIq &iq);
-    void onSslErrors(const QList<QSslError> &errors);
-    void onStateChanged(QXmppClient::State state);
-    void onProcessNetworkState(bool online);
-    void onReadyToUpload();
-    void onAddContactToDB(QString contact);
-    void onDownloadThumbnail(const StMessage message, const QString sender);
-    void onAttachmentStatusChanged(const QString &uploadId, const Enums::AttachmentStatus status);
-    void onAttachmentProgressChanged(const QString &uploadId, const DataSize bytesReceived, const DataSize bytesTotal);
-    void onAttachmentDecrypted(const QString &uploadId, const QString &filePath);
+    void
+    onMessageReceived(const QXmppMessage &message);
+    void
+    onPresenceReceived(const QXmppPresence &presence);
+    void
+    onIqReceived(const QXmppIq &iq);
+    void
+    onSslErrors(const QList<QSslError> &errors);
+    void
+    onStateChanged(QXmppClient::State state);
+    void
+    onProcessNetworkState(bool online);
+    void
+    onReadyToUpload();
+    void
+    onAddContactToDB(QString contact);
+    void
+    onDownloadThumbnail(const StMessage message, const QString sender);
+    void
+    onAttachmentStatusChanged(const QString &uploadId, const Enums::AttachmentStatus status);
+    void
+    onAttachmentProgressChanged(const QString &uploadId, const DataSize bytesReceived, const DataSize bytesTotal);
+    void
+    onAttachmentDecrypted(const QString &uploadId, const QString &filePath);
 
-    void registerForNotifications();
-    void deregisterFromNotifications();
-    void onPushNotificationTokenUpdate();
+    void
+    registerForNotifications();
+    void
+    deregisterFromNotifications();
+    void
+    onPushNotificationTokenUpdate();
 
 private:
     QXmppClient m_xmpp;
-    QXmppMessageReceiptManager* m_xmppReceiptManager;
-    QXmppCarbonManager* m_xmppCarbonManager;
-    VSQDiscoveryManager* m_discoveryManager;
+    QXmppMessageReceiptManager *m_xmppReceiptManager;
+    QXmppCarbonManager *m_xmppCarbonManager;
+    VSQDiscoveryManager *m_discoveryManager;
     VSQContactManager *m_contactManager;
-    VSQLastActivityManager* m_lastActivityManager;
+    VSQLastActivityManager *m_lastActivityManager;
 
     VSQSqlConversationModel *m_sqlConversations;
     VSQSqlChatModel *m_sqlChatModel;
     VSQCrashReporter *m_crashReporter;
     VSQNetworkAnalyzer m_networkAnalyzer;
     VSQSettings *m_settings;
+    Validator *m_validator;
     VSQCryptoTransferManager *m_transferManager;
     VSQAttachmentBuilder m_attachmentBuilder;
 
@@ -300,20 +370,30 @@ private:
     QString
     _caBundleFile();
 
-    void _sendFailedMessages();
+    void
+    _sendFailedMessages();
 
-    QString createJson(const QString &message, const OptionalAttachment &attachment);
+    QString
+    createJson(const QString &message, const OptionalAttachment &attachment);
 
-    StMessage parseJson(const QJsonDocument &json);
+    StMessage
+    parseJson(const QJsonDocument &json);
 
-    OptionalAttachment uploadAttachment(const QString messageId, const QString recipient, const Attachment &attachment);
-    void setFailedAttachmentStatus(const QString &messageId);
+    OptionalAttachment
+    uploadAttachment(const QString messageId, const QString recipient, const Attachment &attachment);
+    void
+    setFailedAttachmentStatus(const QString &messageId);
 
-    VSQMessenger::EnResult _sendMessageInternal(bool createNew, const QString &messageId, const QString &to, const QString &message,
-                                                const OptionalAttachment &attachment);
+    VSQMessenger::EnResult
+    _sendMessageInternal(bool createNew,
+                         const QString &messageId,
+                         const QString &to,
+                         const QString &message,
+                         const OptionalAttachment &attachment);
 
-    using Function = std::function<void (const StMessage &message)>;
-    void downloadAndProcess(StMessage message, const Function &func);
+    using Function = std::function<void(const StMessage &message)>;
+    void
+    downloadAndProcess(StMessage message, const Function &func);
 };
 
 Q_DECLARE_METATYPE(QXmppClient::Error)

@@ -68,10 +68,12 @@ public:
     refresh();
 
 signals:
-    void updateLastMessage(QString chatId, QString message);
+    void
+    updateLastMessage(QString chatId, QString message);
 
 private:
-    void onUpdateLastMessage(QString chatId, QString message);
+    void
+    onUpdateLastMessage(QString chatId, QString message);
 
     QString m_userId;
     QString m_tableName;

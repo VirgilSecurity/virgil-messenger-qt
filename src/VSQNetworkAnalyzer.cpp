@@ -243,13 +243,14 @@ VSQNetworkAnalyzer::onAnalyzeNetwork() {
 void
 VSQNetworkAnalyzer::printNetworkInterface(const QNetworkInterface &interface) const {
 #if DEBUG_NETWORK
-    qCDebug(lcNetwork).noquote().nospace() << QString("\tIndex: %1, HW address: %2, name: %3, valid: %4, type: %5, flags: %6")
-                                            .arg(interface.index())
-                                            .arg(interface.hardwareAddress())
-                                            .arg(interface.humanReadableName())
-                                            .arg(interface.isValid())
-                                            .arg(interface.type())
-                                            .arg(interface.flags());
+    qCDebug(lcNetwork).noquote().nospace()
+            << QString("\tIndex: %1, HW address: %2, name: %3, valid: %4, type: %5, flags: %6")
+                       .arg(interface.index())
+                       .arg(interface.hardwareAddress())
+                       .arg(interface.humanReadableName())
+                       .arg(interface.isValid())
+                       .arg(interface.type())
+                       .arg(interface.flags());
 #else
     Q_UNUSED(interface)
 #endif
@@ -273,14 +274,15 @@ VSQNetworkAnalyzer::printSession(const QNetworkSession &session) const {
 #if DEBUG_NETWORK
     bool sessionConnected = session.state() == QNetworkSession::Connected ? true : false;
 
-    qCDebug(lcNetwork).noquote().nospace() << QString("NetworkAnalyzer: Network session, identifier: %1 (%2, %3), activeTime: "
-                                            "%4, error: %5, state: %6")
-                                            .arg(session.sessionProperty("ActiveConfiguration").toString())
-                                            .arg((session.isOpen() ? "Opened" : "Closed"))
-                                            .arg((sessionConnected ? "Connected" : "Not connected"))
-                                            .arg(session.activeTime())
-                                            .arg(session.errorString())
-                                            .arg(session.state());
+    qCDebug(lcNetwork).noquote().nospace()
+            << QString("NetworkAnalyzer: Network session, identifier: %1 (%2, %3), activeTime: "
+                       "%4, error: %5, state: %6")
+                       .arg(session.sessionProperty("ActiveConfiguration").toString())
+                       .arg((session.isOpen() ? "Opened" : "Closed"))
+                       .arg((sessionConnected ? "Connected" : "Not connected"))
+                       .arg(session.activeTime())
+                       .arg(session.errorString())
+                       .arg(session.state());
 #else
     Q_UNUSED(session)
 #endif

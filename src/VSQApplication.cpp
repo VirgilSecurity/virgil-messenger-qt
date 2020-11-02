@@ -61,23 +61,23 @@ const QString VSQApplication::kVersion = "unknown";
 
 /******************************************************************************/
 VSQApplication::VSQApplication()
-    : m_settings(this)
-    , m_networkAccessManager(new QNetworkAccessManager(this))
-    , m_crashReporter(&m_settings, m_networkAccessManager, this)
-    , m_engine()
-    , m_messenger(m_networkAccessManager, &m_settings)
-{
+    : m_settings(this), m_networkAccessManager(new QNetworkAccessManager(this)),
+      m_crashReporter(&m_settings, m_networkAccessManager, this), m_engine(), m_validator(new Validator(this)),
+      m_messenger(m_networkAccessManager, &m_settings, m_validator),
+      m_keyboardEventFilter(new KeyboardEventFilter(this)),
+      m_applicationStateManager(&m_messenger, m_validator, &m_settings, this) {
     m_settings.print();
     m_networkAccessManager->setAutoDeleteReplies(true);
 #if (MACOS)
     VSQMacos::instance().startUpdatesTimer();
 #endif
     registerMetaTypes();
+    qRegisterMetaType<KeyboardEventFilter *>("KeyboardEventFilter*");
 }
 
 /******************************************************************************/
-void VSQApplication::initialize()
-{
+void
+VSQApplication::initialize() {
     // Attributes
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
@@ -127,7 +127,9 @@ VSQApplication::run(const QString &basePath, VSQLogging *logging) {
     QGuiApplication::setFont(fon);
 
     connect(qApp, &QGuiApplication::applicationStateChanged, this, &VSQApplication::onApplicationStateChanged);
-    connect(qApp, &QGuiApplication::aboutToQuit, std::bind(&VSQMessenger::setStatus, &m_messenger, VSQMessenger::EnStatus::MSTATUS_UNAVAILABLE));
+    connect(qApp,
+            &QGuiApplication::aboutToQuit,
+            std::bind(&VSQMessenger::setStatus, &m_messenger, VSQMessenger::EnStatus::MSTATUS_UNAVAILABLE));
 
     reloadQml();
 
@@ -139,7 +141,8 @@ VSQApplication::run(const QString &basePath, VSQLogging *logging) {
 }
 
 /******************************************************************************/
-void VSQApplication::reloadQml() {
+void
+VSQApplication::reloadQml() {
     const QUrl url(QStringLiteral("main.qml"));
     m_engine.clearComponentCache();
     m_engine.load(url);
@@ -147,15 +150,16 @@ void VSQApplication::reloadQml() {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_WATCHOS)
     {
         QObject *rootObject(m_engine.rootObjects().first());
-// ERROR NULL POINTER !!!
-//        rootObject->setProperty("width", 800);
-//        rootObject->setProperty("height", 640);
+        // ERROR NULL POINTER !!!
+        //        rootObject->setProperty("width", 800);
+        //        rootObject->setProperty("height", 640);
     }
 #endif
 }
 
 /******************************************************************************/
-void VSQApplication::checkUpdates() {
+void
+VSQApplication::checkUpdates() {
 #if (MACOS)
     VSQMacos::instance().checkUpdates();
 #endif
@@ -167,19 +171,13 @@ VSQApplication::currentVersion() const {
     return kVersion + "-alpha";
 }
 
-/******************************************************************************/
-void
-VSQApplication::sendReport() {
-    m_crashReporter.sendLogFiles();
-}
-
-QString VSQApplication::organizationDisplayName() const
-{
+QString
+VSQApplication::organizationDisplayName() const {
     return Customer::OrganizationDisplayName;
 }
 
-QString VSQApplication::applicationDisplayName() const
-{
+QString
+VSQApplication::applicationDisplayName() const {
     return Customer::ApplicationDisplayName;
 }
 
@@ -199,11 +197,12 @@ VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
 
     if (Qt::ApplicationActive == state && _deactivated) {
         _deactivated = false;
-        QTimer::singleShot(200, [this]() {
-            this->m_messenger.checkState();
-        });
+        QTimer::singleShot(200, [this]() { this->m_messenger.checkState(); });
     }
 #endif // VS_ANDROID
 }
 
-/******************************************************************************/
+ApplicationStateManager *
+VSQApplication::stateManager() {
+    return &m_applicationStateManager;
+}

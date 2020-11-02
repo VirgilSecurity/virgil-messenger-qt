@@ -44,15 +44,18 @@
 
 using namespace VirgilIoTKit;
 
-VSQCryptoTransferManager::VSQCryptoTransferManager(QXmppClient *client, QNetworkAccessManager *networkAccessManager, VSQSettings *settings, QObject *parent)
-    : VSQTransferManager(client, networkAccessManager, settings, parent)
-{}
+VSQCryptoTransferManager::VSQCryptoTransferManager(QXmppClient *client,
+                                                   QNetworkAccessManager *networkAccessManager,
+                                                   VSQSettings *settings,
+                                                   QObject *parent)
+    : VSQTransferManager(client, networkAccessManager, settings, parent) {
+}
 
-VSQCryptoTransferManager::~VSQCryptoTransferManager()
-{}
+VSQCryptoTransferManager::~VSQCryptoTransferManager() {
+}
 
-VSQUpload *VSQCryptoTransferManager::startCryptoUpload(const QString id, const QString filePath, const QString recipient)
-{
+VSQUpload *
+VSQCryptoTransferManager::startCryptoUpload(const QString id, const QString filePath, const QString recipient) {
     auto encFilePath = getCacheNewFilePath();
     if (!ecnryptFile(filePath, encFilePath, recipient)) {
         return nullptr;
@@ -68,37 +71,39 @@ VSQUpload *VSQCryptoTransferManager::startCryptoUpload(const QString id, const Q
             qCWarning(lcTransferManager) << "Crypt upload was failed";
         }
         // TODO(fpohtmeh): remove
-        //qCDebug(lcTransferManager) << "Removing of:" << encFilePath;
-        //QFile::remove(encFilePath);
+        // qCDebug(lcTransferManager) << "Removing of:" << encFilePath;
+        // QFile::remove(encFilePath);
     });
     return upload;
 }
 
-VSQDownload *VSQCryptoTransferManager::startCryptoDownload(const QString id, const QUrl url, const QString filePath, const QString recipient)
-{
+VSQDownload *
+VSQCryptoTransferManager::startCryptoDownload(const QString id,
+                                              const QUrl url,
+                                              const QString filePath,
+                                              const QString recipient) {
     auto decFilePath = getCacheNewFilePath();
     auto download = startDownload(id, url, decFilePath);
     connect(download, &VSQDownload::ended, [=](bool failed) {
         if (failed) {
             qCWarning(lcTransferManager) << "Crypt download was failed";
-        }
-        else if (decryptFile(decFilePath, filePath, recipient)) {
+        } else if (decryptFile(decFilePath, filePath, recipient)) {
             emit fileDecrypted(id, filePath);
         }
         // TODO(fpohtmeh): remove
-        //qCDebug(lcTransferManager) << "Removing of:" << decFilePath;
-        //QFile::remove(decFilePath);
+        // qCDebug(lcTransferManager) << "Removing of:" << decFilePath;
+        // QFile::remove(decFilePath);
     });
     return download;
 }
 
-QString VSQCryptoTransferManager::getCacheNewFilePath()
-{
+QString
+VSQCryptoTransferManager::getCacheNewFilePath() {
     return settings()->attachmentCacheDir().filePath(VSQUtils::createUuid());
 }
 
-bool VSQCryptoTransferManager::ecnryptFile(const QString &path, const QString &encPath, const QString &recipient)
-{
+bool
+VSQCryptoTransferManager::ecnryptFile(const QString &path, const QString &encPath, const QString &recipient) {
     qCDebug(lcTransferManager) << "File encryption:" << path << "=>" << encPath << "Recipient:" << recipient;
 #ifdef VS_DEVMODE_BAD_DECRYPT
     qCWarning(lcTransferManager) << "ENCRYPTION IS DISABLED";
@@ -125,12 +130,13 @@ bool VSQCryptoTransferManager::ecnryptFile(const QString &path, const QString &e
     // Encrypt
     std::vector<char> encBytes(VSQUtils::bufferSizeForEncryption(bytes.size()));
     size_t encBytesSize = 0;
-    const auto code = vs_messenger_virgil_encrypt_msg(
-                recipient.toStdString().c_str(),
-                reinterpret_cast<const uint8_t*>(bytes.data()), bytes.size(),
-                reinterpret_cast<uint8_t*>(encBytes.data()), encBytes.size(), &encBytesSize);
-    if (VS_CODE_OK != code)
-    {
+    const auto code = vs_messenger_virgil_encrypt_msg(recipient.toStdString().c_str(),
+                                                      reinterpret_cast<const uint8_t *>(bytes.data()),
+                                                      bytes.size(),
+                                                      reinterpret_cast<uint8_t *>(encBytes.data()),
+                                                      encBytes.size(),
+                                                      &encBytesSize);
+    if (VS_CODE_OK != code) {
         qCCritical(lcTransferManager) << "Cannot encrypt file:" << path << "code:" << code;
         return false;
     }
@@ -149,8 +155,8 @@ bool VSQCryptoTransferManager::ecnryptFile(const QString &path, const QString &e
     return true;
 }
 
-bool VSQCryptoTransferManager::decryptFile(const QString &encPath, const QString &path, const QString &recipient)
-{
+bool
+VSQCryptoTransferManager::decryptFile(const QString &encPath, const QString &path, const QString &recipient) {
     qCDebug(lcTransferManager) << "File decryption:" << encPath << "=>" << path << "Recipient:" << recipient;
 #ifdef VS_DEVMODE_BAD_DECRYPT
     qCWarning(lcTransferManager) << "DECRYPTION IS DISABLED";
@@ -178,12 +184,12 @@ bool VSQCryptoTransferManager::decryptFile(const QString &encPath, const QString
     // Decrypt
     std::vector<char> bytes(encBytes.size());
     size_t bytesSize = 0;
-    const auto code = vs_messenger_virgil_decrypt_msg(
-                recipient.toStdString().c_str(),
-                encBytes.data(),
-                reinterpret_cast<uint8_t*>(bytes.data()), bytes.size(), &bytesSize);
-    if (VS_CODE_OK != code)
-    {
+    const auto code = vs_messenger_virgil_decrypt_msg(recipient.toStdString().c_str(),
+                                                      encBytes.data(),
+                                                      reinterpret_cast<uint8_t *>(bytes.data()),
+                                                      bytes.size(),
+                                                      &bytesSize);
+    if (VS_CODE_OK != code) {
         qCCritical(lcTransferManager) << "Cannot decrypt file:" << encPath << "code:" << code;
         return false;
     }

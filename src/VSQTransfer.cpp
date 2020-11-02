@@ -35,11 +35,7 @@
 #include "VSQTransfer.h"
 
 VSQTransfer::VSQTransfer(QNetworkAccessManager *networkAccessManager, const QString &id, QObject *parent)
-    : QObject(parent)
-    , m_networkAccessManager(networkAccessManager)
-    , m_id(id)
-    , m_status(Attachment::Status::Created)
-{
+    : QObject(parent), m_networkAccessManager(networkAccessManager), m_id(id), m_status(Attachment::Status::Created) {
     connect(this, &VSQTransfer::progressChanged, [&](const DataSize bytesReceived, const DataSize bytesTotal) {
         if (bytesTotal == 0) {
             return; // HACK(fpohtmeh): reply sends zeros finally, ignore it
@@ -52,7 +48,7 @@ VSQTransfer::VSQTransfer(QNetworkAccessManager *networkAccessManager, const QStr
             setStatus(Attachment::Status::Loaded);
         }
     });
-    connect(this, &VSQTransfer::statusChanged, [=](const Enums::AttachmentStatus status){
+    connect(this, &VSQTransfer::statusChanged, [=](const Enums::AttachmentStatus status) {
         if (status == Attachment::Status::Loaded || status == Attachment::Status::Failed) {
             closeFileHandle();
             emit ended(status == Attachment::Status::Failed);
@@ -60,36 +56,35 @@ VSQTransfer::VSQTransfer(QNetworkAccessManager *networkAccessManager, const QStr
     });
 }
 
-VSQTransfer::~VSQTransfer()
-{
+VSQTransfer::~VSQTransfer() {
     closeFileHandle();
 #ifdef VS_DEVMODE
     qCDebug(lcTransferManager) << "Deletion of transfer:" << id();
 #endif
 }
 
-QString VSQTransfer::id() const
-{
+QString
+VSQTransfer::id() const {
     return m_id;
 }
 
-bool VSQTransfer::isRunning() const
-{
+bool
+VSQTransfer::isRunning() const {
     return m_status == Attachment::Status::Loading;
 }
 
-bool VSQTransfer::isFailed() const
-{
+bool
+VSQTransfer::isFailed() const {
     return m_status == Attachment::Status::Failed;
 }
 
-void VSQTransfer::start()
-{
+void
+VSQTransfer::start() {
     setStatus(Attachment::Status::Loading);
 }
 
-void VSQTransfer::abort()
-{
+void
+VSQTransfer::abort() {
     if (!isRunning()) {
         qCDebug(lcTransferManager) << "Can't abort not running transfer";
         return;
@@ -98,8 +93,8 @@ void VSQTransfer::abort()
     setStatus(Attachment::Status::Failed);
 }
 
-QList<QMetaObject::Connection> VSQTransfer::connectReply(QNetworkReply *reply, QMutex *guard)
-{
+QList<QMetaObject::Connection>
+VSQTransfer::connectReply(QNetworkReply *reply, QMutex *guard) {
     QList<QMetaObject::Connection> res;
 #ifdef VS_DEVMODE
     qCDebug(lcDev) << "Connected to reply:" << reply;
@@ -108,8 +103,7 @@ QList<QMetaObject::Connection> VSQTransfer::connectReply(QNetworkReply *reply, Q
         QMutexLocker l(guard);
         if (m_bytesTotal > 0 && m_bytesReceived >= m_bytesTotal) {
             setStatus(Attachment::Status::Loaded);
-        }
-        else {
+        } else {
             qCDebug(lcTransferManager) << "Failed. File was processed partially";
             setStatus(Attachment::Status::Failed);
         }
@@ -128,8 +122,8 @@ QList<QMetaObject::Connection> VSQTransfer::connectReply(QNetworkReply *reply, Q
     return res;
 }
 
-void VSQTransfer::setStatus(const Attachment::Status status)
-{
+void
+VSQTransfer::setStatus(const Attachment::Status status) {
     if (status == m_status) {
         return;
     }
@@ -138,13 +132,13 @@ void VSQTransfer::setStatus(const Attachment::Status status)
     emit statusChanged(status);
 }
 
-QNetworkAccessManager *VSQTransfer::networkAccessManager()
-{
+QNetworkAccessManager *
+VSQTransfer::networkAccessManager() {
     return m_networkAccessManager;
 }
 
-QFile *VSQTransfer::createFileHandle(const QString &filePath)
-{
+QFile *
+VSQTransfer::createFileHandle(const QString &filePath) {
     if (m_fileHandle) {
         qCWarning(lcTransferManager) << "File handle already exists for:" << filePath;
         return nullptr;
@@ -153,8 +147,8 @@ QFile *VSQTransfer::createFileHandle(const QString &filePath)
     return m_fileHandle;
 }
 
-void VSQTransfer::closeFileHandle()
-{
+void
+VSQTransfer::closeFileHandle() {
     if (!m_fileHandle) {
         return;
     }

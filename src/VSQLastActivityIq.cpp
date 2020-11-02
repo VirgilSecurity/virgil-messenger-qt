@@ -36,43 +36,41 @@
 
 #include <QDomElement>
 
-const char* ns_last = "jabber:iq:last";
+const char *ns_last = "jabber:iq:last";
 
 Q_LOGGING_CATEGORY(lcLastActivity, "lastActivity")
 
-VSQLastActivityIq::VSQLastActivityIq(bool debug)
-    : QXmppIq()
-    , m_debug(debug)
-{}
+VSQLastActivityIq::VSQLastActivityIq(bool debug) : QXmppIq(), m_debug(debug) {
+}
 
-bool VSQLastActivityIq::isValid() const
-{
+bool
+VSQLastActivityIq::isValid() const {
     return m_valid;
 }
 
-Seconds VSQLastActivityIq::seconds() const
-{
+Seconds
+VSQLastActivityIq::seconds() const {
     return m_seconds;
 }
 
-bool VSQLastActivityIq::needSubscription() const
-{
+bool
+VSQLastActivityIq::needSubscription() const {
     return type() == QXmppIq::Type::Error && error().code() == 407;
 }
 
-bool VSQLastActivityIq::isLastActivityId(const QDomElement &element)
-{
+bool
+VSQLastActivityIq::isLastActivityId(const QDomElement &element) {
     const QDomElement queryElement = element.firstChildElement("query");
     return queryElement.namespaceURI() == ns_last;
 }
 
-QStringList VSQLastActivityIq::discoveryFeatures()
-{
-    return { ns_last };
+QStringList
+VSQLastActivityIq::discoveryFeatures() {
+    return {ns_last};
 }
 
-void VSQLastActivityIq::parseElementFromChild(const QDomElement &element)
-{
+void
+VSQLastActivityIq::parseElementFromChild(const QDomElement &element) {
     m_valid = false;
     QXmppIq::parseElementFromChild(element);
     if (type() == QXmppIq::Type::Result) {
@@ -81,23 +79,20 @@ void VSQLastActivityIq::parseElementFromChild(const QDomElement &element)
         m_seconds = secondsStr.toUInt(&m_valid);
         if (!m_valid) {
             qCWarning(lcLastActivity) << "Convertation error:" << secondsStr;
-        }
-        else if (m_debug) {
+        } else if (m_debug) {
             qCDebug(lcLastActivity) << "Time sincle last activity (sec):" << secondsStr;
         }
-    }
-    else if (m_debug) {
+    } else if (m_debug) {
         if (type() == QXmppIq::Type::Error) {
             qCDebug(lcLastActivity) << "Error:" << error().code() << error().text();
-        }
-        else {
+        } else {
             qCDebug(lcLastActivity) << "Invalid result type" << type();
         }
     }
 }
 
-void VSQLastActivityIq::toXmlElementFromChild(QXmlStreamWriter *writer) const
-{
+void
+VSQLastActivityIq::toXmlElementFromChild(QXmlStreamWriter *writer) const {
     writer->writeStartElement("query");
     writer->writeDefaultNamespace(ns_last);
     writer->writeEndElement();

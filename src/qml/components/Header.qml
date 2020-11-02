@@ -5,10 +5,9 @@ import QtQuick.Layouts 1.12
 import "../theme"
 
 ToolBar {
-
     property alias title: titleLabel.text
     property bool showBackButton: true
-    property alias showSeporator: seporator.visible
+    property alias showSeparator: separator.visible
     default property alias menu: contextMenu.contentData
 
     background: Rectangle {
@@ -16,7 +15,7 @@ ToolBar {
         color: "transparent"
 
         Rectangle {
-            id: seporator
+            id: separator
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.leftMargin: 20
@@ -40,9 +39,7 @@ ToolBar {
             id: backButton
             image: "Arrow-Left"
 
-            // TODO: Componets sholdn't know about mainView
-            // The logic must be as abastract as possible.
-            onClicked: mainView.back()
+            onClicked: app.stateManager.goBack()
         }
 
         Label {
