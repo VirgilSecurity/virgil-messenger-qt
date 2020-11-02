@@ -35,23 +35,39 @@
 #include "models/Models.h"
 
 #include <QSortFilterProxyModel>
+#include <QThread>
 
 #include "models/AttachmentsModel.h"
 #include "models/ChatsModel.h"
 #include "models/MessagesModel.h"
+#include "models/MessagesQueue.h"
 
 using namespace vm;
 
-Models::Models(VSQSettings *settings, QObject *parent)
+Models::Models(VSQMessenger *messenger, VSQSettings *settings, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
     , m_attachments(new AttachmentsModel(settings, this))
     , m_chats(new ChatsModel(this))
     , m_messages(new MessagesModel(this))
+    , m_messagesQueue(new MessagesQueue(messenger, userDatabase, nullptr))
+    , m_queueThread(new QThread())
 {
     qRegisterMetaType<AttachmentsModel *>("AttachmentsModel*");
     qRegisterMetaType<ChatsModel *>("ChatsModel*");
     qRegisterMetaType<MessagesModel *>("MessagesModel*");
     qRegisterMetaType<QSortFilterProxyModel *>("QSortFilterProxyModel*");
+
+    m_messagesQueue->moveToThread(m_queueThread);
+    m_queueThread->setObjectName("QueueThread");
+    m_queueThread->start();
+}
+
+Models::~Models()
+{
+    m_queueThread->quit();
+    m_queueThread->wait();
+    delete m_messagesQueue;
+    delete m_queueThread;
 }
 
 const AttachmentsModel *Models::attachments() const
@@ -82,4 +98,14 @@ const MessagesModel *Models::messages() const
 MessagesModel *Models::messages()
 {
     return m_messages;
+}
+
+const MessagesQueue *Models::messagesQueue() const
+{
+    return m_messagesQueue;
+}
+
+MessagesQueue *Models::messagesQueue()
+{
+    return m_messagesQueue;
 }

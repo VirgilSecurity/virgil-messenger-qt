@@ -51,11 +51,11 @@ UserDatabase::UserDatabase(const QDir &databaseDir, QObject *parent)
 {
     setMigration(std::make_unique<UserDatabaseMigration>());
 
-    connect(this, &UserDatabase::requestOpen, this, &UserDatabase::openByUsername);
+    connect(this, &UserDatabase::requestOpen, this, &UserDatabase::openByUserId);
     connect(this, &UserDatabase::requestClose, this, &UserDatabase::close);
-    connect(this, &UserDatabase::writeMessage, this, &UserDatabase::processWriteMessage);
-    connect(this, &UserDatabase::writeChatAndLastMessage, this, &UserDatabase::processWriteChatAndLastMessage);
-    connect(this, &UserDatabase::resetUnreadCount, this, &UserDatabase::processResetUnreadCount);
+    connect(this, &UserDatabase::writeMessage, this, &UserDatabase::onWriteMessage);
+    connect(this, &UserDatabase::writeChatAndLastMessage, this, &UserDatabase::onWriteChatAndLastMessage);
+    connect(this, &UserDatabase::resetUnreadCount, this, &UserDatabase::onResetUnreadCount);
 }
 
 UserDatabase::~UserDatabase()
@@ -125,27 +125,28 @@ bool UserDatabase::create()
     return true;
 }
 
-void UserDatabase::openByUsername(const QString &username)
+void UserDatabase::openByUserId(const UserId &userId)
 {
-    if (!DatabaseUtils::isValidName(username)) {
-        qCCritical(lcDatabase) << "Invalid database id:" << username;
+    if (!DatabaseUtils::isValidName(userId)) {
+        qCCritical(lcDatabase) << "Invalid database id:" << userId;
         emit errorOccurred(tr("Invalid database id"));
     }
     else {
-        const QString fileName = QString("user-%1.sqlite3").arg(username);
+        const QString fileName = QString("user-%1.sqlite3").arg(userId);
         const QString filePath(m_databaseDir.filePath(fileName));
-        Database::open(filePath, username + QLatin1String("-messenger"));
-        emit usernameChanged(username);
+        Database::open(filePath, userId + QLatin1String("-messenger"));
+        messagesTable()->setUserId(userId);
+        emit userIdChanged(userId);
     }
 }
 
 void UserDatabase::close()
 {
     Database::close();
-    emit usernameChanged(QString());
+    emit userIdChanged(UserId());
 }
 
-void UserDatabase::processWriteMessage(const Message &message, const Chat::UnreadCount &unreadCount)
+void UserDatabase::onWriteMessage(const Message &message, const Chat::UnreadCount &unreadCount)
 {
     ScopedConnection connection(*this);
     ScopedTransaction transaction(*this);
@@ -156,7 +157,7 @@ void UserDatabase::processWriteMessage(const Message &message, const Chat::Unrea
     chatsTable()->updateLastMessage(message, unreadCount);
 }
 
-void UserDatabase::processWriteChatAndLastMessage(const Chat &chat)
+void UserDatabase::onWriteChatAndLastMessage(const Chat &chat)
 {
     ScopedConnection connection(*this);
     ScopedTransaction transaction(*this);
@@ -174,7 +175,7 @@ void UserDatabase::processWriteChatAndLastMessage(const Chat &chat)
     chatsTable()->updateLastMessage(message, chat.unreadMessageCount);
 }
 
-void UserDatabase::processResetUnreadCount(const Chat &chat)
+void UserDatabase::onResetUnreadCount(const Chat &chat)
 {
     ScopedConnection connection(*this);
     ScopedTransaction transaction(*this);

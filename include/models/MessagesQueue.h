@@ -32,49 +32,52 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "database/AttachmentsTable.h"
+#ifndef VS_MESSAGESQUEUE_H
+#define VS_MESSAGESQUEUE_H
 
-#include "Utils.h"
-#include "database/core/Database.h"
-#include "database/core/DatabaseUtils.h"
+#include <queue>
 
-using namespace vm;
+#include "VSQCommon.h"
 
-AttachmentsTable::AttachmentsTable(Database *database)
-    : DatabaseTable(QLatin1String("attachments"), database)
+class VSQMessenger;
+
+namespace vm
 {
-    connect(this, &AttachmentsTable::createAttachment, this, &AttachmentsTable::onCreateAttachment);
+class UserDatabase;
+
+class MessagesQueue : public QObject
+{
+    Q_OBJECT
+
+public:
+    MessagesQueue(VSQMessenger *messenger, UserDatabase *userDatabase, QObject *parent);
+
+signals:
+    void pushMessage(const Message &message, const Contact::Id &sender, const Contact::Id &recipient);
+
+    void sendFailedMessages();
+    void sendNextMessage(QPrivateSignal);
+
+    void messageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status status);
+
+private:
+    void setUserId(const UserId &userId);
+    void setFailedMessages(const QueueMessages &messages);
+
+    void onPushMessage(const Message &message, const Contact::Id &sender, const Contact::Id &recipient);
+
+    void onSendFailedMessages();
+    void onSendNextMessage();
+
+    void onMessageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status status);
+
+    Message::Status sendMessage(const QueueMessage &message);
+
+    VSQMessenger *m_messenger;
+    UserDatabase *m_userDatabase;
+    std::queue<QueueMessage> m_messages;
+    UserId m_userId;
+};
 }
 
-bool AttachmentsTable::create()
-{
-    if (DatabaseUtils::readExecQueries(database(), QLatin1String("createAttachments"))) {
-        qCDebug(lcDatabase) << "Attachments table was created";
-        return true;
-    }
-    qCCritical(lcDatabase) << "Unable to create attachments table";
-    return false;
-}
-
-void AttachmentsTable::onCreateAttachment(const Attachment &attachment)
-{
-    ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues values {
-        { ":id", attachment.id },
-        { ":messageId", attachment.messageId },
-        { ":type", static_cast<int>(attachment.type) },
-        { ":status", static_cast<int>(attachment.status) },
-        { ":filename", attachment.fileName },
-        { ":size", attachment.size },
-        { ":localPath", attachment.localPath },
-        { ":url", attachment.url },
-        { ":extras", Utils::extrasToJson(attachment.extras, attachment.type) }
-    };
-    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertAttachment"), values);
-    if (!query) {
-        qCCritical(lcDatabase) << "AttachmentsTable::processCreateAttachment error";
-        emit errorOccurred(tr("Failed to insert attachment"));
-        return;
-    }
-    qCDebug(lcDatabase) << "Attachment was inserted into table" << attachment.localPath;
-}
+#endif // VS_MESSAGESQUEUE_H

@@ -205,6 +205,11 @@ Jid Utils::createJid(const Contact::Id &contactId, const QString &xmppUrl)
     return contactId + '@' + xmppUrl;
 }
 
+QString Utils::printableMessageBody(const Message &message)
+{
+    return message.body.left(30).replace('\n', ' ');
+}
+
 Optional<QString> Utils::readTextFile(const QString &filePath)
 {
     QFile file(filePath);
@@ -228,6 +233,7 @@ QString Utils::extrasToJson(const QVariant &extras, const Attachment::Type type)
     if (type != Attachment::Type::Picture) {
         return QString();
     }
+    // FIXME(fpohtmeh): add type parameter (DB or XMPP)
     const auto e = extras.value<PictureExtras>();
     QJsonObject obj;
     // FIXME(fpohtmeh): refine properties

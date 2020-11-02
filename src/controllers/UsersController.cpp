@@ -56,24 +56,24 @@ UsersController::UsersController(VSQMessenger *messenger, Models *models, UserDa
     connect(messenger, &VSQMessenger::keyDownloaded, this, std::bind(&UsersController::openDatabase, this, args::_1, Operation::DownloadKey));
     connect(messenger, &VSQMessenger::downloadKeyFailed, this, &UsersController::downloadKeyFailed);
 
-    connect(userDatabase, &UserDatabase::usernameChanged, this, &UsersController::processDatabaseUsername);
+    connect(userDatabase, &UserDatabase::userIdChanged, this, &UsersController::onDatabaseUserIdChanged);
 
     connect(models->chats(), &ChatsModel::chatCreated, this, &UsersController::subscribeByChat);
 }
 
-QString UsersController::username() const
+UserId UsersController::userId() const
 {
-    return m_username;
+    return m_userId;
 }
 
-void UsersController::signIn(const QString &username)
+void UsersController::signIn(const UserId &userId)
 {
-    m_messenger->signIn(username);
+    m_messenger->signIn(userId);
 }
 
-void UsersController::signUp(const QString &username)
+void UsersController::signUp(const UserId &userId)
 {
-    m_messenger->signUp(username);
+    m_messenger->signUp(userId);
 }
 
 void UsersController::signOut()
@@ -86,36 +86,36 @@ void UsersController::downloadKey(const QString &username, const QString &passwo
     m_messenger->downloadKey(username, password);
 }
 
-void UsersController::openDatabase(const QString &username, const Operation operation)
+void UsersController::openDatabase(const UserId &userId, const Operation operation)
 {
     m_operation = operation;
-    if (username.isEmpty()) {
+    if (userId.isEmpty()) {
         m_userDatabase->requestClose();
     }
     else {
-        m_userDatabase->requestOpen(username);
+        m_userDatabase->requestOpen(userId);
     }
 }
 
-void UsersController::processDatabaseUsername(const QString &username)
+void UsersController::onDatabaseUserIdChanged(const UserId &userId)
 {
-    if (m_username != username) {
-        m_username = username;
-        emit usernameChanged(username);
+    if (m_userId != userId) {
+        m_userId = userId;
+        emit userIdChanged(userId);
     }
 
     switch (m_operation) {
     case Operation::SignIn:
-        emit signedIn(username);
+        emit signedIn(userId);
         break;
     case Operation::SignUp:
-        emit signedUp(username);
+        emit signedUp(userId);
         break;
     case Operation::SignOut:
         emit signedOut();
         break;
     case Operation::DownloadKey:
-        emit keyDownloaded(username);
+        emit keyDownloaded(userId);
     default:
         break;
     }

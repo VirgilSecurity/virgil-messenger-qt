@@ -43,10 +43,10 @@ using namespace vm;
 ChatsTable::ChatsTable(Database *database)
     : DatabaseTable(QLatin1String("chats"), database)
 {
-    connect(this, &ChatsTable::fetch, this, &ChatsTable::processFetch);
-    connect(this, &ChatsTable::createChat, this, &ChatsTable::processCreateChat);
-    connect(this, &ChatsTable::resetUnreadCount, this, &ChatsTable::processResetUnreadCount);
-    connect(this, &ChatsTable::updateLastMessage, this, &ChatsTable::processUpdateLastMessage);
+    connect(this, &ChatsTable::fetch, this, &ChatsTable::onFetch);
+    connect(this, &ChatsTable::createChat, this, &ChatsTable::onCreateChat);
+    connect(this, &ChatsTable::resetUnreadCount, this, &ChatsTable::onResetUnreadCount);
+    connect(this, &ChatsTable::updateLastMessage, this, &ChatsTable::onUpdateLastMessage);
 }
 
 bool ChatsTable::create()
@@ -59,7 +59,7 @@ bool ChatsTable::create()
     return false;
 }
 
-void ChatsTable::processFetch()
+void ChatsTable::onFetch()
 {
     ScopedConnection connection(*database());
     auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectChats"));
@@ -83,7 +83,7 @@ void ChatsTable::processFetch()
     }
 }
 
-void ChatsTable::processCreateChat(const Chat &chat)
+void ChatsTable::onCreateChat(const Chat &chat)
 {
     ScopedConnection connection(*database());
     // Check if chat exists
@@ -121,7 +121,7 @@ void ChatsTable::processCreateChat(const Chat &chat)
     }
 }
 
-void ChatsTable::processResetUnreadCount(const Chat &chat)
+void ChatsTable::onResetUnreadCount(const Chat &chat)
 {
     ScopedConnection connection(*database());
     const DatabaseUtils::BindValues values{{ ":id", chat.id }};
@@ -135,7 +135,7 @@ void ChatsTable::processResetUnreadCount(const Chat &chat)
     }
 }
 
-void ChatsTable::processUpdateLastMessage(const Message &message, const Chat::UnreadCount &unreadMessageCount)
+void ChatsTable::onUpdateLastMessage(const Message &message, const Chat::UnreadCount &unreadMessageCount)
 {
     ScopedConnection connection(*database());
     const DatabaseUtils::BindValues values {

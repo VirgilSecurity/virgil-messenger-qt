@@ -62,21 +62,17 @@ public:
 signals:
     void errorOccurred(const QString &errorText);
 
-    void messageAdded(const Message &message);
-
-    void setMessageStatus(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status, QPrivateSignal);
+    void messageCreated(const Message &message, const Contact::Id &sender, const Contact::Id &recipient);
     void messageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);
 
 private:
     void setupTableConnections();
     void setUserId(const UserId &userId);
 
-    void processUpdatedChat(const Chat &chat);
-    void processSetMessageStatus(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);
+    void onChatUpdated(const Chat &chat);
+    void setMessageStatus(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);
     void setDeliveredStatus(const Jid &jid, const Message::Id &messageId);
     void receiveMessage(const QXmppMessage &msg);
-    void sendMessage(const Message &message);
-    void sendNotSentMessages();
 
     VSQMessenger *m_messenger;
     Models *m_models;
@@ -84,8 +80,6 @@ private:
 
     UserId m_userId;
     Chat m_chat;
-
-    QMutex m_messageGuard; // TODO(fpohtmeh): remove this workaround and mutex include
 };
 }
 

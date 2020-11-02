@@ -52,7 +52,7 @@ ChatsController::ChatsController(Models *models, UserDatabase *userDatabase, QOb
     , m_userDatabase(userDatabase)
 {
     connect(userDatabase, &UserDatabase::opened, this, &ChatsController::setupTableConnections);
-    connect(this, &ChatsController::newContactFound, this, &ChatsController::processNewContact);
+    connect(this, &ChatsController::newContactFound, this, &ChatsController::onNewContactFound);
 }
 
 Chat ChatsController::currentChat() const
@@ -70,9 +70,9 @@ Chat::Id ChatsController::currentChatId() const
     return m_currentChat.id;
 }
 
-void ChatsController::loadChats(const QString &username)
+void ChatsController::loadChats(const UserId &userId)
 {
-    if (username.isEmpty()) {
+    if (userId.isEmpty()) {
         m_models->chats()->setChats({});
     }
     else {
@@ -140,7 +140,7 @@ void ChatsController::setCurrentChat(const Chat &chat)
     emit chat.id.isEmpty() ? chatClosed() : chatOpened(chat);
 }
 
-void ChatsController::processNewContact(const Contact::Id &contactId)
+void ChatsController::onNewContactFound(const Contact::Id &contactId)
 {
     const auto chat = m_models->chats()->createChat(contactId);
     m_userDatabase->chatsTable()->createChat(chat);

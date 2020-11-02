@@ -180,6 +180,7 @@ HEADERS += \
         include/models/AttachmentsModel.h \
         include/models/ChatsModel.h \
         include/models/MessagesModel.h \
+        include/models/MessagesQueue.h \
         include/models/Models.h \
         # Generated
         generated/include/VSQCustomer.h \
@@ -261,6 +262,7 @@ SOURCES += \
         src/models/AttachmentsModel.cpp \
         src/models/ChatsModel.cpp \
         src/models/MessagesModel.cpp \
+        src/models/MessagesQueue.cpp \
         src/models/Models.cpp
 
 #

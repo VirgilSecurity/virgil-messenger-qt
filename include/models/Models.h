@@ -37,6 +37,8 @@
 
 #include <QObject>
 
+class QThread;
+class VSQMessenger;
 class VSQSettings;
 
 namespace vm
@@ -44,6 +46,8 @@ namespace vm
 class AttachmentsModel;
 class ChatsModel;
 class MessagesModel;
+class MessagesQueue;
+class UserDatabase;
 
 class Models : public QObject
 {
@@ -53,7 +57,8 @@ class Models : public QObject
     Q_PROPERTY(MessagesModel *messages READ messages CONSTANT)
 
 public:
-    Models(VSQSettings *settings, QObject *parent);
+    Models(VSQMessenger *messenger, VSQSettings *settings, UserDatabase *userDatabase, QObject *parent);
+    ~Models() override;
 
     const AttachmentsModel *attachments() const;
     AttachmentsModel *attachments();
@@ -61,11 +66,16 @@ public:
     ChatsModel *chats();
     const MessagesModel *messages() const;
     MessagesModel *messages();
+    const MessagesQueue *messagesQueue() const;
+    MessagesQueue *messagesQueue();
 
 private:
     AttachmentsModel *m_attachments;
     ChatsModel *m_chats;
     MessagesModel *m_messages;
+    MessagesQueue *m_messagesQueue;
+
+    QThread *m_queueThread;
 };
 }
 

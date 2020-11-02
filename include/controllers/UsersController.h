@@ -49,30 +49,30 @@ class UserDatabase;
 class UsersController : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString username MEMBER m_username NOTIFY usernameChanged);
+    Q_PROPERTY(UserId userId MEMBER m_userId NOTIFY userIdChanged);
 
 public:
     UsersController(VSQMessenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
-    QString username() const; // TODO(fpohtmeh): use userId instead of username
+    UserId userId() const;
 
-    void signIn(const QString &username);
-    void signUp(const QString &username);
+    void signIn(const UserId &userId);
+    void signUp(const UserId &userId);
     Q_INVOKABLE void signOut();
 
     void downloadKey(const QString &username, const QString &password);
 
 signals:
-    void signedIn(const QString &username);
+    void signedIn(const UserId &username);
     void signInErrorOccured(const QString &errorText);
-    void signedUp(const QString &username);
+    void signedUp(const UserId &userId);
     void signUpErrorOccured(const QString &errorText);
     void signedOut();
 
-    void keyDownloaded(const QString &username);
+    void keyDownloaded(const UserId &userId);
     void downloadKeyFailed(const QString &errorText);
 
-    void usernameChanged(const QString &username);
+    void userIdChanged(const UserId &userId);
 
 private:
     enum class Operation
@@ -83,15 +83,15 @@ private:
         DownloadKey
     };
 
-    void openDatabase(const QString &username, const Operation operation);
-    void processDatabaseUsername(const QString &username);
+    void openDatabase(const UserId &userId, const Operation operation);
+    void onDatabaseUserIdChanged(const UserId &userId);
 
     void subscribeByChat(const Chat &chat);
 
     VSQMessenger *m_messenger;
     UserDatabase *m_userDatabase;
     Operation m_operation = Operation::SignIn;
-    QString m_username;
+    UserId m_userId;
 };
 }
 

@@ -30,7 +30,7 @@ Control {
 
             Action {
                 text: qsTr("Settings")
-                onTriggered: manager.chatListState.requestAccountSettings(controllers.users.username)
+                onTriggered: manager.chatListState.requestAccountSettings(controllers.users.userId)
             }
 
             MenuSeparator {

@@ -99,8 +99,8 @@ private:
     QScopedPointer<QQmlApplicationEngine> m_engine;
     Validator *m_validator;
     VSQMessenger m_messenger;
-    Models m_models;
     UserDatabase *m_userDatabase;
+    Models m_models;
     QThread *m_databaseThread;
     Controllers m_controllers;
     KeyboardEventFilter *m_keyboardEventFilter;

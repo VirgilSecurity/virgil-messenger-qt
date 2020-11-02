@@ -47,22 +47,30 @@ public:
     explicit MessagesTable(Database *database);
 
 signals:
-    void fetch(const Chat::Id &chatId);
+    void setUserId(const UserId &userId);
+    void fetchChatMessages(const Chat::Id &chatId);
+    void fetchFailedMessages();
     void createMessage(const Message &message);
 
-    void markAllAsRead(const Chat &chat);
     void updateStatus(const Message::Id &messageId, const Message::Status &status);
+    void markAllAsRead(const Chat &chat);
 
     void errorOccurred(const QString &errorText);
-    void fetched(const Messages &messages);
+    void chatMessagesFetched(const Messages &messages);
+    void failedMessagesFetched(const QueueMessages &messages);
 
 private:
     bool create() override;
 
-    void processFetch(const Chat::Id &chatId);
-    void processCreateMessage(const Message &message);
-    void processUpdateStatus(const Message::Id &messageId, const Message::Status &status);
-    void processMarkAllAsRead(const Chat &chat);
+    void onSetUserId(const UserId &userId);
+    void onFetchChatMessages(const Chat::Id &chatId);
+    void onFetchFailedMessages();
+    void onCreateMessage(const Message &message);
+
+    void onUpdateStatus(const Message::Id &messageId, const Message::Status &status);
+    void onMarkAllAsRead(const Chat &chat);
+
+    UserId m_userId;
 };
 }
 

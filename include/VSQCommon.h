@@ -234,6 +234,18 @@ struct Chat
 };
 
 using Chats = std::vector<Chat>;
+
+struct QueueMessage : Message
+{
+    using Message::Message;
+
+    QueueMessage(const Message &msg, const Contact::Id &senderId, const Contact::Id &recipientId);
+
+    Contact::Id senderId;
+    Contact::Id recipientId;
+};
+
+using QueueMessages = std::vector<QueueMessage>;
 }
 
 Q_DECLARE_METATYPE(vm::Contact::Type)
@@ -245,6 +257,8 @@ Q_DECLARE_METATYPE(vm::Message)
 Q_DECLARE_METATYPE(vm::Messages)
 Q_DECLARE_METATYPE(vm::Chat)
 Q_DECLARE_METATYPE(vm::Chats)
+Q_DECLARE_METATYPE(vm::QueueMessage)
+Q_DECLARE_METATYPE(vm::QueueMessages)
 
 void registerCommonMetaTypes();
 

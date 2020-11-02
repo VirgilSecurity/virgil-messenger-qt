@@ -66,7 +66,6 @@ public:
     bool hasChatWithContact(const Contact::Id &contactId) const;
 
 signals:
-    // FIXME(fpohtmeh): redirect signals to controller
     void chatCreated(const Chat &chat);
     void chatUpdated(const Chat &chat);
 

@@ -50,9 +50,10 @@ Controllers::Controllers(VSQMessenger *messenger, Models *models, UserDatabase *
     , m_chats(new ChatsController(models, userDatabase, this))
     , m_messages(new MessagesController(messenger, models, userDatabase, this))
 {
-    connect(m_users, &UsersController::usernameChanged, m_chats, &ChatsController::loadChats);
+    connect(m_users, &UsersController::userIdChanged, m_chats, &ChatsController::loadChats);
     connect(m_chats, &ChatsController::chatOpened, m_messages, &MessagesController::loadMessages);
-    connect(m_messages, &MessagesController::messageAdded, m_attachments, &AttachmentsController::preloadAttachment);
+    // FIXME(fpohtmeh): remove?
+    //connect(m_messages, &MessagesController::messageCreated, m_attachments, &AttachmentsController::preloadAttachment);
 
     qRegisterMetaType<AttachmentsController *>("AttachmentsController*");
     qRegisterMetaType<ChatsController *>("ChatsController*");

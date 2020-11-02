@@ -16,3 +16,4 @@ FROM
     messages
 LEFT JOIN attachments ON attachments.messageId = messages.id
 WHERE messages.chatId = :chatId
+ORDER BY messages.timestamp

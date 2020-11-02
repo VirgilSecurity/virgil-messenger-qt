@@ -43,10 +43,12 @@ using namespace vm;
 MessagesTable::MessagesTable(Database *database)
     : DatabaseTable(QLatin1String("messages"), database)
 {
-    connect(this, &MessagesTable::fetch, this, &MessagesTable::processFetch);
-    connect(this, &MessagesTable::createMessage, this, &MessagesTable::processCreateMessage);
-    connect(this, &MessagesTable::updateStatus, this, &MessagesTable::processUpdateStatus);
-    connect(this, &MessagesTable::markAllAsRead, this, &MessagesTable::processMarkAllAsRead);
+    connect(this, &MessagesTable::setUserId, this, &MessagesTable::onSetUserId);
+    connect(this, &MessagesTable::fetchChatMessages, this, &MessagesTable::onFetchChatMessages);
+    connect(this, &MessagesTable::fetchFailedMessages, this, &MessagesTable::onFetchFailedMessages);
+    connect(this, &MessagesTable::createMessage, this, &MessagesTable::onCreateMessage);
+    connect(this, &MessagesTable::updateStatus, this, &MessagesTable::onUpdateStatus);
+    connect(this, &MessagesTable::markAllAsRead, this, &MessagesTable::onMarkAllAsRead);
 }
 
 bool MessagesTable::create()
@@ -59,11 +61,16 @@ bool MessagesTable::create()
     return false;
 }
 
-void MessagesTable::processFetch(const Chat::Id &chatId)
+void MessagesTable::onSetUserId(const UserId &userId)
+{
+    m_userId = userId;
+}
+
+void MessagesTable::onFetchChatMessages(const Chat::Id &chatId)
 {
     ScopedConnection connection(*database());
     const DatabaseUtils::BindValues values{{":chatId", chatId }};
-    auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectMessages"), values);
+    auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectChatMessages"), values);
     if (!query) {
         qCCritical(lcDatabase) << "MessagesTable::processFetch error";
         emit errorOccurred(tr("Failed to fetch messages"));
@@ -74,15 +81,40 @@ void MessagesTable::processFetch(const Chat::Id &chatId)
         while (q.next()) {
             messages.push_back(*DatabaseUtils::readMessage(q));
         }
-        emit fetched(messages);
+        emit chatMessagesFetched(messages);
     }
 }
 
-void MessagesTable::processCreateMessage(const Message &message)
+void MessagesTable::onFetchFailedMessages()
+{
+    ScopedConnection connection(*database());
+    const DatabaseUtils::BindValues values{
+        { ":failedStatus", static_cast<int>(Message::Status::Failed) },
+        { ":createdStatus", static_cast<int>(Message::Status::Created) },
+        { ":userId", m_userId }
+    };
+    auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectFailedMessages"), values);
+    if (!query) {
+        qCCritical(lcDatabase) << "MessagesTable::processFetchFailed error";
+        emit errorOccurred(tr("Failed to fetch failed messages"));
+    }
+    else {
+        auto q = *query;
+        QueueMessages messages;
+        while (q.next()) {
+            const Contact::Id senderId = q.value("senderId").value<Contact::Id>();
+            const Contact::Id recipientId = q.value("recipientId").value<Contact::Id>();
+            messages.push_back(QueueMessage(*DatabaseUtils::readMessage(q), senderId, recipientId));
+        }
+        emit failedMessagesFetched(messages);
+    }
+}
+
+void MessagesTable::onCreateMessage(const Message &message)
 {
     // FIXME(fpohtmeh): check that chat exists?
     ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues values {
+    const DatabaseUtils::BindValues values{
         { ":id", message.id },
         { ":timestamp", message.timestamp },
         { ":chatId", message.chatId },
@@ -100,7 +132,7 @@ void MessagesTable::processCreateMessage(const Message &message)
     }
 }
 
-void MessagesTable::processUpdateStatus(const Message::Id &messageId, const Message::Status &status)
+void MessagesTable::onUpdateStatus(const Message::Id &messageId, const Message::Status &status)
 {
     ScopedConnection connection(*database());
     // Get message by id
@@ -137,12 +169,13 @@ void MessagesTable::processUpdateStatus(const Message::Id &messageId, const Mess
     }
 }
 
-void MessagesTable::processMarkAllAsRead(const Chat &chat)
+void MessagesTable::onMarkAllAsRead(const Chat &chat)
 {
     ScopedConnection connection(*database());
     const DatabaseUtils::BindValues values{
         { ":chatId", chat.id },
-        { ":authorId", chat.contactId }
+        { ":authorId", chat.contactId },
+        { ":readStatus", static_cast<int>(Message::Status::Read) }
     };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("markMessagesAsRead"), values);
     if (query) {

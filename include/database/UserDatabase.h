@@ -64,23 +64,23 @@ public:
     MessagesTable *messagesTable();
 
 signals:
-    void requestOpen(const QString &username);
+    void requestOpen(const UserId &userId);
     void requestClose();
 
     void writeMessage(const Message &message, const Chat::UnreadCount &unreadCount);
     void writeChatAndLastMessage(const Chat &chat);
     void resetUnreadCount(const Chat &chat);
 
-    void usernameChanged(const QString &username);
+    void userIdChanged(const UserId &Id);
 
 private:
     bool create() override;
-    void openByUsername(const QString &username);
+    void openByUserId(const UserId &userId);
     void close();
 
-    void processWriteMessage(const Message &message, const Chat::UnreadCount &unreadCount);
-    void processWriteChatAndLastMessage(const Chat &chat);
-    void processResetUnreadCount(const Chat &chat);
+    void onWriteMessage(const Message &message, const Chat::UnreadCount &unreadCount);
+    void onWriteChatAndLastMessage(const Chat &chat);
+    void onResetUnreadCount(const Chat &chat);
 
     const QDir m_databaseDir;
     int m_attachmentsTableIndex;

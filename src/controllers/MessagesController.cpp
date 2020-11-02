@@ -50,6 +50,7 @@
 #include "models/AttachmentsModel.h"
 #include "models/ChatsModel.h"
 #include "models/MessagesModel.h"
+#include "models/MessagesQueue.h"
 #include "models/Models.h"
 
 using namespace vm;
@@ -60,15 +61,16 @@ MessagesController::MessagesController(VSQMessenger *messenger, Models *models, 
     , m_models(models)
     , m_userDatabase(userDatabase)
 {
+    auto messagesQueue = m_models->messagesQueue();
     // User database
     connect(userDatabase, &UserDatabase::opened, this, &MessagesController::setupTableConnections);
-    connect(userDatabase, &UserDatabase::usernameChanged, this, &MessagesController::setUserId);
-    // Chat
-    connect(m_models->chats(), &ChatsModel::chatUpdated, this, &MessagesController::processUpdatedChat);
-    // Status
-    connect(this, &MessagesController::setMessageStatus, this, &MessagesController::processSetMessageStatus);
+    connect(userDatabase, &UserDatabase::userIdChanged, this, &MessagesController::setUserId);
+    // Queue
+    connect(this, &MessagesController::messageCreated, messagesQueue, &MessagesQueue::pushMessage);
+    connect(messagesQueue, &MessagesQueue::messageStatusChanged, this, &MessagesController::setMessageStatus);
+    connect(m_models->chats(), &ChatsModel::chatUpdated, this, &MessagesController::onChatUpdated);
     // Network
-    connect(messenger, &VSQMessenger::fireReady, this, &MessagesController::sendNotSentMessages);
+    connect(messenger, &VSQMessenger::fireReady, messagesQueue, &MessagesQueue::sendFailedMessages);
     // Xmpp connections
     auto xmpp = messenger->xmpp();
     connect(xmpp, &QXmppClient::messageReceived, this, &MessagesController::receiveMessage);
@@ -87,7 +89,7 @@ void MessagesController::loadMessages(const Chat &chat)
         m_models->messages()->setMessages({});
     }
     else {
-        m_userDatabase->messagesTable()->fetch(chat.id);
+        m_userDatabase->messagesTable()->fetchChatMessages(chat.id);
     }
 }
 
@@ -102,15 +104,14 @@ void MessagesController::createSendMessage(const QString &body, const QVariant &
     const Chat::UnreadCount unreadCount = 0; // message can be created in current chat only
     m_models->chats()->updateLastMessage(message, unreadCount);
     m_userDatabase->writeMessage(message, unreadCount);
-    sendMessage(message);
-    emit messageAdded(message);
+    emit messageCreated(message, m_userId, m_chat.contactId);
 }
 
 void MessagesController::setupTableConnections()
 {
     auto table = m_userDatabase->messagesTable();
     connect(table, &MessagesTable::errorOccurred, this, &MessagesController::errorOccurred);
-    connect(table, &MessagesTable::fetched, m_models->messages(), &MessagesModel::setMessages);
+    connect(table, &MessagesTable::chatMessagesFetched, m_models->messages(), &MessagesModel::setMessages);
 }
 
 void MessagesController::setUserId(const UserId &userId)
@@ -118,14 +119,14 @@ void MessagesController::setUserId(const UserId &userId)
     m_userId = userId;
 }
 
-void MessagesController::processUpdatedChat(const Chat &chat)
+void MessagesController::onChatUpdated(const Chat &chat)
 {
     if (chat.id == m_chat.id) {
         m_chat = chat;
     }
 }
 
-void MessagesController::processSetMessageStatus(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status)
+void MessagesController::setMessageStatus(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status)
 {
     qDebug() << "Set message status:" << messageId << "contact" << contactId << "status" << status;
     if (status == Message::Status::Read) {
@@ -146,7 +147,7 @@ void MessagesController::processSetMessageStatus(const Message::Id &messageId, c
 
 void MessagesController::setDeliveredStatus(const Jid &jid, const Message::Id &messageId)
 {
-    setMessageStatus(messageId, Utils::contactIdFromJid(jid), Message::Status::Delivered, QPrivateSignal());
+    setMessageStatus(messageId, Utils::contactIdFromJid(jid), Message::Status::Delivered);
 }
 
 void MessagesController::receiveMessage(const QXmppMessage &msg)
@@ -212,47 +213,5 @@ void MessagesController::receiveMessage(const QXmppMessage &msg)
     else {
         m_userDatabase->writeMessage(message, chat.unreadMessageCount);
     }
-    emit messageAdded(message);
-}
-
-void MessagesController::sendMessage(const Message &message)
-{
-    QtConcurrent::run([=]() -> void {
-        qDebug() << "Message sending started:" << message.id;
-        auto m = message;
-        if (m.attachment) {
-            qCDebug(lcMessenger) << "Trying to upload the attachment";
-            // TODO(fpohtmeh): uploadAttachment() here
-            qCDebug(lcMessenger) << "Everything was uploaded. Continue to send message";
-        }
-
-        QMutexLocker _guard(&m_messageGuard);
-        const auto encryptedStr = Core::encryptMessage(message, m_chat.contactId);
-        if (!encryptedStr) {
-            emit setMessageStatus(message.id, m_chat.contactId, Message::Status::InvalidM, QPrivateSignal());
-        }
-        else {
-            const auto toJID = Utils::createJid(m_chat.contactId, m_messenger->xmppURL());
-            const auto fromJID = Utils::createJid(m_userId, m_messenger->xmppURL());
-
-            QXmppMessage msg(fromJID, toJID, *encryptedStr);
-            msg.setReceiptRequested(true);
-            msg.setId(message.id);
-
-            // Send message and update status
-            if (m_messenger->xmpp()->sendPacket(msg)) {
-                qCDebug(lcMessenger) << "Message sent:" << message.id;
-                emit setMessageStatus(message.id, m_chat.contactId, Message::Status::Sent, QPrivateSignal());
-            } else {
-                emit setMessageStatus(message.id, m_chat.contactId, Message::Status::Failed, QPrivateSignal());
-            }
-        }
-    });
-}
-
-void MessagesController::sendNotSentMessages()
-{
-    // FIXME(fpohtmeh): implement
-    // Get not sent messages
-    // Send them but don't create again
+    emit messageCreated(message, senderId, recipientId);
 }

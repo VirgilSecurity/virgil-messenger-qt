@@ -59,10 +59,10 @@ signals:
 private:
     bool create() override;
 
-    void processFetch();
-    void processCreateChat(const Chat &chat);
-    void processResetUnreadCount(const Chat &chat);
-    void processUpdateLastMessage(const Message &message, const Chat::UnreadCount &unreadMessageCount);
+    void onFetch();
+    void onCreateChat(const Chat &chat);
+    void onResetUnreadCount(const Chat &chat);
+    void onUpdateLastMessage(const Message &message, const Chat::UnreadCount &unreadMessageCount);
 };
 }
 

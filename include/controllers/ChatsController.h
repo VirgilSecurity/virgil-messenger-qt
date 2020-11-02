@@ -58,7 +58,7 @@ public:
     Contact::Id currentContactId() const;
     Chat::Id currentChatId() const;
 
-    void loadChats(const QString &username);
+    void loadChats(const UserId &userId);
 
     void createChat(const Contact::Id &contactId);
     void openChat(const Chat &chat);
@@ -81,7 +81,7 @@ private:
     void setupTableConnections();
     void setCurrentChat(const Chat &chat);
 
-    void processNewContact(const Contact::Id &contactId);
+    void onNewContactFound(const Contact::Id &contactId);
 
     Models *m_models;
     UserDatabase *m_userDatabase;

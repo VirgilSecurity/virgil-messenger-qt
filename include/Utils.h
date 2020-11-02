@@ -59,6 +59,8 @@ namespace Utils
 
     Jid createJid(const Contact::Id &contactId, const QString &xmppUrl);
 
+    QString printableMessageBody(const Message &message);
+
     // File functions
 
     QString findUniqueFileName(const QString &fileName);

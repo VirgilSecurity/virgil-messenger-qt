@@ -54,7 +54,7 @@ signals:
 private:
     bool create() override;
 
-    void processCreateAttachment(const Attachment &attachment);
+    void onCreateAttachment(const Attachment &attachment);
 };
 }
 

@@ -177,7 +177,7 @@ QVariant ChatsModel::data(const QModelIndex &index, int role) const
             return Utils::attachmentDisplayText(*chat.lastMessage->attachment);
         }
         else {
-            return chat.lastMessage->body.left(30);
+            return Utils::printableMessageBody(*chat.lastMessage);
         }
     case UnreadMessagesCountRole:
         return chat.unreadMessageCount;

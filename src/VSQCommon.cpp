@@ -40,6 +40,8 @@
 Q_LOGGING_CATEGORY(lcDev, "dev");
 #endif
 
+using namespace vm;
+
 void registerCommonMetaTypes()
 {
     qRegisterMetaType<Seconds>("Seconds");
@@ -48,17 +50,25 @@ void registerCommonMetaTypes()
     qRegisterMetaType<Enums::AttachmentStatus>("Enums::AttachmentStatus");
     qRegisterMetaType<Enums::MessageStatus>("Enums::MessageStatus");
 
-    qRegisterMetaType<vm::UserId>("UserId");
-    qRegisterMetaType<vm::Jid>("Jid");
-    qRegisterMetaType<vm::Contact::Id>("Contact::Id");
-    qRegisterMetaType<vm::Message>("Message");
-    qRegisterMetaType<vm::Message::Id>("Message::Id");
-    qRegisterMetaType<vm::Message::Status>("Message::Status");
-    qRegisterMetaType<vm::Messages>("Messages");
-    qRegisterMetaType<vm::Chat>("Chat");
-    qRegisterMetaType<vm::Chat::Id>("Chat::Id");
-    qRegisterMetaType<vm::Chat::UnreadCount>("Chat::UnreadCount");
-    qRegisterMetaType<vm::Chats>("Chats");
+    qRegisterMetaType<UserId>("UserId");
+    qRegisterMetaType<Jid>("Jid");
+    qRegisterMetaType<Contact::Id>("Contact::Id");
+    qRegisterMetaType<Message>("Message");
+    qRegisterMetaType<Message::Id>("Message::Id");
+    qRegisterMetaType<Message::Status>("Message::Status");
+    qRegisterMetaType<Messages>("Messages");
+    qRegisterMetaType<Chat>("Chat");
+    qRegisterMetaType<Chat::Id>("Chat::Id");
+    qRegisterMetaType<Chat::UnreadCount>("Chat::UnreadCount");
+    qRegisterMetaType<Chats>("Chats");
+    qRegisterMetaType<QueueMessage>("QueueMessage");
+    qRegisterMetaType<QueueMessages>("QueueMessages");
 
     qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");
 }
+
+QueueMessage::QueueMessage(const Message &msg, const Contact::Id &senderId, const Contact::Id &recipientId)
+    : Message(msg)
+    , senderId(senderId)
+    , recipientId(recipientId)
+{}
