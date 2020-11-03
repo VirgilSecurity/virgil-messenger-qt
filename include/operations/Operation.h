@@ -32,42 +32,84 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/MessageOperation.h"
+#ifndef VM_OPERATION_H
+#define VM_OPERATION_H
 
-#include "models/SendMessageOperation.h"
+#include <deque>
 
-using namespace vm;
+#include <QObject>
 
-MessageOperation::MessageOperation(const GlobalMessage &message, QObject *parent)
-    : Operation(QString("Message [%1]").arg(message.id), parent)
-    , m_message(message)
-{}
+#include "VSQCommon.h"
 
-const GlobalMessage *MessageOperation::message() const
+Q_DECLARE_LOGGING_CATEGORY(lcOperation)
+
+namespace vm
 {
-    return &m_message;
+class Operation : public QObject
+{
+    Q_OBJECT
+
+public:
+    enum class Status
+    {
+        Created,
+        Started,
+        Failed,
+        Invalid,
+        Finished
+    };
+
+    Operation(const QString &name, QObject *parent);
+    ~Operation() override;
+
+    void start();
+    // Cleanup and deleteLater operation with children
+    void drop();
+    void dropChildren();
+
+    QString name() const;
+    Status status() const;
+
+    void appendChild(Operation *child);
+    void prependChild(Operation *child);
+    bool hasChildren() const;
+    Operation *firstChild();
+    Operation *lastChild();
+
+    // Repeatable operation can be started again after finish
+    void setRepeatable(bool repeatable);
+
+signals:
+    void started();
+    void failed();
+    void invalidated();
+    void finished();
+
+protected:
+    void fail();
+    void invalidate();
+    void finish();
+
+    void cleanupOnce();
+
+    virtual void run();
+    virtual void cleanup();
+    virtual bool populateChildren();
+    virtual void connectChild(Operation *child);
+
+private:
+    bool setStatus(const Status &status);
+
+    void startNextChild();
+    void onChildInvalidated();
+
+    QString m_name;
+    Status m_status = Status::Created;
+    bool m_repeatable = false;
+
+    std::deque<Operation *> m_children;
+    bool m_cleanedUp = false;
+};
 }
 
-void MessageOperation::connectChild(Operation *child)
-{
-    Operation::connectChild(child);
-    connect(child, &Operation::failed, this, std::bind(&MessageOperation::setStatus, this, Message::Status::Failed));
-    connect(child, &Operation::invalidated, this, std::bind(&MessageOperation::setStatus, this, Message::Status::InvalidM));
-    connect(child, &Operation::finished, this, std::bind(&MessageOperation::onChildFinished, this, child));
-}
-
-void MessageOperation::setStatus(const Message::Status &status)
-{
-    if (m_message.status == status) {
-        return;
-    }
-    m_message.status = status;
-    emit statusChanged(status);
-}
-
-void MessageOperation::onChildFinished(const Operation *child)
-{
-    if (dynamic_cast<const SendMessageOperation *>(child)) {
-        setStatus(Message::Status::Sent);
-    }
-}
+#endif // VM_OPERATION_H

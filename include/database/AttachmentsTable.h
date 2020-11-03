@@ -48,6 +48,10 @@ public:
 
 signals:
     void createAttachment(const Attachment &attachment);
+    void updateStatus(const Attachment::Id &attachmentId, const Attachment::Status &status);
+    void updateUrl(const Attachment::Id &attachmentId, const QUrl &url);
+    void updateExtras(const Attachment::Id &attachmentId, const Attachment::Type &type, const QVariant &extras);
+    void updateLocalPath(const Attachment::Id &attachmentId, const QString &localPath);
 
     void errorOccurred(const QString &errorText);
 
@@ -55,6 +59,10 @@ private:
     bool create() override;
 
     void onCreateAttachment(const Attachment &attachment);
+    void onUpdateStatus(const Attachment::Id &attachmentId, const Attachment::Status &status);
+    void onUpdateUrl(const Attachment::Id &attachmentId, const QUrl &url);
+    void onUpdateExtras(const Attachment::Id &attachmentId, const Attachment::Type &type, const QVariant &extras);
+    void onUpdateLocalPath(const Attachment::Id &attachmentId, const QString &localPath);
 };
 }
 

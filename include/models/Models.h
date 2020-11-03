@@ -37,17 +37,19 @@
 
 #include <QObject>
 
+class QNetworkAccessManager;
 class QThread;
+
 class VSQMessenger;
 class VSQSettings;
 
 namespace vm
 {
 class AttachmentsModel;
-class AttachmentsQueue;
 class ChatsModel;
 class MessagesModel;
 class MessagesQueue;
+class FileLoader;
 class UserDatabase;
 
 class Models : public QObject
@@ -58,13 +60,11 @@ class Models : public QObject
     Q_PROPERTY(MessagesModel *messages READ messages CONSTANT)
 
 public:
-    Models(VSQMessenger *messenger, VSQSettings *settings, UserDatabase *userDatabase, QObject *parent);
+    Models(VSQMessenger *messenger, VSQSettings *settings, UserDatabase *userDatabase, QNetworkAccessManager *networkAccessManager, QObject *parent);
     ~Models() override;
 
     const AttachmentsModel *attachments() const;
     AttachmentsModel *attachments();
-    const AttachmentsQueue *attachmentsQueue() const;
-    AttachmentsQueue *attachmentsQueue();
     const ChatsModel *chats() const;
     ChatsModel *chats();
     const MessagesModel *messages() const;
@@ -72,13 +72,15 @@ public:
     const MessagesQueue *messagesQueue() const;
     MessagesQueue *messagesQueue();
 
+signals:
+    void notificationCreated(const QString &notification);
+
 private:
     AttachmentsModel *m_attachments;
-    AttachmentsQueue *m_attachmentsQueue;
     ChatsModel *m_chats;
     MessagesModel *m_messages;
+    FileLoader *m_fileLoader;
     MessagesQueue *m_messagesQueue;
-
     QThread *m_queueThread;
 };
 }

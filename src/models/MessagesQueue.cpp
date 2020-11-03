@@ -40,26 +40,28 @@
 #include "Utils.h"
 #include "database/MessagesTable.h"
 #include "database/UserDatabase.h"
-#include "models/AttachmentsQueue.h"
-#include "models/MessageOperation.h"
-#include "models/Operation.h"
-#include "models/SendMessageOperation.h"
+#include "models/FileLoader.h"
+#include "operations/DownloadAttachmentOperation.h"
+#include "operations/MessageOperation.h"
+#include "operations/MessageOperationFactory.h"
+#include "operations/Operation.h"
 
 using namespace vm;
 
-MessagesQueue::MessagesQueue(VSQMessenger *messenger, UserDatabase *userDatabase, AttachmentsQueue *attachmentsQueue, QObject *parent)
-    : QObject(parent)
+MessagesQueue::MessagesQueue(const VSQSettings *settings, VSQMessenger *messenger, UserDatabase *userDatabase, FileLoader *fileLoader, QObject *parent)
+    : Operation("Queue", parent)
     , m_messenger(messenger)
     , m_userDatabase(userDatabase)
-    , m_attachmentsQueue(attachmentsQueue)
-    , m_root(new Operation("Queue", this))
+    , m_factory(new MessageOperationFactory(settings, messenger, fileLoader, this))
 {
-    m_root->setInfinite();
-    attachmentsQueue->setParent(this);
+    setRepeatable(true);
+    //
     connect(userDatabase, &UserDatabase::userIdChanged, this, &MessagesQueue::setUserId);
     //
-    connect(this, &MessagesQueue::pushMessage, this, &MessagesQueue::onPushMessage);
+    connect(this, &MessagesQueue::pushMessageOperation, this, &MessagesQueue::onPushMessage);
+    connect(this, &MessagesQueue::pushDownloadOperation, this, &MessagesQueue::onPushDownloadOperation);
     connect(this, &MessagesQueue::sendNotSentMessages, this, &MessagesQueue::onSendNotSentMessages);
+    connect(fileLoader, &FileLoader::ready, this, &MessagesQueue::onSendNotSentMessages);
 }
 
 MessagesQueue::~MessagesQueue()
@@ -72,7 +74,7 @@ void MessagesQueue::setUserId(const UserId &userId)
         return;
     }
 
-    m_root->dropChildren();
+    dropChildren();
     m_userId = userId;
     if (!userId.isEmpty()) {
         connect(m_userDatabase->messagesTable(), &MessagesTable::notSentMessagesFetched, this, &MessagesQueue::setMessages);
@@ -82,41 +84,45 @@ void MessagesQueue::setUserId(const UserId &userId)
 
 void MessagesQueue::setMessages(const GlobalMessages &messages)
 {
+    qCDebug(lcOperation) << "Queued" << messages.size() << "unsent messages";
     for (auto &m : messages) {
-        createAppendOperation(m);
+        appendMessageOperation(m);
     }
-    if (m_root->hasChildren()) {
-        m_root->start();
+    if (hasChildren()) {
+        start();
     }
 }
 
-bool MessagesQueue::createAppendOperation(const GlobalMessage &message)
+void MessagesQueue::connectMessageOperation(MessageOperation *op)
 {
-    auto op = new MessageOperation(message, this);
-    // Append attachment operations
-    m_attachmentsQueue->appendOperations(op);
-    // Append send message operation
-    if (message.senderId == m_userId) {
-        if (message.status == Message::Status::Created || message.status == Message::Status::Failed) {
-            op->appendChild(new SendMessageOperation(op, m_messenger->xmpp(), m_messenger->xmppURL()));
-        }
-    }
-    // Check for empty
-    if (!op->hasChildren()) {
-        return false;
-    }
-    // Setup connections
     connect(op, &MessageOperation::statusChanged, this, std::bind(&MessagesQueue::onMessageOperationStatusChanged, this, op));
-    // Append to root
-    m_root->appendChild(op);
-    return true;
+    connect(op, &MessageOperation::attachmentStatusChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentStatusChanged, this, op));
+    connect(op, &MessageOperation::attachmentProgressChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentProgressChanged, this, op));
+    connect(op, &MessageOperation::attachmentUrlChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentUrlChanged, this, op));
+    connect(op, &MessageOperation::attachmentExtrasChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentExtrasChanged, this, op));
+    connect(op, &MessageOperation::attachmentLocalPathChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentLocalPathChanged, this, op));
+}
+
+void MessagesQueue::appendMessageOperation(const GlobalMessage &message)
+{
+    auto op = new MessageOperation(message, m_factory, this);
+    connectMessageOperation(op);
+    appendChild(op);
 }
 
 void MessagesQueue::onPushMessage(const GlobalMessage &message)
 {
-    if (createAppendOperation(message)) {
-        m_root->start();
-    }
+    appendMessageOperation(message);
+    start();
+}
+
+void MessagesQueue::onPushDownloadOperation(const GlobalMessage &message, const QString &filePath)
+{
+    auto op = new DownloadAttachmentOperation(message, m_factory, this, filePath);
+    connectMessageOperation(op);
+    connect(op, &Operation::finished, this, std::bind(&MessagesQueue::notificationCreated, this, tr("File was downloaded")));
+    prependChild(op);
+    start();
 }
 
 void MessagesQueue::onSendNotSentMessages()
@@ -128,6 +134,41 @@ void MessagesQueue::onSendNotSentMessages()
 
 void MessagesQueue::onMessageOperationStatusChanged(const MessageOperation *operation)
 {
-    const auto m = operation->message();
-    emit messageStatusChanged(m->id, m->contactId, m->status);
+    const auto &m = *operation->message();
+    emit messageStatusChanged(m.id, m.contactId, m.status);
+}
+
+void MessagesQueue::onMessageOperationAttachmentStatusChanged(const MessageOperation *operation)
+{
+    const auto &m = *operation->message();
+    const auto &a = *m.attachment;
+    emit attachmentStatusChanged(a.id, m.contactId, a.status);
+}
+
+void MessagesQueue::onMessageOperationAttachmentProgressChanged(const MessageOperation *operation)
+{
+    const auto &m = *operation->message();
+    const auto &a = *m.attachment;
+    emit attachmentProgressChanged(a.id, m.contactId, a.bytesLoaded, a.bytesTotal);
+}
+
+void MessagesQueue::onMessageOperationAttachmentUrlChanged(const MessageOperation *operation)
+{
+    const auto &m = *operation->message();
+    const auto &a = *m.attachment;
+    emit attachmentUrlChanged(a.id, m.contactId, a.url);
+}
+
+void MessagesQueue::onMessageOperationAttachmentExtrasChanged(const MessageOperation *operation)
+{
+    const auto &m = *operation->message();
+    const auto &a = *m.attachment;
+    emit attachmentExtrasChanged(a.id, m.contactId, a.type, a.extras);
+}
+
+void MessagesQueue::onMessageOperationAttachmentLocalPathChanged(const MessageOperation *operation)
+{
+    const auto &m = *operation->message();
+    const auto &a = *m.attachment;
+    emit attachmentLocalPathChanged(a.id, m.contactId, a.localPath);
 }

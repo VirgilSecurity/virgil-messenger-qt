@@ -39,6 +39,8 @@
 
 #include "VSQCommon.h"
 
+class VSQSettings;
+
 namespace vm
 {
 class Models;
@@ -48,7 +50,7 @@ class AttachmentsController : public QObject
     Q_OBJECT
 
 public:
-    explicit AttachmentsController(Models *models, QObject *parent);
+    explicit AttachmentsController(VSQSettings *settings, Models *models, QObject *parent);
 
     Q_INVOKABLE void saveAs(const Message::Id &messageId, const QVariant &fileUrl);
     Q_INVOKABLE void download(const Message::Id &messageId);
@@ -57,9 +59,15 @@ public:
     void setUserId(const UserId &userId);
     void setContactId(const Contact::Id &contactId);
 
-private:
-    //void pushMessageOptions(const Message &message, const QueueOptions &options);
+signals:
+    void openPreviewRequested(const QUrl &url);
+    void notificationCreated(const QString &notification);
 
+private:
+    void downloadAttachment(const GlobalMessage &message);
+    Optional<GlobalMessage> findMessage(const Message::Id &messageId) const;
+
+    VSQSettings *m_settings;
     Models *m_models;
     UserId m_userId;
     Contact::Id m_contactId;

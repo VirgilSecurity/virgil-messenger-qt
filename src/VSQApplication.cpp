@@ -69,7 +69,7 @@ VSQApplication::VSQApplication()
     , m_validator(new Validator(this))
     , m_messenger(m_networkAccessManager, &m_settings, m_validator)
     , m_userDatabase(new UserDatabase(m_settings.databaseDir(), nullptr))
-    , m_models(&m_messenger, &m_settings, m_userDatabase, this)
+    , m_models(&m_messenger, &m_settings, m_userDatabase, m_networkAccessManager, this)
     , m_databaseThread(new QThread())
     , m_controllers(&m_messenger, &m_settings, &m_models, m_userDatabase, this)
     , m_keyboardEventFilter(new KeyboardEventFilter(this))
@@ -80,6 +80,9 @@ VSQApplication::VSQApplication()
 
     registerCommonMetaTypes();
     qRegisterMetaType<KeyboardEventFilter *>("KeyboardEventFilter*");
+
+    connect(&m_models, &Models::notificationCreated, this, &VSQApplication::notificationCreated);
+    connect(&m_controllers, &Controllers::notificationCreated, this, &VSQApplication::notificationCreated);
 
     QThread::currentThread()->setObjectName("MainThread");
     m_userDatabase->moveToThread(m_databaseThread);

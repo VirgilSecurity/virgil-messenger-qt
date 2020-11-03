@@ -49,6 +49,9 @@ public:
     explicit MessagesModel(QObject *parent);
     ~MessagesModel() override;
 
+    void setUserId(const UserId &userId);
+    void setContactId(const Contact::Id &contactId);
+
     void setMessages(const Messages &messages);
     Message createMessage(const Chat::Id &chatId, const Contact::Id &authorId, const QString &body, const Optional<Attachment> &attachment);
     void writeMessage(const Message &message);
@@ -57,7 +60,13 @@ public:
     bool setMessageStatus(const Message::Id &messageId, const Message::Status &status);
     void markAllAsRead();
 
-    Optional<Message> findById(const Message::Id &messageId) const;
+    void setAttachmentStatus(const Attachment::Id &attachmentId, const Attachment::Status &status);
+    void setAttachmentProgress(const Attachment::Id &attachmentId, const DataSize &bytesLoaded, const DataSize &bytesTotal);
+    void setAttachmentUrl(const Attachment::Id &attachmentId, const QUrl &url);
+    void setAttachmentExtras(const Attachment::Id &attachmentId, const QVariant &extras);
+    void setAttachmentLocalPath(const Attachment::Id &attachmentId, const QString &localPath);
+
+    Optional<GlobalMessage> findById(const Message::Id &messageId) const;
 
 private:
     enum Roles
@@ -90,10 +99,16 @@ private:
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
+    void updateAttachment(const Attachment::Id &attachmentId, const QVector<int> &roles, const std::function<bool (Attachment &)> &update);
+
     Optional<int> findRowById(const Message::Id &messageId) const;
+    Optional<int> findRowByAttachmentId(const Attachment::Id &attachmentId) const;
     void invalidateRow(const int row, const QVector<int> &roles = {});
+    void invalidateModel(const QModelIndex &index, const QVector<int> &roles);
 
     Messages m_messages;
+    UserId m_userId;
+    Contact::Id m_contactId;
 };
 }
 

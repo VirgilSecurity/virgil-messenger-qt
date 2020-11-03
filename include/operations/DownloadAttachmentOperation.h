@@ -32,19 +32,28 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/AttachmentsQueue.h"
+#ifndef VM_DOWNLOADATTACHMENTOPERATION_H
+#define VM_DOWNLOADATTACHMENTOPERATION_H
 
-#include "Core.h"
-#include "Settings.h"
+#include "MessageOperation.h"
 
-using namespace vm;
-
-AttachmentsQueue::AttachmentsQueue(const QDir &cacheDir, QObject *parent)
-    : QObject(parent)
-    , m_cacheDir(cacheDir)
-{}
-
-void AttachmentsQueue::appendOperations(const MessageOperation *parent)
+namespace vm
 {
-    // FIXME(fpohtmeh): implement
+class FileLoader;
+
+class DownloadAttachmentOperation : public MessageOperation
+{
+    Q_OBJECT
+
+public:
+    DownloadAttachmentOperation(const GlobalMessage &message, MessageOperationFactory *factory, QObject *parent,
+                                const QString &filePath);
+
+private:
+    bool populateChildren() override;
+
+    QString m_filePath;
+};
 }
+
+#endif // VM_DOWNLOADATTACHMENTOPERATION_H

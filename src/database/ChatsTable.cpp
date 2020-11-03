@@ -64,7 +64,7 @@ void ChatsTable::onFetch()
     ScopedConnection connection(*database());
     auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectChats"));
     if (!query) {
-        qCCritical(lcDatabase) << "ChatsTable::processFetch error";
+        qCCritical(lcDatabase) << "ChatsTable::onFetch error";
         emit errorOccurred(tr("Failed to fetch chats"));
     }
     else {
@@ -92,7 +92,7 @@ void ChatsTable::onCreateChat(const Chat &chat)
         const DatabaseUtils::BindValues values{{ ":contactId", chat.contactId }};
         auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("checkChatByContact"), values);
         if (!query) {
-            qCCritical(lcDatabase) << "ChatsTable::processCreateChat check error";
+            qCCritical(lcDatabase) << "ChatsTable::onCreateChat check error";
             emit errorOccurred(tr("Failed to find chat"));
             return;
         }
@@ -115,7 +115,7 @@ void ChatsTable::onCreateChat(const Chat &chat)
         qCDebug(lcDatabase) << "Chat was inserted into table" << chat.contactId;
     }
     else {
-        qCCritical(lcDatabase) << "ChatsTable::processCreateChat insertion error";
+        qCCritical(lcDatabase) << "ChatsTable::onCreateChat insertion error";
         emit errorOccurred(tr("Failed to insert chat"));
         return;
     }
@@ -130,7 +130,7 @@ void ChatsTable::onResetUnreadCount(const Chat &chat)
         qCDebug(lcDatabase) << "Chat unread count was reset" << chat.id;
     }
     else {
-        qCCritical(lcDatabase) << "ChatsTable::processResetUnreadCount error";
+        qCCritical(lcDatabase) << "ChatsTable::onResetUnreadCount error";
         emit errorOccurred(tr("Failed to reset unread count"));
     }
 }
@@ -148,7 +148,7 @@ void ChatsTable::onUpdateLastMessage(const Message &message, const Chat::UnreadC
         qCDebug(lcDatabase) << "Last message was updated for chat" << message.chatId << "unread" << unreadMessageCount;
     }
     else {
-        qCCritical(lcDatabase) << "ChatsTable::processUpdateLastMessage error";
+        qCCritical(lcDatabase) << "ChatsTable::onUpdateLastMessage error";
         emit errorOccurred(tr("Failed to update last message"));
     }
 }

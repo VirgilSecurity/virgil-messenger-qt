@@ -55,14 +55,14 @@ bool VSQContactManager::addContact(const QString &jid, const QString &name, cons
 
     const auto status = find(jid);
     if (status.exists) {
-        qCWarning(lcContactManager) << "Contact already added:" << jid;
+        qCDebug(lcContactManager) << "Contact already added:" << jid;
     }
     else if (!m_manager->addItem(jid, name)) {
         return setLastErrorText(tr("Contact adding failed"));
     }
 
     if (status.subscriptionType == SubscriptionType::Both) {
-        qCWarning(lcContactManager) << "Contact already subscribed" << jid;
+        qCDebug(lcContactManager) << "Contact already subscribed" << jid;
     }
     else if (!m_manager->subscribe(jid, reason)) {
         return setLastErrorText(tr("Contact subscription failed"));

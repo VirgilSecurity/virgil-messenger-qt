@@ -70,6 +70,9 @@ public:
     const MessagesController *messages() const;
     MessagesController *messages();
 
+signals:
+    void notificationCreated(const QString &notification);
+
 private:
     AttachmentsController *m_attachments;
     UsersController *m_users;

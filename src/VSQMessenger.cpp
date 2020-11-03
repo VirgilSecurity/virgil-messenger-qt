@@ -87,38 +87,6 @@ Q_LOGGING_CATEGORY(lcMessenger, "messenger")
 
 using namespace vm;
 
-// Helper struct to categorize transfers
-struct TransferId
-{
-    enum class Type
-    {
-        File,
-        Thumbnail
-    };
-
-    TransferId() = default;
-    TransferId(const QString &messageId, const Type type)
-        : messageId(messageId)
-        , type(type)
-    {}
-    ~TransferId() = default;
-
-    static TransferId parse(const QString &rawTransferId)
-    {
-        const auto parts = rawTransferId.split(';');
-        return TransferId(parts.front(), (parts.back() == "thumb") ? Type::Thumbnail : Type::File);
-    }
-
-    operator QString() const
-    {
-        return messageId + ((type == Type::Thumbnail) ? QLatin1String(";thumb") : QLatin1String(";file"));
-    }
-
-    QString messageId;
-    Type type = Type::File;
-};
-
-
 /******************************************************************************/
 VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSettings *settings, Validator *validator)
     : QObject()
@@ -150,14 +118,6 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSetti
 
     // Signal connection
     connect(this, SIGNAL(fireError(QString)), this, SLOT(disconnect()));
-    connect(this, &VSQMessenger::downloadThumbnail, this, &VSQMessenger::onDownloadThumbnail);
-
-    // FIXME(fpohtmeh): use first connection
-//    // Uploading
-//    connect(m_transferManager, &VSQCryptoTransferManager::fireReadyToUpload, this,  &VSQMessenger::fireReady, Qt::QueuedConnection);
-//    connect(m_transferManager, &VSQCryptoTransferManager::statusChanged, this, &VSQMessenger::onAttachmentStatusChanged);
-//    connect(m_transferManager, &VSQCryptoTransferManager::progressChanged, this, &VSQMessenger::onAttachmentProgressChanged);
-//    connect(m_transferManager, &VSQCryptoTransferManager::fileDecrypted, this, &VSQMessenger::onAttachmentDecrypted);
 
     // Connect XMPP signals
     connect(&m_xmpp, SIGNAL(connected()), this, SLOT(onConnected()), Qt::QueuedConnection);
@@ -569,58 +529,6 @@ bool VSQMessenger::subscribeToContact(const Contact::Id &contactId)
     return m_contactManager->addContact(contactId + "@" + xmppURL(), contactId, QString());
 }
 
-void VSQMessenger::onDownloadThumbnail(const MessageV0 message, const QString sender)
-{
-    // TODO(fpohtmeh): remove
-//    qCDebug(lcTransferManager) << "Downloading of thumbnail for message:" << message.messageId;
-//    auto attachment = *message.attachment;
-//    if (attachment.thumbnailPath.isEmpty()) {
-//        attachment.thumbnailPath = m_attachmentBuilder.generateThumbnailFileName();
-//    }
-//    auto future = QtConcurrent::run([=]() {
-//        const TransferId id(message.messageId, TransferId::Type::Thumbnail);
-//        auto download = m_transferManager->startCryptoDownload(id, attachment.remoteThumbnailUrl, attachment.thumbnailPath, sender);
-//        bool success = false;
-//        QEventLoop loop;
-//        connect(download, &VSQDownload::ended, [&](bool failed) {
-//            success = !failed;
-//            loop.quit();
-//        });
-//        loop.exec();
-//        if(!success) {
-//            m_sqlConversations->setAttachmentStatus(message.messageId, AttachmentV0::Status::Created);
-//        }
-//    });
-}
-
-void VSQMessenger::onAttachmentStatusChanged(const QString &uploadId, const Enums::AttachmentStatus status)
-{
-    const auto id = TransferId::parse(uploadId);
-    if (id.type == TransferId::Type::File) {
-        //m_sqlConversations->setAttachmentStatus(id.messageId, status);
-    }
-}
-
-void VSQMessenger::onAttachmentProgressChanged(const QString &uploadId, const DataSize bytesReceived, const DataSize bytesTotal)
-{
-    const auto id = TransferId::parse(uploadId);
-    if (id.type == TransferId::Type::File) {
-        //m_sqlConversations->setAttachmentProgress(id.messageId, bytesReceived, bytesTotal);
-    }
-}
-
-void VSQMessenger::onAttachmentDecrypted(const QString &uploadId, const QString &filePath)
-{
-    const auto id = TransferId::parse(uploadId);
-    if (id.type == TransferId::Type::File) {
-        //m_sqlConversations->setAttachmentFilePath(id.messageId, filePath);
-    }
-    else if (id.type == TransferId::Type::Thumbnail) {
-        //m_sqlConversations->setAttachmentThumbnailPath(id.messageId, filePath);
-    }
-}
-
-/******************************************************************************/
 QString
 VSQMessenger::_virgilURL() {
     QString res = qgetenv("VS_MSGR_VIRGIL");
@@ -826,113 +734,6 @@ VSQMessenger::onConnected() {
     registerForNotifications();
 }
 
-// TODO(fpohtmeh): remove
-/*
-Optional<Attachment> VSQMessenger::uploadAttachment(const Message &message)
-{
-    if (!m_transferManager->isReady()) {
-        qCDebug(lcMessenger) << "Transfer manager is not ready";
-        emit messageStatusChanged(message.id, m_recipient, Message::Status::Failed);
-        return NullOptional;
-    }
-
-    auto uploadedAttachment = *message.attachment;
-
-    bool thumbnailUploadNeeded = attachment.type == AttachmentV0::Type::Picture && attachment.remoteThumbnailUrl.isEmpty();
-    if (thumbnailUploadNeeded) {
-        qCDebug(lcMessenger) << "Thumbnail uploading...";
-        const TransferId uploadId(messageId, TransferId::Type::Thumbnail);
-        if (m_transferManager->hasTransfer(uploadId)) {
-            qCCritical(lcMessenger) << "Thumbnail upload for" << messageId << "already exists";
-            return NullOptional;
-        }
-        else if (auto upload = m_transferManager->startCryptoUpload(uploadId, attachment.thumbnailPath, recipient)) {
-            m_sqlConversations->setAttachmentStatus(messageId, AttachmentV0::Status::Loading);
-            QEventLoop loop;
-            QMutex guard;
-            auto con = connect(upload, &VSQUpload::ended, [&](bool failed) {
-                QMutexLocker l(&guard);
-                if (failed) {
-                    emit messageStatusChanged(messageId, recipient, Message::Status::Failed);
-                }
-                else {
-                    m_sqlConversations->setAttachmentThumbnailRemoteUrl(messageId, *upload->remoteUrl());
-                    uploadedAttachment.remoteThumbnailUrl = *upload->remoteUrl();
-                    thumbnailUploadNeeded = false;
-                }
-                loop.quit();
-            });
-            connect(upload, &VSQUpload::connectionChanged, &loop, &QEventLoop::quit);
-            qCDebug(lcMessenger) << "Upload waiting: start";
-            loop.exec();
-            QObject::disconnect(con);
-            QMutexLocker l(&guard);
-            qCDebug(lcMessenger) << "Upload waiting: end";
-            if (!thumbnailUploadNeeded) {
-                qCDebug(lcMessenger) << "Thumbnail was uploaded";
-            }
-        }
-        else  {
-            qCDebug(lcMessenger) << "Unable to start upload";
-            emit messageStatusChanged(messageId, recipient, Message::Status::Failed);
-            return NullOptional;
-        }
-    }
-
-    bool attachmentUploadNeeded = attachment.remoteUrl.isEmpty();
-    if (attachmentUploadNeeded) {
-        qCDebug(lcMessenger) << "Attachment uploading...";
-        const TransferId id(messageId, TransferId::Type::File);
-        if (m_transferManager->hasTransfer(messageId)) {
-            qCCritical(lcMessenger) << "Upload for" << messageId << "already exists";
-            return NullOptional;
-        }
-        else if (auto upload = m_transferManager->startCryptoUpload(id, attachment.filePath, recipient)) {
-            m_sqlConversations->setAttachmentStatus(messageId, AttachmentV0::Status::Loading);
-            uploadedAttachment.bytesTotal = upload->fileSize();
-            m_sqlConversations->setAttachmentBytesTotal(messageId, upload->fileSize());
-            QEventLoop loop;
-            QMutex guard;
-            auto con = connect(upload, &VSQUpload::ended, [&](bool failed) {
-                QMutexLocker locker(&guard);
-                if (failed) {
-                    emit messageStatusChanged(messageId, recipient, Message::Status::Failed);
-                }
-                else {
-                    m_sqlConversations->setAttachmentRemoteUrl(messageId, *upload->remoteUrl());
-                    uploadedAttachment.remoteUrl = *upload->remoteUrl();
-                    attachmentUploadNeeded = false;
-                }
-                loop.quit();
-            });
-            connect(upload, &VSQUpload::connectionChanged, &loop, &QEventLoop::quit);
-            qCDebug(lcMessenger) << ": start";
-            loop.exec();
-            QObject::disconnect(con);
-            QMutexLocker locker(&guard);
-            qCDebug(lcMessenger) << "Upload waiting: end";
-            if (!attachmentUploadNeeded) {
-                qCDebug(lcMessenger) << "Attachment was uploaded";
-            }
-        }
-        else {
-            qCDebug(lcMessenger) << "Unable to start upload";
-            emit messageStatusChanged(messageId, recipient, Message::Status::Failed);
-            return NullOptional;
-        }
-    }
-
-    if (thumbnailUploadNeeded || attachmentUploadNeeded) {
-        qCDebug(lcMessenger) << "Thumbnail or/and attachment were not uploaded";
-        return NullOptional;
-    }
-    qCDebug(lcMessenger) << "Everything was uploaded";
-    m_sqlConversations->setAttachmentStatus(messageId, AttachmentV0::Status::Loaded);
-    uploadedAttachment.status = AttachmentV0::Status::Loaded;
-    return uploadedAttachment;
-}
-*/
-
 void
 VSQMessenger::checkState() {
     if (vs_messenger_virgil_is_signed_in() && (m_xmpp.state() == QXmppClient::DisconnectedState)) {
@@ -977,54 +778,6 @@ VSQMessenger::onError(QXmppClient::Error err) {
 void VSQMessenger::setApplicationActive(bool active)
 {
     m_lastActivityManager->setEnabled(active);
-}
-
-void VSQMessenger::downloadAndProcess(MessageV0 message, const Function &func)
-{
-    // TODO(fpohtmeh): remove
-//    if (!message.attachment) {
-//        qCDebug(lcTransferManager) << "Message has no attachment:" << message.messageId;
-//        return;
-//    }
-//    auto future = QtConcurrent::run([=]() {
-//        auto msg = message;
-//        auto &attachment = *msg.attachment;
-//        auto &filePath = attachment.filePath;
-//        if (QFile::exists(filePath)) {
-//            func(msg);
-//            return;
-//        }
-//        // Update attachment filePath
-//        const auto downloads = m_settings->downloadsDir();
-//        if (filePath.isEmpty() || QFileInfo(filePath).dir() != downloads) {
-//            filePath = Utils::findUniqueFileName(downloads.filePath(attachment.fileName));
-//        }
-//        const TransferId id(msg.messageId, TransferId::Type::File);
-//        auto download = m_transferManager->startCryptoDownload(id, attachment.remoteUrl, filePath, msg.sender);
-//        bool success = false;
-//        QEventLoop loop;
-//        QMutex guard;
-//        auto con = connect(download, &VSQDownload::ended, [&](bool failed) {
-//            QMutexLocker l(&guard);
-//            success = !failed;
-//            loop.quit();
-//        });
-//        connect(m_transferManager, &VSQCryptoTransferManager::fileDecrypted, download, [=](const QString &id, const QString &filePath) {
-//            qCDebug(lcTransferManager) << "Comparing of downloaded file with requested..." << filePath;
-//            if (TransferId::parse(id).messageId == msg.messageId) {
-//                auto msgWithPath = msg;
-//                msgWithPath.attachment->filePath = filePath;
-//                func(msgWithPath);
-//            }
-//        });
-//        loop.exec();
-//        QObject::disconnect(con);
-//        QMutexLocker l(&guard);
-
-//        if(!success) {
-//            m_sqlConversations->setAttachmentStatus(message.messageId, AttachmentV0::Status::Created);
-//        }
-//    });
 }
 
 void
@@ -1072,5 +825,3 @@ VSQMessenger::onStateChanged(QXmppClient::State state) {
         emit fireConnecting();
     }
 }
-
-/******************************************************************************/

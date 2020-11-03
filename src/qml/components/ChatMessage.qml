@@ -134,8 +134,8 @@ Control {
                         id: progressBar
                         anchors.centerIn: parent
                         size: 40
-                        visible: chatMessage.attachmentStatus == Enums.AttachmentStatus.Created || chatMessage.attachmentStatus == Enums.AttachmentStatus.Loading
-                        maxValue: chatMessage.attachmentBytesTotal
+                        visible: chatMessage.attachmentStatus == Enums.AttachmentStatus.Loading
+                        maxValue: Math.max(1, chatMessage.attachmentBytesTotal)
                         value: Math.min(0.99 * maxValue, Math.max(0.01 * maxValue, chatMessage.attachmentBytesLoaded))
                         animated: visible
                     }

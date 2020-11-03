@@ -41,6 +41,8 @@
 #include <QThread>
 #include <QUuid>
 
+Q_LOGGING_CATEGORY(lcUtils, "utils")
+
 using namespace vm;
 
 QString Utils::createUuid()
@@ -84,12 +86,12 @@ bool Utils::isValidUrl(const QUrl &url)
 QString Utils::urlToLocalFile(const QUrl &url)
 {
 #if defined (Q_OS_ANDROID)
-    qDebug() << "Android file url (before encoding):" << url.toString();
+    qCDebug(lcUtils) << "Android file url (before encoding):" << url.toString();
     auto res = QUrl::fromPercentEncoding(url.toString().toUtf8());
-    qDebug() << "Android file url:" << res;
+    qCDebug(lcUtils) << "Android file url:" << res;
     return res;
 #else
-    qDebug() << "File url:" << url.toLocalFile();
+    qCDebug(lcUtils) << "File url:" << url.toLocalFile();
     return url.toLocalFile();
 #endif
 }
@@ -210,6 +212,11 @@ QString Utils::printableMessageBody(const Message &message)
     return message.body.left(30).replace('\n', ' ');
 }
 
+QString Utils::printableLoadProgress(const DataSize &loaded, const DataSize &total)
+{
+    return QString("%1% (%2/%3)").arg(qRound(100 * double(loaded) / total)).arg(loaded).arg(total);
+}
+
 Optional<QString> Utils::readTextFile(const QString &filePath)
 {
     QFile file(filePath);
@@ -269,36 +276,30 @@ Message Utils::messageFromJson(const QByteArray &json)
 {
     // Get message from JSON
     auto doc = QJsonDocument::fromJson(json);
-    qDebug() << "JSON for parsing:" << doc;
+    qCDebug(lcUtils) << "JSON for parsing:" << doc;
     const auto type = doc["type"].toString();
-    const auto payload = doc["payload"];
+    const auto payloadObject = doc["payload"];
 
     Message message;
     if (type == QLatin1String("text")) {
-        message.body = payload["body"].toString();
+        message.body = payloadObject["body"].toString();
         return message;
     }
-    // FIXME(fpohtmeh): implement
-    /*
-    AttachmentV0 attachment;
+
+    const auto attachmentObject = doc["attachment"];
+    Attachment attachment;
     attachment.id = Utils::createUuid();
-    attachment.remoteUrl = payload["url"].toString();
-    attachment.fileName = payload["fileName"].toString();
-    attachment.displayName = payload["displayName"].toString();
-    attachment.bytesTotal = payload["bytesTotal"].toInt();
-    message.message = attachment.displayName;
+    attachment.fileName = attachmentObject["fileName"].toString();
+    attachment.size = attachmentObject["size"].toInt();
+    attachment.url = attachmentObject["url"].toString();
     if (type == QLatin1String("picture")) {
-    attachment.type = AttachmentV0::Type::Picture;
-    attachment.remoteThumbnailUrl = payload["thumbnailUrl"].toString();
-    attachment.thumbnailSize = QSize(payload["thumbnailWidth"].toInt(), payload["thumbnailHeight"].toInt());
+        attachment.type = Attachment::Type::Picture;
     }
     else {
-    attachment.type = AttachmentV0::Type::File;
+        attachment.type = Attachment::Type::File;
     }
     message.attachment = attachment;
-    return message;
-    */
-    qDebug() << "Received message: " << message.body;
+    qCDebug(lcUtils) << "Parsed JSON message: " << message.body;
     return message;
 }
 
@@ -312,21 +313,17 @@ QByteArray Utils::messageToJson(const Message &message)
         payloadObject.insert("body", message.body);
     }
     else {
-        if (attachment->type == AttachmentV0::Type::Picture) {
+        QJsonObject attachmentObject;
+        if (attachment->type == Attachment::Type::Picture) {
             mainObject.insert("type", "picture");
-// FIXME(fpohtmeh): implement
-//            payloadObject.insert("thumbnailUrl", attachment->remoteThumbnailUrl.toString());
-//            payloadObject.insert("thumbnailWidth", attachment->thumbnailSize.width());
-//            payloadObject.insert("thumbnailHeight", attachment->thumbnailSize.height());
         }
         else {
             mainObject.insert("type", "file");
         }
-        // FIXME(fpohtmeh): implement
-//        payloadObject.insert("url", attachment->remoteUrl.toString());
-//        payloadObject.insert("fileName", attachment->fileName);
-//        payloadObject.insert("displayName", attachment->displayName);
-//        payloadObject.insert("bytesTotal", attachment->bytesTotal);
+        attachmentObject.insert("fileName", attachment->fileName);
+        attachmentObject.insert("size", attachment->size);
+        attachmentObject.insert("url", attachment->url.toString());
+        mainObject.insert("attachment", attachmentObject);
     }
     mainObject.insert("payload", payloadObject);
 

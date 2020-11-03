@@ -45,6 +45,7 @@
 #include "VSQMessenger.h"
 #include "Utils.h"
 #include "controllers/ChatsController.h"
+#include "database/AttachmentsTable.h"
 #include "database/MessagesTable.h"
 #include "database/UserDatabase.h"
 #include "models/AttachmentsModel.h"
@@ -65,9 +66,16 @@ MessagesController::MessagesController(VSQMessenger *messenger, Models *models, 
     // User database
     connect(userDatabase, &UserDatabase::opened, this, &MessagesController::setupTableConnections);
     connect(userDatabase, &UserDatabase::userIdChanged, this, &MessagesController::setUserId);
+    connect(userDatabase, &UserDatabase::userIdChanged, m_models->messages(), &MessagesModel::setUserId);
     // Queue
-    connect(this, &MessagesController::messageCreated, messagesQueue, &MessagesQueue::pushMessage);
+    connect(this, &MessagesController::messageCreated, messagesQueue, &MessagesQueue::pushMessageOperation);
     connect(messagesQueue, &MessagesQueue::messageStatusChanged, this, &MessagesController::setMessageStatus);
+    connect(messagesQueue, &MessagesQueue::attachmentStatusChanged, this, &MessagesController::setAttachmentStatus);
+    connect(messagesQueue, &MessagesQueue::attachmentProgressChanged, this, &MessagesController::setAttachmentProgress);
+    connect(messagesQueue, &MessagesQueue::attachmentUrlChanged, this, &MessagesController::setAttachmentUrl);
+    connect(messagesQueue, &MessagesQueue::attachmentExtrasChanged, this, &MessagesController::setAttachmentExtras);
+    connect(messagesQueue, &MessagesQueue::attachmentLocalPathChanged, this, &MessagesController::setAttachmentLocalPath);
+    // Chats
     connect(m_models->chats(), &ChatsModel::chatUpdated, this, &MessagesController::onChatUpdated);
     // Network
     connect(messenger, &VSQMessenger::fireReady, messagesQueue, &MessagesQueue::sendNotSentMessages);
@@ -96,7 +104,7 @@ void MessagesController::loadMessages(const Chat &chat)
 void MessagesController::createSendMessage(const QString &body, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
 {
     if (body.isEmpty() && !attachmentUrl.isValid()) {
-        qDebug() << "Text and attachment are empty";
+        qCDebug(lcController) << "Text and attachment are empty";
         return;
     }
     const auto attachment = m_models->attachments()->createAttachment(attachmentUrl.toUrl(), attachmentType);
@@ -104,7 +112,7 @@ void MessagesController::createSendMessage(const QString &body, const QVariant &
     const Chat::UnreadCount unreadCount = 0; // message can be created in current chat only
     m_models->chats()->updateLastMessage(message, unreadCount);
     m_userDatabase->writeMessage(message, unreadCount);
-    emit messageCreated({ message, m_chat.contactId, m_userId, m_chat.contactId });
+    emit messageCreated({ message, m_userId, m_chat.contactId, m_userId, m_chat.contactId });
 }
 
 void MessagesController::setupTableConnections()
@@ -128,12 +136,12 @@ void MessagesController::onChatUpdated(const Chat &chat)
 
 void MessagesController::setMessageStatus(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status)
 {
-    qDebug() << "Set message status:" << messageId << "contact" << contactId << "status" << status;
+    qCDebug(lcController) << "Set message status:" << messageId << "contact" << contactId << "status" << status;
     if (status == Message::Status::Read) {
-        qWarning() << "Marking of single message as read isn't supported yet";
+        qCWarning(lcModel) << "Marking of single message as read isn't supported yet";
     }
     else if (status == Message::Status::Created) {
-        qWarning() << "Set message status to created isn't allowed";
+        qCWarning(lcModel) << "Set message status to created isn't allowed";
     }
     else {
         if (contactId == m_chat.contactId) {
@@ -150,6 +158,55 @@ void MessagesController::setDeliveredStatus(const Jid &jid, const Message::Id &m
     setMessageStatus(messageId, Utils::contactIdFromJid(jid), Message::Status::Delivered);
 }
 
+void MessagesController::setAttachmentStatus(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Status &status)
+{
+    qCDebug(lcController) << "Set attachment status:" << attachmentId << "contact" << contactId << "status" << status;
+    if (contactId == m_chat.contactId) {
+        m_models->messages()->setAttachmentStatus(attachmentId, status);
+    }
+    m_models->chats()->updateLastMessageAttachmentStatus(attachmentId, status);
+    m_userDatabase->attachmentsTable()->updateStatus(attachmentId, status);
+}
+
+void MessagesController::setAttachmentProgress(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &bytesLoaded, const DataSize &bytesTotal)
+{
+    //qCDebug(lcController) << "Set attachment progress:" << attachmentId << "contact" << contactId << "progress" << Utils::printableLoadProgress(bytesLoaded, bytesTotal);
+    if (contactId == m_chat.contactId) {
+        m_models->messages()->setAttachmentProgress(attachmentId, bytesLoaded, bytesTotal);
+    }
+    m_models->chats()->updateLastMessageAttachmentProgress(attachmentId, bytesLoaded, bytesTotal);
+}
+
+void MessagesController::setAttachmentUrl(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QUrl &url)
+{
+    qCDebug(lcController) << "Set attachment url:" << attachmentId << "contact" << contactId << "url" << url;
+    if (contactId == m_chat.contactId) {
+        m_models->messages()->setAttachmentUrl(attachmentId, url);
+    }
+    m_models->chats()->updateLastMessageAttachmentUrl(attachmentId, url);
+    m_userDatabase->attachmentsTable()->updateUrl(attachmentId, url);
+}
+
+void MessagesController::setAttachmentExtras(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Type &type, const QVariant &extras)
+{
+    qCDebug(lcController) << "Set attachment extras:" << attachmentId << "contact" << contactId << "type" << type << Utils::extrasToJson(extras, type);
+    if (contactId == m_chat.contactId) {
+        m_models->messages()->setAttachmentExtras(attachmentId, extras);
+    }
+    m_models->chats()->updateLastMessageAttachmentExtras(attachmentId, extras);
+    m_userDatabase->attachmentsTable()->updateExtras(attachmentId, type, extras);
+}
+
+void MessagesController::setAttachmentLocalPath(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &localPath)
+{
+    qCDebug(lcController) << "Set attachment local path:" << attachmentId << "contact" << contactId << "path" << localPath;
+    if (contactId == m_chat.contactId) {
+        m_models->messages()->setAttachmentLocalPath(attachmentId, localPath);
+    }
+    m_models->chats()->updateLastMessageAttachmentLocalPath(attachmentId, localPath);
+    m_userDatabase->attachmentsTable()->updateLocalPath(attachmentId, localPath);
+}
+
 void MessagesController::receiveMessage(const QXmppMessage &msg)
 {
     const auto senderId = Utils::contactIdFromJid(msg.from());
@@ -164,6 +221,9 @@ void MessagesController::receiveMessage(const QXmppMessage &msg)
     auto message = *decryptedMessage;
     message.id = msg.id();
     message.timestamp = timestamp;
+    if (message.attachment) {
+        message.attachment->messageId = message.id;
+    }
 
     const auto messages = m_models->messages();
     const auto chats = m_models->chats();
@@ -172,10 +232,10 @@ void MessagesController::receiveMessage(const QXmppMessage &msg)
     if (senderId == m_userId) {
         message.status = Message::Status::Sent;
         if (recipientId == m_chat.contactId) {
-            qDebug() << "Received carbon message to current chat";
+            qCDebug(lcController) << "Received carbon message to current chat";
         }
         else {
-            qDebug() << "Received carbon message to not current chat";
+            qCDebug(lcController) << "Received carbon message to not current chat";
             auto senderChat = chats->findByContact(recipientId);
             if (senderChat) {
                 chat = *senderChat;
@@ -188,10 +248,10 @@ void MessagesController::receiveMessage(const QXmppMessage &msg)
     }
     else {
         if (senderId == m_chat.contactId) {
-            qDebug() << "Received a message to current chat";
+            qCDebug(lcController) << "Received a message to current chat";
         }
         else {
-            qDebug() << "Received a message to not current chat";
+            qCDebug(lcController) << "Received a message to not current chat";
             auto senderChat = chats->findByContact(senderId);
             if (senderChat) {
                 chat = *senderChat;
@@ -215,5 +275,5 @@ void MessagesController::receiveMessage(const QXmppMessage &msg)
     else {
         m_userDatabase->writeMessage(message, chat.unreadMessageCount);
     }
-    emit messageCreated({ message, chat.contactId, senderId, recipientId });
+    emit messageCreated({ message, m_userId, chat.contactId, senderId, recipientId });
 }

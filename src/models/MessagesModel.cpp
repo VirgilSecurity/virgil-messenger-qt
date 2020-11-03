@@ -45,6 +45,16 @@ MessagesModel::MessagesModel(QObject *parent)
 MessagesModel::~MessagesModel()
 {}
 
+void MessagesModel::setUserId(const UserId &userId)
+{
+    m_userId = userId;
+}
+
+void MessagesModel::setContactId(const Contact::Id &contactId)
+{
+    m_contactId = contactId;
+}
+
 void MessagesModel::setMessages(const Messages &messages)
 {
     beginResetModel();
@@ -78,7 +88,7 @@ bool MessagesModel::setMessageStatus(const Message::Id &messageId, const Message
 {
     const auto messageRow = findRowById(messageId);
     if (!messageRow) {
-        qWarning() << "Message not found! Id" << messageId;
+        qCWarning(lcModel) << "Message not found! Id" << messageId;
         return true;
     }
     auto &message = m_messages[*messageRow];
@@ -101,12 +111,73 @@ void MessagesModel::markAllAsRead()
     }
 }
 
-Optional<Message> MessagesModel::findById(const Message::Id &messageId) const
+void MessagesModel::setAttachmentStatus(const Attachment::Id &attachmentId, const Attachment::Status &status)
+{
+    updateAttachment(attachmentId, { AttachmentStatusRole }, [=](Attachment &a) {
+        if (a.status == status) {
+            return false;
+        }
+        a.status = status;
+        return true;
+    });
+}
+
+void MessagesModel::setAttachmentProgress(const Attachment::Id &attachmentId, const DataSize &bytesLoaded, const DataSize &bytesTotal)
+{
+    updateAttachment(attachmentId, { AttachmentBytesLoadedRole, AttachmentBytesTotalRole }, [=](Attachment &a) {
+        if (a.bytesLoaded == bytesLoaded && a.bytesTotal == bytesTotal) {
+            return false;
+        }
+        a.bytesLoaded = bytesLoaded;
+        a.bytesTotal = bytesTotal;
+        return true;
+    });
+}
+
+void MessagesModel::setAttachmentUrl(const Attachment::Id &attachmentId, const QUrl &url)
+{
+    updateAttachment(attachmentId, {}, [=](Attachment &a) {
+        if (a.url == url) {
+            return false;
+        }
+        a.url = url;
+        return true;
+    });
+}
+
+void MessagesModel::setAttachmentExtras(const Attachment::Id &attachmentId, const QVariant &extras)
+{
+    updateAttachment(attachmentId, { AttachmentImageSizeRole, AttachmentImagePathRole }, [=](Attachment &a) {
+        if (a.extras == extras) {
+            return false;
+        }
+        a.extras = extras;
+        return true;
+    });
+}
+
+void MessagesModel::setAttachmentLocalPath(const Attachment::Id &attachmentId, const QString &localPath)
+{
+    updateAttachment(attachmentId, { AttachmentFileExistsRole }, [=](Attachment &a) {
+        if (a.localPath == localPath) {
+            return false;
+        }
+        a.localPath = localPath;
+        return true;
+    });
+}
+
+Optional<GlobalMessage> MessagesModel::findById(const Message::Id &messageId) const
 {
     for (int i = 0, s = m_messages.size(); i < s; ++i) {
         auto &message = m_messages[i];
         if (message.id == messageId) {
-            return message;
+            Contact::Id senderId = m_userId;
+            Contact::Id recipientId = m_contactId;
+            if (message.authorId == recipientId) {
+                std::swap(senderId, recipientId);
+            }
+            return GlobalMessage(message, m_userId, m_contactId, senderId, recipientId);
         }
     }
     return NullOptional;
@@ -207,7 +278,7 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
     }
     case AttachmentBytesTotalRole:
     {
-        return attachment ? qMax(attachment->size, attachment->bytesTotal) : 0;
+        return attachment ? attachment->bytesTotal : 0;
     }
     case AttachmentBytesLoadedRole:
     {
@@ -268,10 +339,34 @@ QHash<int, QByteArray> MessagesModel::roleNames() const
     };
 }
 
+void MessagesModel::updateAttachment(const Attachment::Id &attachmentId, const QVector<int> &roles, const std::function<bool (Attachment &)> &update)
+{
+    const auto messageRow = findRowByAttachmentId(attachmentId);
+    if (!messageRow) {
+        qCWarning(lcModel) << "Message not found! Attachment id" << attachmentId;
+        return;
+    }
+    auto &attachment = *m_messages[*messageRow].attachment;
+    if (update(attachment) && !roles.empty()) {
+        invalidateRow(*messageRow, roles);
+    }
+}
+
 Optional<int> MessagesModel::findRowById(const Message::Id &messageId) const
 {
     for (int i = m_messages.size() - 1; i >= 0; --i) {
         if (m_messages[i].id == messageId) {
+            return i;
+        }
+    }
+    return NullOptional;
+}
+
+Optional<int> MessagesModel::findRowByAttachmentId(const Attachment::Id &attachmentId) const
+{
+    for (int i = m_messages.size() - 1; i >= 0; --i) {
+        const auto a = m_messages[i].attachment;
+        if (a && a->id == attachmentId) {
             return i;
         }
     }
@@ -285,17 +380,20 @@ void MessagesModel::invalidateRow(const int row, const QVector<int> &roles)
         allRoles << FailedRole;
     }
     if (!allRoles.empty()) {
-        const auto rowIndex = index(row);
-        emit dataChanged(rowIndex, rowIndex, allRoles);
+        invalidateModel(index(row), allRoles);
     }
     if (allRoles.isEmpty() || allRoles.contains(StatusRole)) {
         if (row > 0) {
-            const auto rowIndex = index(row - 1);
-            emit dataChanged(rowIndex, rowIndex, { StatusRole, InRowRole });
+            invalidateModel(index(row - 1), { StatusRole, InRowRole });
         }
         if (row < rowCount() - 1) {
-            const auto rowIndex = index(row + 1);
-            emit dataChanged(rowIndex, rowIndex, { FirstInRowRole });
+            invalidateModel(index(row + 1), { FirstInRowRole });
         }
     }
+}
+
+void MessagesModel::invalidateModel(const QModelIndex &index, const QVector<int> &roles)
+{
+    //qCDebug(lcModel) << "Invalidated model" << roles << "at row" << index.row();
+    emit dataChanged(index, index, roles);
 }

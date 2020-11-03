@@ -48,11 +48,12 @@ using namespace vm;
 Controllers::Controllers(VSQMessenger *messenger, VSQSettings *settings,
                          Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
-    , m_attachments(new AttachmentsController(models, this))
+    , m_attachments(new AttachmentsController(settings, models, this))
     , m_users(new UsersController(messenger, models, userDatabase, this))
     , m_chats(new ChatsController(models, userDatabase, this))
     , m_messages(new MessagesController(messenger, models, userDatabase, this))
 {
+    connect(m_attachments, &AttachmentsController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_users, &UsersController::userIdChanged, m_attachments, &AttachmentsController::setUserId);
     connect(m_users, &UsersController::userIdChanged, m_chats, &ChatsController::loadChats);
     connect(m_chats, &ChatsController::currentContactIdChanged, m_attachments, &AttachmentsController::setContactId);

@@ -54,7 +54,7 @@ ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, Contro
     , m_attachmentPreviewState(new AttachmentPreviewState(this))
     , m_backupKeyState(new BackupKeyState(m_messenger, this))
     , m_chatListState(new ChatListState(controllers->chats(), this))
-    , m_chatState(new ChatState(m_messenger, this))
+    , m_chatState(new ChatState(controllers, m_messenger->lastActivityManager(), this))
     , m_downloadKeyState(new DownloadKeyState(controllers->users(), this))
     , m_newChatState(new NewChatState(controllers->chats(), this))
     , m_signInAsState(new SignInAsState(this))

@@ -131,7 +131,7 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
-        Messenger.informationRequested.connect(showPopupInform)
+        app.notificationCreated.connect(showPopupInform)
         crashReporter.crashReportRequested.connect(sendReportAsk.open)
         crashReporter.reportSent.connect(showPopupSuccess)
         crashReporter.reportErrorOccurred.connect(showPopupError)

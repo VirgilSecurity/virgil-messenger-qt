@@ -58,13 +58,13 @@ Optional<Attachment> AttachmentsModel::createAttachment(const QUrl &url, const A
     }
     QFileInfo localInfo(Utils::urlToLocalFile(url));
     if (!localInfo.exists()) {
-        qWarning() << tr("File doesn't exist"); // TODO(fpohtmeh): forward error to UI
+        qCWarning(lcModel) << tr("File doesn't exist"); // TODO(fpohtmeh): forward error to UI
         return NullOptional;
     }
 
     // Check file size
     if (localInfo.size() == 0) {
-        qWarning() << tr("File is empty");
+        qCWarning(lcModel) << tr("File is empty");
         return NullOptional;
     }
 #ifdef VS_ANDROID
@@ -73,7 +73,7 @@ Optional<Attachment> AttachmentsModel::createAttachment(const QUrl &url, const A
     const DataSize fileSize = localInfo.size();
 #endif
     if (fileSize > m_settings->attachmentMaxFileSize()) {
-        qWarning() << tr("File exceeds size limit");
+        qCWarning(lcModel) << tr("File exceeds size limit");
         return NullOptional;
     }
 

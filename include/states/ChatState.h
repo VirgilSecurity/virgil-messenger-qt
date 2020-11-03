@@ -39,17 +39,19 @@
 
 #include "VSQCommon.h"
 
-class VSQMessenger;
+class VSQLastActivityManager;
 
 namespace vm
 {
+class Controllers;
+
 class ChatState : public QState
 {
     Q_OBJECT
     Q_PROPERTY(QString lastActivityText READ lastActivityText WRITE setLastActivityText NOTIFY lastActivityTextChanged)
 
 public:
-    ChatState(VSQMessenger *messenger, QState *parent);
+    ChatState(Controllers *controllers, VSQLastActivityManager *lastActivityManager, QState *parent);
 
     QString lastActivityText() const;
     void setLastActivityText(const QString &text);
@@ -62,7 +64,7 @@ signals:
 private:
     void onMessageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);
 
-    VSQMessenger *m_messenger;
+    Controllers *m_controllers;
     QString m_lastActivityText;
 };
 }

@@ -85,6 +85,9 @@ public:
     QString organizationDisplayName() const;
     QString applicationDisplayName() const;
 
+signals:
+    void notificationCreated(const QString &notification);
+
 private slots:
     void
     onApplicationStateChanged(Qt::ApplicationState state);

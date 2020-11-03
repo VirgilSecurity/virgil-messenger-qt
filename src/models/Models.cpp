@@ -38,27 +38,30 @@
 #include <QThread>
 
 #include "Settings.h"
+#include "VSQMessenger.h"
 #include "models/AttachmentsModel.h"
-#include "models/AttachmentsQueue.h"
 #include "models/ChatsModel.h"
 #include "models/MessagesModel.h"
 #include "models/MessagesQueue.h"
+#include "models/FileLoader.h"
 
 using namespace vm;
 
-Models::Models(VSQMessenger *messenger, VSQSettings *settings, UserDatabase *userDatabase, QObject *parent)
+Models::Models(VSQMessenger *messenger, VSQSettings *settings, UserDatabase *userDatabase, QNetworkAccessManager *networkAccessManager, QObject *parent)
     : QObject(parent)
     , m_attachments(new AttachmentsModel(settings, this))
-    , m_attachmentsQueue(new AttachmentsQueue(settings->attachmentCacheDir(), nullptr))
     , m_chats(new ChatsModel(this))
     , m_messages(new MessagesModel(this))
-    , m_messagesQueue(new MessagesQueue(messenger, userDatabase, m_attachmentsQueue, nullptr))
+    , m_fileLoader(new FileLoader(messenger->xmpp(), networkAccessManager, this))
+    , m_messagesQueue(new MessagesQueue(settings, messenger, userDatabase, m_fileLoader, nullptr))
     , m_queueThread(new QThread())
 {
     qRegisterMetaType<AttachmentsModel *>("AttachmentsModel*");
     qRegisterMetaType<ChatsModel *>("ChatsModel*");
     qRegisterMetaType<MessagesModel *>("MessagesModel*");
     qRegisterMetaType<QSortFilterProxyModel *>("QSortFilterProxyModel*");
+
+    connect(m_messagesQueue, &MessagesQueue::notificationCreated, this, &Models::notificationCreated);
 
     m_messagesQueue->moveToThread(m_queueThread);
     m_queueThread->setObjectName("QueueThread");

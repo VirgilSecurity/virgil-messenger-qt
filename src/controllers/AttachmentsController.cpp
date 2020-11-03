@@ -34,6 +34,7 @@
 
 #include "controllers/AttachmentsController.h"
 
+#include "Settings.h"
 #include "Utils.h"
 #include "models/Models.h"
 #include "models/MessagesModel.h"
@@ -41,39 +42,48 @@
 
 using namespace vm;
 
-AttachmentsController::AttachmentsController(Models *models, QObject *parent)
+AttachmentsController::AttachmentsController(VSQSettings *settings, Models *models, QObject *parent)
     : QObject(parent)
+    , m_settings(settings)
     , m_models(models)
 {}
 
 void AttachmentsController::saveAs(const Message::Id &messageId, const QVariant &fileUrl)
 {
-    const auto message = m_models->messages()->findById(messageId);
-    if (!message) {
-        qWarning() << "Message not found! Id:" << messageId;
-        return;
+    qCDebug(lcController) << "Saving of attachment" << messageId << "as" << fileUrl;
+    if (const auto message = findMessage(messageId)) {
+        const auto &a = *message->attachment;
+        if (a.localPath.isEmpty() || !QFile::exists(a.localPath)) {
+            downloadAttachment(*message);
+        }
+        else {
+            const auto filePath = Utils::urlToLocalFile(fileUrl.toUrl());
+            QFile::copy(a.localPath, filePath);
+            emit notificationCreated(tr("Attachment was saved"));
+        }
     }
-    //pushMessageOptions(*message, { QueueFlag::SaveAttachmentAs, Utils::urlToLocalFile(fileUrl.toUrl()) });
 }
 
 void AttachmentsController::download(const Message::Id &messageId)
 {
-    const auto message = m_models->messages()->findById(messageId);
-    if (!message) {
-        qWarning() << "Message not found! Id:" << messageId;
-        return;
+    qCDebug(lcController) << "Downloading of attachment" << messageId;
+    if (const auto message = findMessage(messageId)) {
+        downloadAttachment(*message);
     }
-    //pushMessageOptions(*message, { QueueFlag::DownloadAttachment, QString() });
 }
 
 void AttachmentsController::open(const Message::Id &messageId)
 {
-    const auto message = m_models->messages()->findById(messageId);
-    if (!message) {
-        qWarning() << "Message not found! Id:" << messageId;
-        return;
+    qCDebug(lcController) << "Opening of attachment" << messageId;
+    if (const auto message = findMessage(messageId)) {
+        const auto &a = *message->attachment;
+        if (a.localPath.isEmpty() || !QFile::exists(a.localPath)) {
+            downloadAttachment(*message);
+        }
+        else {
+            emit openPreviewRequested(Utils::localFileToUrl(a.localPath));
+        }
     }
-    //pushMessageOptions(*message, { QueueFlag::OpenAttachment, QString() });
 }
 
 void AttachmentsController::setUserId(const UserId &userId)
@@ -86,12 +96,23 @@ void AttachmentsController::setContactId(const Contact::Id &contactId)
     m_contactId = contactId;
 }
 
-//void AttachmentsController::pushMessageOptions(const Message &message, const QueueOptions &options)
-//{
-//    Contact::Id senderId = m_userId;
-//    Contact::Id recipientId = m_contactId;
-//    if (message.authorId == recipientId) {
-//        std::swap(senderId, recipientId);
-//    }
-//    m_models->messagesQueue()->pushMessageOptions(message, senderId, recipientId, options);
-//}
+void AttachmentsController::downloadAttachment(const GlobalMessage &message)
+{
+    const auto fileName = message.attachment->fileName;
+    const auto filePath = Utils::findUniqueFileName(m_settings->downloadsDir().filePath(fileName));
+    m_models->messagesQueue()->pushDownloadOperation(message, filePath);
+}
+
+Optional<GlobalMessage> AttachmentsController::findMessage(const Message::Id &messageId) const
+{
+    const auto message = m_models->messages()->findById(messageId);
+    if (!message) {
+        qCWarning(lcController) << "Message not found:" << messageId;
+        return NullOptional;
+    }
+    if (!message->attachment) {
+        qCWarning(lcController) << "Message has not attachment:" << messageId;
+        return NullOptional;
+    }
+    return message;
+}

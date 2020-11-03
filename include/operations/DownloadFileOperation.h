@@ -32,46 +32,30 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/SendMessageOperation.h"
+#ifndef VM_DOWNLOADFILEOPERATION_H
+#define VM_DOWNLOADFILEOPERATION_H
 
-#include <QXmppClient.h>
-#include <QXmppMessage.h>
+#include "LoadFileOperation.h"
 
-#include "Core.h"
-#include "Utils.h"
-#include "models/MessageOperation.h"
-
-using namespace vm;
-
-SendMessageOperation::SendMessageOperation(MessageOperation *parent, QXmppClient *xmpp, const QString &xmppUrl)
-    : Operation(QString("SendMessage [%1]").arg(parent->message()->id), parent)
-    , m_parent(parent)
-    , m_xmpp(xmpp)
-    , m_xmppUrl(xmppUrl)
-{}
-
-void SendMessageOperation::run()
+namespace vm
 {
-    const auto message = m_parent->message();
-    const auto encryptedStr = Core::encryptMessage(*message, message->recipientId);
-    if (!encryptedStr) {
-        qCDebug(lcOperation) << "Unable to encrypt message";
-        invalidate();
-    }
-    else {
-        const auto fromJID = Utils::createJid(message->senderId, m_xmppUrl);
-        const auto toJID = Utils::createJid(message->recipientId, m_xmppUrl);
+class DownloadFileOperation : public LoadFileOperation
+{
+    Q_OBJECT
 
-        QXmppMessage msg(fromJID, toJID, *encryptedStr);
-        msg.setReceiptRequested(true);
-        msg.setId(message->id);
+public:
+    DownloadFileOperation(MessageOperation *parent, FileLoader *fileLoader, const QString &filePath);
 
-        if (m_xmpp->sendPacket(msg)) {
-            qCDebug(lcOperation) << "Message sent:" << message->id;
-            finish();
-        } else {
-            qCDebug(lcOperation) << "Message NOT sent:" << message->id;
-            fail();
-        }
-    }
+    void run() override;
+
+private:
+    void connectReply(QNetworkReply *reply) override;
+
+    void onFinished();
+
+    MessageOperation *m_parent;
+    QUrl m_url;
+};
 }
+
+#endif // VM_DOWNLOADFILEOPERATION_H

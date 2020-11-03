@@ -170,14 +170,25 @@ HEADERS += \
         include/logging/VSQMessageLogContext.h \
         # Models
         include/models/AttachmentsModel.h \
-        include/models/AttachmentsQueue.h \
         include/models/ChatsModel.h \
+        include/models/FileLoader.h \
         include/models/MessagesModel.h \
-        include/models/MessageOperation.h \
         include/models/MessagesQueue.h \
         include/models/Models.h \
-        include/models/Operation.h \
-        include/models/SendMessageOperation.h \
+        # Operations
+        include/operations/CopyFileOperation.h \
+        include/operations/DecryptFileOperation.h \
+        include/operations/DownloadAttachmentOperation.h \
+        include/operations/DownloadFileOperation.h \
+        include/operations/EncryptFileOperation.h \
+        include/operations/LoadFileOperation.h \
+        include/operations/MakeThumbnailOperation.h \
+        include/operations/MessageOperation.h \
+        include/operations/MessageOperationFactory.h \
+        include/operations/Operation.h \
+        include/operations/OpenPreviewOperation.h \
+        include/operations/SendMessageOperation.h \
+        include/operations/UploadFileOperation.h \
         # Generated
         generated/include/VSQCustomer.h \
         # Thirdparty
@@ -248,14 +259,25 @@ SOURCES += \
         src/logging/VSQLogWorker.cpp \
         # Models
         src/models/AttachmentsModel.cpp \
-        src/models/AttachmentsQueue.cpp \
         src/models/ChatsModel.cpp \
+        src/models/FileLoader.cpp \
         src/models/MessagesModel.cpp \
-        src/models/MessageOperation.cpp \
         src/models/MessagesQueue.cpp \
         src/models/Models.cpp \
-        src/models/Operation.cpp \
-        src/models/SendMessageOperation.cpp
+        # Operations
+        src/operations/CopyFileOperation.cpp \
+        src/operations/DecryptFileOperation.cpp \
+        src/operations/DownloadAttachmentOperation.cpp \
+        src/operations/DownloadFileOperation.cpp \
+        src/operations/EncryptFileOperation.cpp \
+        src/operations/LoadFileOperation.cpp \
+        src/operations/MakeThumbnailOperation.cpp \
+        src/operations/MessageOperation.cpp \
+        src/operations/MessageOperationFactory.cpp \
+        src/operations/Operation.cpp \
+        src/operations/OpenPreviewOperation.cpp \
+        src/operations/SendMessageOperation.cpp \
+        src/operations/UploadFileOperation.cpp
 
 #
 #   Resources

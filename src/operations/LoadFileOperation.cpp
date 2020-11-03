@@ -1,0 +1,150 @@
+//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//
+//  All rights reserved.
+//
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are
+//  met:
+//
+//      (1) Redistributions of source code must retain the above copyright
+//      notice, this list of conditions and the following disclaimer.
+//
+//      (2) Redistributions in binary form must reproduce the above copyright
+//      notice, this list of conditions and the following disclaimer in
+//      the documentation and/or other materials provided with the
+//      distribution.
+//
+//      (3) Neither the name of the copyright holder nor the names of its
+//      contributors may be used to endorse or promote products derived from
+//      this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ''AS IS'' AND ANY EXPRESS OR
+//  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+//  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//  DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
+//  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+//  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+//  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+//  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+//  IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+//  POSSIBILITY OF SUCH DAMAGE.
+//
+//  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
+
+#include "operations/LoadFileOperation.h"
+
+#include <QNetworkReply>
+
+#include "Utils.h"
+#include "operations/MessageOperation.h"
+
+using namespace vm;
+
+LoadFileOperation::LoadFileOperation(const QString &name, MessageOperation *parent, FileLoader *fileLoader)
+    : Operation(name, parent)
+    , m_parent(parent)
+    , m_fileLoader(fileLoader)
+{
+    connect(this, &LoadFileOperation::updateProgress, this, &LoadFileOperation::onReplyProgressChanged);
+}
+
+void LoadFileOperation::setFilePath(const QString &filePath)
+{
+    if (m_filePath == filePath) {
+        return;
+    }
+    m_filePath = filePath;
+    closeFileHandle();
+}
+
+void LoadFileOperation::connectReply(QNetworkReply *reply)
+{
+    connect(reply, &QNetworkReply::finished, this, &LoadFileOperation::onReplyFinished);
+    connect(reply, &QNetworkReply::errorOccurred, this, &LoadFileOperation::onReplyErrorOccurred);
+    connect(reply, &QNetworkReply::sslErrors, this, &LoadFileOperation::onReplySslErrors);
+}
+
+bool LoadFileOperation::openFileHandle(const QIODevice::OpenMode &mode)
+{
+    if (m_filePath.isEmpty()) {
+        qCWarning(lcOperation) << "File path is empty";
+        invalidate();
+        return false;
+    }
+
+    if (mode == QFile::ReadOnly && !QFile::exists(m_filePath)) {
+        qCWarning(lcOperation) << "File doesn't exist" << m_filePath;
+        invalidate();
+        return false;
+    }
+
+    m_fileHandle.reset(new QFile(m_filePath));
+    if (!m_fileHandle->open(mode)) {
+        qCWarning(lcOperation) << "File can't be opened" << m_filePath;
+        invalidate();
+        return false;
+    }
+
+    return true;
+}
+
+void LoadFileOperation::closeFileHandle()
+{
+    m_fileHandle.reset();
+}
+
+QFile *LoadFileOperation::fileHandle()
+{
+    return &*m_fileHandle;
+}
+
+FileLoader *LoadFileOperation::fileLoader()
+{
+    return m_fileLoader;
+}
+
+QString LoadFileOperation::filePath() const
+{
+    return m_filePath;
+}
+
+void LoadFileOperation::onReplyFinished()
+{
+    if (m_bytesTotal > 0 && m_bytesLoaded >= m_bytesTotal) {
+        finish();
+    }
+    else {
+        qCWarning(lcOperation) << "Failed. Load file was processed partially";
+        fail();
+    }
+}
+
+void LoadFileOperation::onReplyProgressChanged(const DataSize &bytesLoaded, const DataSize &bytesTotal)
+{
+    if (bytesTotal <= 0) {
+        return; // HACK(fpohtmeh): reply sends zeros finally, ignore it
+    }
+    m_bytesLoaded = bytesLoaded;
+    m_bytesTotal = bytesTotal;
+    //qCDebug(lcOperation) << "Load progress:" << Utils::printableLoadProgress(bytesLoaded, bytesTotal);
+    if (bytesLoaded < bytesTotal) {
+        m_parent->setAttachmentProgress(bytesLoaded, bytesTotal);
+    }
+    else {
+        qCDebug(lcOperation) << "All bytes were processed, set load operation finished";
+        finish();
+    }
+}
+
+void LoadFileOperation::onReplyErrorOccurred()
+{
+    qCWarning(lcOperation) << "Upload error occurred";
+    fail();
+}
+
+void LoadFileOperation::onReplySslErrors()
+{
+    qCWarning(lcOperation) << "SSL errors occurred";
+    fail();
+}

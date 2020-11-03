@@ -72,7 +72,7 @@ void MessagesTable::onFetchChatMessages(const Chat::Id &chatId)
     const DatabaseUtils::BindValues values{{":chatId", chatId }};
     auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectChatMessages"), values);
     if (!query) {
-        qCCritical(lcDatabase) << "MessagesTable::processFetch error";
+        qCCritical(lcDatabase) << "MessagesTable::onFetch error";
         emit errorOccurred(tr("Failed to fetch messages"));
     }
     else {
@@ -95,7 +95,7 @@ void MessagesTable::onFetchNotSentMessages()
     };
     auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectNotSentMessages"), values);
     if (!query) {
-        qCCritical(lcDatabase) << "MessagesTable::processFetchFailed error";
+        qCCritical(lcDatabase) << "MessagesTable::onFetchFailed error";
         emit errorOccurred(tr("Failed to fetch failed messages"));
     }
     else {
@@ -105,7 +105,7 @@ void MessagesTable::onFetchNotSentMessages()
             const Contact::Id contactId = q.value("contactId").value<Contact::Id>();
             const Contact::Id senderId = q.value("senderId").value<Contact::Id>();
             const Contact::Id recipientId = q.value("recipientId").value<Contact::Id>();
-            messages.push_back({ *DatabaseUtils::readMessage(q), contactId, senderId, recipientId });
+            messages.push_back({ *DatabaseUtils::readMessage(q), m_userId, contactId, senderId, recipientId });
         }
         emit notSentMessagesFetched(messages);
     }
@@ -127,7 +127,7 @@ void MessagesTable::onCreateMessage(const Message &message)
         qCDebug(lcDatabase) << "Message was inserted into table" << message.id;
     }
     else {
-        qCCritical(lcDatabase) << "MessagesTable::processCreateMessage error";
+        qCCritical(lcDatabase) << "MessagesTable::onCreateMessage error";
         emit errorOccurred(tr("Failed to insert message"));
     }
 }
@@ -135,26 +135,6 @@ void MessagesTable::onCreateMessage(const Message &message)
 void MessagesTable::onUpdateStatus(const Message::Id &messageId, const Message::Status &status)
 {
     ScopedConnection connection(*database());
-    // Get message by id
-    Optional<Message> message;
-    {
-        const DatabaseUtils::BindValues values {
-            { ":id", messageId }
-        };
-        auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("getMessageById"), values);
-        if (query && query->next()) {
-            message = DatabaseUtils::readMessage(*query);
-            if (!message) {
-                qCWarning(lcDatabase) << "Message wasn't found in database:" << messageId;
-                return;
-            }
-            if (message->status == status) {
-                qCWarning(lcDatabase) << "Message has the same status. Nothing is updated";
-                return;
-            }
-        }
-    }
-    // Update message status
     const DatabaseUtils::BindValues values {
         { ":id", messageId },
         { ":status", static_cast<int>(status) }
@@ -164,7 +144,7 @@ void MessagesTable::onUpdateStatus(const Message::Id &messageId, const Message::
         qCDebug(lcDatabase) << "Message status was updated" << messageId << "status" << status;
     }
     else {
-        qCCritical(lcDatabase) << "MessagesTable::processUpdateStatus error";
+        qCCritical(lcDatabase) << "MessagesTable::onUpdateStatus error";
         emit errorOccurred(tr("Failed to update message status"));
     }
 }
@@ -182,7 +162,7 @@ void MessagesTable::onMarkAllAsRead(const Chat &chat)
         qCDebug(lcDatabase) << "All messages in chat marked as read" << chat.id << "contact" << chat.contactId;
     }
     else {
-        qCCritical(lcDatabase) << "MessagesTable::processMarkAllAsRead error";
+        qCCritical(lcDatabase) << "MessagesTable::onMarkAllAsRead error";
         emit errorOccurred(tr("Failed to mark messages as read"));
     }
 }

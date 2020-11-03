@@ -32,33 +32,29 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VS_MESSAGEOPERATION_H
-#define VS_MESSAGEOPERATION_H
+#include "operations/DecryptFileOperation.h"
 
-#include "Operation.h"
+#include <QDir>
 
-namespace vm
+#include "Core.h"
+#include "operations/MessageOperation.h"
+
+using namespace vm;
+
+DecryptFileOperation::DecryptFileOperation(MessageOperation *parent, const QString &encFilePath, const QString &filePath)
+    : Operation(QString("DecryptFile"), parent)
+    , m_parent(parent)
+    , m_encFilePath(encFilePath)
+    , m_filePath(filePath)
+{}
+
+void DecryptFileOperation::run()
 {
-class MessageOperation : public Operation
-{
-    Q_OBJECT
-
-public:
-    MessageOperation(const GlobalMessage &message, QObject *parent);
-
-    const GlobalMessage *message() const;
-
-signals:
-    void statusChanged(const Message::Status &status);
-
-private:
-    void connectChild(Operation *child) override;
-
-    void setStatus(const Message::Status &status);
-    void onChildFinished(const Operation *child);
-
-    GlobalMessage m_message;
-};
+    const auto senderId = m_parent->message()->senderId;
+    if (Core::decryptFile(m_encFilePath, m_filePath, senderId)) {
+        finish();
+    }
+    else {
+        invalidate();
+    }
 }
-
-#endif // VS_MESSAGEOPERATION_H

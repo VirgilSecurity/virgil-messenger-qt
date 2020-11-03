@@ -32,7 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/Operation.h"
+#include "operations/Operation.h"
 
 Q_LOGGING_CATEGORY(lcOperation, "operation")
 
@@ -45,7 +45,7 @@ Operation::Operation(const QString &name, QObject *parent)
 
 Operation::~Operation()
 {
-    cleanup();
+    cleanupOnce();
 }
 
 void Operation::start()
@@ -68,7 +68,7 @@ void Operation::drop()
 {
     qCDebug(lcOperation) << "Drop operation:" << name();
     dropChildren();
-    cleanup();
+    cleanupOnce();
     deleteLater();
 }
 
@@ -107,15 +107,25 @@ bool Operation::hasChildren() const
     return !m_children.empty();
 }
 
-void Operation::setInfinite()
+Operation *Operation::firstChild()
 {
-    m_infinite = true;
+    return hasChildren() ? m_children.front() : nullptr;
+}
+
+Operation *Operation::lastChild()
+{
+    return hasChildren() ? m_children.back() : nullptr;
+}
+
+void Operation::setRepeatable(bool repeatable)
+{
+    m_repeatable = repeatable;
 }
 
 void Operation::fail()
 {
     if (setStatus(Status::Failed)) {
-        cleanup();
+        cleanupOnce();
     }
 }
 
@@ -130,7 +140,7 @@ void Operation::finish()
     setStatus(Status::Finished);
 }
 
-void Operation::cleanup()
+void Operation::cleanupOnce()
 {
     if (m_cleanedUp) {
         return;
@@ -138,23 +148,23 @@ void Operation::cleanup()
     m_cleanedUp = true;
 
     for (auto child : m_children) {
-        child->cleanup();
+        child->cleanupOnce();
     }
-    stopRun();
+    cleanup();
 }
 
 void Operation::run()
-{}
-
-void Operation::stopRun()
 {
-    qCDebug(lcOperation) << "Stop operation:" << name();
+}
+
+void Operation::cleanup()
+{
+    qCDebug(lcOperation) << "Cleanup operation:" << name();
 }
 
 bool Operation::populateChildren()
 {
-    // TODO(fpohtmeh): remove method?
-    return false;
+    return hasChildren();
 }
 
 void Operation::connectChild(Operation *child)
@@ -176,7 +186,7 @@ bool Operation::setStatus(const Operation::Status &status)
     case Status::Created:
         return false;
     case Status::Started:
-        if (m_status != Status::Created && m_status != Status::Failed && !(m_infinite && m_status == Status::Finished)) {
+        if (m_status != Status::Created && m_status != Status::Failed && !(m_repeatable && m_status == Status::Finished)) {
             qCWarning(lcOperation) << "Unable to start operation";
             return false;
         }
@@ -221,6 +231,9 @@ void Operation::startNextChild()
             child->drop();
             m_children.pop_front();
         }
+        else {
+            break;
+        }
     }
     // Find not started children
     for (auto &child : m_children) {
@@ -235,7 +248,7 @@ void Operation::startNextChild()
 
 void Operation::onChildInvalidated()
 {
-    if (m_infinite) {
+    if (m_repeatable) {
         startNextChild();
     }
     else {

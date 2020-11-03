@@ -37,6 +37,8 @@
 
 #include "VSQCommon.h"
 
+Q_DECLARE_LOGGING_CATEGORY(lcUtils)
+
 namespace vm
 {
 namespace Utils
@@ -60,6 +62,8 @@ namespace Utils
     Jid createJid(const Contact::Id &contactId, const QString &xmppUrl);
 
     QString printableMessageBody(const Message &message);
+
+    QString printableLoadProgress(const DataSize &loaded, const DataSize &total);
 
     // File functions
 

@@ -78,12 +78,12 @@ void ChatsModel::resetUnreadCount(const Chat::Id &chatId)
 {
     const auto chatRow = findRowById(chatId);
     if (!chatRow) {
-        qWarning() << "Chat not found! Id" << chatId;
+        qCWarning(lcModel) << "Chat not found! Id" << chatId;
         return;
     }
     auto &chat = m_chats[*chatRow];
     chat.unreadMessageCount = 0;
-    qDebug() << "Unread message count was reset";
+    qCDebug(lcModel) << "Unread message count was reset";
     const auto chatIndex = index(*chatRow);
     emit dataChanged(chatIndex, chatIndex, { UnreadMessagesCountRole });
     emit chatUpdated(chat);
@@ -93,17 +93,19 @@ void ChatsModel::updateLastMessage(const Message &message, const Chat::UnreadCou
 {
     const auto chatRow = findRowById(message.chatId);
     if (!chatRow) {
-        qWarning() << "Chat not found! Id" << message.chatId;
+        qCWarning(lcModel) << "Chat not found! Id" << message.chatId;
         return;
     }
 
     auto &chat = m_chats[*chatRow];
-    qDebug() << "Last message was set to" << message.id;
+    if (!chat.lastMessage || chat.lastMessage->id != message.id) {
+        qCDebug(lcModel) << "Last message was set to" << message.id;
+    }
     chat.lastMessage = message;
     QVector<int> roles{ LastMessageBodyRole, LastEventTimeRole };
     if (unreadMessageCount != chat.unreadMessageCount) {
         chat.unreadMessageCount = unreadMessageCount;
-        qDebug() << "Unread message count was set to" << unreadMessageCount;
+        qCDebug(lcModel) << "Unread message count was set to" << unreadMessageCount;
         roles << UnreadMessagesCountRole;
     }
     const auto chatIndex = index(*chatRow);
@@ -113,18 +115,76 @@ void ChatsModel::updateLastMessage(const Message &message, const Chat::UnreadCou
 
 void ChatsModel::updateLastMessageStatus(const Message::Id &messageId, const Message::Status &status)
 {
-    for (int i = 0, s = m_chats.size(); i < s; ++i) {
-        auto &chat = m_chats[i];
-        if (!chat.lastMessage) {
-            continue;
-        }
-        auto &m = *chat.lastMessage;
-        if (m.id != messageId || m.status == status) {
-            continue;
-        }
-        m.status = status;
-        updateLastMessage(m, chat.unreadMessageCount);
+    auto messageRow = findRowByLastMessageId(messageId);
+    if (!messageRow) {
+        return;
     }
+    auto &chat = m_chats[*messageRow];
+    auto &m = *chat.lastMessage;
+    if (m.status == status) {
+        return;
+    }
+    m.status = status;
+    updateLastMessage(m, chat.unreadMessageCount);
+}
+
+void ChatsModel::updateLastMessageAttachmentStatus(const Attachment::Id &attachmentId, const Attachment::Status &status)
+{
+    updateLastMessageAttachment(attachmentId, [=](Attachment &a) {
+        if (a.status == status) {
+            return false;
+        }
+        a.status = status;
+        return true;
+    });
+}
+
+void ChatsModel::updateLastMessageAttachmentProgress(const Attachment::Id &attachmentId, const DataSize &bytesLoaded, const DataSize &bytesTotal)
+{
+    // TODO(fpohtmeh): need some optimization
+    /*
+    updateLastMessageAttachment(attachmentId, [=](Attachment &a) {
+        if (a.bytesLoaded == bytesLoaded && a.bytesTotal == bytesTotal) {
+            return false;
+        }
+        a.bytesLoaded = bytesLoaded;
+        a.bytesTotal = bytesTotal;
+        return true;
+    });
+    */
+}
+
+void ChatsModel::updateLastMessageAttachmentUrl(const Attachment::Id &attachmentId, const QUrl &url)
+{
+    updateLastMessageAttachment(attachmentId, [=](Attachment &a) {
+        if (a.url == url) {
+            return false;
+        }
+        a.url = url;
+        return true;
+    });
+}
+
+void ChatsModel::updateLastMessageAttachmentExtras(const Attachment::Id &attachmentId, const QVariant &extras)
+{
+    updateLastMessageAttachment(attachmentId, [=](Attachment &a) {
+        if (a.extras == extras) {
+            return false;
+        }
+        a.extras = extras;
+        return true;
+    });
+}
+
+void ChatsModel::updateLastMessageAttachmentLocalPath(const Attachment::Id &attachmentId, const QString &localPath)
+{
+    updateLastMessageAttachment(attachmentId, [=](Attachment &a) {
+        if (a.localPath == localPath) {
+            return false;
+        }
+        a.localPath = localPath;
+        return true;
+    });
 }
 
 Optional<Chat> ChatsModel::find(const Chat::Id &chatId) const
@@ -137,7 +197,7 @@ Optional<Chat> ChatsModel::find(const Chat::Id &chatId) const
 
 Optional<Chat> ChatsModel::findByContact(const Contact::Id &contactId) const
 {
-    if (const auto row = findRowByContact(contactId)) {
+    if (const auto row = findRowByContactId(contactId)) {
         return m_chats[*row];
     }
     return NullOptional;
@@ -150,7 +210,7 @@ bool ChatsModel::hasChat(const Chat::Id &chatId) const
 
 bool ChatsModel::hasChatWithContact(const Contact::Id &contactId) const
 {
-    return bool(findRowByContact(contactId));
+    return bool(findRowByContactId(contactId));
 }
 
 int ChatsModel::rowCount(const QModelIndex &parent) const
@@ -217,7 +277,29 @@ Optional<int> ChatsModel::findRowById(const Chat::Id &chatId) const
     return NullOptional;
 }
 
-Optional<int> ChatsModel::findRowByContact(const Contact::Id &contactId) const
+Optional<int> ChatsModel::findRowByLastMessageId(const Message::Id &messageId) const
+{
+    for (int i = 0, s = m_chats.size(); i < s; ++i) {
+        auto m = m_chats[i].lastMessage;
+        if (m && m->id == messageId) {
+            return i;
+        }
+    }
+    return NullOptional;
+}
+
+Optional<int> ChatsModel::findRowByLastMessageAttachmentId(const Attachment::Id &attachmentId) const
+{
+    for (int i = 0, s = m_chats.size(); i < s; ++i) {
+        auto m = m_chats[i].lastMessage;
+        if (m && m->attachment && m->attachment->id == attachmentId) {
+            return i;
+        }
+    }
+    return NullOptional;
+}
+
+Optional<int> ChatsModel::findRowByContactId(const Contact::Id &contactId) const
 {
     for (int i = 0, s = m_chats.size(); i < s; ++i) {
         if (m_chats[i].contactId == contactId) {
@@ -225,4 +307,18 @@ Optional<int> ChatsModel::findRowByContact(const Contact::Id &contactId) const
         }
     }
     return NullOptional;
+}
+
+void ChatsModel::updateLastMessageAttachment(const Attachment::Id &attachmentId, const std::function<bool (Attachment &)> &update)
+{
+    auto messageRow = findRowByLastMessageAttachmentId(attachmentId);
+    if (!messageRow) {
+        return;
+    }
+    auto &chat = m_chats[*messageRow];
+    auto &m = *chat.lastMessage;
+    auto &a = *m.attachment;
+    if (update(a)) {
+        updateLastMessage(m, chat.unreadMessageCount);
+    }
 }

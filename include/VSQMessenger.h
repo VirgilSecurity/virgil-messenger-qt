@@ -161,18 +161,11 @@ signals:
     void
     fireReady();
 
-    void chatEntryRequested(const QString &contact);
-
     void
     fireNewMessage(QString from, QString message);
 
     void
     fireCurrentUserChanged();
-
-    void openPreviewRequested(const QUrl &url);
-    void informationRequested(const QString &message);
-
-    void downloadThumbnail(const MessageV0 message, const QString sender, QPrivateSignal);
 
     // New signals
 
@@ -198,10 +191,6 @@ private slots:
     void onSslErrors(const QList<QSslError> &errors);
     void onStateChanged(QXmppClient::State state);
     void onProcessNetworkState(bool online);
-    void onDownloadThumbnail(const MessageV0 message, const QString sender);
-    void onAttachmentStatusChanged(const QString &uploadId, const Enums::AttachmentStatus status);
-    void onAttachmentProgressChanged(const QString &uploadId, const DataSize bytesReceived, const DataSize bytesTotal);
-    void onAttachmentDecrypted(const QString &uploadId, const QString &filePath);
 
     void registerForNotifications();
     void deregisterFromNotifications();
@@ -269,9 +258,6 @@ private:
 
     QString
     _caBundleFile();
-
-    using Function = std::function<void (const MessageV0 &message)>;
-    void downloadAndProcess(MessageV0 message, const Function &func);
 };
 
 Q_DECLARE_METATYPE(QXmppClient::Error)

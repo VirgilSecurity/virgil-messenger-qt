@@ -37,6 +37,8 @@
 
 #include "VSQCommon.h"
 
+Q_DECLARE_LOGGING_CATEGORY(lcCore)
+
 namespace vm
 {
 class Core

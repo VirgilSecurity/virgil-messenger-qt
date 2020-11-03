@@ -36,43 +36,61 @@
 #define VS_MESSAGESQUEUE_H
 
 #include "VSQCommon.h"
+#include "operations/Operation.h"
 
 class VSQMessenger;
+class VSQSettings;
 
 namespace vm
 {
-class AttachmentsQueue;
 class MessageOperation;
+class MessageOperationFactory;
 class Operation;
+class FileLoader;
 class UserDatabase;
 
-class MessagesQueue : public QObject
+class MessagesQueue : public Operation
 {
     Q_OBJECT
 
 public:
-    MessagesQueue(VSQMessenger *messenger, UserDatabase *userDatabase, AttachmentsQueue *attachmentsQueue, QObject *parent);
+    MessagesQueue(const VSQSettings *settings, VSQMessenger *messenger, UserDatabase *userDatabase, FileLoader *fileLoader, QObject *parent);
     ~MessagesQueue() override;
 
 signals:
-    void pushMessage(const GlobalMessage &message);
+    void pushMessageOperation(const GlobalMessage &message);
+    void pushDownloadOperation(const GlobalMessage &message, const QString &filePath);
     void sendNotSentMessages();
 
     void messageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status status);
+    void attachmentStatusChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Status &status);
+    void attachmentProgressChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &bytesLoaded, const DataSize &bytesTotal);
+    void attachmentUrlChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QUrl &url);
+    void attachmentExtrasChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Type &type, const QVariant &extras);
+    void attachmentLocalPathChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &localPath);
+
+    void notificationCreated(const QString &notification);
 
 private:
     void setUserId(const UserId &userId);
     void setMessages(const GlobalMessages &messages);
-    bool createAppendOperation(const GlobalMessage &message);
+
+    void connectMessageOperation(MessageOperation *op);
+    void appendMessageOperation(const GlobalMessage &message);
 
     void onPushMessage(const GlobalMessage &message);
+    void onPushDownloadOperation(const GlobalMessage &message, const QString &filePath);
     void onSendNotSentMessages();
     void onMessageOperationStatusChanged(const MessageOperation *operation);
+    void onMessageOperationAttachmentStatusChanged(const MessageOperation *operation);
+    void onMessageOperationAttachmentProgressChanged(const MessageOperation *operation);
+    void onMessageOperationAttachmentUrlChanged(const MessageOperation *operation);
+    void onMessageOperationAttachmentExtrasChanged(const MessageOperation *operation);
+    void onMessageOperationAttachmentLocalPathChanged(const MessageOperation *operation);
 
     VSQMessenger *m_messenger;
     UserDatabase *m_userDatabase;
-    AttachmentsQueue *m_attachmentsQueue;
-    Operation *m_root;
+    MessageOperationFactory *m_factory;
     UserId m_userId;
 };
 }

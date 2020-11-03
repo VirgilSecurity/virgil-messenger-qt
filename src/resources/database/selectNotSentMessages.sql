@@ -1,6 +1,7 @@
 SELECT
     messages.id AS messageId,
     messages.timestamp AS messageTimestamp,
+    messages.chatId AS messageChatId,
     messages.authorId AS messageAuthorId,
     messages.status AS messageStatus,
     messages.body AS messageBody,

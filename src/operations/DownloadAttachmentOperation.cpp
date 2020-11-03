@@ -32,29 +32,22 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VS_ATTACHMENTSQUEUE_H
-#define VS_ATTACHMENTSQUEUE_H
+#include "operations/DownloadAttachmentOperation.h"
 
-#include <QDir>
+#include "operations/MessageOperationFactory.h"
 
-#include "VSQCommon.h"
+using namespace vm;
 
-namespace vm
+DownloadAttachmentOperation::DownloadAttachmentOperation(const GlobalMessage &message, MessageOperationFactory *factory, QObject *parent,
+                                                         const QString &filePath)
+    : MessageOperation(message, factory, parent)
+    , m_filePath(filePath)
+{}
+
+bool DownloadAttachmentOperation::populateChildren()
 {
-class MessageOperation;
-
-class AttachmentsQueue : public QObject
-{
-    Q_OBJECT
-
-public:
-    explicit AttachmentsQueue(const QDir &cacheDir, QObject *parent);
-
-    void appendOperations(const MessageOperation *parent);
-
-private:
-    QDir m_cacheDir;
-};
+    if (factory()) {
+        factory()->populateDownloadDecryptChildren(this, m_filePath);
+    }
+    return hasChildren();
 }
-
-#endif // VS_ATTACHMENTSQUEUE_H

@@ -135,6 +135,7 @@ Optional<Message> DatabaseUtils::readMessage(const QSqlQuery &q, const QString &
     Message message;
     message.id = messageId;
     message.timestamp = q.value("messageTimestamp").toDateTime();
+    message.chatId = q.value("messageChatId").value<Chat::Id>();
     message.authorId = q.value("messageAuthorId").value<Contact::Id>();
     message.status = static_cast<Message::Status>(q.value("messageStatus").toInt());
     message.body = q.value("messageBody").toString();

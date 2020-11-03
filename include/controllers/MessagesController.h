@@ -70,8 +70,15 @@ private:
     void setUserId(const UserId &userId);
 
     void onChatUpdated(const Chat &chat);
+
     void setMessageStatus(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);
     void setDeliveredStatus(const Jid &jid, const Message::Id &messageId);
+    void setAttachmentStatus(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Status &status);
+    void setAttachmentProgress(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &bytesLoaded, const DataSize &bytesTotal);
+    void setAttachmentUrl(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QUrl &url);
+    void setAttachmentExtras(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Type &type, const QVariant &extras);
+    void setAttachmentLocalPath(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &localPath);
+
     void receiveMessage(const QXmppMessage &msg);
 
     VSQMessenger *m_messenger;

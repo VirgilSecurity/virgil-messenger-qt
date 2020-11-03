@@ -35,17 +35,20 @@
 #include "states/ChatState.h"
 
 #include "VSQLastActivityManager.h"
-#include "VSQMessenger.h"
+#include "controllers/AttachmentsController.h"
+#include "controllers/ChatsController.h"
+#include "controllers/MessagesController.h"
+#include "controllers/Controllers.h"
 
 using namespace vm;
 
-ChatState::ChatState(VSQMessenger *messenger, QState *parent)
+ChatState::ChatState(Controllers *controllers, VSQLastActivityManager *lastActivityManager, QState *parent)
     : QState(parent)
-    , m_messenger(messenger)
+    , m_controllers(controllers)
 {
-    connect(m_messenger, &VSQMessenger::openPreviewRequested, this, &ChatState::requestPreview);
-    connect(m_messenger, &VSQMessenger::messageStatusChanged, this, &ChatState::onMessageStatusChanged);
-    connect(m_messenger->lastActivityManager(), &VSQLastActivityManager::lastActivityTextChanged, this, &ChatState::setLastActivityText);
+    connect(m_controllers->attachments(), &AttachmentsController::openPreviewRequested, this, &ChatState::requestPreview);
+    connect(m_controllers->messages(), &MessagesController::messageStatusChanged, this, &ChatState::onMessageStatusChanged);
+    connect(lastActivityManager, &VSQLastActivityManager::lastActivityTextChanged, this, &ChatState::setLastActivityText);
 }
 
 QString ChatState::lastActivityText() const
@@ -65,7 +68,7 @@ void ChatState::setLastActivityText(const QString &text)
 void ChatState::onMessageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status)
 {
     Q_UNUSED(messageId)
-    if (status == Message::Status::Sent && contactId == m_messenger->currentRecipient()) {
+    if (status == Message::Status::Sent && contactId == m_controllers->chats()->currentContactId()) {
         emit messageSent();
     }
 }

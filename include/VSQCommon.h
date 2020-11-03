@@ -68,6 +68,8 @@ static constexpr OptionalType NullOptional(tl::nullopt);
 #ifdef VS_DEVMODE
 Q_DECLARE_LOGGING_CATEGORY(lcDev);
 #endif
+Q_DECLARE_LOGGING_CATEGORY(lcController);
+Q_DECLARE_LOGGING_CATEGORY(lcModel);
 
 // Namespace for passing of enum values to QML
 namespace Enums {
@@ -90,15 +92,6 @@ namespace Enums {
     };
     Q_ENUM_NS(AttachmentStatus)
 
-    enum class MessageAuthorV0
-    {
-        // User is message author
-        User,
-        // Contact is message author
-        Contact
-    };
-    Q_ENUM_NS(MessageAuthorV0)
-
     // NOTE(fpohtmeh): some statuses have suffix M to avoid QML collisions
     // with AttachmentStatus
     enum class MessageStatus
@@ -112,45 +105,6 @@ namespace Enums {
     };
     Q_ENUM_NS(MessageStatus)
 }
-
-// TODO(fpohtmeh): remove this old class
-struct AttachmentV0
-{
-    using Type = Enums::AttachmentType;
-    using Status = Enums::AttachmentStatus;
-
-    QString id;
-    Type type = Type::File;
-    QString filePath; // raw
-    QString fileName;
-    QString displayName;
-    QUrl remoteUrl; // encrypted
-    // Thumbnail
-    QString thumbnailPath; // raw
-    QUrl remoteThumbnailUrl; // encrypted
-    QSize thumbnailSize;
-    // Status
-    DataSize bytesTotal = 0; // encrypted
-    DataSize bytesLoaded = 0; // encrypted
-    Status status = Status::Created;
-};
-Q_DECLARE_METATYPE(AttachmentV0)
-
-using OptionalAttachmentV0 = Optional<AttachmentV0>;
-Q_DECLARE_METATYPE(OptionalAttachmentV0)
-
-struct MessageV0
-{
-    using Author = Enums::MessageAuthorV0;
-    using Status = Enums::MessageStatus;
-
-    QString messageId;
-    QString message;
-    QString sender;
-    QString recipient;
-    OptionalAttachmentV0 attachment;
-};
-Q_DECLARE_METATYPE(MessageV0);
 
 namespace vm
 {
@@ -180,9 +134,11 @@ struct PictureExtras
     QSize size;
     int orientation = 0; // same as QImageIOHandler::Transformations
     QSize thumbnailSize;
-    // FIXME(fpohtmeh): implement
-    //QString thumbnailPath;
-    //QString previewPath;
+
+    bool operator==(const PictureExtras &e) const
+    {
+        return size == e.size && orientation == e.orientation && thumbnailSize == e.thumbnailSize;
+    }
 };
 
 struct Attachment
@@ -239,9 +195,10 @@ struct GlobalMessage : Message
 {
     using Message::Message;
 
-    GlobalMessage(const Message &message, const Contact::Id &contactId,
+    GlobalMessage(const Message &message, const UserId &userId, const Contact::Id &contactId,
                   const Contact::Id &senderId, const Contact::Id &recipientId);
 
+    UserId userId;
     Contact::Id contactId;
     Contact::Id senderId;
     Contact::Id recipientId;

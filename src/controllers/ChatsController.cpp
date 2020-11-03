@@ -53,6 +53,7 @@ ChatsController::ChatsController(Models *models, UserDatabase *userDatabase, QOb
 {
     connect(userDatabase, &UserDatabase::opened, this, &ChatsController::setupTableConnections);
     connect(this, &ChatsController::newContactFound, this, &ChatsController::onNewContactFound);
+    connect(this, &ChatsController::currentContactIdChanged, m_models->messages(), &MessagesModel::setContactId);
 }
 
 Chat ChatsController::currentChat() const
@@ -101,7 +102,7 @@ void ChatsController::createChat(const Contact::Id &contactId)
 
 void ChatsController::openChat(const Chat &chat)
 {
-    qDebug() << "Opening chat" << chat.id << "contact" << chat.contactId << "unread" << chat.unreadMessageCount;
+    qCDebug(lcController) << "Opening chat" << chat.id << "contact" << chat.contactId << "unread" << chat.unreadMessageCount;
     setCurrentChat(chat);
     if (chat.unreadMessageCount > 0) {
         m_models->chats()->resetUnreadCount(chat.id);

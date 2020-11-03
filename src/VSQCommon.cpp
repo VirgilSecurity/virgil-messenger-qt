@@ -39,6 +39,8 @@
 #ifdef VS_DEVMODE
 Q_LOGGING_CATEGORY(lcDev, "dev");
 #endif
+Q_LOGGING_CATEGORY(lcModel, "model");
+Q_LOGGING_CATEGORY(lcController, "controller");
 
 using namespace vm;
 
@@ -53,6 +55,8 @@ void registerCommonMetaTypes()
     qRegisterMetaType<UserId>("UserId");
     qRegisterMetaType<Jid>("Jid");
     qRegisterMetaType<Contact::Id>("Contact::Id");
+    qRegisterMetaType<Attachment::Id>("Attachment::Id");
+    qRegisterMetaType<Attachment::Status>("Attachment::Status");
     qRegisterMetaType<Message>("Message");
     qRegisterMetaType<Message::Id>("Message::Id");
     qRegisterMetaType<Message::Status>("Message::Status");
@@ -67,9 +71,10 @@ void registerCommonMetaTypes()
     qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");
 }
 
-GlobalMessage::GlobalMessage(const Message &message, const Contact::Id &contactId,
+GlobalMessage::GlobalMessage(const Message &message, const UserId &userId, const Contact::Id &contactId,
                              const Contact::Id &senderId, const Contact::Id &recipientId)
     : Message(message)
+    , userId(userId)
     , contactId(contactId)
     , senderId(senderId)
     , recipientId(recipientId)

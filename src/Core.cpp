@@ -38,6 +38,8 @@
 
 #include "Utils.h"
 
+Q_LOGGING_CATEGORY(lcCore, "core")
+
 using namespace vm;
 using namespace VirgilIoTKit;
 
@@ -63,8 +65,8 @@ Optional<Message> Core::decryptMessage(const Contact::Id &sender, const QString 
     QByteArray decryptedMessage = QByteArray(decryptedMsgSzMax + 1, 0x00);
     size_t decryptedMessageSz = 0;
 
-    qDebug() << "Sender:" << sender;
-    qDebug() << "Encrypted message:" << message.length() << "bytes";
+    qCDebug(lcCore) << "Sender:" << sender;
+    qCDebug(lcCore) << "Encrypted message:" << message.length() << "bytes";
 
     // Decrypt message
     if (VS_CODE_OK != vs_messenger_virgil_decrypt_msg(
@@ -72,7 +74,7 @@ Optional<Message> Core::decryptMessage(const Contact::Id &sender, const QString 
                 message.toStdString().c_str(),
                 (uint8_t *)decryptedMessage.data(), decryptedMsgSzMax,
                 &decryptedMessageSz)) {
-        qWarning("Received message cannot be decrypted");
+        qCWarning(lcCore) << "Received message cannot be decrypted";
         return NullOptional;
     }
 
@@ -88,8 +90,8 @@ Optional<QString> Core::encryptMessage(const Message &message, const Contact::Id
 {
     // Create JSON-formatted message to be sent
     const QString internalJson = Utils::messageToJson(message);
-    qDebug() << "Recipient:" << recipient;
-    qDebug() << "Json for encryption:" << internalJson;
+    qCDebug(lcCore) << "Recipient:" << recipient;
+    qCDebug(lcCore) << "Json for encryption:" << internalJson;
 
     // Encrypt message
     const auto plaintext = internalJson.toStdString();
@@ -104,7 +106,7 @@ Optional<QString> Core::encryptMessage(const Message &message, const Contact::Id
                      encryptedMessage,
                      _encryptedMsgSzMax,
                      &encryptedMessageSz)) {
-        qWarning("Cannot encrypt message to be sent");
+        qCWarning(lcCore) << "Cannot encrypt message to be sent";
         return NullOptional;
     }
     return QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage), encryptedMessageSz);
@@ -112,28 +114,21 @@ Optional<QString> Core::encryptMessage(const Message &message, const Contact::Id
 
 bool Core::decryptFile(const QString &encPath, const QString &path, const Contact::Id &recipientId)
 {
-    /*
-    qCDebug(lcTransferManager) << "File decryption:" << encPath << "=>" << path << "Recipient:" << recipient;
-#ifdef VS_DEVMODE_BAD_DECRYPT
-    qCWarning(lcTransferManager) << "DECRYPTION IS DISABLED";
-    return QFile::copy(encPath, path);
-#endif
-
     // Read
     QFile encFile(encPath);
     if (!encFile.exists()) {
-        qCCritical(lcTransferManager) << "Source file doesn't exist";
+        qCCritical(lcCore) << "Source file doesn't exist";
         return false;
     }
     if (!encFile.open(QFile::ReadOnly)) {
-        qCCritical(lcTransferManager) << "Source file can't be opened";
+        qCCritical(lcCore) << "Source file can't be opened";
         return false;
     }
     const auto encBytes = encFile.readAll();
-    qCDebug(lcTransferManager) << "Read" << encBytes.size() << "bytes";
+    qCDebug(lcCore) << "Read" << encBytes.size() << "bytes";
     encFile.close();
     if (encBytes.size() == 0) {
-        qCDebug(lcTransferManager) << "Empty file was skipped";
+        qCDebug(lcCore) << "Empty file was skipped";
         return false;
     }
 
@@ -141,12 +136,12 @@ bool Core::decryptFile(const QString &encPath, const QString &path, const Contac
     std::vector<char> bytes(Core::bufferSizeForDecryption(encBytes.size()));
     size_t bytesSize = 0;
     const auto code = vs_messenger_virgil_decrypt_msg(
-                recipient.toStdString().c_str(),
+                recipientId.toStdString().c_str(),
                 encBytes.data(),
                 reinterpret_cast<uint8_t*>(bytes.data()), bytes.size(), &bytesSize);
     if (VS_CODE_OK != code)
     {
-        qCCritical(lcTransferManager) << "Cannot decrypt file:" << encPath << "code:" << code;
+        qCCritical(lcCore) << "Cannot decrypt file:" << encPath << "code:" << code;
         return false;
     }
     bytes.resize(bytesSize);
@@ -154,67 +149,58 @@ bool Core::decryptFile(const QString &encPath, const QString &path, const Contac
     // Write
     QFile file(path);
     if (!file.open(QFile::WriteOnly)) {
-        qCCritical(lcTransferManager) << "Destination file can't be opened";
+        qCCritical(lcCore) << "Destination file can't be opened";
         return false;
     }
     file.write(bytes.data(), bytesSize);
     file.close();
-    qCDebug(lcTransferManager) << "File decrypted:" << path << "size:" << QFileInfo(file).size();
-    */
+    qCDebug(lcCore) << "File decrypted:" << path << "size:" << QFileInfo(file).size();
     return true;
 }
 
 bool Core::encryptFile(const QString &path, const QString &encPath, const Contact::Id &recipientId)
 {
-    /*
-        qCDebug(lcTransferManager) << "File encryption:" << path << "=>" << encPath << "Recipient:" << recipient;
-    #ifdef VS_DEVMODE_BAD_DECRYPT
-        qCWarning(lcTransferManager) << "ENCRYPTION IS DISABLED";
-        return QFile::copy(path, encPath);
-    #endif
-        // Read
-        QFile file(path);
-        if (!file.exists()) {
-            qCCritical(lcTransferManager) << "Source file doesn't exist";
-            return false;
-        }
-        if (!file.open(QFile::ReadOnly)) {
-            qCCritical(lcTransferManager) << "Source file can't be opened";
-            return false;
-        }
-        const auto bytes = file.readAll();
-        qCDebug(lcTransferManager) << "Read" << bytes.size() << "bytes";
-        if (bytes.size() == 0) {
-            qCDebug(lcTransferManager) << "Empty file was skipped";
-            return false;
-        }
-        file.close();
+    // Read
+    QFile file(path);
+    if (!file.exists()) {
+        qCCritical(lcCore) << "Source file doesn't exist";
+        return false;
+    }
+    if (!file.open(QFile::ReadOnly)) {
+        qCCritical(lcCore) << "Source file can't be opened";
+        return false;
+    }
+    const auto bytes = file.readAll();
+    qCDebug(lcCore) << "Read" << bytes.size() << "bytes";
+    if (bytes.size() == 0) {
+        qCDebug(lcCore) << "Empty file was skipped";
+        return false;
+    }
+    file.close();
 
-        // Encrypt
-        std::vector<char> encBytes(Core::bufferSizeForEncryption(bytes.size()));
-        size_t encBytesSize = 0;
-        const auto code = vs_messenger_virgil_encrypt_msg(
-                    recipient.toStdString().c_str(),
-                    reinterpret_cast<const uint8_t*>(bytes.data()), bytes.size(),
-                    reinterpret_cast<uint8_t*>(encBytes.data()), encBytes.size(), &encBytesSize);
-        if (VS_CODE_OK != code)
-        {
-            qCCritical(lcTransferManager) << "Cannot encrypt file:" << path << "code:" << code;
-            return false;
-        }
-        encBytes.resize(encBytesSize);
+    // Encrypt
+    std::vector<char> encBytes(Core::bufferSizeForEncryption(bytes.size()));
+    size_t encBytesSize = 0;
+    const auto code = vs_messenger_virgil_encrypt_msg(
+                recipientId.toStdString().c_str(),
+                reinterpret_cast<const uint8_t*>(bytes.data()), bytes.size(),
+                reinterpret_cast<uint8_t*>(encBytes.data()), encBytes.size(), &encBytesSize);
+    if (VS_CODE_OK != code)
+    {
+        qCCritical(lcCore) << "Cannot encrypt file:" << path << "code:" << code;
+        return false;
+    }
+    encBytes.resize(encBytesSize);
+    encBytes.push_back(0);
 
-        encBytes.push_back(0);
-        // Write
-        QFile encFile(encPath);
-        if (!encFile.open(QFile::WriteOnly)) {
-            qCCritical(lcTransferManager) << "Destination file can't be opened";
-            return false;
-        }
-        encFile.write(encBytes.data(), encBytes.size());
-        encFile.close();
-        qCDebug(lcTransferManager) << "File encrypted:" << encPath << "size:" << QFileInfo(encFile).size();
-        return true;
-        */
+    // Write
+    QFile encFile(encPath);
+    if (!encFile.open(QFile::WriteOnly)) {
+        qCCritical(lcCore) << "Destination file can't be opened";
+        return false;
+    }
+    encFile.write(encBytes.data(), encBytes.size());
+    encFile.close();
+    qCDebug(lcCore) << "File encrypted:" << encPath << "size:" << QFileInfo(encFile).size();
     return true;
 }
