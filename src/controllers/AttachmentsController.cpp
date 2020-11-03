@@ -34,24 +34,64 @@
 
 #include "controllers/AttachmentsController.h"
 
-#include "models/MessagesModel.h"
+#include "Utils.h"
 #include "models/Models.h"
+#include "models/MessagesModel.h"
+#include "models/MessagesQueue.h"
 
 using namespace vm;
 
-AttachmentsController::AttachmentsController(QObject *parent)
+AttachmentsController::AttachmentsController(Models *models, QObject *parent)
     : QObject(parent)
+    , m_models(models)
 {}
 
-void AttachmentsController::preloadAttachment(const Message &message)
+void AttachmentsController::saveAs(const Message::Id &messageId, const QVariant &fileUrl)
 {
-    if (!message.attachment) {
+    const auto message = m_models->messages()->findById(messageId);
+    if (!message) {
+        qWarning() << "Message not found! Id:" << messageId;
         return;
     }
-    const auto attachment = *message.attachment;
-    if (attachment.type != Attachment::Type::Picture) {
-        return;
-    }
-    qDebug() << "Preloading of attachment for message:" << message.id;
-    // FIXME(fpohtmeh): implement
+    //pushMessageOptions(*message, { QueueFlag::SaveAttachmentAs, Utils::urlToLocalFile(fileUrl.toUrl()) });
 }
+
+void AttachmentsController::download(const Message::Id &messageId)
+{
+    const auto message = m_models->messages()->findById(messageId);
+    if (!message) {
+        qWarning() << "Message not found! Id:" << messageId;
+        return;
+    }
+    //pushMessageOptions(*message, { QueueFlag::DownloadAttachment, QString() });
+}
+
+void AttachmentsController::open(const Message::Id &messageId)
+{
+    const auto message = m_models->messages()->findById(messageId);
+    if (!message) {
+        qWarning() << "Message not found! Id:" << messageId;
+        return;
+    }
+    //pushMessageOptions(*message, { QueueFlag::OpenAttachment, QString() });
+}
+
+void AttachmentsController::setUserId(const UserId &userId)
+{
+    m_userId = userId;
+}
+
+void AttachmentsController::setContactId(const Contact::Id &contactId)
+{
+    m_contactId = contactId;
+}
+
+//void AttachmentsController::pushMessageOptions(const Message &message, const QueueOptions &options)
+//{
+//    Contact::Id senderId = m_userId;
+//    Contact::Id recipientId = m_contactId;
+//    if (message.authorId == recipientId) {
+//        std::swap(senderId, recipientId);
+//    }
+//    m_models->messagesQueue()->pushMessageOptions(message, senderId, recipientId, options);
+//}

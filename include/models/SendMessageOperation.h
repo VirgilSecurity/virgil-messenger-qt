@@ -32,58 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "VSQDownload.h"
+#ifndef VM_SENDMESSAGEOPERATION_H
+#define VM_SENDMESSAGEOPERATION_H
 
-#include <QNetworkAccessManager>
-#include <QNetworkRequest>
+#include "Operation.h"
 
-#include "Utils.h"
+class QXmppClient;
 
-VSQDownload::VSQDownload(QNetworkAccessManager *networkAccessManager, const QString &id,
-                         const QUrl &remoteUrl, const QString &filePath, QObject *parent)
-    : VSQTransfer(networkAccessManager, id, parent)
-    , m_remoteUrl(remoteUrl)
-    , m_filePath(filePath)
-{}
-
-VSQDownload::~VSQDownload()
+namespace vm
 {
-    for (auto &con: m_connections) {
-        QObject::disconnect(con);
-    }
-    QMutexLocker locker(&m_guard);
-#ifdef VS_DEVMODE
-    qCDebug(lcDev) << "~Download" << m_filePath;
-#endif
+class MessageOperation;
+
+class SendMessageOperation : public Operation
+{
+    Q_OBJECT
+
+public:
+    SendMessageOperation(MessageOperation *parent, QXmppClient *xmpp, const QString &xmppUrl);
+
+    void run() override;
+
+private:
+    MessageOperation *m_parent;
+    QXmppClient *m_xmpp;
+    const QString m_xmppUrl;
+};
 }
 
-void VSQDownload::start()
-{
-    if (isRunning()) {
-        qCWarning(lcTransferManager) << "Cannot start again a running download";
-        return;
-    }
-    qCDebug(lcTransferManager) << QString("Started download: %1").arg(id());
-    VSQTransfer::start();
-
-    // Check file for writing
-    auto file = createFileHandle(m_filePath);
-    if (!file->open(QFile::WriteOnly)) {
-        setStatus(AttachmentV0::Status::Interrupted);
-        return;
-    }
-
-    // Create request
-    QNetworkRequest request(m_remoteUrl);
-    auto reply = networkAccessManager()->get(request);
-    m_connections = connectReply(reply, &m_guard);
-    m_connections << connect(reply, &QNetworkReply::downloadProgress, [=](qint64 bytesReceived, qint64 bytesTotal) {
-        emit progressChanged(bytesReceived, bytesTotal);
-    });
-    m_connections << connect(reply, &QNetworkReply::readyRead, [=]() {
-        const auto bytes = reply->readAll();
-        //qCDebug(lcTransferManager()) << "Wrote bytes:" << bytes.size();
-        file->write(bytes);
-        file->flush();
-    });
-}
+#endif // VM_SENDMESSAGEOPERATION_H

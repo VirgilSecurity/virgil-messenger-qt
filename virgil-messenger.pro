@@ -106,25 +106,17 @@ VS_PLATFORMS_PATH=$$absolute_path(generated/platforms)
 
 HEADERS += \
         include/VSQApplication.h \
-        include/VSQAttachmentBuilder.h \
         include/AccountSelectionModel.h \
         include/VSQClipboardProxy.h \
         include/VSQCommon.h \
         include/VSQContactManager.h \
         include/VSQCrashReporter.h \
-        include/VSQCryptoTransferManager.h \
         include/VSQDiscoveryManager.h \
-        include/VSQDownload.h \
         include/VSQLastActivityIq.h \
         include/VSQLastActivityManager.h \
         include/VSQMessenger.h \
         include/Settings.h \
-        include/VSQSqlChatModel.h \
-        include/VSQSqlConversationModel.h \
         include/VSQNetworkAnalyzer.h \
-        include/VSQTransfer.h \
-        include/VSQTransferManager.h \
-        include/VSQUpload.h \
         include/Utils.h \
         include/android/VSQAndroid.h \
         include/macos/VSQMacos.h \
@@ -178,10 +170,14 @@ HEADERS += \
         include/logging/VSQMessageLogContext.h \
         # Models
         include/models/AttachmentsModel.h \
+        include/models/AttachmentsQueue.h \
         include/models/ChatsModel.h \
         include/models/MessagesModel.h \
+        include/models/MessageOperation.h \
         include/models/MessagesQueue.h \
         include/models/Models.h \
+        include/models/Operation.h \
+        include/models/SendMessageOperation.h \
         # Generated
         generated/include/VSQCustomer.h \
         # Thirdparty
@@ -192,25 +188,17 @@ HEADERS += \
 #
 
 SOURCES += \
-        src/VSQAttachmentBuilder.cpp \
         src/AccountSelectionModel.cpp \
         src/VSQClipboardProxy.cpp \
         src/VSQCommon.cpp \
         src/VSQContactManager.cpp \
         src/VSQCrashReporter.cpp \
-        src/VSQCryptoTransferManager.cpp \
         src/VSQDiscoveryManager.cpp \
-        src/VSQDownload.cpp \
         src/VSQMessenger.cpp \
         src/VSQLastActivityIq.cpp \
         src/VSQLastActivityManager.cpp \
         src/Settings.cpp \
-        src/VSQSqlChatModel.cpp \
-        src/VSQSqlConversationModel.cpp \
         src/VSQNetworkAnalyzer.cpp \
-        src/VSQTransfer.cpp \
-        src/VSQTransferManager.cpp \
-        src/VSQUpload.cpp \
         src/Utils.cpp \
         src/android/VSQAndroid.cpp \
         src/main.cpp \
@@ -260,10 +248,14 @@ SOURCES += \
         src/logging/VSQLogWorker.cpp \
         # Models
         src/models/AttachmentsModel.cpp \
+        src/models/AttachmentsQueue.cpp \
         src/models/ChatsModel.cpp \
         src/models/MessagesModel.cpp \
+        src/models/MessageOperation.cpp \
         src/models/MessagesQueue.cpp \
-        src/models/Models.cpp
+        src/models/Models.cpp \
+        src/models/Operation.cpp \
+        src/models/SendMessageOperation.cpp
 
 #
 #   Resources

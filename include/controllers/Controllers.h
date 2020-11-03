@@ -38,6 +38,7 @@
 #include <QObject>
 
 class VSQMessenger;
+class VSQSettings;
 
 namespace vm
 {
@@ -57,7 +58,8 @@ class Controllers : public QObject
     Q_PROPERTY(MessagesController *messages READ messages CONSTANT)
 
 public:
-    Controllers(VSQMessenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
+    Controllers(VSQMessenger *messenger, VSQSettings *settings,
+                Models *models, UserDatabase *userDatabase, QObject *parent);
 
     const AttachmentsController *attachments() const;
     AttachmentsController *attachments();

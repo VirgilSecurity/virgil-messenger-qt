@@ -36,25 +36,34 @@
 
 #include "qxmpp/QXmppMessage.h"
 
-#include "Core.h"
 #include "VSQMessenger.h"
 #include "Utils.h"
 #include "database/MessagesTable.h"
 #include "database/UserDatabase.h"
+#include "models/AttachmentsQueue.h"
+#include "models/MessageOperation.h"
+#include "models/Operation.h"
+#include "models/SendMessageOperation.h"
 
 using namespace vm;
 
-MessagesQueue::MessagesQueue(VSQMessenger *messenger, UserDatabase *userDatabase, QObject *parent)
+MessagesQueue::MessagesQueue(VSQMessenger *messenger, UserDatabase *userDatabase, AttachmentsQueue *attachmentsQueue, QObject *parent)
     : QObject(parent)
     , m_messenger(messenger)
     , m_userDatabase(userDatabase)
+    , m_attachmentsQueue(attachmentsQueue)
+    , m_root(new Operation("Queue", this))
 {
+    m_root->setInfinite();
+    attachmentsQueue->setParent(this);
     connect(userDatabase, &UserDatabase::userIdChanged, this, &MessagesQueue::setUserId);
     //
     connect(this, &MessagesQueue::pushMessage, this, &MessagesQueue::onPushMessage);
-    connect(this, &MessagesQueue::sendFailedMessages, this, &MessagesQueue::onSendFailedMessages);
-    connect(this, &MessagesQueue::sendNextMessage, this, &MessagesQueue::onSendNextMessage, Qt::QueuedConnection); // queue connection to avoid recursion
-    connect(this, &MessagesQueue::messageStatusChanged, this, &MessagesQueue::onMessageStatusChanged);
+    connect(this, &MessagesQueue::sendNotSentMessages, this, &MessagesQueue::onSendNotSentMessages);
+}
+
+MessagesQueue::~MessagesQueue()
+{
 }
 
 void MessagesQueue::setUserId(const UserId &userId)
@@ -62,105 +71,63 @@ void MessagesQueue::setUserId(const UserId &userId)
     if (m_userId == userId) {
         return;
     }
+
+    m_root->dropChildren();
     m_userId = userId;
-    //
-    m_messages = {};
     if (!userId.isEmpty()) {
-        connect(m_userDatabase->messagesTable(), &MessagesTable::failedMessagesFetched, this, &MessagesQueue::setFailedMessages);
-        sendFailedMessages();
+        connect(m_userDatabase->messagesTable(), &MessagesTable::notSentMessagesFetched, this, &MessagesQueue::setMessages);
+        sendNotSentMessages();
     }
 }
 
-void MessagesQueue::setFailedMessages(const QueueMessages &messages)
+void MessagesQueue::setMessages(const GlobalMessages &messages)
 {
-    if (messages.empty()) {
-        return;
-    }
     for (auto &m : messages) {
-        m_messages.push(m);
+        createAppendOperation(m);
     }
-    qDebug() << "Enqueued" << messages.size() << "failed messages";
-    sendNextMessage(QPrivateSignal());
+    if (m_root->hasChildren()) {
+        m_root->start();
+    }
 }
 
-void MessagesQueue::onPushMessage(const Message &message, const Contact::Id &sender, const Contact::Id &recipient)
+bool MessagesQueue::createAppendOperation(const GlobalMessage &message)
 {
-    m_messages.push({ message, sender, recipient });
-    sendNextMessage(QPrivateSignal());
+    auto op = new MessageOperation(message, this);
+    // Append attachment operations
+    m_attachmentsQueue->appendOperations(op);
+    // Append send message operation
+    if (message.senderId == m_userId) {
+        if (message.status == Message::Status::Created || message.status == Message::Status::Failed) {
+            op->appendChild(new SendMessageOperation(op, m_messenger->xmpp(), m_messenger->xmppURL()));
+        }
+    }
+    // Check for empty
+    if (!op->hasChildren()) {
+        return false;
+    }
+    // Setup connections
+    connect(op, &MessageOperation::statusChanged, this, std::bind(&MessagesQueue::onMessageOperationStatusChanged, this, op));
+    // Append to root
+    m_root->appendChild(op);
+    return true;
 }
 
-void MessagesQueue::onSendFailedMessages()
+void MessagesQueue::onPushMessage(const GlobalMessage &message)
+{
+    if (createAppendOperation(message)) {
+        m_root->start();
+    }
+}
+
+void MessagesQueue::onSendNotSentMessages()
 {
     if (!m_userId.isEmpty()) {
-        m_userDatabase->messagesTable()->fetchFailedMessages();
+        m_userDatabase->messagesTable()->fetchNotSentMessages();
     }
 }
 
-void MessagesQueue::onSendNextMessage()
+void MessagesQueue::onMessageOperationStatusChanged(const MessageOperation *operation)
 {
-    if(m_messages.empty()) {
-        return;
-    }
-
-    auto &message = m_messages.front();
-    bool processed = false;
-    if (message.status != Message::Status::Created && message.status != Message::Status::Failed) {
-        processed = true;
-    }
-    else if (message.senderId == m_userId) {
-        if (!message.attachment) {
-            const auto status = sendMessage(message);
-            if (message.status != status) {
-                message.status = status;
-                emit messageStatusChanged(message.id, message.recipientId, status);
-            }
-            processed = true;
-        }
-    }
-    else if (message.recipientId == m_userId) {
-        if (!message.attachment) {
-            processed = true;
-        }
-    }
-
-    if (processed) {
-        m_messages.pop();
-    }
-    else {
-        qWarning() << "Message wasn't processed by queue. Id:" << message.id << "sender;" << message.senderId << "recipient:" << message.recipientId
-                   << "body:" << Utils::printableMessageBody(message);
-    }
-}
-
-void MessagesQueue::onMessageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status status)
-{
-    Q_UNUSED(messageId)
-    Q_UNUSED(contactId)
-    if (status == Message::Status::Sent) {
-        sendNextMessage(QPrivateSignal());
-    }
-}
-
-Message::Status MessagesQueue::sendMessage(const QueueMessage &message)
-{
-    qDebug() << "Message sending started:" << message.id;
-    const auto encryptedStr = Core::encryptMessage(message, message.recipientId);
-    if (!encryptedStr) {
-        return Message::Status::InvalidM;
-    }
-    else {
-        const auto fromJID = Utils::createJid(message.senderId, m_messenger->xmppURL());
-        const auto toJID = Utils::createJid(message.recipientId, m_messenger->xmppURL());
-
-        QXmppMessage msg(fromJID, toJID, *encryptedStr);
-        msg.setReceiptRequested(true);
-        msg.setId(message.id);
-
-        if (m_messenger->xmpp()->sendPacket(msg)) {
-            qDebug() << "Message sent:" << message.id;
-            return Message::Status::Sent;
-        } else {
-            return Message::Status::Failed;
-        }
-    }
+    const auto m = operation->message();
+    emit messageStatusChanged(m->id, m->contactId, m->status);
 }

@@ -45,7 +45,7 @@ MessagesTable::MessagesTable(Database *database)
 {
     connect(this, &MessagesTable::setUserId, this, &MessagesTable::onSetUserId);
     connect(this, &MessagesTable::fetchChatMessages, this, &MessagesTable::onFetchChatMessages);
-    connect(this, &MessagesTable::fetchFailedMessages, this, &MessagesTable::onFetchFailedMessages);
+    connect(this, &MessagesTable::fetchNotSentMessages, this, &MessagesTable::onFetchNotSentMessages);
     connect(this, &MessagesTable::createMessage, this, &MessagesTable::onCreateMessage);
     connect(this, &MessagesTable::updateStatus, this, &MessagesTable::onUpdateStatus);
     connect(this, &MessagesTable::markAllAsRead, this, &MessagesTable::onMarkAllAsRead);
@@ -85,7 +85,7 @@ void MessagesTable::onFetchChatMessages(const Chat::Id &chatId)
     }
 }
 
-void MessagesTable::onFetchFailedMessages()
+void MessagesTable::onFetchNotSentMessages()
 {
     ScopedConnection connection(*database());
     const DatabaseUtils::BindValues values{
@@ -93,26 +93,26 @@ void MessagesTable::onFetchFailedMessages()
         { ":createdStatus", static_cast<int>(Message::Status::Created) },
         { ":userId", m_userId }
     };
-    auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectFailedMessages"), values);
+    auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectNotSentMessages"), values);
     if (!query) {
         qCCritical(lcDatabase) << "MessagesTable::processFetchFailed error";
         emit errorOccurred(tr("Failed to fetch failed messages"));
     }
     else {
         auto q = *query;
-        QueueMessages messages;
+        GlobalMessages messages;
         while (q.next()) {
+            const Contact::Id contactId = q.value("contactId").value<Contact::Id>();
             const Contact::Id senderId = q.value("senderId").value<Contact::Id>();
             const Contact::Id recipientId = q.value("recipientId").value<Contact::Id>();
-            messages.push_back(QueueMessage(*DatabaseUtils::readMessage(q), senderId, recipientId));
+            messages.push_back({ *DatabaseUtils::readMessage(q), contactId, senderId, recipientId });
         }
-        emit failedMessagesFetched(messages);
+        emit notSentMessagesFetched(messages);
     }
 }
 
 void MessagesTable::onCreateMessage(const Message &message)
 {
-    // FIXME(fpohtmeh): check that chat exists?
     ScopedConnection connection(*database());
     const DatabaseUtils::BindValues values{
         { ":id", message.id },

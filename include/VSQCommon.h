@@ -83,9 +83,7 @@ namespace Enums {
     enum class AttachmentStatus
     {
         Created,
-        Preloading,
         Loading,
-        Postloading,
         Loaded,
         Interrupted, // must be re-loaded
         Invalid // Can't be processed
@@ -182,8 +180,9 @@ struct PictureExtras
     QSize size;
     int orientation = 0; // same as QImageIOHandler::Transformations
     QSize thumbnailSize;
-    QString thumbnailPath;
-    QString previewPath;
+    // FIXME(fpohtmeh): implement
+    //QString thumbnailPath;
+    //QString previewPath;
 };
 
 struct Attachment
@@ -198,11 +197,12 @@ struct Attachment
     Status status = Status::Created;
     QString fileName;
     DataSize size = 0;
-    DataSize bytesTotal = 0; // after encryption
-    DataSize bytesLoaded = 0;
     QString localPath;
     QUrl url;
     QVariant extras;
+
+    DataSize bytesLoaded = 0;
+    DataSize bytesTotal = 0; // after encryption
 };
 
 struct Message
@@ -235,17 +235,19 @@ struct Chat
 
 using Chats = std::vector<Chat>;
 
-struct QueueMessage : Message
+struct GlobalMessage : Message
 {
     using Message::Message;
 
-    QueueMessage(const Message &msg, const Contact::Id &senderId, const Contact::Id &recipientId);
+    GlobalMessage(const Message &message, const Contact::Id &contactId,
+                  const Contact::Id &senderId, const Contact::Id &recipientId);
 
+    Contact::Id contactId;
     Contact::Id senderId;
     Contact::Id recipientId;
 };
 
-using QueueMessages = std::vector<QueueMessage>;
+using GlobalMessages = std::vector<GlobalMessage>;
 }
 
 Q_DECLARE_METATYPE(vm::Contact::Type)
@@ -257,8 +259,8 @@ Q_DECLARE_METATYPE(vm::Message)
 Q_DECLARE_METATYPE(vm::Messages)
 Q_DECLARE_METATYPE(vm::Chat)
 Q_DECLARE_METATYPE(vm::Chats)
-Q_DECLARE_METATYPE(vm::QueueMessage)
-Q_DECLARE_METATYPE(vm::QueueMessages)
+Q_DECLARE_METATYPE(vm::GlobalMessage)
+Q_DECLARE_METATYPE(vm::GlobalMessages)
 
 void registerCommonMetaTypes();
 

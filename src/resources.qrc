@@ -129,7 +129,7 @@
         <file>resources/database/markMessagesAsRead.sql</file>
         <file>resources/database/selectChats.sql</file>
         <file>resources/database/selectChatMessages.sql</file>
-        <file>resources/database/selectFailedMessages.sql</file>
+        <file>resources/database/selectNotSentMessages.sql</file>
         <file>resources/database/resetUnreadCount.sql</file>
         <file>resources/database/updateLastMessage.sql</file>
         <file>resources/database/updateMessageStatus.sql</file>

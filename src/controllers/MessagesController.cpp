@@ -70,7 +70,7 @@ MessagesController::MessagesController(VSQMessenger *messenger, Models *models, 
     connect(messagesQueue, &MessagesQueue::messageStatusChanged, this, &MessagesController::setMessageStatus);
     connect(m_models->chats(), &ChatsModel::chatUpdated, this, &MessagesController::onChatUpdated);
     // Network
-    connect(messenger, &VSQMessenger::fireReady, messagesQueue, &MessagesQueue::sendFailedMessages);
+    connect(messenger, &VSQMessenger::fireReady, messagesQueue, &MessagesQueue::sendNotSentMessages);
     // Xmpp connections
     auto xmpp = messenger->xmpp();
     connect(xmpp, &QXmppClient::messageReceived, this, &MessagesController::receiveMessage);
@@ -104,7 +104,7 @@ void MessagesController::createSendMessage(const QString &body, const QVariant &
     const Chat::UnreadCount unreadCount = 0; // message can be created in current chat only
     m_models->chats()->updateLastMessage(message, unreadCount);
     m_userDatabase->writeMessage(message, unreadCount);
-    emit messageCreated(message, m_userId, m_chat.contactId);
+    emit messageCreated({ message, m_chat.contactId, m_userId, m_chat.contactId });
 }
 
 void MessagesController::setupTableConnections()
@@ -204,7 +204,9 @@ void MessagesController::receiveMessage(const QXmppMessage &msg)
         }
     }
     message.chatId = chat.id;
-    messages->writeMessage(message);
+    if (m_chat.id == chat.id) {
+        messages->writeMessage(message);
+    }
     chats->updateLastMessage(message, chat.unreadMessageCount);
     if (isNewChat) {
         chat.lastMessage = message;
@@ -213,5 +215,5 @@ void MessagesController::receiveMessage(const QXmppMessage &msg)
     else {
         m_userDatabase->writeMessage(message, chat.unreadMessageCount);
     }
-    emit messageCreated(message, senderId, recipientId);
+    emit messageCreated({ message, chat.contactId, senderId, recipientId });
 }

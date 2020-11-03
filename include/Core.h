@@ -55,6 +55,10 @@ public:
     static Optional<Message> decryptMessage(const Contact::Id &sender, const QString &message);
 
     static Optional<QString> encryptMessage(const Message &message, const Contact::Id &recipient);
+
+    static bool decryptFile(const QString &encPath, const QString &path, const Contact::Id &recipientId);
+
+    static bool encryptFile(const QString &path, const QString &encPath, const Contact::Id &recipientId);
 };
 }
 

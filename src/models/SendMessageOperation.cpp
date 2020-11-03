@@ -32,57 +32,46 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_TRANSFER_H
-#define VM_TRANSFER_H
+#include "models/SendMessageOperation.h"
 
-#include <QNetworkReply>
-#include <QObject>
-#include <QMutex>
+#include <QXmppClient.h>
+#include <QXmppMessage.h>
 
-#include "VSQCommon.h"
+#include "Core.h"
+#include "Utils.h"
+#include "models/MessageOperation.h"
 
-class QNetworkAccessManager;
+using namespace vm;
 
-Q_DECLARE_LOGGING_CATEGORY(lcTransferManager);
+SendMessageOperation::SendMessageOperation(MessageOperation *parent, QXmppClient *xmpp, const QString &xmppUrl)
+    : Operation(QString("SendMessage [%1]").arg(parent->message()->id), parent)
+    , m_parent(parent)
+    , m_xmpp(xmpp)
+    , m_xmppUrl(xmppUrl)
+{}
 
-class VSQTransfer : public QObject
+void SendMessageOperation::run()
 {
-    Q_OBJECT
+    const auto message = m_parent->message();
+    const auto encryptedStr = Core::encryptMessage(*message, message->recipientId);
+    if (!encryptedStr) {
+        qCDebug(lcOperation) << "Unable to encrypt message";
+        invalidate();
+    }
+    else {
+        const auto fromJID = Utils::createJid(message->senderId, m_xmppUrl);
+        const auto toJID = Utils::createJid(message->recipientId, m_xmppUrl);
 
-public:
-    VSQTransfer(QNetworkAccessManager *networkAccessManager, const QString &id, QObject *parent);
-    virtual ~VSQTransfer();
+        QXmppMessage msg(fromJID, toJID, *encryptedStr);
+        msg.setReceiptRequested(true);
+        msg.setId(message->id);
 
-    QString id() const;
-    bool isRunning() const;
-
-    virtual void start();
-    virtual void abort();
-
-    void setStatus(const AttachmentV0::Status status);
-
-signals:
-    void progressChanged(const DataSize bytesReceived, const DataSize bytesTotal);
-    void statusChanged(const Enums::AttachmentStatus status);
-    void ended(bool failed);
-    void connectionChanged();
-
-protected:
-    QList<QMetaObject::Connection> connectReply(QNetworkReply *reply, QMutex *guard);
-
-    QNetworkAccessManager *networkAccessManager();
-    QFile *createFileHandle(const QString &filePath);
-
-private:
-    void closeFileHandle();
-
-    QNetworkAccessManager *m_networkAccessManager;
-    QString m_id;
-    AttachmentV0::Status m_status;
-    DataSize m_bytesReceived = 0;
-    DataSize m_bytesTotal = 0;
-    QFile *m_fileHandle = nullptr;
-};
-
-#endif // VM_TRANSFER_H
-
+        if (m_xmpp->sendPacket(msg)) {
+            qCDebug(lcOperation) << "Message sent:" << message->id;
+            finish();
+        } else {
+            qCDebug(lcOperation) << "Message NOT sent:" << message->id;
+            fail();
+        }
+    }
+}

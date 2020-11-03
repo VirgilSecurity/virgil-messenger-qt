@@ -37,7 +37,6 @@ Control {
     property bool attachmentFileExists: false
 
     signal saveAttachmentAs(string messageId)
-    signal downloadOpenAttachment(string messageId, bool isPicture)
     signal openContextMenu(string messageId, var mouse, var contextMenu)
 
     QtObject {
@@ -135,8 +134,7 @@ Control {
                         id: progressBar
                         anchors.centerIn: parent
                         size: 40
-                        visible: chatMessage.attachmentStatus == Enums.AttachmentStatus.Created || chatMessage.attachmentStatus == Enums.AttachmentStatus.Preloading ||
-                                 chatMessage.attachmentStatus == Enums.AttachmentStatus.Loading || chatMessage.attachmentStatus == Enums.AttachmentStatus.Postloading
+                        visible: chatMessage.attachmentStatus == Enums.AttachmentStatus.Created || chatMessage.attachmentStatus == Enums.AttachmentStatus.Loading
                         maxValue: chatMessage.attachmentBytesTotal
                         value: Math.min(0.99 * maxValue, Math.max(0.01 * maxValue, chatMessage.attachmentBytesLoaded))
                         animated: visible
@@ -172,7 +170,7 @@ Control {
 
                 Action {
                     text: Platform.isMobile ? qsTr("Save to downloads") : qsTr("Save As...")
-                    onTriggered: (Platform.isMobile ? Messenger.downloadAttachment : chatMessage.saveAttachmentAs)(messageId)
+                    onTriggered: (Platform.isMobile ? controllers.attachments.download : chatMessage.saveAttachmentAs)(messageId)
                     // TODO(fpohtmeh): disable for not loaded attachments
                 }
             }
@@ -259,7 +257,12 @@ Control {
                             openContextMenu(messageId, coord, loader.item.contextMenu)
                         }
                         else if (d.hasAttachment) {
-                            downloadOpenAttachment(messageId, d.isPicture)
+                            if (attachmentFileExists) {
+                                controllers.attachments.open(messageId)
+                            }
+                            else {
+                                controllers.attachments.download(messageId)
+                            }
                         }
                     }
                     onPressAndHold: {

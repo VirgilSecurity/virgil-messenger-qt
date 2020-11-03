@@ -101,6 +101,17 @@ void MessagesModel::markAllAsRead()
     }
 }
 
+Optional<Message> MessagesModel::findById(const Message::Id &messageId) const
+{
+    for (int i = 0, s = m_messages.size(); i < s; ++i) {
+        auto &message = m_messages[i];
+        if (message.id == messageId) {
+            return message;
+        }
+    }
+    return NullOptional;
+}
+
 int MessagesModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
@@ -162,10 +173,13 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
             else if (attachment->type == Attachment::Type::Picture) {
                 switch (attachment->status) {
                 case Attachment::Status::Loading:
-                case Attachment::Status::Postloading:
-                    return attachment->extras.value<PictureExtras>().thumbnailPath;
+                    // FIXME(fpohtmeh): implement
+                    return QString();
+                    //return attachment->extras.value<PictureExtras>().thumbnailPath;
                 case Attachment::Status::Loaded:
-                    return attachment->extras.value<PictureExtras>().previewPath;
+                    // FIXME(fpohtmeh): implement
+                    return QString();
+                    //return attachment->extras.value<PictureExtras>().previewPath;
                 default:
                     return QString();
                 }

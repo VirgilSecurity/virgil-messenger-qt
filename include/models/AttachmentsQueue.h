@@ -32,38 +32,29 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_ATTACHMENT_BUILDER
-#define VM_ATTACHMENT_BUILDER
+#ifndef VS_ATTACHMENTSQUEUE_H
+#define VS_ATTACHMENTSQUEUE_H
 
-#include <QObject>
-#include <QImageIOHandler>
+#include <QDir>
 
 #include "VSQCommon.h"
 
-Q_DECLARE_LOGGING_CATEGORY(lcAttachment);
-
-class QPixmap;
-
-class VSQSettings;
-
-class VSQAttachmentBuilder : public QObject
+namespace vm
 {
+class MessageOperation;
+
+class AttachmentsQueue : public QObject
+{
+    Q_OBJECT
+
 public:
-    VSQAttachmentBuilder(VSQSettings *settings, QObject *parent);
-    VSQAttachmentBuilder() = default; // QML engine requires default constructor
+    explicit AttachmentsQueue(const QDir &cacheDir, QObject *parent);
 
-    // Build encoded attachment by local url, attachment type and recipient
-    // Start thumbnail/file uploads
-    OptionalAttachmentV0 build(const QUrl &localUrl, const AttachmentV0::Type type, QString &errorText);
-
-    QString generateThumbnailFileName() const;
+    void appendOperations(const MessageOperation *parent);
 
 private:
-    QImage applyImageOrientation(const QImage &image, const QImageIOHandler::Transformations transformations) const;
-    QPixmap generateThumbnail(const QString &fileName) const;
-    void saveThumbnailFile(const QPixmap &pixmap, const QString &fileName) const;
-
-    VSQSettings *m_settings;
+    QDir m_cacheDir;
 };
+}
 
-#endif // VM_ATTACHMENT_BUILDER
+#endif // VS_ATTACHMENTSQUEUE_H

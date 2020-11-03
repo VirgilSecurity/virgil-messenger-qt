@@ -41,14 +41,28 @@
 
 namespace vm
 {
+class Models;
+
 class AttachmentsController : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit AttachmentsController(QObject *parent);
+    explicit AttachmentsController(Models *models, QObject *parent);
 
-    void preloadAttachment(const Message &message);
+    Q_INVOKABLE void saveAs(const Message::Id &messageId, const QVariant &fileUrl);
+    Q_INVOKABLE void download(const Message::Id &messageId);
+    Q_INVOKABLE void open(const Message::Id &messageId);
+
+    void setUserId(const UserId &userId);
+    void setContactId(const Contact::Id &contactId);
+
+private:
+    //void pushMessageOptions(const Message &message, const QueueOptions &options);
+
+    Models *m_models;
+    UserId m_userId;
+    Contact::Id m_contactId;
 };
 }
 

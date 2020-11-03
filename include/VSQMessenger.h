@@ -48,12 +48,8 @@
 #include <virgil/iot/messenger/messenger.h>
 
 #include "Validator.h"
-#include "VSQSqlConversationModel.h"
-#include "VSQSqlChatModel.h"
 #include "VSQCrashReporter.h"
 #include <VSQNetworkAnalyzer.h>
-#include <VSQAttachmentBuilder.h>
-#include <VSQCryptoTransferManager.h>
 
 class QJsonDocument;
 
@@ -147,12 +143,6 @@ public slots:
 
     void setCurrentRecipient(const QString &recipient);
 
-    void saveAttachmentAs(const QString &messageId, const QVariant &fileUrl);
-
-    void downloadAttachment(const QString &messageId);
-
-    void openAttachment(const QString &messageId);
-
     bool subscribeToContact(const Contact::Id &contactId);
 
 signals:
@@ -225,14 +215,10 @@ private:
     VSQContactManager *m_contactManager;
     VSQLastActivityManager* m_lastActivityManager;
 
-    VSQSqlConversationModel *m_sqlConversations;
-    //VSQSqlChatModel *m_sqlChatModel;
     VSQCrashReporter *m_crashReporter;
     VSQNetworkAnalyzer m_networkAnalyzer;
     VSQSettings *m_settings;
     Validator *m_validator;
-    VSQCryptoTransferManager *m_transferManager;
-    VSQAttachmentBuilder m_attachmentBuilder;
 
     QMutex m_connectGuard;
     QString m_user;

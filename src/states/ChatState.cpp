@@ -43,9 +43,6 @@ ChatState::ChatState(VSQMessenger *messenger, QState *parent)
     : QState(parent)
     , m_messenger(messenger)
 {
-    connect(this, &ChatState::downloadAttachment, m_messenger, &VSQMessenger::downloadAttachment);
-    connect(this, &ChatState::openAttachment, m_messenger, &VSQMessenger::openAttachment);
-    connect(this, &ChatState::saveAttachmentAs, m_messenger, &VSQMessenger::saveAttachmentAs);
     connect(m_messenger, &VSQMessenger::openPreviewRequested, this, &ChatState::requestPreview);
     connect(m_messenger, &VSQMessenger::messageStatusChanged, this, &ChatState::onMessageStatusChanged);
     connect(m_messenger->lastActivityManager(), &VSQLastActivityManager::lastActivityTextChanged, this, &ChatState::setLastActivityText);

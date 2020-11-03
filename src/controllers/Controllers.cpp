@@ -34,6 +34,7 @@
 
 #include "controllers/Controllers.h"
 
+#include "Settings.h"
 #include "VSQMessenger.h"
 #include "controllers/AttachmentsController.h"
 #include "controllers/ChatsController.h"
@@ -43,17 +44,19 @@
 
 using namespace vm;
 
-Controllers::Controllers(VSQMessenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent)
+// TODO(fpohtmeh): remove settings from constructor?
+Controllers::Controllers(VSQMessenger *messenger, VSQSettings *settings,
+                         Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
-    , m_attachments(new AttachmentsController(this))
+    , m_attachments(new AttachmentsController(models, this))
     , m_users(new UsersController(messenger, models, userDatabase, this))
     , m_chats(new ChatsController(models, userDatabase, this))
     , m_messages(new MessagesController(messenger, models, userDatabase, this))
 {
+    connect(m_users, &UsersController::userIdChanged, m_attachments, &AttachmentsController::setUserId);
     connect(m_users, &UsersController::userIdChanged, m_chats, &ChatsController::loadChats);
+    connect(m_chats, &ChatsController::currentContactIdChanged, m_attachments, &AttachmentsController::setContactId);
     connect(m_chats, &ChatsController::chatOpened, m_messages, &MessagesController::loadMessages);
-    // FIXME(fpohtmeh): remove?
-    //connect(m_messages, &MessagesController::messageCreated, m_attachments, &AttachmentsController::preloadAttachment);
 
     qRegisterMetaType<AttachmentsController *>("AttachmentsController*");
     qRegisterMetaType<ChatsController *>("ChatsController*");

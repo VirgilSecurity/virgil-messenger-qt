@@ -35,14 +35,15 @@
 #ifndef VS_MESSAGESQUEUE_H
 #define VS_MESSAGESQUEUE_H
 
-#include <queue>
-
 #include "VSQCommon.h"
 
 class VSQMessenger;
 
 namespace vm
 {
+class AttachmentsQueue;
+class MessageOperation;
+class Operation;
 class UserDatabase;
 
 class MessagesQueue : public QObject
@@ -50,32 +51,28 @@ class MessagesQueue : public QObject
     Q_OBJECT
 
 public:
-    MessagesQueue(VSQMessenger *messenger, UserDatabase *userDatabase, QObject *parent);
+    MessagesQueue(VSQMessenger *messenger, UserDatabase *userDatabase, AttachmentsQueue *attachmentsQueue, QObject *parent);
+    ~MessagesQueue() override;
 
 signals:
-    void pushMessage(const Message &message, const Contact::Id &sender, const Contact::Id &recipient);
-
-    void sendFailedMessages();
-    void sendNextMessage(QPrivateSignal);
+    void pushMessage(const GlobalMessage &message);
+    void sendNotSentMessages();
 
     void messageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status status);
 
 private:
     void setUserId(const UserId &userId);
-    void setFailedMessages(const QueueMessages &messages);
+    void setMessages(const GlobalMessages &messages);
+    bool createAppendOperation(const GlobalMessage &message);
 
-    void onPushMessage(const Message &message, const Contact::Id &sender, const Contact::Id &recipient);
-
-    void onSendFailedMessages();
-    void onSendNextMessage();
-
-    void onMessageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status status);
-
-    Message::Status sendMessage(const QueueMessage &message);
+    void onPushMessage(const GlobalMessage &message);
+    void onSendNotSentMessages();
+    void onMessageOperationStatusChanged(const MessageOperation *operation);
 
     VSQMessenger *m_messenger;
     UserDatabase *m_userDatabase;
-    std::queue<QueueMessage> m_messages;
+    AttachmentsQueue *m_attachmentsQueue;
+    Operation *m_root;
     UserId m_userId;
 };
 }

@@ -49,7 +49,7 @@ public:
 signals:
     void setUserId(const UserId &userId);
     void fetchChatMessages(const Chat::Id &chatId);
-    void fetchFailedMessages();
+    void fetchNotSentMessages();
     void createMessage(const Message &message);
 
     void updateStatus(const Message::Id &messageId, const Message::Status &status);
@@ -57,14 +57,14 @@ signals:
 
     void errorOccurred(const QString &errorText);
     void chatMessagesFetched(const Messages &messages);
-    void failedMessagesFetched(const QueueMessages &messages);
+    void notSentMessagesFetched(const GlobalMessages &messages);
 
 private:
     bool create() override;
 
     void onSetUserId(const UserId &userId);
     void onFetchChatMessages(const Chat::Id &chatId);
-    void onFetchFailedMessages();
+    void onFetchNotSentMessages();
     void onCreateMessage(const Message &message);
 
     void onUpdateStatus(const Message::Id &messageId, const Message::Status &status);

@@ -32,41 +32,19 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_UPLOAD_H
-#define VM_UPLOAD_H
+#include "models/AttachmentsQueue.h"
 
-#include "VSQTransfer.h"
-#include <QMutex>
+#include "Core.h"
+#include "Settings.h"
 
-class VSQUpload : public VSQTransfer
+using namespace vm;
+
+AttachmentsQueue::AttachmentsQueue(const QDir &cacheDir, QObject *parent)
+    : QObject(parent)
+    , m_cacheDir(cacheDir)
+{}
+
+void AttachmentsQueue::appendOperations(const MessageOperation *parent)
 {
-    Q_OBJECT
-
-public:
-    VSQUpload(QNetworkAccessManager *networkAccessManager, const QString &id, const QString &filePath, QObject *parent);
-    ~VSQUpload() override;
-
-    void start() override;
-
-    QString filePath() const;
-    Optional<QUrl> remoteUrl();
-
-    QString slotId() const;
-    void setSlotId(const QString &id);
-
-    DataSize fileSize() const;
-
-signals:
-    void remoteUrlReceived(const QUrl &url);
-    void remoteUrlErrorOccured();
-
-private:
-    QString m_filePath;
-    Optional<QUrl> m_remoteUrl;
-    bool m_remoteUrlError = false;
-    QString m_slotId;
-    QMutex m_guard;
-    QList<QMetaObject::Connection> m_connections;
-};
-
-#endif // VM_UPLOAD_H
+    // FIXME(fpohtmeh): implement
+}

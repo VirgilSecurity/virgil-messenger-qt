@@ -80,6 +80,7 @@ Optional<Attachment> AttachmentsModel::createAttachment(const QUrl &url, const A
     // Create attachment
     Attachment attachment;
     attachment.id = Utils::createUuid();
+    attachment.messageId = Utils::createUuid();
     attachment.type = type;
     attachment.size = fileSize; // TODO(fpohtmeh): use size after encryption?
 
@@ -103,9 +104,6 @@ Optional<Attachment> AttachmentsModel::createAttachment(const QUrl &url, const A
     if (type == Attachment::Type::Picture) {
         attachment.extras.setValue(createPictureExtras(attachment.localPath));
     }
-
-    // Message id
-    attachment.messageId = Utils::createUuid();
 
     return attachment;
 }

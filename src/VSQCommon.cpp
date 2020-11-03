@@ -61,14 +61,16 @@ void registerCommonMetaTypes()
     qRegisterMetaType<Chat::Id>("Chat::Id");
     qRegisterMetaType<Chat::UnreadCount>("Chat::UnreadCount");
     qRegisterMetaType<Chats>("Chats");
-    qRegisterMetaType<QueueMessage>("QueueMessage");
-    qRegisterMetaType<QueueMessages>("QueueMessages");
+    qRegisterMetaType<GlobalMessage>("GlobalMessage");
+    qRegisterMetaType<GlobalMessages>("GlobalMessages");
 
     qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");
 }
 
-QueueMessage::QueueMessage(const Message &msg, const Contact::Id &senderId, const Contact::Id &recipientId)
-    : Message(msg)
+GlobalMessage::GlobalMessage(const Message &message, const Contact::Id &contactId,
+                             const Contact::Id &senderId, const Contact::Id &recipientId)
+    : Message(message)
+    , contactId(contactId)
     , senderId(senderId)
     , recipientId(recipientId)
 {}

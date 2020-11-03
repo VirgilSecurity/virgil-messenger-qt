@@ -37,7 +37,9 @@
 #include <QSortFilterProxyModel>
 #include <QThread>
 
+#include "Settings.h"
 #include "models/AttachmentsModel.h"
+#include "models/AttachmentsQueue.h"
 #include "models/ChatsModel.h"
 #include "models/MessagesModel.h"
 #include "models/MessagesQueue.h"
@@ -47,9 +49,10 @@ using namespace vm;
 Models::Models(VSQMessenger *messenger, VSQSettings *settings, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
     , m_attachments(new AttachmentsModel(settings, this))
+    , m_attachmentsQueue(new AttachmentsQueue(settings->attachmentCacheDir(), nullptr))
     , m_chats(new ChatsModel(this))
     , m_messages(new MessagesModel(this))
-    , m_messagesQueue(new MessagesQueue(messenger, userDatabase, nullptr))
+    , m_messagesQueue(new MessagesQueue(messenger, userDatabase, m_attachmentsQueue, nullptr))
     , m_queueThread(new QThread())
 {
     qRegisterMetaType<AttachmentsModel *>("AttachmentsModel*");

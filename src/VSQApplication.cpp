@@ -71,7 +71,7 @@ VSQApplication::VSQApplication()
     , m_userDatabase(new UserDatabase(m_settings.databaseDir(), nullptr))
     , m_models(&m_messenger, &m_settings, m_userDatabase, this)
     , m_databaseThread(new QThread())
-    , m_controllers(&m_messenger, &m_models, m_userDatabase, this)
+    , m_controllers(&m_messenger, &m_settings, &m_models, m_userDatabase, this)
     , m_keyboardEventFilter(new KeyboardEventFilter(this))
     , m_applicationStateManager(&m_messenger, &m_controllers, m_validator, &m_settings, this)
 {

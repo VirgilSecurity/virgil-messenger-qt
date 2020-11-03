@@ -32,49 +32,33 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_IOTKIT_QT_SQL_CHAT_MODEL_H
-#define VIRGIL_IOTKIT_QT_SQL_CHAT_MODEL_H
+#ifndef VS_MESSAGEOPERATION_H
+#define VS_MESSAGEOPERATION_H
 
-#include <QSqlTableModel>
+#include "Operation.h"
 
-class VSQSqlChatModel : public QSqlTableModel {
+namespace vm
+{
+class MessageOperation : public Operation
+{
     Q_OBJECT
 
 public:
-    VSQSqlChatModel(QObject *parent = nullptr);
+    MessageOperation(const GlobalMessage &message, QObject *parent);
 
-    void
-    init(const QString &userId);
-
-    QVariant
-    data(const QModelIndex &index, int role) const override;
-
-    QHash<int, QByteArray>
-    roleNames() const override;
-
-    void
-    createPrivateChat(const QString &recipientId);
-
-    Q_INVOKABLE void
-    updateUnreadMessageCount(QString chatId);
-
-    Q_INVOKABLE void
-    applyFilter(const QString &filter);
-
-    Q_INVOKABLE void
-    clearFilter();
-
-    Q_INVOKABLE void
-    refresh();
+    const GlobalMessage *message() const;
 
 signals:
-    void updateLastMessage(QString chatId, QString message);
+    void statusChanged(const Message::Status &status);
 
 private:
-    void onUpdateLastMessage(QString chatId, QString message);
+    void connectChild(Operation *child) override;
 
-    QString m_userId;
-    QString m_tableName;
+    void setStatus(const Message::Status &status);
+    void onChildFinished(const Operation *child);
+
+    GlobalMessage m_message;
 };
+}
 
-#endif // VIRGIL_IOTKIT_QT_SQL_CHAT_MODEL_H
+#endif // VS_MESSAGEOPERATION_H

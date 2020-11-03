@@ -126,10 +126,6 @@ Page {
                 saveAttachmentAsDialog.open()
             }
 
-            onDownloadOpenAttachment: function(messageId, isPicture) {
-                (isPicture ? appState.openAttachment : appState.downloadAttachment)(messageId)
-            }
-
             onOpenContextMenu: function(messageId, mouse, contextMenu) {
                 listView.contextMenu = contextMenu
                 var coord = mapToItem(listView, mouse.x, mouse.y)
@@ -191,7 +187,7 @@ Page {
 
             property string messageId: ""
 
-            onAccepted: appState.saveAttachmentAs(messageId, fileUrl)
+            onAccepted: controllers.attachments.saveAs(messageId, fileUrl)
         }
 
         SoundEffect {

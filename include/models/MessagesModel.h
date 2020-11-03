@@ -57,6 +57,8 @@ public:
     bool setMessageStatus(const Message::Id &messageId, const Message::Status &status);
     void markAllAsRead();
 
+    Optional<Message> findById(const Message::Id &messageId) const;
+
 private:
     enum Roles
     {

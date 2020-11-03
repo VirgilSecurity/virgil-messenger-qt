@@ -32,28 +32,42 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_DOWNLOAD_H
-#define VM_DOWNLOAD_H
+#include "models/MessageOperation.h"
 
-#include "VSQTransfer.h"
-#include <QMutex>
+#include "models/SendMessageOperation.h"
 
-class VSQDownload : public VSQTransfer
+using namespace vm;
+
+MessageOperation::MessageOperation(const GlobalMessage &message, QObject *parent)
+    : Operation(QString("Message [%1]").arg(message.id), parent)
+    , m_message(message)
+{}
+
+const GlobalMessage *MessageOperation::message() const
 {
-    Q_OBJECT
+    return &m_message;
+}
 
-public:
-    VSQDownload(QNetworkAccessManager *networkAccessManager, const QString &id,
-                const QUrl &remoteUrl, const QString &filePath, QObject *parent);
-    ~VSQDownload() override;
+void MessageOperation::connectChild(Operation *child)
+{
+    Operation::connectChild(child);
+    connect(child, &Operation::failed, this, std::bind(&MessageOperation::setStatus, this, Message::Status::Failed));
+    connect(child, &Operation::invalidated, this, std::bind(&MessageOperation::setStatus, this, Message::Status::InvalidM));
+    connect(child, &Operation::finished, this, std::bind(&MessageOperation::onChildFinished, this, child));
+}
 
-    void start() override;
+void MessageOperation::setStatus(const Message::Status &status)
+{
+    if (m_message.status == status) {
+        return;
+    }
+    m_message.status = status;
+    emit statusChanged(status);
+}
 
-private:
-    QUrl m_remoteUrl;
-    QString m_filePath;
-    QMutex m_guard;
-    QList<QMetaObject::Connection> m_connections;
-};
-
-#endif // VM_DOWNLOAD_H
+void MessageOperation::onChildFinished(const Operation *child)
+{
+    if (dynamic_cast<const SendMessageOperation *>(child)) {
+        setStatus(Message::Status::Sent);
+    }
+}

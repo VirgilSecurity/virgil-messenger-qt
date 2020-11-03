@@ -44,6 +44,7 @@ class VSQSettings;
 namespace vm
 {
 class AttachmentsModel;
+class AttachmentsQueue;
 class ChatsModel;
 class MessagesModel;
 class MessagesQueue;
@@ -62,6 +63,8 @@ public:
 
     const AttachmentsModel *attachments() const;
     AttachmentsModel *attachments();
+    const AttachmentsQueue *attachmentsQueue() const;
+    AttachmentsQueue *attachmentsQueue();
     const ChatsModel *chats() const;
     ChatsModel *chats();
     const MessagesModel *messages() const;
@@ -71,6 +74,7 @@ public:
 
 private:
     AttachmentsModel *m_attachments;
+    AttachmentsQueue *m_attachmentsQueue;
     ChatsModel *m_chats;
     MessagesModel *m_messages;
     MessagesQueue *m_messagesQueue;

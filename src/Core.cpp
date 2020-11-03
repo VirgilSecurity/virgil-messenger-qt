@@ -109,3 +109,112 @@ Optional<QString> Core::encryptMessage(const Message &message, const Contact::Id
     }
     return QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage), encryptedMessageSz);
 }
+
+bool Core::decryptFile(const QString &encPath, const QString &path, const Contact::Id &recipientId)
+{
+    /*
+    qCDebug(lcTransferManager) << "File decryption:" << encPath << "=>" << path << "Recipient:" << recipient;
+#ifdef VS_DEVMODE_BAD_DECRYPT
+    qCWarning(lcTransferManager) << "DECRYPTION IS DISABLED";
+    return QFile::copy(encPath, path);
+#endif
+
+    // Read
+    QFile encFile(encPath);
+    if (!encFile.exists()) {
+        qCCritical(lcTransferManager) << "Source file doesn't exist";
+        return false;
+    }
+    if (!encFile.open(QFile::ReadOnly)) {
+        qCCritical(lcTransferManager) << "Source file can't be opened";
+        return false;
+    }
+    const auto encBytes = encFile.readAll();
+    qCDebug(lcTransferManager) << "Read" << encBytes.size() << "bytes";
+    encFile.close();
+    if (encBytes.size() == 0) {
+        qCDebug(lcTransferManager) << "Empty file was skipped";
+        return false;
+    }
+
+    // Decrypt
+    std::vector<char> bytes(Core::bufferSizeForDecryption(encBytes.size()));
+    size_t bytesSize = 0;
+    const auto code = vs_messenger_virgil_decrypt_msg(
+                recipient.toStdString().c_str(),
+                encBytes.data(),
+                reinterpret_cast<uint8_t*>(bytes.data()), bytes.size(), &bytesSize);
+    if (VS_CODE_OK != code)
+    {
+        qCCritical(lcTransferManager) << "Cannot decrypt file:" << encPath << "code:" << code;
+        return false;
+    }
+    bytes.resize(bytesSize);
+
+    // Write
+    QFile file(path);
+    if (!file.open(QFile::WriteOnly)) {
+        qCCritical(lcTransferManager) << "Destination file can't be opened";
+        return false;
+    }
+    file.write(bytes.data(), bytesSize);
+    file.close();
+    qCDebug(lcTransferManager) << "File decrypted:" << path << "size:" << QFileInfo(file).size();
+    */
+    return true;
+}
+
+bool Core::encryptFile(const QString &path, const QString &encPath, const Contact::Id &recipientId)
+{
+    /*
+        qCDebug(lcTransferManager) << "File encryption:" << path << "=>" << encPath << "Recipient:" << recipient;
+    #ifdef VS_DEVMODE_BAD_DECRYPT
+        qCWarning(lcTransferManager) << "ENCRYPTION IS DISABLED";
+        return QFile::copy(path, encPath);
+    #endif
+        // Read
+        QFile file(path);
+        if (!file.exists()) {
+            qCCritical(lcTransferManager) << "Source file doesn't exist";
+            return false;
+        }
+        if (!file.open(QFile::ReadOnly)) {
+            qCCritical(lcTransferManager) << "Source file can't be opened";
+            return false;
+        }
+        const auto bytes = file.readAll();
+        qCDebug(lcTransferManager) << "Read" << bytes.size() << "bytes";
+        if (bytes.size() == 0) {
+            qCDebug(lcTransferManager) << "Empty file was skipped";
+            return false;
+        }
+        file.close();
+
+        // Encrypt
+        std::vector<char> encBytes(Core::bufferSizeForEncryption(bytes.size()));
+        size_t encBytesSize = 0;
+        const auto code = vs_messenger_virgil_encrypt_msg(
+                    recipient.toStdString().c_str(),
+                    reinterpret_cast<const uint8_t*>(bytes.data()), bytes.size(),
+                    reinterpret_cast<uint8_t*>(encBytes.data()), encBytes.size(), &encBytesSize);
+        if (VS_CODE_OK != code)
+        {
+            qCCritical(lcTransferManager) << "Cannot encrypt file:" << path << "code:" << code;
+            return false;
+        }
+        encBytes.resize(encBytesSize);
+
+        encBytes.push_back(0);
+        // Write
+        QFile encFile(encPath);
+        if (!encFile.open(QFile::WriteOnly)) {
+            qCCritical(lcTransferManager) << "Destination file can't be opened";
+            return false;
+        }
+        encFile.write(encBytes.data(), encBytes.size());
+        encFile.close();
+        qCDebug(lcTransferManager) << "File encrypted:" << encPath << "size:" << QFileInfo(encFile).size();
+        return true;
+        */
+    return true;
+}

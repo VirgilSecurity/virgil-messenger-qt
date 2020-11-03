@@ -12,6 +12,7 @@ SELECT
     attachments.localPath AS attachmentLocalPath,
     attachments.url AS attachmentUrl,
     attachments.extras AS attachmentExtras,
+    chats.contactId AS contactId,
     :userId AS senderId,
     chats.contactId AS recipientId
 FROM

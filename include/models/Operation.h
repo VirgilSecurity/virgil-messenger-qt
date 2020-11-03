@@ -32,31 +32,80 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CRYPTOTRANSFERMANAGER_H
-#define VM_CRYPTOTRANSFERMANAGER_H
+#ifndef VM_OPERATION_H
+#define VM_OPERATION_H
 
-#include "VSQTransferManager.h"
+#include <deque>
 
-class VSQCryptoTransferManager : public VSQTransferManager
+#include <QObject>
+
+#include "VSQCommon.h"
+
+Q_DECLARE_LOGGING_CATEGORY(lcOperation)
+
+namespace vm
+{
+class Operation : public QObject
 {
     Q_OBJECT
 
 public:
-    VSQCryptoTransferManager(QXmppClient *client, QNetworkAccessManager *networkAccessManager, VSQSettings *settings, QObject *parent);
-    virtual ~VSQCryptoTransferManager();
+    enum class Status
+    {
+        Created,
+        Started,
+        Failed,
+        Invalid,
+        Finished
+    };
 
-    VSQUpload *startCryptoUpload(const QString id, const QString filePath, const QString recipient);
-    VSQDownload *startCryptoDownload(const QString id, const QUrl url, const QString filePath, const QString recipient);
+    Operation(const QString &name, QObject *parent);
+    ~Operation() override;
+
+    void start();
+    void drop();
+    void dropChildren();
+
+    QString name() const;
+    Status status() const;
+
+    void appendChild(Operation *child);
+    void prependChild(Operation *child);
+    bool hasChildren() const;
+
+    void setInfinite();
 
 signals:
-    void fileEncrypted(const QString &id, const QString &encryptedFileName);
-    void fileDecrypted(const QString &id, const QString &filePath);
+    void started();
+    void failed();
+    void invalidated();
+    void finished();
+
+protected:
+    void fail();
+    void invalidate();
+    void finish();
+
+    void cleanup();
+
+    virtual void run();
+    virtual void stopRun();
+    virtual bool populateChildren();
+    virtual void connectChild(Operation *child);
 
 private:
-    QString getCacheNewFilePath();
+    bool setStatus(const Status &status);
 
-    bool ecnryptFile(const QString &path, const QString &encPath,  const QString &recipient);
-    bool decryptFile(const QString &encPath, const QString &path, const QString &recipient);
+    void startNextChild();
+    void onChildInvalidated();
+
+    QString m_name;
+    Status m_status = Status::Created;
+    bool m_infinite = false;
+
+    std::deque<Operation *> m_children;
+    bool m_cleanedUp = false;
 };
+}
 
-#endif // VM_CRYPTOTRANSFERMANAGER_H
+#endif // VM_OPERATION_H
