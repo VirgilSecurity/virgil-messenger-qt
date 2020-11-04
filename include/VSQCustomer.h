@@ -39,11 +39,11 @@
 
 namespace Customer
 {
-    static QString OrganizationName = "Braes Capital";
-    static QString OrganizationDisplayName = "Braes";
+    static QString OrganizationName = "VirgilSecurity";
+    static QString OrganizationDisplayName = "Virgil";
 
-    static QString ApplicationName = "BraesMessenger";
-    static QString ApplicationDisplayName = "Braes Secure Messenger";
+    static QString ApplicationName = "VirgilMessenger";
+    static QString ApplicationDisplayName = "Virgil Secure messenger";
 
     static QString OrganizationDomain = "virgil.net";
     static QString MessengerUrlTemplate = "https://messenger%1.virgilsecurity.com";

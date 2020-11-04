@@ -114,10 +114,14 @@ endif()
 set(PREBUILT_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt")
 set(PREBUILT_QT_DIR "${PREBUILT_DIR}/qt")
 
+if(VS_IOS_SIMULATOR AND VS_PLATFORM STREQUAL "ios")
+    set(VS_IOS_SIM_PREFIX "-sim")
+endif()
+
 if(VS_PLATFORM STREQUAL "android")
     set(PREBUILT_BASE_DIR "${PREBUILT_DIR}/${VS_PLATFORM}.${ANDROID_ABI}/${CMAKE_BUILD_TYPE_LOWER}/installed/usr/local")    
 else()
-    set(PREBUILT_BASE_DIR "${PREBUILT_DIR}/${VS_PLATFORM}/${CMAKE_BUILD_TYPE_LOWER}/installed/usr/local")
+    set(PREBUILT_BASE_DIR "${PREBUILT_DIR}/${VS_PLATFORM}${VS_IOS_SIM_PREFIX}/${CMAKE_BUILD_TYPE_LOWER}/installed/usr/local")
 endif()
 
 set(PREBUILT_INCLUDE_DIR "${PREBUILT_BASE_DIR}/include")
@@ -143,6 +147,12 @@ set(VS_QT_EXTRA "")
 
 # IOS, IOS_SIM
 if(VS_PLATFORM STREQUAL "ios")
+    if(NOT XCODE_VERSION)
+      message(FATAL_ERROR "Xcode only")
+    endif()
+
+    # QT Extra packages
+    string(APPEND VS_QT_EXTRA "QmlImportScanner")
 
 # Android
 elseif(VS_PLATFORM STREQUAL "android")
@@ -194,7 +204,6 @@ include(GNUInstallDirs)
 include(FetchContent)
 
 find_package(Qt5 COMPONENTS Core Widgets Quick Sql Network Concurrent Qml Xml ${VS_QT_EXTRA} REQUIRED)
-
 
 # ---------------------------------------------------------------------------
 #   Prepare for build target
@@ -254,22 +263,49 @@ elseif(VS_PLATFORM STREQUAL "macos")
     )
 # IOS    
 elseif(VS_PLATFORM STREQUAL "ios")    
-    set(CMAKE_XCODE_EFFECTIVE_PLATFORMS "-iphoneos;-iphonesimulator")
+
+    if(VS_IOS_SIMULATOR)
+	set(CMAKE_XCODE_ATTRIBUTE_SUPPORTED_PLATFORMS "iphonesimulator")
+	set(CMAKE_XCODE_EFFECTIVE_PLATFORMS "-iphonesimulator")    
+	set(CMAKE_OSX_ARCHITECTURES "x86_64")	
+    else()
+	set(CMAKE_XCODE_ATTRIBUTE_SUPPORTED_PLATFORMS "iphoneos")
+	set(CMAKE_XCODE_EFFECTIVE_PLATFORMS "-iphoneos")    
+	set(CMAKE_OSX_ARCHITECTURES "arm64")	
+    endif()
+
+    set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} "-Wl,-e,_qt_main_wrapper")
+    set(CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
+    set(CMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH NO)    
+    
     add_executable(${VS_TARGET_NAME} MACOSX_BUNDLE)
+    
+    # Settings for signing
+    if(VS_CODE_SIGN_IDENTITY)
+        SET_XCODE_PROPERTY(${VS_TARGET_NAME} CODE_SIGN_IDENTITY "${VS_CODE_SIGN_IDENTITY}")
+    endif()
+    if(VS_DEVELOPMENT_TEAM)
+	SET_XCODE_PROPERTY(${VS_TARGET_NAME} DEVELOPMENT_TEAM "${VS_DEVELOPMENT_TEAM}")
+    endif()
+    if(VS_PROVISIONING_PROFILE_SPECIFIER)
+	SET_XCODE_PROPERTY(${VS_TARGET_NAME} PROVISIONING_PROFILE_SPECIFIER "${VS_PROVISIONING_PROFILE_SPECIFIER}")
+    endif()	
+
+    
     set_target_properties(${VS_TARGET_NAME}
         PROPERTIES 
     	    MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/platforms/ios/Info.plist.in"
 	    LINK_FLAGS "-framework Foundation -framework UserNotifications"        
     )
 
+    SET_XCODE_PROPERTY(${VS_TARGET_NAME} IPHONEOS_DEPLOYMENT_TARGET "${IOS_DEPLOYMENT_TARGET}")
     SET_XCODE_PROPERTY(${VS_TARGET_NAME} CODE_SIGN_ENTITLEMENTS "${VS_CUSTOMER_DIR}/platforms/ios/Entitlements/VirgilMessenger.entitlements")
     
     target_sources(${VS_TARGET_NAME} PRIVATE "${VS_CUSTOMER_DIR}/platforms/ios/Assets.xcassets")
     set_source_files_properties("${VS_CUSTOMER_DIR}/platforms/ios/Assets.xcassets" 
 	PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"
     )
-    source_group("Resources" FILES "${VS_CUSTOMER_DIR}/platforms/ios/Assets.xcassets")
-
+    qt5_import_qml_plugins(${VS_TARGET_NAME})
 else()
     message(FATAL_ERROR "Unknown target platform")
 endif()
@@ -500,6 +536,7 @@ target_compile_definitions(${VS_TARGET_NAME}
 
     $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","ios">:VS_IOS=1>>
     $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","ios">:VS_MOBILE=1>>    
+    $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","ios">:VS_PUSHNOTIFICATIONS=1>>    
     
     $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","macos">:MACOS=1>>
     $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","macos">:VS_DESKTOP=1>>    
@@ -523,8 +560,3 @@ target_compile_definitions(${VS_TARGET_NAME}
 #if(COMMAND add_clangformat AND ENABLE_CLANGFORMAT)
 #    add_clangformat(${VS_TARGET_NAME})
 #endif()
-
-
-#SET_XCODE_PROPERTY(${VS_TARGET_NAME} CODE_SIGN_IDENTITY "")
-#SET_XCODE_PROPERTY(MyTarget DEVELOPMENT_TEAM ${DEVELOPMENT_TEAM_ID})
-#SET_XCODE_PROPERTY(MyTarget PROVISIONING_PROFILE_SPECIFIER ${PROVISIONING_PROFILE_NAME})

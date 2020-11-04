@@ -86,7 +86,7 @@ endif()
 
 
 # Autodetect sdk, ndk for specified platform
-list(APPEND VS_PLATFORM_LIST "linux" "android" "ios" "ios-sim" "macos" "windows")
+list(APPEND VS_PLATFORM_LIST "linux" "android" "ios" "macos" "windows")
 if(VS_PLATFORM)
     message(STATUS "Autodetecting enviroment for target platform: [${VS_PLATFORM}]")
     # Check platform name
@@ -142,11 +142,24 @@ if(VS_PLATFORM)
         prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE)            
     
     # -- IOS
-    elseif(VS_PLATFORM STREQUAL "ios")
+    elseif(VS_PLATFORM STREQUAL "ios" AND NOT VS_IOS_SIMULATOR)
         set(QT_PREFIX_PATH "ios")
         set(CMAKE_SYSTEM_NAME "iOS")
-#        set(CMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH NO)
-#        set(CMAKE_IOS_INSTALL_COMBINED YES)
+        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE)            
+
+    # -- IOS-SIM
+    elseif(VS_PLATFORM STREQUAL "ios" AND VS_IOS_SIMULATOR)
+        set(QT_PREFIX_PATH "ios")
+        set(CMAKE_SYSTEM_NAME "iOS")
+        execute_process(COMMAND xcodebuild -version -sdk iphonesimulator Path
+            OUTPUT_VARIABLE CMAKE_OSX_SYSROOT
+	    ERROR_QUIET
+    	    OUTPUT_STRIP_TRAILING_WHITESPACE)
+	message(STATUS "Using SDK: ${CMAKE_OSX_SYSROOT} for platform: IOS Simulator")
+	if (NOT EXISTS ${CMAKE_OSX_SYSROOT})
+	    message(FATAL_ERROR "Invalid CMAKE_OSX_SYSROOT: ${CMAKE_OSX_SYSROOT} does not exist.")
+	endif()
+
         prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE)            
     
     # -- Windows

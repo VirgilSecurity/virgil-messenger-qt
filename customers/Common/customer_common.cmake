@@ -61,8 +61,9 @@ else()
     # IOS    
     # ----------
     # ***********************************************************************************
-    elseif(VS_PLATFORM STREQUAL "ios" OR VS_PLATFORM STREQUAL "iossim")        
+    elseif(VS_PLATFORM STREQUAL "ios")        
         # Version
+        set(IOS_DEPLOYMENT_TARGET "9.0")
         set(MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
         set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")        
         set(MACOSX_BUNDLE_BUNDLE_NAME "${VS_BUNDLE_PREFIX}.${PROJECT_NAME}")

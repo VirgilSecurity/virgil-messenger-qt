@@ -7,14 +7,16 @@ PROJECT_FOLDER="${SCRIPT_FOLDER}/../.."
 
 pushd ${PROJECT_FOLDER}
 
+  rm -rf build-sim
+  mkdir -p build-sim
+  
   rm -rf build
   mkdir -p build
 
-  cmake -S. -Bbuild -GXcode -DVS_PLATFORM="ios" -DCMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM="JWNLQ3HC5A"
-#  cmake --build build --config Debug --target VirgilMessenger
-
-    #-DCMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM="JWNLQ3HC5A" -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH=NO -DCMAKE_IOS_INSTALL_COMBINED=YES
-    #-DCMAKE_OSX_ARCHITECTURES="armv7;armv7s;arm64;i386;x86_64"  ..
-    #-DCMAKE_SYSTEM_NAME=iOS -DCMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH=NO -DCMAKE_IOS_INSTALL_COMBINED=YES
+#  cmake -S. -Bbuild-sim -GXcode -DVS_PLATFORM="ios" -DVS_IOS_SIMULATOR=TRUE -DVS_DEVELOPMENT_TEAM="JWNLQ3HC5A"
+#  cmake --build build-sim --config Debug 
+  
+  cmake -S. -Bbuild -GXcode -DVS_PLATFORM="ios" -DVS_DEVELOPMENT_TEAM="JWNLQ3HC5A"
+  cmake --build build --config Release
 
 popd  

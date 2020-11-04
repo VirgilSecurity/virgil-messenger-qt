@@ -46,7 +46,7 @@ else()
     # IOS
     # ----------
     # ***********************************************************************************
-    elseif(VS_PLATFORM STREQUAL "ios" OR VS_PLATFORM STREQUAL "iossim")
+    elseif(VS_PLATFORM STREQUAL "ios")
         set(VS_BUNDLE_PREFIX "com.virgil")
     endif()
 endif()
