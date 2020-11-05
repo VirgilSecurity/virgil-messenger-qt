@@ -42,7 +42,7 @@
 class QNetworkAccessManager;
 class QNetworkReply;
 
-class VSQSettings;
+class Settings;
 
 Q_DECLARE_LOGGING_CATEGORY(lcCrashReporter)
 
@@ -51,7 +51,7 @@ class VSQCrashReporter : public QObject
     Q_OBJECT
 
 public:
-    VSQCrashReporter(VSQSettings *settings, QNetworkAccessManager *networkAccessManager, QObject *parent);
+    VSQCrashReporter(Settings *settings, QNetworkAccessManager *networkAccessManager, QObject *parent);
     virtual ~VSQCrashReporter();
 
     void checkAppCrash();
@@ -71,7 +71,7 @@ private:
     bool sendFileToBackendRequest(QByteArray fileData);
     void endpointReply(QNetworkReply *reply);
 
-    VSQSettings *m_settings;
+    Settings *m_settings;
     QNetworkAccessManager *m_manager;
     QString m_currentVirgilUrl;
     QString m_version;

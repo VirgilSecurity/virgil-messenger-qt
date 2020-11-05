@@ -120,7 +120,7 @@ void MessagesTable::onCreateMessage(const Message &message)
         { ":chatId", message.chatId },
         { ":authorId", message.authorId },
         { ":status", static_cast<int>(message.status) },
-        { ":body", message.body }
+        { ":body", message.body.isEmpty() ? QVariant() : QVariant(message.body) }
     };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertMessage"), values);
     if (query) {

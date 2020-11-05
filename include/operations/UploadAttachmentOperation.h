@@ -32,29 +32,30 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_ACCOUNTSELECTIONSTATE_H
-#define VM_ACCOUNTSELECTIONSTATE_H
+#ifndef VM_UPLOADATTACHMENTOPERATION_H
+#define VM_UPLOADATTACHMENTOPERATION_H
 
-#include "SignInState.h"
-#include "AccountSelectionModel.h"
+#include "Operation.h"
+
+class Settings;
 
 namespace vm
 {
-class AccountSelectionState : public SignInState
+class MessageOperation;
+
+class UploadAttachmentOperation : public Operation
 {
     Q_OBJECT
-    Q_PROPERTY(AccountSelectionModel *model MEMBER m_model CONSTANT)
 
 public:
-    AccountSelectionState(UsersController *usersController, Validator *validator, Settings *settings, QState *parent);
-
-signals:
-    void requestSignInUsername();
-    void requestSignUp();
+    UploadAttachmentOperation(MessageOperation *parent, const Settings *settings);
 
 private:
-    AccountSelectionModel *m_model;
+    bool populateChildren() override;
+
+    MessageOperation *m_parent;
+    const Settings *m_settings;
 };
 }
 
-#endif // VM_ACCOUNTSELECTIONSTATE_H
+#endif // VM_UPLOADATTACHMENTOPERATION_H

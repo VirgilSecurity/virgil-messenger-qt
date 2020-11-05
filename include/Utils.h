@@ -35,6 +35,9 @@
 #ifndef VM_UTILS_H
 #define VM_UTILS_H
 
+#include <QImage>
+#include <QImageReader>
+
 #include "VSQCommon.h"
 
 Q_DECLARE_LOGGING_CATEGORY(lcUtils)
@@ -73,6 +76,10 @@ namespace Utils
 
     Optional<QString> readTextFile(const QString &filePath);
 
+    bool fileExists(const QString &filePath);
+
+    void removeFile(const QString &filePath);
+
     // Url functions
 
     bool isValidUrl(const QUrl &url);
@@ -87,13 +94,23 @@ namespace Utils
 
     // JSON functions
 
-    QString extrasToJson(const QVariant &extras, const Attachment::Type type);
+    QString extrasToJson(const QVariant &extras, const Attachment::Type type, bool skipLocal);
 
-    QVariant extrasFromJson(const QString &json, const Attachment::Type type);
+    QVariant extrasFromJson(const QString &json, const Attachment::Type type, bool skipLocal);
 
     Message messageFromJson(const QByteArray &json);
 
     QByteArray messageToJson(const Message &message);
+
+    // Image functions
+
+    QSize applyOrientation(const QSize &size, const int orientation);
+
+    QImage applyOrientation(const QImage &image, const int orientation);
+
+    QSize calculateThumbnailSize(const QSize &size, const QSize &maxSize, const int orientation = 0);
+
+    bool readImage(QImageReader *reader, QImage *image);
 }
 }
 

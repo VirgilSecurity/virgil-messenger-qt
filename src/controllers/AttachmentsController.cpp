@@ -42,7 +42,7 @@
 
 using namespace vm;
 
-AttachmentsController::AttachmentsController(VSQSettings *settings, Models *models, QObject *parent)
+AttachmentsController::AttachmentsController(Settings *settings, Models *models, QObject *parent)
     : QObject(parent)
     , m_settings(settings)
     , m_models(models)
@@ -50,13 +50,13 @@ AttachmentsController::AttachmentsController(VSQSettings *settings, Models *mode
 
 void AttachmentsController::saveAs(const Message::Id &messageId, const QVariant &fileUrl)
 {
-    qCDebug(lcController) << "Saving of attachment" << messageId << "as" << fileUrl;
     if (const auto message = findMessage(messageId)) {
         const auto &a = *message->attachment;
         if (a.localPath.isEmpty() || !QFile::exists(a.localPath)) {
             downloadAttachment(*message);
         }
         else {
+            qCDebug(lcController) << "Saving of attachment" << messageId << "as" << fileUrl;
             const auto filePath = Utils::urlToLocalFile(fileUrl.toUrl());
             QFile::copy(a.localPath, filePath);
             emit notificationCreated(tr("Attachment was saved"));
@@ -66,7 +66,6 @@ void AttachmentsController::saveAs(const Message::Id &messageId, const QVariant 
 
 void AttachmentsController::download(const Message::Id &messageId)
 {
-    qCDebug(lcController) << "Downloading of attachment" << messageId;
     if (const auto message = findMessage(messageId)) {
         downloadAttachment(*message);
     }
@@ -74,14 +73,15 @@ void AttachmentsController::download(const Message::Id &messageId)
 
 void AttachmentsController::open(const Message::Id &messageId)
 {
-    qCDebug(lcController) << "Opening of attachment" << messageId;
     if (const auto message = findMessage(messageId)) {
         const auto &a = *message->attachment;
         if (a.localPath.isEmpty() || !QFile::exists(a.localPath)) {
             downloadAttachment(*message);
         }
         else {
-            emit openPreviewRequested(Utils::localFileToUrl(a.localPath));
+            const auto url = Utils::localFileToUrl(a.localPath);
+            qCDebug(lcController) << "Opening of preview for" << url;
+            emit openPreviewRequested(url);
         }
     }
 }
@@ -98,9 +98,10 @@ void AttachmentsController::setContactId(const Contact::Id &contactId)
 
 void AttachmentsController::downloadAttachment(const GlobalMessage &message)
 {
+    qCDebug(lcController) << "Downloading of attachment" << message.id;
     const auto fileName = message.attachment->fileName;
     const auto filePath = Utils::findUniqueFileName(m_settings->downloadsDir().filePath(fileName));
-    m_models->messagesQueue()->pushDownloadOperation(message, filePath);
+    m_models->messagesQueue()->pushMessageDownload(message, filePath);
 }
 
 Optional<GlobalMessage> AttachmentsController::findMessage(const Message::Id &messageId) const

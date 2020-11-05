@@ -41,7 +41,7 @@
 
 using namespace vm;
 
-SplashScreenState::SplashScreenState(UsersController *usersController, Validator *validator, VSQSettings *settings, QState *parent)
+SplashScreenState::SplashScreenState(UsersController *usersController, Validator *validator, Settings *settings, QState *parent)
     : SignInState(usersController, validator, parent)
     , m_settings(settings)
 {

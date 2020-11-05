@@ -32,27 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_MAKETHUMBNAILOPERATION_H
-#define VM_MAKETHUMBNAILOPERATION_H
+#ifndef VM_CREATETHUMBNAILOPERATION_H
+#define VM_CREATETHUMBNAILOPERATION_H
 
 #include "Operation.h"
 
 namespace vm
 {
-class MessageOperation;
-
-class MakeThumbnailOperation : public Operation
+class CreateThumbnailOperation : public Operation
 {
     Q_OBJECT
 
 public:
-    explicit MakeThumbnailOperation(MessageOperation *parent);
+    CreateThumbnailOperation(const QString &name, QObject *parent,
+                             const QString &sourcePath, const QString &destPath, const QSize &maxSize);
 
     void run() override;
 
+signals:
+    void thumbnailReady(const QString &destPath);
+
 private:
-    MessageOperation *m_parent;
+    QString m_sourcePath;
+    QString m_destPath;
+    const QSize m_maxSize;
 };
 }
 
-#endif // VM_MAKETHUMBNAILOPERATION_H
+#endif // VM_CREATETHUMBNAILOPERATION_H

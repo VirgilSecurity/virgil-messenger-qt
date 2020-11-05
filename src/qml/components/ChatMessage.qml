@@ -295,4 +295,9 @@ Control {
             }
         }
     }
+
+    Component.onCompleted: {
+//        console.log("->", messageId, body, displayTime, nickname, status, failed)
+//        console.log(attachmentId, attachmentType, attachmentStatus, attachmentImagePath, attachmentFileExists)
+    }
 }

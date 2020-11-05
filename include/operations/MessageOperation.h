@@ -55,20 +55,25 @@ public:
     void setAttachmentStatus(const Attachment::Status status);
     void setAttachmentProgress(const DataSize &bytesLoaded, const DataSize &bytesTotal);
     void setAttachmentUrl(const QUrl &url);
-    void setAttachmentExtras(const QVariant &extras);
     void setAttachmentLocalPath(const QString &localPath);
+
+    void setAttachmentExtras(const QVariant &extras);
+    void setAttachmentPreviewPath(const QString &previewPath);
+    void setAttachmentThumbnailPath(const QString &thumbnailPath);
+    void setAttachmentThumbnailUrl(const QUrl &thumbnailUrl);
 
 signals:
     void statusChanged(const Message::Status &status);
     void attachmentStatusChanged(const Attachment::Status &status);
     void attachmentProgressChanged(const DataSize &bytesLoaded, const DataSize &bytesTotal);
     void attachmentUrlChanged(const QUrl &url);
-    void attachmentExtrasChanged(const QVariant &extras);
     void attachmentLocalPathChanged(const QString &localPath);
 
+    void attachmentExtrasChanged(const QVariant &extras);
+
 protected:
-    bool populateChildren() override;
     void connectChild(Operation *child) override;
+    bool populateChildren() override;
 
 private:
     Attachment *writableAttachment();

@@ -34,24 +34,22 @@
 
 #include "operations/DecryptFileOperation.h"
 
-#include <QDir>
-
 #include "Core.h"
 #include "operations/MessageOperation.h"
 
 using namespace vm;
 
-DecryptFileOperation::DecryptFileOperation(MessageOperation *parent, const QString &encFilePath, const QString &filePath)
-    : Operation(QString("DecryptFile"), parent)
-    , m_parent(parent)
-    , m_encFilePath(encFilePath)
-    , m_filePath(filePath)
+DecryptFileOperation::DecryptFileOperation(const QString &name, QObject *parent, const QString &sourcePath, const QString &destPath, const Contact::Id &senderId)
+    : Operation(name, parent)
+    , m_sourcePath(sourcePath)
+    , m_destPath(destPath)
+    , m_senderId(senderId)
 {}
 
 void DecryptFileOperation::run()
 {
-    const auto senderId = m_parent->message()->senderId;
-    if (Core::decryptFile(m_encFilePath, m_filePath, senderId)) {
+    if (Core::decryptFile(m_sourcePath, m_destPath, m_senderId)) {
+        emit decrypted(m_destPath);
         finish();
     }
     else {

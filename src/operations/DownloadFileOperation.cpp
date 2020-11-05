@@ -41,10 +41,9 @@
 
 using namespace vm;
 
-DownloadFileOperation::DownloadFileOperation(MessageOperation *parent, FileLoader *fileLoader, const QString &filePath)
-    : LoadFileOperation(QString("DownloadFile"), parent, fileLoader)
-    , m_parent(parent)
-    , m_url(parent->message()->attachment->url)
+DownloadFileOperation::DownloadFileOperation(const QString &name, QObject *parent, FileLoader *fileLoader, const QUrl &url, const QString &filePath)
+    : LoadFileOperation(name, parent, fileLoader)
+    , m_url(url)
 {
     setFilePath(filePath);
     connect(this, &DownloadFileOperation::finished, this, &DownloadFileOperation::onFinished);
@@ -61,7 +60,7 @@ void DownloadFileOperation::run()
 void DownloadFileOperation::connectReply(QNetworkReply *reply)
 {
     LoadFileOperation::connectReply(reply);
-    connect(reply, &QNetworkReply::downloadProgress, this, &LoadFileOperation::updateProgress);
+    connect(reply, &QNetworkReply::downloadProgress, this, &LoadFileOperation::setProgress);
     connect(reply, &QNetworkReply::readyRead, [=]() {
         const auto bytes = reply->readAll();
         fileHandle()->write(bytes);
@@ -72,5 +71,5 @@ void DownloadFileOperation::connectReply(QNetworkReply *reply)
 void DownloadFileOperation::onFinished()
 {
     qCDebug(lcOperation) << "File was downloaded to:" << filePath();
-    m_parent->setAttachmentLocalPath(filePath());
+    emit downloaded(filePath());
 }

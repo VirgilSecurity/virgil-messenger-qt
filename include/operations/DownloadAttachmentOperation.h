@@ -35,24 +35,38 @@
 #ifndef VM_DOWNLOADATTACHMENTOPERATION_H
 #define VM_DOWNLOADATTACHMENTOPERATION_H
 
-#include "MessageOperation.h"
+#include "Operation.h"
+
+class Settings;
 
 namespace vm
 {
-class FileLoader;
+class MessageOperation;
 
-class DownloadAttachmentOperation : public MessageOperation
+class DownloadAttachmentOperation : public Operation
 {
     Q_OBJECT
 
 public:
-    DownloadAttachmentOperation(const GlobalMessage &message, MessageOperationFactory *factory, QObject *parent,
-                                const QString &filePath);
+    struct Parameter
+    {
+        enum class Type
+        {
+            Full,
+            Preload
+        };
+        Type type;
+        QString filePath;
+    };
+
+    DownloadAttachmentOperation(MessageOperation *parent, const Settings *settings, const Parameter &parameter);
 
 private:
     bool populateChildren() override;
 
-    QString m_filePath;
+    MessageOperation *m_parent;
+    const Settings *m_settings;
+    Parameter m_parameter;
 };
 }
 

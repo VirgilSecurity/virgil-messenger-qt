@@ -32,29 +32,43 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_ACCOUNTSELECTIONSTATE_H
-#define VM_ACCOUNTSELECTIONSTATE_H
+#include "operations/CreateThumbnailOperation.h"
 
-#include "SignInState.h"
-#include "AccountSelectionModel.h"
+#include <QImageReader>
 
-namespace vm
+#include "Utils.h"
+
+using namespace vm;
+
+CreateThumbnailOperation::CreateThumbnailOperation(const QString &name, QObject *parent,
+                                                   const QString &sourcePath, const QString &destPath, const QSize &maxSize)
+    : Operation(name, parent)
+    , m_sourcePath(sourcePath)
+    , m_destPath(destPath)
+    , m_maxSize(maxSize)
+{}
+
+void CreateThumbnailOperation::run()
 {
-class AccountSelectionState : public SignInState
-{
-    Q_OBJECT
-    Q_PROPERTY(AccountSelectionModel *model MEMBER m_model CONSTANT)
-
-public:
-    AccountSelectionState(UsersController *usersController, Validator *validator, Settings *settings, QState *parent);
-
-signals:
-    void requestSignInUsername();
-    void requestSignUp();
-
-private:
-    AccountSelectionModel *m_model;
-};
+    QImageReader reader(m_sourcePath);
+    QImage source;
+    if (!Utils::readImage(&reader, &source)) {
+        fail();
+        return;
+    }
+    const auto image = Utils::applyOrientation(source, reader.transformation());
+    const auto size = Utils::calculateThumbnailSize(image.size(), m_maxSize);
+    if (size == image.size()) {
+        QFile::copy(m_sourcePath, m_destPath);
+    }
+    else {
+        const auto dest = image.scaled(size.width(), size.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        if (!QImage(dest).save(m_destPath)) {
+            qCDebug(lcOperation) << "Unable to save thumbnail file:" << m_destPath;
+            fail();
+            return;
+        }
+    }
+    emit thumbnailReady(m_destPath);
+    finish();
 }
-
-#endif // VM_ACCOUNTSELECTIONSTATE_H

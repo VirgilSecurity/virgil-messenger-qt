@@ -147,10 +147,8 @@ void MessagesModel::setAttachmentUrl(const Attachment::Id &attachmentId, const Q
 
 void MessagesModel::setAttachmentExtras(const Attachment::Id &attachmentId, const QVariant &extras)
 {
-    updateAttachment(attachmentId, { AttachmentImageSizeRole, AttachmentImagePathRole }, [=](Attachment &a) {
-        if (a.extras == extras) {
-            return false;
-        }
+    updateAttachment(attachmentId, { AttachmentImagePathRole }, [=](Attachment &a) {
+        // NOTE(fpohtmeh): don't compare values because file existence can be changed
         a.extras = extras;
         return true;
     });
@@ -159,9 +157,7 @@ void MessagesModel::setAttachmentExtras(const Attachment::Id &attachmentId, cons
 void MessagesModel::setAttachmentLocalPath(const Attachment::Id &attachmentId, const QString &localPath)
 {
     updateAttachment(attachmentId, { AttachmentFileExistsRole }, [=](Attachment &a) {
-        if (a.localPath == localPath) {
-            return false;
-        }
+        // NOTE(fpohtmeh): don't compare values because file existence can be changed
         a.localPath = localPath;
         return true;
     });
@@ -242,18 +238,14 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
                 return QLatin1String("../resources/icons/File Selected Big.png");
             }
             else if (attachment->type == Attachment::Type::Picture) {
-                switch (attachment->status) {
-                case Attachment::Status::Loading:
-                    // FIXME(fpohtmeh): implement
-                    return QString();
-                    //return attachment->extras.value<PictureExtras>().thumbnailPath;
-                case Attachment::Status::Loaded:
-                    // FIXME(fpohtmeh): implement
-                    return QString();
-                    //return attachment->extras.value<PictureExtras>().previewPath;
-                default:
-                    return QString();
+                const auto e = attachment->extras.value<PictureExtras>();
+                if (Utils::fileExists(e.previewPath)) {
+                    return Utils::localFileToUrl(e.previewPath);
                 }
+                if (Utils::fileExists(e.thumbnailPath)) {
+                    return Utils::localFileToUrl(e.thumbnailPath);
+                }
+                return QString();
             }
         }
         return QString();
@@ -290,14 +282,7 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
     }
     case FailedRole:
     {
-        if (message.status == Message::Status::Failed) {
-            return true;
-        }
-        if (attachment) {
-            const auto &status = attachment->status;
-            return status == Attachment::Status::Interrupted || status == Attachment::Status::Invalid;
-        }
-        return false;
+        return message.status == Message::Status::Failed;
     }
     case FirstInRowRole:
     {

@@ -54,7 +54,7 @@ using namespace vm;
 
 Q_LOGGING_CATEGORY(lcSettings, "settings")
 
-VSQSettings::VSQSettings(QObject *parent)
+Settings::Settings(QObject *parent)
     : QSettings(Customer::OrganizationName, Customer::ApplicationName, parent)
     , m_sessionId(Utils::createUuid())
 {
@@ -70,14 +70,14 @@ VSQSettings::VSQSettings(QObject *parent)
     m_downloadsDir.setPath(QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
 }
 
-VSQSettings::~VSQSettings()
+Settings::~Settings()
 {
 #ifdef VS_DEVMODE
     qCDebug(lcDev) << "~Settings";
 #endif
 }
 
-void VSQSettings::print()
+void Settings::print()
 {
     qCDebug(lcSettings) << "Settings";
     qCDebug(lcSettings) << "Device id:" << deviceId();
@@ -92,7 +92,7 @@ void VSQSettings::print()
     }
 }
 
-void VSQSettings::setLastSignedInUserId(const QString &userId)
+void Settings::setLastSignedInUserId(const QString &userId)
 {
     if (lastSignedInUserId() == userId) {
         return;
@@ -102,12 +102,12 @@ void VSQSettings::setLastSignedInUserId(const QString &userId)
     emit lastSignedInUserIdChanged(userId);
 }
 
-QString VSQSettings::lastSignedInUserId() const
+QString Settings::lastSignedInUserId() const
 {
     return groupValue(kLastSessionGroup, kSignedInUserId).toString();
 }
 
-void VSQSettings::setUsersList(const QStringList &users)
+void Settings::setUsersList(const QStringList &users)
 {
     if (usersList() == users) {
         return;
@@ -117,12 +117,12 @@ void VSQSettings::setUsersList(const QStringList &users)
     emit usersListChanged(users);
 }
 
-QStringList VSQSettings::usersList() const
+QStringList Settings::usersList() const
 {
     return groupValue(kUsersGroup, kUsersList).toStringList();
 }
 
-void VSQSettings::addUserToList(const QString &user)
+void Settings::addUserToList(const QString &user)
 {
     auto users = usersList();
     if (!users.contains(user)) {
@@ -130,29 +130,29 @@ void VSQSettings::addUserToList(const QString &user)
     }
 }
 
-QString VSQSettings::userCredential(const QString &user) const
+QString Settings::userCredential(const QString &user) const
 {
     return groupValue(kCredenitalsGroup, user).toString();
 }
 
-void VSQSettings::setUserCredential(const QString &user, const QString &credential)
+void Settings::setUserCredential(const QString &user, const QString &credential)
 {
     setGroupValue(kCredenitalsGroup, user, credential);
     sync();
 }
 
-QString VSQSettings::deviceId() const
+QString Settings::deviceId() const
 {
     return value(kDeviceId).toString();
 }
 
-bool VSQSettings::runFlag() const
+bool Settings::runFlag() const
 {
     auto lastSessionId = groupValue(kLastSessionGroup, kSessionId).toString();
     return !lastSessionId.isEmpty() && lastSessionId != m_sessionId;
 }
 
-void VSQSettings::setRunFlag(bool run)
+void Settings::setRunFlag(bool run)
 {
     if (run) {
         qCDebug(lcSettings) << "Save session id" << m_sessionId;
@@ -164,7 +164,7 @@ void VSQSettings::setRunFlag(bool run)
     }
 }
 
-QDir VSQSettings::databaseDir() const
+QDir Settings::databaseDir() const
 {
     if (!m_databaseDir.exists()) {
         Utils::forceCreateDir(m_databaseDir.absolutePath());
@@ -172,12 +172,12 @@ QDir VSQSettings::databaseDir() const
     return m_databaseDir;
 }
 
-DataSize VSQSettings::attachmentMaxFileSize() const
+DataSize Settings::attachmentMaxFileSize() const
 {
     return 25 * 1024 * 1024;
 }
 
-QDir VSQSettings::attachmentCacheDir() const
+QDir Settings::attachmentCacheDir() const
 {
     if(!m_attachmentCacheDir.exists()) {
         Utils::forceCreateDir(m_attachmentCacheDir.absolutePath());
@@ -185,7 +185,7 @@ QDir VSQSettings::attachmentCacheDir() const
     return m_attachmentCacheDir;
 }
 
-QDir VSQSettings::thumbnailsDir() const
+QDir Settings::thumbnailsDir() const
 {
     if(!m_thumbnaisDir.exists()) {
         Utils::forceCreateDir(m_thumbnaisDir.absolutePath());
@@ -193,7 +193,7 @@ QDir VSQSettings::thumbnailsDir() const
     return m_thumbnaisDir;
 }
 
-QDir VSQSettings::downloadsDir() const
+QDir Settings::downloadsDir() const
 {
     if(!m_downloadsDir.exists()) {
         Utils::forceCreateDir(m_downloadsDir.absolutePath());
@@ -201,12 +201,22 @@ QDir VSQSettings::downloadsDir() const
     return m_downloadsDir;
 }
 
-QSize VSQSettings::thumbnailMaxSize() const
+QString Settings::generateThumbnailPath() const
+{
+    return thumbnailsDir().filePath(Utils::createUuid() + QString(".png"));
+}
+
+QSize Settings::thumbnailMaxSize() const
 {
     return QSize(100, 80);
 }
 
-bool VSQSettings::devMode() const
+QSize Settings::previewMaxSize() const
+{
+    return 3 * thumbnailMaxSize();
+}
+
+bool Settings::devMode() const
 {
 #ifdef VS_DEVMODE
     return true;
@@ -215,51 +225,51 @@ bool VSQSettings::devMode() const
 #endif // VS_DEVMODE
 }
 
-QRect VSQSettings::windowGeometry() const
+QRect Settings::windowGeometry() const
 {
     return groupValue(kLastSessionGroup, kWindowGeometryId).toRect();
 }
 
-void VSQSettings::setWindowGeometry(const QRect &geometry)
+void Settings::setWindowGeometry(const QRect &geometry)
 {
     setGroupValue(kLastSessionGroup, kWindowGeometryId, geometry);
     sync();
 }
 
-Seconds VSQSettings::lastSeenActivityInterval() const
+Seconds Settings::lastSeenActivityInterval() const
 {
     return 5;
 }
 
-QString VSQSettings::makeGroupKey(const QString &group, const QString &key) const
+QString Settings::makeGroupKey(const QString &group, const QString &key) const
 {
     return group + '/' + key;
 }
 
-void VSQSettings::setGroupValue(const QString &group, const QString &key, const QVariant &value)
+void Settings::setGroupValue(const QString &group, const QString &key, const QVariant &value)
 {
     setValue(makeGroupKey(group, key), value);
     sync();
 }
 
-QVariant VSQSettings::groupValue(const QString &group, const QString &key, const QVariant &defaultValue) const
+QVariant Settings::groupValue(const QString &group, const QString &key, const QVariant &defaultValue) const
 {
     return value(makeGroupKey(group, key), defaultValue);
 }
 
-void VSQSettings::removeGroupKey(const QString &group, const QString &key)
+void Settings::removeGroupKey(const QString &group, const QString &key)
 {
     remove(makeGroupKey(group, key));
 }
 
-void VSQSettings::removeGroup(const QString &group)
+void Settings::removeGroup(const QString &group)
 {
     beginGroup(group);
     remove(QString());
     endGroup();
 }
 
-void VSQSettings::createDeviceId()
+void Settings::createDeviceId()
 {
     setValue(kDeviceId, Utils::createUuid());
     sync();

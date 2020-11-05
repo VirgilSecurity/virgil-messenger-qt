@@ -42,7 +42,7 @@
 
 using namespace vm;
 
-AttachmentsModel::AttachmentsModel(VSQSettings *settings, QObject *parent)
+AttachmentsModel::AttachmentsModel(Settings *settings, QObject *parent)
     : QAbstractListModel(parent)
     , m_settings(settings)
 {}
@@ -102,7 +102,11 @@ Optional<Attachment> AttachmentsModel::createAttachment(const QUrl &url, const A
 
     // Picture
     if (type == Attachment::Type::Picture) {
-        attachment.extras.setValue(createPictureExtras(attachment.localPath));
+        const auto extras = createPictureExtras(attachment.localPath);
+        if (!extras) {
+            return NullOptional;
+        }
+        attachment.extras.setValue(*extras);
     }
 
     return attachment;
@@ -121,44 +125,15 @@ QVariant AttachmentsModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-PictureExtras AttachmentsModel::createPictureExtras(const QString &localPath) const
+Optional<PictureExtras> AttachmentsModel::createPictureExtras(const QString &localPath) const
 {
     PictureExtras extras;
+    QImage source;
     QImageReader reader(localPath);
-    extras.orientation = reader.transformation();
-    extras.thumbnailSize = calculateThumbnailSize(reader.size(), extras.orientation);
-// TODO(fpohtmeh): remove unused fields from VSQCommon too
-//    extras.size = reader.size();
-//    extras.thumbnailPath = generateThumbnailPath();
-//    extras.previewPath = generateThumbnailPath();
+    if (!Utils::readImage(&reader, &source)) {
+        return NullOptional;
+    }
+    qCDebug(lcModel) << "Read image dimensions:" << reader.size();
+    extras.thumbnailSize = Utils::calculateThumbnailSize(reader.size(), m_settings->thumbnailMaxSize(), reader.transformation());
     return extras;
-}
-
-QString AttachmentsModel::generateThumbnailPath(const QString &attachmentId, const QString &suffix) const
-{
-    return m_settings->thumbnailsDir().filePath(attachmentId + QLatin1Char('-') + suffix + QLatin1String(".png"));
-}
-
-QSize AttachmentsModel::applyOrientation(const QSize &size, int orientation) const
-{
-    if (orientation & QImageIOHandler::TransformationRotate90) {
-        return QSize(size.height(), size.width());
-    }
-    return size;
-}
-
-QSize AttachmentsModel::calculateThumbnailSize(const QSize &size, int orientation) const
-{
-    QSizeF s = applyOrientation(size, orientation);
-    const double ratio = s.height() / s.width();
-    const QSizeF maxSize = m_settings->thumbnailMaxSize();
-    if (s.width() > maxSize.width()) {
-        s.setWidth(maxSize.width());
-        s.setHeight(maxSize.width() * ratio);
-    }
-    if (s.height() > maxSize.height()) {
-        s.setHeight(maxSize.height());
-        s.setWidth(maxSize.height() / ratio);
-    }
-    return s.toSize();
 }

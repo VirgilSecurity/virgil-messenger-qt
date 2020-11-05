@@ -45,7 +45,7 @@
 using namespace vm;
 
 // TODO(fpohtmeh): remove settings from constructor?
-Controllers::Controllers(VSQMessenger *messenger, VSQSettings *settings,
+Controllers::Controllers(VSQMessenger *messenger, Settings *settings,
                          Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
     , m_attachments(new AttachmentsController(settings, models, this))

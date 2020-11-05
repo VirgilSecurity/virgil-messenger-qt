@@ -135,6 +135,17 @@ void UserDatabase::openByUserId(const UserId &userId)
         const QString fileName = QString("user-%1.sqlite3").arg(userId);
         const QString filePath(m_databaseDir.filePath(fileName));
         Database::open(filePath, userId + QLatin1String("-messenger"));
+        // Run initial update for user
+        {
+            ScopedConnection connection(*this);
+            const DatabaseUtils::BindValues values {
+                { ":createdStatus", static_cast<int>(Attachment::Status::Created) },
+                { ":loadingStatus", static_cast<int>(Attachment::Status::Loading) }
+            };
+            if (!DatabaseUtils::readExecQuery(this, QLatin1String("initUser"), values)) {
+                qCDebug(lcDatabase) << "Failed to init user";
+            }
+        }
         messagesTable()->setUserId(userId);
         emit userIdChanged(userId);
     }

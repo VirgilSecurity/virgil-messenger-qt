@@ -32,19 +32,40 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "operations/MakeThumbnailOperation.h"
+#ifndef VM_DOWNLOADDECRYPTFILEOPERATION_H
+#define VM_DOWNLOADDECRYPTFILEOPERATION_H
 
-#include "operations/MessageOperation.h"
+#include "Operation.h"
 
-using namespace vm;
+class Settings;
 
-MakeThumbnailOperation::MakeThumbnailOperation(MessageOperation *parent)
-    : Operation(QString("MakeThumbnail"), parent)
-    , m_parent(parent)
-{}
-
-void MakeThumbnailOperation::run()
+namespace vm
 {
-    qDebug(lcOperation) << "Not implemented";
-    fail();
+class FileLoader;
+
+class DownloadDecryptFileOperation : public Operation
+{
+    Q_OBJECT
+
+public:
+    DownloadDecryptFileOperation(const QString &name, QObject *parent, const Settings *settings, FileLoader *fileLoader,
+                                 const QUrl &url, const QString &filePath, const Contact::Id &senderId);
+
+signals:
+    void progressChanged(const DataSize &bytesLoaded, const DataSize &bytesTotal);
+    void decrypted(const QString &filePath);
+
+private:
+    bool populateChildren() override;
+    void cleanup() override;
+
+    const Settings *m_settings;
+    FileLoader *m_fileLoader;
+    const QUrl m_url;
+    QString m_tempPath;
+    const QString m_filePath;
+    const Contact::Id m_senderId;
+};
 }
+
+#endif // VM_DOWNLOADDECRYPTFILEOPERATION_H

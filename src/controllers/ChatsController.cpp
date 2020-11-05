@@ -75,6 +75,7 @@ void ChatsController::loadChats(const UserId &userId)
 {
     if (userId.isEmpty()) {
         m_models->chats()->setChats({});
+        emit chatsCleared();
     }
     else {
         m_userDatabase->chatsTable()->fetch();
@@ -126,6 +127,7 @@ void ChatsController::setupTableConnections()
     auto table = m_userDatabase->chatsTable();
     connect(table, &ChatsTable::errorOccurred, this, &ChatsController::errorOccurred);
     connect(table, &ChatsTable::fetched, m_models->chats(), &ChatsModel::setChats);
+    connect(table, &ChatsTable::fetched, this, &ChatsController::chatsFetched);
 }
 
 void ChatsController::setCurrentChat(const Chat &chat)

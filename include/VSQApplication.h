@@ -96,7 +96,7 @@ private:
     ApplicationStateManager *stateManager();
 
     static const QString kVersion;
-    VSQSettings m_settings;
+    Settings m_settings;
     QNetworkAccessManager *m_networkAccessManager;
     VSQCrashReporter m_crashReporter;
     QScopedPointer<QQmlApplicationEngine> m_engine;

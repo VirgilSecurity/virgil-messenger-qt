@@ -32,6 +32,43 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "operations/CopyFileOperation.h"
+#include "operations/DownloadDecryptFileOperation.h"
+
+#include "Settings.h"
+#include "Utils.h"
+#include "operations/DownloadFileOperation.h"
+#include "operations/DecryptFileOperation.h"
 
 using namespace vm;
+
+DownloadDecryptFileOperation::DownloadDecryptFileOperation(const QString &name, QObject *parent, const Settings *settings, FileLoader *fileLoader,
+                                                           const QUrl &url, const QString &filePath, const Contact::Id &senderId)
+    : Operation(name, parent)
+    , m_settings(settings)
+    , m_fileLoader(fileLoader)
+    , m_url(url)
+    , m_filePath(filePath)
+    , m_senderId(senderId)
+{}
+
+bool DownloadDecryptFileOperation::populateChildren()
+{
+    m_tempPath = m_settings->attachmentCacheDir().filePath(Utils::createUuid());
+    const auto preffix = name() + QChar('/');
+
+    auto downOp = new DownloadFileOperation(preffix + QString("Download"), this, m_fileLoader, m_url, m_tempPath);
+    connect(downOp, &DownloadFileOperation::progressChanged, this, &DownloadDecryptFileOperation::progressChanged);
+    appendChild(downOp);
+
+    auto decryptOp = new DecryptFileOperation(preffix + QString("Decrypt"), this, m_tempPath, m_filePath, m_senderId);
+    connect(decryptOp, &DecryptFileOperation::decrypted, this, &DownloadDecryptFileOperation::decrypted);
+    appendChild(decryptOp);
+
+    return hasChildren();
+}
+
+void DownloadDecryptFileOperation::cleanup()
+{
+    Utils::removeFile(m_tempPath);
+    Operation::cleanup();
+}

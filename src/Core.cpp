@@ -117,11 +117,11 @@ bool Core::decryptFile(const QString &encPath, const QString &path, const Contac
     // Read
     QFile encFile(encPath);
     if (!encFile.exists()) {
-        qCCritical(lcCore) << "Source file doesn't exist";
+        qCCritical(lcCore) << "Decryption.Source file doesn't exist";
         return false;
     }
     if (!encFile.open(QFile::ReadOnly)) {
-        qCCritical(lcCore) << "Source file can't be opened";
+        qCCritical(lcCore) << "Decryption.Source file can't be opened";
         return false;
     }
     const auto encBytes = encFile.readAll();
@@ -163,11 +163,11 @@ bool Core::encryptFile(const QString &path, const QString &encPath, const Contac
     // Read
     QFile file(path);
     if (!file.exists()) {
-        qCCritical(lcCore) << "Source file doesn't exist";
+        qCCritical(lcCore) << "Encryption. Source file doesn't exist";
         return false;
     }
     if (!file.open(QFile::ReadOnly)) {
-        qCCritical(lcCore) << "Source file can't be opened";
+        qCCritical(lcCore) << "Encryption.Source file can't be opened";
         return false;
     }
     const auto bytes = file.readAll();

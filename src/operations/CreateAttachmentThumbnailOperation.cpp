@@ -32,6 +32,15 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "operations/OpenPreviewOperation.h"
+#include "operations/CreateAttachmentThumbnailOperation.h"
+
+#include "Settings.h"
+#include "operations/MessageOperation.h"
 
 using namespace vm;
+
+CreateAttachmentThumbnailOperation::CreateAttachmentThumbnailOperation(MessageOperation *parent, const Settings *settings, const QString &filePath)
+    : CreateThumbnailOperation(QLatin1String("CreateAttachmentThumbnail"), parent, parent->attachment()->localPath, filePath, settings->previewMaxSize())
+{
+    connect(this, &CreateThumbnailOperation::thumbnailReady, parent, &MessageOperation::setAttachmentThumbnailPath);
+}

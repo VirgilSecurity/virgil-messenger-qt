@@ -32,20 +32,15 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VS_COPYFILEOPERATION_H
-#define VS_COPYFILEOPERATION_H
+#include "operations/CreateAttachmentPreviewOperation.h"
 
-#include "Operation.h"
+#include "Settings.h"
+#include "operations/MessageOperation.h"
 
-namespace vm
+using namespace vm;
+
+CreateAttachmentPreviewOperation::CreateAttachmentPreviewOperation(MessageOperation *parent, const Settings *settings, const QString &sourcePath, const QString &destPath)
+    : CreateThumbnailOperation(QLatin1String("CreateAttachmentPreview"), parent, sourcePath, destPath, settings->previewMaxSize())
 {
-class CopyFileOperation : public Operation
-{
-    Q_OBJECT
-
-public:
-    using Operation::Operation;
-};
+    connect(this, &CreateThumbnailOperation::thumbnailReady, parent, &MessageOperation::setAttachmentPreviewPath);
 }
-
-#endif // VS_COPYFILEOPERATION_H

@@ -38,11 +38,11 @@
 
 using namespace vm;
 
-AccountSelectionModel::AccountSelectionModel(VSQSettings *settings, QObject *parent)
+AccountSelectionModel::AccountSelectionModel(Settings *settings, QObject *parent)
     : QAbstractListModel(parent)
     , m_settings(settings)
 {
-    connect(m_settings, &VSQSettings::usersListChanged, this, &AccountSelectionModel::reload);
+    connect(m_settings, &Settings::usersListChanged, this, &AccountSelectionModel::reload);
 }
 
 int AccountSelectionModel::rowCount(const QModelIndex &parent) const

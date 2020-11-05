@@ -37,7 +37,7 @@
 
 #include "SignInState.h"
 
-class VSQSettings;
+class Settings;
 
 namespace vm
 {
@@ -46,7 +46,7 @@ class SplashScreenState : public SignInState
     Q_OBJECT
 
 public:
-    SplashScreenState(UsersController *usersController, Validator *validator, VSQSettings *settings, QState *parent);
+    SplashScreenState(UsersController *usersController, Validator *validator, Settings *settings, QState *parent);
 
 signals:
     void userNotSelected();
@@ -56,7 +56,7 @@ private:
     void trySignIn();
     void hideNativeSplashScreen();
 
-    VSQSettings *m_settings;
+    Settings *m_settings;
 };
 }
 

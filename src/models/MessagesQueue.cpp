@@ -41,25 +41,27 @@
 #include "database/MessagesTable.h"
 #include "database/UserDatabase.h"
 #include "models/FileLoader.h"
-#include "operations/DownloadAttachmentOperation.h"
 #include "operations/MessageOperation.h"
 #include "operations/MessageOperationFactory.h"
 #include "operations/Operation.h"
 
 using namespace vm;
 
-MessagesQueue::MessagesQueue(const VSQSettings *settings, VSQMessenger *messenger, UserDatabase *userDatabase, FileLoader *fileLoader, QObject *parent)
-    : Operation("Queue", parent)
+MessagesQueue::MessagesQueue(const Settings *settings, VSQMessenger *messenger, UserDatabase *userDatabase, FileLoader *fileLoader, QObject *parent)
+    : Operation("MessageQueue", parent)
     , m_messenger(messenger)
     , m_userDatabase(userDatabase)
     , m_factory(new MessageOperationFactory(settings, messenger, fileLoader, this))
 {
     setRepeatable(true);
+    connect(this, &Operation::finished, []() {
+        qCDebug(lcModel) << "MessageQueue is finished";
+    });
     //
     connect(userDatabase, &UserDatabase::userIdChanged, this, &MessagesQueue::setUserId);
     //
-    connect(this, &MessagesQueue::pushMessageOperation, this, &MessagesQueue::onPushMessage);
-    connect(this, &MessagesQueue::pushDownloadOperation, this, &MessagesQueue::onPushDownloadOperation);
+    connect(this, &MessagesQueue::pushMessage, this, &MessagesQueue::onPushMessage);
+    connect(this, &MessagesQueue::pushMessageDownload, this, &MessagesQueue::onPushMessageDownload);
     connect(this, &MessagesQueue::sendNotSentMessages, this, &MessagesQueue::onSendNotSentMessages);
     connect(fileLoader, &FileLoader::ready, this, &MessagesQueue::onSendNotSentMessages);
 }
@@ -75,6 +77,8 @@ void MessagesQueue::setUserId(const UserId &userId)
     }
 
     dropChildren();
+    qCDebug(lcModel) << "MessageQueue is clear";
+
     m_userId = userId;
     if (!userId.isEmpty()) {
         connect(m_userDatabase->messagesTable(), &MessagesTable::notSentMessagesFetched, this, &MessagesQueue::setMessages);
@@ -86,7 +90,7 @@ void MessagesQueue::setMessages(const GlobalMessages &messages)
 {
     qCDebug(lcOperation) << "Queued" << messages.size() << "unsent messages";
     for (auto &m : messages) {
-        appendMessageOperation(m);
+        pushMessageOperation(m);
     }
     if (hasChildren()) {
         start();
@@ -103,25 +107,25 @@ void MessagesQueue::connectMessageOperation(MessageOperation *op)
     connect(op, &MessageOperation::attachmentLocalPathChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentLocalPathChanged, this, op));
 }
 
-void MessagesQueue::appendMessageOperation(const GlobalMessage &message)
+MessageOperation *MessagesQueue::pushMessageOperation(const GlobalMessage &message, bool prepend)
 {
     auto op = new MessageOperation(message, m_factory, this);
     connectMessageOperation(op);
-    appendChild(op);
+    prepend ? prependChild(op) : appendChild(op);
+    return op;
 }
 
 void MessagesQueue::onPushMessage(const GlobalMessage &message)
 {
-    appendMessageOperation(message);
+    pushMessageOperation(message);
     start();
 }
 
-void MessagesQueue::onPushDownloadOperation(const GlobalMessage &message, const QString &filePath)
+void MessagesQueue::onPushMessageDownload(const GlobalMessage &message, const QString &filePath)
 {
-    auto op = new DownloadAttachmentOperation(message, m_factory, this, filePath);
-    connectMessageOperation(op);
+    auto op = pushMessageOperation(message, true);
+    m_factory->populateForDownload(op, filePath);
     connect(op, &Operation::finished, this, std::bind(&MessagesQueue::notificationCreated, this, tr("File was downloaded")));
-    prependChild(op);
     start();
 }
 

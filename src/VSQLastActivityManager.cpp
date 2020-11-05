@@ -44,7 +44,7 @@
 
 using namespace vm;
 
-VSQLastActivityManager::VSQLastActivityManager(VSQSettings *settings, QObject *parent)
+VSQLastActivityManager::VSQLastActivityManager(Settings *settings, QObject *parent)
     : QXmppClientExtension()
     , m_settings(settings)
 {

@@ -32,20 +32,24 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VS_OPENPREVIEWOPERATION_H
-#define VS_OPENPREVIEWOPERATION_H
+#ifndef VM_CREATEATTACHMENTHUMBNAILOPERATION_H
+#define VM_CREATEATTACHMENTHUMBNAILOPERATION_H
 
-#include "Operation.h"
+#include "CreateThumbnailOperation.h"
+
+class Settings;
 
 namespace vm
 {
-class OpenPreviewOperation : public Operation
+class MessageOperation;
+
+class CreateAttachmentThumbnailOperation : public CreateThumbnailOperation
 {
     Q_OBJECT
 
 public:
-    using Operation::Operation;
+    CreateAttachmentThumbnailOperation(MessageOperation *parent, const Settings *settings, const QString &filePath);
 };
 }
 
-#endif // VS_OPENPREVIEWOPERATION_H
+#endif // VM_CREATEATTACHMENTHUMBNAILOPERATION_H

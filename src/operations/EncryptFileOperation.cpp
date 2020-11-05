@@ -34,25 +34,22 @@
 
 #include "operations/EncryptFileOperation.h"
 
-#include <QDir>
-
 #include "Core.h"
 #include "operations/MessageOperation.h"
 
 using namespace vm;
 
-EncryptFileOperation::EncryptFileOperation(MessageOperation *parent, const QDir &cacheDir)
-    : Operation(QString("EncryptFile [%1]").arg(parent->message()->id), parent)
-    , m_parent(parent)
-    , m_sourceFilePath(parent->attachment()->localPath)
-    , m_destinationFilePath(cacheDir.filePath(QString("enc-") + parent->message()->id))
+EncryptFileOperation::EncryptFileOperation(const QString &name, QObject *parent, const QString &sourcePath, const QString &destPath, const Contact::Id &recipientId)
+    : Operation(name, parent)
+    , m_sourcePath(sourcePath)
+    , m_destPath(destPath)
+    , m_recipientId(recipientId)
 {}
 
 void EncryptFileOperation::run()
 {
-    const auto recipientId = m_parent->message()->recipientId;
-    if (Core::encryptFile(m_sourceFilePath, m_destinationFilePath, recipientId)) {
-        emit fileEncrypted(m_destinationFilePath);
+    if (Core::encryptFile(m_sourcePath, m_destPath, m_recipientId)) {
+        emit encrypted(m_destPath);
         finish();
     }
     else {

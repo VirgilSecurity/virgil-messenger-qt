@@ -34,20 +34,59 @@
 
 #include "operations/DownloadAttachmentOperation.h"
 
+#include "Settings.h"
+#include "Utils.h"
+#include "operations/DownloadDecryptFileOperation.h"
+#include "operations/MessageOperation.h"
 #include "operations/MessageOperationFactory.h"
 
 using namespace vm;
 
-DownloadAttachmentOperation::DownloadAttachmentOperation(const GlobalMessage &message, MessageOperationFactory *factory, QObject *parent,
-                                                         const QString &filePath)
-    : MessageOperation(message, factory, parent)
-    , m_filePath(filePath)
-{}
+DownloadAttachmentOperation::DownloadAttachmentOperation(MessageOperation *parent, const Settings *settings, const Parameter &parameter)
+    : Operation("DownloadAttachment", parent)
+    , m_parent(parent)
+    , m_settings(settings)
+    , m_parameter(parameter)
+{
+    connect(this, &Operation::started, parent, std::bind(&MessageOperation::setAttachmentStatus, parent, Attachment::Status::Loading));
+    connect(this, &Operation::finished, parent, std::bind(&MessageOperation::setAttachmentStatus, parent, Attachment::Status::Loaded));
+}
 
 bool DownloadAttachmentOperation::populateChildren()
 {
-    if (factory()) {
-        factory()->populateDownloadDecryptChildren(this, m_filePath);
+    const auto message = m_parent->message();
+    const auto attachment = m_parent->attachment();
+    auto factory = m_parent->factory();
+    const QString preffix = name() + QChar('/');
+
+    if (m_parameter.type == Parameter::Type::Preload) {
+        // Download/decrypt thumbnail
+        if (attachment->type == Attachment::Type::Picture) {
+            const auto extras = attachment->extras.value<PictureExtras>();
+            if (!Utils::fileExists(extras.thumbnailPath)) {
+                const auto filePath = m_settings->generateThumbnailPath();
+                auto op = factory->populateDownloadDecrypt(preffix + QString("DownloadDecryptThumbnail"), this, extras.thumbnailUrl, filePath, message->senderId);
+                connect(op, &DownloadDecryptFileOperation::progressChanged, m_parent, &MessageOperation::setAttachmentProgress);
+                connect(op, &DownloadDecryptFileOperation::decrypted, m_parent, &MessageOperation::setAttachmentThumbnailPath);
+            }
+        }
+    }
+    else {
+        // Download/decrypt file
+        auto downloadPath = m_parameter.filePath;
+        if (!Utils::fileExists(downloadPath)) {
+            auto op = factory->populateDownloadDecrypt(preffix + QString("DownloadDecrypt"), this, attachment->url, downloadPath, message->senderId);
+            connect(op, &DownloadDecryptFileOperation::progressChanged, m_parent, &MessageOperation::setAttachmentProgress);
+            connect(op, &DownloadDecryptFileOperation::decrypted, m_parent, &MessageOperation::setAttachmentLocalPath);
+        }
+        // Create picture preview
+        if (attachment->type == Attachment::Type::Picture) {
+            const auto extras = attachment->extras.value<PictureExtras>();
+            if (!Utils::fileExists(extras.previewPath)) {
+                const auto filePath = m_settings->generateThumbnailPath();
+                factory->populateCreateAttachmentPreview(m_parent, this, downloadPath, filePath);
+            }
+        }
     }
     return hasChildren();
 }

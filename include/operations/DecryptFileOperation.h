@@ -37,8 +37,6 @@
 
 #include "Operation.h"
 
-class QDir;
-
 namespace vm
 {
 class MessageOperation;
@@ -48,14 +46,17 @@ class DecryptFileOperation : public Operation
     Q_OBJECT
 
 public:
-    explicit DecryptFileOperation(MessageOperation *parent, const QString &encFilePath, const QString &filePath);
+    explicit DecryptFileOperation(const QString &name, QObject *parent, const QString &sourcePath, const QString &destPath, const Contact::Id &senderId);
 
     void run() override;
 
+signals:
+    void decrypted(const QString &filePath);
+
 private:
-    MessageOperation *m_parent;
-    const QString m_encFilePath;
-    const QString m_filePath;
+    QString m_sourcePath;
+    const QString m_destPath;
+    Contact::Id m_senderId;
 };
 }
 

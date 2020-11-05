@@ -41,7 +41,7 @@ class QNetworkAccessManager;
 class QThread;
 
 class VSQMessenger;
-class VSQSettings;
+class Settings;
 
 namespace vm
 {
@@ -60,7 +60,7 @@ class Models : public QObject
     Q_PROPERTY(MessagesModel *messages READ messages CONSTANT)
 
 public:
-    Models(VSQMessenger *messenger, VSQSettings *settings, UserDatabase *userDatabase, QNetworkAccessManager *networkAccessManager, QObject *parent);
+    Models(VSQMessenger *messenger, Settings *settings, UserDatabase *userDatabase, QNetworkAccessManager *networkAccessManager, QObject *parent);
     ~Models() override;
 
     const AttachmentsModel *attachments() const;

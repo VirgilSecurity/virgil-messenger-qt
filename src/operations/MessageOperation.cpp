@@ -63,7 +63,7 @@ MessageOperationFactory *MessageOperation::factory()
 void MessageOperation::setAttachmentStatus(const Attachment::Status status)
 {
     auto a = writableAttachment();
-    if (!a || a->status == status) {
+    if (a->status == status) {
         return;
     }
 
@@ -76,7 +76,7 @@ void MessageOperation::setAttachmentStatus(const Attachment::Status status)
         warnInvalidStatus();
         return;
     case Attachment::Status::Loading:
-        if (a->status != Attachment::Status::Created && a->status != Attachment::Status::Interrupted) {
+        if (a->status == Attachment::Status::Invalid) {
             warnInvalidStatus();
             return;
         }
@@ -111,7 +111,7 @@ void MessageOperation::setAttachmentStatus(const Attachment::Status status)
 void MessageOperation::setAttachmentProgress(const DataSize &bytesLoaded, const DataSize &bytesTotal)
 {
     auto a = writableAttachment();
-    if (!a || (a->bytesLoaded == bytesLoaded && a->bytesTotal == a->bytesTotal)) {
+    if (a->bytesLoaded == bytesLoaded && a->bytesTotal == bytesTotal) {
         return;
     }
     a->bytesLoaded = bytesLoaded;
@@ -122,39 +122,48 @@ void MessageOperation::setAttachmentProgress(const DataSize &bytesLoaded, const 
 void MessageOperation::setAttachmentUrl(const QUrl &url)
 {
     auto a = writableAttachment();
-    if (!a || a->url == url) {
+    if (a->url == url) {
         return;
     }
     a->url = url;
     emit attachmentUrlChanged(url);
 }
 
-void MessageOperation::setAttachmentExtras(const QVariant &extras)
-{
-    auto a = writableAttachment();
-    if (!a || a->extras == extras) {
-        return;
-    }
-    a->extras = QVariant::fromValue(extras);
-    emit attachmentExtrasChanged(extras);
-}
-
 void MessageOperation::setAttachmentLocalPath(const QString &localPath)
 {
     auto a = writableAttachment();
-    if (!a || a->localPath == localPath) {
-        return;
-    }
+    // NOTE(fpohtmeh): don't compare values because file existence can be changed
     a->localPath = localPath;
     emit attachmentLocalPathChanged(localPath);
 }
 
-bool MessageOperation::populateChildren()
+void MessageOperation::setAttachmentExtras(const QVariant &extras)
 {
-    if (m_factory) {
-        m_factory->populateChildren(this);
-    }
-    return hasChildren();
+    auto a = writableAttachment();
+    // NOTE(fpohtmeh): don't compare values because file existence can be changed
+    a->extras = QVariant::fromValue(extras);
+    emit attachmentExtrasChanged(extras);
+}
+
+void MessageOperation::setAttachmentPreviewPath(const QString &previewPath)
+{
+    auto extras = writableAttachment()->extras.value<PictureExtras>();
+    extras.previewPath = previewPath;
+    setAttachmentExtras(QVariant::fromValue(extras));
+}
+
+void MessageOperation::setAttachmentThumbnailPath(const QString &thumbnailPath)
+{
+    auto extras = writableAttachment()->extras.value<PictureExtras>();
+    extras.thumbnailPath = thumbnailPath;
+    setAttachmentExtras(QVariant::fromValue(extras));
+}
+
+void MessageOperation::setAttachmentThumbnailUrl(const QUrl &thumbnailUrl)
+{
+    auto extras = writableAttachment()->extras.value<PictureExtras>();
+    extras.thumbnailUrl = thumbnailUrl;
+    setAttachmentExtras(QVariant::fromValue(extras));
 }
 
 void MessageOperation::connectChild(Operation *child)
@@ -167,6 +176,12 @@ void MessageOperation::connectChild(Operation *child)
     if (dynamic_cast<SendMessageOperation *>(child)) {
         connect(child, &Operation::finished, this, std::bind(&MessageOperation::setStatus, this, Message::Status::Sent));
     }
+}
+
+bool MessageOperation::populateChildren()
+{
+    m_factory->populateAll(this);
+    return hasChildren();
 }
 
 Attachment *MessageOperation::writableAttachment()

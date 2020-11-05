@@ -35,138 +35,90 @@
 #include "operations/MessageOperationFactory.h"
 
 #include "Settings.h"
+#include "Utils.h"
 #include "VSQMessenger.h"
-#include "operations/CopyFileOperation.h"
-#include "operations/DownloadFileOperation.h"
+#include "operations/CreateAttachmentPreviewOperation.h"
+#include "operations/CreateAttachmentThumbnailOperation.h"
+#include "operations/CreateThumbnailOperation.h"
 #include "operations/DecryptFileOperation.h"
 #include "operations/EncryptFileOperation.h"
+#include "operations/EncryptUploadFileOperation.h"
+#include "operations/DownloadFileOperation.h"
+#include "operations/DownloadDecryptFileOperation.h"
+#include "operations/DownloadAttachmentOperation.h"
 #include "operations/MessageOperation.h"
-#include "operations/OpenPreviewOperation.h"
 #include "operations/SendMessageOperation.h"
+#include "operations/UploadAttachmentOperation.h"
 #include "operations/UploadFileOperation.h"
 
 using namespace vm;
 
-MessageOperationFactory::MessageOperationFactory(const VSQSettings *settings, VSQMessenger *messenger, FileLoader *fileLoader,
+using DownloadType = DownloadAttachmentOperation::Parameter::Type;
+
+MessageOperationFactory::MessageOperationFactory(const Settings *settings, VSQMessenger *messenger, FileLoader *fileLoader,
                                                  QObject *parent)
     : QObject(parent)
-    , m_cacheDir(settings->attachmentCacheDir())
+    , m_settings(settings)
     , m_messenger(messenger)
     , m_fileLoader(fileLoader)
 {}
 
-SendMessageOperation *MessageOperationFactory::createSendMessageOperation(MessageOperation *parent)
+void MessageOperationFactory::populateAll(MessageOperation *messageOp)
 {
-    return new SendMessageOperation(parent, m_messenger->xmpp(), m_messenger->xmppURL());
+    populateAttachmentOperation(messageOp);
+    populateMessageOperation(messageOp);
 }
 
-EncryptFileOperation *MessageOperationFactory::createEncryptFileOperation(MessageOperation *parent)
+void MessageOperationFactory::populateForDownload(MessageOperation *messageOp, const QString &filePath)
 {
-    return new EncryptFileOperation(parent, m_cacheDir);
+    messageOp->appendChild(new DownloadAttachmentOperation(messageOp, m_settings, { DownloadType::Full, filePath }));
 }
 
-DecryptFileOperation *MessageOperationFactory::createDecryptFileOperation(MessageOperation *parent, const QString &encFilePath, const QString &filePath)
+DownloadDecryptFileOperation *MessageOperationFactory::populateDownloadDecrypt(const QString &name, Operation *parent, const QUrl &url, const QString &destPath, const Contact::Id &senderId)
 {
-    return new DecryptFileOperation(parent, encFilePath, filePath);
+    auto op = new DownloadDecryptFileOperation(name, parent, m_settings, m_fileLoader, url, destPath, senderId);
+    parent->appendChild(op);
+    return op;
 }
 
-UploadFileOperation *MessageOperationFactory::createUploadFileOperation(MessageOperation *parent)
+EncryptUploadFileOperation *MessageOperationFactory::populateEncryptUpload(const QString &name, Operation *parent, const QString &sourcePath, const Contact::Id &recipientId)
 {
-    return new UploadFileOperation(parent, m_fileLoader);
+    auto op = new EncryptUploadFileOperation(name, parent, m_settings, sourcePath, recipientId, m_fileLoader);
+    parent->appendChild(op);
+    return op;
 }
 
-DownloadFileOperation *MessageOperationFactory::createDownloadFileOperation(MessageOperation *parent, const QString &filePath)
+CreateAttachmentThumbnailOperation *MessageOperationFactory::populateCreateAttachmentThumbnail(MessageOperation *messageOp, Operation *parent, const QString &filePath)
 {
-    return new DownloadFileOperation(parent, m_fileLoader, filePath);
+    auto op = new CreateAttachmentThumbnailOperation(messageOp, m_settings, filePath);
+    parent->appendChild(op);
+    return op;
 }
 
-MakeThumbnailOperation *MessageOperationFactory::createMakeThumbnailOperation(MessageOperation *parent)
+CreateAttachmentPreviewOperation *MessageOperationFactory::populateCreateAttachmentPreview(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &destPath)
 {
-    Q_UNUSED(parent)
-    return nullptr;
+    auto op = new CreateAttachmentPreviewOperation(messageOp, m_settings, sourcePath, destPath);
+    parent->appendChild(op);
+    return op;
 }
 
-OpenPreviewOperation *MessageOperationFactory::createOpenPreviewOperation(MessageOperation *parent)
+void MessageOperationFactory::populateAttachmentOperation(MessageOperation *messageOp)
 {
-    Q_UNUSED(parent)
-    return nullptr;
-}
-
-CopyFileOperation *MessageOperationFactory::createCopyFileOperation(MessageOperation *parent)
-{
-    Q_UNUSED(parent)
-    return nullptr;
-}
-
-void MessageOperationFactory::populateChildren(MessageOperation *messageOp)
-{
-    populateAttachmentOperations(messageOp);
-    auto firstChild = messageOp->firstChild();
-    if (firstChild) {
-        connect(firstChild, &Operation::started, messageOp, std::bind(&MessageOperation::setAttachmentStatus, messageOp, Attachment::Status::Loading));
-        auto lastChild = messageOp->lastChild();
-        connect(lastChild, &Operation::finished, messageOp, std::bind(&MessageOperation::setAttachmentStatus, messageOp, Attachment::Status::Loaded));
+    const auto &message = messageOp->message();
+    if (!message->attachment) {
     }
-
-    populateMessageOperations(messageOp);
-}
-
-void MessageOperationFactory::populateDownloadDecryptChildren(MessageOperation *messageOp, const QString &filePath)
-{
-    const auto tempFilePath = m_cacheDir.filePath("dl-dec-" + messageOp->message()->attachment->id);
-    auto downloadOp = createDownloadFileOperation(messageOp, tempFilePath);
-    connect(downloadOp, &Operation::started, messageOp, std::bind(&MessageOperation::setAttachmentStatus, messageOp, Attachment::Status::Loading));
-    messageOp->appendChild(downloadOp);
-
-    auto decryptOp = createDecryptFileOperation(messageOp, tempFilePath, filePath);
-    connect(decryptOp, &Operation::finished, messageOp, std::bind(&MessageOperation::setAttachmentLocalPath, messageOp, filePath));
-    connect(decryptOp, &Operation::finished, messageOp, std::bind(&MessageOperation::setAttachmentStatus, messageOp, Attachment::Status::Loaded));
-    messageOp->appendChild(decryptOp);
-}
-
-void MessageOperationFactory::populateAttachmentOperations(MessageOperation *messageOp)
-{
-    const auto message = messageOp->message();
-    const auto attachment = message->attachment;
-    if (!attachment) {
-        return;
+    else if (message->senderId == message->userId && (message->status == Message::Status::Created || message->status == Message::Status::Failed)) {
+        messageOp->appendChild(new UploadAttachmentOperation(messageOp, m_settings));
     }
-    const bool needSending = message->senderId == message->userId && (message->status == Message::Status::Created || message->status == Message::Status::Failed);
-    if (needSending) {
-        if (attachment->type == Attachment::Type::Picture) {
-            populateSendPictureOperations(messageOp);
-        }
-        else if (attachment->type == Attachment::Type::File) {
-            populateSendFileOperations(messageOp);
-        }
-        return;
+    else if (message->senderId == message->contactId && (message->status == Message::Status::Created)) {
+        messageOp->appendChild(new DownloadAttachmentOperation(messageOp, m_settings, { DownloadType::Preload, QString() }));
     }
 }
 
-void MessageOperationFactory::populateSendPictureOperations(MessageOperation *messageOp)
+void MessageOperationFactory::populateMessageOperation(MessageOperation *messageOp)
 {
-}
-
-void MessageOperationFactory::populateSendFileOperations(MessageOperation *messageOp)
-{
-    if (messageOp->message()->attachment->url.isEmpty()) {
-        auto encryptionOperation = createEncryptFileOperation(messageOp);
-        messageOp->appendChild(encryptionOperation);
-
-        auto uploadOperation = createUploadFileOperation(messageOp);
-        uploadOperation->setAutoDeleteFile(true);
-        messageOp->appendChild(uploadOperation);
-
-        connect(encryptionOperation, &EncryptFileOperation::fileEncrypted, uploadOperation, &UploadFileOperation::setFilePath);
-    }
-}
-
-void MessageOperationFactory::populateMessageOperations(MessageOperation *messageOp)
-{
-    const auto message = messageOp->message();
-    // Send message operation
-    const bool needSending = message->senderId == message->userId && (message->status == Message::Status::Created || message->status == Message::Status::Failed);
-    if (needSending) {
-        messageOp->appendChild(createSendMessageOperation(messageOp));
+    const auto &message = messageOp->message();
+    if (message->senderId == message->userId && (message->status == Message::Status::Created || message->status == Message::Status::Failed)) {
+        messageOp->appendChild(new SendMessageOperation(messageOp, m_messenger->xmpp(), m_messenger->xmppURL()));
     }
 }

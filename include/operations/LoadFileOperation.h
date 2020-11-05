@@ -42,19 +42,19 @@ class QNetworkReply;
 namespace vm
 {
 class FileLoader;
-class MessageOperation;
 
 class LoadFileOperation : public Operation
 {
     Q_OBJECT
 
 public:
-    LoadFileOperation(const QString &name, MessageOperation *parent, FileLoader *fileLoader);
+    LoadFileOperation(const QString &name, QObject *parent, FileLoader *fileLoader);
 
     void setFilePath(const QString &filePath);
 
 signals:
-    void updateProgress(const DataSize &bytesLoaded, const DataSize &bytesTotal);
+    void setProgress(const DataSize &bytesLoaded, const DataSize &bytesTotal);
+    void progressChanged(const DataSize &bytesLoaded, const DataSize &bytesTotal);
 
 protected:
     virtual void connectReply(QNetworkReply *reply);
@@ -68,11 +68,10 @@ protected:
 
 private:
     void onReplyFinished();
-    void onReplyProgressChanged(const DataSize &bytesLoaded, const DataSize &bytesTotal);
     void onReplyErrorOccurred();
     void onReplySslErrors();
+    void onSetProgress(const DataSize &bytesLoaded, const DataSize &bytesTotal);
 
-    MessageOperation *m_parent;
     FileLoader *m_fileLoader;
     QString m_filePath;
     QScopedPointer<QFile> m_fileHandle;

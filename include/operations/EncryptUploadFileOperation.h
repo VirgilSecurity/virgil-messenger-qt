@@ -32,29 +32,39 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_ACCOUNTSELECTIONSTATE_H
-#define VM_ACCOUNTSELECTIONSTATE_H
+#ifndef VM_ENCRYPTUPLOADFILEOPERATION_H
+#define VM_ENCRYPTUPLOADFILEOPERATION_H
 
-#include "SignInState.h"
-#include "AccountSelectionModel.h"
+#include "Operation.h"
+
+class Settings;
 
 namespace vm
 {
-class AccountSelectionState : public SignInState
+class FileLoader;
+
+class EncryptUploadFileOperation : public Operation
 {
     Q_OBJECT
-    Q_PROPERTY(AccountSelectionModel *model MEMBER m_model CONSTANT)
 
 public:
-    AccountSelectionState(UsersController *usersController, Validator *validator, Settings *settings, QState *parent);
+    EncryptUploadFileOperation(const QString &name, QObject *parent, const Settings *settings, const QString &sourcePath,
+                               const Contact::Id &recipientId, FileLoader *fileLoader);
 
 signals:
-    void requestSignInUsername();
-    void requestSignUp();
+    void progressChanged(const DataSize &bytesLoaded, const DataSize &bytesTotal);
+    void uploaded(const QUrl &url);
 
 private:
-    AccountSelectionModel *m_model;
+    bool populateChildren() override;
+    void cleanup() override;
+
+    const Settings *m_settings;
+    QString m_sourcePath;
+    QString m_tempPath;
+    Contact::Id m_recipientId;
+    FileLoader *m_fileLoader;
 };
 }
 
-#endif // VM_ACCOUNTSELECTIONSTATE_H
+#endif // VM_ENCRYPTUPLOADFILEOPERATION_H

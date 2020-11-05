@@ -32,29 +32,42 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_ACCOUNTSELECTIONSTATE_H
-#define VM_ACCOUNTSELECTIONSTATE_H
+#include "operations/EncryptUploadFileOperation.h"
 
-#include "SignInState.h"
-#include "AccountSelectionModel.h"
+#include "Settings.h"
+#include "Utils.h"
+#include "operations/EncryptFileOperation.h"
+#include "operations/UploadFileOperation.h"
 
-namespace vm
+using namespace vm;
+
+EncryptUploadFileOperation::EncryptUploadFileOperation(const QString &name, QObject *parent, const Settings *settings, const QString &sourcePath,
+                                                       const Contact::Id &recipientId, FileLoader *fileLoader)
+    : Operation(name, parent)
+    , m_settings(settings)
+    , m_sourcePath(sourcePath)
+    , m_recipientId(recipientId)
+    , m_fileLoader(fileLoader)
+{}
+
+bool EncryptUploadFileOperation::populateChildren()
 {
-class AccountSelectionState : public SignInState
-{
-    Q_OBJECT
-    Q_PROPERTY(AccountSelectionModel *model MEMBER m_model CONSTANT)
+    m_tempPath = m_settings->attachmentCacheDir().filePath(Utils::createUuid());
+    const auto preffix = name() + QChar('/');
 
-public:
-    AccountSelectionState(UsersController *usersController, Validator *validator, Settings *settings, QState *parent);
+    auto encryptOp = new EncryptFileOperation(preffix + QString("Encrypt"), this, m_sourcePath, m_tempPath, m_recipientId);
+    appendChild(encryptOp);
 
-signals:
-    void requestSignInUsername();
-    void requestSignUp();
+    auto uploadOp = new UploadFileOperation(preffix + QString("Upload"), this, m_tempPath, m_fileLoader);
+    connect(uploadOp, &UploadFileOperation::progressChanged, this, &EncryptUploadFileOperation::progressChanged);
+    connect(uploadOp, &UploadFileOperation::uploaded, this, &EncryptUploadFileOperation::uploaded);
+    appendChild(uploadOp);
 
-private:
-    AccountSelectionModel *m_model;
-};
+    return hasChildren();
 }
 
-#endif // VM_ACCOUNTSELECTIONSTATE_H
+void EncryptUploadFileOperation::cleanup()
+{
+    Utils::removeFile(m_tempPath);
+    Operation::cleanup();
+}

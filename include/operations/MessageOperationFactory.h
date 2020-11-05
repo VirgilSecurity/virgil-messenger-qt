@@ -40,49 +40,46 @@
 #include "VSQCommon.h"
 
 class VSQMessenger;
-class VSQSettings;
+class Settings;
 
 namespace vm
 {
-class CopyFileOperation;
+class CreateAttachmentPreviewOperation;
+class CreateAttachmentThumbnailOperation;
+class CreateThumbnailOperation;
 class DecryptFileOperation;
-class DownloadFileOperation;
 class EncryptFileOperation;
-class MakeThumbnailOperation;
+class EncryptUploadFileOperation;
+class DownloadFileOperation;
+class DownloadDecryptFileOperation;
+class FileLoader;
 class MessageOperation;
-class OpenPreviewOperation;
 class Operation;
 class SendMessageOperation;
 class UploadFileOperation;
-class FileLoader;
 
 class MessageOperationFactory : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit MessageOperationFactory(const VSQSettings *settings, VSQMessenger *messenger, FileLoader *fileLoader,
-                                     QObject *parent);
+    explicit MessageOperationFactory(const Settings *settings, VSQMessenger *messenger, FileLoader *fileLoader, QObject *parent);
 
-    SendMessageOperation *createSendMessageOperation(MessageOperation *parent);
-    EncryptFileOperation *createEncryptFileOperation(MessageOperation *parent);
-    DecryptFileOperation *createDecryptFileOperation(MessageOperation *parent, const QString &encFilePath, const QString &filePath);
-    UploadFileOperation *createUploadFileOperation(MessageOperation *parent);
-    DownloadFileOperation *createDownloadFileOperation(MessageOperation *parent, const QString &filePath);
-    MakeThumbnailOperation *createMakeThumbnailOperation(MessageOperation *parent);
-    OpenPreviewOperation *createOpenPreviewOperation(MessageOperation *parent);
-    CopyFileOperation *createCopyFileOperation(MessageOperation *parent);
+    void populateAll(MessageOperation *messageOp);
+    void populateForDownload(MessageOperation *messageOp, const QString &filePath);
 
-    void populateChildren(MessageOperation *messageOp);
-    void populateDownloadDecryptChildren(MessageOperation *messageOp, const QString &filePath);
+    DownloadDecryptFileOperation *populateDownloadDecrypt(const QString &name, Operation *parent, const QUrl &url, const QString &destPath, const Contact::Id &senderId);
+    EncryptUploadFileOperation *populateEncryptUpload(const QString &name, Operation *parent, const QString &sourcePath, const Contact::Id &recipientId);
+    CreateAttachmentThumbnailOperation *populateCreateAttachmentThumbnail(MessageOperation *messageOp, Operation *parent, const QString &filePath);
+    CreateAttachmentPreviewOperation *populateCreateAttachmentPreview(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &destPath);
 
 private:
-    void populateAttachmentOperations(MessageOperation *messageOp);
-    void populateSendPictureOperations(MessageOperation *messageOp);
-    void populateSendFileOperations(MessageOperation *messageOp);
-    void populateMessageOperations(MessageOperation *messageOp);
+    SendMessageOperation *createSendMessageOperation(MessageOperation *parent);
+    void populateAttachmentOperation(MessageOperation *messageOp);
+    void populateMessageOperation(MessageOperation *messageOp);
+    void populateDownloadOperation(MessageOperation *messageOp);
 
-    const QDir m_cacheDir;
+    const Settings *m_settings;
     VSQMessenger *m_messenger;
     FileLoader *m_fileLoader;
 };

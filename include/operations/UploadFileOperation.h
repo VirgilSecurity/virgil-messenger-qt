@@ -44,11 +44,12 @@ class UploadFileOperation : public LoadFileOperation
     Q_OBJECT
 
 public:
-    UploadFileOperation(MessageOperation *parent, FileLoader *fileLoader);
+    UploadFileOperation(const QString &name, QObject *parent, const QString &filePath, FileLoader *fileLoader);
 
     void run() override;
 
-    void setAutoDeleteFile(bool autoDelete);
+signals:
+    void uploaded(const QUrl &url);
 
 private:
     void cleanup() override;
@@ -60,9 +61,6 @@ private:
     void onSlotUrlReceived(const QString &slotId, const QUrl &url);
     void onSlotUrlErrorOcurrend(const QString &slotId);
     void onFinished();
-
-    MessageOperation *m_parent;
-    bool m_autoDeleteFile = false;
 
     QString m_slotId;
     QUrl m_url;

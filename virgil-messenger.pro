@@ -176,18 +176,21 @@ HEADERS += \
         include/models/MessagesQueue.h \
         include/models/Models.h \
         # Operations
-        include/operations/CopyFileOperation.h \
+        include/operations/CreateAttachmentPreviewOperation.h \
+        include/operations/CreateAttachmentThumbnailOperation.h \
+        include/operations/CreateThumbnailOperation.h \
         include/operations/DecryptFileOperation.h \
         include/operations/DownloadAttachmentOperation.h \
         include/operations/DownloadFileOperation.h \
+        include/operations/DownloadDecryptFileOperation.h \
         include/operations/EncryptFileOperation.h \
+        include/operations/EncryptUploadFileOperation.h \
         include/operations/LoadFileOperation.h \
-        include/operations/MakeThumbnailOperation.h \
         include/operations/MessageOperation.h \
         include/operations/MessageOperationFactory.h \
         include/operations/Operation.h \
-        include/operations/OpenPreviewOperation.h \
         include/operations/SendMessageOperation.h \
+        include/operations/UploadAttachmentOperation.h \
         include/operations/UploadFileOperation.h \
         # Generated
         generated/include/VSQCustomer.h \
@@ -265,18 +268,21 @@ SOURCES += \
         src/models/MessagesQueue.cpp \
         src/models/Models.cpp \
         # Operations
-        src/operations/CopyFileOperation.cpp \
+        src/operations/CreateAttachmentPreviewOperation.cpp \
+        src/operations/CreateAttachmentThumbnailOperation.cpp \
+        src/operations/CreateThumbnailOperation.cpp \
         src/operations/DecryptFileOperation.cpp \
         src/operations/DownloadAttachmentOperation.cpp \
         src/operations/DownloadFileOperation.cpp \
+        src/operations/DownloadDecryptFileOperation.cpp \
         src/operations/EncryptFileOperation.cpp \
+        src/operations/EncryptUploadFileOperation.cpp \
         src/operations/LoadFileOperation.cpp \
-        src/operations/MakeThumbnailOperation.cpp \
         src/operations/MessageOperation.cpp \
         src/operations/MessageOperationFactory.cpp \
         src/operations/Operation.cpp \
-        src/operations/OpenPreviewOperation.cpp \
         src/operations/SendMessageOperation.cpp \
+        src/operations/UploadAttachmentOperation.cpp \
         src/operations/UploadFileOperation.cpp
 
 #

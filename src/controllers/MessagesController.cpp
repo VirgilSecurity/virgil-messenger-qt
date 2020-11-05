@@ -68,7 +68,7 @@ MessagesController::MessagesController(VSQMessenger *messenger, Models *models, 
     connect(userDatabase, &UserDatabase::userIdChanged, this, &MessagesController::setUserId);
     connect(userDatabase, &UserDatabase::userIdChanged, m_models->messages(), &MessagesModel::setUserId);
     // Queue
-    connect(this, &MessagesController::messageCreated, messagesQueue, &MessagesQueue::pushMessageOperation);
+    connect(this, &MessagesController::messageCreated, messagesQueue, &MessagesQueue::pushMessage);
     connect(messagesQueue, &MessagesQueue::messageStatusChanged, this, &MessagesController::setMessageStatus);
     connect(messagesQueue, &MessagesQueue::attachmentStatusChanged, this, &MessagesController::setAttachmentStatus);
     connect(messagesQueue, &MessagesQueue::attachmentProgressChanged, this, &MessagesController::setAttachmentProgress);
@@ -77,8 +77,6 @@ MessagesController::MessagesController(VSQMessenger *messenger, Models *models, 
     connect(messagesQueue, &MessagesQueue::attachmentLocalPathChanged, this, &MessagesController::setAttachmentLocalPath);
     // Chats
     connect(m_models->chats(), &ChatsModel::chatUpdated, this, &MessagesController::onChatUpdated);
-    // Network
-    connect(messenger, &VSQMessenger::fireReady, messagesQueue, &MessagesQueue::sendNotSentMessages);
     // Xmpp connections
     auto xmpp = messenger->xmpp();
     connect(xmpp, &QXmppClient::messageReceived, this, &MessagesController::receiveMessage);
@@ -189,7 +187,7 @@ void MessagesController::setAttachmentUrl(const Attachment::Id &attachmentId, co
 
 void MessagesController::setAttachmentExtras(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Type &type, const QVariant &extras)
 {
-    qCDebug(lcController) << "Set attachment extras:" << attachmentId << "contact" << contactId << "type" << type << Utils::extrasToJson(extras, type);
+    qCDebug(lcController) << "Set attachment extras:" << attachmentId << "contact" << contactId << "type" << type << Utils::extrasToJson(extras, type, false);
     if (contactId == m_chat.contactId) {
         m_models->messages()->setAttachmentExtras(attachmentId, extras);
     }

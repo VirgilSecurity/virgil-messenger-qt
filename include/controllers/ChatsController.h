@@ -68,6 +68,9 @@ public:
 signals:
     void errorOccurred(const QString &errorText); // TODO(fpohtmeh): remove this signal everywhere?
 
+    void chatsFetched();
+    void chatsCleared();
+
     void currentChatChanged(const Chat &chat);
     void currentContactIdChanged(const Contact::Id &contactId);
     void currentChatIdChanged(const Chat::Id &chatId);

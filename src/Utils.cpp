@@ -226,49 +226,60 @@ Optional<QString> Utils::readTextFile(const QString &filePath)
     return file.readAll();
 }
 
+bool Utils::fileExists(const QString &filePath)
+{
+    return !filePath.isEmpty() && QFile::exists(filePath);
+}
+
+void Utils::removeFile(const QString &filePath)
+{
+    if (fileExists(filePath)) {
+        QFile::remove(filePath);
+    }
+}
+
 void Utils::printThreadId(const QString &message)
 {
 #ifdef VS_DEVMODE
     qDebug(lcDev).noquote().nospace()
             << "Thread " << QThread::currentThread()->objectName() << "(" << QThread::currentThreadId() << "): "
             << message;
+#else
+    Q_UNUSED(message)
 #endif
 }
 
-QString Utils::extrasToJson(const QVariant &extras, const Attachment::Type type)
+QString Utils::extrasToJson(const QVariant &extras, const Attachment::Type type, bool skipLocal)
 {
     if (type != Attachment::Type::Picture) {
         return QString();
     }
-    // FIXME(fpohtmeh): add type parameter (DB or XMPP)
     const auto e = extras.value<PictureExtras>();
     QJsonObject obj;
-    // FIXME(fpohtmeh): refine properties
-//    obj.insert("width", e.size.width());
-//    obj.insert("height", e.size.height());
-//    obj.insert("orientation", e.orientation);
-//    obj.insert("thumbnailWidth", e.thumbnailSize.width());
-//    obj.insert("thumbnailHeight", e.thumbnailSize.height());
-//    obj.insert("thumbnailPath", e.thumbnailPath);
-//    obj.insert("previewPath", e.previewPath);
+    obj.insert("thumbnailWidth", e.thumbnailSize.width());
+    obj.insert("thumbnailHeight", e.thumbnailSize.height());
+    obj.insert("thumbnailUrl", e.thumbnailUrl.toString());
+    if (!skipLocal) {
+        obj.insert("thumbnailPath", e.thumbnailPath);
+        obj.insert("previewPath", e.previewPath);
+    }
     return QJsonDocument(obj).toJson(QJsonDocument::Compact);
 }
 
-QVariant Utils::extrasFromJson(const QString &json, const Attachment::Type type)
+QVariant Utils::extrasFromJson(const QString &json, const Attachment::Type type, bool skipLocal)
 {
     if (type != Attachment::Type::Picture) {
         return QVariant();
     }
     auto doc = QJsonDocument::fromJson(json.toUtf8());
     PictureExtras extras;
-    // FIXME(fpohtmeh): refine properties
-//    extras.size.setWidth(doc["width"].toInt());
-//    extras.size.setHeight(doc["height"].toInt());
-//    extras.orientation = doc["orientation"].toInt();
-//    extras.thumbnailSize.setWidth(doc["thumbnailWidth"].toInt());
-//    extras.thumbnailSize.setHeight(doc["thumbnailHeight"].toInt());
-//    extras.thumbnailPath = doc["thumbnailPath"].toString();
-//    extras.previewPath = doc["previewPath"].toString();
+    extras.thumbnailSize.setWidth(doc["thumbnailWidth"].toInt());
+    extras.thumbnailSize.setHeight(doc["thumbnailHeight"].toInt());
+    extras.thumbnailUrl = doc["thumbnailUrl"].toString();
+    if (!skipLocal) {
+        extras.thumbnailPath = doc["thumbnailPath"].toString();
+        extras.previewPath = doc["previewPath"].toString();
+    }
     return QVariant::fromValue(extras);
 }
 
@@ -286,20 +297,23 @@ Message Utils::messageFromJson(const QByteArray &json)
         return message;
     }
 
-    const auto attachmentObject = doc["attachment"];
+    const auto at = doc["attachment"];
     Attachment attachment;
-    attachment.id = Utils::createUuid();
-    attachment.fileName = attachmentObject["fileName"].toString();
-    attachment.size = attachmentObject["size"].toInt();
-    attachment.url = attachmentObject["url"].toString();
     if (type == QLatin1String("picture")) {
         attachment.type = Attachment::Type::Picture;
     }
     else {
         attachment.type = Attachment::Type::File;
     }
+    attachment.id = Utils::createUuid();
+    attachment.fileName = at["fileName"].toString();
+    attachment.size = at["size"].toInt();
+    attachment.url = at["url"].toString();
+    attachment.extras = extrasFromJson(at["extras"].toString(), attachment.type, true);
     message.attachment = attachment;
-    qCDebug(lcUtils) << "Parsed JSON message: " << message.body;
+    if (!message.body.isEmpty()) {
+        qCDebug(lcUtils) << "Parsed JSON message:" << message.body;
+    }
     return message;
 }
 
@@ -313,20 +327,71 @@ QByteArray Utils::messageToJson(const Message &message)
         payloadObject.insert("body", message.body);
     }
     else {
-        QJsonObject attachmentObject;
+        QJsonObject at;
         if (attachment->type == Attachment::Type::Picture) {
             mainObject.insert("type", "picture");
         }
         else {
             mainObject.insert("type", "file");
         }
-        attachmentObject.insert("fileName", attachment->fileName);
-        attachmentObject.insert("size", attachment->size);
-        attachmentObject.insert("url", attachment->url.toString());
-        mainObject.insert("attachment", attachmentObject);
+        at.insert("fileName", attachment->fileName);
+        at.insert("size", attachment->size);
+        at.insert("url", attachment->url.toString());
+        at.insert("extras", extrasToJson(attachment->extras, attachment->type, true));
+        mainObject.insert("attachment", at);
     }
     mainObject.insert("payload", payloadObject);
 
     QJsonDocument doc(mainObject);
     return doc.toJson(QJsonDocument::Compact);
+}
+
+QSize Utils::applyOrientation(const QSize &size, int orientation)
+{
+    if (orientation & QImageIOHandler::TransformationRotate90) {
+        return QSize(size.height(), size.width());
+    }
+    return size;
+}
+
+QImage Utils::applyOrientation(const QImage &image, const int orientation)
+{
+    auto result = image;
+    const bool horizontally = orientation & QImageIOHandler::TransformationMirror;
+    const bool vertically = orientation & QImageIOHandler::TransformationFlip;
+    if (horizontally || vertically) {
+        result = result.mirrored(horizontally, vertically);
+    }
+    if (orientation & QImageIOHandler::TransformationRotate90) {
+        result = result.transformed(QTransform().rotate(90.0));
+    }
+    return result;
+}
+
+QSize Utils::calculateThumbnailSize(const QSize &size, const QSize &maxSize, const int orientation)
+{
+    QSizeF s = applyOrientation(size, orientation);
+    const double ratio = s.height() / s.width();
+    if (s.width() > maxSize.width()) {
+        s.setWidth(maxSize.width());
+        s.setHeight(maxSize.width() * ratio);
+    }
+    if (s.height() > maxSize.height()) {
+        s.setHeight(maxSize.height());
+        s.setWidth(maxSize.height() / ratio);
+    }
+    return s.toSize();
+}
+
+bool Utils::readImage(QImageReader *reader, QImage *image)
+{
+    if (!reader->read(image)) {
+        qCDebug(lcUtils) << "Image reader error" << reader->errorString() << reader->fileName();
+        return false;
+    }
+    if (image->size().isEmpty()) {
+        qCDebug(lcUtils) << "Read image is invalid" << reader->fileName();
+        return false;
+    }
+    return true;
 }

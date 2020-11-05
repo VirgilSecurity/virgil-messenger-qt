@@ -44,7 +44,7 @@
 
 Q_DECLARE_LOGGING_CATEGORY(lcSettings)
 
-class VSQSettings : public QSettings
+class Settings : public QSettings
 {
     Q_OBJECT
     Q_PROPERTY(QString lastSignedInUserId READ lastSignedInUserId WRITE setLastSignedInUserId NOTIFY lastSignedInUserIdChanged)
@@ -53,8 +53,8 @@ class VSQSettings : public QSettings
     Q_PROPERTY(QRect windowGeometry READ windowGeometry WRITE setWindowGeometry NOTIFY windowGeometryChanged)
 
 public:
-    explicit VSQSettings(QObject *parent);
-    ~VSQSettings();
+    explicit Settings(QObject *parent);
+    ~Settings();
 
     void print();
 
@@ -82,7 +82,10 @@ public:
     QDir attachmentCacheDir() const;
     QDir thumbnailsDir() const;
     QDir downloadsDir() const;
+
+    QString generateThumbnailPath() const;
     QSize thumbnailMaxSize() const;
+    QSize previewMaxSize() const;
 
     // Dev mode
     bool devMode() const;

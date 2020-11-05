@@ -47,7 +47,7 @@
 
 using namespace vm;
 
-Models::Models(VSQMessenger *messenger, VSQSettings *settings, UserDatabase *userDatabase, QNetworkAccessManager *networkAccessManager, QObject *parent)
+Models::Models(VSQMessenger *messenger, Settings *settings, UserDatabase *userDatabase, QNetworkAccessManager *networkAccessManager, QObject *parent)
     : QObject(parent)
     , m_attachments(new AttachmentsModel(settings, this))
     , m_chats(new ChatsModel(this))
@@ -62,6 +62,7 @@ Models::Models(VSQMessenger *messenger, VSQSettings *settings, UserDatabase *use
     qRegisterMetaType<QSortFilterProxyModel *>("QSortFilterProxyModel*");
 
     connect(m_messagesQueue, &MessagesQueue::notificationCreated, this, &Models::notificationCreated);
+    connect(messenger, &VSQMessenger::fireReady, m_messagesQueue, &MessagesQueue::sendNotSentMessages);
 
     m_messagesQueue->moveToThread(m_queueThread);
     m_queueThread->setObjectName("QueueThread");

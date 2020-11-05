@@ -88,7 +88,7 @@ Q_LOGGING_CATEGORY(lcMessenger, "messenger")
 using namespace vm;
 
 /******************************************************************************/
-VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, VSQSettings *settings, Validator *validator)
+VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, Settings *settings, Validator *validator)
     : QObject()
     , m_xmpp()
     , m_settings(settings)

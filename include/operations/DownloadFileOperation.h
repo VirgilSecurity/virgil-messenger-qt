@@ -44,16 +44,18 @@ class DownloadFileOperation : public LoadFileOperation
     Q_OBJECT
 
 public:
-    DownloadFileOperation(MessageOperation *parent, FileLoader *fileLoader, const QString &filePath);
+    DownloadFileOperation(const QString &name, QObject *parent, FileLoader *fileLoader, const QUrl &url, const QString &filePath);
 
     void run() override;
+
+signals:
+    void downloaded(const QString &filePath);
 
 private:
     void connectReply(QNetworkReply *reply) override;
 
     void onFinished();
 
-    MessageOperation *m_parent;
     QUrl m_url;
 };
 }

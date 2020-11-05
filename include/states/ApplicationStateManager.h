@@ -79,7 +79,7 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(QState *previousState MEMBER m_previousState NOTIFY previousStateChanged)
 
 public:
-    ApplicationStateManager(VSQMessenger *messenger, Controllers *controllers, Validator *validator, VSQSettings *settings, QObject *parent);
+    ApplicationStateManager(VSQMessenger *messenger, Controllers *controllers, Validator *validator, Settings *settings, QObject *parent);
     ~ApplicationStateManager() override;
 
 signals:
@@ -109,7 +109,7 @@ private:
     VSQMessenger *m_messenger;
     Controllers *m_controllers;
     Validator *m_validator;
-    VSQSettings *m_settings;
+    Settings *m_settings;
 
     AccountSelectionState *m_accountSelectionState;
     AccountSettingsState *m_accountSettingsState;

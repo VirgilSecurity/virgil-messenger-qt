@@ -39,7 +39,7 @@
 #include "operations/Operation.h"
 
 class VSQMessenger;
-class VSQSettings;
+class Settings;
 
 namespace vm
 {
@@ -54,12 +54,12 @@ class MessagesQueue : public Operation
     Q_OBJECT
 
 public:
-    MessagesQueue(const VSQSettings *settings, VSQMessenger *messenger, UserDatabase *userDatabase, FileLoader *fileLoader, QObject *parent);
+    MessagesQueue(const Settings *settings, VSQMessenger *messenger, UserDatabase *userDatabase, FileLoader *fileLoader, QObject *parent);
     ~MessagesQueue() override;
 
 signals:
-    void pushMessageOperation(const GlobalMessage &message);
-    void pushDownloadOperation(const GlobalMessage &message, const QString &filePath);
+    void pushMessage(const GlobalMessage &message);
+    void pushMessageDownload(const GlobalMessage &message, const QString &filePath);
     void sendNotSentMessages();
 
     void messageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status status);
@@ -76,10 +76,10 @@ private:
     void setMessages(const GlobalMessages &messages);
 
     void connectMessageOperation(MessageOperation *op);
-    void appendMessageOperation(const GlobalMessage &message);
+    MessageOperation *pushMessageOperation(const GlobalMessage &message, bool prepend = false);
 
     void onPushMessage(const GlobalMessage &message);
-    void onPushDownloadOperation(const GlobalMessage &message, const QString &filePath);
+    void onPushMessageDownload(const GlobalMessage &message, const QString &filePath);
     void onSendNotSentMessages();
     void onMessageOperationStatusChanged(const MessageOperation *operation);
     void onMessageOperationAttachmentStatusChanged(const MessageOperation *operation);

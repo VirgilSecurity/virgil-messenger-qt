@@ -56,6 +56,7 @@ void registerCommonMetaTypes()
     qRegisterMetaType<Jid>("Jid");
     qRegisterMetaType<Contact::Id>("Contact::Id");
     qRegisterMetaType<Attachment::Id>("Attachment::Id");
+    qRegisterMetaType<Attachment::Type>("Attachment::Type");
     qRegisterMetaType<Attachment::Status>("Attachment::Status");
     qRegisterMetaType<Message>("Message");
     qRegisterMetaType<Message::Id>("Message::Id");

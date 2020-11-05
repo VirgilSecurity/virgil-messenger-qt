@@ -41,12 +41,11 @@
 
 using namespace vm;
 
-LoadFileOperation::LoadFileOperation(const QString &name, MessageOperation *parent, FileLoader *fileLoader)
+LoadFileOperation::LoadFileOperation(const QString &name, QObject *parent, FileLoader *fileLoader)
     : Operation(name, parent)
-    , m_parent(parent)
     , m_fileLoader(fileLoader)
 {
-    connect(this, &LoadFileOperation::updateProgress, this, &LoadFileOperation::onReplyProgressChanged);
+    connect(this, &LoadFileOperation::setProgress, this, &LoadFileOperation::onSetProgress);
 }
 
 void LoadFileOperation::setFilePath(const QString &filePath)
@@ -73,7 +72,7 @@ bool LoadFileOperation::openFileHandle(const QIODevice::OpenMode &mode)
         return false;
     }
 
-    if (mode == QFile::ReadOnly && !QFile::exists(m_filePath)) {
+    if (mode == QFile::ReadOnly && !Utils::fileExists(m_filePath)) {
         qCWarning(lcOperation) << "File doesn't exist" << m_filePath;
         invalidate();
         return false;
@@ -112,28 +111,13 @@ QString LoadFileOperation::filePath() const
 void LoadFileOperation::onReplyFinished()
 {
     if (m_bytesTotal > 0 && m_bytesLoaded >= m_bytesTotal) {
+        qCDebug(lcOperation) << "Reply finished";
+        closeFileHandle();
         finish();
     }
     else {
         qCWarning(lcOperation) << "Failed. Load file was processed partially";
         fail();
-    }
-}
-
-void LoadFileOperation::onReplyProgressChanged(const DataSize &bytesLoaded, const DataSize &bytesTotal)
-{
-    if (bytesTotal <= 0) {
-        return; // HACK(fpohtmeh): reply sends zeros finally, ignore it
-    }
-    m_bytesLoaded = bytesLoaded;
-    m_bytesTotal = bytesTotal;
-    //qCDebug(lcOperation) << "Load progress:" << Utils::printableLoadProgress(bytesLoaded, bytesTotal);
-    if (bytesLoaded < bytesTotal) {
-        m_parent->setAttachmentProgress(bytesLoaded, bytesTotal);
-    }
-    else {
-        qCDebug(lcOperation) << "All bytes were processed, set load operation finished";
-        finish();
     }
 }
 
@@ -146,5 +130,22 @@ void LoadFileOperation::onReplyErrorOccurred()
 void LoadFileOperation::onReplySslErrors()
 {
     qCWarning(lcOperation) << "SSL errors occurred";
-    fail();
+}
+
+void LoadFileOperation::onSetProgress(const DataSize &bytesLoaded, const DataSize &bytesTotal)
+{
+    if (bytesTotal <= 0) {
+        return; // HACK(fpohtmeh): reply sends zeros finally, ignore it
+    }
+    m_bytesLoaded = bytesLoaded;
+    m_bytesTotal = bytesTotal;
+    //qCDebug(lcOperation) << "Load progress:" << Utils::printableLoadProgress(bytesLoaded, bytesTotal);
+    if (bytesLoaded < bytesTotal) {
+        emit progressChanged(bytesLoaded, bytesTotal);
+    }
+    else {
+        qCDebug(lcOperation) << "All bytes were processed, set load operation finished";
+        closeFileHandle();
+        finish();
+    }
 }

@@ -32,29 +32,24 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_ACCOUNTSELECTIONSTATE_H
-#define VM_ACCOUNTSELECTIONSTATE_H
+#ifndef VM_CREATEATTACHMENTPREVIEWOPERATION_H
+#define VM_CREATEATTACHMENTPREVIEWOPERATION_H
 
-#include "SignInState.h"
-#include "AccountSelectionModel.h"
+#include "CreateThumbnailOperation.h"
+
+class Settings;
 
 namespace vm
 {
-class AccountSelectionState : public SignInState
+class MessageOperation;
+
+class CreateAttachmentPreviewOperation : public CreateThumbnailOperation
 {
     Q_OBJECT
-    Q_PROPERTY(AccountSelectionModel *model MEMBER m_model CONSTANT)
 
 public:
-    AccountSelectionState(UsersController *usersController, Validator *validator, Settings *settings, QState *parent);
-
-signals:
-    void requestSignInUsername();
-    void requestSignUp();
-
-private:
-    AccountSelectionModel *m_model;
+    CreateAttachmentPreviewOperation(MessageOperation *parent, const Settings *settings, const QString &sourcePath, const QString &destPath);
 };
 }
 
-#endif // VM_ACCOUNTSELECTIONSTATE_H
+#endif // VM_CREATEATTACHMENTPREVIEWOPERATION_H

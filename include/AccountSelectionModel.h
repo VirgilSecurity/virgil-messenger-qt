@@ -37,7 +37,7 @@
 
 #include <QAbstractListModel>
 
-class VSQSettings;
+class Settings;
 
 namespace vm
 {
@@ -46,7 +46,7 @@ class AccountSelectionModel : public QAbstractListModel
     Q_OBJECT
 
 public:
-    AccountSelectionModel(VSQSettings *settings, QObject *parent);
+    AccountSelectionModel(Settings *settings, QObject *parent);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -55,7 +55,7 @@ public:
 private:
     void reload();
 
-    VSQSettings *m_settings;
+    Settings *m_settings;
     const int m_chunkSize = 4;
 };
 }

@@ -39,7 +39,7 @@
 
 #include "VSQCommon.h"
 
-class VSQSettings;
+class Settings;
 
 namespace vm
 {
@@ -50,7 +50,7 @@ class AttachmentsController : public QObject
     Q_OBJECT
 
 public:
-    explicit AttachmentsController(VSQSettings *settings, Models *models, QObject *parent);
+    explicit AttachmentsController(Settings *settings, Models *models, QObject *parent);
 
     Q_INVOKABLE void saveAs(const Message::Id &messageId, const QVariant &fileUrl);
     Q_INVOKABLE void download(const Message::Id &messageId);
@@ -67,7 +67,7 @@ private:
     void downloadAttachment(const GlobalMessage &message);
     Optional<GlobalMessage> findMessage(const Message::Id &messageId) const;
 
-    VSQSettings *m_settings;
+    Settings *m_settings;
     Models *m_models;
     UserId m_userId;
     Contact::Id m_contactId;

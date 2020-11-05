@@ -63,7 +63,7 @@ bool AttachmentsTable::create()
 void AttachmentsTable::onCreateAttachment(const Attachment &attachment)
 {
     ScopedConnection connection(*database());
-    const auto extrasJson = Utils::extrasToJson(attachment.extras, attachment.type);
+    const auto extrasJson = Utils::extrasToJson(attachment.extras, attachment.type, false);
     const DatabaseUtils::BindValues values {
         { ":id", attachment.id },
         { ":messageId", attachment.messageId },
@@ -81,7 +81,7 @@ void AttachmentsTable::onCreateAttachment(const Attachment &attachment)
         emit errorOccurred(tr("Failed to insert attachment"));
         return;
     }
-    qCDebug(lcDatabase) << "Attachment was inserted into table" << attachment.localPath;
+    qCDebug(lcDatabase) << "Attachment was inserted into table" << attachment.id;
 }
 
 void AttachmentsTable::onUpdateStatus(const Attachment::Id &attachmentId, const Attachment::Status &status)
@@ -121,7 +121,7 @@ void AttachmentsTable::onUpdateUrl(const Attachment::Id &attachmentId, const QUr
 void AttachmentsTable::onUpdateExtras(const Attachment::Id &attachmentId, const Attachment::Type &type, const QVariant &extras)
 {
     ScopedConnection connection(*database());
-    const auto extrasJson = Utils::extrasToJson(QVariant::fromValue(extras), type);
+    const auto extrasJson = Utils::extrasToJson(QVariant::fromValue(extras), type, false);
     const DatabaseUtils::BindValues values {
         { ":id", attachmentId },
         { ":extras",  extrasJson}

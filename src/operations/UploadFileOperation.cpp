@@ -42,10 +42,10 @@
 
 using namespace vm;
 
-UploadFileOperation::UploadFileOperation(MessageOperation *parent, FileLoader *fileLoader)
-    : LoadFileOperation(QString("UploadFile"), parent, fileLoader)
-    , m_parent(parent)
+UploadFileOperation::UploadFileOperation(const QString &name, QObject *parent, const QString &filePath, FileLoader *fileLoader)
+    : LoadFileOperation(name, parent, fileLoader)
 {
+    setFilePath(filePath);
     connect(fileLoader, &FileLoader::slotUrlReceived, this, &UploadFileOperation::onSlotUrlReceived);
     connect(fileLoader, &FileLoader::slotUrlErrorOcurrend, this, &UploadFileOperation::onSlotUrlErrorOcurrend);
     connect(this, &UploadFileOperation::finished, this, &UploadFileOperation::onFinished);
@@ -63,24 +63,16 @@ void UploadFileOperation::run()
     }
 }
 
-void UploadFileOperation::setAutoDeleteFile(bool autoDelete)
-{
-    m_autoDeleteFile = autoDelete;
-}
-
 void UploadFileOperation::cleanup()
 {
     closeFileHandle();
-    if (m_autoDeleteFile) {
-        QFile::remove(filePath());
-        qCDebug(lcOperation) << "File was removed:" << filePath();
-    }
+    LoadFileOperation::cleanup();
 }
 
 void UploadFileOperation::connectReply(QNetworkReply *reply)
 {
     LoadFileOperation::connectReply(reply);
-    connect(reply, &QNetworkReply::uploadProgress, this, &LoadFileOperation::updateProgress);
+    connect(reply, &QNetworkReply::uploadProgress, this, &LoadFileOperation::setProgress);
 }
 
 void UploadFileOperation::startUpload()
@@ -108,5 +100,5 @@ void UploadFileOperation::onSlotUrlErrorOcurrend(const QString &slotId)
 void UploadFileOperation::onFinished()
 {
     qCDebug(lcOperation) << "File was uploaded to:" << m_url;
-    m_parent->setAttachmentUrl(m_url);
+    emit uploaded(m_url);
 }

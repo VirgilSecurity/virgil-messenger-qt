@@ -131,13 +131,14 @@ using Jid = QString;
 
 struct PictureExtras
 {
-    QSize size;
-    int orientation = 0; // same as QImageIOHandler::Transformations
     QSize thumbnailSize;
+    QUrl thumbnailUrl;
+    QString thumbnailPath;
+    QString previewPath;
 
     bool operator==(const PictureExtras &e) const
     {
-        return size == e.size && orientation == e.orientation && thumbnailSize == e.thumbnailSize;
+        return thumbnailSize == e.thumbnailSize && previewPath == e.previewPath && thumbnailPath == e.thumbnailPath;
     }
 };
 
