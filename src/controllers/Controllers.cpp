@@ -53,6 +53,7 @@ Controllers::Controllers(VSQMessenger *messenger, Settings *settings,
     , m_messages(new MessagesController(messenger, models, userDatabase, this))
 {
     connect(m_attachments, &AttachmentsController::notificationCreated, this, &Controllers::notificationCreated);
+    connect(m_messages, &MessagesController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_users, &UsersController::userIdChanged, m_attachments, &AttachmentsController::setUserId);
     connect(m_users, &UsersController::userIdChanged, m_chats, &ChatsController::loadChats);
     connect(m_chats, &ChatsController::currentContactIdChanged, m_attachments, &AttachmentsController::setContactId);

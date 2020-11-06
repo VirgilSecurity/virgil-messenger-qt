@@ -83,7 +83,7 @@ Optional<Attachment> AttachmentsModel::createAttachment(const QUrl &url, const A
     attachment.id = Utils::createUuid();
     attachment.messageId = Utils::createUuid();
     attachment.type = type;
-    attachment.size = fileSize; // TODO(fpohtmeh): use size after encryption?
+    attachment.size = fileSize;
 
     // Filename
 #ifdef VS_ANDROID
@@ -134,7 +134,7 @@ Optional<PictureExtras> AttachmentsModel::createPictureExtras(const QString &loc
     if (!Utils::readImage(&reader, &source)) {
         return NullOptional;
     }
-    qCDebug(lcModel) << "Read image dimensions:" << reader.size();
-    extras.thumbnailSize = Utils::calculateThumbnailSize(reader.size(), m_settings->thumbnailMaxSize(), reader.transformation());
+    qCDebug(lcModel) << "Read image dimensions:" << source.size();
+    extras.thumbnailSize = Utils::calculateThumbnailSize(source.size(), m_settings->thumbnailMaxSize(), reader.transformation());
     return extras;
 }

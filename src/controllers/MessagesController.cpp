@@ -100,11 +100,17 @@ void MessagesController::loadMessages(const Chat &chat)
 
 void MessagesController::createSendMessage(const QString &body, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
 {
-    if (body.isEmpty() && !attachmentUrl.isValid()) {
-        qCDebug(lcController) << "Text and attachment are empty";
+    const auto isAttachment = attachmentUrl.isValid();
+    if (body.isEmpty() && !isAttachment) {
+        qCWarning(lcController) << "Text and attachment are empty";
         return;
     }
     const auto attachment = m_models->attachments()->createAttachment(attachmentUrl.toUrl(), attachmentType);
+    if (isAttachment && !attachment) {
+        qCWarning(lcController) << "Message wasn't created. Attachment is invalid";
+        emit notificationCreated(tr("Attachment reading error"));
+        return;
+    }
     auto message = m_models->messages()->createMessage(m_chat.id, m_userId, body, attachment);
     const Chat::UnreadCount unreadCount = 0; // message can be created in current chat only
     m_models->chats()->updateLastMessage(message, unreadCount);
