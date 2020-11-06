@@ -44,7 +44,6 @@
 
 using namespace vm;
 
-// TODO(fpohtmeh): remove settings from constructor?
 Controllers::Controllers(VSQMessenger *messenger, Settings *settings,
                          Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
@@ -57,6 +56,7 @@ Controllers::Controllers(VSQMessenger *messenger, Settings *settings,
     connect(m_users, &UsersController::userIdChanged, m_attachments, &AttachmentsController::setUserId);
     connect(m_users, &UsersController::userIdChanged, m_chats, &ChatsController::loadChats);
     connect(m_chats, &ChatsController::currentContactIdChanged, m_attachments, &AttachmentsController::setContactId);
+    connect(m_chats, &ChatsController::chatsSet, m_messages, &MessagesController::setUserId);
     connect(m_chats, &ChatsController::chatOpened, m_messages, &MessagesController::loadMessages);
 
     qRegisterMetaType<AttachmentsController *>("AttachmentsController*");

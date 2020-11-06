@@ -68,8 +68,7 @@ public:
 signals:
     void errorOccurred(const QString &errorText); // TODO(fpohtmeh): remove this signal everywhere?
 
-    void chatsFetched();
-    void chatsCleared();
+    void chatsSet(const UserId &userId);
 
     void currentChatChanged(const Chat &chat);
     void currentContactIdChanged(const Contact::Id &contactId);
@@ -85,9 +84,11 @@ private:
     void setCurrentChat(const Chat &chat);
 
     void onNewContactFound(const Contact::Id &contactId);
+    void onChatsSet();
 
     Models *m_models;
     UserDatabase *m_userDatabase;
+    UserId m_userId;
     Chat m_currentChat;
 };
 }

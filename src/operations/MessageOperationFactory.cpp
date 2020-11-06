@@ -88,9 +88,9 @@ EncryptUploadFileOperation *MessageOperationFactory::populateEncryptUpload(const
     return op;
 }
 
-CreateAttachmentThumbnailOperation *MessageOperationFactory::populateCreateAttachmentThumbnail(MessageOperation *messageOp, Operation *parent, const QString &filePath)
+CreateAttachmentThumbnailOperation *MessageOperationFactory::populateCreateAttachmentThumbnail(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &filePath)
 {
-    auto op = new CreateAttachmentThumbnailOperation(messageOp, m_settings, filePath);
+    auto op = new CreateAttachmentThumbnailOperation(messageOp, m_settings, sourcePath, filePath);
     parent->appendChild(op);
     return op;
 }

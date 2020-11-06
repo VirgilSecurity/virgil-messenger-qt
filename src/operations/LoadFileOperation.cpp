@@ -134,13 +134,14 @@ void LoadFileOperation::onReplySslErrors()
 
 void LoadFileOperation::onSetProgress(const DataSize &bytesLoaded, const DataSize &bytesTotal)
 {
-    if (bytesTotal <= 0) {
-        return; // HACK(fpohtmeh): reply sends zeros finally, ignore it
-    }
+    //qCDebug(lcOperation) << "Load progress:" << Utils::printableLoadProgress(bytesLoaded, total);
     m_bytesLoaded = bytesLoaded;
     m_bytesTotal = bytesTotal;
-    //qCDebug(lcOperation) << "Load progress:" << Utils::printableLoadProgress(bytesLoaded, bytesTotal);
-    if (bytesLoaded < bytesTotal) {
+    if (bytesTotal < 0) {
+        // NOTE(fpohtmeh): download reply sends zeros as bytesTotal
+        emit progressChanged(bytesLoaded, bytesLoaded);
+    }
+    else if (bytesLoaded < bytesTotal) {
         emit progressChanged(bytesLoaded, bytesTotal);
     }
     else {

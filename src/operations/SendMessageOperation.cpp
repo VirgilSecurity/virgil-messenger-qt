@@ -56,7 +56,7 @@ void SendMessageOperation::run()
     const auto encryptedStr = Core::encryptMessage(*message, message->recipientId);
     if (!encryptedStr) {
         qCDebug(lcOperation) << "Unable to encrypt message";
-        invalidate();
+        fail();
     }
     else {
         const auto fromJID = Utils::createJid(message->senderId, m_xmppUrl);

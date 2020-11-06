@@ -48,6 +48,7 @@ AttachmentsTable::AttachmentsTable(Database *database)
     connect(this, &AttachmentsTable::updateUrl, this, &AttachmentsTable::onUpdateUrl);
     connect(this, &AttachmentsTable::updateExtras, this, &AttachmentsTable::onUpdateExtras);
     connect(this, &AttachmentsTable::updateLocalPath, this, &AttachmentsTable::onUpdateLocalPath);
+    connect(this, &AttachmentsTable::updateEncryptedSize, this, &AttachmentsTable::onUpdateEncryptedSize);
 }
 
 bool AttachmentsTable::create()
@@ -73,6 +74,7 @@ void AttachmentsTable::onCreateAttachment(const Attachment &attachment)
         { ":size", attachment.size },
         { ":localPath", attachment.localPath },
         { ":url", attachment.url },
+        { ":encryptedSize", attachment.encryptedSize },
         { ":extras", extrasJson }
     };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertAttachment"), values);
@@ -118,6 +120,23 @@ void AttachmentsTable::onUpdateUrl(const Attachment::Id &attachmentId, const QUr
     }
 }
 
+void AttachmentsTable::onUpdateLocalPath(const Attachment::Id &attachmentId, const QString &localPath)
+{
+    ScopedConnection connection(*database());
+    const DatabaseUtils::BindValues values {
+        { ":id", attachmentId },
+        { ":localPath", localPath }
+    };
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateAttachmentLocalPath"), values);
+    if (query) {
+        qCDebug(lcDatabase) << "Attachment localPath was updated" << attachmentId << "localPath" << localPath;
+    }
+    else {
+        qCCritical(lcDatabase) << "AttachmentsTable::onUpdateLocalPath error";
+        emit errorOccurred(tr("Failed to update attachment localPath"));
+    }
+}
+
 void AttachmentsTable::onUpdateExtras(const Attachment::Id &attachmentId, const Attachment::Type &type, const QVariant &extras)
 {
     ScopedConnection connection(*database());
@@ -136,19 +155,19 @@ void AttachmentsTable::onUpdateExtras(const Attachment::Id &attachmentId, const 
     }
 }
 
-void AttachmentsTable::onUpdateLocalPath(const Attachment::Id &attachmentId, const QString &localPath)
+void AttachmentsTable::onUpdateEncryptedSize(const Attachment::Id &attachmentId, const DataSize &encryptedSize)
 {
     ScopedConnection connection(*database());
     const DatabaseUtils::BindValues values {
         { ":id", attachmentId },
-        { ":localPath", localPath }
+        { ":encryptedSize", encryptedSize }
     };
-    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateAttachmentLocalPath"), values);
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateAttachmentEncryptedSize"), values);
     if (query) {
-        qCDebug(lcDatabase) << "Attachment localPath was updated" << attachmentId << "localPath" << localPath;
+        qCDebug(lcDatabase) << "Attachment encryptedSize was updated" << attachmentId << "encryptedSize" << encryptedSize;
     }
     else {
-        qCCritical(lcDatabase) << "AttachmentsTable::onUpdateLocalPath error";
-        emit errorOccurred(tr("Failed to update attachment localPath"));
+        qCCritical(lcDatabase) << "AttachmentsTable::onUpdateEncryptedSize error";
+        emit errorOccurred(tr("Failed to update attachment encryptedSize"));
     }
 }

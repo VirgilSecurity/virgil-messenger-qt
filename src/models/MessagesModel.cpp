@@ -47,11 +47,13 @@ MessagesModel::~MessagesModel()
 
 void MessagesModel::setUserId(const UserId &userId)
 {
+    qCDebug(lcController) << "Set messages model userId" << userId;
     m_userId = userId;
 }
 
 void MessagesModel::setContactId(const Contact::Id &contactId)
 {
+    qCDebug(lcController) << "Set messages model contactId" << contactId;
     m_contactId = contactId;
 }
 
@@ -122,18 +124,6 @@ void MessagesModel::setAttachmentStatus(const Attachment::Id &attachmentId, cons
     });
 }
 
-void MessagesModel::setAttachmentProgress(const Attachment::Id &attachmentId, const DataSize &bytesLoaded, const DataSize &bytesTotal)
-{
-    updateAttachment(attachmentId, { AttachmentBytesLoadedRole, AttachmentBytesTotalRole }, [=](Attachment &a) {
-        if (a.bytesLoaded == bytesLoaded && a.bytesTotal == bytesTotal) {
-            return false;
-        }
-        a.bytesLoaded = bytesLoaded;
-        a.bytesTotal = bytesTotal;
-        return true;
-    });
-}
-
 void MessagesModel::setAttachmentUrl(const Attachment::Id &attachmentId, const QUrl &url)
 {
     updateAttachment(attachmentId, {}, [=](Attachment &a) {
@@ -147,7 +137,7 @@ void MessagesModel::setAttachmentUrl(const Attachment::Id &attachmentId, const Q
 
 void MessagesModel::setAttachmentExtras(const Attachment::Id &attachmentId, const QVariant &extras)
 {
-    updateAttachment(attachmentId, { AttachmentImagePathRole }, [=](Attachment &a) {
+    updateAttachment(attachmentId, { AttachmentImagePathRole, AttachmentBytesTotalRole }, [=](Attachment &a) {
         // NOTE(fpohtmeh): don't compare values because file existence can be changed
         a.extras = extras;
         return true;
@@ -159,6 +149,28 @@ void MessagesModel::setAttachmentLocalPath(const Attachment::Id &attachmentId, c
     updateAttachment(attachmentId, { AttachmentFileExistsRole }, [=](Attachment &a) {
         // NOTE(fpohtmeh): don't compare values because file existence can be changed
         a.localPath = localPath;
+        return true;
+    });
+}
+
+void MessagesModel::setAttachmentEncryptedSize(const Attachment::Id &attachmentId, const DataSize &size)
+{
+    updateAttachment(attachmentId, { AttachmentBytesTotalRole }, [=](Attachment &a) {
+        if (a.encryptedSize == size) {
+            return false;
+        }
+        a.encryptedSize = size;
+        return true;
+    });
+}
+
+void MessagesModel::setAttachmentProcessedSize(const Attachment::Id &attachmentId, const DataSize &size)
+{
+    updateAttachment(attachmentId, { AttachmentBytesLoadedRole }, [=](Attachment &a) {
+        if (a.processedSize == size) {
+            return false;
+        }
+        a.processedSize = size;
         return true;
     });
 }
@@ -270,11 +282,17 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
     }
     case AttachmentBytesTotalRole:
     {
-        return attachment ? attachment->bytesTotal : 0;
+        if (!attachment) {
+            return 0;
+        }
+        if (attachment->type != Attachment::Type::Picture) {
+            return attachment->encryptedSize;
+        }
+        return attachment->encryptedSize + attachment->extras.value<PictureExtras>().encryptedThumbnailSize;
     }
     case AttachmentBytesLoadedRole:
     {
-        return attachment ? attachment->bytesLoaded : 0;
+        return attachment ? attachment->processedSize : 0;
     }
     case AttachmentFileExistsRole:
     {
@@ -282,7 +300,7 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
     }
     case FailedRole:
     {
-        return message.status == Message::Status::Failed;
+        return message.status == Message::Status::InvalidM;
     }
     case FirstInRowRole:
     {

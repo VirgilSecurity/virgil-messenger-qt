@@ -57,9 +57,8 @@ MessagesQueue::MessagesQueue(const Settings *settings, VSQMessenger *messenger, 
     connect(this, &Operation::finished, []() {
         qCDebug(lcModel) << "MessageQueue is finished";
     });
-    //
-    connect(userDatabase, &UserDatabase::userIdChanged, this, &MessagesQueue::setUserId);
-    //
+
+    connect(this, &MessagesQueue::setUserId, this, &MessagesQueue::onSetUserId);
     connect(this, &MessagesQueue::pushMessage, this, &MessagesQueue::onPushMessage);
     connect(this, &MessagesQueue::pushMessageDownload, this, &MessagesQueue::onPushMessageDownload);
     connect(this, &MessagesQueue::sendNotSentMessages, this, &MessagesQueue::onSendNotSentMessages);
@@ -70,29 +69,13 @@ MessagesQueue::~MessagesQueue()
 {
 }
 
-void MessagesQueue::setUserId(const UserId &userId)
-{
-    if (m_userId == userId) {
-        return;
-    }
-
-    dropChildren();
-    qCDebug(lcModel) << "MessageQueue is clear";
-
-    m_userId = userId;
-    if (!userId.isEmpty()) {
-        connect(m_userDatabase->messagesTable(), &MessagesTable::notSentMessagesFetched, this, &MessagesQueue::setMessages);
-        sendNotSentMessages();
-    }
-}
-
 void MessagesQueue::setMessages(const GlobalMessages &messages)
 {
     qCDebug(lcOperation) << "Queued" << messages.size() << "unsent messages";
     for (auto &m : messages) {
         pushMessageOperation(m);
     }
-    if (hasChildren()) {
+    if (hasChildren() && isActive()) {
         start();
     }
 }
@@ -101,10 +84,11 @@ void MessagesQueue::connectMessageOperation(MessageOperation *op)
 {
     connect(op, &MessageOperation::statusChanged, this, std::bind(&MessagesQueue::onMessageOperationStatusChanged, this, op));
     connect(op, &MessageOperation::attachmentStatusChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentStatusChanged, this, op));
-    connect(op, &MessageOperation::attachmentProgressChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentProgressChanged, this, op));
     connect(op, &MessageOperation::attachmentUrlChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentUrlChanged, this, op));
-    connect(op, &MessageOperation::attachmentExtrasChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentExtrasChanged, this, op));
     connect(op, &MessageOperation::attachmentLocalPathChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentLocalPathChanged, this, op));
+    connect(op, &MessageOperation::attachmentExtrasChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentExtrasChanged, this, op));
+    connect(op, &MessageOperation::attachmentEncryptedSizeChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentEncryptedSizeChanged, this, op));
+    connect(op, &MessageOperation::attachmentProcessedSizeChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentProcessedSizeChanged, this, op));
 }
 
 MessageOperation *MessagesQueue::pushMessageOperation(const GlobalMessage &message, bool prepend)
@@ -115,10 +99,33 @@ MessageOperation *MessagesQueue::pushMessageOperation(const GlobalMessage &messa
     return op;
 }
 
+bool MessagesQueue::isActive() const
+{
+    return !m_userId.isEmpty();
+}
+
+void MessagesQueue::onSetUserId(const UserId &userId)
+{
+    if (m_userId == userId) {
+        return;
+    }
+    m_userId = userId;
+
+    dropChildren();
+    qCDebug(lcModel) << "MessageQueue is cleared. UserId:" << m_userId <<  "Active:" << isActive();
+
+    if (isActive()) {
+        connect(m_userDatabase->messagesTable(), &MessagesTable::notSentMessagesFetched, this, &MessagesQueue::setMessages);
+        sendNotSentMessages();
+    }
+}
+
 void MessagesQueue::onPushMessage(const GlobalMessage &message)
 {
     pushMessageOperation(message);
-    start();
+    if (isActive()) {
+        start();
+    }
 }
 
 void MessagesQueue::onPushMessageDownload(const GlobalMessage &message, const QString &filePath)
@@ -126,12 +133,14 @@ void MessagesQueue::onPushMessageDownload(const GlobalMessage &message, const QS
     auto op = pushMessageOperation(message, true);
     m_factory->populateForDownload(op, filePath);
     connect(op, &Operation::finished, this, std::bind(&MessagesQueue::notificationCreated, this, tr("File was downloaded")));
-    start();
+    if (isActive()) {
+        start();
+    }
 }
 
 void MessagesQueue::onSendNotSentMessages()
 {
-    if (!m_userId.isEmpty()) {
+    if (isActive()) {
         m_userDatabase->messagesTable()->fetchNotSentMessages();
     }
 }
@@ -149,18 +158,18 @@ void MessagesQueue::onMessageOperationAttachmentStatusChanged(const MessageOpera
     emit attachmentStatusChanged(a.id, m.contactId, a.status);
 }
 
-void MessagesQueue::onMessageOperationAttachmentProgressChanged(const MessageOperation *operation)
-{
-    const auto &m = *operation->message();
-    const auto &a = *m.attachment;
-    emit attachmentProgressChanged(a.id, m.contactId, a.bytesLoaded, a.bytesTotal);
-}
-
 void MessagesQueue::onMessageOperationAttachmentUrlChanged(const MessageOperation *operation)
 {
     const auto &m = *operation->message();
     const auto &a = *m.attachment;
     emit attachmentUrlChanged(a.id, m.contactId, a.url);
+}
+
+void MessagesQueue::onMessageOperationAttachmentLocalPathChanged(const MessageOperation *operation)
+{
+    const auto &m = *operation->message();
+    const auto &a = *m.attachment;
+    emit attachmentLocalPathChanged(a.id, m.contactId, a.localPath);
 }
 
 void MessagesQueue::onMessageOperationAttachmentExtrasChanged(const MessageOperation *operation)
@@ -170,9 +179,16 @@ void MessagesQueue::onMessageOperationAttachmentExtrasChanged(const MessageOpera
     emit attachmentExtrasChanged(a.id, m.contactId, a.type, a.extras);
 }
 
-void MessagesQueue::onMessageOperationAttachmentLocalPathChanged(const MessageOperation *operation)
+void MessagesQueue::onMessageOperationAttachmentProcessedSizeChanged(const MessageOperation *operation)
 {
     const auto &m = *operation->message();
     const auto &a = *m.attachment;
-    emit attachmentLocalPathChanged(a.id, m.contactId, a.localPath);
+    emit attachmentProcessedSizeChanged(a.id, m.contactId, a.processedSize);
+}
+
+void MessagesQueue::onMessageOperationAttachmentEncryptedSizeChanged(const MessageOperation *operation)
+{
+    const auto &m = *operation->message();
+    const auto &a = *m.attachment;
+    emit attachmentEncryptedSizeChanged(a.id, m.contactId, a.encryptedSize);
 }

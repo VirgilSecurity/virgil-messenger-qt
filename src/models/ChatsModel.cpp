@@ -59,6 +59,8 @@ void ChatsModel::setChats(const Chats &chats)
     beginResetModel();
     m_chats = chats;
     endResetModel();
+    qCDebug(lcModel) << "Chats set";
+    emit chatsSet();
 }
 
 Chat ChatsModel::createChat(const Contact::Id &contactId)
@@ -139,21 +141,6 @@ void ChatsModel::updateLastMessageAttachmentStatus(const Attachment::Id &attachm
     });
 }
 
-void ChatsModel::updateLastMessageAttachmentProgress(const Attachment::Id &attachmentId, const DataSize &bytesLoaded, const DataSize &bytesTotal)
-{
-    // TODO(fpohtmeh): need some optimization
-    /*
-    updateLastMessageAttachment(attachmentId, [=](Attachment &a) {
-        if (a.bytesLoaded == bytesLoaded && a.bytesTotal == bytesTotal) {
-            return false;
-        }
-        a.bytesLoaded = bytesLoaded;
-        a.bytesTotal = bytesTotal;
-        return true;
-    });
-    */
-}
-
 void ChatsModel::updateLastMessageAttachmentUrl(const Attachment::Id &attachmentId, const QUrl &url)
 {
     updateLastMessageAttachment(attachmentId, [=](Attachment &a) {
@@ -161,6 +148,17 @@ void ChatsModel::updateLastMessageAttachmentUrl(const Attachment::Id &attachment
             return false;
         }
         a.url = url;
+        return true;
+    });
+}
+
+void ChatsModel::updateLastMessageAttachmentLocalPath(const Attachment::Id &attachmentId, const QString &localPath)
+{
+    updateLastMessageAttachment(attachmentId, [=](Attachment &a) {
+        if (a.localPath == localPath) {
+            return false;
+        }
+        a.localPath = localPath;
         return true;
     });
 }
@@ -176,15 +174,20 @@ void ChatsModel::updateLastMessageAttachmentExtras(const Attachment::Id &attachm
     });
 }
 
-void ChatsModel::updateLastMessageAttachmentLocalPath(const Attachment::Id &attachmentId, const QString &localPath)
+void ChatsModel::updateLastMessageAttachmentEncryptedSize(const Attachment::Id &attachmentId, const DataSize &encryptedSize)
 {
     updateLastMessageAttachment(attachmentId, [=](Attachment &a) {
-        if (a.localPath == localPath) {
+        if (a.encryptedSize == encryptedSize) {
             return false;
         }
-        a.localPath = localPath;
+        a.encryptedSize = encryptedSize;
         return true;
     });
+}
+
+void ChatsModel::updateLastMessageAttachmentProcessedSize(const Attachment::Id &attachmentId, const DataSize &processedSize)
+{
+    // NOTE(fpohtmeh): this method requires smarter search by attachmentId
 }
 
 Optional<Chat> ChatsModel::find(const Chat::Id &chatId) const

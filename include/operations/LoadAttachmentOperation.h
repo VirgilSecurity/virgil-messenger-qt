@@ -32,24 +32,36 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CREATEATTACHMENTHUMBNAILOPERATION_H
-#define VM_CREATEATTACHMENTHUMBNAILOPERATION_H
+#ifndef VM_LOADATTACHMENTOPERATION_H
+#define VM_LOADATTACHMENTOPERATION_H
 
-#include "CreateThumbnailOperation.h"
-
-class Settings;
+#include "Operation.h"
 
 namespace vm
 {
 class MessageOperation;
 
-class CreateAttachmentThumbnailOperation : public CreateThumbnailOperation
+class LoadAttachmentOperation : public Operation
 {
     Q_OBJECT
 
 public:
-    CreateAttachmentThumbnailOperation(MessageOperation *parent, const Settings *settings, const QString &sourcePath, const QString &destPath);
+    explicit LoadAttachmentOperation(const QString &name, MessageOperation *parent);
+
+    void startLoadOperation(const DataSize &bytesTotal);
+    void setLoadOperationProgress(const DataSize &bytesLoaded);
+
+signals:
+    void totalProgressChanged(const DataSize &bytesLoaded, const DataSize &bytesTotal);
+
+private:
+    void cleanup() override;
+    void updateTotalProgress();
+
+    DataSize m_bytesTotal = 0;
+    DataSize m_previousBytesTotal = 0;
+    DataSize m_currentBytesLoaded = 0;
 };
 }
 
-#endif // VM_CREATEATTACHMENTHUMBNAILOPERATION_H
+#endif // VM_LOADATTACHMENTOPERATION_H

@@ -53,23 +53,26 @@ public:
     MessageOperationFactory *factory();
 
     void setAttachmentStatus(const Attachment::Status status);
-    void setAttachmentProgress(const DataSize &bytesLoaded, const DataSize &bytesTotal);
     void setAttachmentUrl(const QUrl &url);
     void setAttachmentLocalPath(const QString &localPath);
-
     void setAttachmentExtras(const QVariant &extras);
     void setAttachmentPreviewPath(const QString &previewPath);
     void setAttachmentThumbnailPath(const QString &thumbnailPath);
     void setAttachmentThumbnailUrl(const QUrl &thumbnailUrl);
 
+    void setAttachmentProcessedSize(const DataSize &bytes);
+    void setAttachmentEncryptedSize(const DataSize &size);
+    void setAttachmentEncryptedThumbnailSize(const DataSize &bytes);
+
 signals:
     void statusChanged(const Message::Status &status);
     void attachmentStatusChanged(const Attachment::Status &status);
-    void attachmentProgressChanged(const DataSize &bytesLoaded, const DataSize &bytesTotal);
     void attachmentUrlChanged(const QUrl &url);
     void attachmentLocalPathChanged(const QString &localPath);
 
     void attachmentExtrasChanged(const QVariant &extras);
+    void attachmentProcessedSizeChanged(const DataSize &bytes);
+    void attachmentEncryptedSizeChanged(const DataSize &bytes);
 
 protected:
     void connectChild(Operation *child) override;

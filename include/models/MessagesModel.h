@@ -61,10 +61,11 @@ public:
     void markAllAsRead();
 
     void setAttachmentStatus(const Attachment::Id &attachmentId, const Attachment::Status &status);
-    void setAttachmentProgress(const Attachment::Id &attachmentId, const DataSize &bytesLoaded, const DataSize &bytesTotal);
     void setAttachmentUrl(const Attachment::Id &attachmentId, const QUrl &url);
     void setAttachmentExtras(const Attachment::Id &attachmentId, const QVariant &extras);
     void setAttachmentLocalPath(const Attachment::Id &attachmentId, const QString &localPath);
+    void setAttachmentEncryptedSize(const Attachment::Id &attachmentId, const DataSize &size);
+    void setAttachmentProcessedSize(const Attachment::Id &attachmentId, const DataSize &size);
 
     Optional<GlobalMessage> findById(const Message::Id &messageId) const;
 

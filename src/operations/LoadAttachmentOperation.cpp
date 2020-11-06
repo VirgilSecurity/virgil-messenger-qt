@@ -32,24 +32,44 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CREATEATTACHMENTHUMBNAILOPERATION_H
-#define VM_CREATEATTACHMENTHUMBNAILOPERATION_H
+#include "operations/LoadAttachmentOperation.h"
 
-#include "CreateThumbnailOperation.h"
+#include "operations/MessageOperation.h"
 
-class Settings;
+using namespace vm;
 
-namespace vm
+LoadAttachmentOperation::LoadAttachmentOperation(const QString &name, MessageOperation *parent)
+    : Operation(name, parent)
 {
-class MessageOperation;
-
-class CreateAttachmentThumbnailOperation : public CreateThumbnailOperation
-{
-    Q_OBJECT
-
-public:
-    CreateAttachmentThumbnailOperation(MessageOperation *parent, const Settings *settings, const QString &sourcePath, const QString &destPath);
-};
+    connect(this, &Operation::started, parent, std::bind(&MessageOperation::setAttachmentStatus, parent, Attachment::Status::Loading));
+    connect(this, &Operation::finished, parent, std::bind(&MessageOperation::setAttachmentStatus, parent, Attachment::Status::Loaded));
+    connect(this, &Operation::failed, parent, std::bind(&MessageOperation::setAttachmentStatus, parent, Attachment::Status::Interrupted));
+    connect(this, &Operation::invalidated, parent, std::bind(&MessageOperation::setAttachmentStatus, parent, Attachment::Status::Invalid));
+    connect(this, &LoadAttachmentOperation::totalProgressChanged, parent, &MessageOperation::setAttachmentProcessedSize);
 }
 
-#endif // VM_CREATEATTACHMENTHUMBNAILOPERATION_H
+void LoadAttachmentOperation::startLoadOperation(const DataSize &bytesTotal)
+{
+    m_previousBytesTotal = m_bytesTotal;
+    m_bytesTotal += bytesTotal;
+    updateTotalProgress();
+}
+
+void LoadAttachmentOperation::setLoadOperationProgress(const DataSize &bytesLoaded)
+{
+    m_currentBytesLoaded = bytesLoaded;
+    updateTotalProgress();
+}
+
+void LoadAttachmentOperation::cleanup()
+{
+    Operation::cleanup();
+    m_bytesTotal = 0;
+    m_previousBytesTotal = 0;
+    m_currentBytesLoaded = 0;
+}
+
+void LoadAttachmentOperation::updateTotalProgress()
+{
+    emit totalProgressChanged(m_previousBytesTotal + m_currentBytesLoaded, m_bytesTotal);
+}

@@ -58,6 +58,8 @@ public:
     ~MessagesQueue() override;
 
 signals:
+    void setUserId(const UserId &userId);
+
     void pushMessage(const GlobalMessage &message);
     void pushMessageDownload(const GlobalMessage &message, const QString &filePath);
     void sendNotSentMessages();
@@ -66,27 +68,32 @@ signals:
     void attachmentStatusChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Status &status);
     void attachmentProgressChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &bytesLoaded, const DataSize &bytesTotal);
     void attachmentUrlChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QUrl &url);
-    void attachmentExtrasChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Type &type, const QVariant &extras);
     void attachmentLocalPathChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &localPath);
+    void attachmentExtrasChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Type &type, const QVariant &extras);
+    void attachmentProcessedSizeChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &processedSize);
+    void attachmentEncryptedSizeChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &encryptedSize);
 
     void notificationCreated(const QString &notification);
 
 private:
-    void setUserId(const UserId &userId);
     void setMessages(const GlobalMessages &messages);
-
     void connectMessageOperation(MessageOperation *op);
     MessageOperation *pushMessageOperation(const GlobalMessage &message, bool prepend = false);
 
+    bool isActive() const;
+
+    void onSetUserId(const UserId &userId);
     void onPushMessage(const GlobalMessage &message);
     void onPushMessageDownload(const GlobalMessage &message, const QString &filePath);
     void onSendNotSentMessages();
     void onMessageOperationStatusChanged(const MessageOperation *operation);
     void onMessageOperationAttachmentStatusChanged(const MessageOperation *operation);
-    void onMessageOperationAttachmentProgressChanged(const MessageOperation *operation);
     void onMessageOperationAttachmentUrlChanged(const MessageOperation *operation);
-    void onMessageOperationAttachmentExtrasChanged(const MessageOperation *operation);
     void onMessageOperationAttachmentLocalPathChanged(const MessageOperation *operation);
+    void onMessageOperationAttachmentExtrasChanged(const MessageOperation *operation);
+    void onMessageOperationAttachmentProcessedSizeChanged(const MessageOperation *operation);
+    void onMessageOperationAttachmentEncryptedSizeChanged(const MessageOperation *operation);
+
 
     VSQMessenger *m_messenger;
     UserDatabase *m_userDatabase;

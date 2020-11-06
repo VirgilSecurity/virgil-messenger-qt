@@ -54,6 +54,7 @@ ChatsController::ChatsController(Models *models, UserDatabase *userDatabase, QOb
     connect(userDatabase, &UserDatabase::opened, this, &ChatsController::setupTableConnections);
     connect(this, &ChatsController::newContactFound, this, &ChatsController::onNewContactFound);
     connect(this, &ChatsController::currentContactIdChanged, m_models->messages(), &MessagesModel::setContactId);
+    connect(m_models->chats(), &ChatsModel::chatsSet, this, &ChatsController::onChatsSet);
 }
 
 Chat ChatsController::currentChat() const
@@ -73,9 +74,10 @@ Chat::Id ChatsController::currentChatId() const
 
 void ChatsController::loadChats(const UserId &userId)
 {
+    qCDebug(lcController) << "Started to load chats...";
+    m_userId = userId;
     if (userId.isEmpty()) {
         m_models->chats()->setChats({});
-        emit chatsCleared();
     }
     else {
         m_userDatabase->chatsTable()->fetch();
@@ -127,7 +129,6 @@ void ChatsController::setupTableConnections()
     auto table = m_userDatabase->chatsTable();
     connect(table, &ChatsTable::errorOccurred, this, &ChatsController::errorOccurred);
     connect(table, &ChatsTable::fetched, m_models->chats(), &ChatsModel::setChats);
-    connect(table, &ChatsTable::fetched, this, &ChatsController::chatsFetched);
 }
 
 void ChatsController::setCurrentChat(const Chat &chat)
@@ -148,4 +149,10 @@ void ChatsController::onNewContactFound(const Contact::Id &contactId)
     const auto chat = m_models->chats()->createChat(contactId);
     m_userDatabase->chatsTable()->createChat(chat);
     openChat(chat);
+}
+
+void ChatsController::onChatsSet()
+{
+    qCDebug(lcController) << "Chats set";
+    emit chatsSet(m_userId);
 }

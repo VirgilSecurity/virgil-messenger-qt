@@ -70,7 +70,7 @@ public:
 
     DownloadDecryptFileOperation *populateDownloadDecrypt(const QString &name, Operation *parent, const QUrl &url, const QString &destPath, const Contact::Id &senderId);
     EncryptUploadFileOperation *populateEncryptUpload(const QString &name, Operation *parent, const QString &sourcePath, const Contact::Id &recipientId);
-    CreateAttachmentThumbnailOperation *populateCreateAttachmentThumbnail(MessageOperation *messageOp, Operation *parent, const QString &filePath);
+    CreateAttachmentThumbnailOperation *populateCreateAttachmentThumbnail(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &filePath);
     CreateAttachmentPreviewOperation *populateCreateAttachmentPreview(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &destPath);
 
 private:

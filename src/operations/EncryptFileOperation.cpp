@@ -50,6 +50,7 @@ void EncryptFileOperation::run()
 {
     if (Core::encryptFile(m_sourcePath, m_destPath, m_recipientId)) {
         emit encrypted(m_destPath);
+        emit bytesCalculated(QFile(m_destPath).size());
         finish();
     }
     else {

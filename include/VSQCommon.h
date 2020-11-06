@@ -135,10 +135,11 @@ struct PictureExtras
     QUrl thumbnailUrl;
     QString thumbnailPath;
     QString previewPath;
+    DataSize encryptedThumbnailSize = 0;
 
     bool operator==(const PictureExtras &e) const
     {
-        return thumbnailSize == e.thumbnailSize && previewPath == e.previewPath && thumbnailPath == e.thumbnailPath;
+        return thumbnailSize == e.thumbnailSize && previewPath == e.previewPath && thumbnailPath == e.thumbnailPath && encryptedThumbnailSize == e.encryptedThumbnailSize;
     }
 };
 
@@ -154,12 +155,12 @@ struct Attachment
     Status status = Status::Created;
     QString fileName;
     DataSize size = 0;
+    DataSize encryptedSize = 0;
     QString localPath;
     QUrl url;
     QVariant extras;
 
-    DataSize bytesLoaded = 0;
-    DataSize bytesTotal = 0; // after encryption
+    DataSize processedSize = 0;
 };
 
 struct Message

@@ -50,6 +50,7 @@ public:
 
 signals:
     void encrypted(const QString &filePath);
+    void bytesCalculated(const DataSize &bytes);
 
 private:
     QString m_sourcePath;

@@ -43,13 +43,11 @@
 using namespace vm;
 
 DownloadAttachmentOperation::DownloadAttachmentOperation(MessageOperation *parent, const Settings *settings, const Parameter &parameter)
-    : Operation("DownloadAttachment", parent)
+    : LoadAttachmentOperation("DownloadAttachment", parent)
     , m_parent(parent)
     , m_settings(settings)
     , m_parameter(parameter)
 {
-    connect(this, &Operation::started, parent, std::bind(&MessageOperation::setAttachmentStatus, parent, Attachment::Status::Loading));
-    connect(this, &Operation::finished, parent, std::bind(&MessageOperation::setAttachmentStatus, parent, Attachment::Status::Loaded));
 }
 
 bool DownloadAttachmentOperation::populateChildren()
@@ -66,7 +64,8 @@ bool DownloadAttachmentOperation::populateChildren()
             if (!Utils::fileExists(extras.thumbnailPath)) {
                 const auto filePath = m_settings->generateThumbnailPath();
                 auto op = factory->populateDownloadDecrypt(preffix + QString("DownloadDecryptThumbnail"), this, extras.thumbnailUrl, filePath, message->senderId);
-                connect(op, &DownloadDecryptFileOperation::progressChanged, m_parent, &MessageOperation::setAttachmentProgress);
+                connect(op, &Operation::started, this, std::bind(&LoadAttachmentOperation::startLoadOperation, this, extras.encryptedThumbnailSize));
+                connect(op, &DownloadDecryptFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
                 connect(op, &DownloadDecryptFileOperation::decrypted, m_parent, &MessageOperation::setAttachmentThumbnailPath);
             }
         }
@@ -75,8 +74,10 @@ bool DownloadAttachmentOperation::populateChildren()
         // Download/decrypt file
         auto downloadPath = m_parameter.filePath;
         if (!Utils::fileExists(downloadPath)) {
+            qCDebug(lcOperation) << "Download attachment to:" << downloadPath;
             auto op = factory->populateDownloadDecrypt(preffix + QString("DownloadDecrypt"), this, attachment->url, downloadPath, message->senderId);
-            connect(op, &DownloadDecryptFileOperation::progressChanged, m_parent, &MessageOperation::setAttachmentProgress);
+            connect(op, &Operation::started, this, std::bind(&LoadAttachmentOperation::startLoadOperation, this, attachment->encryptedSize));
+            connect(op, &DownloadDecryptFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
             connect(op, &DownloadDecryptFileOperation::decrypted, m_parent, &MessageOperation::setAttachmentLocalPath);
         }
         // Create picture preview

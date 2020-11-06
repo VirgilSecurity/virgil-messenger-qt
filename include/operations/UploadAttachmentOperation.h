@@ -35,15 +35,13 @@
 #ifndef VM_UPLOADATTACHMENTOPERATION_H
 #define VM_UPLOADATTACHMENTOPERATION_H
 
-#include "Operation.h"
+#include "LoadAttachmentOperation.h"
 
 class Settings;
 
 namespace vm
 {
-class MessageOperation;
-
-class UploadAttachmentOperation : public Operation
+class UploadAttachmentOperation : public LoadAttachmentOperation
 {
     Q_OBJECT
 

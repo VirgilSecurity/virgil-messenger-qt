@@ -56,6 +56,7 @@ bool EncryptUploadFileOperation::populateChildren()
     const auto preffix = name() + QChar('/');
 
     auto encryptOp = new EncryptFileOperation(preffix + QString("Encrypt"), this, m_sourcePath, m_tempPath, m_recipientId);
+    connect(encryptOp, &EncryptFileOperation::bytesCalculated, this, &EncryptUploadFileOperation::bytesCalculated);
     appendChild(encryptOp);
 
     auto uploadOp = new UploadFileOperation(preffix + QString("Upload"), this, m_tempPath, m_fileLoader);

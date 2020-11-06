@@ -65,17 +65,16 @@ MessagesController::MessagesController(VSQMessenger *messenger, Models *models, 
     auto messagesQueue = m_models->messagesQueue();
     // User database
     connect(userDatabase, &UserDatabase::opened, this, &MessagesController::setupTableConnections);
-    connect(userDatabase, &UserDatabase::userIdChanged, this, &MessagesController::setUserId);
-    connect(userDatabase, &UserDatabase::userIdChanged, m_models->messages(), &MessagesModel::setUserId);
     // Queue
     connect(this, &MessagesController::messageCreated, messagesQueue, &MessagesQueue::pushMessage);
     connect(messagesQueue, &MessagesQueue::messageStatusChanged, this, &MessagesController::setMessageStatus);
     connect(messagesQueue, &MessagesQueue::attachmentStatusChanged, this, &MessagesController::setAttachmentStatus);
-    connect(messagesQueue, &MessagesQueue::attachmentProgressChanged, this, &MessagesController::setAttachmentProgress);
     connect(messagesQueue, &MessagesQueue::attachmentUrlChanged, this, &MessagesController::setAttachmentUrl);
-    connect(messagesQueue, &MessagesQueue::attachmentExtrasChanged, this, &MessagesController::setAttachmentExtras);
     connect(messagesQueue, &MessagesQueue::attachmentLocalPathChanged, this, &MessagesController::setAttachmentLocalPath);
-    // Chats
+    connect(messagesQueue, &MessagesQueue::attachmentExtrasChanged, this, &MessagesController::setAttachmentExtras);
+    connect(messagesQueue, &MessagesQueue::attachmentProcessedSizeChanged, this, &MessagesController::setAttachmentProcessedSize);
+    connect(messagesQueue, &MessagesQueue::attachmentEncryptedSizeChanged, this, &MessagesController::setAttachmentEncryptedSize);
+    // Models
     connect(m_models->chats(), &ChatsModel::chatUpdated, this, &MessagesController::onChatUpdated);
     // Xmpp connections
     auto xmpp = messenger->xmpp();
@@ -123,6 +122,9 @@ void MessagesController::setupTableConnections()
 void MessagesController::setUserId(const UserId &userId)
 {
     m_userId = userId;
+    qCDebug(lcController) << "Set messages controller userId";
+    m_models->messages()->setUserId(userId);
+    m_models->messagesQueue()->setUserId(userId);
 }
 
 void MessagesController::onChatUpdated(const Chat &chat)
@@ -166,15 +168,6 @@ void MessagesController::setAttachmentStatus(const Attachment::Id &attachmentId,
     m_userDatabase->attachmentsTable()->updateStatus(attachmentId, status);
 }
 
-void MessagesController::setAttachmentProgress(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &bytesLoaded, const DataSize &bytesTotal)
-{
-    //qCDebug(lcController) << "Set attachment progress:" << attachmentId << "contact" << contactId << "progress" << Utils::printableLoadProgress(bytesLoaded, bytesTotal);
-    if (contactId == m_chat.contactId) {
-        m_models->messages()->setAttachmentProgress(attachmentId, bytesLoaded, bytesTotal);
-    }
-    m_models->chats()->updateLastMessageAttachmentProgress(attachmentId, bytesLoaded, bytesTotal);
-}
-
 void MessagesController::setAttachmentUrl(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QUrl &url)
 {
     qCDebug(lcController) << "Set attachment url:" << attachmentId << "contact" << contactId << "url" << url;
@@ -193,6 +186,25 @@ void MessagesController::setAttachmentExtras(const Attachment::Id &attachmentId,
     }
     m_models->chats()->updateLastMessageAttachmentExtras(attachmentId, extras);
     m_userDatabase->attachmentsTable()->updateExtras(attachmentId, type, extras);
+}
+
+void MessagesController::setAttachmentProcessedSize(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &processedSize)
+{
+    //qCDebug(lcController) << "Set attachment processed size:" << attachmentId << "contact" << contactId << "processed size" << processedSize;
+    if (contactId == m_chat.contactId) {
+        m_models->messages()->setAttachmentProcessedSize(attachmentId, processedSize);
+    }
+    m_models->chats()->updateLastMessageAttachmentProcessedSize(attachmentId, processedSize);
+}
+
+void MessagesController::setAttachmentEncryptedSize(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &encryptedSize)
+{
+    qCDebug(lcController) << "Set attachment encrypted size:" << attachmentId << "contact" << contactId << "encrypted size" << encryptedSize;
+    if (contactId == m_chat.contactId) {
+        m_models->messages()->setAttachmentEncryptedSize(attachmentId, encryptedSize);
+    }
+    m_models->chats()->updateLastMessageAttachmentEncryptedSize(attachmentId, encryptedSize);
+    m_userDatabase->attachmentsTable()->updateEncryptedSize(attachmentId, encryptedSize);
 }
 
 void MessagesController::setAttachmentLocalPath(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &localPath)

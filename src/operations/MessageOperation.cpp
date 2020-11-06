@@ -108,17 +108,6 @@ void MessageOperation::setAttachmentStatus(const Attachment::Status status)
     emit attachmentStatusChanged(status);
 }
 
-void MessageOperation::setAttachmentProgress(const DataSize &bytesLoaded, const DataSize &bytesTotal)
-{
-    auto a = writableAttachment();
-    if (a->bytesLoaded == bytesLoaded && a->bytesTotal == bytesTotal) {
-        return;
-    }
-    a->bytesLoaded = bytesLoaded;
-    a->bytesTotal = bytesTotal;
-    emit attachmentProgressChanged(bytesLoaded, bytesTotal);
-}
-
 void MessageOperation::setAttachmentUrl(const QUrl &url)
 {
     auto a = writableAttachment();
@@ -166,13 +155,38 @@ void MessageOperation::setAttachmentThumbnailUrl(const QUrl &thumbnailUrl)
     setAttachmentExtras(QVariant::fromValue(extras));
 }
 
+void MessageOperation::setAttachmentProcessedSize(const DataSize &size)
+{
+    auto a = writableAttachment();
+    if (a->processedSize == size) {
+        return;
+    }
+    a->processedSize = size;
+    emit attachmentProcessedSizeChanged(size);
+}
+
+void MessageOperation::setAttachmentEncryptedSize(const DataSize &size)
+{
+    auto a = writableAttachment();
+    if (a->encryptedSize == size) {
+        return;
+    }
+    a->encryptedSize = size;
+    emit attachmentEncryptedSizeChanged(size);
+}
+
+void MessageOperation::setAttachmentEncryptedThumbnailSize(const DataSize &bytes)
+{
+    auto extras = writableAttachment()->extras.value<PictureExtras>();
+    extras.encryptedThumbnailSize = bytes;
+    setAttachmentExtras(QVariant::fromValue(extras));
+}
+
 void MessageOperation::connectChild(Operation *child)
 {
     Operation::connectChild(child);
     connect(child, &Operation::failed, this, std::bind(&MessageOperation::setStatus, this, Message::Status::Failed));
-    connect(child, &Operation::failed, this, std::bind(&MessageOperation::setAttachmentStatus, this, Attachment::Status::Interrupted));
     connect(child, &Operation::invalidated, this, std::bind(&MessageOperation::setStatus, this, Message::Status::InvalidM));
-    connect(child, &Operation::invalidated, this, std::bind(&MessageOperation::setAttachmentStatus, this, Attachment::Status::Invalid));
     if (dynamic_cast<SendMessageOperation *>(child)) {
         connect(child, &Operation::finished, this, std::bind(&MessageOperation::setStatus, this, Message::Status::Sent));
     }

@@ -53,6 +53,7 @@ public:
 
 signals:
     void progressChanged(const DataSize &bytesLoaded, const DataSize &bytesTotal);
+    void bytesCalculated(const DataSize &bytes);
     void uploaded(const QUrl &url);
 
 private:

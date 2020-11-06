@@ -44,7 +44,7 @@
 using namespace vm;
 
 UploadAttachmentOperation::UploadAttachmentOperation(MessageOperation *parent, const Settings *settings)
-    : Operation(QString("UploadAttachment"), parent)
+    : LoadAttachmentOperation(QString("UploadAttachment"), parent)
     , m_parent(parent)
     , m_settings(settings)
 {
@@ -65,19 +65,22 @@ bool UploadAttachmentOperation::populateChildren()
     if (!attachment->url.isValid())
     {
         auto op = factory->populateEncryptUpload(preffix + QString("EncryptUpload"), this, attachment->localPath, message->recipientId);
-        connect(op, &EncryptUploadFileOperation::progressChanged, m_parent, &MessageOperation::setAttachmentProgress);
+        connect(op, &EncryptUploadFileOperation::bytesCalculated, this, std::bind(&LoadAttachmentOperation::startLoadOperation, this, args::_1));
+        connect(op, &EncryptUploadFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
         connect(op, &EncryptUploadFileOperation::uploaded, m_parent, &MessageOperation::setAttachmentUrl);
+        connect(op, &EncryptUploadFileOperation::bytesCalculated, m_parent, &MessageOperation::setAttachmentEncryptedSize);
     }
     // Process picture
     if (attachment->type == Attachment::Type::Picture) {
         // Create thumbnail
         const auto filePath = m_settings->generateThumbnailPath();
-        factory->populateCreateAttachmentThumbnail(m_parent, this, filePath);
+        factory->populateCreateAttachmentThumbnail(m_parent, this, attachment->localPath, filePath);
 
         // Encrypt/upload thumbnail
-        auto uplOp = factory->populateEncryptUpload(preffix + QString("EncryptUploadThumbnail"), this, filePath, message->recipientId);
-        connect(uplOp, &EncryptUploadFileOperation::progressChanged, m_parent, &MessageOperation::setAttachmentProgress);
-        connect(uplOp, &EncryptUploadFileOperation::uploaded, m_parent, &MessageOperation::setAttachmentThumbnailUrl);
+        auto op = factory->populateEncryptUpload(preffix + QString("EncryptUploadThumbnail"), this, filePath, message->recipientId);
+        connect(op, &EncryptUploadFileOperation::bytesCalculated, this, std::bind(&LoadAttachmentOperation::startLoadOperation, this, args::_1));
+        connect(op, &EncryptUploadFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
+        connect(op, &EncryptUploadFileOperation::uploaded, m_parent, &MessageOperation::setAttachmentThumbnailUrl);
     }
     // Connection to loading statuses
     connect(this, &Operation::started, m_parent, std::bind(&MessageOperation::setAttachmentStatus, m_parent, Attachment::Status::Loading));

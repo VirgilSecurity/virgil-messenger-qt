@@ -60,10 +60,11 @@ public:
     void updateLastMessage(const Message &message, const Chat::UnreadCount &unreadMessageCount);
     void updateLastMessageStatus(const Message::Id &messageId, const Message::Status &status);
     void updateLastMessageAttachmentStatus(const Attachment::Id &attachmentId, const Attachment::Status &status);
-    void updateLastMessageAttachmentProgress(const Attachment::Id &attachmentId, const DataSize &bytesLoaded, const DataSize &bytesTotal);
     void updateLastMessageAttachmentUrl(const Attachment::Id &attachmentId, const QUrl &url);
-    void updateLastMessageAttachmentExtras(const Attachment::Id &attachmentId, const QVariant &extras);
     void updateLastMessageAttachmentLocalPath(const Attachment::Id &attachmentId, const QString &localPath);
+    void updateLastMessageAttachmentExtras(const Attachment::Id &attachmentId, const QVariant &extras);
+    void updateLastMessageAttachmentEncryptedSize(const Attachment::Id &attachmentId, const DataSize &encryptedSize);
+    void updateLastMessageAttachmentProcessedSize(const Attachment::Id &attachmentId, const DataSize &processedSize);
 
     Optional<Chat> find(const Chat::Id &chatId) const;
     Optional<Chat> findByContact(const Contact::Id &contactId) const;
@@ -71,6 +72,7 @@ public:
     bool hasChatWithContact(const Contact::Id &contactId) const;
 
 signals:
+    void chatsSet();
     void chatCreated(const Chat &chat);
     void chatUpdated(const Chat &chat);
 

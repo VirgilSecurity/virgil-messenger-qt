@@ -7,6 +7,7 @@ CREATE TABLE attachments (
         size INT NOT NULL,
         localPath TEXT,
         url TEXT,
+        encryptedSize INT NOT NULL,
         extras TEXT,
         FOREIGN KEY(messageId) REFERENCES messages(id)
 );

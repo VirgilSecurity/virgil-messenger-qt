@@ -193,7 +193,7 @@ QString Utils::attachmentDisplayText(const Attachment &attachment)
         return QObject::tr("picture");
     }
     else {
-        return Utils::elidedText(attachment.fileName, 50); // TODO(fpohtmeh): move to settings?
+        return Utils::elidedText(attachment.fileName, 50);
     }
 }
 
@@ -214,7 +214,7 @@ QString Utils::printableMessageBody(const Message &message)
 
 QString Utils::printableLoadProgress(const DataSize &loaded, const DataSize &total)
 {
-    return QString("%1% (%2/%3)").arg(qRound(100 * double(loaded) / total)).arg(loaded).arg(total);
+    return QString("%1% (%2/%3)").arg(qRound(100 * qMin<double>(loaded, total) / total)).arg(loaded).arg(total);
 }
 
 Optional<QString> Utils::readTextFile(const QString &filePath)
@@ -259,6 +259,7 @@ QString Utils::extrasToJson(const QVariant &extras, const Attachment::Type type,
     obj.insert("thumbnailWidth", e.thumbnailSize.width());
     obj.insert("thumbnailHeight", e.thumbnailSize.height());
     obj.insert("thumbnailUrl", e.thumbnailUrl.toString());
+    obj.insert("encryptedThumbnailSize", e.encryptedThumbnailSize);
     if (!skipLocal) {
         obj.insert("thumbnailPath", e.thumbnailPath);
         obj.insert("previewPath", e.previewPath);
@@ -276,6 +277,7 @@ QVariant Utils::extrasFromJson(const QString &json, const Attachment::Type type,
     extras.thumbnailSize.setWidth(doc["thumbnailWidth"].toInt());
     extras.thumbnailSize.setHeight(doc["thumbnailHeight"].toInt());
     extras.thumbnailUrl = doc["thumbnailUrl"].toString();
+    extras.encryptedThumbnailSize = doc["encryptedThumbnailSize"].toInt();
     if (!skipLocal) {
         extras.thumbnailPath = doc["thumbnailPath"].toString();
         extras.previewPath = doc["previewPath"].toString();
@@ -309,6 +311,7 @@ Message Utils::messageFromJson(const QByteArray &json)
     attachment.fileName = at["fileName"].toString();
     attachment.size = at["size"].toInt();
     attachment.url = at["url"].toString();
+    attachment.encryptedSize = at["encryptedSize"].toInt();
     attachment.extras = extrasFromJson(at["extras"].toString(), attachment.type, true);
     message.attachment = attachment;
     if (!message.body.isEmpty()) {
@@ -337,6 +340,7 @@ QByteArray Utils::messageToJson(const Message &message)
         at.insert("fileName", attachment->fileName);
         at.insert("size", attachment->size);
         at.insert("url", attachment->url.toString());
+        at.insert("encryptedSize", attachment->encryptedSize);
         at.insert("extras", extrasToJson(attachment->extras, attachment->type, true));
         mainObject.insert("attachment", at);
     }

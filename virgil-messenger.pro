@@ -185,6 +185,7 @@ HEADERS += \
         include/operations/DownloadDecryptFileOperation.h \
         include/operations/EncryptFileOperation.h \
         include/operations/EncryptUploadFileOperation.h \
+        include/operations/LoadAttachmentOperation.h \
         include/operations/LoadFileOperation.h \
         include/operations/MessageOperation.h \
         include/operations/MessageOperationFactory.h \
@@ -277,6 +278,7 @@ SOURCES += \
         src/operations/DownloadDecryptFileOperation.cpp \
         src/operations/EncryptFileOperation.cpp \
         src/operations/EncryptUploadFileOperation.cpp \
+        src/operations/LoadAttachmentOperation.cpp \
         src/operations/LoadFileOperation.cpp \
         src/operations/MessageOperation.cpp \
         src/operations/MessageOperationFactory.cpp \

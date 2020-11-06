@@ -12,6 +12,7 @@ SELECT
     attachments.size AS attachmentSize,
     attachments.localPath AS attachmentLocalPath,
     attachments.url AS attachmentUrl,
+    attachments.encryptedSize AS attachmentEncryptedSize,
     attachments.extras AS attachmentExtras
 FROM
     messages

@@ -125,9 +125,11 @@ QStringList Settings::usersList() const
 void Settings::addUserToList(const QString &user)
 {
     auto users = usersList();
-    if (!users.contains(user)) {
-        setUsersList(users << user);
+    // FIFO
+    if (users.contains(user)) {
+        users.removeOne(user);
     }
+    setUsersList(QStringList(user) + users);
 }
 
 QString Settings::userCredential(const QString &user) const
