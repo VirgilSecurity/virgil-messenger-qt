@@ -290,21 +290,23 @@ elseif(VS_PLATFORM STREQUAL "ios")
     if(VS_PROVISIONING_PROFILE_SPECIFIER)
 	SET_XCODE_PROPERTY(${VS_TARGET_NAME} PROVISIONING_PROFILE_SPECIFIER "${VS_PROVISIONING_PROFILE_SPECIFIER}")
     endif()	
+    SET_XCODE_PROPERTY(${VS_TARGET_NAME} IPHONEOS_DEPLOYMENT_TARGET "${IOS_DEPLOYMENT_TARGET}")
+    SET_XCODE_PROPERTY(${VS_TARGET_NAME} CODE_SIGN_ENTITLEMENTS "${VS_CUSTOMER_DIR}/platforms/ios/Entitlements/VirgilMessenger.entitlements")    
+    SET_XCODE_PROPERTY(${VS_TARGET_NAME} ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon")    
 
-    
+    set(VS_ASSET_DIR "${VS_CUSTOMER_DIR}/platforms/ios/Assets.xcassets")
+    target_sources(${VS_TARGET_NAME} PRIVATE ${VS_ASSET_DIR})
+    set_source_files_properties("${VS_ASSET_DIR}"
+	PROPERTIES 
+	    MACOSX_PACKAGE_LOCATION "Resources"
+    )
+
     set_target_properties(${VS_TARGET_NAME}
         PROPERTIES 
     	    MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/platforms/ios/Info.plist.in"
 	    LINK_FLAGS "-framework Foundation -framework UserNotifications"        
     )
 
-    SET_XCODE_PROPERTY(${VS_TARGET_NAME} IPHONEOS_DEPLOYMENT_TARGET "${IOS_DEPLOYMENT_TARGET}")
-    SET_XCODE_PROPERTY(${VS_TARGET_NAME} CODE_SIGN_ENTITLEMENTS "${VS_CUSTOMER_DIR}/platforms/ios/Entitlements/VirgilMessenger.entitlements")
-    
-    target_sources(${VS_TARGET_NAME} PRIVATE "${VS_CUSTOMER_DIR}/platforms/ios/Assets.xcassets")
-    set_source_files_properties("${VS_CUSTOMER_DIR}/platforms/ios/Assets.xcassets" 
-	PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"
-    )
     qt5_import_qml_plugins(${VS_TARGET_NAME})
 else()
     message(FATAL_ERROR "Unknown target platform")

@@ -18,3 +18,9 @@
     cmake -S. -Bbuild -GXcode -DCMAKE_BUILD_TYPE="Release" -DVS_PLATFORM="ios" -DVS_DEVELOPMENT_TEAM="You development team"
     cmake --build build --config Release    
 
+
+- Building xcarchive and upload to App-store
+
+    cmake -S. -Bbuild -GXcode -DCMAKE_BUILD_TYPE="Release" -DVS_PLATFORM="ios" -DVS_DEVELOPMENT_TEAM="You development team"
+    cmake --build build --config Release --target xcarchive
+    cmake --build build --config Release --target upload_testflight
