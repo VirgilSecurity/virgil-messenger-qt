@@ -294,6 +294,12 @@ elseif(VS_PLATFORM STREQUAL "ios")
     SET_XCODE_PROPERTY(${VS_TARGET_NAME} CODE_SIGN_ENTITLEMENTS "${VS_CUSTOMER_DIR}/platforms/ios/Entitlements/VirgilMessenger.entitlements")    
     SET_XCODE_PROPERTY(${VS_TARGET_NAME} ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon")    
 
+    set_target_properties(${VS_TARGET_NAME}
+        PROPERTIES
+            XCODE_ATTRIBUTE_INSTALL_PATH "/Applications"
+            XCODE_ATTRIBUTE_SKIP_INSTALL "No"
+    )
+
     set(VS_ASSET_DIR "${VS_CUSTOMER_DIR}/platforms/ios/Assets.xcassets")
     target_sources(${VS_TARGET_NAME} PRIVATE ${VS_ASSET_DIR})
     set_source_files_properties("${VS_ASSET_DIR}"

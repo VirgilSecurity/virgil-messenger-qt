@@ -160,12 +160,12 @@ elseif(VS_PLATFORM STREQUAL "ios")
 
   add_custom_target(xcarchive
     COMMAND echo "Building xcarchive..."
-    COMMAND xcodebuild -project ${PROJECT_NAME}.xcodeproj -scheme ${PROJECT_NAME} -sdk iphoneos -configuration Release -destination generic/platform=iOS archive -archivePath ${CMAKE_BINARY_DIR}/1/${PROJECT_NAME}.xcarchive
+    COMMAND xcodebuild -project ${PROJECT_NAME}.xcodeproj -scheme ${PROJECT_NAME} -sdk iphoneos -configuration Release archive -archivePath ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcarchive
     VERBATIM)
 
   add_custom_target(upload_testflight
     COMMAND echo "Upload xcarchive..."
-    COMMAND xcodebuild -exportArchive -archivePath ${CMAKE_BINARY_DIR}/1/${PROJECT_NAME}.xcarchive -exportOptionsPlist ${PROJECT_SOURCE_DIR}/platforms/ios/exportOptions.plist -allowProvisioningUpdates
+    COMMAND xcodebuild -exportArchive -archivePath ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcarchive -exportOptionsPlist ${PROJECT_SOURCE_DIR}/platforms/ios/exportOptions.plist -allowProvisioningUpdates
     VERBATIM)
         
 endif()
