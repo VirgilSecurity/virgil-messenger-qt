@@ -35,6 +35,7 @@
 #include "models/AttachmentsModel.h"
 
 #include <QImageReader>
+#include <QUrlQuery>
 
 #include "Settings.h"
 #include "Utils.h"
