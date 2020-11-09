@@ -112,6 +112,7 @@ Page {
 
                 Column {
                     Layout.fillWidth: true
+                    clip: true
 
                     Text {
                         color: Theme.primaryTextColor

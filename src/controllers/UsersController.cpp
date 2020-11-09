@@ -81,6 +81,11 @@ void UsersController::signOut()
     m_messenger->signOut();
 }
 
+void UsersController::requestAccountSettings(const UserId &userId)
+{
+    emit accountSettingsRequested(userId);
+}
+
 void UsersController::downloadKey(const QString &username, const QString &password)
 {
     m_messenger->downloadKey(username, password);

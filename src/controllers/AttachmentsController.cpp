@@ -34,6 +34,8 @@
 
 #include "controllers/AttachmentsController.h"
 
+#include <QDesktopServices>
+
 #include "Settings.h"
 #include "Utils.h"
 #include "models/Models.h"
@@ -80,8 +82,14 @@ void AttachmentsController::open(const Message::Id &messageId)
         }
         else {
             const auto url = Utils::localFileToUrl(a.localPath);
-            qCDebug(lcController) << "Opening of preview for" << url;
-            emit openPreviewRequested(url);
+            if (a.type == Attachment::Type::Picture) {
+                qCDebug(lcController) << "Opening of preview for" << url;
+                emit openPreviewRequested(url);
+            }
+            else {
+                qCDebug(lcController) << "Opening of url:" << url;
+                QDesktopServices::openUrl(url);
+            }
         }
     }
 }

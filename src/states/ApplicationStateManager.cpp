@@ -113,8 +113,8 @@ void ApplicationStateManager::addTransitions()
     addTwoSideTransition(m_accountSelectionState, m_accountSelectionState, &AccountSelectionState::requestSignUp, m_signUpState);
 
     m_chatListState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
-    addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestAccountSettings, m_accountSettingsState);
-    connect(m_chatListState, &ChatListState::requestAccountSettings, m_accountSettingsState, &AccountSettingsState::setUserId);
+    addTwoSideTransition(m_chatListState, users, &UsersController::accountSettingsRequested, m_accountSettingsState);
+    connect(users, &UsersController::accountSettingsRequested, m_accountSettingsState, &AccountSettingsState::setUserId);
     addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestNewChat, m_newChatState);
     addTwoSideTransition(m_chatListState, chats, &ChatsController::chatOpened, m_chatState);
 
@@ -123,6 +123,7 @@ void ApplicationStateManager::addTransitions()
     m_accountSettingsState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
 
     m_newChatState->addTransition(chats, &ChatsController::chatOpened, m_chatState);
+    m_newChatState->addTransition(users, &UsersController::accountSettingsRequested, m_accountSettingsState);
 
     addTwoSideTransition(m_chatState, m_chatState, &ChatState::requestPreview, m_attachmentPreviewState);
     connect(m_chatState, &ChatState::requestPreview, m_attachmentPreviewState, &AttachmentPreviewState::setUrl);

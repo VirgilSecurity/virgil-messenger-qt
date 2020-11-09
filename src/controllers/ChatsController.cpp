@@ -116,7 +116,7 @@ void ChatsController::openChat(const Chat &chat)
 
 void ChatsController::openChatById(const Chat::Id &chatId)
 {
-    openChat(*m_models->chats()->find(chatId));
+    openChat(*m_models->chats()->findById(chatId));
 }
 
 void ChatsController::closeChat()

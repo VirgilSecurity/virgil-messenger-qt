@@ -60,6 +60,8 @@ public:
     void signUp(const UserId &userId);
     Q_INVOKABLE void signOut();
 
+    Q_INVOKABLE void requestAccountSettings(const UserId &userId);
+
     void downloadKey(const QString &username, const QString &password);
 
 signals:
@@ -71,6 +73,8 @@ signals:
 
     void keyDownloaded(const UserId &userId);
     void downloadKeyFailed(const QString &errorText);
+
+    void accountSettingsRequested(const UserId &userId);
 
     void userIdChanged(const UserId &userId);
 

@@ -286,7 +286,7 @@ Control {
                         case "0": return "sending"
                         case "1": return "sent"
                         case "2": return "delivered"
-                        case "4": return "sending" // attachment
+                        case "4": return "sending"
                         default: return ""
                     }
                 }

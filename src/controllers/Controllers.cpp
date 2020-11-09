@@ -59,6 +59,7 @@ Controllers::Controllers(VSQMessenger *messenger, Settings *settings,
     connect(m_chats, &ChatsController::currentContactIdChanged, m_attachments, &AttachmentsController::setContactId);
     connect(m_chats, &ChatsController::chatsSet, m_messages, &MessagesController::setUserId);
     connect(m_chats, &ChatsController::chatOpened, m_messages, &MessagesController::loadMessages);
+    connect(m_chats, &ChatsController::chatClosed, m_messages, std::bind(&MessagesController::loadMessages, m_messages, Chat()));
 
     qRegisterMetaType<AttachmentsController *>("AttachmentsController*");
     qRegisterMetaType<ChatsController *>("ChatsController*");

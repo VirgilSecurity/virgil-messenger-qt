@@ -30,7 +30,7 @@ Control {
 
             Action {
                 text: qsTr("Settings")
-                onTriggered: manager.chatListState.requestAccountSettings(controllers.users.userId)
+                onTriggered: controllers.users.requestAccountSettings(controllers.users.userId)
             }
 
             MenuSeparator {
@@ -101,7 +101,7 @@ Control {
         }
 
         function openAccountSettingsPage() {
-            if (manager.previousState !== manager.chatListState) {
+            if (manager.previousState !== manager.chatListState && manager.previousState !== manager.newChatState) {
                 return
             }
             stackView.push(page("AccountSettings"), StackView.Transition)

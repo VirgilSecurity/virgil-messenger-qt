@@ -45,7 +45,7 @@ ChatsModel::ChatsModel(QObject *parent)
     , m_proxy(new QSortFilterProxyModel(this))
 {
     m_proxy->setSourceModel(this);
-    m_proxy->setSortRole(LastEventTimeRole);
+    m_proxy->setSortRole(LastEventTimestampRole);
     m_proxy->sort(0, Qt::DescendingOrder);
     m_proxy->setFilterKeyColumn(0);
     m_proxy->setFilterRole(ContactIdRole);
@@ -115,82 +115,7 @@ void ChatsModel::updateLastMessage(const Message &message, const Chat::UnreadCou
     emit chatUpdated(chat);
 }
 
-void ChatsModel::updateLastMessageStatus(const Message::Id &messageId, const Message::Status &status)
-{
-    auto messageRow = findRowByLastMessageId(messageId);
-    if (!messageRow) {
-        return;
-    }
-    auto &chat = m_chats[*messageRow];
-    auto &m = *chat.lastMessage;
-    if (m.status == status) {
-        return;
-    }
-    m.status = status;
-    updateLastMessage(m, chat.unreadMessageCount);
-}
-
-void ChatsModel::updateLastMessageAttachmentStatus(const Attachment::Id &attachmentId, const Attachment::Status &status)
-{
-    updateLastMessageAttachment(attachmentId, [=](Attachment &a) {
-        if (a.status == status) {
-            return false;
-        }
-        a.status = status;
-        return true;
-    });
-}
-
-void ChatsModel::updateLastMessageAttachmentUrl(const Attachment::Id &attachmentId, const QUrl &url)
-{
-    updateLastMessageAttachment(attachmentId, [=](Attachment &a) {
-        if (a.url == url) {
-            return false;
-        }
-        a.url = url;
-        return true;
-    });
-}
-
-void ChatsModel::updateLastMessageAttachmentLocalPath(const Attachment::Id &attachmentId, const QString &localPath)
-{
-    updateLastMessageAttachment(attachmentId, [=](Attachment &a) {
-        if (a.localPath == localPath) {
-            return false;
-        }
-        a.localPath = localPath;
-        return true;
-    });
-}
-
-void ChatsModel::updateLastMessageAttachmentExtras(const Attachment::Id &attachmentId, const QVariant &extras)
-{
-    updateLastMessageAttachment(attachmentId, [=](Attachment &a) {
-        if (a.extras == extras) {
-            return false;
-        }
-        a.extras = extras;
-        return true;
-    });
-}
-
-void ChatsModel::updateLastMessageAttachmentEncryptedSize(const Attachment::Id &attachmentId, const DataSize &encryptedSize)
-{
-    updateLastMessageAttachment(attachmentId, [=](Attachment &a) {
-        if (a.encryptedSize == encryptedSize) {
-            return false;
-        }
-        a.encryptedSize = encryptedSize;
-        return true;
-    });
-}
-
-void ChatsModel::updateLastMessageAttachmentProcessedSize(const Attachment::Id &attachmentId, const DataSize &processedSize)
-{
-    // NOTE(fpohtmeh): this method requires smarter search by attachmentId
-}
-
-Optional<Chat> ChatsModel::find(const Chat::Id &chatId) const
+Optional<Chat> ChatsModel::findById(const Chat::Id &chatId) const
 {
     if (const auto row = findRowById(chatId)) {
         return m_chats[*row];
@@ -204,16 +129,6 @@ Optional<Chat> ChatsModel::findByContact(const Contact::Id &contactId) const
         return m_chats[*row];
     }
     return NullOptional;
-}
-
-bool ChatsModel::hasChat(const Chat::Id &chatId) const
-{
-    return bool(findRowById(chatId));
-}
-
-bool ChatsModel::hasChatWithContact(const Contact::Id &contactId) const
-{
-    return bool(findRowByContactId(contactId));
 }
 
 int ChatsModel::rowCount(const QModelIndex &parent) const
@@ -232,6 +147,8 @@ QVariant ChatsModel::data(const QModelIndex &index, int role) const
         return chat.contactId;
     case LastEventTimeRole:
         return (chat.lastMessage ? qMax(chat.lastMessage->timestamp, chat.timestamp) : chat.timestamp).toString("hh:mm");
+    case LastEventTimestampRole:
+        return chat.lastMessage ? qMax(chat.lastMessage->timestamp, chat.timestamp) : chat.timestamp;
     case LastMessageBodyRole:
         if (!chat.lastMessage) {
             return QLatin1String("...");
@@ -291,17 +208,6 @@ Optional<int> ChatsModel::findRowByLastMessageId(const Message::Id &messageId) c
     return NullOptional;
 }
 
-Optional<int> ChatsModel::findRowByLastMessageAttachmentId(const Attachment::Id &attachmentId) const
-{
-    for (int i = 0, s = m_chats.size(); i < s; ++i) {
-        auto m = m_chats[i].lastMessage;
-        if (m && m->attachment && m->attachment->id == attachmentId) {
-            return i;
-        }
-    }
-    return NullOptional;
-}
-
 Optional<int> ChatsModel::findRowByContactId(const Contact::Id &contactId) const
 {
     for (int i = 0, s = m_chats.size(); i < s; ++i) {
@@ -310,18 +216,4 @@ Optional<int> ChatsModel::findRowByContactId(const Contact::Id &contactId) const
         }
     }
     return NullOptional;
-}
-
-void ChatsModel::updateLastMessageAttachment(const Attachment::Id &attachmentId, const std::function<bool (Attachment &)> &update)
-{
-    auto messageRow = findRowByLastMessageAttachmentId(attachmentId);
-    if (!messageRow) {
-        return;
-    }
-    auto &chat = m_chats[*messageRow];
-    auto &m = *chat.lastMessage;
-    auto &a = *m.attachment;
-    if (update(a)) {
-        updateLastMessage(m, chat.unreadMessageCount);
-    }
 }

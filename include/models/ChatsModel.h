@@ -58,18 +58,9 @@ public:
 
     void resetUnreadCount(const Chat::Id &chatId);
     void updateLastMessage(const Message &message, const Chat::UnreadCount &unreadMessageCount);
-    void updateLastMessageStatus(const Message::Id &messageId, const Message::Status &status);
-    void updateLastMessageAttachmentStatus(const Attachment::Id &attachmentId, const Attachment::Status &status);
-    void updateLastMessageAttachmentUrl(const Attachment::Id &attachmentId, const QUrl &url);
-    void updateLastMessageAttachmentLocalPath(const Attachment::Id &attachmentId, const QString &localPath);
-    void updateLastMessageAttachmentExtras(const Attachment::Id &attachmentId, const QVariant &extras);
-    void updateLastMessageAttachmentEncryptedSize(const Attachment::Id &attachmentId, const DataSize &encryptedSize);
-    void updateLastMessageAttachmentProcessedSize(const Attachment::Id &attachmentId, const DataSize &processedSize);
 
-    Optional<Chat> find(const Chat::Id &chatId) const;
+    Optional<Chat> findById(const Chat::Id &chatId) const;
     Optional<Chat> findByContact(const Contact::Id &contactId) const;
-    bool hasChat(const Chat::Id &chatId) const;
-    bool hasChatWithContact(const Contact::Id &contactId) const;
 
 signals:
     void chatsSet();
@@ -84,6 +75,7 @@ private:
         IdRole = Qt::UserRole,
         ContactIdRole,
         LastEventTimeRole,
+        LastEventTimestampRole,
         LastMessageBodyRole,
         UnreadMessagesCountRole
     };
@@ -96,10 +88,7 @@ private:
 
     Optional<int> findRowById(const Chat::Id &chatId) const;
     Optional<int> findRowByLastMessageId(const Message::Id &messageId) const;
-    Optional<int> findRowByLastMessageAttachmentId(const Attachment::Id &attachmentId) const;
     Optional<int> findRowByContactId(const Contact::Id &contactId) const;
-
-    void updateLastMessageAttachment(const Attachment::Id &attachmentId, const std::function<bool (Attachment &)> &update);
 
     Chats m_chats;
     QSortFilterProxyModel *m_proxy;

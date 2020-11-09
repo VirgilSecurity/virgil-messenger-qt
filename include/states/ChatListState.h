@@ -49,7 +49,6 @@ public:
     ChatListState(ChatsController *chatsController, QState *parent);
 
 signals:
-    void requestAccountSettings(const QString &userId);
     void requestNewChat();
 
 private:

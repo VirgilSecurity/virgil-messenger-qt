@@ -153,7 +153,6 @@ void MessagesController::setMessageStatus(const Message::Id &messageId, const Co
         if (contactId == m_chat.contactId) {
             m_models->messages()->setMessageStatus(messageId, status);
         }
-        m_models->chats()->updateLastMessageStatus(messageId, status);
         m_userDatabase->messagesTable()->updateStatus(messageId, status);
         emit messageStatusChanged(messageId, contactId, status);
     }
@@ -170,7 +169,6 @@ void MessagesController::setAttachmentStatus(const Attachment::Id &attachmentId,
     if (contactId == m_chat.contactId) {
         m_models->messages()->setAttachmentStatus(attachmentId, status);
     }
-    m_models->chats()->updateLastMessageAttachmentStatus(attachmentId, status);
     m_userDatabase->attachmentsTable()->updateStatus(attachmentId, status);
 }
 
@@ -180,7 +178,6 @@ void MessagesController::setAttachmentUrl(const Attachment::Id &attachmentId, co
     if (contactId == m_chat.contactId) {
         m_models->messages()->setAttachmentUrl(attachmentId, url);
     }
-    m_models->chats()->updateLastMessageAttachmentUrl(attachmentId, url);
     m_userDatabase->attachmentsTable()->updateUrl(attachmentId, url);
 }
 
@@ -190,7 +187,6 @@ void MessagesController::setAttachmentExtras(const Attachment::Id &attachmentId,
     if (contactId == m_chat.contactId) {
         m_models->messages()->setAttachmentExtras(attachmentId, extras);
     }
-    m_models->chats()->updateLastMessageAttachmentExtras(attachmentId, extras);
     m_userDatabase->attachmentsTable()->updateExtras(attachmentId, type, extras);
 }
 
@@ -200,7 +196,6 @@ void MessagesController::setAttachmentProcessedSize(const Attachment::Id &attach
     if (contactId == m_chat.contactId) {
         m_models->messages()->setAttachmentProcessedSize(attachmentId, processedSize);
     }
-    m_models->chats()->updateLastMessageAttachmentProcessedSize(attachmentId, processedSize);
 }
 
 void MessagesController::setAttachmentEncryptedSize(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &encryptedSize)
@@ -209,7 +204,6 @@ void MessagesController::setAttachmentEncryptedSize(const Attachment::Id &attach
     if (contactId == m_chat.contactId) {
         m_models->messages()->setAttachmentEncryptedSize(attachmentId, encryptedSize);
     }
-    m_models->chats()->updateLastMessageAttachmentEncryptedSize(attachmentId, encryptedSize);
     m_userDatabase->attachmentsTable()->updateEncryptedSize(attachmentId, encryptedSize);
 }
 
@@ -219,7 +213,6 @@ void MessagesController::setAttachmentLocalPath(const Attachment::Id &attachment
     if (contactId == m_chat.contactId) {
         m_models->messages()->setAttachmentLocalPath(attachmentId, localPath);
     }
-    m_models->chats()->updateLastMessageAttachmentLocalPath(attachmentId, localPath);
     m_userDatabase->attachmentsTable()->updateLocalPath(attachmentId, localPath);
 }
 
