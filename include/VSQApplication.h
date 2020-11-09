@@ -85,6 +85,8 @@ public:
     QString organizationDisplayName() const;
     QString applicationDisplayName() const;
 
+    Q_INVOKABLE bool isIosSimulator() const;
+
 signals:
     void notificationCreated(const QString &notification);
 

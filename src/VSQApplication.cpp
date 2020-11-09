@@ -197,6 +197,15 @@ QString VSQApplication::applicationDisplayName() const
     return Customer::ApplicationDisplayName;
 }
 
+bool VSQApplication::isIosSimulator() const
+{
+#ifdef VS_IOS_SIMULATOR
+    return true;
+#else
+    return false;
+#endif
+}
+
 /******************************************************************************/
 void
 VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {

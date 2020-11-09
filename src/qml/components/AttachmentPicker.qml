@@ -16,13 +16,14 @@ Loader {
             SelectAttachmentsDialog {
                 id: selectFileDialog
                 attachmentType: Enums.AttachmentType.File
-                onAccepted: picked(fileUrls, attachmentType)
+                onAccepted: picked(fileUrls, Enums.AttachmentType.File)
             }
 
             SelectAttachmentsDialog {
                 id: selectPictureDialog
-                attachmentType: Enums.AttachmentType.Picture
-                onAccepted: picked(fileUrls, attachmentType)
+                // NOTE(fpohtmeh): picture dialog doesn't work in Ios simulator
+                attachmentType: app.isIosSimulator() ? Enums.Attachment.File : Enums.AttachmentType.Picture
+                onAccepted: picked(fileUrls, Enums.AttachmentType.Picture)
             }
 
             Connections {

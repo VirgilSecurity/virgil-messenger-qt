@@ -435,6 +435,11 @@ ios: {
     DISTFILES += generated/platforms/ios/Entitlements/VirgilMessenger.entitlements
 }
 
+isEqual(OS_NAME, "ios-sim"): {
+    message("IOS simulator")
+    DEFINES += VS_IOS_SIMULATOR=1
+}
+
 
 #
 #   Android specific
