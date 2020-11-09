@@ -232,8 +232,11 @@ Optional<QString> Utils::readTextFile(const QString &filePath)
 
 bool Utils::fileExists(const QString &filePath)
 {
+    if (filePath.isEmpty()) {
+        return false;
+    }
     qCDebug(lcUtils) << "Check if file exists:" << filePath;
-    const auto exists = !filePath.isEmpty() && QFileInfo::exists(filePath);
+    const auto exists = QFileInfo::exists(filePath);
     qCDebug(lcUtils) << "File exists:" << exists << filePath;
     return exists;
 }

@@ -38,7 +38,6 @@
 
 #include <qxmpp/QXmppCarbonManager.h>
 #include <qxmpp/QXmppClient.h>
-#include <qxmpp/QXmppMessage.h>
 #include <qxmpp/QXmppMessageReceiptManager.h>
 
 #include "Core.h"
@@ -128,9 +127,22 @@ void MessagesController::setupTableConnections()
 void MessagesController::setUserId(const UserId &userId)
 {
     m_userId = userId;
-    qCDebug(lcController) << "Set messages controller userId";
+    qCDebug(lcController) << "Set messages controller userId:" << userId;
     m_models->messages()->setUserId(userId);
     m_models->messagesQueue()->setUserId(userId);
+
+    if (!m_userId.isEmpty()) {
+        // Receive postponed messages
+        for (auto &m : m_receivedMessagesWithoutUser) {
+            receiveMessage(m);
+        }
+        m_receivedMessagesWithoutUser.clear();
+        // Set postponed statuses
+        for (auto &m : m_deliveredStatusesWithoutUser) {
+            setDeliveredStatus(m.jid, m.messageId);
+        }
+        m_deliveredStatusesWithoutUser.clear();
+    }
 }
 
 void MessagesController::onChatUpdated(const Chat &chat)
@@ -160,7 +172,12 @@ void MessagesController::setMessageStatus(const Message::Id &messageId, const Co
 
 void MessagesController::setDeliveredStatus(const Jid &jid, const Message::Id &messageId)
 {
-    setMessageStatus(messageId, Utils::contactIdFromJid(jid), Message::Status::Delivered);
+    if (m_userId.isEmpty()) {
+        m_deliveredStatusesWithoutUser.push_back({ jid, messageId });
+    }
+    else {
+        setMessageStatus(messageId, Utils::contactIdFromJid(jid), Message::Status::Delivered);
+    }
 }
 
 void MessagesController::setAttachmentStatus(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Status &status)
@@ -218,6 +235,11 @@ void MessagesController::setAttachmentLocalPath(const Attachment::Id &attachment
 
 void MessagesController::receiveMessage(const QXmppMessage &msg)
 {
+    if (m_userId.isEmpty()) {
+        m_receivedMessagesWithoutUser.push_back(msg);
+        return;
+    }
+
     const auto senderId = Utils::contactIdFromJid(msg.from());
     const auto recipientId = Utils::contactIdFromJid(msg.to());
     const auto timestamp = QDateTime::currentDateTime();

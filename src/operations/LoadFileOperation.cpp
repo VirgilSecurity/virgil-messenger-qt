@@ -90,7 +90,10 @@ bool LoadFileOperation::openFileHandle(const QIODevice::OpenMode &mode)
 
 void LoadFileOperation::closeFileHandle()
 {
-    m_fileHandle.reset();
+    if (m_fileHandle) {
+        m_fileHandle.reset();
+        qCDebug(lcOperation) << "File handle was closed:" << m_filePath;
+    }
 }
 
 QFile *LoadFileOperation::fileHandle()

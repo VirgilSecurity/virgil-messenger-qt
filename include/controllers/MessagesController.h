@@ -37,9 +37,9 @@
 
 #include <QObject>
 
-#include "VSQCommon.h"
+#include <qxmpp/QXmppMessage.h>
 
-#include <QMutex>
+#include "VSQCommon.h"
 
 class QXmppMessage;
 class VSQMessenger;
@@ -89,6 +89,16 @@ private:
 
     UserId m_userId;
     Chat m_chat;
+
+    // NOTE(fpohtmeh): this workaround is needed when messages are received before chat list loading
+    // it will be remove right after offline mode
+    std::vector<QXmppMessage> m_receivedMessagesWithoutUser;
+    struct DeliveredStatusInfo
+    {
+        const Jid jid;
+        const Message::Id messageId;
+    };
+    std::vector<DeliveredStatusInfo> m_deliveredStatusesWithoutUser;
 };
 }
 
