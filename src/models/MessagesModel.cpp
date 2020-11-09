@@ -251,10 +251,14 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
             }
             else if (attachment->type == Attachment::Type::Picture) {
                 const auto e = attachment->extras.value<PictureExtras>();
+                qCDebug(lcModel) << "Get message preview path";
                 if (Utils::fileExists(e.previewPath)) {
+                    qCDebug(lcModel) << "Message preview exists" << e.previewPath;
                     return Utils::localFileToUrl(e.previewPath);
                 }
+                qCDebug(lcModel) << "Get message thumbnail path";
                 if (Utils::fileExists(e.thumbnailPath)) {
+                    qCDebug(lcModel) << "Message thumnbail exists" << e.thumbnailPath;
                     return Utils::localFileToUrl(e.thumbnailPath);
                 }
                 return QString();
@@ -296,7 +300,8 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
     }
     case AttachmentFileExistsRole:
     {
-        return attachment ? QFile::exists(attachment->localPath) : false;
+        qDebug() << "Check if attachment exists";
+        return attachment ? Utils::fileExists(attachment->localPath) : false;
     }
     case FailedRole:
     {

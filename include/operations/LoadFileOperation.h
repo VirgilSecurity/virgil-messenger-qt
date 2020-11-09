@@ -35,9 +35,9 @@
 #ifndef VM_LOADFILEOPERATION_H
 #define VM_LOADFILEOPERATION_H
 
-#include "Operation.h"
+#include <QNetworkReply>
 
-class QNetworkReply;
+#include "Operation.h"
 
 namespace vm
 {
@@ -68,7 +68,7 @@ protected:
 
 private:
     void onReplyFinished();
-    void onReplyErrorOccurred();
+    void onReplyErrorOccurred(const QNetworkReply::NetworkError &error);
     void onReplySslErrors();
     void onSetProgress(const DataSize &bytesLoaded, const DataSize &bytesTotal);
 

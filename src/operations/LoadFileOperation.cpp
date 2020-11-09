@@ -34,8 +34,6 @@
 
 #include "operations/LoadFileOperation.h"
 
-#include <QNetworkReply>
-
 #include "Utils.h"
 #include "operations/MessageOperation.h"
 
@@ -66,6 +64,7 @@ void LoadFileOperation::connectReply(QNetworkReply *reply)
 
 bool LoadFileOperation::openFileHandle(const QIODevice::OpenMode &mode)
 {
+    qCDebug(lcOperation) << "Opening of file handle:" << mode << m_filePath;
     if (m_filePath.isEmpty()) {
         qCWarning(lcOperation) << "File path is empty";
         invalidate();
@@ -85,6 +84,7 @@ bool LoadFileOperation::openFileHandle(const QIODevice::OpenMode &mode)
         return false;
     }
 
+    qCDebug(lcOperation) << "File handle was opened:" << mode << m_filePath;
     return true;
 }
 
@@ -121,9 +121,9 @@ void LoadFileOperation::onReplyFinished()
     }
 }
 
-void LoadFileOperation::onReplyErrorOccurred()
+void LoadFileOperation::onReplyErrorOccurred(const QNetworkReply::NetworkError &error)
 {
-    qCWarning(lcOperation) << "Upload error occurred";
+    qCWarning(lcOperation) << "File load error occurred:" << error;
     fail();
 }
 

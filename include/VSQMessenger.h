@@ -229,9 +229,6 @@ private:
     static const int kConnectionWaitMs;
     static const int kKeepAliveTimeSec;
 
-    void
-    _connectToDatabase();
-
     bool
     _connect(QString userWithEnv, QString deviceId, QString userId, bool forced = false);
 

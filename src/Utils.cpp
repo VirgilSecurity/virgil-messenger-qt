@@ -58,7 +58,8 @@ QString Utils::formattedDataSize(DataSize fileSize)
 
 QString Utils::findUniqueFileName(const QString &fileName)
 {
-    QFileInfo info(fileName);
+    qCDebug(lcUtils) << "Find unique fileName:" << fileName;
+    const QFileInfo info(fileName);
     if (!info.exists()) {
         return fileName;
     }
@@ -68,7 +69,9 @@ QString Utils::findUniqueFileName(const QString &fileName)
     for(;;) {
         auto uuid = createUuid().remove('-').left(6);
         auto newFileName = dir.filePath(QString("%1-%2.%3").arg(baseName, uuid, suffix));
+        qCDebug(lcUtils) << "Check new filename for uniqueness:" << newFileName;
         if (!QFile::exists(newFileName)) {
+            qCDebug(lcUtils) << "Unique filename is:" << newFileName;
             return newFileName;
         }
     }
@@ -98,6 +101,7 @@ QString Utils::urlToLocalFile(const QUrl &url)
 
 bool Utils::forceCreateDir(const QString &absolutePath)
 {
+    qDebug(lcUtils) << "Force to create dir:" << absolutePath;
     const QFileInfo info(absolutePath);
     if (info.exists()) {
         if (info.isDir()) {
@@ -228,7 +232,10 @@ Optional<QString> Utils::readTextFile(const QString &filePath)
 
 bool Utils::fileExists(const QString &filePath)
 {
-    return !filePath.isEmpty() && QFile::exists(filePath);
+    qCDebug(lcUtils) << "Check if file exists:" << filePath;
+    const auto exists = !filePath.isEmpty() && QFileInfo::exists(filePath);
+    qCDebug(lcUtils) << "File exists:" << exists << filePath;
+    return exists;
 }
 
 void Utils::removeFile(const QString &filePath)

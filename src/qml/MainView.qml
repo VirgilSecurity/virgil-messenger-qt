@@ -117,6 +117,7 @@ Control {
             }
             const replace = [manager.newChatState, manager.downloadKeyState].includes(manager.previousState)
             var push = replace ? stackView.replace : stackView.push
+            console.log("Opening of QML chat page...")
             push(page("Chat"), StackView.Transition)
         }
 
