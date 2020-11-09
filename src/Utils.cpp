@@ -235,10 +235,8 @@ bool Utils::fileExists(const QString &filePath)
     if (filePath.isEmpty()) {
         return false;
     }
-    qCDebug(lcUtils) << "Check if file exists:" << filePath;
-    const auto exists = QFileInfo::exists(filePath);
-    qCDebug(lcUtils) << "File exists:" << exists << filePath;
-    return exists;
+    // TODO(fpohtmeh): minimize these calls
+    return QFileInfo::exists(filePath);
 }
 
 void Utils::removeFile(const QString &filePath)
@@ -246,6 +244,18 @@ void Utils::removeFile(const QString &filePath)
     if (fileExists(filePath)) {
         QFile::remove(filePath);
     }
+}
+
+QString Utils::attachmentDisplayImagePath(const Attachment &attachment)
+{
+    const auto e = attachment.extras.value<PictureExtras>();
+    if (fileExists(e.previewPath)) {
+        return e.previewPath;
+    }
+    if (fileExists(e.thumbnailPath)) {
+        return e.thumbnailPath;
+    }
+    return QString();
 }
 
 void Utils::printThreadId(const QString &message)

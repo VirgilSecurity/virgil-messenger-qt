@@ -124,6 +124,7 @@ void ApplicationStateManager::addTransitions()
 
     m_newChatState->addTransition(chats, &ChatsController::chatOpened, m_chatState);
     m_newChatState->addTransition(users, &UsersController::accountSettingsRequested, m_accountSettingsState);
+    m_newChatState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
 
     addTwoSideTransition(m_chatState, m_chatState, &ChatState::requestPreview, m_attachmentPreviewState);
     connect(m_chatState, &ChatState::requestPreview, m_attachmentPreviewState, &AttachmentPreviewState::setUrl);

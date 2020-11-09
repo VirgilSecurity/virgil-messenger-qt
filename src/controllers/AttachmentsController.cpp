@@ -94,6 +94,14 @@ void AttachmentsController::open(const Message::Id &messageId)
     }
 }
 
+void AttachmentsController::downloadDisplayImage(const Message::Id &messageId)
+{
+    qCDebug(lcController) << "Downloading of display image for:" << messageId;
+    if (const auto message = findMessage(messageId)) {
+        m_models->messagesQueue()->pushMessagePreload(*message);
+    }
+}
+
 void AttachmentsController::setUserId(const UserId &userId)
 {
     m_userId = userId;

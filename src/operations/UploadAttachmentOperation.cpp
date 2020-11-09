@@ -35,6 +35,7 @@
 #include "operations/UploadAttachmentOperation.h"
 
 #include "Settings.h"
+#include "Utils.h"
 #include "operations/CreateAttachmentThumbnailOperation.h"
 #include "operations/CreateThumbnailOperation.h"
 #include "operations/EncryptUploadFileOperation.h"
@@ -58,7 +59,7 @@ bool UploadAttachmentOperation::populateChildren()
     const QString preffix = name() + QChar('/');
     //  Create picture preview
     if (attachment->type == Attachment::Type::Picture) {
-        const auto filePath = m_settings->generateThumbnailPath();
+        const auto filePath = m_settings->makeThumbnailPath(attachment->id, true);
         factory->populateCreateAttachmentPreview(m_parent, this, attachment->localPath, filePath);
     }
     // Encrypt/Upload attachment file
@@ -73,7 +74,7 @@ bool UploadAttachmentOperation::populateChildren()
     // Process picture
     if (attachment->type == Attachment::Type::Picture) {
         // Create thumbnail
-        const auto filePath = m_settings->generateThumbnailPath();
+        const auto filePath = m_settings->makeThumbnailPath(attachment->id, false);
         factory->populateCreateAttachmentThumbnail(m_parent, this, attachment->localPath, filePath);
 
         // Encrypt/upload thumbnail

@@ -62,6 +62,7 @@ signals:
 
     void pushMessage(const GlobalMessage &message);
     void pushMessageDownload(const GlobalMessage &message, const QString &filePath);
+    void pushMessagePreload(const GlobalMessage &message);
     void sendNotSentMessages();
 
     void messageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status status);
@@ -85,6 +86,7 @@ private:
     void onSetUserId(const UserId &userId);
     void onPushMessage(const GlobalMessage &message);
     void onPushMessageDownload(const GlobalMessage &message, const QString &filePath);
+    void onPushMessagePreload(const GlobalMessage &message);
     void onSendNotSentMessages();
     void onMessageOperationStatusChanged(const MessageOperation *operation);
     void onMessageOperationAttachmentStatusChanged(const MessageOperation *operation);

@@ -69,6 +69,9 @@ public:
 
     Optional<GlobalMessage> findById(const Message::Id &messageId) const;
 
+signals:
+    void displayImageNotFound(const Message::Id &messageId) const;
+
 private:
     enum Roles
     {

@@ -61,6 +61,7 @@ MessagesQueue::MessagesQueue(const Settings *settings, VSQMessenger *messenger, 
     connect(this, &MessagesQueue::setUserId, this, &MessagesQueue::onSetUserId);
     connect(this, &MessagesQueue::pushMessage, this, &MessagesQueue::onPushMessage);
     connect(this, &MessagesQueue::pushMessageDownload, this, &MessagesQueue::onPushMessageDownload);
+    connect(this, &MessagesQueue::pushMessagePreload, this, &MessagesQueue::onPushMessagePreload);
     connect(this, &MessagesQueue::sendNotSentMessages, this, &MessagesQueue::onSendNotSentMessages);
     connect(fileLoader, &FileLoader::ready, this, &MessagesQueue::onSendNotSentMessages);
 }
@@ -101,6 +102,7 @@ MessageOperation *MessagesQueue::pushMessageOperation(const GlobalMessage &messa
 
 bool MessagesQueue::isActive() const
 {
+    // TODO(fpohtmeh): remove this method
     return !m_userId.isEmpty();
 }
 
@@ -122,7 +124,8 @@ void MessagesQueue::onSetUserId(const UserId &userId)
 
 void MessagesQueue::onPushMessage(const GlobalMessage &message)
 {
-    pushMessageOperation(message);
+    auto op = pushMessageOperation(message);
+    m_factory->populateAll(op);
     if (isActive()) {
         start();
     }
@@ -131,8 +134,17 @@ void MessagesQueue::onPushMessage(const GlobalMessage &message)
 void MessagesQueue::onPushMessageDownload(const GlobalMessage &message, const QString &filePath)
 {
     auto op = pushMessageOperation(message, true);
-    m_factory->populateForDownload(op, filePath);
+    m_factory->populateDownload(op, filePath);
     connect(op, &Operation::finished, this, std::bind(&MessagesQueue::notificationCreated, this, tr("File was downloaded")));
+    if (isActive()) {
+        start();
+    }
+}
+
+void MessagesQueue::onPushMessagePreload(const GlobalMessage &message)
+{
+    auto op = pushMessageOperation(message, true);
+    m_factory->populatePreload(op);
     if (isActive()) {
         start();
     }

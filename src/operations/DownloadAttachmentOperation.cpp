@@ -58,11 +58,16 @@ bool DownloadAttachmentOperation::populateChildren()
     const QString preffix = name() + QChar('/');
 
     if (m_parameter.type == Parameter::Type::Preload) {
-        // Download/decrypt thumbnail
         if (attachment->type == Attachment::Type::Picture) {
             const auto extras = attachment->extras.value<PictureExtras>();
-            if (!Utils::fileExists(extras.thumbnailPath)) {
-                const auto filePath = m_settings->generateThumbnailPath();
+            // Create preview from original file
+            if (!Utils::fileExists(extras.previewPath) && Utils::fileExists(attachment->localPath)) {
+                const auto filePath = m_settings->makeThumbnailPath(attachment->id, true);
+                factory->populateCreateAttachmentPreview(m_parent, this, attachment->localPath, filePath);
+            }
+            // Otherwise download/decrypt thumbnail
+            else if (!Utils::fileExists(extras.thumbnailPath)) {
+                const auto filePath = m_settings->makeThumbnailPath(attachment->id, false);
                 auto op = factory->populateDownloadDecrypt(preffix + QString("DownloadDecryptThumbnail"), this, extras.thumbnailUrl, filePath, message->senderId);
                 connect(op, &Operation::started, this, std::bind(&LoadAttachmentOperation::startLoadOperation, this, extras.encryptedThumbnailSize));
                 connect(op, &DownloadDecryptFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
@@ -84,7 +89,7 @@ bool DownloadAttachmentOperation::populateChildren()
         if (attachment->type == Attachment::Type::Picture) {
             const auto extras = attachment->extras.value<PictureExtras>();
             if (!Utils::fileExists(extras.previewPath)) {
-                const auto filePath = m_settings->generateThumbnailPath();
+                const auto filePath = m_settings->makeThumbnailPath(attachment->id, true);
                 factory->populateCreateAttachmentPreview(m_parent, this, downloadPath, filePath);
             }
         }

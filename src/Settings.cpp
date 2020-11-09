@@ -203,9 +203,9 @@ QDir Settings::downloadsDir() const
     return m_downloadsDir;
 }
 
-QString Settings::generateThumbnailPath() const
+QString Settings::makeThumbnailPath(const Attachment::Id &attachmentId, bool isPreview) const
 {
-    return thumbnailsDir().filePath(Utils::createUuid() + QString(".png"));
+    return thumbnailsDir().filePath((isPreview ? QLatin1String("p-") : QLatin1String("t-")) + attachmentId + QLatin1String(".png"));
 }
 
 QSize Settings::thumbnailMaxSize() const

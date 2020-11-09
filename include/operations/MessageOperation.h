@@ -76,7 +76,6 @@ signals:
 
 protected:
     void connectChild(Operation *child) override;
-    bool populateChildren() override;
 
 private:
     Attachment *writableAttachment();

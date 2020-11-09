@@ -75,6 +75,7 @@ MessagesController::MessagesController(VSQMessenger *messenger, Models *models, 
     connect(messagesQueue, &MessagesQueue::attachmentEncryptedSizeChanged, this, &MessagesController::setAttachmentEncryptedSize);
     // Models
     connect(m_models->chats(), &ChatsModel::chatUpdated, this, &MessagesController::onChatUpdated);
+    connect(m_models->messages(), &MessagesModel::displayImageNotFound, this, &MessagesController::displayImageNotFound);
     // Xmpp connections
     auto xmpp = messenger->xmpp();
     connect(xmpp, &QXmppClient::messageReceived, this, &MessagesController::receiveMessage);

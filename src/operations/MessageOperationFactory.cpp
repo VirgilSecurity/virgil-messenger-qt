@@ -69,9 +69,19 @@ void MessageOperationFactory::populateAll(MessageOperation *messageOp)
     populateMessageOperation(messageOp);
 }
 
-void MessageOperationFactory::populateForDownload(MessageOperation *messageOp, const QString &filePath)
+void MessageOperationFactory::populateDownload(MessageOperation *messageOp, const QString &filePath)
 {
     messageOp->appendChild(new DownloadAttachmentOperation(messageOp, m_settings, { DownloadType::Full, filePath }));
+}
+
+void MessageOperationFactory::populateUpload(MessageOperation *messageOp)
+{
+    messageOp->appendChild(new UploadAttachmentOperation(messageOp, m_settings));
+}
+
+void MessageOperationFactory::populatePreload(MessageOperation *messageOp)
+{
+    messageOp->appendChild(new DownloadAttachmentOperation(messageOp, m_settings, { DownloadType::Preload, QString() }));
 }
 
 DownloadDecryptFileOperation *MessageOperationFactory::populateDownloadDecrypt(const QString &name, Operation *parent, const QUrl &url, const QString &destPath, const Contact::Id &senderId)
@@ -104,14 +114,26 @@ CreateAttachmentPreviewOperation *MessageOperationFactory::populateCreateAttachm
 
 void MessageOperationFactory::populateAttachmentOperation(MessageOperation *messageOp)
 {
-    const auto &message = messageOp->message();
-    if (!message->attachment) {
+    const auto &m = *messageOp->message();
+    if (!m.attachment) {
+        return;
     }
-    else if (message->senderId == message->userId && (message->status == Message::Status::Created || message->status == Message::Status::Failed)) {
-        messageOp->appendChild(new UploadAttachmentOperation(messageOp, m_settings));
+    const auto &a = *m.attachment;
+    const bool isPicture = a.type == Attachment::Type::Picture;
+    if (m.senderId == m.userId) {
+        if (m.status == Message::Status::Created || m.status == Message::Status::Failed) {
+            populateUpload(messageOp);
+        }
+        else if (isPicture && (m.status == Message::Status::Sent || m.status == Message::Status::Delivered)) {
+            if (Utils::attachmentDisplayImagePath(a).isEmpty()) {
+                populatePreload(messageOp);
+            }
+        }
     }
-    else if (message->senderId == message->contactId && (message->status == Message::Status::Created)) {
-        messageOp->appendChild(new DownloadAttachmentOperation(messageOp, m_settings, { DownloadType::Preload, QString() }));
+    else if (m.senderId == m.contactId) {
+        if (isPicture && (m.status == Message::Status::Created || m.status == Message::Status::Read)) {
+            populatePreload(messageOp);
+        }
     }
 }
 

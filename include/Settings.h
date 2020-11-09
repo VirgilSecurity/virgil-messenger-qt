@@ -83,7 +83,7 @@ public:
     QDir thumbnailsDir() const;
     QDir downloadsDir() const;
 
-    QString generateThumbnailPath() const;
+    QString makeThumbnailPath(const vm::Attachment::Id &attachmentId, bool isPreview) const;
     QSize thumbnailMaxSize() const;
     QSize previewMaxSize() const;
 

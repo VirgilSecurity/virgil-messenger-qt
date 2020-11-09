@@ -56,6 +56,8 @@ public:
     Q_INVOKABLE void download(const Message::Id &messageId);
     Q_INVOKABLE void open(const Message::Id &messageId);
 
+    void downloadDisplayImage(const Message::Id &messageId);
+
     void setUserId(const UserId &userId);
     void setContactId(const Contact::Id &contactId);
 

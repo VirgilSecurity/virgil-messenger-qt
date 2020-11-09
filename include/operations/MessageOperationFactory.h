@@ -66,7 +66,9 @@ public:
     explicit MessageOperationFactory(const Settings *settings, VSQMessenger *messenger, FileLoader *fileLoader, QObject *parent);
 
     void populateAll(MessageOperation *messageOp);
-    void populateForDownload(MessageOperation *messageOp, const QString &filePath);
+    void populateDownload(MessageOperation *messageOp, const QString &filePath);
+    void populateUpload(MessageOperation *messageOp);
+    void populatePreload(MessageOperation *messageOp);
 
     DownloadDecryptFileOperation *populateDownloadDecrypt(const QString &name, Operation *parent, const QUrl &url, const QString &destPath, const Contact::Id &senderId);
     EncryptUploadFileOperation *populateEncryptUpload(const QString &name, Operation *parent, const QString &sourcePath, const Contact::Id &recipientId);

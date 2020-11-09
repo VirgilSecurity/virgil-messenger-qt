@@ -67,6 +67,8 @@ signals:
     void messageCreated(const GlobalMessage &message);
     void messageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);
 
+    void displayImageNotFound(const QString &messageId);
+
 private:
     void setupTableConnections();
 

@@ -192,12 +192,6 @@ void MessageOperation::connectChild(Operation *child)
     }
 }
 
-bool MessageOperation::populateChildren()
-{
-    m_factory->populateAll(this);
-    return hasChildren();
-}
-
 Attachment *MessageOperation::writableAttachment()
 {
     return &*m_message.attachment;
