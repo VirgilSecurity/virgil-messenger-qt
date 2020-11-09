@@ -57,9 +57,11 @@ Optional<Attachment> AttachmentsModel::createAttachment(const QUrl &url, const A
     if (!Utils::isValidUrl(url)) {
         return NullOptional;
     }
-    QFileInfo localInfo(Utils::urlToLocalFile(url));
+    const auto localFileName = Utils::urlToLocalFile(url);
+    qCDebug(lcModel) << "Processing of attachment:" << localFileName;
+    QFileInfo localInfo(localFileName);
     if (!localInfo.exists()) {
-        qCWarning(lcModel) << tr("File doesn't exist"); // TODO(fpohtmeh): forward error to UI
+        qCWarning(lcModel) << tr("File doesn't exist");
         return NullOptional;
     }
 

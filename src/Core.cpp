@@ -114,14 +114,15 @@ Optional<QString> Core::encryptMessage(const Message &message, const Contact::Id
 
 bool Core::decryptFile(const QString &encPath, const QString &path, const Contact::Id &recipientId)
 {
+    qCInfo(lcCore) << "Started to decrypt file:" << encPath;
     // Read
     QFile encFile(encPath);
     if (!encFile.exists()) {
-        qCCritical(lcCore) << "Decryption.Source file doesn't exist";
+        qCCritical(lcCore) << "Decryption. Source file doesn't exist";
         return false;
     }
     if (!encFile.open(QFile::ReadOnly)) {
-        qCCritical(lcCore) << "Decryption.Source file can't be opened";
+        qCCritical(lcCore) << "Decryption. Source file can't be opened";
         return false;
     }
     const auto encBytes = encFile.readAll();
@@ -152,14 +153,16 @@ bool Core::decryptFile(const QString &encPath, const QString &path, const Contac
         qCCritical(lcCore) << "Destination file can't be opened";
         return false;
     }
+    qCDebug(lcCore) << "Started to write file:" << path;
     file.write(bytes.data(), bytesSize);
     file.close();
-    qCDebug(lcCore) << "File decrypted:" << path << "size:" << QFileInfo(file).size();
+    qCDebug(lcCore) << "File decrypted" << path << "size:" << file.size();
     return true;
 }
 
 bool Core::encryptFile(const QString &path, const QString &encPath, const Contact::Id &recipientId)
 {
+    qCInfo(lcCore) << "Started to encrypt file:" << path;
     // Read
     QFile file(path);
     if (!file.exists()) {
@@ -194,6 +197,7 @@ bool Core::encryptFile(const QString &path, const QString &encPath, const Contac
     encBytes.push_back(0);
 
     // Write
+    qCDebug(lcCore) << "Started to write file:" << encPath;
     QFile encFile(encPath);
     if (!encFile.open(QFile::WriteOnly)) {
         qCCritical(lcCore) << "Destination file can't be opened";
@@ -201,6 +205,6 @@ bool Core::encryptFile(const QString &path, const QString &encPath, const Contac
     }
     encFile.write(encBytes.data(), encBytes.size());
     encFile.close();
-    qCDebug(lcCore) << "File encrypted:" << encPath << "size:" << QFileInfo(encFile).size();
+    qCDebug(lcCore) << "File encrypted:" << encPath << "size:" << encFile.size();
     return true;
 }

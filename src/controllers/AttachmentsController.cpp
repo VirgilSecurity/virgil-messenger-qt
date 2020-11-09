@@ -54,7 +54,7 @@ void AttachmentsController::saveAs(const Message::Id &messageId, const QVariant 
 {
     if (const auto message = findMessage(messageId)) {
         const auto &a = *message->attachment;
-        if (a.localPath.isEmpty() || !QFile::exists(a.localPath)) {
+        if (!Utils::fileExists(a.localPath)) {
             downloadAttachment(*message);
         }
         else {
@@ -77,7 +77,7 @@ void AttachmentsController::open(const Message::Id &messageId)
 {
     if (const auto message = findMessage(messageId)) {
         const auto &a = *message->attachment;
-        if (a.localPath.isEmpty() || !QFile::exists(a.localPath)) {
+        if (!Utils::fileExists(a.localPath)) {
             downloadAttachment(*message);
         }
         else {

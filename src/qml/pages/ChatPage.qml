@@ -134,6 +134,8 @@ Page {
                 contextMenu.parent = listView
                 contextMenu.open()
             }
+
+            Component.onCompleted: console.log("Chat message was created. Time", displayTime)
         }
 
         ScrollBar.vertical: ScrollBar { }
@@ -148,6 +150,7 @@ Page {
             })
             previousHeight = height
             showLastMessage()
+            console.log("Chat page was created");
         }
 
         MouseArea {
@@ -172,6 +175,7 @@ Page {
         }
 
         function showLastMessage() {
+            console.log("Starting scroll timer");
             scrollTimer.start()
         }
     }
