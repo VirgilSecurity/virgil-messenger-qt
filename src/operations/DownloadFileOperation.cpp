@@ -61,11 +61,6 @@ void DownloadFileOperation::connectReply(QNetworkReply *reply)
 {
     LoadFileOperation::connectReply(reply);
     connect(reply, &QNetworkReply::downloadProgress, this, &LoadFileOperation::setProgress);
-    connect(reply, &QNetworkReply::readyRead, [=]() {
-        const auto bytes = reply->readAll();
-        fileHandle()->write(bytes);
-        fileHandle()->flush();
-    });
 }
 
 void DownloadFileOperation::onFinished()

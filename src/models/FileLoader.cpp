@@ -36,6 +36,7 @@
 
 #include <QFileInfo>
 #include <QNetworkAccessManager>
+#include <QNetworkReply>
 #include <QNetworkRequest>
 
 #include <QXmppClient.h>
@@ -108,5 +109,10 @@ void FileLoader::onStartDownload(const QUrl &url, QFile *file, const FileLoader:
 {
     QNetworkRequest request(url);
     auto reply = m_networkAccessManager->get(request);
+    connect(reply, &QNetworkReply::readyRead, [=]() {
+        const auto bytes = reply->readAll();
+        file->write(bytes);
+        file->flush();
+    });
     connectionSetup(reply);
 }
