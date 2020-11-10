@@ -110,6 +110,7 @@ private:
     Controllers m_controllers;
     KeyboardEventFilter *m_keyboardEventFilter;
     ApplicationStateManager m_applicationStateManager;
+    bool m_lastOnline = true;
 };
 
 #endif // VSQApplication

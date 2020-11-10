@@ -83,6 +83,13 @@ VSQApplication::VSQApplication()
 
     connect(&m_models, &Models::notificationCreated, this, &VSQApplication::notificationCreated);
     connect(&m_controllers, &Controllers::notificationCreated, this, &VSQApplication::notificationCreated);
+    connect(m_messenger.networkAnalyzer(), &VSQNetworkAnalyzer::fireStateChanged, this, [=](bool online) {
+        if (m_lastOnline == online) {
+            return;
+        }
+        emit notificationCreated(online ? tr("Connected!") : tr("Connecting..."));
+        m_lastOnline = online;
+    });
 
     QThread::currentThread()->setObjectName("MainThread");
     m_userDatabase->moveToThread(m_databaseThread);

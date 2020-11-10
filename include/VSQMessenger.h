@@ -103,6 +103,7 @@ public:
     QXmppClient *xmpp();
     QString xmppURL() const;
     VSQLastActivityManager *lastActivityManager();
+    VSQNetworkAnalyzer *networkAnalyzer();
 
     void setApplicationActive(bool active);
 

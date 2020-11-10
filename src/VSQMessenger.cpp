@@ -636,6 +636,11 @@ VSQLastActivityManager *VSQMessenger::lastActivityManager()
     return m_lastActivityManager;
 }
 
+VSQNetworkAnalyzer *VSQMessenger::networkAnalyzer()
+{
+    return &m_networkAnalyzer;
+}
+
 void VSQMessenger::setCrashReporter(VSQCrashReporter *crashReporter)
 {
     m_crashReporter = crashReporter;
