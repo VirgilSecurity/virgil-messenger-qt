@@ -309,7 +309,6 @@ Message Utils::messageFromJson(const QByteArray &json)
 {
     // Get message from JSON
     auto doc = QJsonDocument::fromJson(json);
-    qCDebug(lcUtils) << "JSON for parsing:" << doc;
     const auto type = doc["type"].toString();
     const auto payloadObject = doc["payload"];
 

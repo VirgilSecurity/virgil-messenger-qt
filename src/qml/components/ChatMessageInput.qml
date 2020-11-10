@@ -38,12 +38,12 @@ Control {
 
                 Action {
                     text: qsTr("Send picture")
-                    onTriggered: picker.open(Enums.AttachmentType.Picture)
+                    onTriggered: attachmentPicker.open(Enums.AttachmentType.Picture)
                 }
 
                 Action {
                     text: qsTr("Send file")
-                    onTriggered: picker.open(Enums.AttachmentType.File)
+                    onTriggered: attachmentPicker.open(Enums.AttachmentType.File)
                 }
             }
         }
@@ -174,15 +174,18 @@ Control {
         }
     }
 
-    AttachmentPicker {
-        id: picker
-        onPicked: sendMessage(fileUrls[fileUrls.length - 1], attachmentType)
-    }
-
     function sendMessage(attachmentUrl, attachmentType) {
         const text = (messageField.text + messageField.preeditText).trim();
         messageField.clear()
         controllers.messages.createSendMessage(text, attachmentUrl, attachmentType)
+    }
+
+    Connections {
+        target: attachmentPicker
+        function onPicked(fileUrls, attachmentType) {
+            const url = fileUrls[fileUrls.length - 1]
+            sendMessage(url, attachmentType)
+        }
     }
 
     Component.onCompleted: {

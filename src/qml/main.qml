@@ -106,6 +106,10 @@ ApplicationWindow {
         SendReportAsk {
             id: sendReportAsk
         }
+
+        AttachmentPicker {
+            id: attachmentPicker
+        }
     }
 
     // Show Popup message

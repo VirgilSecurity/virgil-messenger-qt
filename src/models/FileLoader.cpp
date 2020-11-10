@@ -105,7 +105,7 @@ void FileLoader::onStartUpload(const QUrl &url, QFile *file, const ConnectionSet
     connectionSetup(reply);
 }
 
-void FileLoader::onStartDownload(const QUrl &url, QFile *file, const FileLoader::ConnectionSetup &connectionSetup)
+void FileLoader::onStartDownload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup)
 {
     QNetworkRequest request(url);
     auto reply = m_networkAccessManager->get(request);
