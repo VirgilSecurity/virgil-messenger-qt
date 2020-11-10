@@ -50,6 +50,11 @@ EncryptUploadFileOperation::EncryptUploadFileOperation(const QString &name, QObj
     , m_fileLoader(fileLoader)
 {}
 
+void EncryptUploadFileOperation::setSourcePath(const QString &path)
+{
+    m_sourcePath = path;
+}
+
 bool EncryptUploadFileOperation::populateChildren()
 {
     m_tempPath = m_settings->attachmentCacheDir().filePath(Utils::createUuid());

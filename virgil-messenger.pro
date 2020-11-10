@@ -176,6 +176,7 @@ HEADERS += \
         include/models/MessagesQueue.h \
         include/models/Models.h \
         # Operations
+        include/operations/ConvertToPngOperation.h \
         include/operations/CreateAttachmentPreviewOperation.h \
         include/operations/CreateAttachmentThumbnailOperation.h \
         include/operations/CreateThumbnailOperation.h \
@@ -269,6 +270,7 @@ SOURCES += \
         src/models/MessagesQueue.cpp \
         src/models/Models.cpp \
         # Operations
+        src/operations/ConvertToPngOperation.cpp \
         src/operations/CreateAttachmentPreviewOperation.cpp \
         src/operations/CreateAttachmentThumbnailOperation.cpp \
         src/operations/CreateThumbnailOperation.cpp \

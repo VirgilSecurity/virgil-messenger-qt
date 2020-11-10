@@ -37,6 +37,7 @@
 #include "Settings.h"
 #include "Utils.h"
 #include "VSQMessenger.h"
+#include "operations/ConvertToPngOperation.h"
 #include "operations/CreateAttachmentPreviewOperation.h"
 #include "operations/CreateAttachmentThumbnailOperation.h"
 #include "operations/CreateThumbnailOperation.h"
@@ -94,6 +95,13 @@ DownloadDecryptFileOperation *MessageOperationFactory::populateDownloadDecrypt(c
 EncryptUploadFileOperation *MessageOperationFactory::populateEncryptUpload(const QString &name, Operation *parent, const QString &sourcePath, const Contact::Id &recipientId)
 {
     auto op = new EncryptUploadFileOperation(name, parent, m_settings, sourcePath, recipientId, m_fileLoader);
+    parent->appendChild(op);
+    return op;
+}
+
+ConvertToPngOperation *MessageOperationFactory::populateConvertToPngOperation(Operation *parent, const QString &sourcePath)
+{
+    auto op = new ConvertToPngOperation(m_settings, sourcePath, parent);
     parent->appendChild(op);
     return op;
 }

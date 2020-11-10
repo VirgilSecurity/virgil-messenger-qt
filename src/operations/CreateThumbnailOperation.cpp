@@ -50,19 +50,21 @@ CreateThumbnailOperation::CreateThumbnailOperation(const QString &name, QObject 
 
 void CreateThumbnailOperation::run()
 {
-    QImageReader reader(m_sourcePath);
-    QImage source;
-    if (!Utils::readImage(&reader, &source)) {
-        fail();
-        return;
+    if (m_sourceImage.isNull()) {
+        QImageReader reader(m_sourcePath);
+        QImage source;
+        if (!Utils::readImage(&reader, &source)) {
+            fail();
+            return;
+        }
+        m_sourceImage = Utils::applyOrientation(source, reader.transformation());
     }
-    const auto image = Utils::applyOrientation(source, reader.transformation());
-    const auto size = Utils::calculateThumbnailSize(image.size(), m_maxSize);
-    if (size == image.size()) {
+    const auto size = Utils::calculateThumbnailSize(m_sourceImage.size(), m_maxSize);
+    if (size == m_sourceImage.size()) {
         QFile::copy(m_sourcePath, m_destPath);
     }
     else {
-        const auto dest = image.scaled(size.width(), size.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        const auto dest = m_sourceImage.scaled(size.width(), size.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
         if (!QImage(dest).save(m_destPath)) {
             qCDebug(lcOperation) << "Unable to save thumbnail file:" << m_destPath;
             fail();
@@ -71,4 +73,14 @@ void CreateThumbnailOperation::run()
     }
     emit thumbnailReady(m_destPath);
     finish();
+}
+
+void CreateThumbnailOperation::setSourcePath(const QString &path)
+{
+    m_sourcePath = path;
+}
+
+void CreateThumbnailOperation::setSourceImage(const QImage &image)
+{
+    m_sourceImage = image;
 }

@@ -35,6 +35,8 @@
 #ifndef VM_CREATETHUMBNAILOPERATION_H
 #define VM_CREATETHUMBNAILOPERATION_H
 
+#include <QImage>
+
 #include "Operation.h"
 
 namespace vm
@@ -49,11 +51,15 @@ public:
 
     void run() override;
 
+    void setSourcePath(const QString &path);
+    void setSourceImage(const QImage &image);
+
 signals:
     void thumbnailReady(const QString &destPath);
 
 private:
     QString m_sourcePath;
+    QImage m_sourceImage;
     QString m_destPath;
     const QSize m_maxSize;
 };

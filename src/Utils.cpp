@@ -232,7 +232,6 @@ bool Utils::fileExists(const QString &filePath)
     if (filePath.isEmpty()) {
         return false;
     }
-    // TODO(fpohtmeh): minimize these calls
     return QFileInfo::exists(filePath);
 }
 

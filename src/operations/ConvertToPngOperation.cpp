@@ -32,32 +32,48 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_UPLOADATTACHMENTOPERATION_H
-#define VM_UPLOADATTACHMENTOPERATION_H
+#include "operations/ConvertToPngOperation.h"
 
-#include "LoadAttachmentOperation.h"
+#include <QImageReader>
 
-class Settings;
+#include "Settings.h"
+#include "Utils.h"
 
-namespace vm
+using namespace vm;
+
+ConvertToPngOperation::ConvertToPngOperation(const Settings *settings, const QString &sourcePath, QObject *parent)
+    : Operation(QLatin1String("ConvertToPng"), parent)
+    , m_settings(settings)
+    , m_sourcePath(sourcePath)
+{}
+
+void ConvertToPngOperation::run()
 {
-class UploadAttachmentOperation : public LoadAttachmentOperation
-{
-    Q_OBJECT
+    QImageReader reader(m_sourcePath);
+    QImage source;
+    if (!Utils::readImage(&reader, &source)) {
+        fail();
+        return;
+    }
+    const auto image = Utils::applyOrientation(source, reader.transformation());
+    emit imageRead(image);
 
-public:
-    UploadAttachmentOperation(MessageOperation *parent, const Settings *settings);
-
-private:
-    bool populateChildren() override;
-    void cleanup() override;
-
-    void setTempPngPath(const QString &path);
-
-    MessageOperation *m_parent;
-    const Settings *m_settings;
-    QString m_tempPngPath;
-};
+    const bool isPngFile = QFileInfo(m_sourcePath).completeSuffix().toLower() == QLatin1String(".png");
+    if (isPngFile) {
+        emit converted(m_sourcePath);
+        finish();
+    }
+    else {
+        const auto filePath = m_settings->attachmentCacheDir().filePath(Utils::createUuid() + QLatin1String(".png"));
+        if (!image.save(filePath, nullptr, 100)) {
+            qCWarning(lcOperation) << "Unable to save png file";
+            fail();
+        }
+        else {
+            qCDebug(lcOperation) << "File was converted to png";
+            emit converted(filePath);
+            emit fileCreated(filePath);
+            finish();
+        }
+    }
 }
-
-#endif // VM_UPLOADATTACHMENTOPERATION_H

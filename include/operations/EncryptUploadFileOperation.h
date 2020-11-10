@@ -51,6 +51,8 @@ public:
     EncryptUploadFileOperation(const QString &name, QObject *parent, const Settings *settings, const QString &sourcePath,
                                const Contact::Id &recipientId, FileLoader *fileLoader);
 
+    void setSourcePath(const QString &path);
+
 signals:
     void progressChanged(const DataSize &bytesLoaded, const DataSize &bytesTotal);
     void bytesCalculated(const DataSize &bytes);

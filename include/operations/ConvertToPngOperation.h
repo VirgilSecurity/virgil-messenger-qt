@@ -32,32 +32,33 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_UPLOADATTACHMENTOPERATION_H
-#define VM_UPLOADATTACHMENTOPERATION_H
+#ifndef VM_CONVERTTOPNGOPERATION_H
+#define VM_CONVERTTOPNGOPERATION_H
 
-#include "LoadAttachmentOperation.h"
+#include "Operation.h"
 
 class Settings;
 
 namespace vm
 {
-class UploadAttachmentOperation : public LoadAttachmentOperation
+class ConvertToPngOperation : public Operation
 {
     Q_OBJECT
 
 public:
-    UploadAttachmentOperation(MessageOperation *parent, const Settings *settings);
+    ConvertToPngOperation(const Settings *settings, const QString &sourcePath, QObject *parent);
+
+signals:
+    void imageRead(const QImage &image);
+    void converted(const QString &path);
+    void fileCreated(const QString &newPath);
 
 private:
-    bool populateChildren() override;
-    void cleanup() override;
+    void run() override;
 
-    void setTempPngPath(const QString &path);
-
-    MessageOperation *m_parent;
     const Settings *m_settings;
-    QString m_tempPngPath;
+    const QString m_sourcePath;
 };
 }
 
-#endif // VM_UPLOADATTACHMENTOPERATION_H
+#endif // VM_CONVERTTOPNGOPERATION_H

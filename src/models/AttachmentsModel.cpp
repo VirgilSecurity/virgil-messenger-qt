@@ -101,6 +101,10 @@ Optional<Attachment> AttachmentsModel::createAttachment(const QUrl &url, const A
     if (attachment.fileName.isEmpty()) {
         attachment.fileName = localInfo.fileName();
     }
+    if (type == Attachment::Type::Picture) {
+        // Set png suffix
+        attachment.fileName = attachment.fileName.section('.', 0, 0) + QLatin1String(".png");
+    }
     attachment.localPath = localInfo.absoluteFilePath();
 
     // Picture
