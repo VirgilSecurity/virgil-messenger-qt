@@ -127,7 +127,7 @@ void LoadFileOperation::onReplyFinished()
 void LoadFileOperation::onReplyErrorOccurred(const QNetworkReply::NetworkError &error)
 {
     qCWarning(lcOperation) << "File load error occurred:" << error;
-    fail();
+    //fail();
 }
 
 void LoadFileOperation::onReplySslErrors()
