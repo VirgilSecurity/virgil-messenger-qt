@@ -65,8 +65,7 @@ Optional<Message> Core::decryptMessage(const Contact::Id &sender, const QString 
     QByteArray decryptedMessage = QByteArray(decryptedMsgSzMax + 1, 0x00);
     size_t decryptedMessageSz = 0;
 
-    qCDebug(lcCore) << "Sender:" << sender;
-    qCDebug(lcCore) << "Encrypted message:" << message.length() << "bytes";
+    qCDebug(lcCore) << "Sender:" << sender << "encrypted message size:" << message.length() << "bytes";
 
     // Decrypt message
     if (VS_CODE_OK != vs_messenger_virgil_decrypt_msg(
@@ -90,8 +89,6 @@ Optional<QString> Core::encryptMessage(const Message &message, const Contact::Id
 {
     // Create JSON-formatted message to be sent
     const QString internalJson = Utils::messageToJson(message);
-    qCDebug(lcCore) << "Recipient:" << recipient;
-    qCDebug(lcCore) << "Json for encryption:" << internalJson;
 
     // Encrypt message
     const auto plaintext = internalJson.toStdString();
@@ -114,7 +111,6 @@ Optional<QString> Core::encryptMessage(const Message &message, const Contact::Id
 
 bool Core::decryptFile(const QString &encPath, const QString &path, const Contact::Id &recipientId)
 {
-    qCInfo(lcCore) << "Started to decrypt file:" << encPath;
     // Read
     QFile encFile(encPath);
     if (!encFile.exists()) {
@@ -153,16 +149,14 @@ bool Core::decryptFile(const QString &encPath, const QString &path, const Contac
         qCCritical(lcCore) << "Destination file can't be opened";
         return false;
     }
-    qCDebug(lcCore) << "Started to write file:" << path;
     file.write(bytes.data(), bytesSize);
     file.close();
-    qCDebug(lcCore) << "File decrypted" << path << "size:" << file.size();
+    qCDebug(lcCore) << "File decrypted" << file.fileName() << "size:" << file.size();
     return true;
 }
 
 bool Core::encryptFile(const QString &path, const QString &encPath, const Contact::Id &recipientId)
 {
-    qCInfo(lcCore) << "Started to encrypt file:" << path;
     // Read
     QFile file(path);
     if (!file.exists()) {
@@ -197,7 +191,6 @@ bool Core::encryptFile(const QString &path, const QString &encPath, const Contac
     encBytes.push_back(0);
 
     // Write
-    qCDebug(lcCore) << "Started to write file:" << encPath;
     QFile encFile(encPath);
     if (!encFile.open(QFile::WriteOnly)) {
         qCCritical(lcCore) << "Destination file can't be opened";
@@ -205,6 +198,6 @@ bool Core::encryptFile(const QString &path, const QString &encPath, const Contac
     }
     encFile.write(encBytes.data(), encBytes.size());
     encFile.close();
-    qCDebug(lcCore) << "File encrypted:" << encPath << "size:" << encFile.size();
+    qCDebug(lcCore) << "File encrypted:" << encFile.fileName() << "size:" << encFile.size();
     return true;
 }

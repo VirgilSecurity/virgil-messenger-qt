@@ -83,7 +83,7 @@ void UploadFileOperation::startUpload()
 void UploadFileOperation::onSlotUrlReceived(const QString &slotId, const QUrl &url)
 {
     if (slotId == m_slotId) {
-        qCDebug(lcOperation) << "Upload url received:" << url;
+        qCDebug(lcOperation) << "Upload url received";
         m_url = url;
         startUpload();
     }
@@ -99,6 +99,6 @@ void UploadFileOperation::onSlotUrlErrorOcurrend(const QString &slotId)
 
 void UploadFileOperation::onFinished()
 {
-    qCDebug(lcOperation) << "File was uploaded to:" << m_url;
+    qCDebug(lcOperation) << "File was uploaded";
     emit uploaded(m_url);
 }

@@ -112,7 +112,7 @@ void AttachmentsTable::onUpdateUrl(const Attachment::Id &attachmentId, const QUr
     };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateAttachmentUrl"), values);
     if (query) {
-        qCDebug(lcDatabase) << "Attachment url was updated" << attachmentId << "url" << url;
+        qCDebug(lcDatabase) << "Attachment url was updated" << attachmentId << "url filename" << url.fileName();
     }
     else {
         qCCritical(lcDatabase) << "AttachmentsTable::onUpdateUrl error";
@@ -129,7 +129,8 @@ void AttachmentsTable::onUpdateLocalPath(const Attachment::Id &attachmentId, con
     };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateAttachmentLocalPath"), values);
     if (query) {
-        qCDebug(lcDatabase) << "Attachment localPath was updated" << attachmentId << "localPath" << localPath;
+        qCDebug(lcDatabase) << "Attachment localPath was updated" << attachmentId
+                            << "localPath" << Utils::fileName(localPath);
     }
     else {
         qCCritical(lcDatabase) << "AttachmentsTable::onUpdateLocalPath error";
@@ -147,7 +148,7 @@ void AttachmentsTable::onUpdateExtras(const Attachment::Id &attachmentId, const 
     };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateAttachmentExtras"), values);
     if (query) {
-        qCDebug(lcDatabase) << "Attachment extras was updated" << attachmentId << "extras" << extrasJson;
+        qCDebug(lcDatabase) << "Attachment extras was updated" << attachmentId;
     }
     else {
         qCCritical(lcDatabase) << "AttachmentsTable::onUpdatePictureExtras error";

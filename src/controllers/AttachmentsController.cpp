@@ -83,11 +83,11 @@ void AttachmentsController::open(const Message::Id &messageId)
         else {
             const auto url = Utils::localFileToUrl(a.localPath);
             if (a.type == Attachment::Type::Picture) {
-                qCDebug(lcController) << "Opening of preview for" << url;
+                qCDebug(lcController) << "Opening of preview for" << url.fileName();
                 emit openPreviewRequested(url);
             }
             else {
-                qCDebug(lcController) << "Opening of url:" << url;
+                qCDebug(lcController) << "Opening of file:" << url.fileName();
                 QDesktopServices::openUrl(url);
             }
         }

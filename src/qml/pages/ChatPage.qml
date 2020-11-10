@@ -172,7 +172,6 @@ Page {
         }
 
         function showLastMessage() {
-            console.log("Starting scroll timer");
             scrollTimer.start()
         }
     }

@@ -80,6 +80,8 @@ namespace Utils
 
     void removeFile(const QString &filePath);
 
+    QString fileName(const QString &filePath);
+
     QString attachmentDisplayImagePath(const Attachment &attachment);
 
     // Url functions

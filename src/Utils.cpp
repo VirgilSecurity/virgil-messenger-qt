@@ -58,7 +58,6 @@ QString Utils::formattedDataSize(DataSize fileSize)
 
 QString Utils::findUniqueFileName(const QString &fileName)
 {
-    qCDebug(lcUtils) << "Find unique fileName:" << fileName;
     const QFileInfo info(fileName);
     if (!info.exists()) {
         return fileName;
@@ -69,9 +68,7 @@ QString Utils::findUniqueFileName(const QString &fileName)
     for(;;) {
         auto uuid = createUuid().remove('-').left(6);
         auto newFileName = dir.filePath(QString("%1-%2.%3").arg(baseName, uuid, suffix));
-        qCDebug(lcUtils) << "Check new filename for uniqueness:" << newFileName;
         if (!QFile::exists(newFileName)) {
-            qCDebug(lcUtils) << "Unique filename is:" << newFileName;
             return newFileName;
         }
     }
@@ -244,6 +241,11 @@ void Utils::removeFile(const QString &filePath)
     if (fileExists(filePath)) {
         QFile::remove(filePath);
     }
+}
+
+QString Utils::fileName(const QString &filePath)
+{
+    return QFileInfo(filePath).fileName();
 }
 
 QString Utils::attachmentDisplayImagePath(const Attachment &attachment)

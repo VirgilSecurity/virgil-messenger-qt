@@ -192,7 +192,7 @@ void MessagesController::setAttachmentStatus(const Attachment::Id &attachmentId,
 
 void MessagesController::setAttachmentUrl(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QUrl &url)
 {
-    qCDebug(lcController) << "Set attachment url:" << attachmentId << "contact" << contactId << "url" << url;
+    qCDebug(lcController) << "Set attachment url:" << attachmentId << "contact" << contactId << "url filename" << url.fileName();
     if (contactId == m_chat.contactId) {
         m_models->messages()->setAttachmentUrl(attachmentId, url);
     }
@@ -201,7 +201,7 @@ void MessagesController::setAttachmentUrl(const Attachment::Id &attachmentId, co
 
 void MessagesController::setAttachmentExtras(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Type &type, const QVariant &extras)
 {
-    qCDebug(lcController) << "Set attachment extras:" << attachmentId << "contact" << contactId << "type" << type << Utils::extrasToJson(extras, type, false);
+    qCDebug(lcController) << "Set attachment extras:" << attachmentId << "contact" << contactId;
     if (contactId == m_chat.contactId) {
         m_models->messages()->setAttachmentExtras(attachmentId, extras);
     }

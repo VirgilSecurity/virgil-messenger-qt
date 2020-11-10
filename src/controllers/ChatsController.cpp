@@ -105,7 +105,7 @@ void ChatsController::createChat(const Contact::Id &contactId)
 
 void ChatsController::openChat(const Chat &chat)
 {
-    qCDebug(lcController) << "Opening chat" << chat.id << "contact" << chat.contactId << "unread" << chat.unreadMessageCount;
+    qCDebug(lcController) << "Opening chat with" << chat.contactId;
     setCurrentChat(chat);
     if (chat.unreadMessageCount > 0) {
         m_models->chats()->resetUnreadCount(chat.id);
