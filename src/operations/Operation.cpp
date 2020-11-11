@@ -175,6 +175,7 @@ void Operation::connectChild(Operation *child)
     connect(child, &Operation::failed, this, &Operation::fail);
     connect(child, &Operation::invalidated, this, &Operation::onChildInvalidated);
     connect(child, &Operation::finished, this, &Operation::startNextChild);
+    connect(child, &Operation::notificationCreated, this, &Operation::notificationCreated);
 }
 
 bool Operation::setStatus(const Operation::Status &status)

@@ -53,6 +53,7 @@ void DecryptFileOperation::run()
         finish();
     }
     else {
+        emit notificationCreated(tr("Failed to decrypt file"));
         invalidate();
     }
 }

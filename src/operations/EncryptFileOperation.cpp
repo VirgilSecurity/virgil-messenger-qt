@@ -54,6 +54,7 @@ void EncryptFileOperation::run()
         finish();
     }
     else {
+        emit notificationCreated(tr("Failed to encrypt file"));
         invalidate();
     }
 }

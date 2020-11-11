@@ -66,12 +66,14 @@ bool LoadFileOperation::openFileHandle(const QIODevice::OpenMode &mode)
 {
     if (m_filePath.isEmpty()) {
         qCWarning(lcOperation) << "File path is empty";
+        emit notificationCreated(tr("File path is empty"));
         invalidate();
         return false;
     }
 
     if (mode == QFile::ReadOnly && !Utils::fileExists(m_filePath)) {
         qCWarning(lcOperation) << "File doesn't exist" << m_filePath;
+        emit notificationCreated(tr("File doesn't exist"));
         invalidate();
         return false;
     }
@@ -79,6 +81,7 @@ bool LoadFileOperation::openFileHandle(const QIODevice::OpenMode &mode)
     m_fileHandle.reset(new QFile(m_filePath));
     if (!m_fileHandle->open(mode)) {
         qCWarning(lcOperation) << "File can't be opened" << m_filePath;
+        emit notificationCreated(tr("File can't be opened"));
         invalidate();
         return false;
     }

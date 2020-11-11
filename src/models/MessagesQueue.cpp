@@ -90,6 +90,7 @@ void MessagesQueue::connectMessageOperation(MessageOperation *op)
     connect(op, &MessageOperation::attachmentExtrasChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentExtrasChanged, this, op));
     connect(op, &MessageOperation::attachmentEncryptedSizeChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentEncryptedSizeChanged, this, op));
     connect(op, &MessageOperation::attachmentProcessedSizeChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentProcessedSizeChanged, this, op));
+    connect(op, &MessageOperation::notificationCreated, this, &MessagesQueue::notificationCreated);
 }
 
 MessageOperation *MessagesQueue::pushMessageOperation(const GlobalMessage &message, bool prepend)

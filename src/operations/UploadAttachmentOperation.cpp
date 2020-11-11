@@ -103,6 +103,7 @@ bool UploadAttachmentOperation::populateChildren()
         connect(op2, &EncryptUploadFileOperation::bytesCalculated, this, std::bind(&LoadAttachmentOperation::startLoadOperation, this, args::_1));
         connect(op2, &EncryptUploadFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
         connect(op2, &EncryptUploadFileOperation::uploaded, m_parent, &MessageOperation::setAttachmentThumbnailUrl);
+        connect(op2, &EncryptUploadFileOperation::bytesCalculated, m_parent, &MessageOperation::setAttachmentEncryptedThumbnailSize);
     }
     // Connection to loading statuses
     connect(this, &Operation::started, m_parent, std::bind(&MessageOperation::setAttachmentStatus, m_parent, Attachment::Status::Loading));

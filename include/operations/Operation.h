@@ -85,6 +85,8 @@ signals:
     void invalidated();
     void finished();
 
+    void notificationCreated(const QString &notification);
+
 protected:
     void fail();
     void invalidate();
