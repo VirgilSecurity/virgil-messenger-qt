@@ -94,7 +94,10 @@ void FileLoader::onSlotReceived(const QXmppHttpUploadSlotIq &slot)
 
 void FileLoader::onRequestFailed(const QXmppHttpUploadRequestIq &request)
 {
-    emit slotUrlErrorOcurrend(request.id());
+    const auto error = request.error();
+    const auto errorText = QString("code(%1), condition(%2), text(%3)")
+            .arg(error.code()).arg(error.condition()).arg(error.text());
+    emit slotUrlErrorOcurrend(request.id(), errorText);
 }
 
 void FileLoader::onStartUpload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup)

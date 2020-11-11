@@ -89,11 +89,11 @@ void UploadFileOperation::onSlotUrlReceived(const QString &slotId, const QUrl &u
     }
 }
 
-void UploadFileOperation::onSlotUrlErrorOcurrend(const QString &slotId)
+void UploadFileOperation::onSlotUrlErrorOcurrend(const QString &slotId, const QString &errorText)
 {
     if (slotId == m_slotId) {
-        qCDebug(lcOperation) << "Unable to get upload url";
-        invalidate();
+        qCDebug(lcOperation) << "Unable to get upload url. Error:" << errorText;
+        fail();
     }
 }
 

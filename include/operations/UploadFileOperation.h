@@ -59,7 +59,7 @@ private:
     void startUpload();
 
     void onSlotUrlReceived(const QString &slotId, const QUrl &url);
-    void onSlotUrlErrorOcurrend(const QString &slotId);
+    void onSlotUrlErrorOcurrend(const QString &slotId, const QString &errorText);
     void onFinished();
 
     QString m_slotId;

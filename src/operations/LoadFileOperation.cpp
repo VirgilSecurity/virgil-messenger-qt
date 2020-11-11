@@ -58,7 +58,7 @@ void LoadFileOperation::setFilePath(const QString &filePath)
 void LoadFileOperation::connectReply(QNetworkReply *reply)
 {
     connect(reply, &QNetworkReply::finished, this, &LoadFileOperation::onReplyFinished);
-    connect(reply, &QNetworkReply::errorOccurred, this, &LoadFileOperation::onReplyErrorOccurred);
+    connect(reply, &QNetworkReply::errorOccurred, this, std::bind(&LoadFileOperation::onReplyErrorOccurred, this, args::_1, reply));
     connect(reply, &QNetworkReply::sslErrors, this, &LoadFileOperation::onReplySslErrors);
 }
 
@@ -123,10 +123,10 @@ void LoadFileOperation::onReplyFinished()
     }
 }
 
-void LoadFileOperation::onReplyErrorOccurred(const QNetworkReply::NetworkError &error)
+void LoadFileOperation::onReplyErrorOccurred(const QNetworkReply::NetworkError &error, QNetworkReply *reply)
 {
-    qCWarning(lcOperation) << "File load error occurred:" << error;
-    //fail();
+    qCWarning(lcOperation) << "File load error occurred:" << error << reply->errorString();
+    fail();
 }
 
 void LoadFileOperation::onReplySslErrors()

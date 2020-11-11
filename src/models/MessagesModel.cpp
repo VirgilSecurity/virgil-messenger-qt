@@ -253,7 +253,10 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
             if (!imagePath.isEmpty()) {
                 return Utils::localFileToUrl(imagePath);
             }
-            emit displayImageNotFound(message.id);
+            if (message.status != Message::Status::Created) {
+                qCDebug(lcModel) << "Requesting of missing thumbnail/preview";
+                emit displayImageNotFound(message.id);
+            }
         }
         return QString();
     }

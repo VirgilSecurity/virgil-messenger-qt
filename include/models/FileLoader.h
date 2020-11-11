@@ -68,7 +68,7 @@ signals:
     void startUpload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup);
 
     void slotUrlReceived(const QString &slotId, const QUrl &url);
-    void slotUrlErrorOcurrend(const QString &slotId);
+    void slotUrlErrorOcurrend(const QString &slotId, const QString &errorText);
 
 private:
     void onServiceFound();

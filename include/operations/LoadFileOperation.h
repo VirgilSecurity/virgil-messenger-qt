@@ -68,7 +68,7 @@ protected:
 
 private:
     void onReplyFinished();
-    void onReplyErrorOccurred(const QNetworkReply::NetworkError &error);
+    void onReplyErrorOccurred(const QNetworkReply::NetworkError &error, QNetworkReply *reply);
     void onReplySslErrors();
     void onSetProgress(const DataSize &bytesLoaded, const DataSize &bytesTotal);
 
