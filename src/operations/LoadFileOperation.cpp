@@ -67,7 +67,7 @@ void LoadFileOperation::connectReply(QNetworkReply *reply)
 void LoadFileOperation::cleanup()
 {
     Operation::cleanup();
-    m_connectionChanged = false;
+    m_isConnectionChanged = false;
 }
 
 bool LoadFileOperation::openFileHandle(const QIODevice::OpenMode &mode)
@@ -121,6 +121,11 @@ QString LoadFileOperation::filePath() const
     return m_filePath;
 }
 
+bool LoadFileOperation::isConnectionChanged() const
+{
+    return m_isConnectionChanged;
+}
+
 void LoadFileOperation::onReplyFinished()
 {
     qCDebug(lcOperation) << "Reply finished" << Utils::printableLoadProgress(m_bytesLoaded, m_bytesTotal);
@@ -131,7 +136,7 @@ void LoadFileOperation::onReplyFinished()
     }
     else {
         qCWarning(lcOperation) << "Failed. Load file was processed partially";
-        if (m_connectionChanged) {
+        if (m_isConnectionChanged) {
             fail();
         }
         else {
@@ -144,7 +149,7 @@ void LoadFileOperation::onReplyFinished()
 void LoadFileOperation::onReplyErrorOccurred(const QNetworkReply::NetworkError &error, QNetworkReply *)
 {
     qCWarning(lcOperation) << "File load error occurred:" << error << static_cast<int>(error);
-    if (m_connectionChanged) {
+    if (m_isConnectionChanged) {
         fail();
     }
     else {
@@ -182,6 +187,6 @@ void LoadFileOperation::setConnectionChanged()
 {
     if (status() == Operation::Status::Started) {
         qCDebug(lcOperation) << "Connection was chnaged";
-        m_connectionChanged = true;
+        m_isConnectionChanged = true;
     }
 }

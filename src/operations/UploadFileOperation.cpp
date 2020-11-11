@@ -94,7 +94,13 @@ void UploadFileOperation::onSlotUrlErrorOcurrend(const QString &slotId, const QS
 {
     if (slotId == m_slotId) {
         qCDebug(lcOperation) << "Unable to get upload url. Error:" << errorText;
-        fail();
+        if (isConnectionChanged()) {
+            fail();
+        }
+        else {
+            emit notificationCreated(tr("Unable to upload file"));
+            invalidate();
+        }
     }
 }
 

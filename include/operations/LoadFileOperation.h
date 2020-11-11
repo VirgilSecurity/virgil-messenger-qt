@@ -67,6 +67,8 @@ protected:
     FileLoader *fileLoader();
     QString filePath() const;
 
+    bool isConnectionChanged() const;
+
 private:
     void onReplyFinished();
     void onReplyErrorOccurred(const QNetworkReply::NetworkError &error, QNetworkReply *reply);
@@ -79,7 +81,7 @@ private:
     QScopedPointer<QFile> m_fileHandle;
     DataSize m_bytesLoaded = 0;
     DataSize m_bytesTotal = 0;
-    bool m_connectionChanged = false;
+    bool m_isConnectionChanged = false;
 };
 }
 
