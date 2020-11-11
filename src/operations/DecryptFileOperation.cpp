@@ -48,7 +48,11 @@ DecryptFileOperation::DecryptFileOperation(const QString &name, QObject *parent,
 
 void DecryptFileOperation::run()
 {
-    if (Core::decryptFile(m_sourcePath, m_destPath, m_senderId)) {
+    const auto result = Core::decryptFile(m_sourcePath, m_destPath, m_senderId);
+    if (result == Core::Result::Fail) {
+        fail();
+    }
+    else if (result == Core::Result::Success) {
         emit decrypted(m_destPath);
         finish();
     }

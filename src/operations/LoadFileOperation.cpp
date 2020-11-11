@@ -35,6 +35,7 @@
 #include "operations/LoadFileOperation.h"
 
 #include "Utils.h"
+#include "models/FileLoader.h"
 #include "operations/MessageOperation.h"
 
 using namespace vm;
@@ -44,6 +45,7 @@ LoadFileOperation::LoadFileOperation(const QString &name, QObject *parent, FileL
     , m_fileLoader(fileLoader)
 {
     connect(this, &LoadFileOperation::setProgress, this, &LoadFileOperation::onSetProgress);
+    connect(fileLoader, &FileLoader::serviceFound, this, &LoadFileOperation::setConnectionChanged);
 }
 
 void LoadFileOperation::setFilePath(const QString &filePath)
@@ -62,6 +64,12 @@ void LoadFileOperation::connectReply(QNetworkReply *reply)
     connect(reply, &QNetworkReply::sslErrors, this, &LoadFileOperation::onReplySslErrors);
 }
 
+void LoadFileOperation::cleanup()
+{
+    Operation::cleanup();
+    m_connectionChanged = false;
+}
+
 bool LoadFileOperation::openFileHandle(const QIODevice::OpenMode &mode)
 {
     if (m_filePath.isEmpty()) {
@@ -71,7 +79,7 @@ bool LoadFileOperation::openFileHandle(const QIODevice::OpenMode &mode)
         return false;
     }
 
-    if (mode == QFile::ReadOnly && !Utils::fileExists(m_filePath)) {
+    if ((mode == QFile::ReadOnly) && !Utils::fileExists(m_filePath)) {
         qCWarning(lcOperation) << "File doesn't exist" << m_filePath;
         emit notificationCreated(tr("File doesn't exist"));
         invalidate();
@@ -115,21 +123,34 @@ QString LoadFileOperation::filePath() const
 
 void LoadFileOperation::onReplyFinished()
 {
+    qCDebug(lcOperation) << "Reply finished" << Utils::printableLoadProgress(m_bytesLoaded, m_bytesTotal);
+    closeFileHandle();
     if (m_bytesTotal > 0 && m_bytesLoaded >= m_bytesTotal) {
-        qCDebug(lcOperation) << "Reply finished";
-        closeFileHandle();
+        qCDebug(lcOperation) << "Reply success";
         finish();
     }
     else {
         qCWarning(lcOperation) << "Failed. Load file was processed partially";
-        fail();
+        if (m_connectionChanged) {
+            fail();
+        }
+        else {
+            emit notificationCreated(tr("File loading failed"));
+            invalidate();
+        }
     }
 }
 
-void LoadFileOperation::onReplyErrorOccurred(const QNetworkReply::NetworkError &error, QNetworkReply *reply)
+void LoadFileOperation::onReplyErrorOccurred(const QNetworkReply::NetworkError &error, QNetworkReply *)
 {
-    qCWarning(lcOperation) << "File load error occurred:" << error << static_cast<int>(error) << reply->errorString();
-    fail();
+    qCWarning(lcOperation) << "File load error occurred:" << error << static_cast<int>(error);
+    if (m_connectionChanged) {
+        fail();
+    }
+    else {
+        emit notificationCreated(tr("File loading error: %1").arg(error));
+        invalidate();
+    }
 }
 
 void LoadFileOperation::onReplySslErrors()
@@ -142,7 +163,7 @@ void LoadFileOperation::onSetProgress(const DataSize &bytesLoaded, const DataSiz
     //qCDebug(lcOperation) << "Load progress:" << Utils::printableLoadProgress(bytesLoaded, total);
     m_bytesLoaded = bytesLoaded;
     m_bytesTotal = bytesTotal;
-    if (bytesTotal < 0) {
+    if (bytesTotal <= 0) {
         // NOTE(fpohtmeh): download reply sends zeros as bytesTotal
         emit progressChanged(bytesLoaded, bytesLoaded);
     }
@@ -150,9 +171,17 @@ void LoadFileOperation::onSetProgress(const DataSize &bytesLoaded, const DataSiz
         emit progressChanged(bytesLoaded, bytesTotal);
     }
     else {
-        qCDebug(lcOperation) << "All bytes were processed, set load operation finished."
+        qCDebug(lcOperation) << "All bytes were processed, set load operation finished"
                              << Utils::printableLoadProgress(m_bytesLoaded, m_bytesTotal);
         closeFileHandle();
         finish();
+    }
+}
+
+void LoadFileOperation::setConnectionChanged()
+{
+    if (status() == Operation::Status::Started) {
+        qCDebug(lcOperation) << "Connection was chnaged";
+        m_connectionChanged = true;
     }
 }

@@ -78,11 +78,19 @@ QString FileLoader::requestUploadUrl(const QString &filePath)
     }
 }
 
+bool FileLoader::isServiceFound() const
+{
+    return m_serviceFound;
+}
+
 void FileLoader::onServiceFound()
 {
     m_serviceFound = m_xmppManager->serviceFound();
     qCDebug(lcFileLoader) << "Upload service found:" << m_serviceFound;
     emit serviceFound(m_serviceFound);
+    if (m_serviceFound) {
+        emit ready();
+    }
 }
 
 void FileLoader::onSlotReceived(const QXmppHttpUploadSlotIq &slot)

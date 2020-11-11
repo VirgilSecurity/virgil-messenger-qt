@@ -63,6 +63,7 @@ MessagesQueue::MessagesQueue(const Settings *settings, VSQMessenger *messenger, 
     connect(this, &MessagesQueue::pushMessageDownload, this, &MessagesQueue::onPushMessageDownload);
     connect(this, &MessagesQueue::pushMessagePreload, this, &MessagesQueue::onPushMessagePreload);
     connect(this, &MessagesQueue::sendNotSentMessages, this, &MessagesQueue::onSendNotSentMessages);
+    connect(fileLoader, &FileLoader::ready, this, &MessagesQueue::onSendNotSentMessages);
 }
 
 MessagesQueue::~MessagesQueue()
@@ -73,7 +74,8 @@ void MessagesQueue::setMessages(const GlobalMessages &messages)
 {
     qCDebug(lcOperation) << "Queued" << messages.size() << "unsent messages";
     for (auto &m : messages) {
-        pushMessageOperation(m);
+        auto op = pushMessageOperation(m);
+        m_factory->populateAll(op);
     }
     if (hasChildren() && isActive()) {
         start();

@@ -50,6 +50,13 @@ public:
 
     // Encryption/decryption
 
+    enum class Result
+    {
+        Success,
+        Fail,
+        Invalid
+    };
+
     static int bufferSizeForEncryption(const int rawSize);
 
     static int bufferSizeForDecryption(const int encryptedSize);
@@ -58,9 +65,9 @@ public:
 
     static Optional<QString> encryptMessage(const Message &message, const Contact::Id &recipient);
 
-    static bool decryptFile(const QString &encPath, const QString &path, const Contact::Id &recipientId);
+    static Result decryptFile(const QString &encPath, const QString &path, const Contact::Id &recipientId);
 
-    static bool encryptFile(const QString &path, const QString &encPath, const Contact::Id &recipientId);
+    static Result encryptFile(const QString &path, const QString &encPath, const Contact::Id &recipientId);
 };
 }
 

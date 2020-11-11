@@ -58,6 +58,7 @@ signals:
 
 protected:
     virtual void connectReply(QNetworkReply *reply);
+    void cleanup() override;
 
     bool openFileHandle(const QFile::OpenMode &mode);
     void closeFileHandle();
@@ -71,12 +72,14 @@ private:
     void onReplyErrorOccurred(const QNetworkReply::NetworkError &error, QNetworkReply *reply);
     void onReplySslErrors();
     void onSetProgress(const DataSize &bytesLoaded, const DataSize &bytesTotal);
+    void setConnectionChanged();
 
     FileLoader *m_fileLoader;
     QString m_filePath;
     QScopedPointer<QFile> m_fileHandle;
     DataSize m_bytesLoaded = 0;
     DataSize m_bytesTotal = 0;
+    bool m_connectionChanged = false;
 };
 }
 

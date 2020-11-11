@@ -109,24 +109,24 @@ Optional<QString> Core::encryptMessage(const Message &message, const Contact::Id
     return QString::fromLatin1(reinterpret_cast<char*>(encryptedMessage), encryptedMessageSz);
 }
 
-bool Core::decryptFile(const QString &encPath, const QString &path, const Contact::Id &recipientId)
+Core::Result Core::decryptFile(const QString &encPath, const QString &path, const Contact::Id &recipientId)
 {
     // Read
     QFile encFile(encPath);
     if (!encFile.exists()) {
         qCCritical(lcCore) << "Decryption. Source file doesn't exist";
-        return false;
+        return Result::Invalid;
     }
     if (!encFile.open(QFile::ReadOnly)) {
         qCCritical(lcCore) << "Decryption. Source file can't be opened";
-        return false;
+        return Result::Invalid;
     }
     const auto encBytes = encFile.readAll();
     qCDebug(lcCore) << "Read" << encBytes.size() << "bytes";
     encFile.close();
     if (encBytes.size() == 0) {
         qCDebug(lcCore) << "Empty file was skipped";
-        return false;
+        return Result::Invalid;
     }
 
     // Decrypt
@@ -139,7 +139,7 @@ bool Core::decryptFile(const QString &encPath, const QString &path, const Contac
     if (VS_CODE_OK != code)
     {
         qCCritical(lcCore) << "Cannot decrypt file:" << encPath << "code:" << code;
-        return false;
+        return (code == VS_CODE_ERR_MSGR_SERVICE) ? Result::Fail : Result::Invalid;
     }
     bytes.resize(bytesSize);
 
@@ -147,31 +147,31 @@ bool Core::decryptFile(const QString &encPath, const QString &path, const Contac
     QFile file(path);
     if (!file.open(QFile::WriteOnly)) {
         qCCritical(lcCore) << "Destination file can't be opened";
-        return false;
+        return Result::Invalid;
     }
     file.write(bytes.data(), bytesSize);
     file.close();
     qCDebug(lcCore) << "File decrypted" << file.fileName() << "size:" << file.size();
-    return true;
+    return Result::Success;
 }
 
-bool Core::encryptFile(const QString &path, const QString &encPath, const Contact::Id &recipientId)
+Core::Result Core::encryptFile(const QString &path, const QString &encPath, const Contact::Id &recipientId)
 {
     // Read
     QFile file(path);
     if (!file.exists()) {
         qCCritical(lcCore) << "Encryption. Source file doesn't exist";
-        return false;
+        return Result::Invalid;
     }
     if (!file.open(QFile::ReadOnly)) {
         qCCritical(lcCore) << "Encryption.Source file can't be opened";
-        return false;
+        return Result::Invalid;
     }
     const auto bytes = file.readAll();
     qCDebug(lcCore) << "Read" << bytes.size() << "bytes";
     if (bytes.size() == 0) {
         qCDebug(lcCore) << "Empty file was skipped";
-        return false;
+        return Result::Invalid;
     }
     file.close();
 
@@ -185,7 +185,7 @@ bool Core::encryptFile(const QString &path, const QString &encPath, const Contac
     if (VS_CODE_OK != code)
     {
         qCCritical(lcCore) << "Cannot encrypt file:" << path << "code:" << code;
-        return false;
+        return (code == VS_CODE_ERR_MSGR_SERVICE) ? Result::Fail : Result::Invalid;
     }
     encBytes.resize(encBytesSize);
     encBytes.push_back(0);
@@ -194,10 +194,10 @@ bool Core::encryptFile(const QString &path, const QString &encPath, const Contac
     QFile encFile(encPath);
     if (!encFile.open(QFile::WriteOnly)) {
         qCCritical(lcCore) << "Destination file can't be opened";
-        return false;
+        return Result::Invalid;
     }
     encFile.write(encBytes.data(), encBytes.size());
     encFile.close();
     qCDebug(lcCore) << "File encrypted:" << encFile.fileName() << "size:" << encFile.size();
-    return true;
+    return Result::Success;
 }

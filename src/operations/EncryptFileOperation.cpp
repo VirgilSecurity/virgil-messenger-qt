@@ -48,7 +48,11 @@ EncryptFileOperation::EncryptFileOperation(const QString &name, QObject *parent,
 
 void EncryptFileOperation::run()
 {
-    if (Core::encryptFile(m_sourcePath, m_destPath, m_recipientId)) {
+    const auto result = Core::encryptFile(m_sourcePath, m_destPath, m_recipientId);
+    if (result == Core::Result::Fail) {
+        fail();
+    }
+    else if (result == Core::Result::Success) {
         emit encrypted(m_destPath);
         emit bytesCalculated(QFile(m_destPath).size());
         finish();

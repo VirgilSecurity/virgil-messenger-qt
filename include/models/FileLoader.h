@@ -61,6 +61,8 @@ public:
     // TODO(fpohtmeh): redesign as signal
     QString requestUploadUrl(const QString &filePath);
 
+    bool isServiceFound() const;
+
 signals:
     void serviceFound(const bool found);
     void ready();

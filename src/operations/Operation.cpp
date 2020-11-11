@@ -66,7 +66,7 @@ void Operation::start()
 
 void Operation::drop()
 {
-    //qCDebug(lcOperation) << "Drop operation:" << name();
+    qCDebug(lcOperation) << "Drop operation:" << name();
     dropChildren();
     cleanupOnce();
     deleteLater();
@@ -142,14 +142,13 @@ void Operation::finish()
 
 void Operation::cleanupOnce()
 {
+    if (hasChildren()) {
+        return;
+    }
     if (m_cleanedUp) {
         return;
     }
     m_cleanedUp = true;
-
-    for (auto child : m_children) {
-        child->cleanupOnce();
-    }
     cleanup();
 }
 
@@ -161,7 +160,7 @@ void Operation::run()
 
 void Operation::cleanup()
 {
-    //qCDebug(lcOperation) << "Cleanup operation:" << name();
+    qCDebug(lcOperation) << "Cleanup operation:" << name();
 }
 
 bool Operation::populateChildren()

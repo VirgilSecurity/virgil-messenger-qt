@@ -239,6 +239,7 @@ void Utils::removeFile(const QString &filePath)
 {
     if (fileExists(filePath)) {
         QFile::remove(filePath);
+        qCDebug(lcUtils) << "Removed file:" << filePath;
     }
 }
 
