@@ -96,7 +96,6 @@ private:
     void onMessageOperationAttachmentProcessedSizeChanged(const MessageOperation *operation);
     void onMessageOperationAttachmentEncryptedSizeChanged(const MessageOperation *operation);
 
-
     VSQMessenger *m_messenger;
     UserDatabase *m_userDatabase;
     MessageOperationFactory *m_factory;

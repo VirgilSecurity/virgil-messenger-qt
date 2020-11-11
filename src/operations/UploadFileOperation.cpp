@@ -46,7 +46,7 @@ UploadFileOperation::UploadFileOperation(const QString &name, QObject *parent, c
     : LoadFileOperation(name, parent, fileLoader)
 {
     setFilePath(filePath);
-    connect(fileLoader, &FileLoader::slotUrlReceived, this, &UploadFileOperation::onSlotUrlReceived);
+    connect(fileLoader, &FileLoader::slotUrlsReceived, this, &UploadFileOperation::onSlotUrlsReceived);
     connect(fileLoader, &FileLoader::slotUrlErrorOcurrend, this, &UploadFileOperation::onSlotUrlErrorOcurrend);
     connect(this, &UploadFileOperation::finished, this, &UploadFileOperation::onFinished);
 }
@@ -77,14 +77,15 @@ void UploadFileOperation::connectReply(QNetworkReply *reply)
 
 void UploadFileOperation::startUpload()
 {
-    fileLoader()->startUpload(m_url, fileHandle(), std::bind(&UploadFileOperation::connectReply, this, args::_1));
+    fileLoader()->startUpload(m_putUrl, fileHandle(), std::bind(&UploadFileOperation::connectReply, this, args::_1));
 }
 
-void UploadFileOperation::onSlotUrlReceived(const QString &slotId, const QUrl &url)
+void UploadFileOperation::onSlotUrlsReceived(const QString &slotId, const QUrl &putUrl, const QUrl &getUrl)
 {
     if (slotId == m_slotId) {
         qCDebug(lcOperation) << "Upload url received";
-        m_url = url;
+        m_putUrl = putUrl;
+        m_getUrl = getUrl;
         startUpload();
     }
 }
@@ -100,5 +101,5 @@ void UploadFileOperation::onSlotUrlErrorOcurrend(const QString &slotId, const QS
 void UploadFileOperation::onFinished()
 {
     qCDebug(lcOperation) << "File was uploaded";
-    emit uploaded(m_url);
+    emit uploaded(m_getUrl);
 }

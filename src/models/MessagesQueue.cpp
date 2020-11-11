@@ -63,7 +63,6 @@ MessagesQueue::MessagesQueue(const Settings *settings, VSQMessenger *messenger, 
     connect(this, &MessagesQueue::pushMessageDownload, this, &MessagesQueue::onPushMessageDownload);
     connect(this, &MessagesQueue::pushMessagePreload, this, &MessagesQueue::onPushMessagePreload);
     connect(this, &MessagesQueue::sendNotSentMessages, this, &MessagesQueue::onSendNotSentMessages);
-    connect(fileLoader, &FileLoader::ready, this, &MessagesQueue::onSendNotSentMessages);
 }
 
 MessagesQueue::~MessagesQueue()

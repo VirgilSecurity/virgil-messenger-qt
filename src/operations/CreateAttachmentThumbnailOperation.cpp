@@ -39,8 +39,8 @@
 
 using namespace vm;
 
-CreateAttachmentThumbnailOperation::CreateAttachmentThumbnailOperation(MessageOperation *parent, const Settings *settings, const QString &sourcePath, const QString &destPath)
-    : CreateThumbnailOperation(QLatin1String("CreateAttachmentThumbnail"), parent, sourcePath, destPath, settings->previewMaxSize())
+CreateAttachmentThumbnailOperation::CreateAttachmentThumbnailOperation(const QString &name, MessageOperation *parent, const Settings *settings, const QString &sourcePath, const QString &destPath)
+    : CreateThumbnailOperation(name, parent, sourcePath, destPath, settings->previewMaxSize())
 {
     connect(this, &CreateThumbnailOperation::thumbnailReady, parent, &MessageOperation::setAttachmentThumbnailPath);
 }

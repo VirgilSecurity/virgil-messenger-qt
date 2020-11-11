@@ -49,7 +49,7 @@ public:
     void run() override;
 
 signals:
-    void uploaded(const QUrl &url);
+    void uploaded(const QUrl &getUrl);
 
 private:
     void cleanup() override;
@@ -58,12 +58,13 @@ private:
     void tryAutoDeleteFile();
     void startUpload();
 
-    void onSlotUrlReceived(const QString &slotId, const QUrl &url);
+    void onSlotUrlsReceived(const QString &slotId, const QUrl &putUrl, const QUrl &getUrl);
     void onSlotUrlErrorOcurrend(const QString &slotId, const QString &errorText);
     void onFinished();
 
     QString m_slotId;
-    QUrl m_url;
+    QUrl m_putUrl;
+    QUrl m_getUrl;
 };
 }
 

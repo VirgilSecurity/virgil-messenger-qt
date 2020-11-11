@@ -70,7 +70,7 @@ FileLoader::FileLoader(QXmppClient *client, QNetworkAccessManager *networkAccess
 
 QString FileLoader::requestUploadUrl(const QString &filePath)
 {
-    if (m_isReady) {
+    if (m_serviceFound) {
         return m_xmppManager->requestUploadSlot(QFileInfo(filePath));
     }
     else {
@@ -80,16 +80,14 @@ QString FileLoader::requestUploadUrl(const QString &filePath)
 
 void FileLoader::onServiceFound()
 {
-    m_isReady = m_xmppManager->serviceFound();
-    qCDebug(lcFileLoader) << "Upload service found:" << m_isReady;
-    if (m_isReady) {
-        emit ready();
-    }
+    m_serviceFound = m_xmppManager->serviceFound();
+    qCDebug(lcFileLoader) << "Upload service found:" << m_serviceFound;
+    emit serviceFound(m_serviceFound);
 }
 
 void FileLoader::onSlotReceived(const QXmppHttpUploadSlotIq &slot)
 {
-    emit slotUrlReceived(slot.id(), slot.putUrl());
+    emit slotUrlsReceived(slot.id(), slot.putUrl(), slot.getUrl());
 }
 
 void FileLoader::onRequestFailed(const QXmppHttpUploadRequestIq &request)

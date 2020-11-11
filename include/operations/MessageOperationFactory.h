@@ -73,9 +73,9 @@ public:
 
     DownloadDecryptFileOperation *populateDownloadDecrypt(const QString &name, Operation *parent, const QUrl &url, const QString &destPath, const Contact::Id &senderId);
     EncryptUploadFileOperation *populateEncryptUpload(const QString &name, Operation *parent, const QString &sourcePath, const Contact::Id &recipientId);
-    ConvertToPngOperation *populateConvertToPngOperation(Operation *parent, const QString &sourcePath);
-    CreateAttachmentThumbnailOperation *populateCreateAttachmentThumbnail(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &filePath);
-    CreateAttachmentPreviewOperation *populateCreateAttachmentPreview(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &destPath);
+    ConvertToPngOperation *populateConvertToPngOperation(const QString &name, Operation *parent, const QString &sourcePath);
+    CreateAttachmentThumbnailOperation *populateCreateAttachmentThumbnail(const QString &name, MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &filePath);
+    CreateAttachmentPreviewOperation *populateCreateAttachmentPreview(const QString &name, MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &destPath);
 
 private:
     SendMessageOperation *createSendMessageOperation(MessageOperation *parent);

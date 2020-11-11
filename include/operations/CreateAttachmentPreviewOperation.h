@@ -48,7 +48,7 @@ class CreateAttachmentPreviewOperation : public CreateThumbnailOperation
     Q_OBJECT
 
 public:
-    CreateAttachmentPreviewOperation(MessageOperation *parent, const Settings *settings, const QString &sourcePath, const QString &destPath);
+    CreateAttachmentPreviewOperation(const QString &name, MessageOperation *parent, const Settings *settings, const QString &sourcePath, const QString &destPath);
 };
 }
 

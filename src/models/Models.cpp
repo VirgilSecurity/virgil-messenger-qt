@@ -62,7 +62,6 @@ Models::Models(VSQMessenger *messenger, Settings *settings, UserDatabase *userDa
     qRegisterMetaType<QSortFilterProxyModel *>("QSortFilterProxyModel*");
 
     connect(m_messagesQueue, &MessagesQueue::notificationCreated, this, &Models::notificationCreated);
-    connect(messenger, &VSQMessenger::fireReady, m_messagesQueue, &MessagesQueue::sendNotSentMessages);
 
     m_messagesQueue->moveToThread(m_queueThread);
     m_queueThread->setObjectName("QueueThread");
@@ -115,4 +114,14 @@ const MessagesQueue *Models::messagesQueue() const
 MessagesQueue *Models::messagesQueue()
 {
     return m_messagesQueue;
+}
+
+const FileLoader *Models::fileLoader() const
+{
+    return m_fileLoader;
+}
+
+FileLoader *Models::fileLoader()
+{
+    return m_fileLoader;
 }

@@ -71,6 +71,8 @@ public:
     MessagesModel *messages();
     const MessagesQueue *messagesQueue() const;
     MessagesQueue *messagesQueue();
+    const FileLoader *fileLoader() const;
+    FileLoader *fileLoader();
 
 signals:
     void notificationCreated(const QString &notification);

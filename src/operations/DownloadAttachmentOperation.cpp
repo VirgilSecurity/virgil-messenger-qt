@@ -63,7 +63,7 @@ bool DownloadAttachmentOperation::populateChildren()
             // Create preview from original file
             if (!Utils::fileExists(extras.previewPath) && Utils::fileExists(attachment->localPath)) {
                 const auto filePath = m_settings->makeThumbnailPath(attachment->id, true);
-                factory->populateCreateAttachmentPreview(m_parent, this, attachment->localPath, filePath);
+                factory->populateCreateAttachmentPreview(preffix + QString("CreateAttachmentPreview"), m_parent, this, attachment->localPath, filePath);
             }
             // Otherwise download/decrypt thumbnail
             else if (!Utils::fileExists(extras.thumbnailPath)) {
@@ -90,7 +90,7 @@ bool DownloadAttachmentOperation::populateChildren()
             const auto extras = attachment->extras.value<PictureExtras>();
             if (!Utils::fileExists(extras.previewPath)) {
                 const auto filePath = m_settings->makeThumbnailPath(attachment->id, true);
-                factory->populateCreateAttachmentPreview(m_parent, this, downloadPath, filePath);
+                factory->populateCreateAttachmentPreview(preffix + QString("CreateAttachmentPreview"), m_parent, this, downloadPath, filePath);
             }
         }
     }

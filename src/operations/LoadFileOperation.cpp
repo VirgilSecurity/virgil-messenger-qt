@@ -128,7 +128,7 @@ void LoadFileOperation::onReplyFinished()
 
 void LoadFileOperation::onReplyErrorOccurred(const QNetworkReply::NetworkError &error, QNetworkReply *reply)
 {
-    qCWarning(lcOperation) << "File load error occurred:" << error << reply->errorString();
+    qCWarning(lcOperation) << "File load error occurred:" << error << static_cast<int>(error) << reply->errorString();
     fail();
 }
 
@@ -150,7 +150,8 @@ void LoadFileOperation::onSetProgress(const DataSize &bytesLoaded, const DataSiz
         emit progressChanged(bytesLoaded, bytesTotal);
     }
     else {
-        qCDebug(lcOperation) << "All bytes were processed, set load operation finished";
+        qCDebug(lcOperation) << "All bytes were processed, set load operation finished."
+                             << Utils::printableLoadProgress(m_bytesLoaded, m_bytesTotal);
         closeFileHandle();
         finish();
     }

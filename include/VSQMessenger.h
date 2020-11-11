@@ -151,18 +151,6 @@ signals:
     fireError(QString errorText);
 
     void
-    fireInform(QString informText);
-
-    void
-    fireWarning(QString warningText);
-
-    void
-    fireConnecting();
-
-    void
-    fireReady();
-
-    void
     fireNewMessage(QString from, QString message);
 
     void
@@ -190,7 +178,6 @@ private slots:
     void onPresenceReceived(const QXmppPresence &presence);
     void onIqReceived(const QXmppIq &iq);
     void onSslErrors(const QList<QSslError> &errors);
-    void onStateChanged(QXmppClient::State state);
     void onProcessNetworkState(bool online);
 
     void registerForNotifications();

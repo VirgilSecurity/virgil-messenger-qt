@@ -62,12 +62,13 @@ public:
     QString requestUploadUrl(const QString &filePath);
 
 signals:
+    void serviceFound(const bool found);
     void ready();
 
     void startDownload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup);
     void startUpload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup);
 
-    void slotUrlReceived(const QString &slotId, const QUrl &url);
+    void slotUrlsReceived(const QString &slotId, const QUrl &putUrl, const QUrl &getUrl);
     void slotUrlErrorOcurrend(const QString &slotId, const QString &errorText);
 
 private:
@@ -79,7 +80,7 @@ private:
 
     QNetworkAccessManager *m_networkAccessManager;
     QXmppUploadRequestManager *m_xmppManager;
-    bool m_isReady = false;
+    bool m_serviceFound = false;
 };
 }
 

@@ -90,6 +90,8 @@ Optional<Attachment> AttachmentsModel::createAttachment(const QUrl &url, const A
     // Filename
 #ifdef VS_ANDROID
     attachment.fileName = VSQAndroid::getDisplayName(url);
+#elif defined(VS_IOS_SIMULATOR)
+    attachment.fileName = url.fileName();
 #elif defined(VS_IOS)
     if (type == Attachment::Type::Picture) {
         // Build file name from url, i.e. "file:assets-library://asset/asset.PNG?id=7CE20DC4-89A8-4079-88DC-AD37920581B5&ext=PNG"

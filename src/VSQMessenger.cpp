@@ -123,7 +123,6 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, Settings
     connect(&m_xmpp, SIGNAL(presenceReceived(const QXmppPresence &)), this, SLOT(onPresenceReceived(const QXmppPresence &)));
     connect(&m_xmpp, SIGNAL(iqReceived(const QXmppIq &)), this, SLOT(onIqReceived(const QXmppIq &)));
     connect(&m_xmpp, SIGNAL(sslErrors(const QList<QSslError> &)), this, SLOT(onSslErrors(const QList<QSslError> &)));
-    connect(&m_xmpp, SIGNAL(stateChanged(QXmppClient::State)), this, SLOT(onStateChanged(QXmppClient::State)));
 
     // Network Analyzer
     connect(&m_networkAnalyzer, &VSQNetworkAnalyzer::fireStateChanged, this, &VSQMessenger::onProcessNetworkState, Qt::QueuedConnection);
@@ -256,9 +255,6 @@ VSQMessenger::_connect(QString userWithEnv, QString deviceId, QString userId, bo
 
     // Update users list
     m_settings->addUserToList(userWithEnv);
-
-    // Connect to XMPP
-    emit fireConnecting();
 
     QString jid = userId + "@" + xmppURL() + "/" + deviceId;
     m_conf.setJid(jid);
@@ -794,12 +790,4 @@ void
 VSQMessenger::onSslErrors(const QList<QSslError> &errors) {
     Q_UNUSED(errors)
     emit fireError(tr("Secure connection error ..."));
-}
-
-/******************************************************************************/
-void
-VSQMessenger::onStateChanged(QXmppClient::State state) {
-    if (QXmppClient::ConnectingState == state) {
-        emit fireConnecting();
-    }
 }

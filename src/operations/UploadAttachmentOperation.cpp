@@ -64,13 +64,13 @@ bool UploadAttachmentOperation::populateChildren()
     // Convert to png
     ConvertToPngOperation *convertOp = nullptr;
     if (isPicture) {
-        convertOp = factory->populateConvertToPngOperation(this, attachment->localPath);
+        convertOp = factory->populateConvertToPngOperation(preffix + QString("ConvertToPng"), this, attachment->localPath);
         connect(convertOp, &ConvertToPngOperation::fileCreated, this, &UploadAttachmentOperation::setTempPngPath);
     }
     //  Create picture preview
     if (isPicture) {
         const auto filePath = m_settings->makeThumbnailPath(attachment->id, true);
-        auto op = factory->populateCreateAttachmentPreview(m_parent, this, attachment->localPath, filePath);
+        auto op = factory->populateCreateAttachmentPreview(preffix + QString("CreateAttachmentPreview"), m_parent, this, attachment->localPath, filePath);
         if (convertOp) {
             connect(convertOp, &ConvertToPngOperation::imageRead, op, &CreateAttachmentPreviewOperation::setSourceImage);
             connect(convertOp, &ConvertToPngOperation::converted, op, &CreateAttachmentPreviewOperation::setSourcePath);
@@ -92,7 +92,7 @@ bool UploadAttachmentOperation::populateChildren()
     if (isPicture) {
         // Create thumbnail
         const auto filePath = m_settings->makeThumbnailPath(attachment->id, false);
-        auto op = factory->populateCreateAttachmentThumbnail(m_parent, this, attachment->localPath, filePath);
+        auto op = factory->populateCreateAttachmentThumbnail(preffix + QString("CreateAttachmentThumbnail"), m_parent, this, attachment->localPath, filePath);
         if (convertOp) {
             connect(convertOp, &ConvertToPngOperation::imageRead, op, &CreateAttachmentThumbnailOperation::setSourceImage);
             connect(convertOp, &ConvertToPngOperation::converted, op, &CreateAttachmentThumbnailOperation::setSourcePath);

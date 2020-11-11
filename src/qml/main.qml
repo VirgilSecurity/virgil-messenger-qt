@@ -46,34 +46,6 @@ ApplicationWindow {
         readonly property bool restore: settings.windowGeometry.width > 0 && settings.windowGeometry.height > 0
     }
 
-    //
-    //  Connections
-    //
-    Connections {
-        target: Messenger
-
-        function onFireError() {
-        }
-
-        function onFireInform() {
-        }
-
-        function onFireWarning(text) {
-            showPopupError(text);
-        }
-
-        function onFireConnecting() {
-        }
-
-        function onFireReady() {
-        }
-
-        function onFireNewMessage() {
-        }
-    }
-
-    // TODO(fpohtmeh): display controller/database errors?
-
     onClosing: {
         if (Platform.isAndroid) {
             close.accepted = false

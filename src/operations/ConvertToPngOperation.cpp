@@ -41,8 +41,8 @@
 
 using namespace vm;
 
-ConvertToPngOperation::ConvertToPngOperation(const Settings *settings, const QString &sourcePath, QObject *parent)
-    : Operation(QLatin1String("ConvertToPng"), parent)
+ConvertToPngOperation::ConvertToPngOperation(const QString &name, const Settings *settings, const QString &sourcePath, QObject *parent)
+    : Operation(name, parent)
     , m_settings(settings)
     , m_sourcePath(sourcePath)
 {}
