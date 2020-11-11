@@ -135,11 +135,13 @@ void MessagesController::setUserId(const UserId &userId)
     if (!m_userId.isEmpty()) {
         // Receive postponed messages
         for (auto &m : m_receivedMessagesWithoutUser) {
+            qCDebug(lcController) << "Processing of xmpp message from" << m.from();
             receiveMessage(m);
         }
         m_receivedMessagesWithoutUser.clear();
         // Set postponed statuses
         for (auto &m : m_deliveredStatusesWithoutUser) {
+            qCDebug(lcController) << "Processing of xmpp delivered status from" << m.jid;
             setDeliveredStatus(m.jid, m.messageId);
         }
         m_deliveredStatusesWithoutUser.clear();
@@ -174,6 +176,7 @@ void MessagesController::setMessageStatus(const Message::Id &messageId, const Co
 void MessagesController::setDeliveredStatus(const Jid &jid, const Message::Id &messageId)
 {
     if (m_userId.isEmpty()) {
+        qCDebug(lcController) << "Collecting of xmpp delivered status from" << jid;
         m_deliveredStatusesWithoutUser.push_back({ jid, messageId });
     }
     else {
@@ -237,6 +240,7 @@ void MessagesController::setAttachmentLocalPath(const Attachment::Id &attachment
 void MessagesController::receiveMessage(const QXmppMessage &msg)
 {
     if (m_userId.isEmpty()) {
+        qCDebug(lcController) << "Collecting of xmpp message from" << msg.from();
         m_receivedMessagesWithoutUser.push_back(msg);
         return;
     }

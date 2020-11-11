@@ -131,6 +131,7 @@
         <file>resources/database/selectChatMessages.sql</file>
         <file>resources/database/selectNotSentMessages.sql</file>
         <file>resources/database/resetUnreadCount.sql</file>
+        <file>resources/database/updateAttachmentEncryptedSize.sql</file>
         <file>resources/database/updateAttachmentExtras.sql</file>
         <file>resources/database/updateAttachmentStatus.sql</file>
         <file>resources/database/updateAttachmentUrl.sql</file>

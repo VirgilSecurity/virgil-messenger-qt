@@ -132,11 +132,6 @@ void MessageOperationFactory::populateAttachmentOperation(MessageOperation *mess
         if (m.status == Message::Status::Created || m.status == Message::Status::Failed) {
             populateUpload(messageOp);
         }
-        else if (isPicture && (m.status == Message::Status::Sent || m.status == Message::Status::Delivered)) {
-            if (Utils::attachmentDisplayImagePath(a).isEmpty()) {
-                populatePreload(messageOp);
-            }
-        }
     }
     else if (m.senderId == m.contactId) {
         if (isPicture && (m.status == Message::Status::Created || m.status == Message::Status::Read)) {
