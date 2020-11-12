@@ -32,57 +32,45 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHATSMODEL_H
-#define VM_CHATSMODEL_H
+#include "models/AccountSelectionModel.h"
 
-#include "ListModel.h"
-#include "VSQCommon.h"
+#include "Settings.h"
 
-namespace vm
+using namespace vm;
+
+AccountSelectionModel::AccountSelectionModel(Settings *settings, QObject *parent)
+    : ListModel(parent)
+    , m_settings(settings)
 {
-class ChatsModel : public ListModel
-{
-    Q_OBJECT
-
-public:
-    explicit ChatsModel(QObject *parent);
-    ~ChatsModel() override;
-
-    void setChats(const Chats &chats);
-    Chat createChat(const Contact::Id &contactId);
-
-    void resetUnreadCount(const Chat::Id &chatId);
-    void updateLastMessage(const Message &message, const Chat::UnreadCount &unreadMessageCount);
-
-    Optional<Chat> findById(const Chat::Id &chatId) const;
-    Optional<Chat> findByContact(const Contact::Id &contactId) const;
-
-signals:
-    void chatsSet();
-    void chatCreated(const Chat &chat);
-    void chatUpdated(const Chat &chat);
-
-private:
-    enum Roles
-    {
-        IdRole = Qt::UserRole,
-        ContactIdRole,
-        LastEventTimeRole,
-        LastEventTimestampRole,
-        LastMessageBodyRole,
-        UnreadMessagesCountRole
-    };
-
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
-
-    Optional<int> findRowById(const Chat::Id &chatId) const;
-    Optional<int> findRowByLastMessageId(const Message::Id &messageId) const;
-    Optional<int> findRowByContactId(const Contact::Id &contactId) const;
-
-    Chats m_chats;
-};
+    connect(m_settings, &Settings::usersListChanged, this, &AccountSelectionModel::reload);
 }
 
-#endif // VM_CHATSMODEL_H
+int AccountSelectionModel::rowCount(const QModelIndex &parent) const
+{
+    Q_UNUSED(parent)
+    const auto usersList = m_settings->usersList();
+    return (usersList.size() + m_chunkSize - 1) / m_chunkSize;
+}
+
+QVariant AccountSelectionModel::data(const QModelIndex &index, int role) const
+{
+    Q_UNUSED(role)
+    const auto usersList = m_settings->usersList();
+    const auto group = index.row();
+    const auto start(m_chunkSize * group);
+    const auto end(qMin(m_chunkSize * (group + 1), usersList.size()));
+    return QStringList(usersList.cbegin() + start, usersList.cbegin() + end);
+}
+
+QHash<int, QByteArray> AccountSelectionModel::roleNames() const
+{
+    QHash<int, QByteArray> names;
+    names[Qt::DisplayRole] = "modelData";
+    return names;
+}
+
+void AccountSelectionModel::reload()
+{
+    beginResetModel();
+    endResetModel();
+}

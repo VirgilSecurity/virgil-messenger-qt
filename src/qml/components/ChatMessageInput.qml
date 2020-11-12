@@ -182,7 +182,11 @@ Control {
 
     Connections {
         target: attachmentPicker
+
         function onPicked(fileUrls, attachmentType) {
+            if (manager.currentState !== manager.chatState) {
+                return;
+            }
             const url = fileUrls[fileUrls.length - 1]
             sendMessage(url, attachmentType)
         }

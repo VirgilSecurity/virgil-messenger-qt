@@ -34,8 +34,6 @@
 
 #include "controllers/AttachmentsController.h"
 
-#include <QDesktopServices>
-
 #include "Core.h"
 #include "Settings.h"
 #include "Utils.h"
@@ -45,7 +43,7 @@
 
 using namespace vm;
 
-AttachmentsController::AttachmentsController(Settings *settings, Models *models, QObject *parent)
+AttachmentsController::AttachmentsController(const Settings *settings, Models *models, QObject *parent)
     : QObject(parent)
     , m_settings(settings)
     , m_models(models)
@@ -88,7 +86,7 @@ void AttachmentsController::open(const Message::Id &messageId)
             }
             else {
                 qCDebug(lcController) << "Opening of file:" << url.fileName();
-                QDesktopServices::openUrl(url);
+                Utils::openUrl(url);
             }
         }
     }

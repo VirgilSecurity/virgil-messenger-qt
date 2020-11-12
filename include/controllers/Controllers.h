@@ -44,6 +44,7 @@ namespace vm
 {
 class AttachmentsController;
 class ChatsController;
+class FileCloudController;
 class MessagesController;
 class Models;
 class UserDatabase;
@@ -56,6 +57,7 @@ class Controllers : public QObject
     Q_PROPERTY(UsersController *users READ users CONSTANT)
     Q_PROPERTY(ChatsController *chats READ chats CONSTANT)
     Q_PROPERTY(MessagesController *messages READ messages CONSTANT)
+    Q_PROPERTY(FileCloudController *fileCloud READ fileCloud CONSTANT)
 
 public:
     Controllers(VSQMessenger *messenger, Settings *settings,
@@ -69,6 +71,8 @@ public:
     ChatsController *chats();
     const MessagesController *messages() const;
     MessagesController *messages();
+    const FileCloudController *fileCloud() const;
+    FileCloudController *fileCloud();
 
 signals:
     void notificationCreated(const QString &notification);
@@ -78,6 +82,7 @@ private:
     UsersController *m_users;
     ChatsController *m_chats;
     MessagesController *m_messages;
+    FileCloudController *m_fileCloud;
 };
 }
 

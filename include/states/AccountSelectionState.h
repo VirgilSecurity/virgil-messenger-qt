@@ -36,24 +36,19 @@
 #define VM_ACCOUNTSELECTIONSTATE_H
 
 #include "SignInState.h"
-#include "AccountSelectionModel.h"
 
 namespace vm
 {
 class AccountSelectionState : public SignInState
 {
     Q_OBJECT
-    Q_PROPERTY(AccountSelectionModel *model MEMBER m_model CONSTANT)
 
 public:
-    AccountSelectionState(UsersController *usersController, Validator *validator, Settings *settings, QState *parent);
+    AccountSelectionState(UsersController *usersController, Validator *validator, QState *parent);
 
 signals:
     void requestSignInUsername();
     void requestSignUp();
-
-private:
-    AccountSelectionModel *m_model;
 };
 }
 

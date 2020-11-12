@@ -10,21 +10,31 @@ Control {
         color: Theme.mainBackgroundColor
     }
 
+    readonly property bool isFileCloud: app.stateManager.currentState === manager.fileCloudState
+    readonly property int defaultMargin: 9
+
     default property alias menu: contextMenu.contentData
 
-    ColumnLayout {
+    Rectangle {
+        x: 0
+        y: button.y - defaultMargin
+        width: parent.width
+        height: button.height + 2 * defaultMargin
+        color: Theme.contactsBackgroundColor
 
+        readonly property var button: isFileCloud ? fileCloudButton : chatListButton
+    }
+
+    ColumnLayout {
         anchors.fill: parent
+        spacing: 2 * defaultMargin
 
         ImageButton {
             Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: 10
-            Layout.bottomMargin: 9
+            Layout.topMargin: defaultMargin
             image: "Menu"
 
-            onClicked: {
-                contextMenu.open()
-            }
+            onClicked: contextMenu.open()
 
             ContextMenu {
                 id: contextMenu
@@ -33,11 +43,12 @@ Control {
         }
 
         Rectangle {
+            id: chatListButton
             Layout.alignment: Qt.AlignHCenter
             implicitHeight: 36
             implicitWidth: 36
             color: Customer.serverIconBackgroundColor
-            radius: 9
+            radius: defaultMargin
 
             Image {
                 anchors.centerIn: parent
@@ -46,12 +57,23 @@ Control {
                 source: "../resources/icons/Logo.png"
                 fillMode: Image.PreserveAspectFit
             }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: app.stateManager.openChatList()
+            }
+        }
+
+        ImageButton {
+            id: fileCloudButton
+            Layout.alignment: Qt.AlignHCenter
+            image: "File Selected Big"
+
+            onClicked: app.stateManager.openFileCloud()
         }
 
         ImageButton {
             Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: 10
-            Layout.bottomMargin: 9
             image: "Plus"
         }
 

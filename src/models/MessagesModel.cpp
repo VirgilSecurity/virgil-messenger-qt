@@ -39,7 +39,7 @@
 using namespace vm;
 
 MessagesModel::MessagesModel(QObject *parent)
-    : QAbstractListModel(parent)
+    : ListModel(parent)
 {}
 
 MessagesModel::~MessagesModel()

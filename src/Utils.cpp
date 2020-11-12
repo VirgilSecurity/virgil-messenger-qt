@@ -34,6 +34,7 @@
 
 #include "Utils.h"
 
+#include <QDesktopServices>
 #include <QDir>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -128,48 +129,55 @@ QUrl Utils::localFileToUrl(const QString &filePath)
 #endif
 }
 
-QString Utils::formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval)
+QString Utils::formattedElapsedSeconds(const Seconds &seconds, const Seconds &nowInterval)
 {
-    const auto preffix = QObject::tr("Last seen %1");
-    if (seconds < updateInterval) {
-        return QObject::tr("Online");
+    if (seconds < nowInterval) {
+        return QObject::tr("now");
     }
-    if (seconds <= 3 * updateInterval) {
-        return preffix.arg(QObject::tr("few seconds ago"));
+    if (seconds <= 3 * nowInterval) {
+        return QObject::tr("few seconds ago");
     }
     const Seconds minute(60);
     if (seconds < minute) {
-        return preffix.arg(QObject::tr("recently"));
+        return QObject::tr("recently");
     }
     if (seconds < 2 * minute) {
-        return preffix.arg(QObject::tr("a minute ago"));
+        return QObject::tr("a minute ago");
     }
     if (seconds < 50 * minute) {
-        return preffix.arg(QObject::tr("%1 minutes ago").arg(seconds / minute));
+        return QObject::tr("%1 minutes ago").arg(seconds / minute);
     }
     const Seconds hour(60 * minute);
     if (seconds < 2 * hour) {
-        return preffix.arg(QObject::tr("an hour ago"));
+        return QObject::tr("an hour ago");
     }
     const Seconds day(24 * hour);
     if (seconds < day) {
-        return preffix.arg(QObject::tr("%1 hours ago").arg(seconds / hour));
+        return QObject::tr("%1 hours ago").arg(seconds / hour);
     }
     if (seconds < 2 * day) {
-        return preffix.arg(QObject::tr("yesterday"));
+        return QObject::tr("yesterday");
     }
     const Seconds month(30 * day);
     if (seconds < month) {
-        return preffix.arg(QObject::tr("%1 days ago").arg(seconds / day));
+        return QObject::tr("%1 days ago").arg(seconds / day);
     }
     const Seconds year(12 * month);
     if (seconds < year) {
-        return preffix.arg(QObject::tr("%1 months ago").arg(seconds / month));
+        return QObject::tr("%1 months ago").arg(seconds / month);
     }
     if (seconds < 2 * year) {
-        return preffix.arg(QObject::tr("year ago"));
+        return QObject::tr("year ago");
     }
-    return preffix.arg(QObject::tr("%1 years ago").arg(seconds / year));
+    return QObject::tr("%1 years ago").arg(seconds / year);
+}
+
+QString Utils::formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval)
+{
+    if (seconds < updateInterval) {
+        return QObject::tr("Online");
+    }
+    return QObject::tr("Last seen %1").arg(formattedElapsedSeconds(seconds, updateInterval));
 }
 
 QString Utils::formattedLastSeenNoActivity()
@@ -243,9 +251,27 @@ void Utils::removeFile(const QString &filePath)
     }
 }
 
-QString Utils::fileName(const QString &filePath)
+QString Utils::attachmentFileName(const QUrl &url, const QFileInfo &localInfo)
 {
-    return QFileInfo(filePath).fileName();
+    QString fileName;
+#ifdef VS_ANDROID
+    fileName = VSQAndroid::getDisplayName(url);
+#elif defined(VS_IOS_SIMULATOR)
+    fileName = url.fileName();
+#elif defined(VS_IOS)
+    if (type == Attachment::Type::Picture) {
+        // Build file name from url, i.e. "file:assets-library://asset/asset.PNG?id=7CE20DC4-89A8-4079-88DC-AD37920581B5&ext=PNG"
+        QUrl urlWithoutFileScheme{url.toLocalFile()};
+        const QUrlQuery query(urlWithoutFileScheme.query());
+        fileName = query.queryItemValue("id") + QChar('.') + query.queryItemValue("ext").toLower();
+    }
+#else
+    Q_UNUSED(url)
+#endif
+    if (fileName.isEmpty()) {
+        fileName = localInfo.fileName();
+    }
+    return fileName;
 }
 
 QString Utils::attachmentDisplayImagePath(const Attachment &attachment)
@@ -258,6 +284,11 @@ QString Utils::attachmentDisplayImagePath(const Attachment &attachment)
         return e.thumbnailPath;
     }
     return QString();
+}
+
+bool Utils::openUrl(const QUrl &url)
+{
+    return QDesktopServices::openUrl(url);
 }
 
 void Utils::printThreadId(const QString &message)

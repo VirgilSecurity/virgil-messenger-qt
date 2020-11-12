@@ -4,9 +4,9 @@
         <file>qml/pages/AccountSelectionPage.qml</file>
         <file>qml/pages/AccountSettingsPage.qml</file>
         <file>qml/pages/BackupKeyPage.qml</file>
-        <file>qml/pages/ChatListPage.qml</file>
         <file>qml/pages/ChatPage.qml</file>
         <file>qml/pages/DownloadKeyPage.qml</file>
+        <file>qml/pages/MainPage.qml</file>
         <file>qml/pages/NewChatPage.qml</file>
         <file>qml/pages/OperationPage.qml</file>
         <file>qml/pages/PasswordResetPage.qml</file>
@@ -66,7 +66,7 @@
         <file>qml/components/Avatar.qml</file>
         <file>qml/components/ChatMessage.qml</file>
         <file>qml/components/MessageCounter.qml</file>
-        <file>qml/components/ContactsHeader.qml</file>
+        <file>qml/components/SearchHeader.qml</file>
         <file>qml/components/Header.qml</file>
         <file>qml/components/ContextMenu.qml</file>
         <file>qml/components/ImageButton.qml</file>
@@ -116,6 +116,8 @@
         <file>qml/components/TextScrollView.qml</file>
         <file>qml/components/AttachmentPicker.qml</file>
         <file>qml/components/LogControl.qml</file>
+        <file>qml/components/ListDelegate.qml</file>
+        <file>qml/components/ModelListView.qml</file>
         <!-- Database -->
         <file>resources/database/createAttachments.sql</file>
         <file>resources/database/createChats.sql</file>

@@ -39,8 +39,10 @@
 
 #include "Settings.h"
 #include "VSQMessenger.h"
+#include "models/AccountSelectionModel.h"
 #include "models/AttachmentsModel.h"
 #include "models/ChatsModel.h"
+#include "models/FileCloudModel.h"
 #include "models/MessagesModel.h"
 #include "models/MessagesQueue.h"
 #include "models/FileLoader.h"
@@ -49,15 +51,19 @@ using namespace vm;
 
 Models::Models(VSQMessenger *messenger, Settings *settings, UserDatabase *userDatabase, QNetworkAccessManager *networkAccessManager, QObject *parent)
     : QObject(parent)
+    , m_accountSelection(new AccountSelectionModel(settings, this))
     , m_attachments(new AttachmentsModel(settings, this))
     , m_chats(new ChatsModel(this))
     , m_messages(new MessagesModel(this))
+    , m_fileCloud(new FileCloudModel(settings, this))
     , m_fileLoader(new FileLoader(messenger->xmpp(), networkAccessManager, this))
     , m_messagesQueue(new MessagesQueue(settings, messenger, userDatabase, m_fileLoader, nullptr))
     , m_queueThread(new QThread())
 {
+    qRegisterMetaType<AccountSelectionModel *>("AccountSelectionModel*");
     qRegisterMetaType<AttachmentsModel *>("AttachmentsModel*");
     qRegisterMetaType<ChatsModel *>("ChatsModel*");
+    qRegisterMetaType<FileCloudModel *>("FileCloudModel*");
     qRegisterMetaType<MessagesModel *>("MessagesModel*");
     qRegisterMetaType<QSortFilterProxyModel *>("QSortFilterProxyModel*");
 
@@ -74,6 +80,16 @@ Models::~Models()
     m_queueThread->wait();
     delete m_messagesQueue;
     delete m_queueThread;
+}
+
+const AccountSelectionModel *Models::accountSelection() const
+{
+    return m_accountSelection;
+}
+
+AccountSelectionModel *Models::accountSelection()
+{
+    return m_accountSelection;
 }
 
 const AttachmentsModel *Models::attachments() const
@@ -96,6 +112,26 @@ ChatsModel *Models::chats()
     return m_chats;
 }
 
+const FileCloudModel *Models::fileCloud() const
+{
+    return m_fileCloud;
+}
+
+FileCloudModel *Models::fileCloud()
+{
+    return m_fileCloud;
+}
+
+const FileLoader *Models::fileLoader() const
+{
+    return m_fileLoader;
+}
+
+FileLoader *Models::fileLoader()
+{
+    return m_fileLoader;
+}
+
 const MessagesModel *Models::messages() const
 {
     return m_messages;
@@ -114,14 +150,4 @@ const MessagesQueue *Models::messagesQueue() const
 MessagesQueue *Models::messagesQueue()
 {
     return m_messagesQueue;
-}
-
-const FileLoader *Models::fileLoader() const
-{
-    return m_fileLoader;
-}
-
-FileLoader *Models::fileLoader()
-{
-    return m_fileLoader;
 }

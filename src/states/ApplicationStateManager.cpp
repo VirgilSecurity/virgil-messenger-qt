@@ -43,19 +43,20 @@ Q_LOGGING_CATEGORY(lcAppState, "appState");
 
 using namespace vm;
 
-ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, Controllers *controllers, Validator *validator, Settings *settings, QObject *parent)
+ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, Controllers *controllers, Models *models, Validator *validator, Settings *settings, QObject *parent)
     : QStateMachine(parent)
     , m_messenger(messenger)
     , m_controllers(controllers)
     , m_validator(validator)
     , m_settings(settings)
-    , m_accountSelectionState(new AccountSelectionState(controllers->users(), validator, settings, this))
+    , m_accountSelectionState(new AccountSelectionState(controllers->users(), validator, this))
     , m_accountSettingsState(new AccountSettingsState(this))
     , m_attachmentPreviewState(new AttachmentPreviewState(this))
     , m_backupKeyState(new BackupKeyState(m_messenger, this))
     , m_chatListState(new ChatListState(controllers->chats(), this))
     , m_chatState(new ChatState(controllers, m_messenger->lastActivityManager(), this))
     , m_downloadKeyState(new DownloadKeyState(controllers->users(), this))
+    , m_fileCloudState(new FileCloudState(models, this))
     , m_newChatState(new NewChatState(controllers->chats(), this))
     , m_signInAsState(new SignInAsState(this))
     , m_signInUsernameState(new SignInUsernameState(validator, this))
@@ -82,6 +83,7 @@ void ApplicationStateManager::registerStatesMetaTypes()
     qRegisterMetaType<ChatListState *>("ChatListState*");
     qRegisterMetaType<ChatState *>("ChatState*");
     qRegisterMetaType<DownloadKeyState *>("DownloadKeyState*");
+    qRegisterMetaType<FileCloudState *>("FileCloudState*");
     qRegisterMetaType<NewChatState *>("NewChatState*");
     qRegisterMetaType<SignInAsState *>("SignInAsState*");
     qRegisterMetaType<SignInUsernameState *>("SignInUsernameState*");
@@ -103,6 +105,8 @@ void ApplicationStateManager::addTransitions()
     m_startState->addTransition(this, &ApplicationStateManager::splashScreenRequested, m_splashScreenState);
     // NOTE: Queued connection is a workaround for working state transition
     connect(this, &ApplicationStateManager::setUiState, this, std::bind(&ApplicationStateManager::splashScreenRequested, this, QPrivateSignal()), Qt::QueuedConnection);
+    connect(this, &ApplicationStateManager::openChatList, this, std::bind(&ApplicationStateManager::chatListRequested, this, QPrivateSignal()), Qt::QueuedConnection);
+    connect(this, &ApplicationStateManager::openFileCloud, this, std::bind(&ApplicationStateManager::fileCloudRequested, this, QPrivateSignal()), Qt::QueuedConnection);
 
     m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::userNotSelected, m_accountSelectionState);
     m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::operationErrorOccurred, m_accountSelectionState);
@@ -117,6 +121,11 @@ void ApplicationStateManager::addTransitions()
     connect(users, &UsersController::accountSettingsRequested, m_accountSettingsState, &AccountSettingsState::setUserId);
     addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestNewChat, m_newChatState);
     addTwoSideTransition(m_chatListState, chats, &ChatsController::chatOpened, m_chatState);
+    m_chatListState->addTransition(this, &ApplicationStateManager::fileCloudRequested, m_fileCloudState);
+
+    addTwoSideTransition(m_fileCloudState, users, &UsersController::accountSettingsRequested, m_accountSettingsState);
+    m_fileCloudState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
+    m_fileCloudState->addTransition(this, &ApplicationStateManager::chatListRequested, m_chatListState);
 
     addTwoSideTransition(m_accountSettingsState, m_accountSettingsState, &AccountSettingsState::requestBackupKey, m_backupKeyState);
     connect(m_accountSettingsState, &AccountSettingsState::requestBackupKey, m_backupKeyState, &BackupKeyState::setUserId);

@@ -32,57 +32,37 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHATSMODEL_H
-#define VM_CHATSMODEL_H
+#ifndef VM_LISTMODEL_H
+#define VM_LISTMODEL_H
 
-#include "ListModel.h"
-#include "VSQCommon.h"
+#include <QAbstractListModel>
+
+class QSortFilterProxyModel;
 
 namespace vm
 {
-class ChatsModel : public ListModel
+class ListModel : public QAbstractListModel
 {
     Q_OBJECT
+    Q_PROPERTY(QSortFilterProxyModel *proxy MEMBER m_proxy CONSTANT)
+    Q_PROPERTY(QString filter MEMBER m_filter WRITE setFilter NOTIFY filterChanged)
 
 public:
-    explicit ChatsModel(QObject *parent);
-    ~ChatsModel() override;
-
-    void setChats(const Chats &chats);
-    Chat createChat(const Contact::Id &contactId);
-
-    void resetUnreadCount(const Chat::Id &chatId);
-    void updateLastMessage(const Message &message, const Chat::UnreadCount &unreadMessageCount);
-
-    Optional<Chat> findById(const Chat::Id &chatId) const;
-    Optional<Chat> findByContact(const Contact::Id &contactId) const;
+    explicit ListModel(QObject *parent);
 
 signals:
-    void chatsSet();
-    void chatCreated(const Chat &chat);
-    void chatUpdated(const Chat &chat);
+    void filterChanged(const QString &);
+
+protected:
+    const QSortFilterProxyModel *proxy() const;
+    QSortFilterProxyModel *proxy();
 
 private:
-    enum Roles
-    {
-        IdRole = Qt::UserRole,
-        ContactIdRole,
-        LastEventTimeRole,
-        LastEventTimestampRole,
-        LastMessageBodyRole,
-        UnreadMessagesCountRole
-    };
+    void setFilter(const QString &filter);
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
-
-    Optional<int> findRowById(const Chat::Id &chatId) const;
-    Optional<int> findRowByLastMessageId(const Message::Id &messageId) const;
-    Optional<int> findRowByContactId(const Contact::Id &contactId) const;
-
-    Chats m_chats;
+    QSortFilterProxyModel *m_proxy;
+    QString m_filter;
 };
 }
 
-#endif // VM_CHATSMODEL_H
+#endif // VM_LISTMODEL_H

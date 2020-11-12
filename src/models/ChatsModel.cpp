@@ -41,14 +41,11 @@
 using namespace vm;
 
 ChatsModel::ChatsModel(QObject *parent)
-    : QAbstractListModel(parent)
-    , m_proxy(new QSortFilterProxyModel(this))
+    : ListModel(parent)
 {
-    m_proxy->setSourceModel(this);
-    m_proxy->setSortRole(LastEventTimestampRole);
-    m_proxy->sort(0, Qt::DescendingOrder);
-    m_proxy->setFilterKeyColumn(0);
-    m_proxy->setFilterRole(ContactIdRole);
+    proxy()->setSortRole(LastEventTimestampRole);
+    proxy()->sort(0, Qt::DescendingOrder);
+    proxy()->setFilterRole(ContactIdRole);
 }
 
 ChatsModel::~ChatsModel()
@@ -175,16 +172,6 @@ QHash<int, QByteArray> ChatsModel::roleNames() const
         { LastEventTimeRole, "lastEventTime" },
         { UnreadMessagesCountRole, "unreadMessageCount" }
     };
-}
-
-void ChatsModel::setFilter(const QString &filter)
-{
-    if (m_filter == filter) {
-        return;
-    }
-    m_proxy->setFilterFixedString(filter);
-    m_filter = filter;
-    emit filterChanged(filter);
 }
 
 Optional<int> ChatsModel::findRowById(const Chat::Id &chatId) const

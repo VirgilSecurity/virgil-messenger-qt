@@ -32,57 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHATSMODEL_H
-#define VM_CHATSMODEL_H
+#ifndef VM_FILECLOUDSTATE_H
+#define VM_FILECLOUDSTATE_H
 
-#include "ListModel.h"
-#include "VSQCommon.h"
+#include <QState>
+
+#include "models/FileCloudModel.h"
 
 namespace vm
 {
-class ChatsModel : public ListModel
+class Models;
+
+class FileCloudState : public QState
 {
     Q_OBJECT
 
 public:
-    explicit ChatsModel(QObject *parent);
-    ~ChatsModel() override;
-
-    void setChats(const Chats &chats);
-    Chat createChat(const Contact::Id &contactId);
-
-    void resetUnreadCount(const Chat::Id &chatId);
-    void updateLastMessage(const Message &message, const Chat::UnreadCount &unreadMessageCount);
-
-    Optional<Chat> findById(const Chat::Id &chatId) const;
-    Optional<Chat> findByContact(const Contact::Id &contactId) const;
-
-signals:
-    void chatsSet();
-    void chatCreated(const Chat &chat);
-    void chatUpdated(const Chat &chat);
+    FileCloudState(Models *models, QState *parent);
 
 private:
-    enum Roles
-    {
-        IdRole = Qt::UserRole,
-        ContactIdRole,
-        LastEventTimeRole,
-        LastEventTimestampRole,
-        LastMessageBodyRole,
-        UnreadMessagesCountRole
-    };
+    void onEntry(QEvent *);
+    void onExit(QEvent *);
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
+    void setEnabled(bool enabled);
 
-    Optional<int> findRowById(const Chat::Id &chatId) const;
-    Optional<int> findRowByLastMessageId(const Message::Id &messageId) const;
-    Optional<int> findRowByContactId(const Contact::Id &contactId) const;
-
-    Chats m_chats;
+    Models *m_models;
 };
 }
 
-#endif // VM_CHATSMODEL_H
+#endif // VM_FILECLOUDSTATE_H

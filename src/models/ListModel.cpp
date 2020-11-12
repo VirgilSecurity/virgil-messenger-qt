@@ -32,57 +32,37 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHATSMODEL_H
-#define VM_CHATSMODEL_H
+#include "models/ListModel.h"
 
-#include "ListModel.h"
-#include "VSQCommon.h"
+#include <QSortFilterProxyModel>
 
-namespace vm
+using namespace vm;
+
+ListModel::ListModel(QObject *parent)
+    : QAbstractListModel(parent)
+    , m_proxy(new QSortFilterProxyModel(this))
 {
-class ChatsModel : public ListModel
-{
-    Q_OBJECT
-
-public:
-    explicit ChatsModel(QObject *parent);
-    ~ChatsModel() override;
-
-    void setChats(const Chats &chats);
-    Chat createChat(const Contact::Id &contactId);
-
-    void resetUnreadCount(const Chat::Id &chatId);
-    void updateLastMessage(const Message &message, const Chat::UnreadCount &unreadMessageCount);
-
-    Optional<Chat> findById(const Chat::Id &chatId) const;
-    Optional<Chat> findByContact(const Contact::Id &contactId) const;
-
-signals:
-    void chatsSet();
-    void chatCreated(const Chat &chat);
-    void chatUpdated(const Chat &chat);
-
-private:
-    enum Roles
-    {
-        IdRole = Qt::UserRole,
-        ContactIdRole,
-        LastEventTimeRole,
-        LastEventTimestampRole,
-        LastMessageBodyRole,
-        UnreadMessagesCountRole
-    };
-
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
-
-    Optional<int> findRowById(const Chat::Id &chatId) const;
-    Optional<int> findRowByLastMessageId(const Message::Id &messageId) const;
-    Optional<int> findRowByContactId(const Contact::Id &contactId) const;
-
-    Chats m_chats;
-};
+    m_proxy->setSourceModel(this);
+    m_proxy->setFilterKeyColumn(0);
+    m_proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
 }
 
-#endif // VM_CHATSMODEL_H
+const QSortFilterProxyModel *ListModel::proxy() const
+{
+    return m_proxy;
+}
+
+QSortFilterProxyModel *ListModel::proxy()
+{
+    return m_proxy;
+}
+
+void ListModel::setFilter(const QString &filter)
+{
+    if (m_filter == filter) {
+        return;
+    }
+    m_proxy->setFilterFixedString(filter);
+    m_filter = filter;
+    emit filterChanged(filter);
+}

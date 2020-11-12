@@ -32,57 +32,59 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHATSMODEL_H
-#define VM_CHATSMODEL_H
+#ifndef VM_FILECLOUDMODEL_H
+#define VM_FILECLOUDMODEL_H
+
+#include <QDateTime>
+#include <QFileInfoList>
+#include <QTimer>
 
 #include "ListModel.h"
-#include "VSQCommon.h"
+
+class QSortFilterProxyModel;
+
+class Settings;
 
 namespace vm
 {
-class ChatsModel : public ListModel
+class FileCloudModel : public ListModel
 {
     Q_OBJECT
 
 public:
-    explicit ChatsModel(QObject *parent);
-    ~ChatsModel() override;
-
-    void setChats(const Chats &chats);
-    Chat createChat(const Contact::Id &contactId);
-
-    void resetUnreadCount(const Chat::Id &chatId);
-    void updateLastMessage(const Message &message, const Chat::UnreadCount &unreadMessageCount);
-
-    Optional<Chat> findById(const Chat::Id &chatId) const;
-    Optional<Chat> findByContact(const Contact::Id &contactId) const;
-
-signals:
-    void chatsSet();
-    void chatCreated(const Chat &chat);
-    void chatUpdated(const Chat &chat);
-
-private:
     enum Roles
     {
-        IdRole = Qt::UserRole,
-        ContactIdRole,
-        LastEventTimeRole,
-        LastEventTimestampRole,
-        LastMessageBodyRole,
-        UnreadMessagesCountRole
+        FilenameRole = Qt::UserRole,
+        IsDirRole,
+        DisplayDateTimeRole,
+        DisplayFileSize,
+        SortRole
     };
 
+    FileCloudModel(const Settings *settings, QObject *parent);
+
+    void setDirectory(const QDir &dir);
+    void setEnabled(bool enabled);
+
+    const QFileInfo getFileInfo(const int proxyRow) const;
+
+signals:
+    void listReady(const QFileInfoList &list, QPrivateSignal);
+
+private:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    Optional<int> findRowById(const Chat::Id &chatId) const;
-    Optional<int> findRowByLastMessageId(const Message::Id &messageId) const;
-    Optional<int> findRowByContactId(const Contact::Id &contactId) const;
+    void setList(const QFileInfoList &list);
 
-    Chats m_chats;
+    void invalidateDateTime();
+
+    const Settings *m_settings;
+    QFileInfoList m_list;
+    QDateTime m_now;
+    QTimer m_updateTimer;
 };
 }
 
-#endif // VM_CHATSMODEL_H
+#endif // VM_FILECLOUDMODEL_H

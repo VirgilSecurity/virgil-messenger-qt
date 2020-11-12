@@ -36,7 +36,6 @@
 
 using namespace vm;
 
-AccountSelectionState::AccountSelectionState(UsersController *usersController, Validator *validator, Settings *settings, QState *parent)
+AccountSelectionState::AccountSelectionState(UsersController *usersController, Validator *validator, QState *parent)
     : SignInState(usersController, validator, parent)
-    , m_model(new AccountSelectionModel(settings, parent))
 {}

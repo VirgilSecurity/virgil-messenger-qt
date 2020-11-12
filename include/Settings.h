@@ -94,8 +94,8 @@ public:
     QRect windowGeometry() const;
     void setWindowGeometry(const QRect &geometry);
 
-    // Last seen activity interval (seconds)
-    Seconds lastSeenActivityInterval() const;
+    // Short interval for elapsed seconds that means now
+    Seconds nowInterval() const;
 
 signals:
     void lastSignedInUserIdChanged(const QString &);

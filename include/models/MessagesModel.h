@@ -35,13 +35,12 @@
 #ifndef VM_MESSAGESMODEL_H
 #define VM_MESSAGESMODEL_H
 
-#include <QAbstractListModel>
-
+#include "ListModel.h"
 #include "VSQCommon.h"
 
 namespace vm
 {
-class MessagesModel : public QAbstractListModel
+class MessagesModel : public ListModel
 {
     Q_OBJECT
 

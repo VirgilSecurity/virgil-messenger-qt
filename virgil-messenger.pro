@@ -106,7 +106,6 @@ VS_PLATFORMS_PATH=$$absolute_path(generated/platforms)
 
 HEADERS += \
         include/VSQApplication.h \
-        include/AccountSelectionModel.h \
         include/VSQClipboardProxy.h \
         include/VSQCommon.h \
         include/VSQContactManager.h \
@@ -128,6 +127,7 @@ HEADERS += \
         include/controllers/AttachmentsController.h \
         include/controllers/ChatsController.h \
         include/controllers/Controllers.h \
+        include/controllers/FileCloudController.h \
         include/controllers/MessagesController.h \
         include/controllers/UsersController.h \
         # Helpers
@@ -142,6 +142,7 @@ HEADERS += \
         include/states/ChatListState.h \
         include/states/ChatState.h \
         include/states/DownloadKeyState.h \
+        include/states/FileCloudState.h \
         include/states/OperationState.h \
         include/states/NewChatState.h \
         include/states/SignInAsState.h \
@@ -169,9 +170,12 @@ HEADERS += \
         include/logging/VSQLogWorker.h \
         include/logging/VSQMessageLogContext.h \
         # Models
+        include/models/AccountSelectionModel.h \
         include/models/AttachmentsModel.h \
         include/models/ChatsModel.h \
+        include/models/FileCloudModel.h \
         include/models/FileLoader.h \
+        include/models/ListModel.h \
         include/models/MessagesModel.h \
         include/models/MessagesQueue.h \
         include/models/Models.h \
@@ -206,7 +210,6 @@ HEADERS += \
 #
 
 SOURCES += \
-        src/AccountSelectionModel.cpp \
         src/VSQClipboardProxy.cpp \
         src/VSQCommon.cpp \
         src/VSQContactManager.cpp \
@@ -229,6 +232,7 @@ SOURCES += \
         src/controllers/AttachmentsController.cpp \
         src/controllers/ChatsController.cpp \
         src/controllers/Controllers.cpp \
+        src/controllers/FileCloudController.cpp \
         src/controllers/MessagesController.cpp \
         src/controllers/UsersController.cpp \
         # Applications states
@@ -240,6 +244,7 @@ SOURCES += \
         src/states/ChatListState.cpp \
         src/states/ChatState.cpp \
         src/states/DownloadKeyState.cpp \
+        src/states/FileCloudState.cpp \
         src/states/NewChatState.cpp \
         src/states/SignInAsState.cpp \
         src/states/SignInState.cpp \
@@ -265,9 +270,12 @@ SOURCES += \
         src/logging/VSQLogging.cpp \
         src/logging/VSQLogWorker.cpp \
         # Models
+        src/models/AccountSelectionModel.cpp \
         src/models/AttachmentsModel.cpp \
         src/models/ChatsModel.cpp \
+        src/models/FileCloudModel.cpp \
         src/models/FileLoader.cpp \
+        src/models/ListModel.cpp \
         src/models/MessagesModel.cpp \
         src/models/MessagesQueue.cpp \
         src/models/Models.cpp \

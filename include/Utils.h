@@ -52,6 +52,8 @@ namespace Utils
 
     QString formattedDataSize(DataSize fileSize);
 
+    QString formattedElapsedSeconds(const Seconds &seconds, const Seconds &nowInterval);
+
     QString formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval);
 
     QString formattedLastSeenNoActivity();
@@ -80,9 +82,11 @@ namespace Utils
 
     void removeFile(const QString &filePath);
 
-    QString fileName(const QString &filePath);
+    QString attachmentFileName(const QUrl &url, const QFileInfo &localInfo);
 
     QString attachmentDisplayImagePath(const Attachment &attachment);
+
+    bool openUrl(const QUrl &url);
 
     // Url functions
 

@@ -32,32 +32,30 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_ACCOUNTSELECTIONMODEL_H
-#define VM_ACCOUNTSELECTIONMODEL_H
+#include "states/FileCloudState.h"
 
-#include <QAbstractListModel>
+#include "models/FileCloudModel.h"
+#include "models/Models.h"
 
-class Settings;
+using namespace vm;
 
-namespace vm
+FileCloudState::FileCloudState(Models *models, QState *parent)
+    : QState(parent)
+    , m_models(models)
 {
-class AccountSelectionModel : public QAbstractListModel
-{
-    Q_OBJECT
-
-public:
-    AccountSelectionModel(Settings *settings, QObject *parent);
-
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    QHash<int, QByteArray> roleNames() const override;
-
-private:
-    void reload();
-
-    Settings *m_settings;
-    const int m_chunkSize = 4;
-};
 }
 
-#endif // VM_ACCOUNTSELECTIONMODEL_H
+void FileCloudState::onEntry(QEvent *)
+{
+    setEnabled(true);
+}
+
+void FileCloudState::onExit(QEvent *)
+{
+    setEnabled(false);
+}
+
+void FileCloudState::setEnabled(bool enabled)
+{
+    m_models->fileCloud()->setEnabled(enabled);
+}

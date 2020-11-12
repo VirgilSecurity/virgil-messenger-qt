@@ -238,7 +238,7 @@ void Settings::setWindowGeometry(const QRect &geometry)
     sync();
 }
 
-Seconds Settings::lastSeenActivityInterval() const
+Seconds Settings::nowInterval() const
 {
     return 5;
 }

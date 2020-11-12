@@ -23,7 +23,7 @@ Control {
 
         ServersPanel {
             id: serversPanel
-            visible: [manager.chatListState, manager.newChatState, manager.accountSettingsState].includes(manager.currentState)
+            visible: [manager.chatListState, manager.fileCloudState, manager.newChatState].includes(manager.currentState)
             z: 2
             Layout.preferredWidth: 60
             Layout.fillHeight: true
@@ -76,6 +76,9 @@ Control {
             if (attachmentPreview.visible) {
                 attachmentPreview.visible = false
             }
+            else if (manager.currentState === manager.fileCloudState) {
+                controllers.fileCloud.cdUp()
+            }
             else {
                 stackView.pop()
             }
@@ -94,14 +97,14 @@ Control {
 
         function openChatListPage() {
             if ([manager.splashScreenState, manager.accountSelectionState,
-                 manager.signUpState, manager.downloadKeyState].includes(manager.previousState)) {
+                 manager.signUpState, manager.downloadKeyState, manager.fileCloudState].includes(manager.previousState)) {
                 stackView.clear()
-                stackView.push(page("ChatList"))
+                stackView.push(page("Main"))
             }
         }
 
         function openAccountSettingsPage() {
-            if (manager.previousState !== manager.chatListState && manager.previousState !== manager.newChatState) {
+            if (![manager.chatListState, manager.fileCloudState, manager.newChatState].includes(manager.previousState)) {
                 return
             }
             stackView.push(page("AccountSettings"), StackView.Transition)

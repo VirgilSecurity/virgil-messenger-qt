@@ -131,8 +131,7 @@ void AttachmentsTable::onUpdateLocalPath(const Attachment::Id &attachmentId, con
     };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateAttachmentLocalPath"), values);
     if (query) {
-        qCDebug(lcDatabase) << "Attachment localPath was updated" << attachmentId
-                            << "localPath" << Utils::fileName(localPath);
+        qCDebug(lcDatabase) << "Attachment localPath was updated" << attachmentId << localPath;
     }
     else {
         qCCritical(lcDatabase) << "AttachmentsTable::onUpdateLocalPath error";

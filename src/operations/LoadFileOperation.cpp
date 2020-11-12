@@ -95,7 +95,7 @@ bool LoadFileOperation::openFileHandle(const QIODevice::OpenMode &mode)
         return false;
     }
 
-    qCDebug(lcOperation) << "File handle was opened:" << mode << Utils::fileName(m_filePath);
+    qCDebug(lcOperation) << "File handle was opened:" << mode << m_filePath;
     return true;
 }
 
@@ -103,7 +103,7 @@ void LoadFileOperation::closeFileHandle()
 {
     if (m_fileHandle) {
         m_fileHandle.reset();
-        qCDebug(lcOperation) << "File handle was closed:" << Utils::fileName(m_filePath);
+        qCDebug(lcOperation) << "File handle was closed:" << m_filePath;
     }
 }
 

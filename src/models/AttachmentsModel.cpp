@@ -44,7 +44,7 @@
 using namespace vm;
 
 AttachmentsModel::AttachmentsModel(Settings *settings, QObject *parent)
-    : QAbstractListModel(parent)
+    : ListModel(parent)
     , m_settings(settings)
 {}
 
@@ -57,9 +57,9 @@ Optional<Attachment> AttachmentsModel::createAttachment(const QUrl &url, const A
     if (!Utils::isValidUrl(url)) {
         return NullOptional;
     }
-    const auto localFileName = Utils::urlToLocalFile(url);
-    qCDebug(lcModel) << "Processing of attachment:" << localFileName;
-    QFileInfo localInfo(localFileName);
+    const auto localFilePath = Utils::urlToLocalFile(url);
+    qCDebug(lcModel) << "Processing of attachment:" << localFilePath;
+    QFileInfo localInfo(localFilePath);
     if (!localInfo.exists()) {
         qCWarning(lcModel) << tr("File doesn't exist");
         return NullOptional;
@@ -87,24 +87,9 @@ Optional<Attachment> AttachmentsModel::createAttachment(const QUrl &url, const A
     attachment.type = type;
     attachment.size = fileSize;
 
-    // Filename
-#ifdef VS_ANDROID
-    attachment.fileName = VSQAndroid::getDisplayName(url);
-#elif defined(VS_IOS_SIMULATOR)
-    attachment.fileName = url.fileName();
-#elif defined(VS_IOS)
+    attachment.fileName = Utils::attachmentFileName(url, localInfo);
+    // Set png suffix
     if (type == Attachment::Type::Picture) {
-        // Build file name from url, i.e. "file:assets-library://asset/asset.PNG?id=7CE20DC4-89A8-4079-88DC-AD37920581B5&ext=PNG"
-        QUrl urlWithoutFileScheme{url.toLocalFile()};
-        const QUrlQuery query(urlWithoutFileScheme.query());
-        attachment.fileName = query.queryItemValue("id") + QChar('.') + query.queryItemValue("ext").toLower();
-    }
-#endif
-    if (attachment.fileName.isEmpty()) {
-        attachment.fileName = localInfo.fileName();
-    }
-    if (type == Attachment::Type::Picture) {
-        // Set png suffix
         attachment.fileName = attachment.fileName.section('.', 0, 0) + QLatin1String(".png");
     }
     attachment.localPath = localInfo.absoluteFilePath();

@@ -32,45 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "AccountSelectionModel.h"
+#ifndef VM_ACCOUNTSELECTIONMODEL_H
+#define VM_ACCOUNTSELECTIONMODEL_H
 
-#include "Settings.h"
+#include "models/ListModel.h"
 
-using namespace vm;
+class Settings;
 
-AccountSelectionModel::AccountSelectionModel(Settings *settings, QObject *parent)
-    : QAbstractListModel(parent)
-    , m_settings(settings)
+namespace vm
 {
-    connect(m_settings, &Settings::usersListChanged, this, &AccountSelectionModel::reload);
+class AccountSelectionModel : public ListModel
+{
+    Q_OBJECT
+
+public:
+    AccountSelectionModel(Settings *settings, QObject *parent);
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QHash<int, QByteArray> roleNames() const override;
+
+private:
+    void reload();
+
+    Settings *m_settings;
+    const int m_chunkSize = 4;
+};
 }
 
-int AccountSelectionModel::rowCount(const QModelIndex &parent) const
-{
-    Q_UNUSED(parent)
-    const auto usersList = m_settings->usersList();
-    return (usersList.size() + m_chunkSize - 1) / m_chunkSize;
-}
-
-QVariant AccountSelectionModel::data(const QModelIndex &index, int role) const
-{
-    Q_UNUSED(role)
-    const auto usersList = m_settings->usersList();
-    const auto group = index.row();
-    const auto start(m_chunkSize * group);
-    const auto end(qMin(m_chunkSize * (group + 1), usersList.size()));
-    return QStringList(usersList.cbegin() + start, usersList.cbegin() + end);
-}
-
-QHash<int, QByteArray> AccountSelectionModel::roleNames() const
-{
-    QHash<int, QByteArray> names;
-    names[Qt::DisplayRole] = "modelData";
-    return names;
-}
-
-void AccountSelectionModel::reload()
-{
-    beginResetModel();
-    endResetModel();
-}
+#endif // VM_ACCOUNTSELECTIONMODEL_H

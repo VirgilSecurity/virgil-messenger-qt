@@ -35,15 +35,14 @@
 #ifndef VM_ATTACHMENTSMODEL_H
 #define VM_ATTACHMENTSMODEL_H
 
-#include <QAbstractListModel>
-
+#include "ListModel.h"
 #include "VSQCommon.h"
 
 class Settings;
 
 namespace vm
 {
-class AttachmentsModel : public QAbstractListModel
+class AttachmentsModel : public ListModel
 {
     Q_OBJECT
 
