@@ -36,6 +36,7 @@
 
 #include "Settings.h"
 #include "Utils.h"
+#include "operations/CalculateAttachmentFingerprintOperation.h"
 #include "operations/ConvertToPngOperation.h"
 #include "operations/CreateAttachmentPreviewOperation.h"
 #include "operations/CreateAttachmentThumbnailOperation.h"
@@ -74,6 +75,13 @@ bool UploadAttachmentOperation::populateChildren()
         if (convertOp) {
             connect(convertOp, &ConvertToPngOperation::imageRead, op, &CreateAttachmentPreviewOperation::setSourceImage);
             connect(convertOp, &ConvertToPngOperation::converted, op, &CreateAttachmentPreviewOperation::setSourcePath);
+        }
+    }
+    // Calculate attachment fingerprint
+    if (attachment->fingerprint.isEmpty()) {
+        auto op = factory->populateCalculateAttachmentFingerprint(preffix + QString("CalculateAttachmentFingerprint"), m_parent, this, attachment->localPath);
+        if (convertOp) {
+            connect(convertOp, &ConvertToPngOperation::converted, op, &CalculateAttachmentFingerprintOperation::setSourcePath);
         }
     }
     // Encrypt/Upload attachment file

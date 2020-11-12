@@ -136,6 +136,7 @@
         <file>resources/database/updateAttachmentStatus.sql</file>
         <file>resources/database/updateAttachmentUrl.sql</file>
         <file>resources/database/updateAttachmentLocalPath.sql</file>
+        <file>resources/database/updateAttachmentFingerprint.sql</file>
         <file>resources/database/updateLastMessage.sql</file>
         <file>resources/database/updateMessageStatus.sql</file>
     </qresource>

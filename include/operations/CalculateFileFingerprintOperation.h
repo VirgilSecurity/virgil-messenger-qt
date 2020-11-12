@@ -32,42 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_ATTACHMENTSTABLE_H
-#define VM_ATTACHMENTSTABLE_H
+#ifndef VM_CALCULATEFILEFINGERPRINTOPERATION_H
+#define VM_CALCULATEFILEFINGERPRINTOPERATION_H
 
-#include "core/DatabaseTable.h"
+#include "Operation.h"
 
 namespace vm
 {
-class AttachmentsTable : public DatabaseTable
+class CalculateFileFingerprintOperation : public Operation
 {
     Q_OBJECT
 
 public:
-    explicit AttachmentsTable(Database *database);
+    CalculateFileFingerprintOperation(const QString &name, QObject *parent, const QString &sourcePath);
+
+    void run() override;
+
+    void setSourcePath(const QString &sourcePath);
 
 signals:
-    void createAttachment(const Attachment &attachment);
-    void updateStatus(const Attachment::Id &attachmentId, const Attachment::Status &status);
-    void updateUrl(const Attachment::Id &attachmentId, const QUrl &url);
-    void updateLocalPath(const Attachment::Id &attachmentId, const QString &localPath);
-    void updateFingerprint(const Attachment::Id &attachmentId, const QString &fingerprint);
-    void updateExtras(const Attachment::Id &attachmentId, const Attachment::Type &type, const QVariant &extras);
-    void updateEncryptedSize(const Attachment::Id &attachmentId, const DataSize &size);
-
-    void errorOccurred(const QString &errorText);
+    void fingerprintCalculated(const QString &fingerprint);
+    void fingerpintCalculationFailed();
 
 private:
-    bool create() override;
-
-    void onCreateAttachment(const Attachment &attachment);
-    void onUpdateStatus(const Attachment::Id &attachmentId, const Attachment::Status &status);
-    void onUpdateUrl(const Attachment::Id &attachmentId, const QUrl &url);
-    void onUpdateLocalPath(const Attachment::Id &attachmentId, const QString &localPath);
-    void onUpdateFingerprint(const Attachment::Id &attachmentId, const QString &fingerprint);
-    void onUpdateExtras(const Attachment::Id &attachmentId, const Attachment::Type &type, const QVariant &extras);
-    void onUpdateEncryptedSize(const Attachment::Id &attachmentId, const DataSize &size);
+    QString m_sourcePath;
 };
 }
 
-#endif // VM_ATTACHMENTSTABLE_H
+#endif // VM_CALCULATEFILEFINGERPRINTOPERATION_H

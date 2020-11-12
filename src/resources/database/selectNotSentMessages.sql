@@ -11,6 +11,7 @@ SELECT
     attachments.filename AS attachmentFilename,
     attachments.size AS attachmentSize,
     attachments.localPath AS attachmentLocalPath,
+    attachments.fingerprint AS attachmentFingerprint,
     attachments.url AS attachmentUrl,
     attachments.encryptedSize AS attachmentEncryptedSize,
     attachments.extras AS attachmentExtras,

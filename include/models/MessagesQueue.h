@@ -70,6 +70,7 @@ signals:
     void attachmentProgressChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &bytesLoaded, const DataSize &bytesTotal);
     void attachmentUrlChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QUrl &url);
     void attachmentLocalPathChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &localPath);
+    void attachmentFingerprintChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &fingerprint);
     void attachmentExtrasChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Type &type, const QVariant &extras);
     void attachmentProcessedSizeChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &processedSize);
     void attachmentEncryptedSizeChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &encryptedSize);
@@ -92,6 +93,7 @@ private:
     void onMessageOperationAttachmentStatusChanged(const MessageOperation *operation);
     void onMessageOperationAttachmentUrlChanged(const MessageOperation *operation);
     void onMessageOperationAttachmentLocalPathChanged(const MessageOperation *operation);
+    void onMessageOperationAttachmentFingerprintChanged(const MessageOperation *operation);
     void onMessageOperationAttachmentExtrasChanged(const MessageOperation *operation);
     void onMessageOperationAttachmentProcessedSizeChanged(const MessageOperation *operation);
     void onMessageOperationAttachmentEncryptedSizeChanged(const MessageOperation *operation);

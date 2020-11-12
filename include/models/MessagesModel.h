@@ -64,6 +64,7 @@ public:
     void setAttachmentUrl(const Attachment::Id &attachmentId, const QUrl &url);
     void setAttachmentExtras(const Attachment::Id &attachmentId, const QVariant &extras);
     void setAttachmentLocalPath(const Attachment::Id &attachmentId, const QString &localPath);
+    void setAttachmentFingerprint(const Attachment::Id &attachmentId, const QString &fingerprint);
     void setAttachmentEncryptedSize(const Attachment::Id &attachmentId, const DataSize &size);
     void setAttachmentProcessedSize(const Attachment::Id &attachmentId, const DataSize &size);
 

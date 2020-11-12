@@ -32,42 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_ATTACHMENTSTABLE_H
-#define VM_ATTACHMENTSTABLE_H
+#include "operations/CalculateFileFingerprintOperation.h"
 
-#include "core/DatabaseTable.h"
+#include "Core.h"
 
-namespace vm
+using namespace vm;
+
+CalculateFileFingerprintOperation::CalculateFileFingerprintOperation(const QString &name, QObject *parent, const QString &sourcePath)
+    : Operation(name, parent)
+    , m_sourcePath(sourcePath)
+{}
+
+void CalculateFileFingerprintOperation::run()
 {
-class AttachmentsTable : public DatabaseTable
-{
-    Q_OBJECT
-
-public:
-    explicit AttachmentsTable(Database *database);
-
-signals:
-    void createAttachment(const Attachment &attachment);
-    void updateStatus(const Attachment::Id &attachmentId, const Attachment::Status &status);
-    void updateUrl(const Attachment::Id &attachmentId, const QUrl &url);
-    void updateLocalPath(const Attachment::Id &attachmentId, const QString &localPath);
-    void updateFingerprint(const Attachment::Id &attachmentId, const QString &fingerprint);
-    void updateExtras(const Attachment::Id &attachmentId, const Attachment::Type &type, const QVariant &extras);
-    void updateEncryptedSize(const Attachment::Id &attachmentId, const DataSize &size);
-
-    void errorOccurred(const QString &errorText);
-
-private:
-    bool create() override;
-
-    void onCreateAttachment(const Attachment &attachment);
-    void onUpdateStatus(const Attachment::Id &attachmentId, const Attachment::Status &status);
-    void onUpdateUrl(const Attachment::Id &attachmentId, const QUrl &url);
-    void onUpdateLocalPath(const Attachment::Id &attachmentId, const QString &localPath);
-    void onUpdateFingerprint(const Attachment::Id &attachmentId, const QString &fingerprint);
-    void onUpdateExtras(const Attachment::Id &attachmentId, const Attachment::Type &type, const QVariant &extras);
-    void onUpdateEncryptedSize(const Attachment::Id &attachmentId, const DataSize &size);
-};
+    const auto fingerpint = Core::calculateFileFingerprint(m_sourcePath);
+    if (fingerpint) {
+        emit fingerprintCalculated(*fingerpint);
+    }
+    else {
+        emit fingerpintCalculationFailed();
+    }
+    // NOTE(fpohtmeh): fingerprint is not mandatory so operation is always succesfull
+    finish();
 }
 
-#endif // VM_ATTACHMENTSTABLE_H
+void CalculateFileFingerprintOperation::setSourcePath(const QString &sourcePath)
+{
+    m_sourcePath = sourcePath;
+}

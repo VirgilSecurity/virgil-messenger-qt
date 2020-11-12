@@ -70,6 +70,7 @@ MessagesController::MessagesController(VSQMessenger *messenger, Models *models, 
     connect(messagesQueue, &MessagesQueue::attachmentStatusChanged, this, &MessagesController::setAttachmentStatus);
     connect(messagesQueue, &MessagesQueue::attachmentUrlChanged, this, &MessagesController::setAttachmentUrl);
     connect(messagesQueue, &MessagesQueue::attachmentLocalPathChanged, this, &MessagesController::setAttachmentLocalPath);
+    connect(messagesQueue, &MessagesQueue::attachmentFingerprintChanged, this, &MessagesController::setAttachmentFingerprint);
     connect(messagesQueue, &MessagesQueue::attachmentExtrasChanged, this, &MessagesController::setAttachmentExtras);
     connect(messagesQueue, &MessagesQueue::attachmentProcessedSizeChanged, this, &MessagesController::setAttachmentProcessedSize);
     connect(messagesQueue, &MessagesQueue::attachmentEncryptedSizeChanged, this, &MessagesController::setAttachmentEncryptedSize);
@@ -235,6 +236,15 @@ void MessagesController::setAttachmentLocalPath(const Attachment::Id &attachment
         m_models->messages()->setAttachmentLocalPath(attachmentId, localPath);
     }
     m_userDatabase->attachmentsTable()->updateLocalPath(attachmentId, localPath);
+}
+
+void MessagesController::setAttachmentFingerprint(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &fingerpint)
+{
+    qCDebug(lcController) << "Set attachment fingerprint:" << attachmentId << "contact" << contactId << "fingerprint" << fingerpint;
+    if (contactId == m_chat.contactId) {
+        m_models->messages()->setAttachmentFingerprint(attachmentId, fingerpint);
+    }
+    m_userDatabase->attachmentsTable()->updateFingerprint(attachmentId, fingerpint);
 }
 
 void MessagesController::receiveMessage(const QXmppMessage &msg)

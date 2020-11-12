@@ -6,6 +6,7 @@ CREATE TABLE attachments (
         filename TEXT NOT NULL,
         size INT NOT NULL,
         localPath TEXT,
+        fingerprint TEXT,
         url TEXT,
         encryptedSize INT NOT NULL,
         extras TEXT,

@@ -34,6 +34,8 @@
 
 #include "Core.h"
 
+#include <QCryptographicHash>
+
 #include <virgil/iot/messenger/messenger.h>
 
 #include "Utils.h"
@@ -200,4 +202,22 @@ Core::Result Core::encryptFile(const QString &path, const QString &encPath, cons
     encFile.close();
     qCDebug(lcCore) << "File encrypted:" << encFile.fileName() << "size:" << encFile.size();
     return Result::Success;
+}
+
+Optional<QString> Core::calculateFileFingerprint(const QString &path)
+{
+    if (!Utils::fileExists(path)) {
+        qCWarning(lcUtils) << "Failed to find fingerprint. File doesn't exist:" << path;
+        return NullOptional;
+    }
+    QFile file(path);
+    if (!file.open(QFile::ReadOnly)) {
+        qCWarning(lcUtils) << "Failed to find fingerprint. File can't be opened:" << path;
+        return NullOptional;
+    }
+    QCryptographicHash hash(QCryptographicHash::Sha256);
+    hash.addData(&file);
+    const QString fingerpint = hash.result().toHex().left(8);
+    qCDebug(lcUtils) << "File fingerprint:" << path << "=>" << fingerpint;
+    return fingerpint;
 }

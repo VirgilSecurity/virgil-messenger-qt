@@ -66,6 +66,7 @@ signals:
     void notificationCreated(const QString &notification);
 
 private:
+    bool isAttachmentDownloaded(const GlobalMessage &message);
     void downloadAttachment(const GlobalMessage &message);
     Optional<GlobalMessage> findMessage(const Message::Id &messageId) const;
 

@@ -68,6 +68,8 @@ public:
     static Result decryptFile(const QString &encPath, const QString &path, const Contact::Id &recipientId);
 
     static Result encryptFile(const QString &path, const QString &encPath, const Contact::Id &recipientId);
+
+    static Optional<QString> calculateFileFingerprint(const QString &path);
 };
 }
 

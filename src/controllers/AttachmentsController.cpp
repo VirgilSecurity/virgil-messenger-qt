@@ -36,6 +36,7 @@
 
 #include <QDesktopServices>
 
+#include "Core.h"
 #include "Settings.h"
 #include "Utils.h"
 #include "models/Models.h"
@@ -53,14 +54,13 @@ AttachmentsController::AttachmentsController(Settings *settings, Models *models,
 void AttachmentsController::saveAs(const Message::Id &messageId, const QVariant &fileUrl)
 {
     if (const auto message = findMessage(messageId)) {
-        const auto &a = *message->attachment;
-        if (!Utils::fileExists(a.localPath)) {
+        if (!isAttachmentDownloaded(*message)) {
             downloadAttachment(*message);
         }
         else {
             qCDebug(lcController) << "Saving of attachment" << messageId << "as" << fileUrl;
             const auto filePath = Utils::urlToLocalFile(fileUrl.toUrl());
-            QFile::copy(a.localPath, filePath);
+            QFile::copy(message->attachment->localPath, filePath);
             emit notificationCreated(tr("Attachment was saved"));
         }
     }
@@ -76,11 +76,11 @@ void AttachmentsController::download(const Message::Id &messageId)
 void AttachmentsController::open(const Message::Id &messageId)
 {
     if (const auto message = findMessage(messageId)) {
-        const auto &a = *message->attachment;
-        if (!Utils::fileExists(a.localPath)) {
+        if (!isAttachmentDownloaded(*message)) {
             downloadAttachment(*message);
         }
         else {
+            const auto &a = *message->attachment;
             const auto url = Utils::localFileToUrl(a.localPath);
             if (a.type == Attachment::Type::Picture) {
                 qCDebug(lcController) << "Opening of preview for" << url.fileName();
@@ -110,6 +110,22 @@ void AttachmentsController::setUserId(const UserId &userId)
 void AttachmentsController::setContactId(const Contact::Id &contactId)
 {
     m_contactId = contactId;
+}
+
+bool AttachmentsController::isAttachmentDownloaded(const GlobalMessage &message)
+{
+    const auto &a = *message.attachment;
+    if (!Utils::fileExists(a.localPath)) {
+        return false;
+    }
+    if (a.fingerprint.isEmpty()) {
+        return false;
+    }
+    const auto fingerPrint = Core::calculateFileFingerprint(a.localPath);
+    if (!fingerPrint) {
+        return false;
+    }
+    return true;
 }
 
 void AttachmentsController::downloadAttachment(const GlobalMessage &message)

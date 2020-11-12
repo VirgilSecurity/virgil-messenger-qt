@@ -79,6 +79,7 @@ private:
     void setAttachmentStatus(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Status &status);
     void setAttachmentUrl(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QUrl &url);
     void setAttachmentLocalPath(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &localPath);
+    void setAttachmentFingerprint(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &fingerpint);
     void setAttachmentExtras(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Type &type, const QVariant &extras);
     void setAttachmentProcessedSize(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &processedSize);
     void setAttachmentEncryptedSize(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &encryptedSize);

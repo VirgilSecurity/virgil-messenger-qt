@@ -126,6 +126,16 @@ void MessageOperation::setAttachmentLocalPath(const QString &localPath)
     emit attachmentLocalPathChanged(localPath);
 }
 
+void MessageOperation::setAttachmentFignerprint(const QString &fingerprint)
+{
+    auto a = writableAttachment();
+    if (a->fingerprint == fingerprint) {
+        return;
+    }
+    a->fingerprint = fingerprint;
+    emit attachmentFingerprintChanged(fingerprint);
+}
+
 void MessageOperation::setAttachmentExtras(const QVariant &extras)
 {
     auto a = writableAttachment();

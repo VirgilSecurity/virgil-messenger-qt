@@ -37,6 +37,7 @@
 #include "Settings.h"
 #include "Utils.h"
 #include "VSQMessenger.h"
+#include "operations/CalculateAttachmentFingerprintOperation.h"
 #include "operations/ConvertToPngOperation.h"
 #include "operations/CreateAttachmentPreviewOperation.h"
 #include "operations/CreateAttachmentThumbnailOperation.h"
@@ -116,6 +117,13 @@ CreateAttachmentThumbnailOperation *MessageOperationFactory::populateCreateAttac
 CreateAttachmentPreviewOperation *MessageOperationFactory::populateCreateAttachmentPreview(const QString &name, MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &destPath)
 {
     auto op = new CreateAttachmentPreviewOperation(name, messageOp, m_settings, sourcePath, destPath);
+    parent->appendChild(op);
+    return op;
+}
+
+CalculateAttachmentFingerprintOperation *MessageOperationFactory::populateCalculateAttachmentFingerprint(const QString &name, MessageOperation *messageOp, Operation *parent, const QString &sourcePath)
+{
+    auto op = new CalculateAttachmentFingerprintOperation(name, messageOp, sourcePath);
     parent->appendChild(op);
     return op;
 }

@@ -44,6 +44,7 @@ class Settings;
 
 namespace vm
 {
+class CalculateAttachmentFingerprintOperation;
 class ConvertToPngOperation;
 class CreateAttachmentPreviewOperation;
 class CreateAttachmentThumbnailOperation;
@@ -76,6 +77,7 @@ public:
     ConvertToPngOperation *populateConvertToPngOperation(const QString &name, Operation *parent, const QString &sourcePath);
     CreateAttachmentThumbnailOperation *populateCreateAttachmentThumbnail(const QString &name, MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &filePath);
     CreateAttachmentPreviewOperation *populateCreateAttachmentPreview(const QString &name, MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &destPath);
+    CalculateAttachmentFingerprintOperation *populateCalculateAttachmentFingerprint(const QString &name, MessageOperation *messageOp, Operation *parent, const QString &sourcePath);
 
 private:
     SendMessageOperation *createSendMessageOperation(MessageOperation *parent);

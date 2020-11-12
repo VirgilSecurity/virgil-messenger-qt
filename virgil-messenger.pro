@@ -176,6 +176,8 @@ HEADERS += \
         include/models/MessagesQueue.h \
         include/models/Models.h \
         # Operations
+        include/operations/CalculateAttachmentFingerprintOperation.h \
+        include/operations/CalculateFileFingerprintOperation.h \
         include/operations/ConvertToPngOperation.h \
         include/operations/CreateAttachmentPreviewOperation.h \
         include/operations/CreateAttachmentThumbnailOperation.h \
@@ -270,6 +272,8 @@ SOURCES += \
         src/models/MessagesQueue.cpp \
         src/models/Models.cpp \
         # Operations
+        src/operations/CalculateAttachmentFingerprintOperation.cpp \
+        src/operations/CalculateFileFingerprintOperation.cpp \
         src/operations/ConvertToPngOperation.cpp \
         src/operations/CreateAttachmentPreviewOperation.cpp \
         src/operations/CreateAttachmentThumbnailOperation.cpp \

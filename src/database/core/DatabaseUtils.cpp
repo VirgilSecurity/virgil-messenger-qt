@@ -120,6 +120,7 @@ Optional<Attachment> DatabaseUtils::readAttachment(const QSqlQuery &query)
     attachment.fileName = query.value("attachmentFilename").toString();
     attachment.size = query.value("attachmentSize").value<DataSize>();
     attachment.localPath = query.value("attachmentLocalPath").toString();
+    attachment.fingerprint = query.value("attachmentFingerprint").toString();
     attachment.url = query.value("attachmentUrl").toUrl();
     attachment.encryptedSize = query.value("attachmentEncryptedSize").value<DataSize>();
     attachment.extras = Utils::extrasFromJson(query.value("attachmentExtras").toString(), attachment.type, false);

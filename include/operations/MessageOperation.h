@@ -55,6 +55,7 @@ public:
     void setAttachmentStatus(const Attachment::Status status);
     void setAttachmentUrl(const QUrl &url);
     void setAttachmentLocalPath(const QString &localPath);
+    void setAttachmentFignerprint(const QString &fingerprint);
     void setAttachmentExtras(const QVariant &extras);
     void setAttachmentPreviewPath(const QString &previewPath);
     void setAttachmentThumbnailPath(const QString &thumbnailPath);
@@ -69,6 +70,7 @@ signals:
     void attachmentStatusChanged(const Attachment::Status &status);
     void attachmentUrlChanged(const QUrl &url);
     void attachmentLocalPathChanged(const QString &localPath);
+    void attachmentFingerprintChanged(const QString &fingerpint);
 
     void attachmentExtrasChanged(const QVariant &extras);
     void attachmentProcessedSizeChanged(const DataSize &bytes);

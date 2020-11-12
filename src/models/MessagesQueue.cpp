@@ -88,6 +88,7 @@ void MessagesQueue::connectMessageOperation(MessageOperation *op)
     connect(op, &MessageOperation::attachmentStatusChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentStatusChanged, this, op));
     connect(op, &MessageOperation::attachmentUrlChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentUrlChanged, this, op));
     connect(op, &MessageOperation::attachmentLocalPathChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentLocalPathChanged, this, op));
+    connect(op, &MessageOperation::attachmentFingerprintChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentFingerprintChanged, this, op));
     connect(op, &MessageOperation::attachmentExtrasChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentExtrasChanged, this, op));
     connect(op, &MessageOperation::attachmentEncryptedSizeChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentEncryptedSizeChanged, this, op));
     connect(op, &MessageOperation::attachmentProcessedSizeChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentProcessedSizeChanged, this, op));
@@ -184,6 +185,13 @@ void MessagesQueue::onMessageOperationAttachmentLocalPathChanged(const MessageOp
     const auto &m = *operation->message();
     const auto &a = *m.attachment;
     emit attachmentLocalPathChanged(a.id, m.contactId, a.localPath);
+}
+
+void MessagesQueue::onMessageOperationAttachmentFingerprintChanged(const MessageOperation *operation)
+{
+    const auto &m = *operation->message();
+    const auto &a = *m.attachment;
+    emit attachmentFingerprintChanged(a.id, m.contactId, a.fingerprint);
 }
 
 void MessagesQueue::onMessageOperationAttachmentExtrasChanged(const MessageOperation *operation)

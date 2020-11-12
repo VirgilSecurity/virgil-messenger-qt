@@ -153,6 +153,17 @@ void MessagesModel::setAttachmentLocalPath(const Attachment::Id &attachmentId, c
     });
 }
 
+void MessagesModel::setAttachmentFingerprint(const Attachment::Id &attachmentId, const QString &fingerprint)
+{
+    updateAttachment(attachmentId, {}, [=](Attachment &a) {
+        if (a.fingerprint == fingerprint) {
+            return false;
+        }
+        a.fingerprint = fingerprint;
+        return true;
+    });
+}
+
 void MessagesModel::setAttachmentEncryptedSize(const Attachment::Id &attachmentId, const DataSize &size)
 {
     updateAttachment(attachmentId, { AttachmentBytesTotalRole }, [=](Attachment &a) {

@@ -48,6 +48,7 @@ AttachmentsTable::AttachmentsTable(Database *database)
     connect(this, &AttachmentsTable::updateUrl, this, &AttachmentsTable::onUpdateUrl);
     connect(this, &AttachmentsTable::updateExtras, this, &AttachmentsTable::onUpdateExtras);
     connect(this, &AttachmentsTable::updateLocalPath, this, &AttachmentsTable::onUpdateLocalPath);
+    connect(this, &AttachmentsTable::updateFingerprint, this, &AttachmentsTable::onUpdateFingerprint);
     connect(this, &AttachmentsTable::updateEncryptedSize, this, &AttachmentsTable::onUpdateEncryptedSize);
 }
 
@@ -73,6 +74,7 @@ void AttachmentsTable::onCreateAttachment(const Attachment &attachment)
         { ":filename", attachment.fileName },
         { ":size", attachment.size },
         { ":localPath", attachment.localPath },
+        { ":fingerprint", attachment.fingerprint },
         { ":url", attachment.url },
         { ":encryptedSize", attachment.encryptedSize },
         { ":extras", extrasJson }
@@ -135,6 +137,24 @@ void AttachmentsTable::onUpdateLocalPath(const Attachment::Id &attachmentId, con
     else {
         qCCritical(lcDatabase) << "AttachmentsTable::onUpdateLocalPath error";
         emit errorOccurred(tr("Failed to update attachment localPath"));
+    }
+}
+
+void AttachmentsTable::onUpdateFingerprint(const Attachment::Id &attachmentId, const QString &fingerprint)
+{
+    ScopedConnection connection(*database());
+    const DatabaseUtils::BindValues values {
+        { ":id", attachmentId },
+        { ":fingerprint", fingerprint }
+    };
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateAttachmentFingerprint"), values);
+    if (query) {
+        qCDebug(lcDatabase) << "Attachment fingerprint was updated" << attachmentId
+                            << "fingerprint" << fingerprint;
+    }
+    else {
+        qCCritical(lcDatabase) << "AttachmentsTable::onUpdateFingerprint error";
+        emit errorOccurred(tr("Failed to update attachment fingerprint"));
     }
 }
 

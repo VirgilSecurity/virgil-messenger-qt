@@ -157,6 +157,7 @@ struct Attachment
     DataSize size = 0;
     DataSize encryptedSize = 0;
     QString localPath;
+    QString fingerprint;
     QUrl url;
     QVariant extras;
 

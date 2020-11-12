@@ -333,6 +333,7 @@ Message Utils::messageFromJson(const QByteArray &json)
     attachment.size = at["size"].toInt();
     attachment.url = at["url"].toString();
     attachment.encryptedSize = at["encryptedSize"].toInt();
+    attachment.fingerprint = at["fingerprint"].toString();
     attachment.extras = extrasFromJson(at["extras"].toString(), attachment.type, true);
     message.attachment = attachment;
     if (!message.body.isEmpty()) {
@@ -362,6 +363,7 @@ QByteArray Utils::messageToJson(const Message &message)
         at.insert("size", attachment->size);
         at.insert("url", attachment->url.toString());
         at.insert("encryptedSize", attachment->encryptedSize);
+        at.insert("fingerprint", attachment->fingerprint);
         at.insert("extras", extrasToJson(attachment->extras, attachment->type, true));
         mainObject.insert("attachment", at);
     }
