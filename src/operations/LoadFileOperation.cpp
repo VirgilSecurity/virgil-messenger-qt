@@ -182,7 +182,7 @@ void LoadFileOperation::onSetProgress(const DataSize &bytesLoaded, const DataSiz
         m_bytesTotal = bytesTotal;
     }
     m_bytesLoaded = bytesLoaded;
-    qCDebug(lcOperation) << "Load progress:" << Utils::printableLoadProgress(m_bytesLoaded, m_bytesTotal);
+    //qCDebug(lcOperation) << "Load progress:" << Utils::printableLoadProgress(m_bytesLoaded, m_bytesTotal);
     emit progressChanged(m_bytesLoaded, m_bytesTotal);
 }
 
