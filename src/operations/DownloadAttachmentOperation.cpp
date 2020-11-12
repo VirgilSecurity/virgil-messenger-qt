@@ -68,7 +68,7 @@ bool DownloadAttachmentOperation::populateChildren()
             // Otherwise download/decrypt thumbnail
             else if (!Utils::fileExists(extras.thumbnailPath)) {
                 const auto filePath = m_settings->makeThumbnailPath(attachment->id, false);
-                auto op = factory->populateDownloadDecrypt(preffix + QString("DownloadDecryptThumbnail"), this, extras.thumbnailUrl, filePath, message->senderId);
+                auto op = factory->populateDownloadDecrypt(preffix + QString("DownloadDecryptThumbnail"), this, extras.thumbnailUrl, extras.encryptedThumbnailSize, filePath, message->senderId);
                 connect(op, &Operation::started, this, std::bind(&LoadAttachmentOperation::startLoadOperation, this, extras.encryptedThumbnailSize));
                 connect(op, &DownloadDecryptFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
                 connect(op, &DownloadDecryptFileOperation::decrypted, m_parent, &MessageOperation::setAttachmentThumbnailPath);
@@ -80,7 +80,7 @@ bool DownloadAttachmentOperation::populateChildren()
         auto downloadPath = m_parameter.filePath;
         if (!Utils::fileExists(downloadPath)) {
             qCDebug(lcOperation) << "Download attachment to:" << downloadPath;
-            auto op = factory->populateDownloadDecrypt(preffix + QString("DownloadDecrypt"), this, attachment->url, downloadPath, message->senderId);
+            auto op = factory->populateDownloadDecrypt(preffix + QString("DownloadDecrypt"), this, attachment->url, attachment->encryptedSize, downloadPath, message->senderId);
             connect(op, &Operation::started, this, std::bind(&LoadAttachmentOperation::startLoadOperation, this, attachment->encryptedSize));
             connect(op, &DownloadDecryptFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
             connect(op, &DownloadDecryptFileOperation::decrypted, m_parent, &MessageOperation::setAttachmentLocalPath);

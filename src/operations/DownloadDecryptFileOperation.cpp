@@ -42,11 +42,12 @@
 using namespace vm;
 
 DownloadDecryptFileOperation::DownloadDecryptFileOperation(const QString &name, QObject *parent, const Settings *settings, FileLoader *fileLoader,
-                                                           const QUrl &url, const QString &filePath, const Contact::Id &senderId)
+                                                           const QUrl &url, const DataSize &bytesTotal, const QString &filePath, const Contact::Id &senderId)
     : Operation(name, parent)
     , m_settings(settings)
     , m_fileLoader(fileLoader)
     , m_url(url)
+    , m_bytesTotal(bytesTotal)
     , m_filePath(filePath)
     , m_senderId(senderId)
 {}
@@ -56,7 +57,7 @@ bool DownloadDecryptFileOperation::populateChildren()
     m_tempPath = m_settings->attachmentCacheDir().filePath(Utils::createUuid());
     const auto preffix = name() + QChar('/');
 
-    auto downOp = new DownloadFileOperation(preffix + QString("Download"), this, m_fileLoader, m_url, m_tempPath);
+    auto downOp = new DownloadFileOperation(preffix + QString("Download"), this, m_fileLoader, m_url, m_bytesTotal, m_tempPath);
     connect(downOp, &DownloadFileOperation::progressChanged, this, &DownloadDecryptFileOperation::progressChanged);
     appendChild(downOp);
 

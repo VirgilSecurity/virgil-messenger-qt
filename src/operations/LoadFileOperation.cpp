@@ -40,9 +40,10 @@
 
 using namespace vm;
 
-LoadFileOperation::LoadFileOperation(const QString &name, QObject *parent, FileLoader *fileLoader)
+LoadFileOperation::LoadFileOperation(const QString &name, QObject *parent, FileLoader *fileLoader, const DataSize &bytesTotal)
     : Operation(name, parent)
     , m_fileLoader(fileLoader)
+    , m_bytesTotal(bytesTotal)
 {
     connect(this, &LoadFileOperation::setProgress, this, &LoadFileOperation::onSetProgress);
     connect(fileLoader, &FileLoader::serviceFound, this, &LoadFileOperation::setConnectionChanged);
@@ -165,22 +166,24 @@ void LoadFileOperation::onReplySslErrors()
 
 void LoadFileOperation::onSetProgress(const DataSize &bytesLoaded, const DataSize &bytesTotal)
 {
-    //qCDebug(lcOperation) << "Load progress:" << Utils::printableLoadProgress(bytesLoaded, total);
-    m_bytesLoaded = bytesLoaded;
-    m_bytesTotal = bytesTotal;
-    if (bytesTotal <= 0) {
-        // NOTE(fpohtmeh): download reply sends zeros as bytesTotal
-        emit progressChanged(bytesLoaded, bytesLoaded);
+    if (bytesTotal == 0 && bytesLoaded == 0) {
+        // NOTE(fpohtmeh): Qt finishes upload with zero values
+        return;
     }
-    else if (bytesLoaded < bytesTotal) {
-        emit progressChanged(bytesLoaded, bytesTotal);
+    else if (bytesTotal == -1) {
+        // NOTE(fpohtmeh): Qt uses correct bytesLoaded and bytesTotal=-1 when starts download
+        // and finishes it with correct bytesTotal and bytesLoaded=bytesTotal
+        if (m_bytesTotal < bytesLoaded) {
+            qCWarning(lcOperation) << "Pass bytesTotal to constructor for correct progress calculation";
+            m_bytesTotal = bytesLoaded;
+        }
     }
     else {
-        qCDebug(lcOperation) << "All bytes were processed, set load operation finished"
-                             << Utils::printableLoadProgress(m_bytesLoaded, m_bytesTotal);
-        closeFileHandle();
-        finish();
+        m_bytesTotal = bytesTotal;
     }
+    m_bytesLoaded = bytesLoaded;
+    qCDebug(lcOperation) << "Load progress:" << Utils::printableLoadProgress(m_bytesLoaded, m_bytesTotal);
+    emit progressChanged(m_bytesLoaded, m_bytesTotal);
 }
 
 void LoadFileOperation::setConnectionChanged()

@@ -49,7 +49,7 @@ class DownloadDecryptFileOperation : public Operation
 
 public:
     DownloadDecryptFileOperation(const QString &name, QObject *parent, const Settings *settings, FileLoader *fileLoader,
-                                 const QUrl &url, const QString &filePath, const Contact::Id &senderId);
+                                 const QUrl &url, const DataSize &bytesTotal, const QString &filePath, const Contact::Id &senderId);
 
 signals:
     void progressChanged(const DataSize &bytesLoaded, const DataSize &bytesTotal);
@@ -62,6 +62,7 @@ private:
     const Settings *m_settings;
     FileLoader *m_fileLoader;
     const QUrl m_url;
+    const DataSize m_bytesTotal;
     QString m_tempPath;
     const QString m_filePath;
     const Contact::Id m_senderId;
