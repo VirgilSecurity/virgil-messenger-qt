@@ -42,6 +42,8 @@
 #include <QThread>
 #include <QUuid>
 
+#include "android/VSQAndroid.h"
+
 Q_LOGGING_CATEGORY(lcUtils, "utils")
 
 using namespace vm;
