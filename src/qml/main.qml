@@ -75,8 +75,10 @@ ApplicationWindow {
             visible: false
         }
 
-        SendReportAsk {
+        TemplateDialog {
             id: sendReportAsk
+            title: qsTr("Send report")
+            text: qsTr("Previous run crashed. Send report?")
         }
 
         AttachmentPicker {
