@@ -84,6 +84,7 @@ ApplicationWindow {
         }
     }
 
+
     // Show Popup message
     function showPopup(message, color, textColor, isOnTop, isModal) {
         inform.popupColor = color

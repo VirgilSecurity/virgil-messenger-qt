@@ -9,7 +9,7 @@ Popup {
 
     // Popup background settings
     property color backgroundColor: Theme.mainBackgroundColor
-    property real backgroundOpacity: 0.8
+    property real backgroundOpacity: 1
     property real backgroundRadius: 12
 
     // Bahavior settings
@@ -29,7 +29,6 @@ Popup {
     signal accepted()
     signal rejected()
 
-    anchors.centerIn: parent
     modal: true
     focus: true
     closePolicy: Popup.NoAutoClose
@@ -53,54 +52,67 @@ Popup {
         }
     }
 
-
-    background: Rectangle {
-        implicitWidth: popupImplicitWidth
+    Rectangle {
         focus: false
         color: backgroundColor
         opacity: backgroundOpacity
         radius: backgroundRadius
-    }
+        anchors.centerIn: parent
+        implicitWidth: popupImplicitWidth + 20
+        height: contentColumn.height + 40
 
-    contentItem: Column {
-        spacing: 26
+        Column {
+            id: contentColumn
+            anchors {
+                left: parent.left
+                leftMargin: 20
+                right: parent.right
+                rightMargin: 20
+                top: parent.top
+                topMargin: 20
+            }
 
-        Text {
-            width: parent.width
-            text: templateDialog.title
-            color: Theme.primaryTextColor
-            font.pointSize: UiHelper.fixFontSz(17)
-            wrapMode: Text.WordWrap
-        }
-
-        Text {
-            width: parent.width
-            text: templateDialog.text
-            color: Theme.primaryTextColor
-            font.pointSize: UiHelper.fixFontSz(15)
-            wrapMode: Text.WordWrap
-        }
-
-        Row {
-            anchors.horizontalCenter: parent.horizontalCenter
             spacing: 26
 
-            FormPrimaryButton {
-                text: acceptedButtonText
-                onClicked: {
-                    accepted()
-                    templateDialog.close()
-                }
+            Text {
+                width: parent.width
+                text: templateDialog.title
+                color: Theme.primaryTextColor
+                font.pointSize: UiHelper.fixFontSz(17)
+                wrapMode: Text.WordWrap
             }
 
-            FormSecondaryButton {
-                text: rejectedButtonText
-                onClicked: {
-                    rejected()
-                    templateDialog.close()
+            Text {
+                width: parent.width
+                text: templateDialog.text
+                color: Theme.primaryTextColor
+                font.pointSize: UiHelper.fixFontSz(15)
+                wrapMode: Text.WordWrap
+            }
+
+            Row {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 26
+
+                FormPrimaryButton {
+                    text: acceptedButtonText
+                    onClicked: {
+                        accepted()
+                        templateDialog.close()
+                    }
+                }
+
+                FormSecondaryButton {
+                    text: rejectedButtonText
+                    onClicked: {
+                        rejected()
+                        templateDialog.close()
+                    }
                 }
             }
         }
     }
+
+    background: Item {}
 
 }

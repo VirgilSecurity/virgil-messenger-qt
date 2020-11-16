@@ -1,9 +1,11 @@
 import QtQuick 2.15
-import QtQuick.Dialogs 1.2
+//import QtQuick.Dialogs 1.2
 import QtQuick.Controls 2.15
 
 TemplateDialog {
     id: sendReportAsk
+    width: root.width
+    height: root.height
     title: qsTr("Send report")
     text: qsTr("Previous run crashed. Send report?")
     //standardButtons: Dialog.Yes | StandardButton.No
