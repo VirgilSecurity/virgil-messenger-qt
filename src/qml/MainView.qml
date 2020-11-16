@@ -23,7 +23,7 @@ Control {
 
         ServersPanel {
             id: serversPanel
-            visible: [manager.chatListState, manager.fileCloudState, manager.newChatState].includes(manager.currentState)
+            visible: [manager.chatListState, manager.fileCloudState].includes(manager.currentState)
             z: 2
             Layout.preferredWidth: 60
             Layout.fillHeight: true
