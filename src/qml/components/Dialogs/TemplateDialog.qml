@@ -8,7 +8,7 @@ Popup {
     id: templateDialog
 
     // Popup background settings
-    property color backgroundColor: 'black'
+    property color backgroundColor: Theme.mainBackgroundColor
     property real backgroundOpacity: 0.8
     property real backgroundRadius: 12
 
@@ -18,9 +18,8 @@ Popup {
     property real popupImplicitWidth: 420
 
     // Content settings
-    property string title: "Text Header Example"
-    property string text: "This is a long message. You see it because you did not initialize this popup before calling.
-For initialization - use title, text properties."
+    property string title: "Dialog"
+    property string text: "Text"
 
     // Button settings
     property string acceptedButtonText: qsTr('Ok')
@@ -91,7 +90,6 @@ For initialization - use title, text properties."
                 onClicked: {
                     accepted()
                     templateDialog.close()
-
                 }
             }
 

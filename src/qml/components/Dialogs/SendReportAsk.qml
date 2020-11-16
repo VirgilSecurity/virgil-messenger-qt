@@ -1,17 +1,14 @@
-import QtQuick 2.12
+import QtQuick 2.15
 import QtQuick.Dialogs 1.2
-import QtQuick.Controls 2.5
+import QtQuick.Controls 2.15
 
-Dialog {
+TemplateDialog {
     id: sendReportAsk
     title: qsTr("Send report")
-    modal: true
-    anchors.centerIn: parent
-    standardButtons: Dialog.Yes | StandardButton.No
-
-    Label {
-        text: qsTr("Previous run crashed. Send report?")
-    }
+    text: qsTr("Previous run crashed. Send report?")
+    //standardButtons: Dialog.Yes | StandardButton.No
+    property string acceptedButtonText: qsTr('Yes')
+    property string rejectedButtonText: qsTr('No')
 
     onAccepted: crashReporter.sendLogFiles()
 }
