@@ -40,6 +40,7 @@
 #include <QJsonObject>
 #include <QLocale>
 #include <QThread>
+#include <QUrlQuery>
 #include <QUuid>
 
 #include "android/VSQAndroid.h"
