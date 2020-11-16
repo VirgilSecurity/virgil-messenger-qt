@@ -82,7 +82,7 @@ namespace Utils
 
     void removeFile(const QString &filePath);
 
-    QString attachmentFileName(const QUrl &url, const QFileInfo &localInfo);
+    QString attachmentFileName(const QUrl &url, const QFileInfo &localInfo, bool isPicture);
 
     QString attachmentDisplayImagePath(const Attachment &attachment);
 

@@ -86,7 +86,7 @@ Optional<Attachment> AttachmentsModel::createAttachment(const QUrl &url, const A
     attachment.type = type;
     attachment.size = fileSize;
 
-    attachment.fileName = Utils::attachmentFileName(url, localInfo);
+    attachment.fileName = Utils::attachmentFileName(url, localInfo, type == Attachment::Type::Picture);
     // Set png suffix
     if (type == Attachment::Type::Picture) {
         attachment.fileName = attachment.fileName.section('.', 0, 0) + QLatin1String(".png");

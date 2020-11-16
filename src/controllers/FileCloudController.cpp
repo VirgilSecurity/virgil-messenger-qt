@@ -73,7 +73,7 @@ void FileCloudController::addFile(const QVariant &attachmentUrl)
 {
     const auto url = attachmentUrl.toUrl();
     const auto filePath = Utils::urlToLocalFile(url);
-    const auto fileName = Utils::attachmentFileName(url, QFileInfo(filePath));
+    const auto fileName = Utils::attachmentFileName(url, QFileInfo(filePath), false);
     // Copy
     const auto destFilePath = Utils::findUniqueFileName(m_currentDir.filePath(fileName));
     if (QFile::copy(filePath, destFilePath)) {

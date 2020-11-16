@@ -254,7 +254,7 @@ void Utils::removeFile(const QString &filePath)
     }
 }
 
-QString Utils::attachmentFileName(const QUrl &url, const QFileInfo &localInfo)
+QString Utils::attachmentFileName(const QUrl &url, const QFileInfo &localInfo, bool isPicture)
 {
     QString fileName;
 #ifdef VS_ANDROID
@@ -262,7 +262,7 @@ QString Utils::attachmentFileName(const QUrl &url, const QFileInfo &localInfo)
 #elif defined(VS_IOS_SIMULATOR)
     fileName = url.fileName();
 #elif defined(VS_IOS)
-    if (type == Attachment::Type::Picture) {
+    if (isPicture) {
         // Build file name from url, i.e. "file:assets-library://asset/asset.PNG?id=7CE20DC4-89A8-4079-88DC-AD37920581B5&ext=PNG"
         QUrl urlWithoutFileScheme{url.toLocalFile()};
         const QUrlQuery query(urlWithoutFileScheme.query());
@@ -270,6 +270,7 @@ QString Utils::attachmentFileName(const QUrl &url, const QFileInfo &localInfo)
     }
 #else
     Q_UNUSED(url)
+    Q_UNUSED(isPicture)
 #endif
     if (fileName.isEmpty()) {
         fileName = localInfo.fileName();
