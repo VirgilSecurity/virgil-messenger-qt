@@ -53,12 +53,20 @@ Popup {
     }
 
     Rectangle {
+        id: rectangleBackground
         focus: false
         color: backgroundColor
         opacity: backgroundOpacity
         radius: backgroundRadius
         anchors.centerIn: parent
-        implicitWidth: popupImplicitWidth + 20
+        implicitWidth: {
+            if (popupImplicitWidth >= (root.width * 0.8)) {
+                return root.width * 0.8
+            } else {
+                popupImplicitWidth
+            }
+        }
+
         height: contentColumn.height + 40
 
         Column {
@@ -92,7 +100,7 @@ Popup {
 
             Row {
                 anchors.horizontalCenter: parent.horizontalCenter
-                spacing: 26
+                spacing: rectangleBackground.implicitWidth * 0.062
 
                 FormPrimaryButton {
                     text: acceptedButtonText
