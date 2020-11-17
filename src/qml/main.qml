@@ -3,7 +3,6 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Window 2.15
 import QtMultimedia 5.12
-import QuickFuture 1.0
 
 import "./components/Popups"
 import "./components/Dialogs"

@@ -73,12 +73,6 @@ PREBUILT_PATH = $$PWD/ext/prebuilt
 include($$PWD/ext/commkit.pri)
 
 #
-#   Include QML QFuture
-#
-include($$PWD/ext/quickfuture/quickfuture.pri)
-#include($$PWD/ext/quickpromise/quickpromise.pri)
-
-#
 #   QXMPP
 #
 isEmpty(QXMPP_BUILD_PATH) {

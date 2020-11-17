@@ -63,7 +63,6 @@ using namespace notifications::xmpp;
 #include <QtQml>
 #include <QUuid>
 
-#include <QuickFuture>
 Q_DECLARE_METATYPE(VSQMessenger::EnStatus)
 Q_DECLARE_METATYPE(VSQMessenger::EnResult)
 Q_DECLARE_METATYPE(QFuture<VSQMessenger::EnResult>)
@@ -96,10 +95,6 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, Settings
 {
     // Register QML typess
     qmlRegisterType<VSQMessenger>("MesResult", 1, 0, "Result");
-    QuickFuture::registerType<VSQMessenger::EnResult>([](VSQMessenger::EnResult res) -> QVariant {
-        return QVariant(static_cast<int>(res));
-    });
-
     qRegisterMetaType<QXmppClient::Error>();
 
     // Add receipt messages extension
