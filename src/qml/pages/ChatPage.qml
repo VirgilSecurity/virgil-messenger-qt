@@ -85,7 +85,7 @@ Page {
 
         anchors.fill: parent
         anchors.leftMargin: 20
-        anchors.rightMargin: 20
+        anchors.rightMargin: 2
 
         section.property: "day"
         section.delegate: ChatDateSeporator {
@@ -96,7 +96,8 @@ Page {
 
         spacing: 5
         delegate: ChatMessage {
-            maxWidth: Math.min(root.width - 220, 800)
+            maxWidth: Math.min(listView.width * 0.75, 800)
+
 
             body: model.body
             displayTime: model.displayTime
