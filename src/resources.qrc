@@ -77,7 +77,7 @@
         <file>qml/components/FormSubtitle.qml</file>
         <file>qml/resources/icons/Key.png</file>
         <file>qml/resources/icons/Key@2x.png</file>
-        <file>qml/components/ServersPanel.qml</file>
+        <file>qml/components/SidebarPanel.qml</file>
         <file>qml/resources/icons/Menu.png</file>
         <file>qml/resources/icons/Menu@2x.png</file>
         <file>qml/components/ServerButton.qml</file>

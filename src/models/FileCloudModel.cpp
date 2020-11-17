@@ -59,6 +59,9 @@ FileCloudModel::FileCloudModel(const Settings *settings, QObject *parent)
 
 void FileCloudModel::setDirectory(const QDir &dir)
 {
+    if (!m_settings->fileCloudEnabled()) {
+        return;
+    }
     QtConcurrent::run([=]() {
         auto list = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot, QDir::NoSort);
         emit listReady(list, QPrivateSignal());
@@ -67,6 +70,9 @@ void FileCloudModel::setDirectory(const QDir &dir)
 
 void FileCloudModel::setEnabled(bool enabled)
 {
+    if (!m_settings->fileCloudEnabled()) {
+        return;
+    }
     if (enabled) {
         m_updateTimer.start(m_settings->nowInterval());
     }

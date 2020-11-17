@@ -227,6 +227,15 @@ bool Settings::devMode() const
 #endif // VS_DEVMODE
 }
 
+bool Settings::fileCloudEnabled() const
+{
+#ifdef VS_NO_FILECLOUD
+    return false;
+#else
+    return true;
+#endif // VS_NO_FILECLOUD
+}
+
 QRect Settings::windowGeometry() const
 {
     return groupValue(kLastSessionGroup, kWindowGeometryId).toRect();

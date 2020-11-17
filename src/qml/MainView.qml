@@ -21,8 +21,7 @@ Control {
         spacing: 0
         clip: logControl.visible
 
-        ServersPanel {
-            id: serversPanel
+        SidebarPanel {
             visible: [manager.chatListState, manager.fileCloudState].includes(manager.currentState)
             z: 2
             Layout.preferredWidth: 60

@@ -68,6 +68,7 @@ Control {
             id: fileCloudButton
             Layout.alignment: Qt.AlignHCenter
             image: "File Selected Big"
+            visible: settings.fileCloudEnabled
 
             onClicked: app.stateManager.openFileCloud()
         }

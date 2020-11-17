@@ -50,6 +50,7 @@ class Settings : public QSettings
     Q_PROPERTY(QString lastSignedInUserId READ lastSignedInUserId WRITE setLastSignedInUserId NOTIFY lastSignedInUserIdChanged)
     Q_PROPERTY(QStringList usersList READ usersList WRITE setUsersList NOTIFY usersListChanged)
     Q_PROPERTY(bool devMode READ devMode CONSTANT)
+    Q_PROPERTY(bool fileCloudEnabled READ fileCloudEnabled CONSTANT)
     Q_PROPERTY(QRect windowGeometry READ windowGeometry WRITE setWindowGeometry NOTIFY windowGeometryChanged)
 
 public:
@@ -87,8 +88,9 @@ public:
     QSize thumbnailMaxSize() const;
     QSize previewMaxSize() const;
 
-    // Dev mode
+    // Modes / features
     bool devMode() const;
+    bool fileCloudEnabled() const;
 
     // Window
     QRect windowGeometry() const;
