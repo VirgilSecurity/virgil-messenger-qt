@@ -7,15 +7,11 @@ import "../../theme"
 Popup {
     id: templateDialog
 
-    // Popup background settings
-    property color backgroundColor: Theme.mainBackgroundColor
-    property real backgroundOpacity: 1
-    property real backgroundRadius: 12
+    property alias backgroundRect: backgroundRectangle
 
     // Bahavior settings
     property real enterTransitionDuration: 250
     property real exitTransitionDuration: 200
-    property real popupImplicitWidth: 420
 
     // Content settings
     property string title: "Dialog"
@@ -32,7 +28,16 @@ Popup {
     modal: true
     focus: true
     closePolicy: Popup.NoAutoClose
-    padding: 20
+    padding: d.margin
+
+    QtObject {
+        id: d
+        readonly property real margin: 20
+        readonly property real spacing: 20
+        readonly property real radius: 10
+
+        readonly property real popupImplicitWidth: Math.min(420, root.width * 0.8)
+    }
 
     enter: Transition {
         ParallelAnimation {
@@ -53,34 +58,26 @@ Popup {
     }
 
     Rectangle {
-        id: rectangleBackground
+        id: backgroundRectangle
         focus: false
-        color: backgroundColor
-        opacity: backgroundOpacity
-        radius: backgroundRadius
+        color: Theme.mainBackgroundColor
+        radius: d.radius
         anchors.centerIn: parent
-        implicitWidth: {
-            if (popupImplicitWidth >= (root.width * 0.8)) {
-                return root.width * 0.8
-            } else {
-                popupImplicitWidth
-            }
-        }
-
-        height: contentColumn.height + 40
+        implicitWidth: d.popupImplicitWidth
+        height: contentColumn.height + 2 * d.margin
 
         Column {
             id: contentColumn
             anchors {
                 left: parent.left
-                leftMargin: 20
+                leftMargin: d.margin
                 right: parent.right
-                rightMargin: 20
+                rightMargin: d.margin
                 top: parent.top
-                topMargin: 20
+                topMargin: d.margin
             }
 
-            spacing: 26
+            spacing: d.spacing
 
             Text {
                 width: parent.width
@@ -100,7 +97,7 @@ Popup {
 
             Row {
                 anchors.horizontalCenter: parent.horizontalCenter
-                spacing: rectangleBackground.implicitWidth * 0.062
+                spacing: d.spacing
 
                 FormPrimaryButton {
                     text: acceptedButtonText
