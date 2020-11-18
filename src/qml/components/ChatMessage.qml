@@ -13,6 +13,7 @@ Control {
     width: loader.item.width
 
     property double maxWidth: parent.width
+    readonly property real leftIndent: row.spacing + avatar.width
 
     property string body: ""
     property string displayTime: ""

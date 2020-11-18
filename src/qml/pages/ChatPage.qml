@@ -15,6 +15,12 @@ Page {
     readonly property var appState: app.stateManager.chatState
     readonly property var contactId: controllers.chats.currentContactId
 
+    QtObject {
+        id: d
+        readonly property real margin: 20
+        readonly property real listSpacing: 5
+    }
+
     background: Rectangle {
         color: Theme.chatBackgroundColor
     }
@@ -83,8 +89,8 @@ Page {
         property var contextMenu: null
 
         anchors.fill: parent
-        anchors.leftMargin: 20
-        anchors.rightMargin: 2
+        anchors.leftMargin: d.margin
+        anchors.rightMargin: d.margin
 
         section.property: "day"
         section.delegate: ChatDateSeporator {
@@ -93,10 +99,11 @@ Page {
 
         model: models.messages
 
-        spacing: 5
+        spacing: d.listSpacing
         delegate: ChatMessage {
-            maxWidth: Math.min(listView.width * 0.75, 800)
+            readonly property real fullWidth: root.width - 2 * d.margin - leftIndent
 
+            maxWidth: Platform.isMobile ? (fullWidth - d.margin) : fullWidth
 
             body: model.body
             displayTime: model.displayTime
