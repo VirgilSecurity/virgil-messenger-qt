@@ -5,32 +5,23 @@ import "../theme"
 
 Rectangle {
     id: containerId
-    anchors.centerIn: parent
-    height: parent.height
-    color: Theme.inputBackgroundColor
-    radius: 20
 
-    Behavior on width {
-        NumberAnimation {
-            id: widthAnimation
-            duration: 200
-            easing.type: Easing.InOutQuad
-        }
-    }
+    radius: 20
+    color: 'transparent'
 
     property alias searchPlaceholder: searchField.placeholderText
     property alias search: searchField.text
     property bool isSearchOpen: state === "open"
-    property alias isAnimationRunning: widthAnimation.running
+//    property alias isAnimationRunning: widthAnimation.running
 
     state: "closed"
     states: [
-        State {
+        State { // open
             name: "open"
 
             PropertyChanges {
                 target: containerId
-                width: parent.width
+                color: Theme.inputBackgroundColor
             }
 
             PropertyChanges {
@@ -40,17 +31,16 @@ Rectangle {
 
             PropertyChanges {
                 target: searchButtonId
-                width: 24
-                height: 24
                 icon.color: "white"
-                anchors {
-                    left: parent.left
-                    leftMargin: 10
-                }
             }
         },
-        State {
+        State { // close
             name: "closed"
+
+            PropertyChanges {
+                target: containerId
+                color: 'transparent'
+            }
 
             PropertyChanges {
                 target: closeButtonId
@@ -65,13 +55,26 @@ Rectangle {
 
             PropertyChanges {
                 target: searchButtonId
-                width: 24
-                height: 24
                 icon.color: "transparent"
-                anchors {
-                    left: undefined
-                    leftMargin: undefined
-                }
+            }
+        }
+    ]
+
+    transitions: [
+        Transition {
+            from: 'open'; to: 'closed'
+            PropertyAnimation {
+                properties: "color"
+                easing.type: Easing.InExpo
+                duration: 250
+            }
+        },
+        Transition {
+            from: 'closed'; to: 'open'
+            PropertyAnimation {
+                properties: "color"
+                easing.type: Easing.OutExpo
+                duration: 250
             }
         }
     ]
@@ -103,9 +106,12 @@ Rectangle {
     ImageButton {
         id: searchButtonId
         anchors.verticalCenter: parent.verticalCenter
+        anchors.left: parent.left
+        anchors.leftMargin: 10
+        width: 24
+        height: 24
         image: "Search"
         enabled: !isSearchOpen || !searchField.activeFocus
-        visible: isSearchOpen || !isAnimationRunning
 
         onClicked: {
             containerId.state = "open"
