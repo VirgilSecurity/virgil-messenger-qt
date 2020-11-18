@@ -21,19 +21,19 @@ ToolBar {
 
     default property alias menu: contextMenu.contentData
 
-//    onIsSearchOpenChanged: {
-//        if (filterSource) {
-//            filterSource.filter = ""
-//        }
-//        focus = false
-//        parent.focus = true
-//    }
+    onIsSearchOpenChanged: {
+        if (filterSource) {
+            filterSource.filter = ""
+        }
+        focus = false
+        parent.focus = true
+    }
 
-//    onSearchChanged: {
-//        if (filterSource) {
-//            filterSource.filter = search
-//        }
-//    }
+    onSearchChanged: {
+        if (filterSource) {
+            filterSource.filter = search
+        }
+    }
 
     background: Rectangle {
         implicitHeight: 60
@@ -112,177 +112,120 @@ ToolBar {
     ]
 
     Item {
-        id: toolbarContent_Container
+        id: contentRow
         anchors {
             fill: parent
             leftMargin: 20
-            rightMargin: 20
+            rightMargin: 10
         }
 
         height: 40
 
-        Column { // Title and Description items
-            id: title_descr_Column
+        ImageButton {
+            id: backButton
             anchors {
-                verticalCenter: parent.verticalCenter
                 left: parent.left
-                leftMargin: 0
+                verticalCenter: parent.verticalCenter
             }
-
-            Label {
-                id: titleLabel
-                elide: Label.ElideRight
-
-                font.family: Theme.mainFont
-                font.pointSize: UiHelper.fixFontSz(15)
-                horizontalAlignment: Qt.AlignLeft
-                verticalAlignment: Qt.AlignVCenter
-                font.bold: true
-                color: Theme.primaryTextColor
-            }
-
-            Label {
-                id: descriptionLabel
-                elide: Label.ElideRight
-
-                font.family: Theme.mainFont
-                horizontalAlignment: Qt.AlignLeft
-                verticalAlignment: Qt.AlignVCenter
-                font.pointSize: UiHelper.fixFontSz(11)
-                color: Theme.secondaryTextColor
-            }
-
+            image: "Arrow-Left"
+            width: showBackButton ? 40 : 0
+            onClicked: app.stateManager.goBack()
         }
 
         Item {
-            id: searchContainer
+            id: toolbarContent_Container
             anchors {
-                verticalCenter: parent.verticalCenter
+                left: backButton.right
+                leftMargin: showBackButton ? 10 : 0
                 right: parent.right
-                rightMargin: 40
             }
 
-            height: 40
-            width: 40
+            height: parent.height
 
-            Search {
-                id: searchId
-                anchors.fill: parent
-                visible: true
-                onStateChanged: {
-                    toolbarId.state = searchId.state
+            Column { // Title and Description items
+                id: title_descr_Column
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    left: parent.left
+                    leftMargin: 0
+                }
+
+                Label {
+                    id: titleLabel
+                    elide: Label.ElideRight
+
+                    font.family: Theme.mainFont
+                    font.pointSize: UiHelper.fixFontSz(15)
+                    horizontalAlignment: Qt.AlignLeft
+                    verticalAlignment: Qt.AlignVCenter
+                    font.bold: true
+                    color: Theme.primaryTextColor
+                }
+
+                Label {
+                    id: descriptionLabel
+                    elide: Label.ElideRight
+
+                    font.family: Theme.mainFont
+                    horizontalAlignment: Qt.AlignLeft
+                    verticalAlignment: Qt.AlignVCenter
+                    font.pointSize: UiHelper.fixFontSz(11)
+                    color: Theme.secondaryTextColor
+                }
+
+            }
+
+            Item {
+                id: searchContainer
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    right: parent.right
+                    rightMargin: 40
+                }
+
+                height: 40
+                width: 40
+
+                Search {
+                    id: searchId
+                    anchors.fill: parent
+                    visible: true
+                    onStateChanged: {
+                        toolbarId.state = searchId.state
+                    }
                 }
             }
-        }
 
-        ImageButton {
-            id: menuButton
-            anchors {
-                verticalCenter: parent.verticalCenter
-                right: parent.right
-                rightMargin: 0
-            }
-            image: "More"
-            opacity: menu.length ? 1 : 0
-            enabled: {
-                if (!menu.length) {
-                    return false
+            ImageButton {
+                id: menuButton
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    right: parent.right
+                    rightMargin: 0
                 }
-                //                if (!isSearchOpen && !searchId.isAnimationRunning) {
-                //                    return true
-                //                } else {
-                //                    return false
-                //                }
-            }
+                image: "More"
+                opacity: menu.length ? 1 : 0
+                enabled: {
+                    if (!menu.length) {
+                        return false
+                    }
+                    //                if (!isSearchOpen && !searchId.isAnimationRunning) {
+                    //                    return true
+                    //                } else {
+                    //                    return false
+                    //                }
+                }
 
-            onClicked: {
-                contextMenu.currentIndex = -1
-                contextMenu.open()
-            }
+                onClicked: {
+                    contextMenu.currentIndex = -1
+                    contextMenu.open()
+                }
 
-            ContextMenu {
-                id: contextMenu
-                dropdown: true
+                ContextMenu {
+                    id: contextMenu
+                    dropdown: true
+                }
             }
         }
     }
-
-//    RowLayout {
-//        anchors.fill: parent
-//        anchors.leftMargin: loader.visible ? 8 : 20
-//        anchors.rightMargin: 20
-//        spacing: 10
-
-//        Loader {
-//            id: loader
-//            Layout.preferredWidth: 40
-//            Layout.preferredHeight: 40
-//            visible: showBackButton && !isSearchOpen && !searchId.isAnimationRunning
-
-//            ImageButton {
-//                anchors.fill: parent
-//                image: "Arrow-Left"
-//                onClicked: app.stateManager.goBack()
-//            }
-//        }
-
-//        Column {
-//            Layout.fillWidth: !isSearchOpen
-//            visible: !isSearchOpen && !searchId.isAnimationRunning
-//            clip: true
-
-//            Label {
-//                id: titleLabel
-//                elide: Label.ElideRight
-//                width: parent.width
-
-//                font.family: Theme.mainFont
-//                font.pointSize: UiHelper.fixFontSz(15)
-//                horizontalAlignment: Qt.AlignLeft
-//                verticalAlignment: Qt.AlignVCenter
-//                font.bold: true
-//                color: Theme.primaryTextColor
-//            }
-
-//            Label {
-//                id: descriptionLabel
-//                elide: Label.ElideRight
-//                width: parent.width
-
-//                font.family: Theme.mainFont
-//                horizontalAlignment: Qt.AlignLeft
-//                verticalAlignment: Qt.AlignVCenter
-//                font.pointSize: UiHelper.fixFontSz(11)
-//                color: Theme.secondaryTextColor
-//            }
-//        }
-
-//        Item {
-//            Layout.fillWidth: isSearchOpen || searchId.isAnimationRunning
-//            Layout.preferredWidth: 48
-//            height: 40
-
-//            Search {
-//                id: searchId
-//            }
-//        }
-
-//        ImageButton {
-//            visible: !isSearchOpen && !searchId.isAnimationRunning
-
-//            id: menuButton
-//            image: "More"
-//            opacity: menu.length ? 1 : 0
-//            enabled: menu.length
-//            onClicked: {
-//                contextMenu.currentIndex = -1
-//                contextMenu.open()
-//            }
-
-//            ContextMenu {
-//                id: contextMenu
-//                dropdown: true
-//            }
-//        }
-//    }
 }
