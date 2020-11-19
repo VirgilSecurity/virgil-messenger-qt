@@ -93,7 +93,7 @@ public:
 
     Q_PROPERTY(QString currentUser READ currentUser NOTIFY fireCurrentUserChanged)
 
-    VSQMessenger(QNetworkAccessManager *networkAccessManager, Settings *settings, Validator *validator);
+    VSQMessenger(Settings *settings, Validator *validator);
     VSQMessenger() = default; // QML engine requires default constructor
     virtual ~VSQMessenger();
 

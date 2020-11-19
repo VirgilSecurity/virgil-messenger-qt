@@ -48,13 +48,12 @@
 
 Q_LOGGING_CATEGORY(lcNetwork, "network");
 
-#ifdef Q_OS_MACOS
-// TODO: Remove after fixing of deprecated functionality
+#if defined(VS_MACOS) || defined(VS_LINUX)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
-VSQNetworkAnalyzer::VSQNetworkAnalyzer(QObject *parent) : QObject(parent), m_nwManager(this), m_connectedState(true) {
+VSQNetworkAnalyzer::VSQNetworkAnalyzer(QObject *parent) : QObject(parent), m_nwManager(this), m_isConnected(true) {
     // To disable issue: QNetworkAccessManager shows "Network access is disabled."
     qputenv("QT_BEARER_POLL_TIMEOUT", QByteArray::number(-1));
 
@@ -94,8 +93,8 @@ VSQNetworkAnalyzer::onStart() {
 }
 
 bool
-VSQNetworkAnalyzer::isOnline() const {
-    return m_connectedState;
+VSQNetworkAnalyzer::isConnected() const {
+    return m_isConnected;
 }
 
 void
@@ -200,20 +199,20 @@ VSQNetworkAnalyzer::onAnalyzeNetwork() {
     if (currenNetworkInterfaceData.isEmpty()) {
         qCDebug(lcNetwork).noquote().nospace() << "NetworkAnalyzer: Network is not ready";
         stateChanged = true;
-        emit fireStateChanged(false);
+        emit connectedChanged(false);
         m_networkInterfaceData.clear();
         checkIsNeedStop();
         return;
     }
 
-    if ((!initialized) || (m_connectedState != currentState)) {
-        m_connectedState = currentState;
+    if ((!initialized) || (m_isConnected != currentState)) {
+        m_isConnected = currentState;
         initialized = true;
 
         stateChanged = true;
-        emit fireStateChanged(m_connectedState);
+        emit connectedChanged(m_isConnected);
 
-        qCDebug(lcNetwork).noquote().nospace() << "NetworkAnalyzer: Online status: " << m_connectedState;
+        qCDebug(lcNetwork).noquote().nospace() << "NetworkAnalyzer: Online status: " << m_isConnected;
     }
 
 #if DEBUG_NETWORK
@@ -230,11 +229,11 @@ VSQNetworkAnalyzer::onAnalyzeNetwork() {
 
         m_networkInterfaceData = currenNetworkInterfaceData;
         stateChanged = true;
-        emit fireStateChanged(m_connectedState);
+        emit connectedChanged(m_isConnected);
     }
 
-    if (!stateChanged && m_connectedState) {
-        emit fireHeartBeat();
+    if (!stateChanged && m_isConnected) {
+        emit heartBeat();
     }
 
     checkIsNeedStop();
@@ -306,6 +305,6 @@ VSQNetworkAnalyzer::printConfiguration(const QNetworkConfiguration &configuratio
 #endif
 }
 
-#ifdef Q_OS_MACOS
+#if defined(VS_MACOS) || defined(VS_LINUX)
 #pragma GCC diagnostic pop
 #endif

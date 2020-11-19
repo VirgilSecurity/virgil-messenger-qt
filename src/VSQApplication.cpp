@@ -67,7 +67,7 @@ VSQApplication::VSQApplication()
     , m_crashReporter(&m_settings, m_networkAccessManager, this)
     , m_engine(new QQmlApplicationEngine(this))
     , m_validator(new Validator(this))
-    , m_messenger(m_networkAccessManager, &m_settings, m_validator)
+    , m_messenger(&m_settings, m_validator)
     , m_userDatabase(new UserDatabase(m_settings.databaseDir(), nullptr))
     , m_models(&m_messenger, &m_settings, m_userDatabase, m_networkAccessManager, this)
     , m_databaseThread(new QThread())
@@ -89,7 +89,7 @@ VSQApplication::VSQApplication()
     m_databaseThread->setObjectName("DatabaseThread");
     m_databaseThread->start();
 
-#if (MACOS)
+#ifdef VS_MACOS
     VSQMacos::instance().startUpdatesTimer();
 #endif
 }
@@ -175,8 +175,9 @@ void VSQApplication::reloadQml() {
 }
 
 /******************************************************************************/
-void VSQApplication::checkUpdates() {
-#if (MACOS)
+void VSQApplication::checkUpdates()
+{
+#ifdef VS_MACOS
     VSQMacos::instance().checkUpdates();
 #endif
 }

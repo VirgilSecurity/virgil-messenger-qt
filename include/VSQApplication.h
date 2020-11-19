@@ -44,7 +44,9 @@
 #include <VSQCrashReporter.h>
 #include <VSQMessenger.h>
 #include <Settings.h>
+#ifdef VS_MACOS
 #include <macos/VSQMacos.h>
+#endif // VS_MACOS
 #include "controllers/Controllers.h"
 #include <database/UserDatabase.h>
 #include <models/Models.h>

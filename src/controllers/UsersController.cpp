@@ -121,6 +121,7 @@ void UsersController::onDatabaseUserIdChanged(const UserId &userId)
         break;
     case Operation::DownloadKey:
         emit keyDownloaded(userId);
+        break;
     default:
         break;
     }

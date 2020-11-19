@@ -60,7 +60,7 @@ using namespace notifications::xmpp;
 #include <QStandardPaths>
 #include <QSqlDatabase>
 #include <QSqlError>
-#include <QtQml>
+#include <QSslSocket>
 #include <QUuid>
 
 Q_DECLARE_METATYPE(VSQMessenger::EnStatus)
@@ -87,14 +87,13 @@ Q_LOGGING_CATEGORY(lcMessenger, "messenger")
 using namespace vm;
 
 /******************************************************************************/
-VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, Settings *settings, Validator *validator)
+VSQMessenger::VSQMessenger(Settings *settings, Validator *validator)
     : QObject()
     , m_xmpp()
     , m_settings(settings)
     , m_validator(validator)
 {
-    // Register QML typess
-    qmlRegisterType<VSQMessenger>("MesResult", 1, 0, "Result");
+    // Register QML types
     qRegisterMetaType<QXmppClient::Error>();
 
     // Add receipt messages extension
@@ -120,8 +119,8 @@ VSQMessenger::VSQMessenger(QNetworkAccessManager *networkAccessManager, Settings
     connect(&m_xmpp, SIGNAL(sslErrors(const QList<QSslError> &)), this, SLOT(onSslErrors(const QList<QSslError> &)));
 
     // Network Analyzer
-    connect(&m_networkAnalyzer, &VSQNetworkAnalyzer::fireStateChanged, this, &VSQMessenger::onProcessNetworkState, Qt::QueuedConnection);
-    connect(&m_networkAnalyzer, &VSQNetworkAnalyzer::fireHeartBeat, this, &VSQMessenger::checkState, Qt::QueuedConnection);
+    connect(&m_networkAnalyzer, &VSQNetworkAnalyzer::connectedChanged, this, &VSQMessenger::onProcessNetworkState, Qt::QueuedConnection);
+    connect(&m_networkAnalyzer, &VSQNetworkAnalyzer::heartBeat, this, &VSQMessenger::checkState, Qt::QueuedConnection);
 
     // Push notifications
 #if VS_PUSHNOTIFICATIONS
@@ -711,10 +710,6 @@ VSQMessenger::checkState() {
         emit fireError(tr("Disconnected ..."));
 #endif
         _reconnect();
-    } else {
-#if 0
-        qCDebug(lcNetwork) << "Connection is ok";
-#endif
     }
 }
 

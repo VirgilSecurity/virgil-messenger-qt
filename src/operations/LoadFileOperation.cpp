@@ -34,6 +34,8 @@
 
 #include "operations/LoadFileOperation.h"
 
+#include <QNetworkReply>
+
 #include "Utils.h"
 #include "models/FileLoader.h"
 #include "operations/MessageOperation.h"
@@ -147,14 +149,14 @@ void LoadFileOperation::onReplyFinished()
     }
 }
 
-void LoadFileOperation::onReplyErrorOccurred(const QNetworkReply::NetworkError &error, QNetworkReply *)
+void LoadFileOperation::onReplyErrorOccurred(const int &errorCode, QNetworkReply *)
 {
-    qCWarning(lcOperation) << "File load error occurred:" << error << static_cast<int>(error);
+    qCWarning(lcOperation) << "File load error occurred:" << errorCode << static_cast<int>(errorCode);
     if (m_isConnectionChanged) {
         fail();
     }
     else {
-        emit notificationCreated(tr("File loading error: %1").arg(error));
+        emit notificationCreated(tr("File loading error: %1").arg(errorCode));
         invalidate();
     }
 }

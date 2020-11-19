@@ -112,7 +112,6 @@ HEADERS += \
         include/VSQNetworkAnalyzer.h \
         include/Utils.h \
         include/android/VSQAndroid.h \
-        include/macos/VSQMacos.h \
         include/ui/VSQUiHelper.h \
         include/KeyboardEventFilter.h \
         include/Validator.h \
@@ -319,8 +318,10 @@ INCLUDEPATH += \
 #   Sparkle framework
 #
 macx: {
+    HEADERS += include/macos/VSQMacos.h
     OBJECTIVE_SOURCES += src/macos/VSQMacos.mm
-    DEFINES += MACOS=1
+    DEFINES += VS_MACOS=1
+
     SPARKLE_LOCATION=$$PREBUILT_PATH/$${OS_NAME}/sparkle
     message("SPARKLE LOCATION = $$SPARKLE_LOCATION")
     QMAKE_LFLAGS  += -F$$SPARKLE_LOCATION
@@ -386,7 +387,7 @@ message("ANDROID_TARGET_ARCH = $$ANDROID_TARGET_ARCH")
 #
 
 linux:!android {
-    DEFINES += VS_DESKTOP=1
+    DEFINES += VS_DESKTOP=1 VS_LINUX=1
     QT += widgets
 }
 
