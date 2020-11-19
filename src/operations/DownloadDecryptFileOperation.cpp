@@ -41,22 +41,23 @@
 
 using namespace vm;
 
-DownloadDecryptFileOperation::DownloadDecryptFileOperation(QObject *parent, const Settings *settings, FileLoader *fileLoader,
+DownloadDecryptFileOperation::DownloadDecryptFileOperation(NetworkOperation *parent, const Settings *settings,
                                                            const QUrl &url, const DataSize &bytesTotal, const QString &filePath, const Contact::Id &senderId)
-    : Operation(QLatin1String("DownloadDecrypt"), parent)
+    : NetworkOperation(parent)
     , m_settings(settings)
-    , m_fileLoader(fileLoader)
     , m_url(url)
     , m_bytesTotal(bytesTotal)
     , m_filePath(filePath)
     , m_senderId(senderId)
-{}
+{
+    setName(QLatin1String("DownloadDecrypt"));
+}
 
 bool DownloadDecryptFileOperation::populateChildren()
 {
     m_tempPath = m_settings->attachmentCacheDir().filePath(Utils::createUuid());
 
-    auto downOp = new DownloadFileOperation(this, m_fileLoader, m_url, m_bytesTotal, m_tempPath);
+    auto downOp = new DownloadFileOperation(this, m_url, m_bytesTotal, m_tempPath);
     connect(downOp, &DownloadFileOperation::progressChanged, this, &DownloadDecryptFileOperation::progressChanged);
     appendChild(downOp);
 

@@ -32,45 +32,46 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "operations/LoadAttachmentOperation.h"
+#include "operations/NetworkOperation.h"
 
-#include "operations/MessageOperation.h"
+#include "models/FileLoader.h"
 
 using namespace vm;
 
-LoadAttachmentOperation::LoadAttachmentOperation(MessageOperation *parent)
-    : NetworkOperation(parent)
+NetworkOperation::NetworkOperation(QObject *parent, FileLoader *fileLoader, bool isOnline)
+    : Operation(QLatin1String("Network"), parent)
+    , m_fileLoader(fileLoader)
+    , m_isOnline(isOnline)
 {
-    setName(QLatin1String("LoadAttachment"));
-    connect(this, &Operation::started, parent, std::bind(&MessageOperation::setAttachmentStatus, parent, Attachment::Status::Loading));
-    connect(this, &Operation::finished, parent, std::bind(&MessageOperation::setAttachmentStatus, parent, Attachment::Status::Loaded));
-    connect(this, &Operation::failed, parent, std::bind(&MessageOperation::setAttachmentStatus, parent, Attachment::Status::Interrupted));
-    connect(this, &Operation::invalidated, parent, std::bind(&MessageOperation::setAttachmentStatus, parent, Attachment::Status::Invalid));
-    connect(this, &LoadAttachmentOperation::totalProgressChanged, parent, &MessageOperation::setAttachmentProcessedSize);
+    connect(fileLoader, &FileLoader::serviceFound, this, &NetworkOperation::setIsOnline);
 }
 
-void LoadAttachmentOperation::startLoadOperation(const DataSize &bytesTotal)
+NetworkOperation::NetworkOperation(NetworkOperation *parent)
+    : NetworkOperation(parent, parent->fileLoader(), parent->isOnline())
+{}
+
+FileLoader *NetworkOperation::fileLoader()
 {
-    m_previousBytesTotal = m_bytesTotal;
-    m_bytesTotal += bytesTotal;
-    updateTotalProgress();
+    return m_fileLoader;
 }
 
-void LoadAttachmentOperation::setLoadOperationProgress(const DataSize &bytesLoaded)
+bool NetworkOperation::isOnline() const
 {
-    m_currentBytesLoaded = bytesLoaded;
-    updateTotalProgress();
+    return m_isOnline;
 }
 
-void LoadAttachmentOperation::cleanup()
+bool NetworkOperation::preRun()
 {
-    Operation::cleanup();
-    m_bytesTotal = 0;
-    m_previousBytesTotal = 0;
-    m_currentBytesLoaded = 0;
+    if (!m_isOnline && !hasChildren() && status() == Operation::Status::Started) {
+        qCDebug(lcOperation) << "Operation is failed because network is offline";
+        fail();
+        return false;
+    }
+    return Operation::preRun();
 }
 
-void LoadAttachmentOperation::updateTotalProgress()
+void NetworkOperation::setIsOnline(bool isOnline)
 {
-    emit totalProgressChanged(m_previousBytesTotal + m_currentBytesLoaded, m_bytesTotal);
+    m_isOnline = isOnline;
+    preRun();
 }

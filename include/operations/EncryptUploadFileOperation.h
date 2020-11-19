@@ -35,7 +35,7 @@
 #ifndef VM_ENCRYPTUPLOADFILEOPERATION_H
 #define VM_ENCRYPTUPLOADFILEOPERATION_H
 
-#include "Operation.h"
+#include "NetworkOperation.h"
 
 class Settings;
 
@@ -43,13 +43,12 @@ namespace vm
 {
 class FileLoader;
 
-class EncryptUploadFileOperation : public Operation
+class EncryptUploadFileOperation : public NetworkOperation
 {
     Q_OBJECT
 
 public:
-    EncryptUploadFileOperation(QObject *parent, const Settings *settings, const QString &sourcePath,
-                               const Contact::Id &recipientId, FileLoader *fileLoader);
+    EncryptUploadFileOperation(NetworkOperation *parent, const Settings *settings, const QString &sourcePath, const Contact::Id &recipientId);
 
     void setSourcePath(const QString &path);
 
@@ -66,7 +65,6 @@ private:
     QString m_sourcePath;
     QString m_tempPath;
     Contact::Id m_recipientId;
-    FileLoader *m_fileLoader;
 };
 }
 

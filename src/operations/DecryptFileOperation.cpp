@@ -49,15 +49,17 @@ DecryptFileOperation::DecryptFileOperation(QObject *parent, const QString &sourc
 void DecryptFileOperation::run()
 {
     const auto result = Core::decryptFile(m_sourcePath, m_destPath, m_senderId);
-    if (result == Core::Result::Fail) {
-        fail();
-    }
-    else if (result == Core::Result::Success) {
+    switch (result) {
+    case Core::Result::Success:
         emit decrypted(m_destPath);
         finish();
-    }
-    else {
-        emit notificationCreated(tr("Failed to decrypt file"));
-        invalidate();
+        break;
+    case Core::Result::Fail:
+        fail();
+        break;
+    case Core::Result::Invalid:
+    default:
+        invalidate(tr("Failed to decrypt file"));
+        break;
     }
 }

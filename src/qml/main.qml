@@ -107,7 +107,14 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
-        app.notificationCreated.connect(showPopupInform)
+        app.notificationCreated.connect(function(text, error) {
+            if (error) {
+                showPopupError(text)
+            }
+            else {
+                showPopupInform(text)
+            }
+        })
         crashReporter.crashReportRequested.connect(sendReportAsk.open)
         crashReporter.reportSent.connect(showPopupSuccess)
         crashReporter.reportErrorOccurred.connect(showPopupError)

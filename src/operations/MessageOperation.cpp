@@ -39,11 +39,13 @@
 
 using namespace vm;
 
-MessageOperation::MessageOperation(const GlobalMessage &message, MessageOperationFactory *factory, QObject *parent)
-    : Operation(message.id, parent)
+MessageOperation::MessageOperation(const GlobalMessage &message, MessageOperationFactory *factory, NetworkOperation *parent)
+    : NetworkOperation(parent)
     , m_factory(factory)
     , m_message(message)
-{}
+{
+    setName(message.id);
+}
 
 const GlobalMessage *MessageOperation::message() const
 {

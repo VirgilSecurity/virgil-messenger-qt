@@ -35,7 +35,7 @@
 #ifndef VM_DOWNLOADDECRYPTFILEOPERATION_H
 #define VM_DOWNLOADDECRYPTFILEOPERATION_H
 
-#include "Operation.h"
+#include "NetworkOperation.h"
 
 class Settings;
 
@@ -43,12 +43,12 @@ namespace vm
 {
 class FileLoader;
 
-class DownloadDecryptFileOperation : public Operation
+class DownloadDecryptFileOperation : public NetworkOperation
 {
     Q_OBJECT
 
 public:
-    DownloadDecryptFileOperation(QObject *parent, const Settings *settings, FileLoader *fileLoader,
+    DownloadDecryptFileOperation(NetworkOperation *parent, const Settings *settings,
                                  const QUrl &url, const DataSize &bytesTotal, const QString &filePath, const Contact::Id &senderId);
 
 signals:

@@ -51,6 +51,7 @@ public:
 private:
     bool populateChildren() override;
     void cleanup() override;
+    bool preRun() override;
 
     void setTempPngPath(const QString &path);
 

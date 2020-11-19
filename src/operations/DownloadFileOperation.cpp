@@ -41,9 +41,8 @@
 
 using namespace vm;
 
-DownloadFileOperation::DownloadFileOperation(QObject *parent, FileLoader *fileLoader, const QUrl &url, const DataSize &bytesTotal,
-                                             const QString &filePath)
-    : LoadFileOperation(parent, fileLoader, bytesTotal)
+DownloadFileOperation::DownloadFileOperation(NetworkOperation *parent, const QUrl &url, const DataSize &bytesTotal, const QString &filePath)
+    : LoadFileOperation(parent, bytesTotal)
     , m_url(url)
 {
     setName(QLatin1String("DownloadFile"));

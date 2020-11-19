@@ -44,7 +44,7 @@ class UploadFileOperation : public LoadFileOperation
     Q_OBJECT
 
 public:
-    UploadFileOperation(QObject *parent, const QString &filePath, FileLoader *fileLoader);
+    UploadFileOperation(NetworkOperation *parent, const QString &filePath);
 
     void run() override;
 
@@ -52,7 +52,6 @@ signals:
     void uploaded(const QUrl &getUrl);
 
 private:
-    void cleanup() override;
     void connectReply(QNetworkReply *reply) override;
 
     void tryAutoDeleteFile();

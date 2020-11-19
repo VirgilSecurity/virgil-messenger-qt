@@ -35,7 +35,7 @@
 #ifndef VM_SENDMESSAGEOPERATION_H
 #define VM_SENDMESSAGEOPERATION_H
 
-#include "Operation.h"
+#include "NetworkOperation.h"
 
 class QXmppClient;
 
@@ -43,7 +43,7 @@ namespace vm
 {
 class MessageOperation;
 
-class SendMessageOperation : public Operation
+class SendMessageOperation : public NetworkOperation
 {
     Q_OBJECT
 

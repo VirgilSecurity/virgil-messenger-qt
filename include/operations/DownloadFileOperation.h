@@ -44,8 +44,7 @@ class DownloadFileOperation : public LoadFileOperation
     Q_OBJECT
 
 public:
-    DownloadFileOperation(QObject *parent, FileLoader *fileLoader, const QUrl &url, const DataSize &bytesTotal,
-                          const QString &filePath);
+    DownloadFileOperation(NetworkOperation *parent, const QUrl &url, const DataSize &bytesTotal, const QString &filePath);
 
     void run() override;
 

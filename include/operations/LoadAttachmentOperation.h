@@ -35,18 +35,18 @@
 #ifndef VM_LOADATTACHMENTOPERATION_H
 #define VM_LOADATTACHMENTOPERATION_H
 
-#include "Operation.h"
+#include "NetworkOperation.h"
 
 namespace vm
 {
 class MessageOperation;
 
-class LoadAttachmentOperation : public Operation
+class LoadAttachmentOperation : public NetworkOperation
 {
     Q_OBJECT
 
 public:
-    explicit LoadAttachmentOperation(const QString &name, MessageOperation *parent);
+    explicit LoadAttachmentOperation(MessageOperation *parent);
 
     void startLoadOperation(const DataSize &bytesTotal);
     void setLoadOperationProgress(const DataSize &bytesLoaded);

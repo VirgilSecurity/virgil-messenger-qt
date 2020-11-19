@@ -80,7 +80,7 @@ void FileCloudController::addFile(const QVariant &attachmentUrl)
         setDirectory(m_currentDir);
     }
     else {
-        qCWarning(lcController) << "Unable to copy attachment";
+        qCWarning(lcController) << "Failed to copy attachment";
     }
 }
 

@@ -37,18 +37,16 @@
 #include <QNetworkReply>
 
 #include "Utils.h"
-#include "models/FileLoader.h"
 #include "operations/MessageOperation.h"
 
 using namespace vm;
 
-LoadFileOperation::LoadFileOperation(QObject *parent, FileLoader *fileLoader, const DataSize &bytesTotal)
-    : Operation(QLatin1String("LoadFile"), parent)
-    , m_fileLoader(fileLoader)
+LoadFileOperation::LoadFileOperation(NetworkOperation *parent, const DataSize &bytesTotal)
+    : NetworkOperation(parent)
     , m_bytesTotal(bytesTotal)
 {
+    setName(QLatin1String("LoadFile"));
     connect(this, &LoadFileOperation::setProgress, this, &LoadFileOperation::onSetProgress);
-    connect(fileLoader, &FileLoader::serviceFound, this, &LoadFileOperation::setConnectionChanged);
 }
 
 void LoadFileOperation::setFilePath(const QString &filePath)
@@ -67,33 +65,24 @@ void LoadFileOperation::connectReply(QNetworkReply *reply)
     connect(reply, &QNetworkReply::sslErrors, this, &LoadFileOperation::onReplySslErrors);
 }
 
-void LoadFileOperation::cleanup()
-{
-    Operation::cleanup();
-    m_isConnectionChanged = false;
-}
-
 bool LoadFileOperation::openFileHandle(const QIODevice::OpenMode &mode)
 {
     if (m_filePath.isEmpty()) {
         qCWarning(lcOperation) << "File path is empty";
-        emit notificationCreated(tr("File path is empty"));
-        invalidate();
+        invalidate(tr("File path is empty"));
         return false;
     }
 
     if ((mode == QFile::ReadOnly) && !Utils::fileExists(m_filePath)) {
         qCWarning(lcOperation) << "File doesn't exist" << m_filePath;
-        emit notificationCreated(tr("File doesn't exist"));
-        invalidate();
+        invalidate(tr("File doesn't exist"));
         return false;
     }
 
     m_fileHandle.reset(new QFile(m_filePath));
     if (!m_fileHandle->open(mode)) {
         qCWarning(lcOperation) << "File can't be opened" << m_filePath;
-        emit notificationCreated(tr("File can't be opened"));
-        invalidate();
+        invalidate(tr("File can't be opened"));
         return false;
     }
 
@@ -114,23 +103,16 @@ QFile *LoadFileOperation::fileHandle()
     return &*m_fileHandle;
 }
 
-FileLoader *LoadFileOperation::fileLoader()
-{
-    return m_fileLoader;
-}
-
 QString LoadFileOperation::filePath() const
 {
     return m_filePath;
 }
 
-bool LoadFileOperation::isConnectionChanged() const
-{
-    return m_isConnectionChanged;
-}
-
 void LoadFileOperation::onReplyFinished()
 {
+    if (status() == Status::Failed) {
+        return;
+    }
     qCDebug(lcOperation) << "Reply finished" << Utils::printableLoadProgress(m_bytesLoaded, m_bytesTotal);
     closeFileHandle();
     if (m_bytesTotal > 0 && m_bytesLoaded >= m_bytesTotal) {
@@ -139,25 +121,25 @@ void LoadFileOperation::onReplyFinished()
     }
     else {
         qCWarning(lcOperation) << "Failed. Load file was processed partially";
-        if (m_isConnectionChanged) {
-            fail();
-        }
-        else {
-            emit notificationCreated(tr("File loading failed"));
-            invalidate();
-        }
+        invalidate(tr("File loading failed"));
     }
 }
 
 void LoadFileOperation::onReplyErrorOccurred(const int &errorCode, QNetworkReply *)
 {
-    qCWarning(lcOperation) << "File load error occurred:" << errorCode << static_cast<int>(errorCode);
-    if (m_isConnectionChanged) {
+    // TODO(fpohtmeh): change 1st parameter to QNetworkReply::NetworkError
+    // after fixing of deprecated warnings that appear if QNetworkReply is included into header
+    if (status() == Status::Failed) {
+        return;
+    }
+    using Error = QNetworkReply::NetworkError;
+    if (errorCode == Error::TemporaryNetworkFailureError || errorCode == Error::NetworkSessionFailedError)  {
+        qCDebug(lcOperation) << "Failed due to temporary network issue";
         fail();
     }
     else {
-        emit notificationCreated(tr("File loading error: %1").arg(errorCode));
-        invalidate();
+        qCWarning(lcOperation) << "File load error occurred:" << errorCode;
+        invalidate(tr("File loading error: %1").arg(errorCode));
     }
 }
 
@@ -186,12 +168,4 @@ void LoadFileOperation::onSetProgress(const DataSize &bytesLoaded, const DataSiz
     m_bytesLoaded = bytesLoaded;
     //qCDebug(lcOperation) << "Load progress:" << Utils::printableLoadProgress(m_bytesLoaded, m_bytesTotal);
     emit progressChanged(m_bytesLoaded, m_bytesTotal);
-}
-
-void LoadFileOperation::setConnectionChanged()
-{
-    if (status() == Operation::Status::Started) {
-        qCDebug(lcOperation) << "Connection was chnaged";
-        m_isConnectionChanged = true;
-    }
 }

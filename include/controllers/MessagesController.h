@@ -62,7 +62,7 @@ public:
 
 signals:
     void errorOccurred(const QString &errorText);
-    void notificationCreated(const QString &notification);
+    void notificationCreated(const QString &notification, const bool error);
 
     void messageCreated(const GlobalMessage &message);
     void messageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);

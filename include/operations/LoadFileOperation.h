@@ -35,20 +35,18 @@
 #ifndef VM_LOADFILEOPERATION_H
 #define VM_LOADFILEOPERATION_H
 
-#include "Operation.h"
+#include "NetworkOperation.h"
 
 class QNetworkReply;
 
 namespace vm
 {
-class FileLoader;
-
-class LoadFileOperation : public Operation
+class LoadFileOperation : public NetworkOperation
 {
     Q_OBJECT
 
 public:
-    LoadFileOperation(QObject *parent, FileLoader *fileLoader, const DataSize &bytesTotal = 0);
+    LoadFileOperation(NetworkOperation *parent, const DataSize &bytesTotal = 0);
 
     void setFilePath(const QString &filePath);
 
@@ -58,30 +56,23 @@ signals:
 
 protected:
     virtual void connectReply(QNetworkReply *reply);
-    void cleanup() override;
 
     bool openFileHandle(const QFile::OpenMode &mode);
     void closeFileHandle();
     QFile *fileHandle();
 
-    FileLoader *fileLoader();
     QString filePath() const;
-
-    bool isConnectionChanged() const;
 
 private:
     void onReplyFinished();
     void onReplyErrorOccurred(const int &errorCode, QNetworkReply *reply);
     void onReplySslErrors();
     void onSetProgress(const DataSize &bytesLoaded, const DataSize &bytesTotal);
-    void setConnectionChanged();
 
-    FileLoader *m_fileLoader;
     QString m_filePath;
     QScopedPointer<QFile> m_fileHandle;
     DataSize m_bytesLoaded = 0;
     DataSize m_bytesTotal = 0;
-    bool m_isConnectionChanged = false;
 };
 }
 

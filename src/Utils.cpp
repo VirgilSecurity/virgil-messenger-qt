@@ -115,7 +115,7 @@ bool Utils::forceCreateDir(const QString &absolutePath)
     if (QDir().mkpath(absolutePath)) {
         return true;
     }
-    qFatal("Unable to create directory: %s", qPrintable(absolutePath));
+    qFatal("Failed to create directory: %s", qPrintable(absolutePath));
     return false;
 }
 

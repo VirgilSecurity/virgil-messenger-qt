@@ -48,10 +48,11 @@
 using namespace vm;
 
 UploadAttachmentOperation::UploadAttachmentOperation(MessageOperation *parent, const Settings *settings)
-    : LoadAttachmentOperation(QString("UploadAttachment"), parent)
+    : LoadAttachmentOperation(parent)
     , m_parent(parent)
     , m_settings(settings)
 {
+    setName(QString("UploadAttachment"));
 }
 
 bool UploadAttachmentOperation::populateChildren()
@@ -122,6 +123,15 @@ bool UploadAttachmentOperation::populateChildren()
 void UploadAttachmentOperation::cleanup()
 {
     Utils::removeFile(m_tempPngPath);
+}
+
+bool UploadAttachmentOperation::preRun()
+{
+    if (m_parent->attachment()->type == Attachment::Type::Picture) {
+        // Don't check for network because 1st child operation doesn't require it
+        return true;
+    }
+    return NetworkOperation::preRun();
 }
 
 void UploadAttachmentOperation::setTempPngPath(const QString &path)

@@ -55,7 +55,7 @@ bool ChatsTable::create()
         qCDebug(lcDatabase) << "Chats table was created";
         return true;
     }
-    qCCritical(lcDatabase) << "Unable to create chats table";
+    qCCritical(lcDatabase) << "Failed to create chats table";
     return false;
 }
 

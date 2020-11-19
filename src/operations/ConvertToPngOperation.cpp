@@ -52,8 +52,7 @@ void ConvertToPngOperation::run()
     QImageReader reader(m_sourcePath);
     QImage source;
     if (!Utils::readImage(&reader, &source)) {
-        emit notificationCreated(tr("Failed to read image file"));
-        invalidate();
+        invalidate(tr("Failed to read image file"));
         return;
     }
     const auto image = Utils::applyOrientation(source, reader.transformation());
@@ -68,13 +67,11 @@ void ConvertToPngOperation::run()
         const auto filePath = m_settings->attachmentCacheDir().filePath(Utils::createUuid() + QLatin1String(".png"));
         if (!image.save(filePath)) {
             qCWarning(lcOperation) << "Unable to save png file";
-            emit notificationCreated(tr("Failed to convert to png"));
-            invalidate();
+            invalidate(tr("Failed to convert to png"));
         }
         else if (!Utils::fileExists(filePath)) {
             qCWarning(lcOperation) << "Png file exceeds file limit";
-            emit notificationCreated(tr("Png file exceeds file limit"));
-            invalidate();
+            invalidate(tr("Png file exceeds file limit"));
         }
         else {
             qCDebug(lcOperation) << "File was converted to png";

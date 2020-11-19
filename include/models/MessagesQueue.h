@@ -36,7 +36,7 @@
 #define VS_MESSAGESQUEUE_H
 
 #include "VSQCommon.h"
-#include "operations/Operation.h"
+#include "operations/NetworkOperation.h"
 
 class VSQMessenger;
 class Settings;
@@ -45,11 +45,9 @@ namespace vm
 {
 class MessageOperation;
 class MessageOperationFactory;
-class Operation;
-class FileLoader;
 class UserDatabase;
 
-class MessagesQueue : public Operation
+class MessagesQueue : public NetworkOperation
 {
     Q_OBJECT
 
@@ -74,7 +72,7 @@ signals:
     void attachmentProcessedSizeChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &processedSize);
     void attachmentEncryptedSizeChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &encryptedSize);
 
-    void notificationCreated(const QString &notification);
+    void notificationCreated(const QString &notification, const bool error);
 
 private:
     enum QueueState : Flag

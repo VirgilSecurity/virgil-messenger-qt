@@ -41,14 +41,14 @@
 
 using namespace vm;
 
-EncryptUploadFileOperation::EncryptUploadFileOperation(QObject *parent, const Settings *settings, const QString &sourcePath,
-                                                       const Contact::Id &recipientId, FileLoader *fileLoader)
-    : Operation(QLatin1String("EncryptUpload"), parent)
+EncryptUploadFileOperation::EncryptUploadFileOperation(NetworkOperation *parent, const Settings *settings, const QString &sourcePath, const Contact::Id &recipientId)
+    : NetworkOperation(parent)
     , m_settings(settings)
     , m_sourcePath(sourcePath)
     , m_recipientId(recipientId)
-    , m_fileLoader(fileLoader)
-{}
+{
+    setName(QLatin1String("EncryptUpload"));
+}
 
 void EncryptUploadFileOperation::setSourcePath(const QString &path)
 {
@@ -63,7 +63,7 @@ bool EncryptUploadFileOperation::populateChildren()
     connect(encryptOp, &EncryptFileOperation::bytesCalculated, this, &EncryptUploadFileOperation::bytesCalculated);
     appendChild(encryptOp);
 
-    auto uploadOp = new UploadFileOperation(this, m_tempPath, m_fileLoader);
+    auto uploadOp = new UploadFileOperation(this, m_tempPath);
     connect(uploadOp, &UploadFileOperation::progressChanged, this, &EncryptUploadFileOperation::progressChanged);
     connect(uploadOp, &UploadFileOperation::uploaded, this, &EncryptUploadFileOperation::uploaded);
     appendChild(uploadOp);

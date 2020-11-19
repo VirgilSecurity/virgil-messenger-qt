@@ -58,7 +58,7 @@ bool AttachmentsTable::create()
         qCDebug(lcDatabase) << "Attachments table was created";
         return true;
     }
-    qCCritical(lcDatabase) << "Unable to create attachments table";
+    qCCritical(lcDatabase) << "Failed to create attachments table";
     return false;
 }
 

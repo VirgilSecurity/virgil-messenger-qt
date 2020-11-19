@@ -83,7 +83,7 @@ public:
     MessagesQueue *messagesQueue();
 
 signals:
-    void notificationCreated(const QString &notification);
+    void notificationCreated(const QString &notification, const bool error);
 
 private:
     AccountSelectionModel *m_accountSelection;

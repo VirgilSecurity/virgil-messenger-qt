@@ -42,13 +42,13 @@
 
 using namespace vm;
 
-UploadFileOperation::UploadFileOperation(QObject *parent, const QString &filePath, FileLoader *fileLoader)
-    : LoadFileOperation(parent, fileLoader)
+UploadFileOperation::UploadFileOperation(NetworkOperation *parent, const QString &filePath)
+    : LoadFileOperation(parent)
 {
     setName(QLatin1String("UploadFile"));
     setFilePath(filePath);
-    connect(fileLoader, &FileLoader::slotUrlsReceived, this, &UploadFileOperation::onSlotUrlsReceived);
-    connect(fileLoader, &FileLoader::slotUrlErrorOcurrend, this, &UploadFileOperation::onSlotUrlErrorOcurrend);
+    connect(fileLoader(), &FileLoader::slotUrlsReceived, this, &UploadFileOperation::onSlotUrlsReceived);
+    connect(fileLoader(), &FileLoader::slotUrlErrorOcurrend, this, &UploadFileOperation::onSlotUrlErrorOcurrend);
     connect(this, &UploadFileOperation::finished, this, &UploadFileOperation::onFinished);
 }
 
@@ -59,15 +59,9 @@ void UploadFileOperation::run()
     }
     m_slotId = fileLoader()->requestUploadUrl(filePath());
     if (m_slotId.isEmpty()) {
-        qCWarning(lcOperation) << "Unable to request upload url";
-        fail();
+        qCWarning(lcOperation) << "Failed to request upload slot";
+        invalidate(tr("Failed to request upload slot"));
     }
-}
-
-void UploadFileOperation::cleanup()
-{
-    closeFileHandle();
-    LoadFileOperation::cleanup();
 }
 
 void UploadFileOperation::connectReply(QNetworkReply *reply)
@@ -93,15 +87,11 @@ void UploadFileOperation::onSlotUrlsReceived(const QString &slotId, const QUrl &
 
 void UploadFileOperation::onSlotUrlErrorOcurrend(const QString &slotId, const QString &errorText)
 {
+    if (status() == Status::Failed) {
+        return;
+    }
     if (slotId == m_slotId) {
-        qCDebug(lcOperation) << "Unable to get upload url. Error:" << errorText;
-        if (isConnectionChanged()) {
-            fail();
-        }
-        else {
-            emit notificationCreated(tr("Unable to upload file"));
-            invalidate();
-        }
+        invalidate(errorText);
     }
 }
 

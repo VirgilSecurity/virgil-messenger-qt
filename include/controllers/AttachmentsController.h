@@ -63,7 +63,7 @@ public:
 
 signals:
     void openPreviewRequested(const QUrl &url);
-    void notificationCreated(const QString &notification);
+    void notificationCreated(const QString &notification, const bool error);
 
 private:
     bool isAttachmentDownloaded(const GlobalMessage &message);

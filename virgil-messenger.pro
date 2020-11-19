@@ -189,6 +189,7 @@ HEADERS += \
         include/operations/LoadFileOperation.h \
         include/operations/MessageOperation.h \
         include/operations/MessageOperationFactory.h \
+        include/operations/NetworkOperation.h \
         include/operations/Operation.h \
         include/operations/SendMessageOperation.h \
         include/operations/UploadAttachmentOperation.h \
@@ -289,6 +290,7 @@ SOURCES += \
         src/operations/LoadFileOperation.cpp \
         src/operations/MessageOperation.cpp \
         src/operations/MessageOperationFactory.cpp \
+        src/operations/NetworkOperation.cpp \
         src/operations/Operation.cpp \
         src/operations/SendMessageOperation.cpp \
         src/operations/UploadAttachmentOperation.cpp \

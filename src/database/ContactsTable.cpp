@@ -50,6 +50,6 @@ bool ContactsTable::create()
         qCDebug(lcDatabase) << "Contacts table was created";
         return true;
     }
-    qCCritical(lcDatabase) << "Unable to create contacts table";
+    qCCritical(lcDatabase) << "Failed to create contacts table";
     return false;
 }

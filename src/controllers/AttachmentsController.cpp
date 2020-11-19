@@ -59,7 +59,7 @@ void AttachmentsController::saveAs(const Message::Id &messageId, const QVariant 
             qCDebug(lcController) << "Saving of attachment" << messageId << "as" << fileUrl;
             const auto filePath = Utils::urlToLocalFile(fileUrl.toUrl());
             QFile::copy(message->attachment->localPath, filePath);
-            emit notificationCreated(tr("Attachment was saved"));
+            emit notificationCreated(tr("Attachment was saved"), false);
         }
     }
 }

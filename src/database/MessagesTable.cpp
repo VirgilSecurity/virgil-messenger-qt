@@ -57,7 +57,7 @@ bool MessagesTable::create()
         qCDebug(lcDatabase) << "Messages table was created";
         return true;
     }
-    qCCritical(lcDatabase) << "Unable to create messages table";
+    qCCritical(lcDatabase) << "Failed to create messages table";
     return false;
 }
 

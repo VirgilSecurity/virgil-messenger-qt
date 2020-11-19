@@ -49,16 +49,17 @@ EncryptFileOperation::EncryptFileOperation(QObject *parent, const QString &sourc
 void EncryptFileOperation::run()
 {
     const auto result = Core::encryptFile(m_sourcePath, m_destPath, m_recipientId);
-    if (result == Core::Result::Fail) {
-        fail();
-    }
-    else if (result == Core::Result::Success) {
+    switch (result) {
+    case Core::Result::Success:
         emit encrypted(m_destPath);
         emit bytesCalculated(QFile(m_destPath).size());
         finish();
-    }
-    else {
-        emit notificationCreated(tr("Failed to encrypt file"));
-        invalidate();
+        break;
+    case Core::Result::Fail:
+        fail();
+        break;
+    default:
+        invalidate(tr("Failed to encrypt file"));
+        break;
     }
 }

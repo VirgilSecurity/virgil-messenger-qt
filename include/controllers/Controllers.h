@@ -75,7 +75,7 @@ public:
     FileCloudController *fileCloud();
 
 signals:
-    void notificationCreated(const QString &notification);
+    void notificationCreated(const QString &notification, const bool error);
 
 private:
     AttachmentsController *m_attachments;

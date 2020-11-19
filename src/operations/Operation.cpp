@@ -148,6 +148,12 @@ void Operation::invalidate()
     drop();
 }
 
+void Operation::invalidate(const QString &notification)
+{
+    invalidate();
+    emit notificationCreated(notification, true);
+}
+
 void Operation::finish()
 {
     setStatus(Status::Finished);
@@ -165,8 +171,16 @@ void Operation::cleanupOnce()
     cleanup();
 }
 
+bool Operation::preRun()
+{
+    return true;
+}
+
 void Operation::run()
 {
+    if (!preRun()) {
+        return;
+    }
     qCDebug(lcOperation) << "Empty operation runs. Skipped";
     finish();
 }
@@ -202,7 +216,7 @@ bool Operation::setStatus(const Operation::Status &status)
         return false;
     case Status::Started:
         if (m_status != Status::Created && m_status != Status::Failed && !(m_repeatable && m_status == Status::Finished)) {
-            qCWarning(lcOperation) << "Unable to start operation";
+            qCWarning(lcOperation) << "Failed to start operation";
             return false;
         }
         m_status = status;
@@ -210,7 +224,7 @@ bool Operation::setStatus(const Operation::Status &status)
         return true;
     case Status::Failed:
         if (m_status != Status::Started) {
-            qCWarning(lcOperation) << "Unable to fail operation";
+            qCWarning(lcOperation) << "Failed to fail operation";
             return false;
         }
         m_status = status;
@@ -218,7 +232,7 @@ bool Operation::setStatus(const Operation::Status &status)
         return true;
     case Status::Invalid:
         if (m_status != Status::Started) {
-            qCWarning(lcOperation) << "Unable to invalidate operation";
+            qCWarning(lcOperation) << "Failed to invalidate operation";
             return false;
         }
         m_status = status;
@@ -226,7 +240,7 @@ bool Operation::setStatus(const Operation::Status &status)
         return true;
     case Status::Finished:
         if (m_status != Status::Started) {
-            qCWarning(lcOperation) << "Unable to finish operation";
+            qCWarning(lcOperation) << "Failed to finish operation";
             return false;
         }
         m_status = status;

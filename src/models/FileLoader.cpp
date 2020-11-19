@@ -101,9 +101,14 @@ void FileLoader::onSlotReceived(const QXmppHttpUploadSlotIq &slot)
 void FileLoader::onRequestFailed(const QXmppHttpUploadRequestIq &request)
 {
     const auto error = request.error();
-    const auto errorText = QString("code(%1), condition(%2), text(%3)")
-            .arg(error.code()).arg(error.condition()).arg(error.text());
-    emit slotUrlErrorOcurrend(request.id(), errorText);
+    qCDebug(lcFileLoader) << QString("code(%1), condition(%2), text(%3)")
+                             .arg(error.code()).arg(error.condition()).arg(error.text());
+    if (error.condition() == QXmppStanza::Error::Condition::NotAcceptable && error.code() == 406) {
+        emit slotUrlErrorOcurrend(request.id(), tr("File is larger than limit"));
+    }
+    else {
+        emit slotUrlErrorOcurrend(request.id(), tr("File to upload file"));
+    }
 }
 
 void FileLoader::onStartUpload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup)

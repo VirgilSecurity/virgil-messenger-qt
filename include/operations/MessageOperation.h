@@ -35,18 +35,18 @@
 #ifndef VS_MESSAGEOPERATION_H
 #define VS_MESSAGEOPERATION_H
 
-#include "Operation.h"
+#include "NetworkOperation.h"
 
 namespace vm
 {
 class MessageOperationFactory;
 
-class MessageOperation : public Operation
+class MessageOperation : public NetworkOperation
 {
     Q_OBJECT
 
 public:
-    MessageOperation(const GlobalMessage &message, MessageOperationFactory *factory, QObject *parent);
+    MessageOperation(const GlobalMessage &message, MessageOperationFactory *factory, NetworkOperation *parent);
 
     const GlobalMessage *message() const;
     const Attachment *attachment() const;

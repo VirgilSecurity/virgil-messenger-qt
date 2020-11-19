@@ -109,7 +109,7 @@ void MessagesController::createSendMessage(const QString &body, const QVariant &
     const auto attachment = m_models->attachments()->createAttachment(attachmentUrl.toUrl(), attachmentType);
     if (isAttachment && !attachment) {
         qCWarning(lcController) << "Message wasn't created. Attachment is invalid";
-        emit notificationCreated(tr("Attachment reading error"));
+        emit notificationCreated(tr("Attachment reading error"), true);
         return;
     }
     auto message = m_models->messages()->createMessage(m_chat.id, m_userId, body, attachment);

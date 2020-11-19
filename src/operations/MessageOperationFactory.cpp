@@ -86,16 +86,16 @@ void MessageOperationFactory::populatePreload(MessageOperation *messageOp)
     messageOp->appendChild(new DownloadAttachmentOperation(messageOp, m_settings, { DownloadType::Preload, QString() }));
 }
 
-DownloadDecryptFileOperation *MessageOperationFactory::populateDownloadDecrypt(Operation *parent, const QUrl &url, const DataSize &bytesTotal, const QString &destPath, const Contact::Id &senderId)
+DownloadDecryptFileOperation *MessageOperationFactory::populateDownloadDecrypt(NetworkOperation *parent, const QUrl &url, const DataSize &bytesTotal, const QString &destPath, const Contact::Id &senderId)
 {
-    auto op = new DownloadDecryptFileOperation(parent, m_settings, m_fileLoader, url, bytesTotal, destPath, senderId);
+    auto op = new DownloadDecryptFileOperation(parent, m_settings, url, bytesTotal, destPath, senderId);
     parent->appendChild(op);
     return op;
 }
 
-EncryptUploadFileOperation *MessageOperationFactory::populateEncryptUpload(Operation *parent, const QString &sourcePath, const Contact::Id &recipientId)
+EncryptUploadFileOperation *MessageOperationFactory::populateEncryptUpload(NetworkOperation *parent, const QString &sourcePath, const Contact::Id &recipientId)
 {
-    auto op = new EncryptUploadFileOperation(parent, m_settings, sourcePath, recipientId, m_fileLoader);
+    auto op = new EncryptUploadFileOperation(parent, m_settings, sourcePath, recipientId);
     parent->appendChild(op);
     return op;
 }

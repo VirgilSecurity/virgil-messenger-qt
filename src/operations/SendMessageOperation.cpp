@@ -44,19 +44,21 @@
 using namespace vm;
 
 SendMessageOperation::SendMessageOperation(MessageOperation *parent, QXmppClient *xmpp, const QString &xmppUrl)
-    : Operation(QLatin1String("SendMessage"), parent)
+    : NetworkOperation(parent)
     , m_parent(parent)
     , m_xmpp(xmpp)
     , m_xmppUrl(xmppUrl)
-{}
+{
+    setName(QLatin1String("SendMessage"));
+}
 
 void SendMessageOperation::run()
 {
     const auto message = m_parent->message();
     const auto encryptedStr = Core::encryptMessage(*message, message->recipientId);
     if (!encryptedStr) {
-        qCDebug(lcOperation) << "Unable to encrypt message";
-        fail();
+        qCDebug(lcOperation) << "Failed to encrypt message";
+        invalidate(tr("Failed to encrypt message"));
     }
     else {
         const auto fromJID = Utils::createJid(message->senderId, m_xmppUrl);

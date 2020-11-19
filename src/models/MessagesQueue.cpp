@@ -48,11 +48,12 @@
 using namespace vm;
 
 MessagesQueue::MessagesQueue(const Settings *settings, VSQMessenger *messenger, UserDatabase *userDatabase, FileLoader *fileLoader, QObject *parent)
-    : Operation("MessageQueue", parent)
+    : NetworkOperation(parent, fileLoader, fileLoader->isServiceFound())
     , m_messenger(messenger)
     , m_userDatabase(userDatabase)
     , m_factory(new MessageOperationFactory(settings, messenger, fileLoader, this))
 {
+    setName(QLatin1String("MessageQueue"));
     setRepeatable(true);
     connect(this, &Operation::finished, []() {
         qCDebug(lcModel) << "MessageQueue is finished";
@@ -154,7 +155,7 @@ void MessagesQueue::onPushMessageDownload(const GlobalMessage &message, const QS
 {
     auto op = pushMessageOperation(message, true);
     m_factory->populateDownload(op, filePath);
-    connect(op, &Operation::finished, this, std::bind(&MessagesQueue::notificationCreated, this, tr("File was downloaded")));
+    connect(op, &Operation::finished, this, std::bind(&MessagesQueue::notificationCreated, this, tr("File was downloaded"), false));
     if (m_queueState == QueueState::Alive) {
         start();
     }

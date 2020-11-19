@@ -50,12 +50,13 @@ class CreateAttachmentPreviewOperation;
 class CreateAttachmentThumbnailOperation;
 class CreateThumbnailOperation;
 class DecryptFileOperation;
-class EncryptFileOperation;
-class EncryptUploadFileOperation;
 class DownloadFileOperation;
 class DownloadDecryptFileOperation;
+class EncryptFileOperation;
+class EncryptUploadFileOperation;
 class FileLoader;
 class MessageOperation;
+class NetworkOperation;
 class Operation;
 class SendMessageOperation;
 class UploadFileOperation;
@@ -72,8 +73,8 @@ public:
     void populateUpload(MessageOperation *messageOp);
     void populatePreload(MessageOperation *messageOp);
 
-    DownloadDecryptFileOperation *populateDownloadDecrypt(Operation *parent, const QUrl &url, const DataSize &bytesTotal, const QString &destPath, const Contact::Id &senderId);
-    EncryptUploadFileOperation *populateEncryptUpload(Operation *parent, const QString &sourcePath, const Contact::Id &recipientId);
+    DownloadDecryptFileOperation *populateDownloadDecrypt(NetworkOperation *parent, const QUrl &url, const DataSize &bytesTotal, const QString &destPath, const Contact::Id &senderId);
+    EncryptUploadFileOperation *populateEncryptUpload(NetworkOperation *parent, const QString &sourcePath, const Contact::Id &recipientId);
     ConvertToPngOperation *populateConvertToPngOperation(Operation *parent, const QString &sourcePath);
     CreateAttachmentThumbnailOperation *populateCreateAttachmentThumbnail(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &filePath);
     CreateAttachmentPreviewOperation *populateCreateAttachmentPreview(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &destPath);

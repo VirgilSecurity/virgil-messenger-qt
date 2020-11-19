@@ -43,11 +43,12 @@
 using namespace vm;
 
 DownloadAttachmentOperation::DownloadAttachmentOperation(MessageOperation *parent, const Settings *settings, const Parameter &parameter)
-    : LoadAttachmentOperation("DownloadAttachment", parent)
+    : LoadAttachmentOperation(parent)
     , m_parent(parent)
     , m_settings(settings)
     , m_parameter(parameter)
 {
+    setName(QLatin1String("DownloadAttachment"));
 }
 
 bool DownloadAttachmentOperation::populateChildren()

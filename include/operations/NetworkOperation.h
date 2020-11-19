@@ -32,45 +32,35 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "operations/LoadAttachmentOperation.h"
+#ifndef VM_NETWORKOPERATION_H
+#define VM_NETWORKOPERATION_H
 
-#include "operations/MessageOperation.h"
+#include "Operation.h"
 
-using namespace vm;
-
-LoadAttachmentOperation::LoadAttachmentOperation(MessageOperation *parent)
-    : NetworkOperation(parent)
+namespace vm
 {
-    setName(QLatin1String("LoadAttachment"));
-    connect(this, &Operation::started, parent, std::bind(&MessageOperation::setAttachmentStatus, parent, Attachment::Status::Loading));
-    connect(this, &Operation::finished, parent, std::bind(&MessageOperation::setAttachmentStatus, parent, Attachment::Status::Loaded));
-    connect(this, &Operation::failed, parent, std::bind(&MessageOperation::setAttachmentStatus, parent, Attachment::Status::Interrupted));
-    connect(this, &Operation::invalidated, parent, std::bind(&MessageOperation::setAttachmentStatus, parent, Attachment::Status::Invalid));
-    connect(this, &LoadAttachmentOperation::totalProgressChanged, parent, &MessageOperation::setAttachmentProcessedSize);
+class FileLoader;
+
+class NetworkOperation : public Operation
+{
+    Q_OBJECT
+
+public:
+    NetworkOperation(QObject *parent, FileLoader *fileLoader, bool isOnline);
+    explicit NetworkOperation(NetworkOperation *parent);
+
+    FileLoader *fileLoader();
+    bool isOnline() const;
+
+protected:
+    bool preRun() override;
+
+private:
+    void setIsOnline(bool isOnline);
+
+    FileLoader *m_fileLoader;
+    bool m_isOnline = false;
+};
 }
 
-void LoadAttachmentOperation::startLoadOperation(const DataSize &bytesTotal)
-{
-    m_previousBytesTotal = m_bytesTotal;
-    m_bytesTotal += bytesTotal;
-    updateTotalProgress();
-}
-
-void LoadAttachmentOperation::setLoadOperationProgress(const DataSize &bytesLoaded)
-{
-    m_currentBytesLoaded = bytesLoaded;
-    updateTotalProgress();
-}
-
-void LoadAttachmentOperation::cleanup()
-{
-    Operation::cleanup();
-    m_bytesTotal = 0;
-    m_previousBytesTotal = 0;
-    m_currentBytesLoaded = 0;
-}
-
-void LoadAttachmentOperation::updateTotalProgress()
-{
-    emit totalProgressChanged(m_previousBytesTotal + m_currentBytesLoaded, m_bytesTotal);
-}
+#endif // VM_NETWORKOPERATION_H

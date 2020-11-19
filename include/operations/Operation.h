@@ -87,15 +87,17 @@ signals:
     void invalidated();
     void finished();
 
-    void notificationCreated(const QString &notification);
+    void notificationCreated(const QString &notification, const bool error);
 
 protected:
     void fail();
     void invalidate();
+    void invalidate(const QString &notification);
     void finish();
 
     void cleanupOnce();
 
+    virtual bool preRun();
     virtual void run();
     virtual void cleanup();
     virtual bool populateChildren();
