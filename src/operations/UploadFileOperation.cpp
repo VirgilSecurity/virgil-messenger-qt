@@ -42,9 +42,10 @@
 
 using namespace vm;
 
-UploadFileOperation::UploadFileOperation(const QString &name, QObject *parent, const QString &filePath, FileLoader *fileLoader)
-    : LoadFileOperation(name, parent, fileLoader)
+UploadFileOperation::UploadFileOperation(QObject *parent, const QString &filePath, FileLoader *fileLoader)
+    : LoadFileOperation(parent, fileLoader)
 {
+    setName(QLatin1String("UploadFile"));
     setFilePath(filePath);
     connect(fileLoader, &FileLoader::slotUrlsReceived, this, &UploadFileOperation::onSlotUrlsReceived);
     connect(fileLoader, &FileLoader::slotUrlErrorOcurrend, this, &UploadFileOperation::onSlotUrlErrorOcurrend);

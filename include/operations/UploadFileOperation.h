@@ -44,7 +44,7 @@ class UploadFileOperation : public LoadFileOperation
     Q_OBJECT
 
 public:
-    UploadFileOperation(const QString &name, QObject *parent, const QString &filePath, FileLoader *fileLoader);
+    UploadFileOperation(QObject *parent, const QString &filePath, FileLoader *fileLoader);
 
     void run() override;
 

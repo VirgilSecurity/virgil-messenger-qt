@@ -46,7 +46,7 @@ class CreateThumbnailOperation : public Operation
     Q_OBJECT
 
 public:
-    CreateThumbnailOperation(const QString &name, QObject *parent,
+    CreateThumbnailOperation(QObject *parent,
                              const QString &sourcePath, const QString &destPath, const QSize &maxSize);
 
     void run() override;

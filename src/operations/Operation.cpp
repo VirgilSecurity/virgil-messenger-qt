@@ -54,7 +54,7 @@ void Operation::start()
         return;
     }
 
-    qCDebug(lcOperation) << "Starting operation:" << name();
+    qCDebug(lcOperation) << "Starting operation:" << fullName();
     m_cleanedUp = false;
     if (hasChildren() || populateChildren()) {
         m_children.front()->start();
@@ -66,7 +66,7 @@ void Operation::start()
 
 void Operation::drop()
 {
-    qCDebug(lcOperation) << "Drop operation:" << name();
+    qCDebug(lcOperation) << "Drop operation:" << fullName();
     dropChildren();
     cleanupOnce();
     deleteLater();
@@ -83,6 +83,19 @@ void Operation::dropChildren()
 QString Operation::name() const
 {
     return m_name;
+}
+
+void Operation::setName(const QString &name)
+{
+    m_name = name;
+}
+
+QString Operation::fullName() const
+{
+    if (auto parentOp = dynamic_cast<Operation *>(parent())) {
+        return parentOp->fullName() + QChar('/') + name();
+    }
+    return name();
 }
 
 Operation::Status Operation::status() const
@@ -160,7 +173,7 @@ void Operation::run()
 
 void Operation::cleanup()
 {
-    qCDebug(lcOperation) << "Cleanup operation:" << name();
+    qCDebug(lcOperation) << "Cleanup operation:" << fullName();
 }
 
 bool Operation::populateChildren()

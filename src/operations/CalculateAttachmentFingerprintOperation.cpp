@@ -38,8 +38,9 @@
 
 using namespace vm;
 
-CalculateAttachmentFingerprintOperation::CalculateAttachmentFingerprintOperation(const QString &name, MessageOperation *parent, const QString &sourcePath)
-    : CalculateFileFingerprintOperation(name, parent, sourcePath)
+CalculateAttachmentFingerprintOperation::CalculateAttachmentFingerprintOperation(MessageOperation *parent, const QString &sourcePath)
+    : CalculateFileFingerprintOperation(parent, sourcePath)
 {
+    setName(QLatin1String("CreateAttachmentFingerprint"));
     connect(this, &CalculateAttachmentFingerprintOperation::fingerprintCalculated, parent, &MessageOperation::setAttachmentFignerprint);
 }

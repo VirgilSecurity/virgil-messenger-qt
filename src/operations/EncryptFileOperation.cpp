@@ -39,8 +39,8 @@
 
 using namespace vm;
 
-EncryptFileOperation::EncryptFileOperation(const QString &name, QObject *parent, const QString &sourcePath, const QString &destPath, const Contact::Id &recipientId)
-    : Operation(name, parent)
+EncryptFileOperation::EncryptFileOperation(QObject *parent, const QString &sourcePath, const QString &destPath, const Contact::Id &recipientId)
+    : Operation(QLatin1String("EncryptFile"), parent)
     , m_sourcePath(sourcePath)
     , m_destPath(destPath)
     , m_recipientId(recipientId)

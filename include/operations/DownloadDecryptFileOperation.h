@@ -48,7 +48,7 @@ class DownloadDecryptFileOperation : public Operation
     Q_OBJECT
 
 public:
-    DownloadDecryptFileOperation(const QString &name, QObject *parent, const Settings *settings, FileLoader *fileLoader,
+    DownloadDecryptFileOperation(QObject *parent, const Settings *settings, FileLoader *fileLoader,
                                  const QUrl &url, const DataSize &bytesTotal, const QString &filePath, const Contact::Id &senderId);
 
 signals:

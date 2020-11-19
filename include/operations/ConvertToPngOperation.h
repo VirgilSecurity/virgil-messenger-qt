@@ -46,7 +46,7 @@ class ConvertToPngOperation : public Operation
     Q_OBJECT
 
 public:
-    ConvertToPngOperation(const QString &name, const Settings *settings, const QString &sourcePath, QObject *parent);
+    ConvertToPngOperation(const Settings *settings, const QString &sourcePath, QObject *parent);
 
 signals:
     void imageRead(const QImage &image);

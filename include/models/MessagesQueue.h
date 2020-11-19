@@ -63,7 +63,6 @@ signals:
     void pushMessage(const GlobalMessage &message);
     void pushMessageDownload(const GlobalMessage &message, const QString &filePath);
     void pushMessagePreload(const GlobalMessage &message);
-    void sendNotSentMessages();
 
     void messageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status status);
     void attachmentStatusChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Status &status);
@@ -78,17 +77,28 @@ signals:
     void notificationCreated(const QString &notification);
 
 private:
-    void setMessages(const GlobalMessages &messages);
+    enum QueueState : Flag
+    {
+        Created = 0,
+        UserSet = 1 << 0,
+        FileLoaderReady = 1 << 1,
+        FetchNeeded = QueueState::UserSet | QueueState::FileLoaderReady,
+        FetchRequested = 1 << 2,
+        Alive = UserSet | FileLoaderReady | FetchRequested
+    };
+
+    void setQueueState(const QueueState &state);
+    void unsetQueueState(const QueueState &state);
+
     void connectMessageOperation(MessageOperation *op);
     MessageOperation *pushMessageOperation(const GlobalMessage &message, bool prepend = false);
 
-    bool isActive() const;
-
     void onSetUserId(const UserId &userId);
+    void onFileLoaderServiceFound(bool serviceFound);
+    void onNotSentMessagesFetched(const GlobalMessages &messages);
     void onPushMessage(const GlobalMessage &message);
     void onPushMessageDownload(const GlobalMessage &message, const QString &filePath);
     void onPushMessagePreload(const GlobalMessage &message);
-    void onSendNotSentMessages();
     void onMessageOperationStatusChanged(const MessageOperation *operation);
     void onMessageOperationAttachmentStatusChanged(const MessageOperation *operation);
     void onMessageOperationAttachmentUrlChanged(const MessageOperation *operation);
@@ -102,6 +112,7 @@ private:
     UserDatabase *m_userDatabase;
     MessageOperationFactory *m_factory;
     UserId m_userId;
+    Flag m_queueState = QueueState::Created;
 };
 }
 

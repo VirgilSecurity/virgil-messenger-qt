@@ -42,8 +42,8 @@
 
 using namespace vm;
 
-LoadFileOperation::LoadFileOperation(const QString &name, QObject *parent, FileLoader *fileLoader, const DataSize &bytesTotal)
-    : Operation(name, parent)
+LoadFileOperation::LoadFileOperation(QObject *parent, FileLoader *fileLoader, const DataSize &bytesTotal)
+    : Operation(QLatin1String("LoadFile"), parent)
     , m_fileLoader(fileLoader)
     , m_bytesTotal(bytesTotal)
 {

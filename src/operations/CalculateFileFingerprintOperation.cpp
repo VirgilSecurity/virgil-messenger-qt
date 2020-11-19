@@ -38,8 +38,8 @@
 
 using namespace vm;
 
-CalculateFileFingerprintOperation::CalculateFileFingerprintOperation(const QString &name, QObject *parent, const QString &sourcePath)
-    : Operation(name, parent)
+CalculateFileFingerprintOperation::CalculateFileFingerprintOperation(QObject *parent, const QString &sourcePath)
+    : Operation(QLatin1String("CalculateAttachmentFingerprint"), parent)
     , m_sourcePath(sourcePath)
 {}
 

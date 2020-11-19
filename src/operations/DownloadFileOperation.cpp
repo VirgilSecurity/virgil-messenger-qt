@@ -41,11 +41,12 @@
 
 using namespace vm;
 
-DownloadFileOperation::DownloadFileOperation(const QString &name, QObject *parent, FileLoader *fileLoader, const QUrl &url, const DataSize &bytesTotal,
+DownloadFileOperation::DownloadFileOperation(QObject *parent, FileLoader *fileLoader, const QUrl &url, const DataSize &bytesTotal,
                                              const QString &filePath)
-    : LoadFileOperation(name, parent, fileLoader, bytesTotal)
+    : LoadFileOperation(parent, fileLoader, bytesTotal)
     , m_url(url)
 {
+    setName(QLatin1String("DownloadFile"));
     if (bytesTotal <= 0) {
         qCWarning(lcOperation) << "Download file operation can't determine bytesTotal. Pass correct bytesTotal to constructor";
     }

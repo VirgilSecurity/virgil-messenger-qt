@@ -46,7 +46,7 @@ class CalculateAttachmentFingerprintOperation : public CalculateFileFingerprintO
     Q_OBJECT
 
 public:
-    CalculateAttachmentFingerprintOperation(const QString &name, MessageOperation *parent, const QString &sourcePath);
+    CalculateAttachmentFingerprintOperation(MessageOperation *parent, const QString &sourcePath);
 };
 }
 

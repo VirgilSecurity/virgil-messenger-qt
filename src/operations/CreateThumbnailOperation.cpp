@@ -40,9 +40,9 @@
 
 using namespace vm;
 
-CreateThumbnailOperation::CreateThumbnailOperation(const QString &name, QObject *parent,
+CreateThumbnailOperation::CreateThumbnailOperation(QObject *parent,
                                                    const QString &sourcePath, const QString &destPath, const QSize &maxSize)
-    : Operation(name, parent)
+    : Operation(QLatin1String("CreateThumbnailOperation"), parent)
     , m_sourcePath(sourcePath)
     , m_destPath(destPath)
     , m_maxSize(maxSize)

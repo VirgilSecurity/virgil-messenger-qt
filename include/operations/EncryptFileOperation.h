@@ -44,7 +44,7 @@ class EncryptFileOperation : public Operation
     Q_OBJECT
 
 public:
-    explicit EncryptFileOperation(const QString &name, QObject *parent, const QString &sourcePath, const QString &destPath, const Contact::Id &recipientId);
+    explicit EncryptFileOperation(QObject *parent, const QString &sourcePath, const QString &destPath, const Contact::Id &recipientId);
 
     void run() override;
 

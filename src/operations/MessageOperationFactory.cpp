@@ -86,44 +86,44 @@ void MessageOperationFactory::populatePreload(MessageOperation *messageOp)
     messageOp->appendChild(new DownloadAttachmentOperation(messageOp, m_settings, { DownloadType::Preload, QString() }));
 }
 
-DownloadDecryptFileOperation *MessageOperationFactory::populateDownloadDecrypt(const QString &name, Operation *parent, const QUrl &url, const DataSize &bytesTotal, const QString &destPath, const Contact::Id &senderId)
+DownloadDecryptFileOperation *MessageOperationFactory::populateDownloadDecrypt(Operation *parent, const QUrl &url, const DataSize &bytesTotal, const QString &destPath, const Contact::Id &senderId)
 {
-    auto op = new DownloadDecryptFileOperation(name, parent, m_settings, m_fileLoader, url, bytesTotal, destPath, senderId);
+    auto op = new DownloadDecryptFileOperation(parent, m_settings, m_fileLoader, url, bytesTotal, destPath, senderId);
     parent->appendChild(op);
     return op;
 }
 
-EncryptUploadFileOperation *MessageOperationFactory::populateEncryptUpload(const QString &name, Operation *parent, const QString &sourcePath, const Contact::Id &recipientId)
+EncryptUploadFileOperation *MessageOperationFactory::populateEncryptUpload(Operation *parent, const QString &sourcePath, const Contact::Id &recipientId)
 {
-    auto op = new EncryptUploadFileOperation(name, parent, m_settings, sourcePath, recipientId, m_fileLoader);
+    auto op = new EncryptUploadFileOperation(parent, m_settings, sourcePath, recipientId, m_fileLoader);
     parent->appendChild(op);
     return op;
 }
 
-ConvertToPngOperation *MessageOperationFactory::populateConvertToPngOperation(const QString &name, Operation *parent, const QString &sourcePath)
+ConvertToPngOperation *MessageOperationFactory::populateConvertToPngOperation(Operation *parent, const QString &sourcePath)
 {
-    auto op = new ConvertToPngOperation(name, m_settings, sourcePath, parent);
+    auto op = new ConvertToPngOperation(m_settings, sourcePath, parent);
     parent->appendChild(op);
     return op;
 }
 
-CreateAttachmentThumbnailOperation *MessageOperationFactory::populateCreateAttachmentThumbnail(const QString &name, MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &filePath)
+CreateAttachmentThumbnailOperation *MessageOperationFactory::populateCreateAttachmentThumbnail(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &filePath)
 {
-    auto op = new CreateAttachmentThumbnailOperation(name, messageOp, m_settings, sourcePath, filePath);
+    auto op = new CreateAttachmentThumbnailOperation(messageOp, m_settings, sourcePath, filePath);
     parent->appendChild(op);
     return op;
 }
 
-CreateAttachmentPreviewOperation *MessageOperationFactory::populateCreateAttachmentPreview(const QString &name, MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &destPath)
+CreateAttachmentPreviewOperation *MessageOperationFactory::populateCreateAttachmentPreview(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &destPath)
 {
-    auto op = new CreateAttachmentPreviewOperation(name, messageOp, m_settings, sourcePath, destPath);
+    auto op = new CreateAttachmentPreviewOperation(messageOp, m_settings, sourcePath, destPath);
     parent->appendChild(op);
     return op;
 }
 
-CalculateAttachmentFingerprintOperation *MessageOperationFactory::populateCalculateAttachmentFingerprint(const QString &name, MessageOperation *messageOp, Operation *parent, const QString &sourcePath)
+CalculateAttachmentFingerprintOperation *MessageOperationFactory::populateCalculateAttachmentFingerprint(MessageOperation *messageOp, Operation *parent, const QString &sourcePath)
 {
-    auto op = new CalculateAttachmentFingerprintOperation(name, messageOp, sourcePath);
+    auto op = new CalculateAttachmentFingerprintOperation(messageOp, sourcePath);
     parent->appendChild(op);
     return op;
 }

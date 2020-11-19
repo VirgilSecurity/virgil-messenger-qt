@@ -44,7 +44,7 @@
 using namespace vm;
 
 SendMessageOperation::SendMessageOperation(MessageOperation *parent, QXmppClient *xmpp, const QString &xmppUrl)
-    : Operation(QString("SendMessage [%1]").arg(parent->message()->id), parent)
+    : Operation(QLatin1String("SendMessage"), parent)
     , m_parent(parent)
     , m_xmpp(xmpp)
     , m_xmppUrl(xmppUrl)

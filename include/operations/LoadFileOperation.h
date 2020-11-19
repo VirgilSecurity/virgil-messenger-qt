@@ -48,7 +48,7 @@ class LoadFileOperation : public Operation
     Q_OBJECT
 
 public:
-    LoadFileOperation(const QString &name, QObject *parent, FileLoader *fileLoader, const DataSize &bytesTotal = 0);
+    LoadFileOperation(QObject *parent, FileLoader *fileLoader, const DataSize &bytesTotal = 0);
 
     void setFilePath(const QString &filePath);
 

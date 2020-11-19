@@ -44,7 +44,7 @@ class CalculateFileFingerprintOperation : public Operation
     Q_OBJECT
 
 public:
-    CalculateFileFingerprintOperation(const QString &name, QObject *parent, const QString &sourcePath);
+    CalculateFileFingerprintOperation(QObject *parent, const QString &sourcePath);
 
     void run() override;
 

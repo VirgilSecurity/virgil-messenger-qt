@@ -68,6 +68,8 @@ public:
     void dropChildren();
 
     QString name() const;
+    void setName(const QString &name);
+    QString fullName() const;
     Status status() const;
 
     void appendChild(Operation *child);

@@ -39,8 +39,8 @@
 
 using namespace vm;
 
-DecryptFileOperation::DecryptFileOperation(const QString &name, QObject *parent, const QString &sourcePath, const QString &destPath, const Contact::Id &senderId)
-    : Operation(name, parent)
+DecryptFileOperation::DecryptFileOperation(QObject *parent, const QString &sourcePath, const QString &destPath, const Contact::Id &senderId)
+    : Operation(QLatin1String("DecryptFile"), parent)
     , m_sourcePath(sourcePath)
     , m_destPath(destPath)
     , m_senderId(senderId)

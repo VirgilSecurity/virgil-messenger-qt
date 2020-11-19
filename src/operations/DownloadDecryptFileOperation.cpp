@@ -41,9 +41,9 @@
 
 using namespace vm;
 
-DownloadDecryptFileOperation::DownloadDecryptFileOperation(const QString &name, QObject *parent, const Settings *settings, FileLoader *fileLoader,
+DownloadDecryptFileOperation::DownloadDecryptFileOperation(QObject *parent, const Settings *settings, FileLoader *fileLoader,
                                                            const QUrl &url, const DataSize &bytesTotal, const QString &filePath, const Contact::Id &senderId)
-    : Operation(name, parent)
+    : Operation(QLatin1String("DownloadDecrypt"), parent)
     , m_settings(settings)
     , m_fileLoader(fileLoader)
     , m_url(url)
@@ -55,13 +55,12 @@ DownloadDecryptFileOperation::DownloadDecryptFileOperation(const QString &name, 
 bool DownloadDecryptFileOperation::populateChildren()
 {
     m_tempPath = m_settings->attachmentCacheDir().filePath(Utils::createUuid());
-    const auto preffix = name() + QChar('/');
 
-    auto downOp = new DownloadFileOperation(preffix + QString("Download"), this, m_fileLoader, m_url, m_bytesTotal, m_tempPath);
+    auto downOp = new DownloadFileOperation(this, m_fileLoader, m_url, m_bytesTotal, m_tempPath);
     connect(downOp, &DownloadFileOperation::progressChanged, this, &DownloadDecryptFileOperation::progressChanged);
     appendChild(downOp);
 
-    auto decryptOp = new DecryptFileOperation(preffix + QString("Decrypt"), this, m_tempPath, m_filePath, m_senderId);
+    auto decryptOp = new DecryptFileOperation(this, m_tempPath, m_filePath, m_senderId);
     connect(decryptOp, &DecryptFileOperation::decrypted, this, &DownloadDecryptFileOperation::decrypted);
     appendChild(decryptOp);
 

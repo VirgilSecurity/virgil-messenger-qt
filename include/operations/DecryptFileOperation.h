@@ -46,7 +46,7 @@ class DecryptFileOperation : public Operation
     Q_OBJECT
 
 public:
-    explicit DecryptFileOperation(const QString &name, QObject *parent, const QString &sourcePath, const QString &destPath, const Contact::Id &senderId);
+    explicit DecryptFileOperation(QObject *parent, const QString &sourcePath, const QString &destPath, const Contact::Id &senderId);
 
     void run() override;
 

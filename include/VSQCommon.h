@@ -53,6 +53,8 @@ namespace args {
     using namespace std::placeholders;
 }
 
+using Flag = qint64;
+
 using DataSize = qint64;
 Q_DECLARE_METATYPE(DataSize);
 

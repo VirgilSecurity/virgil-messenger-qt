@@ -62,23 +62,35 @@ MessagesQueue::MessagesQueue(const Settings *settings, VSQMessenger *messenger, 
     connect(this, &MessagesQueue::pushMessage, this, &MessagesQueue::onPushMessage);
     connect(this, &MessagesQueue::pushMessageDownload, this, &MessagesQueue::onPushMessageDownload);
     connect(this, &MessagesQueue::pushMessagePreload, this, &MessagesQueue::onPushMessagePreload);
-    connect(this, &MessagesQueue::sendNotSentMessages, this, &MessagesQueue::onSendNotSentMessages);
-    connect(fileLoader, &FileLoader::ready, this, &MessagesQueue::onSendNotSentMessages);
+    connect(fileLoader, &FileLoader::serviceFound, this, &MessagesQueue::onFileLoaderServiceFound);
 }
 
 MessagesQueue::~MessagesQueue()
 {
 }
 
-void MessagesQueue::setMessages(const GlobalMessages &messages)
+void MessagesQueue::setQueueState(const MessagesQueue::QueueState &state)
 {
-    qCDebug(lcOperation) << "Queued" << messages.size() << "unsent messages";
-    for (auto &m : messages) {
-        auto op = pushMessageOperation(m);
-        m_factory->populateAll(op);
+    m_queueState = m_queueState | state;
+    if (state == QueueState::UserSet) {
+        connect(m_userDatabase->messagesTable(), &MessagesTable::notSentMessagesFetched, this, &MessagesQueue::onNotSentMessagesFetched);
     }
-    if (hasChildren() && isActive()) {
+    if (m_queueState == QueueState::FetchNeeded) {
+        m_queueState = m_queueState | QueueState::FetchRequested;
+        m_userDatabase->messagesTable()->fetchNotSentMessages();
+    }
+    else if (m_queueState == QueueState::Alive) {
         start();
+    }
+}
+
+void MessagesQueue::unsetQueueState(const MessagesQueue::QueueState &state)
+{
+    m_queueState = m_queueState & ~state;
+    if (state == QueueState::UserSet) {
+        m_queueState = m_queueState & ~QueueState::FetchRequested;
+        dropChildren();
+        qCDebug(lcModel) << "MessageQueue is cleared";
     }
 }
 
@@ -103,25 +115,29 @@ MessageOperation *MessagesQueue::pushMessageOperation(const GlobalMessage &messa
     return op;
 }
 
-bool MessagesQueue::isActive() const
-{
-    // TODO(fpohtmeh): remove this method
-    return !m_userId.isEmpty();
-}
-
 void MessagesQueue::onSetUserId(const UserId &userId)
 {
     if (m_userId == userId) {
         return;
     }
     m_userId = userId;
+    userId.isEmpty() ? unsetQueueState(QueueState::UserSet) : setQueueState(QueueState::UserSet);
+}
 
-    dropChildren();
-    qCDebug(lcModel) << "MessageQueue is cleared. UserId:" << m_userId <<  "Active:" << isActive();
+void MessagesQueue::onFileLoaderServiceFound(bool serviceFound)
+{
+    serviceFound ? setQueueState(QueueState::FileLoaderReady) : unsetQueueState(QueueState::FileLoaderReady);
+}
 
-    if (isActive()) {
-        connect(m_userDatabase->messagesTable(), &MessagesTable::notSentMessagesFetched, this, &MessagesQueue::setMessages);
-        sendNotSentMessages();
+void MessagesQueue::onNotSentMessagesFetched(const GlobalMessages &messages)
+{
+    qCDebug(lcOperation) << "Queued" << messages.size() << "unsent messages";
+    for (auto &m : messages) {
+        auto op = pushMessageOperation(m);
+        m_factory->populateAll(op);
+    }
+    if (m_queueState == QueueState::Alive && hasChildren()) {
+        start();
     }
 }
 
@@ -129,7 +145,7 @@ void MessagesQueue::onPushMessage(const GlobalMessage &message)
 {
     auto op = pushMessageOperation(message);
     m_factory->populateAll(op);
-    if (isActive()) {
+    if (m_queueState == QueueState::Alive) {
         start();
     }
 }
@@ -139,7 +155,7 @@ void MessagesQueue::onPushMessageDownload(const GlobalMessage &message, const QS
     auto op = pushMessageOperation(message, true);
     m_factory->populateDownload(op, filePath);
     connect(op, &Operation::finished, this, std::bind(&MessagesQueue::notificationCreated, this, tr("File was downloaded")));
-    if (isActive()) {
+    if (m_queueState == QueueState::Alive) {
         start();
     }
 }
@@ -148,15 +164,8 @@ void MessagesQueue::onPushMessagePreload(const GlobalMessage &message)
 {
     auto op = pushMessageOperation(message, true);
     m_factory->populatePreload(op);
-    if (isActive()) {
+    if (m_queueState == QueueState::Alive) {
         start();
-    }
-}
-
-void MessagesQueue::onSendNotSentMessages()
-{
-    if (isActive()) {
-        m_userDatabase->messagesTable()->fetchNotSentMessages();
     }
 }
 

@@ -59,19 +59,18 @@ bool UploadAttachmentOperation::populateChildren()
     const auto message = m_parent->message();
     const auto attachment = m_parent->attachment();
     auto factory = m_parent->factory();
-    const QString preffix = name() + QChar('/');
     const bool isPicture = attachment->type == Attachment::Type::Picture;
 
     // Convert to png
     ConvertToPngOperation *convertOp = nullptr;
     if (isPicture) {
-        convertOp = factory->populateConvertToPngOperation(preffix + QString("ConvertToPng"), this, attachment->localPath);
+        convertOp = factory->populateConvertToPngOperation(this, attachment->localPath);
         connect(convertOp, &ConvertToPngOperation::fileCreated, this, &UploadAttachmentOperation::setTempPngPath);
     }
     //  Create picture preview
     if (isPicture) {
         const auto filePath = m_settings->makeThumbnailPath(attachment->id, true);
-        auto op = factory->populateCreateAttachmentPreview(preffix + QString("CreateAttachmentPreview"), m_parent, this, attachment->localPath, filePath);
+        auto op = factory->populateCreateAttachmentPreview(m_parent, this, attachment->localPath, filePath);
         if (convertOp) {
             connect(convertOp, &ConvertToPngOperation::imageRead, op, &CreateAttachmentPreviewOperation::setSourceImage);
             connect(convertOp, &ConvertToPngOperation::converted, op, &CreateAttachmentPreviewOperation::setSourcePath);
@@ -79,7 +78,7 @@ bool UploadAttachmentOperation::populateChildren()
     }
     // Calculate attachment fingerprint
     if (attachment->fingerprint.isEmpty()) {
-        auto op = factory->populateCalculateAttachmentFingerprint(preffix + QString("CalculateAttachmentFingerprint"), m_parent, this, attachment->localPath);
+        auto op = factory->populateCalculateAttachmentFingerprint(m_parent, this, attachment->localPath);
         if (convertOp) {
             connect(convertOp, &ConvertToPngOperation::converted, op, &CalculateAttachmentFingerprintOperation::setSourcePath);
         }
@@ -87,7 +86,7 @@ bool UploadAttachmentOperation::populateChildren()
     // Encrypt/Upload attachment file
     if (!attachment->url.isValid())
     {
-        auto op = factory->populateEncryptUpload(preffix + QString("EncryptUpload"), this, attachment->localPath, message->recipientId);
+        auto op = factory->populateEncryptUpload(this, attachment->localPath, message->recipientId);
         connect(op, &EncryptUploadFileOperation::bytesCalculated, this, std::bind(&LoadAttachmentOperation::startLoadOperation, this, args::_1));
         connect(op, &EncryptUploadFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
         connect(op, &EncryptUploadFileOperation::uploaded, m_parent, &MessageOperation::setAttachmentUrl);
@@ -100,14 +99,15 @@ bool UploadAttachmentOperation::populateChildren()
     if (isPicture) {
         // Create thumbnail
         const auto filePath = m_settings->makeThumbnailPath(attachment->id, false);
-        auto op = factory->populateCreateAttachmentThumbnail(preffix + QString("CreateAttachmentThumbnail"), m_parent, this, attachment->localPath, filePath);
+        auto op = factory->populateCreateAttachmentThumbnail(m_parent, this, attachment->localPath, filePath);
         if (convertOp) {
             connect(convertOp, &ConvertToPngOperation::imageRead, op, &CreateAttachmentThumbnailOperation::setSourceImage);
             connect(convertOp, &ConvertToPngOperation::converted, op, &CreateAttachmentThumbnailOperation::setSourcePath);
         }
 
         // Encrypt/upload thumbnail
-        auto op2 = factory->populateEncryptUpload(preffix + QString("EncryptUploadThumbnail"), this, filePath, message->recipientId);
+        auto op2 = factory->populateEncryptUpload(this, filePath, message->recipientId);
+        op2->setName(op2->name() + QLatin1String("Thumbnail"));
         connect(op2, &EncryptUploadFileOperation::bytesCalculated, this, std::bind(&LoadAttachmentOperation::startLoadOperation, this, args::_1));
         connect(op2, &EncryptUploadFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
         connect(op2, &EncryptUploadFileOperation::uploaded, m_parent, &MessageOperation::setAttachmentThumbnailUrl);

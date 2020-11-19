@@ -40,7 +40,7 @@
 using namespace vm;
 
 MessageOperation::MessageOperation(const GlobalMessage &message, MessageOperationFactory *factory, QObject *parent)
-    : Operation(QString("Message [%1]").arg(message.id), parent)
+    : Operation(message.id, parent)
     , m_factory(factory)
     , m_message(message)
 {}
