@@ -95,13 +95,23 @@ private:
 
     // NOTE(fpohtmeh): this workaround is needed when messages are received before chat list loading
     // it will be remove right after offline mode
-    std::vector<QXmppMessage> m_receivedMessagesWithoutUser;
-    struct DeliveredStatusInfo
+    struct PostponedXmppData
     {
-        const Jid jid;
-        const Message::Id messageId;
+        struct DeliverInfo
+        {
+            const Jid jid;
+            const Message::Id messageId;
+        };
+
+        std::vector<QXmppMessage> receivedMessages;
+        std::vector<DeliverInfo> deliverInfos;
+
+        void addMessage(const QXmppMessage &msg);
+        void addDeliverInfo(const Jid jid, const Message::Id messageId);
+        void process(MessagesController *controller);
     };
-    std::vector<DeliveredStatusInfo> m_deliveredStatusesWithoutUser;
+
+    PostponedXmppData m_postponedXmppData;
 };
 }
 

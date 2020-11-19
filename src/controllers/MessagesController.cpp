@@ -134,18 +134,7 @@ void MessagesController::setUserId(const UserId &userId)
     m_models->messagesQueue()->setUserId(userId);
 
     if (!m_userId.isEmpty()) {
-        // Receive postponed messages
-        for (auto &m : m_receivedMessagesWithoutUser) {
-            qCDebug(lcController) << "Processing of xmpp message from" << m.from();
-            receiveMessage(m);
-        }
-        m_receivedMessagesWithoutUser.clear();
-        // Set postponed statuses
-        for (auto &m : m_deliveredStatusesWithoutUser) {
-            qCDebug(lcController) << "Processing of xmpp delivered status from" << m.jid;
-            setDeliveredStatus(m.jid, m.messageId);
-        }
-        m_deliveredStatusesWithoutUser.clear();
+        m_postponedXmppData.process(this);
     }
 }
 
@@ -177,8 +166,7 @@ void MessagesController::setMessageStatus(const Message::Id &messageId, const Co
 void MessagesController::setDeliveredStatus(const Jid &jid, const Message::Id &messageId)
 {
     if (m_userId.isEmpty()) {
-        qCDebug(lcController) << "Collecting of xmpp delivered status from" << jid;
-        m_deliveredStatusesWithoutUser.push_back({ jid, messageId });
+        m_postponedXmppData.addDeliverInfo(jid, messageId);
     }
     else {
         setMessageStatus(messageId, Utils::contactIdFromJid(jid), Message::Status::Delivered);
@@ -250,8 +238,7 @@ void MessagesController::setAttachmentFingerprint(const Attachment::Id &attachme
 void MessagesController::receiveMessage(const QXmppMessage &msg)
 {
     if (m_userId.isEmpty()) {
-        qCDebug(lcController) << "Collecting of xmpp message from" << msg.from();
-        m_receivedMessagesWithoutUser.push_back(msg);
+        m_postponedXmppData.addMessage(msg);
         return;
     }
 
@@ -322,4 +309,31 @@ void MessagesController::receiveMessage(const QXmppMessage &msg)
         m_userDatabase->writeMessage(message, chat.unreadMessageCount);
     }
     emit messageCreated({ message, m_userId, chat.contactId, senderId, recipientId });
+}
+
+void MessagesController::PostponedXmppData::addMessage(const QXmppMessage &msg)
+{
+    qCDebug(lcController) << "Collecting of xmpp message from" << msg.from();
+    receivedMessages.push_back(msg);
+}
+
+void MessagesController::PostponedXmppData::addDeliverInfo(const Jid jid, const Message::Id messageId)
+{
+    qCDebug(lcController) << "Collecting of xmpp delivered status from" << jid;
+    deliverInfos.push_back({ jid, messageId });
+}
+
+void MessagesController::PostponedXmppData::process(MessagesController *controller)
+{
+    for (auto &m : receivedMessages) {
+        qCDebug(lcController) << "Processing of xmpp message from" << m.from();
+        controller->receiveMessage(m);
+    }
+    receivedMessages.clear();
+
+    for (auto &m : deliverInfos) {
+        qCDebug(lcController) << "Processing of xmpp delivered status from" << m.jid;
+        controller->setDeliveredStatus(m.jid, m.messageId);
+    }
+    deliverInfos.clear();
 }
