@@ -13,8 +13,8 @@ Rectangle {
     property alias search: searchField.text
     property bool isSearchOpen: state === "opened"
 
-    signal closeButtonClicked()
-    signal acceptedPressed()
+    signal closed()
+    signal accepted()
 
     state: "closed"
     states: [
@@ -104,7 +104,7 @@ Rectangle {
             }
 
             if (isSearchOpen && (event.key === Qt.Key_Enter || event.key === Qt.Key_Return)) {
-                acceptedPressed()
+                accepted()
                 event.accepted = true
             }
         }
@@ -135,7 +135,7 @@ Rectangle {
         image: "Close"
 
         onClicked: {
-            closeButtonClicked()
+            closed()
         }
     }
 }

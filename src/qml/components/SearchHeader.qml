@@ -22,7 +22,7 @@ ToolBar {
     default property alias menu: contextMenu.contentData
 
     readonly property int deafultBarHeight: 40
-    readonly property int deafultMargin: 20
+    readonly property int defaultMargin: 20
     readonly property int smallMargin: 10
 
     onIsSearchOpenChanged: {
@@ -47,8 +47,8 @@ ToolBar {
             id: separator
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.leftMargin: deafultMargin
-            anchors.rightMargin: deafultMargin
+            anchors.leftMargin: defaultMargin
+            anchors.rightMargin: defaultMargin
 
             height: 1
             color: Theme.chatBackgroundColor
@@ -119,7 +119,7 @@ ToolBar {
         id: contentRow
         anchors {
             fill: parent
-            leftMargin: deafultMargin
+            leftMargin: defaultMargin
             rightMargin: smallMargin
         }
 
@@ -146,12 +146,11 @@ ToolBar {
 
             height: parent.height
 
-            Column { // Title and Description items
+            Column {
                 id: titleDescriptionColumn
                 anchors {
                     verticalCenter: parent.verticalCenter
                     left: parent.left
-                    leftMargin: 0
                 }
 
                 Label {
@@ -198,7 +197,7 @@ ToolBar {
                         toolbarId.state = searchId.state
                     }
 
-                    onCloseButtonClicked: {
+                    onClosed: {
                         searchId.state = "closed"
                     }
                 }
@@ -209,11 +208,10 @@ ToolBar {
                 anchors {
                     verticalCenter: parent.verticalCenter
                     right: parent.right
-                    rightMargin: 0
                 }
                 image: "More"
-                opacity: menu.length ? 1 : 0
-                enabled: menu.length ? true : false
+                opacity: (menu.length > 0) ? 1 : 0
+                enabled: menu.length > 0
 
                 onClicked: {
                     contextMenu.currentIndex = -1
