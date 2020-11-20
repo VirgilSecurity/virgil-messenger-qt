@@ -133,13 +133,17 @@ void LoadFileOperation::onReplyErrorOccurred(const int &errorCode, QNetworkReply
         return;
     }
     using Error = QNetworkReply::NetworkError;
-    if (errorCode == Error::TemporaryNetworkFailureError || errorCode == Error::NetworkSessionFailedError)  {
+    switch (errorCode) {
+    case Error::TemporaryNetworkFailureError:
+    case Error::NetworkSessionFailedError:
+    case Error::UnknownNetworkError:
         qCDebug(lcOperation) << "Failed due to temporary network issue";
         fail();
-    }
-    else {
+        break;
+    default:
         qCWarning(lcOperation) << "File load error occurred:" << errorCode;
         invalidate(tr("File loading error: %1").arg(errorCode));
+        break;
     }
 }
 
