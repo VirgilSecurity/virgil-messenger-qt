@@ -103,7 +103,7 @@ Page {
         delegate: ChatMessage {
             readonly property real fullWidth: root.width - 2 * d.margin - leftIndent
 
-            maxWidth: Platform.isMobile ? (fullWidth - d.margin) : fullWidth
+            maxWidth: Platform.isMobile ? (fullWidth - 2 * d.margin) : fullWidth
 
             body: model.body
             displayTime: model.displayTime

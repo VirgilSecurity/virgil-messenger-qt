@@ -258,6 +258,7 @@ QString Utils::attachmentFileName(const QUrl &url, const QFileInfo &localInfo, b
 {
     QString fileName;
 #ifdef VS_ANDROID
+    Q_UNUSED(isPicture)
     fileName = VSQAndroid::getDisplayName(url);
 #elif defined(VS_IOS_SIMULATOR)
     fileName = url.fileName();

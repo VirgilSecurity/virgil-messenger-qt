@@ -60,7 +60,7 @@ void UploadFileOperation::run()
     m_slotId = fileLoader()->requestUploadUrl(filePath());
     if (m_slotId.isEmpty()) {
         qCWarning(lcOperation) << "Failed to request upload slot";
-        invalidate(tr("Failed to request upload slot"));
+        fail();
     }
 }
 

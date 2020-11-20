@@ -58,6 +58,7 @@ void EncryptFileOperation::run()
     case Core::Result::Fail:
         fail();
         break;
+    case Core::Result::Invalid:
     default:
         invalidate(tr("Failed to encrypt file"));
         break;
