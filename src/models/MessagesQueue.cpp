@@ -169,6 +169,10 @@ void MessagesQueue::onPushMessagePreload(const GlobalMessage &message)
 {
     auto op = pushMessageOperation(message, true);
     m_factory->populatePreload(op);
+    connect(op, &Operation::failed, this, [=]() {
+        // TODO(fpohtmeh): refactor?
+        QTimer::singleShot(2000, this, &MessagesQueue::startIfReady);
+    });
     startIfReady();
 }
 
