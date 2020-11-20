@@ -125,15 +125,6 @@ void UploadAttachmentOperation::cleanup()
     Utils::removeFile(m_tempPngPath);
 }
 
-bool UploadAttachmentOperation::preRun()
-{
-    if (m_parent->attachment()->type == Attachment::Type::Picture) {
-        // Don't check for network because 1st child operation doesn't require it
-        return true;
-    }
-    return NetworkOperation::preRun();
-}
-
 void UploadAttachmentOperation::setTempPngPath(const QString &path)
 {
     m_tempPngPath = path;

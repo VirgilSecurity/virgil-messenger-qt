@@ -70,6 +70,16 @@ MessagesQueue::~MessagesQueue()
 {
 }
 
+void MessagesQueue::startIfReady()
+{
+    if (!hasChildren()) {
+        return;
+    }
+    if (m_queueState & QueueState::ReadyToStart) {
+        start();
+    }
+}
+
 void MessagesQueue::setQueueState(const MessagesQueue::QueueState &state)
 {
     m_queueState = m_queueState | state;
@@ -80,8 +90,8 @@ void MessagesQueue::setQueueState(const MessagesQueue::QueueState &state)
         m_queueState = m_queueState | QueueState::FetchRequested;
         m_userDatabase->messagesTable()->fetchNotSentMessages();
     }
-    else if (m_queueState == QueueState::Alive) {
-        start();
+    else {
+        startIfReady();
     }
 }
 
@@ -137,18 +147,14 @@ void MessagesQueue::onNotSentMessagesFetched(const GlobalMessages &messages)
         auto op = pushMessageOperation(m);
         m_factory->populateAll(op);
     }
-    if (m_queueState == QueueState::Alive && hasChildren()) {
-        start();
-    }
+    startIfReady();
 }
 
 void MessagesQueue::onPushMessage(const GlobalMessage &message)
 {
     auto op = pushMessageOperation(message);
     m_factory->populateAll(op);
-    if (m_queueState == QueueState::Alive) {
-        start();
-    }
+    startIfReady();
 }
 
 void MessagesQueue::onPushMessageDownload(const GlobalMessage &message, const QString &filePath)
@@ -156,18 +162,14 @@ void MessagesQueue::onPushMessageDownload(const GlobalMessage &message, const QS
     auto op = pushMessageOperation(message, true);
     m_factory->populateDownload(op, filePath);
     connect(op, &Operation::finished, this, std::bind(&MessagesQueue::notificationCreated, this, tr("File was downloaded"), false));
-    if (m_queueState == QueueState::Alive) {
-        start();
-    }
+    startIfReady();
 }
 
 void MessagesQueue::onPushMessagePreload(const GlobalMessage &message)
 {
     auto op = pushMessageOperation(message, true);
     m_factory->populatePreload(op);
-    if (m_queueState == QueueState::Alive) {
-        start();
-    }
+    startIfReady();
 }
 
 void MessagesQueue::onMessageOperationStatusChanged(const MessageOperation *operation)

@@ -82,9 +82,10 @@ private:
         FileLoaderReady = 1 << 1,
         FetchNeeded = QueueState::UserSet | QueueState::FileLoaderReady,
         FetchRequested = 1 << 2,
-        Alive = UserSet | FileLoaderReady | FetchRequested
+        ReadyToStart = UserSet | FetchRequested
     };
 
+    void startIfReady();
     void setQueueState(const QueueState &state);
     void unsetQueueState(const QueueState &state);
 
