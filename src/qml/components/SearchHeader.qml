@@ -21,6 +21,10 @@ ToolBar {
 
     default property alias menu: contextMenu.contentData
 
+    readonly property int deafultBarHeight: 40
+    readonly property int defaultMargin: 20
+    readonly property int smallMargin: 10
+
     onIsSearchOpenChanged: {
         if (filterSource) {
             filterSource.filter = ""
@@ -43,8 +47,8 @@ ToolBar {
             id: separator
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.leftMargin: 20
-            anchors.rightMargin: 20
+            anchors.leftMargin: defaultMargin
+            anchors.rightMargin: defaultMargin
 
             height: 1
             color: Theme.chatBackgroundColor
@@ -52,81 +56,172 @@ ToolBar {
         }
     }
 
-    RowLayout {
-        anchors.fill: parent
-        anchors.leftMargin: loader.visible ? 8 : 20
-        anchors.rightMargin: 20
-        spacing: 10
+    state: "closed"
+    states: [
+        State {
+            name: "opened"
 
-        Loader {
-            id: loader
-            Layout.preferredWidth: 40
-            Layout.preferredHeight: 40
-            visible: showBackButton && !isSearchOpen && !searchId.isAnimationRunning
+            PropertyChanges {
+                target: titleDescriptionColumn
+                anchors.leftMargin: -deafultBarHeight
+                opacity: 0
 
-            ImageButton {
-                anchors.fill: parent
-                image: "Arrow-Left"
-                onClicked: app.stateManager.goBack()
+            }
+
+            PropertyChanges {
+                target: searchContainer
+                width: toolbarContentContainer.width
+                anchors.rightMargin: 0
+            }
+
+            PropertyChanges {
+                target: menuButton
+                anchors.rightMargin: -deafultBarHeight
+                opacity: 0
+            }
+
+        },
+        State {
+            name: "closed"
+
+            PropertyChanges {
+                target: titleDescriptionColumn
+                anchors.leftMargin: 0
+                opacity: 1
+
+            }
+
+            PropertyChanges {
+                target: searchContainer
+                width: deafultBarHeight
+                anchors.rightMargin: deafultBarHeight
+            }
+
+            PropertyChanges {
+                target: menuButton
+                anchors.rightMargin: 0
+                opacity: 1
             }
         }
+    ]
 
-        Column {
-            Layout.fillWidth: !isSearchOpen
-            visible: !isSearchOpen && !searchId.isAnimationRunning
-            clip: true
-
-            Label {
-                id: titleLabel
-                elide: Label.ElideRight
-                width: parent.width
-
-                font.family: Theme.mainFont
-                font.pointSize: UiHelper.fixFontSz(15)
-                horizontalAlignment: Qt.AlignLeft
-                verticalAlignment: Qt.AlignVCenter
-                font.bold: true
-                color: Theme.primaryTextColor
+    transitions: [
+        Transition {
+            NumberAnimation {
+                properties: "anchors.leftMargin, anchors.rightMargin, width, opacity"
+                easing.type: Easing.InOutQuad
+                duration: 250
             }
+        }
+    ]
 
-            Label {
-                id: descriptionLabel
-                elide: Label.ElideRight
-                width: parent.width
+    Item {
+        id: contentRow
+        anchors {
+            fill: parent
+            leftMargin: defaultMargin
+            rightMargin: smallMargin
+        }
 
-                font.family: Theme.mainFont
-                horizontalAlignment: Qt.AlignLeft
-                verticalAlignment: Qt.AlignVCenter
-                font.pointSize: UiHelper.fixFontSz(11)
-                color: Theme.secondaryTextColor
+        height: deafultBarHeight
+
+        ImageButton {
+            id: backButton
+            anchors {
+                left: parent.left
+                verticalCenter: parent.verticalCenter
             }
+            image: "Arrow-Left"
+            width: showBackButton ? deafultBarHeight : 0
+            onClicked: app.stateManager.goBack()
         }
 
         Item {
-            Layout.fillWidth: isSearchOpen || searchId.isAnimationRunning
-            Layout.preferredWidth: 48
-            height: 40
-
-            Search {
-                id: searchId
-            }
-        }
-
-        ImageButton {
-            visible: !isSearchOpen && !searchId.isAnimationRunning
-
-            id: menuButton
-            image: "More"
-            opacity: menu.length ? 1 : 0
-            enabled: menu.length
-            onClicked: {
-                contextMenu.currentIndex = -1
-                contextMenu.open()
+            id: toolbarContentContainer
+            anchors {
+                left: backButton.right
+                leftMargin: showBackButton ? smallMargin : 0
+                right: parent.right
             }
 
-            ContextMenu {
-                id: contextMenu
-                dropdown: true
+            height: parent.height
+
+            Column {
+                id: titleDescriptionColumn
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    left: parent.left
+                }
+
+                Label {
+                    id: titleLabel
+                    elide: Label.ElideRight
+
+                    font.family: Theme.mainFont
+                    font.pointSize: UiHelper.fixFontSz(15)
+                    horizontalAlignment: Qt.AlignLeft
+                    verticalAlignment: Qt.AlignVCenter
+                    font.bold: true
+                    color: Theme.primaryTextColor
+                }
+
+                Label {
+                    id: descriptionLabel
+                    elide: Label.ElideRight
+
+                    font.family: Theme.mainFont
+                    horizontalAlignment: Qt.AlignLeft
+                    verticalAlignment: Qt.AlignVCenter
+                    font.pointSize: UiHelper.fixFontSz(11)
+                    color: Theme.secondaryTextColor
+                }
+
+            }
+
+            Item {
+                id: searchContainer
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    right: parent.right
+                    rightMargin: deafultBarHeight
+                }
+
+                height: deafultBarHeight
+                width: deafultBarHeight
+
+                Search {
+                    id: searchId
+                    anchors.fill: parent
+                    visible: true
+                    onStateChanged: {
+                        toolbarId.state = searchId.state
+                    }
+
+                    onClosed: {
+                        searchId.state = "closed"
+                    }
+                }
+            }
+
+            ImageButton {
+                id: menuButton
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    right: parent.right
+                }
+                image: "More"
+                opacity: (menu.length > 0) ? 1 : 0
+                enabled: menu.length > 0
+
+                onClicked: {
+                    contextMenu.currentIndex = -1
+                    contextMenu.open()
+                }
+
+                ContextMenu {
+                    id: contextMenu
+                    dropdown: true
+                }
             }
         }
     }
