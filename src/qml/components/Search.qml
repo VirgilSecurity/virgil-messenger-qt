@@ -7,17 +7,19 @@ Rectangle {
     id: containerId
 
     radius: 20
-    color: 'transparent'
+    color: "transparent"
 
     property alias searchPlaceholder: searchField.placeholderText
     property alias search: searchField.text
-    property bool isSearchOpen: state === "open"
-//    property alias isAnimationRunning: widthAnimation.running
+    property bool isSearchOpen: state === "opened"
+
+    signal closeButtonClicked()
+    signal acceptedPressed()
 
     state: "closed"
     states: [
-        State { // open
-            name: "open"
+        State {
+            name: "opened"
 
             PropertyChanges {
                 target: containerId
@@ -34,12 +36,12 @@ Rectangle {
                 icon.color: "white"
             }
         },
-        State { // close
+        State {
             name: "closed"
 
             PropertyChanges {
                 target: containerId
-                color: 'transparent'
+                color: "transparent"
             }
 
             PropertyChanges {
@@ -62,7 +64,7 @@ Rectangle {
 
     transitions: [
         Transition {
-            from: 'open'; to: 'closed'
+            from: "opened"; to: "closed"
             PropertyAnimation {
                 properties: "color"
                 easing.type: Easing.InExpo
@@ -70,7 +72,7 @@ Rectangle {
             }
         },
         Transition {
-            from: 'closed'; to: 'open'
+            from: "closed"; to: "opened"
             PropertyAnimation {
                 properties: "color"
                 easing.type: Easing.OutExpo
@@ -100,6 +102,11 @@ Rectangle {
                 containerId.state = "closed"
                 event.accepted = true;
             }
+
+            if (isSearchOpen && (event.key === Qt.Key_Enter || event.key === Qt.Key_Return)) {
+                acceptedPressed()
+                event.accepted = true
+            }
         }
     }
 
@@ -114,7 +121,7 @@ Rectangle {
         enabled: !isSearchOpen || !searchField.activeFocus
 
         onClicked: {
-            containerId.state = "open"
+            containerId.state = "opened"
             searchField.forceActiveFocus()
         }
     }
@@ -128,7 +135,7 @@ Rectangle {
         image: "Close"
 
         onClicked: {
-            containerId.state = "closed"
+            closeButtonClicked()
         }
     }
 }

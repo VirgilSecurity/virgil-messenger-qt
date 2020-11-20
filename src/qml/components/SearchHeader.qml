@@ -21,6 +21,10 @@ ToolBar {
 
     default property alias menu: contextMenu.contentData
 
+    readonly property int deafultBarHeight: 40
+    readonly property int deafultMargin: 20
+    readonly property int smallMargin: 10
+
     onIsSearchOpenChanged: {
         if (filterSource) {
             filterSource.filter = ""
@@ -43,8 +47,8 @@ ToolBar {
             id: separator
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.leftMargin: 20
-            anchors.rightMargin: 20
+            anchors.leftMargin: deafultMargin
+            anchors.rightMargin: deafultMargin
 
             height: 1
             color: Theme.chatBackgroundColor
@@ -54,34 +58,34 @@ ToolBar {
 
     state: "closed"
     states: [
-        State { // open
-            name: "open"
+        State {
+            name: "opened"
 
             PropertyChanges {
-                target: title_descr_Column
-                anchors.leftMargin: -40
+                target: titleDescriptionColumn
+                anchors.leftMargin: -deafultBarHeight
                 opacity: 0
 
             }
 
             PropertyChanges {
                 target: searchContainer
-                width: toolbarContent_Container.width
+                width: toolbarContentContainer.width
                 anchors.rightMargin: 0
             }
 
             PropertyChanges {
                 target: menuButton
-                anchors.rightMargin: -40
+                anchors.rightMargin: -deafultBarHeight
                 opacity: 0
             }
 
         },
-        State { // close
+        State {
             name: "closed"
 
             PropertyChanges {
-                target: title_descr_Column
+                target: titleDescriptionColumn
                 anchors.leftMargin: 0
                 opacity: 1
 
@@ -89,8 +93,8 @@ ToolBar {
 
             PropertyChanges {
                 target: searchContainer
-                width: 40
-                anchors.rightMargin: 40
+                width: deafultBarHeight
+                anchors.rightMargin: deafultBarHeight
             }
 
             PropertyChanges {
@@ -115,11 +119,11 @@ ToolBar {
         id: contentRow
         anchors {
             fill: parent
-            leftMargin: 20
-            rightMargin: 10
+            leftMargin: deafultMargin
+            rightMargin: smallMargin
         }
 
-        height: 40
+        height: deafultBarHeight
 
         ImageButton {
             id: backButton
@@ -128,22 +132,22 @@ ToolBar {
                 verticalCenter: parent.verticalCenter
             }
             image: "Arrow-Left"
-            width: showBackButton ? 40 : 0
+            width: showBackButton ? deafultBarHeight : 0
             onClicked: app.stateManager.goBack()
         }
 
         Item {
-            id: toolbarContent_Container
+            id: toolbarContentContainer
             anchors {
                 left: backButton.right
-                leftMargin: showBackButton ? 10 : 0
+                leftMargin: showBackButton ? smallMargin : 0
                 right: parent.right
             }
 
             height: parent.height
 
             Column { // Title and Description items
-                id: title_descr_Column
+                id: titleDescriptionColumn
                 anchors {
                     verticalCenter: parent.verticalCenter
                     left: parent.left
@@ -180,11 +184,11 @@ ToolBar {
                 anchors {
                     verticalCenter: parent.verticalCenter
                     right: parent.right
-                    rightMargin: 40
+                    rightMargin: deafultBarHeight
                 }
 
-                height: 40
-                width: 40
+                height: deafultBarHeight
+                width: deafultBarHeight
 
                 Search {
                     id: searchId
@@ -192,6 +196,10 @@ ToolBar {
                     visible: true
                     onStateChanged: {
                         toolbarId.state = searchId.state
+                    }
+
+                    onCloseButtonClicked: {
+                        searchId.state = "closed"
                     }
                 }
             }
@@ -205,16 +213,7 @@ ToolBar {
                 }
                 image: "More"
                 opacity: menu.length ? 1 : 0
-                enabled: {
-                    if (!menu.length) {
-                        return false
-                    }
-                    //                if (!isSearchOpen && !searchId.isAnimationRunning) {
-                    //                    return true
-                    //                } else {
-                    //                    return false
-                    //                }
-                }
+                enabled: menu.length ? true : false
 
                 onClicked: {
                     contextMenu.currentIndex = -1
