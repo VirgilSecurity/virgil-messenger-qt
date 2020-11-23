@@ -84,6 +84,7 @@ Optional<Attachment> AttachmentsModel::createAttachment(const QUrl &url, const A
     attachment.id = Utils::createUuid();
     attachment.messageId = Utils::createUuid();
     attachment.type = type;
+    attachment.status = Attachment::Status::Loading;
     attachment.size = fileSize;
 
     attachment.fileName = Utils::attachmentFileName(url, localInfo, type == Attachment::Type::Picture);
