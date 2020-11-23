@@ -34,17 +34,11 @@
 
 #include "states/AccountSettingsState.h"
 
-#include "VSQMessenger.h"
+using namespace vm;
 
-using namespace VSQ;
-
-AccountSettingsState::AccountSettingsState(VSQMessenger *messenger, QState *parent)
+AccountSettingsState::AccountSettingsState(QState *parent)
     : QState(parent)
-    , m_messenger(messenger)
-{
-    connect(this, &AccountSettingsState::signOut, m_messenger, &VSQMessenger::signOut);
-    connect(m_messenger, &VSQMessenger::signedOut, this, &AccountSettingsState::signedOut);
-}
+{}
 
 QString AccountSettingsState::userId() const
 {

@@ -2,13 +2,12 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 
 Button {
-
     id: button
 
     property string image: "Grid"
     property string imageSource: ""
-
     property bool disabled: false
+    property alias backgroundColor: background.color
 
     icon.color: "transparent"
     icon.source: "../resources/icons/%1.png".arg(image)
@@ -16,16 +15,18 @@ Button {
     padding: 0
 
     background: Rectangle {
+        id: background
         color: "transparent"
         implicitWidth: 40
         implicitHeight: 40
+        radius: 20
     }
 
     opacity: disabled ? 0.3 : 1
 
     Rectangle {
-        anchors.centerIn: parent
         id: hoverBackground
+        anchors.centerIn: parent
         width: 40
         height: 40
         color: "white"

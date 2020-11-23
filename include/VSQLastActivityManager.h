@@ -32,21 +32,21 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_LASTACTIVITYMANAGER_H
-#define VSQ_LASTACTIVITYMANAGER_H
+#ifndef VM_LASTACTIVITYMANAGER_H
+#define VM_LASTACTIVITYMANAGER_H
 
 #include <qxmpp/QXmppClientExtension.h>
 
 #include "VSQLastActivityIq.h"
 
-class VSQSettings;
+class Settings;
 
 class VSQLastActivityManager : public QXmppClientExtension
 {
     Q_OBJECT
 
 public:
-    VSQLastActivityManager(VSQSettings *settings, QObject *parent);
+    VSQLastActivityManager(Settings *settings, QObject *parent);
     ~VSQLastActivityManager() override;
 
     void setCurrentJid(const QString &jid);
@@ -72,11 +72,11 @@ private:
 
     void onErrorOccured(const QString &errorText);
 
-    VSQSettings *m_settings;
+    Settings *m_settings;
     bool m_enabled = true;
     QString m_jid;
     int m_timerId = 0;
     int m_debugCounter = 0;
 };
 
-#endif // VSQ_LASTACTIVITYMANAGER_H
+#endif // VM_LASTACTIVITYMANAGER_H

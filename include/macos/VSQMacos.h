@@ -35,7 +35,7 @@
 #ifndef VSQMACOS_H
 #define VSQMACOS_H
 
-#if (MACOS)
+#ifdef VS_MACOS
 
 #include <QObject>
 #include <QTimer>
@@ -61,6 +61,6 @@ private:
     void _deleteTimer();
 };
 
-#endif // MACOS
+#endif // VS_MACOS
 
 #endif // VSQMACOS_H

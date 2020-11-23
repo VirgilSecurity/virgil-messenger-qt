@@ -39,15 +39,17 @@
 #include <QNetworkReply>
 #include <QStandardPaths>
 
-#include "VSQSettings.h"
+#include "Settings.h"
 
 #include <virgil/iot/messenger/internal/virgil.h>
 
 const QString VSQCrashReporter::s_endpointSendReport = "/send-logs";
 
+using namespace vm;
+
 Q_LOGGING_CATEGORY(lcCrashReporter, "crashReporter")
 
-VSQCrashReporter::VSQCrashReporter(VSQSettings *settings, QNetworkAccessManager *networkAccessManager, QObject *parent)
+VSQCrashReporter::VSQCrashReporter(Settings *settings, QNetworkAccessManager *networkAccessManager, QObject *parent)
     : QObject(parent)
     , m_settings(settings)
     , m_manager(networkAccessManager)
@@ -83,8 +85,10 @@ void VSQCrashReporter::checkAppCrash()
 {
     qCDebug(lcCrashReporter) << "Checking previous run flag...";
     if(m_settings->runFlag()) {
+#ifndef VS_DEVMODE
         qCCritical(lcCrashReporter) << "Previous application run is crashed ! Sending log files...";
         emit crashReportRequested();
+#endif
     }
     qCDebug(lcCrashReporter) << "Set run flag to true";
     m_settings->setRunFlag(true);

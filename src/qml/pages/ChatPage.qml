@@ -1,7 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
-import QuickFuture 1.0
 import QtQuick.Window 2.12
 import QtMultimedia 5.12
 import com.virgilsecurity.messenger 1.0
@@ -14,7 +13,13 @@ Page {
     id: chatPage
 
     readonly property var appState: app.stateManager.chatState
-    readonly property var contactId: appState.contactId
+    readonly property var contactId: controllers.chats.currentContactId
+
+    QtObject {
+        id: d
+        readonly property real margin: 20
+        readonly property real listSpacing: 5
+    }
 
     background: Rectangle {
         color: Theme.chatBackgroundColor
@@ -84,51 +89,48 @@ Page {
         property var contextMenu: null
 
         anchors.fill: parent
-        anchors.leftMargin: 20
-        anchors.rightMargin: 20
+        anchors.leftMargin: d.margin
+        anchors.rightMargin: d.margin
 
         section.property: "day"
         section.delegate: ChatDateSeporator {
             date: section
         }
 
-        model: ConversationsModel
+        model: models.messages
 
-        spacing: 5
+        spacing: d.listSpacing
         delegate: ChatMessage {
-            maxWidth: Math.min(root.width - 220, 800)
+            readonly property real fullWidth: root.width - 2 * d.margin - leftIndent
 
-            body: model.message
-            time: Qt.formatDateTime(model.timestamp, "hh:mm")
-            nickname: model.author
-            isUser: model.author === app.stateManager.chatListState.userId // FIXME(fpohtmeh); use chat state
-            status: isUser ? model.status : "none"
-            failed: (model.status == 4) && (!attachmentId || attachmentStatus == Enums.AttachmentStatus.Failed)
-            messageId: model.messageId
+            maxWidth: Platform.isMobile ? (fullWidth - 2 * d.margin) : fullWidth
 
-            inRow: model.messageInARow
-            firstInRow: model.firstMessageInARow
+            body: model.body
+            displayTime: model.displayTime
+            nickname: model.authorId
+            isOwnMessage: model.authorId === controllers.users.userId
+            status: isOwnMessage ? model.status : "none"
+            messageId: model.id
+            inRow: model.inRow
+            firstInRow: model.firstInRow
+            failed: model.failed
 
             attachmentId: model.attachmentId
-            attachmentBytesTotal: model.attachmentBytesTotal
-            attachmentDisplaySize: model.attachmentDisplaySize
             attachmentType: model.attachmentType
-            attachmentFilePath: model.attachmentFilePath
-            attachmentThumbnailPath: model.attachmentThumbnailPath
-            attachmentThumbnailWidth: model.attachmentThumbnailWidth
-            attachmentThumbnailHeight: model.attachmentThumbnailHeight
-            attachmentBytesLoaded: model.attachmentBytesLoaded
             attachmentStatus: model.attachmentStatus
-            attachmentDownloaded: model.attachmentDownloaded
+            attachmentDisplaySize: model.attachmentDisplaySize
+            attachmentDisplayText: model.attachmentDisplayText
+            attachmentBytesTotal: model.attachmentBytesTotal
+            attachmentBytesLoaded: model.attachmentBytesLoaded
+            attachmentImagePath: model.attachmentImagePath
+            attachmentThumbnailWidth: model.attachmentImageSize.width
+            attachmentThumbnailHeight: model.attachmentImageSize.height
+            attachmentFileExists: model.attachmentFileExists
 
             onSaveAttachmentAs: function(messageId) {
                 saveAttachmentAsDialog.messageId = messageId
                 saveAttachmentAsDialog.attachmentType = attachmentType
                 saveAttachmentAsDialog.open()
-            }
-
-            onDownloadOpenAttachment: function(messageId, isPicture) {
-                (isPicture ? appState.openAttachment : appState.downloadAttachment)(messageId)
             }
 
             onOpenContextMenu: function(messageId, mouse, contextMenu) {
@@ -169,17 +171,20 @@ Page {
             }
         }
 
+        Timer {
+            id: scrollTimer
+            repeat: false
+            interval: 50
+            onTriggered: listView.positionViewAtEnd()
+        }
+
         function showLastMessage() {
-            positionViewAtEnd()
-            if (Platform.isIos || Platform.isLinux) {
-                positionViewAtEnd() // HACK(fpohtmeh): fix positioning
-            }
+            scrollTimer.start()
         }
     }
 
     footer: ChatMessageInput {
         id: footerControl
-        onMessageSending: appState.sendMessage(contactId, message, attachmentUrl, attachmentType)
     }
 
     Item {
@@ -189,7 +194,7 @@ Page {
 
             property string messageId: ""
 
-            onAccepted: appState.saveAttachmentAs(messageId, fileUrl)
+            onAccepted: controllers.attachments.saveAs(messageId, fileUrl)
         }
 
         SoundEffect {
@@ -200,14 +205,6 @@ Page {
         SoundEffect {
             id: messageSent
             source: "../resources/sounds/message-sent.wav"
-        }
-    }
-
-    onContactIdChanged: {
-        ConversationsModel.recipient = contactId
-        if (contactId) {
-            ConversationsModel.setAsRead(contactId)
-            ChatModel.updateUnreadMessageCount(contactId)
         }
     }
 

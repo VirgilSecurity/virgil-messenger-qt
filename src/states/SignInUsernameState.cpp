@@ -34,9 +34,9 @@
 
 #include "states/SignInUsernameState.h"
 
-#include "VSQUtils.h"
+#include "Utils.h"
 
-using namespace VSQ;
+using namespace vm;
 
 SignInUsernameState::SignInUsernameState(Validator *validator, QState *parent)
     : OperationState(parent)

@@ -34,22 +34,21 @@
 
 #include "states/NewChatState.h"
 
-#include "VSQMessenger.h"
+#include "controllers/ChatsController.h"
 
-using namespace VSQ;
+using namespace vm;
 
-NewChatState::NewChatState(VSQMessenger *messenger, QState *parent)
+NewChatState::NewChatState(ChatsController *chatsController, QState *parent)
     : OperationState(parent)
-    , m_messenger(messenger)
+    , m_chatsController(chatsController)
 {
-    connect(m_messenger, &VSQMessenger::contactAdded, this, &NewChatState::operationFinished);
-    connect(m_messenger, &VSQMessenger::addContactErrorOccured, this, &NewChatState::operationErrorOccurred);
-    connect(m_messenger, &VSQMessenger::contactAdded, this, &NewChatState::requestChat);
+    connect(chatsController, &ChatsController::chatOpened, this, &NewChatState::operationFinished);
+    connect(chatsController, &ChatsController::errorOccurred, this, &NewChatState::operationErrorOccurred);
     connect(this, &NewChatState::addNewChat, this, &NewChatState::processAddNewChat);
 }
 
-void NewChatState::processAddNewChat(const QString &contactId)
+void NewChatState::processAddNewChat(const Contact::Id &contactId)
 {
     emit operationStarted();
-    m_messenger->addContact(contactId);
+    m_chatsController->createChat(contactId);
 }

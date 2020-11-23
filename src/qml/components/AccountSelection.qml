@@ -53,7 +53,7 @@ ColumnLayout {
             height: 240
 
             Repeater {
-                model: app.stateManager.accountSelectionState.model
+                model: models.accountSelection
 
                 Item {
                     id: firstPage

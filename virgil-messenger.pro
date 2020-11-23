@@ -43,6 +43,10 @@ isEmpty(VERSION) {
     VERSION = $$cat($$PWD/VERSION_MESSENGER)
 }
 
+isEmpty(VERSION_DATABASE_SCHEME) {
+    VERSION_DATABASE_SCHEME = $$cat($$PWD/VERSION_DATABASE_SCHEME)
+}
+
 ios {
     isEmpty(VS_TARGET) {
         TARGET = VirgilMessenger
@@ -56,6 +60,7 @@ ios {
 }
 message("TARGET = $$TARGET")
 message("VERSION = $$VERSION")
+message("VERSION_DATABASE_SCHEME = $$VERSION_DATABASE_SCHEME")
 
 #
 #   Directory with precompiled dependencies
@@ -66,12 +71,6 @@ PREBUILT_PATH = $$PWD/ext/prebuilt
 #   Include Virgil CommKit
 #
 include($$PWD/ext/commkit.pri)
-
-#
-#   Include QML QFuture
-#
-include($$PWD/ext/quickfuture/quickfuture.pri)
-#include($$PWD/ext/quickpromise/quickpromise.pri)
 
 #
 #   QXMPP
@@ -88,7 +87,8 @@ message("QXMPP location: $${QXMPP_BUILD_PATH}")
 DEFINES += QT_DEPRECATED_WARNINGS \
         INFO_CLIENT=1 \
         CFG_CLIENT=1 \
-        VERSION="$$VERSION"
+        VERSION="$$VERSION" \
+        VERSION_DATABASE_SCHEME="$$VERSION_DATABASE_SCHEME"
 
 include(customers/customers.pri)
 
@@ -100,31 +100,29 @@ VS_PLATFORMS_PATH=$$absolute_path(generated/platforms)
 
 HEADERS += \
         include/VSQApplication.h \
-        include/VSQAttachmentBuilder.h \
-        include/AccountSelectionModel.h \
         include/VSQClipboardProxy.h \
         include/VSQCommon.h \
         include/VSQContactManager.h \
         include/VSQCrashReporter.h \
-        include/VSQCryptoTransferManager.h \
         include/VSQDiscoveryManager.h \
-        include/VSQDownload.h \
         include/VSQLastActivityIq.h \
         include/VSQLastActivityManager.h \
         include/VSQMessenger.h \
-        include/VSQSettings.h \
-        include/VSQSqlChatModel.h \
-        include/VSQSqlConversationModel.h \
+        include/Settings.h \
         include/VSQNetworkAnalyzer.h \
-        include/VSQTransfer.h \
-        include/VSQTransferManager.h \
-        include/VSQUpload.h \
-        include/VSQUtils.h \
+        include/Utils.h \
         include/android/VSQAndroid.h \
-        include/macos/VSQMacos.h \
         include/ui/VSQUiHelper.h \
         include/KeyboardEventFilter.h \
         include/Validator.h \
+        include/Core.h \
+        # Controllers
+        include/controllers/AttachmentsController.h \
+        include/controllers/ChatsController.h \
+        include/controllers/Controllers.h \
+        include/controllers/FileCloudController.h \
+        include/controllers/MessagesController.h \
+        include/controllers/UsersController.h \
         # Helpers
         include/helpers/VSQSingleton.h \
         include/helpers/FutureWorker.h \
@@ -137,6 +135,7 @@ HEADERS += \
         include/states/ChatListState.h \
         include/states/ChatState.h \
         include/states/DownloadKeyState.h \
+        include/states/FileCloudState.h \
         include/states/OperationState.h \
         include/states/NewChatState.h \
         include/states/SignInAsState.h \
@@ -145,10 +144,56 @@ HEADERS += \
         include/states/SignUpState.h \
         include/states/SplashScreenState.h \
         include/states/StartState.h \
+        # Database
+        include/database/core/Database.h \
+        include/database/core/DatabaseTable.h \
+        include/database/core/DatabaseUtils.h \
+        include/database/core/Migration.h \
+        include/database/core/Patch.h \
+        include/database/core/ScopedConnection.h \
+        include/database/core/ScopedTransaction.h \
+        include/database/AttachmentsTable.h \
+        include/database/ContactsTable.h \
+        include/database/ChatsTable.h \
+        include/database/MessagesTable.h \
+        include/database/UserDatabase.h \
+        include/database/UserDatabaseMigration.h \
         # Logging
         include/logging/VSQLogging.h \
         include/logging/VSQLogWorker.h \
         include/logging/VSQMessageLogContext.h \
+        # Models
+        include/models/AccountSelectionModel.h \
+        include/models/AttachmentsModel.h \
+        include/models/ChatsModel.h \
+        include/models/FileCloudModel.h \
+        include/models/FileLoader.h \
+        include/models/ListModel.h \
+        include/models/MessagesModel.h \
+        include/models/MessagesQueue.h \
+        include/models/Models.h \
+        # Operations
+        include/operations/CalculateAttachmentFingerprintOperation.h \
+        include/operations/CalculateFileFingerprintOperation.h \
+        include/operations/ConvertToPngOperation.h \
+        include/operations/CreateAttachmentPreviewOperation.h \
+        include/operations/CreateAttachmentThumbnailOperation.h \
+        include/operations/CreateThumbnailOperation.h \
+        include/operations/DecryptFileOperation.h \
+        include/operations/DownloadAttachmentOperation.h \
+        include/operations/DownloadFileOperation.h \
+        include/operations/DownloadDecryptFileOperation.h \
+        include/operations/EncryptFileOperation.h \
+        include/operations/EncryptUploadFileOperation.h \
+        include/operations/LoadAttachmentOperation.h \
+        include/operations/LoadFileOperation.h \
+        include/operations/MessageOperation.h \
+        include/operations/MessageOperationFactory.h \
+        include/operations/NetworkOperation.h \
+        include/operations/Operation.h \
+        include/operations/SendMessageOperation.h \
+        include/operations/UploadAttachmentOperation.h \
+        include/operations/UploadFileOperation.h \
         # Generated
         generated/include/VSQCustomer.h \
         # Thirdparty
@@ -159,32 +204,31 @@ HEADERS += \
 #
 
 SOURCES += \
-        src/VSQAttachmentBuilder.cpp \
-        src/AccountSelectionModel.cpp \
         src/VSQClipboardProxy.cpp \
         src/VSQCommon.cpp \
         src/VSQContactManager.cpp \
         src/VSQCrashReporter.cpp \
-        src/VSQCryptoTransferManager.cpp \
         src/VSQDiscoveryManager.cpp \
-        src/VSQDownload.cpp \
         src/VSQMessenger.cpp \
         src/VSQLastActivityIq.cpp \
         src/VSQLastActivityManager.cpp \
-        src/VSQSettings.cpp \
-        src/VSQSqlChatModel.cpp \
-        src/VSQSqlConversationModel.cpp \
+        src/Settings.cpp \
         src/VSQNetworkAnalyzer.cpp \
-        src/VSQTransfer.cpp \
-        src/VSQTransferManager.cpp \
-        src/VSQUpload.cpp \
-        src/VSQUtils.cpp \
+        src/Utils.cpp \
         src/android/VSQAndroid.cpp \
         src/main.cpp \
         src/VSQApplication.cpp \
         src/ui/VSQUiHelper.cpp \
         src/KeyboardEventFilter.cpp \
         src/Validator.cpp \
+        src/Core.cpp \
+        # Controllers
+        src/controllers/AttachmentsController.cpp \
+        src/controllers/ChatsController.cpp \
+        src/controllers/Controllers.cpp \
+        src/controllers/FileCloudController.cpp \
+        src/controllers/MessagesController.cpp \
+        src/controllers/UsersController.cpp \
         # Applications states
         src/states/AccountSelectionState.cpp \
         src/states/AccountSettingsState.cpp \
@@ -194,16 +238,63 @@ SOURCES += \
         src/states/ChatListState.cpp \
         src/states/ChatState.cpp \
         src/states/DownloadKeyState.cpp \
+        src/states/FileCloudState.cpp \
         src/states/NewChatState.cpp \
         src/states/SignInAsState.cpp \
         src/states/SignInState.cpp \
         src/states/SignInUsernameState.cpp \
         src/states/SignUpState.cpp \
         src/states/SplashScreenState.cpp \
+        # Database
+        src/database/core/Database.cpp \
+        src/database/core/DatabaseTable.cpp \
+        src/database/core/DatabaseUtils.cpp \
+        src/database/core/Migration.cpp \
+        src/database/core/Patch.cpp \
+        src/database/core/ScopedConnection.cpp \
+        src/database/core/ScopedTransaction.cpp \
+        src/database/AttachmentsTable.cpp \
+        src/database/ContactsTable.cpp \
+        src/database/ChatsTable.cpp \
+        src/database/MessagesTable.cpp \
+        src/database/UserDatabase.cpp \
+        src/database/UserDatabaseMigration.cpp \
         # Logging
         src/hal.cpp \
         src/logging/VSQLogging.cpp \
-        src/logging/VSQLogWorker.cpp
+        src/logging/VSQLogWorker.cpp \
+        # Models
+        src/models/AccountSelectionModel.cpp \
+        src/models/AttachmentsModel.cpp \
+        src/models/ChatsModel.cpp \
+        src/models/FileCloudModel.cpp \
+        src/models/FileLoader.cpp \
+        src/models/ListModel.cpp \
+        src/models/MessagesModel.cpp \
+        src/models/MessagesQueue.cpp \
+        src/models/Models.cpp \
+        # Operations
+        src/operations/CalculateAttachmentFingerprintOperation.cpp \
+        src/operations/CalculateFileFingerprintOperation.cpp \
+        src/operations/ConvertToPngOperation.cpp \
+        src/operations/CreateAttachmentPreviewOperation.cpp \
+        src/operations/CreateAttachmentThumbnailOperation.cpp \
+        src/operations/CreateThumbnailOperation.cpp \
+        src/operations/DecryptFileOperation.cpp \
+        src/operations/DownloadAttachmentOperation.cpp \
+        src/operations/DownloadFileOperation.cpp \
+        src/operations/DownloadDecryptFileOperation.cpp \
+        src/operations/EncryptFileOperation.cpp \
+        src/operations/EncryptUploadFileOperation.cpp \
+        src/operations/LoadAttachmentOperation.cpp \
+        src/operations/LoadFileOperation.cpp \
+        src/operations/MessageOperation.cpp \
+        src/operations/MessageOperationFactory.cpp \
+        src/operations/NetworkOperation.cpp \
+        src/operations/Operation.cpp \
+        src/operations/SendMessageOperation.cpp \
+        src/operations/UploadAttachmentOperation.cpp \
+        src/operations/UploadFileOperation.cpp
 
 #
 #   Resources
@@ -229,8 +320,10 @@ INCLUDEPATH += \
 #   Sparkle framework
 #
 macx: {
+    HEADERS += include/macos/VSQMacos.h
     OBJECTIVE_SOURCES += src/macos/VSQMacos.mm
-    DEFINES += MACOS=1
+    DEFINES += VS_MACOS=1
+
     SPARKLE_LOCATION=$$PREBUILT_PATH/$${OS_NAME}/sparkle
     message("SPARKLE LOCATION = $$SPARKLE_LOCATION")
     QMAKE_LFLAGS  += -F$$SPARKLE_LOCATION
@@ -296,7 +389,7 @@ message("ANDROID_TARGET_ARCH = $$ANDROID_TARGET_ARCH")
 #
 
 linux:!android {
-    DEFINES += VS_DESKTOP=1
+    DEFINES += VS_DESKTOP=1 VS_LINUX=1
     QT += widgets
 }
 
@@ -351,6 +444,11 @@ ios: {
     QMAKE_MAC_XCODE_SETTINGS += PUSH_NOTIFICATIONS_ENTITLEMENTS
 
     DISTFILES += generated/platforms/ios/Entitlements/VirgilMessenger.entitlements
+}
+
+isEqual(OS_NAME, "ios-sim"): {
+    message("IOS simulator")
+    DEFINES += VS_IOS_SIMULATOR=1
 }
 
 
@@ -472,4 +570,7 @@ android: {
 
 
 OTHER_FILES += \
-    .gitignore
+    .gitignore \
+    VERSION_CORE \
+    VERSION_MESSENGER \
+    VERSION_DATABASE_SCHEME

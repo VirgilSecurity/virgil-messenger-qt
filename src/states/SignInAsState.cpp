@@ -34,7 +34,7 @@
 
 #include "states/SignInAsState.h"
 
-using namespace VSQ;
+using namespace vm;
 
 QString SignInAsState::userId() const
 {

@@ -34,28 +34,17 @@
 
 #include "states/ChatListState.h"
 
-#include "VSQMessenger.h"
+#include "controllers/ChatsController.h"
 
-using namespace VSQ;
+using namespace vm;
 
-ChatListState::ChatListState(VSQMessenger *messenger, QState *parent)
+ChatListState::ChatListState(ChatsController *chatsController, QState *parent)
     : QState(parent)
-    , m_messenger(messenger)
+    , m_chatsController(chatsController)
 {
-    connect(this, &ChatListState::signOut, m_messenger, &VSQMessenger::signOut);
-    connect(m_messenger, &VSQMessenger::signedOut, this, &ChatListState::signedOut);
 }
 
-QString ChatListState::userId() const
+void ChatListState::onEntry(QEvent *)
 {
-    return m_userId;
-}
-
-void ChatListState::setUserId(const QString &userId)
-{
-    if (m_userId == userId) {
-        return;
-    }
-    m_userId = userId;
-    emit userIdChanged(userId);
+    m_chatsController->closeChat();
 }

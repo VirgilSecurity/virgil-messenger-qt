@@ -39,6 +39,7 @@
 #include <VSQCommon.h>
 #include <VSQClipboardProxy.h>
 #include <VSQCustomer.h>
+#include <Utils.h>
 #include <logging/VSQLogging.h>
 #include <ui/VSQUiHelper.h>
 
@@ -64,19 +65,41 @@ VSQApplication::VSQApplication()
     : m_settings(this)
     , m_networkAccessManager(new QNetworkAccessManager(this))
     , m_crashReporter(&m_settings, m_networkAccessManager, this)
-    , m_engine()
+    , m_engine(new QQmlApplicationEngine(this))
     , m_validator(new Validator(this))
-    , m_messenger(m_networkAccessManager, &m_settings, m_validator)
+    , m_messenger(&m_settings, m_validator)
+    , m_userDatabase(new UserDatabase(m_settings.databaseDir(), nullptr))
+    , m_models(&m_messenger, &m_settings, m_userDatabase, m_networkAccessManager, this)
+    , m_databaseThread(new QThread())
+    , m_controllers(&m_messenger, &m_settings, &m_models, m_userDatabase, this)
     , m_keyboardEventFilter(new KeyboardEventFilter(this))
-    , m_applicationStateManager(&m_messenger, m_validator, &m_settings, this)
+    , m_applicationStateManager(&m_messenger, &m_controllers, &m_models, m_validator, &m_settings, this)
 {
     m_settings.print();
     m_networkAccessManager->setAutoDeleteReplies(true);
-#if (MACOS)
+
+    registerCommonMetaTypes();
+    qRegisterMetaType<KeyboardEventFilter *>("KeyboardEventFilter*");
+
+    connect(&m_models, &Models::notificationCreated, this, &VSQApplication::notificationCreated);
+    connect(&m_controllers, &Controllers::notificationCreated, this, &VSQApplication::notificationCreated);
+
+    QThread::currentThread()->setObjectName("MainThread");
+    m_userDatabase->moveToThread(m_databaseThread);
+    m_databaseThread->setObjectName("DatabaseThread");
+    m_databaseThread->start();
+
+#ifdef VS_MACOS
     VSQMacos::instance().startUpdatesTimer();
 #endif
-    registerMetaTypes();
-    qRegisterMetaType<KeyboardEventFilter *>("KeyboardEventFilter*");
+}
+
+VSQApplication::~VSQApplication()
+{
+    m_databaseThread->quit();
+    m_databaseThread->wait();
+    delete m_userDatabase;
+    delete m_databaseThread;
 }
 
 /******************************************************************************/
@@ -112,10 +135,10 @@ VSQApplication::run(const QString &basePath, VSQLogging *logging) {
     } else {
         url = "file://" + basePath + "/qml/";
     }
-    m_engine.setBaseUrl(url);
-    m_engine.addImportPath(url.toString());
+    m_engine->setBaseUrl(url);
+    m_engine->addImportPath(url.toString());
 
-    QQmlContext *context = m_engine.rootContext();
+    QQmlContext *context = m_engine->rootContext();
     context->setContextProperty("UiHelper", &uiHelper);
     context->setContextProperty("app", this);
     context->setContextProperty("clipboard", new VSQClipboardProxy(QGuiApplication::clipboard()));
@@ -123,8 +146,8 @@ VSQApplication::run(const QString &basePath, VSQLogging *logging) {
     context->setContextProperty("logging", logging);
     context->setContextProperty("crashReporter", &m_crashReporter);
     context->setContextProperty("settings", &m_settings);
-    context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
-    context->setContextProperty("ChatModel", &m_messenger.getChatModel());
+    context->setContextProperty("controllers", &m_controllers);
+    context->setContextProperty("models", &m_models);
 
     QFont fon(QGuiApplication::font());
     fon.setPointSize(1.5 * QGuiApplication::font().pointSize());
@@ -139,28 +162,22 @@ VSQApplication::run(const QString &basePath, VSQLogging *logging) {
     notifications::android::FirebaseListener::instance().init();
 #endif
 
-    return QGuiApplication::instance()->exec();
+    const auto result = QGuiApplication::instance()->exec();
+    m_engine.reset(); // Engine must be deleted first since it uses most classes
+    return result;
 }
 
 /******************************************************************************/
 void VSQApplication::reloadQml() {
     const QUrl url(QStringLiteral("main.qml"));
-    m_engine.clearComponentCache();
-    m_engine.load(url);
-
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_WATCHOS)
-    {
-        QObject *rootObject(m_engine.rootObjects().first());
-// ERROR NULL POINTER !!!
-//        rootObject->setProperty("width", 800);
-//        rootObject->setProperty("height", 640);
-    }
-#endif
+    m_engine->clearComponentCache();
+    m_engine->load(url);
 }
 
 /******************************************************************************/
-void VSQApplication::checkUpdates() {
-#if (MACOS)
+void VSQApplication::checkUpdates()
+{
+#ifdef VS_MACOS
     VSQMacos::instance().checkUpdates();
 #endif
 }
@@ -179,6 +196,15 @@ QString VSQApplication::organizationDisplayName() const
 QString VSQApplication::applicationDisplayName() const
 {
     return Customer::ApplicationDisplayName;
+}
+
+bool VSQApplication::isIosSimulator() const
+{
+#ifdef VS_IOS_SIMULATOR
+    return true;
+#else
+    return false;
+#endif
 }
 
 /******************************************************************************/

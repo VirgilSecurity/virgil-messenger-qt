@@ -37,7 +37,7 @@
 #include <QGuiApplication>
 #include <QQuickItem>
 
-using namespace VSQ;
+using namespace vm;
 
 KeyboardEventFilter::KeyboardEventFilter(QObject *parent)
     : QObject(parent)

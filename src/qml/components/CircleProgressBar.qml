@@ -9,6 +9,7 @@ Item {
     property int lineWidth: 4
     property real value: 0
     property real maxValue: 0
+    property bool animated: false
 
     property color primaryColor: "#29b6f6"
     property color secondaryColor: "#ffffff"
@@ -32,6 +33,14 @@ Item {
 
         onDegreeChanged: {
             requestPaint();
+        }
+
+        RotationAnimation on rotation {
+            loops: Animation.Infinite
+            from: 0
+            to: 360
+            duration: 2000
+            running: root.animated
         }
 
         onPaint: {

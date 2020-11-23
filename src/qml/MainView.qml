@@ -21,16 +21,15 @@ Control {
         spacing: 0
         clip: logControl.visible
 
-        ServersPanel {
-            id: serversPanel
-            visible: [manager.chatListState, manager.newChatState, manager.accountSettingsState].includes(manager.currentState)
+        SidebarPanel {
+            visible: [manager.chatListState, manager.fileCloudState].includes(manager.currentState)
             z: 2
             Layout.preferredWidth: 60
             Layout.fillHeight: true
 
             Action {
                 text: qsTr("Settings")
-                onTriggered: manager.chatListState.requestAccountSettings(manager.chatListState.userId)
+                onTriggered: controllers.users.requestAccountSettings(controllers.users.userId)
             }
 
             MenuSeparator {
@@ -39,7 +38,7 @@ Control {
 
             Action {
                 text: qsTr("Sign Out")
-                onTriggered: manager.chatListState.signOut()
+                onTriggered: controllers.users.signOut()
             }
         }
 
@@ -76,6 +75,9 @@ Control {
             if (attachmentPreview.visible) {
                 attachmentPreview.visible = false
             }
+            else if (manager.currentState === manager.fileCloudState) {
+                controllers.fileCloud.cdUp()
+            }
             else {
                 stackView.pop()
             }
@@ -94,14 +96,14 @@ Control {
 
         function openChatListPage() {
             if ([manager.splashScreenState, manager.accountSelectionState,
-                 manager.signUpState, manager.downloadKeyState].includes(manager.previousState)) {
+                 manager.signUpState, manager.downloadKeyState, manager.fileCloudState].includes(manager.previousState)) {
                 stackView.clear()
-                stackView.push(page("ChatList"))
+                stackView.push(page("Main"))
             }
         }
 
         function openAccountSettingsPage() {
-            if (manager.previousState !== manager.chatListState) {
+            if (![manager.chatListState, manager.fileCloudState, manager.newChatState].includes(manager.previousState)) {
                 return
             }
             stackView.push(page("AccountSettings"), StackView.Transition)
@@ -117,6 +119,7 @@ Control {
             }
             const replace = [manager.newChatState, manager.downloadKeyState].includes(manager.previousState)
             var push = replace ? stackView.replace : stackView.push
+            console.log("Opening of QML chat page...")
             push(page("Chat"), StackView.Transition)
         }
 

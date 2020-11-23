@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_APPLICATIONSTATEMANAGER_H
-#define VSQ_APPLICATIONSTATEMANAGER_H
+#ifndef VM_APPLICATIONSTATEMANAGER_H
+#define VM_APPLICATIONSTATEMANAGER_H
 
 #include <QStateMachine>
 
@@ -44,6 +44,7 @@
 #include "ChatListState.h"
 #include "ChatState.h"
 #include "DownloadKeyState.h"
+#include "FileCloudState.h"
 #include "NewChatState.h"
 #include "SignInAsState.h"
 #include "SignInUsernameState.h"
@@ -55,8 +56,11 @@
 
 Q_DECLARE_LOGGING_CATEGORY(lcAppState);
 
-namespace VSQ
+namespace vm
 {
+class Controllers;
+class Models;
+
 class ApplicationStateManager : public QStateMachine
 {
     Q_OBJECT
@@ -67,6 +71,7 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(ChatListState *chatListState MEMBER m_chatListState CONSTANT)
     Q_PROPERTY(ChatState *chatState MEMBER m_chatState CONSTANT)
     Q_PROPERTY(DownloadKeyState *downloadKeyState MEMBER m_downloadKeyState CONSTANT)
+    Q_PROPERTY(FileCloudState *fileCloudState MEMBER m_fileCloudState CONSTANT)
     Q_PROPERTY(NewChatState *newChatState MEMBER m_newChatState CONSTANT)
     Q_PROPERTY(SignInAsState *signInAsState MEMBER m_signInAsState CONSTANT)
     Q_PROPERTY(SignInUsernameState *signInUsernameState MEMBER m_signInUsernameState CONSTANT)
@@ -77,20 +82,26 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(QState *previousState MEMBER m_previousState NOTIFY previousStateChanged)
 
 public:
-    explicit ApplicationStateManager(VSQMessenger *messenger, Validator *validator, VSQSettings *settings, QObject *parent);
+    ApplicationStateManager(VSQMessenger *messenger, Controllers *controllers, Models *models,
+                            Validator *validator, Settings *settings, QObject *parent);
     ~ApplicationStateManager() override;
 
 signals:
     void setUiState();
     void goBack();
+    void openChatList();
+    void openFileCloud();
 
     void currentStateChanged(QState *);
     void previousStateChanged(QState *);
 
     void splashScreenRequested(QPrivateSignal);
+    void chatListRequested(QPrivateSignal);
+    void fileCloudRequested(QPrivateSignal);
 
 private:
     void registerStatesMetaTypes();
+    void addConnections();
     void addTransitions();
 
     template <typename Func>
@@ -104,8 +115,9 @@ private:
     void setPreviousState(QState *state);
 
     VSQMessenger *m_messenger;
+    Controllers *m_controllers;
     Validator *m_validator;
-    VSQSettings *m_settings;
+    Settings *m_settings;
 
     AccountSelectionState *m_accountSelectionState;
     AccountSettingsState *m_accountSettingsState;
@@ -114,6 +126,7 @@ private:
     ChatListState *m_chatListState;
     ChatState *m_chatState;
     DownloadKeyState *m_downloadKeyState;
+    FileCloudState *m_fileCloudState;
     NewChatState *m_newChatState;
     SignInAsState *m_signInAsState;
     SignInUsernameState *m_signInUsernameState;
@@ -126,4 +139,4 @@ private:
 };
 }
 
-#endif // VSQ_APPLICATIONSTATEMANAGER_H
+#endif // VM_APPLICATIONSTATEMANAGER_H

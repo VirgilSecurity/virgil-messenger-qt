@@ -39,17 +39,19 @@
 #include <QXmppClient.h>
 #include <QXmppRosterManager.h>
 
-#include "VSQSettings.h"
-#include "VSQUtils.h"
+#include "Settings.h"
+#include "Utils.h"
 
-VSQLastActivityManager::VSQLastActivityManager(VSQSettings *settings, QObject *parent)
+using namespace vm;
+
+VSQLastActivityManager::VSQLastActivityManager(Settings *settings, QObject *parent)
     : QXmppClientExtension()
     , m_settings(settings)
 {
     setParent(parent);
     connect(this, &VSQLastActivityManager::lastActivityMissing, this, &VSQLastActivityManager::lastActivityTextChanged);
     connect(this, &VSQLastActivityManager::lastActivityDetected, this, [this](const Seconds &seconds) {
-        emit lastActivityTextChanged(VSQUtils::formattedLastSeenActivity(seconds, m_settings->lastSeenActivityInterval()));
+        emit lastActivityTextChanged(vm::Utils::formattedLastSeenActivity(seconds, m_settings->nowInterval()));
     });
     connect(this, &VSQLastActivityManager::errorOccured, this, &VSQLastActivityManager::onErrorOccured);
 }
@@ -94,7 +96,7 @@ bool VSQLastActivityManager::handleStanza(const QDomElement &element)
             emit lastActivityDetected(lastActivityIq.seconds());
         }
         else if (lastActivityIq.needSubscription()) {
-            emit lastActivityMissing(VSQUtils::formattedLastSeenNoActivity());
+            emit lastActivityMissing(vm::Utils::formattedLastSeenNoActivity());
         }
         else {
             emit errorOccured(tr("Failed to find last activity"));
@@ -141,7 +143,7 @@ void VSQLastActivityManager::startUpdates(bool reset)
     if (canStart()) {
         m_debugCounter = 3; // debug few records only
         requestInfo();
-        m_timerId = startTimer(m_settings->lastSeenActivityInterval() * 1000);
+        m_timerId = startTimer(m_settings->nowInterval() * 1000);
         if (m_timerId == 0) {
             emit errorOccured(tr("Failed to start timer"));
         }

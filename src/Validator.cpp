@@ -34,7 +34,7 @@
 
 #include "Validator.h"
 
-using namespace VSQ;
+using namespace vm;
 
 Validator::Validator(QObject *parent)
     : QObject(parent)

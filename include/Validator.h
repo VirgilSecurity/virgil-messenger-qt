@@ -32,15 +32,15 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_VALIDATOR_H
-#define VSQ_VALIDATOR_H
+#ifndef VM_VALIDATOR_H
+#define VM_VALIDATOR_H
 
 #include <QObject>
 #include <QRegExpValidator>
 
 #include "VSQCommon.h"
 
-namespace VSQ
+namespace vm
 {
 class Validator : public QObject
 {
@@ -62,4 +62,4 @@ private:
 };
 }
 
-#endif // VSQ_VALIDATOR_H
+#endif // VM_VALIDATOR_H

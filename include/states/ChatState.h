@@ -32,47 +32,41 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_CHATSTATE_H
-#define VSQ_CHATSTATE_H
+#ifndef VM_CHATSTATE_H
+#define VM_CHATSTATE_H
 
 #include <QState>
 
 #include "VSQCommon.h"
 
-class VSQMessenger;
+class VSQLastActivityManager;
 
-namespace VSQ
+namespace vm
 {
+class Controllers;
+
 class ChatState : public QState
 {
     Q_OBJECT
-    Q_PROPERTY(QString contactId READ contactId WRITE setContactId NOTIFY contactIdChanged)
     Q_PROPERTY(QString lastActivityText READ lastActivityText WRITE setLastActivityText NOTIFY lastActivityTextChanged)
 
 public:
-    ChatState(VSQMessenger *messenger, QState *parent);
-
-    QString contactId() const;
-    void setContactId(const QString &contactId);
+    ChatState(Controllers *controllers, VSQLastActivityManager *lastActivityManager, QState *parent);
 
     QString lastActivityText() const;
     void setLastActivityText(const QString &text);
 
 signals:
-    void sendMessage(const QString &to, const QString &message, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
-    void downloadAttachment(const QString &messageId);
-    void openAttachment(const QString &messageId);
-    void saveAttachmentAs(const QString &messageId, const QVariant &fileUrl);
     void requestPreview(const QUrl &url);
-    void contactIdChanged(const QString &contactId);
     void lastActivityTextChanged(const QString &text);
     void messageSent();
 
 private:
-    VSQMessenger *m_messenger;
-    QString m_contactId;
+    void onMessageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);
+
+    Controllers *m_controllers;
     QString m_lastActivityText;
 };
 }
 
-#endif // VSQ_CHATSTATE_H
+#endif // VM_CHATSTATE_H

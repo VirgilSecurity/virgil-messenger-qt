@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_KEYBOARDEVENTFILTER_H
-#define VSQ_KEYBOARDEVENTFILTER_H
+#ifndef VM_KEYBOARDEVENTFILTER_H
+#define VM_KEYBOARDEVENTFILTER_H
 
 #include <QObject>
 #include <QRectF>
@@ -41,7 +41,7 @@
 class QInputMethod;
 class QQuickItem;
 
-namespace VSQ
+namespace vm
 {
 class KeyboardEventFilter : public QObject
 {
@@ -67,4 +67,4 @@ private:
 };
 }
 
-#endif // VSQ_KEYBOARDEVENTFILTER_H
+#endif // VM_KEYBOARDEVENTFILTER_H
