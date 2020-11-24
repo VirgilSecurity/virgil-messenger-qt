@@ -55,15 +55,13 @@ MessagesQueue::MessagesQueue(const Settings *settings, VSQMessenger *messenger, 
 {
     setName(QLatin1String("MessageQueue"));
     setRepeatable(true);
-    connect(this, &Operation::finished, []() {
-        qCDebug(lcModel) << "MessageQueue is finished";
-    });
 
     connect(this, &MessagesQueue::setUserId, this, &MessagesQueue::onSetUserId);
     connect(this, &MessagesQueue::pushMessage, this, &MessagesQueue::onPushMessage);
     connect(this, &MessagesQueue::pushMessageDownload, this, &MessagesQueue::onPushMessageDownload);
     connect(this, &MessagesQueue::pushMessagePreload, this, &MessagesQueue::onPushMessagePreload);
     connect(fileLoader, &FileLoader::serviceFound, this, &MessagesQueue::onFileLoaderServiceFound);
+    connect(this, &Operation::finished, this, &MessagesQueue::onFinished);
 }
 
 MessagesQueue::~MessagesQueue()
@@ -78,6 +76,16 @@ void MessagesQueue::startIfReady()
     if (m_queueState & QueueState::ReadyToStart) {
         start();
     }
+}
+
+void MessagesQueue::scheduleStartIfReady()
+{
+    QTimer::singleShot(2000, this, &MessagesQueue::startIfReady);
+}
+
+void MessagesQueue::setupRestartOnFail(MessageOperation *operation)
+{
+    connect(operation, &MessageOperation::failedOnce, this, &MessagesQueue::scheduleStartIfReady);
 }
 
 void MessagesQueue::setQueueState(const MessagesQueue::QueueState &state)
@@ -150,6 +158,11 @@ void MessagesQueue::onNotSentMessagesFetched(const GlobalMessages &messages)
     startIfReady();
 }
 
+void MessagesQueue::onFinished()
+{
+    qCDebug(lcModel) << "MessageQueue is finished";
+}
+
 void MessagesQueue::onPushMessage(const GlobalMessage &message)
 {
     auto op = pushMessageOperation(message);
@@ -169,10 +182,7 @@ void MessagesQueue::onPushMessagePreload(const GlobalMessage &message)
 {
     auto op = pushMessageOperation(message, true);
     m_factory->populatePreload(op);
-    connect(op, &Operation::failed, this, [=]() {
-        // TODO(fpohtmeh): refactor?
-        QTimer::singleShot(2000, this, &MessagesQueue::startIfReady);
-    });
+    setupRestartOnFail(op);
     startIfReady();
 }
 
