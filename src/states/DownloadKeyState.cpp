@@ -34,25 +34,26 @@
 
 #include "states/DownloadKeyState.h"
 
-#include "VSQMessenger.h"
+#include "controllers/UsersController.h"
 
-using namespace VSQ;
+using namespace vm;
 
-DownloadKeyState::DownloadKeyState(VSQMessenger *messenger, QState *parent)
-    : OperationState(parent), m_messenger(messenger) {
-    connect(m_messenger, &VSQMessenger::keyDownloaded, this, &DownloadKeyState::operationFinished);
-    connect(m_messenger, &VSQMessenger::downloadKeyFailed, this, &DownloadKeyState::operationErrorOccurred);
-    connect(m_messenger, &VSQMessenger::keyDownloaded, this, &DownloadKeyState::keyDownloaded);
+DownloadKeyState::DownloadKeyState(UsersController *usersController, QState *parent)
+    : OperationState(parent)
+    , m_usersController(usersController)
+{
+    connect(usersController, &UsersController::keyDownloaded, this, &DownloadKeyState::operationFinished);
+    connect(usersController, &UsersController::downloadKeyFailed, this, &DownloadKeyState::operationErrorOccurred);
     connect(this, &DownloadKeyState::downloadKey, this, &DownloadKeyState::processDownloadKey);
 }
 
-QString
-DownloadKeyState::userId() const {
+QString DownloadKeyState::userId() const
+{
     return m_userId;
 }
 
-void
-DownloadKeyState::setUserId(const QString &userId) {
+void DownloadKeyState::setUserId(const QString &userId)
+{
     if (m_userId == userId) {
         return;
     }
@@ -60,8 +61,8 @@ DownloadKeyState::setUserId(const QString &userId) {
     emit userIdChanged(userId);
 }
 
-void
-DownloadKeyState::processDownloadKey(const QString &password) {
+void DownloadKeyState::processDownloadKey(const QString &password)
+{
     emit operationStarted();
-    m_messenger->downloadKey(m_userId, password);
+    m_usersController->downloadKey(m_userId, password);
 }

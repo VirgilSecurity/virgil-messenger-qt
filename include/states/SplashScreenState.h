@@ -32,34 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SPLASHSCREENSTATE_H
-#define VSQ_SPLASHSCREENSTATE_H
+#ifndef VM_SPLASHSCREENSTATE_H
+#define VM_SPLASHSCREENSTATE_H
 
 #include "SignInState.h"
 
-class VSQSettings;
+class Settings;
 
-namespace VSQ {
-class SplashScreenState : public SignInState {
+namespace vm
+{
+class SplashScreenState : public SignInState
+{
     Q_OBJECT
 
 public:
-    SplashScreenState(VSQMessenger *messenger, Validator *validator, VSQSettings *settings, QState *parent);
+    SplashScreenState(UsersController *usersController, Validator *validator, Settings *settings, QState *parent);
 
 signals:
-    void
-    userNotSelected();
+    void userNotSelected();
 
 private:
-    void
-    onEntry(QEvent *) override;
-    void
-    trySignIn();
-    void
-    hideNativeSplashScreen();
+    void onEntry(QEvent *) override;
+    void trySignIn();
+    void hideNativeSplashScreen();
 
-    VSQSettings *m_settings;
+    Settings *m_settings;
 };
-} // namespace VSQ
+}
 
-#endif // VSQ_SPLASHSCREENSTATE_H
+#endif // VM_SPLASHSCREENSTATE_H

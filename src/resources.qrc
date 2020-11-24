@@ -4,9 +4,9 @@
         <file>qml/pages/AccountSelectionPage.qml</file>
         <file>qml/pages/AccountSettingsPage.qml</file>
         <file>qml/pages/BackupKeyPage.qml</file>
-        <file>qml/pages/ChatListPage.qml</file>
         <file>qml/pages/ChatPage.qml</file>
         <file>qml/pages/DownloadKeyPage.qml</file>
+        <file>qml/pages/MainPage.qml</file>
         <file>qml/pages/NewChatPage.qml</file>
         <file>qml/pages/OperationPage.qml</file>
         <file>qml/pages/PasswordResetPage.qml</file>
@@ -66,7 +66,7 @@
         <file>qml/components/Avatar.qml</file>
         <file>qml/components/ChatMessage.qml</file>
         <file>qml/components/MessageCounter.qml</file>
-        <file>qml/components/ContactsHeader.qml</file>
+        <file>qml/components/SearchHeader.qml</file>
         <file>qml/components/Header.qml</file>
         <file>qml/components/ContextMenu.qml</file>
         <file>qml/components/ImageButton.qml</file>
@@ -77,7 +77,7 @@
         <file>qml/components/FormSubtitle.qml</file>
         <file>qml/resources/icons/Key.png</file>
         <file>qml/resources/icons/Key@2x.png</file>
-        <file>qml/components/ServersPanel.qml</file>
+        <file>qml/components/SidebarPanel.qml</file>
         <file>qml/resources/icons/Menu.png</file>
         <file>qml/resources/icons/Menu@2x.png</file>
         <file>qml/components/ServerButton.qml</file>
@@ -116,5 +116,31 @@
         <file>qml/components/TextScrollView.qml</file>
         <file>qml/components/AttachmentPicker.qml</file>
         <file>qml/components/LogControl.qml</file>
+        <file>qml/components/ListDelegate.qml</file>
+        <file>qml/components/ModelListView.qml</file>
+        <file>qml/components/Dialogs/TemplateDialog.qml</file>
+        <!-- Database -->
+        <file>resources/database/createAttachments.sql</file>
+        <file>resources/database/createChats.sql</file>
+        <file>resources/database/createContacts.sql</file>
+        <file>resources/database/createMessages.sql</file>
+        <file>resources/database/checkChatByContact.sql</file>
+        <file>resources/database/initUser.sql</file>
+        <file>resources/database/insertAttachment.sql</file>
+        <file>resources/database/insertChat.sql</file>
+        <file>resources/database/insertMessage.sql</file>
+        <file>resources/database/markMessagesAsRead.sql</file>
+        <file>resources/database/selectChats.sql</file>
+        <file>resources/database/selectChatMessages.sql</file>
+        <file>resources/database/selectNotSentMessages.sql</file>
+        <file>resources/database/resetUnreadCount.sql</file>
+        <file>resources/database/updateAttachmentEncryptedSize.sql</file>
+        <file>resources/database/updateAttachmentExtras.sql</file>
+        <file>resources/database/updateAttachmentStatus.sql</file>
+        <file>resources/database/updateAttachmentUrl.sql</file>
+        <file>resources/database/updateAttachmentLocalPath.sql</file>
+        <file>resources/database/updateAttachmentFingerprint.sql</file>
+        <file>resources/database/updateLastMessage.sql</file>
+        <file>resources/database/updateMessageStatus.sql</file>
     </qresource>
 </RCC>

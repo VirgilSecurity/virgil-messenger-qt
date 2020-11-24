@@ -42,46 +42,36 @@
 class QNetworkAccessManager;
 class QNetworkReply;
 
-class VSQSettings;
+class Settings;
 
 Q_DECLARE_LOGGING_CATEGORY(lcCrashReporter)
 
-class VSQCrashReporter : public QObject {
+class VSQCrashReporter : public QObject
+{
     Q_OBJECT
 
 public:
-    VSQCrashReporter(VSQSettings *settings, QNetworkAccessManager *networkAccessManager, QObject *parent);
+    VSQCrashReporter(Settings *settings, QNetworkAccessManager *networkAccessManager, QObject *parent);
     virtual ~VSQCrashReporter();
 
-    void
-    checkAppCrash();
-    Q_INVOKABLE bool
-    sendLogFiles();
+    void checkAppCrash();
+    Q_INVOKABLE bool sendLogFiles();
 
-    void
-    setVirgilUrl(QString VirgilUrl);
-    void
-    setkVersion(QString AppVersion);
-    void
-    setkOrganization(QString strkOrganization);
-    void
-    setkApp(QString strkApp);
+    void setVirgilUrl(QString VirgilUrl);
+    void setkVersion(QString AppVersion);
+    void setkOrganization(QString strkOrganization);
+    void setkApp(QString strkApp);
 
 signals:
-    void
-    crashReportRequested();
-    void
-    reportSent(const QString &msg);
-    void
-    reportErrorOccurred(const QString &msg);
+    void crashReportRequested();
+    void reportSent(const QString &msg);
+    void reportErrorOccurred(const QString &msg);
 
 private:
-    bool
-    sendFileToBackendRequest(QByteArray fileData);
-    void
-    endpointReply(QNetworkReply *reply);
+    bool sendFileToBackendRequest(QByteArray fileData);
+    void endpointReply(QNetworkReply *reply);
 
-    VSQSettings *m_settings;
+    Settings *m_settings;
     QNetworkAccessManager *m_manager;
     QString m_currentVirgilUrl;
     QString m_version;

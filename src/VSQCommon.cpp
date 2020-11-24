@@ -36,23 +36,47 @@
 
 #include <QtQml>
 
+#ifdef VS_DEVMODE
 Q_LOGGING_CATEGORY(lcDev, "dev");
+#endif
+Q_LOGGING_CATEGORY(lcModel, "model");
+Q_LOGGING_CATEGORY(lcController, "controller");
 
-void
-registerMetaTypes() {
+using namespace vm;
+
+void registerCommonMetaTypes()
+{
     qRegisterMetaType<Seconds>("Seconds");
     qRegisterMetaType<DataSize>("DataSize");
-    qRegisterMetaType<Enums::AttachmentType>();
-    qRegisterMetaType<Enums::AttachmentStatus>();
-    qRegisterMetaType<Enums::MessageStatus>();
-    qRegisterMetaType<Enums::MessageAuthor>();
-    qRegisterMetaType<Attachment>();
-    qRegisterMetaType<OptionalAttachment>();
-    qRegisterMetaType<StMessage>();
-    qmlRegisterUncreatableMetaObject(Enums::staticMetaObject,
-                                     "com.virgilsecurity.messenger",
-                                     1,
-                                     0,
-                                     "Enums",
-                                     "Not creatable as it is an enum type");
+    qRegisterMetaType<Enums::AttachmentType>("Enums::AttachmentType");
+    qRegisterMetaType<Enums::AttachmentStatus>("Enums::AttachmentStatus");
+    qRegisterMetaType<Enums::MessageStatus>("Enums::MessageStatus");
+
+    qRegisterMetaType<UserId>("UserId");
+    qRegisterMetaType<Jid>("Jid");
+    qRegisterMetaType<Contact::Id>("Contact::Id");
+    qRegisterMetaType<Attachment::Id>("Attachment::Id");
+    qRegisterMetaType<Attachment::Type>("Attachment::Type");
+    qRegisterMetaType<Attachment::Status>("Attachment::Status");
+    qRegisterMetaType<Message>("Message");
+    qRegisterMetaType<Message::Id>("Message::Id");
+    qRegisterMetaType<Message::Status>("Message::Status");
+    qRegisterMetaType<Messages>("Messages");
+    qRegisterMetaType<Chat>("Chat");
+    qRegisterMetaType<Chat::Id>("Chat::Id");
+    qRegisterMetaType<Chat::UnreadCount>("Chat::UnreadCount");
+    qRegisterMetaType<Chats>("Chats");
+    qRegisterMetaType<GlobalMessage>("GlobalMessage");
+    qRegisterMetaType<GlobalMessages>("GlobalMessages");
+
+    qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");
 }
+
+GlobalMessage::GlobalMessage(const Message &message, const UserId &userId, const Contact::Id &contactId,
+                             const Contact::Id &senderId, const Contact::Id &recipientId)
+    : Message(message)
+    , userId(userId)
+    , contactId(contactId)
+    , senderId(senderId)
+    , recipientId(recipientId)
+{}

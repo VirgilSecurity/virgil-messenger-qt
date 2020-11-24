@@ -18,6 +18,7 @@ Item {
             id: logControlTextArea
             width: mainView.width
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            textFormat: Text.RichText
             readOnly: true
             font.pointSize: Platform.isMobile ? 12 : 9
             selectByMouse: Platform.isDesktop

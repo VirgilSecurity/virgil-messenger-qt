@@ -32,24 +32,28 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_COMMON_H
-#define VSQ_COMMON_H
+#ifndef VM_COMMON_H
+#define VM_COMMON_H
 
 #include <functional>
 #include <memory>
 
 #include <QDateTime>
 #include <QFileInfo>
+#include <QImageIOHandler>
 #include <QLoggingCategory>
 #include <QSize>
 #include <QtGlobal>
 #include <QUrl>
+#include <QVariant>
 
 #include <thirdparty/optional/optional.hpp>
 
 namespace args {
-using namespace std::placeholders;
+    using namespace std::placeholders;
 }
+
+using Flag = qint64;
 
 using DataSize = qint64;
 Q_DECLARE_METATYPE(DataSize);
@@ -57,7 +61,8 @@ Q_DECLARE_METATYPE(DataSize);
 using Seconds = quint64;
 Q_DECLARE_METATYPE(Seconds);
 
-template <class Type> using Optional = tl::optional<Type>;
+template <class Type>
+using Optional = tl::optional<Type>;
 using OptionalType = tl::nullopt_t;
 
 static constexpr OptionalType NullOptional(tl::nullopt);
@@ -65,82 +70,160 @@ static constexpr OptionalType NullOptional(tl::nullopt);
 #ifdef VS_DEVMODE
 Q_DECLARE_LOGGING_CATEGORY(lcDev);
 #endif
+Q_DECLARE_LOGGING_CATEGORY(lcController);
+Q_DECLARE_LOGGING_CATEGORY(lcModel);
 
 // Namespace for passing of enum values to QML
 namespace Enums {
-Q_NAMESPACE
+    Q_NAMESPACE
 
-enum class AttachmentType { File, Picture, Video, Audio };
-Q_ENUM_NS(AttachmentType)
+    enum class AttachmentType
+    {
+        File,
+        Picture
+    };
+    Q_ENUM_NS(AttachmentType)
 
-enum class AttachmentStatus {
-    Created,
-    Loading,
-    Failed, // must be re-loaded
-    Loaded
+    enum class AttachmentStatus
+    {
+        Created,
+        Loading,
+        Loaded,
+        Interrupted, // must be re-loaded
+        Invalid // Can't be processed
+    };
+    Q_ENUM_NS(AttachmentStatus)
+
+    // NOTE(fpohtmeh): some statuses have suffix M to avoid QML collisions
+    // with AttachmentStatus
+    enum class MessageStatus
+    {
+        Created, // Created by user
+        Sent, // Sent by user
+        Delivered, // Delivered to contact / Sent by contact
+        Read, // Read by contact
+        Failed, // Failed to send by user
+        InvalidM // Can't be sent
+    };
+    Q_ENUM_NS(MessageStatus)
+}
+
+namespace vm
+{
+struct Contact
+{
+    enum class Type
+    {
+        Person,
+        Group
+    };
+
+    using Id = QString;
+
+    Id id;
+    Type type = Type::Person;
+    QString name;
+    QUrl avatarUrl;
 };
-Q_ENUM_NS(AttachmentStatus)
 
-enum class MessageAuthor {
-    // User is message author
-    User,
-    // Contact is message author
-    Contact
+using UserId = QString;
+using MessageId = QString;
+using ChatId = QString;
+using Jid = QString;
+
+struct PictureExtras
+{
+    QSize thumbnailSize;
+    QUrl thumbnailUrl;
+    QString thumbnailPath;
+    QString previewPath;
+    DataSize encryptedThumbnailSize = 0;
+
+    bool operator==(const PictureExtras &e) const
+    {
+        return thumbnailSize == e.thumbnailSize && previewPath == e.previewPath && thumbnailPath == e.thumbnailPath && encryptedThumbnailSize == e.encryptedThumbnailSize;
+    }
 };
-Q_ENUM_NS(MessageAuthor)
 
-enum class MessageStatus {
-    // Created by user
-    MST_CREATED,
-    // Sent by user
-    MST_SENT,
-    // Receiver by contact
-    MST_RECEIVED,
-    // Read by contact
-    MST_READ,
-    // Failed to send by user
-    MST_FAILED
-};
-Q_ENUM_NS(MessageStatus)
-} // namespace Enums
-
-struct Attachment {
+struct Attachment
+{
+    using Id = QString;
     using Type = Enums::AttachmentType;
     using Status = Enums::AttachmentStatus;
 
-    QString id;
+    Id id;
+    MessageId messageId;
     Type type = Type::File;
-    QString filePath; // raw
-    QString fileName;
-    QString displayName;
-    QUrl remoteUrl; // encrypted
-    // Thumbnail
-    QString thumbnailPath;   // raw
-    QUrl remoteThumbnailUrl; // encrypted
-    QSize thumbnailSize;
-    // Status
-    DataSize bytesTotal = 0;  // encrypted
-    DataSize bytesLoaded = 0; // encrypted
     Status status = Status::Created;
+    QString fileName;
+    DataSize size = 0;
+    DataSize encryptedSize = 0;
+    QString localPath;
+    QString fingerprint;
+    QUrl url;
+    QVariant extras;
+
+    DataSize processedSize = 0;
 };
-Q_DECLARE_METATYPE(Attachment)
 
-using OptionalAttachment = Optional<Attachment>;
-Q_DECLARE_METATYPE(OptionalAttachment)
-
-struct StMessage {
-    using Author = Enums::MessageAuthor;
+struct Message
+{
+    using Id = MessageId;
     using Status = Enums::MessageStatus;
 
-    QString messageId;
-    QString message;
-    QString sender;
-    QString recipient;
-    OptionalAttachment attachment;
+    Id id;
+    QDateTime timestamp;
+    ChatId chatId;
+    Contact::Id authorId;
+    Status status = Status::Created;
+    QString body;
+    Optional<Attachment> attachment;
 };
-Q_DECLARE_METATYPE(StMessage);
 
-void
-registerMetaTypes();
+using Messages = std::vector<Message>;
 
-#endif // VSQ_COMMON_H
+struct Chat
+{
+    using Id = QString;
+    using UnreadCount = quint32;
+
+    Id id;
+    QDateTime timestamp;
+    Contact::Id contactId;
+    Optional<Message> lastMessage;
+    UnreadCount unreadMessageCount = 0;
+};
+
+using Chats = std::vector<Chat>;
+
+struct GlobalMessage : Message
+{
+    using Message::Message;
+
+    GlobalMessage(const Message &message, const UserId &userId, const Contact::Id &contactId,
+                  const Contact::Id &senderId, const Contact::Id &recipientId);
+
+    UserId userId;
+    Contact::Id contactId;
+    Contact::Id senderId;
+    Contact::Id recipientId;
+};
+
+using GlobalMessages = std::vector<GlobalMessage>;
+}
+
+Q_DECLARE_METATYPE(vm::Contact::Type)
+Q_DECLARE_METATYPE(vm::PictureExtras)
+Q_DECLARE_METATYPE(vm::Attachment::Type)
+Q_DECLARE_METATYPE(vm::Attachment::Status)
+Q_DECLARE_METATYPE(vm::Message::Status)
+Q_DECLARE_METATYPE(vm::Message)
+Q_DECLARE_METATYPE(vm::Messages)
+Q_DECLARE_METATYPE(vm::Chat)
+Q_DECLARE_METATYPE(vm::Chats)
+Q_DECLARE_METATYPE(vm::GlobalMessage)
+Q_DECLARE_METATYPE(vm::GlobalMessages)
+
+void registerCommonMetaTypes();
+
+#endif // VM_COMMON_H

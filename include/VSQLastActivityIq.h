@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_LASTACTIVITYIQ_H
-#define VSQ_LASTACTIVITYIQ_H
+#ifndef VM_LASTACTIVITYIQ_H
+#define VM_LASTACTIVITYIQ_H
 
 #include <qxmpp/QXmppIq.h>
 
@@ -41,30 +41,24 @@
 
 Q_DECLARE_LOGGING_CATEGORY(lcLastActivity)
 
-class VSQLastActivityIq : public QXmppIq {
+class VSQLastActivityIq : public QXmppIq
+{
 public:
     VSQLastActivityIq() = default;
     explicit VSQLastActivityIq(bool debug);
     ~VSQLastActivityIq() = default;
 
-    bool
-    isValid() const;
-    Seconds
-    seconds() const;
+    bool isValid() const;
+    Seconds seconds() const;
 
-    bool
-    needSubscription() const;
+    bool needSubscription() const;
 
-    static bool
-    isLastActivityId(const QDomElement &element);
-    static QStringList
-    discoveryFeatures();
+    static bool isLastActivityId(const QDomElement &element);
+    static QStringList discoveryFeatures();
 
 protected:
-    void
-    parseElementFromChild(const QDomElement &element) override;
-    void
-    toXmlElementFromChild(QXmlStreamWriter *writer) const override;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
 
 private:
     bool m_debug = true;
@@ -72,4 +66,4 @@ private:
     Seconds m_seconds = 0;
 };
 
-#endif // VSQ_LASTACTIVITYIQ_H
+#endif // VM_LASTACTIVITYIQ_H

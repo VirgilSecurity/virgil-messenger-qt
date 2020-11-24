@@ -32,44 +32,30 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_CHATLISTSTATE_H
-#define VSQ_CHATLISTSTATE_H
+#ifndef VM_CHATLISTSTATE_H
+#define VM_CHATLISTSTATE_H
 
 #include <QState>
 
-class VSQMessenger;
+namespace vm
+{
+class ChatsController;
 
-namespace VSQ {
-class ChatListState : public QState {
+class ChatListState : public QState
+{
     Q_OBJECT
-    Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
 
 public:
-    ChatListState(VSQMessenger *messenger, QState *parent);
-
-    QString
-    userId() const;
-    void
-    setUserId(const QString &userId);
+    ChatListState(ChatsController *chatsController, QState *parent);
 
 signals:
-    void
-    signOut();
-    void
-    requestAccountSettings(const QString &userId);
-    void
-    requestNewChat();
-    void
-    requestChat(const QString &contactId);
-    void
-    signedOut();
-    void
-    userIdChanged(const QString &userId);
+    void requestNewChat();
 
 private:
-    VSQMessenger *m_messenger;
-    QString m_userId;
-};
-} // namespace VSQ
+    void onEntry(QEvent *) override;
 
-#endif // VSQ_CHATLISTSTATE_H
+    ChatsController *m_chatsController;
+};
+}
+
+#endif // VM_CHATLISTSTATE_H

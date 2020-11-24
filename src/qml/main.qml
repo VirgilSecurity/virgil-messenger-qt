@@ -3,7 +3,6 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Window 2.15
 import QtMultimedia 5.12
-import QuickFuture 1.0
 
 import "./components/Popups"
 import "./components/Dialogs"
@@ -14,7 +13,7 @@ import "theme"
 ApplicationWindow {
     id: root
     visible: true
-    title: app.applicationDisplayName
+    title: (!settings.devMode || !controllers.users.userId) ? app.applicationDisplayName : controllers.users.userId
 
     Binding on x {
         when: Platform.isDesktop;
@@ -44,35 +43,6 @@ ApplicationWindow {
         readonly property int height: 800
         readonly property int width: 600
         readonly property bool restore: settings.windowGeometry.width > 0 && settings.windowGeometry.height > 0
-    }
-
-    //
-    //  Connections
-    //
-    Connections {
-        target: Messenger
-
-        function onFireError() {
-        }
-
-        function onFireInform() {
-        }
-
-        function onFireWarning(text) {
-            showPopupError(text);
-        }
-
-        function onFireConnecting() {
-        }
-
-        function onFireReady() {
-        }
-
-        function onFireAddedContact() {
-        }
-
-        function onFireNewMessage() {
-        }
     }
 
     onClosing: {
@@ -107,7 +77,12 @@ ApplicationWindow {
         SendReportAsk {
             id: sendReportAsk
         }
+
+        AttachmentPicker {
+            id: attachmentPicker
+        }
     }
+
 
     // Show Popup message
     function showPopup(message, color, textColor, isOnTop, isModal) {
@@ -132,7 +107,14 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
-        Messenger.informationRequested.connect(showPopupInform)
+        app.notificationCreated.connect(function(text, error) {
+            if (error) {
+                showPopupError(text)
+            }
+            else {
+                showPopupInform(text)
+            }
+        })
         crashReporter.crashReportRequested.connect(sendReportAsk.open)
         crashReporter.reportSent.connect(showPopupSuccess)
         crashReporter.reportErrorOccurred.connect(showPopupError)

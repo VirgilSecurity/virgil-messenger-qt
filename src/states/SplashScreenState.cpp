@@ -36,32 +36,31 @@
 
 #include <QTimer>
 
-#include "VSQMessenger.h"
-#include "VSQSettings.h"
+#include "Settings.h"
 #include "android/VSQAndroid.h"
 
-using namespace VSQ;
+using namespace vm;
 
-SplashScreenState::SplashScreenState(VSQMessenger *messenger,
-                                     Validator *validator,
-                                     VSQSettings *settings,
-                                     QState *parent)
-    : SignInState(messenger, validator, parent), m_settings(settings) {
+SplashScreenState::SplashScreenState(UsersController *usersController, Validator *validator, Settings *settings, QState *parent)
+    : SignInState(usersController, validator, parent)
+    , m_settings(settings)
+{
 }
 
-void
-SplashScreenState::trySignIn() {
+void SplashScreenState::trySignIn()
+{
     hideNativeSplashScreen();
     const auto userId = m_settings->lastSignedInUserId();
     if (userId.isEmpty()) {
         emit userNotSelected();
-    } else {
+    }
+    else {
         signIn(userId);
     }
 }
 
-void
-SplashScreenState::onEntry(QEvent *) {
+void SplashScreenState::onEntry(QEvent *)
+{
     // Schedule sign-in
 #ifdef VS_ANDROID
     const auto interval = 100;
@@ -71,8 +70,8 @@ SplashScreenState::onEntry(QEvent *) {
     QTimer::singleShot(interval, this, &SplashScreenState::trySignIn);
 }
 
-void
-SplashScreenState::hideNativeSplashScreen() {
+void SplashScreenState::hideNativeSplashScreen()
+{
 #ifdef VS_ANDROID
     VSQAndroid::hideSplashScreen();
 #endif

@@ -32,39 +32,35 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SIGNINSTATE_H
-#define VSQ_SIGNINSTATE_H
+#ifndef VM_SIGNINSTATE_H
+#define VM_SIGNINSTATE_H
 
 #include "OperationState.h"
 
-class VSQMessenger;
-
-namespace VSQ {
+namespace vm
+{
 class Validator;
+class UsersController;
 
-class SignInState : public OperationState {
+class SignInState : public OperationState
+{
     Q_OBJECT
     Q_PROPERTY(QString userId MEMBER m_userId NOTIFY userIdChanged)
 
 public:
-    SignInState(VSQMessenger *messenger, Validator *validator, QState *parent);
+    SignInState(UsersController *usersController, Validator *validator, QState *parent);
 
 signals:
-    void
-    signIn(const QString &username);
-    void
-    signedIn(const QString &userId);
-    void
-    userIdChanged(const QString &userId);
+    void signIn(const QString &username);
+    void userIdChanged(const QString &userId);
 
 private:
-    void
-    processSignIn(const QString &username);
+    void processSignIn(const QString &username);
 
-    VSQMessenger *m_messenger;
+    UsersController *m_usersController;
     Validator *m_validator;
     QString m_userId;
 };
-} // namespace VSQ
+}
 
-#endif // VSQ_SIGNINSTATE_H
+#endif // VM_SIGNINSTATE_H

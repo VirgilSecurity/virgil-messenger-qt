@@ -32,16 +32,18 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_VALIDATOR_H
-#define VSQ_VALIDATOR_H
+#ifndef VM_VALIDATOR_H
+#define VM_VALIDATOR_H
 
 #include <QObject>
 #include <QRegExpValidator>
 
 #include "VSQCommon.h"
 
-namespace VSQ {
-class Validator : public QObject {
+namespace vm
+{
+class Validator : public QObject
+{
     Q_OBJECT
     Q_PROPERTY(QRegExpValidator *reUsername MEMBER m_reUsername CONSTANT)
 
@@ -50,16 +52,14 @@ public:
     ~Validator() override;
 
     // Returns username if it's valid or corrected version of username if it exists
-    Optional<QString>
-    validatedUsername(const QString &username, QString *errorText = 0);
+    Optional<QString> validatedUsername(const QString &username, QString *errorText = 0);
 
     // TODO(fpohtmeh): remove this method finally
-    QString
-    databaseUsername(const QString &username);
+    QString databaseUsername(const QString &username);
 
 private:
     QRegExpValidator *m_reUsername;
 };
-} // namespace VSQ
+}
 
-#endif // VSQ_VALIDATOR_H
+#endif // VM_VALIDATOR_H

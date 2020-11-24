@@ -35,32 +35,35 @@
 #include "states/SignInState.h"
 
 #include "Validator.h"
-#include "VSQMessenger.h"
+#include "controllers/UsersController.h"
 
-using namespace VSQ;
+using namespace vm;
 
-SignInState::SignInState(VSQMessenger *messenger, Validator *validator, QState *parent)
-    : OperationState(parent), m_messenger(messenger), m_validator(validator) {
-    connect(m_messenger, &VSQMessenger::signedIn, this, &SignInState::operationFinished);
-    connect(m_messenger, &VSQMessenger::signInErrorOccured, this, &SignInState::operationErrorOccurred);
-    connect(m_messenger, &VSQMessenger::signedIn, this, &SignInState::signedIn);
+SignInState::SignInState(UsersController *usersController, Validator *validator, QState *parent)
+    : OperationState(parent)
+    , m_usersController(usersController)
+    , m_validator(validator)
+{
+    connect(usersController, &UsersController::signedIn, this, &SignInState::operationFinished);
+    connect(usersController, &UsersController::signInErrorOccured, this, &SignInState::operationErrorOccurred);
     connect(this, &SignInState::signIn, this, &SignInState::processSignIn);
 }
 
-void
-SignInState::processSignIn(const QString &username) {
+void SignInState::processSignIn(const QString &username)
+{
     QString errorText;
     const auto validUsername = m_validator->validatedUsername(username);
 
     if (!validUsername) {
         emit operationStarted();
         emit operationErrorOccurred(errorText);
-    } else {
+    }
+    else {
         if (m_userId != *validUsername) {
             m_userId = *validUsername;
             emit userIdChanged(m_userId);
         }
         emit operationStarted();
-        m_messenger->signIn(m_userId);
+        m_usersController->signIn(m_userId);
     }
 }

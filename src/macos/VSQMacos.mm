@@ -32,7 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#if (MACOS)
+#ifdef VS_MACOS
 
 #include <QtCore>
 
@@ -93,4 +93,4 @@ void VSQMacos::startUpdatesTimer() {
 
 /******************************************************************************/
 
-#endif // MACOS
+#endif // VS_MACOS

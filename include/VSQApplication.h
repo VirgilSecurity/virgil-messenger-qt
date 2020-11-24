@@ -43,17 +43,21 @@
 #include <Validator.h>
 #include <VSQCrashReporter.h>
 #include <VSQMessenger.h>
-#include <VSQSettings.h>
+#include <Settings.h>
+#ifdef VS_MACOS
 #include <macos/VSQMacos.h>
+#endif // VS_MACOS
+#include "controllers/Controllers.h"
+#include <database/UserDatabase.h>
+#include <models/Models.h>
 #include <states/ApplicationStateManager.h>
 
 class QNetworkAccessManager;
 
 class VSQLogging;
 
-using namespace VSQ;
-
-class VSQApplication : public QObject {
+class VSQApplication : public QObject
+{
     Q_OBJECT
     Q_PROPERTY(ApplicationStateManager *stateManager READ stateManager CONSTANT)
     Q_PROPERTY(QString organizationDisplayName READ organizationDisplayName CONSTANT)
@@ -63,47 +67,49 @@ class VSQApplication : public QObject {
 
 public:
     VSQApplication();
-    virtual ~VSQApplication() = default;
+    ~VSQApplication() override;
 
-    static void
-    initialize();
+    static void initialize();
 
-    int
-    run(const QString &basePath, VSQLogging *logging);
+    int run(const QString &basePath, VSQLogging *logging);
 
     Q_INVOKABLE
-    void
-    reloadQml();
+    void reloadQml();
 
     Q_INVOKABLE
-    void
-    checkUpdates();
+    void checkUpdates();
 
     Q_INVOKABLE QString
     currentVersion() const;
 
     // Names
 
-    QString
-    organizationDisplayName() const;
-    QString
-    applicationDisplayName() const;
+    QString organizationDisplayName() const;
+    QString applicationDisplayName() const;
+
+    Q_INVOKABLE bool isIosSimulator() const;
+
+signals:
+    void notificationCreated(const QString &notification, const bool error);
 
 private slots:
     void
     onApplicationStateChanged(Qt::ApplicationState state);
 
 private:
-    ApplicationStateManager *
-    stateManager();
+    ApplicationStateManager *stateManager();
 
     static const QString kVersion;
-    VSQSettings m_settings;
+    Settings m_settings;
     QNetworkAccessManager *m_networkAccessManager;
     VSQCrashReporter m_crashReporter;
-    QQmlApplicationEngine m_engine;
+    QScopedPointer<QQmlApplicationEngine> m_engine;
     Validator *m_validator;
     VSQMessenger m_messenger;
+    UserDatabase *m_userDatabase;
+    Models m_models;
+    QThread *m_databaseThread;
+    Controllers m_controllers;
     KeyboardEventFilter *m_keyboardEventFilter;
     ApplicationStateManager m_applicationStateManager;
 };

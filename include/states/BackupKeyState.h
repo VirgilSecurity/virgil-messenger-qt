@@ -32,41 +32,37 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_BACKUPKEYSTATE_H
-#define VSQ_BACKUPKEYSTATE_H
+#ifndef VM_BACKUPKEYSTATE_H
+#define VM_BACKUPKEYSTATE_H
 
 #include "OperationState.h"
 
 class VSQMessenger;
 
-namespace VSQ {
-class BackupKeyState : public OperationState {
+namespace vm
+{
+class BackupKeyState : public OperationState
+{
     Q_OBJECT
     Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
 
 public:
     BackupKeyState(VSQMessenger *messenger, QState *parent);
 
-    QString
-    userId() const;
-    void
-    setUserId(const QString &userId);
+    QString userId() const;
+    void setUserId(const QString &userId);
 
 signals:
-    void
-    backupKey(const QString &password, const QString &confirmedPassword);
-    void
-    keyBackuped(const QString &userId);
-    void
-    userIdChanged(const QString &userId);
+    void backupKey(const QString &password, const QString &confirmedPassword);
+    void keyBackuped(const QString &userId);
+    void userIdChanged(const QString &userId);
 
 private:
-    void
-    processBackupKey(const QString &password, const QString &confirmedPassword);
+    void processBackupKey(const QString &password, const QString &confirmedPassword);
 
     VSQMessenger *m_messenger;
     QString m_userId;
 };
-} // namespace VSQ
+}
 
-#endif // VSQ_BACKUPKEYSTATE_H
+#endif // VM_BACKUPKEYSTATE_H

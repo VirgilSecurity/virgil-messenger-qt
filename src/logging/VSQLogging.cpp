@@ -42,11 +42,14 @@
 
 VSQLogging *VSQLogging::m_instance = nullptr;
 
-VSQLogging::VSQLogging(QObject *parent) : QObject(parent) {
+VSQLogging::VSQLogging(QObject *parent)
+    : QObject(parent)
+{
     // Set instance
     if (m_instance) {
         qFatal("Instance of logger worker already exists!");
-    } else {
+    }
+    else {
         m_instance = this;
     }
 
@@ -70,7 +73,8 @@ VSQLogging::VSQLogging(QObject *parent) : QObject(parent) {
     qInstallMessageHandler(&VSQLogging::messageHandler);
 }
 
-VSQLogging::~VSQLogging() {
+VSQLogging::~VSQLogging()
+{
     // Unset handler
     qInstallMessageHandler(0);
 
@@ -82,14 +86,40 @@ VSQLogging::~VSQLogging() {
     m_instance = nullptr;
 }
 
-void
-VSQLogging::formatMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message) {
-    Q_UNUSED(type)
-    emit formattedMessageCreated(QString("[%1] %2").arg(context.category, message));
+void VSQLogging::formatMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
+{
+    QChar preffix;
+    QString color;
+    switch (type) {
+    case QtDebugMsg:
+        preffix = QLatin1Char('D');
+        break;
+    case QtInfoMsg:
+        preffix = QLatin1Char('I');
+        color = QLatin1String("#00aa00");
+        break;
+    case QtWarningMsg:
+        preffix = QLatin1Char('W');
+        color = QLatin1String("#ff8800");
+        break;
+    case QtCriticalMsg:
+        preffix = QLatin1Char('C');
+        color = QLatin1String("#aa0000");
+        break;
+    case QtFatalMsg:
+        preffix = QLatin1Char('F');
+        color = QLatin1String("#aa0000");
+        break;
+    }
+    auto formattedMessage = QString("%1: [%2] %3").arg(preffix, context.category, message);
+    if (!color.isEmpty()) {
+        formattedMessage = QString("<span style='color:%1;'>%2</span>").arg(color, formattedMessage.toHtmlEscaped());
+    }
+    emit formattedMessageCreated(formattedMessage + QLatin1String("<br/>"));
 }
 
-void
-VSQLogging::messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message) {
-    VSQMessageLogContext logContext{context.category, context.file, context.line};
+void VSQLogging::messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message)
+{
+    VSQMessageLogContext logContext { context.category, context.file, context.line };
     emit m_instance->messageCreated(type, logContext, message);
 }

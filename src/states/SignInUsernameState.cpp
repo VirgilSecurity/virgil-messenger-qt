@@ -34,24 +34,27 @@
 
 #include "states/SignInUsernameState.h"
 
-#include "VSQUtils.h"
+#include "Utils.h"
 
-using namespace VSQ;
+using namespace vm;
 
 SignInUsernameState::SignInUsernameState(Validator *validator, QState *parent)
-    : OperationState(parent), m_validator(validator) {
+    : OperationState(parent)
+    , m_validator(validator)
+{
     connect(this, &SignInUsernameState::validate, this, &SignInUsernameState::processValidation);
 }
 
-void
-SignInUsernameState::processValidation(const QString &username) {
+void SignInUsernameState::processValidation(const QString &username)
+{
     QString errorText;
     const auto validUsername = m_validator->validatedUsername(username, &errorText);
 
     emit operationStarted();
     if (!validUsername) {
         emit operationErrorOccurred(errorText);
-    } else {
+    }
+    else {
         emit operationFinished();
         emit validated(*validUsername);
     }

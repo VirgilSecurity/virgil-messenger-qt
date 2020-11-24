@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_KEYBOARDEVENTFILTER_H
-#define VSQ_KEYBOARDEVENTFILTER_H
+#ifndef VM_KEYBOARDEVENTFILTER_H
+#define VM_KEYBOARDEVENTFILTER_H
 
 #include <QObject>
 #include <QRectF>
@@ -41,8 +41,10 @@
 class QInputMethod;
 class QQuickItem;
 
-namespace VSQ {
-class KeyboardEventFilter : public QObject {
+namespace vm
+{
+class KeyboardEventFilter : public QObject
+{
     Q_OBJECT
     Q_PROPERTY(QRectF keyboardRectangle MEMBER m_keyboardRectangle NOTIFY keyboardRectangleChanged)
 
@@ -50,23 +52,19 @@ public:
     explicit KeyboardEventFilter(QObject *parent);
     ~KeyboardEventFilter() override;
 
-    Q_INVOKABLE void
-    install(QQuickItem *item);
+    Q_INVOKABLE void install(QQuickItem *item);
 
 signals:
-    void
-    keyboardRectangleChanged(const QRectF &);
+    void keyboardRectangleChanged(const QRectF &);
 
 private:
-    bool
-    eventFilter(QObject *obj, QEvent *evt) override;
+    bool eventFilter(QObject *obj, QEvent *evt) override;
 
-    void
-    updateKeyboardRectangle();
+    void updateKeyboardRectangle();
 
     QInputMethod *m_inputMethod;
     QRectF m_keyboardRectangle;
 };
-} // namespace VSQ
+}
 
-#endif // VSQ_KEYBOARDEVENTFILTER_H
+#endif // VM_KEYBOARDEVENTFILTER_H

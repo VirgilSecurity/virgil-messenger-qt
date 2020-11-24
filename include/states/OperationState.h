@@ -32,26 +32,25 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_OPERATIONSTATE_H
-#define VSQ_OPERATIONSTATE_H
+#ifndef VM_OPERATIONSTATE_H
+#define VM_OPERATIONSTATE_H
 
 #include <QState>
 
-namespace VSQ {
-class OperationState : public QState {
+namespace vm
+{
+class OperationState : public QState
+{
     Q_OBJECT
 
 public:
     using QState::QState;
 
 signals:
-    void
-    operationStarted();
-    void
-    operationFinished();
-    void
-    operationErrorOccurred(const QString &errorText);
+    void operationStarted();
+    void operationFinished();
+    void operationErrorOccurred(const QString &errorText);
 };
-} // namespace VSQ
+}
 
-#endif // VSQ_OPERATIONSTATE_H
+#endif // VM_OPERATIONSTATE_H

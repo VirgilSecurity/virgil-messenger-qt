@@ -39,23 +39,20 @@
 
 #include "VSQMessageLogContext.h"
 
-class VSQLogWorker : public QObject {
+class VSQLogWorker : public QObject
+{
     Q_OBJECT
 
 public:
     explicit VSQLogWorker(QObject *parent = nullptr);
     ~VSQLogWorker() override;
 
-    void
-    start();
-    void
-    processMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
+    void start();
+    void processMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
 
 private:
-    void
-    fileMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
-    void
-    consoleMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
+    void fileMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
+    void consoleMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
 
     bool m_logToFile = false;
 };

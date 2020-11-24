@@ -34,15 +34,15 @@
 
 #include "states/AttachmentPreviewState.h"
 
-using namespace VSQ;
+using namespace vm;
 
-QUrl
-AttachmentPreviewState::url() const {
+QUrl AttachmentPreviewState::url() const
+{
     return m_url;
 }
 
-void
-AttachmentPreviewState::setUrl(const QUrl &filePath) {
+void AttachmentPreviewState::setUrl(const QUrl &filePath)
+{
     if (m_url == filePath) {
         return;
     }

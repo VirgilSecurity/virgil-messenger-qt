@@ -32,32 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_ATTACHMENTPREVIEWSTATE_H
-#define VSQ_ATTACHMENTPREVIEWSTATE_H
+#ifndef VM_ATTACHMENTPREVIEWSTATE_H
+#define VM_ATTACHMENTPREVIEWSTATE_H
 
 #include <QState>
 #include <QUrl>
 
-namespace VSQ {
-class AttachmentPreviewState : public QState {
+namespace vm
+{
+class AttachmentPreviewState : public QState
+{
     Q_OBJECT
     Q_PROPERTY(QUrl url READ url WRITE setUrl NOTIFY urlChanged)
 
 public:
     using QState::QState;
 
-    QUrl
-    url() const;
-    void
-    setUrl(const QUrl &filePath);
+    QUrl url() const;
+    void setUrl(const QUrl &filePath);
 
 signals:
-    void
-    urlChanged(const QUrl &url);
+    void urlChanged(const QUrl &url);
 
 private:
     QUrl m_url;
 };
-} // namespace VSQ
+}
 
-#endif // VSQ_ATTACHMENTPREVIEWSTATE_H
+#endif // VM_ATTACHMENTPREVIEWSTATE_H

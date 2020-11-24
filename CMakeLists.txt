@@ -49,12 +49,12 @@ include(customers)
 #
 option(ENABLE_CLANGFORMAT "On/Off formatting source code with clangformat." ON)
 
-
 # ---------------------------------------------------------------------------
 # Project version
 # ---------------------------------------------------------------------------
 set(VS_TARGET_VERSION "3.4.18")
 set(VS_CORE_VERSION "0.1.3.134")
+set(VERSION_DATABASE_SCHEME "0")
 
 # ---------------------------------------------------------------------------
 #   Customers selection
@@ -324,35 +324,38 @@ endif()
 target_sources(${VS_TARGET_NAME}
 
         PRIVATE
-	# -- Headers
-	${CMAKE_CURRENT_LIST_DIR}/include/AccountSelectionModel.h
-	${CMAKE_CURRENT_LIST_DIR}/include/KeyboardEventFilter.h
-	${CMAKE_CURRENT_LIST_DIR}/include/Validator.h
+
+	#
+	# Headers
+	#
 	${CMAKE_CURRENT_LIST_DIR}/include/VSQApplication.h
-	${CMAKE_CURRENT_LIST_DIR}/include/VSQAttachmentBuilder.h
 	${CMAKE_CURRENT_LIST_DIR}/include/VSQClipboardProxy.h
 	${CMAKE_CURRENT_LIST_DIR}/include/VSQCommon.h
 	${CMAKE_CURRENT_LIST_DIR}/include/VSQContactManager.h
 	${CMAKE_CURRENT_LIST_DIR}/include/VSQCrashReporter.h
-	${CMAKE_CURRENT_LIST_DIR}/include/VSQCryptoTransferManager.h
 	${CMAKE_CURRENT_LIST_DIR}/include/VSQDiscoveryManager.h
-	${CMAKE_CURRENT_LIST_DIR}/include/VSQDownload.h
 	${CMAKE_CURRENT_LIST_DIR}/include/VSQLastActivityIq.h
 	${CMAKE_CURRENT_LIST_DIR}/include/VSQLastActivityManager.h
 	${CMAKE_CURRENT_LIST_DIR}/include/VSQMessenger.h
-	${CMAKE_CURRENT_LIST_DIR}/include/VSQSettings.h
-	${CMAKE_CURRENT_LIST_DIR}/include/VSQSqlChatModel.h
-	${CMAKE_CURRENT_LIST_DIR}/include/VSQSqlConversationModel.h
+	${CMAKE_CURRENT_LIST_DIR}/include/Settings.h
 	${CMAKE_CURRENT_LIST_DIR}/include/VSQNetworkAnalyzer.h
-	${CMAKE_CURRENT_LIST_DIR}/include/VSQTransfer.h
-	${CMAKE_CURRENT_LIST_DIR}/include/VSQTransferManager.h
-	${CMAKE_CURRENT_LIST_DIR}/include/VSQUpload.h
-	${CMAKE_CURRENT_LIST_DIR}/include/VSQUtils.h
+	${CMAKE_CURRENT_LIST_DIR}/include/Utils.h
 	${CMAKE_CURRENT_LIST_DIR}/include/android/VSQAndroid.h
-	$<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/include/macos/VSQMacos.h>
+	${CMAKE_CURRENT_LIST_DIR}/include/ui/VSQUiHelper.h
+	${CMAKE_CURRENT_LIST_DIR}/include/KeyboardEventFilter.h
+	${CMAKE_CURRENT_LIST_DIR}/include/Validator.h
+	${CMAKE_CURRENT_LIST_DIR}/include/Core.h
+	# Controllers
+	${CMAKE_CURRENT_LIST_DIR}/include/controllers/AttachmentsController.h
+	${CMAKE_CURRENT_LIST_DIR}/include/controllers/ChatsController.h
+	${CMAKE_CURRENT_LIST_DIR}/include/controllers/Controllers.h
+	${CMAKE_CURRENT_LIST_DIR}/include/controllers/FileCloudController.h
+	${CMAKE_CURRENT_LIST_DIR}/include/controllers/MessagesController.h
+	${CMAKE_CURRENT_LIST_DIR}/include/controllers/UsersController.h
+	# Helpers
 	${CMAKE_CURRENT_LIST_DIR}/include/helpers/VSQSingleton.h
 	${CMAKE_CURRENT_LIST_DIR}/include/helpers/FutureWorker.h
-	${CMAKE_CURRENT_LIST_DIR}/include/ui/VSQUiHelper.h
+	# Applications states
 	${CMAKE_CURRENT_LIST_DIR}/include/states/AccountSelectionState.h
 	${CMAKE_CURRENT_LIST_DIR}/include/states/AccountSettingsState.h
 	${CMAKE_CURRENT_LIST_DIR}/include/states/ApplicationStateManager.h
@@ -361,99 +364,187 @@ target_sources(${VS_TARGET_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/include/states/ChatListState.h
 	${CMAKE_CURRENT_LIST_DIR}/include/states/ChatState.h
 	${CMAKE_CURRENT_LIST_DIR}/include/states/DownloadKeyState.h
-	${CMAKE_CURRENT_LIST_DIR}/include/states/NewChatState.h
+	${CMAKE_CURRENT_LIST_DIR}/include/states/FileCloudState.h
 	${CMAKE_CURRENT_LIST_DIR}/include/states/OperationState.h
+	${CMAKE_CURRENT_LIST_DIR}/include/states/NewChatState.h
 	${CMAKE_CURRENT_LIST_DIR}/include/states/SignInAsState.h
 	${CMAKE_CURRENT_LIST_DIR}/include/states/SignInState.h
 	${CMAKE_CURRENT_LIST_DIR}/include/states/SignInUsernameState.h
 	${CMAKE_CURRENT_LIST_DIR}/include/states/SignUpState.h
 	${CMAKE_CURRENT_LIST_DIR}/include/states/SplashScreenState.h
 	${CMAKE_CURRENT_LIST_DIR}/include/states/StartState.h
-                         
+	# Database
+	${CMAKE_CURRENT_LIST_DIR}/include/database/core/Database.h
+	${CMAKE_CURRENT_LIST_DIR}/include/database/core/DatabaseTable.h
+	${CMAKE_CURRENT_LIST_DIR}/include/database/core/DatabaseUtils.h
+	${CMAKE_CURRENT_LIST_DIR}/include/database/core/Migration.h
+	${CMAKE_CURRENT_LIST_DIR}/include/database/core/Patch.h
+	${CMAKE_CURRENT_LIST_DIR}/include/database/core/ScopedConnection.h
+	${CMAKE_CURRENT_LIST_DIR}/include/database/core/ScopedTransaction.h
+	${CMAKE_CURRENT_LIST_DIR}/include/database/AttachmentsTable.h
+	${CMAKE_CURRENT_LIST_DIR}/include/database/ContactsTable.h
+	${CMAKE_CURRENT_LIST_DIR}/include/database/ChatsTable.h
+	${CMAKE_CURRENT_LIST_DIR}/include/database/MessagesTable.h
+	${CMAKE_CURRENT_LIST_DIR}/include/database/UserDatabase.h
+	${CMAKE_CURRENT_LIST_DIR}/include/database/UserDatabaseMigration.h
 	# Logging
 	${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogging.h
 	${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogWorker.h
 	${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQMessageLogContext.h
+	# Models
+	${CMAKE_CURRENT_LIST_DIR}/include/models/AccountSelectionModel.h
+	${CMAKE_CURRENT_LIST_DIR}/include/models/AttachmentsModel.h
+	${CMAKE_CURRENT_LIST_DIR}/include/models/ChatsModel.h
+	${CMAKE_CURRENT_LIST_DIR}/include/models/FileCloudModel.h
+	${CMAKE_CURRENT_LIST_DIR}/include/models/FileLoader.h
+	${CMAKE_CURRENT_LIST_DIR}/include/models/ListModel.h
+	${CMAKE_CURRENT_LIST_DIR}/include/models/MessagesModel.h
+	${CMAKE_CURRENT_LIST_DIR}/include/models/MessagesQueue.h
+	${CMAKE_CURRENT_LIST_DIR}/include/models/Models.h
+	# Operations
+	${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateAttachmentFingerprintOperation.h
+	${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateFileFingerprintOperation.h
+	${CMAKE_CURRENT_LIST_DIR}/include/operations/ConvertToPngOperation.h
+	${CMAKE_CURRENT_LIST_DIR}/include/operations/CreateAttachmentPreviewOperation.h
+	${CMAKE_CURRENT_LIST_DIR}/include/operations/CreateAttachmentThumbnailOperation.h
+	${CMAKE_CURRENT_LIST_DIR}/include/operations/CreateThumbnailOperation.h
+	${CMAKE_CURRENT_LIST_DIR}/include/operations/DecryptFileOperation.h
+	${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadAttachmentOperation.h
+	${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadFileOperation.h
+	${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadDecryptFileOperation.h
+	${CMAKE_CURRENT_LIST_DIR}/include/operations/EncryptFileOperation.h
+	${CMAKE_CURRENT_LIST_DIR}/include/operations/EncryptUploadFileOperation.h
+	${CMAKE_CURRENT_LIST_DIR}/include/operations/LoadAttachmentOperation.h
+	${CMAKE_CURRENT_LIST_DIR}/include/operations/LoadFileOperation.h
+	${CMAKE_CURRENT_LIST_DIR}/include/operations/MessageOperation.h
+	${CMAKE_CURRENT_LIST_DIR}/include/operations/MessageOperationFactory.h
+	${CMAKE_CURRENT_LIST_DIR}/include/operations/NetworkOperation.h
+	${CMAKE_CURRENT_LIST_DIR}/include/operations/Operation.h
+	${CMAKE_CURRENT_LIST_DIR}/include/operations/SendMessageOperation.h
+	${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadAttachmentOperation.h
+	${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadFileOperation.h
 	# Generated
 	${CMAKE_CURRENT_LIST_DIR}/include/VSQCustomer.h
 	# Thirdparty
 	${CMAKE_CURRENT_LIST_DIR}/include/thirdparty/optional/optional.hpp
+	# MacOS
+	$<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/include/macos/VSQMacos.h>
+        # IOS
+        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/PushNotifications.h>
+        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/XmppPushNotifications.h>
+        # Android
+        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/PushNotifications.h>
+        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/XmppPushNotifications.h>
+        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/android/FirebaseListener.h>
 
-	# IOS
-	$<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/PushNotifications.h>
-	$<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/XmppPushNotifications.h>
-
-	# Android
-	$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/PushNotifications.h>
-	$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/XmppPushNotifications.h>
-	$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/android/FirebaseListener.h>
-
-	# -- Sources
-	${CMAKE_CURRENT_LIST_DIR}/src/AccountSelectionModel.cpp
-	${CMAKE_CURRENT_LIST_DIR}/src/KeyboardEventFilter.cpp
-	${CMAKE_CURRENT_LIST_DIR}/src/Validator.cpp
-	${CMAKE_CURRENT_LIST_DIR}/src/VSQAttachmentBuilder.cpp
+	#
+	# Sources
+	#
 	${CMAKE_CURRENT_LIST_DIR}/src/VSQClipboardProxy.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/VSQCommon.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/VSQContactManager.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/VSQCrashReporter.cpp
-	${CMAKE_CURRENT_LIST_DIR}/src/VSQCryptoTransferManager.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/VSQDiscoveryManager.cpp
-	${CMAKE_CURRENT_LIST_DIR}/src/VSQDownload.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/VSQMessenger.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/VSQLastActivityIq.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/VSQLastActivityManager.cpp
-	${CMAKE_CURRENT_LIST_DIR}/src/VSQSettings.cpp
-	${CMAKE_CURRENT_LIST_DIR}/src/VSQSqlChatModel.cpp
-	${CMAKE_CURRENT_LIST_DIR}/src/VSQSqlConversationModel.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/Settings.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/VSQNetworkAnalyzer.cpp
-	${CMAKE_CURRENT_LIST_DIR}/src/VSQTransfer.cpp
-	${CMAKE_CURRENT_LIST_DIR}/src/VSQTransferManager.cpp
-	${CMAKE_CURRENT_LIST_DIR}/src/VSQUpload.cpp
-	${CMAKE_CURRENT_LIST_DIR}/src/VSQUtils.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/Utils.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/android/VSQAndroid.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/VSQApplication.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/ui/VSQUiHelper.cpp
-	${CMAKE_CURRENT_LIST_DIR}/src/hal.cpp
-	# State
-	${CMAKE_CURRENT_LIST_DIR}/src/states/AccountSelectionState.cpp  
-	${CMAKE_CURRENT_LIST_DIR}/src/states/AccountSettingsState.cpp   
+	${CMAKE_CURRENT_LIST_DIR}/src/KeyboardEventFilter.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/Validator.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/Core.cpp
+	# Controllers
+	${CMAKE_CURRENT_LIST_DIR}/src/controllers/AttachmentsController.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/controllers/ChatsController.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/controllers/Controllers.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/controllers/FileCloudController.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/controllers/MessagesController.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/controllers/UsersController.cpp
+	# Applications states
+	${CMAKE_CURRENT_LIST_DIR}/src/states/AccountSelectionState.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/states/AccountSettingsState.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/states/ApplicationStateManager.cpp
-	${CMAKE_CURRENT_LIST_DIR}/src/states/AttachmentPreviewState.cpp 
-	${CMAKE_CURRENT_LIST_DIR}/src/states/BackupKeyState.cpp         
-	${CMAKE_CURRENT_LIST_DIR}/src/states/ChatListState.cpp          
-	${CMAKE_CURRENT_LIST_DIR}/src/states/ChatState.cpp              
-	${CMAKE_CURRENT_LIST_DIR}/src/states/DownloadKeyState.cpp       
-	${CMAKE_CURRENT_LIST_DIR}/src/states/NewChatState.cpp           
-	${CMAKE_CURRENT_LIST_DIR}/src/states/SignInAsState.cpp          
-	${CMAKE_CURRENT_LIST_DIR}/src/states/SignInState.cpp            
-	${CMAKE_CURRENT_LIST_DIR}/src/states/SignInUsernameState.cpp    
-	${CMAKE_CURRENT_LIST_DIR}/src/states/SignUpState.cpp            
-	${CMAKE_CURRENT_LIST_DIR}/src/states/SplashScreenState.cpp      
+	${CMAKE_CURRENT_LIST_DIR}/src/states/AttachmentPreviewState.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/states/BackupKeyState.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/states/ChatListState.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/states/ChatState.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/states/DownloadKeyState.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/states/FileCloudState.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/states/NewChatState.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/states/SignInAsState.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/states/SignInState.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/states/SignInUsernameState.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/states/SignUpState.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/states/SplashScreenState.cpp
+	# Database
+	${CMAKE_CURRENT_LIST_DIR}/src/database/core/Database.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/database/core/DatabaseTable.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/database/core/DatabaseUtils.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/database/core/Migration.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/database/core/Patch.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/database/core/ScopedConnection.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/database/core/ScopedTransaction.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/database/AttachmentsTable.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/database/ContactsTable.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/database/ChatsTable.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/database/MessagesTable.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/database/UserDatabase.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/database/UserDatabaseMigration.cpp
 	# Logging
+	${CMAKE_CURRENT_LIST_DIR}/src/hal.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogging.cpp
 	${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogWorker.cpp
-	# QT QRC
-	${CMAKE_CURRENT_LIST_DIR}/src/resources.qrc
-	${VS_CUSTOMER_DIR}/src/customer.qrc
+	# Models
+	${CMAKE_CURRENT_LIST_DIR}/src/models/AccountSelectionModel.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/models/AttachmentsModel.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/models/ChatsModel.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/models/FileCloudModel.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/models/FileLoader.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/models/ListModel.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/models/MessagesModel.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/models/MessagesQueue.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/models/Models.cpp
+	# Operations
+	${CMAKE_CURRENT_LIST_DIR}/src/operations/CalculateAttachmentFingerprintOperation.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/operations/CalculateFileFingerprintOperation.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/operations/ConvertToPngOperation.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/operations/CreateAttachmentPreviewOperation.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/operations/CreateAttachmentThumbnailOperation.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/operations/CreateThumbnailOperation.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/operations/DecryptFileOperation.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadAttachmentOperation.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadFileOperation.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadDecryptFileOperation.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/operations/EncryptFileOperation.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/operations/EncryptUploadFileOperation.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/operations/LoadAttachmentOperation.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/operations/LoadFileOperation.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/operations/MessageOperation.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/operations/MessageOperationFactory.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/operations/NetworkOperation.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/operations/Operation.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/operations/SendMessageOperation.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/operations/UploadAttachmentOperation.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/operations/UploadFileOperation.cpp
+        # QT QRC
+        ${CMAKE_CURRENT_LIST_DIR}/src/resources.qrc
+        ${VS_CUSTOMER_DIR}/src/customer.qrc
+        # MACOS
+        $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/src/macos/VSQMacos.mm>
+        # IOS
+        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/AppDelegate.mm>
+        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/PushNotifications.cpp>
+        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/XmppPushNotifications.cpp>
+        # Android
+        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/PushNotifications.cpp>
+        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/XmppPushNotifications.cpp>
+        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/android/FirebaseListener.cpp>
 
-	# MACOS
-	$<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/src/macos/VSQMacos.mm>
-
-	# IOS
-	$<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/AppDelegate.mm>
-	$<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/PushNotifications.cpp>
-	$<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/XmppPushNotifications.cpp>
-
-	# Android
-	$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/PushNotifications.cpp>
-	$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/XmppPushNotifications.cpp>
-	$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/android/FirebaseListener.cpp>
-        
-        #   QuickFuture
-        ${QUICKFUTURE_DIR}/qffuture.cpp
-        
         # Customer sources
         ${VS_CUSTOMER_SOURCES}
         )
@@ -536,6 +627,7 @@ target_compile_definitions(${VS_TARGET_NAME}
     PRIVATE
     $<BUILD_INTERFACE:INFO_CLIENT=1>
     $<BUILD_INTERFACE:CFG_CLIENT=1>
+    $<BUILD_INTERFACE:VERSION_DATABASE_SCHEME=${VERSION_DATABASE_SCHEME}>
     $<BUILD_INTERFACE:VS_CUSTOMER=${VS_CUSTOMER}>
 
     $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:VS_ANDROID=1>>

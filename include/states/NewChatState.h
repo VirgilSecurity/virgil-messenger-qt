@@ -32,32 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_NEWCHATSTATE_H
-#define VSQ_NEWCHATSTATE_H
+#ifndef VM_NEWCHATSTATE_H
+#define VM_NEWCHATSTATE_H
 
 #include "OperationState.h"
+#include "VSQCommon.h"
 
-class VSQMessenger;
+namespace vm
+{
+class ChatsController;
 
-namespace VSQ {
-class NewChatState : public OperationState {
+class NewChatState : public OperationState
+{
     Q_OBJECT
 
 public:
-    NewChatState(VSQMessenger *messenger, QState *parent);
+    NewChatState(ChatsController *chatsController, QState *parent);
 
 signals:
-    void
-    addNewChat(const QString &contactId);
-    void
-    requestChat(const QString &contactId);
+    void addNewChat(const QString &contactId);
 
 private:
-    void
-    processAddNewChat(const QString &contactId);
+    void processAddNewChat(const Contact::Id &contactId);
 
-    VSQMessenger *m_messenger;
+    ChatsController *m_chatsController;
 };
-} // namespace VSQ
+}
 
-#endif // VSQ_NEWCHATSTATE_H
+#endif // VM_NEWCHATSTATE_H

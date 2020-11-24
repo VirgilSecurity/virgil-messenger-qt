@@ -39,36 +39,40 @@
 Q_LOGGING_CATEGORY(lcContactManager, "contactman");
 
 VSQContactManager::VSQContactManager(QXmppClient *client, QObject *parent)
-    : QObject(parent), m_client(client), m_manager(client->findExtension<QXmppRosterManager>()) {
-}
+    : QObject(parent)
+    , m_client(client)
+    , m_manager(client->findExtension<QXmppRosterManager>())
+{}
 
-VSQContactManager::~VSQContactManager() {
-}
+VSQContactManager::~VSQContactManager()
+{}
 
-bool
-VSQContactManager::addContact(const QString &jid, const QString &name, const QString &reason) {
+bool VSQContactManager::addContact(const QString &jid, const QString &name, const QString &reason)
+{
     if (m_client->state() != QXmppClient::ConnectedState) {
         return setLastErrorText(tr("No connection"));
     }
 
     const auto status = find(jid);
     if (status.exists) {
-        qCWarning(lcContactManager) << "Contact already added:" << jid;
-    } else if (!m_manager->addItem(jid, name)) {
+        qCDebug(lcContactManager) << "Contact already added:" << jid;
+    }
+    else if (!m_manager->addItem(jid, name)) {
         return setLastErrorText(tr("Contact adding failed"));
     }
 
     if (status.subscriptionType == SubscriptionType::Both) {
-        qCWarning(lcContactManager) << "Contact already subscribed" << jid;
-    } else if (!m_manager->subscribe(jid, reason)) {
+        qCDebug(lcContactManager) << "Contact already subscribed" << jid;
+    }
+    else if (!m_manager->subscribe(jid, reason)) {
         return setLastErrorText(tr("Contact subscription failed"));
     }
 
     return true;
 }
 
-bool
-VSQContactManager::removeContact(const QString &jid) {
+bool VSQContactManager::removeContact(const QString &jid)
+{
     if (m_client->state() != QXmppClient::ConnectedState) {
         return setLastErrorText(tr("No connection"));
     }
@@ -80,7 +84,8 @@ VSQContactManager::removeContact(const QString &jid) {
 
     if (status.subscriptionType == SubscriptionType::None) {
         qCWarning(lcContactManager) << "Contact wasn't subscribed" << jid;
-    } else if (!m_manager->unsubscribe(jid)) {
+    }
+    else if (!m_manager->unsubscribe(jid)) {
         return setLastErrorText(tr("Contact unsubscription failed"));
     }
 
@@ -91,8 +96,8 @@ VSQContactManager::removeContact(const QString &jid) {
     return true;
 }
 
-bool
-VSQContactManager::renameContact(const QString &jid, const QString &newName) {
+bool VSQContactManager::renameContact(const QString &jid, const QString &newName)
+{
     if (m_client->state() != QXmppClient::ConnectedState) {
         return setLastErrorText(tr("No connection"));
     }
@@ -104,13 +109,13 @@ VSQContactManager::renameContact(const QString &jid, const QString &newName) {
     return true;
 }
 
-QString
-VSQContactManager::lastErrorText() const {
+QString VSQContactManager::lastErrorText() const
+{
     return m_lastErrorText;
 }
 
-VSQContactManager::ContactInfo
-VSQContactManager::find(const QString &jid) const {
+VSQContactManager::ContactInfo VSQContactManager::find(const QString &jid) const
+{
     ContactInfo status;
     status.exists = m_manager->getRosterBareJids().contains(jid);
     if (status.exists) {
@@ -120,8 +125,8 @@ VSQContactManager::find(const QString &jid) const {
     return status;
 }
 
-bool
-VSQContactManager::setLastErrorText(const QString &text) {
+bool VSQContactManager::setLastErrorText(const QString &text)
+{
     m_lastErrorText = text;
     qCWarning(lcContactManager) << text;
     return false;

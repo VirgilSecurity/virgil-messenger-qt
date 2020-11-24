@@ -32,31 +32,30 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_SIGNINUSERNAMESTATE_H
-#define VSQ_SIGNINUSERNAMESTATE_H
+#ifndef VM_SIGNINUSERNAMESTATE_H
+#define VM_SIGNINUSERNAMESTATE_H
 
 #include "OperationState.h"
 #include "Validator.h"
 
-namespace VSQ {
-class SignInUsernameState : public OperationState {
+namespace vm
+{
+class SignInUsernameState : public OperationState
+{
     Q_OBJECT
 
 public:
     SignInUsernameState(Validator *validator, QState *parent);
 
 signals:
-    void
-    validate(const QString &username);
-    void
-    validated(const QString &username);
+    void validate(const QString &username);
+    void validated(const QString &username);
 
 private:
-    void
-    processValidation(const QString &username);
+    void processValidation(const QString &username);
 
     Validator *m_validator;
 };
-} // namespace VSQ
+}
 
-#endif // VSQ_SIGNINUSERNAMESTATE_H
+#endif // VM_SIGNINUSERNAMESTATE_H

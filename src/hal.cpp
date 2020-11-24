@@ -42,7 +42,7 @@
 #include <stdio.h>
 #include <time.h>
 #ifndef LOG_ROTATE_LEVEL
-#define LOG_ROTATE_LEVEL 0 // Log rotate num (num -1)
+#define LOG_ROTATE_LEVEL 0     // Log rotate num (num -1)
 #endif
 #ifndef LOG_MAX_FILESIZE
 #define LOG_MAX_FILESIZE 20 * 1024 * 1024
@@ -51,20 +51,20 @@
 QFile vsLogFile;
 bool vsLogOpeningFailed = false;
 
-bool
-vs_logger_rotate(QString FileName, int LogNums) {
+bool vs_logger_rotate(QString FileName, int LogNums) {
     QString NewFilePath = FileName + "." + QString::number(LogNums + 1);
     QFile HLogFile;
     HLogFile.remove(NewFilePath);
-    for (int TmpLogNum = LogNums; TmpLogNum >= 0; TmpLogNum--) {
-        if (TmpLogNum > 0) {
+    for(int TmpLogNum = LogNums; TmpLogNum >= 0; TmpLogNum--) {
+        if(TmpLogNum > 0 ) {
             HLogFile.setFileName(FileName + "." + QString::number(TmpLogNum));
-        } else {
+        }
+        else {
             HLogFile.setFileName(FileName);
         }
         NewFilePath = FileName + "." + QString::number(TmpLogNum + 1);
-        if (HLogFile.exists()) {
-            if (!HLogFile.rename(NewFilePath)) {
+        if(HLogFile.exists()) {
+            if(!HLogFile.rename(NewFilePath)) {
                 return false;
             }
         }
@@ -72,15 +72,13 @@ vs_logger_rotate(QString FileName, int LogNums) {
     return true;
 }
 
-bool
-vs_logger_rotate_active_file() {
+bool vs_logger_rotate_active_file() {
     vsLogFile.close();
     vs_logger_rotate(vsLogFile.fileName(), LOG_ROTATE_LEVEL);
     return vsLogFile.open(QIODevice::WriteOnly | QIODevice::Text);
 }
 
-bool
-vs_logger_file_opened() {
+bool vs_logger_file_opened() {
     if (vsLogOpeningFailed) {
         return false;
     }
@@ -108,8 +106,8 @@ vs_logger_file_opened() {
 extern "C" bool
 vs_logger_output_hal(const char *buffer) {
     (void)buffer;
-    if (vs_logger_file_opened()) {
-        vsLogFile.write(buffer, strlen(buffer));
+    if(vs_logger_file_opened()) {
+        vsLogFile.write(buffer,strlen(buffer));
         vsLogFile.flush();
         const bool isEOL = buffer[0] != 0 && strlen(buffer) && buffer[strlen(buffer) - 1] == '\n';
         if (isEOL && vsLogFile.size() >= LOG_MAX_FILESIZE && !vs_logger_rotate_active_file()) {
@@ -124,7 +122,7 @@ vs_logger_output_hal(const char *buffer) {
 extern "C" bool
 vs_logger_current_time_hal(char *time_buf) {
     time_t result = time(NULL);
-    if (result != -1) {
+    if(result != -1) {
         strftime(time_buf, 17, "%Y-%m-%d %H:%M", localtime(&result));
         return true;
     }

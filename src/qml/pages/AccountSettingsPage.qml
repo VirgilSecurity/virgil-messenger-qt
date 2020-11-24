@@ -42,7 +42,7 @@ Page {
 
         FormPrimaryButton {
             text: qsTr("Sign out")
-            onClicked: appState.signOut()
+            onClicked: controllers.users.signOut()
         }
     }
 }

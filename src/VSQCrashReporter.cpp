@@ -39,56 +39,63 @@
 #include <QNetworkReply>
 #include <QStandardPaths>
 
-#include "VSQSettings.h"
+#include "Settings.h"
 
 #include <virgil/iot/messenger/internal/virgil.h>
 
 const QString VSQCrashReporter::s_endpointSendReport = "/send-logs";
 
+using namespace vm;
+
 Q_LOGGING_CATEGORY(lcCrashReporter, "crashReporter")
 
-VSQCrashReporter::VSQCrashReporter(VSQSettings *settings, QNetworkAccessManager *networkAccessManager, QObject *parent)
-    : QObject(parent), m_settings(settings), m_manager(networkAccessManager) {
-}
+VSQCrashReporter::VSQCrashReporter(Settings *settings, QNetworkAccessManager *networkAccessManager, QObject *parent)
+    : QObject(parent)
+    , m_settings(settings)
+    , m_manager(networkAccessManager)
+{}
 
-VSQCrashReporter::~VSQCrashReporter() {
+VSQCrashReporter::~VSQCrashReporter()
+{
     m_settings->setRunFlag(false);
 }
 
-void
-VSQCrashReporter::setVirgilUrl(QString VirgilUrl) {
+void VSQCrashReporter::setVirgilUrl(QString VirgilUrl)
+{
     m_currentVirgilUrl = VirgilUrl;
     qCDebug(lcCrashReporter) << "Send report URL set to" << m_currentVirgilUrl;
 }
 
-void
-VSQCrashReporter::setkVersion(QString AppVersion) {
+void VSQCrashReporter::setkVersion(QString AppVersion)
+{
     m_version = AppVersion;
 }
 
-void
-VSQCrashReporter::setkOrganization(QString strkOrganization) {
+void VSQCrashReporter::setkOrganization(QString strkOrganization)
+{
     m_organization = strkOrganization;
 }
 
-void
-VSQCrashReporter::setkApp(QString strkApp) {
+void VSQCrashReporter::setkApp(QString strkApp)
+{
     m_app = strkApp;
 }
 
-void
-VSQCrashReporter::checkAppCrash() {
+void VSQCrashReporter::checkAppCrash()
+{
     qCDebug(lcCrashReporter) << "Checking previous run flag...";
-    if (m_settings->runFlag()) {
+    if(m_settings->runFlag()) {
+#ifndef VS_DEVMODE
         qCCritical(lcCrashReporter) << "Previous application run is crashed ! Sending log files...";
         emit crashReportRequested();
+#endif
     }
     qCDebug(lcCrashReporter) << "Set run flag to true";
     m_settings->setRunFlag(true);
 }
 
-bool
-VSQCrashReporter::sendLogFiles() {
+bool VSQCrashReporter::sendLogFiles()
+{
     const QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (!writeDir.exists()) {
         qFatal("Directory [%s] not exist.", qPrintable(writeDir.absolutePath()));
@@ -100,10 +107,11 @@ VSQCrashReporter::sendLogFiles() {
     QDirIterator fileIterator(writeDir.absolutePath(), QStringList() << "VirgilMessenger.log*");
     while (fileIterator.hasNext()) {
         QFile readFile(fileIterator.next());
-        if (readFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        if ( readFile.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
             qCDebug(lcCrashReporter) << "Read file:" << readFile.fileName();
             fileData.append(readFile.readAll());
-        } else {
+        }
+        else {
             qCDebug(lcCrashReporter) << "Can't open " << readFile.fileName() << readFile.errorString();
         }
     }
@@ -112,8 +120,8 @@ VSQCrashReporter::sendLogFiles() {
     return true;
 }
 
-bool
-VSQCrashReporter::sendFileToBackendRequest(QByteArray fileData) {
+bool VSQCrashReporter::sendFileToBackendRequest(QByteArray fileData)
+{
     char *buffBearer = (char *)malloc(1024);
     size_t sizeBearer = 1024;
 
@@ -137,14 +145,16 @@ VSQCrashReporter::sendFileToBackendRequest(QByteArray fileData) {
     return true;
 }
 
-void
-VSQCrashReporter::endpointReply(QNetworkReply *reply) {
+void VSQCrashReporter::endpointReply(QNetworkReply *reply)
+{
     if (reply->error() == QNetworkReply::NoError) {
         qCDebug(lcCrashReporter) << "Send report OK";
         emit reportSent(tr("Report send OK"));
-    } else {
+    }
+    else {
         qCDebug(lcCrashReporter) << "Error sending report. Code:" << static_cast<int>(reply->error())
-                                 << ". Name:" << reply->error() << ". Message:" << reply->errorString();
+                                 << ". Name:" << reply->error()
+                                 << ". Message:" << reply->errorString();
         emit reportErrorOccurred(tr("Report send error"));
     }
     qCDebug(lcCrashReporter) << "Sending finished";

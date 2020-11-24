@@ -13,38 +13,37 @@ Control {
     width: loader.item.width
 
     property double maxWidth: parent.width
+    readonly property real leftIndent: row.spacing + avatar.width
 
     property string body: ""
-    property string time: ""
+    property string displayTime: ""
     property alias nickname: avatar.nickname
-    property bool isUser: false
+    property bool isOwnMessage: false
     property string status: ""
     property bool failed: false
     property string messageId: ""
-
     property bool inRow: false
     property bool firstInRow: true
 
     property string attachmentId: ""
+    property var attachmentType: undefined
+    property var attachmentStatus: undefined
     property int attachmentBytesTotal: 0
     property string attachmentDisplaySize: ""
-    property var attachmentType: undefined
-    property string attachmentFilePath: ""
-    property string attachmentThumbnailPath: ""
+    property string attachmentDisplayText: ""
+    property string attachmentImagePath: ""
     property int attachmentThumbnailWidth: 0
     property int attachmentThumbnailHeight: 0
     property int attachmentBytesLoaded: 0
-    property int attachmentStatus: 0
-    property bool attachmentDownloaded: false
+    property bool attachmentFileExists: false
 
     signal saveAttachmentAs(string messageId)
-    signal downloadOpenAttachment(string messageId, bool isPicture)
     signal openContextMenu(string messageId, var mouse, var contextMenu)
 
     QtObject {
         id: d
         readonly property bool hasAttachment: attachmentId.length > 0
-        readonly property color background: isUser ? "#59717D" : Theme.mainBackgroundColor
+        readonly property color background: isOwnMessage ? "#59717D" : Theme.mainBackgroundColor
         readonly property bool isPicture: hasAttachment && attachmentType == Enums.AttachmentType.Picture
         readonly property double defaultRadius: 4
     }
@@ -64,7 +63,7 @@ Control {
             font.pointSize: UiHelper.fixFontSz(15)
             wrapMode: Text.Wrap
             readOnly: true
-            text: chatMessage.body.split("\n").join("<br/>")
+            text: chatMessage.body;
             visible: !d.hasAttachment
 
             property var contextMenu: ContextMenu {
@@ -98,7 +97,7 @@ Control {
                     y: 0.5 * (row.height - height)
                     width: image.width
                     height: image.height
-                    color: d.isPicture ? "white" : "transparent"
+                    color: d.isPicture && attachmentImagePath ? "white" : "transparent"
 
                     Image {
                         id: image
@@ -111,20 +110,14 @@ Control {
                             value: image.pictureWidth * attachmentThumbnailHeight / attachmentThumbnailWidth
                         }
                         autoTransform: true
-                        visible: d.isPicture ? true : attachmentDownloaded && !progressBar.visible
-                        source: {
-                            if (d.isPicture) {
-                                return chatMessage.attachmentDownloaded  ? attachmentFilePath : attachmentThumbnailPath;
-                            } else {
-                                return "../resources/icons/File Selected Big.png"
-                            }
-                        }
+                        visible: d.isPicture ? true : attachmentFileExists && !progressBar.visible
+                        source: chatMessage.attachmentImagePath
 
                         readonly property double pictureWidth: d.isPicture ? Math.min(3 * attachmentThumbnailWidth, maxWidth - 2 * offset) : 0
                     }
 
                     Rectangle {
-                        visible: !attachmentDownloaded && !progressBar.visible
+                        visible: !attachmentFileExists && !progressBar.visible
                         anchors.centerIn: parent
                         width: 1.3333 * downloadImage.width
                         height: width
@@ -143,8 +136,9 @@ Control {
                         anchors.centerIn: parent
                         size: 40
                         visible: chatMessage.attachmentStatus == Enums.AttachmentStatus.Loading
-                        maxValue: chatMessage.attachmentBytesTotal
-                        value: chatMessage.attachmentBytesLoaded
+                        maxValue: Math.max(1, chatMessage.attachmentBytesTotal)
+                        value: Math.min(0.99 * maxValue, Math.max(0.01 * maxValue, chatMessage.attachmentBytesLoaded))
+                        animated: visible
                     }
                 }
 
@@ -157,7 +151,7 @@ Control {
                     Label {
                         Layout.fillHeight: true
                         Layout.maximumWidth: column.maxWidth
-                        text: chatMessage.body
+                        text: chatMessage.attachmentDisplayText
                         color: "white"
                         font.pixelSize: UiHelper.fixFontSz(16)
                         wrapMode: Text.Wrap
@@ -177,7 +171,8 @@ Control {
 
                 Action {
                     text: Platform.isMobile ? qsTr("Save to downloads") : qsTr("Save As...")
-                    onTriggered: (Platform.isMobile ? Messenger.downloadAttachment : chatMessage.saveAttachmentAs)(messageId)
+                    onTriggered: (Platform.isMobile ? controllers.attachments.download : chatMessage.saveAttachmentAs)(messageId)
+                    // TODO(fpohtmeh): disable for not loaded attachments
                 }
             }
         }
@@ -211,7 +206,7 @@ Control {
 
                 Label {
                     Layout.alignment: Qt.AlignBottom
-                    text: "•  %1".arg(time)
+                    text: displayTime
                     color: Theme.labelColor
 
                     font.pixelSize: UiHelper.fixFontSz(11)
@@ -263,7 +258,12 @@ Control {
                             openContextMenu(messageId, coord, loader.item.contextMenu)
                         }
                         else if (d.hasAttachment) {
-                            downloadOpenAttachment(messageId, d.isPicture)
+                            if (attachmentFileExists) {
+                                controllers.attachments.open(messageId)
+                            }
+                            else {
+                                controllers.attachments.download(messageId)
+                            }
                         }
                     }
                     onPressAndHold: {
@@ -287,7 +287,7 @@ Control {
                         case "0": return "sending"
                         case "1": return "sent"
                         case "2": return "delivered"
-                        case "4": return "sending" // attachment
+                        case "4": return "sending"
                         default: return ""
                     }
                 }
@@ -295,5 +295,10 @@ Control {
                 font.pixelSize: UiHelper.fixFontSz(11)
             }
         }
+    }
+
+    Component.onCompleted: {
+//        console.log("->", messageId, body, displayTime, nickname, status, failed)
+//        console.log(attachmentId, attachmentType, attachmentStatus, attachmentImagePath, attachmentFileExists)
     }
 }

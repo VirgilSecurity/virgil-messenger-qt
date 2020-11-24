@@ -38,7 +38,8 @@
 #include "VSQCommon.h"
 
 // Copyable alternative of QMessageLogContext
-struct VSQMessageLogContext {
+struct VSQMessageLogContext
+{
     QString category;
     QString fileName;
     int line = 0;

@@ -32,40 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_ACCOUNTSETTINGSSTATE_H
-#define VSQ_ACCOUNTSETTINGSSTATE_H
+#ifndef VM_ACCOUNTSETTINGSSTATE_H
+#define VM_ACCOUNTSETTINGSSTATE_H
 
 #include <QState>
 
-class VSQMessenger;
-
-namespace VSQ {
-class AccountSettingsState : public QState {
+namespace vm
+{
+class AccountSettingsState : public QState
+{
     Q_OBJECT
     Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
 
 public:
-    AccountSettingsState(VSQMessenger *messenger, QState *parent);
+    explicit AccountSettingsState(QState *parent);
 
-    QString
-    userId() const;
-    void
-    setUserId(const QString &userId);
+    QString userId() const;
+    void setUserId(const QString &userId);
 
 signals:
-    void
-    signOut();
-    void
-    requestBackupKey(const QString &userId);
-    void
-    signedOut();
-    void
-    userIdChanged(const QString &);
+    void requestBackupKey(const QString &userId);
+    void userIdChanged(const QString &);
 
 private:
-    VSQMessenger *m_messenger;
     QString m_userId;
 };
-} // namespace VSQ
+}
 
-#endif // VSQ_ACCOUNTSETTINGSSTATE_H
+#endif // VM_ACCOUNTSETTINGSSTATE_H

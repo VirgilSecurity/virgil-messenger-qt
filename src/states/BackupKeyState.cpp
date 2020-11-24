@@ -36,23 +36,25 @@
 
 #include "VSQMessenger.h"
 
-using namespace VSQ;
+using namespace vm;
 
 BackupKeyState::BackupKeyState(VSQMessenger *messenger, QState *parent)
-    : OperationState(parent), m_messenger(messenger) {
+    : OperationState(parent)
+    , m_messenger(messenger)
+{
     connect(m_messenger, &VSQMessenger::keyBackuped, this, &BackupKeyState::operationFinished);
     connect(m_messenger, &VSQMessenger::backupKeyFailed, this, &BackupKeyState::operationErrorOccurred);
     connect(m_messenger, &VSQMessenger::keyBackuped, this, &BackupKeyState::keyBackuped);
     connect(this, &BackupKeyState::backupKey, this, &BackupKeyState::processBackupKey);
 }
 
-QString
-BackupKeyState::userId() const {
+QString BackupKeyState::userId() const
+{
     return m_userId;
 }
 
-void
-BackupKeyState::setUserId(const QString &userId) {
+void BackupKeyState::setUserId(const QString &userId)
+{
     if (m_userId == userId) {
         return;
     }
@@ -60,8 +62,8 @@ BackupKeyState::setUserId(const QString &userId) {
     emit userIdChanged(userId);
 }
 
-void
-BackupKeyState::processBackupKey(const QString &password, const QString &confirmedPassword) {
+void BackupKeyState::processBackupKey(const QString &password, const QString &confirmedPassword)
+{
     emit operationStarted();
     m_messenger->backupKey(password, confirmedPassword);
 }

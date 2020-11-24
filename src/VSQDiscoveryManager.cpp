@@ -40,17 +40,20 @@
 Q_LOGGING_CATEGORY(lcDiscoveryManager, "discoman");
 
 VSQDiscoveryManager::VSQDiscoveryManager(QXmppClient *client, QObject *parent)
-    : QObject(parent), m_client(client), m_manager(client->findExtension<QXmppDiscoveryManager>()) {
+    : QObject(parent)
+    , m_client(client)
+    , m_manager(client->findExtension<QXmppDiscoveryManager>())
+{
     connect(client, &QXmppClient::connected, this, &VSQDiscoveryManager::onClientConnected);
     connect(m_manager, &QXmppDiscoveryManager::infoReceived, this, &VSQDiscoveryManager::onInfoReceived);
     connect(m_manager, &QXmppDiscoveryManager::itemsReceived, this, &VSQDiscoveryManager::onItemsReceived);
 }
 
-VSQDiscoveryManager::~VSQDiscoveryManager() {
-}
+VSQDiscoveryManager::~VSQDiscoveryManager()
+{}
 
-void
-VSQDiscoveryManager::onClientConnected() {
+void VSQDiscoveryManager::onClientConnected()
+{
     const auto domain = m_client->configuration().domain();
     auto infoId = m_manager->requestInfo(domain);
     qCDebug(lcDiscoveryManager) << "Discovery manager info requested" << domain << "id:" << infoId;
@@ -58,8 +61,8 @@ VSQDiscoveryManager::onClientConnected() {
     qCDebug(lcDiscoveryManager) << "Discovery manager items requested" << domain << "id:" << itemsId;
 }
 
-void
-VSQDiscoveryManager::onInfoReceived(const QXmppDiscoveryIq &info) {
+void VSQDiscoveryManager::onInfoReceived(const QXmppDiscoveryIq &info)
+{
     if (info.from() != m_client->configuration().domain())
         return;
 
@@ -67,15 +70,16 @@ VSQDiscoveryManager::onInfoReceived(const QXmppDiscoveryIq &info) {
         auto carbonManager = m_client->findExtension<QXmppCarbonManager>();
         if (!carbonManager) {
             qCDebug(lcDiscoveryManager) << "Carbon manager is not found";
-        } else {
+        }
+        else {
             qCDebug(lcDiscoveryManager) << "Set carbon manager enabled";
             carbonManager->setCarbonsEnabled(true);
         }
     }
 }
 
-void
-VSQDiscoveryManager::onItemsReceived(const QXmppDiscoveryIq &info) {
+void VSQDiscoveryManager::onItemsReceived(const QXmppDiscoveryIq &info)
+{
     const auto domain = m_client->configuration().domain();
     const QList<QXmppDiscoveryIq::Item> items = info.items();
     for (const QXmppDiscoveryIq::Item &item : items) {

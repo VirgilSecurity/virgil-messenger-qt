@@ -37,25 +37,25 @@
 #include <QGuiApplication>
 #include <QQuickItem>
 
-using namespace VSQ;
+using namespace vm;
 
-KeyboardEventFilter::KeyboardEventFilter(QObject *parent) : QObject(parent), m_inputMethod(qApp->inputMethod()) {
-    connect(m_inputMethod,
-            &QInputMethod::keyboardRectangleChanged,
-            this,
-            &KeyboardEventFilter::updateKeyboardRectangle);
+KeyboardEventFilter::KeyboardEventFilter(QObject *parent)
+    : QObject(parent)
+    , m_inputMethod(qApp->inputMethod())
+{
+    connect(m_inputMethod, &QInputMethod::keyboardRectangleChanged, this, &KeyboardEventFilter::updateKeyboardRectangle);
 }
 
-KeyboardEventFilter::~KeyboardEventFilter() {
-}
+KeyboardEventFilter::~KeyboardEventFilter()
+{}
 
-void
-KeyboardEventFilter::install(QQuickItem *item) {
+void KeyboardEventFilter::install(QQuickItem *item)
+{
     item->installEventFilter(this);
 }
 
-bool
-KeyboardEventFilter::eventFilter(QObject *obj, QEvent *event) {
+bool KeyboardEventFilter::eventFilter(QObject *obj, QEvent *event)
+{
 #ifdef VS_IOS
     if (event->type() == QEvent::InputMethodQuery) {
         // HACK(fpohtmeh): Qt scrolls up entire root view if input item is overlapped by keyboard.
@@ -70,8 +70,8 @@ KeyboardEventFilter::eventFilter(QObject *obj, QEvent *event) {
     return QObject::eventFilter(obj, event);
 }
 
-void
-KeyboardEventFilter::updateKeyboardRectangle() {
+void KeyboardEventFilter::updateKeyboardRectangle()
+{
     const auto rect = m_inputMethod->keyboardRectangle();
     m_keyboardRectangle = rect;
     emit keyboardRectangleChanged(rect);

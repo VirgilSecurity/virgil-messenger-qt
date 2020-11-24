@@ -34,11 +34,8 @@
 
 #include "states/AccountSelectionState.h"
 
-using namespace VSQ;
+using namespace vm;
 
-AccountSelectionState::AccountSelectionState(VSQMessenger *messenger,
-                                             Validator *validator,
-                                             VSQSettings *settings,
-                                             QState *parent)
-    : SignInState(messenger, validator, parent), m_model(new AccountSelectionModel(settings, parent)) {
-}
+AccountSelectionState::AccountSelectionState(UsersController *usersController, Validator *validator, QState *parent)
+    : SignInState(usersController, validator, parent)
+{}
