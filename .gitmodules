@@ -1,3 +1,0 @@
-[submodule "ext/quickfuture"]
-	path = ext/quickfuture
-	url = https://github.com/benlau/quickfuture.git
