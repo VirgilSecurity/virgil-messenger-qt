@@ -166,6 +166,7 @@ HEADERS += \
         include/models/AccountSelectionModel.h \
         include/models/AttachmentsModel.h \
         include/models/ChatsModel.h \
+        include/models/DiscoveredContactsModel.h \
         include/models/FileCloudModel.h \
         include/models/FileLoader.h \
         include/models/ListModel.h \
@@ -267,6 +268,7 @@ SOURCES += \
         src/models/AccountSelectionModel.cpp \
         src/models/AttachmentsModel.cpp \
         src/models/ChatsModel.cpp \
+        src/models/DiscoveredContactsModel.cpp \
         src/models/FileCloudModel.cpp \
         src/models/FileLoader.cpp \
         src/models/ListModel.cpp \

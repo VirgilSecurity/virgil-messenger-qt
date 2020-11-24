@@ -42,6 +42,7 @@
 #include "models/AccountSelectionModel.h"
 #include "models/AttachmentsModel.h"
 #include "models/ChatsModel.h"
+#include "models/DiscoveredContactsModel.h"
 #include "models/FileCloudModel.h"
 #include "models/MessagesModel.h"
 #include "models/MessagesQueue.h"
@@ -54,6 +55,7 @@ Models::Models(VSQMessenger *messenger, Settings *settings, UserDatabase *userDa
     , m_accountSelection(new AccountSelectionModel(settings, this))
     , m_attachments(new AttachmentsModel(settings, this))
     , m_chats(new ChatsModel(this))
+    , m_discoveredContacts(new DiscoveredContactsModel(settings, this))
     , m_messages(new MessagesModel(this))
     , m_fileCloud(new FileCloudModel(settings, this))
     , m_fileLoader(new FileLoader(messenger->xmpp(), networkAccessManager, this))
@@ -63,6 +65,7 @@ Models::Models(VSQMessenger *messenger, Settings *settings, UserDatabase *userDa
     qRegisterMetaType<AccountSelectionModel *>("AccountSelectionModel*");
     qRegisterMetaType<AttachmentsModel *>("AttachmentsModel*");
     qRegisterMetaType<ChatsModel *>("ChatsModel*");
+    qRegisterMetaType<DiscoveredContactsModel *>("DiscoveredContactsModel*");
     qRegisterMetaType<FileCloudModel *>("FileCloudModel*");
     qRegisterMetaType<MessagesModel *>("MessagesModel*");
     qRegisterMetaType<QSortFilterProxyModel *>("QSortFilterProxyModel*");
@@ -110,6 +113,16 @@ const ChatsModel *Models::chats() const
 ChatsModel *Models::chats()
 {
     return m_chats;
+}
+
+const DiscoveredContactsModel *Models::discoveredContacts() const
+{
+    return m_discoveredContacts;
+}
+
+DiscoveredContactsModel *Models::discoveredContacts()
+{
+    return m_discoveredContacts;
 }
 
 const FileCloudModel *Models::fileCloud() const

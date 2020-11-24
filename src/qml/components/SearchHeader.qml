@@ -110,7 +110,7 @@ ToolBar {
             NumberAnimation {
                 properties: "anchors.leftMargin, anchors.rightMargin, width, opacity"
                 easing.type: Easing.InOutQuad
-                duration: 250
+                duration: Theme.defaultAnimationDuration
             }
         }
     ]
