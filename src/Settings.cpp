@@ -236,6 +236,11 @@ bool Settings::fileCloudEnabled() const
 #endif // VS_NO_FILECLOUD
 }
 
+bool Settings::autoSendCrashReport() const
+{
+    return !devMode();
+}
+
 QRect Settings::windowGeometry() const
 {
     return groupValue(kLastSessionGroup, kWindowGeometryId).toRect();

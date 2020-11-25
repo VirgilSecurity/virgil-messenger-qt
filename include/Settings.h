@@ -91,6 +91,7 @@ public:
     // Modes / features
     bool devMode() const;
     bool fileCloudEnabled() const;
+    bool autoSendCrashReport() const;
 
     // Window
     QRect windowGeometry() const;

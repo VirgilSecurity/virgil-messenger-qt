@@ -85,9 +85,14 @@ void VSQCrashReporter::checkAppCrash()
 {
     qCDebug(lcCrashReporter) << "Checking previous run flag...";
     if(m_settings->runFlag()) {
-#ifndef VS_DEVMODE
-        qCCritical(lcCrashReporter) << "Previous application run is crashed ! Sending log files...";
-        emit crashReportRequested();
+#ifndef QT_DEBUG
+        qCCritical(lcCrashReporter) << "Previous application run is crashed! Sending log files...";
+        if (m_settings->autoSendCrashReport()) {
+            sendLogFiles();
+        }
+        else {
+            emit crashReportRequested();
+        }
 #endif
     }
     qCDebug(lcCrashReporter) << "Set run flag to true";
