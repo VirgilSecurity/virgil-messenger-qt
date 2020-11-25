@@ -156,6 +156,9 @@ bool Settings::runFlag() const
 
 void Settings::setRunFlag(bool run)
 {
+    if (run == runFlag()) {
+        return;
+    }
     if (run) {
         qCDebug(lcSettings) << "Save session id" << m_sessionId;
         setGroupValue(kLastSessionGroup, kSessionId, m_sessionId);
