@@ -465,6 +465,8 @@ android: {
     DEFINES += VS_ANDROID=1 VS_PUSHNOTIFICATIONS=1 VS_MOBILE=1
     ANDROID_VERSION_CODE = $$AndroidVersionCode($${VERSION})
     ANDROID_VERSION_NAME = $$VERSION
+    ANDROID_MIN_SDK_VERSION = 29
+    ANDROID_TARGET_SDK_VERSION = 29
 
     INCLUDEPATH +=  \
         include/notifications/android \
@@ -568,3 +570,5 @@ OTHER_FILES += \
     .gitignore \
     VERSION_CORE \
     VERSION_MESSENGER
+
+ANDROID_ABIS = armeabi-v7a arm64-v8a x86 x86_64
