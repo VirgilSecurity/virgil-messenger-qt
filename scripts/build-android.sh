@@ -3,12 +3,13 @@ set -o errtrace
 #
 #   Global variables
 #
-SCRIPT_FOLDER="$(cd "$(dirname "$0")" && pwd)"
+SCRIPT_FOLDER="$(cd $(dirname "$0") && pwd)"
 
 # Include common function
 source ${SCRIPT_FOLDER}/ish/common.sh
 PLATFORM=android-clang
 ANDROID_MAKE="${ANDROID_NDK_ROOT}/prebuilt/${HOST_PLATFORM}/bin/make"
+ANDROID_PLATFORM="android-29"
 
 #*************************************************************************************************************
 # env variables passed to build anroid release
