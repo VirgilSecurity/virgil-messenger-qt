@@ -52,7 +52,7 @@ Page {
 
                 Column {
                     Layout.fillWidth: true
-                    clip: false
+                    clip: true
 
                     Text {
                         color: Theme.primaryTextColor
@@ -67,10 +67,7 @@ Page {
                         width: parent.width
                         text: model.lastMessageBody
                         elide: Text.ElideRight
-//                        textFormat: Text.RichText
-                        maximumLineCount: 1
                     }
-
                 }
 
                 Column {
@@ -91,7 +88,6 @@ Page {
                 }
 
                 onClicked: controllers.chats.openChatById(model.id)
-
             }
 
             onPlaceholderClicked: appState.requestNewChat()
