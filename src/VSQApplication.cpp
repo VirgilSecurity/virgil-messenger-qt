@@ -230,8 +230,9 @@ void VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
 
 void VSQApplication::onAboutToQuit()
 {
-    m_messenger.setStatus(VSQMessenger::EnStatus::MSTATUS_UNAVAILABLE);
+    qDebug() << "Application about to quit";
     m_settings.setRunFlag(false);
+    m_messenger.setStatus(VSQMessenger::EnStatus::MSTATUS_UNAVAILABLE);
 }
 
 ApplicationStateManager *VSQApplication::stateManager()

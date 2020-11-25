@@ -156,9 +156,6 @@ bool Settings::runFlag() const
 
 void Settings::setRunFlag(bool run)
 {
-    if (run == runFlag()) {
-        return;
-    }
     if (run) {
         qCDebug(lcSettings) << "Save session id" << m_sessionId;
         setGroupValue(kLastSessionGroup, kSessionId, m_sessionId);
@@ -279,6 +276,7 @@ QVariant Settings::groupValue(const QString &group, const QString &key, const QV
 void Settings::removeGroupKey(const QString &group, const QString &key)
 {
     remove(makeGroupKey(group, key));
+    sync();
 }
 
 void Settings::removeGroup(const QString &group)

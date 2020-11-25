@@ -57,7 +57,6 @@ VSQCrashReporter::VSQCrashReporter(Settings *settings, QNetworkAccessManager *ne
 
 VSQCrashReporter::~VSQCrashReporter()
 {
-    m_settings->setRunFlag(false);
 }
 
 void VSQCrashReporter::setVirgilUrl(QString VirgilUrl)
@@ -154,13 +153,13 @@ void VSQCrashReporter::endpointReply(QNetworkReply *reply)
 {
     if (reply->error() == QNetworkReply::NoError) {
         qCDebug(lcCrashReporter) << "Send report OK";
-        emit reportSent(tr("Report send OK"));
+        emit reportSent(tr("Crashreport sent"));
     }
     else {
         qCDebug(lcCrashReporter) << "Error sending report. Code:" << static_cast<int>(reply->error())
                                  << ". Name:" << reply->error()
                                  << ". Message:" << reply->errorString();
-        emit reportErrorOccurred(tr("Report send error"));
+        emit reportErrorOccurred(tr("Crashreport sending failed"));
     }
     qCDebug(lcCrashReporter) << "Sending finished";
 }
