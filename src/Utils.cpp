@@ -221,7 +221,7 @@ Jid Utils::createJid(const Contact::Id &contactId, const QString &xmppUrl)
 
 QString Utils::printableMessageBody(const Message &message)
 {
-    return message.body.left(30).replace('\n', ' ');
+    return message.body.left(250).replace('\n', ' ');
 }
 
 QString Utils::printableLoadProgress(const DataSize &loaded, const DataSize &total)

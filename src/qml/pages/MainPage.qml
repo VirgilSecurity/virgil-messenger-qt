@@ -61,12 +61,12 @@ Page {
                     }
 
                     Text {
+                        id: messageBody
                         color: Theme.secondaryTextColor
                         font.pointSize: UiHelper.fixFontSz(12)
-                        text: model.lastMessageBody
                         width: parent.width
+                        text: model.lastMessageBody
                         elide: Text.ElideRight
-                        textFormat: Text.RichText
                     }
                 }
 
