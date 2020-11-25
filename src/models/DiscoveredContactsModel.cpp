@@ -56,10 +56,12 @@ DiscoveredContactsModel::DiscoveredContactsModel(const Settings *settings, QObje
 
 void DiscoveredContactsModel::setContacts()
 {
+    beginResetModel();
     Contact user1 {"Connor RK800 new", QUrl("https://cdna.artstation.com/p/assets/images/images/011/345/000/large/junghoon-choi-bryandechart.jpg?1529085789") , "Last seen yesterday"};
     Contact user2 {"Connor RK801 new", QUrl("https://cdna.artstation.com/p/assets/images/images/011/345/000/large/junghoon-choi-bryandechart.jpg?1529085789") , "Online"};
 
     m_list = {user1, user2};
+    endResetModel();
 }
 
 int DiscoveredContactsModel::rowCount(const QModelIndex &parent) const

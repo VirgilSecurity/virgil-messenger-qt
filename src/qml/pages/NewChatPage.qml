@@ -13,6 +13,8 @@ OperationPage {
     readonly property string contact: contactSearch.search.toLowerCase()
     property var filterSource: models.discoveredContacts
     property alias search: contactSearch.search
+    property int modelCount: contactListView.count
+    property string searchResultState: "search empty"
 
     readonly property int defaultMargins: 20
     readonly property int defaultSearchHeight: 40
@@ -21,7 +23,12 @@ OperationPage {
     onSearchChanged: {
         if (filterSource) {
             filterSource.filter = search
+            checkState()
         }
+    }
+
+    onModelCountChanged: {
+        checkState()
     }
 
     header: Header {
@@ -66,7 +73,7 @@ OperationPage {
         }
         color: "transparent"
 
-        state: "search empty"
+        state: searchResultState
         states: [
             State {
                 name: "not found" // search word is NOT IN model
@@ -113,83 +120,8 @@ OperationPage {
             model: models.discoveredContacts.proxy
             spacing: 10
             clip: true
-//            header: contactListHeader
-            delegate: Rectangle {
-
-                property var nameExmple: model.name
-                width: 300
-                height: defaultChatHeight
-                color: 'green'
-
-                Text {
-                    anchors.centerIn: parent
-                    color: "white"
-                    text: "Name is: " + nameExmple
-                }
-
-//                ListDelegate {
-//                    id: contactListDelegate
-//                    anchors.fill: parent
-
-//                    Item {
-//                        width: avatar.width
-//                        height: parent.height
-
-//                        Avatar {
-//                            id: avatar
-//                            nickname: name
-//                            anchors.verticalCenter: parent.verticalCenter
-
-//                            Item {
-//                                id: imageItem
-//                                anchors.fill: parent
-//                                layer.enabled: true
-//                                layer.effect: OpacityMask {
-//                                    maskSource: Item {
-//                                        width: avatar.width
-//                                        height: avatar.height
-//                                        Rectangle {
-//                                            anchors.fill: parent
-//                                            radius: parent.height
-//                                        }
-//                                    }
-//                                }
-
-//                                Image {
-//                                    anchors.fill: parent
-//                                    source: model.imageSource
-//                                    mipmap: true
-//                                    asynchronous: true
-//                                    fillMode: Image.PreserveAspectCrop
-//                                }
-//                            }
-//                        }
-//                    }
-
-//                    Column {
-//                        Layout.fillWidth: true
-//                        clip: true
-
-//                        Text {
-//                            color: Theme.primaryTextColor
-//                            font.pointSize: UiHelper.fixFontSz(15)
-//                            text: model.name
-//                        }
-
-//                        Text {
-//                            color: Theme.secondaryTextColor
-//                            font.pointSize: UiHelper.fixFontSz(12)
-//                            text: model.status
-//                            width: parent.width
-//                            elide: Text.ElideRight
-//                            textFormat: Text.RichText
-//                        }
-//                    }
-
-//                }
-
-            }
-
+            header: contactListHeader
+            delegate: contactListComponent
         }
 
         Component {
@@ -315,6 +247,17 @@ OperationPage {
         }
     }
 
+    function checkState() {
+        if (search) {
+            if (modelCount === 1) {
+                searchResultState = "found"
+            } else {
+                searchResultState = "not found"
+            }
+        } else {
+            searchResultState = "search empty"
+        }
+    }
 
     function accept() {
         appState.addNewChat(contact)
