@@ -10,11 +10,13 @@ import "../theme"
 OperationPage {
     appState: app.stateManager.newChatState
     loadingText: qsTr("Adding of contact...")
+    footerText: ""
     readonly property string contact: contactSearch.search.toLowerCase()
     property var filterSource: models.discoveredContacts
     property alias search: contactSearch.search
     property int modelCount: contactListView.count
     property string searchResultState: "search empty"
+    property string serverName: "Default"
 
     readonly property int defaultMargins: 20
     readonly property int defaultSearchHeight: 40
@@ -50,15 +52,14 @@ OperationPage {
         searchPlaceholder: qsTr("Search contact")
         onClosed: {
             contactSearch.search = ""
-//            reject()
+            reject()
         }
-        onAccepted:  { // Accepted means Qt.Key_Enter and Qt.Key_Return
-            console.log("[X] NEWCHATPAGE.qml Making search: ", contactSearch.search)
-//            accept()
+        onAccepted: {
+            accept()
         }
     }
 
-    Rectangle {
+    Item {
         id: searchResultsItem
         property real headerHeight: 20
         property real headerOpacity: 0
@@ -69,9 +70,9 @@ OperationPage {
             right: parent.right
             bottom: parent.bottom
             topMargin: 1
+            bottomMargin: defaultChatHeight
             margins: defaultMargins
         }
-        color: "transparent"
 
         state: searchResultState
         states: [
@@ -113,7 +114,6 @@ OperationPage {
 
         ListView {
             id: contactListView
-
             signal placeholderClicked()
 
             anchors.fill: parent
@@ -122,6 +122,10 @@ OperationPage {
             clip: true
             header: contactListHeader
             delegate: contactListComponent
+            footer: Item {
+                width: width
+                height: 20
+            }
         }
 
         Component {
@@ -168,10 +172,8 @@ OperationPage {
                             textFormat: Text.RichText
                         }
                     }
-
                 }
             }
-
         }
 
         Component {
@@ -244,6 +246,40 @@ OperationPage {
 
             }
 
+        }
+    }
+
+    Item {
+        anchors {
+            top: searchResultsItem.bottom
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+            leftMargin: defaultMargins
+            rightMargin: defaultMargins
+        }
+
+        Form {
+            id: form
+            formSpacing: 25
+            focus: true
+
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.maximumWidth: Theme.formMaximumWidth
+                Layout.alignment: Qt.AlignHCenter
+
+                Label {
+                    text: qsTr("Server")
+                    color: Theme.primaryTextColor
+                    Layout.fillWidth: true
+                }
+
+                Label {
+                    color: Theme.secondaryTextColor
+                    text: serverName
+                }
+            }
         }
     }
 
