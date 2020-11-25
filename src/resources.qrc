@@ -100,7 +100,7 @@
         <file>qml/base/Platform.qml</file>
         <file>qml/base/qmldir</file>
         <file>qml/components/AppStatus.qml</file>
-        <file>qml/components/Dialogs/SendReportAsk.qml</file>
+        <file>qml/components/Dialogs/SendReportDialog.qml</file>
         <file>qml/components/SelectAttachmentsDialog.qml</file>
         <file>qml/resources/icons/Camera Selected.png</file>
         <file>qml/resources/icons/Camera Selected@2x.png</file>

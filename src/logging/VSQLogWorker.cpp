@@ -39,7 +39,7 @@
 VSQLogWorker::VSQLogWorker(QObject *parent)
     : QObject(parent)
 {
-#ifdef QT_NO_DEBUG // release
+#ifndef QT_DEBUG
     m_logToFile = true;
 #endif
 }

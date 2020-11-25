@@ -74,8 +74,8 @@ ApplicationWindow {
             visible: false
         }
 
-        SendReportAsk {
-            id: sendReportAsk
+        SendReportDialog {
+            id: sendReportDialog
         }
 
         AttachmentPicker {
@@ -115,7 +115,7 @@ ApplicationWindow {
                 showPopupInform(text)
             }
         })
-        crashReporter.crashReportRequested.connect(sendReportAsk.open)
+        crashReporter.crashReportRequested.connect(sendReportDialog.open)
         crashReporter.reportSent.connect(showPopupSuccess)
         crashReporter.reportErrorOccurred.connect(showPopupError)
 
