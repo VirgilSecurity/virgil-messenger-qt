@@ -52,7 +52,7 @@ Page {
 
                 Column {
                     Layout.fillWidth: true
-                    clip: true
+                    clip: false
 
                     Text {
                         color: Theme.primaryTextColor
@@ -65,33 +65,10 @@ Page {
                         color: Theme.secondaryTextColor
                         font.pointSize: UiHelper.fixFontSz(12)
                         width: parent.width
+                        text: model.lastMessageBody
                         elide: Text.ElideRight
-                        textFormat: Text.RichText
+//                        textFormat: Text.RichText
                         maximumLineCount: 1
-                        onWidthChanged: {
-                            messageBody.text = textClipper(_hiddenMessageBody.text, width, _hiddenMessageBody.contentWidth)
-                        }
-                        Component.onCompleted: {
-                            messageBody.text = textClipper(_hiddenMessageBody.text, width, _hiddenMessageBody.contentWidth)
-                        }
-                    }
-
-                    Item { // this item has full width of mesageBody.contentWidth & it is hidden
-                        id: _hiddenLogicItem
-                        width: parent.width
-                        height: 0
-                        visible: false
-
-                        Text {
-                            id: _hiddenMessageBody
-                            color: Theme.secondaryTextColor
-                            font.pointSize: messageBody.font.pointSize
-                            text: model.lastMessageBody
-                            width: parent.width
-                            elide: Text.ElideRight
-                            textFormat: Text.RichText
-                        }
-
                     }
 
                 }
@@ -200,17 +177,6 @@ Page {
             }
             const url = fileUrls[fileUrls.length - 1]
             controllers.fileCloud.addFile(url)
-        }
-    }
-
-    function textClipper(text, textPlaceholderWidth, textContentWidth) {
-        let stringPartVisible = textPlaceholderWidth / textContentWidth
-        if (stringPartVisible >= 1) {
-            return text
-        } else if (stringPartVisible > 0) {
-            let sliceStringLength = parseInt(text.length * stringPartVisible) - 2
-            let newText = text.slice(0, sliceStringLength) + "..."
-            return newText
         }
     }
 }
