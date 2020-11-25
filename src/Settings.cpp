@@ -236,6 +236,11 @@ bool Settings::fileCloudEnabled() const
 #endif // VS_NO_FILECLOUD
 }
 
+bool Settings::autoSendCrashReport() const
+{
+    return !devMode();
+}
+
 QRect Settings::windowGeometry() const
 {
     return groupValue(kLastSessionGroup, kWindowGeometryId).toRect();
@@ -271,6 +276,7 @@ QVariant Settings::groupValue(const QString &group, const QString &key, const QV
 void Settings::removeGroupKey(const QString &group, const QString &key)
 {
     remove(makeGroupKey(group, key));
+    sync();
 }
 
 void Settings::removeGroup(const QString &group)
