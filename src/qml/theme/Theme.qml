@@ -47,4 +47,7 @@ Item {
     readonly property string mainLogoText: app.organizationDisplayName
     readonly property string mainFont: robotoRegular.name
     readonly property string mainFontBold: robotoBold.name
+
+    // animation
+    readonly property int animationDuration: 250
 }

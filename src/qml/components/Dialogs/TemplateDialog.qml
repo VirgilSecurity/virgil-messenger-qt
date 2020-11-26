@@ -10,7 +10,6 @@ Popup {
     property alias backgroundRect: backgroundRectangle
 
     // Bahavior settings
-    property real enterTransitionDuration: 250
     property real exitTransitionDuration: 200
 
     // Content settings
@@ -42,9 +41,9 @@ Popup {
     enter: Transition {
         ParallelAnimation {
             NumberAnimation {property: "opacity"; from: 0.0; to: 1.0; easing.type: Easing.InOutQuad;
-                duration: enterTransitionDuration; easing.overshoot: 1}
+                duration: Theme.animationDuration; easing.overshoot: 1}
             NumberAnimation {property: "scale"; from: 0.8; to: 1.0; easing.type: Easing.OutBack;
-                duration: enterTransitionDuration; easing.overshoot: 2}
+                duration: Theme.animationDuration; easing.overshoot: 2}
         }
     }
 

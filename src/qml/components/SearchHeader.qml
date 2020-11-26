@@ -21,7 +21,7 @@ ToolBar {
 
     default property alias menu: contextMenu.contentData
 
-    readonly property int deafultBarHeight: 40
+    readonly property int defaultBarHeight: 40
     readonly property int defaultMargin: 20
     readonly property int smallMargin: 10
 
@@ -63,7 +63,7 @@ ToolBar {
 
             PropertyChanges {
                 target: titleDescriptionColumn
-                anchors.leftMargin: -deafultBarHeight
+                anchors.leftMargin: -defaultBarHeight
                 opacity: 0
 
             }
@@ -76,7 +76,7 @@ ToolBar {
 
             PropertyChanges {
                 target: menuButton
-                anchors.rightMargin: -deafultBarHeight
+                anchors.rightMargin: -defaultBarHeight
                 opacity: 0
             }
 
@@ -93,8 +93,8 @@ ToolBar {
 
             PropertyChanges {
                 target: searchContainer
-                width: deafultBarHeight
-                anchors.rightMargin: deafultBarHeight
+                width: defaultBarHeight
+                anchors.rightMargin: defaultBarHeight
             }
 
             PropertyChanges {
@@ -110,7 +110,7 @@ ToolBar {
             NumberAnimation {
                 properties: "anchors.leftMargin, anchors.rightMargin, width, opacity"
                 easing.type: Easing.InOutQuad
-                duration: 250
+                duration: Theme.animationDuration
             }
         }
     ]
@@ -123,7 +123,7 @@ ToolBar {
             rightMargin: smallMargin
         }
 
-        height: deafultBarHeight
+        height: defaultBarHeight
 
         ImageButton {
             id: backButton
@@ -132,7 +132,7 @@ ToolBar {
                 verticalCenter: parent.verticalCenter
             }
             image: "Arrow-Left"
-            width: showBackButton ? deafultBarHeight : 0
+            width: showBackButton ? defaultBarHeight : 0
             onClicked: app.stateManager.goBack()
         }
 
@@ -183,11 +183,11 @@ ToolBar {
                 anchors {
                     verticalCenter: parent.verticalCenter
                     right: parent.right
-                    rightMargin: deafultBarHeight
+                    rightMargin: defaultBarHeight
                 }
 
-                height: deafultBarHeight
-                width: deafultBarHeight
+                height: defaultBarHeight
+                width: defaultBarHeight
 
                 Search {
                     id: searchId

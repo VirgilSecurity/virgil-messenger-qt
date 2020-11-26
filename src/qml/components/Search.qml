@@ -68,7 +68,7 @@ Rectangle {
             PropertyAnimation {
                 properties: "color"
                 easing.type: Easing.InExpo
-                duration: 250
+                duration: Theme.animationDuration
             }
         },
         Transition {
@@ -76,7 +76,7 @@ Rectangle {
             PropertyAnimation {
                 properties: "color"
                 easing.type: Easing.OutExpo
-                duration: 250
+                duration: Theme.animationDuration
             }
         }
     ]

@@ -11,76 +11,61 @@ ListView {
     signal placeholderClicked()
 
     property var searchHeader: undefined
-    property alias emptyIcon: labeledIcon.emptyIcon
-    property alias emptyText: labeledIcon.emptyText
-    property int defaultAnimationDuration: 250
-    property int shortAnimationDuration: 250
+    property bool isSearchOpened: searchHeader ? searchHeader.isSearchOpen : false
+    property bool search: searchHeader ? searchHeader.search : ""
 
-    cacheBuffer: 5000
+    property alias emptyIcon: labeledIcon.emptyIcon
+    property alias emptyText: labeledIcon.emptyListText
+    readonly property bool isEmpty: listView.contentItem.children.length === 0
 
     add: Transition {
-        NumberAnimation {property: "scale"; from: 0.9; to: 1; duration: defaultAnimationDuration; easing.type: Easing.InOutCubic}
-        NumberAnimation {property: "opacity"; from: 0; to: 1; duration: defaultAnimationDuration; easing.type: Easing.InOutCubic}
+        NumberAnimation { property: "scale"; from: 0.9; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
     }
 
     displaced: Transition {
-        NumberAnimation {properties: "x,y"; duration: defaultAnimationDuration; easing.type: Easing.InOutCubic}
-        NumberAnimation {property: "scale"; to: 1; duration: defaultAnimationDuration; easing.type: Easing.InOutCubic}
-        NumberAnimation {property: "opacity"; to: 1; duration: defaultAnimationDuration; easing.type: Easing.InOutCubic}
+        NumberAnimation { properties: "x,y"; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+        NumberAnimation { property: "scale"; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+        NumberAnimation { property: "opacity"; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
     }
 
     move: Transition {
-        NumberAnimation {properties: "x,y"; duration: defaultAnimationDuration; easing.type: Easing.InOutCubic}
+        NumberAnimation { properties: "x,y"; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
     }
 
     remove: Transition {
-        NumberAnimation {property: "opacity"; to: 0; duration: shortAnimationDuration; easing.type: Easing.InOutCubic}
-        NumberAnimation {property: "scale"; to: 0.9; duration: shortAnimationDuration; easing.type: Easing.InOutCubic}
+        NumberAnimation { property: "opacity"; to: 0; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+        NumberAnimation { property: "scale"; to: 0.9; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
     }
 
     IconWithText {
         id: labeledIcon
         property url emptyIcon: "../resources/icons/Chats.png"
         property url searchIcon: "../resources/icons/Search_Big.png"
-        property string emptyText: qsTr("Create your first chat<br/>by pressing the dots<br/>button above")
-        property string searchText: qsTr("Search results<br/>will appear here")
-        property string searchEmptyText: qsTr("Nothing found")
-        visible: !listView.contentItem.children.length
+        property string emptyListText: qsTr("Create your first chat<br/>by pressing the dots<br/>button above")
+        property string searchHintText: qsTr("Search results<br/>will appear here")
+        property string searchNoResultsText: qsTr("Nothing found")
+        visible: listView.isEmpty
 
         image {
-            source: {
-                if (searchHeader) {
-                    if (searchHeader.isSearchOpen) {
-                        return searchIcon
-                    } else {
-                        return emptyIcon
-                    }
-                }
-            }
-
+            source: isSearchOpened ? searchIcon : emptyIcon
             width: 48
             height: 48
         }
 
         label {
             text: {
-                if (searchHeader) {
-                    if (!searchHeader.isSearchOpen) {
-                        return emptyText;
-                    }
-                    if (searchHeader.search !== '') {
-                        return searchEmptyText;
-                    }
-                    return searchText;
+                if (!isSearchOpened) {
+                    return emptyListText;
                 }
+                return search === '' ? searchHintText : searchNoResultsText
             }
-
             color: Theme.labelColor
         }
     }
 
     MouseArea {
-        visible: !listView.contentItem.children.length
+        visible: listView.isEmpty
         anchors.fill: parent
         onClicked: {
             listView.placeholderClicked()
