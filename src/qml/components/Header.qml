@@ -11,15 +11,15 @@ ToolBar {
     default property alias menu: contextMenu.contentData
 
     background: Rectangle {
-        implicitHeight: 60
+        implicitHeight: Theme.headerHeight
         color: "transparent"
 
         Rectangle {
             id: separator
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.leftMargin: 20
-            anchors.rightMargin: 20
+            anchors.leftMargin: Theme.margin
+            anchors.rightMargin: Theme.margin
 
             height: 1
             color: Theme.chatBackgroundColor

@@ -27,14 +27,11 @@ Popup {
     modal: true
     focus: true
     closePolicy: Popup.NoAutoClose
-    padding: d.margin
+    padding: Theme.margin
 
     QtObject {
         id: d
-        readonly property real margin: 20
-        readonly property real spacing: 20
         readonly property real radius: 10
-
         readonly property real popupImplicitWidth: Math.min(420, root.width * 0.8)
     }
 
@@ -63,20 +60,20 @@ Popup {
         radius: d.radius
         anchors.centerIn: parent
         implicitWidth: d.popupImplicitWidth
-        height: contentColumn.height + 2 * d.margin
+        height: contentColumn.height + 2 * Theme.margin
 
         Column {
             id: contentColumn
             anchors {
                 left: parent.left
-                leftMargin: d.margin
+                leftMargin: Theme.margin
                 right: parent.right
-                rightMargin: d.margin
+                rightMargin: Theme.margin
                 top: parent.top
-                topMargin: d.margin
+                topMargin: Theme.margin
             }
 
-            spacing: d.spacing
+            spacing: Theme.spacing
 
             Text {
                 width: parent.width
@@ -96,7 +93,7 @@ Popup {
 
             Row {
                 anchors.horizontalCenter: parent.horizontalCenter
-                spacing: d.spacing
+                spacing: Theme.spacing
 
                 FormPrimaryButton {
                     text: acceptedButtonText

@@ -114,7 +114,7 @@ Rectangle {
         id: searchButtonId
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
-        anchors.leftMargin: 10
+        anchors.leftMargin: Theme.smallMargin
         width: 24
         height: 24
         image: "Search"

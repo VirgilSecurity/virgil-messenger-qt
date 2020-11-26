@@ -22,8 +22,6 @@ ToolBar {
     default property alias menu: contextMenu.contentData
 
     readonly property int defaultBarHeight: 40
-    readonly property int defaultMargin: 20
-    readonly property int smallMargin: 10
 
     onIsSearchOpenChanged: {
         if (filterSource) {
@@ -40,15 +38,15 @@ ToolBar {
     }
 
     background: Rectangle {
-        implicitHeight: 60
+        implicitHeight: Theme.headerHeight
         color: Theme.contactsBackgroundColor
 
         Rectangle {
             id: separator
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.leftMargin: defaultMargin
-            anchors.rightMargin: defaultMargin
+            anchors.leftMargin: Theme.margin
+            anchors.rightMargin: Theme.margin
 
             height: 1
             color: Theme.chatBackgroundColor
@@ -119,8 +117,8 @@ ToolBar {
         id: contentRow
         anchors {
             fill: parent
-            leftMargin: defaultMargin
-            rightMargin: smallMargin
+            leftMargin: Theme.margin
+            rightMargin: Theme.smallMargin
         }
 
         height: defaultBarHeight
@@ -140,7 +138,7 @@ ToolBar {
             id: toolbarContentContainer
             anchors {
                 left: backButton.right
-                leftMargin: showBackButton ? smallMargin : 0
+                leftMargin: showBackButton ? Theme.smallMargin : 0
                 right: parent.right
             }
 
