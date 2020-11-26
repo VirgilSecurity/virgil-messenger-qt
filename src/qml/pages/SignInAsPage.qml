@@ -44,5 +44,5 @@ Page {
         }
     }
 
-    footer: Footer {_text: footerText}
+    footer: Footer {text: footerText}
 }

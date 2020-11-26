@@ -12,9 +12,9 @@ OperationPage {
     loadingText: qsTr("Adding of contact...")
     footerText: ""
     readonly property string contact: contactSearch.search.toLowerCase()
-    property var filterSource: models.discoveredContacts
-    property alias search: contactSearch.search
-    property int modelCount: contactListView.count
+    readonly property var filterSource: models.discoveredContacts
+    readonly property alias search: contactSearch.search
+    readonly property int modelCount: contactListView.count
     property string searchResultState: "search empty"
     property string serverName: "Default"
 
@@ -34,8 +34,6 @@ OperationPage {
     }
 
     header: Header {
-//        showBackButton: !form.isLoading
-        showBackButton: true
         title: qsTr("New chat")
     }
 
@@ -166,7 +164,7 @@ OperationPage {
                         Text {
                             color: Theme.secondaryTextColor
                             font.pointSize: UiHelper.fixFontSz(12)
-                            text: "Click here to create chat"
+                            text: qsTr("Click here to create chat")
                             width: parent.width
                             elide: Text.ElideRight
                             textFormat: Text.RichText
@@ -180,6 +178,10 @@ OperationPage {
             id: contactListComponent
 
             Item {
+                readonly property string name: model.name
+                readonly property string avatarUrl: model.avatarUrl
+                readonly property string lastSeenActivity: model.lastSeenActivity
+
                 width: contactListView.width
                 height: defaultChatHeight
 
@@ -193,32 +195,9 @@ OperationPage {
 
                         Avatar {
                             id: avatar
-                            nickname: model.name
+                            nickname: name
+                            avatarUrl: avatarUrl
                             anchors.verticalCenter: parent.verticalCenter
-
-                            Item {
-                                id: imageItem
-                                anchors.fill: parent
-                                layer.enabled: true
-                                layer.effect: OpacityMask {
-                                    maskSource: Item {
-                                        width: avatar.width
-                                        height: avatar.height
-                                        Rectangle {
-                                            anchors.fill: parent
-                                            radius: parent.height
-                                        }
-                                    }
-                                }
-
-                                Image {
-                                    anchors.fill: parent
-                                    source: model.avatarUrl
-                                    mipmap: true
-                                    asynchronous: true
-                                    fillMode: Image.PreserveAspectCrop
-                                }
-                            }
                         }
                     }
 
@@ -229,23 +208,20 @@ OperationPage {
                         Text {
                             color: Theme.primaryTextColor
                             font.pointSize: UiHelper.fixFontSz(15)
-                            text: model.name
+                            text: name
                         }
 
                         Text {
                             color: Theme.secondaryTextColor
                             font.pointSize: UiHelper.fixFontSz(12)
-                            text: model.lastSeenActivity
+                            text: lastSeenActivity
                             width: parent.width
                             elide: Text.ElideRight
                             textFormat: Text.RichText
                         }
                     }
-
                 }
-
             }
-
         }
     }
 
@@ -285,11 +261,13 @@ OperationPage {
 
     function checkState() {
         if (search) {
-            if (modelCount === 1) {
+
+            if (modelCount === 1 && search === contactListView.itemAtIndex(0).name) {
                 searchResultState = "found"
             } else {
                 searchResultState = "not found"
             }
+
         } else {
             searchResultState = "search empty"
         }

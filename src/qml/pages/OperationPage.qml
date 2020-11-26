@@ -8,13 +8,13 @@ Page {
     property var appState
     property bool loadingUsed: true
     property string loadingText: ""
-    property string footerText: qsTr("Powered by Virgil Security, Inc.")
+    property alias footerText: footerItem.text
 
     background: Rectangle {
         color: Theme.mainBackgroundColor
     }
 
-    footer: Footer {_text: footerText}
+    footer: Footer {id: footerItem; text: qsTr("Powered by Virgil Security, Inc.")}
 
     Connections {
         target: appState

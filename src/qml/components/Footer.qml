@@ -5,14 +5,17 @@ import QtQuick.Controls 2.12
 import "../theme"
 
 Item {
-    property string _text: ""
+    property string text: ""
+    readonly property real tightLetterSpacing: 0.23
+
     height: 40
     width: parent.width
+    visible: text !== "" ? true : false
 
     Text {
         anchors.centerIn: parent
-        text: _text
-        font.letterSpacing: 0.23
+        text: text
+        font.letterSpacing: tightLetterSpacing
         verticalAlignment: Text.AlignBottom
         color: Theme.labelColor
         horizontalAlignment: Text.AlignHCenter
