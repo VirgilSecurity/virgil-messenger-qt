@@ -48,21 +48,33 @@ ListView {
         visible: !listView.contentItem.children.length
 
         image {
-            source: searchHeader.isSearchOpen ? searchIcon : emptyIcon
+            source: {
+                if (searchHeader) {
+                    if (searchHeader.isSearchOpen) {
+                        return searchIcon
+                    } else {
+                        return emptyIcon
+                    }
+                }
+            }
+
             width: 48
             height: 48
         }
 
         label {
             text: {
-                if (!searchHeader.isSearchOpen) {
-                    return emptyText;
+                if (searchHeader) {
+                    if (!searchHeader.isSearchOpen) {
+                        return emptyText;
+                    }
+                    if (searchHeader.search !== '') {
+                        return searchEmptyText;
+                    }
+                    return searchText;
                 }
-                if (searchHeader.search !== '') {
-                    return searchEmptyText;
-                }
-                return searchText;
             }
+
             color: Theme.labelColor
         }
     }
