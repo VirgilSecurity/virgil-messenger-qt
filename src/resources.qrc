@@ -15,6 +15,41 @@
         <file>qml/pages/SignInUsernamePage.qml</file>
         <file>qml/pages/SignUpPage.qml</file>
         <file>qml/pages/SplashScreenPage.qml</file>
+        <!-- Icons -->
+        <file>qml/resources/icons/Arrow-Left.png</file>
+        <file>qml/resources/icons/Arrow-Left@2x.png</file>
+        <file>qml/resources/icons/Arrow-Right.png</file>
+        <file>qml/resources/icons/Arrow-Right@2x.png</file>
+        <file>qml/resources/icons/More.png</file>
+        <file>qml/resources/icons/More@2x.png</file>
+        <file>qml/resources/icons/Search.png</file>
+        <file>qml/resources/icons/Search@2x.png</file>
+        <file>qml/resources/icons/Search_Big.png</file>
+        <file>qml/resources/icons/Search_Big@2x.png</file>
+        <file>qml/resources/icons/Close.png</file>
+        <file>qml/resources/icons/Close@2x.png</file>
+        <file>qml/resources/icons/Chats.png</file>
+        <file>qml/resources/icons/Chats@2x.png</file>
+        <file>qml/resources/icons/Lock.png</file>
+        <file>qml/resources/icons/Lock@2x.png</file>
+        <file>qml/resources/icons/Key.png</file>
+        <file>qml/resources/icons/Key@2x.png</file>
+        <file>qml/resources/icons/Menu.png</file>
+        <file>qml/resources/icons/Menu@2x.png</file>
+        <file>qml/resources/icons/Plus.png</file>
+        <file>qml/resources/icons/Plus@2x.png</file>
+        <file>qml/resources/icons/Grid.png</file>
+        <file>qml/resources/icons/Grid@2x.png</file>
+        <file>qml/resources/icons/Send.png</file>
+        <file>qml/resources/icons/Send@2x.png</file>
+        <file>qml/resources/icons/File-Big.png</file>
+        <file>qml/resources/icons/File-Big@2x.png</file>
+        <file>qml/resources/icons/File-Manager.png</file>
+        <file>qml/resources/icons/File-Manager@2x.png</file>
+        <file>qml/resources/icons/Image-Big.png</file>
+        <file>qml/resources/icons/Image-Big@2x.png</file>
+        <file>qml/resources/icons/Folder-Big.png</file>
+        <file>qml/resources/icons/Folder-Big@2x.png</file>
         <!-- Others -->
         <file>qml/components/AttachmentPreview.qml</file>
         <file>qml/components/CommonHelpers/TextInCircle.qml</file>
@@ -28,14 +63,6 @@
         <file>qml/resources/fonts/Roboto-Bold.ttf</file>
         <file>qml/resources/fonts/Roboto-Medium.ttf</file>
         <file>qml/resources/fonts/Roboto-Regular.ttf</file>
-        <file>qml/resources/icons/Arrow-Left.png</file>
-        <file>qml/resources/icons/Arrow-Left@2x.png</file>
-        <file>qml/resources/icons/Arrow-Right.png</file>
-        <file>qml/resources/icons/Arrow-Right@2x.png</file>
-        <file>qml/resources/icons/More.png</file>
-        <file>qml/resources/icons/More@2x.png</file>
-        <file>qml/resources/icons/Search.png</file>
-        <file>qml/resources/icons/Search@2x.png</file>
         <file>qml/resources/AddAccount.png</file>
         <file>qml/resources/AppUserscreen.png</file>
         <file>qml/resources/cert.pem</file>
@@ -50,10 +77,6 @@
         <file>qml/theme/Theme.qml</file>
         <file>qml/main.qml</file>
         <file>qml/MainView.qml</file>
-        <file>qml/resources/icons/Grid.png</file>
-        <file>qml/resources/icons/Grid@2x.png</file>
-        <file>qml/resources/icons/Send.png</file>
-        <file>qml/resources/icons/Send@2x.png</file>
         <file>qml/components/Form.qml</file>
         <file>qml/components/FormLabel.qml</file>
         <file>qml/components/FormInput.qml</file>
@@ -72,35 +95,22 @@
         <file>qml/components/ImageButton.qml</file>
         <file>qml/components/SettingsButton.qml</file>
         <file>qml/components/FormImage.qml</file>
-        <file>qml/resources/icons/Lock.png</file>
-        <file>qml/resources/icons/Lock@2x.png</file>
         <file>qml/components/FormSubtitle.qml</file>
-        <file>qml/resources/icons/Key.png</file>
-        <file>qml/resources/icons/Key@2x.png</file>
+        <file>qml/components/SidebarButton.qml</file>
         <file>qml/components/SidebarPanel.qml</file>
-        <file>qml/resources/icons/Menu.png</file>
-        <file>qml/resources/icons/Menu@2x.png</file>
         <file>qml/components/ServerButton.qml</file>
-        <file>qml/resources/icons/Plus.png</file>
-        <file>qml/resources/icons/Plus@2x.png</file>
         <file>qml/components/CommonHelpers/IconWithText.qml</file>
-        <file>qml/resources/icons/Chats.png</file>
-        <file>qml/resources/icons/Chats@2x.png</file>
         <file>qml/components/ChatDateSeporator.qml</file>
         <file>qml/components/Search.qml</file>
         <file>qml/components/UserNameTextField.qml</file>
         <file>qml/components/UserNameFormInput.qml</file>
-        <file>qml/resources/icons/Search_Big.png</file>
-        <file>qml/resources/icons/Search_Big@2x.png</file>
-        <file>qml/resources/icons/Close.png</file>
-        <file>qml/resources/icons/Close@2x.png</file>
         <file>qml/resources/sounds/notification.wav</file>
         <file>qml/resources/sounds/message-received.wav</file>
         <file>qml/resources/sounds/message-sent.wav</file>
         <file>qml/base/Platform.qml</file>
         <file>qml/base/qmldir</file>
         <file>qml/components/AppStatus.qml</file>
-        <file>qml/components/Dialogs/SendReportAsk.qml</file>
+        <file>qml/components/Dialogs/SendReportDialog.qml</file>
         <file>qml/components/SelectAttachmentsDialog.qml</file>
         <file>qml/resources/icons/Camera Selected.png</file>
         <file>qml/resources/icons/Camera Selected@2x.png</file>

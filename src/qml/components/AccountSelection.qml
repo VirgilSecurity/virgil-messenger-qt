@@ -5,14 +5,13 @@ import QtQuick.Layouts 1.12
 import "../theme"
 
 ColumnLayout {
-
     id: accountSelector
 
     Layout.fillWidth: true
     Layout.maximumWidth: 350 // Theme.formMaximumWidth
     Layout.alignment: Qt.AlignHCenter
 
-    spacing: 20
+    spacing: Theme.spacing
 
     signal userSelected (string userName)
 
@@ -97,7 +96,7 @@ ColumnLayout {
                                         anchors.horizontalCenter: parent.horizontalCenter
                                         font.pointSize: UiHelper.fixFontSz(15)
                                         elide: Text.ElideRight
-                                        width: parent.width - 20
+                                        width: parent.width - Theme.margin
                                         horizontalAlignment: Text.AlignHCenter
                                         color: Theme.primaryTextColor
                                     }

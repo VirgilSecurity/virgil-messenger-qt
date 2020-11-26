@@ -92,11 +92,10 @@ public:
 signals:
     void notificationCreated(const QString &notification, const bool error);
 
-private slots:
-    void
-    onApplicationStateChanged(Qt::ApplicationState state);
-
 private:
+    void onApplicationStateChanged(Qt::ApplicationState state);
+    void onAboutToQuit();
+
     ApplicationStateManager *stateManager();
 
     static const QString kVersion;

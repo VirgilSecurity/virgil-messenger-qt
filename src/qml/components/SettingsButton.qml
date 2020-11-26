@@ -10,7 +10,7 @@ ImageButton {
 
     property real menuWidth: 200
     property real menuItemHeight: 40
-    property real menuItemPadding: 20
+    property real menuItemPadding: Theme.padding
     // move components from direct childrens to menu childrens
     default property alias contentData: menu.contentData
 
@@ -30,8 +30,8 @@ ImageButton {
 
         implicitWidth: menuWidth
 
-        topPadding: 10
-        bottomPadding: 10
+        topPadding: Theme.smallPadding
+        bottomPadding: Theme.smallPadding
 
         background: Rectangle {
             color: Theme.menuBackgroundColor

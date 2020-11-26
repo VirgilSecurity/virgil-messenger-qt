@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Layouts 1.12
 
 import "../components"
+import "../theme"
 
 SignInPage {
     appState: app.stateManager.splashScreenState
@@ -10,7 +11,7 @@ SignInPage {
         id: form
 
         FormVendor {
-            Layout.bottomMargin: 20
+            Layout.bottomMargin: Theme.margin
         }
     }
 }

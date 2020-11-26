@@ -105,7 +105,7 @@ OperationPage {
                 NumberAnimation {
                     properties: "headerHeight, headerOpacity"
                     easing.type: Easing.InExpo
-                    duration: Theme.defaultAnimationDuration
+                    duration: Theme.animationDuration
                 }
             }
         ]
@@ -237,7 +237,7 @@ OperationPage {
 
         Form {
             id: form
-            formSpacing: 25
+            formSpacing: Theme.spacing
             focus: true
 
             RowLayout {
@@ -261,13 +261,11 @@ OperationPage {
 
     function checkState() {
         if (search) {
-
-            if (modelCount === 1 && search === contactListView.itemAtIndex(0).name) {
+            if (modelCount === 1 && search.toLowerCase() === contactListView.itemAtIndex(0).name.toLowerCase()) {
                 searchResultState = "found"
             } else {
                 searchResultState = "not found"
             }
-
         } else {
             searchResultState = "search empty"
         }

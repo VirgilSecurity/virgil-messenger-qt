@@ -57,7 +57,6 @@ VSQCrashReporter::VSQCrashReporter(Settings *settings, QNetworkAccessManager *ne
 
 VSQCrashReporter::~VSQCrashReporter()
 {
-    m_settings->setRunFlag(false);
 }
 
 void VSQCrashReporter::setVirgilUrl(QString VirgilUrl)
@@ -85,9 +84,14 @@ void VSQCrashReporter::checkAppCrash()
 {
     qCDebug(lcCrashReporter) << "Checking previous run flag...";
     if(m_settings->runFlag()) {
-#ifndef VS_DEVMODE
-        qCCritical(lcCrashReporter) << "Previous application run is crashed ! Sending log files...";
-        emit crashReportRequested();
+#ifndef QT_DEBUG
+        qCCritical(lcCrashReporter) << "Previous application run is crashed! Sending log files...";
+        if (m_settings->autoSendCrashReport()) {
+            sendLogFiles();
+        }
+        else {
+            emit crashReportRequested();
+        }
 #endif
     }
     qCDebug(lcCrashReporter) << "Set run flag to true";
@@ -149,13 +153,13 @@ void VSQCrashReporter::endpointReply(QNetworkReply *reply)
 {
     if (reply->error() == QNetworkReply::NoError) {
         qCDebug(lcCrashReporter) << "Send report OK";
-        emit reportSent(tr("Report send OK"));
+        emit reportSent(tr("Crashreport sent"));
     }
     else {
         qCDebug(lcCrashReporter) << "Error sending report. Code:" << static_cast<int>(reply->error())
                                  << ". Name:" << reply->error()
                                  << ". Message:" << reply->errorString();
-        emit reportErrorOccurred(tr("Report send error"));
+        emit reportErrorOccurred(tr("Crashreport sending failed"));
     }
     qCDebug(lcCrashReporter) << "Sending finished";
 }

@@ -2,7 +2,6 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 
 TemplateDialog {
-    id: sendReportAsk
     width: root.width
     height: root.height
     title: qsTr("Send report")

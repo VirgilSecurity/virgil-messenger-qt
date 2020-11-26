@@ -68,7 +68,7 @@ Rectangle {
             PropertyAnimation {
                 properties: "color"
                 easing.type: Easing.InExpo
-                duration: Theme.defaultAnimationDuration
+                duration: Theme.animationDuration
             }
         },
         Transition {
@@ -76,7 +76,7 @@ Rectangle {
             PropertyAnimation {
                 properties: "color"
                 easing.type: Easing.OutExpo
-                duration: Theme.defaultAnimationDuration
+                duration: Theme.animationDuration
             }
         }
     ]
@@ -114,7 +114,7 @@ Rectangle {
         id: searchButtonId
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
-        anchors.leftMargin: 10
+        anchors.leftMargin: Theme.smallMargin
         width: 24
         height: 24
         image: "Search"

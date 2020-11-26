@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+﻿//  Copyright (C) 2015-2020 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -57,11 +57,11 @@ public:
 
 signals:
     void setUserId(const UserId &userId);
-
     void pushMessage(const GlobalMessage &message);
     void pushMessageDownload(const GlobalMessage &message, const QString &filePath);
     void pushMessagePreload(const GlobalMessage &message);
 
+    // Message operation
     void messageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status status);
     void attachmentStatusChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Status &status);
     void attachmentProgressChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &bytesLoaded, const DataSize &bytesTotal);
@@ -80,12 +80,15 @@ private:
         Created = 0,
         UserSet = 1 << 0,
         FileLoaderReady = 1 << 1,
-        FetchNeeded = QueueState::UserSet | QueueState::FileLoaderReady,
+        FetchNeeded = UserSet | FileLoaderReady,
         FetchRequested = 1 << 2,
         ReadyToStart = UserSet | FetchRequested
     };
 
     void startIfReady();
+    void scheduleStartIfReady();
+    void setupRestartOnFail(MessageOperation *operation);
+
     void setQueueState(const QueueState &state);
     void unsetQueueState(const QueueState &state);
 
@@ -93,11 +96,15 @@ private:
     MessageOperation *pushMessageOperation(const GlobalMessage &message, bool prepend = false);
 
     void onSetUserId(const UserId &userId);
-    void onFileLoaderServiceFound(bool serviceFound);
-    void onNotSentMessagesFetched(const GlobalMessages &messages);
     void onPushMessage(const GlobalMessage &message);
     void onPushMessageDownload(const GlobalMessage &message, const QString &filePath);
     void onPushMessagePreload(const GlobalMessage &message);
+
+    void onFileLoaderServiceFound(bool serviceFound);
+    void onNotSentMessagesFetched(const GlobalMessages &messages);
+    void onFinished();
+
+    // Message operation
     void onMessageOperationStatusChanged(const MessageOperation *operation);
     void onMessageOperationAttachmentStatusChanged(const MessageOperation *operation);
     void onMessageOperationAttachmentUrlChanged(const MessageOperation *operation);

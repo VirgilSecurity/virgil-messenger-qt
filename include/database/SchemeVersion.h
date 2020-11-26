@@ -32,60 +32,9 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_FILECLOUDMODEL_H
-#define VM_FILECLOUDMODEL_H
+#ifndef VS_SCHEMEVERSION_H
+#define VS_SCHEMEVERSION_H
 
-#include <QDateTime>
-#include <QFileInfoList>
-#include <QTimer>
+#define VERSION_DATABASE_SCHEME 0
 
-#include "ListModel.h"
-
-class QSortFilterProxyModel;
-
-class Settings;
-
-namespace vm
-{
-class FileCloudModel : public ListModel
-{
-    Q_OBJECT
-
-public:
-    enum Roles
-    {
-        FilenameRole = Qt::UserRole,
-        IsDirRole,
-        DisplayDateTimeRole,
-        DisplayFileSize,
-        SortRole
-    };
-
-    FileCloudModel(const Settings *settings, QObject *parent);
-
-    void setDirectory(const QDir &dir);
-    void setEnabled(bool enabled);
-
-    const QFileInfo getFileInfo(const int proxyRow) const;
-
-signals:
-    void listReady(const QFileInfoList &list, QPrivateSignal);
-
-private:
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
-
-    void setList(const QFileInfoList &list);
-
-    void invalidateDateTime();
-
-    const Settings *m_settings;
-    QFileInfoList m_list;
-    QDateTime m_now;
-    QTimer m_updateTimer;
-    int m_debugCounter = 0;
-};
-}
-
-#endif // VM_FILECLOUDMODEL_H
+#endif // VS_SCHEMEVERSION_H

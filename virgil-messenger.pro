@@ -43,10 +43,6 @@ isEmpty(VERSION) {
     VERSION = $$cat($$PWD/VERSION_MESSENGER)
 }
 
-isEmpty(VERSION_DATABASE_SCHEME) {
-    VERSION_DATABASE_SCHEME = $$cat($$PWD/VERSION_DATABASE_SCHEME)
-}
-
 ios {
     isEmpty(VS_TARGET) {
         TARGET = VirgilMessenger
@@ -60,7 +56,6 @@ ios {
 }
 message("TARGET = $$TARGET")
 message("VERSION = $$VERSION")
-message("VERSION_DATABASE_SCHEME = $$VERSION_DATABASE_SCHEME")
 
 #
 #   Directory with precompiled dependencies
@@ -87,8 +82,7 @@ message("QXMPP location: $${QXMPP_BUILD_PATH}")
 DEFINES += QT_DEPRECATED_WARNINGS \
         INFO_CLIENT=1 \
         CFG_CLIENT=1 \
-        VERSION="$$VERSION" \
-        VERSION_DATABASE_SCHEME="$$VERSION_DATABASE_SCHEME"
+        VERSION="$$VERSION"
 
 include(customers/customers.pri)
 
@@ -156,6 +150,7 @@ HEADERS += \
         include/database/ContactsTable.h \
         include/database/ChatsTable.h \
         include/database/MessagesTable.h \
+        include/database/SchemeVersion.h \
         include/database/UserDatabase.h \
         include/database/UserDatabaseMigration.h \
         # Logging
@@ -472,6 +467,8 @@ android: {
     DEFINES += VS_ANDROID=1 VS_PUSHNOTIFICATIONS=1 VS_MOBILE=1
     ANDROID_VERSION_CODE = $$AndroidVersionCode($${VERSION})
     ANDROID_VERSION_NAME = $$VERSION
+    ANDROID_MIN_SDK_VERSION = 29
+    ANDROID_TARGET_SDK_VERSION = 29
 
     INCLUDEPATH +=  \
         include/notifications/android \
@@ -574,5 +571,6 @@ android: {
 OTHER_FILES += \
     .gitignore \
     VERSION_CORE \
-    VERSION_MESSENGER \
-    VERSION_DATABASE_SCHEME
+    VERSION_MESSENGER
+
+ANDROID_ABIS = armeabi-v7a arm64-v8a x86 x86_64
