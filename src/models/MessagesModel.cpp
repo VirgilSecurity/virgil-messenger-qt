@@ -40,7 +40,9 @@ using namespace vm;
 
 MessagesModel::MessagesModel(QObject *parent)
     : ListModel(parent)
-{}
+{
+    qRegisterMetaType<MessagesModel *>("MessagesModel*");
+}
 
 MessagesModel::~MessagesModel()
 {}

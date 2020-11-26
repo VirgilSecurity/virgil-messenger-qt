@@ -124,6 +124,7 @@ struct Contact
     Type type = Type::Person;
     QString name;
     QUrl avatarUrl;
+    QString lastSeenActivity;
 };
 
 using UserId = QString;

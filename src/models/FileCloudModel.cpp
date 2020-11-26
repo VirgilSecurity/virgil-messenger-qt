@@ -46,12 +46,12 @@ FileCloudModel::FileCloudModel(const Settings *settings, QObject *parent)
     : ListModel(parent)
     , m_settings(settings)
 {
+    qRegisterMetaType<FileCloudModel *>("FileCloudModel*");
+    qRegisterMetaType<QFileInfoList>("QFileInfoList");
+
     proxy()->setSortRole(SortRole);
     proxy()->sort(0, Qt::AscendingOrder);
     proxy()->setFilterRole(FilenameRole);
-
-    qRegisterMetaType<FileCloudModel *>();
-    qRegisterMetaType<QFileInfoList>("QFileInfoList");
 
     connect(this, &FileCloudModel::listReady, this, &FileCloudModel::setList);
     connect(&m_updateTimer, &QTimer::timeout, this, &FileCloudModel::invalidateDateTime);

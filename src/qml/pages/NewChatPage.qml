@@ -213,7 +213,7 @@ OperationPage {
 
                                 Image {
                                     anchors.fill: parent
-                                    source: model.imageSource
+                                    source: model.avatarUrl
                                     mipmap: true
                                     asynchronous: true
                                     fillMode: Image.PreserveAspectCrop
@@ -235,7 +235,7 @@ OperationPage {
                         Text {
                             color: Theme.secondaryTextColor
                             font.pointSize: UiHelper.fixFontSz(12)
-                            text: model.status
+                            text: model.lastSeenActivity
                             width: parent.width
                             elide: Text.ElideRight
                             textFormat: Text.RichText

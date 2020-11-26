@@ -35,32 +35,33 @@
 #include "models/DiscoveredContactsModel.h"
 
 #include <QSortFilterProxyModel>
-#include "Settings.h"
 
-#include <QDebug>
+#include "Settings.h"
+#include "Utils.h"
 
 using namespace vm;
 
-DiscoveredContactsModel::DiscoveredContactsModel(const Settings *settings, QObject *parent)
+DiscoveredContactsModel::DiscoveredContactsModel(QObject *parent)
     : ListModel(parent)
-    , m_settings(settings)
 {
-    setContacts(); //This is a temp implementation
+    qRegisterMetaType<DiscoveredContactsModel *>("DiscoveredContactsModel*");
+
+    fillDummyContacts();
 
     proxy()->setSortRole(NameRole);
     proxy()->sort(0, Qt::AscendingOrder);
     proxy()->setFilterRole(NameRole);
-
-    qRegisterMetaType<DiscoveredContactsModel *>();
 }
 
-void DiscoveredContactsModel::setContacts()
+void DiscoveredContactsModel::fillDummyContacts()
 {
     beginResetModel();
-    Contact user1 {"Connor RK800 new", QUrl("https://cdna.artstation.com/p/assets/images/images/011/345/000/large/junghoon-choi-bryandechart.jpg?1529085789") , "Last seen yesterday"};
-    Contact user2 {"Connor RK801 new", QUrl("https://cdna.artstation.com/p/assets/images/images/011/345/000/large/junghoon-choi-bryandechart.jpg?1529085789") , "Online"};
-
-    m_list = {user1, user2};
+    m_list = {
+        { QLatin1String("id0"), Contact::Type::Person, QLatin1String("John"), QUrl(), tr("Last seen an hour ago") },
+        { QLatin1String("id1"), Contact::Type::Person, QLatin1String("Michael"), QUrl(), tr("Online") },
+        { QLatin1String("id2"), Contact::Type::Person, QLatin1String("Donald"), QUrl(), tr("Last seen recently") },
+        { QLatin1String("id3"), Contact::Type::Person, QLatin1String("David"), QUrl(), tr("Offline") },
+    };
     endResetModel();
 }
 
@@ -76,10 +77,10 @@ QVariant DiscoveredContactsModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case NameRole:
         return info.name;
-    case ImageRole:
-        return info.imageSource;
-    case StatusRole:
-        return info.status;
+    case AvatarUrlRole:
+        return info.avatarUrl;
+    case LastSeenActivityRole:
+        return info.lastSeenActivity;
     default:
         return QVariant();
     }
@@ -89,7 +90,7 @@ QHash<int, QByteArray> DiscoveredContactsModel::roleNames() const
 {
     return {
         { NameRole, "name" },
-        { ImageRole, "imageSource" },
-        { StatusRole, "status" },
+        { AvatarUrlRole, "avatarUrl" },
+        { LastSeenActivityRole, "lastSeenActivity" },
     };
 }

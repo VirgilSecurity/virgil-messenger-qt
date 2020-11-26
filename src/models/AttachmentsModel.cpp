@@ -45,7 +45,9 @@ using namespace vm;
 AttachmentsModel::AttachmentsModel(Settings *settings, QObject *parent)
     : ListModel(parent)
     , m_settings(settings)
-{}
+{
+    qRegisterMetaType<AttachmentsModel *>("AttachmentsModel*");
+}
 
 AttachmentsModel::~AttachmentsModel()
 {}

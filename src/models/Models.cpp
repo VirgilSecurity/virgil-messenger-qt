@@ -55,21 +55,13 @@ Models::Models(VSQMessenger *messenger, Settings *settings, UserDatabase *userDa
     , m_accountSelection(new AccountSelectionModel(settings, this))
     , m_attachments(new AttachmentsModel(settings, this))
     , m_chats(new ChatsModel(this))
-    , m_discoveredContacts(new DiscoveredContactsModel(settings, this))
+    , m_discoveredContacts(new DiscoveredContactsModel(this))
     , m_messages(new MessagesModel(this))
     , m_fileCloud(new FileCloudModel(settings, this))
     , m_fileLoader(new FileLoader(messenger->xmpp(), networkAccessManager, this))
     , m_messagesQueue(new MessagesQueue(settings, messenger, userDatabase, m_fileLoader, nullptr))
     , m_queueThread(new QThread())
 {
-    qRegisterMetaType<AccountSelectionModel *>("AccountSelectionModel*");
-    qRegisterMetaType<AttachmentsModel *>("AttachmentsModel*");
-    qRegisterMetaType<ChatsModel *>("ChatsModel*");
-    qRegisterMetaType<DiscoveredContactsModel *>("DiscoveredContactsModel*");
-    qRegisterMetaType<FileCloudModel *>("FileCloudModel*");
-    qRegisterMetaType<MessagesModel *>("MessagesModel*");
-    qRegisterMetaType<QSortFilterProxyModel *>("QSortFilterProxyModel*");
-
     connect(m_messagesQueue, &MessagesQueue::notificationCreated, this, &Models::notificationCreated);
 
     m_messagesQueue->moveToThread(m_queueThread);

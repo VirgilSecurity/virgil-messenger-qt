@@ -36,11 +36,7 @@
 #define VM_DISCOVEREDCONTACTSMODEL_H
 
 #include "ListModel.h"
-#include <QUrl>
-
-class QSortFilterProxyModel;
-
-class Settings;
+#include "VSQCommon.h"
 
 namespace vm
 {
@@ -52,27 +48,19 @@ public:
     enum Roles
     {
         NameRole = Qt::UserRole,
-        ImageRole,
-        StatusRole
+        AvatarUrlRole,
+        LastSeenActivityRole
     };
 
-    DiscoveredContactsModel(const Settings *settings, QObject *parent);
-
-    void setContacts();
+    explicit DiscoveredContactsModel(QObject *parent);
 
 private:
-    struct Contact
-    {
-        QString name;
-        QUrl imageSource;
-        QString status;
-    };
+    void fillDummyContacts();
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    const Settings *m_settings;
     QList<Contact> m_list;
 };
 }
