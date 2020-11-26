@@ -21,9 +21,7 @@ ToolBar {
 
     default property alias menu: contextMenu.contentData
 
-    readonly property int deafultBarHeight: 40
-    readonly property int defaultMargin: 20
-    readonly property int smallMargin: 10
+    readonly property int defaultBarHeight: 40
 
     onIsSearchOpenChanged: {
         if (filterSource) {
@@ -40,15 +38,15 @@ ToolBar {
     }
 
     background: Rectangle {
-        implicitHeight: 60
+        implicitHeight: Theme.headerHeight
         color: Theme.contactsBackgroundColor
 
         Rectangle {
             id: separator
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.leftMargin: defaultMargin
-            anchors.rightMargin: defaultMargin
+            anchors.leftMargin: Theme.margin
+            anchors.rightMargin: Theme.margin
 
             height: 1
             color: Theme.chatBackgroundColor
@@ -63,7 +61,7 @@ ToolBar {
 
             PropertyChanges {
                 target: titleDescriptionColumn
-                anchors.leftMargin: -deafultBarHeight
+                anchors.leftMargin: -defaultBarHeight
                 opacity: 0
 
             }
@@ -76,7 +74,7 @@ ToolBar {
 
             PropertyChanges {
                 target: menuButton
-                anchors.rightMargin: -deafultBarHeight
+                anchors.rightMargin: -defaultBarHeight
                 opacity: 0
             }
 
@@ -93,8 +91,8 @@ ToolBar {
 
             PropertyChanges {
                 target: searchContainer
-                width: deafultBarHeight
-                anchors.rightMargin: deafultBarHeight
+                width: defaultBarHeight
+                anchors.rightMargin: defaultBarHeight
             }
 
             PropertyChanges {
@@ -110,7 +108,7 @@ ToolBar {
             NumberAnimation {
                 properties: "anchors.leftMargin, anchors.rightMargin, width, opacity"
                 easing.type: Easing.InOutQuad
-                duration: 250
+                duration: Theme.animationDuration
             }
         }
     ]
@@ -119,11 +117,11 @@ ToolBar {
         id: contentRow
         anchors {
             fill: parent
-            leftMargin: defaultMargin
-            rightMargin: smallMargin
+            leftMargin: Theme.margin
+            rightMargin: Theme.smallMargin
         }
 
-        height: deafultBarHeight
+        height: defaultBarHeight
 
         ImageButton {
             id: backButton
@@ -132,7 +130,7 @@ ToolBar {
                 verticalCenter: parent.verticalCenter
             }
             image: "Arrow-Left"
-            width: showBackButton ? deafultBarHeight : 0
+            width: showBackButton ? defaultBarHeight : 0
             onClicked: app.stateManager.goBack()
         }
 
@@ -140,7 +138,7 @@ ToolBar {
             id: toolbarContentContainer
             anchors {
                 left: backButton.right
-                leftMargin: showBackButton ? smallMargin : 0
+                leftMargin: showBackButton ? Theme.smallMargin : 0
                 right: parent.right
             }
 
@@ -183,11 +181,11 @@ ToolBar {
                 anchors {
                     verticalCenter: parent.verticalCenter
                     right: parent.right
-                    rightMargin: deafultBarHeight
+                    rightMargin: defaultBarHeight
                 }
 
-                height: deafultBarHeight
-                width: deafultBarHeight
+                height: defaultBarHeight
+                width: defaultBarHeight
 
                 Search {
                     id: searchId

@@ -7,8 +7,8 @@ import "../theme"
 Label {
     property date date
 
-    topPadding: 10
-    bottomPadding: 10
+    topPadding: Theme.smallPadding
+    bottomPadding: Theme.smallPadding
 
     width: parent.width
     color: Theme.labelColor

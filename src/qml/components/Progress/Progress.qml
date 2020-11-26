@@ -3,6 +3,8 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls.Styles 1.12
 
+import "../../theme"
+
 Page {
     id: progressPage
 
@@ -49,7 +51,7 @@ Page {
 
             height: 20
             Layout.alignment: Qt.AlignHCenter
-            Layout.preferredWidth: parent.width - 20
+            Layout.preferredWidth: parent.width - Theme.margin
 
             background: Rectangle {
                 anchors.left: progressBar.left
@@ -85,12 +87,12 @@ Page {
         }
 
         Item {
-            height: 20
+            height: Theme.spacing
         }
 
         PrimaryButton {
             height: 50
-            Layout.preferredWidth: parent.width - 20
+            Layout.preferredWidth: parent.width - Theme.margin
             Layout.alignment: Qt.AlignHCenter
             name: qsTr("Cancel")
             baseColor: "transparent"

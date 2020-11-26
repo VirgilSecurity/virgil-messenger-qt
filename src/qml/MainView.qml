@@ -24,7 +24,7 @@ Control {
         SidebarPanel {
             visible: [manager.chatListState, manager.fileCloudState].includes(manager.currentState)
             z: 2
-            Layout.preferredWidth: 60
+            Layout.preferredWidth: Theme.headerHeight
             Layout.fillHeight: true
 
             Action {
@@ -33,7 +33,7 @@ Control {
             }
 
             MenuSeparator {
-                leftPadding: 20
+                leftPadding: Theme.padding
             }
 
             Action {

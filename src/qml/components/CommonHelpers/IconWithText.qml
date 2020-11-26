@@ -4,7 +4,7 @@ import "../../theme"
 
 Column {
     anchors.centerIn: parent
-    spacing: 10
+    spacing: Theme.smallSpacing
 
     property alias image: imageId
     property alias label: labelId

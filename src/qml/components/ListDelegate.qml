@@ -22,6 +22,6 @@ ItemDelegate {
         anchors.rightMargin: anchors.leftMargin
         anchors.fill: parent
         height: Theme.avatarHeight
-        spacing: 10
+        spacing: Theme.smallSpacing
     }
 }
