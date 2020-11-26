@@ -13,6 +13,30 @@ ListView {
     property var searchHeader: undefined
     property alias emptyIcon: labeledIcon.emptyIcon
     property alias emptyText: labeledIcon.emptyText
+    property int defaultAnimationDuration: 250
+    property int shortAnimationDuration: 250
+
+    cacheBuffer: 5000
+
+    add: Transition {
+        NumberAnimation {property: "scale"; from: 0.9; to: 1; duration: defaultAnimationDuration; easing.type: Easing.InOutCubic}
+        NumberAnimation {property: "opacity"; from: 0; to: 1; duration: defaultAnimationDuration; easing.type: Easing.InOutCubic}
+    }
+
+    displaced: Transition {
+        NumberAnimation {properties: "x,y"; duration: defaultAnimationDuration; easing.type: Easing.InOutCubic}
+        NumberAnimation {property: "scale"; to: 1; duration: defaultAnimationDuration; easing.type: Easing.InOutCubic}
+        NumberAnimation {property: "opacity"; to: 1; duration: defaultAnimationDuration; easing.type: Easing.InOutCubic}
+    }
+
+    move: Transition {
+        NumberAnimation {properties: "x,y"; duration: defaultAnimationDuration; easing.type: Easing.InOutCubic}
+    }
+
+    remove: Transition {
+        NumberAnimation {property: "opacity"; to: 0; duration: shortAnimationDuration; easing.type: Easing.InOutCubic}
+        NumberAnimation {property: "scale"; to: 0.9; duration: shortAnimationDuration; easing.type: Easing.InOutCubic}
+    }
 
     IconWithText {
         id: labeledIcon
