@@ -63,6 +63,12 @@ void FileCloudController::setDirectory(const QVariant &proxyRow)
     setDirectory(QDir(fileInfo.absoluteFilePath()));
 }
 
+void FileCloudController::processClick(const QVariant &proxyRow)
+{
+    const auto fileInfo = model()->getFileInfo(proxyRow.toInt());
+    fileInfo.isDir() ? setDirectory(proxyRow) : openFile(proxyRow);
+}
+
 void FileCloudController::cdUp()
 {
     m_currentDir.cdUp();

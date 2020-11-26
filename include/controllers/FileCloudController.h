@@ -55,6 +55,7 @@ public:
 
     Q_INVOKABLE void openFile(const QVariant &proxyRow);
     Q_INVOKABLE void setDirectory(const QVariant &proxyRow);
+    Q_INVOKABLE void processClick(const QVariant &proxyRow);
     Q_INVOKABLE void cdUp();
     Q_INVOKABLE void addFile(const QVariant &attachmentUrl);
 
