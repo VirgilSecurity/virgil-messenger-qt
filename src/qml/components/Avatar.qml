@@ -7,11 +7,15 @@ import "./CommonHelpers"
 Item {
     property string nickname
     property string avatarUrl
+    property alias diameter: textInCircle.diameter
+    property alias content: textInCircle.content
+    property alias pointSize: textInCircle.pointSize
 
     width: Theme.avatarHeight
     height: width
 
     TextInCircle {
+        id: textInCircle
         color: Theme.avatarBgColor // intToHexColor(hashCode(nickname))
         anchors.centerIn: parent
         diameter: parent.height
@@ -47,7 +51,7 @@ Item {
     Item {
         id: imageItem
         anchors.fill: parent
-        visible: avatarUrl !== undefined
+        visible: avatarUrl
         layer.enabled: visible
         layer.effect: OpacityMask {
             maskSource: Item {
