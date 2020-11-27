@@ -1,18 +1,20 @@
 import QtQuick 2.12
 
+import "../theme"
+
 // Original source: https://github.com/rafzby/circular-progressbar
 
 Item {
     id: root
 
     property int size: 100
-    property int lineWidth: 4
+    property int lineWidth: 3
     property real value: 0
     property real maxValue: 0
     property bool animated: false
 
-    property color primaryColor: "#29b6f6"
-    property color secondaryColor: "#ffffff"
+    property color primaryColor: Theme.brandColor
+    property color secondaryColor: "transparent"
 
     width: size
     height: size
@@ -21,6 +23,42 @@ Item {
 
     onRatioChanged: {
         canvas.degree = ratio * 360;
+    }
+
+    Behavior on value {
+        NumberAnimation { duration: Theme.animationDuration }
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        radius: height
+        color: "black"
+        opacity: 0.35
+    }
+
+    Item {
+        anchors {
+            fill: parent
+            margins: size * 0.3
+        }
+
+        Rectangle {
+            anchors.centerIn: parent
+            width: parent.width
+            height: lineWidth
+            radius: height
+            color: primaryColor
+            rotation: -45
+        }
+
+        Rectangle {
+            anchors.centerIn: parent
+            width: parent.width
+            height: lineWidth
+            radius: height
+            color: primaryColor
+            rotation: 45
+        }
     }
 
     Canvas {

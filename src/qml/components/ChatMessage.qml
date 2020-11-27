@@ -159,7 +159,28 @@ Control {
 
                     Label {
                         Layout.maximumWidth: column.maxWidth
+                        visible: chatMessage.attachmentStatus == Enums.AttachmentStatus.Loaded
                         text: attachmentDisplaySize
+                        color: "white"
+                        font.pixelSize: UiHelper.fixFontSz(10)
+                    }
+
+                    Label {
+                        Layout.maximumWidth: column.maxWidth
+                        visible: chatMessage.attachmentStatus == Enums.AttachmentStatus.Loading
+                        text: {
+                            if (attachmentBytesLoaded === 0) {
+                                return ".."
+                            } else {
+                                let percent = attachmentBytesLoaded / attachmentBytesTotal
+                                let commaIndex = attachmentDisplaySize.indexOf(",")
+                                let attachmentSize = attachmentDisplaySize.substring(0, commaIndex + 3)
+
+                                let firstNum = parseFloat(attachmentSize) * percent
+                                return firstNum.toFixed(2) + "/" + attachmentDisplaySize
+                            }
+                        }
+
                         color: "white"
                         font.pixelSize: UiHelper.fixFontSz(10)
                     }
@@ -295,6 +316,10 @@ Control {
                 font.pixelSize: UiHelper.fixFontSz(11)
             }
         }
+    }
+
+    function btToMb(bytes) {
+        return (bytes / (1024*1024)).toFixed(2)
     }
 
     Component.onCompleted: {
