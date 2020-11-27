@@ -86,9 +86,6 @@ private:
     };
 
     void startIfReady();
-    void scheduleStartIfReady();
-    void setupRestartOnFail(MessageOperation *operation);
-
     void setQueueState(const QueueState &state);
     void unsetQueueState(const QueueState &state);
 
