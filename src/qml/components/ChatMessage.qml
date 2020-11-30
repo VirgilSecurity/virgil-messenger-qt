@@ -173,11 +173,9 @@ Control {
                                 return ".."
                             } else {
                                 let percent = attachmentBytesLoaded / attachmentBytesTotal
-                                let commaIndex = attachmentDisplaySize.indexOf(",")
-                                let attachmentSize = attachmentDisplaySize.substring(0, commaIndex + 3)
-
-                                let firstNum = parseFloat(attachmentSize) * percent
-                                return firstNum.toFixed(2) + "/" + attachmentDisplaySize
+                                let progress = parseFloat(attachmentSize) * percent
+                                let output = progress.toFixed(2) + "/" + attachmentDisplaySize
+                                return output
                             }
                         }
 
@@ -316,10 +314,6 @@ Control {
                 font.pixelSize: UiHelper.fixFontSz(11)
             }
         }
-    }
-
-    function btToMb(bytes) {
-        return (bytes / (1024*1024)).toFixed(2)
     }
 
     Component.onCompleted: {

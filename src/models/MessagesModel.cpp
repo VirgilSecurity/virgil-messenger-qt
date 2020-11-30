@@ -285,6 +285,21 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
         }
         return QString();
     }
+    case AttachmentSizeRole:
+    {
+        if (attachment) {
+            if (attachment->size > 0) {
+                QString outputString;
+                outputString = Utils::formattedDataSize(attachment->size);
+                int spaceIndex = outputString.indexOf(" ");
+                outputString.resize(spaceIndex);
+                return outputString;
+            } else {
+                return QLatin1String("...");
+            }
+        }
+        return QString();
+    }
     case AttachmentDisplayTextRole:
     {
         return attachment ? Utils::attachmentDisplayText(*attachment) : QString();
@@ -341,6 +356,7 @@ QHash<int, QByteArray> MessagesModel::roleNames() const
         { AttachmentImagePathRole, "attachmentImagePath" },
         { AttachmentImageSizeRole, "attachmentImageSize" },
         { AttachmentDisplaySizeRole, "attachmentDisplaySize" },
+        { AttachmentSizeRole, "attachmentSize" },
         { AttachmentDisplayTextRole, "attachmentDisplayText" },
         { AttachmentBytesTotalRole, "attachmentBytesTotal" },
         { AttachmentBytesLoadedRole, "attachmentBytesLoaded" },

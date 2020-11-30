@@ -42,22 +42,19 @@ Item {
             margins: size * 0.3
         }
 
-        Rectangle {
-            anchors.centerIn: parent
-            width: parent.width
-            height: lineWidth
-            radius: height
-            color: primaryColor
-            rotation: -45
-        }
-
-        Rectangle {
-            anchors.centerIn: parent
-            width: parent.width
-            height: lineWidth
-            radius: height
-            color: primaryColor
-            rotation: 45
+        Repeater {
+            model: ListModel {
+                ListElement { angle: -45 }
+                ListElement { angle: 45 }
+            }
+            Rectangle {
+                anchors.centerIn: parent
+                width: parent.width
+                height: lineWidth
+                radius: height
+                color: primaryColor
+                rotation: angle
+            }
         }
     }
 
