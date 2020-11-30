@@ -45,7 +45,6 @@ MessageOperation::MessageOperation(const GlobalMessage &message, MessageOperatio
     , m_message(message)
 {
     setName(message.id);
-    connect(this, &Operation::failed, this, &MessageOperation::onFailed);
 }
 
 const GlobalMessage *MessageOperation::message() const
@@ -217,12 +216,4 @@ void MessageOperation::setStatus(const Message::Status &status)
     }
     m_message.status = status;
     emit statusChanged(status);
-}
-
-void MessageOperation::onFailed()
-{
-    ++m_failCount;
-    if (m_failCount == 1) {
-        emit failedOnce();
-    }
 }

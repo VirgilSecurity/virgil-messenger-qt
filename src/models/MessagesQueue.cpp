@@ -78,16 +78,6 @@ void MessagesQueue::startIfReady()
     }
 }
 
-void MessagesQueue::scheduleStartIfReady()
-{
-    QTimer::singleShot(2000, this, &MessagesQueue::startIfReady);
-}
-
-void MessagesQueue::setupRestartOnFail(MessageOperation *operation)
-{
-    connect(operation, &MessageOperation::failedOnce, this, &MessagesQueue::scheduleStartIfReady);
-}
-
 void MessagesQueue::setQueueState(const MessagesQueue::QueueState &state)
 {
     m_queueState = m_queueState | state;
@@ -182,7 +172,6 @@ void MessagesQueue::onPushMessagePreload(const GlobalMessage &message)
 {
     auto op = pushMessageOperation(message, true);
     m_factory->populatePreload(op);
-    setupRestartOnFail(op);
     startIfReady();
 }
 
