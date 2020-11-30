@@ -10,7 +10,7 @@
 
     mkdir -p build
     cd build
-    cmake -DVS_PLATFORM="android" -DCMAKE_BUILD_TYPE="MinSizeRel" -DVS_KEYCHAIN="[keychain URL or path] [Key alias]" -DVS_KEYCHAIN_PASSWORD="[Keychain password]" -DVS_KEY_PASSWORD="[Key password]" ..
+    cmake -DVS_PLATFORM="android" -DCMAKE_BUILD_TYPE="MinSizeRel" -DVS_KEYCHAIN="[keychain URL or path]" -DVS_KEY_ALIAS="[Key alias]" -DVS_KEYCHAIN_PASSWORD="[Keychain password]" -DVS_KEY_PASSWORD="[Key password]" ..
     make
     make apk_release
 

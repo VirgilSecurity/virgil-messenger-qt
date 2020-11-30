@@ -56,14 +56,6 @@ if(VS_PLATFORM STREQUAL "android")
     
   set(ANDROID_SDK_BUILD_TOOLS_VERSION "29.0.2")
 
-  if(VS_KEYCHAIN_PASSWORD)
-    set(ANDROID_DEPLOY_QT_PARAMS "--storepass '${VS_KEYCHAIN_PASSWORD}'")
-  endif()
-  
-  if(VS_KEY_PASSWORD)
-    set(ANDROID_DEPLOY_QT_PARAMS "${ANDROID_DEPLOY_QT_PARAMS} --keypass '${VS_KEY_PASSWORD}'")  
-  endif()
-  
   add_custom_target(apk_release
     COMMAND ${CMAKE_COMMAND} -E env JAVA_HOME=${JAVA_HOME} ${ANDROID_DEPLOY_QT}
        --input "${CMAKE_BINARY_DIR}/android_deployment_settings.json"
@@ -72,8 +64,9 @@ if(VS_PLATFORM STREQUAL "android")
        ${android_deploy_qt_platform}
        ${android_deploy_qt_jdk}
        --gradle
-       --sign "${VS_KEYCHAIN}"
-       ${ANDROID_DEPLOY_QT_PARAMS}      
+       --sign "${VS_KEYCHAIN}" "${VS_KEY_ALIAS}"
+       --storepass "${VS_KEYCHAIN_PASSWORD}"
+       --keypass "${VS_KEY_PASSWORD}"
        --no-gdbserver      
     VERBATIM)
 
@@ -86,8 +79,9 @@ if(VS_PLATFORM STREQUAL "android")
       ${android_deploy_qt_platform}
       ${android_deploy_qt_jdk}
       --gradle
-      --sign "${VS_KEYCHAIN}"
-      ${ANDROID_DEPLOY_QT_PARAMS}      
+      --sign "${VS_KEYCHAIN}" "${VS_KEY_ALIAS}"
+      --storepass "${VS_KEYCHAIN_PASSWORD}"
+      --keypass "${VS_KEY_PASSWORD}"      
       --no-gdbserver      
    VERBATIM)
 
