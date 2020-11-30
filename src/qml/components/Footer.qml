@@ -5,7 +5,7 @@ import QtQuick.Controls 2.12
 import "../theme"
 
 Item {
-    property string text: ""
+    property alias text: footerText.text
     readonly property real tightLetterSpacing: 0.23
 
     height: 40
@@ -13,8 +13,8 @@ Item {
     visible: text !== "" ? true : false
 
     Text {
+        id: footerText
         anchors.centerIn: parent
-        text: text
         font.letterSpacing: tightLetterSpacing
         verticalAlignment: Text.AlignBottom
         color: Theme.labelColor
