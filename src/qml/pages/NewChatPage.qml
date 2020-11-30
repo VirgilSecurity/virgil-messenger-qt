@@ -158,7 +158,7 @@ OperationPage {
                         Text {
                             color: Theme.primaryTextColor
                             font.pointSize: UiHelper.fixFontSz(15)
-                            text:  contact
+                            text: contact
                         }
 
                         Text {
@@ -214,7 +214,7 @@ OperationPage {
                         Text {
                             color: Theme.secondaryTextColor
                             font.pointSize: UiHelper.fixFontSz(12)
-                            text: lastSeenActivity
+                            text: details
                             width: parent.width
                             elide: Text.ElideRight
                             textFormat: Text.RichText

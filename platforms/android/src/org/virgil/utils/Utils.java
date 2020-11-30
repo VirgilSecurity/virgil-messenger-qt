@@ -3,6 +3,7 @@ package org.virgil.utils;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.provider.ContactsContract;
 import android.provider.OpenableColumns;
 
 public class Utils
@@ -41,5 +42,24 @@ public class Utils
         }
 
         return fileSize;
+    }
+
+    public static String getContacts(Context context)
+    {
+        String fetch = "";
+
+        Cursor phones = context.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
+        final int nameIndex = phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+        final int phoneNumberIndex = phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+        final String sep = "\n";
+        while (phones.moveToNext()) {
+            final String name = phones.getString(nameIndex);
+            final String phoneNumber = phones.getString(phoneNumberIndex);
+            final String email = "";
+            final String photo = "";
+            fetch += name + sep + phoneNumber + sep + email + sep + photo + sep;
+        }
+
+        return fetch;
     }
 }

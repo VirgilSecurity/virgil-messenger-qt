@@ -55,13 +55,13 @@ QString VSQAndroid::caBundlePath() {
 }
 
 /******************************************************************************/
-static bool
-_checkPermissions() {
-    const QVector<QString> permissions({
-                                        "android.permission.WRITE_EXTERNAL_STORAGE",
-                                        "android.permission.READ_EXTERNAL_STORAGE"});
-
-    for(const QString &permission : permissions){
+static bool _checkPermissions() {
+    const QStringList permissions({
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.READ_CONTACTS"
+    });
+    for(const QString &permission : permissions) {
         auto result = QtAndroid::checkPermission(permission);
         if(result == QtAndroid::PermissionResult::Denied){
             auto resultHash = QtAndroid::requestPermissionsSync(QStringList({permission}));
@@ -156,6 +156,28 @@ DataSize VSQAndroid::getFileSize(const QUrl &url)
         javaUrl.object<jstring>()
     );
     return static_cast<DataSize>(javaFileSize);
+}
+
+Contacts VSQAndroid::getContacts()
+{
+    const auto javaStr = QAndroidJniObject::callStaticObjectMethod(
+        "org/virgil/utils/Utils",
+        "getContacts",
+        "(Landroid/content/Context;)Ljava/lang/String;",
+        QtAndroid::androidActivity().object<jobject>()
+    );
+    const auto lines = javaStr.toString().split('\n');
+
+    Contacts contacts;
+    for (int i = 0, s = lines.size() - 4; i <= s; i += 4) {
+        Contact contact;
+        contact.name = lines[i];
+        contact.phoneNumber = lines[i + 1];
+        contact.email = lines[i + 2];
+        contact.avatarUrl = lines[i + 3];
+        contacts.push_back(contact);
+    }
+    return contacts;
 }
 
 #endif // VS_ANDROID

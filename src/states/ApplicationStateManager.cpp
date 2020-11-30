@@ -38,6 +38,7 @@
 #include "controllers/Controllers.h"
 #include "controllers/ChatsController.h"
 #include "controllers/UsersController.h"
+#include "models/Models.h"
 
 Q_LOGGING_CATEGORY(lcAppState, "appState");
 
@@ -57,7 +58,7 @@ ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, Contro
     , m_chatState(new ChatState(controllers, m_messenger->lastActivityManager(), this))
     , m_downloadKeyState(new DownloadKeyState(controllers->users(), this))
     , m_fileCloudState(new FileCloudState(models, this))
-    , m_newChatState(new NewChatState(controllers->chats(), this))
+    , m_newChatState(new NewChatState(controllers->chats(), models->discoveredContacts(), this))
     , m_signInAsState(new SignInAsState(this))
     , m_signInUsernameState(new SignInUsernameState(validator, this))
     , m_signUpState(new SignUpState(controllers->users(), validator, this))

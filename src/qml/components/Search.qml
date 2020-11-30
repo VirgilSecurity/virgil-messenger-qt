@@ -10,7 +10,7 @@ Rectangle {
     color: "transparent"
 
     property alias searchPlaceholder: searchField.placeholderText
-    property alias search: searchField.text
+    property string search: searchField.text + searchField.preeditText
     property bool isSearchOpen: state === "opened"
 
     signal closed()

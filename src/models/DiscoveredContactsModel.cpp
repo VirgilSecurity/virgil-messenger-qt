@@ -35,6 +35,7 @@
 #include "models/DiscoveredContactsModel.h"
 
 #include <QSortFilterProxyModel>
+#include <QtConcurrent>
 
 #include "Settings.h"
 #include "Utils.h"
@@ -46,41 +47,48 @@ DiscoveredContactsModel::DiscoveredContactsModel(QObject *parent)
 {
     qRegisterMetaType<DiscoveredContactsModel *>("DiscoveredContactsModel*");
 
-    fillDummyContacts();
-
     proxy()->setSortRole(NameRole);
     proxy()->sort(0, Qt::AscendingOrder);
-    proxy()->setFilterRole(NameRole);
+    proxy()->setFilterRole(FilterRole);
+
+    connect(this, &DiscoveredContactsModel::contactsPopulated, this, &DiscoveredContactsModel::setContacts);
 }
 
-void DiscoveredContactsModel::fillDummyContacts()
+void DiscoveredContactsModel::reload()
 {
-    beginResetModel();
-    m_list = {
-        { QLatin1String("id0"), Contact::Type::Person, QLatin1String("John"), QUrl(), tr("Last seen an hour ago") },
-        { QLatin1String("id1"), Contact::Type::Person, QLatin1String("Michael"), QUrl(), tr("Online") },
-        { QLatin1String("id2"), Contact::Type::Person, QLatin1String("Donald"), QUrl(), tr("Last seen recently") },
-        { QLatin1String("id3"), Contact::Type::Person, QLatin1String("David"), QUrl(), tr("Offline") },
-    };
-    endResetModel();
+    QtConcurrent::run([=]() {
+        const auto contacts = Utils::getDeviceContacts();
+        emit contactsPopulated(contacts, QPrivateSignal());
+    });
 }
 
 int DiscoveredContactsModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
-    return m_list.size();
+    return m_contacts.size();
 }
 
 QVariant DiscoveredContactsModel::data(const QModelIndex &index, int role) const
 {
-    const auto &info = m_list[index.row()];
+    const auto &info = m_contacts[index.row()];
     switch (role) {
     case NameRole:
         return info.name;
+    case DetailsRole:
+    {
+        if (info.email.isEmpty()) {
+            return info.phoneNumber.isEmpty() ? tr("No phone/email") : info.phoneNumber;
+        }
+        else {
+            return info.phoneNumber.isEmpty() ? info.email : (info.phoneNumber + QLatin1String(" / ") + info.email);
+        }
+    }
     case AvatarUrlRole:
         return info.avatarUrl;
     case LastSeenActivityRole:
         return info.lastSeenActivity;
+    case FilterRole:
+        return info.name + QLatin1Char('\n') + info.email + QLatin1Char('\n') + info.phoneNumber;
     default:
         return QVariant();
     }
@@ -90,7 +98,16 @@ QHash<int, QByteArray> DiscoveredContactsModel::roleNames() const
 {
     return {
         { NameRole, "name" },
+        { DetailsRole, "details" },
         { AvatarUrlRole, "avatarUrl" },
         { LastSeenActivityRole, "lastSeenActivity" },
+        // Search role is hidden
     };
+}
+
+void DiscoveredContactsModel::setContacts(const Contacts &contacts)
+{
+    beginResetModel();
+    m_contacts = contacts;
+    endResetModel();
 }
