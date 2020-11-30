@@ -103,10 +103,10 @@ Page {
                 width: fileCloudListView.width
 
                 ImageButton {
-                    image: model.isDir ? "Grid" : "File Selected Big"
-                    backgroundColor: model.isDir ? "white" : Theme.avatarBgColor
-                    height: Theme.avatarHeight
-                    width: Theme.avatarHeight
+                    image: model.isDir ? "Folder-Big" : "File-Big"
+                    imageSize: 48
+                    iconSize: 40
+                    onClicked: controllers.fileCloud.processClick(index)
                 }
 
                 Column {
@@ -140,14 +140,7 @@ Page {
                     }
                 }
 
-                onClicked: {
-                    if (model.isDir) {
-                        controllers.fileCloud.setDirectory(index)
-                    }
-                    else {
-                        controllers.fileCloud.openFile(index)
-                    }
-                }
+                onClicked: controllers.fileCloud.processClick(index)
             }
 
             onPlaceholderClicked: attachmentPicker.open(Enums.AttachmentType.File)

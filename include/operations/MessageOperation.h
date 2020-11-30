@@ -76,19 +76,15 @@ signals:
     void attachmentProcessedSizeChanged(const DataSize &bytes);
     void attachmentEncryptedSizeChanged(const DataSize &bytes);
 
-    void failedOnce();
-
 protected:
     void connectChild(Operation *child) override;
 
 private:
     Attachment *writableAttachment();
     void setStatus(const Message::Status &status);
-    void onFailed();
 
     MessageOperationFactory *m_factory;
     GlobalMessage m_message;
-    int m_failCount = 0;
 };
 }
 

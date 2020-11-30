@@ -13,8 +13,6 @@ Control {
     width: parent.width
     implicitHeight: row.height
 
-    readonly property real defaultMargin: 10
-
     background: Rectangle {
         color: Theme.chatBackgroundColor
     }
@@ -51,9 +49,9 @@ Control {
         Rectangle {
             id: inputRect
             Layout.fillWidth: true
-            Layout.preferredHeight: scrollView.height + defaultMargin
-            Layout.topMargin: defaultMargin
-            Layout.bottomMargin: defaultMargin
+            Layout.preferredHeight: scrollView.height + Theme.smallMargin
+            Layout.topMargin: Theme.smallMargin
+            Layout.bottomMargin: Theme.smallMargin
             radius: 20
             color: "#37474F"
 
@@ -64,8 +62,8 @@ Control {
                     left: parent.left
                     right: parent.right
                     top: parent.top
-                    margins: 0.5 * defaultMargin
-                    leftMargin: defaultMargin
+                    margins: 0.5 * Theme.smallMargin
+                    leftMargin: Theme.smallMargin
                 }
 
                 TextArea {

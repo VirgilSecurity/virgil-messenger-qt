@@ -9,7 +9,7 @@ Column {
     Layout.maximumWidth: Theme.formMaximumWidth
     Layout.alignment: Qt.AlignHCenter
 
-    spacing: 10
+    spacing: Theme.smallSpacing
 
     Image {
         id: mainLogo

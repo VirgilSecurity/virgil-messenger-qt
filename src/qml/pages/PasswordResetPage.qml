@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.12
 
 import "../components"
 import "../components/Buttons"
+import "../theme"
 
 Page {
     // TODO(fpohtmeh): remove as unused
@@ -27,7 +28,7 @@ Page {
                 id: control
                 text: qsTr("\uf060")
                 font.pointSize: UiHelper.fixFontSz(24)
-                rightPadding: 10
+                rightPadding: Theme.smallPadding
                 contentItem: Text {
                     text: control.text
                     font: control.font
@@ -57,7 +58,7 @@ Page {
         width: parent.width
         anchors.top: resetText.bottom
         anchors.topMargin: 30
-        spacing: 20
+        spacing: Theme.spacing
 
         UserNameTextField {
             id: registeredUsername
@@ -83,7 +84,7 @@ Page {
                 }
 
                 Rectangle {
-                    width: parent.width - 10
+                    width: parent.width - Theme.smallMargin
                     height: 1
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: parent.bottom
@@ -112,11 +113,11 @@ Page {
                     color: mainAppColor
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    leftPadding: 10
+                    leftPadding: Theme.smallPadding
                 }
 
                 Rectangle {
-                    width: parent.width - 10
+                    width: parent.width - Theme.smallMargin
                     height: 1
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: parent.bottom
@@ -126,12 +127,12 @@ Page {
         }
 
         Item {
-            height: 20
+            height: Theme.spacing
         }
 
         PrimaryButton {
             height: 50
-            Layout.preferredWidth: parent.width - 20
+            Layout.preferredWidth: parent.width - Theme.margin
             Layout.alignment: Qt.AlignHCenter
             name: "Retrieve"
             baseColor: mainAppColor
@@ -147,7 +148,7 @@ Page {
             id: helpText
             text: qsTr("Your Password Is,")
             font.pointSize: UiHelper.fixFontSz(16)
-            Layout.preferredWidth: parent.width - 20
+            Layout.preferredWidth: parent.width - Theme.margin
             Layout.alignment: Qt.AlignLeft
             leftPadding: 15
             color: mainTextCOlor
@@ -165,7 +166,7 @@ Page {
         }
 
         Item {
-            height: 20
+            height: Theme.spacing
         }
     }
 

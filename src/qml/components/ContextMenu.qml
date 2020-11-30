@@ -15,10 +15,10 @@ Menu {
 
         readonly property real spacing: 5
         readonly property real menuWidth: calculateWidth(compact ? 150 : 200)
-        readonly property real vPadding: compact ? 5 : 10
+        readonly property real vPadding: compact ? 0.5 * Theme.smallPadding : Theme.smallPadding
         readonly property real hPadding: 0
         readonly property real itemHeight: compact ? 30 : 40
-        readonly property real itemPadding: compact ? 10 : 20
+        readonly property real itemPadding: compact ? Theme.smallPadding : Theme.padding
 
         function updatePosition() {
             if (!dropdown || !root.visible)
