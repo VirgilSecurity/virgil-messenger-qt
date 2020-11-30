@@ -74,7 +74,6 @@ if(VS_PLATFORM STREQUAL "android")
     COMMAND ${CMAKE_COMMAND} -E env JAVA_HOME=${JAVA_HOME} ${ANDROID_DEPLOY_QT}
       --input "${CMAKE_BINARY_DIR}/android_deployment_settings.json"
       --output "${CMAKE_BINARY_DIR}/android-build"
-      --apk "${CMAKE_BINARY_DIR}/android-build/${PROJECT_NAME}.apk"
       --aab
       ${android_deploy_qt_platform}
       ${android_deploy_qt_jdk}
