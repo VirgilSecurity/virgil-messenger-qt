@@ -13,6 +13,7 @@ OperationPage {
     readonly property string contact: contactSearch.search.toLowerCase()
     readonly property var filterSource: models.discoveredContacts
     readonly property alias search: contactSearch.search
+    property string previousSearch
     readonly property int modelCount: contactListView.count
     property string searchResultState: "search empty"
     property string serverName: "Default"
@@ -74,7 +75,7 @@ OperationPage {
         state: searchResultState
         states: [
             State {
-                name: "not found" // search word is NOT IN model
+                name: "show header"
                 PropertyChanges {
                     target: searchResultsItem
                     headerHeight: 90
@@ -82,15 +83,7 @@ OperationPage {
                 }
             },
             State {
-                name: "found" // search word is IN model
-                PropertyChanges {
-                    target: searchResultsItem
-                    headerHeight: 20
-                    headerOpacity: 0
-                }
-            },
-            State {
-                name: "search empty" // search is empty
+                name: "hide header"
                 PropertyChanges {
                     target: searchResultsItem
                     headerHeight: 20
@@ -145,7 +138,7 @@ OperationPage {
 
                         Avatar {
                             id: avatar
-                            nickname: contact
+                            nickname: search.length === 0 ? previousSearch : contact
                             anchors.verticalCenter: parent.verticalCenter
                         }
                     }
@@ -157,7 +150,7 @@ OperationPage {
                         Text {
                             color: Theme.primaryTextColor
                             font.pointSize: UiHelper.fixFontSz(15)
-                            text: contact
+                            text: search.length === 0 ? previousSearch : contact
                         }
 
                         Text {
@@ -219,6 +212,8 @@ OperationPage {
                             textFormat: Text.RichText
                         }
                     }
+
+                    onClicked: accept()
                 }
             }
         }
@@ -261,12 +256,14 @@ OperationPage {
     function checkState() {
         if (search) {
             if (modelCount === 1 && search.toLowerCase() === contactListView.itemAtIndex(0).name.toLowerCase()) {
-                searchResultState = "found"
+                searchResultState = "hide header"
             } else {
-                searchResultState = "not found"
+                searchResultState = "show header"
             }
+            previousSearch = search
+
         } else {
-            searchResultState = "search empty"
+            searchResultState = "hide header"
         }
     }
 

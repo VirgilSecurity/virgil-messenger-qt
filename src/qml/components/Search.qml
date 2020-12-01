@@ -9,6 +9,7 @@ Rectangle {
     radius: 20
     color: "transparent"
 
+    property alias textValidator: searchField.validator
     property alias searchPlaceholder: searchField.placeholderText
     property string search: searchField.text + searchField.preeditText
     property bool isSearchOpen: state === "opened"
