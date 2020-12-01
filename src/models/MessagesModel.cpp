@@ -264,7 +264,7 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
             if (!imagePath.isEmpty()) {
                 return Utils::localFileToUrl(imagePath);
             }
-            if (message.status != Message::Status::Created) {
+            if (message.status != Message::Status::Created && message.status != Message::Status::InvalidM) {
                 qCDebug(lcModel) << "Requesting of missing thumbnail/preview";
                 emit displayImageNotFound(message.id);
             }
@@ -307,7 +307,7 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
     {
         return attachment ? Utils::fileExists(attachment->localPath) : false;
     }
-    case FailedRole:
+    case IsBrokenRole:
     {
         return message.status == Message::Status::InvalidM;
     }
@@ -345,7 +345,7 @@ QHash<int, QByteArray> MessagesModel::roleNames() const
         { AttachmentBytesTotalRole, "attachmentBytesTotal" },
         { AttachmentBytesLoadedRole, "attachmentBytesLoaded" },
         { AttachmentFileExistsRole, "attachmentFileExists" },
-        { FailedRole, "failed" },
+        { IsBrokenRole, "isBroken" },
         { FirstInRowRole, "firstInRow" },
         { InRowRole, "inRow" },
     };
@@ -389,7 +389,7 @@ void MessagesModel::invalidateRow(const int row, const QVector<int> &roles)
 {
     auto allRoles = roles;
     if (allRoles.contains(StatusRole) || allRoles.contains(AttachmentStatusRole)) {
-        allRoles << FailedRole;
+        allRoles << IsBrokenRole;
     }
     if (!allRoles.empty()) {
         invalidateModel(index(row), allRoles);
