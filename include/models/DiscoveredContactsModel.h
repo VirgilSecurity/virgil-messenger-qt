@@ -48,20 +48,27 @@ public:
     enum Roles
     {
         NameRole = Qt::UserRole,
+        DetailsRole,
         AvatarUrlRole,
-        LastSeenActivityRole
+        LastSeenActivityRole,
+        FilterRole
     };
 
     explicit DiscoveredContactsModel(QObject *parent);
 
-private:
-    void fillDummyContacts();
+    void reload();
 
+signals:
+    void contactsPopulated(const Contacts &contacts, QPrivateSignal);
+
+private:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    QList<Contact> m_list;
+    void setContacts(const Contacts &contacts);
+
+    Contacts m_contacts;
 };
 }
 

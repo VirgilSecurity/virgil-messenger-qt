@@ -119,6 +119,10 @@ namespace Utils
     QSize calculateThumbnailSize(const QSize &size, const QSize &maxSize, const int orientation = 0);
 
     bool readImage(QImageReader *reader, QImage *image);
+
+    // Contacts
+
+    Contacts getDeviceContacts();
 }
 }
 

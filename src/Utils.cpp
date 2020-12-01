@@ -458,3 +458,12 @@ bool Utils::readImage(QImageReader *reader, QImage *image)
     }
     return true;
 }
+
+Contacts Utils::getDeviceContacts()
+{
+#ifdef VS_ANDROID
+    return VSQAndroid::getContacts();
+#else
+    return {};
+#endif
+}
