@@ -139,12 +139,12 @@ bool VSQCrashReporter::sendFileToBackendRequest(QByteArray fileData)
     req.setRawHeader(QString("Version").toUtf8(), qPrintable(m_version));
     req.setRawHeader(QString("Platform").toUtf8(), qPrintable(QSysInfo::kernelType()));
     auto reply = m_manager->post(req, fileData);
+    connect(reply, &QNetworkReply::finished, this, std::bind(&VSQCrashReporter::endpointReply, this, reply));
     qCDebug(lcCrashReporter) << "Send report to endpoint:" << strEndpoint;
     for (auto name : req.rawHeaderList()) {
         qCDebug(lcCrashReporter) << "Request header" << name << ':' << req.rawHeader(name);
     }
     qCDebug(lcCrashReporter) << "File data empty:" << fileData.isEmpty();
-    connect(reply, &QNetworkReply::finished, this, std::bind(&VSQCrashReporter::endpointReply, this, reply));
 
     return true;
 }
@@ -162,4 +162,5 @@ void VSQCrashReporter::endpointReply(QNetworkReply *reply)
         emit reportErrorOccurred(tr("Crashreport sending failed"));
     }
     qCDebug(lcCrashReporter) << "Sending finished";
+    reply->deleteLater();
 }
