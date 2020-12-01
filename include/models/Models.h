@@ -50,10 +50,11 @@ class AttachmentsModel;
 class ChatsModel;
 class DiscoveredContactsModel;
 class FileCloudModel;
+class FileLoader;
 class MessagesModel;
 class MessagesQueue;
-class FileLoader;
 class UserDatabase;
+class Validator;
 
 class Models : public QObject
 {
@@ -66,7 +67,7 @@ class Models : public QObject
     Q_PROPERTY(MessagesModel *messages READ messages CONSTANT)
 
 public:
-    Models(VSQMessenger *messenger, Settings *settings, UserDatabase *userDatabase, QNetworkAccessManager *networkAccessManager, QObject *parent);
+    Models(VSQMessenger *messenger, Settings *settings, Validator *validator, UserDatabase *userDatabase, QNetworkAccessManager *networkAccessManager, QObject *parent);
     ~Models() override;
 
     const AccountSelectionModel *accountSelection() const;

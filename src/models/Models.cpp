@@ -50,12 +50,12 @@
 
 using namespace vm;
 
-Models::Models(VSQMessenger *messenger, Settings *settings, UserDatabase *userDatabase, QNetworkAccessManager *networkAccessManager, QObject *parent)
+Models::Models(VSQMessenger *messenger, Settings *settings, Validator *validator, UserDatabase *userDatabase, QNetworkAccessManager *networkAccessManager, QObject *parent)
     : QObject(parent)
     , m_accountSelection(new AccountSelectionModel(settings, this))
     , m_attachments(new AttachmentsModel(settings, this))
     , m_chats(new ChatsModel(this))
-    , m_discoveredContacts(new DiscoveredContactsModel(this))
+    , m_discoveredContacts(new DiscoveredContactsModel(validator, this))
     , m_messages(new MessagesModel(this))
     , m_fileCloud(new FileCloudModel(settings, this))
     , m_fileLoader(new FileLoader(messenger->xmpp(), networkAccessManager, this))

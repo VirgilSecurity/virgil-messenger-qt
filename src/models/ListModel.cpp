@@ -49,6 +49,11 @@ ListModel::ListModel(QObject *parent)
     m_proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
 }
 
+QString ListModel::filter() const
+{
+    return m_filter;
+}
+
 const QSortFilterProxyModel *ListModel::proxy() const
 {
     return m_proxy;

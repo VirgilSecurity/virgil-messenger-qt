@@ -38,12 +38,14 @@
 #include <QtConcurrent>
 
 #include "Settings.h"
+#include "Validator.h"
 #include "Utils.h"
 
 using namespace vm;
 
-DiscoveredContactsModel::DiscoveredContactsModel(QObject *parent)
+DiscoveredContactsModel::DiscoveredContactsModel(Validator *validator, QObject *parent)
     : ListModel(parent)
+    , m_validator(validator)
 {
     qRegisterMetaType<DiscoveredContactsModel *>("DiscoveredContactsModel*");
 
@@ -52,6 +54,7 @@ DiscoveredContactsModel::DiscoveredContactsModel(QObject *parent)
     proxy()->setFilterRole(FilterRole);
 
     connect(this, &DiscoveredContactsModel::contactsPopulated, this, &DiscoveredContactsModel::setContacts);
+    connect(this, &DiscoveredContactsModel::filterChanged, this, &DiscoveredContactsModel::checkNewContactFiltered);
 }
 
 void DiscoveredContactsModel::reload()
@@ -110,4 +113,24 @@ void DiscoveredContactsModel::setContacts(const Contacts &contacts)
     beginResetModel();
     m_contacts = contacts;
     endResetModel();
+    checkNewContactFiltered();
+}
+
+void DiscoveredContactsModel::checkNewContactFiltered()
+{
+    const auto filter = this->filter();
+    bool filtered = m_validator->isValidUsername(filter);
+    if (filtered) {
+        for (auto &contact : m_contacts) {
+            if (contact.name == filter) {
+                filtered = false;
+                break;
+            }
+        }
+    }
+    if (filtered == m_newContactFiltered) {
+        return;
+    }
+    m_newContactFiltered = filtered;
+    emit newContactFilteredChanged(filtered);
 }

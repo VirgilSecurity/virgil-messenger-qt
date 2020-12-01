@@ -15,7 +15,6 @@ OperationPage {
     readonly property alias search: contactSearch.search
     property string previousSearch
     readonly property int modelCount: contactListView.count
-    property string searchResultState: "search empty"
     property string serverName: "Default"
 
     readonly property int defaultMargins: 20
@@ -23,14 +22,12 @@ OperationPage {
     readonly property int defaultChatHeight: 50
 
     onSearchChanged: {
+        if (search) {
+            previousSearch = search
+        }
         if (filterSource) {
             filterSource.filter = search
-            checkState()
         }
-    }
-
-    onModelCountChanged: {
-        checkState()
     }
 
     header: Header {
@@ -72,7 +69,7 @@ OperationPage {
             margins: defaultMargins
         }
 
-        state: searchResultState
+        state: models.discoveredContacts.newContactFiltered ? "show header" : "hide header"
         states: [
             State {
                 name: "show header"
@@ -138,7 +135,7 @@ OperationPage {
 
                         Avatar {
                             id: avatar
-                            nickname: search.length === 0 ? previousSearch : contact
+                            nickname: search ? contact : previousSearch
                             anchors.verticalCenter: parent.verticalCenter
                         }
                     }
@@ -250,20 +247,6 @@ OperationPage {
                     text: serverName
                 }
             }
-        }
-    }
-
-    function checkState() {
-        if (search) {
-            if (modelCount === 1 && search.toLowerCase() === contactListView.itemAtIndex(0).name.toLowerCase()) {
-                searchResultState = "hide header"
-            } else {
-                searchResultState = "show header"
-            }
-            previousSearch = search
-
-        } else {
-            searchResultState = "hide header"
         }
     }
 

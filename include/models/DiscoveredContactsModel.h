@@ -40,9 +40,12 @@
 
 namespace vm
 {
+class Validator;
+
 class DiscoveredContactsModel : public ListModel
 {
     Q_OBJECT
+    Q_PROPERTY(bool newContactFiltered MEMBER m_newContactFiltered NOTIFY newContactFilteredChanged)
 
 public:
     enum Roles
@@ -54,12 +57,13 @@ public:
         FilterRole
     };
 
-    explicit DiscoveredContactsModel(QObject *parent);
+    DiscoveredContactsModel(Validator *validator, QObject *parent);
 
     void reload();
 
 signals:
     void contactsPopulated(const Contacts &contacts, QPrivateSignal);
+    void newContactFilteredChanged(const bool filtered);
 
 private:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -67,8 +71,11 @@ private:
     QHash<int, QByteArray> roleNames() const override;
 
     void setContacts(const Contacts &contacts);
+    void checkNewContactFiltered();
 
+    Validator *m_validator;
     Contacts m_contacts;
+    bool m_newContactFiltered = false;
 };
 }
 

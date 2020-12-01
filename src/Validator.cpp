@@ -49,7 +49,7 @@ Validator::~Validator()
 {
 }
 
-Optional<QString> Validator::validatedUsername(const QString &username, QString *errorText)
+Optional<QString> Validator::validatedUsername(const QString &username, QString *errorText) const
 {
     if (username.isEmpty()) {
         if (errorText) {
@@ -57,7 +57,7 @@ Optional<QString> Validator::validatedUsername(const QString &username, QString 
         }
         return NullOptional;
     }
-    if (!m_reUsername->regExp().exactMatch(username)) {
+    if (!isValidUsername(username)) {
         if (errorText) {
             *errorText = QObject::tr("Username is not valid");
         }
@@ -66,7 +66,12 @@ Optional<QString> Validator::validatedUsername(const QString &username, QString 
     return username.toLower();
 }
 
-QString Validator::databaseUsername(const QString &username)
+bool Validator::isValidUsername(const QString &username) const
+{
+    return m_reUsername->regExp().exactMatch(username);
+}
+
+QString Validator::databaseUsername(const QString &username) const
 {
     static QRegExp regexp("[^a-zA-Z0-9_]");
     return QString(username).remove(regexp);
