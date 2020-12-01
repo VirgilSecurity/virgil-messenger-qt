@@ -53,6 +53,7 @@ ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, Contro
     , m_accountSettingsState(new AccountSettingsState(this))
     , m_attachmentPreviewState(new AttachmentPreviewState(this))
     , m_backupKeyState(new BackupKeyState(m_messenger, this))
+    , m_editProfileState(new EditProfileState(this))
     , m_chatListState(new ChatListState(controllers->chats(), this))
     , m_chatState(new ChatState(controllers, m_messenger->lastActivityManager(), this))
     , m_downloadKeyState(new DownloadKeyState(controllers->users(), this))
@@ -80,6 +81,7 @@ void ApplicationStateManager::registerStatesMetaTypes()
     qRegisterMetaType<AccountSettingsState *>("AccountSettingsState*");
     qRegisterMetaType<AttachmentPreviewState *>("AttachmentPreviewState*");
     qRegisterMetaType<BackupKeyState *>("BackupKeyState*");
+    qRegisterMetaType<EditProfileState *>("EditProfileState*");
     qRegisterMetaType<ChatListState *>("ChatListState*");
     qRegisterMetaType<ChatState *>("ChatState*");
     qRegisterMetaType<DownloadKeyState *>("DownloadKeyState*");
@@ -130,6 +132,9 @@ void ApplicationStateManager::addTransitions()
     addTwoSideTransition(m_accountSettingsState, m_accountSettingsState, &AccountSettingsState::requestBackupKey, m_backupKeyState);
     connect(m_accountSettingsState, &AccountSettingsState::requestBackupKey, m_backupKeyState, &BackupKeyState::setUserId);
     m_accountSettingsState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
+
+    addTwoSideTransition(m_accountSettingsState, m_accountSettingsState, &AccountSettingsState::editProfile, m_editProfileState);
+//    connect(m_accountSettingsState, &AccountSettingsState::editProfile, m_editProfileState, &EditProfileState::setUserId);
 
     m_newChatState->addTransition(chats, &ChatsController::chatOpened, m_chatState);
     m_newChatState->addTransition(users, &UsersController::accountSettingsRequested, m_accountSettingsState);

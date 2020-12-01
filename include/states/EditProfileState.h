@@ -32,32 +32,23 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_ACCOUNTSETTINGSSTATE_H
-#define VM_ACCOUNTSETTINGSSTATE_H
+#ifndef VM_EDITPROFILESTATE_H
+#define VM_EDITPROFILESTATE_H
 
-#include <QState>
+#include "OperationState.h"
+
+class VSQMessenger;
 
 namespace vm
 {
-class AccountSettingsState : public QState
+class EditProfileState : public OperationState
 {
     Q_OBJECT
-    Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
 
 public:
-    explicit AccountSettingsState(QState *parent);
-
-    QString userId() const;
-    void setUserId(const QString &userId);
-
-signals:
-    void editProfile();
-    void requestBackupKey(const QString &userId);
-    void userIdChanged(const QString &);
-
+    EditProfileState(QState *parent);
 private:
-    QString m_userId;
 };
 }
 
-#endif // VM_ACCOUNTSETTINGSSTATE_H
+#endif // VM_EDITPROFILESTATE_H

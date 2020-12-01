@@ -36,6 +36,11 @@ Page {
         }
 
         FormPrimaryButton {
+            text: qsTr("Edit profile")
+            onClicked: appState.editProfile()
+        }
+
+        FormPrimaryButton {
             text: qsTr("Backup private key")
             onClicked: appState.requestBackupKey(appState.userId)
         }
