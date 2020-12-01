@@ -118,6 +118,9 @@ void MessagesQueue::connectMessageOperation(MessageOperation *op)
 
 MessageOperation *MessagesQueue::pushMessageOperation(const GlobalMessage &message, bool prepend)
 {
+    if (message.status == Message::Status::InvalidM) {
+        return nullptr;
+    }
     auto op = new MessageOperation(message, m_factory, this);
     connectMessageOperation(op);
     prepend ? prependChild(op) : appendChild(op);
@@ -142,8 +145,9 @@ void MessagesQueue::onNotSentMessagesFetched(const GlobalMessages &messages)
 {
     qCDebug(lcOperation) << "Queued" << messages.size() << "unsent messages";
     for (auto &m : messages) {
-        auto op = pushMessageOperation(m);
-        m_factory->populateAll(op);
+        if (auto op = pushMessageOperation(m)) {
+            m_factory->populateAll(op);
+        }
     }
     startIfReady();
 }
@@ -155,24 +159,27 @@ void MessagesQueue::onFinished()
 
 void MessagesQueue::onPushMessage(const GlobalMessage &message)
 {
-    auto op = pushMessageOperation(message);
-    m_factory->populateAll(op);
-    startIfReady();
+    if (auto op = pushMessageOperation(message)) {
+        m_factory->populateAll(op);
+        startIfReady();
+    }
 }
 
 void MessagesQueue::onPushMessageDownload(const GlobalMessage &message, const QString &filePath)
 {
-    auto op = pushMessageOperation(message, true);
-    m_factory->populateDownload(op, filePath);
-    connect(op, &Operation::finished, this, std::bind(&MessagesQueue::notificationCreated, this, tr("File was downloaded"), false));
-    startIfReady();
+    if (auto op = pushMessageOperation(message, true)) {
+        m_factory->populateDownload(op, filePath);
+        connect(op, &Operation::finished, this, std::bind(&MessagesQueue::notificationCreated, this, tr("File was downloaded"), false));
+        startIfReady();
+    }
 }
 
 void MessagesQueue::onPushMessagePreload(const GlobalMessage &message)
 {
-    auto op = pushMessageOperation(message, true);
-    m_factory->populatePreload(op);
-    startIfReady();
+    if (auto op = pushMessageOperation(message, true)) {
+        m_factory->populatePreload(op);
+        startIfReady();
+    }
 }
 
 void MessagesQueue::onMessageOperationStatusChanged(const MessageOperation *operation)

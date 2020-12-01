@@ -264,7 +264,7 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
             if (!imagePath.isEmpty()) {
                 return Utils::localFileToUrl(imagePath);
             }
-            if (message.status != Message::Status::Created) {
+            if (message.status != Message::Status::Created && message.status != Message::Status::InvalidM) {
                 qCDebug(lcModel) << "Requesting of missing thumbnail/preview";
                 emit displayImageNotFound(message.id);
             }
