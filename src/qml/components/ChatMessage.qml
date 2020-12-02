@@ -31,6 +31,7 @@ Control {
     property int attachmentBytesTotal: 0
     property string attachmentDisplaySize: ""
     property string attachmentDisplayText: ""
+    property string attachmentDisplayProgress: ""
     property string attachmentImagePath: ""
     property int attachmentThumbnailWidth: 0
     property int attachmentThumbnailHeight: 0
@@ -169,17 +170,7 @@ Control {
                     Label {
                         Layout.maximumWidth: column.maxWidth
                         visible: chatMessage.attachmentStatus == Enums.AttachmentStatus.Loading
-                        text: {
-                            if (attachmentBytesLoaded === 0) {
-                                return ".."
-                            } else {
-                                let percent = attachmentBytesLoaded / attachmentBytesTotal
-                                let progress = parseFloat(attachmentSize) * percent
-                                let output = progress.toFixed(2) + "/" + attachmentDisplaySize
-                                return output
-                            }
-                        }
-
+                        text: attachmentDisplayProgress
                         color: "white"
                         font.pixelSize: UiHelper.fixFontSz(10)
                     }

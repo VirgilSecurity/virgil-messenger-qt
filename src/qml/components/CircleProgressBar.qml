@@ -33,28 +33,18 @@ Item {
         anchors.fill: parent
         radius: height
         color: "black"
-        opacity: 0.35
+        opacity: 0.333
     }
 
-    Item {
-        anchors {
-            fill: parent
-            margins: size * 0.3
-        }
-
-        Repeater {
-            model: ListModel {
-                ListElement { angle: -45 }
-                ListElement { angle: 45 }
-            }
-            Rectangle {
-                anchors.centerIn: parent
-                width: parent.width
-                height: lineWidth
-                radius: height
-                color: primaryColor
-                rotation: angle
-            }
+    Repeater {
+        model: 2
+        Rectangle {
+            anchors.centerIn: parent
+            width: 0.5 * size
+            height: lineWidth
+            radius: height
+            color: primaryColor
+            rotation: index ? -45 : 45
         }
     }
 
