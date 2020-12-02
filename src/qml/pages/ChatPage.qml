@@ -119,6 +119,7 @@ Page {
             attachmentStatus: model.attachmentStatus
             attachmentDisplaySize: model.attachmentDisplaySize
             attachmentDisplayText: model.attachmentDisplayText
+            attachmentDisplayProgress: model.attachmentDisplayProgress
             attachmentBytesTotal: model.attachmentBytesTotal
             attachmentBytesLoaded: model.attachmentBytesLoaded
             attachmentImagePath: model.attachmentImagePath

@@ -88,6 +88,7 @@ private:
         AttachmentImagePathRole,
         AttachmentImageSizeRole,
         AttachmentDisplaySizeRole,
+        AttachmentDisplayProgressRole,
         AttachmentDisplayTextRole,
         // Loading
         AttachmentBytesTotalRole,

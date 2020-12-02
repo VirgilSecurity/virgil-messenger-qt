@@ -177,7 +177,7 @@ void MessagesModel::setAttachmentEncryptedSize(const Attachment::Id &attachmentI
 
 void MessagesModel::setAttachmentProcessedSize(const Attachment::Id &attachmentId, const DataSize &size)
 {
-    updateAttachment(attachmentId, { AttachmentBytesLoadedRole }, [=](Attachment &a) {
+    updateAttachment(attachmentId, { AttachmentBytesLoadedRole, AttachmentDisplayProgressRole }, [=](Attachment &a) {
         if (a.processedSize == size) {
             return false;
         }
@@ -285,6 +285,13 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
         }
         return QString();
     }
+    case AttachmentDisplayProgressRole:
+    {
+        if (attachment && attachment->type == Attachment::Type::File) {
+            return Utils::formattedDataSizeProgress(attachment->processedSize, attachment->encryptedSize);
+        }
+        return QString();
+    }
     case AttachmentDisplayTextRole:
     {
         return attachment ? Utils::attachmentDisplayText(*attachment) : QString();
@@ -341,6 +348,7 @@ QHash<int, QByteArray> MessagesModel::roleNames() const
         { AttachmentImagePathRole, "attachmentImagePath" },
         { AttachmentImageSizeRole, "attachmentImageSize" },
         { AttachmentDisplaySizeRole, "attachmentDisplaySize" },
+        { AttachmentDisplayProgressRole, "attachmentDisplayProgress" },
         { AttachmentDisplayTextRole, "attachmentDisplayText" },
         { AttachmentBytesTotalRole, "attachmentBytesTotal" },
         { AttachmentBytesLoadedRole, "attachmentBytesLoaded" },

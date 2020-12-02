@@ -31,6 +31,7 @@ Control {
     property int attachmentBytesTotal: 0
     property string attachmentDisplaySize: ""
     property string attachmentDisplayText: ""
+    property string attachmentDisplayProgress: ""
     property string attachmentImagePath: ""
     property int attachmentThumbnailWidth: 0
     property int attachmentThumbnailHeight: 0
@@ -160,7 +161,16 @@ Control {
 
                     Label {
                         Layout.maximumWidth: column.maxWidth
+                        visible: chatMessage.attachmentStatus == Enums.AttachmentStatus.Loaded
                         text: attachmentDisplaySize
+                        color: "white"
+                        font.pixelSize: UiHelper.fixFontSz(10)
+                    }
+
+                    Label {
+                        Layout.maximumWidth: column.maxWidth
+                        visible: chatMessage.attachmentStatus == Enums.AttachmentStatus.Loading
+                        text: attachmentDisplayProgress
                         color: "white"
                         font.pixelSize: UiHelper.fixFontSz(10)
                     }
