@@ -5,31 +5,87 @@ import QtQuick.Layouts 1.12
 import "../theme"
 import "../components"
 
+//Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
+//Q_PROPERTY(QString phoneNumber READ phoneNumber WRITE setPhoneNumber NOTIFY phoneNumberChanged)
+//Q_PROPERTY(QString email READ email WRITE setEmail NOTIFY emailChanged)
+//Q_PROPERTY(bool isPhoneNumberConfirmed READ isPhoneNumberConfirmed WRITE setIsPhoneNumberConfirmed NOTIFY isPhoneNumberConfirmedChanged)
+//Q_PROPERTY(bool isEmailConfirmed READ isEmailConfirmed WRITE setIsEmailConfirmed NOTIFY isEmailConfirmedChanged)
+//Q_PROPERTY(QUrl avatarUrl READ avatarUrl WRITE setAvatarUrl NOTIFY avatarUrlChanged)
+
 OperationPage {
+    id: editProfilePage
     appState: app.stateManager.editProfileState
-    property string phoneValue: "+3809-test-test"
-    property bool phoneConfirmed: false
-
-    property string emailValue: "email@test.com"
-    property bool emailConfirmed: true
-
-//    appState: app.stateManager.accountSettingsState
+    property bool isPhoneConfirmed: appState.isPhoneNumberConfirmed
+    property bool isEmailConfirmed: appState.isEmailConfirmed
 
     loadingText: qsTr("Opening profile page...")
 
     header: Header {
-        showBackButton: !form.isLoading
-        title: qsTr("Profile")
+        showBackButton: !confirmForm.isLoading
+        title: editProfilePage.state === "standard" ? qsTr("Profile") : qsTr("Confirm")
     }
 
+    state: "standard"
+    states: [
+        State {
+            name: "standard"
+            PropertyChanges {
+                target: profileForm
+                opacity: 1
+                enabled: true
+                scale: 1
+            }
+            PropertyChanges {
+                target: confirmForm
+                opacity: 0
+                enabled: false
+                scale: 0.8
+            }
+        },
+        State {
+            name: "phone confirmation"
+            PropertyChanges {
+                target: profileForm
+                opacity: 0
+                enabled: false
+                scale: 1.2
+            }
+            PropertyChanges {
+                target: confirmForm
+                opacity: 1
+                enabled: true
+                scale: 1
+            }
+        },
+        State {
+            name: "email confirmation"
+            PropertyChanges {
+                target: profileForm
+                opacity: 0
+                enabled: false
+                scale: 1.2
+            }
+            PropertyChanges {
+                target: confirmForm
+                opacity: 1
+                enabled: true
+                scale: 1
+            }
+        }
+    ]
+
+    transitions: Transition {
+        NumberAnimation {properties: "opacity, scale, enabled"; duration: Theme.animationDuration; easing.type: Easing.InExpo}
+    }
+
+
     Form {
-        id: form
+        id: profileForm
 
         Avatar {
             Layout.alignment: Qt.AlignHCenter
             diameter: 80
-//            nickname: appState.userId
-            nickname: "ER"
+            nickname: appState.userId
         }
 
         Label {
@@ -37,38 +93,96 @@ OperationPage {
             Layout.bottomMargin: 50
             font.pointSize: UiHelper.fixFontSz(18)
             color: Theme.primaryTextColor
-//            text: appState.userId
-            text: "ERROR_404"
+            text: appState.userId
         }
 
         FormInput {
             id: phone
-            label: qsTr("Phone")
+            label: isPhoneConfirmed ? qsTr("Confirmed phone") : qsTr("Phone")
             password: false
             placeholder: qsTr("Enter phone")
+            text: appState.phoneNumber
+            onTextChanged: appState.phoneNumber = text
+            validator: RegExpValidator { regExp: /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im }
+            enabled: !isPhoneConfirmed
+        }
+
+        FormPrimaryButton {
+            text: isPhoneConfirmed ? qsTr("Reset") : qsTr("Confirm")
+            enabled: phone.acceptableInput
+            onClicked: phoneButtonClicked(isPhoneConfirmed)
         }
 
         FormInput {
             id: email
-            label: qsTr("Email")
+            label: isEmailConfirmed ? qsTr("Confirmed email") : qsTr("Email")
             password: false
             placeholder: qsTr("Enter email")
-            text: emailValue + " ✔" // Would be great to add ✔ icon if this item is confirmed
+            text: appState.email
+            onTextChanged: appState.email = text
+            validator: RegExpValidator { regExp:/\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/ }
+            enabled: !isEmailConfirmed
         }
 
         FormPrimaryButton {
-//            onClicked: appState.backupKey(password.text, confirmPassword.text)
-            text: qsTr("Confirm")
+            text: isEmailConfirmed ? qsTr("Reset") : qsTr("Confirm")
+            enabled: email.acceptableInput
+            onClicked: emailButtonClicked(isEmailConfirmed)
         }
     }
 
-    Connections {
-        target: appState
+    Form {
+        id: confirmForm
 
-        function onOperationFinished() {
-            showPopupSuccess(qsTr("Backup private key success"))
-            password.text = ""
-            confirmPassword.text = ""
+        FormInput {
+            id: confirmInput
+            label: {
+                if (editProfilePage.state === "phone confirmation") {
+                    return qsTr("Confirm phone")
+                } else if (editProfilePage.state === "email confirmation") {
+                    return qsTr("Confirm email")
+                } else {
+                    return ""
+                }
+            }
+
+            password: false
+            placeholder: qsTr("Enter code")
         }
+
+        FormPrimaryButton {
+            text: qsTr("Verify")
+            onClicked: {
+                console.log("[CONFIRMATION] : ", text)
+                editProfilePage.state = "standard"
+            }
+        }
+
+        FormSecondaryButton {
+            text: qsTr("Cancel")
+            onClicked: confirmationCanceled()
+        }
+    }
+
+    function phoneButtonClicked(isPhoneConfirmed) {
+        if (isPhoneConfirmed) {
+            appState.phoneNumber = ""
+            appState.isPhoneNumberConfirmed = false
+        } else {
+            editProfilePage.state = "phone confirmation"
+        }
+    }
+
+    function emailButtonClicked(isPhoneConfirmed) {
+        if (isPhoneConfirmed) {
+            appState.email = ""
+            appState.isEmailConfirmed = false
+        } else {
+            editProfilePage.state = "email confirmation"
+        }
+    }
+
+    function confirmationCanceled() {
+        editProfilePage.state = "standard"
     }
 }

@@ -41,4 +41,92 @@ using namespace vm;
 EditProfileState::EditProfileState(QState *parent)
     : OperationState(parent)
 {
+    m_phoneNumber = "+380123456789";
+    m_isPhoneNumberConfirmed = true;
+    m_isEmailConfirmed = false;
 }
+
+QString EditProfileState::userId() const
+{
+    return m_userId;
+}
+
+void EditProfileState::setUserId(const QString &userId)
+{
+    if (m_userId == userId) {
+        return;
+    }
+    m_userId = userId;
+    emit userIdChanged(userId);
+}
+
+QString EditProfileState::phoneNumber() const
+{
+    return m_phoneNumber;
+}
+
+void EditProfileState::setPhoneNumber(const QString &phoneNumber)
+{
+    if (m_phoneNumber == phoneNumber) {
+        return;
+    }
+    m_phoneNumber = phoneNumber;
+    emit phoneNumberChanged(phoneNumber);
+}
+
+QString EditProfileState::email() const
+{
+    return m_email;
+}
+
+void EditProfileState::setEmail(const QString &email)
+{
+    if (m_email == email) {
+        return;
+    }
+    m_email = email;
+    emit emailChanged(email);
+}
+
+bool EditProfileState::isPhoneNumberConfirmed() const
+{
+    return m_isPhoneNumberConfirmed;
+}
+
+void EditProfileState::setIsPhoneNumberConfirmed(const bool &isPhoneNumberConfirmed)
+{
+    if (m_isPhoneNumberConfirmed == isPhoneNumberConfirmed) {
+        return;
+    }
+    m_isPhoneNumberConfirmed = isPhoneNumberConfirmed;
+    emit isPhoneNumberConfirmedChanged(isPhoneNumberConfirmed);
+}
+
+bool EditProfileState::isEmailConfirmed() const
+{
+    return m_isEmailConfirmed;
+}
+
+void EditProfileState::setIsEmailConfirmed(const bool &isEmailConfirmed)
+{
+    if (m_isEmailConfirmed == isEmailConfirmed) {
+        return;
+    }
+    m_isEmailConfirmed = isEmailConfirmed;
+    emit isEmailConfirmedChanged(isEmailConfirmed);
+}
+
+QUrl EditProfileState::avatarUrl() const
+{
+    return m_avatarUrl;
+}
+
+void EditProfileState::setAvatarUrl(const QUrl &avatarUrl)
+{
+    if (m_avatarUrl == avatarUrl) {
+        return;
+    }
+    m_avatarUrl = avatarUrl;
+    emit avatarUrlChanged(avatarUrl);
+}
+

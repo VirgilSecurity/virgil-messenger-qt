@@ -134,6 +134,8 @@ void ApplicationStateManager::addTransitions()
     m_accountSettingsState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
 
     addTwoSideTransition(m_accountSettingsState, m_accountSettingsState, &AccountSettingsState::editProfile, m_editProfileState);
+    connect(users, &UsersController::accountSettingsRequested, m_editProfileState, &EditProfileState::setUserId);
+
 //    connect(m_accountSettingsState, &AccountSettingsState::editProfile, m_editProfileState, &EditProfileState::setUserId);
 
     m_newChatState->addTransition(chats, &ChatsController::chatOpened, m_chatState);

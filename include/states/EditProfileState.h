@@ -36,6 +36,7 @@
 #define VM_EDITPROFILESTATE_H
 
 #include "OperationState.h"
+#include <QUrl>
 
 class VSQMessenger;
 
@@ -44,10 +45,45 @@ namespace vm
 class EditProfileState : public OperationState
 {
     Q_OBJECT
+    Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
+    Q_PROPERTY(QString phoneNumber READ phoneNumber WRITE setPhoneNumber NOTIFY phoneNumberChanged)
+    Q_PROPERTY(QString email READ email WRITE setEmail NOTIFY emailChanged)
+    Q_PROPERTY(bool isPhoneNumberConfirmed READ isPhoneNumberConfirmed WRITE setIsPhoneNumberConfirmed NOTIFY isPhoneNumberConfirmedChanged)
+    Q_PROPERTY(bool isEmailConfirmed READ isEmailConfirmed WRITE setIsEmailConfirmed NOTIFY isEmailConfirmedChanged)
+    Q_PROPERTY(QUrl avatarUrl READ avatarUrl WRITE setAvatarUrl NOTIFY avatarUrlChanged)
 
 public:
     EditProfileState(QState *parent);
+
+    QString userId() const;
+    void setUserId(const QString &userId);
+    QString phoneNumber() const;
+    void setPhoneNumber(const QString &phoneNumber);
+    QString email() const;
+    void setEmail(const QString &email);
+    bool isPhoneNumberConfirmed() const;
+    void setIsPhoneNumberConfirmed(const bool &isPhoneNumberConfirmed);
+    bool isEmailConfirmed() const;
+    void setIsEmailConfirmed(const bool &isEmailConfirmed);
+    QUrl avatarUrl() const;
+    void setAvatarUrl(const QUrl &avatarUrl);
+
+signals:
+    void userIdChanged(const QString &);
+    void phoneNumberChanged(const QString &);
+    void emailChanged(const QString &);
+    void isPhoneNumberConfirmedChanged(const bool &);
+    void isEmailConfirmedChanged(const bool &);
+    void avatarUrlChanged(const QUrl &);
+
 private:
+    QString m_userId;
+    QString m_phoneNumber;
+    QString m_email;
+    bool m_isPhoneNumberConfirmed;
+    bool m_isEmailConfirmed;
+    QUrl m_avatarUrl;
+
 };
 }
 
