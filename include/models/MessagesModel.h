@@ -95,7 +95,7 @@ private:
         AttachmentBytesLoadedRole,
         AttachmentFileExistsRole,
         //
-        FailedRole,
+        IsBrokenRole,
         FirstInRowRole,
         InRowRole,
     };

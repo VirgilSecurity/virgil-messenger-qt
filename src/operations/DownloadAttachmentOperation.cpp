@@ -48,7 +48,7 @@ DownloadAttachmentOperation::DownloadAttachmentOperation(MessageOperation *paren
     , m_settings(settings)
     , m_parameter(parameter)
 {
-    setName(QLatin1String("DownloadAttachment"));
+    setName((parameter.type == Parameter::Type::Full) ? QLatin1String("DownloadAttachment") : QLatin1String("PreloadAttachment"));
 }
 
 bool DownloadAttachmentOperation::populateChildren()
