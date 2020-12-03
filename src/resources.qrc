@@ -149,5 +149,6 @@
         <file>resources/database/updateLastMessage.sql</file>
         <file>resources/database/updateMessageStatus.sql</file>
         <file>qml/pages/EditProfilePage.qml</file>
+        <file>qml/pages/VerifyProfilePage.qml</file>
     </qresource>
 </RCC>

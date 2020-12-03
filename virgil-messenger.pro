@@ -127,6 +127,7 @@ HEADERS += \
         include/states/AttachmentPreviewState.h \
         include/states/BackupKeyState.h \
         include/states/EditProfileState.h \
+        include/states/VerifyProfileState.h \
         include/states/ChatListState.h \
         include/states/ChatState.h \
         include/states/DownloadKeyState.h \
@@ -232,6 +233,7 @@ SOURCES += \
         src/states/AttachmentPreviewState.cpp \
         src/states/BackupKeyState.cpp \
         src/states/EditProfileState.cpp \
+        src/states/VerifyProfileState.cpp \
         src/states/ChatListState.cpp \
         src/states/ChatState.cpp \
         src/states/DownloadKeyState.cpp \

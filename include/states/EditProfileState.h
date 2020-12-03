@@ -36,6 +36,7 @@
 #define VM_EDITPROFILESTATE_H
 
 #include "OperationState.h"
+#include "VSQCommon.h"
 #include <QUrl>
 
 class VSQMessenger;
@@ -68,7 +69,11 @@ public:
     QUrl avatarUrl() const;
     void setAvatarUrl(const QUrl &avatarUrl);
 
+    void onVerificationResponse(const QString &whatToConfirm, const bool &isVerified);
+
 signals:
+    void verifyProfile(const QString &);
+    void verificationFinished(const bool &);
     void resetPhone();
     void resetEmail();
 
@@ -83,7 +88,7 @@ private:
     void phoneIsReset();
     void emailIsReset();
 
-    QString m_userId;
+    UserId m_userId;
     QString m_phoneNumber;
     QString m_email;
     bool m_isPhoneNumberConfirmed;

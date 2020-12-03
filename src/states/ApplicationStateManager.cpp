@@ -54,6 +54,7 @@ ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, Contro
     , m_attachmentPreviewState(new AttachmentPreviewState(this))
     , m_backupKeyState(new BackupKeyState(m_messenger, this))
     , m_editProfileState(new EditProfileState(this))
+    , m_verifyProfileState(new VerifyProfileState(this))
     , m_chatListState(new ChatListState(controllers->chats(), this))
     , m_chatState(new ChatState(controllers, m_messenger->lastActivityManager(), this))
     , m_downloadKeyState(new DownloadKeyState(controllers->users(), this))
@@ -82,6 +83,7 @@ void ApplicationStateManager::registerStatesMetaTypes()
     qRegisterMetaType<AttachmentPreviewState *>("AttachmentPreviewState*");
     qRegisterMetaType<BackupKeyState *>("BackupKeyState*");
     qRegisterMetaType<EditProfileState *>("EditProfileState*");
+    qRegisterMetaType<VerifyProfileState *>("VerifyProfileState*");
     qRegisterMetaType<ChatListState *>("ChatListState*");
     qRegisterMetaType<ChatState *>("ChatState*");
     qRegisterMetaType<DownloadKeyState *>("DownloadKeyState*");
@@ -136,7 +138,9 @@ void ApplicationStateManager::addTransitions()
     addTwoSideTransition(m_accountSettingsState, m_accountSettingsState, &AccountSettingsState::editProfile, m_editProfileState);
     connect(users, &UsersController::accountSettingsRequested, m_editProfileState, &EditProfileState::setUserId);
 
-//    connect(m_accountSettingsState, &AccountSettingsState::editProfile, m_editProfileState, &EditProfileState::setUserId);
+    addTwoSideTransition(m_editProfileState, m_editProfileState, &EditProfileState::verifyProfile, m_verifyProfileState);
+    connect(m_editProfileState, &EditProfileState::verifyProfile, m_verifyProfileState, &VerifyProfileState::setWhatToConfirm);
+    connect(m_verifyProfileState, &VerifyProfileState::verificationResponse, m_editProfileState, &EditProfileState::onVerificationResponse);
 
     m_newChatState->addTransition(chats, &ChatsController::chatOpened, m_chatState);
     m_newChatState->addTransition(users, &UsersController::accountSettingsRequested, m_accountSettingsState);

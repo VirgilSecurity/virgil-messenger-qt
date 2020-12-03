@@ -42,6 +42,7 @@
 #include "AttachmentPreviewState.h"
 #include "BackupKeyState.h"
 #include "EditProfileState.h"
+#include "VerifyProfileState.h"
 #include "ChatListState.h"
 #include "ChatState.h"
 #include "DownloadKeyState.h"
@@ -70,6 +71,7 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(AttachmentPreviewState *attachmentPreviewState MEMBER m_attachmentPreviewState CONSTANT)
     Q_PROPERTY(BackupKeyState *backupKeyState MEMBER m_backupKeyState CONSTANT)
     Q_PROPERTY(EditProfileState *editProfileState MEMBER m_editProfileState CONSTANT)
+    Q_PROPERTY(VerifyProfileState *verifyProfileState MEMBER m_verifyProfileState CONSTANT)
     Q_PROPERTY(ChatListState *chatListState MEMBER m_chatListState CONSTANT)
     Q_PROPERTY(ChatState *chatState MEMBER m_chatState CONSTANT)
     Q_PROPERTY(DownloadKeyState *downloadKeyState MEMBER m_downloadKeyState CONSTANT)
@@ -126,6 +128,7 @@ private:
     AttachmentPreviewState *m_attachmentPreviewState;
     BackupKeyState *m_backupKeyState;
     EditProfileState *m_editProfileState;
+    VerifyProfileState *m_verifyProfileState;
     ChatListState *m_chatListState;
     ChatState *m_chatState;
     DownloadKeyState *m_downloadKeyState;

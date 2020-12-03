@@ -41,10 +41,6 @@ using namespace vm;
 EditProfileState::EditProfileState(QState *parent)
     : OperationState(parent)
 {
-    m_phoneNumber = "+380123456789";
-    m_isPhoneNumberConfirmed = true;
-    m_isEmailConfirmed = false;
-
     connect(this, &EditProfileState::resetPhone, this, &EditProfileState::phoneIsReset);
     connect(this, &EditProfileState::resetEmail, this, &EditProfileState::emailIsReset);
 }
@@ -151,3 +147,14 @@ void EditProfileState::emailIsReset()
     emit isEmailConfirmedChanged(m_isEmailConfirmed);
 }
 
+void EditProfileState::onVerificationResponse(const QString &whatToConfirm, const bool &isVerified)
+{
+    if (whatToConfirm == "phone") {
+        EditProfileState::setIsPhoneNumberConfirmed(isVerified);
+    }
+    if (whatToConfirm == "email") {
+        EditProfileState::setIsEmailConfirmed(isVerified);
+    }
+
+    emit verificationFinished(isVerified);
+}
