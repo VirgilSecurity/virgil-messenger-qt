@@ -69,6 +69,9 @@ public:
     void setAvatarUrl(const QUrl &avatarUrl);
 
 signals:
+    void resetPhone();
+    void resetEmail();
+
     void userIdChanged(const QString &);
     void phoneNumberChanged(const QString &);
     void emailChanged(const QString &);
@@ -77,13 +80,15 @@ signals:
     void avatarUrlChanged(const QUrl &);
 
 private:
+    void phoneIsReset();
+    void emailIsReset();
+
     QString m_userId;
     QString m_phoneNumber;
     QString m_email;
     bool m_isPhoneNumberConfirmed;
     bool m_isEmailConfirmed;
     QUrl m_avatarUrl;
-
 };
 }
 

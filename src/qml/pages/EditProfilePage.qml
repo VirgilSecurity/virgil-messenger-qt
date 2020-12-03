@@ -78,7 +78,6 @@ OperationPage {
         NumberAnimation {properties: "opacity, scale, enabled"; duration: Theme.animationDuration; easing.type: Easing.InExpo}
     }
 
-
     Form {
         id: profileForm
 
@@ -166,8 +165,11 @@ OperationPage {
 
     function phoneButtonClicked(isPhoneConfirmed) {
         if (isPhoneConfirmed) {
-            appState.phoneNumber = ""
-            appState.isPhoneNumberConfirmed = false
+            appState.resetPhone()
+
+//            appState.phoneNumber = ""
+//            appState.isPhoneNumberConfirmed = false
+            // signal reset phone number
         } else {
             editProfilePage.state = "phone confirmation"
         }
@@ -177,6 +179,7 @@ OperationPage {
         if (isPhoneConfirmed) {
             appState.email = ""
             appState.isEmailConfirmed = false
+            // signal reset email
         } else {
             editProfilePage.state = "email confirmation"
         }

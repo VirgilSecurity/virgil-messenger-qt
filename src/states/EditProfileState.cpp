@@ -44,6 +44,9 @@ EditProfileState::EditProfileState(QState *parent)
     m_phoneNumber = "+380123456789";
     m_isPhoneNumberConfirmed = true;
     m_isEmailConfirmed = false;
+
+    connect(this, &EditProfileState::resetPhone, this, &EditProfileState::phoneIsReset);
+    connect(this, &EditProfileState::resetEmail, this, &EditProfileState::emailIsReset);
 }
 
 QString EditProfileState::userId() const
@@ -128,5 +131,23 @@ void EditProfileState::setAvatarUrl(const QUrl &avatarUrl)
     }
     m_avatarUrl = avatarUrl;
     emit avatarUrlChanged(avatarUrl);
+}
+
+void EditProfileState::phoneIsReset()
+{
+    m_phoneNumber = "";
+    emit phoneNumberChanged(m_phoneNumber);
+
+    m_isPhoneNumberConfirmed = false;
+    emit isPhoneNumberConfirmedChanged(m_isPhoneNumberConfirmed);
+}
+
+void EditProfileState::emailIsReset()
+{
+    m_email = "";
+    emit emailChanged(m_email);
+
+    m_isEmailConfirmed = false;
+    emit isEmailConfirmedChanged(m_isEmailConfirmed);
 }
 
