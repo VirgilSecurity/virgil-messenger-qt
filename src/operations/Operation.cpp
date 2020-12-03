@@ -34,6 +34,8 @@
 
 #include "operations/Operation.h"
 
+#include <QEventLoop>
+
 Q_LOGGING_CATEGORY(lcOperation, "operation")
 
 using namespace vm;
@@ -62,6 +64,30 @@ void Operation::start()
     else {
         run();
     }
+}
+
+void Operation::stop()
+{
+    if (!m_children.empty()) {
+        m_children.front()->stop();
+    }
+    else if (m_status == Status::Started) {
+        fail();
+    }
+    qCDebug(lcOperation) << "Stopped operation:" << this;
+}
+
+void Operation::waitForDone()
+{
+    if (m_status != Operation::Status::Started) {
+        return;
+    }
+
+    QEventLoop loop;
+    connect(this, &Operation::finished, &loop, &QEventLoop::quit);
+    connect(this, &Operation::failed, &loop, &QEventLoop::quit);
+    connect(this, &Operation::invalidated, &loop, &QEventLoop::quit);
+    loop.exec();
 }
 
 void Operation::drop()
@@ -109,30 +135,9 @@ void Operation::appendChild(Operation *child)
     m_children.push_back(child);
 }
 
-void Operation::prependChild(Operation *child)
-{
-    connectChild(child);
-    m_children.push_front(child);
-}
-
 bool Operation::hasChildren() const
 {
     return !m_children.empty();
-}
-
-Operation *Operation::firstChild()
-{
-    return hasChildren() ? m_children.front() : nullptr;
-}
-
-Operation *Operation::lastChild()
-{
-    return hasChildren() ? m_children.back() : nullptr;
-}
-
-void Operation::setRepeatable(bool repeatable)
-{
-    m_repeatable = repeatable;
 }
 
 void Operation::fail()
@@ -199,7 +204,7 @@ void Operation::connectChild(Operation *child)
 {
     child->setParent(this);
     connect(child, &Operation::failed, this, &Operation::fail);
-    connect(child, &Operation::invalidated, this, &Operation::onChildInvalidated);
+    connect(child, &Operation::invalidated, this, qOverload<>(&Operation::invalidate));
     connect(child, &Operation::finished, this, &Operation::startNextChild);
     connect(child, &Operation::notificationCreated, this, &Operation::notificationCreated);
 }
@@ -215,7 +220,7 @@ bool Operation::setStatus(const Operation::Status &status)
     case Status::Created:
         return false;
     case Status::Started:
-        if (m_status != Status::Created && m_status != Status::Failed && !(m_repeatable && m_status == Status::Finished)) {
+        if (m_status != Status::Created && m_status != Status::Failed) {
             qCWarning(lcOperation) << "Failed to start operation";
             return false;
         }
@@ -273,14 +278,4 @@ void Operation::startNextChild()
     }
     //
     setStatus(Operation::Status::Finished);
-}
-
-void Operation::onChildInvalidated()
-{
-    if (m_repeatable) {
-        startNextChild();
-    }
-    else {
-        invalidate();
-    }
 }

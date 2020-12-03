@@ -38,17 +38,18 @@
 
 using namespace vm;
 
-NetworkOperation::NetworkOperation(QObject *parent, FileLoader *fileLoader, bool isOnline)
+NetworkOperation::NetworkOperation(QObject *parent, FileLoader *fileLoader)
     : Operation(QLatin1String("Network"), parent)
     , m_fileLoader(fileLoader)
-    , m_isOnline(isOnline)
+    , m_isOnline(fileLoader->isServiceFound())
 {
     connect(fileLoader, &FileLoader::serviceFound, this, &NetworkOperation::setIsOnline);
 }
 
 NetworkOperation::NetworkOperation(NetworkOperation *parent)
-    : NetworkOperation(parent, parent->fileLoader(), parent->isOnline())
-{}
+    : NetworkOperation(parent, parent->fileLoader())
+{
+}
 
 FileLoader *NetworkOperation::fileLoader()
 {

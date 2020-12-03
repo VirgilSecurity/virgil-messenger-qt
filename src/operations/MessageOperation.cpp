@@ -39,8 +39,8 @@
 
 using namespace vm;
 
-MessageOperation::MessageOperation(const GlobalMessage &message, MessageOperationFactory *factory, NetworkOperation *parent)
-    : NetworkOperation(parent)
+MessageOperation::MessageOperation(const GlobalMessage &message, MessageOperationFactory *factory, FileLoader *fileLoader, QObject *parent)
+    : NetworkOperation(parent, fileLoader)
     , m_factory(factory)
     , m_message(message)
 {

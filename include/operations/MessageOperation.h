@@ -46,7 +46,7 @@ class MessageOperation : public NetworkOperation
     Q_OBJECT
 
 public:
-    MessageOperation(const GlobalMessage &message, MessageOperationFactory *factory, NetworkOperation *parent);
+    MessageOperation(const GlobalMessage &message, MessageOperationFactory *factory, FileLoader *fileLoader, QObject *parent);
 
     const GlobalMessage *message() const;
     const Attachment *attachment() const;
