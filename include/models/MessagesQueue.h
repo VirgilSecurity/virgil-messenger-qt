@@ -94,15 +94,15 @@ private:
         FileLoaderReady = 1 << 1,
         FetchNeeded = UserSet | FileLoaderReady,
         FetchRequested = 1 << 2,
-        ReadyToStart = UserSet | FetchRequested
+        ReadyToRun = UserSet | FetchRequested
     };
 
     void setQueueState(const QueueState &state);
     void unsetQueueState(const QueueState &state);
 
-    void run();
+    void runIfReady();
     void addOperationItem(const OperationItem &item, bool run = true);
-    void runOperationItem(const OperationItem &item);
+    void runOperation(const OperationItem &item);
     void cleanup();
 
     void onFileLoaderServiceFound(const bool serviceFound);
@@ -119,13 +119,14 @@ private:
     void onMessageOperationAttachmentEncryptedSizeChanged(const MessageOperation *operation);
 
     FileLoader *m_fileLoader;
-
     QThreadPool *m_threadPool;
     UserDatabase *m_userDatabase;
     MessageOperationFactory *m_factory;
     UserId m_userId;
+
     Flag m_queueState = QueueState::Created;
     OperationItems m_items;
+    std::atomic_bool m_isStopped;
 };
 }
 

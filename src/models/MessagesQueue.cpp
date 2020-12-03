@@ -48,9 +48,10 @@ using namespace vm;
 MessagesQueue::MessagesQueue(const Settings *settings, VSQMessenger *messenger, UserDatabase *userDatabase, FileLoader *fileLoader, QObject *parent)
     : QObject(parent)
     , m_fileLoader(fileLoader)
-    , m_threadPool(new QThreadPool())
+    , m_threadPool(new QThreadPool(this))
     , m_userDatabase(userDatabase)
     , m_factory(new MessageOperationFactory(settings, messenger, fileLoader, this))
+    , m_isStopped(false)
 {
     qRegisterMetaType<MessagesQueue::OperationItem>("OperationItem");
 
@@ -101,13 +102,14 @@ void MessagesQueue::setQueueState(const MessagesQueue::QueueState &state)
     m_queueState = m_queueState | state;
     if (state == QueueState::UserSet) {
         connect(m_userDatabase->messagesTable(), &MessagesTable::notSentMessagesFetched, this, &MessagesQueue::onNotSentMessagesFetched);
+        m_isStopped = false;
     }
     if (m_queueState == QueueState::FetchNeeded) {
         m_queueState = m_queueState | QueueState::FetchRequested;
         m_userDatabase->messagesTable()->fetchNotSentMessages();
     }
     else {
-        run();
+        runIfReady();
     }
 }
 
@@ -120,15 +122,15 @@ void MessagesQueue::unsetQueueState(const MessagesQueue::QueueState &state)
     }
 }
 
-void MessagesQueue::run()
+void MessagesQueue::runIfReady()
 {
-    if ((m_queueState & QueueState::ReadyToStart) != QueueState::ReadyToStart) {
+    if ((m_queueState & QueueState::ReadyToRun) != QueueState::ReadyToRun) {
         return;
     }
     OperationItems items;
     std::swap(items, m_items);
     for (auto &item : items) {
-        runOperationItem(item);
+        runOperation(item);
     }
 }
 
@@ -139,14 +141,18 @@ void MessagesQueue::addOperationItem(const OperationItem &item, bool run)
     }
     m_items.push_back(item);
     if (run) {
-        this->run();
+        this->runIfReady();
     }
 }
 
-void MessagesQueue::runOperationItem(const OperationItem &item)
+void MessagesQueue::runOperation(const OperationItem &item)
 {
-    QtConcurrent::run(m_threadPool, [=]() {
-        auto op = new MessageOperation(item.message, m_factory, m_fileLoader, QThread::currentThread());
+    QtConcurrent::run(m_threadPool, [=, &stopped = m_isStopped]() {
+        if (stopped) {
+            qCDebug(lcModel) << "Queue was stopped. Operation is skipped";
+            return;
+        }
+        auto op = new MessageOperation(item.message, m_factory, m_fileLoader, nullptr);
         // connect
         connect(op, &MessageOperation::statusChanged, this, std::bind(&MessagesQueue::onMessageOperationStatusChanged, this, op));
         connect(op, &MessageOperation::attachmentStatusChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentStatusChanged, this, op));
@@ -167,12 +173,15 @@ void MessagesQueue::runOperationItem(const OperationItem &item)
         if (op->status() == Operation::Status::Failed) {
             emit operationFailed({ *op->message(), item.setup }, QPrivateSignal());
         }
+        op->deleteLater();
     });
 }
 
 void MessagesQueue::cleanup()
 {
     qCDebug(lcModel) << "Cleanup message queue";
+    m_items.clear();
+    m_isStopped = true;
     emit stopRequested(QPrivateSignal());
     m_threadPool->waitForDone();
 }
