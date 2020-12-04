@@ -159,6 +159,8 @@ OperationPage {
                             textFormat: Text.RichText
                         }
                     }
+
+                    onClicked: accept()
                 }
             }
         }

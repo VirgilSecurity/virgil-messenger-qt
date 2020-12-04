@@ -564,6 +564,7 @@ android: {
 
     OTHER_FILES += \
         platforms/android/res/values/apptheme.xml \
+        platforms/android/src/org/virgil/utils/ContactUtils.java \
         platforms/android/src/org/virgil/utils/Utils.java
 }
 

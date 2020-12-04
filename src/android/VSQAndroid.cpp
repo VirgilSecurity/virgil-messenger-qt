@@ -38,13 +38,16 @@
 #include <QtAndroid>
 
 #include "android/VSQAndroid.h"
+#include "Utils.h"
 
 #include <android/log.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <cstdio>
 
-// TODO: Remove it
+using namespace vm;
+
+// TODO(fpohtmeh): Remove it
 static int pfd[2];
 static pthread_t loggingThread;
 
@@ -161,7 +164,7 @@ DataSize VSQAndroid::getFileSize(const QUrl &url)
 Contacts VSQAndroid::getContacts()
 {
     const auto javaStr = QAndroidJniObject::callStaticObjectMethod(
-        "org/virgil/utils/Utils",
+        "org/virgil/utils/ContactUtils",
         "getContacts",
         "(Landroid/content/Context;)Ljava/lang/String;",
         QtAndroid::androidActivity().object<jobject>()
@@ -174,7 +177,7 @@ Contacts VSQAndroid::getContacts()
         contact.name = lines[i];
         contact.phoneNumber = lines[i + 1];
         contact.email = lines[i + 2];
-        contact.avatarUrl = lines[i + 3];
+        contact.avatarUrl = Utils::localFileToUrl(lines[i + 3]);
         contacts.push_back(contact);
     }
     return contacts;
