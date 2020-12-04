@@ -85,24 +85,25 @@ ApplicationWindow {
 
 
     // Show Popup message
-    function showPopup(message, borderColor, popupBackgroundColor, textColor) {
+    function showPopup(message, borderColor, popupBackgroundColor, textColor, interval) {
         inform.popupBorderColor = borderColor
         inform.popupBackgroundColor = popupBackgroundColor
         inform.popupColorText = textColor
         inform.popupText = message
+        inform.popupInterval = interval
         inform.open()
     }
 
-    function showPopupError(message) {
-        showPopup(message, "#b44", Theme.mainBackgroundColor, "#ffffff")
+    function showPopupError(message, interval = 3000) {
+        showPopup(message, "#b44", "black", "#ffffff", interval)
     }
 
-    function showPopupInform(message) {
-        showPopup(message, "#FFFACD", Theme.mainBackgroundColor, "#ffffff")
+    function showPopupInform(message, interval = 3000) {
+        showPopup(message, "#FFFACD", "black", "#ffffff", interval)
     }
 
-    function showPopupSuccess(message) {
-        showPopup(message, "#66CDAA", Theme.mainBackgroundColor, "#ffffff")
+    function showPopupSuccess(message, interval = 3000) {
+        showPopup(message, "#66CDAA", "black", "#ffffff", interval)
     }
 
     Timer {
@@ -119,14 +120,14 @@ ApplicationWindow {
         repeat: false
         interval: 10000
         onTriggered: {
-            showPopupInform("This is only inform message")
+            showPopupInform("This is only inform message. But now you can see how it work with long text. So, I think this implementation is better")
         }
     }
 
     Timer {
         running: true
         repeat: false
-        interval: 15000
+        interval: 17000
         onTriggered: {
             showPopupSuccess("This is success message!!!!")
         }
