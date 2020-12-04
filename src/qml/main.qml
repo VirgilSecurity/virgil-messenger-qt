@@ -85,25 +85,51 @@ ApplicationWindow {
 
 
     // Show Popup message
-    function showPopup(message, color, textColor, isOnTop, isModal) {
-        inform.popupColor = color
+    function showPopup(message, borderColor, popupBackgroundColor, textColor) {
+        inform.popupBorderColor = borderColor
+        inform.popupBackgroundColor = popupBackgroundColor
         inform.popupColorText = textColor
-        inform.popupView.popMessage = message
-        inform.popupOnTop = isOnTop
-        inform.popupModal = isModal
-        inform.popupView.open()
+        inform.popupText = message
+        inform.open()
     }
 
     function showPopupError(message) {
-        showPopup(message, "#b44", "#ffffff", true, true)
+        showPopup(message, "#b44", Theme.mainBackgroundColor, "#ffffff")
     }
 
     function showPopupInform(message) {
-        showPopup(message, "#FFFACD", "#00", true, false)
+        showPopup(message, "#FFFACD", Theme.mainBackgroundColor, "#ffffff")
     }
 
     function showPopupSuccess(message) {
-        showPopup(message, "#66CDAA", "#00", true, false)
+        showPopup(message, "#66CDAA", Theme.mainBackgroundColor, "#ffffff")
+    }
+
+    Timer {
+        running: true
+        repeat: false
+        interval: 5000
+        onTriggered: {
+            showPopupError("This is new error popup!!!!!")
+        }
+    }
+
+    Timer {
+        running: true
+        repeat: false
+        interval: 10000
+        onTriggered: {
+            showPopupInform("This is only inform message")
+        }
+    }
+
+    Timer {
+        running: true
+        repeat: false
+        interval: 15000
+        onTriggered: {
+            showPopupSuccess("This is success message!!!!")
+        }
     }
 
     Component.onCompleted: {
