@@ -85,8 +85,7 @@ ApplicationWindow {
 
 
     // Show Popup message
-    function showPopup(message, borderColor, popupBackgroundColor, textColor, interval) {
-        inform.popupBorderColor = borderColor
+    function showPopup(message, popupBackgroundColor, textColor, interval) {
         inform.popupBackgroundColor = popupBackgroundColor
         inform.popupColorText = textColor
         inform.popupText = message
@@ -95,42 +94,15 @@ ApplicationWindow {
     }
 
     function showPopupError(message, interval = 3000) {
-        showPopup(message, "#b44", "black", "#ffffff", interval)
+        showPopup(message, "#b44", "#ffffff", interval)
     }
 
     function showPopupInform(message, interval = 3000) {
-        showPopup(message, "#FFFACD", "black", "#ffffff", interval)
+        showPopup(message, "#FFFACD", "#00", interval)
     }
 
     function showPopupSuccess(message, interval = 3000) {
-        showPopup(message, "#66CDAA", "black", "#ffffff", interval)
-    }
-
-    Timer {
-        running: true
-        repeat: false
-        interval: 5000
-        onTriggered: {
-            showPopupError("This is new error popup!!!!!")
-        }
-    }
-
-    Timer {
-        running: true
-        repeat: false
-        interval: 10000
-        onTriggered: {
-            showPopupInform("This is only inform message. But now you can see how it work with long text. So, I think this implementation is better")
-        }
-    }
-
-    Timer {
-        running: true
-        repeat: false
-        interval: 17000
-        onTriggered: {
-            showPopupSuccess("This is success message!!!!")
-        }
+        showPopup(message, "#66CDAA", "#00", interval)
     }
 
     Component.onCompleted: {
