@@ -90,12 +90,17 @@ void Operation::waitForDone()
     loop.exec();
 }
 
-void Operation::drop()
+void Operation::drop(bool wait)
 {
     qCDebug(lcOperation) << "Drop operation:" << fullName();
     dropChildren();
     cleanupOnce();
     deleteLater();
+    if (wait) {
+        QEventLoop loop;
+        connect(this, &Operation::destroyed, &loop, &QEventLoop::quit);
+        loop.exec();
+    }
 }
 
 void Operation::dropChildren()

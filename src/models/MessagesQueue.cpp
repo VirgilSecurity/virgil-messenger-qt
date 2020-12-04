@@ -154,14 +154,14 @@ void MessagesQueue::runOperation(const OperationItem &item)
         }
         auto op = new MessageOperation(item.message, m_factory, m_fileLoader, nullptr);
         // connect
-        connect(op, &MessageOperation::statusChanged, this, std::bind(&MessagesQueue::onMessageOperationStatusChanged, this, op));
-        connect(op, &MessageOperation::attachmentStatusChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentStatusChanged, this, op));
-        connect(op, &MessageOperation::attachmentUrlChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentUrlChanged, this, op));
-        connect(op, &MessageOperation::attachmentLocalPathChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentLocalPathChanged, this, op));
-        connect(op, &MessageOperation::attachmentFingerprintChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentFingerprintChanged, this, op));
-        connect(op, &MessageOperation::attachmentExtrasChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentExtrasChanged, this, op));
-        connect(op, &MessageOperation::attachmentEncryptedSizeChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentEncryptedSizeChanged, this, op));
-        connect(op, &MessageOperation::attachmentProcessedSizeChanged, this, std::bind(&MessagesQueue::onMessageOperationAttachmentProcessedSizeChanged, this, op));
+        connect(op, &MessageOperation::statusChanged, this, &MessagesQueue::messageStatusChanged);
+        connect(op, &MessageOperation::attachmentStatusChanged, this, &MessagesQueue::attachmentStatusChanged);
+        connect(op, &MessageOperation::attachmentUrlChanged, this, &MessagesQueue::attachmentUrlChanged);
+        connect(op, &MessageOperation::attachmentLocalPathChanged, this, &MessagesQueue::attachmentLocalPathChanged);
+        connect(op, &MessageOperation::attachmentFingerprintChanged, this, &MessagesQueue::attachmentFingerprintChanged);
+        connect(op, &MessageOperation::attachmentExtrasChanged, this, &MessagesQueue::attachmentExtrasChanged);
+        connect(op, &MessageOperation::attachmentEncryptedSizeChanged, this, &MessagesQueue::attachmentEncryptedSizeChanged);
+        connect(op, &MessageOperation::attachmentProcessedSizeChanged, this, &MessagesQueue::attachmentProcessedSizeChanged);
         connect(op, &MessageOperation::notificationCreated, this, &MessagesQueue::notificationCreated);
         connect(this, &MessagesQueue::stopRequested, op, &MessageOperation::stop);
         // setup
@@ -173,7 +173,7 @@ void MessagesQueue::runOperation(const OperationItem &item)
         if (op->status() == Operation::Status::Failed) {
             emit operationFailed({ *op->message(), item.setup }, QPrivateSignal());
         }
-        op->deleteLater();
+        op->drop(true);
     });
 }
 
@@ -197,59 +197,4 @@ void MessagesQueue::onNotSentMessagesFetched(const GlobalMessages &messages)
     for (auto &m : messages) {
         pushMessage(m);
     }
-}
-
-void MessagesQueue::onMessageOperationStatusChanged(const MessageOperation *operation)
-{
-    const auto &m = *operation->message();
-    emit messageStatusChanged(m.id, m.contactId, m.status);
-}
-
-void MessagesQueue::onMessageOperationAttachmentStatusChanged(const MessageOperation *operation)
-{
-    const auto &m = *operation->message();
-    const auto &a = *m.attachment;
-    emit attachmentStatusChanged(a.id, m.contactId, a.status);
-}
-
-void MessagesQueue::onMessageOperationAttachmentUrlChanged(const MessageOperation *operation)
-{
-    const auto &m = *operation->message();
-    const auto &a = *m.attachment;
-    emit attachmentUrlChanged(a.id, m.contactId, a.url);
-}
-
-void MessagesQueue::onMessageOperationAttachmentLocalPathChanged(const MessageOperation *operation)
-{
-    const auto &m = *operation->message();
-    const auto &a = *m.attachment;
-    emit attachmentLocalPathChanged(a.id, m.contactId, a.localPath);
-}
-
-void MessagesQueue::onMessageOperationAttachmentFingerprintChanged(const MessageOperation *operation)
-{
-    const auto &m = *operation->message();
-    const auto &a = *m.attachment;
-    emit attachmentFingerprintChanged(a.id, m.contactId, a.fingerprint);
-}
-
-void MessagesQueue::onMessageOperationAttachmentExtrasChanged(const MessageOperation *operation)
-{
-    const auto &m = *operation->message();
-    const auto &a = *m.attachment;
-    emit attachmentExtrasChanged(a.id, m.contactId, a.type, a.extras);
-}
-
-void MessagesQueue::onMessageOperationAttachmentProcessedSizeChanged(const MessageOperation *operation)
-{
-    const auto &m = *operation->message();
-    const auto &a = *m.attachment;
-    emit attachmentProcessedSizeChanged(a.id, m.contactId, a.processedSize);
-}
-
-void MessagesQueue::onMessageOperationAttachmentEncryptedSizeChanged(const MessageOperation *operation)
-{
-    const auto &m = *operation->message();
-    const auto &a = *m.attachment;
-    emit attachmentEncryptedSizeChanged(a.id, m.contactId, a.encryptedSize);
 }

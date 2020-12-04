@@ -66,15 +66,15 @@ public:
     void setAttachmentEncryptedThumbnailSize(const DataSize &bytes);
 
 signals:
-    void statusChanged(const Message::Status &status);
-    void attachmentStatusChanged(const Attachment::Status &status);
-    void attachmentUrlChanged(const QUrl &url);
-    void attachmentLocalPathChanged(const QString &localPath);
-    void attachmentFingerprintChanged(const QString &fingerpint);
+    void statusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);
+    void attachmentStatusChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Status &status);
+    void attachmentUrlChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QUrl &url);
+    void attachmentLocalPathChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &localPath);
+    void attachmentFingerprintChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &fingerpint);
 
-    void attachmentExtrasChanged(const QVariant &extras);
-    void attachmentProcessedSizeChanged(const DataSize &bytes);
-    void attachmentEncryptedSizeChanged(const DataSize &bytes);
+    void attachmentExtrasChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Type &type, const QVariant &extras);
+    void attachmentProcessedSizeChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &bytes);
+    void attachmentEncryptedSizeChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &bytes);
 
 protected:
     void connectChild(Operation *child) override;

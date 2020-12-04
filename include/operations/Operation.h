@@ -67,7 +67,7 @@ public:
     void waitForDone();
 
     // Cleanup and deleteLater operation with children
-    void drop();
+    void drop(bool wait = false);
     void dropChildren();
 
     QString name() const;
