@@ -34,6 +34,8 @@
 
 #include "Utils.h"
 
+#include <cmath>
+
 #include <QDesktopServices>
 #include <QDir>
 #include <QJsonDocument>
@@ -54,10 +56,26 @@ QString Utils::createUuid()
     return QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
 }
 
-QString Utils::formattedDataSize(DataSize fileSize)
+QString Utils::formattedDataSize(const DataSize &fileSize)
 {
-    static QLocale locale = QLocale::system();
-    return locale.formattedDataSize(fileSize);
+    return QLocale::system().formattedDataSize(fileSize);
+}
+
+QString Utils::formattedDataSizeProgress(const DataSize &loaded, const DataSize &total)
+{
+    if (loaded <= 0) {
+        return QLatin1String("...");
+    }
+    // Get power for total. Based on QLocale::formattedDataSize
+    int power = !total ? 0 : int((63 - qCountLeadingZeroBits(quint64(qAbs(total)))) / 10);
+    // Get number for loaded
+    const int base = 1024;
+    const int precision = 2;
+    const auto locale = QLocale::system();
+    const auto formattedLoaded = power
+        ? locale.toString(loaded / std::pow(double(base), power), 'f', qMin(precision, 3 * power))
+        : locale.toString(loaded);
+    return formattedLoaded + QChar('/') + formattedDataSize(total);
 }
 
 QString Utils::findUniqueFileName(const QString &fileName)

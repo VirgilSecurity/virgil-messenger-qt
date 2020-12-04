@@ -64,7 +64,7 @@ protected:
     QString filePath() const;
 
 private:
-    void onReplyFinished();
+    void onReplyFinished(QNetworkReply *reply);
     void onReplyErrorOccurred(const int &errorCode, QNetworkReply *reply);
     void onReplySslErrors();
     void onSetProgress(const DataSize &bytesLoaded, const DataSize &bytesTotal);

@@ -76,7 +76,6 @@ VSQApplication::VSQApplication()
     , m_applicationStateManager(&m_messenger, &m_controllers, &m_models, m_validator, &m_settings, this)
 {
     m_settings.print();
-    m_networkAccessManager->setAutoDeleteReplies(true);
 
     registerCommonMetaTypes();
     qRegisterMetaType<KeyboardEventFilter *>("KeyboardEventFilter*");

@@ -51,51 +51,63 @@ AttachmentsController::AttachmentsController(const Settings *settings, Models *m
 
 void AttachmentsController::saveAs(const Message::Id &messageId, const QVariant &fileUrl)
 {
-    if (const auto message = findMessage(messageId)) {
-        if (!isAttachmentDownloaded(*message)) {
-            downloadAttachment(*message);
-        }
-        else {
-            qCDebug(lcController) << "Saving of attachment" << messageId << "as" << fileUrl;
-            const auto filePath = Utils::urlToLocalFile(fileUrl.toUrl());
-            QFile::copy(message->attachment->localPath, filePath);
-            emit notificationCreated(tr("Attachment was saved"), false);
-        }
+    const auto message = findValidMessage(messageId);
+    if (!message) {
+        return;
+    }
+    else if (!isAttachmentDownloaded(*message)) {
+        downloadAttachment(*message);
+    }
+    else {
+        qCDebug(lcController) << "Saving of attachment" << messageId << "as" << fileUrl;
+        const auto filePath = Utils::urlToLocalFile(fileUrl.toUrl());
+        QFile::copy(message->attachment->localPath, filePath);
+        emit notificationCreated(tr("Attachment was saved"), false);
     }
 }
 
 void AttachmentsController::download(const Message::Id &messageId)
 {
-    if (const auto message = findMessage(messageId)) {
+    const auto message = findValidMessage(messageId);
+    if (!message) {
+        return;
+    }
+    else {
         downloadAttachment(*message);
     }
 }
 
 void AttachmentsController::open(const Message::Id &messageId)
 {
-    if (const auto message = findMessage(messageId)) {
-        if (!isAttachmentDownloaded(*message)) {
-            downloadAttachment(*message);
+    const auto message = findValidMessage(messageId);
+    if (!message) {
+        return;
+    }
+    else if (!isAttachmentDownloaded(*message)) {
+        downloadAttachment(*message);
+    }
+    else {
+        const auto &a = *message->attachment;
+        const auto url = Utils::localFileToUrl(a.localPath);
+        if (a.type == Attachment::Type::Picture) {
+            qCDebug(lcController) << "Opening of preview for" << url.fileName();
+            emit openPreviewRequested(url);
         }
         else {
-            const auto &a = *message->attachment;
-            const auto url = Utils::localFileToUrl(a.localPath);
-            if (a.type == Attachment::Type::Picture) {
-                qCDebug(lcController) << "Opening of preview for" << url.fileName();
-                emit openPreviewRequested(url);
-            }
-            else {
-                qCDebug(lcController) << "Opening of file:" << url.fileName();
-                Utils::openUrl(url);
-            }
+            qCDebug(lcController) << "Opening of file:" << url.fileName();
+            Utils::openUrl(url);
         }
     }
 }
 
 void AttachmentsController::downloadDisplayImage(const Message::Id &messageId)
 {
-    qCDebug(lcController) << "Downloading of display image for:" << messageId;
-    if (const auto message = findMessage(messageId)) {
+    const auto message = findValidMessage(messageId);
+    if (!message) {
+        return;
+    }
+    else {
+        qCDebug(lcController) << "Downloading of display image for:" << messageId;
         m_models->messagesQueue()->pushMessagePreload(*message);
     }
 }
@@ -134,11 +146,15 @@ void AttachmentsController::downloadAttachment(const GlobalMessage &message)
     m_models->messagesQueue()->pushMessageDownload(message, filePath);
 }
 
-Optional<GlobalMessage> AttachmentsController::findMessage(const Message::Id &messageId) const
+Optional<GlobalMessage> AttachmentsController::findValidMessage(const Message::Id &messageId) const
 {
     const auto message = m_models->messages()->findById(messageId);
     if (!message) {
         qCWarning(lcController) << "Message not found:" << messageId;
+        return NullOptional;
+    }
+    if (message->status == Message::Status::InvalidM) {
+        emit notificationCreated(tr("Message is broken. It nothing we can do with it"), true);
         return NullOptional;
     }
     if (!message->attachment) {
