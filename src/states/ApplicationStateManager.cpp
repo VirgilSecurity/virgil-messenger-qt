@@ -134,13 +134,12 @@ void ApplicationStateManager::addTransitions()
     addTwoSideTransition(m_accountSettingsState, m_accountSettingsState, &AccountSettingsState::requestBackupKey, m_backupKeyState);
     connect(m_accountSettingsState, &AccountSettingsState::requestBackupKey, m_backupKeyState, &BackupKeyState::setUserId);
     m_accountSettingsState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
-
     addTwoSideTransition(m_accountSettingsState, m_accountSettingsState, &AccountSettingsState::editProfile, m_editProfileState);
-    connect(users, &UsersController::accountSettingsRequested, m_editProfileState, &EditProfileState::setUserId);
 
-    addTwoSideTransition(m_editProfileState, m_editProfileState, &EditProfileState::verifyProfile, m_verifyProfileState);
-    connect(m_editProfileState, &EditProfileState::verifyProfile, m_verifyProfileState, &VerifyProfileState::setWhatToConfirm);
-    connect(m_verifyProfileState, &VerifyProfileState::verificationResponse, m_editProfileState, &EditProfileState::onVerificationResponse);
+    addTwoSideTransition(m_editProfileState, m_editProfileState, &EditProfileState::verify, m_verifyProfileState);
+    connect(m_editProfileState, &EditProfileState::verify, m_verifyProfileState, &VerifyProfileState::setCodeType);
+    connect(m_verifyProfileState, &VerifyProfileState::verificationFinished, m_editProfileState, &EditProfileState::processVerificationResponse);
+    connect(users, &UsersController::accountSettingsRequested, m_editProfileState, &EditProfileState::setUserId);
 
     m_newChatState->addTransition(chats, &ChatsController::chatOpened, m_chatState);
     m_newChatState->addTransition(users, &UsersController::accountSettingsRequested, m_accountSettingsState);

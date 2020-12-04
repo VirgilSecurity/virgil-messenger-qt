@@ -41,29 +41,24 @@ using namespace vm;
 VerifyProfileState::VerifyProfileState(QState *parent)
     : OperationState(parent)
 {
-    connect(this, &VerifyProfileState::verifyProfileData, this, &VerifyProfileState::dataVerification);
-    m_verificationCode = "0000";
 }
 
-QString VerifyProfileState::whatToConfirm() const
+void VerifyProfileState::verify(const QString &code)
 {
-    return m_whatToConfirm;
+    const auto success = code == QLatin1String("0000");
+    emit verificationFinished(m_codeType, success);
 }
 
-void VerifyProfileState::setWhatToConfirm(const QString &whatToConfirm)
+ConfirmationCodeType VerifyProfileState::codeType() const
 {
-    if (m_whatToConfirm == whatToConfirm) {
+    return m_codeType;
+}
+
+void VerifyProfileState::setCodeType(const ConfirmationCodeType &codeType)
+{
+    if (m_codeType == codeType) {
         return;
     }
-    m_whatToConfirm = whatToConfirm;
-    emit whatToConfirmChanged(whatToConfirm);
-}
-
-void VerifyProfileState::dataVerification(const QString &verificationCode)
-{
-    if (m_verificationCode == verificationCode) {
-        emit verificationResponse(m_whatToConfirm, true);
-    } else {
-        emit verificationResponse(m_whatToConfirm, false);
-    }
+    m_codeType = codeType;
+    emit codeTypeChanged(codeType);
 }

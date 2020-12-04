@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
+import com.virgilsecurity.messenger 1.0
 
 import "../theme"
 import "../components"
@@ -8,8 +9,6 @@ import "../components"
 OperationPage {
     id: editProfilePage
     appState: app.stateManager.editProfileState
-    property bool isPhoneConfirmed: appState.isPhoneNumberConfirmed
-    property bool isEmailConfirmed: appState.isEmailConfirmed
     property string whatToConfirm
 
     loadingText: qsTr("Opening profile page...")
@@ -38,72 +37,52 @@ OperationPage {
 
         FormInput {
             id: phone
-            label: isPhoneConfirmed ? qsTr("Confirmed phone") : qsTr("Phone")
+            label: appState.isPhoneNumberConfirmed ? qsTr("Confirmed phone") : qsTr("Phone")
             password: false
             placeholder: qsTr("Enter phone")
             text: appState.phoneNumber
             onTextChanged: appState.phoneNumber = text
             validator: RegExpValidator { regExp: /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im }
-            enabled: !isPhoneConfirmed
+            enabled: !appState.isPhoneConfirmed
         }
 
         FormPrimaryButton {
-            text: isPhoneConfirmed ? qsTr("Reset") : qsTr("Confirm")
+            text: appState.isPhoneNumberConfirmed ? qsTr("Reset") : qsTr("Confirm")
             enabled: phone.acceptableInput
-            onClicked: phoneButtonClicked(isPhoneConfirmed)
+            onClicked: phoneButtonClicked()
         }
 
         FormInput {
             id: email
-            label: isEmailConfirmed ? qsTr("Confirmed email") : qsTr("Email")
+            label: appState.isEmailConfirmed ? qsTr("Confirmed email") : qsTr("Email")
             password: false
             placeholder: qsTr("Enter email")
             text: appState.email
             onTextChanged: appState.email = text
             validator: RegExpValidator { regExp:/\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/ }
-            enabled: !isEmailConfirmed
+            enabled: !appState.isEmailConfirmed
         }
 
         FormPrimaryButton {
-            text: isEmailConfirmed ? qsTr("Reset") : qsTr("Confirm")
+            text: appState.isEmailConfirmed ? qsTr("Reset") : qsTr("Confirm")
             enabled: email.acceptableInput
-            onClicked: emailButtonClicked(isEmailConfirmed)
+            onClicked: emailButtonClicked()
         }
     }
 
-    Connections {
-        target: appState
-
-        function onVerificationFinished(result) {
-            app.stateManager.goBack()
-
-            if (result) {
-                let msg = qsTr("You have succesfully confirmed your " + whatToConfirm)
-                root.showPopupSuccess(msg)
-            } else {
-                let msg = qsTr("Oops, you entered the wrong verification code")
-                root.showPopupError(msg)
-            }
-
-            console.log("[VERIFICATION] : ", result)
-        }
-    }
-
-    function phoneButtonClicked(isPhoneConfirmed) {
-        if (isPhoneConfirmed) {
-            appState.resetPhone()
+    function phoneButtonClicked() {
+        if (appState.isPhoneNumberConfirmed) {
+            appState.phoneNumber = ""
         } else {
-            whatToConfirm = "phone"
-            appState.verifyProfile(whatToConfirm)
+            appState.verify(Enums.ConfirmationCodeType.Phone)
         }
     }
 
-    function emailButtonClicked(isEmailConfirmed) {
-        if (isEmailConfirmed) {
-            appState.resetEmail()
+    function emailButtonClicked() {
+        if (appState.isEmailConfirmed) {
+            appState.email = ""
         } else {
-            whatToConfirm = "email"
-            appState.verifyProfile(whatToConfirm)
+            appState.verify(Enums.ConfirmationCodeType.Email)
         }
     }
 }

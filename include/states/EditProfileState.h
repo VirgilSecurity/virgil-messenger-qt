@@ -58,35 +58,30 @@ public:
 
     QString userId() const;
     void setUserId(const QString &userId);
+
+    void processVerificationResponse(const ConfirmationCodeType &codeType, const bool isVerified);
+
+signals:
+    void verify(const Enums::ConfirmationCodeType &codeType);
+
+    void userIdChanged(const QString &userId);
+    void phoneNumberChanged(const QString &phoneNumber);
+    void emailChanged(const QString &email);
+    void isPhoneNumberConfirmedChanged(const bool confirmed);
+    void isEmailConfirmedChanged(const bool confirmed);
+    void avatarUrlChanged(const QUrl &url);
+
+private:
     QString phoneNumber() const;
     void setPhoneNumber(const QString &phoneNumber);
     QString email() const;
     void setEmail(const QString &email);
     bool isPhoneNumberConfirmed() const;
-    void setIsPhoneNumberConfirmed(const bool &isPhoneNumberConfirmed);
+    void setIsPhoneNumberConfirmed(const bool confirmed);
     bool isEmailConfirmed() const;
-    void setIsEmailConfirmed(const bool &isEmailConfirmed);
+    void setIsEmailConfirmed(const bool confirmed);
     QUrl avatarUrl() const;
     void setAvatarUrl(const QUrl &avatarUrl);
-
-    void onVerificationResponse(const QString &whatToConfirm, const bool &isVerified);
-
-signals:
-    void verifyProfile(const QString &);
-    void verificationFinished(const bool &);
-    void resetPhone();
-    void resetEmail();
-
-    void userIdChanged(const QString &);
-    void phoneNumberChanged(const QString &);
-    void emailChanged(const QString &);
-    void isPhoneNumberConfirmedChanged(const bool &);
-    void isEmailConfirmedChanged(const bool &);
-    void avatarUrlChanged(const QUrl &);
-
-private:
-    void phoneIsReset();
-    void emailIsReset();
 
     UserId m_userId;
     QString m_phoneNumber;

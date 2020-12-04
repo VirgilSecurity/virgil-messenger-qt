@@ -35,8 +35,10 @@
 #ifndef VM_VERIFYPROFILESTATE_H
 #define VM_VERIFYPROFILESTATE_H
 
-#include "OperationState.h"
 #include <QUrl>
+
+#include "OperationState.h"
+#include "VSQCommon.h"
 
 class VSQMessenger;
 
@@ -45,24 +47,22 @@ namespace vm
 class VerifyProfileState : public OperationState
 {
     Q_OBJECT
-    Q_PROPERTY(QString whatToConfirm READ whatToConfirm WRITE setWhatToConfirm NOTIFY whatToConfirmChanged)
+    Q_PROPERTY(Enums::ConfirmationCodeType codeType READ codeType WRITE setCodeType NOTIFY codeTypeChanged)
+
 public:
     VerifyProfileState(QState *parent);
 
-    QString whatToConfirm() const;
-    void setWhatToConfirm(const QString &whatToConfirm);
+    ConfirmationCodeType codeType() const;
+    void setCodeType(const ConfirmationCodeType &codeType);
+
+    Q_INVOKABLE void verify(const QString &code);
 
 signals:
-    void verifyProfileData(const QString &);
-    void whatToConfirmChanged(const QString &);
-    void verificationResponse(const QString &, const bool &);
+    void verificationFinished(const Enums::ConfirmationCodeType &codeType, const bool success);
+    void codeTypeChanged(const Enums::ConfirmationCodeType &codeType);
 
 private:
-    void dataVerification(const QString &verificationCode);
-
-    bool m_isVerified;
-    QString m_whatToConfirm;
-    QString m_verificationCode;
+    ConfirmationCodeType m_codeType = ConfirmationCodeType::Phone;
 };
 }
 

@@ -41,8 +41,6 @@ using namespace vm;
 EditProfileState::EditProfileState(QState *parent)
     : OperationState(parent)
 {
-    connect(this, &EditProfileState::resetPhone, this, &EditProfileState::phoneIsReset);
-    connect(this, &EditProfileState::resetEmail, this, &EditProfileState::emailIsReset);
 }
 
 QString EditProfileState::userId() const
@@ -71,6 +69,10 @@ void EditProfileState::setPhoneNumber(const QString &phoneNumber)
     }
     m_phoneNumber = phoneNumber;
     emit phoneNumberChanged(phoneNumber);
+
+    if (phoneNumber.isEmpty()) {
+        setIsPhoneNumberConfirmed(false);
+    }
 }
 
 QString EditProfileState::email() const
@@ -85,6 +87,10 @@ void EditProfileState::setEmail(const QString &email)
     }
     m_email = email;
     emit emailChanged(email);
+
+    if (email.isEmpty()) {
+        setIsEmailConfirmed(false);
+    }
 }
 
 bool EditProfileState::isPhoneNumberConfirmed() const
@@ -92,13 +98,13 @@ bool EditProfileState::isPhoneNumberConfirmed() const
     return m_isPhoneNumberConfirmed;
 }
 
-void EditProfileState::setIsPhoneNumberConfirmed(const bool &isPhoneNumberConfirmed)
+void EditProfileState::setIsPhoneNumberConfirmed(const bool confirmed)
 {
-    if (m_isPhoneNumberConfirmed == isPhoneNumberConfirmed) {
+    if (m_isPhoneNumberConfirmed == confirmed) {
         return;
     }
-    m_isPhoneNumberConfirmed = isPhoneNumberConfirmed;
-    emit isPhoneNumberConfirmedChanged(isPhoneNumberConfirmed);
+    m_isPhoneNumberConfirmed = confirmed;
+    emit isPhoneNumberConfirmedChanged(confirmed);
 }
 
 bool EditProfileState::isEmailConfirmed() const
@@ -106,13 +112,13 @@ bool EditProfileState::isEmailConfirmed() const
     return m_isEmailConfirmed;
 }
 
-void EditProfileState::setIsEmailConfirmed(const bool &isEmailConfirmed)
+void EditProfileState::setIsEmailConfirmed(const bool confirmed)
 {
-    if (m_isEmailConfirmed == isEmailConfirmed) {
+    if (m_isEmailConfirmed == confirmed) {
         return;
     }
-    m_isEmailConfirmed = isEmailConfirmed;
-    emit isEmailConfirmedChanged(isEmailConfirmed);
+    m_isEmailConfirmed = confirmed;
+    emit isEmailConfirmedChanged(confirmed);
 }
 
 QUrl EditProfileState::avatarUrl() const
@@ -129,32 +135,16 @@ void EditProfileState::setAvatarUrl(const QUrl &avatarUrl)
     emit avatarUrlChanged(avatarUrl);
 }
 
-void EditProfileState::phoneIsReset()
+void EditProfileState::processVerificationResponse(const ConfirmationCodeType &codeType, const bool isVerified)
 {
-    m_phoneNumber = "";
-    emit phoneNumberChanged(m_phoneNumber);
-
-    m_isPhoneNumberConfirmed = false;
-    emit isPhoneNumberConfirmedChanged(m_isPhoneNumberConfirmed);
-}
-
-void EditProfileState::emailIsReset()
-{
-    m_email = "";
-    emit emailChanged(m_email);
-
-    m_isEmailConfirmed = false;
-    emit isEmailConfirmedChanged(m_isEmailConfirmed);
-}
-
-void EditProfileState::onVerificationResponse(const QString &whatToConfirm, const bool &isVerified)
-{
-    if (whatToConfirm == "phone") {
-        EditProfileState::setIsPhoneNumberConfirmed(isVerified);
+    switch (codeType) {
+    case ConfirmationCodeType::Phone:
+        setIsPhoneNumberConfirmed(isVerified);
+        break;
+    case ConfirmationCodeType::Email:
+        setIsEmailConfirmed(isVerified);
+        break;
+    default:
+        break;
     }
-    if (whatToConfirm == "email") {
-        EditProfileState::setIsEmailConfirmed(isVerified);
-    }
-
-    emit verificationFinished(isVerified);
 }
