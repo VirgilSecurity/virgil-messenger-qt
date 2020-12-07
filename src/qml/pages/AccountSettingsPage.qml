@@ -38,6 +38,7 @@ Page {
         FormPrimaryButton {
             text: qsTr("Edit profile")
             onClicked: appState.editProfile()
+            visible: true
         }
 
         FormPrimaryButton {

@@ -46,6 +46,9 @@ class Validator : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QRegExpValidator *reUsername MEMBER m_reUsername CONSTANT)
+    Q_PROPERTY(QRegExpValidator *rePhone MEMBER m_rePhone CONSTANT)
+    Q_PROPERTY(QRegExpValidator *reEmail MEMBER m_reEmail CONSTANT)
+
 
 public:
     explicit Validator(QObject *parent);
@@ -59,6 +62,8 @@ public:
 
 private:
     QRegExpValidator *m_reUsername;
+    QRegExpValidator *m_rePhone;
+    QRegExpValidator *m_reEmail;
 };
 }
 

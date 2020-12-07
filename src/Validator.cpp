@@ -42,6 +42,8 @@ Validator::Validator(QObject *parent)
     // Original regexp (/(?!_)[a-zA-Z0-9_]{1,20}(?<!_)/) is replaced with equivalent.
     // Issue can be fixed by using RegularExpressionValidator from Qt 5.15
     , m_reUsername(new QRegExpValidator(QRegExp("(?!_)[a-zA-Z0-9_]{0,19}[a-zA-Z0-9]"), this))
+    , m_rePhone(new QRegExpValidator(QRegExp("^[0-9]{10}$"), this))
+    , m_reEmail(new QRegExpValidator(QRegExp("^[0-9a-zA-Z]+([0-9a-zA-Z][-._+])[0-9a-zA-Z]+@[0-9a-zA-Z]+([-.][0-9a-zA-Z]+)([0-9a-zA-Z][.])[a-zA-Z]{2,6}$"), this))
 {
 }
 

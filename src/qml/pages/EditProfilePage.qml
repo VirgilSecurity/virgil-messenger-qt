@@ -9,7 +9,6 @@ import "../components"
 OperationPage {
     id: editProfilePage
     appState: app.stateManager.editProfileState
-    property string whatToConfirm
 
     loadingText: qsTr("Opening profile page...")
 
@@ -42,7 +41,7 @@ OperationPage {
             placeholder: qsTr("Enter phone")
             text: appState.phoneNumber
             onTextChanged: appState.phoneNumber = text
-            validator: RegExpValidator { regExp: /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im }
+            validator: app.validator.rePhone
             enabled: !appState.isPhoneConfirmed
         }
 
@@ -59,7 +58,7 @@ OperationPage {
             placeholder: qsTr("Enter email")
             text: appState.email
             onTextChanged: appState.email = text
-            validator: RegExpValidator { regExp:/\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/ }
+            validator: app.validator.reEmail
             enabled: !appState.isEmailConfirmed
         }
 
