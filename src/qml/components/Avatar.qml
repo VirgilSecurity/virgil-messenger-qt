@@ -52,24 +52,27 @@ Item {
         id: imageItem
         anchors.fill: parent
         visible: avatarUrl
-        layer.enabled: visible
-        layer.effect: OpacityMask {
-            maskSource: Item {
-                width: imageItem.width
-                height: imageItem.height
-                Rectangle {
-                    anchors.fill: parent
-                    radius: parent.height
-                }
-            }
-        }
 
         Image {
+            id: originalImage
             anchors.fill: parent
             source: avatarUrl
             mipmap: true
             asynchronous: true
             fillMode: Image.PreserveAspectCrop
+        }
+
+        Rectangle {
+            id: rectangleMask
+            anchors.fill: parent
+            radius: parent.height
+            visible: false
+        }
+
+        OpacityMask {
+            anchors.fill: originalImage
+            source: originalImage
+            maskSource: rectangleMask
         }
     }
 }
