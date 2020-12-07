@@ -60,7 +60,7 @@ void LoadFileOperation::setFilePath(const QString &filePath)
 
 void LoadFileOperation::connectReply(QNetworkReply *reply)
 {
-    connect(reply, &QNetworkReply::finished, this, &LoadFileOperation::onReplyFinished);
+    connect(reply, &QNetworkReply::finished, this, std::bind(&LoadFileOperation::onReplyFinished, this, reply));
     connect(reply, &QNetworkReply::errorOccurred, this, std::bind(&LoadFileOperation::onReplyErrorOccurred, this, args::_1, reply));
     connect(reply, &QNetworkReply::sslErrors, this, &LoadFileOperation::onReplySslErrors);
 }
@@ -108,8 +108,9 @@ QString LoadFileOperation::filePath() const
     return m_filePath;
 }
 
-void LoadFileOperation::onReplyFinished()
+void LoadFileOperation::onReplyFinished(QNetworkReply *reply)
 {
+    reply->deleteLater();
     if (status() == Status::Failed) {
         return;
     }
@@ -125,8 +126,9 @@ void LoadFileOperation::onReplyFinished()
     }
 }
 
-void LoadFileOperation::onReplyErrorOccurred(const int &errorCode, QNetworkReply *)
+void LoadFileOperation::onReplyErrorOccurred(const int &errorCode, QNetworkReply *reply)
 {
+    Q_UNUSED(reply)
     // TODO(fpohtmeh): change 1st parameter to QNetworkReply::NetworkError
     // after fixing of deprecated warnings that appear if QNetworkReply is included into header
     if (status() == Status::Failed) {

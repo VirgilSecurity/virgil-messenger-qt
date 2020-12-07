@@ -46,7 +46,7 @@ class NetworkOperation : public Operation
     Q_OBJECT
 
 public:
-    NetworkOperation(QObject *parent, FileLoader *fileLoader, bool isOnline);
+    NetworkOperation(QObject *parent, FileLoader *fileLoader);
     explicit NetworkOperation(NetworkOperation *parent);
 
     FileLoader *fileLoader();

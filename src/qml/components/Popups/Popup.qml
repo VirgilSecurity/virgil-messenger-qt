@@ -2,55 +2,87 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 
+import "../../theme"
+
 Item {
-    property alias popupView: popup
-    property alias popupColor: popupBackground.color
+    id: popup
+
+    property alias popupBackgroundColor: popupBackground.color
     property alias popupColorText: message.color
-    property bool popupModal: true
-    property bool popupOnTop: false
+    property alias popupText: message.text
+    property int popupInterval: 4000
 
-    Popup {
-        id: popup
+    readonly property int defaultMargins: 20
 
-        property alias popMessage: message.text
+    width: root.width
+    height: root.height
 
-        background: Rectangle {
+    Item {
+        id: popupInner
+        anchors {
+            left: popup.left
+            right: popup.right
+        }
+
+        height: 36
+        opacity: 0
+
+        Rectangle {
             id: popupBackground
-            implicitWidth: root.width
-            implicitHeight: 25
+            anchors {
+                top: parent.top
+                horizontalCenter: parent.horizontalCenter
+            }
+
+            width: parent.width
+            height: message.contentHeight + defaultMargins
+
+            focus: false
+
+            Text {
+                id: message
+                anchors.centerIn: parent
+                width: popupInner.width
+                padding: defaultMargins
+                text: popup.popupText
+                antialiasing: true
+                clip: false
+                font.pointSize: Theme.isDesktop ? 11 : 14
+                wrapMode: Text.WordWrap
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
         }
-
-        enter: Transition {
-            NumberAnimation { property: "opacity"; from: 0.0; to: 1.0 }
-        }
-
-        exit: Transition {
-            NumberAnimation { property: "opacity"; from: 1.0; to: 0.0 }
-        }
-
-        onAboutToHide: {
-            popupClose.stop()
-        }
-
-        y: popupOnTop ? 0 : (root.height - 25)
-        modal: popupModal
-        focus: popupModal
-
-        closePolicy: Popup.CloseOnPressOutside
-
-        Text {
-            id: message
-            anchors.centerIn: parent
-            font.pointSize: UiHelper.fixFontSz(12)
-        }
-        onOpened: popupClose.start()
     }
 
-    // Popup will be closed automatically in 2 seconds after its opened
+    ParallelAnimation {
+        id: showAnimate
+        NumberAnimation {target: popupInner; property: "opacity"; from: 0.0; to: 1.0;
+            easing.type: Easing.InOutQuad; duration: Theme.animationDuration; easing.overshoot: 1}
+        NumberAnimation {target: popupInner; property: "y"; from: -popupBackground.height; to: 0;
+            easing.type: Easing.InOutQuad; duration: Theme.animationDuration; easing.overshoot: 2}
+    }
+
+    ParallelAnimation {
+        id: hideAnimate
+        NumberAnimation {target: popupInner; property: "opacity"; from: 1.0; to: 0.0;
+            easing.type: Easing.InOutQuad; duration: Theme.animationDuration; easing.overshoot: 1}
+        NumberAnimation {target: popupInner; property: "y"; from: 0; to: -popupBackground.height;
+            easing.type: Easing.InOutQuad; duration: Theme.animationDuration; easing.overshoot: 1}
+    }
+
+    function open() {
+        showAnimate.start()
+        closingTimer.start()
+    }
+
     Timer {
-        id: popupClose
-        interval: 2000
-        onTriggered: popup.close()
+        id: closingTimer
+        running: false
+        repeat: false
+        interval: popup.popupInterval
+        onTriggered: {
+            hideAnimate.start()
+        }
     }
 }
-

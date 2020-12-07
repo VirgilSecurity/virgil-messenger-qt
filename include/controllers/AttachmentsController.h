@@ -63,12 +63,12 @@ public:
 
 signals:
     void openPreviewRequested(const QUrl &url);
-    void notificationCreated(const QString &notification, const bool error);
+    void notificationCreated(const QString &notification, const bool error) const;
 
 private:
     bool isAttachmentDownloaded(const GlobalMessage &message);
     void downloadAttachment(const GlobalMessage &message);
-    Optional<GlobalMessage> findMessage(const Message::Id &messageId) const;
+    Optional<GlobalMessage> findValidMessage(const Message::Id &messageId) const;
 
     const Settings *m_settings;
     Models *m_models;

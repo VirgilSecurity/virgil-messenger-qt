@@ -50,7 +50,9 @@ namespace Utils
 
     // String processing/format
 
-    QString formattedDataSize(DataSize fileSize);
+    QString formattedDataSize(const DataSize &fileSize);
+
+    QString formattedDataSizeProgress(const DataSize &loaded, const DataSize &total);
 
     QString formattedElapsedSeconds(const Seconds &seconds, const Seconds &nowInterval);
 

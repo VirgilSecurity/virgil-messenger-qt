@@ -88,13 +88,14 @@ private:
         AttachmentImagePathRole,
         AttachmentImageSizeRole,
         AttachmentDisplaySizeRole,
+        AttachmentDisplayProgressRole,
         AttachmentDisplayTextRole,
         // Loading
         AttachmentBytesTotalRole,
         AttachmentBytesLoadedRole,
         AttachmentFileExistsRole,
         //
-        FailedRole,
+        IsBrokenRole,
         FirstInRowRole,
         InRowRole,
     };

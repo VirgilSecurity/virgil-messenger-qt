@@ -39,8 +39,8 @@
 
 using namespace vm;
 
-MessageOperation::MessageOperation(const GlobalMessage &message, MessageOperationFactory *factory, NetworkOperation *parent)
-    : NetworkOperation(parent)
+MessageOperation::MessageOperation(const GlobalMessage &message, MessageOperationFactory *factory, FileLoader *fileLoader, QObject *parent)
+    : NetworkOperation(parent, fileLoader)
     , m_factory(factory)
     , m_message(message)
 {
@@ -107,7 +107,7 @@ void MessageOperation::setAttachmentStatus(const Attachment::Status status)
     }
 
     a->status = status;
-    emit attachmentStatusChanged(status);
+    emit attachmentStatusChanged(a->id, m_message.contactId, status);
 }
 
 void MessageOperation::setAttachmentUrl(const QUrl &url)
@@ -117,7 +117,7 @@ void MessageOperation::setAttachmentUrl(const QUrl &url)
         return;
     }
     a->url = url;
-    emit attachmentUrlChanged(url);
+    emit attachmentUrlChanged(a->id, m_message.contactId, url);
 }
 
 void MessageOperation::setAttachmentLocalPath(const QString &localPath)
@@ -125,7 +125,7 @@ void MessageOperation::setAttachmentLocalPath(const QString &localPath)
     auto a = writableAttachment();
     // NOTE(fpohtmeh): don't compare values because file existence can be changed
     a->localPath = localPath;
-    emit attachmentLocalPathChanged(localPath);
+    emit attachmentLocalPathChanged(a->id, m_message.contactId, localPath);
 }
 
 void MessageOperation::setAttachmentFignerprint(const QString &fingerprint)
@@ -135,7 +135,7 @@ void MessageOperation::setAttachmentFignerprint(const QString &fingerprint)
         return;
     }
     a->fingerprint = fingerprint;
-    emit attachmentFingerprintChanged(fingerprint);
+    emit attachmentFingerprintChanged(a->id, m_message.contactId, fingerprint);
 }
 
 void MessageOperation::setAttachmentExtras(const QVariant &extras)
@@ -143,7 +143,7 @@ void MessageOperation::setAttachmentExtras(const QVariant &extras)
     auto a = writableAttachment();
     // NOTE(fpohtmeh): don't compare values because file existence can be changed
     a->extras = QVariant::fromValue(extras);
-    emit attachmentExtrasChanged(extras);
+    emit attachmentExtrasChanged(a->id, m_message.contactId, a->type, extras);
 }
 
 void MessageOperation::setAttachmentPreviewPath(const QString &previewPath)
@@ -174,7 +174,7 @@ void MessageOperation::setAttachmentProcessedSize(const DataSize &size)
         return;
     }
     a->processedSize = size;
-    emit attachmentProcessedSizeChanged(size);
+    emit attachmentProcessedSizeChanged(a->id, m_message.contactId, size);
 }
 
 void MessageOperation::setAttachmentEncryptedSize(const DataSize &size)
@@ -184,7 +184,7 @@ void MessageOperation::setAttachmentEncryptedSize(const DataSize &size)
         return;
     }
     a->encryptedSize = size;
-    emit attachmentEncryptedSizeChanged(size);
+    emit attachmentEncryptedSizeChanged(a->id, m_message.contactId, size);
 }
 
 void MessageOperation::setAttachmentEncryptedThumbnailSize(const DataSize &bytes)
@@ -215,5 +215,5 @@ void MessageOperation::setStatus(const Message::Status &status)
         return;
     }
     m_message.status = status;
-    emit statusChanged(status);
+    emit statusChanged(m_message.id, m_message.contactId, status);
 }
