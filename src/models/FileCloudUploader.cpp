@@ -40,8 +40,8 @@ using namespace vm;
 
 FileCloudUploader::FileCloudUploader(QObject *parent)
     : QObject(parent)
-    , m_fileNames({"First", "Second", "Third"})
 {
+
 }
 
 int FileCloudUploader::currentIndex() const
@@ -49,14 +49,19 @@ int FileCloudUploader::currentIndex() const
     return m_currentIndex;
 }
 
-int FileCloudUploader::currentProcessedBytes() const
+DataSize FileCloudUploader::currentProcessedBytes() const
 {
     return m_currentProcessedBytes;
 }
 
-int FileCloudUploader::currentTotalBytes() const
+DataSize FileCloudUploader::currentTotalBytes() const
 {
     return m_currentTotalBytes;
+}
+
+QStringList FileCloudUploader::fileNames() const
+{
+    return m_fileNames;
 }
 
 void FileCloudUploader::setCurrentIndex(const int &index)
@@ -67,7 +72,7 @@ void FileCloudUploader::setCurrentIndex(const int &index)
     }
 }
 
-void FileCloudUploader::setCurrentProcessedBytes(const int &bytes)
+void FileCloudUploader::setCurrentProcessedBytes(const DataSize &bytes)
 {
     if (m_currentProcessedBytes != bytes) {
         m_currentProcessedBytes = bytes;
@@ -75,7 +80,7 @@ void FileCloudUploader::setCurrentProcessedBytes(const int &bytes)
     }
 }
 
-void FileCloudUploader::setCurrentTotalBytes(const int &bytes)
+void FileCloudUploader::setCurrentTotalBytes(const DataSize &bytes)
 {
     if (m_currentTotalBytes != bytes) {
         m_currentTotalBytes = bytes;

@@ -48,9 +48,10 @@ class AccountSelectionModel;
 class AttachmentsModel;
 class ChatsModel;
 class FileCloudModel;
+class FileCloudUploader;
+class FileLoader;
 class MessagesModel;
 class MessagesQueue;
-class FileLoader;
 class UserDatabase;
 
 class Models : public QObject
@@ -60,6 +61,7 @@ class Models : public QObject
     Q_PROPERTY(AttachmentsModel *attachments READ attachments CONSTANT)
     Q_PROPERTY(ChatsModel *chats READ chats CONSTANT)
     Q_PROPERTY(FileCloudModel *fileCloud MEMBER m_fileCloud CONSTANT)
+    Q_PROPERTY(FileCloudUploader *fileCloudUploader MEMBER m_fileCloudUploader CONSTANT)
     Q_PROPERTY(MessagesModel *messages READ messages CONSTANT)
 
 public:
@@ -74,6 +76,8 @@ public:
     ChatsModel *chats();
     const FileCloudModel *fileCloud() const;
     FileCloudModel *fileCloud();
+    const FileCloudUploader *fileCloudUploader() const;
+    FileCloudUploader *fileCloudUploader();
     const FileLoader *fileLoader() const;
     FileLoader *fileLoader();
     const MessagesModel *messages() const;
@@ -90,6 +94,7 @@ private:
     ChatsModel *m_chats;
     MessagesModel *m_messages;
     FileCloudModel *m_fileCloud;
+    FileCloudUploader *m_fileCloudUploader;
     FileLoader *m_fileLoader;
     MessagesQueue *m_messagesQueue;
 };

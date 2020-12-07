@@ -42,9 +42,10 @@
 #include "models/AttachmentsModel.h"
 #include "models/ChatsModel.h"
 #include "models/FileCloudModel.h"
+#include "models/FileCloudUploader.h"
+#include "models/FileLoader.h"
 #include "models/MessagesModel.h"
 #include "models/MessagesQueue.h"
-#include "models/FileLoader.h"
 
 using namespace vm;
 
@@ -55,6 +56,7 @@ Models::Models(VSQMessenger *messenger, Settings *settings, UserDatabase *userDa
     , m_chats(new ChatsModel(this))
     , m_messages(new MessagesModel(this))
     , m_fileCloud(new FileCloudModel(settings, this))
+    , m_fileCloudUploader(new FileCloudUploader(this))
     , m_fileLoader(new FileLoader(messenger->xmpp(), networkAccessManager, this))
     , m_messagesQueue(new MessagesQueue(settings, messenger, userDatabase, m_fileLoader, nullptr))
 {
@@ -62,6 +64,7 @@ Models::Models(VSQMessenger *messenger, Settings *settings, UserDatabase *userDa
     qRegisterMetaType<AttachmentsModel *>("AttachmentsModel*");
     qRegisterMetaType<ChatsModel *>("ChatsModel*");
     qRegisterMetaType<FileCloudModel *>("FileCloudModel*");
+    qRegisterMetaType<FileCloudModel *>("FileCloudUploader*");
     qRegisterMetaType<MessagesModel *>("MessagesModel*");
     qRegisterMetaType<QSortFilterProxyModel *>("QSortFilterProxyModel*");
 
@@ -110,6 +113,16 @@ const FileCloudModel *Models::fileCloud() const
 FileCloudModel *Models::fileCloud()
 {
     return m_fileCloud;
+}
+
+const FileCloudUploader *Models::fileCloudUploader() const
+{
+    return m_fileCloudUploader;
+}
+
+FileCloudUploader *Models::fileCloudUploader()
+{
+    return m_fileCloudUploader;
 }
 
 const FileLoader *Models::fileLoader() const

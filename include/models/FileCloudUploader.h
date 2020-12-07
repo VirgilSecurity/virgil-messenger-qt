@@ -36,6 +36,8 @@
 #define VM_FILECLOUDUPLOADER_H
 
 #include <QObject>
+#include "VSQCommon.h"
+
 
 namespace vm
 {
@@ -43,26 +45,28 @@ class FileCloudUploader : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(int currentIndex READ currentIndex WRITE setCurrentIndex NOTIFY currentIndexChanged)
-    Q_PROPERTY(int currentProcessedBytes READ currentProcessedBytes WRITE setCurrentProcessedBytes NOTIFY currentProcessedBytesChanged)
-    Q_PROPERTY(int currentTotalBytes READ currentTotalBytes WRITE setCurrentTotalBytes NOTIFY currentTotalBytesChanged)
+    Q_PROPERTY(int currentIndex READ currentIndex NOTIFY currentIndexChanged)
+    Q_PROPERTY(DataSize currentProcessedBytes READ currentProcessedBytes WRITE setCurrentProcessedBytes NOTIFY currentProcessedBytesChanged)
+    Q_PROPERTY(DataSize currentTotalBytes READ currentTotalBytes NOTIFY currentTotalBytesChanged)
+    Q_PROPERTY(QStringList fileNames READ fileNames NOTIFY fileNamesChanged)
 
 public:
     FileCloudUploader(QObject *parent);
 
     int currentIndex() const;
-    int currentProcessedBytes() const;
-    int currentTotalBytes() const;
+    DataSize currentProcessedBytes() const;
+    DataSize currentTotalBytes() const;
+    QStringList fileNames() const;
 
-public slots:
-    void setCurrentIndex(const int &);
-    void setCurrentProcessedBytes(const int &);
-    void setCurrentTotalBytes(const int &);
+    void setCurrentIndex(const int &index);
+    void setCurrentProcessedBytes(const DataSize &bytes);
+    void setCurrentTotalBytes(const DataSize &bytes);
 
 signals:
     void currentIndexChanged(const int &index);
-    void currentProcessedBytesChanged(const int &bytes);
-    void currentTotalBytesChanged(const int &bytes);
+    void currentProcessedBytesChanged(const DataSize &bytes);
+    void currentTotalBytesChanged(const DataSize &bytes);
+    void fileNamesChanged(const QStringList &fileNames);
 
 private:
     QStringList m_fileNames;

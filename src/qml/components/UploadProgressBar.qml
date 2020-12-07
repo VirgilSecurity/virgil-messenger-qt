@@ -5,22 +5,31 @@ import QtQuick.Layouts 1.15
 import "../theme"
 
 
-Item {
+Rectangle {
     id: uploadProgressBar
+
+    property var model: models.fileCloudUploader
+    property int fileIndex: model.currentIndex
+    property int filesCount: model.fileNames.length
+    property real fileUploadValue: model.currentProcessedBytes * 100 / model.currentTotalBytes
 
     property real uploadHeight: 60
     property real uploadOpacity: 1
 
     property real uploadFrom: 0
     property real uploadTo: 100
-    property real uploadValue: 0
 
-    property var fileIndex: 1
-    property var filesCount: 5
-    property var fileName: "Test_file.jpg"
+    color: Theme.mainBackgroundColor
 
+    Rectangle {
+        id: separator
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: 1
+        color: Theme.chatBackgroundColor
+    }
 
-    state: "closed"
+    state: filesCount !== 0 ? "opened" : "closed"
     states: [
         State {
             name: "opened"
@@ -47,7 +56,7 @@ Item {
             NumberAnimation {
                 properties: "opacity, height"
                 easing.type: Easing.InExpo
-                duration: 250
+                duration: Theme.animationDuration
             }
         }
     ]
@@ -56,6 +65,8 @@ Item {
         anchors {
             left: parent.left
             right: parent.right
+            leftMargin: Theme.margin
+            rightMargin: Theme.margin
             verticalCenter: parent.verticalCenter
         }
         height: this.contentHeight
@@ -67,7 +78,11 @@ Item {
             height: 6
             from: uploadFrom
             to: uploadTo
-            value: uploadValue
+            value: fileUploadValue
+
+            Behavior on value {
+                NumberAnimation { duration: Theme.animationDuration * 2 }
+            }
 
             background: Rectangle {
                 implicitWidth: progressBar.width
@@ -91,8 +106,8 @@ Item {
 
         Text {
             color: Theme.secondaryTextColor
-            font.pointSize: UiHelper.fixFontSz(12)
-            text: fileIndex + "/" + filesCount + " " + fileName
+            font.pointSize: UiHelper.fixFontSz(10)
+            text: fileIndex + "/" + filesCount + " " + model.fileNames[fileIndex]
             width: parent.width
             elide: Text.ElideRight
         }
