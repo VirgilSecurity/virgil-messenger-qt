@@ -21,6 +21,7 @@ Item {
         diameter: parent.height
         content: nickname.replace("_", "").substring(0, 2).toUpperCase()
         pointSize: UiHelper.fixFontSz(0.4 * diameter)
+        visible: !imageItem.visible
 
         // Hash any string into an integer value
         // Then we'll use the int and convert to hex.
@@ -51,7 +52,7 @@ Item {
     Item {
         id: imageItem
         anchors.fill: parent
-        visible: avatarUrl
+        visible: originalImage.status == Image.Ready
 
         Image {
             id: originalImage
@@ -60,6 +61,11 @@ Item {
             mipmap: true
             asynchronous: true
             fillMode: Image.PreserveAspectCrop
+            onStatusChanged: {
+                if (status == Image.Error) {
+                    console.log("There was an error -> image URL  : ", avatarUrl)
+                }
+            }
         }
 
         Rectangle {
