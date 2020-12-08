@@ -3,7 +3,8 @@ message(STATUS "[Begin] customer_common.cmake")
 # Set project target name and variables before define project in main Cmake file
 if(NOT PROJECT_NAME)
     # Android API level
-    set(ANDROID_NATIVE_API_LEVEL "21")
+    set(ANDROID_NATIVE_API_LEVEL "24")
+    ANDROID_PLATFORM
     message(STATUS "Android API level: [${ANDROID_NATIVE_API_LEVEL}]")
 else()
     # ----------

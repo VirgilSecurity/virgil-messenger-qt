@@ -5,20 +5,6 @@ set -o errtrace
 #
 SCRIPT_FOLDER="$(cd $(dirname "$0") && pwd)"
 
-
-#***************************************************************************************
-function print_title() {
-    echo
-    echo "===================================="
-    echo "=== ${PLATFORM} ${APPLICATION_NAME} build ${VERSION}"
-    echo "=== Build type : ${BUILD_TYPE}"
-    echo "=== Tool name : ${TOOL_NAME}"
-    echo "=== Output directory : ${BUILD_DIR}"
-    echo "=== Customer : ${PARAM_CUSTOMER}"
-    echo "===================================="
-    echo
-}
-
 #***************************************************************************************
 function print_message() {
     echo
@@ -44,7 +30,6 @@ print_usage() {
 #  Script parameters
 #
 ############################################################################################
-
 while [ -n "$1" ]
  do
    case "$1" in
@@ -73,9 +58,15 @@ function notarize_dmg() {
 	print_message "Send Application for Apple's notarization"
 
 	NOTARIZE_OUTPUT=$(xcrun altool -t osx -f "${DMG_FILE}" --primary-bundle-id "${PKG_IDENTIFIER}" --notarize-app --username ${USER_NAME} -p ${PASS} 2>&1)
+	
 	NOTARIZE_ID=$(echo ${NOTARIZE_OUTPUT} | tr -d "\n" | grep -F 'No errors uploading' | awk -F 'RequestUUID' '{print $2}' | awk -F ' ' '{print $2}')
 
-	echo "NOTARIZE_ID = ${NOTARIZE_ID}"
+	if [ "${NOTARIZE_ID}" == "" ]; then
+	    echo "Error notarization"
+	    echo "${NOTARIZE_OUTPUT}"
+	else
+    	    echo "NOTARIZE_ID = ${NOTARIZE_ID}"		    
+	fi 
 
 	print_message "Get result of notarization"
 
