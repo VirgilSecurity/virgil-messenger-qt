@@ -36,7 +36,7 @@
 #define VM_VALIDATOR_H
 
 #include <QObject>
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 
 #include "VSQCommon.h"
 
@@ -45,9 +45,9 @@ namespace vm
 class Validator : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QRegExpValidator *reUsername MEMBER m_reUsername CONSTANT)
-    Q_PROPERTY(QRegExpValidator *rePhone MEMBER m_rePhone CONSTANT)
-    Q_PROPERTY(QRegExpValidator *reEmail MEMBER m_reEmail CONSTANT)
+    Q_PROPERTY(QRegularExpressionValidator *reUsername MEMBER m_reUsername CONSTANT)
+    Q_PROPERTY(QRegularExpressionValidator *rePhone MEMBER m_rePhone CONSTANT)
+    Q_PROPERTY(QRegularExpressionValidator *reEmail MEMBER m_reEmail CONSTANT)
 
 
 public:
@@ -57,13 +57,10 @@ public:
     // Returns username if it's valid or corrected version of username if it exists
     Optional<QString> validatedUsername(const QString &username, QString *errorText = 0);
 
-    // TODO(fpohtmeh): remove this method finally
-    QString databaseUsername(const QString &username);
-
 private:
-    QRegExpValidator *m_reUsername;
-    QRegExpValidator *m_rePhone;
-    QRegExpValidator *m_reEmail;
+    QRegularExpressionValidator *m_reUsername;
+    QRegularExpressionValidator *m_rePhone;
+    QRegularExpressionValidator *m_reEmail;
 };
 }
 

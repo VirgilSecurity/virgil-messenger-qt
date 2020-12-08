@@ -42,6 +42,7 @@ OperationPage {
             text: appState.phoneNumber
             onTextChanged: appState.phoneNumber = text
             validator: app.validator.rePhone
+            inputHint: Qt.ImhDialableCharactersOnly
             enabled: !appState.isPhoneConfirmed
         }
 
@@ -59,6 +60,7 @@ OperationPage {
             text: appState.email
             onTextChanged: appState.email = text
             validator: app.validator.reEmail
+            inputHint: Qt.ImhEmailCharactersOnly
             enabled: !appState.isEmailConfirmed
         }
 
