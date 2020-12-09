@@ -117,6 +117,12 @@ namespace Enums {
 
 namespace vm
 {
+struct AndroidContactExtras
+{
+    QString id;
+    bool avatarUrlLoaded = false;
+};
+
 struct Contact
 {
     enum class Type
@@ -134,6 +140,7 @@ struct Contact
     QString email;
     QUrl avatarUrl;
     QString lastSeenActivity;
+    QVariant extras;
 };
 
 using Contacts = std::vector<Contact>;

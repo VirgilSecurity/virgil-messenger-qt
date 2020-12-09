@@ -125,10 +125,11 @@ public class ContactUtils
             if (pngFile != null) {
                 photoFile.delete();
                 photoFile = pngFile;
+                return photoFile.getPath();
             }
         }
 
-        return photoFile.getPath();
+        return null;
     }
 
     private static String notNullStr(String input)
@@ -158,12 +159,8 @@ public class ContactUtils
                 String id = cursor.getString(idColumnIndex);
                 String name = cursor.getString(cursor.getColumnIndex(DISPLAY_NAME));
                 String email = notNullStr(getContactEmail(id, cr));
-                //Log.i(TAG, "email " + email);
                 String phone = notNullStr(getContactPhone(id, cursor, cr));
-                //Log.i(TAG, "phone " + phone);
-                //String photo = notNullStr(getContactPhotoUrl(cursor.getLong(idColumnIndex), true, context));
-                String photo = "";
-                //Log.i(TAG, "photo " + photo);
+                String photo = notNullStr(getContactPhotoUrl(cursor.getLong(idColumnIndex), true, context));
                 list += name + sep + phone + sep + email + sep + photo + sep;
             } while (cursor.moveToNext());
             cursor.close();
