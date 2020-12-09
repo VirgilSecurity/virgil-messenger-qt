@@ -80,7 +80,6 @@ OperationPage {
         Form {
             id: form
             formSpacing: Theme.spacing
-            formLogo.visible: false
             focus: true
 
             RowLayout {
