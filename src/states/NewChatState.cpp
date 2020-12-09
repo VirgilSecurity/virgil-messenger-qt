@@ -35,16 +35,24 @@
 #include "states/NewChatState.h"
 
 #include "controllers/ChatsController.h"
+#include "models/DiscoveredContactsModel.h"
 
 using namespace vm;
 
-NewChatState::NewChatState(ChatsController *chatsController, QState *parent)
+NewChatState::NewChatState(ChatsController *chatsController, DiscoveredContactsModel *contactsModel, QState *parent)
     : OperationState(parent)
     , m_chatsController(chatsController)
+    , m_contactsModel(contactsModel)
 {
     connect(chatsController, &ChatsController::chatOpened, this, &NewChatState::operationFinished);
     connect(chatsController, &ChatsController::errorOccurred, this, &NewChatState::operationErrorOccurred);
     connect(this, &NewChatState::addNewChat, this, &NewChatState::processAddNewChat);
+}
+
+void NewChatState::onEntry(QEvent *event)
+{
+    Q_UNUSED(event)
+    m_contactsModel->reload();
 }
 
 void NewChatState::processAddNewChat(const Contact::Id &contactId)

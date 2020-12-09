@@ -196,12 +196,8 @@ Control {
         Avatar {
             id: avatar
             width: 30
+            height: width
             opacity: firstInRow ? 1 : 0
-            diameter: 30
-            anchors {
-                top: parent.top
-                topMargin: 4
-            }
         }
 
         Column {

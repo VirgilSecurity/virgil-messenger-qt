@@ -43,6 +43,8 @@ using namespace vm;
 ChatsModel::ChatsModel(QObject *parent)
     : ListModel(parent)
 {
+    qRegisterMetaType<ChatsModel *>("ChatsModel*");
+
     proxy()->setSortRole(LastEventTimestampRole);
     proxy()->sort(0, Qt::DescendingOrder);
     proxy()->setFilterRole(ContactIdRole);

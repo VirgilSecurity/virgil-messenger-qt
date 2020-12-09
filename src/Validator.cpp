@@ -48,7 +48,7 @@ Validator::~Validator()
 {
 }
 
-Optional<QString> Validator::validatedUsername(const QString &username, QString *errorText)
+Optional<QString> Validator::validatedUsername(const QString &username, QString *errorText) const
 {
     if (username.isEmpty()) {
         if (errorText) {
@@ -56,12 +56,17 @@ Optional<QString> Validator::validatedUsername(const QString &username, QString 
         }
         return NullOptional;
     }
-    const auto match = m_reUsername->regularExpression().match(username);
-    if (!match.hasMatch() || match.hasPartialMatch()) {
+    if (!isValidUsername(username)) {
         if (errorText) {
             *errorText = QObject::tr("Username is not valid");
         }
         return NullOptional;
     }
     return username.toLower();
+}
+
+bool Validator::isValidUsername(const QString &username) const
+{
+    const auto match = m_reUsername->regularExpression().match(username);
+    return match.hasMatch() && !match.hasPartialMatch();
 }

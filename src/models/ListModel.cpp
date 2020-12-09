@@ -42,9 +42,16 @@ ListModel::ListModel(QObject *parent)
     : QAbstractListModel(parent)
     , m_proxy(new QSortFilterProxyModel(this))
 {
+    qRegisterMetaType<QSortFilterProxyModel *>("QSortFilterProxyModel*");
+
     m_proxy->setSourceModel(this);
     m_proxy->setFilterKeyColumn(0);
     m_proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
+}
+
+QString ListModel::filter() const
+{
+    return m_filter;
 }
 
 const QSortFilterProxyModel *ListModel::proxy() const

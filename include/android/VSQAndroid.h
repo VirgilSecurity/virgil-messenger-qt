@@ -41,6 +41,8 @@
 
 #include "VSQCommon.h"
 
+using namespace vm;
+
 class VSQAndroid {
 public:
     VSQAndroid() = delete;
@@ -56,6 +58,8 @@ public:
     static QString getDisplayName(const QUrl &url);
 
     static DataSize getFileSize(const QUrl &url);
+
+    static Contacts getContacts();
 
 private:
     static int runLoggingThread();
