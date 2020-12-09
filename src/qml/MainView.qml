@@ -22,10 +22,13 @@ Control {
         clip: logControl.visible
 
         SidebarPanel {
+            id: sideBar
             visible: [manager.chatListState, manager.fileCloudState].includes(manager.currentState)
             z: 2
             Layout.preferredWidth: Theme.headerHeight
             Layout.fillHeight: true
+            focus: true
+            opacity: 0.99999 // Bug. If the transparency is set to 1, the images will disappear after stack.pop()
 
             Action {
                 text: qsTr("Settings")
