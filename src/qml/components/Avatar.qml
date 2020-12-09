@@ -6,7 +6,7 @@ import "./CommonHelpers"
 
 Item {
     property string nickname
-    property string avatarUrl
+    property url avatarSource
     property alias diameter: textInCircle.diameter
     property alias content: textInCircle.content
     property alias pointSize: textInCircle.pointSize
@@ -57,10 +57,11 @@ Item {
         Image {
             id: originalImage
             anchors.fill: parent
-            source: avatarUrl
+            source: avatarSource
             mipmap: true
             asynchronous: true
             fillMode: Image.PreserveAspectCrop
+            visible: false
             onStatusChanged: {
                 if (status == Image.Error) {
                     console.log("There was an error, image URL  : ", avatarUrl)
@@ -70,8 +71,9 @@ Item {
 
         Rectangle {
             id: rectangleMask
-            anchors.fill: parent
-            radius: parent.height
+            width: parent.width
+            height: parent.height
+            radius: height
             visible: false
         }
 

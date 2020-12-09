@@ -9,6 +9,7 @@
         <file>qml/pages/EditProfilePage.qml</file>
         <file>qml/pages/MainPage.qml</file>
         <file>qml/pages/NewChatPage.qml</file>
+        <file>qml/pages/NewGroupChatPage.qml</file>
         <file>qml/pages/OperationPage.qml</file>
         <file>qml/pages/SignInAsPage.qml</file>
         <file>qml/pages/SignInPage.qml</file>

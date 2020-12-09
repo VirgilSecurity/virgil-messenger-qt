@@ -7,7 +7,7 @@ import "../components"
 import "../theme"
 
 OperationPage {
-    appState: app.stateManager.newChatState
+    appState: app.stateManager.newGroupChatState
     loadingText: qsTr("Adding of contact...")
     footerText: ""
     readonly property string contact: contactSearch.search.toLowerCase()
@@ -31,16 +31,29 @@ OperationPage {
     }
 
     header: Header {
-        title: qsTr("New chat")
+        title: qsTr("New group")
+    }
+
+    Item {
+        id: addedContacts
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+            leftMargin: defaultMargins
+            rightMargin: defaultMargins
+        }
+        height: defaultChatHeight * 2
     }
 
     Search {
         id: contactSearch
         anchors {
-            top: parent.top
+            top: addedContacts.bottom
             left: parent.left
             right: parent.right
             margins: defaultMargins
+            topMargin: 0
         }
         height: defaultSearchHeight
         state: "opened"
@@ -65,7 +78,8 @@ OperationPage {
             bottomMargin: defaultChatHeight
             margins: defaultMargins
         }
-        model: models.discoveredContacts.proxy
+//        model: models.discoveredContacts.proxy
+        model: tempModel
     }
 
     Item {
@@ -104,10 +118,48 @@ OperationPage {
     }
 
     function accept() {
-        appState.addNewChat(contact)
+//        appState.addNewChat(contact)
+
     }
 
     function reject() {
         app.stateManager.goBack()
+    }
+
+    // TEMP
+
+    ListModel {
+        id: tempModel
+
+        ListElement {
+            name: "John Doe"
+            avatarUrl: "https://avatars.mds.yandex.net/get-zen_doc/1779726/pub_5d32ac8bf2df2500adb00103_5d32aeae21f9ff00ad9973ee/scale_1200"
+            details: "yesterday"
+        }
+        ListElement {
+            name: "Bon Min"
+            avatarUrl: "https://peopletalk.ru/wp-content/uploads/2016/10/orig_95f063cefa53daf194fa9f6d5e20b86c.jpg"
+            details: "yesterday"
+        }
+        ListElement {
+            name: "Tin Bin"
+            avatarUrl: "https://i.postimg.cc/wBJKr6CR/K5-W-z1n-Lqms.jpg"
+            details: "yesterday"
+        }
+        ListElement {
+            name: "Mister Bean"
+            avatarUrl: "https://avatars.mds.yandex.net/get-zen_doc/175962/pub_5a7b1334799d9dbfb9cc0f46_5a7b135b57906a1b6eb710eb/scale_1200"
+            details: "yesterday"
+        }
+        ListElement {
+            name: "Erick Helicopter"
+            avatarUrl: ""
+            details: "yesterday"
+        }
+        ListElement {
+            name: "Peter Griffin"
+            avatarUrl: ""
+            details: "yesterday"
+        }
     }
 }

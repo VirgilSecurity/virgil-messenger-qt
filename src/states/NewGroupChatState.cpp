@@ -32,31 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHATLISTSTATE_H
-#define VM_CHATLISTSTATE_H
+#include "states/NewGroupChatState.h"
 
-#include <QState>
+#include "controllers/ChatsController.h"
+#include "models/DiscoveredContactsModel.h"
 
-namespace vm
+using namespace vm;
+
+NewGroupChatState::NewGroupChatState(ChatsController *chatsController, DiscoveredContactsModel *contactsModel, QState *parent)
+    : OperationState(parent)
+    , m_chatsController(chatsController)
+    , m_contactsModel(contactsModel)
 {
-class ChatsController;
-
-class ChatListState : public QState
-{
-    Q_OBJECT
-
-public:
-    ChatListState(ChatsController *chatsController, QState *parent);
-
-signals:
-    void requestNewChat();
-    void requestNewGroupChat();
-
-private:
-    void onEntry(QEvent *) override;
-
-    ChatsController *m_chatsController;
-};
+    connect(chatsController, &ChatsController::chatOpened, this, &NewGroupChatState::operationFinished);
+    connect(chatsController, &ChatsController::errorOccurred, this, &NewGroupChatState::operationErrorOccurred);
+    connect(this, &NewGroupChatState::addNewChat, this, &NewGroupChatState::processAddNewChat);
 }
 
-#endif // VM_CHATLISTSTATE_H
+void NewGroupChatState::onEntry(QEvent *event)
+{
+    Q_UNUSED(event)
+    m_contactsModel->reload();
+}
+
+void NewGroupChatState::processAddNewChat(const Contact::Id &contactId)
+{
+    emit operationStarted();
+    m_chatsController->createChat(contactId);
+}

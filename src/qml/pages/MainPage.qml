@@ -31,6 +31,12 @@ Page {
             text: isChatList ? qsTr("New chat") : qsTr("Add file")
             onTriggered: isChatList ? appState.requestNewChat() : attachmentPicker.open(Enums.AttachmentType.File)
         }
+
+        Action {
+            text: qsTr("New group chat")
+            enabled: isChatList
+            onTriggered: appState.requestNewGroupChat()
+        }
     }
 
     StackLayout {

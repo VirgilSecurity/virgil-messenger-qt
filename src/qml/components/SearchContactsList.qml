@@ -12,6 +12,7 @@ Item {
     property real headerOpacity: 0
     property alias contactListView: contactListView
     property alias modelCount: contactListView.count
+    property alias model: contactListView.model
 
     anchors {
         top: contactSearch.bottom
@@ -68,7 +69,6 @@ Item {
         signal placeholderClicked()
 
         anchors.fill: parent
-        model: models.discoveredContacts.proxy
         spacing: 10
         clip: true
         header: contactListHeader
@@ -136,7 +136,7 @@ Item {
         Item {
             readonly property string name: model.name
             readonly property string avatarUrl: model.avatarUrl
-            readonly property string lastSeenActivity: model.lastSeenActivity
+//            readonly property string lastSeenActivity: model.lastSeenActivity
 
             width: contactListView.width
             height: defaultChatHeight
@@ -152,7 +152,7 @@ Item {
                     Avatar {
                         id: avatar
                         nickname: name
-                        avatarUrl: avatarUrl
+                        avatarSource: avatarUrl
                         anchors.verticalCenter: parent.verticalCenter
                     }
                 }

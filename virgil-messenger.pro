@@ -134,6 +134,7 @@ HEADERS += \
         include/states/FileCloudState.h \
         include/states/OperationState.h \
         include/states/NewChatState.h \
+        include/states/NewGroupChatState.h \
         include/states/SignInAsState.h \
         include/states/SignInState.h \
         include/states/SignInUsernameState.h \
@@ -240,6 +241,7 @@ SOURCES += \
         src/states/DownloadKeyState.cpp \
         src/states/FileCloudState.cpp \
         src/states/NewChatState.cpp \
+        src/states/NewGroupChatState.cpp \
         src/states/SignInAsState.cpp \
         src/states/SignInState.cpp \
         src/states/SignInUsernameState.cpp \
