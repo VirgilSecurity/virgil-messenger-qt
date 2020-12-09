@@ -130,8 +130,13 @@ struct Contact
     Id id;
     Type type = Type::Person;
     QString name;
+    QString phoneNumber;
+    QString email;
     QUrl avatarUrl;
+    QString lastSeenActivity;
 };
+
+using Contacts = std::vector<Contact>;
 
 using UserId = QString;
 using MessageId = QString;
@@ -222,6 +227,8 @@ using ConfirmationCodeType = Enums::ConfirmationCodeType;
 }
 
 Q_DECLARE_METATYPE(vm::Contact::Type)
+Q_DECLARE_METATYPE(vm::Contact)
+Q_DECLARE_METATYPE(vm::Contacts)
 Q_DECLARE_METATYPE(vm::PictureExtras)
 Q_DECLARE_METATYPE(vm::Attachment::Type)
 Q_DECLARE_METATYPE(vm::Attachment::Status)

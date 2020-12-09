@@ -32,47 +32,51 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/AccountSelectionModel.h"
+#ifndef VM_DISCOVEREDCONTACTSMODEL_H
+#define VM_DISCOVEREDCONTACTSMODEL_H
 
-#include "Settings.h"
+#include "ListModel.h"
+#include "VSQCommon.h"
 
-using namespace vm;
-
-AccountSelectionModel::AccountSelectionModel(Settings *settings, QObject *parent)
-    : ListModel(parent)
-    , m_settings(settings)
+namespace vm
 {
-    qRegisterMetaType<AccountSelectionModel *>("AccountSelectionModel*");
+class Validator;
 
-    connect(m_settings, &Settings::usersListChanged, this, &AccountSelectionModel::reload);
+class DiscoveredContactsModel : public ListModel
+{
+    Q_OBJECT
+    Q_PROPERTY(bool newContactFiltered MEMBER m_newContactFiltered NOTIFY newContactFilteredChanged)
+
+public:
+    enum Roles
+    {
+        NameRole = Qt::UserRole,
+        DetailsRole,
+        AvatarUrlRole,
+        LastSeenActivityRole,
+        FilterRole
+    };
+
+    DiscoveredContactsModel(Validator *validator, QObject *parent);
+
+    void reload();
+
+signals:
+    void contactsPopulated(const Contacts &contacts, QPrivateSignal);
+    void newContactFilteredChanged(const bool filtered);
+
+private:
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
+
+    void setContacts(const Contacts &contacts);
+    void checkNewContactFiltered();
+
+    Validator *m_validator;
+    Contacts m_contacts;
+    bool m_newContactFiltered = false;
+};
 }
 
-int AccountSelectionModel::rowCount(const QModelIndex &parent) const
-{
-    Q_UNUSED(parent)
-    const auto usersList = m_settings->usersList();
-    return (usersList.size() + m_chunkSize - 1) / m_chunkSize;
-}
-
-QVariant AccountSelectionModel::data(const QModelIndex &index, int role) const
-{
-    Q_UNUSED(role)
-    const auto usersList = m_settings->usersList();
-    const auto group = index.row();
-    const auto start(m_chunkSize * group);
-    const auto end(qMin(m_chunkSize * (group + 1), usersList.size()));
-    return QStringList(usersList.cbegin() + start, usersList.cbegin() + end);
-}
-
-QHash<int, QByteArray> AccountSelectionModel::roleNames() const
-{
-    QHash<int, QByteArray> names;
-    names[Qt::DisplayRole] = "modelData";
-    return names;
-}
-
-void AccountSelectionModel::reload()
-{
-    beginResetModel();
-    endResetModel();
-}
+#endif // VM_DISCOVEREDCONTACTSMODEL_H

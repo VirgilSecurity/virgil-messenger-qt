@@ -47,12 +47,14 @@ namespace vm
 class AccountSelectionModel;
 class AttachmentsModel;
 class ChatsModel;
+class DiscoveredContactsModel;
 class FileCloudModel;
 class FileCloudUploader;
 class FileLoader;
 class MessagesModel;
 class MessagesQueue;
 class UserDatabase;
+class Validator;
 
 class Models : public QObject
 {
@@ -60,12 +62,13 @@ class Models : public QObject
     Q_PROPERTY(AccountSelectionModel *accountSelection MEMBER m_accountSelection CONSTANT)
     Q_PROPERTY(AttachmentsModel *attachments READ attachments CONSTANT)
     Q_PROPERTY(ChatsModel *chats READ chats CONSTANT)
+    Q_PROPERTY(DiscoveredContactsModel *discoveredContacts MEMBER m_discoveredContacts CONSTANT)
     Q_PROPERTY(FileCloudModel *fileCloud MEMBER m_fileCloud CONSTANT)
     Q_PROPERTY(FileCloudUploader *fileCloudUploader MEMBER m_fileCloudUploader CONSTANT)
     Q_PROPERTY(MessagesModel *messages READ messages CONSTANT)
 
 public:
-    Models(VSQMessenger *messenger, Settings *settings, UserDatabase *userDatabase, QNetworkAccessManager *networkAccessManager, QObject *parent);
+    Models(VSQMessenger *messenger, Settings *settings, Validator *validator, UserDatabase *userDatabase, QNetworkAccessManager *networkAccessManager, QObject *parent);
     ~Models() override;
 
     const AccountSelectionModel *accountSelection() const;
@@ -74,6 +77,8 @@ public:
     AttachmentsModel *attachments();
     const ChatsModel *chats() const;
     ChatsModel *chats();
+    const DiscoveredContactsModel *discoveredContacts() const;
+    DiscoveredContactsModel *discoveredContacts();
     const FileCloudModel *fileCloud() const;
     FileCloudModel *fileCloud();
     const FileCloudUploader *fileCloudUploader() const;
@@ -92,6 +97,7 @@ private:
     AccountSelectionModel *m_accountSelection;
     AttachmentsModel *m_attachments;
     ChatsModel *m_chats;
+    DiscoveredContactsModel *m_discoveredContacts;
     MessagesModel *m_messages;
     FileCloudModel *m_fileCloud;
     FileCloudUploader *m_fileCloudUploader;

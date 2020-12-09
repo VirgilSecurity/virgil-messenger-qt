@@ -41,21 +41,25 @@
 namespace vm
 {
 class ChatsController;
+class DiscoveredContactsModel;
 
 class NewChatState : public OperationState
 {
     Q_OBJECT
 
 public:
-    NewChatState(ChatsController *chatsController, QState *parent);
+    NewChatState(ChatsController *chatsController, DiscoveredContactsModel *contactsModel, QState *parent);
 
 signals:
     void addNewChat(const QString &contactId);
 
 private:
+    void onEntry(QEvent *event);
+
     void processAddNewChat(const Contact::Id &contactId);
 
     ChatsController *m_chatsController;
+    DiscoveredContactsModel *m_contactsModel;
 };
 }
 

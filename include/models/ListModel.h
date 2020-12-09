@@ -50,8 +50,10 @@ class ListModel : public QAbstractListModel
 public:
     explicit ListModel(QObject *parent);
 
+    QString filter() const;
+
 signals:
-    void filterChanged(const QString &);
+    void filterChanged(const QString &filter);
 
 protected:
     const QSortFilterProxyModel *proxy() const;

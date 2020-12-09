@@ -42,7 +42,7 @@ FileCloudUploader::FileCloudUploader(QObject *parent)
     , m_currentProcessedBytes(-1)
     , m_currentTotalBytes(-1)
 {
-
+    qRegisterMetaType<FileCloudUploader *>("FileCloudUploader*");
 }
 
 int FileCloudUploader::currentIndex() const

@@ -83,7 +83,6 @@ ApplicationWindow {
         }
     }
 
-
     // Show Popup message
     function showPopup(message, popupBackgroundColor, textColor, interval) {
         inform.popupBackgroundColor = popupBackgroundColor
