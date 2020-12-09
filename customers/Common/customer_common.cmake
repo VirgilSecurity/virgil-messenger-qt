@@ -4,7 +4,6 @@ message(STATUS "[Begin] customer_common.cmake")
 if(NOT PROJECT_NAME)
     # Android API level
     set(ANDROID_NATIVE_API_LEVEL "24")
-    ANDROID_PLATFORM
     message(STATUS "Android API level: [${ANDROID_NATIVE_API_LEVEL}]")
 else()
     # ----------
