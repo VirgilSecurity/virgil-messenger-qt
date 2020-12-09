@@ -34,4 +34,8 @@ MacOS:
 1. Install appdmg [https://github.com/LinusU/node-appdmg] (Required for signed release only)
 
     npm install -g appdmg
+
+2. Console json parser    
+
+    brew install jq
     
