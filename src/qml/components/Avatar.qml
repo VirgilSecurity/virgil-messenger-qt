@@ -63,7 +63,7 @@ Item {
             fillMode: Image.PreserveAspectCrop
             onStatusChanged: {
                 if (status == Image.Error) {
-                    console.log("There was an error -> image URL  : ", avatarUrl)
+                    console.log("There was an error, image URL  : ", avatarUrl)
                 }
             }
         }
