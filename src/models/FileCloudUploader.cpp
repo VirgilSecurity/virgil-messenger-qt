@@ -34,12 +34,13 @@
 
 #include "models/FileCloudUploader.h"
 
-#include <QObject>
-
 using namespace vm;
 
 FileCloudUploader::FileCloudUploader(QObject *parent)
     : QObject(parent)
+    , m_currentIndex(-1)
+    , m_currentProcessedBytes(-1)
+    , m_currentTotalBytes(-1)
 {
 
 }

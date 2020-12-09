@@ -1,23 +1,21 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
 
 import "../theme"
-
 
 Rectangle {
     id: uploadProgressBar
 
-    property var model: models.fileCloudUploader
-    property int fileIndex: model.currentIndex
-    property int filesCount: model.fileNames.length
-    property real fileUploadValue: model.currentProcessedBytes * 100 / model.currentTotalBytes
+    readonly property var model: models.fileCloudUploader
+    readonly property int fileIndex: model.currentIndex
+    readonly property int filesCount: model.fileNames.length
+    readonly property real fileUploadValue: model.currentProcessedBytes
 
-    property real uploadHeight: 60
-    property real uploadOpacity: 1
+    readonly property real uploadHeight: 60
+    readonly property real uploadOpacity: 1
 
-    property real uploadFrom: 0
-    property real uploadTo: 100
+    readonly property real uploadFrom: 0
+    readonly property real uploadTo: model.currentTotalBytes
 
     color: Theme.mainBackgroundColor
 
@@ -70,7 +68,7 @@ Rectangle {
             verticalCenter: parent.verticalCenter
         }
         height: this.contentHeight
-        spacing: 10
+        spacing: Theme.smallSpacing
 
         ProgressBar {
             id: progressBar
