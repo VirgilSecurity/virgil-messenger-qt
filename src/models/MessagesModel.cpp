@@ -177,7 +177,7 @@ void MessagesModel::setAttachmentEncryptedSize(const Attachment::Id &attachmentI
 
 void MessagesModel::setAttachmentProcessedSize(const Attachment::Id &attachmentId, const DataSize &size)
 {
-    updateAttachment(attachmentId, { AttachmentBytesLoadedRole }, [=](Attachment &a) {
+    updateAttachment(attachmentId, { AttachmentBytesLoadedRole, AttachmentDisplayProgressRole }, [=](Attachment &a) {
         if (a.processedSize == size) {
             return false;
         }
@@ -264,7 +264,7 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
             if (!imagePath.isEmpty()) {
                 return Utils::localFileToUrl(imagePath);
             }
-            if (message.status != Message::Status::Created) {
+            if (message.status != Message::Status::Created && message.status != Message::Status::InvalidM) {
                 qCDebug(lcModel) << "Requesting of missing thumbnail/preview";
                 emit displayImageNotFound(message.id);
             }
@@ -282,6 +282,13 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
     {
         if (attachment) {
             return (attachment->size > 0) ? Utils::formattedDataSize(attachment->size) : QLatin1String("...");
+        }
+        return QString();
+    }
+    case AttachmentDisplayProgressRole:
+    {
+        if (attachment && attachment->type == Attachment::Type::File) {
+            return Utils::formattedDataSizeProgress(attachment->processedSize, attachment->encryptedSize);
         }
         return QString();
     }
@@ -307,7 +314,7 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
     {
         return attachment ? Utils::fileExists(attachment->localPath) : false;
     }
-    case FailedRole:
+    case IsBrokenRole:
     {
         return message.status == Message::Status::InvalidM;
     }
@@ -341,11 +348,12 @@ QHash<int, QByteArray> MessagesModel::roleNames() const
         { AttachmentImagePathRole, "attachmentImagePath" },
         { AttachmentImageSizeRole, "attachmentImageSize" },
         { AttachmentDisplaySizeRole, "attachmentDisplaySize" },
+        { AttachmentDisplayProgressRole, "attachmentDisplayProgress" },
         { AttachmentDisplayTextRole, "attachmentDisplayText" },
         { AttachmentBytesTotalRole, "attachmentBytesTotal" },
         { AttachmentBytesLoadedRole, "attachmentBytesLoaded" },
         { AttachmentFileExistsRole, "attachmentFileExists" },
-        { FailedRole, "failed" },
+        { IsBrokenRole, "isBroken" },
         { FirstInRowRole, "firstInRow" },
         { InRowRole, "inRow" },
     };
@@ -389,7 +397,7 @@ void MessagesModel::invalidateRow(const int row, const QVector<int> &roles)
 {
     auto allRoles = roles;
     if (allRoles.contains(StatusRole) || allRoles.contains(AttachmentStatusRole)) {
-        allRoles << FailedRole;
+        allRoles << IsBrokenRole;
     }
     if (!allRoles.empty()) {
         invalidateModel(index(row), allRoles);

@@ -112,13 +112,14 @@ Page {
             messageId: model.id
             inRow: model.inRow
             firstInRow: model.firstInRow
-            failed: model.failed
+            isBroken: model.isBroken
 
             attachmentId: model.attachmentId
             attachmentType: model.attachmentType
             attachmentStatus: model.attachmentStatus
             attachmentDisplaySize: model.attachmentDisplaySize
             attachmentDisplayText: model.attachmentDisplayText
+            attachmentDisplayProgress: model.attachmentDisplayProgress
             attachmentBytesTotal: model.attachmentBytesTotal
             attachmentBytesLoaded: model.attachmentBytesLoaded
             attachmentImagePath: model.attachmentImagePath
@@ -133,6 +134,9 @@ Page {
             }
 
             onOpenContextMenu: function(messageId, mouse, contextMenu) {
+                if (!contextMenu.enabled) {
+                    return
+                }
                 listView.contextMenu = contextMenu
                 var coord = mapToItem(listView, mouse.x, mouse.y)
                 contextMenu.x = coord.x - (Platform.isMobile ? contextMenu.width : 0)
