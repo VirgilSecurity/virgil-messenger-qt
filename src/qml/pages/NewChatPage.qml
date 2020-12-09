@@ -14,7 +14,7 @@ OperationPage {
     readonly property var filterSource: models.discoveredContacts
     readonly property alias search: contactSearch.search
     property string previousSearch
-    readonly property int modelCount: contactListView.count
+    readonly property int modelCount: searchResultsItem.modelCount
     property string serverName: "Default"
 
     readonly property int defaultMargins: 20
@@ -54,11 +54,8 @@ OperationPage {
         }
     }
 
-    Item {
+    SearchContactsList {
         id: searchResultsItem
-        property real headerHeight: 20
-        property real headerOpacity: 0
-
         anchors {
             top: contactSearch.bottom
             left: parent.left
@@ -67,154 +64,6 @@ OperationPage {
             topMargin: 1
             bottomMargin: defaultChatHeight
             margins: defaultMargins
-        }
-
-        state: models.discoveredContacts.newContactFiltered ? "show header" : "hide header"
-        states: [
-            State {
-                name: "show header"
-                PropertyChanges {
-                    target: searchResultsItem
-                    headerHeight: 90
-                    headerOpacity: 1
-                }
-            },
-            State {
-                name: "hide header"
-                PropertyChanges {
-                    target: searchResultsItem
-                    headerHeight: 20
-                    headerOpacity: 0
-                }
-            }
-        ]
-
-        transitions: [
-            Transition {
-                NumberAnimation {
-                    properties: "headerHeight, headerOpacity"
-                    easing.type: Easing.InExpo
-                    duration: Theme.animationDuration
-                }
-            }
-        ]
-
-        ListView {
-            id: contactListView
-            signal placeholderClicked()
-
-            anchors.fill: parent
-            model: models.discoveredContacts.proxy
-            spacing: 10
-            clip: true
-            header: contactListHeader
-            delegate: contactListComponent
-            footer: Item {
-                width: width
-                height: 20
-            }
-        }
-
-        Component {
-            id: contactListHeader
-
-            Item {
-                width: parent.width
-                height: searchResultsItem.headerHeight
-                opacity: searchResultsItem.headerOpacity
-
-                ListDelegate {
-                    id: contactListDelegate
-                    anchors.centerIn: parent
-                    width: parent.width
-                    height: defaultChatHeight
-
-                    Item {
-                        width: avatar.width
-                        height: parent.height
-
-                        Avatar {
-                            id: avatar
-                            nickname: search ? contact : previousSearch
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-                    }
-
-                    Column {
-                        Layout.fillWidth: true
-                        clip: true
-
-                        Text {
-                            color: Theme.primaryTextColor
-                            font.pointSize: UiHelper.fixFontSz(15)
-                            text: search.length === 0 ? previousSearch : contact
-                        }
-
-                        Text {
-                            color: Theme.secondaryTextColor
-                            font.pointSize: UiHelper.fixFontSz(12)
-                            text: qsTr("Click here to create chat")
-                            width: parent.width
-                            elide: Text.ElideRight
-                            textFormat: Text.RichText
-                        }
-                    }
-
-                    onClicked: accept()
-                }
-            }
-        }
-
-        Component {
-            id: contactListComponent
-
-            Item {
-                readonly property string name: model.name
-                readonly property string avatarUrl: model.avatarUrl
-                readonly property string lastSeenActivity: model.lastSeenActivity
-
-                width: contactListView.width
-                height: defaultChatHeight
-
-                ListDelegate {
-                    id: contactListDelegate
-                    anchors.fill: parent
-
-                    Item {
-                        width: avatar.width
-                        height: parent.height
-
-                        Avatar {
-                            id: avatar
-                            nickname: name
-                            avatarUrl: avatarUrl
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-                    }
-
-                    Column {
-                        Layout.fillWidth: true
-                        clip: true
-
-                        Text {
-                            color: Theme.primaryTextColor
-                            font.pointSize: UiHelper.fixFontSz(15)
-                            text: name
-                        }
-
-                        Text {
-                            color: Theme.secondaryTextColor
-                            font.pointSize: UiHelper.fixFontSz(12)
-                            text: details
-                            width: parent.width
-                            elide: Text.ElideRight
-                            textFormat: Text.RichText
-                        }
-                    }
-
-                    onClicked: accept()
-                }
-            }
         }
     }
 
@@ -231,6 +80,7 @@ OperationPage {
         Form {
             id: form
             formSpacing: Theme.spacing
+            formLogo.visible: false
             focus: true
 
             RowLayout {

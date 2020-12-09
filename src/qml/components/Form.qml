@@ -9,6 +9,7 @@ Item {
 
     default property alias children: formContainer.children
     property alias formSpacing: formContainer.spacing
+    property alias formLogo: vsLogo
 
     ColumnLayout {
         id: formContainer
@@ -37,6 +38,7 @@ Item {
         spacing: 15
 
         FormImage {
+            id: vsLogo
             source: "../resources/icons/Logo.png"
         }
 
