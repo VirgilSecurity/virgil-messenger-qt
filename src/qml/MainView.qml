@@ -133,6 +133,20 @@ Control {
             stackView.push(page("BackupKey"))
         }
 
+        function openEditProfilePage() {
+            if (manager.previousState !== manager.accountSettingsState) {
+                return
+            }
+            stackView.push(page("EditProfile"))
+        }
+
+        function openVerifyProfilePage() {
+            if (manager.previousState !== manager.editProfileState) {
+                return
+            }
+            stackView.push(page("VerifyProfile"))
+        }
+
         function openSignInAsPage() {
             if (manager.previousState !== manager.downloadKeyState) {
                 stackView.push(page("SignInAs"))
@@ -166,6 +180,8 @@ Control {
         manager.chatState.entered.connect(d.openChatPage)
         manager.attachmentPreviewState.entered.connect(d.showAttachmentPreview)
         manager.backupKeyState.entered.connect(d.openBackupKeyPage)
+        manager.editProfileState.entered.connect(d.openEditProfilePage)
+        manager.verifyProfileState.entered.connect(d.openVerifyProfilePage)
         manager.signInAsState.entered.connect(d.openSignInAsPage)
         manager.signInUsernameState.entered.connect(d.openSignInUsernamePage)
         manager.signUpState.entered.connect(d.openSignUpPage)

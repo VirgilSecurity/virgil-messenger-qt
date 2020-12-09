@@ -32,18 +32,38 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-import QtQuick 2.5
-import QtQuick.Layouts 1.5
-import QtQuick.Controls 2.12
+#ifndef VM_VERIFYPROFILESTATE_H
+#define VM_VERIFYPROFILESTATE_H
 
-Label {
-    Layout.fillWidth: true
-    z: 5
-    color: "white"
-    horizontalAlignment: Text.AlignHCenter
-    font.pixelSize: Qt.application.font.pixelSize * 1.3
-    background: Rectangle {
-        anchors.fill: parent
-        color: "steelblue"
-    }
+#include <QUrl>
+
+#include "OperationState.h"
+#include "VSQCommon.h"
+
+class VSQMessenger;
+
+namespace vm
+{
+class VerifyProfileState : public OperationState
+{
+    Q_OBJECT
+    Q_PROPERTY(Enums::ConfirmationCodeType codeType READ codeType WRITE setCodeType NOTIFY codeTypeChanged)
+
+public:
+    VerifyProfileState(QState *parent);
+
+    ConfirmationCodeType codeType() const;
+    void setCodeType(const ConfirmationCodeType &codeType);
+
+    Q_INVOKABLE void verify(const QString &code);
+
+signals:
+    void verificationFinished(const Enums::ConfirmationCodeType &codeType, const bool success);
+    void codeTypeChanged(const Enums::ConfirmationCodeType &codeType);
+
+private:
+    ConfirmationCodeType m_codeType = ConfirmationCodeType::Phone;
+};
 }
+
+#endif // VM_VERIFYPROFILESTATE_H
