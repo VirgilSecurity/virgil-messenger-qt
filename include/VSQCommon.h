@@ -106,6 +106,13 @@ namespace Enums {
         InvalidM // Can't be sent
     };
     Q_ENUM_NS(MessageStatus)
+
+    enum class ConfirmationCodeType
+    {
+        Phone,
+        Email
+    };
+    Q_ENUM_NS(ConfirmationCodeType)
 }
 
 namespace vm
@@ -210,6 +217,8 @@ struct GlobalMessage : Message
 };
 
 using GlobalMessages = std::vector<GlobalMessage>;
+
+using ConfirmationCodeType = Enums::ConfirmationCodeType;
 }
 
 Q_DECLARE_METATYPE(vm::Contact::Type)

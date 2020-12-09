@@ -1,11 +1,13 @@
 <RCC>
     <qresource prefix="/">
-        <!-- Pages -->
+	<!-- Pages -->
         <file>qml/pages/AccountSelectionPage.qml</file>
         <file>qml/pages/AccountSettingsPage.qml</file>
         <file>qml/pages/BackupKeyPage.qml</file>
         <file>qml/pages/ChatPage.qml</file>
         <file>qml/pages/DownloadKeyPage.qml</file>
+        <file>qml/pages/EditProfilePage.qml</file>
+        <file>qml/pages/MainPage.qml</file>
         <file>qml/pages/NewChatPage.qml</file>
         <file>qml/pages/OperationPage.qml</file>
         <file>qml/pages/SignInAsPage.qml</file>
@@ -13,8 +15,8 @@
         <file>qml/pages/SignInUsernamePage.qml</file>
         <file>qml/pages/SignUpPage.qml</file>
         <file>qml/pages/SplashScreenPage.qml</file>
-        <file>qml/pages/MainPage.qml</file>
-        <!-- Icons -->
+        <file>qml/pages/VerifyProfilePage.qml</file>
+	<!-- Icons -->
         <file>qml/resources/icons/Arrow-Left.png</file>
         <file>qml/resources/icons/Arrow-Left@2x.png</file>
         <file>qml/resources/icons/Arrow-Right.png</file>
@@ -49,7 +51,7 @@
         <file>qml/resources/icons/Image-Big@2x.png</file>
         <file>qml/resources/icons/Folder-Big.png</file>
         <file>qml/resources/icons/Folder-Big@2x.png</file>
-        <!-- Others -->
+	<!-- Others -->
         <file>qml/components/AttachmentPreview.qml</file>
         <file>qml/components/CommonHelpers/TextInCircle.qml</file>
         <file>qml/components/Popups/Popup.qml</file>
@@ -121,7 +123,7 @@
         <file>qml/components/ListDelegate.qml</file>
         <file>qml/components/ModelListView.qml</file>
         <file>qml/components/Dialogs/TemplateDialog.qml</file>
-        <!-- Database -->
+	<!-- Database -->
         <file>resources/database/createAttachments.sql</file>
         <file>resources/database/createChats.sql</file>
         <file>resources/database/createContacts.sql</file>

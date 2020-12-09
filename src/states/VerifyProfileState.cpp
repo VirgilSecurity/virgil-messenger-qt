@@ -32,36 +32,33 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_VALIDATOR_H
-#define VM_VALIDATOR_H
+#include "states/VerifyProfileState.h"
 
-#include <QObject>
-#include <QRegularExpressionValidator>
+#include "VSQMessenger.h"
 
-#include "VSQCommon.h"
+using namespace vm;
 
-namespace vm
+VerifyProfileState::VerifyProfileState(QState *parent)
+    : OperationState(parent)
 {
-class Validator : public QObject
-{
-    Q_OBJECT
-    Q_PROPERTY(QRegularExpressionValidator *reUsername MEMBER m_reUsername CONSTANT)
-    Q_PROPERTY(QRegularExpressionValidator *rePhone MEMBER m_rePhone CONSTANT)
-    Q_PROPERTY(QRegularExpressionValidator *reEmail MEMBER m_reEmail CONSTANT)
-
-
-public:
-    explicit Validator(QObject *parent);
-    ~Validator() override;
-
-    // Returns username if it's valid or corrected version of username if it exists
-    Optional<QString> validatedUsername(const QString &username, QString *errorText = 0);
-
-private:
-    QRegularExpressionValidator *m_reUsername;
-    QRegularExpressionValidator *m_rePhone;
-    QRegularExpressionValidator *m_reEmail;
-};
 }
 
-#endif // VM_VALIDATOR_H
+void VerifyProfileState::verify(const QString &code)
+{
+    const auto success = code == QLatin1String("0000");
+    emit verificationFinished(m_codeType, success);
+}
+
+ConfirmationCodeType VerifyProfileState::codeType() const
+{
+    return m_codeType;
+}
+
+void VerifyProfileState::setCodeType(const ConfirmationCodeType &codeType)
+{
+    if (m_codeType == codeType) {
+        return;
+    }
+    m_codeType = codeType;
+    emit codeTypeChanged(codeType);
+}

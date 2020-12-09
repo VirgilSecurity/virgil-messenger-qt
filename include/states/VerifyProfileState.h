@@ -32,36 +32,38 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_VALIDATOR_H
-#define VM_VALIDATOR_H
+#ifndef VM_VERIFYPROFILESTATE_H
+#define VM_VERIFYPROFILESTATE_H
 
-#include <QObject>
-#include <QRegularExpressionValidator>
+#include <QUrl>
 
+#include "OperationState.h"
 #include "VSQCommon.h"
+
+class VSQMessenger;
 
 namespace vm
 {
-class Validator : public QObject
+class VerifyProfileState : public OperationState
 {
     Q_OBJECT
-    Q_PROPERTY(QRegularExpressionValidator *reUsername MEMBER m_reUsername CONSTANT)
-    Q_PROPERTY(QRegularExpressionValidator *rePhone MEMBER m_rePhone CONSTANT)
-    Q_PROPERTY(QRegularExpressionValidator *reEmail MEMBER m_reEmail CONSTANT)
-
+    Q_PROPERTY(Enums::ConfirmationCodeType codeType READ codeType WRITE setCodeType NOTIFY codeTypeChanged)
 
 public:
-    explicit Validator(QObject *parent);
-    ~Validator() override;
+    VerifyProfileState(QState *parent);
 
-    // Returns username if it's valid or corrected version of username if it exists
-    Optional<QString> validatedUsername(const QString &username, QString *errorText = 0);
+    ConfirmationCodeType codeType() const;
+    void setCodeType(const ConfirmationCodeType &codeType);
+
+    Q_INVOKABLE void verify(const QString &code);
+
+signals:
+    void verificationFinished(const Enums::ConfirmationCodeType &codeType, const bool success);
+    void codeTypeChanged(const Enums::ConfirmationCodeType &codeType);
 
 private:
-    QRegularExpressionValidator *m_reUsername;
-    QRegularExpressionValidator *m_rePhone;
-    QRegularExpressionValidator *m_reEmail;
+    ConfirmationCodeType m_codeType = ConfirmationCodeType::Phone;
 };
 }
 
-#endif // VM_VALIDATOR_H
+#endif // VM_VERIFYPROFILESTATE_H

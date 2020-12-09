@@ -16,10 +16,13 @@ Column {
     property alias text: formField.text
     property alias placeholder: formField.placeholderText
     property alias inputHint: formField.inputMethodHints
+    property alias validator: formField.validator
+    property alias acceptableInput: formField.acceptableInput
     property bool password: false
 
     FormLabel {
         id: formLabel
+        width: parent.width
     }
 
     TextField {

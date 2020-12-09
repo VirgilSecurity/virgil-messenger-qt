@@ -4,7 +4,7 @@ import "../components"
 
 OperationPage {
     appState: app.stateManager.downloadKeyState
-    loadingText: qsTr("Downloading up your private key...")
+    loadingText: qsTr("Downloading your private key...")
 
     header: Header {
         title: qsTr("Download from the Cloud")
