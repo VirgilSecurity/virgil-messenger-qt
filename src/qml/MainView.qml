@@ -58,6 +58,15 @@ Control {
         }
     }
 
+    UploadProgressBar {
+        anchors {
+            bottom: parent.bottom
+            left: parent.left
+            right: parent.right
+        }
+        visible: manager.currentState === manager.fileCloudState ? "opened" : "closed"
+    }
+
     LogControl {
         id: logControl
         anchors {

@@ -106,6 +106,7 @@ HEADERS += \
         include/VSQNetworkAnalyzer.h \
         include/Utils.h \
         include/android/VSQAndroid.h \
+        include/models/FileCloudUploader.h \
         include/ui/VSQUiHelper.h \
         include/KeyboardEventFilter.h \
         include/Validator.h \
@@ -165,6 +166,7 @@ HEADERS += \
         include/models/ChatsModel.h \
         include/models/DiscoveredContactsModel.h \
         include/models/FileCloudModel.h \
+        include/models/FileCloudUploader.h \
         include/models/FileLoader.h \
         include/models/ListModel.h \
         include/models/MessagesModel.h \
@@ -269,6 +271,7 @@ SOURCES += \
         src/models/ChatsModel.cpp \
         src/models/DiscoveredContactsModel.cpp \
         src/models/FileCloudModel.cpp \
+        src/models/FileCloudUploader.cpp \
         src/models/FileLoader.cpp \
         src/models/ListModel.cpp \
         src/models/MessagesModel.cpp \
