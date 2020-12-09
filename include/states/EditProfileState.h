@@ -32,32 +32,64 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_ACCOUNTSETTINGSSTATE_H
-#define VM_ACCOUNTSETTINGSSTATE_H
+#ifndef VM_EDITPROFILESTATE_H
+#define VM_EDITPROFILESTATE_H
 
-#include <QState>
+#include "OperationState.h"
+#include "VSQCommon.h"
+#include <QUrl>
+
+class VSQMessenger;
 
 namespace vm
 {
-class AccountSettingsState : public QState
+class EditProfileState : public OperationState
 {
     Q_OBJECT
     Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
+    Q_PROPERTY(QString phoneNumber READ phoneNumber WRITE setPhoneNumber NOTIFY phoneNumberChanged)
+    Q_PROPERTY(QString email READ email WRITE setEmail NOTIFY emailChanged)
+    Q_PROPERTY(bool isPhoneNumberConfirmed READ isPhoneNumberConfirmed WRITE setIsPhoneNumberConfirmed NOTIFY isPhoneNumberConfirmedChanged)
+    Q_PROPERTY(bool isEmailConfirmed READ isEmailConfirmed WRITE setIsEmailConfirmed NOTIFY isEmailConfirmedChanged)
+    Q_PROPERTY(QUrl avatarUrl READ avatarUrl WRITE setAvatarUrl NOTIFY avatarUrlChanged)
 
 public:
-    explicit AccountSettingsState(QState *parent);
+    EditProfileState(QState *parent);
 
     QString userId() const;
     void setUserId(const QString &userId);
 
+    void processVerificationResponse(const ConfirmationCodeType &codeType, const bool isVerified);
+
 signals:
-    void editProfile();
-    void requestBackupKey(const QString &userId);
-    void userIdChanged(const QString &);
+    void verify(const Enums::ConfirmationCodeType &codeType);
+
+    void userIdChanged(const QString &userId);
+    void phoneNumberChanged(const QString &phoneNumber);
+    void emailChanged(const QString &email);
+    void isPhoneNumberConfirmedChanged(const bool confirmed);
+    void isEmailConfirmedChanged(const bool confirmed);
+    void avatarUrlChanged(const QUrl &url);
 
 private:
-    QString m_userId;
+    QString phoneNumber() const;
+    void setPhoneNumber(const QString &phoneNumber);
+    QString email() const;
+    void setEmail(const QString &email);
+    bool isPhoneNumberConfirmed() const;
+    void setIsPhoneNumberConfirmed(const bool confirmed);
+    bool isEmailConfirmed() const;
+    void setIsEmailConfirmed(const bool confirmed);
+    QUrl avatarUrl() const;
+    void setAvatarUrl(const QUrl &avatarUrl);
+
+    UserId m_userId;
+    QString m_phoneNumber;
+    QString m_email;
+    bool m_isPhoneNumberConfirmed;
+    bool m_isEmailConfirmed;
+    QUrl m_avatarUrl;
 };
 }
 
-#endif // VM_ACCOUNTSETTINGSSTATE_H
+#endif // VM_EDITPROFILESTATE_H

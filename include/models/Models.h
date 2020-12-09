@@ -38,7 +38,6 @@
 #include <QObject>
 
 class QNetworkAccessManager;
-class QThread;
 
 class VSQMessenger;
 class Settings;
@@ -99,7 +98,6 @@ private:
     FileCloudModel *m_fileCloud;
     FileLoader *m_fileLoader;
     MessagesQueue *m_messagesQueue;
-    QThread *m_queueThread;
 };
 }
 

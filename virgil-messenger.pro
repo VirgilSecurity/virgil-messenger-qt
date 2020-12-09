@@ -126,6 +126,8 @@ HEADERS += \
         include/states/ApplicationStateManager.h \
         include/states/AttachmentPreviewState.h \
         include/states/BackupKeyState.h \
+        include/states/EditProfileState.h \
+        include/states/VerifyProfileState.h \
         include/states/ChatListState.h \
         include/states/ChatState.h \
         include/states/DownloadKeyState.h \
@@ -231,6 +233,8 @@ SOURCES += \
         src/states/ApplicationStateManager.cpp \
         src/states/AttachmentPreviewState.cpp \
         src/states/BackupKeyState.cpp \
+        src/states/EditProfileState.cpp \
+        src/states/VerifyProfileState.cpp \
         src/states/ChatListState.cpp \
         src/states/ChatState.cpp \
         src/states/DownloadKeyState.cpp \
@@ -467,7 +471,7 @@ android: {
     DEFINES += VS_ANDROID=1 VS_PUSHNOTIFICATIONS=1 VS_MOBILE=1
     ANDROID_VERSION_CODE = $$AndroidVersionCode($${VERSION})
     ANDROID_VERSION_NAME = $$VERSION
-    ANDROID_MIN_SDK_VERSION = 29
+    ANDROID_MIN_SDK_VERSION = 24
     ANDROID_TARGET_SDK_VERSION = 29
 
     INCLUDEPATH +=  \

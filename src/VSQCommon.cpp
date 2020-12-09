@@ -51,6 +51,7 @@ void registerCommonMetaTypes()
     qRegisterMetaType<Enums::AttachmentType>("Enums::AttachmentType");
     qRegisterMetaType<Enums::AttachmentStatus>("Enums::AttachmentStatus");
     qRegisterMetaType<Enums::MessageStatus>("Enums::MessageStatus");
+    qRegisterMetaType<Enums::ConfirmationCodeType>("Enums::ConfirmationCodeType");
 
     qRegisterMetaType<UserId>("UserId");
     qRegisterMetaType<Jid>("Jid");

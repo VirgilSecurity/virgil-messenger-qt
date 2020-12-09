@@ -1,21 +1,22 @@
 <RCC>
     <qresource prefix="/">
-        <!-- Pages -->
+	<!-- Pages -->
         <file>qml/pages/AccountSelectionPage.qml</file>
         <file>qml/pages/AccountSettingsPage.qml</file>
         <file>qml/pages/BackupKeyPage.qml</file>
         <file>qml/pages/ChatPage.qml</file>
         <file>qml/pages/DownloadKeyPage.qml</file>
+        <file>qml/pages/EditProfilePage.qml</file>
         <file>qml/pages/MainPage.qml</file>
         <file>qml/pages/NewChatPage.qml</file>
         <file>qml/pages/OperationPage.qml</file>
-        <file>qml/pages/PasswordResetPage.qml</file>
         <file>qml/pages/SignInAsPage.qml</file>
         <file>qml/pages/SignInPage.qml</file>
         <file>qml/pages/SignInUsernamePage.qml</file>
         <file>qml/pages/SignUpPage.qml</file>
         <file>qml/pages/SplashScreenPage.qml</file>
-        <!-- Icons -->
+        <file>qml/pages/VerifyProfilePage.qml</file>
+	<!-- Icons -->
         <file>qml/resources/icons/Arrow-Left.png</file>
         <file>qml/resources/icons/Arrow-Left@2x.png</file>
         <file>qml/resources/icons/Arrow-Right.png</file>
@@ -50,15 +51,11 @@
         <file>qml/resources/icons/Image-Big@2x.png</file>
         <file>qml/resources/icons/Folder-Big.png</file>
         <file>qml/resources/icons/Folder-Big@2x.png</file>
-        <!-- Others -->
+	<!-- Others -->
         <file>qml/components/AttachmentPreview.qml</file>
         <file>qml/components/CommonHelpers/TextInCircle.qml</file>
         <file>qml/components/Popups/Popup.qml</file>
         <file>qml/components/Progress/Progress.qml</file>
-        <file>qml/iot/DevicesList.qml</file>
-        <file>qml/iot/Main1.qml</file>
-        <file>qml/iot/Sniffer.qml</file>
-        <file>qml/iot/Title.qml</file>
         <file>qml/resources/ca/curl-ca-bundle-win.crt</file>
         <file>qml/resources/fonts/Roboto-Bold.ttf</file>
         <file>qml/resources/fonts/Roboto-Medium.ttf</file>
@@ -93,12 +90,10 @@
         <file>qml/components/Header.qml</file>
         <file>qml/components/ContextMenu.qml</file>
         <file>qml/components/ImageButton.qml</file>
-        <file>qml/components/SettingsButton.qml</file>
         <file>qml/components/FormImage.qml</file>
         <file>qml/components/FormSubtitle.qml</file>
         <file>qml/components/SidebarButton.qml</file>
         <file>qml/components/SidebarPanel.qml</file>
-        <file>qml/components/ServerButton.qml</file>
         <file>qml/components/CommonHelpers/IconWithText.qml</file>
         <file>qml/components/ChatDateSeporator.qml</file>
         <file>qml/components/Search.qml</file>
@@ -109,7 +104,6 @@
         <file>qml/resources/sounds/message-sent.wav</file>
         <file>qml/base/Platform.qml</file>
         <file>qml/base/qmldir</file>
-        <file>qml/components/AppStatus.qml</file>
         <file>qml/components/Dialogs/SendReportDialog.qml</file>
         <file>qml/components/SelectAttachmentsDialog.qml</file>
         <file>qml/resources/icons/Camera Selected.png</file>
@@ -129,7 +123,7 @@
         <file>qml/components/ListDelegate.qml</file>
         <file>qml/components/ModelListView.qml</file>
         <file>qml/components/Dialogs/TemplateDialog.qml</file>
-        <!-- Database -->
+	<!-- Database -->
         <file>resources/database/createAttachments.sql</file>
         <file>resources/database/createChats.sql</file>
         <file>resources/database/createContacts.sql</file>

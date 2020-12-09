@@ -32,47 +32,33 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "operations/NetworkOperation.h"
+#include "states/VerifyProfileState.h"
 
-#include "models/FileLoader.h"
+#include "VSQMessenger.h"
 
 using namespace vm;
 
-NetworkOperation::NetworkOperation(QObject *parent, FileLoader *fileLoader)
-    : Operation(QLatin1String("Network"), parent)
-    , m_fileLoader(fileLoader)
-    , m_isOnline(fileLoader->isServiceFound())
-{
-    connect(fileLoader, &FileLoader::serviceFound, this, &NetworkOperation::setIsOnline);
-}
-
-NetworkOperation::NetworkOperation(NetworkOperation *parent)
-    : NetworkOperation(parent, parent->fileLoader())
+VerifyProfileState::VerifyProfileState(QState *parent)
+    : OperationState(parent)
 {
 }
 
-FileLoader *NetworkOperation::fileLoader()
+void VerifyProfileState::verify(const QString &code)
 {
-    return m_fileLoader;
+    const auto success = code == QLatin1String("0000");
+    emit verificationFinished(m_codeType, success);
 }
 
-bool NetworkOperation::isOnline() const
+ConfirmationCodeType VerifyProfileState::codeType() const
 {
-    return m_isOnline;
+    return m_codeType;
 }
 
-bool NetworkOperation::preRun()
+void VerifyProfileState::setCodeType(const ConfirmationCodeType &codeType)
 {
-    if (!m_isOnline && !hasChildren() && status() == Operation::Status::Started) {
-        qCDebug(lcOperation) << "Operation is failed because network is offline";
-        fail();
-        return false;
+    if (m_codeType == codeType) {
+        return;
     }
-    return Operation::preRun();
-}
-
-void NetworkOperation::setIsOnline(bool isOnline)
-{
-    m_isOnline = isOnline;
-    preRun();
+    m_codeType = codeType;
+    emit codeTypeChanged(codeType);
 }
