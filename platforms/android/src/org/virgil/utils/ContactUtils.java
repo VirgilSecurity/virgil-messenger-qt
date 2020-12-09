@@ -73,7 +73,7 @@ public class ContactUtils
         return phone;
     }
 
-    public static String getContactPhotoUrl(long contactId, boolean isThumbnail, Context context)
+    private static String _getContactPhotoUrl(long contactId, boolean isThumbnail, Context context)
     {
         ContentResolver cr = context.getContentResolver();
         Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
@@ -132,6 +132,11 @@ public class ContactUtils
         return null;
     }
 
+    public static String getContactPhotoUrl(Context context, String contactId)
+    {
+        return _getContactPhotoUrl(Long.parseLong(contactId), true, context);
+    }
+
     private static String notNullStr(String input)
     {
         return input == null ? "" : input;
@@ -160,8 +165,7 @@ public class ContactUtils
                 String name = cursor.getString(cursor.getColumnIndex(DISPLAY_NAME));
                 String email = notNullStr(getContactEmail(id, cr));
                 String phone = notNullStr(getContactPhone(id, cursor, cr));
-                String photo = notNullStr(getContactPhotoUrl(cursor.getLong(idColumnIndex), true, context));
-                list += name + sep + phone + sep + email + sep + photo + sep;
+                list += name + sep + phone + sep + email + sep + id + sep;
             } while (cursor.moveToNext());
             cursor.close();
         }
@@ -191,7 +195,6 @@ public class ContactUtils
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inPreferredConfig = Bitmap.Config.ARGB_8888;
             Bitmap bitmap = BitmapFactory.decodeFile(photoFile.getPath(), options);
-
             File pngFile = new File(photoFile.getPath()+ ".png");
             OutputStream os = new FileOutputStream(pngFile.getPath());
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, os);

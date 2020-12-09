@@ -35,6 +35,7 @@
 #ifndef VM_COMMON_H
 #define VM_COMMON_H
 
+#include <deque>
 #include <functional>
 #include <memory>
 
@@ -119,8 +120,10 @@ namespace vm
 {
 struct AndroidContactExtras
 {
-    QString id;
-    bool avatarUrlLoaded = false;
+    using Id = long long;
+
+    Id id = -1;
+    bool avatarUrlFetched = false;
 };
 
 struct Contact
@@ -140,7 +143,8 @@ struct Contact
     QString email;
     QUrl avatarUrl;
     QString lastSeenActivity;
-    QVariant extras;
+
+    QVariant platformExtras;
 };
 
 using Contacts = std::vector<Contact>;
@@ -233,6 +237,7 @@ using GlobalMessages = std::vector<GlobalMessage>;
 using ConfirmationCodeType = Enums::ConfirmationCodeType;
 }
 
+Q_DECLARE_METATYPE(vm::AndroidContactExtras)
 Q_DECLARE_METATYPE(vm::Contact::Type)
 Q_DECLARE_METATYPE(vm::Contact)
 Q_DECLARE_METATYPE(vm::Contacts)

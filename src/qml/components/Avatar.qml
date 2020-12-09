@@ -36,7 +36,7 @@ Item {
             fillMode: Image.PreserveAspectCrop
             onStatusChanged: {
                 if (status == Image.Error) {
-                    console.log("Avatar url loading error:", avatarUrl)
+                    console.log("Avatar url loading error:", source)
                 }
             }
         }

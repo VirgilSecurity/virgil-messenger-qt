@@ -111,6 +111,7 @@ HEADERS += \
         include/KeyboardEventFilter.h \
         include/Validator.h \
         include/Core.h \
+        include/ContactAvatarLoader.h \
         # Controllers
         include/controllers/AttachmentsController.h \
         include/controllers/ChatsController.h \
@@ -222,6 +223,7 @@ SOURCES += \
         src/KeyboardEventFilter.cpp \
         src/Validator.cpp \
         src/Core.cpp \
+        src/ContactAvatarLoader.cpp \
         # Controllers
         src/controllers/AttachmentsController.cpp \
         src/controllers/ChatsController.cpp \

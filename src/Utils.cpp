@@ -477,11 +477,28 @@ bool Utils::readImage(QImageReader *reader, QImage *image)
     return true;
 }
 
-Contacts Utils::getDeviceContacts()
+Contacts Utils::getDeviceContacts(const Contacts &cachedContacts)
 {
+    Contacts contacts;
 #ifdef VS_ANDROID
-    return VSQAndroid::getContacts();
-#else
-    return {};
-#endif
+    contacts = VSQAndroid::getContacts();
+    // Load avatar urls from cache
+    if (!contacts.empty() && !cachedContacts.empty()) {
+        std::map<AndroidContactExtras::Id, Contact> cache;
+        for (const auto &c : cachedContacts) {
+            const auto id = c.platformExtras.value<AndroidContactExtras>().id;
+            cache[id] = c;
+        }
+        for (auto &c : contacts) {
+            const auto id = c.platformExtras.value<AndroidContactExtras>().id;
+            auto it = cache.find(id);
+            if (it == cache.cend()) {
+                continue;
+            }
+            c.avatarUrl = it->second.avatarUrl;
+            c.platformExtras = it->second.platformExtras;
+        }
+    }
+#endif // VS_ANDROID
+    return contacts;
 }

@@ -124,7 +124,7 @@ namespace Utils
 
     // Contacts
 
-    Contacts getDeviceContacts();
+    Contacts getDeviceContacts(const Contacts &cachedContacts = Contacts());
 }
 }
 
