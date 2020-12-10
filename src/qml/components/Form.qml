@@ -2,12 +2,13 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 
+import "../theme"
+
 Item {
     anchors.fill: parent
 
-    property bool isLoading: false
-
     default property alias children: formContainer.children
+    property bool isLoading: false
     property alias formSpacing: formContainer.spacing
 
     ColumnLayout {
@@ -20,7 +21,7 @@ Item {
             right: parent.right
         }
 
-        spacing: 15
+        spacing: Theme.spacing
     }
 
     // TODO: I don't like this eather, but let's
@@ -34,7 +35,7 @@ Item {
             right: parent.right
         }
 
-        spacing: 15
+        spacing: Theme.spacing
 
         FormImage {
             source: "../resources/icons/Logo.png"
