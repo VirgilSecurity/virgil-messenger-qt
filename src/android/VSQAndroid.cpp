@@ -174,13 +174,12 @@ Contacts VSQAndroid::getContacts()
     Contacts contacts;
     for (int i = 0, s = lines.size() - 4; i <= s; i += 4) {
         Contact contact;
-        contact.id = Utils::createUuid();
         contact.name = lines[i];
         contact.phoneNumber = lines[i + 1];
         contact.email = lines[i + 2];
-        AndroidContactExtras extras;
-        extras.id = lines[i + 3].toLongLong();
-        contact.platformExtras = QVariant::fromValue(extras);
+        const auto &platformIdStr = lines[i + 3];
+        contact.id = QLatin1String("AndroidContact(%1)").arg(platformIdStr);
+        contact.platformId = platformIdStr.toLongLong();
         contacts.push_back(contact);
     }
     return contacts;
@@ -188,8 +187,7 @@ Contacts VSQAndroid::getContacts()
 
 QUrl VSQAndroid::getContactAvatarUrl(const Contact &contact)
 {
-    const auto id = contact.platformExtras.value<AndroidContactExtras>().id;
-    const QString idString = QString::number(id);
+    const QString idString = QString::number(contact.platformId.toLongLong());
     const auto javaIdString = QAndroidJniObject::fromString(idString);
     const auto javaFilePath = QAndroidJniObject::callStaticObjectMethod(
         "org/virgil/utils/ContactUtils",

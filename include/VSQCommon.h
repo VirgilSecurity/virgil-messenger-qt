@@ -118,14 +118,6 @@ namespace Enums {
 
 namespace vm
 {
-struct AndroidContactExtras
-{
-    using Id = long long;
-
-    Id id = -1;
-    bool avatarUrlRequested = false;
-};
-
 struct Contact
 {
     enum class Type
@@ -144,7 +136,8 @@ struct Contact
     QUrl avatarUrl;
     QString lastSeenActivity;
 
-    QVariant platformExtras;
+    QVariant platformId;
+    bool avatarUrlRequested = false;
 };
 
 using Contacts = std::vector<Contact>;
@@ -237,7 +230,6 @@ using GlobalMessages = std::vector<GlobalMessage>;
 using ConfirmationCodeType = Enums::ConfirmationCodeType;
 }
 
-Q_DECLARE_METATYPE(vm::AndroidContactExtras)
 Q_DECLARE_METATYPE(vm::Contact::Type)
 Q_DECLARE_METATYPE(vm::Contact)
 Q_DECLARE_METATYPE(vm::Contacts)

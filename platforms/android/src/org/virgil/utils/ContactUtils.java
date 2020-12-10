@@ -105,7 +105,7 @@ public class ContactUtils
                 try {
                     AssetFileDescriptor fd = cr.openAssetFileDescriptor(displayPhotoUri, "r");
                     try (InputStream is = fd.createInputStream();
-                         OutputStream os = new FileOutputStream(photoFile)) {
+                        OutputStream os = new FileOutputStream(photoFile)) {
                         // Copy image to cache directory
                         final byte[] buffer = new byte[1024 * 4];
                         int n = 0;
@@ -120,7 +120,7 @@ public class ContactUtils
             }
         }
 
-        if (photoFile.exists()) {
+        if (photoFile.exists() && photoFile.length() > 0) {
             File pngFile = convertToPng(photoFile);
             if (pngFile != null) {
                 photoFile.delete();

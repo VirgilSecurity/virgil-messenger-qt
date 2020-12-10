@@ -46,7 +46,6 @@ Item {
             anchors.fill: parent
             asynchronous: true
             fillMode: Image.PreserveAspectCrop
-            visible: false
             onStatusChanged: {
                 if (status == Image.Error) {
                     console.log("Avatar url loading error:", source)

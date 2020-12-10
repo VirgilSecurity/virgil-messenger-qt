@@ -68,25 +68,16 @@ void ContactAvatarLoader::load(Contacts &contacts, int maxLimit)
 
 bool ContactAvatarLoader::canLoad(Contact &contact)
 {
-#ifdef VS_ANDROID
-    auto androidExtras = contact.platformExtras.value<AndroidContactExtras>();
-    if (androidExtras.avatarUrlRequested) {
+    if (contact.avatarUrlRequested) {
         return false;
     }
-    // Update platform extras
-    androidExtras.avatarUrlRequested = true;
-    contact.platformExtras = QVariant::fromValue(androidExtras);
-    // Add contact
+    contact.avatarUrlRequested = true;
     for (auto &c : m_contacts) {
         if (c.id == contact.id) {
             return false;
         }
     }
     return true;
-#else
-    Q_UNUSED(contact)
-#endif // VS_ANDROID
-    return false;
 }
 
 void ContactAvatarLoader::processLoad()
