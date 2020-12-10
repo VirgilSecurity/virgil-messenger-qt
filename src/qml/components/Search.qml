@@ -5,10 +5,6 @@ import "../theme"
 
 Rectangle {
     id: containerId
-
-    radius: 20
-    color: "transparent"
-
     property alias textValidator: searchField.validator
     property alias searchPlaceholder: searchField.placeholderText
     property string search: searchField.text + searchField.preeditText
@@ -16,6 +12,9 @@ Rectangle {
 
     signal closed()
     signal accepted()
+
+    radius: 20
+    color: "transparent"
 
     state: "closed"
     states: [
