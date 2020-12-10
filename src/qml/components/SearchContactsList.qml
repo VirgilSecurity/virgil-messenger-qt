@@ -9,8 +9,8 @@ import "../theme"
 Item {
     id: searchContactsList
     property real headerHeight: 20
-    property real expandedHeaderHeight: 90
     property real headerOpacity: 0
+    readonly property real expandedHeaderHeight: 90
     property alias contactListView: contactListView
     property alias modelCount: contactListView.count
     property alias model: contactListView.model
@@ -74,14 +74,14 @@ Item {
         signal placeholderClicked()
 
         anchors.fill: parent
-        spacing: 10
+        spacing: Theme.smallSpacing
         clip: true
         header: contactListHeader
         delegate: contactListComponent
         focus: true
         footer: Item {
             width: width
-            height: 20
+            height: Theme.spacing
         }
     }
 
