@@ -29,6 +29,18 @@ Item {
         anchors.fill: parent
         visible: originalImage.status == Image.Ready
 
+        layer.enabled: visible
+        layer.effect: OpacityMask {
+            maskSource: Item {
+                width: imageItem.width
+                height: imageItem.height
+                Rectangle {
+                    anchors.fill: parent
+                    radius: parent.height
+                }
+            }
+        }
+
         Image {
             id: originalImage
             anchors.fill: parent
@@ -39,19 +51,6 @@ Item {
                     console.log("Avatar url loading error:", source)
                 }
             }
-        }
-
-        Rectangle {
-            id: rectangleMask
-            anchors.fill: parent
-            radius: parent.height
-            visible: false
-        }
-
-        OpacityMask {
-            anchors.fill: originalImage
-            source: originalImage
-            maskSource: rectangleMask
         }
     }
 }
