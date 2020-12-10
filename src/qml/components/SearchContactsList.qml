@@ -13,16 +13,6 @@ Item {
     property alias contactListView: contactListView
     property alias modelCount: contactListView.count
 
-    anchors {
-        top: contactSearch.bottom
-        left: parent.left
-        right: parent.right
-        bottom: parent.bottom
-        topMargin: 1
-        bottomMargin: defaultChatHeight
-        margins: defaultMargins
-    }
-
     state: {
         if (search !== controllers.users.userId) {
             if (models.discoveredContacts.newContactFiltered) {
