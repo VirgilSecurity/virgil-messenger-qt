@@ -14,16 +14,6 @@ Item {
     property alias modelCount: contactListView.count
     property alias model: contactListView.model
 
-    anchors {
-        top: contactSearch.bottom
-        left: parent.left
-        right: parent.right
-        bottom: parent.bottom
-        topMargin: 1
-        bottomMargin: defaultChatHeight
-        margins: defaultMargins
-    }
-
     state: {
         if (search !== controllers.users.userId) {
             if (models.discoveredContacts.newContactFiltered) {
@@ -86,7 +76,7 @@ Item {
             width: parent.width
             height: searchContactsList.headerHeight
             opacity: searchContactsList.headerOpacity
-            enabled: state == "show header" ? true : false
+            enabled: state == "show header"
 
             ListDelegate {
                 id: contactListDelegate
@@ -134,10 +124,6 @@ Item {
         id: contactListComponent
 
         Item {
-            readonly property string name: model.name
-            readonly property string avatarUrl: model.avatarUrl
-//            readonly property string lastSeenActivity: model.lastSeenActivity
-
             width: contactListView.width
             height: defaultChatHeight
 
@@ -151,8 +137,8 @@ Item {
 
                     Avatar {
                         id: avatar
-                        nickname: name
-                        avatarSource: avatarUrl
+                        nickname: model.name
+                        avatarUrl: model.avatarUrl
                         anchors.verticalCenter: parent.verticalCenter
                     }
                 }
@@ -164,13 +150,13 @@ Item {
                     Text {
                         color: Theme.primaryTextColor
                         font.pointSize: UiHelper.fixFontSz(15)
-                        text: name
+                        text: model.name
                     }
 
                     Text {
                         color: Theme.secondaryTextColor
                         font.pointSize: UiHelper.fixFontSz(12)
-                        text: details
+                        text: model.lastSeenActivity
                         width: parent.width
                         elide: Text.ElideRight
                         textFormat: Text.RichText

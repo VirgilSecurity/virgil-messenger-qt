@@ -68,38 +68,26 @@ OperationPage {
         model: models.discoveredContacts.proxy
     }
 
-    Item {
+    RowLayout {
         anchors {
             top: searchResultsItem.bottom
+            bottom: parent.bottom
             left: parent.left
             right: parent.right
-            bottom: parent.bottom
-            leftMargin: defaultMargins
-            rightMargin: defaultMargins
         }
 
-        Form {
-            id: form
-            formSpacing: Theme.spacing
-            formLogo.visible: false
-            focus: true
+        Label {
+            text: qsTr("Server")
+            color: Theme.primaryTextColor
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter
+        }
 
-            RowLayout {
-                Layout.fillWidth: true
-                Layout.maximumWidth: Theme.formMaximumWidth
-                Layout.alignment: Qt.AlignHCenter
-
-                Label {
-                    text: qsTr("Server")
-                    color: Theme.primaryTextColor
-                    Layout.fillWidth: true
-                }
-
-                Label {
-                    color: Theme.secondaryTextColor
-                    text: serverName
-                }
-            }
+        Label {
+            text: serverName
+            color: Theme.secondaryTextColor
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter
         }
     }
 
