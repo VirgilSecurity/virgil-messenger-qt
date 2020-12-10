@@ -132,7 +132,7 @@ elseif(VS_PLATFORM STREQUAL "macos")
 	"${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dmg"
     VERBATIM)
 
-  add_custom_target(dmg_natarization
+  add_custom_target(dmg_notarization
     COMMAND ${PROJECT_SOURCE_DIR}/platforms/macos/tools/dmg-notarization.sh -f "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dmg" -u ${NOTARIZATION_LOGIN} -p ${NOTARIZATION_PASSWORD} -i "${MACOSX_BUNDLE_GUI_IDENTIFIER}"
     VERBATIM)  
     
