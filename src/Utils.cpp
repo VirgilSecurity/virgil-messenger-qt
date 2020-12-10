@@ -499,6 +499,18 @@ Contacts Utils::getDeviceContacts(const Contacts &cachedContacts)
             c.platformExtras = it->second.platformExtras;
         }
     }
+#else
+    Q_UNUSED(cachedContacts)
 #endif // VS_ANDROID
     return contacts;
+}
+
+QUrl Utils::getContactAvatarUrl(const Contact &contact)
+{
+#ifdef VS_ANDROID
+    return VSQAndroid::getContactAvatarUrl(contact);
+#else
+    Q_UNUSED(contact)
+    return QUrl();
+#endif // VS_ANDROID
 }

@@ -36,7 +36,7 @@
 
 #include <QtConcurrent>
 
-#include "android/VSQAndroid.h"
+#include "Utils.h"
 
 using namespace vm;
 
@@ -45,32 +45,17 @@ ContactAvatarLoader::ContactAvatarLoader(QObject *parent)
 {
     m_timer.setSingleShot(true);
     m_timer.setInterval(100);
-    connect(&m_timer, &QTimer::timeout, this, &ContactAvatarLoader::loadForContacts);
+    connect(&m_timer, &QTimer::timeout, this, &ContactAvatarLoader::processLoad);
 }
 
 void ContactAvatarLoader::load(Contact &contact)
 {
-#ifdef VS_ANDROID
-    auto androidExtras = contact.platformExtras.value<AndroidContactExtras>();
-    if (androidExtras.avatarUrlFetched) {
-        return;
-    }
-    // Update platform extras
-    androidExtras.avatarUrlFetched = true;
-    contact.platformExtras = QVariant::fromValue(androidExtras);
-    // Add item
-    for (auto &c : m_contacts) {
-        if (c.id == contact.id) {
-            return;
+    if (canLoad(contact)) {
+        m_contacts.push_back(contact);
+        if (!m_timer.isActive()) {
+            m_timer.start();
         }
     }
-    m_contacts.push_back(contact);
-    // Start timer
-    if (m_timer.isActive()) {
-        return;
-    }
-    m_timer.start();
-#endif
 }
 
 void ContactAvatarLoader::load(Contacts &contacts, int maxLimit)
@@ -81,16 +66,39 @@ void ContactAvatarLoader::load(Contacts &contacts, int maxLimit)
     }
 }
 
-void ContactAvatarLoader::loadForContacts()
+bool ContactAvatarLoader::canLoad(Contact &contact)
 {
 #ifdef VS_ANDROID
+    auto androidExtras = contact.platformExtras.value<AndroidContactExtras>();
+    if (androidExtras.avatarUrlRequested) {
+        return false;
+    }
+    // Update platform extras
+    androidExtras.avatarUrlRequested = true;
+    contact.platformExtras = QVariant::fromValue(androidExtras);
+    // Add contact
+    for (auto &c : m_contacts) {
+        if (c.id == contact.id) {
+            return false;
+        }
+    }
+    return true;
+#else
+    Q_UNUSED(contact)
+#endif // VS_ANDROID
+    return false;
+}
+
+void ContactAvatarLoader::processLoad()
+{
     Contacts contacts;
     std::swap(contacts, m_contacts);
     QtConcurrent::run([=]() {
         for (auto &contact : contacts) {
-            const auto url = VSQAndroid::getContactAvatarUrl(contact);
-            emit loaded(contact, url);
+            const auto url = Utils::getContactAvatarUrl(contact);
+            if (!url.isEmpty()) {
+                emit loaded(contact, url);
+            }
         }
     });
-#endif // VS_ANDROID
 }

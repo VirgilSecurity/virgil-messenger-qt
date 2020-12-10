@@ -55,12 +55,11 @@ signals:
     void loaded(const Contact &contact, const QUrl &url);
 
 private:
-    void loadForContacts();
+    bool canLoad(Contact &contact);
+    void processLoad();
 
-#ifdef VS_ANDROID
     Contacts m_contacts;
     QTimer m_timer;
-#endif // VS_ANDROID
 };
 }
 

@@ -125,6 +125,8 @@ namespace Utils
     // Contacts
 
     Contacts getDeviceContacts(const Contacts &cachedContacts = Contacts());
+
+    QUrl getContactAvatarUrl(const Contact &contact);
 }
 }
 

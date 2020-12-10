@@ -123,7 +123,7 @@ struct AndroidContactExtras
     using Id = long long;
 
     Id id = -1;
-    bool avatarUrlFetched = false;
+    bool avatarUrlRequested = false;
 };
 
 struct Contact

@@ -106,7 +106,6 @@ HEADERS += \
         include/VSQNetworkAnalyzer.h \
         include/Utils.h \
         include/android/VSQAndroid.h \
-        include/models/FileCloudUploader.h \
         include/ui/VSQUiHelper.h \
         include/KeyboardEventFilter.h \
         include/Validator.h \
