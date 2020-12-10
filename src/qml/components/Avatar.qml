@@ -5,9 +5,10 @@ import "../theme"
 import "./CommonHelpers"
 
 Item {
+    id: avatar
     property string nickname
     property url avatarUrl
-    property alias diameter: textInCircle.diameter
+    property alias diameter: avatar.width
     property alias content: textInCircle.content
     property alias pointSize: textInCircle.pointSize
 

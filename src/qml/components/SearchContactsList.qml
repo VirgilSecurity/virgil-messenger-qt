@@ -9,6 +9,7 @@ import "../theme"
 Item {
     id: searchContactsList
     property real headerHeight: 20
+    property real expandedHeaderHeight: 90
     property real headerOpacity: 0
     property alias contactListView: contactListView
     property alias modelCount: contactListView.count
@@ -25,12 +26,18 @@ Item {
         return "hide header"
     }
 
+    onStateChanged: {
+        if (state === "show header") {
+            flickListView.restart()
+        }
+    }
+
     states: [
         State {
             name: "show header"
             PropertyChanges {
                 target: searchContactsList
-                headerHeight: 90
+                headerHeight: expandedHeaderHeight
                 headerOpacity: 1
             }
         },
@@ -54,6 +61,14 @@ Item {
         }
     ]
 
+    PropertyAnimation {
+        id: flickListView
+        target: contactListView
+        property: "contentY"
+        to: -expandedHeaderHeight
+        duration: Theme.animationDuration
+    }
+
     ListView {
         id: contactListView
         signal placeholderClicked()
@@ -63,6 +78,7 @@ Item {
         clip: true
         header: contactListHeader
         delegate: contactListComponent
+        focus: true
         footer: Item {
             width: width
             height: 20
@@ -84,15 +100,10 @@ Item {
                 width: parent.width
                 height: defaultChatHeight
 
-                Item {
-                    width: avatar.width
-                    height: parent.height
-
-                    Avatar {
-                        id: avatar
-                        nickname: search ? contact : previousSearch
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
+                Avatar {
+                    id: avatar
+                    nickname: search ? contact : previousSearch
+                    Layout.alignment: Qt.AlignVCenter
                 }
 
                 Column {
@@ -131,16 +142,11 @@ Item {
                 id: contactListDelegate
                 anchors.fill: parent
 
-                Item {
-                    width: avatar.width
-                    height: parent.height
-
-                    Avatar {
-                        id: avatar
-                        nickname: model.name
-                        avatarUrl: model.avatarUrl
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
+                Avatar {
+                    id: avatar
+                    nickname: model.name
+                    avatarUrl: model.avatarUrl
+                    Layout.alignment: Qt.AlignVCenter
                 }
 
                 Column {

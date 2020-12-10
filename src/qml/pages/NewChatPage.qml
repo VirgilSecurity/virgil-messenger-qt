@@ -17,7 +17,6 @@ OperationPage {
     readonly property int modelCount: searchResultsItem.modelCount
     property string serverName: "Default"
 
-    readonly property int defaultMargins: 20
     readonly property int defaultSearchHeight: 40
     readonly property int defaultChatHeight: 50
 
@@ -40,7 +39,7 @@ OperationPage {
             top: parent.top
             left: parent.left
             right: parent.right
-            margins: defaultMargins
+            margins: Theme.margin
         }
         height: defaultSearchHeight
         state: "opened"
@@ -63,7 +62,7 @@ OperationPage {
             bottom: parent.bottom
             topMargin: 1
             bottomMargin: defaultChatHeight
-            margins: defaultMargins
+            margins: Theme.margin
         }
         model: models.discoveredContacts.proxy
     }
