@@ -54,8 +54,6 @@ if(VS_PLATFORM STREQUAL "android")
     message(STATUS "Android deploy QT platform: [${ANDROID_SDK_PLATFORM}]")
   endif()
     
-  set(ANDROID_SDK_BUILD_TOOLS_VERSION "29.0.2")
-
   add_custom_target(apk_release
     COMMAND ${CMAKE_COMMAND} -E env JAVA_HOME=${JAVA_HOME} ${ANDROID_DEPLOY_QT}
        --input "${CMAKE_BINARY_DIR}/android_deployment_settings.json"
@@ -134,9 +132,10 @@ elseif(VS_PLATFORM STREQUAL "macos")
 	"${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dmg"
     VERBATIM)
 
-  add_custom_target(dmg_release
+  add_custom_target(dmg_natarization
     COMMAND ${PROJECT_SOURCE_DIR}/platforms/macos/tools/dmg-notarization.sh -f "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dmg" -u ${NOTARIZATION_LOGIN} -p ${NOTARIZATION_PASSWORD} -i "${MACOSX_BUNDLE_GUI_IDENTIFIER}"
     VERBATIM)  
+    
   add_custom_target(dmg_debug
     COMMAND echo "Deploy MacOS bundle data (without signing)..."
     COMMAND ${MAC_DEPLOY_QT}

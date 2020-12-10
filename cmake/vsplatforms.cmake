@@ -138,11 +138,8 @@ if(VS_PLATFORM)
     	    message(FATAL_ERROR "-- Enviroment variable ANDROID_SDK not set")    
         endif()    
 
-        # Detect SDK build tool ( "sdkBuildToolsRevision": "29.0.2",)        
         execute_process (COMMAND bash -c "cd ${ANDROID_SDK}/build-tools && ls -rd -- */ | head -n 1 | cut -d'/' -f1 | tr -d '\n'" OUTPUT_VARIABLE ANDROID_SDK_BUILD_TOOLS_REVISION)
         message(STATUS "Android SDK build tool version: [${ANDROID_SDK_BUILD_TOOLS_REVISION}]")
-#        set(ANDROID_TOOL_STRING "sed -i '/\"sdk\"/i  \"sdkBuildToolsRevision\": \"${ANDROID_SDK_BUILD_TOOLS_REVISION}\",' ${CMAKE_BINARY_DIR}/android_deployment_settings.json")
-#        message(STATUS "Android SDK build tool string: [${ANDROID_TOOL_STRING}]")        
         set(QT_ANDROID_DEPLOYMENT_DEPENDENCIES "\"sdkBuildToolsRevision\": \"${ANDROID_SDK_BUILD_TOOLS_REVISION}\",")
         
     # -- MacOS

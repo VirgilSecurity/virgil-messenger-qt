@@ -10,9 +10,13 @@
 
     mkdir -p build
     cd build
-    cmake -DVS_PLATFORM="macos" -DCMAKE_BUILD_TYPE="Release"  -DVS_MACOS_IDENT="Ident for signing" ..
+    cmake -DVS_PLATFORM="macos" -DCMAKE_BUILD_TYPE="Release"  -DVS_MACOS_IDENT="Ident for signing" \
+	  -DNOTARIZATION_LOGIN=<notarization login> -D NOTARIZATION_PASSWORD="notarization password" ..
     make
     make dmg_release
+
+    # Notarization
+    make dmg_notarization
 
     # Create sparkle update
     make dmg_update
