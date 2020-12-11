@@ -84,9 +84,7 @@ void FileCloudModel::setEnabled(bool enabled)
 
 const QFileInfo FileCloudModel::getFileInfo(const int proxyRow) const
 {
-    const auto proxyIndex = proxy()->index(proxyRow, 0);
-    const auto sourceIndex = proxy()->mapToSource(proxyIndex);
-    return m_list[sourceIndex.row()];
+    return m_list[sourceIndex(proxyRow).row()];
 }
 
 int FileCloudModel::rowCount(const QModelIndex &parent) const

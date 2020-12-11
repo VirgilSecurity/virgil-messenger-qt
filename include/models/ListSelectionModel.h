@@ -32,51 +32,40 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_LISTMODEL_H
-#define VM_LISTMODEL_H
+#ifndef VM_LISTSELECTIONMODEL_H
+#define VM_LISTSELECTIONMODEL_H
 
-#include <QAbstractListModel>
-
-class QSortFilterProxyModel;
+#include <QItemSelectionModel>
 
 namespace vm
 {
-class ListSelectionModel;
+class ListModel;
 
-class ListModel : public QAbstractListModel
+class ListSelectionModel : public QItemSelectionModel
 {
     Q_OBJECT
-    Q_PROPERTY(QSortFilterProxyModel *proxy MEMBER m_proxy CONSTANT)
-    Q_PROPERTY(ListSelectionModel *selection MEMBER m_selection CONSTANT)
-    Q_PROPERTY(QString filter MEMBER m_filter WRITE setFilter NOTIFY filterChanged)
+    Q_PROPERTY(bool hasSelection MEMBER m_hasSelection NOTIFY hasSelectionChanged)
 
 public:
-    explicit ListModel(QObject *parent);
+    explicit ListSelectionModel(ListModel *source);
 
-    QString filter() const;
+    Q_INVOKABLE void setSelected(const QVariant &proxyRow, bool selected);
+    Q_INVOKABLE void toggle(const QVariant &proxyRow);
+    Q_INVOKABLE void clear();
 
-    QModelIndex sourceIndex(const int proxyRow) const;
-    virtual QVariant item(const QModelIndex &index) const;
-
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
-    QHash<int, QByteArray> unitedRoleNames(const QHash<int, QByteArray> &names) const;
+    bool hasSelection() const;
+    QList<QVariant> items() const;
 
 signals:
-    void filterChanged(const QString &filter);
-
-protected:
-    const QSortFilterProxyModel *proxy() const;
-    QSortFilterProxyModel *proxy();
+    void changed(const QList<QModelIndex> &indices);
+    void hasSelectionChanged(const bool changed);
 
 private:
-    void setFilter(const QString &filter);
-    void onSelectionChanged(const QList<QModelIndex> &indices);
+    void onChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
-    QSortFilterProxyModel *m_proxy;
-    ListSelectionModel *m_selection;
-    QString m_filter;
+    ListModel *m_sourceModel;
+    bool m_hasSelection = false;
 };
 }
 
-#endif // VM_LISTMODEL_H
+#endif // VM_LISTSELECTIONMODEL_H

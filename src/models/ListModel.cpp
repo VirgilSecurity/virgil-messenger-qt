@@ -36,22 +36,63 @@
 
 #include <QSortFilterProxyModel>
 
+#include "models/ListSelectionModel.h"
+
 using namespace vm;
 
 ListModel::ListModel(QObject *parent)
     : QAbstractListModel(parent)
     , m_proxy(new QSortFilterProxyModel(this))
+    , m_selection(new ListSelectionModel(this))
 {
     qRegisterMetaType<QSortFilterProxyModel *>("QSortFilterProxyModel*");
+    qRegisterMetaType<ListSelectionModel *>("ListSelectionModel*");
 
     m_proxy->setSourceModel(this);
     m_proxy->setFilterKeyColumn(0);
     m_proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
+
+    connect(m_selection, &ListSelectionModel::changed, this, &ListModel::onSelectionChanged);
 }
 
 QString ListModel::filter() const
 {
     return m_filter;
+}
+
+QModelIndex ListModel::sourceIndex(const int proxyRow) const
+{
+    return proxy()->mapToSource(proxy()->index(proxyRow, 0));
+}
+
+QVariant ListModel::item(const QModelIndex &index) const
+{
+    Q_UNUSED(index)
+    return QVariant();
+}
+
+QVariant ListModel::data(const QModelIndex &index, int role) const
+{
+    if (role == Qt::CheckStateRole) {
+        return m_selection->isSelected(index);
+    }
+    return QVariant();
+}
+
+QHash<int, QByteArray> ListModel::roleNames() const
+{
+    return {
+        { Qt::CheckStateRole, "isSelected" }
+    };
+}
+
+QHash<int, QByteArray> ListModel::unitedRoleNames(const QHash<int, QByteArray> &names) const
+{
+    auto result = ListModel::roleNames();
+    for (auto k : names.keys()) {
+        result.insert(k, names.value(k));
+    }
+    return result;
 }
 
 const QSortFilterProxyModel *ListModel::proxy() const
@@ -72,4 +113,11 @@ void ListModel::setFilter(const QString &filter)
     m_proxy->setFilterFixedString(filter);
     m_filter = filter;
     emit filterChanged(filter);
+}
+
+void ListModel::onSelectionChanged(const QList<QModelIndex> &indices)
+{
+    for (auto &i : indices) {
+        emit dataChanged(i, i, { Qt::CheckStateRole });
+    }
 }

@@ -169,6 +169,7 @@ HEADERS += \
         include/models/FileCloudUploader.h \
         include/models/FileLoader.h \
         include/models/ListModel.h \
+        include/models/ListSelectionModel.h \
         include/models/MessagesModel.h \
         include/models/MessagesQueue.h \
         include/models/Models.h \
@@ -275,6 +276,7 @@ SOURCES += \
         src/models/FileCloudUploader.cpp \
         src/models/FileLoader.cpp \
         src/models/ListModel.cpp \
+        src/models/ListSelectionModel.cpp \
         src/models/MessagesModel.cpp \
         src/models/MessagesQueue.cpp \
         src/models/Models.cpp \
