@@ -35,8 +35,6 @@
 #ifndef VM_OPERATION_H
 #define VM_OPERATION_H
 
-#include <deque>
-
 #include <QObject>
 
 #include "VSQCommon.h"

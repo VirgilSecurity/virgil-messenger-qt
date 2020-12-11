@@ -6,7 +6,7 @@ import "./CommonHelpers"
 
 Item {
     property string nickname
-    property string avatarUrl
+    property alias avatarUrl: originalImage.source
     property alias diameter: textInCircle.diameter
     property alias content: textInCircle.content
     property alias pointSize: textInCircle.pointSize
@@ -29,32 +29,28 @@ Item {
         anchors.fill: parent
         visible: originalImage.status == Image.Ready
 
-        Image {
-            id: originalImage
-            anchors.fill: parent
-            source: avatarUrl
-            mipmap: true
-            asynchronous: true
-            fillMode: Image.PreserveAspectCrop
-            visible: false
-            onStatusChanged: {
-                if (status == Image.Error) {
-                    console.log("Avatar url loading error:", avatarUrl)
+        layer.enabled: visible
+        layer.effect: OpacityMask {
+            maskSource: Item {
+                width: imageItem.width
+                height: imageItem.height
+                Rectangle {
+                    anchors.fill: parent
+                    radius: parent.height
                 }
             }
         }
 
-        Rectangle {
-            id: rectangleMask
+        Image {
+            id: originalImage
             anchors.fill: parent
-            radius: parent.height
-            visible: false
-        }
-
-        OpacityMask {
-            anchors.fill: originalImage
-            source: originalImage
-            maskSource: rectangleMask
+            asynchronous: true
+            fillMode: Image.PreserveAspectCrop
+            onStatusChanged: {
+                if (status == Image.Error) {
+                    console.log("Avatar url loading error:", source)
+                }
+            }
         }
     }
 }

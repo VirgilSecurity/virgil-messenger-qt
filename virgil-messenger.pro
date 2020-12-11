@@ -106,11 +106,11 @@ HEADERS += \
         include/VSQNetworkAnalyzer.h \
         include/Utils.h \
         include/android/VSQAndroid.h \
-        include/models/FileCloudUploader.h \
         include/ui/VSQUiHelper.h \
         include/KeyboardEventFilter.h \
         include/Validator.h \
         include/Core.h \
+        include/ContactAvatarLoader.h \
         # Controllers
         include/controllers/AttachmentsController.h \
         include/controllers/ChatsController.h \
@@ -222,6 +222,7 @@ SOURCES += \
         src/KeyboardEventFilter.cpp \
         src/Validator.cpp \
         src/Core.cpp \
+        src/ContactAvatarLoader.cpp \
         # Controllers
         src/controllers/AttachmentsController.cpp \
         src/controllers/ChatsController.cpp \

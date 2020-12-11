@@ -156,7 +156,7 @@ Item {
                     Text {
                         color: Theme.secondaryTextColor
                         font.pointSize: UiHelper.fixFontSz(12)
-                        text: model.lastSeenActivity
+                        text: model.details
                         width: parent.width
                         elide: Text.ElideRight
                         textFormat: Text.RichText

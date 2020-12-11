@@ -177,10 +177,26 @@ Contacts VSQAndroid::getContacts()
         contact.name = lines[i];
         contact.phoneNumber = lines[i + 1];
         contact.email = lines[i + 2];
-        contact.avatarUrl = Utils::localFileToUrl(lines[i + 3]);
+        const auto &platformIdStr = lines[i + 3];
+        contact.id = QLatin1String("AndroidContact(%1)").arg(platformIdStr);
+        contact.platformId = platformIdStr.toLongLong();
         contacts.push_back(contact);
     }
     return contacts;
+}
+
+QUrl VSQAndroid::getContactAvatarUrl(const Contact &contact)
+{
+    const QString idString = QString::number(contact.platformId.toLongLong());
+    const auto javaIdString = QAndroidJniObject::fromString(idString);
+    const auto javaFilePath = QAndroidJniObject::callStaticObjectMethod(
+        "org/virgil/utils/ContactUtils",
+        "getContactPhotoUrl",
+        "(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;",
+        QtAndroid::androidContext().object(),
+        javaIdString.object<jstring>()
+    );
+    return Utils::localFileToUrl(javaFilePath.toString());
 }
 
 #endif // VS_ANDROID
