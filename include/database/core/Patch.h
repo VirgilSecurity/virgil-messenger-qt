@@ -35,7 +35,7 @@
 #ifndef VM_PATCH_H
 #define VM_PATCH_H
 
-#include "VSQCommon.h"
+#include "Messages.h"
 
 namespace vm
 {

@@ -38,7 +38,7 @@
 #include <QObject>
 #include <QRegExpValidator>
 
-#include "VSQCommon.h"
+#include "Messages.h"
 
 namespace vm
 {

@@ -34,16 +34,16 @@
 
 #include "states/ApplicationStateManager.h"
 
-#include "VSQMessenger.h"
+#include "Messenger.h"
 #include "controllers/Controllers.h"
 #include "controllers/ChatsController.h"
 #include "controllers/UsersController.h"
 
-Q_LOGGING_CATEGORY(lcAppState, "appState");
+Q_LOGGING_CATEGORY(lcAppState, "app-state");
 
 using namespace vm;
 
-ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, Controllers *controllers, Models *models, Validator *validator, Settings *settings, QObject *parent)
+ApplicationStateManager::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Models *models, Validator *validator, Settings *settings, QObject *parent)
     : QStateMachine(parent)
     , m_messenger(messenger)
     , m_controllers(controllers)
@@ -54,7 +54,7 @@ ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, Contro
     , m_attachmentPreviewState(new AttachmentPreviewState(this))
     , m_backupKeyState(new BackupKeyState(m_messenger, this))
     , m_chatListState(new ChatListState(controllers->chats(), this))
-    , m_chatState(new ChatState(controllers, m_messenger->lastActivityManager(), this))
+    , m_chatState(new ChatState(controllers, m_messenger, this))
     , m_downloadKeyState(new DownloadKeyState(controllers->users(), this))
     , m_fileCloudState(new FileCloudState(models, this))
     , m_newChatState(new NewChatState(controllers->chats(), this))

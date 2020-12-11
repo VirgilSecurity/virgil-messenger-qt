@@ -35,16 +35,19 @@
 #ifndef VM_USERSCONTROLLER_H
 #define VM_USERSCONTROLLER_H
 
+#include "Messages.h"
+
 #include <QObject>
+#include <QPointer>
 
-#include "VSQCommon.h"
 
-class VSQMessenger;
+class Messenger;
 
 namespace vm
 {
 class Models;
 class UserDatabase;
+class Messenger;
 
 class UsersController : public QObject
 {
@@ -52,7 +55,7 @@ class UsersController : public QObject
     Q_PROPERTY(UserId userId MEMBER m_userId NOTIFY userIdChanged);
 
 public:
-    UsersController(VSQMessenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
+    UsersController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
     UserId userId() const;
 
@@ -92,8 +95,8 @@ private:
 
     void subscribeByChat(const Chat &chat);
 
-    VSQMessenger *m_messenger;
-    UserDatabase *m_userDatabase;
+    QPointer<Messenger> m_messenger;
+    QPointer<UserDatabase> m_userDatabase;
     Operation m_operation = Operation::SignIn;
     UserId m_userId;
 };

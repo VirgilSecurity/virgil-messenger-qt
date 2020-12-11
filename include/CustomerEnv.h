@@ -32,53 +32,23 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQCRASHREPORTER_H
-#define VSQCRASHREPORTER_H
+#ifndef VM_CUSTOMER_ENV_H
+#define VM_CUSTOMER_ENV_H
 
-#include <QObject>
+#include <QString>
 
-#include "VSQCommon.h"
+namespace vm {
 
-class QNetworkAccessManager;
-class QNetworkReply;
-
-class Settings;
-
-Q_DECLARE_LOGGING_CATEGORY(lcCrashReporter)
-
-class VSQCrashReporter : public QObject
-{
-    Q_OBJECT
-
+class CustomerEnv {
 public:
-    VSQCrashReporter(Settings *settings, QNetworkAccessManager *networkAccessManager, QObject *parent);
-    virtual ~VSQCrashReporter();
-
-    void checkAppCrash();
-    Q_INVOKABLE bool sendLogFiles();
-
-    void setVirgilUrl(QString VirgilUrl);
-    void setkVersion(QString AppVersion);
-    void setkOrganization(QString strkOrganization);
-    void setkApp(QString strkApp);
-
-signals:
-    void crashReportRequested();
-    void reportSent(const QString &msg);
-    void reportErrorOccurred(const QString &msg);
-
-private:
-    bool sendFileToBackendRequest(QByteArray fileData);
-    void endpointReply(QNetworkReply *reply);
-
-    Settings *m_settings;
-    QNetworkAccessManager *m_manager;
-    QString m_currentVirgilUrl;
-    QString m_version;
-    QString m_organization;
-    QString m_app;
-
-    static const QString s_endpointSendReport;
+    static QString messengerServiceUrl();
+    static QString xmppServiceUrl();
+    static QString contactDiscoveryServiceUrl();
+    static QString caBundlePath();
+    static QString version();
 };
 
-#endif // VSQCRASHREPORTER_H
+} // vm
+
+#endif // VM_CUSTOMER_ENV_H
+

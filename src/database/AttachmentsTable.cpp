@@ -65,7 +65,7 @@ bool AttachmentsTable::create()
 void AttachmentsTable::onCreateAttachment(const Attachment &attachment)
 {
     ScopedConnection connection(*database());
-    const auto extrasJson = Utils::extrasToJson(attachment.extras, attachment.type, false);
+    const auto extrasJson = MessageUtils::extrasToJson(attachment.extras, attachment.type, false);
     const DatabaseUtils::BindValues values {
         { ":id", attachment.id },
         { ":messageId", attachment.messageId },
@@ -160,7 +160,7 @@ void AttachmentsTable::onUpdateFingerprint(const Attachment::Id &attachmentId, c
 void AttachmentsTable::onUpdateExtras(const Attachment::Id &attachmentId, const Attachment::Type &type, const QVariant &extras)
 {
     ScopedConnection connection(*database());
-    const auto extrasJson = Utils::extrasToJson(QVariant::fromValue(extras), type, false);
+    const auto extrasJson = MessageUtils::extrasToJson(QVariant::fromValue(extras), type, false);
     const DatabaseUtils::BindValues values {
         { ":id", attachmentId },
         { ":extras",  extrasJson}

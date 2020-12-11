@@ -37,45 +37,55 @@
 #include <QFile>
 #include <QNetworkReply>
 
-#include "models/FileLoader.h"
+#include "FileLoader.h"
 #include "operations/MessageOperation.h"
 
 using namespace vm;
+using Self = UploadFileOperation;
 
-UploadFileOperation::UploadFileOperation(NetworkOperation *parent, const QString &filePath)
+Self::UploadFileOperation(NetworkOperation *parent, FileLoader *fileLoader, const QString &filePath)
     : LoadFileOperation(parent)
+    , m_fileLoader(fileLoader)
 {
     setName(QLatin1String("UploadFile"));
     setFilePath(filePath);
-    connect(fileLoader(), &FileLoader::slotUrlsReceived, this, &UploadFileOperation::onSlotUrlsReceived);
-    connect(fileLoader(), &FileLoader::slotUrlErrorOcurrend, this, &UploadFileOperation::onSlotUrlErrorOcurrend);
-    connect(this, &UploadFileOperation::finished, this, &UploadFileOperation::onFinished);
+    connect(m_fileLoader, &FileLoader::requestUploadSlotFailed, this, &Self::onRequestSlotUrlFailed);
+    connect(m_fileLoader, &FileLoader::uploadSlotReceived, this, &Self::onSlotUrlsReceived);
+    connect(m_fileLoader, &FileLoader::uploadSlotErrorOccurred, this, &Self::onSlotUrlErrorOcurrend);
+    connect(this, &Self::finished, this, &Self::onFinished);
 }
 
-void UploadFileOperation::run()
+void Self::run()
 {
     if (!openFileHandle(QFile::ReadOnly)) {
         return;
     }
-    m_slotId = fileLoader()->requestUploadUrl(filePath());
-    if (m_slotId.isEmpty()) {
-        qCWarning(lcOperation) << "Failed to request upload slot";
-        fail();
-    }
+
+    m_fileLoader->fireRequestUploadSlot(filePath());
 }
 
-void UploadFileOperation::connectReply(QNetworkReply *reply)
+void Self::connectReply(QNetworkReply *reply)
 {
     LoadFileOperation::connectReply(reply);
     connect(reply, &QNetworkReply::uploadProgress, this, &LoadFileOperation::setProgress);
 }
 
-void UploadFileOperation::startUpload()
+void Self::startUpload()
 {
-    fileLoader()->startUpload(m_putUrl, fileHandle(), std::bind(&UploadFileOperation::connectReply, this, args::_1));
+    m_fileLoader->fireStartUpload(m_putUrl, fileHandle(), std::bind(&Self::connectReply, this, args::_1));
 }
 
-void UploadFileOperation::onSlotUrlsReceived(const QString &slotId, const QUrl &putUrl, const QUrl &getUrl)
+
+void
+Self::onRequestSlotUrlFailed(const QString &filePath)
+{
+    Q_UNUSED(filePath);
+    qCWarning(lcOperation) << "Failed to request upload slot, file '" << filePath << "' would not be uploaded.";
+    fail();
+}
+
+
+void Self::onSlotUrlsReceived(const QString &slotId, const QUrl &putUrl, const QUrl &getUrl)
 {
     if (slotId == m_slotId) {
         qCDebug(lcOperation) << "Upload url received";
@@ -85,7 +95,7 @@ void UploadFileOperation::onSlotUrlsReceived(const QString &slotId, const QUrl &
     }
 }
 
-void UploadFileOperation::onSlotUrlErrorOcurrend(const QString &slotId, const QString &errorText)
+void Self::onSlotUrlErrorOcurrend(const QString &slotId, const QString &errorText)
 {
     if (status() == Status::Failed) {
         return;
@@ -95,7 +105,7 @@ void UploadFileOperation::onSlotUrlErrorOcurrend(const QString &slotId, const QS
     }
 }
 
-void UploadFileOperation::onFinished()
+void Self::onFinished()
 {
     qCDebug(lcOperation) << "File was uploaded";
     emit uploaded(m_getUrl);

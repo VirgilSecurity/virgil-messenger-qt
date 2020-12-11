@@ -93,7 +93,7 @@ VSQNetworkAnalyzer::onStart() {
 }
 
 bool
-VSQNetworkAnalyzer::isConnected() const {
+VSQNetworkAnalyzer::isConnected() const noexcept {
     return m_isConnected;
 }
 

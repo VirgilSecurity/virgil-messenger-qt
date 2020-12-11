@@ -36,7 +36,7 @@
 #define VM_CHATSMODEL_H
 
 #include "ListModel.h"
-#include "VSQCommon.h"
+#include "Messages.h"
 
 namespace vm
 {

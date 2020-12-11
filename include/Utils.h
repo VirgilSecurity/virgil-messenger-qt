@@ -38,7 +38,8 @@
 #include <QImage>
 #include <QImageReader>
 
-#include "VSQCommon.h"
+#include "Messages.h"
+#include "CommKitMessage.h"
 
 Q_DECLARE_LOGGING_CATEGORY(lcUtils)
 
@@ -70,45 +71,9 @@ namespace Utils
 
     QString printableLoadProgress(const DataSize &loaded, const DataSize &total);
 
-    // File functions
-
-    QString findUniqueFileName(const QString &fileName);
-
-    bool forceCreateDir(const QString &absolutePath);
-
-    Optional<QString> readTextFile(const QString &filePath);
-
-    bool fileExists(const QString &filePath);
-
-    void removeFile(const QString &filePath);
-
-    QString attachmentFileName(const QUrl &url, const QFileInfo &localInfo, bool isPicture);
-
-    QString attachmentDisplayImagePath(const Attachment &attachment);
-
-    bool openUrl(const QUrl &url);
-
-    // Url functions
-
-    bool isValidUrl(const QUrl &url);
-
-    QString urlToLocalFile(const QUrl &url);
-
-    QUrl localFileToUrl(const QString &filePath);
-
     // Debug
 
     void printThreadId(const QString &message);
-
-    // JSON functions
-
-    QString extrasToJson(const QVariant &extras, const Attachment::Type type, bool skipLocal);
-
-    QVariant extrasFromJson(const QString &json, const Attachment::Type type, bool skipLocal);
-
-    Message messageFromJson(const QByteArray &json);
-
-    QByteArray messageToJson(const Message &message);
 
     // Image functions
 

@@ -34,7 +34,7 @@
 
 #include "controllers/UsersController.h"
 
-#include "VSQMessenger.h"
+#include "Messenger.h"
 #include "database/UserDatabase.h"
 #include "models/Models.h"
 #include "models/ChatsModel.h"
@@ -42,19 +42,19 @@
 
 using namespace vm;
 
-UsersController::UsersController(VSQMessenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent)
+UsersController::UsersController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
     , m_messenger(messenger)
     , m_userDatabase(userDatabase)
 {
-    connect(messenger, &VSQMessenger::signedIn, this, std::bind(&UsersController::openDatabase, this, args::_1, Operation::SignIn));
-    connect(messenger, &VSQMessenger::signInErrorOccured, this, &UsersController::signInErrorOccured);
-    connect(messenger, &VSQMessenger::signedUp, this, std::bind(&UsersController::openDatabase, this, args::_1, Operation::SignUp));
-    connect(messenger, &VSQMessenger::signUpErrorOccured, this, &UsersController::signUpErrorOccured);
-    connect(messenger, &VSQMessenger::signedOut, this, std::bind(&UsersController::openDatabase, this, QString(), Operation::SignOut));
+    connect(messenger, &Messenger::signedIn, this, std::bind(&UsersController::openDatabase, this, args::_1, Operation::SignIn));
+    connect(messenger, &Messenger::signInErrorOccured, this, &UsersController::signInErrorOccured);
+    connect(messenger, &Messenger::signedUp, this, std::bind(&UsersController::openDatabase, this, args::_1, Operation::SignUp));
+    connect(messenger, &Messenger::signUpErrorOccured, this, &UsersController::signUpErrorOccured);
+    connect(messenger, &Messenger::signedOut, this, std::bind(&UsersController::openDatabase, this, QString(), Operation::SignOut));
 
-    connect(messenger, &VSQMessenger::keyDownloaded, this, std::bind(&UsersController::openDatabase, this, args::_1, Operation::DownloadKey));
-    connect(messenger, &VSQMessenger::downloadKeyFailed, this, &UsersController::downloadKeyFailed);
+    connect(messenger, &Messenger::keyDownloaded, this, std::bind(&UsersController::openDatabase, this, args::_1, Operation::DownloadKey));
+    connect(messenger, &Messenger::downloadKeyFailed, this, &UsersController::downloadKeyFailed);
 
     connect(userDatabase, &UserDatabase::userIdChanged, this, &UsersController::onDatabaseUserIdChanged);
 

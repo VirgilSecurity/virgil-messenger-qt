@@ -32,35 +32,21 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "operations/EncryptFileOperation.h"
+#ifndef VM_MESSAGE_SENDER_H
+#define VM_MESSAGE_SENDER_H
 
-#include "Core.h"
-#include "operations/MessageOperation.h"
+#include "Messages.h"
 
-using namespace vm;
+#include <QObject>
 
-EncryptFileOperation::EncryptFileOperation(QObject *parent, const QString &sourcePath, const QString &destPath, const Contact::Id &recipientId)
-    : Operation(QLatin1String("EncryptFile"), parent)
-    , m_sourcePath(sourcePath)
-    , m_destPath(destPath)
-    , m_recipientId(recipientId)
-{}
+namespace vm {
+class MessageSender : public QObject {
+    Q_OBJECT
+public:
+    explicit MessageSender(QObject *parent = nullptr) : QObject(parent) {}
 
-void EncryptFileOperation::run()
-{
-    const auto result = Core::encryptFile(m_sourcePath, m_destPath, m_recipientId);
-    switch (result) {
-    case Core::Result::Success:
-        emit encrypted(m_destPath);
-        emit bytesCalculated(QFile(m_destPath).size());
-        finish();
-        break;
-    case Core::Result::Fail:
-        fail();
-        break;
-    case Core::Result::Invalid:
-    default:
-        invalidate(tr("Failed to encrypt file"));
-        break;
-    }
-}
+    virtual bool sendMessage(const GlobalMessage& message) = 0;
+};
+} // namespace vm
+
+#endif // VM_MESSAGE_SENDER_H

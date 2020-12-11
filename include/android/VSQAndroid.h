@@ -39,7 +39,7 @@
 
 #include <QObject>
 
-#include "VSQCommon.h"
+#include "Messages.h"
 
 class VSQAndroid {
 public:

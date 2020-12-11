@@ -34,9 +34,9 @@
 
 #include "controllers/AttachmentsController.h"
 
-#include "Core.h"
 #include "Settings.h"
 #include "Utils.h"
+#include "FileUtils.h"
 #include "models/Models.h"
 #include "models/MessagesModel.h"
 #include "models/MessagesQueue.h"
@@ -60,7 +60,7 @@ void AttachmentsController::saveAs(const Message::Id &messageId, const QVariant 
     }
     else {
         qCDebug(lcController) << "Saving of attachment" << messageId << "as" << fileUrl;
-        const auto filePath = Utils::urlToLocalFile(fileUrl.toUrl());
+        const auto filePath = FileUtils::urlToLocalFile(fileUrl.toUrl());
         QFile::copy(message->attachment->localPath, filePath);
         emit notificationCreated(tr("Attachment was saved"), false);
     }
@@ -88,14 +88,14 @@ void AttachmentsController::open(const Message::Id &messageId)
     }
     else {
         const auto &a = *message->attachment;
-        const auto url = Utils::localFileToUrl(a.localPath);
+        const auto url = FileUtils::localFileToUrl(a.localPath);
         if (a.type == Attachment::Type::Picture) {
             qCDebug(lcController) << "Opening of preview for" << url.fileName();
             emit openPreviewRequested(url);
         }
         else {
             qCDebug(lcController) << "Opening of file:" << url.fileName();
-            Utils::openUrl(url);
+            FileUtils::openUrl(url);
         }
     }
 }
@@ -125,13 +125,13 @@ void AttachmentsController::setContactId(const Contact::Id &contactId)
 bool AttachmentsController::isAttachmentDownloaded(const GlobalMessage &message)
 {
     const auto &a = *message.attachment;
-    if (!Utils::fileExists(a.localPath)) {
+    if (!FileUtils::fileExists(a.localPath)) {
         return false;
     }
     if (a.fingerprint.isEmpty()) {
         return false;
     }
-    const auto fingerPrint = Core::calculateFileFingerprint(a.localPath);
+    const auto fingerPrint = FileUtils::calculateFingerprint(a.localPath);
     if (!fingerPrint) {
         return false;
     }
@@ -142,7 +142,7 @@ void AttachmentsController::downloadAttachment(const GlobalMessage &message)
 {
     qCDebug(lcController) << "Downloading of attachment" << message.id;
     const auto fileName = message.attachment->fileName;
-    const auto filePath = Utils::findUniqueFileName(m_settings->downloadsDir().filePath(fileName));
+    const auto filePath = FileUtils::findUniqueFileName(m_settings->downloadsDir().filePath(fileName));
     m_models->messagesQueue()->pushMessageDownload(message, filePath);
 }
 

@@ -38,6 +38,7 @@
 
 #include "VSQCustomer.h"
 #include "Utils.h"
+#include "FileUtils.h"
 
 static const QString kUsersGroup = "Users";
 static const QString kUsersList = "UsersList";
@@ -58,6 +59,9 @@ Settings::Settings(QObject *parent)
     : QSettings(Customer::OrganizationName, Customer::ApplicationName, parent)
     , m_sessionId(Utils::createUuid())
 {
+
+    qCDebug(lcSettings) << "Settings are written to: " << fileName();
+
     if (deviceId().isEmpty()) {
         createDeviceId();
         removeGroup(kUsersGroup);
@@ -79,7 +83,6 @@ Settings::~Settings()
 
 void Settings::print()
 {
-    qCDebug(lcSettings) << "Settings";
     qCDebug(lcSettings) << "Device id:" << deviceId();
     qCDebug(lcSettings) << "Database dir:" << databaseDir().absolutePath();
     qCDebug(lcSettings) << "Attachment cache dir:" << attachmentCacheDir().absolutePath();
@@ -169,7 +172,7 @@ void Settings::setRunFlag(bool run)
 QDir Settings::databaseDir() const
 {
     if (!m_databaseDir.exists()) {
-        Utils::forceCreateDir(m_databaseDir.absolutePath());
+        FileUtils::forceCreateDir(m_databaseDir.absolutePath());
     }
     return m_databaseDir;
 }
@@ -182,7 +185,7 @@ DataSize Settings::attachmentMaxFileSize() const
 QDir Settings::attachmentCacheDir() const
 {
     if(!m_attachmentCacheDir.exists()) {
-        Utils::forceCreateDir(m_attachmentCacheDir.absolutePath());
+        FileUtils::forceCreateDir(m_attachmentCacheDir.absolutePath());
     }
     return m_attachmentCacheDir;
 }
@@ -190,7 +193,7 @@ QDir Settings::attachmentCacheDir() const
 QDir Settings::thumbnailsDir() const
 {
     if(!m_thumbnaisDir.exists()) {
-        Utils::forceCreateDir(m_thumbnaisDir.absolutePath());
+        FileUtils::forceCreateDir(m_thumbnaisDir.absolutePath());
     }
     return m_thumbnaisDir;
 }
@@ -198,7 +201,7 @@ QDir Settings::thumbnailsDir() const
 QDir Settings::downloadsDir() const
 {
     if(!m_downloadsDir.exists()) {
-        Utils::forceCreateDir(m_downloadsDir.absolutePath());
+        FileUtils::forceCreateDir(m_downloadsDir.absolutePath());
     }
     return m_downloadsDir;
 }

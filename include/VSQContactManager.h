@@ -37,7 +37,7 @@
 
 #include <qxmpp/QXmppRosterManager.h>
 
-#include "VSQCommon.h"
+#include "Messages.h"
 
 Q_DECLARE_LOGGING_CATEGORY(lcContactManager);
 

@@ -34,20 +34,14 @@
 
 #include "operations/SendMessageOperation.h"
 
-#include <QXmppClient.h>
-#include <QXmppMessage.h>
-
-#include "Core.h"
-#include "Utils.h"
 #include "operations/MessageOperation.h"
 
 using namespace vm;
 
-SendMessageOperation::SendMessageOperation(MessageOperation *parent, QXmppClient *xmpp, const QString &xmppUrl)
+SendMessageOperation::SendMessageOperation(MessageOperation *parent, MessageSender *messageSender)
     : NetworkOperation(parent)
     , m_parent(parent)
-    , m_xmpp(xmpp)
-    , m_xmppUrl(xmppUrl)
+    , m_messageSender(messageSender)
 {
     setName(QLatin1String("SendMessage"));
 }
@@ -55,24 +49,11 @@ SendMessageOperation::SendMessageOperation(MessageOperation *parent, QXmppClient
 void SendMessageOperation::run()
 {
     const auto message = m_parent->message();
-    const auto encryptedStr = Core::encryptMessage(*message, message->recipientId);
-    if (!encryptedStr) {
-        qCDebug(lcOperation) << "Failed to encrypt message";
-        invalidate(tr("Failed to encrypt message"));
-    }
-    else {
-        const auto fromJID = Utils::createJid(message->senderId, m_xmppUrl);
-        const auto toJID = Utils::createJid(message->recipientId, m_xmppUrl);
-
-        QXmppMessage msg(fromJID, toJID, *encryptedStr);
-        msg.setReceiptRequested(true);
-        msg.setId(message->id);
-
-        if (m_xmpp->sendPacket(msg)) {
-            qCDebug(lcOperation) << "Message sent:" << message->id;
+    if (m_messageSender) {
+        const bool wasSent = m_messageSender->sendMessage(*message);
+        if (wasSent) {
             finish();
         } else {
-            qCDebug(lcOperation) << "Message NOT sent:" << message->id;
             fail();
         }
     }

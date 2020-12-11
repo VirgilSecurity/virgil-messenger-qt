@@ -35,14 +35,16 @@
 #ifndef VM_CHATSCONTROLLER_H
 #define VM_CHATSCONTROLLER_H
 
-#include <QObject>
+#include "Messages.h"
 
-#include "VSQCommon.h"
+#include <QObject>
+#include <QPointer>
 
 namespace vm
 {
 class Models;
 class UserDatabase;
+class Messenger;
 
 class ChatsController : public QObject
 {
@@ -52,7 +54,7 @@ class ChatsController : public QObject
     Q_PROPERTY(Chat::Id currentChatId READ currentChatId NOTIFY currentChatIdChanged)
 
 public:
-    ChatsController(Models *models, UserDatabase *userDatabase, QObject *parent);
+    ChatsController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
     Chat currentChat() const;
     Contact::Id currentContactId() const;
@@ -86,8 +88,9 @@ private:
     void onNewContactFound(const Contact::Id &contactId);
     void onChatsSet();
 
-    Models *m_models;
-    UserDatabase *m_userDatabase;
+    QPointer<Messenger> m_messenger;
+    QPointer<Models> m_models;
+    QPointer<UserDatabase> m_userDatabase;
     UserId m_userId;
     Chat m_currentChat;
 };

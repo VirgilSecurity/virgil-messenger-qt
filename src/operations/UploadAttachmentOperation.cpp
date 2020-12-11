@@ -36,6 +36,7 @@
 
 #include "Settings.h"
 #include "Utils.h"
+#include "FileUtils.h"
 #include "operations/CalculateAttachmentFingerprintOperation.h"
 #include "operations/ConvertToPngOperation.h"
 #include "operations/CreateAttachmentPreviewOperation.h"
@@ -122,7 +123,7 @@ bool UploadAttachmentOperation::populateChildren()
 
 void UploadAttachmentOperation::cleanup()
 {
-    Utils::removeFile(m_tempPngPath);
+    FileUtils::removeFile(m_tempPngPath);
 }
 
 void UploadAttachmentOperation::setTempPngPath(const QString &path)

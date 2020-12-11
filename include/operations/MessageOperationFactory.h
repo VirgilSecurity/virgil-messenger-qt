@@ -36,14 +36,16 @@
 #define VS_MESSAGEOPERATIONFACTORY_H
 
 #include <QDir>
+#include <QPointer>
 
-#include "VSQCommon.h"
+#include "Messages.h"
+#include "Messenger.h"
 
-class VSQMessenger;
 class Settings;
 
 namespace vm
 {
+class Messenger;
 class CalculateAttachmentFingerprintOperation;
 class ConvertToPngOperation;
 class CreateAttachmentPreviewOperation;
@@ -54,7 +56,6 @@ class DownloadFileOperation;
 class DownloadDecryptFileOperation;
 class EncryptFileOperation;
 class EncryptUploadFileOperation;
-class FileLoader;
 class MessageOperation;
 class NetworkOperation;
 class Operation;
@@ -66,7 +67,7 @@ class MessageOperationFactory : public QObject
     Q_OBJECT
 
 public:
-    explicit MessageOperationFactory(const Settings *settings, VSQMessenger *messenger, FileLoader *fileLoader, QObject *parent);
+    explicit MessageOperationFactory(const Settings *settings, Messenger *messenger, QObject *parent);
 
     void populateAll(MessageOperation *messageOp);
     void populateDownload(MessageOperation *messageOp, const QString &filePath);
@@ -87,8 +88,7 @@ private:
     void populateDownloadOperation(MessageOperation *messageOp);
 
     const Settings *m_settings;
-    VSQMessenger *m_messenger;
-    FileLoader *m_fileLoader;
+    QPointer<Messenger> m_messenger;
 };
 }
 

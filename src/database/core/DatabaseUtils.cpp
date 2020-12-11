@@ -37,7 +37,8 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
-#include "Utils.h"
+#include "Messages.h"
+#include "FileUtils.h"
 #include "database/core/Database.h"
 
 using namespace vm;
@@ -51,7 +52,7 @@ namespace
 
     Optional<QStringList> readQueryTexts(const QString &queryId)
     {
-        const auto text = Utils::readTextFile(queryPath(queryId));
+        const auto text = FileUtils::readTextFile(queryPath(queryId));
         QStringList queries;
         const auto texts = text->split(";");
         for (auto text : texts) {
@@ -88,7 +89,7 @@ bool DatabaseUtils::readExecQueries(Database *database, const QString &queryId)
 
 Optional<QSqlQuery> DatabaseUtils::readExecQuery(Database *database, const QString &queryId, const BindValues &values)
 {
-    const auto text = Utils::readTextFile(queryPath(queryId));
+    const auto text = FileUtils::readTextFile(queryPath(queryId));
     if (!text) {
         return NullOptional;
     }
@@ -123,7 +124,7 @@ Optional<Attachment> DatabaseUtils::readAttachment(const QSqlQuery &query)
     attachment.fingerprint = query.value("attachmentFingerprint").toString();
     attachment.url = query.value("attachmentUrl").toUrl();
     attachment.encryptedSize = query.value("attachmentEncryptedSize").value<DataSize>();
-    attachment.extras = Utils::extrasFromJson(query.value("attachmentExtras").toString(), attachment.type, false);
+    attachment.extras = MessageUtils::extrasFromJson(query.value("attachmentExtras").toString(), attachment.type, false);
     return attachment;
 }
 

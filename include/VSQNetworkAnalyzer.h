@@ -41,7 +41,7 @@
 #include <QMap>
 #include <QTimer>
 
-#include "VSQCommon.h"
+#include "Messages.h"
 
 Q_DECLARE_LOGGING_CATEGORY(lcNetwork);
 
@@ -59,7 +59,7 @@ public:
     VSQNetworkAnalyzer(QObject *parent = nullptr);
     virtual ~VSQNetworkAnalyzer();
 
-    bool isConnected() const;
+    bool isConnected() const noexcept;
 
 signals:
     void connectedChanged(bool connected);

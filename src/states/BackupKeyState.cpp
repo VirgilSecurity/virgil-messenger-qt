@@ -34,17 +34,17 @@
 
 #include "states/BackupKeyState.h"
 
-#include "VSQMessenger.h"
+#include "Messenger.h"
 
 using namespace vm;
 
-BackupKeyState::BackupKeyState(VSQMessenger *messenger, QState *parent)
+BackupKeyState::BackupKeyState(Messenger *messenger, QState *parent)
     : OperationState(parent)
     , m_messenger(messenger)
 {
-    connect(m_messenger, &VSQMessenger::keyBackuped, this, &BackupKeyState::operationFinished);
-    connect(m_messenger, &VSQMessenger::backupKeyFailed, this, &BackupKeyState::operationErrorOccurred);
-    connect(m_messenger, &VSQMessenger::keyBackuped, this, &BackupKeyState::keyBackuped);
+    connect(m_messenger, &Messenger::keyBackuped, this, &BackupKeyState::operationFinished);
+    connect(m_messenger, &Messenger::backupKeyFailed, this, &BackupKeyState::operationErrorOccurred);
+    connect(m_messenger, &Messenger::keyBackuped, this, &BackupKeyState::keyBackuped);
     connect(this, &BackupKeyState::backupKey, this, &BackupKeyState::processBackupKey);
 }
 

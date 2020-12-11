@@ -37,7 +37,7 @@
 
 #include <QObject>
 
-#include "VSQCommon.h"
+#include "Messages.h"
 
 namespace vm
 {

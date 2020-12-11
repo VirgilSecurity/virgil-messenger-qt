@@ -36,6 +36,9 @@
 #define VM_DOWNLOADFILEOPERATION_H
 
 #include "LoadFileOperation.h"
+#include "FileLoader.h"
+
+#include <QPointer>
 
 namespace vm
 {
@@ -44,7 +47,7 @@ class DownloadFileOperation : public LoadFileOperation
     Q_OBJECT
 
 public:
-    DownloadFileOperation(NetworkOperation *parent, const QUrl &url, const DataSize &bytesTotal, const QString &filePath);
+    DownloadFileOperation(NetworkOperation *parent, FileLoader *fileLoader, const QUrl &url, const DataSize &bytesTotal, const QString &filePath);
 
     void run() override;
 
@@ -57,6 +60,7 @@ private:
     void onFinished();
 
     QUrl m_url;
+    QPointer<FileLoader> m_fileLoader;
 };
 }
 

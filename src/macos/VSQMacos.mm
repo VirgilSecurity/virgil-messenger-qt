@@ -41,8 +41,6 @@
 
 #include "macos/VSQMacos.h"
 
-#include <virgil/iot/logger/logger.h>
-
 /******************************************************************************/
 VSQMacos::~VSQMacos() {
     _deleteTimer();

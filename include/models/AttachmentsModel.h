@@ -36,7 +36,7 @@
 #define VM_ATTACHMENTSMODEL_H
 
 #include "ListModel.h"
-#include "VSQCommon.h"
+#include "Messages.h"
 
 class Settings;
 

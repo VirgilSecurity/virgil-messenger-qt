@@ -34,13 +34,6 @@
 
 CONFIG += c++14
 
-CONFIG(debug, debug|release) {
-    BUILD_TYPE = debug
-}
-CONFIG(release, debug|release) {
-    BUILD_TYPE = release
-}
-
 win32 {
     QMAKE_CFLAGS += -mno-ms-bitfields
     QMAKE_CXXFLAGS += -mno-ms-bitfields
@@ -61,8 +54,7 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
     OS_NAME = ios
 }
 
-release:PREBUILT_SYSROOT = $$PREBUILT_PATH/$${OS_NAME}/release/installed/usr/local
-debug:PREBUILT_SYSROOT = $$PREBUILT_PATH/$${OS_NAME}/debug/installed/usr/local
+PREBUILT_SYSROOT = $$PREBUILT_PATH/$${OS_NAME}/release/installed/usr/local
 message("PREBUILT_SYSROOT : $${PREBUILT_SYSROOT}")
 
 
@@ -70,8 +62,7 @@ message("PREBUILT_SYSROOT : $${PREBUILT_SYSROOT}")
 #   Libraries
 #
 LIBS += -L$${PREBUILT_SYSROOT}/lib
-LIBS += -lvs-module-logger
-LIBS += -lvs-messenger-internal
+LIBS += -lvsc_comm_kit
 LIBS += -lvsc_keyknox_sdk
 LIBS += -lvsc_pythia_sdk
 LIBS += -lvsc_core_sdk

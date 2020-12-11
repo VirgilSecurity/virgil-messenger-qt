@@ -32,45 +32,48 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CORE_H
-#define VM_CORE_H
+#ifndef VM_CRASH_REPORTER_H
+#define VM_CRASH_REPORTER_H
 
-#include "VSQCommon.h"
+#include <QObject>
 
-Q_DECLARE_LOGGING_CATEGORY(lcCore)
+#include "CommKitMessenger.h"
 
-namespace vm
+class QNetworkAccessManager;
+class QNetworkReply;
+
+class Settings;
+
+Q_DECLARE_LOGGING_CATEGORY(lcCrashReporter)
+
+namespace vm {
+class CrashReporter : public QObject
 {
-class Core
-{
+    Q_OBJECT
+
 public:
-    // Contacts/users
+    CrashReporter(Settings *settings, vm::CommKitMessenger *commKitMessenger, QObject *parent = nullptr);
 
-    static bool findContact(const Contact::Id &contactId);
+    virtual ~CrashReporter() noexcept = default;
 
-    // Encryption/decryption
+    void checkAppCrash();
+    Q_INVOKABLE bool sendLogFiles();
 
-    enum class Result
-    {
-        Success,
-        Fail,
-        Invalid
-    };
+signals:
+    void crashReportRequested();
+    void reportSent(const QString &msg);
+    void reportErrorOccurred(const QString &msg);
 
-    static int bufferSizeForEncryption(const int rawSize);
+private:
+    bool sendFileToBackendRequest(QByteArray fileData);
+    void sendSendCrashReportReply(QNetworkReply *reply);
 
-    static int bufferSizeForDecryption(const int encryptedSize);
+    Settings *m_settings;
+    vm::CommKitMessenger *m_commKitMessenger;
+    QNetworkAccessManager *m_networkManager;
 
-    static Optional<Message> decryptMessage(const Contact::Id &sender, const QString &message);
-
-    static Optional<QString> encryptMessage(const Message &message, const Contact::Id &recipient);
-
-    static Result decryptFile(const QString &encPath, const QString &path, const Contact::Id &recipientId);
-
-    static Result encryptFile(const QString &path, const QString &encPath, const Contact::Id &recipientId);
-
-    static Optional<QString> calculateFileFingerprint(const QString &path);
+    static const QString s_endpointSendReport;
 };
-}
+} // namespace vm
 
-#endif // VM_CORE_H
+#endif // VM_CRASH_REPORTER_H

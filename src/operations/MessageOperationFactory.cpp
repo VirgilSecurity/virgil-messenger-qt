@@ -36,14 +36,12 @@
 
 #include "Settings.h"
 #include "Utils.h"
-#include "VSQMessenger.h"
+#include "Messenger.h"
 #include "operations/CalculateAttachmentFingerprintOperation.h"
 #include "operations/ConvertToPngOperation.h"
 #include "operations/CreateAttachmentPreviewOperation.h"
 #include "operations/CreateAttachmentThumbnailOperation.h"
 #include "operations/CreateThumbnailOperation.h"
-#include "operations/DecryptFileOperation.h"
-#include "operations/EncryptFileOperation.h"
 #include "operations/EncryptUploadFileOperation.h"
 #include "operations/DownloadFileOperation.h"
 #include "operations/DownloadDecryptFileOperation.h"
@@ -57,12 +55,11 @@ using namespace vm;
 
 using DownloadType = DownloadAttachmentOperation::Parameter::Type;
 
-MessageOperationFactory::MessageOperationFactory(const Settings *settings, VSQMessenger *messenger, FileLoader *fileLoader,
+MessageOperationFactory::MessageOperationFactory(const Settings *settings, Messenger *messenger,
                                                  QObject *parent)
     : QObject(parent)
     , m_settings(settings)
     , m_messenger(messenger)
-    , m_fileLoader(fileLoader)
 {}
 
 void MessageOperationFactory::populateAll(MessageOperation *messageOp)
@@ -88,14 +85,14 @@ void MessageOperationFactory::populatePreload(MessageOperation *messageOp)
 
 DownloadDecryptFileOperation *MessageOperationFactory::populateDownloadDecrypt(NetworkOperation *parent, const QUrl &url, const DataSize &bytesTotal, const QString &destPath, const Contact::Id &senderId)
 {
-    auto op = new DownloadDecryptFileOperation(parent, m_settings, url, bytesTotal, destPath, senderId);
+    auto op = new DownloadDecryptFileOperation(parent, m_settings, m_messenger->fileLoader(), url, bytesTotal, destPath, senderId);
     parent->appendChild(op);
     return op;
 }
 
 EncryptUploadFileOperation *MessageOperationFactory::populateEncryptUpload(NetworkOperation *parent, const QString &sourcePath, const Contact::Id &recipientId)
 {
-    auto op = new EncryptUploadFileOperation(parent, m_settings, sourcePath, recipientId);
+    auto op = new EncryptUploadFileOperation(parent, m_settings, m_messenger->fileLoader(), sourcePath, recipientId);
     parent->appendChild(op);
     return op;
 }
@@ -152,6 +149,6 @@ void MessageOperationFactory::populateMessageOperation(MessageOperation *message
 {
     const auto &message = messageOp->message();
     if (message->senderId == message->userId && (message->status == Message::Status::Created || message->status == Message::Status::Failed)) {
-        messageOp->appendChild(new SendMessageOperation(messageOp, m_messenger->xmpp(), m_messenger->xmppURL()));
+        messageOp->appendChild(new SendMessageOperation(messageOp, m_messenger));
     }
 }

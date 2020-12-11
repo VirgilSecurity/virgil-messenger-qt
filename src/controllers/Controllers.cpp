@@ -35,7 +35,7 @@
 #include "controllers/Controllers.h"
 
 #include "Settings.h"
-#include "VSQMessenger.h"
+#include "Messenger.h"
 #include "controllers/AttachmentsController.h"
 #include "controllers/ChatsController.h"
 #include "controllers/FileCloudController.h"
@@ -45,12 +45,12 @@
 
 using namespace vm;
 
-Controllers::Controllers(VSQMessenger *messenger, Settings *settings,
+Controllers::Controllers(Messenger *messenger, Settings *settings,
                          Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
     , m_attachments(new AttachmentsController(settings, models, this))
     , m_users(new UsersController(messenger, models, userDatabase, this))
-    , m_chats(new ChatsController(models, userDatabase, this))
+    , m_chats(new ChatsController(messenger, models, userDatabase, this))
     , m_messages(new MessagesController(messenger, models, userDatabase, this))
     , m_fileCloud(new FileCloudController(settings, models, this))
 {

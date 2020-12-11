@@ -32,32 +32,56 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_DECRYPTFILEOPERATION_H
-#define VM_DECRYPTFILEOPERATION_H
+#ifndef VS_FILELOADER_H
+#define VS_FILELOADER_H
 
-#include "Operation.h"
+#include "CommKitMessenger.h"
+
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QLoggingCategory>
+
+
+Q_DECLARE_LOGGING_CATEGORY(lcFileLoader);
+
 
 namespace vm
 {
-class MessageOperation;
 
-class DecryptFileOperation : public Operation
+class FileLoader : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit DecryptFileOperation(QObject *parent, const QString &sourcePath, const QString &destPath, const Contact::Id &senderId);
+    using ConnectionSetup = std::function<void (QNetworkReply *)>;
 
-    void run() override;
+    FileLoader(CommKitMessenger *client, QObject *parent);
+
+    bool isServiceFound() const;
 
 signals:
-    void decrypted(const QString &filePath);
+    void uploadServiceFound(const bool found);
+    void uploadSlotReceived(const QString &slotId, const QUrl &putUrl, const QUrl &getUrl);
+    void uploadSlotErrorOccurred(const QString &slotId, const QString &errorText);
+    void requestUploadSlotFailed(const QString &filePath);
+    void ready();
+
+    void fireStartDownload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup);
+    void fireStartUpload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup);
+    void fireRequestUploadSlot(const QString &filePath);
+
 
 private:
-    QString m_sourcePath;
-    const QString m_destPath;
-    Contact::Id m_senderId;
+    void onServiceFound(bool found);
+    void onStartDownload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup);
+    void onStartUpload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup);
+    void onRequestUploadSlot(const QString &filePath);
+
+    QPointer<CommKitMessenger> m_commKitMessenger;
+    QPointer<QNetworkAccessManager> m_networkAccessManager;
 };
 }
 
-#endif // VM_DECRYPTFILEOPERATION_H
+Q_DECLARE_METATYPE(vm::FileLoader::ConnectionSetup);
+
+#endif // VS_FILELOADER_H

@@ -36,15 +36,16 @@
 
 #include "Settings.h"
 #include "Utils.h"
+#include "FileUtils.h"
 #include "operations/DownloadFileOperation.h"
-#include "operations/DecryptFileOperation.h"
 
 using namespace vm;
 
-DownloadDecryptFileOperation::DownloadDecryptFileOperation(NetworkOperation *parent, const Settings *settings,
+DownloadDecryptFileOperation::DownloadDecryptFileOperation(NetworkOperation *parent, const Settings *settings, FileLoader *fileLoader,
                                                            const QUrl &url, const DataSize &bytesTotal, const QString &filePath, const Contact::Id &senderId)
     : NetworkOperation(parent)
     , m_settings(settings)
+    , m_fileLoader(fileLoader)
     , m_url(url)
     , m_bytesTotal(bytesTotal)
     , m_filePath(filePath)
@@ -57,19 +58,20 @@ bool DownloadDecryptFileOperation::populateChildren()
 {
     m_tempPath = m_settings->attachmentCacheDir().filePath(Utils::createUuid());
 
-    auto downOp = new DownloadFileOperation(this, m_url, m_bytesTotal, m_tempPath);
+    auto downOp = new DownloadFileOperation(this, m_fileLoader, m_url, m_bytesTotal, m_filePath);
     connect(downOp, &DownloadFileOperation::progressChanged, this, &DownloadDecryptFileOperation::progressChanged);
     appendChild(downOp);
 
-    auto decryptOp = new DecryptFileOperation(this, m_tempPath, m_filePath, m_senderId);
-    connect(decryptOp, &DecryptFileOperation::decrypted, this, &DownloadDecryptFileOperation::decrypted);
-    appendChild(decryptOp);
+    // FIXME:  Add decryption.
+//    auto decryptOp = new DecryptFileOperation(this, m_tempPath, m_filePath, m_senderId);
+//    connect(decryptOp, &DecryptFileOperation::decrypted, this, &DownloadDecryptFileOperation::decrypted);
+//    appendChild(decryptOp);
 
     return hasChildren();
 }
 
 void DownloadDecryptFileOperation::cleanup()
 {
-    Utils::removeFile(m_tempPath);
+    FileUtils::removeFile(m_tempPath);
     Operation::cleanup();
 }

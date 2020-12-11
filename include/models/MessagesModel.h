@@ -36,7 +36,7 @@
 #define VM_MESSAGESMODEL_H
 
 #include "ListModel.h"
-#include "VSQCommon.h"
+#include "Messages.h"
 
 namespace vm
 {

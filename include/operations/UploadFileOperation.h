@@ -36,6 +36,9 @@
 #define VM_UPLOADFILEOPERATION_H
 
 #include "LoadFileOperation.h"
+#include "FileLoader.h"
+
+#include <QPointer>
 
 namespace vm
 {
@@ -44,7 +47,7 @@ class UploadFileOperation : public LoadFileOperation
     Q_OBJECT
 
 public:
-    UploadFileOperation(NetworkOperation *parent, const QString &filePath);
+    UploadFileOperation(NetworkOperation *parent, FileLoader *fileLoader, const QString &filePath);
 
     void run() override;
 
@@ -57,6 +60,7 @@ private:
     void tryAutoDeleteFile();
     void startUpload();
 
+    void onRequestSlotUrlFailed(const QString &filePath);
     void onSlotUrlsReceived(const QString &slotId, const QUrl &putUrl, const QUrl &getUrl);
     void onSlotUrlErrorOcurrend(const QString &slotId, const QString &errorText);
     void onFinished();
@@ -64,6 +68,8 @@ private:
     QString m_slotId;
     QUrl m_putUrl;
     QUrl m_getUrl;
+    QPointer<FileLoader> m_fileLoader;
+
 };
 }
 

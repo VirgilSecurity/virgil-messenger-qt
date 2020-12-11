@@ -36,8 +36,10 @@
 #define VM_SENDMESSAGEOPERATION_H
 
 #include "NetworkOperation.h"
+#include "MessageSender.h"
 
-class QXmppClient;
+#include "QPointer"
+
 
 namespace vm
 {
@@ -48,14 +50,13 @@ class SendMessageOperation : public NetworkOperation
     Q_OBJECT
 
 public:
-    SendMessageOperation(MessageOperation *parent, QXmppClient *xmpp, const QString &xmppUrl);
+    SendMessageOperation(MessageOperation *parent, MessageSender *messageSender);
 
     void run() override;
 
 private:
     MessageOperation *m_parent;
-    QXmppClient *m_xmpp;
-    const QString m_xmppUrl;
+    QPointer<MessageSender> m_messageSender;
 };
 }
 

@@ -37,6 +37,7 @@
 #include <QNetworkReply>
 
 #include "Utils.h"
+#include "FileUtils.h"
 #include "operations/MessageOperation.h"
 
 using namespace vm;
@@ -73,7 +74,7 @@ bool LoadFileOperation::openFileHandle(const QIODevice::OpenMode &mode)
         return false;
     }
 
-    if ((mode == QFile::ReadOnly) && !Utils::fileExists(m_filePath)) {
+    if ((mode == QFile::ReadOnly) && !FileUtils::fileExists(m_filePath)) {
         qCWarning(lcOperation) << "File doesn't exist" << m_filePath;
         invalidate(tr("File doesn't exist"));
         return false;

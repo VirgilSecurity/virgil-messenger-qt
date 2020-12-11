@@ -35,24 +35,25 @@
 #ifndef VM_MODELS_H
 #define VM_MODELS_H
 
+#include "AccountSelectionModel.h"
+#include "AttachmentsModel.h"
+#include "ChatsModel.h"
+#include "FileCloudModel.h"
+#include "MessagesModel.h"
+#include "MessagesQueue.h"
+#include "FileLoader.h"
+#include "UserDatabase.h"
+#include "Messenger.h"
+
 #include <QObject>
+#include <QPointer>
+#include <QThread>
 
-class QNetworkAccessManager;
-class QThread;
 
-class VSQMessenger;
 class Settings;
 
 namespace vm
 {
-class AccountSelectionModel;
-class AttachmentsModel;
-class ChatsModel;
-class FileCloudModel;
-class MessagesModel;
-class MessagesQueue;
-class FileLoader;
-class UserDatabase;
 
 class Models : public QObject
 {
@@ -64,7 +65,7 @@ class Models : public QObject
     Q_PROPERTY(MessagesModel *messages READ messages CONSTANT)
 
 public:
-    Models(VSQMessenger *messenger, Settings *settings, UserDatabase *userDatabase, QNetworkAccessManager *networkAccessManager, QObject *parent);
+    Models(Messenger *messenger, Settings *settings, UserDatabase *userDatabase, QObject *parent);
     ~Models() override;
 
     const AccountSelectionModel *accountSelection() const;
@@ -86,14 +87,14 @@ signals:
     void notificationCreated(const QString &notification, const bool error);
 
 private:
-    AccountSelectionModel *m_accountSelection;
-    AttachmentsModel *m_attachments;
-    ChatsModel *m_chats;
-    MessagesModel *m_messages;
-    FileCloudModel *m_fileCloud;
-    FileLoader *m_fileLoader;
-    MessagesQueue *m_messagesQueue;
-    QThread *m_queueThread;
+    QPointer<AccountSelectionModel> m_accountSelection;
+    QPointer<AttachmentsModel> m_attachments;
+    QPointer<ChatsModel> m_chats;
+    QPointer<MessagesModel> m_messages;
+    QPointer<FileCloudModel> m_fileCloud;
+    QPointer<FileLoader> m_fileLoader;
+    QPointer<MessagesQueue> m_messagesQueue;
+    QPointer<QThread> m_queueThread;
 };
 }
 

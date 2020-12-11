@@ -44,11 +44,10 @@
 
 using namespace vm;
 
-VSQLastActivityManager::VSQLastActivityManager(Settings *settings, QObject *parent)
+VSQLastActivityManager::VSQLastActivityManager(Settings *settings)
     : QXmppClientExtension()
     , m_settings(settings)
 {
-    setParent(parent);
     connect(this, &VSQLastActivityManager::lastActivityMissing, this, &VSQLastActivityManager::lastActivityTextChanged);
     connect(this, &VSQLastActivityManager::lastActivityDetected, this, [this](const Seconds &seconds) {
         emit lastActivityTextChanged(vm::Utils::formattedLastSeenActivity(seconds, m_settings->nowInterval()));

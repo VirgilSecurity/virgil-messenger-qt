@@ -32,31 +32,22 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_ENCRYPTFILEOPERATION_H
-#define VM_ENCRYPTFILEOPERATION_H
+#include "CommKitBridge.h"
 
-#include "Operation.h"
 
-namespace vm
-{
-class EncryptFileOperation : public Operation
-{
-    Q_OBJECT
-
-public:
-    explicit EncryptFileOperation(QObject *parent, const QString &sourcePath, const QString &destPath, const Contact::Id &recipientId);
-
-    void run() override;
-
-signals:
-    void encrypted(const QString &filePath);
-    void bytesCalculated(const DataSize &bytes);
-
-private:
-    QString m_sourcePath;
-    const QString m_destPath;
-    Contact::Id m_recipientId;
-};
+vsc_str_t vsc_str_from(const std::string& str) {
+    return vsc_str(str.c_str(), str.size());
 }
 
-#endif // VM_ENCRYPTFILEOPERATION_H
+QString vsc_str_to_qstring(vsc_str_t str) {
+    return QString::fromStdString({str.chars, str.len});
+}
+
+vsc_data_t vsc_data_from(const QByteArray& data) {
+    return vsc_data((const byte *)data.data(), data.size());
+}
+
+QByteArray vsc_data_to_qbytearray(vsc_data_t data) {
+    return QByteArray((const char *)data.bytes, data.len);
+}
+

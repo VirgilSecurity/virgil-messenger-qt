@@ -46,7 +46,7 @@ class VSQLastActivityManager : public QXmppClientExtension
     Q_OBJECT
 
 public:
-    VSQLastActivityManager(Settings *settings, QObject *parent);
+    VSQLastActivityManager(Settings *settings);
     ~VSQLastActivityManager() override;
 
     void setCurrentJid(const QString &jid);

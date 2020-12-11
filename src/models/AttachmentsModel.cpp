@@ -38,6 +38,7 @@
 
 #include "Settings.h"
 #include "Utils.h"
+#include "FileUtils.h"
 #include "android/VSQAndroid.h"
 
 using namespace vm;
@@ -53,10 +54,10 @@ AttachmentsModel::~AttachmentsModel()
 Optional<Attachment> AttachmentsModel::createAttachment(const QUrl &url, const Attachment::Type type)
 {
     // Check file
-    if (!Utils::isValidUrl(url)) {
+    if (!FileUtils::isValidUrl(url)) {
         return NullOptional;
     }
-    const auto localFilePath = Utils::urlToLocalFile(url);
+    const auto localFilePath = FileUtils::urlToLocalFile(url);
     qCDebug(lcModel) << "Processing of attachment:" << localFilePath;
     QFileInfo localInfo(localFilePath);
     if (!localInfo.exists()) {
@@ -87,7 +88,7 @@ Optional<Attachment> AttachmentsModel::createAttachment(const QUrl &url, const A
     attachment.status = Attachment::Status::Loading;
     attachment.size = fileSize;
 
-    attachment.fileName = Utils::attachmentFileName(url, localInfo, type == Attachment::Type::Picture);
+    attachment.fileName = FileUtils::attachmentFileName(url, localInfo, type == Attachment::Type::Picture);
     // Set png suffix
     if (type == Attachment::Type::Picture) {
         attachment.fileName = attachment.fileName.section('.', 0, 0) + QLatin1String(".png");

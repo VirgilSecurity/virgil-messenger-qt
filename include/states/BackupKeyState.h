@@ -37,17 +37,16 @@
 
 #include "OperationState.h"
 
-class VSQMessenger;
-
 namespace vm
 {
+class Messenger;
 class BackupKeyState : public OperationState
 {
     Q_OBJECT
     Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
 
 public:
-    BackupKeyState(VSQMessenger *messenger, QState *parent);
+    BackupKeyState(Messenger *messenger, QState *parent);
 
     QString userId() const;
     void setUserId(const QString &userId);
@@ -60,7 +59,7 @@ signals:
 private:
     void processBackupKey(const QString &password, const QString &confirmedPassword);
 
-    VSQMessenger *m_messenger;
+    Messenger *m_messenger;
     QString m_userId;
 };
 }

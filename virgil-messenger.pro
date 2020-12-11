@@ -34,7 +34,7 @@
 
 QT += core network qml quick sql xml concurrent
 
-CONFIG += c++14
+CONFIG += c++14 console
 
 #
 #   Set version
@@ -82,6 +82,9 @@ message("QXMPP location: $${QXMPP_BUILD_PATH}")
 DEFINES += QT_DEPRECATED_WARNINGS \
         INFO_CLIENT=1 \
         CFG_CLIENT=1 \
+        VS_MSGR_ENV_DEV=1 \
+        VS_MSGR_ENV_STG=0 \
+        VS_MSGR_ENV_PROD=0 \
         VERSION="$$VERSION"
 
 include(customers/customers.pri)
@@ -95,13 +98,13 @@ VS_PLATFORMS_PATH=$$absolute_path(generated/platforms)
 HEADERS += \
         include/VSQApplication.h \
         include/VSQClipboardProxy.h \
-        include/VSQCommon.h \
         include/VSQContactManager.h \
-        include/VSQCrashReporter.h \
+        include/CrashReporter.h \
+        include/FileLoader.h \
         include/VSQDiscoveryManager.h \
         include/VSQLastActivityIq.h \
         include/VSQLastActivityManager.h \
-        include/VSQMessenger.h \
+        include/Messenger.h \
         include/Settings.h \
         include/VSQNetworkAnalyzer.h \
         include/Utils.h \
@@ -109,7 +112,16 @@ HEADERS += \
         include/ui/VSQUiHelper.h \
         include/KeyboardEventFilter.h \
         include/Validator.h \
-        include/Core.h \
+        include/CustomerEnv.h \
+        # Messages
+        include/messages/Messages.h \
+        include/messages/MessageSender.h \
+        # CommKit Wrappers
+        include/comm-kit/CommKitBridge.h \
+        include/comm-kit/CommKitUser.h \
+        include/comm-kit/CommKitUserImpl.h \
+        include/comm-kit/CommKitMessage.h \
+        include/comm-kit/CommKitMessenger.h \
         # Controllers
         include/controllers/AttachmentsController.h \
         include/controllers/ChatsController.h \
@@ -120,6 +132,7 @@ HEADERS += \
         # Helpers
         include/helpers/VSQSingleton.h \
         include/helpers/FutureWorker.h \
+        include/helpers/FileUtils.h \
         # Applications states
         include/states/AccountSelectionState.h \
         include/states/AccountSettingsState.h \
@@ -162,7 +175,6 @@ HEADERS += \
         include/models/AttachmentsModel.h \
         include/models/ChatsModel.h \
         include/models/FileCloudModel.h \
-        include/models/FileLoader.h \
         include/models/ListModel.h \
         include/models/MessagesModel.h \
         include/models/MessagesQueue.h \
@@ -174,11 +186,9 @@ HEADERS += \
         include/operations/CreateAttachmentPreviewOperation.h \
         include/operations/CreateAttachmentThumbnailOperation.h \
         include/operations/CreateThumbnailOperation.h \
-        include/operations/DecryptFileOperation.h \
         include/operations/DownloadAttachmentOperation.h \
         include/operations/DownloadFileOperation.h \
         include/operations/DownloadDecryptFileOperation.h \
-        include/operations/EncryptFileOperation.h \
         include/operations/EncryptUploadFileOperation.h \
         include/operations/LoadAttachmentOperation.h \
         include/operations/LoadFileOperation.h \
@@ -200,11 +210,11 @@ HEADERS += \
 
 SOURCES += \
         src/VSQClipboardProxy.cpp \
-        src/VSQCommon.cpp \
         src/VSQContactManager.cpp \
-        src/VSQCrashReporter.cpp \
+        src/CrashReporter.cpp \
+        src/FileLoader.cpp \
         src/VSQDiscoveryManager.cpp \
-        src/VSQMessenger.cpp \
+        src/Messenger.cpp \
         src/VSQLastActivityIq.cpp \
         src/VSQLastActivityManager.cpp \
         src/Settings.cpp \
@@ -216,7 +226,13 @@ SOURCES += \
         src/ui/VSQUiHelper.cpp \
         src/KeyboardEventFilter.cpp \
         src/Validator.cpp \
-        src/Core.cpp \
+        src/CustomerEnv.cpp \
+        # Messages
+        src/messages/Messages.cpp \
+        # CommKit Wrappers
+        src/comm-kit/CommKitBridge.cpp \
+        src/comm-kit/CommKitUser.cpp \
+        src/comm-kit/CommKitMessenger.cpp \
         # Controllers
         src/controllers/AttachmentsController.cpp \
         src/controllers/ChatsController.cpp \
@@ -224,6 +240,8 @@ SOURCES += \
         src/controllers/FileCloudController.cpp \
         src/controllers/MessagesController.cpp \
         src/controllers/UsersController.cpp \
+        # Helpers
+        src/helpers/FileUtils.cpp \
         # Applications states
         src/states/AccountSelectionState.cpp \
         src/states/AccountSettingsState.cpp \
@@ -255,7 +273,6 @@ SOURCES += \
         src/database/UserDatabase.cpp \
         src/database/UserDatabaseMigration.cpp \
         # Logging
-        src/hal.cpp \
         src/logging/VSQLogging.cpp \
         src/logging/VSQLogWorker.cpp \
         # Models
@@ -263,7 +280,6 @@ SOURCES += \
         src/models/AttachmentsModel.cpp \
         src/models/ChatsModel.cpp \
         src/models/FileCloudModel.cpp \
-        src/models/FileLoader.cpp \
         src/models/ListModel.cpp \
         src/models/MessagesModel.cpp \
         src/models/MessagesQueue.cpp \
@@ -275,11 +291,9 @@ SOURCES += \
         src/operations/CreateAttachmentPreviewOperation.cpp \
         src/operations/CreateAttachmentThumbnailOperation.cpp \
         src/operations/CreateThumbnailOperation.cpp \
-        src/operations/DecryptFileOperation.cpp \
         src/operations/DownloadAttachmentOperation.cpp \
         src/operations/DownloadFileOperation.cpp \
         src/operations/DownloadDecryptFileOperation.cpp \
-        src/operations/EncryptFileOperation.cpp \
         src/operations/EncryptUploadFileOperation.cpp \
         src/operations/LoadAttachmentOperation.cpp \
         src/operations/LoadFileOperation.cpp \
@@ -307,6 +321,16 @@ RESOURCES += \
 INCLUDEPATH += \
     include \
     include/notifications \
+    include/messages \
+    include/helpers \
+    include/database \
+    include/models \
+    include/ui \
+    include/logging \
+    include/controllers \
+    include/states \
+    include/operations \
+    include/comm-kit \
     $${QXMPP_BUILD_PATH}/include \
     $${QXMPP_BUILD_PATH}/include/qxmpp \
     generated/include
@@ -329,35 +353,6 @@ macx: {
     sparkle.files = $$SPARKLE_LOCATION/Sparkle.framework
     QMAKE_BUNDLE_DATA += sparkle
 }
-
-#
-#   Qt Web Driver
-#
-isEmpty(WEBDRIVER) {
-    message("Web Driver is disabled")
-} else {
-    message("Web Driver is enabled")
-    QT += widgets
-    DEFINES += WD_ENABLE_WEB_VIEW=0 \
-           WD_ENABLE_PLAYER=0 \
-           QT_NO_SAMPLES=1 \
-           VSQ_WEBDRIVER_DEBUG=1
-    release:QTWEBDRIVER_LOCATION=$$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/include/qtwebdriver
-    debug:QTWEBDRIVER_LOCATION=$$PWD/ext/prebuilt/$${OS_NAME}/debug/installed/usr/local/include/qtwebdriver
-    HEADERS += $$QTWEBDRIVER_LOCATION/src/Test/Headers.h
-    INCLUDEPATH +=  $$QTWEBDRIVER_LOCATION $$QTWEBDRIVER_LOCATION/src
-    linux:!android: {
-        LIBS += -ldl -Wl,--start-group -lchromium_base -lWebDriver_core -lWebDriver_extension_qt_base -lWebDriver_extension_qt_quick -Wl,--end-group
-    }
-    macx: {
-        LIBS += -lchromium_base -lWebDriver_core -lWebDriver_extension_qt_base -lWebDriver_extension_qt_quick
-        LIBS += -framework Foundation
-        LIBS += -framework CoreFoundation
-        LIBS += -framework ApplicationServices
-        LIBS += -framework Security
-    }
-}
-
 
 #
 #   Libraries
@@ -503,21 +498,9 @@ android: {
         src/notifications/android/FirebaseListener.cpp
 
 
-    release:LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
-    debug:LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
+    LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
 
-#
-#   Messenger Internal
-#
-    LIBS_DIR_PREFIX = $$PWD/ext/prebuilt
-    release:LIBS_DIR_SUFFIX = release/installed/usr/local/lib
-    debug:LIBS_DIR_SUFFIX = debug/installed/usr/local/lib
     FIREBASE_LIBS_DIR = $$PWD/ext/prebuilt/firebase_cpp_sdk/libs/android/$$ANDROID_TARGET_ARCH/c++
-
-#
-#   ~ Messenger Internal
-#
-
 
     LIBS += $${FIREBASE_LIBS_DIR}/libfirebase_messaging.a \
         $${FIREBASE_LIBS_DIR}/libfirebase_app.a \

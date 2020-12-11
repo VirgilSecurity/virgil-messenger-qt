@@ -36,9 +36,10 @@
 
 #include "Settings.h"
 #include "Utils.h"
-#include "operations/DownloadDecryptFileOperation.h"
+#include "FileUtils.h"
 #include "operations/MessageOperation.h"
 #include "operations/MessageOperationFactory.h"
+#include "operations/DownloadDecryptFileOperation.h"
 
 using namespace vm;
 
@@ -61,12 +62,12 @@ bool DownloadAttachmentOperation::populateChildren()
         if (attachment->type == Attachment::Type::Picture) {
             const auto extras = attachment->extras.value<PictureExtras>();
             // Create preview from original file
-            if (!Utils::fileExists(extras.previewPath) && Utils::fileExists(attachment->localPath)) {
+            if (!FileUtils::fileExists(extras.previewPath) && FileUtils::fileExists(attachment->localPath)) {
                 const auto filePath = m_settings->makeThumbnailPath(attachment->id, true);
                 factory->populateCreateAttachmentPreview(m_parent, this, attachment->localPath, filePath);
             }
             // Otherwise download/decrypt thumbnail
-            else if (!Utils::fileExists(extras.thumbnailPath)) {
+            else if (!FileUtils::fileExists(extras.thumbnailPath)) {
                 const auto filePath = m_settings->makeThumbnailPath(attachment->id, false);
                 auto op = factory->populateDownloadDecrypt(this, extras.thumbnailUrl, extras.encryptedThumbnailSize, filePath, message->senderId);
                 op->setName(op->name() + QLatin1String("Thumbnail"));
@@ -79,7 +80,7 @@ bool DownloadAttachmentOperation::populateChildren()
     else {
         // Download/decrypt file
         auto downloadPath = m_parameter.filePath;
-        if (!Utils::fileExists(downloadPath)) {
+        if (!FileUtils::fileExists(downloadPath)) {
             qCDebug(lcOperation) << "Download attachment to:" << downloadPath;
             auto op = factory->populateDownloadDecrypt(this, attachment->url, attachment->encryptedSize, downloadPath, message->senderId);
             connect(op, &Operation::started, this, std::bind(&LoadAttachmentOperation::startLoadOperation, this, attachment->encryptedSize));
@@ -89,7 +90,7 @@ bool DownloadAttachmentOperation::populateChildren()
         // Create picture preview
         if (attachment->type == Attachment::Type::Picture) {
             const auto extras = attachment->extras.value<PictureExtras>();
-            if (!Utils::fileExists(extras.previewPath)) {
+            if (!FileUtils::fileExists(extras.previewPath)) {
                 const auto filePath = m_settings->makeThumbnailPath(attachment->id, true);
                 factory->populateCreateAttachmentPreview(m_parent, this, downloadPath, filePath);
             }

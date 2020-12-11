@@ -32,11 +32,12 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_COMMON_H
-#define VM_COMMON_H
+#ifndef VM_MESSAGES_H
+#define VM_MESSAGES_H
 
-#include <functional>
-#include <memory>
+#include "CommKitMessage.h"
+
+#include <thirdparty/optional/optional.hpp>
 
 #include <QDateTime>
 #include <QFileInfo>
@@ -47,7 +48,9 @@
 #include <QUrl>
 #include <QVariant>
 
-#include <thirdparty/optional/optional.hpp>
+#include <functional>
+#include <memory>
+
 
 namespace args {
     using namespace std::placeholders;
@@ -210,6 +213,19 @@ struct GlobalMessage : Message
 };
 
 using GlobalMessages = std::vector<GlobalMessage>;
+
+class MessageUtils {
+public:
+    MessageUtils() = delete;
+
+    static QString extrasToJson(const QVariant &extras, const Attachment::Type type, bool skipLocal);
+
+    static QVariant extrasFromJson(const QString &json, const Attachment::Type type, bool skipLocal);
+
+    static GlobalMessage messageFromCommKitMessage(const CommKitMessage &commKitMessage);
+
+    static vm::CommKitMessage messageToCommKitMessage(const GlobalMessage &message);
+};
 }
 
 Q_DECLARE_METATYPE(vm::Contact::Type)
@@ -224,6 +240,6 @@ Q_DECLARE_METATYPE(vm::Chats)
 Q_DECLARE_METATYPE(vm::GlobalMessage)
 Q_DECLARE_METATYPE(vm::GlobalMessages)
 
-void registerCommonMetaTypes();
+void registerMessagesMetaTypes();
 
-#endif // VM_COMMON_H
+#endif // VM_MESSAGES_H

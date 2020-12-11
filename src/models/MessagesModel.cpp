@@ -35,6 +35,7 @@
 #include "models/MessagesModel.h"
 
 #include "Utils.h"
+#include "FileUtils.h"
 
 using namespace vm;
 
@@ -260,9 +261,9 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
             if (attachment->type == Attachment::Type::File) {
                 return QLatin1String("../resources/icons/File Selected Big.png");
             }
-            const auto imagePath = Utils::attachmentDisplayImagePath(*attachment);
+            const auto imagePath = FileUtils::attachmentDisplayImagePath(*attachment);
             if (!imagePath.isEmpty()) {
-                return Utils::localFileToUrl(imagePath);
+                return FileUtils::localFileToUrl(imagePath);
             }
             if (message.status != Message::Status::Created && message.status != Message::Status::InvalidM) {
                 qCDebug(lcModel) << "Requesting of missing thumbnail/preview";
@@ -305,7 +306,7 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
     }
     case AttachmentFileExistsRole:
     {
-        return attachment ? Utils::fileExists(attachment->localPath) : false;
+        return attachment ? FileUtils::fileExists(attachment->localPath) : false;
     }
     case IsBrokenRole:
     {

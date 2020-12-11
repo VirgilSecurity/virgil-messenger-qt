@@ -37,12 +37,13 @@
 
 #include <QState>
 
-#include "VSQCommon.h"
+#include "Messages.h"
 
-class VSQLastActivityManager;
+class Messenger;
 
 namespace vm
 {
+class Messenger;
 class Controllers;
 
 class ChatState : public QState
@@ -51,7 +52,7 @@ class ChatState : public QState
     Q_PROPERTY(QString lastActivityText READ lastActivityText WRITE setLastActivityText NOTIFY lastActivityTextChanged)
 
 public:
-    ChatState(Controllers *controllers, VSQLastActivityManager *lastActivityManager, QState *parent);
+    ChatState(Controllers *controllers, Messenger *messenger, QState *parent);
 
     QString lastActivityText() const;
     void setLastActivityText(const QString &text);

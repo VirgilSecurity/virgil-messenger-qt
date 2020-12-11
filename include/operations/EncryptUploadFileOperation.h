@@ -36,6 +36,9 @@
 #define VM_ENCRYPTUPLOADFILEOPERATION_H
 
 #include "NetworkOperation.h"
+#include "FileLoader.h"
+
+#include <QPointer>
 
 class Settings;
 
@@ -48,7 +51,7 @@ class EncryptUploadFileOperation : public NetworkOperation
     Q_OBJECT
 
 public:
-    EncryptUploadFileOperation(NetworkOperation *parent, const Settings *settings, const QString &sourcePath, const Contact::Id &recipientId);
+    EncryptUploadFileOperation(NetworkOperation *parent, const Settings *settings, FileLoader *fileLoader, const QString &sourcePath, const Contact::Id &recipientId);
 
     void setSourcePath(const QString &path);
 
@@ -62,6 +65,7 @@ private:
     void cleanup() override;
 
     const Settings *m_settings;
+    QPointer<FileLoader> m_fileLoader;
     QString m_sourcePath;
     QString m_tempPath;
     Contact::Id m_recipientId;

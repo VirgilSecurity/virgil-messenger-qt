@@ -36,8 +36,6 @@
 
 #include <QThread>
 
-#include <virgil/iot/logger/logger.h>
-
 #include "logging/VSQLogWorker.h"
 
 VSQLogging *VSQLogging::m_instance = nullptr;
@@ -65,7 +63,6 @@ VSQLogging::VSQLogging(QObject *parent)
     auto worker = new VSQLogWorker();
     worker->moveToThread(m_workerThread.get());
     connect(this, &VSQLogging::messageCreated, worker, &VSQLogWorker::processMessage);
-    connect(m_workerThread.get(), &QThread::started, worker, &VSQLogWorker::start);
     connect(m_workerThread.get(), &QThread::finished, worker, &VSQLogWorker::deleteLater);
     m_workerThread->start();
 

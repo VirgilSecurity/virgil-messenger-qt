@@ -32,62 +32,45 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VS_FILELOADER_H
-#define VS_FILELOADER_H
+#ifndef VM_FILE_UTILS_H
+#define VM_FILE_UTILS_H
 
-#include <QXmppHttpUploadIq.h>
+#include <Messages.h>
 
-#include "VSQCommon.h"
+#include <QString>
 
-class QNetworkAccessManager;
-class QNetworkReply;
 
-class QXmppClient;
-class QXmppUploadRequestManager;
+Q_DECLARE_LOGGING_CATEGORY(lcFileUtils);
 
-Q_DECLARE_LOGGING_CATEGORY(lcFileLoader)
 
 namespace vm
 {
-class FileLoader : public QObject
-{
-    Q_OBJECT
-
+class FileUtils {
 public:
-    using ConnectionSetup = std::function<void (QNetworkReply *)>;
+    static Optional<QString> calculateFingerprint(const QString &path);
 
-    FileLoader(QXmppClient *client, QNetworkAccessManager *networkAccessManager, QObject *parent);
+    static QString findUniqueFileName(const QString &fileName);
 
-    // TODO(fpohtmeh): redesign as signal
-    QString requestUploadUrl(const QString &filePath);
+    static bool forceCreateDir(const QString &absolutePath);
 
-    bool isServiceFound() const;
+    static Optional<QString> readTextFile(const QString &filePath);
 
-signals:
-    void serviceFound(const bool found);
-    void ready();
+    static bool fileExists(const QString &filePath);
 
-    void startDownload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup);
-    void startUpload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup);
+    static void removeFile(const QString &filePath);
 
-    void slotUrlsReceived(const QString &slotId, const QUrl &putUrl, const QUrl &getUrl);
-    void slotUrlErrorOcurrend(const QString &slotId, const QString &errorText);
+    static QString attachmentFileName(const QUrl &url, const QFileInfo &localInfo, bool isPicture);
 
-private:
-    void onServiceFound();
-    void onSlotReceived(const QXmppHttpUploadSlotIq &slot);
-    void onRequestFailed(const QXmppHttpUploadRequestIq &request);
-    void onStartDownload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup);
-    void onStartUpload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup);
+    static QString attachmentDisplayImagePath(const Attachment &attachment);
 
-    QNetworkAccessManager *m_networkAccessManager;
-    QXmppUploadRequestManager *m_xmppManager;
-    bool m_serviceFound = false;
+    static bool openUrl(const QUrl &url);
+
+    static bool isValidUrl(const QUrl &url);
+
+    static QString urlToLocalFile(const QUrl &url);
+
+    static QUrl localFileToUrl(const QString &filePath);
 };
-}
+}; // vm
 
-Q_DECLARE_METATYPE(QXmppHttpUploadSlotIq)
-Q_DECLARE_METATYPE(QXmppHttpUploadRequestIq)
-Q_DECLARE_METATYPE(vm::FileLoader::ConnectionSetup)
-
-#endif // VS_FILELOADER_H
+#endif // VM_FILE_UTILS_H

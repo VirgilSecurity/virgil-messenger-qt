@@ -35,24 +35,26 @@
 #ifndef VS_MESSAGESQUEUE_H
 #define VS_MESSAGESQUEUE_H
 
-#include "VSQCommon.h"
+#include "Messages.h"
+#include "Messenger.h"
+#include "UserDatabase.h"
 #include "operations/NetworkOperation.h"
 
-class VSQMessenger;
+#include <QPointer>
+
 class Settings;
 
 namespace vm
 {
 class MessageOperation;
 class MessageOperationFactory;
-class UserDatabase;
 
 class MessagesQueue : public NetworkOperation
 {
     Q_OBJECT
 
 public:
-    MessagesQueue(const Settings *settings, VSQMessenger *messenger, UserDatabase *userDatabase, FileLoader *fileLoader, QObject *parent);
+    MessagesQueue(const Settings *settings, Messenger *messenger, UserDatabase *userDatabase, QObject *parent);
     ~MessagesQueue() override;
 
 signals:
@@ -111,9 +113,9 @@ private:
     void onMessageOperationAttachmentProcessedSizeChanged(const MessageOperation *operation);
     void onMessageOperationAttachmentEncryptedSizeChanged(const MessageOperation *operation);
 
-    VSQMessenger *m_messenger;
-    UserDatabase *m_userDatabase;
-    MessageOperationFactory *m_factory;
+    QPointer<Messenger> m_messenger;
+    QPointer<UserDatabase> m_userDatabase;
+    QPointer<MessageOperationFactory> m_factory;
     UserId m_userId;
     Flag m_queueState = QueueState::Created;
 };

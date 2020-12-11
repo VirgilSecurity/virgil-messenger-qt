@@ -37,24 +37,20 @@
 
 #include <QObject>
 
-#include <qxmpp/QXmppMessage.h>
-
-#include "VSQCommon.h"
-
-class QXmppMessage;
-class VSQMessenger;
+#include "Messages.h"
+#include "Messenger.h"
+#include "Models.h"
+#include "UserDatabase.h"
 
 namespace vm
 {
-class Models;
-class UserDatabase;
 
 class MessagesController : public QObject
 {
     Q_OBJECT
 
 public:
-    MessagesController(VSQMessenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
+    MessagesController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
     void setUserId(const UserId &userId);
     void loadMessages(const Chat &chat);
@@ -72,10 +68,8 @@ signals:
 private:
     void setupTableConnections();
 
-    void onChatUpdated(const Chat &chat);
 
     void setMessageStatus(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);
-    void setDeliveredStatus(const Jid &jid, const Message::Id &messageId);
     void setAttachmentStatus(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Status &status);
     void setAttachmentUrl(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QUrl &url);
     void setAttachmentLocalPath(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &localPath);
@@ -84,35 +78,39 @@ private:
     void setAttachmentProcessedSize(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &processedSize);
     void setAttachmentEncryptedSize(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &encryptedSize);
 
-    void receiveMessage(const QXmppMessage &msg);
+private slots:
+    void onChatUpdated(const Chat &chat);
+    void onMessageReceived(GlobalMessage message);
+    void setDeliveredStatus(const QString &recipientId, const QString &messageId);
 
-    VSQMessenger *m_messenger;
-    Models *m_models;
-    UserDatabase *m_userDatabase;
+private:
+    QPointer<Messenger> m_messenger;
+    QPointer<Models> m_models;
+    QPointer<UserDatabase> m_userDatabase;
 
     UserId m_userId;
     Chat m_chat;
 
     // NOTE(fpohtmeh): this workaround is needed when messages are received before chat list loading
     // it will be remove right after offline mode
-    struct PostponedXmppData
+    struct PostponedMessage
     {
         struct DeliverInfo
         {
-            const Jid jid;
-            const Message::Id messageId;
+            const QString recipientId;
+            const QString messageId;
         };
 
-        std::vector<QXmppMessage> receivedMessages;
+        std::vector<GlobalMessage> receivedMessages;
         std::vector<DeliverInfo> deliverInfos;
 
-        void addMessage(const QXmppMessage &msg);
-        void addDeliverInfo(const Jid jid, const Message::Id messageId);
+        void addMessage(GlobalMessage message);
+        void addDeliverInfo(QString recipientId, QString messageId);
         void process(MessagesController *controller);
     };
 
-    PostponedXmppData m_postponedXmppData;
+    PostponedMessage m_postponedMessages;
 };
-}
+} // namespace vm
 
 #endif // VM_MESSAGESCONTROLLER_H

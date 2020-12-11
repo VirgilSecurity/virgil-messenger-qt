@@ -36,7 +36,7 @@
 
 #include <QtConcurrent>
 
-#include "Core.h"
+#include "Messenger.h"
 #include "database/ChatsTable.h"
 #include "database/MessagesTable.h"
 #include "database/UserDatabase.h"
@@ -45,34 +45,36 @@
 #include "models/Models.h"
 
 using namespace vm;
+using Self = ChatsController;
 
-ChatsController::ChatsController(Models *models, UserDatabase *userDatabase, QObject *parent)
+Self::ChatsController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
+    , m_messenger(messenger)
     , m_models(models)
     , m_userDatabase(userDatabase)
 {
-    connect(userDatabase, &UserDatabase::opened, this, &ChatsController::setupTableConnections);
-    connect(this, &ChatsController::newContactFound, this, &ChatsController::onNewContactFound);
-    connect(this, &ChatsController::currentContactIdChanged, m_models->messages(), &MessagesModel::setContactId);
-    connect(m_models->chats(), &ChatsModel::chatsSet, this, &ChatsController::onChatsSet);
+    connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
+    connect(this, &Self::newContactFound, this, &Self::onNewContactFound);
+    connect(this, &Self::currentContactIdChanged, m_models->messages(), &MessagesModel::setContactId);
+    connect(m_models->chats(), &ChatsModel::chatsSet, this, &Self::onChatsSet);
 }
 
-Chat ChatsController::currentChat() const
+Chat Self::currentChat() const
 {
     return m_currentChat;
 }
 
-Contact::Id ChatsController::currentContactId() const
+Contact::Id Self::currentContactId() const
 {
     return m_currentChat.contactId;
 }
 
-Chat::Id ChatsController::currentChatId() const
+Chat::Id Self::currentChatId() const
 {
     return m_currentChat.id;
 }
 
-void ChatsController::loadChats(const UserId &userId)
+void Self::loadChats(const UserId &userId)
 {
     qCDebug(lcController) << "Started to load chats...";
     m_userId = userId;
@@ -84,16 +86,20 @@ void ChatsController::loadChats(const UserId &userId)
     }
 }
 
-void ChatsController::createChat(const Contact::Id &contactId)
+void Self::createChat(const Contact::Id &contactId)
 {
     auto chat = m_models->chats()->findByContact(contactId);
     if (chat) {
         openChat(*chat);
     }
     else {
-        // TODO(fpohtmeh): check if online?
-        QtConcurrent::run([=]() {
-            if (!Core::findContact(contactId)) {
+        QtConcurrent::run([this, contactId = contactId]() {
+            if (!m_messenger) {
+                qCWarning(lcController) << "Messenger was not initialized";
+                emit errorOccurred(tr("Contact not found"));
+            }
+            auto user = m_messenger->findUserByUsername(contactId);
+            if (!user) {
                 emit errorOccurred(tr("Contact not found"));
             }
             else {
@@ -103,7 +109,7 @@ void ChatsController::createChat(const Contact::Id &contactId)
     }
 }
 
-void ChatsController::openChat(const Chat &chat)
+void Self::openChat(const Chat &chat)
 {
     qCDebug(lcController) << "Opening chat with" << chat.contactId;
     setCurrentChat(chat);
@@ -114,24 +120,24 @@ void ChatsController::openChat(const Chat &chat)
     }
 }
 
-void ChatsController::openChatById(const Chat::Id &chatId)
+void Self::openChatById(const Chat::Id &chatId)
 {
     openChat(*m_models->chats()->findById(chatId));
 }
 
-void ChatsController::closeChat()
+void Self::closeChat()
 {
     setCurrentChat({});
 }
 
-void ChatsController::setupTableConnections()
+void Self::setupTableConnections()
 {
     auto table = m_userDatabase->chatsTable();
-    connect(table, &ChatsTable::errorOccurred, this, &ChatsController::errorOccurred);
+    connect(table, &ChatsTable::errorOccurred, this, &Self::errorOccurred);
     connect(table, &ChatsTable::fetched, m_models->chats(), &ChatsModel::setChats);
 }
 
-void ChatsController::setCurrentChat(const Chat &chat)
+void Self::setCurrentChat(const Chat &chat)
 {
     if (m_currentChat.id == chat.id) {
         return;
@@ -144,14 +150,14 @@ void ChatsController::setCurrentChat(const Chat &chat)
     emit chat.id.isEmpty() ? chatClosed() : chatOpened(chat);
 }
 
-void ChatsController::onNewContactFound(const Contact::Id &contactId)
+void Self::onNewContactFound(const Contact::Id &contactId)
 {
     const auto chat = m_models->chats()->createChat(contactId);
     m_userDatabase->chatsTable()->createChat(chat);
     openChat(chat);
 }
 
-void ChatsController::onChatsSet()
+void Self::onChatsSet()
 {
     qCDebug(lcController) << "Chats set";
     emit chatsSet(m_userId);

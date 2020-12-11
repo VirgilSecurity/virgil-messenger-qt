@@ -36,8 +36,9 @@
 #define VM_CONTROLLERS_H
 
 #include <QObject>
+#include <QPointer>
 
-class VSQMessenger;
+class Messenger;
 class Settings;
 
 namespace vm
@@ -49,6 +50,7 @@ class MessagesController;
 class Models;
 class UserDatabase;
 class UsersController;
+class Messenger;
 
 class Controllers : public QObject
 {
@@ -60,7 +62,7 @@ class Controllers : public QObject
     Q_PROPERTY(FileCloudController *fileCloud READ fileCloud CONSTANT)
 
 public:
-    Controllers(VSQMessenger *messenger, Settings *settings,
+    Controllers(Messenger *messenger, Settings *settings,
                 Models *models, UserDatabase *userDatabase, QObject *parent);
 
     const AttachmentsController *attachments() const;
@@ -78,11 +80,11 @@ signals:
     void notificationCreated(const QString &notification, const bool error);
 
 private:
-    AttachmentsController *m_attachments;
-    UsersController *m_users;
-    ChatsController *m_chats;
-    MessagesController *m_messages;
-    FileCloudController *m_fileCloud;
+    QPointer<AttachmentsController> m_attachments;
+    QPointer<UsersController> m_users;
+    QPointer<ChatsController> m_chats;
+    QPointer<MessagesController> m_messages;
+    QPointer<FileCloudController> m_fileCloud;
 };
 }
 

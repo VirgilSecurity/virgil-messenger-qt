@@ -36,7 +36,7 @@
 #define VM_NEWCHATSTATE_H
 
 #include "OperationState.h"
-#include "VSQCommon.h"
+#include "Messages.h"
 
 namespace vm
 {

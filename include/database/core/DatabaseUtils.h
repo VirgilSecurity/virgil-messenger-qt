@@ -35,7 +35,7 @@
 #ifndef VM_DATABASEUTILS_H
 #define VM_DATABASEUTILS_H
 
-#include "VSQCommon.h"
+#include "Messages.h"
 
 class QSqlQuery;
 
