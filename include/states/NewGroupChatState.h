@@ -32,31 +32,35 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHATLISTSTATE_H
-#define VM_CHATLISTSTATE_H
+#ifndef VM_NEWGROUPCHATSTATE_H
+#define VM_NEWGROUPCHATSTATE_H
 
-#include <QState>
+#include "OperationState.h"
+#include "VSQCommon.h"
 
 namespace vm
 {
 class ChatsController;
+class DiscoveredContactsModel;
 
-class ChatListState : public QState
+class NewGroupChatState : public OperationState
 {
     Q_OBJECT
 
 public:
-    ChatListState(ChatsController *chatsController, QState *parent);
+    NewGroupChatState(ChatsController *chatsController, DiscoveredContactsModel *contactsModel, QState *parent);
 
 signals:
-    void requestNewChat();
-    void requestNewGroupChat();
+    void addNewChat(const QString &contactId);
 
 private:
-    void onEntry(QEvent *) override;
+    void onEntry(QEvent *event);
+
+    void processAddNewChat(const Contact::Id &contactId);
 
     ChatsController *m_chatsController;
+    DiscoveredContactsModel *m_contactsModel;
 };
 }
 
-#endif // VM_CHATLISTSTATE_H
+#endif // VM_NEWGROUPCHATSTATE_H

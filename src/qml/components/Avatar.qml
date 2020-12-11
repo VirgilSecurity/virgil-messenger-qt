@@ -5,6 +5,7 @@ import "../theme"
 import "./CommonHelpers"
 
 Item {
+    id: avatar
     property string nickname
     property alias avatarUrl: originalImage.source
     property alias diameter: textInCircle.diameter
