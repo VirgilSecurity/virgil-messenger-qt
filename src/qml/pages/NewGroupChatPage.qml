@@ -61,34 +61,10 @@ OperationPage {
             }
         }
 
-        ListModel {
-            id: t_model
-            ListElement {
-                name: "John Doegherty Third"
-                avatarUrl: "https://avatars.mds.yandex.net/get-zen_doc/1779726/pub_5d32ac8bf2df2500adb00103_5d32aeae21f9ff00ad9973ee/scale_1200"
-                lastSeenActivity: "yesterday"
-            }
-            ListElement {
-                name: "Bon Min"
-                avatarUrl: "https://peopletalk.ru/wp-content/uploads/2016/10/orig_95f063cefa53daf194fa9f6d5e20b86c.jpg"
-                lastSeenActivity: "yesterday"
-            }
-            ListElement {
-                name: "Tin Bin"
-                avatarUrl: "https://i.postimg.cc/wBJKr6CR/K5-W-z1n-Lqms.jpg"
-                lastSeenActivity: "yesterday"
-            }
-            ListElement {
-                name: "Mister Bean"
-                avatarUrl: "https://avatars.mds.yandex.net/get-zen_doc/175962/pub_5a7b1334799d9dbfb9cc0f46_5a7b135b57906a1b6eb710eb/scale_1200"
-                lastSeenActivity: "yesterday"
-            }
-        }
-
         FlowListView {
             id: addedContactsView
             anchors.fill: parent
-            model: t_model
+            model: flowModel
             spacing: flowSpaing
             delegate: addedContactComponent
             focus: true
@@ -192,7 +168,7 @@ OperationPage {
         }
     }
 
-    SearchContactsList {
+    SelectContactsList {
         id: searchResultsItem
         anchors {
             top: contactSearch.bottom
@@ -201,10 +177,10 @@ OperationPage {
             bottom: parent.bottom
             topMargin: 1
             bottomMargin: defaultChatHeight
-            margins: Theme.margin
         }
 //        model: models.discoveredContacts.proxy
-        model: tempModel
+        model: contactsModel
+        multiselect: true
     }
 
     RowLayout {
@@ -230,9 +206,29 @@ OperationPage {
         }
     }
 
+    function selectContact(index) {
+        console.log("selectContact:", index)
+        let item = contactsModel.get(index)
+        if (item['selected'] === false) {
+            item['selected'] = true
+            flowModel.append(item)
+            console.log("flowModel.append:", index)
+        } else {
+            item['selected'] = false
+            console.log("item['selected'] = false:", index)
+
+            let i
+            for (i = 0; i < flowModel.count; i++) {
+                let flowFalseItem = flowModel.get(i).selected
+                if (flowFalseItem === false) {
+                    flowModel.remove(i)
+                    console.log("flowModel.remove:", index)
+                }
+            }
+        }
+    }
+
     function accept() {
-//        appState.addNewChat(contact)
-        // move to flowListModel
     }
 
     function reject() {
@@ -241,83 +237,49 @@ OperationPage {
 
     // TEMP
 
-
-    Component {
-        id: contactListComponent
-
-        Item {
-            width: contactListView.width
-            height: defaultChatHeight
-
-            ListDelegate {
-                id: contactListDelegate
-                anchors.fill: parent
-
-                Avatar {
-                    id: avatar
-                    nickname: model.name
-                    avatarUrl: model.avatarUrl
-                    Layout.alignment: Qt.AlignVCenter
-                }
-
-                Column {
-                    Layout.fillWidth: true
-                    clip: true
-
-                    Text {
-                        color: Theme.primaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(15)
-                        text: model.name
-                    }
-
-                    Text {
-                        color: Theme.secondaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(12)
-                        text: model.lastSeenActivity
-                        width: parent.width
-                        elide: Text.ElideRight
-                        textFormat: Text.RichText
-                    }
-                }
-
-                onClicked: accept()
-            }
-        }
-    }
-
-
     ListModel {
-        id: tempModel
+        id: contactsModel
 
         ListElement {
             name: "John Doe"
             avatarUrl: "https://avatars.mds.yandex.net/get-zen_doc/1779726/pub_5d32ac8bf2df2500adb00103_5d32aeae21f9ff00ad9973ee/scale_1200"
             lastSeenActivity: "yesterday"
+            selected: false
         }
         ListElement {
             name: "Bon Min"
             avatarUrl: "https://peopletalk.ru/wp-content/uploads/2016/10/orig_95f063cefa53daf194fa9f6d5e20b86c.jpg"
             lastSeenActivity: "yesterday"
+            selected: false
         }
         ListElement {
             name: "Tin Bin"
             avatarUrl: "https://i.postimg.cc/wBJKr6CR/K5-W-z1n-Lqms.jpg"
             lastSeenActivity: "yesterday"
+            selected: false
         }
         ListElement {
             name: "Mister Bean"
             avatarUrl: "https://avatars.mds.yandex.net/get-zen_doc/175962/pub_5a7b1334799d9dbfb9cc0f46_5a7b135b57906a1b6eb710eb/scale_1200"
             lastSeenActivity: "yesterday"
+            selected: false
         }
         ListElement {
             name: "Erick Helicopter"
             avatarUrl: ""
             lastSeenActivity: "yesterday"
+            selected: false
         }
         ListElement {
             name: "Peter Griffin"
             avatarUrl: ""
             lastSeenActivity: "yesterday"
+            selected: false
         }
     }
+
+    ListModel {
+        id: flowModel
+    }
+
 }
