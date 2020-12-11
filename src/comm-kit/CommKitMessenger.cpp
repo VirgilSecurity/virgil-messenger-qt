@@ -203,10 +203,6 @@ Self::resetXmppConfiguration() {
 
     m_impl->xmpp = std::make_unique<QXmppClient>();
 
-    // Set on-line status.
-    // QXmppPresence::Type presenceType = m_impl->isActive ? QXmppPresence::Available : QXmppPresence::Unavailable;
-    // m_impl->xmpp->setClientPresence(QXmppPresence(presenceType));
-
     // Add receipt messages extension
     m_impl->discoveryManager = std::make_unique<VSQDiscoveryManager>(m_impl->xmpp.get(), this);
     m_impl->contactManager = std::make_unique<VSQContactManager>(m_impl->xmpp.get(), this);
@@ -290,6 +286,10 @@ Self::activate() {
 
     if (m_impl->xmpp) {
         m_impl->xmpp->setActive(true);
+
+        QXmppPresence presenceOnline(QXmppPresence::Available);
+        presenceOnline.setAvailableStatusType(QXmppPresence::Online);
+        m_impl->xmpp->setClientPresence(presenceOnline);
     }
 
     fireReconnectIfNeeded();
@@ -302,13 +302,11 @@ Self::deactivate() {
 
     if (m_impl->xmpp) {
         m_impl->xmpp->setActive(false);
-    }
 
-    // if (m_impl->xmpp) {
-    //     m_impl->xmpp->disconnect();
-    //     m_impl->xmpp->disconnectFromServer();
-    //     m_impl->xmpp = nullptr;
-    // }
+        QXmppPresence presenceAway(QXmppPresence::Available);
+        presenceAway.setAvailableStatusType(QXmppPresence::Away);
+        m_impl->xmpp->setClientPresence(presenceAway);
+    }
 }
 
 
@@ -960,8 +958,6 @@ Self::createXmppMessageToSend() {
 void
 Self::xmppOnConnected() {
     m_impl->lastActivityManager->setEnabled(true);
-
-    m_impl->xmpp->setClientPresence(QXmppPresence(QXmppPresence::Available));
 
     registerForNotifications();
 
