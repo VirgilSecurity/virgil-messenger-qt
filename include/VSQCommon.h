@@ -35,6 +35,7 @@
 #ifndef VM_COMMON_H
 #define VM_COMMON_H
 
+#include <deque>
 #include <functional>
 #include <memory>
 
@@ -134,6 +135,9 @@ struct Contact
     QString email;
     QUrl avatarUrl;
     QString lastSeenActivity;
+
+    QVariant platformId;
+    bool avatarUrlRequested = false;
 };
 
 using Contacts = std::vector<Contact>;

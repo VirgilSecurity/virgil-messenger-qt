@@ -14,7 +14,7 @@ OperationPage {
     readonly property var filterSource: models.discoveredContacts
     readonly property alias search: contactSearch.search
     property string previousSearch
-    readonly property int modelCount: searchResultsItem.modelCount
+    readonly property int modelCount: selectedContacts.count
     property string serverName: "Default"
 
     readonly property int defaultSearchHeight: 40
@@ -37,173 +37,209 @@ OperationPage {
         title: qsTr("New group")
     }
 
-    Item {
-        id: addedContacts
-        anchors {
-            top: parent.top
-            left: parent.left
-            right: parent.right
-            leftMargin: Theme.margin
-            rightMargin: Theme.margin
-        }
-        height: {
-            if (addedContactsView.contentHeight > defaultChatHeight * 2) {
-                return defaultChatHeight * 2
-            } else {
-                return addedContactsView.contentHeight
+    CustomForm {
+        id: form
+
+        Item {
+            id: addedContacts
+            clip: true
+            anchors {
+                top: parent.top
+                left: parent.left
+                right: parent.right
+                leftMargin: Theme.margin
+                rightMargin: Theme.margin
             }
-        }
-
-        Behavior on height {
-            NumberAnimation {
-                easing.type: Easing.InOutCubic
-                duration: Theme.animationDuration
-            }
-        }
-
-        FlowListView {
-            id: addedContactsView
-            anchors.fill: parent
-            model: flowModel
-            spacing: flowSpaing
-            delegate: addedContactComponent
-            clip: false
-            focus: true
-            onFocusChanged: {
-                if (!focus) {
-                    addedContactsView.currentIndex = -1
-                }
-            }
-        }
-
-        Component {
-            id: addedContactComponent
-            Rectangle {
-                id: contactRec
-                height: avatar.height
-                width: row.width + row.spacing
-                color: addedContactsView.currentIndex === index ? Theme.buttonPrimaryColor : Theme.contactPressedColor
-                radius: height
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        addedContactsView.focus = true
-                        if (addedContactsView.currentIndex !== index) {
-                            addedContactsView.currentIndex = index
-                        } else {
-                            addedContactsView.currentIndex = -1
-                        }
+            height: {
+                if (addedContactsView.contentHeight > defaultChatHeight * 2) {
+                    return defaultChatHeight * 2
+                } else {
+                    if (addedContactsView.count > 0) {
+                        return addedContactsView.contentHeight
+                    } else {
+                        return 0
                     }
                 }
+            }
 
-                Row {
-                    id: row
-                    spacing: Theme.smallSpacing
-                    anchors.verticalCenter: parent.verticalCenter
-                    Item {
-                        height: flowItemHeight
-                        width: height
-                        visible: addedContactsView.currentIndex === index
-                        enabled: addedContactsView.currentIndex === index
-                        Repeater {
-                            model: 2
-                            Rectangle {
-                                anchors.centerIn: parent
-                                width: 0.5 * parent.width
-                                height: lineWidth
-                                radius: height
-                                color: Theme.brandColor
-                                rotation: index ? -45 : 45
-                            }
-                        }
+            Behavior on height {
+                NumberAnimation {
+                    easing.type: Easing.InOutCubic
+                    duration: Theme.animationDuration
+                }
+            }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
+            FlowListView {
+                id: addedContactsView
+                anchors.fill: parent
+                model: flowModel
+                spacing: flowSpaing
+                delegate: addedContactComponent
+                clip: false
+                focus: true
+                onFocusChanged: {
+                    if (!focus) {
+                        addedContactsView.currentIndex = -1
+                    }
+                }
+            }
+
+            Component {
+                id: addedContactComponent
+                Rectangle {
+                    id: contactRec
+                    height: flowItemHeight
+                    width: row.width + row.spacing
+                    color: addedContactsView.currentIndex === index ? Theme.buttonPrimaryColor : Theme.contactPressedColor
+                    radius: height
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            addedContactsView.focus = true
+                            if (addedContactsView.currentIndex !== index) {
+                                addedContactsView.currentIndex = index
+                            } else {
                                 addedContactsView.currentIndex = -1
-                                addedContactsView.model.remove(index)
                             }
                         }
                     }
 
-                    Avatar {
-                        id: avatar
-                        nickname: model.name
-                        avatarUrl: model.avatarUrl
-                        diameter: flowItemHeight
+                    Row {
+                        id: row
+                        spacing: Theme.smallSpacing
                         anchors.verticalCenter: parent.verticalCenter
-                        visible: addedContactsView.currentIndex !== index
-                    }
+                        Item {
+                            height: flowItemHeight
+                            width: height
+                            Item {
+                                height: flowItemHeight
+                                width: height
+                                visible: addedContactsView.currentIndex === index
+                                enabled: addedContactsView.currentIndex === index
+                                Repeater {
+                                    model: 2
+                                    Rectangle {
+                                        anchors.centerIn: parent
+                                        width: 0.5 * parent.width
+                                        height: lineWidth
+                                        radius: height
+                                        color: Theme.brandColor
+                                        rotation: index ? -45 : 45
+                                    }
+                                }
 
-                    Text {
-                        color: Theme.primaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(15)
-                        text: model.name
-                        anchors.verticalCenter: parent.verticalCenter
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: {
+                                        addedContactsView.currentIndex = -1
+                                        addedContactsView.model.remove(index)
+                                    }
+                                }
+                            }
+
+                            Avatar {
+                                id: avatar
+                                nickname: model.name
+                                avatarUrl: model.avatarUrl
+                                diameter: flowItemHeight
+                                anchors.verticalCenter: parent.verticalCenter
+                                visible: addedContactsView.currentIndex !== index
+                            }
+                        }
+
+                        Text {
+                            color: Theme.primaryTextColor
+                            font.pointSize: UiHelper.fixFontSz(15)
+                            text: model.name
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
                     }
                 }
             }
+
+            Rectangle {
+                id: separator
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: 1
+                color: Theme.chatBackgroundColor
+                anchors.bottom: parent.bottom
+                visible: addedContactsView.count > 0
+            }
         }
 
-    }
+        Item {
+            id: contactSearchItem
+            anchors {
+                top: addedContacts.bottom
+                left: parent.left
+                right: parent.right
+                margins: Theme.margin
+                topMargin: Theme.smallSpacing
+            }
+            height: contactSearch.height + Theme.smallSpacing
 
-    Search {
-        id: contactSearch
-        anchors {
-            top: addedContacts.bottom
-            left: parent.left
-            right: parent.right
-            margins: Theme.margin
-            topMargin: 0
-        }
-        height: defaultSearchHeight
-        state: "opened"
-        searchPlaceholder: qsTr("Search contact")
-        onClosed: {
-            contactSearch.search = ""
-            reject()
-        }
-        onAccepted: {
-            accept()
-        }
-    }
+            Search {
+                id: contactSearch
+                height: defaultSearchHeight
+                width: parent.width
+                state: "opened"
+                searchPlaceholder: qsTr("Search contact")
+                onClosed: {
+                    contactSearch.search = ""
+                    reject()
+                }
+                onAccepted: {
+                    accept()
+                }
+            }
 
-    SelectContactsList {
-        id: searchResultsItem
-        anchors {
-            top: contactSearch.bottom
-            left: parent.left
-            right: parent.right
-            bottom: parent.bottom
-            topMargin: 1
-            bottomMargin: defaultChatHeight
-        }
-//        model: models.discoveredContacts.proxy
-        model: contactsModel
-        multiselect: true
-    }
-
-    RowLayout {
-        anchors {
-            top: searchResultsItem.bottom
-            bottom: parent.bottom
-            left: parent.left
-            right: parent.right
+            Rectangle {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: 1
+                color: Theme.chatBackgroundColor
+                anchors.bottom: parent.bottom
+                visible: selectedContacts.count > 0
+            }
         }
 
-        Label {
-            text: qsTr("Server")
-            color: Theme.primaryTextColor
-            Layout.fillWidth: true
-            horizontalAlignment: Text.AlignHCenter
+        SelectContactsList {
+            id: selectedContacts
+            anchors {
+                top: contactSearchItem.bottom
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+                bottomMargin: defaultChatHeight
+            }
+    //        model: models.discoveredContacts.proxy
+            model: contactsModel
+            multiselect: true
         }
 
-        Label {
-            text: serverName
-            color: Theme.secondaryTextColor
-            Layout.fillWidth: true
-            horizontalAlignment: Text.AlignHCenter
+        RowLayout {
+            anchors {
+                top: selectedContacts.bottom
+                bottom: parent.bottom
+                left: parent.left
+                right: parent.right
+            }
+
+            Label {
+                text: qsTr("Server")
+                color: Theme.primaryTextColor
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
+            }
+
+            Label {
+                text: serverName
+                color: Theme.secondaryTextColor
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
+            }
         }
     }
 
@@ -278,5 +314,4 @@ OperationPage {
     ListModel {
         id: flowModel
     }
-
 }

@@ -8,11 +8,12 @@ import "../theme"
 
 Item {
     id: searchContactsList
+    property alias isClipped: contactListView.clip
     property real headerHeight: 20
     property real headerOpacity: 0
     readonly property real expandedHeaderHeight: 90
     property alias contactListView: contactListView
-    property alias modelCount: contactListView.count
+    property alias count: contactListView.count
     property alias model: contactListView.model
     property bool multiselect: false
     readonly property int checkCircleMargin: 2
@@ -136,82 +137,85 @@ Item {
     Component {
         id: contactListComponent
 
-        Item {
-            width: contactListView.width
+        ListDelegate {
+            id: contactListDelegate
+            width: parent.width
             height: defaultChatHeight
 
-            ListDelegate {
-                id: contactListDelegate
-                anchors.fill: parent
+            Item {
+                width: parent.width
+                height: parent.height
+                Row {
+                    width: parent.width
+                    height: parent.height
+                    spacing: Theme.spacing
 
-                Avatar {
-                    id: avatar
-                    nickname: model.name
-                    avatarUrl: model.avatarUrl
-                    Layout.alignment: Qt.AlignVCenter
+                    add: Transition {
+                        NumberAnimation { property: "scale"; from: 0.9; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+                        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+                    }
+
+                    move: Transition {
+                        NumberAnimation { properties: "x,y"; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+                    }
 
                     Rectangle {
-                        anchors {
-                            right: parent.right
-                            bottom: parent.bottom
-                        }
-                        width: parent.width * 0.4
+                        width: headerHeight
                         height: width
-                        radius: width
-                        color: Theme.mainBackgroundColor
+                        radius: height
+                        color: Theme.avatarBgColor
                         visible: selected
+                        anchors.verticalCenter: parent.verticalCenter
 
-                        Rectangle {
-                            anchors {
-                                fill: parent
-                                margins: checkCircleMargin
-                            }
-                            radius: width
-                            color: Theme.contactPressedColor
+                        Repeater {
+                            model: 2
 
-                            Repeater {
-                                model: 2
-
-                                Rectangle {
-                                    anchors.centerIn: parent
-                                    width: parent.width - 2 * checkCircleMargin
-                                    height: checkCircleMargin
-                                    radius: height
-                                    rotation: index ? 0 : 90
-                                }
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: parent.width * 0.6
+                                height: checkCircleMargin
+                                radius: height
+                                rotation: index ? 0 : 90
                             }
                         }
                     }
-                }
 
-                Column {
-                    Layout.fillWidth: true
-                    clip: true
-
-                    Text {
-                        color: Theme.primaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(15)
-                        text: model.name
+                    Avatar {
+                        id: avatar
+                        nickname: model.name
+                        avatarUrl: model.avatarUrl
+                        anchors.verticalCenter: parent.verticalCenter
                     }
 
-                    Text {
-                        color: Theme.secondaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(12)
-                        text: model.lastSeenActivity
-                        width: parent.width
-                        elide: Text.ElideRight
-                        textFormat: Text.RichText
-                    }
-                }
+                    Column {
+                        anchors.verticalCenter: parent.verticalCenter
 
-                onClicked: {
-                    if (multiselect === true) {
-                        selectContact(index)
-                    } else {
-                        accept()
+                        Text {
+                            color: Theme.primaryTextColor
+                            font.pointSize: UiHelper.fixFontSz(15)
+                            text: model.name
+                        }
+
+                        Text {
+                            color: Theme.secondaryTextColor
+                            font.pointSize: UiHelper.fixFontSz(12)
+                            text: model.lastSeenActivity
+                            width: parent.width
+                            elide: Text.ElideRight
+                            textFormat: Text.RichText
+                        }
                     }
                 }
             }
+
+            onClicked: {
+                if (multiselect === true) {
+                    selectContact(index)
+                } else {
+                    accept()
+                }
+            }
         }
+
     }
 }

@@ -32,59 +32,40 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_DISCOVEREDCONTACTSMODEL_H
-#define VM_DISCOVEREDCONTACTSMODEL_H
+#ifndef VM_LISTSELECTIONMODEL_H
+#define VM_LISTSELECTIONMODEL_H
 
-#include "ListModel.h"
-#include "VSQCommon.h"
+#include <QItemSelectionModel>
 
 namespace vm
 {
-class ContactAvatarLoader;
-class Validator;
+class ListModel;
 
-class DiscoveredContactsModel : public ListModel
+class ListSelectionModel : public QItemSelectionModel
 {
     Q_OBJECT
-    Q_PROPERTY(bool newContactFiltered MEMBER m_newContactFiltered NOTIFY newContactFilteredChanged)
+    Q_PROPERTY(bool hasSelection MEMBER m_hasSelection NOTIFY hasSelectionChanged)
 
 public:
-    enum Roles
-    {
-        NameRole = Qt::UserRole,
-        DetailsRole,
-        AvatarUrlRole,
-        LastSeenActivityRole,
-        FilterRole
-    };
+    explicit ListSelectionModel(ListModel *source);
 
-    DiscoveredContactsModel(Validator *validator, QObject *parent);
+    Q_INVOKABLE void setSelected(const QVariant &proxyRow, bool selected);
+    Q_INVOKABLE void toggle(const QVariant &proxyRow);
+    Q_INVOKABLE void clear();
 
-    void reload();
+    bool hasSelection() const;
+    QList<QVariant> items() const;
 
 signals:
-    void newContactFilteredChanged(const bool filtered);
-
-    void contactsPopulated(const Contacts &contacts, QPrivateSignal);
-    void contactAvatarUrlNotFound(const Contact::Id &contactId, QPrivateSignal) const;
+    void changed(const QList<QModelIndex> &indices);
+    void hasSelectionChanged(const bool changed);
 
 private:
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
+    void onChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
-    void setContacts(const Contacts &contacts);
-    void checkNewContactFiltered();
-    void loadAvatarUrl(const Contact::Id &contactId);
-    void setAvatarUrl(const Contact &contact, const QUrl &url);
-
-    Optional<int> findRowByContactId(const Contact::Id &contactId) const;
-
-    Validator *m_validator;
-    ContactAvatarLoader *m_avatarLoader;
-    Contacts m_contacts;
-    bool m_newContactFiltered = false;
+    ListModel *m_sourceModel;
+    bool m_hasSelection = false;
 };
 }
 
-#endif // VM_DISCOVEREDCONTACTSMODEL_H
+#endif // VM_LISTSELECTIONMODEL_H

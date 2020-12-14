@@ -49,6 +49,7 @@ class AttachmentsModel;
 class ChatsModel;
 class DiscoveredContactsModel;
 class FileCloudModel;
+class FileCloudUploader;
 class FileLoader;
 class MessagesModel;
 class MessagesQueue;
@@ -63,6 +64,7 @@ class Models : public QObject
     Q_PROPERTY(ChatsModel *chats READ chats CONSTANT)
     Q_PROPERTY(DiscoveredContactsModel *discoveredContacts MEMBER m_discoveredContacts CONSTANT)
     Q_PROPERTY(FileCloudModel *fileCloud MEMBER m_fileCloud CONSTANT)
+    Q_PROPERTY(FileCloudUploader *fileCloudUploader MEMBER m_fileCloudUploader CONSTANT)
     Q_PROPERTY(MessagesModel *messages READ messages CONSTANT)
 
 public:
@@ -79,6 +81,8 @@ public:
     DiscoveredContactsModel *discoveredContacts();
     const FileCloudModel *fileCloud() const;
     FileCloudModel *fileCloud();
+    const FileCloudUploader *fileCloudUploader() const;
+    FileCloudUploader *fileCloudUploader();
     const FileLoader *fileLoader() const;
     FileLoader *fileLoader();
     const MessagesModel *messages() const;
@@ -96,6 +100,7 @@ private:
     DiscoveredContactsModel *m_discoveredContacts;
     MessagesModel *m_messages;
     FileCloudModel *m_fileCloud;
+    FileCloudUploader *m_fileCloudUploader;
     FileLoader *m_fileLoader;
     MessagesQueue *m_messagesQueue;
 };

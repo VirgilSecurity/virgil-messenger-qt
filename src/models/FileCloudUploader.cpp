@@ -32,59 +32,61 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_DISCOVEREDCONTACTSMODEL_H
-#define VM_DISCOVEREDCONTACTSMODEL_H
+#include "models/FileCloudUploader.h"
 
-#include "ListModel.h"
-#include "VSQCommon.h"
+using namespace vm;
 
-namespace vm
+FileCloudUploader::FileCloudUploader(QObject *parent)
+    : QObject(parent)
+    , m_currentIndex(-1)
+    , m_currentProcessedBytes(-1)
+    , m_currentTotalBytes(-1)
 {
-class ContactAvatarLoader;
-class Validator;
-
-class DiscoveredContactsModel : public ListModel
-{
-    Q_OBJECT
-    Q_PROPERTY(bool newContactFiltered MEMBER m_newContactFiltered NOTIFY newContactFilteredChanged)
-
-public:
-    enum Roles
-    {
-        NameRole = Qt::UserRole,
-        DetailsRole,
-        AvatarUrlRole,
-        LastSeenActivityRole,
-        FilterRole
-    };
-
-    DiscoveredContactsModel(Validator *validator, QObject *parent);
-
-    void reload();
-
-signals:
-    void newContactFilteredChanged(const bool filtered);
-
-    void contactsPopulated(const Contacts &contacts, QPrivateSignal);
-    void contactAvatarUrlNotFound(const Contact::Id &contactId, QPrivateSignal) const;
-
-private:
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
-
-    void setContacts(const Contacts &contacts);
-    void checkNewContactFiltered();
-    void loadAvatarUrl(const Contact::Id &contactId);
-    void setAvatarUrl(const Contact &contact, const QUrl &url);
-
-    Optional<int> findRowByContactId(const Contact::Id &contactId) const;
-
-    Validator *m_validator;
-    ContactAvatarLoader *m_avatarLoader;
-    Contacts m_contacts;
-    bool m_newContactFiltered = false;
-};
+    qRegisterMetaType<FileCloudUploader *>("FileCloudUploader*");
 }
 
-#endif // VM_DISCOVEREDCONTACTSMODEL_H
+int FileCloudUploader::currentIndex() const
+{
+    return m_currentIndex;
+}
+
+DataSize FileCloudUploader::currentProcessedBytes() const
+{
+    return m_currentProcessedBytes;
+}
+
+DataSize FileCloudUploader::currentTotalBytes() const
+{
+    return m_currentTotalBytes;
+}
+
+QStringList FileCloudUploader::fileNames() const
+{
+    return m_fileNames;
+}
+
+void FileCloudUploader::setCurrentIndex(const int &index)
+{
+    if (m_currentIndex != index) {
+        m_currentIndex = index;
+        emit currentIndexChanged(m_currentIndex);
+    }
+}
+
+void FileCloudUploader::setCurrentProcessedBytes(const DataSize &bytes)
+{
+    if (m_currentProcessedBytes != bytes) {
+        m_currentProcessedBytes = bytes;
+        emit currentProcessedBytesChanged(m_currentProcessedBytes);
+    }
+}
+
+void FileCloudUploader::setCurrentTotalBytes(const DataSize &bytes)
+{
+    if (m_currentTotalBytes != bytes) {
+        m_currentTotalBytes = bytes;
+        emit currentTotalBytesChanged(m_currentTotalBytes);
+    }
+}
+
+

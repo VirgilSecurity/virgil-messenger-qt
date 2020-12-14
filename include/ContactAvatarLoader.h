@@ -32,59 +32,35 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_DISCOVEREDCONTACTSMODEL_H
-#define VM_DISCOVEREDCONTACTSMODEL_H
+#ifndef VM_CONTACTAVATARLOADER_H
+#define VM_CONTACTAVATARLOADER_H
 
-#include "ListModel.h"
+#include <QTimer>
+
 #include "VSQCommon.h"
 
 namespace vm
 {
-class ContactAvatarLoader;
-class Validator;
-
-class DiscoveredContactsModel : public ListModel
+class ContactAvatarLoader : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(bool newContactFiltered MEMBER m_newContactFiltered NOTIFY newContactFilteredChanged)
 
 public:
-    enum Roles
-    {
-        NameRole = Qt::UserRole,
-        DetailsRole,
-        AvatarUrlRole,
-        LastSeenActivityRole,
-        FilterRole
-    };
+    explicit ContactAvatarLoader(QObject *parent);
 
-    DiscoveredContactsModel(Validator *validator, QObject *parent);
-
-    void reload();
+    void load(Contact &contact);
+    void load(Contacts &contacts, int maxLimit);
 
 signals:
-    void newContactFilteredChanged(const bool filtered);
-
-    void contactsPopulated(const Contacts &contacts, QPrivateSignal);
-    void contactAvatarUrlNotFound(const Contact::Id &contactId, QPrivateSignal) const;
+    void loaded(const Contact &contact, const QUrl &url);
 
 private:
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
+    bool canLoad(Contact &contact);
+    void processLoad();
 
-    void setContacts(const Contacts &contacts);
-    void checkNewContactFiltered();
-    void loadAvatarUrl(const Contact::Id &contactId);
-    void setAvatarUrl(const Contact &contact, const QUrl &url);
-
-    Optional<int> findRowByContactId(const Contact::Id &contactId) const;
-
-    Validator *m_validator;
-    ContactAvatarLoader *m_avatarLoader;
     Contacts m_contacts;
-    bool m_newContactFiltered = false;
+    QTimer m_timer;
 };
 }
 
-#endif // VM_DISCOVEREDCONTACTSMODEL_H
+#endif // VM_CONTACTAVATARLOADER_H

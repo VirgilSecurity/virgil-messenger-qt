@@ -49,7 +49,6 @@ class Validator : public QObject
     Q_PROPERTY(QRegularExpressionValidator *rePhone MEMBER m_rePhone CONSTANT)
     Q_PROPERTY(QRegularExpressionValidator *reEmail MEMBER m_reEmail CONSTANT)
 
-
 public:
     explicit Validator(QObject *parent);
     ~Validator() override;

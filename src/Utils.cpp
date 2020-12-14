@@ -477,11 +477,36 @@ bool Utils::readImage(QImageReader *reader, QImage *image)
     return true;
 }
 
-Contacts Utils::getDeviceContacts()
+Contacts Utils::getDeviceContacts(const Contacts &cachedContacts)
+{
+    Contacts contacts;
+#ifdef VS_ANDROID
+    contacts = VSQAndroid::getContacts();
+#endif // VS_ANDROID
+    if (!contacts.empty() && !cachedContacts.empty()) {
+        // Load avatar information from cache
+        std::map<QVariant, Contact> cache;
+        for (const auto &c : cachedContacts) {
+            cache[c.platformId] = c;
+        }
+        for (auto &c : contacts) {
+            const auto it = cache.find(c.platformId);
+            if (it == cache.cend()) {
+                continue;
+            }
+            c.avatarUrl = it->second.avatarUrl;
+            c.avatarUrlRequested = it->second.avatarUrlRequested;
+        }
+    }
+    return contacts;
+}
+
+QUrl Utils::getContactAvatarUrl(const Contact &contact)
 {
 #ifdef VS_ANDROID
-    return VSQAndroid::getContacts();
+    return VSQAndroid::getContactAvatarUrl(contact);
 #else
-    return {};
-#endif
+    Q_UNUSED(contact)
+    return QUrl();
+#endif // VS_ANDROID
 }

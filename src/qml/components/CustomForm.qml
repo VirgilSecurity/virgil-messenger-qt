@@ -10,20 +10,11 @@ Item {
 
     default property alias children: formContainer.children
     property bool isLoading: false
-    property bool isCentered: true
-    property var formSpacing: Theme.spacing
 
-    ColumnLayout {
+    Item {
         id: formContainer
+        anchors.fill: parent
         visible: !isLoading
-
-        anchors {
-            verticalCenter: isCentered ? parent.verticalCenter : undefined
-            left: parent.left
-            right: parent.right
-        }
-
-        spacing: Theme.spacing
     }
 
     // TODO: I don't like this eather, but let's

@@ -43,9 +43,10 @@
 #include "models/ChatsModel.h"
 #include "models/DiscoveredContactsModel.h"
 #include "models/FileCloudModel.h"
+#include "models/FileCloudUploader.h"
+#include "models/FileLoader.h"
 #include "models/MessagesModel.h"
 #include "models/MessagesQueue.h"
-#include "models/FileLoader.h"
 
 using namespace vm;
 
@@ -57,6 +58,7 @@ Models::Models(VSQMessenger *messenger, Settings *settings, Validator *validator
     , m_discoveredContacts(new DiscoveredContactsModel(validator, this))
     , m_messages(new MessagesModel(this))
     , m_fileCloud(new FileCloudModel(settings, this))
+    , m_fileCloudUploader(new FileCloudUploader(this))
     , m_fileLoader(new FileLoader(messenger->xmpp(), networkAccessManager, this))
     , m_messagesQueue(new MessagesQueue(settings, messenger, userDatabase, m_fileLoader, nullptr))
 {
@@ -115,6 +117,16 @@ const FileCloudModel *Models::fileCloud() const
 FileCloudModel *Models::fileCloud()
 {
     return m_fileCloud;
+}
+
+const FileCloudUploader *Models::fileCloudUploader() const
+{
+    return m_fileCloudUploader;
+}
+
+FileCloudUploader *Models::fileCloudUploader()
+{
+    return m_fileCloudUploader;
 }
 
 const FileLoader *Models::fileLoader() const

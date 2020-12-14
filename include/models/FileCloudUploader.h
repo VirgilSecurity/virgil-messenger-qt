@@ -32,59 +32,48 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_DISCOVEREDCONTACTSMODEL_H
-#define VM_DISCOVEREDCONTACTSMODEL_H
+#ifndef VM_FILECLOUDUPLOADER_H
+#define VM_FILECLOUDUPLOADER_H
 
-#include "ListModel.h"
+#include <QObject>
 #include "VSQCommon.h"
+
 
 namespace vm
 {
-class ContactAvatarLoader;
-class Validator;
-
-class DiscoveredContactsModel : public ListModel
+class FileCloudUploader : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(bool newContactFiltered MEMBER m_newContactFiltered NOTIFY newContactFilteredChanged)
+
+    Q_PROPERTY(int currentIndex READ currentIndex NOTIFY currentIndexChanged)
+    Q_PROPERTY(DataSize currentProcessedBytes READ currentProcessedBytes WRITE setCurrentProcessedBytes NOTIFY currentProcessedBytesChanged)
+    Q_PROPERTY(DataSize currentTotalBytes READ currentTotalBytes NOTIFY currentTotalBytesChanged)
+    Q_PROPERTY(QStringList fileNames READ fileNames NOTIFY fileNamesChanged)
 
 public:
-    enum Roles
-    {
-        NameRole = Qt::UserRole,
-        DetailsRole,
-        AvatarUrlRole,
-        LastSeenActivityRole,
-        FilterRole
-    };
+    FileCloudUploader(QObject *parent);
 
-    DiscoveredContactsModel(Validator *validator, QObject *parent);
+    int currentIndex() const;
+    DataSize currentProcessedBytes() const;
+    DataSize currentTotalBytes() const;
+    QStringList fileNames() const;
 
-    void reload();
+    void setCurrentIndex(const int &index);
+    void setCurrentProcessedBytes(const DataSize &bytes);
+    void setCurrentTotalBytes(const DataSize &bytes);
 
 signals:
-    void newContactFilteredChanged(const bool filtered);
-
-    void contactsPopulated(const Contacts &contacts, QPrivateSignal);
-    void contactAvatarUrlNotFound(const Contact::Id &contactId, QPrivateSignal) const;
+    void currentIndexChanged(const int &index);
+    void currentProcessedBytesChanged(const DataSize &bytes);
+    void currentTotalBytesChanged(const DataSize &bytes);
+    void fileNamesChanged(const QStringList &fileNames);
 
 private:
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
-
-    void setContacts(const Contacts &contacts);
-    void checkNewContactFiltered();
-    void loadAvatarUrl(const Contact::Id &contactId);
-    void setAvatarUrl(const Contact &contact, const QUrl &url);
-
-    Optional<int> findRowByContactId(const Contact::Id &contactId) const;
-
-    Validator *m_validator;
-    ContactAvatarLoader *m_avatarLoader;
-    Contacts m_contacts;
-    bool m_newContactFiltered = false;
+    QStringList m_fileNames;
+    int m_currentIndex;
+    int m_currentProcessedBytes;
+    int m_currentTotalBytes;
 };
 }
 
-#endif // VM_DISCOVEREDCONTACTSMODEL_H
+#endif // VM_FILECLOUDUPLOADER_H

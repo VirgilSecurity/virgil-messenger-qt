@@ -32,59 +32,64 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_DISCOVEREDCONTACTSMODEL_H
-#define VM_DISCOVEREDCONTACTSMODEL_H
+#include "ContactAvatarLoader.h"
 
-#include "ListModel.h"
-#include "VSQCommon.h"
+#include <QtConcurrent>
 
-namespace vm
+#include "Utils.h"
+
+using namespace vm;
+
+ContactAvatarLoader::ContactAvatarLoader(QObject *parent)
+    : QObject(parent)
 {
-class ContactAvatarLoader;
-class Validator;
-
-class DiscoveredContactsModel : public ListModel
-{
-    Q_OBJECT
-    Q_PROPERTY(bool newContactFiltered MEMBER m_newContactFiltered NOTIFY newContactFilteredChanged)
-
-public:
-    enum Roles
-    {
-        NameRole = Qt::UserRole,
-        DetailsRole,
-        AvatarUrlRole,
-        LastSeenActivityRole,
-        FilterRole
-    };
-
-    DiscoveredContactsModel(Validator *validator, QObject *parent);
-
-    void reload();
-
-signals:
-    void newContactFilteredChanged(const bool filtered);
-
-    void contactsPopulated(const Contacts &contacts, QPrivateSignal);
-    void contactAvatarUrlNotFound(const Contact::Id &contactId, QPrivateSignal) const;
-
-private:
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
-
-    void setContacts(const Contacts &contacts);
-    void checkNewContactFiltered();
-    void loadAvatarUrl(const Contact::Id &contactId);
-    void setAvatarUrl(const Contact &contact, const QUrl &url);
-
-    Optional<int> findRowByContactId(const Contact::Id &contactId) const;
-
-    Validator *m_validator;
-    ContactAvatarLoader *m_avatarLoader;
-    Contacts m_contacts;
-    bool m_newContactFiltered = false;
-};
+    m_timer.setSingleShot(true);
+    m_timer.setInterval(100);
+    connect(&m_timer, &QTimer::timeout, this, &ContactAvatarLoader::processLoad);
 }
 
-#endif // VM_DISCOVEREDCONTACTSMODEL_H
+void ContactAvatarLoader::load(Contact &contact)
+{
+    if (canLoad(contact)) {
+        m_contacts.push_back(contact);
+        if (!m_timer.isActive()) {
+            m_timer.start();
+        }
+    }
+}
+
+void ContactAvatarLoader::load(Contacts &contacts, int maxLimit)
+{
+    const auto s = qMin<int>(maxLimit, m_contacts.size());
+    for (int i = 0; i < s; ++i) {
+        load(contacts[i]);
+    }
+}
+
+bool ContactAvatarLoader::canLoad(Contact &contact)
+{
+    if (contact.avatarUrlRequested) {
+        return false;
+    }
+    contact.avatarUrlRequested = true;
+    for (auto &c : m_contacts) {
+        if (c.id == contact.id) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void ContactAvatarLoader::processLoad()
+{
+    Contacts contacts;
+    std::swap(contacts, m_contacts);
+    QtConcurrent::run([=]() {
+        for (auto &contact : contacts) {
+            const auto url = Utils::getContactAvatarUrl(contact);
+            if (!url.isEmpty()) {
+                emit loaded(contact, url);
+            }
+        }
+    });
+}

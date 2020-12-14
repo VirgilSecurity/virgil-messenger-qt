@@ -7,7 +7,7 @@ import "./CommonHelpers"
 Item {
     id: avatar
     property string nickname
-    property url avatarUrl
+    property alias avatarUrl: originalImage.source
     property alias diameter: avatar.width
     property alias content: textInCircle.content
     property alias pointSize: textInCircle.pointSize
@@ -34,7 +34,7 @@ Item {
             id: originalImage
             anchors.fill: parent
             source: avatarUrl
-            mipmap: true
+            smooth: true
             asynchronous: true
             fillMode: Image.PreserveAspectCrop
             visible: false

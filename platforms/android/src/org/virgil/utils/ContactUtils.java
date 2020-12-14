@@ -73,7 +73,7 @@ public class ContactUtils
         return phone;
     }
 
-    public static String getContactPhotoUrl(long contactId, boolean isThumbnail, Context context)
+    private static String getContactPhotoUrl(long contactId, boolean isThumbnail, Context context)
     {
         ContentResolver cr = context.getContentResolver();
         Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
@@ -105,7 +105,7 @@ public class ContactUtils
                 try {
                     AssetFileDescriptor fd = cr.openAssetFileDescriptor(displayPhotoUri, "r");
                     try (InputStream is = fd.createInputStream();
-                         OutputStream os = new FileOutputStream(photoFile)) {
+                        OutputStream os = new FileOutputStream(photoFile)) {
                         // Copy image to cache directory
                         final byte[] buffer = new byte[1024 * 4];
                         int n = 0;
@@ -120,15 +120,21 @@ public class ContactUtils
             }
         }
 
-        if (photoFile.exists()) {
+        if (photoFile.exists() && photoFile.length() > 0) {
             File pngFile = convertToPng(photoFile);
             if (pngFile != null) {
                 photoFile.delete();
                 photoFile = pngFile;
+                return photoFile.getPath();
             }
         }
 
-        return photoFile.getPath();
+        return null;
+    }
+
+    public static String getContactThumbnailUrl(Context context, String contactId)
+    {
+        return getContactPhotoUrl(Long.parseLong(contactId), true, context);
     }
 
     private static String notNullStr(String input)
@@ -158,13 +164,8 @@ public class ContactUtils
                 String id = cursor.getString(idColumnIndex);
                 String name = cursor.getString(cursor.getColumnIndex(DISPLAY_NAME));
                 String email = notNullStr(getContactEmail(id, cr));
-                //Log.i(TAG, "email " + email);
                 String phone = notNullStr(getContactPhone(id, cursor, cr));
-                //Log.i(TAG, "phone " + phone);
-                //String photo = notNullStr(getContactPhotoUrl(cursor.getLong(idColumnIndex), true, context));
-                String photo = "";
-                //Log.i(TAG, "photo " + photo);
-                list += name + sep + phone + sep + email + sep + photo + sep;
+                list += name + sep + phone + sep + email + sep + id + sep;
             } while (cursor.moveToNext());
             cursor.close();
         }
@@ -194,7 +195,6 @@ public class ContactUtils
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inPreferredConfig = Bitmap.Config.ARGB_8888;
             Bitmap bitmap = BitmapFactory.decodeFile(photoFile.getPath(), options);
-
             File pngFile = new File(photoFile.getPath()+ ".png");
             OutputStream os = new FileOutputStream(pngFile.getPath());
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, os);

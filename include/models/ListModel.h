@@ -41,16 +41,26 @@ class QSortFilterProxyModel;
 
 namespace vm
 {
+class ListSelectionModel;
+
 class ListModel : public QAbstractListModel
 {
     Q_OBJECT
     Q_PROPERTY(QSortFilterProxyModel *proxy MEMBER m_proxy CONSTANT)
+    Q_PROPERTY(ListSelectionModel *selection MEMBER m_selection CONSTANT)
     Q_PROPERTY(QString filter MEMBER m_filter WRITE setFilter NOTIFY filterChanged)
 
 public:
     explicit ListModel(QObject *parent);
 
     QString filter() const;
+
+    QModelIndex sourceIndex(const int proxyRow) const;
+    virtual QVariant item(const QModelIndex &index) const;
+
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
+    QHash<int, QByteArray> unitedRoleNames(const QHash<int, QByteArray> &names) const;
 
 signals:
     void filterChanged(const QString &filter);
@@ -61,8 +71,10 @@ protected:
 
 private:
     void setFilter(const QString &filter);
+    void onSelectionChanged(const QList<QModelIndex> &indices);
 
     QSortFilterProxyModel *m_proxy;
+    ListSelectionModel *m_selection;
     QString m_filter;
 };
 }

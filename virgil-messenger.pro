@@ -110,6 +110,7 @@ HEADERS += \
         include/KeyboardEventFilter.h \
         include/Validator.h \
         include/Core.h \
+        include/ContactAvatarLoader.h \
         # Controllers
         include/controllers/AttachmentsController.h \
         include/controllers/ChatsController.h \
@@ -166,8 +167,10 @@ HEADERS += \
         include/models/ChatsModel.h \
         include/models/DiscoveredContactsModel.h \
         include/models/FileCloudModel.h \
+        include/models/FileCloudUploader.h \
         include/models/FileLoader.h \
         include/models/ListModel.h \
+        include/models/ListSelectionModel.h \
         include/models/MessagesModel.h \
         include/models/MessagesQueue.h \
         include/models/Models.h \
@@ -221,6 +224,7 @@ SOURCES += \
         src/KeyboardEventFilter.cpp \
         src/Validator.cpp \
         src/Core.cpp \
+        src/ContactAvatarLoader.cpp \
         # Controllers
         src/controllers/AttachmentsController.cpp \
         src/controllers/ChatsController.cpp \
@@ -271,8 +275,10 @@ SOURCES += \
         src/models/ChatsModel.cpp \
         src/models/DiscoveredContactsModel.cpp \
         src/models/FileCloudModel.cpp \
+        src/models/FileCloudUploader.cpp \
         src/models/FileLoader.cpp \
         src/models/ListModel.cpp \
+        src/models/ListSelectionModel.cpp \
         src/models/MessagesModel.cpp \
         src/models/MessagesQueue.cpp \
         src/models/Models.cpp \
