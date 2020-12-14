@@ -243,6 +243,17 @@ OperationPage {
         }
     }
 
+    ImageButton {
+        image: "Arrow-Right"
+        backgroundColor: Theme.contactPressedColor
+        anchors {
+            right: parent.right
+            bottom: parent.bottom
+            rightMargin: Theme.margin
+            bottomMargin: Theme.margin * 3
+        }
+    }
+
     function selectContact(index) {
         let item = contactsModel.get(index)
         if (item['selected'] === false) {
