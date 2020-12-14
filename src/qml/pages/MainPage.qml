@@ -33,7 +33,7 @@ Page {
         }
 
         Action {
-            text: qsTr("New group chat")
+            text: qsTr("New group")
             enabled: isChatList
             onTriggered: appState.requestNewGroupChat()
         }

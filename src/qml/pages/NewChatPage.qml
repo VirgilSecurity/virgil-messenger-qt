@@ -32,58 +32,62 @@ OperationPage {
         title: qsTr("New chat")
     }
 
-    Search {
-        id: contactSearch
-        anchors {
-            top: parent.top
-            left: parent.left
-            right: parent.right
-            margins: Theme.margin
-        }
-        height: defaultSearchHeight
-        state: "opened"
-        searchPlaceholder: qsTr("Search contact")
-        onClosed: {
-            contactSearch.search = ""
-            reject()
-        }
-        onAccepted: {
-            accept()
-        }
-    }
+    CustomForm {
+        id: form
 
-    SelectContactsList {
-        id: searchResultsItem
-        anchors {
-            top: contactSearch.bottom
-            left: parent.left
-            right: parent.right
-            bottom: parent.bottom
-            topMargin: 1
-            bottomMargin: defaultChatHeight
-        }
-    }
-
-    RowLayout {
-        anchors {
-            top: searchResultsItem.bottom
-            bottom: parent.bottom
-            left: parent.left
-            right: parent.right
+        Search {
+            id: contactSearch
+            anchors {
+                top: parent.top
+                left: parent.left
+                right: parent.right
+                margins: Theme.margin
+            }
+            height: defaultSearchHeight
+            state: "opened"
+            searchPlaceholder: qsTr("Search contact")
+            onClosed: {
+                contactSearch.search = ""
+                reject()
+            }
+            onAccepted: {
+                accept()
+            }
         }
 
-        Label {
-            text: qsTr("Server")
-            color: Theme.primaryTextColor
-            Layout.fillWidth: true
-            horizontalAlignment: Text.AlignHCenter
+        SelectContactsList {
+            id: searchResultsItem
+            anchors {
+                top: contactSearch.bottom
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+                topMargin: 1
+                bottomMargin: defaultChatHeight
+            }
         }
 
-        Label {
-            text: serverName
-            color: Theme.secondaryTextColor
-            Layout.fillWidth: true
-            horizontalAlignment: Text.AlignHCenter
+        RowLayout {
+            anchors {
+                top: searchResultsItem.bottom
+                bottom: parent.bottom
+                left: parent.left
+                right: parent.right
+            }
+
+            Label {
+                text: qsTr("Server")
+                color: Theme.primaryTextColor
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
+            }
+
+            Label {
+                text: serverName
+                color: Theme.secondaryTextColor
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
+            }
         }
     }
 
