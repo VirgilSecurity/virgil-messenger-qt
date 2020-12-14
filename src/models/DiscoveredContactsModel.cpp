@@ -34,97 +34,34 @@
 
 #include "models/DiscoveredContactsModel.h"
 
-#include <QSortFilterProxyModel>
 #include <QtConcurrent>
 
-#include "ContactAvatarLoader.h"
 #include "Settings.h"
 #include "Validator.h"
 #include "Utils.h"
+#include "models/ListSelectionModel.h"
 
 using namespace vm;
 
 DiscoveredContactsModel::DiscoveredContactsModel(Validator *validator, QObject *parent)
-    : ListModel(parent)
+    : ContactsModel(parent)
     , m_validator(validator)
-    , m_avatarLoader(new ContactAvatarLoader(this))
+    , m_selectedContacts(new ContactsModel(this))
 {
     qRegisterMetaType<DiscoveredContactsModel *>("DiscoveredContactsModel*");
 
-    proxy()->setSortRole(NameRole);
-    proxy()->sort(0, Qt::AscendingOrder);
-    proxy()->setFilterRole(FilterRole);
-
+    connect(this, &ContactsModel::contactsChanged, this, &DiscoveredContactsModel::checkNewContactFiltered);
+    connect(selection(), &ListSelectionModel::changed, this, &DiscoveredContactsModel::processSelection);
     connect(this, &DiscoveredContactsModel::filterChanged, this, &DiscoveredContactsModel::checkNewContactFiltered);
     connect(this, &DiscoveredContactsModel::contactsPopulated, this, &DiscoveredContactsModel::setContacts);
-    connect(this, &DiscoveredContactsModel::avatarUrlNotFound, this, &DiscoveredContactsModel::loadAvatarUrl);
-    connect(m_avatarLoader, &ContactAvatarLoader::loaded, this, &DiscoveredContactsModel::setAvatarUrl);
 }
 
 void DiscoveredContactsModel::reload()
 {
     QtConcurrent::run([=]() {
-        const auto contacts = Utils::getDeviceContacts(m_contacts);
+        const auto contacts = Utils::getDeviceContacts(getContacts());
         emit contactsPopulated(contacts, QPrivateSignal());
     });
-}
-
-int DiscoveredContactsModel::rowCount(const QModelIndex &parent) const
-{
-    Q_UNUSED(parent)
-    return m_contacts.size();
-}
-
-QVariant DiscoveredContactsModel::data(const QModelIndex &index, int role) const
-{
-    const auto &info = m_contacts[index.row()];
-    switch (role) {
-    case NameRole:
-        return info.name;
-    case DetailsRole:
-    {
-        if (info.email.isEmpty()) {
-            return info.phoneNumber.isEmpty() ? tr("No phone/email") : info.phoneNumber;
-        }
-        else {
-            return info.phoneNumber.isEmpty() ? info.email : (info.phoneNumber + QLatin1String(" / ") + info.email);
-        }
-    }
-    case AvatarUrlRole:
-    {
-        const auto &url = info.avatarUrl;
-        if (url.isEmpty()) {
-            emit avatarUrlNotFound(info.id, QPrivateSignal());
-        }
-        return url;
-    }
-    case LastSeenActivityRole:
-        return info.lastSeenActivity;
-    case FilterRole:
-        return info.name + QLatin1Char('\n') + info.email + QLatin1Char('\n') + info.phoneNumber;
-    default:
-        return QVariant();
-    }
-}
-
-QHash<int, QByteArray> DiscoveredContactsModel::roleNames() const
-{
-    return {
-        { NameRole, "name" },
-        { DetailsRole, "details" },
-        { AvatarUrlRole, "avatarUrl" },
-        { LastSeenActivityRole, "lastSeenActivity" },
-        // Search role is hidden
-    };
-}
-
-void DiscoveredContactsModel::setContacts(const Contacts &contacts)
-{
-    beginResetModel();
-    m_contacts = contacts;
-    endResetModel();
-    checkNewContactFiltered();
-    m_avatarLoader->load(m_contacts, 10);
 }
 
 void DiscoveredContactsModel::checkNewContactFiltered()
@@ -132,7 +69,7 @@ void DiscoveredContactsModel::checkNewContactFiltered()
     const auto filter = this->filter();
     bool filtered = m_validator->isValidUsername(filter);
     if (filtered) {
-        for (auto &contact : m_contacts) {
+        for (const auto &contact : getContacts()) {
             if (contact.name == filter) {
                 filtered = false;
                 break;
@@ -147,30 +84,15 @@ void DiscoveredContactsModel::checkNewContactFiltered()
     emit newContactFilteredChanged(filtered);
 }
 
-void DiscoveredContactsModel::loadAvatarUrl(const Contact::Id &contactId)
+void DiscoveredContactsModel::processSelection(const QList<QModelIndex> &indices)
 {
-    if (const auto row = findRowByContactId(contactId)) {
-        m_avatarLoader->load(m_contacts[*row]);
-    }
-}
-
-void DiscoveredContactsModel::setAvatarUrl(const Contact &contact, const QUrl &url)
-{
-    if (const auto row = findRowByContactId(contact.id)) {
-        m_contacts[*row].avatarUrl = url;
-        const auto idx = index(*row);
-        emit dataChanged(idx, idx, { AvatarUrlRole });
-    }
-}
-
-Optional<int> DiscoveredContactsModel::findRowByContactId(const Contact::Id &contactId) const
-{
-    int row = -1;
-    for (auto &info : m_contacts) {
-        ++row;
-        if (info.id == contactId) {
-            return row;
+    for (const auto &i : indices) {
+        const auto &c = getContact(i.row());
+        if (m_selectedContacts->hasContact(c)) {
+            m_selectedContacts->removeContact(c);
+        }
+        else {
+            m_selectedContacts->addContact(c);
         }
     }
-    return NullOptional;
 }

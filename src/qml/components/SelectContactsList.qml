@@ -7,17 +7,16 @@ import "../components"
 import "../theme"
 
 Item {
-    id: searchContactsList
+    id: root
+    property var model: models.discoveredContacts
+
     property real headerHeight: 20
     property real headerOpacity: 0
     readonly property real expandedHeaderHeight: 90
-    property alias contactListView: contactListView
-    property alias modelCount: contactListView.count
-    property alias model: contactListView.model
-    property bool multiselect: false
     readonly property int checkCircleMargin: 2
 
     state: {
+        // FIXME(fpohtmeh): move this check to C++
         if (search !== controllers.users.userId) {
             if (models.discoveredContacts.newContactFiltered) {
                 return "show header"
@@ -38,7 +37,7 @@ Item {
         State {
             name: "show header"
             PropertyChanges {
-                target: searchContactsList
+                target: root
                 headerHeight: expandedHeaderHeight
                 headerOpacity: 1
             }
@@ -46,7 +45,7 @@ Item {
         State {
             name: "hide header"
             PropertyChanges {
-                target: searchContactsList
+                target: root
                 headerHeight: 20
                 headerOpacity: 0
             }
@@ -73,14 +72,17 @@ Item {
 
     ListView {
         id: contactListView
+
         signal placeholderClicked()
 
         anchors.fill: parent
         spacing: Theme.smallSpacing
         clip: true
+        focus: true
+
+        model: root.model.proxy
         header: contactListHeader
         delegate: contactListComponent
-        focus: true
         footer: Item {
             width: width
             height: Theme.spacing
@@ -92,8 +94,8 @@ Item {
 
         Item {
             width: parent.width
-            height: searchContactsList.headerHeight
-            opacity: searchContactsList.headerOpacity
+            height: root.headerHeight
+            opacity: root.headerOpacity
             enabled: state == "show header"
 
             ListDelegate {
@@ -159,7 +161,7 @@ Item {
                         height: width
                         radius: width
                         color: Theme.mainBackgroundColor
-                        visible: selected
+                        visible: model.isSelected
 
                         Rectangle {
                             anchors {
@@ -205,9 +207,10 @@ Item {
                 }
 
                 onClicked: {
-                    if (multiselect === true) {
-                        selectContact(index)
-                    } else {
+                    if (root.model.selection.multiSelect) {
+                        root.model.selection.toggle(index)
+                    }
+                    else {
                         accept()
                     }
                 }

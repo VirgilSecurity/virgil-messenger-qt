@@ -35,29 +35,19 @@
 #ifndef VM_DISCOVEREDCONTACTSMODEL_H
 #define VM_DISCOVEREDCONTACTSMODEL_H
 
-#include "ListModel.h"
-#include "VSQCommon.h"
+#include "ContactsModel.h"
 
 namespace vm
 {
-class ContactAvatarLoader;
 class Validator;
 
-class DiscoveredContactsModel : public ListModel
+class DiscoveredContactsModel : public ContactsModel
 {
     Q_OBJECT
+    Q_PROPERTY(ContactsModel *selectedContacts MEMBER m_selectedContacts CONSTANT)
     Q_PROPERTY(bool newContactFiltered MEMBER m_newContactFiltered NOTIFY newContactFilteredChanged)
 
 public:
-    enum Roles
-    {
-        NameRole = Qt::UserRole,
-        DetailsRole,
-        AvatarUrlRole,
-        LastSeenActivityRole,
-        FilterRole
-    };
-
     DiscoveredContactsModel(Validator *validator, QObject *parent);
 
     void reload();
@@ -66,24 +56,13 @@ signals:
     void newContactFilteredChanged(const bool filtered);
 
     void contactsPopulated(const Contacts &contacts, QPrivateSignal);
-    void avatarUrlNotFound(const Contact::Id &contactId, QPrivateSignal) const;
 
 private:
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
-
-    void setContacts(const Contacts &contacts);
-
     void checkNewContactFiltered();
-    void loadAvatarUrl(const Contact::Id &contactId);
-    void setAvatarUrl(const Contact &contact, const QUrl &url);
-
-    Optional<int> findRowByContactId(const Contact::Id &contactId) const;
+    void processSelection(const QList<QModelIndex> &indices);
 
     Validator *m_validator;
-    ContactAvatarLoader *m_avatarLoader;
-    Contacts m_contacts;
+    ContactsModel *m_selectedContacts;
     bool m_newContactFiltered = false;
 };
 }

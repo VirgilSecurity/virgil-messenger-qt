@@ -65,36 +65,6 @@ void ListSelectionModel::clear()
     QItemSelectionModel::clearSelection();
 }
 
-bool ListSelectionModel::hasSelection() const
-{
-    return m_hasSelection;
-}
-
-QList<QVariant> ListSelectionModel::items() const
-{
-    QList<QVariant> result;
-    for (auto &i : selectedIndexes()) {
-        result << m_sourceModel->item(i);
-    }
-    return result;
-}
-
-void ListSelectionModel::onChanged(const QItemSelection &selected, const QItemSelection &deselected)
-{
-    // Update hasSelection
-    const auto has = QItemSelectionModel::hasSelection();
-    if (has != m_hasSelection) {
-        m_hasSelection = has;
-        emit hasSelectionChanged(has);
-    }
-    // Collect and order changed indices
-    auto indices = selected.indexes() + deselected.indexes();
-    std::sort(indices.begin(), indices.end(), [](const QModelIndex &a, const QModelIndex &b) {
-        return a.row() < b.row();
-    });
-    emit changed(indices);
-}
-
 void ListSelectionModel::setMultiSelect(const bool multiSelect)
 {
     if (multiSelect == m_multiSelect) {
@@ -102,4 +72,40 @@ void ListSelectionModel::setMultiSelect(const bool multiSelect)
     }
     m_multiSelect = multiSelect;
     emit multiSelectChanged(multiSelect);
+}
+
+bool ListSelectionModel::hasSelection() const
+{
+    return !m_indices.empty();
+}
+
+std::vector<QVariant> ListSelectionModel::items() const
+{
+    std::vector<QVariant> result;
+    for (auto &i : m_indices) {
+        result.push_back(m_sourceModel->item(i));
+    }
+    return result;
+}
+
+void ListSelectionModel::onChanged(const QItemSelection &selected, const QItemSelection &deselected)
+{
+    const auto hadSelection = this->hasSelection();
+    // Update indices
+    for (const auto &i : deselected.indexes()) {
+        m_indices.removeOne(i);
+    }
+    for (const auto &i : selected.indexes()) {
+        m_indices.push_back(i);
+    }
+    // Collect and order changed indices
+    auto indices = selected.indexes() + deselected.indexes();
+    std::sort(indices.begin(), indices.end(), [](const QModelIndex &a, const QModelIndex &b) {
+        return a.row() < b.row();
+    });
+    emit changed(indices);
+    //
+    if (hadSelection != this->hasSelection()) {
+        emit hasSelectionChanged(this->hasSelection());
+    }
 }

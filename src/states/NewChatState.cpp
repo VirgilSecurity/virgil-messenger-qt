@@ -36,6 +36,7 @@
 
 #include "controllers/ChatsController.h"
 #include "models/DiscoveredContactsModel.h"
+#include "models/ListSelectionModel.h"
 
 using namespace vm;
 
@@ -53,6 +54,7 @@ void NewChatState::onEntry(QEvent *event)
 {
     Q_UNUSED(event)
     m_contactsModel->reload();
+    m_contactsModel->selection()->setMultiSelect(false);
 }
 
 void NewChatState::processAddNewChat(const Contact::Id &contactId)

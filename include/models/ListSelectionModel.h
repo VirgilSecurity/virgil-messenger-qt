@@ -44,7 +44,7 @@ class ListModel;
 class ListSelectionModel : public QItemSelectionModel
 {
     Q_OBJECT
-    Q_PROPERTY(bool hasSelection MEMBER m_hasSelection NOTIFY hasSelectionChanged)
+    Q_PROPERTY(bool hasSelection READ hasSelection NOTIFY hasSelectionChanged)
     Q_PROPERTY(bool multiSelect MEMBER m_multiSelect WRITE setMultiSelect NOTIFY multiSelectChanged)
 
 public:
@@ -54,8 +54,10 @@ public:
     Q_INVOKABLE void toggle(const QVariant &proxyRow);
     Q_INVOKABLE void clear();
 
+    void setMultiSelect(const bool multiSelect);
+
     bool hasSelection() const;
-    QList<QVariant> items() const;
+    std::vector<QVariant> items() const;
 
 signals:
     void changed(const QList<QModelIndex> &indices);
@@ -65,10 +67,8 @@ signals:
 private:
     void onChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
-    void setMultiSelect(const bool multiSelect);
-
     ListModel *m_sourceModel;
-    bool m_hasSelection = false;
+    QList<QModelIndex> m_indices;
     bool m_multiSelect = false;
 };
 }

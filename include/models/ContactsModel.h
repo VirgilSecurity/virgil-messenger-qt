@@ -32,33 +32,59 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "states/NewGroupChatState.h"
+#ifndef VM_CONTACTSMODEL_H
+#define VM_CONTACTSMODEL_H
 
-#include "controllers/ChatsController.h"
-#include "models/DiscoveredContactsModel.h"
-#include "models/ListSelectionModel.h"
+#include "ListModel.h"
+#include "VSQCommon.h"
 
-using namespace vm;
-
-NewGroupChatState::NewGroupChatState(ChatsController *chatsController, DiscoveredContactsModel *contactsModel, QState *parent)
-    : OperationState(parent)
-    , m_chatsController(chatsController)
-    , m_contactsModel(contactsModel)
+namespace vm
 {
-    connect(chatsController, &ChatsController::chatOpened, this, &NewGroupChatState::operationFinished);
-    connect(chatsController, &ChatsController::errorOccurred, this, &NewGroupChatState::operationErrorOccurred);
-    connect(this, &NewGroupChatState::addNewChat, this, &NewGroupChatState::processAddNewChat);
+class ContactAvatarLoader;
+
+class ContactsModel : public ListModel
+{
+    Q_OBJECT
+
+public:
+    enum Roles
+    {
+        NameRole = Qt::UserRole,
+        DetailsRole,
+        AvatarUrlRole,
+        LastSeenActivityRole,
+        FilterRole
+    };
+
+    explicit ContactsModel(QObject *parent);
+
+    void setContacts(const Contacts &contacts);
+    const Contacts &getContacts() const;
+
+    const Contact &getContact(const int row) const;
+    void addContact(const Contact &contact);
+    void removeContact(const Contact &contact);
+    bool hasContact(const Contact &contact) const;
+
+signals:
+    void contactsChanged();
+
+    void avatarUrlNotFound(const Contact::Id &contactId, QPrivateSignal) const;
+
+protected:
+    Optional<int> findRowByContactId(const Contact::Id &contactId) const;
+
+private:
+    void loadAvatarUrl(const Contact::Id &contactId);
+    void setAvatarUrl(const Contact &contact, const QUrl &url);
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
+
+    Contacts m_contacts;
+    ContactAvatarLoader *m_avatarLoader;
+};
 }
 
-void NewGroupChatState::onEntry(QEvent *event)
-{
-    Q_UNUSED(event)
-    m_contactsModel->reload();
-    m_contactsModel->selection()->setMultiSelect(true);
-}
-
-void NewGroupChatState::processAddNewChat(const Contact::Id &contactId)
-{
-    emit operationStarted();
-    m_chatsController->createChat(contactId);
-}
+#endif // VM_CONTACTSMODEL_H

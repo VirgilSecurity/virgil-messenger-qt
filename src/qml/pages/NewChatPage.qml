@@ -14,7 +14,6 @@ OperationPage {
     readonly property var filterSource: models.discoveredContacts
     readonly property alias search: contactSearch.search
     property string previousSearch
-    readonly property int modelCount: searchResultsItem.modelCount
     property string serverName: "Default"
 
     readonly property int defaultSearchHeight: 40
@@ -63,7 +62,6 @@ OperationPage {
             topMargin: 1
             bottomMargin: defaultChatHeight
         }
-        model: models.discoveredContacts.proxy
     }
 
     RowLayout {
