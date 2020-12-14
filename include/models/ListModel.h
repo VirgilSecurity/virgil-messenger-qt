@@ -68,6 +68,8 @@ signals:
 protected:
     const QSortFilterProxyModel *proxy() const;
     QSortFilterProxyModel *proxy();
+    const ListSelectionModel *selection() const;
+    ListSelectionModel *selection();
 
 private:
     void setFilter(const QString &filter);

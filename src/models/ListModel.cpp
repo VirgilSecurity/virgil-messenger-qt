@@ -105,6 +105,16 @@ QSortFilterProxyModel *ListModel::proxy()
     return m_proxy;
 }
 
+const ListSelectionModel *ListModel::selection() const
+{
+    return m_selection;
+}
+
+ListSelectionModel *ListModel::selection()
+{
+    return m_selection;
+}
+
 void ListModel::setFilter(const QString &filter)
 {
     if (m_filter == filter) {

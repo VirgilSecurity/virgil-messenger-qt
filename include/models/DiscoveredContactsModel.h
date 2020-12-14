@@ -66,7 +66,7 @@ signals:
     void newContactFilteredChanged(const bool filtered);
 
     void contactsPopulated(const Contacts &contacts, QPrivateSignal);
-    void contactAvatarUrlNotFound(const Contact::Id &contactId, QPrivateSignal) const;
+    void avatarUrlNotFound(const Contact::Id &contactId, QPrivateSignal) const;
 
 private:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -74,6 +74,7 @@ private:
     QHash<int, QByteArray> roleNames() const override;
 
     void setContacts(const Contacts &contacts);
+
     void checkNewContactFiltered();
     void loadAvatarUrl(const Contact::Id &contactId);
     void setAvatarUrl(const Contact &contact, const QUrl &url);

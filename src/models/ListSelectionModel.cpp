@@ -94,3 +94,12 @@ void ListSelectionModel::onChanged(const QItemSelection &selected, const QItemSe
     });
     emit changed(indices);
 }
+
+void ListSelectionModel::setMultiSelect(const bool multiSelect)
+{
+    if (multiSelect == m_multiSelect) {
+        return;
+    }
+    m_multiSelect = multiSelect;
+    emit multiSelectChanged(multiSelect);
+}

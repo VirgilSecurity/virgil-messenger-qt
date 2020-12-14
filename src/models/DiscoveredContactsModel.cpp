@@ -57,7 +57,7 @@ DiscoveredContactsModel::DiscoveredContactsModel(Validator *validator, QObject *
 
     connect(this, &DiscoveredContactsModel::filterChanged, this, &DiscoveredContactsModel::checkNewContactFiltered);
     connect(this, &DiscoveredContactsModel::contactsPopulated, this, &DiscoveredContactsModel::setContacts);
-    connect(this, &DiscoveredContactsModel::contactAvatarUrlNotFound, this, &DiscoveredContactsModel::loadAvatarUrl);
+    connect(this, &DiscoveredContactsModel::avatarUrlNotFound, this, &DiscoveredContactsModel::loadAvatarUrl);
     connect(m_avatarLoader, &ContactAvatarLoader::loaded, this, &DiscoveredContactsModel::setAvatarUrl);
 }
 
@@ -94,7 +94,7 @@ QVariant DiscoveredContactsModel::data(const QModelIndex &index, int role) const
     {
         const auto &url = info.avatarUrl;
         if (url.isEmpty()) {
-            emit contactAvatarUrlNotFound(info.id, QPrivateSignal());
+            emit avatarUrlNotFound(info.id, QPrivateSignal());
         }
         return url;
     }
@@ -142,6 +142,7 @@ void DiscoveredContactsModel::checkNewContactFiltered()
     if (filtered == m_newContactFiltered) {
         return;
     }
+    // FIXME(fpohtmeh): compare with current userId
     m_newContactFiltered = filtered;
     emit newContactFilteredChanged(filtered);
 }
