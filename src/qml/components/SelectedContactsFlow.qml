@@ -6,30 +6,31 @@ import "../components"
 import "../theme"
 
 FlowListView {
-    id: addedContactsView
+    id: root
     clip: true
     spacing: flowSpacing
     focus: true
 
-    readonly property int flowItemHeight: 30
-    readonly property int flowSpacing: 3
-    readonly property int lineWidth: 2
+    readonly property real recommendedHeight: flowItemHeight
+
+    readonly property real flowItemHeight: 30
+    readonly property real flowSpacing: 3
+    readonly property real lineWidth: 2
 
     delegate: Rectangle {
-        id: contactRec
         height: flowItemHeight
         width: row.width + row.spacing
-        color: addedContactsView.currentIndex === index ? Theme.buttonPrimaryColor : Theme.contactPressedColor
+        color: root.currentIndex === index ? Theme.buttonPrimaryColor : Theme.contactPressedColor
         radius: height
 
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                addedContactsView.focus = true
-                if (addedContactsView.currentIndex !== index) {
-                    addedContactsView.currentIndex = index
+                root.focus = true
+                if (root.currentIndex !== index) {
+                    root.currentIndex = index
                 } else {
-                    addedContactsView.currentIndex = -1
+                    root.currentIndex = -1
                 }
             }
         }
@@ -44,8 +45,8 @@ FlowListView {
                 Item {
                     height: flowItemHeight
                     width: height
-                    visible: addedContactsView.currentIndex === index
-                    enabled: addedContactsView.currentIndex === index
+                    visible: root.currentIndex === index
+                    enabled: root.currentIndex === index
                     Repeater {
                         model: 2
                         Rectangle {
@@ -61,8 +62,8 @@ FlowListView {
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
-                            addedContactsView.currentIndex = -1
-                            addedContactsView.model.remove(index)
+                            root.currentIndex = -1
+                            root.model.remove(index)
                         }
                     }
                 }
@@ -73,7 +74,7 @@ FlowListView {
                     avatarUrl: model.avatarUrl
                     diameter: flowItemHeight
                     anchors.verticalCenter: parent.verticalCenter
-                    visible: addedContactsView.currentIndex !== index
+                    visible: root.currentIndex !== index
                 }
             }
 
@@ -95,7 +96,7 @@ FlowListView {
 
     onFocusChanged: {
         if (!focus) {
-            addedContactsView.currentIndex = -1
+            root.currentIndex = -1
         }
     }
 }

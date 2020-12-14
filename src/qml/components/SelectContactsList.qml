@@ -8,13 +8,22 @@ import "../theme"
 
 Item {
     id: root
-    state: model.newContactFiltered ? "show header" : "hide header"
 
-    property real headerHeight: 20
-    property real headerOpacity: 0
-    readonly property real expandedHeaderHeight: 90
-    readonly property int checkCircleMargin: 2
-    property var model: models.discoveredContacts
+    state: d.model.filterHasNewContact ? "show header" : "hide header"
+    property string newContactText: ""
+
+    QtObject {
+        id: d
+
+        readonly property var model: models.discoveredContacts
+        property real headerHeight: defaultChatHeight
+        property real headerOpacity: 0
+        readonly property real defaultChatHeight: 50
+        readonly property real defaultHeaderHeight: 20
+        readonly property real expandedHeaderHeight: 90
+        readonly property real checkCircleMargin: 2
+        readonly property real selectionIconSize: 20
+    }
 
     onStateChanged: {
         if (state === "show header") {
@@ -26,16 +35,16 @@ Item {
         State {
             name: "show header"
             PropertyChanges {
-                target: root
-                headerHeight: expandedHeaderHeight
+                target: d
+                headerHeight: d.expandedHeaderHeight
                 headerOpacity: 1
             }
         },
         State {
             name: "hide header"
             PropertyChanges {
-                target: root
-                headerHeight: 20
+                target: d
+                headerHeight: d.defaultHeaderHeight
                 headerOpacity: 0
             }
         }
@@ -44,6 +53,7 @@ Item {
     transitions: [
         Transition {
             NumberAnimation {
+                target: d
                 properties: "headerHeight, headerOpacity"
                 easing.type: Easing.InExpo
                 duration: Theme.animationDuration
@@ -55,7 +65,7 @@ Item {
         id: flickListView
         target: contactListView
         property: "contentY"
-        to: -expandedHeaderHeight
+        to: -d.expandedHeaderHeight
         duration: Theme.animationDuration
     }
 
@@ -69,7 +79,7 @@ Item {
         clip: true
         focus: true
 
-        model: root.model.proxy
+        model: d.model.proxy
         header: contactListHeader
         delegate: contactListComponent
         footer: Item {
@@ -83,19 +93,19 @@ Item {
 
         Item {
             width: parent.width
-            height: root.headerHeight
-            opacity: root.headerOpacity
+            height: d.headerHeight
+            opacity: d.headerOpacity
             enabled: state == "show header"
 
             ListDelegate {
                 id: contactListDelegate
                 anchors.centerIn: parent
                 width: parent.width
-                height: defaultChatHeight
+                height: d.defaultChatHeight
 
                 Avatar {
                     id: avatar
-                    nickname: search ? contact : previousSearch
+                    nickname: root.newContactText
                     Layout.alignment: Qt.AlignVCenter
                 }
 
@@ -106,13 +116,13 @@ Item {
                     Text {
                         color: Theme.primaryTextColor
                         font.pointSize: UiHelper.fixFontSz(15)
-                        text: search.length === 0 ? previousSearch : contact
+                        text: root.newContactText
                     }
 
                     Text {
                         color: Theme.secondaryTextColor
                         font.pointSize: UiHelper.fixFontSz(12)
-                        text: qsTr("Click here to create chat")
+                        text: qsTr("Click here to select contact")
                         width: parent.width
                         elide: Text.ElideRight
                         textFormat: Text.RichText
@@ -130,77 +140,72 @@ Item {
         ListDelegate {
             id: contactListDelegate
             width: contactListView.width
-            height: defaultChatHeight
+            height: d.defaultChatHeight
 
-            Item {
+            Row {
                 width: parent.width
                 height: parent.height
-                Row {
-                    width: parent.width
-                    height: parent.height
-                    spacing: Theme.spacing
+                spacing: Theme.spacing
 
-                    add: Transition {
-                        NumberAnimation { property: "scale"; from: 0.9; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
-                        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
-                    }
+                add: Transition {
+                    NumberAnimation { property: "scale"; from: 0.9; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+                }
 
-                    move: Transition {
-                        NumberAnimation { properties: "x,y"; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
-                    }
+                move: Transition {
+                    NumberAnimation { properties: "x,y"; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+                }
 
-                    Rectangle {
-                        width: headerHeight
-                        height: width
-                        radius: height
-                        color: Theme.avatarBgColor
-                        visible: model.isSelected
-                        anchors.verticalCenter: parent.verticalCenter
+                // FIXME(fpohtmeh): replace with image
+                Item {
+                    width: d.selectionIconSize
+                    height: width
+                    visible: d.model.selection.hasSelection
+                    anchors.verticalCenter: parent.verticalCenter
 
-                        Repeater {
-                            model: 2
+                    Repeater {
+                        model: isSelected ? 2 : 0
 
-                            Rectangle {
-                                anchors.centerIn: parent
-                                width: parent.width * 0.6
-                                height: checkCircleMargin
-                                radius: height
-                                rotation: index ? 0 : 90
-                            }
+                        Rectangle {
+                            anchors.centerIn: parent
+                            width: parent.width * 0.6
+                            height: d.checkCircleMargin
+                            radius: height
+                            rotation: index ? 0 : 90
                         }
                     }
+                }
 
-                    Avatar {
-                        id: avatar
-                        nickname: model.name
-                        avatarUrl: model.avatarUrl
-                        anchors.verticalCenter: parent.verticalCenter
+                Avatar {
+                    id: avatar
+                    nickname: model.name
+                    avatarUrl: model.avatarUrl
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                Column {
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    Text {
+                        color: Theme.primaryTextColor
+                        font.pointSize: UiHelper.fixFontSz(15)
+                        text: model.name
                     }
 
-                    Column {
-                        anchors.verticalCenter: parent.verticalCenter
-
-                        Text {
-                            color: Theme.primaryTextColor
-                            font.pointSize: UiHelper.fixFontSz(15)
-                            text: model.name
-                        }
-
-                        Text {
-                            color: Theme.secondaryTextColor
-                            font.pointSize: UiHelper.fixFontSz(12)
-                            text: model.lastSeenActivity
-                            width: parent.width
-                            elide: Text.ElideRight
-                            textFormat: Text.RichText
-                        }
+                    Text {
+                        color: Theme.secondaryTextColor
+                        font.pointSize: UiHelper.fixFontSz(12)
+                        text: model.lastSeenActivity
+                        width: parent.width
+                        elide: Text.ElideRight
+                        textFormat: Text.RichText
                     }
                 }
             }
 
             onClicked: {
-                if (root.model.selection.multiSelect) {
-                    root.model.selection.toggle(index)
+                if (d.model.selection.multiSelect) {
+                    d.model.selection.toggle(index)
                 }
                 else {
                     accept()

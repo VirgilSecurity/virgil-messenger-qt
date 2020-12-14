@@ -50,9 +50,9 @@ DiscoveredContactsModel::DiscoveredContactsModel(Validator *validator, QObject *
 {
     qRegisterMetaType<DiscoveredContactsModel *>("DiscoveredContactsModel*");
 
-    connect(this, &ContactsModel::contactsChanged, this, &DiscoveredContactsModel::checkNewContactFiltered);
+    connect(this, &ContactsModel::contactsChanged, this, &DiscoveredContactsModel::checkFilterHasNewContact);
     connect(selection(), &ListSelectionModel::changed, this, &DiscoveredContactsModel::processSelection);
-    connect(this, &DiscoveredContactsModel::filterChanged, this, &DiscoveredContactsModel::checkNewContactFiltered);
+    connect(this, &DiscoveredContactsModel::filterChanged, this, &DiscoveredContactsModel::checkFilterHasNewContact);
     connect(this, &DiscoveredContactsModel::contactsPopulated, this, &DiscoveredContactsModel::setContacts);
     connect(this, &DiscoveredContactsModel::contactsPopulated, this, std::bind(&ContactsModel::setContacts, m_selectedContacts, Contacts()));
 }
@@ -70,29 +70,30 @@ void DiscoveredContactsModel::reload()
     });
 }
 
-void DiscoveredContactsModel::checkNewContactFiltered()
+void DiscoveredContactsModel::checkFilterHasNewContact()
 {
     const auto filter = this->filter();
-    bool filtered = m_validator->isValidUsername(filter) && filter != m_userId;
-    if (filtered) {
+    bool has = filter != m_userId && m_validator->isValidUsername(filter);
+    if (has) {
         for (const auto &contact : getContacts()) {
             if (contact.name == filter) {
-                filtered = false;
+                has = false;
                 break;
             }
         }
     }
-    if (filtered == m_newContactFiltered) {
+    if (has == m_filterHasNewContact) {
         return;
     }
-    m_newContactFiltered = filtered;
-    emit newContactFilteredChanged(filtered);
+    m_filterHasNewContact = has;
+    emit filterHasNewContactChanged(has);
 }
 
 void DiscoveredContactsModel::processSelection(const QList<QModelIndex> &indices)
 {
     for (const auto &i : indices) {
         const auto &c = getContact(i.row());
+        // TODO(fpohtmeh): add method toggle
         if (m_selectedContacts->hasContact(c)) {
             m_selectedContacts->removeContact(c);
         }

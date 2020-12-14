@@ -12,23 +12,22 @@ OperationPage {
     loadingText: qsTr("Adding of contact...")
     footerText: ""
 
-    readonly property var model: models.discoveredContacts
     property alias actionButtonText: actionButton.text
 
-    // FIXME(fpohtmeh): remove superfluous properties
-    readonly property string contact: contactSearch.search.toLowerCase()
-    readonly property var filterSource: models.discoveredContacts
-    readonly property alias search: contactSearch.search
-    property string previousSearch
-    readonly property int defaultSearchHeight: 40
-    readonly property int defaultChatHeight: 50
+    QtObject {
+        id: d
+        readonly property var model: models.discoveredContacts
+        readonly property string contact: contactSearch.search.toLowerCase()
+        readonly property alias search: contactSearch.search
+        property string previousSearch
+        readonly property int defaultSearchHeight: 40
 
-    onSearchChanged: {
-        if (search) {
-            previousSearch = search
-        }
-        if (filterSource) {
-            filterSource.filter = search
+
+        onSearchChanged: {
+            if (search) {
+                previousSearch = search
+            }
+            model.filter = search
         }
     }
 
@@ -45,22 +44,24 @@ OperationPage {
             state: "opened"
             searchPlaceholder: qsTr("Search contact")
             closeable: false
-            Layout.preferredHeight: defaultSearchHeight
+            Layout.preferredHeight: d.defaultSearchHeight
             Layout.fillWidth: true
 
             onClosed: contactSearch.search = ""
             onAccepted: root.accept()
         }
 
-        SelectedContactsFlow {
-            model: root.model.selectedContacts
-            Layout.fillWidth: true
-            Layout.preferredHeight: flowItemHeight
-        }
-
         SelectContactsList {
+            newContactText: d.search ? d.contact : d.previousSearch
             Layout.fillWidth: true
             Layout.fillHeight: true
+        }
+
+        SelectedContactsFlow {
+            model: d.model.selectedContacts
+            visible: d.model.selection.hasSelection
+            Layout.fillWidth: true
+            Layout.preferredHeight: recommendedHeight
         }
 
         ServerSelectionRow {
@@ -69,14 +70,14 @@ OperationPage {
 
         FormPrimaryButton {
             id: actionButton
-            visible: root.model.selection.multiSelect
-            enabled: root.model.selection.hasSelection
+            visible: d.model.selection.multiSelect
+            enabled: d.model.selection.hasSelection
         }
     }
 
     function accept() {
-        if (!root.model.selection.multiSelect) {
-            appState.addNewChat(contact)
+        if (!d.model.selection.multiSelect) {
+            appState.addNewChat(d.contact)
         }
     }
 

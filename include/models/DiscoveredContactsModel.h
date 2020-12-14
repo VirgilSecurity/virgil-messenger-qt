@@ -45,7 +45,7 @@ class DiscoveredContactsModel : public ContactsModel
 {
     Q_OBJECT
     Q_PROPERTY(ContactsModel *selectedContacts MEMBER m_selectedContacts CONSTANT)
-    Q_PROPERTY(bool newContactFiltered MEMBER m_newContactFiltered NOTIFY newContactFilteredChanged)
+    Q_PROPERTY(bool filterHasNewContact MEMBER m_filterHasNewContact NOTIFY filterHasNewContactChanged)
 
 public:
     DiscoveredContactsModel(Validator *validator, QObject *parent);
@@ -55,18 +55,18 @@ public:
     void reload();
 
 signals:
-    void newContactFilteredChanged(const bool filtered);
+    void filterHasNewContactChanged(const bool filtered);
 
     void contactsPopulated(const Contacts &contacts, QPrivateSignal);
 
 private:
-    void checkNewContactFiltered();
+    void checkFilterHasNewContact();
     void processSelection(const QList<QModelIndex> &indices);
 
     Validator *m_validator;
     ContactsModel *m_selectedContacts;
     UserId m_userId;
-    bool m_newContactFiltered = false;
+    bool m_filterHasNewContact = false;
 };
 }
 
