@@ -246,6 +246,7 @@ OperationPage {
     ImageButton {
         image: "Arrow-Right"
         backgroundColor: Theme.contactPressedColor
+        onClicked: appState.setChatName()
         anchors {
             right: parent.right
             bottom: parent.bottom

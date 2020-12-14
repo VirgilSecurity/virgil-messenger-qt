@@ -129,6 +129,10 @@ Control {
             stackView.push(page("NewGroupChat"))
         }
 
+        function openNameGroupChatPage() {
+            stackView.push(page("NameGroupChat"))
+        }
+
         function openChatPage() {
             if (manager.previousState === manager.attachmentPreviewState) {
                 return
@@ -194,6 +198,7 @@ Control {
         manager.accountSettingsState.entered.connect(d.openAccountSettingsPage)
         manager.newChatState.entered.connect(d.openAddNewChatPage)
         manager.newGroupChatState.entered.connect(d.openAddNewGroupChatPage)
+        manager.nameGroupChatState.entered.connect(d.openNameGroupChatPage)
         manager.chatState.entered.connect(d.openChatPage)
         manager.attachmentPreviewState.entered.connect(d.showAttachmentPreview)
         manager.backupKeyState.entered.connect(d.openBackupKeyPage)
