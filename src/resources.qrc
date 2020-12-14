@@ -128,6 +128,8 @@
         <file>qml/components/ModelListView.qml</file>
         <file>qml/components/Dialogs/TemplateDialog.qml</file>
         <file>qml/components/UploadProgressBar.qml</file>
+        <file>qml/components/ServerSelectionRow.qml</file>
+        <file>qml/components/SelectedContactsFlow.qml</file>
         <!-- Database -->
         <file>resources/database/createAttachments.sql</file>
         <file>resources/database/createChats.sql</file>

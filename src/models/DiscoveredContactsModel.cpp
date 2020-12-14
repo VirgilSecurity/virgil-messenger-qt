@@ -54,6 +54,12 @@ DiscoveredContactsModel::DiscoveredContactsModel(Validator *validator, QObject *
     connect(selection(), &ListSelectionModel::changed, this, &DiscoveredContactsModel::processSelection);
     connect(this, &DiscoveredContactsModel::filterChanged, this, &DiscoveredContactsModel::checkNewContactFiltered);
     connect(this, &DiscoveredContactsModel::contactsPopulated, this, &DiscoveredContactsModel::setContacts);
+    connect(this, &DiscoveredContactsModel::contactsPopulated, this, std::bind(&ContactsModel::setContacts, m_selectedContacts, Contacts()));
+}
+
+void DiscoveredContactsModel::setUserId(const UserId &userId)
+{
+    m_userId = userId;
 }
 
 void DiscoveredContactsModel::reload()
@@ -67,7 +73,7 @@ void DiscoveredContactsModel::reload()
 void DiscoveredContactsModel::checkNewContactFiltered()
 {
     const auto filter = this->filter();
-    bool filtered = m_validator->isValidUsername(filter);
+    bool filtered = m_validator->isValidUsername(filter) && filter != m_userId;
     if (filtered) {
         for (const auto &contact : getContacts()) {
             if (contact.name == filter) {
@@ -79,7 +85,6 @@ void DiscoveredContactsModel::checkNewContactFiltered()
     if (filtered == m_newContactFiltered) {
         return;
     }
-    // FIXME(fpohtmeh): compare with current userId
     m_newContactFiltered = filtered;
     emit newContactFilteredChanged(filtered);
 }

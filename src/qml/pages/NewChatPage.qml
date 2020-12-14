@@ -1,6 +1,6 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 
 import "../base"
 import "../components"
@@ -14,7 +14,6 @@ OperationPage {
     readonly property var filterSource: models.discoveredContacts
     readonly property alias search: contactSearch.search
     property string previousSearch
-    property string serverName: "Default"
 
     readonly property int defaultSearchHeight: 40
     readonly property int defaultChatHeight: 50
@@ -56,7 +55,7 @@ OperationPage {
         }
 
         SelectContactsList {
-            id: searchResultsItem
+            id: selectedContacts
             anchors {
                 top: contactSearch.bottom
                 left: parent.left
@@ -67,26 +66,12 @@ OperationPage {
             }
         }
 
-        RowLayout {
+        ServerSelectionRow {
             anchors {
-                top: searchResultsItem.bottom
+                top: selectedContacts.bottom
                 bottom: parent.bottom
                 left: parent.left
                 right: parent.right
-            }
-
-            Label {
-                text: qsTr("Server")
-                color: Theme.primaryTextColor
-                Layout.fillWidth: true
-                horizontalAlignment: Text.AlignHCenter
-            }
-
-            Label {
-                text: serverName
-                color: Theme.secondaryTextColor
-                Layout.fillWidth: true
-                horizontalAlignment: Text.AlignHCenter
             }
         }
     }

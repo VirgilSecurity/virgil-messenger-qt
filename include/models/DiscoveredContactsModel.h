@@ -50,6 +50,8 @@ class DiscoveredContactsModel : public ContactsModel
 public:
     DiscoveredContactsModel(Validator *validator, QObject *parent);
 
+    void setUserId(const UserId &userId);
+
     void reload();
 
 signals:
@@ -63,6 +65,7 @@ private:
 
     Validator *m_validator;
     ContactsModel *m_selectedContacts;
+    UserId m_userId;
     bool m_newContactFiltered = false;
 };
 }

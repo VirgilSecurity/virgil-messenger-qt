@@ -8,23 +8,13 @@ import "../theme"
 
 Item {
     id: root
+    state: model.newContactFiltered ? "show header" : "hide header"
+
     property real headerHeight: 20
     property real headerOpacity: 0
     readonly property real expandedHeaderHeight: 90
     readonly property int checkCircleMargin: 2
     property var model: models.discoveredContacts
-
-    state: {
-        // FIXME(fpohtmeh): move this check to C++
-        if (search !== controllers.users.userId) {
-            if (models.discoveredContacts.newContactFiltered) {
-                return "show header"
-            } else {
-                return "hide header"
-            }
-        }
-        return "hide header"
-    }
 
     onStateChanged: {
         if (state === "show header") {
@@ -139,7 +129,7 @@ Item {
 
         ListDelegate {
             id: contactListDelegate
-            width: parent.width
+            width: contactListView.width
             height: defaultChatHeight
 
             Item {
