@@ -14,6 +14,8 @@ Item {
     property alias contactListView: contactListView
     property alias modelCount: contactListView.count
     property alias model: contactListView.model
+    property bool multiselect: false
+    readonly property int checkCircleMargin: 2
 
     state: {
         if (search !== controllers.users.userId) {
@@ -147,6 +149,39 @@ Item {
                     nickname: model.name
                     avatarUrl: model.avatarUrl
                     Layout.alignment: Qt.AlignVCenter
+
+                    Rectangle {
+                        anchors {
+                            right: parent.right
+                            bottom: parent.bottom
+                        }
+                        width: parent.width * 0.4
+                        height: width
+                        radius: width
+                        color: Theme.mainBackgroundColor
+                        visible: selected
+
+                        Rectangle {
+                            anchors {
+                                fill: parent
+                                margins: checkCircleMargin
+                            }
+                            radius: width
+                            color: Theme.contactPressedColor
+
+                            Repeater {
+                                model: 2
+
+                                Rectangle {
+                                    anchors.centerIn: parent
+                                    width: parent.width - 2 * checkCircleMargin
+                                    height: checkCircleMargin
+                                    radius: height
+                                    rotation: index ? 0 : 90
+                                }
+                            }
+                        }
+                    }
                 }
 
                 Column {
@@ -169,7 +204,13 @@ Item {
                     }
                 }
 
-                onClicked: accept()
+                onClicked: {
+                    if (multiselect === true) {
+                        selectContact(index)
+                    } else {
+                        accept()
+                    }
+                }
             }
         }
     }

@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-	<!-- Pages -->
         <file>qml/pages/AccountSelectionPage.qml</file>
         <file>qml/pages/AccountSettingsPage.qml</file>
         <file>qml/pages/BackupKeyPage.qml</file>
@@ -17,7 +16,6 @@
         <file>qml/pages/SignUpPage.qml</file>
         <file>qml/pages/SplashScreenPage.qml</file>
         <file>qml/pages/VerifyProfilePage.qml</file>
-	<!-- Icons -->
         <file>qml/resources/icons/Arrow-Left.png</file>
         <file>qml/resources/icons/Arrow-Left@2x.png</file>
         <file>qml/resources/icons/Arrow-Right.png</file>
@@ -52,7 +50,6 @@
         <file>qml/resources/icons/Image-Big@2x.png</file>
         <file>qml/resources/icons/Folder-Big.png</file>
         <file>qml/resources/icons/Folder-Big@2x.png</file>
-	<!-- Others -->
         <file>qml/components/FlowListView.qml</file>
         <file>qml/components/AttachmentPreview.qml</file>
         <file>qml/components/CommonHelpers/TextInCircle.qml</file>
@@ -89,7 +86,7 @@
         <file>qml/components/ChatMessage.qml</file>
         <file>qml/components/MessageCounter.qml</file>
         <file>qml/components/SearchHeader.qml</file>
-	<file>qml/components/SearchContactsList.qml</file>
+        <file>qml/components/SelectContactsList.qml</file>
         <file>qml/components/Header.qml</file>
         <file>qml/components/ContextMenu.qml</file>
         <file>qml/components/ImageButton.qml</file>

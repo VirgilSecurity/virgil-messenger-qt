@@ -53,7 +53,7 @@ OperationPage {
         }
     }
 
-    SearchContactsList {
+    SelectContactsList {
         id: searchResultsItem
         anchors {
             top: contactSearch.bottom
@@ -62,7 +62,6 @@ OperationPage {
             bottom: parent.bottom
             topMargin: 1
             bottomMargin: defaultChatHeight
-            margins: Theme.margin
         }
         model: models.discoveredContacts.proxy
     }
