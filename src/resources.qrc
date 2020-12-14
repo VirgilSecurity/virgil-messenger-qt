@@ -11,6 +11,7 @@
         <file>qml/pages/NewChatPage.qml</file>
         <file>qml/pages/NewGroupChatPage.qml</file>
         <file>qml/pages/OperationPage.qml</file>
+        <file>qml/pages/SelectContactsPage.qml</file>
         <file>qml/pages/SignInAsPage.qml</file>
         <file>qml/pages/SignInPage.qml</file>
         <file>qml/pages/SignInUsernamePage.qml</file>
@@ -76,7 +77,6 @@
         <file>qml/theme/Theme.qml</file>
         <file>qml/main.qml</file>
         <file>qml/MainView.qml</file>
-        <file>qml/components/CustomForm.qml</file>
         <file>qml/components/Form.qml</file>
         <file>qml/components/FormLabel.qml</file>
         <file>qml/components/FormInput.qml</file>
