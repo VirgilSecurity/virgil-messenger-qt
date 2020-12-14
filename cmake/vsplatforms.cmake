@@ -65,12 +65,17 @@ endif()
     
 if(VS_PLATFORM)
     file(APPEND "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake" "set(VS_PLATFORM \"${VS_PLATFORM}\" CACHE \"STRING\" \"Target build platform\")\n")
-    message(STATUS "Create transitive-args.cmake")     
+    message(STATUS "Write VS_PLATFORM transitive-args.cmake")     
 endif()
 
 if(VS_CUSTOMER)
     file(APPEND "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake" "set(VS_CUSTOMER \"${VS_CUSTOMER}\" CACHE \"STRING\" \"Customer name\")\n")
-    message(STATUS "Create transitive-args.cmake")     
+    message(STATUS "Write VS_CUSTOMER transitive-args.cmake")     
+endif()
+
+if(CMAKE_BUILD_TYPE)
+    file(APPEND "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake" "set(CMAKE_BUILD_TYPE \"${CMAKE_BUILD_TYPE}\" CACHE \"STRING\" \"Build type\")\n")
+    message(STATUS "Write CMAKE_BUILD_TYPE  transitive-args.cmake")     
 endif()
 
 if(NOT VS_PLATFORM OR NOT VS_CUSTOMER)

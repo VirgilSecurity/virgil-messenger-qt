@@ -35,7 +35,6 @@
 #include "models/Models.h"
 
 #include <QSortFilterProxyModel>
-#include <QThread>
 
 #include "Settings.h"
 #include "VSQMessenger.h"
@@ -58,7 +57,6 @@ Models::Models(VSQMessenger *messenger, Settings *settings, UserDatabase *userDa
     , m_fileCloud(new FileCloudModel(settings, this))
     , m_fileLoader(new FileLoader(messenger->xmpp(), networkAccessManager, this))
     , m_messagesQueue(new MessagesQueue(settings, messenger, userDatabase, m_fileLoader, nullptr))
-    , m_queueThread(new QThread())
 {
     qRegisterMetaType<AccountSelectionModel *>("AccountSelectionModel*");
     qRegisterMetaType<AttachmentsModel *>("AttachmentsModel*");
@@ -68,18 +66,10 @@ Models::Models(VSQMessenger *messenger, Settings *settings, UserDatabase *userDa
     qRegisterMetaType<QSortFilterProxyModel *>("QSortFilterProxyModel*");
 
     connect(m_messagesQueue, &MessagesQueue::notificationCreated, this, &Models::notificationCreated);
-
-    m_messagesQueue->moveToThread(m_queueThread);
-    m_queueThread->setObjectName("QueueThread");
-    m_queueThread->start();
 }
 
 Models::~Models()
 {
-    m_queueThread->quit();
-    m_queueThread->wait();
-    delete m_messagesQueue;
-    delete m_queueThread;
 }
 
 const AccountSelectionModel *Models::accountSelection() const

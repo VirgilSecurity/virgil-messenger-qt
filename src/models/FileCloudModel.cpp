@@ -74,7 +74,8 @@ void FileCloudModel::setEnabled(bool enabled)
         return;
     }
     if (enabled) {
-        m_updateTimer.start(m_settings->nowInterval());
+        m_updateTimer.start(m_settings->nowInterval() * 1000);
+        m_debugCounter = 1; // debug one update only
     }
     else {
         m_updateTimer.stop();
@@ -137,6 +138,10 @@ void FileCloudModel::setList(const QFileInfoList &list)
 
 void FileCloudModel::invalidateDateTime()
 {
+    if (m_debugCounter > 0) {
+        --m_debugCounter;
+        qCDebug(lcModel) << "Updating of filecloud model";
+    }
     m_now = QDateTime::currentDateTime();
     emit dataChanged(index(0), index(rowCount() - 1), { DisplayDateTimeRole });
 }

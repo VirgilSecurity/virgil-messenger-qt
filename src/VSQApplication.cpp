@@ -76,7 +76,6 @@ VSQApplication::VSQApplication()
     , m_applicationStateManager(&m_messenger, &m_controllers, &m_models, m_validator, &m_settings, this)
 {
     m_settings.print();
-    m_networkAccessManager->setAutoDeleteReplies(true);
 
     registerCommonMetaTypes();
     qRegisterMetaType<KeyboardEventFilter *>("KeyboardEventFilter*");
@@ -154,7 +153,7 @@ VSQApplication::run(const QString &basePath, VSQLogging *logging) {
     QGuiApplication::setFont(fon);
 
     connect(qApp, &QGuiApplication::applicationStateChanged, this, &VSQApplication::onApplicationStateChanged);
-    connect(qApp, &QGuiApplication::aboutToQuit, std::bind(&VSQMessenger::setStatus, &m_messenger, VSQMessenger::EnStatus::MSTATUS_UNAVAILABLE));
+    connect(qApp, &QGuiApplication::aboutToQuit, this, &VSQApplication::onAboutToQuit);
 
     reloadQml();
 
@@ -207,9 +206,7 @@ bool VSQApplication::isIosSimulator() const
 #endif
 }
 
-/******************************************************************************/
-void
-VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
+void VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
     qDebug() << state;
     m_messenger.setApplicationActive(state == Qt::ApplicationState::ApplicationActive);
 
@@ -230,4 +227,14 @@ VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
 #endif // VS_ANDROID
 }
 
-ApplicationStateManager *VSQApplication::stateManager() { return &m_applicationStateManager; }
+void VSQApplication::onAboutToQuit()
+{
+    qDebug() << "Application about to quit";
+    m_settings.setRunFlag(false);
+    m_messenger.setStatus(VSQMessenger::EnStatus::MSTATUS_UNAVAILABLE);
+}
+
+ApplicationStateManager *VSQApplication::stateManager()
+{
+    return &m_applicationStateManager;
+}

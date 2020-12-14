@@ -84,6 +84,7 @@ private:
     QFileInfoList m_list;
     QDateTime m_now;
     QTimer m_updateTimer;
+    int m_debugCounter = 0;
 };
 }
 

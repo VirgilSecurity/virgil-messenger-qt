@@ -10,7 +10,6 @@ Popup {
     property alias backgroundRect: backgroundRectangle
 
     // Bahavior settings
-    property real enterTransitionDuration: 250
     property real exitTransitionDuration: 200
 
     // Content settings
@@ -28,23 +27,20 @@ Popup {
     modal: true
     focus: true
     closePolicy: Popup.NoAutoClose
-    padding: d.margin
+    padding: Theme.margin
 
     QtObject {
         id: d
-        readonly property real margin: 20
-        readonly property real spacing: 20
         readonly property real radius: 10
-
         readonly property real popupImplicitWidth: Math.min(420, root.width * 0.8)
     }
 
     enter: Transition {
         ParallelAnimation {
             NumberAnimation {property: "opacity"; from: 0.0; to: 1.0; easing.type: Easing.InOutQuad;
-                duration: enterTransitionDuration; easing.overshoot: 1}
+                duration: Theme.animationDuration; easing.overshoot: 1}
             NumberAnimation {property: "scale"; from: 0.8; to: 1.0; easing.type: Easing.OutBack;
-                duration: enterTransitionDuration; easing.overshoot: 2}
+                duration: Theme.animationDuration; easing.overshoot: 2}
         }
     }
 
@@ -64,20 +60,20 @@ Popup {
         radius: d.radius
         anchors.centerIn: parent
         implicitWidth: d.popupImplicitWidth
-        height: contentColumn.height + 2 * d.margin
+        height: contentColumn.height + 2 * Theme.margin
 
         Column {
             id: contentColumn
             anchors {
                 left: parent.left
-                leftMargin: d.margin
+                leftMargin: Theme.margin
                 right: parent.right
-                rightMargin: d.margin
+                rightMargin: Theme.margin
                 top: parent.top
-                topMargin: d.margin
+                topMargin: Theme.margin
             }
 
-            spacing: d.spacing
+            spacing: Theme.spacing
 
             Text {
                 width: parent.width
@@ -97,7 +93,7 @@ Popup {
 
             Row {
                 anchors.horizontalCenter: parent.horizontalCenter
-                spacing: d.spacing
+                spacing: Theme.spacing
 
                 FormPrimaryButton {
                     text: acceptedButtonText

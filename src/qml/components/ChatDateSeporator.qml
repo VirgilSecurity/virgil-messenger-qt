@@ -7,12 +7,12 @@ import "../theme"
 Label {
     property date date
 
-    topPadding: 10
-    bottomPadding: 10
+    topPadding: Theme.smallPadding
+    bottomPadding: Theme.smallPadding
 
     width: parent.width
     color: Theme.labelColor
-    font.pointSize: UiHelper.fixFontSz(10)
+    font.pointSize: UiHelper.fixFontSz(12)
     text: Qt.formatDate(date, "MMMM dd, yyyy")
     horizontalAlignment: Text.Center
 }

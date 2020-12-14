@@ -34,10 +34,18 @@ Item {
     readonly property color chatBackgroundColor: "#263238"
 
     // sizes
+    readonly property real margin: 20
+    readonly property real spacing: 20
+    readonly property real padding: 20
+    readonly property real smallMargin: 10
+    readonly property real smallSpacing: 10
+    readonly property real smallPadding: 10
+
     readonly property real avatarHeight: 40
     readonly property real avatarWidth: avatarHeight
     readonly property real avatarRadius: avatarWidth / 2
 
+    readonly property real headerHeight: 60
     readonly property real formMaximumWidth: 260
 
     // icons
@@ -47,4 +55,7 @@ Item {
     readonly property string mainLogoText: app.organizationDisplayName
     readonly property string mainFont: robotoRegular.name
     readonly property string mainFontBold: robotoBold.name
+
+    // animation
+    readonly property int animationDuration: 250
 }

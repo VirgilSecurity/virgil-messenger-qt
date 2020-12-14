@@ -17,7 +17,6 @@ Page {
 
     QtObject {
         id: d
-        readonly property real margin: 20
         readonly property real listSpacing: 5
     }
 
@@ -28,7 +27,7 @@ Page {
     header: Control {
         id: headerControl
         width: parent.width
-        height: 60
+        height: Theme.headerHeight
         z: 1
 
         background: Rectangle {
@@ -54,8 +53,8 @@ Page {
 
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: 10
-            anchors.rightMargin: 10
+            anchors.leftMargin: Theme.smallMargin
+            anchors.rightMargin: Theme.smallMargin
 
             ImageButton {
                 image: "Arrow-Left"
@@ -64,7 +63,7 @@ Page {
 
             Column {
                 Layout.fillWidth: true
-                Layout.leftMargin: 10
+                Layout.leftMargin: Theme.smallMargin
                 Label {
                     text: contactId
                     font.pointSize: UiHelper.fixFontSz(15)
@@ -89,8 +88,8 @@ Page {
         property var contextMenu: null
 
         anchors.fill: parent
-        anchors.leftMargin: d.margin
-        anchors.rightMargin: d.margin
+        anchors.leftMargin: Theme.margin
+        anchors.rightMargin: Theme.margin
 
         section.property: "day"
         section.delegate: ChatDateSeporator {
@@ -101,9 +100,9 @@ Page {
 
         spacing: d.listSpacing
         delegate: ChatMessage {
-            readonly property real fullWidth: root.width - 2 * d.margin - leftIndent
+            readonly property real fullWidth: root.width - 2 * Theme.margin - leftIndent
 
-            maxWidth: Platform.isMobile ? (fullWidth - 2 * d.margin) : fullWidth
+            maxWidth: Platform.isMobile ? (fullWidth - 2 * Theme.margin) : fullWidth
 
             body: model.body
             displayTime: model.displayTime
@@ -113,13 +112,14 @@ Page {
             messageId: model.id
             inRow: model.inRow
             firstInRow: model.firstInRow
-            failed: model.failed
+            isBroken: model.isBroken
 
             attachmentId: model.attachmentId
             attachmentType: model.attachmentType
             attachmentStatus: model.attachmentStatus
             attachmentDisplaySize: model.attachmentDisplaySize
             attachmentDisplayText: model.attachmentDisplayText
+            attachmentDisplayProgress: model.attachmentDisplayProgress
             attachmentBytesTotal: model.attachmentBytesTotal
             attachmentBytesLoaded: model.attachmentBytesLoaded
             attachmentImagePath: model.attachmentImagePath
@@ -134,6 +134,9 @@ Page {
             }
 
             onOpenContextMenu: function(messageId, mouse, contextMenu) {
+                if (!contextMenu.enabled) {
+                    return
+                }
                 listView.contextMenu = contextMenu
                 var coord = mapToItem(listView, mouse.x, mouse.y)
                 contextMenu.x = coord.x - (Platform.isMobile ? contextMenu.width : 0)

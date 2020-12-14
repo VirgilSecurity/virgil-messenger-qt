@@ -20,7 +20,7 @@ Control {
     property alias nickname: avatar.nickname
     property bool isOwnMessage: false
     property string status: ""
-    property bool failed: false
+    property bool isBroken: false
     property string messageId: ""
     property bool inRow: false
     property bool firstInRow: true
@@ -31,6 +31,7 @@ Control {
     property int attachmentBytesTotal: 0
     property string attachmentDisplaySize: ""
     property string attachmentDisplayText: ""
+    property string attachmentDisplayProgress: ""
     property string attachmentImagePath: ""
     property int attachmentThumbnailWidth: 0
     property int attachmentThumbnailHeight: 0
@@ -68,6 +69,7 @@ Control {
 
             property var contextMenu: ContextMenu {
                 compact: true
+                enabled: !chatMessage.isBroken
 
                 Action {
                     text: qsTr("Copy")
@@ -159,7 +161,16 @@ Control {
 
                     Label {
                         Layout.maximumWidth: column.maxWidth
+                        visible: chatMessage.attachmentStatus == Enums.AttachmentStatus.Loaded
                         text: attachmentDisplaySize
+                        color: "white"
+                        font.pixelSize: UiHelper.fixFontSz(10)
+                    }
+
+                    Label {
+                        Layout.maximumWidth: column.maxWidth
+                        visible: chatMessage.attachmentStatus == Enums.AttachmentStatus.Loading
+                        text: attachmentDisplayProgress
                         color: "white"
                         font.pixelSize: UiHelper.fixFontSz(10)
                     }
@@ -168,11 +179,11 @@ Control {
 
             property var contextMenu: ContextMenu {
                 compact: true
+                enabled: !chatMessage.isBroken
 
                 Action {
                     text: Platform.isMobile ? qsTr("Save to downloads") : qsTr("Save As...")
                     onTriggered: (Platform.isMobile ? controllers.attachments.download : chatMessage.saveAttachmentAs)(messageId)
-                    // TODO(fpohtmeh): disable for not loaded attachments
                 }
             }
         }
@@ -187,29 +198,43 @@ Control {
             width: 30
             opacity: firstInRow ? 1 : 0
             diameter: 30
+            anchors {
+                top: parent.top
+                topMargin: 4
+            }
         }
 
         Column {
             spacing: 4
+            anchors.top: parent.top
 
             // Nickname + timestamp
-            RowLayout {
+
+            Item {
+                visible: firstInRow
+                width: parent.width
+                height: 5
+            }
+
+            Row {
                 visible: firstInRow
                 spacing: 6
 
                 Label {
                     text: nickname
-                    height: 16
                     color: Theme.labelColor
-                    font.pixelSize: UiHelper.fixFontSz(16)
+                    font.pixelSize: UiHelper.fixFontSz(14)
+                    anchors.verticalCenter: parent.verticalCenter
                 }
 
                 Label {
-                    Layout.alignment: Qt.AlignBottom
                     text: displayTime
                     color: Theme.labelColor
-
                     font.pixelSize: UiHelper.fixFontSz(11)
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        verticalCenterOffset: 1
+                    }
                 }
             }
 
@@ -280,8 +305,8 @@ Control {
                 id: statusLabel
                 height: 12
                 text: {
-                    if (chatMessage.failed) {
-                        return "failed"
+                    if (chatMessage.isBroken) {
+                        return "broken"
                     }
                     switch (status) {
                         case "0": return "sending"
@@ -291,14 +316,14 @@ Control {
                         default: return ""
                     }
                 }
-                color: chatMessage.failed ? "red" : Theme.labelColor
+                color: chatMessage.isBroken ? "red" : Theme.labelColor
                 font.pixelSize: UiHelper.fixFontSz(11)
             }
         }
     }
 
     Component.onCompleted: {
-//        console.log("->", messageId, body, displayTime, nickname, status, failed)
+//        console.log("->", messageId, body, displayTime, nickname, status, isBroken)
 //        console.log(attachmentId, attachmentType, attachmentStatus, attachmentImagePath, attachmentFileExists)
     }
 }

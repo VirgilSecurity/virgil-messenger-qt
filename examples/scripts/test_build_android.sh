@@ -9,7 +9,7 @@ pushd ${PROJECT_FOLDER}
   mkdir -p build
 
   pushd build
-   cmake -DVS_PLATFORM="android" ..
+   cmake -DVS_PLATFORM="android" -DCMAKE_BUILD_TYPE="MinSizeRel" ..
    make 
    make apk
   popd

@@ -190,6 +190,15 @@ elseif(VS_PLATFORM STREQUAL "android")
     string(APPEND VS_QT_EXTRA "AndroidExtras")
     # Android gradle path
     set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/platforms/android")    
+
+# Linux
+elseif(VS_PLATFORM STREQUAL "linux")    
+    string(APPEND VS_QT_EXTRA "Widgets")
+
+# MacOS
+elseif(VS_PLATFORM STREQUAL "macos")    
+    string(APPEND VS_QT_EXTRA "Widgets")
+
 endif()    
 
 set(CMAKE_CXX_STANDARD 14)
@@ -203,7 +212,7 @@ set(CMAKE_AUTORCC ON)
 include(GNUInstallDirs)
 include(FetchContent)
 
-find_package(Qt5 COMPONENTS Core Widgets Quick Sql Network Concurrent Qml Xml ${VS_QT_EXTRA} REQUIRED)
+find_package(Qt5 COMPONENTS Core Quick Sql Network Concurrent Qml Xml ${VS_QT_EXTRA} REQUIRED)
 
 # ---------------------------------------------------------------------------
 #   Prepare for build target
@@ -343,8 +352,8 @@ target_sources(${VS_TARGET_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/include/android/VSQAndroid.h
 	${CMAKE_CURRENT_LIST_DIR}/include/ui/VSQUiHelper.h
 	${CMAKE_CURRENT_LIST_DIR}/include/KeyboardEventFilter.h
-	${CMAKE_CURRENT_LIST_DIR}/include/Validator.h
 	${CMAKE_CURRENT_LIST_DIR}/include/Core.h
+	${CMAKE_CURRENT_LIST_DIR}/include/Validator.h
 	# Controllers
 	${CMAKE_CURRENT_LIST_DIR}/include/controllers/AttachmentsController.h
 	${CMAKE_CURRENT_LIST_DIR}/include/controllers/ChatsController.h
@@ -564,7 +573,6 @@ target_link_libraries(${VS_TARGET_NAME}
         Qt5::Quick
         $<$<STREQUAL:"${VS_PLATFORM}","linux">:Qt5::Widgets>                
         $<$<STREQUAL:"${VS_PLATFORM}","macos">:Qt5::Widgets>                        
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:Qt5::Widgets>                        
         $<$<STREQUAL:"${VS_PLATFORM}","android">:Qt5::AndroidExtras>        
         $<$<STREQUAL:"${VS_PLATFORM}","android">:log>        
         $<$<STREQUAL:"${VS_PLATFORM}","windows">:Qt5::Widgets>                        
@@ -637,11 +645,15 @@ target_compile_definitions(${VS_TARGET_NAME}
     $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","ios">:VS_IOS=1>>
     $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","ios">:VS_MOBILE=1>>    
     $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","ios">:VS_PUSHNOTIFICATIONS=1>>    
+    $<BUILD_INTERFACE:$<$<BOOL:${VS_IOS_SIMULATOR}>:VS_IOS_SIMULATOR=1>>    
     
     $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","macos">:MACOS=1>>
     $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","macos">:VS_DESKTOP=1>>    
 
     $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","linux">:VS_DESKTOP=1>>    
+
+    $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","linux">:VS_DESKTOP=1>>        
+
     )
 
 target_compile_options(${VS_TARGET_NAME}

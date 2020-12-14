@@ -32,47 +32,9 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "operations/NetworkOperation.h"
+#ifndef VS_SCHEMEVERSION_H
+#define VS_SCHEMEVERSION_H
 
-#include "models/FileLoader.h"
+#define VERSION_DATABASE_SCHEME 0
 
-using namespace vm;
-
-NetworkOperation::NetworkOperation(QObject *parent, FileLoader *fileLoader)
-    : Operation(QLatin1String("Network"), parent)
-    , m_fileLoader(fileLoader)
-    , m_isOnline(fileLoader->isServiceFound())
-{
-    connect(fileLoader, &FileLoader::serviceFound, this, &NetworkOperation::setIsOnline);
-}
-
-NetworkOperation::NetworkOperation(NetworkOperation *parent)
-    : NetworkOperation(parent, parent->fileLoader())
-{
-}
-
-FileLoader *NetworkOperation::fileLoader()
-{
-    return m_fileLoader;
-}
-
-bool NetworkOperation::isOnline() const
-{
-    return m_isOnline;
-}
-
-bool NetworkOperation::preRun()
-{
-    if (!m_isOnline && !hasChildren() && status() == Operation::Status::Started) {
-        qCDebug(lcOperation) << "Operation is failed because network is offline";
-        fail();
-        return false;
-    }
-    return Operation::preRun();
-}
-
-void NetworkOperation::setIsOnline(bool isOnline)
-{
-    m_isOnline = isOnline;
-    preRun();
-}
+#endif // VS_SCHEMEVERSION_H
