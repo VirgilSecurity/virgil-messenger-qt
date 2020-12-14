@@ -67,6 +67,7 @@ OperationPage {
             model: flowModel
             spacing: flowSpaing
             delegate: addedContactComponent
+            clip: false
             focus: true
             onFocusChanged: {
                 if (!focus) {
@@ -207,22 +208,18 @@ OperationPage {
     }
 
     function selectContact(index) {
-        console.log("selectContact:", index)
         let item = contactsModel.get(index)
         if (item['selected'] === false) {
             item['selected'] = true
             flowModel.append(item)
-            console.log("flowModel.append:", index)
         } else {
             item['selected'] = false
-            console.log("item['selected'] = false:", index)
 
             let i
             for (i = 0; i < flowModel.count; i++) {
                 let flowFalseItem = flowModel.get(i).selected
                 if (flowFalseItem === false) {
                     flowModel.remove(i)
-                    console.log("flowModel.remove:", index)
                 }
             }
         }
