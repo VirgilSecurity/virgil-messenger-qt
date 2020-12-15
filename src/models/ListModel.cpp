@@ -60,6 +60,16 @@ QString ListModel::filter() const
     return m_filter;
 }
 
+void ListModel::setFilter(const QString &filter)
+{
+    if (m_filter == filter) {
+        return;
+    }
+    m_proxy->setFilterFixedString(filter);
+    m_filter = filter;
+    emit filterChanged(filter);
+}
+
 QModelIndex ListModel::sourceIndex(const int proxyRow) const
 {
     return proxy()->mapToSource(proxy()->index(proxyRow, 0));
@@ -118,16 +128,6 @@ const ListSelectionModel *ListModel::selection() const
 ListSelectionModel *ListModel::selection()
 {
     return m_selection;
-}
-
-void ListModel::setFilter(const QString &filter)
-{
-    if (m_filter == filter) {
-        return;
-    }
-    m_proxy->setFilterFixedString(filter);
-    m_filter = filter;
-    emit filterChanged(filter);
 }
 
 void ListModel::onSelectionChanged(const QList<QModelIndex> &indices)

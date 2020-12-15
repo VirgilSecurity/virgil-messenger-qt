@@ -84,9 +84,18 @@ void ContactsModel::addContact(const Contact &contact)
     emit contactsChanged();
 }
 
-void ContactsModel::removeContact(const Contact &contact)
+void ContactsModel::addContact(const Contact::Id &contactId)
 {
-    if (auto row = findRowByContactId(contact.id)) {
+    Contact contact;
+    contact.id = contactId;
+    contact.name = contactId;
+    contact.platformId = contactId;
+    addContact(contact);
+}
+
+void ContactsModel::removeContact(const Contact::Id &contactId)
+{
+    if (auto row = findRowByContactId(contactId)) {
         beginRemoveRows(QModelIndex(), *row, *row);
         m_contacts.erase(m_contacts.begin() + *row);
         endRemoveRows();
@@ -94,9 +103,9 @@ void ContactsModel::removeContact(const Contact &contact)
     }
 }
 
-bool ContactsModel::hasContact(const Contact &contact) const
+bool ContactsModel::hasContact(const Contact::Id &contactId) const
 {
-    return findRowByContactId(contact.id) != NullOptional;
+    return findRowByContactId(contactId) != NullOptional;
 }
 
 Optional<int> ContactsModel::findRowByContactId(const Contact::Id &contactId) const
@@ -170,7 +179,7 @@ QVariant ContactsModel::data(const QModelIndex &index, int role) const
 QHash<int, QByteArray> ContactsModel::roleNames() const
 {
     return unitedRoleNames({
-        { IdRole, "id" },
+        { IdRole, "contactId" },
         { NameRole, "name" },
         { DetailsRole, "details" },
         { AvatarUrlRole, "avatarUrl" },

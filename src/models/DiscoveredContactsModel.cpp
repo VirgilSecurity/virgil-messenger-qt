@@ -51,10 +51,9 @@ DiscoveredContactsModel::DiscoveredContactsModel(Validator *validator, QObject *
     qRegisterMetaType<DiscoveredContactsModel *>("DiscoveredContactsModel*");
 
     connect(this, &ContactsModel::contactsChanged, this, &DiscoveredContactsModel::checkFilterHasNewContact);
-    connect(selection(), &ListSelectionModel::changed, this, &DiscoveredContactsModel::processSelection);
+    connect(selection(), &ListSelectionModel::changed, this, &DiscoveredContactsModel::onSelectionChanged);
     connect(this, &DiscoveredContactsModel::filterChanged, this, &DiscoveredContactsModel::checkFilterHasNewContact);
     connect(this, &DiscoveredContactsModel::contactsPopulated, this, &DiscoveredContactsModel::setContacts);
-    connect(this, &DiscoveredContactsModel::contactsPopulated, this, std::bind(&ContactsModel::setContacts, m_selectedContacts, Contacts()));
 }
 
 void DiscoveredContactsModel::setUserId(const UserId &userId)
@@ -64,6 +63,9 @@ void DiscoveredContactsModel::setUserId(const UserId &userId)
 
 void DiscoveredContactsModel::reload()
 {
+    m_selectedContacts->setContacts(Contacts());
+    setFilter(QString());
+
     QtConcurrent::run([=]() {
         const auto contacts = Utils::getDeviceContacts(getContacts());
         emit contactsPopulated(contacts, QPrivateSignal());
@@ -75,20 +77,18 @@ void DiscoveredContactsModel::toggleById(const Contact::Id &contactId)
     if (auto row = findRowByContactId(contactId)) {
         selection()->toggle(index(*row));
     }
+    else if (m_selectedContacts->hasContact(contactId)) {
+        m_selectedContacts->removeContact(contactId);
+    }
+    else {
+        m_selectedContacts->addContact(contactId);
+    }
 }
 
 void DiscoveredContactsModel::checkFilterHasNewContact()
 {
     const auto filter = this->filter();
-    bool has = filter != m_userId && m_validator->isValidUsername(filter);
-    if (has) {
-        for (const auto &contact : getContacts()) {
-            if (contact.name == filter) {
-                has = false;
-                break;
-            }
-        }
-    }
+    const bool has = filter != m_userId && m_validator->isValidUsername(filter) && !hasContact(filter);
     if (has == m_filterHasNewContact) {
         return;
     }
@@ -96,12 +96,12 @@ void DiscoveredContactsModel::checkFilterHasNewContact()
     emit filterHasNewContactChanged(has);
 }
 
-void DiscoveredContactsModel::processSelection(const QList<QModelIndex> &indices)
+void DiscoveredContactsModel::onSelectionChanged(const QList<QModelIndex> &indices)
 {
     for (const auto &i : indices) {
         const auto &c = getContact(i.row());
-        if (m_selectedContacts->hasContact(c)) {
-            m_selectedContacts->removeContact(c);
+        if (m_selectedContacts->hasContact(c.id)) {
+            m_selectedContacts->removeContact(c.id);
         }
         else {
             m_selectedContacts->addContact(c);

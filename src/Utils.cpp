@@ -88,7 +88,7 @@ namespace
         int i = 0;
         for (auto &c : contacts) {
             c.id = QLatin1String("dummy/%1").arg(i);
-            c.platformId = i;
+            c.platformId = c.id;
             c.avatarUrlRequested = true;
             ++i;
         }

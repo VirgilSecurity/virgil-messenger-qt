@@ -8,9 +8,11 @@ import "../theme"
 
 Item {
     id: root
-
     state: d.model.filterHasNewContact ? "show header" : "hide header"
+
     property string newContactText: ""
+
+    signal contactSelected(string contactId)
 
     QtObject {
         id: d
@@ -129,7 +131,12 @@ Item {
                     }
                 }
 
-                onClicked: accept()
+                onClicked: {
+                    if (d.model.selection.multiSelect) {
+                        d.model.toggleById(root.newContactText)
+                    }
+                    contactSelected(root.newContactText)
+                }
             }
         }
     }
@@ -156,7 +163,7 @@ Item {
                     NumberAnimation { properties: "x,y"; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
                 }
 
-                // FIXME(fpohtmeh): replace with image
+                // TODO(fpohtmeh): replace with image
                 Item {
                     width: d.selectionIconSize
                     height: width
@@ -207,9 +214,7 @@ Item {
                 if (d.model.selection.multiSelect) {
                     d.model.selection.toggle(index)
                 }
-                else {
-                    accept()
-                }
+                contactSelected(contactId)
             }
         }
 

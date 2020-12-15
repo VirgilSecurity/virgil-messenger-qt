@@ -8,21 +8,21 @@ OperationPage {
 
     header: Header {
         showBackButton: !form.isLoading
-        title: qsTr("Create group")
+        title: qsTr("New group")
     }
 
     Form {
         id: form
 
         FormInput {
-            id: password
+            id: nameInput
             label: qsTr("Group name")
-            password: false
             placeholder: qsTr("Enter name")
+            // TODO(fpohtmeh): validate
         }
 
         FormPrimaryButton {
-            onClicked: {}
+            onClicked: appState.createGroup(nameInput.text)
             text: qsTr("Create")
         }
     }

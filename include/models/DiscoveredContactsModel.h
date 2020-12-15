@@ -62,7 +62,8 @@ signals:
 
 private:
     void checkFilterHasNewContact();
-    void processSelection(const QList<QModelIndex> &indices);
+
+    void onSelectionChanged(const QList<QModelIndex> &indices);
 
     Validator *m_validator;
     ContactsModel *m_selectedContacts;

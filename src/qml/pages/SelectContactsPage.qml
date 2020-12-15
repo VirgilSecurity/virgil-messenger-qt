@@ -14,6 +14,9 @@ OperationPage {
 
     property alias actionButtonText: actionButton.text
 
+    signal contactSelected(string contactId)
+    signal actionButtonClicked()
+
     QtObject {
         id: d
         readonly property var model: models.discoveredContacts
@@ -54,6 +57,8 @@ OperationPage {
             newContactText: d.search ? d.contact : d.previousSearch
             Layout.fillWidth: true
             Layout.fillHeight: true
+
+            onContactSelected: root.contactSelected(contactId)
         }
 
         SelectedContactsFlow {
@@ -70,16 +75,7 @@ OperationPage {
             id: actionButton
             visible: d.model.selection.multiSelect
             enabled: d.model.selection.hasSelection
+            onClicked: root.actionButtonClicked()
         }
-    }
-
-    function accept() {
-        if (!d.model.selection.multiSelect) {
-            appState.addNewChat(d.contact)
-        }
-    }
-
-    function reject() {
-        app.stateManager.goBack()
     }
 }

@@ -145,6 +145,7 @@ using Contacts = std::vector<Contact>;
 using UserId = QString;
 using MessageId = QString;
 using ChatId = QString;
+using GroupId = QString;
 using Jid = QString;
 
 struct PictureExtras

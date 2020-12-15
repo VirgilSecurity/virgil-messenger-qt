@@ -64,8 +64,9 @@ public:
 
     const Contact &getContact(const int row) const;
     void addContact(const Contact &contact);
-    void removeContact(const Contact &contact);
-    bool hasContact(const Contact &contact) const;
+    void addContact(const Contact::Id &contactId);
+    void removeContact(const Contact::Id &contactId);
+    bool hasContact(const Contact::Id &contactId) const;
 
 signals:
     void contactsChanged();

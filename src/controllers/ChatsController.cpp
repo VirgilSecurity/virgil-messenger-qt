@@ -53,6 +53,7 @@ ChatsController::ChatsController(Models *models, UserDatabase *userDatabase, QOb
 {
     connect(userDatabase, &UserDatabase::opened, this, &ChatsController::setupTableConnections);
     connect(this, &ChatsController::newContactFound, this, &ChatsController::onNewContactFound);
+    connect(this, &ChatsController::groupChatCreated, this, &ChatsController::onGroupChatCreated);
     connect(this, &ChatsController::currentContactIdChanged, m_models->messages(), &MessagesModel::setContactId);
     connect(m_models->chats(), &ChatsModel::chatsSet, this, &ChatsController::onChatsSet);
 }
@@ -103,6 +104,20 @@ void ChatsController::createChat(const Contact::Id &contactId)
     }
 }
 
+void ChatsController::createGroupChat(const GroupId &groupId)
+{
+    auto chat = m_models->chats()->findById(groupId);
+    if (chat) {
+        openChat(*chat);
+    }
+    else {
+        // TODO(fpohtmeh): check if online?
+        QtConcurrent::run([=]() {
+            emit groupChatCreated(groupId, QPrivateSignal());
+        });
+    }
+}
+
 void ChatsController::openChat(const Chat &chat)
 {
     qCDebug(lcController) << "Opening chat with" << chat.contactId;
@@ -147,6 +162,13 @@ void ChatsController::setCurrentChat(const Chat &chat)
 void ChatsController::onNewContactFound(const Contact::Id &contactId)
 {
     const auto chat = m_models->chats()->createChat(contactId);
+    m_userDatabase->chatsTable()->createChat(chat);
+    openChat(chat);
+}
+
+void ChatsController::onGroupChatCreated(const GroupId &groupId)
+{
+    const auto chat = m_models->chats()->createChat(groupId);
     m_userDatabase->chatsTable()->createChat(chat);
     openChat(chat);
 }

@@ -54,6 +54,7 @@ public:
     explicit ListModel(QObject *parent);
 
     QString filter() const;
+    void setFilter(const QString &filter);
 
     QModelIndex sourceIndex(const int proxyRow) const;
     QModelIndex proxyIndex(const int sourceRow) const;
@@ -72,7 +73,6 @@ signals:
     void filterChanged(const QString &filter);
 
 private:
-    void setFilter(const QString &filter);
     void onSelectionChanged(const QList<QModelIndex> &indices);
 
     QSortFilterProxyModel *m_proxy;

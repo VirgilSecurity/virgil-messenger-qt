@@ -34,10 +34,21 @@
 
 #include "states/NameGroupChatState.h"
 
+#include "controllers/ChatsController.h"
+
 using namespace vm;
 
-NameGroupChatState::NameGroupChatState(QState *parent)
+NameGroupChatState::NameGroupChatState(ChatsController *chatsController, QState *parent)
     : OperationState(parent)
+    , m_chatsController(chatsController)
 {
+    connect(chatsController, &ChatsController::chatOpened, this, &NameGroupChatState::operationFinished);
+    connect(chatsController, &ChatsController::errorOccurred, this, &NameGroupChatState::operationErrorOccurred);
+    connect(this, &NameGroupChatState::createGroup, this, &NameGroupChatState::onCreateGroup);
 }
 
+void NameGroupChatState::onCreateGroup(const GroupId &groupId)
+{
+    emit operationStarted();
+    m_chatsController->createGroupChat(groupId);
+}

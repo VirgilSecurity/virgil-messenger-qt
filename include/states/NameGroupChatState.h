@@ -40,12 +40,22 @@
 
 namespace vm
 {
+class ChatsController;
+
 class NameGroupChatState : public OperationState
 {
     Q_OBJECT
 
 public:
-    NameGroupChatState(QState *parent);
+    NameGroupChatState(ChatsController *chatsController, QState *parent);
+
+signals:
+    void createGroup(const GroupId &groupId);
+
+private:
+    void onCreateGroup(const GroupId &groupId);
+
+    ChatsController *m_chatsController;
 };
 }
 
