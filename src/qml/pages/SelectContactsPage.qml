@@ -22,7 +22,6 @@ OperationPage {
         property string previousSearch
         readonly property int defaultSearchHeight: 40
 
-
         onSearchChanged: {
             if (search) {
                 previousSearch = search
@@ -58,7 +57,6 @@ OperationPage {
         }
 
         SelectedContactsFlow {
-            model: d.model.selectedContacts
             visible: d.model.selection.hasSelection
             Layout.fillWidth: true
             Layout.preferredHeight: recommendedHeight

@@ -49,6 +49,9 @@ ListSelectionModel::ListSelectionModel(ListModel *source)
 
 void ListSelectionModel::setSelected(const QVariant &proxyRow, bool selected)
 {
+    if (!m_multiSelect && selected) {
+        clear();
+    }
     const auto index = m_sourceModel->sourceIndex(proxyRow.toInt());
     const auto flag = selected ? QItemSelectionModel::Select : QItemSelectionModel::Deselect;
     QItemSelectionModel::select(index, flag);
@@ -57,6 +60,9 @@ void ListSelectionModel::setSelected(const QVariant &proxyRow, bool selected)
 void ListSelectionModel::toggle(const QVariant &proxyRow)
 {
     const auto index = m_sourceModel->sourceIndex(proxyRow.toInt());
+    if (!m_multiSelect && !isSelected(index)) {
+        clear();
+    }
     QItemSelectionModel::select(index, QItemSelectionModel::Toggle);
 }
 
@@ -76,13 +82,13 @@ void ListSelectionModel::setMultiSelect(const bool multiSelect)
 
 bool ListSelectionModel::hasSelection() const
 {
-    return !m_indices.empty();
+    return m_hasSelection;
 }
 
 std::vector<QVariant> ListSelectionModel::items() const
 {
     std::vector<QVariant> result;
-    for (auto &i : m_indices) {
+    for (auto &i : selectedIndexes()) {
         result.push_back(m_sourceModel->item(i));
     }
     return result;
@@ -90,14 +96,6 @@ std::vector<QVariant> ListSelectionModel::items() const
 
 void ListSelectionModel::onChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
-    const auto hadSelection = this->hasSelection();
-    // Update indices
-    for (const auto &i : deselected.indexes()) {
-        m_indices.removeOne(i);
-    }
-    for (const auto &i : selected.indexes()) {
-        m_indices.push_back(i);
-    }
     // Collect and order changed indices
     auto indices = selected.indexes() + deselected.indexes();
     std::sort(indices.begin(), indices.end(), [](const QModelIndex &a, const QModelIndex &b) {
@@ -105,7 +103,8 @@ void ListSelectionModel::onChanged(const QItemSelection &selected, const QItemSe
     });
     emit changed(indices);
     //
-    if (hadSelection != this->hasSelection()) {
-        emit hasSelectionChanged(this->hasSelection());
+    if (m_hasSelection != QItemSelectionModel::hasSelection()) {
+        m_hasSelection = !m_hasSelection;
+        emit hasSelectionChanged(m_hasSelection);
     }
 }

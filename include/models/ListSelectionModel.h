@@ -68,7 +68,7 @@ private:
     void onChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
     ListModel *m_sourceModel;
-    QList<QModelIndex> m_indices;
+    bool m_hasSelection = false;
     bool m_multiSelect = false;
 };
 }

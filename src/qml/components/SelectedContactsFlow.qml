@@ -8,31 +8,31 @@ import "../theme"
 FlowListView {
     id: root
     clip: true
-    spacing: flowSpacing
-    focus: true
+    spacing: d.flowSpacing
+    model: selectedModel.proxy
 
-    readonly property real recommendedHeight: flowItemHeight
+    readonly property var selectedModel: models.discoveredContacts.selectedContacts
+    readonly property var editedModel: models.discoveredContacts
+    readonly property real recommendedHeight: d.recommendedHeight
 
-    readonly property real flowItemHeight: 30
-    readonly property real flowSpacing: 3
-    readonly property real lineWidth: 2
+    QtObject {
+        id: d
+
+        readonly property real flowItemHeight: 30
+        readonly property real flowSpacing: 3
+        readonly property real lineWidth: 2
+        readonly property real recommendedHeight: Math.min(root.contentHeight, 3 * (d.flowItemHeight + root.spacing) - root.spacing)
+    }
 
     delegate: Rectangle {
-        height: flowItemHeight
+        height: d.flowItemHeight
         width: row.width + row.spacing
-        color: root.currentIndex === index ? Theme.buttonPrimaryColor : Theme.contactPressedColor
+        color: isSelected ? Theme.buttonPrimaryColor : Theme.contactPressedColor
         radius: height
 
         MouseArea {
             anchors.fill: parent
-            onClicked: {
-                root.focus = true
-                if (root.currentIndex !== index) {
-                    root.currentIndex = index
-                } else {
-                    root.currentIndex = -1
-                }
-            }
+            onClicked: selectedModel.selection.toggle(index)
         }
 
         Row {
@@ -40,19 +40,18 @@ FlowListView {
             spacing: Theme.smallSpacing
             anchors.verticalCenter: parent.verticalCenter
             Item {
-                height: flowItemHeight
+                height: d.flowItemHeight
                 width: height
                 Item {
-                    height: flowItemHeight
+                    height: d.flowItemHeight
                     width: height
-                    visible: root.currentIndex === index
-                    enabled: root.currentIndex === index
+                    visible: isSelected
                     Repeater {
                         model: 2
                         Rectangle {
                             anchors.centerIn: parent
                             width: 0.5 * parent.width
-                            height: lineWidth
+                            height: d.lineWidth
                             radius: height
                             color: Theme.brandColor
                             rotation: index ? -45 : 45
@@ -61,10 +60,8 @@ FlowListView {
 
                     MouseArea {
                         anchors.fill: parent
-                        onClicked: {
-                            root.currentIndex = -1
-                            root.model.remove(index)
-                        }
+                        // FIXME(fpohtmeh): implement
+                        //onClicked: editedModel.selection.toggle(index)
                     }
                 }
 
@@ -72,9 +69,9 @@ FlowListView {
                     id: avatar
                     nickname: model.name
                     avatarUrl: model.avatarUrl
-                    diameter: flowItemHeight
+                    diameter: d.flowItemHeight
                     anchors.verticalCenter: parent.verticalCenter
-                    visible: root.currentIndex !== index
+                    visible: !isSelected
                 }
             }
 
@@ -91,12 +88,6 @@ FlowListView {
         NumberAnimation {
             easing.type: Easing.InOutCubic
             duration: Theme.animationDuration
-        }
-    }
-
-    onFocusChanged: {
-        if (!focus) {
-            root.currentIndex = -1
         }
     }
 }

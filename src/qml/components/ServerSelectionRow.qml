@@ -4,7 +4,7 @@ import QtQuick.Controls 2.15
 import "../theme"
 
 Row {
-    spacing: Theme.spacing
+    spacing: 100 // TODO(fpohtmeh): remove this code
 
     Label {
         text: qsTr("Server")
