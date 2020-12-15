@@ -1,32 +1,28 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 
 import "../base"
 import "../components"
 import "../theme"
 
 Item {
-    id: searchContactsList
-    property alias isClipped: contactListView.clip
-    property real headerHeight: 20
-    property real headerOpacity: 0
-    readonly property real expandedHeaderHeight: 90
-    property alias contactListView: contactListView
-    property alias count: contactListView.count
-    property alias model: contactListView.model
-    property bool multiselect: false
-    readonly property int checkCircleMargin: 2
+    id: root
 
-    state: {
-        if (search !== controllers.users.userId) {
-            if (models.discoveredContacts.newContactFiltered) {
-                return "show header"
-            } else {
-                return "hide header"
-            }
-        }
-        return "hide header"
+    state: d.model.filterHasNewContact ? "show header" : "hide header"
+    property string newContactText: ""
+
+    QtObject {
+        id: d
+
+        readonly property var model: models.discoveredContacts
+        property real headerHeight: defaultChatHeight
+        property real headerOpacity: 0
+        readonly property real defaultChatHeight: 50
+        readonly property real defaultHeaderHeight: 20
+        readonly property real expandedHeaderHeight: 90
+        readonly property real checkCircleMargin: 2
+        readonly property real selectionIconSize: 20
     }
 
     onStateChanged: {
@@ -39,16 +35,16 @@ Item {
         State {
             name: "show header"
             PropertyChanges {
-                target: searchContactsList
-                headerHeight: expandedHeaderHeight
+                target: d
+                headerHeight: d.expandedHeaderHeight
                 headerOpacity: 1
             }
         },
         State {
             name: "hide header"
             PropertyChanges {
-                target: searchContactsList
-                headerHeight: 20
+                target: d
+                headerHeight: d.defaultHeaderHeight
                 headerOpacity: 0
             }
         }
@@ -57,6 +53,7 @@ Item {
     transitions: [
         Transition {
             NumberAnimation {
+                target: d
                 properties: "headerHeight, headerOpacity"
                 easing.type: Easing.InExpo
                 duration: Theme.animationDuration
@@ -68,20 +65,23 @@ Item {
         id: flickListView
         target: contactListView
         property: "contentY"
-        to: -expandedHeaderHeight
+        to: -d.expandedHeaderHeight
         duration: Theme.animationDuration
     }
 
     ListView {
         id: contactListView
+
         signal placeholderClicked()
 
         anchors.fill: parent
         spacing: Theme.smallSpacing
         clip: true
+        focus: true
+
+        model: d.model.proxy
         header: contactListHeader
         delegate: contactListComponent
-        focus: true
         footer: Item {
             width: width
             height: Theme.spacing
@@ -93,19 +93,19 @@ Item {
 
         Item {
             width: parent.width
-            height: searchContactsList.headerHeight
-            opacity: searchContactsList.headerOpacity
+            height: d.headerHeight
+            opacity: d.headerOpacity
             enabled: state == "show header"
 
             ListDelegate {
                 id: contactListDelegate
                 anchors.centerIn: parent
                 width: parent.width
-                height: defaultChatHeight
+                height: d.defaultChatHeight
 
                 Avatar {
                     id: avatar
-                    nickname: search ? contact : previousSearch
+                    nickname: root.newContactText
                     Layout.alignment: Qt.AlignVCenter
                 }
 
@@ -116,13 +116,13 @@ Item {
                     Text {
                         color: Theme.primaryTextColor
                         font.pointSize: UiHelper.fixFontSz(15)
-                        text: search.length === 0 ? previousSearch : contact
+                        text: root.newContactText
                     }
 
                     Text {
                         color: Theme.secondaryTextColor
                         font.pointSize: UiHelper.fixFontSz(12)
-                        text: qsTr("Click here to create chat")
+                        text: qsTr("Click here to select contact")
                         width: parent.width
                         elide: Text.ElideRight
                         textFormat: Text.RichText
@@ -139,79 +139,75 @@ Item {
 
         ListDelegate {
             id: contactListDelegate
-            width: parent.width
-            height: defaultChatHeight
+            width: contactListView.width
+            height: d.defaultChatHeight
 
-            Item {
+            Row {
                 width: parent.width
                 height: parent.height
-                Row {
-                    width: parent.width
-                    height: parent.height
-                    spacing: Theme.spacing
+                spacing: Theme.spacing
 
-                    add: Transition {
-                        NumberAnimation { property: "scale"; from: 0.9; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
-                        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
-                    }
+                add: Transition {
+                    NumberAnimation { property: "scale"; from: 0.9; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+                }
 
-                    move: Transition {
-                        NumberAnimation { properties: "x,y"; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
-                    }
+                move: Transition {
+                    NumberAnimation { properties: "x,y"; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+                }
 
-                    Rectangle {
-                        width: headerHeight
-                        height: width
-                        radius: height
-                        color: Theme.avatarBgColor
-                        visible: selected
-                        anchors.verticalCenter: parent.verticalCenter
+                // FIXME(fpohtmeh): replace with image
+                Item {
+                    width: d.selectionIconSize
+                    height: width
+                    visible: d.model.selection.hasSelection
+                    anchors.verticalCenter: parent.verticalCenter
 
-                        Repeater {
-                            model: 2
+                    Repeater {
+                        model: isSelected ? 2 : 0
 
-                            Rectangle {
-                                anchors.centerIn: parent
-                                width: parent.width * 0.6
-                                height: checkCircleMargin
-                                radius: height
-                                rotation: index ? 0 : 90
-                            }
+                        Rectangle {
+                            anchors.centerIn: parent
+                            width: parent.width * 0.6
+                            height: d.checkCircleMargin
+                            radius: height
+                            rotation: index ? 0 : 90
                         }
                     }
+                }
 
-                    Avatar {
-                        id: avatar
-                        nickname: model.name
-                        avatarUrl: model.avatarUrl
-                        anchors.verticalCenter: parent.verticalCenter
+                Avatar {
+                    id: avatar
+                    nickname: model.name
+                    avatarUrl: model.avatarUrl
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                Column {
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    Text {
+                        color: Theme.primaryTextColor
+                        font.pointSize: UiHelper.fixFontSz(15)
+                        text: model.name
                     }
 
-                    Column {
-                        anchors.verticalCenter: parent.verticalCenter
-
-                        Text {
-                            color: Theme.primaryTextColor
-                            font.pointSize: UiHelper.fixFontSz(15)
-                            text: model.name
-                        }
-
-                        Text {
-                            color: Theme.secondaryTextColor
-                            font.pointSize: UiHelper.fixFontSz(12)
-                            text: model.lastSeenActivity
-                            width: parent.width
-                            elide: Text.ElideRight
-                            textFormat: Text.RichText
-                        }
+                    Text {
+                        color: Theme.secondaryTextColor
+                        font.pointSize: UiHelper.fixFontSz(12)
+                        text: model.lastSeenActivity
+                        width: parent.width
+                        elide: Text.ElideRight
+                        textFormat: Text.RichText
                     }
                 }
             }
 
             onClicked: {
-                if (multiselect === true) {
-                    selectContact(index)
-                } else {
+                if (d.model.selection.multiSelect) {
+                    d.model.selection.toggle(index)
+                }
+                else {
                     accept()
                 }
             }

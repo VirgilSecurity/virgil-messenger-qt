@@ -12,6 +12,7 @@
         <file>qml/pages/NewChatPage.qml</file>
         <file>qml/pages/NewGroupChatPage.qml</file>
         <file>qml/pages/OperationPage.qml</file>
+        <file>qml/pages/SelectContactsPage.qml</file>
         <file>qml/pages/SignInAsPage.qml</file>
         <file>qml/pages/SignInPage.qml</file>
         <file>qml/pages/SignInUsernamePage.qml</file>
@@ -77,7 +78,6 @@
         <file>qml/theme/Theme.qml</file>
         <file>qml/main.qml</file>
         <file>qml/MainView.qml</file>
-        <file>qml/components/CustomForm.qml</file>
         <file>qml/components/Form.qml</file>
         <file>qml/components/FormLabel.qml</file>
         <file>qml/components/FormInput.qml</file>
@@ -129,6 +129,8 @@
         <file>qml/components/ModelListView.qml</file>
         <file>qml/components/Dialogs/TemplateDialog.qml</file>
         <file>qml/components/UploadProgressBar.qml</file>
+        <file>qml/components/ServerSelectionRow.qml</file>
+        <file>qml/components/SelectedContactsFlow.qml</file>
         <!-- Database -->
         <file>resources/database/createAttachments.sql</file>
         <file>resources/database/createChats.sql</file>

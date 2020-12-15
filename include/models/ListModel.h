@@ -62,12 +62,13 @@ public:
     QHash<int, QByteArray> roleNames() const override;
     QHash<int, QByteArray> unitedRoleNames(const QHash<int, QByteArray> &names) const;
 
-signals:
-    void filterChanged(const QString &filter);
-
-protected:
     const QSortFilterProxyModel *proxy() const;
     QSortFilterProxyModel *proxy();
+    const ListSelectionModel *selection() const;
+    ListSelectionModel *selection();
+
+signals:
+    void filterChanged(const QString &filter);
 
 private:
     void setFilter(const QString &filter);

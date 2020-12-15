@@ -1,41 +1,15 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
+import QtQuick 2.15
 
-import "../base"
 import "../components"
-import "../theme"
 
-OperationPage {
+SelectContactsPage {
     appState: app.stateManager.newGroupChatState
-    loadingText: qsTr("Adding of contact...")
-    footerText: ""
-    readonly property string contact: contactSearch.search.toLowerCase()
-    readonly property var filterSource: models.discoveredContacts
-    readonly property alias search: contactSearch.search
-    property string previousSearch
-    readonly property int modelCount: selectedContacts.count
-    property string serverName: "Default"
-
-    readonly property int defaultSearchHeight: 40
-    readonly property int defaultChatHeight: 50
-    readonly property int flowSpaing: 3
-    readonly property int flowItemHeight: 30
-    readonly property int lineWidth: 2
-
-
-    onSearchChanged: {
-        if (search) {
-            previousSearch = search
-        }
-        if (filterSource) {
-            filterSource.filter = search
-        }
-    }
+    actionButtonText: qsTr("Create group")
 
     header: Header {
         title: qsTr("New group")
     }
+<<<<<<< HEAD
 
     CustomForm {
         id: form
@@ -326,4 +300,6 @@ OperationPage {
     ListModel {
         id: flowModel
     }
+=======
+>>>>>>> remotes/origin/feature/group-chats
 }

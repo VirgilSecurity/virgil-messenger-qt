@@ -49,6 +49,9 @@ ListSelectionModel::ListSelectionModel(ListModel *source)
 
 void ListSelectionModel::setSelected(const QVariant &proxyRow, bool selected)
 {
+    if (!m_multiSelect && selected) {
+        clear();
+    }
     const auto index = m_sourceModel->sourceIndex(proxyRow.toInt());
     const auto flag = selected ? QItemSelectionModel::Select : QItemSelectionModel::Deselect;
     QItemSelectionModel::select(index, flag);
@@ -57,6 +60,9 @@ void ListSelectionModel::setSelected(const QVariant &proxyRow, bool selected)
 void ListSelectionModel::toggle(const QVariant &proxyRow)
 {
     const auto index = m_sourceModel->sourceIndex(proxyRow.toInt());
+    if (!m_multiSelect && !isSelected(index)) {
+        clear();
+    }
     QItemSelectionModel::select(index, QItemSelectionModel::Toggle);
 }
 
@@ -65,32 +71,40 @@ void ListSelectionModel::clear()
     QItemSelectionModel::clearSelection();
 }
 
+void ListSelectionModel::setMultiSelect(const bool multiSelect)
+{
+    if (multiSelect == m_multiSelect) {
+        return;
+    }
+    m_multiSelect = multiSelect;
+    emit multiSelectChanged(multiSelect);
+}
+
 bool ListSelectionModel::hasSelection() const
 {
     return m_hasSelection;
 }
 
-QList<QVariant> ListSelectionModel::items() const
+std::vector<QVariant> ListSelectionModel::items() const
 {
-    QList<QVariant> result;
+    std::vector<QVariant> result;
     for (auto &i : selectedIndexes()) {
-        result << m_sourceModel->item(i);
+        result.push_back(m_sourceModel->item(i));
     }
     return result;
 }
 
 void ListSelectionModel::onChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
-    // Update hasSelection
-    const auto has = QItemSelectionModel::hasSelection();
-    if (has != m_hasSelection) {
-        m_hasSelection = has;
-        emit hasSelectionChanged(has);
-    }
     // Collect and order changed indices
     auto indices = selected.indexes() + deselected.indexes();
     std::sort(indices.begin(), indices.end(), [](const QModelIndex &a, const QModelIndex &b) {
         return a.row() < b.row();
     });
     emit changed(indices);
+    //
+    if (m_hasSelection != QItemSelectionModel::hasSelection()) {
+        m_hasSelection = !m_hasSelection;
+        emit hasSelectionChanged(m_hasSelection);
+    }
 }

@@ -9,6 +9,7 @@ Rectangle {
     property alias searchPlaceholder: searchField.placeholderText
     property string search: searchField.text + searchField.preeditText
     property bool isSearchOpen: state === "opened"
+    property bool closeable: true
 
     signal closed()
     signal accepted()
@@ -98,12 +99,11 @@ Rectangle {
         }
 
         Keys.onPressed: {
-            if (isSearchOpen && (event.key === Qt.Key_Back || event.key === Qt.Key_Escape)) {
+            if (containerId.closeable && isSearchOpen && (event.key === Qt.Key_Back || event.key === Qt.Key_Escape)) {
                 containerId.state = "closed"
                 event.accepted = true;
             }
-
-            if (isSearchOpen && (event.key === Qt.Key_Enter || event.key === Qt.Key_Return)) {
+            else if (isSearchOpen && (event.key === Qt.Key_Enter || event.key === Qt.Key_Return)) {
                 accepted()
                 event.accepted = true
             }

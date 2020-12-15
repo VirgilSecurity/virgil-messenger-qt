@@ -42,6 +42,8 @@
 #include "controllers/MessagesController.h"
 #include "controllers/UsersController.h"
 #include "database/UserDatabase.h"
+#include "models/DiscoveredContactsModel.h"
+#include "models/Models.h"
 
 using namespace vm;
 
@@ -59,6 +61,7 @@ Controllers::Controllers(VSQMessenger *messenger, Settings *settings,
     connect(m_messages, &MessagesController::displayImageNotFound, m_attachments, &AttachmentsController::downloadDisplayImage);
     connect(m_users, &UsersController::userIdChanged, m_attachments, &AttachmentsController::setUserId);
     connect(m_users, &UsersController::userIdChanged, m_chats, &ChatsController::loadChats);
+    connect(m_users, &UsersController::userIdChanged, models->discoveredContacts(), &DiscoveredContactsModel::setUserId); // TODO(fpohtmeh): create contacts controller
     connect(m_chats, &ChatsController::currentContactIdChanged, m_attachments, &AttachmentsController::setContactId);
     connect(m_chats, &ChatsController::chatsSet, m_messages, &MessagesController::setUserId);
     connect(m_chats, &ChatsController::chatOpened, m_messages, &MessagesController::loadMessages);

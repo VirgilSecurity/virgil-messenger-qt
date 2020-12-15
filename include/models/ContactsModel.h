@@ -32,42 +32,59 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_DISCOVEREDCONTACTSMODEL_H
-#define VM_DISCOVEREDCONTACTSMODEL_H
+#ifndef VM_CONTACTSMODEL_H
+#define VM_CONTACTSMODEL_H
 
-#include "ContactsModel.h"
+#include "ListModel.h"
+#include "VSQCommon.h"
 
 namespace vm
 {
-class Validator;
+class ContactAvatarLoader;
 
-class DiscoveredContactsModel : public ContactsModel
+class ContactsModel : public ListModel
 {
     Q_OBJECT
-    Q_PROPERTY(ContactsModel *selectedContacts MEMBER m_selectedContacts CONSTANT)
-    Q_PROPERTY(bool filterHasNewContact MEMBER m_filterHasNewContact NOTIFY filterHasNewContactChanged)
 
 public:
-    DiscoveredContactsModel(Validator *validator, QObject *parent);
+    enum Roles
+    {
+        NameRole = Qt::UserRole,
+        DetailsRole,
+        AvatarUrlRole,
+        LastSeenActivityRole,
+        FilterRole
+    };
 
-    void setUserId(const UserId &userId);
+    explicit ContactsModel(QObject *parent);
 
-    void reload();
+    void setContacts(const Contacts &contacts);
+    const Contacts &getContacts() const;
+
+    const Contact &getContact(const int row) const;
+    void addContact(const Contact &contact);
+    void removeContact(const Contact &contact);
+    bool hasContact(const Contact &contact) const;
 
 signals:
-    void filterHasNewContactChanged(const bool filtered);
+    void contactsChanged();
 
-    void contactsPopulated(const Contacts &contacts, QPrivateSignal);
+    void avatarUrlNotFound(const Contact::Id &contactId, QPrivateSignal) const;
+
+protected:
+    Optional<int> findRowByContactId(const Contact::Id &contactId) const;
 
 private:
-    void checkFilterHasNewContact();
-    void processSelection(const QList<QModelIndex> &indices);
+    void loadAvatarUrl(const Contact::Id &contactId);
+    void setAvatarUrl(const Contact &contact, const QUrl &url);
 
-    Validator *m_validator;
-    ContactsModel *m_selectedContacts;
-    UserId m_userId;
-    bool m_filterHasNewContact = false;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
+
+    Contacts m_contacts;
+    ContactAvatarLoader *m_avatarLoader;
 };
 }
 
-#endif // VM_DISCOVEREDCONTACTSMODEL_H
+#endif // VM_CONTACTSMODEL_H
