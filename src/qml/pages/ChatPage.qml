@@ -81,25 +81,115 @@ Page {
         }
     }
 
-    ListView {
-        id: listView
+    ModelListView {
+        id: chatListView
 
         property real previousHeight: 0.0
         property var contextMenu: null
+        property bool animationEnabled: false
 
-        anchors.fill: parent
-        anchors.leftMargin: Theme.margin
-        anchors.rightMargin: Theme.margin
+        anchors {
+            fill: parent
+            leftMargin: Theme.margin
+            rightMargin: Theme.margin
+        }
 
+        spacing: d.listSpacing
         section.property: "day"
         section.delegate: ChatDateSeporator {
             date: section
         }
 
         model: models.messages
+        delegate: messageDelegate
 
-        spacing: d.listSpacing
-        delegate: ChatMessage {
+        ScrollBar.vertical: ScrollBar { }
+
+        Component.onCompleted: {
+            previousHeight = height
+            chatListView.positionViewAtEnd()
+        }
+
+        onCountChanged: {
+            if (chatListView.animationEnabled) {
+                flickTimer.restart()
+            } else {
+                chatListView.positionViewAtEnd()
+                animationEnableTimer.restart()
+            }
+        }
+
+        onHeightChanged: {
+            if (height < previousHeight) {
+                flickTimer.restart()
+            }
+            previousHeight = height
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onPressed: {
+                forceActiveFocus()
+                mouse.accepted = false
+            }
+            onWheel: {
+                if (chatListView.contextMenu) {
+                    chatListView.contextMenu.visible = false
+                }
+                wheel.accepted = false
+            }
+        }
+
+        Timer {
+            id: animationEnableTimer
+            repeat: false
+            interval: Theme.animationDuration
+            onTriggered: {
+                chatListView.animationEnabled = true
+            }
+        }
+
+        Timer {
+            id: flickTimer
+            repeat: false
+            interval: 50
+            onTriggered: {
+                chatListView.flickLastMessage()
+                repeatflickTimer.restart()
+            }
+        }
+
+        Timer {
+            id: repeatflickTimer
+            repeat: false
+            interval: Theme.animationDuration
+            onTriggered: {
+                chatListView.flickLastMessage()
+            }
+        }
+
+        function flickLastMessage() {
+            let position = chatListView.contentY
+            chatListView.positionViewAtEnd()
+            let destPosition = chatListView.contentY
+
+            flickAnimation.from = position
+            flickAnimation.to = destPosition
+            flickAnimation.start()
+        }
+
+        NumberAnimation {
+            id: flickAnimation
+            target: chatListView
+            property: "contentY"
+            duration: Theme.animationDuration
+        }
+    }
+
+    Component {
+        id: messageDelegate
+
+        ChatMessage {
             readonly property real fullWidth: root.width - 2 * Theme.margin - leftIndent
 
             maxWidth: Platform.isMobile ? (fullWidth - 2 * Theme.margin) : fullWidth
@@ -137,52 +227,13 @@ Page {
                 if (!contextMenu.enabled) {
                     return
                 }
-                listView.contextMenu = contextMenu
-                var coord = mapToItem(listView, mouse.x, mouse.y)
+                chatListView.contextMenu = contextMenu
+                var coord = mapToItem(chatListView, mouse.x, mouse.y)
                 contextMenu.x = coord.x - (Platform.isMobile ? contextMenu.width : 0)
                 contextMenu.y = coord.y
-                contextMenu.parent = listView
+                contextMenu.parent = chatListView
                 contextMenu.open()
             }
-        }
-
-        ScrollBar.vertical: ScrollBar { }
-
-        Component.onCompleted: {
-            countChanged.connect(showLastMessage)
-            heightChanged.connect(function() {
-                if (height < previousHeight) {
-                    showLastMessage()
-                }
-                previousHeight = height
-            })
-            previousHeight = height
-            showLastMessage()
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            onPressed: {
-                forceActiveFocus()
-                mouse.accepted = false
-            }
-            onWheel: {
-                if (listView.contextMenu) {
-                    listView.contextMenu.visible = false
-                }
-                wheel.accepted = false
-            }
-        }
-
-        Timer {
-            id: scrollTimer
-            repeat: false
-            interval: 50
-            onTriggered: listView.positionViewAtEnd()
-        }
-
-        function showLastMessage() {
-            scrollTimer.start()
         }
     }
 
