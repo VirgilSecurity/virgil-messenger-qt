@@ -122,10 +122,16 @@ Control {
         }
 
         function openAddNewChatPage() {
+            if (![manager.chatListState, manager.fileCloudState, manager.newChatState].includes(manager.previousState)) {
+                return
+            }
             stackView.push(page("NewChat"))
         }
 
         function openAddNewGroupChatPage() {
+            if (![manager.chatListState, manager.fileCloudState, manager.newChatState].includes(manager.previousState)) {
+                return
+            }
             stackView.push(page("NewGroupChat"))
         }
 
