@@ -78,6 +78,31 @@ Page {
                     color: Theme.secondaryTextColor
                 }
             }
+
+            ImageButton {
+                image: "More"
+                onClicked: {
+                    contextMenu.currentIndex = -1
+                    contextMenu.open()
+                }
+
+                ContextMenu {
+                    id: contextMenu
+                    dropdown: true
+
+                    Action {
+                        text: qsTr("Add participant")
+                    }
+
+                    Action {
+                        text: qsTr("Remove participant")
+                    }
+
+                    Action {
+                        text: qsTr("Leave group")
+                    }
+                }
+            }
         }
     }
 

@@ -53,7 +53,7 @@ using namespace vm;
 
 namespace
 {
-#ifdef VS_DEVMODE
+#ifdef VS_DUMMY_CONTACTS
     Contacts getDummyContacts()
     {
         Contact c0;
