@@ -56,7 +56,7 @@ public:
         FilterRole
     };
 
-    explicit ContactsModel(QObject *parent);
+    ContactsModel(bool sorted, QObject *parent);
 
     void setContacts(const Contacts &contacts);
     const Contacts &getContacts() const;

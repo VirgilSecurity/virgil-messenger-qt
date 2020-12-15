@@ -40,14 +40,16 @@
 
 using namespace vm;
 
-ContactsModel::ContactsModel(QObject *parent)
+ContactsModel::ContactsModel(bool sorted, QObject *parent)
     : ListModel(parent)
     , m_avatarLoader(new ContactAvatarLoader(this))
 {
     qRegisterMetaType<ContactsModel *>("ContactsModel*");
 
-    proxy()->setSortRole(NameRole);
-    proxy()->sort(0, Qt::AscendingOrder);
+    if (sorted) {
+        proxy()->setSortRole(NameRole);
+        proxy()->sort(0, Qt::AscendingOrder);
+    }
     proxy()->setFilterRole(FilterRole);
 
     connect(this, &ContactsModel::avatarUrlNotFound, this, &ContactsModel::loadAvatarUrl);

@@ -44,9 +44,9 @@
 using namespace vm;
 
 DiscoveredContactsModel::DiscoveredContactsModel(Validator *validator, QObject *parent)
-    : ContactsModel(parent)
+    : ContactsModel(true, parent)
     , m_validator(validator)
-    , m_selectedContacts(new ContactsModel(this))
+    , m_selectedContacts(new ContactsModel(false, this))
 {
     qRegisterMetaType<DiscoveredContactsModel *>("DiscoveredContactsModel*");
 
@@ -93,7 +93,6 @@ void DiscoveredContactsModel::processSelection(const QList<QModelIndex> &indices
 {
     for (const auto &i : indices) {
         const auto &c = getContact(i.row());
-        // TODO(fpohtmeh): add method toggle
         if (m_selectedContacts->hasContact(c)) {
             m_selectedContacts->removeContact(c);
         }
