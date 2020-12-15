@@ -6,9 +6,12 @@ import "../base"
 import "../components"
 import "../theme"
 
-Item {
+ModelListView {
     id: root
     state: d.model.filterHasNewContact ? "show header" : "hide header"
+    model: d.model.proxy
+    header: contactListHeader
+    delegate: contactListComponent
 
     property string newContactText: ""
 
@@ -65,29 +68,10 @@ Item {
 
     PropertyAnimation {
         id: flickListView
-        target: contactListView
+        target: root
         property: "contentY"
         to: -d.expandedHeaderHeight
         duration: Theme.animationDuration
-    }
-
-    ListView {
-        id: contactListView
-
-        signal placeholderClicked()
-
-        anchors.fill: parent
-        spacing: Theme.smallSpacing
-        clip: true
-        focus: true
-
-        model: d.model.proxy
-        header: contactListHeader
-        delegate: contactListComponent
-        footer: Item {
-            width: width
-            height: Theme.spacing
-        }
     }
 
     Component {
@@ -146,13 +130,13 @@ Item {
 
         ListDelegate {
             id: contactListDelegate
-            width: contactListView.width
+            width: root.width
             height: d.defaultChatHeight
 
             Row {
                 width: parent.width
                 height: parent.height
-                spacing: Theme.spacing
+                spacing: Theme.smallSpacing
 
                 add: Transition {
                     NumberAnimation { property: "scale"; from: 0.9; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
@@ -218,5 +202,10 @@ Item {
             }
         }
 
+    }
+
+    footer: Item {
+        width: width
+        height: Theme.spacing
     }
 }

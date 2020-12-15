@@ -7,16 +7,18 @@ import "../components/CommonHelpers"
 
 ListView {
     id: listView
+    spacing: Theme.minSpacing
+    clip: true
 
     signal placeholderClicked()
 
     property var searchHeader: undefined
-    property bool isSearchOpened: searchHeader ? searchHeader.isSearchOpen : false
-    property bool search: searchHeader ? searchHeader.search : ""
+    property bool isSearchOpened: searchHeader ? searchHeader.isSearchOpen : true
+    property string search: searchHeader ? searchHeader.search : ""
 
     property alias emptyIcon: labeledIcon.emptyIcon
     property alias emptyText: labeledIcon.emptyListText
-    readonly property bool isEmpty: listView.contentItem.children.length === 0
+    readonly property bool isEmpty: listView.count === 0
 
     add: Transition {
         NumberAnimation { property: "scale"; from: 0.9; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }

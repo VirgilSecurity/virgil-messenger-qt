@@ -48,12 +48,10 @@ OperationPage {
             closeable: false
             Layout.preferredHeight: d.defaultSearchHeight
             Layout.fillWidth: true
-
-            onClosed: contactSearch.search = ""
-            onAccepted: root.accept()
         }
 
         SelectContactsList {
+            search: d.search
             newContactText: d.search ? d.contact : d.previousSearch
             Layout.fillWidth: true
             Layout.fillHeight: true

@@ -40,6 +40,7 @@ Item {
     readonly property real smallMargin: 10
     readonly property real smallSpacing: 10
     readonly property real smallPadding: 10
+    readonly property real minSpacing: 3
 
     readonly property real avatarHeight: 40
     readonly property real avatarWidth: avatarHeight
