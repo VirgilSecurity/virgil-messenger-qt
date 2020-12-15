@@ -122,11 +122,21 @@ Control {
         }
 
         function openAddNewChatPage() {
+            if (![manager.chatListState, manager.fileCloudState, manager.newChatState].includes(manager.previousState)) {
+                return
+            }
             stackView.push(page("NewChat"))
         }
 
         function openAddNewGroupChatPage() {
+            if (![manager.chatListState, manager.fileCloudState, manager.newChatState].includes(manager.previousState)) {
+                return
+            }
             stackView.push(page("NewGroupChat"))
+        }
+
+        function openNameGroupChatPage() {
+            stackView.push(page("NameGroupChat"))
         }
 
         function openChatPage() {
@@ -194,6 +204,7 @@ Control {
         manager.accountSettingsState.entered.connect(d.openAccountSettingsPage)
         manager.newChatState.entered.connect(d.openAddNewChatPage)
         manager.newGroupChatState.entered.connect(d.openAddNewGroupChatPage)
+        manager.nameGroupChatState.entered.connect(d.openNameGroupChatPage)
         manager.chatState.entered.connect(d.openChatPage)
         manager.attachmentPreviewState.entered.connect(d.showAttachmentPreview)
         manager.backupKeyState.entered.connect(d.openBackupKeyPage)
