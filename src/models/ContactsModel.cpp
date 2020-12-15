@@ -137,6 +137,8 @@ QVariant ContactsModel::data(const QModelIndex &index, int role) const
 {
     const auto &info = m_contacts[index.row()];
     switch (role) {
+    case IdRole:
+        return info.id;
     case NameRole:
         return info.name;
     case DetailsRole:
@@ -168,6 +170,7 @@ QVariant ContactsModel::data(const QModelIndex &index, int role) const
 QHash<int, QByteArray> ContactsModel::roleNames() const
 {
     return unitedRoleNames({
+        { IdRole, "id" },
         { NameRole, "name" },
         { DetailsRole, "details" },
         { AvatarUrlRole, "avatarUrl" },

@@ -70,6 +70,13 @@ void DiscoveredContactsModel::reload()
     });
 }
 
+void DiscoveredContactsModel::toggleById(const Contact::Id &contactId)
+{
+    if (auto row = findRowByContactId(contactId)) {
+        selection()->toggle(index(*row));
+    }
+}
+
 void DiscoveredContactsModel::checkFilterHasNewContact()
 {
     const auto filter = this->filter();

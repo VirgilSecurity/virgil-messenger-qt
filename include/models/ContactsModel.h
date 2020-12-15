@@ -49,7 +49,8 @@ class ContactsModel : public ListModel
 public:
     enum Roles
     {
-        NameRole = Qt::UserRole,
+        IdRole = Qt::UserRole,
+        NameRole,
         DetailsRole,
         AvatarUrlRole,
         LastSeenActivityRole,

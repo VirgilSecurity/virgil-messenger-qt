@@ -59,11 +59,16 @@ void ListSelectionModel::setSelected(const QVariant &proxyRow, bool selected)
 
 void ListSelectionModel::toggle(const QVariant &proxyRow)
 {
-    const auto index = m_sourceModel->sourceIndex(proxyRow.toInt());
-    if (!m_multiSelect && !isSelected(index)) {
+    const auto sourceIndex = m_sourceModel->sourceIndex(proxyRow.toInt());
+    toggle(sourceIndex);
+}
+
+void ListSelectionModel::toggle(const QModelIndex &sourceIndex)
+{
+    if (!m_multiSelect && !isSelected(sourceIndex)) {
         clear();
     }
-    QItemSelectionModel::select(index, QItemSelectionModel::Toggle);
+    QItemSelectionModel::select(sourceIndex, QItemSelectionModel::Toggle);
 }
 
 void ListSelectionModel::clear()

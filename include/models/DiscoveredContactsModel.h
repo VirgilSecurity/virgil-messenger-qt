@@ -53,6 +53,7 @@ public:
     void setUserId(const UserId &userId);
 
     void reload();
+    Q_INVOKABLE void toggleById(const Contact::Id &contactId);
 
 signals:
     void filterHasNewContactChanged(const bool filtered);

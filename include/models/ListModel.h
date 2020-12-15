@@ -56,6 +56,7 @@ public:
     QString filter() const;
 
     QModelIndex sourceIndex(const int proxyRow) const;
+    QModelIndex proxyIndex(const int sourceRow) const;
     virtual QVariant item(const QModelIndex &index) const;
 
     QVariant data(const QModelIndex &index, int role) const override;

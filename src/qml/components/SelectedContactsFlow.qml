@@ -60,8 +60,7 @@ FlowListView {
 
                     MouseArea {
                         anchors.fill: parent
-                        // FIXME(fpohtmeh): implement
-                        //onClicked: editedModel.selection.toggle(index)
+                        onClicked: editedModel.toggleById(model.id)
                     }
                 }
 

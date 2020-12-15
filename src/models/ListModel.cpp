@@ -65,6 +65,11 @@ QModelIndex ListModel::sourceIndex(const int proxyRow) const
     return proxy()->mapToSource(proxy()->index(proxyRow, 0));
 }
 
+QModelIndex ListModel::proxyIndex(const int sourceRow) const
+{
+    return proxy()->mapFromSource(index(sourceRow));
+}
+
 QVariant ListModel::item(const QModelIndex &index) const
 {
     Q_UNUSED(index)
