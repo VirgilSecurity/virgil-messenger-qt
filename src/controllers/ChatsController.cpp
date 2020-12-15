@@ -124,6 +124,22 @@ void ChatsController::closeChat()
     setCurrentChat({});
 }
 
+void ChatsController::addParticipant(const UserId &userId)
+{
+    // addParticipant
+}
+
+void ChatsController::removeParticipant(const UserId &userId)
+{
+    // removeParticipant
+}
+
+void ChatsController::leaveGroup()
+{
+    auto currChatId = ChatsController::currentChatId();
+    // leaveGroup(currChatId)
+}
+
 void ChatsController::setupTableConnections()
 {
     auto table = m_userDatabase->chatsTable();

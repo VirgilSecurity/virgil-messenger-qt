@@ -92,14 +92,17 @@ Page {
 
                     Action {
                         text: qsTr("Add participant")
+                        onTriggered: controllers.chats.addParticipant(/*userId*/)
                     }
 
                     Action {
                         text: qsTr("Remove participant")
+                        onTriggered: controllers.chats.removeParticipants(/*userId*/)
                     }
 
                     Action {
                         text: qsTr("Leave group")
+                        onTriggered: controllers.chats.leaveGroup()
                     }
                 }
             }
