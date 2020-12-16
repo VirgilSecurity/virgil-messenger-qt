@@ -82,12 +82,42 @@ Page {
             ImageButton {
                 image: "More"
                 onClicked: {
-                    contextMenu.currentIndex = -1
-                    contextMenu.open()
+                    if (appState.isGroupChat) {
+                        if (appState.isAdmin) {
+                            groupChatAdminContextMenu.currentIndex = -1
+                            groupChatAdminContextMenu.open()
+                        } else {
+                            groupChatNotAdminContextMenu.currentIndex = -1
+                            groupChatNotAdminContextMenu.open()
+                        }
+                    } else {
+                        stdChatContextMenu.currentIndex = -1
+                        stdChatContextMenu.open()
+                    }
                 }
 
                 ContextMenu {
-                    id: contextMenu
+                    id: stdChatContextMenu
+                    dropdown: true
+
+                    Action {
+                        text: qsTr("Delete chat")
+                        onTriggered: controllers.chats.addParticipant(/*userId*/)
+                    }
+                }
+
+                ContextMenu {
+                    id: groupChatNotAdminContextMenu
+                    dropdown: true
+
+                    Action {
+                        text: qsTr("Leave group")
+                        onTriggered: controllers.chats.leaveGroup()
+                    }
+                }
+
+                ContextMenu {
+                    id: groupChatAdminContextMenu
                     dropdown: true
 
                     Action {

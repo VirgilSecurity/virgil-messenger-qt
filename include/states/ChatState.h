@@ -49,23 +49,33 @@ class ChatState : public QState
 {
     Q_OBJECT
     Q_PROPERTY(QString lastActivityText READ lastActivityText WRITE setLastActivityText NOTIFY lastActivityTextChanged)
+    Q_PROPERTY(bool isAdmin READ isAdmin NOTIFY isAdminChanged)
+    Q_PROPERTY(bool isGroupChat READ isGroupChat NOTIFY isGroupChatChanged)
 
 public:
     ChatState(Controllers *controllers, VSQLastActivityManager *lastActivityManager, QState *parent);
 
     QString lastActivityText() const;
     void setLastActivityText(const QString &text);
+    bool isAdmin() const;
+    void setIsAdmin(const bool &adminValue);
+    bool isGroupChat() const;
+    void setIsGroupChat(const bool &chatValue);
 
 signals:
     void requestPreview(const QUrl &url);
     void lastActivityTextChanged(const QString &text);
     void messageSent();
+    void isAdminChanged(const bool);
+    void isGroupChatChanged(const bool);
 
 private:
     void onMessageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);
 
     Controllers *m_controllers;
     QString m_lastActivityText;
+    bool m_isAdmin;
+    bool m_isGroupChat;
 };
 }
 
