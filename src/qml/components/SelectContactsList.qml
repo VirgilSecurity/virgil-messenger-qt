@@ -7,7 +7,7 @@ import "../components"
 import "../theme"
 
 ModelListView {
-    id: root
+    id: modelListView
     state: d.model.filterHasNewContact ? "show header" : "hide header"
     model: d.model.proxy
     header: contactListHeader
@@ -25,7 +25,7 @@ ModelListView {
         property real headerOpacity: 0
         readonly property real defaultChatHeight: 50
         readonly property real defaultHeaderHeight: 20
-        readonly property real expandedHeaderHeight: 90
+        readonly property real expandedHeaderHeight: 70
         readonly property real checkCircleMargin: 2
         readonly property real selectionIconSize: 20
     }
@@ -68,10 +68,11 @@ ModelListView {
 
     PropertyAnimation {
         id: flickListView
-        target: root
+        target: modelListView
         property: "contentY"
         to: -d.expandedHeaderHeight
         duration: Theme.animationDuration
+        easing.type: Easing.InExpo
     }
 
     Component {
@@ -81,7 +82,7 @@ ModelListView {
             width: parent.width
             height: d.headerHeight
             opacity: d.headerOpacity
-            enabled: state == "show header"
+            enabled: modelListView.state === "show header"
 
             ListDelegate {
                 id: contactListDelegate
@@ -91,7 +92,7 @@ ModelListView {
 
                 Avatar {
                     id: avatar
-                    nickname: root.newContactText
+                    nickname: modelListView.newContactText
                     Layout.alignment: Qt.AlignVCenter
                 }
 
@@ -102,7 +103,7 @@ ModelListView {
                     Text {
                         color: Theme.primaryTextColor
                         font.pointSize: UiHelper.fixFontSz(15)
-                        text: root.newContactText
+                        text: modelListView.newContactText
                     }
 
                     Text {
@@ -117,9 +118,9 @@ ModelListView {
 
                 onClicked: {
                     if (d.model.selection.multiSelect) {
-                        d.model.toggleById(root.newContactText)
+                        d.model.toggleById(modelListView.newContactText)
                     }
-                    contactSelected(root.newContactText)
+                    contactSelected(modelListView.newContactText)
                 }
             }
         }
@@ -130,68 +131,73 @@ ModelListView {
 
         ListDelegate {
             id: contactListDelegate
-            width: root.width
+            leftInset: 0
+            rightInset: 0
+            width: modelListView.width
             height: d.defaultChatHeight
 
-            Row {
+            Item { // we need this item!
                 width: parent.width
                 height: parent.height
-                spacing: Theme.smallSpacing
 
-                add: Transition {
-                    NumberAnimation { property: "scale"; from: 0.9; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
-                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
-                }
-
-                move: Transition {
-                    NumberAnimation { properties: "x,y"; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
-                }
-
-                // TODO(fpohtmeh): replace with image
-                Item {
-                    width: d.selectionIconSize
-                    height: width
-                    visible: d.model.selection.hasSelection
+                Row {
+                    width: parent.width
+                    height: parent.height
                     anchors.verticalCenter: parent.verticalCenter
 
-                    Repeater {
-                        model: isSelected ? 2 : 0
+                    spacing: Theme.smallSpacing
 
-                        Rectangle {
-                            anchors.centerIn: parent
-                            width: parent.width * 0.6
-                            height: d.checkCircleMargin
-                            radius: height
-                            rotation: index ? 0 : 90
+                    add: Transition {
+                        NumberAnimation { property: "scale"; from: 0.9; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+                        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+                    }
+
+                    move: Transition {
+                        NumberAnimation { properties: "x,y"; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+                    }
+
+                    // TODO(fpohtmeh): replace with image
+                    Item {
+                        width: d.selectionIconSize
+                        height: width
+                        visible: isSelected ? true : false
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Image {
+                            id: image
+                            anchors.fill: parent
+                            source: "../resources/icons/Check.png"
+                            fillMode: Image.PreserveAspectFit
+                        }
+                    }
+
+                    Avatar {
+                        id: avatar
+                        nickname: model.name
+                        avatarUrl: model.avatarUrl
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+
+                    Column {
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Text {
+                            color: Theme.primaryTextColor
+                            font.pointSize: UiHelper.fixFontSz(15)
+                            text: model.name
+                        }
+
+                        Text {
+                            color: Theme.secondaryTextColor
+                            font.pointSize: UiHelper.fixFontSz(12)
+                            text: model.lastSeenActivity
+                            width: parent.width
+                            elide: Text.ElideRight
+                            textFormat: Text.RichText
                         }
                     }
                 }
 
-                Avatar {
-                    id: avatar
-                    nickname: model.name
-                    avatarUrl: model.avatarUrl
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-
-                Column {
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    Text {
-                        color: Theme.primaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(15)
-                        text: model.name
-                    }
-
-                    Text {
-                        color: Theme.secondaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(12)
-                        text: model.lastSeenActivity
-                        width: parent.width
-                        elide: Text.ElideRight
-                        textFormat: Text.RichText
-                    }
-                }
             }
 
             onClicked: {
@@ -201,7 +207,6 @@ ModelListView {
                 contactSelected(contactId)
             }
         }
-
     }
 
     footer: Item {

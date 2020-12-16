@@ -94,7 +94,7 @@ namespace
         }
         return contacts;
     }
-#endif // VS_DEVMODE
+#endif // VS_DUMMY_CONTACTS
 }
 
 QString Utils::createUuid()

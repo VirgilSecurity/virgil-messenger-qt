@@ -21,7 +21,6 @@ ListView {
     readonly property bool isEmpty: listView.count === 0
 
     add: Transition {
-        NumberAnimation { property: "scale"; from: 0.9; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
         NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
     }
 
@@ -37,7 +36,6 @@ ListView {
 
     remove: Transition {
         NumberAnimation { property: "opacity"; to: 0; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
-        NumberAnimation { property: "scale"; to: 0.9; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
     }
 
     IconWithText {

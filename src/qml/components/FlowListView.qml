@@ -10,6 +10,7 @@ Flickable {
 
     property alias delegate: repeater.delegate
     property alias model: repeater.model
+    property alias count: repeater.count
     property alias spacing: flow.spacing
 
     Flow {

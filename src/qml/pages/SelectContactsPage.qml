@@ -41,32 +41,52 @@ OperationPage {
         id: form
         isCentered: false
 
-        Search {
-            id: contactSearch
-            state: "opened"
-            searchPlaceholder: qsTr("Search contact")
-            closeable: false
-            Layout.preferredHeight: d.defaultSearchHeight
-            Layout.fillWidth: true
-        }
-
-        SelectContactsList {
-            search: d.search
-            newContactText: d.search ? d.contact : d.previousSearch
+        ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            spacing: 0
 
-            onContactSelected: root.contactSelected(contactId)
-        }
+            Search {
+                id: contactSearch
+                state: "opened"
+                searchPlaceholder: qsTr("Search contact")
+                closeable: false
+                Layout.preferredHeight: d.defaultSearchHeight
+                Layout.fillWidth: true
+            }
 
-        SelectedContactsFlow {
-            visible: d.model.selection.hasSelection
-            Layout.fillWidth: true
-            Layout.preferredHeight: recommendedHeight
-        }
+            SelectContactsList {
+                search: d.search
+                newContactText: d.search ? d.contact : d.previousSearch
+                Layout.fillWidth: true
+                Layout.fillHeight: true
 
-        ServerSelectionRow {
-            Layout.alignment: Qt.AlignHCenter
+                onContactSelected: root.contactSelected(contactId)
+
+                Rectangle {
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                        bottom: parent.bottom
+                    }
+
+                    height: 1
+                    color: Theme.chatBackgroundColor
+                }
+            }
+
+            SelectedContactsFlow {
+                visible: d.model.selection.hasSelection
+                Layout.fillWidth: true
+                Layout.preferredHeight: recommendedHeight
+
+                Behavior on Layout.preferredHeight {
+                    NumberAnimation {
+                        easing.type: Easing.InOutCubic
+                        duration: Theme.animationDuration
+                    }
+                }
+            }
         }
 
         FormPrimaryButton {
@@ -74,6 +94,10 @@ OperationPage {
             visible: d.model.selection.multiSelect
             enabled: d.model.selection.hasSelection
             onClicked: root.actionButtonClicked()
+        }
+
+        ServerSelectionRow {
+            Layout.alignment: Qt.AlignHCenter
         }
     }
 }
