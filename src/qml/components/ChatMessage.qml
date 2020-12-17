@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
+import QtQuick.Shapes 1.12
 import com.virgilsecurity.messenger 1.0
 
 import "../base"
@@ -20,6 +21,7 @@ Control {
     property alias nickname: avatar.nickname
     property bool isOwnMessage: false
     property string status: ""
+
     property bool isBroken: false
     property string messageId: ""
     property bool inRow: false
@@ -40,6 +42,15 @@ Control {
 
     signal saveAttachmentAs(string messageId)
     signal openContextMenu(string messageId, var mouse, var contextMenu)
+
+    readonly property int stdCheckHeight: 14
+    readonly property int stdRadiusHeight: 20
+    readonly property int stdRectangleSize: 22
+    property int leftBottomRadiusHeight: inRow ? 4 : stdRadiusHeight
+
+    Behavior on leftBottomRadiusHeight {
+        NumberAnimation { duration: Theme.animationDuration}
+    }
 
     QtObject {
         id: d
@@ -193,11 +204,21 @@ Control {
         id: row
         spacing: 12
 
-        Avatar {
-            id: avatar
-            width: 30
-            height: width
-            opacity: firstInRow ? 1 : 0
+        Column {
+            anchors.top: parent.top
+
+            Item {
+                visible: firstInRow
+                width: parent.width
+                height: 3
+            }
+
+            Avatar {
+                id: avatar
+                width: 30
+                height: width
+                opacity: firstInRow ? 1 : 0
+            }
         }
 
         Column {
@@ -235,33 +256,54 @@ Control {
             }
 
             // Message or attachment
-            Rectangle {
+            Item {
                 width: loader.item.width
                 height: loader.item.height
-                color: "transparent"
 
                 Rectangle {
+                    visible: d.isPicture
                     width: parent.width
                     height: parent.height
                     color: d.background
-                    radius: d.isPicture ? d.defaultRadius : 20
+                    radius: d.defaultRadius
                 }
 
                 Rectangle {
-                    anchors.top: parent.top
-                    height: 22
-                    width: 22
-                    radius: d.defaultRadius
+                    id: paintingRec
+                    visible: !d.isPicture
+                    width: parent.width
+                    height: parent.height
                     color: d.background
-                }
+                    radius: stdRadiusHeight
 
-                Rectangle {
-                    visible: inRow
-                    anchors.bottom: parent.bottom
-                    height: 22
-                    width: 22
-                    radius: d.defaultRadius
-                    color: d.background
+                    Shape {
+                        id: messageShape
+                        anchors.fill: parent
+                        layer.enabled: true
+                        layer.samples: 4
+
+                        ShapePath {
+                            strokeColor: "transparent"
+                            strokeWidth: 0
+                            fillColor: d.background
+                            capStyle: ShapePath.RoundCap
+                            joinStyle: ShapePath.RoundJoin
+
+                             startX: 0
+                             startY: messageShape.height * 0.5
+                             PathLine {x: 0; y: 4}
+
+                             PathQuad {x: 4; y: 0; controlX: 0; controlY: 0}
+
+                             PathLine {x: messageShape.width * 0.5; y: 0}
+
+                             PathLine {x: messageShape.width * 0.5; y: messageShape.height}
+
+                             PathLine {x: leftBottomRadiusHeight; y: messageShape.height}
+
+                             PathQuad {x: 0; y: messageShape.height - leftBottomRadiusHeight; controlX: 0; controlY: messageShape.height}
+                        }
+                    }
                 }
 
                 Loader {
@@ -294,27 +336,54 @@ Control {
                         }
                     }
                 }
-            }
 
-            // Status label
-            Label {
-                id: statusLabel
-                height: 12
-                text: {
-                    if (chatMessage.isBroken) {
-                        return "broken"
+                Item {
+                    id: messageStatus
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        right: parent.right
+                        rightMargin: -Theme.margin
                     }
-                    switch (status) {
-                        case "0": return "sending"
-                        case "1": return "sent"
-                        case "2": return "delivered"
-                        case "4": return "sending"
-                        default: return ""
+                    width: stdCheckHeight
+                    height: stdCheckHeight
+
+                    Image {
+                        anchors.fill: parent
+                        source: "../resources/icons/Check.png"
+                        visible: isCheckVisible()
+                    }
+
+                    Item {
+                        id: messageIsBroken
+                        anchors.fill: parent
+                        visible: chatMessage.isBroken
+                        Repeater {
+                            model: 2
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: 0.75 * parent.width
+                                height: 2
+                                radius: height
+                                color: Theme.buttonPrimaryColor
+                                rotation: index ? -45 : 45
+                            }
+                        }
                     }
                 }
-                color: chatMessage.isBroken ? "red" : Theme.labelColor
-                font.pixelSize: UiHelper.fixFontSz(11)
             }
+        }
+    }
+
+    function isCheckVisible() {
+        if (chatMessage.isBroken) {
+            return false
+        }
+        switch (status) {
+            case "0": return false // "sending"
+            case "1": return true // "sent"
+            case "2": return true // "delivered"
+            case "4": return false // "sending"
+            default: return false
         }
     }
 

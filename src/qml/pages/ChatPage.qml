@@ -269,4 +269,65 @@ Page {
             messageSent.play()
         }
     }
+
+//    readonly property int stdRadiusHeight: 20
+//    property int leftBottomRadiusHeight: 4
+
+//    Behavior on leftBottomRadiusHeight {
+//        NumberAnimation { duration: 250}
+//    }
+
+//    Timer {
+//        running: true
+//        repeat: true
+//        interval: 2000
+//        onTriggered: {
+//            if (leftBottomRadiusHeight === 4) {
+//                leftBottomRadiusHeight = 20
+//            } else {
+//                leftBottomRadiusHeight = 4
+//            }
+//        }
+//    }
+
+//    Rectangle {
+//        id: paintingRec
+//        anchors.centerIn: parent
+//        width: 400
+//        height: 400
+//        color: 'black'
+//        layer.enabled: true
+//        layer.samples: 4
+
+//        Shape {
+//            id: messageShape
+//            anchors.fill: parent
+
+//            ShapePath {
+//                strokeColor: "transparent"
+//                strokeWidth: 0
+//                fillColor: "green"
+//                capStyle: ShapePath.RoundCap
+//                joinStyle: ShapePath.RoundJoin
+
+//                 startX: 0
+//                 startY: paintingRec.height * 0.5
+//                 PathLine {x: 0; y: 4}
+
+//                 PathQuad {x: 4; y: 0; controlX: 0; controlY: 0}
+
+//                 PathLine {x: messageShape.width - stdRadiusHeight; y: 0}
+
+//                 PathQuad {x: messageShape.width; y: stdRadiusHeight; controlX: messageShape.width; controlY: 0}
+
+//                 PathLine {x: messageShape.width; y: messageShape.height - stdRadiusHeight}
+
+//                 PathQuad {x: messageShape.width - stdRadiusHeight; y: messageShape.height; controlX: messageShape.width; controlY: messageShape.height}
+
+//                 PathLine {x: leftBottomRadiusHeight; y: messageShape.height}
+
+//                 PathQuad {x: 0; y: messageShape.height - leftBottomRadiusHeight; controlX: 0; controlY: messageShape.height}
+//            }
+//        }
+//    }
 }
