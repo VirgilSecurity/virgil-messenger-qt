@@ -58,7 +58,6 @@ public:
     void setMultiSelect(const bool multiSelect);
 
     bool hasSelection() const;
-    std::vector<QVariant> items() const;
 
 signals:
     void changed(const QList<QModelIndex> &indices);

@@ -90,15 +90,6 @@ bool ListSelectionModel::hasSelection() const
     return m_hasSelection;
 }
 
-std::vector<QVariant> ListSelectionModel::items() const
-{
-    std::vector<QVariant> result;
-    for (auto &i : selectedIndexes()) {
-        result.push_back(m_sourceModel->item(i));
-    }
-    return result;
-}
-
 void ListSelectionModel::onChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
     // Collect and order changed indices

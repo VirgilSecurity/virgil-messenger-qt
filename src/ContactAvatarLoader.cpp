@@ -68,10 +68,10 @@ void ContactAvatarLoader::load(Contacts &contacts, int maxLimit)
 
 bool ContactAvatarLoader::canLoad(Contact &contact)
 {
-    if (contact.avatarUrlRequested) {
+    if (contact.avatarUrlRetryCount == 0) {
         return false;
     }
-    contact.avatarUrlRequested = true;
+    --contact.avatarUrlRetryCount;
     for (auto &c : m_contacts) {
         if (c.id == contact.id) {
             return false;

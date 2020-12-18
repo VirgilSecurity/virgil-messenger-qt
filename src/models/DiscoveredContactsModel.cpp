@@ -50,10 +50,9 @@ DiscoveredContactsModel::DiscoveredContactsModel(Validator *validator, QObject *
 {
     qRegisterMetaType<DiscoveredContactsModel *>("DiscoveredContactsModel*");
 
-    connect(this, &ContactsModel::contactsChanged, this, &DiscoveredContactsModel::checkFilterHasNewContact);
     connect(selection(), &ListSelectionModel::changed, this, &DiscoveredContactsModel::onSelectionChanged);
     connect(this, &DiscoveredContactsModel::filterChanged, this, &DiscoveredContactsModel::checkFilterHasNewContact);
-    connect(this, &DiscoveredContactsModel::contactsPopulated, this, &DiscoveredContactsModel::setContacts);
+    connect(this, &DiscoveredContactsModel::contactsPopulated, this, &DiscoveredContactsModel::onContactsPopulated);
 }
 
 void DiscoveredContactsModel::setUserId(const UserId &userId)
@@ -81,7 +80,7 @@ void DiscoveredContactsModel::toggleById(const Contact::Id &contactId)
         m_selectedContacts->removeContact(contactId);
     }
     else {
-        m_selectedContacts->addContact(contactId);
+        m_selectedContacts->addContact(createContact(contactId));
     }
 }
 
@@ -94,6 +93,12 @@ void DiscoveredContactsModel::checkFilterHasNewContact()
     }
     m_filterHasNewContact = has;
     emit filterHasNewContactChanged(has);
+}
+
+void DiscoveredContactsModel::onContactsPopulated(const Contacts &contacts)
+{
+    setContacts(contacts);
+    checkFilterHasNewContact();
 }
 
 void DiscoveredContactsModel::onSelectionChanged(const QList<QModelIndex> &indices)

@@ -80,15 +80,9 @@ QModelIndex ListModel::proxyIndex(const int sourceRow) const
     return proxy()->mapFromSource(index(sourceRow));
 }
 
-QVariant ListModel::item(const QModelIndex &index) const
-{
-    Q_UNUSED(index)
-    return QVariant();
-}
-
 QVariant ListModel::data(const QModelIndex &index, int role) const
 {
-    if (role == Qt::CheckStateRole) {
+    if (role == IsSelectedRole) {
         return m_selection->isSelected(index);
     }
     return QVariant();
@@ -97,7 +91,7 @@ QVariant ListModel::data(const QModelIndex &index, int role) const
 QHash<int, QByteArray> ListModel::roleNames() const
 {
     return {
-        { Qt::CheckStateRole, "isSelected" }
+        { IsSelectedRole, "isSelected" }
     };
 }
 
@@ -133,6 +127,6 @@ ListSelectionModel *ListModel::selection()
 void ListModel::onSelectionChanged(const QList<QModelIndex> &indices)
 {
     for (auto &i : indices) {
-        emit dataChanged(i, i, { Qt::CheckStateRole });
+        emit dataChanged(i, i, { IsSelectedRole });
     }
 }

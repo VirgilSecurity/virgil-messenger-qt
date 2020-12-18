@@ -63,6 +63,7 @@ signals:
 private:
     void checkFilterHasNewContact();
 
+    void onContactsPopulated(const Contacts &contacts);
     void onSelectionChanged(const QList<QModelIndex> &indices);
 
     Validator *m_validator;

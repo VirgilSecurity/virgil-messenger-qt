@@ -62,7 +62,6 @@ void ContactsModel::setContacts(const Contacts &contacts)
     m_contacts = contacts;
     endResetModel();
     m_avatarLoader->load(m_contacts, 10);
-    emit contactsChanged();
 }
 
 const Contacts &ContactsModel::getContacts() const
@@ -70,9 +69,23 @@ const Contacts &ContactsModel::getContacts() const
     return m_contacts;
 }
 
+Contact ContactsModel::createContact(const Contact::Id &contactId) const
+{
+    Contact contact;
+    contact.id = contactId;
+    contact.name = contactId;
+    contact.platformId = contactId;
+    return contact;
+}
+
 const Contact &ContactsModel::getContact(const int row) const
 {
     return m_contacts[row];
+}
+
+bool ContactsModel::hasContact(const Contact::Id &contactId) const
+{
+    return findRowByContactId(contactId) != NullOptional;
 }
 
 void ContactsModel::addContact(const Contact &contact)
@@ -81,16 +94,6 @@ void ContactsModel::addContact(const Contact &contact)
     m_contacts.push_back(contact);
     endInsertRows();
     m_avatarLoader->load(m_contacts.back());
-    emit contactsChanged();
-}
-
-void ContactsModel::addContact(const Contact::Id &contactId)
-{
-    Contact contact;
-    contact.id = contactId;
-    contact.name = contactId;
-    contact.platformId = contactId;
-    addContact(contact);
 }
 
 void ContactsModel::removeContact(const Contact::Id &contactId)
@@ -99,13 +102,7 @@ void ContactsModel::removeContact(const Contact::Id &contactId)
         beginRemoveRows(QModelIndex(), *row, *row);
         m_contacts.erase(m_contacts.begin() + *row);
         endRemoveRows();
-        emit contactsChanged();
     }
-}
-
-bool ContactsModel::hasContact(const Contact::Id &contactId) const
-{
-    return findRowByContactId(contactId) != NullOptional;
 }
 
 Optional<int> ContactsModel::findRowByContactId(const Contact::Id &contactId) const
@@ -167,8 +164,6 @@ QVariant ContactsModel::data(const QModelIndex &index, int role) const
         }
         return url;
     }
-    case LastSeenActivityRole:
-        return info.lastSeenActivity;
     case FilterRole:
         return info.name + QLatin1Char('\n') + info.email + QLatin1Char('\n') + info.phoneNumber;
     default:
@@ -182,8 +177,7 @@ QHash<int, QByteArray> ContactsModel::roleNames() const
         { IdRole, "contactId" },
         { NameRole, "name" },
         { DetailsRole, "details" },
-        { AvatarUrlRole, "avatarUrl" },
-        { LastSeenActivityRole, "lastSeenActivity" },
-        // Search role is hidden
+        { AvatarUrlRole, "avatarUrl" }
+        // Filter role is hidden
     });
 }

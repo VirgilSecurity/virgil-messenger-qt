@@ -51,6 +51,11 @@ class ListModel : public QAbstractListModel
     Q_PROPERTY(QString filter MEMBER m_filter WRITE setFilter NOTIFY filterChanged)
 
 public:
+    enum Roles
+    {
+        IsSelectedRole = Qt::CheckStateRole
+    };
+
     explicit ListModel(QObject *parent);
 
     QString filter() const;
@@ -58,7 +63,6 @@ public:
 
     QModelIndex sourceIndex(const int proxyRow) const;
     QModelIndex proxyIndex(const int sourceRow) const;
-    virtual QVariant item(const QModelIndex &index) const;
 
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
