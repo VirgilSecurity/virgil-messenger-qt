@@ -19,12 +19,8 @@ Rectangle {
 
     color: Theme.mainBackgroundColor
 
-    Rectangle {
+    HorizontalRule {
         id: separator
-        anchors.left: parent.left
-        anchors.right: parent.right
-        height: 1
-        color: Theme.chatBackgroundColor
     }
 
     state: filesCount !== 0 ? "opened" : "closed"

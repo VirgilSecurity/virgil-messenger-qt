@@ -34,24 +34,16 @@
 
 #include "models/ListModel.h"
 
-#include <QSortFilterProxyModel>
-
+#include "models/ListProxyModel.h"
 #include "models/ListSelectionModel.h"
 
 using namespace vm;
 
-ListModel::ListModel(QObject *parent)
+ListModel::ListModel(QObject *parent, bool createProxy)
     : QAbstractListModel(parent)
-    , m_proxy(new QSortFilterProxyModel(this))
+    , m_proxy(createProxy ? new ListProxyModel(this) : nullptr)
     , m_selection(new ListSelectionModel(this))
 {
-    qRegisterMetaType<QSortFilterProxyModel *>("QSortFilterProxyModel*");
-    qRegisterMetaType<ListSelectionModel *>("ListSelectionModel*");
-
-    m_proxy->setSourceModel(this);
-    m_proxy->setFilterKeyColumn(0);
-    m_proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
-
     connect(m_selection, &ListSelectionModel::changed, this, &ListModel::onSelectionChanged);
 }
 
@@ -95,23 +87,29 @@ QHash<int, QByteArray> ListModel::roleNames() const
     };
 }
 
-QHash<int, QByteArray> ListModel::unitedRoleNames(const QHash<int, QByteArray> &names) const
+ListModel::RoleNames ListModel::unitedRoleNames(const ListModel::RoleNames &a, const ListModel::RoleNames &b)
 {
-    auto result = ListModel::roleNames();
-    for (auto k : names.keys()) {
-        result.insert(k, names.value(k));
+    auto result = a;
+    for (auto k : b.keys()) {
+        result.insert(k, b.value(k));
     }
     return result;
 }
 
-const QSortFilterProxyModel *ListModel::proxy() const
+const ListProxyModel *ListModel::proxy() const
 {
     return m_proxy;
 }
 
-QSortFilterProxyModel *ListModel::proxy()
+ListProxyModel *ListModel::proxy()
 {
     return m_proxy;
+}
+
+void ListModel::setProxy(ListProxyModel *proxy)
+{
+    m_proxy = proxy;
+    emit proxyChanged(proxy);
 }
 
 const ListSelectionModel *ListModel::selection() const

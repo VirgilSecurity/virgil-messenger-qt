@@ -10,11 +10,12 @@ Rectangle {
     property string search: searchField.text + searchField.preeditText
     property bool isSearchOpen: state === "opened"
     property bool closeable: true
+    readonly property int recommendedHeight: 40
 
     signal closed()
     signal accepted()
 
-    radius: 20
+    radius: 0.5 * recommendedHeight
     color: "transparent"
 
     state: "closed"
@@ -99,8 +100,14 @@ Rectangle {
         }
 
         Keys.onPressed: {
-            if (root.closeable && isSearchOpen && (event.key === Qt.Key_Back || event.key === Qt.Key_Escape)) {
-                root.state = "closed"
+            if (isSearchOpen && (event.key === Qt.Key_Back || event.key === Qt.Key_Escape)) {
+                if (root.closeable) {
+                    root.state = "closed"
+                }
+                else {
+                    searchField.text = ""
+                }
+
                 event.accepted = true;
             }
             else if (isSearchOpen && (event.key === Qt.Key_Enter || event.key === Qt.Key_Return)) {

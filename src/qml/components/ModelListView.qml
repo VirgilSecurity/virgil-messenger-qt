@@ -20,23 +20,10 @@ ListView {
     property alias emptyText: labeledIcon.emptyListText
     readonly property bool isEmpty: listView.count === 0
 
-    add: Transition {
-        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
-    }
-
-    displaced: Transition {
-        NumberAnimation { properties: "x,y"; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
-        NumberAnimation { property: "scale"; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
-        NumberAnimation { property: "opacity"; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
-    }
-
-    move: Transition {
-        NumberAnimation { properties: "x,y"; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
-    }
-
-    remove: Transition {
-        NumberAnimation { property: "opacity"; to: 0; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
-    }
+    add: Theme.addTransitionNoScale
+    displaced: Theme.displacedTransition
+    move: Theme.moveTransition
+    remove: Theme.removeTransition
 
     IconWithText {
         id: labeledIcon

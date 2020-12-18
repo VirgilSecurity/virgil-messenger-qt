@@ -40,7 +40,11 @@ Page {
     }
 
     StackLayout {
-        anchors.fill: parent
+        anchors {
+            leftMargin: Theme.smallMargin
+            rightMargin: Theme.smallMargin
+            fill: parent
+        }
         currentIndex: isChatList ? 0 : 1
 
         ModelListView {

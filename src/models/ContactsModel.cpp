@@ -34,23 +34,20 @@
 
 #include "models/ContactsModel.h"
 
-#include <QSortFilterProxyModel>
-
+#include "models/ContactsProxyModel.h"
 #include "ContactAvatarLoader.h"
 
 using namespace vm;
 
-ContactsModel::ContactsModel(bool sorted, QObject *parent)
-    : ListModel(parent)
+ContactsModel::ContactsModel(QObject *parent, bool createProxy)
+    : ListModel(parent, false)
     , m_avatarLoader(new ContactAvatarLoader(this))
 {
     qRegisterMetaType<ContactsModel *>("ContactsModel*");
 
-    if (sorted) {
-        proxy()->setSortRole(NameRole);
-        proxy()->sort(0, Qt::AscendingOrder);
+    if (createProxy) {
+        setProxy(new ContactsProxyModel(this));
     }
-    proxy()->setFilterRole(FilterRole);
 
     connect(this, &ContactsModel::avatarUrlNotFound, this, &ContactsModel::loadAvatarUrl);
     connect(m_avatarLoader, &ContactAvatarLoader::loaded, this, &ContactsModel::setAvatarUrl);
@@ -67,6 +64,11 @@ void ContactsModel::setContacts(const Contacts &contacts)
 const Contacts &ContactsModel::getContacts() const
 {
     return m_contacts;
+}
+
+int ContactsModel::getContactsCount() const
+{
+    return m_contacts.size();
 }
 
 Contact ContactsModel::createContact(const Contact::Id &contactId) const
@@ -103,6 +105,20 @@ void ContactsModel::removeContact(const Contact::Id &contactId)
         m_contacts.erase(m_contacts.begin() + *row);
         endRemoveRows();
     }
+}
+
+void ContactsModel::removeContactsByRows(const int startRow, const int endRow)
+{
+    beginRemoveRows(QModelIndex(), startRow, endRow);
+    m_contacts.erase(m_contacts.begin() + startRow, m_contacts.begin() + endRow + 1);
+    endRemoveRows();
+}
+
+void ContactsModel::updateContact(const Contact &contact, int row)
+{
+    m_contacts[row] = contact;
+    const auto rowIndex = index(row);
+    emit dataChanged(rowIndex, rowIndex);
 }
 
 Optional<int> ContactsModel::findRowByContactId(const Contact::Id &contactId) const
@@ -166,6 +182,8 @@ QVariant ContactsModel::data(const QModelIndex &index, int role) const
     }
     case FilterRole:
         return info.name + QLatin1Char('\n') + info.email + QLatin1Char('\n') + info.phoneNumber;
+    case SortRole:
+        return info.name;
     default:
         return ListModel::data(index, role);
     }
@@ -173,11 +191,10 @@ QVariant ContactsModel::data(const QModelIndex &index, int role) const
 
 QHash<int, QByteArray> ContactsModel::roleNames() const
 {
-    return unitedRoleNames({
+    return unitedRoleNames(ListModel::roleNames(), {
         { IdRole, "contactId" },
         { NameRole, "name" },
         { DetailsRole, "details" },
         { AvatarUrlRole, "avatarUrl" }
-        // Filter role is hidden
     });
 }

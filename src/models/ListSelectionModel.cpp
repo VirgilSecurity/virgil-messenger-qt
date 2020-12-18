@@ -42,6 +42,8 @@ ListSelectionModel::ListSelectionModel(ListModel *source)
     : QItemSelectionModel(source)
     , m_sourceModel(source)
 {
+    qRegisterMetaType<ListSelectionModel *>("ListSelectionModel*");
+
     setModel(source);
 
     connect(this, &QItemSelectionModel::selectionChanged, this, &ListSelectionModel::onChanged);
@@ -92,13 +94,7 @@ bool ListSelectionModel::hasSelection() const
 
 void ListSelectionModel::onChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
-    // Collect and order changed indices
-    auto indices = selected.indexes() + deselected.indexes();
-    std::sort(indices.begin(), indices.end(), [](const QModelIndex &a, const QModelIndex &b) {
-        return a.row() < b.row();
-    });
-    emit changed(indices);
-    //
+    emit changed(selected.indexes() + deselected.indexes());
     if (m_hasSelection != QItemSelectionModel::hasSelection()) {
         m_hasSelection = !m_hasSelection;
         emit hasSelectionChanged(m_hasSelection);
