@@ -32,13 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_COMM_KIT_MESSENGER_H
-#define VM_COMM_KIT_MESSENGER_H
+#ifndef VM_CORE_MESSENGER_H
+#define VM_CORE_MESSENGER_H
 
-#include "CommKitUser.h"
+#include "User.h"
 
+#include "Message.h"
+#include "MessageUpdate.h"
 #include "Settings.h"
-#include "CommKitMessage.h"
 
 #include <qxmpp/QXmppClient.h>
 #include <qxmpp/QXmppHttpUploadIq.h>
@@ -55,7 +56,7 @@ Q_DECLARE_LOGGING_CATEGORY(lcCommKitMessenger)
 
 namespace vm
 {
-class CommKitMessenger : public QObject
+class CoreMessenger : public QObject
 {
     Q_OBJECT
 public:
@@ -93,8 +94,8 @@ signals:
 
     void lastActivityTextChanged(const QString& text);
 
-    void messageReceived(const CommKitMessage& message);
-    void messageDelivered(const QString& recipientId, const QString& messageId);
+    void messageReceived(const Message& message);
+    void messageUpadted(const MessageUpdate& messageUpdate);
 
     //
     //  Private signals, to resolve thread. issues.
@@ -106,8 +107,8 @@ public:
     //
     //  Create.
     //
-    explicit CommKitMessenger(Settings *settings, QObject *parent = nullptr);
-    ~CommKitMessenger() noexcept;
+    explicit CoreMessenger(Settings *settings, QObject *parent = nullptr);
+    ~CoreMessenger() noexcept;
 
     //
     //  Info / Controls.
@@ -141,14 +142,14 @@ public:
     //
     // Users.
     //
-    QSharedPointer<CommKitUser> findUserByUsername(const QString &username) const;
-    QSharedPointer<CommKitUser> findUserById(const QString &userId) const;
-    QSharedPointer<CommKitUser> currentUser() const;
+    std::shared_ptr<User> findUserByUsername(const QString &username) const;
+    std::shared_ptr<User> findUserById(const UserId &userId) const;
+    std::shared_ptr<User> currentUser() const;
 
     //
     //  Messages.
     //
-    QFuture<Result> sendMessage(CommKitMessage message);
+    QFuture<Result> sendMessage(MessageHandler message);
     QFuture<Result> processReceivedXmppMessage(const QXmppMessage& xmppMessage);
 
     //
@@ -160,7 +161,7 @@ public:
     //
     //  Contacts (XMPP).
     //
-    bool subscribeToUser(const CommKitUser &user);
+    bool subscribeToUser(const User &user);
     void setCurrentRecipient(const QString& recipientId);
 
     //
@@ -198,8 +199,8 @@ private:
     //
     //  Helpers.
     //
-    QString userIdFromJid(const QString& jid) const;
-    QString userIdToJid(const QString& userId) const;
+    UserId userIdFromJid(const QString& jid) const;
+    QString userIdToJid(const UserId& userId) const;
     QString currentUserJid() const;
 
     bool isNetworkOnline() const noexcept;
@@ -224,7 +225,7 @@ private slots:
     void onProcessNetworkState(bool online);
     void onConnectXmppServer();
     void onReconnectIfNeeded();
-    void onLogConnectionStateChanged(CommKitMessenger::ConnectionState state);
+    void onLogConnectionStateChanged(CoreMessenger::ConnectionState state);
 
 private:
     class Impl;
@@ -240,4 +241,4 @@ Q_DECLARE_METATYPE(QXmppIq);
 Q_DECLARE_METATYPE(QXmppHttpUploadSlotIq);
 Q_DECLARE_METATYPE(QXmppHttpUploadRequestIq);
 
-#endif // VM_COMM_KIT_MESSENGER_H
+#endif // VM_CORE_MESSENGER_H

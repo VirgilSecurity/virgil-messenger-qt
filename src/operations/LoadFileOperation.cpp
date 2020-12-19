@@ -42,7 +42,7 @@
 
 using namespace vm;
 
-LoadFileOperation::LoadFileOperation(NetworkOperation *parent, const DataSize &bytesTotal)
+LoadFileOperation::LoadFileOperation(NetworkOperation *parent, const quint64 &bytesTotal)
     : NetworkOperation(parent)
     , m_bytesTotal(bytesTotal)
 {
@@ -155,7 +155,7 @@ void LoadFileOperation::onReplySslErrors()
     qCWarning(lcOperation) << "SSL errors occurred";
 }
 
-void LoadFileOperation::onSetProgress(const DataSize &bytesLoaded, const DataSize &bytesTotal)
+void LoadFileOperation::onSetProgress(const quint64 &bytesLoaded, const quint64 &bytesTotal)
 {
     if (bytesTotal == 0 && bytesLoaded == 0) {
         // NOTE(fpohtmeh): Qt finishes upload with zero values

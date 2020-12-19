@@ -38,7 +38,6 @@
 #include <QDir>
 #include <QPointer>
 
-#include "Messages.h"
 #include "Messenger.h"
 
 class Settings;
@@ -74,8 +73,8 @@ public:
     void populateUpload(MessageOperation *messageOp);
     void populatePreload(MessageOperation *messageOp);
 
-    DownloadDecryptFileOperation *populateDownloadDecrypt(NetworkOperation *parent, const QUrl &url, const DataSize &bytesTotal, const QString &destPath, const Contact::Id &senderId);
-    EncryptUploadFileOperation *populateEncryptUpload(NetworkOperation *parent, const QString &sourcePath, const Contact::Id &recipientId);
+    DownloadDecryptFileOperation *populateDownloadDecrypt(NetworkOperation *parent, const QUrl &url, const quint64 &bytesTotal, const QString &destPath, const UserId &senderId);
+    EncryptUploadFileOperation *populateEncryptUpload(NetworkOperation *parent, const QString &sourcePath, const UserId &recipientId);
     ConvertToPngOperation *populateConvertToPngOperation(Operation *parent, const QString &sourcePath);
     CreateAttachmentThumbnailOperation *populateCreateAttachmentThumbnail(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &filePath);
     CreateAttachmentPreviewOperation *populateCreateAttachmentPreview(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &destPath);

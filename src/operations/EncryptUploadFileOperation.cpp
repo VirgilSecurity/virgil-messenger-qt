@@ -40,7 +40,7 @@
 
 using namespace vm;
 
-EncryptUploadFileOperation::EncryptUploadFileOperation(NetworkOperation *parent, const Settings *settings, FileLoader *fileLoader, const QString &sourcePath, const Contact::Id &recipientId)
+EncryptUploadFileOperation::EncryptUploadFileOperation(NetworkOperation *parent, const Settings *settings, FileLoader *fileLoader, const QString &sourcePath, const UserId &recipientId)
     : NetworkOperation(parent)
     , m_settings(settings)
     , m_fileLoader(fileLoader)

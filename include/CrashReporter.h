@@ -37,7 +37,7 @@
 
 #include <QObject>
 
-#include "CommKitMessenger.h"
+#include "CoreMessenger.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -52,7 +52,7 @@ class CrashReporter : public QObject
     Q_OBJECT
 
 public:
-    CrashReporter(Settings *settings, vm::CommKitMessenger *commKitMessenger, QObject *parent = nullptr);
+    CrashReporter(Settings *settings, vm::CoreMessenger *commKitMessenger, QObject *parent = nullptr);
 
     virtual ~CrashReporter() noexcept = default;
 
@@ -69,7 +69,7 @@ private:
     void sendSendCrashReportReply(QNetworkReply *reply);
 
     Settings *m_settings;
-    vm::CommKitMessenger *m_commKitMessenger;
+    vm::CoreMessenger *m_coreMessenger;
     QNetworkAccessManager *m_networkManager;
 
     static const QString s_endpointSendReport;

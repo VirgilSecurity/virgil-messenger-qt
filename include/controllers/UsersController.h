@@ -35,7 +35,8 @@
 #ifndef VM_USERSCONTROLLER_H
 #define VM_USERSCONTROLLER_H
 
-#include "Messages.h"
+#include "UserId.h"
+#include "Chat.h"
 
 #include <QObject>
 #include <QPointer>
@@ -52,53 +53,38 @@ class Messenger;
 class UsersController : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(UserId userId MEMBER m_userId NOTIFY userIdChanged);
 
 public:
     UsersController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
-    UserId userId() const;
-
     void signIn(const UserId &userId);
-    void signUp(const UserId &userId);
-    Q_INVOKABLE void signOut();
+    void signUp(const QString &username);
 
+    Q_INVOKABLE void signOut();
     Q_INVOKABLE void requestAccountSettings(const UserId &userId);
 
     void downloadKey(const QString &username, const QString &password);
 
 signals:
     void signedIn(const UserId &username);
-    void signInErrorOccured(const QString &errorText);
-    void signedUp(const UserId &userId);
-    void signUpErrorOccured(const QString &errorText);
     void signedOut();
-
-    void keyDownloaded(const UserId &userId);
+    void signInErrorOccured(const QString &errorText);
+    void signUpErrorOccured(const QString &errorText);
     void downloadKeyFailed(const QString &errorText);
 
     void accountSettingsRequested(const UserId &userId);
 
-    void userIdChanged(const UserId &userId);
+private:
+    void onSignedIn(const UserId &userId);
+    void onSignedOut();
+    void onFinishSignIn();
+    void onFinishSignOut();
+
+    void onChatAdded(const ChatHandler &chat);
 
 private:
-    enum class Operation
-    {
-        SignIn,
-        SignUp,
-        SignOut,
-        DownloadKey
-    };
-
-    void openDatabase(const UserId &userId, const Operation operation);
-    void onDatabaseUserIdChanged(const UserId &userId);
-
-    void subscribeByChat(const Chat &chat);
-
     QPointer<Messenger> m_messenger;
     QPointer<UserDatabase> m_userDatabase;
-    Operation m_operation = Operation::SignIn;
-    UserId m_userId;
 };
 }
 

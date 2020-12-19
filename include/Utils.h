@@ -38,10 +38,8 @@
 #include <QImage>
 #include <QImageReader>
 
-#include "Messages.h"
-#include "CommKitMessage.h"
-
-Q_DECLARE_LOGGING_CATEGORY(lcUtils)
+#include "Message.h"
+#include "MessageContentAttachment.h"
 
 namespace vm
 {
@@ -51,25 +49,19 @@ namespace Utils
 
     // String processing/format
 
-    QString formattedDataSize(DataSize fileSize);
+    QString formattedSize(quint64 fileSize);
 
-    QString formattedElapsedSeconds(const Seconds &seconds, const Seconds &nowInterval);
+    QString formattedElapsedSeconds(std::chrono::seconds seconds, std::chrono::seconds nowInterval);
 
-    QString formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval);
+    QString formattedLastSeenActivity(std::chrono::seconds seconds, std::chrono::seconds updateInterval);
 
     QString formattedLastSeenNoActivity();
 
     QString elidedText(const QString &text, const int maxLength);
 
-    QString attachmentDisplayText(const Attachment &attachment);
+    QString messageContentDisplayText(const MessageContent &messageContent);
 
-    Contact::Id contactIdFromJid(const Jid &jid);
-
-    Jid createJid(const Contact::Id &contactId, const QString &xmppUrl);
-
-    QString printableMessageBody(const Message &message);
-
-    QString printableLoadProgress(const DataSize &loaded, const DataSize &total);
+    QString printableLoadProgress(const quint64 &loaded, const quint64 &total);
 
     // Debug
 

@@ -39,6 +39,7 @@
 #include <QCryptographicHash>
 #include <QDir>
 #include <QDesktopServices>
+#include <QLoggingCategory>
 
 
 Q_LOGGING_CATEGORY(lcFileUtils, "file-utils");
@@ -48,16 +49,16 @@ using namespace vm;
 using Self = vm::FileUtils;
 
 
-Optional<QString>
+QString
 Self::calculateFingerprint(const QString &path) {
    if (!Self::fileExists(path)) {
         qCWarning(lcFileUtils) << "Failed to find fingerprint. File doesn't exist:" << path;
-        return NullOptional;
+        return QString();
     }
     QFile file(path);
     if (!file.open(QFile::ReadOnly)) {
         qCWarning(lcFileUtils) << "Failed to find fingerprint. File can't be opened:" << path;
-        return NullOptional;
+        return QString();
     }
     QCryptographicHash hash(QCryptographicHash::Sha256);
     hash.addData(&file);
@@ -139,11 +140,11 @@ QUrl Self::localFileToUrl(const QString &filePath)
 #endif
 }
 
-Optional<QString> Self::readTextFile(const QString &filePath)
+QString Self::readTextFile(const QString &filePath)
 {
     QFile file(filePath);
     if (!file.open(QFile::Text | QFile::ReadOnly)) {
-        return NullOptional;
+        return QString();
     }
     return file.readAll();
 }
@@ -187,18 +188,6 @@ QString Self::attachmentFileName(const QUrl &url, const QFileInfo &localInfo, bo
         fileName = localInfo.fileName();
     }
     return fileName;
-}
-
-QString Self::attachmentDisplayImagePath(const Attachment &attachment)
-{
-    const auto e = attachment.extras.value<PictureExtras>();
-    if (fileExists(e.previewPath)) {
-        return e.previewPath;
-    }
-    if (fileExists(e.thumbnailPath)) {
-        return e.thumbnailPath;
-    }
-    return QString();
 }
 
 bool Self::openUrl(const QUrl &url)

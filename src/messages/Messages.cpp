@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "Messages.h"
 
 #include "Utils.h"
 
@@ -48,34 +47,32 @@ using namespace vm;
 
 void registerMessagesMetaTypes()
 {
-    qRegisterMetaType<Seconds>("Seconds");
-    qRegisterMetaType<DataSize>("DataSize");
     qRegisterMetaType<Enums::AttachmentType>("Enums::AttachmentType");
     qRegisterMetaType<Enums::AttachmentStatus>("Enums::AttachmentStatus");
     qRegisterMetaType<Enums::MessageStatus>("Enums::MessageStatus");
 
     qRegisterMetaType<UserId>("UserId");
     qRegisterMetaType<Jid>("Jid");
-    qRegisterMetaType<Contact::Id>("Contact::Id");
-    qRegisterMetaType<Attachment::Id>("Attachment::Id");
+    qRegisterMetaType<UserId>("UserId");
+    qRegisterMetaType<AttachmentId>("AttachmentId");
     qRegisterMetaType<Attachment::Type>("Attachment::Type");
     qRegisterMetaType<Attachment::Status>("Attachment::Status");
     qRegisterMetaType<Message>("Message");
-    qRegisterMetaType<Message::Id>("Message::Id");
+    qRegisterMetaType<MessageId>("MessageId");
     qRegisterMetaType<Message::Status>("Message::Status");
     qRegisterMetaType<Messages>("Messages");
     qRegisterMetaType<Chat>("Chat");
-    qRegisterMetaType<Chat::Id>("Chat::Id");
-    qRegisterMetaType<Chat::UnreadCount>("Chat::UnreadCount");
+    qRegisterMetaType<ChatId>("ChatId");
+    qRegisterMetaType<qsizetype>("qsizetype");
     qRegisterMetaType<Chats>("Chats");
-    qRegisterMetaType<GlobalMessage>("GlobalMessage");
-    qRegisterMetaType<GlobalMessages>("GlobalMessages");
+    qRegisterMetaType<Message>("Message");
+    qRegisterMetaType<Messages>("Messages");
 
     qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");
 }
 
-GlobalMessage::GlobalMessage(const Message &message, const UserId &userId, const Contact::Id &contactId,
-                             const Contact::Id &senderId, const Contact::Id &recipientId)
+Message::Message(const Message &message, const UserId &userId, const UserId &contactId,
+                             const UserId &senderId, const UserId &recipientId)
     : Message(message)
     , userId(userId)
     , contactId(contactId)
@@ -120,14 +117,14 @@ QVariant MessageUtils::extrasFromJson(const QString &json, const Attachment::Typ
     return QVariant::fromValue(extras);
 }
 
-GlobalMessage MessageUtils::messageFromCommKitMessage(const CommKitMessage &commKitMessage)
+Message MessageUtils::messageFromMessage(const Message &commKitMessage)
 {
     // Get message from JSON
     auto doc = QJsonDocument::fromJson(commKitMessage.body);
     const auto type = doc["type"].toString();
     const auto payloadObject = doc["payload"];
 
-    GlobalMessage message;
+    Message message;
     if (type == QLatin1String("text")) {
         message.body = payloadObject["body"].toString();
         return message;
@@ -167,7 +164,7 @@ GlobalMessage MessageUtils::messageFromCommKitMessage(const CommKitMessage &comm
     return message;
 }
 
-CommKitMessage MessageUtils::messageToCommKitMessage(const GlobalMessage &message)
+Message MessageUtils::messageToMessage(const Message &message)
 {
     QJsonObject mainObject;
     QJsonObject payloadObject;
@@ -196,7 +193,7 @@ CommKitMessage MessageUtils::messageToCommKitMessage(const GlobalMessage &messag
 
     QJsonDocument doc(mainObject);
 
-    CommKitMessage commKitMessage;
+    Message commKitMessage;
     commKitMessage.id = message.id;
     commKitMessage.recipientId = message.recipientId;
     commKitMessage.senderId = message.senderId;

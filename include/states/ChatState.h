@@ -36,8 +36,8 @@
 #define VM_CHATSTATE_H
 
 #include <QState>
+#include "Message.h"
 
-#include "Messages.h"
 
 class Messenger;
 
@@ -60,10 +60,9 @@ public:
 signals:
     void requestPreview(const QUrl &url);
     void lastActivityTextChanged(const QString &text);
-    void messageSent();
 
 private:
-    void onMessageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);
+    void onMessageUpdated(const MessageUpdate &messageUpdate);
 
     Controllers *m_controllers;
     QString m_lastActivityText;

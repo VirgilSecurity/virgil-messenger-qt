@@ -56,7 +56,7 @@ public:
     bool handleStanza(const QDomElement &element) override;
 
 signals:
-    void lastActivityDetected(const Seconds &seconds);
+    void lastActivityDetected(std::chrono::seconds seconds);
     void lastActivityMissing(const QString &reason);
     void lastActivityTextChanged(const QString &text);
     void errorOccured(const QString &errorText);
@@ -76,7 +76,6 @@ private:
     bool m_enabled = true;
     QString m_jid;
     int m_timerId = 0;
-    int m_debugCounter = 0;
 };
 
 #endif // VM_LASTACTIVITYMANAGER_H

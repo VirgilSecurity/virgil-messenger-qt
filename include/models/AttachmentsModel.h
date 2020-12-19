@@ -36,7 +36,8 @@
 #define VM_ATTACHMENTSMODEL_H
 
 #include "ListModel.h"
-#include "Messages.h"
+
+#include <QPointer>
 
 class Settings;
 
@@ -50,15 +51,11 @@ public:
     AttachmentsModel(Settings *settings, QObject *parent);
     ~AttachmentsModel() override;
 
-    Optional<Attachment> createAttachment(const QUrl &url, const Attachment::Type type);
-
 private:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
 
-    Optional<PictureExtras> createPictureExtras(const QString &localPath) const;
-
-    Settings *m_settings;
+    QPointer<Settings> *m_settings;
 };
 }
 

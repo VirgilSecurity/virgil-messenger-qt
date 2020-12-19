@@ -52,9 +52,7 @@
 #include "SplashScreenState.h"
 #include "StartState.h"
 #include "Validator.h"
-#include "Messages.h"
 
-Q_DECLARE_LOGGING_CATEGORY(lcAppState);
 
 namespace vm
 {

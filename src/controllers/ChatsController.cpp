@@ -43,6 +43,7 @@
 #include "models/ChatsModel.h"
 #include "models/MessagesModel.h"
 #include "models/Models.h"
+#include "Controller.h"
 
 using namespace vm;
 using Self = ChatsController;
@@ -54,111 +55,105 @@ Self::ChatsController(Messenger *messenger, Models *models, UserDatabase *userDa
     , m_userDatabase(userDatabase)
 {
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
-    connect(this, &Self::newContactFound, this, &Self::onNewContactFound);
-    connect(this, &Self::currentContactIdChanged, m_models->messages(), &MessagesModel::setContactId);
-    connect(m_models->chats(), &ChatsModel::chatsSet, this, &Self::onChatsSet);
+    connect(this, &Self::createChatWithUser, this, &Self::onCreateChatWithUser);
 }
 
-Chat Self::currentChat() const
+ChatHandler Self::currentChat() const
 {
     return m_currentChat;
 }
 
-Contact::Id Self::currentContactId() const
-{
-    return m_currentChat.contactId;
-}
-
-Chat::Id Self::currentChatId() const
-{
-    return m_currentChat.id;
-}
-
-void Self::loadChats(const UserId &userId)
+void Self::loadChats()
 {
     qCDebug(lcController) << "Started to load chats...";
-    m_userId = userId;
-    if (userId.isEmpty()) {
-        m_models->chats()->setChats({});
-    }
-    else {
-        m_userDatabase->chatsTable()->fetch();
-    }
+    m_userDatabase->chatsTable()->fetch();
 }
 
-void Self::createChat(const Contact::Id &contactId)
+void Self::clearChats()
 {
-    auto chat = m_models->chats()->findByContact(contactId);
-    if (chat) {
-        openChat(*chat);
-    }
-    else {
-        QtConcurrent::run([this, contactId = contactId]() {
-            if (!m_messenger) {
-                qCWarning(lcController) << "Messenger was not initialized";
-                emit errorOccurred(tr("Contact not found"));
-            }
-            auto user = m_messenger->findUserByUsername(contactId);
-            if (!user) {
-                emit errorOccurred(tr("Contact not found"));
-            }
-            else {
-                emit newContactFound(contactId, QPrivateSignal());
-            }
-        });
-    }
+    qCDebug(lcController) << "Clear chats...";
+    m_models->chats()->clearChats();
 }
 
-void Self::openChat(const Chat &chat)
+void Self::createChatWithUsername(const QString &username)
 {
-    qCDebug(lcController) << "Opening chat with" << chat.contactId;
-    setCurrentChat(chat);
-    if (chat.unreadMessageCount > 0) {
-        m_models->chats()->resetUnreadCount(chat.id);
-        m_models->messages()->markAllAsRead();
+    QtConcurrent::run([this, username = username]() {
+        if (!m_messenger) {
+            qCWarning(lcController) << "Messenger was not initialized";
+            emit errorOccurred(tr("Chat can not be created"));
+        }
+        auto user = m_messenger->findUserByUsername(username);
+        if (user) {
+            emit createChatWithUser(user, QPrivateSignal());
+        }
+        else {
+            emit errorOccurred(tr("Contact not found"));
+        }
+    });
+}
+
+
+void Self::createChatWithUserId(const UserId &userId)
+{
+    QtConcurrent::run([this, userId = userId]() {
+        if (!m_messenger) {
+            qCWarning(lcController) << "Messenger was not initialized";
+            emit errorOccurred(tr("Contact not found"));
+        }
+        auto user = m_messenger->findUserById(userId);
+        if (user) {
+            emit createChatWithUser(user, QPrivateSignal());
+        }
+        else {
+            emit errorOccurred(tr("Contact not found"));
+        }
+    });
+}
+
+void Self::openChat(const ChatHandler& chat)
+{
+    qCDebug(lcController) << "Opening chat with id: " << chat->id();
+    if (chat->unreadMessageCount() > 0) {
+        m_models->chats()->resetUnreadCount(chat->id());
         m_userDatabase->resetUnreadCount(chat);
     }
+    m_currentChat = chat;
+    emit chatOpened(m_currentChat);
 }
 
-void Self::openChatById(const Chat::Id &chatId)
+void Self::openChat(const ChatId &chatId)
 {
-    openChat(*m_models->chats()->findById(chatId));
+    openChat(m_models->chats()->findChat(chatId));
 }
 
 void Self::closeChat()
 {
-    setCurrentChat({});
+    m_currentChat = nullptr;
+
+    emit chatClosed();
 }
 
 void Self::setupTableConnections()
 {
     auto table = m_userDatabase->chatsTable();
     connect(table, &ChatsTable::errorOccurred, this, &Self::errorOccurred);
-    connect(table, &ChatsTable::fetched, m_models->chats(), &ChatsModel::setChats);
+    connect(table, &ChatsTable::fetched, this, &Self::onChatsLoaded);
 }
 
-void Self::setCurrentChat(const Chat &chat)
+void Self::onCreateChatWithUser(const UserHandler &user)
 {
-    if (m_currentChat.id == chat.id) {
-        return;
-    }
-    m_currentChat = chat;
-
-    emit currentChatIdChanged(chat.id);
-    emit currentContactIdChanged(chat.contactId);
-    emit currentChatChanged(chat);
-    emit chat.id.isEmpty() ? chatClosed() : chatOpened(chat);
+    auto newChat = std::make_shared<Chat>();
+    newChat->setId(ChatId(user->id()));
+    newChat->setCreatedAt(QDateTime::currentDateTime());
+    newChat->setType(Chat::Type::Personal);
+    newChat->setTitle(user->username().isEmpty() ? user->id() : user->username());
+    m_userDatabase->chatsTable()->addChat(newChat);
+    openChat(newChat);
 }
 
-void Self::onNewContactFound(const Contact::Id &contactId)
+void Self::onChatsLoaded(ModifiableChats chats)
 {
-    const auto chat = m_models->chats()->createChat(contactId);
-    m_userDatabase->chatsTable()->createChat(chat);
-    openChat(chat);
-}
-
-void Self::onChatsSet()
-{
-    qCDebug(lcController) << "Chats set";
-    emit chatsSet(m_userId);
+    qCDebug(lcController) << "Chats loaded from the database";
+    m_models->chats()->setChats(chats);
+    emit chatsLoaded();
 }

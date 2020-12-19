@@ -32,29 +32,21 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_COMM_KIT_USER_IMPL_H
-#define VM_COMM_KIT_USER_IMPL_H
 
-#include <virgil/sdk/comm-kit/vssq_messenger_user.h>
+#ifndef VM_MESSAGE_STATUS_H
+#define VM_MESSAGE_STATUS_H
 
-#include <memory>
-
-namespace vm
-{
-class CommKitUserImpl
-{
-public:
-    using PointerType = std::unique_ptr<const vssq_messenger_user_t, void(*)(const vssq_messenger_user_t*)>;
-
-    CommKitUserImpl(vssq_messenger_user_t *ptr)
-            : user(ptr, vssq_messenger_user_delete) {}
-
-    CommKitUserImpl(const vssq_messenger_user_t *ptr)
-            : user(vssq_messenger_user_shallow_copy_const(ptr), vssq_messenger_user_delete) {}
-
-    PointerType user;
+namespace vm {
+//
+//  Represent message processing status.
+//
+enum class MessageStatus {
+    New, // A message is created, and not currently processing.
+    Waiting, // A message processing is scheduled, but not currently running.
+    Processing, // A message is currently processing.
+    Succeed, // A message processing successfully completed.
+    Failed, // A message processing failed, see stages do define what stage was accomplished to recover operation.
 };
-}
+} // namespace vm
 
-
-#endif // VM_COMM_KIT_USER_IMPL_H
+#endif // VM_MESSAGE_STATUS_H

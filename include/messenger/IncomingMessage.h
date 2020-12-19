@@ -32,35 +32,59 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_COMM_KIT_USER_H
-#define VM_COMM_KIT_USER_H
 
-#include <QLoggingCategory>
-#include <QObject>
+#ifndef VM_INCOMING_MESSAGE_H
+#define VM_INCOMING_MESSAGE_H
 
-#include <memory>
+#include "Message.h"
+#include "IncomingMessageStage.h"
 
-Q_DECLARE_LOGGING_CATEGORY(lcCommKitMessenger)
 
-namespace vm
-{
-class CommKitUserImpl;
-class CommKitUser : public QObject
-{
-    Q_OBJECT
-
+namespace vm {
+//
+//  Handles incoming message.
+//
+class IncomingMessage : public Message {
 public:
-    CommKitUser(std::unique_ptr<CommKitUserImpl> impl);
-    ~CommKitUser() noexcept;
+    //
+    //  Denotes the message processing stage.
+    //
+    using Stage = IncomingMessageStage;
 
-    QString identity() const;
-    QString username() const;
+    //
+    //  Return stage from a given string.
+    //  Throws if correspond stage is not found.
+    //
+    static Stage stageFromString(const QString& stageString);
 
-    const CommKitUserImpl* impl() const noexcept;
+    //
+    //  Return string from a given stage.
+    //
+    static QString stageToString(Stage stage);
 
+    //
+    //  Return current message stage.
+    //
+    Stage stage() const noexcept;
+
+    //
+    //  State current message stage.
+    //
+    void setStage(Stage status);
+
+    //
+    //  Return the message stage as string.
+    //
+    QString stageString() const;
+
+    //
+    //  State the message stage from string.
+    //
+    void setStageString(QString stageString);
 private:
-    std::unique_ptr<CommKitUserImpl> m_impl;
-};
-}
+    Stage m_stage;
 
-#endif // VM_COMM_KIT_USER_H
+};
+} // namespace vm
+
+#endif // VM_INCOMING_MESSAGE_H

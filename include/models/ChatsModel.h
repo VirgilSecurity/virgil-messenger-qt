@@ -36,7 +36,9 @@
 #define VM_CHATSMODEL_H
 
 #include "ListModel.h"
-#include "Messages.h"
+#include "Chat.h"
+
+#include <optional>
 
 namespace vm
 {
@@ -48,19 +50,19 @@ public:
     explicit ChatsModel(QObject *parent);
     ~ChatsModel() override;
 
-    void setChats(const Chats &chats);
-    Chat createChat(const Contact::Id &contactId);
+    void setChats(ModifiableChats chats);
+    void clearChats();
 
-    void resetUnreadCount(const Chat::Id &chatId);
-    void updateLastMessage(const Message &message, const Chat::UnreadCount &unreadMessageCount);
+    void addChat(ModifiableChatHandler chat);
+    ChatHandler findChat(const ChatId &chatId) const;
 
-    Optional<Chat> findById(const Chat::Id &chatId) const;
-    Optional<Chat> findByContact(const Contact::Id &contactId) const;
+    void resetUnreadCount(const ChatId &chatId);
+    void updateLastMessage(const MessageHandler &message, qsizetype unreadMessageCount);
+
 
 signals:
-    void chatsSet();
-    void chatCreated(const Chat &chat);
-    void chatUpdated(const Chat &chat);
+    void chatAdded(const ChatHandler &chat);
+    void chatUpdated(const ChatHandler &chat);
 
 private:
     enum Roles
@@ -77,12 +79,11 @@ private:
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    Optional<int> findRowById(const Chat::Id &chatId) const;
-    Optional<int> findRowByLastMessageId(const Message::Id &messageId) const;
-    Optional<int> findRowByContactId(const Contact::Id &contactId) const;
+    std::optional<int> findRowById(const ChatId &chatId) const;
 
-    Chats m_chats;
+private:
+    ModifiableChats m_chats;
 };
-}
+} // namespace vm
 
 #endif // VM_CHATSMODEL_H

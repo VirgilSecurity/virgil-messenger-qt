@@ -32,41 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "CommKitUser.h"
+#ifndef VM_COMM_KIT_USER_H
+#define VM_COMM_KIT_USER_H
 
-#include "CommKitUserImpl.h"
-#include "CommKitBridge.h"
+#include "UserId.h"
 
-#include <QCryptographicHash>
+#include <memory>
 
+namespace vm
+{
+class UserImpl;
+class User {
+public:
+    User(std::unique_ptr<UserImpl> impl);
+    ~User() noexcept;
 
-using namespace vm;
-using Self = CommKitUser;
+    UserId id() const;
+    QString username() const;
 
-Q_LOGGING_CATEGORY(lcCommKitUser, "comm-kit");
+    const UserImpl* impl() const noexcept;
 
-Self::CommKitUser(std::unique_ptr<CommKitUserImpl> impl) : m_impl(std::move(impl)) {
-}
+private:
+    std::unique_ptr<UserImpl> m_impl;
+};
 
+using UserHandler = std::shared_ptr<User>;
 
-Self::~CommKitUser() noexcept = default;
+} // namespace vm
 
-
-QString
-Self::identity() const {
-    auto user = m_impl->user.get();
-    return vsc_str_to_qstring(vssq_messenger_user_identity(user));
-}
-
-
-QString
-Self::username() const {
-    auto user = m_impl->user.get();
-    return vsc_str_to_qstring(vssq_messenger_user_username(user));
-}
-
-
-const CommKitUserImpl*
-Self::impl() const noexcept {
-    return m_impl.get();
-}
+#endif // VM_COMM_KIT_USER_H

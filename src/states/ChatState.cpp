@@ -39,6 +39,7 @@
 #include "controllers/ChatsController.h"
 #include "controllers/MessagesController.h"
 #include "controllers/Controllers.h"
+#include "MessageUpdate.h"
 
 using namespace vm;
 
@@ -47,7 +48,6 @@ ChatState::ChatState(Controllers *controllers, Messenger *messenger, QState *par
     , m_controllers(controllers)
 {
     connect(m_controllers->attachments(), &AttachmentsController::openPreviewRequested, this, &ChatState::requestPreview);
-    connect(m_controllers->messages(), &MessagesController::messageStatusChanged, this, &ChatState::onMessageStatusChanged);
     connect(messenger, &Messenger::lastActivityTextChanged, this, &ChatState::setLastActivityText);
 }
 
@@ -63,12 +63,4 @@ void ChatState::setLastActivityText(const QString &text)
     }
     m_lastActivityText = text;
     emit lastActivityTextChanged(text);
-}
-
-void ChatState::onMessageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status)
-{
-    Q_UNUSED(messageId)
-    if (status == Message::Status::Sent && contactId == m_controllers->chats()->currentContactId()) {
-        emit messageSent();
-    }
 }

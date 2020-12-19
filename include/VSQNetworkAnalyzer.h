@@ -41,10 +41,6 @@
 #include <QMap>
 #include <QTimer>
 
-#include "Messages.h"
-
-Q_DECLARE_LOGGING_CATEGORY(lcNetwork);
-
 #if defined(VS_MACOS) || defined(VS_LINUX)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"

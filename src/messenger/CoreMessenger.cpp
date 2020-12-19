@@ -32,11 +32,11 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "CommKitMessenger.h"
+#include "CoreMessenger.h"
 
 #include "Utils.h"
 #include "CustomerEnv.h"
-#include "CommKitUserImpl.h"
+#include "UserImpl.h"
 #include "CommKitBridge.h"
 
 #include "VSQNetworkAnalyzer.h"
@@ -65,8 +65,10 @@ using namespace notifications::xmpp;
 #include <QtConcurrent>
 #include <QJsonDocument>
 
+#include <memory>
+
 using namespace vm;
-using Self = vm::CommKitMessenger;
+using Self = vm::CoreMessenger;
 
 Q_LOGGING_CATEGORY(lcCommKitMessenger, "comm-kit");
 
@@ -116,14 +118,14 @@ public:
     QXmppUploadRequestManager *xmppUploadManager;
     VSQLastActivityManager *lastActivityManager;
 
-    QMap<QString, QSharedPointer<CommKitUser>> identityToUser;
-    QMap<QString, QSharedPointer<CommKitUser>> usernameToUser;
+    std::map<QString, std::shared_ptr<User>> identityToUser;
+    std::map<QString, std::shared_ptr<User>> usernameToUser;
 
     bool isActive = true;
 };
 
 
-Self::CommKitMessenger(Settings *settings, QObject *parent)
+Self::CoreMessenger(Settings *settings, QObject *parent)
         : QObject(parent), m_impl(std::make_unique<Self::Impl>()), m_settings(settings) {
 
     //
@@ -148,7 +150,7 @@ Self::CommKitMessenger(Settings *settings, QObject *parent)
 }
 
 
-Self::~CommKitMessenger() noexcept = default;
+Self::~CoreMessenger() noexcept = default;
 
 
 Self::Result
@@ -485,14 +487,14 @@ Self::currentUserJid() const {
 }
 
 
-QString
+UserId
 Self::userIdFromJid(const QString& jid) const {
-    return jid.split("@").first();
+    return UserId(jid.split("@").first());
 }
 
 
 QString
-Self::userIdToJid(const QString& userId) const {
+Self::userIdToJid(const UserId& userId) const {
     return userId + "@" + CustomerEnv::xmppServiceUrl();
 }
 
@@ -563,7 +565,7 @@ Self::deregisterFromNotifications() {
 
 
 bool
-Self::subscribeToUser(const CommKitUser &user) {
+Self::subscribeToUser(const User &user) {
 
     auto userJid = userIdToJid(user.identity());
 
@@ -665,7 +667,7 @@ Self::onReconnectIfNeeded() {
 // --------------------------------------------------------------------------
 // Find users.
 // --------------------------------------------------------------------------
-QSharedPointer<CommKitUser>
+std::shared_ptr<User>
 Self::findUserByUsername(const QString &username) const {
     qDebug(lcCommKitMessenger) << "Trying to find user with username: " << username;
 
@@ -675,7 +677,7 @@ Self::findUserByUsername(const QString &username) const {
     auto userIt = m_impl->usernameToUser.find(username);
     if (userIt != m_impl->usernameToUser.end()) {
         qDebug(lcCommKitMessenger) << "User found in the cache";
-        return userIt.value();
+        return userIt->second;
     }
 
     //
@@ -703,8 +705,8 @@ Self::findUserByUsername(const QString &username) const {
     //
     //  Cache and return.
     //
-    auto commKitUserImpl = std::make_unique<CommKitUserImpl>(user);
-    auto commKitUser = QSharedPointer<CommKitUser>::create(std::move(commKitUserImpl));
+    auto commKitUserImpl = std::make_unique<UserImpl>(user);
+    auto commKitUser = std::make_shared<User>(std::move(commKitUserImpl));
 
     m_impl->usernameToUser[username] = commKitUser;
     m_impl->identityToUser[commKitUser->identity()] = commKitUser;
@@ -713,8 +715,8 @@ Self::findUserByUsername(const QString &username) const {
 }
 
 
-QSharedPointer<CommKitUser>
-Self::findUserById(const QString &userId) const {
+std::shared_ptr<User>
+Self::findUserById(const UserId &userId) const {
     qDebug(lcCommKitMessenger) << "Trying to find user with id: " << userId;
 
     //
@@ -723,7 +725,7 @@ Self::findUserById(const QString &userId) const {
     auto userIt = m_impl->identityToUser.find(userId);
     if (userIt != m_impl->identityToUser.end()) {
         qDebug(lcCommKitMessenger) << "User found in the cache";
-        return userIt.value();
+        return userIt->second;
     }
 
     //
@@ -736,7 +738,7 @@ Self::findUserById(const QString &userId) const {
     vssq_error_t error;
     vssq_error_reset(&error);
 
-    auto userIdStdStr = userId.toStdString();
+    auto userIdStdStr = QString(userId).toStdString();
 
     auto user = vssq_messenger_find_user_with_identity(m_impl->messenger.get(), vsc_str_from(userIdStdStr), &error);
 
@@ -751,8 +753,8 @@ Self::findUserById(const QString &userId) const {
     //
     //  Cache and return.
     //
-    auto commKitUserImpl = std::make_unique<CommKitUserImpl>(user);
-    auto commKitUser = QSharedPointer<CommKitUser>::create(std::move(commKitUserImpl));
+    auto commKitUserImpl = std::make_unique<UserImpl>(user);
+    auto commKitUser = std::make_shared<User>(std::move(commKitUserImpl));
 
     m_impl->identityToUser[userId] = commKitUser;
     m_impl->usernameToUser[userId] = commKitUser;
@@ -761,7 +763,7 @@ Self::findUserById(const QString &userId) const {
 }
 
 
-QSharedPointer<CommKitUser>
+std::shared_ptr<User>
 Self::currentUser() const {
     if (!isSignedIn()) {
         return nullptr;
@@ -769,9 +771,9 @@ Self::currentUser() const {
 
     auto user = vssq_messenger_user(m_impl->messenger.get());
 
-    auto commKitUserImpl = std::make_unique<CommKitUserImpl>(user);
+    auto commKitUserImpl = std::make_unique<UserImpl>(user);
 
-    auto commKitUser = QSharedPointer<CommKitUser>::create(std::move(commKitUserImpl));
+    auto commKitUser = std::make_shared<User>(std::move(commKitUserImpl));
 
     return commKitUser;
 }
@@ -781,7 +783,7 @@ Self::currentUser() const {
 //  Message handling.
 // --------------------------------------------------------------------------
 QFuture<Self::Result>
-Self::sendMessage(CommKitMessage message) {
+Self::sendMessage(MessageHandler message) {
 
     return QtConcurrent::run([this, message = std::move(message)]() -> Result {
         qCInfo(lcCommKitMessenger) << "Trying to send message";
@@ -794,7 +796,7 @@ Self::sendMessage(CommKitMessage message) {
         //
         //  Find recipient.
         //
-        auto recipient = findUserByUsername(message.recipientId);
+        auto recipient = findUserByUsername(message->recipientId());
         if (!recipient) {
             //
             //  Got network troubles to find recipient, so cache message and try later.
@@ -804,9 +806,10 @@ Self::sendMessage(CommKitMessage message) {
         }
 
         //
-        //  Encrypt message.
+        //  Encrypt message content.
         //
-        auto& plaintext = message.body;
+        auto contentJson = message->content()->toJson();
+        auto QJsonD
         auto ciphertextDataMinLen = vssq_messenger_encrypted_message_len(m_impl->messenger.get(), plaintext.size(), recipient->impl()->user.get());
 
         qCDebug(lcCommKitMessenger) << "Message Len   : " << plaintext.size();
@@ -831,7 +834,7 @@ Self::sendMessage(CommKitMessage message) {
         //  Pack JSON body
         //
         QJsonObject ciphertextJson;
-        ciphertextJson.insert("version", "v2");
+        ciphertextJson.insert("version", "v3");
         ciphertextJson.insert("timestamp", static_cast<qint64>(message.timestamp.toTime_t()));
         ciphertextJson.insert("ciphertext", QString::fromLatin1(ciphertextData.toBase64()));
         auto ciphertextJsonStr = QJsonDocument(ciphertextJson).toJson(QJsonDocument::Compact);
@@ -867,7 +870,7 @@ Self::processReceivedXmppMessage(const QXmppMessage& xmppMessage) {
     return QtConcurrent::run([this, xmppMessage = xmppMessage]() -> Result {
         qCInfo(lcCommKitMessenger) << "Trying to sign in user";
 
-        CommKitMessage message;
+        Message message;
 
         message.id = xmppMessage.id();
         message.senderId = xmppMessage.from();
@@ -884,8 +887,8 @@ Self::processReceivedXmppMessage(const QXmppMessage& xmppMessage) {
         }
 
         auto version = messageBodyJson["version"].toString();
-        if (version != "v2") {
-            qCWarning(lcCommKitMessenger) << "Got invalid XMPP message - unsupported version";
+        if (version != "v3") {
+            qCWarning(lcCommKitMessenger) << "Got invalid XMPP message - unsupported version, expected v3, got " << version;
             return Self::Result::Error_InvalidMessageVersion;
         }
 
@@ -897,7 +900,7 @@ Self::processReceivedXmppMessage(const QXmppMessage& xmppMessage) {
 
         auto ciphertextResult = QByteArray::fromBase64Encoding(ciphertextBase64.toLatin1());
         if (!ciphertextResult) {
-            qCWarning(lcCommKitMessenger) << "Got invalid XMPP message - ciphertwext is not base64 encoded";
+            qCWarning(lcCommKitMessenger) << "Got invalid XMPP message - ciphertext is not base64 encoded";
             return Self::Result::Error_InvalidMessageCiphertext;
         }
 
@@ -1017,7 +1020,8 @@ Self::xmppOnMessageReceived(const QXmppMessage &xmppMessage) {
 
 void
 Self::xmppOnMessageDelivered(const QString &jid, const QString &messageId) {
-    emit messageDelivered(userIdFromJid(jid), messageId);
+    qCDebug(lcCommKitMessenger) << "Message delivered to: " << jid;
+    emit messageUpdated(MessageUpdateDelivered(messageId));
 }
 
 
@@ -1099,7 +1103,7 @@ void Self::xmppOnUploadRequestFailed(const QXmppHttpUploadRequestIq &request) {
 //  Handle self events for debug purposes.
 // --------------------------------------------------------------------------
 void
-Self::onLogConnectionStateChanged(CommKitMessenger::ConnectionState state) {
+Self::onLogConnectionStateChanged(CoreMessenger::ConnectionState state) {
     switch(state) {
         case Self::ConnectionState::Offline:
             qCDebug(lcCommKitMessenger) << "New connection status: offline";

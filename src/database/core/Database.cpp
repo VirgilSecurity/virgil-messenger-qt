@@ -35,24 +35,29 @@
 #include "database/core/Database.h"
 
 #include <QSqlError>
+#include <QLoggingCategory>
+
+
+using namespace vm;
+using Self = Database;
+
 
 Q_LOGGING_CATEGORY(lcDatabase, "db")
 
-using namespace vm;
 
-Database::Database(const Version &latestVersion, QObject *parent)
+Self::Database(const Version &latestVersion, QObject *parent)
     : QObject(parent)
     , m_latestVersion(latestVersion)
 {
     qCDebug(lcDatabase) << "Database latest version:" << latestVersion;
 }
 
-Database::~Database()
+Self::~Database()
 {
     close();
 }
 
-bool Database::open(const QString &databaseFileName, const QString &connectionName)
+bool Self::open(const QString &databaseFileName, const QString &connectionName)
 {
     close();
 
@@ -70,7 +75,7 @@ bool Database::open(const QString &databaseFileName, const QString &connectionNa
         ScopedTransaction transaction(*this);
         if (!create()) {
             emit errorOccurred(tr("Failed to create database"));
-            qCCritical(lcDatabase) << "Database::create error";
+            qCCritical(lcDatabase) << "Self::create error";
             return transaction.rollback();
         }
     }
@@ -96,7 +101,7 @@ bool Database::open(const QString &databaseFileName, const QString &connectionNa
     return true;
 }
 
-void Database::close()
+void Self::close()
 {
     const auto connectionName = m_qtDatabase.connectionName();
     if (!QSqlDatabase::contains(connectionName)) {
@@ -108,17 +113,17 @@ void Database::close()
     emit closed();
 }
 
-QSqlQuery Database::createQuery() const
+QSqlQuery Self::createQuery() const
 {
     return QSqlQuery(m_qtDatabase);
 }
 
-bool Database::tableExists(const QString &tableName) const
+bool Self::tableExists(const QString &tableName) const
 {
     return m_qtDatabase.tables().contains(tableName);
 }
 
-bool Database::addTable(TablePointer table)
+bool Self::addTable(TablePointer table)
 {
     if (!tableExists(table->name()) && !table->create()) {
         return false;
@@ -127,53 +132,53 @@ bool Database::addTable(TablePointer table)
     return true;
 }
 
-const Database::Tables &Database::tables() const
+const Self::Tables &Self::tables() const
 {
     return m_tables;
 }
 
-Database::Tables &Database::tables()
+Self::Tables &Self::tables()
 {
     return m_tables;
 }
 
-DatabaseTable *Database::table(int index)
+DatabaseTable *Self::table(int index)
 {
     return m_tables[index].get();
 }
 
-const DatabaseTable *Database::table(int index) const
+const DatabaseTable *Self::table(int index) const
 {
     return m_tables[index].get();
 }
 
-Database::Version Database::version() const
+Self::Version Self::version() const
 {
     return m_version;
 }
 
-void Database::setMigration(std::unique_ptr<Migration> migration)
+void Self::setMigration(std::unique_ptr<Migration> migration)
 {
     m_migration = std::move(migration);
 }
 
-Database::operator QSqlDatabase() const
+Self::operator QSqlDatabase() const
 {
     return m_qtDatabase;
 }
 
-bool Database::create()
+bool Self::create()
 {
     return true;
 }
 
-bool Database::readVersion()
+bool Self::readVersion()
 {
     auto query = createQuery();
     const auto queryText = QLatin1String("PRAGMA user_version;");
     if (!query.exec(queryText)) {
         emit errorOccurred(tr("Failed to read database version"));
-        qCCritical(lcDatabase) << "Database::readVersion error";
+        qCCritical(lcDatabase) << "Self::readVersion error";
         return false;
     }
     m_version = query.next() ? query.value(0).toULongLong() : 0;
@@ -181,13 +186,13 @@ bool Database::readVersion()
     return true;
 }
 
-bool Database::writeVersion()
+bool Self::writeVersion()
 {
     auto query = createQuery();
     const auto queryText = QString("PRAGMA user_version(%1);").arg(m_latestVersion);
     if (!query.exec(queryText)) {
         emit errorOccurred(tr("Failed to write database version"));
-        qCCritical(lcDatabase) << "Database::writeVersion error";
+        qCCritical(lcDatabase) << "Self::writeVersion error";
         return false;
     }
     m_version = m_latestVersion;

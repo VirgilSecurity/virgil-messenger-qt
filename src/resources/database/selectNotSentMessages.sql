@@ -1,26 +1,28 @@
 SELECT
     messages.id AS messageId,
-    messages.timestamp AS messageTimestamp,
     messages.chatId AS messageChatId,
+    messages.createdAt AS messageCreatedAt,
     messages.authorId AS messageAuthorId,
-    messages.status AS messageStatus,
+    messages.isOutgoing AS messageIsOutgoing,
+    messages.stage AS messageStage,
     messages.body AS messageBody,
+    messages.ciphertext AS messageCiphertext,
     attachments.id AS attachmentId,
     attachments.type AS attachmentType,
-    attachments.status AS attachmentStatus,
-    attachments.filename AS attachmentFilename,
-    attachments.size AS attachmentSize,
-    attachments.localPath AS attachmentLocalPath,
     attachments.fingerprint AS attachmentFingerprint,
+    attachments.filename AS attachmentFilename,
+    attachments.localPath AS attachmentLocalPath,
     attachments.url AS attachmentUrl,
+    attachments.size AS attachmentSize,
     attachments.encryptedSize AS attachmentEncryptedSize,
     attachments.extras AS attachmentExtras,
-    chats.contactId AS contactId,
-    :userId AS senderId,
-    chats.contactId AS recipientId
-FROM
-    messages
+    attachments.uploadStage AS attachmentUploadStage,
+    attachments.downloadStage AS attachmentDownloadStage,
+    chats.type AS chatType
+FROM messages
 INNER JOIN chats ON chats.id = messages.chatId
 LEFT JOIN attachments ON attachments.messageId = messages.id
-WHERE (messages.status = :failedStatus OR messages.status = :createdStatus) AND messages.authorId == :userId
+WHERE messages.isOutgoing = 1
+    AND (messages.stage = "created"
+         OR messages.stage = "encrypted")
 ORDER BY messages.timestamp

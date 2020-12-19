@@ -35,33 +35,27 @@
 #ifndef VM_FILE_UTILS_H
 #define VM_FILE_UTILS_H
 
-#include <Messages.h>
-
 #include <QString>
-
-
-Q_DECLARE_LOGGING_CATEGORY(lcFileUtils);
-
+#include <QUrl>
+#include <QFileInfo>
 
 namespace vm
 {
 class FileUtils {
 public:
-    static Optional<QString> calculateFingerprint(const QString &path);
+    static QString calculateFingerprint(const QString &path);
 
     static QString findUniqueFileName(const QString &fileName);
 
     static bool forceCreateDir(const QString &absolutePath);
 
-    static Optional<QString> readTextFile(const QString &filePath);
+    static QString readTextFile(const QString &filePath);
 
     static bool fileExists(const QString &filePath);
 
     static void removeFile(const QString &filePath);
 
     static QString attachmentFileName(const QUrl &url, const QFileInfo &localInfo, bool isPicture);
-
-    static QString attachmentDisplayImagePath(const Attachment &attachment);
 
     static bool openUrl(const QUrl &url);
 

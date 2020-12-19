@@ -1,15 +1,16 @@
 CREATE TABLE attachments (
-        id TEXT NOT NULL,
+        id TEXT NOT NULL PRIMARY KEY,
         messageId TEXT NOT NULL,
-        type INT NOT NULL,
-        status INT NOT NULL,
-        filename TEXT NOT NULL,
-        size INT NOT NULL,
-        localPath TEXT,
+        type TEXT NOT NULL,
         fingerprint TEXT,
+        filename TEXT NOT NULL,
+        localPath TEXT,
         url TEXT,
+        size INT NOT NULL,
         encryptedSize INT NOT NULL,
         extras TEXT,
+        uploadStage TEXT NOT NULL,
+        downloadStage TEXT NOT NULL,
         FOREIGN KEY(messageId) REFERENCES messages(id)
 );
 
@@ -17,4 +18,6 @@ CREATE INDEX attachmentsIdxMessageId ON attachments(messageId);
 
 CREATE INDEX attachmentsIdxType ON attachments(type);
 
-CREATE INDEX attachmentsIdxStatus ON attachments(status);
+CREATE INDEX attachmentsIdxStatus ON attachments(uploadStage);
+
+CREATE INDEX attachmentsIdxStatus ON attachments(downloadStage);

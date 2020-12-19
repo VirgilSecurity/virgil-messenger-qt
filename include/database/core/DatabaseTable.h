@@ -37,7 +37,6 @@
 
 #include <QObject>
 
-#include "Messages.h"
 
 namespace vm
 {

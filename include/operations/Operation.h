@@ -39,7 +39,6 @@
 
 #include <QObject>
 
-#include "Messages.h"
 
 Q_DECLARE_LOGGING_CATEGORY(lcOperation)
 

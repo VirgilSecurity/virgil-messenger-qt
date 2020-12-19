@@ -1,3 +1,3 @@
 UPDATE messages
-SET status = :status
+SET stage = :stage
 WHERE id = :id

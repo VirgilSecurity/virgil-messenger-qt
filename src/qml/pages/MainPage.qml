@@ -87,7 +87,7 @@ Page {
                     }
                 }
 
-                onClicked: controllers.chats.openChatById(model.id)
+                onClicked: controllers.chats.openChat(model.id)
             }
 
             onPlaceholderClicked: appState.requestNewChat()

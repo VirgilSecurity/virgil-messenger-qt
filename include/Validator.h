@@ -38,7 +38,7 @@
 #include <QObject>
 #include <QRegExpValidator>
 
-#include "Messages.h"
+#include <optional>
 
 namespace vm
 {
@@ -52,7 +52,7 @@ public:
     ~Validator() override;
 
     // Returns username if it's valid or corrected version of username if it exists
-    Optional<QString> validatedUsername(const QString &username, QString *errorText = 0);
+    std::optional<QString> validatedUsername(const QString &username, QString *errorText = 0);
 
     // TODO(fpohtmeh): remove this method finally
     QString databaseUsername(const QString &username);

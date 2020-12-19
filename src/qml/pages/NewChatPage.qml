@@ -9,7 +9,7 @@ import "../theme"
 OperationPage {
     appState: app.stateManager.newChatState
     loadingText: qsTr("Adding of contact...")
-    readonly property string contact: username.text.toLowerCase()
+    readonly property string username: username.text.toLowerCase()
 
     header: Header {
         showBackButton: !form.isLoading

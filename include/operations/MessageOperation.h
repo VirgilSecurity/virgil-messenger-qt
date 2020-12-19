@@ -46,9 +46,9 @@ class MessageOperation : public NetworkOperation
     Q_OBJECT
 
 public:
-    MessageOperation(const GlobalMessage &message, MessageOperationFactory *factory, NetworkOperation *parent);
+    MessageOperation(const Message &message, MessageOperationFactory *factory, NetworkOperation *parent);
 
-    const GlobalMessage *message() const;
+    const Message *message() const;
     const Attachment *attachment() const;
     MessageOperationFactory *factory();
 
@@ -61,9 +61,9 @@ public:
     void setAttachmentThumbnailPath(const QString &thumbnailPath);
     void setAttachmentThumbnailUrl(const QUrl &thumbnailUrl);
 
-    void setAttachmentProcessedSize(const DataSize &bytes);
-    void setAttachmentEncryptedSize(const DataSize &size);
-    void setAttachmentEncryptedThumbnailSize(const DataSize &bytes);
+    void setAttachmentProcessedSize(const quint64 &bytes);
+    void setAttachmentEncryptedSize(const quint64 &size);
+    void setAttachmentEncryptedThumbnailSize(const quint64 &bytes);
 
 signals:
     void statusChanged(const Message::Status &status);
@@ -73,8 +73,8 @@ signals:
     void attachmentFingerprintChanged(const QString &fingerpint);
 
     void attachmentExtrasChanged(const QVariant &extras);
-    void attachmentProcessedSizeChanged(const DataSize &bytes);
-    void attachmentEncryptedSizeChanged(const DataSize &bytes);
+    void attachmentProcessedSizeChanged(const quint64 &bytes);
+    void attachmentEncryptedSizeChanged(const quint64 &bytes);
 
 protected:
     void connectChild(Operation *child) override;
@@ -84,7 +84,7 @@ private:
     void setStatus(const Message::Status &status);
 
     MessageOperationFactory *m_factory;
-    GlobalMessage m_message;
+    Message m_message;
 };
 }
 

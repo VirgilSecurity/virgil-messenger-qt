@@ -35,26 +35,40 @@
 #ifndef VM_DATABASEUTILS_H
 #define VM_DATABASEUTILS_H
 
-#include "Messages.h"
+#include "Message.h"
 
-class QSqlQuery;
+#include <QSqlQuery>
+
+#include <vector>
+#include <utility>
+#include <optional>
+
 
 namespace vm
 {
 class Database;
 
-namespace DatabaseUtils
+class DatabaseUtils
 {
+public:
     using BindValues = std::vector<std::pair<QString, QVariant>>;
 
-    bool isValidName(const QString &id);
+    static bool isValidName(const QString &id);
 
-    bool readExecQueries(Database *database, const QString &queryId);
-    Optional<QSqlQuery> readExecQuery(Database *database, const QString &queryId, const BindValues &values = {});
+    static bool readExecQueries(Database *database, const QString &queryId);
 
-    Optional<Attachment> readAttachment(const QSqlQuery &query);
-    Optional<Message> readMessage(const QSqlQuery &query, const QString &idColumn = QString());
-}
+    static std::optional<QSqlQuery> readExecQuery(Database *database, const QString &queryId, const BindValues &values = {});
+
+    static ModifiableMessageHandler readMessage(const QSqlQuery &query, const QString &idColumn = {});
+
+private:
+    static bool readMessageContentAttachment(const QSqlQuery &query, MessageContentAttachment& attachment);
+    static MessageContent readMessageContent(const QSqlQuery &query);
+    static MessageContent readMessageContentFile(const QSqlQuery &query);
+    static MessageContent readMessageContentPicture(const QSqlQuery &query);
+    static MessageContent readMessageContentText(const QSqlQuery &query);
+    static MessageContent readMessageContentEncrypted(const QSqlQuery &query);
+};
 }
 
 #endif // VM_DATABASEUTILS_H

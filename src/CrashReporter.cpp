@@ -48,10 +48,10 @@ using Self = CrashReporter;
 
 Q_LOGGING_CATEGORY(lcCrashReporter, "crash-reporter")
 
-Self::CrashReporter(Settings *settings, vm::CommKitMessenger *commKitMessenger, QObject *parent)
+Self::CrashReporter(Settings *settings, vm::CoreMessenger *commKitMessenger, QObject *parent)
     : QObject(parent)
     , m_settings(settings)
-    , m_commKitMessenger(commKitMessenger)
+    , m_coreMessenger(commKitMessenger)
     , m_networkManager(new QNetworkAccessManager(this))
 {}
 
@@ -99,8 +99,8 @@ bool Self::sendLogFiles()
         }
     }
 
-    auto endpointUrl = m_commKitMessenger->getCrashReportEndpointUrl();
-    auto authHeaderValue = m_commKitMessenger->getAuthHeaderVaue();
+    auto endpointUrl = m_coreMessenger->getCrashReportEndpointUrl();
+    auto authHeaderValue = m_coreMessenger->getAuthHeaderVaue();
 
     qCDebug(lcCrashReporter) << "Send crash report to the endpoint: " << endpointUrl;
     qCDebug(lcCrashReporter) << "Messenger Backend auth header value: " << authHeaderValue;

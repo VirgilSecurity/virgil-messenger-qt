@@ -37,8 +37,8 @@
 #define VIRGIL_IOTKIT_QT_MESSENGER_H
 
 #include "Validator.h"
-#include "CommKitUser.h"
-#include "CommKitMessenger.h"
+#include "User.h"
+#include "CoreMessenger.h"
 #include "CrashReporter.h"
 #include "MessageSender.h"
 #include "FileLoader.h"
@@ -55,38 +55,35 @@ class Messenger : public MessageSender {
 
 public:
 
-    Q_PROPERTY(QString currentUser READ currentUser NOTIFY fireCurrentUserChanged)
-
     Messenger(Settings *settings, Validator *validator);
     Messenger() = default; // QML engine requires default constructor
     virtual ~Messenger() noexcept = default;
 
     //
-    //  Info.
-    //
-    Q_INVOKABLE QString currentUser() const;
-    Q_INVOKABLE QString currentRecipient() const;
-    Q_INVOKABLE bool isOnline() const noexcept;
-
-    //
     //  Messages.
     //
-    virtual bool sendMessage(const GlobalMessage& message) override;
+    virtual bool sendMessage(MessageHandler message) override;
 
     //
     // User control.
     //
-    void signIn(const QString &userId);
+    void signIn(const UserId &userId);
     void signOut();
-    void signUp(const QString &userId);
+    void signUp(const QString &username);
     void backupKey(const QString &password, const QString &confirmedPassword);
-    void downloadKey(const QString &userId, const QString &password);
+    void downloadKey(const QString &username, const QString &password);
+
+    //
+    //  Attachment control.
+    //
+    QString requestUploadSlot(const QString &filePath);
 
     //
     // Find users.
     //
-    QSharedPointer<CommKitUser> findUserByUsername(const QString &username);
-    QSharedPointer<CommKitUser> findUserById(const QString &id);
+    UserHandler currentUser() const;
+    UserHandler findUserByUsername(const QString &username) const;
+    UserHandler findUserById(const UserId &id) const;
 
     //
     //  Helpers.
@@ -99,56 +96,45 @@ public:
 public slots:
     void setCurrentRecipient(const QString &recipient);
 
-    bool subscribeToContact(const Contact::Id &contactId);
+    bool subscribeToUser(const UserId &contactId);
 
 signals:
-    void
-    fireError(QString errorText);
-
-    void
-    fireNewMessage(QString from, QString message);
-
-    void
-    fireCurrentUserChanged();
-
-    //
-    // Sign-in statuses.
+    //--
+    // Sign-in.
     //
     void signedIn(const QString &userId);
     void signInErrorOccured(const QString &errorText);
     void signedUp(const QString &userId);
     void signUpErrorOccured(const QString &errorText);
     void signedOut();
+    //--
 
-    //
-    // Connection statuses.
-    //
-    void onlineStatusChanged(bool isOnline);
-
-    //
-    //  Key management statuses.
+    //--
+    //  Key management.
     //
     void keyBackuped(const QString &userId);
     void backupKeyFailed(const QString &errorText);
     void keyDownloaded(const QString &userId);
     void downloadKeyFailed(const QString &errorText);
+    //--
 
+    //--
+    //  Messages and user activity.
     //
-    //  Messages and user activity statuses.
-    //
-    void messageStatusChanged(const Message::Id &messageId, const QString &recipeintId, const Message::Status &status);
-    void messageReceived(const GlobalMessage& message);
-    void messageDelivered(const QString& userId, const QString& messageId);
-
+    void messageUpdated(const MessageUpdate &messageUpdate);
+    void messageReceived(const Message& message);
     void lastActivityTextChanged(const QString& text);
+    //--
+
+    //--
+    // Connection.
+    //
+    void onlineStatusChanged(bool isOnline);
+    //--
 
     //--
     //  File upload.
     //
-public:
-    QString requestUploadSlot(const QString &filePath);
-
-signals:
     void uploadServiceFound(bool found);
     void uploadSlotReceived(const QString &slotId, const QUrl &putUrl, const QUrl &getUrl);
     void uploadSlotErrorOcurred(const QString &slotId, const QString &errorText);
@@ -156,16 +142,15 @@ signals:
 
 private slots:
     void onPushNotificationTokenUpdate();
-    void onConnectionStateChanged(CommKitMessenger::ConnectionState state);
-    void onMessageReceived(const CommKitMessage& message);
+    void onConnectionStateChanged(CoreMessenger::ConnectionState state);
+    void onMessageReceived(const Message& message);
 
 private:
     QPointer<Settings> m_settings;
     QPointer<Validator> m_validator;
-    QPointer<CommKitMessenger> m_commKitMessenger;
+    QPointer<CoreMessenger> m_coreMessenger;
     QPointer<CrashReporter> m_crashReporter;
     QPointer<FileLoader> m_fileLoader;
-    QString m_currentRecipient;
 };
 } // namespace vm
 

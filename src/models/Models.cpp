@@ -40,7 +40,6 @@
 #include "Settings.h"
 #include "Messenger.h"
 #include "models/AccountSelectionModel.h"
-#include "models/AttachmentsModel.h"
 #include "models/ChatsModel.h"
 #include "models/FileCloudModel.h"
 #include "models/MessagesModel.h"
@@ -51,7 +50,6 @@ using namespace vm;
 Models::Models(Messenger *messenger, Settings *settings, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
     , m_accountSelection(new AccountSelectionModel(settings, this))
-    , m_attachments(new AttachmentsModel(settings, this))
     , m_chats(new ChatsModel(this))
     , m_messages(new MessagesModel(this))
     , m_fileCloud(new FileCloudModel(settings, this))
@@ -60,7 +58,6 @@ Models::Models(Messenger *messenger, Settings *settings, UserDatabase *userDatab
     , m_queueThread(new QThread())
 {
     qRegisterMetaType<AccountSelectionModel *>("AccountSelectionModel*");
-    qRegisterMetaType<AttachmentsModel *>("AttachmentsModel*");
     qRegisterMetaType<ChatsModel *>("ChatsModel*");
     qRegisterMetaType<FileCloudModel *>("FileCloudModel*");
     qRegisterMetaType<MessagesModel *>("MessagesModel*");
@@ -89,16 +86,6 @@ const AccountSelectionModel *Models::accountSelection() const
 AccountSelectionModel *Models::accountSelection()
 {
     return m_accountSelection;
-}
-
-const AttachmentsModel *Models::attachments() const
-{
-    return m_attachments;
-}
-
-AttachmentsModel *Models::attachments()
-{
-    return m_attachments;
 }
 
 const ChatsModel *Models::chats() const

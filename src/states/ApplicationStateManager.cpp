@@ -39,11 +39,16 @@
 #include "controllers/ChatsController.h"
 #include "controllers/UsersController.h"
 
-Q_LOGGING_CATEGORY(lcAppState, "app-state");
+#include <QLoggingCategory>
 
 using namespace vm;
+using Self = ApplicationStateManager;
 
-ApplicationStateManager::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Models *models, Validator *validator, Settings *settings, QObject *parent)
+
+Q_LOGGING_CATEGORY(lcAppState, "app-state");
+
+
+Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Models *models, Validator *validator, Settings *settings, QObject *parent)
     : QStateMachine(parent)
     , m_messenger(messenger)
     , m_controllers(controllers)
@@ -70,10 +75,10 @@ ApplicationStateManager::ApplicationStateManager(Messenger *messenger, Controlle
     start();
 }
 
-ApplicationStateManager::~ApplicationStateManager()
+Self::~ApplicationStateManager()
 {}
 
-void ApplicationStateManager::registerStatesMetaTypes()
+void Self::registerStatesMetaTypes()
 {
     // Qt requires registering to avoid namespace issues
     qRegisterMetaType<AccountSelectionState *>("AccountSelectionState*");
@@ -92,21 +97,21 @@ void ApplicationStateManager::registerStatesMetaTypes()
     qRegisterMetaType<StartState *>("StartState*");
 }
 
-void ApplicationStateManager::addTransitions()
+void Self::addTransitions()
 {
     for (auto state : findChildren<QState *>()) {
-        connect(state, &QState::entered, this, std::bind(&ApplicationStateManager::setCurrentState, this, state));
-        connect(state, &QState::exited, this, std::bind(&ApplicationStateManager::setPreviousState, this, state));
+        connect(state, &QState::entered, this, std::bind(&Self::setCurrentState, this, state));
+        connect(state, &QState::exited, this, std::bind(&Self::setPreviousState, this, state));
     }
 
     auto users = m_controllers->users();
     auto chats = m_controllers->chats();
 
-    m_startState->addTransition(this, &ApplicationStateManager::splashScreenRequested, m_splashScreenState);
+    m_startState->addTransition(this, &Self::splashScreenRequested, m_splashScreenState);
     // NOTE: Queued connection is a workaround for working state transition
-    connect(this, &ApplicationStateManager::setUiState, this, std::bind(&ApplicationStateManager::splashScreenRequested, this, QPrivateSignal()), Qt::QueuedConnection);
-    connect(this, &ApplicationStateManager::openChatList, this, std::bind(&ApplicationStateManager::chatListRequested, this, QPrivateSignal()), Qt::QueuedConnection);
-    connect(this, &ApplicationStateManager::openFileCloud, this, std::bind(&ApplicationStateManager::fileCloudRequested, this, QPrivateSignal()), Qt::QueuedConnection);
+    connect(this, &Self::setUiState, this, std::bind(&Self::splashScreenRequested, this, QPrivateSignal()), Qt::QueuedConnection);
+    connect(this, &Self::openChatList, this, std::bind(&Self::chatListRequested, this, QPrivateSignal()), Qt::QueuedConnection);
+    connect(this, &Self::openFileCloud, this, std::bind(&Self::fileCloudRequested, this, QPrivateSignal()), Qt::QueuedConnection);
 
     m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::userNotSelected, m_accountSelectionState);
     m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::operationErrorOccurred, m_accountSelectionState);
@@ -121,11 +126,11 @@ void ApplicationStateManager::addTransitions()
     connect(users, &UsersController::accountSettingsRequested, m_accountSettingsState, &AccountSettingsState::setUserId);
     addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestNewChat, m_newChatState);
     addTwoSideTransition(m_chatListState, chats, &ChatsController::chatOpened, m_chatState);
-    m_chatListState->addTransition(this, &ApplicationStateManager::fileCloudRequested, m_fileCloudState);
+    m_chatListState->addTransition(this, &Self::fileCloudRequested, m_fileCloudState);
 
     addTwoSideTransition(m_fileCloudState, users, &UsersController::accountSettingsRequested, m_accountSettingsState);
     m_fileCloudState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
-    m_fileCloudState->addTransition(this, &ApplicationStateManager::chatListRequested, m_chatListState);
+    m_fileCloudState->addTransition(this, &Self::chatListRequested, m_chatListState);
 
     addTwoSideTransition(m_accountSettingsState, m_accountSettingsState, &AccountSettingsState::requestBackupKey, m_backupKeyState);
     connect(m_accountSettingsState, &AccountSettingsState::requestBackupKey, m_backupKeyState, &BackupKeyState::setUserId);
@@ -138,7 +143,7 @@ void ApplicationStateManager::addTransitions()
     addTwoSideTransition(m_chatState, m_chatState, &ChatState::requestPreview, m_attachmentPreviewState);
     connect(m_chatState, &ChatState::requestPreview, m_attachmentPreviewState, &AttachmentPreviewState::setUrl);
 
-    m_signUpState->addTransition(users, &UsersController::signedUp, m_chatListState);
+    m_signUpState->addTransition(users, &UsersController::signedIn, m_chatListState);
 
     addTwoSideTransition(m_signInUsernameState, m_signInUsernameState, &SignInUsernameState::validated, m_signInAsState);
     connect(m_signInUsernameState, &SignInUsernameState::validated, m_signInAsState, &SignInAsState::setUserId);
@@ -146,17 +151,17 @@ void ApplicationStateManager::addTransitions()
     addTwoSideTransition(m_signInAsState, m_signInAsState, &SignInAsState::requestDownloadKey, m_downloadKeyState);
     connect(m_signInAsState, &SignInAsState::requestDownloadKey, m_downloadKeyState, &DownloadKeyState::setUserId);
 
-    m_downloadKeyState->addTransition(users, &UsersController::keyDownloaded, m_chatListState);
+    m_downloadKeyState->addTransition(users, &UsersController::signedIn, m_chatListState);
 }
 
-void ApplicationStateManager::setCurrentState(QState *state)
+void Self::setCurrentState(QState *state)
 {
     qCDebug(lcAppState) << "Current state:" << state;
     m_currentState = state;
     emit currentStateChanged(state);
 }
 
-void ApplicationStateManager::setPreviousState(QState *state)
+void Self::setPreviousState(QState *state)
 {
     m_previousState = state;
     emit previousStateChanged(state);

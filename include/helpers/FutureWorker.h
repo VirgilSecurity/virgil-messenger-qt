@@ -37,11 +37,11 @@
 
 #include <QFutureWatcher>
 
-#include "CommKitMessenger.h"
+#include "CoreMessenger.h"
 
 namespace vm
 {
-using FutureResult = CommKitMessenger::Result;
+using FutureResult = CoreMessenger::Result;
 using Future = QFuture<FutureResult>;
 using FutureWatcher = QFutureWatcher<FutureResult>;
 

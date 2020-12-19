@@ -32,25 +32,60 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_COMM_KIT_MESSAGE_H
-#define VM_COMM_KIT_MESSAGE_H
 
-#include <QObject>
-#include <QString>
-#include <QByteArray>
-#include <QDateTime>
 
-namespace vm
-{
-struct CommKitMessage
-{
-    QString id;
-    QString senderId;
-    QString recipientId;
-    QByteArray body;
-    QDateTime timestamp;
+#ifndef VM_MESSAGE_CONTENT_PICTURE_H
+#define VM_MESSAGE_CONTENT_PICTURE_H
+
+#include "MessageContentAttachment.h"
+
+
+namespace vm {
+
+//
+//  Class that handles picture as message content.
+//
+class MessageContentPicture : public MessageContentAttachment  {
+public:
+    //
+    //  Apply picture specific update.
+    //
+    bool applyUpdate(const MessageUpdate& update) override;
+
+    //
+    //  Return path to the resized picture suitable for a preview.
+    //
+    QString previewPath() const;
+
+    //
+    //  Return preview picture path if exists or thumbnail path otherwise.
+    //
+    QString previewOrThumbnailPath() const;
+
+    //
+    //  Return image thumbnail size.
+    //
+    QSize thumbnailSize() const;
+
+    //
+    //  Return picture thumbnail.
+    //
+    MessageContentFile thumbnail() const;
+
+    //
+    //  Create picture message content from the given path.
+    //
+    static MessageContentPicture createFromLocalFile(const QUrl& localUrl);
+
+private:
+    MessageContentPicture();
+
+private:
+    QString m_previewFilePath;
+    MessageContentFile m_thumbnail;
+    qsizetype m_thumbnailHeight;
+    qsizetype m_thumbnailWidth;
 };
 } // namespace vm
 
-
-#endif // VM_COMM_KIT_MESSAGE_H
+#endif // VM_MESSAGE_CONTENT_PICTURE_H

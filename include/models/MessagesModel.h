@@ -36,7 +36,11 @@
 #define VM_MESSAGESMODEL_H
 
 #include "ListModel.h"
-#include "Messages.h"
+#include "AttachmentId.h"
+#include "Chat.h"
+#include "Message.h"
+
+#include <optional>
 
 namespace vm
 {
@@ -46,55 +50,82 @@ class MessagesModel : public ListModel
 
 public:
     explicit MessagesModel(QObject *parent);
-    ~MessagesModel() override;
+    ~MessagesModel() override = default;
 
-    void setUserId(const UserId &userId);
-    void setContactId(const Contact::Id &contactId);
+    //
+    //  Change current chat.
+    //
+    void setChat(ChatHandler chat);
 
-    void setMessages(const Messages &messages);
-    Message createMessage(const Chat::Id &chatId, const Contact::Id &authorId, const QString &body, const Optional<Attachment> &attachment);
-    void writeMessage(const Message &message);
+    //
+    //  Set messages for the current chat.
+    //
+    void setMessages(ModifiableMessages messages);
 
-    // Sets message status. Returns false if message had the same status
-    bool setMessageStatus(const Message::Id &messageId, const Message::Status &status);
-    void markAllAsRead();
+    //
+    //  Invalidate chat.
+    //
+    void cleartChat();
 
-    void setAttachmentStatus(const Attachment::Id &attachmentId, const Attachment::Status &status);
-    void setAttachmentUrl(const Attachment::Id &attachmentId, const QUrl &url);
-    void setAttachmentExtras(const Attachment::Id &attachmentId, const QVariant &extras);
-    void setAttachmentLocalPath(const Attachment::Id &attachmentId, const QString &localPath);
-    void setAttachmentFingerprint(const Attachment::Id &attachmentId, const QString &fingerprint);
-    void setAttachmentEncryptedSize(const Attachment::Id &attachmentId, const DataSize &size);
-    void setAttachmentProcessedSize(const Attachment::Id &attachmentId, const DataSize &size);
+    //
+    //  Create text message within current chat.
+    //
+    MessageHandler createTextMessage(const QString &body);
 
-    Optional<GlobalMessage> findById(const Message::Id &messageId) const;
+    //
+    //  Create message with file attachment within current chat.
+    //
+    MessageHandler createFileMessage(const QUrl &localFileUrl);
+
+    //
+    //  Create message with file attachment within current chat.
+    //
+    MessageHandler createPictureMessage(const QUrl &localFileUrl);
+
+    //
+    // Update message. Returns false if message had the same status.
+    //
+    bool applyMessageUpdate(const MessageUpdate &messageUpdate);
+
+    //
+    //  Return message if found, nullptr otherwise.
+    //
+    MessageHandler findById(const MessageId &messageId) const;
 
 signals:
-    void displayImageNotFound(const Message::Id &messageId) const;
+    void displayImageNotFound(const MessageId &messageId) const;
+
+private:
+    std::unique_ptr<OutgoingMessage> createOutgoingMessage();
+
+    static QVector<int> rolesFromMessageUpdate(const MessageUpdate& messageUpdate);
 
 private:
     enum Roles
     {
+        // Common
         IdRole = Qt::UserRole,
         DayRole,
         DisplayTimeRole,
         AuthorIdRole,
         StatusRole,
+        StageRole,
+        // Text
         BodyRole,
         // Attachment
         AttachmentIdRole,
-        AttachmentTypeRole,
-        AttachmentStatusRole,
-        AttachmentImagePathRole,
-        AttachmentImageSizeRole,
+        AttachmentTypeIsFileRole,
+        AttachmentTypeIsPictureRole,
+        AttachmentIsLoadingRole,
+        AttachmentIconPathRole,
+        AttachmentPictureThumbnailSizeRole,
         AttachmentDisplaySizeRole,
         AttachmentDisplayTextRole,
         // Loading
         AttachmentBytesTotalRole,
         AttachmentBytesLoadedRole,
         AttachmentFileExistsRole,
-        //
-        IsBrokenRole,
+        // ???
         FirstInRowRole,
         InRowRole,
     };
@@ -103,16 +134,19 @@ private:
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    void updateAttachment(const Attachment::Id &attachmentId, const QVector<int> &roles, const std::function<bool (Attachment &)> &update);
 
-    Optional<int> findRowById(const Message::Id &messageId) const;
-    Optional<int> findRowByAttachmentId(const Attachment::Id &attachmentId) const;
+    std::optional<int> findRowById(const MessageId &messageId) const;
     void invalidateRow(const int row, const QVector<int> &roles = {});
     void invalidateModel(const QModelIndex &index, const QVector<int> &roles);
 
-    Messages m_messages;
-    UserId m_userId;
-    Contact::Id m_contactId;
+    //
+    //  Append a new message to the in-memory collection and update UI.
+    //
+    MessageHandler appendMessage(std::unique_ptr<Message> message);
+
+private:
+    ModifiableMessages m_messages;
+    ChatHandler m_currentChat;
 };
 }
 

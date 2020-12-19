@@ -1,2 +1,2 @@
-INSERT INTO attachments (id, messageId, type, status, filename, size, localPath, fingerprint, url, extras, encryptedSize)
-VALUES (:id, :messageId, :type, :status, :filename, :size, :localPath, :fingerprint, :url, :extras, :encryptedSize)
+INSERT INTO attachments (id, messageId, type, fingerprint, filename, localPath, url, size, encryptedSize, extras, uploadStage, downloadStage)
+VALUES (:id, :messageId, :type, :fingerprint, :filename, :localPath, :url, :size, :encryptedSize, :extras, :uploadStage, :downloadStage)

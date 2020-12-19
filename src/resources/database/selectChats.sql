@@ -1,20 +1,24 @@
 SELECT
     chats.*,
-    messages.timestamp AS messageTimestamp,
+    messages.id AS messageId,
     messages.chatId AS messageChatId,
+    messages.createdAt AS messageCreatedAt,
     messages.authorId AS messageAuthorId,
-    messages.status AS messageStatus,
+    messages.isOutgoing AS messageIsOutgoing,
+    messages.stage AS messageStage,
     messages.body AS messageBody,
+    messages.ciphertext AS messageCiphertext,
     attachments.id AS attachmentId,
     attachments.type AS attachmentType,
-    attachments.status AS attachmentStatus,
-    attachments.filename AS attachmentFilename,
-    attachments.size AS attachmentSize,
-    attachments.localPath AS attachmentLocalPath,
     attachments.fingerprint AS attachmentFingerprint,
+    attachments.filename AS attachmentFilename,
+    attachments.localPath AS attachmentLocalPath,
     attachments.url AS attachmentUrl,
+    attachments.size AS attachmentSize,
     attachments.encryptedSize AS attachmentEncryptedSize,
-    attachments.extras AS attachmentExtras
+    attachments.extras AS attachmentExtras,
+    attachments.uploadStage AS attachmentUploadStage,
+    attachments.downloadStage AS attachmentDownloadStage
 FROM
     chats
 LEFT JOIN messages ON chats.lastMessageId = messages.id

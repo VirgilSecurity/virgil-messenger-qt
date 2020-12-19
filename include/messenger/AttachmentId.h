@@ -32,21 +32,25 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_MESSAGE_SENDER_H
-#define VM_MESSAGE_SENDER_H
 
-#include "Messages.h"
+#ifndef VM_ATTACHMENT_ID_H
+#define VM_ATTACHMENT_ID_H
 
-#include <QObject>
+#include <QString>
+#include <QVariant>
 
 namespace vm {
-class MessageSender : public QObject {
-    Q_OBJECT
+//
+//  This class just wraps QString but is used for a strong type checking.
+//
+class AttachmentId {
 public:
-    explicit MessageSender(QObject *parent = nullptr) : QObject(parent) {}
+    explicit AttachmentId(QString attachmentId);
 
-    virtual bool sendMessage(const GlobalMessage& message) = 0;
+    operator QString() const;
+
+    static AttachmentId generate();
 };
 } // namespace vm
 
-#endif // VM_MESSAGE_SENDER_H
+#endif // VM_ATTACHMENT_ID_H

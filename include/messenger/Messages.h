@@ -35,9 +35,7 @@
 #ifndef VM_MESSAGES_H
 #define VM_MESSAGES_H
 
-#include "CommKitMessage.h"
-
-#include <thirdparty/optional/optional.hpp>
+#include "Message.h"
 
 #include <QDateTime>
 #include <QFileInfo>
@@ -58,17 +56,17 @@ namespace args {
 
 using Flag = qint64;
 
-using DataSize = qint64;
-Q_DECLARE_METATYPE(DataSize);
+using quint64 = qint64;
+Q_DECLARE_METATYPE(quint64);
 
-using Seconds = quint64;
-Q_DECLARE_METATYPE(Seconds);
+using std::chrono::seconds = quint64;
+Q_DECLARE_METATYPE(std::chrono::seconds);
 
 template <class Type>
-using Optional = tl::optional<Type>;
-using OptionalType = tl::nullopt_t;
+using std::optional = tl::optional<Type>;
+using std::optionalType = tl::nullopt_t;
 
-static constexpr OptionalType NullOptional(tl::nullopt);
+static constexpr std::optionalType {}(tl::nullopt);
 
 #ifdef VS_DEVMODE
 Q_DECLARE_LOGGING_CATEGORY(lcDev);
@@ -121,9 +119,7 @@ struct Contact
         Group
     };
 
-    using Id = QString;
-
-    Id id;
+    QString id;
     Type type = Type::Person;
     QString name;
     QUrl avatarUrl;
@@ -140,7 +136,7 @@ struct PictureExtras
     QUrl thumbnailUrl;
     QString thumbnailPath;
     QString previewPath;
-    DataSize encryptedThumbnailSize = 0;
+    quint64 encryptedThumbnailSize = 0;
 
     bool operator==(const PictureExtras &e) const
     {
@@ -159,14 +155,14 @@ struct Attachment
     Type type = Type::File;
     Status status = Status::Created;
     QString fileName;
-    DataSize size = 0;
-    DataSize encryptedSize = 0;
+    quint64 size = 0;
+    quint64 encryptedSize = 0;
     QString localPath;
     QString fingerprint;
     QUrl url;
     QVariant extras;
 
-    DataSize processedSize = 0;
+    quint64 processedSize = 0;
 };
 
 struct Message
@@ -177,10 +173,10 @@ struct Message
     Id id;
     QDateTime timestamp;
     ChatId chatId;
-    Contact::Id authorId;
+    UserId authorId;
     Status status = Status::Created;
     QString body;
-    Optional<Attachment> attachment;
+    std::optional<Attachment> attachment;
 };
 
 using Messages = std::vector<Message>;
@@ -192,27 +188,27 @@ struct Chat
 
     Id id;
     QDateTime timestamp;
-    Contact::Id contactId;
-    Optional<Message> lastMessage;
+    UserId contactId;
+    std::optional<Message> lastMessage;
     UnreadCount unreadMessageCount = 0;
 };
 
 using Chats = std::vector<Chat>;
 
-struct GlobalMessage : Message
+struct Message : Message
 {
     using Message::Message;
 
-    GlobalMessage(const Message &message, const UserId &userId, const Contact::Id &contactId,
-                  const Contact::Id &senderId, const Contact::Id &recipientId);
+    Message(const Message &message, const UserId &userId, const UserId &contactId,
+                  const UserId &senderId, const UserId &recipientId);
 
     UserId userId;
-    Contact::Id contactId;
-    Contact::Id senderId;
-    Contact::Id recipientId;
+    UserId contactId;
+    UserId senderId;
+    UserId recipientId;
 };
 
-using GlobalMessages = std::vector<GlobalMessage>;
+using Messages = std::vector<Message>;
 
 class MessageUtils {
 public:
@@ -222,9 +218,9 @@ public:
 
     static QVariant extrasFromJson(const QString &json, const Attachment::Type type, bool skipLocal);
 
-    static GlobalMessage messageFromCommKitMessage(const CommKitMessage &commKitMessage);
+    static Message messageFromMessage(const Message &commKitMessage);
 
-    static vm::CommKitMessage messageToCommKitMessage(const GlobalMessage &message);
+    static vm::Message messageToMessage(const Message &message);
 };
 }
 
@@ -237,8 +233,8 @@ Q_DECLARE_METATYPE(vm::Message)
 Q_DECLARE_METATYPE(vm::Messages)
 Q_DECLARE_METATYPE(vm::Chat)
 Q_DECLARE_METATYPE(vm::Chats)
-Q_DECLARE_METATYPE(vm::GlobalMessage)
-Q_DECLARE_METATYPE(vm::GlobalMessages)
+Q_DECLARE_METATYPE(vm::Message)
+Q_DECLARE_METATYPE(vm::Messages)
 
 void registerMessagesMetaTypes();
 

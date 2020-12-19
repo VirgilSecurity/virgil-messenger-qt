@@ -52,14 +52,12 @@ public:
 
 signals:
     void signUp(const QString &username);
-    void userIdChanged(const QString &userId);
 
 private:
     void processSignUp(const QString &username);
 
     UsersController *m_usersController;
     Validator *m_validator;
-    QString m_userId;
 };
 }
 

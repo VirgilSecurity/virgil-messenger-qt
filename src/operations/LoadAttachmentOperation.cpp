@@ -49,14 +49,14 @@ LoadAttachmentOperation::LoadAttachmentOperation(MessageOperation *parent)
     connect(this, &LoadAttachmentOperation::totalProgressChanged, parent, &MessageOperation::setAttachmentProcessedSize);
 }
 
-void LoadAttachmentOperation::startLoadOperation(const DataSize &bytesTotal)
+void LoadAttachmentOperation::startLoadOperation(const quint64 &bytesTotal)
 {
     m_previousBytesTotal = m_bytesTotal;
     m_bytesTotal += bytesTotal;
     updateTotalProgress();
 }
 
-void LoadAttachmentOperation::setLoadOperationProgress(const DataSize &bytesLoaded)
+void LoadAttachmentOperation::setLoadOperationProgress(const quint64 &bytesLoaded)
 {
     m_currentBytesLoaded = bytesLoaded;
     updateTotalProgress();

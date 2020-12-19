@@ -42,7 +42,7 @@ DownloadKeyState::DownloadKeyState(UsersController *usersController, QState *par
     : OperationState(parent)
     , m_usersController(usersController)
 {
-    connect(usersController, &UsersController::keyDownloaded, this, &DownloadKeyState::operationFinished);
+    connect(usersController, &UsersController::signedIn, this, &DownloadKeyState::operationFinished);
     connect(usersController, &UsersController::downloadKeyFailed, this, &DownloadKeyState::operationErrorOccurred);
     connect(this, &DownloadKeyState::downloadKey, this, &DownloadKeyState::processDownloadKey);
 }

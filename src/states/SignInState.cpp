@@ -49,21 +49,12 @@ SignInState::SignInState(UsersController *usersController, Validator *validator,
     connect(this, &SignInState::signIn, this, &SignInState::processSignIn);
 }
 
-void SignInState::processSignIn(const QString &username)
+void SignInState::processSignIn(const UserId &userId)
 {
-    QString errorText;
-    const auto validUsername = m_validator->validatedUsername(username);
-
-    if (!validUsername) {
-        emit operationStarted();
-        emit operationErrorOccurred(errorText);
+    if (m_userId && *m_userId != userId) {
+        m_userId = userId;
+        emit userIdChanged(*m_userId);
     }
-    else {
-        if (m_userId != *validUsername) {
-            m_userId = *validUsername;
-            emit userIdChanged(m_userId);
-        }
-        emit operationStarted();
-        m_usersController->signIn(m_userId);
-    }
+    emit operationStarted();
+    m_usersController->signIn(*m_userId);
 }

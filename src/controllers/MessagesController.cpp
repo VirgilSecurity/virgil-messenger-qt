@@ -46,11 +46,11 @@
 #include "database/AttachmentsTable.h"
 #include "database/MessagesTable.h"
 #include "database/UserDatabase.h"
-#include "models/AttachmentsModel.h"
 #include "models/ChatsModel.h"
 #include "models/MessagesModel.h"
 #include "models/MessagesQueue.h"
 #include "models/Models.h"
+#include "Controller.h"
 
 using namespace vm;
 using Self = MessagesController;
@@ -66,52 +66,74 @@ Self::MessagesController(Messenger *messenger, Models *models, UserDatabase *use
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
     // Queue
     connect(this, &Self::messageCreated, messagesQueue, &MessagesQueue::pushMessage);
-    connect(messagesQueue, &MessagesQueue::messageStatusChanged, this, &Self::setMessageStatus);
-    connect(messagesQueue, &MessagesQueue::attachmentStatusChanged, this, &Self::setAttachmentStatus);
-    connect(messagesQueue, &MessagesQueue::attachmentUrlChanged, this, &Self::setAttachmentUrl);
-    connect(messagesQueue, &MessagesQueue::attachmentLocalPathChanged, this, &Self::setAttachmentLocalPath);
-    connect(messagesQueue, &MessagesQueue::attachmentFingerprintChanged, this, &Self::setAttachmentFingerprint);
-    connect(messagesQueue, &MessagesQueue::attachmentExtrasChanged, this, &Self::setAttachmentExtras);
-    connect(messagesQueue, &MessagesQueue::attachmentProcessedSizeChanged, this, &Self::setAttachmentProcessedSize);
-    connect(messagesQueue, &MessagesQueue::attachmentEncryptedSizeChanged, this, &Self::setAttachmentEncryptedSize);
+    connect(messagesQueue, &MessagesQueue::messageChanged, this, &Self::onMessageUpdated);
     // Models
     connect(m_models->chats(), &ChatsModel::chatUpdated, this, &Self::onChatUpdated);
     connect(m_models->messages(), &MessagesModel::displayImageNotFound, this, &Self::displayImageNotFound);
     // Messages
     connect(m_messenger, &Messenger::messageReceived, this, &Self::onMessageReceived);
-    connect(m_messenger, &Messenger::messageDelivered, this, &Self::setDeliveredStatus);
+    connect(m_messenger, &Messenger::messageUpdated, this, &Self::onMessageUpdated);
 }
 
-void Self::loadMessages(const Chat &chat)
+void Self::loadMessages(const ChatHandler &chat)
 {
     m_chat = chat;
-    m_messenger->setCurrentRecipient(chat.contactId);
-    if (chat.id.isEmpty()) {
-        m_models->messages()->setMessages({});
-    }
-    else {
-        m_userDatabase->messagesTable()->fetchChatMessages(chat.id);
-    }
+    m_userDatabase->messagesTable()->fetchChatMessages(chat->id());
 }
 
-void Self::createSendMessage(const QString &body, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType)
+void Self::clearMessages()
 {
-    const auto isAttachment = attachmentUrl.isValid();
-    if (body.isEmpty() && !isAttachment) {
-        qCWarning(lcController) << "Text and attachment are empty";
+    m_chat = nullptr;
+    m_models->messages()->cleartChat();
+}
+
+void Self::sendTextMessage(const QString &body)
+{
+    auto message = m_models->messages()->createTextMessage(body);
+    const qsizetype unreadCount = 0; // message can be created in current chat only
+    m_models->chats()->updateLastMessage(message, unreadCount);
+    m_userDatabase->writeMessage(*message, unreadCount);
+    emit messageCreated(message);
+}
+
+void Self::sendFileMessage(const QVariant &attachmentUrl)
+{
+    if (!attachmentUrl.isValid()) {
+        qCWarning(lcController) << "File attachment URL is empty";
         return;
     }
-    const auto attachment = m_models->attachments()->createAttachment(attachmentUrl.toUrl(), attachmentType);
-    if (isAttachment && !attachment) {
-        qCWarning(lcController) << "Message wasn't created. Attachment is invalid";
-        emit notificationCreated(tr("Attachment reading error"), true);
+
+    auto message = m_models->messages()->createFileMessage(attachmentUrl.toUrl());
+    if (message) {
+        qCWarning(lcController) << "Message wasn't created. File is invalid.";
+        emit notificationCreated(tr("File reading error"), true);
         return;
     }
-    auto message = m_models->messages()->createMessage(m_chat.id, m_userId, body, attachment);
-    const Chat::UnreadCount unreadCount = 0; // message can be created in current chat only
+
+    const qsizetype unreadCount = 0; // message can be created in current chat only
     m_models->chats()->updateLastMessage(message, unreadCount);
     m_userDatabase->writeMessage(message, unreadCount);
-    emit messageCreated({ message, m_userId, m_chat.contactId, m_userId, m_chat.contactId });
+    emit messageCreated(message);
+}
+
+void Self::sendPictureMessage(const QVariant &attachmentUrl)
+{
+    if (!attachmentUrl.isValid()) {
+        qCWarning(lcController) << "Picture attachment URL is empty";
+        return;
+    }
+
+    auto message = m_models->messages()->createPictureMessage(attachmentUrl.toUrl());
+    if (message) {
+        qCWarning(lcController) << "Message wasn't created. Picture is invalid.";
+        emit notificationCreated(tr("Picture reading error"), true);
+        return;
+    }
+
+    const qsizetype unreadCount = 0; // message can be created in current chat only
+    m_models->chats()->updateLastMessage(message, unreadCount);
+    m_userDatabase->writeMessage(message, unreadCount);
+    emit messageCreated(message);
 }
 
 void Self::setupTableConnections()
@@ -140,103 +162,26 @@ void Self::onChatUpdated(const Chat &chat)
     }
 }
 
-void Self::setMessageStatus(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status)
+void Self::onMessageUpdated(const MessageUpdate& messageUpdate)
 {
-    qCDebug(lcController) << "Set message status:" << messageId << "contact" << contactId << "status" << status;
-    if (status == Message::Status::Read) {
-        qCWarning(lcModel) << "Marking of single message as read isn't supported yet";
-    }
-    else if (status == Message::Status::Created) {
-        qCWarning(lcModel) << "Set message status to created isn't allowed";
-    }
-    else {
-        if (contactId == m_chat.contactId) {
-            m_models->messages()->setMessageStatus(messageId, status);
+    //
+    //  Update DB.
+    //
+    m_userDatabase->messagesTable()->updateMessage(messageUpdate);
+
+    //
+    //  Update UI for the current chat.
+    //
+    if (message.chatId() == m_chat.id()) {
+        const bool isUpdated = m_models->messages()->applyMessageUpdate(messageUpdate);
+        if (isUpdated) {
+            emit messageUpdated(messageUpdate);
         }
-        m_userDatabase->messagesTable()->updateStatus(messageId, status);
-        emit messageStatusChanged(messageId, contactId, status);
     }
 }
 
-void Self::setDeliveredStatus(const QString &recipientId, const QString &messageId)
+void Self::onMessageReceived(MessageHandler message)
 {
-    if (m_userId.isEmpty()) {
-        m_postponedMessages.addDeliverInfo(recipientId, messageId);
-    }
-    else {
-        setMessageStatus(messageId, recipientId, Message::Status::Delivered);
-    }
-}
-
-void Self::setAttachmentStatus(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Status &status)
-{
-    qCDebug(lcController) << "Set attachment status:" << attachmentId << "contact" << contactId << "status" << status;
-    if (contactId == m_chat.contactId) {
-        m_models->messages()->setAttachmentStatus(attachmentId, status);
-    }
-    m_userDatabase->attachmentsTable()->updateStatus(attachmentId, status);
-}
-
-void Self::setAttachmentUrl(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QUrl &url)
-{
-    qCDebug(lcController) << "Set attachment url:" << attachmentId << "contact" << contactId << "url filename" << url.fileName();
-    if (contactId == m_chat.contactId) {
-        m_models->messages()->setAttachmentUrl(attachmentId, url);
-    }
-    m_userDatabase->attachmentsTable()->updateUrl(attachmentId, url);
-}
-
-void Self::setAttachmentExtras(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Type &type, const QVariant &extras)
-{
-    qCDebug(lcController) << "Set attachment extras:" << attachmentId << "contact" << contactId;
-    if (contactId == m_chat.contactId) {
-        m_models->messages()->setAttachmentExtras(attachmentId, extras);
-    }
-    m_userDatabase->attachmentsTable()->updateExtras(attachmentId, type, extras);
-}
-
-void Self::setAttachmentProcessedSize(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &processedSize)
-{
-    //qCDebug(lcController) << "Set attachment processed size:" << attachmentId << "contact" << contactId << "processed size" << processedSize;
-    if (contactId == m_chat.contactId) {
-        m_models->messages()->setAttachmentProcessedSize(attachmentId, processedSize);
-    }
-}
-
-void Self::setAttachmentEncryptedSize(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &encryptedSize)
-{
-    qCDebug(lcController) << "Set attachment encrypted size:" << attachmentId << "contact" << contactId << "encrypted size" << encryptedSize;
-    if (contactId == m_chat.contactId) {
-        m_models->messages()->setAttachmentEncryptedSize(attachmentId, encryptedSize);
-    }
-    m_userDatabase->attachmentsTable()->updateEncryptedSize(attachmentId, encryptedSize);
-}
-
-void Self::setAttachmentLocalPath(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &localPath)
-{
-    qCDebug(lcController) << "Set attachment local path:" << attachmentId << "contact" << contactId << "path" << localPath;
-    if (contactId == m_chat.contactId) {
-        m_models->messages()->setAttachmentLocalPath(attachmentId, localPath);
-    }
-    m_userDatabase->attachmentsTable()->updateLocalPath(attachmentId, localPath);
-}
-
-void Self::setAttachmentFingerprint(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &fingerpint)
-{
-    qCDebug(lcController) << "Set attachment fingerprint:" << attachmentId << "contact" << contactId << "fingerprint" << fingerpint;
-    if (contactId == m_chat.contactId) {
-        m_models->messages()->setAttachmentFingerprint(attachmentId, fingerpint);
-    }
-    m_userDatabase->attachmentsTable()->updateFingerprint(attachmentId, fingerpint);
-}
-
-void Self::onMessageReceived(GlobalMessage message)
-{
-    if (m_userId.isEmpty()) {
-        m_postponedMessages.addMessage(message);
-        return;
-    }
-
     const auto senderId = message.senderId;
     const auto recipientId = message.recipientId;
     const auto timestamp = message.timestamp;
@@ -295,30 +240,6 @@ void Self::onMessageReceived(GlobalMessage message)
     emit messageCreated({ message, m_userId, chat.contactId, senderId, recipientId });
 }
 
-void Self::PostponedMessage::addMessage(GlobalMessage message)
-{
-    qCDebug(lcController) << "Postpone message from: " << message.senderId;
-    receivedMessages.emplace_back(std::move(message));
-}
+void Self::onMessageUpdated(const MessageUpadte &messageUpdate) {
 
-void Self::PostponedMessage::addDeliverInfo(QString recipientId, QString messageId)
-{
-    qCDebug(lcController) << "Postpone deliver info processing from: " << recipientId;
-    PostponedMessage::DeliverInfo deliverInfo{ std::move(recipientId), std::move(messageId) };
-    deliverInfos.emplace_back(std::move(deliverInfo));
-}
-
-void Self::PostponedMessage::process(MessagesController *controller)
-{
-    for (auto &message : receivedMessages) {
-        qCDebug(lcController) << "Processing of message from: " << message.senderId;
-        controller->onMessageReceived(std::move(message));
-    }
-    receivedMessages.clear();
-
-    for (auto &deliverInfo : deliverInfos) {
-        qCDebug(lcController) << "Processing of comm kit delivered status from: " << deliverInfo.recipientId;
-        controller->setDeliveredStatus(deliverInfo.recipientId, deliverInfo.messageId);
-    }
-    deliverInfos.clear();
 }

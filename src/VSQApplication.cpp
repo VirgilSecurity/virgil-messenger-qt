@@ -36,7 +36,6 @@
 #include <QtQml>
 
 #include "CustomerEnv.h"
-#include "Messages.h"
 #include "Utils.h"
 #include "VSQApplication.h"
 #include "VSQClipboardProxy.h"

@@ -39,7 +39,7 @@
 
 using namespace vm;
 
-MessageOperation::MessageOperation(const GlobalMessage &message, MessageOperationFactory *factory, NetworkOperation *parent)
+MessageOperation::MessageOperation(const Message &message, MessageOperationFactory *factory, NetworkOperation *parent)
     : NetworkOperation(parent)
     , m_factory(factory)
     , m_message(message)
@@ -47,7 +47,7 @@ MessageOperation::MessageOperation(const GlobalMessage &message, MessageOperatio
     setName(message.id);
 }
 
-const GlobalMessage *MessageOperation::message() const
+const Message *MessageOperation::message() const
 {
     return &m_message;
 }
@@ -167,7 +167,7 @@ void MessageOperation::setAttachmentThumbnailUrl(const QUrl &thumbnailUrl)
     setAttachmentExtras(QVariant::fromValue(extras));
 }
 
-void MessageOperation::setAttachmentProcessedSize(const DataSize &size)
+void MessageOperation::setAttachmentProcessedSize(const quint64 &size)
 {
     auto a = writableAttachment();
     if (a->processedSize == size) {
@@ -177,7 +177,7 @@ void MessageOperation::setAttachmentProcessedSize(const DataSize &size)
     emit attachmentProcessedSizeChanged(size);
 }
 
-void MessageOperation::setAttachmentEncryptedSize(const DataSize &size)
+void MessageOperation::setAttachmentEncryptedSize(const quint64 &size)
 {
     auto a = writableAttachment();
     if (a->encryptedSize == size) {
@@ -187,7 +187,7 @@ void MessageOperation::setAttachmentEncryptedSize(const DataSize &size)
     emit attachmentEncryptedSizeChanged(size);
 }
 
-void MessageOperation::setAttachmentEncryptedThumbnailSize(const DataSize &bytes)
+void MessageOperation::setAttachmentEncryptedThumbnailSize(const quint64 &bytes)
 {
     auto extras = writableAttachment()->extras.value<PictureExtras>();
     extras.encryptedThumbnailSize = bytes;

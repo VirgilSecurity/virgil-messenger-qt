@@ -35,7 +35,6 @@
 #ifndef VS_MESSAGESQUEUE_H
 #define VS_MESSAGESQUEUE_H
 
-#include "Messages.h"
 #include "Messenger.h"
 #include "UserDatabase.h"
 #include "operations/NetworkOperation.h"
@@ -59,25 +58,20 @@ public:
 
 signals:
     void setUserId(const UserId &userId);
-    void pushMessage(const GlobalMessage &message);
-    void pushMessageDownload(const GlobalMessage &message, const QString &filePath);
-    void pushMessagePreload(const GlobalMessage &message);
+    void pushMessage(const MessageHandler &message);
+    void pushMessageDecrypt(const MessageHandler &message);
+    void pushMessageDownloadAttachment(const MessageHandler &message, const QString &filePath);
+    void pushMessageDecryptAttachment(const MessageHandler &message, const QString &filePath);
+    void pushMessageDownloadTumbnail(const MessageHandler &message);
+    void pushMessageDecryptTumbnail(const MessageHandler &message);
 
     // Message operation
-    void messageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status status);
-    void attachmentStatusChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Status &status);
-    void attachmentProgressChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &bytesLoaded, const DataSize &bytesTotal);
-    void attachmentUrlChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QUrl &url);
-    void attachmentLocalPathChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &localPath);
-    void attachmentFingerprintChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &fingerprint);
-    void attachmentExtrasChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Type &type, const QVariant &extras);
-    void attachmentProcessedSizeChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &processedSize);
-    void attachmentEncryptedSizeChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &encryptedSize);
+    void messageChanged(const MessageId &messageId, const MessageUpdate& messagesUpdate);
 
     void notificationCreated(const QString &notification, const bool error);
 
 private:
-    enum QueueState : Flag
+    enum QueueState
     {
         Created = 0,
         UserSet = 1 << 0,
@@ -92,15 +86,15 @@ private:
     void unsetQueueState(const QueueState &state);
 
     void connectMessageOperation(MessageOperation *op);
-    MessageOperation *pushMessageOperation(const GlobalMessage &message, bool prepend = false);
+    MessageOperation *pushMessageOperation(const Message &message, bool prepend = false);
 
     void onSetUserId(const UserId &userId);
-    void onPushMessage(const GlobalMessage &message);
-    void onPushMessageDownload(const GlobalMessage &message, const QString &filePath);
-    void onPushMessagePreload(const GlobalMessage &message);
+    void onPushMessage(const Message &message);
+    void onPushMessageDownload(const Message &message, const QString &filePath);
+    void onPushMessagePreload(const Message &message);
 
     void onFileLoaderServiceFound(bool serviceFound);
-    void onNotSentMessagesFetched(const GlobalMessages &messages);
+    void onNotSentMessagesFetched(const Messages &messages);
     void onFinished();
 
     // Message operation
@@ -117,7 +111,7 @@ private:
     QPointer<UserDatabase> m_userDatabase;
     QPointer<MessageOperationFactory> m_factory;
     UserId m_userId;
-    Flag m_queueState = QueueState::Created;
+    int m_queueState = QueueState::Created;
 };
 }
 

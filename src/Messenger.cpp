@@ -76,25 +76,25 @@ Self::Messenger(Settings *settings, Validator *validator)
     : MessageSender()
     , m_settings(settings)
     , m_validator(validator)
-    , m_commKitMessenger(new CommKitMessenger(settings, this))
-    , m_crashReporter(new CrashReporter(settings, m_commKitMessenger, this))
-    , m_fileLoader(new FileLoader(m_commKitMessenger, this))
+    , m_coreMessenger(new CoreMessenger(settings, this))
+    , m_crashReporter(new CrashReporter(settings, m_coreMessenger, this))
+    , m_fileLoader(new FileLoader(m_coreMessenger, this))
 {
     //
     //  Proxy messenger signals.
     //
-    connect(m_commKitMessenger, &CommKitMessenger::lastActivityTextChanged, this, &Self::lastActivityTextChanged);
-    connect(m_commKitMessenger, &CommKitMessenger::messageDelivered, this, &Self::messageDelivered);
+    connect(m_coreMessenger, &CoreMessenger::lastActivityTextChanged, this, &Self::lastActivityTextChanged);
+    connect(m_coreMessenger, &CoreMessenger::messageUpadted, this, &Self::messageUpdated);
 
     //
     //  Handle connection states.
     //
-    connect(m_commKitMessenger, &CommKitMessenger::connectionStateChanged, this, &Self::onConnectionStateChanged);
+    connect(m_coreMessenger, &CoreMessenger::connectionStateChanged, this, &Self::onConnectionStateChanged);
 
     //
     //  Handle received messages.
     //
-    connect(m_commKitMessenger, &CommKitMessenger::messageReceived, this, &Self::onMessageReceived);
+    connect(m_coreMessenger, &CoreMessenger::messageReceived, this, &Self::onMessageReceived);
 
     //
     // Push notifications
@@ -107,14 +107,13 @@ Self::Messenger(Settings *settings, Validator *validator)
 
 
 void
-Self::signIn(const QString &username)
+Self::signIn(const UserId &userId)
 {
-    FutureWorker::run(m_commKitMessenger->signIn(username), [this, username = username](const FutureResult &result) {
+    FutureWorker::run(m_coreMessenger->signIn(userId), [this, userId = userId](const FutureResult &result) {
         switch (result) {
         case FutureResult::Success:
-            m_settings->addUserToList(username);
-            m_settings->setLastSignedInUserId(username);
-            emit signedIn(username);
+            m_settings->setLastSignedInUserId(userId);
+            emit signedIn(userId);
             break;
 
         case FutureResult::Error_NoCred:
@@ -139,7 +138,7 @@ Self::signIn(const QString &username)
 void
 Self::signOut()
 {
-    FutureWorker::run(m_commKitMessenger->signOut(), [this](const FutureResult &) {
+    FutureWorker::run(m_coreMessenger->signOut(), [this](const FutureResult &) {
         m_settings->setLastSignedInUserId(QString());
         emit signedOut();
     });
@@ -149,7 +148,7 @@ Self::signOut()
 void
 Self::signUp(const QString &username)
 {
-    FutureWorker::run(m_commKitMessenger->signUp(username), [this, username = username](const FutureResult &result) {
+    FutureWorker::run(m_coreMessenger->signUp(username), [this, username = username](const FutureResult &result) {
         switch (result) {
 
         case FutureResult::Success:
@@ -180,9 +179,9 @@ Self::backupKey(const QString &password, const QString &confirmedPassword)
         emit backupKeyFailed(tr("Passwords do not match"));
 
     } else {
-        FutureWorker::run(m_commKitMessenger->backupKey(password), [this](const FutureResult &result) {
+        FutureWorker::run(m_coreMessenger->backupKey(password), [this](const FutureResult &result) {
             if (result == FutureResult::Success) {
-                auto username = m_commKitMessenger->currentUser()->username();
+                auto username = m_coreMessenger->currentUser()->username();
                 emit keyBackuped(username);
             }
             else {
@@ -200,7 +199,7 @@ Self::downloadKey(const QString &username, const QString &password)
         emit downloadKeyFailed(tr("Password cannot be empty"));
 
     } else {
-        FutureWorker::run(m_commKitMessenger->signInWithBackupKey(username, password), [this, username = username](const FutureResult &result) {
+        FutureWorker::run(m_coreMessenger->signInWithBackupKey(username, password), [this, username = username](const FutureResult &result) {
             if (result == FutureResult::Success) {
                 m_settings->addUserToList(username);
                 m_settings->setLastSignedInUserId(username);
@@ -214,52 +213,38 @@ Self::downloadKey(const QString &username, const QString &password)
 }
 
 
-QSharedPointer<CommKitUser>
-Self::findUserByUsername(const QString &username) {
-    return m_commKitMessenger->findUserByUsername(username);
+UserHandler
+Self::findUserByUsername(const QString &username) const {
+    return m_coreMessenger->findUserByUsername(username);
 }
 
 
-QSharedPointer<CommKitUser>
-Self::findUserById(const QString &id) {
-    return m_commKitMessenger->findUserById(id);
+UserHandler
+Self::findUserById(const UserId &id) const {
+    return m_coreMessenger->findUserById(id);
 }
 
 
-QString
+UserHandler
 Self::currentUser() const {
-    return m_commKitMessenger->currentUser()->username();
+    return m_coreMessenger->currentUser();
 }
-
-
-QString
-Self::currentRecipient() const {
-    return m_currentRecipient;
-}
-
 
 bool
-Self::isOnline() const noexcept {
-    return m_commKitMessenger->isOnline();
-}
+Self::sendMessage(MessageHandler message) {
 
-
-bool
-Self::sendMessage(const GlobalMessage& message) {
-
-    auto commKitMesseage = MessageUtils::messageToCommKitMessage(message);
-    auto future = m_commKitMessenger->sendMessage(std::move(commKitMesseage));
+    auto future = m_coreMessenger->sendMessage(message);
 
     return future.result() == FutureResult::Success;
 }
 
 
 bool
-Self::subscribeToContact(const QString &username)
+Self::subscribeToUser(const UserId &userId)
 {
-    auto user = m_commKitMessenger->findUserByUsername(username);
+    auto user = m_coreMessenger->findUserById(userId);
     if (user) {
-        return m_commKitMessenger->subscribeToUser(*user);
+        return m_coreMessenger->subscribeToUser(*user);
     }
 
     qCCritical(lcMessenger) << "Cannot subscribe to the user. User not found, but should be at this point";
@@ -283,9 +268,9 @@ void
 Self::setApplicationActive(bool active)
 {
     if (active) {
-        m_commKitMessenger->activate();
+        m_coreMessenger->activate();
     } else {
-        m_commKitMessenger->deactivate();
+        m_coreMessenger->deactivate();
     }
 }
 
@@ -293,26 +278,25 @@ Self::setApplicationActive(bool active)
 void
 Self::setCurrentRecipient(const QString &recipient)
 {
-    m_commKitMessenger->setCurrentRecipient(recipient);
+    m_coreMessenger->setCurrentRecipient(recipient);
 }
 
 
 void
 Self::onPushNotificationTokenUpdate() {
-    m_commKitMessenger->registerForNotifications();
+    m_coreMessenger->registerForNotifications();
 }
 
 
 void
-Self::onConnectionStateChanged(CommKitMessenger::ConnectionState state) {
-    const bool isOnline = CommKitMessenger::ConnectionState::Connected == state;
+Self::onConnectionStateChanged(CoreMessenger::ConnectionState state) {
+    const bool isOnline = CoreMessenger::ConnectionState::Connected == state;
 
     emit onlineStatusChanged(isOnline);
 }
 
 
 void
-Self::onMessageReceived(const CommKitMessage& commKitMesseage) {
-    auto message = MessageUtils::messageFromCommKitMessage(commKitMesseage);
+Self::onMessageReceived(const Message& message) {
     emit messageReceived(message);
 }

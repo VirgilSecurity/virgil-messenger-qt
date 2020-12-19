@@ -40,9 +40,7 @@
 #include <QSettings>
 #include <QSize>
 
-#include "Messages.h"
-
-Q_DECLARE_LOGGING_CATEGORY(lcSettings)
+#include "AttachmentId.h"
 
 class Settings : public QSettings
 {
@@ -79,12 +77,12 @@ public:
     // Attachments
 
     QDir databaseDir() const;
-    DataSize attachmentMaxFileSize() const;
+    quint64 attachmentMaxFileSize() const;
     QDir attachmentCacheDir() const;
     QDir thumbnailsDir() const;
     QDir downloadsDir() const;
 
-    QString makeThumbnailPath(const vm::Attachment::Id &attachmentId, bool isPreview) const;
+    QString makeThumbnailPath(const vm::AttachmentId &attachmentId, bool isPreview) const;
     QSize thumbnailMaxSize() const;
     QSize previewMaxSize() const;
 
@@ -98,7 +96,7 @@ public:
     void setWindowGeometry(const QRect &geometry);
 
     // Short interval for elapsed seconds that means now
-    Seconds nowInterval() const;
+    std::chrono::seconds nowInterval() const;
 
 signals:
     void lastSignedInUserIdChanged(const QString &);

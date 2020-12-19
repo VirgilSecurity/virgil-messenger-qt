@@ -35,12 +35,12 @@
 #ifndef VM_MESSAGESCONTROLLER_H
 #define VM_MESSAGESCONTROLLER_H
 
-#include <QObject>
-
-#include "Messages.h"
 #include "Messenger.h"
 #include "Models.h"
 #include "UserDatabase.h"
+
+#include <QObject>
+
 
 namespace vm
 {
@@ -52,64 +52,37 @@ class MessagesController : public QObject
 public:
     MessagesController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
-    void setUserId(const UserId &userId);
-    void loadMessages(const Chat &chat);
-    Q_INVOKABLE void createSendMessage(const QString &body, const QVariant &attachmentUrl, const Enums::AttachmentType attachmentType);
+    void loadMessages(const ChatHandler &chat);
+    void clearMessages();
+    Q_INVOKABLE void sendTextMessage(const QString &body);
+    Q_INVOKABLE void sendFileMessage(const QVariant &attachmentUrl);
+    Q_INVOKABLE void sendPictureMessage(const QVariant &attachmentUrl);
 
 signals:
     void errorOccurred(const QString &errorText);
     void notificationCreated(const QString &notification, const bool error);
 
-    void messageCreated(const GlobalMessage &message);
-    void messageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);
+    void messageCreated(const MessageHandler &message);
+    void messageUpdated(const MessageUpdate &messageUpdate);
 
-    void displayImageNotFound(const QString &messageId);
+    void displayImageNotFound(const MessageId &messageId);
 
 private:
     void setupTableConnections();
 
-
-    void setMessageStatus(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);
-    void setAttachmentStatus(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Status &status);
-    void setAttachmentUrl(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QUrl &url);
-    void setAttachmentLocalPath(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &localPath);
-    void setAttachmentFingerprint(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &fingerpint);
-    void setAttachmentExtras(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Type &type, const QVariant &extras);
-    void setAttachmentProcessedSize(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &processedSize);
-    void setAttachmentEncryptedSize(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &encryptedSize);
+    void updateMessage(const MessageId &messageId, const MessageUpdate &messageUpdate);
 
 private slots:
     void onChatUpdated(const Chat &chat);
-    void onMessageReceived(GlobalMessage message);
-    void setDeliveredStatus(const QString &recipientId, const QString &messageId);
+    void onMessageReceived(const MessageHandler &message);
+    void onMessageUpdated(const MessageId &messageId, const MessageUpdate& messageUpdate);
 
 private:
     QPointer<Messenger> m_messenger;
     QPointer<Models> m_models;
     QPointer<UserDatabase> m_userDatabase;
 
-    UserId m_userId;
-    Chat m_chat;
-
-    // NOTE(fpohtmeh): this workaround is needed when messages are received before chat list loading
-    // it will be remove right after offline mode
-    struct PostponedMessage
-    {
-        struct DeliverInfo
-        {
-            const QString recipientId;
-            const QString messageId;
-        };
-
-        std::vector<GlobalMessage> receivedMessages;
-        std::vector<DeliverInfo> deliverInfos;
-
-        void addMessage(GlobalMessage message);
-        void addDeliverInfo(QString recipientId, QString messageId);
-        void process(MessagesController *controller);
-    };
-
-    PostponedMessage m_postponedMessages;
+    ChatHandler m_chat;
 };
 } // namespace vm
 

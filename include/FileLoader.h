@@ -35,7 +35,7 @@
 #ifndef VS_FILELOADER_H
 #define VS_FILELOADER_H
 
-#include "CommKitMessenger.h"
+#include "CoreMessenger.h"
 
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -55,7 +55,7 @@ class FileLoader : public QObject
 public:
     using ConnectionSetup = std::function<void (QNetworkReply *)>;
 
-    FileLoader(CommKitMessenger *client, QObject *parent);
+    FileLoader(CoreMessenger *client, QObject *parent);
 
     bool isServiceFound() const;
 
@@ -77,7 +77,7 @@ private:
     void onStartUpload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup);
     void onRequestUploadSlot(const QString &filePath);
 
-    QPointer<CommKitMessenger> m_commKitMessenger;
+    QPointer<CoreMessenger> m_coreMessenger;
     QPointer<QNetworkAccessManager> m_networkAccessManager;
 };
 }

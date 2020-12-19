@@ -49,16 +49,16 @@ using Self = FileLoader;
 
 
 // TODO(fpohtmeh): re-design class slightly, methods are used from another thread
-Self::FileLoader(CommKitMessenger *commKitMessenger, QObject *parent)
+Self::FileLoader(CoreMessenger *commKitMessenger, QObject *parent)
     : QObject(parent)
-    , m_commKitMessenger(commKitMessenger)
+    , m_coreMessenger(commKitMessenger)
     , m_networkAccessManager(new QNetworkAccessManager(this)) {
 
     qRegisterMetaType<Self::ConnectionSetup>("ConnectionSetup");
 
-    connect(m_commKitMessenger, &CommKitMessenger::uploadServiceFound, this, &Self::uploadServiceFound);
-    connect(m_commKitMessenger, &CommKitMessenger::uploadSlotReceived, this, &Self::uploadSlotReceived);
-    connect(m_commKitMessenger, &CommKitMessenger::uploadSlotErrorOccurred, this, &Self::uploadSlotErrorOccurred);
+    connect(m_coreMessenger, &CoreMessenger::uploadServiceFound, this, &Self::uploadServiceFound);
+    connect(m_coreMessenger, &CoreMessenger::uploadSlotReceived, this, &Self::uploadSlotReceived);
+    connect(m_coreMessenger, &CoreMessenger::uploadSlotErrorOccurred, this, &Self::uploadSlotErrorOccurred);
 
     connect(this, &Self::fireStartDownload, this, &Self::onStartDownload);
     connect(this, &Self::fireStartUpload, this, &Self::onStartUpload);
@@ -67,13 +67,13 @@ Self::FileLoader(CommKitMessenger *commKitMessenger, QObject *parent)
 
 
 bool Self::isServiceFound() const {
-    return m_commKitMessenger->isUploadServiceFound();
+    return m_coreMessenger->isUploadServiceFound();
 }
 
 
 void
 Self::onRequestUploadSlot(const QString &filePath){
-    auto requestId = m_commKitMessenger->requestUploadSlot(filePath);
+    auto requestId = m_coreMessenger->requestUploadSlot(filePath);
 
     if (requestId.isEmpty()) {
         emit requestUploadSlotFailed(filePath);

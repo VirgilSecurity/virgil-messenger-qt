@@ -13,7 +13,7 @@ Page {
     id: chatPage
 
     readonly property var appState: app.stateManager.chatState
-    readonly property var contactId: controllers.chats.currentContactId
+    readonly property var chatName: controllers.chats.currentChatName
 
     QtObject {
         id: d
@@ -65,7 +65,7 @@ Page {
                 Layout.fillWidth: true
                 Layout.leftMargin: Theme.smallMargin
                 Label {
-                    text: contactId
+                    text: chatName
                     font.pointSize: UiHelper.fixFontSz(15)
                     color: Theme.primaryTextColor
                     font.bold: true

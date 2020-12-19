@@ -118,7 +118,7 @@ void Self::connectMessageOperation(MessageOperation *op)
     connect(op, &MessageOperation::notificationCreated, this, &Self::notificationCreated);
 }
 
-MessageOperation *Self::pushMessageOperation(const GlobalMessage &message, bool prepend)
+MessageOperation *Self::pushMessageOperation(const Message &message, bool prepend)
 {
     if (message.status == Message::Status::InvalidM) {
         return nullptr;
@@ -143,7 +143,7 @@ void Self::onFileLoaderServiceFound(bool serviceFound)
     serviceFound ? setQueueState(QueueState::FileLoaderReady) : unsetQueueState(QueueState::FileLoaderReady);
 }
 
-void Self::onNotSentMessagesFetched(const GlobalMessages &messages)
+void Self::onNotSentMessagesFetched(const Messages &messages)
 {
     qCDebug(lcOperation) << "Queued" << messages.size() << "unsent messages";
     for (auto &m : messages) {
@@ -159,7 +159,7 @@ void Self::onFinished()
     qCDebug(lcModel) << "MessageQueue is finished";
 }
 
-void Self::onPushMessage(const GlobalMessage &message)
+void Self::onPushMessage(const Message &message)
 {
     if (auto op = pushMessageOperation(message)) {
         m_factory->populateAll(op);
@@ -167,7 +167,7 @@ void Self::onPushMessage(const GlobalMessage &message)
     }
 }
 
-void Self::onPushMessageDownload(const GlobalMessage &message, const QString &filePath)
+void Self::onPushMessageDownload(const Message &message, const QString &filePath)
 {
     if (auto op = pushMessageOperation(message, true)) {
         m_factory->populateDownload(op, filePath);
@@ -176,7 +176,7 @@ void Self::onPushMessageDownload(const GlobalMessage &message, const QString &fi
     }
 }
 
-void Self::onPushMessagePreload(const GlobalMessage &message)
+void Self::onPushMessagePreload(const Message &message)
 {
     if (auto op = pushMessageOperation(message, true)) {
         m_factory->populatePreload(op);

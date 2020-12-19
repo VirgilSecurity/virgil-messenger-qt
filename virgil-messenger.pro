@@ -34,7 +34,7 @@
 
 QT += core network qml quick sql xml concurrent
 
-CONFIG += c++14 console
+CONFIG += c++17
 
 #
 #   Set version
@@ -113,16 +113,39 @@ HEADERS += \
         include/KeyboardEventFilter.h \
         include/Validator.h \
         include/CustomerEnv.h \
-        # Messages
-        include/messages/Messages.h \
-        include/messages/MessageSender.h \
-        # CommKit Wrappers
-        include/comm-kit/CommKitBridge.h \
-        include/comm-kit/CommKitUser.h \
-        include/comm-kit/CommKitUserImpl.h \
-        include/comm-kit/CommKitMessage.h \
-        include/comm-kit/CommKitMessenger.h \
+        # Messenger Core
+        include/messenger/AttachmentId.h \
+        include/messenger/Chat.h \
+        include/messenger/ChatId.h \
+        include/messenger/ChatType.h \
+        include/messenger/CommKitBridge.h \
+        include/messenger/CoreMessenger.h \
+        include/messenger/IncomingMessage.h \
+        include/messenger/IncomingMessageStage.h \
+        include/messenger/Message.h \
+        include/messenger/MessageContent.h \
+        include/messenger/MessageContentAttachment.h \
+        include/messenger/MessageContentDownloadStage.h \
+        include/messenger/MessageContentEncrypted.h \
+        include/messenger/MessageContentFile.h \
+        include/messenger/MessageContentPicture.h \
+        include/messenger/MessageContentText.h \
+        include/messenger/MessageContentType.h \
+        include/messenger/MessageContentUploadStage.h \
+        include/messenger/MessageGroupChatInfo.h \
+        include/messenger/MessageId.h \
+        include/messenger/MessageSender.h \
+        include/messenger/MessageStatus.h \
+        include/messenger/MessageStatus.h \
+        include/messenger/MessageUpdate.h \
+        include/messenger/MessageUpdateable.h \
+        include/messenger/OutgoingMessage.h \
+        include/messenger/OutgoingMessageStage.h \
+        include/messenger/User.h \
+        include/messenger/UserId.h \
+        include/messenger/UserImpl.h \
         # Controllers
+        include/controllers/Controller.h \
         include/controllers/AttachmentsController.h \
         include/controllers/ChatsController.h \
         include/controllers/Controllers.h \
@@ -172,13 +195,13 @@ HEADERS += \
         include/logging/VSQMessageLogContext.h \
         # Models
         include/models/AccountSelectionModel.h \
-        include/models/AttachmentsModel.h \
         include/models/ChatsModel.h \
         include/models/FileCloudModel.h \
         include/models/ListModel.h \
         include/models/MessagesModel.h \
         include/models/MessagesQueue.h \
         include/models/Models.h \
+        include/models/Model.h \
         # Operations
         include/operations/CalculateAttachmentFingerprintOperation.h \
         include/operations/CalculateFileFingerprintOperation.h \
@@ -200,9 +223,7 @@ HEADERS += \
         include/operations/UploadAttachmentOperation.h \
         include/operations/UploadFileOperation.h \
         # Generated
-        generated/include/VSQCustomer.h \
-        # Thirdparty
-        include/thirdparty/optional/optional.hpp
+        generated/include/VSQCustomer.h
 
 #
 #   Sources
@@ -229,11 +250,12 @@ SOURCES += \
         src/CustomerEnv.cpp \
         # Messages
         src/messages/Messages.cpp \
-        # CommKit Wrappers
-        src/comm-kit/CommKitBridge.cpp \
-        src/comm-kit/CommKitUser.cpp \
-        src/comm-kit/CommKitMessenger.cpp \
+        # Messenger Core
+        src/messenger/CommKitBridge.cpp \
+        src/messenger/User.cpp \
+        src/messenger/CoreMessenger.cpp \
         # Controllers
+        src/controllers/Controller.cpp \
         src/controllers/AttachmentsController.cpp \
         src/controllers/ChatsController.cpp \
         src/controllers/Controllers.cpp \
@@ -277,13 +299,13 @@ SOURCES += \
         src/logging/VSQLogWorker.cpp \
         # Models
         src/models/AccountSelectionModel.cpp \
-        src/models/AttachmentsModel.cpp \
         src/models/ChatsModel.cpp \
         src/models/FileCloudModel.cpp \
         src/models/ListModel.cpp \
         src/models/MessagesModel.cpp \
         src/models/MessagesQueue.cpp \
         src/models/Models.cpp \
+        src/models/Model.cpp \
         # Operations
         src/operations/CalculateAttachmentFingerprintOperation.cpp \
         src/operations/CalculateFileFingerprintOperation.cpp \
@@ -321,7 +343,6 @@ RESOURCES += \
 INCLUDEPATH += \
     include \
     include/notifications \
-    include/messages \
     include/helpers \
     include/database \
     include/models \
@@ -330,7 +351,7 @@ INCLUDEPATH += \
     include/controllers \
     include/states \
     include/operations \
-    include/comm-kit \
+    include/messenger \
     $${QXMPP_BUILD_PATH}/include \
     $${QXMPP_BUILD_PATH}/include/qxmpp \
     generated/include

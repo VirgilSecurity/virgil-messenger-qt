@@ -34,23 +34,19 @@
 
 #include "VSQLastActivityIq.h"
 
+#include <QLoggingCategory>
 #include <QDomElement>
 
 const char* ns_last = "jabber:iq:last";
 
-Q_LOGGING_CATEGORY(lcLastActivity, "lastActivity")
-
-VSQLastActivityIq::VSQLastActivityIq(bool debug)
-    : QXmppIq()
-    , m_debug(debug)
-{}
+Q_LOGGING_CATEGORY(lcLastActivity, "lastActivity");
 
 bool VSQLastActivityIq::isValid() const
 {
     return m_valid;
 }
 
-Seconds VSQLastActivityIq::seconds() const
+std::chrono::seconds VSQLastActivityIq::seconds() const
 {
     return m_seconds;
 }
@@ -78,20 +74,19 @@ void VSQLastActivityIq::parseElementFromChild(const QDomElement &element)
     if (type() == QXmppIq::Type::Result) {
         QDomElement queryElement = element.firstChildElement("query");
         const auto secondsStr = queryElement.attribute("seconds");
-        m_seconds = secondsStr.toUInt(&m_valid);
+        m_seconds = std::chrono::seconds(secondsStr.toUInt(&m_valid));
         if (!m_valid) {
             qCWarning(lcLastActivity) << "Convertation error:" << secondsStr;
-        }
-        else if (m_debug) {
+        } else {
             qCDebug(lcLastActivity) << "Time sincle last activity (sec):" << secondsStr;
         }
     }
-    else if (m_debug) {
+    else {
         if (type() == QXmppIq::Type::Error) {
-            qCDebug(lcLastActivity) << "Error:" << error().code() << error().text();
+            qCWarning(lcLastActivity) << "Error: " << error().code() << error().text();
         }
         else {
-            qCDebug(lcLastActivity) << "Invalid result type" << type();
+            qCWarning(lcLastActivity) << "Invalid result type: " << type();
         }
     }
 }

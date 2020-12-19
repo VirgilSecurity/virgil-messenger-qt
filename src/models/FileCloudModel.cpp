@@ -109,7 +109,7 @@ QVariant FileCloudModel::data(const QModelIndex &index, int role) const
         return Utils::formattedElapsedSeconds(diff, m_settings->nowInterval());
     }
     case DisplayFileSize:
-        return Utils::formattedDataSize(info.size());
+        return Utils::formattedSize(info.size());
     case SortRole:
         return QString("%1%2").arg(static_cast<int>(!info.isDir())).arg(info.fileName());
     default:

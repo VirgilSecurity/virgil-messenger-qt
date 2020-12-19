@@ -37,18 +37,19 @@
 #include "controllers/ChatsController.h"
 
 using namespace vm;
+using Self = NewChatState;
 
-NewChatState::NewChatState(ChatsController *chatsController, QState *parent)
+Self::NewChatState(ChatsController *chatsController, QState *parent)
     : OperationState(parent)
     , m_chatsController(chatsController)
 {
-    connect(chatsController, &ChatsController::chatOpened, this, &NewChatState::operationFinished);
-    connect(chatsController, &ChatsController::errorOccurred, this, &NewChatState::operationErrorOccurred);
-    connect(this, &NewChatState::addNewChat, this, &NewChatState::processAddNewChat);
+    connect(chatsController, &ChatsController::chatOpened, this, &Self::operationFinished);
+    connect(chatsController, &ChatsController::errorOccurred, this, &Self::operationErrorOccurred);
+    connect(this, &Self::addNewChatWithUsername, this, &Self::onAddNewChatWithUsername);
 }
 
-void NewChatState::processAddNewChat(const Contact::Id &contactId)
+void Self::onAddNewChatWithUsername(const QString &username)
 {
     emit operationStarted();
-    m_chatsController->createChat(contactId);
+    m_chatsController->createChatWithUsername(username);
 }

@@ -55,7 +55,7 @@ void SplashScreenState::trySignIn()
         emit userNotSelected();
     }
     else {
-        signIn(userId);
+        signIn(UserId(userId));
     }
 }
 

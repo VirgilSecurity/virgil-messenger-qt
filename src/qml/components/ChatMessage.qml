@@ -26,12 +26,13 @@ Control {
     property bool firstInRow: true
 
     property string attachmentId: ""
-    property var attachmentType: undefined
-    property var attachmentStatus: undefined
+    property var attachmentTypeIsFile: false
+    property var attachmentTypeIsPicture: false
+    property var attachmentIsLoading: false
     property int attachmentBytesTotal: 0
     property string attachmentDisplaySize: ""
     property string attachmentDisplayText: ""
-    property string attachmentImagePath: ""
+    property string attachmentIconPath: ""
     property int attachmentThumbnailWidth: 0
     property int attachmentThumbnailHeight: 0
     property int attachmentBytesLoaded: 0
@@ -44,7 +45,7 @@ Control {
         id: d
         readonly property bool hasAttachment: attachmentId.length > 0
         readonly property color background: isOwnMessage ? "#59717D" : Theme.mainBackgroundColor
-        readonly property bool isPicture: hasAttachment && attachmentType == Enums.AttachmentType.Picture
+        readonly property bool isPicture: attachmentTypeIsPicture
         readonly property double defaultRadius: 4
     }
 
@@ -98,7 +99,7 @@ Control {
                     y: 0.5 * (row.height - height)
                     width: image.width
                     height: image.height
-                    color: d.isPicture && attachmentImagePath ? "white" : "transparent"
+                    color: d.isPicture && attachmentIconPath ? "white" : "transparent"
 
                     Image {
                         id: image
@@ -112,7 +113,7 @@ Control {
                         }
                         autoTransform: true
                         visible: d.isPicture ? true : attachmentFileExists && !progressBar.visible
-                        source: chatMessage.attachmentImagePath
+                        source: chatMessage.attachmentIconPath
 
                         readonly property double pictureWidth: d.isPicture ? Math.min(3 * attachmentThumbnailWidth, maxWidth - 2 * offset) : 0
                     }
@@ -136,7 +137,7 @@ Control {
                         id: progressBar
                         anchors.centerIn: parent
                         size: 40
-                        visible: chatMessage.attachmentStatus == Enums.AttachmentStatus.Loading
+                        visible: chatMessage.attachmentIsLoading
                         maxValue: Math.max(1, chatMessage.attachmentBytesTotal)
                         value: Math.min(0.99 * maxValue, Math.max(0.01 * maxValue, chatMessage.attachmentBytesLoaded))
                         animated: visible
@@ -285,10 +286,11 @@ Control {
                         return "broken"
                     }
                     switch (status) {
-                        case "0": return "sending"
-                        case "1": return "sent"
-                        case "2": return "delivered"
-                        case "4": return "sending"
+                        case "New": return "sending"
+                        case "Waiting": return "sending"
+                        case "Processing": return "sending"
+                        case "Succeed": return "sent"
+                        case "Failed": return "failed"
                         default: return ""
                     }
                 }
@@ -300,6 +302,6 @@ Control {
 
     Component.onCompleted: {
 //        console.log("->", messageId, body, displayTime, nickname, status, isBroken)
-//        console.log(attachmentId, attachmentType, attachmentStatus, attachmentImagePath, attachmentFileExists)
+//        console.log(attachmentId, attachmentType, attachmentIsLoading, attachmentIconPath, attachmentFileExists)
     }
 }

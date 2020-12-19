@@ -41,6 +41,7 @@
 #include <QTimer>
 #include <QRegularExpression>
 #include <QNetworkSession>
+#include <QLoggingCategory>
 
 #if !defined(DEBUG_NETWORK)
 #define DEBUG_NETWORK 0

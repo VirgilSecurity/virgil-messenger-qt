@@ -34,11 +34,13 @@
 
 #include "Settings.h"
 
-#include <QStandardPaths>
 
 #include "VSQCustomer.h"
 #include "Utils.h"
 #include "FileUtils.h"
+
+#include <QStandardPaths>
+#include <QLoggingCategory>
 
 static const QString kUsersGroup = "Users";
 static const QString kUsersList = "UsersList";
@@ -177,7 +179,7 @@ QDir Settings::databaseDir() const
     return m_databaseDir;
 }
 
-DataSize Settings::attachmentMaxFileSize() const
+quint64 Settings::attachmentMaxFileSize() const
 {
     return 25 * 1024 * 1024;
 }
@@ -206,7 +208,7 @@ QDir Settings::downloadsDir() const
     return m_downloadsDir;
 }
 
-QString Settings::makeThumbnailPath(const Attachment::Id &attachmentId, bool isPreview) const
+QString Settings::makeThumbnailPath(const AttachmentId &attachmentId, bool isPreview) const
 {
     return thumbnailsDir().filePath((isPreview ? QLatin1String("p-") : QLatin1String("t-")) + attachmentId + QLatin1String(".png"));
 }
@@ -255,9 +257,9 @@ void Settings::setWindowGeometry(const QRect &geometry)
     sync();
 }
 
-Seconds Settings::nowInterval() const
+std::chrono::seconds Settings::nowInterval() const
 {
-    return 5;
+    return std::chrono::seconds(5);
 }
 
 QString Settings::makeGroupKey(const QString &group, const QString &key) const

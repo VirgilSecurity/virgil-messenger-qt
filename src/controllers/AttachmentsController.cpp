@@ -40,126 +40,159 @@
 #include "models/Models.h"
 #include "models/MessagesModel.h"
 #include "models/MessagesQueue.h"
+#include "MessageContentAttachment.h"
+
+#include "Controller.h"
 
 using namespace vm;
+using Self = AttachmentsController;
 
-AttachmentsController::AttachmentsController(const Settings *settings, Models *models, QObject *parent)
+Self::AttachmentsController(const Settings *settings, Models *models, QObject *parent)
     : QObject(parent)
     , m_settings(settings)
     , m_models(models)
 {}
 
-void AttachmentsController::saveAs(const Message::Id &messageId, const QVariant &fileUrl)
+void Self::saveAs(const MessageId &messageId, const QVariant &fileUrl)
 {
-    const auto message = findValidMessage(messageId);
+    const auto message = findMessageWithAttachment(messageId);
     if (!message) {
         return;
     }
-    else if (!isAttachmentDownloaded(*message)) {
-        downloadAttachment(*message);
-    }
-    else {
-        qCDebug(lcController) << "Saving of attachment" << messageId << "as" << fileUrl;
-        const auto filePath = FileUtils::urlToLocalFile(fileUrl.toUrl());
-        QFile::copy(message->attachment->localPath, filePath);
-        emit notificationCreated(tr("Attachment was saved"), false);
+
+    const auto attachment = std::get_if<MessageContentAttachment>(&message->content());
+
+    switch (attachment->downloadStage()) {
+        case MessageContentDownloadStage::Initial:
+            downloadAttachment(message);
+            break;
+
+        case MessageContentDownloadStage::Downloaded:
+            decryptAttachment(message);
+            break;
+
+        case MessageContentDownloadStage::Decrypted:
+            saveAttachment(message, fileUrl.toUrl());
+            break;
     }
 }
 
-void AttachmentsController::download(const Message::Id &messageId)
-{
-    const auto message = findValidMessage(messageId);
-    if (!message) {
-        return;
-    }
-    else {
-        downloadAttachment(*message);
-    }
-}
-
-void AttachmentsController::open(const Message::Id &messageId)
-{
-    const auto message = findValidMessage(messageId);
-    if (!message) {
-        return;
-    }
-    else if (!isAttachmentDownloaded(*message)) {
-        downloadAttachment(*message);
-    }
-    else {
-        const auto &a = *message->attachment;
-        const auto url = FileUtils::localFileToUrl(a.localPath);
-        if (a.type == Attachment::Type::Picture) {
-            qCDebug(lcController) << "Opening of preview for" << url.fileName();
-            emit openPreviewRequested(url);
-        }
-        else {
-            qCDebug(lcController) << "Opening of file:" << url.fileName();
-            FileUtils::openUrl(url);
-        }
-    }
-}
-
-void AttachmentsController::downloadDisplayImage(const Message::Id &messageId)
-{
-    const auto message = findValidMessage(messageId);
-    if (!message) {
-        return;
-    }
-    else {
-        qCDebug(lcController) << "Downloading of display image for:" << messageId;
-        m_models->messagesQueue()->pushMessagePreload(*message);
-    }
-}
-
-void AttachmentsController::setUserId(const UserId &userId)
-{
-    m_userId = userId;
-}
-
-void AttachmentsController::setContactId(const Contact::Id &contactId)
-{
-    m_contactId = contactId;
-}
-
-bool AttachmentsController::isAttachmentDownloaded(const GlobalMessage &message)
-{
-    const auto &a = *message.attachment;
-    if (!FileUtils::fileExists(a.localPath)) {
-        return false;
-    }
-    if (a.fingerprint.isEmpty()) {
-        return false;
-    }
-    const auto fingerPrint = FileUtils::calculateFingerprint(a.localPath);
-    if (!fingerPrint) {
-        return false;
-    }
-    return true;
-}
-
-void AttachmentsController::downloadAttachment(const GlobalMessage &message)
-{
-    qCDebug(lcController) << "Downloading of attachment" << message.id;
-    const auto fileName = message.attachment->fileName;
-    const auto filePath = FileUtils::findUniqueFileName(m_settings->downloadsDir().filePath(fileName));
-    m_models->messagesQueue()->pushMessageDownload(message, filePath);
-}
-
-Optional<GlobalMessage> AttachmentsController::findValidMessage(const Message::Id &messageId) const
+void Self::download(const MessageId &messageId)
 {
     const auto message = m_models->messages()->findById(messageId);
     if (!message) {
-        qCWarning(lcController) << "Message not found:" << messageId;
-        return NullOptional;
+        return;
     }
-    if (message->status == Message::Status::InvalidM) {
-        emit notificationCreated(tr("Message is broken. It nothing we can do with it"), true);
-        return NullOptional;
+    else {
+        downloadAttachment(message);
     }
-    if (!message->attachment) {
-        qCWarning(lcController) << "Message has not attachment:" << messageId;
-        return NullOptional;
+}
+
+void Self::open(const MessageId &messageId)
+{
+    const auto message = m_models->messages()->findById(messageId);
+    if (!message) {
+        return;
     }
+
+    const auto attachment = std::get_if<MessageContentAttachment>(&message->content());
+
+    switch (attachment->downloadStage()) {
+        case MessageContentDownloadStage::Initial:
+            downloadAttachment(message);
+            break;
+
+        case MessageContentDownloadStage::Downloaded:
+            decryptAttachment(message);
+            break;
+
+        case MessageContentDownloadStage::Decrypted: {
+            const auto url = FileUtils::localFileToUrl(attachment->localPath());
+            if (std::holds_alternative<MessageContentPicture>(message->content())) {
+                qCDebug(lcController) << "Opening of preview for" << url.fileName();
+                emit openPreviewRequested(url);
+            }
+            else {
+                qCDebug(lcController) << "Opening of file:" << url.fileName();
+                FileUtils::openUrl(url);
+            }
+            break;
+        }
+    }
+}
+
+void Self::downloadDisplayImage(const MessageId &messageId)
+{
+    const auto message = m_models->messages()->findById(messageId);
+    if (!message) {
+        return;
+    }
+
+    qCDebug(lcController) << "Downloading of display image for:" << messageId;
+    m_models->messagesQueue()->pushMessageDownloadTumbnail(message);
+}
+
+void Self::downloadAttachment(const MessageHandler &message)
+{
+    qCDebug(lcController) << "Downloading attachment of message: " << message->id();
+    const auto attachment = std::get_if<MessageContentAttachment>(&message->content());
+    const auto fileName = attachment->filename();
+    const auto filePath = FileUtils::findUniqueFileName(m_settings->downloadsDir().filePath(fileName));
+    m_models->messagesQueue()->pushMessageDownloadAttachment(message, filePath);
+}
+
+void Self::decryptAttachment(const MessageHandler &message)
+{
+    qCDebug(lcController) << "Decrypting attachment of message: " << message->id();
+    const auto attachment = std::get_if<MessageContentAttachment>(&message->content());
+    const auto fileName = attachment->filename();
+    const auto filePath = FileUtils::findUniqueFileName(m_settings->downloadsDir().filePath(fileName));
+    m_models->messagesQueue()->pushMessageDecryptAttachment(message, filePath);
+}
+
+void Self::saveAttachment(const MessageHandler &message, const QUrl &fileUrl)
+{
+    qCDebug(lcController) << "Checking file consistency: " << message->id();
+
+    const auto attachment = std::get_if<MessageContentAttachment>(&message->content());
+    if (!FileUtils::fileExists(attachment->localPath()) || attachment->fingerprint().isEmpty()) {
+        downloadAttachment(message);
+        return;
+    }
+
+    const auto fingerprint = FileUtils::calculateFingerprint(attachment->localPath());
+    if (fingerprint.isEmpty()) {
+        qCritical(lcController()) << "Can not calculate fingerprint when saving file";
+        emit notificationCreated(tr("Attachment file is broken"), true);
+        return;
+    }
+
+    if (fingerprint != attachment->fingerprint()) {
+        qCritical(lcController()) << "Fingerprint mismatch download file again";
+        emit notificationCreated(tr("Attachment file is broken, downloading again..."), true);
+        downloadAttachment(message);
+        return;
+    }
+
+    qCDebug(lcController) << "Saving attachment of message: " << message->id();
+    const auto filePath = FileUtils::urlToLocalFile(fileUrl);
+    QFile::copy(attachment->localPath(), filePath);
+
+    emit notificationCreated(tr("Attachment was saved"), false);
+}
+
+MessageHandler Self::findMessageWithAttachment(const MessageId &messageId) const
+{
+    const auto message = m_models->messages()->findById(messageId);
+    if (!message) {
+        qCWarning(lcController) << "Message not found: " << messageId;
+        return nullptr;
+    }
+
+    if (!std::holds_alternative<MessageContentAttachment>(message->content())) {
+        qCWarning(lcController) << "Message has no attachment: " << messageId;
+        return nullptr;
+    }
+
     return message;
 }

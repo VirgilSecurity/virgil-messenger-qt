@@ -39,7 +39,6 @@
 
 #include <QObject>
 
-#include "Messages.h"
 
 class VSQAndroid {
 public:
@@ -55,7 +54,7 @@ public:
 
     static QString getDisplayName(const QUrl &url);
 
-    static DataSize getFileSize(const QUrl &url);
+    static quint64 getFileSize(const QUrl &url);
 
 private:
     static int runLoggingThread();

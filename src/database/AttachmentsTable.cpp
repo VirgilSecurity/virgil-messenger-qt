@@ -39,20 +39,18 @@
 #include "database/core/DatabaseUtils.h"
 
 using namespace vm;
+using Self = AttachmentsTable;
 
-AttachmentsTable::AttachmentsTable(Database *database)
+template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+
+Self::AttachmentsTable(Database *database)
     : DatabaseTable(QLatin1String("attachments"), database)
 {
-    connect(this, &AttachmentsTable::createAttachment, this, &AttachmentsTable::onCreateAttachment);
-    connect(this, &AttachmentsTable::updateStatus, this, &AttachmentsTable::onUpdateStatus);
-    connect(this, &AttachmentsTable::updateUrl, this, &AttachmentsTable::onUpdateUrl);
-    connect(this, &AttachmentsTable::updateExtras, this, &AttachmentsTable::onUpdateExtras);
-    connect(this, &AttachmentsTable::updateLocalPath, this, &AttachmentsTable::onUpdateLocalPath);
-    connect(this, &AttachmentsTable::updateFingerprint, this, &AttachmentsTable::onUpdateFingerprint);
-    connect(this, &AttachmentsTable::updateEncryptedSize, this, &AttachmentsTable::onUpdateEncryptedSize);
+    connect(this, &Self::addAttachment, this, &Self::onAddAttachment);
+    connect(this, &Self::updateAttachment, this, &Self::onUpdateAttachment);
 }
 
-bool AttachmentsTable::create()
+bool Self::create()
 {
     if (DatabaseUtils::readExecQueries(database(), QLatin1String("createAttachments"))) {
         qCDebug(lcDatabase) << "Attachments table was created";
@@ -62,132 +60,71 @@ bool AttachmentsTable::create()
     return false;
 }
 
-void AttachmentsTable::onCreateAttachment(const Attachment &attachment)
+void Self::onAddAttachment(MessageHandler message)
 {
+    auto attachment = std::get_if<MessageContentAttachment>(&message->content());
+    if (!attachment) {
+        return;
+    }
+
     ScopedConnection connection(*database());
-    const auto extrasJson = MessageUtils::extrasToJson(attachment.extras, attachment.type, false);
+    const auto extrasJson = attachment->extrasToJson();
     const DatabaseUtils::BindValues values {
-        { ":id", attachment.id },
-        { ":messageId", attachment.messageId },
-        { ":type", static_cast<int>(attachment.type) },
-        { ":status", static_cast<int>(attachment.status) },
-        { ":filename", attachment.fileName },
-        { ":size", attachment.size },
-        { ":localPath", attachment.localPath },
-        { ":fingerprint", attachment.fingerprint },
-        { ":url", attachment.url },
-        { ":encryptedSize", attachment.encryptedSize },
-        { ":extras", extrasJson }
+        { ":id", QString(attachment->id()) },
+        { ":messageId", QString(message->id()) },
+        { ":type",  MessageContent::typeToString(attachment->type()) },
+        { ":fingerprint", attachment->fingerprint() },
+        { ":filename", attachment->filename() },
+        { ":localPath", attachment->localPath() },
+        { ":url", attachment->remoteUrl() },
+        { ":size", attachment->size() },
+        { ":encryptedSize", attachment->encryptedSize() },
+        { ":extras", attachment->extrasToJson() },
+        { ":uploadStage", MessageContentAttachment::uploadStageToString(attachment->uploadStage()) },
+        { ":downloadStage", MessageContentAttachment::downloadStageToString(attachment->downloadStage()) },
     };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertAttachment"), values);
     if (!query) {
-        qCCritical(lcDatabase) << "AttachmentsTable::onCreateAttachment error";
+        qCCritical(lcDatabase) << "Self::onCreateAttachment error";
         emit errorOccurred(tr("Failed to insert attachment"));
         return;
     }
-    qCDebug(lcDatabase) << "Attachment was inserted into table" << attachment.id;
+    qCDebug(lcDatabase) << "Attachment was inserted into table: " << attachment->id();
 }
 
-void AttachmentsTable::onUpdateStatus(const Attachment::Id &attachmentId, const Attachment::Status &status)
-{
-    ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues values {
-        { ":id", attachmentId },
-        { ":status", static_cast<int>(status) }
-    };
-    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateAttachmentStatus"), values);
-    if (query) {
-        qCDebug(lcDatabase) << "Attachment status was updated" << attachmentId << "status" << status;
+static std::tuple<QString, DatabaseUtils::BindValues> createDatabaseBindings(const MessageUpdate &attachmentUpdate) {
+    if (auto arg = std::get_if<MessageAttachmentUploadStageUpdate>(&attachmentUpdate)) {
+        return {"updateAttachmentUpladStage", {
+            { ":id", QString(arg->attachmentId) },
+            { ":uploadStage",  MessageContentAttachment::uploadStageToString(arg->uploadStage) }
+        }};
     }
-    else {
-        qCCritical(lcDatabase) << "AttachmentsTable::onUpdateStatus error";
-        emit errorOccurred(tr("Failed to update attachment status"));
+
+    if (auto arg = std::get_if<MessageAttachmentDownloadStageUpdate>(&attachmentUpdate)) {
+        return {"updateAttachmentDownloadStage", {
+            { ":id", QString(arg->attachmentId) },
+            { ":downloadStage",  MessageContentAttachment::downloadStageToString(arg->downloadStage) }
+        }};
     }
+
+    // FIXME: Add etc.
+
+    return {};
 }
 
-void AttachmentsTable::onUpdateUrl(const Attachment::Id &attachmentId, const QUrl &url)
-{
-    ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues values {
-        { ":id", attachmentId },
-        { ":url", url }
-    };
-    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateAttachmentUrl"), values);
-    if (query) {
-        qCDebug(lcDatabase) << "Attachment url was updated" << attachmentId << "url filename" << url.fileName();
+void Self::onUpdateAttachment(const MessageUpdate &attachmentUpdate) {
+    auto [queryId, bindValues] = createDatabaseBindings(attachmentUpdate);
+    if (queryId.isEmpty()) {
+        // Nothing to update.
+        return;
     }
-    else {
-        qCCritical(lcDatabase) << "AttachmentsTable::onUpdateUrl error";
-        emit errorOccurred(tr("Failed to update attachment url"));
-    }
-}
 
-void AttachmentsTable::onUpdateLocalPath(const Attachment::Id &attachmentId, const QString &localPath)
-{
-    ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues values {
-        { ":id", attachmentId },
-        { ":localPath", localPath }
-    };
-    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateAttachmentLocalPath"), values);
+    const auto query = DatabaseUtils::readExecQuery(database(), queryId, bindValues);
     if (query) {
-        qCDebug(lcDatabase) << "Attachment localPath was updated" << attachmentId << localPath;
+        qCDebug(lcDatabase) << "Attachment was updated";
+    } else {
+        qCCritical(lcDatabase) << "Self::onUpdateStatus error";
+        emit errorOccurred(tr("Failed to update attachment"));
     }
-    else {
-        qCCritical(lcDatabase) << "AttachmentsTable::onUpdateLocalPath error";
-        emit errorOccurred(tr("Failed to update attachment localPath"));
-    }
-}
 
-void AttachmentsTable::onUpdateFingerprint(const Attachment::Id &attachmentId, const QString &fingerprint)
-{
-    ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues values {
-        { ":id", attachmentId },
-        { ":fingerprint", fingerprint }
-    };
-    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateAttachmentFingerprint"), values);
-    if (query) {
-        qCDebug(lcDatabase) << "Attachment fingerprint was updated" << attachmentId
-                            << "fingerprint" << fingerprint;
-    }
-    else {
-        qCCritical(lcDatabase) << "AttachmentsTable::onUpdateFingerprint error";
-        emit errorOccurred(tr("Failed to update attachment fingerprint"));
-    }
-}
-
-void AttachmentsTable::onUpdateExtras(const Attachment::Id &attachmentId, const Attachment::Type &type, const QVariant &extras)
-{
-    ScopedConnection connection(*database());
-    const auto extrasJson = MessageUtils::extrasToJson(QVariant::fromValue(extras), type, false);
-    const DatabaseUtils::BindValues values {
-        { ":id", attachmentId },
-        { ":extras",  extrasJson}
-    };
-    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateAttachmentExtras"), values);
-    if (query) {
-        qCDebug(lcDatabase) << "Attachment extras was updated" << attachmentId;
-    }
-    else {
-        qCCritical(lcDatabase) << "AttachmentsTable::onUpdatePictureExtras error";
-        emit errorOccurred(tr("Failed to update attachment extras"));
-    }
-}
-
-void AttachmentsTable::onUpdateEncryptedSize(const Attachment::Id &attachmentId, const DataSize &encryptedSize)
-{
-    ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues values {
-        { ":id", attachmentId },
-        { ":encryptedSize", encryptedSize }
-    };
-    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateAttachmentEncryptedSize"), values);
-    if (query) {
-        qCDebug(lcDatabase) << "Attachment encryptedSize was updated" << attachmentId << "encryptedSize" << encryptedSize;
-    }
-    else {
-        qCCritical(lcDatabase) << "AttachmentsTable::onUpdateEncryptedSize error";
-        emit errorOccurred(tr("Failed to update attachment encryptedSize"));
-    }
 }

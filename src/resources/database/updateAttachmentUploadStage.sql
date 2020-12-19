@@ -1,3 +1,3 @@
 UPDATE attachments
-SET status = :status
+SET uploadStage = :uploadStage
 WHERE id = :id

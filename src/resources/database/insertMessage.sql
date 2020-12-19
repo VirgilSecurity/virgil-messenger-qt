@@ -1,2 +1,2 @@
-INSERT INTO messages (id, timestamp, chatId, authorId, status, body)
-VALUES (:id, :timestamp, :chatId, :authorId, :status, :body)
+INSERT INTO messages (id, chatId, chatType, createdAt, authorId, isOutgoing, stage, body, ciphertext)
+VALUES (:id, :chatId, :chatType, :createdAt, :authorId, :isOutgoing, :stage, :body, :ciphertext)

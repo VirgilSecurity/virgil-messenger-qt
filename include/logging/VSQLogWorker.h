@@ -35,9 +35,11 @@
 #ifndef VSQLOGWORKER_H
 #define VSQLOGWORKER_H
 
-#include <QObject>
-
 #include "VSQMessageLogContext.h"
+
+#include <QObject>
+#include <QFile>
+
 
 class VSQLogWorker : public QObject
 {

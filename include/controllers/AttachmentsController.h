@@ -35,9 +35,11 @@
 #ifndef VM_ATTACHMENTSCONTROLLER_H
 #define VM_ATTACHMENTSCONTROLLER_H
 
-#include <QObject>
+#include "Message.h"
 
-#include "Messages.h"
+#include <QObject>
+#include <QPointer>
+#include <QUrl>
 
 class Settings;
 
@@ -52,28 +54,24 @@ class AttachmentsController : public QObject
 public:
     explicit AttachmentsController(const Settings *settings, Models *models, QObject *parent);
 
-    Q_INVOKABLE void saveAs(const Message::Id &messageId, const QVariant &fileUrl);
-    Q_INVOKABLE void download(const Message::Id &messageId);
-    Q_INVOKABLE void open(const Message::Id &messageId);
+    Q_INVOKABLE void saveAs(const MessageId &messageId, const QVariant &fileUrl);
+    Q_INVOKABLE void download(const MessageId &messageId);
+    Q_INVOKABLE void open(const MessageId &messageId);
 
-    void downloadDisplayImage(const Message::Id &messageId);
-
-    void setUserId(const UserId &userId);
-    void setContactId(const Contact::Id &contactId);
+    void downloadDisplayImage(const MessageId &messageId);
 
 signals:
     void openPreviewRequested(const QUrl &url);
     void notificationCreated(const QString &notification, const bool error) const;
 
 private:
-    bool isAttachmentDownloaded(const GlobalMessage &message);
-    void downloadAttachment(const GlobalMessage &message);
-    Optional<GlobalMessage> findValidMessage(const Message::Id &messageId) const;
+    MessageHandler findMessageWithAttachment(const MessageId &messageId) const;
+    void downloadAttachment(const MessageHandler &message);
+    void decryptAttachment(const MessageHandler &message);
+    void saveAttachment(const MessageHandler &message, const QUrl &fileUrl);
 
-    const Settings *m_settings;
-    Models *m_models;
-    UserId m_userId;
-    Contact::Id m_contactId;
+    QPointer<const Settings> m_settings;
+    QPointer<Models> m_models;
 };
 }
 

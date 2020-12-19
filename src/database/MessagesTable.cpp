@@ -37,18 +37,18 @@
 #include "Utils.h"
 #include "database/core/Database.h"
 #include "database/core/DatabaseUtils.h"
+#include "IncomingMessage.h"
+#include "OutgoingMessage.h"
 
 using namespace vm;
 
 MessagesTable::MessagesTable(Database *database)
     : DatabaseTable(QLatin1String("messages"), database)
 {
-    connect(this, &MessagesTable::setUserId, this, &MessagesTable::onSetUserId);
     connect(this, &MessagesTable::fetchChatMessages, this, &MessagesTable::onFetchChatMessages);
     connect(this, &MessagesTable::fetchNotSentMessages, this, &MessagesTable::onFetchNotSentMessages);
-    connect(this, &MessagesTable::createMessage, this, &MessagesTable::onCreateMessage);
-    connect(this, &MessagesTable::updateStatus, this, &MessagesTable::onUpdateStatus);
-    connect(this, &MessagesTable::markAllAsRead, this, &MessagesTable::onMarkAllAsRead);
+    connect(this, &MessagesTable::addMessage, this, &MessagesTable::onAddMessage);
+    connect(this, &MessagesTable::updateMessage, this, &MessagesTable::onUpdateMessage);
 }
 
 bool MessagesTable::create()
@@ -61,25 +61,19 @@ bool MessagesTable::create()
     return false;
 }
 
-void MessagesTable::onSetUserId(const UserId &userId)
-{
-    m_userId = userId;
-}
-
-void MessagesTable::onFetchChatMessages(const Chat::Id &chatId)
+void MessagesTable::onFetchChatMessages(const ChatId &chatId)
 {
     ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues values{{":chatId", chatId }};
+    const DatabaseUtils::BindValues values{{":chatId", QString(chatId) }};
     auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectChatMessages"), values);
     if (!query) {
         qCCritical(lcDatabase) << "MessagesTable::onFetch error";
         emit errorOccurred(tr("Failed to fetch messages"));
     }
     else {
-        auto q = *query;
-        Messages messages;
-        while (q.next()) {
-            messages.push_back(*DatabaseUtils::readMessage(q));
+        ModifiableMessages messages;
+        while (query->next()) {
+            messages.push_back(DatabaseUtils::readMessage(*query));
         }
         emit chatMessagesFetched(messages);
     }
@@ -88,43 +82,64 @@ void MessagesTable::onFetchChatMessages(const Chat::Id &chatId)
 void MessagesTable::onFetchNotSentMessages()
 {
     ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues values{
-        { ":failedStatus", static_cast<int>(Message::Status::Failed) },
-        { ":createdStatus", static_cast<int>(Message::Status::Created) },
-        { ":userId", m_userId }
-    };
-    auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectNotSentMessages"), values);
+    auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectNotSentMessages"));
     if (!query) {
         qCCritical(lcDatabase) << "MessagesTable::onFetchFailed error";
         emit errorOccurred(tr("Failed to fetch failed messages"));
     }
     else {
-        auto q = *query;
-        GlobalMessages messages;
-        while (q.next()) {
-            const Contact::Id contactId = q.value("contactId").value<Contact::Id>();
-            const Contact::Id senderId = q.value("senderId").value<Contact::Id>();
-            const Contact::Id recipientId = q.value("recipientId").value<Contact::Id>();
-            messages.push_back({ *DatabaseUtils::readMessage(q), m_userId, contactId, senderId, recipientId });
+        ModifiableMessages messages;
+        while (query->next()) {
+            messages.push_back(DatabaseUtils::readMessage(*query));
         }
-        emit notSentMessagesFetched(messages);
+        emit notSentMessagesFetched(std::move(messages));
     }
 }
 
-void MessagesTable::onCreateMessage(const Message &message)
+void MessagesTable::onAddMessage(const MessageHandler &message)
 {
+    QString messageStage;
+    if (message->isOutgoing()) {
+        auto outgoingMessage = message->asOutgoingMessage();
+        messageStage = outgoingMessage->stageString();
+    } else {
+        auto incomingMessage = message->asOutgoingMessage();
+        messageStage = incomingMessage->stageString();
+    }
+
     ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues values{
-        { ":id", message.id },
-        { ":timestamp", message.timestamp },
-        { ":chatId", message.chatId },
-        { ":authorId", message.authorId },
-        { ":status", static_cast<int>(message.status) },
-        { ":body", message.body.isEmpty() ? QVariant() : QVariant(message.body) }
+    DatabaseUtils::BindValues values{
+        { ":id", QString(message->id()) },
+        { ":chatId", QString(message->chatId()) },
+        { ":chatType", ChatTypeToString(message->chatType()) },
+        { ":createdAt", message->createdAt().toTime_t() },
+        { ":authorId", QString(message->senderId()) },
+        { ":isOutgoing", message->isOutgoing() },
+        { ":stage", messageStage },
     };
+
+    const auto content = message->content();
+    switch (content->type()) {
+        case MessageContent::Type::Text:
+            values.push_back({ ":body", message->textContent()->text() });
+            values.push_back({ ":ciphertext", QVariant() });
+            break;
+
+        case MessageContent::Type::Encrypted:
+            values.push_back({ ":ciphertext", message->encryptedContent()->ciphertext() });
+            values.push_back({ ":body", QVariant() });
+            break;
+
+        case MessageContent::Type::Picture:
+        case MessageContent::Type::File:
+            values.push_back({ ":ciphertext", QVariant() });
+            values.push_back({ ":body", QVariant() });
+            break;
+    }
+
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertMessage"), values);
     if (query) {
-        qCDebug(lcDatabase) << "Message was inserted into table" << message.id;
+        qCDebug(lcDatabase) << "Message was inserted into table" << message->id();
     }
     else {
         qCCritical(lcDatabase) << "MessagesTable::onCreateMessage error";
@@ -132,37 +147,30 @@ void MessagesTable::onCreateMessage(const Message &message)
     }
 }
 
-void MessagesTable::onUpdateStatus(const Message::Id &messageId, const Message::Status &status)
+void MessagesTable::onUpdateMessage(const MessageUpdate &messageUpdate)
 {
-    ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues values {
-        { ":id", messageId },
-        { ":status", static_cast<int>(status) }
-    };
-    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateMessageStatus"), values);
-    if (query) {
-        qCDebug(lcDatabase) << "Message status was updated" << messageId << "status" << status;
-    }
-    else {
-        qCCritical(lcDatabase) << "MessagesTable::onUpdateStatus error";
-        emit errorOccurred(tr("Failed to update message status"));
-    }
-}
+    DatabaseUtils::BindValues values;
 
-void MessagesTable::onMarkAllAsRead(const Chat &chat)
-{
+    if (auto update = std::get_if<IncomingMessageStageUpdate>(&messageUpdate)) {
+        values.push_back({ ":id", QString(update->messageId) });
+        values.push_back({ ":stage", IncomingMessageStageToString(update->stage) });
+
+    } else if (auto update = std::get_if<OutgoingMessageStageUpdate>(&messageUpdate)) {
+        values.push_back({ ":id", QString(update->messageId) });
+        values.push_back({ ":stage", OutgoingMessageStageToString(update->stage) });
+    }
+
+    if (values.empty()) {
+        return;
+    }
+
     ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues values{
-        { ":chatId", chat.id },
-        { ":authorId", chat.contactId },
-        { ":readStatus", static_cast<int>(Message::Status::Read) }
-    };
-    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("markMessagesAsRead"), values);
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateMessageStage"), values);
     if (query) {
-        qCDebug(lcDatabase) << "All messages in chat marked as read" << chat.id << "contact" << chat.contactId;
+        qCDebug(lcDatabase) << "Message stage was updated";
     }
     else {
-        qCCritical(lcDatabase) << "MessagesTable::onMarkAllAsRead error";
-        emit errorOccurred(tr("Failed to mark messages as read"));
+        qCCritical(lcDatabase) << "MessagesTable::onUpdateMessage error";
+        emit errorOccurred(tr("Failed to update message stage"));
     }
 }

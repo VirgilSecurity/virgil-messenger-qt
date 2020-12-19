@@ -42,7 +42,7 @@
 using namespace vm;
 
 DownloadDecryptFileOperation::DownloadDecryptFileOperation(NetworkOperation *parent, const Settings *settings, FileLoader *fileLoader,
-                                                           const QUrl &url, const DataSize &bytesTotal, const QString &filePath, const Contact::Id &senderId)
+                                                           const QUrl &url, const quint64 &bytesTotal, const QString &filePath, const UserId &senderId)
     : NetworkOperation(parent)
     , m_settings(settings)
     , m_fileLoader(fileLoader)

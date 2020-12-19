@@ -42,6 +42,7 @@
 #include <QThread>
 #include <QUrlQuery>
 #include <QUuid>
+#include <QLoggingCategory>
 
 #include "android/VSQAndroid.h"
 
@@ -54,13 +55,13 @@ QString Utils::createUuid()
     return QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
 }
 
-QString Utils::formattedDataSize(DataSize fileSize)
+QString Utils::formattedSize(quint64 fileSize)
 {
     static QLocale locale = QLocale::system();
     return locale.formattedDataSize(fileSize);
 }
 
-QString Utils::formattedElapsedSeconds(const Seconds &seconds, const Seconds &nowInterval)
+QString Utils::formattedElapsedSeconds(std::chrono::seconds seconds, std::chrono::seconds nowInterval)
 {
     if (seconds < nowInterval) {
         return QObject::tr("now");
@@ -68,7 +69,7 @@ QString Utils::formattedElapsedSeconds(const Seconds &seconds, const Seconds &no
     if (seconds <= 3 * nowInterval) {
         return QObject::tr("few seconds ago");
     }
-    const Seconds minute(60);
+    const std::chrono::seconds minute(60);
     if (seconds < minute) {
         return QObject::tr("recently");
     }
@@ -78,22 +79,22 @@ QString Utils::formattedElapsedSeconds(const Seconds &seconds, const Seconds &no
     if (seconds < 50 * minute) {
         return QObject::tr("%1 minutes ago").arg(seconds / minute);
     }
-    const Seconds hour(60 * minute);
+    const std::chrono::seconds hour(60 * minute);
     if (seconds < 2 * hour) {
         return QObject::tr("an hour ago");
     }
-    const Seconds day(24 * hour);
+    const std::chrono::seconds day(24 * hour);
     if (seconds < day) {
         return QObject::tr("%1 hours ago").arg(seconds / hour);
     }
     if (seconds < 2 * day) {
         return QObject::tr("yesterday");
     }
-    const Seconds month(30 * day);
+    const std::chrono::seconds month(30 * day);
     if (seconds < month) {
         return QObject::tr("%1 days ago").arg(seconds / day);
     }
-    const Seconds year(12 * month);
+    const std::chrono::seconds year(12 * month);
     if (seconds < year) {
         return QObject::tr("%1 months ago").arg(seconds / month);
     }
@@ -103,7 +104,7 @@ QString Utils::formattedElapsedSeconds(const Seconds &seconds, const Seconds &no
     return QObject::tr("%1 years ago").arg(seconds / year);
 }
 
-QString Utils::formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval)
+QString Utils::formattedLastSeenActivity(std::chrono::seconds seconds, std::chrono::seconds updateInterval)
 {
     if (seconds < updateInterval) {
         return QObject::tr("Online");
@@ -127,32 +128,23 @@ QString Utils::elidedText(const QString &text, const int maxLength)
     return text.left(half) + ellipsisChar + text.right(max - 1 - half);
 }
 
-QString Utils::attachmentDisplayText(const Attachment &attachment)
+QString Utils::messageContentDisplayText(const MessageContent &messageContent)
 {
-    if (attachment.type == Attachment::Type::Picture) {
+    if (auto text = std::get_if<MessageContentText>(&messageContent)) {
+        return text->text().left(250).replace('\n', ' ');
+
+    } else if (std::holds_alternative<MessageContentPicture>(messageContent)) {
         return QObject::tr("picture");
+
+    } else if (auto file = std::get_if<MessageContentFile>(&messageContent)) {
+        return Utils::elidedText(file->filename(), 50);
+
+    } else {
+        return {};
     }
-    else {
-        return Utils::elidedText(attachment.fileName, 50);
-    }
 }
 
-Contact::Id Utils::contactIdFromJid(const Jid &jid)
-{
-    return jid.split('@').front();
-}
-
-Jid Utils::createJid(const Contact::Id &contactId, const QString &xmppUrl)
-{
-    return contactId + '@' + xmppUrl;
-}
-
-QString Utils::printableMessageBody(const Message &message)
-{
-    return message.body.left(250).replace('\n', ' ');
-}
-
-QString Utils::printableLoadProgress(const DataSize &loaded, const DataSize &total)
+QString Utils::printableLoadProgress(const quint64 &loaded, const quint64 &total)
 {
     return QString("%1% (%2/%3)").arg(qRound(100 * qMin<double>(loaded, total) / total)).arg(loaded).arg(total);
 }

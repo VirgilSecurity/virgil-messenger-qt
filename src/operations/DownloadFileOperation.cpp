@@ -41,7 +41,7 @@
 
 using namespace vm;
 
-DownloadFileOperation::DownloadFileOperation(NetworkOperation *parent, FileLoader *fileLoader, const QUrl &url, const DataSize &bytesTotal, const QString &filePath)
+DownloadFileOperation::DownloadFileOperation(NetworkOperation *parent, FileLoader *fileLoader, const QUrl &url, const quint64 &bytesTotal, const QString &filePath)
     : LoadFileOperation(parent, bytesTotal)
     , m_url(url)
     , m_fileLoader(fileLoader)

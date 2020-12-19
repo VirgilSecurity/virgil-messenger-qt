@@ -51,33 +51,33 @@ AttachmentsModel::AttachmentsModel(Settings *settings, QObject *parent)
 AttachmentsModel::~AttachmentsModel()
 {}
 
-Optional<Attachment> AttachmentsModel::createAttachment(const QUrl &url, const Attachment::Type type)
+std::optional<Attachment> AttachmentsModel::createAttachment(const QUrl &url, const Attachment::Type type)
 {
     // Check file
     if (!FileUtils::isValidUrl(url)) {
-        return NullOptional;
+        return {};
     }
     const auto localFilePath = FileUtils::urlToLocalFile(url);
     qCDebug(lcModel) << "Processing of attachment:" << localFilePath;
     QFileInfo localInfo(localFilePath);
     if (!localInfo.exists()) {
         qCWarning(lcModel) << tr("File doesn't exist");
-        return NullOptional;
+        return {};
     }
 
     // Check file size
     if (localInfo.size() == 0) {
         qCWarning(lcModel) << tr("File is empty");
-        return NullOptional;
+        return {};
     }
 #ifdef VS_ANDROID
-    const DataSize fileSize = VSQAndroid::getFileSize(url);
+    const quint64 fileSize = VSQAndroid::getFileSize(url);
 #else
-    const DataSize fileSize = localInfo.size();
+    const quint64 fileSize = localInfo.size();
 #endif
     if (fileSize > m_settings->attachmentMaxFileSize()) {
         qCWarning(lcModel) << tr("File exceeds size limit");
-        return NullOptional;
+        return {};
     }
 
     // Create attachment
@@ -99,7 +99,7 @@ Optional<Attachment> AttachmentsModel::createAttachment(const QUrl &url, const A
     if (type == Attachment::Type::Picture) {
         const auto extras = createPictureExtras(attachment.localPath);
         if (!extras) {
-            return NullOptional;
+            return {};
         }
         attachment.extras.setValue(*extras);
     }
@@ -120,13 +120,13 @@ QVariant AttachmentsModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-Optional<PictureExtras> AttachmentsModel::createPictureExtras(const QString &localPath) const
+std::optional<PictureExtras> AttachmentsModel::createPictureExtras(const QString &localPath) const
 {
     PictureExtras extras;
     QImage source;
     QImageReader reader(localPath);
     if (!Utils::readImage(&reader, &source)) {
-        return NullOptional;
+        return {};
     }
     qCDebug(lcModel) << "Read image dimensions:" << source.size();
     extras.thumbnailSize = Utils::calculateThumbnailSize(source.size(), m_settings->thumbnailMaxSize(), reader.transformation());

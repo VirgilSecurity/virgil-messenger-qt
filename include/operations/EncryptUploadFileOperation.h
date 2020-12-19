@@ -51,13 +51,13 @@ class EncryptUploadFileOperation : public NetworkOperation
     Q_OBJECT
 
 public:
-    EncryptUploadFileOperation(NetworkOperation *parent, const Settings *settings, FileLoader *fileLoader, const QString &sourcePath, const Contact::Id &recipientId);
+    EncryptUploadFileOperation(NetworkOperation *parent, const Settings *settings, FileLoader *fileLoader, const QString &sourcePath, const UserId &recipientId);
 
     void setSourcePath(const QString &path);
 
 signals:
-    void progressChanged(const DataSize &bytesLoaded, const DataSize &bytesTotal);
-    void bytesCalculated(const DataSize &bytes);
+    void progressChanged(const quint64 &bytesLoaded, const quint64 &bytesTotal);
+    void bytesCalculated(const quint64 &bytes);
     void uploaded(const QUrl &url);
 
 private:
@@ -68,7 +68,7 @@ private:
     QPointer<FileLoader> m_fileLoader;
     QString m_sourcePath;
     QString m_tempPath;
-    Contact::Id m_recipientId;
+    UserId m_recipientId;
 };
 }
 

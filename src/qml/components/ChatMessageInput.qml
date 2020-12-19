@@ -172,10 +172,14 @@ Control {
         }
     }
 
-    function sendMessage(attachmentUrl, attachmentType) {
+    function sendTextMessage() {
         const text = (messageField.text + messageField.preeditText).trim();
         messageField.clear()
-        controllers.messages.createSendMessage(text, attachmentUrl, attachmentType)
+        controllers.messages.sendTextMessage(text)
+    }
+
+    function sendFileMessage(attachmentUrl, attachmentType) {
+        controllers.messages.sendFileMessage(attachmentUrl, attachmentType)
     }
 
     Connections {
@@ -186,7 +190,7 @@ Control {
                 return;
             }
             const url = fileUrls[fileUrls.length - 1]
-            sendMessage(url, attachmentType)
+            sendFileMessage(url, attachmentType)
         }
     }
 
