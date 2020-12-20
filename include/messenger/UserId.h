@@ -51,14 +51,14 @@ public:
     operator QString() const;
 
 private:
-    QString m_id;
+    QString m_userId;
 };
 
 } // namespace vm
 
-bool operator<(const vm::UserId& rhs, const vm::UserId& lhs);
-bool operator>(const vm::UserId& rhs, const vm::UserId& lhs);
-bool operator==(const vm::UserId& rhs, const vm::UserId& lhs);
-bool operator!=(const vm::UserId& rhs, const vm::UserId& lhs);
+bool operator<(const vm::UserId& lhs, const vm::UserId& rhs);
+bool operator>(const vm::UserId& lhs, const vm::UserId& rhs);
+bool operator==(const vm::UserId& lhs, const vm::UserId& rhs);
+bool operator!=(const vm::UserId& lhs, const vm::UserId& rhs);
 
 #endif // VM_USER_ID_H

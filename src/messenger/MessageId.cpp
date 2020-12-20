@@ -33,31 +33,42 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 
-#ifndef VM_CHAT_ID_H
-#define VM_CHAT_ID_H
+#include "MessageId.h"
 
-#include <QString>
+#include "Utils.h"
 
-namespace vm {
-//
-//  This class just wraps QString but is used for a strong type checking.
-//
-class ChatId {
-public:
-    explicit ChatId(QString chatId = {});
+using namespace vm;
+using Self = MessageId;
 
-    operator QString() const;
 
-    bool isValid() const noexcept;
+Self::MessageId(QString messageId) : m_messageId(std::move(messageId)) {
 
-private:
-    QString m_chatId;
-};
-} // namespace vm
+}
 
-bool operator<(const vm::ChatId& lhs, const vm::ChatId& rhs);
-bool operator>(const vm::ChatId& lhs, const vm::ChatId& rhs);
-bool operator==(const vm::ChatId& lhs, const vm::ChatId& rhs);
-bool operator!=(const vm::ChatId& lhs, const vm::ChatId& rhs);
+Self::operator QString() const {
+    return m_messageId;
+}
 
-#endif // VM_CHAT_ID_H
+bool Self::isValid() const noexcept {
+    return !m_messageId.isEmpty();
+}
+
+MessageId Self::generate() {
+    return MessageId(Utils::createUuid());
+}
+
+bool operator<(const vm::MessageId& lhs, const vm::MessageId& rhs) {
+    return QString(lhs) < QString(rhs);
+}
+
+bool operator>(const vm::MessageId& lhs, const vm::MessageId& rhs) {
+    return QString(lhs) > QString(rhs);
+}
+
+bool operator==(const vm::MessageId& lhs, const vm::MessageId& rhs) {
+    return QString(lhs) == QString(rhs);
+}
+
+bool operator!=(const vm::MessageId& lhs, const vm::MessageId& rhs) {
+    return QString(lhs) != QString(rhs);
+}

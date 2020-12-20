@@ -32,6 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "Controller.h"
+#include "Model.h"
 
-Q_LOGGING_CATEGORY(lcController, "ui-model");
+Q_LOGGING_CATEGORY(lcModel, "ui-model");

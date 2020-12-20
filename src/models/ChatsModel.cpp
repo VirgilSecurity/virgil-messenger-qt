@@ -124,6 +124,14 @@ ChatHandler Self::findChat(const ChatId &chatId) const
     return nullptr;
 }
 
+ModifiableChatHandler Self::findChat(const ChatId &chatId)
+{
+    if (const auto row = findRowById(chatId)) {
+        return m_chats[*row];
+    }
+    return nullptr;
+}
+
 int Self::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);

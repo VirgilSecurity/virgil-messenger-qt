@@ -52,7 +52,15 @@ public:
     bool isValid() const noexcept;
 
     static AttachmentId generate();
+
+private:
+    QString m_attachmentId;
 };
 } // namespace vm
+
+bool operator<(const vm::AttachmentId& lhs, const vm::AttachmentId& rhs);
+bool operator>(const vm::AttachmentId& lhs, const vm::AttachmentId& rhs);
+bool operator==(const vm::AttachmentId& lhs, const vm::AttachmentId& rhs);
+bool operator!=(const vm::AttachmentId& lhs, const vm::AttachmentId& rhs);
 
 #endif // VM_ATTACHMENT_ID_H

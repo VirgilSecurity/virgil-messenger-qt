@@ -52,12 +52,15 @@ public:
     bool isValid() const noexcept;
 
     static MessageId generate();
+
+private:
+    QString m_messageId;
 };
 } // namespace vm
 
-bool operator<(const vm::MessageId& rhs, const vm::MessageId& lhs);
-bool operator>(const vm::MessageId& rhs, const vm::MessageId& lhs);
-bool operator==(const vm::MessageId& rhs, const vm::MessageId& lhs);
-bool operator!=(const vm::MessageId& rhs, const vm::MessageId& lhs);
+bool operator<(const vm::MessageId& lhs, const vm::MessageId& rhs);
+bool operator>(const vm::MessageId& lhs, const vm::MessageId& rhs);
+bool operator==(const vm::MessageId& lhs, const vm::MessageId& rhs);
+bool operator!=(const vm::MessageId& lhs, const vm::MessageId& rhs);
 
 #endif // VM_MESSAGE_ID_H

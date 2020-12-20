@@ -251,10 +251,14 @@ SOURCES += \
         src/Validator.cpp \
         src/CustomerEnv.cpp \
         # Messenger Core
-        src/messenger/CommKitBridge.cpp \
-        src/messenger/User.cpp \
-        src/messenger/CoreMessenger.cpp \
         # Controllers
+        src/messenger/AttachmentId.cpp \
+        src/messenger/ChatId.cpp \
+        src/messenger/CommKitBridge.cpp \
+        src/messenger/CoreMessenger.cpp \
+        src/messenger/MessageId.cpp \
+        src/messenger/User.cpp \
+        src/messenger/UserId.cpp \
         src/controllers/Controller.cpp \
         src/controllers/AttachmentsController.cpp \
         src/controllers/ChatsController.cpp \
