@@ -72,6 +72,15 @@ void Self::addMessage(ModifiableMessageHandler message) {
     }
 }
 
+void Self::cleartChat() {
+    qCDebug(lcModel) << "Clear all messages";
+    beginResetModel();
+    m_messages.clear();
+    m_currentChat = nullptr;
+    endResetModel();
+}
+
+
 std::unique_ptr<OutgoingMessage> Self::createOutgoingMessage() {
     auto message = std::make_unique<OutgoingMessage>();
 
