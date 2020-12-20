@@ -42,7 +42,7 @@
 
 using namespace vm;
 
-LoadFileOperation::LoadFileOperation(NetworkOperation *parent, const quint64 &bytesTotal)
+LoadFileOperation::LoadFileOperation(NetworkOperation *parent, quint64 bytesTotal)
     : NetworkOperation(parent)
     , m_bytesTotal(bytesTotal)
 {
@@ -62,7 +62,7 @@ void LoadFileOperation::setFilePath(const QString &filePath)
 void LoadFileOperation::connectReply(QNetworkReply *reply)
 {
     connect(reply, &QNetworkReply::finished, this, std::bind(&LoadFileOperation::onReplyFinished, this, reply));
-    connect(reply, &QNetworkReply::errorOccurred, this, std::bind(&LoadFileOperation::onReplyErrorOccurred, this, args::_1, reply));
+    connect(reply, &QNetworkReply::errorOccurred, this, std::bind(&LoadFileOperation::onReplyErrorOccurred, this, std::placeholders::_1, reply));
     connect(reply, &QNetworkReply::sslErrors, this, &LoadFileOperation::onReplySslErrors);
 }
 
@@ -155,7 +155,7 @@ void LoadFileOperation::onReplySslErrors()
     qCWarning(lcOperation) << "SSL errors occurred";
 }
 
-void LoadFileOperation::onSetProgress(const quint64 &bytesLoaded, const quint64 &bytesTotal)
+void LoadFileOperation::onSetProgress(quint64 bytesLoaded, quint64 bytesTotal)
 {
     if (bytesTotal == 0 && bytesLoaded == 0) {
         // NOTE(fpohtmeh): Qt finishes upload with zero values

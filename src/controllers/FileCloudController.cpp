@@ -39,6 +39,7 @@
 #include "FileUtils.h"
 #include "models/FileCloudModel.h"
 #include "models/Models.h"
+#include "Controller.h"
 
 using namespace vm;
 

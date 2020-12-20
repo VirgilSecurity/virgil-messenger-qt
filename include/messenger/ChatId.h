@@ -44,9 +44,11 @@ namespace vm {
 //
 class ChatId {
 public:
-    explicit ChatId(QString chatId);
+    explicit ChatId(QString chatId = {});
 
     operator QString() const;
+
+    bool isValid() const noexcept;
 
     static ChatId generate();
 

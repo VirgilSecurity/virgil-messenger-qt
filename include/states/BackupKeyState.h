@@ -43,24 +43,18 @@ class Messenger;
 class BackupKeyState : public OperationState
 {
     Q_OBJECT
-    Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
 
 public:
     BackupKeyState(Messenger *messenger, QState *parent);
 
-    QString userId() const;
-    void setUserId(const QString &userId);
-
 signals:
     void backupKey(const QString &password, const QString &confirmedPassword);
     void keyBackuped(const QString &userId);
-    void userIdChanged(const QString &userId);
 
 private:
     void processBackupKey(const QString &password, const QString &confirmedPassword);
 
     Messenger *m_messenger;
-    QString m_userId;
 };
 }
 

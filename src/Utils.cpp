@@ -144,7 +144,7 @@ QString Utils::messageContentDisplayText(const MessageContent &messageContent)
     }
 }
 
-QString Utils::printableLoadProgress(const quint64 &loaded, const quint64 &total)
+QString Utils::printableLoadProgress(quint64 loaded, quint64 total)
 {
     return QString("%1% (%2/%3)").arg(qRound(100 * qMin<double>(loaded, total) / total)).arg(loaded).arg(total);
 }

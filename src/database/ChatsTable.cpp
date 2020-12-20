@@ -86,7 +86,7 @@ void ChatsTable::onFetch()
             chat->setLastMessage(lastMessage);
             chat->setUnreadMessageCount(unreadMessageCount);
 
-            chats.emplace_back(chat);
+            chats.emplace_back(std::move(chat));
         }
         emit fetched(std::move(chats));
     }

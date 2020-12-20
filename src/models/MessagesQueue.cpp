@@ -34,8 +34,6 @@
 
 #include "models/MessagesQueue.h"
 
-#include "qxmpp/QXmppMessage.h"
-
 #include "Messenger.h"
 #include "Utils.h"
 #include "MessagesTable.h"
@@ -45,8 +43,13 @@
 #include "MessageOperationFactory.h"
 #include "Operation.h"
 
+
 using namespace vm;
 using Self = MessagesQueue;
+
+
+Q_LOGGING_CATEGORY(lcMessageQueue, "messages-queue");
+
 
 Self::MessagesQueue(const Settings *settings, Messenger *messenger, UserDatabase *userDatabase, QObject *parent)
     : NetworkOperation(parent, messenger->isOnline())
@@ -57,8 +60,12 @@ Self::MessagesQueue(const Settings *settings, Messenger *messenger, UserDatabase
     setName(QLatin1String("MessageQueue"));
     setRepeatable(true);
 
+    //
+    //  Connect database.
+    //
+    connect(m_userDatabase, &UserDatabase::opened, this, &Self::onDatabaseOpened);
+
     connect(messenger, &Messenger::onlineStatusChanged, this, &NetworkOperation::setIsOnline);
-    connect(this, &Self::setUserId, this, &Self::onSetUserId);
     connect(this, &Self::pushMessage, this, &Self::onPushMessage);
     connect(this, &Self::pushMessageDownload, this, &Self::onPushMessageDownload);
     connect(this, &Self::pushMessagePreload, this, &Self::onPushMessagePreload);
@@ -66,175 +73,59 @@ Self::MessagesQueue(const Settings *settings, Messenger *messenger, UserDatabase
     connect(this, &Operation::finished, this, &Self::onFinished);
 }
 
-Self::~MessagesQueue()
-{
+
+void Self::onDatabaseOpened() {
+    connect(m_userDatabase->messagesTable(), &MessagesTable::notSentMessagesFetched, this, &Self::onNotSentMessagesFetched);
+    m_userDatabase->messagesTable()->fetchNotSentMessages();
 }
 
-void Self::startIfReady()
-{
-    if (!hasChildren()) {
-        return;
-    }
-    if (m_queueState & QueueState::ReadyToStart) {
-        start();
-    }
-}
 
-void Self::setQueueState(const Self::QueueState &state)
+MessageOperation *Self::pushMessageOperation(const MessageHandler &message, bool prepend)
 {
-    m_queueState = m_queueState | state;
-    if (state == QueueState::UserSet) {
-        connect(m_userDatabase->messagesTable(), &MessagesTable::notSentMessagesFetched, this, &Self::onNotSentMessagesFetched);
-    }
-    if (m_queueState == QueueState::FetchNeeded) {
-        m_queueState = m_queueState | QueueState::FetchRequested;
-        m_userDatabase->messagesTable()->fetchNotSentMessages();
-    }
-    else {
-        startIfReady();
-    }
-}
-
-void Self::unsetQueueState(const Self::QueueState &state)
-{
-    m_queueState = m_queueState & ~state;
-    if (state == QueueState::UserSet) {
-        m_queueState = m_queueState & ~QueueState::FetchRequested;
-        dropChildren();
-        qCDebug(lcModel) << "MessageQueue is cleared";
-    }
-}
-
-void Self::connectMessageOperation(MessageOperation *op)
-{
-    connect(op, &MessageOperation::statusChanged, this, std::bind(&Self::onMessageOperationStatusChanged, this, op));
-    connect(op, &MessageOperation::attachmentStatusChanged, this, std::bind(&Self::onMessageOperationAttachmentStatusChanged, this, op));
-    connect(op, &MessageOperation::attachmentUrlChanged, this, std::bind(&Self::onMessageOperationAttachmentUrlChanged, this, op));
-    connect(op, &MessageOperation::attachmentLocalPathChanged, this, std::bind(&Self::onMessageOperationAttachmentLocalPathChanged, this, op));
-    connect(op, &MessageOperation::attachmentFingerprintChanged, this, std::bind(&Self::onMessageOperationAttachmentFingerprintChanged, this, op));
-    connect(op, &MessageOperation::attachmentExtrasChanged, this, std::bind(&Self::onMessageOperationAttachmentExtrasChanged, this, op));
-    connect(op, &MessageOperation::attachmentEncryptedSizeChanged, this, std::bind(&Self::onMessageOperationAttachmentEncryptedSizeChanged, this, op));
-    connect(op, &MessageOperation::attachmentProcessedSizeChanged, this, std::bind(&Self::onMessageOperationAttachmentProcessedSizeChanged, this, op));
-    connect(op, &MessageOperation::notificationCreated, this, &Self::notificationCreated);
-}
-
-MessageOperation *Self::pushMessageOperation(const Message &message, bool prepend)
-{
-    if (message.status == Message::Status::InvalidM) {
-        return nullptr;
-    }
     auto op = new MessageOperation(message, m_factory, this);
-    connectMessageOperation(op);
+
+    connect(op, &MessageOperation::messageUpdate, this, &Self::updateMessage);
+    connect(op, &MessageOperation::notificationCreated, this, &Self::notificationCreated);
+
     prepend ? prependChild(op) : appendChild(op);
+
     return op;
 }
 
-void Self::onSetUserId(const UserId &userId)
-{
-    if (m_userId == userId) {
-        return;
-    }
-    m_userId = userId;
-    userId.isEmpty() ? unsetQueueState(QueueState::UserSet) : setQueueState(QueueState::UserSet);
-}
 
-void Self::onFileLoaderServiceFound(bool serviceFound)
+void Self::onNotSentMessagesFetched(const ModifiableMessages &messages)
 {
-    serviceFound ? setQueueState(QueueState::FileLoaderReady) : unsetQueueState(QueueState::FileLoaderReady);
-}
-
-void Self::onNotSentMessagesFetched(const Messages &messages)
-{
-    qCDebug(lcOperation) << "Queued" << messages.size() << "unsent messages";
+    qCDebug(lcMessageQueue) << "Queued" << messages.size() << "unsent messages";
     for (auto &m : messages) {
         if (auto op = pushMessageOperation(m)) {
             m_factory->populateAll(op);
         }
     }
-    startIfReady();
 }
 
 void Self::onFinished()
 {
-    qCDebug(lcModel) << "MessageQueue is finished";
+    qCDebug(lcMessageQueue) << "Messages queue is finished";
 }
 
-void Self::onPushMessage(const Message &message)
+void Self::onPushMessage(const MessageHandler &message)
 {
     if (auto op = pushMessageOperation(message)) {
         m_factory->populateAll(op);
-        startIfReady();
     }
 }
 
-void Self::onPushMessageDownload(const Message &message, const QString &filePath)
+void Self::onPushMessageDownload(const MessageHandler &message, const QString &filePath)
 {
     if (auto op = pushMessageOperation(message, true)) {
         m_factory->populateDownload(op, filePath);
         connect(op, &Operation::finished, this, std::bind(&Self::notificationCreated, this, tr("File was downloaded"), false));
-        startIfReady();
     }
 }
 
-void Self::onPushMessagePreload(const Message &message)
+void Self::onPushMessagePreload(const MessageHandler &message)
 {
     if (auto op = pushMessageOperation(message, true)) {
         m_factory->populatePreload(op);
-        startIfReady();
     }
-}
-
-void Self::onMessageOperationStatusChanged(const MessageOperation *operation)
-{
-    const auto &m = *operation->message();
-    emit messageStatusChanged(m.id, m.contactId, m.status);
-}
-
-void Self::onMessageOperationAttachmentStatusChanged(const MessageOperation *operation)
-{
-    const auto &m = *operation->message();
-    const auto &a = *m.attachment;
-    emit attachmentStatusChanged(a.id, m.contactId, a.status);
-}
-
-void Self::onMessageOperationAttachmentUrlChanged(const MessageOperation *operation)
-{
-    const auto &m = *operation->message();
-    const auto &a = *m.attachment;
-    emit attachmentUrlChanged(a.id, m.contactId, a.url);
-}
-
-void Self::onMessageOperationAttachmentLocalPathChanged(const MessageOperation *operation)
-{
-    const auto &m = *operation->message();
-    const auto &a = *m.attachment;
-    emit attachmentLocalPathChanged(a.id, m.contactId, a.localPath);
-}
-
-void Self::onMessageOperationAttachmentFingerprintChanged(const MessageOperation *operation)
-{
-    const auto &m = *operation->message();
-    const auto &a = *m.attachment;
-    emit attachmentFingerprintChanged(a.id, m.contactId, a.fingerprint);
-}
-
-void Self::onMessageOperationAttachmentExtrasChanged(const MessageOperation *operation)
-{
-    const auto &m = *operation->message();
-    const auto &a = *m.attachment;
-    emit attachmentExtrasChanged(a.id, m.contactId, a.type, a.extras);
-}
-
-void Self::onMessageOperationAttachmentProcessedSizeChanged(const MessageOperation *operation)
-{
-    const auto &m = *operation->message();
-    const auto &a = *m.attachment;
-    emit attachmentProcessedSizeChanged(a.id, m.contactId, a.processedSize);
-}
-
-void Self::onMessageOperationAttachmentEncryptedSizeChanged(const MessageOperation *operation)
-{
-    const auto &m = *operation->message();
-    const auto &a = *m.attachment;
-    emit attachmentEncryptedSizeChanged(a.id, m.contactId, a.encryptedSize);
 }

@@ -37,6 +37,7 @@
 #include "Utils.h"
 #include "database/core/Database.h"
 #include "database/core/DatabaseUtils.h"
+#include "MessageContentType.h"
 
 using namespace vm;
 using Self = AttachmentsTable;
@@ -72,7 +73,7 @@ void Self::onAddAttachment(MessageHandler message)
     const DatabaseUtils::BindValues values {
         { ":id", QString(attachment->id()) },
         { ":messageId", QString(message->id()) },
-        { ":type",  MessageContent::typeToString(attachment->type()) },
+        { ":type",  MessageContentTypeToString(message->contentType()) },
         { ":fingerprint", attachment->fingerprint() },
         { ":filename", attachment->filename() },
         { ":localPath", attachment->localPath() },

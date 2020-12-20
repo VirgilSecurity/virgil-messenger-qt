@@ -36,25 +36,21 @@
 
 #include "operations/MessageOperationFactory.h"
 #include "operations/SendMessageOperation.h"
+#include "MessageUpdate.h"
 
 using namespace vm;
 
-MessageOperation::MessageOperation(const Message &message, MessageOperationFactory *factory, NetworkOperation *parent)
+MessageOperation::MessageOperation(const MessageHandler &message, MessageOperationFactory *factory, NetworkOperation *parent)
     : NetworkOperation(parent)
     , m_factory(factory)
     , m_message(message)
 {
-    setName(message.id);
+    setName(message->id());
 }
 
-const Message *MessageOperation::message() const
+MessageHandler MessageOperation::message() const
 {
-    return &m_message;
-}
-
-const Attachment *MessageOperation::attachment() const
-{
-    return &*m_message.attachment;
+    return m_message;
 }
 
 MessageOperationFactory *MessageOperation::factory()
@@ -62,158 +58,41 @@ MessageOperationFactory *MessageOperation::factory()
     return m_factory;
 }
 
-void MessageOperation::setAttachmentStatus(const Attachment::Status status)
-{
-    auto a = writableAttachment();
-    if (a->status == status) {
-        return;
-    }
-
-    auto warnInvalidStatus = [=]() {
-        qCWarning(lcOperation) << "Unsupported attachment status change:" << a->status << "=>" << status;;
-    };
-
-    switch (status) {
-    case Attachment::Status::Created:
-        warnInvalidStatus();
-        return;
-    case Attachment::Status::Loading:
-        if (a->status == Attachment::Status::Invalid) {
-            warnInvalidStatus();
-            return;
-        }
-        break;
-    case Attachment::Status::Loaded:
-        if (a->status != Attachment::Status::Created && a->status != Attachment::Status::Loading) {
-            warnInvalidStatus();
-            return;
-        }
-        break;
-    case Attachment::Status::Interrupted:
-        if (a->status != Attachment::Status::Created && a->status != Attachment::Status::Loading) {
-            warnInvalidStatus();
-            return;
-        }
-        break;
-    case Attachment::Status::Invalid:
-        if (a->status != Attachment::Status::Loading) {
-            warnInvalidStatus();
-            return;
-        }
-        break;
-    default:
-        warnInvalidStatus();
-        return;
-    }
-
-    a->status = status;
-    emit attachmentStatusChanged(status);
-}
-
-void MessageOperation::setAttachmentUrl(const QUrl &url)
-{
-    auto a = writableAttachment();
-    if (a->url == url) {
-        return;
-    }
-    a->url = url;
-    emit attachmentUrlChanged(url);
-}
-
-void MessageOperation::setAttachmentLocalPath(const QString &localPath)
-{
-    auto a = writableAttachment();
-    // NOTE(fpohtmeh): don't compare values because file existence can be changed
-    a->localPath = localPath;
-    emit attachmentLocalPathChanged(localPath);
-}
-
-void MessageOperation::setAttachmentFignerprint(const QString &fingerprint)
-{
-    auto a = writableAttachment();
-    if (a->fingerprint == fingerprint) {
-        return;
-    }
-    a->fingerprint = fingerprint;
-    emit attachmentFingerprintChanged(fingerprint);
-}
-
-void MessageOperation::setAttachmentExtras(const QVariant &extras)
-{
-    auto a = writableAttachment();
-    // NOTE(fpohtmeh): don't compare values because file existence can be changed
-    a->extras = QVariant::fromValue(extras);
-    emit attachmentExtrasChanged(extras);
-}
-
-void MessageOperation::setAttachmentPreviewPath(const QString &previewPath)
-{
-    auto extras = writableAttachment()->extras.value<PictureExtras>();
-    extras.previewPath = previewPath;
-    setAttachmentExtras(QVariant::fromValue(extras));
-}
-
-void MessageOperation::setAttachmentThumbnailPath(const QString &thumbnailPath)
-{
-    auto extras = writableAttachment()->extras.value<PictureExtras>();
-    extras.thumbnailPath = thumbnailPath;
-    setAttachmentExtras(QVariant::fromValue(extras));
-}
-
-void MessageOperation::setAttachmentThumbnailUrl(const QUrl &thumbnailUrl)
-{
-    auto extras = writableAttachment()->extras.value<PictureExtras>();
-    extras.thumbnailUrl = thumbnailUrl;
-    setAttachmentExtras(QVariant::fromValue(extras));
-}
-
-void MessageOperation::setAttachmentProcessedSize(const quint64 &size)
-{
-    auto a = writableAttachment();
-    if (a->processedSize == size) {
-        return;
-    }
-    a->processedSize = size;
-    emit attachmentProcessedSizeChanged(size);
-}
-
-void MessageOperation::setAttachmentEncryptedSize(const quint64 &size)
-{
-    auto a = writableAttachment();
-    if (a->encryptedSize == size) {
-        return;
-    }
-    a->encryptedSize = size;
-    emit attachmentEncryptedSizeChanged(size);
-}
-
-void MessageOperation::setAttachmentEncryptedThumbnailSize(const quint64 &bytes)
-{
-    auto extras = writableAttachment()->extras.value<PictureExtras>();
-    extras.encryptedThumbnailSize = bytes;
-    setAttachmentExtras(QVariant::fromValue(extras));
-}
-
 void MessageOperation::connectChild(Operation *child)
 {
+
     Operation::connectChild(child);
-    connect(child, &Operation::failed, this, std::bind(&MessageOperation::setStatus, this, Message::Status::Failed));
-    connect(child, &Operation::invalidated, this, std::bind(&MessageOperation::setStatus, this, Message::Status::InvalidM));
-    if (dynamic_cast<SendMessageOperation *>(child)) {
-        connect(child, &Operation::finished, this, std::bind(&MessageOperation::setStatus, this, Message::Status::Sent));
-    }
-}
 
-Attachment *MessageOperation::writableAttachment()
-{
-    return &*m_message.attachment;
-}
+    MessageStatusUpdate statusUpdate;
+    statusUpdate.messageId = m_message->id();
+    statusUpdate.status = MessageStatus::Waiting;
+    emit messageUpdate(statusUpdate);
 
-void MessageOperation::setStatus(const Message::Status &status)
-{
-    if (m_message.status == status) {
-        return;
-    }
-    m_message.status = status;
-    emit statusChanged(status);
+    connect(this, &Operation::started, [this]() {
+        MessageStatusUpdate statusUpdate;
+        statusUpdate.messageId = m_message->id();
+        statusUpdate.status = MessageStatus::Processing;
+        emit messageUpdate(statusUpdate);
+    });
+
+    connect(this, &Operation::finished, [this]() {
+        MessageStatusUpdate statusUpdate;
+        statusUpdate.messageId = m_message->id();
+        statusUpdate.status = MessageStatus::Succeed;
+        emit messageUpdate(statusUpdate);
+    });
+
+    connect(this, &Operation::failed, [this]() {
+        MessageStatusUpdate statusUpdate;
+        statusUpdate.messageId = m_message->id();
+        statusUpdate.status = MessageStatus::Failed;
+        emit messageUpdate(statusUpdate);
+    });
+
+    connect(this, &Operation::invalidated, [this]() {
+        MessageStatusUpdate statusUpdate;
+        statusUpdate.messageId = m_message->id();
+        statusUpdate.status = MessageStatus::Failed;
+        emit messageUpdate(statusUpdate);
+    });
 }

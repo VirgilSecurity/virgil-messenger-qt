@@ -44,23 +44,18 @@ class UsersController;
 class DownloadKeyState : public OperationState
 {
     Q_OBJECT
-    Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
 
 public:
     DownloadKeyState(UsersController *usersController, QState *parent);
 
-    QString userId() const;
-    void setUserId(const QString &userId);
-
 signals:
     void downloadKey(const QString &password);
-    void userIdChanged(const QString &userId);
 
 private:
     void processDownloadKey(const QString &password);
 
     UsersController *m_usersController;
-    QString m_userId;
+    QString m_username;
 };
 }
 

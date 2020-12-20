@@ -51,10 +51,10 @@ class DownloadDecryptFileOperation : public NetworkOperation
 
 public:
     DownloadDecryptFileOperation(NetworkOperation *parent, const Settings *settings, FileLoader *fileLoader,
-                                 const QUrl &url, const quint64 &bytesTotal, const QString &filePath, const UserId &senderId);
+                                 const QUrl &url, quint64 bytesTotal, const QString &filePath, const UserId &senderId);
 
 signals:
-    void progressChanged(const quint64 &bytesLoaded, const quint64 &bytesTotal);
+    void progressChanged(quint64 bytesLoaded, quint64 bytesTotal);
     void decrypted(const QString &filePath);
 
 private:

@@ -34,14 +34,15 @@
 
 #include "VSQLastActivityManager.h"
 
-#include <QDomElement>
-
-#include <QXmppClient.h>
-#include <QXmppRosterManager.h>
-#include <QLoggingCategory.h>
-
 #include "Settings.h"
 #include "Utils.h"
+
+#include <qxmpp/QXmppClient.h>
+#include <qxmpp/QXmppRosterManager.h>
+
+#include <QLoggingCategory>
+#include <QDomElement>
+
 
 using namespace vm;
 using Self = VSQLastActivityManager;

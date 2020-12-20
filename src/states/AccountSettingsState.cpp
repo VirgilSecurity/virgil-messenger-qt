@@ -39,17 +39,3 @@ using namespace vm;
 AccountSettingsState::AccountSettingsState(QState *parent)
     : QState(parent)
 {}
-
-QString AccountSettingsState::userId() const
-{
-    return m_userId;
-}
-
-void AccountSettingsState::setUserId(const QString &userId)
-{
-    if (m_userId == userId) {
-        return;
-    }
-    m_userId = userId;
-    emit userIdChanged(userId);
-}

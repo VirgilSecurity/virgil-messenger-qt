@@ -37,7 +37,7 @@
 #ifndef VM_MESSAGE_CONTENT_PICTURE_H
 #define VM_MESSAGE_CONTENT_PICTURE_H
 
-#include "MessageContentAttachment.h"
+#include "MessageContentFile.h"
 
 
 namespace vm {
@@ -76,9 +76,6 @@ public:
     //  Create picture message content from the given path.
     //
     static MessageContentPicture createFromLocalFile(const QUrl& localUrl);
-
-private:
-    MessageContentPicture();
 
 private:
     QString m_previewFilePath;

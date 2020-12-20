@@ -33,26 +33,70 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 
-#ifndef VM_ATTACHMENT_ID_H
-#define VM_ATTACHMENT_ID_H
+#ifndef VM_MESSAGE_CONTENT_JSON_UTILS_H
+#define VM_MESSAGE_CONTENT_JSON_UTILS_H
 
+#include "MessageContent.h"
+
+#include <QByteArray>
 #include <QString>
-#include <QVariant>
+#include <QJsonObject>
 
 namespace vm {
+
 //
-//  This class just wraps QString but is used for a strong type checking.
+//  Utility class to convert MessageContent to/from JSON.
 //
-class AttachmentId {
+class MessageContentJsonUtils {
 public:
-    explicit AttachmentId(QString attachmentId = {});
+    //
+    //  Convert message content to the JSON object.
+    //
+    static QJsonObject to(const MessageContent& messageContent);
 
-    operator QString() const;
+    //
+    //  Convert message content to the JSON string.
+    //
+    static QString toString(const MessageContent& messageContent);
 
-    bool isValid() const noexcept;
+    //
+    //  Convert message content to the JSON byte array.
+    //
+    static QByteArray toBytes(const MessageContent& messageContent);
 
-    static AttachmentId generate();
+    //
+    //  Get message content from the JSON object.
+    //
+    static MessageContent from(const QJsonObject& messageJsonObject, QString &errorString);
+
+    //
+    //  Get message content from the JSON string.
+    //
+    static MessageContent fromString(const QString& messageJsonString, QString &errorString);
+
+    //
+    //  Get message content from the JSON byte array.
+    //
+    static MessageContent fromBytes(const QByteArray& messageJsonBytes, QString &errorString);
+
+    //
+    //  Parse extra JSON fields related to a picture content.
+    //
+    static bool readExtras(const QJsonObject& json, MessageContentPicture &picture);
+
+    //
+    //  Parse extra JSON fields related to a picture content.
+    //
+    static bool readExtras(const QString& jsonString, MessageContentPicture &picture);
+
+    //
+    //  Parse write JSON fields related to a picture content.
+    //
+    static bool writeExtras(MessageContentPicture &picture, QJsonObject& json);
+private:
+    MessageContentJsonUtils() {};
+
 };
 } // namespace vm
 
-#endif // VM_ATTACHMENT_ID_H
+#endif // VM_MESSAGE_CONTENT_JSON_UTILS_H

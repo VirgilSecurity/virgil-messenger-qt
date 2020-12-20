@@ -118,23 +118,17 @@ void MessagesTable::onAddMessage(const MessageHandler &message)
         { ":stage", messageStage },
     };
 
-    const auto content = message->content();
-    switch (content->type()) {
-        case MessageContent::Type::Text:
-            values.push_back({ ":body", message->textContent()->text() });
-            values.push_back({ ":ciphertext", QVariant() });
-            break;
+    if (auto text = std::get_if<MessageContentText>(&message->content())) {
+        values.push_back({ ":body", text->text() });
+        values.push_back({ ":ciphertext", QVariant() });
 
-        case MessageContent::Type::Encrypted:
-            values.push_back({ ":ciphertext", message->encryptedContent()->ciphertext() });
-            values.push_back({ ":body", QVariant() });
-            break;
+    } else if (auto encrypted = std::get_if<MessageContentEncrypted>(&message->content())) {
+        values.push_back({ ":ciphertext", encrypted->ciphertext() });
+        values.push_back({ ":body", QVariant() });
 
-        case MessageContent::Type::Picture:
-        case MessageContent::Type::File:
-            values.push_back({ ":ciphertext", QVariant() });
-            values.push_back({ ":body", QVariant() });
-            break;
+    } else if (auto attachment = std::get_if<MessageContentAttachment>(&message->content())) {
+        values.push_back({ ":ciphertext", QVariant() });
+        values.push_back({ ":body", QVariant() });
     }
 
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertMessage"), values);

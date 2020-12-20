@@ -56,8 +56,8 @@ public:
     void setSourcePath(const QString &path);
 
 signals:
-    void progressChanged(const quint64 &bytesLoaded, const quint64 &bytesTotal);
-    void bytesCalculated(const quint64 &bytes);
+    void progressChanged(quint64 bytesLoaded, quint64 bytesTotal);
+    void bytesCalculated(quint64 bytes);
     void uploaded(const QUrl &url);
 
 private:

@@ -94,7 +94,7 @@ signals:
 
     void lastActivityTextChanged(const QString& text);
 
-    void messageReceived(const Message& message);
+    void messageReceived(ModifiableMessageHandler message);
     void messageUpadted(const MessageUpdate& messageUpdate);
 
     //

@@ -104,6 +104,14 @@ struct MessageAttachmentProcessedSizeUpdate : public MessageAttachmentUpdateBase
     quint64 size;
 };
 
+struct MessaggePictureThumbnailPathUpdate : public MessageAttachmentUpdateBase {
+    QString thumbnailPath;
+};
+
+struct MessaggePicturePreviewPathUpdate : public MessageAttachmentUpdateBase {
+    QString previewPath;
+};
+
 
 using MessageUpdate = std::variant<
     MessageUpdateBase,
@@ -116,6 +124,7 @@ using MessageUpdate = std::variant<
     MessageAttachmentFingerprintUpdate,
     MessageAttachmentSizeUpdate,
     MessageAttachmentRemoteUrlUpdate,
+    MessageAttachmentEncryptedSizeUpdate,
     MessageAttachmentLocalPathUpdate,
     MessageAttachmentProcessedSizeUpdate
     >;

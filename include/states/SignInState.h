@@ -36,9 +36,6 @@
 #define VM_SIGNINSTATE_H
 
 #include "OperationState.h"
-#include "UserId.h"
-
-#include <optional>
 
 namespace vm
 {
@@ -48,21 +45,18 @@ class UsersController;
 class SignInState : public OperationState
 {
     Q_OBJECT
-    Q_PROPERTY(QString userId MEMBER m_userId NOTIFY userIdChanged)
 
 public:
     SignInState(UsersController *usersController, Validator *validator, QState *parent);
 
 signals:
-    void signIn(const UserId &userId);
-    void userIdChanged(const UserId &userId);
+    void signIn(const QString &username);
 
 private:
-    void processSignIn(const UserId &userId);
+    void processSignIn(const QString &username);
 
     UsersController *m_usersController;
     Validator *m_validator;
-    std::optional<UserId> m_userId;
 };
 }
 

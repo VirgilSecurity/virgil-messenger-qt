@@ -69,10 +69,10 @@ signals:
     //
     //  Control signals.
     //
-    void open(const UserId &userId);
+    void open(const QString &username);
     void close();
 
-    void writeMessage(const Message &message, qsizetype unreadCount = 0);
+    void writeMessage(const MessageHandler &message, qsizetype unreadCount = 0);
     void writeChatAndLastMessage(const ChatHandler &chat);
     void resetUnreadCount(const ChatHandler &chat);
 
@@ -83,7 +83,7 @@ signals:
 
 private:
     bool create() override;
-    void onOpen(const UserId &userId);
+    void onOpen(const QString &username);
     void onClose();
 
     void onWriteMessage(const MessageHandler &message, qsizetype unreadCount);

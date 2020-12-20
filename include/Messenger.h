@@ -60,6 +60,14 @@ public:
     virtual ~Messenger() noexcept = default;
 
     //
+    //  Status.
+    //
+    //
+    //  Return true if messenger has Internet connection with all services.
+    //
+    bool isOnline() const noexcept;
+
+    //
     //  Messages.
     //
     virtual bool sendMessage(MessageHandler message) override;
@@ -67,7 +75,7 @@ public:
     //
     // User control.
     //
-    void signIn(const UserId &userId);
+    void signIn(const QString &username);
     void signOut();
     void signUp(const QString &username);
     void backupKey(const QString &password, const QString &confirmedPassword);
@@ -102,9 +110,9 @@ signals:
     //--
     // Sign-in.
     //
-    void signedIn(const QString &userId);
+    void signedIn(const QString &username);
     void signInErrorOccured(const QString &errorText);
-    void signedUp(const QString &userId);
+    void signedUp(const QString &username);
     void signUpErrorOccured(const QString &errorText);
     void signedOut();
     //--
@@ -112,17 +120,17 @@ signals:
     //--
     //  Key management.
     //
-    void keyBackuped(const QString &userId);
+    void keyBackuped(const QString &username);
     void backupKeyFailed(const QString &errorText);
-    void keyDownloaded(const QString &userId);
+    void keyDownloaded(const QString &username);
     void downloadKeyFailed(const QString &errorText);
     //--
 
     //--
     //  Messages and user activity.
     //
-    void messageUpdated(const MessageUpdate &messageUpdate);
-    void messageReceived(const Message& message);
+    void updateMessage(const MessageUpdate &messageUpdate);
+    void messageReceived(ModifiableMessageHandler message);
     void lastActivityTextChanged(const QString& text);
     //--
 
@@ -143,7 +151,7 @@ signals:
 private slots:
     void onPushNotificationTokenUpdate();
     void onConnectionStateChanged(CoreMessenger::ConnectionState state);
-    void onMessageReceived(const Message& message);
+    void onMessageReceived(ModifiableMessageHandler message);
 
 private:
     QPointer<Settings> m_settings;

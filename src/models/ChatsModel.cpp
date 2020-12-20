@@ -151,7 +151,7 @@ QVariant Self::data(const QModelIndex &index, int role) const
             return QLatin1String("...");
 
         } else {
-            return Utils::messageContentDisplayText(*chat->lastMessage()->content());
+            return Utils::messageContentDisplayText(chat->lastMessage()->content());
         }
 
     case UnreadMessagesCountRole:

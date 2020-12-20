@@ -123,7 +123,6 @@ void Self::addTransitions()
 
     m_chatListState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
     addTwoSideTransition(m_chatListState, users, &UsersController::accountSettingsRequested, m_accountSettingsState);
-    connect(users, &UsersController::accountSettingsRequested, m_accountSettingsState, &AccountSettingsState::setUserId);
     addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestNewChat, m_newChatState);
     addTwoSideTransition(m_chatListState, chats, &ChatsController::chatOpened, m_chatState);
     m_chatListState->addTransition(this, &Self::fileCloudRequested, m_fileCloudState);
@@ -133,7 +132,6 @@ void Self::addTransitions()
     m_fileCloudState->addTransition(this, &Self::chatListRequested, m_chatListState);
 
     addTwoSideTransition(m_accountSettingsState, m_accountSettingsState, &AccountSettingsState::requestBackupKey, m_backupKeyState);
-    connect(m_accountSettingsState, &AccountSettingsState::requestBackupKey, m_backupKeyState, &BackupKeyState::setUserId);
     m_accountSettingsState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
 
     m_newChatState->addTransition(chats, &ChatsController::chatOpened, m_chatState);
@@ -146,10 +144,8 @@ void Self::addTransitions()
     m_signUpState->addTransition(users, &UsersController::signedIn, m_chatListState);
 
     addTwoSideTransition(m_signInUsernameState, m_signInUsernameState, &SignInUsernameState::validated, m_signInAsState);
-    connect(m_signInUsernameState, &SignInUsernameState::validated, m_signInAsState, &SignInAsState::setUserId);
 
     addTwoSideTransition(m_signInAsState, m_signInAsState, &SignInAsState::requestDownloadKey, m_downloadKeyState);
-    connect(m_signInAsState, &SignInAsState::requestDownloadKey, m_downloadKeyState, &DownloadKeyState::setUserId);
 
     m_downloadKeyState->addTransition(users, &UsersController::signedIn, m_chatListState);
 }

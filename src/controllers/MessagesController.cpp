@@ -66,24 +66,22 @@ Self::MessagesController(Messenger *messenger, Models *models, UserDatabase *use
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
     // Queue
     connect(this, &Self::messageCreated, messagesQueue, &MessagesQueue::pushMessage);
-    connect(messagesQueue, &MessagesQueue::messageChanged, this, &Self::onMessageUpdated);
+    connect(messagesQueue, &MessagesQueue::updateMessage, this, &Self::onUpdateMessage);
     // Models
-    connect(m_models->chats(), &ChatsModel::chatUpdated, this, &Self::onChatUpdated);
     connect(m_models->messages(), &MessagesModel::displayImageNotFound, this, &Self::displayImageNotFound);
     // Messages
     connect(m_messenger, &Messenger::messageReceived, this, &Self::onMessageReceived);
-    connect(m_messenger, &Messenger::messageUpdated, this, &Self::onMessageUpdated);
+    connect(m_messenger, &Messenger::updateMessage, this, &Self::onUpdateMessage);
 }
 
 void Self::loadMessages(const ChatHandler &chat)
 {
-    m_chat = chat;
+    m_models->messages()->setChat(chat);
     m_userDatabase->messagesTable()->fetchChatMessages(chat->id());
 }
 
 void Self::clearMessages()
 {
-    m_chat = nullptr;
     m_models->messages()->cleartChat();
 }
 
@@ -92,7 +90,7 @@ void Self::sendTextMessage(const QString &body)
     auto message = m_models->messages()->createTextMessage(body);
     const qsizetype unreadCount = 0; // message can be created in current chat only
     m_models->chats()->updateLastMessage(message, unreadCount);
-    m_userDatabase->writeMessage(*message, unreadCount);
+    m_userDatabase->writeMessage(message, unreadCount);
     emit messageCreated(message);
 }
 
@@ -143,26 +141,7 @@ void Self::setupTableConnections()
     connect(table, &MessagesTable::chatMessagesFetched, m_models->messages(), &MessagesModel::setMessages);
 }
 
-void Self::setUserId(const UserId &userId)
-{
-    m_userId = userId;
-    qCDebug(lcController) << "Set messages controller userId:" << userId;
-    m_models->messages()->setUserId(userId);
-    m_models->messagesQueue()->setUserId(userId);
-
-    if (!m_userId.isEmpty()) {
-        m_postponedMessages.process(this);
-    }
-}
-
-void Self::onChatUpdated(const Chat &chat)
-{
-    if (chat.id == m_chat.id) {
-        m_chat = chat;
-    }
-}
-
-void Self::onMessageUpdated(const MessageUpdate& messageUpdate)
+void Self::onUpdateMessage(const MessageUpdate& messageUpdate)
 {
     //
     //  Update DB.
@@ -172,74 +151,47 @@ void Self::onMessageUpdated(const MessageUpdate& messageUpdate)
     //
     //  Update UI for the current chat.
     //
-    if (message.chatId() == m_chat.id()) {
-        const bool isUpdated = m_models->messages()->applyMessageUpdate(messageUpdate);
-        if (isUpdated) {
-            emit messageUpdated(messageUpdate);
-        }
+    if (m_models->messages()->updateMessage(messageUpdate)) {
+        // TODO: Check if this signal is still needed.
+        emit updateMessage(messageUpdate);
     }
 }
 
-void Self::onMessageReceived(MessageHandler message)
+void Self::onMessageReceived(ModifiableMessageHandler message)
 {
-    const auto senderId = message.senderId;
-    const auto recipientId = message.recipientId;
-    const auto timestamp = message.timestamp;
-    qInfo() << "Received message from:" << senderId << "recipient:" << recipientId;
 
-    const auto messages = m_models->messages();
-    const auto chats = m_models->chats();
-    auto chat = m_chat;
-    bool isNewChat = false;
-    if (senderId == m_userId) {
-        message.status = Message::Status::Sent;
-        if (recipientId == m_chat.contactId) {
-            qCDebug(lcController) << "Received carbon message to current chat";
-        }
-        else {
-            qCDebug(lcController) << "Received carbon message to not current chat";
-            auto senderChat = chats->findByContact(recipientId);
-            if (senderChat) {
-                chat = *senderChat;
-            }
-            else {
-                chat = chats->createChat(recipientId);
-                isNewChat = true;
-            }
-        }
-    }
-    else {
-        if (senderId == m_chat.contactId) {
-            qCDebug(lcController) << "Received a message to current chat";
-        }
-        else {
-            qCDebug(lcController) << "Received a message to not current chat";
-            auto senderChat = chats->findByContact(senderId);
-            if (senderChat) {
-                chat = *senderChat;
-            }
-            else {
-                chat = chats->createChat(senderId);
-                isNewChat = true;
-            }
-            ++chat.unreadMessageCount;
-        }
-    }
-    message.chatId = chat.id;
-    if (m_chat.id == chat.id) {
-        messages->writeMessage(message);
-    }
-    chats->updateLastMessage(message, chat.unreadMessageCount);
-    if (isNewChat) {
-        chat.lastMessage = message;
-        m_userDatabase->writeChatAndLastMessage(chat);
-    }
-    else {
-        m_userDatabase->writeMessage(message, chat.unreadMessageCount);
-    }
-    emit messageCreated({ message, m_userId, chat.contactId, senderId, recipientId });
-}
+    //
+    //  Got a new message.
+    //
+    qInfo(lcController()) << "Received message from:" << message->senderId() << "recipient:" << message->recipientId();
 
-void Self::onMessageUpdated(const MessageUpadte &messageUpdate) {
+    auto messages = m_models->messages();
+    auto chats = m_models->chats();
 
+    //
+    // Find destination chat.
+    //
+    auto destChat = chats->findChat(message->chatId());
+    if (destChat) {
+        //
+        //  Update existing chat.
+        //
+        destChat->setLastMessage(message);
+        m_userDatabase->writeMessage(message, destChat->unreadMessageCount() + 1);
+    } else {
+        //
+        //  Create a new chat.
+        //
+        destChat = std::make_unique<Chat>();
+        destChat->setId(message->chatId());
+        destChat->setCreatedAt(QDateTime::currentDateTime());
+        destChat->setLastMessage(message);
+        destChat->setType(message->isGroupChatMessage() ? ChatType::Group : ChatType::Personal);
+
+        m_userDatabase->writeChatAndLastMessage(destChat);
+    }
+
+    messages->addMessage(message);
+
+    emit messageCreated(message);
 }

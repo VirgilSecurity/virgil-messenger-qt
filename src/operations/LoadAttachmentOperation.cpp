@@ -35,6 +35,7 @@
 #include "operations/LoadAttachmentOperation.h"
 
 #include "operations/MessageOperation.h"
+#include "MessageUpdate.h"
 
 using namespace vm;
 
@@ -42,21 +43,24 @@ LoadAttachmentOperation::LoadAttachmentOperation(MessageOperation *parent)
     : NetworkOperation(parent)
 {
     setName(QLatin1String("LoadAttachment"));
-    connect(this, &Operation::started, parent, std::bind(&MessageOperation::setAttachmentStatus, parent, Attachment::Status::Loading));
-    connect(this, &Operation::finished, parent, std::bind(&MessageOperation::setAttachmentStatus, parent, Attachment::Status::Loaded));
-    connect(this, &Operation::failed, parent, std::bind(&MessageOperation::setAttachmentStatus, parent, Attachment::Status::Interrupted));
-    connect(this, &Operation::invalidated, parent, std::bind(&MessageOperation::setAttachmentStatus, parent, Attachment::Status::Invalid));
-    connect(this, &LoadAttachmentOperation::totalProgressChanged, parent, &MessageOperation::setAttachmentProcessedSize);
+
+    connect(this, &LoadAttachmentOperation::totalProgressChanged, [parent](quint64 bytesLoaded, quint64 /*bytesTotal*/) {
+        MessageAttachmentProcessedSizeUpdate update;
+        update.messageId = parent->message()->id();
+        update.attachmentId = std::get_if<MessageContentAttachment>(&parent->message()->content())->id();
+        update.size = bytesLoaded;
+        parent->messageUpdate(update);
+    });
 }
 
-void LoadAttachmentOperation::startLoadOperation(const quint64 &bytesTotal)
+void LoadAttachmentOperation::startLoadOperation(quint64 bytesTotal)
 {
     m_previousBytesTotal = m_bytesTotal;
     m_bytesTotal += bytesTotal;
     updateTotalProgress();
 }
 
-void LoadAttachmentOperation::setLoadOperationProgress(const quint64 &bytesLoaded)
+void LoadAttachmentOperation::setLoadOperationProgress(quint64 bytesLoaded)
 {
     m_currentBytesLoaded = bytesLoaded;
     updateTotalProgress();

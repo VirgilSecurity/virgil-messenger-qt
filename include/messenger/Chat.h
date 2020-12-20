@@ -136,7 +136,6 @@ public:
 
 private:
     ChatId m_id;
-    UserId m_myUserId;
     QString m_tittle;
     Type m_type;
     QDateTime m_createdAt;

@@ -50,7 +50,7 @@ void SendMessageOperation::run()
 {
     const auto message = m_parent->message();
     if (m_messageSender) {
-        const bool wasSent = m_messageSender->sendMessage(*message);
+        const bool wasSent = m_messageSender->sendMessage(message);
         if (wasSent) {
             finish();
         } else {

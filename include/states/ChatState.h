@@ -58,12 +58,11 @@ public:
     void setLastActivityText(const QString &text);
 
 signals:
+    void lastActivityTextChanged(const QString& text);
     void requestPreview(const QUrl &url);
-    void lastActivityTextChanged(const QString &text);
+    void onLastActivityTextChanged(const QString &text);
 
 private:
-    void onMessageUpdated(const MessageUpdate &messageUpdate);
-
     Controllers *m_controllers;
     QString m_lastActivityText;
 };

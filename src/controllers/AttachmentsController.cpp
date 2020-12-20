@@ -129,7 +129,7 @@ void Self::downloadDisplayImage(const MessageId &messageId)
     }
 
     qCDebug(lcController) << "Downloading of display image for:" << messageId;
-    m_models->messagesQueue()->pushMessageDownloadTumbnail(message);
+    m_models->messagesQueue()->pushMessagePreload(message);
 }
 
 void Self::downloadAttachment(const MessageHandler &message)
@@ -138,7 +138,7 @@ void Self::downloadAttachment(const MessageHandler &message)
     const auto attachment = std::get_if<MessageContentAttachment>(&message->content());
     const auto fileName = attachment->filename();
     const auto filePath = FileUtils::findUniqueFileName(m_settings->downloadsDir().filePath(fileName));
-    m_models->messagesQueue()->pushMessageDownloadAttachment(message, filePath);
+    m_models->messagesQueue()->pushMessageDownload(message, filePath);
 }
 
 void Self::decryptAttachment(const MessageHandler &message)
@@ -147,7 +147,7 @@ void Self::decryptAttachment(const MessageHandler &message)
     const auto attachment = std::get_if<MessageContentAttachment>(&message->content());
     const auto fileName = attachment->filename();
     const auto filePath = FileUtils::findUniqueFileName(m_settings->downloadsDir().filePath(fileName));
-    m_models->messagesQueue()->pushMessageDecryptAttachment(message, filePath);
+    m_models->messagesQueue()->pushMessageDownload(message, filePath); // FIXME: change to the separate "decrypt" only operation.
 }
 
 void Self::saveAttachment(const MessageHandler &message, const QUrl &fileUrl)

@@ -48,20 +48,6 @@ BackupKeyState::BackupKeyState(Messenger *messenger, QState *parent)
     connect(this, &BackupKeyState::backupKey, this, &BackupKeyState::processBackupKey);
 }
 
-QString BackupKeyState::userId() const
-{
-    return m_userId;
-}
-
-void BackupKeyState::setUserId(const QString &userId)
-{
-    if (m_userId == userId) {
-        return;
-    }
-    m_userId = userId;
-    emit userIdChanged(userId);
-}
-
 void BackupKeyState::processBackupKey(const QString &password, const QString &confirmedPassword)
 {
     emit operationStarted();

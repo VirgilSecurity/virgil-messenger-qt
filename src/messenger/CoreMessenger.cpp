@@ -38,6 +38,7 @@
 #include "CustomerEnv.h"
 #include "UserImpl.h"
 #include "CommKitBridge.h"
+#include "MessageContentJsonUtils.h"
 
 #include "VSQNetworkAnalyzer.h"
 #include "VSQDiscoveryManager.h"
@@ -567,9 +568,9 @@ Self::deregisterFromNotifications() {
 bool
 Self::subscribeToUser(const User &user) {
 
-    auto userJid = userIdToJid(user.identity());
+    auto userJid = userIdToJid(user.id());
 
-    return m_impl->contactManager->addContact(userJid, user.identity(), QString());
+    return m_impl->contactManager->addContact(userJid, user.id(), QString());
 }
 
 
@@ -709,7 +710,7 @@ Self::findUserByUsername(const QString &username) const {
     auto commKitUser = std::make_shared<User>(std::move(commKitUserImpl));
 
     m_impl->usernameToUser[username] = commKitUser;
-    m_impl->identityToUser[commKitUser->identity()] = commKitUser;
+    m_impl->identityToUser[commKitUser->id()] = commKitUser;
 
     return commKitUser;
 }
@@ -808,11 +809,10 @@ Self::sendMessage(MessageHandler message) {
         //
         //  Encrypt message content.
         //
-        auto contentJson = message->content()->toJson();
-        auto QJsonD
-        auto ciphertextDataMinLen = vssq_messenger_encrypted_message_len(m_impl->messenger.get(), plaintext.size(), recipient->impl()->user.get());
+        auto contentJson = MessageContentJsonUtils::toBytes(message->content());
+        auto ciphertextDataMinLen = vssq_messenger_encrypted_message_len(m_impl->messenger.get(), contentJson.size(), recipient->impl()->user.get());
 
-        qCDebug(lcCommKitMessenger) << "Message Len   : " << plaintext.size();
+        qCDebug(lcCommKitMessenger) << "Message Len   : " << contentJson.size();
         qCDebug(lcCommKitMessenger) << "ciphertext Len: " << ciphertextDataMinLen;
 
         QByteArray ciphertextData(ciphertextDataMinLen, 0x00);
@@ -821,7 +821,7 @@ Self::sendMessage(MessageHandler message) {
         vsc_buffer_use(ciphertext.get(),  (byte *)ciphertextData.data(), ciphertextData.size());
 
         const vssq_status_t encryptionStatus = vssq_messenger_encrypt_data(
-                    m_impl->messenger.get(), vsc_data_from(plaintext), recipient->impl()->user.get(), ciphertext.get());
+                    m_impl->messenger.get(), vsc_data_from(contentJson), recipient->impl()->user.get(), ciphertext.get());
 
         if (encryptionStatus != vssq_status_SUCCESS) {
             qCWarning(lcCommKitMessenger) << "Can not encrypt ciphertext: " << vsc_str_to_qstring(vssq_error_message_from_status(encryptionStatus));
@@ -835,17 +835,18 @@ Self::sendMessage(MessageHandler message) {
         //
         QJsonObject ciphertextJson;
         ciphertextJson.insert("version", "v3");
-        ciphertextJson.insert("timestamp", static_cast<qint64>(message.timestamp.toTime_t()));
+        ciphertextJson.insert("timestamp", static_cast<qint64>(message->createdAt().toTime_t()));
         ciphertextJson.insert("ciphertext", QString::fromLatin1(ciphertextData.toBase64()));
         auto ciphertextJsonStr = QJsonDocument(ciphertextJson).toJson(QJsonDocument::Compact);
 
         qCDebug(lcCommKitMessenger) << "Will send XMPP message with body: " << ciphertextJsonStr;
 
-        auto senderJid = userIdToJid(message.senderId);
-        auto recipientJid = userIdToJid(message.recipientId);
+        // TODO: review next lines when implement group chats.
+        auto senderJid = userIdToJid(message->senderId());
+        auto recipientJid = userIdToJid(UserId(message->chatId()));
 
         QXmppMessage xmppMessage(senderJid, recipientJid, ciphertextJsonStr);
-        xmppMessage.setStamp(message.timestamp);
+        xmppMessage.setStamp(message->createdAt());
         xmppMessage.setType(QXmppMessage::Type::Chat);
 
         //
@@ -870,12 +871,13 @@ Self::processReceivedXmppMessage(const QXmppMessage& xmppMessage) {
     return QtConcurrent::run([this, xmppMessage = xmppMessage]() -> Result {
         qCInfo(lcCommKitMessenger) << "Trying to sign in user";
 
-        Message message;
+        auto message = std::make_unique<Message>();
 
-        message.id = xmppMessage.id();
-        message.senderId = xmppMessage.from();
-        message.recipientId= xmppMessage.to();
-        message.timestamp = xmppMessage.stamp();
+        // TODO: review next lines when implement group chats.
+        message->setId(MessageId(xmppMessage.id()));
+        message->setSenderId(userIdFromJid(xmppMessage.from()));
+        message->setChatId(ChatId(userIdFromJid(xmppMessage.to())));
+        message->setCreatedAt(xmppMessage.stamp());
 
         //
         //  Unpack JSON body.
@@ -909,13 +911,15 @@ Self::processReceivedXmppMessage(const QXmppMessage& xmppMessage) {
         //
         //  Find sender.
         //
-        auto sender = findUserByUsername(message.senderId);
+        auto sender = findUserById(message->senderId());
         if (!sender) {
             //
             //  Got network troubles to find sender, so cache message and try later.
             //
             qCWarning(lcCommKitMessenger) << "Can not decrypt ciphertext - sender is not found";
-            return Self::Result::Error_UserNotFound;
+            message->setContent(MessageContentEncrypted(ciphertext));
+            emit messageReceived(std::move(message));
+            return Self::Result::Success;
         }
 
         //
@@ -937,12 +941,22 @@ Self::processReceivedXmppMessage(const QXmppMessage& xmppMessage) {
 
         plaintextData.resize(vsc_buffer_len(plaintext.get()));
 
-        message.body = std::move(plaintextData);
+        //
+        //  Parse content.
+        //
+        QString errorString;
+        auto content = MessageContentJsonUtils::fromBytes(plaintextData, errorString);
+
+        if (std::get_if<std::monostate>(&content)) {
+            return Self::Result::Error_InvalidMessageFormat;
+        }
+
+        message->setContent(std::move(content));
 
         //
         //  Tell the world we got a message.
         //
-        emit messageReceived(message);
+        emit messageReceived(std::move(message));
 
         return Self::Result::Success;
     });
@@ -1021,7 +1035,7 @@ Self::xmppOnMessageReceived(const QXmppMessage &xmppMessage) {
 void
 Self::xmppOnMessageDelivered(const QString &jid, const QString &messageId) {
     qCDebug(lcCommKitMessenger) << "Message delivered to: " << jid;
-    emit messageUpdated(MessageUpdateDelivered(messageId));
+//    emit updateMessage(MessageContentUpdateDelivered(messageId));
 }
 
 
@@ -1046,7 +1060,7 @@ Self::setCurrentRecipient(const QString& recipientId) {
     if (!recipientId.isEmpty()) {
         auto user = findUserByUsername(recipientId);
         if (user) {
-            m_impl->lastActivityManager->setCurrentJid(userIdToJid(user->identity()));
+            m_impl->lastActivityManager->setCurrentJid(userIdToJid(user->id()));
             return;
         }
     }

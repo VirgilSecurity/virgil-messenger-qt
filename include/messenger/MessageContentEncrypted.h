@@ -57,4 +57,4 @@ private:
 };
 } // namespace vm
 
-#endif VM_MESSAGE_CONTENT_ENCRYPTED_H
+#endif // VM_MESSAGE_CONTENT_ENCRYPTED_H

@@ -57,25 +57,25 @@ class UsersController : public QObject
 public:
     UsersController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
-    void signIn(const UserId &userId);
+    void signIn(const QString &username);
     void signUp(const QString &username);
 
     Q_INVOKABLE void signOut();
-    Q_INVOKABLE void requestAccountSettings(const UserId &userId);
+    Q_INVOKABLE void requestAccountSettings(const QString &username);
 
     void downloadKey(const QString &username, const QString &password);
 
 signals:
-    void signedIn(const UserId &username);
+    void signedIn(const QString &username);
     void signedOut();
     void signInErrorOccured(const QString &errorText);
     void signUpErrorOccured(const QString &errorText);
     void downloadKeyFailed(const QString &errorText);
 
-    void accountSettingsRequested(const UserId &userId);
+    void accountSettingsRequested(const QString &username);
 
 private:
-    void onSignedIn(const UserId &userId);
+    void onSignedIn(const QString &username);
     void onSignedOut();
     void onFinishSignIn();
     void onFinishSignOut();

@@ -35,17 +35,3 @@
 #include "states/SignInAsState.h"
 
 using namespace vm;
-
-QString SignInAsState::userId() const
-{
-    return m_userId;
-}
-
-void SignInAsState::setUserId(const QString &userId)
-{
-    if (m_userId == userId) {
-        return;
-    }
-    m_userId = userId;
-    emit userIdChanged(userId);
-}

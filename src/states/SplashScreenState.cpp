@@ -50,12 +50,12 @@ SplashScreenState::SplashScreenState(UsersController *usersController, Validator
 void SplashScreenState::trySignIn()
 {
     hideNativeSplashScreen();
-    const auto userId = m_settings->lastSignedInUserId();
-    if (userId.isEmpty()) {
+    const auto username = m_settings->lastSignedInUser();
+    if (username.isEmpty()) {
         emit userNotSelected();
     }
     else {
-        signIn(UserId(userId));
+        signIn(username);
     }
 }
 

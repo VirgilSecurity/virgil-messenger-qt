@@ -45,7 +45,7 @@
 class Settings : public QSettings
 {
     Q_OBJECT
-    Q_PROPERTY(QString lastSignedInUserId READ lastSignedInUserId WRITE setLastSignedInUserId NOTIFY lastSignedInUserIdChanged)
+    Q_PROPERTY(QString lastSignedInUser READ lastSignedInUser WRITE setLastSignedInUser NOTIFY lastSignedInUserChanged)
     Q_PROPERTY(QStringList usersList READ usersList WRITE setUsersList NOTIFY usersListChanged)
     Q_PROPERTY(bool devMode READ devMode CONSTANT)
     Q_PROPERTY(bool fileCloudEnabled READ fileCloudEnabled CONSTANT)
@@ -59,8 +59,8 @@ public:
 
     // Users
 
-    void setLastSignedInUserId(const QString &userId);
-    QString lastSignedInUserId() const;
+    void setLastSignedInUser(const QString &username);
+    QString lastSignedInUser() const;
 
     void setUsersList(const QStringList &users);
     QStringList usersList() const;
@@ -99,7 +99,7 @@ public:
     std::chrono::seconds nowInterval() const;
 
 signals:
-    void lastSignedInUserIdChanged(const QString &);
+    void lastSignedInUserChanged(const QString &username);
     void usersListChanged(const QStringList &);
     void windowGeometryChanged(const QRect &); // Required by QML, not used
 

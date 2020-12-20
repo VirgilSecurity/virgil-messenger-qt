@@ -40,6 +40,11 @@
 #include "operations/NetworkOperation.h"
 
 #include <QPointer>
+#include <QLoggingCategory>
+
+
+Q_DECLARE_LOGGING_CATEGORY(lcMessageQueue);
+
 
 class Settings;
 
@@ -59,59 +64,32 @@ public:
 signals:
     void setUserId(const UserId &userId);
     void pushMessage(const MessageHandler &message);
-    void pushMessageDecrypt(const MessageHandler &message);
-    void pushMessageDownloadAttachment(const MessageHandler &message, const QString &filePath);
-    void pushMessageDecryptAttachment(const MessageHandler &message, const QString &filePath);
-    void pushMessageDownloadTumbnail(const MessageHandler &message);
-    void pushMessageDecryptTumbnail(const MessageHandler &message);
+    void pushMessageDownload(const MessageHandler &message, const QString &filePath);
+    void pushMessagePreload(const MessageHandler &message);
 
     // Message operation
-    void messageChanged(const MessageId &messageId, const MessageUpdate& messagesUpdate);
+    void updateMessage(const MessageUpdate& messagesUpdate);
 
     void notificationCreated(const QString &notification, const bool error);
 
 private:
-    enum QueueState
-    {
-        Created = 0,
-        UserSet = 1 << 0,
-        FileLoaderReady = 1 << 1,
-        FetchNeeded = UserSet | FileLoaderReady,
-        FetchRequested = 1 << 2,
-        ReadyToStart = UserSet | FetchRequested
-    };
+    MessageOperation *pushMessageOperation(const MessageHandler &message, bool prepend = false);
 
-    void startIfReady();
-    void setQueueState(const QueueState &state);
-    void unsetQueueState(const QueueState &state);
-
-    void connectMessageOperation(MessageOperation *op);
-    MessageOperation *pushMessageOperation(const Message &message, bool prepend = false);
-
-    void onSetUserId(const UserId &userId);
-    void onPushMessage(const Message &message);
-    void onPushMessageDownload(const Message &message, const QString &filePath);
-    void onPushMessagePreload(const Message &message);
+    void onDatabaseOpened();
+    void onPushMessage(const MessageHandler &message);
+    void onPushMessageDownload(const MessageHandler &message, const QString &filePath);
+    void onPushMessagePreload(const MessageHandler &message);
 
     void onFileLoaderServiceFound(bool serviceFound);
-    void onNotSentMessagesFetched(const Messages &messages);
+    void onNotSentMessagesFetched(const ModifiableMessages &messages);
     void onFinished();
 
     // Message operation
-    void onMessageOperationStatusChanged(const MessageOperation *operation);
-    void onMessageOperationAttachmentStatusChanged(const MessageOperation *operation);
-    void onMessageOperationAttachmentUrlChanged(const MessageOperation *operation);
-    void onMessageOperationAttachmentLocalPathChanged(const MessageOperation *operation);
-    void onMessageOperationAttachmentFingerprintChanged(const MessageOperation *operation);
-    void onMessageOperationAttachmentExtrasChanged(const MessageOperation *operation);
-    void onMessageOperationAttachmentProcessedSizeChanged(const MessageOperation *operation);
-    void onMessageOperationAttachmentEncryptedSizeChanged(const MessageOperation *operation);
+    void onMessageOperationUpdated(const MessageOperation *operation);
 
     QPointer<Messenger> m_messenger;
     QPointer<UserDatabase> m_userDatabase;
     QPointer<MessageOperationFactory> m_factory;
-    UserId m_userId;
-    int m_queueState = QueueState::Created;
 };
 }
 

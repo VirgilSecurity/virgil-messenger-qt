@@ -36,30 +36,62 @@
 #ifndef VM_MESSAGE_CONTENT_TYPE_H
 #define VM_MESSAGE_CONTENT_TYPE_H
 
+#include "MessageContent.h"
+
 #include <QString>
 
-
 namespace vm {
+
+//
+//  Private helper to get compile time index of a variant.
+//
+namespace {
+template<typename VariantType, typename T, std::size_t index = 0>
+constexpr std::size_t variant_index() {
+    if constexpr (index == std::variant_size_v<VariantType>) {
+        return index;
+    } else if constexpr (std::is_same_v<std::variant_alternative_t<index, VariantType>, T>) {
+        return index;
+    } else {
+        return variant_index<VariantType, T, index + 1>();
+    }
+}
+}
+
 //
 //  Defines content type of a message.
+//  Indexes are equal to the MessageContent variant indexes.
 //
-enum class MessageContentType {
-    Encrypted,
-    Text,
-    Picture,
-    File,
+enum class MessageContentType : size_t {
+    None = variant_index<MessageContent, std::monostate>(),
+    Encrypted = variant_index<MessageContent, MessageContentEncrypted>(),
+    Text = variant_index<MessageContent, MessageContentText>(),
+    Picture = variant_index<MessageContent, MessageContentPicture>(),
+    File = variant_index<MessageContent, MessageContentFile>(),
 };
 
 //
 //  Return message content type from a given string.
 //  Throws if correspond type is not found.
 //
-MessageContentType MessageContentTypeFromString(const QString& typeString);
+MessageContentType MessageContentTypeFrom(const QString& typeString);
+
+//
+//  Return message content type from a given content.
+//  Throws if correspond type is not found.
+//
+MessageContentType MessageContentTypeFrom(const MessageContent& messageContent);
 
 //
 //  Return string from a given message content type.
 //
-QString MessageContentTypeoString(MessageContentType type);
+QString MessageContentTypeToString(MessageContentType type);
+
+//
+//  Return string from a given message content.
+//
+QString MessageContentTypeToString(const MessageContent& content);
+
 } // namespace vm
 
 #endif // VM_MESSAGE_CONTENT_TYPE_H

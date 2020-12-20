@@ -51,7 +51,7 @@ static const QString kDeviceId = "DeviceId";
 static const QString kLastSessionGroup = "LastSession";
 static const QString kWindowGeometryId = "WindowGeometry";
 static const QString kSessionId = "SessionId";
-static const QString kSignedInUserId = "SignedInUserId";
+static const QString kSignedInUsername = "SignedInUsername";
 
 using namespace vm;
 
@@ -97,19 +97,19 @@ void Settings::print()
     }
 }
 
-void Settings::setLastSignedInUserId(const QString &userId)
+void Settings::setLastSignedInUser(const QString &username)
 {
-    if (lastSignedInUserId() == userId) {
+    if (lastSignedInUser() == username) {
         return;
     }
-    setGroupValue(kLastSessionGroup, kSignedInUserId, userId);
+    setGroupValue(kLastSessionGroup, kSignedInUsername, username);
     sync();
-    emit lastSignedInUserIdChanged(userId);
+    emit lastSignedInUserChanged(username);
 }
 
-QString Settings::lastSignedInUserId() const
+QString Settings::lastSignedInUser() const
 {
-    return groupValue(kLastSessionGroup, kSignedInUserId).toString();
+    return groupValue(kLastSessionGroup, kSignedInUsername).toString();
 }
 
 void Settings::setUsersList(const QStringList &users)

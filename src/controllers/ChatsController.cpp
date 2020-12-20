@@ -63,6 +63,11 @@ ChatHandler Self::currentChat() const
     return m_currentChat;
 }
 
+QString Self::currentChatName() const
+{
+    return m_currentChat ? m_currentChat->title() : QString();
+}
+
 void Self::loadChats()
 {
     qCDebug(lcController) << "Started to load chats...";

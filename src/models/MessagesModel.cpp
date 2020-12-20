@@ -62,6 +62,16 @@ void Self::setMessages(ModifiableMessages messages)
     endResetModel();
 }
 
+void Self::addMessage(ModifiableMessageHandler message) {
+    if (m_currentChat && (m_currentChat->id() == message->chatId())) {
+        const auto count = rowCount();
+        beginInsertRows(QModelIndex(), count, count);
+        m_messages.emplace_back(std::move(message));
+        endInsertRows();
+        invalidateRow(count);
+    }
+}
+
 std::unique_ptr<OutgoingMessage> Self::createOutgoingMessage() {
     auto message = std::make_unique<OutgoingMessage>();
 
@@ -77,7 +87,7 @@ std::unique_ptr<OutgoingMessage> Self::createOutgoingMessage() {
 
 MessageHandler Self::createTextMessage(const QString &body)
 {
-    auto content = std::make_unique<MessageContentText>(body);
+    auto content = MessageContentText(body);
 
     auto message = createOutgoingMessage();
     message->setContent(std::move(content));
@@ -117,13 +127,13 @@ MessageHandler Self::appendMessage(std::unique_ptr<Message> message)
 }
 
 
-bool Self::applyMessageUpdate(const MessageUpdate &messageUpdate) {
+bool Self::updateMessage(const MessageUpdate &messageUpdate) {
     auto messageId = std::get_if<MessageUpdateBase>(&messageUpdate)->messageId;
 
     const auto messageRow = findRowById(messageId);
     if (!messageRow) {
         qCWarning(lcModel) << "Message not found! Id" << messageId;
-        return true;
+        return false;
     }
 
     auto &message = m_messages[*messageRow];
@@ -141,7 +151,7 @@ bool Self::applyMessageUpdate(const MessageUpdate &messageUpdate) {
 MessageHandler Self::findById(const MessageId &messageId) const
 {
     auto messageIt = std::find_if(std::rbegin(m_messages), std::rend(m_messages), [&messageId](auto message) {
-        return message->id == messageId;
+        return message->id() == messageId;
     });
 
     if (messageIt != std::rend(m_messages)) {
@@ -251,7 +261,7 @@ QVariant Self::data(const QModelIndex &index, int role) const
     }
 
     case AttachmentDisplayTextRole: {
-        return attachment ? Utils::messageContentDisplayText(message) : QString();
+        return attachment ? Utils::messageContentDisplayText(message->content()) : QString();
     }
 
     case AttachmentBytesTotalRole: {
@@ -319,7 +329,7 @@ QHash<int, QByteArray> Self::roleNames() const
 std::optional<int> Self::findRowById(const MessageId &messageId) const
 {
     auto messageIt = std::find_if(std::rbegin(m_messages), std::rend(m_messages), [&messageId](auto message) {
-        return message->id == messageId;
+        return message->id() == messageId;
     });
 
     if (messageIt != std::rend(m_messages)) {
@@ -354,37 +364,37 @@ void Self::invalidateModel(const QModelIndex &index, const QVector<int> &roles)
 
 QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate& messageUpdate) {
 
-    if(std::get_if<MessageStatusUpdate>(&messageUpdate)) {
+    if(std::holds_alternative<MessageStatusUpdate>(messageUpdate)) {
         return { StatusRole };
 
-    } else if(std::get_if<IncomingMessageStageUpdate>(&messageUpdate)) {
+    } else if(std::holds_alternative<IncomingMessageStageUpdate>(messageUpdate)) {
         return { StageRole };
 
-    } else if(std::get_if<OutgoingMessageStageUpdate>(&messageUpdate)) {
+    } else if(std::holds_alternative<OutgoingMessageStageUpdate>(messageUpdate)) {
         return { StatusRole };
 
-    } else if(std::get_if<MessageAttachmentUploadStageUpdate>(&messageUpdate)) {
+    } else if(std::holds_alternative<MessageAttachmentUploadStageUpdate>(messageUpdate)) {
         return { AttachmentIsLoadingRole };
 
-    } else if(std::get_if<MessageAttachmentDownloadStageUpdate>(&messageUpdate)) {
+    } else if(std::holds_alternative<MessageAttachmentDownloadStageUpdate>(messageUpdate)) {
         return { AttachmentIsLoadingRole };
 
-    } else if(std::get_if<MessageAttachmentFingerprintUpdate>(&messageUpdate)) {
+    } else if(std::holds_alternative<MessageAttachmentFingerprintUpdate>(messageUpdate)) {
         return {  };
 
-    } else if(std::get_if<MessageAttachmentSizeUpdate>(&messageUpdate)) {
+    } else if(std::holds_alternative<MessageAttachmentSizeUpdate>(messageUpdate)) {
         return { AttachmentPictureThumbnailSizeRole };
 
-    } else if(std::get_if<MessageAttachmentRemoteUrlUpdate>(&messageUpdate)) {
+    } else if(std::holds_alternative<MessageAttachmentRemoteUrlUpdate>(messageUpdate)) {
         return {  };
 
-    } else if(std::get_if<MessageAttachmentLocalPathUpdate>(&messageUpdate)) {
+    } else if(std::holds_alternative<MessageAttachmentLocalPathUpdate>(messageUpdate)) {
         return { AttachmentIconPathRole };
 
-    } else if(std::get_if<MessageAttachmentEncryptedSizeUpdate>(&messageUpdate)) {
+    } else if(std::holds_alternative<MessageAttachmentEncryptedSizeUpdate>(messageUpdate)) {
         return {  };
 
-    } else if(std::get_if<MessageAttachmentProcessedSizeUpdate>(&messageUpdate)) {
+    } else if(std::holds_alternative<MessageAttachmentProcessedSizeUpdate>(messageUpdate)) {
         return { AttachmentBytesLoadedRole };
 
     } else {

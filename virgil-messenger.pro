@@ -122,12 +122,14 @@ HEADERS += \
         include/messenger/CoreMessenger.h \
         include/messenger/IncomingMessage.h \
         include/messenger/IncomingMessageStage.h \
+        include/messenger/JsonExportable.h \
         include/messenger/Message.h \
         include/messenger/MessageContent.h \
         include/messenger/MessageContentAttachment.h \
         include/messenger/MessageContentDownloadStage.h \
         include/messenger/MessageContentEncrypted.h \
         include/messenger/MessageContentFile.h \
+        include/messenger/MessageContentJsonUtils.h \
         include/messenger/MessageContentPicture.h \
         include/messenger/MessageContentText.h \
         include/messenger/MessageContentType.h \
@@ -248,8 +250,6 @@ SOURCES += \
         src/KeyboardEventFilter.cpp \
         src/Validator.cpp \
         src/CustomerEnv.cpp \
-        # Messages
-        src/messages/Messages.cpp \
         # Messenger Core
         src/messenger/CommKitBridge.cpp \
         src/messenger/User.cpp \

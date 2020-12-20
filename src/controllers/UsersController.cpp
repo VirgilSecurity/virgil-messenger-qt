@@ -66,10 +66,10 @@ Self::UsersController(Messenger *messenger, Models *models, UserDatabase *userDa
     connect(models->chats(), &ChatsModel::addChat, this, &Self::onChatAdded);
 }
 
-void Self::signIn(const UserId &userId)
+void Self::signIn(const QString &username)
 {
-    m_userDatabase->open(userId);
-    m_messenger->signIn(userId);
+    m_userDatabase->open(username);
+    m_messenger->signIn(username);
 }
 
 void Self::signUp(const QString &username)
@@ -82,9 +82,9 @@ void Self::signOut()
     m_messenger->signOut();
 }
 
-void Self::requestAccountSettings(const UserId &userId)
+void Self::requestAccountSettings(const QString &username)
 {
-    emit accountSettingsRequested(userId);
+    emit accountSettingsRequested(username);
 }
 
 void Self::downloadKey(const QString &username, const QString &password)
@@ -92,9 +92,9 @@ void Self::downloadKey(const QString &username, const QString &password)
     m_messenger->downloadKey(username, password);
 }
 
-void Self::onSignedIn(const UserId &userId)
+void Self::onSignedIn(const QString &username)
 {
-    m_userDatabase->open(userId);
+    m_userDatabase->open(username);
 }
 
 void Self::onSignedOut()

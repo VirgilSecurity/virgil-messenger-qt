@@ -45,7 +45,6 @@ class UsersController;
 class SignUpState : public OperationState
 {
     Q_OBJECT
-    Q_PROPERTY(QString userId MEMBER m_userId NOTIFY userIdChanged)
 
 public:
     SignUpState(UsersController *usersController, Validator *validator, QState *parent);

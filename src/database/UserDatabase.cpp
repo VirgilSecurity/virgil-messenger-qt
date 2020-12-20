@@ -127,17 +127,17 @@ bool Self::create()
     return true;
 }
 
-void Self::onOpen(const UserId &userId)
+void Self::onOpen(const QString &username)
 {
-    if (!DatabaseUtils::isValidName(userId)) {
-        qCCritical(lcDatabase) << "Invalid database id:" << userId;
+    if (!DatabaseUtils::isValidName(username)) {
+        qCCritical(lcDatabase) << "Invalid database id:" << username;
         emit errorOccurred(tr("Invalid database id"));
     }
     else {
-        const QString fileName = QString("user-%1.sqlite3").arg(userId);
+        const QString fileName = QString("user-%1.sqlite3").arg(username);
         const QString filePath(m_databaseDir.filePath(fileName));
 
-        if (Database::open(filePath, userId + QLatin1String("-messenger"))) {
+        if (Database::open(filePath, username + QLatin1String("-messenger"))) {
             emit opened();
         }
         else {

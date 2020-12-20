@@ -63,6 +63,11 @@ public:
     void setMessages(ModifiableMessages messages);
 
     //
+    //  Add message to the current chat if ids match, otherwise - ignore.
+    //
+    void addMessage(ModifiableMessageHandler message);
+
+    //
     //  Invalidate chat.
     //
     void cleartChat();
@@ -85,7 +90,7 @@ public:
     //
     // Update message. Returns false if message had the same status.
     //
-    bool applyMessageUpdate(const MessageUpdate &messageUpdate);
+    bool updateMessage(const MessageUpdate &messageUpdate);
 
     //
     //  Return message if found, nullptr otherwise.

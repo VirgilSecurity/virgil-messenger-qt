@@ -73,7 +73,7 @@ public:
     void populateUpload(MessageOperation *messageOp);
     void populatePreload(MessageOperation *messageOp);
 
-    DownloadDecryptFileOperation *populateDownloadDecrypt(NetworkOperation *parent, const QUrl &url, const quint64 &bytesTotal, const QString &destPath, const UserId &senderId);
+    DownloadDecryptFileOperation *populateDownloadDecrypt(NetworkOperation *parent, const QUrl &url, quint64 bytesTotal, const QString &destPath, const UserId &senderId);
     EncryptUploadFileOperation *populateEncryptUpload(NetworkOperation *parent, const QString &sourcePath, const UserId &recipientId);
     ConvertToPngOperation *populateConvertToPngOperation(Operation *parent, const QString &sourcePath);
     CreateAttachmentThumbnailOperation *populateCreateAttachmentThumbnail(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &filePath);

@@ -63,7 +63,7 @@ signals:
     void notificationCreated(const QString &notification, const bool error);
 
     void messageCreated(const MessageHandler &message);
-    void messageUpdated(const MessageUpdate &messageUpdate);
+    void updateMessage(const MessageUpdate &messageUpdate);
 
     void displayImageNotFound(const MessageId &messageId);
 
@@ -73,16 +73,13 @@ private:
     void updateMessage(const MessageId &messageId, const MessageUpdate &messageUpdate);
 
 private slots:
-    void onChatUpdated(const Chat &chat);
-    void onMessageReceived(const MessageHandler &message);
-    void onMessageUpdated(const MessageId &messageId, const MessageUpdate& messageUpdate);
+    void onMessageReceived(ModifiableMessageHandler message);
+    void onUpdateMessage(const MessageUpdate& messageUpdate);
 
 private:
     QPointer<Messenger> m_messenger;
     QPointer<Models> m_models;
     QPointer<UserDatabase> m_userDatabase;
-
-    ChatHandler m_chat;
 };
 } // namespace vm
 

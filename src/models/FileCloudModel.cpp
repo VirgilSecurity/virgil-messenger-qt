@@ -39,6 +39,7 @@
 
 #include "Settings.h"
 #include "Utils.h"
+#include "Model.h"
 
 using namespace vm;
 
@@ -105,7 +106,7 @@ QVariant FileCloudModel::data(const QModelIndex &index, int role) const
         return info.isDir();
     case DisplayDateTimeRole: {
         const auto modified = info.fileTime(QFile::FileModificationTime);
-        const auto diff = modified.secsTo(m_now);
+        const auto diff = std::chrono::seconds(modified.secsTo(m_now));
         return Utils::formattedElapsedSeconds(diff, m_settings->nowInterval());
     }
     case DisplayFileSize:

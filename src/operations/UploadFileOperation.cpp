@@ -72,7 +72,7 @@ void Self::connectReply(QNetworkReply *reply)
 
 void Self::startUpload()
 {
-    m_fileLoader->fireStartUpload(m_putUrl, fileHandle(), std::bind(&Self::connectReply, this, args::_1));
+    m_fileLoader->fireStartUpload(m_putUrl, fileHandle(), std::bind(&Self::connectReply, this, std::placeholders::_1));
 }
 
 

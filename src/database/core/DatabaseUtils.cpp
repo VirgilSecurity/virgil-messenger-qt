@@ -39,6 +39,8 @@
 #include "AttachmentId.h"
 #include "OutgoingMessage.h"
 #include "IncomingMessage.h"
+#include "MessageContentJsonUtils.h"
+#include "MessageContentType.h"
 
 #include <QSqlError>
 #include <QSqlQuery>
@@ -167,11 +169,11 @@ MessageContent Self::readMessageContentPicture(const QSqlQuery &query) {
     //
     //  Parse extras and write to the content.
     //
-    if (!content.parseExtra(attachmentExtras)) {
-        return {};
+    if (MessageContentJsonUtils::readExtras(attachmentExtras, content)) {
+        return content;
     }
 
-    return content;
+    return {};
 }
 
 
@@ -185,7 +187,7 @@ MessageContent Self::readMessageContentText(const QSqlQuery &query) {
 
 MessageContent Self::readMessageContentEncrypted(const QSqlQuery &query) {
 
-    auto messageCiphertext = query.value("messageCiphertext").toString();
+    auto messageCiphertext = query.value("messageCiphertext").toByteArray();
 
     return MessageContentEncrypted(messageCiphertext);
 }
@@ -195,20 +197,23 @@ MessageContent Self::readMessageContent(const QSqlQuery &query) {
 
     auto contentType = query.value("contentType").toString();
     if (contentType.isEmpty()) {
-        return nullptr;
+        return {};
     }
 
-    switch (MessageContent::typeFromString(contentType)) {
-        case MessageContent::Type::File:
+    switch (MessageContentTypeFrom(contentType)) {
+        case MessageContentType::None:
+            return {};
+
+        case MessageContentType::File:
             return Self::readMessageContentFile(query);
 
-        case MessageContent::Type::Picture:
+        case MessageContentType::Picture:
             return Self::readMessageContentPicture(query);
 
-        case MessageContent::Type::Encrypted:
+        case MessageContentType::Encrypted:
             return Self::readMessageContentEncrypted(query);
 
-        case MessageContent::Type::Text:
+        case MessageContentType::Text:
             return Self::readMessageContentText(query);
     }
 }
@@ -230,7 +235,7 @@ ModifiableMessageHandler Self::readMessage(const QSqlQuery &query, const QString
     auto messageStage = query.value("messageStage").toString();
 
     auto content = readMessageContent(query);
-    if (!content) {
+    if (std::holds_alternative<std::monostate>(content)) {
         qCCritical(lcDatabase) << "Read message without content with id: " << messageId;
         return nullptr;
     }

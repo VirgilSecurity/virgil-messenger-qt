@@ -49,12 +49,8 @@ SignInState::SignInState(UsersController *usersController, Validator *validator,
     connect(this, &SignInState::signIn, this, &SignInState::processSignIn);
 }
 
-void SignInState::processSignIn(const UserId &userId)
+void SignInState::processSignIn(const QString &username)
 {
-    if (m_userId && *m_userId != userId) {
-        m_userId = userId;
-        emit userIdChanged(*m_userId);
-    }
     emit operationStarted();
-    m_usersController->signIn(*m_userId);
+    m_usersController->signIn(username);
 }

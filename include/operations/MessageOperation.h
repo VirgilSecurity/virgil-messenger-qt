@@ -36,6 +36,7 @@
 #define VS_MESSAGEOPERATION_H
 
 #include "NetworkOperation.h"
+#include "Message.h"
 
 namespace vm
 {
@@ -46,45 +47,20 @@ class MessageOperation : public NetworkOperation
     Q_OBJECT
 
 public:
-    MessageOperation(const Message &message, MessageOperationFactory *factory, NetworkOperation *parent);
+    MessageOperation(const MessageHandler &message, MessageOperationFactory *factory, NetworkOperation *parent);
 
-    const Message *message() const;
-    const Attachment *attachment() const;
+    MessageHandler message() const;
     MessageOperationFactory *factory();
 
-    void setAttachmentStatus(const Attachment::Status status);
-    void setAttachmentUrl(const QUrl &url);
-    void setAttachmentLocalPath(const QString &localPath);
-    void setAttachmentFignerprint(const QString &fingerprint);
-    void setAttachmentExtras(const QVariant &extras);
-    void setAttachmentPreviewPath(const QString &previewPath);
-    void setAttachmentThumbnailPath(const QString &thumbnailPath);
-    void setAttachmentThumbnailUrl(const QUrl &thumbnailUrl);
-
-    void setAttachmentProcessedSize(const quint64 &bytes);
-    void setAttachmentEncryptedSize(const quint64 &size);
-    void setAttachmentEncryptedThumbnailSize(const quint64 &bytes);
-
 signals:
-    void statusChanged(const Message::Status &status);
-    void attachmentStatusChanged(const Attachment::Status &status);
-    void attachmentUrlChanged(const QUrl &url);
-    void attachmentLocalPathChanged(const QString &localPath);
-    void attachmentFingerprintChanged(const QString &fingerpint);
-
-    void attachmentExtrasChanged(const QVariant &extras);
-    void attachmentProcessedSizeChanged(const quint64 &bytes);
-    void attachmentEncryptedSizeChanged(const quint64 &bytes);
+    void messageUpdate(const MessageUpdate &update);
 
 protected:
     void connectChild(Operation *child) override;
 
 private:
-    Attachment *writableAttachment();
-    void setStatus(const Message::Status &status);
-
     MessageOperationFactory *m_factory;
-    Message m_message;
+    MessageHandler m_message;
 };
 }
 

@@ -36,6 +36,7 @@
 
 #include "Settings.h"
 #include "operations/MessageOperation.h"
+#include "MessageUpdate.h"
 
 using namespace vm;
 
@@ -43,5 +44,11 @@ CreateAttachmentPreviewOperation::CreateAttachmentPreviewOperation(MessageOperat
     : CreateThumbnailOperation(parent, sourcePath, destPath, settings->previewMaxSize())
 {
     setName(QLatin1String("CreateAttachmentPreview"));
-    connect(this, &CreateThumbnailOperation::thumbnailReady, parent, &MessageOperation::setAttachmentPreviewPath);
+    connect(this, &CreateThumbnailOperation::thumbnailReady, [parent](const QString& destPath) {
+        MessaggePicturePreviewPathUpdate update;
+        update.messageId = parent->message()->id();
+        update.attachmentId = std::get_if<MessageContentAttachment>(&parent->message()->content())->id();
+        update.previewPath = destPath;
+        parent->messageUpdate(update);
+    });
 }

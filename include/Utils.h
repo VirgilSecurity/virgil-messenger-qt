@@ -61,7 +61,7 @@ namespace Utils
 
     QString messageContentDisplayText(const MessageContent &messageContent);
 
-    QString printableLoadProgress(const quint64 &loaded, const quint64 &total);
+    QString printableLoadProgress(quint64 loaded, quint64 total);
 
     // Debug
 

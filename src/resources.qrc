@@ -134,23 +134,21 @@
         <file>resources/database/createChats.sql</file>
         <file>resources/database/createContacts.sql</file>
         <file>resources/database/createMessages.sql</file>
-        <file>resources/database/checkChatByContact.sql</file>
-        <file>resources/database/initUser.sql</file>
         <file>resources/database/insertAttachment.sql</file>
         <file>resources/database/insertChat.sql</file>
         <file>resources/database/insertMessage.sql</file>
-        <file>resources/database/markMessagesAsRead.sql</file>
-        <file>resources/database/selectChats.sql</file>
-        <file>resources/database/selectChatMessages.sql</file>
-        <file>resources/database/selectNotSentMessages.sql</file>
         <file>resources/database/resetUnreadCount.sql</file>
+        <file>resources/database/selectChatMessages.sql</file>
+        <file>resources/database/selectChats.sql</file>
+        <file>resources/database/selectNotSentMessages.sql</file>
+        <file>resources/database/updateAttachmentDownloadStage.sql</file>
         <file>resources/database/updateAttachmentEncryptedSize.sql</file>
         <file>resources/database/updateAttachmentExtras.sql</file>
-        <file>resources/database/updateAttachmentStatus.sql</file>
-        <file>resources/database/updateAttachmentUrl.sql</file>
-        <file>resources/database/updateAttachmentLocalPath.sql</file>
         <file>resources/database/updateAttachmentFingerprint.sql</file>
+        <file>resources/database/updateAttachmentLocalPath.sql</file>
+        <file>resources/database/updateAttachmentUploadStage.sql</file>
+        <file>resources/database/updateAttachmentUrl.sql</file>
         <file>resources/database/updateLastMessage.sql</file>
-        <file>resources/database/updateMessageStatus.sql</file>
+        <file>resources/database/updateMessageStage.sql</file>
     </qresource>
 </RCC>

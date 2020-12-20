@@ -84,7 +84,7 @@ Self::Messenger(Settings *settings, Validator *validator)
     //  Proxy messenger signals.
     //
     connect(m_coreMessenger, &CoreMessenger::lastActivityTextChanged, this, &Self::lastActivityTextChanged);
-    connect(m_coreMessenger, &CoreMessenger::messageUpadted, this, &Self::messageUpdated);
+    connect(m_coreMessenger, &CoreMessenger::messageUpadted, this, &Self::updateMessage);
 
     //
     //  Handle connection states.
@@ -107,13 +107,13 @@ Self::Messenger(Settings *settings, Validator *validator)
 
 
 void
-Self::signIn(const UserId &userId)
+Self::signIn(const QString &username)
 {
-    FutureWorker::run(m_coreMessenger->signIn(userId), [this, userId = userId](const FutureResult &result) {
+    FutureWorker::run(m_coreMessenger->signIn(username), [this, username = username](const FutureResult &result) {
         switch (result) {
         case FutureResult::Success:
-            m_settings->setLastSignedInUserId(userId);
-            emit signedIn(userId);
+            m_settings->setLastSignedInUser(username);
+            emit signedIn(username);
             break;
 
         case FutureResult::Error_NoCred:
@@ -139,7 +139,7 @@ void
 Self::signOut()
 {
     FutureWorker::run(m_coreMessenger->signOut(), [this](const FutureResult &) {
-        m_settings->setLastSignedInUserId(QString());
+        m_settings->setLastSignedInUser(QString());
         emit signedOut();
     });
 }
@@ -153,7 +153,7 @@ Self::signUp(const QString &username)
 
         case FutureResult::Success:
             m_settings->addUserToList(username);
-            m_settings->setLastSignedInUserId(username);
+            m_settings->setLastSignedInUser(username);
             emit signedUp(username);
             break;
 
@@ -202,7 +202,7 @@ Self::downloadKey(const QString &username, const QString &password)
         FutureWorker::run(m_coreMessenger->signInWithBackupKey(username, password), [this, username = username](const FutureResult &result) {
             if (result == FutureResult::Success) {
                 m_settings->addUserToList(username);
-                m_settings->setLastSignedInUserId(username);
+                m_settings->setLastSignedInUser(username);
                 emit keyDownloaded(username);
             }
             else {
@@ -297,6 +297,6 @@ Self::onConnectionStateChanged(CoreMessenger::ConnectionState state) {
 
 
 void
-Self::onMessageReceived(const Message& message) {
-    emit messageReceived(message);
+Self::onMessageReceived(ModifiableMessageHandler message) {
+    emit messageReceived(std::move(message));
 }

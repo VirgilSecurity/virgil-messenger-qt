@@ -33,6 +33,8 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 
+// FIXME: REMOVE ME
+
 #include "Utils.h"
 
 #include <QtQml>
@@ -45,40 +47,15 @@ Q_LOGGING_CATEGORY(lcController, "controller");
 
 using namespace vm;
 
+
 void registerMessagesMetaTypes()
 {
-    qRegisterMetaType<Enums::AttachmentType>("Enums::AttachmentType");
-    qRegisterMetaType<Enums::AttachmentStatus>("Enums::AttachmentStatus");
-    qRegisterMetaType<Enums::MessageStatus>("Enums::MessageStatus");
-
-    qRegisterMetaType<UserId>("UserId");
-    qRegisterMetaType<Jid>("Jid");
-    qRegisterMetaType<UserId>("UserId");
-    qRegisterMetaType<AttachmentId>("AttachmentId");
-    qRegisterMetaType<Attachment::Type>("Attachment::Type");
-    qRegisterMetaType<Attachment::Status>("Attachment::Status");
-    qRegisterMetaType<Message>("Message");
+    qRegisterMetaType<vm::UserId>("UserId");
+    qRegisterMetaType<vm::AttachmentId>("AttachmentId");
+    qRegisterMetaType<vm::ChatId>("ChatIds");
+    qRegisterMetaType<vm::MessageId>("MessageId");
     qRegisterMetaType<MessageId>("MessageId");
-    qRegisterMetaType<Message::Status>("Message::Status");
-    qRegisterMetaType<Messages>("Messages");
-    qRegisterMetaType<Chat>("Chat");
-    qRegisterMetaType<ChatId>("ChatId");
-    qRegisterMetaType<qsizetype>("qsizetype");
-    qRegisterMetaType<Chats>("Chats");
-    qRegisterMetaType<Message>("Message");
-    qRegisterMetaType<Messages>("Messages");
-
-    qmlRegisterUncreatableMetaObject(Enums::staticMetaObject, "com.virgilsecurity.messenger", 1, 0, "Enums", "Not creatable as it is an enum type");
 }
-
-Message::Message(const Message &message, const UserId &userId, const UserId &contactId,
-                             const UserId &senderId, const UserId &recipientId)
-    : Message(message)
-    , userId(userId)
-    , contactId(contactId)
-    , senderId(senderId)
-    , recipientId(recipientId)
-{}
 
 
 QString MessageUtils::extrasToJson(const QVariant &extras, const Attachment::Type type, bool skipLocal)

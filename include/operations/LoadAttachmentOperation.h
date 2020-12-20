@@ -48,11 +48,11 @@ class LoadAttachmentOperation : public NetworkOperation
 public:
     explicit LoadAttachmentOperation(MessageOperation *parent);
 
-    void startLoadOperation(const quint64 &bytesTotal);
-    void setLoadOperationProgress(const quint64 &bytesLoaded);
+    void startLoadOperation(quint64 bytesTotal);
+    void setLoadOperationProgress(quint64 bytesLoaded);
 
 signals:
-    void totalProgressChanged(const quint64 &bytesLoaded, const quint64 &bytesTotal);
+    void totalProgressChanged(quint64 bytesLoaded, quint64 bytesTotal);
 
 private:
     void cleanup() override;

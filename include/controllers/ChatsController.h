@@ -55,9 +55,7 @@ class Messenger;
 class ChatsController : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(Chat currentChat READ currentChat NOTIFY currentChatChanged)
-    Q_PROPERTY(UserId currentChatName READ currentChatName NOTIFY currentChatNameChanged)
-    Q_PROPERTY(ChatId currentChatId READ currentChatId NOTIFY currentChatIdChanged)
+    Q_PROPERTY(QString currentChatName READ currentChatName)
 
 public:
     ChatsController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
@@ -71,7 +69,8 @@ public:
     Q_INVOKABLE void openChat(const ChatId& chatId);
     Q_INVOKABLE void openChat(const ChatHandler& chat);
     Q_INVOKABLE void closeChat();
-    Q_INVOKABLE ChatHandler currentChat() const;
+    Q_INVOKABLE QString currentChatName() const;
+    ChatHandler currentChat() const;
 
 signals:
     void errorOccurred(const QString &errorText); // TODO(fpohtmeh): remove this signal everywhere?

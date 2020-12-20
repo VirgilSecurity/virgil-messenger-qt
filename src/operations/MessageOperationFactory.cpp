@@ -83,7 +83,7 @@ void MessageOperationFactory::populatePreload(MessageOperation *messageOp)
     messageOp->appendChild(new DownloadAttachmentOperation(messageOp, m_settings, { DownloadType::Preload, QString() }));
 }
 
-DownloadDecryptFileOperation *MessageOperationFactory::populateDownloadDecrypt(NetworkOperation *parent, const QUrl &url, const quint64 &bytesTotal, const QString &destPath, const UserId &senderId)
+DownloadDecryptFileOperation *MessageOperationFactory::populateDownloadDecrypt(NetworkOperation *parent, const QUrl &url, quint64 bytesTotal, const QString &destPath, const UserId &senderId)
 {
     auto op = new DownloadDecryptFileOperation(parent, m_settings, m_messenger->fileLoader(), url, bytesTotal, destPath, senderId);
     parent->appendChild(op);
@@ -127,19 +127,17 @@ CalculateAttachmentFingerprintOperation *MessageOperationFactory::populateCalcul
 
 void MessageOperationFactory::populateAttachmentOperation(MessageOperation *messageOp)
 {
-    const auto &m = *messageOp->message();
-    if (!m.attachment) {
+    const auto message = messageOp->message();
+    if (!std::holds_alternative<MessageContentAttachment>(message->content())) {
         return;
     }
-    const auto &a = *m.attachment;
-    const bool isPicture = a.type == Attachment::Type::Picture;
-    if (m.senderId == m.userId) {
-        if (m.status == Message::Status::Created || m.status == Message::Status::Failed) {
+
+    if (message->isOutgoing()) {
+        if (auto attachment = std::get_if<MessageContentAttachment>(&message->content())) {
             populateUpload(messageOp);
         }
-    }
-    else if (m.senderId == m.contactId) {
-        if (isPicture && (m.status == Message::Status::Created || m.status == Message::Status::Read)) {
+    } else {
+        if (auto picture = std::get_if<MessageContentPicture>(&message->content())) {
             populatePreload(messageOp);
         }
     }
@@ -147,8 +145,8 @@ void MessageOperationFactory::populateAttachmentOperation(MessageOperation *mess
 
 void MessageOperationFactory::populateMessageOperation(MessageOperation *messageOp)
 {
-    const auto &message = messageOp->message();
-    if (message->senderId == message->userId && (message->status == Message::Status::Created || message->status == Message::Status::Failed)) {
+    const auto message = messageOp->message();
+    if (message->isOutgoing() && (message->status() == Message::Status::New|| message->status() == Message::Status::Failed)) {
         messageOp->appendChild(new SendMessageOperation(messageOp, m_messenger));
     }
 }

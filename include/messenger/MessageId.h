@@ -45,9 +45,11 @@ namespace vm {
 //
 class MessageId {
 public:
-    explicit MessageId(QString messageId);
+    explicit MessageId(QString messageId = {});
 
     operator QString() const;
+
+    bool isValid() const noexcept;
 
     static MessageId generate();
 };

@@ -41,6 +41,7 @@
 #include "ChatType.h"
 #include "UserId.h"
 #include "MessageContent.h"
+#include "MessageContentType.h"
 #include "MessageGroupChatInfo.h"
 #include "MessageStatus.h"
 #include "MessageUpdateable.h"
@@ -131,6 +132,11 @@ public:
     //  Return message content.
     //
     MessageContent& content();
+
+    //
+    //  Return message content type.
+    //
+    MessageContentType contentType() const noexcept;
 
     //
     //  Set message content.

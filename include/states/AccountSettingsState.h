@@ -42,20 +42,13 @@ namespace vm
 class AccountSettingsState : public QState
 {
     Q_OBJECT
-    Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
 
 public:
     explicit AccountSettingsState(QState *parent);
 
-    QString userId() const;
-    void setUserId(const QString &userId);
-
 signals:
-    void requestBackupKey(const QString &userId);
-    void userIdChanged(const QString &);
-
-private:
-    QString m_userId;
+    void requestBackupKey(const QString &username);
+    void usernameChanged(const QString &);
 };
 }
 
