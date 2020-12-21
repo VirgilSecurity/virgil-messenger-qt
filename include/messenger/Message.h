@@ -67,7 +67,6 @@ public:
 
     virtual ~Message() noexcept = default;
 
-public:
     //
     // Return message unique identifier.
     //

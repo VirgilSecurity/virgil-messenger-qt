@@ -39,6 +39,8 @@
 
 #include "VSQLastActivityIq.h"
 
+Q_DECLARE_LOGGING_CATEGORY(lcLastActivityManager)
+
 class Settings;
 
 class VSQLastActivityManager : public QXmppClientExtension

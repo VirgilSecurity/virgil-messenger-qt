@@ -81,8 +81,8 @@ void Self::onAddAttachment(MessageHandler message)
         { ":size", attachment->size() },
         { ":encryptedSize", attachment->encryptedSize() },
         { ":extras", attachment->extrasToJson() },
-        { ":uploadStage", MessageContentAttachment::uploadStageToString(attachment->uploadStage()) },
-        { ":downloadStage", MessageContentAttachment::downloadStageToString(attachment->downloadStage()) },
+        { ":uploadStage", MessageContentUploadStageToString(attachment->uploadStage()) },
+        { ":downloadStage", MessageContentDownloadStageToString(attachment->downloadStage()) },
     };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertAttachment"), values);
     if (!query) {
@@ -94,17 +94,17 @@ void Self::onAddAttachment(MessageHandler message)
 }
 
 static std::tuple<QString, DatabaseUtils::BindValues> createDatabaseBindings(const MessageUpdate &attachmentUpdate) {
-    if (auto arg = std::get_if<MessageAttachmentUploadStageUpdate>(&attachmentUpdate)) {
+    if (const auto arg = std::get_if<MessageAttachmentUploadStageUpdate>(&attachmentUpdate)) {
         return {"updateAttachmentUpladStage", {
             { ":id", QString(arg->attachmentId) },
-            { ":uploadStage",  MessageContentAttachment::uploadStageToString(arg->uploadStage) }
+            { ":uploadStage",  MessageContentUploadStageToString(arg->uploadStage) }
         }};
     }
 
-    if (auto arg = std::get_if<MessageAttachmentDownloadStageUpdate>(&attachmentUpdate)) {
+    if (const auto arg = std::get_if<MessageAttachmentDownloadStageUpdate>(&attachmentUpdate)) {
         return {"updateAttachmentDownloadStage", {
             { ":id", QString(arg->attachmentId) },
-            { ":downloadStage",  MessageContentAttachment::downloadStageToString(arg->downloadStage) }
+            { ":downloadStage",  MessageContentDownloadStageToString(arg->downloadStage) }
         }};
     }
 

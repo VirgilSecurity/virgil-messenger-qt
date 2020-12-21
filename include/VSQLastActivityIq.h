@@ -35,9 +35,13 @@
 #ifndef VM_LASTACTIVITYIQ_H
 #define VM_LASTACTIVITYIQ_H
 
+#include <chrono>
+
+#include <QLoggingCategory>
+
 #include <qxmpp/QXmppIq.h>
 
-#include <chrono>
+Q_DECLARE_LOGGING_CATEGORY(lcLastActivity)
 
 class VSQLastActivityIq : public QXmppIq
 {

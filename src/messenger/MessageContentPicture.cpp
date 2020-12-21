@@ -32,41 +32,57 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHATSTATE_H
-#define VM_CHATSTATE_H
 
-#include <QState>
-
-#include "Message.h"
+#include "MessageContentPicture.h"
 
 
-class Messenger;
+using namespace vm;
+using Self = MessageContentPicture;
 
-namespace vm
-{
-class Messenger;
-class Controllers;
 
-class ChatState : public QState
-{
-    Q_OBJECT
-    Q_PROPERTY(QString lastActivityText READ lastActivityText NOTIFY lastActivityTextChanged)
-
-public:
-    ChatState(Controllers *controllers, Messenger *messenger, QState *parent);
-
-    QString lastActivityText() const;
-
-signals:
-    void lastActivityTextChanged(const QString& text);
-    void requestPreview(const QUrl &url);
-
-private:
-    void onLastActivityTextChanged(const QString &text);
-
-    Controllers *m_controllers;
-    QString m_lastActivityText;
-};
+bool Self::applyUpdate(const MessageUpdate& update) {
+    // FIXME(fpohtmeh): implement
+    return MessageContentAttachment::applyUpdate(update);
 }
 
-#endif // VM_CHATSTATE_H
+
+QString Self::previewPath() const {
+    return m_previewPath;
+}
+
+void MessageContentPicture::setPreviewPath(const QString &path) {
+    m_previewPath = path;
+}
+
+
+QString Self::previewOrThumbnailPath() const {
+    return !m_previewPath.isEmpty() ? m_previewPath : m_thumbnail.localPath();
+}
+
+
+QSize Self::thumbnailSize() const {
+    return QSize(m_thumbnailWidth, m_thumbnailHeight);
+}
+
+
+void MessageContentPicture::setThumbnailSize(const QSize &thumbnailSize) {
+    m_thumbnailWidth = thumbnailSize.width();
+    m_thumbnailHeight = thumbnailSize.height();
+}
+
+
+MessageContentFile Self::thumbnail() const {
+    return m_thumbnail;
+}
+
+
+void MessageContentPicture::setThumbnail(MessageContentFile thumbnail)
+{
+    m_thumbnail = std::move(thumbnail);
+}
+
+
+MessageContentPicture Self::createFromLocalFile(const QUrl& localUrl) {
+    // FIXME(fpohtmeh): implement
+    return MessageContentPicture();
+}

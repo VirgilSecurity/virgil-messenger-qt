@@ -159,6 +159,7 @@ private:
     QPointer<CoreMessenger> m_coreMessenger;
     QPointer<CrashReporter> m_crashReporter;
     QPointer<FileLoader> m_fileLoader;
+    bool m_isOnline = false;
 };
 } // namespace vm
 

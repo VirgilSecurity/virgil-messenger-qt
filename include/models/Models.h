@@ -36,7 +36,6 @@
 #define VM_MODELS_H
 
 #include "AccountSelectionModel.h"
-#include "AttachmentsModel.h"
 #include "ChatsModel.h"
 #include "FileCloudModel.h"
 #include "MessagesModel.h"
@@ -59,7 +58,6 @@ class Models : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(AccountSelectionModel *accountSelection MEMBER m_accountSelection CONSTANT)
-    Q_PROPERTY(AttachmentsModel *attachments READ attachments CONSTANT)
     Q_PROPERTY(ChatsModel *chats READ chats CONSTANT)
     Q_PROPERTY(FileCloudModel *fileCloud MEMBER m_fileCloud CONSTANT)
     Q_PROPERTY(MessagesModel *messages READ messages CONSTANT)
@@ -70,8 +68,6 @@ public:
 
     const AccountSelectionModel *accountSelection() const;
     AccountSelectionModel *accountSelection();
-    const AttachmentsModel *attachments() const;
-    AttachmentsModel *attachments();
     const ChatsModel *chats() const;
     ChatsModel *chats();
     const FileCloudModel *fileCloud() const;
@@ -88,7 +84,6 @@ signals:
 
 private:
     QPointer<AccountSelectionModel> m_accountSelection;
-    QPointer<AttachmentsModel> m_attachments;
     QPointer<ChatsModel> m_chats;
     QPointer<MessagesModel> m_messages;
     QPointer<FileCloudModel> m_fileCloud;

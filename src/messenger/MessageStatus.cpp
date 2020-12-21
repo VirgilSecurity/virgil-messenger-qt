@@ -32,41 +32,55 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHATSTATE_H
-#define VM_CHATSTATE_H
 
-#include <QState>
-
-#include "Message.h"
+#include "MessageStatus.h"
 
 
-class Messenger;
+using namespace vm;
 
-namespace vm
-{
-class Messenger;
-class Controllers;
 
-class ChatState : public QState
-{
-    Q_OBJECT
-    Q_PROPERTY(QString lastActivityText READ lastActivityText NOTIFY lastActivityTextChanged)
-
-public:
-    ChatState(Controllers *controllers, Messenger *messenger, QState *parent);
-
-    QString lastActivityText() const;
-
-signals:
-    void lastActivityTextChanged(const QString& text);
-    void requestPreview(const QUrl &url);
-
-private:
-    void onLastActivityTextChanged(const QString &text);
-
-    Controllers *m_controllers;
-    QString m_lastActivityText;
-};
+MessageStatus vm::MessageStatusFromString(const QString& statusString) {
+    if (statusString == QLatin1String("new")) {
+        return MessageStatus::New;
+    }
+    else if (statusString == QLatin1String("waiting")) {
+        return MessageStatus::Waiting;
+    }
+    else if (statusString == QLatin1String("processing")) {
+        return MessageStatus::Processing;
+    }
+    else if (statusString == QLatin1String("succeed")) {
+        return MessageStatus::Succeed;
+    }
+    else if (statusString == QLatin1String("failed")) {
+        return MessageStatus::Failed;
+    }
+    else {
+        throw "Invalid MessageStatus string";
+        return {};
+    }
 }
 
-#endif // VM_CHATSTATE_H
+
+QString vm::MessageStatusToString(MessageStatus status) {
+    switch (status) {
+        case MessageStatus::New:
+            return QLatin1String("new");
+
+        case MessageStatus::Waiting:
+            return QLatin1String("waiting");
+
+        case MessageStatus::Processing:
+            return QLatin1String("processing");
+
+        case MessageStatus::Succeed:
+            return QLatin1String("succeed");
+
+        case MessageStatus::Failed:
+            return QLatin1String("failed");
+
+        default:
+            throw "Invalid MessageStatus";
+            return {};
+    }
+}

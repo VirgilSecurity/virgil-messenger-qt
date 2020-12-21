@@ -117,15 +117,15 @@ bool Self::readMessageContentAttachment(const QSqlQuery &query, MessageContentAt
     //
     //  Read generic attachment properties.
     //
-    auto attachmentId = query.value("attachmentId").toString();
-    auto attachmentFingerprint = query.value("attachmentFingerprint").toString();
-    auto attachmentFilename = query.value("attachmentFilename").toString();
-    auto attachmentLocalPath = query.value("attachmentLocalPath").toString();
-    auto attachmentUrl = query.value("attachmentUrl").toString();
-    auto attachmentSize = query.value("attachmentSize").value<quint64>();
-    auto attachmentEncryptedSize = query.value("attachmentEncryptedSize").value<quint64>();
-    auto attachmentUploadStage = query.value("attachmentUploadStage").toString();
-    auto attachmentDownloadStage = query.value("attachmentDownloadStage").toString();
+    const auto attachmentId = query.value("attachmentId").toString();
+    const auto attachmentFingerprint = query.value("attachmentFingerprint").toString();
+    const auto attachmentFilename = query.value("attachmentFilename").toString();
+    const auto attachmentLocalPath = query.value("attachmentLocalPath").toString();
+    const auto attachmentUrl = query.value("attachmentUrl").toString();
+    const auto attachmentSize = query.value("attachmentSize").value<quint64>();
+    const auto attachmentEncryptedSize = query.value("attachmentEncryptedSize").value<quint64>();
+    const auto attachmentUploadStage = query.value("attachmentUploadStage").toString();
+    const auto attachmentDownloadStage = query.value("attachmentDownloadStage").toString();
 
     attachment.setId(AttachmentId(attachmentId));
     attachment.setFingerprint(attachmentFingerprint);
@@ -134,8 +134,8 @@ bool Self::readMessageContentAttachment(const QSqlQuery &query, MessageContentAt
     attachment.setRemoteUrl(attachmentUrl);
     attachment.setSize(attachmentSize);
     attachment.setEncryptedSize(attachmentEncryptedSize);
-    attachment.setUploadStage(MessageContentAttachment::uploadStageFromString(attachmentUploadStage));
-    attachment.setDownloadStage(MessageContentAttachment::downloadStageFromString(attachmentDownloadStage));
+    attachment.setUploadStage(MessageContentUploadStageFromString(attachmentUploadStage));
+    attachment.setDownloadStage(MessageContentDownloadStageFromString(attachmentDownloadStage));
 
     return true;
 }
@@ -164,7 +164,7 @@ MessageContent Self::readMessageContentPicture(const QSqlQuery &query) {
     //
     //  Read extras.
     //
-    auto attachmentExtras = query.value("attachmentExtras").toString();
+    const auto attachmentExtras = query.value("attachmentExtras").toString();
 
     //
     //  Parse extras and write to the content.
@@ -179,7 +179,7 @@ MessageContent Self::readMessageContentPicture(const QSqlQuery &query) {
 
 MessageContent Self::readMessageContentText(const QSqlQuery &query) {
 
-    auto messageBody = query.value("messageBody").toString();
+    const auto messageBody = query.value("messageBody").toString();
 
     return MessageContentText(messageBody);
 }
@@ -187,7 +187,7 @@ MessageContent Self::readMessageContentText(const QSqlQuery &query) {
 
 MessageContent Self::readMessageContentEncrypted(const QSqlQuery &query) {
 
-    auto messageCiphertext = query.value("messageCiphertext").toByteArray();
+    const auto messageCiphertext = query.value("messageCiphertext").toByteArray();
 
     return MessageContentEncrypted(messageCiphertext);
 }
@@ -195,7 +195,7 @@ MessageContent Self::readMessageContentEncrypted(const QSqlQuery &query) {
 
 MessageContent Self::readMessageContent(const QSqlQuery &query) {
 
-    auto contentType = query.value("contentType").toString();
+    const auto contentType = query.value("contentType").toString();
     if (contentType.isEmpty()) {
         return {};
     }
@@ -227,14 +227,14 @@ ModifiableMessageHandler Self::readMessage(const QSqlQuery &query, const QString
         return nullptr;
     }
 
-    auto messageChatId = query.value("messageChatId").toString();
-    auto messageChatType = query.value("chatType").toString();
-    auto messageCreatedAt = query.value("messageCreatedAt").toULongLong();
-    auto messageAuthorId = query.value("messageAuthorId").toString();
-    auto messageIsOutgoing = query.value("messageIsOutgoing").toBool();
-    auto messageStage = query.value("messageStage").toString();
+    const auto messageChatId = query.value("messageChatId").toString();
+    const auto messageChatType = query.value("chatType").toString();
+    const auto messageCreatedAt = query.value("messageCreatedAt").toULongLong();
+    const auto messageAuthorId = query.value("messageAuthorId").toString();
+    const auto messageIsOutgoing = query.value("messageIsOutgoing").toBool();
+    const auto messageStage = query.value("messageStage").toString();
 
-    auto content = readMessageContent(query);
+    const auto content = readMessageContent(query);
     if (std::holds_alternative<std::monostate>(content)) {
         qCCritical(lcDatabase) << "Read message without content with id: " << messageId;
         return nullptr;

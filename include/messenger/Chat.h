@@ -45,24 +45,13 @@
 namespace vm {
 
 class Chat {
+
 public:
     //
     //  Defines chat type.
     //
     using Type = ChatType;
 
-    //
-    //  Return chat type from a given string.
-    //  Throws if correspond type is not found.
-    //
-    static Type typeFromString(const QString& typeString);
-
-    //
-    //  Return string from a given chat type.
-    //
-    static QString typeToString(Type type);
-
-public:
     //
     //  Return chat unique identifier.
     //
@@ -122,7 +111,6 @@ public:
     //  Set count of unread messages in chat.
     //
     void setUnreadMessageCount(qsizetype  unreadMessageCount);
-
 
 private:
     ChatId m_id;

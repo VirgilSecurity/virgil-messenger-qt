@@ -32,41 +32,19 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHATSTATE_H
-#define VM_CHATSTATE_H
 
-#include <QState>
-
-#include "Message.h"
+#include "MessageContentText.h"
 
 
-class Messenger;
+using namespace vm;
+using Self = MessageContentText;
 
-namespace vm
-{
-class Messenger;
-class Controllers;
 
-class ChatState : public QState
-{
-    Q_OBJECT
-    Q_PROPERTY(QString lastActivityText READ lastActivityText NOTIFY lastActivityTextChanged)
+Self::MessageContentText(QString text) : m_text(text) {
 
-public:
-    ChatState(Controllers *controllers, Messenger *messenger, QState *parent);
-
-    QString lastActivityText() const;
-
-signals:
-    void lastActivityTextChanged(const QString& text);
-    void requestPreview(const QUrl &url);
-
-private:
-    void onLastActivityTextChanged(const QString &text);
-
-    Controllers *m_controllers;
-    QString m_lastActivityText;
-};
 }
 
-#endif // VM_CHATSTATE_H
+
+QString Self::text() const {
+    return m_text;
+}

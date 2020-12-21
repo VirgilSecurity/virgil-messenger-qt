@@ -32,41 +32,43 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHATSTATE_H
-#define VM_CHATSTATE_H
 
-#include <QState>
-
-#include "Message.h"
+#include "MessageContentDownloadStage.h"
 
 
-class Messenger;
+using namespace vm;
 
-namespace vm
-{
-class Messenger;
-class Controllers;
 
-class ChatState : public QState
-{
-    Q_OBJECT
-    Q_PROPERTY(QString lastActivityText READ lastActivityText NOTIFY lastActivityTextChanged)
-
-public:
-    ChatState(Controllers *controllers, Messenger *messenger, QState *parent);
-
-    QString lastActivityText() const;
-
-signals:
-    void lastActivityTextChanged(const QString& text);
-    void requestPreview(const QUrl &url);
-
-private:
-    void onLastActivityTextChanged(const QString &text);
-
-    Controllers *m_controllers;
-    QString m_lastActivityText;
-};
+MessageContentDownloadStage vm::MessageContentDownloadStageFromString(const QString& stageString) {
+    if (stageString == QLatin1String("initial")) {
+        return MessageContentDownloadStage::Initial;
+    }
+    else if (stageString == QLatin1String("downloaded")) {
+        return MessageContentDownloadStage::Downloaded;
+    }
+    else if (stageString == QLatin1String("decrypted")) {
+        return MessageContentDownloadStage::Decrypted;
+    }
+    else {
+        throw "Invalid MessageContentDownloadStage string";
+        return {};
+    }
 }
 
-#endif // VM_CHATSTATE_H
+
+QString vm::MessageContentDownloadStageToString(MessageContentDownloadStage stage) {
+    switch (stage) {
+        case MessageContentDownloadStage::Initial:
+            return QLatin1String("initial");
+
+        case MessageContentDownloadStage::Downloaded:
+            return QLatin1String("downloaded");
+
+        case MessageContentDownloadStage::Decrypted:
+            return QLatin1String("decrypted");
+
+        default:
+            throw "Invalid MessageContentDownloadStage";
+            return {};
+    }
+}

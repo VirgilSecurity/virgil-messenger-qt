@@ -66,6 +66,7 @@ enum class MessageContentType : size_t {
     None = variant_index<MessageContent, std::monostate>(),
     Encrypted = variant_index<MessageContent, MessageContentEncrypted>(),
     Text = variant_index<MessageContent, MessageContentText>(),
+    Attachment = variant_index<MessageContent, MessageContentAttachment>(),
     Picture = variant_index<MessageContent, MessageContentPicture>(),
     File = variant_index<MessageContent, MessageContentFile>(),
 };

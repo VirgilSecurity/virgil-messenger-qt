@@ -138,7 +138,6 @@ HEADERS += \
         include/messenger/MessageId.h \
         include/messenger/MessageSender.h \
         include/messenger/MessageStatus.h \
-        include/messenger/MessageStatus.h \
         include/messenger/MessageUpdate.h \
         include/messenger/MessageUpdateable.h \
         include/messenger/OutgoingMessage.h \
@@ -254,13 +253,26 @@ SOURCES += \
         src/messenger/AttachmentId.cpp \
         src/messenger/Chat.cpp \
         src/messenger/ChatId.cpp \
+        src/messenger/ChatType.cpp \
         src/messenger/CommKitBridge.cpp \
         src/messenger/CoreMessenger.cpp \
         src/messenger/IncomingMessage.cpp \
+        src/messenger/IncomingMessageStage.cpp \
         src/messenger/Message.cpp \
+        src/messenger/MessageContentAttachment.cpp \
+        src/messenger/MessageContentDownloadStage.cpp \
+        src/messenger/MessageContentEncrypted.cpp \
+        src/messenger/MessageContentFile.cpp \
+        src/messenger/MessageContentJsonUtils.cpp \
+        src/messenger/MessageContentPicture.cpp \
+        src/messenger/MessageContentText.cpp \
+        src/messenger/MessageContentType.cpp \
+        src/messenger/MessageContentUploadStage.cpp \
         src/messenger/MessageGroupChatInfo.cpp \
         src/messenger/MessageId.cpp \
+        src/messenger/MessageStatus.cpp \
         src/messenger/OutgoingMessage.cpp \
+        src/messenger/OutgoingMessageStage.cpp \
         src/messenger/User.cpp \
         src/messenger/UserId.cpp \
         # Controllers

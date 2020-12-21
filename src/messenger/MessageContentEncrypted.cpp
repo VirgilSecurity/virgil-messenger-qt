@@ -32,31 +32,19 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_ATTACHMENTSMODEL_H
-#define VM_ATTACHMENTSMODEL_H
 
-#include "ListModel.h"
+#include "MessageContentEncrypted.h"
 
-#include <QPointer>
 
-class Settings;
+using namespace vm;
+using Self = MessageContentEncrypted;
 
-namespace vm
-{
-class AttachmentsModel : public ListModel
-{
-    Q_OBJECT
 
-public:
-    AttachmentsModel(Settings *settings, QObject *parent);
-    ~AttachmentsModel() override;
+Self::MessageContentEncrypted(QByteArray ciphertext) : m_ciphertext(ciphertext) {
 
-private:
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-
-    QPointer<Settings> *m_settings;
-};
 }
 
-#endif // VM_ATTACHMENTSMODEL_H
+
+QByteArray Self::ciphertext() const {
+	return m_ciphertext;
+}

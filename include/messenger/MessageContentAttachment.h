@@ -50,6 +50,7 @@ namespace vm {
 //  for instance image, file, voice record, etc.
 //
 class MessageContentAttachment : public MessageUpdateable {
+
 public:
     virtual ~MessageContentAttachment() noexcept = default;
 
@@ -59,33 +60,10 @@ public:
     using UploadStage =  MessageContentUploadStage;
 
     //
-    //  Return upload stage from a given string.
-    //  Throws if correspond stage is not found.
-    //
-    static UploadStage uploadStageFromString(const QString& stageString);
-
-    //
-    //  Return string from a given upload stage.
-    //
-    static QString uploadStageToString(UploadStage stage);
-
-    //
     //  Defines processing stages for incoming attachment.
     //
     using DownloadStage =  MessageContentDownloadStage;
 
-    //
-    //  Return download stage from a given string.
-    //  Throws if correspond stage is not found.
-    //
-    static DownloadStage downloadStageFromString(const QString& stageString);
-
-    //
-    //  Return string from a given download stage.
-    //
-    static QString downloadStageToString(DownloadStage stage);
-
-public:
     //
     //  Apply file specific update.
     //
@@ -109,7 +87,7 @@ public:
     //
     //  Set attachment file name without path.
     //
-    void setFilename(QString filename);
+    void setFilename(QString fileName);
 
     //
     //  Return attachment fingerprint.
@@ -142,7 +120,7 @@ public:
     //  Note, if attachment is outgoing remote URL is known when uploading slot is received.
     //  Note, if attachment is incoming remote URL is known from message.
     //
-    void setRemoteUrl(QUrl  remoteUrl) const;
+    void setRemoteUrl(QUrl remoteUrl);
 
     //
     //  Return attachment absolute path.
@@ -166,7 +144,7 @@ public:
     //  Note, if attachment is outgoing encrypted size is known only after encryption.
     //  Note, if attachment is incoming encrypted size is known from message.
     //
-    void setEncryptedSize(qint64 encryptedSize) const;
+    void setEncryptedSize(qint64 encryptedSize);
 
     //
     //  Return attachment processed size.
@@ -178,7 +156,7 @@ public:
     //  Set attachment processed size.
     //  Note, this property should not be persist.
     //
-    void setProcessedSize(qint64 processedSize) const;
+    void setProcessedSize(qint64 processedSize);
 
     //
     //  Return processing stages for outgoing attachment.
@@ -215,11 +193,11 @@ private:
     AttachmentId m_id;
     QString m_fileName;
     QString m_fingerprint;
-    quint64 m_size;
+    quint64 m_size = 0;
     QUrl m_remoteUrl;
     QString m_localPath;
-    quint64 m_encryptedSize;
-    quint64 m_processedSize;
+    quint64 m_encryptedSize = 0;
+    quint64 m_processedSize = 0;
     UploadStage m_uploadStage;
     DownloadStage m_downloadStage;
 

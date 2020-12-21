@@ -81,7 +81,7 @@ void ChatsTable::onFetch()
 
             chat->setId(ChatId(id));
             chat->setTitle(title);
-            chat->setType(Chat::typeFromString(type));
+            chat->setType(ChatTypeFromString(type));
             chat->setCreatedAt(QDateTime::fromTime_t(createdAt));
             chat->setLastMessage(lastMessage);
             chat->setUnreadMessageCount(unreadMessageCount);
@@ -98,7 +98,7 @@ void ChatsTable::onAddChat(const ChatHandler &chat)
     const auto lastMessageId = chat->lastMessage() ? chat->lastMessage()->id() : QString();
     const DatabaseUtils::BindValues values {
         { ":id", QString(chat->id()) },
-        { ":type", Chat::typeToString(chat->type()) },
+        { ":type", ChatTypeToString(chat->type()) },
         { ":title", chat->title() },
         { ":createdAt", chat->createdAt().toTime_t() },
         { ":lastMessageId", QVariant() },

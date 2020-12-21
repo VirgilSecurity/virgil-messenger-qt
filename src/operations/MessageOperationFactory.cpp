@@ -134,10 +134,12 @@ void MessageOperationFactory::populateAttachmentOperation(MessageOperation *mess
 
     if (message->isOutgoing()) {
         if (auto attachment = std::get_if<MessageContentAttachment>(&message->content())) {
+            Q_UNUSED(attachment)
             populateUpload(messageOp);
         }
     } else {
         if (auto picture = std::get_if<MessageContentPicture>(&message->content())) {
+            Q_UNUSED(picture)
             populatePreload(messageOp);
         }
     }

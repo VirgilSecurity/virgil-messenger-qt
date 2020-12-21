@@ -43,13 +43,10 @@
 #include <QLoggingCategory>
 #include <QDomElement>
 
-
 using namespace vm;
 using Self = VSQLastActivityManager;
 
-
-Q_LOGGING_CATEGORY(lcLastActivity, "last-activity-manager");
-
+Q_LOGGING_CATEGORY(lcLastActivityManager, "last-activity-manager");
 
 Self::VSQLastActivityManager(Settings *settings)
     : QXmppClientExtension()
@@ -122,7 +119,7 @@ QString Self::requestInfo()
     if (m_jid.isEmpty()) {
         return QString();
     }
-    qCDebug(lcLastActivity) << "Requesting info for: " << m_jid;
+    qCDebug(lcLastActivityManager) << "Requesting info for: " << m_jid;
 
     VSQLastActivityIq request;
     request.setType(QXmppIq::Get);
@@ -131,7 +128,7 @@ QString Self::requestInfo()
         return request.id();
     }
     else {
-        qCWarning(lcLastActivity) << "Last activity request failed";
+        qCWarning(lcLastActivityManager) << "Last activity request failed";
         return QString();
     }
 }
@@ -168,6 +165,6 @@ void Self::stopUpdates(bool reset)
 
 void Self::onErrorOccured(const QString &errorText)
 {
-    qCWarning(lcLastActivity) << errorText;
+    qCWarning(lcLastActivityManager) << errorText;
     stopUpdates(true);
 }

@@ -32,41 +32,60 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHATSTATE_H
-#define VM_CHATSTATE_H
 
-#include <QState>
-
-#include "Message.h"
+#include "MessageContentType.h"
 
 
-class Messenger;
+using namespace vm;
 
-namespace vm
-{
-class Messenger;
-class Controllers;
 
-class ChatState : public QState
-{
-    Q_OBJECT
-    Q_PROPERTY(QString lastActivityText READ lastActivityText NOTIFY lastActivityTextChanged)
-
-public:
-    ChatState(Controllers *controllers, Messenger *messenger, QState *parent);
-
-    QString lastActivityText() const;
-
-signals:
-    void lastActivityTextChanged(const QString& text);
-    void requestPreview(const QUrl &url);
-
-private:
-    void onLastActivityTextChanged(const QString &text);
-
-    Controllers *m_controllers;
-    QString m_lastActivityText;
-};
+MessageContentType vm::MessageContentTypeFrom(const QString& typeString) {
+    if (typeString == QLatin1String("none")) {
+        return MessageContentType::None;
+    }
+    else if (typeString == QLatin1String("encrypted")) {
+        return MessageContentType::Encrypted;
+    }
+    else if (typeString == QLatin1String("text")) {
+        return MessageContentType::Text;
+    }
+    else if (typeString == QLatin1String("picture")) {
+        return MessageContentType::Picture;
+    }
+    else if (typeString == QLatin1String("file")) {
+        return MessageContentType::File;
+    }
+    else {
+        throw "Invalid MessageContentType string";
+        return {};
+    }
 }
 
-#endif // VM_CHATSTATE_H
+
+MessageContentType vm::MessageContentTypeFrom(const MessageContent& messageContent) {
+    return static_cast<MessageContentType>(messageContent.index());
+}
+
+
+QString vm::MessageContentTypeToString(MessageContentType type) {
+    switch (type) {
+        case MessageContentType::None:
+            return QLatin1String("none");
+        case MessageContentType::Encrypted:
+            return QLatin1String("encrypted");
+        case MessageContentType::Text:
+            return QLatin1String("text");
+        case MessageContentType::Picture:
+            return QLatin1String("picture");
+        case MessageContentType::File:
+            return QLatin1String("file");
+        default:
+            throw "Invalid MessageContentType";
+            return {};
+    }
+}
+
+
+QString vm::MessageContentTypeToString(const MessageContent& content) {
+    return MessageContentTypeToString(MessageContentTypeFrom(content));
+}

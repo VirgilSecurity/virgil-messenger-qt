@@ -36,6 +36,8 @@
 #ifndef VM_MESSAGE_STATUS_H
 #define VM_MESSAGE_STATUS_H
 
+#include <QString>
+
 namespace vm {
 //
 //  Represent message processing status.

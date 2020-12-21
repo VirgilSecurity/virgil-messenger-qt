@@ -45,6 +45,7 @@ namespace vm {
 //  Handles outgoing message.
 //
 class OutgoingMessage : public Message {
+
 public:
     //
     //  Denotes the message processing stage.
@@ -62,7 +63,6 @@ public:
     //
     static QString stageToString(Stage stage);
 
-public:
     //
     //  Return true.
     //

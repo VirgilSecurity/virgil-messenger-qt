@@ -48,7 +48,7 @@ using namespace vm;
 using Self = MessagesQueue;
 
 
-Q_LOGGING_CATEGORY(lcMessageQueue, "messages-queue");
+Q_LOGGING_CATEGORY(lcMessagesQueue, "messages-queue");
 
 
 Self::MessagesQueue(const Settings *settings, Messenger *messenger, UserDatabase *userDatabase, QObject *parent)
@@ -73,6 +73,9 @@ Self::MessagesQueue(const Settings *settings, Messenger *messenger, UserDatabase
     connect(this, &Operation::finished, this, &Self::onFinished);
 }
 
+MessagesQueue::~MessagesQueue() {
+}
+
 
 void Self::onDatabaseOpened() {
     connect(m_userDatabase->messagesTable(), &MessagesTable::notSentMessagesFetched, this, &Self::onNotSentMessagesFetched);
@@ -93,9 +96,16 @@ MessageOperation *Self::pushMessageOperation(const MessageHandler &message, bool
 }
 
 
+void MessagesQueue::onFileLoaderServiceFound(bool serviceFound)
+{
+    // FIXME(fpohtmeh): remove method?
+    Q_UNUSED(serviceFound)
+}
+
+
 void Self::onNotSentMessagesFetched(const ModifiableMessages &messages)
 {
-    qCDebug(lcMessageQueue) << "Queued" << messages.size() << "unsent messages";
+    qCDebug(lcMessagesQueue) << "Queued" << messages.size() << "unsent messages";
     for (auto &m : messages) {
         if (auto op = pushMessageOperation(m)) {
             m_factory->populateAll(op);
@@ -105,7 +115,7 @@ void Self::onNotSentMessagesFetched(const ModifiableMessages &messages)
 
 void Self::onFinished()
 {
-    qCDebug(lcMessageQueue) << "Messages queue is finished";
+    qCDebug(lcMessagesQueue) << "Messages queue is finished";
 }
 
 void Self::onPushMessage(const MessageHandler &message)

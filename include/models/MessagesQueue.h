@@ -43,7 +43,7 @@
 #include <QLoggingCategory>
 
 
-Q_DECLARE_LOGGING_CATEGORY(lcMessageQueue);
+Q_DECLARE_LOGGING_CATEGORY(lcMessagesQueue);
 
 
 class Settings;

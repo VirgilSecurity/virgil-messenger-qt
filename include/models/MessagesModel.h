@@ -75,7 +75,7 @@ public:
     //
     //  Invalidate chat.
     //
-    void cleartChat();
+    void clearChat();
 
     //
     // Update message. Returns false if message had the same status.

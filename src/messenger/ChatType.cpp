@@ -32,41 +32,37 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHATSTATE_H
-#define VM_CHATSTATE_H
 
-#include <QState>
-
-#include "Message.h"
+#include "ChatType.h"
 
 
-class Messenger;
+using namespace vm;
 
-namespace vm
-{
-class Messenger;
-class Controllers;
 
-class ChatState : public QState
-{
-    Q_OBJECT
-    Q_PROPERTY(QString lastActivityText READ lastActivityText NOTIFY lastActivityTextChanged)
-
-public:
-    ChatState(Controllers *controllers, Messenger *messenger, QState *parent);
-
-    QString lastActivityText() const;
-
-signals:
-    void lastActivityTextChanged(const QString& text);
-    void requestPreview(const QUrl &url);
-
-private:
-    void onLastActivityTextChanged(const QString &text);
-
-    Controllers *m_controllers;
-    QString m_lastActivityText;
-};
+ChatType vm::ChatTypeFromString(const QString& typeString) {
+    if (typeString == QLatin1String("personal")) {
+        return ChatType::Personal;
+    }
+    else if (typeString == QLatin1String("group")) {
+        return ChatType::Group;
+    }
+    else {
+        throw "Invalid ChatType string";
+        return {};
+    }
 }
 
-#endif // VM_CHATSTATE_H
+
+QString vm::ChatTypeToString(ChatType type) {
+    switch (type) {
+        case ChatType::Personal:
+            return QLatin1String("personal");
+
+        case ChatType::Group:
+            return QLatin1String("group");
+
+        default:
+            throw "Invalid ChatType";
+            return {};
+    }
+}

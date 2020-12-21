@@ -58,6 +58,11 @@ public:
     QString previewPath() const;
 
     //
+    //  Set path to the resized picture suitable for a preview.
+    //
+    void setPreviewPath(const QString &path);
+
+    //
     //  Return preview picture path if exists or thumbnail path otherwise.
     //
     QString previewOrThumbnailPath() const;
@@ -68,9 +73,19 @@ public:
     QSize thumbnailSize() const;
 
     //
+    //  Return image thumbnail size.
+    //
+    void setThumbnailSize(const QSize &thumbnailSize);
+
+    //
     //  Return picture thumbnail.
     //
     MessageContentFile thumbnail() const;
+
+    //
+    //  Set picture thumbnail.
+    //
+    void setThumbnail(MessageContentFile thumbnail);
 
     //
     //  Create picture message content from the given path.
@@ -78,10 +93,10 @@ public:
     static MessageContentPicture createFromLocalFile(const QUrl& localUrl);
 
 private:
-    QString m_previewFilePath;
+    QString m_previewPath;
     MessageContentFile m_thumbnail;
-    qsizetype m_thumbnailHeight;
     qsizetype m_thumbnailWidth;
+    qsizetype m_thumbnailHeight;
 };
 } // namespace vm
 

@@ -106,6 +106,11 @@ Self::Messenger(Settings *settings, Validator *validator)
 }
 
 
+bool Messenger::isOnline() const noexcept {
+    return m_isOnline;
+}
+
+
 void
 Self::signIn(const QString &username)
 {
@@ -291,8 +296,10 @@ Self::onPushNotificationTokenUpdate() {
 void
 Self::onConnectionStateChanged(CoreMessenger::ConnectionState state) {
     const bool isOnline = CoreMessenger::ConnectionState::Connected == state;
-
-    emit onlineStatusChanged(isOnline);
+    if (m_isOnline != isOnline) {
+        m_isOnline = isOnline;
+        emit onlineStatusChanged(isOnline);
+    }
 }
 
 

@@ -48,6 +48,7 @@ namespace vm {
 //  Utility class to convert MessageContent to/from JSON.
 //
 class MessageContentJsonUtils {
+
 public:
     //
     //  Convert message content to the JSON object.
@@ -92,7 +93,8 @@ public:
     //
     //  Parse write JSON fields related to a picture content.
     //
-    static bool writeExtras(MessageContentPicture &picture, QJsonObject& json);
+    static bool writeExtras(const MessageContentPicture &picture, QJsonObject& json);
+
 private:
     MessageContentJsonUtils() {};
 

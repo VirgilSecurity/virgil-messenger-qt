@@ -62,7 +62,6 @@ public:
     //
     static QString stageToString(Stage stage);
 
-public:
     //
     //  Return true.
     //
@@ -92,6 +91,7 @@ public:
     //  Apply message update. Return true some properties were actually updated.
     //
     bool applyUpdate(const MessageUpdate& update) override;
+
 private:
     Stage m_stage;
 

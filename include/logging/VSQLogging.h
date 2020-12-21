@@ -35,6 +35,8 @@
 #ifndef VSQLOGGING_H
 #define VSQLOGGING_H
 
+#include <memory>
+
 #include <QObject>
 
 #include "VSQMessageLogContext.h"

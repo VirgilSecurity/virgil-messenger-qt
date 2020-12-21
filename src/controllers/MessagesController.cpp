@@ -83,7 +83,7 @@ void Self::loadMessages(const ChatHandler &chat)
 
 void Self::clearMessages()
 {
-    m_models->messages()->cleartChat();
+    m_models->messages()->clearChat();
 }
 
 void Self::sendTextMessage(const QString &body)
@@ -154,6 +154,7 @@ std::unique_ptr<OutgoingMessage> Self::createOutgoingMessage() {
     return message;
 }
 
+
 ModifiableMessageHandler Self::createTextMessage(const QString &body)
 {
     auto content = MessageContentText(body);
@@ -164,6 +165,7 @@ ModifiableMessageHandler Self::createTextMessage(const QString &body)
     return message;
 }
 
+
 ModifiableMessageHandler Self::createFileMessage(const QUrl &localFileUrl)
 {
     auto content = MessageContentFile::createFromLocalFile(localFileUrl);
@@ -173,6 +175,7 @@ ModifiableMessageHandler Self::createFileMessage(const QUrl &localFileUrl)
 
     return message;
 }
+
 
 ModifiableMessageHandler Self::createPictureMessage(const QUrl &localFileUrl)
 {

@@ -79,7 +79,7 @@ void Self::addMessage(ModifiableMessageHandler message) {
 }
 
 
-void Self::cleartChat() {
+void Self::clearChat() {
     qCDebug(lcModel) << "Clear all messages";
     beginResetModel();
     m_messages.clear();
