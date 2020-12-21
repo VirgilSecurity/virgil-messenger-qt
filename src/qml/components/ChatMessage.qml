@@ -7,11 +7,12 @@ import com.virgilsecurity.messenger 1.0
 import "../base"
 import "../theme"
 
-
 Control {
     id: chatMessage
-    height: row.implicitHeight
+    height: row.height
     width: loader.item.width
+
+    property int thisIndex: -1
 
     property double maxWidth: parent.width
     readonly property real leftIndent: row.spacing + avatar.width
@@ -58,6 +59,181 @@ Control {
         readonly property color background: isOwnMessage ? "#59717D" : Theme.mainBackgroundColor
         readonly property bool isPicture: hasAttachment && attachmentType == Enums.AttachmentType.Picture
         readonly property double defaultRadius: 4
+    }
+
+    Row {
+        id: row
+        spacing: 12
+
+        Column {
+            anchors.top: parent.top
+
+            Item {
+                visible: firstInRow
+                width: parent.width
+                height: 3
+            }
+
+            Avatar {
+                id: avatar
+                width: 30
+                height: width
+                opacity: firstInRow ? 1 : 0
+            }
+        }
+
+        Column {
+            spacing: 4
+            anchors.top: parent.top
+
+            // Nickname + timestamp
+
+            Item {
+                id: nicknameTopSeparator
+                visible: firstInRow
+                width: parent.width
+                height: 5
+            }
+
+            Row {
+                visible: firstInRow
+                spacing: 6
+
+                Label {
+                    text: nickname
+                    color: Theme.labelColor
+                    font.pixelSize: UiHelper.fixFontSz(14)
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                Label {
+                    text: displayTime
+                    color: Theme.labelColor
+                    font.pixelSize: UiHelper.fixFontSz(11)
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        verticalCenterOffset: 1
+                    }
+                }
+            }
+
+            // Message or attachment with status
+            Item {
+                width: loader.item.width
+                height: loader.item.height
+
+                Rectangle {
+                    visible: d.isPicture
+                    width: parent.width
+                    height: parent.height
+                    color: d.background
+                    radius: d.defaultRadius
+                }
+
+                Rectangle {
+                    id: paintingRec
+                    visible: !d.isPicture
+                    width: parent.width
+                    height: parent.height
+                    color: d.background
+                    radius: stdRadiusHeight
+
+                    Shape {
+                        id: messageShape
+                        anchors.fill: parent
+                        layer.enabled: true
+                        layer.samples: 4
+
+                        ShapePath {
+                            strokeColor: "transparent"
+                            strokeWidth: 0
+                            fillColor: d.background
+                            capStyle: ShapePath.RoundCap
+                            joinStyle: ShapePath.RoundJoin
+
+                             startX: 0
+                             startY: messageShape.height * 0.5
+                             PathLine {x: 0; y: 4}
+
+                             PathQuad {x: 4; y: 0; controlX: 0; controlY: 0}
+
+                             PathLine {x: messageShape.width * 0.5; y: 0}
+
+                             PathLine {x: messageShape.width * 0.5; y: messageShape.height}
+
+                             PathLine {x: leftBottomRadiusHeight; y: messageShape.height}
+
+                             PathQuad {x: 0; y: messageShape.height - leftBottomRadiusHeight; controlX: 0; controlY: messageShape.height}
+                        }
+                    }
+                }
+
+                Loader {
+                    id: loader
+                    sourceComponent: d.hasAttachment ? attachmentComponent : textEditComponent
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Platform.isDesktop ? (Qt.LeftButton | Qt.RightButton) : Qt.LeftButton
+
+                    onClicked: function(mouse) {
+                        if (Platform.isDesktop && mouse.button == Qt.RightButton) {
+                            var coord = mapToItem(chatMessage, mouse.x, mouse.y)
+                            openContextMenu(messageId, coord, loader.item.contextMenu)
+                        }
+                        else if (d.hasAttachment) {
+                            if (attachmentFileExists) {
+                                controllers.attachments.open(messageId)
+                            }
+                            else {
+                                controllers.attachments.download(messageId)
+                            }
+                        }
+                    }
+                    onPressAndHold: {
+                        if (Platform.isMobile) {
+                            var coord = mapToItem(chatMessage, mouse.x, mouse.y)
+                            openContextMenu(messageId, coord, loader.item.contextMenu)
+                        }
+                    }
+                }
+
+                Item {
+                    id: messageStatus
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        right: parent.right
+                        rightMargin: -Theme.margin
+                    }
+                    width: stdCheckHeight
+                    height: stdCheckHeight
+
+                    Image {
+                        anchors.fill: parent
+                        source: "../resources/icons/Check.png"
+                        visible: isCheckVisible()
+                    }
+
+                    Item {
+                        id: messageIsBroken
+                        anchors.fill: parent
+                        visible: chatMessage.isBroken
+                        Repeater {
+                            model: 2
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: 0.75 * parent.width
+                                height: 2
+                                radius: height
+                                color: Theme.buttonPrimaryColor
+                                rotation: index ? -45 : 45
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     Component {
@@ -195,180 +371,6 @@ Control {
                 Action {
                     text: Platform.isMobile ? qsTr("Save to downloads") : qsTr("Save As...")
                     onTriggered: (Platform.isMobile ? controllers.attachments.download : chatMessage.saveAttachmentAs)(messageId)
-                }
-            }
-        }
-    }
-
-    Row {
-        id: row
-        spacing: 12
-
-        Column {
-            anchors.top: parent.top
-
-            Item {
-                visible: firstInRow
-                width: parent.width
-                height: 3
-            }
-
-            Avatar {
-                id: avatar
-                width: 30
-                height: width
-                opacity: firstInRow ? 1 : 0
-            }
-        }
-
-        Column {
-            spacing: 4
-            anchors.top: parent.top
-
-            // Nickname + timestamp
-
-            Item {
-                visible: firstInRow
-                width: parent.width
-                height: 5
-            }
-
-            Row {
-                visible: firstInRow
-                spacing: 6
-
-                Label {
-                    text: nickname
-                    color: Theme.labelColor
-                    font.pixelSize: UiHelper.fixFontSz(14)
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-
-                Label {
-                    text: displayTime
-                    color: Theme.labelColor
-                    font.pixelSize: UiHelper.fixFontSz(11)
-                    anchors {
-                        verticalCenter: parent.verticalCenter
-                        verticalCenterOffset: 1
-                    }
-                }
-            }
-
-            // Message or attachment
-            Item {
-                width: loader.item.width
-                height: loader.item.height
-
-                Rectangle {
-                    visible: d.isPicture
-                    width: parent.width
-                    height: parent.height
-                    color: d.background
-                    radius: d.defaultRadius
-                }
-
-                Rectangle {
-                    id: paintingRec
-                    visible: !d.isPicture
-                    width: parent.width
-                    height: parent.height
-                    color: d.background
-                    radius: stdRadiusHeight
-
-                    Shape {
-                        id: messageShape
-                        anchors.fill: parent
-                        layer.enabled: true
-                        layer.samples: 4
-
-                        ShapePath {
-                            strokeColor: "transparent"
-                            strokeWidth: 0
-                            fillColor: d.background
-                            capStyle: ShapePath.RoundCap
-                            joinStyle: ShapePath.RoundJoin
-
-                             startX: 0
-                             startY: messageShape.height * 0.5
-                             PathLine {x: 0; y: 4}
-
-                             PathQuad {x: 4; y: 0; controlX: 0; controlY: 0}
-
-                             PathLine {x: messageShape.width * 0.5; y: 0}
-
-                             PathLine {x: messageShape.width * 0.5; y: messageShape.height}
-
-                             PathLine {x: leftBottomRadiusHeight; y: messageShape.height}
-
-                             PathQuad {x: 0; y: messageShape.height - leftBottomRadiusHeight; controlX: 0; controlY: messageShape.height}
-                        }
-                    }
-                }
-
-                Loader {
-                    id: loader
-                    sourceComponent: d.hasAttachment ? attachmentComponent : textEditComponent
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    acceptedButtons: Platform.isDesktop ? (Qt.LeftButton | Qt.RightButton) : Qt.LeftButton
-
-                    onClicked: function(mouse) {
-                        if (Platform.isDesktop && mouse.button == Qt.RightButton) {
-                            var coord = mapToItem(chatMessage, mouse.x, mouse.y)
-                            openContextMenu(messageId, coord, loader.item.contextMenu)
-                        }
-                        else if (d.hasAttachment) {
-                            if (attachmentFileExists) {
-                                controllers.attachments.open(messageId)
-                            }
-                            else {
-                                controllers.attachments.download(messageId)
-                            }
-                        }
-                    }
-                    onPressAndHold: {
-                        if (Platform.isMobile) {
-                            var coord = mapToItem(chatMessage, mouse.x, mouse.y)
-                            openContextMenu(messageId, coord, loader.item.contextMenu)
-                        }
-                    }
-                }
-
-                Item {
-                    id: messageStatus
-                    anchors {
-                        verticalCenter: parent.verticalCenter
-                        right: parent.right
-                        rightMargin: -Theme.margin
-                    }
-                    width: stdCheckHeight
-                    height: stdCheckHeight
-
-                    Image {
-                        anchors.fill: parent
-                        source: "../resources/icons/Check.png"
-                        visible: isCheckVisible()
-                    }
-
-                    Item {
-                        id: messageIsBroken
-                        anchors.fill: parent
-                        visible: chatMessage.isBroken
-                        Repeater {
-                            model: 2
-                            Rectangle {
-                                anchors.centerIn: parent
-                                width: 0.75 * parent.width
-                                height: 2
-                                radius: height
-                                color: Theme.buttonPrimaryColor
-                                rotation: index ? -45 : 45
-                            }
-                        }
-                    }
                 }
             }
         }

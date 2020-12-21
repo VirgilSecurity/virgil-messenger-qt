@@ -14,6 +14,7 @@ Page {
 
     readonly property var appState: app.stateManager.chatState
     readonly property var contactId: controllers.chats.currentContactId
+    property real chatListViewHeight: 0
 
     QtObject {
         id: d
@@ -81,159 +82,221 @@ Page {
         }
     }
 
-    ModelListView {
-        id: chatListView
+//  ChatListItem
+    Item {
+        id: chatListItem
+        anchors.fill: parent
 
         property real previousHeight: 0.0
-        property var contextMenu: null
+        property real chatContentHeight: chatListView.height
         property bool animationEnabled: false
+        property bool autoFlickToBottom: true
+        property bool autoFlickToBottomButtonVisible: false
+        readonly property int minHeightToDisableAutoFlick: 100
 
-        anchors {
-            fill: parent
-            leftMargin: Theme.margin
-            rightMargin: Theme.margin
-        }
+        property int unreadMessages: 0
 
-        spacing: d.listSpacing
-        section.property: "day"
-        section.delegate: ChatDateSeporator {
-            date: section
-        }
-
-        model: models.messages
-        delegate: messageDelegate
-
-        ScrollBar.vertical: ScrollBar { }
-
-        Component.onCompleted: {
-            previousHeight = height
-            chatListView.positionViewAtEnd()
-        }
-
-        onCountChanged: {
-            if (chatListView.animationEnabled) {
-                flickTimer.restart()
-            } else {
-                chatListView.positionViewAtEnd()
-                animationEnableTimer.restart()
-            }
-        }
-
-        onHeightChanged: {
-            if (height < previousHeight) {
-                flickTimer.restart()
-            }
-            previousHeight = height
-        }
-
-        MouseArea {
+        Flickable {
+            id: chatFlickable
             anchors.fill: parent
-            onPressed: {
-                forceActiveFocus()
-                mouse.accepted = false
-            }
-            onWheel: {
-                if (chatListView.contextMenu) {
-                    chatListView.contextMenu.visible = false
+            contentHeight: chatListItem.chatContentHeight
+
+            property real previousContentY: contentY
+            onContentYChanged: chatListItem.autoFlickToBottomController()
+            Behavior on contentY {
+                NumberAnimation {
+                    duration: chatListItem.animationEnabled ? Theme.animationDuration : 0
+                    easing.type: Easing.InOutCubic
                 }
-                wheel.accepted = false
             }
+
+//            onHeightChanged: chatListItem.heightChangedController() not working yet
+
+            ChatPageList {
+                id: chatListView
+
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    leftMargin: Theme.margin
+                    rightMargin: Theme.margin
+                    top: parent.top
+                }
+
+                interactive: false
+                height: contentHeight
+                onCountChanged: chatListItem.flickToBottomController()
+
+                footer: Item {
+                    width: parent.width
+                    height: Theme.smallSpacing
+                }
+            }
+
+            ScrollBar.vertical: ScrollBar { }
         }
 
         Timer {
-            id: animationEnableTimer
+            running: true
             repeat: false
             interval: Theme.animationDuration
             onTriggered: {
-                chatListView.animationEnabled = true
+                chatListItem.animationEnabled = true
             }
         }
 
-        Timer {
-            id: flickTimer
-            repeat: false
-            interval: 50
-            onTriggered: {
-                chatListView.flickLastMessage()
-                repeatflickTimer.restart()
+//      Funtions
+        function flickToBottomController(newItem = true) {
+            if (chatListItem.autoFlickToBottom) {
+                if (chatListItem.animationEnabled) {
+                    flickChatToBottom(newItem)
+                } else {
+                    setChatToBottom()
+                }
+                return
+            }
+
+//            if (newItem) {
+//                let lastItem = chatListView.itemAtIndex(chatListView.count - 1)
+//                if (lastItem) {
+//                }
+//                unreadMessages += 1
+//            }
+        }
+
+        function isChatBottom() { // not using
+            if (chatFlickable.atYEnd) {
+                chatListItem.animationEnabled = true
+            } else {
+                chatListItem.animationEnabled = false
+                chatFlickable.contentY = chatListItem.chatContentHeight
+                chatListItem.animationEnabled = true
             }
         }
 
-        Timer {
-            id: repeatflickTimer
-            repeat: false
-            interval: Theme.animationDuration
-            onTriggered: {
-                chatListView.flickLastMessage()
+        function setChatToBottom() {
+            chatFlickable.contentY = chatListItem.chatContentHeight
+        }
+
+        function flickChatToBottom(newItem) {
+            if (chatListItem.chatContentHeight < chatListItem.height) {
+                chatFlickable.contentY = 0
+                return
+            }
+
+            let contentDiff = chatListItem.height
+            if (newItem === true) {
+                let lastItem = chatListView.itemAtIndex(chatListView.count - 1)
+                if (lastItem) {
+                    contentDiff -= (lastItem.height + chatListView.spacing)
+                    console.log("INSIDE: ", lastItem.height, lastItem.body, lastItem.firstInRow)
+                }
+            }
+
+            chatFlickable.contentY = chatListItem.chatContentHeight - contentDiff
+        }
+
+        function heightChangedController() {
+            let val = 0
+            if (chatListItem.height < chatListItem.previousHeight) {
+                chatListItem.flickToBottomController(false)
+                val = 1
+            }
+            chatListItem.previousHeight = chatListItem.height
+
+            console.log("heightChangedController", val)
+        }
+
+        function autoFlickToBottomController() {
+
+            if (flk.chatAtBottom()) {
+                flk.setAutoFlick(true, false)
+                flk.setNewContentY()
+                return
+            }
+
+            if (flk.unreadMessages() || flk.scrollingDown()) {
+                flk.setAutoFlick(flk.chatAtBottom(), !flk.chatAtBottom())
+                flk.setNewContentY()
+                return
+            }
+
+            if (!flk.scrollingDown()) {
+                flk.setAutoFlick(false, false)
+                flk.setNewContentY()
+                return
             }
         }
 
-        function flickLastMessage() {
-            let position = chatListView.contentY
-            chatListView.positionViewAtEnd()
-            let destPosition = chatListView.contentY
+        QtObject {
+            id: flk
 
-            flickAnimation.from = position
-            flickAnimation.to = destPosition
-            flickAnimation.start()
-        }
+            function scrollingDown() {
+                return chatFlickable.contentY > chatFlickable.previousContentY
+            }
 
-        NumberAnimation {
-            id: flickAnimation
-            target: chatListView
-            property: "contentY"
-            duration: Theme.animationDuration
+            function chatAtBottom() {
+                let autoFlickMinDiff = chatListItem.height + chatListItem.minHeightToDisableAutoFlick
+                return chatFlickable.contentHeight - chatFlickable.contentY < autoFlickMinDiff
+            }
+
+            function unreadMessages() {
+                return false
+            }
+
+            function setNewContentY() {
+                chatFlickable.previousContentY = chatFlickable.contentY
+            }
+
+            function setAutoFlick(autoFlick, buttonVisible) {
+                chatListItem.autoFlickToBottom = autoFlick
+                chatListItem.autoFlickToBottomButtonVisible = buttonVisible
+            }
         }
     }
 
-    Component {
-        id: messageDelegate
+//  Components
+    Item {
+        anchors {
+            bottom: parent.bottom
+            right: parent.right
+            bottomMargin: Theme.margin * 3
+            rightMargin: Theme.margin
+        }
+        width: scrollToBottomButton.width + Theme.margin
+        height: scrollToBottomButton.height + Theme.margin
+        opacity: chatListItem.autoFlickToBottomButtonVisible ? 1 : 0
+        visible: opacity > 0 ? true : false
+        layer.enabled: true
 
-        ChatMessage {
-            readonly property real fullWidth: root.width - 2 * Theme.margin - leftIndent
+        Behavior on opacity {
+            NumberAnimation { duration: Theme.shortAnimationDuration; easing.type: Easing.InOutCubic }
+        }
 
-            maxWidth: Platform.isMobile ? (fullWidth - 2 * Theme.margin) : fullWidth
+        ImageButton {
+            id: scrollToBottomButton
+            anchors.centerIn: parent
+            backgroundColor: Theme.chatSeparatorColor
+            image: "Arrow-Right"
+            rotation: 90
 
-            body: model.body
-            displayTime: model.displayTime
-            nickname: model.authorId
-            isOwnMessage: model.authorId === controllers.users.userId
-            status: isOwnMessage ? model.status : "none"
-            messageId: model.id
-            inRow: model.inRow
-            firstInRow: model.firstInRow
-            isBroken: model.isBroken
-
-            attachmentId: model.attachmentId
-            attachmentType: model.attachmentType
-            attachmentStatus: model.attachmentStatus
-            attachmentDisplaySize: model.attachmentDisplaySize
-            attachmentDisplayText: model.attachmentDisplayText
-            attachmentDisplayProgress: model.attachmentDisplayProgress
-            attachmentBytesTotal: model.attachmentBytesTotal
-            attachmentBytesLoaded: model.attachmentBytesLoaded
-            attachmentImagePath: model.attachmentImagePath
-            attachmentThumbnailWidth: model.attachmentImageSize.width
-            attachmentThumbnailHeight: model.attachmentImageSize.height
-            attachmentFileExists: model.attachmentFileExists
-
-            onSaveAttachmentAs: function(messageId) {
-                saveAttachmentAsDialog.messageId = messageId
-                saveAttachmentAsDialog.attachmentType = attachmentType
-                saveAttachmentAsDialog.open()
+            onClicked: {
+                chatListItem.autoFlickToBottom = true
+                chatListItem.flickToBottomController(false)
             }
+        }
 
-            onOpenContextMenu: function(messageId, mouse, contextMenu) {
-                if (!contextMenu.enabled) {
-                    return
-                }
-                chatListView.contextMenu = contextMenu
-                var coord = mapToItem(chatListView, mouse.x, mouse.y)
-                contextMenu.x = coord.x - (Platform.isMobile ? contextMenu.width : 0)
-                contextMenu.y = coord.y
-                contextMenu.parent = chatListView
-                contextMenu.open()
+        Rectangle {
+            anchors {
+                horizontalCenter: scrollToBottomButton.right
+                horizontalCenterOffset: -5
+                verticalCenter: scrollToBottomButton.top
+                verticalCenterOffset: 5
             }
+            width: 20
+            height: width
+            radius: height
+            color: Theme.buttonPrimaryColor
         }
     }
 
@@ -269,65 +332,5 @@ Page {
             messageSent.play()
         }
     }
-
-//    readonly property int stdRadiusHeight: 20
-//    property int leftBottomRadiusHeight: 4
-
-//    Behavior on leftBottomRadiusHeight {
-//        NumberAnimation { duration: 250}
-//    }
-
-//    Timer {
-//        running: true
-//        repeat: true
-//        interval: 2000
-//        onTriggered: {
-//            if (leftBottomRadiusHeight === 4) {
-//                leftBottomRadiusHeight = 20
-//            } else {
-//                leftBottomRadiusHeight = 4
-//            }
-//        }
-//    }
-
-//    Rectangle {
-//        id: paintingRec
-//        anchors.centerIn: parent
-//        width: 400
-//        height: 400
-//        color: 'black'
-//        layer.enabled: true
-//        layer.samples: 4
-
-//        Shape {
-//            id: messageShape
-//            anchors.fill: parent
-
-//            ShapePath {
-//                strokeColor: "transparent"
-//                strokeWidth: 0
-//                fillColor: "green"
-//                capStyle: ShapePath.RoundCap
-//                joinStyle: ShapePath.RoundJoin
-
-//                 startX: 0
-//                 startY: paintingRec.height * 0.5
-//                 PathLine {x: 0; y: 4}
-
-//                 PathQuad {x: 4; y: 0; controlX: 0; controlY: 0}
-
-//                 PathLine {x: messageShape.width - stdRadiusHeight; y: 0}
-
-//                 PathQuad {x: messageShape.width; y: stdRadiusHeight; controlX: messageShape.width; controlY: 0}
-
-//                 PathLine {x: messageShape.width; y: messageShape.height - stdRadiusHeight}
-
-//                 PathQuad {x: messageShape.width - stdRadiusHeight; y: messageShape.height; controlX: messageShape.width; controlY: messageShape.height}
-
-//                 PathLine {x: leftBottomRadiusHeight; y: messageShape.height}
-
-//                 PathQuad {x: 0; y: messageShape.height - leftBottomRadiusHeight; controlX: 0; controlY: messageShape.height}
-//            }
-//        }
-//    }
 }
+

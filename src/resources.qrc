@@ -53,11 +53,6 @@
         <file>qml/resources/icons/Image-Big@2x.png</file>
         <file>qml/resources/icons/Folder-Big.png</file>
         <file>qml/resources/icons/Folder-Big@2x.png</file>
-	<!-- Others -->
-        <file>qml/components/AttachmentPreview.qml</file>
-        <file>qml/components/CommonHelpers/TextInCircle.qml</file>
-        <file>qml/components/Popups/Popup.qml</file>
-        <file>qml/components/Progress/Progress.qml</file>
         <file>qml/resources/ca/curl-ca-bundle-win.crt</file>
         <file>qml/resources/fonts/Roboto-Bold.ttf</file>
         <file>qml/resources/fonts/Roboto-Medium.ttf</file>
@@ -72,6 +67,22 @@
         <file>qml/resources/PoweredBy.png</file>
         <file>qml/resources/Settings.png</file>
         <file>qml/resources/User.png</file>
+        <file>qml/resources/icons/Camera Selected.png</file>
+        <file>qml/resources/icons/Camera Selected@2x.png</file>
+        <file>qml/resources/icons/File Selected Big.png</file>
+        <file>qml/resources/icons/File Selected Big@2x.png</file>
+        <file>qml/resources/icons/File Selected.png</file>
+        <file>qml/resources/icons/File Selected@2x.png</file>
+        <file>qml/resources/icons/Mic Selected.png</file>
+        <file>qml/resources/icons/Mic Selected@2x.png</file>
+        <file>qml/resources/icons/File Download Big.png</file>
+        <file>qml/resources/icons/File Download Big@2x.png</file>
+	<!-- Others -->
+        <file>qml/components/Avatar.qml</file>
+        <file>qml/components/AttachmentPreview.qml</file>
+        <file>qml/components/CommonHelpers/TextInCircle.qml</file>
+        <file>qml/components/Popups/Popup.qml</file>
+        <file>qml/components/Progress/Progress.qml</file>
         <file>qml/theme/qmldir</file>
         <file>qml/theme/Theme.qml</file>
         <file>qml/main.qml</file>
@@ -85,7 +96,7 @@
         <file>qml/components/FormVendor.qml</file>
         <file>qml/components/AccountSelection.qml</file>
         <file>qml/components/ChatMessageInput.qml</file>
-        <file>qml/components/Avatar.qml</file>
+        <file>qml/components/ChatPageList.qml</file>
         <file>qml/components/ChatMessage.qml</file>
         <file>qml/components/MessageCounter.qml</file>
         <file>qml/components/SearchHeader.qml</file>
@@ -109,16 +120,6 @@
         <file>qml/base/qmldir</file>
         <file>qml/components/Dialogs/SendReportDialog.qml</file>
         <file>qml/components/SelectAttachmentsDialog.qml</file>
-        <file>qml/resources/icons/Camera Selected.png</file>
-        <file>qml/resources/icons/Camera Selected@2x.png</file>
-        <file>qml/resources/icons/File Selected Big.png</file>
-        <file>qml/resources/icons/File Selected Big@2x.png</file>
-        <file>qml/resources/icons/File Selected.png</file>
-        <file>qml/resources/icons/File Selected@2x.png</file>
-        <file>qml/resources/icons/Mic Selected.png</file>
-        <file>qml/resources/icons/Mic Selected@2x.png</file>
-        <file>qml/resources/icons/File Download Big.png</file>
-        <file>qml/resources/icons/File Download Big@2x.png</file>
         <file>qml/components/CircleProgressBar.qml</file>
         <file>qml/components/TextScrollView.qml</file>
         <file>qml/components/AttachmentPicker.qml</file>
