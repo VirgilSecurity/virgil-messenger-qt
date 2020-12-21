@@ -41,6 +41,7 @@
 namespace vm
 {
 class ContactAvatarLoader;
+class ContactsProxyModel;
 
 class ContactsModel : public ListModel
 {
@@ -49,38 +50,44 @@ class ContactsModel : public ListModel
 public:
     enum Roles
     {
-        NameRole = Qt::UserRole,
+        IdRole = Qt::UserRole,
+        NameRole,
         DetailsRole,
         AvatarUrlRole,
-        LastSeenActivityRole,
-        FilterRole
+        FilterRole,
+        SortRole,
+        //
+        UserRole
     };
 
-    explicit ContactsModel(QObject *parent);
+    explicit ContactsModel(QObject *parent, bool createProxy = true);
 
     void setContacts(const Contacts &contacts);
     const Contacts &getContacts() const;
+    int getContactsCount() const;
 
+    Contact createContact(const Contact::Id &contactId) const;
     const Contact &getContact(const int row) const;
+    bool hasContact(const Contact::Id &contactId) const;
+
     void addContact(const Contact &contact);
-    void removeContact(const Contact &contact);
-    bool hasContact(const Contact &contact) const;
+    void removeContact(const Contact::Id &contactId);
+    void removeContactsByRows(const int startRow, const int endRow);
+    void updateContact(const Contact &contact, int row);
 
 signals:
-    void contactsChanged();
-
     void avatarUrlNotFound(const Contact::Id &contactId, QPrivateSignal) const;
 
 protected:
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
+
     Optional<int> findRowByContactId(const Contact::Id &contactId) const;
 
 private:
     void loadAvatarUrl(const Contact::Id &contactId);
     void setAvatarUrl(const Contact &contact, const QUrl &url);
-
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
 
     Contacts m_contacts;
     ContactAvatarLoader *m_avatarLoader;

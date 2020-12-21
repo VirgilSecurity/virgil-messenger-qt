@@ -122,18 +122,31 @@ Control {
         }
 
         function openAddNewChatPage() {
+            if (![manager.chatListState, manager.fileCloudState, manager.newChatState].includes(manager.previousState)) {
+                return
+            }
             stackView.push(page("NewChat"))
         }
 
         function openAddNewGroupChatPage() {
+            if (![manager.chatListState, manager.fileCloudState, manager.newChatState].includes(manager.previousState)) {
+                return
+            }
             stackView.push(page("NewGroupChat"))
+        }
+
+        function openNameGroupChatPage() {
+            stackView.push(page("NameGroupChat"))
         }
 
         function openChatPage() {
             if (manager.previousState === manager.attachmentPreviewState) {
                 return
             }
-            const replace = [manager.newChatState, manager.downloadKeyState].includes(manager.previousState)
+            const replace = [manager.newChatState, manager.nameGroupChatState, manager.downloadKeyState].includes(manager.previousState)
+            if (manager.previousState === manager.nameGroupChatState) {
+                stackView.pop()
+            }
             var push = replace ? stackView.replace : stackView.push
             push(page("Chat"), StackView.Transition)
         }
@@ -194,6 +207,7 @@ Control {
         manager.accountSettingsState.entered.connect(d.openAccountSettingsPage)
         manager.newChatState.entered.connect(d.openAddNewChatPage)
         manager.newGroupChatState.entered.connect(d.openAddNewGroupChatPage)
+        manager.nameGroupChatState.entered.connect(d.openNameGroupChatPage)
         manager.chatState.entered.connect(d.openChatPage)
         manager.attachmentPreviewState.entered.connect(d.showAttachmentPreview)
         manager.backupKeyState.entered.connect(d.openBackupKeyPage)

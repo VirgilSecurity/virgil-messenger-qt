@@ -35,8 +35,8 @@
 #include "models/FileCloudModel.h"
 
 #include <QtConcurrent>
-#include <QSortFilterProxyModel>
 
+#include "models/ListProxyModel.h"
 #include "Settings.h"
 #include "Utils.h"
 

@@ -45,28 +45,41 @@ class DiscoveredContactsModel : public ContactsModel
 {
     Q_OBJECT
     Q_PROPERTY(ContactsModel *selectedContacts MEMBER m_selectedContacts CONSTANT)
-    Q_PROPERTY(bool filterHasNewContact MEMBER m_filterHasNewContact NOTIFY filterHasNewContactChanged)
 
 public:
+    enum Roles {
+        SectionRole = UserRole
+    };
+
     DiscoveredContactsModel(Validator *validator, QObject *parent);
 
     void setUserId(const UserId &userId);
-
     void reload();
 
-signals:
-    void filterHasNewContactChanged(const bool filtered);
+    Q_INVOKABLE void toggleById(const Contact::Id &contactId);
 
-    void contactsPopulated(const Contacts &contacts, QPrivateSignal);
+    int fixedContactsCount() const;
+
+signals:
+    void fixedContactsPopulated(const Contacts &contacts, QPrivateSignal);
 
 private:
-    void checkFilterHasNewContact();
-    void processSelection(const QList<QModelIndex> &indices);
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
+
+    Contacts findContactsByFilter() const;
+    void invalidateIsSelectedRole(int startRow, int endRow);
+    void updateDiscoveredContacts();
+    void updateSelectedContacts(const Contact::Id &contactId, const Contact *contact = nullptr);
+
+    void onDeviceContactsPopulated(const Contacts &contacts);
+    void onSelectionChanged(const QList<QModelIndex> &indices);
 
     Validator *m_validator;
     ContactsModel *m_selectedContacts;
     UserId m_userId;
-    bool m_filterHasNewContact = false;
+
+    int m_fixedContactsCount = 0;
 };
 }
 

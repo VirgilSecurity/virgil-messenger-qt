@@ -14,15 +14,10 @@ ToolBar {
         implicitHeight: Theme.headerHeight
         color: "transparent"
 
-        Rectangle {
+        HorizontalRule {
             id: separator
-            anchors.left: parent.left
-            anchors.right: parent.right
             anchors.leftMargin: Theme.margin
             anchors.rightMargin: Theme.margin
-
-            height: 1
-            color: Theme.chatBackgroundColor
             anchors.bottom: parent.bottom
         }
     }

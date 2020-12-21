@@ -34,8 +34,7 @@
 
 #include "models/ChatsModel.h"
 
-#include <QSortFilterProxyModel>
-
+#include "models/ListProxyModel.h"
 #include "Utils.h"
 
 using namespace vm;

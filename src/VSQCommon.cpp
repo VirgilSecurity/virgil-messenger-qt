@@ -54,6 +54,7 @@ void registerCommonMetaTypes()
     qRegisterMetaType<Enums::ConfirmationCodeType>("Enums::ConfirmationCodeType");
 
     qRegisterMetaType<UserId>("UserId");
+    qRegisterMetaType<GroupId>("GroupId");
     qRegisterMetaType<Jid>("Jid");
     qRegisterMetaType<Contact::Id>("Contact::Id");
     qRegisterMetaType<Contact>("Contact");

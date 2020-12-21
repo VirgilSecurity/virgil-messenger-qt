@@ -42,6 +42,8 @@ ListSelectionModel::ListSelectionModel(ListModel *source)
     : QItemSelectionModel(source)
     , m_sourceModel(source)
 {
+    qRegisterMetaType<ListSelectionModel *>("ListSelectionModel*");
+
     setModel(source);
 
     connect(this, &QItemSelectionModel::selectionChanged, this, &ListSelectionModel::onChanged);
@@ -59,11 +61,16 @@ void ListSelectionModel::setSelected(const QVariant &proxyRow, bool selected)
 
 void ListSelectionModel::toggle(const QVariant &proxyRow)
 {
-    const auto index = m_sourceModel->sourceIndex(proxyRow.toInt());
-    if (!m_multiSelect && !isSelected(index)) {
+    const auto sourceIndex = m_sourceModel->sourceIndex(proxyRow.toInt());
+    toggle(sourceIndex);
+}
+
+void ListSelectionModel::toggle(const QModelIndex &sourceIndex)
+{
+    if (!m_multiSelect && !isSelected(sourceIndex)) {
         clear();
     }
-    QItemSelectionModel::select(index, QItemSelectionModel::Toggle);
+    QItemSelectionModel::select(sourceIndex, QItemSelectionModel::Toggle);
 }
 
 void ListSelectionModel::clear()
@@ -85,24 +92,9 @@ bool ListSelectionModel::hasSelection() const
     return m_hasSelection;
 }
 
-std::vector<QVariant> ListSelectionModel::items() const
-{
-    std::vector<QVariant> result;
-    for (auto &i : selectedIndexes()) {
-        result.push_back(m_sourceModel->item(i));
-    }
-    return result;
-}
-
 void ListSelectionModel::onChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
-    // Collect and order changed indices
-    auto indices = selected.indexes() + deselected.indexes();
-    std::sort(indices.begin(), indices.end(), [](const QModelIndex &a, const QModelIndex &b) {
-        return a.row() < b.row();
-    });
-    emit changed(indices);
-    //
+    emit changed(selected.indexes() + deselected.indexes());
     if (m_hasSelection != QItemSelectionModel::hasSelection()) {
         m_hasSelection = !m_hasSelection;
         emit hasSelectionChanged(m_hasSelection);

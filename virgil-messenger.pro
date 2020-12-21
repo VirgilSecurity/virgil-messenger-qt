@@ -136,6 +136,7 @@ HEADERS += \
         include/states/OperationState.h \
         include/states/NewChatState.h \
         include/states/NewGroupChatState.h \
+        include/states/NameGroupChatState.h \
         include/states/SignInAsState.h \
         include/states/SignInState.h \
         include/states/SignInUsernameState.h \
@@ -166,11 +167,14 @@ HEADERS += \
         include/models/AttachmentsModel.h \
         include/models/ChatsModel.h \
         include/models/ContactsModel.h \
+        include/models/ContactsProxyModel.h \
         include/models/DiscoveredContactsModel.h \
+        include/models/DiscoveredContactsProxyModel.h \
         include/models/FileCloudModel.h \
         include/models/FileCloudUploader.h \
         include/models/FileLoader.h \
         include/models/ListModel.h \
+        include/models/ListProxyModel.h \
         include/models/ListSelectionModel.h \
         include/models/MessagesModel.h \
         include/models/MessagesQueue.h \
@@ -247,6 +251,7 @@ SOURCES += \
         src/states/FileCloudState.cpp \
         src/states/NewChatState.cpp \
         src/states/NewGroupChatState.cpp \
+        src/states/NameGroupChatState.cpp \
         src/states/SignInAsState.cpp \
         src/states/SignInState.cpp \
         src/states/SignInUsernameState.cpp \
@@ -275,11 +280,14 @@ SOURCES += \
         src/models/AttachmentsModel.cpp \
         src/models/ChatsModel.cpp \
         src/models/ContactsModel.cpp \
+        src/models/ContactsProxyModel.cpp \
         src/models/DiscoveredContactsModel.cpp \
+        src/models/DiscoveredContactsProxyModel.cpp \
         src/models/FileCloudModel.cpp \
         src/models/FileCloudUploader.cpp \
         src/models/FileLoader.cpp \
         src/models/ListModel.cpp \
+        src/models/ListProxyModel.cpp \
         src/models/ListSelectionModel.cpp \
         src/models/MessagesModel.cpp \
         src/models/MessagesQueue.cpp \
