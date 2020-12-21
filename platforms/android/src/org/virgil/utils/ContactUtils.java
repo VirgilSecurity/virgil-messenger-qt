@@ -73,7 +73,7 @@ public class ContactUtils
         return phone;
     }
 
-    private static String _getContactPhotoUrl(long contactId, boolean isThumbnail, Context context)
+    private static String getContactPhotoUrl(long contactId, boolean isThumbnail, Context context)
     {
         ContentResolver cr = context.getContentResolver();
         Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
@@ -132,9 +132,9 @@ public class ContactUtils
         return null;
     }
 
-    public static String getContactPhotoUrl(Context context, String contactId)
+    public static String getContactThumbnailUrl(Context context, String contactId)
     {
-        return _getContactPhotoUrl(Long.parseLong(contactId), true, context);
+        return getContactPhotoUrl(Long.parseLong(contactId), true, context);
     }
 
     private static String notNullStr(String input)

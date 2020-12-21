@@ -61,6 +61,8 @@ ApplicationStateManager::ApplicationStateManager(VSQMessenger *messenger, Contro
     , m_downloadKeyState(new DownloadKeyState(controllers->users(), this))
     , m_fileCloudState(new FileCloudState(models, this))
     , m_newChatState(new NewChatState(controllers->chats(), models->discoveredContacts(), this))
+    , m_newGroupChatState(new NewGroupChatState(models->discoveredContacts(), this))
+    , m_nameGroupChatState(new NameGroupChatState(controllers->chats(), this))
     , m_signInAsState(new SignInAsState(this))
     , m_signInUsernameState(new SignInUsernameState(validator, this))
     , m_signUpState(new SignUpState(controllers->users(), validator, this))
@@ -90,6 +92,8 @@ void ApplicationStateManager::registerStatesMetaTypes()
     qRegisterMetaType<DownloadKeyState *>("DownloadKeyState*");
     qRegisterMetaType<FileCloudState *>("FileCloudState*");
     qRegisterMetaType<NewChatState *>("NewChatState*");
+    qRegisterMetaType<NewGroupChatState *>("NewGroupChatState*");
+    qRegisterMetaType<NameGroupChatState *>("NameGroupChatState*");
     qRegisterMetaType<SignInAsState *>("SignInAsState*");
     qRegisterMetaType<SignInUsernameState *>("SignInUsernameState*");
     qRegisterMetaType<SignUpState *>("SignUpState*");
@@ -125,8 +129,13 @@ void ApplicationStateManager::addTransitions()
     addTwoSideTransition(m_chatListState, users, &UsersController::accountSettingsRequested, m_accountSettingsState);
     connect(users, &UsersController::accountSettingsRequested, m_accountSettingsState, &AccountSettingsState::setUserId);
     addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestNewChat, m_newChatState);
+    addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestNewGroupChat, m_newGroupChatState);
     addTwoSideTransition(m_chatListState, chats, &ChatsController::chatOpened, m_chatState);
     m_chatListState->addTransition(this, &ApplicationStateManager::fileCloudRequested, m_fileCloudState);
+
+    addTwoSideTransition(m_newGroupChatState, m_newGroupChatState, &NewGroupChatState::requestChatName, m_nameGroupChatState);
+
+    m_nameGroupChatState->addTransition(chats, &ChatsController::chatOpened, m_chatState);
 
     addTwoSideTransition(m_fileCloudState, users, &UsersController::accountSettingsRequested, m_accountSettingsState);
     m_fileCloudState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);

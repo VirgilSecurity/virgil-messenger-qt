@@ -32,61 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_LISTMODEL_H
-#define VM_LISTMODEL_H
+#ifndef VM_NAMEGROUPCHATSTATE_H
+#define VM_NAMEGROUPCHATSTATE_H
 
-#include <QAbstractListModel>
+#include "OperationState.h"
+#include "VSQCommon.h"
 
 namespace vm
 {
-class ListProxyModel;
-class ListSelectionModel;
+class ChatsController;
 
-class ListModel : public QAbstractListModel
+class NameGroupChatState : public OperationState
 {
     Q_OBJECT
-    Q_PROPERTY(ListProxyModel *proxy MEMBER m_proxy NOTIFY proxyChanged)
-    Q_PROPERTY(ListSelectionModel *selection MEMBER m_selection CONSTANT)
-    Q_PROPERTY(QString filter MEMBER m_filter WRITE setFilter NOTIFY filterChanged)
 
 public:
-    enum Roles
-    {
-        IsSelectedRole = Qt::CheckStateRole
-    };
-
-    using RoleNames = QHash<int, QByteArray>;
-
-    explicit ListModel(QObject *parent, bool createProxy = true);
-
-    QString filter() const;
-    void setFilter(const QString &filter);
-
-    QModelIndex sourceIndex(const int proxyRow) const;
-    QModelIndex proxyIndex(const int sourceRow) const;
-
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
-    static RoleNames unitedRoleNames(const RoleNames &a, const RoleNames &b);
-
-    const ListProxyModel *proxy() const;
-    ListProxyModel *proxy();
-    void setProxy(ListProxyModel *proxy);
-
-    const ListSelectionModel *selection() const;
-    ListSelectionModel *selection();
+    NameGroupChatState(ChatsController *chatsController, QState *parent);
 
 signals:
-    void filterChanged(const QString &filter);
-    void proxyChanged(ListProxyModel *proxy);
+    void createGroup(const GroupId &groupId);
 
 private:
-    void onSelectionChanged(const QList<QModelIndex> &indices);
+    void onCreateGroup(const GroupId &groupId);
 
-    ListProxyModel *m_proxy;
-    ListSelectionModel *m_selection;
-    QString m_filter;
+    ChatsController *m_chatsController;
 };
 }
 
-#endif // VM_LISTMODEL_H
+#endif // VM_NAMEGROUPCHATSTATE_H

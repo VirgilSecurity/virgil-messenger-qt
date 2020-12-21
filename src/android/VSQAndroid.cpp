@@ -180,6 +180,7 @@ Contacts VSQAndroid::getContacts()
         const auto &platformIdStr = lines[i + 3];
         contact.id = QLatin1String("AndroidContact(%1)").arg(platformIdStr);
         contact.platformId = platformIdStr.toLongLong();
+        contact.avatarUrlRetryCount = 1;
         contacts.push_back(contact);
     }
     return contacts;
@@ -191,7 +192,7 @@ QUrl VSQAndroid::getContactAvatarUrl(const Contact &contact)
     const auto javaIdString = QAndroidJniObject::fromString(idString);
     const auto javaFilePath = QAndroidJniObject::callStaticObjectMethod(
         "org/virgil/utils/ContactUtils",
-        "getContactPhotoUrl",
+        "getContactThumbnailUrl",
         "(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;",
         QtAndroid::androidContext().object(),
         javaIdString.object<jstring>()

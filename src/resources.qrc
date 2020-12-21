@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-	<!-- Pages -->
+        <!-- Pages -->
         <file>qml/pages/AccountSelectionPage.qml</file>
         <file>qml/pages/AccountSettingsPage.qml</file>
         <file>qml/pages/BackupKeyPage.qml</file>
@@ -8,15 +8,18 @@
         <file>qml/pages/DownloadKeyPage.qml</file>
         <file>qml/pages/EditProfilePage.qml</file>
         <file>qml/pages/MainPage.qml</file>
+        <file>qml/pages/NameGroupChatPage.qml</file>
         <file>qml/pages/NewChatPage.qml</file>
+        <file>qml/pages/NewGroupChatPage.qml</file>
         <file>qml/pages/OperationPage.qml</file>
+        <file>qml/pages/SelectContactsPage.qml</file>
         <file>qml/pages/SignInAsPage.qml</file>
         <file>qml/pages/SignInPage.qml</file>
         <file>qml/pages/SignInUsernamePage.qml</file>
         <file>qml/pages/SignUpPage.qml</file>
         <file>qml/pages/SplashScreenPage.qml</file>
         <file>qml/pages/VerifyProfilePage.qml</file>
-	<!-- Icons -->
+        <!-- Icons -->
         <file>qml/resources/icons/Arrow-Left.png</file>
         <file>qml/resources/icons/Arrow-Left@2x.png</file>
         <file>qml/resources/icons/Arrow-Right.png</file>
@@ -31,6 +34,8 @@
         <file>qml/resources/icons/Close@2x.png</file>
         <file>qml/resources/icons/Chats.png</file>
         <file>qml/resources/icons/Chats@2x.png</file>
+        <file>qml/resources/icons/Check.png</file>
+        <file>qml/resources/icons/Check@2x.png</file>
         <file>qml/resources/icons/Lock.png</file>
         <file>qml/resources/icons/Lock@2x.png</file>
         <file>qml/resources/icons/Key.png</file>
@@ -51,7 +56,8 @@
         <file>qml/resources/icons/Image-Big@2x.png</file>
         <file>qml/resources/icons/Folder-Big.png</file>
         <file>qml/resources/icons/Folder-Big@2x.png</file>
-	<!-- Others -->
+        <!-- Others -->
+        <file>qml/components/FlowListView.qml</file>
         <file>qml/components/AttachmentPreview.qml</file>
         <file>qml/components/CommonHelpers/TextInCircle.qml</file>
         <file>qml/components/Popups/Popup.qml</file>
@@ -87,7 +93,7 @@
         <file>qml/components/ChatMessage.qml</file>
         <file>qml/components/MessageCounter.qml</file>
         <file>qml/components/SearchHeader.qml</file>
-	<file>qml/components/SearchContactsList.qml</file>
+        <file>qml/components/SelectContactsList.qml</file>
         <file>qml/components/Header.qml</file>
         <file>qml/components/ContextMenu.qml</file>
         <file>qml/components/ImageButton.qml</file>
@@ -125,7 +131,10 @@
         <file>qml/components/ModelListView.qml</file>
         <file>qml/components/Dialogs/TemplateDialog.qml</file>
         <file>qml/components/UploadProgressBar.qml</file>
-	<!-- Database -->
+        <file>qml/components/ServerSelectionRow.qml</file>
+        <file>qml/components/SelectedContactsFlow.qml</file>
+        <file>qml/components/HorizontalRule.qml</file>
+        <!-- Database -->
         <file>resources/database/createAttachments.sql</file>
         <file>resources/database/createChats.sql</file>
         <file>resources/database/createContacts.sql</file>

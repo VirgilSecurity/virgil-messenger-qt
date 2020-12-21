@@ -21,8 +21,6 @@ ToolBar {
 
     default property alias menu: contextMenu.contentData
 
-    readonly property int defaultBarHeight: 40
-
     onIsSearchOpenChanged: {
         if (filterSource) {
             filterSource.filter = ""
@@ -41,15 +39,10 @@ ToolBar {
         implicitHeight: Theme.headerHeight
         color: Theme.contactsBackgroundColor
 
-        Rectangle {
+        HorizontalRule {
             id: separator
-            anchors.left: parent.left
-            anchors.right: parent.right
             anchors.leftMargin: Theme.margin
             anchors.rightMargin: Theme.margin
-
-            height: 1
-            color: Theme.chatBackgroundColor
             anchors.bottom: parent.bottom
         }
     }
@@ -61,7 +54,7 @@ ToolBar {
 
             PropertyChanges {
                 target: titleDescriptionColumn
-                anchors.leftMargin: -defaultBarHeight
+                anchors.leftMargin: -searchId.recommendedHeight
                 opacity: 0
 
             }
@@ -74,7 +67,7 @@ ToolBar {
 
             PropertyChanges {
                 target: menuButton
-                anchors.rightMargin: -defaultBarHeight
+                anchors.rightMargin: -searchId.recommendedHeight
                 opacity: 0
             }
 
@@ -91,8 +84,8 @@ ToolBar {
 
             PropertyChanges {
                 target: searchContainer
-                width: defaultBarHeight
-                anchors.rightMargin: defaultBarHeight
+                width: searchId.recommendedHeight
+                anchors.rightMargin: searchId.recommendedHeight
             }
 
             PropertyChanges {
@@ -121,7 +114,7 @@ ToolBar {
             rightMargin: Theme.smallMargin
         }
 
-        height: defaultBarHeight
+        height: searchId.recommendedHeight
 
         ImageButton {
             id: backButton
@@ -130,7 +123,7 @@ ToolBar {
                 verticalCenter: parent.verticalCenter
             }
             image: "Arrow-Left"
-            width: showBackButton ? defaultBarHeight : 0
+            width: showBackButton ? searchId.recommendedHeight : 0
             onClicked: app.stateManager.goBack()
         }
 
@@ -181,11 +174,11 @@ ToolBar {
                 anchors {
                     verticalCenter: parent.verticalCenter
                     right: parent.right
-                    rightMargin: defaultBarHeight
+                    rightMargin: searchId.recommendedHeight
                 }
 
-                height: defaultBarHeight
-                width: defaultBarHeight
+                height: searchId.recommendedHeight
+                width: searchId.recommendedHeight
 
                 Search {
                     id: searchId

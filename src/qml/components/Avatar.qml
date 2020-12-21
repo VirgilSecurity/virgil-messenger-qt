@@ -5,9 +5,10 @@ import "../theme"
 import "./CommonHelpers"
 
 Item {
+    id: avatar
     property string nickname
     property alias avatarUrl: originalImage.source
-    property alias diameter: textInCircle.diameter
+    property alias diameter: avatar.width
     property alias content: textInCircle.content
     property alias pointSize: textInCircle.pointSize
 
@@ -29,28 +30,33 @@ Item {
         anchors.fill: parent
         visible: originalImage.status == Image.Ready
 
-        layer.enabled: visible
-        layer.effect: OpacityMask {
-            maskSource: Item {
-                width: imageItem.width
-                height: imageItem.height
-                Rectangle {
-                    anchors.fill: parent
-                    radius: parent.height
+        Image {
+            id: originalImage
+            anchors.fill: parent
+            source: avatarUrl
+            smooth: true
+            asynchronous: true
+            fillMode: Image.PreserveAspectCrop
+            visible: false
+            onStatusChanged: {
+                if (status == Image.Error) {
+                    console.log("Avatar url loading error:", avatarUrl)
                 }
             }
         }
 
-        Image {
-            id: originalImage
-            anchors.fill: parent
-            asynchronous: true
-            fillMode: Image.PreserveAspectCrop
-            onStatusChanged: {
-                if (status == Image.Error) {
-                    console.log("Avatar url loading error:", source)
-                }
-            }
+        Rectangle {
+            id: rectangleMask
+            width: parent.width
+            height: parent.height
+            radius: height
+            visible: false
+        }
+
+        OpacityMask {
+            anchors.fill: originalImage
+            source: originalImage
+            maskSource: rectangleMask
         }
     }
 }

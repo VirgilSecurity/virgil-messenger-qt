@@ -32,61 +32,66 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_LISTMODEL_H
-#define VM_LISTMODEL_H
+#ifndef VM_CONTACTSMODEL_H
+#define VM_CONTACTSMODEL_H
 
-#include <QAbstractListModel>
+#include "ListModel.h"
+#include "VSQCommon.h"
 
 namespace vm
 {
-class ListProxyModel;
-class ListSelectionModel;
+class ContactAvatarLoader;
+class ContactsProxyModel;
 
-class ListModel : public QAbstractListModel
+class ContactsModel : public ListModel
 {
     Q_OBJECT
-    Q_PROPERTY(ListProxyModel *proxy MEMBER m_proxy NOTIFY proxyChanged)
-    Q_PROPERTY(ListSelectionModel *selection MEMBER m_selection CONSTANT)
-    Q_PROPERTY(QString filter MEMBER m_filter WRITE setFilter NOTIFY filterChanged)
 
 public:
     enum Roles
     {
-        IsSelectedRole = Qt::CheckStateRole
+        IdRole = Qt::UserRole,
+        NameRole,
+        DetailsRole,
+        AvatarUrlRole,
+        FilterRole,
+        SortRole,
+        //
+        UserRole
     };
 
-    using RoleNames = QHash<int, QByteArray>;
+    explicit ContactsModel(QObject *parent, bool createProxy = true);
 
-    explicit ListModel(QObject *parent, bool createProxy = true);
+    void setContacts(const Contacts &contacts);
+    const Contacts &getContacts() const;
+    int getContactsCount() const;
 
-    QString filter() const;
-    void setFilter(const QString &filter);
+    Contact createContact(const Contact::Id &contactId) const;
+    const Contact &getContact(const int row) const;
+    bool hasContact(const Contact::Id &contactId) const;
 
-    QModelIndex sourceIndex(const int proxyRow) const;
-    QModelIndex proxyIndex(const int sourceRow) const;
-
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
-    static RoleNames unitedRoleNames(const RoleNames &a, const RoleNames &b);
-
-    const ListProxyModel *proxy() const;
-    ListProxyModel *proxy();
-    void setProxy(ListProxyModel *proxy);
-
-    const ListSelectionModel *selection() const;
-    ListSelectionModel *selection();
+    void addContact(const Contact &contact);
+    void removeContact(const Contact::Id &contactId);
+    void removeContactsByRows(const int startRow, const int endRow);
+    void updateContact(const Contact &contact, int row);
 
 signals:
-    void filterChanged(const QString &filter);
-    void proxyChanged(ListProxyModel *proxy);
+    void avatarUrlNotFound(const Contact::Id &contactId, QPrivateSignal) const;
+
+protected:
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
+
+    Optional<int> findRowByContactId(const Contact::Id &contactId) const;
 
 private:
-    void onSelectionChanged(const QList<QModelIndex> &indices);
+    void loadAvatarUrl(const Contact::Id &contactId);
+    void setAvatarUrl(const Contact &contact, const QUrl &url);
 
-    ListProxyModel *m_proxy;
-    ListSelectionModel *m_selection;
-    QString m_filter;
+    Contacts m_contacts;
+    ContactAvatarLoader *m_avatarLoader;
 };
 }
 
-#endif // VM_LISTMODEL_H
+#endif // VM_CONTACTSMODEL_H

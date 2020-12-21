@@ -32,61 +32,45 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_LISTMODEL_H
-#define VM_LISTMODEL_H
+#ifndef VM_LISTSELECTIONMODEL_H
+#define VM_LISTSELECTIONMODEL_H
 
-#include <QAbstractListModel>
+#include <QItemSelectionModel>
 
 namespace vm
 {
-class ListProxyModel;
-class ListSelectionModel;
+class ListModel;
 
-class ListModel : public QAbstractListModel
+class ListSelectionModel : public QItemSelectionModel
 {
     Q_OBJECT
-    Q_PROPERTY(ListProxyModel *proxy MEMBER m_proxy NOTIFY proxyChanged)
-    Q_PROPERTY(ListSelectionModel *selection MEMBER m_selection CONSTANT)
-    Q_PROPERTY(QString filter MEMBER m_filter WRITE setFilter NOTIFY filterChanged)
+    Q_PROPERTY(bool hasSelection READ hasSelection NOTIFY hasSelectionChanged)
+    Q_PROPERTY(bool multiSelect MEMBER m_multiSelect WRITE setMultiSelect NOTIFY multiSelectChanged)
 
 public:
-    enum Roles
-    {
-        IsSelectedRole = Qt::CheckStateRole
-    };
+    explicit ListSelectionModel(ListModel *source);
 
-    using RoleNames = QHash<int, QByteArray>;
+    Q_INVOKABLE void setSelected(const QVariant &proxyRow, bool selected);
+    Q_INVOKABLE void toggle(const QVariant &proxyRow);
+    void toggle(const QModelIndex &sourceIndex);
+    Q_INVOKABLE void clear();
 
-    explicit ListModel(QObject *parent, bool createProxy = true);
+    void setMultiSelect(const bool multiSelect);
 
-    QString filter() const;
-    void setFilter(const QString &filter);
-
-    QModelIndex sourceIndex(const int proxyRow) const;
-    QModelIndex proxyIndex(const int sourceRow) const;
-
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
-    static RoleNames unitedRoleNames(const RoleNames &a, const RoleNames &b);
-
-    const ListProxyModel *proxy() const;
-    ListProxyModel *proxy();
-    void setProxy(ListProxyModel *proxy);
-
-    const ListSelectionModel *selection() const;
-    ListSelectionModel *selection();
+    bool hasSelection() const;
 
 signals:
-    void filterChanged(const QString &filter);
-    void proxyChanged(ListProxyModel *proxy);
+    void changed(const QList<QModelIndex> &indices);
+    void hasSelectionChanged(const bool changed);
+    void multiSelectChanged(const bool multiselect);
 
 private:
-    void onSelectionChanged(const QList<QModelIndex> &indices);
+    void onChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
-    ListProxyModel *m_proxy;
-    ListSelectionModel *m_selection;
-    QString m_filter;
+    ListModel *m_sourceModel;
+    bool m_hasSelection = false;
+    bool m_multiSelect = false;
 };
 }
 
-#endif // VM_LISTMODEL_H
+#endif // VM_LISTSELECTIONMODEL_H

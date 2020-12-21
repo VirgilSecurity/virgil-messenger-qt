@@ -61,6 +61,7 @@ public:
     void loadChats(const UserId &userId);
 
     void createChat(const Contact::Id &contactId);
+    void createGroupChat(const GroupId &groupId);
     void openChat(const Chat &chat);
     Q_INVOKABLE void openChatById(const Chat::Id &chatId);
     void closeChat();
@@ -78,12 +79,14 @@ signals:
     void chatClosed();
 
     void newContactFound(const Contact::Id &contactId, QPrivateSignal);
+    void groupChatCreated(const GroupId &groupId, QPrivateSignal);
 
 private:
     void setupTableConnections();
     void setCurrentChat(const Chat &chat);
 
     void onNewContactFound(const Contact::Id &contactId);
+    void onGroupChatCreated(const GroupId &groupId);
     void onChatsSet();
 
     Models *m_models;

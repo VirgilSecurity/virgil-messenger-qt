@@ -35,55 +35,51 @@
 #ifndef VM_DISCOVEREDCONTACTSMODEL_H
 #define VM_DISCOVEREDCONTACTSMODEL_H
 
-#include "ListModel.h"
-#include "VSQCommon.h"
+#include "ContactsModel.h"
 
 namespace vm
 {
-class ContactAvatarLoader;
 class Validator;
 
-class DiscoveredContactsModel : public ListModel
+class DiscoveredContactsModel : public ContactsModel
 {
     Q_OBJECT
-    Q_PROPERTY(bool newContactFiltered MEMBER m_newContactFiltered NOTIFY newContactFilteredChanged)
+    Q_PROPERTY(ContactsModel *selectedContacts MEMBER m_selectedContacts CONSTANT)
 
 public:
-    enum Roles
-    {
-        NameRole = Qt::UserRole,
-        DetailsRole,
-        AvatarUrlRole,
-        LastSeenActivityRole,
-        FilterRole
+    enum Roles {
+        SectionRole = UserRole
     };
 
     DiscoveredContactsModel(Validator *validator, QObject *parent);
 
+    void setUserId(const UserId &userId);
     void reload();
 
-signals:
-    void newContactFilteredChanged(const bool filtered);
+    Q_INVOKABLE void toggleById(const Contact::Id &contactId);
 
-    void contactsPopulated(const Contacts &contacts, QPrivateSignal);
-    void contactAvatarUrlNotFound(const Contact::Id &contactId, QPrivateSignal) const;
+    int fixedContactsCount() const;
+
+signals:
+    void fixedContactsPopulated(const Contacts &contacts, QPrivateSignal);
 
 private:
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    void setContacts(const Contacts &contacts);
-    void checkNewContactFiltered();
-    void loadAvatarUrl(const Contact::Id &contactId);
-    void setAvatarUrl(const Contact &contact, const QUrl &url);
+    Contacts findContactsByFilter() const;
+    void invalidateIsSelectedRole(int startRow, int endRow);
+    void updateDiscoveredContacts();
+    void updateSelectedContacts(const Contact::Id &contactId, const Contact *contact = nullptr);
 
-    Optional<int> findRowByContactId(const Contact::Id &contactId) const;
+    void onDeviceContactsPopulated(const Contacts &contacts);
+    void onSelectionChanged(const QList<QModelIndex> &indices);
 
     Validator *m_validator;
-    ContactAvatarLoader *m_avatarLoader;
-    Contacts m_contacts;
-    bool m_newContactFiltered = false;
+    ContactsModel *m_selectedContacts;
+    UserId m_userId;
+
+    int m_fixedContactsCount = 0;
 };
 }
 
