@@ -161,7 +161,7 @@ void LoadFileOperation::onSetProgress(quint64 bytesLoaded, quint64 bytesTotal)
         // NOTE(fpohtmeh): Qt finishes upload with zero values
         return;
     }
-    else if (bytesTotal == -1) {
+    else if (bytesTotal == quint64(-1)) {
         // NOTE(fpohtmeh): Qt uses correct bytesLoaded and bytesTotal=-1 when starts download
         // and finishes it with correct bytesTotal and bytesLoaded=bytesTotal
         if (m_bytesTotal < bytesLoaded) {

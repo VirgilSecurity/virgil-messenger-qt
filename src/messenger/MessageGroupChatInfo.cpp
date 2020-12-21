@@ -33,69 +33,35 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 
-#ifndef VM_OUTGOING_MESSAGE_H
-#define VM_OUTGOING_MESSAGE_H
-
-#include "Message.h"
-#include "OutgoingMessageStage.h"
+#include "MessageGroupChatInfo.h"
 
 
-namespace vm {
-//
-//  Handles outgoing message.
-//
-class OutgoingMessage : public Message {
-public:
-    //
-    //  Denotes the message processing stage.
-    //
-    using Stage = OutgoingMessageStage;
+using namespace vm;
+using Self = MessageGroupChatInfo;
 
-    //
-    //  Return stage from a given string.
-    //  Throws if correspond stage is not found.
-    //
-    static Stage stageFromString(const QString& stageString);
 
-    //
-    //  Return string from a given stage.
-    //
-    static QString stageToString(Stage stage);
+Self::MessageGroupChatInfo(QString groupId, QString senderGroupNickname, QString recipientGroupNickname, bool isPrivate)
+    : m_groupId(std::move(groupId)),
+    m_senderGroupNickname(std::move(senderGroupNickname)),
+    m_recipientGroupNickname(std::move(recipientGroupNickname)),
+    m_isPrivate(isPrivate)
+{}
 
-public:
-    //
-    //  Return true.
-    //
-    bool isOutgoing() const noexcept override;
+QString Self::groupId() const {
+    return m_groupId;
+}
 
-    //
-    //  Return the message stage.
-    //
-    Stage stage() const noexcept;
 
-    //
-    //  State the message stage.
-    //
-    void setStage(Stage stage);
+QString Self::senderGroupNickname() const {
+    return m_senderGroupNickname;
+}
 
-    //
-    //  Return the message stage as string.
-    //
-    QString stageString() const override;
 
-    //
-    //  State the message stage from string.
-    //
-    void setStageString(QString stageString) override;
+QString Self::recipientGroupNickname() const {
+    return m_recipientGroupNickname;
+}
 
-    //
-    //  Apply message update. Return true some properties were actually updated.
-    //
-    bool applyUpdate(const MessageUpdate& update) override;
-private:
-    Stage m_stage;
 
-};
-} // namespace vm
-
-#endif // VM_OUTGOING_MESSAGE_H
+bool Self::isPrivate() const {
+    return m_isPrivate;
+}

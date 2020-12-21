@@ -53,6 +53,11 @@ public:
     ~MessagesModel() override = default;
 
     //
+    //  Current chat.
+    //
+    ChatHandler chat() const;
+
+    //
     //  Change current chat.
     //
     void setChat(ChatHandler chat);
@@ -73,21 +78,6 @@ public:
     void cleartChat();
 
     //
-    //  Create text message within current chat.
-    //
-    MessageHandler createTextMessage(const QString &body);
-
-    //
-    //  Create message with file attachment within current chat.
-    //
-    MessageHandler createFileMessage(const QUrl &localFileUrl);
-
-    //
-    //  Create message with file attachment within current chat.
-    //
-    MessageHandler createPictureMessage(const QUrl &localFileUrl);
-
-    //
     // Update message. Returns false if message had the same status.
     //
     bool updateMessage(const MessageUpdate &messageUpdate);
@@ -99,11 +89,6 @@ public:
 
 signals:
     void displayImageNotFound(const MessageId &messageId) const;
-
-private:
-    std::unique_ptr<OutgoingMessage> createOutgoingMessage();
-
-    static QVector<int> rolesFromMessageUpdate(const MessageUpdate& messageUpdate);
 
 private:
     enum Roles
@@ -135,6 +120,8 @@ private:
         InRowRole,
     };
 
+    static QVector<int> rolesFromMessageUpdate(const MessageUpdate& messageUpdate);
+
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
@@ -143,11 +130,6 @@ private:
     std::optional<int> findRowById(const MessageId &messageId) const;
     void invalidateRow(const int row, const QVector<int> &roles = {});
     void invalidateModel(const QModelIndex &index, const QVector<int> &roles);
-
-    //
-    //  Append a new message to the in-memory collection and update UI.
-    //
-    MessageHandler appendMessage(std::unique_ptr<Message> message);
 
 private:
     ModifiableMessages m_messages;

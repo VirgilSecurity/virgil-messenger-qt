@@ -62,6 +62,12 @@ public:
     //
     static QString stageToString(Stage stage);
 
+public:
+    //
+    //  Return true.
+    //
+    bool isIncoming() const noexcept override;
+
     //
     //  Return current message stage.
     //
@@ -70,17 +76,22 @@ public:
     //
     //  State current message stage.
     //
-    void setStage(Stage status);
+    void setStage(Stage stage);
 
     //
     //  Return the message stage as string.
     //
-    QString stageString() const;
+    QString stageString() const override;
 
     //
     //  State the message stage from string.
     //
-    void setStageString(QString stageString);
+    void setStageString(QString stageString) override;
+
+    //
+    //  Apply message update. Return true some properties were actually updated.
+    //
+    bool applyUpdate(const MessageUpdate& update) override;
 private:
     Stage m_stage;
 

@@ -68,9 +68,30 @@ signals:
     void displayImageNotFound(const MessageId &messageId);
 
 private:
-    void setupTableConnections();
+    //
+    //  Create text message within current chat.
+    //
+    ModifiableMessageHandler createTextMessage(const QString &body);
 
-    void updateMessage(const MessageId &messageId, const MessageUpdate &messageUpdate);
+    //
+    //  Create message with file attachment within current chat.
+    //
+    ModifiableMessageHandler createFileMessage(const QUrl &localFileUrl);
+
+    //
+    //  Create message with file attachment within current chat.
+    //
+    ModifiableMessageHandler createPictureMessage(const QUrl &localFileUrl);
+
+    //
+    //  Create outgoing message without content.
+    //
+    std::unique_ptr<OutgoingMessage> createOutgoingMessage();
+
+    //
+    //  Connect to the database.
+    //
+    void setupTableConnections();
 
 private slots:
     void onMessageReceived(ModifiableMessageHandler message);

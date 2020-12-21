@@ -47,6 +47,19 @@ enum class MessageStatus {
     Succeed, // A message processing successfully completed.
     Failed, // A message processing failed, see stages do define what stage was accomplished to recover operation.
 };
+
+//
+//  Return incoming status from a given string.
+//  Throws if correspond status is not found.
+//
+MessageStatus MessageStatusFromString(const QString& statusString);
+
+//
+//  Return string from a given incoming status.
+//
+QString MessageStatusToString(MessageStatus status);
+
+
 } // namespace vm
 
 #endif // VM_MESSAGE_STATUS_H

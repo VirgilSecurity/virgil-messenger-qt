@@ -98,14 +98,7 @@ void MessagesTable::onFetchNotSentMessages()
 
 void MessagesTable::onAddMessage(const MessageHandler &message)
 {
-    QString messageStage;
-    if (message->isOutgoing()) {
-        auto outgoingMessage = message->asOutgoingMessage();
-        messageStage = outgoingMessage->stageString();
-    } else {
-        auto incomingMessage = message->asOutgoingMessage();
-        messageStage = incomingMessage->stageString();
-    }
+    auto messageStage = message->stageString();;
 
     ScopedConnection connection(*database());
     DatabaseUtils::BindValues values{

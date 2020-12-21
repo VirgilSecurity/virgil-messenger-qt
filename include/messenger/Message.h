@@ -169,6 +169,21 @@ public:
     QString statusString() const;
 
     //
+    //  Set current message status from string.
+    //
+    void setStatusString(const QString statusString);
+
+    //
+    //  Return the message stage as string.
+    //
+    virtual QString stageString() const = 0;
+
+    //
+    //  State the message stage from string.
+    //
+    virtual void setStageString(QString stageString) = 0;
+
+    //
     //  Return processing message attempts count.
     //
     qsizetype attemptCount() const noexcept;
@@ -176,12 +191,12 @@ public:
     //
     //  Increment processing message attempts count and return true if MAX was not reached.
     //
-    bool increaseAttemptCount(qsizetype trySendCount);
+    bool increaseAttemptCount();
 
     //
     //  Reset processing message attempts count to 0.
     //
-    void resetAttemptCount(qsizetype trySendCount);
+    void resetAttemptCount();
 
     //
     //  Apply message update. Return true some properties were actually updated.
@@ -209,25 +224,16 @@ public:
     //
     virtual bool isIncoming() const noexcept;
 
-    //
-    //  Return valid pointer if message is incoming.
-    //
-    std::shared_ptr<const IncomingMessage> asIncommingMessage() const;
-
-    //
-    //  Return valid pointer if message is incoming.
-    //
-    std::shared_ptr<const OutgoingMessage> asOutgoingMessage() const;
-
 private:
     MessageId m_id;
     ChatId m_chatId;
     ChatType m_chatType;
     UserId m_senderId;
     QDateTime m_createdAt;
-    std::shared_ptr<MessageContent> m_content;
+    MessageContent m_content;
     std::shared_ptr<MessageGroupChatInfo> m_groupChatInfo;
     qsizetype m_attemptCount;
+    Status m_status;
 };
 
 using MessageHandler = std::shared_ptr<const Message>;

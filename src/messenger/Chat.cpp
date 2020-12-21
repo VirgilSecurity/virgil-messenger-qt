@@ -33,69 +33,68 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 
-#ifndef VM_OUTGOING_MESSAGE_H
-#define VM_OUTGOING_MESSAGE_H
-
-#include "Message.h"
-#include "OutgoingMessageStage.h"
+#include "Chat.h"
 
 
-namespace vm {
-//
-//  Handles outgoing message.
-//
-class OutgoingMessage : public Message {
-public:
-    //
-    //  Denotes the message processing stage.
-    //
-    using Stage = OutgoingMessageStage;
+using namespace vm;
+using Self = Chat;
 
-    //
-    //  Return stage from a given string.
-    //  Throws if correspond stage is not found.
-    //
-    static Stage stageFromString(const QString& stageString);
 
-    //
-    //  Return string from a given stage.
-    //
-    static QString stageToString(Stage stage);
+ChatId Self::id() const {
+    return m_id;
+}
 
-public:
-    //
-    //  Return true.
-    //
-    bool isOutgoing() const noexcept override;
 
-    //
-    //  Return the message stage.
-    //
-    Stage stage() const noexcept;
+void Self::setId(ChatId id) {
+    m_id = std::move(id);
+}
 
-    //
-    //  State the message stage.
-    //
-    void setStage(Stage stage);
 
-    //
-    //  Return the message stage as string.
-    //
-    QString stageString() const override;
+QString Self::title() const {
+    return m_title;
+}
 
-    //
-    //  State the message stage from string.
-    //
-    void setStageString(QString stageString) override;
 
-    //
-    //  Apply message update. Return true some properties were actually updated.
-    //
-    bool applyUpdate(const MessageUpdate& update) override;
-private:
-    Stage m_stage;
+void Self::setTitle(QString title) {
+    m_title = std::move(title);
+}
 
-};
-} // namespace vm
 
-#endif // VM_OUTGOING_MESSAGE_H
+Self::Type Self::type() const {
+    return m_type;
+}
+
+
+void Self::setType(Self::Type type) {
+    m_type = type;
+}
+
+
+QDateTime Self::createdAt() const {
+    return m_createdAt;
+}
+
+
+void Self::setCreatedAt(QDateTime createdAt) {
+    m_createdAt = std::move(createdAt);
+}
+
+
+MessageHandler Self::lastMessage() const {
+    return m_lastMessage;
+}
+
+
+void Self::setLastMessage(MessageHandler lastMessage) {
+    m_lastMessage = std::move(lastMessage);
+}
+
+
+qsizetype Self::unreadMessageCount() const {
+    return m_unreadMessageCount;
+}
+
+
+void Self::setUnreadMessageCount(qsizetype  unreadMessageCount) {
+    m_unreadMessageCount = unreadMessageCount;
+}

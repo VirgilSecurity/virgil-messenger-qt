@@ -37,7 +37,6 @@
 #include "Utils.h"
 #include "FileUtils.h"
 #include "Model.h"
-#include "OutgoingMessage.h"
 
 #include <algorithm>
 
@@ -49,10 +48,17 @@ Self::MessagesModel(QObject *parent)
     : ListModel(parent)
 {}
 
+
+ChatHandler Self::chat() const {
+    return m_currentChat;
+}
+
+
 void Self::setChat(ChatHandler chat) {
     qCDebug(lcModel) << "Set chat to the messages model: " << chat->id();
     m_currentChat = std::move(chat);
 }
+
 
 void Self::setMessages(ModifiableMessages messages)
 {
@@ -72,67 +78,13 @@ void Self::addMessage(ModifiableMessageHandler message) {
     }
 }
 
+
 void Self::cleartChat() {
     qCDebug(lcModel) << "Clear all messages";
     beginResetModel();
     m_messages.clear();
     m_currentChat = nullptr;
     endResetModel();
-}
-
-
-std::unique_ptr<OutgoingMessage> Self::createOutgoingMessage() {
-    auto message = std::make_unique<OutgoingMessage>();
-
-    message->setId(MessageId::generate());
-    message->setChatId(m_currentChat->id());
-    message->setChatType(m_currentChat->type());
-    message->setStage(OutgoingMessageStage::Created);
-    message->setCreatedAt(QDateTime::currentDateTime());
-    message->setSenderId(m_currentChat->senderId());
-
-    return message;
-}
-
-MessageHandler Self::createTextMessage(const QString &body)
-{
-    auto content = MessageContentText(body);
-
-    auto message = createOutgoingMessage();
-    message->setContent(std::move(content));
-
-    return this->appendMessage(std::move(message));
-}
-
-MessageHandler Self::createFileMessage(const QUrl &localFileUrl)
-{
-    auto content = MessageContentFile::createFromLocalFile(localFileUrl);
-
-    auto message = createOutgoingMessage();
-    message->setContent(std::move(content));
-
-    return this->appendMessage(std::move(message));
-}
-
-MessageHandler Self::createPictureMessage(const QUrl &localFileUrl)
-{
-    auto content = MessageContentPicture::createFromLocalFile(localFileUrl);
-
-    auto message = createOutgoingMessage();
-    message->setContent(std::move(content));
-
-    return this->appendMessage(std::move(message));
-}
-
-MessageHandler Self::appendMessage(std::unique_ptr<Message> message)
-{
-    const auto count = rowCount();
-    beginInsertRows(QModelIndex(), count, count);
-    m_messages.emplace_back(std::move(message));
-    endInsertRows();
-    invalidateRow(count);
-
-    return m_messages.back();
 }
 
 

@@ -51,6 +51,7 @@
 #include "models/MessagesQueue.h"
 #include "models/Models.h"
 #include "Controller.h"
+#include "OutgoingMessage.h"
 
 using namespace vm;
 using Self = MessagesController;
@@ -87,10 +88,11 @@ void Self::clearMessages()
 
 void Self::sendTextMessage(const QString &body)
 {
-    auto message = m_models->messages()->createTextMessage(body);
+    auto message = createTextMessage(body);
     const qsizetype unreadCount = 0; // message can be created in current chat only
-    m_models->chats()->updateLastMessage(message, unreadCount);
     m_userDatabase->writeMessage(message, unreadCount);
+    m_models->chats()->updateLastMessage(message, unreadCount);
+    m_models->messages()->addMessage(message);
     emit messageCreated(message);
 }
 
@@ -101,7 +103,7 @@ void Self::sendFileMessage(const QVariant &attachmentUrl)
         return;
     }
 
-    auto message = m_models->messages()->createFileMessage(attachmentUrl.toUrl());
+    auto message = createFileMessage(attachmentUrl.toUrl());
     if (message) {
         qCWarning(lcController) << "Message wasn't created. File is invalid.";
         emit notificationCreated(tr("File reading error"), true);
@@ -111,6 +113,7 @@ void Self::sendFileMessage(const QVariant &attachmentUrl)
     const qsizetype unreadCount = 0; // message can be created in current chat only
     m_models->chats()->updateLastMessage(message, unreadCount);
     m_userDatabase->writeMessage(message, unreadCount);
+    m_models->messages()->addMessage(message);
     emit messageCreated(message);
 }
 
@@ -121,7 +124,7 @@ void Self::sendPictureMessage(const QVariant &attachmentUrl)
         return;
     }
 
-    auto message = m_models->messages()->createPictureMessage(attachmentUrl.toUrl());
+    auto message = createPictureMessage(attachmentUrl.toUrl());
     if (message) {
         qCWarning(lcController) << "Message wasn't created. Picture is invalid.";
         emit notificationCreated(tr("Picture reading error"), true);
@@ -131,8 +134,56 @@ void Self::sendPictureMessage(const QVariant &attachmentUrl)
     const qsizetype unreadCount = 0; // message can be created in current chat only
     m_models->chats()->updateLastMessage(message, unreadCount);
     m_userDatabase->writeMessage(message, unreadCount);
+    m_models->messages()->addMessage(message);
     emit messageCreated(message);
 }
+
+
+std::unique_ptr<OutgoingMessage> Self::createOutgoingMessage() {
+    auto message = std::make_unique<OutgoingMessage>();
+
+    auto currentChat = m_models->messages()->chat();
+
+    message->setId(MessageId::generate());
+    message->setChatId(currentChat->id());
+    message->setChatType(currentChat->type());
+    message->setStage(OutgoingMessageStage::Created);
+    message->setCreatedAt(QDateTime::currentDateTime());
+    message->setSenderId(m_messenger->currentUser()->id());
+
+    return message;
+}
+
+ModifiableMessageHandler Self::createTextMessage(const QString &body)
+{
+    auto content = MessageContentText(body);
+
+    auto message = createOutgoingMessage();
+    message->setContent(std::move(content));
+
+    return message;
+}
+
+ModifiableMessageHandler Self::createFileMessage(const QUrl &localFileUrl)
+{
+    auto content = MessageContentFile::createFromLocalFile(localFileUrl);
+
+    auto message = createOutgoingMessage();
+    message->setContent(std::move(content));
+
+    return message;
+}
+
+ModifiableMessageHandler Self::createPictureMessage(const QUrl &localFileUrl)
+{
+    auto content = MessageContentPicture::createFromLocalFile(localFileUrl);
+
+    auto message = createOutgoingMessage();
+    message->setContent(std::move(content));
+
+    return message;
+}
+
 
 void Self::setupTableConnections()
 {

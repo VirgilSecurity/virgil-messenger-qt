@@ -33,69 +33,52 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 
-#ifndef VM_OUTGOING_MESSAGE_H
-#define VM_OUTGOING_MESSAGE_H
-
-#include "Message.h"
-#include "OutgoingMessageStage.h"
+#include "OutgoingMessage.h"
 
 
-namespace vm {
-//
-//  Handles outgoing message.
-//
-class OutgoingMessage : public Message {
-public:
-    //
-    //  Denotes the message processing stage.
-    //
-    using Stage = OutgoingMessageStage;
+using namespace vm;
+using Self = OutgoingMessage;
 
-    //
-    //  Return stage from a given string.
-    //  Throws if correspond stage is not found.
-    //
-    static Stage stageFromString(const QString& stageString);
 
-    //
-    //  Return string from a given stage.
-    //
-    static QString stageToString(Stage stage);
+Self::Stage Self::stageFromString(const QString& stageString) {
+    return OutgoingMessageStageFromString(stageString);
+}
 
-public:
-    //
-    //  Return true.
-    //
-    bool isOutgoing() const noexcept override;
 
-    //
-    //  Return the message stage.
-    //
-    Stage stage() const noexcept;
+QString Self::stageToString(Self::Stage stage) {
+    return OutgoingMessageStageToString(stage);
+}
 
-    //
-    //  State the message stage.
-    //
-    void setStage(Stage stage);
 
-    //
-    //  Return the message stage as string.
-    //
-    QString stageString() const override;
+bool Self::isOutgoing() const noexcept {
+    return true;
+}
 
-    //
-    //  State the message stage from string.
-    //
-    void setStageString(QString stageString) override;
 
-    //
-    //  Apply message update. Return true some properties were actually updated.
-    //
-    bool applyUpdate(const MessageUpdate& update) override;
-private:
-    Stage m_stage;
+Self::Stage Self::stage() const noexcept {
+    return m_stage;
+}
 
-};
-} // namespace vm
 
-#endif // VM_OUTGOING_MESSAGE_H
+void Self::setStage(Self::Stage stage) {
+    m_stage = stage;
+}
+
+
+QString Self::stageString() const {
+    return Self::stageToString(m_stage);
+}
+
+
+void Self::setStageString(QString stageString) {
+    m_stage = Self::stageFromString(stageString);
+}
+
+
+bool Self::applyUpdate(const MessageUpdate& update) {
+    if (auto stageUpdate = std::get_if<OutgoingMessageStageUpdate>(&update)) {
+        m_stage = stageUpdate->stage;
+        return true;
+    }
+    return Message::applyUpdate(update);
+}

@@ -39,6 +39,7 @@
 #include "UserImpl.h"
 #include "CommKitBridge.h"
 #include "MessageContentJsonUtils.h"
+#include "IncomingMessage.h"
 
 #include "VSQNetworkAnalyzer.h"
 #include "VSQDiscoveryManager.h"
@@ -871,7 +872,7 @@ Self::processReceivedXmppMessage(const QXmppMessage& xmppMessage) {
     return QtConcurrent::run([this, xmppMessage = xmppMessage]() -> Result {
         qCInfo(lcCommKitMessenger) << "Trying to sign in user";
 
-        auto message = std::make_unique<Message>();
+        auto message = std::make_unique<IncomingMessage>();
 
         // TODO: review next lines when implement group chats.
         message->setId(MessageId(xmppMessage.id()));

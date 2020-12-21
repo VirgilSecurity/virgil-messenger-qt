@@ -74,16 +74,6 @@ public:
     void setId(ChatId id);
 
     //
-    //  Return chat sender id.
-    //
-    UserId senderId() const;
-
-    //
-    //  Set chat unique identifier.
-    //
-    void setSenderId(UserId senderId);
-
-    //
     //  Return human readable chat title.
     //
     QString title() const;
@@ -136,7 +126,7 @@ public:
 
 private:
     ChatId m_id;
-    QString m_tittle;
+    QString m_title;
     Type m_type;
     QDateTime m_createdAt;
     std::shared_ptr<const Message> m_lastMessage;
