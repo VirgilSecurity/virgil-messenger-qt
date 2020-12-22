@@ -126,18 +126,18 @@ void ChatsController::closeChat()
 
 void ChatsController::addParticipant(const UserId &userId)
 {
-    // addParticipant
+    //    TODO: implement
 }
 
 void ChatsController::removeParticipant(const UserId &userId)
 {
-    // removeParticipant
+    //    TODO: implement
 }
 
 void ChatsController::leaveGroup()
 {
     auto currChatId = ChatsController::currentChatId();
-    // leaveGroup(currChatId)
+    //    TODO: implement
 }
 
 void ChatsController::setupTableConnections()

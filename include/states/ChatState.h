@@ -58,9 +58,9 @@ public:
     QString lastActivityText() const;
     void setLastActivityText(const QString &text);
     bool isAdmin() const;
-    void setIsAdmin(const bool &adminValue);
+    void setIsAdmin(const bool isAdmin);
     bool isGroupChat() const;
-    void setIsGroupChat(const bool &chatValue);
+    void setIsGroupChat(const bool chatValue);
 
 signals:
     void requestPreview(const QUrl &url);

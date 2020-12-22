@@ -84,14 +84,11 @@ Page {
                 onClicked: {
                     if (appState.isGroupChat) {
                         if (appState.isAdmin) {
-                            groupChatAdminContextMenu.currentIndex = -1
                             groupChatAdminContextMenu.open()
                         } else {
-                            groupChatNotAdminContextMenu.currentIndex = -1
                             groupChatNotAdminContextMenu.open()
                         }
                     } else {
-                        stdChatContextMenu.currentIndex = -1
                         stdChatContextMenu.open()
                     }
                 }
@@ -99,16 +96,18 @@ Page {
                 ContextMenu {
                     id: stdChatContextMenu
                     dropdown: true
+                    currentIndex: -1
 
                     Action {
                         text: qsTr("Delete chat")
-                        onTriggered: controllers.chats.addParticipant(/*userId*/)
+                        onTriggered: controllers.chats.addParticipant("userId")
                     }
                 }
 
                 ContextMenu {
                     id: groupChatNotAdminContextMenu
                     dropdown: true
+                    currentIndex: -1
 
                     Action {
                         text: qsTr("Leave group")
@@ -119,15 +118,16 @@ Page {
                 ContextMenu {
                     id: groupChatAdminContextMenu
                     dropdown: true
+                    currentIndex: -1
 
                     Action {
                         text: qsTr("Add participant")
-                        onTriggered: controllers.chats.addParticipant(/*userId*/)
+                        onTriggered: controllers.chats.addParticipant("userId")
                     }
 
                     Action {
                         text: qsTr("Remove participant")
-                        onTriggered: controllers.chats.removeParticipants(/*userId*/)
+                        onTriggered: controllers.chats.removeParticipants("userId")
                     }
 
                     Action {
