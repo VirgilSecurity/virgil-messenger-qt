@@ -136,7 +136,7 @@ void Self::downloadAttachment(const MessageHandler &message)
 {
     qCDebug(lcController) << "Downloading attachment of message: " << message->id();
     const auto attachment = std::get_if<MessageContentAttachment>(&message->content());
-    const auto fileName = attachment->filename();
+    const auto fileName = attachment->fileName();
     const auto filePath = FileUtils::findUniqueFileName(m_settings->downloadsDir().filePath(fileName));
     m_models->messagesQueue()->pushMessageDownload(message, filePath);
 }
@@ -145,7 +145,7 @@ void Self::decryptAttachment(const MessageHandler &message)
 {
     qCDebug(lcController) << "Decrypting attachment of message: " << message->id();
     const auto attachment = std::get_if<MessageContentAttachment>(&message->content());
-    const auto fileName = attachment->filename();
+    const auto fileName = attachment->fileName();
     const auto filePath = FileUtils::findUniqueFileName(m_settings->downloadsDir().filePath(fileName));
     m_models->messagesQueue()->pushMessageDownload(message, filePath); // FIXME: change to the separate "decrypt" only operation.
 }

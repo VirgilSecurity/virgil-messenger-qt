@@ -69,18 +69,18 @@ void Self::onAddAttachment(MessageHandler message)
     }
 
     ScopedConnection connection(*database());
-    const auto extrasJson = attachment->extrasToJson();
+    const auto extrasJson = attachment->extrasToJson(true);
     const DatabaseUtils::BindValues values {
         { ":id", QString(attachment->id()) },
         { ":messageId", QString(message->id()) },
         { ":type",  MessageContentTypeToString(message->contentType()) },
         { ":fingerprint", attachment->fingerprint() },
-        { ":filename", attachment->filename() },
+        { ":filename", attachment->fileName() },
         { ":localPath", attachment->localPath() },
         { ":url", attachment->remoteUrl() },
         { ":size", attachment->size() },
         { ":encryptedSize", attachment->encryptedSize() },
-        { ":extras", attachment->extrasToJson() },
+        { ":extras", extrasJson },
         { ":uploadStage", MessageContentUploadStageToString(attachment->uploadStage()) },
         { ":downloadStage", MessageContentDownloadStageToString(attachment->downloadStage()) },
     };

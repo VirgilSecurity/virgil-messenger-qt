@@ -208,7 +208,7 @@ private:
     bool isXmppConnecting() const noexcept;
 
 
-private slots:
+private:
     void xmppOnConnected();
     void xmppOnDisconnected();
     void xmppOnStateChanged(QXmppClient::State state);
@@ -227,7 +227,6 @@ private slots:
     void onReconnectIfNeeded();
     void onLogConnectionStateChanged(CoreMessenger::ConnectionState state);
 
-private:
     class Impl;
     std::unique_ptr<Impl> m_impl;
     QPointer<Settings> m_settings;

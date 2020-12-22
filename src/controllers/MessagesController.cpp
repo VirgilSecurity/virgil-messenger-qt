@@ -168,7 +168,12 @@ ModifiableMessageHandler Self::createTextMessage(const QString &body)
 
 ModifiableMessageHandler Self::createFileMessage(const QUrl &localFileUrl)
 {
-    auto content = MessageContentFile::createFromLocalFile(localFileUrl);
+    QString errorString;
+    auto content = MessageContentFile::createFromLocalFile(localFileUrl, errorString);
+    // FIXME(fpohtmeh): is it correct way to handle errors? skip errorString?
+    if (!errorString.isEmpty()) {
+        return ModifiableMessageHandler();
+    }
 
     auto message = createOutgoingMessage();
     message->setContent(std::move(content));
@@ -179,7 +184,12 @@ ModifiableMessageHandler Self::createFileMessage(const QUrl &localFileUrl)
 
 ModifiableMessageHandler Self::createPictureMessage(const QUrl &localFileUrl)
 {
-    auto content = MessageContentPicture::createFromLocalFile(localFileUrl);
+    QString errorString;
+    const auto content = MessageContentPicture::createFromLocalFile(localFileUrl, errorString);
+    // FIXME(fpohtmeh): is it correct way to handle errors? skip errorString?
+    if (!errorString.isEmpty()) {
+        return ModifiableMessageHandler();
+    }
 
     auto message = createOutgoingMessage();
     message->setContent(std::move(content));

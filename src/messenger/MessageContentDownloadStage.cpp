@@ -50,7 +50,7 @@ MessageContentDownloadStage vm::MessageContentDownloadStageFromString(const QStr
         return MessageContentDownloadStage::Decrypted;
     }
     else {
-        throw "Invalid MessageContentDownloadStage string";
+        throw std::logic_error("Invalid MessageContentDownloadStage string");
         return {};
     }
 }
@@ -68,7 +68,7 @@ QString vm::MessageContentDownloadStageToString(MessageContentDownloadStage stag
             return QLatin1String("decrypted");
 
         default:
-            throw "Invalid MessageContentDownloadStage";
+            throw std::logic_error("Invalid MessageContentDownloadStage");
             return {};
     }
 }

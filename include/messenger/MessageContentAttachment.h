@@ -82,12 +82,12 @@ public:
     //
     //  Return attachment file name without path.
     //
-    QString filename() const;
+    QString fileName() const;
 
     //
     //  Set attachment file name without path.
     //
-    void setFilename(QString fileName);
+    void setFileName(QString fileName);
 
     //
     //  Return attachment fingerprint.
@@ -187,7 +187,12 @@ public:
     //
     //  Return JSON string with extra attachment attributes.
     //
-    virtual QString extrasToJson() const;
+    virtual QString extrasToJson(const bool writeLocalPaths) const;
+
+    //
+    //  Parse local file.
+    //
+    bool readLocalFile(const QUrl &localUrl, QString &errorString);
 
 private:
     AttachmentId m_id;

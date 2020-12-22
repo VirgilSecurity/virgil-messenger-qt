@@ -36,17 +36,21 @@
 #include "MessageContentFile.h"
 
 
+#include "FileUtils.h"
+
+
 using namespace vm;
 using Self = MessageContentFile;
 
 
 bool Self::applyUpdate(const MessageUpdate& update) {
-    // FIXME(fpohtmeh): implement
     return MessageContentAttachment::applyUpdate(update);
 }
 
 
-MessageContentFile Self::createFromLocalFile(const QUrl& localUrl) {
-	// FIXME(fpohtmeh): implement
-	return MessageContentFile();
+MessageContentFile Self::createFromLocalFile(const QUrl& localUrl, QString &errorString) {
+    MessageContentFile file;
+    file.readLocalFile(localUrl, errorString);
+    file.setFileName(FileUtils::attachmentFileName(localUrl, false));
+    return file;
 }

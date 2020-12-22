@@ -56,7 +56,7 @@ MessageStatus vm::MessageStatusFromString(const QString& statusString) {
         return MessageStatus::Failed;
     }
     else {
-        throw "Invalid MessageStatus string";
+        throw std::logic_error("Invalid MessageStatus string");
         return {};
     }
 }
@@ -80,7 +80,7 @@ QString vm::MessageStatusToString(MessageStatus status) {
             return QLatin1String("failed");
 
         default:
-            throw "Invalid MessageStatus";
+            throw std::logic_error("Invalid MessageStatus");
             return {};
     }
 }

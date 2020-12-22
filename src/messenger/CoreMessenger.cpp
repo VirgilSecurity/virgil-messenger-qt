@@ -810,7 +810,7 @@ Self::sendMessage(MessageHandler message) {
         //
         //  Encrypt message content.
         //
-        auto contentJson = MessageContentJsonUtils::toBytes(message->content());
+        auto contentJson = MessageContentJsonUtils::toBytes(message->content(), false);
         auto ciphertextDataMinLen = vssq_messenger_encrypted_message_len(m_impl->messenger.get(), contentJson.size(), recipient->impl()->user.get());
 
         qCDebug(lcCommKitMessenger) << "Message Len   : " << contentJson.size();
@@ -838,7 +838,7 @@ Self::sendMessage(MessageHandler message) {
         ciphertextJson.insert("version", "v3");
         ciphertextJson.insert("timestamp", static_cast<qint64>(message->createdAt().toTime_t()));
         ciphertextJson.insert("ciphertext", QString::fromLatin1(ciphertextData.toBase64()));
-        auto ciphertextJsonStr = QJsonDocument(ciphertextJson).toJson(QJsonDocument::Compact);
+        auto ciphertextJsonStr = MessageContentJsonUtils::toBytes(ciphertextJson);
 
         qCDebug(lcCommKitMessenger) << "Will send XMPP message with body: " << ciphertextJsonStr;
 

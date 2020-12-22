@@ -36,19 +36,35 @@
 #include "MessageContentPicture.h"
 
 
+#include <QImageReader>
+
+
+#include "FileUtils.h"
+#include "MessageContentJsonUtils.h"
+#include "Utils.h"
+
+
 using namespace vm;
 using Self = MessageContentPicture;
 
 
 bool Self::applyUpdate(const MessageUpdate& update) {
-    // FIXME(fpohtmeh): implement
     return MessageContentAttachment::applyUpdate(update);
+}
+
+
+QString MessageContentPicture::extrasToJson(const bool writeLocalPaths) const
+{
+    QJsonObject json;
+    MessageContentJsonUtils::writeExtras(*this, writeLocalPaths, json);
+    return MessageContentJsonUtils::toBytes(json);
 }
 
 
 QString Self::previewPath() const {
     return m_previewPath;
 }
+
 
 void MessageContentPicture::setPreviewPath(const QString &path) {
     m_previewPath = path;
@@ -82,7 +98,26 @@ void MessageContentPicture::setThumbnail(MessageContentFile thumbnail)
 }
 
 
-MessageContentPicture Self::createFromLocalFile(const QUrl& localUrl) {
-    // FIXME(fpohtmeh): implement
-    return MessageContentPicture();
+MessageContentPicture Self::createFromLocalFile(const QUrl& localUrl, QString &errorString) {
+    MessageContentPicture picture;
+    if (picture.readLocalFile(localUrl, errorString)) {
+        const auto fileName = FileUtils::attachmentFileName(localUrl, true);
+        picture.setFileName(fileName.section('.', 0, 0) + QLatin1String(".png"));
+        picture.readImage(errorString);
+    }
+    return picture;
+}
+
+
+bool MessageContentPicture::readImage(QString &errorString) {
+    QImage source;
+    QImageReader reader(localPath());
+    if (!Utils::readImage(&reader, &source)) {
+        errorString = QObject::tr("Unable to read image");
+        return false;
+    }
+    const QSize thumbnailMaxSize(100, 80); // FIXME(fpohtmeh): use settings
+    const auto thumbnailSize = Utils::calculateThumbnailSize(source.size(), thumbnailMaxSize, reader.transformation());
+    setThumbnailSize(thumbnailSize);
+    return true;
 }

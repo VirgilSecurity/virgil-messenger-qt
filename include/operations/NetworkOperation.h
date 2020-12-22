@@ -48,8 +48,6 @@ public:
     explicit NetworkOperation(NetworkOperation *parent);
 
     bool isOnline() const noexcept;
-
-public slots:
     void setIsOnline(bool isOnline);
 
 protected:

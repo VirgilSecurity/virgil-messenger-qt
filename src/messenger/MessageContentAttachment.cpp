@@ -36,13 +36,44 @@
 #include "MessageContentAttachment.h"
 
 
+#include "FileUtils.h"
+#include "Utils.h"
+#include "android/VSQAndroid.h"
+
+
 using namespace vm;
 using Self = MessageContentAttachment;
 
 
 bool Self::applyUpdate(const MessageUpdate& update) {
-    // FIXME(fpohtmeh): implement
-    return true;
+    if (auto uploadStageUpdate = std::get_if<MessageAttachmentUploadStageUpdate>(&update)) {
+        setUploadStage(uploadStageUpdate->uploadStage);
+    }
+    else if (auto downloadStageUpdate = std::get_if<MessageAttachmentDownloadStageUpdate>(&update)) {
+        setDownloadStage(downloadStageUpdate->downloadStage);
+    }
+    else if (auto fingerprintUpdate = std::get_if<MessageAttachmentFingerprintUpdate>(&update)) {
+        setFingerprint(fingerprintUpdate->fingerprint);
+    }
+    else if (auto sizeUpdate = std::get_if<MessageAttachmentSizeUpdate>(&update)) {
+        // FIXME(fpohtmeh): Likely we don't need size update. Remove MessageAttachmentSizeUpdate struct
+        setSize(sizeUpdate->size);
+    }
+    else if (auto remoteUrlUpdate = std::get_if<MessageAttachmentRemoteUrlUpdate>(&update)) {
+        setRemoteUrl(remoteUrlUpdate->remoteUrl);
+    }
+    else if (auto encryptedSizeUpdate = std::get_if<MessageAttachmentEncryptedSizeUpdate>(&update)) {
+        setEncryptedSize(encryptedSizeUpdate->encryptedSize);
+    }
+    else if (auto localPathUpdate = std::get_if<MessageAttachmentLocalPathUpdate>(&update)) {
+        setLocalPath(localPathUpdate->localPath);
+    }
+    else if (auto processedSizeUpdate = std::get_if<MessageAttachmentProcessedSizeUpdate>(&update)) {
+        setProcessedSize(processedSizeUpdate->processedSize);
+    }
+    else {
+        return false;
+    }
 }
 
 
@@ -56,12 +87,12 @@ void Self::setId(AttachmentId id) {
 }
 
 
-QString Self::filename() const {
+QString Self::fileName() const {
     return m_fileName;
 }
 
 
-void Self::setFilename(QString fileName) {
+void Self::setFileName(QString fileName) {
     m_fileName = fileName;
 }
 
@@ -146,7 +177,35 @@ void Self::setDownloadStage(DownloadStage downloadStage) {
 }
 
 
-QString Self::extrasToJson() const {
-    // FIXME(fpohtmeh): implement
+QString Self::extrasToJson(const bool writeLocalPaths) const {
+    Q_UNUSED(writeLocalPaths)
     return QString();
+}
+
+bool Self::readLocalFile(const QUrl &localUrl, QString &errorString) {
+    if (!FileUtils::isValidUrl(localUrl)) {
+        errorString = QObject::tr("File doesn't exist");
+        return false;
+    }
+
+    const auto localFilePath = FileUtils::urlToLocalFile(localUrl);
+    QFileInfo localInfo(localFilePath);
+    if (!localInfo.exists()) {
+        errorString = QObject::tr("File doesn't exist");
+        return false;
+    }
+    if (localInfo.size() == 0) {
+        errorString = QObject::tr("File is empty");
+        return false;
+    }
+
+#ifdef VS_ANDROID
+    const quint64 fileSize = VSQAndroid::getFileSize(url);
+#else
+    const quint64 fileSize = localInfo.size();
+#endif
+    setId(AttachmentId(Utils::createUuid()));
+    setSize(fileSize);
+    setLocalPath(localInfo.absoluteFilePath());
+    return true;
 }

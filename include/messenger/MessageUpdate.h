@@ -101,7 +101,7 @@ struct MessageAttachmentEncryptedSizeUpdate : public MessageAttachmentUpdateBase
 };
 
 struct MessageAttachmentProcessedSizeUpdate : public MessageAttachmentUpdateBase {
-    quint64 size;
+    quint64 processedSize;
 };
 
 struct MessaggePictureThumbnailPathUpdate : public MessageAttachmentUpdateBase {

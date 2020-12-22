@@ -36,43 +36,92 @@
 #include "MessageContentJsonUtils.h"
 
 
+#include "MessageContentType.h"
+
+
 using namespace vm;
 using Self = MessageContentJsonUtils;
 
 
-QJsonObject Self::to(const MessageContent& messageContent) {
-	// FIXME(fpohtmeh): implement
-	return QJsonObject();
+QJsonObject Self::to(const MessageContent& messageContent, const bool writeLocalPaths) {
+    QJsonObject mainObject;
+    mainObject.insert(QLatin1String("type"), MessageContentTypeToString(messageContent));
+    if (auto text = std::get_if<MessageContentText>(&messageContent)) {
+        mainObject.insert(QLatin1String("text"), text->text());
+    }
+    else if (auto encrypted = std::get_if<MessageContentEncrypted>(&messageContent)) {
+        mainObject.insert(QLatin1String("ciphertext"), QString(encrypted->ciphertext().toBase64()));
+    }
+    else if (auto attachment = std::get_if<MessageContentAttachment>(&messageContent)) {
+        QJsonObject attachmentObject;
+        writeAttachment(*attachment, attachmentObject);
+        QJsonObject extrasObject;
+        if (auto picture = std::get_if<MessageContentPicture>(&messageContent)) {
+            writeExtras(*picture, writeLocalPaths, extrasObject);
+        }
+        attachmentObject.insert(QLatin1String("extras"), extrasObject);
+        mainObject.insert(QLatin1String("attachment"), attachmentObject);
+    }
+    else {
+        throw std::logic_error("Invalid messageContent");
+    }
+    return mainObject;
 }
 
 
-QString Self::toString(const MessageContent& messageContent) {
-	// FIXME(fpohtmeh): implement
-	return QString();
+QString Self::toString(const MessageContent& messageContent, const bool writeLocalPaths) {
+    return toBytes(messageContent, writeLocalPaths);
 }
 
 
-QByteArray Self::toBytes(const MessageContent& messageContent) {
-	// FIXME(fpohtmeh): implement
-	return QByteArray();
+QByteArray Self::toBytes(const MessageContent& messageContent, const bool writeLocalPaths) {
+    return toBytes(to(messageContent, writeLocalPaths));
 }
 
 
-MessageContent Self::from(const QJsonObject& messageJsonObject, QString &errorString) {
-	// FIXME(fpohtmeh): implement
-	return MessageContent();
+QByteArray MessageContentJsonUtils::toBytes(const QJsonObject& jsonObject) {
+    return QJsonDocument(jsonObject).toJson(QJsonDocument::Compact);
 }
 
 
-MessageContent Self::fromString(const QString& messageJsonString, QString &errorString) {
-	// FIXME(fpohtmeh): implement
-	return MessageContent();
+MessageContent Self::from(const QJsonObject& messageJsonObject, QString& errorString) {
+    const auto type = MessageContentTypeFrom(messageJsonObject[QLatin1String("type")].toString());
+    switch (type) {
+        case MessageContentType::Text:
+            return MessageContentText(messageJsonObject[QLatin1String("text")].toString());
+        case MessageContentType::Encrypted: {
+            const QByteArray cipherText = messageJsonObject[QLatin1String("ciphertext")].toString().toUtf8();
+            return MessageContentEncrypted(QByteArray::fromBase64(cipherText));
+        }
+        case MessageContentType::File: {
+            MessageContentFile file;
+            const auto attachmentObject = messageJsonObject[QLatin1String("attachment")].toObject();
+            readAttachment(attachmentObject, file);
+            return file;
+        }
+        case MessageContentType::Picture: {
+            MessageContentPicture picture;
+            const auto attachmentObject = messageJsonObject[QLatin1String("attachment")].toObject();
+            readAttachment(attachmentObject, picture);
+            const auto extrasObject = attachmentObject[QLatin1String("extras")].toObject();
+            readExtras(extrasObject, picture);
+            return picture;
+        }
+        default:
+            errorString = QObject::tr("Invalid messageContent json");
+            return {};
+    }
+}
+
+
+MessageContent Self::fromString(const QString& messageJsonString, QString& errorString) {
+    return fromBytes(messageJsonString.toUtf8(), errorString);
 }
 
 
 MessageContent Self::fromBytes(const QByteArray& messageJsonBytes, QString &errorString) {
-	// FIXME(fpohtmeh): implement
-	return MessageContent();
+    const auto json = QJsonDocument::fromJson(messageJsonBytes).object();
+    return from(json, errorString);
 }
 
 
@@ -88,20 +137,41 @@ bool Self::readExtras(const QJsonObject& json, MessageContentPicture &picture) {
 }
 
 
-bool Self::readExtras(const QString& jsonString, MessageContentPicture &picture) {
+bool Self::readExtras(const QString& jsonString, MessageContentPicture& picture) {
     const auto json = QJsonDocument::fromJson(jsonString.toUtf8()).object();
     return readExtras(json, picture);
 }
 
 
-bool Self::writeExtras(const MessageContentPicture &picture, QJsonObject& json) {
+bool Self::writeExtras(const MessageContentPicture& picture, const bool writeLocalPaths, QJsonObject& json) {
     const auto thumbnail = picture.thumbnail();
-    json["thumbnailPath"] = thumbnail.localPath();
+    if (writeLocalPaths) {
+        json["thumbnailPath"] = thumbnail.localPath();
+    }
     json["thumbnailUrl"] = thumbnail.remoteUrl().toString();
     json["thumbnailEncryptedSize"] = thumbnail.encryptedSize();
     const auto thumbnailSize = picture.thumbnailSize();
     json["thumbnailWidth"] = thumbnailSize.width();
     json["thumbnailHeight"] = thumbnailSize.height();
-    json["previewPath"] = picture.previewPath();
+    if (writeLocalPaths) {
+        json["previewPath"] = picture.previewPath();
+    }
 	return true;
+}
+
+void Self::writeAttachment(const MessageContentAttachment& attachment, QJsonObject& jsonObject) {
+    // FIXME(fpohtmeh): write/read id?
+    jsonObject.insert(QLatin1String("fileName"), attachment.fileName());
+    jsonObject.insert(QLatin1String("size"), attachment.size());
+    jsonObject.insert(QLatin1String("remoteUrl"), attachment.remoteUrl().toString());
+    jsonObject.insert(QLatin1String("encryptedSize"), attachment.encryptedSize());
+    jsonObject.insert(QLatin1String("fingerprint"), attachment.fingerprint());
+}
+
+void Self::readAttachment(const QJsonObject& jsonObject, MessageContentAttachment& attachment) {
+    attachment.setFileName(jsonObject[QLatin1String("fileName")].toString());
+    attachment.setSize(jsonObject[QLatin1String("size")].toInt());
+    attachment.setRemoteUrl(jsonObject[QLatin1String("remoteUrl")].toString());
+    attachment.setEncryptedSize(jsonObject[QLatin1String("encryptedSize")].toInt());
+    attachment.setFingerprint(jsonObject[QLatin1String("fingerprint")].toString());
 }

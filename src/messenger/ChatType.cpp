@@ -47,7 +47,7 @@ ChatType vm::ChatTypeFromString(const QString& typeString) {
         return ChatType::Group;
     }
     else {
-        throw "Invalid ChatType string";
+        throw std::logic_error("Invalid ChatType string");
         return {};
     }
 }
@@ -62,7 +62,7 @@ QString vm::ChatTypeToString(ChatType type) {
             return QLatin1String("group");
 
         default:
-            throw "Invalid ChatType";
+            throw std::logic_error("Invalid ChatType");
             return {};
     }
 }

@@ -165,7 +165,7 @@ void Self::removeFile(const QString &filePath)
     }
 }
 
-QString Self::attachmentFileName(const QUrl &url, const QFileInfo &localInfo, bool isPicture)
+QString Self::attachmentFileName(const QUrl &url, bool isPicture)
 {
     QString fileName;
 #ifdef VS_ANDROID
@@ -185,7 +185,7 @@ QString Self::attachmentFileName(const QUrl &url, const QFileInfo &localInfo, bo
     Q_UNUSED(isPicture)
 #endif
     if (fileName.isEmpty()) {
-        fileName = localInfo.fileName();
+        fileName = QFileInfo(urlToLocalFile(url)).fileName();
     }
     return fileName;
 }

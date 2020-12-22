@@ -46,11 +46,17 @@ namespace vm {
 //  Class that handles picture as message content.
 //
 class MessageContentPicture : public MessageContentAttachment  {
+
 public:
     //
     //  Apply picture specific update.
     //
     bool applyUpdate(const MessageUpdate& update) override;
+
+    //
+    //  Return JSON string with extra attachment attributes.
+    //
+    QString extrasToJson(const bool writeLocalPaths) const override;
 
     //
     //  Return path to the resized picture suitable for a preview.
@@ -90,9 +96,11 @@ public:
     //
     //  Create picture message content from the given path.
     //
-    static MessageContentPicture createFromLocalFile(const QUrl& localUrl);
+    static MessageContentPicture createFromLocalFile(const QUrl& localUrl, QString &errorString);
 
 private:
+    bool readImage(QString &errorString);
+
     QString m_previewPath;
     MessageContentFile m_thumbnail;
     qsizetype m_thumbnailWidth;

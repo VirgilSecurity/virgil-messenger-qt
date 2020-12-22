@@ -93,11 +93,9 @@ private:
     //
     void setupTableConnections();
 
-private slots:
     void onMessageReceived(ModifiableMessageHandler message);
     void onUpdateMessage(const MessageUpdate& messageUpdate);
 
-private:
     QPointer<Messenger> m_messenger;
     QPointer<Models> m_models;
     QPointer<UserDatabase> m_userDatabase;

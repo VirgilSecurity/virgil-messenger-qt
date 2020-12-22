@@ -137,7 +137,7 @@ QString Utils::messageContentDisplayText(const MessageContent &messageContent)
         return QObject::tr("picture");
 
     } else if (auto file = std::get_if<MessageContentFile>(&messageContent)) {
-        return Utils::elidedText(file->filename(), 50);
+        return Utils::elidedText(file->fileName(), 50);
 
     } else {
         return {};

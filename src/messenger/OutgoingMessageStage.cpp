@@ -53,7 +53,7 @@ OutgoingMessageStage vm::OutgoingMessageStageFromString(const QString& stageStri
         return OutgoingMessageStage::Sent;
     }
     else {
-        throw "Invalid OutgoingMessageStage string";
+        throw std::logic_error("Invalid OutgoingMessageStage string");
         return {};
     }
 }
@@ -74,7 +74,7 @@ QString vm::OutgoingMessageStageToString(OutgoingMessageStage stage) {
             return QLatin1String("sent");
 
         default:
-            throw "Invalid OutgoingMessageStage";
+            throw std::logic_error("Invalid OutgoingMessageStage");
             return {};
     }
 }

@@ -50,7 +50,7 @@ IncomingMessageStage vm::IncomingMessageStageFromString(const QString& stageStri
         return IncomingMessageStage::Processed;
     }
     else {
-        throw "Invalid IncomingMessageStage string";
+        throw std::logic_error("Invalid IncomingMessageStage string");
         return {};
     }
 }
@@ -68,7 +68,7 @@ QString vm::IncomingMessageStageToString(IncomingMessageStage stage) {
             return QLatin1String("processed");
 
         default:
-            throw "Invalid IncomingMessageStage";
+            throw std::logic_error("Invalid IncomingMessageStage");
             return {};
     }
 }

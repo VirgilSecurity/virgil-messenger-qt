@@ -53,7 +53,7 @@ MessageContentUploadStage vm::MessageContentUploadStageFromString(const QString&
         return MessageContentUploadStage::Uploaded;
     }
     else {
-        throw "Invalid MessageContentUploadStage string";
+        throw std::logic_error("Invalid MessageContentUploadStage string");
         return {};
     }
 }
@@ -74,7 +74,7 @@ QString vm::MessageContentUploadStageToString(MessageContentUploadStage stage) {
             return QLatin1String("uploaded");
 
         default:
-            throw "Invalid MessageContentUploadStage";
+            throw std::logic_error("Invalid MessageContentUploadStage");
             return {};
     }
 }

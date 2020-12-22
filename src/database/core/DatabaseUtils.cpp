@@ -129,7 +129,7 @@ bool Self::readMessageContentAttachment(const QSqlQuery &query, MessageContentAt
 
     attachment.setId(AttachmentId(attachmentId));
     attachment.setFingerprint(attachmentFingerprint);
-    attachment.setFilename(attachmentFilename);
+    attachment.setFileName(attachmentFilename);
     attachment.setLocalPath(attachmentLocalPath);
     attachment.setRemoteUrl(attachmentUrl);
     attachment.setSize(attachmentSize);

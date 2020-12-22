@@ -44,6 +44,7 @@ namespace vm {
 //  Class that handles file as message content.
 //
 class MessageContentFile : public MessageContentAttachment  {
+
 public:
     using MessageContentAttachment::MessageContentAttachment;
 
@@ -55,7 +56,7 @@ public:
     //
     //  Create file message content from the given path.
     //
-    static MessageContentFile createFromLocalFile(const QUrl& localUrl);
+    static MessageContentFile createFromLocalFile(const QUrl& localUrl, QString &errorString);
 };
 } // namespace vm
 
