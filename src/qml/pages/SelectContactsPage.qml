@@ -14,20 +14,16 @@ OperationPage {
 
     property alias actionButtonText: actionButton.text
 
+    signal contactSelected(string contactId)
+    signal actionButtonClicked()
+
     QtObject {
         id: d
         readonly property var model: models.discoveredContacts
         readonly property string contact: contactSearch.search.toLowerCase()
         readonly property alias search: contactSearch.search
-        property string previousSearch
-        readonly property int defaultSearchHeight: 40
 
-        onSearchChanged: {
-            if (search) {
-                previousSearch = search
-            }
-            model.filter = search
-        }
+        onSearchChanged: model.filter = search
     }
 
     header: Header {
@@ -43,43 +39,44 @@ OperationPage {
             state: "opened"
             searchPlaceholder: qsTr("Search contact")
             closeable: false
-            Layout.preferredHeight: d.defaultSearchHeight
+            Layout.preferredHeight: recommendedHeight
             Layout.fillWidth: true
-
-            onClosed: contactSearch.search = ""
-            onAccepted: root.accept()
+            Layout.leftMargin: Theme.smallSpacing
         }
 
         SelectContactsList {
-            newContactText: d.search ? d.contact : d.previousSearch
+            search: d.search
             Layout.fillWidth: true
             Layout.fillHeight: true
+
+            footer: HorizontalRule {}
+            footerPositioning: ListView.OverlayFooter
+
+            onContactSelected: root.contactSelected(contactId)
         }
 
         SelectedContactsFlow {
-            visible: d.model.selection.hasSelection
+            id: flow
             Layout.fillWidth: true
             Layout.preferredHeight: recommendedHeight
-        }
 
-        ServerSelectionRow {
-            Layout.alignment: Qt.AlignHCenter
+            Behavior on Layout.preferredHeight {
+                NumberAnimation {
+                    easing.type: Easing.InOutCubic
+                    duration: Theme.animationDuration
+                }
+            }
         }
 
         FormPrimaryButton {
             id: actionButton
             visible: d.model.selection.multiSelect
-            enabled: d.model.selection.hasSelection
+            enabled: flow.visible
+            onClicked: root.actionButtonClicked()
         }
-    }
 
-    function accept() {
-        if (!d.model.selection.multiSelect) {
-            appState.addNewChat(d.contact)
+        ServerSelectionRow {
+            Layout.alignment: Qt.AlignHCenter
         }
-    }
-
-    function reject() {
-        app.stateManager.goBack()
     }
 }

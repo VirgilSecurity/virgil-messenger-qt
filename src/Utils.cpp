@@ -59,42 +59,38 @@ namespace
         Contact c0;
         c0.name = "John Doe";
         c0.avatarUrl = "https://avatars.mds.yandex.net/get-zen_doc/1779726/pub_5d32ac8bf2df2500adb00103_5d32aeae21f9ff00ad9973ee/scale_1200";
-        c0.lastSeenActivity = "yesterday";
+        c0.email = "johndoe@gmail.com";
 
         Contact c1;
         c1.name = "Bon Min";
         c1.avatarUrl = "https://peopletalk.ru/wp-content/uploads/2016/10/orig_95f063cefa53daf194fa9f6d5e20b86c.jpg";
-        c1.lastSeenActivity = "yesterday";
 
         Contact c2;
         c2.name = "Tin Bin";
         c2.avatarUrl = "https://i.postimg.cc/wBJKr6CR/K5-W-z1n-Lqms.jpg";
-        c2.lastSeenActivity = "yesterday";
 
         Contact c3;
         c3.name = "Mister Bean";
         c3.avatarUrl = "https://avatars.mds.yandex.net/get-zen_doc/175962/pub_5a7b1334799d9dbfb9cc0f46_5a7b135b57906a1b6eb710eb/scale_1200";
-        c3.lastSeenActivity = "yesterday";
+        c3.phoneNumber = "+12345678";
 
         Contact c4;
         c4.name = "Erick Helicopter";
-        c4.lastSeenActivity = "yesterday";
+        c4.email = "heli@copt.er";
 
         Contact c5;
         c5.name = "Peter Griffin";
-        c5.lastSeenActivity = "yesterday";
 
         Contacts contacts{ c0, c1, c2, c3, c4, c5 };
         int i = 0;
         for (auto &c : contacts) {
             c.id = QLatin1String("dummy/%1").arg(i);
-            c.platformId = i;
-            c.avatarUrlRequested = true;
+            c.platformId = c.id;
             ++i;
         }
         return contacts;
     }
-#endif // VS_DEVMODE
+#endif // VS_DUMMY_CONTACTS
 }
 
 QString Utils::createUuid()
@@ -543,7 +539,7 @@ Contacts Utils::getDeviceContacts(const Contacts &cachedContacts)
                 continue;
             }
             c.avatarUrl = it->second.avatarUrl;
-            c.avatarUrlRequested = it->second.avatarUrlRequested;
+            c.avatarUrlRetryCount = it->second.avatarUrlRetryCount;
         }
     }
     return contacts;

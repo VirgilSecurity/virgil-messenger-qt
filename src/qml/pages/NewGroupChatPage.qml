@@ -4,9 +4,11 @@ import "../components"
 
 SelectContactsPage {
     appState: app.stateManager.newGroupChatState
-    actionButtonText: qsTr("Create group")
+    actionButtonText: qsTr("Next")
 
     header: Header {
         title: qsTr("New group")
     }
+
+    onActionButtonClicked: appState.requestChatName()
 }

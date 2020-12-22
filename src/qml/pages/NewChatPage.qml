@@ -8,4 +8,6 @@ SelectContactsPage {
     header: Header {
         title: qsTr("New chat")
     }
+
+    onContactSelected: appState.addNewChat(contactId)
 }

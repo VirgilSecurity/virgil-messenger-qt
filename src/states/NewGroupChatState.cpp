@@ -34,20 +34,15 @@
 
 #include "states/NewGroupChatState.h"
 
-#include "controllers/ChatsController.h"
 #include "models/DiscoveredContactsModel.h"
 #include "models/ListSelectionModel.h"
 
 using namespace vm;
 
-NewGroupChatState::NewGroupChatState(ChatsController *chatsController, DiscoveredContactsModel *contactsModel, QState *parent)
+NewGroupChatState::NewGroupChatState(DiscoveredContactsModel *contactsModel, QState *parent)
     : OperationState(parent)
-    , m_chatsController(chatsController)
     , m_contactsModel(contactsModel)
 {
-    connect(chatsController, &ChatsController::chatOpened, this, &NewGroupChatState::operationFinished);
-    connect(chatsController, &ChatsController::errorOccurred, this, &NewGroupChatState::operationErrorOccurred);
-    connect(this, &NewGroupChatState::addNewChat, this, &NewGroupChatState::processAddNewChat);
 }
 
 void NewGroupChatState::onEntry(QEvent *event)
@@ -55,10 +50,4 @@ void NewGroupChatState::onEntry(QEvent *event)
     Q_UNUSED(event)
     m_contactsModel->reload();
     m_contactsModel->selection()->setMultiSelect(true);
-}
-
-void NewGroupChatState::processAddNewChat(const Contact::Id &contactId)
-{
-    emit operationStarted();
-    m_chatsController->createChat(contactId);
 }

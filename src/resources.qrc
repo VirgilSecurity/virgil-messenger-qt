@@ -8,6 +8,7 @@
         <file>qml/pages/DownloadKeyPage.qml</file>
         <file>qml/pages/EditProfilePage.qml</file>
         <file>qml/pages/MainPage.qml</file>
+        <file>qml/pages/NameGroupChatPage.qml</file>
         <file>qml/pages/NewChatPage.qml</file>
         <file>qml/pages/NewGroupChatPage.qml</file>
         <file>qml/pages/OperationPage.qml</file>
@@ -33,6 +34,8 @@
         <file>qml/resources/icons/Close@2x.png</file>
         <file>qml/resources/icons/Chats.png</file>
         <file>qml/resources/icons/Chats@2x.png</file>
+        <file>qml/resources/icons/Check.png</file>
+        <file>qml/resources/icons/Check@2x.png</file>
         <file>qml/resources/icons/Lock.png</file>
         <file>qml/resources/icons/Lock@2x.png</file>
         <file>qml/resources/icons/Key.png</file>
@@ -130,6 +133,7 @@
         <file>qml/components/UploadProgressBar.qml</file>
         <file>qml/components/ServerSelectionRow.qml</file>
         <file>qml/components/SelectedContactsFlow.qml</file>
+        <file>qml/components/HorizontalRule.qml</file>
         <!-- Database -->
         <file>resources/database/createAttachments.sql</file>
         <file>resources/database/createChats.sql</file>
