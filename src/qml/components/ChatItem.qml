@@ -23,10 +23,12 @@ Item {
 
     Flickable {
         id: chatFlickable
-        anchors.fill: parent
-        contentHeight: chatListItem.chatContentHeight
 
         property real previousContentY: contentY
+
+        anchors.fill: parent
+        contentHeight: chatListItem.chatContentHeight
+        onHeightChanged: chatList.heightChangedController()
         onContentYChanged: chatList.autoFlickToBottomController()
         Behavior on contentY {
             NumberAnimation {
@@ -34,8 +36,6 @@ Item {
                 easing.type: Easing.InOutCubic
             }
         }
-
-//            onHeightChanged: chatList.heightChangedController() not working yet
 
         ChatPageList {
             id: chatListView
@@ -152,14 +152,10 @@ Item {
         }
 
         function heightChangedController() {
-            let val = 0
             if (chatListItem.height < chatListItem.previousHeight) {
                 chatList.flickToBottomController(false)
-                val = 1
             }
             chatListItem.previousHeight = chatListItem.height
-
-            console.log("heightChangedController", val)
         }
     }
 
