@@ -95,6 +95,7 @@
         <file>qml/components/FormSecondaryButton.qml</file>
         <file>qml/components/FormVendor.qml</file>
         <file>qml/components/AccountSelection.qml</file>
+        <file>qml/components/ChatItem.qml</file>
         <file>qml/components/ChatMessageInput.qml</file>
         <file>qml/components/ChatPageList.qml</file>
         <file>qml/components/ChatMessage.qml</file>
