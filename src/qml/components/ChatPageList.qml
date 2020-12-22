@@ -18,6 +18,19 @@ ModelListView {
     section.property: "day"
     section.delegate: ChatDateSeporator {
         date: section
+
+        Rectangle {
+            anchors.fill: parent
+            color: 'green'
+            opacity: 0.2
+            Label {
+                id: unreadMessagesCount
+                text: parent.height
+                color: Theme.primaryTextColor
+                font.pixelSize: UiHelper.fixFontSz(14)
+                anchors.centerIn: parent
+            }
+        }
     }
 
     model: models.messages

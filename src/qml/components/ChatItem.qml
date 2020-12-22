@@ -28,6 +28,9 @@ Item {
 
         anchors.fill: parent
         contentHeight: chatListItem.chatContentHeight
+        onContentHeightChanged: {
+            console.log("contentHeight CHANGED. NEW value:", chatFlickable.contentHeight)
+        }
         onHeightChanged: chatList.heightChangedController()
         onContentYChanged: chatList.autoFlickToBottomController()
         Behavior on contentY {
@@ -102,6 +105,7 @@ Item {
             let contentDiff = chatListItem.height
             if (newItem === true) {
                 let lastItem = chatListView.itemAtIndex(chatListView.count - 1)
+//                let prevItem = chatListView.itemAtIndex(chatListView.count - 2)
                 if (lastItem) {
                     contentDiff -= (lastItem.height + chatListView.spacing)
                 }
