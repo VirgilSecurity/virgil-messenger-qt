@@ -49,6 +49,8 @@ ChatState::ChatState(Controllers *controllers, VSQLastActivityManager *lastActiv
     connect(m_controllers->attachments(), &AttachmentsController::openPreviewRequested, this, &ChatState::requestPreview);
     connect(m_controllers->messages(), &MessagesController::messageStatusChanged, this, &ChatState::onMessageStatusChanged);
     connect(lastActivityManager, &VSQLastActivityManager::lastActivityTextChanged, this, &ChatState::setLastActivityText);
+    setIsAdmin(true);
+    setIsGroupChat(false);
 }
 
 QString ChatState::lastActivityText() const
@@ -63,6 +65,34 @@ void ChatState::setLastActivityText(const QString &text)
     }
     m_lastActivityText = text;
     emit lastActivityTextChanged(text);
+}
+
+bool ChatState::isAdmin() const
+{
+    return m_isAdmin;
+}
+
+void ChatState::setIsAdmin(const bool isAdmin)
+{
+    if (isAdmin == m_isAdmin) {
+        return;
+    }
+    m_isAdmin = isAdmin;
+    emit isAdminChanged(isAdmin);
+}
+
+bool ChatState::isGroupChat() const
+{
+    return m_isGroupChat;
+}
+
+void ChatState::setIsGroupChat(const bool chatValue)
+{
+    if (chatValue == m_isGroupChat) {
+        return;
+    }
+    m_isGroupChat = chatValue;
+    emit isGroupChatChanged(chatValue);
 }
 
 void ChatState::onMessageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status)

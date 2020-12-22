@@ -75,6 +75,64 @@ Page {
                     color: Theme.secondaryTextColor
                 }
             }
+
+            ImageButton {
+                image: "More"
+                onClicked: {
+                    if (appState.isGroupChat) {
+                        if (appState.isAdmin) {
+                            groupChatAdminContextMenu.open()
+                        } else {
+                            groupChatNotAdminContextMenu.open()
+                        }
+                    } else {
+                        stdChatContextMenu.open()
+                    }
+                }
+
+                ContextMenu {
+                    id: stdChatContextMenu
+                    dropdown: true
+                    currentIndex: -1
+
+                    Action {
+                        text: qsTr("Delete chat")
+                        onTriggered: controllers.chats.addParticipant("userId")
+                    }
+                }
+
+                ContextMenu {
+                    id: groupChatNotAdminContextMenu
+                    dropdown: true
+                    currentIndex: -1
+
+                    Action {
+                        text: qsTr("Leave group")
+                        onTriggered: controllers.chats.leaveGroup()
+                    }
+                }
+
+                ContextMenu {
+                    id: groupChatAdminContextMenu
+                    dropdown: true
+                    currentIndex: -1
+
+                    Action {
+                        text: qsTr("Add participant")
+                        onTriggered: controllers.chats.addParticipant("userId")
+                    }
+
+                    Action {
+                        text: qsTr("Remove participant")
+                        onTriggered: controllers.chats.removeParticipants("userId")
+                    }
+
+                    Action {
+                        text: qsTr("Leave group")
+                        onTriggered: controllers.chats.leaveGroup()
+                    }
+                }
+            }
         }
     }
 
