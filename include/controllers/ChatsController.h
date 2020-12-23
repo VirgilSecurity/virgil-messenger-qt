@@ -66,8 +66,8 @@ public:
     void createChatWithUsername(const QString &username);
     void createChatWithUserId(const UserId &userId);
 
-    Q_INVOKABLE void openChat(const ChatId& chatId);
-    Q_INVOKABLE void openChat(const ChatHandler& chat);
+    void openChat(const ChatHandler& chat);
+    Q_INVOKABLE void openChat(const QString& chatId); // can be used within QML only
     Q_INVOKABLE void closeChat();
     Q_INVOKABLE QString currentChatName() const;
     ChatHandler currentChat() const;

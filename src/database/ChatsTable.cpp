@@ -61,6 +61,7 @@ bool ChatsTable::create()
 
 void ChatsTable::onFetch()
 {
+    qCDebug(lcDatabase) << "Fetching chats...";
     ScopedConnection connection(*database());
     auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectChats"));
     if (!query) {
@@ -88,6 +89,7 @@ void ChatsTable::onFetch()
 
             chats.emplace_back(std::move(chat));
         }
+        qCDebug(lcDatabase) << "Fetched chats count: " << chats.size();
         emit fetched(std::move(chats));
     }
 }

@@ -57,7 +57,6 @@ MessageContentType vm::MessageContentTypeFrom(const QString& typeString) {
     }
     else {
         throw std::logic_error("Invalid MessageContentType string");
-        return {};
     }
 }
 
@@ -81,7 +80,6 @@ QString vm::MessageContentTypeToString(MessageContentType type) {
             return QLatin1String("file");
         default:
             throw std::logic_error("Invalid MessageContentType");
-            return {};
     }
 }
 

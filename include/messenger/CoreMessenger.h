@@ -35,10 +35,11 @@
 #ifndef VM_CORE_MESSENGER_H
 #define VM_CORE_MESSENGER_H
 
-#include "User.h"
 
 #include "Message.h"
 #include "MessageUpdate.h"
+#include "User.h"
+#include "Chat.h"
 #include "Settings.h"
 
 #include <qxmpp/QXmppClient.h>
@@ -192,11 +193,6 @@ private:
     void resetXmppConfiguration();
 
     //
-    //  Encryption / Decryption.
-    //
-    QXmppMessage createXmppMessageToSend();
-
-    //
     //  Helpers.
     //
     UserId userIdFromJid(const QString& jid) const;
@@ -232,6 +228,18 @@ private:
     QPointer<Settings> m_settings;
 };
 }
+
+Q_DECLARE_METATYPE(vm::MessageHandler);
+Q_DECLARE_METATYPE(vm::ModifiableMessageHandler);
+Q_DECLARE_METATYPE(vm::Messages);
+Q_DECLARE_METATYPE(vm::ModifiableMessages);
+Q_DECLARE_METATYPE(vm::UserHandler);
+Q_DECLARE_METATYPE(vm::ChatHandler);
+Q_DECLARE_METATYPE(vm::ModifiableChatHandler);
+Q_DECLARE_METATYPE(vm::ModifiableChats);
+Q_DECLARE_METATYPE(vm::ChatId);
+Q_DECLARE_METATYPE(vm::MessageId);
+Q_DECLARE_METATYPE(vm::AttachmentId);
 
 Q_DECLARE_METATYPE(QXmppClient::State);
 Q_DECLARE_METATYPE(QXmppClient::Error);

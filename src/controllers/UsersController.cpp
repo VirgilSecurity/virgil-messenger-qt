@@ -69,7 +69,6 @@ Self::UsersController(Messenger *messenger, Models *models, UserDatabase *userDa
 void Self::signIn(const QString &username)
 {
     setNextUsername(username);
-    m_userDatabase->open(username);
     m_messenger->signIn(username);
 }
 
@@ -114,7 +113,6 @@ QString UsersController::nextUsername() const
 void Self::onSignedIn(const QString &username)
 {
     m_userDatabase->open(username);
-    emit currentUsernameChanged(username);
 }
 
 void Self::onSignedOut()
@@ -123,7 +121,9 @@ void Self::onSignedOut()
 }
 
 void Self::onFinishSignIn() {
-    emit signedIn(m_messenger->currentUser()->id());
+    // TODO: Do we really need to duplicate signals?
+    emit signedIn(m_messenger->currentUser()->username());
+    emit currentUsernameChanged(m_messenger->currentUser()->username());
 }
 
 void Self::onFinishSignOut() {

@@ -48,7 +48,6 @@ ChatType vm::ChatTypeFromString(const QString& typeString) {
     }
     else {
         throw std::logic_error("Invalid ChatType string");
-        return {};
     }
 }
 
@@ -63,6 +62,5 @@ QString vm::ChatTypeToString(ChatType type) {
 
         default:
             throw std::logic_error("Invalid ChatType");
-            return {};
     }
 }

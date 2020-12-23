@@ -59,7 +59,12 @@ Controllers::Controllers(Messenger *messenger, Settings *settings,
     connect(m_attachments, &AttachmentsController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_messages, &MessagesController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_messages, &MessagesController::displayImageNotFound, m_attachments, &AttachmentsController::downloadDisplayImage);
-    connect(m_users, &UsersController::signedIn, m_chats, &ChatsController::loadChats);
+
+    //
+    //  Queued connection is used here to give ChatsController a chance to setup database connections.
+    //  TODO: find a better solution.
+    //
+    connect(m_users, &UsersController::signedIn, m_chats, &ChatsController::loadChats, Qt::QueuedConnection);
     connect(m_chats, &ChatsController::chatOpened, m_messages, &MessagesController::loadMessages);
     connect(m_chats, &ChatsController::chatClosed, m_messages, &MessagesController::clearMessages);
 

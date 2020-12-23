@@ -256,19 +256,19 @@ Page {
             messageId: model.id
             inRow: model.inRow
             firstInRow: model.firstInRow
-            isBroken: model.isBroken
 
             attachmentId: model.attachmentId
-            attachmentType: model.attachmentType
-            attachmentStatus: model.attachmentStatus
+            attachmentTypeIsFile: model.attachmentTypeIsFile
+            attachmentTypeIsPicture: model.attachmentTypeIsPicture
+            attachmentIsLoading: model.attachmentIsLoading
+            attachmentIconPath: model.attachmentIconPath
+            attachmentPictureThumbnailWidth: model.attachmentPictureThumbnailSize.width
+            attachmentPictureThumbnailHeight: model.attachmentPictureThumbnailSize.height
             attachmentDisplaySize: model.attachmentDisplaySize
             attachmentDisplayText: model.attachmentDisplayText
             attachmentDisplayProgress: model.attachmentDisplayProgress
             attachmentBytesTotal: model.attachmentBytesTotal
             attachmentBytesLoaded: model.attachmentBytesLoaded
-            attachmentImagePath: model.attachmentImagePath
-            attachmentThumbnailWidth: model.attachmentImageSize.width
-            attachmentThumbnailHeight: model.attachmentImageSize.height
             attachmentFileExists: model.attachmentFileExists
 
             onSaveAttachmentAs: function(messageId) {

@@ -133,13 +133,11 @@ void MessageOperationFactory::populateAttachmentOperation(MessageOperation *mess
     }
 
     if (message->isOutgoing()) {
-        if (auto attachment = std::get_if<MessageContentAttachment>(&message->content())) {
-            Q_UNUSED(attachment)
+        if (std::holds_alternative<MessageContentAttachment>(message->content())) {
             populateUpload(messageOp);
         }
     } else {
-        if (auto picture = std::get_if<MessageContentPicture>(&message->content())) {
-            Q_UNUSED(picture)
+        if (std::holds_alternative<MessageContentPicture>(message->content())) {
             populatePreload(messageOp);
         }
     }

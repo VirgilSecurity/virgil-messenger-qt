@@ -137,9 +137,9 @@ void Self::openChat(const ChatHandler& chat)
     emit chatOpened(m_currentChat);
 }
 
-void Self::openChat(const ChatId &chatId)
+void Self::openChat(const QString &chatId)
 {
-    openChat(m_models->chats()->findChat(chatId));
+    openChat(m_models->chats()->findChat(ChatId(chatId)));
 }
 
 void Self::closeChat()
@@ -150,6 +150,7 @@ void Self::closeChat()
 
 void Self::setupTableConnections()
 {
+    qCDebug(lcController) << "Setup database table connections for chats...";
     auto table = m_userDatabase->chatsTable();
     connect(table, &ChatsTable::errorOccurred, this, &Self::errorOccurred);
     connect(table, &ChatsTable::fetched, this, &Self::onChatsLoaded);

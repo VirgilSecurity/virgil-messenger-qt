@@ -25,4 +25,4 @@ LEFT JOIN attachments ON attachments.messageId = messages.id
 WHERE messages.isOutgoing = 1
     AND (messages.stage = "created"
          OR messages.stage = "encrypted")
-ORDER BY messages.timestamp
+ORDER BY messages.createdAt

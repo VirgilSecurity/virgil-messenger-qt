@@ -18,6 +18,6 @@ CREATE INDEX attachmentsIdxMessageId ON attachments(messageId);
 
 CREATE INDEX attachmentsIdxType ON attachments(type);
 
-CREATE INDEX attachmentsIdxStatus ON attachments(uploadStage);
+CREATE INDEX attachmentsIdxUploadStage ON attachments(uploadStage);
 
-CREATE INDEX attachmentsIdxStatus ON attachments(downloadStage);
+CREATE INDEX attachmentsIdxDownloadStage ON attachments(downloadStage);

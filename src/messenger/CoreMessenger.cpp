@@ -137,6 +137,18 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     qRegisterMetaType<QXmppHttpUploadSlotIq>();
     qRegisterMetaType<QXmppHttpUploadRequestIq>();
 
+    qRegisterMetaType<vm::MessageHandler>("MessageHandler");
+    qRegisterMetaType<vm::ModifiableMessageHandler>("ModifiableMessageHandler");
+    qRegisterMetaType<vm::Messages>("Messages");
+    qRegisterMetaType<vm::ModifiableMessages>("ModifiableMessages");
+    qRegisterMetaType<vm::UserHandler>("UserHandler");
+    qRegisterMetaType<vm::ChatHandler>("ChatHandler");
+    qRegisterMetaType<vm::ModifiableChatHandler>("ModifiableChatHandler");
+    qRegisterMetaType<vm::ModifiableChats>("ModifiableChats");
+    qRegisterMetaType<vm::ChatId>("ChatId");
+    qRegisterMetaType<vm::MessageId>("MessageId");
+    qRegisterMetaType<vm::AttachmentId>("AttachmentId");
+
     //
     //  Register self signals-slots
     //
@@ -649,7 +661,7 @@ Self::onConnectXmppServer() {
     logger->setMessageTypes(QXmppLogger::AnyMessage);
 
     connect(logger, &QXmppLogger::message, [=](QXmppLogger::MessageType, const QString &text){
-        qDebug() << text;
+        qCDebug(lcCommKitMessenger) << text;
     });
 
     m_impl->xmpp->setLogger(logger);
@@ -671,14 +683,14 @@ Self::onReconnectIfNeeded() {
 // --------------------------------------------------------------------------
 std::shared_ptr<User>
 Self::findUserByUsername(const QString &username) const {
-    qDebug(lcCommKitMessenger) << "Trying to find user with username: " << username;
+    qCDebug(lcCommKitMessenger) << "Trying to find user with username: " << username;
 
     //
     //  Check cache first.
     //
     auto userIt = m_impl->usernameToUser.find(username);
     if (userIt != m_impl->usernameToUser.end()) {
-        qDebug(lcCommKitMessenger) << "User found in the cache";
+        qCDebug(lcCommKitMessenger) << "User found in the cache";
         return userIt->second;
     }
 
@@ -686,6 +698,7 @@ Self::findUserByUsername(const QString &username) const {
     //  Search on-line.
     //
     if (!isOnline()) {
+        qCWarning(lcCommKitMessenger) << "Attempt to find user when offline.";
         return nullptr;
     }
 
@@ -697,12 +710,12 @@ Self::findUserByUsername(const QString &username) const {
     auto user = vssq_messenger_find_user_with_username(m_impl->messenger.get(), vsc_str_from(usernameStdStr), &error);
 
     if (vssq_error_has_error(&error)) {
-        qDebug(lcCommKitMessenger) << "User not found";
+        qCDebug(lcCommKitMessenger) << "User not found";
         qCWarning(lcCommKitMessenger) << "Got error status: " << vsc_str_to_qstring(vssq_error_message_from_error(&error));
         return nullptr;
     }
 
-    qDebug(lcCommKitMessenger) << "User found in the cloud";
+    qCDebug(lcCommKitMessenger) << "User found in the cloud";
 
     //
     //  Cache and return.
@@ -719,14 +732,14 @@ Self::findUserByUsername(const QString &username) const {
 
 std::shared_ptr<User>
 Self::findUserById(const UserId &userId) const {
-    qDebug(lcCommKitMessenger) << "Trying to find user with id: " << userId;
+    qCDebug(lcCommKitMessenger) << "Trying to find user with id: " << userId;
 
     //
     //  Check cache first.
     //
     auto userIt = m_impl->identityToUser.find(userId);
     if (userIt != m_impl->identityToUser.end()) {
-        qDebug(lcCommKitMessenger) << "User found in the cache";
+        qCDebug(lcCommKitMessenger) << "User found in the cache";
         return userIt->second;
     }
 
@@ -745,12 +758,12 @@ Self::findUserById(const UserId &userId) const {
     auto user = vssq_messenger_find_user_with_identity(m_impl->messenger.get(), vsc_str_from(userIdStdStr), &error);
 
     if (vssq_error_has_error(&error)) {
-        qDebug(lcCommKitMessenger) << "User not found";
+        qCDebug(lcCommKitMessenger) << "User not found";
         qCWarning(lcCommKitMessenger) << "Got error status: " << vsc_str_to_qstring(vssq_error_message_from_error(&error));
         return nullptr;
     }
 
-    qDebug(lcCommKitMessenger) << "User found in the cloud";
+    qCDebug(lcCommKitMessenger) << "User found in the cloud";
 
     //
     //  Cache and return.
@@ -962,13 +975,6 @@ Self::processReceivedXmppMessage(const QXmppMessage& xmppMessage) {
         return Self::Result::Success;
     });
 }
-
-
-QXmppMessage
-Self::createXmppMessageToSend() {
-
-}
-
 
 // --------------------------------------------------------------------------
 //  XMPP event handlers.

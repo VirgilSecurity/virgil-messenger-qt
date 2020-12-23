@@ -57,7 +57,6 @@ MessageStatus vm::MessageStatusFromString(const QString& statusString) {
     }
     else {
         throw std::logic_error("Invalid MessageStatus string");
-        return {};
     }
 }
 
@@ -81,6 +80,5 @@ QString vm::MessageStatusToString(MessageStatus status) {
 
         default:
             throw std::logic_error("Invalid MessageStatus");
-            return {};
     }
 }

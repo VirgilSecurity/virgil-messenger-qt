@@ -54,7 +54,6 @@ OutgoingMessageStage vm::OutgoingMessageStageFromString(const QString& stageStri
     }
     else {
         throw std::logic_error("Invalid OutgoingMessageStage string");
-        return {};
     }
 }
 
@@ -75,6 +74,5 @@ QString vm::OutgoingMessageStageToString(OutgoingMessageStage stage) {
 
         default:
             throw std::logic_error("Invalid OutgoingMessageStage");
-            return {};
     }
 }
