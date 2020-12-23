@@ -13,25 +13,11 @@ ModelListView {
     id: chatListView
 
     property var contextMenu: null
+    property real separatorHeight: 0
 
     spacing: d.listSpacing
     section.property: "day"
-    section.delegate: ChatDateSeporator {
-        date: section
-
-        Rectangle {
-            anchors.fill: parent
-            color: 'green'
-            opacity: 0.2
-            Label {
-                id: unreadMessagesCount
-                text: parent.height
-                color: Theme.primaryTextColor
-                font.pixelSize: UiHelper.fixFontSz(14)
-                anchors.centerIn: parent
-            }
-        }
-    }
+    section.delegate: separatorDelegate
 
     model: models.messages
     delegate: messageDelegate
@@ -51,12 +37,22 @@ ModelListView {
     }
 
     Component {
+        id: separatorDelegate
+
+        ChatDateSeporator {
+            date: section
+            Component.onCompleted: separatorHeight = height
+        }
+    }
+
+    Component {
         id: messageDelegate
 
         ChatMessage {
             readonly property real fullWidth: root.width - 2 * Theme.margin - leftIndent
 
             thisIndex: index
+            thisDay: day
 
             maxWidth: Platform.isMobile ? (fullWidth - 2 * Theme.margin) : fullWidth
 

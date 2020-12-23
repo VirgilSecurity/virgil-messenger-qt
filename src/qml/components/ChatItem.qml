@@ -28,9 +28,6 @@ Item {
 
         anchors.fill: parent
         contentHeight: chatListItem.chatContentHeight
-        onContentHeightChanged: {
-            console.log("contentHeight CHANGED. NEW value:", chatFlickable.contentHeight)
-        }
         onHeightChanged: chatList.heightChangedController()
         onContentYChanged: chatList.autoFlickToBottomController()
         Behavior on contentY {
@@ -67,9 +64,12 @@ Item {
     Timer {
         running: true
         repeat: false
-        interval: Theme.animationDuration
+        interval: 1
         onTriggered: {
             chatListItem.animationEnabled = true
+
+            chatListItem.autoFlickToBottom = true
+            chatList.flickToBottomController(false)
         }
     }
 
@@ -102,34 +102,29 @@ Item {
                 return
             }
 
-            let contentDiff = chatListItem.height
-            if (newItem === true) {
-                let lastItem = chatListView.itemAtIndex(chatListView.count - 1)
-//                let prevItem = chatListView.itemAtIndex(chatListView.count - 2)
-                if (lastItem) {
-                    contentDiff -= (lastItem.height + chatListView.spacing)
-                }
+            if (newItem === true && chatListView.count > 1) {
+                chatFlickable.contentY = chatListItem.chatContentHeight - flick.calculateContentDiff(chatListItem.height)
+            } else if (newItem === false) {
+                chatFlickable.contentY = chatListItem.chatContentHeight - chatListItem.height
             }
-
-            chatFlickable.contentY = chatListItem.chatContentHeight - contentDiff
         }
 
         function autoFlickToBottomController() {
 
-            if (flick.chatAtBottom()) {
+            if (flick.isChatAtBottom()) {
                 flick.setAutoFlick(true, false)
                 flick.setNewContentY()
                 flick.readAllMessages()
                 return
             }
 
-            if (flick.unreadMessages() || flick.scrollingDown()) {
-                flick.setAutoFlick(flick.chatAtBottom(), !flick.chatAtBottom())
+            if (flick.hasUnreadMessages() || flick.isScrollingDown()) {
+                flick.setAutoFlick(flick.isChatAtBottom(), !flick.isChatAtBottom())
                 flick.setNewContentY()
                 return
             }
 
-            if (!flick.scrollingDown()) {
+            if (!flick.isScrollingDown()) {
                 flick.setAutoFlick(false, false)
                 flick.setNewContentY()
                 return
@@ -141,17 +136,18 @@ Item {
             if (lastItem) {
                 if (lastItem.isOwnMessage) {
                     flick.scrollDown()
+                    console.log(">>>>>>>>>>>>>>>>> IS OWN MESSAGE")
                 } else {
-                    if (flick.chatAtBottom()) {
+                    if (flick.isChatAtBottom()) {
                         flick.scrollDown()
+                        console.log(">>>>>>>>>>>>>>>>> CHAT AT BOTTOM")
                     } else {
                         chatListItem.unreadMessages += 1
                         flickToBottomController(true)
                         autoFlickToBottomController()
+                        console.log(">>>>>>>>>>>>>>>>> CHAT NOT AT BOTTOM")
                     }
                 }
-            } else {
-                console.log("This is big error. Trying to access not created yet item")
             }
         }
 
@@ -166,16 +162,16 @@ Item {
     QtObject {
         id: flick
 
-        function scrollingDown() {
+        function isScrollingDown() {
             return chatFlickable.contentY > chatFlickable.previousContentY
         }
 
-        function chatAtBottom() {
+        function isChatAtBottom() {
             let autoFlickMinDiff = chatListItem.height + chatListItem.minHeightToDisableAutoFlick
             return chatFlickable.contentHeight - chatFlickable.contentY < autoFlickMinDiff
         }
 
-        function unreadMessages() {
+        function hasUnreadMessages() {
             return chatListItem.unreadMessages > 0
         }
 
@@ -196,6 +192,30 @@ Item {
             // use it only if you don't need to perform checks
             chatListItem.autoFlickToBottom = true
             chatList.flickToBottomController(true)
+        }
+
+        function calculateContentDiff(contentDiff) {
+            let lastItem = chatListView.itemAtIndex(chatListView.count - 1)
+            let prevItem = chatListView.itemAtIndex(chatListView.count - 2)
+
+            if (lastItem && prevItem) {
+
+                if (lastItem.thisDay.valueOf() === prevItem.thisDay.valueOf()) {
+
+                    if (lastItem.firstInRow) {
+                        return contentDiff - (lastItem.height + chatListView.spacing + Theme.smallSpacing)
+                    } else {
+                        return contentDiff - (lastItem.height + chatListView.spacing)
+                    }
+
+                } else {
+                    return contentDiff - (lastItem.height + chatListView.separatorHeight + Theme.smallSpacing)
+                }
+
+            } else {
+                console.log("There was an error. ChatListMessage was not created yet!")
+                return 0
+            }
         }
     }
 
@@ -241,7 +261,7 @@ Item {
             height: 20
             radius: height
             color: Theme.buttonPrimaryColor
-            visible: flick.unreadMessages()
+            visible: flick.hasUnreadMessages()
 
             Label {
                 id: unreadMessagesCount

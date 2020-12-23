@@ -13,6 +13,7 @@ Control {
     width: loader.item.width
 
     property int thisIndex: -1
+    property var thisDay
 
     property double maxWidth: parent.width
     readonly property real leftIndent: row.spacing + avatar.width
@@ -392,19 +393,18 @@ Control {
     Component.onCompleted: {
 //        console.log("->", messageId, body, displayTime, nickname, status, isBroken)
 //        console.log(attachmentId, attachmentType, attachmentStatus, attachmentImagePath, attachmentFileExists)
-        console.log("CHAT MESSAGE HEIGHT:", chatMessage.height, body, day)
     }
 
-    Rectangle {
-        anchors.fill: parent
-        color: 'green'
-        opacity: 0.2
-        Label {
-            id: unreadMessagesCount
-            text: parent.height
-            color: Theme.primaryTextColor
-            font.pixelSize: UiHelper.fixFontSz(14)
-            anchors.centerIn: parent
-        }
-    }
+//    Rectangle {
+//        anchors.fill: parent
+//        color: 'green'
+//        opacity: 0.2
+//        Label {
+//            id: unreadMessagesCount
+//            text: parent.height
+//            color: Theme.primaryTextColor
+//            font.pixelSize: UiHelper.fixFontSz(14)
+//            anchors.centerIn: parent
+//        }
+//    }
 }
