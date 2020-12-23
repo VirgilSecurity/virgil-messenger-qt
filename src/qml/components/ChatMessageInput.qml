@@ -1,8 +1,7 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 import Qt.labs.platform 1.0 as Native
-import com.virgilsecurity.messenger 1.0
 
 import "../base"
 import "../theme"
@@ -36,12 +35,12 @@ Control {
 
                 Action {
                     text: qsTr("Send picture")
-                    onTriggered: attachmentPicker.open(Enums.AttachmentType.Picture)
+                    onTriggered: attachmentPicker.open(AttachmentTypes.picture)
                 }
 
                 Action {
                     text: qsTr("Send file")
-                    onTriggered: attachmentPicker.open(Enums.AttachmentType.File)
+                    onTriggered: attachmentPicker.open(AttachmentTypes.file)
                 }
             }
         }

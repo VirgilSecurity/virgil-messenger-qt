@@ -1,5 +1,4 @@
-import QtQuick 2.12
-import com.virgilsecurity.messenger 1.0
+import QtQuick 2.15
 
 import "../base"
 
@@ -15,21 +14,21 @@ Loader {
         Item {
             SelectAttachmentsDialog {
                 id: selectFileDialog
-                attachmentType: Enums.AttachmentType.File
-                onAccepted: picked(fileUrls, Enums.AttachmentType.File)
+                attachmentType: AttachmentTypes.file
+                onAccepted: picked(fileUrls, AttachmentTypes.file)
             }
 
             SelectAttachmentsDialog {
                 id: selectPictureDialog
                 // NOTE(fpohtmeh): picture dialog doesn't work in Ios simulator
-                attachmentType: app.isIosSimulator() ? Enums.Attachment.File : Enums.AttachmentType.Picture
-                onAccepted: picked(fileUrls, Enums.AttachmentType.Picture)
+                attachmentType: app.isIosSimulator() ? AttachmentTypes.file : AttachmentTypes.picture
+                onAccepted: picked(fileUrls, AttachmentTypes.picture)
             }
 
             Connections {
                 target: loader
                 function onOpen(attachmentType) {
-                    var dialog = (attachmentType == Enums.AttachmentType.Picture) ? selectPictureDialog : selectFileDialog
+                    var dialog = (attachmentType === AttachmentTypes.picture) ? selectPictureDialog : selectFileDialog
                     dialog.open()
                 }
             }

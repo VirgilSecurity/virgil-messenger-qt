@@ -74,6 +74,7 @@ bool Self::applyUpdate(const MessageUpdate& update) {
     else {
         return false;
     }
+    return true;
 }
 
 

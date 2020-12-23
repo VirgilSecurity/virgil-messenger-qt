@@ -215,6 +215,9 @@ MessageContent Self::readMessageContent(const QSqlQuery &query) {
 
         case MessageContentType::Text:
             return Self::readMessageContentText(query);
+
+        default:
+            return {};
     }
 }
 

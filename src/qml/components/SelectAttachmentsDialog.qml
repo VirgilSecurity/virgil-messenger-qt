@@ -1,10 +1,11 @@
-import QtQuick 2.0
+import QtQuick 2.15
 import QtQuick.Dialogs 1.3
-import com.virgilsecurity.messenger 1.0
+
+import "../base"
 
 FileDialog {
     id: root
-    property var attachmentType: Enums.AttachmentType.File
+    property var attachmentType: AttachmentTypes.file
 
     readonly property var _titles: [
         qsTr("Send files"),

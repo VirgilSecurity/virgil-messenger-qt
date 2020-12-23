@@ -48,7 +48,7 @@ LoadAttachmentOperation::LoadAttachmentOperation(MessageOperation *parent)
         MessageAttachmentProcessedSizeUpdate update;
         update.messageId = parent->message()->id();
         update.attachmentId = std::get_if<MessageContentAttachment>(&parent->message()->content())->id();
-        update.size = bytesLoaded;
+        update.processedSize = bytesLoaded;
         parent->messageUpdate(update);
     });
 }

@@ -1,8 +1,8 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.12
-import com.virgilsecurity.messenger 1.0
 
+import "../base"
 import "../theme"
 import "../components"
 import "../components/CommonHelpers"
@@ -29,7 +29,7 @@ Page {
 
         Action {
             text: isChatList ? qsTr("New chat") : qsTr("Add file")
-            onTriggered: isChatList ? appState.requestNewChat() : attachmentPicker.open(Enums.AttachmentType.File)
+            onTriggered: isChatList ? appState.requestNewChat() : attachmentPicker.open(AttachmentTypes.file)
         }
     }
 
@@ -143,7 +143,7 @@ Page {
                 onClicked: controllers.fileCloud.processClick(index)
             }
 
-            onPlaceholderClicked: attachmentPicker.open(Enums.AttachmentType.File)
+            onPlaceholderClicked: attachmentPicker.open(AttachmentTypes.file)
         }
     }
 
