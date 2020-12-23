@@ -64,7 +64,7 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
     , m_fileCloudState(new FileCloudState(models, this))
     , m_newChatState(new NewChatState(controllers->chats(), this))
     , m_signInAsState(new SignInAsState(this))
-    , m_signInUsernameState(new SignInUsernameState(validator, this))
+    , m_signInUsernameState(new SignInUsernameState(controllers->users(), validator, this))
     , m_signUpState(new SignUpState(controllers->users(), validator, this))
     , m_splashScreenState(new SplashScreenState(controllers->users(), validator, settings, this))
     , m_startState(new StartState(this))

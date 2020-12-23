@@ -53,6 +53,8 @@ class Messenger;
 class UsersController : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QString currentUsername READ currentUsername NOTIFY currentUsernameChanged)
+    Q_PROPERTY(QString nextUsername READ nextUsername NOTIFY nextUsernameChanged)
 
 public:
     UsersController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
@@ -65,6 +67,9 @@ public:
 
     void downloadKey(const QString &username, const QString &password);
 
+    void setNextUsername(const QString &username);
+    QString nextUsername() const;
+
 signals:
     void signedIn(const QString &username);
     void signedOut();
@@ -73,8 +78,12 @@ signals:
     void downloadKeyFailed(const QString &errorText);
 
     void accountSettingsRequested(const QString &username);
+    void currentUsernameChanged(const QString &username);
+    void nextUsernameChanged(const QString &username);
 
 private:
+    QString currentUsername() const;
+
     void onSignedIn(const QString &username);
     void onSignedOut();
     void onFinishSignIn();
@@ -85,6 +94,7 @@ private:
 private:
     QPointer<Messenger> m_messenger;
     QPointer<UserDatabase> m_userDatabase;
+    QString m_nextUsername;
 };
 }
 

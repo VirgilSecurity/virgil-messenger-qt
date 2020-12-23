@@ -1,11 +1,12 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 
 Item {
     anchors.fill: parent
 
     property bool isLoading: false
+    property alias loadingText: busyDescryption.text
 
     default property alias children: formContainer.children
     property alias formSpacing: formContainer.spacing
@@ -44,15 +45,5 @@ Item {
             id: busyDescryption
             horizontalAlignment: Text.AlignHCenter
         }
-    }
-
-    function showLoading(loadingText) {
-        isLoading = true
-        busyDescryption.text = loadingText
-    }
-
-    function hideLoading() {
-        isLoading = false
-        busyDescryption.text = ""
     }
 }

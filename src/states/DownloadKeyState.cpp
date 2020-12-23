@@ -50,5 +50,5 @@ DownloadKeyState::DownloadKeyState(UsersController *usersController, QState *par
 void DownloadKeyState::processDownloadKey(const QString &password)
 {
     emit operationStarted();
-    m_usersController->downloadKey(m_username, password);
+    m_usersController->downloadKey(m_usersController->nextUsername(), password);
 }

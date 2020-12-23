@@ -36,16 +36,18 @@
 #define VM_SIGNINUSERNAMESTATE_H
 
 #include "OperationState.h"
-#include "Validator.h"
 
 namespace vm
 {
+class UsersController;
+class Validator;
+
 class SignInUsernameState : public OperationState
 {
     Q_OBJECT
 
 public:
-    SignInUsernameState(Validator *validator, QState *parent);
+    SignInUsernameState(UsersController *usersController, Validator *validator, QState *parent);
 
 signals:
     void validate(const QString &username);
@@ -54,6 +56,7 @@ signals:
 private:
     void processValidation(const QString &username);
 
+    UsersController *m_usersController;
     Validator *m_validator;
 };
 }

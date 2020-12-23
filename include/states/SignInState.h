@@ -39,8 +39,8 @@
 
 namespace vm
 {
-class Validator;
 class UsersController;
+class Validator;
 
 class SignInState : public OperationState
 {

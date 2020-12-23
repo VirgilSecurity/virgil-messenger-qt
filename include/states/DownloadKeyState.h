@@ -55,7 +55,6 @@ private:
     void processDownloadKey(const QString &password);
 
     UsersController *m_usersController;
-    QString m_username;
 };
 }
 

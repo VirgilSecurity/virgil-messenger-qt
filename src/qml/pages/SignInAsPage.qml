@@ -13,7 +13,7 @@ Page {
     }
 
     header: Header {
-        title: qsTr("Sign in as %1").arg(appState.userId)
+        title: qsTr("Sign in as %1").arg(controllers.users.nextUsername)
     }
 
     Form {
@@ -29,7 +29,7 @@ Page {
 
         FormPrimaryButton {
             text: qsTr("Download from the Cloud")
-            onClicked: appState.requestDownloadKey(appState.userId)
+            onClicked: appState.requestDownloadKey(controllers.users.nextUsername)
         }
 
         FormPrimaryButton {
