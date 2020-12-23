@@ -38,6 +38,7 @@
 #include "controllers/Controllers.h"
 #include "controllers/ChatsController.h"
 #include "controllers/UsersController.h"
+#include "models/Models.h"
 
 #include <QLoggingCategory>
 
@@ -58,11 +59,15 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
     , m_accountSettingsState(new AccountSettingsState(this))
     , m_attachmentPreviewState(new AttachmentPreviewState(this))
     , m_backupKeyState(new BackupKeyState(m_messenger, this))
+    , m_editProfileState(new EditProfileState(controllers->users(), this))
+    , m_verifyProfileState(new VerifyProfileState(this))
     , m_chatListState(new ChatListState(controllers->chats(), this))
     , m_chatState(new ChatState(controllers, m_messenger, this))
     , m_downloadKeyState(new DownloadKeyState(controllers->users(), this))
     , m_fileCloudState(new FileCloudState(models, this))
-    , m_newChatState(new NewChatState(controllers->chats(), this))
+    , m_newChatState(new NewChatState(controllers->chats(), models->discoveredContacts(), this))
+    , m_newGroupChatState(new NewGroupChatState(models->discoveredContacts(), this))
+    , m_nameGroupChatState(new NameGroupChatState(controllers->chats(), this))
     , m_signInAsState(new SignInAsState(this))
     , m_signInUsernameState(new SignInUsernameState(controllers->users(), validator, this))
     , m_signUpState(new SignUpState(controllers->users(), validator, this))
@@ -85,11 +90,15 @@ void Self::registerStatesMetaTypes()
     qRegisterMetaType<AccountSettingsState *>("AccountSettingsState*");
     qRegisterMetaType<AttachmentPreviewState *>("AttachmentPreviewState*");
     qRegisterMetaType<BackupKeyState *>("BackupKeyState*");
+    qRegisterMetaType<EditProfileState *>("EditProfileState*");
+    qRegisterMetaType<VerifyProfileState *>("VerifyProfileState*");
     qRegisterMetaType<ChatListState *>("ChatListState*");
     qRegisterMetaType<ChatState *>("ChatState*");
     qRegisterMetaType<DownloadKeyState *>("DownloadKeyState*");
     qRegisterMetaType<FileCloudState *>("FileCloudState*");
     qRegisterMetaType<NewChatState *>("NewChatState*");
+    qRegisterMetaType<NewGroupChatState *>("NewGroupChatState*");
+    qRegisterMetaType<NameGroupChatState *>("NameGroupChatState*");
     qRegisterMetaType<SignInAsState *>("SignInAsState*");
     qRegisterMetaType<SignInUsernameState *>("SignInUsernameState*");
     qRegisterMetaType<SignUpState *>("SignUpState*");
@@ -124,8 +133,13 @@ void Self::addTransitions()
     m_chatListState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
     addTwoSideTransition(m_chatListState, users, &UsersController::accountSettingsRequested, m_accountSettingsState);
     addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestNewChat, m_newChatState);
+    addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestNewGroupChat, m_newGroupChatState);
     addTwoSideTransition(m_chatListState, chats, &ChatsController::chatOpened, m_chatState);
     m_chatListState->addTransition(this, &Self::fileCloudRequested, m_fileCloudState);
+
+    addTwoSideTransition(m_newGroupChatState, m_newGroupChatState, &NewGroupChatState::requestChatName, m_nameGroupChatState);
+
+    m_nameGroupChatState->addTransition(chats, &ChatsController::chatOpened, m_chatState);
 
     addTwoSideTransition(m_fileCloudState, users, &UsersController::accountSettingsRequested, m_accountSettingsState);
     m_fileCloudState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
@@ -133,6 +147,11 @@ void Self::addTransitions()
 
     addTwoSideTransition(m_accountSettingsState, m_accountSettingsState, &AccountSettingsState::requestBackupKey, m_backupKeyState);
     m_accountSettingsState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
+    addTwoSideTransition(m_accountSettingsState, m_accountSettingsState, &AccountSettingsState::editProfile, m_editProfileState);
+
+    addTwoSideTransition(m_editProfileState, m_editProfileState, &EditProfileState::verify, m_verifyProfileState);
+    connect(m_editProfileState, &EditProfileState::verify, m_verifyProfileState, &VerifyProfileState::setCodeType);
+    connect(m_verifyProfileState, &VerifyProfileState::verificationFinished, m_editProfileState, &EditProfileState::processVerificationResponse);
 
     m_newChatState->addTransition(chats, &ChatsController::chatOpened, m_chatState);
     m_newChatState->addTransition(users, &UsersController::accountSettingsRequested, m_accountSettingsState);

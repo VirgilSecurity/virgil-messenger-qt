@@ -50,6 +50,7 @@ public:
 
 signals:
     void requestNewChat();
+    void requestNewGroupChat();
 
 private:
     void onEntry(QEvent *) override;

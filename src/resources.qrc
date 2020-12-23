@@ -6,15 +6,19 @@
         <file>qml/pages/BackupKeyPage.qml</file>
         <file>qml/pages/ChatPage.qml</file>
         <file>qml/pages/DownloadKeyPage.qml</file>
+        <file>qml/pages/EditProfilePage.qml</file>
         <file>qml/pages/MainPage.qml</file>
+        <file>qml/pages/NameGroupChatPage.qml</file>
         <file>qml/pages/NewChatPage.qml</file>
+        <file>qml/pages/NewGroupChatPage.qml</file>
         <file>qml/pages/OperationPage.qml</file>
-        <file>qml/pages/PasswordResetPage.qml</file>
+        <file>qml/pages/SelectContactsPage.qml</file>
         <file>qml/pages/SignInAsPage.qml</file>
         <file>qml/pages/SignInPage.qml</file>
         <file>qml/pages/SignInUsernamePage.qml</file>
         <file>qml/pages/SignUpPage.qml</file>
         <file>qml/pages/SplashScreenPage.qml</file>
+        <file>qml/pages/VerifyProfilePage.qml</file>
         <!-- Icons -->
         <file>qml/resources/icons/Arrow-Left.png</file>
         <file>qml/resources/icons/Arrow-Left@2x.png</file>
@@ -30,6 +34,8 @@
         <file>qml/resources/icons/Close@2x.png</file>
         <file>qml/resources/icons/Chats.png</file>
         <file>qml/resources/icons/Chats@2x.png</file>
+        <file>qml/resources/icons/Check.png</file>
+        <file>qml/resources/icons/Check@2x.png</file>
         <file>qml/resources/icons/Lock.png</file>
         <file>qml/resources/icons/Lock@2x.png</file>
         <file>qml/resources/icons/Key.png</file>
@@ -51,14 +57,11 @@
         <file>qml/resources/icons/Folder-Big.png</file>
         <file>qml/resources/icons/Folder-Big@2x.png</file>
         <!-- Others -->
+        <file>qml/components/FlowListView.qml</file>
         <file>qml/components/AttachmentPreview.qml</file>
         <file>qml/components/CommonHelpers/TextInCircle.qml</file>
         <file>qml/components/Popups/Popup.qml</file>
         <file>qml/components/Progress/Progress.qml</file>
-        <file>qml/iot/DevicesList.qml</file>
-        <file>qml/iot/Main1.qml</file>
-        <file>qml/iot/Sniffer.qml</file>
-        <file>qml/iot/Title.qml</file>
         <file>qml/resources/ca/curl-ca-bundle-win.crt</file>
         <file>qml/resources/fonts/Roboto-Bold.ttf</file>
         <file>qml/resources/fonts/Roboto-Medium.ttf</file>
@@ -90,15 +93,14 @@
         <file>qml/components/ChatMessage.qml</file>
         <file>qml/components/MessageCounter.qml</file>
         <file>qml/components/SearchHeader.qml</file>
+        <file>qml/components/SelectContactsList.qml</file>
         <file>qml/components/Header.qml</file>
         <file>qml/components/ContextMenu.qml</file>
         <file>qml/components/ImageButton.qml</file>
-        <file>qml/components/SettingsButton.qml</file>
         <file>qml/components/FormImage.qml</file>
         <file>qml/components/FormSubtitle.qml</file>
         <file>qml/components/SidebarButton.qml</file>
         <file>qml/components/SidebarPanel.qml</file>
-        <file>qml/components/ServerButton.qml</file>
         <file>qml/components/CommonHelpers/IconWithText.qml</file>
         <file>qml/components/ChatDateSeporator.qml</file>
         <file>qml/components/Search.qml</file>
@@ -110,7 +112,6 @@
         <file>qml/base/AttachmentTypes.qml</file>
         <file>qml/base/Platform.qml</file>
         <file>qml/base/qmldir</file>
-        <file>qml/components/AppStatus.qml</file>
         <file>qml/components/Dialogs/SendReportDialog.qml</file>
         <file>qml/components/SelectAttachmentsDialog.qml</file>
         <file>qml/resources/icons/Camera Selected.png</file>
@@ -130,6 +131,10 @@
         <file>qml/components/ListDelegate.qml</file>
         <file>qml/components/ModelListView.qml</file>
         <file>qml/components/Dialogs/TemplateDialog.qml</file>
+        <file>qml/components/UploadProgressBar.qml</file>
+        <file>qml/components/ServerSelectionRow.qml</file>
+        <file>qml/components/SelectedContactsFlow.qml</file>
+        <file>qml/components/HorizontalRule.qml</file>
         <!-- Database -->
         <file>resources/database/createAttachments.sql</file>
         <file>resources/database/createChats.sql</file>

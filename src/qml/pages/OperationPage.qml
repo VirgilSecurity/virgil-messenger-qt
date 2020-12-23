@@ -8,6 +8,7 @@ Page {
     property var appState
     property bool loadingUsed: true
     property string loadingText: ""
+    property alias footerText: footerItem.text
 
     Binding { target: form; property: "loadingText"; value: loadingText }
 
@@ -15,7 +16,7 @@ Page {
         color: Theme.mainBackgroundColor
     }
 
-    footer: Footer {}
+    footer: Footer {id: footerItem; text: qsTr("Powered by Virgil Security, Inc.")}
 
     Connections {
         target: appState

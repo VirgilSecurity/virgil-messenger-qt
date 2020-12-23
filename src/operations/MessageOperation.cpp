@@ -60,7 +60,6 @@ MessageOperationFactory *MessageOperation::factory()
 
 void MessageOperation::connectChild(Operation *child)
 {
-
     Operation::connectChild(child);
 
     MessageStatusUpdate statusUpdate;

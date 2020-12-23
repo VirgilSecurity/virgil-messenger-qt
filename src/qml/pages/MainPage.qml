@@ -31,10 +31,20 @@ Page {
             text: isChatList ? qsTr("New chat") : qsTr("Add file")
             onTriggered: isChatList ? appState.requestNewChat() : attachmentPicker.open(AttachmentTypes.file)
         }
+
+        Action {
+            text: qsTr("New group")
+            enabled: isChatList
+            onTriggered: appState.requestNewGroupChat()
+        }
     }
 
     StackLayout {
-        anchors.fill: parent
+        anchors {
+            leftMargin: Theme.smallMargin
+            rightMargin: Theme.smallMargin
+            fill: parent
+        }
         currentIndex: isChatList ? 0 : 1
 
         ModelListView {

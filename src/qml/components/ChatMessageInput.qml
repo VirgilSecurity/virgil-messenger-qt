@@ -70,7 +70,6 @@ Control {
                     placeholderText: qsTr("Message")
                     placeholderTextColor: "#59717D"
                     wrapMode: TextArea.Wrap
-                    font.family: Theme.mainFont
                     font.pixelSize: 15
                     color: Theme.primaryTextColor
                     verticalAlignment: TextEdit.AlignVCenter

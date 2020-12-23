@@ -7,6 +7,7 @@ import "../components"
 
 Page {
     property var appState: app.stateManager.signInAsState
+    property string footerText: qsTr("Powered by Virgil Security, Inc.")
 
     background: Rectangle {
         color: Theme.mainBackgroundColor
@@ -43,5 +44,5 @@ Page {
         }
     }
 
-    footer: Footer {}
+    footer: Footer {text: footerText}
 }

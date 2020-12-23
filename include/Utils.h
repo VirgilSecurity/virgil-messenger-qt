@@ -38,6 +38,7 @@
 #include <QImage>
 #include <QImageReader>
 
+#include "Contact.h"
 #include "Message.h"
 #include "MessageContentAttachment.h"
 
@@ -50,6 +51,8 @@ namespace Utils
     // String processing/format
 
     QString formattedSize(quint64 fileSize);
+
+    QString formattedDataSizeProgress(quint64 loaded, quint64 total);
 
     QString formattedElapsedSeconds(std::chrono::seconds seconds, std::chrono::seconds nowInterval);
 
@@ -76,6 +79,12 @@ namespace Utils
     QSize calculateThumbnailSize(const QSize &size, const QSize &maxSize, const int orientation = 0);
 
     bool readImage(QImageReader *reader, QImage *image);
+
+    // Contacts
+
+    Contacts getDeviceContacts(const Contacts &cachedContacts = Contacts());
+
+    QUrl getContactAvatarUrl(const Contact &contact);
 }
 }
 

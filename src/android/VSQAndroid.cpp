@@ -38,13 +38,16 @@
 #include <QtAndroid>
 
 #include "android/VSQAndroid.h"
+#include "Utils.h"
 
 #include <android/log.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <cstdio>
 
-// TODO: Remove it
+using namespace vm;
+
+// TODO(fpohtmeh): Remove it
 static int pfd[2];
 static pthread_t loggingThread;
 
@@ -55,13 +58,13 @@ QString VSQAndroid::caBundlePath() {
 }
 
 /******************************************************************************/
-static bool
-_checkPermissions() {
-    const QVector<QString> permissions({
-                                        "android.permission.WRITE_EXTERNAL_STORAGE",
-                                        "android.permission.READ_EXTERNAL_STORAGE"});
-
-    for(const QString &permission : permissions){
+static bool _checkPermissions() {
+    const QStringList permissions({
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.READ_CONTACTS"
+    });
+    for(const QString &permission : permissions) {
         auto result = QtAndroid::checkPermission(permission);
         if(result == QtAndroid::PermissionResult::Denied){
             auto resultHash = QtAndroid::requestPermissionsSync(QStringList({permission}));
@@ -156,6 +159,45 @@ quint64 VSQAndroid::getFileSize(const QUrl &url)
         javaUrl.object<jstring>()
     );
     return static_cast<quint64>(javaFileSize);
+}
+
+Contacts VSQAndroid::getContacts()
+{
+    const auto javaStr = QAndroidJniObject::callStaticObjectMethod(
+        "org/virgil/utils/ContactUtils",
+        "getContacts",
+        "(Landroid/content/Context;)Ljava/lang/String;",
+        QtAndroid::androidActivity().object<jobject>()
+    );
+    const auto lines = javaStr.toString().split('\n');
+
+    Contacts contacts;
+    for (int i = 0, s = lines.size() - 4; i <= s; i += 4) {
+        Contact contact;
+        contact.name = lines[i];
+        contact.phoneNumber = lines[i + 1];
+        contact.email = lines[i + 2];
+        const auto &platformIdStr = lines[i + 3];
+        contact.id = QLatin1String("AndroidContact(%1)").arg(platformIdStr);
+        contact.platformId = platformIdStr.toLongLong();
+        contact.avatarUrlRetryCount = 1;
+        contacts.push_back(contact);
+    }
+    return contacts;
+}
+
+QUrl VSQAndroid::getContactAvatarUrl(const Contact &contact)
+{
+    const QString idString = QString::number(contact.platformId.toLongLong());
+    const auto javaIdString = QAndroidJniObject::fromString(idString);
+    const auto javaFilePath = QAndroidJniObject::callStaticObjectMethod(
+        "org/virgil/utils/ContactUtils",
+        "getContactThumbnailUrl",
+        "(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;",
+        QtAndroid::androidContext().object(),
+        javaIdString.object<jstring>()
+    );
+    return Utils::localFileToUrl(javaFilePath.toString());
 }
 
 #endif // VS_ANDROID

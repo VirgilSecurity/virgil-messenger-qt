@@ -35,10 +35,12 @@
 #ifndef VM_OPERATION_H
 #define VM_OPERATION_H
 
-#include <deque>
 
 #include <QObject>
 #include <QLoggingCategory>
+
+
+#include <deque>
 
 
 Q_DECLARE_LOGGING_CATEGORY(lcOperation)
@@ -63,8 +65,11 @@ public:
     ~Operation() override;
 
     void start();
+    void stop();
+    void waitForDone();
+
     // Cleanup and deleteLater operation with children
-    void drop();
+    void drop(bool wait = false);
     void dropChildren();
 
     QString name() const;
@@ -73,13 +78,7 @@ public:
     Status status() const;
 
     void appendChild(Operation *child);
-    void prependChild(Operation *child);
     bool hasChildren() const;
-    Operation *firstChild();
-    Operation *lastChild();
-
-    // Repeatable operation can be started again after finish
-    void setRepeatable(bool repeatable);
 
 signals:
     void started();
@@ -107,11 +106,9 @@ private:
     bool setStatus(const Status &status);
 
     void startNextChild();
-    void onChildInvalidated();
 
     QString m_name;
     Status m_status = Status::Created;
-    bool m_repeatable = false;
 
     std::deque<Operation *> m_children;
     bool m_cleanedUp = false;

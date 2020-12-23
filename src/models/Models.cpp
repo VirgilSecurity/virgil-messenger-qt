@@ -35,47 +35,36 @@
 #include "models/Models.h"
 
 #include <QSortFilterProxyModel>
-#include <QThread>
 
 #include "Settings.h"
 #include "Messenger.h"
 #include "models/AccountSelectionModel.h"
 #include "models/ChatsModel.h"
+#include "models/DiscoveredContactsModel.h"
 #include "models/FileCloudModel.h"
+#include "models/FileCloudUploader.h"
 #include "models/MessagesModel.h"
 #include "models/MessagesQueue.h"
 
 using namespace vm;
 
-Models::Models(Messenger *messenger, Settings *settings, UserDatabase *userDatabase, QObject *parent)
+Models::Models(Messenger *messenger, Settings *settings, UserDatabase *userDatabase, Validator *validator, QObject *parent)
     : QObject(parent)
     , m_accountSelection(new AccountSelectionModel(settings, this))
     , m_chats(new ChatsModel(this))
+    , m_discoveredContacts(new DiscoveredContactsModel(nullptr, validator, this)) // FIXME(fpohtmeh): pass usersController
     , m_messages(new MessagesModel(this))
     , m_fileCloud(new FileCloudModel(settings, this))
+    , m_fileCloudUploader(new FileCloudUploader(this))
     , m_fileLoader(messenger->fileLoader())
     , m_messagesQueue(new MessagesQueue(settings, messenger, userDatabase, nullptr))
     , m_queueThread(new QThread())
 {
-    qRegisterMetaType<AccountSelectionModel *>("AccountSelectionModel*");
-    qRegisterMetaType<ChatsModel *>("ChatsModel*");
-    qRegisterMetaType<FileCloudModel *>("FileCloudModel*");
-    qRegisterMetaType<MessagesModel *>("MessagesModel*");
-    qRegisterMetaType<QSortFilterProxyModel *>("QSortFilterProxyModel*");
-
     connect(m_messagesQueue, &MessagesQueue::notificationCreated, this, &Models::notificationCreated);
-
-    m_messagesQueue->moveToThread(m_queueThread);
-    m_queueThread->setObjectName("QueueThread");
-    m_queueThread->start();
 }
 
 Models::~Models()
 {
-    m_queueThread->quit();
-    m_queueThread->wait();
-    delete m_messagesQueue;
-    delete m_queueThread;
 }
 
 const AccountSelectionModel *Models::accountSelection() const
@@ -98,6 +87,16 @@ ChatsModel *Models::chats()
     return m_chats;
 }
 
+const DiscoveredContactsModel *Models::discoveredContacts() const
+{
+    return m_discoveredContacts;
+}
+
+DiscoveredContactsModel *Models::discoveredContacts()
+{
+    return m_discoveredContacts;
+}
+
 const FileCloudModel *Models::fileCloud() const
 {
     return m_fileCloud;
@@ -106,6 +105,16 @@ const FileCloudModel *Models::fileCloud() const
 FileCloudModel *Models::fileCloud()
 {
     return m_fileCloud;
+}
+
+const FileCloudUploader *Models::fileCloudUploader() const
+{
+    return m_fileCloudUploader;
+}
+
+FileCloudUploader *Models::fileCloudUploader()
+{
+    return m_fileCloudUploader;
 }
 
 const FileLoader *Models::fileLoader() const

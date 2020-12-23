@@ -36,6 +36,7 @@
 
 #include "Utils.h"
 #include "Model.h"
+#include "models/ListProxyModel.h"
 
 #include <QSortFilterProxyModel>
 
@@ -45,6 +46,8 @@ using Self = ChatsModel;
 Self::ChatsModel(QObject *parent)
     : ListModel(parent)
 {
+    qRegisterMetaType<ChatsModel *>("ChatsModel*");
+
     proxy()->setSortRole(LastEventTimestampRole);
     proxy()->sort(0, Qt::DescendingOrder);
     proxy()->setFilterRole(ContactIdRole);

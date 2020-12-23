@@ -30,7 +30,10 @@ Control {
     property int attachmentBytesTotal: 0
     property string attachmentDisplaySize: ""
     property string attachmentDisplayText: ""
-    property string attachmentIconPath: ""
+    // FIXME(fpohtmeh): uncomment
+//    property string attachmentIconPath: ""
+//    property string attachmentDisplayProgress: ""
+//    property string attachmentImagePath: ""
     property int attachmentThumbnailWidth: 0
     property int attachmentThumbnailHeight: 0
     property int attachmentBytesLoaded: 0
@@ -159,7 +162,16 @@ Control {
 
                     Label {
                         Layout.maximumWidth: column.maxWidth
+                        visible: chatMessage.attachmentStatus == Enums.AttachmentStatus.Loaded
                         text: attachmentDisplaySize
+                        color: "white"
+                        font.pixelSize: UiHelper.fixFontSz(10)
+                    }
+
+                    Label {
+                        Layout.maximumWidth: column.maxWidth
+                        visible: chatMessage.attachmentStatus == Enums.AttachmentStatus.Loading
+                        text: attachmentDisplayProgress
                         color: "white"
                         font.pixelSize: UiHelper.fixFontSz(10)
                     }
@@ -185,31 +197,41 @@ Control {
         Avatar {
             id: avatar
             width: 30
+            height: width
             opacity: firstInRow ? 1 : 0
-            diameter: 30
         }
 
         Column {
             spacing: 4
+            anchors.top: parent.top
 
             // Nickname + timestamp
-            RowLayout {
+
+            Item {
+                visible: firstInRow
+                width: parent.width
+                height: 5
+            }
+
+            Row {
                 visible: firstInRow
                 spacing: 6
 
                 Label {
                     text: nickname
-                    height: 16
                     color: Theme.labelColor
-                    font.pixelSize: UiHelper.fixFontSz(16)
+                    font.pixelSize: UiHelper.fixFontSz(14)
+                    anchors.verticalCenter: parent.verticalCenter
                 }
 
                 Label {
-                    Layout.alignment: Qt.AlignBottom
                     text: displayTime
                     color: Theme.labelColor
-
                     font.pixelSize: UiHelper.fixFontSz(11)
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        verticalCenterOffset: 1
+                    }
                 }
             }
 

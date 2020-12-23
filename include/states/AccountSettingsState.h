@@ -47,8 +47,8 @@ public:
     explicit AccountSettingsState(QState *parent);
 
 signals:
+    void editProfile();
     void requestBackupKey(const QString &username);
-    void usernameChanged(const QString &);
 };
 }
 

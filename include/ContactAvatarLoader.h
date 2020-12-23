@@ -32,18 +32,35 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-import QtQuick 2.5
-import QtQuick.Layouts 1.5
-import QtQuick.Controls 2.12
+#ifndef VM_CONTACTAVATARLOADER_H
+#define VM_CONTACTAVATARLOADER_H
 
-Label {
-    Layout.fillWidth: true
-    z: 5
-    color: "white"
-    horizontalAlignment: Text.AlignHCenter
-    font.pixelSize: Qt.application.font.pixelSize * 1.3
-    background: Rectangle {
-        anchors.fill: parent
-        color: "steelblue"
-    }
+#include <QTimer>
+
+#include "Contact.h"
+
+namespace vm
+{
+class ContactAvatarLoader : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit ContactAvatarLoader(QObject *parent);
+
+    void load(Contact &contact);
+    void load(Contacts &contacts, int maxLimit);
+
+signals:
+    void loaded(const Contact &contact, const QUrl &url);
+
+private:
+    bool canLoad(Contact &contact);
+    void processLoad();
+
+    Contacts m_contacts;
+    QTimer m_timer;
+};
 }
+
+#endif // VM_CONTACTAVATARLOADER_H

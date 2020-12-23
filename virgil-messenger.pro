@@ -112,7 +112,11 @@ HEADERS += \
         include/ui/VSQUiHelper.h \
         include/KeyboardEventFilter.h \
         include/Validator.h \
+        include/ContactAvatarLoader.h \
         include/CustomerEnv.h \
+        include/Contact.h \
+        include/ConfirmationCodeType.h \
+        include/GroupId.h \
         # Messenger Core
         include/messenger/AttachmentId.h \
         include/messenger/Chat.h \
@@ -163,12 +167,16 @@ HEADERS += \
         include/states/ApplicationStateManager.h \
         include/states/AttachmentPreviewState.h \
         include/states/BackupKeyState.h \
+        include/states/EditProfileState.h \
+        include/states/VerifyProfileState.h \
         include/states/ChatListState.h \
         include/states/ChatState.h \
         include/states/DownloadKeyState.h \
         include/states/FileCloudState.h \
         include/states/OperationState.h \
         include/states/NewChatState.h \
+        include/states/NewGroupChatState.h \
+        include/states/NameGroupChatState.h \
         include/states/SignInAsState.h \
         include/states/SignInState.h \
         include/states/SignInUsernameState.h \
@@ -197,8 +205,15 @@ HEADERS += \
         # Models
         include/models/AccountSelectionModel.h \
         include/models/ChatsModel.h \
+        include/models/ContactsModel.h \
+        include/models/ContactsProxyModel.h \
+        include/models/DiscoveredContactsModel.h \
+        include/models/DiscoveredContactsProxyModel.h \
         include/models/FileCloudModel.h \
+        include/models/FileCloudUploader.h \
         include/models/ListModel.h \
+        include/models/ListProxyModel.h \
+        include/models/ListSelectionModel.h \
         include/models/MessagesModel.h \
         include/models/MessagesQueue.h \
         include/models/Models.h \
@@ -248,6 +263,7 @@ SOURCES += \
         src/ui/VSQUiHelper.cpp \
         src/KeyboardEventFilter.cpp \
         src/Validator.cpp \
+        src/ContactAvatarLoader.cpp \
         src/CustomerEnv.cpp \
         # Messenger Core
         src/messenger/AttachmentId.cpp \
@@ -291,11 +307,15 @@ SOURCES += \
         src/states/ApplicationStateManager.cpp \
         src/states/AttachmentPreviewState.cpp \
         src/states/BackupKeyState.cpp \
+        src/states/EditProfileState.cpp \
+        src/states/VerifyProfileState.cpp \
         src/states/ChatListState.cpp \
         src/states/ChatState.cpp \
         src/states/DownloadKeyState.cpp \
         src/states/FileCloudState.cpp \
         src/states/NewChatState.cpp \
+        src/states/NewGroupChatState.cpp \
+        src/states/NameGroupChatState.cpp \
         src/states/SignInAsState.cpp \
         src/states/SignInState.cpp \
         src/states/SignInUsernameState.cpp \
@@ -321,8 +341,15 @@ SOURCES += \
         # Models
         src/models/AccountSelectionModel.cpp \
         src/models/ChatsModel.cpp \
+        src/models/ContactsModel.cpp \
+        src/models/ContactsProxyModel.cpp \
+        src/models/DiscoveredContactsModel.cpp \
+        src/models/DiscoveredContactsProxyModel.cpp \
         src/models/FileCloudModel.cpp \
+        src/models/FileCloudUploader.cpp \
         src/models/ListModel.cpp \
+        src/models/ListProxyModel.cpp \
+        src/models/ListSelectionModel.cpp \
         src/models/MessagesModel.cpp \
         src/models/MessagesQueue.cpp \
         src/models/Models.cpp \
@@ -502,7 +529,7 @@ android: {
     DEFINES += VS_ANDROID=1 VS_PUSHNOTIFICATIONS=1 VS_MOBILE=1
     ANDROID_VERSION_CODE = $$AndroidVersionCode($${VERSION})
     ANDROID_VERSION_NAME = $$VERSION
-    ANDROID_MIN_SDK_VERSION = 29
+    ANDROID_MIN_SDK_VERSION = 24
     ANDROID_TARGET_SDK_VERSION = 29
 
     INCLUDEPATH +=  \
@@ -587,6 +614,7 @@ android: {
 
     OTHER_FILES += \
         platforms/android/res/values/apptheme.xml \
+        platforms/android/src/org/virgil/utils/ContactUtils.java \
         platforms/android/src/org/virgil/utils/Utils.java
 }
 

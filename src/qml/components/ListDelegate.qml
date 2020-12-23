@@ -6,8 +6,6 @@ import "../theme"
 
 ItemDelegate {
     id: delegate
-    leftInset: 8
-    rightInset: leftInset
 
     default property alias children: rowLayout.children
 
@@ -18,9 +16,11 @@ ItemDelegate {
 
     contentItem: RowLayout {
         id: rowLayout
-        anchors.leftMargin: 2 * spacing
-        anchors.rightMargin: anchors.leftMargin
-        anchors.fill: parent
+        anchors {
+            fill: parent
+            leftMargin: Theme.smallSpacing
+            rightMargin: Theme.smallSpacing
+        }
         height: Theme.avatarHeight
         spacing: Theme.smallSpacing
     }

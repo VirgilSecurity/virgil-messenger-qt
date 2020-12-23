@@ -35,17 +35,27 @@
 #include "states/NewChatState.h"
 
 #include "controllers/ChatsController.h"
+#include "models/DiscoveredContactsModel.h"
+#include "models/ListSelectionModel.h"
 
 using namespace vm;
 using Self = NewChatState;
 
-Self::NewChatState(ChatsController *chatsController, QState *parent)
+Self::NewChatState(ChatsController *chatsController, DiscoveredContactsModel *contactsModel, QState *parent)
     : OperationState(parent)
     , m_chatsController(chatsController)
+    , m_contactsModel(contactsModel)
 {
     connect(chatsController, &ChatsController::chatOpened, this, &Self::operationFinished);
     connect(chatsController, &ChatsController::errorOccurred, this, &Self::operationErrorOccurred);
     connect(this, &Self::addNewChatWithUsername, this, &Self::onAddNewChatWithUsername);
+}
+
+void Self::onEntry(QEvent *event)
+{
+    Q_UNUSED(event)
+    m_contactsModel->reload();
+    m_contactsModel->selection()->setMultiSelect(false);
 }
 
 void Self::onAddNewChatWithUsername(const QString &username)

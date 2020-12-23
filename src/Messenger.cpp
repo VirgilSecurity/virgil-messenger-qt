@@ -238,9 +238,12 @@ Self::currentUser() const {
 bool
 Self::sendMessage(MessageHandler message) {
 
-    auto future = m_coreMessenger->sendMessage(message);
-
-    return future.result() == FutureResult::Success;
+    const auto future = m_coreMessenger->sendMessage(message);
+    if (future.result() == FutureResult::Success) {
+        emit messageSent(message);
+        return true;
+    }
+    return false;
 }
 
 

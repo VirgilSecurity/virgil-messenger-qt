@@ -110,6 +110,7 @@ private:
         AttachmentIconPathRole,
         AttachmentPictureThumbnailSizeRole,
         AttachmentDisplaySizeRole,
+        AttachmentDisplayProgressRole,
         AttachmentDisplayTextRole,
         // Loading
         AttachmentBytesTotalRole,

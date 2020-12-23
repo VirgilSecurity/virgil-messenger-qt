@@ -39,7 +39,7 @@ Popup {
         ParallelAnimation {
             NumberAnimation {property: "opacity"; from: 0.0; to: 1.0; easing.type: Easing.InOutQuad;
                 duration: Theme.animationDuration; easing.overshoot: 1}
-            NumberAnimation {property: "scale"; from: 0.8; to: 1.0; easing.type: Easing.OutBack;
+            NumberAnimation {property: "scale"; from: 0.8; to: 1.0; easing.type: Easing.InOutQuad;
                 duration: Theme.animationDuration; easing.overshoot: 2}
         }
     }

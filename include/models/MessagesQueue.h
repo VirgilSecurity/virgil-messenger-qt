@@ -73,7 +73,7 @@ signals:
     void notificationCreated(const QString &notification, const bool error);
 
 private:
-    MessageOperation *pushMessageOperation(const MessageHandler &message, bool prepend = false);
+    MessageOperation *pushMessageOperation(const MessageHandler &message);
 
     void onDatabaseOpened();
     void onPushMessage(const MessageHandler &message);
@@ -83,9 +83,6 @@ private:
     void onFileLoaderServiceFound(bool serviceFound);
     void onNotSentMessagesFetched(const ModifiableMessages &messages);
     void onFinished();
-
-    // Message operation
-    void onMessageOperationUpdated(const MessageOperation *operation);
 
     QPointer<Messenger> m_messenger;
     QPointer<UserDatabase> m_userDatabase;

@@ -58,7 +58,6 @@ Self::MessagesQueue(const Settings *settings, Messenger *messenger, UserDatabase
     , m_factory(new MessageOperationFactory(settings, messenger, this))
 {
     setName(QLatin1String("MessageQueue"));
-    setRepeatable(true);
 
     //
     //  Connect database.
@@ -83,14 +82,14 @@ void Self::onDatabaseOpened() {
 }
 
 
-MessageOperation *Self::pushMessageOperation(const MessageHandler &message, bool prepend)
+MessageOperation *Self::pushMessageOperation(const MessageHandler &message)
 {
     auto op = new MessageOperation(message, m_factory, this);
 
     connect(op, &MessageOperation::messageUpdate, this, &Self::updateMessage);
     connect(op, &MessageOperation::notificationCreated, this, &Self::notificationCreated);
 
-    prepend ? prependChild(op) : appendChild(op);
+    appendChild(op);
 
     return op;
 }
@@ -127,7 +126,7 @@ void Self::onPushMessage(const MessageHandler &message)
 
 void Self::onPushMessageDownload(const MessageHandler &message, const QString &filePath)
 {
-    if (auto op = pushMessageOperation(message, true)) {
+    if (auto op = pushMessageOperation(message)) {
         m_factory->populateDownload(op, filePath);
         connect(op, &Operation::finished, this, std::bind(&Self::notificationCreated, this, tr("File was downloaded"), false));
     }
@@ -135,7 +134,7 @@ void Self::onPushMessageDownload(const MessageHandler &message, const QString &f
 
 void Self::onPushMessagePreload(const MessageHandler &message)
 {
-    if (auto op = pushMessageOperation(message, true)) {
+    if (auto op = pushMessageOperation(message)) {
         m_factory->populatePreload(op);
     }
 }

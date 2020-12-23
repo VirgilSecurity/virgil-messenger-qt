@@ -42,6 +42,8 @@ AccountSelectionModel::AccountSelectionModel(Settings *settings, QObject *parent
     : ListModel(parent)
     , m_settings(settings)
 {
+    qRegisterMetaType<AccountSelectionModel *>("AccountSelectionModel*");
+
     connect(m_settings, &Settings::usersListChanged, this, &AccountSelectionModel::reload);
 }
 

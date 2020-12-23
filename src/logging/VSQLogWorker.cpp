@@ -144,5 +144,9 @@ QString VSQLogWorker::formatLogType(QtMsgType type) {
 
     case QtFatalMsg:
         return "F:";
+
+    default:
+        throw std::logic_error("Invalid Qt message type");
+        return "";
     }
 }

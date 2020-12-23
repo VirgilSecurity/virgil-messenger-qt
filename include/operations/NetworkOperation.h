@@ -44,8 +44,8 @@ class NetworkOperation : public Operation
     Q_OBJECT
 
 public:
-    explicit NetworkOperation(QObject *parent, bool isOnline);
     explicit NetworkOperation(NetworkOperation *parent);
+    NetworkOperation(QObject *parent, bool isOnline);
 
     bool isOnline() const noexcept;
     void setIsOnline(bool isOnline);

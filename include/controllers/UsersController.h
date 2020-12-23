@@ -67,6 +67,7 @@ public:
 
     void downloadKey(const QString &username, const QString &password);
 
+    QString currentUsername() const;
     void setNextUsername(const QString &username);
     QString nextUsername() const;
 
@@ -82,8 +83,6 @@ signals:
     void nextUsernameChanged(const QString &username);
 
 private:
-    QString currentUsername() const;
-
     void onSignedIn(const QString &username);
     void onSignedOut();
     void onFinishSignIn();

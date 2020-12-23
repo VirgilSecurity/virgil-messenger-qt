@@ -72,6 +72,10 @@ public:
     Q_INVOKABLE QString currentChatName() const;
     ChatHandler currentChat() const;
 
+    Q_INVOKABLE void addParticipant(const QString &username);
+    Q_INVOKABLE void removeParticipant(const QString &username);
+    Q_INVOKABLE void leaveGroup();
+
 signals:
     void errorOccurred(const QString &errorText); // TODO(fpohtmeh): remove this signal everywhere?
 

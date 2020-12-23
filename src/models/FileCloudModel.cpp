@@ -35,8 +35,8 @@
 #include "models/FileCloudModel.h"
 
 #include <QtConcurrent>
-#include <QSortFilterProxyModel>
 
+#include "models/ListProxyModel.h"
 #include "Settings.h"
 #include "Utils.h"
 #include "Model.h"
@@ -47,12 +47,12 @@ FileCloudModel::FileCloudModel(const Settings *settings, QObject *parent)
     : ListModel(parent)
     , m_settings(settings)
 {
+    qRegisterMetaType<FileCloudModel *>("FileCloudModel*");
+    qRegisterMetaType<QFileInfoList>("QFileInfoList");
+
     proxy()->setSortRole(SortRole);
     proxy()->sort(0, Qt::AscendingOrder);
     proxy()->setFilterRole(FilenameRole);
-
-    qRegisterMetaType<FileCloudModel *>();
-    qRegisterMetaType<QFileInfoList>("QFileInfoList");
 
     connect(this, &FileCloudModel::listReady, this, &FileCloudModel::setList);
     connect(&m_updateTimer, &QTimer::timeout, this, &FileCloudModel::invalidateDateTime);
@@ -85,9 +85,7 @@ void FileCloudModel::setEnabled(bool enabled)
 
 const QFileInfo FileCloudModel::getFileInfo(const int proxyRow) const
 {
-    const auto proxyIndex = proxy()->index(proxyRow, 0);
-    const auto sourceIndex = proxy()->mapToSource(proxyIndex);
-    return m_list[sourceIndex.row()];
+    return m_list[sourceIndex(proxyRow).row()];
 }
 
 int FileCloudModel::rowCount(const QModelIndex &parent) const

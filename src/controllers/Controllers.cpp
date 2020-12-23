@@ -42,6 +42,8 @@
 #include "controllers/MessagesController.h"
 #include "controllers/UsersController.h"
 #include "database/UserDatabase.h"
+#include "models/DiscoveredContactsModel.h"
+#include "models/Models.h"
 
 using namespace vm;
 

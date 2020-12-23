@@ -46,7 +46,9 @@ using Self = MessagesModel;
 
 Self::MessagesModel(QObject *parent)
     : ListModel(parent)
-{}
+{
+    qRegisterMetaType<MessagesModel *>("MessagesModel*");
+}
 
 
 ChatHandler Self::chat() const {
@@ -277,6 +279,7 @@ QHash<int, QByteArray> Self::roleNames() const
         { AttachmentIconPathRole, "attachmentIconPath" },
         { AttachmentPictureThumbnailSizeRole, "attachmentPictureThumbnailSize" },
         { AttachmentDisplaySizeRole, "attachmentDisplaySize" },
+        { AttachmentDisplayProgressRole, "attachmentDisplayProgress" },
         { AttachmentDisplayTextRole, "attachmentDisplayText" },
         { AttachmentBytesTotalRole, "attachmentBytesTotal" },
         { AttachmentBytesLoadedRole, "attachmentBytesLoaded" },

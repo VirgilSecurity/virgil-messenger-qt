@@ -63,6 +63,18 @@ ChatHandler Self::currentChat() const
     return m_currentChat;
 }
 
+void ChatsController::addParticipant(const QString &username) {
+
+}
+
+void ChatsController::removeParticipant(const QString &username) {
+
+}
+
+void ChatsController::leaveGroup() {
+
+}
+
 QString Self::currentChatName() const
 {
     return m_currentChat ? m_currentChat->title() : QString();
@@ -96,7 +108,6 @@ void Self::createChatWithUsername(const QString &username)
         }
     });
 }
-
 
 void Self::createChatWithUserId(const UserId &userId)
 {
@@ -134,7 +145,6 @@ void Self::openChat(const ChatId &chatId)
 void Self::closeChat()
 {
     m_currentChat = nullptr;
-
     emit chatClosed();
 }
 

@@ -3,6 +3,7 @@ package org.virgil.utils;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.provider.ContactsContract;
 import android.provider.OpenableColumns;
 
 public class Utils

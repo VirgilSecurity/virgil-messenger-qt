@@ -130,6 +130,7 @@ signals:
     //  Messages and user activity.
     //
     void updateMessage(const MessageUpdate &messageUpdate);
+    void messageSent(MessageHandler message);
     void messageReceived(ModifiableMessageHandler message);
     void lastActivityTextChanged(const QString& text);
     //--

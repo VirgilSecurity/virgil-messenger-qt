@@ -34,6 +34,8 @@
 
 #include "Utils.h"
 
+#include <cmath>
+
 #include <QDesktopServices>
 #include <QDir>
 #include <QJsonDocument>
@@ -50,6 +52,48 @@ Q_LOGGING_CATEGORY(lcUtils, "utils")
 
 using namespace vm;
 
+namespace
+{
+#ifdef VS_DUMMY_CONTACTS
+    Contacts getDummyContacts()
+    {
+        Contact c0;
+        c0.name = "John Doe";
+        c0.avatarUrl = "https://avatars.mds.yandex.net/get-zen_doc/1779726/pub_5d32ac8bf2df2500adb00103_5d32aeae21f9ff00ad9973ee/scale_1200";
+        c0.email = "johndoe@gmail.com";
+
+        Contact c1;
+        c1.name = "Bon Min";
+        c1.avatarUrl = "https://peopletalk.ru/wp-content/uploads/2016/10/orig_95f063cefa53daf194fa9f6d5e20b86c.jpg";
+
+        Contact c2;
+        c2.name = "Tin Bin";
+        c2.avatarUrl = "https://i.postimg.cc/wBJKr6CR/K5-W-z1n-Lqms.jpg";
+
+        Contact c3;
+        c3.name = "Mister Bean";
+        c3.avatarUrl = "https://avatars.mds.yandex.net/get-zen_doc/175962/pub_5a7b1334799d9dbfb9cc0f46_5a7b135b57906a1b6eb710eb/scale_1200";
+        c3.phoneNumber = "+12345678";
+
+        Contact c4;
+        c4.name = "Erick Helicopter";
+        c4.email = "heli@copt.er";
+
+        Contact c5;
+        c5.name = "Peter Griffin";
+
+        Contacts contacts{ c0, c1, c2, c3, c4, c5 };
+        int i = 0;
+        for (auto &c : contacts) {
+            c.id = QLatin1String("dummy/%1").arg(i);
+            c.platformId = c.id;
+            ++i;
+        }
+        return contacts;
+    }
+#endif // VS_DUMMY_CONTACTS
+}
+
 QString Utils::createUuid()
 {
     return QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
@@ -57,8 +101,24 @@ QString Utils::createUuid()
 
 QString Utils::formattedSize(quint64 fileSize)
 {
-    static QLocale locale = QLocale::system();
-    return locale.formattedDataSize(fileSize);
+    return QLocale::system().formattedDataSize(fileSize);
+}
+
+QString Utils::formattedDataSizeProgress(quint64 loaded, quint64 total)
+{
+    if (loaded <= 0) {
+        return QLatin1String("...");
+    }
+    // Get power for total. Based on QLocale::formattedDataSize
+    int power = !total ? 0 : int((63 - qCountLeadingZeroBits(quint64(qAbs(total)))) / 10);
+    // Get number for loaded
+    const int base = 1024;
+    const int precision = 2;
+    const auto locale = QLocale::system();
+    const auto formattedLoaded = power
+        ? locale.toString(loaded / std::pow(double(base), power), 'f', qMin(precision, 3 * power))
+        : locale.toString(loaded);
+    return formattedLoaded + QChar('/') + formattedSize(total);
 }
 
 QString Utils::formattedElapsedSeconds(std::chrono::seconds seconds, std::chrono::seconds nowInterval)
@@ -208,4 +268,40 @@ bool Utils::readImage(QImageReader *reader, QImage *image)
         return false;
     }
     return true;
+}
+
+Contacts Utils::getDeviceContacts(const Contacts &cachedContacts)
+{
+    Contacts contacts;
+#ifdef VS_DUMMY_CONTACTS
+    contacts = getDummyContacts();
+#elif defined(VS_ANDROID)
+    contacts = VSQAndroid::getContacts();
+#endif // VS_ANDROID
+    if (!contacts.empty() && !cachedContacts.empty()) {
+        // Load avatar information from cache
+        std::map<QVariant, Contact> cache;
+        for (const auto &c : cachedContacts) {
+            cache[c.platformId] = c;
+        }
+        for (auto &c : contacts) {
+            const auto it = cache.find(c.platformId);
+            if (it == cache.cend()) {
+                continue;
+            }
+            c.avatarUrl = it->second.avatarUrl;
+            c.avatarUrlRetryCount = it->second.avatarUrlRetryCount;
+        }
+    }
+    return contacts;
+}
+
+QUrl Utils::getContactAvatarUrl(const Contact &contact)
+{
+#ifdef VS_ANDROID
+    return VSQAndroid::getContactAvatarUrl(contact);
+#else
+    Q_UNUSED(contact)
+    return QUrl();
+#endif // VS_ANDROID
 }

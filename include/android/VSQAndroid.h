@@ -40,6 +40,8 @@
 #include <QObject>
 
 
+using namespace vm;
+
 class VSQAndroid {
 public:
     VSQAndroid() = delete;
@@ -55,6 +57,10 @@ public:
     static QString getDisplayName(const QUrl &url);
 
     static quint64 getFileSize(const QUrl &url);
+
+    static Contacts getContacts();
+
+    static QUrl getContactAvatarUrl(const Contact &contact);
 
 private:
     static int runLoggingThread();
