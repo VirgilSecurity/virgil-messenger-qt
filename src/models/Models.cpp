@@ -52,7 +52,7 @@ Models::Models(Messenger *messenger, Settings *settings, UserDatabase *userDatab
     : QObject(parent)
     , m_accountSelection(new AccountSelectionModel(settings, this))
     , m_chats(new ChatsModel(this))
-    , m_discoveredContacts(new DiscoveredContactsModel(nullptr, validator, this)) // FIXME(fpohtmeh): pass usersController
+    , m_discoveredContacts(new DiscoveredContactsModel(validator, this))
     , m_messages(new MessagesModel(this))
     , m_fileCloud(new FileCloudModel(settings, this))
     , m_fileCloudUploader(new FileCloudUploader(this))

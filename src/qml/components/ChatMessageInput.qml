@@ -16,6 +16,22 @@ Control {
         color: Theme.chatBackgroundColor
     }
 
+    QtObject {
+        id: d
+
+        readonly property string messageText: (messageField.text + messageField.preeditText).trim()
+
+        function sendTextMessage() {
+            const text = d.messageText;
+            messageField.clear()
+            controllers.messages.sendTextMessage(text)
+        }
+
+        function sendFileMessage(attachmentUrl, attachmentType) {
+            controllers.messages.sendFileMessage(attachmentUrl, attachmentType)
+        }
+    }
+
     RowLayout {
         id: row
         anchors.left: parent.left
@@ -52,7 +68,7 @@ Control {
             Layout.topMargin: Theme.smallMargin
             Layout.bottomMargin: Theme.smallMargin
             radius: 20
-            color: "#37474F"
+            color: Theme.inputBackgroundColor
 
             TextScrollView {
                 id: scrollView
@@ -68,7 +84,7 @@ Control {
                 TextArea {
                     id: messageField
                     placeholderText: qsTr("Message")
-                    placeholderTextColor: "#59717D"
+                    placeholderTextColor: "#59717D" // TODO(fpohtmeh): move this to Theme
                     wrapMode: TextArea.Wrap
                     font.pixelSize: 15
                     color: Theme.primaryTextColor
@@ -96,7 +112,7 @@ Control {
                             }
                             else {
                                 event.accepted = true
-                                root.sendMessage()
+                                d.sendTextMessage()
                             }
                         }
                     }
@@ -163,21 +179,10 @@ Control {
             Layout.leftMargin: 2
             Layout.alignment: Qt.AlignVCenter
             focusPolicy: Qt.NoFocus
-            objectName: "btnSend"
-            disabled: !(messageField.text + messageField.preeditText).length
+            disabled: d.messageText.length == 0
             image: "Send"
-            onClicked: root.sendMessage()
+            onClicked: d.sendTextMessage()
         }
-    }
-
-    function sendTextMessage() {
-        const text = (messageField.text + messageField.preeditText).trim();
-        messageField.clear()
-        controllers.messages.sendTextMessage(text)
-    }
-
-    function sendFileMessage(attachmentUrl, attachmentType) {
-        controllers.messages.sendFileMessage(attachmentUrl, attachmentType)
     }
 
     Connections {
@@ -188,7 +193,7 @@ Control {
                 return;
             }
             const url = fileUrls[fileUrls.length - 1]
-            sendFileMessage(url, attachmentType)
+            d.sendFileMessage(url, attachmentType)
         }
     }
 

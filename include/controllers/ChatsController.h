@@ -55,7 +55,7 @@ class Messenger;
 class ChatsController : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString currentChatName READ currentChatName)
+    Q_PROPERTY(QString currentChatName READ currentChatName NOTIFY currentChatNameChanged)
 
 public:
     ChatsController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
@@ -83,6 +83,8 @@ signals:
     void chatOpened(const ChatHandler &chat);
     void chatCreated(const ChatHandler &chat);
     void chatClosed();
+
+    void currentChatNameChanged(const QString &name);
 
     void createChatWithUser(const UserHandler& user, QPrivateSignal);
 

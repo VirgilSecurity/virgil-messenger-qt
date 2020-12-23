@@ -62,6 +62,9 @@ Self::MessagesController(Messenger *messenger, Models *models, UserDatabase *use
     , m_models(models)
     , m_userDatabase(userDatabase)
 {
+    qRegisterMetaType<MessageHandler>("MessageHandler");
+    qRegisterMetaType<MessageUpdate>("MessageUpdate");
+
     auto messagesQueue = m_models->messagesQueue();
     // User database
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);

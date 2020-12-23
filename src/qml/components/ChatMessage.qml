@@ -24,9 +24,9 @@ Control {
     property bool firstInRow: true
 
     property string attachmentId: ""
-    property var attachmentTypeIsFile: false
-    property var attachmentTypeIsPicture: false
-    property var attachmentIsLoading: false
+    property bool attachmentTypeIsFile: false
+    property bool attachmentTypeIsPicture: false
+    property bool attachmentIsLoading: false
     property int attachmentBytesTotal: 0
     property string attachmentDisplaySize: ""
     property string attachmentDisplayText: ""

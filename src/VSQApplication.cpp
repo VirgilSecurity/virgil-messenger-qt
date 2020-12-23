@@ -70,6 +70,7 @@ Self::VSQApplication()
 {
     m_settings.print();
 
+    qRegisterMetaType<qsizetype>("qsizetype");
     qRegisterMetaType<KeyboardEventFilter *>("KeyboardEventFilter*");
 
     connect(&m_models, &Models::notificationCreated, this, &Self::notificationCreated);

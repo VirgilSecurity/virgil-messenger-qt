@@ -39,7 +39,6 @@
 
 namespace vm
 {
-class UsersController;
 class Validator;
 
 class DiscoveredContactsModel : public ContactsModel
@@ -52,7 +51,7 @@ public:
         SectionRole = UserRole
     };
 
-    DiscoveredContactsModel(UsersController *usersController, Validator *validator, QObject *parent);
+    DiscoveredContactsModel(Validator *validator, QObject *parent);
 
     void reload();
 
@@ -75,12 +74,13 @@ private:
     void onDeviceContactsPopulated(const Contacts &contacts);
     void onSelectionChanged(const QList<QModelIndex> &indices);
 
-    UsersController *m_usersController;
     Validator *m_validator;
     ContactsModel *m_selectedContacts;
 
     int m_fixedContactsCount = 0;
 };
 }
+
+Q_DECLARE_METATYPE(vm::Contacts)
 
 #endif // VM_DISCOVEREDCONTACTSMODEL_H

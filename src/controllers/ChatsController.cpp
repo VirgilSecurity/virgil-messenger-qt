@@ -135,6 +135,7 @@ void Self::openChat(const ChatHandler& chat)
     }
     m_currentChat = chat;
     emit chatOpened(m_currentChat);
+    emit currentChatNameChanged(currentChatName());
 }
 
 void Self::openChat(const QString &chatId)

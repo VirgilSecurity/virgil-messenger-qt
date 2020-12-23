@@ -257,16 +257,17 @@ Page {
             inRow: model.inRow
             firstInRow: model.firstInRow
 
+            // FIXME(fpohtmeh); implement
             attachmentId: model.attachmentId
             attachmentTypeIsFile: model.attachmentTypeIsFile
             attachmentTypeIsPicture: model.attachmentTypeIsPicture
             attachmentIsLoading: model.attachmentIsLoading
-            attachmentIconPath: model.attachmentIconPath
-            attachmentPictureThumbnailWidth: model.attachmentPictureThumbnailSize.width
-            attachmentPictureThumbnailHeight: model.attachmentPictureThumbnailSize.height
+            //attachmentIconPath: model.attachmentIconPath
+            //attachmentPictureThumbnailWidth: model.attachmentPictureThumbnailSize.width
+            //attachmentPictureThumbnailHeight: model.attachmentPictureThumbnailSize.height
             attachmentDisplaySize: model.attachmentDisplaySize
             attachmentDisplayText: model.attachmentDisplayText
-            attachmentDisplayProgress: model.attachmentDisplayProgress
+            //attachmentDisplayProgress: model.attachmentDisplayProgress
             attachmentBytesTotal: model.attachmentBytesTotal
             attachmentBytesLoaded: model.attachmentBytesLoaded
             attachmentFileExists: model.attachmentFileExists

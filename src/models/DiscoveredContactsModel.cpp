@@ -45,12 +45,12 @@
 
 using namespace vm;
 
-DiscoveredContactsModel::DiscoveredContactsModel(UsersController *usersController, Validator *validator, QObject *parent)
+DiscoveredContactsModel::DiscoveredContactsModel(Validator *validator, QObject *parent)
     : ContactsModel(parent, false)
-    , m_usersController(usersController)
     , m_validator(validator)
     , m_selectedContacts(new ContactsModel(this, false))
 {
+    qRegisterMetaType<Contacts>("Contacts");
     qRegisterMetaType<DiscoveredContactsModel *>("DiscoveredContactsModel*");
 
     setProxy(new DiscoveredContactsProxyModel(this));
@@ -124,7 +124,8 @@ Contacts DiscoveredContactsModel::findContactsByFilter() const
 {
     Contacts contacts;
     for (const Contact::Id &id : { filter() }) {
-        if (id != m_usersController->currentUsername() && m_validator->isValidUsername(id)) {
+        // TODO(fpohtmeh): exclude current user
+        if (m_validator->isValidUsername(id)) {
             contacts.push_back(createContact(id));
         }
     }

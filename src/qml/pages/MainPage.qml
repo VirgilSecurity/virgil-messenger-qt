@@ -32,11 +32,12 @@ Page {
             onTriggered: isChatList ? appState.requestNewChat() : attachmentPicker.open(AttachmentTypes.file)
         }
 
-        Action {
-            text: qsTr("New group")
-            enabled: isChatList
-            onTriggered: appState.requestNewGroupChat()
-        }
+        // TODO(fpohtmeh): restore later
+//        Action {
+//            text: qsTr("New group")
+//            enabled: isChatList
+//            onTriggered: appState.requestNewGroupChat()
+//        }
     }
 
     StackLayout {
