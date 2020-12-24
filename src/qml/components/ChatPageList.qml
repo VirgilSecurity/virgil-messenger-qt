@@ -49,12 +49,12 @@ ModelListView {
         id: messageDelegate
 
         ChatMessage {
-            readonly property real fullWidth: root.width - 2 * Theme.margin - leftIndent
+            readonly property real fullWidth: chatListView.width - leftIndent
+            width: parent.width
+            maxWidth: Platform.isMobile ? (fullWidth - 2 * Theme.margin) : fullWidth
 
             thisIndex: index
             thisDay: day
-
-            maxWidth: Platform.isMobile ? (fullWidth - 2 * Theme.margin) : fullWidth
 
             body: model.body
             displayTime: model.displayTime

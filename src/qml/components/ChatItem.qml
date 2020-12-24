@@ -66,10 +66,10 @@ Item {
         repeat: false
         interval: 1
         onTriggered: {
-            chatListItem.animationEnabled = true
-
             chatListItem.autoFlickToBottom = true
-            chatList.flickToBottomController(false)
+            chatList.flickChatToBottom(false)
+
+            chatListItem.animationEnabled = true
         }
     }
 
@@ -220,11 +220,12 @@ Item {
     }
 
 // Components
+
     Item {
         anchors {
             bottom: parent.bottom
             right: parent.right
-            bottomMargin: Theme.margin * 3
+            bottomMargin: Theme.margin
             rightMargin: Theme.margin
         }
         width: scrollToBottomButton.width + Theme.margin
@@ -240,7 +241,8 @@ Item {
         ImageButton {
             id: scrollToBottomButton
             anchors.centerIn: parent
-            backgroundColor: Theme.chatSeparatorColor
+            imageSize: 34
+            backgroundColor: Theme.inputBackgroundColor
             image: "Arrow-Right"
             rotation: 90
 
@@ -257,8 +259,8 @@ Item {
                 verticalCenter: scrollToBottomButton.top
                 verticalCenterOffset: 5
             }
-            width: chatListItem.unreadMessages > 9 ? 25 : 20
-            height: 20
+            width: chatListItem.unreadMessages > 9 ? 23: 18
+            height: 18
             radius: height
             color: Theme.buttonPrimaryColor
             visible: flick.hasUnreadMessages()
@@ -267,7 +269,7 @@ Item {
                 id: unreadMessagesCount
                 text: chatListItem.unreadMessages > 9 ? "9+" : chatListItem.unreadMessages
                 color: Theme.primaryTextColor
-                font.pixelSize: UiHelper.fixFontSz(14)
+                font.pixelSize: UiHelper.fixFontSz(12)
                 anchors.centerIn: parent
             }
         }
