@@ -84,7 +84,7 @@ Self::Messenger(Settings *settings, Validator *validator)
     //  Proxy messenger signals.
     //
     connect(m_coreMessenger, &CoreMessenger::lastActivityTextChanged, this, &Self::lastActivityTextChanged);
-    connect(m_coreMessenger, &CoreMessenger::messageUpadted, this, &Self::updateMessage);
+    connect(m_coreMessenger, &CoreMessenger::updateMessage, this, &Self::updateMessage);
 
     //
     //  Handle connection states.

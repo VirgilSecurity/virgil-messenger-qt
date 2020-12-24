@@ -83,7 +83,6 @@ public:
     };
 
     enum class ConnectionState {
-        Offline, // No Internet connection
         Disconnected,
         Connecting,
         Connected,
@@ -91,19 +90,33 @@ public:
     };
 
 signals:
+    //
+    //  Should be called when application became activated.
+    //
+    void activate();
+
+    //
+    //  Should be called when application goes to the background.
+    //
+    void deactivate();
+
+    //
+    //  Info signals.
+    //
     void connectionStateChanged(ConnectionState state);
 
     void lastActivityTextChanged(const QString& text);
 
     void messageReceived(ModifiableMessageHandler message);
-    void messageUpadted(const MessageUpdate& messageUpdate);
+    void updateMessage(const MessageUpdate& messageUpdate);
 
     //
     //  Private signals, to resolve thread. issues.
     //
-    void fireConnectXmppServer();
-    void fireReconnectIfNeeded();
-
+    void reconnectXmppServerIfNeeded();
+    void disconnectXmppServer();
+    void cleanupCommKitMessenger();
+    void deregisterFromPushNotifications();
 public:
     //
     //  Create.
@@ -120,16 +133,6 @@ public:
     //
     bool isOnline() const noexcept;
     bool isSignedIn() const noexcept;
-
-    //
-    //  Should be called when application became activated.
-    //
-    void activate();
-
-    //
-    //  Should be called when application goes to the background.
-    //
-    void deactivate();
 
     //
     //  Sign-in / Sign-up / Backup.
@@ -193,6 +196,12 @@ private:
     void resetXmppConfiguration();
 
     //
+    //  Connection
+    //
+    void connectXmppServer();
+    void changeConnectionState(ConnectionState state);
+
+    //
     //  Helpers.
     //
     UserId userIdFromJid(const QString& jid) const;
@@ -202,12 +211,14 @@ private:
     bool isNetworkOnline() const noexcept;
     bool isXmppConnected() const noexcept;
     bool isXmppConnecting() const noexcept;
+    bool isXmppDisconnected() const noexcept;
 
 
-private:
+private slots:
+    void onActivate();
+    void onDeactivate();
     void xmppOnConnected();
     void xmppOnDisconnected();
-    void xmppOnStateChanged(QXmppClient::State state);
     void xmppOnError(QXmppClient::Error);
     void xmppOnPresenceReceived(const QXmppPresence &presence);
     void xmppOnIqReceived(const QXmppIq &iq);
@@ -218,11 +229,15 @@ private:
     void xmppOnUploadSlotReceived(const QXmppHttpUploadSlotIq &slot);
     void xmppOnUploadRequestFailed(const QXmppHttpUploadRequestIq &request);
 
+    void onReconnectXmppServerIfNeeded();
+    void onDisconnectXmppServer();
+    void onCleanupCommKitMessenger();
+    void onDeregisterFromPushNotifications();
+
     void onProcessNetworkState(bool online);
-    void onConnectXmppServer();
-    void onReconnectIfNeeded();
     void onLogConnectionStateChanged(CoreMessenger::ConnectionState state);
 
+private:
     class Impl;
     std::unique_ptr<Impl> m_impl;
     QPointer<Settings> m_settings;
@@ -241,7 +256,6 @@ Q_DECLARE_METATYPE(vm::ChatId);
 Q_DECLARE_METATYPE(vm::MessageId);
 Q_DECLARE_METATYPE(vm::AttachmentId);
 
-Q_DECLARE_METATYPE(QXmppClient::State);
 Q_DECLARE_METATYPE(QXmppClient::Error);
 Q_DECLARE_METATYPE(QXmppPresence);
 Q_DECLARE_METATYPE(QXmppIq);

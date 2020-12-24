@@ -123,7 +123,7 @@ public:
     std::map<QString, std::shared_ptr<User>> identityToUser;
     std::map<QString, std::shared_ptr<User>> usernameToUser;
 
-    bool isActive = true;
+    ConnectionState connectionState = ConnectionState::Disconnected;
 };
 
 
@@ -152,9 +152,14 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     //
     //  Register self signals-slots
     //
-    connect(this, &Self::fireConnectXmppServer, this, &Self::onConnectXmppServer);
-    connect(this, &Self::fireReconnectIfNeeded, this, &Self::onReconnectIfNeeded);
+    connect(this, &Self::activate, this, &Self::onActivate);
+    connect(this, &Self::deactivate, this, &Self::onDeactivate);
     connect(this, &Self::connectionStateChanged, this, &Self::onLogConnectionStateChanged);
+
+    connect(this, &Self::reconnectXmppServerIfNeeded, this, &Self::onReconnectXmppServerIfNeeded);
+    connect(this, &Self::disconnectXmppServer, this, &Self::onDisconnectXmppServer);
+    connect(this, &Self::cleanupCommKitMessenger, this, &Self::onCleanupCommKitMessenger);
+    connect(this, &Self::deregisterFromPushNotifications, this, &Self::onDeregisterFromPushNotifications);
 
     //
     //  Configure Network Analyzer.
@@ -211,12 +216,6 @@ Self::resetXmppConfiguration() {
 
     qCDebug(lcCommKitMessenger) << "Reset XMPP configuration";
 
-    if (m_impl->xmpp) {
-        qCDebug(lcCommKitMessenger) << "Disconnecting from XMPP server...";
-        m_impl->xmpp->disconnect();
-        m_impl->xmpp->disconnectFromServer();
-    }
-
     m_impl->xmpp = std::make_unique<QXmppClient>();
 
     // Add receipt messages extension
@@ -248,12 +247,24 @@ Self::resetXmppConfiguration() {
 
     connect(m_impl->xmpp.get(), &QXmppClient::connected, this, &Self::xmppOnConnected);
     connect(m_impl->xmpp.get(), &QXmppClient::disconnected, this, &Self::xmppOnDisconnected);
-    connect(m_impl->xmpp.get(), &QXmppClient::stateChanged, this, &Self::xmppOnStateChanged);
     connect(m_impl->xmpp.get(), &QXmppClient::error, this, &Self::xmppOnError);
     connect(m_impl->xmpp.get(), &QXmppClient::presenceReceived, this, &Self::xmppOnPresenceReceived);
     connect(m_impl->xmpp.get(), &QXmppClient::iqReceived, this, &Self::xmppOnIqReceived);
     connect(m_impl->xmpp.get(), &QXmppClient::sslErrors, this, &Self::xmppOnSslErrors);
     connect(m_impl->xmpp.get(), &QXmppClient::messageReceived, this, &Self::xmppOnMessageReceived);
+
+    // Add extra logging
+#if USE_XMPP_LOGS
+    auto logger = QXmppLogger::getLogger();
+    logger->setLoggingType(QXmppLogger::SignalLogging);
+    logger->setMessageTypes(QXmppLogger::AnyMessage);
+
+    connect(logger, &QXmppLogger::message, [=](QXmppLogger::MessageType, const QString &text){
+        qCDebug(lcCommKitMessenger) << text;
+    });
+
+    m_impl->xmpp->setLogger(logger);
+#endif
 
     auto receipt = m_impl->xmpp->findExtension<QXmppMessageReceiptManager>();
     connect(receipt, &QXmppMessageReceiptManager::messageDelivered, this, &Self::xmppOnMessageDelivered);
@@ -283,13 +294,30 @@ Self::isNetworkOnline() const noexcept {
 
 bool
 Self::isXmppConnected() const noexcept {
-    return m_impl->xmpp && m_impl->xmpp->state() == QXmppClient::ConnectedState;
+    if (m_impl->xmpp) {
+        return  m_impl->xmpp->state() == QXmppClient::ConnectedState;
+    }
+
+    return false;
 }
 
 
 bool
 Self::isXmppConnecting() const noexcept {
-    return m_impl->xmpp && m_impl->xmpp->state() == QXmppClient::ConnectingState;
+    if (m_impl->xmpp) {
+        return m_impl->xmpp->state() == QXmppClient::ConnectingState;
+    }
+
+    return false;
+}
+
+bool
+Self::isXmppDisconnected() const noexcept {
+    if (m_impl->xmpp) {
+        return m_impl->xmpp->state() == QXmppClient::DisconnectedState;
+    }
+
+    return true;
 }
 
 
@@ -297,9 +325,7 @@ Self::isXmppConnecting() const noexcept {
 // State controls.
 // --------------------------------------------------------------------------
 void
-Self::activate() {
-    m_impl->isActive = true;
-
+Self::onActivate() {
     if (m_impl->xmpp) {
         m_impl->xmpp->setActive(true);
 
@@ -308,14 +334,12 @@ Self::activate() {
         m_impl->xmpp->setClientPresence(presenceOnline);
     }
 
-    fireReconnectIfNeeded();
+    reconnectXmppServerIfNeeded();
 }
 
 
 void
-Self::deactivate() {
-    m_impl->isActive = false;
-
+Self::onDeactivate() {
     if (m_impl->xmpp) {
         m_impl->xmpp->setActive(false);
 
@@ -365,7 +389,7 @@ Self::signIn(const QString& username) {
             return Self::Result::Error_Signin;
         }
 
-        emit fireConnectXmppServer();
+        // emit reconnectXmppServerIfNeeded();
 
         return Self::Result::Success;
     });
@@ -406,7 +430,7 @@ Self::signUp(const QString& username) {
         auto credentials = vsc_str_to_qstring(vssc_json_object_as_str(credsJson.get()));
         m_settings->setUserCredential(QString::fromStdString(username), credentials);
 
-        emit fireConnectXmppServer();
+        emit reconnectXmppServerIfNeeded();
 
         return Self::Result::Success;
     });
@@ -462,7 +486,7 @@ Self::signInWithBackupKey(const QString& username, const QString& password) {
         auto credentials = vsc_str_to_qstring(vssc_json_object_as_str(credsJson.get()));
         m_settings->setUserCredential(QString::fromStdString(username), credentials);
 
-        emit fireConnectXmppServer();
+        emit reconnectXmppServerIfNeeded();
 
         return Self::Result::Success;
     });
@@ -474,19 +498,9 @@ Self::signOut() {
     return QtConcurrent::run([this]() -> Result {
         qCInfo(lcCommKitMessenger) << "Signing out";
 
-        if (m_impl->messenger) {
-            m_impl->messenger = nullptr;
-        }
-
-        if (m_impl->xmpp) {
-            // TODO: Discuss: do we really need to unregister from the push notifications?
-            this->deregisterFromNotifications();
-
-            m_impl->xmpp->disconnect();
-            m_impl->xmpp->disconnectFromServer();
-            m_impl->xmpp = nullptr;
-        }
-
+        emit cleanupCommKitMessenger();
+        emit deregisterFromPushNotifications();
+        emit disconnectXmppServer();
 
         return Self::Result::Success;
     });
@@ -546,8 +560,8 @@ Self::registerForNotifications() {
 }
 
 
-bool
-Self::deregisterFromNotifications() {
+void
+Self::onDeregisterFromPushNotifications() {
 #if VS_PUSHNOTIFICATIONS
 
     if (!isOnline()) {
@@ -570,10 +584,6 @@ Self::deregisterFromNotifications() {
     const bool sentStatus = m_impl->xmpp->sendPacket(xmppPush);
 
     qCDebug(lcCommKitMessenger) << "Unsubscribe from push notifications status: " << (sentStatus ? "success" : "failed");
-
-    return sentStatus;
-#else
-    return true;
 #endif // VS_PUSHNOTIFICATIONS
 }
 
@@ -622,22 +632,26 @@ Self::getAuthHeaderVaue() const {
 
 
 void
-Self::onConnectXmppServer() {
-    //
-    //  We need to reset XMPP before a new connection.
-    //  It prevents XMPP Client being in the "disconnecting" state, or other.
-    //
-    resetXmppConfiguration();
+Self::changeConnectionState(ConnectionState state) {
+    if (m_impl->connectionState != state) {
+        m_impl->connectionState = state;
+        emit connectionStateChanged(state);
+    }
+}
 
+void
+Self::connectXmppServer() {
     vssq_error_t error;
     vssq_error_reset(&error);
+
+    changeConnectionState(Self::ConnectionState::Connecting);
 
     const vssq_messenger_auth_t *auth = vssq_messenger_auth(m_impl->messenger.get());
     const vssq_ejabberd_jwt_t *jwt = vssq_messenger_auth_ejabberd_jwt(auth, &error);
 
     if (vssq_error_has_error(&error)) {
         qCWarning(lcCommKitMessenger) << "Got error status: " << vsc_str_to_qstring(vssq_error_message_from_error(&error));
-        emit connectionStateChanged(Self::ConnectionState::Disconnected);
+        changeConnectionState(Self::ConnectionState::Disconnected);
         return;
     }
 
@@ -654,28 +668,32 @@ Self::onConnectXmppServer() {
     config.setKeepAliveTimeout(kKeepAliveTimeSec - 1);
 #endif
 
-
-// #if USE_XMPP_LOGS
-    auto logger = QXmppLogger::getLogger();
-    logger->setLoggingType(QXmppLogger::SignalLogging);
-    logger->setMessageTypes(QXmppLogger::AnyMessage);
-
-    connect(logger, &QXmppLogger::message, [=](QXmppLogger::MessageType, const QString &text){
-        qCDebug(lcCommKitMessenger) << text;
-    });
-
-    m_impl->xmpp->setLogger(logger);
-// #endif
+    if (nullptr == m_impl->xmpp) {
+        //
+        //  Configure QXMPP.
+        //
+        resetXmppConfiguration();
+    }
 
     qCDebug(lcCommKitMessenger) << "Connecting to XMPP server...";
     m_impl->xmpp->connectToServer(config);
 }
 
 void
-Self::onReconnectIfNeeded() {
-    if (isSignedIn() && isNetworkOnline() && !isXmppConnected() && !isXmppConnecting()) {
-        emit fireConnectXmppServer();
+Self::onReconnectXmppServerIfNeeded() {
+    if (isSignedIn() && isNetworkOnline() && isXmppDisconnected()) {
+        connectXmppServer();
     }
+}
+
+void
+Self::onDisconnectXmppServer() {
+    m_impl->xmpp->disconnectFromServer();
+}
+
+void
+Self::onCleanupCommKitMessenger() {
+    m_impl->messenger = nullptr;
 }
 
 // --------------------------------------------------------------------------
@@ -985,7 +1003,7 @@ Self::xmppOnConnected() {
 
     registerForNotifications();
 
-    emit connectionStateChanged(Self::ConnectionState::Connected);
+    changeConnectionState(Self::ConnectionState::Connected);
 }
 
 
@@ -993,15 +1011,7 @@ void
 Self::xmppOnDisconnected() {
     m_impl->lastActivityManager->setEnabled(false);
 
-    emit connectionStateChanged(Self::ConnectionState::Disconnected);
-}
-
-
-void
-Self::xmppOnStateChanged(QXmppClient::State state) {
-    if (QXmppClient::ConnectingState == state) {
-        emit connectionStateChanged(Self::ConnectionState::Connecting);
-    }
+    changeConnectionState(Self::ConnectionState::Disconnected);
 }
 
 
@@ -1009,6 +1019,7 @@ void
 Self::xmppOnError(QXmppClient::Error error) {
     qCWarning(lcCommKitMessenger) << "XMPP error: " << error;
     emit connectionStateChanged(Self::ConnectionState::Error);
+    emit reconnectXmppServerIfNeeded();
 }
 
 
@@ -1027,6 +1038,7 @@ void
 Self::xmppOnSslErrors(const QList<QSslError> &errors) {
     qCWarning(lcCommKitMessenger) << "XMPP SSL errors: " << errors;
     emit connectionStateChanged(Self::ConnectionState::Error);
+    emit reconnectXmppServerIfNeeded();
 }
 
 
@@ -1042,7 +1054,10 @@ Self::xmppOnMessageReceived(const QXmppMessage &xmppMessage) {
 void
 Self::xmppOnMessageDelivered(const QString &jid, const QString &messageId) {
     qCDebug(lcCommKitMessenger) << "Message delivered to: " << jid;
-//    emit updateMessage(MessageContentUpdateDelivered(messageId));
+    OutgoingMessageStageUpdate update;
+    update.messageId = MessageId(messageId);
+    update.stage = OutgoingMessageStage::Delivered;
+    emit updateMessage(update);
 }
 
 
@@ -1051,8 +1066,10 @@ Self::xmppOnMessageDelivered(const QString &jid, const QString &messageId) {
 // --------------------------------------------------------------------------
 void
 Self::onProcessNetworkState(bool isOnline) {
-    if (isSignedIn() && isOnline && !this->isOnline()) {
-        emit fireConnectXmppServer();
+    if (isOnline) {
+        emit reconnectXmppServerIfNeeded();
+    } else {
+        emit disconnectXmppServer();
     }
 }
 
@@ -1126,10 +1143,6 @@ void Self::xmppOnUploadRequestFailed(const QXmppHttpUploadRequestIq &request) {
 void
 Self::onLogConnectionStateChanged(CoreMessenger::ConnectionState state) {
     switch(state) {
-        case Self::ConnectionState::Offline:
-            qCDebug(lcCommKitMessenger) << "New connection status: offline";
-            break;
-
         case Self::ConnectionState::Disconnected:
             qCDebug(lcCommKitMessenger) << "New connection status: disconnected";
             break;
