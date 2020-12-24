@@ -40,8 +40,9 @@
 
 using namespace vm;
 
-MessageOperation::MessageOperation(const MessageHandler &message, MessageOperationFactory *factory, NetworkOperation *parent)
-    : NetworkOperation(parent)
+MessageOperation::MessageOperation(const MessageHandler &message, MessageOperationFactory *factory, bool isOnline,
+                                   QObject *parent)
+    : NetworkOperation(parent, isOnline)
     , m_factory(factory)
     , m_message(message)
 {

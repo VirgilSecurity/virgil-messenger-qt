@@ -36,8 +36,6 @@
 #define VS_MESSAGESQUEUE_H
 
 #include "Messenger.h"
-#include "UserDatabase.h"
-#include "operations/NetworkOperation.h"
 
 #include <QPointer>
 #include <QLoggingCategory>
@@ -46,14 +44,19 @@
 Q_DECLARE_LOGGING_CATEGORY(lcMessagesQueue);
 
 
+class QThreadPool;
+
+
 class Settings;
+
 
 namespace vm
 {
 class MessageOperation;
 class MessageOperationFactory;
+class UserDatabase;
 
-class MessagesQueue : public NetworkOperation
+class MessagesQueue : public QObject
 {
     Q_OBJECT
 
@@ -62,31 +65,38 @@ public:
     ~MessagesQueue() override;
 
 signals:
-    void setUserId(const UserId &userId);
     void pushMessage(const MessageHandler &message);
     void pushMessageDownload(const MessageHandler &message, const QString &filePath);
     void pushMessagePreload(const MessageHandler &message);
 
-    // Message operation
     void updateMessage(const MessageUpdate& messagesUpdate);
-
     void notificationCreated(const QString &notification, const bool error);
 
+    void stopRequested(QPrivateSignal);
+
 private:
-    MessageOperation *pushMessageOperation(const MessageHandler &message);
+    enum class OperationType
+    {
+        Full,
+        Download,
+        Preload
+    };
+
+    void runOperation(MessageHandler message, const OperationType operationType, const QVariant &data);
+    void stop();
 
     void onDatabaseOpened();
     void onPushMessage(const MessageHandler &message);
     void onPushMessageDownload(const MessageHandler &message, const QString &filePath);
     void onPushMessagePreload(const MessageHandler &message);
-
-    void onFileLoaderServiceFound(bool serviceFound);
     void onNotSentMessagesFetched(const ModifiableMessages &messages);
-    void onFinished();
 
     QPointer<Messenger> m_messenger;
     QPointer<UserDatabase> m_userDatabase;
     QPointer<MessageOperationFactory> m_factory;
+
+    QPointer<QThreadPool> m_threadPool;
+    std::atomic_bool m_isStopped = false;
 };
 }
 

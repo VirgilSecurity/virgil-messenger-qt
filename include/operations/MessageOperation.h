@@ -47,7 +47,8 @@ class MessageOperation : public NetworkOperation
     Q_OBJECT
 
 public:
-    MessageOperation(const MessageHandler &message, MessageOperationFactory *factory, NetworkOperation *parent);
+    MessageOperation(const MessageHandler &message, MessageOperationFactory *factory, bool isOnline,
+                     QObject *parent);
 
     MessageHandler message() const;
     MessageOperationFactory *factory();

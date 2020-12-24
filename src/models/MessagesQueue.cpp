@@ -34,14 +34,16 @@
 
 #include "models/MessagesQueue.h"
 
+
 #include "Messenger.h"
 #include "Utils.h"
 #include "MessagesTable.h"
 #include "UserDatabase.h"
-#include "FileLoader.h"
 #include "MessageOperation.h"
 #include "MessageOperationFactory.h"
-#include "Operation.h"
+
+
+#include <QtConcurrent>
 
 
 using namespace vm;
@@ -52,27 +54,67 @@ Q_LOGGING_CATEGORY(lcMessagesQueue, "messages-queue");
 
 
 Self::MessagesQueue(const Settings *settings, Messenger *messenger, UserDatabase *userDatabase, QObject *parent)
-    : NetworkOperation(parent, messenger->isOnline())
+    : QObject(parent)
     , m_messenger(messenger)
     , m_userDatabase(userDatabase)
     , m_factory(new MessageOperationFactory(settings, messenger, this))
+    , m_threadPool(new QThreadPool(this))
 {
-    setName(QLatin1String("MessageQueue"));
+    m_threadPool->setMaxThreadCount(5);
 
-    //
-    //  Connect database.
-    //
     connect(m_userDatabase, &UserDatabase::opened, this, &Self::onDatabaseOpened);
-
-    connect(messenger, &Messenger::onlineStatusChanged, this, &NetworkOperation::setIsOnline);
     connect(this, &Self::pushMessage, this, &Self::onPushMessage);
     connect(this, &Self::pushMessageDownload, this, &Self::onPushMessageDownload);
     connect(this, &Self::pushMessagePreload, this, &Self::onPushMessagePreload);
-    connect(messenger->fileLoader(), &FileLoader::uploadServiceFound, this, &Self::onFileLoaderServiceFound);
-    connect(this, &Operation::finished, this, &Self::onFinished);
 }
 
-MessagesQueue::~MessagesQueue() {
+
+Self::~MessagesQueue() {
+    stop();
+    m_threadPool->deleteLater(); // TODO(fpohtmeh): remove?
+}
+
+
+void Self::runOperation(MessageHandler message, const OperationType operationType, const QVariant &data)
+{
+    QtConcurrent::run(m_threadPool, [=]() {
+        if (m_isStopped) {
+            qCDebug(lcMessagesQueue) << "Operation was skipped because queue was stopped";
+            return;
+        }
+        auto op = new MessageOperation(message, m_factory, m_messenger->isOnline(), nullptr);
+        connect(op, &MessageOperation::messageUpdate, this, &Self::updateMessage);
+        connect(m_messenger, &Messenger::onlineStatusChanged, op, &NetworkOperation::setIsOnline);
+        connect(op, &MessageOperation::notificationCreated, this, &MessagesQueue::notificationCreated);
+        connect(this, &MessagesQueue::stopRequested, op, &MessageOperation::stop);
+        switch (operationType) {
+            case OperationType::Download:
+                m_factory->populateDownload(op, data.toString());
+                connect(op, &Operation::finished,
+                        this, std::bind(&Self::notificationCreated, this, tr("File was downloaded"), false));
+                break;
+            case OperationType::Preload:
+                m_factory->populatePreload(op);
+                break;
+            case OperationType::Full:
+            default:
+                m_factory->populateAll(op);
+                break;
+        }
+        op->start();
+        op->waitForDone();
+        // TODO(fpohtmeh): add retry
+        op->drop(true);
+    });
+}
+
+
+void Self::stop()
+{
+    qCDebug(lcMessagesQueue) << "Cleanup messages queue";
+    m_isStopped = true; // TODO(fpohtmeh): set false on user set
+    emit stopRequested(QPrivateSignal());
+    m_threadPool->waitForDone();
 }
 
 
@@ -82,59 +124,28 @@ void Self::onDatabaseOpened() {
 }
 
 
-MessageOperation *Self::pushMessageOperation(const MessageHandler &message)
-{
-    auto op = new MessageOperation(message, m_factory, this);
-
-    connect(op, &MessageOperation::messageUpdate, this, &Self::updateMessage);
-    connect(op, &MessageOperation::notificationCreated, this, &Self::notificationCreated);
-
-    appendChild(op);
-
-    return op;
-}
-
-
-void MessagesQueue::onFileLoaderServiceFound(bool serviceFound)
-{
-    // FIXME(fpohtmeh): remove method?
-    Q_UNUSED(serviceFound)
-}
-
-
 void Self::onNotSentMessagesFetched(const ModifiableMessages &messages)
 {
     qCDebug(lcMessagesQueue) << "Queued" << messages.size() << "unsent messages";
     for (auto &m : messages) {
-        if (auto op = pushMessageOperation(m)) {
-            m_factory->populateAll(op);
-        }
+        onPushMessage(m);
     }
 }
 
-void Self::onFinished()
-{
-    qCDebug(lcMessagesQueue) << "Messages queue is finished";
-}
 
 void Self::onPushMessage(const MessageHandler &message)
 {
-    if (auto op = pushMessageOperation(message)) {
-        m_factory->populateAll(op);
-    }
+    runOperation(message, OperationType::Full, QVariant());
 }
+
 
 void Self::onPushMessageDownload(const MessageHandler &message, const QString &filePath)
 {
-    if (auto op = pushMessageOperation(message)) {
-        m_factory->populateDownload(op, filePath);
-        connect(op, &Operation::finished, this, std::bind(&Self::notificationCreated, this, tr("File was downloaded"), false));
-    }
+    runOperation(message, OperationType::Download, filePath);
 }
+
 
 void Self::onPushMessagePreload(const MessageHandler &message)
 {
-    if (auto op = pushMessageOperation(message)) {
-        m_factory->populatePreload(op);
-    }
+    runOperation(message, OperationType::Preload, QVariant());
 }
