@@ -92,7 +92,7 @@ void MessageOperation::connectChild(Operation *child)
     connect(this, &Operation::invalidated, [this]() {
         MessageStatusUpdate statusUpdate;
         statusUpdate.messageId = m_message->id();
-        statusUpdate.status = MessageStatus::Failed;
+        statusUpdate.status = MessageStatus::Broken;
         emit messageUpdate(statusUpdate);
     });
 }

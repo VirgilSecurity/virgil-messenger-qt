@@ -62,63 +62,92 @@ Self::MessagesQueue(const Settings *settings, Messenger *messenger, UserDatabase
 {
     m_threadPool->setMaxThreadCount(5);
 
+    connect(m_messenger, &Messenger::signedOut, this, &MessagesQueue::stop);
     connect(m_userDatabase, &UserDatabase::opened, this, &Self::onDatabaseOpened);
     connect(this, &Self::pushMessage, this, &Self::onPushMessage);
     connect(this, &Self::pushMessageDownload, this, &Self::onPushMessageDownload);
     connect(this, &Self::pushMessagePreload, this, &Self::onPushMessagePreload);
+    connect(this, &Self::itemFailed, this, &Self::onItemFailed);
 }
 
 
-Self::~MessagesQueue() {
-    stop();
-    m_threadPool->deleteLater(); // TODO(fpohtmeh): remove?
-}
-
-
-void Self::runOperation(MessageHandler message, const OperationType operationType, const QVariant &data)
+Self::~MessagesQueue()
 {
-    QtConcurrent::run(m_threadPool, [=]() {
+    stop();
+}
+
+
+void Self::run()
+{
+    std::vector<Item> items;
+    std::swap(items, m_items);
+    for (auto &item : items) {
+        runItem(item);
+    }
+}
+
+
+void Self::stop()
+{
+    qCDebug(lcMessagesQueue) << "stop";
+    m_items.clear();
+    m_isStopped = true;
+    emit stopRequested(QPrivateSignal());
+    m_threadPool->waitForDone();
+}
+
+
+void Self::addItem(Item item, const bool run)
+{
+    if (item.message->status() == MessageStatus::Broken) {
+        // Broken message can't be processed (downloaded, preloaded, etc)
+        return;
+    }
+    m_items.push_back(std::move(item));
+    if (run) {
+        this->run();
+    }
+}
+
+
+void Self::runItem(Item item)
+{
+    QtConcurrent::run(m_threadPool, [=, item = std::move(item)]() {
         if (m_isStopped) {
             qCDebug(lcMessagesQueue) << "Operation was skipped because queue was stopped";
             return;
         }
-        auto op = new MessageOperation(message, m_factory, m_messenger->isOnline(), nullptr);
+        auto op = new MessageOperation(item.message, m_factory, m_messenger->isOnline(), nullptr);
         connect(op, &MessageOperation::messageUpdate, this, &Self::updateMessage);
         connect(m_messenger, &Messenger::onlineStatusChanged, op, &NetworkOperation::setIsOnline);
         connect(op, &MessageOperation::notificationCreated, this, &MessagesQueue::notificationCreated);
         connect(this, &MessagesQueue::stopRequested, op, &MessageOperation::stop);
-        switch (operationType) {
-            case OperationType::Download:
-                m_factory->populateDownload(op, data.toString());
-                connect(op, &Operation::finished,
-                        this, std::bind(&Self::notificationCreated, this, tr("File was downloaded"), false));
+        switch (item.type) {
+            case Item::ActionType::Download:
+                m_factory->populateDownload(op, item.parameter.toString());
+                connect(op, &Operation::finished, this, std::bind(&Self::notificationCreated, this, tr("File was downloaded"), false));
                 break;
-            case OperationType::Preload:
+            case Item::ActionType::Preload:
                 m_factory->populatePreload(op);
                 break;
-            case OperationType::Full:
+            case Item::ActionType::SendReceive:
             default:
                 m_factory->populateAll(op);
                 break;
         }
         op->start();
         op->waitForDone();
-        // TODO(fpohtmeh): add retry
+        if (op->status() == Operation::Status::Failed) {
+            emit itemFailed(item, QPrivateSignal());
+        }
         op->drop(true);
     });
 }
 
 
-void Self::stop()
+void Self::onDatabaseOpened()
 {
-    qCDebug(lcMessagesQueue) << "Cleanup messages queue";
-    m_isStopped = true; // TODO(fpohtmeh): set false on user set
-    emit stopRequested(QPrivateSignal());
-    m_threadPool->waitForDone();
-}
-
-
-void Self::onDatabaseOpened() {
+    m_isStopped = false;
     connect(m_userDatabase->messagesTable(), &MessagesTable::notSentMessagesFetched, this, &Self::onNotSentMessagesFetched);
     m_userDatabase->messagesTable()->fetchNotSentMessages();
 }
@@ -133,19 +162,35 @@ void Self::onNotSentMessagesFetched(const ModifiableMessages &messages)
 }
 
 
+void MessagesQueue::onItemFailed(Item item)
+{
+    const int maxAttemptCount = 3;
+    if (item.attemptCount < maxAttemptCount) {
+        ++item.attemptCount;
+        addItem(std::move(item), false);
+    }
+    else if (item.attemptCount == maxAttemptCount) {
+        MessageStatusUpdate statusUpdate;
+        statusUpdate.messageId = item.message->id();
+        statusUpdate.status = MessageStatus::Broken;
+        emit updateMessage(statusUpdate);
+    }
+}
+
+
 void Self::onPushMessage(const MessageHandler &message)
 {
-    runOperation(message, OperationType::Full, QVariant());
+    addItem({ message }, true);
 }
 
 
 void Self::onPushMessageDownload(const MessageHandler &message, const QString &filePath)
 {
-    runOperation(message, OperationType::Download, filePath);
+    addItem({ message, Item::ActionType::Download, filePath }, true);
 }
 
 
 void Self::onPushMessagePreload(const MessageHandler &message)
 {
-    runOperation(message, OperationType::Preload, QVariant());
+    addItem({ message, Item::ActionType::Preload }, true);
 }

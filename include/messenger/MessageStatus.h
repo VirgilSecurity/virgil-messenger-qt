@@ -48,6 +48,7 @@ enum class MessageStatus {
     Processing, // A message is currently processing.
     Succeed, // A message processing successfully completed.
     Failed, // A message processing failed, see stages do define what stage was accomplished to recover operation.
+    Broken // A message is broken and can't be processed.
 };
 
 //

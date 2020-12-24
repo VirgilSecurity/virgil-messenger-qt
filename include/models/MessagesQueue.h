@@ -61,6 +61,21 @@ class MessagesQueue : public QObject
     Q_OBJECT
 
 public:
+    struct Item
+    {
+        enum class ActionType
+        {
+            SendReceive,
+            Download,
+            Preload
+        };
+
+        MessageHandler message;
+        ActionType type = ActionType::SendReceive;
+        QVariant parameter = QVariant();
+        qsizetype attemptCount = 0;
+    };
+
     MessagesQueue(const Settings *settings, Messenger *messenger, UserDatabase *userDatabase, QObject *parent);
     ~MessagesQueue() override;
 
@@ -69,33 +84,31 @@ signals:
     void pushMessageDownload(const MessageHandler &message, const QString &filePath);
     void pushMessagePreload(const MessageHandler &message);
 
-    void updateMessage(const MessageUpdate& messagesUpdate);
+    void updateMessage(const MessageUpdate &messagesUpdate);
     void notificationCreated(const QString &notification, const bool error);
 
+    void itemFailed(Item item, QPrivateSignal);
     void stopRequested(QPrivateSignal);
 
 private:
-    enum class OperationType
-    {
-        Full,
-        Download,
-        Preload
-    };
-
-    void runOperation(MessageHandler message, const OperationType operationType, const QVariant &data);
+    void run();
     void stop();
+    void addItem(Item item, const bool run);
+    void runItem(Item item);
 
     void onDatabaseOpened();
     void onPushMessage(const MessageHandler &message);
     void onPushMessageDownload(const MessageHandler &message, const QString &filePath);
     void onPushMessagePreload(const MessageHandler &message);
     void onNotSentMessagesFetched(const ModifiableMessages &messages);
+    void onItemFailed(Item item);
 
     QPointer<Messenger> m_messenger;
     QPointer<UserDatabase> m_userDatabase;
     QPointer<MessageOperationFactory> m_factory;
-
     QPointer<QThreadPool> m_threadPool;
+
+    std::vector<Item> m_items;
     std::atomic_bool m_isStopped = false;
 };
 }

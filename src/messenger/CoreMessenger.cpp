@@ -829,7 +829,7 @@ Self::sendMessage(MessageHandler message) {
         //
         //  Find recipient.
         //
-        auto recipient = findUserByUsername(message->recipientId());
+        auto recipient = findUserById(message->recipientId());
         if (!recipient) {
             //
             //  Got network troubles to find recipient, so cache message and try later.

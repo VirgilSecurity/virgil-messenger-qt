@@ -55,6 +55,9 @@ MessageStatus vm::MessageStatusFromString(const QString& statusString) {
     else if (statusString == QLatin1String("failed")) {
         return MessageStatus::Failed;
     }
+    else if (statusString == QLatin1String("broken")) {
+        return MessageStatus::Broken;
+    }
     else {
         throw std::logic_error("Invalid MessageStatus string");
     }
@@ -77,6 +80,9 @@ QString vm::MessageStatusToString(MessageStatus status) {
 
         case MessageStatus::Failed:
             return QLatin1String("failed");
+
+        case MessageStatus::Broken:
+            return QLatin1String("broken");
 
         default:
             throw std::logic_error("Invalid MessageStatus");
