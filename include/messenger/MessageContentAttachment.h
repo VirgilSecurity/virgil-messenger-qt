@@ -203,8 +203,8 @@ private:
     QString m_localPath;
     quint64 m_encryptedSize = 0;
     quint64 m_processedSize = 0;
-    UploadStage m_uploadStage;
-    DownloadStage m_downloadStage;
+    UploadStage m_uploadStage = UploadStage::Initial;
+    DownloadStage m_downloadStage = DownloadStage::Initial;
 
 };
 } // namespace vm

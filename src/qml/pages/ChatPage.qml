@@ -251,23 +251,22 @@ Page {
             body: model.body
             displayTime: model.displayTime
             nickname: model.authorId
-            isOwnMessage: model.authorId === controllers.users.userId
+            isOwnMessage: model.authorId === controllers.users.currentUsername
             status: isOwnMessage ? model.status : "none"
             messageId: model.id
             inRow: model.inRow
             firstInRow: model.firstInRow
 
-            // FIXME(fpohtmeh); implement
             attachmentId: model.attachmentId
             attachmentTypeIsFile: model.attachmentTypeIsFile
             attachmentTypeIsPicture: model.attachmentTypeIsPicture
             attachmentIsLoading: model.attachmentIsLoading
-            //attachmentIconPath: model.attachmentIconPath
-            //attachmentPictureThumbnailWidth: model.attachmentPictureThumbnailSize.width
-            //attachmentPictureThumbnailHeight: model.attachmentPictureThumbnailSize.height
+            attachmentIconPath: model.attachmentIconPath
+            attachmentPictureThumbnailWidth: model.attachmentPictureThumbnailSize.width
+            attachmentPictureThumbnailHeight: model.attachmentPictureThumbnailSize.height
             attachmentDisplaySize: model.attachmentDisplaySize
             attachmentDisplayText: model.attachmentDisplayText
-            //attachmentDisplayProgress: model.attachmentDisplayProgress
+            attachmentDisplayProgress: model.attachmentDisplayProgress
             attachmentBytesTotal: model.attachmentBytesTotal
             attachmentBytesLoaded: model.attachmentBytesLoaded
             attachmentFileExists: model.attachmentFileExists

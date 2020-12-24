@@ -18,7 +18,7 @@ Page {
     }
 
     header: SearchHeader {
-        id: searchHeader
+        id: mainSearchHeader
         title: isChatList ? app.organizationDisplayName : qsTr("File Cloud") + controllers.fileCloud.displayPath
         description: isChatList ? qsTr("%1 Server").arg(app.organizationDisplayName) : ""
         showDescription: isChatList
@@ -51,7 +51,9 @@ Page {
         ModelListView {
             id: chatListView
             model: models.chats.proxy
-            searchHeader: searchHeader
+            searchHeader: mainSearchHeader
+            emptyIcon: "../resources/icons/Chats.png"
+            emptyText: qsTr("Create your first chat<br/>by pressing the dots<br/>button above")
 
             delegate: ListDelegate {
                 width: chatListView.width
@@ -107,7 +109,8 @@ Page {
         ModelListView {
             id: fileCloudListView
             model: models.fileCloud.proxy
-            searchHeader: searchHeader
+            searchHeader: mainSearchHeader
+            emptyIcon: "../resources/icons/Chats.png"
             emptyText: qsTr("Add a file<br/>by pressing the plus<br/>button above")
 
             delegate: ListDelegate {

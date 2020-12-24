@@ -32,7 +32,7 @@ Control {
 
             Action {
                 text: qsTr("Settings")
-                onTriggered: controllers.users.requestAccountSettings(controllers.users.userId)
+                onTriggered: controllers.users.requestAccountSettings(controllers.users.currentUsername)
             }
 
             MenuSeparator {

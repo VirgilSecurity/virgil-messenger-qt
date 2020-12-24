@@ -63,10 +63,7 @@ bool Self::create()
 
 void Self::onAddAttachment(MessageHandler message)
 {
-    auto attachment = message->contentAsAttachment();
-    if (!attachment) {
-        return;
-    }
+    const auto attachment = message->contentAsAttachment();
 
     ScopedConnection connection(*database());
     const auto extrasJson = attachment->extrasToJson(true);

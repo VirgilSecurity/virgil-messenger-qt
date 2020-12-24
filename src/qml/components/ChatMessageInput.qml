@@ -28,7 +28,12 @@ Control {
         }
 
         function sendFileMessage(attachmentUrl, attachmentType) {
-            controllers.messages.sendFileMessage(attachmentUrl, attachmentType)
+            if (attachmentType === AttachmentTypes.picture) {
+                controllers.messages.sendPictureMessage(attachmentUrl, attachmentType)
+            }
+            else {
+                controllers.messages.sendFileMessage(attachmentUrl, attachmentType)
+            }
         }
     }
 

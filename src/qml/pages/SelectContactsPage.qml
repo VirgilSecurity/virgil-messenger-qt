@@ -59,6 +59,7 @@ OperationPage {
             id: flow
             Layout.fillWidth: true
             Layout.preferredHeight: recommendedHeight
+            visible: d.model.selection.multiSelect
 
             Behavior on Layout.preferredHeight {
                 NumberAnimation {

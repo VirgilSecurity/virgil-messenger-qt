@@ -5,7 +5,7 @@ import "../base"
 
 FileDialog {
     id: root
-    property var attachmentType: AttachmentTypes.file
+    property int attachmentType: AttachmentTypes.file
 
     readonly property var _titles: [
         qsTr("Send files"),

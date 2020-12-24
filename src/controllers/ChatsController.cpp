@@ -164,6 +164,7 @@ void Self::onCreateChatWithUser(const UserHandler &user)
     newChat->setCreatedAt(QDateTime::currentDateTime());
     newChat->setType(Chat::Type::Personal);
     newChat->setTitle(user->username().isEmpty() ? user->id() : user->username());
+    m_models->chats()->addChat(newChat);
     m_userDatabase->chatsTable()->addChat(newChat);
     openChat(newChat);
 }

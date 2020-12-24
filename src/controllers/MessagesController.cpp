@@ -107,7 +107,7 @@ void Self::sendFileMessage(const QVariant &attachmentUrl)
     }
 
     auto message = createFileMessage(attachmentUrl.toUrl());
-    if (message) {
+    if (!message) {
         qCWarning(lcController) << "Message wasn't created. File is invalid.";
         emit notificationCreated(tr("File reading error"), true);
         return;
@@ -128,7 +128,7 @@ void Self::sendPictureMessage(const QVariant &attachmentUrl)
     }
 
     auto message = createPictureMessage(attachmentUrl.toUrl());
-    if (message) {
+    if (!message) {
         qCWarning(lcController) << "Message wasn't created. Picture is invalid.";
         emit notificationCreated(tr("Picture reading error"), true);
         return;

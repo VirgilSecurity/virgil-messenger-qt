@@ -20,7 +20,7 @@ Page {
         Avatar {
             Layout.alignment: Qt.AlignHCenter
             diameter: 80
-            nickname: appState.userId
+            nickname: controllers.users.currentUsername
         }
 
         Label {
@@ -28,7 +28,7 @@ Page {
             Layout.bottomMargin: 50
             font.pointSize: UiHelper.fixFontSz(18)
             color: Theme.primaryTextColor
-            text: appState.userId
+            text: controllers.users.currentUsername
         }
 
         FormLabel {
@@ -43,7 +43,7 @@ Page {
 
         FormPrimaryButton {
             text: qsTr("Backup private key")
-            onClicked: appState.requestBackupKey(appState.userId)
+            onClicked: appState.requestBackupKey(controllers.users.currentUsername)
         }
 
         FormPrimaryButton {

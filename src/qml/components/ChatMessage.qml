@@ -27,15 +27,14 @@ Control {
     property bool attachmentTypeIsFile: false
     property bool attachmentTypeIsPicture: false
     property bool attachmentIsLoading: false
+    property bool attachmentIsLoaded: false
     property int attachmentBytesTotal: 0
     property string attachmentDisplaySize: ""
     property string attachmentDisplayText: ""
-    // FIXME(fpohtmeh): uncomment
-//    property string attachmentIconPath: ""
-//    property string attachmentDisplayProgress: ""
-//    property string attachmentImagePath: ""
-    property int attachmentThumbnailWidth: 0
-    property int attachmentThumbnailHeight: 0
+    property string attachmentIconPath: ""
+    property int attachmentPictureThumbnailWidth: 0
+    property int attachmentPictureThumbnailHeight: 0
+    property string attachmentDisplayProgress: ""
     property int attachmentBytesLoaded: 0
     property bool attachmentFileExists: false
 
@@ -110,13 +109,13 @@ Control {
                         }
                         Binding on height {
                             when: d.isPicture
-                            value: image.pictureWidth * attachmentThumbnailHeight / attachmentThumbnailWidth
+                            value: image.pictureWidth * attachmentPictureThumbnailHeight / attachmentPictureThumbnailWidth
                         }
                         autoTransform: true
                         visible: d.isPicture ? true : attachmentFileExists && !progressBar.visible
                         source: chatMessage.attachmentIconPath
 
-                        readonly property double pictureWidth: d.isPicture ? Math.min(3 * attachmentThumbnailWidth, maxWidth - 2 * offset) : 0
+                        readonly property double pictureWidth: d.isPicture ? Math.min(3 * attachmentPictureThumbnailWidth, maxWidth - 2 * offset) : 0
                     }
 
                     Rectangle {
@@ -162,7 +161,7 @@ Control {
 
                     Label {
                         Layout.maximumWidth: column.maxWidth
-                        visible: chatMessage.attachmentStatus == Enums.AttachmentStatus.Loaded
+                        visible: chatMessage.attachmentIsLoaded
                         text: attachmentDisplaySize
                         color: "white"
                         font.pixelSize: UiHelper.fixFontSz(10)
@@ -170,7 +169,7 @@ Control {
 
                     Label {
                         Layout.maximumWidth: column.maxWidth
-                        visible: chatMessage.attachmentStatus == Enums.AttachmentStatus.Loading
+                        visible: chatMessage.attachmentIsLoading
                         text: attachmentDisplayProgress
                         color: "white"
                         font.pixelSize: UiHelper.fixFontSz(10)

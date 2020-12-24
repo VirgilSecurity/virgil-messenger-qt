@@ -12,6 +12,7 @@ ModelListView {
     delegate: contactListComponent
     section.delegate: contactSectionComponent
     section.property: "section"
+    isSearchOpened: true
 
     signal contactSelected(string contactId)
 

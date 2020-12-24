@@ -23,7 +23,7 @@ OperationPage {
         Avatar {
             Layout.alignment: Qt.AlignHCenter
             diameter: 80
-            nickname: appState.userId
+            nickname: controllers.users.currentUsername
         }
 
         Label {
@@ -31,7 +31,7 @@ OperationPage {
             Layout.bottomMargin: 50
             font.pointSize: UiHelper.fixFontSz(18)
             color: Theme.primaryTextColor
-            text: appState.userId
+            text: controllers.users.currentUsername
         }
 
         FormInput {

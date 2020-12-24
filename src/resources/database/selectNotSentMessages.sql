@@ -5,8 +5,10 @@ SELECT
     messages.authorId AS messageAuthorId,
     messages.isOutgoing AS messageIsOutgoing,
     messages.stage AS messageStage,
+    messages.contentType as messageContentType,
     messages.body AS messageBody,
     messages.ciphertext AS messageCiphertext,
+    chats.type AS messageChatType,
     attachments.id AS attachmentId,
     attachments.type AS attachmentType,
     attachments.fingerprint AS attachmentFingerprint,
@@ -17,8 +19,7 @@ SELECT
     attachments.encryptedSize AS attachmentEncryptedSize,
     attachments.extras AS attachmentExtras,
     attachments.uploadStage AS attachmentUploadStage,
-    attachments.downloadStage AS attachmentDownloadStage,
-    chats.type AS chatType
+    attachments.downloadStage AS attachmentDownloadStage
 FROM messages
 INNER JOIN chats ON chats.id = messages.chatId
 LEFT JOIN attachments ON attachments.messageId = messages.id

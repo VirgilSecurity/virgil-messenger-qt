@@ -134,7 +134,7 @@ QVariant Self::data(const QModelIndex &index, int role) const
 {
     const auto row = index.row();
     const auto message = m_messages[row];
-    const auto attachment = message->contentAsAttachment();
+    const auto attachment = message->contentIsAttachment() ? message->contentAsAttachment() : nullptr;
 
     switch (role) {
     case IdRole:
@@ -191,6 +191,17 @@ QVariant Self::data(const QModelIndex &index, int role) const
         return isUploading || isDownloading;
     }
 
+    case AttachmentIsLoadedRole: {
+        if (!attachment) {
+            return false;
+        }
+
+        const bool isUploaded = message->isOutgoing() && (attachment->uploadStage() == MessageContentUploadStage::Uploaded);
+        const bool isDownloaded = attachment->downloadStage() == MessageContentDownloadStage::Decrypted;
+
+        return isUploaded || isDownloaded;
+    }
+
     case AttachmentIconPathRole: {
         if (std::holds_alternative<MessageContentFile>(message->content())) {
             return QLatin1String("../resources/icons/File Selected Big.png");
@@ -219,6 +230,13 @@ QVariant Self::data(const QModelIndex &index, int role) const
     case AttachmentDisplaySizeRole: {
         if (attachment) {
             return (attachment->size() > 0) ? Utils::formattedSize(attachment->size()) : QLatin1String("...");
+        }
+        return QString();
+    }
+
+    case AttachmentDisplayProgressRole: {
+        if (attachment) {
+            return Utils::formattedDataSizeProgress(attachment->processedSize(), attachment->encryptedSize());
         }
         return QString();
     }
@@ -276,6 +294,7 @@ QHash<int, QByteArray> Self::roleNames() const
         { AttachmentTypeIsFileRole, "attachmentTypeIsFile" },
         { AttachmentTypeIsPictureRole, "attachmentTypeIsPicture" },
         { AttachmentIsLoadingRole, "attachmentIsLoading" },
+        { AttachmentIsLoadedRole, "attachmentIsLoaded" },
         { AttachmentIconPathRole, "attachmentIconPath" },
         { AttachmentPictureThumbnailSizeRole, "attachmentPictureThumbnailSize" },
         { AttachmentDisplaySizeRole, "attachmentDisplaySize" },

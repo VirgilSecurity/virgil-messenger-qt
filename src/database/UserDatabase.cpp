@@ -156,7 +156,9 @@ void Self::onWriteMessage(const MessageHandler &message, qsizetype unreadCount)
     ScopedConnection connection(*this);
     ScopedTransaction transaction(*this);
     messagesTable()->addMessage(message);
-    attachmentsTable()->addAttachment(message);
+    if (message->contentIsAttachment()) {
+        attachmentsTable()->addAttachment(message);
+    }
     chatsTable()->updateLastMessage(message, unreadCount);
 }
 
@@ -169,7 +171,9 @@ void Self::onWriteChatAndLastMessage(const ChatHandler &chat)
     // Create message & attachment
     const auto message = chat->lastMessage();
     messagesTable()->addMessage(message);
-    attachmentsTable()->addAttachment(message);
+    if (message->contentIsAttachment()) {
+        attachmentsTable()->addAttachment(message);
+    }
     // Update last message
     chatsTable()->updateLastMessage(message, chat->unreadMessageCount());
 }

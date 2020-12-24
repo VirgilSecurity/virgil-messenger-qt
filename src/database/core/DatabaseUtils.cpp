@@ -195,7 +195,7 @@ MessageContent Self::readMessageContentEncrypted(const QSqlQuery &query) {
 
 MessageContent Self::readMessageContent(const QSqlQuery &query) {
 
-    const auto contentType = query.value("contentType").toString();
+    const auto contentType = query.value("messageContentType").toString();
     if (contentType.isEmpty()) {
         return {};
     }
@@ -231,7 +231,7 @@ ModifiableMessageHandler Self::readMessage(const QSqlQuery &query, const QString
     }
 
     const auto messageChatId = query.value("messageChatId").toString();
-    const auto messageChatType = query.value("chatType").toString();
+    const auto messageChatType = query.value("messageChatType").toString();
     const auto messageCreatedAt = query.value("messageCreatedAt").toULongLong();
     const auto messageAuthorId = query.value("messageAuthorId").toString();
     const auto messageIsOutgoing = query.value("messageIsOutgoing").toBool();

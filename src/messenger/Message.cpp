@@ -126,7 +126,7 @@ const MessageContentAttachment* Self::contentAsAttachment() const {
     if (auto file = std::get_if<MessageContentFile>(&m_content)) {
         return file;
     }
-    else if (auto picture = std::get_if<MessageContentFile>(&m_content)) {
+    else if (auto picture = std::get_if<MessageContentPicture>(&m_content)) {
         return picture;
     }
     else {
@@ -139,7 +139,7 @@ MessageContentAttachment* Self::contentAsAttachment() {
     if (auto file = std::get_if<MessageContentFile>(&m_content)) {
         return file;
     }
-    else if (auto picture = std::get_if<MessageContentFile>(&m_content)) {
+    else if (auto picture = std::get_if<MessageContentPicture>(&m_content)) {
         return picture;
     }
     else {

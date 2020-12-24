@@ -107,6 +107,7 @@ private:
         AttachmentTypeIsFileRole,
         AttachmentTypeIsPictureRole,
         AttachmentIsLoadingRole,
+        AttachmentIsLoadedRole,
         AttachmentIconPathRole,
         AttachmentPictureThumbnailSizeRole,
         AttachmentDisplaySizeRole,

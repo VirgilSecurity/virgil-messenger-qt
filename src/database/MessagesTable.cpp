@@ -109,6 +109,7 @@ void MessagesTable::onAddMessage(const MessageHandler &message)
         { ":authorId", QString(message->senderId()) },
         { ":isOutgoing", message->isOutgoing() },
         { ":stage", messageStage },
+        { ":contentType", MessageContentTypeToString(message->content()) }
     };
 
     if (auto text = std::get_if<MessageContentText>(&message->content())) {

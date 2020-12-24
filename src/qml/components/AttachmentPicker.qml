@@ -5,8 +5,8 @@ import "../base"
 Loader {
     id: loader
 
-    signal open(var attachmentType)
-    signal picked(var fileUrls, var attachmentType)
+    signal open(int attachmentType)
+    signal picked(var fileUrls, int attachmentType)
 
     Component {
         id: iosPicker

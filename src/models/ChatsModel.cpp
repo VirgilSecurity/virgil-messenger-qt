@@ -107,7 +107,7 @@ void Self::updateLastMessage(const MessageHandler &message, qsizetype unreadMess
     if (!chat->lastMessage() || chat->lastMessage()->id() != message->id()) {
         qCDebug(lcModel) << "Last message was set to" << message->id();
     }
-    chat->lastMessage() = message;
+    chat->setLastMessage(message);
     QVector<int> roles{ LastMessageBodyRole, LastEventTimeRole };
     if (unreadMessageCount != chat->unreadMessageCount()) {
         chat->setUnreadMessageCount(unreadMessageCount);
@@ -149,7 +149,7 @@ QVariant Self::data(const QModelIndex &index, int role) const
         return QString(chat->id());
 
     case ContactIdRole:
-        return QString(chat->title()); // TODO: maybe we need change the role
+        return chat->title(); // TODO: maybe we need change the role
 
     case LastEventTimeRole:
         return (chat->lastMessage() ? qMax(chat->lastMessage()->createdAt(), chat->createdAt()) : chat->createdAt()).toString("hh:mm");
