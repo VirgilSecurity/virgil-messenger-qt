@@ -44,9 +44,9 @@ CreateAttachmentThumbnailOperation::CreateAttachmentThumbnailOperation(MessageOp
 {
     setName(QLatin1String("CreateAttachmentThumbnail"));
     connect(this, &CreateThumbnailOperation::thumbnailReady, [parent](const QString& destPath) {
-        MessaggePictureThumbnailPathUpdate update;
+        MessagePictureThumbnailPathUpdate update;
         update.messageId = parent->message()->id();
-        update.attachmentId = std::get_if<MessageContentAttachment>(&parent->message()->content())->id();
+        update.attachmentId = parent->message()->contentAsAttachment()->id();
         update.thumbnailPath = destPath;
         parent->messageUpdate(update);
     });

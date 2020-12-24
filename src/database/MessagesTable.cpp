@@ -119,7 +119,7 @@ void MessagesTable::onAddMessage(const MessageHandler &message)
         values.push_back({ ":ciphertext", encrypted->ciphertext() });
         values.push_back({ ":body", QVariant() });
 
-    } else if (auto attachment = std::get_if<MessageContentAttachment>(&message->content())) {
+    } else if (auto attachment = message->contentAsAttachment()) {
         Q_UNUSED(attachment)
         values.push_back({ ":ciphertext", QVariant() });
         values.push_back({ ":body", QVariant() });

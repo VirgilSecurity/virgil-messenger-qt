@@ -43,39 +43,41 @@ using namespace vm;
 using Self = MessageContentJsonUtils;
 
 
-QJsonObject Self::to(const MessageContent& messageContent, const bool writeLocalPaths) {
+QJsonObject Self::to(const MessageContent& messageContent) {
     QJsonObject mainObject;
-    mainObject.insert(QLatin1String("type"), MessageContentTypeToString(messageContent));
+
     if (auto text = std::get_if<MessageContentText>(&messageContent)) {
         mainObject.insert(QLatin1String("text"), text->text());
     }
     else if (auto encrypted = std::get_if<MessageContentEncrypted>(&messageContent)) {
         mainObject.insert(QLatin1String("ciphertext"), QString(encrypted->ciphertext().toBase64()));
     }
-    else if (auto attachment = std::get_if<MessageContentAttachment>(&messageContent)) {
+    else if (auto file = std::get_if<MessageContentFile>(&messageContent)) {
         QJsonObject attachmentObject;
-        writeAttachment(*attachment, attachmentObject);
-        QJsonObject extrasObject;
-        if (auto picture = std::get_if<MessageContentPicture>(&messageContent)) {
-            writeExtras(*picture, writeLocalPaths, extrasObject);
-        }
-        attachmentObject.insert(QLatin1String("extras"), extrasObject);
-        mainObject.insert(QLatin1String("attachment"), attachmentObject);
+        writeAttachment(*file, attachmentObject);
+        mainObject.insert(QLatin1String("file"), attachmentObject);
+    }
+    else if (auto picture = std::get_if<MessageContentPicture>(&messageContent)) {
+        QJsonObject attachmentObject;
+        writeAttachment(*picture, attachmentObject);
+        writeExtras(*picture, false, attachmentObject);
+        mainObject.insert(QLatin1String("picture"), attachmentObject);
     }
     else {
         throw std::logic_error("Invalid messageContent");
     }
+
     return mainObject;
 }
 
 
-QString Self::toString(const MessageContent& messageContent, const bool writeLocalPaths) {
-    return toBytes(messageContent, writeLocalPaths);
+QString Self::toString(const MessageContent& messageContent) {
+    return Self::toBytes(messageContent);
 }
 
 
-QByteArray Self::toBytes(const MessageContent& messageContent, const bool writeLocalPaths) {
-    return toBytes(to(messageContent, writeLocalPaths));
+QByteArray Self::toBytes(const MessageContent& messageContent) {
+    return Self::toBytes(Self::to(messageContent));
 }
 
 
@@ -84,48 +86,79 @@ QByteArray MessageContentJsonUtils::toBytes(const QJsonObject& jsonObject) {
 }
 
 
-MessageContent Self::from(const QJsonObject& messageJsonObject, QString& errorString) {
-    const auto type = MessageContentTypeFrom(messageJsonObject[QLatin1String("type")].toString());
-    switch (type) {
-        case MessageContentType::Text:
-            return MessageContentText(messageJsonObject[QLatin1String("text")].toString());
-        case MessageContentType::Encrypted: {
-            const QByteArray cipherText = messageJsonObject[QLatin1String("ciphertext")].toString().toUtf8();
-            return MessageContentEncrypted(QByteArray::fromBase64(cipherText));
-        }
-        case MessageContentType::File: {
-            MessageContentFile file;
-            const auto attachmentObject = messageJsonObject[QLatin1String("attachment")].toObject();
-            readAttachment(attachmentObject, file);
-            return file;
-        }
-        case MessageContentType::Picture: {
-            MessageContentPicture picture;
-            const auto attachmentObject = messageJsonObject[QLatin1String("attachment")].toObject();
-            readAttachment(attachmentObject, picture);
-            const auto extrasObject = attachmentObject[QLatin1String("extras")].toObject();
-            readExtras(extrasObject, picture);
-            return picture;
-        }
-        default:
-            errorString = QObject::tr("Invalid messageContent json");
-            return {};
+MessageContent Self::from(const QJsonObject& json, QString& errorString) {
+
+    if (auto value = json[QLatin1String("text")]; !value.isUndefined()) {
+        return MessageContentText(value.toString());
+    }
+    else if (auto value = json[QLatin1String("ciphertext")]; !value.isUndefined()) {
+        const auto ciphertext = value.toString().toUtf8();
+        return MessageContentEncrypted(QByteArray::fromBase64(ciphertext));
+    }
+    else if (auto value = json[QLatin1String("file")]; !value.isUndefined()) {
+        MessageContentFile file;
+        readAttachment(value.toObject(), file);
+        return file;
+    }
+    else if (auto value = json[QLatin1String("picture")]; !value.isUndefined()) {
+        MessageContentPicture picture;
+        readAttachment(value.toObject(), picture);
+        readExtras(value.toObject(), picture);
+        return picture;
+    }
+    else {
+        errorString = QObject::tr("Invalid messageContent json");
+        return {};
     }
 }
 
 
 MessageContent Self::fromString(const QString& messageJsonString, QString& errorString) {
-    return fromBytes(messageJsonString.toUtf8(), errorString);
+    return Self::fromBytes(messageJsonString.toUtf8(), errorString);
 }
 
 
 MessageContent Self::fromBytes(const QByteArray& messageJsonBytes, QString &errorString) {
     const auto json = QJsonDocument::fromJson(messageJsonBytes).object();
-    return from(json, errorString);
+    return Self::from(json, errorString);
+}
+
+
+void Self::writeAttachment(const MessageContentAttachment& attachment, QJsonObject& json) {
+    // FIXME(fpohtmeh): write/read id?
+    json.insert(QLatin1String("fileName"), attachment.fileName());
+    json.insert(QLatin1String("size"), attachment.size());
+    json.insert(QLatin1String("remoteUrl"), attachment.remoteUrl().toString());
+    json.insert(QLatin1String("encryptedSize"), attachment.encryptedSize());
+    json.insert(QLatin1String("fingerprint"), attachment.fingerprint());
+}
+
+
+void Self::writeExtras(const MessageContentPicture& picture, const bool writeLocalPaths, QJsonObject& json) {
+    const auto thumbnail = picture.thumbnail();
+    json["thumbnailUrl"] = thumbnail.remoteUrl().toString();
+    json["thumbnailEncryptedSize"] = thumbnail.encryptedSize();
+
+    const auto thumbnailSize = picture.thumbnailSize();
+    json["thumbnailWidth"] = thumbnailSize.width();
+    json["thumbnailHeight"] = thumbnailSize.height();
+
+    if (writeLocalPaths) {
+        json["thumbnailPath"] = thumbnail.localPath();
+        json["previewPath"] = picture.previewPath();
+    }
+}
+
+
+bool Self::readExtras(const QString& str, MessageContentPicture &picture) {
+    const auto json = QJsonDocument::fromJson(str.toUtf8()).object();
+    return Self::readExtras(json, picture);
 }
 
 
 bool Self::readExtras(const QJsonObject& json, MessageContentPicture &picture) {
+    // TODO: Check mandatory fields and return false if absent.
+
     MessageContentFile thumbnail;
     thumbnail.setLocalPath(json["thumbnailPath"].toString());
     thumbnail.setRemoteUrl(json["thumbnailUrl"].toString());
@@ -133,45 +166,19 @@ bool Self::readExtras(const QJsonObject& json, MessageContentPicture &picture) {
     picture.setThumbnail(thumbnail);
     picture.setThumbnailSize(QSize(json["thumbnailWidth"].toInt(), json["thumbnailHeight"].toInt()));
     picture.setPreviewPath(json["previewPath"].toString());
-	return true;
+
+    return true;
 }
 
 
-bool Self::readExtras(const QString& jsonString, MessageContentPicture& picture) {
-    const auto json = QJsonDocument::fromJson(jsonString.toUtf8()).object();
-    return readExtras(json, picture);
-}
+bool Self::readAttachment(const QJsonObject& jsonObject, MessageContentAttachment& attachment) {
+    // TODO: Check mandatory fields and return false if absent.
 
-
-bool Self::writeExtras(const MessageContentPicture& picture, const bool writeLocalPaths, QJsonObject& json) {
-    const auto thumbnail = picture.thumbnail();
-    if (writeLocalPaths) {
-        json["thumbnailPath"] = thumbnail.localPath();
-    }
-    json["thumbnailUrl"] = thumbnail.remoteUrl().toString();
-    json["thumbnailEncryptedSize"] = thumbnail.encryptedSize();
-    const auto thumbnailSize = picture.thumbnailSize();
-    json["thumbnailWidth"] = thumbnailSize.width();
-    json["thumbnailHeight"] = thumbnailSize.height();
-    if (writeLocalPaths) {
-        json["previewPath"] = picture.previewPath();
-    }
-	return true;
-}
-
-void Self::writeAttachment(const MessageContentAttachment& attachment, QJsonObject& jsonObject) {
-    // FIXME(fpohtmeh): write/read id?
-    jsonObject.insert(QLatin1String("fileName"), attachment.fileName());
-    jsonObject.insert(QLatin1String("size"), attachment.size());
-    jsonObject.insert(QLatin1String("remoteUrl"), attachment.remoteUrl().toString());
-    jsonObject.insert(QLatin1String("encryptedSize"), attachment.encryptedSize());
-    jsonObject.insert(QLatin1String("fingerprint"), attachment.fingerprint());
-}
-
-void Self::readAttachment(const QJsonObject& jsonObject, MessageContentAttachment& attachment) {
     attachment.setFileName(jsonObject[QLatin1String("fileName")].toString());
     attachment.setSize(jsonObject[QLatin1String("size")].toInt());
     attachment.setRemoteUrl(jsonObject[QLatin1String("remoteUrl")].toString());
     attachment.setEncryptedSize(jsonObject[QLatin1String("encryptedSize")].toInt());
     attachment.setFingerprint(jsonObject[QLatin1String("fingerprint")].toString());
+
+    return true;
 }

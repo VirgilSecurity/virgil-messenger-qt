@@ -823,7 +823,7 @@ Self::sendMessage(MessageHandler message) {
         //
         //  Encrypt message content.
         //
-        auto contentJson = MessageContentJsonUtils::toBytes(message->content(), false);
+        auto contentJson = MessageContentJsonUtils::toBytes(message->content());
         auto ciphertextDataMinLen = vssq_messenger_encrypted_message_len(m_impl->messenger.get(), contentJson.size(), recipient->impl()->user.get());
 
         qCDebug(lcCommKitMessenger) << "Message Len   : " << contentJson.size();

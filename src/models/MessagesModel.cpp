@@ -91,7 +91,7 @@ void Self::clearChat() {
 
 
 bool Self::updateMessage(const MessageUpdate &messageUpdate) {
-    auto messageId = std::get_if<MessageUpdateBase>(&messageUpdate)->messageId;
+    auto messageId = MessageUpdateGetMessageId(messageUpdate);
 
     const auto messageRow = findRowById(messageId);
     if (!messageRow) {
@@ -134,7 +134,7 @@ QVariant Self::data(const QModelIndex &index, int role) const
 {
     const auto row = index.row();
     const auto message = m_messages[row];
-    const auto attachment = std::get_if<MessageContentAttachment>(&message->content());
+    const auto attachment = message->contentAsAttachment();
 
     switch (role) {
     case IdRole:

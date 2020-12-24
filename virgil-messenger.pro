@@ -287,6 +287,7 @@ SOURCES += \
         src/messenger/MessageGroupChatInfo.cpp \
         src/messenger/MessageId.cpp \
         src/messenger/MessageStatus.cpp \
+        src/messenger/MessageUpdate.cpp \
         src/messenger/OutgoingMessage.cpp \
         src/messenger/OutgoingMessageStage.cpp \
         src/messenger/User.cpp \

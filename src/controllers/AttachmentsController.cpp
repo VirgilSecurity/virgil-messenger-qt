@@ -60,7 +60,7 @@ void Self::saveAs(const MessageId &messageId, const QVariant &fileUrl)
         return;
     }
 
-    const auto attachment = std::get_if<MessageContentAttachment>(&message->content());
+    const auto attachment = message->contentAsAttachment();
 
     switch (attachment->downloadStage()) {
         case MessageContentDownloadStage::Initial:
@@ -95,7 +95,7 @@ void Self::open(const MessageId &messageId)
         return;
     }
 
-    const auto attachment = std::get_if<MessageContentAttachment>(&message->content());
+    const auto attachment = message->contentAsAttachment();
 
     switch (attachment->downloadStage()) {
         case MessageContentDownloadStage::Initial:
@@ -135,7 +135,7 @@ void Self::downloadDisplayImage(const MessageId &messageId)
 void Self::downloadAttachment(const MessageHandler &message)
 {
     qCDebug(lcController) << "Downloading attachment of message: " << message->id();
-    const auto attachment = std::get_if<MessageContentAttachment>(&message->content());
+    const auto attachment = message->contentAsAttachment();
     const auto fileName = attachment->fileName();
     const auto filePath = FileUtils::findUniqueFileName(m_settings->downloadsDir().filePath(fileName));
     m_models->messagesQueue()->pushMessageDownload(message, filePath);
@@ -144,7 +144,7 @@ void Self::downloadAttachment(const MessageHandler &message)
 void Self::decryptAttachment(const MessageHandler &message)
 {
     qCDebug(lcController) << "Decrypting attachment of message: " << message->id();
-    const auto attachment = std::get_if<MessageContentAttachment>(&message->content());
+    const auto attachment = message->contentAsAttachment();
     const auto fileName = attachment->fileName();
     const auto filePath = FileUtils::findUniqueFileName(m_settings->downloadsDir().filePath(fileName));
     m_models->messagesQueue()->pushMessageDownload(message, filePath); // FIXME: change to the separate "decrypt" only operation.
@@ -154,7 +154,7 @@ void Self::saveAttachment(const MessageHandler &message, const QUrl &fileUrl)
 {
     qCDebug(lcController) << "Checking file consistency: " << message->id();
 
-    const auto attachment = std::get_if<MessageContentAttachment>(&message->content());
+    const auto attachment = message->contentAsAttachment();
     if (!FileUtils::fileExists(attachment->localPath()) || attachment->fingerprint().isEmpty()) {
         downloadAttachment(message);
         return;
@@ -189,7 +189,7 @@ MessageHandler Self::findMessageWithAttachment(const MessageId &messageId) const
         return nullptr;
     }
 
-    if (!std::holds_alternative<MessageContentAttachment>(message->content())) {
+    if (!message->contentIsAttachment()) {
         qCWarning(lcController) << "Message has no attachment: " << messageId;
         return nullptr;
     }

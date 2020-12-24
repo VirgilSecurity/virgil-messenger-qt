@@ -53,17 +53,17 @@ public:
     //
     //  Convert message content to the JSON object.
     //
-    static QJsonObject to(const MessageContent& messageContent, const bool writeLocalPaths);
+    static QJsonObject to(const MessageContent& messageContent);
 
     //
     //  Convert message content to the JSON string.
     //
-    static QString toString(const MessageContent& messageContent, const bool writeLocalPaths);
+    static QString toString(const MessageContent& messageContent);
 
     //
     //  Convert message content to the JSON byte array.
     //
-    static QByteArray toBytes(const MessageContent& messageContent, const bool writeLocalPaths);
+    static QByteArray toBytes(const MessageContent& messageContent);
 
     //
     //  Convert any JSON object to JSON byte array.
@@ -73,17 +73,22 @@ public:
     //
     //  Get message content from the JSON object.
     //
-    static MessageContent from(const QJsonObject& messageJsonObject, QString& errorString);
+    static MessageContent from(const QJsonObject& json, QString& errorString);
 
     //
     //  Get message content from the JSON string.
     //
-    static MessageContent fromString(const QString& messageJsonString, QString& errorString);
+    static MessageContent fromString(const QString& str, QString& errorString);
 
     //
     //  Get message content from the JSON byte array.
     //
-    static MessageContent fromBytes(const QByteArray& messageJsonBytes, QString& errorString);
+    static MessageContent fromBytes(const QByteArray& data, QString& errorString);
+
+    //
+    //  Write picture extra fields.
+    //
+    static void writeExtras(const MessageContentPicture& picture, bool writeLocalPaths, QJsonObject& json);
 
     //
     //  Parse extra JSON fields related to a picture content.
@@ -93,12 +98,7 @@ public:
     //
     //  Parse extra JSON fields related to a picture content.
     //
-    static bool readExtras(const QString& jsonString, MessageContentPicture& picture);
-
-    //
-    //  Parse write JSON fields related to a picture content.
-    //
-    static bool writeExtras(const MessageContentPicture& picture, const bool writeLocalPaths, QJsonObject& json);
+    static bool readExtras(const QString& str, MessageContentPicture& picture);
 
 private:
     MessageContentJsonUtils() {};
@@ -106,12 +106,13 @@ private:
     //
     //  Write attachment fields except extras.
     //
-    static void writeAttachment(const MessageContentAttachment& attachment, QJsonObject& jsonObject);
+    static void writeAttachment(const MessageContentAttachment& attachment, QJsonObject& json);
 
     //
     //  Parse attachment fields except extras.
     //
-    static void readAttachment(const QJsonObject& jsonObject, MessageContentAttachment& attachment);
+    static bool readAttachment(const QJsonObject& json, MessageContentAttachment& attachment);
+
 };
 } // namespace vm
 

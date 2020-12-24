@@ -104,18 +104,16 @@ struct MessageAttachmentProcessedSizeUpdate : public MessageAttachmentUpdateBase
     quint64 processedSize;
 };
 
-struct MessaggePictureThumbnailPathUpdate : public MessageAttachmentUpdateBase {
+struct MessagePictureThumbnailPathUpdate : public MessageAttachmentUpdateBase {
     QString thumbnailPath;
 };
 
-struct MessaggePicturePreviewPathUpdate : public MessageAttachmentUpdateBase {
+struct MessagePicturePreviewPathUpdate : public MessageAttachmentUpdateBase {
     QString previewPath;
 };
 
 
 using MessageUpdate = std::variant<
-    MessageUpdateBase,
-    MessageAttachmentUpdateBase,
     MessageStatusUpdate,
     IncomingMessageStageUpdate,
     OutgoingMessageStageUpdate,
@@ -126,9 +124,16 @@ using MessageUpdate = std::variant<
     MessageAttachmentRemoteUrlUpdate,
     MessageAttachmentEncryptedSizeUpdate,
     MessageAttachmentLocalPathUpdate,
-    MessageAttachmentProcessedSizeUpdate
+    MessageAttachmentProcessedSizeUpdate,
+    MessagePictureThumbnailPathUpdate,
+    MessagePicturePreviewPathUpdate
     >;
+//
+//  Return message unique identifier the update relates to.
+//
+MessageId MessageUpdateGetMessageId(const MessageUpdate& update);
 
 } // namespace vm
+
 
 #endif // VM_MESSAGE_UPDATE_H

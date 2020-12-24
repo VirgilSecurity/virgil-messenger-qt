@@ -63,7 +63,7 @@ bool Self::create()
 
 void Self::onAddAttachment(MessageHandler message)
 {
-    auto attachment = std::get_if<MessageContentAttachment>(&message->content());
+    auto attachment = message->contentAsAttachment();
     if (!attachment) {
         return;
     }

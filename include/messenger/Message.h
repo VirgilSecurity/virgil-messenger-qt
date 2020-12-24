@@ -125,12 +125,12 @@ public:
     //
     //  Return message content.
     //
-    const MessageContent& content() const;
+    const MessageContent& content() const noexcept;
 
     //
     //  Return message content.
     //
-    MessageContent& content();
+    MessageContent& content() noexcept;
 
     //
     //  Return message content type.
@@ -141,6 +141,23 @@ public:
     //  Set message content.
     //
     void setContent(MessageContent content);
+
+    //
+    //  Return true if message content is an attachment: i.e. file, picture, etc.
+    //
+    bool contentIsAttachment() const noexcept;
+
+    //
+    //  Return message content as attachment.
+    //  Throws if isContentAttachment() returns false.
+    //
+    const MessageContentAttachment* contentAsAttachment() const;
+
+    //
+    //  Return message content as attachment.
+    //  Throws if isContentAttachment() returns false.
+    //
+    MessageContentAttachment* contentAsAttachment();
 
     //
     //  Return info related to a group chat message.

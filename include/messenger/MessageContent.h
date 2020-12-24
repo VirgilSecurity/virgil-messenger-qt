@@ -50,7 +50,6 @@ using MessageContent = std::variant<
     std::monostate,
     MessageContentText,
     MessageContentEncrypted,
-    MessageContentAttachment,
     MessageContentFile,
     MessageContentPicture
     >;

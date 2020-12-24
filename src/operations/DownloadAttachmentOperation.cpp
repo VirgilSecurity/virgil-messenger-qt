@@ -74,9 +74,9 @@ bool Self::populateChildren()
                 connect(op, &Operation::started, this, std::bind(&LoadAttachmentOperation::startLoadOperation, this, picture->thumbnail().encryptedSize()));
                 connect(op, &DownloadDecryptFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
                 connect(op, &DownloadDecryptFileOperation::decrypted, [parent = m_parent, message](const QString &filePath) {
-                    MessaggePictureThumbnailPathUpdate update;
+                    MessagePictureThumbnailPathUpdate update;
                     update.messageId = message->id();
-                    update.attachmentId = std::get_if<MessageContentAttachment>(&message->content())->id();
+                    update.attachmentId = message->contentAsAttachment()->id();
                     update.thumbnailPath = filePath;
                     parent->messageUpdate(update);
                 });
@@ -94,7 +94,7 @@ bool Self::populateChildren()
             connect(op, &DownloadDecryptFileOperation::decrypted, [parent = m_parent, message](const QString &filePath) {
                 MessageAttachmentLocalPathUpdate update;
                 update.messageId = message->id();
-                update.attachmentId = std::get_if<MessageContentAttachment>(&message->content())->id();
+                update.attachmentId = message->contentAsAttachment()->id();
                 update.localPath = filePath;
                 parent->messageUpdate(update);
             });

@@ -128,14 +128,12 @@ CalculateAttachmentFingerprintOperation *MessageOperationFactory::populateCalcul
 void MessageOperationFactory::populateAttachmentOperation(MessageOperation *messageOp)
 {
     const auto message = messageOp->message();
-    if (!std::holds_alternative<MessageContentAttachment>(message->content())) {
+    if (!message->contentIsAttachment()) {
         return;
     }
 
     if (message->isOutgoing()) {
-        if (std::holds_alternative<MessageContentAttachment>(message->content())) {
-            populateUpload(messageOp);
-        }
+        populateUpload(messageOp);
     } else {
         if (std::holds_alternative<MessageContentPicture>(message->content())) {
             populatePreload(messageOp);

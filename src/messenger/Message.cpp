@@ -95,12 +95,12 @@ void Self::setCreatedAt(QDateTime createdAt) {
 }
 
 
-const MessageContent& Self::content() const {
+const MessageContent& Self::content() const noexcept {
     return m_content;
 }
 
 
-MessageContent& Self::content() {
+MessageContent& Self::content() noexcept {
     return m_content;
 }
 
@@ -113,6 +113,40 @@ MessageContentType Self::contentType() const noexcept {
 void Self::setContent(MessageContent content) {
     m_content = std::move(content);
 }
+
+
+bool Self::contentIsAttachment() const noexcept {
+    const bool isFile = std::holds_alternative<MessageContentFile>(m_content);
+    const bool isPicture = std::holds_alternative<MessageContentPicture>(m_content);
+    return isFile || isPicture;
+}
+
+
+const MessageContentAttachment* Self::contentAsAttachment() const {
+    if (auto file = std::get_if<MessageContentFile>(&m_content)) {
+        return file;
+    }
+    else if (auto picture = std::get_if<MessageContentFile>(&m_content)) {
+        return picture;
+    }
+    else {
+        throw std::logic_error("Message content is not an attachment.");
+    }
+}
+
+
+MessageContentAttachment* Self::contentAsAttachment() {
+    if (auto file = std::get_if<MessageContentFile>(&m_content)) {
+        return file;
+    }
+    else if (auto picture = std::get_if<MessageContentFile>(&m_content)) {
+        return picture;
+    }
+    else {
+        throw std::logic_error("Message content is not an attachment.");
+    }
+}
+
 
 
 std::shared_ptr<MessageGroupChatInfo> Self::groupChatInfo() const {

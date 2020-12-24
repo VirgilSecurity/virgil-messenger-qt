@@ -45,9 +45,9 @@ CreateAttachmentPreviewOperation::CreateAttachmentPreviewOperation(MessageOperat
 {
     setName(QLatin1String("CreateAttachmentPreview"));
     connect(this, &CreateThumbnailOperation::thumbnailReady, [parent](const QString& destPath) {
-        MessaggePicturePreviewPathUpdate update;
+        MessagePicturePreviewPathUpdate update;
         update.messageId = parent->message()->id();
-        update.attachmentId = std::get_if<MessageContentAttachment>(&parent->message()->content())->id();
+        update.attachmentId = parent->message()->contentAsAttachment()->id();
         update.previewPath = destPath;
         parent->messageUpdate(update);
     });

@@ -46,7 +46,7 @@ CalculateAttachmentFingerprintOperation::CalculateAttachmentFingerprintOperation
     connect(this, &CalculateAttachmentFingerprintOperation::fingerprintCalculated, [parent](const QString& fingerprint) {
         MessageAttachmentFingerprintUpdate update;
         update.messageId = parent->message()->id();
-        update.attachmentId = std::get_if<MessageContentAttachment>(&parent->message()->content())->id();
+        update.attachmentId = parent->message()->contentAsAttachment()->id();
         update.fingerprint = fingerprint;
         parent->messageUpdate(update);
     });
