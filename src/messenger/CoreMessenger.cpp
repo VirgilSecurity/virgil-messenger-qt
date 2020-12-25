@@ -1015,6 +1015,8 @@ Self::xmppOnDisconnected() {
     m_impl->lastActivityManager->setEnabled(false);
 
     changeConnectionState(Self::ConnectionState::Disconnected);
+
+    reconnectXmppServerIfNeeded();
 }
 
 
@@ -1030,6 +1032,9 @@ void
 Self::xmppOnError(QXmppClient::Error error) {
     qCWarning(lcCommKitMessenger) << "XMPP error: " << error;
     emit connectionStateChanged(Self::ConnectionState::Error);
+
+    m_impl->xmpp->disconnectFromServer();
+    emit reconnectXmppServerIfNeeded();
 }
 
 
@@ -1048,6 +1053,9 @@ void
 Self::xmppOnSslErrors(const QList<QSslError> &errors) {
     qCWarning(lcCommKitMessenger) << "XMPP SSL errors: " << errors;
     emit connectionStateChanged(Self::ConnectionState::Error);
+
+    m_impl->xmpp->disconnectFromServer();
+    emit reconnectXmppServerIfNeeded();
 }
 
 
