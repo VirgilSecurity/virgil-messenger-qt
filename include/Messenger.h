@@ -102,7 +102,7 @@ public:
     QPointer<FileLoader> fileLoader() noexcept;
 
 public slots:
-    void setCurrentRecipient(const QString &recipient);
+    void setCurrentRecipient(const UserId &recipientId);
 
     bool subscribeToUser(const UserId &contactId);
 
@@ -160,7 +160,6 @@ private:
     QPointer<CoreMessenger> m_coreMessenger;
     QPointer<CrashReporter> m_crashReporter;
     QPointer<FileLoader> m_fileLoader;
-    bool m_isOnline = false;
 };
 } // namespace vm
 

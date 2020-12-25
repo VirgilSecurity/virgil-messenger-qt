@@ -247,6 +247,7 @@ Self::resetXmppConfiguration() {
 
     connect(m_impl->xmpp.get(), &QXmppClient::connected, this, &Self::xmppOnConnected);
     connect(m_impl->xmpp.get(), &QXmppClient::disconnected, this, &Self::xmppOnDisconnected);
+    connect(m_impl->xmpp.get(), &QXmppClient::stateChanged, this, &Self::xmppOnStateChanged);
     connect(m_impl->xmpp.get(), &QXmppClient::error, this, &Self::xmppOnError);
     connect(m_impl->xmpp.get(), &QXmppClient::presenceReceived, this, &Self::xmppOnPresenceReceived);
     connect(m_impl->xmpp.get(), &QXmppClient::iqReceived, this, &Self::xmppOnIqReceived);
@@ -389,7 +390,7 @@ Self::signIn(const QString& username) {
             return Self::Result::Error_Signin;
         }
 
-        // emit reconnectXmppServerIfNeeded();
+        emit reconnectXmppServerIfNeeded();
 
         return Self::Result::Success;
     });
@@ -644,7 +645,7 @@ Self::connectXmppServer() {
     vssq_error_t error;
     vssq_error_reset(&error);
 
-    changeConnectionState(Self::ConnectionState::Connecting);
+    qCDebug(lcCommKitMessenger) << "Obtain XMPP credentials...";
 
     const vssq_messenger_auth_t *auth = vssq_messenger_auth(m_impl->messenger.get());
     const vssq_ejabberd_jwt_t *jwt = vssq_messenger_auth_ejabberd_jwt(auth, &error);
@@ -819,7 +820,7 @@ QFuture<Self::Result>
 Self::sendMessage(MessageHandler message) {
 
     return QtConcurrent::run([this, message = std::move(message)]() -> Result {
-        qCInfo(lcCommKitMessenger) << "Trying to send message";
+        qCInfo(lcCommKitMessenger) << "Trying to send message with id: " << QString(message->id());
 
         if (!isOnline()) {
             qCInfo(lcCommKitMessenger) << "Trying to send message when offline";
@@ -878,6 +879,7 @@ Self::sendMessage(MessageHandler message) {
         auto recipientJid = userIdToJid(UserId(message->chatId()));
 
         QXmppMessage xmppMessage(senderJid, recipientJid, ciphertextJsonStr);
+        xmppMessage.setId(message->id());
         xmppMessage.setStamp(message->createdAt());
         xmppMessage.setType(QXmppMessage::Type::Chat);
 
@@ -901,7 +903,8 @@ QFuture<Self::Result>
 Self::processReceivedXmppMessage(const QXmppMessage& xmppMessage) {
 
     return QtConcurrent::run([this, xmppMessage = xmppMessage]() -> Result {
-        qCInfo(lcCommKitMessenger) << "Trying to sign in user";
+        qCInfo(lcCommKitMessenger) << "Received XMPP message";
+        qCDebug(lcCommKitMessenger) << "Received XMPP message: " << xmppMessage.id() << "from: " << xmppMessage.from();
 
         auto message = std::make_unique<IncomingMessage>();
 
@@ -957,7 +960,7 @@ Self::processReceivedXmppMessage(const QXmppMessage& xmppMessage) {
         //
         //  Decrypt message.
         //
-        auto plaintextDataMinLen = vssq_messenger_decrypted_message_len(m_impl->messenger.get(), ciphertext.size());
+        auto plaintextDataMinLen = 2 * vssq_messenger_decrypted_message_len(m_impl->messenger.get(), ciphertext.size());
         QByteArray plaintextData(plaintextDataMinLen, 0x00);
 
         auto plaintext = vsc_buffer_wrap_ptr(vsc_buffer_new());
@@ -1016,10 +1019,17 @@ Self::xmppOnDisconnected() {
 
 
 void
+Self::xmppOnStateChanged(QXmppClient::State state) {
+    if (QXmppClient::ConnectingState == state) {
+        changeConnectionState(Self::ConnectionState::Connecting);
+    }
+}
+
+
+void
 Self::xmppOnError(QXmppClient::Error error) {
     qCWarning(lcCommKitMessenger) << "XMPP error: " << error;
     emit connectionStateChanged(Self::ConnectionState::Error);
-    emit reconnectXmppServerIfNeeded();
 }
 
 
@@ -1038,7 +1048,6 @@ void
 Self::xmppOnSslErrors(const QList<QSslError> &errors) {
     qCWarning(lcCommKitMessenger) << "XMPP SSL errors: " << errors;
     emit connectionStateChanged(Self::ConnectionState::Error);
-    emit reconnectXmppServerIfNeeded();
 }
 
 
@@ -1078,11 +1087,10 @@ Self::onProcessNetworkState(bool isOnline) {
 //  LastActivityManager: controls and events.
 // --------------------------------------------------------------------------
 void
-Self::setCurrentRecipient(const QString& recipientId) {
+Self::setCurrentRecipient(const UserId& recipientId) {
 
-    //  FIXME: now username is passed, but should be user identity.
-    if (!recipientId.isEmpty()) {
-        auto user = findUserByUsername(recipientId);
+    if (recipientId.isValid()) {
+        auto user = findUserById(recipientId);
         if (user) {
             m_impl->lastActivityManager->setCurrentJid(userIdToJid(user->id()));
             return;

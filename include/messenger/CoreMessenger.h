@@ -166,7 +166,7 @@ public:
     //  Contacts (XMPP).
     //
     bool subscribeToUser(const User &user);
-    void setCurrentRecipient(const QString& recipientId);
+    void setCurrentRecipient(const UserId& recipientId);
 
     //
     //  Internal helpers.
@@ -219,6 +219,7 @@ private slots:
     void onDeactivate();
     void xmppOnConnected();
     void xmppOnDisconnected();
+    void xmppOnStateChanged(QXmppClient::State state);
     void xmppOnError(QXmppClient::Error);
     void xmppOnPresenceReceived(const QXmppPresence &presence);
     void xmppOnIqReceived(const QXmppIq &iq);
@@ -256,6 +257,7 @@ Q_DECLARE_METATYPE(vm::ChatId);
 Q_DECLARE_METATYPE(vm::MessageId);
 Q_DECLARE_METATYPE(vm::AttachmentId);
 
+Q_DECLARE_METATYPE(QXmppClient::State);
 Q_DECLARE_METATYPE(QXmppClient::Error);
 Q_DECLARE_METATYPE(QXmppPresence);
 Q_DECLARE_METATYPE(QXmppIq);
