@@ -250,8 +250,8 @@ Page {
 
             body: model.body
             displayTime: model.displayTime
-            nickname: model.senderId
-            isOwnMessage: model.senderId === controllers.users.currentUsername
+            nickname: model.senderUsername
+            isOwnMessage: model.senderId === controllers.users.currentUserId
             status: isOwnMessage ? model.status : "none"
             messageId: model.id
             inRow: model.inRow

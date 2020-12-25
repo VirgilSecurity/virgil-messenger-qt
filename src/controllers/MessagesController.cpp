@@ -252,17 +252,7 @@ void Self::onMessageReceived(ModifiableMessageHandler message)
             qCDebug(lcController) << "Received carbon message to not current chat";
             chatId = newChatId;
         }
-
-        // Convert incoming message to outgoing
-        auto m = std::make_shared<OutgoingMessage>();
-        m->setId(message->id());
-        m->setSenderId(message->senderId());
-        m->setRecipientId(message->recipientId());
-        m->setChatType(message->chatType());
-        m->setCreatedAt(message->createdAt());
-        m->setContent(message->content());
-        m->setStage(OutgoingMessageStage::Sent);
-        message = m;
+        // TODO(fpohtmeh): set status to Sent
     }
     else {
         const ChatId newChatId(message->senderId());
@@ -277,6 +267,7 @@ void Self::onMessageReceived(ModifiableMessageHandler message)
     }
 
     ChatHandler chat;
+    bool isNewChat = false;
     if (!chatId.isValid()) {
         chat = m_chat;
         chats->updateLastMessage(message, 0);
@@ -289,21 +280,26 @@ void Self::onMessageReceived(ModifiableMessageHandler message)
         else {
             auto newChat = std::make_shared<Chat>();
             newChat->setId(message->chatId());
-            newChat->setTitle(message->chatId());
-            newChat->setCreatedAt(QDateTime::currentDateTime());
+            newChat->setTitle(message->senderUsername());
+            newChat->setCreatedAt(message->createdAt());
             newChat->setLastMessage(message);
-            newChat->setType(message->isGroupChatMessage() ? ChatType::Group : ChatType::Personal);
+            newChat->setType(message->isGroupChatMessage() ? ChatType::Group : ChatType::Personal); // TODO(fpohtmeh): why not use message->chatType?
+            newChat->setUnreadMessageCount(1);
             chats->addChat(newChat);
             chat = newChat;
+            isNewChat = true;
         }
     }
 
     if (chat == m_chat) {
         messages->addMessage(message);
-        m_userDatabase->writeMessage(message);
     }
-    else {
+    if (isNewChat) {
         m_userDatabase->writeChatAndLastMessage(chat);
     }
+    else {
+        m_userDatabase->writeMessage(message);
+    }
+
     emit messageCreated(message);
 }

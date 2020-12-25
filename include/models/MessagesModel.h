@@ -98,6 +98,7 @@ private:
         DayRole,
         DisplayTimeRole,
         SenderIdRole,
+        SenderUsernameRole,
         StatusRole,
         // Text
         BodyRole,

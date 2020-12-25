@@ -320,7 +320,7 @@ Control {
     }
 
     Component.onCompleted: {
-//        console.log("->", messageId, body, displayTime, nickname, status, isBroken)
-//        console.log(attachmentId, attachmentType, attachmentIsLoading, attachmentIconPath, attachmentFileExists)
+//        console.log("->", messageId, body, displayTime, nickname, isOwnMessage, status, isBroken)
+//        console.log(attachmentId, attachmentIsLoading, attachmentIsLoaded, attachmentIconPath, attachmentFileExists)
     }
 }

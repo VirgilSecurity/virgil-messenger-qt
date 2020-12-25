@@ -93,6 +93,12 @@ void Self::downloadKey(const QString &username, const QString &password)
     m_messenger->downloadKey(username, password);
 }
 
+QString UsersController::currentUserId() const
+{
+    const auto currentUser = m_messenger->currentUser();
+    return currentUser ? currentUser->id() : QString();
+}
+
 QString UsersController::currentUsername() const
 {
     const auto currentUser = m_messenger->currentUser();
@@ -121,9 +127,12 @@ void Self::onSignedOut()
 }
 
 void Self::onFinishSignIn() {
+    const auto user = m_messenger->currentUser();
     // TODO: Do we really need to duplicate signals?
-    emit signedIn(m_messenger->currentUser()->username());
-    emit currentUsernameChanged(m_messenger->currentUser()->username());
+    emit signedIn(user->username());
+
+    emit currentUserIdChanged(user->id());
+    emit currentUsernameChanged(user->username());
 }
 
 void Self::onFinishSignOut() {

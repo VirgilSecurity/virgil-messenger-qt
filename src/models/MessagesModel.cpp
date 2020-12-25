@@ -148,6 +148,9 @@ QVariant Self::data(const QModelIndex &index, int role) const
     case SenderIdRole:
         return QString(message->senderId());
 
+    case SenderUsernameRole:
+        return QString(message->senderUsername());
+
     case StatusRole: {
         const auto nextMessage = (row + 1 == rowCount()) ? nullptr : m_messages[row + 1];
         if (nextMessage && nextMessage->senderId() == message->senderId() &&
@@ -287,6 +290,7 @@ QHash<int, QByteArray> Self::roleNames() const
         { DayRole, "day" },
         { DisplayTimeRole, "displayTime" },
         { SenderIdRole, "senderId" },
+        { SenderUsernameRole, "senderUsername" },
         { StatusRole, "status" },
         { BodyRole, "body" },
         { AttachmentIdRole, "attachmentId" },

@@ -53,6 +53,7 @@ class Messenger;
 class UsersController : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QString currentUserId READ currentUserId NOTIFY currentUserIdChanged)
     Q_PROPERTY(QString currentUsername READ currentUsername NOTIFY currentUsernameChanged)
     Q_PROPERTY(QString nextUsername READ nextUsername NOTIFY nextUsernameChanged)
 
@@ -67,6 +68,7 @@ public:
 
     void downloadKey(const QString &username, const QString &password);
 
+    QString currentUserId() const;
     QString currentUsername() const;
     void setNextUsername(const QString &username);
     QString nextUsername() const;
@@ -79,6 +81,8 @@ signals:
     void downloadKeyFailed(const QString &errorText);
 
     void accountSettingsRequested(const QString &username);
+
+    void currentUserIdChanged(const QString &userId);
     void currentUsernameChanged(const QString &username);
     void nextUsernameChanged(const QString &username);
 
