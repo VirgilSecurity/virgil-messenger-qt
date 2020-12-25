@@ -62,6 +62,8 @@ Self::MessagesQueue(const Settings *settings, Messenger *messenger, UserDatabase
 {
     m_threadPool->setMaxThreadCount(5);
 
+    qRegisterMetaType<vm::MessagesQueue::Item>("Item");
+
     connect(m_messenger, &Messenger::signedOut, this, &MessagesQueue::stop);
     connect(m_userDatabase, &UserDatabase::opened, this, &Self::onDatabaseOpened);
     connect(this, &Self::pushMessage, this, &Self::onPushMessage);

@@ -113,4 +113,6 @@ private:
 };
 }
 
+Q_DECLARE_METATYPE(vm::MessagesQueue::Item);
+
 #endif // VS_MESSAGESQUEUE_H
