@@ -108,6 +108,16 @@ public:
     void setSenderId(UserId userId);
 
     //
+    // Return message sender unique identifier.
+    //
+    QString senderUsername() const;
+
+    //
+    // Set message sender unique identifier.
+    //
+    void setSenderUsername(QString username);
+
+    //
     // Return message recipient unique identifier.
     //
     UserId recipientId() const;
@@ -240,11 +250,16 @@ public:
     //
     virtual bool isIncoming() const noexcept;
 
+    //
+    //
+    //
+
 private:
     MessageId m_id;
     ChatId m_chatId;
     ChatType m_chatType;
     UserId m_senderId;
+    QString m_senderUsername;
     QDateTime m_createdAt;
     MessageContent m_content;
     std::shared_ptr<MessageGroupChatInfo> m_groupChatInfo;

@@ -78,6 +78,7 @@ public:
         Error_Attachment,
         Error_InvalidMessageFormat,
         Error_InvalidMessageVersion,
+        Error_InvalidMessageTimestamp,
         Error_InvalidMessageCiphertext,
         Error_SendMessageFailed,
     };

@@ -155,6 +155,7 @@ std::unique_ptr<OutgoingMessage> Self::createOutgoingMessage() {
     message->setStage(OutgoingMessageStage::Created);
     message->setCreatedAt(QDateTime::currentDateTime());
     message->setSenderId(m_messenger->currentUser()->id());
+    message->setSenderUsername(m_messenger->currentUser()->username());
 
     return message;
 }

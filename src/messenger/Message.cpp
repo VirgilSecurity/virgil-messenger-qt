@@ -80,6 +80,16 @@ void Self::setSenderId(UserId userId) {
 }
 
 
+QString Self::senderUsername() const {
+    return m_senderUsername;
+}
+
+
+void Self::setSenderUsername(QString username) {
+    m_senderUsername = std::move(username);
+}
+
+
 UserId Self::recipientId() const {
     return UserId(m_chatId);
 }

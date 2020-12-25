@@ -840,12 +840,21 @@ Self::sendMessage(MessageHandler message) {
         }
 
         //
-        //  Encrypt message content.
+        //  Pack message to JSON.
         //
-        auto contentJson = MessageContentJsonUtils::toBytes(message->content());
-        auto ciphertextDataMinLen = vssq_messenger_encrypted_message_len(m_impl->messenger.get(), contentJson.size(), recipient->impl()->user.get());
+        QJsonObject messageJson;
+        messageJson.insert("version", "v3");
+        messageJson.insert("timestamp", static_cast<qint64>(message->createdAt().toTime_t()));
+        messageJson.insert("from", message->senderUsername());
+        messageJson.insert("content", MessageContentJsonUtils::to(message->content()));
 
-        qCDebug(lcCommKitMessenger) << "Message Len   : " << contentJson.size();
+        //
+        //  Encrypt message.
+        //
+        auto messageData = MessageContentJsonUtils::toBytes(messageJson);
+        auto ciphertextDataMinLen = vssq_messenger_encrypted_message_len(m_impl->messenger.get(), messageData.size(), recipient->impl()->user.get());
+
+        qCDebug(lcCommKitMessenger) << "Message Len   : " << messageData.size();
         qCDebug(lcCommKitMessenger) << "ciphertext Len: " << ciphertextDataMinLen;
 
         QByteArray ciphertextData(ciphertextDataMinLen, 0x00);
@@ -854,7 +863,7 @@ Self::sendMessage(MessageHandler message) {
         vsc_buffer_use(ciphertext.get(),  (byte *)ciphertextData.data(), ciphertextData.size());
 
         const vssq_status_t encryptionStatus = vssq_messenger_encrypt_data(
-                    m_impl->messenger.get(), vsc_data_from(contentJson), recipient->impl()->user.get(), ciphertext.get());
+                    m_impl->messenger.get(), vsc_data_from(messageData), recipient->impl()->user.get(), ciphertext.get());
 
         if (encryptionStatus != vssq_status_SUCCESS) {
             qCWarning(lcCommKitMessenger) << "Can not encrypt ciphertext: " << vsc_str_to_qstring(vssq_error_message_from_status(encryptionStatus));
@@ -864,21 +873,17 @@ Self::sendMessage(MessageHandler message) {
         ciphertextData.resize(vsc_buffer_len(ciphertext.get()));
 
         //
-        //  Pack JSON body
+        //  Pack JSON body.
         //
-        QJsonObject ciphertextJson;
-        ciphertextJson.insert("version", "v3");
-        ciphertextJson.insert("timestamp", static_cast<qint64>(message->createdAt().toTime_t()));
-        ciphertextJson.insert("ciphertext", QString::fromLatin1(ciphertextData.toBase64()));
-        auto ciphertextJsonStr = MessageContentJsonUtils::toBytes(ciphertextJson);
+        QByteArray messageBody = ciphertextData.toBase64();
 
-        qCDebug(lcCommKitMessenger) << "Will send XMPP message with body: " << ciphertextJsonStr;
+        qCDebug(lcCommKitMessenger) << "Will send XMPP message with body: " << messageBody;
 
         // TODO: review next lines when implement group chats.
         auto senderJid = userIdToJid(message->senderId());
         auto recipientJid = userIdToJid(UserId(message->chatId()));
 
-        QXmppMessage xmppMessage(senderJid, recipientJid, ciphertextJsonStr);
+        QXmppMessage xmppMessage(senderJid, recipientJid, messageBody);
         xmppMessage.setId(message->id());
         xmppMessage.setStamp(message->createdAt());
         xmppMessage.setType(QXmppMessage::Type::Chat);
@@ -915,33 +920,21 @@ Self::processReceivedXmppMessage(const QXmppMessage& xmppMessage) {
         message->setCreatedAt(xmppMessage.stamp());
 
         //
-        //  Unpack JSON body.
+        //  Decode message body from Base64.
         //
-        auto messageBodyJson = QJsonDocument::fromJson(xmppMessage.body().toUtf8());
-        if (messageBodyJson.isNull()) {
-            qCWarning(lcCommKitMessenger) << "Got invalid XMPP message - body (not JSON)";
-            return Self::Result::Error_InvalidMessageFormat;
-        }
-
-        auto version = messageBodyJson["version"].toString();
-        if (version != "v3") {
-            qCWarning(lcCommKitMessenger) << "Got invalid XMPP message - unsupported version, expected v3, got " << version;
-            return Self::Result::Error_InvalidMessageVersion;
-        }
-
-        auto ciphertextBase64 = messageBodyJson["ciphertext"].toString();
+        auto ciphertextBase64 = xmppMessage.body().toLatin1();
         if (ciphertextBase64.isEmpty()) {
             qCWarning(lcCommKitMessenger) << "Got invalid XMPP message - empty ciphertext";
             return Self::Result::Error_InvalidMessageCiphertext;
         }
 
-        auto ciphertextResult = QByteArray::fromBase64Encoding(ciphertextBase64.toLatin1());
-        if (!ciphertextResult) {
+        auto ciphertextDecoded = QByteArray::fromBase64Encoding(ciphertextBase64);
+        if (!ciphertextDecoded) {
             qCWarning(lcCommKitMessenger) << "Got invalid XMPP message - ciphertext is not base64 encoded";
             return Self::Result::Error_InvalidMessageCiphertext;
         }
 
-        auto ciphertext = *ciphertextResult;
+        auto ciphertext = *ciphertextDecoded;
 
         //
         //  Find sender.
@@ -977,16 +970,59 @@ Self::processReceivedXmppMessage(const QXmppMessage& xmppMessage) {
         plaintextData.resize(vsc_buffer_len(plaintext.get()));
 
         //
+        //  Parse message.
+        //
+        const auto messageJsonDocument = QJsonDocument::fromJson(plaintextData);
+        if (messageJsonDocument.isNull()) {
+            qCWarning(lcCommKitMessenger) << "Got invalid message format - not a JSON";
+            return Self::Result::Error_InvalidMessageFormat;
+        }
+
+        const auto messageJson = messageJsonDocument.object();
+
+        //
+        //  Check version and timestamp.
+        //
+        const auto version = messageJson["version"].toString();
+        if (version != "v3") {
+            qCWarning(lcCommKitMessenger) << "Got invalid message - unsupported version, expected v3, got " << version;
+            return Self::Result::Error_InvalidMessageVersion;
+        }
+
+        const auto timestamp = messageJson["timestamp"].toVariant().value<uint>();
+        if (timestamp != xmppMessage.stamp().toTime_t()) {
+            qCWarning(lcCommKitMessenger) << "Got invalid message - timestamp mismatch. Expected "
+                                          << timestamp << ", xmpp " << xmppMessage.stamp().toTime_t();
+            message->setCreatedAt(QDateTime::fromTime_t(timestamp));
+        }
+
+        auto fromUsername = messageJson["from"].toString();
+        if (fromUsername.isEmpty()) {
+            qCWarning(lcCommKitMessenger) << "Got invalid message - missing 'from' username";
+            return Self::Result::Error_InvalidMessageFormat;
+        }
+
+        message->setSenderUsername(std::move(fromUsername));
+
+        //
         //  Parse content.
         //
+        const auto contentJson = messageJson["content"].toObject();
+        if (contentJson.isEmpty()) {
+            qCWarning(lcCommKitMessenger) << "Got invalid message - missing content";
+            return Self::Result::Error_InvalidMessageFormat;
+        }
+
         QString errorString;
-        auto content = MessageContentJsonUtils::fromBytes(plaintextData, errorString);
+        auto content = MessageContentJsonUtils::from(contentJson, errorString);
 
         if (std::get_if<std::monostate>(&content)) {
             return Self::Result::Error_InvalidMessageFormat;
         }
 
         message->setContent(std::move(content));
+
+        qCInfo(lcCommKitMessenger) << "Received XMPP message was decrypted";
 
         //
         //  Tell the world we got a message.
@@ -1034,7 +1070,9 @@ Self::xmppOnError(QXmppClient::Error error) {
     emit connectionStateChanged(Self::ConnectionState::Error);
 
     m_impl->xmpp->disconnectFromServer();
-    emit reconnectXmppServerIfNeeded();
+
+    // Wait 3 second and try to reconnect.
+    QTimer::singleShot(3000, this, &Self::reconnectXmppServerIfNeeded);
 }
 
 
@@ -1055,7 +1093,9 @@ Self::xmppOnSslErrors(const QList<QSslError> &errors) {
     emit connectionStateChanged(Self::ConnectionState::Error);
 
     m_impl->xmpp->disconnectFromServer();
-    emit reconnectXmppServerIfNeeded();
+
+    // Wait 3 second and try to reconnect.
+    QTimer::singleShot(3000, this, &Self::reconnectXmppServerIfNeeded);
 }
 
 

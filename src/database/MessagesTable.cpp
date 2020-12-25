@@ -107,6 +107,7 @@ void MessagesTable::onAddMessage(const MessageHandler &message)
         { ":chatType", ChatTypeToString(message->chatType()) },
         { ":createdAt", message->createdAt().toTime_t() },
         { ":authorId", QString(message->senderId()) },
+        { ":authorUsername", QString(message->senderUsername()) },
         { ":isOutgoing", message->isOutgoing() },
         { ":stage", messageStage },
         { ":contentType", MessageContentTypeToString(message->content()) }

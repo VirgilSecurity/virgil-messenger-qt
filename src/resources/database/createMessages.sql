@@ -4,6 +4,7 @@ CREATE TABLE messages (
     chatType TEXT NOT NULL,
     createdAt INT NOT NULL,
     authorId TEXT NOT NULL,
+    authorUsername TEXT NOT NULL,
     isOutgoing INT NOT NULL,
     stage TEXT NOT NULL,
     contentType TEXT NOT NULL,
