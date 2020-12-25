@@ -99,7 +99,6 @@ private:
         DisplayTimeRole,
         AuthorIdRole,
         StatusRole,
-        StageRole,
         // Text
         BodyRole,
         // Attachment
@@ -117,7 +116,7 @@ private:
         AttachmentBytesTotalRole,
         AttachmentBytesLoadedRole,
         AttachmentFileExistsRole,
-        // ???
+        // Grouping
         FirstInRowRole,
         InRowRole,
     };

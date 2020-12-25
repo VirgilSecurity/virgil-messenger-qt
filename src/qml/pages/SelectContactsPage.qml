@@ -42,9 +42,17 @@ OperationPage {
             Layout.preferredHeight: recommendedHeight
             Layout.fillWidth: true
             Layout.leftMargin: Theme.smallSpacing
+
+            onAccepted: {
+                const contactId = d.model.firstContactId();
+                if (contactId) {
+                    root.contactSelected(contactId)
+                }
+            }
         }
 
         SelectContactsList {
+            id: contactsList
             search: d.search
             Layout.fillWidth: true
             Layout.fillHeight: true

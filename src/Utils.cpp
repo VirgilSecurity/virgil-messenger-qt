@@ -212,7 +212,7 @@ QString Utils::printableLoadProgress(quint64 loaded, quint64 total)
 void Utils::printThreadId(const QString &message)
 {
 #ifdef VS_DEVMODE
-    qDebug(lcDev).noquote().nospace()
+    qDebug().noquote().nospace()
             << "Thread " << QThread::currentThread()->objectName() << "(" << QThread::currentThreadId() << "): "
             << message;
 #else

@@ -78,9 +78,6 @@ Settings::Settings(QObject *parent)
 
 Settings::~Settings()
 {
-#ifdef VS_DEVMODE
-    qCDebug(lcDev) << "~Settings";
-#endif
 }
 
 void Settings::print()

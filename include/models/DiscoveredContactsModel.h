@@ -54,10 +54,10 @@ public:
     DiscoveredContactsModel(Validator *validator, QObject *parent);
 
     void reload();
+    int fixedContactsCount() const;
 
     Q_INVOKABLE void toggleById(const Contact::Id &contactId);
-
-    int fixedContactsCount() const;
+    Q_INVOKABLE QString firstContactId() const;
 
 signals:
     void fixedContactsPopulated(const Contacts &contacts, QPrivateSignal);

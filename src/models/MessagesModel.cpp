@@ -95,19 +95,18 @@ bool Self::updateMessage(const MessageUpdate &messageUpdate) {
 
     const auto messageRow = findRowById(messageId);
     if (!messageRow) {
-        qCWarning(lcModel) << "Message not found! Id" << messageId;
         return false;
     }
 
-    auto &message = m_messages[*messageRow];
-
+    const auto row = *messageRow;
+    auto &message = m_messages[row];
     if (!message->applyUpdate(messageUpdate)) {
-        auto roles = rolesFromMessageUpdate(messageUpdate);
-        invalidateRow(*messageRow, roles);
-        return true;
+        return false;
     }
 
-    return false;
+    const auto roles = rolesFromMessageUpdate(messageUpdate);
+    invalidateRow(row, roles);
+    return true;
 }
 
 
@@ -351,7 +350,7 @@ QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate& messageUpdate) {
         return { StatusRole };
 
     } else if(std::holds_alternative<IncomingMessageStageUpdate>(messageUpdate)) {
-        return { StageRole };
+        return { StatusRole };
 
     } else if(std::holds_alternative<OutgoingMessageStageUpdate>(messageUpdate)) {
         return { StatusRole };

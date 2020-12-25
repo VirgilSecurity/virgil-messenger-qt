@@ -131,7 +131,7 @@ Self::run(const QString &basePath, VSQLogging *logging) {
     context->setContextProperty("UiHelper", &uiHelper);
     context->setContextProperty("app", this);
     context->setContextProperty("clipboard", new VSQClipboardProxy(QGuiApplication::clipboard()));
-    context->setContextProperty("Messenger", &m_messenger);
+    context->setContextProperty("messenger", &m_messenger);
     context->setContextProperty("logging", logging);
     context->setContextProperty("crashReporter", m_messenger.crashReporter());
     context->setContextProperty("settings", &m_settings);

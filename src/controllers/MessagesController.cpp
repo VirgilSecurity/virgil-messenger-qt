@@ -251,9 +251,11 @@ void Self::onMessageReceived(ModifiableMessageHandler message)
         //
         destChat = std::make_unique<Chat>();
         destChat->setId(message->chatId());
+        destChat->setTitle(message->chatId());
         destChat->setCreatedAt(QDateTime::currentDateTime());
         destChat->setLastMessage(message);
         destChat->setType(message->isGroupChatMessage() ? ChatType::Group : ChatType::Personal);
+        chats->addChat(destChat);
 
         m_userDatabase->writeChatAndLastMessage(destChat);
     }

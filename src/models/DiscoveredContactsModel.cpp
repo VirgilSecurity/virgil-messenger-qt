@@ -72,6 +72,11 @@ void DiscoveredContactsModel::reload()
     });
 }
 
+int DiscoveredContactsModel::fixedContactsCount() const
+{
+    return m_fixedContactsCount;
+}
+
 void DiscoveredContactsModel::toggleById(const Contact::Id &contactId)
 {
     const auto row = findRowByContactId(contactId);
@@ -83,9 +88,12 @@ void DiscoveredContactsModel::toggleById(const Contact::Id &contactId)
     }
 }
 
-int DiscoveredContactsModel::fixedContactsCount() const
+QString DiscoveredContactsModel::firstContactId() const
 {
-    return m_fixedContactsCount;
+    if (proxy()->rowCount() > 0) {
+        return proxy()->data(proxy()->index(0, 0), IdRole).toString();
+    }
+    return QString();
 }
 
 QVariant DiscoveredContactsModel::data(const QModelIndex &index, int role) const
