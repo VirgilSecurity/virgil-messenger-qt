@@ -145,7 +145,7 @@ QVariant Self::data(const QModelIndex &index, int role) const
     case DisplayTimeRole:
         return message->createdAt().toString("• hh:mm");
 
-    case AuthorIdRole:
+    case SenderIdRole:
         return QString(message->senderId());
 
     case StatusRole: {
@@ -286,7 +286,7 @@ QHash<int, QByteArray> Self::roleNames() const
         { IdRole, "id" },
         { DayRole, "day" },
         { DisplayTimeRole, "displayTime" },
-        { AuthorIdRole, "authorId" },
+        { SenderIdRole, "senderId" },
         { StatusRole, "status" },
         { BodyRole, "body" },
         { AttachmentIdRole, "attachmentId" },

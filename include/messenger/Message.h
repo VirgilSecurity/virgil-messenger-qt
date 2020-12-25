@@ -78,26 +78,6 @@ public:
     void setId(MessageId id);
 
     //
-    // Return a chat unique identifier the message belongs to.
-    //
-    ChatId chatId() const;
-
-    //
-    // Set a chat unique identifier the message belongs to.
-    //
-    void setChatId(ChatId chatId);
-
-    //
-    // Return a chat type the message belongs to.
-    //
-    ChatType chatType() const;
-
-    //
-    // Set a chat type the message belongs to.
-    //
-    void setChatType(ChatType chatType);
-
-    //
     // Return message sender unique identifier.
     //
     UserId senderId() const;
@@ -121,6 +101,26 @@ public:
     // Return message recipient unique identifier.
     //
     UserId recipientId() const;
+
+    //
+    // Set message recipient unique identifier.
+    //
+    void setRecipientId(UserId userId);
+
+    //
+    // Return a chat unique identifier the message belongs to.
+    //
+    ChatId chatId() const;
+
+    //
+    // Return a chat type the message belongs to.
+    //
+    ChatType chatType() const;
+
+    //
+    // Set a chat type the message belongs to.
+    //
+    void setChatType(ChatType chatType);
 
     //
     // Return date when message was created.
@@ -250,15 +250,11 @@ public:
     //
     virtual bool isIncoming() const noexcept;
 
-    //
-    //
-    //
-
 private:
     MessageId m_id;
-    ChatId m_chatId;
-    ChatType m_chatType;
     UserId m_senderId;
+    UserId m_recipientId;
+    ChatType m_chatType;
     QString m_senderUsername;
     QDateTime m_createdAt;
     MessageContent m_content;

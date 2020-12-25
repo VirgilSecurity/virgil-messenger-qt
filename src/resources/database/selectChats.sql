@@ -1,10 +1,11 @@
 SELECT
     chats.*,
     messages.id AS messageId,
+    messages.recipientId AS messageRecipientId,
+    messages.senderId AS messageSenderId,
+    messages.senderUsername AS messageSenderUsername,
     messages.chatId AS messageChatId,
     messages.createdAt AS messageCreatedAt,
-    messages.authorId AS messageAuthorId,
-    messages.authorUsername AS messageAuthorUsername,
     messages.isOutgoing AS messageIsOutgoing,
     messages.stage AS messageStage,
     messages.contentType as messageContentType,

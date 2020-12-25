@@ -915,8 +915,8 @@ Self::processReceivedXmppMessage(const QXmppMessage& xmppMessage) {
 
         // TODO: review next lines when implement group chats.
         message->setId(MessageId(xmppMessage.id()));
+        message->setRecipientId(userIdFromJid(xmppMessage.to()));
         message->setSenderId(userIdFromJid(xmppMessage.from()));
-        message->setChatId(ChatId(userIdFromJid(xmppMessage.to())));
         message->setCreatedAt(xmppMessage.stamp());
 
         //

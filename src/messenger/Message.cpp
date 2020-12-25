@@ -50,13 +50,36 @@ void Self::setId(MessageId id) {
 }
 
 
-ChatId Self::chatId() const {
-    return m_chatId;
+UserId Self::senderId() const {
+    return m_senderId;
 }
 
 
-void Self::setChatId(ChatId chatId) {
-    m_chatId = std::move(chatId);
+void Self::setSenderId(UserId userId) {
+    m_senderId = std::move(userId);
+}
+
+
+UserId Self::recipientId() const {
+    return m_recipientId;
+}
+
+
+void Self::setRecipientId(UserId userId) {
+    m_recipientId = std::move(userId);
+}
+
+
+ChatId Self::chatId() const {
+    if (isGroupChatMessage()) {
+        return ChatId(m_groupChatInfo->groupId());
+    }
+    else if (isIncoming()) {
+        return ChatId(m_senderId);
+    }
+    else {
+        return ChatId(m_recipientId);
+    }
 }
 
 
@@ -70,16 +93,6 @@ void Self::setChatType(ChatType chatType) {
 }
 
 
-UserId Self::senderId() const {
-    return m_senderId;
-}
-
-
-void Self::setSenderId(UserId userId) {
-    m_senderId = std::move(userId);
-}
-
-
 QString Self::senderUsername() const {
     return m_senderUsername;
 }
@@ -89,10 +102,6 @@ void Self::setSenderUsername(QString username) {
     m_senderUsername = std::move(username);
 }
 
-
-UserId Self::recipientId() const {
-    return UserId(m_chatId);
-}
 
 
 QDateTime Self::createdAt() const {

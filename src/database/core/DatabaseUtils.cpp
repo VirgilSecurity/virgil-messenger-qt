@@ -233,8 +233,9 @@ ModifiableMessageHandler Self::readMessage(const QSqlQuery &query, const QString
     const auto messageChatId = query.value("messageChatId").toString();
     const auto messageChatType = query.value("messageChatType").toString();
     const auto messageCreatedAt = query.value("messageCreatedAt").toULongLong();
-    const auto messageAuthorId = query.value("messageAuthorId").toString();
-    const auto messageAuthorUsername = query.value("messageAuthorUsername").toString();
+    const auto messageRecipientId = query.value("messageRecipientId").toString();
+    const auto messageSenderId = query.value("messageSenderId").toString();
+    const auto messageSenderUsername = query.value("messageSenderUsername").toString();
     const auto messageIsOutgoing = query.value("messageIsOutgoing").toBool();
     const auto messageStage = query.value("messageStage").toString();
 
@@ -257,11 +258,11 @@ ModifiableMessageHandler Self::readMessage(const QSqlQuery &query, const QString
     }
 
     message->setId(MessageId(messageId));
-    message->setChatId(ChatId(messageChatId));
+    message->setRecipientId(UserId(messageRecipientId));
+    message->setSenderId(UserId(messageSenderId));
     message->setChatType(ChatTypeFromString(messageChatType));
     message->setCreatedAt(QDateTime::fromTime_t(messageCreatedAt));
-    message->setSenderId(UserId(messageAuthorId));
-    message->setSenderUsername(UserId(messageAuthorUsername));
+    message->setSenderUsername(UserId(messageSenderUsername));
     message->setContent(std::move(content));
 
     return message;

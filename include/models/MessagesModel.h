@@ -97,7 +97,7 @@ private:
         IdRole = Qt::UserRole,
         DayRole,
         DisplayTimeRole,
-        AuthorIdRole,
+        SenderIdRole,
         StatusRole,
         // Text
         BodyRole,

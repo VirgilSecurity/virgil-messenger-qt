@@ -150,12 +150,12 @@ std::unique_ptr<OutgoingMessage> Self::createOutgoingMessage() {
     auto currentChat = m_models->messages()->chat();
 
     message->setId(MessageId::generate());
-    message->setChatId(currentChat->id());
+    message->setRecipientId(UserId(currentChat->id()));
+    message->setSenderId(m_messenger->currentUser()->id());
+    message->setSenderUsername(m_messenger->currentUser()->username());
     message->setChatType(currentChat->type());
     message->setStage(OutgoingMessageStage::Created);
     message->setCreatedAt(QDateTime::currentDateTime());
-    message->setSenderId(m_messenger->currentUser()->id());
-    message->setSenderUsername(m_messenger->currentUser()->username());
 
     return message;
 }
@@ -257,7 +257,7 @@ void Self::onMessageReceived(ModifiableMessageHandler message)
         auto m = std::make_shared<OutgoingMessage>();
         m->setId(message->id());
         m->setSenderId(message->senderId());
-        m->setChatId(message->chatId());
+        m->setRecipientId(message->recipientId());
         m->setChatType(message->chatType());
         m->setCreatedAt(message->createdAt());
         m->setContent(message->content());

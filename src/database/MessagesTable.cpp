@@ -103,11 +103,12 @@ void MessagesTable::onAddMessage(const MessageHandler &message)
     ScopedConnection connection(*database());
     DatabaseUtils::BindValues values{
         { ":id", QString(message->id()) },
+        { ":recipientId", QString(message->recipientId()) },
+        { ":senderId", QString(message->senderId()) },
+        { ":senderUsername", QString(message->senderUsername()) },
         { ":chatId", QString(message->chatId()) },
         { ":chatType", ChatTypeToString(message->chatType()) },
         { ":createdAt", message->createdAt().toTime_t() },
-        { ":authorId", QString(message->senderId()) },
-        { ":authorUsername", QString(message->senderUsername()) },
         { ":isOutgoing", message->isOutgoing() },
         { ":stage", messageStage },
         { ":contentType", MessageContentTypeToString(message->content()) }
