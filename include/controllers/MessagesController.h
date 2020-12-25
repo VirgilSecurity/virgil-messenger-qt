@@ -99,6 +99,7 @@ private:
     QPointer<Messenger> m_messenger;
     QPointer<Models> m_models;
     QPointer<UserDatabase> m_userDatabase;
+    ChatHandler m_chat;
 };
 } // namespace vm
 

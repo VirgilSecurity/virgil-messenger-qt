@@ -13,7 +13,7 @@ import "theme"
 ApplicationWindow {
     id: root
     visible: true
-    title: (!settings.devMode || !controllers.users.userId) ? app.applicationDisplayName : controllers.users.userId
+    title: (!settings.devMode || !controllers.users.currentUsername) ? app.applicationDisplayName : controllers.users.currentUsername
 
     Binding on x {
         when: Platform.isDesktop;

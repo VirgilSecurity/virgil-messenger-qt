@@ -80,12 +80,14 @@ Self::MessagesController(Messenger *messenger, Models *models, UserDatabase *use
 
 void Self::loadMessages(const ChatHandler &chat)
 {
+    m_chat = chat;
     m_models->messages()->setChat(chat);
     m_userDatabase->messagesTable()->fetchChatMessages(chat->id());
 }
 
 void Self::clearMessages()
 {
+    m_chat = {};
     m_models->messages()->clearChat();
 }
 
@@ -226,7 +228,6 @@ void Self::onUpdateMessage(const MessageUpdate& messageUpdate)
 
 void Self::onMessageReceived(ModifiableMessageHandler message)
 {
-
     //
     //  Got a new message.
     //
@@ -235,32 +236,73 @@ void Self::onMessageReceived(ModifiableMessageHandler message)
     auto messages = m_models->messages();
     auto chats = m_models->chats();
 
-    //
-    // Find destination chat.
-    //
-    auto destChat = chats->findChat(message->chatId());
-    if (destChat) {
-        //
-        //  Update existing chat.
-        //
-        destChat->setLastMessage(message);
-        m_userDatabase->writeMessage(message, destChat->unreadMessageCount() + 1);
-    } else {
-        //
-        //  Create a new chat.
-        //
-        destChat = std::make_unique<Chat>();
-        destChat->setId(message->chatId());
-        destChat->setTitle(message->chatId());
-        destChat->setCreatedAt(QDateTime::currentDateTime());
-        destChat->setLastMessage(message);
-        destChat->setType(message->isGroupChatMessage() ? ChatType::Group : ChatType::Personal);
-        chats->addChat(destChat);
+    bool isUnread = false;
+    ChatId chatId;
 
-        m_userDatabase->writeChatAndLastMessage(destChat);
+    if (message->senderId() == m_messenger->currentUser()->id()) {
+        // FIXME(fpohtmeh): restore carbons
+        return;
+
+        const ChatId newChatId(message->recipientId());
+        if (m_chat && newChatId == m_chat->id()) {
+            qCDebug(lcController) << "Received carbon message to current chat";
+        }
+        else {
+            qCDebug(lcController) << "Received carbon message to not current chat";
+            chatId = newChatId;
+        }
+
+        // Convert incoming message to outgoing
+        auto m = std::make_shared<OutgoingMessage>();
+        m->setId(message->id());
+        m->setSenderId(message->senderId());
+        m->setChatId(message->chatId());
+        m->setChatType(message->chatType());
+        m->setCreatedAt(message->createdAt());
+        m->setContent(message->content());
+        m->setStage(OutgoingMessageStage::Sent);
+        message = m;
+    }
+    else {
+        const ChatId newChatId(message->senderId());
+        if (m_chat && newChatId == m_chat->id()) {
+            qCDebug(lcController) << "Received a message to current chat";
+        }
+        else {
+            qCDebug(lcController) << "Received a message to not current chat";
+            chatId = newChatId;
+            isUnread = true;
+        }
     }
 
-    messages->addMessage(message);
+    ChatHandler chat;
+    if (!chatId.isValid()) {
+        chat = m_chat;
+        chats->updateLastMessage(message, 0);
+    }
+    else {
+        chat = chats->findChat(chatId);
+        if (chat) {
+            chats->updateLastMessage(message, chat->unreadMessageCount() + (isUnread ? 1 : 0));
+        }
+        else {
+            auto newChat = std::make_shared<Chat>();
+            newChat->setId(message->chatId());
+            newChat->setTitle(message->chatId());
+            newChat->setCreatedAt(QDateTime::currentDateTime());
+            newChat->setLastMessage(message);
+            newChat->setType(message->isGroupChatMessage() ? ChatType::Group : ChatType::Personal);
+            chats->addChat(newChat);
+            chat = newChat;
+        }
+    }
 
+    if (chat == m_chat) {
+        messages->addMessage(message);
+        m_userDatabase->writeMessage(message);
+    }
+    else {
+        m_userDatabase->writeChatAndLastMessage(chat);
+    }
     emit messageCreated(message);
 }

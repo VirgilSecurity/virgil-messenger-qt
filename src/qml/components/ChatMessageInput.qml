@@ -23,8 +23,10 @@ Control {
 
         function sendTextMessage() {
             const text = d.messageText;
-            messageField.clear()
-            controllers.messages.sendTextMessage(text)
+            if (text) {
+                messageField.clear()
+                controllers.messages.sendTextMessage(text)
+            }
         }
 
         function sendFileMessage(attachmentUrl, attachmentType) {
