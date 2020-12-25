@@ -960,7 +960,7 @@ Self::processReceivedXmppMessage(const QXmppMessage& xmppMessage) {
         //
         //  Decrypt message.
         //
-        auto plaintextDataMinLen = 2 * vssq_messenger_decrypted_message_len(m_impl->messenger.get(), ciphertext.size());
+        auto plaintextDataMinLen = vssq_messenger_decrypted_message_len(m_impl->messenger.get(), ciphertext.size());
         QByteArray plaintextData(plaintextDataMinLen, 0x00);
 
         auto plaintext = vsc_buffer_wrap_ptr(vsc_buffer_new());
