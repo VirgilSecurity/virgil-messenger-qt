@@ -20,14 +20,19 @@ Item {
     readonly property int minHeightToDisableAutoFlick: 100
 
     property int unreadMessages: 0
+    property string idOfFirstUnreadMessage: ""
+
+    property bool isInsert: false
 
     Flickable {
         id: chatFlickable
 
         property real previousContentY: contentY
+        property real previousContentHeight: contentHeight
 
         anchors.fill: parent
         contentHeight: chatListItem.chatContentHeight
+//        onContentHeightChanged: chatList.contentHeightChangedController() // breaks onCountChanged
         onHeightChanged: chatList.heightChangedController()
         onContentYChanged: chatList.autoFlickToBottomController()
         Behavior on contentY {
@@ -79,7 +84,7 @@ Item {
         id: chatList
 
         function countChangedController() {
-            newMessageController()
+            if (chatListItem.animationEnabled) newMessageController()
         }
 
         function flickToBottomController(newItem = true) {
@@ -136,16 +141,17 @@ Item {
             if (lastItem) {
                 if (lastItem.isOwnMessage) {
                     flick.scrollDown()
-                    console.log(">>>>>>>>>>>>>>>>> IS OWN MESSAGE")
                 } else {
                     if (flick.isChatAtBottom()) {
                         flick.scrollDown()
-                        console.log(">>>>>>>>>>>>>>>>> CHAT AT BOTTOM")
                     } else {
+                        if (chatListItem.unreadMessages === 0) {
+                            idOfFirstUnreadMessage = lastItem.messageId
+                        }
+
                         chatListItem.unreadMessages += 1
                         flickToBottomController(true)
                         autoFlickToBottomController()
-                        console.log(">>>>>>>>>>>>>>>>> CHAT NOT AT BOTTOM")
                     }
                 }
             }
@@ -157,6 +163,19 @@ Item {
             }
             chatListItem.previousHeight = chatListItem.height
         }
+
+//        function contentHeightChangedController() {
+//            if (chatListItem.animationEnabled) {
+//                if (!chatListItem.isInsert) {
+//                    chatListItem.animationEnabled = false
+//                    let contentYPercent = chatFlickable.contentY / chatFlickable.previousContentHeight
+//                    chatFlickable.contentY = chatFlickable.contentHeight * contentYPercent
+//                    chatListItem.animationEnabled = true
+//                }
+//            }
+
+//            chatFlickable.previousContentHeight = chatFlickable.contentHeight
+//        }
     }
 
     QtObject {
@@ -177,6 +196,7 @@ Item {
 
         function readAllMessages() {
             chatListItem.unreadMessages = 0
+            idOfFirstUnreadMessage = ""
         }
 
         function setNewContentY() {

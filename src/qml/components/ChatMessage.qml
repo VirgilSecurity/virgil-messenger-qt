@@ -9,16 +9,13 @@ import "../theme"
 
 Control {
     id: chatMessage
-//    height: row.height
-//    width: loader.item.width
-
     height: messageLoader.height
 
     property int thisIndex: -1
     property var thisDay
 
     property double maxWidth: 0
-    readonly property real leftIndent: avatarSize + contentSpacing
+    readonly property real leftIndent: isMessageAlignedLeft ? avatarSize + contentSpacing + Theme.margin : avatarSize + contentSpacing
 
     property string body: ""
     property string displayTime: ""
@@ -57,27 +54,28 @@ Control {
     readonly property int avatarSize: 30
     readonly property int contentSpacing: 12
 
-    readonly property var displayingComponent: {
+    readonly property bool isMessageAlignedLeft: {
         if (!Platform.isMobile) {
             if (isOwnMessage) {
                 if (chatMessage.width > 500) {
-                    return leftMessage
+                    return true
                 } else {
-                    return rightMessage
+                    return false
                 }
             } else {
-                return leftMessage
+                return true
             }
         }
 
         if (Platform.isMobile) {
             if (isOwnMessage) {
-                return rightMessage
+                return false
             } else {
-                return leftMessage
+                return true
             }
         }
     }
+
 
     Behavior on leftBottomRadiusHeight {
         NumberAnimation { duration: Theme.animationDuration}
@@ -94,32 +92,85 @@ Control {
     Loader {
         id: messageLoader
         width: parent.width
-        sourceComponent: displayingComponent
+        sourceComponent: smartMessage
     }
 
     Component {
-        id: rightMessage
+        id: smartMessage
+
         Item {
             height: contentRow.height + contentRow.y
             width: parent.width
+            state: isMessageAlignedLeft ? "aligned left" : "aligned right"
+            states: [
+                State {
+                    name: "aligned left"
+
+                    AnchorChanges {
+                        target: contentRow
+                        anchors.left: parent.left
+                        anchors.right: undefined
+                    }
+                    AnchorChanges {
+                        target: nicknameTimeRow
+                        anchors.left: parent.left
+                        anchors.right: undefined
+                    }
+                    AnchorChanges {
+                        target: messageContentItem
+                        anchors.left: parent.left
+                        anchors.right: undefined
+                    }
+                },
+                State {
+                    name: "aligned right"
+
+                    AnchorChanges {
+                        target: contentRow
+                        anchors.left: undefined
+                        anchors.right: parent.right
+                    }
+                    AnchorChanges {
+                        target: nicknameTimeRow
+                        anchors.left: undefined
+                        anchors.right: parent.right
+                    }
+                    AnchorChanges {
+                        target: messageContentItem
+                        anchors.left: undefined
+                        anchors.right: parent.right
+                    }
+                }
+            ]
 
             Row {
                 id: contentRow
-                anchors.right: parent.right
                 y: firstInRow ? stdTopMargin : 0
                 spacing: contentSpacing
+
+                Item { // avatar placeholder. visible on left side
+                    width: avatarSize
+                    height: width
+                    visible: isMessageAlignedLeft
+                    Avatar {
+                        id: avatar
+                        nickname: chatMessage.nickname
+                        anchors.fill: parent
+                        visible: firstInRow ? 1 : 0
+                    }
+                }
 
                 Column {
                     spacing: stdSmallMargin
 
                     Row { // nickname + time
-                        anchors.right: parent.right
+                        id: nicknameTimeRow
                         visible: firstInRow
                         spacing: 6
 
                         Label {
                             id: nicknameLabel
-                            text: qsTr("you")
+                            text: isMessageAlignedLeft ? nickname : qsTr("you")
                             color: Theme.labelColor
                             font.pixelSize: UiHelper.fixFontSz(14)
                             anchors.verticalCenter: parent.verticalCenter
@@ -136,7 +187,7 @@ Control {
                     }
 
                     Item { // message content
-                        anchors.right: parent.right
+                        id: messageContentItem
                         width: loader.item.width
                         height: loader.item.height
 
@@ -157,7 +208,7 @@ Control {
                             transform: Scale {
                                 origin.x: paintingRec.width / 2
                                 origin.y: paintingRec.height / 2
-                                xScale: -1
+                                xScale: isMessageAlignedLeft ? 1 : -1
                             }
 
                             Shape {
@@ -187,6 +238,19 @@ Control {
 
                                      PathQuad {x: 0; y: messageShape.height - leftBottomRadiusHeight; controlX: 0; controlY: messageShape.height}
                                 }
+                            }
+                        }
+
+                        Item { // status
+                            width: 20
+                            height: parent.height
+                            anchors.left: parent.right
+                            visible: isOwnMessage
+                            Image {
+                                width: parent.width
+                                height: width
+                                anchors.centerIn: parent
+                                source: messageStatusImageSource()
                             }
                         }
 
@@ -222,140 +286,11 @@ Control {
                         }
                     }
                 }
-            }
-        }
-    }
 
-    Component {
-        id: leftMessage
-
-        Item { // all message placeholder
-            height: contentRow.height + contentRow.y
-            width: parent.width
-
-            Row {
-                id: contentRow
-                anchors.left: parent.left
-                y: firstInRow ? stdTopMargin : 0
-                spacing: contentSpacing
-
-                Item { // avatar placeholder
-                    width: avatarSize
-                    height: width
-                    Avatar {
-                        id: avatar
-                        nickname: chatMessage.nickname
-                        anchors.fill: parent
-                        visible: firstInRow ? 1 : 0
-                    }
-                }
-
-                Column {
-                    spacing: stdSmallMargin
-
-                    Row { // nickname + time
-                        visible: firstInRow
-                        spacing: 6
-
-                        Label {
-                            id: nicknameLabel
-                            text: nickname
-                            color: Theme.labelColor
-                            font.pixelSize: UiHelper.fixFontSz(14)
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-
-                        Label {
-                            text: displayTime
-                            color: Theme.labelColor
-                            font.pixelSize: UiHelper.fixFontSz(11)
-                            anchors {
-                                verticalCenter: parent.verticalCenter
-                            }
-                        }
-                    }
-
-                    Item { // message content
-                        width: loader.item.width
-                        height: loader.item.height
-
-                        Rectangle {
-                            visible: d.isPicture
-                            width: parent.width
-                            height: parent.height
-                            color: d.background
-                            radius: d.defaultRadius
-                        }
-
-                        Rectangle {
-                            id: paintingRec
-                            visible: !d.isPicture
-                            width: parent.width
-                            height: parent.height
-                            color: d.background
-                            radius: stdRadiusHeight
-
-                            Shape {
-                                id: messageShape
-                                anchors.fill: parent
-                                layer.enabled: true
-                                layer.samples: 4
-
-                                ShapePath {
-                                    strokeColor: "transparent"
-                                    strokeWidth: 0
-                                    fillColor: d.background
-                                    capStyle: ShapePath.RoundCap
-                                    joinStyle: ShapePath.RoundJoin
-
-                                     startX: 0
-                                     startY: messageShape.height * 0.5
-                                     PathLine {x: 0; y: 4}
-
-                                     PathQuad {x: 4; y: 0; controlX: 0; controlY: 0}
-
-                                     PathLine {x: messageShape.width * 0.5; y: 0}
-
-                                     PathLine {x: messageShape.width * 0.5; y: messageShape.height}
-
-                                     PathLine {x: leftBottomRadiusHeight; y: messageShape.height}
-
-                                     PathQuad {x: 0; y: messageShape.height - leftBottomRadiusHeight; controlX: 0; controlY: messageShape.height}
-                                }
-                            }
-                        }
-
-                        Loader {
-                            id: loader
-                            sourceComponent: d.hasAttachment ? attachmentComponent : textEditComponent
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            acceptedButtons: Platform.isDesktop ? (Qt.LeftButton | Qt.RightButton) : Qt.LeftButton
-
-                            onClicked: function(mouse) {
-                                if (Platform.isDesktop && mouse.button == Qt.RightButton) {
-                                    var coord = mapToItem(chatMessage, mouse.x, mouse.y)
-                                    openContextMenu(messageId, coord, loader.item.contextMenu)
-                                }
-                                else if (d.hasAttachment) {
-                                    if (attachmentFileExists) {
-                                        controllers.attachments.open(messageId)
-                                    }
-                                    else {
-                                        controllers.attachments.download(messageId)
-                                    }
-                                }
-                            }
-                            onPressAndHold: {
-                                if (Platform.isMobile) {
-                                    var coord = mapToItem(chatMessage, mouse.x, mouse.y)
-                                    openContextMenu(messageId, coord, loader.item.contextMenu)
-                                }
-                            }
-                        }
-                    }
+                Item { // right separator for right-aligned messages
+                    width: Theme.smallMargin
+                    height: 1
+                    visible: !isMessageAlignedLeft
                 }
             }
         }
@@ -501,16 +436,103 @@ Control {
         }
     }
 
-    function isCheckVisible() {
+//  Smart items
+    Item {
+        id: newMessageItem
+        property bool isVisible: messageId === idOfFirstUnreadMessage
+        onIsVisibleChanged: {
+            if (isVisible) {
+                newMessageItem.opacity = 1
+            } else {
+                opacityOffDelay.restart()
+            }
+        }
+
+        anchors {
+            left: parent.left
+            leftMargin: leftIndent
+            right: parent.right
+            top: parent.top
+            topMargin: firstInRow ? contentSpacing : -contentSpacing / 4
+        }
+
+        height: 1
+        opacity: 0
+        visible: newMessageItem.opacity > 0
+
+        Timer {
+            id: opacityOffDelay
+            running: false
+            repeat: false
+            interval: 1500
+            onTriggered: newMessageItem.opacity = 0
+        }
+
+        Behavior on opacity {
+            NumberAnimation { duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+        }
+
+        Item {
+            width: parent.width
+            height: unreadMessageRec.height
+            anchors.verticalCenter: parent.verticalCenter
+            layer.enabled: true
+
+            Rectangle {
+                width: parent.width
+                height: 1
+                color: Theme.buttonPrimaryColor
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Rectangle {
+                id: unreadMessageRec
+                anchors {
+                    right: parent.right
+                    verticalCenter: parent.verticalCenter
+                }
+
+                height: newMessage.height + stdSmallMargin
+                width: newMessage.width + stdSmallMargin
+                radius: 3
+                color: Theme.buttonPrimaryColor
+
+                Rectangle {
+                    anchors {
+                        horizontalCenter: parent.left
+                        horizontalCenterOffset: 2
+                        verticalCenter: parent.verticalCenter
+                    }
+
+                    height: parent.height * 0.65
+                    width: height
+                    rotation: 45
+                    color: parent.color
+                }
+
+                Label {
+                    id: newMessage
+                    text: qsTr("NEW")
+                    color: Theme.primaryTextColor
+                    font.pixelSize: UiHelper.fixFontSz(8)
+                    font.bold: true
+                    anchors.centerIn: parent
+                }
+            }
+        }
+    }
+
+
+    function messageStatusImageSource() {
         if (chatMessage.isBroken) {
-            return false
+            return "" // "broken"
         }
         switch (status) {
-            case "0": return false // "sending"
-            case "1": return true // "sent"
-            case "2": return true // "delivered"
-            case "4": return false // "sending"
-            default: return false
+            case "0": return "" // "sending"
+            case "1": return // "sent"
+            case "2": return // "delivered"
+            case "4": return // "read"
+            default: return // "read"
         }
     }
 

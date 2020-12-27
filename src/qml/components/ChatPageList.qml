@@ -50,7 +50,7 @@ ModelListView {
 
         ChatMessage {
             readonly property real fullWidth: chatListView.width - leftIndent
-            width: parent.width
+            width: chatListView.width
             maxWidth: Platform.isMobile ? (fullWidth - 2 * Theme.margin) : fullWidth
 
             thisIndex: index
