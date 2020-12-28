@@ -93,7 +93,7 @@ public:
     bool applyUpdate(const MessageUpdate& update) override;
 
 private:
-    Stage m_stage;
+    Stage m_stage = Stage::Received;
 
 };
 } // namespace vm

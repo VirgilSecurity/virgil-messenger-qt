@@ -53,9 +53,9 @@ Self::AttachmentsController(const Settings *settings, Models *models, QObject *p
     , m_models(models)
 {}
 
-void Self::saveAs(const MessageId &messageId, const QVariant &fileUrl)
+void Self::saveAs(const QString &messageId, const QVariant &fileUrl)
 {
-    const auto message = findMessageWithAttachment(messageId);
+    const auto message = findMessageWithAttachment(MessageId{ messageId });
     if (!message) {
         return;
     }
@@ -77,9 +77,9 @@ void Self::saveAs(const MessageId &messageId, const QVariant &fileUrl)
     }
 }
 
-void Self::download(const MessageId &messageId)
+void Self::download(const QString &messageId)
 {
-    const auto message = m_models->messages()->findById(messageId);
+    const auto message = m_models->messages()->findById(MessageId{ messageId });
     if (!message) {
         return;
     }
@@ -88,9 +88,9 @@ void Self::download(const MessageId &messageId)
     }
 }
 
-void Self::open(const MessageId &messageId)
+void Self::open(const QString &messageId)
 {
-    const auto message = m_models->messages()->findById(messageId);
+    const auto message = m_models->messages()->findById(MessageId{ messageId });
     if (!message) {
         return;
     }

@@ -270,8 +270,8 @@ private:
     QDateTime m_createdAt;
     MessageContent m_content;
     std::shared_ptr<MessageGroupChatInfo> m_groupChatInfo;
-    Status m_status;
-    bool m_isCarbonsCopy;
+    Status m_status = Status::New;
+    bool m_isCarbonsCopy = false;
 };
 
 using MessageHandler = std::shared_ptr<const Message>;

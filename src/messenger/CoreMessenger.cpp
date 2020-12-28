@@ -1240,13 +1240,13 @@ Self::xmppOnError(QXmppClient::Error error) {
 
 void
 Self::xmppOnPresenceReceived(const QXmppPresence &presence) {
-
+    Q_UNUSED(presence)
 }
 
 
 void
 Self::xmppOnIqReceived(const QXmppIq &iq) {
-
+    Q_UNUSED(iq)
 }
 
 void

@@ -92,8 +92,9 @@ public:
     //  Apply message update. Return true some properties were actually updated.
     //
     bool applyUpdate(const MessageUpdate& update) override;
+
 private:
-    Stage m_stage;
+    Stage m_stage = Stage::Created;
 
 };
 } // namespace vm

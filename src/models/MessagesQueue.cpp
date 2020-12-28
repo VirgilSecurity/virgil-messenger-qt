@@ -168,7 +168,7 @@ void Self::onNotSentMessagesFetched(const ModifiableMessages &messages)
 {
     qCDebug(lcMessagesQueue) << "Queued" << messages.size() << "unsent messages";
     for (auto &m : messages) {
-        onPushMessage(m);
+        pushMessage(m);
     }
 }
 
@@ -193,7 +193,12 @@ void MessagesQueue::onItemFailed(Item item)
 
 void Self::onPushMessage(const MessageHandler &message)
 {
-    addItem({ message }, true);
+    if (message->isOutgoingCopyFromOtherDevice()) {
+        pushMessagePreload(message);
+    }
+    else {
+        addItem({ message }, true);
+    }
 }
 
 

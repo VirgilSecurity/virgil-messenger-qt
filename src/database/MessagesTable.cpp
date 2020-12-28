@@ -158,7 +158,7 @@ void MessagesTable::onUpdateMessage(const MessageUpdate &messageUpdate)
     ScopedConnection connection(*database());
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateMessageStage"), values);
     if (query) {
-        qCDebug(lcDatabase) << "Message stage was updated";
+        qCDebug(lcDatabase) << "Message stage was updated" << values.back().second;
     }
     else {
         qCCritical(lcDatabase) << "MessagesTable::onUpdateMessage error";
