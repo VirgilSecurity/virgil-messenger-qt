@@ -102,6 +102,7 @@ Control {
         Item {
             height: contentRow.height + contentRow.y
             width: parent.width
+            layer.enabled: true
             state: isMessageAlignedLeft ? "aligned left" : "aligned right"
             states: [
                 State {

@@ -99,6 +99,11 @@ Item {
         }
 
         function setChatToBottom() {
+            if (chatListItem.chatContentHeight < chatListItem.height) {
+                chatFlickable.contentY = 0
+                return
+            }
+
             chatFlickable.contentY = chatListItem.chatContentHeight - chatListItem.height
         }
 
