@@ -210,21 +210,6 @@ public:
     virtual void setStageString(QString stageString) = 0;
 
     //
-    //  Return processing message attempts count.
-    //
-    qsizetype attemptCount() const noexcept;
-
-    //
-    //  Increment processing message attempts count and return true if MAX was not reached.
-    //
-    bool increaseAttemptCount();
-
-    //
-    //  Reset processing message attempts count to 0.
-    //
-    void resetAttemptCount();
-
-    //
     //  Apply message update. Return true some properties were actually updated.
     //
     bool applyUpdate(const MessageUpdate& update) override;
@@ -259,7 +244,6 @@ private:
     QDateTime m_createdAt;
     MessageContent m_content;
     std::shared_ptr<MessageGroupChatInfo> m_groupChatInfo;
-    qsizetype m_attemptCount;
     Status m_status;
 };
 

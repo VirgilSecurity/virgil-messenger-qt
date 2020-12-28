@@ -98,7 +98,7 @@ void MessagesTable::onFetchNotSentMessages()
 
 void MessagesTable::onAddMessage(const MessageHandler &message)
 {
-    auto messageStage = message->stageString();;
+    auto messageStage = message->stageString();
 
     ScopedConnection connection(*database());
     DatabaseUtils::BindValues values{

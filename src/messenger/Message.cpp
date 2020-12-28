@@ -192,27 +192,9 @@ QString Self::statusString() const {
     return MessageStatusToString(m_status);
 }
 
+
 void Self::setStatusString(const QString statusString) {
     m_status = MessageStatusFromString(statusString);
-}
-
-qsizetype Self::attemptCount() const noexcept {
-    return m_attemptCount;
-}
-
-
-bool Self::increaseAttemptCount() {
-    if (m_attemptCount < 3) {
-        ++m_attemptCount;
-        return true;
-    }
-
-    return false;
-}
-
-
-void Self::resetAttemptCount() {
-    m_attemptCount = 0;
 }
 
 

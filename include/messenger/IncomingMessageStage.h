@@ -46,7 +46,7 @@ namespace vm {
 enum class IncomingMessageStage {
     Received,  // A message was locally received from a sender.
     Decrypted, // A message was decrypted, so content handles specific message content: text, picture, etc.
-    Processed, // A message was fMully processed, i.e. attachment was downloaded, decrypted, and stored locally.
+    Processed, // A message was fully processed, i.e. attachment was downloaded, decrypted, and stored locally.
 };
 
 //

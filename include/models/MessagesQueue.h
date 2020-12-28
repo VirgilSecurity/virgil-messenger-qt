@@ -96,10 +96,12 @@ private:
     void addItem(Item item, const bool run);
     void runItem(Item item);
 
-    void onDatabaseOpened();
     void onPushMessage(const MessageHandler &message);
     void onPushMessageDownload(const MessageHandler &message, const QString &filePath);
     void onPushMessagePreload(const MessageHandler &message);
+
+    void onDatabaseOpened();
+    void onOnlineStatusChanged(const bool isOnline);
     void onNotSentMessagesFetched(const ModifiableMessages &messages);
     void onItemFailed(Item item);
 

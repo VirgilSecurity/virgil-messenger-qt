@@ -17,8 +17,7 @@ Control {
     property string displayTime: ""
     property alias nickname: avatar.nickname
     property bool isOwnMessage: false
-    property string status: ""
-    property bool isBroken: false
+    property string displayStatus: ""
     property string messageId: ""
     property bool inRow: false
     property bool firstInRow: true
@@ -296,31 +295,15 @@ Control {
                 }
             }
 
-            // Status label
+            // Display status label
             Label {
-                id: statusLabel
+                id: displayStatusLabel
+                visible: text
                 height: 12
-                text: {
-                    if (chatMessage.isBroken) {
-                        return "broken"
-                    }
-                    switch (status) {
-                        case "New": return "sending"
-                        case "Waiting": return "sending"
-                        case "Processing": return "sending"
-                        case "Succeed": return "sent"
-                        case "Failed": return "failed"
-                        default: return ""
-                    }
-                }
+                text: chatMessage.displayStatus
                 color: chatMessage.isBroken ? "red" : Theme.labelColor
                 font.pixelSize: UiHelper.fixFontSz(11)
             }
         }
-    }
-
-    Component.onCompleted: {
-//        console.log("->", messageId, body, displayTime, nickname, isOwnMessage, status, isBroken)
-//        console.log(attachmentId, attachmentIsLoading, attachmentIsLoaded, attachmentIconPath, attachmentFileExists)
     }
 }

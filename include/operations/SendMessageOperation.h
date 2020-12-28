@@ -55,6 +55,8 @@ public:
     void run() override;
 
 private:
+    void setSentStage();
+
     MessageOperation *m_parent;
     QPointer<MessageSender> m_messageSender;
 };

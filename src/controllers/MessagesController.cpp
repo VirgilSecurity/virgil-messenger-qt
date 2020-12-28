@@ -252,7 +252,7 @@ void Self::onMessageReceived(ModifiableMessageHandler message)
             qCDebug(lcController) << "Received carbon message to not current chat";
             chatId = newChatId;
         }
-        // TODO(fpohtmeh): set status to Sent
+        // TODO(fpohtmeh): process as carbon?
     }
     else {
         const ChatId newChatId(message->senderId());
@@ -283,7 +283,7 @@ void Self::onMessageReceived(ModifiableMessageHandler message)
             newChat->setTitle(message->senderUsername());
             newChat->setCreatedAt(message->createdAt());
             newChat->setLastMessage(message);
-            newChat->setType(message->isGroupChatMessage() ? ChatType::Group : ChatType::Personal); // TODO(fpohtmeh): why not use message->chatType?
+            newChat->setType(message->isGroupChatMessage() ? ChatType::Group : ChatType::Personal);
             newChat->setUnreadMessageCount(1);
             chats->addChat(newChat);
             chat = newChat;

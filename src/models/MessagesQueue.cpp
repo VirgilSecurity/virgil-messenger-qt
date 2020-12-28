@@ -64,6 +64,7 @@ Self::MessagesQueue(const Settings *settings, Messenger *messenger, UserDatabase
 
     qRegisterMetaType<vm::MessagesQueue::Item>("Item");
 
+    connect(m_messenger, &Messenger::onlineStatusChanged, this, &MessagesQueue::onOnlineStatusChanged);
     connect(m_messenger, &Messenger::signedOut, this, &MessagesQueue::stop);
     connect(m_userDatabase, &UserDatabase::opened, this, &Self::onDatabaseOpened);
     connect(this, &Self::pushMessage, this, &Self::onPushMessage);
@@ -155,6 +156,14 @@ void Self::onDatabaseOpened()
 }
 
 
+void MessagesQueue::onOnlineStatusChanged(const bool isOnline)
+{
+    if (isOnline) {
+        run();
+    }
+}
+
+
 void Self::onNotSentMessagesFetched(const ModifiableMessages &messages)
 {
     qCDebug(lcMessagesQueue) << "Queued" << messages.size() << "unsent messages";
@@ -168,10 +177,12 @@ void MessagesQueue::onItemFailed(Item item)
 {
     const int maxAttemptCount = 3;
     if (item.attemptCount < maxAttemptCount) {
+        qCDebug(lcMessagesQueue) << "Enqueued failed message:" << item.message->id();
         ++item.attemptCount;
         addItem(std::move(item), false);
     }
     else if (item.attemptCount == maxAttemptCount) {
+        qCDebug(lcMessagesQueue) << "Failed message was marked as broken:" << item.message->id();
         MessageStatusUpdate statusUpdate;
         statusUpdate.messageId = item.message->id();
         statusUpdate.status = MessageStatus::Broken;

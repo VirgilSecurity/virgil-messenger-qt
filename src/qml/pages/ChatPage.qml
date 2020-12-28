@@ -252,7 +252,7 @@ Page {
             displayTime: model.displayTime
             nickname: model.senderUsername
             isOwnMessage: model.senderId === controllers.users.currentUserId
-            status: isOwnMessage ? model.status : "none"
+            displayStatus: isOwnMessage ? model.displayStatus : ""
             messageId: model.id
             inRow: model.inRow
             firstInRow: model.firstInRow

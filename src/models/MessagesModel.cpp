@@ -151,13 +151,18 @@ QVariant Self::data(const QModelIndex &index, int role) const
     case SenderUsernameRole:
         return QString(message->senderUsername());
 
-    case StatusRole: {
+    case DisplayStatusRole: {
+        const auto displayStatus = displayStatusString(message);
         const auto nextMessage = (row + 1 == rowCount()) ? nullptr : m_messages[row + 1];
         if (nextMessage && nextMessage->senderId() == message->senderId() &&
-                    nextMessage->status() == message->status()) {
+                    displayStatusString(nextMessage) == displayStatus) {
             return QString();
         }
-        return message->statusString();
+        return displayStatus;
+    }
+
+    case IsBrokenRole: {
+        return message->status() == Message::Status::Broken;
     }
 
     case BodyRole: {
@@ -291,7 +296,8 @@ QHash<int, QByteArray> Self::roleNames() const
         { DisplayTimeRole, "displayTime" },
         { SenderIdRole, "senderId" },
         { SenderUsernameRole, "senderUsername" },
-        { StatusRole, "status" },
+        { DisplayStatusRole, "displayStatus" },
+        { IsBrokenRole, "isBroken" },
         { BodyRole, "body" },
         { AttachmentIdRole, "attachmentId" },
         { AttachmentTypeIsFileRole, "attachmentTypeIsFile" },
@@ -327,15 +333,13 @@ std::optional<int> Self::findRowById(const MessageId &messageId) const
 
 void Self::invalidateRow(const int row, const QVector<int> &roles)
 {
-    auto allRoles = roles;
-
-    if (!allRoles.empty()) {
-        invalidateModel(index(row), allRoles);
+    if (!roles.empty()) {
+        invalidateModel(index(row), roles);
     }
 
-    if (allRoles.contains(StatusRole)) {
+    if (roles.contains(DisplayStatusRole)) {
         if (row > 0) {
-            invalidateModel(index(row - 1), { StatusRole, InRowRole });
+            invalidateModel(index(row - 1), { DisplayStatusRole, IsBrokenRole, InRowRole });
         }
         if (row < rowCount() - 1) {
             invalidateModel(index(row + 1), { FirstInRowRole });
@@ -351,13 +355,13 @@ void Self::invalidateModel(const QModelIndex &index, const QVector<int> &roles)
 QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate& messageUpdate) {
 
     if(std::holds_alternative<MessageStatusUpdate>(messageUpdate)) {
-        return { StatusRole };
+        return { DisplayStatusRole, IsBrokenRole };
 
     } else if(std::holds_alternative<IncomingMessageStageUpdate>(messageUpdate)) {
-        return { StatusRole };
+        return { DisplayStatusRole, IsBrokenRole };
 
     } else if(std::holds_alternative<OutgoingMessageStageUpdate>(messageUpdate)) {
-        return { StatusRole };
+        return { DisplayStatusRole, IsBrokenRole };
 
     } else if(std::holds_alternative<MessageAttachmentUploadStageUpdate>(messageUpdate)) {
         return { AttachmentIsLoadingRole };
@@ -385,6 +389,24 @@ QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate& messageUpdate) {
 
     } else {
         return { };
+    }
+}
+
+QString MessagesModel::displayStatusString(MessageHandler message)
+{
+    switch (message->status()) {
+        case Message::Status::New:
+        case Message::Status::Waiting:
+        case Message::Status::Processing:
+            return tr("sending");
+        case Message::Status::Succeed:
+            return tr("sent");
+        case Message::Status::Failed:
+            return tr("failed");
+        case Message::Status::Broken:
+            return tr("broken");
+        default:
+            return QString();
     }
 }
 

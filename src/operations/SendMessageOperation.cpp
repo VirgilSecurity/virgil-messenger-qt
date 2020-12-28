@@ -44,17 +44,22 @@ SendMessageOperation::SendMessageOperation(MessageOperation *parent, MessageSend
     , m_messageSender(messageSender)
 {
     setName(QLatin1String("SendMessage"));
+    connect(this, &Operation::finished, this, &SendMessageOperation::setSentStage);
 }
 
 void SendMessageOperation::run()
 {
-    const auto message = m_parent->message();
-    if (m_messageSender) {
-        const bool wasSent = m_messageSender->sendMessage(message);
-        if (wasSent) {
-            finish();
-        } else {
-            fail();
-        }
+    const bool wasSent = m_messageSender->sendMessage(m_parent->message());
+    if (wasSent) {
+        finish();
+    } else {
+        fail();
     }
+}
+
+void SendMessageOperation::setSentStage()
+{
+    OutgoingMessageStageUpdate update;
+    update.stage = OutgoingMessageStage::Sent;
+    m_parent->messageUpdate(update);
 }

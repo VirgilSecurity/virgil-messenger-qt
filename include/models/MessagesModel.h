@@ -99,7 +99,8 @@ private:
         DisplayTimeRole,
         SenderIdRole,
         SenderUsernameRole,
-        StatusRole,
+        DisplayStatusRole,
+        IsBrokenRole,
         // Text
         BodyRole,
         // Attachment
@@ -123,11 +124,11 @@ private:
     };
 
     static QVector<int> rolesFromMessageUpdate(const MessageUpdate& messageUpdate);
+    static QString displayStatusString(MessageHandler message);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
-
 
     std::optional<int> findRowById(const MessageId &messageId) const;
     void invalidateRow(const int row, const QVector<int> &roles = {});
