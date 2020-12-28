@@ -3,7 +3,6 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
 import QtQuick.Window 2.12
 import QtMultimedia 5.12
-import com.virgilsecurity.messenger 1.0
 
 import "../base"
 import "../theme"
@@ -60,7 +59,7 @@ ModelListView {
             displayTime: model.displayTime
             nickname: model.senderUsername
             isOwnMessage: model.senderId === controllers.users.currentUserId
-            status: isOwnMessage ? model.status : "none"
+            status: isOwnMessage ? model.displayStatus : "none"
             messageId: model.id
             inRow: model.inRow
             firstInRow: model.firstInRow

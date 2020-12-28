@@ -3,7 +3,6 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
 import QtQuick.Window 2.12
 import QtMultimedia 5.12
-import com.virgilsecurity.messenger 1.0
 
 import "../base"
 import "../theme"

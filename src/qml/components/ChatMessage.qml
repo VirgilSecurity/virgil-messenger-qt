@@ -2,7 +2,6 @@ import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
 import QtQuick.Shapes 1.12
-import com.virgilsecurity.messenger 1.0
 
 import "../base"
 import "../theme"
