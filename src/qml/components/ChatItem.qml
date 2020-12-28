@@ -32,7 +32,7 @@ Item {
 
         anchors.fill: parent
         contentHeight: chatListItem.chatContentHeight
-//        onContentHeightChanged: chatList.contentHeightChangedController() // breaks onCountChanged TODO(dz)
+      //onContentHeightChanged: chatList.contentHeightChangedController() // breaks onCountChanged TODO(dz)
         onHeightChanged: chatList.heightChangedController() // when changing height - new messages are not on bottom TODO(dz)
         onContentYChanged: chatList.autoFlickToBottomController()
         Behavior on contentY {

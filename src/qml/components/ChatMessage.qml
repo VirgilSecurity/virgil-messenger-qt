@@ -242,15 +242,19 @@ Control {
                         }
 
                         Item { // status
-                            width: 20
-                            height: parent.height
-                            anchors.left: parent.right
+                            width: 14
+                            height: width
+                            anchors{
+                                left: parent.right
+                                leftMargin: -width * 0.7
+                                bottom: parent.bottom
+                            }
                             visible: isOwnMessage
                             Image {
                                 width: parent.width
-                                height: width
-                                anchors.centerIn: parent
-                                source: messageStatusImageSource()
+                                anchors.bottom: parent.bottom
+                                fillMode: Image.PreserveAspectFit
+                                source: "../resources/icons/%1.png".arg(messageStatusImageSource())
                             }
                         }
 
@@ -522,17 +526,16 @@ Control {
         }
     }
 
-
     function messageStatusImageSource() {
         if (chatMessage.isBroken) {
-            return "" // "broken"
+            return "M-Sending" // "broken"
         }
         switch (status) {
-            case "0": return "" // "sending"
-            case "1": return "" // "sent"
-            case "2": return "" // "delivered"
-            case "4": return "" // "read"
-            default: return "" // "read"
+            case "0": return "M-Sending" // "sending"
+            case "1": return "M-Sent" // "sent"
+            case "2": return "M-Delivered" // "delivered"
+            case "4": return "M-Read" // "read"
+            default: return "M-Read" // "read"
         }
     }
 
