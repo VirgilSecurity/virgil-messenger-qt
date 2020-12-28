@@ -234,6 +234,7 @@ ModifiableMessageHandler Self::readMessage(const QSqlQuery &query, const QString
     const auto messageChatType = query.value("messageChatType").toString();
     const auto messageCreatedAt = query.value("messageCreatedAt").toULongLong();
     const auto messageRecipientId = query.value("messageRecipientId").toString();
+    const auto messageRecipientUsername = query.value("messageRecipientUsername").toString();
     const auto messageSenderId = query.value("messageSenderId").toString();
     const auto messageSenderUsername = query.value("messageSenderUsername").toString();
     const auto messageIsOutgoing = query.value("messageIsOutgoing").toBool();
@@ -263,6 +264,7 @@ ModifiableMessageHandler Self::readMessage(const QSqlQuery &query, const QString
     message->setChatType(ChatTypeFromString(messageChatType));
     message->setCreatedAt(QDateTime::fromTime_t(messageCreatedAt));
     message->setSenderUsername(UserId(messageSenderUsername));
+    message->setRecipientUsername(UserId(messageRecipientUsername));
     message->setContent(std::move(content));
 
     return message;

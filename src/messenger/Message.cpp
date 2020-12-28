@@ -60,6 +60,16 @@ void Self::setSenderId(UserId userId) {
 }
 
 
+QString Self::senderUsername() const {
+    return m_senderUsername;
+}
+
+
+void Self::setSenderUsername(QString username) {
+    m_senderUsername = std::move(username);
+}
+
+
 UserId Self::recipientId() const {
     return m_recipientId;
 }
@@ -67,6 +77,16 @@ UserId Self::recipientId() const {
 
 void Self::setRecipientId(UserId userId) {
     m_recipientId = std::move(userId);
+}
+
+
+QString Self::recipientUsername() const {
+    return m_recipientUsername;
+}
+
+
+void Self::setRecipientUsername(QString username) {
+    m_recipientUsername = std::move(username);
 }
 
 
@@ -83,6 +103,16 @@ ChatId Self::chatId() const {
 }
 
 
+QString Self::chatTitle() const {
+    if (isIncoming()) {
+        return m_senderUsername;
+    }
+    else {
+        return m_recipientUsername;
+    }
+}
+
+
 ChatType Self::chatType() const {
     return m_chatType;
 }
@@ -91,17 +121,6 @@ ChatType Self::chatType() const {
 void Self::setChatType(ChatType chatType) {
     m_chatType = chatType;
 }
-
-
-QString Self::senderUsername() const {
-    return m_senderUsername;
-}
-
-
-void Self::setSenderUsername(QString username) {
-    m_senderUsername = std::move(username);
-}
-
 
 
 QDateTime Self::createdAt() const {
@@ -224,4 +243,14 @@ bool Self::isOutgoing() const noexcept {
 
 bool Self::isIncoming() const noexcept {
     return false;
+}
+
+
+bool Self::isOutgoingCopyFromOtherDevice() const noexcept {
+    return m_isCarbonsCopy;
+}
+
+
+void Self::markAsOutgoingCopyFromOtherDevice() {
+    m_isCarbonsCopy = true;
 }

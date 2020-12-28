@@ -40,6 +40,7 @@
 #include "CommKitBridge.h"
 #include "MessageContentJsonUtils.h"
 #include "IncomingMessage.h"
+#include "OutgoingMessage.h"
 
 #include "VSQNetworkAnalyzer.h"
 #include "VSQDiscoveryManager.h"
@@ -254,6 +255,13 @@ Self::resetXmppConfiguration() {
     connect(m_impl->xmpp.get(), &QXmppClient::sslErrors, this, &Self::xmppOnSslErrors);
     connect(m_impl->xmpp.get(), &QXmppClient::messageReceived, this, &Self::xmppOnMessageReceived);
 
+    //
+    //  Handle carbons (message copies).
+    //  See, XEP-0280.
+    //
+    connect(m_impl->xmppCarbonManager, &QXmppCarbonManager::messageReceived, this, &Self::xmppOnCarbonMessageReceived);
+    connect(m_impl->xmppCarbonManager, &QXmppCarbonManager::messageSent, this, &Self::xmppOnCarbonMessageReceived);
+
     // Add extra logging
 #if USE_XMPP_LOGS
     auto logger = QXmppLogger::getLogger();
@@ -277,7 +285,7 @@ Self::resetXmppConfiguration() {
 // --------------------------------------------------------------------------
 bool
 Self::isOnline() const noexcept {
-    return isNetworkOnline() && isXmppConnected();
+    return isSignedIn() && isNetworkOnline() && isXmppConnected();
 }
 
 
@@ -499,8 +507,8 @@ Self::signOut() {
     return QtConcurrent::run([this]() -> Result {
         qCInfo(lcCommKitMessenger) << "Signing out";
 
-        emit cleanupCommKitMessenger();
         emit deregisterFromPushNotifications();
+        emit cleanupCommKitMessenger();
         emit disconnectXmppServer();
 
         return Self::Result::Success;
@@ -564,10 +572,8 @@ Self::registerForNotifications() {
 void
 Self::onDeregisterFromPushNotifications() {
 #if VS_PUSHNOTIFICATIONS
-
     if (!isOnline()) {
         qCWarning(lcCommKitMessenger) << "Can not unsubscribe from the push notifications, no connection.";
-        return false;
     }
 
     auto xmppPush = XmppPushNotifications::instance().buildDisableIq();
@@ -846,6 +852,7 @@ Self::sendMessage(MessageHandler message) {
         messageJson.insert("version", "v3");
         messageJson.insert("timestamp", static_cast<qint64>(message->createdAt().toTime_t()));
         messageJson.insert("from", message->senderUsername());
+        messageJson.insert("to", message->recipientUsername());
         messageJson.insert("content", MessageContentJsonUtils::to(message->content()));
 
         //
@@ -907,7 +914,7 @@ Self::sendMessage(MessageHandler message) {
 QFuture<Self::Result>
 Self::processReceivedXmppMessage(const QXmppMessage& xmppMessage) {
 
-    return QtConcurrent::run([this, xmppMessage = xmppMessage]() -> Result {
+    return QtConcurrent::run([this, xmppMessage]() -> Result {
         qCInfo(lcCommKitMessenger) << "Received XMPP message";
         qCDebug(lcCommKitMessenger) << "Received XMPP message: " << xmppMessage.id() << "from: " << xmppMessage.from();
 
@@ -996,13 +1003,24 @@ Self::processReceivedXmppMessage(const QXmppMessage& xmppMessage) {
             message->setCreatedAt(QDateTime::fromTime_t(timestamp));
         }
 
-        auto fromUsername = messageJson["from"].toString();
-        if (fromUsername.isEmpty()) {
+        //
+        //  Get sender and recipient usernames.
+        //
+        auto senderUsername = messageJson["from"].toString();
+        if (senderUsername.isEmpty()) {
             qCWarning(lcCommKitMessenger) << "Got invalid message - missing 'from' username";
             return Self::Result::Error_InvalidMessageFormat;
         }
 
-        message->setSenderUsername(std::move(fromUsername));
+        message->setSenderUsername(std::move(senderUsername));
+
+        auto recipientUsername = messageJson["to"].toString();
+        if (recipientUsername.isEmpty()) {
+            qCWarning(lcCommKitMessenger) << "Got invalid message - missing 'to' username";
+            return Self::Result::Error_InvalidMessageFormat;
+        }
+
+        message->setRecipientUsername(std::move(recipientUsername));
 
         //
         //  Parse content.
@@ -1033,6 +1051,147 @@ Self::processReceivedXmppMessage(const QXmppMessage& xmppMessage) {
     });
 }
 
+QFuture<Self::Result>
+Self::processReceivedXmppCarbonMessage(const QXmppMessage& xmppMessage) {
+
+    return QtConcurrent::run([this, xmppMessage]() -> Result {
+        qCInfo(lcCommKitMessenger) << "Received XMPP message copy";
+        qCDebug(lcCommKitMessenger) << "Received XMPP message copy: " << xmppMessage.id();
+
+        auto senderId = userIdFromJid(xmppMessage.from());
+        auto recipientId = userIdFromJid(xmppMessage.to());
+
+        if (currentUser()->id() != senderId) {
+            qCWarning(lcCommKitMessenger) << "Got message carbons copy from an another account: " << senderId;
+            return Self::Result::Error_InvalidCarbonMessage;
+        }
+
+        auto message = std::make_unique<OutgoingMessage>();
+
+        // TODO: review next lines when implement group chats.
+        message->setId(MessageId(xmppMessage.id()));
+        message->setRecipientId(recipientId);
+        message->setSenderId(senderId);
+        message->setCreatedAt(xmppMessage.stamp());
+
+        //
+        //  Decode message body from Base64.
+        //
+        auto ciphertextBase64 = xmppMessage.body().toLatin1();
+        if (ciphertextBase64.isEmpty()) {
+            qCWarning(lcCommKitMessenger) << "Got invalid XMPP message - empty ciphertext";
+            return Self::Result::Error_InvalidMessageCiphertext;
+        }
+
+        auto ciphertextDecoded = QByteArray::fromBase64Encoding(ciphertextBase64);
+        if (!ciphertextDecoded) {
+            qCWarning(lcCommKitMessenger) << "Got invalid XMPP message - ciphertext is not base64 encoded";
+            return Self::Result::Error_InvalidMessageCiphertext;
+        }
+
+        auto ciphertext = *ciphertextDecoded;
+
+        //
+        //  Sender is a current user.
+        //
+        auto sender = currentUser();
+
+        //
+        //  Decrypt message.
+        //
+        auto plaintextDataMinLen = vssq_messenger_decrypted_message_len(m_impl->messenger.get(), ciphertext.size());
+        QByteArray plaintextData(plaintextDataMinLen, 0x00);
+
+        auto plaintext = vsc_buffer_wrap_ptr(vsc_buffer_new());
+        vsc_buffer_use(plaintext.get(),  (byte *)plaintextData.data(), plaintextData.size());
+
+        const vssq_status_t decryptionStatus = vssq_messenger_decrypt_data(
+                    m_impl->messenger.get(), vsc_data_from(ciphertext), sender->impl()->user.get(), plaintext.get());
+
+        if (decryptionStatus != vssq_status_SUCCESS) {
+            qCWarning(lcCommKitMessenger) << "Can not decrypt ciphertext: " << vsc_str_to_qstring(vssq_error_message_from_status(decryptionStatus));
+            return Self::Result::Error_InvalidMessageCiphertext;
+        }
+
+        plaintextData.resize(vsc_buffer_len(plaintext.get()));
+
+        //
+        //  Parse message.
+        //
+        const auto messageJsonDocument = QJsonDocument::fromJson(plaintextData);
+        if (messageJsonDocument.isNull()) {
+            qCWarning(lcCommKitMessenger) << "Got invalid message format - not a JSON";
+            return Self::Result::Error_InvalidMessageFormat;
+        }
+
+        const auto messageJson = messageJsonDocument.object();
+
+        //
+        //  Check version and timestamp.
+        //
+        const auto version = messageJson["version"].toString();
+        if (version != "v3") {
+            qCWarning(lcCommKitMessenger) << "Got invalid message - unsupported version, expected v3, got " << version;
+            return Self::Result::Error_InvalidMessageVersion;
+        }
+
+        const auto timestamp = messageJson["timestamp"].toVariant().value<uint>();
+        if (timestamp != xmppMessage.stamp().toTime_t()) {
+            qCWarning(lcCommKitMessenger) << "Got invalid message - timestamp mismatch. Expected "
+                                          << timestamp << ", xmpp " << xmppMessage.stamp().toTime_t();
+            message->setCreatedAt(QDateTime::fromTime_t(timestamp));
+        }
+
+        //
+        //  Get sender and recipient usernames.
+        //
+        auto senderUsername = messageJson["from"].toString();
+        if (senderUsername.isEmpty()) {
+            qCWarning(lcCommKitMessenger) << "Got invalid message - missing 'from' username";
+            return Self::Result::Error_InvalidMessageFormat;
+        }
+
+        message->setSenderUsername(std::move(senderUsername));
+
+        auto recipientUsername = messageJson["to"].toString();
+        if (recipientUsername.isEmpty()) {
+            qCWarning(lcCommKitMessenger) << "Got invalid message - missing 'to' username";
+            return Self::Result::Error_InvalidMessageFormat;
+        }
+
+        message->setRecipientUsername(std::move(recipientUsername));
+
+        //
+        //  Parse content.
+        //
+        const auto contentJson = messageJson["content"].toObject();
+        if (contentJson.isEmpty()) {
+            qCWarning(lcCommKitMessenger) << "Got invalid message - missing content";
+            return Self::Result::Error_InvalidMessageFormat;
+        }
+
+        QString errorString;
+        auto content = MessageContentJsonUtils::from(contentJson, errorString);
+
+        if (std::get_if<std::monostate>(&content)) {
+            return Self::Result::Error_InvalidMessageFormat;
+        }
+
+        message->setContent(std::move(content));
+        message->setStage(OutgoingMessageStage::Sent);
+        message->markAsOutgoingCopyFromOtherDevice();
+
+        qCInfo(lcCommKitMessenger) << "Received XMPP message was decrypted";
+
+        //
+        //  Tell the world we got a message.
+        //
+        emit messageReceived(std::move(message));
+
+        return Self::Result::Success;
+    });
+}
+
 // --------------------------------------------------------------------------
 //  XMPP event handlers.
 // --------------------------------------------------------------------------
@@ -1041,6 +1200,10 @@ Self::xmppOnConnected() {
     m_impl->lastActivityManager->setEnabled(true);
 
     registerForNotifications();
+
+    if (m_impl->xmppCarbonManager->carbonsEnabled()) {
+        m_impl->xmppCarbonManager->setCarbonsEnabled(true);
+    }
 
     changeConnectionState(Self::ConnectionState::Connected);
 }
@@ -1105,6 +1268,15 @@ Self::xmppOnMessageReceived(const QXmppMessage &xmppMessage) {
     //  TODO: handle result.
     //
     processReceivedXmppMessage(xmppMessage);
+}
+
+
+void
+Self::xmppOnCarbonMessageReceived(const QXmppMessage &xmppMessage) {
+    //
+    //  TODO: handle result.
+    //
+    processReceivedXmppCarbonMessage(xmppMessage);
 }
 
 

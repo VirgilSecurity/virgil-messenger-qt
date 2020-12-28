@@ -12,6 +12,7 @@ SELECT
     messages.body AS messageBody,
     messages.ciphertext AS messageCiphertext,
     chats.type AS messageChatType,
+    chats.title AS messageRecipientUsername,
     attachments.id AS attachmentId,
     attachments.type AS attachmentType,
     attachments.fingerprint AS attachmentFingerprint,

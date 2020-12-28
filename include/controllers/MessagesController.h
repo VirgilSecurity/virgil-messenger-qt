@@ -89,6 +89,11 @@ private:
     std::unique_ptr<OutgoingMessage> createOutgoingMessage();
 
     //
+    //  Return new unread message count based on destination chat and current chat.
+    //
+    size_t calculateUnreadMessageCount(const ChatHandler& destinationChat, const MessageHandler& message) const;
+
+    //
     //  Connect to the database.
     //
     void setupTableConnections();
@@ -99,7 +104,6 @@ private:
     QPointer<Messenger> m_messenger;
     QPointer<Models> m_models;
     QPointer<UserDatabase> m_userDatabase;
-    ChatHandler m_chat;
 };
 } // namespace vm
 

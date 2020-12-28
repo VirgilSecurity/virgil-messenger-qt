@@ -76,6 +76,7 @@ public:
         Error_ExportCredentials,
         Error_ImportCredentials,
         Error_Attachment,
+        Error_InvalidCarbonMessage,
         Error_InvalidMessageFormat,
         Error_InvalidMessageVersion,
         Error_InvalidMessageTimestamp,
@@ -156,6 +157,7 @@ public:
     //
     QFuture<Result> sendMessage(MessageHandler message);
     QFuture<Result> processReceivedXmppMessage(const QXmppMessage& xmppMessage);
+    QFuture<Result> processReceivedXmppCarbonMessage(const QXmppMessage& xmppMessage);
 
     //
     //  Push Notifications.
@@ -226,6 +228,7 @@ private slots:
     void xmppOnIqReceived(const QXmppIq &iq);
     void xmppOnSslErrors(const QList<QSslError> &errors);
     void xmppOnMessageReceived(const QXmppMessage &xmppMessage);
+    void xmppOnCarbonMessageReceived(const QXmppMessage &xmppMessage);
     void xmppOnMessageDelivered(const QString &jid, const QString &messageId);
     void xmppOnUploadServiceFound();
     void xmppOnUploadSlotReceived(const QXmppHttpUploadSlotIq &slot);

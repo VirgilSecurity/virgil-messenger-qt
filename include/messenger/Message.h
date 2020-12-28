@@ -108,6 +108,16 @@ public:
     void setRecipientId(UserId userId);
 
     //
+    // Return message recipient unique identifier.
+    //
+    QString recipientUsername() const;
+
+    //
+    // Set message recipient unique identifier.
+    //
+    void setRecipientUsername(QString username);
+
+    //
     // Return a chat unique identifier the message belongs to.
     //
     ChatId chatId() const;
@@ -116,6 +126,11 @@ public:
     // Return a chat type the message belongs to.
     //
     ChatType chatType() const;
+
+    //
+    // Return suggested chat title.
+    //
+    QString chatTitle() const;
 
     //
     // Set a chat type the message belongs to.
@@ -235,16 +250,28 @@ public:
     //
     virtual bool isIncoming() const noexcept;
 
+    //
+    //  Return true if message is a copy of outgoing message that was sent from another device.
+    //
+    bool isOutgoingCopyFromOtherDevice() const noexcept;
+
+    //
+    //  Mark message as a copy of an outgoing message that was sent from another device.
+    //
+    void markAsOutgoingCopyFromOtherDevice();
+
 private:
     MessageId m_id;
     UserId m_senderId;
     UserId m_recipientId;
-    ChatType m_chatType;
     QString m_senderUsername;
+    QString m_recipientUsername;
+    ChatType m_chatType;
     QDateTime m_createdAt;
     MessageContent m_content;
     std::shared_ptr<MessageGroupChatInfo> m_groupChatInfo;
     Status m_status;
+    bool m_isCarbonsCopy;
 };
 
 using MessageHandler = std::shared_ptr<const Message>;
