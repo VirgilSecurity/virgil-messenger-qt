@@ -12,9 +12,9 @@ import "../components"
 Item {
     id: chatListItem
 
-    property real previousHeight: 0.0
+    property real previousHeight: chatListItem.height
     property real chatContentHeight: chatListView.height
-    property bool animationEnabled: false
+    property bool smartChatEnabled: false
     property bool autoFlickToBottom: true
     property bool autoFlickToBottomButtonVisible: false
     readonly property int minHeightToDisableAutoFlick: 100
@@ -32,17 +32,18 @@ Item {
 
         anchors.fill: parent
         contentHeight: chatListItem.chatContentHeight
-//        onContentHeightChanged: chatList.contentHeightChangedController() // breaks onCountChanged
-        onHeightChanged: chatList.heightChangedController()
+//        onContentHeightChanged: chatList.contentHeightChangedController() // breaks onCountChanged TODO(dz)
+        onHeightChanged: chatList.heightChangedController() // when changing height - new messages are not on bottom TODO(dz)
         onContentYChanged: chatList.autoFlickToBottomController()
         Behavior on contentY {
             NumberAnimation {
-                duration: chatListItem.animationEnabled ? Theme.animationDuration : 0
+                duration: chatListItem.smartChatEnabled ? Theme.animationDuration : 0
                 easing.type: Easing.InOutCubic
+                alwaysRunToEnd: true
             }
         }
 
-        ChatPageList {
+        ChatList {
             id: chatListView
 
             anchors {
@@ -72,9 +73,8 @@ Item {
         interval: 1
         onTriggered: {
             chatListItem.autoFlickToBottom = true
-            chatList.flickChatToBottom(false)
-
-            chatListItem.animationEnabled = true
+            chatList.flickToBottomController(false)
+            chatListItem.smartChatEnabled = true
         }
     }
 
@@ -84,12 +84,14 @@ Item {
         id: chatList
 
         function countChangedController() {
-            if (chatListItem.animationEnabled) newMessageController()
+            if (chatListItem.smartChatEnabled) {
+                newMessageController()
+            }
         }
 
         function flickToBottomController(newItem = true) {
             if (chatListItem.autoFlickToBottom) {
-                if (chatListItem.animationEnabled) {
+                if (chatListItem.smartChatEnabled) {
                     flickChatToBottom(newItem)
                 } else {
                     setChatToBottom()
@@ -98,7 +100,7 @@ Item {
         }
 
         function setChatToBottom() {
-            chatFlickable.contentY = chatListItem.chatContentHeight
+            chatFlickable.contentY = chatListItem.chatContentHeight - chatListItem.height
         }
 
         function flickChatToBottom(newItem) {
@@ -158,24 +160,37 @@ Item {
         }
 
         function heightChangedController() {
-            if (chatListItem.height < chatListItem.previousHeight) {
-                chatList.flickToBottomController(false)
+            if (!chatListItem.smartChatEnabled) {
+                return
             }
+
+            if (chatListItem.height < chatListItem.previousHeight) {
+                chatListItem.smartChatEnabled = false
+                chatFlickable.contentY += chatListItem.previousHeight - chatListItem.height
+                chatListItem.smartChatEnabled = true
+            }
+
+            if (chatListItem.height > chatListItem.previousHeight) {
+                chatListItem.smartChatEnabled = false
+                chatFlickable.contentY -= chatListItem.height - chatListItem.previousHeight
+                chatListItem.smartChatEnabled = true
+            }
+
             chatListItem.previousHeight = chatListItem.height
         }
 
-//        function contentHeightChangedController() {
-//            if (chatListItem.animationEnabled) {
-//                if (!chatListItem.isInsert) {
-//                    chatListItem.animationEnabled = false
-//                    let contentYPercent = chatFlickable.contentY / chatFlickable.previousContentHeight
-//                    chatFlickable.contentY = chatFlickable.contentHeight * contentYPercent
-//                    chatListItem.animationEnabled = true
-//                }
-//            }
+        function contentHeightChangedController() {
+            if (chatListItem.smartChatEnabled) {
+                if (!chatListItem.isInsert) {
+                    chatListItem.smartChatEnabled = false
+                    let contentYPercent = chatFlickable.contentY / chatFlickable.previousContentHeight
+                    chatFlickable.contentY = chatFlickable.contentHeight * contentYPercent
+                    chatListItem.smartChatEnabled = true
+                }
+            }
 
-//            chatFlickable.previousContentHeight = chatFlickable.contentHeight
-//        }
+            chatFlickable.previousContentHeight = chatFlickable.contentHeight
+        }
     }
 
     QtObject {

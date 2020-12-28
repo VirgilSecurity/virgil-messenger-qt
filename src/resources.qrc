@@ -97,7 +97,7 @@
         <file>qml/components/AccountSelection.qml</file>
         <file>qml/components/ChatItem.qml</file>
         <file>qml/components/ChatMessageInput.qml</file>
-        <file>qml/components/ChatPageList.qml</file>
+        <file>qml/components/ChatList.qml</file>
         <file>qml/components/ChatMessage.qml</file>
         <file>qml/components/MessageCounter.qml</file>
         <file>qml/components/SearchHeader.qml</file>

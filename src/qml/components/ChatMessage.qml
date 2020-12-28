@@ -529,10 +529,10 @@ Control {
         }
         switch (status) {
             case "0": return "" // "sending"
-            case "1": return // "sent"
-            case "2": return // "delivered"
-            case "4": return // "read"
-            default: return // "read"
+            case "1": return "" // "sent"
+            case "2": return "" // "delivered"
+            case "4": return "" // "read"
+            default: return "" // "read"
         }
     }
 
