@@ -259,7 +259,7 @@ Self::resetXmppConfiguration() {
     //  Handle carbons (message copies).
     //  See, XEP-0280.
     //
-    connect(m_impl->xmppCarbonManager, &QXmppCarbonManager::messageReceived, this, &Self::xmppOnCarbonMessageReceived);
+    connect(m_impl->xmppCarbonManager, &QXmppCarbonManager::messageReceived, this, &Self::xmppOnMessageReceived);
     connect(m_impl->xmppCarbonManager, &QXmppCarbonManager::messageSent, this, &Self::xmppOnCarbonMessageReceived);
 
     // Add extra logging
