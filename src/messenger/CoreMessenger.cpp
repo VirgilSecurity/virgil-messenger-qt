@@ -797,7 +797,6 @@ Self::findUserById(const UserId &userId) const {
     auto commKitUser = std::make_shared<User>(std::move(commKitUserImpl));
 
     m_impl->identityToUser[userId] = commKitUser;
-    m_impl->usernameToUser[userId] = commKitUser;
 
     return commKitUser;
 }
