@@ -68,6 +68,11 @@ public:
     bool isIncoming() const noexcept override;
 
     //
+    //  Return current message status.
+    //
+    Status status() const noexcept override;
+
+    //
     //  Return current message stage.
     //
     Stage stage() const noexcept;

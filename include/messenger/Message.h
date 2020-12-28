@@ -197,22 +197,12 @@ public:
     //
     //  Return current message status.
     //
-    Status status() const noexcept;
-
-    //
-    //  Set current message status.
-    //
-    void setStatus(Status status);
+    virtual Status status() const noexcept = 0;
 
     //
     //  Return current message status as string.
     //
     QString statusString() const;
-
-    //
-    //  Set current message status from string.
-    //
-    void setStatusString(const QString statusString);
 
     //
     //  Return the message stage as string.
@@ -270,7 +260,6 @@ private:
     QDateTime m_createdAt;
     MessageContent m_content;
     std::shared_ptr<MessageGroupChatInfo> m_groupChatInfo;
-    Status m_status = Status::New;
     bool m_isCarbonsCopy = false;
 };
 

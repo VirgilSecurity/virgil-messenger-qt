@@ -40,10 +40,7 @@
 using namespace vm;
 
 MessageId vm::MessageUpdateGetMessageId(const MessageUpdate& update) {
-    if (auto base = std::get_if<MessageStatusUpdate>(&update)) {
-        return base->messageId;
-    }
-    else if (auto base = std::get_if<IncomingMessageStageUpdate>(&update)) {
+    if (auto base = std::get_if<IncomingMessageStageUpdate>(&update)) {
         return base->messageId;
     }
     else if (auto base = std::get_if<OutgoingMessageStageUpdate>(&update)) {

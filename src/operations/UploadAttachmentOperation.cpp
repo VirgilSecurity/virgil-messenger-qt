@@ -58,6 +58,58 @@ UploadAttachmentOperation::UploadAttachmentOperation(MessageOperation *parent, c
 
 bool UploadAttachmentOperation::populateChildren()
 {
+    const auto content = m_parent->message()->content();
+    if (std::holds_alternative<MessageContentFile>(content)) {
+        populateFileOperations();
+    }
+    else if (std::holds_alternative<MessageContentPicture>(content)) {
+        populatePictureOperations();
+    }
+    return true;
+}
+
+void UploadAttachmentOperation::populateFileOperations()
+{
+    const auto message = m_parent->message();
+    const auto attachment = std::get_if<MessageContentFile>(&message->content());
+    const auto factory = m_parent->factory();
+    // Fingerprint
+    auto fingerprintOp = factory->populateCalculateAttachmentFingerprint(m_parent, this, attachment->localPath());
+    connect(fingerprintOp, &Operation::finished, [=]() {
+        // Stage update
+        updateStage(MessageContentUploadStage::Preprocessed);
+    });
+    // Encrypt/Upload
+    auto encUploadOp = factory->populateEncryptUpload(this, attachment->localPath(), message->recipientId());
+    connect(encUploadOp, &EncryptUploadFileOperation::bytesCalculated, this, std::bind(&LoadAttachmentOperation::startLoadOperation, this, std::placeholders::_1));
+    connect(encUploadOp, &EncryptUploadFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
+    connect(encUploadOp, &EncryptUploadFileOperation::uploaded, [=](const QUrl &url) {
+        // Remote url update
+        MessageAttachmentRemoteUrlUpdate urlUpdate;
+        urlUpdate.messageId = message->id();
+        urlUpdate.remoteUrl = url;
+        m_parent->messageUpdate(urlUpdate);
+        // Stage update
+        updateStage(MessageContentUploadStage::GotUploadingSlot);
+    });
+    connect(encUploadOp, &EncryptUploadFileOperation::encrypted, [=](quint64 bytes) {
+        // Encrypted size update
+        MessageAttachmentEncryptedSizeUpdate sizeUpdate;
+        sizeUpdate.messageId = message->id();
+        sizeUpdate.encryptedSize = bytes;
+        m_parent->messageUpdate(sizeUpdate);
+        // Stage update
+        updateStage(MessageContentUploadStage::Encrypted);
+    });
+    // Finish
+    connect(this, &Operation::finished, [=]() {
+        // Stage update
+        updateStage(MessageContentUploadStage::Uploaded);
+    });
+}
+
+void UploadAttachmentOperation::populatePictureOperations()
+{
     // FIXME: Split operation to file and picture.
 //    const auto message = m_parent->message();
 //    const auto attachment = m_parent->attachment();
@@ -119,15 +171,14 @@ bool UploadAttachmentOperation::populateChildren()
 //    // Connection to loading statuses
 //    connect(this, &Operation::started, m_parent, std::bind(&MessageOperation::setAttachmentStatus, m_parent, Attachment::Status::Loading));
 //    connect(this, &Operation::finished, m_parent, std::bind(&MessageOperation::setAttachmentStatus, m_parent, Attachment::Status::Loaded));
-    return hasChildren();
+
+    // FIXME(fpohtmeh): use tempPngPath?
 }
 
-void UploadAttachmentOperation::cleanup()
+void UploadAttachmentOperation::updateStage(MessageContentUploadStage uploadStage)
 {
-    FileUtils::removeFile(m_tempPngPath);
-}
-
-void UploadAttachmentOperation::setTempPngPath(const QString &path)
-{
-    m_tempPngPath = path;
+    MessageAttachmentUploadStageUpdate stageUpdate;
+    stageUpdate.messageId = m_parent->message()->id();
+    stageUpdate.uploadStage = uploadStage;
+    m_parent->messageUpdate(stageUpdate);
 }

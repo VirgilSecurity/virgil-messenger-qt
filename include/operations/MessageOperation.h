@@ -56,9 +56,6 @@ public:
 signals:
     void messageUpdate(const MessageUpdate &update);
 
-protected:
-    void connectChild(Operation *child) override;
-
 private:
     MessageOperationFactory *m_factory;
     MessageHandler m_message;

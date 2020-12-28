@@ -44,7 +44,6 @@ namespace vm {
 //
 enum class MessageStatus {
     New, // A message is created, and not currently processing.
-    Waiting, // A message processing is scheduled, but not currently running.
     Processing, // A message is currently processing.
     Succeed, // A message processing successfully completed.
     Failed, // A message processing failed, see stages do define what stage was accomplished to recover operation.

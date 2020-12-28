@@ -186,7 +186,6 @@ MessageContentAttachment* Self::contentAsAttachment() {
 }
 
 
-
 std::shared_ptr<MessageGroupChatInfo> Self::groupChatInfo() const {
     return m_groupChatInfo;
 }
@@ -197,31 +196,13 @@ void Self::setGroupChatInfo(std::shared_ptr<MessageGroupChatInfo> groupChatInfo)
 }
 
 
-Self::Status Self::status() const noexcept {
-    return m_status;
-}
-
-
-void Self::setStatus(Self::Status status) {
-    m_status = status;
-}
-
-
 QString Self::statusString() const {
-    return MessageStatusToString(m_status);
-}
-
-
-void Self::setStatusString(const QString statusString) {
-    m_status = MessageStatusFromString(statusString);
+    return MessageStatusToString(status());
 }
 
 
 bool Self::applyUpdate(const MessageUpdate& update) {
-    if (auto statusUpdate = std::get_if<MessageStatusUpdate>(&update)) {
-        m_status = statusUpdate->status;
-        return true;
-    }
+    Q_UNUSED(update)
     return false;
 }
 

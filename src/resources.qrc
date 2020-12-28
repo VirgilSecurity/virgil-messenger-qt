@@ -153,7 +153,7 @@
         <file>resources/database/updateAttachmentFingerprint.sql</file>
         <file>resources/database/updateAttachmentLocalPath.sql</file>
         <file>resources/database/updateAttachmentUploadStage.sql</file>
-        <file>resources/database/updateAttachmentUrl.sql</file>
+        <file>resources/database/updateAttachmentRemoteUrl.sql</file>
         <file>resources/database/updateLastMessage.sql</file>
         <file>resources/database/updateMessageStage.sql</file>
     </qresource>

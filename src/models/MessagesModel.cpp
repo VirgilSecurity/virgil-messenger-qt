@@ -354,10 +354,7 @@ void Self::invalidateModel(const QModelIndex &index, const QVector<int> &roles)
 
 QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate& messageUpdate) {
 
-    if(std::holds_alternative<MessageStatusUpdate>(messageUpdate)) {
-        return { DisplayStatusRole, IsBrokenRole };
-
-    } else if(std::holds_alternative<IncomingMessageStageUpdate>(messageUpdate)) {
+    if(std::holds_alternative<IncomingMessageStageUpdate>(messageUpdate)) {
         return { DisplayStatusRole, IsBrokenRole };
 
     } else if(std::holds_alternative<OutgoingMessageStageUpdate>(messageUpdate)) {
@@ -392,11 +389,10 @@ QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate& messageUpdate) {
     }
 }
 
-QString MessagesModel::displayStatusString(MessageHandler message)
+QString Self::displayStatusString(MessageHandler message)
 {
     switch (message->status()) {
         case Message::Status::New:
-        case Message::Status::Waiting:
         case Message::Status::Processing:
             return tr("sending");
         case Message::Status::Succeed:
@@ -409,4 +405,3 @@ QString MessagesModel::displayStatusString(MessageHandler message)
             return QString();
     }
 }
-

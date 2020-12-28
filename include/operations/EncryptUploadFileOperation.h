@@ -57,6 +57,7 @@ public:
 
 signals:
     void progressChanged(quint64 bytesLoaded, quint64 bytesTotal);
+    void encrypted(quint64 bytes);
     void bytesCalculated(quint64 bytes);
     void uploaded(const QUrl &url);
 

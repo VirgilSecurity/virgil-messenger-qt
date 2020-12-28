@@ -43,9 +43,6 @@ MessageStatus vm::MessageStatusFromString(const QString& statusString) {
     if (statusString == QLatin1String("new")) {
         return MessageStatus::New;
     }
-    else if (statusString == QLatin1String("waiting")) {
-        return MessageStatus::Waiting;
-    }
     else if (statusString == QLatin1String("processing")) {
         return MessageStatus::Processing;
     }
@@ -68,9 +65,6 @@ QString vm::MessageStatusToString(MessageStatus status) {
     switch (status) {
         case MessageStatus::New:
             return QLatin1String("new");
-
-        case MessageStatus::Waiting:
-            return QLatin1String("waiting");
 
         case MessageStatus::Processing:
             return QLatin1String("processing");

@@ -32,35 +32,19 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#include "EncryptFileOperation.h"
 
-#ifndef VM_MESSAGE_CONTENT_UPLOAD_STAGE_H
-#define VM_MESSAGE_CONTENT_UPLOAD_STAGE_H
+using namespace vm;
 
-#include <QString>
+EncryptFileOperation::EncryptFileOperation(QObject *parent, const QString &sourcePath, const QString &destPath, const UserId &recipientId)
+    : Operation(QLatin1String("EncryptFile"), parent)
+    , m_sourcePath(sourcePath)
+    , m_destPath(destPath)
+    , m_recipientId(recipientId)
+{}
 
-
-namespace vm {
-//
-//  Defines processing stages for outgoing attachment.
-//
-enum class MessageContentUploadStage {
-    Initial,  // Nothing was done.
-    Preprocessed, // Attachment was pre-processed.
-    Encrypted, // Attachment was encrypted.
-    GotUploadingSlot, // Requested uploading slots (URLs) was received.
-    Uploaded // Attachment was uploaded.
-};
-
-//
-//  Return upload stage from a given string.
-//  Throws if correspond stage is not found.
-//
-MessageContentUploadStage MessageContentUploadStageFromString(const QString& stageString);
-
-//
-//  Return string from a given upload stage.
-//
-QString MessageContentUploadStageToString(MessageContentUploadStage stage);
-} // namespace vm
-
-#endif // VM_MESSAGE_CONTENT_UPLOAD_STAGE_H
+void EncryptFileOperation::run()
+{
+    // FIXME(fpohtmeh): implement
+    fail();
+}

@@ -92,7 +92,7 @@ void Self::onAddAttachment(MessageHandler message)
 
 static std::tuple<QString, DatabaseUtils::BindValues> createDatabaseBindings(const MessageUpdate &attachmentUpdate) {
     if (const auto arg = std::get_if<MessageAttachmentUploadStageUpdate>(&attachmentUpdate)) {
-        return {"updateAttachmentUpladStage", {
+        return {"updateAttachmentUploadStage", {
             { ":id", QString(arg->attachmentId) },
             { ":uploadStage",  MessageContentUploadStageToString(arg->uploadStage) }
         }};
@@ -105,7 +105,50 @@ static std::tuple<QString, DatabaseUtils::BindValues> createDatabaseBindings(con
         }};
     }
 
-    // FIXME: Add etc.
+    if (const auto arg = std::get_if<MessageAttachmentFingerprintUpdate>(&attachmentUpdate)) {
+        return {"updateAttachmentFingerprint", {
+            { ":id", QString(arg->attachmentId) },
+            { ":fingerprint",  arg->fingerprint }
+        }};
+    }
+
+    if (const auto arg = std::get_if<MessageAttachmentRemoteUrlUpdate>(&attachmentUpdate)) {
+        return {"updateAttachmentRemoteUrl", {
+            { ":id", QString(arg->attachmentId) },
+            { ":url",  arg->remoteUrl }
+        }};
+    }
+
+    if (const auto arg = std::get_if<MessageAttachmentEncryptedSizeUpdate>(&attachmentUpdate)) {
+        return {"updateAttachmentEncryptedSize", {
+            { ":id", QString(arg->attachmentId) },
+            { ":encryptedSize",  arg->encryptedSize }
+        }};
+    }
+
+    if (const auto arg = std::get_if<MessageAttachmentLocalPathUpdate>(&attachmentUpdate)) {
+        return {"updateAttachmentLocalPath", {
+            { ":id", QString(arg->attachmentId) },
+            { ":localPath",  arg->localPath }
+        }};
+    }
+
+    // FIXME(fpohtmeh): implement
+    /*
+    if (const auto arg = std::get_if<MessagePictureThumbnailPathUpdate>(&attachmentUpdate)) {
+        return {"updateAttachmentEncryptedSize", {
+            { ":id", QString(arg->attachmentId) },
+            { ":encryptedSize",  arg->thumbnailPath }
+        }};
+    }
+
+    if (const auto arg = std::get_if<MessagePicturePreviewPathUpdate>(&attachmentUpdate)) {
+        return {"updateAttachmentEncryptedSize", {
+            { ":id", QString(arg->attachmentId) },
+            { ":encryptedSize",  arg->previewPath }
+        }};
+    }
+    */
 
     return {};
 }
@@ -124,5 +167,4 @@ void Self::onUpdateAttachment(const MessageUpdate &attachmentUpdate) {
         qCCritical(lcDatabase) << "Self::onUpdateStatus error";
         emit errorOccurred(tr("Failed to update attachment"));
     }
-
 }

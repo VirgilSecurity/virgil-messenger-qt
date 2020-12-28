@@ -57,8 +57,7 @@ void EncryptUploadFileOperation::setSourcePath(const QString &path)
 
 bool EncryptUploadFileOperation::populateChildren()
 {
-
-    //  FIXME: Add file encryption.
+    //  FIXME: Add file encryption. Use signal "encrypted", remove signal bytesCalculated
 
     auto uploadOp = new UploadFileOperation(this, m_fileLoader, m_sourcePath);
     connect(uploadOp, &UploadFileOperation::progressChanged, this, &EncryptUploadFileOperation::progressChanged);

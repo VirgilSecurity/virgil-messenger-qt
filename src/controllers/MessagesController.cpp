@@ -232,7 +232,7 @@ void Self::onUpdateMessage(const MessageUpdate& messageUpdate)
     //
     //  Update DB.
     //
-    m_userDatabase->messagesTable()->updateMessage(messageUpdate);
+    m_userDatabase->updateMessage(messageUpdate);
 
     //
     //  Update UI for the current chat.

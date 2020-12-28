@@ -60,10 +60,6 @@ struct MessageAttachmentUpdateBase : public MessageUpdateBase {
     AttachmentId attachmentId;
 };
 
-struct MessageStatusUpdate : public MessageUpdateBase {
-    MessageStatus status;
-};
-
 struct IncomingMessageStageUpdate : public MessageUpdateBase {
     IncomingMessageStage stage;
 };
@@ -114,7 +110,6 @@ struct MessagePicturePreviewPathUpdate : public MessageAttachmentUpdateBase {
 
 
 using MessageUpdate = std::variant<
-    MessageStatusUpdate,
     IncomingMessageStageUpdate,
     OutgoingMessageStageUpdate,
     MessageAttachmentUploadStageUpdate,

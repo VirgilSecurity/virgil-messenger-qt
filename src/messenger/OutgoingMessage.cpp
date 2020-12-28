@@ -55,6 +55,12 @@ bool Self::isOutgoing() const noexcept {
 }
 
 
+Self::Status Self::status() const noexcept
+{
+    return OutgoingMessageStageToMessageStatus(m_stage);
+}
+
+
 Self::Stage Self::stage() const noexcept {
     return m_stage;
 }

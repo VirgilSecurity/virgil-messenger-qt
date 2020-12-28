@@ -32,35 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#ifndef VM_ENCRYPTFILEOPERATION_H
+#define VM_ENCRYPTFILEOPERATION_H
 
-#ifndef VM_MESSAGE_CONTENT_UPLOAD_STAGE_H
-#define VM_MESSAGE_CONTENT_UPLOAD_STAGE_H
+#include "Operation.h"
+#include "UserId.h"
 
-#include <QString>
+namespace vm
+{
+class EncryptFileOperation : public Operation
+{
+    Q_OBJECT
 
+public:
+    explicit EncryptFileOperation(QObject *parent, const QString &sourcePath, const QString &destPath, const UserId &recipientId);
 
-namespace vm {
-//
-//  Defines processing stages for outgoing attachment.
-//
-enum class MessageContentUploadStage {
-    Initial,  // Nothing was done.
-    Preprocessed, // Attachment was pre-processed.
-    Encrypted, // Attachment was encrypted.
-    GotUploadingSlot, // Requested uploading slots (URLs) was received.
-    Uploaded // Attachment was uploaded.
+    void run() override;
+
+signals:
+    void encrypted(const QString &filePath);
+    void bytesCalculated(qint64 bytes);
+
+private:
+    QString m_sourcePath;
+    const QString m_destPath;
+    UserId m_recipientId;
 };
+}
 
-//
-//  Return upload stage from a given string.
-//  Throws if correspond stage is not found.
-//
-MessageContentUploadStage MessageContentUploadStageFromString(const QString& stageString);
-
-//
-//  Return string from a given upload stage.
-//
-QString MessageContentUploadStageToString(MessageContentUploadStage stage);
-} // namespace vm
-
-#endif // VM_MESSAGE_CONTENT_UPLOAD_STAGE_H
+#endif // VM_ENCRYPTFILEOPERATION_H

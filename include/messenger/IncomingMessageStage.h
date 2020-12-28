@@ -36,6 +36,10 @@
 #ifndef VM_INCOMING_MESSAGE_STAGE_H
 #define VM_INCOMING_MESSAGE_STAGE_H
 
+
+#include "MessageStatus.h"
+
+
 #include <QString>
 
 
@@ -47,6 +51,7 @@ enum class IncomingMessageStage {
     Received,  // A message was locally received from a sender.
     Decrypted, // A message was decrypted, so content handles specific message content: text, picture, etc.
     Processed, // A message was fully processed, i.e. attachment was downloaded, decrypted, and stored locally.
+    Broken // A message is broken and can't be processed.
 };
 
 //
@@ -59,6 +64,11 @@ IncomingMessageStage IncomingMessageStageFromString(const QString& stageString);
 //  Return string from a given incoming stage.
 //
 QString IncomingMessageStageToString(IncomingMessageStage stage);
+
+//
+// Converts incoming message stage to message status
+//
+MessageStatus IncomingMessageStageToMessageStatus(IncomingMessageStage stage);
 } // namespace vm
 
 #endif // VM_INCOMING_MESSAGE_STAGE_H
