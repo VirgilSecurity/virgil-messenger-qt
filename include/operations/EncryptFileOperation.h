@@ -38,6 +38,8 @@
 #include "Operation.h"
 #include "UserId.h"
 
+#include <QFileInfo>
+
 namespace vm
 {
 class EncryptFileOperation : public Operation
@@ -50,13 +52,12 @@ public:
     void run() override;
 
 signals:
-    void encrypted(const QString &filePath);
-    void bytesCalculated(qint64 bytes);
+    void encrypted(const QFileInfo &file);
 
 private:
-    QString m_sourcePath;
+    const QString m_sourcePath;
     const QString m_destPath;
-    UserId m_recipientId;
+    const UserId m_recipientId;
 };
 }
 

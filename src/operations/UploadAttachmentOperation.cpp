@@ -34,14 +34,7 @@
 
 #include "operations/UploadAttachmentOperation.h"
 
-#include "Settings.h"
-#include "Utils.h"
-#include "FileUtils.h"
 #include "operations/CalculateAttachmentFingerprintOperation.h"
-#include "operations/ConvertToPngOperation.h"
-#include "operations/CreateAttachmentPreviewOperation.h"
-#include "operations/CreateAttachmentThumbnailOperation.h"
-#include "operations/CreateThumbnailOperation.h"
 #include "operations/EncryptUploadFileOperation.h"
 #include "operations/MessageOperation.h"
 #include "operations/MessageOperationFactory.h"
@@ -73,34 +66,39 @@ void UploadAttachmentOperation::populateFileOperations()
     const auto message = m_parent->message();
     const auto attachment = std::get_if<MessageContentFile>(&message->content());
     const auto factory = m_parent->factory();
+
     // Fingerprint
     auto fingerprintOp = factory->populateCalculateAttachmentFingerprint(m_parent, this, attachment->localPath());
     connect(fingerprintOp, &Operation::finished, [=]() {
         // Stage update
         updateStage(MessageContentUploadStage::Preprocessed);
     });
+
     // Encrypt/Upload
     auto encUploadOp = factory->populateEncryptUpload(this, attachment->localPath(), message->recipientId());
-    connect(encUploadOp, &EncryptUploadFileOperation::bytesCalculated, this, std::bind(&LoadAttachmentOperation::startLoadOperation, this, std::placeholders::_1));
+    connect(encUploadOp, &EncryptUploadFileOperation::encrypted, [=](const QFileInfo &file) {
+        startLoadOperation(file.size());
+        // Encrypted size update
+        MessageAttachmentEncryptedSizeUpdate sizeUpdate;
+        sizeUpdate.messageId = message->id();
+        sizeUpdate.attachmentId = attachment->id();
+        sizeUpdate.encryptedSize = file.size();
+        m_parent->messageUpdate(sizeUpdate);
+        // Stage update
+        updateStage(MessageContentUploadStage::Encrypted);
+    });
     connect(encUploadOp, &EncryptUploadFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
     connect(encUploadOp, &EncryptUploadFileOperation::uploaded, [=](const QUrl &url) {
         // Remote url update
         MessageAttachmentRemoteUrlUpdate urlUpdate;
         urlUpdate.messageId = message->id();
+        urlUpdate.attachmentId = attachment->id();
         urlUpdate.remoteUrl = url;
         m_parent->messageUpdate(urlUpdate);
         // Stage update
         updateStage(MessageContentUploadStage::GotUploadingSlot);
     });
-    connect(encUploadOp, &EncryptUploadFileOperation::encrypted, [=](quint64 bytes) {
-        // Encrypted size update
-        MessageAttachmentEncryptedSizeUpdate sizeUpdate;
-        sizeUpdate.messageId = message->id();
-        sizeUpdate.encryptedSize = bytes;
-        m_parent->messageUpdate(sizeUpdate);
-        // Stage update
-        updateStage(MessageContentUploadStage::Encrypted);
-    });
+
     // Finish
     connect(this, &Operation::finished, [=]() {
         // Stage update
@@ -177,8 +175,12 @@ void UploadAttachmentOperation::populatePictureOperations()
 
 void UploadAttachmentOperation::updateStage(MessageContentUploadStage uploadStage)
 {
+    const auto message = m_parent->message();
+    const auto attachment = std::get_if<MessageContentFile>(&message->content());
+
     MessageAttachmentUploadStageUpdate stageUpdate;
-    stageUpdate.messageId = m_parent->message()->id();
+    stageUpdate.messageId = message->id();
+    stageUpdate.attachmentId = attachment->id();
     stageUpdate.uploadStage = uploadStage;
     m_parent->messageUpdate(stageUpdate);
 }

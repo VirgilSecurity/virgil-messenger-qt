@@ -34,40 +34,40 @@
 
 #include "operations/EncryptUploadFileOperation.h"
 
+#include "FileUtils.h"
 #include "Settings.h"
 #include "Utils.h"
+#include "operations/EncryptFileOperation.h"
 #include "operations/UploadFileOperation.h"
 
 using namespace vm;
 
 EncryptUploadFileOperation::EncryptUploadFileOperation(NetworkOperation *parent, const Settings *settings, FileLoader *fileLoader, const QString &sourcePath, const UserId &recipientId)
     : NetworkOperation(parent)
-    , m_settings(settings)
     , m_fileLoader(fileLoader)
     , m_sourcePath(sourcePath)
+    , m_tempPath(settings->attachmentCacheDir().filePath(Utils::createUuid()))
     , m_recipientId(recipientId)
 {
     setName(QLatin1String("EncryptUpload"));
 }
 
-void EncryptUploadFileOperation::setSourcePath(const QString &path)
-{
-    m_sourcePath = path;
-}
-
 bool EncryptUploadFileOperation::populateChildren()
 {
-    //  FIXME: Add file encryption. Use signal "encrypted", remove signal bytesCalculated
+    auto encryptOp = new EncryptFileOperation(this, m_sourcePath, m_tempPath, m_recipientId);
+    connect(encryptOp, &EncryptFileOperation::encrypted, this, &EncryptUploadFileOperation::encrypted);
+    appendChild(encryptOp);
 
-    auto uploadOp = new UploadFileOperation(this, m_fileLoader, m_sourcePath);
+    auto uploadOp = new UploadFileOperation(this, m_fileLoader, m_tempPath);
     connect(uploadOp, &UploadFileOperation::progressChanged, this, &EncryptUploadFileOperation::progressChanged);
     connect(uploadOp, &UploadFileOperation::uploaded, this, &EncryptUploadFileOperation::uploaded);
     appendChild(uploadOp);
 
-    return hasChildren();
+    return true;
 }
 
 void EncryptUploadFileOperation::cleanup()
 {
     Operation::cleanup();
+    FileUtils::removeFile(m_tempPath);
 }

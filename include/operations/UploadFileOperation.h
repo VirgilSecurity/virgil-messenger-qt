@@ -60,11 +60,13 @@ private:
     void tryAutoDeleteFile();
     void startUpload();
 
-    void onRequestSlotUrlFailed(const QString &filePath);
+    void onSlotRequestFinished(const QString &requestId, const QString &slotId);
+    void onSlotRequestFailed(const QString &requestId);
     void onSlotUrlsReceived(const QString &slotId, const QUrl &putUrl, const QUrl &getUrl);
     void onSlotUrlErrorOcurrend(const QString &slotId, const QString &errorText);
     void onFinished();
 
+    QString m_requestId;
     QString m_slotId;
     QUrl m_putUrl;
     QUrl m_getUrl;

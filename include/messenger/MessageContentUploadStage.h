@@ -47,7 +47,7 @@ enum class MessageContentUploadStage {
     Initial,  // Nothing was done.
     Preprocessed, // Attachment was pre-processed.
     Encrypted, // Attachment was encrypted.
-    GotUploadingSlot, // Requested uploading slots (URLs) was received.
+    GotUploadingSlot, // Requested uploading slots (URLs) were received.
     Uploaded // Attachment was uploaded.
 };
 

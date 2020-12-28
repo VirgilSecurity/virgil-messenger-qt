@@ -140,25 +140,25 @@ void MessagesTable::onAddMessage(const MessageHandler &message)
 
 void MessagesTable::onUpdateMessage(const MessageUpdate &messageUpdate)
 {
-    DatabaseUtils::BindValues values;
+    DatabaseUtils::BindValues bindValues;
 
     if (auto update = std::get_if<IncomingMessageStageUpdate>(&messageUpdate)) {
-        values.push_back({ ":id", QString(update->messageId) });
-        values.push_back({ ":stage", IncomingMessageStageToString(update->stage) });
+        bindValues.push_back({ ":id", QString(update->messageId) });
+        bindValues.push_back({ ":stage", IncomingMessageStageToString(update->stage) });
 
     } else if (auto update = std::get_if<OutgoingMessageStageUpdate>(&messageUpdate)) {
-        values.push_back({ ":id", QString(update->messageId) });
-        values.push_back({ ":stage", OutgoingMessageStageToString(update->stage) });
+        bindValues.push_back({ ":id", QString(update->messageId) });
+        bindValues.push_back({ ":stage", OutgoingMessageStageToString(update->stage) });
     }
 
-    if (values.empty()) {
+    if (bindValues.empty()) {
         return;
     }
 
     ScopedConnection connection(*database());
-    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateMessageStage"), values);
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateMessageStage"), bindValues);
     if (query) {
-        qCDebug(lcDatabase) << "Message stage was updated" << values.back().second;
+        qCDebug(lcDatabase) << "Message was updated" << bindValues.front().second << bindValues.back();
     }
     else {
         qCCritical(lcDatabase) << "MessagesTable::onUpdateMessage error";

@@ -144,7 +144,7 @@ void MessageOperationFactory::populateAttachmentOperation(MessageOperation *mess
 void MessageOperationFactory::populateMessageOperation(MessageOperation *messageOp)
 {
     const auto message = messageOp->message();
-    if (message->isOutgoing() && (message->status() == Message::Status::New|| message->status() == Message::Status::Failed)) {
+    if (message->isOutgoing() && (message->status() == Message::Status::New)) {
         messageOp->appendChild(new SendMessageOperation(messageOp, m_messenger));
     }
 }

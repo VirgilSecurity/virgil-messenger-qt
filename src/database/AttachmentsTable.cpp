@@ -162,7 +162,7 @@ void Self::onUpdateAttachment(const MessageUpdate &attachmentUpdate) {
 
     const auto query = DatabaseUtils::readExecQuery(database(), queryId, bindValues);
     if (query) {
-        qCDebug(lcDatabase) << "Attachment was updated";
+        qCDebug(lcDatabase) << "Attachment was updated" << bindValues.front().second << bindValues.back();
     } else {
         qCCritical(lcDatabase) << "Self::onUpdateStatus error";
         emit errorOccurred(tr("Failed to update attachment"));

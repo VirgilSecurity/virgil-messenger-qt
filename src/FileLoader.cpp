@@ -48,7 +48,6 @@ using namespace vm;
 using Self = FileLoader;
 
 
-// TODO(fpohtmeh): re-design class slightly, methods are used from another thread
 Self::FileLoader(CoreMessenger *commKitMessenger, QObject *parent)
     : QObject(parent)
     , m_coreMessenger(commKitMessenger)
@@ -60,9 +59,9 @@ Self::FileLoader(CoreMessenger *commKitMessenger, QObject *parent)
     connect(m_coreMessenger, &CoreMessenger::uploadSlotReceived, this, &Self::uploadSlotReceived);
     connect(m_coreMessenger, &CoreMessenger::uploadSlotErrorOccurred, this, &Self::uploadSlotErrorOccurred);
 
-    connect(this, &Self::fireStartDownload, this, &Self::onStartDownload);
-    connect(this, &Self::fireStartUpload, this, &Self::onStartUpload);
-    connect(this, &Self::fireRequestUploadSlot, this, &Self::onRequestUploadSlot);
+    connect(this, &Self::startDownload, this, &Self::onStartDownload);
+    connect(this, &Self::startUpload, this, &Self::onStartUpload);
+    connect(this, &Self::requestUploadSlot, this, &Self::onRequestUploadSlot);
 }
 
 
@@ -71,12 +70,14 @@ bool Self::isServiceFound() const {
 }
 
 
-void
-Self::onRequestUploadSlot(const QString &filePath){
-    auto requestId = m_coreMessenger->requestUploadSlot(filePath);
+void Self::onRequestUploadSlot(const QString &requestId, const QString &filePath){
+    const auto slotId = m_coreMessenger->requestUploadSlot(filePath);
 
-    if (requestId.isEmpty()) {
-        emit requestUploadSlotFailed(filePath);
+    if (slotId.isEmpty()) {
+        emit uploadSlotRequestFailed(requestId);
+    }
+    else {
+        emit uploadSlotRequestFinished(requestId, slotId);
     }
 }
 

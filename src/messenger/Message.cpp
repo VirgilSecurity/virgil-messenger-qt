@@ -202,7 +202,9 @@ QString Self::statusString() const {
 
 
 bool Self::applyUpdate(const MessageUpdate& update) {
-    Q_UNUSED(update)
+    if (contentIsAttachment()) {
+        return contentAsAttachment()->applyUpdate(update);
+    }
     return false;
 }
 

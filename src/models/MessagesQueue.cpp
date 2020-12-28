@@ -183,6 +183,7 @@ void MessagesQueue::onItemFailed(Item item)
         addItem(std::move(item), false);
     }
     else if (item.attemptCount == maxAttemptCount) {
+        // Mark as broken
         if (message->isIncoming()) {
             IncomingMessageStageUpdate update;
             update.messageId = message->id();

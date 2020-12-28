@@ -161,7 +161,7 @@ Control {
                     Label {
                         Layout.maximumWidth: column.maxWidth
                         visible: chatMessage.attachmentIsLoaded
-                        text: attachmentDisplaySize
+                        text: chatMessage.attachmentDisplaySize
                         color: "white"
                         font.pixelSize: UiHelper.fixFontSz(10)
                     }
@@ -169,7 +169,7 @@ Control {
                     Label {
                         Layout.maximumWidth: column.maxWidth
                         visible: chatMessage.attachmentIsLoading
-                        text: attachmentDisplayProgress
+                        text: chatMessage.attachmentDisplayProgress
                         color: "white"
                         font.pixelSize: UiHelper.fixFontSz(10)
                     }

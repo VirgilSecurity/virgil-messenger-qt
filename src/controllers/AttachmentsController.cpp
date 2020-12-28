@@ -62,9 +62,14 @@ void Self::saveAs(const QString &messageId, const QVariant &fileUrl)
 
     const auto attachment = message->contentAsAttachment();
 
+    // TODO(fpohtmeh): move to queue
     switch (attachment->downloadStage()) {
         case MessageContentDownloadStage::Initial:
             downloadAttachment(message);
+            break;
+
+        case MessageContentDownloadStage::Downloading:
+            // Another download is active
             break;
 
         case MessageContentDownloadStage::Downloaded:
@@ -97,6 +102,7 @@ void Self::open(const QString &messageId)
 
     const auto attachment = message->contentAsAttachment();
 
+    // TODO(fpohtmeh): move to queue
     switch (attachment->downloadStage()) {
         case MessageContentDownloadStage::Initial:
             downloadAttachment(message);
@@ -104,6 +110,10 @@ void Self::open(const QString &messageId)
 
         case MessageContentDownloadStage::Downloaded:
             decryptAttachment(message);
+            break;
+
+        case MessageContentDownloadStage::Downloading:
+            // Another download is active
             break;
 
         case MessageContentDownloadStage::Decrypted: {

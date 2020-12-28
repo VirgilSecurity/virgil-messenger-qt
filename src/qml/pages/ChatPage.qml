@@ -261,6 +261,7 @@ Page {
             attachmentTypeIsFile: model.attachmentTypeIsFile
             attachmentTypeIsPicture: model.attachmentTypeIsPicture
             attachmentIsLoading: model.attachmentIsLoading
+            attachmentIsLoaded: model.attachmentIsLoaded
             attachmentIconPath: model.attachmentIconPath
             attachmentPictureThumbnailWidth: model.attachmentPictureThumbnailSize.width
             attachmentPictureThumbnailHeight: model.attachmentPictureThumbnailSize.height
@@ -273,7 +274,7 @@ Page {
 
             onSaveAttachmentAs: function(messageId) {
                 saveAttachmentAsDialog.messageId = messageId
-                saveAttachmentAsDialog.attachmentType = attachmentType
+                saveAttachmentAsDialog.attachmentType = attachmentTypeIsPicture ? AttachmentTypes.picture : AttachmentTypes.file
                 saveAttachmentAsDialog.open()
             }
 

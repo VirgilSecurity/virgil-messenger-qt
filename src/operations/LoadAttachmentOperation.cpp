@@ -44,7 +44,8 @@ LoadAttachmentOperation::LoadAttachmentOperation(MessageOperation *parent)
 {
     setName(QLatin1String("LoadAttachment"));
 
-    connect(this, &LoadAttachmentOperation::totalProgressChanged, [parent](quint64 bytesLoaded, quint64 /*bytesTotal*/) {
+    connect(this, &LoadAttachmentOperation::totalProgressChanged, [parent](quint64 bytesLoaded, quint64 bytesTotal) {
+        Q_UNUSED(bytesTotal)
         MessageAttachmentProcessedSizeUpdate update;
         update.messageId = parent->message()->id();
         update.attachmentId = parent->message()->contentAsAttachment()->id();
