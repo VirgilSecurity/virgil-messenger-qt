@@ -169,10 +169,10 @@ public:
     std::tuple<Result, QByteArray> encryptFile(const QString &sourceFilePath, const QString &destFilePath);
 
     //
-    //  Decrypt given file and returns a key for decryption.
+    //  Decrypt given file.
     //
     Result decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray& decryptionKey,
-            const UserId fileOwnerId);
+            const UserId senderId);
 
     //
     //  Push Notifications.

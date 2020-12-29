@@ -46,6 +46,8 @@
 #include <QObject>
 #include <QPointer>
 
+#include <optional>
+
 
 Q_DECLARE_LOGGING_CATEGORY(lcMessenger)
 
@@ -71,6 +73,17 @@ public:
     //  Messages.
     //
     virtual bool sendMessage(MessageHandler message) override;
+
+    //
+    //  Encrypt given file and returns a key for decryption.
+    //
+    std::optional<QByteArray> encryptFile(const QString &sourceFilePath, const QString &destFilePath);
+
+    //
+    //  Decrypt given file and returns a key for decryption.
+    //
+    bool decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray& decryptionKey,
+            const UserId senderId);
 
     //
     // User control.

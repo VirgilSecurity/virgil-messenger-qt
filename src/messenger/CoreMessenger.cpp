@@ -1382,7 +1382,7 @@ Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
 
 Self::Result
 Self::decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray& decryptionKey,
-        const UserId fileOwnerId) {
+        const UserId senderId) {
     //
     //  Create helpers for error handling.
     //
@@ -1400,11 +1400,11 @@ Self::decryptFile(const QString &sourceFilePath, const QString &destFilePath, co
     };
 
     //
-    //  Find file owner.
+    //  Find file sender.
     //
-    auto owner = findUserById(fileOwnerId);
-    if (!owner) {
-        qCWarning(lcCoreMessenger) << "Can not decrypt file - file owner info is not found.";
+    auto sender = findUserById(senderId);
+    if (!sender) {
+        qCWarning(lcCoreMessenger) << "Can not decrypt file - file sender info is not found.";
         return Self::Result::Error_UserNotFound;
     }
 
@@ -1498,8 +1498,8 @@ Self::decryptFile(const QString &sourceFilePath, const QString &destFilePath, co
     vsc_buffer_reset(workingBuffer.get());
     vsc_buffer_reserve_unused(workingBuffer.get(), tailLen);
 
-    const auto ownerPublicKey = vssq_messenger_user_public_key(owner->impl()->user.get());
-    decryptionStatus = vssq_messenger_file_cipher_finish_decryption(fileCipher.get(), ownerPublicKey, workingBuffer.get());
+    const auto senderPublicKey = vssq_messenger_user_public_key(sender->impl()->user.get());
+    decryptionStatus = vssq_messenger_file_cipher_finish_decryption(fileCipher.get(), senderPublicKey, workingBuffer.get());
 
     if (decryptionStatus != vssq_status_SUCCESS) {
         return cryptoError(decryptionStatus);

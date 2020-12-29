@@ -248,6 +248,26 @@ Self::sendMessage(MessageHandler message) {
 }
 
 
+std::optional<QByteArray>
+Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
+    auto [result, decryptionKey] = m_coreMessenger->encryptFile(sourceFilePath, destFilePath);
+
+    if (CoreMessenger::Result::Success == result) {
+        return std::move(decryptionKey);
+    }
+
+    return {};
+}
+
+
+bool
+Self::decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray& decryptionKey, const UserId senderId) {
+    auto result = m_coreMessenger->decryptFile(sourceFilePath, destFilePath, decryptionKey, senderId);
+
+    return CoreMessenger::Result::Success == result;
+}
+
+
 bool
 Self::subscribeToUser(const UserId &userId)
 {
