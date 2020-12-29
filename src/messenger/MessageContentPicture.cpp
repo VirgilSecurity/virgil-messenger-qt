@@ -49,12 +49,34 @@ using Self = MessageContentPicture;
 
 
 bool Self::applyUpdate(const MessageUpdate& update) {
-    return MessageContentAttachment::applyUpdate(update);
+    if (auto thumbnailPathUpdate = std::get_if<MessagePictureThumbnailPathUpdate>(&update)) {
+        const auto thumbnailUrl = FileUtils::localFileToUrl(thumbnailPathUpdate->thumbnailPath);
+        QString errorString;
+        const auto thumbnail = MessageContentFile::createFromLocalFile(thumbnailUrl, errorString);
+        if (thumbnail) {
+            setThumbnail(*thumbnail);
+        }
+    }
+    if (auto thumbnailSizeUpdate = std::get_if<MessagePictureThumbnailSizeUpdate>(&update)) {
+        setThumbnailSize(thumbnailSizeUpdate->thumbnailSize);
+    }
+    if (auto thumbnailEncryptedSizeUpdate = std::get_if<MessagePictureThumbnailEncryptedSizeUpdate>(&update)) {
+        thumbnail().setEncryptedSize(thumbnailEncryptedSizeUpdate->encryptedSize);
+    }
+    if (auto thumbnailRemoteUrlUpdate = std::get_if<MessagePictureThumbnailRemoteUrlUpdate>(&update)) {
+        thumbnail().setRemoteUrl(thumbnailRemoteUrlUpdate->remoteUrl);
+    }
+    else if (auto previewPathUpdate = std::get_if<MessagePicturePreviewPathUpdate>(&update)) {
+        setPreviewPath(previewPathUpdate->previewPath);
+    }
+    else {
+        return MessageContentAttachment::applyUpdate(update);
+    }
+    return true;
 }
 
 
-QString MessageContentPicture::extrasToJson(const bool writeLocalPaths) const
-{
+QString MessageContentPicture::extrasToJson(const bool writeLocalPaths) const {
     QJsonObject json;
     MessageContentJsonUtils::writeExtras(*this, writeLocalPaths, json);
     return MessageContentJsonUtils::toBytes(json);
@@ -98,13 +120,15 @@ void MessageContentPicture::setThumbnail(MessageContentFile thumbnail)
 }
 
 
-MessageContentPicture Self::createFromLocalFile(const QUrl& localUrl, QString &errorString) {
+std::optional<MessageContentPicture> Self::createFromLocalFile(const QUrl& localUrl, QString &errorString) {
     MessageContentPicture picture;
-    if (picture.readLocalFile(localUrl, errorString)) {
-        const auto fileName = FileUtils::attachmentFileName(localUrl, true);
-        picture.setFileName(fileName.section('.', 0, 0) + QLatin1String(".png"));
-        picture.readImage(errorString);
+    if (!picture.readLocalFile(localUrl, errorString)) {
+        return std::nullopt;
     }
+
+    const auto fileName = FileUtils::attachmentFileName(localUrl, true);
+    picture.setFileName(fileName.section('.', 0, 0) + QLatin1String(".png"));
+    picture.readImage(errorString);
     return picture;
 }
 

@@ -34,7 +34,11 @@
 
 #include "operations/UploadAttachmentOperation.h"
 
+#include "FileUtils.h"
 #include "operations/CalculateAttachmentFingerprintOperation.h"
+#include "operations/ConvertToPngOperation.h"
+#include "operations/CreateAttachmentPreviewOperation.h"
+#include "operations/CreateAttachmentThumbnailOperation.h"
 #include "operations/EncryptUploadFileOperation.h"
 #include "operations/MessageOperation.h"
 #include "operations/MessageOperationFactory.h"
@@ -58,7 +62,16 @@ bool UploadAttachmentOperation::populateChildren()
     else if (std::holds_alternative<MessageContentPicture>(content)) {
         populatePictureOperations();
     }
+    else {
+        std::logic_error("Invalid attachment content");
+    }
     return true;
+}
+
+void UploadAttachmentOperation::cleanup()
+{
+    Operation::cleanup();
+    FileUtils::removeFile(m_tempPngPath);
 }
 
 void UploadAttachmentOperation::populateFileOperations()
@@ -74,8 +87,78 @@ void UploadAttachmentOperation::populateFileOperations()
         updateStage(MessageContentUploadStage::Preprocessed);
     });
 
+    populateEncryptUpload();
+}
+
+void UploadAttachmentOperation::populatePictureOperations()
+{
+    const auto message = m_parent->message();
+    const auto attachment = std::get_if<MessageContentPicture>(&message->content());
+    const auto factory = m_parent->factory();
+
+    // Convert to png
+    auto convertOp = factory->populateConvertToPngOperation(this, attachment->localPath());
+    connect(convertOp, &ConvertToPngOperation::fileCreated, [=](const QString &filePath) {
+        m_tempPngPath = filePath;
+    });
+
+    // Create picture preview
+    const auto previewFilePath = m_settings->makeThumbnailPath(attachment->id(), true);
+    auto createPreviewOp = factory->populateCreateAttachmentPreview(m_parent, this, attachment->localPath(), previewFilePath);
+    connect(convertOp, &ConvertToPngOperation::converted, createPreviewOp, &CreateAttachmentPreviewOperation::setSourcePath);
+
+    // Create thumbnail
+    const auto thumbnailFilePath = m_settings->makeThumbnailPath(attachment->id(), false);
+    auto createThumbnailOp = factory->populateCreateAttachmentThumbnail(m_parent, this, attachment->localPath(), thumbnailFilePath);
+    connect(convertOp, &ConvertToPngOperation::converted, createThumbnailOp, &CreateAttachmentThumbnailOperation::setSourcePath);
+
+    // Encrypt/Upload thumbnail
+    auto encUploadThumbOp = factory->populateEncryptUpload(this, thumbnailFilePath, message->recipientId());
+    connect(encUploadThumbOp, &EncryptUploadFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
+    const auto extrasToJson = [=]() {
+        return attachment->extrasToJson(true);
+    };
+    connect(encUploadThumbOp, &EncryptUploadFileOperation::encrypted, [=](const QFileInfo &file) {
+        startLoadOperation(file.size());
+        // Thumbnail encrypted size update
+        MessagePictureThumbnailEncryptedSizeUpdate sizeUpdate;
+        sizeUpdate.messageId = message->id();
+        sizeUpdate.attachmentId = attachment->id();
+        sizeUpdate.extrasToJson = extrasToJson;
+        sizeUpdate.encryptedSize = file.size();
+        m_parent->messageUpdate(sizeUpdate);
+    });
+    connect(encUploadThumbOp, &EncryptUploadFileOperation::uploaded, [=](const QUrl &url) {
+        // Thumbnail remote url update
+        MessagePictureThumbnailRemoteUrlUpdate urlUpdate;
+        urlUpdate.messageId = message->id();
+        urlUpdate.attachmentId = attachment->id();
+        urlUpdate.extrasToJson = extrasToJson;
+        urlUpdate.remoteUrl = url;
+        m_parent->messageUpdate(urlUpdate);
+    });
+
+    // Calculate attachment fingerprint
+    auto fingerprintOp = factory->populateCalculateAttachmentFingerprint(m_parent, this, attachment->localPath());
+    connect(convertOp, &ConvertToPngOperation::converted, fingerprintOp, &CalculateAttachmentFingerprintOperation::setSourcePath);
+    connect(fingerprintOp, &Operation::finished, [=]() {
+        // Stage update
+        updateStage(MessageContentUploadStage::Preprocessed);
+    });
+
+    // Encrypt/Upload attachment
+    auto encUploadOp = populateEncryptUpload();
+    connect(convertOp, &ConvertToPngOperation::converted, encUploadOp, &EncryptUploadFileOperation::setSourcePath);
+}
+
+EncryptUploadFileOperation *UploadAttachmentOperation::populateEncryptUpload()
+{
+    const auto message = m_parent->message();
+    const auto attachment = std::get_if<MessageContentPicture>(&message->content());
+
     // Encrypt/Upload
-    auto encUploadOp = factory->populateEncryptUpload(this, attachment->localPath(), message->recipientId());
+    auto encUploadOp = m_parent->factory()->populateEncryptUpload(this, attachment->localPath(), message->recipientId());
+    connect(encUploadOp, &EncryptUploadFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
     connect(encUploadOp, &EncryptUploadFileOperation::encrypted, [=](const QFileInfo &file) {
         startLoadOperation(file.size());
         // Encrypted size update
@@ -87,7 +170,10 @@ void UploadAttachmentOperation::populateFileOperations()
         // Stage update
         updateStage(MessageContentUploadStage::Encrypted);
     });
-    connect(encUploadOp, &EncryptUploadFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
+    connect(encUploadOp, &EncryptUploadFileOperation::uploadSlotReceived, [=]() {
+        // Stage update
+        updateStage(MessageContentUploadStage::GotUploadingSlot);
+    });
     connect(encUploadOp, &EncryptUploadFileOperation::uploaded, [=](const QUrl &url) {
         // Remote url update
         MessageAttachmentRemoteUrlUpdate urlUpdate;
@@ -96,91 +182,19 @@ void UploadAttachmentOperation::populateFileOperations()
         urlUpdate.remoteUrl = url;
         m_parent->messageUpdate(urlUpdate);
         // Stage update
-        updateStage(MessageContentUploadStage::GotUploadingSlot);
-    });
-
-    // Finish
-    connect(this, &Operation::finished, [=]() {
-        // Stage update
         updateStage(MessageContentUploadStage::Uploaded);
     });
-}
 
-void UploadAttachmentOperation::populatePictureOperations()
-{
-    // FIXME: Split operation to file and picture.
-//    const auto message = m_parent->message();
-//    const auto attachment = m_parent->attachment();
-//    auto factory = m_parent->factory();
-//    const bool isPicture = attachment->type == Attachment::Type::Picture;
-
-//    // Convert to png
-//    ConvertToPngOperation *convertOp = nullptr;
-//    if (isPicture) {
-//        convertOp = factory->populateConvertToPngOperation(this, attachment->localPath);
-//        connect(convertOp, &ConvertToPngOperation::fileCreated, this, &UploadAttachmentOperation::setTempPngPath);
-//    }
-//    //  Create picture preview
-//    if (isPicture) {
-//        const auto filePath = m_settings->makeThumbnailPath(attachment->id, true);
-//        auto op = factory->populateCreateAttachmentPreview(m_parent, this, attachment->localPath, filePath);
-//        if (convertOp) {
-//            connect(convertOp, &ConvertToPngOperation::imageRead, op, &CreateAttachmentPreviewOperation::setSourceImage);
-//            connect(convertOp, &ConvertToPngOperation::converted, op, &CreateAttachmentPreviewOperation::setSourcePath);
-//        }
-//    }
-//    // Calculate attachment fingerprint
-//    if (attachment->fingerprint.isEmpty()) {
-//        auto op = factory->populateCalculateAttachmentFingerprint(m_parent, this, attachment->localPath);
-//        if (convertOp) {
-//            connect(convertOp, &ConvertToPngOperation::converted, op, &CalculateAttachmentFingerprintOperation::setSourcePath);
-//        }
-//    }
-//    // Encrypt/Upload attachment file
-//    if (!attachment->url.isValid())
-//    {
-//        auto op = factory->populateEncryptUpload(this, attachment->localPath, message->recipientId);
-//        connect(op, &EncryptUploadFileOperation::bytesCalculated, this, std::bind(&LoadAttachmentOperation::startLoadOperation, this, std::placeholders::_1));
-//        connect(op, &EncryptUploadFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
-//        connect(op, &EncryptUploadFileOperation::uploaded, m_parent, &MessageOperation::setAttachmentUrl);
-//        connect(op, &EncryptUploadFileOperation::bytesCalculated, m_parent, &MessageOperation::setAttachmentEncryptedSize);
-//        if (convertOp) {
-//            connect(convertOp, &ConvertToPngOperation::converted, op, &EncryptUploadFileOperation::setSourcePath);
-//        }
-//    }
-//    // Process picture
-//    if (isPicture) {
-//        // Create thumbnail
-//        const auto filePath = m_settings->makeThumbnailPath(attachment->id, false);
-//        auto op = factory->populateCreateAttachmentThumbnail(m_parent, this, attachment->localPath, filePath);
-//        if (convertOp) {
-//            connect(convertOp, &ConvertToPngOperation::imageRead, op, &CreateAttachmentThumbnailOperation::setSourceImage);
-//            connect(convertOp, &ConvertToPngOperation::converted, op, &CreateAttachmentThumbnailOperation::setSourcePath);
-//        }
-
-//        // Encrypt/upload thumbnail
-//        auto op2 = factory->populateEncryptUpload(this, filePath, message->recipientId);
-//        op2->setName(op2->name() + QLatin1String("Thumbnail"));
-//        connect(op2, &EncryptUploadFileOperation::bytesCalculated, this, std::bind(&LoadAttachmentOperation::startLoadOperation, this, std::placeholders::_1));
-//        connect(op2, &EncryptUploadFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
-//        connect(op2, &EncryptUploadFileOperation::uploaded, m_parent, &MessageOperation::setAttachmentThumbnailUrl);
-//        connect(op2, &EncryptUploadFileOperation::bytesCalculated, m_parent, &MessageOperation::setAttachmentEncryptedThumbnailSize);
-//    }
-//    // Connection to loading statuses
-//    connect(this, &Operation::started, m_parent, std::bind(&MessageOperation::setAttachmentStatus, m_parent, Attachment::Status::Loading));
-//    connect(this, &Operation::finished, m_parent, std::bind(&MessageOperation::setAttachmentStatus, m_parent, Attachment::Status::Loaded));
-
-    // FIXME(fpohtmeh): use tempPngPath?
+    return encUploadOp;
 }
 
 void UploadAttachmentOperation::updateStage(MessageContentUploadStage uploadStage)
 {
     const auto message = m_parent->message();
-    const auto attachment = std::get_if<MessageContentFile>(&message->content());
 
     MessageAttachmentUploadStageUpdate stageUpdate;
     stageUpdate.messageId = message->id();
-    stageUpdate.attachmentId = attachment->id();
+    stageUpdate.attachmentId = message->contentAsAttachment()->id();
     stageUpdate.uploadStage = uploadStage;
     m_parent->messageUpdate(stageUpdate);
 }

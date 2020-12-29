@@ -43,10 +43,22 @@ CreateAttachmentThumbnailOperation::CreateAttachmentThumbnailOperation(MessageOp
     : CreateThumbnailOperation(parent, sourcePath, destPath, settings->previewMaxSize())
 {
     setName(QLatin1String("CreateAttachmentThumbnail"));
-    connect(this, &CreateThumbnailOperation::thumbnailReady, [parent](const QString& destPath) {
+    connect(this, &CreateThumbnailOperation::thumbnailReady, [parent](const QString& destPath, const QSize &destSize) {
+        const auto extrasToJson = [=]() {
+            return parent->message()->contentAsAttachment()->extrasToJson(true);
+        };
+
+        MessagePictureThumbnailSizeUpdate sizeUpdate;
+        sizeUpdate.messageId = parent->message()->id();
+        sizeUpdate.attachmentId = parent->message()->contentAsAttachment()->id();
+        sizeUpdate.extrasToJson = extrasToJson;
+        sizeUpdate.thumbnailSize = destSize;
+        parent->messageUpdate(sizeUpdate);
+
         MessagePictureThumbnailPathUpdate update;
         update.messageId = parent->message()->id();
         update.attachmentId = parent->message()->contentAsAttachment()->id();
+        update.extrasToJson = extrasToJson;
         update.thumbnailPath = destPath;
         parent->messageUpdate(update);
     });

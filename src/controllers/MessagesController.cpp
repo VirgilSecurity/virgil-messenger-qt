@@ -175,13 +175,13 @@ ModifiableMessageHandler Self::createFileMessage(const QUrl &localFileUrl)
 {
     QString errorString;
     auto content = MessageContentFile::createFromLocalFile(localFileUrl, errorString);
-    // FIXME(fpohtmeh): is it correct way to handle errors? skip errorString?
-    if (!errorString.isEmpty()) {
+    if (!content) {
+        qCWarning(lcController) << "MessageContentFile creation error:" << errorString;
         return ModifiableMessageHandler();
     }
 
     auto message = createOutgoingMessage();
-    message->setContent(std::move(content));
+    message->setContent(std::move(*content));
 
     return message;
 }
@@ -191,13 +191,13 @@ ModifiableMessageHandler Self::createPictureMessage(const QUrl &localFileUrl)
 {
     QString errorString;
     const auto content = MessageContentPicture::createFromLocalFile(localFileUrl, errorString);
-    // FIXME(fpohtmeh): is it correct way to handle errors? skip errorString?
-    if (!errorString.isEmpty()) {
+    if (!content) {
+        qCWarning(lcController) << "MessageContentPicture creation error:" << errorString;
         return ModifiableMessageHandler();
     }
 
     auto message = createOutgoingMessage();
-    message->setContent(std::move(content));
+    message->setContent(std::move(*content));
 
     return message;
 }
@@ -227,20 +227,18 @@ void Self::setupTableConnections()
     connect(table, &MessagesTable::chatMessagesFetched, m_models->messages(), &MessagesModel::setMessages);
 }
 
+
 void Self::onUpdateMessage(const MessageUpdate& messageUpdate)
 {
+    //
+    //  Update UI for the current chat.
+    //
+    m_models->messages()->updateMessage(messageUpdate);
+
     //
     //  Update DB.
     //
     m_userDatabase->updateMessage(messageUpdate);
-
-    //
-    //  Update UI for the current chat.
-    //
-    if (m_models->messages()->updateMessage(messageUpdate)) {
-        // TODO: Check if this signal is still needed.
-        emit updateMessage(messageUpdate);
-    }
 }
 
 

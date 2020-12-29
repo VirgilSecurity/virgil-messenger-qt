@@ -52,6 +52,7 @@ public:
     void run() override;
 
 signals:
+    void uploadSlotReceived();
     void uploaded(const QUrl &getUrl);
 
 private:

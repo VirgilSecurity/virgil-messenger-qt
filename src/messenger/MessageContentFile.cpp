@@ -48,9 +48,11 @@ bool Self::applyUpdate(const MessageUpdate& update) {
 }
 
 
-MessageContentFile Self::createFromLocalFile(const QUrl& localUrl, QString &errorString) {
+std::optional<MessageContentFile> Self::createFromLocalFile(const QUrl& localUrl, QString &errorString) {
     MessageContentFile file;
-    file.readLocalFile(localUrl, errorString);
+    if (!file.readLocalFile(localUrl, errorString)) {
+        return std::nullopt;
+    }
     file.setFileName(FileUtils::attachmentFileName(localUrl, false));
     return file;
 }

@@ -100,11 +100,27 @@ struct MessageAttachmentProcessedSizeUpdate : public MessageAttachmentUpdateBase
     quint64 processedSize;
 };
 
-struct MessagePictureThumbnailPathUpdate : public MessageAttachmentUpdateBase {
+struct MessageAttachmentExtrasUpdate : public MessageAttachmentUpdateBase {
+    std::function<QString()> extrasToJson;
+};
+
+struct MessagePictureThumbnailPathUpdate : public MessageAttachmentExtrasUpdate {
     QString thumbnailPath;
 };
 
-struct MessagePicturePreviewPathUpdate : public MessageAttachmentUpdateBase {
+struct MessagePictureThumbnailSizeUpdate : public MessageAttachmentExtrasUpdate {
+    QSize thumbnailSize;
+};
+
+struct MessagePictureThumbnailEncryptedSizeUpdate : public MessageAttachmentExtrasUpdate {
+    qint64 encryptedSize;
+};
+
+struct MessagePictureThumbnailRemoteUrlUpdate : public MessageAttachmentExtrasUpdate {
+    QUrl remoteUrl;
+};
+
+struct MessagePicturePreviewPathUpdate : public MessageAttachmentExtrasUpdate {
     QString previewPath;
 };
 
@@ -121,13 +137,21 @@ using MessageUpdate = std::variant<
     MessageAttachmentLocalPathUpdate,
     MessageAttachmentProcessedSizeUpdate,
     MessagePictureThumbnailPathUpdate,
+    MessagePictureThumbnailSizeUpdate,
+    MessagePictureThumbnailEncryptedSizeUpdate,
+    MessagePictureThumbnailRemoteUrlUpdate,
     MessagePicturePreviewPathUpdate
     >;
+
 //
 //  Return message unique identifier the update relates to.
 //
 MessageId MessageUpdateGetMessageId(const MessageUpdate& update);
 
+//
+//  Convert to message attachment extras update if possible.
+//
+const MessageAttachmentExtrasUpdate *MessageUpdateToAttachmentExtrasUpdate(const MessageUpdate &update);
 } // namespace vm
 
 

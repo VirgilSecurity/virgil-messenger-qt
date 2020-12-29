@@ -39,7 +39,6 @@
 
 #include "MessageContentFile.h"
 
-
 namespace vm {
 
 //
@@ -96,7 +95,7 @@ public:
     //
     //  Create picture message content from the given path.
     //
-    static MessageContentPicture createFromLocalFile(const QUrl& localUrl, QString &errorString);
+    static std::optional<MessageContentPicture> createFromLocalFile(const QUrl& localUrl, QString &errorString);
 
 private:
     bool readImage(QString &errorString);

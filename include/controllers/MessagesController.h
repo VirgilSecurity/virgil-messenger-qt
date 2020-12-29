@@ -63,7 +63,6 @@ signals:
     void notificationCreated(const QString &notification, const bool error);
 
     void messageCreated(const MessageHandler &message);
-    void updateMessage(const MessageUpdate &messageUpdate);
 
     void displayImageNotFound(const MessageId &messageId);
 

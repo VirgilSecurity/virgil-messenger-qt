@@ -56,7 +56,7 @@ public:
     //
     //  Create file message content from the given path.
     //
-    static MessageContentFile createFromLocalFile(const QUrl& localUrl, QString &errorString);
+    static std::optional<MessageContentFile> createFromLocalFile(const QUrl& localUrl, QString &errorString);
 };
 } // namespace vm
 

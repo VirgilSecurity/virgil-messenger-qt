@@ -52,6 +52,11 @@ EncryptUploadFileOperation::EncryptUploadFileOperation(NetworkOperation *parent,
     setName(QLatin1String("EncryptUpload"));
 }
 
+void EncryptUploadFileOperation::setSourcePath(const QString &sourcePath)
+{
+    m_sourcePath = sourcePath;
+}
+
 bool EncryptUploadFileOperation::populateChildren()
 {
     auto encryptOp = new EncryptFileOperation(this, m_sourcePath, m_tempPath, m_recipientId);
@@ -60,6 +65,7 @@ bool EncryptUploadFileOperation::populateChildren()
 
     auto uploadOp = new UploadFileOperation(this, m_fileLoader, m_tempPath);
     connect(uploadOp, &UploadFileOperation::progressChanged, this, &EncryptUploadFileOperation::progressChanged);
+    connect(uploadOp, &UploadFileOperation::uploadSlotReceived, this, &EncryptUploadFileOperation::uploadSlotReceived);
     connect(uploadOp, &UploadFileOperation::uploaded, this, &EncryptUploadFileOperation::uploaded);
     appendChild(uploadOp);
 

@@ -165,6 +165,11 @@ void Self::onWriteMessage(const MessageHandler &message, qsizetype unreadCount)
 
 void UserDatabase::onUpdateMessage(const MessageUpdate &messageUpdate)
 {
+    // Early ignore of updates that doesn't write to DB
+    if (std::holds_alternative<MessageAttachmentProcessedSizeUpdate>(messageUpdate)) {
+        return;
+    }
+
     ScopedConnection connection(*this);
     ScopedTransaction transaction(*this);
     messagesTable()->updateMessage(messageUpdate);

@@ -99,6 +99,7 @@ void Self::onSlotUrlsReceived(const QString &slotId, const QUrl &putUrl, const Q
         qCDebug(lcOperation) << "Upload url received";
         m_putUrl = putUrl;
         m_getUrl = getUrl;
+        emit uploadSlotReceived();
         startUpload();
     }
 }

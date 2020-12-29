@@ -71,7 +71,7 @@ void CreateThumbnailOperation::run()
             return;
         }
     }
-    emit thumbnailReady(m_destPath);
+    emit thumbnailReady(m_destPath, size);
     finish();
 }
 

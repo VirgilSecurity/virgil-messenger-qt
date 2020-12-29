@@ -55,7 +55,7 @@ public:
     void setSourceImage(const QImage &image);
 
 signals:
-    void thumbnailReady(const QString &destPath);
+    void thumbnailReady(const QString &destPath, const QSize &destSize);
 
 private:
     QString m_sourcePath;

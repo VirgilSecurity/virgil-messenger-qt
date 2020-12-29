@@ -133,22 +133,12 @@ static std::tuple<QString, DatabaseUtils::BindValues> createDatabaseBindings(con
         }};
     }
 
-    // FIXME(fpohtmeh): implement
-    /*
-    if (const auto arg = std::get_if<MessagePictureThumbnailPathUpdate>(&attachmentUpdate)) {
-        return {"updateAttachmentEncryptedSize", {
-            { ":id", QString(arg->attachmentId) },
-            { ":encryptedSize",  arg->thumbnailPath }
+    if (const auto arg = MessageUpdateToAttachmentExtrasUpdate(attachmentUpdate)) {
+        return {"updateAttachmentExtras", {
+            { ":id", QString(MessageUpdateGetMessageId(attachmentUpdate)) },
+            { ":extras", arg->extrasToJson() }
         }};
     }
-
-    if (const auto arg = std::get_if<MessagePicturePreviewPathUpdate>(&attachmentUpdate)) {
-        return {"updateAttachmentEncryptedSize", {
-            { ":id", QString(arg->attachmentId) },
-            { ":encryptedSize",  arg->previewPath }
-        }};
-    }
-    */
 
     return {};
 }

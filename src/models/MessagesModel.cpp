@@ -366,7 +366,7 @@ QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate& messageUpdate) {
 
     } else if(std::holds_alternative<MessageAttachmentUploadStageUpdate>(messageUpdate) ||
               std::holds_alternative<MessageAttachmentDownloadStageUpdate>(messageUpdate)) {
-        return { AttachmentIsLoadingRole, AttachmentIsLoadedRole };
+        return { AttachmentIsLoadingRole, AttachmentIsLoadedRole, AttachmentFileExistsRole };
 
     } else if(std::holds_alternative<MessageAttachmentSizeUpdate>(messageUpdate)) {
         return { AttachmentPictureThumbnailSizeRole };
@@ -379,6 +379,15 @@ QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate& messageUpdate) {
 
     } else if(std::holds_alternative<MessageAttachmentProcessedSizeUpdate>(messageUpdate)) {
         return { AttachmentBytesLoadedRole, AttachmentDisplayProgressRole };
+
+    } else if(std::holds_alternative<MessagePictureThumbnailPathUpdate>(messageUpdate)) {
+        return { AttachmentIconPathRole };
+
+    } else if(std::holds_alternative<MessagePictureThumbnailSizeUpdate>(messageUpdate)) {
+        return { AttachmentPictureThumbnailSizeRole };
+
+    } else if(std::holds_alternative<MessagePicturePreviewPathUpdate>(messageUpdate)) {
+        return { AttachmentIconPathRole };
 
     } else {
         return { };
