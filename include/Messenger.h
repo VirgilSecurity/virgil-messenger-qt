@@ -54,6 +54,7 @@ Q_DECLARE_LOGGING_CATEGORY(lcMessenger)
 namespace vm {
 class Messenger : public MessageSender {
     Q_OBJECT
+    Q_PROPERTY(bool isOnline READ isOnline NOTIFY onlineStatusChanged)
 
 public:
 

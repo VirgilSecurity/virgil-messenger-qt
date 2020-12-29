@@ -59,6 +59,7 @@ Control {
     }
 
     UploadProgressBar {
+        // TODO(fpohtmeh): move to main.qml
         anchors {
             bottom: parent.bottom
             left: parent.left

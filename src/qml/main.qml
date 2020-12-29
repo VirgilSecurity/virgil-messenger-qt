@@ -81,6 +81,10 @@ ApplicationWindow {
         AttachmentPicker {
             id: attachmentPicker
         }
+
+        NetworkStatusControl {
+            anchors.centerIn: parent
+        }
     }
 
     // Show Popup message

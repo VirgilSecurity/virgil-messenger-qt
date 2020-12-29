@@ -147,6 +147,7 @@
         <file>qml/components/ServerSelectionRow.qml</file>
         <file>qml/components/SelectedContactsFlow.qml</file>
         <file>qml/components/HorizontalRule.qml</file>
+        <file>qml/components/NetworkStatusControl.qml</file>
         <!-- Database -->
         <file>resources/database/createAttachments.sql</file>
         <file>resources/database/createChats.sql</file>
