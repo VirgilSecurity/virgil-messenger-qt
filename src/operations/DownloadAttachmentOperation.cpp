@@ -78,7 +78,7 @@ void Self::populateDownload()
     if (!FileUtils::fileExists(downloadPath)) {
         qCDebug(lcOperation) << "Download attachment to:" << downloadPath;
         auto downloadDecOp = factory->populateDownloadDecrypt(this, attachment->remoteUrl(), attachment->encryptedSize(),
-                                                   downloadPath, message->senderId());
+                                                   downloadPath, attachment->decryptionKey(), message->senderId());
         connect(downloadDecOp, &DownloadDecryptFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
         connect(downloadDecOp, &Operation::started, this, [=]() {
             startLoadOperation(attachment->encryptedSize());
@@ -143,7 +143,7 @@ void Self::populatePreload()
         };
 
         auto downloadDecOp = factory->populateDownloadDecrypt(this, thumbnail.remoteUrl(), thumbnail.encryptedSize(),
-                                                              thumbnailPath, message->senderId());
+                                                              thumbnailPath, thumbnail.decryptionKey(), message->senderId());
         downloadDecOp->setName(QLatin1String("DownloadDecryptThumbnail"));
         connect(downloadDecOp, &DownloadDecryptFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
         connect(downloadDecOp, &Operation::started, [=]() {

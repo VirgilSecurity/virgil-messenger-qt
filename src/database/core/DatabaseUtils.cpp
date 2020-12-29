@@ -43,7 +43,9 @@
 #include "MessageContentType.h"
 
 #include <QSqlError>
+#include <QSqlField>
 #include <QSqlQuery>
+#include <QSqlRecord>
 
 using namespace vm;
 using Self = DatabaseUtils;
@@ -192,6 +194,15 @@ MessageContent Self::readMessageContentEncrypted(const QSqlQuery &query) {
     const auto messageCiphertext = query.value("messageCiphertext").toByteArray();
 
     return MessageContentEncrypted(messageCiphertext);
+}
+
+void DatabaseUtils::printQueryRecord(const QSqlQuery &query)
+{
+    const auto r = query.record();
+    qCDebug(lcDatabase) << "Printing query record";
+    for (int i = 0, s = r.count(); i < s; ++i) {
+        qCDebug(lcDatabase).noquote().nospace() << r.field(i).name() << "=>" << r.value(i);
+    }
 }
 
 

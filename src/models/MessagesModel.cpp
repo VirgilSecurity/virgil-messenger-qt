@@ -371,7 +371,7 @@ QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate& messageUpdate) {
     } else if(std::holds_alternative<MessageAttachmentLocalPathUpdate>(messageUpdate)) {
         return { AttachmentIconPathRole };
 
-    } else if(std::holds_alternative<MessageAttachmentEncryptedSizeUpdate>(messageUpdate)) {
+    } else if(std::holds_alternative<MessageAttachmentEncryptionUpdate>(messageUpdate)) {
         return { AttachmentBytesTotalRole, AttachmentDisplayProgressRole };
 
     } else if(std::holds_alternative<MessageAttachmentProcessedSizeUpdate>(messageUpdate)) {

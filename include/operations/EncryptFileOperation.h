@@ -35,6 +35,7 @@
 #ifndef VM_ENCRYPTFILEOPERATION_H
 #define VM_ENCRYPTFILEOPERATION_H
 
+#include "Messenger.h"
 #include "Operation.h"
 #include "UserId.h"
 
@@ -47,17 +48,17 @@ class EncryptFileOperation : public Operation
     Q_OBJECT
 
 public:
-    explicit EncryptFileOperation(QObject *parent, const QString &sourcePath, const QString &destPath, const UserId &recipientId);
+    explicit EncryptFileOperation(QObject *parent, Messenger *messenger, const QString &sourcePath, const QString &destPath);
 
     void run() override;
 
 signals:
-    void encrypted(const QFileInfo &file);
+    void encrypted(const QFileInfo &file, const QByteArray &decryptionKey);
 
 private:
+    QPointer<Messenger> m_messenger;
     const QString m_sourcePath;
     const QString m_destPath;
-    const UserId m_recipientId;
 };
 }
 

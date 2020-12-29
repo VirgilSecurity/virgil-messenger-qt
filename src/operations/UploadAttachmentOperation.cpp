@@ -114,20 +114,21 @@ void Self::populatePictureOperations()
     connect(convertOp, &ConvertToPngOperation::converted, createThumbnailOp, &CreateAttachmentThumbnailOperation::setSourcePath);
 
     // Encrypt/Upload thumbnail
-    auto encUploadThumbOp = factory->populateEncryptUpload(this, thumbnailFilePath, message->recipientId());
+    auto encUploadThumbOp = factory->populateEncryptUpload(this, thumbnailFilePath);
     connect(encUploadThumbOp, &EncryptUploadFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
     const auto extrasToJson = [=]() {
         return attachment->extrasToJson(true);
     };
-    connect(encUploadThumbOp, &EncryptUploadFileOperation::encrypted, [=](const QFileInfo &file) {
+    connect(encUploadThumbOp, &EncryptUploadFileOperation::encrypted, [=](const QFileInfo &file, const QByteArray &decryptionKey) {
         startLoadOperation(file.size());
         // Thumbnail encrypted size update
-        MessagePictureThumbnailEncryptedSizeUpdate sizeUpdate;
-        sizeUpdate.messageId = message->id();
-        sizeUpdate.attachmentId = attachment->id();
-        sizeUpdate.extrasToJson = extrasToJson;
-        sizeUpdate.encryptedSize = file.size();
-        m_parent->messageUpdate(sizeUpdate);
+        MessagePictureThumbnailEncryptionUpdate update;
+        update.messageId = message->id();
+        update.attachmentId = attachment->id();
+        update.extrasToJson = extrasToJson;
+        update.encryptedSize = file.size();
+        update.decryptionKey = decryptionKey;
+        m_parent->messageUpdate(update);
     });
     connect(encUploadThumbOp, &EncryptUploadFileOperation::uploaded, [=](const QUrl &url) {
         // Thumbnail remote url update
@@ -158,16 +159,17 @@ EncryptUploadFileOperation *Self::populateEncryptUpload()
     const auto attachment = message->contentAsAttachment();
 
     // Encrypt/Upload
-    auto encUploadOp = m_parent->factory()->populateEncryptUpload(this, attachment->localPath(), message->recipientId());
+    auto encUploadOp = m_parent->factory()->populateEncryptUpload(this, attachment->localPath());
     connect(encUploadOp, &EncryptUploadFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
-    connect(encUploadOp, &EncryptUploadFileOperation::encrypted, [=](const QFileInfo &file) {
+    connect(encUploadOp, &EncryptUploadFileOperation::encrypted, [=](const QFileInfo &file, const QByteArray &decryptionKey) {
         startLoadOperation(file.size());
         // Encrypted size update
-        MessageAttachmentEncryptedSizeUpdate sizeUpdate;
-        sizeUpdate.messageId = message->id();
-        sizeUpdate.attachmentId = attachment->id();
-        sizeUpdate.encryptedSize = file.size();
-        m_parent->messageUpdate(sizeUpdate);
+        MessageAttachmentEncryptionUpdate update;
+        update.messageId = message->id();
+        update.attachmentId = attachment->id();
+        update.encryptedSize = file.size();
+        update.decryptionKey = decryptionKey;
+        m_parent->messageUpdate(update);
         // Stage update
         updateStage(MessageContentUploadStage::Encrypted);
     });

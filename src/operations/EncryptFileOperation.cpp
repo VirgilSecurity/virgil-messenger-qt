@@ -40,18 +40,23 @@
 
 using namespace vm;
 
-EncryptFileOperation::EncryptFileOperation(QObject *parent, const QString &sourcePath, const QString &destPath, const UserId &recipientId)
+EncryptFileOperation::EncryptFileOperation(QObject *parent, Messenger *messenger, const QString &sourcePath, const QString &destPath)
     : Operation(QLatin1String("EncryptFile"), parent)
+    , m_messenger(messenger)
     , m_sourcePath(sourcePath)
     , m_destPath(destPath)
-    , m_recipientId(recipientId)
 {
 }
 
 void EncryptFileOperation::run()
 {
-    // FIXME(fpohtmeh): implement, remove QFile
-    QFile::copy(m_sourcePath, m_destPath);
-    emit encrypted(QFileInfo(m_destPath));
-    finish();
+    const auto decryptionKey = m_messenger->encryptFile(m_sourcePath, m_destPath);
+    if (decryptionKey) {
+        emit encrypted(QFileInfo(m_destPath), *decryptionKey);
+        finish();
+    }
+    else {
+        qCWarning(lcOperation) << "Failed to encrypt file:" << m_sourcePath;
+        fail();
+    }
 }

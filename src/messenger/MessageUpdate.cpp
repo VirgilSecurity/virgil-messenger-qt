@@ -55,13 +55,10 @@ MessageId vm::MessageUpdateGetMessageId(const MessageUpdate& update) {
     else if (auto base = std::get_if<MessageAttachmentFingerprintUpdate>(&update)) {
         return base->messageId;
     }
-    else if (auto base = std::get_if<MessageAttachmentDecryptionKeyUpdate>(&update)) {
-        return base->messageId;
-    }
     else if (auto base = std::get_if<MessageAttachmentRemoteUrlUpdate>(&update)) {
         return base->messageId;
     }
-    else if (auto base = std::get_if<MessageAttachmentEncryptedSizeUpdate>(&update)) {
+    else if (auto base = std::get_if<MessageAttachmentEncryptionUpdate>(&update)) {
         return base->messageId;
     }
     else if (auto base = std::get_if<MessageAttachmentLocalPathUpdate>(&update)) {
@@ -76,7 +73,7 @@ MessageId vm::MessageUpdateGetMessageId(const MessageUpdate& update) {
     else if (auto base = std::get_if<MessagePictureThumbnailSizeUpdate>(&update)) {
         return base->messageId;
     }
-    else if (auto base = std::get_if<MessagePictureThumbnailEncryptedSizeUpdate>(&update)) {
+    else if (auto base = std::get_if<MessagePictureThumbnailEncryptionUpdate>(&update)) {
         return base->messageId;
     }
     else if (auto base = std::get_if<MessagePictureThumbnailRemoteUrlUpdate>(&update)) {
@@ -98,7 +95,7 @@ const MessageAttachmentExtrasUpdate *vm::MessageUpdateToAttachmentExtrasUpdate(c
     if (auto base = std::get_if<MessagePictureThumbnailSizeUpdate>(&update)) {
         return base;
     }
-    if (auto base = std::get_if<MessagePictureThumbnailEncryptedSizeUpdate>(&update)) {
+    if (auto base = std::get_if<MessagePictureThumbnailEncryptionUpdate>(&update)) {
         return base;
     }
     if (auto base = std::get_if<MessagePictureThumbnailRemoteUrlUpdate>(&update)) {

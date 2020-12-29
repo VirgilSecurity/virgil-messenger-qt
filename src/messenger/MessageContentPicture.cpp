@@ -60,7 +60,7 @@ bool Self::applyUpdate(const MessageUpdate& update) {
     if (auto thumbnailSizeUpdate = std::get_if<MessagePictureThumbnailSizeUpdate>(&update)) {
         setThumbnailSize(thumbnailSizeUpdate->thumbnailSize);
     }
-    if (auto thumbnailEncryptedSizeUpdate = std::get_if<MessagePictureThumbnailEncryptedSizeUpdate>(&update)) {
+    if (auto thumbnailEncryptedSizeUpdate = std::get_if<MessagePictureThumbnailEncryptionUpdate>(&update)) {
         thumbnail().setEncryptedSize(thumbnailEncryptedSizeUpdate->encryptedSize);
     }
     if (auto thumbnailRemoteUrlUpdate = std::get_if<MessagePictureThumbnailRemoteUrlUpdate>(&update)) {

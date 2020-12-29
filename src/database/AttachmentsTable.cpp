@@ -84,7 +84,7 @@ void Self::onAddAttachment(MessageHandler message)
     };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertAttachment"), values);
     if (!query) {
-        qCCritical(lcDatabase) << "Self::onCreateAttachment error";
+        qCCritical(lcDatabase) << "AttachmentsTable::onAddAttachment error";
         emit errorOccurred(tr("Failed to insert attachment"));
         return;
     }
@@ -113,13 +113,6 @@ static std::tuple<QString, DatabaseUtils::BindValues> createDatabaseBindings(con
         }};
     }
 
-    if (const auto arg = std::get_if<MessageAttachmentDecryptionKeyUpdate>(&attachmentUpdate)) {
-        return {"updateAttachmentDecryptionKey", {
-            { ":id", QString(arg->attachmentId) },
-            { ":decryptionKey",  arg->decryptionKey }
-        }};
-    }
-
     if (const auto arg = std::get_if<MessageAttachmentRemoteUrlUpdate>(&attachmentUpdate)) {
         return {"updateAttachmentRemoteUrl", {
             { ":id", QString(arg->attachmentId) },
@@ -127,10 +120,11 @@ static std::tuple<QString, DatabaseUtils::BindValues> createDatabaseBindings(con
         }};
     }
 
-    if (const auto arg = std::get_if<MessageAttachmentEncryptedSizeUpdate>(&attachmentUpdate)) {
-        return {"updateAttachmentEncryptedSize", {
+    if (const auto arg = std::get_if<MessageAttachmentEncryptionUpdate>(&attachmentUpdate)) {
+        return {"updateAttachmentEncryption", {
             { ":id", QString(arg->attachmentId) },
-            { ":encryptedSize",  arg->encryptedSize }
+            { ":encryptedSize",  arg->encryptedSize },
+            { ":decryptionKey",  arg->decryptionKey }
         }};
     }
 
@@ -162,7 +156,7 @@ void Self::onUpdateAttachment(const MessageUpdate &attachmentUpdate) {
     if (query) {
         qCDebug(lcDatabase) << "Attachment was updated" << bindValues.front().second << bindValues.back();
     } else {
-        qCCritical(lcDatabase) << "Self::onUpdateStatus error";
+        qCCritical(lcDatabase) << "Self::onUpdateAttachment error";
         emit errorOccurred(tr("Failed to update attachment"));
     }
 }

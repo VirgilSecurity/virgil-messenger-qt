@@ -37,6 +37,7 @@
 
 
 #include "MessageContentType.h"
+#include "Utils.h"
 
 
 using namespace vm;
@@ -50,7 +51,7 @@ QJsonObject Self::to(const MessageContent& messageContent) {
         mainObject.insert(QLatin1String("text"), text->text());
     }
     else if (auto encrypted = std::get_if<MessageContentEncrypted>(&messageContent)) {
-        mainObject.insert(QLatin1String("ciphertext"), QString(encrypted->ciphertext().toBase64()));
+        mainObject.insert(QLatin1String("ciphertext"), toBase64(encrypted->ciphertext()));
     }
     else if (auto file = std::get_if<MessageContentFile>(&messageContent)) {
         QJsonObject attachmentObject;
@@ -92,8 +93,7 @@ MessageContent Self::from(const QJsonObject& json, QString& errorString) {
         return MessageContentText(value.toString());
     }
     else if (auto value = json[QLatin1String("ciphertext")]; !value.isUndefined()) {
-        const auto ciphertext = value.toString().toUtf8();
-        return MessageContentEncrypted(QByteArray::fromBase64(ciphertext));
+        return MessageContentEncrypted(fromBase64(value));
     }
     else if (auto value = json[QLatin1String("file")]; !value.isUndefined()) {
         MessageContentFile file;
@@ -131,7 +131,7 @@ void Self::writeAttachment(const MessageContentAttachment& attachment, QJsonObje
     json.insert(QLatin1String("remoteUrl"), attachment.remoteUrl().toString());
     json.insert(QLatin1String("encryptedSize"), attachment.encryptedSize());
     json.insert(QLatin1String("fingerprint"), attachment.fingerprint());
-    json.insert(QLatin1String("decryptionKey"), QString(attachment.decryptionKey().toBase64()));
+    json.insert(QLatin1String("decryptionKey"), toBase64(attachment.decryptionKey()));
 }
 
 
@@ -139,6 +139,7 @@ void Self::writeExtras(const MessageContentPicture& picture, const bool writeLoc
     const auto thumbnail = picture.thumbnail();
     json["thumbnailUrl"] = thumbnail.remoteUrl().toString();
     json["thumbnailEncryptedSize"] = thumbnail.encryptedSize();
+    json["thumbnailDecryptionKey"] = toBase64(thumbnail.decryptionKey());
 
     const auto thumbnailSize = picture.thumbnailSize();
     json["thumbnailWidth"] = thumbnailSize.width();
@@ -164,6 +165,7 @@ bool Self::readExtras(const QJsonObject& json, MessageContentPicture &picture) {
     thumbnail.setLocalPath(json["thumbnailPath"].toString());
     thumbnail.setRemoteUrl(json["thumbnailUrl"].toString());
     thumbnail.setEncryptedSize(json["thumbnailEncryptedSize"].toInt());
+    thumbnail.setDecryptionKey(fromBase64(json["thumbnailDecryptionKey"]));
     picture.setThumbnail(thumbnail);
     picture.setThumbnailSize(QSize(json["thumbnailWidth"].toInt(), json["thumbnailHeight"].toInt()));
     picture.setPreviewPath(json["previewPath"].toString());
@@ -174,13 +176,23 @@ bool Self::readExtras(const QJsonObject& json, MessageContentPicture &picture) {
 
 bool Self::readAttachment(const QJsonObject& jsonObject, MessageContentAttachment& attachment) {
     // TODO: Check mandatory fields and return false if absent.
-
+    attachment.setId(AttachmentId(Utils::createUuid())); // FIXME(fpohtmeh): keep attachment id in json?
     attachment.setFileName(jsonObject[QLatin1String("fileName")].toString());
     attachment.setSize(jsonObject[QLatin1String("size")].toInt());
     attachment.setRemoteUrl(jsonObject[QLatin1String("remoteUrl")].toString());
     attachment.setEncryptedSize(jsonObject[QLatin1String("encryptedSize")].toInt());
     attachment.setFingerprint(jsonObject[QLatin1String("fingerprint")].toString());
-    attachment.setDecryptionKey(QByteArray::fromBase64(jsonObject[QLatin1String("decryptionKey")].toString().toUtf8()));
+    attachment.setDecryptionKey(fromBase64(jsonObject[QLatin1String("decryptionKey")]));
 
     return true;
+}
+
+QString MessageContentJsonUtils::toBase64(const QByteArray &bytes)
+{
+    return QString::fromUtf8(bytes.toBase64());
+}
+
+QByteArray MessageContentJsonUtils::fromBase64(const QVariant &str)
+{
+    return QByteArray::fromBase64(str.toString().toUtf8());
 }

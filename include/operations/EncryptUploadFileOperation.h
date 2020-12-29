@@ -43,19 +43,20 @@
 namespace vm
 {
 class FileLoader;
+class Messenger;
 
 class EncryptUploadFileOperation : public NetworkOperation
 {
     Q_OBJECT
 
 public:
-    EncryptUploadFileOperation(NetworkOperation *parent, const Settings *settings, FileLoader *fileLoader, const QString &sourcePath, const UserId &recipientId);
+    EncryptUploadFileOperation(NetworkOperation *parent, Messenger *messenger, const Settings *settings, const QString &sourcePath);
 
     void setSourcePath(const QString &sourcePath);
 
 signals:
     void progressChanged(quint64 bytesLoaded, quint64 bytesTotal);
-    void encrypted(const QFileInfo &file);
+    void encrypted(const QFileInfo &file, const QByteArray &decryptionKey);
     void uploadSlotReceived();
     void uploaded(const QUrl &url);
 
@@ -63,10 +64,9 @@ private:
     bool populateChildren() override;
     void cleanup() override;
 
-    QPointer<FileLoader> m_fileLoader;
+    QPointer<Messenger> m_messenger;
     QString m_sourcePath;
     const QString m_tempPath;
-    const UserId m_recipientId;
 };
 }
 

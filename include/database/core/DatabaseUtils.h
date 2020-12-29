@@ -68,6 +68,8 @@ private:
     static MessageContent readMessageContentPicture(const QSqlQuery &query);
     static MessageContent readMessageContentText(const QSqlQuery &query);
     static MessageContent readMessageContentEncrypted(const QSqlQuery &query);
+
+    static void printQueryRecord(const QSqlQuery &query);
 };
 }
 

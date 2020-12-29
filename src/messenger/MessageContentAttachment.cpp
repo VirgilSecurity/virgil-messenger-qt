@@ -55,14 +55,12 @@ bool Self::applyUpdate(const MessageUpdate& messageUpdate) {
     else if (auto update = std::get_if<MessageAttachmentFingerprintUpdate>(&messageUpdate)) {
         setFingerprint(update->fingerprint);
     }
-    else if (auto update = std::get_if<MessageAttachmentDecryptionKeyUpdate>(&messageUpdate)) {
-        setDecryptionKey(update->decryptionKey);
-    }
     else if (auto update = std::get_if<MessageAttachmentRemoteUrlUpdate>(&messageUpdate)) {
         setRemoteUrl(update->remoteUrl);
     }
-    else if (auto update = std::get_if<MessageAttachmentEncryptedSizeUpdate>(&messageUpdate)) {
+    else if (auto update = std::get_if<MessageAttachmentEncryptionUpdate>(&messageUpdate)) {
         setEncryptedSize(update->encryptedSize);
+        setDecryptionKey(update->decryptionKey);
     }
     else if (auto update = std::get_if<MessageAttachmentLocalPathUpdate>(&messageUpdate)) {
         setLocalPath(update->localPath);

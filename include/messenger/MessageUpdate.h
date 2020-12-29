@@ -80,10 +80,6 @@ struct MessageAttachmentFingerprintUpdate : public MessageAttachmentUpdateBase {
     QString fingerprint;
 };
 
-struct MessageAttachmentDecryptionKeyUpdate : public MessageAttachmentUpdateBase {
-    QByteArray decryptionKey;
-};
-
 struct MessageAttachmentRemoteUrlUpdate : public MessageAttachmentUpdateBase {
     QUrl remoteUrl;
 };
@@ -92,8 +88,9 @@ struct MessageAttachmentLocalPathUpdate : public MessageAttachmentUpdateBase {
     QString localPath;
 };
 
-struct MessageAttachmentEncryptedSizeUpdate : public MessageAttachmentUpdateBase {
+struct MessageAttachmentEncryptionUpdate : public MessageAttachmentUpdateBase {
     quint64 encryptedSize;
+    QByteArray decryptionKey;
 };
 
 struct MessageAttachmentProcessedSizeUpdate : public MessageAttachmentUpdateBase {
@@ -112,8 +109,9 @@ struct MessagePictureThumbnailSizeUpdate : public MessageAttachmentExtrasUpdate 
     QSize thumbnailSize;
 };
 
-struct MessagePictureThumbnailEncryptedSizeUpdate : public MessageAttachmentExtrasUpdate {
+struct MessagePictureThumbnailEncryptionUpdate : public MessageAttachmentExtrasUpdate {
     qint64 encryptedSize;
+    QByteArray decryptionKey;
 };
 
 struct MessagePictureThumbnailRemoteUrlUpdate : public MessageAttachmentExtrasUpdate {
@@ -131,14 +129,13 @@ using MessageUpdate = std::variant<
     MessageAttachmentUploadStageUpdate,
     MessageAttachmentDownloadStageUpdate,
     MessageAttachmentFingerprintUpdate,
-    MessageAttachmentDecryptionKeyUpdate,
     MessageAttachmentRemoteUrlUpdate,
-    MessageAttachmentEncryptedSizeUpdate,
+    MessageAttachmentEncryptionUpdate,
     MessageAttachmentLocalPathUpdate,
     MessageAttachmentProcessedSizeUpdate,
     MessagePictureThumbnailPathUpdate,
     MessagePictureThumbnailSizeUpdate,
-    MessagePictureThumbnailEncryptedSizeUpdate,
+    MessagePictureThumbnailEncryptionUpdate,
     MessagePictureThumbnailRemoteUrlUpdate,
     MessagePicturePreviewPathUpdate
     >;

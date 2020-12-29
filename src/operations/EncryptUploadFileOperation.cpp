@@ -35,6 +35,7 @@
 #include "operations/EncryptUploadFileOperation.h"
 
 #include "FileUtils.h"
+#include "Messenger.h"
 #include "Settings.h"
 #include "Utils.h"
 #include "operations/EncryptFileOperation.h"
@@ -42,12 +43,11 @@
 
 using namespace vm;
 
-EncryptUploadFileOperation::EncryptUploadFileOperation(NetworkOperation *parent, const Settings *settings, FileLoader *fileLoader, const QString &sourcePath, const UserId &recipientId)
+EncryptUploadFileOperation::EncryptUploadFileOperation(NetworkOperation *parent, Messenger *messenger, const Settings *settings, const QString &sourcePath)
     : NetworkOperation(parent)
-    , m_fileLoader(fileLoader)
+    , m_messenger(messenger)
     , m_sourcePath(sourcePath)
     , m_tempPath(settings->attachmentCacheDir().filePath(Utils::createUuid()))
-    , m_recipientId(recipientId)
 {
     setName(QLatin1String("EncryptUpload"));
 }
@@ -59,11 +59,11 @@ void EncryptUploadFileOperation::setSourcePath(const QString &sourcePath)
 
 bool EncryptUploadFileOperation::populateChildren()
 {
-    auto encryptOp = new EncryptFileOperation(this, m_sourcePath, m_tempPath, m_recipientId);
+    auto encryptOp = new EncryptFileOperation(this, m_messenger, m_sourcePath, m_tempPath);
     connect(encryptOp, &EncryptFileOperation::encrypted, this, &EncryptUploadFileOperation::encrypted);
     appendChild(encryptOp);
 
-    auto uploadOp = new UploadFileOperation(this, m_fileLoader, m_tempPath);
+    auto uploadOp = new UploadFileOperation(this, m_messenger->fileLoader(), m_tempPath);
     connect(uploadOp, &UploadFileOperation::progressChanged, this, &EncryptUploadFileOperation::progressChanged);
     connect(uploadOp, &UploadFileOperation::uploadSlotReceived, this, &EncryptUploadFileOperation::uploadSlotReceived);
     connect(uploadOp, &UploadFileOperation::uploaded, this, &EncryptUploadFileOperation::uploaded);

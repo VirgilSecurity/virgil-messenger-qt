@@ -113,6 +113,15 @@ private:
     //
     static bool readAttachment(const QJsonObject& json, MessageContentAttachment& attachment);
 
+    //
+    //  Builds Base64 string
+    //
+    static QString toBase64(const QByteArray &bytes);
+
+    //
+    //  Parse Base64 string
+    //
+    static QByteArray fromBase64(const QVariant &str);
 };
 } // namespace vm
 

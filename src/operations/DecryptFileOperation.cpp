@@ -38,18 +38,25 @@
 
 using namespace vm;
 
-DecryptFileOperation::DecryptFileOperation(QObject *parent, const QString &sourcePath, const QString &destPath, const UserId &senderId)
+DecryptFileOperation::DecryptFileOperation(QObject *parent, Messenger *messenger, const QString &sourcePath, const QString &destPath,
+                                           const QByteArray &decryptionKey, const UserId &senderId)
     : Operation(QLatin1String("DecryptFile"), parent)
+    , m_messenger(messenger)
     , m_sourcePath(sourcePath)
     , m_destPath(destPath)
+    , m_decryptionKey(decryptionKey)
     , m_senderId(senderId)
 {
 }
 
 void DecryptFileOperation::run()
 {
-    // FIXME(fpohtmeh): implement, remove QFile
-    QFile::copy(m_sourcePath, m_destPath);
-    emit decrypted(QFileInfo(m_destPath));
-    finish();
+    if (m_messenger->decryptFile(m_sourcePath, m_destPath, m_decryptionKey, m_senderId)) {
+        emit decrypted(QFileInfo(m_destPath));
+        finish();
+    }
+    else {
+        qCWarning(lcOperation) << "Failed to decrypt file:" << m_sourcePath;
+        fail();
+    }
 }
