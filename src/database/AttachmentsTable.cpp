@@ -72,6 +72,7 @@ void Self::onAddAttachment(MessageHandler message)
         { ":messageId", QString(message->id()) },
         { ":type",  MessageContentTypeToString(message->contentType()) },
         { ":fingerprint", attachment->fingerprint() },
+        { ":decryptionKey", attachment->decryptionKey() },
         { ":filename", attachment->fileName() },
         { ":localPath", attachment->localPath() },
         { ":url", attachment->remoteUrl() },
@@ -109,6 +110,13 @@ static std::tuple<QString, DatabaseUtils::BindValues> createDatabaseBindings(con
         return {"updateAttachmentFingerprint", {
             { ":id", QString(arg->attachmentId) },
             { ":fingerprint",  arg->fingerprint }
+        }};
+    }
+
+    if (const auto arg = std::get_if<MessageAttachmentDecryptionKeyUpdate>(&attachmentUpdate)) {
+        return {"updateAttachmentDecryptionKey", {
+            { ":id", QString(arg->attachmentId) },
+            { ":decryptionKey",  arg->decryptionKey }
         }};
     }
 

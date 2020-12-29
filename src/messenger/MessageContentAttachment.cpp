@@ -45,31 +45,34 @@ using namespace vm;
 using Self = MessageContentAttachment;
 
 
-bool Self::applyUpdate(const MessageUpdate& update) {
-    if (auto uploadStageUpdate = std::get_if<MessageAttachmentUploadStageUpdate>(&update)) {
-        setUploadStage(uploadStageUpdate->uploadStage);
+bool Self::applyUpdate(const MessageUpdate& messageUpdate) {
+    if (auto update = std::get_if<MessageAttachmentUploadStageUpdate>(&messageUpdate)) {
+        setUploadStage(update->uploadStage);
     }
-    else if (auto downloadStageUpdate = std::get_if<MessageAttachmentDownloadStageUpdate>(&update)) {
-        setDownloadStage(downloadStageUpdate->downloadStage);
+    else if (auto update = std::get_if<MessageAttachmentDownloadStageUpdate>(&messageUpdate)) {
+        setDownloadStage(update->downloadStage);
     }
-    else if (auto fingerprintUpdate = std::get_if<MessageAttachmentFingerprintUpdate>(&update)) {
-        setFingerprint(fingerprintUpdate->fingerprint);
+    else if (auto update = std::get_if<MessageAttachmentFingerprintUpdate>(&messageUpdate)) {
+        setFingerprint(update->fingerprint);
     }
-    else if (auto sizeUpdate = std::get_if<MessageAttachmentSizeUpdate>(&update)) {
+    else if (auto update = std::get_if<MessageAttachmentDecryptionKeyUpdate>(&messageUpdate)) {
+        setDecryptionKey(update->decryptionKey);
+    }
+    else if (auto update = std::get_if<MessageAttachmentSizeUpdate>(&messageUpdate)) {
         // FIXME(fpohtmeh): Likely we don't need size update. Remove MessageAttachmentSizeUpdate struct
-        setSize(sizeUpdate->size);
+        setSize(update->size);
     }
-    else if (auto remoteUrlUpdate = std::get_if<MessageAttachmentRemoteUrlUpdate>(&update)) {
-        setRemoteUrl(remoteUrlUpdate->remoteUrl);
+    else if (auto update = std::get_if<MessageAttachmentRemoteUrlUpdate>(&messageUpdate)) {
+        setRemoteUrl(update->remoteUrl);
     }
-    else if (auto encryptedSizeUpdate = std::get_if<MessageAttachmentEncryptedSizeUpdate>(&update)) {
-        setEncryptedSize(encryptedSizeUpdate->encryptedSize);
+    else if (auto update = std::get_if<MessageAttachmentEncryptedSizeUpdate>(&messageUpdate)) {
+        setEncryptedSize(update->encryptedSize);
     }
-    else if (auto localPathUpdate = std::get_if<MessageAttachmentLocalPathUpdate>(&update)) {
-        setLocalPath(localPathUpdate->localPath);
+    else if (auto update = std::get_if<MessageAttachmentLocalPathUpdate>(&messageUpdate)) {
+        setLocalPath(update->localPath);
     }
-    else if (auto processedSizeUpdate = std::get_if<MessageAttachmentProcessedSizeUpdate>(&update)) {
-        setProcessedSize(processedSizeUpdate->processedSize);
+    else if (auto update = std::get_if<MessageAttachmentProcessedSizeUpdate>(&messageUpdate)) {
+        setProcessedSize(update->processedSize);
     }
     else {
         return false;
@@ -105,6 +108,16 @@ QString Self::fingerprint() const {
 
 void Self::setFingerprint(QString fingerprint) {
     m_fingerprint = fingerprint;
+}
+
+
+QByteArray Self::decryptionKey() const {
+    return m_decryptionKey;
+}
+
+
+void Self::setDecryptionKey(QByteArray decryptionKey) {
+    m_decryptionKey = std::move(decryptionKey);
 }
 
 

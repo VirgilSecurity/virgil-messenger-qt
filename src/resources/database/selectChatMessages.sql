@@ -15,6 +15,7 @@ SELECT
     attachments.id AS attachmentId,
     attachments.type AS attachmentType,
     attachments.fingerprint AS attachmentFingerprint,
+    attachments.decryptionKey AS attachmentDecryptionKey,
     attachments.filename AS attachmentFilename,
     attachments.localPath AS attachmentLocalPath,
     attachments.url AS attachmentUrl,

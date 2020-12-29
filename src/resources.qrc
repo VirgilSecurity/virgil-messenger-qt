@@ -163,6 +163,7 @@
         <file>resources/database/updateAttachmentEncryptedSize.sql</file>
         <file>resources/database/updateAttachmentExtras.sql</file>
         <file>resources/database/updateAttachmentFingerprint.sql</file>
+        <file>resources/database/updateAttachmentDecryptionKey.sql</file>
         <file>resources/database/updateAttachmentLocalPath.sql</file>
         <file>resources/database/updateAttachmentUploadStage.sql</file>
         <file>resources/database/updateAttachmentRemoteUrl.sql</file>

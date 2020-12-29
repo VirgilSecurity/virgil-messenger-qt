@@ -3,6 +3,7 @@ CREATE TABLE attachments (
         messageId TEXT NOT NULL,
         type TEXT NOT NULL,
         fingerprint TEXT,
+        decryptionKey BLOB,
         filename TEXT NOT NULL,
         localPath TEXT,
         url TEXT,

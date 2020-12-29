@@ -45,15 +45,14 @@
 #include <qxmpp/QXmppClient.h>
 #include <qxmpp/QXmppHttpUploadIq.h>
 
-#include <QLoggingCategory>
 #include <QObject>
 #include <QFuture>
 #include <QUrl>
 #include <QPointer>
 
 #include <memory>
+#include <tuple>
 
-Q_DECLARE_LOGGING_CATEGORY(lcCommKitMessenger)
 
 namespace vm
 {
@@ -75,12 +74,17 @@ public:
         Error_UserAlreadyExists,
         Error_ExportCredentials,
         Error_ImportCredentials,
-        Error_Attachment,
         Error_InvalidCarbonMessage,
         Error_InvalidMessageFormat,
         Error_InvalidMessageVersion,
         Error_InvalidMessageTimestamp,
         Error_InvalidMessageCiphertext,
+        Error_FileEncryptionReadFailed,
+        Error_FileEncryptionWriteFailed,
+        Error_FileEncryptionCryptoFailed,
+        Error_FileDecryptionReadFailed,
+        Error_FileDecryptionWriteFailed,
+        Error_FileDecryptionCryptoFailed,
         Error_SendMessageFailed,
     };
 
@@ -158,6 +162,17 @@ public:
     QFuture<Result> sendMessage(MessageHandler message);
     QFuture<Result> processReceivedXmppMessage(const QXmppMessage& xmppMessage);
     QFuture<Result> processReceivedXmppCarbonMessage(const QXmppMessage& xmppMessage);
+
+    //
+    //  Encrypt given file and returns a key for decryption.
+    //
+    std::tuple<Result, QByteArray> encryptFile(const QString &sourceFilePath, const QString &destFilePath);
+
+    //
+    //  Decrypt given file and returns a key for decryption.
+    //
+    Result decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray& decryptionKey,
+            const UserId fileOwnerId);
 
     //
     //  Push Notifications.

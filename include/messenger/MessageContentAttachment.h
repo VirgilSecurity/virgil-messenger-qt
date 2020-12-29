@@ -42,6 +42,7 @@
 #include "MessageContentDownloadStage.h"
 
 #include <QUrl>
+#include <QByteArray>
 
 namespace vm {
 
@@ -99,6 +100,16 @@ public:
     //  Note, can be calculated later.
     //
     void setFingerprint(QString fingerprint);
+
+    //
+    //  Return attachment decryption key.
+    //
+    QByteArray decryptionKey() const;
+
+    //
+    //  Set attachment decryption key.
+    //
+    void setDecryptionKey(QByteArray decryptionKey);
 
     //
     //  Return attachment size.
@@ -198,6 +209,7 @@ private:
     AttachmentId m_id;
     QString m_fileName;
     QString m_fingerprint;
+    QByteArray m_decryptionKey;
     quint64 m_size = 0;
     QUrl m_remoteUrl;
     QString m_localPath;

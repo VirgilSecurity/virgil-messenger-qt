@@ -80,6 +80,10 @@ struct MessageAttachmentFingerprintUpdate : public MessageAttachmentUpdateBase {
     QString fingerprint;
 };
 
+struct MessageAttachmentDecryptionKeyUpdate : public MessageAttachmentUpdateBase {
+    QByteArray decryptionKey;
+};
+
 struct MessageAttachmentSizeUpdate : public MessageAttachmentUpdateBase {
     quint64 size;
 };
@@ -131,6 +135,7 @@ using MessageUpdate = std::variant<
     MessageAttachmentUploadStageUpdate,
     MessageAttachmentDownloadStageUpdate,
     MessageAttachmentFingerprintUpdate,
+    MessageAttachmentDecryptionKeyUpdate,
     MessageAttachmentSizeUpdate,
     MessageAttachmentRemoteUrlUpdate,
     MessageAttachmentEncryptedSizeUpdate,

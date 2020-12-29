@@ -131,6 +131,7 @@ void Self::writeAttachment(const MessageContentAttachment& attachment, QJsonObje
     json.insert(QLatin1String("remoteUrl"), attachment.remoteUrl().toString());
     json.insert(QLatin1String("encryptedSize"), attachment.encryptedSize());
     json.insert(QLatin1String("fingerprint"), attachment.fingerprint());
+    json.insert(QLatin1String("decryptionKey"), QString(attachment.decryptionKey().toBase64()));
 }
 
 
@@ -179,6 +180,7 @@ bool Self::readAttachment(const QJsonObject& jsonObject, MessageContentAttachmen
     attachment.setRemoteUrl(jsonObject[QLatin1String("remoteUrl")].toString());
     attachment.setEncryptedSize(jsonObject[QLatin1String("encryptedSize")].toInt());
     attachment.setFingerprint(jsonObject[QLatin1String("fingerprint")].toString());
+    attachment.setDecryptionKey(QByteArray::fromBase64(jsonObject[QLatin1String("decryptionKey")].toString().toUtf8()));
 
     return true;
 }

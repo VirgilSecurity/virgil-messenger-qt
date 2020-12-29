@@ -55,6 +55,9 @@ MessageId vm::MessageUpdateGetMessageId(const MessageUpdate& update) {
     else if (auto base = std::get_if<MessageAttachmentFingerprintUpdate>(&update)) {
         return base->messageId;
     }
+    else if (auto base = std::get_if<MessageAttachmentDecryptionKeyUpdate>(&update)) {
+        return base->messageId;
+    }
     else if (auto base = std::get_if<MessageAttachmentSizeUpdate>(&update)) {
         return base->messageId;
     }
