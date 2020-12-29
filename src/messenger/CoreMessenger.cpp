@@ -259,7 +259,7 @@ Self::resetXmppConfiguration() {
     //  Handle carbons (message copies).
     //  See, XEP-0280.
     //
-    connect(m_impl->xmppCarbonManager, &QXmppCarbonManager::messageReceived, this, &Self::xmppOnCarbonMessageReceived);
+    connect(m_impl->xmppCarbonManager, &QXmppCarbonManager::messageReceived, this, &Self::xmppOnMessageReceived);
     connect(m_impl->xmppCarbonManager, &QXmppCarbonManager::messageSent, this, &Self::xmppOnCarbonMessageReceived);
 
     // Add extra logging
@@ -797,7 +797,6 @@ Self::findUserById(const UserId &userId) const {
     auto commKitUser = std::make_shared<User>(std::move(commKitUserImpl));
 
     m_impl->identityToUser[userId] = commKitUser;
-    m_impl->usernameToUser[userId] = commKitUser;
 
     return commKitUser;
 }
@@ -1241,13 +1240,13 @@ Self::xmppOnError(QXmppClient::Error error) {
 
 void
 Self::xmppOnPresenceReceived(const QXmppPresence &presence) {
-
+    Q_UNUSED(presence)
 }
 
 
 void
 Self::xmppOnIqReceived(const QXmppIq &iq) {
-
+    Q_UNUSED(iq)
 }
 
 void

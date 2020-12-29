@@ -192,8 +192,10 @@ QVariant Self::data(const QModelIndex &index, int role) const
             return false;
         }
 
-        const bool isUploading = message->isOutgoing() && (attachment->uploadStage() != MessageContentUploadStage::Uploaded);
-        const bool isDownloading = attachment->downloadStage() != MessageContentDownloadStage::Decrypted;
+        const bool isUploading = message->isOutgoing() && (attachment->uploadStage() != MessageContentUploadStage::Initial &&
+            attachment->uploadStage() != MessageContentUploadStage::Uploaded);
+        const bool isDownloading = attachment->downloadStage() == MessageContentDownloadStage::Downloading ||
+            attachment->downloadStage() == MessageContentDownloadStage::Downloaded;
 
         return isUploading || isDownloading;
     }
@@ -230,7 +232,6 @@ QVariant Self::data(const QModelIndex &index, int role) const
         if (auto picture = std::get_if<MessageContentPicture>(&message->content())) {
             return picture->thumbnailSize();
         }
-
         return QSize();
     }
 
@@ -242,10 +243,15 @@ QVariant Self::data(const QModelIndex &index, int role) const
     }
 
     case AttachmentDisplayProgressRole: {
-        if (attachment) {
-            return Utils::formattedDataSizeProgress(attachment->processedSize(), attachment->encryptedSize());
+        if (!attachment) {
+            return QString();
         }
-        return QString();
+
+        auto totalSize = attachment->encryptedSize();
+        if (auto picture = std::get_if<MessageContentPicture>(&message->content())) {
+            totalSize += picture->thumbnail().encryptedSize();
+        }
+        return Utils::formattedDataSizeProgress(attachment->processedSize(), totalSize);
     }
 
     case AttachmentDisplayTextRole: {
@@ -257,11 +263,11 @@ QVariant Self::data(const QModelIndex &index, int role) const
             return 0;
         }
 
+        auto totalSize = attachment->encryptedSize();
         if (auto picture = std::get_if<MessageContentPicture>(&message->content())) {
-            return picture->encryptedSize() + picture->thumbnail().encryptedSize();
+            totalSize += picture->thumbnail().encryptedSize();
         }
-
-        return attachment->encryptedSize();
+        return totalSize;
     }
 
     case AttachmentBytesLoadedRole: {
@@ -333,11 +339,11 @@ std::optional<int> Self::findRowById(const MessageId &messageId) const
 
 void Self::invalidateRow(const int row, const QVector<int> &roles)
 {
-    if (!roles.empty()) {
-        invalidateModel(index(row), roles);
-    }
+    // Invalidate row
+    invalidateModel(index(row), roles);
 
-    if (roles.contains(DisplayStatusRole)) {
+    // Invalidate neighbour rows
+    if (roles.isEmpty() || roles.contains(DisplayStatusRole)) {
         if (row > 0) {
             invalidateModel(index(row - 1), { DisplayStatusRole, IsBrokenRole, InRowRole });
         }
@@ -354,49 +360,35 @@ void Self::invalidateModel(const QModelIndex &index, const QVector<int> &roles)
 
 QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate& messageUpdate) {
 
-    if(std::holds_alternative<MessageStatusUpdate>(messageUpdate)) {
-        return { DisplayStatusRole, IsBrokenRole };
+    if(std::holds_alternative<IncomingMessageStageUpdate>(messageUpdate) ||
+            std::holds_alternative<OutgoingMessageStageUpdate>(messageUpdate)) {
+        return { DisplayStatusRole, IsBrokenRole, InRowRole };
 
-    } else if(std::holds_alternative<IncomingMessageStageUpdate>(messageUpdate)) {
-        return { DisplayStatusRole, IsBrokenRole };
-
-    } else if(std::holds_alternative<OutgoingMessageStageUpdate>(messageUpdate)) {
-        return { DisplayStatusRole, IsBrokenRole };
-
-    } else if(std::holds_alternative<MessageAttachmentUploadStageUpdate>(messageUpdate)) {
-        return { AttachmentIsLoadingRole };
-
-    } else if(std::holds_alternative<MessageAttachmentDownloadStageUpdate>(messageUpdate)) {
-        return { AttachmentIsLoadingRole };
-
-    } else if(std::holds_alternative<MessageAttachmentFingerprintUpdate>(messageUpdate)) {
-        return {  };
+    } else if(std::holds_alternative<MessageAttachmentUploadStageUpdate>(messageUpdate) ||
+              std::holds_alternative<MessageAttachmentDownloadStageUpdate>(messageUpdate)) {
+        return { AttachmentIsLoadingRole, AttachmentIsLoadedRole };
 
     } else if(std::holds_alternative<MessageAttachmentSizeUpdate>(messageUpdate)) {
         return { AttachmentPictureThumbnailSizeRole };
-
-    } else if(std::holds_alternative<MessageAttachmentRemoteUrlUpdate>(messageUpdate)) {
-        return {  };
 
     } else if(std::holds_alternative<MessageAttachmentLocalPathUpdate>(messageUpdate)) {
         return { AttachmentIconPathRole };
 
     } else if(std::holds_alternative<MessageAttachmentEncryptedSizeUpdate>(messageUpdate)) {
-        return {  };
+        return { AttachmentBytesTotalRole, AttachmentDisplayProgressRole };
 
     } else if(std::holds_alternative<MessageAttachmentProcessedSizeUpdate>(messageUpdate)) {
-        return { AttachmentBytesLoadedRole };
+        return { AttachmentBytesLoadedRole, AttachmentDisplayProgressRole };
 
     } else {
         return { };
     }
 }
 
-QString MessagesModel::displayStatusString(MessageHandler message)
+QString Self::displayStatusString(MessageHandler message)
 {
     switch (message->status()) {
         case Message::Status::New:
-        case Message::Status::Waiting:
         case Message::Status::Processing:
             return tr("sending");
         case Message::Status::Succeed:
@@ -409,4 +401,3 @@ QString MessagesModel::displayStatusString(MessageHandler message)
             return QString();
     }
 }
-

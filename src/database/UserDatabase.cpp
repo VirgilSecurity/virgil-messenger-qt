@@ -56,6 +56,7 @@ Self::UserDatabase(const QDir &databaseDir, QObject *parent)
     connect(this, &Self::open, this, &Self::onOpen);
     connect(this, &Self::close, this, &Self::onClose);
     connect(this, &Self::writeMessage, this, &Self::onWriteMessage);
+    connect(this, &Self::updateMessage, this, &Self::onUpdateMessage);
     connect(this, &Self::writeChatAndLastMessage, this, &Self::onWriteChatAndLastMessage);
     connect(this, &Self::resetUnreadCount, this, &Self::onResetUnreadCount);
 }
@@ -160,6 +161,14 @@ void Self::onWriteMessage(const MessageHandler &message, qsizetype unreadCount)
         attachmentsTable()->addAttachment(message);
     }
     chatsTable()->updateLastMessage(message, unreadCount);
+}
+
+void UserDatabase::onUpdateMessage(const MessageUpdate &messageUpdate)
+{
+    ScopedConnection connection(*this);
+    ScopedTransaction transaction(*this);
+    messagesTable()->updateMessage(messageUpdate);
+    attachmentsTable()->updateAttachment(messageUpdate);
 }
 
 void Self::onWriteChatAndLastMessage(const ChatHandler &chat)

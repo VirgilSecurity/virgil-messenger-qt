@@ -55,6 +55,12 @@ bool Self::isIncoming() const noexcept {
 }
 
 
+Self::Status Self::status() const noexcept
+{
+    return IncomingMessageStageToMessageStatus(m_stage);
+}
+
+
 Self::Stage Self::stage() const noexcept {
     return m_stage;
 }

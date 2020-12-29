@@ -40,8 +40,6 @@
 
 #include <QPointer>
 
-class Settings;
-
 namespace vm
 {
 class FileLoader;
@@ -53,22 +51,19 @@ class EncryptUploadFileOperation : public NetworkOperation
 public:
     EncryptUploadFileOperation(NetworkOperation *parent, const Settings *settings, FileLoader *fileLoader, const QString &sourcePath, const UserId &recipientId);
 
-    void setSourcePath(const QString &path);
-
 signals:
     void progressChanged(quint64 bytesLoaded, quint64 bytesTotal);
-    void bytesCalculated(quint64 bytes);
+    void encrypted(const QFileInfo &file);
     void uploaded(const QUrl &url);
 
 private:
     bool populateChildren() override;
     void cleanup() override;
 
-    const Settings *m_settings;
     QPointer<FileLoader> m_fileLoader;
-    QString m_sourcePath;
-    QString m_tempPath;
-    UserId m_recipientId;
+    const QString m_sourcePath;
+    const QString m_tempPath;
+    const UserId m_recipientId;
 };
 }
 

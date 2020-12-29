@@ -43,6 +43,9 @@ MessageContentUploadStage vm::MessageContentUploadStageFromString(const QString&
     if (stageString == QLatin1String("initial")) {
         return MessageContentUploadStage::Initial;
     }
+    else if (stageString == QLatin1String("preprocessed")) {
+        return MessageContentUploadStage::Preprocessed;
+    }
     else if (stageString == QLatin1String("encrypted")) {
         return MessageContentUploadStage::Encrypted;
     }
@@ -62,6 +65,9 @@ QString vm::MessageContentUploadStageToString(MessageContentUploadStage stage) {
     switch (stage) {
         case MessageContentUploadStage::Initial:
             return QLatin1String("initial");
+
+        case MessageContentUploadStage::Preprocessed:
+            return QLatin1String("preprocessed");
 
         case MessageContentUploadStage::Encrypted:
             return QLatin1String("encrypted");

@@ -60,7 +60,7 @@ void DownloadFileOperation::run()
     if (!openFileHandle(QFile::WriteOnly)) {
         return;
     }
-    m_fileLoader->fireStartDownload(m_url, fileHandle(), std::bind(&DownloadFileOperation::connectReply, this, std::placeholders::_1));
+    m_fileLoader->startDownload(m_url, fileHandle(), std::bind(&DownloadFileOperation::connectReply, this, std::placeholders::_1));
 }
 
 void DownloadFileOperation::connectReply(QNetworkReply *reply)

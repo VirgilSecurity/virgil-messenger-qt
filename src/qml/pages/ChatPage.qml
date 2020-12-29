@@ -141,8 +141,6 @@ Page {
         id: footerControl
     }
 
-// ChatListItem
-
     ChatItem {
         anchors.fill: parent
     }

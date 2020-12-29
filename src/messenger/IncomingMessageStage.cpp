@@ -49,6 +49,9 @@ IncomingMessageStage vm::IncomingMessageStageFromString(const QString& stageStri
     else if (stageString == QLatin1String("processed")) {
         return IncomingMessageStage::Processed;
     }
+    else if (stageString == QLatin1String("broken")) {
+        return IncomingMessageStage::Broken;
+    }
     else {
         throw std::logic_error("Invalid IncomingMessageStage string");
     }
@@ -65,6 +68,28 @@ QString vm::IncomingMessageStageToString(IncomingMessageStage stage) {
 
         case IncomingMessageStage::Processed:
             return QLatin1String("processed");
+
+        case IncomingMessageStage::Broken:
+            return QLatin1String("broken");
+
+        default:
+            throw std::logic_error("Invalid IncomingMessageStage");
+    }
+}
+
+MessageStatus vm::IncomingMessageStageToMessageStatus(IncomingMessageStage stage) {
+    switch (stage) {
+        case IncomingMessageStage::Received:
+            return MessageStatus::New;
+
+        case IncomingMessageStage::Decrypted:
+            return MessageStatus::Processing;
+
+        case IncomingMessageStage::Processed:
+            return MessageStatus::Succeed;
+
+        case IncomingMessageStage::Broken:
+            return MessageStatus::Broken;
 
         default:
             throw std::logic_error("Invalid IncomingMessageStage");

@@ -168,7 +168,7 @@ void Self::onNotSentMessagesFetched(const ModifiableMessages &messages)
 {
     qCDebug(lcMessagesQueue) << "Queued" << messages.size() << "unsent messages";
     for (auto &m : messages) {
-        onPushMessage(m);
+        pushMessage(m);
     }
 }
 
@@ -176,24 +176,40 @@ void Self::onNotSentMessagesFetched(const ModifiableMessages &messages)
 void MessagesQueue::onItemFailed(Item item)
 {
     const int maxAttemptCount = 3;
+    const auto &message = item.message;
     if (item.attemptCount < maxAttemptCount) {
-        qCDebug(lcMessagesQueue) << "Enqueued failed message:" << item.message->id();
+        qCDebug(lcMessagesQueue) << "Enqueued failed message:" << message->id();
         ++item.attemptCount;
         addItem(std::move(item), false);
     }
     else if (item.attemptCount == maxAttemptCount) {
-        qCDebug(lcMessagesQueue) << "Failed message was marked as broken:" << item.message->id();
-        MessageStatusUpdate statusUpdate;
-        statusUpdate.messageId = item.message->id();
-        statusUpdate.status = MessageStatus::Broken;
-        emit updateMessage(statusUpdate);
+        // Mark as broken
+        if (message->isIncoming()) {
+            IncomingMessageStageUpdate update;
+            update.messageId = message->id();
+            update.stage = IncomingMessageStage::Broken;
+            emit updateMessage(update);
+            qCDebug(lcMessagesQueue) << "Incoming message was marked as broken:" << message->id();
+        }
+        else if (message->isOutgoing()) {
+            OutgoingMessageStageUpdate update;
+            update.messageId = message->id();
+            update.stage = OutgoingMessageStage::Broken;
+            emit updateMessage(update);
+            qCDebug(lcMessagesQueue) << "Outgoing message was marked as broken:" << message->id();
+        }
     }
 }
 
 
 void Self::onPushMessage(const MessageHandler &message)
 {
-    addItem({ message }, true);
+    if (message->isOutgoingCopyFromOtherDevice()) {
+        pushMessagePreload(message);
+    }
+    else {
+        addItem({ message }, true);
+    }
 }
 
 

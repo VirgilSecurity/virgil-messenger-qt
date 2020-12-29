@@ -36,6 +36,10 @@
 #ifndef VM_OUTGOING_MESSAGE_STAGE_H
 #define VM_OUTGOING_MESSAGE_STAGE_H
 
+
+#include "MessageStatus.h"
+
+
 #include <QString>
 
 
@@ -48,6 +52,7 @@ enum class OutgoingMessageStage {
     Sent, // A message was sent over network.
     Delivered, // A message was sent delivered by a recipient.
     Read, // A message was read by a recipient.
+    Broken // // A message is broken and can't be processed.
 };
 
 //
@@ -60,6 +65,11 @@ OutgoingMessageStage OutgoingMessageStageFromString(const QString& stageString);
 //  Return string from a given outgoing stage.
 //
 QString OutgoingMessageStageToString(OutgoingMessageStage stage);
+
+//
+// Converts outgoing message stage to message status
+//
+MessageStatus OutgoingMessageStageToMessageStatus(OutgoingMessageStage stage);
 } // namespace vm
 
 #endif // VM_OUTGOING_MESSAGE_STAGE_H

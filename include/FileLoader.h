@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VS_FILELOADER_H
-#define VS_FILELOADER_H
+#ifndef VM_FILELOADER_H
+#define VM_FILELOADER_H
 
 #include "CoreMessenger.h"
 
@@ -61,21 +61,20 @@ public:
 
 signals:
     void uploadServiceFound(const bool found);
+    void uploadSlotRequestFinished(const QString &requestId, const QString &slotId);
+    void uploadSlotRequestFailed(const QString &requestId);
     void uploadSlotReceived(const QString &slotId, const QUrl &putUrl, const QUrl &getUrl);
     void uploadSlotErrorOccurred(const QString &slotId, const QString &errorText);
-    void requestUploadSlotFailed(const QString &filePath);
-    void ready();
 
-    void fireStartDownload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup);
-    void fireStartUpload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup);
-    void fireRequestUploadSlot(const QString &filePath);
-
+    void startDownload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup);
+    void startUpload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup);
+    void requestUploadSlot(const QString &requestId, const QString &filePath);
 
 private:
     void onServiceFound(bool found);
     void onStartDownload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup);
     void onStartUpload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup);
-    void onRequestUploadSlot(const QString &filePath);
+    void onRequestUploadSlot(const QString &requestId, const QString &filePath);
 
     QPointer<CoreMessenger> m_coreMessenger;
     QPointer<QNetworkAccessManager> m_networkAccessManager;
@@ -84,4 +83,4 @@ private:
 
 Q_DECLARE_METATYPE(vm::FileLoader::ConnectionSetup);
 
-#endif // VS_FILELOADER_H
+#endif // VM_FILELOADER_H

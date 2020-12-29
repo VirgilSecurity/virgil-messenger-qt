@@ -34,14 +34,7 @@
 
 #include "operations/UploadAttachmentOperation.h"
 
-#include "Settings.h"
-#include "Utils.h"
-#include "FileUtils.h"
 #include "operations/CalculateAttachmentFingerprintOperation.h"
-#include "operations/ConvertToPngOperation.h"
-#include "operations/CreateAttachmentPreviewOperation.h"
-#include "operations/CreateAttachmentThumbnailOperation.h"
-#include "operations/CreateThumbnailOperation.h"
 #include "operations/EncryptUploadFileOperation.h"
 #include "operations/MessageOperation.h"
 #include "operations/MessageOperationFactory.h"
@@ -57,6 +50,63 @@ UploadAttachmentOperation::UploadAttachmentOperation(MessageOperation *parent, c
 }
 
 bool UploadAttachmentOperation::populateChildren()
+{
+    const auto content = m_parent->message()->content();
+    if (std::holds_alternative<MessageContentFile>(content)) {
+        populateFileOperations();
+    }
+    else if (std::holds_alternative<MessageContentPicture>(content)) {
+        populatePictureOperations();
+    }
+    return true;
+}
+
+void UploadAttachmentOperation::populateFileOperations()
+{
+    const auto message = m_parent->message();
+    const auto attachment = std::get_if<MessageContentFile>(&message->content());
+    const auto factory = m_parent->factory();
+
+    // Fingerprint
+    auto fingerprintOp = factory->populateCalculateAttachmentFingerprint(m_parent, this, attachment->localPath());
+    connect(fingerprintOp, &Operation::finished, [=]() {
+        // Stage update
+        updateStage(MessageContentUploadStage::Preprocessed);
+    });
+
+    // Encrypt/Upload
+    auto encUploadOp = factory->populateEncryptUpload(this, attachment->localPath(), message->recipientId());
+    connect(encUploadOp, &EncryptUploadFileOperation::encrypted, [=](const QFileInfo &file) {
+        startLoadOperation(file.size());
+        // Encrypted size update
+        MessageAttachmentEncryptedSizeUpdate sizeUpdate;
+        sizeUpdate.messageId = message->id();
+        sizeUpdate.attachmentId = attachment->id();
+        sizeUpdate.encryptedSize = file.size();
+        m_parent->messageUpdate(sizeUpdate);
+        // Stage update
+        updateStage(MessageContentUploadStage::Encrypted);
+    });
+    connect(encUploadOp, &EncryptUploadFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
+    connect(encUploadOp, &EncryptUploadFileOperation::uploaded, [=](const QUrl &url) {
+        // Remote url update
+        MessageAttachmentRemoteUrlUpdate urlUpdate;
+        urlUpdate.messageId = message->id();
+        urlUpdate.attachmentId = attachment->id();
+        urlUpdate.remoteUrl = url;
+        m_parent->messageUpdate(urlUpdate);
+        // Stage update
+        updateStage(MessageContentUploadStage::GotUploadingSlot);
+    });
+
+    // Finish
+    connect(this, &Operation::finished, [=]() {
+        // Stage update
+        updateStage(MessageContentUploadStage::Uploaded);
+    });
+}
+
+void UploadAttachmentOperation::populatePictureOperations()
 {
     // FIXME: Split operation to file and picture.
 //    const auto message = m_parent->message();
@@ -119,15 +169,18 @@ bool UploadAttachmentOperation::populateChildren()
 //    // Connection to loading statuses
 //    connect(this, &Operation::started, m_parent, std::bind(&MessageOperation::setAttachmentStatus, m_parent, Attachment::Status::Loading));
 //    connect(this, &Operation::finished, m_parent, std::bind(&MessageOperation::setAttachmentStatus, m_parent, Attachment::Status::Loaded));
-    return hasChildren();
+
+    // FIXME(fpohtmeh): use tempPngPath?
 }
 
-void UploadAttachmentOperation::cleanup()
+void UploadAttachmentOperation::updateStage(MessageContentUploadStage uploadStage)
 {
-    FileUtils::removeFile(m_tempPngPath);
-}
+    const auto message = m_parent->message();
+    const auto attachment = std::get_if<MessageContentFile>(&message->content());
 
-void UploadAttachmentOperation::setTempPngPath(const QString &path)
-{
-    m_tempPngPath = path;
+    MessageAttachmentUploadStageUpdate stageUpdate;
+    stageUpdate.messageId = message->id();
+    stageUpdate.attachmentId = attachment->id();
+    stageUpdate.uploadStage = uploadStage;
+    m_parent->messageUpdate(stageUpdate);
 }

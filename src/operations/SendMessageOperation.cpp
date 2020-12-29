@@ -50,16 +50,13 @@ SendMessageOperation::SendMessageOperation(MessageOperation *parent, MessageSend
 void SendMessageOperation::run()
 {
     const bool wasSent = m_messageSender->sendMessage(m_parent->message());
-    if (wasSent) {
-        finish();
-    } else {
-        fail();
-    }
+    wasSent ? finish() : fail();
 }
 
 void SendMessageOperation::setSentStage()
 {
     OutgoingMessageStageUpdate update;
+    update.messageId = m_parent->message()->id();
     update.stage = OutgoingMessageStage::Sent;
     m_parent->messageUpdate(update);
 }

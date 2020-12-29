@@ -73,6 +73,7 @@ signals:
     void close();
 
     void writeMessage(const MessageHandler &message, qsizetype unreadCount = 0);
+    void updateMessage(const MessageUpdate &messageUpdate);
     void writeChatAndLastMessage(const ChatHandler &chat);
     void resetUnreadCount(const ChatHandler &chat);
 
@@ -87,6 +88,7 @@ private:
     void onClose();
 
     void onWriteMessage(const MessageHandler &message, qsizetype unreadCount);
+    void onUpdateMessage(const MessageUpdate &messageUpdate);
     void onWriteChatAndLastMessage(const ChatHandler &chat);
     void onResetUnreadCount(const ChatHandler &chat);
 

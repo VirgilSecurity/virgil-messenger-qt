@@ -32,43 +32,26 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
-#ifndef VM_INCOMING_MESSAGE_STAGE_H
-#define VM_INCOMING_MESSAGE_STAGE_H
+#include "EncryptFileOperation.h"
 
 
-#include "MessageStatus.h"
+#include <QFile>
 
 
-#include <QString>
+using namespace vm;
 
+EncryptFileOperation::EncryptFileOperation(QObject *parent, const QString &sourcePath, const QString &destPath, const UserId &recipientId)
+    : Operation(QLatin1String("EncryptFile"), parent)
+    , m_sourcePath(sourcePath)
+    , m_destPath(destPath)
+    , m_recipientId(recipientId)
+{
+}
 
-namespace vm {
-//
-//  Denotes incoming message processing stage.
-//
-enum class IncomingMessageStage {
-    Received,  // A message was locally received from a sender.
-    Decrypted, // A message was decrypted, so content handles specific message content: text, picture, etc.
-    Processed, // A message was fully processed, i.e. attachment was downloaded, decrypted, and stored locally.
-    Broken // A message is broken and can't be processed.
-};
-
-//
-//  Return incoming stage from a given string.
-//  Throws if correspond stage is not found.
-//
-IncomingMessageStage IncomingMessageStageFromString(const QString& stageString);
-
-//
-//  Return string from a given incoming stage.
-//
-QString IncomingMessageStageToString(IncomingMessageStage stage);
-
-//
-// Converts incoming message stage to message status
-//
-MessageStatus IncomingMessageStageToMessageStatus(IncomingMessageStage stage);
-} // namespace vm
-
-#endif // VM_INCOMING_MESSAGE_STAGE_H
+void EncryptFileOperation::run()
+{
+    // FIXME(fpohtmeh): implement, remove QFile
+    QFile::copy(m_sourcePath, m_destPath);
+    emit encrypted(QFileInfo(m_destPath));
+    finish();
+}

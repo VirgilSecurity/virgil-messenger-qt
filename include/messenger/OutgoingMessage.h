@@ -69,6 +69,11 @@ public:
     bool isOutgoing() const noexcept override;
 
     //
+    //  Return current message status.
+    //
+    Status status() const noexcept override;
+
+    //
     //  Return the message stage.
     //
     Stage stage() const noexcept;
@@ -92,8 +97,9 @@ public:
     //  Apply message update. Return true some properties were actually updated.
     //
     bool applyUpdate(const MessageUpdate& update) override;
+
 private:
-    Stage m_stage;
+    Stage m_stage = Stage::Created;
 
 };
 } // namespace vm

@@ -43,6 +43,9 @@ MessageContentDownloadStage vm::MessageContentDownloadStageFromString(const QStr
     if (stageString == QLatin1String("initial")) {
         return MessageContentDownloadStage::Initial;
     }
+    else if (stageString == QLatin1String("downloading")) {
+        return MessageContentDownloadStage::Downloading;
+    }
     else if (stageString == QLatin1String("downloaded")) {
         return MessageContentDownloadStage::Downloaded;
     }
@@ -59,6 +62,9 @@ QString vm::MessageContentDownloadStageToString(MessageContentDownloadStage stag
     switch (stage) {
         case MessageContentDownloadStage::Initial:
             return QLatin1String("initial");
+
+        case MessageContentDownloadStage::Downloading:
+            return QLatin1String("downloading");
 
         case MessageContentDownloadStage::Downloaded:
             return QLatin1String("downloaded");

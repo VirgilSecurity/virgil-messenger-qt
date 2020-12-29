@@ -53,18 +53,23 @@ Self::AttachmentsController(const Settings *settings, Models *models, QObject *p
     , m_models(models)
 {}
 
-void Self::saveAs(const MessageId &messageId, const QVariant &fileUrl)
+void Self::saveAs(const QString &messageId, const QVariant &fileUrl)
 {
-    const auto message = findMessageWithAttachment(messageId);
+    const auto message = findMessageWithAttachment(MessageId{ messageId });
     if (!message) {
         return;
     }
 
     const auto attachment = message->contentAsAttachment();
 
+    // TODO(fpohtmeh): move to queue
     switch (attachment->downloadStage()) {
         case MessageContentDownloadStage::Initial:
             downloadAttachment(message);
+            break;
+
+        case MessageContentDownloadStage::Downloading:
+            // Another download is active
             break;
 
         case MessageContentDownloadStage::Downloaded:
@@ -77,9 +82,9 @@ void Self::saveAs(const MessageId &messageId, const QVariant &fileUrl)
     }
 }
 
-void Self::download(const MessageId &messageId)
+void Self::download(const QString &messageId)
 {
-    const auto message = m_models->messages()->findById(messageId);
+    const auto message = m_models->messages()->findById(MessageId{ messageId });
     if (!message) {
         return;
     }
@@ -88,15 +93,16 @@ void Self::download(const MessageId &messageId)
     }
 }
 
-void Self::open(const MessageId &messageId)
+void Self::open(const QString &messageId)
 {
-    const auto message = m_models->messages()->findById(messageId);
+    const auto message = m_models->messages()->findById(MessageId{ messageId });
     if (!message) {
         return;
     }
 
     const auto attachment = message->contentAsAttachment();
 
+    // TODO(fpohtmeh): move to queue
     switch (attachment->downloadStage()) {
         case MessageContentDownloadStage::Initial:
             downloadAttachment(message);
@@ -104,6 +110,10 @@ void Self::open(const MessageId &messageId)
 
         case MessageContentDownloadStage::Downloaded:
             decryptAttachment(message);
+            break;
+
+        case MessageContentDownloadStage::Downloading:
+            // Another download is active
             break;
 
         case MessageContentDownloadStage::Decrypted: {

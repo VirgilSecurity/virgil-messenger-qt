@@ -54,9 +54,9 @@ class AttachmentsController : public QObject
 public:
     explicit AttachmentsController(const Settings *settings, Models *models, QObject *parent);
 
-    Q_INVOKABLE void saveAs(const MessageId &messageId, const QVariant &fileUrl);
-    Q_INVOKABLE void download(const MessageId &messageId);
-    Q_INVOKABLE void open(const MessageId &messageId);
+    Q_INVOKABLE void saveAs(const QString &messageId, const QVariant &fileUrl);
+    Q_INVOKABLE void download(const QString &messageId);
+    Q_INVOKABLE void open(const QString &messageId);
 
     void downloadDisplayImage(const MessageId &messageId);
 

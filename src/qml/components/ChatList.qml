@@ -69,6 +69,7 @@ ModelListView {
             attachmentTypeIsFile: model.attachmentTypeIsFile
             attachmentTypeIsPicture: model.attachmentTypeIsPicture
             attachmentIsLoading: model.attachmentIsLoading
+            attachmentIsLoaded: model.attachmentIsLoaded
             attachmentIconPath: model.attachmentIconPath
             attachmentPictureThumbnailWidth: model.attachmentPictureThumbnailSize.width
             attachmentPictureThumbnailHeight: model.attachmentPictureThumbnailSize.height
@@ -78,15 +79,10 @@ ModelListView {
             attachmentBytesTotal: model.attachmentBytesTotal
             attachmentBytesLoaded: model.attachmentBytesLoaded
             attachmentFileExists: model.attachmentFileExists
-//            attachmentType: model.attachmentType
-//            attachmentStatus: model.attachmentStatus
-//            attachmentImagePath: model.attachmentImagePath
-//            attachmentThumbnailWidth: model.attachmentImageSize.width
-//            attachmentThumbnailHeight: model.attachmentImageSize.height
 
             onSaveAttachmentAs: function(messageId) {
                 saveAttachmentAsDialog.messageId = messageId
-                saveAttachmentAsDialog.attachmentType = attachmentType
+                saveAttachmentAsDialog.attachmentType = attachmentTypeIsPicture ? AttachmentTypes.picture : AttachmentTypes.file
                 saveAttachmentAsDialog.open()
             }
 

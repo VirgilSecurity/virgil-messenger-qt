@@ -64,11 +64,11 @@ ChatHandler Self::currentChat() const
 }
 
 void ChatsController::addParticipant(const QString &username) {
-
+    Q_UNUSED(username)
 }
 
 void ChatsController::removeParticipant(const QString &username) {
-
+    Q_UNUSED(username)
 }
 
 void ChatsController::leaveGroup() {
