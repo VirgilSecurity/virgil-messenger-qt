@@ -62,9 +62,11 @@ void Self::saveAs(const QString &messageId, const QVariant &fileUrl)
 
     const auto attachment = message->contentAsAttachment();
 
-    // TODO(fpohtmeh): move to queue
+    // TODO(fpohtmeh): move to queue?
     switch (attachment->downloadStage()) {
         case MessageContentDownloadStage::Initial:
+        case MessageContentDownloadStage::Preloading:
+        case MessageContentDownloadStage::Preloaded:
             downloadAttachment(message);
             break;
 
@@ -102,9 +104,11 @@ void Self::open(const QString &messageId)
 
     const auto attachment = message->contentAsAttachment();
 
-    // TODO(fpohtmeh): move to queue
+    // TODO(fpohtmeh): move to queue?
     switch (attachment->downloadStage()) {
         case MessageContentDownloadStage::Initial:
+        case MessageContentDownloadStage::Preloading:
+        case MessageContentDownloadStage::Preloaded:
             downloadAttachment(message);
             break;
 

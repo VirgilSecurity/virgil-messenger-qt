@@ -39,7 +39,7 @@
 
 namespace vm
 {
-// FIXME(fpohtmeh): implement
+// TODO(fpohtmeh): refactor
 using GroupId = QString;
 }
 

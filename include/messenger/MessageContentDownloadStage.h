@@ -45,6 +45,8 @@ namespace vm {
 //
 enum class MessageContentDownloadStage {
     Initial,  // Nothing was done.
+    Preloading, // Attachment preload is active.
+    Preloaded, // Attachment was preloaded.
     Downloading, // Attachment download is active.
     Downloaded, // Attachment was downloaded.
     Decrypted // Attachment was decrypted and stored as local file.

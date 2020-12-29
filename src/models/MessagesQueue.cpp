@@ -125,7 +125,7 @@ void Self::runItem(Item item)
         connect(m_messenger, &Messenger::onlineStatusChanged, op, &NetworkOperation::setIsOnline);
         connect(op, &MessageOperation::notificationCreated, this, &MessagesQueue::notificationCreated);
         connect(this, &MessagesQueue::stopRequested, op, &MessageOperation::stop);
-        switch (item.type) {
+        switch (item.actionType) {
             case Item::ActionType::Download:
                 m_factory->populateDownload(op, item.parameter.toString());
                 connect(op, &Operation::finished, this, std::bind(&Self::notificationCreated, this, tr("File was downloaded"), false));

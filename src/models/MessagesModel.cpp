@@ -368,9 +368,6 @@ QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate& messageUpdate) {
               std::holds_alternative<MessageAttachmentDownloadStageUpdate>(messageUpdate)) {
         return { AttachmentIsLoadingRole, AttachmentIsLoadedRole, AttachmentFileExistsRole };
 
-    } else if(std::holds_alternative<MessageAttachmentSizeUpdate>(messageUpdate)) {
-        return { AttachmentPictureThumbnailSizeRole };
-
     } else if(std::holds_alternative<MessageAttachmentLocalPathUpdate>(messageUpdate)) {
         return { AttachmentIconPathRole };
 

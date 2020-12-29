@@ -32,47 +32,35 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "operations/DownloadDecryptFileOperation.h"
+#ifndef VM_DECRYPTFILEOPERATION_H
+#define VM_DECRYPTFILEOPERATION_H
 
-#include "Settings.h"
-#include "Utils.h"
-#include "FileUtils.h"
-#include "operations/DecryptFileOperation.h"
-#include "operations/DownloadFileOperation.h"
+#include "Operation.h"
+#include "UserId.h"
 
-using namespace vm;
+#include <QFileInfo>
 
-DownloadDecryptFileOperation::DownloadDecryptFileOperation(NetworkOperation *parent, const Settings *settings, FileLoader *fileLoader,
-                                                           const QUrl &url, quint64 bytesTotal, const QString &filePath, const UserId &senderId)
-    : NetworkOperation(parent)
-    , m_settings(settings)
-    , m_fileLoader(fileLoader)
-    , m_url(url)
-    , m_bytesTotal(bytesTotal)
-    , m_filePath(filePath)
-    , m_senderId(senderId)
+namespace vm
 {
-    setName(QLatin1String("DownloadDecrypt"));
+class MessageOperation;
+
+class DecryptFileOperation : public Operation
+{
+    Q_OBJECT
+
+public:
+    explicit DecryptFileOperation(QObject *parent, const QString &sourcePath, const QString &destPath, const UserId &senderId);
+
+    void run() override;
+
+signals:
+    void decrypted(const QFileInfo &file);
+
+private:
+    const QString m_sourcePath;
+    const QString m_destPath;
+    const UserId m_senderId;
+};
 }
 
-bool DownloadDecryptFileOperation::populateChildren()
-{
-    m_tempPath = m_settings->attachmentCacheDir().filePath(Utils::createUuid());
-
-    auto downOp = new DownloadFileOperation(this, m_fileLoader, m_url, m_bytesTotal, m_filePath);
-    connect(downOp, &DownloadFileOperation::progressChanged, this, &DownloadDecryptFileOperation::progressChanged);
-    connect(downOp, &DownloadFileOperation::downloaded, this, &DownloadDecryptFileOperation::downloaded);
-    appendChild(downOp);
-
-    auto decryptOp = new DecryptFileOperation(this, m_tempPath, m_filePath, m_senderId);
-    connect(decryptOp, &DecryptFileOperation::decrypted, this, &DownloadDecryptFileOperation::decrypted);
-    appendChild(decryptOp);
-
-    return true;
-}
-
-void DownloadDecryptFileOperation::cleanup()
-{
-    FileUtils::removeFile(m_tempPath);
-    Operation::cleanup();
-}
+#endif // VM_DECRYPTFILEOPERATION_H

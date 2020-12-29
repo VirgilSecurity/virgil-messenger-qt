@@ -55,7 +55,8 @@ public:
 
 signals:
     void progressChanged(quint64 bytesLoaded, quint64 bytesTotal);
-    void decrypted(const QString &filePath);
+    void downloaded();
+    void decrypted(const QFileInfo &file);
 
 private:
     bool populateChildren() override;

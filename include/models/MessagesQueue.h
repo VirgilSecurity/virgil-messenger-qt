@@ -71,7 +71,7 @@ public:
         };
 
         MessageHandler message;
-        ActionType type = ActionType::SendReceive;
+        ActionType actionType = ActionType::SendReceive;
         QVariant parameter = QVariant();
         qsizetype attemptCount = 0;
     };

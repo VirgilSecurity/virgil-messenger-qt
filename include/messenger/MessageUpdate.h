@@ -84,10 +84,6 @@ struct MessageAttachmentDecryptionKeyUpdate : public MessageAttachmentUpdateBase
     QByteArray decryptionKey;
 };
 
-struct MessageAttachmentSizeUpdate : public MessageAttachmentUpdateBase {
-    quint64 size;
-};
-
 struct MessageAttachmentRemoteUrlUpdate : public MessageAttachmentUpdateBase {
     QUrl remoteUrl;
 };
@@ -105,7 +101,7 @@ struct MessageAttachmentProcessedSizeUpdate : public MessageAttachmentUpdateBase
 };
 
 struct MessageAttachmentExtrasUpdate : public MessageAttachmentUpdateBase {
-    std::function<QString()> extrasToJson;
+    std::function<QString()> extrasToJson; // TODO(fpohtmeh): find better way to get extras in update
 };
 
 struct MessagePictureThumbnailPathUpdate : public MessageAttachmentExtrasUpdate {
@@ -136,7 +132,6 @@ using MessageUpdate = std::variant<
     MessageAttachmentDownloadStageUpdate,
     MessageAttachmentFingerprintUpdate,
     MessageAttachmentDecryptionKeyUpdate,
-    MessageAttachmentSizeUpdate,
     MessageAttachmentRemoteUrlUpdate,
     MessageAttachmentEncryptedSizeUpdate,
     MessageAttachmentLocalPathUpdate,

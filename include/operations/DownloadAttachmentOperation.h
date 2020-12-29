@@ -36,6 +36,7 @@
 #define VM_DOWNLOADATTACHMENTOPERATION_H
 
 #include "LoadAttachmentOperation.h"
+#include "MessageContentDownloadStage.h"
 
 class Settings;
 
@@ -48,12 +49,12 @@ class DownloadAttachmentOperation : public LoadAttachmentOperation
 public:
     struct Parameter
     {
-        enum class Type
+        enum class ActionType
         {
-            Full,
+            Download,
             Preload
         };
-        Type type;
+        ActionType actionType;
         QString filePath;
     };
 
@@ -61,6 +62,11 @@ public:
 
 private:
     bool populateChildren() override;
+
+    void populateDownload();
+    void populatePreload();
+
+    void updateStage(MessageContentDownloadStage downloadStage);
 
     MessageOperation *m_parent;
     const Settings *m_settings;

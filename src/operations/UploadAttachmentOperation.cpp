@@ -44,8 +44,9 @@
 #include "operations/MessageOperationFactory.h"
 
 using namespace vm;
+using Self = UploadAttachmentOperation;
 
-UploadAttachmentOperation::UploadAttachmentOperation(MessageOperation *parent, const Settings *settings)
+Self::UploadAttachmentOperation(MessageOperation *parent, const Settings *settings)
     : LoadAttachmentOperation(parent)
     , m_parent(parent)
     , m_settings(settings)
@@ -53,7 +54,7 @@ UploadAttachmentOperation::UploadAttachmentOperation(MessageOperation *parent, c
     setName(QString("UploadAttachment"));
 }
 
-bool UploadAttachmentOperation::populateChildren()
+bool Self::populateChildren()
 {
     const auto content = m_parent->message()->content();
     if (std::holds_alternative<MessageContentFile>(content)) {
@@ -63,18 +64,18 @@ bool UploadAttachmentOperation::populateChildren()
         populatePictureOperations();
     }
     else {
-        std::logic_error("Invalid attachment content");
+        throw std::logic_error("Invalid attachment content");
     }
     return true;
 }
 
-void UploadAttachmentOperation::cleanup()
+void Self::cleanup()
 {
     Operation::cleanup();
     FileUtils::removeFile(m_tempPngPath);
 }
 
-void UploadAttachmentOperation::populateFileOperations()
+void Self::populateFileOperations()
 {
     const auto message = m_parent->message();
     const auto attachment = std::get_if<MessageContentFile>(&message->content());
@@ -90,7 +91,7 @@ void UploadAttachmentOperation::populateFileOperations()
     populateEncryptUpload();
 }
 
-void UploadAttachmentOperation::populatePictureOperations()
+void Self::populatePictureOperations()
 {
     const auto message = m_parent->message();
     const auto attachment = std::get_if<MessageContentPicture>(&message->content());
@@ -151,10 +152,10 @@ void UploadAttachmentOperation::populatePictureOperations()
     connect(convertOp, &ConvertToPngOperation::converted, encUploadOp, &EncryptUploadFileOperation::setSourcePath);
 }
 
-EncryptUploadFileOperation *UploadAttachmentOperation::populateEncryptUpload()
+EncryptUploadFileOperation *Self::populateEncryptUpload()
 {
     const auto message = m_parent->message();
-    const auto attachment = std::get_if<MessageContentPicture>(&message->content());
+    const auto attachment = message->contentAsAttachment();
 
     // Encrypt/Upload
     auto encUploadOp = m_parent->factory()->populateEncryptUpload(this, attachment->localPath(), message->recipientId());
@@ -188,7 +189,7 @@ EncryptUploadFileOperation *UploadAttachmentOperation::populateEncryptUpload()
     return encUploadOp;
 }
 
-void UploadAttachmentOperation::updateStage(MessageContentUploadStage uploadStage)
+void Self::updateStage(MessageContentUploadStage uploadStage)
 {
     const auto message = m_parent->message();
 

@@ -53,7 +53,7 @@
 
 using namespace vm;
 
-using DownloadType = DownloadAttachmentOperation::Parameter::Type;
+using DownloadType = DownloadAttachmentOperation::Parameter::ActionType;
 
 MessageOperationFactory::MessageOperationFactory(const Settings *settings, Messenger *messenger,
                                                  QObject *parent)
@@ -70,7 +70,7 @@ void MessageOperationFactory::populateAll(MessageOperation *messageOp)
 
 void MessageOperationFactory::populateDownload(MessageOperation *messageOp, const QString &filePath)
 {
-    messageOp->appendChild(new DownloadAttachmentOperation(messageOp, m_settings, { DownloadType::Full, filePath }));
+    messageOp->appendChild(new DownloadAttachmentOperation(messageOp, m_settings, { DownloadType::Download, filePath }));
 }
 
 void MessageOperationFactory::populateUpload(MessageOperation *messageOp)

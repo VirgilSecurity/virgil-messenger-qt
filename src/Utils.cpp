@@ -89,6 +89,8 @@ namespace
             c.platformId = c.id;
             ++i;
         }
+        contacts[1].id = "fff";
+        contacts[4].id = "ppp";
         return contacts;
     }
 #endif // VS_DUMMY_CONTACTS

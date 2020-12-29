@@ -126,7 +126,6 @@ HEADERS += \
         include/messenger/CoreMessenger.h \
         include/messenger/IncomingMessage.h \
         include/messenger/IncomingMessageStage.h \
-        include/messenger/JsonExportable.h \
         include/messenger/Message.h \
         include/messenger/MessageContent.h \
         include/messenger/MessageContentAttachment.h \
@@ -225,6 +224,7 @@ HEADERS += \
         include/operations/CreateAttachmentPreviewOperation.h \
         include/operations/CreateAttachmentThumbnailOperation.h \
         include/operations/CreateThumbnailOperation.h \
+        include/operations/DecryptFileOperation.h \
         include/operations/DownloadAttachmentOperation.h \
         include/operations/DownloadFileOperation.h \
         include/operations/DownloadDecryptFileOperation.h \
@@ -363,6 +363,7 @@ SOURCES += \
         src/operations/CreateAttachmentPreviewOperation.cpp \
         src/operations/CreateAttachmentThumbnailOperation.cpp \
         src/operations/CreateThumbnailOperation.cpp \
+        src/operations/DecryptFileOperation.cpp \
         src/operations/DownloadAttachmentOperation.cpp \
         src/operations/DownloadFileOperation.cpp \
         src/operations/DownloadDecryptFileOperation.cpp \

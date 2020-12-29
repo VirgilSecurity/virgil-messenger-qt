@@ -58,10 +58,6 @@ bool Self::applyUpdate(const MessageUpdate& messageUpdate) {
     else if (auto update = std::get_if<MessageAttachmentDecryptionKeyUpdate>(&messageUpdate)) {
         setDecryptionKey(update->decryptionKey);
     }
-    else if (auto update = std::get_if<MessageAttachmentSizeUpdate>(&messageUpdate)) {
-        // FIXME(fpohtmeh): Likely we don't need size update. Remove MessageAttachmentSizeUpdate struct
-        setSize(update->size);
-    }
     else if (auto update = std::get_if<MessageAttachmentRemoteUrlUpdate>(&messageUpdate)) {
         setRemoteUrl(update->remoteUrl);
     }

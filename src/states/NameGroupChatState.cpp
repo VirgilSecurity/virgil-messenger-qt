@@ -50,7 +50,7 @@ NameGroupChatState::NameGroupChatState(ChatsController *chatsController, QState 
 void NameGroupChatState::onCreateGroup(const GroupId &groupId)
 {
     Q_UNUSED(groupId)
-    // FIXME(fpohtmeh): implement
+    // TODO(fpohtmeh): implement
     //emit operationStarted();
     //m_chatsController->createGroupChat(groupId);
 }

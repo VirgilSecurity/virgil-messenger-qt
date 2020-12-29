@@ -88,7 +88,7 @@ void Self::onSlotRequestFinished(const QString &requestId, const QString &slotId
 void Self::onSlotRequestFailed(const QString &requestId)
 {
     if (m_requestId == requestId) {
-        qCWarning(lcOperation) << "Failed to request upload slot, file '" + filePath() + "' would not be uploaded.";
+        qCCritical(lcOperation) << "Failed to request upload slot, file '" + filePath() + "' would not be uploaded.";
         fail();
     }
 }
