@@ -95,10 +95,10 @@ public:
     //
     //  Create picture message content from the given path.
     //
-    static std::optional<MessageContentPicture> createFromLocalFile(const QUrl& localUrl, QString &errorString);
+    static std::optional<MessageContentPicture> createFromLocalFile(const QUrl& localUrl, const QSize &thumbnailMaxSize, QString &errorString);
 
 private:
-    bool readImage(QString &errorString);
+    bool readImage(const QSize &thumbnailMaxSize, QString &errorString);
 
     QString m_previewPath;
     MessageContentFile m_thumbnail;

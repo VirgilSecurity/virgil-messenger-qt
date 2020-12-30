@@ -61,7 +61,7 @@ bool DownloadDecryptFileOperation::populateChildren()
 {
     m_tempPath = m_settings->attachmentCacheDir().filePath(Utils::createUuid());
 
-    auto downOp = new DownloadFileOperation(this, m_messenger->fileLoader(), m_url, m_bytesTotal, m_filePath);
+    auto downOp = new DownloadFileOperation(this, m_messenger->fileLoader(), m_url, m_bytesTotal, m_tempPath);
     connect(downOp, &DownloadFileOperation::progressChanged, this, &DownloadDecryptFileOperation::progressChanged);
     connect(downOp, &DownloadFileOperation::downloaded, this, &DownloadDecryptFileOperation::downloaded);
     appendChild(downOp);

@@ -56,8 +56,9 @@
 using namespace vm;
 using Self = MessagesController;
 
-Self::MessagesController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent)
+Self::MessagesController(Messenger *messenger, const Settings *settings, Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
+    , m_settings(settings)
     , m_messenger(messenger)
     , m_models(models)
     , m_userDatabase(userDatabase)
@@ -190,7 +191,7 @@ ModifiableMessageHandler Self::createFileMessage(const QUrl &localFileUrl)
 ModifiableMessageHandler Self::createPictureMessage(const QUrl &localFileUrl)
 {
     QString errorString;
-    const auto content = MessageContentPicture::createFromLocalFile(localFileUrl, errorString);
+    const auto content = MessageContentPicture::createFromLocalFile(localFileUrl, m_settings->thumbnailMaxSize(), errorString);
     if (!content) {
         qCWarning(lcController) << "MessageContentPicture creation error:" << errorString;
         return ModifiableMessageHandler();

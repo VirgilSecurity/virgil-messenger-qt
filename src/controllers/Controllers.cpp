@@ -53,7 +53,7 @@ Controllers::Controllers(Messenger *messenger, Settings *settings,
     , m_attachments(new AttachmentsController(settings, models, this))
     , m_users(new UsersController(messenger, models, userDatabase, this))
     , m_chats(new ChatsController(messenger, models, userDatabase, this))
-    , m_messages(new MessagesController(messenger, models, userDatabase, this))
+    , m_messages(new MessagesController(messenger, settings, models, userDatabase, this))
     , m_fileCloud(new FileCloudController(settings, models, this))
 {
     connect(m_attachments, &AttachmentsController::notificationCreated, this, &Controllers::notificationCreated);

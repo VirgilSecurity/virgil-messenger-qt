@@ -40,8 +40,7 @@
 
 using namespace vm;
 
-CreateThumbnailOperation::CreateThumbnailOperation(QObject *parent,
-                                                   const QString &sourcePath, const QString &destPath, const QSize &maxSize)
+CreateThumbnailOperation::CreateThumbnailOperation(QObject *parent, const QString &sourcePath, const QString &destPath, const QSize &maxSize)
     : Operation(QLatin1String("CreateThumbnailOperation"), parent)
     , m_sourcePath(sourcePath)
     , m_destPath(destPath)
@@ -71,7 +70,7 @@ void CreateThumbnailOperation::run()
             return;
         }
     }
-    emit thumbnailReady(m_destPath, size);
+    emit thumbnailReady(m_destPath);
     finish();
 }
 

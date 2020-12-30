@@ -57,14 +57,15 @@ bool Self::applyUpdate(const MessageUpdate& update) {
             setThumbnail(*thumbnail);
         }
     }
-    if (auto thumbnailSizeUpdate = std::get_if<MessagePictureThumbnailSizeUpdate>(&update)) {
+    else if (auto thumbnailSizeUpdate = std::get_if<MessagePictureThumbnailSizeUpdate>(&update)) {
         setThumbnailSize(thumbnailSizeUpdate->thumbnailSize);
     }
-    if (auto thumbnailEncryptedSizeUpdate = std::get_if<MessagePictureThumbnailEncryptionUpdate>(&update)) {
-        thumbnail().setEncryptedSize(thumbnailEncryptedSizeUpdate->encryptedSize);
+    else if (auto thumbnailEncryptionUpdate = std::get_if<MessagePictureThumbnailEncryptionUpdate>(&update)) {
+        m_thumbnail.setEncryptedSize(thumbnailEncryptionUpdate->encryptedSize);
+        m_thumbnail.setDecryptionKey(thumbnailEncryptionUpdate->decryptionKey);
     }
-    if (auto thumbnailRemoteUrlUpdate = std::get_if<MessagePictureThumbnailRemoteUrlUpdate>(&update)) {
-        thumbnail().setRemoteUrl(thumbnailRemoteUrlUpdate->remoteUrl);
+    else if (auto thumbnailRemoteUrlUpdate = std::get_if<MessagePictureThumbnailRemoteUrlUpdate>(&update)) {
+        m_thumbnail.setRemoteUrl(thumbnailRemoteUrlUpdate->remoteUrl);
     }
     else if (auto previewPathUpdate = std::get_if<MessagePicturePreviewPathUpdate>(&update)) {
         setPreviewPath(previewPathUpdate->previewPath);
@@ -72,7 +73,7 @@ bool Self::applyUpdate(const MessageUpdate& update) {
     else {
         return MessageContentAttachment::applyUpdate(update);
     }
-    return true;
+    return false;
 }
 
 
@@ -120,7 +121,7 @@ void MessageContentPicture::setThumbnail(MessageContentFile thumbnail)
 }
 
 
-std::optional<MessageContentPicture> Self::createFromLocalFile(const QUrl& localUrl, QString &errorString) {
+std::optional<MessageContentPicture> Self::createFromLocalFile(const QUrl& localUrl, const QSize &thumbnailMaxSize, QString &errorString) {
     MessageContentPicture picture;
     if (!picture.readLocalFile(localUrl, errorString)) {
         return std::nullopt;
@@ -128,19 +129,19 @@ std::optional<MessageContentPicture> Self::createFromLocalFile(const QUrl& local
 
     const auto fileName = FileUtils::attachmentFileName(localUrl, true);
     picture.setFileName(fileName.section('.', 0, 0) + QLatin1String(".png"));
-    picture.readImage(errorString);
+    picture.readImage(thumbnailMaxSize, errorString);
     return picture;
 }
 
 
-bool MessageContentPicture::readImage(QString &errorString) {
+bool MessageContentPicture::readImage(const QSize &thumbnailMaxSize, QString &errorString) {
     QImage source;
     QImageReader reader(localPath());
     if (!Utils::readImage(&reader, &source)) {
         errorString = QObject::tr("Unable to read image");
         return false;
     }
-    const QSize thumbnailMaxSize(100, 80); // FIXME(fpohtmeh): use settings
+
     const auto thumbnailSize = Utils::calculateThumbnailSize(source.size(), thumbnailMaxSize, reader.transformation());
     setThumbnailSize(thumbnailSize);
     return true;

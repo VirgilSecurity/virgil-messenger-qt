@@ -37,10 +37,10 @@
 
 #include "Messenger.h"
 #include "Models.h"
+#include "Settings.h"
 #include "UserDatabase.h"
 
 #include <QObject>
-
 
 namespace vm
 {
@@ -50,7 +50,7 @@ class MessagesController : public QObject
     Q_OBJECT
 
 public:
-    MessagesController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
+    MessagesController(Messenger *messenger, const Settings *settings, Models *models, UserDatabase *userDatabase, QObject *parent);
 
     void loadMessages(const ChatHandler &chat);
     void clearMessages();
@@ -100,6 +100,7 @@ private:
     void onMessageReceived(ModifiableMessageHandler message);
     void onUpdateMessage(const MessageUpdate& messageUpdate);
 
+    QPointer<const Settings> m_settings;
     QPointer<Messenger> m_messenger;
     QPointer<Models> m_models;
     QPointer<UserDatabase> m_userDatabase;
