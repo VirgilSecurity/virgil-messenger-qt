@@ -43,6 +43,7 @@ class CustomerEnv {
 public:
     static QString messengerServiceUrl();
     static QString xmppServiceUrl();
+    static QString xmppServiceDomain();
     static QString contactDiscoveryServiceUrl();
     static QString caBundlePath();
     static QString version();

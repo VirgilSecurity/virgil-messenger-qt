@@ -215,7 +215,7 @@ Self::resetCommKitConfiguration() {
     auto contactDiscoveryServiceUrlStd = contactDiscoveryServiceUrl.toStdString();
 
     vssq_messenger_config_t *config = vssq_messenger_config_new_with(
-            vsc_str_from(messengerServiceUrlStd),  vsc_str_from(contactDiscoveryServiceUrlStd), vsc_str_from(xmppServiceUrlStd));
+            vsc_str_from(messengerServiceUrlStd), vsc_str_from(contactDiscoveryServiceUrlStd), vsc_str_from(xmppServiceUrlStd));
 
     auto caBundlePath = CustomerEnv::caBundlePath().toStdString();
     if (!caBundlePath.empty()) {
@@ -555,7 +555,7 @@ QString
 Self::currentUserJid() const {
     auto user = vssq_messenger_user(m_impl->messenger.get());
     vsc_str_t userIdentity = vssq_messenger_user_identity(user);
-    return vsc_str_to_qstring(userIdentity) + "@" + CustomerEnv::xmppServiceUrl() + "/" + m_settings->deviceId();
+    return vsc_str_to_qstring(userIdentity) + "@" + CustomerEnv::xmppServiceDomain() + "/" + m_settings->deviceId();
 }
 
 
@@ -567,7 +567,7 @@ Self::userIdFromJid(const QString& jid) const {
 
 QString
 Self::userIdToJid(const UserId& userId) const {
-    return userId + "@" + CustomerEnv::xmppServiceUrl();
+    return userId + "@" + CustomerEnv::xmppServiceDomain();
 }
 
 

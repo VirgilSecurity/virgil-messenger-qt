@@ -75,6 +75,16 @@ QString Self::xmppServiceUrl() {
     #endif
 }
 
+QString Self::xmppServiceDomain() {
+    #if VS_MSGR_ENV_DEV
+        return Customer::XmppDomainTemplate.arg(QLatin1String("-dev"));
+    #elif VS_MSGR_ENV_STG
+        return Customer::XmppDomainTemplate.arg(QLatin1String("-stg"));
+    #else
+        return Customer::XmppDomainTemplate.arg(QString());
+    #endif
+}
+
 QString Self::contactDiscoveryServiceUrl() {
     #if VS_MSGR_ENV_DEV
         return Customer::ContactDiscoveryUrlTemplate.arg(QLatin1String("-dev"));
