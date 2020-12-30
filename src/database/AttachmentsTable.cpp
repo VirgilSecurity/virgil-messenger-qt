@@ -137,7 +137,7 @@ static std::tuple<QString, DatabaseUtils::BindValues> createDatabaseBindings(con
 
     if (const auto arg = MessageUpdateToAttachmentExtrasUpdate(attachmentUpdate)) {
         return {"updateAttachmentExtras", {
-            { ":id", QString(MessageUpdateGetMessageId(attachmentUpdate)) },
+            { ":id", QString(arg->attachmentId) },
             { ":extras", arg->extrasToJson() }
         }};
     }
