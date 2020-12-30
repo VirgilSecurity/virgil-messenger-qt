@@ -95,7 +95,7 @@ void Self::onStartDownload(const QUrl &url, QFile *file, const ConnectionSetup &
 
     QNetworkRequest request(url);
     auto reply = m_networkAccessManager->get(request);
-    connect(reply, &QNetworkReply::readyRead, [=]() {
+    connect(reply, &QNetworkReply::readyRead, [file, reply]() {
         const auto bytes = reply->readAll();
         file->write(bytes);
         file->flush();

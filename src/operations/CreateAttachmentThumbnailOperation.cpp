@@ -44,8 +44,8 @@ CreateAttachmentThumbnailOperation::CreateAttachmentThumbnailOperation(MessageOp
 {
     setName(QLatin1String("CreateAttachmentThumbnail"));
     connect(this, &CreateThumbnailOperation::thumbnailReady, [parent](const QString& destPath) {
-        const auto extrasToJson = [=]() {
-            return parent->message()->contentAsAttachment()->extrasToJson(true);
+        const auto extrasToJson = [message = parent->message()]() {
+            return message->contentAsAttachment()->extrasToJson(true);
         };
 
         MessagePictureThumbnailPathUpdate update;

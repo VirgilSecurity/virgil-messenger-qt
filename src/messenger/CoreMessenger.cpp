@@ -289,7 +289,7 @@ Self::resetXmppConfiguration() {
     logger->setLoggingType(QXmppLogger::SignalLogging);
     logger->setMessageTypes(QXmppLogger::AnyMessage);
 
-    connect(logger, &QXmppLogger::message, [=](QXmppLogger::MessageType, const QString &text){
+    connect(logger, &QXmppLogger::message, [](QXmppLogger::MessageType, const QString &text){
         qCDebug(lcCoreMessenger) << text;
     });
 

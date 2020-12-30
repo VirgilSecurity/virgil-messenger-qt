@@ -66,7 +66,7 @@ void DiscoveredContactsModel::reload()
     m_selectedContacts->setContacts(Contacts());
     setFilter(QString());
 
-    QtConcurrent::run([=]() {
+    QtConcurrent::run([this]() {
         const auto contacts = Utils::getDeviceContacts(getContacts());
         emit fixedContactsPopulated(contacts, QPrivateSignal());
     });

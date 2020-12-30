@@ -84,7 +84,7 @@ void ContactAvatarLoader::processLoad()
 {
     Contacts contacts;
     std::swap(contacts, m_contacts);
-    QtConcurrent::run([=]() {
+    QtConcurrent::run([this, contacts = std::move(contacts)]() {
         for (auto &contact : contacts) {
             const auto url = Utils::getContactAvatarUrl(contact);
             if (!url.isEmpty()) {

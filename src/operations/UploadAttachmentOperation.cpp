@@ -83,7 +83,7 @@ void Self::populateFileOperations()
 
     // Fingerprint
     auto fingerprintOp = factory->populateCalculateAttachmentFingerprint(m_parent, this, attachment->localPath());
-    connect(fingerprintOp, &Operation::finished, [=]() {
+    connect(fingerprintOp, &Operation::finished, [this]() {
         // Stage update
         updateStage(MessageContentUploadStage::Preprocessed);
     });
@@ -99,7 +99,7 @@ void Self::populatePictureOperations()
 
     // Convert to png
     auto convertOp = factory->populateConvertToPngOperation(this, attachment->localPath());
-    connect(convertOp, &ConvertToPngOperation::fileCreated, [=](const QString &filePath) {
+    connect(convertOp, &ConvertToPngOperation::fileCreated, [this](const QString &filePath) {
         m_tempPngPath = filePath;
     });
 
@@ -116,25 +116,31 @@ void Self::populatePictureOperations()
     // Encrypt/Upload thumbnail
     auto encUploadThumbOp = factory->populateEncryptUpload(this, thumbnailFilePath);
     connect(encUploadThumbOp, &EncryptUploadFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
-    const auto extrasToJson = [=]() {
-        return attachment->extrasToJson(true);
-    };
-    connect(encUploadThumbOp, &EncryptUploadFileOperation::encrypted, [=](const QFileInfo &file, const QByteArray &decryptionKey) {
+    connect(encUploadThumbOp, &EncryptUploadFileOperation::encrypted, [this, message](const QFileInfo &file, const QByteArray &decryptionKey) {
+        const auto extrasToJson = [message]() {
+            return message->contentAsAttachment()->extrasToJson(true);
+        };
+
         startLoadOperation(file.size());
         // Thumbnail encrypted size update
         MessagePictureThumbnailEncryptionUpdate update;
         update.messageId = message->id();
-        update.attachmentId = attachment->id();
+        update.attachmentId = message->contentAsAttachment()->id();
         update.extrasToJson = extrasToJson;
         update.encryptedSize = file.size();
         update.decryptionKey = decryptionKey;
         m_parent->messageUpdate(update);
     });
-    connect(encUploadThumbOp, &EncryptUploadFileOperation::uploaded, [=](const QUrl &url) {
+
+    connect(encUploadThumbOp, &EncryptUploadFileOperation::uploaded, [this, message](const QUrl &url) {
         // Thumbnail remote url update
+        const auto extrasToJson = [message]() {
+            return message->contentAsAttachment()->extrasToJson(true);
+        };
+
         MessagePictureThumbnailRemoteUrlUpdate urlUpdate;
         urlUpdate.messageId = message->id();
-        urlUpdate.attachmentId = attachment->id();
+        urlUpdate.attachmentId = message->contentAsAttachment()->id();
         urlUpdate.extrasToJson = extrasToJson;
         urlUpdate.remoteUrl = url;
         m_parent->messageUpdate(urlUpdate);
@@ -143,7 +149,7 @@ void Self::populatePictureOperations()
     // Calculate attachment fingerprint
     auto fingerprintOp = factory->populateCalculateAttachmentFingerprint(m_parent, this, attachment->localPath());
     connect(convertOp, &ConvertToPngOperation::converted, fingerprintOp, &CalculateAttachmentFingerprintOperation::setSourcePath);
-    connect(fingerprintOp, &Operation::finished, [=]() {
+    connect(fingerprintOp, &Operation::finished, [this]() {
         // Stage update
         updateStage(MessageContentUploadStage::Preprocessed);
     });
@@ -161,27 +167,27 @@ EncryptUploadFileOperation *Self::populateEncryptUpload()
     // Encrypt/Upload
     auto encUploadOp = m_parent->factory()->populateEncryptUpload(this, attachment->localPath());
     connect(encUploadOp, &EncryptUploadFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
-    connect(encUploadOp, &EncryptUploadFileOperation::encrypted, [=](const QFileInfo &file, const QByteArray &decryptionKey) {
+    connect(encUploadOp, &EncryptUploadFileOperation::encrypted, [this, message](const QFileInfo &file, const QByteArray &decryptionKey) {
         startLoadOperation(file.size());
         // Encrypted size update
         MessageAttachmentEncryptionUpdate update;
         update.messageId = message->id();
-        update.attachmentId = attachment->id();
+        update.attachmentId = message->contentAsAttachment()->id();
         update.encryptedSize = file.size();
         update.decryptionKey = decryptionKey;
         m_parent->messageUpdate(update);
         // Stage update
         updateStage(MessageContentUploadStage::Encrypted);
     });
-    connect(encUploadOp, &EncryptUploadFileOperation::uploadSlotReceived, [=]() {
+    connect(encUploadOp, &EncryptUploadFileOperation::uploadSlotReceived, [this]() {
         // Stage update
         updateStage(MessageContentUploadStage::GotUploadingSlot);
     });
-    connect(encUploadOp, &EncryptUploadFileOperation::uploaded, [=](const QUrl &url) {
+    connect(encUploadOp, &EncryptUploadFileOperation::uploaded, [this, message](const QUrl &url) {
         // Remote url update
         MessageAttachmentRemoteUrlUpdate urlUpdate;
         urlUpdate.messageId = message->id();
-        urlUpdate.attachmentId = attachment->id();
+        urlUpdate.attachmentId = message->contentAsAttachment()->id();
         urlUpdate.remoteUrl = url;
         m_parent->messageUpdate(urlUpdate);
         // Stage update

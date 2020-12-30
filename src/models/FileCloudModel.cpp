@@ -63,7 +63,7 @@ void FileCloudModel::setDirectory(const QDir &dir)
     if (!m_settings->fileCloudEnabled()) {
         return;
     }
-    QtConcurrent::run([=]() {
+    QtConcurrent::run([this, dir]() {
         auto list = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot, QDir::NoSort);
         emit listReady(list, QPrivateSignal());
     });

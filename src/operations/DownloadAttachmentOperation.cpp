@@ -77,23 +77,28 @@ void Self::populateDownload()
     auto downloadPath = m_parameter.filePath;
     if (!FileUtils::fileExists(downloadPath)) {
         qCDebug(lcOperation) << "Download attachment to:" << downloadPath;
+
         auto downloadDecOp = factory->populateDownloadDecrypt(this, attachment->remoteUrl(), attachment->encryptedSize(),
                                                    downloadPath, attachment->decryptionKey(), message->senderId());
+
         connect(downloadDecOp, &DownloadDecryptFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
-        connect(downloadDecOp, &Operation::started, this, [=]() {
-            startLoadOperation(attachment->encryptedSize());
+
+        connect(downloadDecOp, &Operation::started, this, [this, encryptedSize = attachment->encryptedSize()]() {
+            startLoadOperation(encryptedSize);
             updateStage(MessageContentDownloadStage::Downloading);
         });
-        connect(downloadDecOp, &DownloadDecryptFileOperation::downloaded, [=]() {
+
+        connect(downloadDecOp, &DownloadDecryptFileOperation::downloaded, [this]() {
             updateStage(MessageContentDownloadStage::Downloaded);
         });
-        connect(downloadDecOp, &DownloadDecryptFileOperation::decrypted, [=](const QFileInfo &file) {
+
+        connect(downloadDecOp, &DownloadDecryptFileOperation::decrypted, [this, message](const QFileInfo &file) {
             MessageAttachmentLocalPathUpdate update;
             update.messageId = message->id();
             update.attachmentId = message->contentAsAttachment()->id();
             update.localPath = file.absoluteFilePath();
             m_parent->messageUpdate(update);
-            //
+
             updateStage(MessageContentDownloadStage::Decrypted);
         });
     }
@@ -103,7 +108,7 @@ void Self::populateDownload()
     if (picture && !FileUtils::fileExists(picture->previewPath())) {
         const auto previewPath = m_settings->makeThumbnailPath(picture->id(), true);
         auto createPreviewOp = factory->populateCreateAttachmentPreview(m_parent, this, downloadPath, previewPath);
-        connect(createPreviewOp, &Operation::finished, [=]() {
+        connect(createPreviewOp, &Operation::finished, [this]() {
             updateStage(MessageContentDownloadStage::Preloaded);
             updateStage(MessageContentDownloadStage::Decrypted); // TODO(fpohtmeh): don't use this stage as final?
         });
@@ -138,19 +143,20 @@ void Self::populatePreload()
 
         // Download/decrypt thumbnail
         const auto thumbnailPath = m_settings->makeThumbnailPath(picture->id(), false);
-        const auto extrasToJson = [=]() {
-            const auto picture = std::get_if<MessageContentPicture>(&message->content());
-            return picture->extrasToJson(true);
-        };
 
         auto downloadDecOp = factory->populateDownloadDecrypt(this, thumbnail.remoteUrl(), thumbnail.encryptedSize(),
                                                               thumbnailPath, thumbnail.decryptionKey(), message->senderId());
         downloadDecOp->setName(QLatin1String("DownloadDecryptThumbnail"));
         connect(downloadDecOp, &DownloadDecryptFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
-        connect(downloadDecOp, &Operation::started, [=]() {
-            startLoadOperation(thumbnail.encryptedSize());
+        connect(downloadDecOp, &Operation::started, [this, encryptedSize = thumbnail.encryptedSize()]() {
+            startLoadOperation(encryptedSize);
         });
-        connect(downloadDecOp, &DownloadDecryptFileOperation::decrypted, [=](const QFileInfo &file) {
+        connect(downloadDecOp, &DownloadDecryptFileOperation::decrypted, [this, message](const QFileInfo &file) {
+            const auto extrasToJson = [message]() {
+                const auto picture = std::get_if<MessageContentPicture>(&message->content());
+                return picture->extrasToJson(true);
+            };
+
             MessagePictureThumbnailPathUpdate update;
             update.messageId = message->id();
             update.attachmentId = message->contentAsAttachment()->id();
@@ -161,10 +167,11 @@ void Self::populatePreload()
     }
 
     // Update stages
-    connect(this, &Operation::started, [=]() {
+    connect(this, &Operation::started, [this]() {
         updateStage(MessageContentDownloadStage::Preloading);
     });
-    connect(this, &Operation::finished, [=]() {
+
+    connect(this, &Operation::finished, [this]() {
         updateStage(MessageContentDownloadStage::Preloaded);
     });
 }

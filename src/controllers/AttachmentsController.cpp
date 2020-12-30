@@ -62,7 +62,7 @@ void Self::saveAs(const QString &messageId, const QVariant &fileUrl)
     }
 
     const auto filePath = FileUtils::urlToLocalFile(fileUrl.toUrl());
-    downloadAttachment(message, [=]() {
+    downloadAttachment(message, [this, message, filePath]() {
         QFile::copy(message->contentAsAttachment()->localPath(), filePath);
         emit notificationCreated(tr("Attachment was saved"), false);
     });
@@ -75,7 +75,7 @@ void Self::download(const QString &messageId)
         return;
     }
 
-    downloadAttachment(message, [=]() {
+    downloadAttachment(message, [this]() {
         emit notificationCreated(tr("File was downloaded"), false);
     });
 }
@@ -87,7 +87,7 @@ void Self::open(const QString &messageId)
         return;
     }
 
-    downloadAttachment(message, [=]() {
+    downloadAttachment(message, [this, message]() {
         const auto attachment = message->contentAsAttachment();
         const auto url = FileUtils::localFileToUrl(attachment->localPath());
         if (std::holds_alternative<MessageContentPicture>(message->content())) {
