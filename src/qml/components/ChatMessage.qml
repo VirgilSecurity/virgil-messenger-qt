@@ -249,7 +249,7 @@ Control {
                             height: width
                             anchors{
                                 left: parent.right
-                                leftMargin: (d.hasAttachment && d.isPicture) ? 0 : -10
+                                leftMargin: d.isPicture ? 3 : -10
                                 bottom: parent.bottom
                             }
                             visible: isOwnMessage

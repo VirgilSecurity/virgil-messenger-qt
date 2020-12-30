@@ -92,6 +92,7 @@ Rectangle {
             rightMargin: 30
         }
         activeFocusOnPress: true
+        inputMethodHints: Qt.ImhNoAutoUppercase
         font.pixelSize: UiHelper.fixFontSz(15)
         placeholderTextColor: "#59717D"
         color: "white"

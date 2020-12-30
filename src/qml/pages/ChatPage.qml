@@ -79,6 +79,7 @@ Page {
 
             ImageButton {
                 image: "More"
+                visible: appState.isGroupChat
                 onClicked: {
                     if (appState.isGroupChat) {
                         if (appState.isAdmin) {
@@ -98,7 +99,7 @@ Page {
 
                     Action {
                         text: qsTr("Delete chat")
-                        onTriggered: controllers.chats.addParticipant("userId")
+                        onTriggered: console.log("Chat deletion isn't implemented")
                     }
                 }
 
