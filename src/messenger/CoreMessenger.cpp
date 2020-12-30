@@ -1284,7 +1284,7 @@ Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
     auto workingBuffer = vsc_buffer_wrap_ptr(vsc_buffer_new());
 
     const auto headLen = vssq_messenger_file_cipher_start_encryption_out_len(fileCipher.get());
-    vsc_buffer_reserve_unused(workingBuffer.get(), headLen);
+    vsc_buffer_reset_with_capacity(workingBuffer.get(), headLen);
 
     encryptionStatus = vssq_messenger_file_cipher_start_encryption(fileCipher.get(), workingBuffer.get());
 
@@ -1322,8 +1322,7 @@ Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
         const auto workingBufferLen =
                 vssq_messenger_file_cipher_process_encryption_out_len(fileCipher.get(), readBytesData.len);
 
-        vsc_buffer_reset(workingBuffer.get());
-        vsc_buffer_reserve_unused(workingBuffer.get(), workingBufferLen);
+        vsc_buffer_reset_with_capacity(workingBuffer.get(), workingBufferLen);
 
         encryptionStatus =
             vssq_messenger_file_cipher_process_encryption(fileCipher.get(), readBytesData, workingBuffer.get());
@@ -1348,8 +1347,7 @@ Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
     //  Encrypt - Step 5 - Write tail.
     //
     const auto tailLen = vssq_messenger_file_cipher_finish_encryption_out_len(fileCipher.get());
-    vsc_buffer_reset(workingBuffer.get());
-    vsc_buffer_reserve_unused(workingBuffer.get(), tailLen);
+    vsc_buffer_reset_with_capacity(workingBuffer.get(), tailLen);
 
     encryptionStatus = vssq_messenger_file_cipher_finish_encryption(fileCipher.get(), workingBuffer.get());
 
@@ -1365,8 +1363,7 @@ Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
     //  Encrypt - Step 6 - Write footer.
     //
     const auto footerLen = vssq_messenger_file_cipher_finish_encryption_footer_out_len(fileCipher.get());
-    vsc_buffer_reset(workingBuffer.get());
-    vsc_buffer_reserve_unused(workingBuffer.get(), footerLen);
+    vsc_buffer_reset_with_capacity(workingBuffer.get(), footerLen);
 
     encryptionStatus = vssq_messenger_file_cipher_finish_encryption_footer(fileCipher.get(), workingBuffer.get());
 
@@ -1479,8 +1476,7 @@ Self::decryptFile(const QString &sourceFilePath, const QString &destFilePath, co
         const auto workingBufferLen =
                 vssq_messenger_file_cipher_process_decryption_out_len(fileCipher.get(), readBytesData.len);
 
-        vsc_buffer_reset(workingBuffer.get());
-        vsc_buffer_reserve_unused(workingBuffer.get(), workingBufferLen);
+        vsc_buffer_reset_with_capacity(workingBuffer.get(), workingBufferLen);
 
         decryptionStatus =
             vssq_messenger_file_cipher_process_decryption(fileCipher.get(), readBytesData, workingBuffer.get());
@@ -1505,8 +1501,7 @@ Self::decryptFile(const QString &sourceFilePath, const QString &destFilePath, co
     //  Decrypt - Step 4 - Write tail and verify signature.
     //
     const auto tailLen = vssq_messenger_file_cipher_finish_decryption_out_len(fileCipher.get());
-    vsc_buffer_reset(workingBuffer.get());
-    vsc_buffer_reserve_unused(workingBuffer.get(), tailLen);
+    vsc_buffer_reset_with_capacity(workingBuffer.get(), tailLen);
 
     const auto senderPublicKey = vssq_messenger_user_public_key(sender->impl()->user.get());
     decryptionStatus = vssq_messenger_file_cipher_finish_decryption(fileCipher.get(), senderPublicKey, workingBuffer.get());
