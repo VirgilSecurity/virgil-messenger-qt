@@ -62,7 +62,8 @@ Self::MessagesQueue(const Settings *settings, Messenger *messenger, UserDatabase
 {
     m_threadPool->setMaxThreadCount(5);
 
-    qRegisterMetaType<vm::MessagesQueue::Item>("Item");
+    qRegisterMetaType<vm::MessagesQueue::Item>("Item"); // TODO(fpohtmeh): rename
+    qRegisterMetaType<vm::MessagesQueue::PostDownloadFunction>("PostDownloadFunction");
 
     connect(m_messenger, &Messenger::onlineStatusChanged, this, &MessagesQueue::onOnlineStatusChanged);
     connect(m_messenger, &Messenger::signedOut, this, &MessagesQueue::stop);
@@ -125,19 +126,18 @@ void Self::runItem(Item item)
         connect(m_messenger, &Messenger::onlineStatusChanged, op, &NetworkOperation::setIsOnline);
         connect(op, &MessageOperation::notificationCreated, this, &MessagesQueue::notificationCreated);
         connect(this, &MessagesQueue::stopRequested, op, &MessageOperation::stop);
-        switch (item.actionType) {
-            case Item::ActionType::Download:
-                m_factory->populateDownload(op, item.parameter.toString());
-                connect(op, &Operation::finished, this, std::bind(&Self::notificationCreated, this, tr("File was downloaded"), false));
-                break;
-            case Item::ActionType::Preload:
+        if (item.download) {
+            if (item.download->type == DownloadParameter::Type::Download) {
+                m_factory->populateDownload(op, item.download->filePath);
+            }
+            else {
                 m_factory->populatePreload(op);
-                break;
-            case Item::ActionType::SendReceive:
-            default:
-                m_factory->populateAll(op);
-                break;
+            }
         }
+        else {
+            m_factory->populateAll(op);
+        }
+
         op->start();
         op->waitForDone();
         if (op->status() == Operation::Status::Failed) {
@@ -213,13 +213,21 @@ void Self::onPushMessage(const ModifiableMessageHandler &message)
 }
 
 
-void Self::onPushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath)
+void Self::onPushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath, const PostDownloadFunction &postFunction)
 {
-    addItem({ message, Item::ActionType::Download, filePath }, true);
+    DownloadParameter parameter;
+    parameter.type = DownloadParameter::Type::Download;
+    parameter.filePath = filePath;
+    parameter.postFunction = postFunction;
+
+    addItem({ message, std::move(parameter) }, true);
 }
 
 
 void Self::onPushMessagePreload(const ModifiableMessageHandler &message)
 {
-    addItem({ message, Item::ActionType::Preload }, true);
+    DownloadParameter parameter;
+    parameter.type = DownloadParameter::Type::Preload;
+
+    addItem({ message, std::move(parameter) }, true);
 }

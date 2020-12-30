@@ -52,15 +52,15 @@ Self::DownloadAttachmentOperation(MessageOperation *parent, const Settings *sett
     , m_settings(settings)
     , m_parameter(parameter)
 {
-    setName((parameter.actionType == Parameter::ActionType::Download) ? QLatin1String("DownloadAttachment") : QLatin1String("PreloadAttachment"));
+    setName((parameter.type == Parameter::Type::Download) ? QLatin1String("DownloadAttachment") : QLatin1String("PreloadAttachment"));
 }
 
 bool Self::populateChildren()
 {
-    if (m_parameter.actionType == Parameter::ActionType::Preload) {
+    if (m_parameter.type == Parameter::Type::Preload) {
         populatePreload();
     }
-    else if (m_parameter.actionType == Parameter::ActionType::Download) {
+    else if (m_parameter.type == Parameter::Type::Download) {
         populateDownload();
     }
 
@@ -139,6 +139,7 @@ void Self::populatePreload()
         // Download/decrypt thumbnail
         const auto thumbnailPath = m_settings->makeThumbnailPath(picture->id(), false);
         const auto extrasToJson = [=]() {
+            const auto picture = std::get_if<MessageContentPicture>(&message->content());
             return picture->extrasToJson(true);
         };
 

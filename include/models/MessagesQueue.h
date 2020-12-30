@@ -35,6 +35,7 @@
 #ifndef VS_MESSAGESQUEUE_H
 #define VS_MESSAGESQUEUE_H
 
+#include "DownloadAttachmentOperation.h"
 #include "Messenger.h"
 
 #include <QPointer>
@@ -61,18 +62,17 @@ class MessagesQueue : public QObject
     Q_OBJECT
 
 public:
+    using PostDownloadFunction = std::function<void ()>;
+
+    struct DownloadParameter : DownloadAttachmentOperation::Parameter
+    {
+        PostDownloadFunction postFunction;
+    };
+
     struct Item
     {
-        enum class ActionType
-        {
-            SendReceive,
-            Download,
-            Preload
-        };
-
         ModifiableMessageHandler message;
-        ActionType actionType = ActionType::SendReceive;
-        QVariant parameter = QVariant();
+        std::optional<DownloadParameter> download = std::nullopt; // Parameter for download/preload
         qsizetype attemptCount = 0;
     };
 
@@ -81,7 +81,7 @@ public:
 
 signals:
     void pushMessage(const ModifiableMessageHandler &message);
-    void pushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath);
+    void pushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath, const PostDownloadFunction &func);
     void pushMessagePreload(const ModifiableMessageHandler &message);
 
     void updateMessage(const MessageUpdate &messagesUpdate);
@@ -97,7 +97,7 @@ private:
     void runItem(Item item);
 
     void onPushMessage(const ModifiableMessageHandler &message);
-    void onPushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath);
+    void onPushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath, const PostDownloadFunction &postFunction);
     void onPushMessagePreload(const ModifiableMessageHandler &message);
 
     void onDatabaseOpened();
@@ -116,5 +116,6 @@ private:
 }
 
 Q_DECLARE_METATYPE(vm::MessagesQueue::Item);
+Q_DECLARE_METATYPE(vm::MessagesQueue::PostDownloadFunction);
 
 #endif // VS_MESSAGESQUEUE_H

@@ -64,8 +64,6 @@ signals:
 
     void messageCreated(const ModifiableMessageHandler &message);
 
-    void displayImageNotFound(const MessageId &messageId);
-
 private:
     //
     //  Create text message within current chat.
@@ -99,6 +97,7 @@ private:
 
     void onMessageReceived(ModifiableMessageHandler message);
     void onUpdateMessage(const MessageUpdate& messageUpdate, const bool apply);
+    void onPictureIconNotFound(const MessageId &messageId);
 
     QPointer<const Settings> m_settings;
     QPointer<Messenger> m_messenger;

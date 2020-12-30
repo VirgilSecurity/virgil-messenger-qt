@@ -53,7 +53,7 @@
 
 using namespace vm;
 
-using DownloadType = DownloadAttachmentOperation::Parameter::ActionType;
+using DownloadType = DownloadAttachmentOperation::Parameter::Type;
 
 MessageOperationFactory::MessageOperationFactory(const Settings *settings, Messenger *messenger,
                                                  QObject *parent)

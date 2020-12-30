@@ -49,13 +49,14 @@ class DownloadAttachmentOperation : public LoadAttachmentOperation
 public:
     struct Parameter
     {
-        enum class ActionType
+        enum class Type
         {
-            Download,
-            Preload
+            Preload,
+            Download
         };
-        ActionType actionType;
-        QString filePath;
+
+        Type type = Type::Preload;
+        QString filePath = QString(); // for download
     };
 
     DownloadAttachmentOperation(MessageOperation *parent, const Settings *settings, const Parameter &parameter);

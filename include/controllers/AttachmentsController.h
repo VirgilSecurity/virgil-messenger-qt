@@ -35,7 +35,7 @@
 #ifndef VM_ATTACHMENTSCONTROLLER_H
 #define VM_ATTACHMENTSCONTROLLER_H
 
-#include "Message.h"
+#include "models/MessagesQueue.h"
 
 #include <QObject>
 #include <QPointer>
@@ -58,17 +58,14 @@ public:
     Q_INVOKABLE void download(const QString &messageId);
     Q_INVOKABLE void open(const QString &messageId);
 
-    void downloadDisplayImage(const MessageId &messageId);
-
 signals:
     void openPreviewRequested(const QUrl &url);
     void notificationCreated(const QString &notification, const bool error) const;
 
 private:
-    ModifiableMessageHandler findMessageWithAttachment(const MessageId &messageId) const;
-    void downloadAttachment(const ModifiableMessageHandler &message);
-    void decryptAttachment(const ModifiableMessageHandler &message);
-    void saveAttachment(const ModifiableMessageHandler &message, const QUrl &fileUrl);
+    ModifiableMessageHandler findMessageById(const QString &messageId) const;
+
+    void downloadAttachment(const ModifiableMessageHandler &message, const MessagesQueue::PostDownloadFunction &function);
 
     QPointer<const Settings> m_settings;
     QPointer<Models> m_models;

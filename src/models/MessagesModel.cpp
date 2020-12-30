@@ -214,7 +214,7 @@ QVariant Self::data(const QModelIndex &index, int role) const
             }
             if (message->status() != MessageStatus::New && message->status() != MessageStatus::Processing) {
                 qCDebug(lcModel) << "Requesting of missing thumbnail/preview";
-                emit displayImageNotFound(message->id());
+                emit pictureIconNotFound(message->id());
             }
         }
         return QString();

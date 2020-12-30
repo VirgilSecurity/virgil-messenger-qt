@@ -58,7 +58,6 @@ Controllers::Controllers(Messenger *messenger, Settings *settings,
 {
     connect(m_attachments, &AttachmentsController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_messages, &MessagesController::notificationCreated, this, &Controllers::notificationCreated);
-    connect(m_messages, &MessagesController::displayImageNotFound, m_attachments, &AttachmentsController::downloadDisplayImage);
 
     //
     //  Queued connection is used here to give ChatsController a chance to setup database connections.

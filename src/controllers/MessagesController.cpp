@@ -73,7 +73,7 @@ Self::MessagesController(Messenger *messenger, const Settings *settings, Models 
     connect(this, &Self::messageCreated, messagesQueue, &MessagesQueue::pushMessage);
     connect(messagesQueue, &MessagesQueue::updateMessage, this, std::bind(&Self::onUpdateMessage, this, std::placeholders::_1, false));
     // Models
-    connect(m_models->messages(), &MessagesModel::displayImageNotFound, this, &Self::displayImageNotFound);
+    connect(m_models->messages(), &MessagesModel::pictureIconNotFound, this, &Self::onPictureIconNotFound);
     // Messages
     connect(m_messenger, &Messenger::messageReceived, this, &Self::onMessageReceived);
     connect(m_messenger, &Messenger::updateMessage, this, std::bind(&Self::onUpdateMessage, this, std::placeholders::_1, true));
@@ -240,6 +240,17 @@ void Self::onUpdateMessage(const MessageUpdate& messageUpdate, const bool apply)
     //  Update DB.
     //
     m_userDatabase->updateMessage(messageUpdate);
+}
+
+
+void Self::onPictureIconNotFound(const MessageId &messageId)
+{
+    const auto message = m_models->messages()->findById(messageId);
+    if (!message) {
+        return;
+    }
+    qCDebug(lcController) << "Auto-downloading of missing picture icon for:" << messageId;
+    m_models->messagesQueue()->pushMessagePreload(message);
 }
 
 

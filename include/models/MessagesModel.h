@@ -88,7 +88,7 @@ public:
     ModifiableMessageHandler findById(const MessageId &messageId) const;
 
 signals:
-    void displayImageNotFound(const MessageId &messageId) const;
+    void pictureIconNotFound(const MessageId &messageId) const;
 
 private:
     enum Roles
