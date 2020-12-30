@@ -202,6 +202,7 @@ QString Self::statusString() const {
 
 
 bool Self::applyUpdate(const MessageUpdate& update) {
+    std::lock_guard<std::mutex> _(m_updateGuardMutex);
     if (contentIsAttachment()) {
         return contentAsAttachment()->applyUpdate(update);
     }

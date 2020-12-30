@@ -51,6 +51,7 @@
 
 #include <memory>
 #include <list>
+#include <mutex>
 
 namespace vm {
 
@@ -261,6 +262,7 @@ private:
     MessageContent m_content;
     std::shared_ptr<MessageGroupChatInfo> m_groupChatInfo;
     bool m_isCarbonsCopy = false;
+    std::mutex m_updateGuardMutex;
 };
 
 using MessageHandler = std::shared_ptr<const Message>;
