@@ -127,7 +127,8 @@ signals:
     void reconnectXmppServerIfNeeded();
     void disconnectXmppServer();
     void cleanupCommKitMessenger();
-    void deregisterFromPushNotifications();
+    void registerPushNotifications();
+    void deregisterPushNotifications();
 public:
     //
     //  Create.
@@ -178,12 +179,6 @@ public:
     //
     Result decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray& decryptionKey,
             const UserId senderId);
-
-    //
-    //  Push Notifications.
-    //
-    bool registerForNotifications();
-    bool deregisterFromNotifications();
 
     //
     //  Contacts (XMPP).
@@ -258,7 +253,8 @@ private slots:
     void onReconnectXmppServerIfNeeded();
     void onDisconnectXmppServer();
     void onCleanupCommKitMessenger();
-    void onDeregisterFromPushNotifications();
+    void onRegisterPushNotifications();
+    void onDeregisterPushNotifications();
 
     void onProcessNetworkState(bool online);
     void onLogConnectionStateChanged(CoreMessenger::ConnectionState state);

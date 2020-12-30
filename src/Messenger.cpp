@@ -317,7 +317,7 @@ Self::setCurrentRecipient(const UserId &recipientId)
 
 void
 Self::onPushNotificationTokenUpdate() {
-    m_coreMessenger->registerForNotifications();
+    m_coreMessenger->registerPushNotifications();
 }
 
 

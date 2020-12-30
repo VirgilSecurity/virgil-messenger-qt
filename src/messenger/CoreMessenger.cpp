@@ -184,7 +184,8 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     connect(this, &Self::reconnectXmppServerIfNeeded, this, &Self::onReconnectXmppServerIfNeeded);
     connect(this, &Self::disconnectXmppServer, this, &Self::onDisconnectXmppServer);
     connect(this, &Self::cleanupCommKitMessenger, this, &Self::onCleanupCommKitMessenger);
-    connect(this, &Self::deregisterFromPushNotifications, this, &Self::onDeregisterFromPushNotifications);
+    connect(this, &Self::registerPushNotifications, this, &Self::onRegisterPushNotifications);
+    connect(this, &Self::deregisterPushNotifications, this, &Self::onDeregisterPushNotifications);
 
     //
     //  Configure Network Analyzer.
@@ -542,7 +543,7 @@ Self::signOut() {
     return QtConcurrent::run([this]() -> Result {
         qCInfo(lcCoreMessenger) << "Signing out";
 
-        emit deregisterFromPushNotifications();
+        emit deregisterPushNotifications();
         emit cleanupCommKitMessenger();
         emit disconnectXmppServer();
 
@@ -571,8 +572,8 @@ Self::userIdToJid(const UserId& userId) const {
 }
 
 
-bool
-Self::registerForNotifications() {
+void
+Self::onRegisterPushNotifications() {
 #if VS_PUSHNOTIFICATIONS
     if (!isOnline()) {
         qCWarning(lcCoreMessenger) << "Can not subscribe for push notifications, no connection. Will try it later.";
@@ -597,15 +598,12 @@ Self::registerForNotifications() {
 
     qCInfo(lcCoreMessenger) << "Register for push notifications on XMPP server status: " << sentStatus;
 
-    return sentStatus;
-#else
-    return true;
 #endif // VS_PUSHNOTIFICATIONS
 }
 
 
 void
-Self::onDeregisterFromPushNotifications() {
+Self::onDeregisterPushNotifications() {
 #if VS_PUSHNOTIFICATIONS
     if (!isOnline()) {
         qCWarning(lcCoreMessenger) << "Can not unsubscribe from the push notifications, no connection.";
@@ -1536,13 +1534,13 @@ void
 Self::xmppOnConnected() {
     m_impl->lastActivityManager->setEnabled(true);
 
-    registerForNotifications();
-
     if (m_impl->xmppCarbonManager->carbonsEnabled()) {
         m_impl->xmppCarbonManager->setCarbonsEnabled(true);
     }
 
     changeConnectionState(Self::ConnectionState::Connected);
+
+    registerPushNotifications();
 }
 
 
