@@ -191,24 +191,25 @@ QVariant Self::data(const QModelIndex &index, int role) const
         if (!attachment) {
             return false;
         }
-
-        const bool isUploading = message->isOutgoing() && (attachment->uploadStage() != MessageContentUploadStage::Initial &&
-            attachment->uploadStage() != MessageContentUploadStage::Uploaded);
-        const bool isDownloading = attachment->downloadStage() == MessageContentDownloadStage::Downloading ||
-            attachment->downloadStage() == MessageContentDownloadStage::Downloaded;
-
-        return isUploading || isDownloading;
+        if (message->isOutgoing() && (attachment->uploadStage() != MessageContentUploadStage::Uploaded)) {
+            return true; // uploading
+        }
+        const bool isDownloading =
+                attachment->downloadStage() == MessageContentDownloadStage::Preloading ||
+                attachment->downloadStage() == MessageContentDownloadStage::Preloaded ||
+                attachment->downloadStage() == MessageContentDownloadStage::Downloading ||
+                attachment->downloadStage() == MessageContentDownloadStage::Downloaded;
+        return isDownloading;
     }
 
     case AttachmentIsLoadedRole: {
         if (!attachment) {
             return false;
         }
-
-        const bool isUploaded = message->isOutgoing() && (attachment->uploadStage() == MessageContentUploadStage::Uploaded);
-        const bool isDownloaded = attachment->downloadStage() == MessageContentDownloadStage::Decrypted;
-
-        return isUploaded || isDownloaded;
+        if (message->isOutgoing() && (attachment->uploadStage() == MessageContentUploadStage::Uploaded)) {
+            return true; // uploaded
+        }
+        return attachment->downloadStage() == MessageContentDownloadStage::Decrypted;
     }
 
     case AttachmentIconPathRole: {

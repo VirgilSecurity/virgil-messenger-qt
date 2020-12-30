@@ -261,8 +261,7 @@ void Self::onMessageReceived(ModifiableMessageHandler message)
         //  Update existing chat.
         //
         const auto unreadMessageCount = calculateUnreadMessageCount(destChat, message);
-
-        destChat->setLastMessage(message);
+        chats->updateLastMessage(message, unreadMessageCount);
 
         m_userDatabase->writeMessage(message, unreadMessageCount);
     } else {

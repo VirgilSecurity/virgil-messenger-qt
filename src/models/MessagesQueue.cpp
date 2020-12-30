@@ -204,7 +204,7 @@ void MessagesQueue::onItemFailed(Item item)
 
 void Self::onPushMessage(const MessageHandler &message)
 {
-    if (message->isOutgoingCopyFromOtherDevice()) {
+    if (message->isIncoming() || message->isOutgoingCopyFromOtherDevice()) {
         pushMessagePreload(message);
     }
     else {
