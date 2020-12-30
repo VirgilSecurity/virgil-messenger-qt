@@ -65,4 +65,5 @@ void MessageOperation::onMessageUpdate(const MessageUpdate &update)
 {
     // TODO(fpohtmeh): use update result?
     m_message->applyUpdate(update);
+    // TODO(fpohtmeh): create json extras update here
 }

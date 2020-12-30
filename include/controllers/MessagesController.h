@@ -98,7 +98,7 @@ private:
     void setupTableConnections();
 
     void onMessageReceived(ModifiableMessageHandler message);
-    void onUpdateMessage(const MessageUpdate& messageUpdate);
+    void onUpdateMessage(const MessageUpdate& messageUpdate, const bool apply);
 
     QPointer<const Settings> m_settings;
     QPointer<Messenger> m_messenger;

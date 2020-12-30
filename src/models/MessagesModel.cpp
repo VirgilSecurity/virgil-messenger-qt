@@ -90,7 +90,7 @@ void Self::clearChat() {
 }
 
 
-bool Self::updateMessage(const MessageUpdate &messageUpdate) {
+bool Self::updateMessage(const MessageUpdate &messageUpdate, const bool apply) {
     auto messageId = MessageUpdateGetMessageId(messageUpdate);
 
     const auto messageRow = findRowById(messageId);
@@ -99,6 +99,11 @@ bool Self::updateMessage(const MessageUpdate &messageUpdate) {
     }
 
     const auto row = *messageRow;
+    if (apply) {
+        m_messages[row]->applyUpdate(messageUpdate);
+        // FIXME(fpohtmeh): merge logic with MessageOperation logic
+    }
+
     const auto roles = rolesFromMessageUpdate(messageUpdate);
     invalidateRow(row, roles);
     return true;
@@ -146,13 +151,11 @@ QVariant Self::data(const QModelIndex &index, int role) const
     case SenderUsernameRole:
         return QString(message->senderUsername());
 
-    case StatusIconRole: {
+    case StatusIconRole:
         return statusIconPath(message);
-    }
 
-    case IsBrokenRole: {
+    case IsBrokenRole:
         return message->status() == Message::Status::Broken;
-    }
 
     case BodyRole: {
         if (auto textContent = std::get_if<MessageContentText>(&message->content())) {
@@ -209,7 +212,7 @@ QVariant Self::data(const QModelIndex &index, int role) const
             if (!imagePath.isEmpty()) {
                 return FileUtils::localFileToUrl(imagePath);
             }
-            if (message->status() != Message::Status::New) {
+            if (message->status() != MessageStatus::New && message->status() != MessageStatus::Processing) {
                 qCDebug(lcModel) << "Requesting of missing thumbnail/preview";
                 emit displayImageNotFound(message->id());
             }
@@ -402,7 +405,7 @@ QString Self::statusIconPath(MessageHandler message)
         case Message::Status::Failed:
             return path.arg("M-Sending");
         case Message::Status::Broken:
-            return path.arg("M-Sending");
+            return path.arg("M-Error");
         default:
             return QString();
     }
