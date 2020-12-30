@@ -37,7 +37,7 @@
 #include "VSQCustomer.h"
 
 #if VS_ANDROID
-    #include "VSQAndroid.h"
+    #include "android/VSQAndroid.h"
 #endif
 
 

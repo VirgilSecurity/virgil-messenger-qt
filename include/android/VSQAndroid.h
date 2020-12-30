@@ -38,7 +38,8 @@
 #if (VS_ANDROID)
 
 #include <QObject>
-
+#include <Contact.h>
+#include <FileUtils.h>
 
 using namespace vm;
 
