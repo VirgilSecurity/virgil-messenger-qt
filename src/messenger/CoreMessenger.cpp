@@ -691,11 +691,6 @@ Self::connectXmppServer() {
     config.setPassword(xmppPass);
     config.setAutoReconnectionEnabled(false);
     config.setAutoAcceptSubscriptions(true);
-#if VS_ANDROID
-    config.setKeepAliveInterval(kKeepAliveTimeSec);
-    config.setKeepAliveTimeout(kKeepAliveTimeSec - 1);
-#endif
-
     if (nullptr == m_impl->xmpp) {
         //
         //  Configure QXMPP.

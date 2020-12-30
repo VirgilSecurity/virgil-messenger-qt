@@ -41,13 +41,12 @@
 #include <QDesktopServices>
 #include <QLoggingCategory>
 
+#include <android/VSQAndroid.h>
 
 Q_LOGGING_CATEGORY(lcFileUtils, "file-utils");
 
-
 using namespace vm;
 using Self = vm::FileUtils;
-
 
 QString
 Self::calculateFingerprint(const QString &path) {

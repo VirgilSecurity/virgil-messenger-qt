@@ -197,7 +197,7 @@ QUrl VSQAndroid::getContactAvatarUrl(const Contact &contact)
         QtAndroid::androidContext().object(),
         javaIdString.object<jstring>()
     );
-    return Utils::localFileToUrl(javaFilePath.toString());
+    return FileUtils::localFileToUrl(javaFilePath.toString());
 }
 
 #endif // VS_ANDROID

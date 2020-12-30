@@ -208,7 +208,7 @@ bool Self::readLocalFile(const QUrl &localUrl, QString &errorString) {
     }
 
 #ifdef VS_ANDROID
-    const quint64 fileSize = VSQAndroid::getFileSize(url);
+    const quint64 fileSize = VSQAndroid::getFileSize(localUrl);
 #else
     const quint64 fileSize = localInfo.size();
 #endif
