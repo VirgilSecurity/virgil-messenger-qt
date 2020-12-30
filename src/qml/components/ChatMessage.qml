@@ -245,11 +245,11 @@ Control {
 
                         // status icon
                         Item {
-                            width: 14
+                            width: 24
                             height: width
                             anchors{
                                 left: parent.right
-                                leftMargin: d.isPicture ? 3 : -10
+                                leftMargin: d.isPicture ? 1 : -3
                                 bottom: parent.bottom
                             }
                             visible: isOwnMessage
