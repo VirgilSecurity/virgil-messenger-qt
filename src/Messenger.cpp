@@ -303,6 +303,12 @@ Self::setApplicationActive(bool active)
 
 
 void
+Self::suspend() {
+    m_coreMessenger->suspend();
+}
+
+
+void
 Self::setCurrentRecipient(const UserId &recipientId)
 {
     m_coreMessenger->setCurrentRecipient(recipientId);

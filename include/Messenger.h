@@ -111,6 +111,7 @@ public:
     //  Helpers.
     //
     void setApplicationActive(bool active);
+    void suspend();
 
     QPointer<CrashReporter> crashReporter() noexcept;
     QPointer<FileLoader> fileLoader() noexcept;

@@ -197,7 +197,11 @@ bool Self::isIosSimulator() const
 
 void Self::onApplicationStateChanged(Qt::ApplicationState state) {
     qDebug() << state;
-    m_messenger.setApplicationActive(state == Qt::ApplicationState::ApplicationActive);
+    m_messenger.setApplicationActive(Qt::ApplicationState::ApplicationActive == state);
+
+    if (Qt::ApplicationState::ApplicationSuspended == state) {
+        m_messenger.suspend();
+    }
 }
 
 void Self::onAboutToQuit()

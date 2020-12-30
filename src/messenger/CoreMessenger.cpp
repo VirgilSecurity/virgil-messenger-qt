@@ -146,6 +146,8 @@ public:
     std::map<QString, std::shared_ptr<User>> usernameToUser;
 
     ConnectionState connectionState = ConnectionState::Disconnected;
+
+    bool suspended = false;
 };
 
 
@@ -176,6 +178,7 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     //
     connect(this, &Self::activate, this, &Self::onActivate);
     connect(this, &Self::deactivate, this, &Self::onDeactivate);
+    connect(this, &Self::suspend, this, &Self::onSuspend);
     connect(this, &Self::connectionStateChanged, this, &Self::onLogConnectionStateChanged);
 
     connect(this, &Self::reconnectXmppServerIfNeeded, this, &Self::onReconnectXmppServerIfNeeded);
@@ -364,6 +367,8 @@ Self::onActivate() {
         m_impl->xmpp->setClientPresence(presenceOnline);
     }
 
+    m_impl->suspended = false;
+
     reconnectXmppServerIfNeeded();
 }
 
@@ -377,6 +382,15 @@ Self::onDeactivate() {
         presenceAway.setAvailableStatusType(QXmppPresence::Away);
         m_impl->xmpp->setClientPresence(presenceAway);
     }
+}
+
+
+void
+Self::onSuspend() {
+    if (m_impl->xmpp) {
+        m_impl->xmpp->disconnectFromServer();
+    }
+    m_impl->suspended = true;
 }
 
 
@@ -704,7 +718,7 @@ Self::connectXmppServer() {
 
 void
 Self::onReconnectXmppServerIfNeeded() {
-    if (isSignedIn() && isNetworkOnline() && isXmppDisconnected()) {
+    if (isSignedIn() && isNetworkOnline() && isXmppDisconnected() && !m_impl->suspended) {
         connectXmppServer();
     }
 }

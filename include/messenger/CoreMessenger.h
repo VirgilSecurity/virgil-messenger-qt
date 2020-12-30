@@ -107,6 +107,11 @@ signals:
     void deactivate();
 
     //
+    //  Should be called when application went to the background and was suspended.
+    //
+    void suspend();
+
+    //
     //  Info signals.
     //
     void connectionStateChanged(ConnectionState state);
@@ -235,6 +240,7 @@ private:
 private slots:
     void onActivate();
     void onDeactivate();
+    void onSuspend();
     void xmppOnConnected();
     void xmppOnDisconnected();
     void xmppOnStateChanged(QXmppClient::State state);
