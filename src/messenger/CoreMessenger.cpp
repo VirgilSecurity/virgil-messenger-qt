@@ -909,6 +909,7 @@ Self::sendMessage(MessageHandler message) {
         xmppMessage.setId(message->id());
         xmppMessage.setStamp(message->createdAt());
         xmppMessage.setType(QXmppMessage::Type::Chat);
+        xmppMessage.setReceiptRequested(true);
 
         //
         //  Send.
