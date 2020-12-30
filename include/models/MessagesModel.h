@@ -99,7 +99,7 @@ private:
         DisplayTimeRole,
         SenderIdRole,
         SenderUsernameRole,
-        DisplayStatusRole,
+        StatusIconRole,
         IsBrokenRole,
         // Text
         BodyRole,
@@ -124,7 +124,7 @@ private:
     };
 
     static QVector<int> rolesFromMessageUpdate(const MessageUpdate& messageUpdate);
-    static QString displayStatusString(MessageHandler message);
+    static QString statusIconPath(MessageHandler message);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;

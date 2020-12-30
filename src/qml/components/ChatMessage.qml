@@ -20,7 +20,7 @@ Control {
     property string displayTime: ""
     property string nickname
     property bool isOwnMessage: false
-    property string status: ""
+    property string statusIcon: ""
 
     property bool isBroken: false
     property string messageId: ""
@@ -243,7 +243,8 @@ Control {
                             }
                         }
 
-                        Item { // status
+                        // status icon
+                        Item {
                             width: 14
                             height: width
                             anchors{
@@ -252,11 +253,12 @@ Control {
                                 bottom: parent.bottom
                             }
                             visible: isOwnMessage
+
                             Image {
                                 width: parent.width
                                 anchors.bottom: parent.bottom
                                 fillMode: Image.PreserveAspectFit
-                                source: "../resources/icons/%1.png".arg(messageStatusImageSource())
+                                source: statusIcon
                             }
                         }
 
@@ -525,19 +527,6 @@ Control {
                     anchors.centerIn: parent
                 }
             }
-        }
-    }
-
-    function messageStatusImageSource() {
-        if (chatMessage.isBroken) {
-            return "M-Sending" // "broken"
-        }
-        switch (status) {
-            case "0": return "M-Sending" // "sending"
-            case "1": return "M-Sent" // "sent"
-            case "2": return "M-Delivered" // "delivered"
-            case "4": return "M-Read" // "read"
-            default: return "M-Read" // "read"
         }
     }
 }

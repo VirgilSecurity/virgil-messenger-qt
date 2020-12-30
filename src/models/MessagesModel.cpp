@@ -151,14 +151,8 @@ QVariant Self::data(const QModelIndex &index, int role) const
     case SenderUsernameRole:
         return QString(message->senderUsername());
 
-    case DisplayStatusRole: {
-        const auto displayStatus = displayStatusString(message);
-        const auto nextMessage = (row + 1 == rowCount()) ? nullptr : m_messages[row + 1];
-        if (nextMessage && nextMessage->senderId() == message->senderId() &&
-                    displayStatusString(nextMessage) == displayStatus) {
-            return QString();
-        }
-        return displayStatus;
+    case StatusIconRole: {
+        return statusIconPath(message);
     }
 
     case IsBrokenRole: {
@@ -303,7 +297,7 @@ QHash<int, QByteArray> Self::roleNames() const
         { DisplayTimeRole, "displayTime" },
         { SenderIdRole, "senderId" },
         { SenderUsernameRole, "senderUsername" },
-        { DisplayStatusRole, "displayStatus" },
+        { StatusIconRole, "statusIcon" },
         { IsBrokenRole, "isBroken" },
         { BodyRole, "body" },
         { AttachmentIdRole, "attachmentId" },
@@ -344,9 +338,9 @@ void Self::invalidateRow(const int row, const QVector<int> &roles)
     invalidateModel(index(row), roles);
 
     // Invalidate neighbour rows
-    if (roles.isEmpty() || roles.contains(DisplayStatusRole)) {
+    if (roles.isEmpty() || roles.contains(StatusIconRole)) {
         if (row > 0) {
-            invalidateModel(index(row - 1), { DisplayStatusRole, IsBrokenRole, InRowRole });
+            invalidateModel(index(row - 1), { StatusIconRole, IsBrokenRole, InRowRole });
         }
         if (row < rowCount() - 1) {
             invalidateModel(index(row + 1), { FirstInRowRole });
@@ -363,7 +357,7 @@ QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate& messageUpdate) {
 
     if(std::holds_alternative<IncomingMessageStageUpdate>(messageUpdate) ||
             std::holds_alternative<OutgoingMessageStageUpdate>(messageUpdate)) {
-        return { DisplayStatusRole, IsBrokenRole, InRowRole };
+        return { StatusIconRole, IsBrokenRole, InRowRole };
 
     } else if(std::holds_alternative<MessageAttachmentUploadStageUpdate>(messageUpdate) ||
               std::holds_alternative<MessageAttachmentDownloadStageUpdate>(messageUpdate)) {
@@ -392,18 +386,29 @@ QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate& messageUpdate) {
     }
 }
 
-QString Self::displayStatusString(MessageHandler message)
+QString Self::statusIconPath(MessageHandler message)
 {
+    const QString path("../resources/icons/%1.png");
+
     switch (message->status()) {
         case Message::Status::New:
         case Message::Status::Processing:
-            return tr("sending");
+            return path.arg("M-Sending");
         case Message::Status::Succeed:
-            return tr("sent");
+            if (message->isOutgoing()) {
+                // TODO(fpohtmeh): implement smarter check?
+                if (message->stageString() == OutgoingMessageStageToString(OutgoingMessageStage::Delivered)) {
+                    return path.arg("M-Delivered");
+                }
+                else if (message->stageString() == OutgoingMessageStageToString(OutgoingMessageStage::Read)) {
+                    return path.arg("M-Read");
+                }
+            }
+            return path.arg("M-Sent");
         case Message::Status::Failed:
-            return tr("failed");
+            return path.arg("M-Sending");
         case Message::Status::Broken:
-            return tr("broken");
+            return path.arg("M-Sending");
         default:
             return QString();
     }

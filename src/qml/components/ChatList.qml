@@ -59,7 +59,7 @@ ModelListView {
             displayTime: model.displayTime
             nickname: model.senderUsername
             isOwnMessage: model.senderId === controllers.users.currentUserId
-            status: isOwnMessage ? model.displayStatus : "none"
+            statusIcon: isOwnMessage ? model.statusIcon : ""
             messageId: model.id
             inRow: model.inRow
             firstInRow: model.firstInRow
