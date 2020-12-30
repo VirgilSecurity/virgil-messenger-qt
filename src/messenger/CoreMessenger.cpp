@@ -909,7 +909,11 @@ Self::sendMessage(MessageHandler message) {
         //
         //  Pack JSON body.
         //
-        QByteArray messageBody = ciphertextData.toBase64();
+        QJsonObject messageBodyJson;
+        messageBodyJson["pushType"] = "alert";
+        messageBodyJson["ciphertext"] = QString::fromLatin1(ciphertextData.toBase64());
+
+        QByteArray messageBody = MessageContentJsonUtils::toBytes(messageBodyJson).toBase64();
 
         qCDebug(lcCoreMessenger) << "Will send XMPP message with body: " << messageBody;
 
@@ -955,15 +959,38 @@ Self::processReceivedXmppMessage(const QXmppMessage& xmppMessage) {
         message->setCreatedAt(xmppMessage.stamp());
 
         //
-        //  Decode message body from Base64.
+        //  Decode message body from Base64 and JSON.
         //
-        auto ciphertextBase64 = xmppMessage.body().toLatin1();
+        auto messageBody = xmppMessage.body().toLatin1();
+        if (messageBody.isEmpty()) {
+            qCWarning(lcCoreMessenger) << "Got invalid XMPP message - body is empty";
+            return Self::Result::Error_InvalidMessageFormat;
+        }
+
+        auto messageBodyJsonString = QByteArray::fromBase64Encoding(messageBody);
+        if (!messageBodyJsonString) {
+            qCWarning(lcCoreMessenger) << "Got invalid XMPP message - body is not Base64";
+            return Self::Result::Error_InvalidMessageFormat;
+        }
+
+        const auto messageBodyJsonDocument = QJsonDocument::fromJson(*messageBodyJsonString);
+        if (messageBodyJsonDocument.isNull()) {
+            qCWarning(lcCoreMessenger) << "Got invalid XMPP message - body is not JSON within Base64";
+            return Self::Result::Error_InvalidMessageFormat;
+        }
+
+        const auto messageBodyJson = messageBodyJsonDocument.object();
+
+        //
+        //  Get ciphertext.
+        //
+        const auto ciphertextBase64 = messageBodyJson["ciphertext"].toString();
         if (ciphertextBase64.isEmpty()) {
             qCWarning(lcCoreMessenger) << "Got invalid XMPP message - empty ciphertext";
             return Self::Result::Error_InvalidMessageCiphertext;
         }
 
-        auto ciphertextDecoded = QByteArray::fromBase64Encoding(ciphertextBase64);
+        auto ciphertextDecoded = QByteArray::fromBase64Encoding(ciphertextBase64.toLatin1());
         if (!ciphertextDecoded) {
             qCWarning(lcCoreMessenger) << "Got invalid XMPP message - ciphertext is not base64 encoded";
             return Self::Result::Error_InvalidMessageCiphertext;
@@ -1103,15 +1130,38 @@ Self::processReceivedXmppCarbonMessage(const QXmppMessage& xmppMessage) {
         message->setCreatedAt(xmppMessage.stamp());
 
         //
-        //  Decode message body from Base64.
+        //  Decode message body from Base64 and JSON.
         //
-        auto ciphertextBase64 = xmppMessage.body().toLatin1();
+        auto messageBody = xmppMessage.body().toLatin1();
+        if (messageBody.isEmpty()) {
+            qCWarning(lcCoreMessenger) << "Got invalid XMPP message - body is empty";
+            return Self::Result::Error_InvalidMessageFormat;
+        }
+
+        auto messageBodyJsonString = QByteArray::fromBase64Encoding(messageBody);
+        if (!messageBodyJsonString) {
+            qCWarning(lcCoreMessenger) << "Got invalid XMPP message - body is not Base64";
+            return Self::Result::Error_InvalidMessageFormat;
+        }
+
+        const auto messageBodyJsonDocument = QJsonDocument::fromJson(*messageBodyJsonString);
+        if (messageBodyJsonDocument.isNull()) {
+            qCWarning(lcCoreMessenger) << "Got invalid XMPP message - body is not JSON within Base64";
+            return Self::Result::Error_InvalidMessageFormat;
+        }
+
+        const auto messageBodyJson = messageBodyJsonDocument.object();
+
+        //
+        //  Get ciphertext.
+        //
+        const auto ciphertextBase64 = messageBodyJson["ciphertext"].toString();
         if (ciphertextBase64.isEmpty()) {
             qCWarning(lcCoreMessenger) << "Got invalid XMPP message - empty ciphertext";
             return Self::Result::Error_InvalidMessageCiphertext;
         }
 
-        auto ciphertextDecoded = QByteArray::fromBase64Encoding(ciphertextBase64);
+        auto ciphertextDecoded = QByteArray::fromBase64Encoding(ciphertextBase64.toLatin1());
         if (!ciphertextDecoded) {
             qCWarning(lcCoreMessenger) << "Got invalid XMPP message - ciphertext is not base64 encoded";
             return Self::Result::Error_InvalidMessageCiphertext;
