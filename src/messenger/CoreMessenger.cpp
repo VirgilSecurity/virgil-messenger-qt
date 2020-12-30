@@ -1225,7 +1225,7 @@ Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
     };
 
     auto fileError = [](Self::Result error) -> std::tuple<Result, QByteArray> {
-        qCWarning(lcCoreMessenger) << "Can not encrypt file, read/write failed.";
+        qCWarning(lcCoreMessenger) << "Can not encrypt file - read/write failed.";
 
         return std::make_tuple(error, QByteArray());
     };
@@ -1235,6 +1235,11 @@ Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
     //  Open File Streams.
     //
     QFile sourceFile(sourceFilePath);
+    if (!sourceFile.exists()) {
+        qCWarning(lcCoreMessenger) << "Can not encrypt file - source file not exists.";
+        return fileError(Self::Result::Error_FileDecryptionReadFailed);
+    }
+
     if (!sourceFile.open(QIODevice::ReadOnly)) {
         return fileError(Self::Result::Error_FileEncryptionReadFailed);
     }
@@ -1394,7 +1399,7 @@ Self::decryptFile(const QString &sourceFilePath, const QString &destFilePath, co
     };
 
     auto fileError = [](Self::Result error) -> Self::Result {
-        qCWarning(lcCoreMessenger) << "Can not decrypt file, read/write failed.";
+        qCWarning(lcCoreMessenger) << "Can not decrypt file - read/write failed.";
 
         return error;
     };
@@ -1412,6 +1417,11 @@ Self::decryptFile(const QString &sourceFilePath, const QString &destFilePath, co
     //  Open File Streams.
     //
     QFile sourceFile(sourceFilePath);
+    if (!sourceFile.exists()) {
+        qCWarning(lcCoreMessenger) << "Can not decrypt file - source file not exists.";
+        return fileError(Self::Result::Error_FileDecryptionReadFailed);
+    }
+
     if (!sourceFile.open(QIODevice::ReadOnly)) {
         return fileError(Self::Result::Error_FileDecryptionReadFailed);
     }
