@@ -158,7 +158,6 @@ Self::signUp(const QString &username)
         switch (result) {
 
         case FutureResult::Success:
-            m_settings->addUserToList(username);
             m_settings->setLastSignedInUser(username);
             emit signedUp(username);
             break;
@@ -207,7 +206,6 @@ Self::downloadKey(const QString &username, const QString &password)
     } else {
         FutureWorker::run(m_coreMessenger->signInWithBackupKey(username, password), [this, username = username](const FutureResult &result) {
             if (result == FutureResult::Success) {
-                m_settings->addUserToList(username);
                 m_settings->setLastSignedInUser(username);
                 emit keyDownloaded(username);
             }

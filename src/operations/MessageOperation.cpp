@@ -40,13 +40,15 @@
 
 using namespace vm;
 
-MessageOperation::MessageOperation(const MessageHandler &message, MessageOperationFactory *factory, bool isOnline,
+MessageOperation::MessageOperation(const ModifiableMessageHandler &message, MessageOperationFactory *factory, bool isOnline,
                                    QObject *parent)
     : NetworkOperation(parent, isOnline)
     , m_factory(factory)
     , m_message(message)
 {
     setName(message->id());
+
+    connect(this, &MessageOperation::messageUpdate, &MessageOperation::onMessageUpdate);
 }
 
 MessageHandler MessageOperation::message() const
@@ -57,4 +59,10 @@ MessageHandler MessageOperation::message() const
 MessageOperationFactory *MessageOperation::factory()
 {
     return m_factory;
+}
+
+void MessageOperation::onMessageUpdate(const MessageUpdate &update)
+{
+    // TODO(fpohtmeh): use update result?
+    m_message->applyUpdate(update);
 }

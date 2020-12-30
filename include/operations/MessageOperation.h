@@ -47,7 +47,7 @@ class MessageOperation : public NetworkOperation
     Q_OBJECT
 
 public:
-    MessageOperation(const MessageHandler &message, MessageOperationFactory *factory, bool isOnline,
+    MessageOperation(const ModifiableMessageHandler &message, MessageOperationFactory *factory, bool isOnline,
                      QObject *parent);
 
     MessageHandler message() const;
@@ -57,8 +57,10 @@ signals:
     void messageUpdate(const MessageUpdate &update);
 
 private:
+    void onMessageUpdate(const MessageUpdate &update);
+
     MessageOperationFactory *m_factory;
-    MessageHandler m_message;
+    ModifiableMessageHandler m_message;
 };
 }
 

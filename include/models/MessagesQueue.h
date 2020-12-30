@@ -70,7 +70,7 @@ public:
             Preload
         };
 
-        MessageHandler message;
+        ModifiableMessageHandler message;
         ActionType actionType = ActionType::SendReceive;
         QVariant parameter = QVariant();
         qsizetype attemptCount = 0;
@@ -80,9 +80,9 @@ public:
     ~MessagesQueue() override;
 
 signals:
-    void pushMessage(const MessageHandler &message);
-    void pushMessageDownload(const MessageHandler &message, const QString &filePath);
-    void pushMessagePreload(const MessageHandler &message);
+    void pushMessage(const ModifiableMessageHandler &message);
+    void pushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath);
+    void pushMessagePreload(const ModifiableMessageHandler &message);
 
     void updateMessage(const MessageUpdate &messagesUpdate);
     void notificationCreated(const QString &notification, const bool error);
@@ -96,9 +96,9 @@ private:
     void addItem(Item item, const bool run);
     void runItem(Item item);
 
-    void onPushMessage(const MessageHandler &message);
-    void onPushMessageDownload(const MessageHandler &message, const QString &filePath);
-    void onPushMessagePreload(const MessageHandler &message);
+    void onPushMessage(const ModifiableMessageHandler &message);
+    void onPushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath);
+    void onPushMessagePreload(const ModifiableMessageHandler &message);
 
     void onDatabaseOpened();
     void onOnlineStatusChanged(const bool isOnline);

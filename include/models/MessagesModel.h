@@ -85,7 +85,7 @@ public:
     //
     //  Return message if found, nullptr otherwise.
     //
-    MessageHandler findById(const MessageId &messageId) const;
+    ModifiableMessageHandler findById(const MessageId &messageId) const;
 
 signals:
     void displayImageNotFound(const MessageId &messageId) const;

@@ -102,6 +102,10 @@ void Settings::setLastSignedInUser(const QString &username)
     setGroupValue(kLastSessionGroup, kSignedInUsername, username);
     sync();
     emit lastSignedInUserChanged(username);
+
+    if (!username.isEmpty()) {
+        addUserToList(username);
+    }
 }
 
 QString Settings::lastSignedInUser() const

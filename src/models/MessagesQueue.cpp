@@ -202,7 +202,7 @@ void MessagesQueue::onItemFailed(Item item)
 }
 
 
-void Self::onPushMessage(const MessageHandler &message)
+void Self::onPushMessage(const ModifiableMessageHandler &message)
 {
     if (message->isIncoming() || message->isOutgoingCopyFromOtherDevice()) {
         pushMessagePreload(message);
@@ -213,13 +213,13 @@ void Self::onPushMessage(const MessageHandler &message)
 }
 
 
-void Self::onPushMessageDownload(const MessageHandler &message, const QString &filePath)
+void Self::onPushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath)
 {
     addItem({ message, Item::ActionType::Download, filePath }, true);
 }
 
 
-void Self::onPushMessagePreload(const MessageHandler &message)
+void Self::onPushMessagePreload(const ModifiableMessageHandler &message)
 {
     addItem({ message, Item::ActionType::Preload }, true);
 }

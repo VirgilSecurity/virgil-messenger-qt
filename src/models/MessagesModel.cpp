@@ -99,18 +99,13 @@ bool Self::updateMessage(const MessageUpdate &messageUpdate) {
     }
 
     const auto row = *messageRow;
-    auto &message = m_messages[row];
-    if (!message->applyUpdate(messageUpdate)) {
-        return false;
-    }
-
     const auto roles = rolesFromMessageUpdate(messageUpdate);
     invalidateRow(row, roles);
     return true;
 }
 
 
-MessageHandler Self::findById(const MessageId &messageId) const
+ModifiableMessageHandler Self::findById(const MessageId &messageId) const
 {
     auto messageIt = std::find_if(std::rbegin(m_messages), std::rend(m_messages), [&messageId](auto message) {
         return message->id() == messageId;
@@ -190,7 +185,6 @@ QVariant Self::data(const QModelIndex &index, int role) const
         }
         const bool isDownloading =
                 attachment->downloadStage() == MessageContentDownloadStage::Preloading ||
-                attachment->downloadStage() == MessageContentDownloadStage::Preloaded ||
                 attachment->downloadStage() == MessageContentDownloadStage::Downloading ||
                 attachment->downloadStage() == MessageContentDownloadStage::Downloaded;
         return isDownloading;

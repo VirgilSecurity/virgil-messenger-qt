@@ -64,7 +64,6 @@ public:
 
     void setUsersList(const QStringList &users);
     QStringList usersList() const;
-    void addUserToList(const QString &user);
 
     QString userCredential(const QString &user) const;
     void setUserCredential(const QString &user, const QString &userCredential);
@@ -111,6 +110,7 @@ private:
     void removeGroup(const QString &group);
 
     void createDeviceId();
+    void addUserToList(const QString &user);
 
     QString m_sessionId;
     QDir m_databaseDir;

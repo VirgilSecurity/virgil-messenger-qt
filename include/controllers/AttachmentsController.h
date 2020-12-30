@@ -65,10 +65,10 @@ signals:
     void notificationCreated(const QString &notification, const bool error) const;
 
 private:
-    MessageHandler findMessageWithAttachment(const MessageId &messageId) const;
-    void downloadAttachment(const MessageHandler &message);
-    void decryptAttachment(const MessageHandler &message);
-    void saveAttachment(const MessageHandler &message, const QUrl &fileUrl);
+    ModifiableMessageHandler findMessageWithAttachment(const MessageId &messageId) const;
+    void downloadAttachment(const ModifiableMessageHandler &message);
+    void decryptAttachment(const ModifiableMessageHandler &message);
+    void saveAttachment(const ModifiableMessageHandler &message, const QUrl &fileUrl);
 
     QPointer<const Settings> m_settings;
     QPointer<Models> m_models;

@@ -146,7 +146,7 @@ void Self::downloadDisplayImage(const MessageId &messageId)
     m_models->messagesQueue()->pushMessagePreload(message);
 }
 
-void Self::downloadAttachment(const MessageHandler &message)
+void Self::downloadAttachment(const ModifiableMessageHandler &message)
 {
     qCDebug(lcController) << "Downloading attachment of message: " << message->id();
     const auto attachment = message->contentAsAttachment();
@@ -155,7 +155,7 @@ void Self::downloadAttachment(const MessageHandler &message)
     m_models->messagesQueue()->pushMessageDownload(message, filePath);
 }
 
-void Self::decryptAttachment(const MessageHandler &message)
+void Self::decryptAttachment(const ModifiableMessageHandler &message)
 {
     qCDebug(lcController) << "Decrypting attachment of message: " << message->id();
     const auto attachment = message->contentAsAttachment();
@@ -164,7 +164,7 @@ void Self::decryptAttachment(const MessageHandler &message)
     m_models->messagesQueue()->pushMessageDownload(message, filePath); // FIXME: change to the separate "decrypt" only operation.
 }
 
-void Self::saveAttachment(const MessageHandler &message, const QUrl &fileUrl)
+void Self::saveAttachment(const ModifiableMessageHandler &message, const QUrl &fileUrl)
 {
     qCDebug(lcController) << "Checking file consistency: " << message->id();
 
@@ -195,7 +195,7 @@ void Self::saveAttachment(const MessageHandler &message, const QUrl &fileUrl)
     emit notificationCreated(tr("Attachment was saved"), false);
 }
 
-MessageHandler Self::findMessageWithAttachment(const MessageId &messageId) const
+ModifiableMessageHandler Self::findMessageWithAttachment(const MessageId &messageId) const
 {
     const auto message = m_models->messages()->findById(messageId);
     if (!message) {
