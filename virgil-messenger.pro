@@ -82,9 +82,9 @@ message("QXMPP location: $${QXMPP_BUILD_PATH}")
 DEFINES += QT_DEPRECATED_WARNINGS \
         INFO_CLIENT=1 \
         CFG_CLIENT=1 \
-        VS_MSGR_ENV_DEV=1 \
+        VS_MSGR_ENV_DEV=0 \
         VS_MSGR_ENV_STG=0 \
-        VS_MSGR_ENV_PROD=0 \
+        VS_MSGR_ENV_PROD=1 \
         VERSION="$$VERSION"
 
 include(customers/customers.pri)
