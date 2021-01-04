@@ -22,7 +22,7 @@ Item {
             y: 0.5 * (row.height - height)
             width: image.width
             height: image.height
-            color: d.isPicture && attachmentIconPath ? "white" : "transparent"
+            color: d.isPicture && model.attachmentIconPath ? "white" : "transparent"
 
             Image {
                 id: image
@@ -35,14 +35,14 @@ Item {
                     value: image.pictureWidth * attachmentPictureThumbnailHeight / attachmentPictureThumbnailWidth
                 }
                 autoTransform: true
-                visible: d.isPicture ? true : attachmentFileExists && !progressBar.visible
-                source: chatMessage.attachmentIconPath
+                visible: d.isPicture ? true : model.attachmentFileExists && !progressBar.visible
+                source: model.attachmentIconPath
 
                 readonly property double pictureWidth: d.isPicture ? Math.min(3 * attachmentPictureThumbnailWidth, maxWidth - 2 * offset) : 0
             }
 
             Rectangle {
-                visible: !attachmentFileExists && !progressBar.visible
+                visible: !model.attachmentFileExists && !progressBar.visible
                 anchors.centerIn: parent
                 width: 1.3333 * downloadImage.width
                 height: width
@@ -60,9 +60,9 @@ Item {
                 id: progressBar
                 anchors.centerIn: parent
                 size: 40
-                visible: chatMessage.attachmentIsLoading
-                maxValue: Math.max(1, chatMessage.attachmentBytesTotal)
-                value: Math.min(0.99 * maxValue, Math.max(0.01 * maxValue, chatMessage.attachmentBytesLoaded))
+                visible: model.attachmentIsLoading
+                maxValue: Math.max(1, model.attachmentBytesTotal)
+                value: Math.min(0.99 * maxValue, Math.max(0.01 * maxValue, model.attachmentBytesLoaded))
                 animated: visible
             }
         }
@@ -76,7 +76,7 @@ Item {
             Label {
                 Layout.fillHeight: true
                 Layout.maximumWidth: column.maxWidth
-                text: chatMessage.attachmentDisplayText
+                text: model.attachmentDisplayText
                 color: "white"
                 font.pixelSize: UiHelper.fixFontSz(16)
                 wrapMode: Text.Wrap
@@ -84,16 +84,16 @@ Item {
 
             Label {
                 Layout.maximumWidth: column.maxWidth
-                visible: chatMessage.attachmentIsLoaded
-                text: chatMessage.attachmentDisplaySize
+                visible: model.attachmentIsLoaded
+                text: model.attachmentDisplaySize
                 color: "white"
                 font.pixelSize: UiHelper.fixFontSz(10)
             }
 
             Label {
                 Layout.maximumWidth: column.maxWidth
-                visible: chatMessage.attachmentIsLoading
-                text: chatMessage.attachmentDisplayProgress
+                visible: model.attachmentIsLoading
+                text: model.attachmentDisplayProgress
                 color: "white"
                 font.pixelSize: UiHelper.fixFontSz(10)
             }
@@ -102,7 +102,7 @@ Item {
 
     property var contextMenu: ContextMenu {
         compact: true
-        enabled: !chatMessage.isBroken
+        enabled: !model.isBroken
 
         Action {
             text: Platform.isMobile ? qsTr("Save to downloads") : qsTr("Save As...")

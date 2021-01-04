@@ -152,7 +152,7 @@ Item {
                         flick.scrollDown()
                     } else {
                         if (chatListItem.unreadMessages === 0) {
-                            idOfFirstUnreadMessage = lastItem.messageId
+                            idOfFirstUnreadMessage = lastItem.id
                         }
 
                         chatListItem.unreadMessages += 1

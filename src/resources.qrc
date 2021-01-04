@@ -109,6 +109,7 @@
         <file>qml/components/FormSecondaryButton.qml</file>
         <file>qml/components/FormVendor.qml</file>
         <file>qml/components/AccountSelection.qml</file>
+        <file>qml/components/MessageShape.qml</file>
         <file>qml/components/MessageListView.qml</file>
         <file>qml/components/MessageCounter.qml</file>
         <file>qml/components/MessageListFlickable.qml</file>
@@ -116,7 +117,7 @@
         <file>qml/components/MessageContentAttachment.qml</file>
         <file>qml/components/ChatMessage.qml</file>
         <file>qml/components/ChatMessageInput.qml</file>
-        <file>qml/components/ChatMessagePlaceholder.qml</file>
+        <file>qml/components/ChatMessageBody.qml</file>
         <file>qml/components/SearchHeader.qml</file>
         <file>qml/components/SelectContactsList.qml</file>
         <file>qml/components/Header.qml</file>

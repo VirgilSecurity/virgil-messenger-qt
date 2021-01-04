@@ -21,7 +21,7 @@ Item {
         leftMargin: leftIndent
         right: parent.right
         top: parent.top
-        topMargin: firstInRow ? contentSpacing : -contentSpacing / 4
+        topMargin: model.firstInRow ? contentSpacing : -contentSpacing / 4
     }
 
     height: 1

@@ -9,7 +9,7 @@ TextEdit {
     id: textEdit
     property var contextMenu: ContextMenu {
         compact: true
-        enabled: !chatMessage.isBroken
+        enabled: !model.isBroken
 
         Action {
             text: qsTr("Copy")
@@ -27,6 +27,6 @@ TextEdit {
     font.pointSize: UiHelper.fixFontSz(15)
     wrapMode: Text.Wrap
     readOnly: true
-    text: chatMessage.body;
+    text: model.body
     visible: !d.hasAttachment
 }
