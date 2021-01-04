@@ -54,35 +54,15 @@ ModelListView {
 
             thisIndex: index
             thisDay: day
-
-            body: model.body
-            displayTime: model.displayTime
-            nickname: model.senderUsername
             isOwnMessage: model.senderId === controllers.users.currentUserId
             statusIcon: isOwnMessage ? model.statusIcon : ""
-            messageId: model.id
-            inRow: model.inRow
-            firstInRow: model.firstInRow
-            isBroken: model.isBroken
-
-            attachmentId: model.attachmentId
-            attachmentTypeIsFile: model.attachmentTypeIsFile
-            attachmentTypeIsPicture: model.attachmentTypeIsPicture
-            attachmentIsLoading: model.attachmentIsLoading
-            attachmentIsLoaded: model.attachmentIsLoaded
-            attachmentIconPath: model.attachmentIconPath
             attachmentPictureThumbnailWidth: model.attachmentPictureThumbnailSize.width
             attachmentPictureThumbnailHeight: model.attachmentPictureThumbnailSize.height
-            attachmentDisplaySize: model.attachmentDisplaySize
-            attachmentDisplayText: model.attachmentDisplayText
-            attachmentDisplayProgress: model.attachmentDisplayProgress
-            attachmentBytesTotal: model.attachmentBytesTotal
-            attachmentBytesLoaded: model.attachmentBytesLoaded
-            attachmentFileExists: model.attachmentFileExists
+            messageId: model.id
 
             onSaveAttachmentAs: function(messageId) {
                 saveAttachmentAsDialog.messageId = messageId
-                saveAttachmentAsDialog.attachmentType = attachmentTypeIsPicture ? AttachmentTypes.picture : AttachmentTypes.file
+                saveAttachmentAsDialog.attachmentType = model.attachmentTypeIsPicture ? AttachmentTypes.picture : AttachmentTypes.file
                 saveAttachmentAsDialog.open()
             }
 
@@ -90,6 +70,9 @@ ModelListView {
                 if (!contextMenu.enabled) {
                     return
                 }
+
+                app.stateManager.chatState.currentMessageId = messageId
+
                 chatListView.contextMenu = contextMenu
                 var coord = mapToItem(chatListView, mouse.x, mouse.y)
                 contextMenu.x = coord.x - (Platform.isMobile ? contextMenu.width : 0)
