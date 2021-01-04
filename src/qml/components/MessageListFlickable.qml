@@ -42,7 +42,7 @@ Item {
             }
         }
 
-        ChatList {
+        MessageListView {
             id: chatListView
 
             anchors {

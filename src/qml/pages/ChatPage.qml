@@ -142,7 +142,7 @@ Page {
         id: footerControl
     }
 
-    ChatItem {
+    MessageListFlickable {
         anchors.fill: parent
     }
 
