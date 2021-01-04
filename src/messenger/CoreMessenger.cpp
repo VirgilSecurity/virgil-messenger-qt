@@ -577,7 +577,7 @@ Self::onRegisterPushNotifications() {
 #if VS_PUSHNOTIFICATIONS
     if (!isOnline()) {
         qCWarning(lcCoreMessenger) << "Can not subscribe for push notifications, no connection. Will try it later.";
-        return false;
+        return;
     }
 
     qCInfo(lcCoreMessenger) << "Register for push notifications on XMPP server.";
