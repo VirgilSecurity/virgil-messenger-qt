@@ -38,7 +38,7 @@
 #include <QObject>
 #include <QRegularExpressionValidator>
 
-#include "VSQCommon.h"
+#include <optional>
 
 namespace vm
 {
@@ -54,7 +54,7 @@ public:
     ~Validator() override;
 
     // Returns username if it's valid or corrected version of username if it exists
-    Optional<QString> validatedUsername(const QString &username, QString *errorText = 0) const;
+    std::optional<QString> validatedUsername(const QString &username, QString *errorText = 0) const;
     bool isValidUsername(const QString &username) const;
 
 private:

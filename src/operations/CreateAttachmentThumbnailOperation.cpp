@@ -40,8 +40,19 @@
 using namespace vm;
 
 CreateAttachmentThumbnailOperation::CreateAttachmentThumbnailOperation(MessageOperation *parent, const Settings *settings, const QString &sourcePath, const QString &destPath)
-    : CreateThumbnailOperation(parent, sourcePath, destPath, settings->previewMaxSize())
+    : CreateThumbnailOperation(parent, sourcePath, destPath, settings->thumbnailMaxSize())
 {
     setName(QLatin1String("CreateAttachmentThumbnail"));
-    connect(this, &CreateThumbnailOperation::thumbnailReady, parent, &MessageOperation::setAttachmentThumbnailPath);
+    connect(this, &CreateThumbnailOperation::thumbnailReady, [parent](const QString& destPath) {
+        const auto extrasToJson = [message = parent->message()]() {
+            return message->contentAsAttachment()->extrasToJson(true);
+        };
+
+        MessagePictureThumbnailPathUpdate update;
+        update.messageId = parent->message()->id();
+        update.attachmentId = parent->message()->contentAsAttachment()->id();
+        update.extrasToJson = extrasToJson;
+        update.thumbnailPath = destPath;
+        parent->messageUpdate(update);
+    });
 }

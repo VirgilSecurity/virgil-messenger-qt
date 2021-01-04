@@ -35,11 +35,14 @@
 #include "states/SignInUsernameState.h"
 
 #include "Utils.h"
+#include "Validator.h"
+#include "controllers/UsersController.h"
 
 using namespace vm;
 
-SignInUsernameState::SignInUsernameState(Validator *validator, QState *parent)
+SignInUsernameState::SignInUsernameState(UsersController *usersController, Validator *validator, QState *parent)
     : OperationState(parent)
+    , m_usersController(usersController)
     , m_validator(validator)
 {
     connect(this, &SignInUsernameState::validate, this, &SignInUsernameState::processValidation);
@@ -55,6 +58,7 @@ void SignInUsernameState::processValidation(const QString &username)
         emit operationErrorOccurred(errorText);
     }
     else {
+        m_usersController->setNextUsername(username);
         emit operationFinished();
         emit validated(*validUsername);
     }

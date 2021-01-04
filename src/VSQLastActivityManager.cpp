@@ -34,34 +34,37 @@
 
 #include "VSQLastActivityManager.h"
 
-#include <QDomElement>
-
-#include <QXmppClient.h>
-#include <QXmppRosterManager.h>
-
 #include "Settings.h"
 #include "Utils.h"
 
-using namespace vm;
+#include <qxmpp/QXmppClient.h>
+#include <qxmpp/QXmppRosterManager.h>
 
-VSQLastActivityManager::VSQLastActivityManager(Settings *settings, QObject *parent)
+#include <QLoggingCategory>
+#include <QDomElement>
+
+using namespace vm;
+using Self = VSQLastActivityManager;
+
+Q_LOGGING_CATEGORY(lcLastActivityManager, "last-activity-manager");
+
+Self::VSQLastActivityManager(Settings *settings)
     : QXmppClientExtension()
     , m_settings(settings)
 {
-    setParent(parent);
-    connect(this, &VSQLastActivityManager::lastActivityMissing, this, &VSQLastActivityManager::lastActivityTextChanged);
-    connect(this, &VSQLastActivityManager::lastActivityDetected, this, [this](const Seconds &seconds) {
+    connect(this, &Self::lastActivityMissing, this, &Self::lastActivityTextChanged);
+    connect(this, &Self::lastActivityDetected, this, [this](std::chrono::seconds seconds) {
         emit lastActivityTextChanged(vm::Utils::formattedLastSeenActivity(seconds, m_settings->nowInterval()));
     });
-    connect(this, &VSQLastActivityManager::errorOccured, this, &VSQLastActivityManager::onErrorOccured);
+    connect(this, &Self::errorOccured, this, &Self::onErrorOccured);
 }
 
-VSQLastActivityManager::~VSQLastActivityManager()
+Self::~VSQLastActivityManager()
 {
     stopUpdates(true);
 }
 
-void VSQLastActivityManager::setCurrentJid(const QString &jid)
+void Self::setCurrentJid(const QString &jid)
 {
     if (m_jid == jid) {
         return;
@@ -70,7 +73,7 @@ void VSQLastActivityManager::setCurrentJid(const QString &jid)
     canStart() ? startUpdates(true) : stopUpdates(true);
 }
 
-void VSQLastActivityManager::setEnabled(bool enabled)
+void Self::setEnabled(bool enabled)
 {
     if (enabled == m_enabled) {
         return;
@@ -79,15 +82,15 @@ void VSQLastActivityManager::setEnabled(bool enabled)
     canStart() ? startUpdates(false) : stopUpdates(false);
 }
 
-QStringList VSQLastActivityManager::discoveryFeatures() const
+QStringList Self::discoveryFeatures() const
 {
     return VSQLastActivityIq::discoveryFeatures();
 }
 
-bool VSQLastActivityManager::handleStanza(const QDomElement &element)
+bool Self::handleStanza(const QDomElement &element)
 {
     if (element.tagName() == "iq" && VSQLastActivityIq::isLastActivityId(element)) {
-        VSQLastActivityIq lastActivityIq(m_debugCounter > 0);
+        VSQLastActivityIq lastActivityIq;
         lastActivityIq.parse(element);
         if (m_jid != lastActivityIq.from()) {
             return false;
@@ -101,47 +104,44 @@ bool VSQLastActivityManager::handleStanza(const QDomElement &element)
         else {
             emit errorOccured(tr("Failed to find last activity"));
         }
-        --m_debugCounter;
         return true;
     }
     return false;
 }
 
-void VSQLastActivityManager::timerEvent(QTimerEvent *)
+void Self::timerEvent(QTimerEvent *)
 {
     requestInfo();
 }
 
-QString VSQLastActivityManager::requestInfo()
+QString Self::requestInfo()
 {
     if (m_jid.isEmpty()) {
         return QString();
     }
-    if (m_debugCounter > 0) {
-        qCDebug(lcLastActivity) << "Requesting info for:" << m_jid;
-    }
-    VSQLastActivityIq request(m_debugCounter > 0);
+    qCDebug(lcLastActivityManager) << "Requesting info for: " << m_jid;
+
+    VSQLastActivityIq request;
     request.setType(QXmppIq::Get);
     request.setTo(m_jid);
     if (client()->sendPacket(request)) {
         return request.id();
     }
     else {
-        qCWarning(lcLastActivity) << "Last activity request failed";
+        qCWarning(lcLastActivityManager) << "Last activity request failed";
         return QString();
     }
 }
 
-bool VSQLastActivityManager::canStart() const
+bool Self::canStart() const
 {
     return !m_jid.isEmpty() && m_enabled;
 }
 
-void VSQLastActivityManager::startUpdates(bool reset)
+void Self::startUpdates(bool reset)
 {
     stopUpdates(reset);
     if (canStart()) {
-        m_debugCounter = 3; // debug few records only
         requestInfo();
         m_timerId = startTimer(m_settings->nowInterval() * 1000);
         if (m_timerId == 0) {
@@ -150,7 +150,7 @@ void VSQLastActivityManager::startUpdates(bool reset)
     }
 }
 
-void VSQLastActivityManager::stopUpdates(bool reset)
+void Self::stopUpdates(bool reset)
 {
     if (m_timerId == 0) {
         return;
@@ -163,8 +163,8 @@ void VSQLastActivityManager::stopUpdates(bool reset)
     }
 }
 
-void VSQLastActivityManager::onErrorOccured(const QString &errorText)
+void Self::onErrorOccured(const QString &errorText)
 {
-    qCWarning(lcLastActivity) << errorText;
+    qCWarning(lcLastActivityManager) << errorText;
     stopUpdates(true);
 }

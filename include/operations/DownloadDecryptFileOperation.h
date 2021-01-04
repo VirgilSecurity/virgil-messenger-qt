@@ -36,36 +36,43 @@
 #define VM_DOWNLOADDECRYPTFILEOPERATION_H
 
 #include "NetworkOperation.h"
+#include "FileLoader.h"
+
+#include <QPointer>
 
 class Settings;
 
 namespace vm
 {
-class FileLoader;
+class Messenger;
 
 class DownloadDecryptFileOperation : public NetworkOperation
 {
     Q_OBJECT
 
 public:
-    DownloadDecryptFileOperation(NetworkOperation *parent, const Settings *settings,
-                                 const QUrl &url, const DataSize &bytesTotal, const QString &filePath, const Contact::Id &senderId);
+    DownloadDecryptFileOperation(NetworkOperation *parent, Messenger *messenger, const Settings *settings,
+                                 const QUrl &url, quint64 bytesTotal, const QString &filePath,
+                                 const QByteArray& decryptionKey, const UserId &senderId);
 
 signals:
-    void progressChanged(const DataSize &bytesLoaded, const DataSize &bytesTotal);
-    void decrypted(const QString &filePath);
+    void progressChanged(quint64 bytesLoaded, quint64 bytesTotal);
+    void downloaded();
+    void decrypted(const QFileInfo &file);
 
 private:
     bool populateChildren() override;
     void cleanup() override;
 
+    QPointer<Messenger> m_messenger;
     const Settings *m_settings;
-    FileLoader *m_fileLoader;
     const QUrl m_url;
-    const DataSize m_bytesTotal;
+    const quint64 m_bytesTotal;
     QString m_tempPath;
     const QString m_filePath;
-    const Contact::Id m_senderId;
+
+    const QByteArray m_decryptionKey;
+    const UserId m_senderId;
 };
 }
 

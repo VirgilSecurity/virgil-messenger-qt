@@ -48,19 +48,19 @@ Validator::~Validator()
 {
 }
 
-Optional<QString> Validator::validatedUsername(const QString &username, QString *errorText) const
+std::optional<QString> Validator::validatedUsername(const QString &username, QString *errorText) const
 {
     if (username.isEmpty()) {
         if (errorText) {
             *errorText = QObject::tr("Username can't be empty");
         }
-        return NullOptional;
+        return {};
     }
     if (!isValidUsername(username)) {
         if (errorText) {
             *errorText = QObject::tr("Username is not valid");
         }
-        return NullOptional;
+        return {};
     }
     return username.toLower();
 }

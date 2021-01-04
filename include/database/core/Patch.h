@@ -35,7 +35,7 @@
 #ifndef VM_PATCH_H
 #define VM_PATCH_H
 
-#include "VSQCommon.h"
+#include <QtCore>
 
 namespace vm
 {
@@ -44,8 +44,7 @@ class Database;
 class Patch
 {
 public:
-    using Version = quint64;
-
+    using Version = qsizetype;
     explicit Patch(const Version &version);
     virtual ~Patch();
 

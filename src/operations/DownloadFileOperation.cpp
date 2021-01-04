@@ -36,14 +36,16 @@
 
 #include <QNetworkReply>
 
-#include "models/FileLoader.h"
+#include "FileLoader.h"
 #include "operations/MessageOperation.h"
+#include <functional>
 
 using namespace vm;
 
-DownloadFileOperation::DownloadFileOperation(NetworkOperation *parent, const QUrl &url, const DataSize &bytesTotal, const QString &filePath)
+DownloadFileOperation::DownloadFileOperation(NetworkOperation *parent, FileLoader *fileLoader, const QUrl &url, quint64 bytesTotal, const QString &filePath)
     : LoadFileOperation(parent, bytesTotal)
     , m_url(url)
+    , m_fileLoader(fileLoader)
 {
     setName(QLatin1String("DownloadFile"));
     if (bytesTotal <= 0) {
@@ -58,7 +60,7 @@ void DownloadFileOperation::run()
     if (!openFileHandle(QFile::WriteOnly)) {
         return;
     }
-    fileLoader()->startDownload(m_url, fileHandle(), std::bind(&DownloadFileOperation::connectReply, this, args::_1));
+    m_fileLoader->startDownload(m_url, fileHandle(), std::bind(&DownloadFileOperation::connectReply, this, std::placeholders::_1));
 }
 
 void DownloadFileOperation::connectReply(QNetworkReply *reply)

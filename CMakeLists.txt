@@ -316,7 +316,7 @@ target_sources(virgil-messenger-qt
         # Headers
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQApplication.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQClipboardProxy.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQMessenger.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/Messenger.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQPushNotifications.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQSqlChatModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQSqlConversationModel.h
@@ -334,7 +334,7 @@ target_sources(virgil-messenger-qt
         ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQApplication.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQClipboardProxy.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQMessenger.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/Messenger.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQPushNotifications.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQSqlChatModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQSqlConversationModel.cpp

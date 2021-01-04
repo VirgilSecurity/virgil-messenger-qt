@@ -36,35 +36,37 @@
 #define VM_ENCRYPTUPLOADFILEOPERATION_H
 
 #include "NetworkOperation.h"
+#include "FileLoader.h"
 
-class Settings;
+#include <QPointer>
 
 namespace vm
 {
 class FileLoader;
+class Messenger;
 
 class EncryptUploadFileOperation : public NetworkOperation
 {
     Q_OBJECT
 
 public:
-    EncryptUploadFileOperation(NetworkOperation *parent, const Settings *settings, const QString &sourcePath, const Contact::Id &recipientId);
+    EncryptUploadFileOperation(NetworkOperation *parent, Messenger *messenger, const Settings *settings, const QString &sourcePath);
 
-    void setSourcePath(const QString &path);
+    void setSourcePath(const QString &sourcePath);
 
 signals:
-    void progressChanged(const DataSize &bytesLoaded, const DataSize &bytesTotal);
-    void bytesCalculated(const DataSize &bytes);
+    void progressChanged(quint64 bytesLoaded, quint64 bytesTotal);
+    void encrypted(const QFileInfo &file, const QByteArray &decryptionKey);
+    void uploadSlotReceived();
     void uploaded(const QUrl &url);
 
 private:
     bool populateChildren() override;
     void cleanup() override;
 
-    const Settings *m_settings;
+    QPointer<Messenger> m_messenger;
     QString m_sourcePath;
-    QString m_tempPath;
-    Contact::Id m_recipientId;
+    const QString m_tempPath;
 };
 }
 

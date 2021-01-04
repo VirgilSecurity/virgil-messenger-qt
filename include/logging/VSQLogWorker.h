@@ -35,9 +35,11 @@
 #ifndef VSQLOGWORKER_H
 #define VSQLOGWORKER_H
 
-#include <QObject>
-
 #include "VSQMessageLogContext.h"
+
+#include <QObject>
+#include <QFile>
+
 
 class VSQLogWorker : public QObject
 {
@@ -45,16 +47,23 @@ class VSQLogWorker : public QObject
 
 public:
     explicit VSQLogWorker(QObject *parent = nullptr);
-    ~VSQLogWorker() override;
+    ~VSQLogWorker() override = default;
 
-    void start();
     void processMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
 
 private:
+    static QString formatLogType(QtMsgType type);
+
     void fileMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
     void consoleMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
 
-    bool m_logToFile = false;
+    bool prepareLogFile(qint64 messageLen);
+    void logToFile(const QString& formattedMessage);
+    void logToConsole(const QString& formattedMessage);
+
+private:
+    QFile m_logFile;
+    size_t m_logFileIndex;
 };
 
 #endif // VSQLOGGWORKER_H

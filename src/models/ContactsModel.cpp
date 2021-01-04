@@ -87,7 +87,7 @@ const Contact &ContactsModel::getContact(const int row) const
 
 bool ContactsModel::hasContact(const Contact::Id &contactId) const
 {
-    return findRowByContactId(contactId) != NullOptional;
+    return findRowByContactId(contactId) != std::nullopt;
 }
 
 void ContactsModel::addContact(const Contact &contact)
@@ -121,7 +121,7 @@ void ContactsModel::updateContact(const Contact &contact, int row)
     emit dataChanged(rowIndex, rowIndex);
 }
 
-Optional<int> ContactsModel::findRowByContactId(const Contact::Id &contactId) const
+std::optional<int> ContactsModel::findRowByContactId(const Contact::Id &contactId) const
 {
     int row = -1;
     for (auto &info : m_contacts) {
@@ -130,7 +130,7 @@ Optional<int> ContactsModel::findRowByContactId(const Contact::Id &contactId) co
             return row;
         }
     }
-    return NullOptional;
+    return std::nullopt;
 }
 
 void ContactsModel::loadAvatarUrl(const Contact::Id &contactId)

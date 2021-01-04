@@ -50,12 +50,12 @@ int FileCloudUploader::currentIndex() const
     return m_currentIndex;
 }
 
-DataSize FileCloudUploader::currentProcessedBytes() const
+qint64 FileCloudUploader::currentProcessedBytes() const
 {
     return m_currentProcessedBytes;
 }
 
-DataSize FileCloudUploader::currentTotalBytes() const
+qint64 FileCloudUploader::currentTotalBytes() const
 {
     return m_currentTotalBytes;
 }
@@ -65,7 +65,7 @@ QStringList FileCloudUploader::fileNames() const
     return m_fileNames;
 }
 
-void FileCloudUploader::setCurrentIndex(const int &index)
+void FileCloudUploader::setCurrentIndex(const int index)
 {
     if (m_currentIndex != index) {
         m_currentIndex = index;
@@ -73,7 +73,7 @@ void FileCloudUploader::setCurrentIndex(const int &index)
     }
 }
 
-void FileCloudUploader::setCurrentProcessedBytes(const DataSize &bytes)
+void FileCloudUploader::setCurrentProcessedBytes(const qint64 bytes)
 {
     if (m_currentProcessedBytes != bytes) {
         m_currentProcessedBytes = bytes;
@@ -81,7 +81,7 @@ void FileCloudUploader::setCurrentProcessedBytes(const DataSize &bytes)
     }
 }
 
-void FileCloudUploader::setCurrentTotalBytes(const DataSize &bytes)
+void FileCloudUploader::setCurrentTotalBytes(const qint64 bytes)
 {
     if (m_currentTotalBytes != bytes) {
         m_currentTotalBytes = bytes;

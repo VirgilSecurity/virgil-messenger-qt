@@ -35,9 +35,11 @@
 #ifndef VM_ATTACHMENTSCONTROLLER_H
 #define VM_ATTACHMENTSCONTROLLER_H
 
-#include <QObject>
+#include "models/MessagesQueue.h"
 
-#include "VSQCommon.h"
+#include <QObject>
+#include <QPointer>
+#include <QUrl>
 
 class Settings;
 
@@ -52,28 +54,21 @@ class AttachmentsController : public QObject
 public:
     explicit AttachmentsController(const Settings *settings, Models *models, QObject *parent);
 
-    Q_INVOKABLE void saveAs(const Message::Id &messageId, const QVariant &fileUrl);
-    Q_INVOKABLE void download(const Message::Id &messageId);
-    Q_INVOKABLE void open(const Message::Id &messageId);
-
-    void downloadDisplayImage(const Message::Id &messageId);
-
-    void setUserId(const UserId &userId);
-    void setContactId(const Contact::Id &contactId);
+    Q_INVOKABLE void saveAs(const QString &messageId, const QVariant &fileUrl);
+    Q_INVOKABLE void download(const QString &messageId);
+    Q_INVOKABLE void open(const QString &messageId);
 
 signals:
     void openPreviewRequested(const QUrl &url);
     void notificationCreated(const QString &notification, const bool error) const;
 
 private:
-    bool isAttachmentDownloaded(const GlobalMessage &message);
-    void downloadAttachment(const GlobalMessage &message);
-    Optional<GlobalMessage> findValidMessage(const Message::Id &messageId) const;
+    ModifiableMessageHandler findMessageById(const QString &messageId) const;
 
-    const Settings *m_settings;
-    Models *m_models;
-    UserId m_userId;
-    Contact::Id m_contactId;
+    void downloadAttachment(const ModifiableMessageHandler &message, const MessagesQueue::PostDownloadFunction &function);
+
+    QPointer<const Settings> m_settings;
+    QPointer<Models> m_models;
 };
 }
 

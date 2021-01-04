@@ -38,6 +38,7 @@
 
 #include "Settings.h"
 #include "Utils.h"
+#include "FileUtils.h"
 
 using namespace vm;
 
@@ -69,7 +70,7 @@ void ConvertToPngOperation::run()
             qCWarning(lcOperation) << "Unable to save png file";
             invalidate(tr("Failed to convert to png"));
         }
-        else if (!Utils::fileExists(filePath)) {
+        else if (!FileUtils::fileExists(filePath)) {
             qCWarning(lcOperation) << "Png file exceeds file limit";
             invalidate(tr("Png file exceeds file limit"));
         }

@@ -35,8 +35,8 @@
 #ifndef VM_NAMEGROUPCHATSTATE_H
 #define VM_NAMEGROUPCHATSTATE_H
 
+#include "GroupId.h"
 #include "OperationState.h"
-#include "VSQCommon.h"
 
 namespace vm
 {

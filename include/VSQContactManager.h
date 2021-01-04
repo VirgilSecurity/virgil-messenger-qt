@@ -37,9 +37,6 @@
 
 #include <qxmpp/QXmppRosterManager.h>
 
-#include "VSQCommon.h"
-
-Q_DECLARE_LOGGING_CATEGORY(lcContactManager);
 
 class VSQContactManager : public QObject
 {

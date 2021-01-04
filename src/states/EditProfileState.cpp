@@ -34,27 +34,12 @@
 
 #include "states/EditProfileState.h"
 
-#include "VSQMessenger.h"
-
 using namespace vm;
 
-EditProfileState::EditProfileState(QState *parent)
+EditProfileState::EditProfileState(UsersController *usersController, QState *parent)
     : OperationState(parent)
+    , m_usersController(usersController)
 {
-}
-
-QString EditProfileState::userId() const
-{
-    return m_userId;
-}
-
-void EditProfileState::setUserId(const QString &userId)
-{
-    if (m_userId == userId) {
-        return;
-    }
-    m_userId = userId;
-    emit userIdChanged(userId);
 }
 
 QString EditProfileState::phoneNumber() const
@@ -138,7 +123,7 @@ void EditProfileState::setAvatarUrl(const QUrl &avatarUrl)
 void EditProfileState::processVerificationResponse(const ConfirmationCodeType &codeType, const bool isVerified)
 {
     switch (codeType) {
-    case ConfirmationCodeType::Phone:
+    case ConfirmationCodeType::PhoneNumber:
         setIsPhoneNumberConfirmed(isVerified);
         break;
     case ConfirmationCodeType::Email:

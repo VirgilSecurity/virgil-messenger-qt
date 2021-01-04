@@ -37,7 +37,7 @@
 
 #include <QTimer>
 
-#include "VSQCommon.h"
+#include "Contact.h"
 
 namespace vm
 {

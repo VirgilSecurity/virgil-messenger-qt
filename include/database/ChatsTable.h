@@ -36,6 +36,7 @@
 #define VM_CHATSTABLE_H
 
 #include "core/DatabaseTable.h"
+#include "Chat.h"
 
 namespace vm
 {
@@ -48,22 +49,23 @@ public:
 
 signals:
     void fetch();
-    void createChat(const Chat &chat);
+    void addChat(const ChatHandler &chat);
 
-    void resetUnreadCount(const Chat &chat);
-    void updateLastMessage(const Message &message, const Chat::UnreadCount &unreadMessageCount);
+    void resetUnreadCount(const ChatHandler &chat);
+    void updateLastMessage(const MessageHandler &message, qsizetype unreadMessageCount);
 
     void errorOccurred(const QString &errorText);
-    void fetched(const Chats &chats);
+    void fetched(ModifiableChats chats);
 
 private:
     bool create() override;
 
     void onFetch();
-    void onCreateChat(const Chat &chat);
-    void onResetUnreadCount(const Chat &chat);
-    void onUpdateLastMessage(const Message &message, const Chat::UnreadCount &unreadMessageCount);
+    void onAddChat(const ChatHandler &chat);
+    void onResetUnreadCount(const ChatHandler &chat);
+    void onUpdateLastMessage(const MessageHandler &message, qsizetype unreadMessageCount);
 };
 }
+
 
 #endif // VM_CHATSTABLE_H

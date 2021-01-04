@@ -36,6 +36,8 @@
 #define VM_USERDATABASE_H
 
 #include "core/Database.h"
+#include "Message.h"
+#include "Chat.h"
 
 #include <QDir>
 
@@ -64,23 +66,31 @@ public:
     MessagesTable *messagesTable();
 
 signals:
-    void requestOpen(const UserId &userId);
-    void requestClose();
+    //
+    //  Control signals.
+    //
+    void open(const QString &username);
+    void close();
 
-    void writeMessage(const Message &message, const Chat::UnreadCount &unreadCount);
-    void writeChatAndLastMessage(const Chat &chat);
-    void resetUnreadCount(const Chat &chat);
+    void writeMessage(const MessageHandler &message, qsizetype unreadCount = 0);
+    void updateMessage(const MessageUpdate &messageUpdate);
+    void writeChatAndLastMessage(const ChatHandler &chat);
+    void resetUnreadCount(const ChatHandler &chat);
 
-    void userIdChanged(const UserId &Id);
+    //
+    //  Notification signals.
+    //
+    void opened();
 
 private:
     bool create() override;
-    void openByUserId(const UserId &userId);
-    void close();
+    void onOpen(const QString &username);
+    void onClose();
 
-    void onWriteMessage(const Message &message, const Chat::UnreadCount &unreadCount);
-    void onWriteChatAndLastMessage(const Chat &chat);
-    void onResetUnreadCount(const Chat &chat);
+    void onWriteMessage(const MessageHandler &message, qsizetype unreadCount);
+    void onUpdateMessage(const MessageUpdate &messageUpdate);
+    void onWriteChatAndLastMessage(const ChatHandler &chat);
+    void onResetUnreadCount(const ChatHandler &chat);
 
     const QDir m_databaseDir;
     int m_attachmentsTableIndex;

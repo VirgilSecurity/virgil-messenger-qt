@@ -34,32 +34,29 @@
 
 #include "operations/DecryptFileOperation.h"
 
-#include "Core.h"
 #include "operations/MessageOperation.h"
 
 using namespace vm;
 
-DecryptFileOperation::DecryptFileOperation(QObject *parent, const QString &sourcePath, const QString &destPath, const Contact::Id &senderId)
+DecryptFileOperation::DecryptFileOperation(QObject *parent, Messenger *messenger, const QString &sourcePath, const QString &destPath,
+                                           const QByteArray &decryptionKey, const UserId &senderId)
     : Operation(QLatin1String("DecryptFile"), parent)
+    , m_messenger(messenger)
     , m_sourcePath(sourcePath)
     , m_destPath(destPath)
+    , m_decryptionKey(decryptionKey)
     , m_senderId(senderId)
-{}
+{
+}
 
 void DecryptFileOperation::run()
 {
-    const auto result = Core::decryptFile(m_sourcePath, m_destPath, m_senderId);
-    switch (result) {
-    case Core::Result::Success:
-        emit decrypted(m_destPath);
+    if (m_messenger->decryptFile(m_sourcePath, m_destPath, m_decryptionKey, m_senderId)) {
+        emit decrypted(QFileInfo(m_destPath));
         finish();
-        break;
-    case Core::Result::Fail:
+    }
+    else {
+        qCWarning(lcOperation) << "Failed to decrypt file:" << m_sourcePath;
         fail();
-        break;
-    case Core::Result::Invalid:
-    default:
-        invalidate(tr("Failed to decrypt file"));
-        break;
     }
 }

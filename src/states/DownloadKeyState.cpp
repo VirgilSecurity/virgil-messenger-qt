@@ -42,27 +42,13 @@ DownloadKeyState::DownloadKeyState(UsersController *usersController, QState *par
     : OperationState(parent)
     , m_usersController(usersController)
 {
-    connect(usersController, &UsersController::keyDownloaded, this, &DownloadKeyState::operationFinished);
+    connect(usersController, &UsersController::signedIn, this, &DownloadKeyState::operationFinished);
     connect(usersController, &UsersController::downloadKeyFailed, this, &DownloadKeyState::operationErrorOccurred);
     connect(this, &DownloadKeyState::downloadKey, this, &DownloadKeyState::processDownloadKey);
-}
-
-QString DownloadKeyState::userId() const
-{
-    return m_userId;
-}
-
-void DownloadKeyState::setUserId(const QString &userId)
-{
-    if (m_userId == userId) {
-        return;
-    }
-    m_userId = userId;
-    emit userIdChanged(userId);
 }
 
 void DownloadKeyState::processDownloadKey(const QString &password)
 {
     emit operationStarted();
-    m_usersController->downloadKey(m_userId, password);
+    m_usersController->downloadKey(m_usersController->nextUsername(), password);
 }

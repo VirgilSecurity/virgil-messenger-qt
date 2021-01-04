@@ -34,74 +34,119 @@
 
 #include "logging/VSQLogWorker.h"
 
-#include <virgil/iot/logger/logger.h>
+#include <QTextStream>
+#include <QStandardPaths>
+#include <QCoreApplication>
+#include <QDir>
+
+#include <stdio.h>
+
+constexpr const qint64 LOG_MAX_FILESIZE = 20 * 1024 * 1024;
 
 VSQLogWorker::VSQLogWorker(QObject *parent)
-    : QObject(parent)
+    : QObject(parent), m_logFile(), m_logFileIndex(0)
 {
-#ifndef QT_DEBUG
-    m_logToFile = true;
-#endif
-}
-
-VSQLogWorker::~VSQLogWorker()
-{
-}
-
-void VSQLogWorker::start()
-{
-    if (m_logToFile) {
-        vs_logger_init(VirgilIoTKit::VS_LOGLEV_DEBUG);
-    }
 }
 
 void VSQLogWorker::processMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
 {
     consoleMessageHandler(type, context, message);
-    if (m_logToFile) {
-        fileMessageHandler(type, context, message);
-    }
+    fileMessageHandler(type, context, message);
+#ifdef QT_DEBUG
+#endif
 }
 
 void VSQLogWorker::fileMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
 {
-    const QByteArray localMsg = message.toLocal8Bit();
-    switch (type) {
-    case QtDebugMsg:
-        vs_logger_message(VS_LOG_MAKE_LEVEL(VS_LOGLEV_DEBUG), qPrintable(context.fileName), context.line, qPrintable(localMsg));
-        break;
-    case QtInfoMsg:
-        vs_logger_message(VS_LOG_MAKE_LEVEL(VS_LOGLEV_INFO), qPrintable(context.fileName), context.line, qPrintable(localMsg));
-        break;
-    case QtWarningMsg:
-        vs_logger_message(VS_LOG_MAKE_LEVEL(VS_LOGLEV_WARNING), qPrintable(context.fileName), context.line, qPrintable(localMsg));
-        break;
-    case QtCriticalMsg:
-        vs_logger_message(VS_LOG_MAKE_LEVEL(VS_LOGLEV_CRITICAL), qPrintable(context.fileName), context.line, qPrintable(localMsg));
-        break;
-    case QtFatalMsg:
-        vs_logger_message(VS_LOG_MAKE_LEVEL(VS_LOGLEV_FATAL), qPrintable(context.fileName), context.line, qPrintable(localMsg));
-        abort();
-    }
+
+    auto formattedMessage = QString("%1 [%2] [%3:%4] %5").arg(formatLogType(type))
+                                                            .arg(context.category)
+                                                            .arg(context.fileName)
+                                                            .arg(context.line)
+                                                            .arg(message);
+    logToFile(formattedMessage);
 }
 
 void VSQLogWorker::consoleMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
 {
+    auto formattedMessage = QString("%1 [%2] %3").arg(formatLogType(type))
+                                                    .arg(context.category)
+                                                    .arg(message);
+    logToConsole(formattedMessage);
+}
+
+
+bool VSQLogWorker::prepareLogFile(qint64 messageLen) {
+    if (messageLen > LOG_MAX_FILESIZE) {
+        return false;
+    }
+
+    if (!m_logFile.isOpen()) {
+        // Open log file.
+        auto appDir = QDir{QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)};
+
+        if (!appDir.mkpath(".")) {
+            return false;
+        }
+
+        auto fileName = QCoreApplication::applicationName() + "_" + QString::number(m_logFileIndex) + ".log";
+        m_logFile.setFileName(appDir.absolutePath() + '/' + fileName);
+
+        if (!m_logFile.open(QIODevice::WriteOnly)) {
+            return false;
+        }
+
+        m_logFileIndex = (0 == m_logFileIndex) ? 1 : 0;
+
+    } else if (m_logFile.size() > LOG_MAX_FILESIZE - messageLen) {
+        // Rotate log file.
+        m_logFile.close();
+
+        return prepareLogFile(messageLen);
+    }
+
+    return true;
+}
+
+
+void VSQLogWorker::logToFile(const QString& formattedMessage)
+{
+    if (!prepareLogFile(formattedMessage.size())) {
+        return;
+    }
+
+    QTextStream{&m_logFile} << formattedMessage << "\n";
+}
+
+
+void VSQLogWorker::logToConsole(const QString& formattedMessage)
+{
+    fflush(stdout);
+    QFile consoleFile;
+    if (consoleFile.open(stderr, QIODevice::WriteOnly)) {
+        QTextStream{&consoleFile} << formattedMessage << "\n";
+    }
+}
+
+QString VSQLogWorker::formatLogType(QtMsgType type) {
     switch (type) {
     case QtDebugMsg:
-        fprintf(stderr, "D: [%s] %s\n", qPrintable(context.category), qPrintable(message));
-        break;
+        return "D:";
+
     case QtInfoMsg:
-        fprintf(stderr, "I: [%s] %s\n", qPrintable(context.category), qPrintable(message));
-        break;
+        return "I:";
+
     case QtWarningMsg:
-        fprintf(stderr, "W: [%s] %s\n", qPrintable(context.category), qPrintable(message));
-        break;
+        return "W:";
+
     case QtCriticalMsg:
-        fprintf(stderr, "C: [%s] %s\n", qPrintable(context.category), qPrintable(message));
-        break;
+        return "C:";
+
     case QtFatalMsg:
-        fprintf(stderr, "F: [%s] %s\n", qPrintable(context.category), qPrintable(message));
-        break;
+        return "F:";
+
+    default:
+        throw std::logic_error("Invalid Qt message type");
+        return "";
     }
 }

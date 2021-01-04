@@ -191,7 +191,7 @@ void Operation::run()
     if (!preRun()) {
         return;
     }
-    qCDebug(lcOperation) << "Empty operation runs. Skipped";
+    qCWarning(lcOperation) << "Empty operation runs. Skipped";
     finish();
 }
 

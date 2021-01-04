@@ -37,11 +37,12 @@
 #include <QNetworkReply>
 
 #include "Utils.h"
+#include "FileUtils.h"
 #include "operations/MessageOperation.h"
 
 using namespace vm;
 
-LoadFileOperation::LoadFileOperation(NetworkOperation *parent, const DataSize &bytesTotal)
+LoadFileOperation::LoadFileOperation(NetworkOperation *parent, quint64 bytesTotal)
     : NetworkOperation(parent)
     , m_bytesTotal(bytesTotal)
 {
@@ -61,7 +62,7 @@ void LoadFileOperation::setFilePath(const QString &filePath)
 void LoadFileOperation::connectReply(QNetworkReply *reply)
 {
     connect(reply, &QNetworkReply::finished, this, std::bind(&LoadFileOperation::onReplyFinished, this, reply));
-    connect(reply, &QNetworkReply::errorOccurred, this, std::bind(&LoadFileOperation::onReplyErrorOccurred, this, args::_1, reply));
+    connect(reply, &QNetworkReply::errorOccurred, this, std::bind(&LoadFileOperation::onReplyErrorOccurred, this, std::placeholders::_1, reply));
     connect(reply, &QNetworkReply::sslErrors, this, &LoadFileOperation::onReplySslErrors);
 }
 
@@ -73,7 +74,7 @@ bool LoadFileOperation::openFileHandle(const QIODevice::OpenMode &mode)
         return false;
     }
 
-    if ((mode == QFile::ReadOnly) && !Utils::fileExists(m_filePath)) {
+    if ((mode == QFile::ReadOnly) && !FileUtils::fileExists(m_filePath)) {
         qCWarning(lcOperation) << "File doesn't exist" << m_filePath;
         invalidate(tr("File doesn't exist"));
         return false;
@@ -154,13 +155,13 @@ void LoadFileOperation::onReplySslErrors()
     qCWarning(lcOperation) << "SSL errors occurred";
 }
 
-void LoadFileOperation::onSetProgress(const DataSize &bytesLoaded, const DataSize &bytesTotal)
+void LoadFileOperation::onSetProgress(quint64 bytesLoaded, quint64 bytesTotal)
 {
     if (bytesTotal == 0 && bytesLoaded == 0) {
         // NOTE(fpohtmeh): Qt finishes upload with zero values
         return;
     }
-    else if (bytesTotal == -1) {
+    else if (bytesTotal == quint64(-1)) {
         // NOTE(fpohtmeh): Qt uses correct bytesLoaded and bytesTotal=-1 when starts download
         // and finishes it with correct bytesTotal and bytesLoaded=bytesTotal
         if (m_bytesTotal < bytesLoaded) {

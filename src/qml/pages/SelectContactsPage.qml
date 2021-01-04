@@ -38,13 +38,23 @@ OperationPage {
             id: contactSearch
             state: "opened"
             searchPlaceholder: qsTr("Search contact")
+            textValidator: app.validator.reUsername // TODO(fpohtmeh): delete once we have contact discover
             closeable: false
+
             Layout.preferredHeight: recommendedHeight
             Layout.fillWidth: true
             Layout.leftMargin: Theme.smallSpacing
+
+            onAccepted: {
+                const contactId = d.model.firstContactId();
+                if (contactId) {
+                    root.contactSelected(contactId)
+                }
+            }
         }
 
         SelectContactsList {
+            id: contactsList
             search: d.search
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -59,6 +69,7 @@ OperationPage {
             id: flow
             Layout.fillWidth: true
             Layout.preferredHeight: recommendedHeight
+            visible: d.model.selection.multiSelect
 
             Behavior on Layout.preferredHeight {
                 NumberAnimation {

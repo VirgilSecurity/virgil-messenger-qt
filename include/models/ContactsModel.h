@@ -35,8 +35,8 @@
 #ifndef VM_CONTACTSMODEL_H
 #define VM_CONTACTSMODEL_H
 
+#include "Contact.h"
 #include "ListModel.h"
-#include "VSQCommon.h"
 
 namespace vm
 {
@@ -83,7 +83,7 @@ protected:
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    Optional<int> findRowByContactId(const Contact::Id &contactId) const;
+    std::optional<int> findRowByContactId(const Contact::Id &contactId) const;
 
 private:
     void loadAvatarUrl(const Contact::Id &contactId);

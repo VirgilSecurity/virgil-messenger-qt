@@ -32,7 +32,7 @@ Control {
 
             Action {
                 text: qsTr("Settings")
-                onTriggered: controllers.users.requestAccountSettings(controllers.users.userId)
+                onTriggered: controllers.users.requestAccountSettings(controllers.users.currentUsername)
             }
 
             MenuSeparator {
@@ -59,6 +59,7 @@ Control {
     }
 
     UploadProgressBar {
+        // TODO(fpohtmeh): move to main.qml
         anchors {
             bottom: parent.bottom
             left: parent.left

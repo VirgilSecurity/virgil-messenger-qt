@@ -39,26 +39,27 @@
 #include "models/ListSelectionModel.h"
 
 using namespace vm;
+using Self = NewChatState;
 
-NewChatState::NewChatState(ChatsController *chatsController, DiscoveredContactsModel *contactsModel, QState *parent)
+Self::NewChatState(ChatsController *chatsController, DiscoveredContactsModel *contactsModel, QState *parent)
     : OperationState(parent)
     , m_chatsController(chatsController)
     , m_contactsModel(contactsModel)
 {
-    connect(chatsController, &ChatsController::chatOpened, this, &NewChatState::operationFinished);
-    connect(chatsController, &ChatsController::errorOccurred, this, &NewChatState::operationErrorOccurred);
-    connect(this, &NewChatState::addNewChat, this, &NewChatState::processAddNewChat);
+    connect(chatsController, &ChatsController::chatOpened, this, &Self::operationFinished);
+    connect(chatsController, &ChatsController::errorOccurred, this, &Self::operationErrorOccurred);
+    connect(this, &Self::addNewChatWithUsername, this, &Self::onAddNewChatWithUsername);
 }
 
-void NewChatState::onEntry(QEvent *event)
+void Self::onEntry(QEvent *event)
 {
     Q_UNUSED(event)
     m_contactsModel->reload();
     m_contactsModel->selection()->setMultiSelect(false);
 }
 
-void NewChatState::processAddNewChat(const Contact::Id &contactId)
+void Self::onAddNewChatWithUsername(const QString &username)
 {
     emit operationStarted();
-    m_chatsController->createChat(contactId);
+    m_chatsController->createChatWithUsername(username);
 }

@@ -53,12 +53,11 @@ public:
 
     DiscoveredContactsModel(Validator *validator, QObject *parent);
 
-    void setUserId(const UserId &userId);
     void reload();
+    int fixedContactsCount() const;
 
     Q_INVOKABLE void toggleById(const Contact::Id &contactId);
-
-    int fixedContactsCount() const;
+    Q_INVOKABLE QString firstContactId() const;
 
 signals:
     void fixedContactsPopulated(const Contacts &contacts, QPrivateSignal);
@@ -77,10 +76,11 @@ private:
 
     Validator *m_validator;
     ContactsModel *m_selectedContacts;
-    UserId m_userId;
 
     int m_fixedContactsCount = 0;
 };
 }
+
+Q_DECLARE_METATYPE(vm::Contacts)
 
 #endif // VM_DISCOVEREDCONTACTSMODEL_H

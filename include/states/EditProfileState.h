@@ -35,18 +35,18 @@
 #ifndef VM_EDITPROFILESTATE_H
 #define VM_EDITPROFILESTATE_H
 
+#include "ConfirmationCodeType.h"
 #include "OperationState.h"
-#include "VSQCommon.h"
-#include <QUrl>
 
-class VSQMessenger;
+#include <QUrl>
 
 namespace vm
 {
+class UsersController;
+
 class EditProfileState : public OperationState
 {
     Q_OBJECT
-    Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
     Q_PROPERTY(QString phoneNumber READ phoneNumber WRITE setPhoneNumber NOTIFY phoneNumberChanged)
     Q_PROPERTY(QString email READ email WRITE setEmail NOTIFY emailChanged)
     Q_PROPERTY(bool isPhoneNumberConfirmed READ isPhoneNumberConfirmed WRITE setIsPhoneNumberConfirmed NOTIFY isPhoneNumberConfirmedChanged)
@@ -54,17 +54,13 @@ class EditProfileState : public OperationState
     Q_PROPERTY(QUrl avatarUrl READ avatarUrl WRITE setAvatarUrl NOTIFY avatarUrlChanged)
 
 public:
-    EditProfileState(QState *parent);
-
-    QString userId() const;
-    void setUserId(const QString &userId);
+    EditProfileState(UsersController *usersController, QState *parent);
 
     void processVerificationResponse(const ConfirmationCodeType &codeType, const bool isVerified);
 
 signals:
-    void verify(const Enums::ConfirmationCodeType &codeType);
+    void verify(const ConfirmationCodeType &codeType);
 
-    void userIdChanged(const QString &userId);
     void phoneNumberChanged(const QString &phoneNumber);
     void emailChanged(const QString &email);
     void isPhoneNumberConfirmedChanged(const bool confirmed);
@@ -83,7 +79,7 @@ private:
     QUrl avatarUrl() const;
     void setAvatarUrl(const QUrl &avatarUrl);
 
-    UserId m_userId;
+    UsersController *m_usersController;
     QString m_phoneNumber;
     QString m_email;
     bool m_isPhoneNumberConfirmed;

@@ -40,14 +40,12 @@
 #include <QSettings>
 #include <QSize>
 
-#include "VSQCommon.h"
-
-Q_DECLARE_LOGGING_CATEGORY(lcSettings)
+#include "AttachmentId.h"
 
 class Settings : public QSettings
 {
     Q_OBJECT
-    Q_PROPERTY(QString lastSignedInUserId READ lastSignedInUserId WRITE setLastSignedInUserId NOTIFY lastSignedInUserIdChanged)
+    Q_PROPERTY(QString lastSignedInUser READ lastSignedInUser WRITE setLastSignedInUser NOTIFY lastSignedInUserChanged)
     Q_PROPERTY(QStringList usersList READ usersList WRITE setUsersList NOTIFY usersListChanged)
     Q_PROPERTY(bool devMode READ devMode CONSTANT)
     Q_PROPERTY(bool fileCloudEnabled READ fileCloudEnabled CONSTANT)
@@ -61,12 +59,11 @@ public:
 
     // Users
 
-    void setLastSignedInUserId(const QString &userId);
-    QString lastSignedInUserId() const;
+    void setLastSignedInUser(const QString &username);
+    QString lastSignedInUser() const;
 
     void setUsersList(const QStringList &users);
     QStringList usersList() const;
-    void addUserToList(const QString &user);
 
     QString userCredential(const QString &user) const;
     void setUserCredential(const QString &user, const QString &userCredential);
@@ -79,12 +76,12 @@ public:
     // Attachments
 
     QDir databaseDir() const;
-    DataSize attachmentMaxFileSize() const;
+    quint64 attachmentMaxFileSize() const;
     QDir attachmentCacheDir() const;
     QDir thumbnailsDir() const;
     QDir downloadsDir() const;
 
-    QString makeThumbnailPath(const vm::Attachment::Id &attachmentId, bool isPreview) const;
+    QString makeThumbnailPath(const vm::AttachmentId &attachmentId, bool isPreview) const;
     QSize thumbnailMaxSize() const;
     QSize previewMaxSize() const;
 
@@ -98,10 +95,10 @@ public:
     void setWindowGeometry(const QRect &geometry);
 
     // Short interval for elapsed seconds that means now
-    Seconds nowInterval() const;
+    std::chrono::seconds nowInterval() const;
 
 signals:
-    void lastSignedInUserIdChanged(const QString &);
+    void lastSignedInUserChanged(const QString &username);
     void usersListChanged(const QStringList &);
     void windowGeometryChanged(const QRect &); // Required by QML, not used
 
@@ -113,6 +110,7 @@ private:
     void removeGroup(const QString &group);
 
     void createDeviceId();
+    void addUserToList(const QString &user);
 
     QString m_sessionId;
     QDir m_databaseDir;

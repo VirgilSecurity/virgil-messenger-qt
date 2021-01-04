@@ -36,6 +36,7 @@
 #define VM_ATTACHMENTSTABLE_H
 
 #include "core/DatabaseTable.h"
+#include "Message.h"
 
 namespace vm
 {
@@ -47,26 +48,15 @@ public:
     explicit AttachmentsTable(Database *database);
 
 signals:
-    void createAttachment(const Attachment &attachment);
-    void updateStatus(const Attachment::Id &attachmentId, const Attachment::Status &status);
-    void updateUrl(const Attachment::Id &attachmentId, const QUrl &url);
-    void updateLocalPath(const Attachment::Id &attachmentId, const QString &localPath);
-    void updateFingerprint(const Attachment::Id &attachmentId, const QString &fingerprint);
-    void updateExtras(const Attachment::Id &attachmentId, const Attachment::Type &type, const QVariant &extras);
-    void updateEncryptedSize(const Attachment::Id &attachmentId, const DataSize &size);
-
+    void addAttachment(MessageHandler message);
+    void updateAttachment(const MessageUpdate &messageUpdate);
     void errorOccurred(const QString &errorText);
 
 private:
     bool create() override;
 
-    void onCreateAttachment(const Attachment &attachment);
-    void onUpdateStatus(const Attachment::Id &attachmentId, const Attachment::Status &status);
-    void onUpdateUrl(const Attachment::Id &attachmentId, const QUrl &url);
-    void onUpdateLocalPath(const Attachment::Id &attachmentId, const QString &localPath);
-    void onUpdateFingerprint(const Attachment::Id &attachmentId, const QString &fingerprint);
-    void onUpdateExtras(const Attachment::Id &attachmentId, const Attachment::Type &type, const QVariant &extras);
-    void onUpdateEncryptedSize(const Attachment::Id &attachmentId, const DataSize &size);
+    void onAddAttachment(MessageHandler message);
+    void onUpdateAttachment(const MessageUpdate &attachmentUpdate);
 };
 }
 

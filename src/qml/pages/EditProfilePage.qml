@@ -1,7 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
-import com.virgilsecurity.messenger 1.0
 
 import "../theme"
 import "../components"
@@ -23,7 +22,7 @@ OperationPage {
         Avatar {
             Layout.alignment: Qt.AlignHCenter
             diameter: 80
-            nickname: appState.userId
+            nickname: controllers.users.currentUsername
         }
 
         Label {
@@ -31,7 +30,7 @@ OperationPage {
             Layout.bottomMargin: 50
             font.pointSize: UiHelper.fixFontSz(18)
             color: Theme.primaryTextColor
-            text: appState.userId
+            text: controllers.users.currentUsername
         }
 
         FormInput {

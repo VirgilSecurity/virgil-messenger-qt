@@ -41,10 +41,6 @@
 #include <QMap>
 #include <QTimer>
 
-#include "VSQCommon.h"
-
-Q_DECLARE_LOGGING_CATEGORY(lcNetwork);
-
 #if defined(VS_MACOS) || defined(VS_LINUX)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -59,7 +55,7 @@ public:
     VSQNetworkAnalyzer(QObject *parent = nullptr);
     virtual ~VSQNetworkAnalyzer();
 
-    bool isConnected() const;
+    bool isConnected() const noexcept;
 
 signals:
     void connectedChanged(bool connected);

@@ -34,8 +34,6 @@
 
 #include "states/VerifyProfileState.h"
 
-#include "VSQMessenger.h"
-
 using namespace vm;
 
 VerifyProfileState::VerifyProfileState(QState *parent)
@@ -54,7 +52,7 @@ ConfirmationCodeType VerifyProfileState::codeType() const
     return m_codeType;
 }
 
-void VerifyProfileState::setCodeType(const ConfirmationCodeType &codeType)
+void VerifyProfileState::setCodeType(const ConfirmationCodeType codeType)
 {
     if (m_codeType == codeType) {
         return;

@@ -37,6 +37,8 @@
 
 #include "NetworkOperation.h"
 
+#include "QFile"
+
 class QNetworkReply;
 
 namespace vm
@@ -46,13 +48,13 @@ class LoadFileOperation : public NetworkOperation
     Q_OBJECT
 
 public:
-    LoadFileOperation(NetworkOperation *parent, const DataSize &bytesTotal = 0);
+    LoadFileOperation(NetworkOperation *parent, quint64 bytesTotal = 0);
 
     void setFilePath(const QString &filePath);
 
 signals:
-    void setProgress(const DataSize &bytesLoaded, const DataSize &bytesTotal);
-    void progressChanged(const DataSize &bytesLoaded, const DataSize &bytesTotal);
+    void setProgress(quint64 bytesLoaded, quint64 bytesTotal);
+    void progressChanged(quint64 bytesLoaded, quint64 bytesTotal);
 
 protected:
     virtual void connectReply(QNetworkReply *reply);
@@ -67,12 +69,12 @@ private:
     void onReplyFinished(QNetworkReply *reply);
     void onReplyErrorOccurred(const int &errorCode, QNetworkReply *reply);
     void onReplySslErrors();
-    void onSetProgress(const DataSize &bytesLoaded, const DataSize &bytesTotal);
+    void onSetProgress(quint64 bytesLoaded, quint64 bytesTotal);
 
     QString m_filePath;
     QScopedPointer<QFile> m_fileHandle;
-    DataSize m_bytesLoaded = 0;
-    DataSize m_bytesTotal = 0;
+    quint64 m_bytesLoaded = 0;
+    quint64 m_bytesTotal = 0;
 };
 }
 

@@ -39,18 +39,17 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
-#include <KeyboardEventFilter.h>
-#include <Validator.h>
-#include <VSQCrashReporter.h>
-#include <VSQMessenger.h>
-#include <Settings.h>
+#include "KeyboardEventFilter.h"
+#include "Validator.h"
+#include "Messenger.h"
+#include "Settings.h"
 #ifdef VS_MACOS
 #include <macos/VSQMacos.h>
 #endif // VS_MACOS
-#include "controllers/Controllers.h"
-#include <database/UserDatabase.h>
-#include <models/Models.h>
-#include <states/ApplicationStateManager.h>
+#include "Controllers.h"
+#include "UserDatabase.h"
+#include "Models.h"
+#include "ApplicationStateManager.h"
 
 class QNetworkAccessManager;
 
@@ -59,11 +58,11 @@ class VSQLogging;
 class VSQApplication : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(ApplicationStateManager *stateManager READ stateManager CONSTANT)
+    Q_PROPERTY(vm::ApplicationStateManager *stateManager READ stateManager CONSTANT)
     Q_PROPERTY(QString organizationDisplayName READ organizationDisplayName CONSTANT)
     Q_PROPERTY(QString applicationDisplayName READ applicationDisplayName CONSTANT)
-    Q_PROPERTY(KeyboardEventFilter *keyboardEventFilter MEMBER m_keyboardEventFilter CONSTANT)
-    Q_PROPERTY(Validator *validator MEMBER m_validator CONSTANT)
+    Q_PROPERTY(vm::KeyboardEventFilter *keyboardEventFilter MEMBER m_keyboardEventFilter CONSTANT)
+    Q_PROPERTY(vm::Validator *validator MEMBER m_validator CONSTANT)
 
 public:
     VSQApplication();
@@ -96,21 +95,19 @@ private:
     void onApplicationStateChanged(Qt::ApplicationState state);
     void onAboutToQuit();
 
-    ApplicationStateManager *stateManager();
+    vm::ApplicationStateManager *stateManager();
 
     static const QString kVersion;
     Settings m_settings;
-    QNetworkAccessManager *m_networkAccessManager;
-    VSQCrashReporter m_crashReporter;
     QScopedPointer<QQmlApplicationEngine> m_engine;
-    Validator *m_validator;
-    VSQMessenger m_messenger;
-    UserDatabase *m_userDatabase;
-    Models m_models;
+    vm::Validator *m_validator;
+    vm::Messenger m_messenger;
+    vm::UserDatabase *m_userDatabase;
+    vm::Models m_models;
     QThread *m_databaseThread;
-    Controllers m_controllers;
-    KeyboardEventFilter *m_keyboardEventFilter;
-    ApplicationStateManager m_applicationStateManager;
+    vm::Controllers m_controllers;
+    vm::KeyboardEventFilter *m_keyboardEventFilter;
+    vm::ApplicationStateManager m_applicationStateManager;
 };
 
 #endif // VSQApplication

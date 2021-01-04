@@ -44,6 +44,7 @@
 #include <QThread>
 #include <QUrlQuery>
 #include <QUuid>
+#include <QLoggingCategory>
 
 #include "android/VSQAndroid.h"
 
@@ -88,6 +89,8 @@ namespace
             c.platformId = c.id;
             ++i;
         }
+        contacts[1].id = "fff";
+        contacts[4].id = "ppp";
         return contacts;
     }
 #endif // VS_DUMMY_CONTACTS
@@ -98,12 +101,12 @@ QString Utils::createUuid()
     return QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
 }
 
-QString Utils::formattedDataSize(const DataSize &fileSize)
+QString Utils::formattedSize(quint64 fileSize)
 {
     return QLocale::system().formattedDataSize(fileSize);
 }
 
-QString Utils::formattedDataSizeProgress(const DataSize &loaded, const DataSize &total)
+QString Utils::formattedDataSizeProgress(quint64 loaded, quint64 total)
 {
     if (loaded <= 0) {
         return QLatin1String("...");
@@ -117,82 +120,10 @@ QString Utils::formattedDataSizeProgress(const DataSize &loaded, const DataSize 
     const auto formattedLoaded = power
         ? locale.toString(loaded / std::pow(double(base), power), 'f', qMin(precision, 3 * power))
         : locale.toString(loaded);
-    return formattedLoaded + QChar('/') + formattedDataSize(total);
+    return formattedLoaded + QChar('/') + formattedSize(total);
 }
 
-QString Utils::findUniqueFileName(const QString &fileName)
-{
-    const QFileInfo info(fileName);
-    if (!info.exists()) {
-        return fileName;
-    }
-    auto dir = info.absoluteDir();
-    auto baseName = info.baseName();
-    auto suffix = info.completeSuffix();
-    for(;;) {
-        auto uuid = createUuid().remove('-').left(6);
-        auto newFileName = dir.filePath(QString("%1-%2.%3").arg(baseName, uuid, suffix));
-        if (!QFile::exists(newFileName)) {
-            return newFileName;
-        }
-    }
-}
-
-bool Utils::isValidUrl(const QUrl &url)
-{
-    bool isValid = url.isValid();
-#if !defined(Q_OS_ANDROID)
-    isValid = isValid && url.isLocalFile();
-#endif
-    return isValid;
-}
-
-QString Utils::urlToLocalFile(const QUrl &url)
-{
-#if defined (Q_OS_ANDROID)
-    qCDebug(lcUtils) << "Android file url (before encoding):" << url.toString();
-    auto res = QUrl::fromPercentEncoding(url.toString().toUtf8());
-    qCDebug(lcUtils) << "Android file url:" << res;
-    return res;
-#else
-    qCDebug(lcUtils) << "File url:" << url.toLocalFile();
-    return url.toLocalFile();
-#endif
-}
-
-bool Utils::forceCreateDir(const QString &absolutePath)
-{
-    qDebug(lcUtils) << "Force to create dir:" << absolutePath;
-    const QFileInfo info(absolutePath);
-    if (info.exists()) {
-        if (info.isDir()) {
-            return true;
-        }
-        else {
-            QFile::remove(absolutePath);
-        }
-    }
-    if (QDir().mkpath(absolutePath)) {
-        return true;
-    }
-    qFatal("Failed to create directory: %s", qPrintable(absolutePath));
-    return false;
-}
-
-QUrl Utils::localFileToUrl(const QString &filePath)
-{
-#if defined (Q_OS_ANDROID)
-    QUrl url(filePath);
-    if (url.scheme().isEmpty()) {
-        return QUrl::fromLocalFile(filePath);
-    }
-    return url;
-#else
-    return QUrl::fromLocalFile(filePath);
-#endif
-}
-
-QString Utils::formattedElapsedSeconds(const Seconds &seconds, const Seconds &nowInterval)
+QString Utils::formattedElapsedSeconds(std::chrono::seconds seconds, std::chrono::seconds nowInterval)
 {
     if (seconds < nowInterval) {
         return QObject::tr("now");
@@ -200,7 +131,7 @@ QString Utils::formattedElapsedSeconds(const Seconds &seconds, const Seconds &no
     if (seconds <= 3 * nowInterval) {
         return QObject::tr("few seconds ago");
     }
-    const Seconds minute(60);
+    const std::chrono::seconds minute(60);
     if (seconds < minute) {
         return QObject::tr("recently");
     }
@@ -210,22 +141,22 @@ QString Utils::formattedElapsedSeconds(const Seconds &seconds, const Seconds &no
     if (seconds < 50 * minute) {
         return QObject::tr("%1 minutes ago").arg(seconds / minute);
     }
-    const Seconds hour(60 * minute);
+    const std::chrono::seconds hour(60 * minute);
     if (seconds < 2 * hour) {
         return QObject::tr("an hour ago");
     }
-    const Seconds day(24 * hour);
+    const std::chrono::seconds day(24 * hour);
     if (seconds < day) {
         return QObject::tr("%1 hours ago").arg(seconds / hour);
     }
     if (seconds < 2 * day) {
         return QObject::tr("yesterday");
     }
-    const Seconds month(30 * day);
+    const std::chrono::seconds month(30 * day);
     if (seconds < month) {
         return QObject::tr("%1 days ago").arg(seconds / day);
     }
-    const Seconds year(12 * month);
+    const std::chrono::seconds year(12 * month);
     if (seconds < year) {
         return QObject::tr("%1 months ago").arg(seconds / month);
     }
@@ -235,7 +166,7 @@ QString Utils::formattedElapsedSeconds(const Seconds &seconds, const Seconds &no
     return QObject::tr("%1 years ago").arg(seconds / year);
 }
 
-QString Utils::formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval)
+QString Utils::formattedLastSeenActivity(std::chrono::seconds seconds, std::chrono::seconds updateInterval)
 {
     if (seconds < updateInterval) {
         return QObject::tr("Online");
@@ -259,214 +190,36 @@ QString Utils::elidedText(const QString &text, const int maxLength)
     return text.left(half) + ellipsisChar + text.right(max - 1 - half);
 }
 
-QString Utils::attachmentDisplayText(const Attachment &attachment)
+QString Utils::messageContentDisplayText(const MessageContent &messageContent)
 {
-    if (attachment.type == Attachment::Type::Picture) {
+    if (auto text = std::get_if<MessageContentText>(&messageContent)) {
+        return text->text().left(250).replace('\n', ' ');
+
+    } else if (std::holds_alternative<MessageContentPicture>(messageContent)) {
         return QObject::tr("picture");
+
+    } else if (auto file = std::get_if<MessageContentFile>(&messageContent)) {
+        return Utils::elidedText(file->fileName(), 50);
+
+    } else {
+        return {};
     }
-    else {
-        return Utils::elidedText(attachment.fileName, 50);
-    }
 }
 
-Contact::Id Utils::contactIdFromJid(const Jid &jid)
-{
-    return jid.split('@').front();
-}
-
-Jid Utils::createJid(const Contact::Id &contactId, const QString &xmppUrl)
-{
-    return contactId + '@' + xmppUrl;
-}
-
-QString Utils::printableMessageBody(const Message &message)
-{
-    return message.body.left(250).replace('\n', ' ');
-}
-
-QString Utils::printableLoadProgress(const DataSize &loaded, const DataSize &total)
+QString Utils::printableLoadProgress(quint64 loaded, quint64 total)
 {
     return QString("%1% (%2/%3)").arg(qRound(100 * qMin<double>(loaded, total) / total)).arg(loaded).arg(total);
-}
-
-Optional<QString> Utils::readTextFile(const QString &filePath)
-{
-    QFile file(filePath);
-    if (!file.open(QFile::Text | QFile::ReadOnly)) {
-        return NullOptional;
-    }
-    return file.readAll();
-}
-
-bool Utils::fileExists(const QString &filePath)
-{
-    if (filePath.isEmpty()) {
-        return false;
-    }
-    return QFileInfo::exists(filePath);
-}
-
-void Utils::removeFile(const QString &filePath)
-{
-    if (fileExists(filePath)) {
-        QFile::remove(filePath);
-        qCDebug(lcUtils) << "Removed file:" << filePath;
-    }
-}
-
-QString Utils::attachmentFileName(const QUrl &url, const QFileInfo &localInfo, bool isPicture)
-{
-    QString fileName;
-#ifdef VS_ANDROID
-    Q_UNUSED(isPicture)
-    fileName = VSQAndroid::getDisplayName(url);
-#elif defined(VS_IOS_SIMULATOR)
-    fileName = url.fileName();
-#elif defined(VS_IOS)
-    if (isPicture) {
-        // Build file name from url, i.e. "file:assets-library://asset/asset.PNG?id=7CE20DC4-89A8-4079-88DC-AD37920581B5&ext=PNG"
-        QUrl urlWithoutFileScheme{url.toLocalFile()};
-        const QUrlQuery query(urlWithoutFileScheme.query());
-        fileName = query.queryItemValue("id") + QChar('.') + query.queryItemValue("ext").toLower();
-    }
-#else
-    Q_UNUSED(url)
-    Q_UNUSED(isPicture)
-#endif
-    if (fileName.isEmpty()) {
-        fileName = localInfo.fileName();
-    }
-    return fileName;
-}
-
-QString Utils::attachmentDisplayImagePath(const Attachment &attachment)
-{
-    const auto e = attachment.extras.value<PictureExtras>();
-    if (fileExists(e.previewPath)) {
-        return e.previewPath;
-    }
-    if (fileExists(e.thumbnailPath)) {
-        return e.thumbnailPath;
-    }
-    return QString();
-}
-
-bool Utils::openUrl(const QUrl &url)
-{
-    return QDesktopServices::openUrl(url);
 }
 
 void Utils::printThreadId(const QString &message)
 {
 #ifdef VS_DEVMODE
-    qDebug(lcDev).noquote().nospace()
+    qDebug().noquote().nospace()
             << "Thread " << QThread::currentThread()->objectName() << "(" << QThread::currentThreadId() << "): "
             << message;
 #else
     Q_UNUSED(message)
 #endif
-}
-
-QString Utils::extrasToJson(const QVariant &extras, const Attachment::Type type, bool skipLocal)
-{
-    if (type != Attachment::Type::Picture) {
-        return QString();
-    }
-    const auto e = extras.value<PictureExtras>();
-    QJsonObject obj;
-    obj.insert("thumbnailWidth", e.thumbnailSize.width());
-    obj.insert("thumbnailHeight", e.thumbnailSize.height());
-    obj.insert("thumbnailUrl", e.thumbnailUrl.toString());
-    obj.insert("encryptedThumbnailSize", e.encryptedThumbnailSize);
-    if (!skipLocal) {
-        obj.insert("thumbnailPath", e.thumbnailPath);
-        obj.insert("previewPath", e.previewPath);
-    }
-    return QJsonDocument(obj).toJson(QJsonDocument::Compact);
-}
-
-QVariant Utils::extrasFromJson(const QString &json, const Attachment::Type type, bool skipLocal)
-{
-    if (type != Attachment::Type::Picture) {
-        return QVariant();
-    }
-    auto doc = QJsonDocument::fromJson(json.toUtf8());
-    PictureExtras extras;
-    extras.thumbnailSize.setWidth(doc["thumbnailWidth"].toInt());
-    extras.thumbnailSize.setHeight(doc["thumbnailHeight"].toInt());
-    extras.thumbnailUrl = doc["thumbnailUrl"].toString();
-    extras.encryptedThumbnailSize = doc["encryptedThumbnailSize"].toInt();
-    if (!skipLocal) {
-        extras.thumbnailPath = doc["thumbnailPath"].toString();
-        extras.previewPath = doc["previewPath"].toString();
-    }
-    return QVariant::fromValue(extras);
-}
-
-Message Utils::messageFromJson(const QByteArray &json)
-{
-    // Get message from JSON
-    auto doc = QJsonDocument::fromJson(json);
-    const auto type = doc["type"].toString();
-    const auto payloadObject = doc["payload"];
-
-    Message message;
-    if (type == QLatin1String("text")) {
-        message.body = payloadObject["body"].toString();
-        return message;
-    }
-
-    const auto at = doc["attachment"];
-    Attachment attachment;
-    if (type == QLatin1String("picture")) {
-        attachment.type = Attachment::Type::Picture;
-    }
-    else {
-        attachment.type = Attachment::Type::File;
-    }
-    attachment.id = Utils::createUuid();
-    attachment.fileName = at["fileName"].toString();
-    attachment.size = at["size"].toInt();
-    attachment.url = at["url"].toString();
-    attachment.encryptedSize = at["encryptedSize"].toInt();
-    attachment.fingerprint = at["fingerprint"].toString();
-    attachment.extras = extrasFromJson(at["extras"].toString(), attachment.type, true);
-    message.attachment = attachment;
-    if (!message.body.isEmpty()) {
-        qCDebug(lcUtils) << "Parsed JSON message:" << message.body;
-    }
-    return message;
-}
-
-QByteArray Utils::messageToJson(const Message &message)
-{
-    QJsonObject mainObject;
-    QJsonObject payloadObject;
-    const auto &attachment = message.attachment;
-    if (!attachment) {
-        mainObject.insert("type", "text");
-        payloadObject.insert("body", message.body);
-    }
-    else {
-        QJsonObject at;
-        if (attachment->type == Attachment::Type::Picture) {
-            mainObject.insert("type", "picture");
-        }
-        else {
-            mainObject.insert("type", "file");
-        }
-        at.insert("fileName", attachment->fileName);
-        at.insert("size", attachment->size);
-        at.insert("url", attachment->url.toString());
-        at.insert("encryptedSize", attachment->encryptedSize);
-        at.insert("fingerprint", attachment->fingerprint);
-        at.insert("extras", extrasToJson(attachment->extras, attachment->type, true));
-        mainObject.insert("attachment", at);
-    }
-    mainObject.insert("payload", payloadObject);
-
-    QJsonDocument doc(mainObject);
-    return doc.toJson(QJsonDocument::Compact);
 }
 
 QSize Utils::applyOrientation(const QSize &size, int orientation)

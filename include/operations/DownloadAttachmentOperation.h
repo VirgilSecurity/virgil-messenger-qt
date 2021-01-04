@@ -36,6 +36,7 @@
 #define VM_DOWNLOADATTACHMENTOPERATION_H
 
 #include "LoadAttachmentOperation.h"
+#include "MessageContentDownloadStage.h"
 
 class Settings;
 
@@ -50,17 +51,23 @@ public:
     {
         enum class Type
         {
-            Full,
-            Preload
+            Preload,
+            Download
         };
-        Type type;
-        QString filePath;
+
+        Type type = Type::Preload;
+        QString filePath = QString(); // for download
     };
 
     DownloadAttachmentOperation(MessageOperation *parent, const Settings *settings, const Parameter &parameter);
 
 private:
     bool populateChildren() override;
+
+    void populateDownload();
+    void populatePreload();
+
+    void updateStage(MessageContentDownloadStage downloadStage);
 
     MessageOperation *m_parent;
     const Settings *m_settings;

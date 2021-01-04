@@ -9,8 +9,9 @@ Item {
     anchors.fill: parent
 
     default property alias children: formContainer.children
-    property bool isLoading: false
     property bool isCentered: true
+    property bool isLoading: false
+    property alias loadingText: busyDescryption.text
 
     ColumnLayout {
         id: formContainer
@@ -48,15 +49,5 @@ Item {
             id: busyDescryption
             horizontalAlignment: Text.AlignHCenter
         }
-    }
-
-    function showLoading(loadingText) {
-        isLoading = true
-        busyDescryption.text = loadingText
-    }
-
-    function hideLoading() {
-        isLoading = false
-        busyDescryption.text = ""
     }
 }

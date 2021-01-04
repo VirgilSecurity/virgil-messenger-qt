@@ -1,8 +1,7 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 import Qt.labs.platform 1.0 as Native
-import com.virgilsecurity.messenger 1.0
 
 import "../base"
 import "../theme"
@@ -15,6 +14,29 @@ Control {
 
     background: Rectangle {
         color: Theme.chatBackgroundColor
+    }
+
+    QtObject {
+        id: d
+
+        readonly property string messageText: (messageField.text + messageField.preeditText).trim()
+
+        function sendTextMessage() {
+            const text = d.messageText;
+            if (text) {
+                messageField.clear()
+                controllers.messages.sendTextMessage(text)
+            }
+        }
+
+        function sendFileMessage(attachmentUrl, attachmentType) {
+            if (attachmentType === AttachmentTypes.picture) {
+                controllers.messages.sendPictureMessage(attachmentUrl, attachmentType)
+            }
+            else {
+                controllers.messages.sendFileMessage(attachmentUrl, attachmentType)
+            }
+        }
     }
 
     RowLayout {
@@ -36,12 +58,12 @@ Control {
 
                 Action {
                     text: qsTr("Send picture")
-                    onTriggered: attachmentPicker.open(Enums.AttachmentType.Picture)
+                    onTriggered: attachmentPicker.open(AttachmentTypes.picture)
                 }
 
                 Action {
                     text: qsTr("Send file")
-                    onTriggered: attachmentPicker.open(Enums.AttachmentType.File)
+                    onTriggered: attachmentPicker.open(AttachmentTypes.file)
                 }
             }
         }
@@ -53,7 +75,7 @@ Control {
             Layout.topMargin: Theme.smallMargin
             Layout.bottomMargin: Theme.smallMargin
             radius: 20
-            color: "#37474F"
+            color: Theme.inputBackgroundColor
 
             TextScrollView {
                 id: scrollView
@@ -69,7 +91,7 @@ Control {
                 TextArea {
                     id: messageField
                     placeholderText: qsTr("Message")
-                    placeholderTextColor: "#59717D"
+                    placeholderTextColor: "#59717D" // TODO(fpohtmeh): move this to Theme
                     wrapMode: TextArea.Wrap
                     font.pixelSize: 15
                     color: Theme.primaryTextColor
@@ -97,7 +119,7 @@ Control {
                             }
                             else {
                                 event.accepted = true
-                                root.sendMessage()
+                                d.sendTextMessage()
                             }
                         }
                     }
@@ -164,17 +186,10 @@ Control {
             Layout.leftMargin: 2
             Layout.alignment: Qt.AlignVCenter
             focusPolicy: Qt.NoFocus
-            objectName: "btnSend"
-            disabled: !(messageField.text + messageField.preeditText).length
+            disabled: d.messageText.length == 0
             image: "Send"
-            onClicked: root.sendMessage()
+            onClicked: d.sendTextMessage()
         }
-    }
-
-    function sendMessage(attachmentUrl, attachmentType) {
-        const text = (messageField.text + messageField.preeditText).trim();
-        messageField.clear()
-        controllers.messages.createSendMessage(text, attachmentUrl, attachmentType)
     }
 
     Connections {
@@ -185,7 +200,7 @@ Control {
                 return;
             }
             const url = fileUrls[fileUrls.length - 1]
-            sendMessage(url, attachmentType)
+            d.sendFileMessage(url, attachmentType)
         }
     }
 

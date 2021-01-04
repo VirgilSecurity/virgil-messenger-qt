@@ -49,6 +49,8 @@ NameGroupChatState::NameGroupChatState(ChatsController *chatsController, QState 
 
 void NameGroupChatState::onCreateGroup(const GroupId &groupId)
 {
-    emit operationStarted();
-    m_chatsController->createGroupChat(groupId);
+    Q_UNUSED(groupId)
+    // TODO(fpohtmeh): implement
+    //emit operationStarted();
+    //m_chatsController->createGroupChat(groupId);
 }

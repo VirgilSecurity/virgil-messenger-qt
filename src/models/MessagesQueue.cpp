@@ -34,167 +34,200 @@
 
 #include "models/MessagesQueue.h"
 
-#include <QtConcurrent>
-#include <QThreadPool>
 
-#include "database/MessagesTable.h"
-#include "database/UserDatabase.h"
-#include "models/FileLoader.h"
-#include "operations/MessageOperation.h"
-#include "operations/MessageOperationFactory.h"
+#include "Messenger.h"
+#include "Utils.h"
+#include "MessagesTable.h"
+#include "UserDatabase.h"
+#include "MessageOperation.h"
+#include "MessageOperationFactory.h"
+
+
+#include <QtConcurrent>
+
 
 using namespace vm;
+using Self = MessagesQueue;
 
-MessagesQueue::MessagesQueue(const Settings *settings, VSQMessenger *messenger, UserDatabase *userDatabase, FileLoader *fileLoader, QObject *parent)
+
+Q_LOGGING_CATEGORY(lcMessagesQueue, "messages-queue");
+
+
+Self::MessagesQueue(const Settings *settings, Messenger *messenger, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
-    , m_fileLoader(fileLoader)
-    , m_threadPool(new QThreadPool(this))
+    , m_messenger(messenger)
     , m_userDatabase(userDatabase)
-    , m_factory(new MessageOperationFactory(settings, messenger, fileLoader, this))
-    , m_isStopped(false)
+    , m_factory(new MessageOperationFactory(settings, messenger, this))
+    , m_threadPool(new QThreadPool(this))
 {
-    qRegisterMetaType<MessagesQueue::OperationItem>("OperationItem");
-
     m_threadPool->setMaxThreadCount(5);
-    connect(fileLoader, &FileLoader::serviceFound, this, &MessagesQueue::onFileLoaderServiceFound);
-    connect(this, &MessagesQueue::operationFailed, this, std::bind(&MessagesQueue::addOperationItem, this, args::_1, false));
+
+    qRegisterMetaType<vm::MessagesQueue::Item>("Item"); // TODO(fpohtmeh): rename
+    qRegisterMetaType<vm::MessagesQueue::PostDownloadFunction>("PostDownloadFunction");
+
+    connect(m_messenger, &Messenger::onlineStatusChanged, this, &MessagesQueue::onOnlineStatusChanged);
+    connect(m_messenger, &Messenger::signedOut, this, &MessagesQueue::stop);
+    connect(m_userDatabase, &UserDatabase::opened, this, &Self::onDatabaseOpened);
+    connect(this, &Self::pushMessage, this, &Self::onPushMessage);
+    connect(this, &Self::pushMessageDownload, this, &Self::onPushMessageDownload);
+    connect(this, &Self::pushMessagePreload, this, &Self::onPushMessagePreload);
+    connect(this, &Self::itemFailed, this, &Self::onItemFailed);
 }
 
-MessagesQueue::~MessagesQueue()
+
+Self::~MessagesQueue()
 {
-    cleanup();
-    m_threadPool->deleteLater();
+    stop();
 }
 
-void MessagesQueue::setUserId(const UserId &userId)
-{
-    if (m_userId == userId) {
-        return;
-    }
-    m_userId = userId;
-    userId.isEmpty() ? unsetQueueState(QueueState::UserSet) : setQueueState(QueueState::UserSet);
-}
 
-void MessagesQueue::pushMessage(const GlobalMessage &message)
+void Self::run()
 {
-    addOperationItem({ message, [=](MessageOperation *op) {
-        m_factory->populateAll(op);
-    }});
-}
-
-void MessagesQueue::pushMessageDownload(const GlobalMessage &message, const QString &filePath)
-{
-    addOperationItem({ message, [=](MessageOperation *op) {
-        m_factory->populateDownload(op, filePath);
-        connect(op, &Operation::finished, this, std::bind(&MessagesQueue::notificationCreated, this, tr("File was downloaded"), false));
-    }});
-}
-
-void MessagesQueue::pushMessagePreload(const GlobalMessage &message)
-{
-    addOperationItem({ message, [=](MessageOperation *op) {
-        m_factory->populatePreload(op);
-    }});
-}
-
-void MessagesQueue::setQueueState(const MessagesQueue::QueueState &state)
-{
-    m_queueState = m_queueState | state;
-    if (state == QueueState::UserSet) {
-        connect(m_userDatabase->messagesTable(), &MessagesTable::notSentMessagesFetched, this, &MessagesQueue::onNotSentMessagesFetched);
-        m_isStopped = false;
-    }
-    if (m_queueState == QueueState::FetchNeeded) {
-        m_queueState = m_queueState | QueueState::FetchRequested;
-        m_userDatabase->messagesTable()->fetchNotSentMessages();
-    }
-    else {
-        runIfReady();
-    }
-}
-
-void MessagesQueue::unsetQueueState(const MessagesQueue::QueueState &state)
-{
-    m_queueState = m_queueState & ~state;
-    if (state == QueueState::UserSet) {
-        m_queueState = m_queueState & ~QueueState::FetchRequested;
-        cleanup();
-    }
-}
-
-void MessagesQueue::runIfReady()
-{
-    if ((m_queueState & QueueState::ReadyToRun) != QueueState::ReadyToRun) {
-        return;
-    }
-    OperationItems items;
+    std::vector<Item> items;
     std::swap(items, m_items);
     for (auto &item : items) {
-        runOperation(item);
+        runItem(item);
     }
 }
 
-void MessagesQueue::addOperationItem(const OperationItem &item, bool run)
-{
-    if (item.message.status == Message::Status::InvalidM) {
-        return;
-    }
-    m_items.push_back(item);
-    if (run) {
-        this->runIfReady();
-    }
-}
 
-void MessagesQueue::runOperation(const OperationItem &item)
+void Self::stop()
 {
-    QtConcurrent::run(m_threadPool, [=, &stopped = m_isStopped]() {
-        if (stopped) {
-            qCDebug(lcModel) << "Queue was stopped. Operation is skipped";
-            return;
-        }
-        auto op = new MessageOperation(item.message, m_factory, m_fileLoader, nullptr);
-        // connect
-        connect(op, &MessageOperation::statusChanged, this, &MessagesQueue::messageStatusChanged);
-        connect(op, &MessageOperation::attachmentStatusChanged, this, &MessagesQueue::attachmentStatusChanged);
-        connect(op, &MessageOperation::attachmentUrlChanged, this, &MessagesQueue::attachmentUrlChanged);
-        connect(op, &MessageOperation::attachmentLocalPathChanged, this, &MessagesQueue::attachmentLocalPathChanged);
-        connect(op, &MessageOperation::attachmentFingerprintChanged, this, &MessagesQueue::attachmentFingerprintChanged);
-        connect(op, &MessageOperation::attachmentExtrasChanged, this, &MessagesQueue::attachmentExtrasChanged);
-        connect(op, &MessageOperation::attachmentEncryptedSizeChanged, this, &MessagesQueue::attachmentEncryptedSizeChanged);
-        connect(op, &MessageOperation::attachmentProcessedSizeChanged, this, &MessagesQueue::attachmentProcessedSizeChanged);
-        connect(op, &MessageOperation::notificationCreated, this, &MessagesQueue::notificationCreated);
-        connect(this, &MessagesQueue::stopRequested, op, &MessageOperation::stop);
-        // setup
-        item.setup(op);
-        // start & wait for done
-        op->start();
-        op->waitForDone();
-        // notify MessagesQueue about failed operation
-        if (op->status() == Operation::Status::Failed) {
-            emit operationFailed({ *op->message(), item.setup }, QPrivateSignal());
-        }
-        op->drop(true);
-    });
-}
-
-void MessagesQueue::cleanup()
-{
-    qCDebug(lcModel) << "Cleanup message queue";
+    qCDebug(lcMessagesQueue) << "stop";
     m_items.clear();
     m_isStopped = true;
     emit stopRequested(QPrivateSignal());
     m_threadPool->waitForDone();
 }
 
-void MessagesQueue::onFileLoaderServiceFound(const bool serviceFound)
+
+void Self::addItem(Item item, const bool run)
 {
-    serviceFound ? setQueueState(QueueState::FileLoaderReady) : unsetQueueState(QueueState::FileLoaderReady);
+    if (item.message->status() == MessageStatus::Broken) {
+        // Broken message can't be processed (downloaded, preloaded, etc)
+        return;
+    }
+    m_items.push_back(std::move(item));
+    if (run) {
+        this->run();
+    }
 }
 
-void MessagesQueue::onNotSentMessagesFetched(const GlobalMessages &messages)
+
+void Self::runItem(Item item)
 {
-    qCDebug(lcOperation) << "Queued" << messages.size() << "unsent messages";
+    QtConcurrent::run(m_threadPool, [=, item = std::move(item)]() {
+        if (m_isStopped) {
+            qCDebug(lcMessagesQueue) << "Operation was skipped because queue was stopped";
+            return;
+        }
+        auto op = new MessageOperation(item.message, m_factory, m_messenger->isOnline(), nullptr);
+        connect(op, &MessageOperation::messageUpdate, this, &Self::updateMessage);
+        connect(m_messenger, &Messenger::onlineStatusChanged, op, &NetworkOperation::setIsOnline);
+        connect(op, &MessageOperation::notificationCreated, this, &MessagesQueue::notificationCreated);
+        connect(this, &MessagesQueue::stopRequested, op, &MessageOperation::stop);
+        if (item.download) {
+            if (item.download->type == DownloadParameter::Type::Download) {
+                m_factory->populateDownload(op, item.download->filePath);
+            }
+            else {
+                m_factory->populatePreload(op);
+            }
+        }
+        else {
+            m_factory->populateAll(op);
+        }
+
+        op->start();
+        op->waitForDone();
+        if (op->status() == Operation::Status::Failed) {
+            emit itemFailed(item, QPrivateSignal());
+        }
+        op->drop(true);
+    });
+}
+
+
+void Self::onDatabaseOpened()
+{
+    m_isStopped = false;
+    connect(m_userDatabase->messagesTable(), &MessagesTable::notSentMessagesFetched, this, &Self::onNotSentMessagesFetched);
+    m_userDatabase->messagesTable()->fetchNotSentMessages();
+}
+
+
+void MessagesQueue::onOnlineStatusChanged(const bool isOnline)
+{
+    if (isOnline) {
+        run();
+    }
+}
+
+
+void Self::onNotSentMessagesFetched(const ModifiableMessages &messages)
+{
+    qCDebug(lcMessagesQueue) << "Queued" << messages.size() << "unsent messages";
     for (auto &m : messages) {
         pushMessage(m);
     }
+}
+
+
+void MessagesQueue::onItemFailed(Item item)
+{
+    const int maxAttemptCount = 3;
+    const auto &message = item.message;
+    if (item.attemptCount < maxAttemptCount) {
+        qCDebug(lcMessagesQueue) << "Enqueued failed message:" << message->id();
+        ++item.attemptCount;
+        addItem(std::move(item), false);
+    }
+    else if (item.attemptCount == maxAttemptCount) {
+        // Mark as broken
+        if (message->isIncoming()) {
+            IncomingMessageStageUpdate update;
+            update.messageId = message->id();
+            update.stage = IncomingMessageStage::Broken;
+            emit updateMessage(update);
+            qCDebug(lcMessagesQueue) << "Incoming message was marked as broken:" << message->id();
+        }
+        else if (message->isOutgoing()) {
+            OutgoingMessageStageUpdate update;
+            update.messageId = message->id();
+            update.stage = OutgoingMessageStage::Broken;
+            emit updateMessage(update);
+            qCDebug(lcMessagesQueue) << "Outgoing message was marked as broken:" << message->id();
+        }
+    }
+}
+
+
+void Self::onPushMessage(const ModifiableMessageHandler &message)
+{
+    if (message->isIncoming() || message->isOutgoingCopyFromOtherDevice()) {
+        pushMessagePreload(message);
+    }
+    else {
+        addItem({ message }, true);
+    }
+}
+
+
+void Self::onPushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath, const PostDownloadFunction &postFunction)
+{
+    DownloadParameter parameter;
+    parameter.type = DownloadParameter::Type::Download;
+    parameter.filePath = filePath;
+    parameter.postFunction = postFunction;
+
+    addItem({ message, std::move(parameter) }, true);
+}
+
+
+void Self::onPushMessagePreload(const ModifiableMessageHandler &message)
+{
+    DownloadParameter parameter;
+    parameter.type = DownloadParameter::Type::Preload;
+
+    addItem({ message, std::move(parameter) }, true);
 }

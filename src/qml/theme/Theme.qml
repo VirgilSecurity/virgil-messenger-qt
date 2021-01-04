@@ -59,6 +59,7 @@ Item {
 
     // animation
     readonly property int animationDuration: 250
+    readonly property int shortAnimationDuration: 125
 
     // transitions
     readonly property var addTransition: Transition {

@@ -34,7 +34,7 @@
 
 QT += core network qml quick sql xml concurrent
 
-CONFIG += c++14
+CONFIG += c++17
 
 #
 #   Set version
@@ -82,6 +82,9 @@ message("QXMPP location: $${QXMPP_BUILD_PATH}")
 DEFINES += QT_DEPRECATED_WARNINGS \
         INFO_CLIENT=1 \
         CFG_CLIENT=1 \
+        VS_MSGR_ENV_DEV=0 \
+        VS_MSGR_ENV_STG=0 \
+        VS_MSGR_ENV_PROD=1 \
         VERSION="$$VERSION"
 
 include(customers/customers.pri)
@@ -95,13 +98,13 @@ VS_PLATFORMS_PATH=$$absolute_path(generated/platforms)
 HEADERS += \
         include/VSQApplication.h \
         include/VSQClipboardProxy.h \
-        include/VSQCommon.h \
         include/VSQContactManager.h \
-        include/VSQCrashReporter.h \
+        include/CrashReporter.h \
+        include/FileLoader.h \
         include/VSQDiscoveryManager.h \
         include/VSQLastActivityIq.h \
         include/VSQLastActivityManager.h \
-        include/VSQMessenger.h \
+        include/Messenger.h \
         include/Settings.h \
         include/VSQNetworkAnalyzer.h \
         include/Utils.h \
@@ -109,9 +112,44 @@ HEADERS += \
         include/ui/VSQUiHelper.h \
         include/KeyboardEventFilter.h \
         include/Validator.h \
-        include/Core.h \
         include/ContactAvatarLoader.h \
+        include/CustomerEnv.h \
+        include/Contact.h \
+        include/ConfirmationCodeType.h \
+        include/GroupId.h \
+        # Messenger Core
+        include/messenger/AttachmentId.h \
+        include/messenger/Chat.h \
+        include/messenger/ChatId.h \
+        include/messenger/ChatType.h \
+        include/messenger/CommKitBridge.h \
+        include/messenger/CoreMessenger.h \
+        include/messenger/IncomingMessage.h \
+        include/messenger/IncomingMessageStage.h \
+        include/messenger/Message.h \
+        include/messenger/MessageContent.h \
+        include/messenger/MessageContentAttachment.h \
+        include/messenger/MessageContentDownloadStage.h \
+        include/messenger/MessageContentEncrypted.h \
+        include/messenger/MessageContentFile.h \
+        include/messenger/MessageContentJsonUtils.h \
+        include/messenger/MessageContentPicture.h \
+        include/messenger/MessageContentText.h \
+        include/messenger/MessageContentType.h \
+        include/messenger/MessageContentUploadStage.h \
+        include/messenger/MessageGroupChatInfo.h \
+        include/messenger/MessageId.h \
+        include/messenger/MessageSender.h \
+        include/messenger/MessageStatus.h \
+        include/messenger/MessageUpdate.h \
+        include/messenger/MessageUpdateable.h \
+        include/messenger/OutgoingMessage.h \
+        include/messenger/OutgoingMessageStage.h \
+        include/messenger/User.h \
+        include/messenger/UserId.h \
+        include/messenger/UserImpl.h \
         # Controllers
+        include/controllers/Controller.h \
         include/controllers/AttachmentsController.h \
         include/controllers/ChatsController.h \
         include/controllers/Controllers.h \
@@ -121,6 +159,7 @@ HEADERS += \
         # Helpers
         include/helpers/VSQSingleton.h \
         include/helpers/FutureWorker.h \
+        include/helpers/FileUtils.h \
         # Applications states
         include/states/AccountSelectionState.h \
         include/states/AccountSettingsState.h \
@@ -164,7 +203,6 @@ HEADERS += \
         include/logging/VSQMessageLogContext.h \
         # Models
         include/models/AccountSelectionModel.h \
-        include/models/AttachmentsModel.h \
         include/models/ChatsModel.h \
         include/models/ContactsModel.h \
         include/models/ContactsProxyModel.h \
@@ -172,13 +210,13 @@ HEADERS += \
         include/models/DiscoveredContactsProxyModel.h \
         include/models/FileCloudModel.h \
         include/models/FileCloudUploader.h \
-        include/models/FileLoader.h \
         include/models/ListModel.h \
         include/models/ListProxyModel.h \
         include/models/ListSelectionModel.h \
         include/models/MessagesModel.h \
         include/models/MessagesQueue.h \
         include/models/Models.h \
+        include/models/Model.h \
         # Operations
         include/operations/CalculateAttachmentFingerprintOperation.h \
         include/operations/CalculateFileFingerprintOperation.h \
@@ -202,9 +240,7 @@ HEADERS += \
         include/operations/UploadAttachmentOperation.h \
         include/operations/UploadFileOperation.h \
         # Generated
-        generated/include/VSQCustomer.h \
-        # Thirdparty
-        include/thirdparty/optional/optional.hpp
+        generated/include/VSQCustomer.h
 
 #
 #   Sources
@@ -212,11 +248,11 @@ HEADERS += \
 
 SOURCES += \
         src/VSQClipboardProxy.cpp \
-        src/VSQCommon.cpp \
         src/VSQContactManager.cpp \
-        src/VSQCrashReporter.cpp \
+        src/CrashReporter.cpp \
+        src/FileLoader.cpp \
         src/VSQDiscoveryManager.cpp \
-        src/VSQMessenger.cpp \
+        src/Messenger.cpp \
         src/VSQLastActivityIq.cpp \
         src/VSQLastActivityManager.cpp \
         src/Settings.cpp \
@@ -228,15 +264,45 @@ SOURCES += \
         src/ui/VSQUiHelper.cpp \
         src/KeyboardEventFilter.cpp \
         src/Validator.cpp \
-        src/Core.cpp \
         src/ContactAvatarLoader.cpp \
+        src/CustomerEnv.cpp \
+        # Messenger Core
+        src/messenger/AttachmentId.cpp \
+        src/messenger/Chat.cpp \
+        src/messenger/ChatId.cpp \
+        src/messenger/ChatType.cpp \
+        src/messenger/CommKitBridge.cpp \
+        src/messenger/CoreMessenger.cpp \
+        src/messenger/IncomingMessage.cpp \
+        src/messenger/IncomingMessageStage.cpp \
+        src/messenger/Message.cpp \
+        src/messenger/MessageContentAttachment.cpp \
+        src/messenger/MessageContentDownloadStage.cpp \
+        src/messenger/MessageContentEncrypted.cpp \
+        src/messenger/MessageContentFile.cpp \
+        src/messenger/MessageContentJsonUtils.cpp \
+        src/messenger/MessageContentPicture.cpp \
+        src/messenger/MessageContentText.cpp \
+        src/messenger/MessageContentType.cpp \
+        src/messenger/MessageContentUploadStage.cpp \
+        src/messenger/MessageGroupChatInfo.cpp \
+        src/messenger/MessageId.cpp \
+        src/messenger/MessageStatus.cpp \
+        src/messenger/MessageUpdate.cpp \
+        src/messenger/OutgoingMessage.cpp \
+        src/messenger/OutgoingMessageStage.cpp \
+        src/messenger/User.cpp \
+        src/messenger/UserId.cpp \
         # Controllers
+        src/controllers/Controller.cpp \
         src/controllers/AttachmentsController.cpp \
         src/controllers/ChatsController.cpp \
         src/controllers/Controllers.cpp \
         src/controllers/FileCloudController.cpp \
         src/controllers/MessagesController.cpp \
         src/controllers/UsersController.cpp \
+        # Helpers
+        src/helpers/FileUtils.cpp \
         # Applications states
         src/states/AccountSelectionState.cpp \
         src/states/AccountSettingsState.cpp \
@@ -272,12 +338,10 @@ SOURCES += \
         src/database/UserDatabase.cpp \
         src/database/UserDatabaseMigration.cpp \
         # Logging
-        src/hal.cpp \
         src/logging/VSQLogging.cpp \
         src/logging/VSQLogWorker.cpp \
         # Models
         src/models/AccountSelectionModel.cpp \
-        src/models/AttachmentsModel.cpp \
         src/models/ChatsModel.cpp \
         src/models/ContactsModel.cpp \
         src/models/ContactsProxyModel.cpp \
@@ -285,13 +349,13 @@ SOURCES += \
         src/models/DiscoveredContactsProxyModel.cpp \
         src/models/FileCloudModel.cpp \
         src/models/FileCloudUploader.cpp \
-        src/models/FileLoader.cpp \
         src/models/ListModel.cpp \
         src/models/ListProxyModel.cpp \
         src/models/ListSelectionModel.cpp \
         src/models/MessagesModel.cpp \
         src/models/MessagesQueue.cpp \
         src/models/Models.cpp \
+        src/models/Model.cpp \
         # Operations
         src/operations/CalculateAttachmentFingerprintOperation.cpp \
         src/operations/CalculateFileFingerprintOperation.cpp \
@@ -331,6 +395,15 @@ RESOURCES += \
 INCLUDEPATH += \
     include \
     include/notifications \
+    include/helpers \
+    include/database \
+    include/models \
+    include/ui \
+    include/logging \
+    include/controllers \
+    include/states \
+    include/operations \
+    include/messenger \
     $${QXMPP_BUILD_PATH}/include \
     $${QXMPP_BUILD_PATH}/include/qxmpp \
     generated/include
@@ -353,35 +426,6 @@ macx: {
     sparkle.files = $$SPARKLE_LOCATION/Sparkle.framework
     QMAKE_BUNDLE_DATA += sparkle
 }
-
-#
-#   Qt Web Driver
-#
-isEmpty(WEBDRIVER) {
-    message("Web Driver is disabled")
-} else {
-    message("Web Driver is enabled")
-    QT += widgets
-    DEFINES += WD_ENABLE_WEB_VIEW=0 \
-           WD_ENABLE_PLAYER=0 \
-           QT_NO_SAMPLES=1 \
-           VSQ_WEBDRIVER_DEBUG=1
-    release:QTWEBDRIVER_LOCATION=$$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/include/qtwebdriver
-    debug:QTWEBDRIVER_LOCATION=$$PWD/ext/prebuilt/$${OS_NAME}/debug/installed/usr/local/include/qtwebdriver
-    HEADERS += $$QTWEBDRIVER_LOCATION/src/Test/Headers.h
-    INCLUDEPATH +=  $$QTWEBDRIVER_LOCATION $$QTWEBDRIVER_LOCATION/src
-    linux:!android: {
-        LIBS += -ldl -Wl,--start-group -lchromium_base -lWebDriver_core -lWebDriver_extension_qt_base -lWebDriver_extension_qt_quick -Wl,--end-group
-    }
-    macx: {
-        LIBS += -lchromium_base -lWebDriver_core -lWebDriver_extension_qt_base -lWebDriver_extension_qt_quick
-        LIBS += -framework Foundation
-        LIBS += -framework CoreFoundation
-        LIBS += -framework ApplicationServices
-        LIBS += -framework Security
-    }
-}
-
 
 #
 #   Libraries
@@ -527,21 +571,9 @@ android: {
         src/notifications/android/FirebaseListener.cpp
 
 
-    release:LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
-    debug:LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
+    LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
 
-#
-#   Messenger Internal
-#
-    LIBS_DIR_PREFIX = $$PWD/ext/prebuilt
-    release:LIBS_DIR_SUFFIX = release/installed/usr/local/lib
-    debug:LIBS_DIR_SUFFIX = debug/installed/usr/local/lib
     FIREBASE_LIBS_DIR = $$PWD/ext/prebuilt/firebase_cpp_sdk/libs/android/$$ANDROID_TARGET_ARCH/c++
-
-#
-#   ~ Messenger Internal
-#
-
 
     LIBS += $${FIREBASE_LIBS_DIR}/libfirebase_messaging.a \
         $${FIREBASE_LIBS_DIR}/libfirebase_app.a \

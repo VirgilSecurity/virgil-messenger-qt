@@ -37,7 +37,6 @@
 
 #include <QObject>
 
-#include "VSQCommon.h"
 
 namespace vm
 {

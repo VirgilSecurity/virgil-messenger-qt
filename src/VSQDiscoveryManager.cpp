@@ -37,7 +37,9 @@
 #include <qxmpp/QXmppClient.h>
 #include <qxmpp/QXmppCarbonManager.h>
 
-Q_LOGGING_CATEGORY(lcDiscoveryManager, "discoman");
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(lcDiscoveryManager, "discovery-manager");
 
 VSQDiscoveryManager::VSQDiscoveryManager(QXmppClient *client, QObject *parent)
     : QObject(parent)

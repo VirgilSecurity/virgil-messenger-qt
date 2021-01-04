@@ -36,14 +36,15 @@
 #define VS_MESSAGEOPERATIONFACTORY_H
 
 #include <QDir>
+#include <QPointer>
 
-#include "VSQCommon.h"
+#include "Messenger.h"
 
-class VSQMessenger;
 class Settings;
 
 namespace vm
 {
+class Messenger;
 class CalculateAttachmentFingerprintOperation;
 class ConvertToPngOperation;
 class CreateAttachmentPreviewOperation;
@@ -54,7 +55,6 @@ class DownloadFileOperation;
 class DownloadDecryptFileOperation;
 class EncryptFileOperation;
 class EncryptUploadFileOperation;
-class FileLoader;
 class MessageOperation;
 class NetworkOperation;
 class Operation;
@@ -66,15 +66,16 @@ class MessageOperationFactory : public QObject
     Q_OBJECT
 
 public:
-    explicit MessageOperationFactory(const Settings *settings, VSQMessenger *messenger, FileLoader *fileLoader, QObject *parent);
+    explicit MessageOperationFactory(const Settings *settings, Messenger *messenger, QObject *parent);
 
     void populateAll(MessageOperation *messageOp);
     void populateDownload(MessageOperation *messageOp, const QString &filePath);
     void populateUpload(MessageOperation *messageOp);
     void populatePreload(MessageOperation *messageOp);
 
-    DownloadDecryptFileOperation *populateDownloadDecrypt(NetworkOperation *parent, const QUrl &url, const DataSize &bytesTotal, const QString &destPath, const Contact::Id &senderId);
-    EncryptUploadFileOperation *populateEncryptUpload(NetworkOperation *parent, const QString &sourcePath, const Contact::Id &recipientId);
+    DownloadDecryptFileOperation *populateDownloadDecrypt(NetworkOperation *parent, const QUrl &url, quint64 bytesTotal,
+                                                          const QString &destPath, const QByteArray &decryptionKey, const UserId &senderId);
+    EncryptUploadFileOperation *populateEncryptUpload(NetworkOperation *parent, const QString &sourcePath);
     ConvertToPngOperation *populateConvertToPngOperation(Operation *parent, const QString &sourcePath);
     CreateAttachmentThumbnailOperation *populateCreateAttachmentThumbnail(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &filePath);
     CreateAttachmentPreviewOperation *populateCreateAttachmentPreview(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &destPath);
@@ -87,8 +88,7 @@ private:
     void populateDownloadOperation(MessageOperation *messageOp);
 
     const Settings *m_settings;
-    VSQMessenger *m_messenger;
-    FileLoader *m_fileLoader;
+    QPointer<Messenger> m_messenger;
 };
 }
 

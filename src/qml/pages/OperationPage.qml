@@ -10,6 +10,8 @@ Page {
     property string loadingText: ""
     property alias footerText: footerItem.text
 
+    Binding { target: form; property: "loadingText"; value: loadingText }
+
     background: Rectangle {
         color: Theme.mainBackgroundColor
     }
@@ -21,19 +23,19 @@ Page {
 
         function onOperationStarted() {
             if (loadingUsed) {
-                form.showLoading(loadingText)
+                form.isLoading = true
             }
         }
 
         function onOperationFinished() {
             if (loadingUsed) {
-                form.hideLoading()
+                form.isLoading = false
             }
         }
 
         function onOperationErrorOccurred(errorText) {
             if (loadingUsed) {
-                form.hideLoading()
+                form.isLoading = false
                 showPopupError(errorText) // TODO(fpohtmeh): don't use parent method directly
             }
         }

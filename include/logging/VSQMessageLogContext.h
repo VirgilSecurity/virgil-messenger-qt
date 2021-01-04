@@ -35,7 +35,7 @@
 #ifndef VSQMESSAGELOGCONTEXT_H
 #define VSQMESSAGELOGCONTEXT_H
 
-#include "VSQCommon.h"
+#include <QString>
 
 // Copyable alternative of QMessageLogContext
 struct VSQMessageLogContext

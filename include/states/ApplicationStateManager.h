@@ -56,9 +56,7 @@
 #include "SplashScreenState.h"
 #include "StartState.h"
 #include "Validator.h"
-#include "VSQCommon.h"
 
-Q_DECLARE_LOGGING_CATEGORY(lcAppState);
 
 namespace vm
 {
@@ -90,7 +88,7 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(QState *previousState MEMBER m_previousState NOTIFY previousStateChanged)
 
 public:
-    ApplicationStateManager(VSQMessenger *messenger, Controllers *controllers, Models *models,
+    ApplicationStateManager(Messenger *messenger, Controllers *controllers, Models *models,
                             Validator *validator, Settings *settings, QObject *parent);
     ~ApplicationStateManager() override;
 
@@ -122,7 +120,7 @@ private:
     void setCurrentState(QState *state);
     void setPreviousState(QState *state);
 
-    VSQMessenger *m_messenger;
+    Messenger *m_messenger;
     Controllers *m_controllers;
     Validator *m_validator;
     Settings *m_settings;

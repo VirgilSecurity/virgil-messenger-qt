@@ -5,7 +5,7 @@ import "../components"
 
 OperationPage {
     appState: app.stateManager.signUpState
-    loadingText: qsTr("Registering %1...").arg(appState.userId)
+    loadingText: qsTr("Registering %1...").arg(controllers.users.nextUsername)
 
     readonly property string terms:
         "By creating an account, you agree to Virgil's " +

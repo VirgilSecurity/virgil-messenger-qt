@@ -35,17 +35,24 @@
 #ifndef VS_MESSAGESQUEUE_H
 #define VS_MESSAGESQUEUE_H
 
-#include "VSQCommon.h"
-#include "operations/Operation.h"
+#include "DownloadAttachmentOperation.h"
+#include "Messenger.h"
+
+#include <QPointer>
+#include <QLoggingCategory>
+
+
+Q_DECLARE_LOGGING_CATEGORY(lcMessagesQueue);
+
 
 class QThreadPool;
 
-class VSQMessenger;
+
 class Settings;
+
 
 namespace vm
 {
-class FileLoader;
 class MessageOperation;
 class MessageOperationFactory;
 class UserDatabase;
@@ -55,70 +62,60 @@ class MessagesQueue : public QObject
     Q_OBJECT
 
 public:
-    struct OperationItem
-    {
-        GlobalMessage message;
-        std::function<void (MessageOperation *)> setup;
-    };
-    using OperationItems = std::vector<OperationItem>;
+    using PostDownloadFunction = std::function<void ()>;
 
-    MessagesQueue(const Settings *settings, VSQMessenger *messenger, UserDatabase *userDatabase, FileLoader *fileLoader, QObject *parent);
+    struct DownloadParameter : DownloadAttachmentOperation::Parameter
+    {
+        PostDownloadFunction postFunction;
+    };
+
+    struct Item
+    {
+        ModifiableMessageHandler message;
+        std::optional<DownloadParameter> download = std::nullopt; // Parameter for download/preload
+        qsizetype attemptCount = 0;
+    };
+
+    MessagesQueue(const Settings *settings, Messenger *messenger, UserDatabase *userDatabase, QObject *parent);
     ~MessagesQueue() override;
 
-    void setUserId(const UserId &userId);
-    void pushMessage(const GlobalMessage &message);
-    void pushMessageDownload(const GlobalMessage &message, const QString &filePath);
-    void pushMessagePreload(const GlobalMessage &message);
-
 signals:
-    void messageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status status);
-    void attachmentStatusChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Status &status);
-    void attachmentUrlChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QUrl &url);
-    void attachmentLocalPathChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &localPath);
-    void attachmentFingerprintChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &fingerprint);
-    void attachmentExtrasChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Type &type, const QVariant &extras);
-    void attachmentProcessedSizeChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &processedSize);
-    void attachmentEncryptedSizeChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &encryptedSize);
+    void pushMessage(const ModifiableMessageHandler &message);
+    void pushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath, const PostDownloadFunction &func);
+    void pushMessagePreload(const ModifiableMessageHandler &message);
 
+    void updateMessage(const MessageUpdate &messagesUpdate);
     void notificationCreated(const QString &notification, const bool error);
 
+    void itemFailed(Item item, QPrivateSignal);
     void stopRequested(QPrivateSignal);
-    void operationFailed(const OperationItem &item, QPrivateSignal);
 
 private:
-    enum QueueState : Flag
-    {
-        Created = 0,
-        UserSet = 1 << 0,
-        FileLoaderReady = 1 << 1,
-        FetchNeeded = UserSet | FileLoaderReady,
-        FetchRequested = 1 << 2,
-        ReadyToRun = UserSet | FetchRequested
-    };
+    void run();
+    void stop();
+    void addItem(Item item, const bool run);
+    void runItem(Item item);
 
-    void setQueueState(const QueueState &state);
-    void unsetQueueState(const QueueState &state);
+    void onPushMessage(const ModifiableMessageHandler &message);
+    void onPushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath, const PostDownloadFunction &postFunction);
+    void onPushMessagePreload(const ModifiableMessageHandler &message);
 
-    void runIfReady();
-    void addOperationItem(const OperationItem &item, bool run = true);
-    void runOperation(const OperationItem &item);
-    void cleanup();
+    void onDatabaseOpened();
+    void onOnlineStatusChanged(const bool isOnline);
+    void onNotSentMessagesFetched(const ModifiableMessages &messages);
+    void onItemFailed(Item item);
 
-    void onFileLoaderServiceFound(const bool serviceFound);
-    void onNotSentMessagesFetched(const GlobalMessages &messages);
+    QPointer<Messenger> m_messenger;
+    QPointer<UserDatabase> m_userDatabase;
+    QPointer<MessageOperationFactory> m_factory;
+    QPointer<QThreadPool> m_threadPool;
 
-    FileLoader *m_fileLoader;
-    QThreadPool *m_threadPool;
-    UserDatabase *m_userDatabase;
-    MessageOperationFactory *m_factory;
-    UserId m_userId;
-
-    Flag m_queueState = QueueState::Created;
-    OperationItems m_items;
-    std::atomic_bool m_isStopped;
+    std::vector<Item> m_items;
+    std::atomic_bool m_isStopped = false;
 };
 }
 
-Q_DECLARE_METATYPE(vm::MessagesQueue::OperationItem)
+Q_DECLARE_METATYPE(vm::MessagesQueue::Item);
+Q_DECLARE_METATYPE(vm::MessagesQueue::PostDownloadFunction);
 
 #endif // VS_MESSAGESQUEUE_H

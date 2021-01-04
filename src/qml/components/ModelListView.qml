@@ -13,7 +13,7 @@ ListView {
     signal placeholderClicked()
 
     property var searchHeader: undefined
-    property bool isSearchOpened: searchHeader ? searchHeader.isSearchOpen : true
+    property bool isSearchOpened: searchHeader ? searchHeader.isSearchOpen : false
     property string search: searchHeader ? searchHeader.search : ""
 
     property alias emptyIcon: labeledIcon.emptyIcon
@@ -27,12 +27,12 @@ ListView {
 
     IconWithText {
         id: labeledIcon
-        property url emptyIcon: "../resources/icons/Chats.png"
+        property url emptyIcon: ""
         property url searchIcon: "../resources/icons/Search_Big.png"
-        property string emptyListText: qsTr("Create your first chat<br/>by pressing the dots<br/>button above")
+        property string emptyListText: ""
         property string searchHintText: qsTr("Search results<br/>will appear here")
         property string searchNoResultsText: qsTr("Nothing found")
-        visible: listView.isEmpty
+        visible: listView.isEmpty && emptyIcon
 
         image {
             source: isSearchOpened ? searchIcon : emptyIcon

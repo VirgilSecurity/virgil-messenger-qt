@@ -9,5 +9,5 @@ SelectContactsPage {
         title: qsTr("New chat")
     }
 
-    onContactSelected: appState.addNewChat(contactId)
+    onContactSelected: appState.addNewChatWithUsername(contactId)
 }

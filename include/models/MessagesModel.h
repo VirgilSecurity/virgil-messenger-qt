@@ -36,7 +36,11 @@
 #define VM_MESSAGESMODEL_H
 
 #include "ListModel.h"
-#include "VSQCommon.h"
+#include "AttachmentId.h"
+#include "Chat.h"
+#include "Message.h"
+
+#include <optional>
 
 namespace vm
 {
@@ -46,47 +50,67 @@ class MessagesModel : public ListModel
 
 public:
     explicit MessagesModel(QObject *parent);
-    ~MessagesModel() override;
+    ~MessagesModel() override = default;
 
-    void setUserId(const UserId &userId);
-    void setContactId(const Contact::Id &contactId);
+    //
+    //  Current chat.
+    //
+    ChatHandler chat() const;
 
-    void setMessages(const Messages &messages);
-    Message createMessage(const Chat::Id &chatId, const Contact::Id &authorId, const QString &body, const Optional<Attachment> &attachment);
-    void writeMessage(const Message &message);
+    //
+    //  Change current chat.
+    //
+    void setChat(ChatHandler chat);
 
-    // Sets message status. Returns false if message had the same status
-    bool setMessageStatus(const Message::Id &messageId, const Message::Status &status);
-    void markAllAsRead();
+    //
+    //  Set messages for the current chat.
+    //
+    void setMessages(ModifiableMessages messages);
 
-    void setAttachmentStatus(const Attachment::Id &attachmentId, const Attachment::Status &status);
-    void setAttachmentUrl(const Attachment::Id &attachmentId, const QUrl &url);
-    void setAttachmentExtras(const Attachment::Id &attachmentId, const QVariant &extras);
-    void setAttachmentLocalPath(const Attachment::Id &attachmentId, const QString &localPath);
-    void setAttachmentFingerprint(const Attachment::Id &attachmentId, const QString &fingerprint);
-    void setAttachmentEncryptedSize(const Attachment::Id &attachmentId, const DataSize &size);
-    void setAttachmentProcessedSize(const Attachment::Id &attachmentId, const DataSize &size);
+    //
+    //  Add message to the current chat if ids match, otherwise - ignore.
+    //
+    void addMessage(ModifiableMessageHandler message);
 
-    Optional<GlobalMessage> findById(const Message::Id &messageId) const;
+    //
+    //  Invalidate chat.
+    //
+    void clearChat();
+
+    //
+    // Update message. Returns false if message had the same status.
+    //
+    bool updateMessage(const MessageUpdate &messageUpdate, const bool apply);
+
+    //
+    //  Return message if found, nullptr otherwise.
+    //
+    ModifiableMessageHandler findById(const MessageId &messageId) const;
 
 signals:
-    void displayImageNotFound(const Message::Id &messageId) const;
+    void pictureIconNotFound(const MessageId &messageId) const;
 
 private:
     enum Roles
     {
+        // Common
         IdRole = Qt::UserRole,
         DayRole,
         DisplayTimeRole,
-        AuthorIdRole,
-        StatusRole,
+        SenderIdRole,
+        SenderUsernameRole,
+        StatusIconRole,
+        IsBrokenRole,
+        // Text
         BodyRole,
         // Attachment
         AttachmentIdRole,
-        AttachmentTypeRole,
-        AttachmentStatusRole,
-        AttachmentImagePathRole,
-        AttachmentImageSizeRole,
+        AttachmentTypeIsFileRole,
+        AttachmentTypeIsPictureRole,
+        AttachmentIsLoadingRole,
+        AttachmentIsLoadedRole,
+        AttachmentIconPathRole,
+        AttachmentPictureThumbnailSizeRole,
         AttachmentDisplaySizeRole,
         AttachmentDisplayProgressRole,
         AttachmentDisplayTextRole,
@@ -94,26 +118,25 @@ private:
         AttachmentBytesTotalRole,
         AttachmentBytesLoadedRole,
         AttachmentFileExistsRole,
-        //
-        IsBrokenRole,
+        // Grouping
         FirstInRowRole,
         InRowRole,
     };
+
+    static QVector<int> rolesFromMessageUpdate(const MessageUpdate& messageUpdate);
+    static QString statusIconPath(MessageHandler message);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    void updateAttachment(const Attachment::Id &attachmentId, const QVector<int> &roles, const std::function<bool (Attachment &)> &update);
-
-    Optional<int> findRowById(const Message::Id &messageId) const;
-    Optional<int> findRowByAttachmentId(const Attachment::Id &attachmentId) const;
+    std::optional<int> findRowById(const MessageId &messageId) const;
     void invalidateRow(const int row, const QVector<int> &roles = {});
     void invalidateModel(const QModelIndex &index, const QVector<int> &roles);
 
-    Messages m_messages;
-    UserId m_userId;
-    Contact::Id m_contactId;
+private:
+    ModifiableMessages m_messages;
+    ChatHandler m_currentChat;
 };
 }
 

@@ -39,6 +39,7 @@
 #include "models/ListProxyModel.h"
 #include "Settings.h"
 #include "Utils.h"
+#include "Model.h"
 
 using namespace vm;
 
@@ -62,7 +63,7 @@ void FileCloudModel::setDirectory(const QDir &dir)
     if (!m_settings->fileCloudEnabled()) {
         return;
     }
-    QtConcurrent::run([=]() {
+    QtConcurrent::run([this, dir]() {
         auto list = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot, QDir::NoSort);
         emit listReady(list, QPrivateSignal());
     });
@@ -103,11 +104,11 @@ QVariant FileCloudModel::data(const QModelIndex &index, int role) const
         return info.isDir();
     case DisplayDateTimeRole: {
         const auto modified = info.fileTime(QFile::FileModificationTime);
-        const auto diff = modified.secsTo(m_now);
+        const auto diff = std::chrono::seconds(modified.secsTo(m_now));
         return Utils::formattedElapsedSeconds(diff, m_settings->nowInterval());
     }
     case DisplayFileSize:
-        return Utils::formattedDataSize(info.size());
+        return Utils::formattedSize(info.size());
     case SortRole:
         return QString("%1%2").arg(static_cast<int>(!info.isDir())).arg(info.fileName());
     default:

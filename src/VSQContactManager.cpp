@@ -36,7 +36,9 @@
 
 #include <qxmpp/QXmppClient.h>
 
-Q_LOGGING_CATEGORY(lcContactManager, "contactman");
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(lcContactManager, "contact-manager");
 
 VSQContactManager::VSQContactManager(QXmppClient *client, QObject *parent)
     : QObject(parent)

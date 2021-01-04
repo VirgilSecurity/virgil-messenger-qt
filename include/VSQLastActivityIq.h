@@ -35,21 +35,19 @@
 #ifndef VM_LASTACTIVITYIQ_H
 #define VM_LASTACTIVITYIQ_H
 
-#include <qxmpp/QXmppIq.h>
+#include <chrono>
 
-#include "VSQCommon.h"
+#include <QLoggingCategory>
+
+#include <qxmpp/QXmppIq.h>
 
 Q_DECLARE_LOGGING_CATEGORY(lcLastActivity)
 
 class VSQLastActivityIq : public QXmppIq
 {
 public:
-    VSQLastActivityIq() = default;
-    explicit VSQLastActivityIq(bool debug);
-    ~VSQLastActivityIq() = default;
-
     bool isValid() const;
-    Seconds seconds() const;
+    std::chrono::seconds seconds() const;
 
     bool needSubscription() const;
 
@@ -61,9 +59,8 @@ protected:
     void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
 
 private:
-    bool m_debug = true;
     bool m_valid = false;
-    Seconds m_seconds = 0;
+    std::chrono::seconds m_seconds = std::chrono::seconds(0);
 };
 
 #endif // VM_LASTACTIVITYIQ_H

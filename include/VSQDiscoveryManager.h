@@ -37,10 +37,6 @@
 
 #include <qxmpp/QXmppDiscoveryManager.h>
 
-#include "VSQCommon.h"
-
-Q_DECLARE_LOGGING_CATEGORY(lcDiscoveryManager);
-
 class VSQDiscoveryManager : public QObject
 {
     Q_OBJECT

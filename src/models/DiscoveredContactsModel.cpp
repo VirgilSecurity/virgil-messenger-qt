@@ -39,6 +39,7 @@
 #include "Settings.h"
 #include "Validator.h"
 #include "Utils.h"
+#include "controllers/UsersController.h"
 #include "models/DiscoveredContactsProxyModel.h"
 #include "models/ListSelectionModel.h"
 
@@ -49,6 +50,7 @@ DiscoveredContactsModel::DiscoveredContactsModel(Validator *validator, QObject *
     , m_validator(validator)
     , m_selectedContacts(new ContactsModel(this, false))
 {
+    qRegisterMetaType<Contacts>("Contacts");
     qRegisterMetaType<DiscoveredContactsModel *>("DiscoveredContactsModel*");
 
     setProxy(new DiscoveredContactsProxyModel(this));
@@ -59,20 +61,20 @@ DiscoveredContactsModel::DiscoveredContactsModel(Validator *validator, QObject *
     connect(this, &DiscoveredContactsModel::fixedContactsPopulated, this, &DiscoveredContactsModel::onDeviceContactsPopulated);
 }
 
-void DiscoveredContactsModel::setUserId(const UserId &userId)
-{
-    m_userId = userId;
-}
-
 void DiscoveredContactsModel::reload()
 {
     m_selectedContacts->setContacts(Contacts());
     setFilter(QString());
 
-    QtConcurrent::run([=]() {
+    QtConcurrent::run([this]() {
         const auto contacts = Utils::getDeviceContacts(getContacts());
         emit fixedContactsPopulated(contacts, QPrivateSignal());
     });
+}
+
+int DiscoveredContactsModel::fixedContactsCount() const
+{
+    return m_fixedContactsCount;
 }
 
 void DiscoveredContactsModel::toggleById(const Contact::Id &contactId)
@@ -86,9 +88,12 @@ void DiscoveredContactsModel::toggleById(const Contact::Id &contactId)
     }
 }
 
-int DiscoveredContactsModel::fixedContactsCount() const
+QString DiscoveredContactsModel::firstContactId() const
 {
-    return m_fixedContactsCount;
+    if (proxy()->rowCount() > 0) {
+        return proxy()->data(proxy()->index(0, 0), IdRole).toString();
+    }
+    return QString();
 }
 
 QVariant DiscoveredContactsModel::data(const QModelIndex &index, int role) const
@@ -127,7 +132,8 @@ Contacts DiscoveredContactsModel::findContactsByFilter() const
 {
     Contacts contacts;
     for (const Contact::Id &id : { filter() }) {
-        if (id != m_userId && m_validator->isValidUsername(id)) {
+        // TODO(fpohtmeh): exclude current user
+        if (m_validator->isValidUsername(id)) {
             contacts.push_back(createContact(id));
         }
     }

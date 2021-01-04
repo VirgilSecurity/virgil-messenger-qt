@@ -36,64 +36,153 @@
 
 #include "Settings.h"
 #include "Utils.h"
-#include "operations/DownloadDecryptFileOperation.h"
+#include "FileUtils.h"
+#include "operations/CreateAttachmentPreviewOperation.h"
 #include "operations/MessageOperation.h"
 #include "operations/MessageOperationFactory.h"
+#include "operations/DownloadDecryptFileOperation.h"
+#include "MessageUpdate.h"
 
 using namespace vm;
+using Self = DownloadAttachmentOperation;
 
-DownloadAttachmentOperation::DownloadAttachmentOperation(MessageOperation *parent, const Settings *settings, const Parameter &parameter)
+Self::DownloadAttachmentOperation(MessageOperation *parent, const Settings *settings, const Parameter &parameter)
     : LoadAttachmentOperation(parent)
     , m_parent(parent)
     , m_settings(settings)
     , m_parameter(parameter)
 {
-    setName((parameter.type == Parameter::Type::Full) ? QLatin1String("DownloadAttachment") : QLatin1String("PreloadAttachment"));
+    setName((parameter.type == Parameter::Type::Download) ? QLatin1String("DownloadAttachment") : QLatin1String("PreloadAttachment"));
 }
 
-bool DownloadAttachmentOperation::populateChildren()
+bool Self::populateChildren()
+{
+    if (m_parameter.type == Parameter::Type::Preload) {
+        populatePreload();
+    }
+    else if (m_parameter.type == Parameter::Type::Download) {
+        populateDownload();
+    }
+
+    return hasChildren();
+}
+
+void Self::populateDownload()
 {
     const auto message = m_parent->message();
-    const auto attachment = m_parent->attachment();
-    auto factory = m_parent->factory();
+    const auto attachment = message->contentAsAttachment();
+    const auto factory = m_parent->factory();
 
-    if (m_parameter.type == Parameter::Type::Preload) {
-        if (attachment->type == Attachment::Type::Picture) {
-            const auto extras = attachment->extras.value<PictureExtras>();
-            // Create preview from original file
-            if (!Utils::fileExists(extras.previewPath) && Utils::fileExists(attachment->localPath)) {
-                const auto filePath = m_settings->makeThumbnailPath(attachment->id, true);
-                factory->populateCreateAttachmentPreview(m_parent, this, attachment->localPath, filePath);
-            }
-            // Otherwise download/decrypt thumbnail
-            else if (!Utils::fileExists(extras.thumbnailPath)) {
-                const auto filePath = m_settings->makeThumbnailPath(attachment->id, false);
-                auto op = factory->populateDownloadDecrypt(this, extras.thumbnailUrl, extras.encryptedThumbnailSize, filePath, message->senderId);
-                op->setName(op->name() + QLatin1String("Thumbnail"));
-                connect(op, &Operation::started, this, std::bind(&LoadAttachmentOperation::startLoadOperation, this, extras.encryptedThumbnailSize));
-                connect(op, &DownloadDecryptFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
-                connect(op, &DownloadDecryptFileOperation::decrypted, m_parent, &MessageOperation::setAttachmentThumbnailPath);
-            }
-        }
+    // Download/decrypt file
+    auto downloadPath = m_parameter.filePath;
+    if (!FileUtils::fileExists(downloadPath)) {
+        qCDebug(lcOperation) << "Download attachment to:" << downloadPath;
+
+        auto downloadDecOp = factory->populateDownloadDecrypt(this, attachment->remoteUrl(), attachment->encryptedSize(),
+                                                   downloadPath, attachment->decryptionKey(), message->senderId());
+
+        connect(downloadDecOp, &DownloadDecryptFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
+
+        connect(downloadDecOp, &Operation::started, this, [this, encryptedSize = attachment->encryptedSize()]() {
+            startLoadOperation(encryptedSize);
+            updateStage(MessageContentDownloadStage::Downloading);
+        });
+
+        connect(downloadDecOp, &DownloadDecryptFileOperation::downloaded, [this]() {
+            updateStage(MessageContentDownloadStage::Downloaded);
+        });
+
+        connect(downloadDecOp, &DownloadDecryptFileOperation::decrypted, [this, message](const QFileInfo &file) {
+            MessageAttachmentLocalPathUpdate update;
+            update.messageId = message->id();
+            update.attachmentId = message->contentAsAttachment()->id();
+            update.localPath = file.absoluteFilePath();
+            m_parent->messageUpdate(update);
+
+            updateStage(MessageContentDownloadStage::Decrypted);
+        });
+    }
+
+    // Create picture preview
+    const auto picture = std::get_if<MessageContentPicture>(&message->content());
+    if (picture && !FileUtils::fileExists(picture->previewPath())) {
+        const auto previewPath = m_settings->makeThumbnailPath(picture->id(), true);
+        auto createPreviewOp = factory->populateCreateAttachmentPreview(m_parent, this, downloadPath, previewPath);
+        connect(createPreviewOp, &Operation::finished, [this]() {
+            updateStage(MessageContentDownloadStage::Preloaded);
+            updateStage(MessageContentDownloadStage::Decrypted); // TODO(fpohtmeh): don't use this stage as final?
+        });
+    }
+}
+
+void Self::populatePreload()
+{
+    const auto message = m_parent->message();
+    const auto factory = m_parent->factory();
+
+    const auto picture = std::get_if<MessageContentPicture>(&message->content());
+    if (!picture) {
+        throw std::logic_error("Invalid attachment content in preload operation");
+    }
+
+    if (FileUtils::fileExists(picture->previewPath())) {
+        return;
+    }
+
+    // Create preview from original file
+    if (FileUtils::fileExists(picture->localPath())) {
+        const auto previewPath = m_settings->makeThumbnailPath(picture->id(), true);
+        factory->populateCreateAttachmentPreview(m_parent, this, picture->localPath(), previewPath);
     }
     else {
-        // Download/decrypt file
-        auto downloadPath = m_parameter.filePath;
-        if (!Utils::fileExists(downloadPath)) {
-            qCDebug(lcOperation) << "Download attachment to:" << downloadPath;
-            auto op = factory->populateDownloadDecrypt(this, attachment->url, attachment->encryptedSize, downloadPath, message->senderId);
-            connect(op, &Operation::started, this, std::bind(&LoadAttachmentOperation::startLoadOperation, this, attachment->encryptedSize));
-            connect(op, &DownloadDecryptFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
-            connect(op, &DownloadDecryptFileOperation::decrypted, m_parent, &MessageOperation::setAttachmentLocalPath);
+        // Check if thumbnail exists
+        const auto thumbnail = picture->thumbnail();
+        if (FileUtils::fileExists(thumbnail.localPath())) {
+            return;
         }
-        // Create picture preview
-        if (attachment->type == Attachment::Type::Picture) {
-            const auto extras = attachment->extras.value<PictureExtras>();
-            if (!Utils::fileExists(extras.previewPath)) {
-                const auto filePath = m_settings->makeThumbnailPath(attachment->id, true);
-                factory->populateCreateAttachmentPreview(m_parent, this, downloadPath, filePath);
-            }
-        }
+
+        // Download/decrypt thumbnail
+        const auto thumbnailPath = m_settings->makeThumbnailPath(picture->id(), false);
+
+        auto downloadDecOp = factory->populateDownloadDecrypt(this, thumbnail.remoteUrl(), thumbnail.encryptedSize(),
+                                                              thumbnailPath, thumbnail.decryptionKey(), message->senderId());
+        downloadDecOp->setName(QLatin1String("DownloadDecryptThumbnail"));
+        connect(downloadDecOp, &DownloadDecryptFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
+        connect(downloadDecOp, &Operation::started, [this, encryptedSize = thumbnail.encryptedSize()]() {
+            startLoadOperation(encryptedSize);
+        });
+        connect(downloadDecOp, &DownloadDecryptFileOperation::decrypted, [this, message](const QFileInfo &file) {
+            const auto extrasToJson = [message]() {
+                const auto picture = std::get_if<MessageContentPicture>(&message->content());
+                return picture->extrasToJson(true);
+            };
+
+            MessagePictureThumbnailPathUpdate update;
+            update.messageId = message->id();
+            update.attachmentId = message->contentAsAttachment()->id();
+            update.extrasToJson = extrasToJson;
+            update.thumbnailPath = file.absoluteFilePath();
+            m_parent->messageUpdate(update);
+        });
     }
-    return hasChildren();
+
+    // Update stages
+    connect(this, &Operation::started, [this]() {
+        updateStage(MessageContentDownloadStage::Preloading);
+    });
+
+    connect(this, &Operation::finished, [this]() {
+        updateStage(MessageContentDownloadStage::Preloaded);
+    });
+}
+
+void DownloadAttachmentOperation::updateStage(MessageContentDownloadStage downloadStage)
+{
+    const auto message = m_parent->message();
+
+    MessageAttachmentDownloadStageUpdate stageUpdate;
+    stageUpdate.messageId = message->id();
+    stageUpdate.attachmentId = message->contentAsAttachment()->id();
+    stageUpdate.downloadStage = downloadStage;
+    m_parent->messageUpdate(stageUpdate);
 }

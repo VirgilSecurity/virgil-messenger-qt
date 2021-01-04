@@ -37,8 +37,8 @@
 
 #include <QUrl>
 
+#include "ConfirmationCodeType.h"
 #include "OperationState.h"
-#include "VSQCommon.h"
 
 class VSQMessenger;
 
@@ -47,22 +47,22 @@ namespace vm
 class VerifyProfileState : public OperationState
 {
     Q_OBJECT
-    Q_PROPERTY(Enums::ConfirmationCodeType codeType READ codeType WRITE setCodeType NOTIFY codeTypeChanged)
+    Q_PROPERTY(ConfirmationCodeType codeType READ codeType WRITE setCodeType NOTIFY codeTypeChanged)
 
 public:
     VerifyProfileState(QState *parent);
 
     ConfirmationCodeType codeType() const;
-    void setCodeType(const ConfirmationCodeType &codeType);
+    void setCodeType(const ConfirmationCodeType codeType);
 
     Q_INVOKABLE void verify(const QString &code);
 
 signals:
-    void verificationFinished(const Enums::ConfirmationCodeType &codeType, const bool success);
-    void codeTypeChanged(const Enums::ConfirmationCodeType &codeType);
+    void verificationFinished(const ConfirmationCodeType codeType, const bool success);
+    void codeTypeChanged(const ConfirmationCodeType codeType);
 
 private:
-    ConfirmationCodeType m_codeType = ConfirmationCodeType::Phone;
+    ConfirmationCodeType m_codeType = ConfirmationCodeType::PhoneNumber;
 };
 }
 

@@ -32,35 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "operations/EncryptFileOperation.h"
+#include "EncryptFileOperation.h"
 
-#include "Core.h"
-#include "operations/MessageOperation.h"
+
+#include <QFile>
+
 
 using namespace vm;
 
-EncryptFileOperation::EncryptFileOperation(QObject *parent, const QString &sourcePath, const QString &destPath, const Contact::Id &recipientId)
+EncryptFileOperation::EncryptFileOperation(QObject *parent, Messenger *messenger, const QString &sourcePath, const QString &destPath)
     : Operation(QLatin1String("EncryptFile"), parent)
+    , m_messenger(messenger)
     , m_sourcePath(sourcePath)
     , m_destPath(destPath)
-    , m_recipientId(recipientId)
-{}
+{
+}
 
 void EncryptFileOperation::run()
 {
-    const auto result = Core::encryptFile(m_sourcePath, m_destPath, m_recipientId);
-    switch (result) {
-    case Core::Result::Success:
-        emit encrypted(m_destPath);
-        emit bytesCalculated(QFile(m_destPath).size());
+    const auto decryptionKey = m_messenger->encryptFile(m_sourcePath, m_destPath);
+    if (decryptionKey) {
+        emit encrypted(QFileInfo(m_destPath), *decryptionKey);
         finish();
-        break;
-    case Core::Result::Fail:
+    }
+    else {
+        qCWarning(lcOperation) << "Failed to encrypt file:" << m_sourcePath;
         fail();
-        break;
-    case Core::Result::Invalid:
-    default:
-        invalidate(tr("Failed to encrypt file"));
-        break;
     }
 }
