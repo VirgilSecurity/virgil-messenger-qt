@@ -12,6 +12,7 @@
         <file>qml/pages/NewChatPage.qml</file>
         <file>qml/pages/NewGroupChatPage.qml</file>
         <file>qml/pages/OperationPage.qml</file>
+        <file>qml/pages/SelectChatsPage.qml</file>
         <file>qml/pages/SelectContactsPage.qml</file>
         <file>qml/pages/SignInAsPage.qml</file>
         <file>qml/pages/SignInPage.qml</file>
@@ -112,6 +113,8 @@
         <file>qml/components/ChatItem.qml</file>
         <file>qml/components/ChatMessageInput.qml</file>
         <file>qml/components/ChatList.qml</file>
+        <file>qml/components/ChatListDelegate.qml</file>
+        <file>qml/components/ChatListView.qml</file>
         <file>qml/components/ChatMessage.qml</file>
         <file>qml/components/MessageCounter.qml</file>
         <file>qml/components/SearchHeader.qml</file>

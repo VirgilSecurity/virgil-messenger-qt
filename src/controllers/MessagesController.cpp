@@ -142,6 +142,13 @@ void Self::sendPictureMessage(const QVariant &attachmentUrl)
     emit messageCreated(message);
 }
 
+void MessagesController::shareMessage(const QVariant &messageId, const QVariant &chatId)
+{
+    Q_UNUSED(messageId)
+    Q_UNUSED(chatId)
+    qCDebug(lcController) << "Message sharing is under development";
+}
+
 
 std::unique_ptr<OutgoingMessage> Self::createOutgoingMessage() {
     auto message = std::make_unique<OutgoingMessage>();
@@ -204,7 +211,7 @@ ModifiableMessageHandler Self::createPictureMessage(const QUrl &localFileUrl)
 }
 
 
-size_t Self::calculateUnreadMessageCount(const ChatHandler& destinationChat, const MessageHandler& message) const {
+qsizetype Self::calculateUnreadMessageCount(const ChatHandler& destinationChat, const MessageHandler& message) const {
 
     auto currentChat = m_models->messages()->chat();
 

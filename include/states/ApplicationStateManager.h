@@ -50,6 +50,7 @@
 #include "NewChatState.h"
 #include "NewGroupChatState.h"
 #include "NameGroupChatState.h"
+#include "SelectChatsState.h"
 #include "SignInAsState.h"
 #include "SignInUsernameState.h"
 #include "SignUpState.h"
@@ -79,6 +80,7 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(NewChatState *newChatState MEMBER m_newChatState CONSTANT)
     Q_PROPERTY(NewGroupChatState *newGroupChatState MEMBER m_newGroupChatState CONSTANT)
     Q_PROPERTY(NameGroupChatState *nameGroupChatState MEMBER m_nameGroupChatState CONSTANT)
+    Q_PROPERTY(SelectChatsState *selectChatsState MEMBER m_selectChatsState CONSTANT)
     Q_PROPERTY(SignInAsState *signInAsState MEMBER m_signInAsState CONSTANT)
     Q_PROPERTY(SignInUsernameState *signInUsernameState MEMBER m_signInUsernameState CONSTANT)
     Q_PROPERTY(SignUpState *signUpState MEMBER m_signUpState CONSTANT)
@@ -97,6 +99,7 @@ signals:
     void goBack();
     void openChatList();
     void openFileCloud();
+    void selectChats();
 
     void currentStateChanged(QState *);
     void previousStateChanged(QState *);
@@ -104,6 +107,7 @@ signals:
     void splashScreenRequested(QPrivateSignal);
     void chatListRequested(QPrivateSignal);
     void fileCloudRequested(QPrivateSignal);
+    void selectChatsRequested(QPrivateSignal);
 
 private:
     void registerStatesMetaTypes();
@@ -138,6 +142,7 @@ private:
     NewChatState *m_newChatState;
     NewGroupChatState *m_newGroupChatState;
     NameGroupChatState *m_nameGroupChatState;
+    SelectChatsState *m_selectChatsState;
     SignInAsState *m_signInAsState;
     SignInUsernameState *m_signInUsernameState;
     SignUpState *m_signUpState;

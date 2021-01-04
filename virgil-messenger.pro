@@ -176,6 +176,7 @@ HEADERS += \
         include/states/NewChatState.h \
         include/states/NewGroupChatState.h \
         include/states/NameGroupChatState.h \
+        include/states/SelectChatsState.h \
         include/states/SignInAsState.h \
         include/states/SignInState.h \
         include/states/SignInUsernameState.h \
@@ -318,6 +319,7 @@ SOURCES += \
         src/states/NewChatState.cpp \
         src/states/NewGroupChatState.cpp \
         src/states/NameGroupChatState.cpp \
+        src/states/SelectChatsState.cpp \
         src/states/SignInAsState.cpp \
         src/states/SignInState.cpp \
         src/states/SignInUsernameState.cpp \

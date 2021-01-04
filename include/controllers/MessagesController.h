@@ -54,9 +54,12 @@ public:
 
     void loadMessages(const ChatHandler &chat);
     void clearMessages();
+
     Q_INVOKABLE void sendTextMessage(const QString &body);
     Q_INVOKABLE void sendFileMessage(const QVariant &attachmentUrl);
     Q_INVOKABLE void sendPictureMessage(const QVariant &attachmentUrl);
+
+    Q_INVOKABLE void shareMessage(const QVariant &messageId, const QVariant &chatId);
 
 signals:
     void errorOccurred(const QString &errorText);
@@ -88,7 +91,7 @@ private:
     //
     //  Return new unread message count based on destination chat and current chat.
     //
-    size_t calculateUnreadMessageCount(const ChatHandler& destinationChat, const MessageHandler& message) const;
+    qsizetype calculateUnreadMessageCount(const ChatHandler& destinationChat, const MessageHandler& message) const;
 
     //
     //  Connect to the database.

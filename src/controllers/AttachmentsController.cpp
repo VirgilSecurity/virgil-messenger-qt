@@ -134,7 +134,7 @@ void AttachmentsController::downloadAttachment(const ModifiableMessageHandler &m
     }
     else if (fingerprint != attachment->fingerprint()) {
         qCritical(lcController) << "Fingerprint mismatch, download file";
-        emit notificationCreated(tr("Downloading attachment..."), true);
+        emit notificationCreated(tr("Downloading attachment..."), false);
         needDownload = true;
     }
 

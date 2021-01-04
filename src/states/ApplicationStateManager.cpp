@@ -61,13 +61,14 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
     , m_backupKeyState(new BackupKeyState(m_messenger, this))
     , m_editProfileState(new EditProfileState(controllers->users(), this))
     , m_verifyProfileState(new VerifyProfileState(this))
-    , m_chatListState(new ChatListState(controllers->chats(), this))
+    , m_chatListState(new ChatListState(controllers->chats(), models->chats(), this))
     , m_chatState(new ChatState(controllers, m_messenger, this))
     , m_downloadKeyState(new DownloadKeyState(controllers->users(), this))
     , m_fileCloudState(new FileCloudState(models, this))
     , m_newChatState(new NewChatState(controllers->chats(), models->discoveredContacts(), this))
     , m_newGroupChatState(new NewGroupChatState(models->discoveredContacts(), this))
     , m_nameGroupChatState(new NameGroupChatState(controllers->chats(), this))
+    , m_selectChatsState(new SelectChatsState(models->chats(), this))
     , m_signInAsState(new SignInAsState(this))
     , m_signInUsernameState(new SignInUsernameState(controllers->users(), validator, this))
     , m_signUpState(new SignUpState(controllers->users(), validator, this))
@@ -99,6 +100,7 @@ void Self::registerStatesMetaTypes()
     qRegisterMetaType<NewChatState *>("NewChatState*");
     qRegisterMetaType<NewGroupChatState *>("NewGroupChatState*");
     qRegisterMetaType<NameGroupChatState *>("NameGroupChatState*");
+    qRegisterMetaType<SelectChatsState *>("SelectChatsState*");
     qRegisterMetaType<SignInAsState *>("SignInAsState*");
     qRegisterMetaType<SignInUsernameState *>("SignInUsernameState*");
     qRegisterMetaType<SignUpState *>("SignUpState*");
@@ -121,6 +123,7 @@ void Self::addTransitions()
     connect(this, &Self::setUiState, this, std::bind(&Self::splashScreenRequested, this, QPrivateSignal()), Qt::QueuedConnection);
     connect(this, &Self::openChatList, this, std::bind(&Self::chatListRequested, this, QPrivateSignal()), Qt::QueuedConnection);
     connect(this, &Self::openFileCloud, this, std::bind(&Self::fileCloudRequested, this, QPrivateSignal()), Qt::QueuedConnection);
+    connect(this, &Self::selectChats, this, std::bind(&Self::selectChatsRequested, this, QPrivateSignal()), Qt::QueuedConnection);
 
     m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::userNotSelected, m_accountSelectionState);
     m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::operationErrorOccurred, m_accountSelectionState);
@@ -159,6 +162,7 @@ void Self::addTransitions()
 
     addTwoSideTransition(m_chatState, m_chatState, &ChatState::requestPreview, m_attachmentPreviewState);
     connect(m_chatState, &ChatState::requestPreview, m_attachmentPreviewState, &AttachmentPreviewState::setUrl);
+    addTwoSideTransition(m_chatState, this, &ApplicationStateManager::selectChatsRequested, m_selectChatsState);
 
     m_signUpState->addTransition(users, &UsersController::signedIn, m_chatListState);
 

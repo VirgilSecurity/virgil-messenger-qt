@@ -64,7 +64,7 @@ DiscoveredContactsModel::DiscoveredContactsModel(Validator *validator, QObject *
 void DiscoveredContactsModel::reload()
 {
     m_selectedContacts->setContacts(Contacts());
-    setFilter(QString());
+    clearFilter();
 
     QtConcurrent::run([this]() {
         const auto contacts = Utils::getDeviceContacts(getContacts());

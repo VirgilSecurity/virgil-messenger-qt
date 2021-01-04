@@ -141,7 +141,7 @@ Control {
         }
 
         function openChatPage() {
-            if (manager.previousState === manager.attachmentPreviewState) {
+            if ([manager.attachmentPreviewState, manager.selectChatsState].includes(manager.previousState)) {
                 return
             }
             const replace = [manager.newChatState, manager.nameGroupChatState, manager.downloadKeyState].includes(manager.previousState)
@@ -198,6 +198,10 @@ Control {
         function openDownloadKeyPage() {
             stackView.push(page("DownloadKey"))
         }
+
+        function openSelectChatsPage() {
+            stackView.push(page("SelectChats"))
+        }
     }
 
     Component.onCompleted: {
@@ -218,6 +222,7 @@ Control {
         manager.signInUsernameState.entered.connect(d.openSignInUsernamePage)
         manager.signUpState.entered.connect(d.openSignUpPage)
         manager.downloadKeyState.entered.connect(d.openDownloadKeyPage)
+        manager.selectChatsState.entered.connect(d.openSelectChatsPage)
 
         if (Platform.isIos) {
             app.keyboardEventFilter.keyboardRectangleChanged.connect(function(rect) {

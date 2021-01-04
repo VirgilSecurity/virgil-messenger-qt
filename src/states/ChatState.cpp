@@ -79,6 +79,15 @@ void ChatState::setLastActivityText(const QString &text)
     emit lastActivityTextChanged(text);
 }
 
+void ChatState::setCurrentMessageId(const QString &messageId)
+{
+    if (messageId == m_currentMessageId) {
+        return;
+    }
+    m_currentMessageId = messageId;
+    emit currentMessageIdChanged(messageId);
+}
+
 void ChatState::setIsAdmin(const bool isAdmin)
 {
     if (isAdmin == m_isAdmin) {
