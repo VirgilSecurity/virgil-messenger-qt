@@ -53,6 +53,8 @@ namespace Customer
 
     static const QString kPushNotificationsProxy = "push-notifications-proxy";
     static const QString kPushNotificationsTopic = "com.virgil.VirgilMessenger";
+
+    static const QString kSecurityApplicationGroupIdentifier = "group.com.virgil.VirgilMessenger";
 }
 
 #endif // VSQ_CUSTOMER_H
