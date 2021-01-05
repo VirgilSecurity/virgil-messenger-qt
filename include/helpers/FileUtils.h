@@ -47,7 +47,7 @@ public:
 
     static QString findUniqueFileName(const QString &fileName);
 
-    static bool forceCreateDir(const QString &absolutePath, bool silent = false);
+    static bool forceCreateDir(const QString &absolutePath);
 
     static QString readTextFile(const QString &filePath);
 

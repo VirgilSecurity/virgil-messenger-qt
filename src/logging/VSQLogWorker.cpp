@@ -34,7 +34,6 @@
 
 #include "logging/VSQLogWorker.h"
 
-#include "CustomerEnv.h"
 #include "Settings.h"
 
 #include <QTextStream>
@@ -55,10 +54,10 @@ VSQLogWorker::VSQLogWorker(QObject *parent)
 
 void VSQLogWorker::processMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
 {
-    consoleMessageHandler(type, context, message);
-    fileMessageHandler(type, context, message);
 #ifdef QT_DEBUG
+    consoleMessageHandler(type, context, message);
 #endif
+    fileMessageHandler(type, context, message);
 }
 
 void VSQLogWorker::fileMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
