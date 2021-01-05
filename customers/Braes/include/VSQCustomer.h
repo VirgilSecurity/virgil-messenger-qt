@@ -54,6 +54,7 @@ namespace Customer
     static const QString kPushNotificationsProxy = "braes-push-notifications-proxy";
     static const QString kPushNotificationsTopic = "com.virgil.BraesMessenger2";
 
+    static const QString kSecurityApplicationGroupIdentifier = "group.com.virgil.BraesMessenger";
 }
 
 #endif // VSQ_CUSTOMER_H

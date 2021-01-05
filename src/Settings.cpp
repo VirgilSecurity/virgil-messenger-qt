@@ -34,7 +34,7 @@
 
 #include "Settings.h"
 
-
+#include "CustomerEnv.h"
 #include "VSQCustomer.h"
 #include "Utils.h"
 #include "FileUtils.h"
@@ -55,10 +55,13 @@ static const QString kSignedInUsername = "SignedInUsername";
 
 using namespace vm;
 
+QDir Settings::m_logsDir = QDir();
+bool Settings::m_logsDirInitialized = false;
+
 Q_LOGGING_CATEGORY(lcSettings, "settings")
 
 Settings::Settings(QObject *parent)
-    : QSettings(Customer::OrganizationName, Customer::ApplicationName, parent)
+    : QSettings(settingsFileName(), QSettings::NativeFormat, parent)
     , m_sessionId(Utils::createUuid())
 {
 
@@ -70,9 +73,10 @@ Settings::Settings(QObject *parent)
         removeGroup(kCredenitalsGroup);
     }
 
-    m_databaseDir.setPath(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QLatin1String("/database"));
-    m_attachmentCacheDir.setPath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/attachments"));
-    m_thumbnaisDir.setPath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QLatin1String("/thumbnails"));
+    m_databaseDir.setPath(CustomerEnv::appDataLocation().filePath(QLatin1String("database")));
+    const QDir cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    m_attachmentCacheDir.setPath(cacheDir.filePath(QLatin1String("attachments")));
+    m_thumbnaisDir.setPath(cacheDir.filePath(QLatin1String("thumbnails")));
     m_downloadsDir.setPath(QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
 }
 
@@ -138,6 +142,17 @@ void Settings::addUserToList(const QString &user)
     setUsersList(QStringList(user) + users);
 }
 
+QString Settings::settingsFileName()
+{
+    QString ext;
+#if defined(VS_MACOS) || defined (VS_IOS)
+    ext = QLatin1String(".plist");
+#elif defined(VS_LINUX)
+    ext = QLatin1String(".ini");
+#endif
+    return CustomerEnv::appDataLocation().filePath(QLatin1String("settings") + ext);
+}
+
 QString Settings::userCredential(const QString &user) const
 {
     return groupValue(kCredenitalsGroup, user).toString();
@@ -170,6 +185,19 @@ void Settings::setRunFlag(bool run)
         qCDebug(lcSettings) << "Reset session id";
         removeGroupKey(kLastSessionGroup, kSessionId);
     }
+}
+
+QDir Settings::logsDir()
+{
+    if (!m_logsDirInitialized) {
+        m_logsDir.setPath(CustomerEnv::appDataLocation().filePath(QLatin1String("logs")));
+        m_logsDirInitialized = true;
+    }
+    if (!m_logsDir.exists()) {
+        qDebug(lcSettings) << "Create logs dir:" << m_logsDir.absolutePath();
+        QDir().mkpath(m_logsDir.absolutePath());
+    }
+    return m_logsDir;
 }
 
 QDir Settings::databaseDir() const

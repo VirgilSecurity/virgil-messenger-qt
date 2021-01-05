@@ -454,6 +454,9 @@ message("ANDROID_TARGET_ARCH = $$ANDROID_TARGET_ARCH")
 linux:!android {
     DEFINES += VS_DESKTOP=1 VS_LINUX=1
     QT += widgets
+    SOURCES += \
+        platforms/default/CustomerEnvDefault.cpp
+
 }
 
 #
@@ -463,6 +466,9 @@ linux:!android {
 win32|win64 {
     DEFINES += VS_DESKTOP=1
     QT += widgets
+
+    SOURCES += \
+        platforms/default/CustomerEnvDefault.cpp
 
     # Assets
     RC_ICONS = $$VS_PLATFORMS_PATH/windows/Logo.ico
@@ -479,6 +485,9 @@ macx: {
     DEFINES += VS_DESKTOP=1
     QT += widgets
 
+    OBJECTIVE_SOURCES += \
+        platforms/apple/CustomerEnvApple.mm
+
     DISTFILES += $$VS_PLATFORMS_PATH/macos/virgil-messenger.plist.in
 }
 
@@ -492,7 +501,9 @@ ios: {
     QMAKE_INFO_PLIST = platforms/ios/Info.plist
     DEFINES += VS_IOS=1 VS_PUSHNOTIFICATIONS=1 VS_MOBILE=1
     LIBS += -framework Foundation -framework UserNotifications
-    OBJECTIVE_SOURCES += platforms/ios/AppDelegate.mm
+    OBJECTIVE_SOURCES += \
+        platforms/ios/AppDelegate.mm \
+        platforms/apple/CustomerEnvApple.mm
 
     HEADERS += \
          include/notifications/PushNotifications.h \
@@ -568,7 +579,8 @@ android: {
     SOURCES += \
         src/notifications/PushNotifications.cpp \
         src/notifications/XmppPushNotifications.cpp \
-        src/notifications/android/FirebaseListener.cpp
+        src/notifications/android/FirebaseListener.cpp \
+        platforms/default/CustomerEnvDefault.cpp
 
 
     LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
