@@ -37,6 +37,7 @@
 #include "Utils.h"
 #include "FileUtils.h"
 #include "Model.h"
+#include "models/ListProxyModel.h"
 
 #include <algorithm>
 
@@ -48,6 +49,9 @@ Self::MessagesModel(QObject *parent)
     : ListModel(parent)
 {
     qRegisterMetaType<MessagesModel *>("MessagesModel*");
+
+    proxy()->setSortRole(SortRole);
+    proxy()->sort(0, Qt::DescendingOrder);
 }
 
 
@@ -279,6 +283,10 @@ QVariant Self::data(const QModelIndex &index, int role) const
     case InRowRole: {
         const auto nextMessage = (row + 1 == rowCount()) ? nullptr : m_messages[row + 1];
         return nextMessage && message->senderId() == nextMessage->senderId();
+    }
+
+    case SortRole: {
+        return message->createdAt();
     }
 
     default:
