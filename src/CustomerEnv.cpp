@@ -111,7 +111,7 @@ QString Self::version() {
     return kVersion;
 }
 
-QString Self::appDataLocation() {
+QDir Self::appDataLocation() {
     auto appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 
     #if VS_MSGR_ENV_DEV

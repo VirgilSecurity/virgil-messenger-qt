@@ -38,6 +38,7 @@
 #include <QtAndroid>
 
 #include "android/VSQAndroid.h"
+#include "CustomerEnv.h"
 #include "Utils.h"
 
 #include <android/log.h>
@@ -53,8 +54,7 @@ static pthread_t loggingThread;
 
 /******************************************************************************/
 QString VSQAndroid::caBundlePath() {
-    QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    return appDataPath + QDir::separator() + "cert.pem";
+    return CustomerEnv::appDataLocation().filePath("cert.pem");
 }
 
 /******************************************************************************/
