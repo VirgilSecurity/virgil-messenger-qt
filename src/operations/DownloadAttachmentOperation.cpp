@@ -79,7 +79,7 @@ void Self::populateDownload()
         qCDebug(lcOperation) << "Download attachment to:" << downloadPath;
 
         auto downloadDecOp = factory->populateDownloadDecrypt(this, attachment->remoteUrl(), attachment->encryptedSize(),
-                                                   downloadPath, attachment->decryptionKey(), message->senderId());
+                                                   downloadPath, attachment->decryptionKey(), attachment->signature(), message->senderId());
 
         connect(downloadDecOp, &DownloadDecryptFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
 
@@ -145,7 +145,7 @@ void Self::populatePreload()
         const auto thumbnailPath = m_settings->makeThumbnailPath(picture->id(), false);
 
         auto downloadDecOp = factory->populateDownloadDecrypt(this, thumbnail.remoteUrl(), thumbnail.encryptedSize(),
-                                                              thumbnailPath, thumbnail.decryptionKey(), message->senderId());
+                                                              thumbnailPath, thumbnail.decryptionKey(), thumbnail.signature(), message->senderId());
         downloadDecOp->setName(QLatin1String("DownloadDecryptThumbnail"));
         connect(downloadDecOp, &DownloadDecryptFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
         connect(downloadDecOp, &Operation::started, [this, encryptedSize = thumbnail.encryptedSize()]() {

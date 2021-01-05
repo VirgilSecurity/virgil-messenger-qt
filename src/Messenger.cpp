@@ -246,12 +246,12 @@ Self::sendMessage(MessageHandler message) {
 }
 
 
-std::optional<QByteArray>
+std::tuple<bool, QByteArray, QByteArray>
 Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
-    auto [result, decryptionKey] = m_coreMessenger->encryptFile(sourceFilePath, destFilePath);
+    auto [result, decryptionKey, signature] = m_coreMessenger->encryptFile(sourceFilePath, destFilePath);
 
     if (CoreMessenger::Result::Success == result) {
-        return std::move(decryptionKey);
+        return std::make_tuple(true, std::move(decryptionKey), std::move(signature));
     }
 
     return {};
@@ -259,8 +259,8 @@ Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
 
 
 bool
-Self::decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray& decryptionKey, const UserId senderId) {
-    auto result = m_coreMessenger->decryptFile(sourceFilePath, destFilePath, decryptionKey, senderId);
+Self::decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray& decryptionKey, const QByteArray& signature, const UserId senderId) {
+    auto result = m_coreMessenger->decryptFile(sourceFilePath, destFilePath, decryptionKey, signature, senderId);
 
     return CoreMessenger::Result::Success == result;
 }

@@ -51,7 +51,7 @@ class DecryptFileOperation : public Operation
 
 public:
     explicit DecryptFileOperation(QObject *parent, Messenger *messenger, const QString &sourcePath, const QString &destPath,
-                                  const QByteArray& decryptionKey, const UserId &senderId);
+                                  const QByteArray& decryptionKey, const QByteArray& signature, const UserId &senderId);
 
     void run() override;
 
@@ -63,6 +63,7 @@ private:
     const QString m_sourcePath;
     const QString m_destPath;
     const QByteArray m_decryptionKey;
+    const QByteArray m_signature;
     const UserId m_senderId;
 };
 }

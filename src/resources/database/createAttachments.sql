@@ -4,6 +4,7 @@ CREATE TABLE attachments (
         type TEXT NOT NULL,
         fingerprint TEXT,
         decryptionKey BLOB,
+        signature BLOB,
         filename TEXT NOT NULL,
         localPath TEXT,
         url TEXT,

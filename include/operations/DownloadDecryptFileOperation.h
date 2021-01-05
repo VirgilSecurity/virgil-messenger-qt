@@ -53,7 +53,7 @@ class DownloadDecryptFileOperation : public NetworkOperation
 public:
     DownloadDecryptFileOperation(NetworkOperation *parent, Messenger *messenger, const Settings *settings,
                                  const QUrl &url, quint64 bytesTotal, const QString &filePath,
-                                 const QByteArray& decryptionKey, const UserId &senderId);
+                                 const QByteArray& decryptionKey, const QByteArray& signature, const UserId &senderId);
 
 signals:
     void progressChanged(quint64 bytesLoaded, quint64 bytesTotal);
@@ -72,6 +72,7 @@ private:
     const QString m_filePath;
 
     const QByteArray m_decryptionKey;
+    const QByteArray m_signature;
     const UserId m_senderId;
 };
 }
