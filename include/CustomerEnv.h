@@ -47,6 +47,7 @@ public:
     static QString contactDiscoveryServiceUrl();
     static QString caBundlePath();
     static QString version();
+    static QString appDataLocation();
 };
 
 } // vm

@@ -41,6 +41,9 @@
 #endif
 
 
+#include <QStandardPaths>
+
+
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
@@ -106,4 +109,16 @@ QString Self::caBundlePath() {
 
 QString Self::version() {
     return kVersion;
+}
+
+QString Self::appDataLocation() {
+    auto appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+
+    #if VS_MSGR_ENV_DEV
+        return appDataLocation + "-dev";
+    #elif VS_MSGR_ENV_STG
+        return appDataLocation + "-stg";
+    #else
+        return appDataLocation;
+    #endif
 }
