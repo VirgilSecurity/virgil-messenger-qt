@@ -36,6 +36,7 @@
 #define VM_CALCULATEATTACHMENTFINGERPRINTOPERATION_H
 
 #include "CalculateFileFingerprintOperation.h"
+#include "MessageOperation.h"
 
 namespace vm
 {

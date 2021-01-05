@@ -1,9 +1,8 @@
-import QtQuick 2.12
-import QtQuick.Layouts 1.12
-import QtQuick.Controls 2.12
-import QtQuick.Window 2.12
-import QtMultimedia 5.12
-import com.virgilsecurity.messenger 1.0
+import QtQuick 2.15
+import QtQuick.Layouts 1.15
+import QtQuick.Controls 2.15
+import QtQuick.Window 2.15
+import QtMultimedia 5.15
 
 import "../base"
 import "../theme"
@@ -13,7 +12,9 @@ Page {
     id: chatPage
 
     readonly property var appState: app.stateManager.chatState
+    readonly property var chatName: controllers.chats.currentChatName
     readonly property var contactId: controllers.chats.currentContactId
+    property real chatListViewHeight: 0
 
     QtObject {
         id: d
@@ -35,13 +36,10 @@ Page {
             anchors.leftMargin: 5
             anchors.rightMargin: 5
 
-            Rectangle {
+            HorizontalRule {
                 anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                anchors.right: parent.right
                 anchors.leftMargin: 20
                 anchors.rightMargin: 20
-                height: 1
                 color: Theme.chatSeparatorColor
             }
         }
@@ -65,7 +63,7 @@ Page {
                 Layout.fillWidth: true
                 Layout.leftMargin: Theme.smallMargin
                 Label {
-                    text: contactId
+                    text: chatName
                     font.pointSize: UiHelper.fixFontSz(15)
                     color: Theme.primaryTextColor
                     font.bold: true
@@ -78,117 +76,77 @@ Page {
                     color: Theme.secondaryTextColor
                 }
             }
-        }
-    }
 
-    ListView {
-        id: listView
-
-        property real previousHeight: 0.0
-        property var contextMenu: null
-
-        anchors.fill: parent
-        anchors.leftMargin: Theme.margin
-        anchors.rightMargin: Theme.margin
-
-        section.property: "day"
-        section.delegate: ChatDateSeporator {
-            date: section
-        }
-
-        model: models.messages
-
-        spacing: d.listSpacing
-        delegate: ChatMessage {
-            readonly property real fullWidth: root.width - 2 * Theme.margin - leftIndent
-
-            maxWidth: Platform.isMobile ? (fullWidth - 2 * Theme.margin) : fullWidth
-
-            body: model.body
-            displayTime: model.displayTime
-            nickname: model.authorId
-            isOwnMessage: model.authorId === controllers.users.userId
-            status: isOwnMessage ? model.status : "none"
-            messageId: model.id
-            inRow: model.inRow
-            firstInRow: model.firstInRow
-            isBroken: model.isBroken
-
-            attachmentId: model.attachmentId
-            attachmentType: model.attachmentType
-            attachmentStatus: model.attachmentStatus
-            attachmentDisplaySize: model.attachmentDisplaySize
-            attachmentDisplayText: model.attachmentDisplayText
-            attachmentDisplayProgress: model.attachmentDisplayProgress
-            attachmentBytesTotal: model.attachmentBytesTotal
-            attachmentBytesLoaded: model.attachmentBytesLoaded
-            attachmentImagePath: model.attachmentImagePath
-            attachmentThumbnailWidth: model.attachmentImageSize.width
-            attachmentThumbnailHeight: model.attachmentImageSize.height
-            attachmentFileExists: model.attachmentFileExists
-
-            onSaveAttachmentAs: function(messageId) {
-                saveAttachmentAsDialog.messageId = messageId
-                saveAttachmentAsDialog.attachmentType = attachmentType
-                saveAttachmentAsDialog.open()
-            }
-
-            onOpenContextMenu: function(messageId, mouse, contextMenu) {
-                if (!contextMenu.enabled) {
-                    return
+            ImageButton {
+                image: "More"
+                visible: appState.isGroupChat
+                onClicked: {
+                    if (appState.isGroupChat) {
+                        if (appState.isAdmin) {
+                            groupChatAdminContextMenu.open()
+                        } else {
+                            groupChatNotAdminContextMenu.open()
+                        }
+                    } else {
+                        stdChatContextMenu.open()
+                    }
                 }
-                listView.contextMenu = contextMenu
-                var coord = mapToItem(listView, mouse.x, mouse.y)
-                contextMenu.x = coord.x - (Platform.isMobile ? contextMenu.width : 0)
-                contextMenu.y = coord.y
-                contextMenu.parent = listView
-                contextMenu.open()
-            }
-        }
 
-        ScrollBar.vertical: ScrollBar { }
+                ContextMenu {
+                    id: stdChatContextMenu
+                    dropdown: true
+                    currentIndex: -1
 
-        Component.onCompleted: {
-            countChanged.connect(showLastMessage)
-            heightChanged.connect(function() {
-                if (height < previousHeight) {
-                    showLastMessage()
+                    Action {
+                        text: qsTr("Delete chat")
+                        onTriggered: console.log("Chat deletion isn't implemented")
+                    }
                 }
-                previousHeight = height
-            })
-            previousHeight = height
-            showLastMessage()
-        }
 
-        MouseArea {
-            anchors.fill: parent
-            onPressed: {
-                forceActiveFocus()
-                mouse.accepted = false
-            }
-            onWheel: {
-                if (listView.contextMenu) {
-                    listView.contextMenu.visible = false
+                ContextMenu {
+                    id: groupChatNotAdminContextMenu
+                    dropdown: true
+                    currentIndex: -1
+
+                    Action {
+                        text: qsTr("Leave group")
+                        onTriggered: controllers.chats.leaveGroup()
+                    }
                 }
-                wheel.accepted = false
+
+                ContextMenu {
+                    id: groupChatAdminContextMenu
+                    dropdown: true
+                    currentIndex: -1
+
+                    Action {
+                        text: qsTr("Add participant")
+                        onTriggered: controllers.chats.addParticipant("userId")
+                    }
+
+                    Action {
+                        text: qsTr("Remove participant")
+                        onTriggered: controllers.chats.removeParticipants("userId")
+                    }
+
+                    Action {
+                        text: qsTr("Leave group")
+                        onTriggered: controllers.chats.leaveGroup()
+                    }
+                }
             }
-        }
-
-        Timer {
-            id: scrollTimer
-            repeat: false
-            interval: 50
-            onTriggered: listView.positionViewAtEnd()
-        }
-
-        function showLastMessage() {
-            scrollTimer.start()
         }
     }
 
     footer: ChatMessageInput {
         id: footerControl
     }
+
+    ChatItem {
+        anchors.fill: parent
+    }
+
+// Components
 
     Item {
         SelectAttachmentsDialog {
@@ -219,3 +177,4 @@ Page {
         }
     }
 }
+

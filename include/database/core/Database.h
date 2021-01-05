@@ -35,15 +35,17 @@
 #ifndef VM_DATABASE_H
 #define VM_DATABASE_H
 
-#include <QSqlDatabase>
-#include <QSqlQuery>
-
 #include "DatabaseTable.h"
 #include "Migration.h"
 #include "ScopedConnection.h"
 #include "ScopedTransaction.h"
 
-Q_DECLARE_LOGGING_CATEGORY(lcDatabase)
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QLoggingCategory>
+
+
+Q_DECLARE_LOGGING_CATEGORY(lcDatabase);
 
 namespace vm
 {

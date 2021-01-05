@@ -45,64 +45,66 @@
 #include "database/UserDatabaseMigration.h"
 
 using namespace vm;
+using Self = UserDatabase;
 
-UserDatabase::UserDatabase(const QDir &databaseDir, QObject *parent)
+Self::UserDatabase(const QDir &databaseDir, QObject *parent)
     : Database(VERSION_DATABASE_SCHEME, parent)
     , m_databaseDir(databaseDir)
 {
     setMigration(std::make_unique<UserDatabaseMigration>());
 
-    connect(this, &UserDatabase::requestOpen, this, &UserDatabase::openByUserId);
-    connect(this, &UserDatabase::requestClose, this, &UserDatabase::close);
-    connect(this, &UserDatabase::writeMessage, this, &UserDatabase::onWriteMessage);
-    connect(this, &UserDatabase::writeChatAndLastMessage, this, &UserDatabase::onWriteChatAndLastMessage);
-    connect(this, &UserDatabase::resetUnreadCount, this, &UserDatabase::onResetUnreadCount);
+    connect(this, &Self::open, this, &Self::onOpen);
+    connect(this, &Self::close, this, &Self::onClose);
+    connect(this, &Self::writeMessage, this, &Self::onWriteMessage);
+    connect(this, &Self::updateMessage, this, &Self::onUpdateMessage);
+    connect(this, &Self::writeChatAndLastMessage, this, &Self::onWriteChatAndLastMessage);
+    connect(this, &Self::resetUnreadCount, this, &Self::onResetUnreadCount);
 }
 
-UserDatabase::~UserDatabase()
+Self::~UserDatabase()
 {}
 
-const AttachmentsTable *UserDatabase::attachmentsTable() const
+const AttachmentsTable *Self::attachmentsTable() const
 {
     return static_cast<const AttachmentsTable *>(table(m_attachmentsTableIndex));
 }
 
-AttachmentsTable *UserDatabase::attachmentsTable()
+AttachmentsTable *Self::attachmentsTable()
 {
     return static_cast<AttachmentsTable *>(table(m_attachmentsTableIndex));
 }
 
-const ChatsTable *UserDatabase::chatsTable() const
+const ChatsTable *Self::chatsTable() const
 {
     return static_cast<const ChatsTable *>(table(m_chatsTableIndex));
 }
 
-ChatsTable *UserDatabase::chatsTable()
+ChatsTable *Self::chatsTable()
 {
     return static_cast<ChatsTable *>(table(m_chatsTableIndex));
 }
 
-const ContactsTable *UserDatabase::contactsTable() const
+const ContactsTable *Self::contactsTable() const
 {
     return static_cast<const ContactsTable *>(table(m_contactsTableIndex));
 }
 
-ContactsTable *UserDatabase::contactsTable()
+ContactsTable *Self::contactsTable()
 {
     return static_cast<ContactsTable *>(table(m_contactsTableIndex));
 }
 
-const MessagesTable *UserDatabase::messagesTable() const
+const MessagesTable *Self::messagesTable() const
 {
     return static_cast<const MessagesTable *>(table(m_messagesTableIndex));
 }
 
-MessagesTable *UserDatabase::messagesTable()
+MessagesTable *Self::messagesTable()
 {
     return static_cast<MessagesTable *>(table(m_messagesTableIndex));
 }
 
-bool UserDatabase::create()
+bool Self::create()
 {
     tables().clear();
     int counter = -1;
@@ -126,71 +128,73 @@ bool UserDatabase::create()
     return true;
 }
 
-void UserDatabase::openByUserId(const UserId &userId)
+void Self::onOpen(const QString &username)
 {
-    if (!DatabaseUtils::isValidName(userId)) {
-        qCCritical(lcDatabase) << "Invalid database id:" << userId;
+    if (!DatabaseUtils::isValidName(username)) {
+        qCCritical(lcDatabase) << "Invalid database id:" << username;
         emit errorOccurred(tr("Invalid database id"));
     }
     else {
-        const QString fileName = QString("user-%1.sqlite3").arg(userId);
+        const QString fileName = QString("user-%1.sqlite3").arg(username);
         const QString filePath(m_databaseDir.filePath(fileName));
-        Database::open(filePath, userId + QLatin1String("-messenger"));
-        // Run initial update for user
-        {
-            ScopedConnection connection(*this);
-            const DatabaseUtils::BindValues values {
-                { ":createdStatus", static_cast<int>(Attachment::Status::Created) },
-                { ":loadingStatus", static_cast<int>(Attachment::Status::Loading) }
-            };
-            if (!DatabaseUtils::readExecQuery(this, QLatin1String("initUser"), values)) {
-                qCDebug(lcDatabase) << "Failed to init user";
-            }
+
+        if (Database::open(filePath, username + QLatin1String("-messenger"))) {
+            emit opened();
         }
-        messagesTable()->setUserId(userId);
-        emit userIdChanged(userId);
+        else {
+            emit errorOccurred(tr("Can not open database with users"));
+        }
     }
 }
 
-void UserDatabase::close()
+void Self::onClose()
 {
     Database::close();
-    emit userIdChanged(UserId());
 }
 
-void UserDatabase::onWriteMessage(const Message &message, const Chat::UnreadCount &unreadCount)
+void Self::onWriteMessage(const MessageHandler &message, qsizetype unreadCount)
 {
     ScopedConnection connection(*this);
     ScopedTransaction transaction(*this);
-    messagesTable()->createMessage(message);
-    if (message.attachment) {
-        attachmentsTable()->createAttachment(*message.attachment);
+    messagesTable()->addMessage(message);
+    if (message->contentIsAttachment()) {
+        attachmentsTable()->addAttachment(message);
     }
     chatsTable()->updateLastMessage(message, unreadCount);
 }
 
-void UserDatabase::onWriteChatAndLastMessage(const Chat &chat)
+void UserDatabase::onUpdateMessage(const MessageUpdate &messageUpdate)
+{
+    // Early ignore of updates that doesn't write to DB
+    if (std::holds_alternative<MessageAttachmentProcessedSizeUpdate>(messageUpdate)) {
+        return;
+    }
+
+    ScopedConnection connection(*this);
+    ScopedTransaction transaction(*this);
+    messagesTable()->updateMessage(messageUpdate);
+    attachmentsTable()->updateAttachment(messageUpdate);
+}
+
+void Self::onWriteChatAndLastMessage(const ChatHandler &chat)
 {
     ScopedConnection connection(*this);
     ScopedTransaction transaction(*this);
     // Create chat without last message
-    auto c = chat;
-    c.lastMessage = NullOptional;
-    chatsTable()->createChat(c);
+    chatsTable()->addChat(chat);
     // Create message & attachment
-    const auto message = *chat.lastMessage;
-    messagesTable()->createMessage(message);
-    if (message.attachment) {
-        attachmentsTable()->createAttachment(*message.attachment);
+    const auto message = chat->lastMessage();
+    messagesTable()->addMessage(message);
+    if (message->contentIsAttachment()) {
+        attachmentsTable()->addAttachment(message);
     }
     // Update last message
-    chatsTable()->updateLastMessage(message, chat.unreadMessageCount);
+    chatsTable()->updateLastMessage(message, chat->unreadMessageCount());
 }
 
-void UserDatabase::onResetUnreadCount(const Chat &chat)
+void Self::onResetUnreadCount(const ChatHandler &chat)
 {
     ScopedConnection connection(*this);
     ScopedTransaction transaction(*this);
     chatsTable()->resetUnreadCount(chat);
-    messagesTable()->markAllAsRead(chat);
 }

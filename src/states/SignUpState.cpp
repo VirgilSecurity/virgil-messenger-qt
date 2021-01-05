@@ -44,7 +44,7 @@ SignUpState::SignUpState(UsersController *usersController, Validator *validator,
     , m_usersController(usersController)
     , m_validator(validator)
 {
-    connect(usersController, &UsersController::signedUp, this, &SignUpState::operationFinished);
+    connect(usersController, &UsersController::signedIn, this, &SignUpState::operationFinished);
     connect(usersController, &UsersController::signUpErrorOccured, this, &SignUpState::operationErrorOccurred);
     connect(this, &SignUpState::signUp, this, &SignUpState::processSignUp);
 }
@@ -52,18 +52,14 @@ SignUpState::SignUpState(UsersController *usersController, Validator *validator,
 void SignUpState::processSignUp(const QString &username)
 {
     QString errorText;
-    const auto validUsername = m_validator->validatedUsername(username);
+    const auto validUsername = m_validator->validatedUsername(username, &errorText);
 
-    if (!validUsername) {
+    if (validUsername) {
+        emit operationStarted();
+        m_usersController->signUp(*validUsername);
+
+    } else {
         emit operationStarted();
         emit operationErrorOccurred(errorText);
-    }
-    else {
-        if (m_userId != *validUsername) {
-            m_userId = *validUsername;
-            emit userIdChanged(m_userId);
-        }
-        emit operationStarted();
-        m_usersController->signUp(m_userId);
     }
 }

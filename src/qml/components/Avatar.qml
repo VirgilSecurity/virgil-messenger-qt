@@ -1,38 +1,62 @@
 import QtQuick 2.12
+import QtGraphicalEffects 1.0
 
 import "../theme"
 import "./CommonHelpers"
 
-TextInCircle {
+Item {
+    id: avatar
     property string nickname
+    property alias avatarUrl: originalImage.source
+    property alias diameter: avatar.width
+    property alias content: textInCircle.content
+    property alias pointSize: textInCircle.pointSize
 
-    color: Theme.avatarBgColor // intToHexColor(hashCode(nickname))
-    diameter: Theme.avatarHeight
-    content: nickname.replace("_", "").substring(0, 2).toUpperCase()
-    pointSize: UiHelper.fixFontSz(0.4 * diameter)
+    width: Theme.avatarHeight
+    height: width
 
-    // Hash any string into an integer value
-    // Then we'll use the int and convert to hex.
-    function hashCode(str) {
-        var hash = 0;
-        for (var i = 0; i < str.length; i++) {
-            hash = str.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        return hash;
+    TextInCircle {
+        id: textInCircle
+        color: Theme.avatarBgColor
+        anchors.centerIn: parent
+        diameter: parent.height
+        content: nickname.replace("_", "").substring(0, 2).toUpperCase()
+        pointSize: UiHelper.fixFontSz(0.4 * diameter)
+        visible: !imageItem.visible
     }
 
-    // Convert an int to hexadecimal with a max length
-    // of six characters.
-    function intToHexColor(i) {
-        var hex = ((i>>24)&0xFF).toString(16) +
-                ((i>>16)&0xFF).toString(16) +
-                ((i>>8)&0xFF).toString(16) +
-                (i&0xFF).toString(16);
+    Item {
+        id: imageItem
+        anchors.fill: parent
+        visible: originalImage.status == Image.Ready
 
-        // Sometimes the string returned will be too short so we
-        // add zeros to pad it out, which later get removed if
-        // the length is greater than six.
-        hex += '000000';
-        return "#" + hex.substring(0, 6);
+        Image {
+            id: originalImage
+            anchors.fill: parent
+            source: avatarUrl
+            smooth: true
+            asynchronous: true
+            fillMode: Image.PreserveAspectCrop
+            visible: false
+            onStatusChanged: {
+                if (status == Image.Error) {
+                    console.log("Avatar url loading error:", avatarUrl)
+                }
+            }
+        }
+
+        Rectangle {
+            id: rectangleMask
+            width: parent.width
+            height: parent.height
+            radius: height
+            visible: false
+        }
+
+        OpacityMask {
+            anchors.fill: originalImage
+            source: originalImage
+            maskSource: rectangleMask
+        }
     }
 }

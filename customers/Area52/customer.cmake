@@ -16,7 +16,9 @@ else()
     set(VS_ORGANIATION_DOMAIN "virgil.net")
     set(VS_MESSANGER_URL_TEMPLATE "https://messenger%1.area52.virgil.net")
     set(VS_XMPP_URL_TEMPLATE "xmpp%1.area52.virgil.net")
-    
+    set(VS_XMPP_DOMAIN_TEMPLATE "")
+    set(CONTACT_DISCOVERY_URL_TEMPLATE "")
+
     # -- Sources and includes
     # Custom customer sources and includes
     #set(VS_CUSTOMER_INCLUDE_DIR "${VS_CUSTOMER_DIR}/includes")

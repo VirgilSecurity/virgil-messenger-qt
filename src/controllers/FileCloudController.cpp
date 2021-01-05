@@ -36,8 +36,10 @@
 
 #include "Settings.h"
 #include "Utils.h"
+#include "FileUtils.h"
 #include "models/FileCloudModel.h"
 #include "models/Models.h"
+#include "Controller.h"
 
 using namespace vm;
 
@@ -54,7 +56,7 @@ FileCloudController::FileCloudController(const Settings *settings, Models *model
 void FileCloudController::openFile(const QVariant &proxyRow)
 {
     const auto fileInfo = model()->getFileInfo(proxyRow.toInt());
-    Utils::openUrl(Utils::localFileToUrl(fileInfo.absoluteFilePath()));
+    FileUtils::openUrl(FileUtils::localFileToUrl(fileInfo.absoluteFilePath()));
 }
 
 void FileCloudController::setDirectory(const QVariant &proxyRow)
@@ -78,10 +80,10 @@ void FileCloudController::cdUp()
 void FileCloudController::addFile(const QVariant &attachmentUrl)
 {
     const auto url = attachmentUrl.toUrl();
-    const auto filePath = Utils::urlToLocalFile(url);
-    const auto fileName = Utils::attachmentFileName(url, QFileInfo(filePath), false);
+    const auto filePath = FileUtils::urlToLocalFile(url);
+    const auto fileName = FileUtils::attachmentFileName(url, false);
     // Copy
-    const auto destFilePath = Utils::findUniqueFileName(m_currentDir.filePath(fileName));
+    const auto destFilePath = FileUtils::findUniqueFileName(m_currentDir.filePath(fileName));
     if (QFile::copy(filePath, destFilePath)) {
         setDirectory(m_currentDir);
     }

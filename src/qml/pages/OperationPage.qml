@@ -8,31 +8,34 @@ Page {
     property var appState
     property bool loadingUsed: true
     property string loadingText: ""
+    property alias footerText: footerItem.text
+
+    Binding { target: form; property: "loadingText"; value: loadingText }
 
     background: Rectangle {
         color: Theme.mainBackgroundColor
     }
 
-    footer: Footer {}
+    footer: Footer {id: footerItem; text: qsTr("Powered by Virgil Security, Inc.")}
 
     Connections {
         target: appState
 
         function onOperationStarted() {
             if (loadingUsed) {
-                form.showLoading(loadingText)
+                form.isLoading = true
             }
         }
 
         function onOperationFinished() {
             if (loadingUsed) {
-                form.hideLoading()
+                form.isLoading = false
             }
         }
 
         function onOperationErrorOccurred(errorText) {
             if (loadingUsed) {
-                form.hideLoading()
+                form.isLoading = false
                 showPopupError(errorText) // TODO(fpohtmeh): don't use parent method directly
             }
         }

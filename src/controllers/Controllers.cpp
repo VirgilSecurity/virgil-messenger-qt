@@ -35,34 +35,37 @@
 #include "controllers/Controllers.h"
 
 #include "Settings.h"
-#include "VSQMessenger.h"
+#include "Messenger.h"
 #include "controllers/AttachmentsController.h"
 #include "controllers/ChatsController.h"
 #include "controllers/FileCloudController.h"
 #include "controllers/MessagesController.h"
 #include "controllers/UsersController.h"
 #include "database/UserDatabase.h"
+#include "models/DiscoveredContactsModel.h"
+#include "models/Models.h"
 
 using namespace vm;
 
-Controllers::Controllers(VSQMessenger *messenger, Settings *settings,
+Controllers::Controllers(Messenger *messenger, Settings *settings,
                          Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
     , m_attachments(new AttachmentsController(settings, models, this))
     , m_users(new UsersController(messenger, models, userDatabase, this))
-    , m_chats(new ChatsController(models, userDatabase, this))
-    , m_messages(new MessagesController(messenger, models, userDatabase, this))
+    , m_chats(new ChatsController(messenger, models, userDatabase, this))
+    , m_messages(new MessagesController(messenger, settings, models, userDatabase, this))
     , m_fileCloud(new FileCloudController(settings, models, this))
 {
     connect(m_attachments, &AttachmentsController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_messages, &MessagesController::notificationCreated, this, &Controllers::notificationCreated);
-    connect(m_messages, &MessagesController::displayImageNotFound, m_attachments, &AttachmentsController::downloadDisplayImage);
-    connect(m_users, &UsersController::userIdChanged, m_attachments, &AttachmentsController::setUserId);
-    connect(m_users, &UsersController::userIdChanged, m_chats, &ChatsController::loadChats);
-    connect(m_chats, &ChatsController::currentContactIdChanged, m_attachments, &AttachmentsController::setContactId);
-    connect(m_chats, &ChatsController::chatsSet, m_messages, &MessagesController::setUserId);
+
+    //
+    //  Queued connection is used here to give ChatsController a chance to setup database connections.
+    //  TODO: find a better solution.
+    //
+    connect(m_users, &UsersController::signedIn, m_chats, &ChatsController::loadChats, Qt::QueuedConnection);
     connect(m_chats, &ChatsController::chatOpened, m_messages, &MessagesController::loadMessages);
-    connect(m_chats, &ChatsController::chatClosed, m_messages, std::bind(&MessagesController::loadMessages, m_messages, Chat()));
+    connect(m_chats, &ChatsController::chatClosed, m_messages, &MessagesController::clearMessages);
 
     qRegisterMetaType<AttachmentsController *>("AttachmentsController*");
     qRegisterMetaType<ChatsController *>("ChatsController*");

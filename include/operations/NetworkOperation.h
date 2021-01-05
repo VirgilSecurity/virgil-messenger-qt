@@ -39,26 +39,21 @@
 
 namespace vm
 {
-class FileLoader;
-
 class NetworkOperation : public Operation
 {
     Q_OBJECT
 
 public:
-    NetworkOperation(QObject *parent, FileLoader *fileLoader);
     explicit NetworkOperation(NetworkOperation *parent);
+    NetworkOperation(QObject *parent, bool isOnline);
 
-    FileLoader *fileLoader();
-    bool isOnline() const;
+    bool isOnline() const noexcept;
+    void setIsOnline(bool isOnline);
 
 protected:
     bool preRun() override;
 
 private:
-    void setIsOnline(bool isOnline);
-
-    FileLoader *m_fileLoader;
     bool m_isOnline = false;
 };
 }

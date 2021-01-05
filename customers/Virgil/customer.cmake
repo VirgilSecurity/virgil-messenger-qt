@@ -17,6 +17,11 @@ else()
     set(VS_MESSANGER_URL_TEMPLATE "https://messenger%1.virgilsecurity.com")
     set(VS_XMPP_URL_TEMPLATE "xmpp%1.virgilsecurity.com")
 
+    set(VS_XMPP_DOMAIN_TEMPLATE "xmpp%1.virgilsecurity.com")
+    set(CONTACT_DISCOVERY_URL_TEMPLATE "https://disco%1-va.virgilsecurity.com")
+    
+    set(VS_BUNDLE_PREFIX "com.virgil")
+
     # -- Sources and includes
     # Custom customer sources and includes
     #set(VS_CUSTOMER_INCLUDE_DIR "${VS_CUSTOMER_DIR}/includes")
@@ -41,13 +46,13 @@ else()
         set(SU_PUBLIC_ED_KEY "44RVxRhV4h4Hlw+VOeXvCj78Z5NUhJ2Qi5N+kpu8KxI=")
         set(MACOSX_BUNDLE_ICON_FILE "MyIcon.icns")    
         set(MACOSX_BUNDLE_BACKGROUND_FILE "Background.png")
-        set(VS_BUNDLE_PREFIX "com.virgilsecurity")
+#        set(VS_BUNDLE_PREFIX "com.virgilsecurity")
     # ----------    
     # IOS    
     # ----------
     # ***********************************************************************************
     elseif(VS_PLATFORM STREQUAL "ios")        
-        set(VS_BUNDLE_PREFIX "com.virgil")
+#        set(VS_BUNDLE_PREFIX "com.virgil")
     endif()    
 
 endif()

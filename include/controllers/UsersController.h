@@ -35,67 +35,69 @@
 #ifndef VM_USERSCONTROLLER_H
 #define VM_USERSCONTROLLER_H
 
+#include "UserId.h"
+#include "Chat.h"
+
 #include <QObject>
+#include <QPointer>
 
-#include "VSQCommon.h"
 
-class VSQMessenger;
+class Messenger;
 
 namespace vm
 {
 class Models;
 class UserDatabase;
+class Messenger;
 
 class UsersController : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(UserId userId MEMBER m_userId NOTIFY userIdChanged);
+    Q_PROPERTY(QString currentUserId READ currentUserId NOTIFY currentUserIdChanged)
+    Q_PROPERTY(QString currentUsername READ currentUsername NOTIFY currentUsernameChanged)
+    Q_PROPERTY(QString nextUsername READ nextUsername NOTIFY nextUsernameChanged)
 
 public:
-    UsersController(VSQMessenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
+    UsersController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
-    UserId userId() const;
+    void signIn(const QString &username);
+    void signUp(const QString &username);
 
-    void signIn(const UserId &userId);
-    void signUp(const UserId &userId);
     Q_INVOKABLE void signOut();
-
-    Q_INVOKABLE void requestAccountSettings(const UserId &userId);
+    Q_INVOKABLE void requestAccountSettings(const QString &username);
 
     void downloadKey(const QString &username, const QString &password);
 
-signals:
-    void signedIn(const UserId &username);
-    void signInErrorOccured(const QString &errorText);
-    void signedUp(const UserId &userId);
-    void signUpErrorOccured(const QString &errorText);
-    void signedOut();
+    QString currentUserId() const;
+    QString currentUsername() const;
+    void setNextUsername(const QString &username);
+    QString nextUsername() const;
 
-    void keyDownloaded(const UserId &userId);
+signals:
+    void signedIn(const QString &username);
+    void signedOut();
+    void signInErrorOccured(const QString &errorText);
+    void signUpErrorOccured(const QString &errorText);
     void downloadKeyFailed(const QString &errorText);
 
-    void accountSettingsRequested(const UserId &userId);
+    void accountSettingsRequested(const QString &username);
 
-    void userIdChanged(const UserId &userId);
+    void currentUserIdChanged(const QString &userId);
+    void currentUsernameChanged(const QString &username);
+    void nextUsernameChanged(const QString &username);
 
 private:
-    enum class Operation
-    {
-        SignIn,
-        SignUp,
-        SignOut,
-        DownloadKey
-    };
+    void onSignedIn(const QString &username);
+    void onSignedOut();
+    void onFinishSignIn();
+    void onFinishSignOut();
 
-    void openDatabase(const UserId &userId, const Operation operation);
-    void onDatabaseUserIdChanged(const UserId &userId);
+    void onChatAdded(const ChatHandler &chat);
 
-    void subscribeByChat(const Chat &chat);
-
-    VSQMessenger *m_messenger;
-    UserDatabase *m_userDatabase;
-    Operation m_operation = Operation::SignIn;
-    UserId m_userId;
+private:
+    QPointer<Messenger> m_messenger;
+    QPointer<UserDatabase> m_userDatabase;
+    QString m_nextUsername;
 };
 }
 

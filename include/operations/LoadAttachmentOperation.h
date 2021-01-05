@@ -48,19 +48,19 @@ class LoadAttachmentOperation : public NetworkOperation
 public:
     explicit LoadAttachmentOperation(MessageOperation *parent);
 
-    void startLoadOperation(const DataSize &bytesTotal);
-    void setLoadOperationProgress(const DataSize &bytesLoaded);
+    void startLoadOperation(quint64 bytesTotal);
+    void setLoadOperationProgress(quint64 bytesLoaded);
 
 signals:
-    void totalProgressChanged(const DataSize &bytesLoaded, const DataSize &bytesTotal);
+    void totalProgressChanged(quint64 bytesLoaded, quint64 bytesTotal);
 
 private:
     void cleanup() override;
     void updateTotalProgress();
 
-    DataSize m_bytesTotal = 0;
-    DataSize m_previousBytesTotal = 0;
-    DataSize m_currentBytesLoaded = 0;
+    quint64 m_bytesTotal = 0;
+    quint64 m_previousBytesTotal = 0;
+    quint64 m_currentBytesLoaded = 0;
 };
 }
 

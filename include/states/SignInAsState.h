@@ -42,20 +42,12 @@ namespace vm
 class SignInAsState : public QState
 {
     Q_OBJECT
-    Q_PROPERTY(QString userId READ userId WRITE setUserId NOTIFY userIdChanged)
 
 public:
     using QState::QState;
 
-    QString userId() const;
-    void setUserId(const QString &userId);
-
 signals:
     void requestDownloadKey(const QString &userId);
-    void userIdChanged(const QString &userId);
-
-private:
-    QString m_userId;
 };
 }
 

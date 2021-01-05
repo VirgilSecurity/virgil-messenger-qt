@@ -35,13 +35,13 @@
 #include <QtCore>
 #include <QtQml>
 
-#include <VSQApplication.h>
-#include <VSQCommon.h>
-#include <VSQClipboardProxy.h>
-#include <VSQCustomer.h>
-#include <Utils.h>
-#include <logging/VSQLogging.h>
-#include <ui/VSQUiHelper.h>
+#include "CustomerEnv.h"
+#include "Utils.h"
+#include "VSQApplication.h"
+#include "VSQClipboardProxy.h"
+#include "VSQCustomer.h"
+#include "VSQLogging.h"
+#include "VSQUiHelper.h"
 
 #if defined(VS_ANDROID) && VS_ANDROID
 #include "FirebaseListener.h"
@@ -51,25 +51,18 @@
 #include <QFont>
 #include <QDesktopServices>
 
-#define STRINGIFY(x) #x
-#define TOSTRING(x) STRINGIFY(x)
 
-#if defined(VERSION)
-const QString VSQApplication::kVersion = QString(TOSTRING(VERSION));
-#else
-const QString VSQApplication::kVersion = "unknown";
-#endif
+using namespace vm;
+using Self = VSQApplication;
 
 /******************************************************************************/
-VSQApplication::VSQApplication()
+Self::VSQApplication()
     : m_settings(this)
-    , m_networkAccessManager(new QNetworkAccessManager(this))
-    , m_crashReporter(&m_settings, m_networkAccessManager, this)
     , m_engine(new QQmlApplicationEngine(this))
     , m_validator(new Validator(this))
     , m_messenger(&m_settings, m_validator)
     , m_userDatabase(new UserDatabase(m_settings.databaseDir(), nullptr))
-    , m_models(&m_messenger, &m_settings, m_userDatabase, m_networkAccessManager, this)
+    , m_models(&m_messenger, &m_settings, m_userDatabase, m_validator, this)
     , m_databaseThread(new QThread())
     , m_controllers(&m_messenger, &m_settings, &m_models, m_userDatabase, this)
     , m_keyboardEventFilter(new KeyboardEventFilter(this))
@@ -77,11 +70,11 @@ VSQApplication::VSQApplication()
 {
     m_settings.print();
 
-    registerCommonMetaTypes();
+    qRegisterMetaType<qsizetype>("qsizetype");
     qRegisterMetaType<KeyboardEventFilter *>("KeyboardEventFilter*");
 
-    connect(&m_models, &Models::notificationCreated, this, &VSQApplication::notificationCreated);
-    connect(&m_controllers, &Controllers::notificationCreated, this, &VSQApplication::notificationCreated);
+    connect(&m_models, &Models::notificationCreated, this, &Self::notificationCreated);
+    connect(&m_controllers, &Controllers::notificationCreated, this, &Self::notificationCreated);
 
     QThread::currentThread()->setObjectName("MainThread");
     m_userDatabase->moveToThread(m_databaseThread);
@@ -93,7 +86,7 @@ VSQApplication::VSQApplication()
 #endif
 }
 
-VSQApplication::~VSQApplication()
+Self::~VSQApplication()
 {
     m_databaseThread->quit();
     m_databaseThread->wait();
@@ -102,7 +95,7 @@ VSQApplication::~VSQApplication()
 }
 
 /******************************************************************************/
-void VSQApplication::initialize()
+void Self::initialize()
 {
     // Attributes
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -116,17 +109,14 @@ void VSQApplication::initialize()
     QCoreApplication::setApplicationName(Customer::ApplicationName);
     QGuiApplication::setApplicationDisplayName(Customer::ApplicationDisplayName);
 
-    // TODO(fpohtmeh): set version, use in currentVersion()
+    // TODO(fpohtmeh): set version, use in CustomerEnv::version()
 }
 
 /******************************************************************************/
 int
-VSQApplication::run(const QString &basePath, VSQLogging *logging) {
+Self::run(const QString &basePath, VSQLogging *logging) {
 
     VSQUiHelper uiHelper;
-
-    m_messenger.setCrashReporter(&m_crashReporter);
-    m_crashReporter.setkVersion(kVersion);
 
     QUrl url;
     if (basePath.isEmpty()) {
@@ -141,9 +131,9 @@ VSQApplication::run(const QString &basePath, VSQLogging *logging) {
     context->setContextProperty("UiHelper", &uiHelper);
     context->setContextProperty("app", this);
     context->setContextProperty("clipboard", new VSQClipboardProxy(QGuiApplication::clipboard()));
-    context->setContextProperty("Messenger", &m_messenger);
+    context->setContextProperty("messenger", &m_messenger);
     context->setContextProperty("logging", logging);
-    context->setContextProperty("crashReporter", &m_crashReporter);
+    context->setContextProperty("crashReporter", m_messenger.crashReporter());
     context->setContextProperty("settings", &m_settings);
     context->setContextProperty("controllers", &m_controllers);
     context->setContextProperty("models", &m_models);
@@ -152,8 +142,8 @@ VSQApplication::run(const QString &basePath, VSQLogging *logging) {
     fon.setPointSize(1.5 * QGuiApplication::font().pointSize());
     QGuiApplication::setFont(fon);
 
-    connect(qApp, &QGuiApplication::applicationStateChanged, this, &VSQApplication::onApplicationStateChanged);
-    connect(qApp, &QGuiApplication::aboutToQuit, this, &VSQApplication::onAboutToQuit);
+    connect(qApp, &QGuiApplication::applicationStateChanged, this, &Self::onApplicationStateChanged);
+    connect(qApp, &QGuiApplication::aboutToQuit, this, &Self::onAboutToQuit);
 
     reloadQml();
 
@@ -167,37 +157,36 @@ VSQApplication::run(const QString &basePath, VSQLogging *logging) {
 }
 
 /******************************************************************************/
-void VSQApplication::reloadQml() {
+void Self::reloadQml() {
     const QUrl url(QStringLiteral("main.qml"));
     m_engine->clearComponentCache();
     m_engine->load(url);
 }
 
 /******************************************************************************/
-void VSQApplication::checkUpdates()
+void Self::checkUpdates()
 {
 #ifdef VS_MACOS
     VSQMacos::instance().checkUpdates();
 #endif
 }
 
-/******************************************************************************/
-QString
-VSQApplication::currentVersion() const {
-    return kVersion + "-alpha";
-}
-
-QString VSQApplication::organizationDisplayName() const
+QString Self::organizationDisplayName() const
 {
     return Customer::OrganizationDisplayName;
 }
 
-QString VSQApplication::applicationDisplayName() const
+QString Self::applicationDisplayName() const
 {
     return Customer::ApplicationDisplayName;
 }
 
-bool VSQApplication::isIosSimulator() const
+QString
+Self::currentVersion() const {
+    return CustomerEnv::version();
+}
+
+bool Self::isIosSimulator() const
 {
 #ifdef VS_IOS_SIMULATOR
     return true;
@@ -206,35 +195,23 @@ bool VSQApplication::isIosSimulator() const
 #endif
 }
 
-void VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
+void Self::onApplicationStateChanged(Qt::ApplicationState state) {
     qDebug() << state;
-    m_messenger.setApplicationActive(state == Qt::ApplicationState::ApplicationActive);
+    m_messenger.setApplicationActive(Qt::ApplicationState::ApplicationActive == state);
 
-#if VS_PUSHNOTIFICATIONS
-    static bool _deactivated = false;
-
-    if (Qt::ApplicationInactive == state) {
-        _deactivated = true;
-        m_messenger.setStatus(VSQMessenger::MSTATUS_UNAVAILABLE);
+    if (Qt::ApplicationState::ApplicationSuspended == state) {
+        m_messenger.suspend();
     }
-
-    if (Qt::ApplicationActive == state && _deactivated) {
-        _deactivated = false;
-        QTimer::singleShot(200, [this]() {
-            this->m_messenger.checkState();
-        });
-    }
-#endif // VS_ANDROID
 }
 
-void VSQApplication::onAboutToQuit()
+void Self::onAboutToQuit()
 {
     qDebug() << "Application about to quit";
+    m_messenger.setApplicationActive(false);
     m_settings.setRunFlag(false);
-    m_messenger.setStatus(VSQMessenger::EnStatus::MSTATUS_UNAVAILABLE);
 }
 
-ApplicationStateManager *VSQApplication::stateManager()
+ApplicationStateManager *Self::stateManager()
 {
     return &m_applicationStateManager;
 }

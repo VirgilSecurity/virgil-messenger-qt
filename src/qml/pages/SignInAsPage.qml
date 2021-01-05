@@ -7,13 +7,14 @@ import "../components"
 
 Page {
     property var appState: app.stateManager.signInAsState
+    property string footerText: qsTr("Powered by Virgil Security, Inc.")
 
     background: Rectangle {
         color: Theme.mainBackgroundColor
     }
 
     header: Header {
-        title: qsTr("Sign in as %1").arg(appState.userId)
+        title: qsTr("Sign in as %1").arg(controllers.users.nextUsername)
     }
 
     Form {
@@ -29,7 +30,7 @@ Page {
 
         FormPrimaryButton {
             text: qsTr("Download from the Cloud")
-            onClicked: appState.requestDownloadKey(appState.userId)
+            onClicked: appState.requestDownloadKey(controllers.users.nextUsername)
         }
 
         FormPrimaryButton {
@@ -43,5 +44,5 @@ Page {
         }
     }
 
-    footer: Footer {}
+    footer: Footer {text: footerText}
 }

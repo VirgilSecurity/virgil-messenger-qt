@@ -34,7 +34,7 @@
 
 #include "operations/CalculateFileFingerprintOperation.h"
 
-#include "Core.h"
+#include "FileUtils.h"
 
 using namespace vm;
 
@@ -45,9 +45,9 @@ CalculateFileFingerprintOperation::CalculateFileFingerprintOperation(QObject *pa
 
 void CalculateFileFingerprintOperation::run()
 {
-    const auto fingerpint = Core::calculateFileFingerprint(m_sourcePath);
-    if (fingerpint) {
-        emit fingerprintCalculated(*fingerpint);
+    const auto fingerpint = FileUtils::calculateFingerprint(m_sourcePath);
+    if (!fingerpint.isEmpty()) {
+        emit fingerprintCalculated(fingerpint);
     }
     else {
         emit fingerpintCalculationFailed();

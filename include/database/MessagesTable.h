@@ -36,6 +36,10 @@
 #define VM_MESSAGESTABLE_H
 
 #include "core/DatabaseTable.h"
+#include "Message.h"
+#include "Chat.h"
+
+#include <optional>
 
 namespace vm
 {
@@ -47,30 +51,32 @@ public:
     explicit MessagesTable(Database *database);
 
 signals:
-    void setUserId(const UserId &userId);
-    void fetchChatMessages(const Chat::Id &chatId);
+    //
+    //  Control signals.
+    //
+    void fetchChatMessages(const ChatId &chatId);
     void fetchNotSentMessages();
-    void createMessage(const Message &message);
+    void addMessage(const MessageHandler &message);
 
-    void updateStatus(const Message::Id &messageId, const Message::Status &status);
+    void updateMessage(const MessageUpdate &messageId);
     void markAllAsRead(const Chat &chat);
 
+    //
+    //  Notification signals.
+    //
     void errorOccurred(const QString &errorText);
-    void chatMessagesFetched(const Messages &messages);
-    void notSentMessagesFetched(const GlobalMessages &messages);
+    void chatMessagesFetched(ModifiableMessages messages);
+    void notSentMessagesFetched(ModifiableMessages messages);
 
 private:
     bool create() override;
 
-    void onSetUserId(const UserId &userId);
-    void onFetchChatMessages(const Chat::Id &chatId);
+    void onFetchChatMessages(const ChatId &chatId);
     void onFetchNotSentMessages();
-    void onCreateMessage(const Message &message);
+    void onAddMessage(const MessageHandler &message);
 
-    void onUpdateStatus(const Message::Id &messageId, const Message::Status &status);
+    void onUpdateMessage(const MessageUpdate &MessageUpdate);
     void onMarkAllAsRead(const Chat &chat);
-
-    UserId m_userId;
 };
 }
 

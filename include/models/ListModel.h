@@ -37,30 +37,54 @@
 
 #include <QAbstractListModel>
 
-class QSortFilterProxyModel;
-
 namespace vm
 {
+class ListProxyModel;
+class ListSelectionModel;
+
 class ListModel : public QAbstractListModel
 {
     Q_OBJECT
-    Q_PROPERTY(QSortFilterProxyModel *proxy MEMBER m_proxy CONSTANT)
+    Q_PROPERTY(ListProxyModel *proxy MEMBER m_proxy NOTIFY proxyChanged)
+    Q_PROPERTY(ListSelectionModel *selection MEMBER m_selection CONSTANT)
     Q_PROPERTY(QString filter MEMBER m_filter WRITE setFilter NOTIFY filterChanged)
 
 public:
-    explicit ListModel(QObject *parent);
+    enum Roles
+    {
+        IsSelectedRole = Qt::CheckStateRole
+    };
 
-signals:
-    void filterChanged(const QString &);
+    using RoleNames = QHash<int, QByteArray>;
 
-protected:
-    const QSortFilterProxyModel *proxy() const;
-    QSortFilterProxyModel *proxy();
+    explicit ListModel(QObject *parent, bool createProxy = true);
 
-private:
+    QString filter() const;
     void setFilter(const QString &filter);
 
-    QSortFilterProxyModel *m_proxy;
+    QModelIndex sourceIndex(const int proxyRow) const;
+    QModelIndex proxyIndex(const int sourceRow) const;
+
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
+    static RoleNames unitedRoleNames(const RoleNames &a, const RoleNames &b);
+
+    const ListProxyModel *proxy() const;
+    ListProxyModel *proxy();
+    void setProxy(ListProxyModel *proxy);
+
+    const ListSelectionModel *selection() const;
+    ListSelectionModel *selection();
+
+signals:
+    void filterChanged(const QString &filter);
+    void proxyChanged(ListProxyModel *proxy);
+
+private:
+    void onSelectionChanged(const QList<QModelIndex> &indices);
+
+    ListProxyModel *m_proxy;
+    ListSelectionModel *m_selection;
     QString m_filter;
 };
 }

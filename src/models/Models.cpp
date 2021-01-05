@@ -37,34 +37,29 @@
 #include <QSortFilterProxyModel>
 
 #include "Settings.h"
-#include "VSQMessenger.h"
+#include "Messenger.h"
 #include "models/AccountSelectionModel.h"
-#include "models/AttachmentsModel.h"
 #include "models/ChatsModel.h"
+#include "models/DiscoveredContactsModel.h"
 #include "models/FileCloudModel.h"
+#include "models/FileCloudUploader.h"
 #include "models/MessagesModel.h"
 #include "models/MessagesQueue.h"
-#include "models/FileLoader.h"
 
 using namespace vm;
 
-Models::Models(VSQMessenger *messenger, Settings *settings, UserDatabase *userDatabase, QNetworkAccessManager *networkAccessManager, QObject *parent)
+Models::Models(Messenger *messenger, Settings *settings, UserDatabase *userDatabase, Validator *validator, QObject *parent)
     : QObject(parent)
     , m_accountSelection(new AccountSelectionModel(settings, this))
-    , m_attachments(new AttachmentsModel(settings, this))
     , m_chats(new ChatsModel(this))
+    , m_discoveredContacts(new DiscoveredContactsModel(validator, this))
     , m_messages(new MessagesModel(this))
     , m_fileCloud(new FileCloudModel(settings, this))
-    , m_fileLoader(new FileLoader(messenger->xmpp(), networkAccessManager, this))
-    , m_messagesQueue(new MessagesQueue(settings, messenger, userDatabase, m_fileLoader, nullptr))
+    , m_fileCloudUploader(new FileCloudUploader(this))
+    , m_fileLoader(messenger->fileLoader())
+    , m_messagesQueue(new MessagesQueue(settings, messenger, userDatabase, nullptr)) // TODO(fpohtmeh): set parent?
+    , m_queueThread(new QThread())
 {
-    qRegisterMetaType<AccountSelectionModel *>("AccountSelectionModel*");
-    qRegisterMetaType<AttachmentsModel *>("AttachmentsModel*");
-    qRegisterMetaType<ChatsModel *>("ChatsModel*");
-    qRegisterMetaType<FileCloudModel *>("FileCloudModel*");
-    qRegisterMetaType<MessagesModel *>("MessagesModel*");
-    qRegisterMetaType<QSortFilterProxyModel *>("QSortFilterProxyModel*");
-
     connect(m_messagesQueue, &MessagesQueue::notificationCreated, this, &Models::notificationCreated);
 }
 
@@ -82,16 +77,6 @@ AccountSelectionModel *Models::accountSelection()
     return m_accountSelection;
 }
 
-const AttachmentsModel *Models::attachments() const
-{
-    return m_attachments;
-}
-
-AttachmentsModel *Models::attachments()
-{
-    return m_attachments;
-}
-
 const ChatsModel *Models::chats() const
 {
     return m_chats;
@@ -102,6 +87,16 @@ ChatsModel *Models::chats()
     return m_chats;
 }
 
+const DiscoveredContactsModel *Models::discoveredContacts() const
+{
+    return m_discoveredContacts;
+}
+
+DiscoveredContactsModel *Models::discoveredContacts()
+{
+    return m_discoveredContacts;
+}
+
 const FileCloudModel *Models::fileCloud() const
 {
     return m_fileCloud;
@@ -110,6 +105,16 @@ const FileCloudModel *Models::fileCloud() const
 FileCloudModel *Models::fileCloud()
 {
     return m_fileCloud;
+}
+
+const FileCloudUploader *Models::fileCloudUploader() const
+{
+    return m_fileCloudUploader;
+}
+
+FileCloudUploader *Models::fileCloudUploader()
+{
+    return m_fileCloudUploader;
 }
 
 const FileLoader *Models::fileLoader() const

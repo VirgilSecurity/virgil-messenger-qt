@@ -35,11 +35,13 @@
 #ifndef VM_OPERATION_H
 #define VM_OPERATION_H
 
-#include <deque>
 
 #include <QObject>
+#include <QLoggingCategory>
 
-#include "VSQCommon.h"
+
+#include <deque>
+
 
 Q_DECLARE_LOGGING_CATEGORY(lcOperation)
 

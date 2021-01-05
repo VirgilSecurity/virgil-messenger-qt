@@ -34,101 +34,113 @@
 
 #include "controllers/UsersController.h"
 
-#include "VSQMessenger.h"
+#include "Messenger.h"
 #include "database/UserDatabase.h"
 #include "models/Models.h"
 #include "models/ChatsModel.h"
 #include "models/MessagesModel.h"
 
-using namespace vm;
+#include <utility>
 
-UsersController::UsersController(VSQMessenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent)
+using namespace vm;
+using Self = UsersController;
+
+
+Self::UsersController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
     , m_messenger(messenger)
     , m_userDatabase(userDatabase)
 {
-    connect(messenger, &VSQMessenger::signedIn, this, std::bind(&UsersController::openDatabase, this, args::_1, Operation::SignIn));
-    connect(messenger, &VSQMessenger::signInErrorOccured, this, &UsersController::signInErrorOccured);
-    connect(messenger, &VSQMessenger::signedUp, this, std::bind(&UsersController::openDatabase, this, args::_1, Operation::SignUp));
-    connect(messenger, &VSQMessenger::signUpErrorOccured, this, &UsersController::signUpErrorOccured);
-    connect(messenger, &VSQMessenger::signedOut, this, std::bind(&UsersController::openDatabase, this, QString(), Operation::SignOut));
+    connect(messenger, &Messenger::signedIn, this, &Self::onSignedIn);
+    connect(messenger, &Messenger::signedUp, this, &Self::onSignedIn);
+    connect(messenger, &Messenger::keyDownloaded, this, &Self::onSignedIn);
+    connect(messenger, &Messenger::signedOut, this, &Self::onSignedOut);
 
-    connect(messenger, &VSQMessenger::keyDownloaded, this, std::bind(&UsersController::openDatabase, this, args::_1, Operation::DownloadKey));
-    connect(messenger, &VSQMessenger::downloadKeyFailed, this, &UsersController::downloadKeyFailed);
+    connect(messenger, &Messenger::signInErrorOccured, this, &Self::signInErrorOccured);
+    connect(messenger, &Messenger::signUpErrorOccured, this, &Self::signUpErrorOccured);
+    connect(messenger, &Messenger::downloadKeyFailed, this, &Self::downloadKeyFailed);
 
-    connect(userDatabase, &UserDatabase::userIdChanged, this, &UsersController::onDatabaseUserIdChanged);
+    connect(userDatabase, &UserDatabase::opened, this, &Self::onFinishSignIn);
+    connect(userDatabase, &UserDatabase::closed, this, &Self::onFinishSignOut);
 
-    connect(models->chats(), &ChatsModel::chatCreated, this, &UsersController::subscribeByChat);
+    connect(models->chats(), &ChatsModel::chatAdded, this, &Self::onChatAdded);
 }
 
-UserId UsersController::userId() const
+void Self::signIn(const QString &username)
 {
-    return m_userId;
+    setNextUsername(username);
+    m_messenger->signIn(username);
 }
 
-void UsersController::signIn(const UserId &userId)
+void Self::signUp(const QString &username)
 {
-    m_messenger->signIn(userId);
+    setNextUsername(username);
+    m_messenger->signUp(username);
 }
 
-void UsersController::signUp(const UserId &userId)
-{
-    m_messenger->signUp(userId);
-}
-
-void UsersController::signOut()
+void Self::signOut()
 {
     m_messenger->signOut();
 }
 
-void UsersController::requestAccountSettings(const UserId &userId)
+void Self::requestAccountSettings(const QString &username)
 {
-    emit accountSettingsRequested(userId);
+    emit accountSettingsRequested(username);
 }
 
-void UsersController::downloadKey(const QString &username, const QString &password)
+void Self::downloadKey(const QString &username, const QString &password)
 {
     m_messenger->downloadKey(username, password);
 }
 
-void UsersController::openDatabase(const UserId &userId, const Operation operation)
+QString UsersController::currentUserId() const
 {
-    m_operation = operation;
-    if (userId.isEmpty()) {
-        m_userDatabase->requestClose();
-    }
-    else {
-        m_userDatabase->requestOpen(userId);
-    }
+    const auto currentUser = m_messenger->currentUser();
+    return currentUser ? currentUser->id() : QString();
 }
 
-void UsersController::onDatabaseUserIdChanged(const UserId &userId)
+QString UsersController::currentUsername() const
 {
-    if (m_userId != userId) {
-        m_userId = userId;
-        emit userIdChanged(userId);
-    }
-
-    switch (m_operation) {
-    case Operation::SignIn:
-        emit signedIn(userId);
-        break;
-    case Operation::SignUp:
-        emit signedUp(userId);
-        break;
-    case Operation::SignOut:
-        emit signedOut();
-        break;
-    case Operation::DownloadKey:
-        emit keyDownloaded(userId);
-        break;
-    default:
-        break;
-    }
+    const auto currentUser = m_messenger->currentUser();
+    return currentUser ? currentUser->username() : QString();
 }
 
-void UsersController::subscribeByChat(const Chat &chat)
+void UsersController::setNextUsername(const QString &username)
 {
-    // TODO(fpohtmeh): move to contact manager/controller
-    m_messenger->subscribeToContact(chat.contactId);
+    m_nextUsername = username;
+    emit nextUsernameChanged(username);
+}
+
+QString UsersController::nextUsername() const
+{
+    return m_nextUsername;
+}
+
+void Self::onSignedIn(const QString &username)
+{
+    m_userDatabase->open(username);
+}
+
+void Self::onSignedOut()
+{
+    m_userDatabase->close();
+}
+
+void Self::onFinishSignIn() {
+    const auto user = m_messenger->currentUser();
+    // TODO: Do we really need to duplicate signals?
+    emit signedIn(user->username());
+
+    emit currentUserIdChanged(user->id());
+    emit currentUsernameChanged(user->username());
+}
+
+void Self::onFinishSignOut() {
+    emit signedOut();
+}
+
+void Self::onChatAdded(const ChatHandler &chat) {
+    if (chat->type() == Chat::Type::Personal) {
+        m_messenger->subscribeToUser(UserId(chat->id()));
+    }
 }

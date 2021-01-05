@@ -1,8 +1,8 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.12
-import com.virgilsecurity.messenger 1.0
 
+import "../base"
 import "../theme"
 import "../components"
 import "../components/CommonHelpers"
@@ -18,7 +18,7 @@ Page {
     }
 
     header: SearchHeader {
-        id: searchHeader
+        id: mainSearchHeader
         title: isChatList ? app.organizationDisplayName : qsTr("File Cloud") + controllers.fileCloud.displayPath
         description: isChatList ? qsTr("%1 Server").arg(app.organizationDisplayName) : ""
         showDescription: isChatList
@@ -29,18 +29,31 @@ Page {
 
         Action {
             text: isChatList ? qsTr("New chat") : qsTr("Add file")
-            onTriggered: isChatList ? appState.requestNewChat() : attachmentPicker.open(Enums.AttachmentType.File)
+            onTriggered: isChatList ? appState.requestNewChat() : attachmentPicker.open(AttachmentTypes.file)
         }
+
+        // TODO(fpohtmeh): restore later
+//        Action {
+//            text: qsTr("New group")
+//            enabled: isChatList
+//            onTriggered: appState.requestNewGroupChat()
+//        }
     }
 
     StackLayout {
-        anchors.fill: parent
+        anchors {
+            leftMargin: Theme.smallMargin
+            rightMargin: Theme.smallMargin
+            fill: parent
+        }
         currentIndex: isChatList ? 0 : 1
 
         ModelListView {
             id: chatListView
             model: models.chats.proxy
-            searchHeader: searchHeader
+            searchHeader: mainSearchHeader
+            emptyIcon: "../resources/icons/Chats.png"
+            emptyText: qsTr("Create your first chat<br/>by pressing the dots<br/>button above")
 
             delegate: ListDelegate {
                 width: chatListView.width
@@ -87,7 +100,7 @@ Page {
                     }
                 }
 
-                onClicked: controllers.chats.openChatById(model.id)
+                onClicked: controllers.chats.openChat(model.id)
             }
 
             onPlaceholderClicked: appState.requestNewChat()
@@ -96,7 +109,8 @@ Page {
         ModelListView {
             id: fileCloudListView
             model: models.fileCloud.proxy
-            searchHeader: searchHeader
+            searchHeader: mainSearchHeader
+            emptyIcon: "../resources/icons/Chats.png"
             emptyText: qsTr("Add a file<br/>by pressing the plus<br/>button above")
 
             delegate: ListDelegate {
@@ -143,7 +157,7 @@ Page {
                 onClicked: controllers.fileCloud.processClick(index)
             }
 
-            onPlaceholderClicked: attachmentPicker.open(Enums.AttachmentType.File)
+            onPlaceholderClicked: attachmentPicker.open(AttachmentTypes.file)
         }
     }
 

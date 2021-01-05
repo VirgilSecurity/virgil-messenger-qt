@@ -34,29 +34,20 @@
 
 #include "operations/NetworkOperation.h"
 
-#include "models/FileLoader.h"
-
 using namespace vm;
 
-NetworkOperation::NetworkOperation(QObject *parent, FileLoader *fileLoader)
-    : Operation(QLatin1String("Network"), parent)
-    , m_fileLoader(fileLoader)
-    , m_isOnline(fileLoader->isServiceFound())
-{
-    connect(fileLoader, &FileLoader::serviceFound, this, &NetworkOperation::setIsOnline);
-}
-
 NetworkOperation::NetworkOperation(NetworkOperation *parent)
-    : NetworkOperation(parent, parent->fileLoader())
+    : NetworkOperation(parent, parent->isOnline())
 {
 }
 
-FileLoader *NetworkOperation::fileLoader()
+NetworkOperation::NetworkOperation(QObject *parent, bool isOnline)
+    : Operation(QLatin1String("Network"), parent)
+    , m_isOnline(isOnline)
 {
-    return m_fileLoader;
 }
 
-bool NetworkOperation::isOnline() const
+bool NetworkOperation::isOnline() const noexcept
 {
     return m_isOnline;
 }

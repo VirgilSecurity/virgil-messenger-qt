@@ -41,6 +41,7 @@
 #include <QTimer>
 #include <QRegularExpression>
 #include <QNetworkSession>
+#include <QLoggingCategory>
 
 #if !defined(DEBUG_NETWORK)
 #define DEBUG_NETWORK 0
@@ -93,7 +94,7 @@ VSQNetworkAnalyzer::onStart() {
 }
 
 bool
-VSQNetworkAnalyzer::isConnected() const {
+VSQNetworkAnalyzer::isConnected() const noexcept {
     return m_isConnected;
 }
 

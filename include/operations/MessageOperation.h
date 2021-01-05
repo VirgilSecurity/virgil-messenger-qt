@@ -36,6 +36,7 @@
 #define VS_MESSAGEOPERATION_H
 
 #include "NetworkOperation.h"
+#include "Message.h"
 
 namespace vm
 {
@@ -46,45 +47,20 @@ class MessageOperation : public NetworkOperation
     Q_OBJECT
 
 public:
-    MessageOperation(const GlobalMessage &message, MessageOperationFactory *factory, FileLoader *fileLoader, QObject *parent);
+    MessageOperation(const ModifiableMessageHandler &message, MessageOperationFactory *factory, bool isOnline,
+                     QObject *parent);
 
-    const GlobalMessage *message() const;
-    const Attachment *attachment() const;
+    MessageHandler message() const;
     MessageOperationFactory *factory();
 
-    void setAttachmentStatus(const Attachment::Status status);
-    void setAttachmentUrl(const QUrl &url);
-    void setAttachmentLocalPath(const QString &localPath);
-    void setAttachmentFignerprint(const QString &fingerprint);
-    void setAttachmentExtras(const QVariant &extras);
-    void setAttachmentPreviewPath(const QString &previewPath);
-    void setAttachmentThumbnailPath(const QString &thumbnailPath);
-    void setAttachmentThumbnailUrl(const QUrl &thumbnailUrl);
-
-    void setAttachmentProcessedSize(const DataSize &bytes);
-    void setAttachmentEncryptedSize(const DataSize &size);
-    void setAttachmentEncryptedThumbnailSize(const DataSize &bytes);
-
 signals:
-    void statusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status);
-    void attachmentStatusChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Status &status);
-    void attachmentUrlChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QUrl &url);
-    void attachmentLocalPathChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &localPath);
-    void attachmentFingerprintChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const QString &fingerpint);
-
-    void attachmentExtrasChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const Attachment::Type &type, const QVariant &extras);
-    void attachmentProcessedSizeChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &bytes);
-    void attachmentEncryptedSizeChanged(const Attachment::Id &attachmentId, const Contact::Id &contactId, const DataSize &bytes);
-
-protected:
-    void connectChild(Operation *child) override;
+    void messageUpdate(const MessageUpdate &update);
 
 private:
-    Attachment *writableAttachment();
-    void setStatus(const Message::Status &status);
+    void onMessageUpdate(const MessageUpdate &update);
 
     MessageOperationFactory *m_factory;
-    GlobalMessage m_message;
+    ModifiableMessageHandler m_message;
 };
 }
 

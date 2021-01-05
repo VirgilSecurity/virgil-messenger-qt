@@ -34,13 +34,21 @@
 
 #include "database/core/DatabaseUtils.h"
 
-#include <QSqlError>
-#include <QSqlQuery>
-
-#include "Utils.h"
+#include "FileUtils.h"
 #include "database/core/Database.h"
+#include "AttachmentId.h"
+#include "OutgoingMessage.h"
+#include "IncomingMessage.h"
+#include "MessageContentJsonUtils.h"
+#include "MessageContentType.h"
+
+#include <QSqlError>
+#include <QSqlField>
+#include <QSqlQuery>
+#include <QSqlRecord>
 
 using namespace vm;
+using Self = DatabaseUtils;
 
 namespace
 {
@@ -49,11 +57,11 @@ namespace
         return QString(":/resources/database/%1.sql").arg(fileName);
     }
 
-    Optional<QStringList> readQueryTexts(const QString &queryId)
+    std::optional<QStringList> readQueryTexts(const QString &queryId)
     {
-        const auto text = Utils::readTextFile(queryPath(queryId));
+        const auto text = FileUtils::readTextFile(queryPath(queryId));
         QStringList queries;
-        const auto texts = text->split(";");
+        const auto texts = text.split(";");
         for (auto text : texts) {
             auto query = text.trimmed();
             if (!query.isEmpty()) {
@@ -64,13 +72,13 @@ namespace
     }
 }
 
-bool DatabaseUtils::isValidName(const QString &id)
+bool Self::isValidName(const QString &id)
 {
     // TODO(fpohtmeh): add regexp check
     return !id.isEmpty();
 }
 
-bool DatabaseUtils::readExecQueries(Database *database, const QString &queryId)
+bool Self::readExecQueries(Database *database, const QString &queryId)
 {
     const auto texts = readQueryTexts(queryId);
     if (!texts) {
@@ -86,61 +94,191 @@ bool DatabaseUtils::readExecQueries(Database *database, const QString &queryId)
     return true;
 }
 
-Optional<QSqlQuery> DatabaseUtils::readExecQuery(Database *database, const QString &queryId, const BindValues &values)
+std::optional<QSqlQuery> Self::readExecQuery(Database *database, const QString &queryId, const BindValues &values)
 {
-    const auto text = Utils::readTextFile(queryPath(queryId));
-    if (!text) {
-        return NullOptional;
+    const auto text = FileUtils::readTextFile(queryPath(queryId));
+    if (text.isEmpty()) {
+        return {};
     }
     auto query = database->createQuery();
-    if (!query.prepare(*text)) {
+    if (!query.prepare(text)) {
         qCCritical(lcDatabase) << "Failed to prepare query:" << query.lastError().databaseText();
-        return NullOptional;
+        return {};
     }
     for (auto &v : values) {
         query.bindValue(v.first, v.second);
     }
     if (!query.exec()) {
         qCCritical(lcDatabase) << "Failed to exec query:" << query.lastError().databaseText();
-        return NullOptional;
+        return {};
     }
     return query;
 }
 
-Optional<Attachment> DatabaseUtils::readAttachment(const QSqlQuery &query)
-{
-    const auto attachmentId = query.value("attachmentId").value<Attachment::Id>();
-    if (attachmentId.isEmpty()) {
-        return NullOptional;
-    }
-    Attachment attachment;
-    attachment.id = attachmentId;
-    attachment.type = static_cast<Attachment::Type>(query.value("attachmentType").toInt());
-    attachment.status = static_cast<Attachment::Status>(query.value("attachmentStatus").toInt());
-    attachment.fileName = query.value("attachmentFilename").toString();
-    attachment.size = query.value("attachmentSize").value<DataSize>();
-    attachment.localPath = query.value("attachmentLocalPath").toString();
-    attachment.fingerprint = query.value("attachmentFingerprint").toString();
-    attachment.url = query.value("attachmentUrl").toUrl();
-    attachment.encryptedSize = query.value("attachmentEncryptedSize").value<DataSize>();
-    attachment.extras = Utils::extrasFromJson(query.value("attachmentExtras").toString(), attachment.type, false);
-    return attachment;
+bool Self::readMessageContentAttachment(const QSqlQuery &query, MessageContentAttachment& attachment) {
+    //
+    //  Read generic attachment properties.
+    //
+    const auto attachmentId = query.value("attachmentId").toString();
+    const auto attachmentFingerprint = query.value("attachmentFingerprint").toString();
+    const auto attachmentDecryptionKey = query.value("attachmentDecryptionKey").toByteArray();
+    const auto attachmentFilename = query.value("attachmentFilename").toString();
+    const auto attachmentLocalPath = query.value("attachmentLocalPath").toString();
+    const auto attachmentUrl = query.value("attachmentUrl").toString();
+    const auto attachmentSize = query.value("attachmentSize").value<quint64>();
+    const auto attachmentEncryptedSize = query.value("attachmentEncryptedSize").value<quint64>();
+    const auto attachmentUploadStage = query.value("attachmentUploadStage").toString();
+    const auto attachmentDownloadStage = query.value("attachmentDownloadStage").toString();
+
+    attachment.setId(AttachmentId(attachmentId));
+    attachment.setFingerprint(attachmentFingerprint);
+    attachment.setDecryptionKey(attachmentDecryptionKey);
+    attachment.setFileName(attachmentFilename);
+    attachment.setLocalPath(attachmentLocalPath);
+    attachment.setRemoteUrl(attachmentUrl);
+    attachment.setSize(attachmentSize);
+    attachment.setEncryptedSize(attachmentEncryptedSize);
+    attachment.setUploadStage(MessageContentUploadStageFromString(attachmentUploadStage));
+    attachment.setDownloadStage(MessageContentDownloadStageFromString(attachmentDownloadStage));
+
+    return true;
 }
 
-Optional<Message> DatabaseUtils::readMessage(const QSqlQuery &q, const QString &idColumn)
-{
-    const auto idc = idColumn.isEmpty() ? QLatin1String("messageId") : idColumn;
-    const auto messageId = q.value(idc).value<Message::Id>();
-    if (messageId.isEmpty()) {
-        return NullOptional;
+
+MessageContent Self::readMessageContentFile(const QSqlQuery &query) {
+
+    MessageContentFile content;
+
+    if (Self::readMessageContentAttachment(query, content)) {
+        return content;
     }
-    Message message;
-    message.id = messageId;
-    message.timestamp = q.value("messageTimestamp").toDateTime();
-    message.chatId = q.value("messageChatId").value<Chat::Id>();
-    message.authorId = q.value("messageAuthorId").value<Contact::Id>();
-    message.status = static_cast<Message::Status>(q.value("messageStatus").toInt());
-    message.body = q.value("messageBody").toString();
-    message.attachment = DatabaseUtils::readAttachment(q);
+
+    return {};
+}
+
+
+MessageContent Self::readMessageContentPicture(const QSqlQuery &query) {
+
+    MessageContentPicture content;
+
+    if (!Self::readMessageContentAttachment(query, content)) {
+        return {};
+    }
+
+    //
+    //  Read extras.
+    //
+    const auto attachmentExtras = query.value("attachmentExtras").toString();
+
+    //
+    //  Parse extras and write to the content.
+    //
+    if (MessageContentJsonUtils::readExtras(attachmentExtras, content)) {
+        return content;
+    }
+
+    return {};
+}
+
+
+MessageContent Self::readMessageContentText(const QSqlQuery &query) {
+
+    const auto messageBody = query.value("messageBody").toString();
+
+    return MessageContentText(messageBody);
+}
+
+
+MessageContent Self::readMessageContentEncrypted(const QSqlQuery &query) {
+
+    const auto messageCiphertext = query.value("messageCiphertext").toByteArray();
+
+    return MessageContentEncrypted(messageCiphertext);
+}
+
+void DatabaseUtils::printQueryRecord(const QSqlQuery &query)
+{
+    const auto r = query.record();
+    qCDebug(lcDatabase) << "Printing query record";
+    for (int i = 0, s = r.count(); i < s; ++i) {
+        qCDebug(lcDatabase).noquote().nospace() << r.field(i).name() << "=>" << r.value(i);
+    }
+}
+
+
+MessageContent Self::readMessageContent(const QSqlQuery &query) {
+
+    const auto contentType = query.value("messageContentType").toString();
+    if (contentType.isEmpty()) {
+        return {};
+    }
+
+    switch (MessageContentTypeFrom(contentType)) {
+        case MessageContentType::None:
+            return {};
+
+        case MessageContentType::File:
+            return Self::readMessageContentFile(query);
+
+        case MessageContentType::Picture:
+            return Self::readMessageContentPicture(query);
+
+        case MessageContentType::Encrypted:
+            return Self::readMessageContentEncrypted(query);
+
+        case MessageContentType::Text:
+            return Self::readMessageContentText(query);
+
+        default:
+            return {};
+    }
+}
+
+
+ModifiableMessageHandler Self::readMessage(const QSqlQuery &query, const QString &idColumn)
+{
+    const auto messageIdColumn = idColumn.isEmpty() ? QLatin1String("messageId") : idColumn;
+    const auto messageId = query.value(messageIdColumn).toString();
+    if (messageId.isEmpty()) {
+        return nullptr;
+    }
+
+    const auto messageChatId = query.value("messageChatId").toString();
+    const auto messageChatType = query.value("messageChatType").toString();
+    const auto messageCreatedAt = query.value("messageCreatedAt").toULongLong();
+    const auto messageRecipientId = query.value("messageRecipientId").toString();
+    const auto messageRecipientUsername = query.value("messageRecipientUsername").toString();
+    const auto messageSenderId = query.value("messageSenderId").toString();
+    const auto messageSenderUsername = query.value("messageSenderUsername").toString();
+    const auto messageIsOutgoing = query.value("messageIsOutgoing").toBool();
+    const auto messageStage = query.value("messageStage").toString();
+
+    const auto content = readMessageContent(query);
+    if (std::holds_alternative<std::monostate>(content)) {
+        qCCritical(lcDatabase) << "Read message without content with id: " << messageId;
+        return nullptr;
+    }
+
+    ModifiableMessageHandler message;
+    if (messageIsOutgoing) {
+        auto outgoingMessage = std::make_unique<OutgoingMessage>();
+        outgoingMessage->setStage(OutgoingMessage::stageFromString(messageStage));
+        message = std::move(outgoingMessage);
+
+    } else {
+        auto incomingMessage = std::make_unique<IncomingMessage>();
+        incomingMessage->setStage(IncomingMessage::stageFromString(messageStage));
+        message = std::move(incomingMessage);
+    }
+
+    message->setId(MessageId(messageId));
+    message->setRecipientId(UserId(messageRecipientId));
+    message->setSenderId(UserId(messageSenderId));
+    message->setChatType(ChatTypeFromString(messageChatType));
+    message->setCreatedAt(QDateTime::fromTime_t(messageCreatedAt));
+    message->setSenderUsername(UserId(messageSenderUsername));
+    message->setRecipientUsername(UserId(messageRecipientUsername));
+    message->setContent(std::move(content));
+
     return message;
 }

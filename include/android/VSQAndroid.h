@@ -38,8 +38,10 @@
 #if (VS_ANDROID)
 
 #include <QObject>
+#include <Contact.h>
+#include <FileUtils.h>
 
-#include "VSQCommon.h"
+using namespace vm;
 
 class VSQAndroid {
 public:
@@ -55,7 +57,11 @@ public:
 
     static QString getDisplayName(const QUrl &url);
 
-    static DataSize getFileSize(const QUrl &url);
+    static quint64 getFileSize(const QUrl &url);
+
+    static Contacts getContacts();
+
+    static QUrl getContactAvatarUrl(const Contact &contact);
 
 private:
     static int runLoggingThread();

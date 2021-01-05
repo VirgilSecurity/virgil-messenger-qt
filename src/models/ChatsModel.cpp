@@ -34,46 +34,54 @@
 
 #include "models/ChatsModel.h"
 
+#include "Utils.h"
+#include "Model.h"
+#include "models/ListProxyModel.h"
+
 #include <QSortFilterProxyModel>
 
-#include "Utils.h"
-
 using namespace vm;
+using Self = ChatsModel;
 
-ChatsModel::ChatsModel(QObject *parent)
+Self::ChatsModel(QObject *parent)
     : ListModel(parent)
 {
+    qRegisterMetaType<ChatsModel *>("ChatsModel*");
+
     proxy()->setSortRole(LastEventTimestampRole);
     proxy()->sort(0, Qt::DescendingOrder);
     proxy()->setFilterRole(ContactIdRole);
 }
 
-ChatsModel::~ChatsModel()
+Self::~ChatsModel()
 {}
 
-void ChatsModel::setChats(const Chats &chats)
+void Self::setChats(ModifiableChats chats)
 {
     beginResetModel();
-    m_chats = chats;
+    m_chats = std::move(chats);
     endResetModel();
     qCDebug(lcModel) << "Chats set";
-    emit chatsSet();
 }
 
-Chat ChatsModel::createChat(const Contact::Id &contactId)
+void Self::clearChats()
 {
+    beginResetModel();
+    m_chats.clear();
+    endResetModel();
+    qCDebug(lcModel) << "Chats removed";
+}
+
+void Self::addChat(ModifiableChatHandler chat)
+{
+    qCDebug(lcModel) << "New chat added:" << chat->id();
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    Chat chat;
-    chat.id = Utils::createUuid();
-    chat.timestamp = QDateTime::currentDateTime();
-    chat.contactId = contactId;
     m_chats.push_back(chat);
     endInsertRows();
-    emit chatCreated(chat);
-    return chat;
+    emit chatAdded(chat);
 }
 
-void ChatsModel::resetUnreadCount(const Chat::Id &chatId)
+void Self::resetUnreadCount(const ChatId &chatId)
 {
     const auto chatRow = findRowById(chatId);
     if (!chatRow) {
@@ -81,29 +89,29 @@ void ChatsModel::resetUnreadCount(const Chat::Id &chatId)
         return;
     }
     auto &chat = m_chats[*chatRow];
-    chat.unreadMessageCount = 0;
+    chat->setUnreadMessageCount(0);
     qCDebug(lcModel) << "Unread message count was reset";
     const auto chatIndex = index(*chatRow);
     emit dataChanged(chatIndex, chatIndex, { UnreadMessagesCountRole });
     emit chatUpdated(chat);
 }
 
-void ChatsModel::updateLastMessage(const Message &message, const Chat::UnreadCount &unreadMessageCount)
+void Self::updateLastMessage(const MessageHandler &message, qsizetype unreadMessageCount)
 {
-    const auto chatRow = findRowById(message.chatId);
+    const auto chatRow = findRowById(message->chatId());
     if (!chatRow) {
-        qCWarning(lcModel) << "Chat not found! Id" << message.chatId;
+        qCWarning(lcModel) << "Chat not found! Id" << message->chatId();
         return;
     }
 
     auto &chat = m_chats[*chatRow];
-    if (!chat.lastMessage || chat.lastMessage->id != message.id) {
-        qCDebug(lcModel) << "Last message was set to" << message.id;
+    if (!chat->lastMessage() || chat->lastMessage()->id() != message->id()) {
+        qCDebug(lcModel) << "Last message was set to" << message->id();
     }
-    chat.lastMessage = message;
+    chat->setLastMessage(message); // TODO(fpohtmeh): don't set last message if it's not older then current
     QVector<int> roles{ LastMessageBodyRole, LastEventTimeRole };
-    if (unreadMessageCount != chat.unreadMessageCount) {
-        chat.unreadMessageCount = unreadMessageCount;
+    if (unreadMessageCount != chat->unreadMessageCount()) {
+        chat->setUnreadMessageCount(unreadMessageCount);
         qCDebug(lcModel) << "Unread message count was set to" << unreadMessageCount;
         roles << UnreadMessagesCountRole;
     }
@@ -112,58 +120,61 @@ void ChatsModel::updateLastMessage(const Message &message, const Chat::UnreadCou
     emit chatUpdated(chat);
 }
 
-Optional<Chat> ChatsModel::findById(const Chat::Id &chatId) const
+ChatHandler Self::findChat(const ChatId &chatId) const
 {
     if (const auto row = findRowById(chatId)) {
         return m_chats[*row];
     }
-    return NullOptional;
+    return nullptr;
 }
 
-Optional<Chat> ChatsModel::findByContact(const Contact::Id &contactId) const
+ModifiableChatHandler Self::findChat(const ChatId &chatId)
 {
-    if (const auto row = findRowByContactId(contactId)) {
+    if (const auto row = findRowById(chatId)) {
         return m_chats[*row];
     }
-    return NullOptional;
+    return nullptr;
 }
 
-int ChatsModel::rowCount(const QModelIndex &parent) const
+int Self::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
     return m_chats.size();
 }
 
-QVariant ChatsModel::data(const QModelIndex &index, int role) const
+QVariant Self::data(const QModelIndex &index, int role) const
 {
     const auto &chat = m_chats[index.row()];
     switch (role) {
     case IdRole:
-        return chat.id;
+        return QString(chat->id());
+
     case ContactIdRole:
-        return chat.contactId;
+        return chat->title(); // TODO: maybe we need change the role
+
     case LastEventTimeRole:
-        return (chat.lastMessage ? qMax(chat.lastMessage->timestamp, chat.timestamp) : chat.timestamp).toString("hh:mm");
+        return (chat->lastMessage() ? qMax(chat->lastMessage()->createdAt(), chat->createdAt()) : chat->createdAt()).toString("hh:mm");
+
     case LastEventTimestampRole:
-        return chat.lastMessage ? qMax(chat.lastMessage->timestamp, chat.timestamp) : chat.timestamp;
+        return chat->lastMessage() ? qMax(chat->lastMessage()->createdAt(), chat->createdAt()) : chat->createdAt();
+
     case LastMessageBodyRole:
-        if (!chat.lastMessage) {
+        if (!chat->lastMessage()) {
             return QLatin1String("...");
+
+        } else {
+            return Utils::messageContentDisplayText(chat->lastMessage()->content());
         }
-        else if (chat.lastMessage->attachment) {
-            return Utils::attachmentDisplayText(*chat.lastMessage->attachment);
-        }
-        else {
-            return Utils::printableMessageBody(*chat.lastMessage);
-        }
+
     case UnreadMessagesCountRole:
-        return chat.unreadMessageCount;
+        return chat->unreadMessageCount();
+
     default:
         return QVariant();
     }
 }
 
-QHash<int, QByteArray> ChatsModel::roleNames() const
+QHash<int, QByteArray> Self::roleNames() const
 {
     return {
         { IdRole, "id" },
@@ -174,33 +185,12 @@ QHash<int, QByteArray> ChatsModel::roleNames() const
     };
 }
 
-Optional<int> ChatsModel::findRowById(const Chat::Id &chatId) const
+std::optional<int> Self::findRowById(const ChatId &chatId) const
 {
     for (int i = 0, s = m_chats.size(); i < s; ++i) {
-        if (m_chats[i].id == chatId) {
+        if (m_chats[i]->id() == chatId) {
             return i;
         }
     }
-    return NullOptional;
-}
-
-Optional<int> ChatsModel::findRowByLastMessageId(const Message::Id &messageId) const
-{
-    for (int i = 0, s = m_chats.size(); i < s; ++i) {
-        auto m = m_chats[i].lastMessage;
-        if (m && m->id == messageId) {
-            return i;
-        }
-    }
-    return NullOptional;
-}
-
-Optional<int> ChatsModel::findRowByContactId(const Contact::Id &contactId) const
-{
-    for (int i = 0, s = m_chats.size(); i < s; ++i) {
-        if (m_chats[i].contactId == contactId) {
-            return i;
-        }
-    }
-    return NullOptional;
+    return {};
 }

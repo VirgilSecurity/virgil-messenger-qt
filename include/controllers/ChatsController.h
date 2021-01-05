@@ -35,61 +35,70 @@
 #ifndef VM_CHATSCONTROLLER_H
 #define VM_CHATSCONTROLLER_H
 
-#include <QObject>
+#include "ChatId.h"
+#include "MessageId.h"
+#include "UserId.h"
+#include "Chat.h"
+#include "User.h"
 
-#include "VSQCommon.h"
+#include <QObject>
+#include <QPointer>
+
+#include <memory>
 
 namespace vm
 {
 class Models;
 class UserDatabase;
+class Messenger;
 
 class ChatsController : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(Chat currentChat READ currentChat NOTIFY currentChatChanged)
-    Q_PROPERTY(Contact::Id currentContactId READ currentContactId NOTIFY currentContactIdChanged)
-    Q_PROPERTY(Chat::Id currentChatId READ currentChatId NOTIFY currentChatIdChanged)
+    Q_PROPERTY(QString currentChatName READ currentChatName NOTIFY currentChatNameChanged)
 
 public:
-    ChatsController(Models *models, UserDatabase *userDatabase, QObject *parent);
+    ChatsController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
-    Chat currentChat() const;
-    Contact::Id currentContactId() const;
-    Chat::Id currentChatId() const;
+    void loadChats();
+    void clearChats();
 
-    void loadChats(const UserId &userId);
+    void createChatWithUsername(const QString &username);
+    void createChatWithUserId(const UserId &userId);
 
-    void createChat(const Contact::Id &contactId);
-    void openChat(const Chat &chat);
-    Q_INVOKABLE void openChatById(const Chat::Id &chatId);
-    void closeChat();
+    void openChat(const ChatHandler& chat);
+    Q_INVOKABLE void openChat(const QString& chatId); // can be used within QML only
+    Q_INVOKABLE void closeChat();
+    Q_INVOKABLE QString currentChatName() const;
+    ChatHandler currentChat() const;
+
+    Q_INVOKABLE void addParticipant(const QString &username);
+    Q_INVOKABLE void removeParticipant(const QString &username);
+    Q_INVOKABLE void leaveGroup();
 
 signals:
     void errorOccurred(const QString &errorText); // TODO(fpohtmeh): remove this signal everywhere?
 
-    void chatsSet(const UserId &userId);
-
-    void currentChatChanged(const Chat &chat);
-    void currentContactIdChanged(const Contact::Id &contactId);
-    void currentChatIdChanged(const Chat::Id &chatId);
-
-    void chatOpened(const Chat &chat);
+    void chatsLoaded();
+    void chatOpened(const ChatHandler &chat);
+    void chatCreated(const ChatHandler &chat);
     void chatClosed();
 
-    void newContactFound(const Contact::Id &contactId, QPrivateSignal);
+    void currentChatNameChanged(const QString &name);
+
+    void createChatWithUser(const UserHandler& user, QPrivateSignal);
 
 private:
     void setupTableConnections();
-    void setCurrentChat(const Chat &chat);
+    void setCurrentChat(ChatHandler chat);
 
-    void onNewContactFound(const Contact::Id &contactId);
-    void onChatsSet();
+    void onChatsLoaded(ModifiableChats chats);
+    void onCreateChatWithUser(const UserHandler &user);
 
-    Models *m_models;
-    UserDatabase *m_userDatabase;
-    UserId m_userId;
-    Chat m_currentChat;
+    QPointer<Messenger> m_messenger;
+    QPointer<Models> m_models;
+    QPointer<UserDatabase> m_userDatabase;
+    ChatHandler m_currentChat;
 };
 }
 

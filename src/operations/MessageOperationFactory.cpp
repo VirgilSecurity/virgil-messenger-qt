@@ -36,14 +36,12 @@
 
 #include "Settings.h"
 #include "Utils.h"
-#include "VSQMessenger.h"
+#include "Messenger.h"
 #include "operations/CalculateAttachmentFingerprintOperation.h"
 #include "operations/ConvertToPngOperation.h"
 #include "operations/CreateAttachmentPreviewOperation.h"
 #include "operations/CreateAttachmentThumbnailOperation.h"
 #include "operations/CreateThumbnailOperation.h"
-#include "operations/DecryptFileOperation.h"
-#include "operations/EncryptFileOperation.h"
 #include "operations/EncryptUploadFileOperation.h"
 #include "operations/DownloadFileOperation.h"
 #include "operations/DownloadDecryptFileOperation.h"
@@ -57,12 +55,11 @@ using namespace vm;
 
 using DownloadType = DownloadAttachmentOperation::Parameter::Type;
 
-MessageOperationFactory::MessageOperationFactory(const Settings *settings, VSQMessenger *messenger, FileLoader *fileLoader,
+MessageOperationFactory::MessageOperationFactory(const Settings *settings, Messenger *messenger,
                                                  QObject *parent)
     : QObject(parent)
     , m_settings(settings)
     , m_messenger(messenger)
-    , m_fileLoader(fileLoader)
 {}
 
 void MessageOperationFactory::populateAll(MessageOperation *messageOp)
@@ -73,7 +70,7 @@ void MessageOperationFactory::populateAll(MessageOperation *messageOp)
 
 void MessageOperationFactory::populateDownload(MessageOperation *messageOp, const QString &filePath)
 {
-    messageOp->appendChild(new DownloadAttachmentOperation(messageOp, m_settings, { DownloadType::Full, filePath }));
+    messageOp->appendChild(new DownloadAttachmentOperation(messageOp, m_settings, { DownloadType::Download, filePath }));
 }
 
 void MessageOperationFactory::populateUpload(MessageOperation *messageOp)
@@ -86,16 +83,17 @@ void MessageOperationFactory::populatePreload(MessageOperation *messageOp)
     messageOp->appendChild(new DownloadAttachmentOperation(messageOp, m_settings, { DownloadType::Preload, QString() }));
 }
 
-DownloadDecryptFileOperation *MessageOperationFactory::populateDownloadDecrypt(NetworkOperation *parent, const QUrl &url, const DataSize &bytesTotal, const QString &destPath, const Contact::Id &senderId)
+DownloadDecryptFileOperation *MessageOperationFactory::populateDownloadDecrypt(NetworkOperation *parent, const QUrl &url, quint64 bytesTotal,
+                                                                               const QString &destPath, const QByteArray& decryptionKey, const UserId &senderId)
 {
-    auto op = new DownloadDecryptFileOperation(parent, m_settings, url, bytesTotal, destPath, senderId);
+    auto op = new DownloadDecryptFileOperation(parent, m_messenger, m_settings, url, bytesTotal, destPath, decryptionKey, senderId);
     parent->appendChild(op);
     return op;
 }
 
-EncryptUploadFileOperation *MessageOperationFactory::populateEncryptUpload(NetworkOperation *parent, const QString &sourcePath, const Contact::Id &recipientId)
+EncryptUploadFileOperation *MessageOperationFactory::populateEncryptUpload(NetworkOperation *parent, const QString &sourcePath)
 {
-    auto op = new EncryptUploadFileOperation(parent, m_settings, sourcePath, recipientId);
+    auto op = new EncryptUploadFileOperation(parent, m_messenger, m_settings, sourcePath);
     parent->appendChild(op);
     return op;
 }
@@ -130,19 +128,15 @@ CalculateAttachmentFingerprintOperation *MessageOperationFactory::populateCalcul
 
 void MessageOperationFactory::populateAttachmentOperation(MessageOperation *messageOp)
 {
-    const auto &m = *messageOp->message();
-    if (!m.attachment) {
+    const auto message = messageOp->message();
+    if (!message->contentIsAttachment()) {
         return;
     }
-    const auto &a = *m.attachment;
-    const bool isPicture = a.type == Attachment::Type::Picture;
-    if (m.senderId == m.userId) {
-        if (m.status == Message::Status::Created || m.status == Message::Status::Failed) {
-            populateUpload(messageOp);
-        }
-    }
-    else if (m.senderId == m.contactId) {
-        if (isPicture && (m.status == Message::Status::Created || m.status == Message::Status::Read)) {
+
+    if (message->isOutgoing()) {
+        populateUpload(messageOp);
+    } else {
+        if (std::holds_alternative<MessageContentPicture>(message->content())) {
             populatePreload(messageOp);
         }
     }
@@ -150,8 +144,8 @@ void MessageOperationFactory::populateAttachmentOperation(MessageOperation *mess
 
 void MessageOperationFactory::populateMessageOperation(MessageOperation *messageOp)
 {
-    const auto &message = messageOp->message();
-    if (message->senderId == message->userId && (message->status == Message::Status::Created || message->status == Message::Status::Failed)) {
-        messageOp->appendChild(new SendMessageOperation(messageOp, m_messenger->xmpp(), m_messenger->xmppURL()));
+    const auto message = messageOp->message();
+    if (message->isOutgoing() && (message->status() == Message::Status::New)) {
+        messageOp->appendChild(new SendMessageOperation(messageOp, m_messenger));
     }
 }

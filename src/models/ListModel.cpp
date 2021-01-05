@@ -34,27 +34,22 @@
 
 #include "models/ListModel.h"
 
-#include <QSortFilterProxyModel>
+#include "models/ListProxyModel.h"
+#include "models/ListSelectionModel.h"
 
 using namespace vm;
 
-ListModel::ListModel(QObject *parent)
+ListModel::ListModel(QObject *parent, bool createProxy)
     : QAbstractListModel(parent)
-    , m_proxy(new QSortFilterProxyModel(this))
+    , m_proxy(createProxy ? new ListProxyModel(this) : nullptr)
+    , m_selection(new ListSelectionModel(this))
 {
-    m_proxy->setSourceModel(this);
-    m_proxy->setFilterKeyColumn(0);
-    m_proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    connect(m_selection, &ListSelectionModel::changed, this, &ListModel::onSelectionChanged);
 }
 
-const QSortFilterProxyModel *ListModel::proxy() const
+QString ListModel::filter() const
 {
-    return m_proxy;
-}
-
-QSortFilterProxyModel *ListModel::proxy()
-{
-    return m_proxy;
+    return m_filter;
 }
 
 void ListModel::setFilter(const QString &filter)
@@ -65,4 +60,71 @@ void ListModel::setFilter(const QString &filter)
     m_proxy->setFilterFixedString(filter);
     m_filter = filter;
     emit filterChanged(filter);
+}
+
+QModelIndex ListModel::sourceIndex(const int proxyRow) const
+{
+    return proxy()->mapToSource(proxy()->index(proxyRow, 0));
+}
+
+QModelIndex ListModel::proxyIndex(const int sourceRow) const
+{
+    return proxy()->mapFromSource(index(sourceRow));
+}
+
+QVariant ListModel::data(const QModelIndex &index, int role) const
+{
+    if (role == IsSelectedRole) {
+        return m_selection->isSelected(index);
+    }
+    return QVariant();
+}
+
+QHash<int, QByteArray> ListModel::roleNames() const
+{
+    return {
+        { IsSelectedRole, "isSelected" }
+    };
+}
+
+ListModel::RoleNames ListModel::unitedRoleNames(const ListModel::RoleNames &a, const ListModel::RoleNames &b)
+{
+    auto result = a;
+    for (auto k : b.keys()) {
+        result.insert(k, b.value(k));
+    }
+    return result;
+}
+
+const ListProxyModel *ListModel::proxy() const
+{
+    return m_proxy;
+}
+
+ListProxyModel *ListModel::proxy()
+{
+    return m_proxy;
+}
+
+void ListModel::setProxy(ListProxyModel *proxy)
+{
+    m_proxy = proxy;
+    emit proxyChanged(proxy);
+}
+
+const ListSelectionModel *ListModel::selection() const
+{
+    return m_selection;
+}
+
+ListSelectionModel *ListModel::selection()
+{
+    return m_selection;
+}
+
+void ListModel::onSelectionChanged(const QList<QModelIndex> &indices)
+{
+    for (auto &i : indices) {
+        emit dataChanged(i, i, { IsSelectedRole });
+    }
 }

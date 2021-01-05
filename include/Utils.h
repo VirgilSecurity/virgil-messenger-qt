@@ -38,9 +38,9 @@
 #include <QImage>
 #include <QImageReader>
 
-#include "VSQCommon.h"
-
-Q_DECLARE_LOGGING_CATEGORY(lcUtils)
+#include "Contact.h"
+#include "Message.h"
+#include "MessageContentAttachment.h"
 
 namespace vm
 {
@@ -50,67 +50,25 @@ namespace Utils
 
     // String processing/format
 
-    QString formattedDataSize(const DataSize &fileSize);
+    QString formattedSize(quint64 fileSize);
 
-    QString formattedDataSizeProgress(const DataSize &loaded, const DataSize &total);
+    QString formattedDataSizeProgress(quint64 loaded, quint64 total);
 
-    QString formattedElapsedSeconds(const Seconds &seconds, const Seconds &nowInterval);
+    QString formattedElapsedSeconds(std::chrono::seconds seconds, std::chrono::seconds nowInterval);
 
-    QString formattedLastSeenActivity(const Seconds &seconds, const Seconds &updateInterval);
+    QString formattedLastSeenActivity(std::chrono::seconds seconds, std::chrono::seconds updateInterval);
 
     QString formattedLastSeenNoActivity();
 
     QString elidedText(const QString &text, const int maxLength);
 
-    QString attachmentDisplayText(const Attachment &attachment);
+    QString messageContentDisplayText(const MessageContent &messageContent);
 
-    Contact::Id contactIdFromJid(const Jid &jid);
-
-    Jid createJid(const Contact::Id &contactId, const QString &xmppUrl);
-
-    QString printableMessageBody(const Message &message);
-
-    QString printableLoadProgress(const DataSize &loaded, const DataSize &total);
-
-    // File functions
-
-    QString findUniqueFileName(const QString &fileName);
-
-    bool forceCreateDir(const QString &absolutePath);
-
-    Optional<QString> readTextFile(const QString &filePath);
-
-    bool fileExists(const QString &filePath);
-
-    void removeFile(const QString &filePath);
-
-    QString attachmentFileName(const QUrl &url, const QFileInfo &localInfo, bool isPicture);
-
-    QString attachmentDisplayImagePath(const Attachment &attachment);
-
-    bool openUrl(const QUrl &url);
-
-    // Url functions
-
-    bool isValidUrl(const QUrl &url);
-
-    QString urlToLocalFile(const QUrl &url);
-
-    QUrl localFileToUrl(const QString &filePath);
+    QString printableLoadProgress(quint64 loaded, quint64 total);
 
     // Debug
 
     void printThreadId(const QString &message);
-
-    // JSON functions
-
-    QString extrasToJson(const QVariant &extras, const Attachment::Type type, bool skipLocal);
-
-    QVariant extrasFromJson(const QString &json, const Attachment::Type type, bool skipLocal);
-
-    Message messageFromJson(const QByteArray &json);
-
-    QByteArray messageToJson(const Message &message);
 
     // Image functions
 
@@ -121,6 +79,12 @@ namespace Utils
     QSize calculateThumbnailSize(const QSize &size, const QSize &maxSize, const int orientation = 0);
 
     bool readImage(QImageReader *reader, QImage *image);
+
+    // Contacts
+
+    Contacts getDeviceContacts(const Contacts &cachedContacts = Contacts());
+
+    QUrl getContactAvatarUrl(const Contact &contact);
 }
 }
 

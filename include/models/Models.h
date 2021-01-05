@@ -35,45 +35,49 @@
 #ifndef VM_MODELS_H
 #define VM_MODELS_H
 
+#include "AccountSelectionModel.h"
+#include "ChatsModel.h"
+#include "DiscoveredContactsModel.h"
+#include "FileCloudModel.h"
+#include "FileCloudUploader.h"
+#include "MessagesModel.h"
+#include "MessagesQueue.h"
+#include "FileLoader.h"
+#include "UserDatabase.h"
+#include "Messenger.h"
+
 #include <QObject>
+#include <QPointer>
+#include <QThread>
 
-class QNetworkAccessManager;
-
-class VSQMessenger;
 class Settings;
 
 namespace vm
 {
-class AccountSelectionModel;
-class AttachmentsModel;
-class ChatsModel;
-class FileCloudModel;
-class MessagesModel;
-class MessagesQueue;
-class FileLoader;
-class UserDatabase;
-
 class Models : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(AccountSelectionModel *accountSelection MEMBER m_accountSelection CONSTANT)
-    Q_PROPERTY(AttachmentsModel *attachments READ attachments CONSTANT)
     Q_PROPERTY(ChatsModel *chats READ chats CONSTANT)
+    Q_PROPERTY(DiscoveredContactsModel *discoveredContacts MEMBER m_discoveredContacts CONSTANT)
     Q_PROPERTY(FileCloudModel *fileCloud MEMBER m_fileCloud CONSTANT)
+    Q_PROPERTY(FileCloudUploader *fileCloudUploader MEMBER m_fileCloudUploader CONSTANT)
     Q_PROPERTY(MessagesModel *messages READ messages CONSTANT)
 
 public:
-    Models(VSQMessenger *messenger, Settings *settings, UserDatabase *userDatabase, QNetworkAccessManager *networkAccessManager, QObject *parent);
+    Models(Messenger *messenger, Settings *settings, UserDatabase *userDatabase, Validator *validator, QObject *parent);
     ~Models() override;
 
     const AccountSelectionModel *accountSelection() const;
     AccountSelectionModel *accountSelection();
-    const AttachmentsModel *attachments() const;
-    AttachmentsModel *attachments();
     const ChatsModel *chats() const;
     ChatsModel *chats();
+    const DiscoveredContactsModel *discoveredContacts() const;
+    DiscoveredContactsModel *discoveredContacts();
     const FileCloudModel *fileCloud() const;
     FileCloudModel *fileCloud();
+    const FileCloudUploader *fileCloudUploader() const;
+    FileCloudUploader *fileCloudUploader();
     const FileLoader *fileLoader() const;
     FileLoader *fileLoader();
     const MessagesModel *messages() const;
@@ -85,13 +89,15 @@ signals:
     void notificationCreated(const QString &notification, const bool error);
 
 private:
-    AccountSelectionModel *m_accountSelection;
-    AttachmentsModel *m_attachments;
-    ChatsModel *m_chats;
-    MessagesModel *m_messages;
-    FileCloudModel *m_fileCloud;
-    FileLoader *m_fileLoader;
-    MessagesQueue *m_messagesQueue;
+    QPointer<AccountSelectionModel> m_accountSelection;
+    QPointer<ChatsModel> m_chats;
+    QPointer<DiscoveredContactsModel> m_discoveredContacts;
+    QPointer<MessagesModel> m_messages;
+    QPointer<FileCloudModel> m_fileCloud;
+    QPointer<FileCloudUploader> m_fileCloudUploader;
+    QPointer<FileLoader> m_fileLoader;
+    QPointer<MessagesQueue> m_messagesQueue;
+    QPointer<QThread> m_queueThread;
 };
 }
 

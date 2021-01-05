@@ -34,26 +34,40 @@
 
 #include "states/ChatState.h"
 
-#include "VSQLastActivityManager.h"
+#include "Messenger.h"
 #include "controllers/AttachmentsController.h"
 #include "controllers/ChatsController.h"
 #include "controllers/MessagesController.h"
 #include "controllers/Controllers.h"
+#include "MessageUpdate.h"
 
 using namespace vm;
 
-ChatState::ChatState(Controllers *controllers, VSQLastActivityManager *lastActivityManager, QState *parent)
+ChatState::ChatState(Controllers *controllers, Messenger *messenger, QState *parent)
     : QState(parent)
     , m_controllers(controllers)
 {
     connect(m_controllers->attachments(), &AttachmentsController::openPreviewRequested, this, &ChatState::requestPreview);
-    connect(m_controllers->messages(), &MessagesController::messageStatusChanged, this, &ChatState::onMessageStatusChanged);
-    connect(lastActivityManager, &VSQLastActivityManager::lastActivityTextChanged, this, &ChatState::setLastActivityText);
+    connect(messenger, &Messenger::lastActivityTextChanged, this, &ChatState::setLastActivityText);
+    connect(messenger, &Messenger::messageSent, this, &ChatState::onMessageSent);
+    setIsAdmin(true);
+    setIsGroupChat(false);
 }
 
 QString ChatState::lastActivityText() const
 {
     return m_lastActivityText;
+}
+
+
+bool ChatState::isAdmin() const
+{
+    return m_isAdmin;
+}
+
+bool ChatState::isGroupChat() const
+{
+    return m_isGroupChat;
 }
 
 void ChatState::setLastActivityText(const QString &text)
@@ -65,10 +79,29 @@ void ChatState::setLastActivityText(const QString &text)
     emit lastActivityTextChanged(text);
 }
 
-void ChatState::onMessageStatusChanged(const Message::Id &messageId, const Contact::Id &contactId, const Message::Status &status)
+void ChatState::setIsAdmin(const bool isAdmin)
 {
-    Q_UNUSED(messageId)
-    if (status == Message::Status::Sent && contactId == m_controllers->chats()->currentContactId()) {
+    if (isAdmin == m_isAdmin) {
+        return;
+    }
+    m_isAdmin = isAdmin;
+    emit isAdminChanged(isAdmin);
+}
+
+void ChatState::setIsGroupChat(const bool isGroupChat)
+{
+    if (isGroupChat == m_isGroupChat) {
+        return;
+    }
+    m_isGroupChat = isGroupChat;
+    emit isGroupChatChanged(isGroupChat);
+}
+
+void ChatState::onMessageSent(MessageHandler message)
+{
+    const auto currentChat = m_controllers->chats()->currentChat();
+    const auto currentChatId = currentChat ? currentChat->id() : QString();
+    if (currentChatId == message->chatId()) {
         emit messageSent();
     }
 }

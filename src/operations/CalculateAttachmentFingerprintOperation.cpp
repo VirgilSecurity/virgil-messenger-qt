@@ -35,6 +35,7 @@
 #include "operations/CalculateAttachmentFingerprintOperation.h"
 
 #include "operations/MessageOperation.h"
+#include "MessageUpdate.h"
 
 using namespace vm;
 
@@ -42,5 +43,11 @@ CalculateAttachmentFingerprintOperation::CalculateAttachmentFingerprintOperation
     : CalculateFileFingerprintOperation(parent, sourcePath)
 {
     setName(QLatin1String("CreateAttachmentFingerprint"));
-    connect(this, &CalculateAttachmentFingerprintOperation::fingerprintCalculated, parent, &MessageOperation::setAttachmentFignerprint);
+    connect(this, &CalculateAttachmentFingerprintOperation::fingerprintCalculated, [parent](const QString& fingerprint) {
+        MessageAttachmentFingerprintUpdate update;
+        update.messageId = parent->message()->id();
+        update.attachmentId = parent->message()->contentAsAttachment()->id();
+        update.fingerprint = fingerprint;
+        parent->messageUpdate(update);
+    });
 }

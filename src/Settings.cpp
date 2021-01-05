@@ -34,10 +34,13 @@
 
 #include "Settings.h"
 
-#include <QStandardPaths>
 
 #include "VSQCustomer.h"
 #include "Utils.h"
+#include "FileUtils.h"
+
+#include <QStandardPaths>
+#include <QLoggingCategory>
 
 static const QString kUsersGroup = "Users";
 static const QString kUsersList = "UsersList";
@@ -48,7 +51,7 @@ static const QString kDeviceId = "DeviceId";
 static const QString kLastSessionGroup = "LastSession";
 static const QString kWindowGeometryId = "WindowGeometry";
 static const QString kSessionId = "SessionId";
-static const QString kSignedInUserId = "SignedInUserId";
+static const QString kSignedInUsername = "SignedInUsername";
 
 using namespace vm;
 
@@ -58,6 +61,9 @@ Settings::Settings(QObject *parent)
     : QSettings(Customer::OrganizationName, Customer::ApplicationName, parent)
     , m_sessionId(Utils::createUuid())
 {
+
+    qCDebug(lcSettings) << "Settings are written to: " << fileName();
+
     if (deviceId().isEmpty()) {
         createDeviceId();
         removeGroup(kUsersGroup);
@@ -72,14 +78,10 @@ Settings::Settings(QObject *parent)
 
 Settings::~Settings()
 {
-#ifdef VS_DEVMODE
-    qCDebug(lcDev) << "~Settings";
-#endif
 }
 
 void Settings::print()
 {
-    qCDebug(lcSettings) << "Settings";
     qCDebug(lcSettings) << "Device id:" << deviceId();
     qCDebug(lcSettings) << "Database dir:" << databaseDir().absolutePath();
     qCDebug(lcSettings) << "Attachment cache dir:" << attachmentCacheDir().absolutePath();
@@ -92,19 +94,23 @@ void Settings::print()
     }
 }
 
-void Settings::setLastSignedInUserId(const QString &userId)
+void Settings::setLastSignedInUser(const QString &username)
 {
-    if (lastSignedInUserId() == userId) {
+    if (lastSignedInUser() == username) {
         return;
     }
-    setGroupValue(kLastSessionGroup, kSignedInUserId, userId);
+    setGroupValue(kLastSessionGroup, kSignedInUsername, username);
     sync();
-    emit lastSignedInUserIdChanged(userId);
+    emit lastSignedInUserChanged(username);
+
+    if (!username.isEmpty()) {
+        addUserToList(username);
+    }
 }
 
-QString Settings::lastSignedInUserId() const
+QString Settings::lastSignedInUser() const
 {
-    return groupValue(kLastSessionGroup, kSignedInUserId).toString();
+    return groupValue(kLastSessionGroup, kSignedInUsername).toString();
 }
 
 void Settings::setUsersList(const QStringList &users)
@@ -169,12 +175,12 @@ void Settings::setRunFlag(bool run)
 QDir Settings::databaseDir() const
 {
     if (!m_databaseDir.exists()) {
-        Utils::forceCreateDir(m_databaseDir.absolutePath());
+        FileUtils::forceCreateDir(m_databaseDir.absolutePath());
     }
     return m_databaseDir;
 }
 
-DataSize Settings::attachmentMaxFileSize() const
+quint64 Settings::attachmentMaxFileSize() const
 {
     return 25 * 1024 * 1024;
 }
@@ -182,7 +188,7 @@ DataSize Settings::attachmentMaxFileSize() const
 QDir Settings::attachmentCacheDir() const
 {
     if(!m_attachmentCacheDir.exists()) {
-        Utils::forceCreateDir(m_attachmentCacheDir.absolutePath());
+        FileUtils::forceCreateDir(m_attachmentCacheDir.absolutePath());
     }
     return m_attachmentCacheDir;
 }
@@ -190,7 +196,7 @@ QDir Settings::attachmentCacheDir() const
 QDir Settings::thumbnailsDir() const
 {
     if(!m_thumbnaisDir.exists()) {
-        Utils::forceCreateDir(m_thumbnaisDir.absolutePath());
+        FileUtils::forceCreateDir(m_thumbnaisDir.absolutePath());
     }
     return m_thumbnaisDir;
 }
@@ -198,12 +204,12 @@ QDir Settings::thumbnailsDir() const
 QDir Settings::downloadsDir() const
 {
     if(!m_downloadsDir.exists()) {
-        Utils::forceCreateDir(m_downloadsDir.absolutePath());
+        FileUtils::forceCreateDir(m_downloadsDir.absolutePath());
     }
     return m_downloadsDir;
 }
 
-QString Settings::makeThumbnailPath(const Attachment::Id &attachmentId, bool isPreview) const
+QString Settings::makeThumbnailPath(const AttachmentId &attachmentId, bool isPreview) const
 {
     return thumbnailsDir().filePath((isPreview ? QLatin1String("p-") : QLatin1String("t-")) + attachmentId + QLatin1String(".png"));
 }
@@ -252,9 +258,9 @@ void Settings::setWindowGeometry(const QRect &geometry)
     sync();
 }
 
-Seconds Settings::nowInterval() const
+std::chrono::seconds Settings::nowInterval() const
 {
-    return 5;
+    return std::chrono::seconds(5);
 }
 
 QString Settings::makeGroupKey(const QString &group, const QString &key) const

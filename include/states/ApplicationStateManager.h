@@ -41,20 +41,22 @@
 #include "AccountSettingsState.h"
 #include "AttachmentPreviewState.h"
 #include "BackupKeyState.h"
+#include "EditProfileState.h"
+#include "VerifyProfileState.h"
 #include "ChatListState.h"
 #include "ChatState.h"
 #include "DownloadKeyState.h"
 #include "FileCloudState.h"
 #include "NewChatState.h"
+#include "NewGroupChatState.h"
+#include "NameGroupChatState.h"
 #include "SignInAsState.h"
 #include "SignInUsernameState.h"
 #include "SignUpState.h"
 #include "SplashScreenState.h"
 #include "StartState.h"
 #include "Validator.h"
-#include "VSQCommon.h"
 
-Q_DECLARE_LOGGING_CATEGORY(lcAppState);
 
 namespace vm
 {
@@ -68,11 +70,15 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(AccountSettingsState *accountSettingsState MEMBER m_accountSettingsState CONSTANT)
     Q_PROPERTY(AttachmentPreviewState *attachmentPreviewState MEMBER m_attachmentPreviewState CONSTANT)
     Q_PROPERTY(BackupKeyState *backupKeyState MEMBER m_backupKeyState CONSTANT)
+    Q_PROPERTY(EditProfileState *editProfileState MEMBER m_editProfileState CONSTANT)
+    Q_PROPERTY(VerifyProfileState *verifyProfileState MEMBER m_verifyProfileState CONSTANT)
     Q_PROPERTY(ChatListState *chatListState MEMBER m_chatListState CONSTANT)
     Q_PROPERTY(ChatState *chatState MEMBER m_chatState CONSTANT)
     Q_PROPERTY(DownloadKeyState *downloadKeyState MEMBER m_downloadKeyState CONSTANT)
     Q_PROPERTY(FileCloudState *fileCloudState MEMBER m_fileCloudState CONSTANT)
     Q_PROPERTY(NewChatState *newChatState MEMBER m_newChatState CONSTANT)
+    Q_PROPERTY(NewGroupChatState *newGroupChatState MEMBER m_newGroupChatState CONSTANT)
+    Q_PROPERTY(NameGroupChatState *nameGroupChatState MEMBER m_nameGroupChatState CONSTANT)
     Q_PROPERTY(SignInAsState *signInAsState MEMBER m_signInAsState CONSTANT)
     Q_PROPERTY(SignInUsernameState *signInUsernameState MEMBER m_signInUsernameState CONSTANT)
     Q_PROPERTY(SignUpState *signUpState MEMBER m_signUpState CONSTANT)
@@ -82,7 +88,7 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(QState *previousState MEMBER m_previousState NOTIFY previousStateChanged)
 
 public:
-    ApplicationStateManager(VSQMessenger *messenger, Controllers *controllers, Models *models,
+    ApplicationStateManager(Messenger *messenger, Controllers *controllers, Models *models,
                             Validator *validator, Settings *settings, QObject *parent);
     ~ApplicationStateManager() override;
 
@@ -114,7 +120,7 @@ private:
     void setCurrentState(QState *state);
     void setPreviousState(QState *state);
 
-    VSQMessenger *m_messenger;
+    Messenger *m_messenger;
     Controllers *m_controllers;
     Validator *m_validator;
     Settings *m_settings;
@@ -123,11 +129,15 @@ private:
     AccountSettingsState *m_accountSettingsState;
     AttachmentPreviewState *m_attachmentPreviewState;
     BackupKeyState *m_backupKeyState;
+    EditProfileState *m_editProfileState;
+    VerifyProfileState *m_verifyProfileState;
     ChatListState *m_chatListState;
     ChatState *m_chatState;
     DownloadKeyState *m_downloadKeyState;
     FileCloudState *m_fileCloudState;
     NewChatState *m_newChatState;
+    NewGroupChatState *m_newGroupChatState;
+    NameGroupChatState *m_nameGroupChatState;
     SignInAsState *m_signInAsState;
     SignInUsernameState *m_signInUsernameState;
     SignUpState *m_signUpState;

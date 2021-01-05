@@ -1,20 +1,22 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 
 import "../theme"
 
 Rectangle {
-    id: containerId
-
-    radius: 20
-    color: "transparent"
-
+    id: root
+    property alias textValidator: searchField.validator
     property alias searchPlaceholder: searchField.placeholderText
-    property alias search: searchField.text
+    property string search: searchField.text + searchField.preeditText
     property bool isSearchOpen: state === "opened"
+    property bool closeable: true
+    readonly property int recommendedHeight: 40
 
     signal closed()
     signal accepted()
+
+    radius: 0.5 * recommendedHeight
+    color: "transparent"
 
     state: "closed"
     states: [
@@ -22,7 +24,7 @@ Rectangle {
             name: "opened"
 
             PropertyChanges {
-                target: containerId
+                target: root
                 color: Theme.inputBackgroundColor
             }
 
@@ -32,7 +34,7 @@ Rectangle {
             }
 
             PropertyChanges {
-                target: searchButtonId
+                target: searchButton
                 icon.color: "white"
             }
         },
@@ -40,12 +42,12 @@ Rectangle {
             name: "closed"
 
             PropertyChanges {
-                target: containerId
+                target: root
                 color: "transparent"
             }
 
             PropertyChanges {
-                target: closeButtonId
+                target: closeButton
                 visible: false
             }
 
@@ -56,7 +58,7 @@ Rectangle {
             }
 
             PropertyChanges {
-                target: searchButtonId
+                target: searchButton
                 icon.color: "transparent"
             }
         }
@@ -90,6 +92,7 @@ Rectangle {
             rightMargin: 30
         }
         activeFocusOnPress: true
+        inputMethodHints: Qt.ImhNoAutoUppercase
         font.pixelSize: UiHelper.fixFontSz(15)
         placeholderTextColor: "#59717D"
         color: "white"
@@ -99,19 +102,24 @@ Rectangle {
 
         Keys.onPressed: {
             if (isSearchOpen && (event.key === Qt.Key_Back || event.key === Qt.Key_Escape)) {
-                containerId.state = "closed"
+                if (root.closeable) {
+                    root.state = "closed"
+                }
+                else {
+                    searchField.text = ""
+                }
+
                 event.accepted = true;
             }
-
-            if (isSearchOpen && (event.key === Qt.Key_Enter || event.key === Qt.Key_Return)) {
-                accepted()
+            else if (isSearchOpen && (event.key === Qt.Key_Enter || event.key === Qt.Key_Return)) {
+                root.accepted()
                 event.accepted = true
             }
         }
     }
 
     ImageButton {
-        id: searchButtonId
+        id: searchButton
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
         anchors.leftMargin: Theme.smallMargin
@@ -121,13 +129,13 @@ Rectangle {
         enabled: !isSearchOpen || !searchField.activeFocus
 
         onClicked: {
-            containerId.state = "opened"
+            root.state = "opened"
             searchField.forceActiveFocus()
         }
     }
 
     ImageButton {
-        id: closeButtonId
+        id: closeButton
         anchors {
             verticalCenter: parent.verticalCenter
             right: parent.right
@@ -135,7 +143,13 @@ Rectangle {
         image: "Close"
 
         onClicked: {
-            closed()
+            if (root.closeable) {
+                root.closed()
+            }
+            else {
+                searchField.text = ""
+            }
+
         }
     }
 }

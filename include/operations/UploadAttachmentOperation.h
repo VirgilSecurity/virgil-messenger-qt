@@ -36,11 +36,14 @@
 #define VM_UPLOADATTACHMENTOPERATION_H
 
 #include "LoadAttachmentOperation.h"
+#include "MessageContentUploadStage.h"
 
 class Settings;
 
 namespace vm
 {
+class EncryptUploadFileOperation;
+
 class UploadAttachmentOperation : public LoadAttachmentOperation
 {
     Q_OBJECT
@@ -52,7 +55,11 @@ private:
     bool populateChildren() override;
     void cleanup() override;
 
-    void setTempPngPath(const QString &path);
+    void populateFileOperations();
+    void populatePictureOperations();
+    EncryptUploadFileOperation *populateEncryptUpload();
+
+    void updateStage(MessageContentUploadStage uploadStage);
 
     MessageOperation *m_parent;
     const Settings *m_settings;

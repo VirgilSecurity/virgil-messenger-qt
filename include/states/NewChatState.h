@@ -36,26 +36,29 @@
 #define VM_NEWCHATSTATE_H
 
 #include "OperationState.h"
-#include "VSQCommon.h"
 
 namespace vm
 {
 class ChatsController;
+class DiscoveredContactsModel;
 
 class NewChatState : public OperationState
 {
     Q_OBJECT
 
 public:
-    NewChatState(ChatsController *chatsController, QState *parent);
+    NewChatState(ChatsController *chatsController, DiscoveredContactsModel *contactsModel, QState *parent);
 
 signals:
-    void addNewChat(const QString &contactId);
+    void addNewChatWithUsername(const QString &username);
 
 private:
-    void processAddNewChat(const Contact::Id &contactId);
+    void onEntry(QEvent *event);
+
+    void onAddNewChatWithUsername(const QString &username);
 
     ChatsController *m_chatsController;
+    DiscoveredContactsModel *m_contactsModel;
 };
 }
 

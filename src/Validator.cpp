@@ -38,10 +38,9 @@ using namespace vm;
 
 Validator::Validator(QObject *parent)
     : QObject(parent)
-    // HACK(vova.y): lookbehind doesn't work in RegExpValidator.
-    // Original regexp (/(?!_)[a-zA-Z0-9_]{1,20}(?<!_)/) is replaced with equivalent.
-    // Issue can be fixed by using RegularExpressionValidator from Qt 5.15
-    , m_reUsername(new QRegExpValidator(QRegExp("(?!_)[a-zA-Z0-9_]{0,19}[a-zA-Z0-9]"), this))
+    , m_reUsername(new QRegularExpressionValidator(QRegularExpression(R"(^(?!_)\w{1,20}(?<!_)$)"), this))
+    , m_rePhone(new QRegularExpressionValidator(QRegularExpression(R"(^\+?[1-9]\d{3,14}$)"), this))
+    , m_reEmail(new QRegularExpressionValidator(QRegularExpression(R"(^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$)"), this))
 {
 }
 
@@ -49,25 +48,25 @@ Validator::~Validator()
 {
 }
 
-Optional<QString> Validator::validatedUsername(const QString &username, QString *errorText)
+std::optional<QString> Validator::validatedUsername(const QString &username, QString *errorText) const
 {
     if (username.isEmpty()) {
         if (errorText) {
             *errorText = QObject::tr("Username can't be empty");
         }
-        return NullOptional;
+        return {};
     }
-    if (!m_reUsername->regExp().exactMatch(username)) {
+    if (!isValidUsername(username)) {
         if (errorText) {
             *errorText = QObject::tr("Username is not valid");
         }
-        return NullOptional;
+        return {};
     }
     return username.toLower();
 }
 
-QString Validator::databaseUsername(const QString &username)
+bool Validator::isValidUsername(const QString &username) const
 {
-    static QRegExp regexp("[^a-zA-Z0-9_]");
-    return QString(username).remove(regexp);
+    const auto match = m_reUsername->regularExpression().match(username);
+    return match.hasMatch() && !match.hasPartialMatch();
 }

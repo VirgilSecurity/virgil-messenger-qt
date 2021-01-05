@@ -48,10 +48,15 @@ namespace Customer
     static QString OrganizationDomain = "virgil.net";
     static QString MessengerUrlTemplate = "https://messenger%1.virgilsecurity.com";
     static QString XmppUrlTemplate = "xmpp%1.virgilsecurity.com";
+    static QString XmppDomainTemplate = "xmpp%1.virgilsecurity.com";
+    static QString ContactDiscoveryUrlTemplate = "https://disco%1-va.virgilsecurity.com";
 
-    static const QString kPushNotificationsProxy = "VS_PUSH_PROXY@";
-    static const QString kPushNotificationsTopic = "VS_PUSH_TOPIC@";
-    
+    static const QString kPushNotificationsProxy = "";
+    static const QString kPushNotificationsTopic = "";
 }
 
 #endif // VSQ_CUSTOMER_H
+
+
+
+
