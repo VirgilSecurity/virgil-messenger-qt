@@ -71,10 +71,28 @@ Control {
 
     ChatMessageBody {
         id: chatMessageBody
+
+        ParallelAnimation {
+            id: chatMessageBodyAnimation
+            NumberAnimation { target: chatMessageBody; property: 'y'; from: chatMessageBody.height; to: 0; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+            NumberAnimation { target: chatMessageBody; property: 'scale'; from: 0; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+            NumberAnimation { target: chatMessageBody; property: 'opacity'; from: 0; to: 1; duration: Theme.animationDuration }
+        }
     }
 
 //  Smart items
-    UnreadMessagesSeparator {
-        id: unreadMessagesSeparator
+//    UnreadMessagesSeparator {
+//        id: unreadMessagesSeparator
+//    }
+
+    Component.onCompleted: {
+        if (index === 0) {
+            console.log("YYYYYYYYYYYYYYY messageAddAnimationEnabled", messageAddAnimationEnabled)
+        }
+
+        if (index === 0 && messageAddAnimationEnabled) {
+            chatMessageBodyAnimation.restart()
+            messageAddAnimationEnabled = false
+        }
     }
 }

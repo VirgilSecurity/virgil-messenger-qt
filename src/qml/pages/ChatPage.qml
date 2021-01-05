@@ -142,7 +142,11 @@ Page {
         id: footerControl
     }
 
-    MessageListFlickable {
+//    MessageListFlickable {
+//        anchors.fill: parent
+//    }
+
+    MessagesList {
         anchors.fill: parent
     }
 

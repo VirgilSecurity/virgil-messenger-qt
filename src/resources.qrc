@@ -109,6 +109,8 @@
         <file>qml/components/FormSecondaryButton.qml</file>
         <file>qml/components/FormVendor.qml</file>
         <file>qml/components/AccountSelection.qml</file>
+        <file>qml/components/MessagesList.qml</file>
+        <file>qml/components/MessagesFlickToBottomButton.qml</file>
         <file>qml/components/MessageShape.qml</file>
         <file>qml/components/MessageListView.qml</file>
         <file>qml/components/MessageCounter.qml</file>
