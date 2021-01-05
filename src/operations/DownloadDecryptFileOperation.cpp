@@ -44,7 +44,7 @@ using namespace vm;
 
 DownloadDecryptFileOperation::DownloadDecryptFileOperation(NetworkOperation *parent, Messenger *messenger, const Settings *settings,
                                                            const QUrl &url, quint64 bytesTotal, const QString &filePath,
-                                                           const QByteArray& decryptionKey, const UserId &senderId)
+                                                           const QByteArray& decryptionKey, const QByteArray& signature, const UserId &senderId)
     : NetworkOperation(parent)
     , m_messenger(messenger)
     , m_settings(settings)
@@ -52,6 +52,7 @@ DownloadDecryptFileOperation::DownloadDecryptFileOperation(NetworkOperation *par
     , m_bytesTotal(bytesTotal)
     , m_filePath(filePath)
     , m_decryptionKey(decryptionKey)
+    , m_signature(signature)
     , m_senderId(senderId)
 {
     setName(QLatin1String("DownloadDecrypt"));
@@ -67,7 +68,7 @@ bool DownloadDecryptFileOperation::populateChildren()
     appendChild(downOp);
 
     auto decryptOp = new DecryptFileOperation(this, m_messenger, m_tempPath, m_filePath,
-                                              m_decryptionKey, m_senderId);
+                                              m_decryptionKey, m_signature, m_senderId);
     connect(decryptOp, &DecryptFileOperation::decrypted, this, &DownloadDecryptFileOperation::decrypted);
     appendChild(decryptOp);
 

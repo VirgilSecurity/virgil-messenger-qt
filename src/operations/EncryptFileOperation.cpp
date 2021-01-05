@@ -50,9 +50,9 @@ EncryptFileOperation::EncryptFileOperation(QObject *parent, Messenger *messenger
 
 void EncryptFileOperation::run()
 {
-    const auto decryptionKey = m_messenger->encryptFile(m_sourcePath, m_destPath);
-    if (decryptionKey) {
-        emit encrypted(QFileInfo(m_destPath), *decryptionKey);
+    const auto [success, decryptionKey, signature] = m_messenger->encryptFile(m_sourcePath, m_destPath);
+    if (success) {
+        emit encrypted(QFileInfo(m_destPath), decryptionKey, signature);
         finish();
     }
     else {

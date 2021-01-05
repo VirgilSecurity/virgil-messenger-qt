@@ -56,7 +56,7 @@ public:
 
 signals:
     void progressChanged(quint64 bytesLoaded, quint64 bytesTotal);
-    void encrypted(const QFileInfo &file, const QByteArray &decryptionKey);
+    void encrypted(const QFileInfo &file, const QByteArray &decryptionKey, const QByteArray &signature);
     void uploadSlotReceived();
     void uploaded(const QUrl &url);
 
