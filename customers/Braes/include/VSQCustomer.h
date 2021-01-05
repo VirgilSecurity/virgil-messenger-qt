@@ -46,9 +46,9 @@ namespace Customer
     static QString ApplicationDisplayName = "Braes Secure Messenger";
 
     static QString OrganizationDomain = "braescapital.com";
-    static QString MessengerUrlTemplate = "https://messenger%1-va.virgilsecurity.com";
-    static QString ContactDiscoveryUrlTemplate = "https://disco%1-va.virgilsecurity.com";
-    static QString XmppUrlTemplate = "xmpp%1-va.virgilsecurity.com";
+    static QString MessengerUrlTemplate = "https://messenger%1.virgilsecurity.com";
+    static QString ContactDiscoveryUrlTemplate = "https://disco%1.virgilsecurity.com";
+    static QString XmppUrlTemplate = "xmpp%1.virgilsecurity.com";
     static QString XmppDomainTemplate = "xmpp%1.virgilsecurity.com";
 
     static const QString kPushNotificationsProxy = "braes-push-notifications-proxy";
