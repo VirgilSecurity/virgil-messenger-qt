@@ -20,6 +20,9 @@ Item {
 
     ListView {
         id: messagesListView
+
+        property var contextMenu: null
+
         anchors {
             fill: parent
             leftMargin: Theme.margin
@@ -66,6 +69,20 @@ Item {
             interval: 10
             onTriggered: {
                 isReady = true
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onPressed: {
+                forceActiveFocus()
+                mouse.accepted = false
+            }
+            onWheel: {
+                if (messagesListView.contextMenu) {
+                    messagesListView.contextMenu.visible = false
+                }
+                wheel.accepted = false
             }
         }
     }
@@ -115,7 +132,7 @@ Item {
 
         function countChangedController() {
 
-//            if (tempModel.get(0).isOwnMessage) {  // need to get data from model
+//            if (messagesListView.model.get(0).isOwnMessage) {  // need to get data from model
 //                flick.setChatToBottom()
 //                return
 //            }
