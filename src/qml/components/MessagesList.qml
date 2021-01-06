@@ -14,7 +14,7 @@ Item {
     property bool isReady: false
     property int bottomContentY: 0
     property int previousContentY: 0
-    property int previousCount: 0
+    property bool addAnimationEnabled: false
     property bool flickToBottomButtonVisible: false
     property int unreadMessagesCount: 0
     onUnreadMessagesCountChanged: chatList.autoFlickToBottomController()
@@ -91,7 +91,6 @@ Item {
     MessagesFlickToBottomButton {}
 
     // OTHER
-
     Component {
         id: messageDelegate
 
@@ -228,6 +227,13 @@ Item {
             flickToStartAnimation.from = currentPosition
             flickToStartAnimation.to = destinationPosition
             flickToStartAnimation.running = true
+        }
+    }
+
+    Connections {
+        target: models.messages
+        function onMessageAdding() {
+            messagesListItem.addAnimationEnabled = true
         }
     }
 }

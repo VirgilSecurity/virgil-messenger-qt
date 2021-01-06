@@ -76,6 +76,7 @@ void Self::setMessages(ModifiableMessages messages)
 
 void Self::addMessage(ModifiableMessageHandler message) {
     if (m_currentChat && (m_currentChat->id() == message->chatId())) {
+        emit messageAdding();
         const auto count = rowCount();
         beginInsertRows(QModelIndex(), count, count);
         m_messages.emplace_back(std::move(message));

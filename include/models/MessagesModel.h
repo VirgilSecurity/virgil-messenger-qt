@@ -91,6 +91,8 @@ public:
 
 signals:
     void pictureIconNotFound(const MessageId &messageId) const;
+    void messageAdding();
+
 
 private:
     enum Roles

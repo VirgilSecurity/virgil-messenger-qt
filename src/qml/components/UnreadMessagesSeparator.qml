@@ -7,7 +7,7 @@ import "../theme"
 
 Item {
     id: newMessageItem
-    property bool isVisible: messageId === idOfFirstUnreadMessage
+    property bool isVisible: index === (unreadMessagesCount - 1)
     onIsVisibleChanged: {
         if (isVisible) {
             newMessageItem.opacity = 1
@@ -16,15 +16,6 @@ Item {
         }
     }
 
-    anchors {
-        left: parent.left
-        leftMargin: leftIndent
-        right: parent.right
-        top: parent.top
-        topMargin: model.firstInRow ? contentSpacing : -contentSpacing / 4
-    }
-
-    height: 1
     opacity: 0
     visible: newMessageItem.opacity > 0
 

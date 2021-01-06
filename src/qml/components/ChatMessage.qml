@@ -5,9 +5,8 @@ import QtQuick.Controls 2.15
 import "../base"
 import "../theme"
 
-Control {
+Column {
     id: chatMessage
-    height: chatMessageBody.height
 
     property int thisIndex: -1
     property var thisDay
@@ -69,7 +68,6 @@ Control {
     }
 
     ChatMessageHeader {
-        visible: model.firstInSection
         width: parent.width
     }
 
@@ -84,14 +82,9 @@ Control {
         }
     }
 
-//  Smart items
-//    UnreadMessagesSeparator {
-//        id: unreadMessagesSeparator
-//    }
-
     Component.onCompleted: {
-        if (index === 0 && previousCount !== messagesListView.count && isReady) {
-            previousCount = messagesListView.count
+        if (index === 0 && addAnimationEnabled && isReady) {
+            addAnimationEnabled = false
             chatMessageBodyAnimation.restart()
         }
     }

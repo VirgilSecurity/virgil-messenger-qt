@@ -5,20 +5,16 @@ import "../components"
 Column {
     id: root
 
-    Rectangle {
-        color: "navy"
-        height: 20
-        width: root.width
-
-        Text {
-            text: qsTr("Replied from user1")
-            color: "white"
-        }
-    }
-
     ChatDateSeporator {
-        text: qsTr("today")
+        visible: model.firstInSection
+        date: model.day
         height: 40
         width: root.width
+    }
+
+    UnreadMessagesSeparator {
+        id: unreadMessagesSeparator
+        width: parent.width
+        height: 1
     }
 }
