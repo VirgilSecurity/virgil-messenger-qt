@@ -123,6 +123,7 @@ private:
         // Grouping
         FirstInRowRole,
         InRowRole,
+        FirstInSectionRole,
         // Sorting
         SortRole
     };

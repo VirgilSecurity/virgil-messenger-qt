@@ -69,7 +69,7 @@ Control {
     }
 
     ChatMessageHeader {
-        visible: false // TODO(fpohtmeh): implement
+        visible: model.firstInSection
         width: parent.width
     }
 

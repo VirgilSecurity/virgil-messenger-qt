@@ -290,6 +290,11 @@ QVariant Self::data(const QModelIndex &index, int role) const
         return nextMessage && message->senderId() == nextMessage->senderId();
     }
 
+    case FirstInSectionRole: {
+        const auto prevMessage = (row == 0) ? nullptr : m_messages[row - 1];
+        return !prevMessage || prevMessage->createdAt().date() != message->createdAt().date();
+    }
+
     case SortRole: {
         return message->createdAt();
     }
@@ -325,6 +330,7 @@ QHash<int, QByteArray> Self::roleNames() const
         { AttachmentFileExistsRole, "attachmentFileExists" },
         { FirstInRowRole, "firstInRow" },
         { InRowRole, "inRow" },
+        { FirstInSectionRole, "firstInSection" }
     };
 }
 
