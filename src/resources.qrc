@@ -118,6 +118,7 @@
         <file>qml/components/MessageContentText.qml</file>
         <file>qml/components/MessageContentAttachment.qml</file>
         <file>qml/components/ChatMessage.qml</file>
+        <file>qml/components/ChatMessageHeader.qml</file>
         <file>qml/components/ChatMessageInput.qml</file>
         <file>qml/components/ChatMessageBody.qml</file>
         <file>qml/components/SearchHeader.qml</file>
