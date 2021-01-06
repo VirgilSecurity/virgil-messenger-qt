@@ -121,6 +121,8 @@ private:
         // Grouping
         FirstInRowRole,
         InRowRole,
+        // Sorting
+        SortRole
     };
 
     static QVector<int> rolesFromMessageUpdate(const MessageUpdate& messageUpdate);
