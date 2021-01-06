@@ -83,18 +83,18 @@ Item {
             maxWidth: Platform.isMobile ? (fullWidth - 2 * Theme.margin) : fullWidth
 
             thisIndex: index
-//            thisDay: day
-//            isOwnMessage: model.senderId === controllers.users.currentUserId
-//            statusIcon: isOwnMessage ? model.statusIcon : ""
-//            attachmentPictureThumbnailWidth: model.attachmentPictureThumbnailSize.width
-//            attachmentPictureThumbnailHeight: model.attachmentPictureThumbnailSize.height
-//            messageId: model.id
+            thisDay: day
+            isOwnMessage: model.senderId === controllers.users.currentUserId
+            statusIcon: isOwnMessage ? model.statusIcon : ""
+            attachmentPictureThumbnailWidth: model.attachmentPictureThumbnailSize.width
+            attachmentPictureThumbnailHeight: model.attachmentPictureThumbnailSize.height
+            messageId: model.id
 
-            isOwnMessage: model.isOwnMessage
-            statusIcon: model.statusIcon
-            attachmentPictureThumbnailWidth: 0
-            attachmentPictureThumbnailHeight: 0
-            messageId: model.messageId
+//            isOwnMessage: model.isOwnMessage
+//            statusIcon: model.statusIcon
+//            attachmentPictureThumbnailWidth: 0
+//            attachmentPictureThumbnailHeight: 0
+//            messageId: model.messageId
 
             onSaveAttachmentAs: function(messageId) {
                 saveAttachmentAsDialog.messageId = messageId
@@ -121,10 +121,10 @@ Item {
 
         function countChangedController() {
 
-            if (tempModel.get(0).isOwnMessage) {
-                flick.setChatToBottom()
-                return
-            }
+//            if (tempModel.get(0).isOwnMessage) {  // need to get data from model
+//                flick.setChatToBottom()
+//                return
+//            }
 
             if (!flick.chatAtBottom()) {
                 unreadMessagesCount += 1
