@@ -46,14 +46,7 @@ Item {
 
         displaced: Theme.displacedTransition
 
-        ScrollBar.vertical: ScrollBar {
-            anchors {
-                top: parent.top
-                bottom: parent.bottom
-                right: parent.right
-                rightMargin: -(Theme.margin - 2)
-            }
-        }
+        ScrollBar.vertical: MessageListViewScrollBar {}
 
         NumberAnimation {
             id: flickToStartAnimation
