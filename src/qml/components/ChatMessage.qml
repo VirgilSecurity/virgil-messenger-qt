@@ -56,7 +56,6 @@ Control {
         }
     }
 
-
     Behavior on leftBottomRadiusHeight {
         NumberAnimation { duration: Theme.animationDuration}
     }
@@ -86,13 +85,9 @@ Control {
 //    }
 
     Component.onCompleted: {
-        if (index === 0) {
-            console.log("YYYYYYYYYYYYYYY messageAddAnimationEnabled", messageAddAnimationEnabled)
-        }
-
-        if (index === 0 && messageAddAnimationEnabled) {
+        if (index === 0 && previousCount !== messagesListView.count && isReady) {
+            previousCount = messagesListView.count
             chatMessageBodyAnimation.restart()
-            messageAddAnimationEnabled = false
         }
     }
 }

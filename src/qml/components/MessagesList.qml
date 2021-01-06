@@ -12,10 +12,11 @@ Item {
     id: messagesListItem
 
     property bool isReady: false
-    property bool messageAddAnimationEnabled: false
+    property int previousContentY: 0
+    property int previousCount: 0
     property bool flickToBottomButtonVisible: false
     property int unreadMessagesCount: 0
-    property int previousContentY: 0
+    onUnreadMessagesCountChanged: chatList.autoFlickToBottomController()
 
     ListView {
         id: messagesListView
@@ -27,7 +28,7 @@ Item {
 
         verticalLayoutDirection: ListView.BottomToTop
         spacing: d.listSpacing
-        model: tempModel
+        model: models.messages.proxy
         footer: Item {
             width: messagesListView.width
             height: Theme.margin
@@ -65,7 +66,6 @@ Item {
             interval: 10
             onTriggered: {
                 isReady = true
-                messageAddAnimationEnabled = true
             }
         }
     }
@@ -121,17 +121,12 @@ Item {
 
         function countChangedController() {
 
-            if (messagesListView.count > 0 && isReady) {
-                messageAddAnimationEnabled = true
-            }
-
             if (tempModel.get(0).isOwnMessage) {
                 flick.setChatToBottom()
                 return
             }
 
             if (!flick.chatAtBottom()) {
-//                console.log(">>>>>>> unreadMessagesCount += 1")
                 unreadMessagesCount += 1
             }
         }
@@ -141,6 +136,11 @@ Item {
             if (flick.chatAtBottom()) {
                 flick.flickToBottomButtonVisible(false)
                 flick.readAllMessages()
+                return
+            }
+
+            if (unreadMessagesCount > 0) {
+                flick.flickToBottomButtonVisible(true)
                 return
             }
 
@@ -207,100 +207,4 @@ Item {
             flickToStartAnimation.running = true
         }
     }
-
-
-
-    // TEMP
-    ListModel {
-        id: tempModel
-
-        Component.onCompleted: {
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-            tempModel.insert(0, getRandomDict())
-        }
-    }
-
-    Timer {
-        running: false
-        repeat: true
-        interval: 3000
-        onTriggered: {
-            tempModel.insert(0, getRandomDict())
-        }
-    }
-
-    function getRandomDict() {
-        let listOfProperties = {
-            "body": getRandom(possibleMessages),
-            "displayTime": Date.now(),
-            "senderUsername": "Test Guy",
-            "isOwnMessage": (Math.random() < 0.5),
-            "statusIcon": '',
-            "messageId": Math.random().toString(36).substring(7),
-            "inRow": (Math.random() < 0.5),
-            "firstInRow": (Math.random() < 0.5),
-            "isBroken": false,
-
-            "attachmentId": '',
-            "attachmentTypeIsFile": false,
-            "attachmentTypeIsPicture": false,
-            "attachmentIsLoading": false,
-            "attachmentIsLoaded": false,
-            "attachmentIconPath": "",
-            "attachmentPictureThumbnailWidth": 0,
-            "attachmentPictureThumbnailHeight": 0,
-            "attachmentDisplaySize": 0,
-            "attachmentDisplayText": "",
-            "attachmentDisplayProgress": 0,
-            "attachmentBytesTotal": 0,
-            "attachmentBytesLoaded": 0,
-            "attachmentFileExists": false
-        }
-
-        if (listOfProperties["isOwnMessage"]) {
-            console.log(">>>>>>>> OWN MESSAGE", Math.random() * 100)
-        }
-
-        return listOfProperties
-    }
-
-    function getRandom(list) {
-        return list[Math.floor((Math.random()*list.length))]
-    }
-
-    property var possibleMessages: [
-        'Hello my friend, this is short message',
-        'Hello my friend, this is long message. I need to see how that works, so I added more letters',
-        'To access and use all the features of Apple Card, you must add Apple Card to Wallet on an iPhone or iPad with iOS 12.4 or later or iPadOS. To manage Apple Card Monthly Installments, you need an iPhone with iOS 13.2 or later or an iPad with iPadOS 13.2 or later. Update to the latest version of iOS or iPadOS by going to Settings > General > Software Update. Tap Download and Install.',
-        'Available for qualifying applicants in the United States.',
-        '5G goes Pro. A14 Bionic rockets past every other smartphone chip. The Pro camera system takes low-light photography to the next level — with an even bigger jump on iPhone 12 Pro Max. And Ceramic Shield delivers four times better drop performance. Let’s see what this thing can do.',
-        'Ok'
-    ]
-
 }
