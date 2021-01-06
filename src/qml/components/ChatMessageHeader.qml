@@ -14,6 +14,7 @@ Column {
 
     UnreadMessagesSeparator {
         id: unreadMessagesSeparator
+        visible: false
         width: parent.width
         height: 1
     }

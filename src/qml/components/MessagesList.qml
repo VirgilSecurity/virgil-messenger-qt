@@ -33,11 +33,11 @@ Item {
         verticalLayoutDirection: ListView.BottomToTop
         spacing: d.listSpacing
         model: models.messages.proxy
+
         footer: Item {
             width: messagesListView.width
             height: Theme.margin
         }
-
         delegate: messageDelegate
         interactive: true
 
@@ -45,6 +45,11 @@ Item {
         onContentYChanged: chatList.autoFlickToBottomController()
 
         displaced: Theme.displacedTransition
+
+        bottomMargin: flick.calculateContentMargin()
+        Behavior on bottomMargin {
+            NumberAnimation { duration: isReady ? Theme.animationDuration : 0; easing.type: Easing.InOutCubic }
+        }
 
         ScrollBar.vertical: MessageListViewScrollBar {}
 
@@ -202,7 +207,7 @@ Item {
             messagesListItem.bottomContentY = messagesListView.contentY
         }
 
-        function setChatToBottom() {
+        function setChatToBottom() { // Breaks unreadMes... separator logic
             messagesListView.cancelFlick()
             flickToStartAnimation.running = false
             let currentPosition = messagesListView.contentY
@@ -220,6 +225,14 @@ Item {
             flickToStartAnimation.from = currentPosition
             flickToStartAnimation.to = destinationPosition
             flickToStartAnimation.running = true
+        }
+
+        function calculateContentMargin() {
+            if (messagesListView.contentHeight < messagesListItem.height) {
+                return messagesListItem.height - messagesListView.contentHeight
+            } else {
+                return 0
+            }
         }
     }
 
