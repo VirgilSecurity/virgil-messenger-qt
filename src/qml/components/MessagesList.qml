@@ -220,8 +220,6 @@ Item {
                 currentPosition = destinationPosition - 400
             }
 
-            console.log("setChatToBottom", flick.chatAtBottom())
-
             flickToStartAnimation.from = currentPosition
             flickToStartAnimation.to = destinationPosition
             flickToStartAnimation.running = true
