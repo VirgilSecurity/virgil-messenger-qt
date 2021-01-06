@@ -127,6 +127,11 @@ ModifiableMessageHandler Self::findById(const MessageId &messageId) const
     return nullptr;
 }
 
+QString MessagesModel::lastMessageSenderId() const
+{
+    return m_messages.empty() ? QString() : m_messages.back()->senderId();
+}
+
 int Self::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
