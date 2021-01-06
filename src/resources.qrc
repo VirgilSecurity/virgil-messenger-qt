@@ -113,6 +113,7 @@
         <file>qml/components/MessagesFlickToBottomButton.qml</file>
         <file>qml/components/MessageShape.qml</file>
         <file>qml/components/MessageListView.qml</file>
+        <file>qml/components/MessageListViewScrollBar.qml</file>
         <file>qml/components/MessageCounter.qml</file>
         <file>qml/components/MessageListFlickable.qml</file>
         <file>qml/components/MessageContentText.qml</file>

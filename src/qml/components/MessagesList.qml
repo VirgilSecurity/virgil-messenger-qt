@@ -46,14 +46,7 @@ Item {
 
         displaced: Theme.displacedTransition
 
-        ScrollBar.vertical: ScrollBar {
-            anchors {
-                top: parent.top
-                bottom: parent.bottom
-                right: parent.right
-                rightMargin: -(Theme.margin - 2)
-            }
-        }
+        ScrollBar.vertical: MessageListViewScrollBar {}
 
         NumberAnimation {
             id: flickToStartAnimation
@@ -117,11 +110,11 @@ Item {
                 if (!contextMenu.enabled) {
                     return
                 }
-                chatListView.contextMenu = contextMenu
-                var coord = mapToItem(chatListView, mouse.x, mouse.y)
+                messagesListView.contextMenu = contextMenu
+                var coord = mapToItem(messagesListView, mouse.x, mouse.y)
                 contextMenu.x = coord.x - (Platform.isMobile ? contextMenu.width : 0)
                 contextMenu.y = coord.y
-                contextMenu.parent = chatListView
+                contextMenu.parent = messagesListView
                 contextMenu.open()
             }
         }
