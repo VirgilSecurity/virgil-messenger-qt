@@ -46,7 +46,7 @@
 #include <QObject>
 #include <QPointer>
 
-#include <optional>
+#include <tuple>
 
 
 Q_DECLARE_LOGGING_CATEGORY(lcMessenger)
@@ -78,13 +78,13 @@ public:
     //
     //  Encrypt given file and returns a key for decryption.
     //
-    std::optional<QByteArray> encryptFile(const QString &sourceFilePath, const QString &destFilePath);
+    std::tuple<bool, QByteArray, QByteArray> encryptFile(const QString &sourceFilePath, const QString &destFilePath);
 
     //
     //  Decrypt given file and returns a key for decryption.
     //
     bool decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray& decryptionKey,
-            const UserId senderId);
+            const QByteArray& signature, const UserId senderId);
 
     //
     // User control.

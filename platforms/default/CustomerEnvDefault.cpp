@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,29 +32,22 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_CUSTOMER_H
-#define VSQ_CUSTOMER_H
+#include "CustomerEnv.h"
 
-#include <QString>
+#include <QStandardPaths>
 
-namespace Customer
-{
-    static QString OrganizationName = "VirgilSecurity";
-    static QString OrganizationDisplayName = "Virgil";
+using namespace vm;
+using Self = vm::CustomerEnv;
 
-    static QString ApplicationName = "VirgilMessenger";
-    static QString ApplicationDisplayName = "Virgil Secure Communications Platform";
 
-    static QString OrganizationDomain = "virgil.net";
-    static QString MessengerUrlTemplate = "https://messenger%1.virgilsecurity.com";
-    static QString ContactDiscoveryUrlTemplate = "https://disco%1.virgilsecurity.com";
-    static QString XmppUrlTemplate = "xmpp%1.virgilsecurity.com";
-    static QString XmppDomainTemplate = "xmpp%1.virgilsecurity.com";
+QDir Self::appDataLocation() {
+    auto appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 
-    static const QString kPushNotificationsProxy = "push-notifications-proxy";
-    static const QString kPushNotificationsTopic = "com.virgil.VirgilMessenger";
-
-    static const QString kSecurityApplicationGroupIdentifier = "group.com.virgil.VirgilMessenger";
+    #if VS_MSGR_ENV_DEV
+        return appDataLocation + "-dev";
+    #elif VS_MSGR_ENV_STG
+        return appDataLocation + "-stg";
+    #else
+        return appDataLocation;
+    #endif
 }
-
-#endif // VSQ_CUSTOMER_H

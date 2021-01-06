@@ -63,6 +63,7 @@ bool Self::applyUpdate(const MessageUpdate& update) {
     else if (auto thumbnailEncryptionUpdate = std::get_if<MessagePictureThumbnailEncryptionUpdate>(&update)) {
         m_thumbnail.setEncryptedSize(thumbnailEncryptionUpdate->encryptedSize);
         m_thumbnail.setDecryptionKey(thumbnailEncryptionUpdate->decryptionKey);
+        m_thumbnail.setSignature(thumbnailEncryptionUpdate->signature);
     }
     else if (auto thumbnailRemoteUrlUpdate = std::get_if<MessagePictureThumbnailRemoteUrlUpdate>(&update)) {
         m_thumbnail.setRemoteUrl(thumbnailRemoteUrlUpdate->remoteUrl);

@@ -8,9 +8,5 @@
 	<array>
 		<string>group.com.virgil.BraesMessenger</string>
 	</array>
-	<key>keychain-access-groups</key>
-	<array>
-		<string>$(AppIdentifierPrefix)com.virgil.BraesMessenger</string>
-	</array>
 </dict>
 </plist>

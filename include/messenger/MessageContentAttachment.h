@@ -112,6 +112,16 @@ public:
     void setDecryptionKey(QByteArray decryptionKey);
 
     //
+    //  Return attachment signature.
+    //
+    QByteArray signature() const;
+
+    //
+    //  Set attachment signature.
+    //
+    void setSignature(QByteArray signature);
+
+    //
     //  Return attachment size.
     //
     qint64 size() const;
@@ -210,6 +220,7 @@ private:
     QString m_fileName;
     QString m_fingerprint;
     QByteArray m_decryptionKey;
+    QByteArray m_signature;
     quint64 m_size = 0;
     QUrl m_remoteUrl;
     QString m_localPath;
