@@ -68,6 +68,11 @@ Control {
         readonly property double defaultRadius: 4
     }
 
+    ChatMessageHeader {
+        visible: false // TODO(fpohtmeh): implement
+        width: parent.width
+    }
+
     ChatMessageBody {
         id: chatMessageBody
 
