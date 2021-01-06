@@ -12,6 +12,7 @@ Item {
     id: messagesListItem
 
     property bool isReady: false
+    property int bottomContentY: 0
     property int previousContentY: 0
     property int previousCount: 0
     property bool flickToBottomButtonVisible: false
@@ -68,7 +69,7 @@ Item {
             repeat: false
             interval: 10
             onTriggered: {
-                isReady = true
+                chatList.init()
             }
         }
 
@@ -130,12 +131,17 @@ Item {
     QtObject {
         id: chatList
 
+        function init() {
+            isReady = true
+            flick.setBotomContentY()
+        }
+
         function countChangedController() {
 
-//            if (messagesListView.model.get(0).isOwnMessage) {  // need to get data from model
-//                flick.setChatToBottom()
-//                return
-//            }
+            if (flick.ownMessage()) {
+                flick.setChatToBottom()
+                return
+            }
 
             if (!flick.chatAtBottom()) {
                 unreadMessagesCount += 1
@@ -147,6 +153,7 @@ Item {
             if (flick.chatAtBottom()) {
                 flick.flickToBottomButtonVisible(false)
                 flick.readAllMessages()
+                flick.setBotomContentY()
                 return
             }
 
@@ -155,14 +162,11 @@ Item {
                 return
             }
 
-            if (flick.scrollingDown()) {
-                flick.flickToBottomButtonVisible(true)
-                flick.setNewContentY()
-                return
-            }
-
-            if (!flick.scrollingDown()) {
-                flick.flickToBottomButtonVisible(false)
+            if (!flick.chatAtBottom()) {
+                let diff = messagesListItem.bottomContentY - messagesListView.contentY
+                if (diff > 100) {
+                    flick.flickToBottomButtonVisible(true)
+                }
                 flick.setNewContentY()
                 return
             }
@@ -173,6 +177,10 @@ Item {
 
     QtObject {
         id: flick
+
+        function ownMessage() {
+            return models.messages.lastMessageSenderId() === controllers.users.currentUserId
+        }
 
         function chatAtBottom() {
             return messagesListView.atYEnd
@@ -198,6 +206,10 @@ Item {
             messagesListItem.previousContentY = messagesListView.contentY
         }
 
+        function setBotomContentY() {
+            messagesListItem.bottomContentY = messagesListView.contentY
+        }
+
         function setChatToBottom() {
             messagesListView.cancelFlick()
             flickToStartAnimation.running = false
@@ -205,7 +217,7 @@ Item {
 
             messagesListView.positionViewAtBeginning()
             let destinationPosition = messagesListView.contentY
-
+            flick.setBotomContentY()
             let diff = destinationPosition - currentPosition
             if (diff > 400) {
                 currentPosition = destinationPosition - 400
