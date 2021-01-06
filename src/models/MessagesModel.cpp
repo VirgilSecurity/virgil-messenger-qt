@@ -190,7 +190,7 @@ QVariant Self::data(const QModelIndex &index, int role) const
     }
 
     case AttachmentIsLoadingRole: {
-        if (!attachment) {
+        if (!attachment || message->status() == MessageStatus::Broken) {
             return false;
         }
         if (message->isOutgoing() && (attachment->uploadStage() != MessageContentUploadStage::Uploaded)) {
@@ -204,7 +204,7 @@ QVariant Self::data(const QModelIndex &index, int role) const
     }
 
     case AttachmentIsLoadedRole: {
-        if (!attachment) {
+        if (!attachment || message->status() == MessageStatus::Broken) {
             return false;
         }
         if (message->isOutgoing() && (attachment->uploadStage() == MessageContentUploadStage::Uploaded)) {
