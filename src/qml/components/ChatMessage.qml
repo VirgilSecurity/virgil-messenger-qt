@@ -68,15 +68,18 @@ Column {
     }
 
     ChatMessageHeader {
+        id: chatMessageHeader
         width: parent.width
     }
 
     ChatMessageBody {
         id: chatMessageBody
+        property real translateY: chatMessageBody.height
+        transform: Translate { y: chatMessageBody.translateY }
 
         ParallelAnimation {
             id: chatMessageBodyAnimation
-            NumberAnimation { target: chatMessageBody; property: 'y'; from: chatMessageBody.height; to: 0; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+            NumberAnimation { target: chatMessageBody; property: 'translateY'; to: 0; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
             NumberAnimation { target: chatMessageBody; property: 'scale'; from: 0; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
             NumberAnimation { target: chatMessageBody; property: 'opacity'; from: 0; to: 1; duration: Theme.animationDuration }
         }
@@ -86,6 +89,8 @@ Column {
         if (index === 0 && addAnimationEnabled && isReady) {
             addAnimationEnabled = false
             chatMessageBodyAnimation.restart()
+        } else {
+            chatMessageBody.translateY = 0
         }
     }
 }
