@@ -90,12 +90,6 @@ Item {
             attachmentPictureThumbnailHeight: model.attachmentPictureThumbnailSize.height
             messageId: model.id
 
-//            isOwnMessage: model.isOwnMessage
-//            statusIcon: model.statusIcon
-//            attachmentPictureThumbnailWidth: 0
-//            attachmentPictureThumbnailHeight: 0
-//            messageId: model.messageId
-
             onSaveAttachmentAs: function(messageId) {
                 saveAttachmentAsDialog.messageId = messageId
                 saveAttachmentAsDialog.attachmentType = model.attachmentTypeIsPicture ? AttachmentTypes.picture : AttachmentTypes.file
