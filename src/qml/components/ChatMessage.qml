@@ -74,23 +74,22 @@ Column {
 
     ChatMessageBody {
         id: chatMessageBody
-        property real translateY: chatMessageBody.height
+        property real translateY: 0
         transform: Translate { y: chatMessageBody.translateY }
 
         ParallelAnimation {
             id: chatMessageBodyAnimation
-            NumberAnimation { target: chatMessageBody; property: 'translateY'; to: 0; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+            NumberAnimation { target: chatMessageBody; property: 'translateY'; from: chatMessageBody.height; to: 0; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
             NumberAnimation { target: chatMessageBody; property: 'scale'; from: 0; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
             NumberAnimation { target: chatMessageBody; property: 'opacity'; from: 0; to: 1; duration: Theme.animationDuration }
         }
     }
 
     Component.onCompleted: {
+        console.log('>>>>>>>>> ITEM with INDEX', index, "was added to list", "addAnimationEnabled:", addAnimationEnabled, "isReady:", isReady)
         if (index === 0 && addAnimationEnabled && isReady) {
             addAnimationEnabled = false
             chatMessageBodyAnimation.restart()
-        } else {
-            chatMessageBody.translateY = 0
         }
     }
 }

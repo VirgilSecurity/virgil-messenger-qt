@@ -107,6 +107,7 @@ Item {
                 }
 
                 MessageShape {
+                    id: messageShape
                     anchors.fill: parent
                 }
 
