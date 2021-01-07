@@ -86,7 +86,6 @@ Column {
     }
 
     Component.onCompleted: {
-        console.log('>>>>>>>>> ITEM with INDEX', index, "was added to list", "addAnimationEnabled:", addAnimationEnabled, "isReady:", isReady)
         if (index === 0 && addAnimationEnabled && isReady) {
             addAnimationEnabled = false
             chatMessageBodyAnimation.restart()
