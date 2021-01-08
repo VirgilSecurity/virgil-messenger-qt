@@ -45,8 +45,6 @@ Item {
         onCountChanged: chatList.countChangedController()
         onContentYChanged: chatList.autoFlickToBottomController()
 
-//        displaced: Theme.displacedTransition
-
         bottomMargin: flick.calculateContentMargin()
         Behavior on bottomMargin {
             NumberAnimation { duration: isReady ? Theme.animationDuration : 0; easing.type: Easing.InOutCubic }
@@ -93,42 +91,35 @@ Item {
     Component {
         id: messageDelegate
 
-        Rectangle {
-            width: chtMsg.width
-            height: chtMsg.height
-//            color: Qt.rgba(Math.random(),Math.random(),Math.random(),0.5)
-            color: 'transparent'
-            ChatMessage {
-                id: chtMsg
-                readonly property real fullWidth: messagesListView.width - leftIndent
-                width: messagesListView.width
-                maxWidth: Platform.isMobile ? (fullWidth - 2 * Theme.margin) : fullWidth
+        ChatMessage {
+            readonly property real fullWidth: messagesListView.width - leftIndent
+            width: messagesListView.width
+            maxWidth: Platform.isMobile ? (fullWidth - 2 * Theme.margin) : fullWidth
 
-                thisIndex: index
-                thisDay: day
-                isOwnMessage: model.senderId === controllers.users.currentUserId
-                statusIcon: isOwnMessage ? model.statusIcon : ""
-                attachmentPictureThumbnailWidth: model.attachmentPictureThumbnailSize.width
-                attachmentPictureThumbnailHeight: model.attachmentPictureThumbnailSize.height
-                messageId: model.id
+            thisIndex: index
+            thisDay: day
+            isOwnMessage: model.senderId === controllers.users.currentUserId
+            statusIcon: isOwnMessage ? model.statusIcon : ""
+            attachmentPictureThumbnailWidth: model.attachmentPictureThumbnailSize.width
+            attachmentPictureThumbnailHeight: model.attachmentPictureThumbnailSize.height
+            messageId: model.id
 
-                onSaveAttachmentAs: function(messageId) {
-                    saveAttachmentAsDialog.messageId = messageId
-                    saveAttachmentAsDialog.attachmentType = model.attachmentTypeIsPicture ? AttachmentTypes.picture : AttachmentTypes.file
-                    saveAttachmentAsDialog.open()
+            onSaveAttachmentAs: function(messageId) {
+                saveAttachmentAsDialog.messageId = messageId
+                saveAttachmentAsDialog.attachmentType = model.attachmentTypeIsPicture ? AttachmentTypes.picture : AttachmentTypes.file
+                saveAttachmentAsDialog.open()
+            }
+
+            onOpenContextMenu: function(messageId, mouse, contextMenu) {
+                if (!contextMenu.enabled) {
+                    return
                 }
-
-                onOpenContextMenu: function(messageId, mouse, contextMenu) {
-                    if (!contextMenu.enabled) {
-                        return
-                    }
-                    messagesListView.contextMenu = contextMenu
-                    var coord = mapToItem(messagesListView, mouse.x, mouse.y)
-                    contextMenu.x = coord.x - (Platform.isMobile ? contextMenu.width : 0)
-                    contextMenu.y = coord.y
-                    contextMenu.parent = messagesListView
-                    contextMenu.open()
-                }
+                messagesListView.contextMenu = contextMenu
+                var coord = mapToItem(messagesListView, mouse.x, mouse.y)
+                contextMenu.x = coord.x - (Platform.isMobile ? contextMenu.width : 0)
+                contextMenu.y = coord.y
+                contextMenu.parent = messagesListView
+                contextMenu.open()
             }
         }
     }
