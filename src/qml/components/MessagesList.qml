@@ -45,7 +45,7 @@ Item {
         onCountChanged: chatList.countChangedController()
         onContentYChanged: chatList.autoFlickToBottomController()
 
-        displaced: Theme.displacedTransition
+//        displaced: Theme.displacedTransition
 
         bottomMargin: flick.calculateContentMargin()
         Behavior on bottomMargin {
@@ -96,7 +96,8 @@ Item {
         Rectangle {
             width: chtMsg.width
             height: chtMsg.height
-            color: Qt.rgba(Math.random(),Math.random(),Math.random(),0.5)
+//            color: Qt.rgba(Math.random(),Math.random(),Math.random(),0.5)
+            color: 'transparent'
             ChatMessage {
                 id: chtMsg
                 readonly property real fullWidth: messagesListView.width - leftIndent
