@@ -37,6 +37,7 @@
 #include "Utils.h"
 #include "FileUtils.h"
 #include "Model.h"
+#include "models/ListProxyModel.h"
 
 #include <algorithm>
 
@@ -48,6 +49,9 @@ Self::MessagesModel(QObject *parent)
     : ListModel(parent)
 {
     qRegisterMetaType<MessagesModel *>("MessagesModel*");
+
+    proxy()->setSortRole(SortRole);
+    proxy()->sort(0, Qt::DescendingOrder);
 }
 
 
@@ -72,6 +76,7 @@ void Self::setMessages(ModifiableMessages messages)
 
 void Self::addMessage(ModifiableMessageHandler message) {
     if (m_currentChat && (m_currentChat->id() == message->chatId())) {
+        emit messageAdding();
         const auto count = rowCount();
         beginInsertRows(QModelIndex(), count, count);
         m_messages.emplace_back(std::move(message));
@@ -121,6 +126,11 @@ ModifiableMessageHandler Self::findById(const MessageId &messageId) const
     }
 
     return nullptr;
+}
+
+QString MessagesModel::lastMessageSenderId() const
+{
+    return m_messages.empty() ? QString() : m_messages.back()->senderId();
 }
 
 int Self::rowCount(const QModelIndex &parent) const
@@ -180,7 +190,7 @@ QVariant Self::data(const QModelIndex &index, int role) const
     }
 
     case AttachmentIsLoadingRole: {
-        if (!attachment) {
+        if (!attachment || message->status() == MessageStatus::Broken) {
             return false;
         }
         if (message->isOutgoing() && (attachment->uploadStage() != MessageContentUploadStage::Uploaded)) {
@@ -194,7 +204,7 @@ QVariant Self::data(const QModelIndex &index, int role) const
     }
 
     case AttachmentIsLoadedRole: {
-        if (!attachment) {
+        if (!attachment || message->status() == MessageStatus::Broken) {
             return false;
         }
         if (message->isOutgoing() && (attachment->uploadStage() == MessageContentUploadStage::Uploaded)) {
@@ -281,6 +291,15 @@ QVariant Self::data(const QModelIndex &index, int role) const
         return nextMessage && message->senderId() == nextMessage->senderId();
     }
 
+    case FirstInSectionRole: {
+        const auto prevMessage = (row == 0) ? nullptr : m_messages[row - 1];
+        return !prevMessage || prevMessage->createdAt().date() != message->createdAt().date();
+    }
+
+    case SortRole: {
+        return message->createdAt();
+    }
+
     default:
         return QVariant();
     }
@@ -312,6 +331,7 @@ QHash<int, QByteArray> Self::roleNames() const
         { AttachmentFileExistsRole, "attachmentFileExists" },
         { FirstInRowRole, "firstInRow" },
         { InRowRole, "inRow" },
+        { FirstInSectionRole, "firstInSection" }
     };
 }
 
@@ -395,7 +415,7 @@ QString Self::statusIconPath(MessageHandler message)
             if (message->isOutgoing()) {
                 // TODO(fpohtmeh): implement smarter check?
                 if (message->stageString() == OutgoingMessageStageToString(OutgoingMessageStage::Delivered)) {
-                    return path.arg("M-Delivered");
+                    return path.arg("M-Read"); // TODO(fpohtmeh): should be "M-Delivered"
                 }
                 else if (message->stageString() == OutgoingMessageStageToString(OutgoingMessageStage::Read)) {
                     return path.arg("M-Read");

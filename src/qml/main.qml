@@ -83,7 +83,13 @@ ApplicationWindow {
         }
 
         NetworkStatusControl {
-            anchors.centerIn: parent
+            anchors {
+                bottom: parent.bottom
+                left: parent.left
+                bottomMargin: Theme.smallMargin
+                leftMargin: Theme.smallMargin
+            }
+            z: Theme.overlayZ
         }
     }
 

@@ -87,8 +87,12 @@ public:
     //
     ModifiableMessageHandler findById(const MessageId &messageId) const;
 
+    Q_INVOKABLE QString lastMessageSenderId() const;
+
 signals:
     void pictureIconNotFound(const MessageId &messageId) const;
+    void messageAdding();
+
 
 private:
     enum Roles
@@ -121,6 +125,9 @@ private:
         // Grouping
         FirstInRowRole,
         InRowRole,
+        FirstInSectionRole,
+        // Sorting
+        SortRole
     };
 
     static QVector<int> rolesFromMessageUpdate(const MessageUpdate& messageUpdate);

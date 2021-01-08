@@ -54,7 +54,7 @@ Q_DECLARE_LOGGING_CATEGORY(lcMessenger)
 namespace vm {
 class Messenger : public MessageSender {
     Q_OBJECT
-    Q_PROPERTY(bool isOnline READ isOnline NOTIFY onlineStatusChanged)
+    Q_PROPERTY(QString connectionStateString READ connectionStateString NOTIFY connectionStateStringChanged)
 
 public:
 
@@ -116,6 +116,8 @@ public:
     QPointer<CrashReporter> crashReporter() noexcept;
     QPointer<FileLoader> fileLoader() noexcept;
 
+    QString connectionStateString() const noexcept;
+
 public slots:
     void setCurrentRecipient(const UserId &recipientId);
 
@@ -154,6 +156,7 @@ signals:
     // Connection.
     //
     void onlineStatusChanged(bool isOnline);
+    void connectionStateStringChanged(const QString &stateString);
     //--
 
     //--

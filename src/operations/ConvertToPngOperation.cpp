@@ -42,10 +42,11 @@
 
 using namespace vm;
 
-ConvertToPngOperation::ConvertToPngOperation(const Settings *settings, const QString &sourcePath, QObject *parent)
+ConvertToPngOperation::ConvertToPngOperation(const Settings *settings, const QString &sourcePath, const QString &destFileName, QObject *parent)
     : Operation(QLatin1String("ConvertToPng"), parent)
     , m_settings(settings)
     , m_sourcePath(sourcePath)
+    , m_destFileName(destFileName)
 {}
 
 void ConvertToPngOperation::run()
@@ -65,7 +66,7 @@ void ConvertToPngOperation::run()
         finish();
     }
     else {
-        const auto filePath = m_settings->attachmentCacheDir().filePath(Utils::createUuid() + QLatin1String(".png"));
+        const auto filePath = m_settings->attachmentCacheDir().filePath(m_destFileName + QLatin1String(".png"));
         if (!image.save(filePath)) {
             qCWarning(lcOperation) << "Unable to save png file";
             invalidate(tr("Failed to convert to png"));

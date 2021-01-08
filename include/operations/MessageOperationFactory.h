@@ -76,7 +76,7 @@ public:
     DownloadDecryptFileOperation *populateDownloadDecrypt(NetworkOperation *parent, const QUrl &url, quint64 bytesTotal,
                                                           const QString &destPath, const QByteArray &decryptionKey, const QByteArray& signature, const UserId &senderId);
     EncryptUploadFileOperation *populateEncryptUpload(NetworkOperation *parent, const QString &sourcePath);
-    ConvertToPngOperation *populateConvertToPngOperation(Operation *parent, const QString &sourcePath);
+    ConvertToPngOperation *populateConvertToPngOperation(Operation *parent, const QString &sourcePath, const QString &destFileName);
     CreateAttachmentThumbnailOperation *populateCreateAttachmentThumbnail(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &filePath);
     CreateAttachmentPreviewOperation *populateCreateAttachmentPreview(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &destPath);
     CalculateAttachmentFingerprintOperation *populateCalculateAttachmentFingerprint(MessageOperation *messageOp, Operation *parent, const QString &sourcePath);

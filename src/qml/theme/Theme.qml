@@ -57,6 +57,9 @@ Item {
     readonly property string mainFont: robotoRegular.name
     readonly property string mainFontBold: robotoBold.name
 
+    // z indices
+    readonly property real overlayZ: 1000
+
     // animation
     readonly property int animationDuration: 250
     readonly property int shortAnimationDuration: 125

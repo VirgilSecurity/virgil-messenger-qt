@@ -145,6 +145,7 @@ public:
     //
     bool isOnline() const noexcept;
     bool isSignedIn() const noexcept;
+    ConnectionState connectionState() const;
 
     //
     //  Sign-in / Sign-up / Backup.

@@ -320,6 +320,11 @@ Self::isSignedIn() const noexcept {
 }
 
 
+CoreMessenger::ConnectionState Self::connectionState() const {
+    return m_impl->connectionState;
+}
+
+
 bool
 Self::isNetworkOnline() const noexcept {
     return m_impl->networkAnalyzer->isConnected();

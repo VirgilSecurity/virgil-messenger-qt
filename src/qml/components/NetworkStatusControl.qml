@@ -1,8 +1,16 @@
-import QtQuick.Controls 2.15
+import QtQuick 2.15
 
-Label {
-    color: "red"
-    text: qsTr("Connecting...")
-    font.pointSize: UiHelper.fixFontSz(32)
-    visible: settings.devMode && !messenger.isOnline && controllers.users.currentUserId
+Rectangle {
+    height: 8
+    width: height
+    radius: 0.5 * width
+    color: {
+        if (messenger.connectionStateString === "connected") {
+            return "green";
+        }
+        if (messenger.connectionStateString === "connecting") {
+            return "orange";
+        }
+        return "red";
+    }
 }

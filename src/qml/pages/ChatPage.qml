@@ -142,7 +142,7 @@ Page {
         id: footerControl
     }
 
-    ChatItem {
+    MessagesList {
         anchors.fill: parent
     }
 

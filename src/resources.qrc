@@ -109,11 +109,17 @@
         <file>qml/components/FormSecondaryButton.qml</file>
         <file>qml/components/FormVendor.qml</file>
         <file>qml/components/AccountSelection.qml</file>
-        <file>qml/components/ChatItem.qml</file>
-        <file>qml/components/ChatMessageInput.qml</file>
-        <file>qml/components/ChatList.qml</file>
-        <file>qml/components/ChatMessage.qml</file>
+        <file>qml/components/MessagesList.qml</file>
+        <file>qml/components/MessagesFlickToBottomButton.qml</file>
+        <file>qml/components/MessageShape.qml</file>
+        <file>qml/components/MessageListViewScrollBar.qml</file>
         <file>qml/components/MessageCounter.qml</file>
+        <file>qml/components/MessageContentText.qml</file>
+        <file>qml/components/MessageContentAttachment.qml</file>
+        <file>qml/components/ChatMessage.qml</file>
+        <file>qml/components/ChatMessageHeader.qml</file>
+        <file>qml/components/ChatMessageInput.qml</file>
+        <file>qml/components/ChatMessageBody.qml</file>
         <file>qml/components/SearchHeader.qml</file>
         <file>qml/components/SelectContactsList.qml</file>
         <file>qml/components/Header.qml</file>
@@ -128,6 +134,7 @@
         <file>qml/components/Search.qml</file>
         <file>qml/components/UserNameTextField.qml</file>
         <file>qml/components/UserNameFormInput.qml</file>
+        <file>qml/components/UnreadMessagesSeparator.qml</file>
         <file>qml/resources/sounds/notification.wav</file>
         <file>qml/resources/sounds/message-received.wav</file>
         <file>qml/resources/sounds/message-sent.wav</file>
