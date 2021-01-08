@@ -24,7 +24,6 @@ Column {
     signal openContextMenu(string messageId, var mouse, var contextMenu)
 
     readonly property int stdCheckHeight: 14
-    readonly property int stdTopMargin: 15
     readonly property int stdSmallMargin: 5
     readonly property int stdRadiusHeight: 20
     readonly property int stdRectangleSize: 22
@@ -36,7 +35,7 @@ Column {
     readonly property bool isMessageAlignedLeft: {
         if (!Platform.isMobile) {
             if (isOwnMessage) {
-                if (chatMessage.width > 500) {
+                if (chatMessage.width > 800) {
                     return true
                 } else {
                     return false
