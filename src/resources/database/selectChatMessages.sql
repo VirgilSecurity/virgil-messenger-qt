@@ -30,4 +30,3 @@ FROM
 LEFT JOIN attachments ON attachments.messageId = messages.id
 LEFT JOIN chats ON chats.id = :chatId
 WHERE messages.chatId = :chatId
-ORDER BY messages.createdAt
