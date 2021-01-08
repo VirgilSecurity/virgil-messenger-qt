@@ -69,12 +69,6 @@ bool Self::populateChildren()
     return true;
 }
 
-void Self::cleanup()
-{
-    Operation::cleanup();
-    FileUtils::removeFile(m_tempPngPath);
-}
-
 void Self::populateFileOperations()
 {
     const auto message = m_parent->message();
@@ -98,9 +92,13 @@ void Self::populatePictureOperations()
     const auto factory = m_parent->factory();
 
     // Convert to png
-    auto convertOp = factory->populateConvertToPngOperation(this, attachment->localPath());
-    connect(convertOp, &ConvertToPngOperation::fileCreated, [this](const QString &filePath) {
-        m_tempPngPath = filePath;
+    auto convertOp = factory->populateConvertToPngOperation(this, attachment->localPath(), QLatin1String("png-%1").arg(attachment->id()));
+    connect(convertOp, &ConvertToPngOperation::fileCreated, [this, message](const QString &filePath) {
+        MessageAttachmentLocalPathUpdate update;
+        update.messageId = message->id();
+        update.attachmentId = message->contentAsAttachment()->id();
+        update.localPath = filePath;
+        m_parent->messageUpdate(update);
     });
 
     // Create picture preview

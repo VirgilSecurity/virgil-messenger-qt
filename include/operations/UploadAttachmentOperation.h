@@ -53,7 +53,6 @@ public:
 
 private:
     bool populateChildren() override;
-    void cleanup() override;
 
     void populateFileOperations();
     void populatePictureOperations();
@@ -63,7 +62,6 @@ private:
 
     MessageOperation *m_parent;
     const Settings *m_settings;
-    QString m_tempPngPath;
 };
 }
 

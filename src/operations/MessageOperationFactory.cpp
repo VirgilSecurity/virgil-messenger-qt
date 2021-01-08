@@ -98,9 +98,9 @@ EncryptUploadFileOperation *MessageOperationFactory::populateEncryptUpload(Netwo
     return op;
 }
 
-ConvertToPngOperation *MessageOperationFactory::populateConvertToPngOperation(Operation *parent, const QString &sourcePath)
+ConvertToPngOperation *MessageOperationFactory::populateConvertToPngOperation(Operation *parent, const QString &sourcePath, const QString &destFileName)
 {
-    auto op = new ConvertToPngOperation(m_settings, sourcePath, parent);
+    auto op = new ConvertToPngOperation(m_settings, sourcePath, destFileName, parent);
     parent->appendChild(op);
     return op;
 }
