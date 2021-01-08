@@ -134,7 +134,7 @@ Item {
 
         function countChangedController() {
 
-            if (flick.ownMessage()) {
+            if (flick.ownMessage() && messagesListView.contentHeight > messagesListItem.height) {
                 flick.setChatToBottom()
                 return
             }
@@ -160,7 +160,7 @@ Item {
 
             if (!flick.chatAtBottom()) {
                 let diff = messagesListItem.bottomContentY - messagesListView.contentY
-                if (diff > 100) {
+                if (diff > messagesListItem.height * 0.6) {
                     flick.flickToBottomButtonVisible(true)
                 }
                 flick.setNewContentY()
@@ -226,7 +226,9 @@ Item {
 
         function calculateContentMargin() {
             if (messagesListView.contentHeight < messagesListItem.height) {
-                return messagesListItem.height - messagesListView.contentHeight
+                let contentMargin = messagesListItem.height - messagesListView.contentHeight
+                if (contentMargin < 0) return 0
+                return contentMargin
             } else {
                 return 0
             }
