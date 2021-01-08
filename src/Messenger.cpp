@@ -291,6 +291,21 @@ QPointer<FileLoader> Self::fileLoader() noexcept {
 }
 
 
+QString Messenger::connectionStateString() const noexcept {
+    switch (m_coreMessenger->connectionState()) {
+        case CoreMessenger::ConnectionState::Connected:
+            return QLatin1String("connected");
+        case CoreMessenger::ConnectionState::Connecting:
+            return QLatin1String("connecting");
+        case CoreMessenger::ConnectionState::Disconnected:
+            return QLatin1String("disconnected");
+        case CoreMessenger::ConnectionState::Error:
+        default:
+            return QLatin1String("error");
+    }
+}
+
+
 void
 Self::setApplicationActive(bool active)
 {
@@ -325,6 +340,7 @@ void
 Self::onConnectionStateChanged(CoreMessenger::ConnectionState state) {
     const bool isOnline = CoreMessenger::ConnectionState::Connected == state;
     emit onlineStatusChanged(isOnline);
+    emit connectionStateStringChanged(connectionStateString());
 }
 
 
