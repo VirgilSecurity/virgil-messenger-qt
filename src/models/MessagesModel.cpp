@@ -297,7 +297,7 @@ QVariant Self::data(const QModelIndex &index, int role) const
     }
 
     case SortRole: {
-        return index.row();
+        return message->createdAt();
     }
 
     default:
