@@ -41,6 +41,7 @@
 #include <QSize>
 
 #include "AttachmentId.h"
+#include "UserId.h"
 
 class Settings : public QSettings
 {
@@ -81,6 +82,7 @@ public:
     QDir attachmentCacheDir() const;
     QDir thumbnailsDir() const;
     QDir downloadsDir() const;
+    QDir userDownloadsDir(const vm::UserId &userId) const;
 
     QString makeThumbnailPath(const vm::AttachmentId &attachmentId, bool isPreview) const;
     QSize thumbnailMaxSize() const;

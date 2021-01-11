@@ -8,8 +8,10 @@ ItemDelegate {
     id: delegate
 
     default property alias children: rowLayout.children
+    property alias backgroundColor: backgroundItem.color
 
     background: Rectangle {
+        id: backgroundItem
         color: delegate.down ? Theme.contactPressedColor : "Transparent"
         radius: 6
     }

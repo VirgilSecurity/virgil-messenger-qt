@@ -37,6 +37,7 @@
 #include <QtConcurrent>
 
 #include "models/ListProxyModel.h"
+#include "models/ListSelectionModel.h"
 #include "Settings.h"
 #include "Utils.h"
 #include "Model.h"
@@ -53,6 +54,8 @@ FileCloudModel::FileCloudModel(const Settings *settings, QObject *parent)
     proxy()->setSortRole(SortRole);
     proxy()->sort(0, Qt::AscendingOrder);
     proxy()->setFilterRole(FilenameRole);
+
+    selection()->setMultiSelect(true);
 
     connect(this, &FileCloudModel::listReady, this, &FileCloudModel::setList);
     connect(&m_updateTimer, &QTimer::timeout, this, &FileCloudModel::invalidateDateTime);
@@ -112,19 +115,18 @@ QVariant FileCloudModel::data(const QModelIndex &index, int role) const
     case SortRole:
         return QString("%1%2").arg(static_cast<int>(!info.isDir())).arg(info.fileName());
     default:
-        return QVariant();
+        return ListModel::data(index, role);
     }
 }
 
 QHash<int, QByteArray> FileCloudModel::roleNames() const
 {
-    return {
+    return unitedRoleNames(ListModel::roleNames(), {
         { FilenameRole, "fileName" },
         { IsDirRole, "isDir" },
         { DisplayDateTimeRole, "displayDateTime" },
-        { DisplayFileSize, "displayFileSize" },
-        // SortRole is hidden
-    };
+        { DisplayFileSize, "displayFileSize" }
+    });
 }
 
 void FileCloudModel::setList(const QFileInfoList &list)

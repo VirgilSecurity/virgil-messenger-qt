@@ -90,7 +90,7 @@
         <file>qml/resources/icons/Mic Selected@2x.png</file>
         <file>qml/resources/icons/File Download Big.png</file>
         <file>qml/resources/icons/File Download Big@2x.png</file>
-	<!-- Others -->
+        <!-- Others -->
         <file>qml/components/Avatar.qml</file>
         <file>qml/components/AttachmentPreview.qml</file>
         <file>qml/components/FlowListView.qml</file>
@@ -155,6 +155,8 @@
         <file>qml/components/SelectedContactsFlow.qml</file>
         <file>qml/components/HorizontalRule.qml</file>
         <file>qml/components/NetworkStatusControl.qml</file>
+        <file>qml/components/ChatListView.qml</file>
+        <file>qml/components/FileCloudListView.qml</file>
         <!-- Database -->
         <file>resources/database/createAttachments.sql</file>
         <file>resources/database/createChats.sql</file>

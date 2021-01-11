@@ -237,6 +237,15 @@ QDir Settings::downloadsDir() const
     return m_downloadsDir;
 }
 
+QDir Settings::userDownloadsDir(const UserId &userId) const
+{
+    const QDir dir = m_downloadsDir.filePath(userId);
+    if (!dir.exists()) {
+        FileUtils::forceCreateDir(dir.absolutePath());
+    }
+    return dir;
+}
+
 QString Settings::makeThumbnailPath(const AttachmentId &attachmentId, bool isPreview) const
 {
     return thumbnailsDir().filePath((isPreview ? QLatin1String("p-") : QLatin1String("t-")) + attachmentId + QLatin1String(".png"));

@@ -1,11 +1,11 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.12
+import QtQuick.Layouts 1.15
 
 import "../base"
-import "../theme"
 import "../components"
 import "../components/CommonHelpers"
+import "../theme"
 
 Page {
     property var appState: manager.chatListState
@@ -20,8 +20,8 @@ Page {
     header: SearchHeader {
         id: mainSearchHeader
         title: isChatList ? app.organizationDisplayName : qsTr("File Cloud") + controllers.fileCloud.displayPath
-        description: isChatList ? qsTr("%1 Server").arg(app.organizationDisplayName) : ""
-        showDescription: isChatList
+        description: isChatList ? qsTr("%1 Server").arg(app.organizationDisplayName) : qsTr("Selected: %1").arg(models.fileCloud.selection.selectedCount)
+        showDescription: isChatList || models.fileCloud.selection.hasSelection
         showBackButton: !isChatList && controllers.fileCloud.displayPath
         menuImage: isChatList ? "More" : "Plus"
         searchPlaceholder: isChatList ? qsTr("Search conversation") : qsTr("Search file")
@@ -48,116 +48,12 @@ Page {
         }
         currentIndex: isChatList ? 0 : 1
 
-        ModelListView {
-            id: chatListView
-            model: models.chats.proxy
+        ChatListView {
             searchHeader: mainSearchHeader
-            emptyIcon: "../resources/icons/Chats.png"
-            emptyText: qsTr("Create your first chat<br/>by pressing the dots<br/>button above")
-
-            delegate: ListDelegate {
-                width: chatListView.width
-
-                Avatar {
-                    id: avatar
-                    nickname: model.contactId
-                }
-
-                Column {
-                    Layout.fillWidth: true
-                    clip: true
-
-                    Text {
-                        color: Theme.primaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(15)
-                        text: model.contactId
-                    }
-
-                    Text {
-                        id: messageBody
-                        color: Theme.secondaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(12)
-                        width: parent.width
-                        text: model.lastMessageBody
-                        elide: Text.ElideRight
-                    }
-                }
-
-                Column {
-                    width: 30
-                    spacing: 5
-
-                    MessageCounter {
-                       count: model.unreadMessageCount
-                       anchors.horizontalCenter: parent.horizontalCenter
-                    }
-
-                    Text {
-                        text: model.lastEventTime
-                        color: Theme.secondaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(9)
-                        anchors.horizontalCenter: parent.horizontalCenter
-                    }
-                }
-
-                onClicked: controllers.chats.openChat(model.id)
-            }
-
-            onPlaceholderClicked: appState.requestNewChat()
         }
 
-        ModelListView {
-            id: fileCloudListView
-            model: models.fileCloud.proxy
+        FileCloudListView {
             searchHeader: mainSearchHeader
-            emptyIcon: "../resources/icons/Chats.png"
-            emptyText: qsTr("Add a file<br/>by pressing the plus<br/>button above")
-
-            delegate: ListDelegate {
-                width: fileCloudListView.width
-
-                ImageButton {
-                    image: model.isDir ? "Folder-Big" : "File-Big"
-                    imageSize: 48
-                    iconSize: 40
-                    onClicked: controllers.fileCloud.processClick(index)
-                }
-
-                Column {
-                    Layout.fillWidth: true
-                    clip: true
-
-                    Text {
-                        color: Theme.primaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(15)
-                        text: model.fileName
-                        width: parent.width
-                    }
-                }
-
-                Column {
-                    width: 30
-                    spacing: 5
-
-                    Text {
-                        text: model.displayFileSize
-                        color: Theme.primaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(12)
-                        anchors.right: parent.right
-                    }
-
-                    Text {
-                        text: model.displayDateTime
-                        color: Theme.secondaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(9)
-                        anchors.right: parent.right
-                    }
-                }
-
-                onClicked: controllers.fileCloud.processClick(index)
-            }
-
-            onPlaceholderClicked: attachmentPicker.open(AttachmentTypes.file)
         }
     }
 

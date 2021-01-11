@@ -76,6 +76,7 @@ void ListSelectionModel::toggle(const QModelIndex &sourceIndex)
 void ListSelectionModel::clear()
 {
     QItemSelectionModel::clearSelection();
+    updateProperties();
 }
 
 void ListSelectionModel::setMultiSelect(const bool multiSelect)
@@ -92,11 +93,25 @@ bool ListSelectionModel::hasSelection() const
     return m_hasSelection;
 }
 
-void ListSelectionModel::onChanged(const QItemSelection &selected, const QItemSelection &deselected)
+int ListSelectionModel::selectedCount() const
 {
-    emit changed(selected.indexes() + deselected.indexes());
+    return m_selectedCount;
+}
+
+void ListSelectionModel::updateProperties()
+{
     if (m_hasSelection != QItemSelectionModel::hasSelection()) {
         m_hasSelection = !m_hasSelection;
         emit hasSelectionChanged(m_hasSelection);
     }
+    if (m_selectedCount != selectedIndexes().count()) {
+        m_selectedCount = selectedIndexes().count();
+        emit selectedCountChanged(m_selectedCount);
+    }
+}
+
+void ListSelectionModel::onChanged(const QItemSelection &selected, const QItemSelection &deselected)
+{
+    emit changed(selected.indexes() + deselected.indexes());
+    updateProperties();
 }
