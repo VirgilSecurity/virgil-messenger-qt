@@ -36,6 +36,8 @@
 
 #include "models/ListModel.h"
 
+#include <QTimer>
+
 using namespace vm;
 
 ListSelectionModel::ListSelectionModel(ListModel *source)
@@ -75,8 +77,9 @@ void ListSelectionModel::toggle(const QModelIndex &sourceIndex)
 
 void ListSelectionModel::clear()
 {
-    QItemSelectionModel::clearSelection();
-    updateProperties();
+    QItemSelectionModel::clear();
+    // NOTE(fpohtmeh): don't update properties immediatelly because signals are blocked
+    QTimer::singleShot(10, this, &ListSelectionModel::updateProperties);
 }
 
 void ListSelectionModel::setMultiSelect(const bool multiSelect)
