@@ -84,9 +84,9 @@ void MessageOperationFactory::populatePreload(MessageOperation *messageOp)
 }
 
 DownloadDecryptFileOperation *MessageOperationFactory::populateDownloadDecrypt(NetworkOperation *parent, const QUrl &url, quint64 bytesTotal,
-                                                                               const QString &destPath, const QByteArray& decryptionKey, const UserId &senderId)
+                                                                               const QString &destPath, const QByteArray& decryptionKey, const QByteArray& signature, const UserId &senderId)
 {
-    auto op = new DownloadDecryptFileOperation(parent, m_messenger, m_settings, url, bytesTotal, destPath, decryptionKey, senderId);
+    auto op = new DownloadDecryptFileOperation(parent, m_messenger, m_settings, url, bytesTotal, destPath, decryptionKey, signature, senderId);
     parent->appendChild(op);
     return op;
 }
@@ -98,9 +98,9 @@ EncryptUploadFileOperation *MessageOperationFactory::populateEncryptUpload(Netwo
     return op;
 }
 
-ConvertToPngOperation *MessageOperationFactory::populateConvertToPngOperation(Operation *parent, const QString &sourcePath)
+ConvertToPngOperation *MessageOperationFactory::populateConvertToPngOperation(Operation *parent, const QString &sourcePath, const QString &destFileName)
 {
-    auto op = new ConvertToPngOperation(m_settings, sourcePath, parent);
+    auto op = new ConvertToPngOperation(m_settings, sourcePath, destFileName, parent);
     parent->appendChild(op);
     return op;
 }

@@ -320,6 +320,11 @@ Self::isSignedIn() const noexcept {
 }
 
 
+CoreMessenger::ConnectionState Self::connectionState() const {
+    return m_impl->connectionState;
+}
+
+
 bool
 Self::isNetworkOnline() const noexcept {
     return m_impl->networkAnalyzer->isConnected();
@@ -697,6 +702,8 @@ Self::connectXmppServer() {
 
     QString xmppPass = vsc_str_to_qstring(vssq_ejabberd_jwt_as_string(jwt));
 
+    qCDebug(lcCoreMessenger) << "Connect user with JID: " << currentUserJid();
+
     QXmppConfiguration config{};
     config.setJid(currentUserJid());
     config.setHost(CustomerEnv::xmppServiceUrl());
@@ -920,6 +927,9 @@ Self::sendMessage(MessageHandler message) {
         // TODO: review next lines when implement group chats.
         auto senderJid = userIdToJid(message->senderId());
         auto recipientJid = userIdToJid(UserId(message->chatId()));
+
+        qCDebug(lcCoreMessenger) << "Will send XMPP message from JID: " << senderJid;
+        qCDebug(lcCoreMessenger) << "Will send XMPP message to JID: " << recipientJid;
 
         QXmppMessage xmppMessage(senderJid, recipientJid, messageBody);
         xmppMessage.setId(message->id());
@@ -1270,22 +1280,22 @@ Self::processReceivedXmppCarbonMessage(const QXmppMessage& xmppMessage) {
     });
 }
 
-std::tuple<Self::Result, QByteArray>
+std::tuple<Self::Result, QByteArray, QByteArray>
 Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
     //
     //  Create helpers for error handling.
     //
-    auto cryptoError = [](vssq_status_t status) -> std::tuple<Result, QByteArray> {
+    auto cryptoError = [](vssq_status_t status) -> std::tuple<Result, QByteArray, QByteArray> {
         qCWarning(lcCoreMessenger) << "Can not encrypt file: " <<
                 vsc_str_to_qstring(vssq_error_message_from_status(status));
 
-        return std::make_tuple(Self::Result::Error_FileEncryptionCryptoFailed, QByteArray());
+        return std::make_tuple(Self::Result::Error_FileEncryptionCryptoFailed, QByteArray(), QByteArray());
     };
 
-    auto fileError = [](Self::Result error) -> std::tuple<Result, QByteArray> {
+    auto fileError = [](Self::Result error) -> std::tuple<Result, QByteArray, QByteArray> {
         qCWarning(lcCoreMessenger) << "Can not encrypt file - read/write failed.";
 
-        return std::make_tuple(error, QByteArray());
+        return std::make_tuple(error, QByteArray(), QByteArray());
     };
 
 
@@ -1325,10 +1335,7 @@ Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
     const auto decryptionKeyBufLen = vssq_messenger_file_cipher_init_encryption_out_key_len(fileCipher.get());
     auto [decryptionKey, decryptionKeyBuf] = makeMappedBuffer(decryptionKeyBufLen);
 
-    const auto ownerPrivateKey = vssq_messenger_creds_private_key(vssq_messenger_creds(m_impl->messenger.get()));
-
-    encryptionStatus = vssq_messenger_file_cipher_init_encryption(
-                fileCipher.get(), ownerPrivateKey, fileSize, decryptionKeyBuf.get());
+    encryptionStatus = vssq_messenger_file_cipher_init_encryption(fileCipher.get(), decryptionKeyBuf.get());
 
     if (encryptionStatus != vssq_status_SUCCESS) {
         return cryptoError(encryptionStatus);
@@ -1353,7 +1360,6 @@ Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
     if (destFile.write((const char *)vsc_buffer_bytes(workingBuffer.get()), vsc_buffer_len(workingBuffer.get())) == -1) {
         return fileError(Self::Result::Error_FileEncryptionWriteFailed);
     }
-
 
     //
     //  Encrypt - Step 4 - Encrypt file.
@@ -1402,28 +1408,17 @@ Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
     }
 
     //
-    //  Encrypt - Step 5 - Write tail.
+    //  Encrypt - Step 5 - Write tail and produce signature.
     //
     const auto tailLen = vssq_messenger_file_cipher_finish_encryption_out_len(fileCipher.get());
     vsc_buffer_reset_with_capacity(workingBuffer.get(), tailLen);
 
-    encryptionStatus = vssq_messenger_file_cipher_finish_encryption(fileCipher.get(), workingBuffer.get());
+    const auto ownerPrivateKey = vssq_messenger_creds_private_key(vssq_messenger_creds(m_impl->messenger.get()));
 
-    if (encryptionStatus != vssq_status_SUCCESS) {
-        return cryptoError(encryptionStatus);
-    }
+    const auto signatureBufferLen = vssq_messenger_file_cipher_finish_encryption_signature_len(fileCipher.get(), ownerPrivateKey);
+    auto [signature, signatureBuffer] = makeMappedBuffer(signatureBufferLen);
 
-    if (destFile.write((const char *)vsc_buffer_bytes(workingBuffer.get()), vsc_buffer_len(workingBuffer.get())) == -1) {
-        return fileError(Self::Result::Error_FileEncryptionWriteFailed);
-    }
-
-    //
-    //  Encrypt - Step 6 - Write footer.
-    //
-    const auto footerLen = vssq_messenger_file_cipher_finish_encryption_footer_out_len(fileCipher.get());
-    vsc_buffer_reset_with_capacity(workingBuffer.get(), footerLen);
-
-    encryptionStatus = vssq_messenger_file_cipher_finish_encryption_footer(fileCipher.get(), workingBuffer.get());
+    encryptionStatus = vssq_messenger_file_cipher_finish_encryption(fileCipher.get(), ownerPrivateKey, workingBuffer.get(), signatureBuffer.get());
 
     if (encryptionStatus != vssq_status_SUCCESS) {
         return cryptoError(encryptionStatus);
@@ -1436,13 +1431,13 @@ Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
     //
     //  Return result.
     //
-    return std::make_tuple(Self::Result::Success, std::move(decryptionKey));
+    return std::make_tuple(Self::Result::Success, std::move(decryptionKey), std::move(signature));
 }
 
 
 Self::Result
 Self::decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray& decryptionKey,
-        const UserId senderId) {
+        const QByteArray& signature, const UserId senderId) {
     //
     //  Create helpers for error handling.
     //
@@ -1501,7 +1496,7 @@ Self::decryptFile(const QString &sourceFilePath, const QString &destFilePath, co
     //
     //  Decrypt - Step 2 - Setup decryption key.
     //
-    decryptionStatus = vssq_messenger_file_cipher_start_decryption(fileCipher.get(), vsc_data_from(decryptionKey));
+    decryptionStatus = vssq_messenger_file_cipher_start_decryption(fileCipher.get(), vsc_data_from(decryptionKey), vsc_data_from(signature));
 
     if (decryptionStatus != vssq_status_SUCCESS) {
         return cryptoError(decryptionStatus);

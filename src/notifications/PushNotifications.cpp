@@ -32,6 +32,36 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+<<<<<<< HEAD:include/notifications/XmppPushNotifications.h
+#ifndef VIRGIL_MESSENGER_NOTIFICATIONS_XMPP_PUSH_NOTIFICATIONS_H_INCLUDED
+#define VIRGIL_MESSENGER_NOTIFICATIONS_XMPP_PUSH_NOTIFICATIONS_H_INCLUDED
+
+#include <qxmpp/QXmppPushEnableIq.h>
+
+namespace notifications {
+namespace xmpp {
+
+class XmppPushNotifications {
+public:
+    static XmppPushNotifications &
+    instance();
+
+    QXmppPushEnableIq
+    buildEnableIq() const;
+
+    QXmppPushEnableIq
+    buildDisableIq() const;
+
+private:
+    XmppPushNotifications() = default;
+    ~XmppPushNotifications() noexcept = default;
+};
+
+} // namespace xmpp
+} // namespace notifications
+
+#endif // VIRGIL_MESSENGER_NOTIFICATIONS_XMPP_PUSH_NOTIFICATIONS_H_INCLUDED
+=======
 #include "PushNotifications.h"
 
 using namespace notifications;
@@ -54,3 +84,4 @@ const QString &
 Self::token() const noexcept {
     return m_token;
 }
+>>>>>>> develop:src/notifications/PushNotifications.cpp

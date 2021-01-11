@@ -109,7 +109,6 @@ QString Self::urlToLocalFile(const QUrl &url)
 
 bool Self::forceCreateDir(const QString &absolutePath)
 {
-    qDebug(lcFileUtils) << "Force to create dir:" << absolutePath;
     const QFileInfo info(absolutePath);
     if (info.exists()) {
         if (info.isDir()) {

@@ -32,6 +32,35 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+<<<<<<< HEAD:src/operations/DecryptFileOperation.cpp
+#include "operations/DecryptFileOperation.h"
+
+#include "operations/MessageOperation.h"
+
+using namespace vm;
+
+DecryptFileOperation::DecryptFileOperation(QObject *parent, Messenger *messenger, const QString &sourcePath, const QString &destPath,
+                                           const QByteArray &decryptionKey, const UserId &senderId)
+    : Operation(QLatin1String("DecryptFile"), parent)
+    , m_messenger(messenger)
+    , m_sourcePath(sourcePath)
+    , m_destPath(destPath)
+    , m_decryptionKey(decryptionKey)
+    , m_senderId(senderId)
+{
+}
+
+void DecryptFileOperation::run()
+{
+    if (m_messenger->decryptFile(m_sourcePath, m_destPath, m_decryptionKey, m_senderId)) {
+        emit decrypted(QFileInfo(m_destPath));
+        finish();
+    }
+    else {
+        qCWarning(lcOperation) << "Failed to decrypt file:" << m_sourcePath;
+        fail();
+    }
+=======
 
 #include "AttachmentId.h"
 
@@ -71,4 +100,5 @@ bool operator==(const vm::AttachmentId& lhs, const vm::AttachmentId& rhs) {
 
 bool operator!=(const vm::AttachmentId& lhs, const vm::AttachmentId& rhs) {
     return QString(lhs) != QString(rhs);
+>>>>>>> develop:src/messenger/AttachmentId.cpp
 }

@@ -34,6 +34,8 @@
 
 #include "logging/VSQLogWorker.h"
 
+#include "Settings.h"
+
 #include <QTextStream>
 #include <QStandardPaths>
 #include <QCoreApplication>
@@ -43,6 +45,8 @@
 
 constexpr const qint64 LOG_MAX_FILESIZE = 20 * 1024 * 1024;
 
+using namespace vm;
+
 VSQLogWorker::VSQLogWorker(QObject *parent)
     : QObject(parent), m_logFile(), m_logFileIndex(0)
 {
@@ -50,10 +54,10 @@ VSQLogWorker::VSQLogWorker(QObject *parent)
 
 void VSQLogWorker::processMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
 {
-    consoleMessageHandler(type, context, message);
-    fileMessageHandler(type, context, message);
 #ifdef QT_DEBUG
+    consoleMessageHandler(type, context, message);
 #endif
+    fileMessageHandler(type, context, message);
 }
 
 void VSQLogWorker::fileMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
@@ -82,15 +86,9 @@ bool VSQLogWorker::prepareLogFile(qint64 messageLen) {
     }
 
     if (!m_logFile.isOpen()) {
-        // Open log file.
-        auto appDir = QDir{QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)};
-
-        if (!appDir.mkpath(".")) {
-            return false;
-        }
-
-        auto fileName = QCoreApplication::applicationName() + "_" + QString::number(m_logFileIndex) + ".log";
-        m_logFile.setFileName(appDir.absolutePath() + '/' + fileName);
+        // Open log file
+        const auto fileName = QCoreApplication::applicationName() + "_" + QString::number(m_logFileIndex) + ".log";
+        m_logFile.setFileName(Settings::logsDir().filePath(fileName));
 
         if (!m_logFile.open(QIODevice::WriteOnly)) {
             return false;

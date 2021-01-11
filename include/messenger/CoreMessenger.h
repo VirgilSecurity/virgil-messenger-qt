@@ -145,6 +145,7 @@ public:
     //
     bool isOnline() const noexcept;
     bool isSignedIn() const noexcept;
+    ConnectionState connectionState() const;
 
     //
     //  Sign-in / Sign-up / Backup.
@@ -170,15 +171,15 @@ public:
     QFuture<Result> processReceivedXmppCarbonMessage(const QXmppMessage& xmppMessage);
 
     //
-    //  Encrypt given file and returns a key for decryption.
+    //  Encrypt given file and returns a key for decryption and signature.
     //
-    std::tuple<Result, QByteArray> encryptFile(const QString &sourceFilePath, const QString &destFilePath);
+    std::tuple<Result, QByteArray, QByteArray> encryptFile(const QString &sourceFilePath, const QString &destFilePath);
 
     //
     //  Decrypt given file.
     //
     Result decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray& decryptionKey,
-            const UserId senderId);
+            const QByteArray& signature, const UserId senderId);
 
     //
     //  Contacts (XMPP).

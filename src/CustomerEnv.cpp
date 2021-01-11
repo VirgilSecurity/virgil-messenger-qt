@@ -107,3 +107,4 @@ QString Self::caBundlePath() {
 QString Self::version() {
     return kVersion;
 }
+

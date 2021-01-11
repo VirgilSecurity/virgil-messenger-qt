@@ -75,6 +75,7 @@ public:
 
     // Attachments
 
+    static QDir logsDir();
     QDir databaseDir() const;
     quint64 attachmentMaxFileSize() const;
     QDir attachmentCacheDir() const;
@@ -111,8 +112,11 @@ private:
 
     void createDeviceId();
     void addUserToList(const QString &user);
+    static QString settingsFileName();
 
     QString m_sessionId;
+    static QDir m_logsDir;
+    static bool m_logsDirInitialized;
     QDir m_databaseDir;
     QDir m_attachmentCacheDir;
     QDir m_thumbnaisDir;

@@ -91,6 +91,7 @@ struct MessageAttachmentLocalPathUpdate : public MessageAttachmentUpdateBase {
 struct MessageAttachmentEncryptionUpdate : public MessageAttachmentUpdateBase {
     quint64 encryptedSize;
     QByteArray decryptionKey;
+    QByteArray signature;
 };
 
 struct MessageAttachmentProcessedSizeUpdate : public MessageAttachmentUpdateBase {
@@ -112,6 +113,7 @@ struct MessagePictureThumbnailSizeUpdate : public MessageAttachmentExtrasUpdate 
 struct MessagePictureThumbnailEncryptionUpdate : public MessageAttachmentExtrasUpdate {
     qint64 encryptedSize;
     QByteArray decryptionKey;
+    QByteArray signature;
 };
 
 struct MessagePictureThumbnailRemoteUrlUpdate : public MessageAttachmentExtrasUpdate {

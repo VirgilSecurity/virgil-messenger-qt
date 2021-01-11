@@ -32,6 +32,47 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+<<<<<<< HEAD:include/operations/EncryptUploadFileOperation.h
+#ifndef VM_ENCRYPTUPLOADFILEOPERATION_H
+#define VM_ENCRYPTUPLOADFILEOPERATION_H
+
+#include "NetworkOperation.h"
+#include "FileLoader.h"
+
+#include <QPointer>
+
+namespace vm
+{
+class FileLoader;
+class Messenger;
+
+class EncryptUploadFileOperation : public NetworkOperation
+{
+    Q_OBJECT
+
+public:
+    EncryptUploadFileOperation(NetworkOperation *parent, Messenger *messenger, const Settings *settings, const QString &sourcePath);
+
+    void setSourcePath(const QString &sourcePath);
+
+signals:
+    void progressChanged(quint64 bytesLoaded, quint64 bytesTotal);
+    void encrypted(const QFileInfo &file, const QByteArray &decryptionKey);
+    void uploadSlotReceived();
+    void uploaded(const QUrl &url);
+
+private:
+    bool populateChildren() override;
+    void cleanup() override;
+
+    QPointer<Messenger> m_messenger;
+    QString m_sourcePath;
+    const QString m_tempPath;
+};
+}
+
+#endif // VM_ENCRYPTUPLOADFILEOPERATION_H
+=======
 #ifndef VM_DOWNLOADATTACHMENTOPERATION_H
 #define VM_DOWNLOADATTACHMENTOPERATION_H
 
@@ -76,3 +117,4 @@ private:
 }
 
 #endif // VM_DOWNLOADATTACHMENTOPERATION_H
+>>>>>>> develop:include/operations/DownloadAttachmentOperation.h
