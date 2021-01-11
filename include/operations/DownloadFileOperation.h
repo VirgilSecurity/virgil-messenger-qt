@@ -32,29 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-<<<<<<< HEAD:src/states/SignInState.cpp
-#include "states/SignInState.h"
-
-#include "Validator.h"
-#include "controllers/UsersController.h"
-
-using namespace vm;
-
-SignInState::SignInState(UsersController *usersController, Validator *validator, QState *parent)
-    : OperationState(parent)
-    , m_usersController(usersController)
-    , m_validator(validator)
-{
-    connect(usersController, &UsersController::signedIn, this, &SignInState::operationFinished);
-    connect(usersController, &UsersController::signInErrorOccured, this, &SignInState::operationErrorOccurred);
-    connect(this, &SignInState::signIn, this, &SignInState::processSignIn);
-}
-
-void SignInState::processSignIn(const QString &username)
-{
-    emit operationStarted();
-    m_usersController->signIn(username);
-=======
 #ifndef VM_DOWNLOADFILEOPERATION_H
 #define VM_DOWNLOADFILEOPERATION_H
 
@@ -85,7 +62,6 @@ private:
     QUrl m_url;
     QPointer<FileLoader> m_fileLoader;
 };
->>>>>>> develop:include/operations/DownloadFileOperation.h
 }
 
 #endif // VM_DOWNLOADFILEOPERATION_H

@@ -88,6 +88,7 @@ elseif(VS_PLATFORM STREQUAL "linux")
 
   add_custom_target(deploy
     COMMAND ${LINUX_DEPLOY_QT}
+       deploySystem
        -bin ${PROJECT_NAME} 
        -qmlDir ${PROJECT_SOURCE_DIR}/src/qml 
        -targetDir ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist

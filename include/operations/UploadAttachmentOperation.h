@@ -32,22 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-<<<<<<< HEAD:include/operations/DecryptFileOperation.h
-#ifndef VM_DECRYPTFILEOPERATION_H
-#define VM_DECRYPTFILEOPERATION_H
-
-#include "Messenger.h"
-#include "Operation.h"
-#include "UserId.h"
-
-#include <QFileInfo>
-
-namespace vm
-{
-class MessageOperation;
-
-class DecryptFileOperation : public Operation
-=======
 #ifndef VM_UPLOADATTACHMENTOPERATION_H
 #define VM_UPLOADATTACHMENTOPERATION_H
 
@@ -61,31 +45,10 @@ namespace vm
 class EncryptUploadFileOperation;
 
 class UploadAttachmentOperation : public LoadAttachmentOperation
->>>>>>> develop:include/operations/UploadAttachmentOperation.h
 {
     Q_OBJECT
 
 public:
-<<<<<<< HEAD:include/operations/DecryptFileOperation.h
-    explicit DecryptFileOperation(QObject *parent, Messenger *messenger, const QString &sourcePath, const QString &destPath,
-                                  const QByteArray& decryptionKey, const UserId &senderId);
-
-    void run() override;
-
-signals:
-    void decrypted(const QFileInfo &file);
-
-private:
-    QPointer<Messenger> m_messenger;
-    const QString m_sourcePath;
-    const QString m_destPath;
-    const QByteArray m_decryptionKey;
-    const UserId m_senderId;
-};
-}
-
-#endif // VM_DECRYPTFILEOPERATION_H
-=======
     UploadAttachmentOperation(MessageOperation *parent, const Settings *settings);
 
 private:
@@ -103,4 +66,3 @@ private:
 }
 
 #endif // VM_UPLOADATTACHMENTOPERATION_H
->>>>>>> develop:include/operations/UploadAttachmentOperation.h
