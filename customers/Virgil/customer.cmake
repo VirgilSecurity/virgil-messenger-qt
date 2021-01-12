@@ -20,6 +20,8 @@ else()
     set(VS_XMPP_DOMAIN_TEMPLATE "xmpp%1.virgilsecurity.com")
     set(CONTACT_DISCOVERY_URL_TEMPLATE "https://disco%1-va.virgilsecurity.com")
     
+    set(SECURITY_APPLICATION_GROUP_IDENTIFIER "group.com.virgil.VirgilMessenger")
+    
     set(VS_BUNDLE_PREFIX "com.virgil")
 
     # -- Sources and includes

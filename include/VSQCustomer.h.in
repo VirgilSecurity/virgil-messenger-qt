@@ -53,6 +53,8 @@ namespace Customer
 
     static const QString kPushNotificationsProxy = "@VS_PUSH_PROXY@";
     static const QString kPushNotificationsTopic = "@VS_PUSH_TOPIC@";
+    
+    static const QString kSecurityApplicationGroupIdentifier = "@SECURITY_APPLICATION_GROUP_IDENTIFIER@";
 }
 
 #endif // VSQ_CUSTOMER_H

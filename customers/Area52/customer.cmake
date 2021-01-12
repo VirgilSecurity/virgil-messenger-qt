@@ -18,6 +18,8 @@ else()
     set(VS_XMPP_URL_TEMPLATE "xmpp%1.area52.virgil.net")
     set(VS_XMPP_DOMAIN_TEMPLATE "")
     set(CONTACT_DISCOVERY_URL_TEMPLATE "")
+    
+    set(SECURITY_APPLICATION_GROUP_IDENTIFIER "group.com.virgil.Area52Messenger")
 
     # -- Sources and includes
     # Custom customer sources and includes
