@@ -40,19 +40,19 @@ cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 function(get_prebuild)
     set(PREBUILT_CORE_ARCHIVE "${CMAKE_CURRENT_LIST_DIR}/ext/downloads/prebuilt-${VS_CORE_VERSION}.tgz")
     message(STATUS "Get prebuild libraries [https://virgilsecurity.bintray.com/iotl-demo-cdn/prebuilt-${VS_CORE_VERSION}.tgz]...")
-    if(NOT EXISTS "${PREBUILT_CORE_ARCHIVE}")
-	file(DOWNLOAD
-            "https://virgilsecurity.bintray.com/iotl-demo-cdn/prebuilt-${VS_CORE_VERSION}.tgz"
-            "${PREBUILT_CORE_ARCHIVE}"
-            SHOW_PROGRESS
+    if (NOT EXISTS "${PREBUILT_CORE_ARCHIVE}")
+        file(DOWNLOAD
+                "https://virgilsecurity.bintray.com/iotl-demo-cdn/prebuilt-${VS_CORE_VERSION}.tgz"
+                "${PREBUILT_CORE_ARCHIVE}"
+                SHOW_PROGRESS
+                )
+        message(STATUS "Unpacking ...")
+        execute_process(
+                COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_LIST_DIR}/ext/prebuild
+                COMMAND ${CMAKE_COMMAND} -E tar xzf "${PREBUILT_CORE_ARCHIVE}"
+                WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/ext"
         )
-	message(STATUS "Unpacking ...")
-	execute_process(
-            COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_LIST_DIR}/ext/prebuild 
-            COMMAND ${CMAKE_COMMAND} -E tar xzf "${PREBUILT_CORE_ARCHIVE}"
-            WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/ext"
-        )        
-    endif()
+    endif ()
 endfunction()
 
 #
@@ -61,19 +61,19 @@ endfunction()
 function(get_firebase)
     set(PREBUILT_FIREBASE_SDK_VERSION "6.11.0")
     set(PREBUILT_FIREBASE_SDK_ARCHIVE
-        "${CMAKE_CURRENT_LIST_DIR}/ext/downloads/firebase_cpp_sdk_${PREBUILT_FIREBASE_SDK_VERSION}.zip"
-    )
+            "${CMAKE_CURRENT_LIST_DIR}/ext/downloads/firebase_cpp_sdk_${PREBUILT_FIREBASE_SDK_VERSION}.zip"
+            )
     message(STATUS "Get prebuild firebase [https://dl.google.com/firebase/sdk/cpp/firebase_cpp_sdk_${PREBUILT_FIREBASE_SDK_VERSION}.zip]...")
-    if(NOT EXISTS "${PREBUILT_FIREBASE_SDK_ARCHIVE}")
+    if (NOT EXISTS "${PREBUILT_FIREBASE_SDK_ARCHIVE}")
         file(DOWNLOAD
-            "https://dl.google.com/firebase/sdk/cpp/firebase_cpp_sdk_${PREBUILT_FIREBASE_SDK_VERSION}.zip"
-            "${PREBUILT_FIREBASE_SDK_ARCHIVE}"
-            SHOW_PROGRESS
+                "https://dl.google.com/firebase/sdk/cpp/firebase_cpp_sdk_${PREBUILT_FIREBASE_SDK_VERSION}.zip"
+                "${PREBUILT_FIREBASE_SDK_ARCHIVE}"
+                SHOW_PROGRESS
+                )
+        execute_process(
+                COMMAND ${CMAKE_COMMAND} -E tar xzf "${PREBUILT_FIREBASE_SDK_ARCHIVE}"
+                WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt"
         )
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} -E tar xzf "${PREBUILT_FIREBASE_SDK_ARCHIVE}"
-        WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt"
-    )
-    endif()
+    endif ()
 endfunction()
 

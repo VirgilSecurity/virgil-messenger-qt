@@ -1,5 +1,8 @@
-#####
+##### Generated
+gradle.properties
+VSQCustomer.h
 transitive-args.cmake
+#####
 downloads/
 prebuilt/
 build*/
