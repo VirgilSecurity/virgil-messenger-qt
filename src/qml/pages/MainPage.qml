@@ -41,13 +41,6 @@ Page {
             text: d.isChatList ? qsTr("New chat") : qsTr("Add file")
             onTriggered: d.isChatList ? appState.requestNewChat() : attachmentPicker.open(AttachmentTypes.file)
         }
-
-        // TODO(fpohtmeh): restore later
-//        Action {
-//            text: qsTr("New group")
-//            enabled: d.isChatList
-//            onTriggered: appState.requestNewGroupChat()
-//        }
     }
 
     StackLayout {

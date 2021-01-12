@@ -124,6 +124,8 @@
         <file>qml/components/SelectContactsList.qml</file>
         <file>qml/components/Header.qml</file>
         <file>qml/components/ContextMenu.qml</file>
+        <file>qml/components/ContextMenuDelegate.qml</file>
+        <file>qml/components/ContextMenuSeparator.qml</file>
         <file>qml/components/ImageButton.qml</file>
         <file>qml/components/FormImage.qml</file>
         <file>qml/components/FormSubtitle.qml</file>

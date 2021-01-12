@@ -35,8 +35,7 @@ Control {
                 onTriggered: controllers.users.requestAccountSettings(controllers.users.currentUsername)
             }
 
-            MenuSeparator {
-                leftPadding: Theme.padding
+            ContextMenuSeparator {
             }
 
             Action {

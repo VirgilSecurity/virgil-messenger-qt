@@ -1,0 +1,35 @@
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+
+import "../theme"
+
+MenuItem {
+    id: menuItem
+    implicitWidth: parent.width
+    implicitHeight: d.itemHeight
+    font.pointSize: UiHelper.fixFontSz(15)
+
+    QtObject {
+        id: d
+
+        readonly property real itemHeight: contextMenu.compact ? 30 : 40
+        readonly property real itemPadding: contextMenu.compact ? Theme.smallPadding : Theme.padding
+    }
+
+    contentItem: Text {
+        leftPadding: d.itemPadding
+        rightPadding: d.itemPadding
+        text: menuItem.text
+        font: menuItem.font
+        color: Theme.primaryTextColor
+        horizontalAlignment: Text.AlignLeft
+        verticalAlignment: Text.AlignVCenter
+        elide: Text.ElideRight
+    }
+
+    background: Rectangle {
+        implicitWidth: contextMenu.implicitWidth
+        implicitHeight: contextMenu.implicitHeight
+        color: menuItem.highlighted ? "#59717D" : contextMenu.background.color
+    }
+}
