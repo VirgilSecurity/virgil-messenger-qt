@@ -55,6 +55,6 @@ Menu {
         radius: 6
     }
 
-    delegate: ContextMenuDelegate {
+    delegate: ContextMenuItem {
     }
 }

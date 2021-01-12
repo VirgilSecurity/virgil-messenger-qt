@@ -15,6 +15,7 @@ Page {
 
         readonly property var manager: app.stateManager
         readonly property bool isChatList: appState === manager.chatListState
+        readonly property bool isFileCloud: appState === manager.fileCloudState
         readonly property var fileCloudSelection: models.fileCloud.selection
 
         readonly property string chatTitle: app.organizationDisplayName
@@ -32,14 +33,41 @@ Page {
         id: mainSearchHeader
         title: d.isChatList ? d.chatTitle : d.fileCloudTitle
         description: d.isChatList ? d.chatDescription : d.fileCloudDescription
-        showBackButton: !d.isChatList && controllers.fileCloud.displayPath
+        showBackButton: d.isFileCloud && controllers.fileCloud.displayPath
         menuImage: d.isChatList ? "More" : "Plus"
         searchPlaceholder: d.isChatList ? qsTr("Search conversation") : qsTr("Search file")
         filterSource: d.isChatList ? models.chats : models.fileCloud
 
-        Action {
-            text: d.isChatList ? qsTr("New chat") : qsTr("Add file")
-            onTriggered: d.isChatList ? appState.requestNewChat() : attachmentPicker.open(AttachmentTypes.file)
+        // Chat items
+
+        ContextMenuItem {
+            text: qsTr("New chat")
+            onTriggered: appState.requestNewChat()
+            visible: d.isChatList
+        }
+
+        // File cloud items
+
+        ContextMenuItem {
+            text: qsTr("Add file")
+            onTriggered: attachmentPicker.open(AttachmentTypes.file)
+            visible: d.isFileCloud
+        }
+
+        ContextMenuItem {
+            text: qsTr("New dir")
+            onTriggered: appState.requestNewDir()
+            visible: d.isFileCloud
+        }
+
+        ContextMenuSeparator {
+            visible: d.isFileCloud && d.fileCloudSelection.hasSelection
+        }
+
+        ContextMenuItem {
+            text: qsTr("Delete")
+            onTriggered: appState.requestDeletion()
+            visible: d.isFileCloud && d.fileCloudSelection.hasSelection
         }
     }
 

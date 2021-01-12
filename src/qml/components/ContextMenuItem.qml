@@ -5,13 +5,14 @@ import "../theme"
 
 MenuItem {
     id: menuItem
-    implicitWidth: parent.width
-    implicitHeight: d.itemHeight
+    implicitWidth: d.contextMenu.width
+    implicitHeight: visible ? d.itemHeight : 0
     font.pointSize: UiHelper.fixFontSz(15)
 
     QtObject {
         id: d
 
+        readonly property var contextMenu: menuItem.parent
         readonly property real itemHeight: contextMenu.compact ? 30 : 40
         readonly property real itemPadding: contextMenu.compact ? Theme.smallPadding : Theme.padding
     }
@@ -28,8 +29,8 @@ MenuItem {
     }
 
     background: Rectangle {
-        implicitWidth: contextMenu.implicitWidth
-        implicitHeight: contextMenu.implicitHeight
-        color: menuItem.highlighted ? "#59717D" : contextMenu.background.color
+        implicitWidth: d.contextMenu.implicitWidth
+        implicitHeight: d.contextMenu.implicitHeight
+        color: menuItem.highlighted ? "#59717D" : Theme.menuBackgroundColor
     }
 }
