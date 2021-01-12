@@ -6,15 +6,7 @@
 	<string>development</string>
 	<key>com.apple.security.application-groups</key>
 	<array>
-<<<<<<< HEAD:customers/Area52/platforms/ios/Entitlements/VirgilMessenger.entitlements
-		<string>group.virgil.area52messenger</string>
-	</array>
-	<key>keychain-access-groups</key>
-	<array>
-		<string>$(AppIdentifierPrefix)com.virgil.area52messenger</string>
-=======
-		<string>group.com.virgil.BraesMessenger</string>
->>>>>>> develop:customers/Braes/platforms/ios/Entitlements/VirgilMessenger.entitlements
+		<string>group.com.virgil.Area52Messenger</string>
 	</array>
 </dict>
 </plist>
