@@ -1,4 +1,10 @@
+##### Generated
+gradle.properties
+VSQCustomer.h
+transitive-args.cmake
 #####
+downloads/
+prebuilt/
 build*/
 install*/
 .depends_cache/
@@ -58,3 +64,5 @@ generated
 
 
 !ext/commkit.pri
+transitive-args.cmake
+CMakeLists.txt.user
