@@ -2,35 +2,40 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 
 Button {
-
     id: button
 
     property string image: "Grid"
     property string imageSource: ""
-
+    property int imageSize: 40
+    property int iconSize: 24
     property bool disabled: false
+    property alias backgroundColor: background.color
 
     icon.color: "transparent"
     icon.source: "../resources/icons/%1.png".arg(image)
+    icon.width: iconSize
+    icon.height: iconSize
 
     padding: 0
 
     background: Rectangle {
+        id: background
         color: "transparent"
-        implicitWidth: 40
-        implicitHeight: 40
+        implicitWidth: imageSize
+        implicitHeight: imageSize
+        radius: 0.5 * imageSize
     }
 
     opacity: disabled ? 0.3 : 1
 
     Rectangle {
-        anchors.centerIn: parent
         id: hoverBackground
-        width: 40
-        height: 40
+        anchors.centerIn: parent
+        width: imageSize
+        height: imageSize
         color: "white"
         opacity: 0.07
-        radius: 20
+        radius: 0.5 * imageSize
         visible: button.hovered && !button.disabled
     }
 
@@ -53,17 +58,17 @@ Button {
     states: [
         State {
             name: "PRESSED"
-            PropertyChanges { target: hoverBackground; width: 38 }
-            PropertyChanges { target: hoverBackground; height: 38 }
-            PropertyChanges { target: button; icon.height: 23 }
-            PropertyChanges { target: button; icon.width: 23 }
+            PropertyChanges { target: hoverBackground; width: imageSize - 2 }
+            PropertyChanges { target: hoverBackground; height: imageSize - 2 }
+            PropertyChanges { target: button; icon.height: iconSize - 1 }
+            PropertyChanges { target: button; icon.width: iconSize - 1 }
         },
         State {
             name: "RELEASED"
-            PropertyChanges { target: hoverBackground; width: 40 }
-            PropertyChanges { target: hoverBackground; height: 40 }
-            PropertyChanges { target: button; icon.height: 24 }
-            PropertyChanges { target: button; icon.width: 24 }
+            PropertyChanges { target: hoverBackground; width: imageSize }
+            PropertyChanges { target: hoverBackground; height: imageSize }
+            PropertyChanges { target: button; icon.height: iconSize }
+            PropertyChanges { target: button; icon.width: iconSize }
         }
     ]
 

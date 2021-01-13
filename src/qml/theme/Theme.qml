@@ -34,17 +34,53 @@ Item {
     readonly property color chatBackgroundColor: "#263238"
 
     // sizes
+    readonly property real margin: 20
+    readonly property real spacing: 20
+    readonly property real padding: 20
+    readonly property real smallMargin: 10
+    readonly property real smallSpacing: 10
+    readonly property real smallPadding: 10
+    readonly property real minSpacing: 3
+
     readonly property real avatarHeight: 40
     readonly property real avatarWidth: avatarHeight
     readonly property real avatarRadius: avatarWidth / 2
 
+    readonly property real headerHeight: 60
     readonly property real formMaximumWidth: 260
 
     // icons
     readonly property url mainLogo: "../resources/icons/Logo-Big.png"
 
     // texts
-    readonly property string mainLogoText: "Virgil"
+    readonly property string mainLogoText: app.organizationDisplayName
     readonly property string mainFont: robotoRegular.name
     readonly property string mainFontBold: robotoBold.name
+
+    // z indices
+    readonly property real overlayZ: 1000
+
+    // animation
+    readonly property int animationDuration: 250
+    readonly property int shortAnimationDuration: 125
+
+    // transitions
+    readonly property var addTransition: Transition {
+        NumberAnimation { property: "scale"; from: 0.9; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+    }
+    readonly property var addTransitionNoScale: Transition {
+        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+    }
+    readonly property var moveTransition: Transition {
+        NumberAnimation { properties: "x,y"; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+    }
+    readonly property var displacedTransition: Transition {
+        NumberAnimation { properties: "x,y"; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+        NumberAnimation { property: "scale"; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+        NumberAnimation { property: "opacity"; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+    }
+    readonly property var removeTransition: Transition {
+        NumberAnimation { property: "opacity"; to: 0; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+    }
 }

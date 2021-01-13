@@ -9,7 +9,7 @@ Column {
     Layout.maximumWidth: Theme.formMaximumWidth
     Layout.alignment: Qt.AlignHCenter
 
-    spacing: 10
+    spacing: Theme.smallSpacing
 
     Image {
         id: mainLogo
@@ -35,7 +35,7 @@ Column {
     Text {
         id: mainLogoDescription
         width: 180
-        text: qsTr("Virgil Secure Communications Platform")
+        text: app.applicationDisplayName
         lineHeight: 1
         wrapMode: Text.WordWrap
         horizontalAlignment: Text.AlignHCenter

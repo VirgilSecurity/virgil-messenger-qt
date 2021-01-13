@@ -38,6 +38,10 @@
 #if (VS_ANDROID)
 
 #include <QObject>
+#include <Contact.h>
+#include <FileUtils.h>
+
+using namespace vm;
 
 class VSQAndroid {
 public:
@@ -48,6 +52,16 @@ public:
     static bool prepare();
 
     static QString certFile();
+
+    static void hideSplashScreen();
+
+    static QString getDisplayName(const QUrl &url);
+
+    static quint64 getFileSize(const QUrl &url);
+
+    static Contacts getContacts();
+
+    static QUrl getContactAvatarUrl(const Contact &contact);
 
 private:
     static int runLoggingThread();

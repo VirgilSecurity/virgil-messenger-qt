@@ -32,7 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#if (MACOS)
+#ifdef VS_MACOS
 
 #include <QtCore>
 
@@ -40,8 +40,6 @@
 #include <SUUpdater.h>
 
 #include "macos/VSQMacos.h"
-
-#include <virgil/iot/logger/logger.h>
 
 /******************************************************************************/
 VSQMacos::~VSQMacos() {
@@ -93,4 +91,4 @@ void VSQMacos::startUpdatesTimer() {
 
 /******************************************************************************/
 
-#endif // MACOS
+#endif // VS_MACOS

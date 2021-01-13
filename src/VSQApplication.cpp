@@ -35,151 +35,183 @@
 #include <QtCore>
 #include <QtQml>
 
-#include <VSQApplication.h>
-#include <VSQCommon.h>
-#include <VSQClipboardProxy.h>
-#include <ui/VSQUiHelper.h>
-#include <virgil/iot/logger/logger.h>
+#include "CustomerEnv.h"
+#include "Utils.h"
+#include "VSQApplication.h"
+#include "VSQClipboardProxy.h"
+#include "VSQCustomer.h"
+#include "VSQLogging.h"
+#include "VSQUiHelper.h"
+
+#if defined(VS_ANDROID) && VS_ANDROID
+#include "FirebaseListener.h"
+#endif // VS_ANDROID
 
 #include <QGuiApplication>
 #include <QFont>
 #include <QDesktopServices>
 
-#define STRINGIFY(x) #x
-#define TOSTRING(x) STRINGIFY(x)
 
-#if defined(VERSION)
-const QString VSQApplication::kVersion = QString(TOSTRING(VERSION));
-#else
-const QString VSQApplication::kVersion = "unknown";
-#endif
+using namespace vm;
+using Self = VSQApplication;
 
 /******************************************************************************/
-VSQApplication::VSQApplication()
+Self::VSQApplication()
     : m_settings(this)
-    , m_networkAccessManager(new QNetworkAccessManager(this))
-    , m_engine()
-    , m_messenger(m_networkAccessManager, &m_settings)
-    , m_logging(m_networkAccessManager)
+    , m_engine(new QQmlApplicationEngine(this))
+    , m_validator(new Validator(this))
+    , m_messenger(&m_settings, m_validator)
+    , m_userDatabase(new UserDatabase(m_settings.databaseDir(), nullptr))
+    , m_models(&m_messenger, &m_settings, m_userDatabase, m_validator, this)
+    , m_databaseThread(new QThread())
+    , m_controllers(&m_messenger, &m_settings, &m_models, m_userDatabase, this)
+    , m_keyboardEventFilter(new KeyboardEventFilter(this))
+    , m_applicationStateManager(&m_messenger, &m_controllers, &m_models, m_validator, &m_settings, this)
 {
-    m_networkAccessManager->setAutoDeleteReplies(true);
-#if (MACOS)
+    m_settings.print();
+
+    qRegisterMetaType<qsizetype>("qsizetype");
+    qRegisterMetaType<KeyboardEventFilter *>("KeyboardEventFilter*");
+
+    connect(&m_models, &Models::notificationCreated, this, &Self::notificationCreated);
+    connect(&m_controllers, &Controllers::notificationCreated, this, &Self::notificationCreated);
+
+    QThread::currentThread()->setObjectName("MainThread");
+    m_userDatabase->moveToThread(m_databaseThread);
+    m_databaseThread->setObjectName("DatabaseThread");
+    m_databaseThread->start();
+
+#ifdef VS_MACOS
     VSQMacos::instance().startUpdatesTimer();
 #endif
-    registerCommonTypes();
+}
+
+Self::~VSQApplication()
+{
+    m_databaseThread->quit();
+    m_databaseThread->wait();
+    delete m_userDatabase;
+    delete m_databaseThread;
+}
+
+/******************************************************************************/
+void Self::initialize()
+{
+    // Attributes
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+
+    // Organization params
+    QCoreApplication::setOrganizationName(Customer::OrganizationName);
+    QCoreApplication::setOrganizationDomain(Customer::OrganizationDomain);
+
+    // Application params
+    QCoreApplication::setApplicationName(Customer::ApplicationName);
+    QGuiApplication::setApplicationDisplayName(Customer::ApplicationDisplayName);
+
+    // TODO(fpohtmeh): set version, use in CustomerEnv::version()
 }
 
 /******************************************************************************/
 int
-VSQApplication::run(const QString &basePath) {
+Self::run(const QString &basePath, VSQLogging *logging) {
 
     VSQUiHelper uiHelper;
 
-    auto features = VSQFeatures();
-    auto impl = VSQImplementations();
-    auto roles = VSQDeviceRoles();
-    auto appConfig = VSQAppConfig() << VirgilIoTKit::VS_LOGLEV_DEBUG;
-
-    if (!VSQIoTKitFacade::instance().init(features, impl, appConfig)) {
-        VS_LOG_CRITICAL("Unable to initialize Virgil IoT KIT");
-        return -1;
-    }
-
-    // Initialization loging
-#ifdef VS_DEVMODE
-    qInstallMessageHandler(&VSQLogging::logger_qt_redir); // Redirect standard logging
-#endif
-    m_messenger.setLogging(&m_logging);
-    m_logging.setkVersion(kVersion);
-
+    QUrl url;
     if (basePath.isEmpty()) {
-        m_engine.setBaseUrl(QUrl(QStringLiteral("qrc:/qml/")));
+        url = QStringLiteral("qrc:/qml/");
     } else {
-        QUrl url("file://" + basePath + "/qml/");
-        m_engine.setBaseUrl(url);
+        url = "file://" + basePath + "/qml/";
     }
+    m_engine->setBaseUrl(url);
+    m_engine->addImportPath(url.toString());
 
-    QQmlContext *context = m_engine.rootContext();
+    QQmlContext *context = m_engine->rootContext();
     context->setContextProperty("UiHelper", &uiHelper);
     context->setContextProperty("app", this);
     context->setContextProperty("clipboard", new VSQClipboardProxy(QGuiApplication::clipboard()));
-    context->setContextProperty("SnapInfoClient", &VSQSnapInfoClientQml::instance());
-    context->setContextProperty("SnapSniffer", VSQIoTKitFacade::instance().snapSniffer().get());
-    context->setContextProperty("Messenger", &m_messenger);
-    context->setContextProperty("Logging", &m_logging);
+    context->setContextProperty("messenger", &m_messenger);
+    context->setContextProperty("logging", logging);
+    context->setContextProperty("crashReporter", m_messenger.crashReporter());
     context->setContextProperty("settings", &m_settings);
-    context->setContextProperty("ConversationsModel", &m_messenger.modelConversations());
-    context->setContextProperty("ChatModel", &m_messenger.getChatModel());
+    context->setContextProperty("controllers", &m_controllers);
+    context->setContextProperty("models", &m_models);
 
     QFont fon(QGuiApplication::font());
     fon.setPointSize(1.5 * QGuiApplication::font().pointSize());
     QGuiApplication::setFont(fon);
 
-    connect(QGuiApplication::instance(),
-            SIGNAL(applicationStateChanged(Qt::ApplicationState)),
-            this,
-            SLOT(onApplicationStateChanged(Qt::ApplicationState)));
+    connect(qApp, &QGuiApplication::applicationStateChanged, this, &Self::onApplicationStateChanged);
+    connect(qApp, &QGuiApplication::aboutToQuit, this, &Self::onAboutToQuit);
 
     reloadQml();
-    return QGuiApplication::instance()->exec();
-}
 
-/******************************************************************************/
-void VSQApplication::reloadQml() {
-    const QUrl url(QStringLiteral("main.qml"));
-    m_engine.clearComponentCache();
-    m_engine.load(url);
-
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_WATCHOS)
-    {
-        QObject *rootObject(m_engine.rootObjects().first());
-// ERROR NULL POINTER !!!
-//        rootObject->setProperty("width", 800);
-//        rootObject->setProperty("height", 640);
-    }
+#if defined(VS_ANDROID) && VS_ANDROID
+    notifications::android::FirebaseListener::instance().init();
 #endif
+
+    const auto result = QGuiApplication::instance()->exec();
+    m_engine.reset(); // Engine must be deleted first since it uses most classes
+    return result;
 }
 
 /******************************************************************************/
-void VSQApplication::checkUpdates() {
-#if (MACOS)
+void Self::reloadQml() {
+    const QUrl url(QStringLiteral("main.qml"));
+    m_engine->clearComponentCache();
+    m_engine->load(url);
+}
+
+/******************************************************************************/
+void Self::checkUpdates()
+{
+#ifdef VS_MACOS
     VSQMacos::instance().checkUpdates();
 #endif
 }
 
-/******************************************************************************/
+QString Self::organizationDisplayName() const
+{
+    return Customer::OrganizationDisplayName;
+}
+
+QString Self::applicationDisplayName() const
+{
+    return Customer::ApplicationDisplayName;
+}
+
 QString
-VSQApplication::currentVersion() const {
-    return kVersion + "-alpha";
+Self::currentVersion() const {
+    return CustomerEnv::version();
 }
 
-/******************************************************************************/
-void
-VSQApplication::sendReport() {
-    m_logging.sendLogFiles();
+bool Self::isIosSimulator() const
+{
+#ifdef VS_IOS_SIMULATOR
+    return true;
+#else
+    return false;
+#endif
 }
 
-/******************************************************************************/
-void
-VSQApplication::onApplicationStateChanged(Qt::ApplicationState state) {
+void Self::onApplicationStateChanged(Qt::ApplicationState state) {
     qDebug() << state;
+    m_messenger.setApplicationActive(Qt::ApplicationState::ApplicationActive == state);
 
-#if VS_PUSHNOTIFICATIONS
-    static bool _deactivated = false;
-
-    if (Qt::ApplicationInactive == state) {
-        _deactivated = true;
-        m_messenger.setStatus(VSQMessenger::MSTATUS_UNAVAILABLE);
+    if (Qt::ApplicationState::ApplicationSuspended == state) {
+        m_messenger.suspend();
     }
-
-    if (Qt::ApplicationActive == state && _deactivated) {
-        _deactivated = false;
-        QTimer::singleShot(200, [this]() {
-            this->m_messenger.checkState();
-        });
-    }
-#endif // VS_ANDROID
 }
 
+void Self::onAboutToQuit()
+{
+    qDebug() << "Application about to quit";
+    m_messenger.setApplicationActive(false);
+    m_settings.setRunFlag(false);
+}
 
-/******************************************************************************/
+ApplicationStateManager *Self::stateManager()
+{
+    return &m_applicationStateManager;
+}

@@ -41,12 +41,7 @@
 #include <QMap>
 #include <QTimer>
 
-#include "VSQCommon.h"
-
-Q_DECLARE_LOGGING_CATEGORY(lcNetwork);
-
-#ifdef Q_OS_MACOS
-// TODO: Remove after fixing of deprecated functionality
+#if defined(VS_MACOS) || defined(VS_LINUX)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
@@ -60,15 +55,11 @@ public:
     VSQNetworkAnalyzer(QObject *parent = nullptr);
     virtual ~VSQNetworkAnalyzer();
 
-    bool
-    isOnline() const;
+    bool isConnected() const noexcept;
 
 signals:
-    void
-    fireStateChanged(bool online);
-
-    void
-    fireHeartBeat();
+    void connectedChanged(bool connected);
+    void heartBeat();
 
 protected slots:
     void
@@ -94,7 +85,7 @@ protected:
     static const int kSessionTimeoutMs = 1000;
 
     QNetworkConfigurationManager m_nwManager;
-    bool m_connectedState;
+    bool m_isConnected;
     VSQNetworkInterfaceData m_networkInterfaceData;
     QTimer m_timer;
 
@@ -109,7 +100,7 @@ private:
     checkIsNeedStop();
 };
 
-#ifdef Q_OS_MACOS
+#if defined(VS_MACOS) || defined(VS_LINUX)
 #pragma GCC diagnostic pop
 #endif
 

@@ -3,13 +3,13 @@ set -o errtrace
 #
 #   Global variables
 #
-SCRIPT_FOLDER="$(cd "$(dirname "$0")" && pwd)"
-source ${SCRIPT_FOLDER}/ish/common.sh
+SCRIPT_FOLDER="$(cd $(dirname "$0") && pwd)"
 
-ANDOID_APP_ID="com.virgilsecurity.qtmessenger"
+# Include common function
+source ${SCRIPT_FOLDER}/ish/common.sh
 PLATFORM=android-clang
 ANDROID_MAKE="${ANDROID_NDK_ROOT}/prebuilt/${HOST_PLATFORM}/bin/make"
-ANDROID_PLATFORM="android-28"
+ANDROID_PLATFORM="android-29"
 
 #*************************************************************************************************************
 # env variables passed to build anroid release
@@ -37,11 +37,14 @@ build_proc() {
 
     if [[ "x$ENABLE_RELEASE" != "x" ]]; then
         ANDROID_DEPLOY_QT_ADD_ARGS="--sign ${SCRIPT_FOLDER}/../android.keystore upload --storepass ${ANDROID_STORE_PASS} --keypass ${ANDROID_KEY_PASS}"
-        ANDROID_BUILD_MODE="qtquickcompiler"            
+        ANDROID_BUILD_MODE="qtquickcompiler"
+        ANDROID_BUILD_TYPE="release"
+    else
+        ANDROID_BUILD_TYPE="debug"    
     fi
 
     pushd ${BUILD_DIR}
-        ${ANDROID_QMAKE} ANDROID_ABIS="${ANDROID_ABIS}" -spec android-clang CONFIG+=${ANDROID_BUILD_MODE} VERSION="${VERSION}" ${PROJECT_FILE}
+        ${ANDROID_QMAKE} ANDROID_ABIS="${ANDROID_ABIS}" -spec android-clang CONFIG+=${ANDROID_BUILD_MODE} VERSION="1${VERSION}" VS_CUSTOMER="${PARAM_CUSTOMER}" ${PROJECT_FILE} 
 
         ${ANDROID_MAKE} -j10
 
@@ -49,6 +52,14 @@ build_proc() {
 
         ${ANDROID_DEPLOY_QT} --verbose --input ${BUILD_DIR}/android-${APPLICATION_NAME}-deployment-settings.json --output ${BUILD_DIR}/android-build --android-platform ${ANDROID_PLATFORM} ${ANDROID_DEPLOY_QT_ADD_ARGS} --aab
     popd
+
+   print_message "Rename ${APPLICATION_NAME} => ${ANDROID_NAME}-${VERSION}"
+   pushd "${BUILD_DIR}/android-build/build/outputs/apk/${ANDROID_BUILD_TYPE}"
+    mv -f *.apk     "${ANDROID_NAME}-${VERSION}.apk"
+   popd
+   pushd "${BUILD_DIR}/android-build/build/outputs/bundle/${ANDROID_BUILD_TYPE}"
+    mv -f *.aab  "${ANDROID_NAME}-${VERSION}.aab"
+   popd
 }
 
 #*************************************************************************************************************

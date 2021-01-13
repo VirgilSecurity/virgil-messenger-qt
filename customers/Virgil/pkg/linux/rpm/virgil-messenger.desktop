@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=virgil-messenger
+GenericName=virgil-messenger
+Comment=Virgil security messenger
+Exec=virgil-messenger
+Terminal=false
+Type=Application
+Encoding=UTF-8
+Icon=virgil-messenger.png
+Categories=Application
+Keywords=virgil-messenger
+X-Desktop-File-Install-Version=0.23

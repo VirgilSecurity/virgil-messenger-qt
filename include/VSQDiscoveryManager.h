@@ -32,17 +32,15 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_DISCOVERYMANAGER_H
-#define VSQ_DISCOVERYMANAGER_H
+#ifndef VM_DISCOVERYMANAGER_H
+#define VM_DISCOVERYMANAGER_H
 
 #include <qxmpp/QXmppDiscoveryManager.h>
 
-#include "VSQCommon.h"
-
-Q_DECLARE_LOGGING_CATEGORY(lcDiscoveryManager);
-
 class VSQDiscoveryManager : public QObject
 {
+    Q_OBJECT
+
 public:
     explicit VSQDiscoveryManager(QXmppClient *client, QObject *parent = nullptr);
     ~VSQDiscoveryManager() override;
@@ -53,7 +51,7 @@ private:
     void onItemsReceived(const QXmppDiscoveryIq &info);
 
     QXmppClient *m_client;
-    QXmppDiscoveryManager *m_discoveryManager;
+    QXmppDiscoveryManager *m_manager;
 };
 
-#endif // VSQ_DISCOVERYMANAGER_H
+#endif // VM_DISCOVERYMANAGER_H

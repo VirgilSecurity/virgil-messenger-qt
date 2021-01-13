@@ -7,7 +7,7 @@ codegen/test/gsl/
 ext/*
 docs/doxygen
 Deploy/
-
+generated/
 #####
 # OS X temporary files that should never be committed
 
@@ -51,6 +51,10 @@ Makefile
 
 ####
 # macOS
-platforms/macos/virgil-messenger.plist
-
 !scripts/macos/pkg_resources/bin
+
+####
+generated
+
+
+!ext/commkit.pri

@@ -6,8 +6,7 @@ import "../theme"
 import "../components"
 
 Page {
-
-    property bool showServersPanel: true
+    property var appState: app.stateManager.accountSettingsState
 
     background: Rectangle {
         color: Theme.contactsBackgroundColor
@@ -18,11 +17,10 @@ Page {
     }
 
     Form {
-
         Avatar {
             Layout.alignment: Qt.AlignHCenter
             diameter: 80
-            nickname: Messenger.currentUser
+            nickname: controllers.users.currentUsername
         }
 
         Label {
@@ -30,45 +28,27 @@ Page {
             Layout.bottomMargin: 50
             font.pointSize: UiHelper.fixFontSz(18)
             color: Theme.primaryTextColor
-            text: Messenger.currentUser
+            text: controllers.users.currentUsername
         }
 
         FormLabel {
-            text: qsTr("Version: %1".arg(app.currentVersion()))
-        }
-/*
-        FormPrimaryButton {
-            text: "Software Update"
-            onClicked: {
-                app.checkUpdates()
-            }
+            text: qsTr("Version: %1").arg(app.currentVersion())
         }
 
         FormPrimaryButton {
-            text: "Delete Account"
-            onClicked: {
-            }
+            text: qsTr("Edit profile")
+            onClicked: appState.editProfile()
+            visible: false
         }
-*/
+
         FormPrimaryButton {
-            text: "Backup private key"
-            onClicked: {
-                mainView.showBackupKey()
-            }
+            text: qsTr("Backup private key")
+            onClicked: appState.requestBackupKey(controllers.users.currentUsername)
         }
-/*
+
         FormPrimaryButton {
-            text: "Send report"
-            onClicked: {
-                app.sendReport()
-            }
-        }
-*/
-        FormPrimaryButton {
-            text: "Sign out"
-            onClicked: {
-                mainView.signOut()
-            }
+            text: qsTr("Sign out")
+            onClicked: controllers.users.signOut()
         }
     }
 }

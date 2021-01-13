@@ -1,0 +1,39 @@
+%global debug_package %{nil}
+
+Summary:          Braes messenger
+Name:             braes-messenger
+Version:          {{MAJOR_VER}}.{{MINOR_VER}}.{{SUB_VER}}
+Release:          {{BUILD_VER}}
+Group:            Internet
+License:          BSD-3-Clause
+URL:              https://virgilsecurity.com/
+Source0:         %{name}-%{version}.tgz
+
+%description
+Braes messenger
+
+%prep
+%setup -q -n %{name}-%{version}
+
+%build
+
+%install
+
+install -d                                                                                                       %{buildroot}%{_datarootdir}/braes-messenger
+install -d                                                                                                       %{buildroot}%{_bindir}
+install -d                                                                                                       %{buildroot}%{_datadir}/applications
+install -d                                                                                                       %{buildroot}%{_datadir}/icons/hicolor/scalable/apps
+
+cp -rf ./*                                                                                                       %{buildroot}%{_datarootdir}/braes-messenger
+ln -s %{_datarootdir}/braes-messenger/braes-messenger.sh                                                       	 %{buildroot}%{_bindir}/braes-messenger
+install -p -m 644 braes-messenger.desktop                                                                        %{buildroot}%{_datadir}/applications/
+install -p -m 644 braes-messenger.png                            		  				 %{buildroot}%{_datadir}/icons/hicolor/scalable/apps
+
+%files
+%doc VERSION_MESSENGER
+%{_datarootdir}/braes-messenger
+%{_bindir}/braes-messenger
+%{_datadir}/applications
+%{_datadir}/icons/hicolor/scalable/apps
+
+%changelog

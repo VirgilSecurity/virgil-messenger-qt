@@ -35,11 +35,11 @@
 #ifndef VSQMACOS_H
 #define VSQMACOS_H
 
-#if (MACOS)
+#ifdef VS_MACOS
 
 #include <QObject>
 #include <QTimer>
-#include <virgil/iot/qt/helpers/VSQSingleton.h>
+#include "helpers/VSQSingleton.h"
 
 class VSQMacos: public QObject, public VSQSingleton<VSQMacos> {
     Q_OBJECT
@@ -61,6 +61,6 @@ private:
     void _deleteTimer();
 };
 
-#endif // MACOS
+#endif // VS_MACOS
 
 #endif // VSQMACOS_H

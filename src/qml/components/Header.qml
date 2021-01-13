@@ -5,25 +5,19 @@ import QtQuick.Layouts 1.12
 import "../theme"
 
 ToolBar {
-
     property alias title: titleLabel.text
     property bool showBackButton: true
-    property alias showSeporator: seporator.visible
+    property alias showSeparator: separator.visible
     default property alias menu: contextMenu.contentData
 
     background: Rectangle {
-        implicitHeight: 60
+        implicitHeight: Theme.headerHeight
         color: "transparent"
 
-        Rectangle {
-            id: seporator
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.leftMargin: 20
-            anchors.rightMargin: 20
-
-            height: 1
-            color: Theme.chatBackgroundColor
+        HorizontalRule {
+            id: separator
+            anchors.leftMargin: Theme.margin
+            anchors.rightMargin: Theme.margin
             anchors.bottom: parent.bottom
         }
     }
@@ -40,9 +34,7 @@ ToolBar {
             id: backButton
             image: "Arrow-Left"
 
-            // TODO: Componets sholdn't know about mainView
-            // The logic must be as abastract as possible.
-            onClicked: mainView.back()
+            onClicked: app.stateManager.goBack()
         }
 
         Label {
@@ -63,9 +55,9 @@ ToolBar {
 
             id: menuButton
             image: "More"
-            // visible: menu.length
-            opacity: menu.length ? 1 : 0
-            enabled: menu.length
+             // TODO(fpohtmeh): try with visibility
+            opacity: contextMenu.count ? 1 : 0
+            enabled: contextMenu.count
             onClicked: {
                 contextMenu.open()
             }

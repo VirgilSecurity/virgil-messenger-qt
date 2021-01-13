@@ -1,40 +1,45 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
+
+import "../theme"
 
 Item {
-
+    id: form
     anchors.fill: parent
 
-    property bool isLoading: false
-
     default property alias children: formContainer.children
+    property bool isCentered: true
+    property bool isLoading: false
+    property alias loadingText: busyDescryption.text
 
     ColumnLayout {
         id: formContainer
         visible: !isLoading
+        spacing: Theme.spacing
 
         anchors {
-            verticalCenter: parent.verticalCenter
+            verticalCenter: isCentered ? parent.verticalCenter : undefined
             left: parent.left
             right: parent.right
+            top: isCentered ? undefined : parent.top
+            bottom: isCentered ? undefined : parent.bottom
+            leftMargin: isCentered ? undefined : Theme.margin
+            rightMargin: isCentered ? undefined : Theme.margin
+            bottomMargin: isCentered ? undefined : Theme.margin
+            topMargin: isCentered ? undefined : Theme.margin
         }
-
-        spacing: 15
     }
 
-    // TODO: I don't like this eather, but let's
-    // keep it simple for now ;)
     ColumnLayout {
         visible: isLoading
+        spacing: Theme.spacing
 
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
             right: parent.right
         }
-
-        spacing: 15
 
         FormImage {
             source: "../resources/icons/Logo.png"
@@ -44,15 +49,5 @@ Item {
             id: busyDescryption
             horizontalAlignment: Text.AlignHCenter
         }
-    }
-
-    function showLoading(loadingText) {
-        isLoading = true
-        busyDescryption.text = loadingText
-    }
-
-    function hideLoading() {
-        isLoading = false
-        busyDescryption.text = ""
     }
 }

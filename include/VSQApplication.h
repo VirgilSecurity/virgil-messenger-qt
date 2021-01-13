@@ -38,23 +38,39 @@
 #include <QtCore>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <VSQMessenger.h>
-#include <virgil/iot/qt/netif/VSQUdpBroadcast.h>
-#include <VSQLogging.h>
-#include <VSQSettings.h>
 
+#include "KeyboardEventFilter.h"
+#include "Validator.h"
+#include "Messenger.h"
+#include "Settings.h"
+#ifdef VS_MACOS
 #include <macos/VSQMacos.h>
+#endif // VS_MACOS
+#include "Controllers.h"
+#include "UserDatabase.h"
+#include "Models.h"
+#include "ApplicationStateManager.h"
 
 class QNetworkAccessManager;
 
-class VSQApplication : public QObject {
+class VSQLogging;
+
+class VSQApplication : public QObject
+{
     Q_OBJECT
+    Q_PROPERTY(vm::ApplicationStateManager *stateManager READ stateManager CONSTANT)
+    Q_PROPERTY(QString organizationDisplayName READ organizationDisplayName CONSTANT)
+    Q_PROPERTY(QString applicationDisplayName READ applicationDisplayName CONSTANT)
+    Q_PROPERTY(vm::KeyboardEventFilter *keyboardEventFilter MEMBER m_keyboardEventFilter CONSTANT)
+    Q_PROPERTY(vm::Validator *validator MEMBER m_validator CONSTANT)
+
 public:
     VSQApplication();
-    virtual ~VSQApplication() = default;
+    ~VSQApplication() override;
 
-    int
-    run(const QString &basePath);
+    static void initialize();
+
+    int run(const QString &basePath, VSQLogging *logging);
 
     Q_INVOKABLE
     void reloadQml();
@@ -65,21 +81,33 @@ public:
     Q_INVOKABLE QString
     currentVersion() const;
 
-    Q_INVOKABLE void
-    sendReport();
+    // Names
 
+    QString organizationDisplayName() const;
+    QString applicationDisplayName() const;
 
-private slots:
-    void
-    onApplicationStateChanged(Qt::ApplicationState state);
+    Q_INVOKABLE bool isIosSimulator() const;
+
+signals:
+    void notificationCreated(const QString &notification, const bool error);
 
 private:
+    void onApplicationStateChanged(Qt::ApplicationState state);
+    void onAboutToQuit();
+
+    vm::ApplicationStateManager *stateManager();
+
     static const QString kVersion;
-    VSQSettings m_settings;
-    QNetworkAccessManager *m_networkAccessManager;
-    QQmlApplicationEngine m_engine;
-    VSQMessenger m_messenger;
-    VSQLogging m_logging;
+    Settings m_settings;
+    QScopedPointer<QQmlApplicationEngine> m_engine;
+    vm::Validator *m_validator;
+    vm::Messenger m_messenger;
+    vm::UserDatabase *m_userDatabase;
+    vm::Models m_models;
+    QThread *m_databaseThread;
+    vm::Controllers m_controllers;
+    vm::KeyboardEventFilter *m_keyboardEventFilter;
+    vm::ApplicationStateManager m_applicationStateManager;
 };
 
 #endif // VSQApplication

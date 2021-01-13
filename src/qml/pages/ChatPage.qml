@@ -1,18 +1,25 @@
-import QtQuick 2.12
-import QtQuick.Layouts 1.12
-import QtQuick.Controls 2.12
-import QuickFuture 1.0
-import QtQuick.Window 2.12
-import QtMultimedia 5.12
-import com.virgilsecurity.messenger 1.0
+import QtQuick 2.15
+import QtQuick.Layouts 1.15
+import QtQuick.Controls 2.15
+import QtQuick.Window 2.15
+import QtMultimedia 5.15
 
+import "../base"
 import "../theme"
 import "../components"
 
 Page {
     id: chatPage
 
-    property string recipient
+    readonly property var appState: app.stateManager.chatState
+    readonly property var chatName: controllers.chats.currentChatName
+    readonly property var contactId: controllers.chats.currentContactId
+    property real chatListViewHeight: 0
+
+    QtObject {
+        id: d
+        readonly property real listSpacing: 5
+    }
 
     background: Rectangle {
         color: Theme.chatBackgroundColor
@@ -21,7 +28,7 @@ Page {
     header: Control {
         id: headerControl
         width: parent.width
-        height: 60
+        height: Theme.headerHeight
         z: 1
 
         background: Rectangle {
@@ -29,32 +36,34 @@ Page {
             anchors.leftMargin: 5
             anchors.rightMargin: 5
 
-            Rectangle {
+            HorizontalRule {
                 anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                anchors.right: parent.right
                 anchors.leftMargin: 20
                 anchors.rightMargin: 20
-                height: 1
                 color: Theme.chatSeparatorColor
             }
         }
 
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.AllButtons
+        }
+
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: 10
-            anchors.rightMargin: 10
+            anchors.leftMargin: Theme.smallMargin
+            anchors.rightMargin: Theme.smallMargin
 
             ImageButton {
                 image: "Arrow-Left"
-                onClicked: mainView.back()
+                onClicked: app.stateManager.goBack()
             }
 
             Column {
                 Layout.fillWidth: true
-                Layout.leftMargin: 10
+                Layout.leftMargin: Theme.smallMargin
                 Label {
-                    text: ConversationsModel.recipient
+                    text: chatName
                     font.pointSize: UiHelper.fixFontSz(15)
                     color: Theme.primaryTextColor
                     font.bold: true
@@ -62,121 +71,110 @@ Page {
 
                 Label {
                     topPadding: 2
-                    text: qsTr("Last seen yesterday")
+                    text: appState.lastActivityText
                     font.pointSize: UiHelper.fixFontSz(12)
                     color: Theme.secondaryTextColor
                 }
             }
-        }
-    }
 
+            ImageButton {
+                image: "More"
+                visible: appState.isGroupChat
+                onClicked: {
+                    if (appState.isGroupChat) {
+                        if (appState.isAdmin) {
+                            groupChatAdminContextMenu.open()
+                        } else {
+                            groupChatNotAdminContextMenu.open()
+                        }
+                    } else {
+                        stdChatContextMenu.open()
+                    }
+                }
 
-    ListView {
-        id: listView
+                ContextMenu {
+                    id: stdChatContextMenu
+                    dropdown: true
+                    currentIndex: -1
 
-        anchors.fill: parent
-        anchors.leftMargin: 20
-        anchors.rightMargin: 20
+                    Action {
+                        text: qsTr("Delete chat")
+                        onTriggered: console.log("Chat deletion isn't implemented")
+                    }
+                }
 
-        section.property: "day"
-        section.delegate: ChatDateSeporator {
-            date: section
-        }
+                ContextMenu {
+                    id: groupChatNotAdminContextMenu
+                    dropdown: true
+                    currentIndex: -1
 
-        spacing: 5
-        delegate: ChatMessage {
-            body: model.message
-            time: Qt.formatDateTime(model.timestamp, "hh:mm")
-            nickname: model.author
-            isUser: model.author === Messenger.currentUser
-            status: isUser ? model.status : "none"
-            failed: (model.status == 4) && (!attachmentId || attachmentStatus == Enums.AttachmentStatus.Failed)
-            messageId: model.messageId
+                    Action {
+                        text: qsTr("Leave group")
+                        onTriggered: controllers.chats.leaveGroup()
+                    }
+                }
 
-            inRow: model.messageInARow
-            firstInRow: model.firstMessageInARow
+                ContextMenu {
+                    id: groupChatAdminContextMenu
+                    dropdown: true
+                    currentIndex: -1
 
-            attachmentId: model.attachmentId
-            attachmentBytesTotal: model.attachmentBytesTotal
-            attachmentDisplaySize: model.attachmentDisplaySize
-            attachmentType: model.attachmentType
-            attachmentFilePath: model.attachmentFilePath
-            attachmentThumbnailPath: model.attachmentThumbnailPath
-            attachmentThumbnailWidth: model.attachmentThumbnailWidth
-            attachmentThumbnailHeight: model.attachmentThumbnailHeight
-            attachmentBytesLoaded: model.attachmentBytesLoaded
-            attachmentStatus: model.attachmentStatus
-            attachmentDownloaded: model.attachmentDownloaded
+                    Action {
+                        text: qsTr("Add participant")
+                        onTriggered: controllers.chats.addParticipant("userId")
+                    }
 
-            onSaveAttachmentAs: function(messageId) {
-                saveAttachmentAsDialog.messageId = messageId
-                saveAttachmentAsDialog.attachmentType = attachmentType
-                saveAttachmentAsDialog.open()
-            }
-        }
+                    Action {
+                        text: qsTr("Remove participant")
+                        onTriggered: controllers.chats.removeParticipants("userId")
+                    }
 
-        onCountChanged: {
-            positionViewAtEnd()
-        }
-
-        ScrollBar.vertical: ScrollBar { }
-
-        MouseArea {
-            anchors.fill: parent
-            onPressed: {
-                forceActiveFocus()
-                mouse.accepted = false
+                    Action {
+                        text: qsTr("Leave group")
+                        onTriggered: controllers.chats.leaveGroup()
+                    }
+                }
             }
         }
     }
 
     footer: ChatMessageInput {
         id: footerControl
-        onMessageSending: {
-            var future = Messenger.sendMessage(ConversationsModel.recipient, message, attachmentUrl, attachmentType)
-            Future.onFinished(future, function(value) {
-                messageSent.play()
-            })
+    }
+
+    MessagesList {
+        anchors.fill: parent
+    }
+
+// Components
+
+    Item {
+        SelectAttachmentsDialog {
+            id: saveAttachmentAsDialog
+            selectExisting: false
+
+            property string messageId: ""
+
+            onAccepted: controllers.attachments.saveAs(messageId, fileUrl)
+        }
+
+        SoundEffect {
+            id: messageReceived
+            source: "../resources/sounds/message-received.wav"
+        }
+
+        SoundEffect {
+            id: messageSent
+            source: "../resources/sounds/message-sent.wav"
         }
     }
 
-    SelectAttachmentsDialog {
-        id: saveAttachmentAsDialog
-        selectExisting: false
+    Connections {
+        target: appState
 
-        property string messageId: ""
-
-        onAccepted: Messenger.saveAttachmentAs(messageId, fileUrl)
-    }
-
-    // Component events
-
-    Component.onCompleted: {
-        // configure conversation model to chat with
-        // recipient provided as a parameter to this page.
-
-        ConversationsModel.recipient = recipient
-        listView.model = ConversationsModel
-        ConversationsModel.setAsRead(recipient)
-        ChatModel.updateUnreadMessageCount(recipient)
-
-        Messenger.openPreviewRequested.connect(openPreview)
-    }
-
-    Component.onDestruction: {
-        Messenger.openPreviewRequested.disconnect(openPreview)
-    }
-
-    // Sounds
-
-    SoundEffect {
-        id: messageReceived
-        source: "../resources/sounds/message-received.wav"
-    }
-
-    SoundEffect {
-        id: messageSent
-        source: "../resources/sounds/message-sent.wav"
+        function onMessageSent() {
+            messageSent.play()
+        }
     }
 }
 

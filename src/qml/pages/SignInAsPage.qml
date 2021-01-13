@@ -6,19 +6,18 @@ import "../theme"
 import "../components"
 
 Page {
-
-    property string username
+    property var appState: app.stateManager.signInAsState
+    property string footerText: qsTr("Powered by Virgil Security, Inc.")
 
     background: Rectangle {
         color: Theme.mainBackgroundColor
     }
 
     header: Header {
-        title: qsTr("Sign in as %1".arg(username))
+        title: qsTr("Sign in as %1").arg(controllers.users.nextUsername)
     }
 
     Form {
-
         id: form
 
         FormImage {
@@ -31,9 +30,7 @@ Page {
 
         FormPrimaryButton {
             text: qsTr("Download from the Cloud")
-            onClicked: {
-                mainView.showDownloadKey({ username: username })
-            }
+            onClicked: appState.requestDownloadKey(controllers.users.nextUsername)
         }
 
         FormPrimaryButton {
@@ -45,8 +42,7 @@ Page {
             text: qsTr("Use local file")
             enabled: false
         }
-
     }
 
-    footer: Footer {}
+    footer: Footer {text: footerText}
 }

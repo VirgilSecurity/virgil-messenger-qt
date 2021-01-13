@@ -1,94 +1,84 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 
 import "../theme"
 
-Item {
-    id: containerId
-    height: parent.height
-
-    anchors.centerIn: parent
-
+Rectangle {
+    id: root
+    property alias textValidator: searchField.validator
     property alias searchPlaceholder: searchField.placeholderText
-    property alias search: searchField.text
-    property bool isSearchOpen: state === "open"
+    property string search: searchField.text + searchField.preeditText
+    property bool isSearchOpen: state === "opened"
+    property bool closeable: true
+    readonly property int recommendedHeight: 40
 
-    Behavior on width {
-        NumberAnimation { duration: 200; easing.type: Easing.InOutQuad }
-    }
+    signal closed()
+    signal accepted()
 
-    state: 'closed'
+    radius: 0.5 * recommendedHeight
+    color: "transparent"
+
+    state: "closed"
     states: [
         State {
-            name: "open"
-
-            ParentChange {
-                target: searchButtonId
-                parent: searchField
-            }
+            name: "opened"
 
             PropertyChanges {
-                target: containerId
-                width: parent.width
-            }
-
-            PropertyChanges {
-                target: backgroundId
+                target: root
                 color: Theme.inputBackgroundColor
             }
 
             PropertyChanges {
                 target: searchField
-                text: ''
+                text: ""
             }
 
             PropertyChanges {
-                target: searchButtonId
-                width: 20
-                height: 20
+                target: searchButton
                 icon.color: "white"
-                anchors {
-                    left: parent.left
-                    leftMargin: 11
-                    horizontalCenter: undefined
-                }
             }
         },
         State {
-            name: 'closed'
+            name: "closed"
 
-            ParentChange {
-                target: searchButtonId
-                parent: containerId
+            PropertyChanges {
+                target: root
+                color: "transparent"
             }
 
             PropertyChanges {
-                target: containerId
-                width: 48
-            }
-
-            PropertyChanges {
-                target: closeButtonId
+                target: closeButton
                 visible: false
             }
 
             PropertyChanges {
                 target: searchField
                 visible: false
-                text: ''
+                text: ""
             }
 
             PropertyChanges {
-                target: searchButtonId
-                width: 24
-                height: 24
+                target: searchButton
                 icon.color: "transparent"
-                anchors {
-                    horizontalCenter: parent.horizontalCenter
-                    // clear previous anchor
-                    left: undefined
-                    leftMargin: undefined
-                }
+            }
+        }
+    ]
+
+    transitions: [
+        Transition {
+            from: "opened"; to: "closed"
+            PropertyAnimation {
+                properties: "color"
+                easing.type: Easing.InExpo
+                duration: Theme.animationDuration
+            }
+        },
+        Transition {
+            from: "closed"; to: "opened"
+            PropertyAnimation {
+                properties: "color"
+                easing.type: Easing.OutExpo
+                duration: Theme.animationDuration
             }
         }
     ]
@@ -96,51 +86,70 @@ Item {
     TextField {
         id: searchField
 
-        anchors.fill: parent;
+        anchors {
+            fill: parent
+            leftMargin: 30
+            rightMargin: 30
+        }
         activeFocusOnPress: true
-        leftPadding: 38
-        rightPadding: 30
+        inputMethodHints: Qt.ImhNoAutoUppercase
         font.pixelSize: UiHelper.fixFontSz(15)
         placeholderTextColor: "#59717D"
-
         color: "white"
 
-        background: Rectangle {
-            id: backgroundId
-            radius: 20
-            color: "transparent"
-        }
-
-        ImageButton {
-            id: closeButtonId
-            image: "Close"
-            anchors {
-                verticalCenter: parent.verticalCenter
-                right: parent.right
-                rightMargin: 6
-            }
-            onClicked: {
-                containerId.state = 'closed'
-            }
+        background: Item {
         }
 
         Keys.onPressed: {
-            if (containerId.state === "open" && (event.key === Qt.Key_Back || event.key === Qt.Key_Escape)) {
-                containerId.state = "closed"
+            if (isSearchOpen && (event.key === Qt.Key_Back || event.key === Qt.Key_Escape)) {
+                if (root.closeable) {
+                    root.state = "closed"
+                }
+                else {
+                    searchField.text = ""
+                }
+
                 event.accepted = true;
+            }
+            else if (isSearchOpen && (event.key === Qt.Key_Enter || event.key === Qt.Key_Return)) {
+                root.accepted()
+                event.accepted = true
             }
         }
     }
 
     ImageButton {
-        id: searchButtonId
+        id: searchButton
         anchors.verticalCenter: parent.verticalCenter
-
+        anchors.left: parent.left
+        anchors.leftMargin: Theme.smallMargin
+        width: 24
+        height: 24
         image: "Search"
+        enabled: !isSearchOpen || !searchField.activeFocus
 
         onClicked: {
-            containerId.state = "open"
-            searchField.focus = true
+            root.state = "opened"
+            searchField.forceActiveFocus()
+        }
+    }
+
+    ImageButton {
+        id: closeButton
+        anchors {
+            verticalCenter: parent.verticalCenter
+            right: parent.right
+        }
+        image: "Close"
+
+        onClicked: {
+            if (root.closeable) {
+                root.closed()
+            }
+            else {
+                searchField.text = ""
+            }
+
         }
     }
 }

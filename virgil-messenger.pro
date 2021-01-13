@@ -32,39 +32,48 @@
 #
 #  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-QT += core network qml quick bluetooth sql xml concurrent
+QT += core network qml quick sql xml concurrent
 
-CONFIG += c++14
-
-TARGET = virgil-messenger
-
-QMAKE_TARGET_BUNDLE_PREFIX = com.virgilsecurity
+CONFIG += c++17
 
 #
 #   Set version
 #
 isEmpty(VERSION) {
-    VERSION = $$cat($$PWD/VERSION_MESSENGER).0
+    VERSION = $$cat($$PWD/VERSION_MESSENGER)
 }
+
+ios {
+    isEmpty(VS_TARGET) {
+        TARGET = VirgilMessenger
+    } else {
+        TARGET = $$VS_TARGET
+    }
+    QMAKE_TARGET_BUNDLE_PREFIX = com.virgil
+} else {
+    TARGET = virgil-messenger
+    QMAKE_TARGET_BUNDLE_PREFIX = com.virgilsecurity
+}
+message("TARGET = $$TARGET")
 message("VERSION = $$VERSION")
 
 #
-#   Include IoTKit Qt wrapper
+#   Directory with precompiled dependencies
 #
 PREBUILT_PATH = $$PWD/ext/prebuilt
-include($${PREBUILT_PATH}/qt/iotkit.pri)
 
 #
-#   Include QML QFuture
+#   Include Virgil CommKit
 #
-include($$PWD/ext/quickfuture/quickfuture.pri)
-#include($$PWD/ext/quickpromise/quickpromise.pri)
+include($$PWD/ext/commkit.pri)
 
 #
 #   QXMPP
 #
-QXMPP_BUILD_PATH = $$PREBUILT_SYSROOT
-message("QXMPP location : $${QXMPP_BUILD_PATH}")
+isEmpty(QXMPP_BUILD_PATH) {
+    QXMPP_BUILD_PATH=$$PREBUILT_SYSROOT
+}
+message("QXMPP location: $${QXMPP_BUILD_PATH}")
 
 #
 #   Defines
@@ -73,11 +82,14 @@ message("QXMPP location : $${QXMPP_BUILD_PATH}")
 DEFINES += QT_DEPRECATED_WARNINGS \
         INFO_CLIENT=1 \
         CFG_CLIENT=1 \
+        VS_MSGR_ENV_DEV=0 \
+        VS_MSGR_ENV_STG=0 \
+        VS_MSGR_ENV_PROD=1 \
         VERSION="$$VERSION"
 
-CONFIG(iphoneos, iphoneos | iphonesimulator) {
-    DEFINES += VS_IOS=1 VS_MOBILE=1
-}
+include(customers/customers.pri)
+
+VS_PLATFORMS_PATH=$$absolute_path(generated/platforms)
 
 #
 #   Headers
@@ -85,74 +97,325 @@ CONFIG(iphoneos, iphoneos | iphonesimulator) {
 
 HEADERS += \
         include/VSQApplication.h \
-        include/VSQAttachmentBuilder.h \
         include/VSQClipboardProxy.h \
-        include/VSQCommon.h \
-        include/VSQCryptoTransferManager.h \
+        include/VSQContactManager.h \
+        include/CrashReporter.h \
+        include/FileLoader.h \
         include/VSQDiscoveryManager.h \
-        include/VSQDownload.h \
-        include/VSQLogging.h \
-        include/VSQMessenger.h \
-        include/VSQSettings.h \
-        include/VSQSqlChatModel.h \
-        include/VSQSqlConversationModel.h \
+        include/VSQLastActivityIq.h \
+        include/VSQLastActivityManager.h \
+        include/Messenger.h \
+        include/Settings.h \
         include/VSQNetworkAnalyzer.h \
-        include/VSQTransfer.h \
-        include/VSQTransferManager.h \
-        include/VSQUpload.h \
-        include/VSQUtils.h \
+        include/Utils.h \
         include/android/VSQAndroid.h \
-        include/macos/VSQMacos.h \
         include/ui/VSQUiHelper.h \
-        include/thirdparty/optional/optional.hpp
+        include/KeyboardEventFilter.h \
+        include/Validator.h \
+        include/ContactAvatarLoader.h \
+        include/CustomerEnv.h \
+        include/Contact.h \
+        include/ConfirmationCodeType.h \
+        include/GroupId.h \
+        # Messenger Core
+        include/messenger/AttachmentId.h \
+        include/messenger/Chat.h \
+        include/messenger/ChatId.h \
+        include/messenger/ChatType.h \
+        include/messenger/CommKitBridge.h \
+        include/messenger/CoreMessenger.h \
+        include/messenger/IncomingMessage.h \
+        include/messenger/IncomingMessageStage.h \
+        include/messenger/Message.h \
+        include/messenger/MessageContent.h \
+        include/messenger/MessageContentAttachment.h \
+        include/messenger/MessageContentDownloadStage.h \
+        include/messenger/MessageContentEncrypted.h \
+        include/messenger/MessageContentFile.h \
+        include/messenger/MessageContentJsonUtils.h \
+        include/messenger/MessageContentPicture.h \
+        include/messenger/MessageContentText.h \
+        include/messenger/MessageContentType.h \
+        include/messenger/MessageContentUploadStage.h \
+        include/messenger/MessageGroupChatInfo.h \
+        include/messenger/MessageId.h \
+        include/messenger/MessageSender.h \
+        include/messenger/MessageStatus.h \
+        include/messenger/MessageUpdate.h \
+        include/messenger/MessageUpdateable.h \
+        include/messenger/OutgoingMessage.h \
+        include/messenger/OutgoingMessageStage.h \
+        include/messenger/User.h \
+        include/messenger/UserId.h \
+        include/messenger/UserImpl.h \
+        # Controllers
+        include/controllers/Controller.h \
+        include/controllers/AttachmentsController.h \
+        include/controllers/ChatsController.h \
+        include/controllers/Controllers.h \
+        include/controllers/FileCloudController.h \
+        include/controllers/MessagesController.h \
+        include/controllers/UsersController.h \
+        # Helpers
+        include/helpers/VSQSingleton.h \
+        include/helpers/FutureWorker.h \
+        include/helpers/FileUtils.h \
+        # Applications states
+        include/states/AccountSelectionState.h \
+        include/states/AccountSettingsState.h \
+        include/states/ApplicationStateManager.h \
+        include/states/AttachmentPreviewState.h \
+        include/states/BackupKeyState.h \
+        include/states/EditProfileState.h \
+        include/states/VerifyProfileState.h \
+        include/states/ChatListState.h \
+        include/states/ChatState.h \
+        include/states/DownloadKeyState.h \
+        include/states/FileCloudState.h \
+        include/states/OperationState.h \
+        include/states/NewChatState.h \
+        include/states/NewGroupChatState.h \
+        include/states/NameGroupChatState.h \
+        include/states/SignInAsState.h \
+        include/states/SignInState.h \
+        include/states/SignInUsernameState.h \
+        include/states/SignUpState.h \
+        include/states/SplashScreenState.h \
+        include/states/StartState.h \
+        # Database
+        include/database/core/Database.h \
+        include/database/core/DatabaseTable.h \
+        include/database/core/DatabaseUtils.h \
+        include/database/core/Migration.h \
+        include/database/core/Patch.h \
+        include/database/core/ScopedConnection.h \
+        include/database/core/ScopedTransaction.h \
+        include/database/AttachmentsTable.h \
+        include/database/ContactsTable.h \
+        include/database/ChatsTable.h \
+        include/database/MessagesTable.h \
+        include/database/SchemeVersion.h \
+        include/database/UserDatabase.h \
+        include/database/UserDatabaseMigration.h \
+        # Logging
+        include/logging/VSQLogging.h \
+        include/logging/VSQLogWorker.h \
+        include/logging/VSQMessageLogContext.h \
+        # Models
+        include/models/AccountSelectionModel.h \
+        include/models/ChatsModel.h \
+        include/models/ContactsModel.h \
+        include/models/ContactsProxyModel.h \
+        include/models/DiscoveredContactsModel.h \
+        include/models/DiscoveredContactsProxyModel.h \
+        include/models/FileCloudModel.h \
+        include/models/FileCloudUploader.h \
+        include/models/ListModel.h \
+        include/models/ListProxyModel.h \
+        include/models/ListSelectionModel.h \
+        include/models/MessagesModel.h \
+        include/models/MessagesQueue.h \
+        include/models/Models.h \
+        include/models/Model.h \
+        # Operations
+        include/operations/CalculateAttachmentFingerprintOperation.h \
+        include/operations/CalculateFileFingerprintOperation.h \
+        include/operations/ConvertToPngOperation.h \
+        include/operations/CreateAttachmentPreviewOperation.h \
+        include/operations/CreateAttachmentThumbnailOperation.h \
+        include/operations/CreateThumbnailOperation.h \
+        include/operations/DecryptFileOperation.h \
+        include/operations/DownloadAttachmentOperation.h \
+        include/operations/DownloadFileOperation.h \
+        include/operations/DownloadDecryptFileOperation.h \
+        include/operations/EncryptFileOperation.h \
+        include/operations/EncryptUploadFileOperation.h \
+        include/operations/LoadAttachmentOperation.h \
+        include/operations/LoadFileOperation.h \
+        include/operations/MessageOperation.h \
+        include/operations/MessageOperationFactory.h \
+        include/operations/NetworkOperation.h \
+        include/operations/Operation.h \
+        include/operations/SendMessageOperation.h \
+        include/operations/UploadAttachmentOperation.h \
+        include/operations/UploadFileOperation.h \
+        # Generated
+        generated/include/VSQCustomer.h
 
 #
 #   Sources
 #
 
 SOURCES += \
-        src/VSQAttachmentBuilder.cpp \
         src/VSQClipboardProxy.cpp \
-        src/VSQCommon.cpp \
-        src/VSQCryptoTransferManager.cpp \
+        src/VSQContactManager.cpp \
+        src/CrashReporter.cpp \
+        src/FileLoader.cpp \
         src/VSQDiscoveryManager.cpp \
-        src/VSQDownload.cpp \
-        src/VSQMessenger.cpp \
-        src/VSQLogging.cpp \
-        src/VSQSettings.cpp \
-        src/VSQSqlChatModel.cpp \
-        src/VSQSqlConversationModel.cpp \
+        src/Messenger.cpp \
+        src/VSQLastActivityIq.cpp \
+        src/VSQLastActivityManager.cpp \
+        src/Settings.cpp \
         src/VSQNetworkAnalyzer.cpp \
-        src/VSQTransfer.cpp \
-        src/VSQTransferManager.cpp \
-        src/VSQUpload.cpp \
-        src/VSQUtils.cpp \
+        src/Utils.cpp \
         src/android/VSQAndroid.cpp \
         src/main.cpp \
         src/VSQApplication.cpp \
-        src/ui/VSQUiHelper.cpp
+        src/ui/VSQUiHelper.cpp \
+        src/KeyboardEventFilter.cpp \
+        src/Validator.cpp \
+        src/ContactAvatarLoader.cpp \
+        src/CustomerEnv.cpp \
+        # Messenger Core
+        src/messenger/AttachmentId.cpp \
+        src/messenger/Chat.cpp \
+        src/messenger/ChatId.cpp \
+        src/messenger/ChatType.cpp \
+        src/messenger/CommKitBridge.cpp \
+        src/messenger/CoreMessenger.cpp \
+        src/messenger/IncomingMessage.cpp \
+        src/messenger/IncomingMessageStage.cpp \
+        src/messenger/Message.cpp \
+        src/messenger/MessageContentAttachment.cpp \
+        src/messenger/MessageContentDownloadStage.cpp \
+        src/messenger/MessageContentEncrypted.cpp \
+        src/messenger/MessageContentFile.cpp \
+        src/messenger/MessageContentJsonUtils.cpp \
+        src/messenger/MessageContentPicture.cpp \
+        src/messenger/MessageContentText.cpp \
+        src/messenger/MessageContentType.cpp \
+        src/messenger/MessageContentUploadStage.cpp \
+        src/messenger/MessageGroupChatInfo.cpp \
+        src/messenger/MessageId.cpp \
+        src/messenger/MessageStatus.cpp \
+        src/messenger/MessageUpdate.cpp \
+        src/messenger/OutgoingMessage.cpp \
+        src/messenger/OutgoingMessageStage.cpp \
+        src/messenger/User.cpp \
+        src/messenger/UserId.cpp \
+        # Controllers
+        src/controllers/Controller.cpp \
+        src/controllers/AttachmentsController.cpp \
+        src/controllers/ChatsController.cpp \
+        src/controllers/Controllers.cpp \
+        src/controllers/FileCloudController.cpp \
+        src/controllers/MessagesController.cpp \
+        src/controllers/UsersController.cpp \
+        # Helpers
+        src/helpers/FileUtils.cpp \
+        # Applications states
+        src/states/AccountSelectionState.cpp \
+        src/states/AccountSettingsState.cpp \
+        src/states/ApplicationStateManager.cpp \
+        src/states/AttachmentPreviewState.cpp \
+        src/states/BackupKeyState.cpp \
+        src/states/EditProfileState.cpp \
+        src/states/VerifyProfileState.cpp \
+        src/states/ChatListState.cpp \
+        src/states/ChatState.cpp \
+        src/states/DownloadKeyState.cpp \
+        src/states/FileCloudState.cpp \
+        src/states/NewChatState.cpp \
+        src/states/NewGroupChatState.cpp \
+        src/states/NameGroupChatState.cpp \
+        src/states/SignInAsState.cpp \
+        src/states/SignInState.cpp \
+        src/states/SignInUsernameState.cpp \
+        src/states/SignUpState.cpp \
+        src/states/SplashScreenState.cpp \
+        # Database
+        src/database/core/Database.cpp \
+        src/database/core/DatabaseTable.cpp \
+        src/database/core/DatabaseUtils.cpp \
+        src/database/core/Migration.cpp \
+        src/database/core/Patch.cpp \
+        src/database/core/ScopedConnection.cpp \
+        src/database/core/ScopedTransaction.cpp \
+        src/database/AttachmentsTable.cpp \
+        src/database/ContactsTable.cpp \
+        src/database/ChatsTable.cpp \
+        src/database/MessagesTable.cpp \
+        src/database/UserDatabase.cpp \
+        src/database/UserDatabaseMigration.cpp \
+        # Logging
+        src/logging/VSQLogging.cpp \
+        src/logging/VSQLogWorker.cpp \
+        # Models
+        src/models/AccountSelectionModel.cpp \
+        src/models/ChatsModel.cpp \
+        src/models/ContactsModel.cpp \
+        src/models/ContactsProxyModel.cpp \
+        src/models/DiscoveredContactsModel.cpp \
+        src/models/DiscoveredContactsProxyModel.cpp \
+        src/models/FileCloudModel.cpp \
+        src/models/FileCloudUploader.cpp \
+        src/models/ListModel.cpp \
+        src/models/ListProxyModel.cpp \
+        src/models/ListSelectionModel.cpp \
+        src/models/MessagesModel.cpp \
+        src/models/MessagesQueue.cpp \
+        src/models/Models.cpp \
+        src/models/Model.cpp \
+        # Operations
+        src/operations/CalculateAttachmentFingerprintOperation.cpp \
+        src/operations/CalculateFileFingerprintOperation.cpp \
+        src/operations/ConvertToPngOperation.cpp \
+        src/operations/CreateAttachmentPreviewOperation.cpp \
+        src/operations/CreateAttachmentThumbnailOperation.cpp \
+        src/operations/CreateThumbnailOperation.cpp \
+        src/operations/DecryptFileOperation.cpp \
+        src/operations/DownloadAttachmentOperation.cpp \
+        src/operations/DownloadFileOperation.cpp \
+        src/operations/DownloadDecryptFileOperation.cpp \
+        src/operations/EncryptFileOperation.cpp \
+        src/operations/EncryptUploadFileOperation.cpp \
+        src/operations/LoadAttachmentOperation.cpp \
+        src/operations/LoadFileOperation.cpp \
+        src/operations/MessageOperation.cpp \
+        src/operations/MessageOperationFactory.cpp \
+        src/operations/NetworkOperation.cpp \
+        src/operations/Operation.cpp \
+        src/operations/SendMessageOperation.cpp \
+        src/operations/UploadAttachmentOperation.cpp \
+        src/operations/UploadFileOperation.cpp
 
 #
 #   Resources
 #
 
-RESOURCES += src/resources.qrc
+RESOURCES += \
+    src/resources.qrc \
+    generated/src/customer.qrc
 
 #
 #   Include path
 #
 
 
-INCLUDEPATH +=  include \
-        $${QXMPP_BUILD_PATH}/include \
-         $${QXMPP_BUILD_PATH}/include/qxmpp
+INCLUDEPATH += \
+    include \
+    include/notifications \
+    include/helpers \
+    include/database \
+    include/models \
+    include/ui \
+    include/logging \
+    include/controllers \
+    include/states \
+    include/operations \
+    include/messenger \
+    $${QXMPP_BUILD_PATH}/include \
+    $${QXMPP_BUILD_PATH}/include/qxmpp \
+    generated/include
 
 #
 #   Sparkle framework
 #
-unix:mac:!ios {
+macx: {
+    HEADERS += include/macos/VSQMacos.h
     OBJECTIVE_SOURCES += src/macos/VSQMacos.mm
-    DEFINES += MACOS=1
+    DEFINES += VS_MACOS=1
+
     SPARKLE_LOCATION=$$PREBUILT_PATH/$${OS_NAME}/sparkle
     message("SPARKLE LOCATION = $$SPARKLE_LOCATION")
     QMAKE_LFLAGS  += -F$$SPARKLE_LOCATION
@@ -163,35 +426,6 @@ unix:mac:!ios {
     sparkle.files = $$SPARKLE_LOCATION/Sparkle.framework
     QMAKE_BUNDLE_DATA += sparkle
 }
-
-#
-#   Qt Web Driver
-#
-isEmpty(WEBDRIVER) {
-    message("Web Driver is disabled")
-} else {
-    message("Web Driver is enabled")
-    QT += widgets
-    DEFINES += WD_ENABLE_WEB_VIEW=0 \
-           WD_ENABLE_PLAYER=0 \
-           QT_NO_SAMPLES=1 \
-           VSQ_WEBDRIVER_DEBUG=1
-    release:QTWEBDRIVER_LOCATION=$$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/include/qtwebdriver
-    debug:QTWEBDRIVER_LOCATION=$$PWD/ext/prebuilt/$${OS_NAME}/debug/installed/usr/local/include/qtwebdriver
-    HEADERS += $$QTWEBDRIVER_LOCATION/src/Test/Headers.h
-    INCLUDEPATH +=  $$QTWEBDRIVER_LOCATION $$QTWEBDRIVER_LOCATION/src
-    linux:!android: {
-        LIBS += -ldl -Wl,--start-group -lchromium_base -lWebDriver_core -lWebDriver_extension_qt_base -lWebDriver_extension_qt_quick -Wl,--end-group
-    }
-    macx: {
-        LIBS += -lchromium_base -lWebDriver_core -lWebDriver_extension_qt_base -lWebDriver_extension_qt_quick
-        LIBS += -framework Foundation
-        LIBS += -framework CoreFoundation
-        LIBS += -framework ApplicationServices
-        LIBS += -framework Security
-    }
-}
-
 
 #
 #   Libraries
@@ -206,7 +440,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 #
-#   Depencies
+#   Dependencies
 #
 
 DEPENDPATH += $${INCLUDEPATH}
@@ -218,8 +452,11 @@ message("ANDROID_TARGET_ARCH = $$ANDROID_TARGET_ARCH")
 #
 
 linux:!android {
-    DEFINES += VS_DESKTOP=1
+    DEFINES += VS_DESKTOP=1 VS_LINUX=1
     QT += widgets
+    SOURCES += \
+        platforms/default/CustomerEnvDefault.cpp
+
 }
 
 #
@@ -229,6 +466,13 @@ linux:!android {
 win32|win64 {
     DEFINES += VS_DESKTOP=1
     QT += widgets
+
+    SOURCES += \
+        platforms/default/CustomerEnvDefault.cpp
+
+    # Assets
+    RC_ICONS = $$VS_PLATFORMS_PATH/windows/Logo.ico
+    DISTFILES += $$VS_PLATFORMS_PATH/windows/Logo.ico
 }
 
 #
@@ -236,36 +480,49 @@ win32|win64 {
 #
 
 macx: {
-    ICON = $$PWD/scripts/macos/pkg_resources/MyIcon.icns
-    QMAKE_INFO_PLIST = $$PWD/platforms/macos/virgil-messenger.plist
+    ICON = generated/scripts/macos/pkg_resources/MyIcon.icns
+    QMAKE_INFO_PLIST = $$VS_PLATFORMS_PATH/macos/virgil-messenger.plist
     DEFINES += VS_DESKTOP=1
     QT += widgets
+
+    OBJECTIVE_SOURCES += \
+        platforms/apple/CustomerEnvApple.mm
+
+    DISTFILES += $$VS_PLATFORMS_PATH/macos/virgil-messenger.plist.in
 }
 
 #
 #   iOS specific
 #
-#ios: {
-#    OBJECTIVE_SOURCES += \
-#        src/ios/APNSApplicationDelegate.mm
 
-#    #IOS_ENTITLEMENTS.name = CODE_SIGN_ENTITLEMENTS
-#    #IOS_ENTITLEMENTS.value = ios/pushnotifications.entitlements
-#    QMAKE_MAC_XCODE_SETTINGS += IOS_ENTITLEMENTS
-#}
+ios: {
+    QMAKE_ASSET_CATALOGS += generated/platforms/ios/Assets.xcassets
+    QMAKE_IOS_DEPLOYMENT_TARGET = 9.0
+    QMAKE_INFO_PLIST = platforms/ios/Info.plist
+    DEFINES += VS_IOS=1 VS_PUSHNOTIFICATIONS=1 VS_MOBILE=1
+    LIBS += -framework Foundation -framework UserNotifications
+    OBJECTIVE_SOURCES += \
+        platforms/ios/AppDelegate.mm \
+        platforms/apple/CustomerEnvApple.mm
 
-isEqual(OS_NAME, "ios")|isEqual(OS_NAME, "ios-sim"): {
-    Q_ENABLE_BITCODE.name = ENABLE_BITCODE
-    Q_ENABLE_BITCODE.value = NO
-    QMAKE_MAC_XCODE_SETTINGS += Q_ENABLE_BITCODE
+    HEADERS += \
+         include/notifications/PushNotifications.h \
+         include/notifications/XmppPushNotifications.h
 
-    LIBS_DIR = $$PWD/ext/prebuilt/$$OS_NAME/release/installed/usr/local/lib
-    QMAKE_RPATHDIR = @executable_path/Frameworks
+    SOURCES += \
+         src/notifications/PushNotifications.cpp \
+         src/notifications/XmppPushNotifications.cpp
 
-    IOS_DYLIBS.files = \
-    $$LIBS_DIR/libvs-messenger-internal.dylib
-    IOS_DYLIBS.path = Frameworks
-    QMAKE_BUNDLE_DATA += IOS_DYLIBS
+    PUSH_NOTIFICATIONS_ENTITLEMENTS.name = CODE_SIGN_ENTITLEMENTS
+    PUSH_NOTIFICATIONS_ENTITLEMENTS.value = $$VS_PLATFORMS_PATH/ios/Entitlements/VirgilMessenger.entitlements
+    QMAKE_MAC_XCODE_SETTINGS += PUSH_NOTIFICATIONS_ENTITLEMENTS
+
+    DISTFILES += generated/platforms/ios/Entitlements/VirgilMessenger.entitlements
+}
+
+isEqual(OS_NAME, "ios-sim"): {
+    message("IOS simulator")
+    DEFINES += VS_IOS_SIMULATOR=1
 }
 
 
@@ -276,131 +533,111 @@ isEqual(OS_NAME, "ios")|isEqual(OS_NAME, "ios-sim"): {
 defineReplace(AndroidVersionCode) {
         segments = $$split(1, ".")
         vCode = "$$first(vCode)$$format_number($$member(segments,0,0), width=3 zeropad)"
-        vCode = "$$first(vCode)$$format_number($$member(segments,1,1), width=3 zeropad)"
-        vCode = "$$first(vCode)$$format_number($$member(segments,2,2), width=3 zeropad)"
-        vCode = "$$first(vCode)$$format_number($$member(segments,3,3), width=5 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,1,1), width=2 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,2,2), width=2 zeropad)"
+        vCode = "$$first(vCode)$$format_number($$member(segments,3,3), width=3 zeropad)"
         return($$first(vCode))
 }
 
 android: {
     QT += androidextras
     DEFINES += VS_ANDROID=1 VS_PUSHNOTIFICATIONS=1 VS_MOBILE=1
-    ANDROID_VERSION_CODE = $$AndroidVersionCode($$VERSION)
+    ANDROID_VERSION_CODE = $$AndroidVersionCode($${VERSION})
     ANDROID_VERSION_NAME = $$VERSION
+    ANDROID_MIN_SDK_VERSION = 24
+    ANDROID_TARGET_SDK_VERSION = 29
 
+    INCLUDEPATH +=  \
+        include/notifications/android \
+        $$PWD/ext/prebuilt/firebase_cpp_sdk/include
+
+    # OpenSSL
+    INCLUDEPATH += $$(ANDROID_SDK_ROOT)/android_openssl/static/include
     include($$(ANDROID_SDK_ROOT)/android_openssl/openssl.pri)
 
-    INCLUDEPATH +=  $$PWD/ext/prebuilt/firebase_cpp_sdk/include
+    equals(ANDROID_TARGET_ARCH, armeabi-v7a) {
+        LIBS += -L$$SSL_PATH/latest/arm/
+    }
+
+    equals(ANDROID_TARGET_ARCH, arm64-v8a) {
+        LIBS += -L$$SSL_PATH/latest/arm64
+    }
+
+    equals(ANDROID_TARGET_ARCH, x86) {
+        LIBS += -L$$SSL_PATH/latest/x86
+    }
+
+    equals(ANDROID_TARGET_ARCH, x86_64) {
+        LIBS += -L$$SSL_PATH/latest/x86_64
+    }
 
     HEADERS += \
-         include/VSQPushNotifications.h \
-         include/android/VSQFirebaseListener.h
+        include/notifications/PushNotifications.h \
+        include/notifications/XmppPushNotifications.h \
+        include/notifications/android/FirebaseListener.h
 
     SOURCES += \
-        src/VSQPushNotifications.cpp \
-        src/android/VSQFirebaseListener.cpp
+        src/notifications/PushNotifications.cpp \
+        src/notifications/XmppPushNotifications.cpp \
+        src/notifications/android/FirebaseListener.cpp \
+        platforms/default/CustomerEnvDefault.cpp
 
 
-    release:LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
-    debug:LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
+    LIBS_DIR = $$PWD/ext/prebuilt/$${OS_NAME}/release/installed/usr/local/lib
 
-
-
-#
-#   Messenger Internal
-#
-    LIBS_DIR_PREFIX = $$PWD/ext/prebuilt
-    release:LIBS_DIR_SUFFIX = release/installed/usr/local/lib
-    debug:LIBS_DIR_SUFFIX = debug/installed/usr/local/lib
     FIREBASE_LIBS_DIR = $$PWD/ext/prebuilt/firebase_cpp_sdk/libs/android/$$ANDROID_TARGET_ARCH/c++
-    ANDROID_EXTRA_LIBS += \
-        $$LIBS_DIR_PREFIX/android.x86/$$LIBS_DIR_SUFFIX/libvs-messenger-internal.so \
-        $$LIBS_DIR_PREFIX/android.armeabi-v7a/$$LIBS_DIR_SUFFIX/libvs-messenger-internal.so \
-        $$LIBS_DIR_PREFIX/android.arm64-v8a/$$LIBS_DIR_SUFFIX/libvs-messenger-internal.so
-
-#
-#   ~ Messenger Internal
-#
-
 
     LIBS += $${FIREBASE_LIBS_DIR}/libfirebase_messaging.a \
         $${FIREBASE_LIBS_DIR}/libfirebase_app.a \
         $${FIREBASE_LIBS_DIR}/libfirebase_auth.a
 
-    ANDROID_PACKAGE_SOURCE_DIR = \
-        $$PWD/platforms/android
+    ANDROID_PACKAGE_SOURCE_DIR = $$VS_PLATFORMS_PATH/android
 
     DISTFILES += \
-        platforms/android/gradle.properties \
-        platforms/android/google-services.json \
-        platforms/android/AndroidManifest.xml \
-        platforms/android/build.gradle \
-        platforms/android/gradle/wrapper/gradle-wrapper.jar \
-        platforms/android/gradle/wrapper/gradle-wrapper.properties \
-        platforms/android/gradlew \
-        platforms/android/gradlew.bat \
-        platforms/android/res/values/libs.xml \
-        platforms/android/src/org/virgil/notification/NotificationClient.java
+        $$ANDROID_PACKAGE_SOURCE_DIR/gradle.properties \
+        $$ANDROID_PACKAGE_SOURCE_DIR/google-services.json \
+        $$ANDROID_PACKAGE_SOURCE_DIR/AndroidManifest.xml \
+        $$ANDROID_PACKAGE_SOURCE_DIR/build.gradle \
+        $$ANDROID_PACKAGE_SOURCE_DIR/gradle/wrapper/gradle-wrapper.jar \
+        $$ANDROID_PACKAGE_SOURCE_DIR/gradle/wrapper/gradle-wrapper.properties \
+        $$ANDROID_PACKAGE_SOURCE_DIR/gradlew \
+        $$ANDROID_PACKAGE_SOURCE_DIR/gradlew.bat \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/values/libs.xml \
+        # Java
+        $$ANDROID_PACKAGE_SOURCE_DIR/src/org/virgil/notification/NotificationClient.java \
+        # Assets
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-hdpi/icon.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-hdpi/icon_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-ldpi/icon.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-ldpi/icon_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-mdpi/icon.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-mdpi/icon_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-xhdpi/icon.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-xhdpi/icon_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-xxhdpi/icon.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-xxhdpi/icon_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-xxxhdpi/icon.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/drawable-xxxhdpi/icon_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-hdpi/ic_launcher_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-mdpi/ic_launcher.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-mdpi/ic_launcher_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xhdpi/ic_launcher.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xhdpi/ic_launcher_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xxhdpi/ic_launcher.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xxhdpi/ic_launcher_round.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xxxhdpi/ic_launcher.png \
+        $$ANDROID_PACKAGE_SOURCE_DIR/res/mipmap-xxxhdpi/ic_launcher_round.png
+
+    OTHER_FILES += \
+        platforms/android/res/values/apptheme.xml \
+        platforms/android/src/org/virgil/utils/ContactUtils.java \
+        platforms/android/src/org/virgil/utils/Utils.java
 }
 
-#
-#   Enable Address Sanitizer if required
-#
-message(">>> ENABLE ADDRESS SANITIZER: $$USE_ASAN")
-equals(USE_ASAN, "yes") {
-    CONFIG += sanitizer sanitize_address
-}
 
-#
-#   Enable Undefined behavior Sanitizer if required
-#
-message(">>> ENABLE UNDEFINED BEHAVIOR SANITIZER: $$USE_UBSAN")
-equals(USE_UBSAN, "yes") {
-    CONFIG += sanitizer sanitize_undefined
-}
+OTHER_FILES += \
+    .gitignore \
+    VERSION_CORE \
+    VERSION_MESSENGER
 
-#
-#   Enable Memory Sanitizer if required
-#
-message(">>> ENABLE MEMORY SANITIZER: $$USE_MSAN")
-equals(USE_MSAN, "yes") {
-    CONFIG += sanitizer sanitize_memory
-}
-
-#
-#   Enable Thread Sanitizer if required
-#
-message(">>> ENABLE THREAD SANITIZER: $$USE_TSAN")
-equals(USE_TSAN, "yes") {
-    CONFIG += sanitizer sanitize_thread
-}
-
-#
-#   Assets
-#
-RC_ICONS = platforms/windows/Virgil.ico
-
-DISTFILES += \
-    platforms/android/res/drawable-hdpi/icon.png \
-    platforms/android/res/drawable-hdpi/icon_round.png \
-    platforms/android/res/drawable-ldpi/icon.png \
-    platforms/android/res/drawable-ldpi/icon_round.png \
-    platforms/android/res/drawable-mdpi/icon.png \
-    platforms/android/res/drawable-mdpi/icon_round.png \
-    platforms/android/res/drawable-xhdpi/icon.png \
-    platforms/android/res/drawable-xhdpi/icon_round.png \
-    platforms/android/res/drawable-xxhdpi/icon.png \
-    platforms/android/res/drawable-xxhdpi/icon_round.png \
-    platforms/android/res/drawable-xxxhdpi/icon.png \
-    platforms/android/res/drawable-xxxhdpi/icon_round.png \
-    platforms/android/res/mipmap-hdpi/ic_launcher_round.png \
-    platforms/android/res/mipmap-mdpi/ic_launcher.png \
-    platforms/android/res/mipmap-mdpi/ic_launcher_round.png \
-    platforms/android/res/mipmap-xhdpi/ic_launcher.png \
-    platforms/android/res/mipmap-xhdpi/ic_launcher_round.png \
-    platforms/android/res/mipmap-xxhdpi/ic_launcher.png \
-    platforms/android/res/mipmap-xxhdpi/ic_launcher_round.png \
-    platforms/android/res/mipmap-xxxhdpi/ic_launcher.png \
-    platforms/android/res/mipmap-xxxhdpi/ic_launcher_round.png \
-    platforms/macos/virgil-messenger.plist.in \
-    platforms/windows/Virgil.ico
+ANDROID_ABIS = armeabi-v7a arm64-v8a x86 x86_64

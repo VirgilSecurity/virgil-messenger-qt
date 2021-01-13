@@ -37,17 +37,18 @@
 #include <qxmpp/QXmppClient.h>
 #include <qxmpp/QXmppCarbonManager.h>
 
-Q_LOGGING_CATEGORY(lcDiscoveryManager, "discoman");
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(lcDiscoveryManager, "discovery-manager");
 
 VSQDiscoveryManager::VSQDiscoveryManager(QXmppClient *client, QObject *parent)
-    : QObject()
+    : QObject(parent)
     , m_client(client)
-    , m_discoveryManager(client->findExtension<QXmppDiscoveryManager>())
+    , m_manager(client->findExtension<QXmppDiscoveryManager>())
 {
-    setParent(parent);
     connect(client, &QXmppClient::connected, this, &VSQDiscoveryManager::onClientConnected);
-    connect(m_discoveryManager, &QXmppDiscoveryManager::infoReceived, this, &VSQDiscoveryManager::onInfoReceived);
-    connect(m_discoveryManager, &QXmppDiscoveryManager::itemsReceived, this, &VSQDiscoveryManager::onItemsReceived);
+    connect(m_manager, &QXmppDiscoveryManager::infoReceived, this, &VSQDiscoveryManager::onInfoReceived);
+    connect(m_manager, &QXmppDiscoveryManager::itemsReceived, this, &VSQDiscoveryManager::onItemsReceived);
 }
 
 VSQDiscoveryManager::~VSQDiscoveryManager()
@@ -56,9 +57,9 @@ VSQDiscoveryManager::~VSQDiscoveryManager()
 void VSQDiscoveryManager::onClientConnected()
 {
     const auto domain = m_client->configuration().domain();
-    auto infoId = m_discoveryManager->requestInfo(domain);
+    auto infoId = m_manager->requestInfo(domain);
     qCDebug(lcDiscoveryManager) << "Discovery manager info requested" << domain << "id:" << infoId;
-    auto itemsId = m_discoveryManager->requestItems(domain);
+    auto itemsId = m_manager->requestItems(domain);
     qCDebug(lcDiscoveryManager) << "Discovery manager items requested" << domain << "id:" << itemsId;
 }
 
@@ -87,6 +88,6 @@ void VSQDiscoveryManager::onItemsReceived(const QXmppDiscoveryIq &info)
         if (item.jid() == domain)
             continue;
         qCDebug(lcDiscoveryManager) << "Discovery manager items requested" << item.jid();
-        m_discoveryManager->requestInfo(item.jid());
+        m_manager->requestInfo(item.jid());
     }
 }
