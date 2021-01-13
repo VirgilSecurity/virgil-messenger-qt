@@ -64,6 +64,7 @@ ApplicationWindow {
     Item {
         anchors.fill: parent
 
+        // TODO(fpohtmeh): rename to NotificationPopup, move logic inside
         Popup {
             id: inform
         }
@@ -91,9 +92,23 @@ ApplicationWindow {
             }
             z: Theme.overlayZ
         }
+
+        MessageDialog {
+            id: fileCloudDeleteItemDialog
+            title: qsTr("File Manager")
+            text: qsTr("Delete file(s)?")
+            onAccepted: controllers.fileCloud.deleteFiles()
+        }
+
+        InputDialog {
+            id: fileCloudNewDirectoryDialog
+            title: qsTr("File Manager")
+            label: qsTr("New directory")
+            placeholderText: qsTr("Enter name")
+            onAccepted: controllers.fileCloud.createDirectory(text)
+        }
     }
 
-    // Show Popup message
     function showPopup(message, popupBackgroundColor, textColor, interval) {
         inform.popupBackgroundColor = popupBackgroundColor
         inform.popupColorText = textColor

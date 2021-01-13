@@ -52,7 +52,14 @@ ModelListView {
             }
         }
 
-        onClicked: controllers.fileCloud.processClick(model.index)
+        onClicked: {
+            if (model.isDir) {
+                controllers.fileCloud.setDirectory(model.index)
+            }
+            else {
+                controllers.fileCloud.openFile(model.index)
+            }
+        }
     }
 
     onPlaceholderClicked: attachmentPicker.open(AttachmentTypes.file)

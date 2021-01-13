@@ -50,10 +50,6 @@ class FileCloudState : public QState
 public:
     FileCloudState(Models *models, QState *parent);
 
-signals:
-    void requestNewDir();
-    void requestDeletion();
-
 private:
     void onEntry(QEvent *);
     void onExit(QEvent *);

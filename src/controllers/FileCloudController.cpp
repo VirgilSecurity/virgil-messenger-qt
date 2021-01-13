@@ -65,12 +65,6 @@ void FileCloudController::setDirectory(const QVariant &proxyRow)
     setDirectory(QDir(fileInfo.absoluteFilePath()));
 }
 
-void FileCloudController::processClick(const QVariant &proxyRow)
-{
-    const auto fileInfo = model()->getFileInfo(proxyRow.toInt());
-    fileInfo.isDir() ? setDirectory(proxyRow) : openFile(proxyRow);
-}
-
 void FileCloudController::cdUp()
 {
     m_currentDir.cdUp();
@@ -90,6 +84,17 @@ void FileCloudController::addFile(const QVariant &attachmentUrl)
     else {
         qCWarning(lcController) << "Failed to copy attachment";
     }
+}
+
+void FileCloudController::deleteFiles()
+{
+    qCDebug(lcController) << "Feature is under development";
+}
+
+void FileCloudController::createDirectory(const QString &name)
+{
+    Q_UNUSED(name)
+    qCDebug(lcController) << "Feature is under development";
 }
 
 FileCloudModel *FileCloudController::model()

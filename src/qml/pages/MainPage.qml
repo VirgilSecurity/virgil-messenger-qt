@@ -21,7 +21,7 @@ Page {
         readonly property string chatTitle: app.organizationDisplayName
         readonly property string chatDescription: qsTr("%1 Server").arg(app.organizationDisplayName)
 
-        readonly property string fileCloudTitle: qsTr("File Cloud") + controllers.fileCloud.displayPath
+        readonly property string fileCloudTitle: qsTr("File Manager") + controllers.fileCloud.displayPath
         readonly property string fileCloudDescription: fileCloudSelection.hasSelection ? qsTr("Selected: %1").arg(fileCloudSelection.selectedCount) : " "
     }
 
@@ -55,8 +55,8 @@ Page {
         }
 
         ContextMenuItem {
-            text: qsTr("New dir")
-            onTriggered: appState.requestNewDir()
+            text: qsTr("New directory")
+            onTriggered: fileCloudNewDirectoryDialog.open()
             visible: d.isFileCloud
         }
 
@@ -66,7 +66,7 @@ Page {
 
         ContextMenuItem {
             text: qsTr("Delete")
-            onTriggered: appState.requestDeletion()
+            onTriggered: fileCloudDeleteItemDialog.open()
             visible: d.isFileCloud && d.fileCloudSelection.hasSelection
         }
     }
