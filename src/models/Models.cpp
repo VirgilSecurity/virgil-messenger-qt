@@ -57,7 +57,7 @@ Models::Models(Messenger *messenger, Settings *settings, UserDatabase *userDatab
     , m_fileCloud(new FileCloudModel(settings, this))
     , m_fileCloudUploader(new FileCloudUploader(this))
     , m_fileLoader(messenger->fileLoader())
-    , m_messagesQueue(new MessagesQueue(settings, messenger, userDatabase, nullptr)) // TODO(fpohtmeh): set parent?
+    , m_messagesQueue(new MessagesQueue(messenger, userDatabase, nullptr)) // TODO(fpohtmeh): set parent?
     , m_queueThread(new QThread())
 {
     connect(m_messagesQueue, &MessagesQueue::notificationCreated, this, &Models::notificationCreated);

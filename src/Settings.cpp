@@ -239,7 +239,7 @@ QDir Settings::downloadsDir() const
 
 QDir Settings::userDownloadsDir(const UserId &userId) const
 {
-    const QDir dir = m_downloadsDir.filePath(userId);
+    const QDir dir = m_downloadsDir.filePath(QLatin1String("FileCloud/") + userId);
     if (!dir.exists()) {
         FileUtils::forceCreateDir(dir.absolutePath());
     }

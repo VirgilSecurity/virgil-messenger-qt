@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,33 +32,17 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_FILECLOUDSTATE_H
-#define VM_FILECLOUDSTATE_H
+#include "FileCloudQueue.h"
 
-#include <QState>
+using namespace vm;
 
-#include "UserId.h"
-#include "models/FileCloudModel.h"
+Q_LOGGING_CATEGORY(lcFileCloudQueue, "filecloud-queue");
 
-namespace vm
+FileCloudQueue::FileCloudQueue(QObject *parent)
+    : QObject(parent)
 {
-class FileCloudController;
-class Messenger;
-
-class FileCloudState : public QState
-{
-    Q_OBJECT
-
-public:
-    FileCloudState(Messenger *messenger, FileCloudController *controller, QState *parent);
-
-private:
-    void onEntry(QEvent *);
-    void onExit(QEvent *);
-
-    Messenger *m_messenger;
-    FileCloudController *m_controller;
-};
 }
 
-#endif // VM_FILECLOUDSTATE_H
+FileCloudQueue::~FileCloudQueue()
+{
+}

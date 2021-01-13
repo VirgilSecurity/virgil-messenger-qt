@@ -53,11 +53,11 @@ using Self = MessagesQueue;
 Q_LOGGING_CATEGORY(lcMessagesQueue, "messages-queue");
 
 
-Self::MessagesQueue(const Settings *settings, Messenger *messenger, UserDatabase *userDatabase, QObject *parent)
+Self::MessagesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
     , m_messenger(messenger)
     , m_userDatabase(userDatabase)
-    , m_factory(new MessageOperationFactory(settings, messenger, this))
+    , m_factory(new MessageOperationFactory(messenger, this))
     , m_threadPool(new QThreadPool(this))
 {
     m_threadPool->setMaxThreadCount(5);

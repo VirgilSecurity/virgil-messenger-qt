@@ -47,11 +47,9 @@ FileCloudController::FileCloudController(const Settings *settings, Models *model
     : QObject(parent)
     , m_settings(settings)
     , m_models(models)
-    , m_rootDir(m_settings->downloadsDir())
+    , m_rootDir()
     , m_currentDir(m_rootDir)
-{
-    setDirectory(m_rootDir);
-}
+{}
 
 void FileCloudController::openFile(const QVariant &proxyRow)
 {
@@ -100,6 +98,12 @@ void FileCloudController::createDirectory(const QString &name)
 FileCloudModel *FileCloudController::model()
 {
     return m_models->fileCloud();
+}
+
+void FileCloudController::setRootDirectory(const QDir &dir)
+{
+    m_rootDir = dir;
+    setDirectory(dir);
 }
 
 void FileCloudController::setDirectory(const QDir &dir)

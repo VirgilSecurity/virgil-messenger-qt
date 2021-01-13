@@ -60,16 +60,17 @@ public:
     Q_INVOKABLE void deleteFiles();
     Q_INVOKABLE void createDirectory(const QString &name);
 
+    FileCloudModel *model();
+    void setRootDirectory(const QDir &dir);
+
 signals:
     void displayPathChanged(const QString &path);
 
 private:
-    FileCloudModel *model();
     void setDirectory(const QDir &dir);
 
     const Settings *m_settings;
     Models *m_models;
-
     QDir m_rootDir;
     QDir m_currentDir;
     QString m_displayPath;

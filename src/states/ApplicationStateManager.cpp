@@ -49,12 +49,12 @@ using Self = ApplicationStateManager;
 Q_LOGGING_CATEGORY(lcAppState, "app-state");
 
 
-Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Models *models, Validator *validator, Settings *settings, QObject *parent)
+Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Models *models, Validator *validator, QObject *parent)
     : QStateMachine(parent)
     , m_messenger(messenger)
     , m_controllers(controllers)
     , m_validator(validator)
-    , m_settings(settings)
+    , m_settings(m_messenger->settings())
     , m_accountSelectionState(new AccountSelectionState(controllers->users(), validator, this))
     , m_accountSettingsState(new AccountSettingsState(this))
     , m_attachmentPreviewState(new AttachmentPreviewState(this))
@@ -64,14 +64,14 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
     , m_chatListState(new ChatListState(controllers->chats(), this))
     , m_chatState(new ChatState(controllers, m_messenger, this))
     , m_downloadKeyState(new DownloadKeyState(controllers->users(), this))
-    , m_fileCloudState(new FileCloudState(models, this))
+    , m_fileCloudState(new FileCloudState(m_messenger, controllers->fileCloud(), this))
     , m_newChatState(new NewChatState(controllers->chats(), models->discoveredContacts(), this))
     , m_newGroupChatState(new NewGroupChatState(models->discoveredContacts(), this))
     , m_nameGroupChatState(new NameGroupChatState(controllers->chats(), this))
     , m_signInAsState(new SignInAsState(this))
     , m_signInUsernameState(new SignInUsernameState(controllers->users(), validator, this))
     , m_signUpState(new SignUpState(controllers->users(), validator, this))
-    , m_splashScreenState(new SplashScreenState(controllers->users(), validator, settings, this))
+    , m_splashScreenState(new SplashScreenState(controllers->users(), validator, m_messenger->settings(), this))
     , m_startState(new StartState(this))
 {
     registerStatesMetaTypes();

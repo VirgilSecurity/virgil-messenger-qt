@@ -455,6 +455,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/DiscoveredContactsModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/DiscoveredContactsProxyModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/FileCloudModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/FileCloudQueue.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/FileCloudUploader.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListProxyModel.h
@@ -601,6 +602,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/models/DiscoveredContactsModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/DiscoveredContactsProxyModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/FileCloudModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/FileCloudQueue.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/FileCloudUploader.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ListModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ListProxyModel.cpp

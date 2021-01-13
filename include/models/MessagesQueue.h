@@ -48,9 +48,6 @@ Q_DECLARE_LOGGING_CATEGORY(lcMessagesQueue);
 class QThreadPool;
 
 
-class Settings;
-
-
 namespace vm
 {
 class MessageOperation;
@@ -76,7 +73,7 @@ public:
         qsizetype attemptCount = 0;
     };
 
-    MessagesQueue(const Settings *settings, Messenger *messenger, UserDatabase *userDatabase, QObject *parent);
+    MessagesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject *parent);
     ~MessagesQueue() override;
 
 signals:

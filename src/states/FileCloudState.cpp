@@ -34,28 +34,28 @@
 
 #include "states/FileCloudState.h"
 
+#include "controllers/FileCloudController.h"
 #include "models/FileCloudModel.h"
 #include "models/Models.h"
 
 using namespace vm;
 
-FileCloudState::FileCloudState(Models *models, QState *parent)
+FileCloudState::FileCloudState(Messenger *messenger, FileCloudController *controller, QState *parent)
     : QState(parent)
-    , m_models(models)
+    , m_messenger(messenger)
+    , m_controller(controller)
 {
 }
 
 void FileCloudState::onEntry(QEvent *)
 {
-    setEnabled(true);
+    const auto userId = m_messenger->currentUser()->id();
+    const auto rootDir = m_messenger->settings()->userDownloadsDir(userId);
+    m_controller->setRootDirectory(rootDir);
+    m_controller->model()->setEnabled(true);
 }
 
 void FileCloudState::onExit(QEvent *)
 {
-    setEnabled(false);
-}
-
-void FileCloudState::setEnabled(bool enabled)
-{
-    m_models->fileCloud()->setEnabled(enabled);
+    m_controller->model()->setEnabled(false);
 }

@@ -89,7 +89,7 @@ class ApplicationStateManager : public QStateMachine
 
 public:
     ApplicationStateManager(Messenger *messenger, Controllers *controllers, Models *models,
-                            Validator *validator, Settings *settings, QObject *parent);
+                            Validator *validator, QObject *parent);
     ~ApplicationStateManager() override;
 
 signals:
