@@ -32,26 +32,40 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "FileCloudQueue.h"
+#ifndef VM_MESSAGEOPERATIONSOURCE_H
+#define VM_MESSAGEOPERATIONSOURCE_H
 
-using namespace vm;
+#include "DownloadAttachmentOperation.h"
+#include "Message.h"
+#include "OperationSource.h"
 
-Q_LOGGING_CATEGORY(lcFileCloudQueue, "filecloud-queue");
-
-FileCloudQueue::FileCloudQueue(QObject *parent)
-    : OperationQueue(lcFileCloudQueue(), parent)
+namespace vm
 {
+class MessageOperationSource : public OperationSource
+{
+public:
+    using PostDownloadFunction = std::function<void ()>;
+
+    // Parameter for download/preload
+    struct DownloadParameter : DownloadAttachmentOperation::Parameter
+    {
+        PostDownloadFunction postFunction;
+    };
+
+    MessageOperationSource() = default;
+    explicit MessageOperationSource(ModifiableMessageHandler message, std::optional<DownloadParameter> download = std::nullopt);
+
+    bool isValid() const override;
+    QString toString() const override;
+
+    ModifiableMessageHandler message();
+    MessageHandler message() const;
+    std::optional<DownloadParameter> download() const;
+
+private:
+    ModifiableMessageHandler m_message;
+    std::optional<DownloadParameter> m_download;
+};
 }
 
-FileCloudQueue::~FileCloudQueue()
-{
-}
-
-Operation *FileCloudQueue::createOperation(OperationSourcePtr source)
-{
-    return nullptr;
-}
-
-void FileCloudQueue::invalidateOperation(OperationSourcePtr source)
-{
-}
+#endif // VM_MESSAGEOPERATIONSOURCE_H

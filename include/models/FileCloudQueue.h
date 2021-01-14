@@ -37,17 +37,23 @@
 
 #include <QLoggingCategory>
 
+#include "OperationQueue.h"
+
 Q_DECLARE_LOGGING_CATEGORY(lcFileCloudQueue);
 
 namespace vm
 {
-class FileCloudQueue : public QObject
+class FileCloudQueue : public OperationQueue
 {
     Q_OBJECT
 
 public:
     explicit FileCloudQueue(QObject *parent);
     ~FileCloudQueue() override;
+
+private:
+    Operation *createOperation(OperationSourcePtr source) override;
+    void invalidateOperation(OperationSourcePtr source) override;
 };
 }
 

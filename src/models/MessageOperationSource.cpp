@@ -32,26 +32,39 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "FileCloudQueue.h"
+#include "MessageOperationSource.h"
 
 using namespace vm;
+using Self = MessageOperationSource;
 
-Q_LOGGING_CATEGORY(lcFileCloudQueue, "filecloud-queue");
-
-FileCloudQueue::FileCloudQueue(QObject *parent)
-    : OperationQueue(lcFileCloudQueue(), parent)
+Self::MessageOperationSource(ModifiableMessageHandler message, std::optional<DownloadParameter> download)
+    : OperationSource()
+    , m_message(std::move(message))
+    , m_download(std::move(download))
 {
 }
 
-FileCloudQueue::~FileCloudQueue()
+bool Self::isValid() const
 {
+    return m_message->status() != MessageStatus::Broken;
 }
 
-Operation *FileCloudQueue::createOperation(OperationSourcePtr source)
+QString Self::toString() const
 {
-    return nullptr;
+    return QLatin1String("MessageOperationSource(%1)").arg(m_message->id());
 }
 
-void FileCloudQueue::invalidateOperation(OperationSourcePtr source)
+ModifiableMessageHandler Self::message()
 {
+    return m_message;
+}
+
+MessageHandler Self::message() const
+{
+    return m_message;
+}
+
+std::optional<Self::DownloadParameter> Self::download() const
+{
+    return m_download;
 }

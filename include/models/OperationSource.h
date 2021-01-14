@@ -32,26 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "FileCloudQueue.h"
+#ifndef VM_OPERATIONSOURCE_H
+#define VM_OPERATIONSOURCE_H
 
-using namespace vm;
+#include <memory>
 
-Q_LOGGING_CATEGORY(lcFileCloudQueue, "filecloud-queue");
+#include <QString>
 
-FileCloudQueue::FileCloudQueue(QObject *parent)
-    : OperationQueue(lcFileCloudQueue(), parent)
+namespace vm
 {
+class OperationSource
+{
+public:
+    virtual ~OperationSource() {}
+
+    virtual bool isValid() const = 0;
+    virtual QString toString() const = 0;
+
+    qsizetype attemptCount() const { return m_attemptCount; }
+    void incAttemptCount() { ++m_attemptCount; }
+
+private:
+    qsizetype m_attemptCount = 0;
+};
+
+using OperationSourcePtr = std::shared_ptr<OperationSource>;
 }
 
-FileCloudQueue::~FileCloudQueue()
-{
-}
-
-Operation *FileCloudQueue::createOperation(OperationSourcePtr source)
-{
-    return nullptr;
-}
-
-void FileCloudQueue::invalidateOperation(OperationSourcePtr source)
-{
-}
+#endif // VM_OPERATIONSOURCE_H

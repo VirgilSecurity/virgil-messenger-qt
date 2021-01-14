@@ -460,10 +460,13 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListProxyModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListSelectionModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/MessageOperationSource.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/MessagesModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/MessagesQueue.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/Models.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/Model.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationQueue.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationSource.h
         # Operations
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateAttachmentFingerprintOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateFileFingerprintOperation.h
@@ -607,10 +610,12 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ListModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ListProxyModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ListSelectionModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/MessageOperationSource.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/MessagesModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/MessagesQueue.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/Models.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/Model.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/OperationQueue.cpp
         # Operations
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CalculateAttachmentFingerprintOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CalculateFileFingerprintOperation.cpp

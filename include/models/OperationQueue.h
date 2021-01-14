@@ -32,26 +32,56 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "FileCloudQueue.h"
+#ifndef VM_OPERATIONQUEUE_H
+#define VM_OPERATIONQUEUE_H
 
-using namespace vm;
+#include <QLoggingCategory>
+#include <QPointer>
 
-Q_LOGGING_CATEGORY(lcFileCloudQueue, "filecloud-queue");
+#include "OperationSource.h"
 
-FileCloudQueue::FileCloudQueue(QObject *parent)
-    : OperationQueue(lcFileCloudQueue(), parent)
+class QThreadPool;
+
+namespace vm
 {
+class Operation;
+
+class OperationQueue : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit OperationQueue(const QLoggingCategory &category, QObject *parent);
+    ~OperationQueue() override;
+
+    void start();
+    void run();
+    void stop();
+
+    void addSource(OperationSourcePtr source);
+
+signals:
+    void stopRequested(QPrivateSignal);
+    void operationFailed(OperationSourcePtr source, QPrivateSignal);
+
+protected:
+    virtual Operation *createOperation(OperationSourcePtr source) = 0;
+    virtual void invalidateOperation(OperationSourcePtr source) = 0;
+
+private:
+    void addSourceImpl(OperationSourcePtr source, const bool run);
+    void runSource(OperationSourcePtr source);
+
+    void onOperationFailed(OperationSourcePtr source);
+
+    const QLoggingCategory &m_category;
+
+    QPointer<QThreadPool> m_threadPool;
+    std::atomic_bool m_isStopped = false;
+    std::vector<OperationSourcePtr> m_sources;
+};
 }
 
-FileCloudQueue::~FileCloudQueue()
-{
-}
+Q_DECLARE_METATYPE(vm::OperationSourcePtr);
 
-Operation *FileCloudQueue::createOperation(OperationSourcePtr source)
-{
-    return nullptr;
-}
-
-void FileCloudQueue::invalidateOperation(OperationSourcePtr source)
-{
-}
+#endif // VM_OPERATIONQUEUE_H
