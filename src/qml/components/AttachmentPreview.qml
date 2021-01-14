@@ -1,16 +1,21 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 
+import "../theme"
+
 Item {
     id: attachmentPreview
+    onVisibleChanged: startAnimation.restart()
 
     Rectangle {
+        id: imageBackground
         anchors.fill: parent
         color: "black"
-        opacity: 0.5
+        opacity: 0
     }
 
     Image {
+        id: imagePreview
         source: app.stateManager.attachmentPreviewState.url
         anchors.fill: parent
         fillMode: Image.PreserveAspectFit
@@ -26,7 +31,7 @@ Item {
         }
         text: qsTr("Close")
         color: "white"
-        font.bold: true
+        font.pointSize: 14
     }
 
     MouseArea {
@@ -34,5 +39,11 @@ Item {
         anchors.fill: parent
         onClicked: app.stateManager.goBack()
         onWheel: wheel.accepted = true
+    }
+
+    ParallelAnimation {
+        id: startAnimation
+        NumberAnimation { target: imageBackground; property: "opacity"; from: 0; to: 1; duration: Theme.animationDuration; easing.type: Easing.OutCubic}
+        NumberAnimation { target: imagePreview; property: "scale"; from: 0.5; to: 1; duration: Theme.animationDuration; easing.type: Easing.OutCubic}
     }
 }
