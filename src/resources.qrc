@@ -147,6 +147,7 @@
         <file>qml/components/TextScrollView.qml</file>
         <file>qml/components/AttachmentPicker.qml</file>
         <file>qml/components/LogControl.qml</file>
+	<file>qml/components/KeyboardHandler.qml</file>
         <file>qml/components/ListDelegate.qml</file>
         <file>qml/components/ModelListView.qml</file>
         <file>qml/components/Dialogs/TemplateDialog.qml</file>

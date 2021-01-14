@@ -10,13 +10,12 @@ Control {
     id: mainView
 
     property var attachmentPreview: undefined
-    property int keyboardHeight: 0
     readonly property var manager: app.stateManager
 
     RowLayout {
         anchors {
             fill: parent
-            bottomMargin: (logControl.visible ? logControl.height : 0) + keyboardHeight
+            bottomMargin: keyboardHandler.keyboardHeight
         }
         spacing: 0
         clip: logControl.visible
@@ -75,6 +74,10 @@ Control {
             topMargin: 0.75 * mainView.height
         }
         visible: settings.devMode
+    }
+
+    KeyboardHandler {
+        id: keyboardHandler
     }
 
     QtObject {
@@ -218,11 +221,5 @@ Control {
         manager.signInUsernameState.entered.connect(d.openSignInUsernamePage)
         manager.signUpState.entered.connect(d.openSignUpPage)
         manager.downloadKeyState.entered.connect(d.openDownloadKeyPage)
-
-        if (Platform.isIos) {
-            app.keyboardEventFilter.keyboardRectangleChanged.connect(function(rect) {
-                keyboardHeight = Math.max(0, root.height - rect.y)
-            })
-        }
     }
 }
