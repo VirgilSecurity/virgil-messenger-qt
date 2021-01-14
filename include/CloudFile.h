@@ -36,6 +36,7 @@
 #define VM_CLOUDFILE_H
 
 #include <QDateTime>
+#include <QFileInfo>
 #include <QString>
 
 namespace vm
@@ -44,20 +45,35 @@ class CloudFile
 {
 public:
     CloudFile() = default;
-    CloudFile(const QString &path, const bool isDirectory, const qsizetype size, const QDateTime &createdAt);
+    explicit CloudFile(const QFileInfo &info);
+    explicit CloudFile(const QString &path);
+    CloudFile(const QString &name, const bool isDirectory, const qsizetype size, const QDateTime &createdAt);
     virtual ~CloudFile() noexcept = default;
 
-    QString path() const noexcept;
+    QString name() const noexcept;
     bool isDirectory() const noexcept;
     qsizetype size() const noexcept;
     QDateTime createdAt() const noexcept;
 
+    void setLocalPath(const QString &path);
+    QString localPath() const;
+
+    QString relativePath(const CloudFile &dir) const;
+    QString parentPath() const;
+    void cdUp();
+    CloudFile child(const QString &name) const;
+
 private:
-    QString m_path;
+    QString m_name;
     bool m_isDirectory = false;
     qsizetype m_size = 0;
     QDateTime m_createdAt;
+    QString m_localPath;
 };
+
+using CloudFileHandler = std::shared_ptr<const CloudFile>;
+using CloudFiles = std::vector<CloudFileHandler>;
+
 }
 
 #endif // VM_CLOUDFILE_H

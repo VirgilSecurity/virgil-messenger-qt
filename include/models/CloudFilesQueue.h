@@ -37,6 +37,7 @@
 
 #include <QLoggingCategory>
 
+#include "CloudFile.h"
 #include "OperationQueue.h"
 
 Q_DECLARE_LOGGING_CATEGORY(lcCloudFilesQueue);
@@ -51,9 +52,18 @@ public:
     explicit CloudFilesQueue(QObject *parent);
     ~CloudFilesQueue() override;
 
+signals:
+    void pushCreateDirectory(const QString &name, const CloudFileHandler &parentDir);
+    void pushUploadFile(const QString &filePath, const CloudFileHandler &parentDir);
+    void pushDeleteFiles(const CloudFiles &files);
+
 private:
     Operation *createOperation(OperationSourcePtr source) override;
     void invalidateOperation(OperationSourcePtr source) override;
+
+    void onPushCreateDirectory(const QString &name, const CloudFileHandler &parentDir);
+    void onPushUploadFile(const QString &filePath, const CloudFileHandler &parentDir);
+    void onPushDeleteFiles(const CloudFiles &files);
 };
 }
 

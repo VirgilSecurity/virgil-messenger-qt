@@ -63,7 +63,6 @@ signals:
     void pushMessagePreload(const ModifiableMessageHandler &message);
 
     void updateMessage(const MessageUpdate &messagesUpdate);
-    void notificationCreated(const QString &notification, const bool error);
 
 private:
     Operation *createOperation(OperationSourcePtr source) override;

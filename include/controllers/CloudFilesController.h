@@ -38,6 +38,8 @@
 #include <QDir>
 #include <QObject>
 
+#include "CloudFile.h"
+
 class Settings;
 
 namespace vm
@@ -53,6 +55,10 @@ class CloudFilesController : public QObject
 public:
     CloudFilesController(const Settings *settings, Models *models, QObject *parent);
 
+    CloudFilesModel *model();
+    void setRootDirectory(const CloudFileHandler &cloudDir);
+    void setDownloadsDir(const QDir &dir);
+
     Q_INVOKABLE void openFile(const QVariant &proxyRow);
     Q_INVOKABLE void setDirectory(const QVariant &proxyRow);
     Q_INVOKABLE void cdUp();
@@ -60,19 +66,17 @@ public:
     Q_INVOKABLE void deleteFiles();
     Q_INVOKABLE void createDirectory(const QString &name);
 
-    CloudFilesModel *model();
-    void setRootDirectory(const QDir &dir);
-
 signals:
     void displayPathChanged(const QString &path);
 
 private:
-    void setDirectory(const QDir &dir);
+    void setDirectory(const CloudFileHandler &cloudDir);
 
     const Settings *m_settings;
     Models *m_models;
-    QDir m_rootDir;
-    QDir m_currentDir;
+    CloudFileHandler m_rootDir;
+    QDir m_downloadsDir;
+    CloudFileHandler m_currentDir;
     QString m_displayPath;
 };
 }

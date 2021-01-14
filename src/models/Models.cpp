@@ -34,17 +34,17 @@
 
 #include "models/Models.h"
 
-#include <QSortFilterProxyModel>
-
-#include "Settings.h"
+#include "AccountSelectionModel.h"
+#include "ChatsModel.h"
+#include "CloudFilesModel.h"
+#include "CloudFilesQueue.h"
+#include "CloudFilesUploader.h"
+#include "DiscoveredContactsModel.h"
+#include "MessagesModel.h"
+#include "MessagesQueue.h"
+#include "FileLoader.h"
+#include "UserDatabase.h"
 #include "Messenger.h"
-#include "models/AccountSelectionModel.h"
-#include "models/ChatsModel.h"
-#include "models/CloudFilesModel.h"
-#include "models/CloudFilesUploader.h"
-#include "models/DiscoveredContactsModel.h"
-#include "models/MessagesModel.h"
-#include "models/MessagesQueue.h"
 
 using namespace vm;
 
@@ -55,12 +55,13 @@ Models::Models(Messenger *messenger, Settings *settings, UserDatabase *userDatab
     , m_discoveredContacts(new DiscoveredContactsModel(validator, this))
     , m_messages(new MessagesModel(this))
     , m_cloudFiles(new CloudFilesModel(settings, this))
+    , m_cloudFilesQueue(new CloudFilesQueue(this))
     , m_cloudFilesUploader(new CloudFilesUploader(this))
     , m_fileLoader(messenger->fileLoader())
-    , m_messagesQueue(new MessagesQueue(messenger, userDatabase, nullptr)) // TODO(fpohtmeh): set parent?
-    , m_queueThread(new QThread())
+    , m_messagesQueue(new MessagesQueue(messenger, userDatabase, this))
 {
     connect(m_messagesQueue, &MessagesQueue::notificationCreated, this, &Models::notificationCreated);
+    connect(m_cloudFilesQueue, &CloudFilesQueue::notificationCreated, this, &Models::notificationCreated);
 }
 
 Models::~Models()
@@ -105,6 +106,16 @@ const CloudFilesModel *Models::cloudFiles() const
 CloudFilesModel *Models::cloudFiles()
 {
     return m_cloudFiles;
+}
+
+const CloudFilesQueue *Models::cloudFilesQueue() const
+{
+    return m_cloudFilesQueue;
+}
+
+CloudFilesQueue *Models::cloudFilesQueue()
+{
+    return m_cloudFilesQueue;
 }
 
 const CloudFilesUploader *Models::cloudFilesUploader() const

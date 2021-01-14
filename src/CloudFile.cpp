@@ -34,18 +34,35 @@
 
 #include "CloudFile.h"
 
+#include <QDir>
+
 using namespace vm;
 
-CloudFile::CloudFile(const QString &path, const bool isDirectory, const qsizetype size, const QDateTime &createdAt)
-    : m_path(path)
+CloudFile::CloudFile(const QString &name, const bool isDirectory, const qsizetype size, const QDateTime &createdAt)
+    : m_name(name)
     , m_isDirectory(isDirectory)
     , m_size(size)
     , m_createdAt(createdAt)
-{}
-
-QString CloudFile::path() const noexcept
 {
-    return m_path;
+}
+
+CloudFile::CloudFile(const QFileInfo &info)
+    : m_name(info.fileName())
+    , m_isDirectory(info.isDir())
+    , m_size(info.size())
+    , m_createdAt(info.fileTime(QFile::FileBirthTime))
+{
+    setLocalPath(info.absoluteFilePath());
+}
+
+CloudFile::CloudFile(const QString &path)
+    : CloudFile(QFileInfo(path))
+{
+}
+
+QString CloudFile::name() const noexcept
+{
+    return m_name;
 }
 
 bool CloudFile::isDirectory() const noexcept
@@ -61,4 +78,44 @@ qsizetype CloudFile::size() const noexcept
 QDateTime CloudFile::createdAt() const noexcept
 {
     return m_createdAt;
+}
+
+void CloudFile::setLocalPath(const QString &path)
+{
+    m_localPath = path;
+}
+
+QString CloudFile::localPath() const
+{
+    return m_localPath;
+}
+
+QString CloudFile::relativePath(const CloudFile &dir) const
+{
+    auto child(*this);
+    QStringList parts;
+    while (child.localPath() != dir.localPath()) {
+        parts.push_front(child.name());
+        child.cdUp();
+    }
+    return parts.join(QLatin1Char('/'));
+}
+
+QString CloudFile::parentPath() const
+{
+    return QFileInfo(m_localPath).absolutePath();
+}
+
+void CloudFile::cdUp()
+{
+    const auto dir = QFileInfo(m_localPath).dir();
+    m_name = dir.dirName();
+    m_isDirectory = true;
+    m_size = 0;
+    m_localPath = dir.absolutePath();
+}
+
+CloudFile CloudFile::child(const QString &name) const
+{
+    return CloudFile(QDir(localPath()).filePath(name));
 }

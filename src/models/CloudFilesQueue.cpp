@@ -35,23 +35,39 @@
 #include "CloudFilesQueue.h"
 
 using namespace vm;
+using Self = CloudFilesQueue;
 
 Q_LOGGING_CATEGORY(lcCloudFilesQueue, "cloudfiles-queue");
 
-CloudFilesQueue::CloudFilesQueue(QObject *parent)
+Self::CloudFilesQueue(QObject *parent)
     : OperationQueue(lcCloudFilesQueue(), parent)
 {
+    connect(this, &Self::pushCreateDirectory, this, &Self::onPushCreateDirectory);
+    connect(this, &Self::pushUploadFile, this, &Self::onPushUploadFile);
+    connect(this, &Self::pushDeleteFiles, this, &Self::onPushDeleteFiles);
 }
 
-CloudFilesQueue::~CloudFilesQueue()
+Self::~CloudFilesQueue()
 {
 }
 
-Operation *CloudFilesQueue::createOperation(OperationSourcePtr source)
+Operation *Self::createOperation(OperationSourcePtr source)
 {
     return nullptr;
 }
 
-void CloudFilesQueue::invalidateOperation(OperationSourcePtr source)
+void Self::invalidateOperation(OperationSourcePtr source)
+{
+}
+
+void Self::onPushCreateDirectory(const QString &name, const CloudFileHandler &parentDir)
+{
+}
+
+void Self::onPushUploadFile(const QString &filePath, const CloudFileHandler &parentDir)
+{
+}
+
+void Self::onPushDeleteFiles(const CloudFiles &files)
 {
 }

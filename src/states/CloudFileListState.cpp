@@ -34,9 +34,9 @@
 
 #include "states/CloudFileListState.h"
 
-#include "controllers/CloudFilesController.h"
-#include "models/CloudFilesModel.h"
-#include "models/Models.h"
+#include "CloudFilesController.h"
+#include "CloudFilesModel.h"
+#include "Messenger.h"
 
 using namespace vm;
 
@@ -50,8 +50,9 @@ CloudFileListState::CloudFileListState(Messenger *messenger, CloudFilesControlle
 void CloudFileListState::onEntry(QEvent *)
 {
     const auto userId = m_messenger->currentUser()->id();
-    const auto rootDir = m_messenger->settings()->userDownloadsDir(userId);
-    m_controller->setRootDirectory(rootDir);
+    const auto rootDir = m_messenger->settings()->cloudFilesDownloadsDir(userId);
+    m_controller->setRootDirectory(std::make_shared<CloudFile>(rootDir.absolutePath()));
+    m_controller->setDownloadsDir(rootDir);
     m_controller->model()->setEnabled(true);
 }
 

@@ -32,13 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "controllers/CloudFilesController.h"
+#include "CloudFilesController.h"
 
 #include "Settings.h"
 #include "Utils.h"
 #include "FileUtils.h"
-#include "models/CloudFilesModel.h"
-#include "models/Models.h"
+#include "CloudFilesModel.h"
+#include "CloudFilesQueue.h"
+#include "Models.h"
 #include "Controller.h"
 
 using namespace vm;
@@ -51,21 +52,37 @@ CloudFilesController::CloudFilesController(const Settings *settings, Models *mod
     , m_currentDir(m_rootDir)
 {}
 
+CloudFilesModel *CloudFilesController::model()
+{
+    return m_models->cloudFiles();
+}
+
+void CloudFilesController::setRootDirectory(const CloudFileHandler &cloudDir)
+{
+    m_rootDir = cloudDir;
+    setDirectory(cloudDir);
+}
+
+void CloudFilesController::setDownloadsDir(const QDir &dir)
+{
+    m_downloadsDir = dir;
+}
+
 void CloudFilesController::openFile(const QVariant &proxyRow)
 {
-    const auto fileInfo = model()->getFileInfo(proxyRow.toInt());
-    FileUtils::openUrl(FileUtils::localFileToUrl(fileInfo.absoluteFilePath()));
+    const auto cloudFile = model()->getFile(proxyRow.toInt());
+    FileUtils::openUrl(FileUtils::localFileToUrl(cloudFile->localPath()));
 }
 
 void CloudFilesController::setDirectory(const QVariant &proxyRow)
 {
-    const auto fileInfo = model()->getFileInfo(proxyRow.toInt());
-    setDirectory(QDir(fileInfo.absoluteFilePath()));
+    const auto cloudFile = model()->getFile(proxyRow.toInt());
+    setDirectory(cloudFile);
 }
 
 void CloudFilesController::cdUp()
 {
-    m_currentDir.cdUp();
+    m_currentDir = std::make_shared<CloudFile>(m_currentDir->parentPath());
     setDirectory(m_currentDir);
 }
 
@@ -73,47 +90,26 @@ void CloudFilesController::addFile(const QVariant &attachmentUrl)
 {
     const auto url = attachmentUrl.toUrl();
     const auto filePath = FileUtils::urlToLocalFile(url);
-    const auto fileName = FileUtils::attachmentFileName(url, false);
-    // Copy
-    const auto destFilePath = FileUtils::findUniqueFileName(m_currentDir.filePath(fileName));
-    if (QFile::copy(filePath, destFilePath)) {
-        setDirectory(m_currentDir);
-    }
-    else {
-        qCWarning(lcController) << "Failed to copy attachment";
-    }
+    m_models->cloudFilesQueue()->pushUploadFile(filePath, m_currentDir);
 }
 
 void CloudFilesController::deleteFiles()
 {
-    qCDebug(lcController) << "Feature is under development";
+    m_models->cloudFilesQueue()->pushDeleteFiles(m_models->cloudFiles()->getSelectedFiles());
 }
 
 void CloudFilesController::createDirectory(const QString &name)
 {
-    Q_UNUSED(name)
-    qCDebug(lcController) << "Feature is under development";
+    m_models->cloudFilesQueue()->pushCreateDirectory(name, m_currentDir);
 }
 
-CloudFilesModel *CloudFilesController::model()
+void CloudFilesController::setDirectory(const CloudFileHandler &cloudDir)
 {
-    return m_models->cloudFiles();
-}
-
-void CloudFilesController::setRootDirectory(const QDir &dir)
-{
-    m_rootDir = dir;
-    setDirectory(dir);
-}
-
-void CloudFilesController::setDirectory(const QDir &dir)
-{
-    m_currentDir = dir;
-    model()->setDirectory(dir);
-    // Update display path
-    m_displayPath.clear();
-    for (auto d = dir; d != m_rootDir; d.cdUp()) {
-        m_displayPath.append(QLatin1String("  /  ") + d.dirName());
+    m_currentDir = cloudDir;
+    model()->setDirectory(cloudDir);
+    m_displayPath = cloudDir->relativePath(*m_rootDir);
+    if (!m_displayPath.isEmpty()) {
+        m_displayPath = QLatin1Char('/') + m_displayPath;
     }
     emit displayPathChanged(m_displayPath);
 }

@@ -35,25 +35,26 @@
 #ifndef VM_MODELS_H
 #define VM_MODELS_H
 
-#include "AccountSelectionModel.h"
-#include "ChatsModel.h"
-#include "CloudFilesModel.h"
-#include "CloudFilesUploader.h"
-#include "DiscoveredContactsModel.h"
-#include "MessagesModel.h"
-#include "MessagesQueue.h"
-#include "FileLoader.h"
-#include "UserDatabase.h"
-#include "Messenger.h"
-
 #include <QObject>
 #include <QPointer>
-#include <QThread>
 
 class Settings;
 
 namespace vm
 {
+class AccountSelectionModel;
+class ChatsModel;
+class CloudFilesModel;
+class CloudFilesQueue;
+class CloudFilesUploader;
+class DiscoveredContactsModel;
+class FileLoader;
+class MessagesModel;
+class MessagesQueue;
+class Messenger;
+class UserDatabase;
+class Validator;
+
 class Models : public QObject
 {
     Q_OBJECT
@@ -76,6 +77,8 @@ public:
     DiscoveredContactsModel *discoveredContacts();
     const CloudFilesModel *cloudFiles() const;
     CloudFilesModel *cloudFiles();
+    const CloudFilesQueue *cloudFilesQueue() const;
+    CloudFilesQueue *cloudFilesQueue();
     const CloudFilesUploader *cloudFilesUploader() const;
     CloudFilesUploader *cloudFilesUploader();
     const FileLoader *fileLoader() const;
@@ -94,10 +97,10 @@ private:
     QPointer<DiscoveredContactsModel> m_discoveredContacts;
     QPointer<MessagesModel> m_messages;
     QPointer<CloudFilesModel> m_cloudFiles;
+    QPointer<CloudFilesQueue> m_cloudFilesQueue;
     QPointer<CloudFilesUploader> m_cloudFilesUploader;
     QPointer<FileLoader> m_fileLoader;
     QPointer<MessagesQueue> m_messagesQueue;
-    QPointer<QThread> m_queueThread;
 };
 }
 

@@ -39,6 +39,7 @@
 #include <QFileInfoList>
 #include <QTimer>
 
+#include "CloudFile.h"
 #include "ListModel.h"
 
 class Settings;
@@ -61,10 +62,11 @@ public:
 
     CloudFilesModel(const Settings *settings, QObject *parent);
 
-    void setDirectory(const QDir &dir);
+    void setDirectory(const CloudFileHandler &cloudDir);
     void setEnabled(bool enabled);
 
-    const QFileInfo getFileInfo(const int proxyRow) const;
+    CloudFileHandler getFile(const int proxyRow) const;
+    CloudFiles getSelectedFiles() const;
 
 signals:
     void listReady(const QFileInfoList &list, QPrivateSignal);
@@ -78,7 +80,7 @@ private:
     void invalidateDateTime();
 
     const Settings *m_settings;
-    QFileInfoList m_list;
+    CloudFiles m_list;
     QDateTime m_now;
     QTimer m_updateTimer;
     int m_debugCounter = 0;

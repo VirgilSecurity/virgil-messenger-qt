@@ -63,6 +63,7 @@ public:
 signals:
     void stopRequested(QPrivateSignal);
     void operationFailed(OperationSourcePtr source, QPrivateSignal);
+    void notificationCreated(const QString &notification, const bool error);
 
 protected:
     virtual Operation *createOperation(OperationSourcePtr source) = 0;

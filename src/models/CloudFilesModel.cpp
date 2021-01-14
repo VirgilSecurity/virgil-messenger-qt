@@ -61,10 +61,11 @@ CloudFilesModel::CloudFilesModel(const Settings *settings, QObject *parent)
     connect(&m_updateTimer, &QTimer::timeout, this, &CloudFilesModel::invalidateDateTime);
 }
 
-void CloudFilesModel::setDirectory(const QDir &dir)
+void CloudFilesModel::setDirectory(const CloudFileHandler &cloudDir)
 {
-    QtConcurrent::run([this, dir]() {
-        auto list = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot, QDir::NoSort);
+    QtConcurrent::run([this, cloudDir]() {
+        const QDir dir(cloudDir->localPath());
+        const auto list = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot, QDir::NoSort);
         emit listReady(list, QPrivateSignal());
     });
 }
@@ -80,9 +81,19 @@ void CloudFilesModel::setEnabled(bool enabled)
     }
 }
 
-const QFileInfo CloudFilesModel::getFileInfo(const int proxyRow) const
+CloudFileHandler CloudFilesModel::getFile(const int proxyRow) const
 {
     return m_list[sourceIndex(proxyRow).row()];
+}
+
+CloudFiles CloudFilesModel::getSelectedFiles() const
+{
+    CloudFiles files;
+    const auto indices = selection()->selectedIndexes();
+    for (const auto &i : indices) {
+        files.push_back(m_list[i.row()]);
+    }
+    return files;
 }
 
 int CloudFilesModel::rowCount(const QModelIndex &parent) const
@@ -93,21 +104,20 @@ int CloudFilesModel::rowCount(const QModelIndex &parent) const
 
 QVariant CloudFilesModel::data(const QModelIndex &index, int role) const
 {
-    const auto &info = m_list[index.row()];
+    const auto &file = m_list[index.row()];
     switch (role) {
     case FilenameRole:
-        return info.fileName();
+        return file->name();
     case IsDirRole:
-        return info.isDir();
+        return file->isDirectory();
     case DisplayDateTimeRole: {
-        const auto modified = info.fileTime(QFile::FileModificationTime);
-        const auto diff = std::chrono::seconds(modified.secsTo(m_now));
+        const auto diff = std::chrono::seconds(file->createdAt().secsTo(m_now));
         return Utils::formattedElapsedSeconds(diff, m_settings->nowInterval());
     }
     case DisplayFileSize:
-        return Utils::formattedSize(info.size());
+        return Utils::formattedSize(file->size());
     case SortRole:
-        return QString("%1%2").arg(static_cast<int>(!info.isDir())).arg(info.fileName());
+        return QString("%1%2").arg(static_cast<int>(!file->isDirectory())).arg(file->name());
     default:
         return ListModel::data(index, role);
     }
@@ -127,7 +137,11 @@ void CloudFilesModel::setList(const QFileInfoList &list)
 {
     beginResetModel();
     m_now = QDateTime::currentDateTime();
-    m_list = list;
+    const auto s = list.size();
+    m_list.resize(s);
+    for (int i = 0; i < s; ++i) {
+        m_list[i] = std::make_shared<CloudFile>(list[i]);
+    }
     endResetModel();
 }
 

@@ -237,12 +237,13 @@ QDir Settings::downloadsDir() const
     return m_downloadsDir;
 }
 
-QDir Settings::userDownloadsDir(const UserId &userId) const
+QDir Settings::cloudFilesDownloadsDir(const UserId &userId) const
 {
     const QDir dir = m_downloadsDir.filePath(QLatin1String("VirgilCloudFiles/") + userId);
     if (!dir.exists()) {
         FileUtils::forceCreateDir(dir.absolutePath());
     }
+    qCDebug(lcSettings) << "Cloud files dir:" << dir.absolutePath();
     return dir;
 }
 

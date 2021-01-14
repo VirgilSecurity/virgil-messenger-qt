@@ -22,7 +22,7 @@ Page {
         readonly property string chatsDescription: qsTr("%1 Server").arg(app.organizationDisplayName)
 
         readonly property string cloudFilesTitle: qsTr("File Manager") + controllers.cloudFiles.displayPath
-        readonly property string cloudFilesDescription: cloudFilesSelection.hasSelection ? qsTr("Selected: %1").arg(cloudFilesSelection.selectedCount) : " "
+        readonly property string cloudFilesDescription: cloudFilesSelection.hasSelection ? qsTr("Selected: %1").arg(cloudFilesSelection.selectedCount) : ""
     }
 
     background: Rectangle {
@@ -33,6 +33,7 @@ Page {
         id: mainSearchHeader
         title: d.isChatList ? d.chatsTitle : d.cloudFilesTitle
         description: d.isChatList ? d.chatsDescription : d.cloudFilesDescription
+        showDescription: description
         showBackButton: d.isCloudFileList && controllers.cloudFiles.displayPath
         menuImage: d.isChatList ? "More" : "Plus"
         searchPlaceholder: d.isChatList ? qsTr("Search conversation") : qsTr("Search file")
