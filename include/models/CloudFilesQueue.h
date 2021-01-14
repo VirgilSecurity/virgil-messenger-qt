@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,48 +32,29 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_FILECLOUDUPLOADER_H
-#define VM_FILECLOUDUPLOADER_H
+#ifndef VS_CLOUDFILESQUEUE_H
+#define VS_CLOUDFILESQUEUE_H
 
+#include <QLoggingCategory>
 
-#include <QObject>
+#include "OperationQueue.h"
 
+Q_DECLARE_LOGGING_CATEGORY(lcCloudFilesQueue);
 
 namespace vm
 {
-class FileCloudUploader : public QObject
+class CloudFilesQueue : public OperationQueue
 {
     Q_OBJECT
 
-    Q_PROPERTY(int currentIndex READ currentIndex NOTIFY currentIndexChanged)
-    Q_PROPERTY(qint64 currentProcessedBytes READ currentProcessedBytes WRITE setCurrentProcessedBytes NOTIFY currentProcessedBytesChanged)
-    Q_PROPERTY(qint64 currentTotalBytes READ currentTotalBytes NOTIFY currentTotalBytesChanged)
-    Q_PROPERTY(QStringList fileNames READ fileNames NOTIFY fileNamesChanged)
-
 public:
-    FileCloudUploader(QObject *parent);
-
-    int currentIndex() const;
-    qint64 currentProcessedBytes() const;
-    qint64 currentTotalBytes() const;
-    QStringList fileNames() const;
-
-    void setCurrentIndex(const int index);
-    void setCurrentProcessedBytes(const qint64 bytes);
-    void setCurrentTotalBytes(const qint64 bytes);
-
-signals:
-    void currentIndexChanged(const int &index);
-    void currentProcessedBytesChanged(const qint64 bytes);
-    void currentTotalBytesChanged(const qint64 bytes);
-    void fileNamesChanged(const QStringList &fileNames);
+    explicit CloudFilesQueue(QObject *parent);
+    ~CloudFilesQueue() override;
 
 private:
-    QStringList m_fileNames;
-    int m_currentIndex;
-    int m_currentProcessedBytes;
-    int m_currentTotalBytes;
+    Operation *createOperation(OperationSourcePtr source) override;
+    void invalidateOperation(OperationSourcePtr source) override;
 };
 }
 
-#endif // VM_FILECLOUDUPLOADER_H
+#endif // VS_CLOUDFILESQUEUE_H

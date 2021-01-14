@@ -239,7 +239,7 @@ QDir Settings::downloadsDir() const
 
 QDir Settings::userDownloadsDir(const UserId &userId) const
 {
-    const QDir dir = m_downloadsDir.filePath(QLatin1String("FileCloud/") + userId);
+    const QDir dir = m_downloadsDir.filePath(QLatin1String("VirgilCloudFiles/") + userId);
     if (!dir.exists()) {
         FileUtils::forceCreateDir(dir.absolutePath());
     }
@@ -268,15 +268,6 @@ bool Settings::devMode() const
 #else
     return false;
 #endif // VS_DEVMODE
-}
-
-bool Settings::fileCloudEnabled() const
-{
-#ifdef VS_NO_FILECLOUD
-    return false;
-#else
-    return true;
-#endif // VS_NO_FILECLOUD
 }
 
 bool Settings::autoSendCrashReport() const

@@ -32,18 +32,18 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "controllers/FileCloudController.h"
+#include "controllers/CloudFilesController.h"
 
 #include "Settings.h"
 #include "Utils.h"
 #include "FileUtils.h"
-#include "models/FileCloudModel.h"
+#include "models/CloudFilesModel.h"
 #include "models/Models.h"
 #include "Controller.h"
 
 using namespace vm;
 
-FileCloudController::FileCloudController(const Settings *settings, Models *models, QObject *parent)
+CloudFilesController::CloudFilesController(const Settings *settings, Models *models, QObject *parent)
     : QObject(parent)
     , m_settings(settings)
     , m_models(models)
@@ -51,25 +51,25 @@ FileCloudController::FileCloudController(const Settings *settings, Models *model
     , m_currentDir(m_rootDir)
 {}
 
-void FileCloudController::openFile(const QVariant &proxyRow)
+void CloudFilesController::openFile(const QVariant &proxyRow)
 {
     const auto fileInfo = model()->getFileInfo(proxyRow.toInt());
     FileUtils::openUrl(FileUtils::localFileToUrl(fileInfo.absoluteFilePath()));
 }
 
-void FileCloudController::setDirectory(const QVariant &proxyRow)
+void CloudFilesController::setDirectory(const QVariant &proxyRow)
 {
     const auto fileInfo = model()->getFileInfo(proxyRow.toInt());
     setDirectory(QDir(fileInfo.absoluteFilePath()));
 }
 
-void FileCloudController::cdUp()
+void CloudFilesController::cdUp()
 {
     m_currentDir.cdUp();
     setDirectory(m_currentDir);
 }
 
-void FileCloudController::addFile(const QVariant &attachmentUrl)
+void CloudFilesController::addFile(const QVariant &attachmentUrl)
 {
     const auto url = attachmentUrl.toUrl();
     const auto filePath = FileUtils::urlToLocalFile(url);
@@ -84,29 +84,29 @@ void FileCloudController::addFile(const QVariant &attachmentUrl)
     }
 }
 
-void FileCloudController::deleteFiles()
+void CloudFilesController::deleteFiles()
 {
     qCDebug(lcController) << "Feature is under development";
 }
 
-void FileCloudController::createDirectory(const QString &name)
+void CloudFilesController::createDirectory(const QString &name)
 {
     Q_UNUSED(name)
     qCDebug(lcController) << "Feature is under development";
 }
 
-FileCloudModel *FileCloudController::model()
+CloudFilesModel *CloudFilesController::model()
 {
-    return m_models->fileCloud();
+    return m_models->cloudFiles();
 }
 
-void FileCloudController::setRootDirectory(const QDir &dir)
+void CloudFilesController::setRootDirectory(const QDir &dir)
 {
     m_rootDir = dir;
     setDirectory(dir);
 }
 
-void FileCloudController::setDirectory(const QDir &dir)
+void CloudFilesController::setDirectory(const QDir &dir)
 {
     m_currentDir = dir;
     model()->setDirectory(dir);

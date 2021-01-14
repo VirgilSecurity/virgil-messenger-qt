@@ -94,18 +94,18 @@ ApplicationWindow {
         }
 
         MessageDialog {
-            id: fileCloudDeleteItemDialog
+            id: deleteCloudFilesDialog
             title: qsTr("File Manager")
             text: qsTr("Delete file(s)?")
-            onAccepted: controllers.fileCloud.deleteFiles()
+            onAccepted: controllers.cloudFiles.deleteFiles()
         }
 
         InputDialog {
-            id: fileCloudNewDirectoryDialog
+            id: createCloudDirectoryDialog
             title: qsTr("File Manager")
             label: qsTr("New directory")
             placeholderText: qsTr("Enter name")
-            onAccepted: controllers.fileCloud.createDirectory(text)
+            onAccepted: controllers.cloudFiles.createDirectory(text)
         }
     }
 

@@ -15,14 +15,14 @@ Page {
 
         readonly property var manager: app.stateManager
         readonly property bool isChatList: appState === manager.chatListState
-        readonly property bool isFileCloud: appState === manager.fileCloudState
-        readonly property var fileCloudSelection: models.fileCloud.selection
+        readonly property bool isCloudFileList: appState === manager.cloudFileListState
+        readonly property var cloudFilesSelection: models.cloudFiles.selection
 
-        readonly property string chatTitle: app.organizationDisplayName
-        readonly property string chatDescription: qsTr("%1 Server").arg(app.organizationDisplayName)
+        readonly property string chatsTitle: app.organizationDisplayName
+        readonly property string chatsDescription: qsTr("%1 Server").arg(app.organizationDisplayName)
 
-        readonly property string fileCloudTitle: qsTr("File Manager") + controllers.fileCloud.displayPath
-        readonly property string fileCloudDescription: fileCloudSelection.hasSelection ? qsTr("Selected: %1").arg(fileCloudSelection.selectedCount) : " "
+        readonly property string cloudFilesTitle: qsTr("File Manager") + controllers.cloudFiles.displayPath
+        readonly property string cloudFilesDescription: cloudFilesSelection.hasSelection ? qsTr("Selected: %1").arg(cloudFilesSelection.selectedCount) : " "
     }
 
     background: Rectangle {
@@ -31,14 +31,14 @@ Page {
 
     header: SearchHeader {
         id: mainSearchHeader
-        title: d.isChatList ? d.chatTitle : d.fileCloudTitle
-        description: d.isChatList ? d.chatDescription : d.fileCloudDescription
-        showBackButton: d.isFileCloud && controllers.fileCloud.displayPath
+        title: d.isChatList ? d.chatsTitle : d.cloudFilesTitle
+        description: d.isChatList ? d.chatsDescription : d.cloudFilesDescription
+        showBackButton: d.isCloudFileList && controllers.cloudFiles.displayPath
         menuImage: d.isChatList ? "More" : "Plus"
         searchPlaceholder: d.isChatList ? qsTr("Search conversation") : qsTr("Search file")
-        filterSource: d.isChatList ? models.chats : models.fileCloud
+        filterSource: d.isChatList ? models.chats : models.cloudFiles
 
-        // Chat items
+        // Chat actions
 
         ContextMenuItem {
             text: qsTr("New chat")
@@ -46,28 +46,28 @@ Page {
             visible: d.isChatList
         }
 
-        // File cloud items
+        // Cloud file actions
 
         ContextMenuItem {
             text: qsTr("Add file")
             onTriggered: attachmentPicker.open(AttachmentTypes.file)
-            visible: d.isFileCloud
+            visible: d.isCloudFileList
         }
 
         ContextMenuItem {
             text: qsTr("New directory")
-            onTriggered: fileCloudNewDirectoryDialog.open()
-            visible: d.isFileCloud
+            onTriggered: createCloudDirectoryDialog.open()
+            visible: d.isCloudFileList
         }
 
         ContextMenuSeparator {
-            visible: d.isFileCloud && d.fileCloudSelection.hasSelection
+            visible: d.isCloudFileList && d.cloudFilesSelection.hasSelection
         }
 
         ContextMenuItem {
             text: qsTr("Delete")
-            onTriggered: fileCloudDeleteItemDialog.open()
-            visible: d.isFileCloud && d.fileCloudSelection.hasSelection
+            onTriggered: deleteCloudFilesDialog.open()
+            visible: d.isCloudFileList && d.cloudFilesSelection.hasSelection
         }
     }
 
@@ -83,7 +83,7 @@ Page {
             searchHeader: mainSearchHeader
         }
 
-        FileCloudListView {
+        CloudFileListView {
             searchHeader: mainSearchHeader
         }
     }
@@ -92,7 +92,7 @@ Page {
         target: d.manager
 
         function onCurrentStateChanged(state) {
-            if ([d.manager.chatListState, d.manager.fileCloudState].includes(state)) {
+            if ([d.manager.chatListState, d.manager.cloudFileListState].includes(state)) {
                 appState = state
             }
         }
@@ -102,11 +102,11 @@ Page {
         target: attachmentPicker
 
         function onPicked(fileUrls, attachmentType) {
-            if (d.manager.currentState !== d.manager.fileCloudState) {
+            if (d.manager.currentState !== d.manager.cloudFileListState) {
                 return;
             }
             const url = fileUrls[fileUrls.length - 1]
-            controllers.fileCloud.addFile(url)
+            controllers.cloudFiles.addFile(url)
         }
     }
 }

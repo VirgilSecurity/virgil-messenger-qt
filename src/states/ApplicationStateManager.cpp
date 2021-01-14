@@ -64,7 +64,7 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
     , m_chatListState(new ChatListState(controllers->chats(), this))
     , m_chatState(new ChatState(controllers, m_messenger, this))
     , m_downloadKeyState(new DownloadKeyState(controllers->users(), this))
-    , m_fileCloudState(new FileCloudState(m_messenger, controllers->fileCloud(), this))
+    , m_cloudFileListState(new CloudFileListState(m_messenger, controllers->cloudFiles(), this))
     , m_newChatState(new NewChatState(controllers->chats(), models->discoveredContacts(), this))
     , m_newGroupChatState(new NewGroupChatState(models->discoveredContacts(), this))
     , m_nameGroupChatState(new NameGroupChatState(controllers->chats(), this))
@@ -95,7 +95,7 @@ void Self::registerStatesMetaTypes()
     qRegisterMetaType<ChatListState *>("ChatListState*");
     qRegisterMetaType<ChatState *>("ChatState*");
     qRegisterMetaType<DownloadKeyState *>("DownloadKeyState*");
-    qRegisterMetaType<FileCloudState *>("FileCloudState*");
+    qRegisterMetaType<CloudFileListState *>("CloudFileListState*");
     qRegisterMetaType<NewChatState *>("NewChatState*");
     qRegisterMetaType<NewGroupChatState *>("NewGroupChatState*");
     qRegisterMetaType<NameGroupChatState *>("NameGroupChatState*");
@@ -120,7 +120,7 @@ void Self::addTransitions()
     // NOTE: Queued connection is a workaround for working state transition
     connect(this, &Self::setUiState, this, std::bind(&Self::splashScreenRequested, this, QPrivateSignal()), Qt::QueuedConnection);
     connect(this, &Self::openChatList, this, std::bind(&Self::chatListRequested, this, QPrivateSignal()), Qt::QueuedConnection);
-    connect(this, &Self::openFileCloud, this, std::bind(&Self::fileCloudRequested, this, QPrivateSignal()), Qt::QueuedConnection);
+    connect(this, &Self::openCloudFileList, this, std::bind(&Self::cloudFileListRequested, this, QPrivateSignal()), Qt::QueuedConnection);
 
     m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::userNotSelected, m_accountSelectionState);
     m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::operationErrorOccurred, m_accountSelectionState);
@@ -135,15 +135,15 @@ void Self::addTransitions()
     addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestNewChat, m_newChatState);
     addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestNewGroupChat, m_newGroupChatState);
     addTwoSideTransition(m_chatListState, chats, &ChatsController::chatOpened, m_chatState);
-    m_chatListState->addTransition(this, &Self::fileCloudRequested, m_fileCloudState);
+    m_chatListState->addTransition(this, &Self::cloudFileListRequested, m_cloudFileListState);
 
     addTwoSideTransition(m_newGroupChatState, m_newGroupChatState, &NewGroupChatState::requestChatName, m_nameGroupChatState);
 
     m_nameGroupChatState->addTransition(chats, &ChatsController::chatOpened, m_chatState);
 
-    addTwoSideTransition(m_fileCloudState, users, &UsersController::accountSettingsRequested, m_accountSettingsState);
-    m_fileCloudState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
-    m_fileCloudState->addTransition(this, &Self::chatListRequested, m_chatListState);
+    addTwoSideTransition(m_cloudFileListState, users, &UsersController::accountSettingsRequested, m_accountSettingsState);
+    m_cloudFileListState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
+    m_cloudFileListState->addTransition(this, &Self::chatListRequested, m_chatListState);
 
     addTwoSideTransition(m_accountSettingsState, m_accountSettingsState, &AccountSettingsState::requestBackupKey, m_backupKeyState);
     m_accountSettingsState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);

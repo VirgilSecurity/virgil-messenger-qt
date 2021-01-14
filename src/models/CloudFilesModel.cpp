@@ -32,7 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/FileCloudModel.h"
+#include "models/CloudFilesModel.h"
 
 #include <QtConcurrent>
 
@@ -44,11 +44,11 @@
 
 using namespace vm;
 
-FileCloudModel::FileCloudModel(const Settings *settings, QObject *parent)
+CloudFilesModel::CloudFilesModel(const Settings *settings, QObject *parent)
     : ListModel(parent)
     , m_settings(settings)
 {
-    qRegisterMetaType<FileCloudModel *>("FileCloudModel*");
+    qRegisterMetaType<CloudFilesModel *>("CloudFilesModel*");
     qRegisterMetaType<QFileInfoList>("QFileInfoList");
 
     proxy()->setSortRole(SortRole);
@@ -57,26 +57,20 @@ FileCloudModel::FileCloudModel(const Settings *settings, QObject *parent)
 
     selection()->setMultiSelect(true);
 
-    connect(this, &FileCloudModel::listReady, this, &FileCloudModel::setList);
-    connect(&m_updateTimer, &QTimer::timeout, this, &FileCloudModel::invalidateDateTime);
+    connect(this, &CloudFilesModel::listReady, this, &CloudFilesModel::setList);
+    connect(&m_updateTimer, &QTimer::timeout, this, &CloudFilesModel::invalidateDateTime);
 }
 
-void FileCloudModel::setDirectory(const QDir &dir)
+void CloudFilesModel::setDirectory(const QDir &dir)
 {
-    if (!m_settings->fileCloudEnabled()) {
-        return;
-    }
     QtConcurrent::run([this, dir]() {
         auto list = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot, QDir::NoSort);
         emit listReady(list, QPrivateSignal());
     });
 }
 
-void FileCloudModel::setEnabled(bool enabled)
+void CloudFilesModel::setEnabled(bool enabled)
 {
-    if (!m_settings->fileCloudEnabled()) {
-        return;
-    }
     if (enabled) {
         m_updateTimer.start(m_settings->nowInterval() * 1000);
         m_debugCounter = 1; // debug one update only
@@ -86,18 +80,18 @@ void FileCloudModel::setEnabled(bool enabled)
     }
 }
 
-const QFileInfo FileCloudModel::getFileInfo(const int proxyRow) const
+const QFileInfo CloudFilesModel::getFileInfo(const int proxyRow) const
 {
     return m_list[sourceIndex(proxyRow).row()];
 }
 
-int FileCloudModel::rowCount(const QModelIndex &parent) const
+int CloudFilesModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
     return m_list.size();
 }
 
-QVariant FileCloudModel::data(const QModelIndex &index, int role) const
+QVariant CloudFilesModel::data(const QModelIndex &index, int role) const
 {
     const auto &info = m_list[index.row()];
     switch (role) {
@@ -119,7 +113,7 @@ QVariant FileCloudModel::data(const QModelIndex &index, int role) const
     }
 }
 
-QHash<int, QByteArray> FileCloudModel::roleNames() const
+QHash<int, QByteArray> CloudFilesModel::roleNames() const
 {
     return unitedRoleNames(ListModel::roleNames(), {
         { FilenameRole, "fileName" },
@@ -129,7 +123,7 @@ QHash<int, QByteArray> FileCloudModel::roleNames() const
     });
 }
 
-void FileCloudModel::setList(const QFileInfoList &list)
+void CloudFilesModel::setList(const QFileInfoList &list)
 {
     beginResetModel();
     m_now = QDateTime::currentDateTime();
@@ -137,11 +131,11 @@ void FileCloudModel::setList(const QFileInfoList &list)
     endResetModel();
 }
 
-void FileCloudModel::invalidateDateTime()
+void CloudFilesModel::invalidateDateTime()
 {
     if (m_debugCounter > 0) {
         --m_debugCounter;
-        qCDebug(lcModel) << "Updating of filecloud model";
+        qCDebug(lcModel) << "Updating of cloud files model";
     }
     m_now = QDateTime::currentDateTime();
     emit dataChanged(index(0), index(rowCount() - 1), { DisplayDateTimeRole });

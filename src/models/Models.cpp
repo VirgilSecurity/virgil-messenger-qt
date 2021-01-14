@@ -40,9 +40,9 @@
 #include "Messenger.h"
 #include "models/AccountSelectionModel.h"
 #include "models/ChatsModel.h"
+#include "models/CloudFilesModel.h"
+#include "models/CloudFilesUploader.h"
 #include "models/DiscoveredContactsModel.h"
-#include "models/FileCloudModel.h"
-#include "models/FileCloudUploader.h"
 #include "models/MessagesModel.h"
 #include "models/MessagesQueue.h"
 
@@ -54,8 +54,8 @@ Models::Models(Messenger *messenger, Settings *settings, UserDatabase *userDatab
     , m_chats(new ChatsModel(this))
     , m_discoveredContacts(new DiscoveredContactsModel(validator, this))
     , m_messages(new MessagesModel(this))
-    , m_fileCloud(new FileCloudModel(settings, this))
-    , m_fileCloudUploader(new FileCloudUploader(this))
+    , m_cloudFiles(new CloudFilesModel(settings, this))
+    , m_cloudFilesUploader(new CloudFilesUploader(this))
     , m_fileLoader(messenger->fileLoader())
     , m_messagesQueue(new MessagesQueue(messenger, userDatabase, nullptr)) // TODO(fpohtmeh): set parent?
     , m_queueThread(new QThread())
@@ -97,24 +97,24 @@ DiscoveredContactsModel *Models::discoveredContacts()
     return m_discoveredContacts;
 }
 
-const FileCloudModel *Models::fileCloud() const
+const CloudFilesModel *Models::cloudFiles() const
 {
-    return m_fileCloud;
+    return m_cloudFiles;
 }
 
-FileCloudModel *Models::fileCloud()
+CloudFilesModel *Models::cloudFiles()
 {
-    return m_fileCloud;
+    return m_cloudFiles;
 }
 
-const FileCloudUploader *Models::fileCloudUploader() const
+const CloudFilesUploader *Models::cloudFilesUploader() const
 {
-    return m_fileCloudUploader;
+    return m_cloudFilesUploader;
 }
 
-FileCloudUploader *Models::fileCloudUploader()
+CloudFilesUploader *Models::cloudFilesUploader()
 {
-    return m_fileCloudUploader;
+    return m_cloudFilesUploader;
 }
 
 const FileLoader *Models::fileLoader() const

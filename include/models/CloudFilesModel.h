@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_FILECLOUDMODEL_H
-#define VM_FILECLOUDMODEL_H
+#ifndef VM_CLOUDFILESMODEL_H
+#define VM_CLOUDFILESMODEL_H
 
 #include <QDateTime>
 #include <QFileInfoList>
@@ -41,13 +41,11 @@
 
 #include "ListModel.h"
 
-class QSortFilterProxyModel;
-
 class Settings;
 
 namespace vm
 {
-class FileCloudModel : public ListModel
+class CloudFilesModel : public ListModel
 {
     Q_OBJECT
 
@@ -61,7 +59,7 @@ public:
         SortRole
     };
 
-    FileCloudModel(const Settings *settings, QObject *parent);
+    CloudFilesModel(const Settings *settings, QObject *parent);
 
     void setDirectory(const QDir &dir);
     void setEnabled(bool enabled);
@@ -77,7 +75,6 @@ private:
     QHash<int, QByteArray> roleNames() const override;
 
     void setList(const QFileInfoList &list);
-
     void invalidateDateTime();
 
     const Settings *m_settings;
@@ -88,4 +85,4 @@ private:
 };
 }
 
-#endif // VM_FILECLOUDMODEL_H
+#endif // VM_CLOUDFILESMODEL_H

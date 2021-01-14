@@ -37,9 +37,9 @@
 
 #include "AccountSelectionModel.h"
 #include "ChatsModel.h"
+#include "CloudFilesModel.h"
+#include "CloudFilesUploader.h"
 #include "DiscoveredContactsModel.h"
-#include "FileCloudModel.h"
-#include "FileCloudUploader.h"
 #include "MessagesModel.h"
 #include "MessagesQueue.h"
 #include "FileLoader.h"
@@ -60,8 +60,8 @@ class Models : public QObject
     Q_PROPERTY(AccountSelectionModel *accountSelection MEMBER m_accountSelection CONSTANT)
     Q_PROPERTY(ChatsModel *chats READ chats CONSTANT)
     Q_PROPERTY(DiscoveredContactsModel *discoveredContacts MEMBER m_discoveredContacts CONSTANT)
-    Q_PROPERTY(FileCloudModel *fileCloud MEMBER m_fileCloud CONSTANT)
-    Q_PROPERTY(FileCloudUploader *fileCloudUploader MEMBER m_fileCloudUploader CONSTANT)
+    Q_PROPERTY(CloudFilesModel *cloudFiles MEMBER m_cloudFiles CONSTANT)
+    Q_PROPERTY(CloudFilesUploader *cloudFilesUploader MEMBER m_cloudFilesUploader CONSTANT)
     Q_PROPERTY(MessagesModel *messages READ messages CONSTANT)
 
 public:
@@ -74,10 +74,10 @@ public:
     ChatsModel *chats();
     const DiscoveredContactsModel *discoveredContacts() const;
     DiscoveredContactsModel *discoveredContacts();
-    const FileCloudModel *fileCloud() const;
-    FileCloudModel *fileCloud();
-    const FileCloudUploader *fileCloudUploader() const;
-    FileCloudUploader *fileCloudUploader();
+    const CloudFilesModel *cloudFiles() const;
+    CloudFilesModel *cloudFiles();
+    const CloudFilesUploader *cloudFilesUploader() const;
+    CloudFilesUploader *cloudFilesUploader();
     const FileLoader *fileLoader() const;
     FileLoader *fileLoader();
     const MessagesModel *messages() const;
@@ -93,8 +93,8 @@ private:
     QPointer<ChatsModel> m_chats;
     QPointer<DiscoveredContactsModel> m_discoveredContacts;
     QPointer<MessagesModel> m_messages;
-    QPointer<FileCloudModel> m_fileCloud;
-    QPointer<FileCloudUploader> m_fileCloudUploader;
+    QPointer<CloudFilesModel> m_cloudFiles;
+    QPointer<CloudFilesUploader> m_cloudFilesUploader;
     QPointer<FileLoader> m_fileLoader;
     QPointer<MessagesQueue> m_messagesQueue;
     QPointer<QThread> m_queueThread;

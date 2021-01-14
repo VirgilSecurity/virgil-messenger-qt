@@ -32,50 +32,33 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_FILECLOUDCONTROLLER_H
-#define VM_FILECLOUDCONTROLLER_H
+#ifndef VM_CLOUDFILELISTSTATE_H
+#define VM_CLOUDFILELISTSTATE_H
 
-#include <QDir>
-#include <QObject>
+#include <QState>
 
-class Settings;
+#include "UserId.h"
+#include "models/CloudFilesModel.h"
 
 namespace vm
 {
-class FileCloudModel;
-class Models;
+class CloudFilesController;
+class Messenger;
 
-class FileCloudController : public QObject
+class CloudFileListState : public QState
 {
     Q_OBJECT
-    Q_PROPERTY(QString displayPath MEMBER m_displayPath NOTIFY displayPathChanged)
 
 public:
-    FileCloudController(const Settings *settings, Models *models, QObject *parent);
-
-    Q_INVOKABLE void openFile(const QVariant &proxyRow);
-    Q_INVOKABLE void setDirectory(const QVariant &proxyRow);
-    Q_INVOKABLE void cdUp();
-    Q_INVOKABLE void addFile(const QVariant &attachmentUrl);
-    Q_INVOKABLE void deleteFiles();
-    Q_INVOKABLE void createDirectory(const QString &name);
-
-    FileCloudModel *model();
-    void setRootDirectory(const QDir &dir);
-
-signals:
-    void displayPathChanged(const QString &path);
+    CloudFileListState(Messenger *messenger, CloudFilesController *controller, QState *parent);
 
 private:
-    void setDirectory(const QDir &dir);
+    void onEntry(QEvent *);
+    void onExit(QEvent *);
 
-    const Settings *m_settings;
-    Models *m_models;
-    QDir m_rootDir;
-    QDir m_currentDir;
-    QString m_displayPath;
+    Messenger *m_messenger;
+    CloudFilesController *m_controller;
 };
 }
 
-
-#endif // VM_FILECLOUDCONTROLLER_H
+#endif // VM_CLOUDFILELISTSTATE_H

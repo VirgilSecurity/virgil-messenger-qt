@@ -32,22 +32,22 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "states/FileCloudState.h"
+#include "states/CloudFileListState.h"
 
-#include "controllers/FileCloudController.h"
-#include "models/FileCloudModel.h"
+#include "controllers/CloudFilesController.h"
+#include "models/CloudFilesModel.h"
 #include "models/Models.h"
 
 using namespace vm;
 
-FileCloudState::FileCloudState(Messenger *messenger, FileCloudController *controller, QState *parent)
+CloudFileListState::CloudFileListState(Messenger *messenger, CloudFilesController *controller, QState *parent)
     : QState(parent)
     , m_messenger(messenger)
     , m_controller(controller)
 {
 }
 
-void FileCloudState::onEntry(QEvent *)
+void CloudFileListState::onEntry(QEvent *)
 {
     const auto userId = m_messenger->currentUser()->id();
     const auto rootDir = m_messenger->settings()->userDownloadsDir(userId);
@@ -55,7 +55,7 @@ void FileCloudState::onEntry(QEvent *)
     m_controller->model()->setEnabled(true);
 }
 
-void FileCloudState::onExit(QEvent *)
+void CloudFileListState::onExit(QEvent *)
 {
     m_controller->model()->setEnabled(false);
 }

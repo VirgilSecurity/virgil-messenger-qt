@@ -5,20 +5,20 @@ import QtQuick.Layouts 1.15
 import "../theme"
 
 ModelListView {
-    id: fileCloudListView
-    model: models.fileCloud.proxy
+    id: cloudFileListView
+    model: models.cloudFiles.proxy
     emptyIcon: "../resources/icons/Chats.png"
     emptyText: qsTr("Add a file<br/>by pressing the plus<br/>button above")
 
     delegate: ListDelegate {
-        width: fileCloudListView.width
+        width: cloudFileListView.width
         backgroundColor: (model.isSelected || down) ? Theme.contactPressedColor : "transparent"
 
         ImageButton {
             image: model.isDir ? "Folder-Big" : "File-Big"
             imageSize: 48
             iconSize: 40
-            onClicked: models.fileCloud.selection.toggle(model.index)
+            onClicked: models.cloudFiles.selection.toggle(model.index)
         }
 
         Column {
@@ -54,10 +54,10 @@ ModelListView {
 
         onClicked: {
             if (model.isDir) {
-                controllers.fileCloud.setDirectory(model.index)
+                controllers.cloudFiles.setDirectory(model.index)
             }
             else {
-                controllers.fileCloud.openFile(model.index)
+                controllers.cloudFiles.openFile(model.index)
             }
         }
     }

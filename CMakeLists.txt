@@ -363,6 +363,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/Contact.h
         ${CMAKE_CURRENT_LIST_DIR}/include/ConfirmationCodeType.h
         ${CMAKE_CURRENT_LIST_DIR}/include/GroupId.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFile.h
         # Messenger Core
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/AttachmentId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Chat.h
@@ -398,8 +399,8 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/Controller.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/AttachmentsController.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/ChatsController.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/controllers/CloudFilesController.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/Controllers.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/controllers/FileCloudController.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/MessagesController.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/UsersController.h
         # Helpers
@@ -412,12 +413,12 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/states/ApplicationStateManager.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/AttachmentPreviewState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/BackupKeyState.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/states/CloudFileListState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/EditProfileState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/VerifyProfileState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/ChatListState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/ChatState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/DownloadKeyState.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/states/FileCloudState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/OperationState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/NewChatState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/NewGroupChatState.h
@@ -454,9 +455,9 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ContactsProxyModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/DiscoveredContactsModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/DiscoveredContactsProxyModel.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/FileCloudModel.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/FileCloudQueue.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/FileCloudUploader.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesQueue.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesUploader.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListProxyModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListSelectionModel.h
@@ -523,6 +524,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/Validator.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/ContactAvatarLoader.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CustomerEnv.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/CloudFile.cpp
         # Messenger Core
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/AttachmentId.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Chat.cpp
@@ -554,8 +556,8 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/Controller.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/AttachmentsController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/ChatsController.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/controllers/CloudFilesController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/Controllers.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/controllers/FileCloudController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/MessagesController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/UsersController.cpp
         # Helpers
@@ -570,8 +572,8 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/states/VerifyProfileState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/ChatListState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/ChatState.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/states/CloudFileListState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/DownloadKeyState.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/states/FileCloudState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/NewChatState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/NewGroupChatState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/NameGroupChatState.cpp
@@ -600,13 +602,13 @@ target_sources(${VS_TARGET_NAME}
         # Models
         ${CMAKE_CURRENT_LIST_DIR}/src/models/AccountSelectionModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ChatsModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesQueue.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesUploader.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ContactsModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ContactsProxyModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/DiscoveredContactsModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/DiscoveredContactsProxyModel.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/models/FileCloudModel.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/models/FileCloudQueue.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/models/FileCloudUploader.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ListModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ListProxyModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ListSelectionModel.cpp

@@ -49,7 +49,6 @@ class Settings : public QSettings
     Q_PROPERTY(QString lastSignedInUser READ lastSignedInUser WRITE setLastSignedInUser NOTIFY lastSignedInUserChanged)
     Q_PROPERTY(QStringList usersList READ usersList WRITE setUsersList NOTIFY usersListChanged)
     Q_PROPERTY(bool devMode READ devMode CONSTANT)
-    Q_PROPERTY(bool fileCloudEnabled READ fileCloudEnabled CONSTANT)
     Q_PROPERTY(QRect windowGeometry READ windowGeometry WRITE setWindowGeometry NOTIFY windowGeometryChanged)
 
 public:
@@ -90,7 +89,6 @@ public:
 
     // Modes / features
     bool devMode() const;
-    bool fileCloudEnabled() const;
     bool autoSendCrashReport() const;
 
     // Window

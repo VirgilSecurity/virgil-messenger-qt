@@ -32,26 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "FileCloudQueue.h"
+#ifndef VM_CLOUDFILE_H
+#define VM_CLOUDFILE_H
 
-using namespace vm;
+#include <QDateTime>
+#include <QString>
 
-Q_LOGGING_CATEGORY(lcFileCloudQueue, "filecloud-queue");
-
-FileCloudQueue::FileCloudQueue(QObject *parent)
-    : OperationQueue(lcFileCloudQueue(), parent)
+namespace vm
 {
+class CloudFile
+{
+public:
+    CloudFile() = default;
+    CloudFile(const QString &path, const bool isDirectory, const qsizetype size, const QDateTime &createdAt);
+    virtual ~CloudFile() noexcept = default;
+
+    QString path() const noexcept;
+    bool isDirectory() const noexcept;
+    qsizetype size() const noexcept;
+    QDateTime createdAt() const noexcept;
+
+private:
+    QString m_path;
+    bool m_isDirectory = false;
+    qsizetype m_size = 0;
+    QDateTime m_createdAt;
+};
 }
 
-FileCloudQueue::~FileCloudQueue()
-{
-}
-
-Operation *FileCloudQueue::createOperation(OperationSourcePtr source)
-{
-    return nullptr;
-}
-
-void FileCloudQueue::invalidateOperation(OperationSourcePtr source)
-{
-}
+#endif // VM_CLOUDFILE_H

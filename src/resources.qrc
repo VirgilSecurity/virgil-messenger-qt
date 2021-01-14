@@ -160,7 +160,7 @@
         <file>qml/components/HorizontalRule.qml</file>
         <file>qml/components/NetworkStatusControl.qml</file>
         <file>qml/components/ChatListView.qml</file>
-        <file>qml/components/FileCloudListView.qml</file>
+        <file>qml/components/CloudFileListView.qml</file>
         <!-- Database -->
         <file>resources/database/createAttachments.sql</file>
         <file>resources/database/createChats.sql</file>

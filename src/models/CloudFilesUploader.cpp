@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2021 Virgil Security, Inc.
+//  Copyright (C) 2015-2020 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,29 +32,61 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VS_FILECLOUDQUEUE_H
-#define VS_FILECLOUDQUEUE_H
+#include "models/CloudFilesUploader.h"
 
-#include <QLoggingCategory>
+using namespace vm;
 
-#include "OperationQueue.h"
-
-Q_DECLARE_LOGGING_CATEGORY(lcFileCloudQueue);
-
-namespace vm
+CloudFilesUploader::CloudFilesUploader(QObject *parent)
+    : QObject(parent)
+    , m_currentIndex(-1)
+    , m_currentProcessedBytes(-1)
+    , m_currentTotalBytes(-1)
 {
-class FileCloudQueue : public OperationQueue
-{
-    Q_OBJECT
-
-public:
-    explicit FileCloudQueue(QObject *parent);
-    ~FileCloudQueue() override;
-
-private:
-    Operation *createOperation(OperationSourcePtr source) override;
-    void invalidateOperation(OperationSourcePtr source) override;
-};
+    qRegisterMetaType<CloudFilesUploader *>("CloudFilesUploader*");
 }
 
-#endif // VS_FILECLOUDQUEUE_H
+int CloudFilesUploader::currentIndex() const
+{
+    return m_currentIndex;
+}
+
+qint64 CloudFilesUploader::currentProcessedBytes() const
+{
+    return m_currentProcessedBytes;
+}
+
+qint64 CloudFilesUploader::currentTotalBytes() const
+{
+    return m_currentTotalBytes;
+}
+
+QStringList CloudFilesUploader::fileNames() const
+{
+    return m_fileNames;
+}
+
+void CloudFilesUploader::setCurrentIndex(const int index)
+{
+    if (m_currentIndex != index) {
+        m_currentIndex = index;
+        emit currentIndexChanged(m_currentIndex);
+    }
+}
+
+void CloudFilesUploader::setCurrentProcessedBytes(const qint64 bytes)
+{
+    if (m_currentProcessedBytes != bytes) {
+        m_currentProcessedBytes = bytes;
+        emit currentProcessedBytesChanged(m_currentProcessedBytes);
+    }
+}
+
+void CloudFilesUploader::setCurrentTotalBytes(const qint64 bytes)
+{
+    if (m_currentTotalBytes != bytes) {
+        m_currentTotalBytes = bytes;
+        emit currentTotalBytesChanged(m_currentTotalBytes);
+    }
+}
+
+
