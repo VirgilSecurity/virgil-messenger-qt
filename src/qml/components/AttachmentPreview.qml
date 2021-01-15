@@ -3,16 +3,11 @@ import QtQuick.Controls 2.12
 
 import "../theme"
 
-Item {
+Rectangle {
     id: attachmentPreview
-    onVisibleChanged: startAnimation.restart()
-
-    Rectangle {
-        id: imageBackground
-        anchors.fill: parent
-        color: "black"
-        opacity: 0
-    }
+    onVisibleChanged: showAnimation.restart()
+    color: "black"
+    opacity: 0
 
     Image {
         id: imagePreview
@@ -22,28 +17,50 @@ Item {
         autoTransform: true
     }
 
-    Label {
+    ImageButton {
         anchors {
             top: parent.top
             right: parent.right
             topMargin: 15
             rightMargin: 15
         }
-        text: qsTr("Close")
-        color: "white"
-        font.pointSize: 14
+        image: "Close"
+
+        onClicked: {
+            hideAnimation.restart()
+            goBackTimer.restart()
+        }
     }
 
     MouseArea {
         acceptedButtons: Qt.AllButtons
         anchors.fill: parent
-        onClicked: app.stateManager.goBack()
+        onClicked: {
+            hideAnimation.restart()
+            goBackTimer.restart()
+        }
+
         onWheel: wheel.accepted = true
     }
 
+    Timer {
+        id: goBackTimer
+        running: false
+        repeat: false
+        interval: Theme.shortAnimationDuration
+        onTriggered: {
+            app.stateManager.goBack()
+        }
+    }
+
     ParallelAnimation {
-        id: startAnimation
-        NumberAnimation { target: imageBackground; property: "opacity"; from: 0; to: 1; duration: Theme.animationDuration; easing.type: Easing.OutCubic}
+        id: showAnimation
+        NumberAnimation { target: attachmentPreview; property: "opacity"; from: 0; to: 1; duration: Theme.animationDuration; easing.type: Easing.OutCubic}
         NumberAnimation { target: imagePreview; property: "scale"; from: 0.5; to: 1; duration: Theme.animationDuration; easing.type: Easing.OutCubic}
+    }
+
+    ParallelAnimation {
+        id: hideAnimation
+        NumberAnimation { target: attachmentPreview; property: "opacity"; to: 0; duration: Theme.shortAnimationDuration; easing.type: Easing.OutCubic}
     }
 }
