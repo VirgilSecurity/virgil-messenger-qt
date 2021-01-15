@@ -59,7 +59,7 @@ set(VERSION_DATABASE_SCHEME "0")
 # ---------------------------------------------------------------------------
 #   Customers selection
 # ---------------------------------------------------------------------------
-set(VS_CUSTOMER "Virgil" CACHE "STRING" "Customer for build")
+set(VS_CUSTOMER "Virgil" CACHE STRING "Customer for build")
 set(VS_CUSTOMER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/customers/${VS_CUSTOMER}")
 set(VS_CUSTOMER_COMMON_DIR "${CMAKE_CURRENT_SOURCE_DIR}/customers/Common")
 message(STATUS "Current customer : [${VS_CUSTOMER}]")
