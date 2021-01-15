@@ -9,7 +9,7 @@ pushd ${PROJECT_FOLDER}
   mkdir -p build 
 
   pushd build
-   cmake -DVS_PLATFORM="linux" -DVS_CUSTOMER="Area52" .. 
+   cmake -DVS_PLATFORM="linux" -DVS_CUSTOMER="Virgil" .. 
    make 
    make deploy
   popd
