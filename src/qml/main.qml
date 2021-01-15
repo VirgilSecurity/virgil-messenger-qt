@@ -12,6 +12,9 @@ import "theme"
 
 ApplicationWindow {
     id: root
+
+    property alias mainView: mainView
+
     visible: true
     title: (!settings.devMode || !controllers.users.currentUsername) ? app.applicationDisplayName : controllers.users.currentUsername
 

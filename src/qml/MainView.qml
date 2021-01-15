@@ -15,7 +15,7 @@ Control {
     RowLayout {
         anchors {
             fill: parent
-            bottomMargin: keyboardHandler.keyboardHeight
+            bottomMargin: (logControl.visible ? logControl.height : 0) + keyboardHandler.keyboardHeight
         }
         spacing: 0
         clip: logControl.visible

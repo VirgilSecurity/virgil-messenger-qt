@@ -1,5 +1,5 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 
 import "../base"
 import "../theme"
@@ -10,24 +10,27 @@ Item {
     id: keyboardHandler
 
     property real keyboardHeight: 0
-    property var constKeyboardRectangle
-    property real constKeyboardYTranslate: 0
-    property var currentKeyboardRectangle
-    property bool keyboardOpen: false
-    onKeyboardOpenChanged: {
-        if (!Platform.isDesktop) {
-            if (keyboardOpen) {
-                keyboardHandler.onOpeningKeyboard()
-            } else {
-                keyboardHandler.onClosingKeyboard()
+
+    QtObject {
+        id: d
+        property var initKeyboardRectangle
+        property real initKeyboardYTranslate: 0
+        property bool keyboardOpen: false
+        onKeyboardOpenChanged: {
+            if (!Platform.isDesktop) {
+                if (keyboardOpen) {
+                    keyboardHandler.onOpeningKeyboard()
+                } else {
+                    keyboardHandler.onClosingKeyboard()
+                }
             }
         }
     }
 
     function onOpeningKeyboard() {
         if (isAnimationRequired()) {
-            let keyboard = keyboardHandler.constKeyboardRectangle
-            let keyboardYTranslate = keyboardHandler.constKeyboardYTranslate
+            let keyboard = keyboardHandler.d.initKeyboardRectangle
+            let keyboardYTranslate = keyboardHandler.d.initKeyboardYTranslate
             let toPosition = keyboard.height - keyboardYTranslate
             keyboardAnimation.to = toPosition
             keyboardAnimation.easing.type = Easing.OutCubic
@@ -44,14 +47,14 @@ Item {
     }
 
     function onChangingKeyboard() {
-        if (mainView.keyboardHeight === 0) {
+        if (keyboardHandler.keyboardHeight === 0) {
             return
         }
 
-        let currentKeyboard = keyboardHandler.currentKeyboardRectangle
-        let constKeyboard = keyboardHandler.constKeyboardRectangle
-        if (currentKeyboard.y !== constKeyboard.y) {
-            keyboardAnimation.to = currentKeyboard.height - keyboardHandler.constKeyboardYTranslate
+        let currentKeyboard = Qt.inputMethod.keyboardRectangle
+        let initKeyboard = keyboardHandler.d.initKeyboardRectangle
+        if (currentKeyboard.y !== initKeyboard.y) {
+            keyboardAnimation.to = currentKeyboard.height - keyboardHandler.d.initKeyboardYTranslate
             keyboardAnimation.easing.type = Easing.InOutSine
             keyboardAnimation.duration = Theme.shortAnimationDuration
             keyboardAnimation.restart()
@@ -62,7 +65,7 @@ Item {
         let globalPoint = mainView.mapFromItem(activeFocusItem, activeFocusItem.x, activeFocusItem.y)
         let activeItemBottomPoint = globalPoint.y + activeFocusItem.height
 
-        let keyboard = keyboardHandler.constKeyboardRectangle
+        let keyboard = keyboardHandler.d.initKeyboardRectangle
         let keyboardSpacing = Theme.margin * 2
         let keyboardTopPoint = mainView.height - keyboard.height - keyboardSpacing
 
@@ -73,28 +76,28 @@ Item {
         }
     }
 
-    function constKeyboardInit() {
+    function keyboardInit() {
         let keyboard = Qt.inputMethod.keyboardRectangle
-        keyboardHandler.constKeyboardRectangle = Qt.rect(keyboard.x, keyboard.y, keyboard.width, keyboard.height)
-        keyboardHandler.constKeyboardYTranslate = keyboard.y - mainView.height
+        keyboardHandler.d.initKeyboardRectangle = Qt.rect(keyboard.x, keyboard.y, keyboard.width, keyboard.height)
+        keyboardHandler.d.initKeyboardYTranslate = keyboard.y - mainView.height
     }
 
     Connections {
-         target: visible ? Qt.inputMethod : null
+         target: Qt.inputMethod
+         enabled: visible
 
          function onVisibleChanged() {
-             if(visible && keyboardHandler.keyboardOpen) {
-                 keyboardHandler.keyboardOpen = false;
+             if(visible && keyboardHandler.d.keyboardOpen) {
+                 keyboardHandler.d.keyboardOpen = false;
              } else {
-                 if (typeof keyboardHandler.constKeyboardRectangle === "undefined") {
-                     keyboardHandler.constKeyboardInit()
+                 if (typeof keyboardHandler.d.initKeyboardRectangle === "undefined") {
+                     keyboardHandler.keyboardInit()
                  }
-                 keyboardHandler.keyboardOpen = true;
+                 keyboardHandler.d.keyboardOpen = true;
              }
          }
 
          function onKeyboardRectangleChanged() {
-             keyboardHandler.currentKeyboardRectangle = Qt.inputMethod.keyboardRectangle
              keyboardHandler.onChangingKeyboard()
          }
      }
