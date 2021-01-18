@@ -44,12 +44,13 @@ endmacro(set_xcode_property)
 # ---------------------------------------------------------------------------
 # Set CMAKE_FIND_ROOT_PATH for QT cmake include directory
 # ---------------------------------------------------------------------------
-function(PREPARE_QT_SDK CMAKE_PREFIX_PATH_OUT CMAKE_FIND_ROOT_PATH_OUT QT_QMAKE_EXECUTABLE_OUT)
+function(PREPARE_QT_SDK CMAKE_PREFIX_PATH_OUT CMAKE_FIND_ROOT_PATH_OUT QT_QMAKE_EXECUTABLE_OUT QT_RELATIVE_PATH_OUT)
     if (DEFINED ENV{QTDIR})
         get_filename_component(QT_RELATIVE_PATH "$ENV{QTDIR}/../" ABSOLUTE)
         set(${CMAKE_FIND_ROOT_PATH_OUT} "${QT_RELATIVE_PATH}/${QT_PREFIX_PATH}" PARENT_SCOPE)
         set(${CMAKE_PREFIX_PATH_OUT} "${QT_RELATIVE_PATH}/${QT_PREFIX_PATH}" PARENT_SCOPE)
         set(${QT_QMAKE_EXECUTABLE_OUT} "${QT_RELATIVE_PATH}/${QT_PREFIX_PATH}/bin/qmake" PARENT_SCOPE)
+        set(${QT_RELATIVE_PATH_OUT} "${QT_RELATIVE_PATH}" PARENT_SCOPE)        
     else ()
         message(FATAL_ERROR "Error detecting QT SDK (Env QTDIR not set)")
     endif ()
@@ -100,7 +101,7 @@ if (VS_PLATFORM)
     # -- Linux
     if (VS_PLATFORM STREQUAL "linux")
         set(QT_PREFIX_PATH "gcc_64")
-        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE)
+        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE QT_RELATIVE_PATH)
 
         # -- Android
     elseif (VS_PLATFORM STREQUAL "android")
@@ -117,7 +118,7 @@ if (VS_PLATFORM)
         message(STATUS "ANDROID_BUILD_ABI_armeabi-v7a: ${ANDROID_BUILD_ABI_armeabi-v7a}")
         message(STATUS "ANDROID_BUILD_ABI_x86: ${ANDROID_BUILD_ABI_x86}")
         message(STATUS "ANDROID_BUILD_ABI_x86_64: ${ANDROID_BUILD_ABI_x86_64}")
-        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE)
+        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE QT_RELATIVE_PATH)
 
         #  Android NDK
         if (NOT CMAKE_TOOLCHAIN_FILE)
@@ -147,13 +148,13 @@ if (VS_PLATFORM)
         # -- MacOS
     elseif (VS_PLATFORM STREQUAL "macos")
         set(QT_PREFIX_PATH "clang_64")
-        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE)
+        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE QT_RELATIVE_PATH)
 
         # -- IOS
     elseif (VS_PLATFORM STREQUAL "ios" AND NOT VS_IOS_SIMULATOR)
         set(QT_PREFIX_PATH "ios")
         set(CMAKE_SYSTEM_NAME "iOS")
-        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE)
+        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE QT_RELATIVE_PATH)
 
         # -- IOS-SIM
     elseif (VS_PLATFORM STREQUAL "ios" AND VS_IOS_SIMULATOR)
@@ -168,12 +169,12 @@ if (VS_PLATFORM)
             message(FATAL_ERROR "Invalid CMAKE_OSX_SYSROOT: ${CMAKE_OSX_SYSROOT} does not exist.")
         endif ()
 
-        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE)
+        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE QT_RELATIVE_PATH)
 
         # -- Windows
     elseif (VS_PLATFORM STREQUAL "windows")
         set(QT_PREFIX_PATH "mingw32")
-        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE)
+        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE QT_RELATIVE_PATH)
     endif ()
 endif ()
 

@@ -285,8 +285,11 @@ elseif (VS_PLATFORM STREQUAL "ios")
     else ()
         set(CMAKE_XCODE_ATTRIBUTE_SUPPORTED_PLATFORMS "iphoneos")
         set(CMAKE_XCODE_EFFECTIVE_PLATFORMS "-iphoneos")
+
         set(CMAKE_OSX_ARCHITECTURES "arm64")
     endif ()
+
+    set(CMAKE_XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2")
 
     set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} "-Wl,-e,_qt_main_wrapper")
     set(CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
@@ -313,9 +316,19 @@ elseif (VS_PLATFORM STREQUAL "ios")
             XCODE_ATTRIBUTE_INSTALL_PATH "/Applications"
             XCODE_ATTRIBUTE_SKIP_INSTALL "No"
             )
+    # Storyboard default
+    configure_file("${QT_RELATIVE_PATH}/ios/mkspecs/macx-ios-clang/LaunchScreen.storyboard"
+                   "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard" COPYONLY)
+    configure_file("${QT_RELATIVE_PATH}/ios/mkspecs/macx-ios-clang/Default-568h@2x.png"
+                   "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/Default-568h@2x.png" COPYONLY)
+
+    set(STORYBOARD_DEFAULT
+            ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard
+            ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/Default-568h@2x.png
+            )
 
     set(VS_ASSET_DIR "${VS_CUSTOMER_DIR}/platforms/ios/Assets.xcassets")
-    target_sources(${VS_TARGET_NAME} PRIVATE ${VS_ASSET_DIR})
+    target_sources(${VS_TARGET_NAME} PRIVATE ${VS_ASSET_DIR} ${STORYBOARD_DEFAULT})
     set_source_files_properties("${VS_ASSET_DIR}"
             PROPERTIES
             MACOSX_PACKAGE_LOCATION "Resources"
@@ -325,6 +338,7 @@ elseif (VS_PLATFORM STREQUAL "ios")
             PROPERTIES
             MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/platforms/ios/Info.plist.in"
             LINK_FLAGS "-framework Foundation -framework UserNotifications"
+            RESOURCE "${STORYBOARD_DEFAULT}"
             )
 
     qt5_import_qml_plugins(${VS_TARGET_NAME})
