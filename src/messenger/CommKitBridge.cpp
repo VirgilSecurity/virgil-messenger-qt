@@ -39,15 +39,59 @@ vsc_str_t vsc_str_from(const std::string& str) {
     return vsc_str(str.c_str(), str.size());
 }
 
+
 QString vsc_str_to_qstring(vsc_str_t str) {
     return QString::fromStdString({str.chars, str.len});
 }
+
 
 vsc_data_t vsc_data_from(const QByteArray& data) {
     return vsc_data((const byte *)data.data(), data.size());
 }
 
+
 QByteArray vsc_data_to_qbytearray(vsc_data_t data) {
     return QByteArray((const char *)data.bytes, data.len);
 }
 
+
+vsc_buffer_ptr_t vsc_buffer_wrap_ptr(vsc_buffer_t *ptr) {
+    return vsc_buffer_ptr_t{ptr, vsc_buffer_delete};
+}
+
+
+vscf_impl_ptr_t vscf_impl_wrap_ptr(vscf_impl_t *ptr) {
+    return vscf_impl_ptr_t{ptr, vscf_impl_delete};
+}
+
+
+vscf_impl_ptr_const_t vscf_impl_wrap_ptr(const vscf_impl_t *ptr) {
+    return vscf_impl_ptr_const_t{ptr, vscf_impl_delete};
+}
+
+
+std::tuple<QByteArray, vsc_buffer_ptr_t> makeMappedBuffer(size_t size) {
+
+    QByteArray byteArray(size, 0x00);
+    auto buffer  = vsc_buffer_wrap_ptr(vsc_buffer_new());
+    vsc_buffer_use(buffer.get(), (byte *)byteArray.data(), byteArray.size());
+
+    return std::make_tuple(std::move(byteArray), std::move(buffer));
+}
+
+
+void ensureMappedBuffer(QByteArray& bytes, vsc_buffer_ptr_t& buffer, size_t capacity) {
+
+    auto len = vsc_buffer_len(buffer.get());
+
+    bytes.resize(capacity);
+
+    vsc_buffer_use(buffer.get(), (byte *)bytes.data(), bytes.size());
+    vsc_buffer_inc_used(buffer.get(), len);
+}
+
+
+void adjustMappedBuffer(const vsc_buffer_ptr_t& buffer, QByteArray& bytes) {
+
+    bytes.resize(vsc_buffer_len(buffer.get()));
+}

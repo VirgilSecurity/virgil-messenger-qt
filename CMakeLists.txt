@@ -53,7 +53,7 @@ option(ENABLE_CLANGFORMAT "On/Off formatting source code with clangformat." ON)
 # Project version
 # ---------------------------------------------------------------------------
 set(VS_TARGET_VERSION "3.5.3")
-set(VS_CORE_VERSION "0.2.1.33")
+set(VS_CORE_VERSION "0.2.1.38")
 set(VERSION_DATABASE_SCHEME "0")
 
 # ---------------------------------------------------------------------------
@@ -254,7 +254,7 @@ elseif (VS_PLATFORM STREQUAL "macos")
     set_source_files_properties(${App_ICON}
             PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
-    # Sparkle	
+    # Sparkle
     message(STATUS "Copy Sparkle framework")
     execute_process(
             COMMAND mkdir -p ${CMAKE_BINARY_DIR}/${VS_TARGET_NAME}.app/Contents/Frameworks
@@ -370,6 +370,14 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/ChatType.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CommKitBridge.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessenger.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFileId.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFileInfo.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolder.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolderId.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolderInfo.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsNewFile.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessengerCloudFs.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessengerStatus.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/IncomingMessage.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/IncomingMessageStage.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Message.h
@@ -526,6 +534,13 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/ChatType.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CommKitBridge.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CoreMessenger.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFileId.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFileInfo.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolder.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolderId.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolderInfo.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsNewFile.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CoreMessengerCloudFs.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/IncomingMessage.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/IncomingMessageStage.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Message.cpp
@@ -682,6 +697,7 @@ target_link_libraries(${VS_TARGET_NAME}
         qxmpp
 
         vsc_comm_kit
+        vsc_comm_kit_pb
         vsc_keyknox_sdk
         vsc_pythia_sdk
         vsc_core_sdk
