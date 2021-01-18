@@ -362,7 +362,6 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/CustomerEnv.h
         ${CMAKE_CURRENT_LIST_DIR}/include/Contact.h
         ${CMAKE_CURRENT_LIST_DIR}/include/ConfirmationCodeType.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/GroupId.h
         # Messenger Core
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/AttachmentId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Chat.h
@@ -370,6 +369,8 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/ChatType.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CommKitBridge.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessenger.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Group.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/IncomingMessage.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/IncomingMessageStage.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Message.h
@@ -526,6 +527,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/ChatType.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CommKitBridge.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CoreMessenger.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Group.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/IncomingMessage.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/IncomingMessageStage.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Message.cpp

@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,23 +32,23 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "states/NameGroupChatState.h"
-
-#include "controllers/ChatsController.h"
+#include "Group.h"
 
 using namespace vm;
 
-NameGroupChatState::NameGroupChatState(ChatsController *chatsController, QState *parent)
-    : OperationState(parent)
-    , m_chatsController(chatsController)
+Group::Group(const GroupId &id, const QString &name)
+    : m_id(id)
+    , m_name(name)
+{}
+
+Group::~Group() noexcept = default;
+
+GroupId Group::id() const
 {
-    connect(chatsController, &ChatsController::chatOpened, this, &NameGroupChatState::operationFinished);
-    connect(chatsController, &ChatsController::errorOccurred, this, &NameGroupChatState::operationErrorOccurred);
-    connect(this, &NameGroupChatState::createGroup, this, &NameGroupChatState::onCreateGroup);
+    return m_id;
 }
 
-void NameGroupChatState::onCreateGroup(const QString &name)
+QString Group::name() const
 {
-    emit operationStarted();
-    m_chatsController->createChatWithGroupName(name);
+    return m_name;
 }
