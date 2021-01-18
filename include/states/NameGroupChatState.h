@@ -50,10 +50,10 @@ public:
     NameGroupChatState(ChatsController *chatsController, QState *parent);
 
 signals:
-    void createGroup(const GroupId &groupId);
+    void createGroup(const QString &groupId);
 
 private:
-    void onCreateGroup(const GroupId &groupId);
+    void onCreateGroup(const QString &groupId);
 
     ChatsController *m_chatsController;
 };

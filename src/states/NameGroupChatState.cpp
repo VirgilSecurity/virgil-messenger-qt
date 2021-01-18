@@ -47,7 +47,7 @@ NameGroupChatState::NameGroupChatState(ChatsController *chatsController, QState 
     connect(this, &NameGroupChatState::createGroup, this, &NameGroupChatState::onCreateGroup);
 }
 
-void NameGroupChatState::onCreateGroup(const GroupId &groupId)
+void NameGroupChatState::onCreateGroup(const QString &groupId)
 {
     Q_UNUSED(groupId)
     // TODO(fpohtmeh): implement

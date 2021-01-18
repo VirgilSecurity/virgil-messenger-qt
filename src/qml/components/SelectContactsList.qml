@@ -57,23 +57,49 @@ ModelListView {
                 Layout.preferredHeight: parent.height
                 spacing: Theme.smallSpacing
 
-                add: Theme.addTransition
-                move: Theme.moveTransition
-
-                Image {
-                    width: d.selectionIconSize
+                Item {
+                    id: multiselectAvatarItem
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: avatar.width + 8
                     height: width
-                    source: "../resources/icons/Check.png"
-                    fillMode: Image.PreserveAspectFit
-                    visible: isSelected ? true : false
-                    anchors.verticalCenter: parent.verticalCenter
-                }
 
-                Avatar {
-                    id: avatar
-                    nickname: model.name
-                    avatarUrl: model.avatarUrl
-                    anchors.verticalCenter: parent.verticalCenter
+                    Avatar {
+                        id: avatar
+                        nickname: model.name
+                        avatarUrl: model.avatarUrl
+                        anchors.centerIn: parent
+                    }
+
+                    Rectangle {
+                        anchors.fill: parent
+                        visible: isSelected ? true : false
+                        radius: width
+                        color: 'transparent'
+                        border.width: 2
+                        border.color: Theme.contactSelectionColor
+
+                        Rectangle {
+                            anchors {
+                                bottom: parent.bottom
+                                right: parent.right
+                            }
+
+                            width: parent.width * 0.38
+                            height: width
+                            radius: width
+                            color: Theme.contactSelectionColor
+
+                            border.width: 2
+                            border.color: Theme.mainBackgroundColor
+
+                            Image {
+                                anchors.centerIn: parent
+                                width: parent.width * 0.7
+                                fillMode: Image.PreserveAspectFit
+                                source: "../resources/icons/Check-XSmall.png"
+                            }
+                        }
+                    }
                 }
 
                 Column {
