@@ -40,23 +40,21 @@ else()
         set(VS_ANDROID_PACKAGE_NAME "com.virgilsecurity.android.virgil")
 
     # ----------
-    # MacOS    
+    # MacOS
     # ----------
     # ***********************************************************************************
     elseif(VS_PLATFORM STREQUAL "macos")
         # Sparkle data
         set(SU_FEED_URL "https://virgilsecurity.bintray.com/messenger/macos/nightly/appcast.xml")
         set(SU_PUBLIC_ED_KEY "44RVxRhV4h4Hlw+VOeXvCj78Z5NUhJ2Qi5N+kpu8KxI=")
-        set(MACOSX_BUNDLE_ICON_FILE "MyIcon.icns")    
+        set(MACOSX_BUNDLE_ICON_FILE "MyIcon.icns")
         set(MACOSX_BUNDLE_BACKGROUND_FILE "Background.png")
-#        set(VS_BUNDLE_PREFIX "com.virgilsecurity")
-    # ----------    
-    # IOS    
+    # ----------
+    # IOS
     # ----------
     # ***********************************************************************************
-    elseif(VS_PLATFORM STREQUAL "ios")        
-#        set(VS_BUNDLE_PREFIX "com.virgil")
-    endif()    
+    elseif(VS_PLATFORM STREQUAL "ios")
+    endif()
 
 endif()
 

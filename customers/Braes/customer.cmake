@@ -34,7 +34,7 @@ else()
     # ***********************************************************************************    
     if(VS_PLATFORM STREQUAL "android")
         # Firebase dir for gradle
-        set(VS_ANDROID_PACKAGE_NAME "com.virgil.BraesMessenger")        
+        set(VS_ANDROID_PACKAGE_NAME "com.virgil.BraesMessenger")
 
     # ----------
     # MacOS

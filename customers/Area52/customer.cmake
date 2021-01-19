@@ -31,10 +31,10 @@ else()
     # ----------
     # Android
     # ----------    
-    # ***********************************************************************************    
+    # ***********************************************************************************
     if(VS_PLATFORM STREQUAL "android")
         # Firebase dir for gradle
-        set(VS_ANDROID_PACKAGE_NAME "com.area52.area52messenger")        
+        set(VS_ANDROID_PACKAGE_NAME "com.area52.area52messenger")
 
     # ----------
     # MacOS

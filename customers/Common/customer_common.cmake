@@ -20,7 +20,6 @@ else()
         # Firebase dir for gradle
         set(VS_FIREBASE_DIR "${PREBUILT_DIR}/firebase_cpp_sdk")
         # Templates
-#        list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/src/android/java/org/virgil/notification/NotificationClient.java.in=${PROJECT_SOURCE_DIR}/src/android/java/org/virgil/notification/NotificationClient.java")
         list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/platforms/android/AndroidManifest.xml.in=${PROJECT_SOURCE_DIR}/platforms/android/AndroidManifest.xml")
         list(APPEND VS_TEMPLATES "${VS_CUSTOMER_DIR}/platforms/android/google-services.json.in=${PROJECT_SOURCE_DIR}/platforms/android/google-services.json")
         list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/platforms/android/gradle.properties.in=${PROJECT_SOURCE_DIR}/platforms/android/gradle.properties")
@@ -46,7 +45,7 @@ else()
         list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable-ldpi/splashscreen.png=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable-ldpi/splashscreen.png")
         list(APPEND VS_FILES "${VS_CUSTOMER_DIR}/platforms/android/res/drawable/splash.xml=${PROJECT_SOURCE_DIR}/platforms/android/res/drawable/splash.xml")
     # ----------
-    # MacOS    
+    # MacOS
     # ----------
     # ***********************************************************************************
     elseif(VS_PLATFORM STREQUAL "macos")
@@ -57,18 +56,18 @@ else()
         set(MACOSX_BUNDLE_GUI_IDENTIFIER "${VS_BUNDLE_PREFIX}.${PROJECT_NAME}")        
         list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/platforms/macos/release-notes.html.in=${CMAKE_CURRENT_BINARY_DIR}/update/release-notes.html")
         list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/platforms/macos/dmg.json.in=${CMAKE_CURRENT_BINARY_DIR}/dmg.json")
-    # ----------    
-    # IOS    
+    # ----------
+    # IOS
     # ----------
     # ***********************************************************************************
-    elseif(VS_PLATFORM STREQUAL "ios")        
+    elseif(VS_PLATFORM STREQUAL "ios")
         # Version
         set(MACOSX_DEPLOYMENT_TARGET "9.0")
         set(MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
-        set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")        
+        set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
         set(MACOSX_BUNDLE_BUNDLE_NAME "${VS_BUNDLE_PREFIX}.${PROJECT_NAME}")
-        set(MACOSX_BUNDLE_GUI_IDENTIFIER "${VS_BUNDLE_PREFIX}.${PROJECT_NAME}")            
-    endif()    
+        set(MACOSX_BUNDLE_GUI_IDENTIFIER "${VS_BUNDLE_PREFIX}.${PROJECT_NAME}")
+    endif()
 endif()
 
 message(STATUS "[End] customer_common.cmake")
