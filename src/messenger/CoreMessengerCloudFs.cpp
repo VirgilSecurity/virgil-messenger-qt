@@ -376,10 +376,10 @@ Self::FutureResult<CloudFsFolder> Self::listFolder(const CloudFsFolderId& folder
         folder.info = cloudFsFolderInfoFromC(vssq_messenger_cloud_fs_folder_info(folderC.get()));
 
         folder.folderPublicKey =
-                vsc_data_to_qbytearray(vssq_messenger_cloud_fs_folder_folder_public_key(folderC.get()));
+                vsc_data_to_qbytearray(vssq_messenger_cloud_fs_folder_public_key(folderC.get()));
 
         folder.folderEncryptedKey =
-                vsc_data_to_qbytearray(vssq_messenger_cloud_fs_folder_folder_encrypted_key(folderC.get()));
+                vsc_data_to_qbytearray(vssq_messenger_cloud_fs_folder_encrypted_key(folderC.get()));
 
         const auto filesC = vssq_messenger_cloud_fs_folder_files(folderC.get());
         for (auto fileIt = filesC;
