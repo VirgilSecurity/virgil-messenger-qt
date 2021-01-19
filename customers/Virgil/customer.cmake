@@ -49,11 +49,6 @@ else()
         set(SU_PUBLIC_ED_KEY "44RVxRhV4h4Hlw+VOeXvCj78Z5NUhJ2Qi5N+kpu8KxI=")
         set(MACOSX_BUNDLE_ICON_FILE "MyIcon.icns")
         set(MACOSX_BUNDLE_BACKGROUND_FILE "Background.png")
-    # ----------
-    # IOS
-    # ----------
-    # ***********************************************************************************
-    elseif(VS_PLATFORM STREQUAL "ios")
     endif()
 
 endif()
