@@ -40,20 +40,6 @@ Control {
                 height: menuStatusButton.iconSize
             }
 
-//            Rectangle {
-//                width: parent.width * 0.15
-//                height: width
-//                radius: width * 0.5
-//                color: Theme.labelColor
-
-//                anchors {
-//                    bottom: parent.bottom
-//                    right: parent.right
-//                    bottomMargin: parent.width * 0.26
-//                    rightMargin: parent.width * 0.24
-//                }
-//            }
-
             onClicked: contextMenu.open()
 
             ContextMenu {

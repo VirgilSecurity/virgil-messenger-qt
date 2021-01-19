@@ -57,6 +57,15 @@ Page {
             ImageButton {
                 image: "Arrow-Left"
                 onClicked: app.stateManager.goBack()
+
+                NetworkStatusControl {
+                    anchors {
+                        centerIn: parent
+                        verticalCenterOffset: 2
+                        horizontalCenterOffset: 1
+                    }
+                    height: parent.iconSize
+                }
             }
 
             Column {

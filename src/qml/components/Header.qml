@@ -34,6 +34,15 @@ ToolBar {
             id: backButton
             image: "Arrow-Left"
 
+            NetworkStatusControl {
+                anchors {
+                    centerIn: parent
+                    verticalCenterOffset: 2
+                    horizontalCenterOffset: 2
+                }
+                height: parent.iconSize
+            }
+
             onClicked: app.stateManager.goBack()
         }
 
