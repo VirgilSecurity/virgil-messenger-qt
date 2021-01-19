@@ -317,9 +317,9 @@ elseif (VS_PLATFORM STREQUAL "ios")
             XCODE_ATTRIBUTE_SKIP_INSTALL "No"
             )
     # Storyboard default
-    configure_file("${QT_RELATIVE_PATH}/ios/mkspecs/macx-ios-clang/LaunchScreen.storyboard"
-                   "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard" COPYONLY)
-    configure_file("${QT_RELATIVE_PATH}/ios/mkspecs/macx-ios-clang/Default-568h@2x.png"
+    configure_file("${CMAKE_CURRENT_LIST_DIR}/platforms/ios/LaunchScreen.storyboard.in"
+                   "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard" @ONLY)
+    configure_file("${CMAKE_CURRENT_LIST_DIR}/platforms/ios/Default-568h@2x.png"
                    "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/Default-568h@2x.png" COPYONLY)
 
     set(STORYBOARD_DEFAULT
