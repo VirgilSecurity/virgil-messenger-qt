@@ -65,8 +65,9 @@ void VSQDiscoveryManager::onClientConnected()
 
 void VSQDiscoveryManager::onInfoReceived(const QXmppDiscoveryIq &info)
 {
-    if (info.from() != m_client->configuration().domain())
+    if (info.from() != m_client->configuration().domain()) {
         return;
+    }
 
     if (info.features().contains("urn:xmpp:carbons:2")) {
         auto carbonManager = m_client->findExtension<QXmppCarbonManager>();
