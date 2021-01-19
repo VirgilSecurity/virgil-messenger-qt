@@ -9,32 +9,33 @@ else()
     # -- Application variables
     set(VS_ORGANIZATION_NAME "Area52")
     set(VS_ORGANIZATION_DISPLAYNAME "Area52")
-    
+
     set(VS_APPLICATION_NAME "Area52Messenger")
     set(VS_APPLICATION_DISPLAY_NAME "Area52 Messenger")
-    
+
     set(VS_ORGANIATION_DOMAIN "virgil.net")
     set(VS_MESSANGER_URL_TEMPLATE "https://messenger%1.area52.virgil.net")
     set(VS_XMPP_URL_TEMPLATE "xmpp%1.area52.virgil.net")
-    set(VS_XMPP_DOMAIN_TEMPLATE "")
-    set(CONTACT_DISCOVERY_URL_TEMPLATE "")
-    
+    set(CONTACT_DISCOVERY_URL_TEMPLATE "https://disco%1.virgilsecurity.com")
+    set(VS_XMPP_DOMAIN_TEMPLATE "xmpp%1.area52.virgil.net")
+    set(VS_PUSH_PROXY "push-notifications-proxy")
+    set(VS_PUSH_TOPIC "com.virgil.Area52Messenger")
+
     set(SECURITY_APPLICATION_GROUP_IDENTIFIER "group.com.virgil.Area52Messenger")
 
     # -- Sources and includes
     # Custom customer sources and includes
     #set(VS_CUSTOMER_INCLUDE_DIR "${VS_CUSTOMER_DIR}/includes")
     #set(VS_CUSTOMER_SOURCES "${VS_CUSTOMER_DIR}/src/Example.cpp")
-    
+
     # ----------
     # Android
     # ----------    
-    # ***********************************************************************************    
+    # ***********************************************************************************
     if(VS_PLATFORM STREQUAL "android")
         # Firebase dir for gradle
-        set(VS_ANDROID_PACKAGE_NAME "com.area52.area52messenger")        
-        set(VS_PUSH_PROXY "push-notifications-proxy")
-        set(VS_PUSH_TOPIC "com.virgil.Area52Messenger")
+        set(VS_ANDROID_PACKAGE_NAME "com.area52.area52messenger")
+
     # ----------
     # MacOS
     # ----------

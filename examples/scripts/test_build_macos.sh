@@ -1,7 +1,5 @@
 #!/bin/bash
 
-export QTDIR=/opt/Qt/5.15.0/clang_64
-
 SCRIPT_FOLDER="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_FOLDER="${SCRIPT_FOLDER}/../.."
 
