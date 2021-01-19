@@ -7,7 +7,7 @@ if(NOT PROJECT_NAME)
 else()
 
     # -- Application variables
-    set(VS_ORGANIZATION_NAME "Virgil Security, Inc.")
+    set(VS_ORGANIZATION_NAME "VirgilSecurity")
     set(VS_ORGANIZATION_DISPLAYNAME "Virgil")
 
     set(VS_APPLICATION_NAME "VirgilMessenger")
