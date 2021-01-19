@@ -36,6 +36,8 @@
         <file>qml/resources/icons/Chats@2x.png</file>
         <file>qml/resources/icons/Check.png</file>
         <file>qml/resources/icons/Check@2x.png</file>
+        <file>qml/resources/icons/Check-XSmall.png</file>
+        <file>qml/resources/icons/Check-XSmall@2x.png</file>
         <file>qml/resources/icons/Lock.png</file>
         <file>qml/resources/icons/Lock@2x.png</file>
         <file>qml/resources/icons/Key.png</file>
@@ -156,6 +158,7 @@
         <file>qml/components/SelectedContactsFlow.qml</file>
         <file>qml/components/HorizontalRule.qml</file>
         <file>qml/components/NetworkStatusControl.qml</file>
+	<file>qml/components/NewGroupChatHeader.qml</file>
         <!-- Database -->
         <file>resources/database/createAttachments.sql</file>
         <file>resources/database/createChats.sql</file>

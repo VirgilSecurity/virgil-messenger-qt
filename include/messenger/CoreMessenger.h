@@ -37,8 +37,9 @@
 
 
 #include "Chat.h"
-#include "CoreMessengerStatus.h"
 #include "CoreMessengerCloudFs.h"
+#include "CoreMessengerStatus.h"
+#include "Group.h"
 #include "Message.h"
 #include "MessageUpdate.h"
 #include "Settings.h"

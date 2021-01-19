@@ -44,6 +44,7 @@
 #include "models/MessagesModel.h"
 #include "models/Models.h"
 #include "Controller.h"
+#include "Utils.h"
 
 using namespace vm;
 using Self = ChatsController;
@@ -56,6 +57,7 @@ Self::ChatsController(Messenger *messenger, Models *models, UserDatabase *userDa
 {
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
     connect(this, &Self::createChatWithUser, this, &Self::onCreateChatWithUser);
+    connect(this, &Self::createChatWithGroup, this, &Self::onCreateChatWithGroup);
 }
 
 ChatHandler Self::currentChat() const
@@ -126,6 +128,19 @@ void Self::createChatWithUserId(const UserId &userId)
     });
 }
 
+void ChatsController::createChatWithGroupName(const QString &groupName)
+{
+    QtConcurrent::run([this, groupName = groupName]() {
+        if (!m_messenger) {
+            qCWarning(lcController) << "Messenger was not initialized";
+            emit errorOccurred(tr("Group was not found"));
+        }
+        // TODO(fpohtmeh): use core messenger here
+        auto group = std::make_shared<Group>(Utils::createUuid(), groupName);
+        emit createChatWithGroup(group, QPrivateSignal());
+    });
+}
+
 void Self::openChat(const ChatHandler& chat)
 {
     qCDebug(lcController) << "Opening chat with id: " << chat->id();
@@ -164,6 +179,18 @@ void Self::onCreateChatWithUser(const UserHandler &user)
     newChat->setCreatedAt(QDateTime::currentDateTime());
     newChat->setType(Chat::Type::Personal);
     newChat->setTitle(user->username().isEmpty() ? user->id() : user->username());
+    m_models->chats()->addChat(newChat);
+    m_userDatabase->chatsTable()->addChat(newChat);
+    openChat(newChat);
+}
+
+void ChatsController::onCreateChatWithGroup(const GroupHandler &group)
+{
+    auto newChat = std::make_shared<Chat>();
+    newChat->setId(ChatId(group->id()));
+    newChat->setCreatedAt(QDateTime::currentDateTime());
+    newChat->setType(Chat::Type::Group);
+    newChat->setTitle(group->name());
     m_models->chats()->addChat(newChat);
     m_userDatabase->chatsTable()->addChat(newChat);
     openChat(newChat);

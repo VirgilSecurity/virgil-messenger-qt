@@ -155,6 +155,7 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     qRegisterMetaType<vm::Messages>("Messages");
     qRegisterMetaType<vm::ModifiableMessages>("ModifiableMessages");
     qRegisterMetaType<vm::UserHandler>("UserHandler");
+    qRegisterMetaType<vm::GroupHandler>("GroupHandler");
     qRegisterMetaType<vm::ChatHandler>("ChatHandler");
     qRegisterMetaType<vm::ModifiableChatHandler>("ModifiableChatHandler");
     qRegisterMetaType<vm::ModifiableChats>("ModifiableChats");

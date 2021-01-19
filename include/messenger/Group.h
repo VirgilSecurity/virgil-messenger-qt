@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,55 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_DISCOVEREDCONTACTSMODEL_H
-#define VM_DISCOVEREDCONTACTSMODEL_H
+#ifndef VM_GROUP_H
+#define VM_GROUP_H
 
-#include "ContactsModel.h"
+#include "GroupId.h"
+
+#include <memory>
 
 namespace vm
 {
-class Validator;
-
-class DiscoveredContactsModel : public ContactsModel
+class Group
 {
-    Q_OBJECT
-    Q_PROPERTY(ContactsModel *selectedContacts MEMBER m_selectedContacts CONSTANT)
-
 public:
-    enum Roles {
-        SectionRole = UserRole
-    };
+    Group(const GroupId &id, const QString &name);
+    ~Group() noexcept;
 
-    DiscoveredContactsModel(Validator *validator, QObject *parent);
-
-    void reload();
-    int fixedContactsCount() const;
-
-    Q_INVOKABLE void toggleById(const QString &contactId);
-    Q_INVOKABLE QString firstContactId() const;
-
-signals:
-    void fixedContactsPopulated(const Contacts &contacts, QPrivateSignal);
+    GroupId id() const;
+    QString name() const;
 
 private:
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
-
-    Contacts findContactsByFilter() const;
-    void invalidateIsSelectedRole(int startRow, int endRow);
-    void updateDiscoveredContacts();
-    void updateSelectedContacts(const Contact::Id &contactId, const Contact *contact = nullptr);
-
-    void onDeviceContactsPopulated(const Contacts &contacts);
-    void onSelectionChanged(const QList<QModelIndex> &indices);
-
-    Validator *m_validator;
-    ContactsModel *m_selectedContacts;
-
-    int m_fixedContactsCount = 0;
+    GroupId m_id;
+    QString m_name;
 };
+
+using GroupHandler = std::shared_ptr<Group>;
+
 }
 
-Q_DECLARE_METATYPE(vm::Contacts)
-
-#endif // VM_DISCOVEREDCONTACTSMODEL_H
+#endif // VM_GROUP_H
