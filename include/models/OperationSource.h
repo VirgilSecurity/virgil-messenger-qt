@@ -44,6 +44,12 @@ namespace vm
 class OperationSource
 {
 public:
+    enum class Priority
+    {
+        Default,
+        Highest
+    };
+
     virtual ~OperationSource() {}
 
     virtual bool isValid() const = 0;
@@ -52,8 +58,12 @@ public:
     qsizetype attemptCount() const { return m_attemptCount; }
     void incAttemptCount() { ++m_attemptCount; }
 
+    void setPriority(Priority priority) { m_priority = priority; }
+    Priority priority() const { return m_priority; }
+
 private:
     qsizetype m_attemptCount = 0;
+    Priority m_priority = Priority::Default;
 };
 
 using OperationSourcePtr = std::shared_ptr<OperationSource>;

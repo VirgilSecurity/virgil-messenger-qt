@@ -99,7 +99,8 @@ void Self::addSourceImpl(OperationSourcePtr source, const bool run)
 
 void Self::runSource(OperationSourcePtr source)
 {
-    QtConcurrent::run(m_threadPool, [=, source = std::move(source)]() {
+    auto threadPool = (source->priority() == OperationSource::Priority::Highest) ? QThreadPool::globalInstance() : &*m_threadPool;
+    QtConcurrent::run(threadPool, [=, source = std::move(source)]() {
         if (m_isStopped) {
             qCDebug(m_category) << "Operation was skipped because queue was stopped";
             return;

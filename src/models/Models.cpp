@@ -55,7 +55,7 @@ Models::Models(Messenger *messenger, Settings *settings, UserDatabase *userDatab
     , m_discoveredContacts(new DiscoveredContactsModel(validator, this))
     , m_messages(new MessagesModel(this))
     , m_cloudFiles(new CloudFilesModel(settings, this))
-    , m_cloudFilesQueue(new CloudFilesQueue(this))
+    , m_cloudFilesQueue(new CloudFilesQueue(messenger, this))
     , m_cloudFilesUploader(new CloudFilesUploader(this))
     , m_fileLoader(messenger->fileLoader())
     , m_messagesQueue(new MessagesQueue(messenger, userDatabase, this))

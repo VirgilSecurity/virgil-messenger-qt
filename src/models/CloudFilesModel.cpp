@@ -40,6 +40,8 @@
 #include "Utils.h"
 #include "Model.h"
 
+#include <algorithm>
+
 using namespace vm;
 
 CloudFilesModel::CloudFilesModel(const Settings *settings, QObject *parent)
@@ -68,7 +70,7 @@ void CloudFilesModel::setFiles(const ModifiableCloudFiles &files)
 void CloudFilesModel::setEnabled(bool enabled)
 {
     if (enabled) {
-        m_updateTimer.start(m_settings->nowInterval() * 1000);
+        m_updateTimer.start(m_settings->nowInterval());
     }
     else {
         m_updateTimer.stop();
@@ -88,6 +90,29 @@ CloudFiles CloudFilesModel::selectedFiles() const
         files.push_back(m_files[i.row()]);
     }
     return files;
+}
+
+void CloudFilesModel::updateCloudFile(const CloudFileUpdate &update)
+{
+    if (auto upd = std::get_if<CreatedCloudFileUpdate>(&update)) {
+        beginInsertRows(QModelIndex(), rowCount(), rowCount());
+        m_files.push_back(upd->cloudFile);
+        endInsertRows();
+    }
+    else if (auto upd = std::get_if<DeletedCloudFileUpdate>(&update)) {
+        if (const auto row = findRowById(upd->cloudFileId)) {
+            beginRemoveRows(QModelIndex(), *row, *row);
+            m_files.erase(m_files.begin() + *row);
+            endRemoveRows();
+        }
+    }
+    else if (auto upd = std::get_if<RenamedCloudFileUpdate>(&update)) {
+        if (const auto row = findRowById(upd->cloudFileId)) {
+            m_files[*row]->setName(upd->name);
+            const auto modelIndex = index(*row);
+            emit dataChanged(modelIndex, modelIndex, { FilenameRole });
+        }
+    }
 }
 
 int CloudFilesModel::rowCount(const QModelIndex &parent) const
@@ -128,6 +153,19 @@ QHash<int, QByteArray> CloudFilesModel::roleNames() const
         { DisplayDateTimeRole, "displayDateTime" },
         { DisplayFileSize, "displayFileSize" }
     });
+}
+
+std::optional<int> CloudFilesModel::findRowById(const CloudFileId &cloudFileId) const
+{
+    auto it = std::find_if(std::begin(m_files), std::end(m_files), [&cloudFileId](auto cloudFile) {
+        return cloudFile->id() == cloudFileId;
+    });
+
+    if (it != std::end(m_files)) {
+        return std::distance(std::begin(m_files), it);
+    }
+
+    return std::nullopt;
 }
 
 void CloudFilesModel::invalidateDateTime()

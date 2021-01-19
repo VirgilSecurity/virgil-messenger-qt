@@ -167,7 +167,8 @@
         <file>resources/database/createCloudFiles.sql</file>
         <file>resources/database/createContacts.sql</file>
         <file>resources/database/createMessages.sql</file>
-        <file>resources/database/deleteCloudFiles.sql</file>
+        <file>resources/database/deleteCloudFileById.sql</file>
+        <file>resources/database/deleteCloudFilesByParentId.sql</file>
         <file>resources/database/insertAttachment.sql</file>
         <file>resources/database/insertChat.sql</file>
         <file>resources/database/insertCloudFile.sql</file>

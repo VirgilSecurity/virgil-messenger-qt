@@ -44,9 +44,24 @@ CloudFileOperationSource::CloudFileOperationSource(Type type)
 {
 }
 
+CloudFileOperationSource::Type CloudFileOperationSource::type() const
+{
+    return m_type;
+}
+
+CloudFileHandler CloudFileOperationSource::folder() const
+{
+    return m_folder;
+}
+
 void CloudFileOperationSource::setFolder(const CloudFileHandler &folder)
 {
     m_folder = folder;
+}
+
+CloudFiles CloudFileOperationSource::files() const
+{
+    return m_files;
 }
 
 void CloudFileOperationSource::setFiles(const CloudFiles &files)
@@ -54,9 +69,24 @@ void CloudFileOperationSource::setFiles(const CloudFiles &files)
     m_files = files;
 }
 
-void CloudFileOperationSource::setUploadFilePath(const QString &path)
+QString CloudFileOperationSource::filePath() const
 {
-    m_uploadFilePath = path;
+    return m_filePath;
+}
+
+void CloudFileOperationSource::setFilePath(const QString &path)
+{
+    m_filePath = path;
+}
+
+QString CloudFileOperationSource::name() const
+{
+    return m_name;
+}
+
+void CloudFileOperationSource::setName(const QString &name)
+{
+    m_name = name;
 }
 
 bool CloudFileOperationSource::isValid() const

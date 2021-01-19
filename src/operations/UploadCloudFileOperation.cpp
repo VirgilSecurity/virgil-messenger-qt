@@ -34,13 +34,19 @@
 
 #include "UploadCloudFileOperation.h"
 
-#include <QFile>
 #include <QDir>
+#include <QFile>
+#include <QMimeDatabase>
+
+#include "CloudFileOperation.h"
+#include "FileUtils.h"
+#include "Utils.h"
 
 using namespace vm;
 
-UploadCloudFileOperation::UploadCloudFileOperation(const QString &filePath, const CloudFileHandler &folder, QObject *parent)
+UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, const QString &filePath, const CloudFileHandler &folder)
     : Operation(QLatin1String("UploadCloudFile"), parent)
+    , m_parent(parent)
     , m_filePath(filePath)
     , m_folder(folder)
 {
@@ -48,12 +54,33 @@ UploadCloudFileOperation::UploadCloudFileOperation(const QString &filePath, cons
 
 void UploadCloudFileOperation::run()
 {
-    // Create local dir
+    // Create local dir & copy file to local dir
     QDir folderDir(m_folder->localPath());
     folderDir.mkpath(".");
-    // Copy file to local dir
     QFileInfo info(m_filePath);
-    QFile::copy(info.absoluteFilePath(), folderDir.filePath(info.fileName()));
-    //
+    const auto localPath = folderDir.filePath(info.fileName());
+    QFile::copy(info.absoluteFilePath(), localPath);
+
+    // Create cloud file
+    auto cloudFile = std::make_shared<CloudFile>();
+    cloudFile->setId(Utils::createUuid());
+    cloudFile->setParentId(m_folder->id());
+    cloudFile->setName(info.fileName());
+    cloudFile->setIsFolder(false);
+    cloudFile->setType(FileUtils::fileMimeType(m_filePath));
+    cloudFile->setSize(info.size());
+    const auto now = QDateTime::currentDateTime();
+    cloudFile->setCreatedAt(now);
+    cloudFile->setUpdatedAt(now);
+    cloudFile->setUpdatedBy(m_parent->userId());
+    cloudFile->setLocalPath(localPath);
+    cloudFile->setFingerprint(FileUtils::calculateFingerprint(m_filePath));
+
+    // Send update
+    CreatedCloudFileUpdate update;
+    update.cloudFileId = cloudFile->id();
+    update.cloudFile = cloudFile;
+    m_parent->cloudFileUpdate(update);
+
     finish();
 }

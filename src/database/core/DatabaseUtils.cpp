@@ -62,7 +62,7 @@ namespace
         const auto text = FileUtils::readTextFile(queryPath(queryId));
         QStringList queries;
         const auto texts = text.split(";");
-        for (auto text : texts) {
+        for (auto &text : texts) {
             auto query = text.trimmed();
             if (!query.isEmpty()) {
                 queries << query;
@@ -314,5 +314,5 @@ ModifiableCloudFileHandler Self::readCloudFile(const QSqlQuery &query)
     cloudFile->setLocalPath(localPath);
     cloudFile->setFingerprint(fingerprint);
 
-    return std::move(cloudFile);
+    return cloudFile;
 }

@@ -14,4 +14,6 @@ TemplateDialog {
         height: implicitHeight
         validator: app.validator.reDirectoryName
     }
+
+    onRejected: text = ""
 }

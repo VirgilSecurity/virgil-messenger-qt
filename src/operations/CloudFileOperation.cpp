@@ -32,48 +32,19 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CLOUD_FILE_OPERATION_SOURCE_H
-#define VM_CLOUD_FILE_OPERATION_SOURCE_H
+#include "CloudFileOperation.h"
 
-#include "CloudFile.h"
-#include "OperationSource.h"
+using namespace vm;
 
-namespace vm
+quint64 CloudFileOperation::m_counter = 0;
+
+CloudFileOperation::CloudFileOperation(const UserId &userId, QObject *parent)
+    : Operation(QLatin1String("CloudFile(%1)").arg(QString::number(++m_counter)), parent)
+    , m_userId(userId)
 {
-class CloudFileOperationSource : public OperationSource
-{
-public:
-    enum class Type
-    {
-        CreateFolder,
-        Upload,
-        Delete
-    };
-
-    explicit CloudFileOperationSource(Type type);
-
-    Type type() const;
-
-    CloudFileHandler folder() const;
-    void setFolder(const CloudFileHandler &folder);
-    CloudFiles files() const;
-    void setFiles(const CloudFiles &files);
-    QString filePath() const;
-    void setFilePath(const QString &path);
-    QString name() const;
-    void setName(const QString &name);
-
-    bool isValid() const override;
-    QString toString() const override;
-
-private:
-    Type m_type;
-    CloudFileHandler m_folder;
-    CloudFiles m_files;
-    QString m_filePath;
-    QString m_name;
-};
 }
 
-#endif // VM_CLOUD_FILE_OPERATION_SOURCE_H
-
+UserId CloudFileOperation::userId() const
+{
+    return m_userId;
+}

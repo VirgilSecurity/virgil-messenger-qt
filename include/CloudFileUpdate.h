@@ -32,48 +32,37 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CLOUD_FILE_OPERATION_SOURCE_H
-#define VM_CLOUD_FILE_OPERATION_SOURCE_H
+#ifndef VM_CLOUD_FILE_UPDATE_H
+#define VM_CLOUD_FILE_UPDATE_H
 
 #include "CloudFile.h"
-#include "OperationSource.h"
+
+#include <variant>
 
 namespace vm
 {
-class CloudFileOperationSource : public OperationSource
-{
-public:
-    enum class Type
-    {
-        CreateFolder,
-        Upload,
-        Delete
-    };
-
-    explicit CloudFileOperationSource(Type type);
-
-    Type type() const;
-
-    CloudFileHandler folder() const;
-    void setFolder(const CloudFileHandler &folder);
-    CloudFiles files() const;
-    void setFiles(const CloudFiles &files);
-    QString filePath() const;
-    void setFilePath(const QString &path);
-    QString name() const;
-    void setName(const QString &name);
-
-    bool isValid() const override;
-    QString toString() const override;
-
-private:
-    Type m_type;
-    CloudFileHandler m_folder;
-    CloudFiles m_files;
-    QString m_filePath;
-    QString m_name;
+struct CloudFileUpdateBase {
+    CloudFileId cloudFileId;
 };
+
+struct CreatedCloudFileUpdate : public CloudFileUpdateBase {
+    ModifiableCloudFileHandler cloudFile;
+};
+
+struct DeletedCloudFileUpdate : public CloudFileUpdateBase {
+    bool isFolder = false;
+};
+
+struct RenamedCloudFileUpdate : public CloudFileUpdateBase {
+    QString name;
+};
+
+using CloudFileUpdate = std::variant<
+    CreatedCloudFileUpdate,
+    DeletedCloudFileUpdate,
+    RenamedCloudFileUpdate
+    >;
+
 }
 
-#endif // VM_CLOUD_FILE_OPERATION_SOURCE_H
-
+#endif // VM_CLOUD_FILE_UPDATE_H

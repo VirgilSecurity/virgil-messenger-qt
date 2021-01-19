@@ -365,6 +365,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/GroupId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFile.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileId.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileUpdate.h
         # Messenger Core
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/AttachmentId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Chat.h
@@ -474,11 +475,14 @@ target_sources(${VS_TARGET_NAME}
         # Operations
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateAttachmentFingerprintOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateFileFingerprintOperation.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/operations/CloudFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/ConvertToPngOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CreateAttachmentPreviewOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CreateAttachmentThumbnailOperation.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/operations/CreateCloudFolderOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CreateThumbnailOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DecryptFileOperation.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/operations/DeleteCloudFilesOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadAttachmentOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadDecryptFileOperation.h
@@ -627,11 +631,14 @@ target_sources(${VS_TARGET_NAME}
         # Operations
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CalculateAttachmentFingerprintOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CalculateFileFingerprintOperation.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/operations/CloudFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/ConvertToPngOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CreateAttachmentPreviewOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CreateAttachmentThumbnailOperation.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/operations/CreateCloudFolderOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CreateThumbnailOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DecryptFileOperation.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/operations/DeleteCloudFilesOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadAttachmentOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadDecryptFileOperation.cpp

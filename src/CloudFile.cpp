@@ -117,7 +117,7 @@ QDateTime CloudFile::updatedAt() const noexcept
 
 void CloudFile::setUpdatedAt(const QDateTime &dateTime)
 {
-    m_createdAt = dateTime;
+    m_updatedAt = dateTime;
 }
 
 UserId CloudFile::updatedBy() const noexcept

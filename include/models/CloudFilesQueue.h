@@ -38,24 +38,29 @@
 #include <QLoggingCategory>
 
 #include "CloudFile.h"
+#include "CloudFileUpdate.h"
 #include "OperationQueue.h"
 
 Q_DECLARE_LOGGING_CATEGORY(lcCloudFilesQueue);
 
 namespace vm
 {
+class Messenger;
+
 class CloudFilesQueue : public OperationQueue
 {
     Q_OBJECT
 
 public:
-    explicit CloudFilesQueue(QObject *parent);
+    CloudFilesQueue(Messenger *messenger, QObject *parent);
     ~CloudFilesQueue() override;
 
 signals:
     void pushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
     void pushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
     void pushDeleteFiles(const CloudFiles &files);
+
+    void updateCloudFile(const CloudFileUpdate &update);
 
 private:
     Operation *createOperation(OperationSourcePtr source) override;
@@ -64,6 +69,8 @@ private:
     void onPushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
     void onPushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
     void onPushDeleteFiles(const CloudFiles &files);
+
+    Messenger *m_messenger;
 };
 }
 

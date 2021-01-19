@@ -34,6 +34,7 @@
 
 #include "CloudFilesController.h"
 
+#include "CloudFileUpdate.h"
 #include "CloudFilesModel.h"
 #include "CloudFilesQueue.h"
 #include "CloudFilesTable.h"
@@ -50,15 +51,17 @@ Self::CloudFilesController(const Settings *settings, Models *models, UserDatabas
     , m_models(models)
     , m_userDatabase(userDatabase)
 {
+    qRegisterMetaType<CloudFileUpdate>("CloudFileUpdate");
+
     m_rootFolder = std::make_shared<CloudFile>();
     m_rootFolder->setId("");
     m_rootFolder->setName(tr("File Manager"));
     m_rootFolder->setIsFolder(true);
 
-    m_currentFolder = m_rootFolder;
     m_hierarchy.push_back(m_rootFolder);
 
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
+    connect(models->cloudFilesQueue(), &CloudFilesQueue::updateCloudFile, this, &Self::onUpdateCloudFile);
 }
 
 CloudFilesModel *Self::model()
@@ -100,11 +103,16 @@ void Self::switchToParentFolder()
     switchToHierarchy(hierarchy);
 }
 
+void Self::refresh()
+{
+    switchToHierarchy(m_hierarchy);
+}
+
 void Self::addFile(const QVariant &attachmentUrl)
 {
     const auto url = attachmentUrl.toUrl();
     const auto filePath = FileUtils::urlToLocalFile(url);
-    m_models->cloudFilesQueue()->pushUploadFile(filePath, m_currentFolder);
+    m_models->cloudFilesQueue()->pushUploadFile(filePath, m_hierarchy.back());
 }
 
 void Self::deleteFiles()
@@ -114,7 +122,7 @@ void Self::deleteFiles()
 
 void Self::createFolder(const QString &name)
 {
-    m_models->cloudFilesQueue()->pushCreateFolder(name, m_currentFolder);
+    m_models->cloudFilesQueue()->pushCreateFolder(name, m_hierarchy.back());
 }
 
 void Self::setupTableConnections()
@@ -156,4 +164,12 @@ void Self::onCloudFilesFetched(const CloudFileHandler &folder, const ModifiableC
         emit displayPathChanged(displayPath());
         emit isRootChanged(isRoot());
     }
+}
+
+void Self::onUpdateCloudFile(const CloudFileUpdate &update)
+{
+    // Update UI
+    m_models->cloudFiles()->updateCloudFile(update);
+    // Update DB
+    m_userDatabase->cloudFilesTable()->updateCloudFile(update);
 }

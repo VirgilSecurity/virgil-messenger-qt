@@ -57,7 +57,17 @@ Page {
 
         ContextMenuItem {
             text: qsTr("New directory")
-            onTriggered: createCloudDirectoryDialog.open()
+            onTriggered: createCloudFolderDialog.open()
+            visible: d.isCloudFileList
+        }
+
+        ContextMenuSeparator {
+            visible: d.isCloudFileList
+        }
+
+        ContextMenuItem {
+            text: qsTr("Refresh")
+            onTriggered: controllers.cloudFiles.refresh()
             visible: d.isCloudFileList
         }
 

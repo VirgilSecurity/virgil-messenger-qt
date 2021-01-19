@@ -32,48 +32,36 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CLOUD_FILE_OPERATION_SOURCE_H
-#define VM_CLOUD_FILE_OPERATION_SOURCE_H
+#include "DeleteCloudFilesOperation.h"
 
-#include "CloudFile.h"
-#include "OperationSource.h"
+#include "CloudFileOperation.h"
+#include "FileUtils.h"
 
-namespace vm
+using namespace vm;
+
+DeleteCloudFilesOperation::DeleteCloudFilesOperation(CloudFileOperation *parent, const CloudFiles &files)
+    : Operation(QLatin1String("DeleteCloudFiles"), parent)
+    , m_parent(parent)
+    , m_files(files)
 {
-class CloudFileOperationSource : public OperationSource
-{
-public:
-    enum class Type
-    {
-        CreateFolder,
-        Upload,
-        Delete
-    };
-
-    explicit CloudFileOperationSource(Type type);
-
-    Type type() const;
-
-    CloudFileHandler folder() const;
-    void setFolder(const CloudFileHandler &folder);
-    CloudFiles files() const;
-    void setFiles(const CloudFiles &files);
-    QString filePath() const;
-    void setFilePath(const QString &path);
-    QString name() const;
-    void setName(const QString &name);
-
-    bool isValid() const override;
-    QString toString() const override;
-
-private:
-    Type m_type;
-    CloudFileHandler m_folder;
-    CloudFiles m_files;
-    QString m_filePath;
-    QString m_name;
-};
 }
 
-#endif // VM_CLOUD_FILE_OPERATION_SOURCE_H
+void DeleteCloudFilesOperation::run()
+{
+    for (auto &file : m_files) {
+        // Delete local file/dir
+        if (file->isFolder()) {
+            FileUtils::removeDir(file->localPath());
+        }
+        else {
+            FileUtils::removeFile(file->localPath());
+        }
 
+        // Send update
+        DeletedCloudFileUpdate update;
+        update.cloudFileId = file->id();
+        update.isFolder = file->isFolder();
+        m_parent->cloudFileUpdate(update);
+    }
+    finish();
+}

@@ -142,6 +142,7 @@ QString Self::readTextFile(const QString &filePath)
 {
     QFile file(filePath);
     if (!file.open(QFile::Text | QFile::ReadOnly)) {
+        qCWarning(lcFileUtils) << "Failed to read text file";
         return QString();
     }
     return file.readAll();
@@ -158,8 +159,18 @@ bool Self::fileExists(const QString &filePath)
 void Self::removeFile(const QString &filePath)
 {
     if (fileExists(filePath)) {
-        QFile::remove(filePath);
-        qCDebug(lcFileUtils) << "Removed file:" << filePath;
+        if (QFile::remove(filePath)) {
+            qCDebug(lcFileUtils) << "File was removed:" << filePath;
+        }
+    }
+}
+
+void FileUtils::removeDir(const QString &dirPath)
+{
+    if (fileExists(dirPath)) {
+        if (QDir(dirPath).removeRecursively()) {
+            qCDebug(lcFileUtils) << "Dir was removed recursively:" << dirPath;
+        }
     }
 }
 
@@ -186,6 +197,12 @@ QString Self::attachmentFileName(const QUrl &url, bool isPicture)
         fileName = QFileInfo(urlToLocalFile(url)).fileName();
     }
     return fileName;
+}
+
+QString FileUtils::fileMimeType(const QString &filePath)
+{
+    static QMimeDatabase db;
+    return db.mimeTypeForFile(filePath).name();
 }
 
 bool Self::openUrl(const QUrl &url)

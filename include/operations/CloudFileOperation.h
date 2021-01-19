@@ -32,48 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CLOUD_FILE_OPERATION_SOURCE_H
-#define VM_CLOUD_FILE_OPERATION_SOURCE_H
+#ifndef VM_CLOUD_FILE_OPERATION_H
+#define VM_CLOUD_FILE_OPERATION_H
 
-#include "CloudFile.h"
-#include "OperationSource.h"
+#include "CloudFileUpdate.h"
+#include "Operation.h"
+#include "UserId.h"
 
 namespace vm
 {
-class CloudFileOperationSource : public OperationSource
+class CloudFileOperation : public Operation
 {
+    Q_OBJECT
+
 public:
-    enum class Type
-    {
-        CreateFolder,
-        Upload,
-        Delete
-    };
+    CloudFileOperation(const UserId &userId, QObject *parent);
 
-    explicit CloudFileOperationSource(Type type);
+    UserId userId() const;
 
-    Type type() const;
-
-    CloudFileHandler folder() const;
-    void setFolder(const CloudFileHandler &folder);
-    CloudFiles files() const;
-    void setFiles(const CloudFiles &files);
-    QString filePath() const;
-    void setFilePath(const QString &path);
-    QString name() const;
-    void setName(const QString &name);
-
-    bool isValid() const override;
-    QString toString() const override;
+signals:
+    void cloudFileUpdate(const CloudFileUpdate &update);
 
 private:
-    Type m_type;
-    CloudFileHandler m_folder;
-    CloudFiles m_files;
-    QString m_filePath;
-    QString m_name;
+    static quint64 m_counter;
+    UserId m_userId;
 };
 }
 
-#endif // VM_CLOUD_FILE_OPERATION_SOURCE_H
-
+#endif // VM_CLOUD_FILE_OPERATION_H

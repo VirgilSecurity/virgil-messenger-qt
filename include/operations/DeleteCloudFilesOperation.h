@@ -32,48 +32,29 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CLOUD_FILE_OPERATION_SOURCE_H
-#define VM_CLOUD_FILE_OPERATION_SOURCE_H
+#ifndef VM_DELETE_CLOUD_FILES_OPERATION_H
+#define VM_DELETE_CLOUD_FILES_OPERATION_H
 
 #include "CloudFile.h"
-#include "OperationSource.h"
+#include "Operation.h"
 
 namespace vm
 {
-class CloudFileOperationSource : public OperationSource
+class CloudFileOperation;
+
+class DeleteCloudFilesOperation : public Operation
 {
+    Q_OBJECT
+
 public:
-    enum class Type
-    {
-        CreateFolder,
-        Upload,
-        Delete
-    };
+    DeleteCloudFilesOperation(CloudFileOperation *parent, const CloudFiles &files);
 
-    explicit CloudFileOperationSource(Type type);
-
-    Type type() const;
-
-    CloudFileHandler folder() const;
-    void setFolder(const CloudFileHandler &folder);
-    CloudFiles files() const;
-    void setFiles(const CloudFiles &files);
-    QString filePath() const;
-    void setFilePath(const QString &path);
-    QString name() const;
-    void setName(const QString &name);
-
-    bool isValid() const override;
-    QString toString() const override;
+    void run() override;
 
 private:
-    Type m_type;
-    CloudFileHandler m_folder;
+    CloudFileOperation *m_parent;
     CloudFiles m_files;
-    QString m_filePath;
-    QString m_name;
 };
 }
 
-#endif // VM_CLOUD_FILE_OPERATION_SOURCE_H
-
+#endif // VM_DELETE_CLOUD_FILES_OPERATION_H

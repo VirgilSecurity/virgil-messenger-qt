@@ -39,6 +39,7 @@
 #include <QTimer>
 
 #include "CloudFile.h"
+#include "CloudFileUpdate.h"
 #include "ListModel.h"
 
 class Settings;
@@ -67,11 +68,14 @@ public:
     CloudFileHandler file(const int proxyRow) const;
     CloudFiles selectedFiles() const;
 
+    void updateCloudFile(const CloudFileUpdate &update);
+
 private:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
+    std::optional<int> findRowById(const CloudFileId &cloudFileId) const;
     void invalidateDateTime();
 
     const Settings *m_settings;

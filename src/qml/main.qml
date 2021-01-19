@@ -101,11 +101,14 @@ ApplicationWindow {
         }
 
         InputDialog {
-            id: createCloudDirectoryDialog
+            id: createCloudFolderDialog
             title: qsTr("File Manager")
             label: qsTr("New directory")
             placeholderText: qsTr("Enter name")
-            onAccepted: controllers.cloudFiles.createFolder(text)
+            onAccepted: {
+                controllers.cloudFiles.createFolder(text)
+                text = ""
+            }
         }
     }
 

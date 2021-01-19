@@ -39,6 +39,7 @@
 #include <QObject>
 
 #include "CloudFile.h"
+#include "CloudFileUpdate.h"
 #include "Models.h"
 #include "Settings.h"
 #include "UserDatabase.h"
@@ -63,6 +64,8 @@ public:
     Q_INVOKABLE void openFile(const QVariant &proxyRow);
     Q_INVOKABLE void switchToFolder(const QVariant &proxyRow);
     Q_INVOKABLE void switchToParentFolder();
+    Q_INVOKABLE void refresh();
+
     Q_INVOKABLE void addFile(const QVariant &attachmentUrl);
     Q_INVOKABLE void deleteFiles();
     Q_INVOKABLE void createFolder(const QString &name);
@@ -84,13 +87,13 @@ private:
     bool isRoot() const;
 
     void onCloudFilesFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles);
+    void onUpdateCloudFile(const CloudFileUpdate &update);
 
     QPointer<const Settings> m_settings;
     QPointer<Models> m_models;
     QPointer<UserDatabase> m_userDatabase;
 
     ModifiableCloudFileHandler m_rootFolder;
-    CloudFileHandler m_currentFolder;
     FoldersHierarchy m_hierarchy;
     FoldersHierarchy m_newHierarchy;
 };

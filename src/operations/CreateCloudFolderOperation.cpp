@@ -32,48 +32,49 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CLOUD_FILE_OPERATION_SOURCE_H
-#define VM_CLOUD_FILE_OPERATION_SOURCE_H
+#include "CreateCloudFolderOperation.h"
 
-#include "CloudFile.h"
-#include "OperationSource.h"
+#include <QDir>
 
-namespace vm
+#include "CloudFileOperation.h"
+#include "Utils.h"
+
+using namespace vm;
+
+CreateCloudFolderOperation::CreateCloudFolderOperation(CloudFileOperation *parent, const QString &name, const CloudFileHandler &parentFolder)
+    : Operation(QLatin1String("CreateCloudFolder"), parent)
+    , m_parent(parent)
+    , m_name(name)
+    , m_parentFolder(parentFolder)
 {
-class CloudFileOperationSource : public OperationSource
-{
-public:
-    enum class Type
-    {
-        CreateFolder,
-        Upload,
-        Delete
-    };
-
-    explicit CloudFileOperationSource(Type type);
-
-    Type type() const;
-
-    CloudFileHandler folder() const;
-    void setFolder(const CloudFileHandler &folder);
-    CloudFiles files() const;
-    void setFiles(const CloudFiles &files);
-    QString filePath() const;
-    void setFilePath(const QString &path);
-    QString name() const;
-    void setName(const QString &name);
-
-    bool isValid() const override;
-    QString toString() const override;
-
-private:
-    Type m_type;
-    CloudFileHandler m_folder;
-    CloudFiles m_files;
-    QString m_filePath;
-    QString m_name;
-};
 }
 
-#endif // VM_CLOUD_FILE_OPERATION_SOURCE_H
+void CreateCloudFolderOperation::run()
+{
+    // Create local dir
+    QDir parentDir(m_parentFolder->localPath());
+    if (!parentDir.mkpath(m_name)) {
+        invalidate(tr("Failed to create folder: %1").arg(m_name));
+        return;
+    }
 
+    // Create cloud folder
+    auto cloudFile = std::make_shared<CloudFile>();
+    cloudFile->setId(Utils::createUuid());
+    cloudFile->setParentId(m_parentFolder->id());
+    cloudFile->setName(m_name);
+    cloudFile->setIsFolder(true);
+    const auto now = QDateTime::currentDateTime();
+    cloudFile->setCreatedAt(now);
+    cloudFile->setUpdatedAt(now);
+    cloudFile->setUpdatedBy(m_parent->userId());
+    cloudFile->setLocalPath(parentDir.filePath(m_name));
+
+    // Send update
+    CreatedCloudFileUpdate update;
+    update.cloudFileId = cloudFile->id();
+    update.cloudFile = cloudFile;
+    m_parent->cloudFileUpdate(update);
+
+    finish();
+}

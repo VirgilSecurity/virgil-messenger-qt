@@ -40,16 +40,19 @@
 
 namespace vm
 {
+class CloudFileOperation;
+
 class UploadCloudFileOperation : public Operation
 {
     Q_OBJECT
 
 public:
-    UploadCloudFileOperation(const QString &filePath, const CloudFileHandler &folder, QObject *parent);
+    UploadCloudFileOperation(CloudFileOperation *parent, const QString &filePath, const CloudFileHandler &folder);
 
     void run() override;
 
 private:
+    CloudFileOperation *m_parent;
     QString m_filePath;
     CloudFileHandler m_folder;
 };
