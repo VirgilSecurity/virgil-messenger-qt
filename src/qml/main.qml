@@ -84,16 +84,6 @@ ApplicationWindow {
         AttachmentPicker {
             id: attachmentPicker
         }
-
-        NetworkStatusControl {
-            anchors {
-                bottom: parent.bottom
-                left: parent.left
-                bottomMargin: Theme.smallMargin
-                leftMargin: Theme.smallMargin
-            }
-            z: Theme.overlayZ
-        }
     }
 
     // Show Popup message

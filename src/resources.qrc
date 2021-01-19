@@ -26,6 +26,10 @@
         <file>qml/resources/icons/Arrow-Right@2x.png</file>
         <file>qml/resources/icons/More.png</file>
         <file>qml/resources/icons/More@2x.png</file>
+	<file>qml/resources/icons/Menu-Status-On.png</file>
+        <file>qml/resources/icons/Menu-Status-On@2x.png</file>
+	<file>qml/resources/icons/Menu-Status.png</file>
+        <file>qml/resources/icons/Menu-Status@2x.png</file>
         <file>qml/resources/icons/Search.png</file>
         <file>qml/resources/icons/Search@2x.png</file>
         <file>qml/resources/icons/Search_Big.png</file>
@@ -68,6 +72,8 @@
         <file>qml/resources/icons/M-Sending@2x.png</file>
         <file>qml/resources/icons/M-Sent.png</file>
         <file>qml/resources/icons/M-Sent@2x.png</file>
+	<file>qml/resources/icons/Overlay-Offline.png</file>
+        <file>qml/resources/icons/Overlay-Offline@2x.png</file>
         <file>qml/resources/ca/curl-ca-bundle-win.crt</file>
         <file>qml/resources/fonts/Roboto-Bold.ttf</file>
         <file>qml/resources/fonts/Roboto-Medium.ttf</file>
