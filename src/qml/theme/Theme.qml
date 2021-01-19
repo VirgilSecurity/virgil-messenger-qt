@@ -32,6 +32,7 @@ Item {
     readonly property color menuSeparatorColor: "#90A4AE"
     readonly property color inputBackgroundColor: "#37474F"
     readonly property color chatBackgroundColor: "#263238"
+    readonly property color contactSelectionColor: "#2196F3"
 
     // sizes
     readonly property real margin: 20

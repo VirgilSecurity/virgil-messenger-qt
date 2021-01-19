@@ -39,6 +39,7 @@
 #include "Message.h"
 #include "MessageUpdate.h"
 #include "User.h"
+#include "Group.h"
 #include "Chat.h"
 #include "Settings.h"
 
@@ -272,6 +273,7 @@ Q_DECLARE_METATYPE(vm::ModifiableMessageHandler);
 Q_DECLARE_METATYPE(vm::Messages);
 Q_DECLARE_METATYPE(vm::ModifiableMessages);
 Q_DECLARE_METATYPE(vm::UserHandler);
+Q_DECLARE_METATYPE(vm::GroupHandler);
 Q_DECLARE_METATYPE(vm::ChatHandler);
 Q_DECLARE_METATYPE(vm::ModifiableChatHandler);
 Q_DECLARE_METATYPE(vm::ModifiableChats);
