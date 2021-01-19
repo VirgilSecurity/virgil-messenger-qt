@@ -32,39 +32,39 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VS_CLOUDFILESQUEUE_H
-#define VS_CLOUDFILESQUEUE_H
-
-#include <QLoggingCategory>
+#ifndef VM_CLOUD_FILE_OPERATION_SOURCE_H
+#define VM_CLOUD_FILE_OPERATION_SOURCE_H
 
 #include "CloudFile.h"
-#include "OperationQueue.h"
-
-Q_DECLARE_LOGGING_CATEGORY(lcCloudFilesQueue);
+#include "OperationSource.h"
 
 namespace vm
 {
-class CloudFilesQueue : public OperationQueue
+class CloudFileOperationSource : public OperationSource
 {
-    Q_OBJECT
-
 public:
-    explicit CloudFilesQueue(QObject *parent);
-    ~CloudFilesQueue() override;
+    enum class Type
+    {
+        Upload,
+        Delete
+    };
 
-signals:
-    void pushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
-    void pushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
-    void pushDeleteFiles(const CloudFiles &files);
+    explicit CloudFileOperationSource(Type type);
+
+    void setFolder(const CloudFileHandler &folder);
+    void setFiles(const CloudFiles &files);
+    void setUploadFilePath(const QString &path);
+
+    bool isValid() const override;
+    QString toString() const override;
 
 private:
-    Operation *createOperation(OperationSourcePtr source) override;
-    void invalidateOperation(OperationSourcePtr source) override;
-
-    void onPushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
-    void onPushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
-    void onPushDeleteFiles(const CloudFiles &files);
+    Type m_type;
+    CloudFileHandler m_folder;
+    CloudFiles m_files;
+    QString m_uploadFilePath;
 };
 }
 
-#endif // VS_CLOUDFILESQUEUE_H
+#endif // VM_CLOUD_FILE_OPERATION_SOURCE_H
+

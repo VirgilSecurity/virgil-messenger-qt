@@ -164,14 +164,18 @@
         <!-- Database -->
         <file>resources/database/createAttachments.sql</file>
         <file>resources/database/createChats.sql</file>
+        <file>resources/database/createCloudFiles.sql</file>
         <file>resources/database/createContacts.sql</file>
         <file>resources/database/createMessages.sql</file>
+        <file>resources/database/deleteCloudFiles.sql</file>
         <file>resources/database/insertAttachment.sql</file>
         <file>resources/database/insertChat.sql</file>
+        <file>resources/database/insertCloudFile.sql</file>
         <file>resources/database/insertMessage.sql</file>
         <file>resources/database/resetUnreadCount.sql</file>
         <file>resources/database/selectChatMessages.sql</file>
         <file>resources/database/selectChats.sql</file>
+        <file>resources/database/selectCloudFolderFiles.sql</file>
         <file>resources/database/selectNotSentMessages.sql</file>
         <file>resources/database/updateAttachmentDownloadStage.sql</file>
         <file>resources/database/updateAttachmentEncryption.sql</file>

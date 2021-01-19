@@ -32,39 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VS_CLOUDFILESQUEUE_H
-#define VS_CLOUDFILESQUEUE_H
+#ifndef VM_CLOUDFILESTABLE_H
+#define VM_CLOUDFILESTABLE_H
 
-#include <QLoggingCategory>
-
+#include "core/DatabaseTable.h"
 #include "CloudFile.h"
-#include "OperationQueue.h"
-
-Q_DECLARE_LOGGING_CATEGORY(lcCloudFilesQueue);
 
 namespace vm
 {
-class CloudFilesQueue : public OperationQueue
+class CloudFilesTable : public DatabaseTable
 {
     Q_OBJECT
 
 public:
-    explicit CloudFilesQueue(QObject *parent);
-    ~CloudFilesQueue() override;
+    explicit CloudFilesTable(Database *database);
 
 signals:
-    void pushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
-    void pushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
-    void pushDeleteFiles(const CloudFiles &files);
+    void fetch(const CloudFileHandler &folder);
+
+    void errorOccurred(const QString &errorText);
+    void fetched(const CloudFileHandler &folder, ModifiableCloudFiles cloudFiles);
 
 private:
-    Operation *createOperation(OperationSourcePtr source) override;
-    void invalidateOperation(OperationSourcePtr source) override;
+    bool create() override;
 
-    void onPushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
-    void onPushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
-    void onPushDeleteFiles(const CloudFiles &files);
+    void onFetch(const CloudFileHandler &folder);
 };
 }
 
-#endif // VS_CLOUDFILESQUEUE_H
+#endif // VM_CLOUDFILESTABLE_H

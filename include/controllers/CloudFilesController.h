@@ -39,45 +39,60 @@
 #include <QObject>
 
 #include "CloudFile.h"
+#include "Models.h"
+#include "Settings.h"
+#include "UserDatabase.h"
 
 class Settings;
 
 namespace vm
 {
-class CloudFilesModel;
-class Models;
-
 class CloudFilesController : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString displayPath MEMBER m_displayPath NOTIFY displayPathChanged)
+    Q_PROPERTY(QString displayPath READ displayPath NOTIFY displayPathChanged)
+    Q_PROPERTY(bool isRoot READ isRoot NOTIFY isRootChanged)
 
 public:
-    CloudFilesController(const Settings *settings, Models *models, QObject *parent);
+    CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase, QObject *parent);
 
     CloudFilesModel *model();
-    void setRootDirectory(const CloudFileHandler &cloudDir);
+    void switchToRootFolder();
     void setDownloadsDir(const QDir &dir);
 
     Q_INVOKABLE void openFile(const QVariant &proxyRow);
-    Q_INVOKABLE void setDirectory(const QVariant &proxyRow);
-    Q_INVOKABLE void cdUp();
+    Q_INVOKABLE void switchToFolder(const QVariant &proxyRow);
+    Q_INVOKABLE void switchToParentFolder();
     Q_INVOKABLE void addFile(const QVariant &attachmentUrl);
     Q_INVOKABLE void deleteFiles();
-    Q_INVOKABLE void createDirectory(const QString &name);
+    Q_INVOKABLE void createFolder(const QString &name);
 
 signals:
+    void errorOccurred(const QString &errorText);
+
     void displayPathChanged(const QString &path);
+    void isRootChanged(const bool isRoot);
+    void isFetchingChanged(const bool isFetching);
 
 private:
-    void setDirectory(const CloudFileHandler &cloudDir);
+    using FoldersHierarchy = std::vector<CloudFileHandler>;
 
-    const Settings *m_settings;
-    Models *m_models;
-    CloudFileHandler m_rootDir;
-    QDir m_downloadsDir;
-    CloudFileHandler m_currentDir;
-    QString m_displayPath;
+    void setupTableConnections();
+    void switchToHierarchy(const FoldersHierarchy &hierarchy);
+
+    QString displayPath() const;
+    bool isRoot() const;
+
+    void onCloudFilesFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles);
+
+    QPointer<const Settings> m_settings;
+    QPointer<Models> m_models;
+    QPointer<UserDatabase> m_userDatabase;
+
+    ModifiableCloudFileHandler m_rootFolder;
+    CloudFileHandler m_currentFolder;
+    FoldersHierarchy m_hierarchy;
+    FoldersHierarchy m_newHierarchy;
 };
 }
 

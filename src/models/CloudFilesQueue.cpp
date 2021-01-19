@@ -34,6 +34,8 @@
 
 #include "CloudFilesQueue.h"
 
+#include "CloudFileOperationSource.h"
+
 using namespace vm;
 using Self = CloudFilesQueue;
 
@@ -42,7 +44,7 @@ Q_LOGGING_CATEGORY(lcCloudFilesQueue, "cloudfiles-queue");
 Self::CloudFilesQueue(QObject *parent)
     : OperationQueue(lcCloudFilesQueue(), parent)
 {
-    connect(this, &Self::pushCreateDirectory, this, &Self::onPushCreateDirectory);
+    connect(this, &Self::pushCreateFolder, this, &Self::onPushCreateFolder);
     connect(this, &Self::pushUploadFile, this, &Self::onPushUploadFile);
     connect(this, &Self::pushDeleteFiles, this, &Self::onPushDeleteFiles);
 }
@@ -58,16 +60,23 @@ Operation *Self::createOperation(OperationSourcePtr source)
 
 void Self::invalidateOperation(OperationSourcePtr source)
 {
+    Q_UNUSED(source)
 }
 
-void Self::onPushCreateDirectory(const QString &name, const CloudFileHandler &parentDir)
+void Self::onPushCreateFolder(const QString &name, const CloudFileHandler &parentFolder)
 {
+    Q_UNUSED(name)
 }
 
-void Self::onPushUploadFile(const QString &filePath, const CloudFileHandler &parentDir)
+void Self::onPushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder)
 {
+    auto source = std::make_shared<CloudFileOperationSource>(CloudFileOperationSource::Type::Upload);
+    source->setFolder(parentFolder);
+    source->setUploadFilePath(filePath);
+    addSource(source);
 }
 
 void Self::onPushDeleteFiles(const CloudFiles &files)
 {
+    Q_UNUSED(files)
 }

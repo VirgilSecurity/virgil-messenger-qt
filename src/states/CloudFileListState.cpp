@@ -49,9 +49,9 @@ CloudFileListState::CloudFileListState(Messenger *messenger, CloudFilesControlle
 
 void CloudFileListState::onEntry(QEvent *)
 {
-    const auto userId = m_messenger->currentUser()->id();
-    const auto rootDir = m_messenger->settings()->cloudFilesDownloadsDir(userId);
-    m_controller->setRootDirectory(std::make_shared<CloudFile>(rootDir.absolutePath()));
+    const auto username = m_messenger->currentUser()->username();
+    const auto rootDir = m_messenger->settings()->cloudFilesDownloadsDir(username);
+    m_controller->switchToRootFolder();
     m_controller->setDownloadsDir(rootDir);
     m_controller->model()->setEnabled(true);
 }

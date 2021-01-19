@@ -35,6 +35,7 @@
 #ifndef VM_DATABASEUTILS_H
 #define VM_DATABASEUTILS_H
 
+#include "CloudFile.h"
 #include "Message.h"
 
 #include <QSqlQuery>
@@ -60,6 +61,7 @@ public:
     static std::optional<QSqlQuery> readExecQuery(Database *database, const QString &queryId, const BindValues &values = {});
 
     static ModifiableMessageHandler readMessage(const QSqlQuery &query, const QString &idColumn = {});
+    static ModifiableCloudFileHandler readCloudFile(const QSqlQuery &query);
 
 private:
     static bool readMessageContentAttachment(const QSqlQuery &query, MessageContentAttachment& attachment);

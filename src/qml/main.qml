@@ -105,7 +105,7 @@ ApplicationWindow {
             title: qsTr("File Manager")
             label: qsTr("New directory")
             placeholderText: qsTr("Enter name")
-            onAccepted: controllers.cloudFiles.createDirectory(text)
+            onAccepted: controllers.cloudFiles.createFolder(text)
         }
     }
 

@@ -32,39 +32,45 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VS_CLOUDFILESQUEUE_H
-#define VS_CLOUDFILESQUEUE_H
+#include "CloudFilesTable.h"
 
-#include <QLoggingCategory>
+#include "core/Database.h"
+#include "core/DatabaseUtils.h"
 
-#include "CloudFile.h"
-#include "OperationQueue.h"
+using namespace vm;
 
-Q_DECLARE_LOGGING_CATEGORY(lcCloudFilesQueue);
-
-namespace vm
+CloudFilesTable::CloudFilesTable(Database *database)
+    : DatabaseTable(QLatin1String("cloudFiles"), database)
 {
-class CloudFilesQueue : public OperationQueue
-{
-    Q_OBJECT
-
-public:
-    explicit CloudFilesQueue(QObject *parent);
-    ~CloudFilesQueue() override;
-
-signals:
-    void pushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
-    void pushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
-    void pushDeleteFiles(const CloudFiles &files);
-
-private:
-    Operation *createOperation(OperationSourcePtr source) override;
-    void invalidateOperation(OperationSourcePtr source) override;
-
-    void onPushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
-    void onPushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
-    void onPushDeleteFiles(const CloudFiles &files);
-};
+    connect(this, &CloudFilesTable::fetch, this, &CloudFilesTable::onFetch);
 }
 
-#endif // VS_CLOUDFILESQUEUE_H
+bool CloudFilesTable::create()
+{
+    if (DatabaseUtils::readExecQueries(database(), QLatin1String("createCloudFiles"))) {
+        qCDebug(lcDatabase) << "Cloud files table was created";
+        return true;
+    }
+    qCCritical(lcDatabase) << "Failed to create Cloud files table";
+    return false;
+}
+
+void CloudFilesTable::onFetch(const CloudFileHandler &folder)
+{
+    qCDebug(lcDatabase) << "Fetching cloud files...";
+    ScopedConnection connection(*database());
+    const DatabaseUtils::BindValues values{{ ":folderId", folder->id() }};
+    auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectCloudFolderFiles"), values);
+    if (!query) {
+        qCCritical(lcDatabase) << "CloudFilesTable::onFetch error";
+        emit errorOccurred(tr("Failed to fetch cloud files"));
+    }
+    else {
+        ModifiableCloudFiles cloudFiles;
+        while (query->next()) {
+            cloudFiles.push_back(DatabaseUtils::readCloudFile(*query));
+        }
+        qCDebug(lcDatabase) << "Fetched cloud files count: " << cloudFiles.size();
+        emit fetched(folder, std::move(cloudFiles));
+    }
+}

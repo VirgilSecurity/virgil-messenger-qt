@@ -88,7 +88,7 @@ Control {
                 attachmentPreview.visible = false
             }
             else if (manager.currentState === manager.cloudFileListState) {
-                controllers.cloudFiles.cdUp()
+                controllers.cloudFiles.switchToParentFolder()
             }
             else {
                 stackView.pop()

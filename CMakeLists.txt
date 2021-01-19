@@ -364,6 +364,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/ConfirmationCodeType.h
         ${CMAKE_CURRENT_LIST_DIR}/include/GroupId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFile.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileId.h
         # Messenger Core
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/AttachmentId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Chat.h
@@ -440,6 +441,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/database/AttachmentsTable.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/ContactsTable.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/ChatsTable.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/database/CloudFilesTable.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/MessagesTable.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/SchemeVersion.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/UserDatabase.h
@@ -455,6 +457,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ContactsProxyModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/DiscoveredContactsModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/DiscoveredContactsProxyModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFileOperationSource.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesQueue.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesUploader.h
@@ -490,6 +493,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/SendMessageOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadAttachmentOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadFileOperation.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadCloudFileOperation.h
         # Generated
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQCustomer.h
         # MacOS
@@ -593,6 +597,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/database/AttachmentsTable.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/ContactsTable.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/ChatsTable.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/database/CloudFilesTable.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/MessagesTable.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/UserDatabase.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/UserDatabaseMigration.cpp
@@ -602,6 +607,7 @@ target_sources(${VS_TARGET_NAME}
         # Models
         ${CMAKE_CURRENT_LIST_DIR}/src/models/AccountSelectionModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ChatsModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFileOperationSource.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesQueue.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesUploader.cpp
@@ -640,6 +646,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/SendMessageOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/UploadAttachmentOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/UploadFileOperation.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/operations/UploadCloudFileOperation.cpp
         # QT QRC
         ${CMAKE_CURRENT_LIST_DIR}/src/resources.qrc
         ${VS_CUSTOMER_DIR}/src/customer.qrc

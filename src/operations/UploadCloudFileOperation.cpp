@@ -32,39 +32,28 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VS_CLOUDFILESQUEUE_H
-#define VS_CLOUDFILESQUEUE_H
+#include "UploadCloudFileOperation.h"
 
-#include <QLoggingCategory>
+#include <QFile>
+#include <QDir>
 
-#include "CloudFile.h"
-#include "OperationQueue.h"
+using namespace vm;
 
-Q_DECLARE_LOGGING_CATEGORY(lcCloudFilesQueue);
-
-namespace vm
+UploadCloudFileOperation::UploadCloudFileOperation(const QString &filePath, const CloudFileHandler &folder, QObject *parent)
+    : Operation(QLatin1String("UploadCloudFile"), parent)
+    , m_filePath(filePath)
+    , m_folder(folder)
 {
-class CloudFilesQueue : public OperationQueue
-{
-    Q_OBJECT
-
-public:
-    explicit CloudFilesQueue(QObject *parent);
-    ~CloudFilesQueue() override;
-
-signals:
-    void pushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
-    void pushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
-    void pushDeleteFiles(const CloudFiles &files);
-
-private:
-    Operation *createOperation(OperationSourcePtr source) override;
-    void invalidateOperation(OperationSourcePtr source) override;
-
-    void onPushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
-    void onPushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
-    void onPushDeleteFiles(const CloudFiles &files);
-};
 }
 
-#endif // VS_CLOUDFILESQUEUE_H
+void UploadCloudFileOperation::run()
+{
+    // Create local dir
+    QDir folderDir(m_folder->localPath());
+    folderDir.mkpath(".");
+    // Copy file to local dir
+    QFileInfo info(m_filePath);
+    QFile::copy(info.absoluteFilePath(), folderDir.filePath(info.fileName()));
+    //
+    finish();
+}

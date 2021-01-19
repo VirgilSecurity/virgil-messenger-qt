@@ -32,48 +32,73 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CLOUDFILE_H
-#define VM_CLOUDFILE_H
+#ifndef VM_CLOUD_FILE_H
+#define VM_CLOUD_FILE_H
 
+#include <memory>
+
+#include <QByteArray>
 #include <QDateTime>
 #include <QFileInfo>
-#include <QString>
+
+#include "CloudFileId.h"
+#include "UserId.h"
 
 namespace vm
 {
 class CloudFile
 {
 public:
-    CloudFile() = default;
-    explicit CloudFile(const QFileInfo &info);
-    explicit CloudFile(const QString &path);
-    CloudFile(const QString &name, const bool isDirectory, const qsizetype size, const QDateTime &createdAt);
     virtual ~CloudFile() noexcept = default;
 
+    CloudFileId id() const noexcept;
+    void setId(const CloudFileId &id);
+    CloudFileId parentId() const noexcept;
+    void setParentId(const CloudFileId &id);
     QString name() const noexcept;
-    bool isDirectory() const noexcept;
-    qsizetype size() const noexcept;
+    void setName(const QString &name);
+    bool isFolder() const noexcept;
+    void setIsFolder(const bool isFolder);
+    QString type() const;
+    void setType(const QString &type);
+    quint64 size() const noexcept;
+    void setSize(const quint64 size);
     QDateTime createdAt() const noexcept;
-
+    void setCreatedAt(const QDateTime &dateTime);
+    QDateTime updatedAt() const noexcept;
+    void setUpdatedAt(const QDateTime &dateTime);
+    UserId updatedBy() const noexcept;
+    void setUpdatedBy(const UserId &userId);
+    QByteArray encryptedKey() const noexcept;
+    void setEncryptedKey(const QByteArray &key);
+    QByteArray publicKey() const noexcept;
+    void setPublicKey(const QByteArray &key);
+    QString localPath() const noexcept;
     void setLocalPath(const QString &path);
-    QString localPath() const;
-
-    QString relativePath(const CloudFile &dir) const;
-    QString parentPath() const;
-    void cdUp();
-    CloudFile child(const QString &name) const;
+    QString fingerprint() const noexcept;
+    void setFingerprint(const QString &fingerprint);
 
 private:
+    CloudFileId m_id;
+    CloudFileId m_parentId;
     QString m_name;
-    bool m_isDirectory = false;
-    qsizetype m_size = 0;
+    bool m_isFolder = false;
+    QString m_type;
+    quint64 m_size = 0;
     QDateTime m_createdAt;
+    QDateTime m_updatedAt;
+    UserId m_updatedBy;
+    QByteArray m_encryptedKey;
+    QByteArray m_publicKey;
     QString m_localPath;
+    QString m_fingerprint;
 };
 
 using CloudFileHandler = std::shared_ptr<const CloudFile>;
+using ModifiableCloudFileHandler = std::shared_ptr<CloudFile>;
 using CloudFiles = std::vector<CloudFileHandler>;
+using ModifiableCloudFiles = std::vector<ModifiableCloudFileHandler>;
 
 }
 
-#endif // VM_CLOUDFILE_H
+#endif // VM_CLOUD_FILE_H

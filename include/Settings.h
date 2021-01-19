@@ -81,7 +81,7 @@ public:
     QDir attachmentCacheDir() const;
     QDir thumbnailsDir() const;
     QDir downloadsDir() const;
-    QDir cloudFilesDownloadsDir(const vm::UserId &userId) const;
+    QDir cloudFilesDownloadsDir(const QString &userName) const;
 
     QString makeThumbnailPath(const vm::AttachmentId &attachmentId, bool isPreview) const;
     QSize thumbnailMaxSize() const;

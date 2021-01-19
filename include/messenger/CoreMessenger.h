@@ -40,6 +40,7 @@
 #include "MessageUpdate.h"
 #include "User.h"
 #include "Chat.h"
+#include "CloudFile.h"
 #include "Settings.h"
 
 #include <qxmpp/QXmppClient.h>
@@ -275,9 +276,14 @@ Q_DECLARE_METATYPE(vm::UserHandler);
 Q_DECLARE_METATYPE(vm::ChatHandler);
 Q_DECLARE_METATYPE(vm::ModifiableChatHandler);
 Q_DECLARE_METATYPE(vm::ModifiableChats);
+Q_DECLARE_METATYPE(vm::CloudFileHandler);
+Q_DECLARE_METATYPE(vm::ModifiableCloudFileHandler);
+Q_DECLARE_METATYPE(vm::CloudFiles);
+Q_DECLARE_METATYPE(vm::ModifiableCloudFiles);
 Q_DECLARE_METATYPE(vm::ChatId);
 Q_DECLARE_METATYPE(vm::MessageId);
 Q_DECLARE_METATYPE(vm::AttachmentId);
+Q_DECLARE_METATYPE(vm::CloudFileId);
 
 Q_DECLARE_METATYPE(QXmppClient::State);
 Q_DECLARE_METATYPE(QXmppClient::Error);

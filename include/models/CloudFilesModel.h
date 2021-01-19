@@ -36,7 +36,6 @@
 #define VM_CLOUDFILESMODEL_H
 
 #include <QDateTime>
-#include <QFileInfoList>
 #include <QTimer>
 
 #include "CloudFile.h"
@@ -54,7 +53,7 @@ public:
     enum Roles
     {
         FilenameRole = Qt::UserRole,
-        IsDirRole,
+        IsFolderRole,
         DisplayDateTimeRole,
         DisplayFileSize,
         SortRole
@@ -62,28 +61,23 @@ public:
 
     CloudFilesModel(const Settings *settings, QObject *parent);
 
-    void setDirectory(const CloudFileHandler &cloudDir);
+    void setFiles(const ModifiableCloudFiles &files);
     void setEnabled(bool enabled);
 
-    CloudFileHandler getFile(const int proxyRow) const;
-    CloudFiles getSelectedFiles() const;
-
-signals:
-    void listReady(const QFileInfoList &list, QPrivateSignal);
+    CloudFileHandler file(const int proxyRow) const;
+    CloudFiles selectedFiles() const;
 
 private:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    void setList(const QFileInfoList &list);
     void invalidateDateTime();
 
     const Settings *m_settings;
-    CloudFiles m_list;
+    ModifiableCloudFiles m_files;
     QDateTime m_now;
     QTimer m_updateTimer;
-    int m_debugCounter = 0;
 };
 }
 

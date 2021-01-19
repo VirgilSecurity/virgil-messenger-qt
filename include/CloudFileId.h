@@ -32,39 +32,15 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VS_CLOUDFILESQUEUE_H
-#define VS_CLOUDFILESQUEUE_H
+#ifndef VM_CLOUD_FILE_ID_H
+#define VM_CLOUD_FILE_ID_H
 
-#include <QLoggingCategory>
-
-#include "CloudFile.h"
-#include "OperationQueue.h"
-
-Q_DECLARE_LOGGING_CATEGORY(lcCloudFilesQueue);
+#include <QString>
 
 namespace vm
 {
-class CloudFilesQueue : public OperationQueue
-{
-    Q_OBJECT
-
-public:
-    explicit CloudFilesQueue(QObject *parent);
-    ~CloudFilesQueue() override;
-
-signals:
-    void pushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
-    void pushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
-    void pushDeleteFiles(const CloudFiles &files);
-
-private:
-    Operation *createOperation(OperationSourcePtr source) override;
-    void invalidateOperation(OperationSourcePtr source) override;
-
-    void onPushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
-    void onPushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
-    void onPushDeleteFiles(const CloudFiles &files);
-};
+// TODO(fpohtmeh): refactor
+using CloudFileId = QString;
 }
 
-#endif // VS_CLOUDFILESQUEUE_H
+#endif // VM_CLOUD_FILE_ID_H

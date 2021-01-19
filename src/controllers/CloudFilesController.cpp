@@ -34,82 +34,126 @@
 
 #include "CloudFilesController.h"
 
-#include "Settings.h"
-#include "Utils.h"
-#include "FileUtils.h"
 #include "CloudFilesModel.h"
 #include "CloudFilesQueue.h"
-#include "Models.h"
+#include "CloudFilesTable.h"
 #include "Controller.h"
+#include "FileUtils.h"
+#include "Utils.h"
 
 using namespace vm;
+using Self = CloudFilesController;
 
-CloudFilesController::CloudFilesController(const Settings *settings, Models *models, QObject *parent)
+Self::CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent)
     , m_settings(settings)
     , m_models(models)
-    , m_rootDir()
-    , m_currentDir(m_rootDir)
-{}
+    , m_userDatabase(userDatabase)
+{
+    m_rootFolder = std::make_shared<CloudFile>();
+    m_rootFolder->setId("");
+    m_rootFolder->setName(tr("File Manager"));
+    m_rootFolder->setIsFolder(true);
 
-CloudFilesModel *CloudFilesController::model()
+    m_currentFolder = m_rootFolder;
+    m_hierarchy.push_back(m_rootFolder);
+
+    connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
+}
+
+CloudFilesModel *Self::model()
 {
     return m_models->cloudFiles();
 }
 
-void CloudFilesController::setRootDirectory(const CloudFileHandler &cloudDir)
+void Self::switchToRootFolder()
 {
-    m_rootDir = cloudDir;
-    setDirectory(cloudDir);
+    switchToHierarchy({ m_rootFolder });
 }
 
-void CloudFilesController::setDownloadsDir(const QDir &dir)
+void Self::setDownloadsDir(const QDir &dir)
 {
-    m_downloadsDir = dir;
+    m_rootFolder->setLocalPath(dir.absolutePath());
 }
 
-void CloudFilesController::openFile(const QVariant &proxyRow)
+void Self::openFile(const QVariant &proxyRow)
 {
-    const auto cloudFile = model()->getFile(proxyRow.toInt());
+    const auto cloudFile = model()->file(proxyRow.toInt());
     FileUtils::openUrl(FileUtils::localFileToUrl(cloudFile->localPath()));
 }
 
-void CloudFilesController::setDirectory(const QVariant &proxyRow)
+void Self::switchToFolder(const QVariant &proxyRow)
 {
-    const auto cloudFile = model()->getFile(proxyRow.toInt());
-    setDirectory(cloudFile);
+    auto hierarchy = m_hierarchy;
+    hierarchy.push_back(model()->file(proxyRow.toInt()));
+    switchToHierarchy(hierarchy);
 }
 
-void CloudFilesController::cdUp()
+void Self::switchToParentFolder()
 {
-    m_currentDir = std::make_shared<CloudFile>(m_currentDir->parentPath());
-    setDirectory(m_currentDir);
+    if (isRoot()) {
+        qCWarning(lcController) << "Root cloud folder has no parent";
+        return;
+    }
+    auto hierarchy = m_hierarchy;
+    hierarchy.pop_back();
+    switchToHierarchy(hierarchy);
 }
 
-void CloudFilesController::addFile(const QVariant &attachmentUrl)
+void Self::addFile(const QVariant &attachmentUrl)
 {
     const auto url = attachmentUrl.toUrl();
     const auto filePath = FileUtils::urlToLocalFile(url);
-    m_models->cloudFilesQueue()->pushUploadFile(filePath, m_currentDir);
+    m_models->cloudFilesQueue()->pushUploadFile(filePath, m_currentFolder);
 }
 
-void CloudFilesController::deleteFiles()
+void Self::deleteFiles()
 {
-    m_models->cloudFilesQueue()->pushDeleteFiles(m_models->cloudFiles()->getSelectedFiles());
+    m_models->cloudFilesQueue()->pushDeleteFiles(m_models->cloudFiles()->selectedFiles());
 }
 
-void CloudFilesController::createDirectory(const QString &name)
+void Self::createFolder(const QString &name)
 {
-    m_models->cloudFilesQueue()->pushCreateDirectory(name, m_currentDir);
+    m_models->cloudFilesQueue()->pushCreateFolder(name, m_currentFolder);
 }
 
-void CloudFilesController::setDirectory(const CloudFileHandler &cloudDir)
+void Self::setupTableConnections()
 {
-    m_currentDir = cloudDir;
-    model()->setDirectory(cloudDir);
-    m_displayPath = cloudDir->relativePath(*m_rootDir);
-    if (!m_displayPath.isEmpty()) {
-        m_displayPath = QLatin1Char('/') + m_displayPath;
+    qCDebug(lcController) << "Setup database table connections for cloud files...";
+    auto table = m_userDatabase->cloudFilesTable();
+    connect(table, &CloudFilesTable::errorOccurred, this, &Self::errorOccurred);
+    connect(table, &CloudFilesTable::fetched, this, &Self::onCloudFilesFetched);
+}
+
+void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)
+{
+    m_newHierarchy = hierarchy;
+    m_userDatabase->cloudFilesTable()->fetch(hierarchy.back());
+}
+
+QString CloudFilesController::displayPath() const
+{
+    QStringList names;
+    for (auto &folder : m_hierarchy) {
+        names << folder->name();
     }
-    emit displayPathChanged(m_displayPath);
+    return names.join(QLatin1String(" / "));
+}
+
+bool CloudFilesController::isRoot() const
+{
+    return m_hierarchy.size() == 1;
+}
+
+void Self::onCloudFilesFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles)
+{
+    Q_UNUSED(folder)
+    m_models->cloudFiles()->setFiles(cloudFiles);
+
+    if (m_hierarchy != m_newHierarchy) {
+        m_hierarchy = m_newHierarchy;
+        m_newHierarchy.clear();
+        emit displayPathChanged(displayPath());
+        emit isRootChanged(isRoot());
+    }
 }

@@ -36,28 +36,28 @@
 
 #include <QDir>
 
+#include "Utils.h"
+
 using namespace vm;
 
-CloudFile::CloudFile(const QString &name, const bool isDirectory, const qsizetype size, const QDateTime &createdAt)
-    : m_name(name)
-    , m_isDirectory(isDirectory)
-    , m_size(size)
-    , m_createdAt(createdAt)
+CloudFileId CloudFile::id() const noexcept
 {
+    return m_id;
 }
 
-CloudFile::CloudFile(const QFileInfo &info)
-    : m_name(info.fileName())
-    , m_isDirectory(info.isDir())
-    , m_size(info.size())
-    , m_createdAt(info.fileTime(QFile::FileBirthTime))
+void CloudFile::setId(const CloudFileId &id)
 {
-    setLocalPath(info.absoluteFilePath());
+    m_id = id;
 }
 
-CloudFile::CloudFile(const QString &path)
-    : CloudFile(QFileInfo(path))
+CloudFileId CloudFile::parentId() const noexcept
 {
+    return m_parentId;
+}
+
+void CloudFile::setParentId(const CloudFileId &id)
+{
+    m_parentId = id;
 }
 
 QString CloudFile::name() const noexcept
@@ -65,14 +65,39 @@ QString CloudFile::name() const noexcept
     return m_name;
 }
 
-bool CloudFile::isDirectory() const noexcept
+void CloudFile::setName(const QString &name)
 {
-    return m_isDirectory;
+    m_name = name;
 }
 
-qsizetype CloudFile::size() const noexcept
+bool CloudFile::isFolder() const noexcept
+{
+    return m_isFolder;
+}
+
+void CloudFile::setIsFolder(const bool isFolder)
+{
+    m_isFolder = isFolder;
+}
+
+QString CloudFile::type() const
+{
+    return m_type;
+}
+
+void CloudFile::setType(const QString &type)
+{
+    m_type = type;
+}
+
+quint64 CloudFile::size() const noexcept
 {
     return m_size;
+}
+
+void CloudFile::setSize(const quint64 size)
+{
+    m_size = size;
 }
 
 QDateTime CloudFile::createdAt() const noexcept
@@ -80,42 +105,67 @@ QDateTime CloudFile::createdAt() const noexcept
     return m_createdAt;
 }
 
+void CloudFile::setCreatedAt(const QDateTime &dateTime)
+{
+    m_createdAt = dateTime;
+}
+
+QDateTime CloudFile::updatedAt() const noexcept
+{
+    return m_updatedAt;
+}
+
+void CloudFile::setUpdatedAt(const QDateTime &dateTime)
+{
+    m_createdAt = dateTime;
+}
+
+UserId CloudFile::updatedBy() const noexcept
+{
+    return m_updatedBy;
+}
+
+void CloudFile::setUpdatedBy(const UserId &userId)
+{
+    m_updatedBy = userId;
+}
+
+QByteArray CloudFile::encryptedKey() const noexcept
+{
+    return m_encryptedKey;
+}
+
+void CloudFile::setEncryptedKey(const QByteArray &key)
+{
+    m_encryptedKey = key;
+}
+
+QByteArray CloudFile::publicKey() const noexcept
+{
+    return m_publicKey;
+}
+
+void CloudFile::setPublicKey(const QByteArray &key)
+{
+    m_publicKey = key;
+}
+
+QString CloudFile::localPath() const noexcept
+{
+    return m_localPath;
+}
+
 void CloudFile::setLocalPath(const QString &path)
 {
     m_localPath = path;
 }
 
-QString CloudFile::localPath() const
+QString CloudFile::fingerprint() const noexcept
 {
-    return m_localPath;
+    return m_fingerprint;
 }
 
-QString CloudFile::relativePath(const CloudFile &dir) const
+void CloudFile::setFingerprint(const QString &fingerprint)
 {
-    auto child(*this);
-    QStringList parts;
-    while (child.localPath() != dir.localPath()) {
-        parts.push_front(child.name());
-        child.cdUp();
-    }
-    return parts.join(QLatin1Char('/'));
-}
-
-QString CloudFile::parentPath() const
-{
-    return QFileInfo(m_localPath).absolutePath();
-}
-
-void CloudFile::cdUp()
-{
-    const auto dir = QFileInfo(m_localPath).dir();
-    m_name = dir.dirName();
-    m_isDirectory = true;
-    m_size = 0;
-    m_localPath = dir.absolutePath();
-}
-
-CloudFile CloudFile::child(const QString &name) const
-{
-    return CloudFile(QDir(localPath()).filePath(name));
+    m_fingerprint = fingerprint;
 }

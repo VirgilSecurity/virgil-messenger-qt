@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
+import "../base"
 import "../theme"
 
 ModelListView {
@@ -15,7 +16,7 @@ ModelListView {
         backgroundColor: (model.isSelected || down) ? Theme.contactPressedColor : "transparent"
 
         ImageButton {
-            image: model.isDir ? "Folder-Big" : "File-Big"
+            image: model.isFolder ? "Folder-Big" : "File-Big"
             imageSize: 48
             iconSize: 40
             onClicked: models.cloudFiles.selection.toggle(model.index)
@@ -53,8 +54,8 @@ ModelListView {
         }
 
         onClicked: {
-            if (model.isDir) {
-                controllers.cloudFiles.setDirectory(model.index)
+            if (model.isFolder) {
+                controllers.cloudFiles.switchToFolder(model.index)
             }
             else {
                 controllers.cloudFiles.openFile(model.index)
