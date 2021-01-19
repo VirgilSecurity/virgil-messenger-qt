@@ -32,54 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_COMM_KIT_BRIDGE_H
-#define VM_COMM_KIT_BRIDGE_H
 
-#include <virgil/crypto/common/vsc_str.h>
-#include <virgil/crypto/common/vsc_data.h>
-#include <virgil/crypto/common/vsc_buffer.h>
-
-#include <virgil/crypto/foundation/vscf_impl.h>
-
-#include <virgil/sdk/comm-kit/vssq_messenger_cloud_fs.h>
+#ifndef VM_CLOUD_FS_FOLDER_ID_H
+#define VM_CLOUD_FS_FOLDER_ID_H
 
 #include <QString>
-#include <QByteArray>
 
-#include <string>
-#include <tuple>
-#include <type_traits>
+namespace vm {
+//
+//  This class just wraps QString but is used for a strong type checking.
+//
+class CloudFsFolderId {
+public:
+    explicit CloudFsFolderId(QString id = {});
 
+    operator QString() const;
 
-template<typename CType>
-using vsc_unique_ptr = std::unique_ptr<CType, void(*)(const std::remove_const_t<CType> *)>;
+    bool isValid() const noexcept;
 
-using vsc_buffer_ptr_t = vsc_unique_ptr<vsc_buffer_t>;
+private:
+    QString m_id;
+};
+} // namespace vm
 
-using vssq_messenger_cloud_fs_ptr_t = vsc_unique_ptr<const vssq_messenger_cloud_fs_t>;
+bool operator<(const vm::CloudFsFolderId& lhs, const vm::CloudFsFolderId& rhs);
+bool operator>(const vm::CloudFsFolderId& lhs, const vm::CloudFsFolderId& rhs);
+bool operator==(const vm::CloudFsFolderId& lhs, const vm::CloudFsFolderId& rhs);
+bool operator!=(const vm::CloudFsFolderId& lhs, const vm::CloudFsFolderId& rhs);
 
-using vscf_impl_ptr_t = vsc_unique_ptr<vscf_impl_t>;
-
-using vscf_impl_ptr_const_t = vsc_unique_ptr<const vscf_impl_t>;
-
-vsc_str_t vsc_str_from(const std::string& str);
-
-QString vsc_str_to_qstring(vsc_str_t str);
-
-vsc_data_t vsc_data_from(const QByteArray& data);
-
-QByteArray vsc_data_to_qbytearray(vsc_data_t data);
-
-vsc_buffer_ptr_t vsc_buffer_wrap_ptr(vsc_buffer_t *ptr);
-
-vscf_impl_ptr_t vscf_impl_wrap_ptr(vscf_impl_t *ptr);
-
-vscf_impl_ptr_const_t vscf_impl_wrap_ptr(const vscf_impl_t *ptr);
-
-std::tuple<QByteArray, vsc_buffer_ptr_t> makeMappedBuffer(size_t size);
-
-void ensureMappedBuffer(QByteArray& bytes, vsc_buffer_ptr_t& buffer, size_t capacity);
-
-void adjustMappedBuffer(const vsc_buffer_ptr_t& buffer, QByteArray& bytes);
-
-#endif // VM_COMM_KIT_BRIDGE_H
+#endif // VM_CLOUD_FS_FOLDER_ID_H

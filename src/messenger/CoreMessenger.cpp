@@ -53,10 +53,13 @@ using namespace notifications;
 using namespace notifications::xmpp;
 #endif // VS_PUSHNOTIFICATIONS
 
+#include <virgil/crypto/foundation/vscf_ctr_drbg.h>
+
 #include <virgil/sdk/core/vssc_json_object.h>
 #include <virgil/sdk/comm-kit/vssq_messenger.h>
 #include <virgil/sdk/comm-kit/vssq_error_message.h>
 #include <virgil/sdk/comm-kit/vssq_messenger_file_cipher.h>
+#include <virgil/sdk/comm-kit/vssq_messenger_cloud_fs.h>
 
 #include <qxmpp/QXmppMessage.h>
 #include <qxmpp/QXmppMessageReceiptManager.h>
@@ -80,18 +83,16 @@ Q_LOGGING_CATEGORY(lcCoreMessenger, "core-messenger");
 // --------------------------------------------------------------------------
 // C Helpers.
 // --------------------------------------------------------------------------
-template<typename CType>
-using vsc_unique_ptr = std::unique_ptr<CType, void(*)(const CType*)>;
+using vscf_ctr_drbg_ptr_t = vsc_unique_ptr<vscf_ctr_drbg_t>;
 
-using vsc_buffer_unique_ptr_t = vsc_unique_ptr<vsc_buffer_t>;
 using vssc_json_object_unique_ptr_t = vsc_unique_ptr<vssc_json_object_t>;
 using vssq_messenger_creds_unique_ptr_t = vsc_unique_ptr<vssq_messenger_creds_t>;
-using vssq_messenger_unique_ptr_t = vsc_unique_ptr<vssq_messenger_t>;
+using vssq_messenger_ptr_t = vsc_unique_ptr<vssq_messenger_t>;
 using vssq_messenger_file_cipher_ptr_t = vsc_unique_ptr<vssq_messenger_file_cipher_t>;
 
 
-static vsc_buffer_unique_ptr_t vsc_buffer_wrap_ptr(vsc_buffer_t *ptr) {
-    return vsc_buffer_unique_ptr_t{ptr, vsc_buffer_delete};
+static vscf_ctr_drbg_ptr_t vscf_ctr_drbg_wrap_ptr(vscf_ctr_drbg_t *ptr) {
+    return vscf_ctr_drbg_ptr_t{ptr, vscf_ctr_drbg_delete};
 }
 
 static vssc_json_object_unique_ptr_t vssc_json_object_wrap_ptr(vssc_json_object_t *ptr) {
@@ -102,26 +103,12 @@ static vssq_messenger_creds_unique_ptr_t vssq_messenger_creds_wrap_ptr(vssq_mess
     return vssq_messenger_creds_unique_ptr_t{ptr, vssq_messenger_creds_delete};
 }
 
-static vssq_messenger_unique_ptr_t vssq_messenger_wrap_ptr(vssq_messenger_t *ptr) {
-    return vssq_messenger_unique_ptr_t{ptr, vssq_messenger_delete};
+static vssq_messenger_ptr_t vssq_messenger_wrap_ptr(vssq_messenger_t *ptr) {
+    return vssq_messenger_ptr_t{ptr, vssq_messenger_delete};
 }
 
 static vssq_messenger_file_cipher_ptr_t vssq_messenger_file_cipher_wrap(vssq_messenger_file_cipher_t *ptr) {
     return vssq_messenger_file_cipher_ptr_t{ptr, vssq_messenger_file_cipher_delete};
-}
-
-static std::tuple<QByteArray, vsc_buffer_unique_ptr_t> makeMappedBuffer(size_t size) {
-
-    QByteArray byteArray(size, 0x00);
-    auto buffer  = vsc_buffer_wrap_ptr(vsc_buffer_new());
-    vsc_buffer_use(buffer.get(),  (byte *)byteArray.data(), byteArray.size());
-
-    return std::make_tuple(std::move(byteArray), std::move(buffer));
-}
-
-static void adjustMappedBuffer(const vsc_buffer_unique_ptr_t& buffer, QByteArray& bytes) {
-
-    bytes.resize(vsc_buffer_len(buffer.get()));
 }
 
 
@@ -130,7 +117,9 @@ static void adjustMappedBuffer(const vsc_buffer_unique_ptr_t& buffer, QByteArray
 // --------------------------------------------------------------------------
 class Self::Impl {
 public:
-    vssq_messenger_unique_ptr_t messenger = vssq_messenger_wrap_ptr(nullptr);
+    vscf_impl_ptr_t random = vscf_impl_ptr_t(nullptr, vscf_impl_delete);
+
+    vssq_messenger_ptr_t messenger = vssq_messenger_wrap_ptr(nullptr);
 
     VSQNetworkAnalyzer *networkAnalyzer;
 
@@ -225,9 +214,21 @@ Self::resetCommKitConfiguration() {
     }
 
     m_impl->messenger = vssq_messenger_wrap_ptr(vssq_messenger_new_with_config(config));
-
-    auto status = vssq_messenger_setup_defaults(m_impl->messenger.get());
     vssq_messenger_config_destroy(&config);
+
+    if (!m_impl->random) {
+        auto randomImpl = vscf_ctr_drbg_wrap_ptr(vscf_ctr_drbg_new());
+        auto randomStatus = vscf_ctr_drbg_setup_defaults(randomImpl.get());
+        if (randomStatus != vscf_status_SUCCESS) {
+            qCWarning(lcCoreMessenger) << "Got error status: failed to init crypto module - random";
+            return Self::Result::Error_CryptoInit;
+        }
+
+        m_impl->random = vscf_impl_wrap_ptr(vscf_ctr_drbg_impl(randomImpl.release()));
+    }
+
+    vssq_messenger_use_random(m_impl->messenger.get(), m_impl->random.get());
+    auto status = vssq_messenger_setup_defaults(m_impl->messenger.get());
 
     if (status != vssq_status_SUCCESS) {
         qCWarning(lcCoreMessenger) << "Got error status: " << vsc_str_to_qstring(vssq_error_message_from_status(status));
@@ -1768,4 +1769,15 @@ Self::onLogConnectionStateChanged(CoreMessenger::ConnectionState state) {
             qCDebug(lcCoreMessenger) << "New connection status: error";
             break;
     }
+}
+
+// --------------------------------------------------------------------------
+//  Cloud FS.
+// --------------------------------------------------------------------------
+CoreMessengerCloudFs
+Self::cloudFs() const {
+    auto cloudFsCopyPtr = vssq_messenger_cloud_fs_shallow_copy_const(vssq_messenger_cloud_fs(m_impl->messenger.get()));
+    auto cloudFsCopy = vssq_messenger_cloud_fs_ptr_t(cloudFsCopyPtr, vssq_messenger_cloud_fs_delete);
+    auto randomCopy = vscf_impl_wrap_ptr(vscf_impl_shallow_copy(m_impl->random.get()));
+    return CoreMessengerCloudFs(std::move(cloudFsCopy), std::move(randomCopy));
 }

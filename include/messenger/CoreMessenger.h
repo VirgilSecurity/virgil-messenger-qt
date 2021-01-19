@@ -36,12 +36,14 @@
 #define VM_CORE_MESSENGER_H
 
 
+#include "Chat.h"
+#include "CoreMessengerCloudFs.h"
+#include "CoreMessengerStatus.h"
+#include "Group.h"
 #include "Message.h"
 #include "MessageUpdate.h"
-#include "User.h"
-#include "Group.h"
-#include "Chat.h"
 #include "Settings.h"
+#include "User.h"
 
 #include <qxmpp/QXmppClient.h>
 #include <qxmpp/QXmppHttpUploadIq.h>
@@ -61,33 +63,7 @@ class CoreMessenger : public QObject
 {
     Q_OBJECT
 public:
-    enum class Result
-    {
-        Success,
-        Error_CryptoInit,
-        Error_Offline,
-        Error_NoCred,
-        Error_Signin,
-        Error_Signup,
-        Error_MakeKeyBackup,
-        Error_RestoreKeyBackup,
-        Error_UserNotFound,
-        Error_UserAlreadyExists,
-        Error_ExportCredentials,
-        Error_ImportCredentials,
-        Error_InvalidCarbonMessage,
-        Error_InvalidMessageFormat,
-        Error_InvalidMessageVersion,
-        Error_InvalidMessageTimestamp,
-        Error_InvalidMessageCiphertext,
-        Error_FileEncryptionReadFailed,
-        Error_FileEncryptionWriteFailed,
-        Error_FileEncryptionCryptoFailed,
-        Error_FileDecryptionReadFailed,
-        Error_FileDecryptionWriteFailed,
-        Error_FileDecryptionCryptoFailed,
-        Error_SendMessageFailed,
-    };
+    using Result = CoreMessengerStatus;
 
     enum class ConnectionState {
         Disconnected,
@@ -189,6 +165,11 @@ public:
     void setCurrentRecipient(const UserId& recipientId);
 
     //
+    //  Cloud FS.
+    //
+    CoreMessengerCloudFs cloudFs() const;
+
+    //
     //  Internal helpers.
     //
     QUrl getCrashReportEndpointUrl() const;
@@ -273,7 +254,6 @@ Q_DECLARE_METATYPE(vm::ModifiableMessageHandler);
 Q_DECLARE_METATYPE(vm::Messages);
 Q_DECLARE_METATYPE(vm::ModifiableMessages);
 Q_DECLARE_METATYPE(vm::UserHandler);
-Q_DECLARE_METATYPE(vm::GroupHandler);
 Q_DECLARE_METATYPE(vm::ChatHandler);
 Q_DECLARE_METATYPE(vm::ModifiableChatHandler);
 Q_DECLARE_METATYPE(vm::ModifiableChats);

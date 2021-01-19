@@ -122,6 +122,7 @@ bool Self::readMessageContentAttachment(const QSqlQuery &query, MessageContentAt
     const auto attachmentId = query.value("attachmentId").toString();
     const auto attachmentFingerprint = query.value("attachmentFingerprint").toString();
     const auto attachmentDecryptionKey = query.value("attachmentDecryptionKey").toByteArray();
+    const auto attachmentSignature = query.value("attachmentSignature").toByteArray();
     const auto attachmentFilename = query.value("attachmentFilename").toString();
     const auto attachmentLocalPath = query.value("attachmentLocalPath").toString();
     const auto attachmentUrl = query.value("attachmentUrl").toString();
@@ -133,6 +134,7 @@ bool Self::readMessageContentAttachment(const QSqlQuery &query, MessageContentAt
     attachment.setId(AttachmentId(attachmentId));
     attachment.setFingerprint(attachmentFingerprint);
     attachment.setDecryptionKey(attachmentDecryptionKey);
+    attachment.setSignature(attachmentSignature);
     attachment.setFileName(attachmentFilename);
     attachment.setLocalPath(attachmentLocalPath);
     attachment.setRemoteUrl(attachmentUrl);

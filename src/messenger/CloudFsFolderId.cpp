@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,54 +32,38 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_COMM_KIT_BRIDGE_H
-#define VM_COMM_KIT_BRIDGE_H
 
-#include <virgil/crypto/common/vsc_str.h>
-#include <virgil/crypto/common/vsc_data.h>
-#include <virgil/crypto/common/vsc_buffer.h>
-
-#include <virgil/crypto/foundation/vscf_impl.h>
-
-#include <virgil/sdk/comm-kit/vssq_messenger_cloud_fs.h>
-
-#include <QString>
-#include <QByteArray>
-
-#include <string>
-#include <tuple>
-#include <type_traits>
+#include "CloudFsFolderId.h"
 
 
-template<typename CType>
-using vsc_unique_ptr = std::unique_ptr<CType, void(*)(const std::remove_const_t<CType> *)>;
+using namespace vm;
+using Self = CloudFsFolderId;
 
-using vsc_buffer_ptr_t = vsc_unique_ptr<vsc_buffer_t>;
 
-using vssq_messenger_cloud_fs_ptr_t = vsc_unique_ptr<const vssq_messenger_cloud_fs_t>;
+Self::CloudFsFolderId(QString id) : m_id(std::move(id)) {
 
-using vscf_impl_ptr_t = vsc_unique_ptr<vscf_impl_t>;
+}
 
-using vscf_impl_ptr_const_t = vsc_unique_ptr<const vscf_impl_t>;
+Self::operator QString() const {
+    return m_id;
+}
 
-vsc_str_t vsc_str_from(const std::string& str);
+bool Self::isValid() const noexcept {
+    return !m_id.isEmpty();
+}
 
-QString vsc_str_to_qstring(vsc_str_t str);
+bool operator<(const Self& lhs, const Self& rhs) {
+    return QString(lhs) < QString(rhs);
+}
 
-vsc_data_t vsc_data_from(const QByteArray& data);
+bool operator>(const Self& lhs, const Self& rhs) {
+    return QString(lhs) > QString(rhs);
+}
 
-QByteArray vsc_data_to_qbytearray(vsc_data_t data);
+bool operator==(const Self& lhs, const Self& rhs) {
+    return QString(lhs) == QString(rhs);
+}
 
-vsc_buffer_ptr_t vsc_buffer_wrap_ptr(vsc_buffer_t *ptr);
-
-vscf_impl_ptr_t vscf_impl_wrap_ptr(vscf_impl_t *ptr);
-
-vscf_impl_ptr_const_t vscf_impl_wrap_ptr(const vscf_impl_t *ptr);
-
-std::tuple<QByteArray, vsc_buffer_ptr_t> makeMappedBuffer(size_t size);
-
-void ensureMappedBuffer(QByteArray& bytes, vsc_buffer_ptr_t& buffer, size_t capacity);
-
-void adjustMappedBuffer(const vsc_buffer_ptr_t& buffer, QByteArray& bytes);
-
-#endif // VM_COMM_KIT_BRIDGE_H
+bool operator!=(const Self& lhs, const Self& rhs) {
+    return QString(lhs) != QString(rhs);
+}
