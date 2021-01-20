@@ -10,7 +10,7 @@ Control {
         color: Theme.mainBackgroundColor
     }
 
-    readonly property bool isFileCloud: app.stateManager.currentState === manager.fileCloudState
+    readonly property bool isCloudFileList: app.stateManager.currentState === manager.cloudFileListState
     readonly property int defaultMargin: 9
 
     default property alias menu: contextMenu.contentData
@@ -22,7 +22,7 @@ Control {
         height: button.height + 2 * defaultMargin
         color: Theme.contactsBackgroundColor
 
-        readonly property var button: isFileCloud ? fileCloudButton : chatListButton
+        readonly property var button: isCloudFileList ? cloudFileListButton : chatListButton
     }
 
     ColumnLayout {
@@ -49,11 +49,11 @@ Control {
         }
 
         SidebarButton {
-            id: fileCloudButton
+            id: cloudFileListButton
             Layout.alignment: Qt.AlignHCenter
             imageSize: 32
             imageSource: "../resources/icons/File-Manager.png"
-            onClicked: app.stateManager.openFileCloud()
+            onClicked: app.stateManager.openCloudFileList()
         }
 
         ImageButton {

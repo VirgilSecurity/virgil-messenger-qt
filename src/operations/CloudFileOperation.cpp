@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,60 +32,19 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_FILECLOUDMODEL_H
-#define VM_FILECLOUDMODEL_H
+#include "CloudFileOperation.h"
 
-#include <QDateTime>
-#include <QFileInfoList>
-#include <QTimer>
+using namespace vm;
 
-#include "ListModel.h"
+quint64 CloudFileOperation::m_counter = 0;
 
-class QSortFilterProxyModel;
-
-class Settings;
-
-namespace vm
+CloudFileOperation::CloudFileOperation(const UserId &userId, QObject *parent)
+    : Operation(QLatin1String("CloudFile(%1)").arg(QString::number(++m_counter)), parent)
+    , m_userId(userId)
 {
-class FileCloudModel : public ListModel
-{
-    Q_OBJECT
-
-public:
-    enum Roles
-    {
-        FilenameRole = Qt::UserRole,
-        IsDirRole,
-        DisplayDateTimeRole,
-        DisplayFileSize,
-        SortRole
-    };
-
-    FileCloudModel(const Settings *settings, QObject *parent);
-
-    void setDirectory(const QDir &dir);
-    void setEnabled(bool enabled);
-
-    const QFileInfo getFileInfo(const int proxyRow) const;
-
-signals:
-    void listReady(const QFileInfoList &list, QPrivateSignal);
-
-private:
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
-
-    void setList(const QFileInfoList &list);
-
-    void invalidateDateTime();
-
-    const Settings *m_settings;
-    QFileInfoList m_list;
-    QDateTime m_now;
-    QTimer m_updateTimer;
-    int m_debugCounter = 0;
-};
 }
 
-#endif // VM_FILECLOUDMODEL_H
+UserId CloudFileOperation::userId() const
+{
+    return m_userId;
+}

@@ -46,6 +46,7 @@
 #include <QString>
 #include <QByteArray>
 
+#include <memory>
 #include <string>
 #include <tuple>
 #include <type_traits>

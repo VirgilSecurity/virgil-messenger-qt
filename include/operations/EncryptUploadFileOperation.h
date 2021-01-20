@@ -50,7 +50,7 @@ class EncryptUploadFileOperation : public NetworkOperation
     Q_OBJECT
 
 public:
-    EncryptUploadFileOperation(NetworkOperation *parent, Messenger *messenger, const Settings *settings, const QString &sourcePath);
+    EncryptUploadFileOperation(NetworkOperation *parent, Messenger *messenger, const QString &sourcePath);
 
     void setSourcePath(const QString &sourcePath);
 

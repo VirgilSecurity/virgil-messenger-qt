@@ -113,6 +113,7 @@ public:
     void setApplicationActive(bool active);
     void suspend();
 
+    QPointer<Settings> settings() noexcept;
     QPointer<CrashReporter> crashReporter() noexcept;
     QPointer<FileLoader> fileLoader() noexcept;
 

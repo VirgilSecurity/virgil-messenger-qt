@@ -34,17 +34,17 @@
 
 #include "models/Models.h"
 
-#include <QSortFilterProxyModel>
-
-#include "Settings.h"
+#include "AccountSelectionModel.h"
+#include "ChatsModel.h"
+#include "CloudFilesModel.h"
+#include "CloudFilesQueue.h"
+#include "CloudFilesUploader.h"
+#include "DiscoveredContactsModel.h"
+#include "MessagesModel.h"
+#include "MessagesQueue.h"
+#include "FileLoader.h"
+#include "UserDatabase.h"
 #include "Messenger.h"
-#include "models/AccountSelectionModel.h"
-#include "models/ChatsModel.h"
-#include "models/DiscoveredContactsModel.h"
-#include "models/FileCloudModel.h"
-#include "models/FileCloudUploader.h"
-#include "models/MessagesModel.h"
-#include "models/MessagesQueue.h"
 
 using namespace vm;
 
@@ -54,13 +54,14 @@ Models::Models(Messenger *messenger, Settings *settings, UserDatabase *userDatab
     , m_chats(new ChatsModel(this))
     , m_discoveredContacts(new DiscoveredContactsModel(validator, this))
     , m_messages(new MessagesModel(this))
-    , m_fileCloud(new FileCloudModel(settings, this))
-    , m_fileCloudUploader(new FileCloudUploader(this))
+    , m_cloudFiles(new CloudFilesModel(settings, this))
+    , m_cloudFilesQueue(new CloudFilesQueue(messenger, this))
+    , m_cloudFilesUploader(new CloudFilesUploader(this))
     , m_fileLoader(messenger->fileLoader())
-    , m_messagesQueue(new MessagesQueue(settings, messenger, userDatabase, nullptr)) // TODO(fpohtmeh): set parent?
-    , m_queueThread(new QThread())
+    , m_messagesQueue(new MessagesQueue(messenger, userDatabase, this))
 {
     connect(m_messagesQueue, &MessagesQueue::notificationCreated, this, &Models::notificationCreated);
+    connect(m_cloudFilesQueue, &CloudFilesQueue::notificationCreated, this, &Models::notificationCreated);
 }
 
 Models::~Models()
@@ -97,24 +98,34 @@ DiscoveredContactsModel *Models::discoveredContacts()
     return m_discoveredContacts;
 }
 
-const FileCloudModel *Models::fileCloud() const
+const CloudFilesModel *Models::cloudFiles() const
 {
-    return m_fileCloud;
+    return m_cloudFiles;
 }
 
-FileCloudModel *Models::fileCloud()
+CloudFilesModel *Models::cloudFiles()
 {
-    return m_fileCloud;
+    return m_cloudFiles;
 }
 
-const FileCloudUploader *Models::fileCloudUploader() const
+const CloudFilesQueue *Models::cloudFilesQueue() const
 {
-    return m_fileCloudUploader;
+    return m_cloudFilesQueue;
 }
 
-FileCloudUploader *Models::fileCloudUploader()
+CloudFilesQueue *Models::cloudFilesQueue()
 {
-    return m_fileCloudUploader;
+    return m_cloudFilesQueue;
+}
+
+const CloudFilesUploader *Models::cloudFilesUploader() const
+{
+    return m_cloudFilesUploader;
+}
+
+CloudFilesUploader *Models::cloudFilesUploader()
+{
+    return m_cloudFilesUploader;
 }
 
 const FileLoader *Models::fileLoader() const

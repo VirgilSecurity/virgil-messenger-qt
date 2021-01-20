@@ -66,7 +66,7 @@ class MessageOperationFactory : public QObject
     Q_OBJECT
 
 public:
-    explicit MessageOperationFactory(const Settings *settings, Messenger *messenger, QObject *parent);
+    MessageOperationFactory(Messenger *messenger, QObject *parent);
 
     void populateAll(MessageOperation *messageOp);
     void populateDownload(MessageOperation *messageOp, const QString &filePath);
@@ -87,7 +87,8 @@ private:
     void populateMessageOperation(MessageOperation *messageOp);
     void populateDownloadOperation(MessageOperation *messageOp);
 
-    const Settings *m_settings;
+    const QPointer<Settings> settings() const;
+
     QPointer<Messenger> m_messenger;
 };
 }
