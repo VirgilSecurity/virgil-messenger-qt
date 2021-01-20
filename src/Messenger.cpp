@@ -280,6 +280,10 @@ Self::subscribeToUser(const UserId &userId)
 }
 
 
+QPointer<Settings> Self::settings() noexcept {
+    return m_settings;
+}
+
 
 QPointer<CrashReporter> Self::crashReporter() noexcept {
     return m_crashReporter;

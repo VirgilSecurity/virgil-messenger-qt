@@ -48,6 +48,7 @@ class Validator : public QObject
     Q_PROPERTY(QRegularExpressionValidator *reUsername MEMBER m_reUsername CONSTANT)
     Q_PROPERTY(QRegularExpressionValidator *rePhone MEMBER m_rePhone CONSTANT)
     Q_PROPERTY(QRegularExpressionValidator *reEmail MEMBER m_reEmail CONSTANT)
+    Q_PROPERTY(QRegularExpressionValidator *reDirectoryName MEMBER m_reDirectoryName CONSTANT)
 
 public:
     explicit Validator(QObject *parent);
@@ -61,6 +62,7 @@ private:
     QRegularExpressionValidator *m_reUsername;
     QRegularExpressionValidator *m_rePhone;
     QRegularExpressionValidator *m_reEmail;
+    QRegularExpressionValidator *m_reDirectoryName;
 };
 }
 

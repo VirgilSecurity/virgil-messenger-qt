@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,48 +32,41 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_FILECLOUDCONTROLLER_H
-#define VM_FILECLOUDCONTROLLER_H
+#ifndef VM_OPERATIONSOURCE_H
+#define VM_OPERATIONSOURCE_H
 
-#include <QDir>
-#include <QObject>
+#include <memory>
 
-class Settings;
+#include <QString>
 
 namespace vm
 {
-class FileCloudModel;
-class Models;
-
-class FileCloudController : public QObject
+class OperationSource
 {
-    Q_OBJECT
-    Q_PROPERTY(QString displayPath MEMBER m_displayPath NOTIFY displayPathChanged)
-
 public:
-    FileCloudController(const Settings *settings, Models *models, QObject *parent);
+    enum class Priority
+    {
+        Default,
+        Highest
+    };
 
-    Q_INVOKABLE void openFile(const QVariant &proxyRow);
-    Q_INVOKABLE void setDirectory(const QVariant &proxyRow);
-    Q_INVOKABLE void processClick(const QVariant &proxyRow);
-    Q_INVOKABLE void cdUp();
-    Q_INVOKABLE void addFile(const QVariant &attachmentUrl);
+    virtual ~OperationSource() {}
 
-signals:
-    void displayPathChanged(const QString &path);
+    virtual bool isValid() const = 0;
+    virtual QString toString() const = 0;
+
+    qsizetype attemptCount() const { return m_attemptCount; }
+    void incAttemptCount() { ++m_attemptCount; }
+
+    void setPriority(Priority priority) { m_priority = priority; }
+    Priority priority() const { return m_priority; }
 
 private:
-    FileCloudModel *model();
-    void setDirectory(const QDir &dir);
-
-    const Settings *m_settings;
-    Models *m_models;
-
-    QDir m_rootDir;
-    QDir m_currentDir;
-    QString m_displayPath;
+    qsizetype m_attemptCount = 0;
+    Priority m_priority = Priority::Default;
 };
+
+using OperationSourcePtr = std::shared_ptr<OperationSource>;
 }
 
-
-#endif // VM_FILECLOUDCONTROLLER_H
+#endif // VM_OPERATIONSOURCE_H

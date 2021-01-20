@@ -43,11 +43,11 @@
 
 using namespace vm;
 
-EncryptUploadFileOperation::EncryptUploadFileOperation(NetworkOperation *parent, Messenger *messenger, const Settings *settings, const QString &sourcePath)
+EncryptUploadFileOperation::EncryptUploadFileOperation(NetworkOperation *parent, Messenger *messenger, const QString &sourcePath)
     : NetworkOperation(parent)
     , m_messenger(messenger)
     , m_sourcePath(sourcePath)
-    , m_tempPath(settings->attachmentCacheDir().filePath(Utils::createUuid()))
+    , m_tempPath(messenger->settings()->attachmentCacheDir().filePath(Utils::createUuid()))
 {
     setName(QLatin1String("EncryptUpload"));
 }

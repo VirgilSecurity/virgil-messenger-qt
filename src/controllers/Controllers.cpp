@@ -38,7 +38,7 @@
 #include "Messenger.h"
 #include "controllers/AttachmentsController.h"
 #include "controllers/ChatsController.h"
-#include "controllers/FileCloudController.h"
+#include "controllers/CloudFilesController.h"
 #include "controllers/MessagesController.h"
 #include "controllers/UsersController.h"
 #include "database/UserDatabase.h"
@@ -54,7 +54,7 @@ Controllers::Controllers(Messenger *messenger, Settings *settings,
     , m_users(new UsersController(messenger, models, userDatabase, this))
     , m_chats(new ChatsController(messenger, models, userDatabase, this))
     , m_messages(new MessagesController(messenger, settings, models, userDatabase, this))
-    , m_fileCloud(new FileCloudController(settings, models, this))
+    , m_cloudFiles(new CloudFilesController(settings, models, userDatabase, this))
 {
     connect(m_attachments, &AttachmentsController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_messages, &MessagesController::notificationCreated, this, &Controllers::notificationCreated);
@@ -71,7 +71,7 @@ Controllers::Controllers(Messenger *messenger, Settings *settings,
     qRegisterMetaType<ChatsController *>("ChatsController*");
     qRegisterMetaType<MessagesController *>("MessagesController*");
     qRegisterMetaType<UsersController *>("UsersController*");
-    qRegisterMetaType<FileCloudController *>("FileCloudController*");
+    qRegisterMetaType<CloudFilesController *>("CloudFilesController*");
 }
 
 const AttachmentsController *Controllers::attachments() const
@@ -114,12 +114,12 @@ MessagesController *Controllers::messages()
     return m_messages;
 }
 
-const FileCloudController *Controllers::fileCloud() const
+const CloudFilesController *Controllers::cloudFiles() const
 {
-    return m_fileCloud;
+    return m_cloudFiles;
 }
 
-FileCloudController *Controllers::fileCloud()
+CloudFilesController *Controllers::cloudFiles()
 {
-    return m_fileCloud;
+    return m_cloudFiles;
 }

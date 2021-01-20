@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,32 +32,30 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_FILECLOUDSTATE_H
-#define VM_FILECLOUDSTATE_H
+#ifndef VM_UPLOAD_CLOUD_FILE_OPERATION_H
+#define VM_UPLOAD_CLOUD_FILE_OPERATION_H
 
-#include <QState>
-
-#include "models/FileCloudModel.h"
+#include "CloudFile.h"
+#include "Operation.h"
 
 namespace vm
 {
-class Models;
+class CloudFileOperation;
 
-class FileCloudState : public QState
+class UploadCloudFileOperation : public Operation
 {
     Q_OBJECT
 
 public:
-    FileCloudState(Models *models, QState *parent);
+    UploadCloudFileOperation(CloudFileOperation *parent, const QString &filePath, const CloudFileHandler &folder);
+
+    void run() override;
 
 private:
-    void onEntry(QEvent *);
-    void onExit(QEvent *);
-
-    void setEnabled(bool enabled);
-
-    Models *m_models;
+    CloudFileOperation *m_parent;
+    QString m_filePath;
+    CloudFileHandler m_folder;
 };
 }
 
-#endif // VM_FILECLOUDSTATE_H
+#endif // VM_UPLOAD_CLOUD_FILE_OPERATION_H

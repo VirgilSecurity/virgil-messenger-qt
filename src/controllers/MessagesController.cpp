@@ -63,7 +63,6 @@ Self::MessagesController(Messenger *messenger, const Settings *settings, Models 
     , m_models(models)
     , m_userDatabase(userDatabase)
 {
-    qRegisterMetaType<MessageHandler>("MessageHandler");
     qRegisterMetaType<MessageUpdate>("MessageUpdate");
 
     auto messagesQueue = m_models->messagesQueue();

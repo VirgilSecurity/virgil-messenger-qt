@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,48 +32,40 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_FILECLOUDUPLOADER_H
-#define VM_FILECLOUDUPLOADER_H
+#ifndef VM_MESSAGEOPERATIONSOURCE_H
+#define VM_MESSAGEOPERATIONSOURCE_H
 
-
-#include <QObject>
-
+#include "DownloadAttachmentOperation.h"
+#include "Message.h"
+#include "OperationSource.h"
 
 namespace vm
 {
-class FileCloudUploader : public QObject
+class MessageOperationSource : public OperationSource
 {
-    Q_OBJECT
-
-    Q_PROPERTY(int currentIndex READ currentIndex NOTIFY currentIndexChanged)
-    Q_PROPERTY(qint64 currentProcessedBytes READ currentProcessedBytes WRITE setCurrentProcessedBytes NOTIFY currentProcessedBytesChanged)
-    Q_PROPERTY(qint64 currentTotalBytes READ currentTotalBytes NOTIFY currentTotalBytesChanged)
-    Q_PROPERTY(QStringList fileNames READ fileNames NOTIFY fileNamesChanged)
-
 public:
-    FileCloudUploader(QObject *parent);
+    using PostDownloadFunction = std::function<void ()>;
 
-    int currentIndex() const;
-    qint64 currentProcessedBytes() const;
-    qint64 currentTotalBytes() const;
-    QStringList fileNames() const;
+    // Parameter for download/preload
+    struct DownloadParameter : DownloadAttachmentOperation::Parameter
+    {
+        PostDownloadFunction postFunction;
+    };
 
-    void setCurrentIndex(const int index);
-    void setCurrentProcessedBytes(const qint64 bytes);
-    void setCurrentTotalBytes(const qint64 bytes);
+    MessageOperationSource() = default;
+    explicit MessageOperationSource(ModifiableMessageHandler message, std::optional<DownloadParameter> download = std::nullopt);
 
-signals:
-    void currentIndexChanged(const int &index);
-    void currentProcessedBytesChanged(const qint64 bytes);
-    void currentTotalBytesChanged(const qint64 bytes);
-    void fileNamesChanged(const QStringList &fileNames);
+    bool isValid() const override;
+    QString toString() const override;
+
+    ModifiableMessageHandler message();
+    MessageHandler message() const;
+    std::optional<DownloadParameter> download() const;
 
 private:
-    QStringList m_fileNames;
-    int m_currentIndex;
-    int m_currentProcessedBytes;
-    int m_currentTotalBytes;
+    ModifiableMessageHandler m_message;
+    std::optional<DownloadParameter> m_download;
 };
 }
 
-#endif // VM_FILECLOUDUPLOADER_H
+#endif // VM_MESSAGEOPERATIONSOURCE_H

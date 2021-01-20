@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,61 +32,48 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/FileCloudUploader.h"
+#ifndef VM_CLOUD_FILE_OPERATION_SOURCE_H
+#define VM_CLOUD_FILE_OPERATION_SOURCE_H
 
-using namespace vm;
+#include "CloudFile.h"
+#include "OperationSource.h"
 
-FileCloudUploader::FileCloudUploader(QObject *parent)
-    : QObject(parent)
-    , m_currentIndex(-1)
-    , m_currentProcessedBytes(-1)
-    , m_currentTotalBytes(-1)
+namespace vm
 {
-    qRegisterMetaType<FileCloudUploader *>("FileCloudUploader*");
+class CloudFileOperationSource : public OperationSource
+{
+public:
+    enum class Type
+    {
+        CreateFolder,
+        Upload,
+        Delete
+    };
+
+    explicit CloudFileOperationSource(Type type);
+
+    Type type() const;
+
+    CloudFileHandler folder() const;
+    void setFolder(const CloudFileHandler &folder);
+    CloudFiles files() const;
+    void setFiles(const CloudFiles &files);
+    QString filePath() const;
+    void setFilePath(const QString &path);
+    QString name() const;
+    void setName(const QString &name);
+
+    bool isValid() const override;
+    QString toString() const override;
+
+private:
+    Type m_type;
+    CloudFileHandler m_folder;
+    CloudFiles m_files;
+    QString m_filePath;
+    QString m_name;
+};
 }
 
-int FileCloudUploader::currentIndex() const
-{
-    return m_currentIndex;
-}
-
-qint64 FileCloudUploader::currentProcessedBytes() const
-{
-    return m_currentProcessedBytes;
-}
-
-qint64 FileCloudUploader::currentTotalBytes() const
-{
-    return m_currentTotalBytes;
-}
-
-QStringList FileCloudUploader::fileNames() const
-{
-    return m_fileNames;
-}
-
-void FileCloudUploader::setCurrentIndex(const int index)
-{
-    if (m_currentIndex != index) {
-        m_currentIndex = index;
-        emit currentIndexChanged(m_currentIndex);
-    }
-}
-
-void FileCloudUploader::setCurrentProcessedBytes(const qint64 bytes)
-{
-    if (m_currentProcessedBytes != bytes) {
-        m_currentProcessedBytes = bytes;
-        emit currentProcessedBytesChanged(m_currentProcessedBytes);
-    }
-}
-
-void FileCloudUploader::setCurrentTotalBytes(const qint64 bytes)
-{
-    if (m_currentTotalBytes != bytes) {
-        m_currentTotalBytes = bytes;
-        emit currentTotalBytesChanged(m_currentTotalBytes);
-    }
-}
-
+#endif // VM_CLOUD_FILE_OPERATION_SOURCE_H
 

@@ -22,7 +22,7 @@ Control {
 
         SidebarPanel {
             id: sideBar
-            visible: [manager.chatListState, manager.fileCloudState].includes(manager.currentState)
+            visible: [manager.chatListState, manager.cloudFileListState].includes(manager.currentState)
             z: 2
             Layout.preferredWidth: Theme.headerHeight
             Layout.fillHeight: true
@@ -34,8 +34,7 @@ Control {
                 onTriggered: controllers.users.requestAccountSettings(controllers.users.currentUsername)
             }
 
-            MenuSeparator {
-                leftPadding: Theme.padding
+            ContextMenuSeparator {
             }
 
             Action {
@@ -64,7 +63,7 @@ Control {
             left: parent.left
             right: parent.right
         }
-        visible: manager.currentState === manager.fileCloudState ? "opened" : "closed"
+        visible: manager.currentState === manager.cloudFileListState ? "opened" : "closed"
     }
 
     LogControl {
@@ -91,8 +90,8 @@ Control {
             if (attachmentPreview.visible) {
                 attachmentPreview.visible = false
             }
-            else if (manager.currentState === manager.fileCloudState) {
-                controllers.fileCloud.cdUp()
+            else if (manager.currentState === manager.cloudFileListState) {
+                controllers.cloudFiles.switchToParentFolder()
             }
             else {
                 stackView.pop()
@@ -112,28 +111,28 @@ Control {
 
         function openChatListPage() {
             if ([manager.splashScreenState, manager.accountSelectionState,
-                 manager.signUpState, manager.downloadKeyState, manager.fileCloudState].includes(manager.previousState)) {
+                 manager.signUpState, manager.downloadKeyState, manager.cloudFileListState].includes(manager.previousState)) {
                 stackView.clear()
                 stackView.push(page("Main"))
             }
         }
 
         function openAccountSettingsPage() {
-            if (![manager.chatListState, manager.fileCloudState, manager.newChatState].includes(manager.previousState)) {
+            if (![manager.chatListState, manager.cloudFileListState, manager.newChatState].includes(manager.previousState)) {
                 return
             }
             stackView.push(page("AccountSettings"), StackView.Transition)
         }
 
         function openAddNewChatPage() {
-            if (![manager.chatListState, manager.fileCloudState, manager.newChatState].includes(manager.previousState)) {
+            if (![manager.chatListState, manager.cloudFileListState, manager.newChatState].includes(manager.previousState)) {
                 return
             }
             stackView.push(page("NewChat"))
         }
 
         function openAddNewGroupChatPage() {
-            if (![manager.chatListState, manager.fileCloudState, manager.newChatState].includes(manager.previousState)) {
+            if (![manager.chatListState, manager.cloudFileListState, manager.newChatState].includes(manager.previousState)) {
                 return
             }
             stackView.push(page("NewGroupChat"))

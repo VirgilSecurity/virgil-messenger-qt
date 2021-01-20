@@ -58,7 +58,7 @@ signals:
     void fetchNotSentMessages();
     void addMessage(const MessageHandler &message);
 
-    void updateMessage(const MessageUpdate &messageId);
+    void updateMessage(const MessageUpdate &messageUpdate);
     void markAllAsRead(const Chat &chat);
 
     //
@@ -75,7 +75,7 @@ private:
     void onFetchNotSentMessages();
     void onAddMessage(const MessageHandler &message);
 
-    void onUpdateMessage(const MessageUpdate &MessageUpdate);
+    void onUpdateMessage(const MessageUpdate &messageUpdate);
     void onMarkAllAsRead(const Chat &chat);
 };
 }

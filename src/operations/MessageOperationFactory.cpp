@@ -55,10 +55,8 @@ using namespace vm;
 
 using DownloadType = DownloadAttachmentOperation::Parameter::Type;
 
-MessageOperationFactory::MessageOperationFactory(const Settings *settings, Messenger *messenger,
-                                                 QObject *parent)
+MessageOperationFactory::MessageOperationFactory(Messenger *messenger, QObject *parent)
     : QObject(parent)
-    , m_settings(settings)
     , m_messenger(messenger)
 {}
 
@@ -70,51 +68,51 @@ void MessageOperationFactory::populateAll(MessageOperation *messageOp)
 
 void MessageOperationFactory::populateDownload(MessageOperation *messageOp, const QString &filePath)
 {
-    messageOp->appendChild(new DownloadAttachmentOperation(messageOp, m_settings, { DownloadType::Download, filePath }));
+    messageOp->appendChild(new DownloadAttachmentOperation(messageOp, settings(), { DownloadType::Download, filePath }));
 }
 
 void MessageOperationFactory::populateUpload(MessageOperation *messageOp)
 {
-    messageOp->appendChild(new UploadAttachmentOperation(messageOp, m_settings));
+    messageOp->appendChild(new UploadAttachmentOperation(messageOp, settings()));
 }
 
 void MessageOperationFactory::populatePreload(MessageOperation *messageOp)
 {
-    messageOp->appendChild(new DownloadAttachmentOperation(messageOp, m_settings, { DownloadType::Preload, QString() }));
+    messageOp->appendChild(new DownloadAttachmentOperation(messageOp, settings(), { DownloadType::Preload, QString() }));
 }
 
 DownloadDecryptFileOperation *MessageOperationFactory::populateDownloadDecrypt(NetworkOperation *parent, const QUrl &url, quint64 bytesTotal,
                                                                                const QString &destPath, const QByteArray& decryptionKey, const QByteArray& signature, const UserId &senderId)
 {
-    auto op = new DownloadDecryptFileOperation(parent, m_messenger, m_settings, url, bytesTotal, destPath, decryptionKey, signature, senderId);
+    auto op = new DownloadDecryptFileOperation(parent, m_messenger, url, bytesTotal, destPath, decryptionKey, signature, senderId);
     parent->appendChild(op);
     return op;
 }
 
 EncryptUploadFileOperation *MessageOperationFactory::populateEncryptUpload(NetworkOperation *parent, const QString &sourcePath)
 {
-    auto op = new EncryptUploadFileOperation(parent, m_messenger, m_settings, sourcePath);
+    auto op = new EncryptUploadFileOperation(parent, m_messenger, sourcePath);
     parent->appendChild(op);
     return op;
 }
 
 ConvertToPngOperation *MessageOperationFactory::populateConvertToPngOperation(Operation *parent, const QString &sourcePath, const QString &destFileName)
 {
-    auto op = new ConvertToPngOperation(m_settings, sourcePath, destFileName, parent);
+    auto op = new ConvertToPngOperation(settings(), sourcePath, destFileName, parent);
     parent->appendChild(op);
     return op;
 }
 
 CreateAttachmentThumbnailOperation *MessageOperationFactory::populateCreateAttachmentThumbnail(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &filePath)
 {
-    auto op = new CreateAttachmentThumbnailOperation(messageOp, m_settings, sourcePath, filePath);
+    auto op = new CreateAttachmentThumbnailOperation(messageOp, settings(), sourcePath, filePath);
     parent->appendChild(op);
     return op;
 }
 
 CreateAttachmentPreviewOperation *MessageOperationFactory::populateCreateAttachmentPreview(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &destPath)
 {
-    auto op = new CreateAttachmentPreviewOperation(messageOp, m_settings, sourcePath, destPath);
+    auto op = new CreateAttachmentPreviewOperation(messageOp, settings(), sourcePath, destPath);
     parent->appendChild(op);
     return op;
 }
@@ -148,4 +146,9 @@ void MessageOperationFactory::populateMessageOperation(MessageOperation *message
     if (message->isOutgoing() && (message->status() == Message::Status::New)) {
         messageOp->appendChild(new SendMessageOperation(messageOp, m_messenger));
     }
+}
+
+const QPointer<Settings> MessageOperationFactory::settings() const
+{
+    return m_messenger->settings();
 }

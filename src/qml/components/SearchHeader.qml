@@ -166,7 +166,6 @@ ToolBar {
                     font.pointSize: UiHelper.fixFontSz(11)
                     color: Theme.secondaryTextColor
                 }
-
             }
 
             Item {
