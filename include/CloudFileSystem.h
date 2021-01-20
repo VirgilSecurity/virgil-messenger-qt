@@ -55,12 +55,14 @@ public:
     void signOut();
 
     void fetchList(const CloudFileHandler &parentFolder);
-    ModifiableCloudFileHandler createFolder(const QString &name, const CloudFileHandler &parentFolder);
+    void createFolder(const QString &name, const CloudFileHandler &parentFolder);
     bool deleteFiles(const CloudFiles &files);
 
 signals:
     void listFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &files);
     void fetchListErrorOccured(const QString &errorText);
+    void folderCreated(const ModifiableCloudFileHandler &folder);
+    void createFolderErrorOccured(const QString &errorText);
 
 private:
     ModifiableCloudFileHandler createFolderFromInfo(const CloudFsFolderInfo &info, const CloudFsFolderId &parentId) const;

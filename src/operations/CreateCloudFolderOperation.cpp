@@ -48,30 +48,26 @@ CreateCloudFolderOperation::CreateCloudFolderOperation(CloudFileOperation *paren
     , m_name(name)
     , m_parentFolder(parentFolder)
 {
+    connect(m_parent->cloudFileSystem(), &CloudFileSystem::folderCreated, this, &CreateCloudFolderOperation::onCreated);
+    connect(m_parent->cloudFileSystem(), &CloudFileSystem::createFolderErrorOccured, this, &CreateCloudFolderOperation::onErrorOccured);
 }
 
 void CreateCloudFolderOperation::run()
 {
-    auto folder = m_parent->cloudFileSystem()->createFolder(m_name, m_parentFolder);
-    if (!folder) {
-        invalidate(tr("Failed to create folder: %1").arg(m_name));
-        return;
-    }
+    m_parent->cloudFileSystem()->createFolder(m_name, m_parentFolder);
+}
 
-    // Create local dir
-    QDir parentDir(m_parentFolder->localPath());
-    if (!parentDir.mkpath(m_name)) {
-        qCWarning(lcOperation) << tr("Failed to create local folder: %1").arg(m_name);
-    }
-
-    // Set local path
-    folder->setLocalPath(parentDir.filePath(m_name));
-
-    // Send update
+void CreateCloudFolderOperation::onCreated(const ModifiableCloudFileHandler &folder)
+{
     CreatedCloudFileUpdate update;
     update.cloudFileId = folder->id();
     update.cloudFile = folder;
     m_parent->cloudFileUpdate(update);
 
     finish();
+}
+
+void CreateCloudFolderOperation::onErrorOccured(const QString &errorText)
+{
+    invalidate(errorText);
 }

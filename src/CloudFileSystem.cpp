@@ -71,7 +71,7 @@ void CloudFileSystem::fetchList(const CloudFileHandler &parentFolder)
         // Update fetched folder
         auto listedFolder = createFolderFromInfo(fsFolder->info, parentFolderId);
         if (isRoot) {
-            listedFolder->setId(CloudFileId()); // use empty id for root
+            listedFolder->setId(CloudFileId()); // empty id for root
         }
         listedFolder->setEncryptedKey(fsFolder->folderEncryptedKey);
         listedFolder->setPublicKey(fsFolder->folderPublicKey);
@@ -93,16 +93,27 @@ void CloudFileSystem::fetchList(const CloudFileHandler &parentFolder)
     });
 }
 
-ModifiableCloudFileHandler CloudFileSystem::createFolder(const QString &name, const CloudFileHandler &parentFolder)
+void CloudFileSystem::createFolder(const QString &name, const CloudFileHandler &parentFolder)
 {
-    // FIXME(fpohtmeh): implement
-    Q_UNUSED(name)
-    Q_UNUSED(parentFolder)
-//    const auto parentFolderId = parentFolder->id();
-//    const auto folderId = std::get_if<CloudFsFolderId>(&parentFolderId);
-//    const auto isRoot = !folderId->isValid();
-//    auto future = isRoot ? m_cloudFs.createFolder(name) : m_cloudFs.createFolder(name, *folderId, parentFolder->publicKey());
-    return {};
+    const auto parentId = parentFolder->id().toCoreFolderId();
+    const auto isRoot = !parentId.isValid();
+    auto future = isRoot ? m_coreFs->createFolder(name) : m_coreFs->createFolder(name, parentId, parentFolder->publicKey());
+    FutureWorker::run(future, [this, parentFolder, name, isRoot](auto result) {
+        if (std::holds_alternative<CoreMessengerStatus>(result)) {
+            emit createFolderErrorOccured(tr("Cloud file creation error: %1").arg(name));
+            return;
+        }
+        const auto fsFolder = std::get_if<CloudFsFolder>(&result);
+        const auto parentFolderId = fsFolder->info.id;
+        // Create folder from core info
+        auto createdFolder = createFolderFromInfo(fsFolder->info, parentFolderId);
+        if (isRoot) {
+            createdFolder->setId(CloudFileId()); // empty id for root
+        }
+        createdFolder->setLocalPath(QDir(parentFolder->localPath()).filePath(name));
+        // TODO(fpohtmeh): create local folder?
+        emit folderCreated(createdFolder);
+    });
 }
 
 bool CloudFileSystem::deleteFiles(const CloudFiles &files)

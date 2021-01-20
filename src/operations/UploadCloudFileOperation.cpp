@@ -86,4 +86,6 @@ void UploadCloudFileOperation::run()
 
     finish();
     */
+
+    // TODO(fpohtmeh): add interruption mechanism
 }
