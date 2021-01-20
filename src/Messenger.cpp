@@ -85,6 +85,7 @@ Self::Messenger(Settings *settings, Validator *validator)
     //
     connect(m_coreMessenger, &CoreMessenger::lastActivityTextChanged, this, &Self::lastActivityTextChanged);
     connect(m_coreMessenger, &CoreMessenger::updateMessage, this, &Self::updateMessage);
+    connect(m_coreMessenger, &CoreMessenger::groupChatCreated, this, &Self::groupChatCreated);
 
     //
     //  Handle connection states.
@@ -331,6 +332,13 @@ void
 Self::setCurrentRecipient(const UserId &recipientId)
 {
     m_coreMessenger->setCurrentRecipient(recipientId);
+}
+
+
+void
+Self::createGroupChat(const GroupHandler& group) {
+
+    m_coreMessenger->createGroupChat(group);
 }
 
 

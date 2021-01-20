@@ -44,9 +44,11 @@
 #include "Message.h"
 #include "Settings.h"
 #include "User.h"
+#include "Group.h"
 
 #include <qxmpp/QXmppClient.h>
 #include <qxmpp/QXmppHttpUploadIq.h>
+#include <qxmpp/QXmppMucManager.h>
 
 #include <QObject>
 #include <QFuture>
@@ -97,6 +99,14 @@ signals:
 
     void messageReceived(ModifiableMessageHandler message);
     void updateMessage(const MessageUpdate& messageUpdate);
+
+    //
+    //  Group Chats has signal / slot architecture.
+    //
+    void createGroupChat(const GroupHandler& group);
+
+    void groupChatCreated(const GroupId& groupId);
+    void groupChatCreateFailed(const GroupId& chatId, const QString& errorText);
 
     //
     //  Private signals, to resolve thread. issues.
@@ -209,6 +219,8 @@ private:
     QString userIdToJid(const UserId& userId) const;
     QString currentUserJid() const;
 
+    QString groupIdToJid(const GroupId& userId) const;
+
     bool isNetworkOnline() const noexcept;
     bool isXmppConnected() const noexcept;
     bool isXmppConnecting() const noexcept;
@@ -219,6 +231,7 @@ private slots:
     void onActivate();
     void onDeactivate();
     void onSuspend();
+    void onCreateGroupChat(const GroupHandler& groupHandler);
     void xmppOnConnected();
     void xmppOnDisconnected();
     void xmppOnStateChanged(QXmppClient::State state);
@@ -232,6 +245,8 @@ private slots:
     void xmppOnUploadServiceFound();
     void xmppOnUploadSlotReceived(const QXmppHttpUploadSlotIq &slot);
     void xmppOnUploadRequestFailed(const QXmppHttpUploadRequestIq &request);
+    void xmppOnMucInvitationReceived(const QString &roomJid, const QString &inviter, const QString &reason);
+    void xmppOnMucRoomAdded(QXmppMucRoom *room);
 
     void onReconnectXmppServerIfNeeded();
     void onDisconnectXmppServer();

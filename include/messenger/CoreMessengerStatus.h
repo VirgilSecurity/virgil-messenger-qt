@@ -69,6 +69,7 @@ enum class CoreMessengerStatus
     Error_CryptoGenerateKeyFailed,
     Error_CloudFsRequestFailed,
     Error_SendMessageFailed,
+    Error_GroupIsAlreadyExists,
 };
 
 } // namespace vm

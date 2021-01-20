@@ -37,15 +37,12 @@
 
 #include "GroupId.h"
 
-#include <memory>
-
 namespace vm
 {
 class Group
 {
 public:
-    Group(const GroupId &id, const QString &name);
-    ~Group() noexcept;
+    Group(GroupId id, QString name);
 
     GroupId id() const;
     QString name() const;

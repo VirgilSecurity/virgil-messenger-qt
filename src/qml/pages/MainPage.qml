@@ -50,7 +50,7 @@ Page {
         ContextMenuItem {
             text: qsTr("New group")
             onTriggered: appState.requestNewGroupChat()
-            visible: false //d.isChatList // TODO(fpohtmeh): enable
+            visible: d.isChatList
         }
 
         // Cloud file actions

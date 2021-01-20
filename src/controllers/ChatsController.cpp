@@ -133,11 +133,17 @@ void ChatsController::createChatWithGroupName(const QString &groupName)
     QtConcurrent::run([this, groupName = groupName]() {
         if (!m_messenger) {
             qCWarning(lcController) << "Messenger was not initialized";
-            emit errorOccurred(tr("Group was not found"));
+            emit errorOccurred(tr("Group con not be created"));
         }
-        // TODO(fpohtmeh): use core messenger here
+
+        //
+        //  FIXME: Add initial participants.
+        //
         auto group = std::make_shared<Group>(Utils::createUuid(), groupName);
+
         emit createChatWithGroup(group, QPrivateSignal());
+
+        m_messenger->createGroupChat(group);
     });
 }
 
@@ -199,6 +205,6 @@ void ChatsController::onCreateChatWithGroup(const GroupHandler &group)
 void Self::onChatsLoaded(ModifiableChats chats)
 {
     qCDebug(lcController) << "Chats loaded from the database";
-    m_models->chats()->setChats(chats);
+    m_models->chats()->setChats(std::move(chats));
     emit chatsLoaded();
 }

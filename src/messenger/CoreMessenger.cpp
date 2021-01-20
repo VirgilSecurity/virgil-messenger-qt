@@ -65,6 +65,7 @@ using namespace notifications::xmpp;
 #include <qxmpp/QXmppMessageReceiptManager.h>
 #include <qxmpp/QXmppCarbonManager.h>
 #include <qxmpp/QXmppUploadRequestManager.h>
+#include <qxmpp/QXmppMucManager.h>
 
 #include <QCryptographicHash>
 #include <QMap>
@@ -129,6 +130,7 @@ public:
 
     QXmppCarbonManager *xmppCarbonManager;
     QXmppUploadRequestManager *xmppUploadManager;
+    QXmppMucManager *xmppGroupChatManager;
     VSQLastActivityManager *lastActivityManager;
 
     std::map<QString, std::shared_ptr<User>> identityToUser;
@@ -149,6 +151,7 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     qRegisterMetaType<QXmppClient::Error>();
     qRegisterMetaType<QXmppHttpUploadSlotIq>();
     qRegisterMetaType<QXmppHttpUploadRequestIq>();
+    qRegisterMetaType<QXmppPresence>();
 
     qRegisterMetaType<vm::MessageHandler>("MessageHandler");
     qRegisterMetaType<vm::ModifiableMessageHandler>("ModifiableMessageHandler");
@@ -165,6 +168,7 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     qRegisterMetaType<vm::ModifiableCloudFiles>("ModifiableCloudFiles");
 
     qRegisterMetaType<vm::ChatId>("ChatId");
+    qRegisterMetaType<vm::GroupId>("GroupId");
     qRegisterMetaType<vm::MessageId>("MessageId");
     qRegisterMetaType<vm::AttachmentId>("AttachmentId");
     qRegisterMetaType<vm::CloudFileId>("CloudFileId");
@@ -182,6 +186,7 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     connect(this, &Self::cleanupCommKitMessenger, this, &Self::onCleanupCommKitMessenger);
     connect(this, &Self::registerPushNotifications, this, &Self::onRegisterPushNotifications);
     connect(this, &Self::deregisterPushNotifications, this, &Self::onDeregisterPushNotifications);
+    connect(this, &Self::createGroupChat, this, &Self::onCreateGroupChat);
 
     //
     //  Configure Network Analyzer.
@@ -259,12 +264,14 @@ Self::resetXmppConfiguration() {
     //  Create & connect extensions.
     m_impl->xmppCarbonManager = new QXmppCarbonManager();
     m_impl->xmppUploadManager = new QXmppUploadRequestManager();
+    m_impl->xmppGroupChatManager = new QXmppMucManager();
     m_impl->lastActivityManager = new VSQLastActivityManager(m_settings);
 
     // Parent is implicitly changed to the QXmppClient within addExtension()
     m_impl->xmpp->addExtension(new QXmppMessageReceiptManager());
     m_impl->xmpp->addExtension(m_impl->xmppCarbonManager);
     m_impl->xmpp->addExtension(m_impl->xmppUploadManager);
+    m_impl->xmpp->addExtension(m_impl->xmppGroupChatManager);
     m_impl->xmpp->addExtension(m_impl->lastActivityManager);
 
     // Connect XMPP signals
@@ -278,6 +285,13 @@ Self::resetXmppConfiguration() {
 
     connect(m_impl->xmppUploadManager, &QXmppUploadRequestManager::requestFailed,
                 this, &Self::xmppOnUploadRequestFailed);
+
+    connect(m_impl->xmppGroupChatManager, &QXmppMucManager::invitationReceived,
+                this, &Self::xmppOnMucInvitationReceived);
+
+    connect(m_impl->xmppGroupChatManager, &QXmppMucManager::roomAdded,
+                this, &Self::xmppOnMucRoomAdded);
+
 
     connect(m_impl->xmpp.get(), &QXmppClient::connected, this, &Self::xmppOnConnected);
     connect(m_impl->xmpp.get(), &QXmppClient::disconnected, this, &Self::xmppOnDisconnected);
@@ -296,7 +310,7 @@ Self::resetXmppConfiguration() {
     connect(m_impl->xmppCarbonManager, &QXmppCarbonManager::messageSent, this, &Self::xmppOnCarbonMessageReceived);
 
     // Add extra logging
-#if USE_XMPP_LOGS
+//#if USE_XMPP_LOGS
     auto logger = QXmppLogger::getLogger();
     logger->setLoggingType(QXmppLogger::SignalLogging);
     logger->setMessageTypes(QXmppLogger::AnyMessage);
@@ -306,7 +320,7 @@ Self::resetXmppConfiguration() {
     });
 
     m_impl->xmpp->setLogger(logger);
-#endif
+//#endif
 
     auto receipt = m_impl->xmpp->findExtension<QXmppMessageReceiptManager>();
     connect(receipt, &QXmppMessageReceiptManager::messageDelivered, this, &Self::xmppOnMessageDelivered);
@@ -582,6 +596,12 @@ Self::userIdFromJid(const QString& jid) const {
 QString
 Self::userIdToJid(const UserId& userId) const {
     return userId + "@" + CustomerEnv::xmppServiceDomain();
+}
+
+
+QString
+Self::groupIdToJid(const GroupId& groupId) const {
+    return groupId + "@" + CustomerEnv::xmppServiceDomain();
 }
 
 
@@ -1786,4 +1806,116 @@ Self::cloudFs() const {
     auto cloudFsCopy = vssq_messenger_cloud_fs_ptr_t(cloudFsCopyPtr, vssq_messenger_cloud_fs_delete);
     auto randomCopy = vscf_impl_wrap_ptr(vscf_impl_shallow_copy(m_impl->random.get()));
     return CoreMessengerCloudFs(std::move(cloudFsCopy), std::move(randomCopy));
+}
+
+// --------------------------------------------------------------------------
+//  Group chats.
+// --------------------------------------------------------------------------
+void
+Self::onCreateGroupChat(const GroupHandler& group) {
+    qCInfo(lcCoreMessenger) << "Trying to create group chat";
+    //
+    //  Create XMPP multi-user chat room, aka group chat.
+    //
+    auto roomJid = groupIdToJid(group->id());
+
+    QXmppMucRoom *room = m_impl->xmppGroupChatManager->addRoom(roomJid);
+    room->setNickName("Boss");
+    room->setSubject(group->name());
+
+    // connect(room, &QXmppMucRoom::joined, [room]() {
+    //     qCDebug(lcCoreMessenger) << "---> Joined to the room: " << room->jid() << " , with nickname: " << room->nickName();
+    // });
+
+    // connect(room, &QXmppMucRoom::error, [room](const QXmppStanza::Error &error) {
+    //     qCDebug(lcCoreMessenger) << "---> error: " << error.text();
+    // });
+
+    // connect(room, &QXmppMucRoom::error, [room](const QXmppStanza::Error &error) {
+    //     qCDebug(lcCoreMessenger) << "---> error: " << error.text();
+    // });
+
+    // // ---
+
+
+    connect(room, &QXmppMucRoom::allowedActionsChanged, [room](QXmppMucRoom::Actions actions) {
+        qCDebug(lcCoreMessenger) << "---> allowedActionsChanged: ";
+    });
+
+    connect(room, &QXmppMucRoom::configurationReceived, [room](const QXmppDataForm &configuration) {
+        qCDebug(lcCoreMessenger) << "---> configurationReceived: ";
+    });
+
+    connect(room, &QXmppMucRoom::error, [room](const QXmppStanza::Error &error) {
+        qCDebug(lcCoreMessenger) << "---> error: ";
+    });
+
+    connect(room, &QXmppMucRoom::joined, [room]() {
+        qCDebug(lcCoreMessenger) << "---> joined: ";
+    });
+
+    connect(room, &QXmppMucRoom::kicked, [room](const QString &jid, const QString &reason) {
+        qCDebug(lcCoreMessenger) << "---> kicked: ";
+    });
+
+    connect(room, &QXmppMucRoom::isJoinedChanged, [room]() {
+        qCDebug(lcCoreMessenger) << "---> isJoinedChanged: ";
+    });
+
+    connect(room, &QXmppMucRoom::left, [room]() {
+        qCDebug(lcCoreMessenger) << "---> left: ";
+    });
+
+    connect(room, &QXmppMucRoom::messageReceived, [room](const QXmppMessage &message) {
+        qCDebug(lcCoreMessenger) << "---> messageReceived: ";
+    });
+
+    connect(room, &QXmppMucRoom::nameChanged, [room](const QString &name) {
+        qCDebug(lcCoreMessenger) << "---> nameChanged: ";
+    });
+
+    connect(room, &QXmppMucRoom::nickNameChanged, [room](const QString &nickName) {
+        qCDebug(lcCoreMessenger) << "---> nickNameChanged: ";
+    });
+
+    connect(room, &QXmppMucRoom::participantAdded, [room](const QString &jid) {
+        qCDebug(lcCoreMessenger) << "---> participantAdded: ";
+    });
+
+    connect(room, &QXmppMucRoom::participantChanged, [room](const QString &jid) {
+        qCDebug(lcCoreMessenger) << "---> participantChanged: ";
+    });
+
+    connect(room, &QXmppMucRoom::participantRemoved, [room](const QString &jid) {
+        qCDebug(lcCoreMessenger) << "---> participantRemoved: ";
+    });
+
+    connect(room, &QXmppMucRoom::participantsChanged, [room]() {
+        qCDebug(lcCoreMessenger) << "---> participantsChanged: ";
+    });
+
+    connect(room, &QXmppMucRoom::permissionsReceived, [room](const QList<QXmppMucItem> &permissions) {
+        qCDebug(lcCoreMessenger) << "---> permissionsReceived: ";
+    });
+
+    connect(room, &QXmppMucRoom::subjectChanged, [room](const QString &subject) {
+        qCDebug(lcCoreMessenger) << "---> subjectChanged: ";
+    });
+
+    room->join();
+
+
+    //
+    //  Create Comm Kit group chat.
+    //
+}
+
+
+void Self::xmppOnMucInvitationReceived(const QString &roomJid, const QString &inviter, const QString &reason) {
+    qCDebug(lcCoreMessenger) << "---> xmppOnInvitationReceived: " << roomJid;
+}
+
+
+void Self::xmppOnMucRoomAdded(QXmppMucRoom *room) {
+    qCDebug(lcCoreMessenger) << "---> xmppOnRoomAdded: " << room->jid();
 }
