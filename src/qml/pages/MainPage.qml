@@ -158,11 +158,12 @@ Page {
             }
 
             onPlaceholderClicked: attachmentPicker.open(AttachmentTypes.file)
-
-            FileManagerUploadDownload {
-                id: fileUploadDownload
-            }
         }
+    }
+
+    FileManagerUploadDownload {
+        id: fileUploadDownload
+        visible: !isChatList
     }
 
     Connections {

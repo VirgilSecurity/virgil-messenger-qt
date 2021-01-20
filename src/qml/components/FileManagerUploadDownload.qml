@@ -12,6 +12,13 @@ Item {
     readonly property real minInfoHeight: 40
     property real maxInfoTopMargin: height
 
+    QtObject {
+        id: d
+
+//        readonly property var model: models.discoveredContacts
+        readonly property real defaultChatHeight: 60
+    }
+
     state: "minInfo"
     states: [
         State {
@@ -143,13 +150,6 @@ Item {
                     color: Theme.chatBackgroundColor
                     anchors.leftMargin: 5
                     anchors.rightMargin: 5
-
-                    HorizontalRule {
-                        anchors.bottom: parent.bottom
-                        anchors.leftMargin: 20
-                        anchors.rightMargin: 20
-                        color: Theme.chatSeparatorColor
-                    }
                 }
 
                 MouseArea {
@@ -161,11 +161,6 @@ Item {
                     anchors.fill: parent
                     anchors.leftMargin: Theme.smallMargin
                     anchors.rightMargin: Theme.smallMargin
-
-                    ImageButton {
-                        image: "Arrow-Left"
-                        onClicked: fileManagerUploadDownload.state = "minInfo"
-                    }
 
                     Column {
                         Layout.fillWidth: true
@@ -185,10 +180,134 @@ Item {
                     }
 
                     ImageButton {
-                        image: "More"
-                        visible: true
-                        opacity: 0
+                        image: "Close"
+                        onClicked: fileManagerUploadDownload.state = "minInfo"
                     }
+                }
+            }
+
+            ModelListView {
+                id: modelListView
+                anchors {
+                    fill: parent
+                    leftMargin: Theme.smallMargin
+                    rightMargin: Theme.smallMargin
+                }
+                emptyIcon: "../resources/icons/File-Big.png"
+                emptyText: qsTr("Download files<br/>will appear here")
+                model: tempModel
+                header: Item {width: parent.width; height: Theme.margin}
+                delegate: listDelegate
+                footer: Item {width: parent.width; height: Theme.margin}
+            }
+
+            Component {
+                id: listDelegate
+
+                ListDelegate {
+                    id: contactListDelegate
+                    width: modelListView.width
+                    height: d.defaultChatHeight
+
+                    Row {
+                        Layout.preferredHeight: parent.height
+                        Layout.fillWidth: true
+                        spacing: Theme.smallSpacing
+
+                        Image {
+                            id: multiselectAvatarItem
+                            anchors.verticalCenter: parent.verticalCenter
+                            height: Theme.avatarHeight
+                            source: "../resources/icons/File-Big.png"
+                            fillMode: Image.PreserveAspectFit
+                        }
+
+                        Column {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width - multiselectAvatarItem.width - parent.spacing
+                            spacing: 2
+
+                            Text {
+                                color: Theme.primaryTextColor
+                                font.pointSize: UiHelper.fixFontSz(15)
+                                text: model.name
+                            }
+
+                            ProgressBar {
+                                id: progressBar
+                                width: parent.width
+                                height: 2
+                                from: 0
+                                to: model.totalBytes
+                                value: model.bytesLoaded
+
+                                Behavior on value {
+                                    NumberAnimation { duration: Theme.animationDuration * 2 }
+                                }
+
+                                background: Rectangle {
+                                    implicitWidth: progressBar.width
+                                    implicitHeight: progressBar.height
+                                    radius: height
+                                    color: Theme.menuSeparatorColor
+                                }
+
+                                contentItem: Item {
+                                    implicitWidth: progressBar.width
+                                    implicitHeight: progressBar.height
+
+                                    Rectangle {
+                                        width: parent.width * progressBar.visualPosition
+                                        height: parent.height
+                                        radius: height
+                                        color: Theme.buttonPrimaryColor
+                                    }
+                                }
+                            }
+
+                            Text {
+                                color: Theme.secondaryTextColor
+                                font.pointSize: UiHelper.fixFontSz(12)
+                                text: qsTr(model.bytesLoaded + "of" + model.bytesTotal)
+                                width: parent.width
+                                elide: Text.ElideRight
+                                textFormat: Text.RichText
+                            }
+                        }
+                    }
+                }
+            }
+
+            ListModel {
+                id: tempModel
+                ListElement {
+                    name: "File 1.png"
+                    bytesLoaded: 300
+                    totalBytes: 1000
+                }
+
+                ListElement {
+                    name: "File 2.png"
+                    bytesLoaded: 400
+                    totalBytes: 1000
+                }
+
+                ListElement {
+                    name: "File 3.png"
+                    bytesLoaded: 300
+                    totalBytes: 1000
+                }
+
+                ListElement {
+                    name: "File 4.png"
+                    bytesLoaded: 900
+                    totalBytes: 1000
+                }
+
+                ListElement {
+                    name: "File 5.png"
+                    bytesLoaded: 990
+                    totalBytes: 1000
                 }
             }
         }
