@@ -170,7 +170,7 @@ elseif (VS_PLATFORM STREQUAL "ios")
 
     add_custom_target(ipa
             COMMAND echo "Build IPA..."
-            COMMAND xcodebuild -exportArchive -archivePath ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcarchive -exportOptionsPlist ${PROJECT_SOURCE_DIR}/platforms/ios/exportOptions-ipa.plist -allowProvisioningUpdates
+            COMMAND xcodebuild -exportArchive -archivePath ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcarchive -exportOptionsPlist ${PROJECT_SOURCE_DIR}/platforms/ios/exportOptions-ipa.plist -allowProvisioningUpdates -exportPath ${CMAKE_BINARY_DIR}
             VERBATIM)
 
 endif ()
