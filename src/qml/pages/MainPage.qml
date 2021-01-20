@@ -158,6 +158,10 @@ Page {
             }
 
             onPlaceholderClicked: attachmentPicker.open(AttachmentTypes.file)
+
+            FileManagerUploadDownload {
+                id: fileUploadDownload
+            }
         }
     }
 
