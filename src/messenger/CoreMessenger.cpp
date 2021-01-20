@@ -1823,21 +1823,6 @@ Self::onCreateGroupChat(const GroupHandler& group) {
     room->setNickName("Boss");
     room->setSubject(group->name());
 
-    // connect(room, &QXmppMucRoom::joined, [room]() {
-    //     qCDebug(lcCoreMessenger) << "---> Joined to the room: " << room->jid() << " , with nickname: " << room->nickName();
-    // });
-
-    // connect(room, &QXmppMucRoom::error, [room](const QXmppStanza::Error &error) {
-    //     qCDebug(lcCoreMessenger) << "---> error: " << error.text();
-    // });
-
-    // connect(room, &QXmppMucRoom::error, [room](const QXmppStanza::Error &error) {
-    //     qCDebug(lcCoreMessenger) << "---> error: " << error.text();
-    // });
-
-    // // ---
-
-
     connect(room, &QXmppMucRoom::allowedActionsChanged, [room](QXmppMucRoom::Actions actions) {
         qCDebug(lcCoreMessenger) << "---> allowedActionsChanged: ";
     });
@@ -1903,6 +1888,9 @@ Self::onCreateGroupChat(const GroupHandler& group) {
     });
 
     room->join();
+
+    room->requestConfiguration();
+    room->requestPermissions();
 
 
     //
