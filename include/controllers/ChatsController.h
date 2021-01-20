@@ -36,6 +36,7 @@
 #define VM_CHATSCONTROLLER_H
 
 #include "ChatId.h"
+#include "Group.h"
 #include "MessageId.h"
 #include "UserId.h"
 #include "Chat.h"
@@ -65,6 +66,7 @@ public:
 
     void createChatWithUsername(const QString &username);
     void createChatWithUserId(const UserId &userId);
+    void createChatWithGroupName(const QString &groupName);
 
     void openChat(const ChatHandler& chat);
     Q_INVOKABLE void openChat(const QString& chatId); // can be used within QML only
@@ -87,6 +89,7 @@ signals:
     void currentChatNameChanged(const QString &name);
 
     void createChatWithUser(const UserHandler& user, QPrivateSignal);
+    void createChatWithGroup(const GroupHandler& group, QPrivateSignal);
 
 private:
     void setupTableConnections();
@@ -94,6 +97,7 @@ private:
 
     void onChatsLoaded(ModifiableChats chats);
     void onCreateChatWithUser(const UserHandler &user);
+    void onCreateChatWithGroup(const GroupHandler& group);
 
     QPointer<Messenger> m_messenger;
     QPointer<Models> m_models;

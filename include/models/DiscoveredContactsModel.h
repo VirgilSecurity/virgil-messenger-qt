@@ -56,7 +56,7 @@ public:
     void reload();
     int fixedContactsCount() const;
 
-    Q_INVOKABLE void toggleById(const Contact::Id &contactId);
+    Q_INVOKABLE void toggleById(const QString &contactId);
     Q_INVOKABLE QString firstContactId() const;
 
 signals:

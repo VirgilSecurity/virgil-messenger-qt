@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,55 +32,45 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_COMM_KIT_BRIDGE_H
-#define VM_COMM_KIT_BRIDGE_H
+#ifndef VM_CORE_MESSENGER_STATUS_H
+#define VM_CORE_MESSENGER_STATUS_H
 
-#include <virgil/crypto/common/vsc_str.h>
-#include <virgil/crypto/common/vsc_data.h>
-#include <virgil/crypto/common/vsc_buffer.h>
+namespace vm {
 
-#include <virgil/crypto/foundation/vscf_impl.h>
+enum class CoreMessengerStatus
+{
+    Success,
+    Error_CryptoInit,
+    Error_Offline,
+    Error_NoCred,
+    Error_Signin,
+    Error_Signup,
+    Error_MakeKeyBackup,
+    Error_RestoreKeyBackup,
+    Error_UserNotFound,
+    Error_UserAlreadyExists,
+    Error_ExportCredentials,
+    Error_ImportCredentials,
+    Error_InvalidCarbonMessage,
+    Error_InvalidMessageFormat,
+    Error_InvalidMessageVersion,
+    Error_InvalidMessageCiphertext,
+    Error_FileEncryptionReadFailed,
+    Error_FileEncryptionWriteFailed,
+    Error_FileEncryptionCryptoFailed,
+    Error_FileDecryptionReadFailed,
+    Error_FileDecryptionWriteFailed,
+    Error_FileDecryptionCryptoFailed,
+    Error_FileDecryptionCryptoSignatureFailed,
+    Error_CryptoImportPublicKeyFailed,
+    Error_CryptoImportPrivateKeyFailed,
+    Error_CryptoExportPublicKeyFailed,
+    Error_CryptoExportPrivateKeyFailed,
+    Error_CryptoGenerateKeyFailed,
+    Error_CloudFsRequestFailed,
+    Error_SendMessageFailed,
+};
 
-#include <virgil/sdk/comm-kit/vssq_messenger_cloud_fs.h>
+} // namespace vm
 
-#include <QString>
-#include <QByteArray>
-
-#include <memory>
-#include <string>
-#include <tuple>
-#include <type_traits>
-
-
-template<typename CType>
-using vsc_unique_ptr = std::unique_ptr<CType, void(*)(const std::remove_const_t<CType> *)>;
-
-using vsc_buffer_ptr_t = vsc_unique_ptr<vsc_buffer_t>;
-
-using vssq_messenger_cloud_fs_ptr_t = vsc_unique_ptr<const vssq_messenger_cloud_fs_t>;
-
-using vscf_impl_ptr_t = vsc_unique_ptr<vscf_impl_t>;
-
-using vscf_impl_ptr_const_t = vsc_unique_ptr<const vscf_impl_t>;
-
-vsc_str_t vsc_str_from(const std::string& str);
-
-QString vsc_str_to_qstring(vsc_str_t str);
-
-vsc_data_t vsc_data_from(const QByteArray& data);
-
-QByteArray vsc_data_to_qbytearray(vsc_data_t data);
-
-vsc_buffer_ptr_t vsc_buffer_wrap_ptr(vsc_buffer_t *ptr);
-
-vscf_impl_ptr_t vscf_impl_wrap_ptr(vscf_impl_t *ptr);
-
-vscf_impl_ptr_const_t vscf_impl_wrap_ptr(const vscf_impl_t *ptr);
-
-std::tuple<QByteArray, vsc_buffer_ptr_t> makeMappedBuffer(size_t size);
-
-void ensureMappedBuffer(QByteArray& bytes, vsc_buffer_ptr_t& buffer, size_t capacity);
-
-void adjustMappedBuffer(const vsc_buffer_ptr_t& buffer, QByteArray& bytes);
-
-#endif // VM_COMM_KIT_BRIDGE_H
+#endif // VM_CORE_MESSENGER_STATUS_H

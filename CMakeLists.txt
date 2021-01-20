@@ -52,14 +52,14 @@ option(ENABLE_CLANGFORMAT "On/Off formatting source code with clangformat." ON)
 # ---------------------------------------------------------------------------
 # Project version
 # ---------------------------------------------------------------------------
-set(VS_TARGET_VERSION "3.5.3")
-set(VS_CORE_VERSION "0.2.1.33")
+set(VS_TARGET_VERSION "3.5.4")
+set(VS_CORE_VERSION "0.2.1.39")
 set(VERSION_DATABASE_SCHEME "0")
 
 # ---------------------------------------------------------------------------
 #   Customers selection
 # ---------------------------------------------------------------------------
-set(VS_CUSTOMER "Virgil" CACHE "STRING" "Customer for build")
+set(VS_CUSTOMER "Virgil" CACHE STRING "Customer for build")
 set(VS_CUSTOMER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/customers/${VS_CUSTOMER}")
 set(VS_CUSTOMER_COMMON_DIR "${CMAKE_CURRENT_SOURCE_DIR}/customers/Common")
 message(STATUS "Current customer : [${VS_CUSTOMER}]")
@@ -254,7 +254,7 @@ elseif (VS_PLATFORM STREQUAL "macos")
     set_source_files_properties(${App_ICON}
             PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
-    # Sparkle	
+    # Sparkle
     message(STATUS "Copy Sparkle framework")
     execute_process(
             COMMAND mkdir -p ${CMAKE_BINARY_DIR}/${VS_TARGET_NAME}.app/Contents/Frameworks
@@ -285,8 +285,11 @@ elseif (VS_PLATFORM STREQUAL "ios")
     else ()
         set(CMAKE_XCODE_ATTRIBUTE_SUPPORTED_PLATFORMS "iphoneos")
         set(CMAKE_XCODE_EFFECTIVE_PLATFORMS "-iphoneos")
+
         set(CMAKE_OSX_ARCHITECTURES "arm64")
     endif ()
+
+    set(CMAKE_XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2")
 
     set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} "-Wl,-e,_qt_main_wrapper")
     set(CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
@@ -313,9 +316,19 @@ elseif (VS_PLATFORM STREQUAL "ios")
             XCODE_ATTRIBUTE_INSTALL_PATH "/Applications"
             XCODE_ATTRIBUTE_SKIP_INSTALL "No"
             )
+    # Storyboard default
+    configure_file("${CMAKE_CURRENT_LIST_DIR}/platforms/ios/LaunchScreen.storyboard.in"
+                   "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard" @ONLY)
+    configure_file("${CMAKE_CURRENT_LIST_DIR}/platforms/ios/Default-568h@2x.png"
+                   "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/Default-568h@2x.png" COPYONLY)
+
+    set(STORYBOARD_DEFAULT
+            ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard
+            ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/Default-568h@2x.png
+            )
 
     set(VS_ASSET_DIR "${VS_CUSTOMER_DIR}/platforms/ios/Assets.xcassets")
-    target_sources(${VS_TARGET_NAME} PRIVATE ${VS_ASSET_DIR})
+    target_sources(${VS_TARGET_NAME} PRIVATE ${VS_ASSET_DIR} ${STORYBOARD_DEFAULT})
     set_source_files_properties("${VS_ASSET_DIR}"
             PROPERTIES
             MACOSX_PACKAGE_LOCATION "Resources"
@@ -325,6 +338,7 @@ elseif (VS_PLATFORM STREQUAL "ios")
             PROPERTIES
             MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/platforms/ios/Info.plist.in"
             LINK_FLAGS "-framework Foundation -framework UserNotifications"
+            RESOURCE "${STORYBOARD_DEFAULT}"
             )
 
     qt5_import_qml_plugins(${VS_TARGET_NAME})
@@ -362,7 +376,6 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/CustomerEnv.h
         ${CMAKE_CURRENT_LIST_DIR}/include/Contact.h
         ${CMAKE_CURRENT_LIST_DIR}/include/ConfirmationCodeType.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/GroupId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFile.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileUpdate.h
@@ -373,6 +386,16 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/ChatType.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CommKitBridge.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessenger.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFileId.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFileInfo.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolder.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolderId.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolderInfo.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsNewFile.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessengerCloudFs.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessengerStatus.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Group.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/IncomingMessage.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/IncomingMessageStage.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Message.h
@@ -540,6 +563,14 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/ChatType.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CommKitBridge.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CoreMessenger.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFileId.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFileInfo.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolder.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolderId.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolderInfo.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsNewFile.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CoreMessengerCloudFs.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Group.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/IncomingMessage.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/IncomingMessageStage.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Message.cpp
@@ -705,6 +736,7 @@ target_link_libraries(${VS_TARGET_NAME}
         qxmpp
 
         vsc_comm_kit
+        vsc_comm_kit_pb
         vsc_keyknox_sdk
         vsc_pythia_sdk
         vsc_core_sdk
@@ -778,7 +810,7 @@ target_compile_definitions(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","ios">:VS_PUSHNOTIFICATIONS=1>>
         $<BUILD_INTERFACE:$<$<BOOL:${VS_IOS_SIMULATOR}>:VS_IOS_SIMULATOR=1>>
 
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","macos">:MACOS=1>>
+        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","macos">:VS_MACOS=1>>
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","macos">:VS_DESKTOP=1>>
 
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","linux">:VS_DESKTOP=1>>

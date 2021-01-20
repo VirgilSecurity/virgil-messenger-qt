@@ -36,6 +36,8 @@
         <file>qml/resources/icons/Chats@2x.png</file>
         <file>qml/resources/icons/Check.png</file>
         <file>qml/resources/icons/Check@2x.png</file>
+        <file>qml/resources/icons/Check-XSmall.png</file>
+        <file>qml/resources/icons/Check-XSmall@2x.png</file>
         <file>qml/resources/icons/Lock.png</file>
         <file>qml/resources/icons/Lock@2x.png</file>
         <file>qml/resources/icons/Key.png</file>
@@ -151,6 +153,7 @@
         <file>qml/components/TextScrollView.qml</file>
         <file>qml/components/AttachmentPicker.qml</file>
         <file>qml/components/LogControl.qml</file>
+        <file>qml/components/KeyboardHandler.qml</file>
         <file>qml/components/ListDelegate.qml</file>
         <file>qml/components/ModelListView.qml</file>
         <file>qml/components/Dialogs/TemplateDialog.qml</file>
@@ -161,6 +164,7 @@
         <file>qml/components/NetworkStatusControl.qml</file>
         <file>qml/components/ChatListView.qml</file>
         <file>qml/components/CloudFileListView.qml</file>
+        <file>qml/components/NewGroupChatHeader.qml</file>
         <!-- Database -->
         <file>resources/database/createAttachments.sql</file>
         <file>resources/database/createChats.sql</file>
