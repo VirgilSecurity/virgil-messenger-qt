@@ -601,7 +601,7 @@ Self::userIdToJid(const UserId& userId) const {
 
 QString
 Self::groupIdToJid(const GroupId& groupId) const {
-    return groupId + "@" + CustomerEnv::xmppServiceDomain();
+    return groupId + "@conference." + CustomerEnv::xmppServiceDomain();
 }
 
 
