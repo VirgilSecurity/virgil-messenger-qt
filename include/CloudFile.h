@@ -49,8 +49,6 @@ namespace vm
 class CloudFile
 {
 public:
-    virtual ~CloudFile() noexcept = default;
-
     CloudFileId id() const noexcept;
     void setId(const CloudFileId &id);
     CloudFileId parentId() const noexcept;
