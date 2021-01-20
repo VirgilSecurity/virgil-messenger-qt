@@ -37,26 +37,36 @@
 
 #include <QFutureWatcher>
 
-#include "CoreMessenger.h"
-
 namespace vm
 {
-using FutureResult = CoreMessenger::Result;
-using Future = QFuture<FutureResult>;
-using FutureWatcher = QFutureWatcher<FutureResult>;
 
 class FutureWorker
 {
 public:
-    static void run(const Future &future, const std::function<void(FutureResult)> &resultHandler)
+
+    template<typename FutureType, typename ResultType = decltype(typename FutureType::result())>
+    static void run(FutureType future, std::function<void(ResultType)> resultHandler)
     {
+        using FutureWatcher = QFutureWatcher<ResultType>;
+
         auto futureWatcher = new FutureWatcher();
-        QObject::connect(futureWatcher, &FutureWatcher::finished, [=]() {
-            futureWatcher->deleteLater();
-            resultHandler(future.result());
-        });
+        QObject::connect(futureWatcher, &FutureWatcher::finished,
+            [futureWatcher, future = std::move(future), resultHandler = std::move(resultHandler)]() {
+                futureWatcher->deleteLater();
+                resultHandler(future.result());
+            });
         futureWatcher->setFuture(future);
     }
+
+    template<typename FutureType, typename ResultHandler>
+    static void run(FutureType future, ResultHandler resultHandler) {
+        using ResultType = decltype(future.result());
+
+        std::function<void(ResultType)> f = std::move(resultHandler);
+
+        run(std::move(future), std::move(f));
+    }
+
 };
 }
 
