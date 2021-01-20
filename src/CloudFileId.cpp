@@ -63,8 +63,7 @@ CloudFileId::operator QString() const
 
 bool CloudFileId::operator==(const CloudFileId &id) const
 {
-    // FIXME(fpohtmeh): add more precise realization
-    return QString(*this) == QString(id);
+    return m_id.index() == id.m_id.index() && QString(*this) == QString(id);
 }
 
 bool CloudFileId::operator!=(const CloudFileId &id) const

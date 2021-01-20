@@ -55,21 +55,20 @@ void DeleteCloudFilesOperation::run()
         return;
     }
 
+    // Delete local files/dirs
     for (auto &file : m_files) {
-        // Delete local file/dir
         if (file->isFolder()) {
             FileUtils::removeDir(file->localPath());
         }
         else {
             FileUtils::removeFile(file->localPath());
         }
-
-        // Send update
-        DeletedCloudFileUpdate update;
-        update.cloudFileId = file->id();
-        update.isFolder = file->isFolder();
-        m_parent->cloudFileUpdate(update);
     }
+
+    // Emit update
+    DeletedCloudFilesUpdate update;
+    update.files = m_files;
+    m_parent->cloudFilesUpdate(update);
 
     finish();
 }

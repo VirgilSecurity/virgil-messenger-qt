@@ -34,7 +34,7 @@
 
 #include "CloudFilesController.h"
 
-#include "CloudFileUpdate.h"
+#include "CloudFilesUpdate.h"
 #include "CloudFilesModel.h"
 #include "CloudFilesQueue.h"
 #include "CloudFilesTable.h"
@@ -53,7 +53,7 @@ Self::CloudFilesController(const Settings *settings, Models *models, UserDatabas
     , m_userDatabase(userDatabase)
     , m_cloudFileSystem(cloudFileSystem)
 {
-    qRegisterMetaType<CloudFileUpdate>("CloudFileUpdate");
+    qRegisterMetaType<CloudFilesUpdate>("CloudFileUpdate");
 
     m_rootFolder = std::make_shared<CloudFile>();
     m_rootFolder->setName(tr("File Manager"));
@@ -61,8 +61,9 @@ Self::CloudFilesController(const Settings *settings, Models *models, UserDatabas
 
     m_hierarchy.push_back(m_rootFolder);
 
+    connect(this, &Self::updateCloudFiles, this, &Self::onUpdateCloudFiles);
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
-    connect(models->cloudFilesQueue(), &CloudFilesQueue::updateCloudFile, this, &Self::onUpdateCloudFile);
+    connect(models->cloudFilesQueue(), &CloudFilesQueue::updateCloudFiles, this, &Self::updateCloudFiles);
     connect(cloudFileSystem, &CloudFileSystem::listFetched, this, &Self::onCloudFilesFetched);
 }
 
@@ -131,6 +132,7 @@ void Self::setupTableConnections()
 {
     qCDebug(lcController) << "Setup database table connections for cloud files...";
     auto table = m_userDatabase->cloudFilesTable();
+    connect(m_cloudFileSystem, &CloudFileSystem::fetchListErrorOccured, table, &CloudFilesTable::fetch);
     connect(table, &CloudFilesTable::errorOccurred, this, &Self::errorOccurred);
     connect(table, &CloudFilesTable::fetched, this, &Self::onDbFilesFetched);
 }
@@ -138,15 +140,17 @@ void Self::setupTableConnections()
 void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)
 {
     m_newHierarchy = hierarchy;
-    m_fetchedFromCloud = false;
-    m_userDatabase->cloudFilesTable()->fetch(hierarchy.back());
     m_cloudFileSystem->fetchList(hierarchy.back());
 }
 
-void CloudFilesController::setCloudFiles(const ModifiableCloudFiles &cloudFiles)
+void CloudFilesController::processFetchedFiles(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles, bool databaseUsed)
 {
-    m_models->cloudFiles()->setFiles(cloudFiles);
+    if (folder->id() != m_newHierarchy.back()->id()) {
+        qCWarning(lcController) << "Fetched folder isn't current" << folder->id();
+        return; // Files were fetched for another folder
+    }
 
+    // Update hierarchy
     const auto oldDisplayPath = displayPath();
     const auto oldIsRoot = isRoot();
     m_hierarchy = m_newHierarchy;
@@ -156,6 +160,13 @@ void CloudFilesController::setCloudFiles(const ModifiableCloudFiles &cloudFiles)
     if (isRoot() != oldIsRoot) {
         emit isRootChanged(isRoot());
     }
+
+    // Emit update
+    ListedCloudFolderUpdate update;
+    update.folder = folder;
+    update.files = cloudFiles;
+    update.databaseUsed = databaseUsed;
+    emit updateCloudFiles(update);
 }
 
 QString CloudFilesController::displayPath() const
@@ -174,31 +185,18 @@ bool CloudFilesController::isRoot() const
 
 void Self::onDbFilesFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles)
 {
-    if (m_fetchedFromCloud) {
-        return; // Cloud list was fetched earlier, skip DB cache
-    }
-    if (folder->id() != m_newHierarchy.back()->id()) {
-        qCWarning(lcController) << "Fetched folder isn't relevant" << folder->id();
-        return;
-    }
-    setCloudFiles(cloudFiles);
+    processFetchedFiles(folder, cloudFiles, true);
 }
 
 void CloudFilesController::onCloudFilesFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles)
 {
-    if (folder->id() != m_newHierarchy.back()->id()) {
-        qCWarning(lcController) << "Fetched folder isn't relevant" << folder->id();
-        return; // Files were fetched for another folder
-    }
-    m_fetchedFromCloud = true;
-    setCloudFiles(cloudFiles);
-    // FIXME(fpohtmeh): replace cloud files in db
+    processFetchedFiles(folder, cloudFiles, false);
 }
 
-void Self::onUpdateCloudFile(const CloudFileUpdate &update)
+void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)
 {
     // Update UI
-    m_models->cloudFiles()->updateCloudFile(update);
+    m_models->cloudFiles()->updateCloudFiles(update);
     // Update DB
-    m_userDatabase->cloudFilesTable()->updateCloudFile(update);
+    m_userDatabase->cloudFilesTable()->updateCloudFiles(update);
 }

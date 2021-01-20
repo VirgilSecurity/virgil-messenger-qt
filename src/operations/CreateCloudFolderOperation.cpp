@@ -60,9 +60,8 @@ void CreateCloudFolderOperation::run()
 void CreateCloudFolderOperation::onCreated(const ModifiableCloudFileHandler &folder)
 {
     CreatedCloudFileUpdate update;
-    update.cloudFileId = folder->id();
-    update.cloudFile = folder;
-    m_parent->cloudFileUpdate(update);
+    update.file = folder;
+    m_parent->cloudFilesUpdate(update);
 
     finish();
 }

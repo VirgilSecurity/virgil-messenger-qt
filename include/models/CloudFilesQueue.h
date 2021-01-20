@@ -38,7 +38,7 @@
 #include <QLoggingCategory>
 
 #include "CloudFile.h"
-#include "CloudFileUpdate.h"
+#include "CloudFilesUpdate.h"
 #include "OperationQueue.h"
 
 Q_DECLARE_LOGGING_CATEGORY(lcCloudFilesQueue);
@@ -60,7 +60,7 @@ signals:
     void pushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
     void pushDeleteFiles(const CloudFiles &files);
 
-    void updateCloudFile(const CloudFileUpdate &update);
+    void updateCloudFiles(const CloudFilesUpdate &update);
 
 private:
     Operation *createOperation(OperationSourcePtr source) override;

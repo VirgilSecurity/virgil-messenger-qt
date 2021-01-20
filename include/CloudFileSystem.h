@@ -60,7 +60,7 @@ public:
 
 signals:
     void listFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &files);
-    void fetchListErrorOccured(const QString &errorText);
+    void fetchListErrorOccured(const CloudFileHandler &folder, const QString &errorText);
     void folderCreated(const ModifiableCloudFileHandler &folder);
     void createFolderErrorOccured(const QString &errorText);
 

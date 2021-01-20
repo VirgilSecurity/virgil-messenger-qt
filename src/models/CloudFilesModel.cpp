@@ -59,14 +59,6 @@ CloudFilesModel::CloudFilesModel(const Settings *settings, QObject *parent)
     connect(&m_updateTimer, &QTimer::timeout, this, &CloudFilesModel::invalidateDateTime);
 }
 
-void CloudFilesModel::setFiles(const ModifiableCloudFiles &files)
-{
-    beginResetModel();
-    m_now = QDateTime::currentDateTime();
-    m_files = files;
-    endResetModel();
-}
-
 void CloudFilesModel::setEnabled(bool enabled)
 {
     if (enabled) {
@@ -92,25 +84,26 @@ CloudFiles CloudFilesModel::selectedFiles() const
     return files;
 }
 
-void CloudFilesModel::updateCloudFile(const CloudFileUpdate &update)
+void CloudFilesModel::updateCloudFiles(const CloudFilesUpdate &update)
 {
-    if (auto upd = std::get_if<CreatedCloudFileUpdate>(&update)) {
+    if (auto upd = std::get_if<ListedCloudFolderUpdate>(&update)) {
+        beginResetModel();
+        m_now = QDateTime::currentDateTime();
+        m_files = upd->files;
+        endResetModel();
+    }
+    else if (auto upd = std::get_if<CreatedCloudFileUpdate>(&update)) {
         beginInsertRows(QModelIndex(), rowCount(), rowCount());
-        m_files.push_back(upd->cloudFile);
+        m_files.push_back(upd->file);
         endInsertRows();
     }
-    else if (auto upd = std::get_if<DeletedCloudFileUpdate>(&update)) {
-        if (const auto row = findRowById(upd->cloudFileId)) {
-            beginRemoveRows(QModelIndex(), *row, *row);
-            m_files.erase(m_files.begin() + *row);
-            endRemoveRows();
-        }
-    }
-    else if (auto upd = std::get_if<RenamedCloudFileUpdate>(&update)) {
-        if (const auto row = findRowById(upd->cloudFileId)) {
-            m_files[*row]->setName(upd->name);
-            const auto modelIndex = index(*row);
-            emit dataChanged(modelIndex, modelIndex, { FilenameRole });
+    else if (auto upd = std::get_if<DeletedCloudFilesUpdate>(&update)) {
+        for (auto file : upd->files) {
+            if (const auto row = findRowById(file->id())) {
+                beginRemoveRows(QModelIndex(), *row, *row);
+                m_files.erase(m_files.begin() + *row);
+                endRemoveRows();
+            }
         }
     }
 }

@@ -32,8 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CLOUD_FILE_UPDATE_H
-#define VM_CLOUD_FILE_UPDATE_H
+#ifndef VM_CLOUD_FILES_UPDATE_H
+#define VM_CLOUD_FILES_UPDATE_H
 
 #include "CloudFile.h"
 
@@ -41,28 +41,26 @@
 
 namespace vm
 {
-struct CloudFileUpdateBase {
-    CloudFileId cloudFileId;
+struct ListedCloudFolderUpdate {
+    CloudFileHandler folder;
+    ModifiableCloudFiles files;
+    bool databaseUsed = false;
 };
 
-struct CreatedCloudFileUpdate : public CloudFileUpdateBase {
-    ModifiableCloudFileHandler cloudFile;
+struct CreatedCloudFileUpdate {
+    ModifiableCloudFileHandler file;
 };
 
-struct DeletedCloudFileUpdate : public CloudFileUpdateBase {
-    bool isFolder = false;
+struct DeletedCloudFilesUpdate  {
+    CloudFiles files;
 };
 
-struct RenamedCloudFileUpdate : public CloudFileUpdateBase {
-    QString name;
-};
-
-using CloudFileUpdate = std::variant<
+using CloudFilesUpdate = std::variant<
+    ListedCloudFolderUpdate,
     CreatedCloudFileUpdate,
-    DeletedCloudFileUpdate,
-    RenamedCloudFileUpdate
+    DeletedCloudFilesUpdate
     >;
 
 }
 
-#endif // VM_CLOUD_FILE_UPDATE_H
+#endif // VM_CLOUD_FILES_UPDATE_H

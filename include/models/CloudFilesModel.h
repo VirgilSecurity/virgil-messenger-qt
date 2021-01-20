@@ -39,7 +39,7 @@
 #include <QTimer>
 
 #include "CloudFile.h"
-#include "CloudFileUpdate.h"
+#include "CloudFilesUpdate.h"
 #include "ListModel.h"
 
 class Settings;
@@ -62,13 +62,12 @@ public:
 
     CloudFilesModel(const Settings *settings, QObject *parent);
 
-    void setFiles(const ModifiableCloudFiles &files);
     void setEnabled(bool enabled);
 
     CloudFileHandler file(const int proxyRow) const;
     CloudFiles selectedFiles() const;
 
-    void updateCloudFile(const CloudFileUpdate &update);
+    void updateCloudFiles(const CloudFilesUpdate &update);
 
 private:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;

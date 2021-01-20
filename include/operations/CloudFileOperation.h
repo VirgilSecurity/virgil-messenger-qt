@@ -35,7 +35,7 @@
 #ifndef VM_CLOUD_FILE_OPERATION_H
 #define VM_CLOUD_FILE_OPERATION_H
 
-#include "CloudFileUpdate.h"
+#include "CloudFilesUpdate.h"
 #include "Operation.h"
 #include "UserId.h"
 
@@ -53,7 +53,7 @@ public:
     CloudFileSystem *cloudFileSystem();
 
 signals:
-    void cloudFileUpdate(const CloudFileUpdate &update);
+    void cloudFilesUpdate(const CloudFilesUpdate &update);
 
 private:
     static quint64 m_counter;

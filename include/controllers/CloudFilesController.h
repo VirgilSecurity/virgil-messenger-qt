@@ -40,7 +40,7 @@
 
 #include "CloudFile.h"
 #include "CloudFileSystem.h"
-#include "CloudFileUpdate.h"
+#include "CloudFilesUpdate.h"
 #include "Models.h"
 #include "Settings.h"
 #include "UserDatabase.h"
@@ -73,6 +73,7 @@ public:
     Q_INVOKABLE void createFolder(const QString &name);
 
 signals:
+    void updateCloudFiles(const CloudFilesUpdate &update);
     void errorOccurred(const QString &errorText);
 
     void displayPathChanged(const QString &path);
@@ -84,14 +85,14 @@ private:
 
     void setupTableConnections();
     void switchToHierarchy(const FoldersHierarchy &hierarchy);
-    void setCloudFiles(const ModifiableCloudFiles &cloudFiles);
+    void processFetchedFiles(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles, bool databaseUsed);
 
     QString displayPath() const;
     bool isRoot() const;
 
     void onDbFilesFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles);
     void onCloudFilesFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles);
-    void onUpdateCloudFile(const CloudFileUpdate &update);
+    void onUpdateCloudFiles(const CloudFilesUpdate &update);
 
     QPointer<const Settings> m_settings;
     QPointer<Models> m_models;
@@ -101,7 +102,6 @@ private:
     ModifiableCloudFileHandler m_rootFolder;
     FoldersHierarchy m_hierarchy;
     FoldersHierarchy m_newHierarchy;
-    bool m_fetchedFromCloud = false;
 };
 }
 

@@ -66,7 +66,7 @@ Operation *Self::createOperation(OperationSourcePtr source)
 
     auto *op = new CloudFileOperation(m_messenger->cloudFileSystem(), nullptr);
     connect(op, &Operation::notificationCreated, this, &Self::notificationCreated);
-    connect(op, &CloudFileOperation::cloudFileUpdate, this, &Self::updateCloudFile);
+    connect(op, &CloudFileOperation::cloudFilesUpdate, this, &Self::updateCloudFiles);
 
     switch (cloudFileSource->type()) {
         case CloudFileOperationSource::Type::CreateFolder:

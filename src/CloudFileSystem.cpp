@@ -63,7 +63,7 @@ void CloudFileSystem::fetchList(const CloudFileHandler &parentFolder)
     const auto isRoot = !parentId.isValid();
     FutureWorker::run(m_coreFs->listFolder(parentId), [this, parentFolder, isRoot](auto result) {
         if (std::holds_alternative<CoreMessengerStatus>(result)) {
-            emit fetchListErrorOccured(tr("Cloud folder listing error"));
+            emit fetchListErrorOccured(parentFolder, tr("Cloud folder listing error"));
             return;
         }
         const auto fsFolder = std::get_if<CloudFsFolder>(&result);
@@ -110,8 +110,7 @@ void CloudFileSystem::createFolder(const QString &name, const CloudFileHandler &
         if (isRoot) {
             createdFolder->setId(CloudFileId()); // empty id for root
         }
-        createdFolder->setLocalPath(QDir(parentFolder->localPath()).filePath(name));
-        // TODO(fpohtmeh): create local folder?
+        createdFolder->setLocalPath(QDir(parentFolder->localPath()).filePath(name)); // TODO(fpohtmeh): create local folder?
         emit folderCreated(createdFolder);
     });
 }
