@@ -39,7 +39,6 @@
 
 #include <QByteArray>
 #include <QDateTime>
-#include <QFileInfo>
 
 #include "CloudFileId.h"
 #include "UserId.h"

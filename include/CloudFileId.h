@@ -52,6 +52,7 @@ public:
     operator QString() const;
 
     bool operator==(const CloudFileId &id) const;
+    bool operator!=(const CloudFileId &id) const;
 
     CloudFsFileId toCoreFileId() const;
     CloudFsFolderId toCoreFolderId() const;

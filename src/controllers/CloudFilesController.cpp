@@ -147,10 +147,13 @@ void CloudFilesController::setCloudFiles(const ModifiableCloudFiles &cloudFiles)
 {
     m_models->cloudFiles()->setFiles(cloudFiles);
 
-    if (m_hierarchy != m_newHierarchy) {
-        m_hierarchy = m_newHierarchy;
-        m_newHierarchy.clear();
+    const auto oldDisplayPath = displayPath();
+    const auto oldIsRoot = isRoot();
+    m_hierarchy = m_newHierarchy;
+    if (displayPath() != oldDisplayPath) {
         emit displayPathChanged(displayPath());
+    }
+    if (isRoot() != oldIsRoot) {
         emit isRootChanged(isRoot());
     }
 }
@@ -174,15 +177,17 @@ void Self::onDbFilesFetched(const CloudFileHandler &folder, const ModifiableClou
     if (m_fetchedFromCloud) {
         return; // Cloud list was fetched earlier, skip DB cache
     }
-    if (folder != m_newHierarchy.back()) {
-        return; // Files were fetched for another folder
+    if (folder->id() != m_newHierarchy.back()->id()) {
+        qCWarning(lcController) << "Fetched folder isn't relevant" << folder->id();
+        return;
     }
     setCloudFiles(cloudFiles);
 }
 
 void CloudFilesController::onCloudFilesFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles)
 {
-    if (folder != m_newHierarchy.back()) {
+    if (folder->id() != m_newHierarchy.back()->id()) {
+        qCWarning(lcController) << "Fetched folder isn't relevant" << folder->id();
         return; // Files were fetched for another folder
     }
     m_fetchedFromCloud = true;

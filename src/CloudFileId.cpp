@@ -67,6 +67,11 @@ bool CloudFileId::operator==(const CloudFileId &id) const
     return QString(*this) == QString(id);
 }
 
+bool CloudFileId::operator!=(const CloudFileId &id) const
+{
+    return !operator==(id);
+}
+
 CloudFsFileId CloudFileId::toCoreFileId() const
 {
     if (auto id = std::get_if<CloudFsFileId>(&m_id)) {

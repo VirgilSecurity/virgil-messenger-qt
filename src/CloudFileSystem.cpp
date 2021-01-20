@@ -34,6 +34,8 @@
 
 #include "CloudFileSystem.h"
 
+#include <QMimeDatabase>
+
 #include "CoreMessenger.h"
 #include "FutureWorker.h"
 
@@ -55,25 +57,40 @@ void CloudFileSystem::signOut()
     m_coreFs = {};
 }
 
-void CloudFileSystem::fetchList(const CloudFileHandler &folder)
+void CloudFileSystem::fetchList(const CloudFileHandler &parentFolder)
 {
-    // FIXME(fpohtmeh): implement
-//    FutureWorker::run(m_coreFs->listFolder(folder->id().toCoreFolderId()), [this, folder = folder](const CloudFsFutureResult &result) {
-//        if (auto fsFolder = std::get_if<CloudFsFolder>(&result)) {
-//            // Build list
-//            ModifiableCloudFiles list;
-//            for (auto &f : fsFolder->folders) {
-//                list.push_back(createFolder(f));
-//            }
-//            for (auto &f : fsFolder->files) {
-//                list.push_back(createFile(f));
-//            }
-//            emit listFetched(folder, list);
-//        }
-//        else {
-//            emit fetchListErrorOccured(tr("Cloud files listing error"));
-//        }
-//    });
+    const auto parentId = parentFolder->id().toCoreFolderId();
+    const auto isRoot = !parentId.isValid();
+    FutureWorker::run(m_coreFs->listFolder(parentId), [this, parentFolder, isRoot](auto result) {
+        if (std::holds_alternative<CoreMessengerStatus>(result)) {
+            emit fetchListErrorOccured(tr("Cloud folder listing error"));
+            return;
+        }
+        const auto fsFolder = std::get_if<CloudFsFolder>(&result);
+        const auto parentFolderId = fsFolder->info.id;
+        // Update fetched folder
+        auto listedFolder = createFolderFromInfo(fsFolder->info, parentFolderId);
+        if (isRoot) {
+            listedFolder->setId(CloudFileId()); // use empty id for root
+        }
+        listedFolder->setEncryptedKey(fsFolder->folderEncryptedKey);
+        listedFolder->setPublicKey(fsFolder->folderPublicKey);
+        listedFolder->setLocalPath(parentFolder->localPath());
+        const QDir listedDir(parentFolder->localPath());
+        // Build list
+        ModifiableCloudFiles list;
+        for (auto &info : fsFolder->folders) {
+            auto folder = createFolderFromInfo(info, parentFolderId);
+            folder->setLocalPath(listedDir.filePath(info.name));
+            list.push_back(folder);
+        }
+        for (auto &info : fsFolder->files) {
+            auto file = createFileFromInfo(info, parentFolderId);
+            file->setLocalPath(listedDir.filePath(info.name));
+            list.push_back(file);
+        }
+        emit listFetched(listedFolder, list);
+    });
 }
 
 ModifiableCloudFileHandler CloudFileSystem::createFolder(const QString &name, const CloudFileHandler &parentFolder)
@@ -94,14 +111,28 @@ bool CloudFileSystem::deleteFiles(const CloudFiles &files)
     return false;
 }
 
-ModifiableCloudFileHandler CloudFileSystem::createFolder(const CloudFsFolderInfo &info) const
+ModifiableCloudFileHandler CloudFileSystem::createFolderFromInfo(const CloudFsFolderInfo &info, const CloudFsFolderId &parentId) const
 {
     auto folder = std::make_shared<CloudFile>();
+    folder->setId(info.id);
+    folder->setParentId(parentId);
+    folder->setName(info.name);
+    folder->setCreatedAt(info.createdAt);
+    folder->setUpdatedAt(info.updatedAt);
+    folder->setUpdatedBy(info.updatedBy);
     return folder;
 }
 
-ModifiableCloudFileHandler CloudFileSystem::createFile(const CloudFsFileInfo &info) const
+ModifiableCloudFileHandler CloudFileSystem::createFileFromInfo(const CloudFsFileInfo &info, const CloudFsFolderId &parentId) const
 {
     auto file = std::make_shared<CloudFile>();
+    file->setId(info.id);
+    file->setParentId(parentId);
+    file->setName(info.name);
+    file->setType(info.type);
+    file->setSize(info.size);
+    file->setCreatedAt(info.createdAt);
+    file->setUpdatedAt(info.updatedAt);
+    file->setUpdatedBy(info.updatedBy);
     return file;
 }

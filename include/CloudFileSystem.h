@@ -54,7 +54,7 @@ public:
     void signIn();
     void signOut();
 
-    void fetchList(const CloudFileHandler &folder);
+    void fetchList(const CloudFileHandler &parentFolder);
     ModifiableCloudFileHandler createFolder(const QString &name, const CloudFileHandler &parentFolder);
     bool deleteFiles(const CloudFiles &files);
 
@@ -63,8 +63,8 @@ signals:
     void fetchListErrorOccured(const QString &errorText);
 
 private:
-    ModifiableCloudFileHandler createFolder(const CloudFsFolderInfo &info) const;
-    ModifiableCloudFileHandler createFile(const CloudFsFileInfo &info) const;
+    ModifiableCloudFileHandler createFolderFromInfo(const CloudFsFolderInfo &info, const CloudFsFolderId &parentId) const;
+    ModifiableCloudFileHandler createFileFromInfo(const CloudFsFileInfo &info, const CloudFsFolderId &parentId) const;
 
     CoreMessenger *m_coreMessenger;
     std::optional<CoreMessengerCloudFs> m_coreFs;

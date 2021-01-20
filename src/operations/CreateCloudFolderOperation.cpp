@@ -65,7 +65,6 @@ void CreateCloudFolderOperation::run()
     }
 
     // Set local path
-    // FIXME(fpohtmeh): remove?
     folder->setLocalPath(parentDir.filePath(m_name));
 
     // Send update
