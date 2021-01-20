@@ -6,28 +6,46 @@ import "../theme"
 Item {
     id: busyControl
 
+//    To use - place in center of parent, toggle busy property
+
+    width: size
+    height: size
+
+    property color primaryColor: Theme.brandColor
+    property color secondaryColor: "transparent"
+
     property int size: Theme.avatarHeight
     property int lineWidth: 3
     property real value: 100
     property real maxValue: 100
     property bool busy: false
-
-    property color primaryColor: Theme.brandColor
-    property color secondaryColor: "transparent"
-
-    width: size
-    height: size
-
     readonly property real ratio: value / maxValue
+
+    onBusyChanged: {
+        if (busy) {
+            busyControl.opacity = 1
+        } else {
+            busyControl.opacity = 0
+        }
+    }
 
     onRatioChanged: {
         canvas.degree = ratio * 360;
+    }
+
+    Behavior on opacity {
+        NumberAnimation { duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+    }
+
+    Behavior on value {
+        NumberAnimation { duration: 1000; easing.type: Easing.InOutCubic }
     }
 
     Timer {
         running: busyControl.busy
         repeat: true
         interval: 1050
+        triggeredOnStart: true
         onTriggered: {
             if (busyControl.value === 0) {
                 busyControl.value = busyControl.maxValue
@@ -36,10 +54,6 @@ Item {
                 rotationAnimation.restart()
             }
         }
-    }
-
-    Behavior on value {
-        NumberAnimation { duration: 1000; easing.type: Easing.InOutCubic }
     }
 
     Rectangle {
