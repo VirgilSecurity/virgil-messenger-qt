@@ -34,17 +34,19 @@
 
 #include "CloudFileOperation.h"
 
+#include "Messenger.h"
+
 using namespace vm;
 
 quint64 CloudFileOperation::m_counter = 0;
 
-CloudFileOperation::CloudFileOperation(const UserId &userId, QObject *parent)
+CloudFileOperation::CloudFileOperation(CloudFileSystem *fileSystem, QObject *parent)
     : Operation(QLatin1String("CloudFile(%1)").arg(QString::number(++m_counter)), parent)
-    , m_userId(userId)
+    , m_cloudFileSystem(fileSystem)
 {
 }
 
-UserId CloudFileOperation::userId() const
+CloudFileSystem *CloudFileOperation::cloudFileSystem()
 {
-    return m_userId;
+    return m_cloudFileSystem;
 }

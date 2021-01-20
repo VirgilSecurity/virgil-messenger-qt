@@ -39,6 +39,7 @@
 #include <QObject>
 
 #include "CloudFile.h"
+#include "CloudFileSystem.h"
 #include "CloudFileUpdate.h"
 #include "Models.h"
 #include "Settings.h"
@@ -55,7 +56,8 @@ class CloudFilesController : public QObject
     Q_PROPERTY(bool isRoot READ isRoot NOTIFY isRootChanged)
 
 public:
-    CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase, QObject *parent);
+    CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase, CloudFileSystem *cloudFileSystem,
+                         QObject *parent);
 
     CloudFilesModel *model();
     void switchToRootFolder();
@@ -82,20 +84,24 @@ private:
 
     void setupTableConnections();
     void switchToHierarchy(const FoldersHierarchy &hierarchy);
+    void setCloudFiles(const ModifiableCloudFiles &cloudFiles);
 
     QString displayPath() const;
     bool isRoot() const;
 
+    void onDbFilesFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles);
     void onCloudFilesFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles);
     void onUpdateCloudFile(const CloudFileUpdate &update);
 
     QPointer<const Settings> m_settings;
     QPointer<Models> m_models;
     QPointer<UserDatabase> m_userDatabase;
+    QPointer<CloudFileSystem> m_cloudFileSystem;
 
     ModifiableCloudFileHandler m_rootFolder;
     FoldersHierarchy m_hierarchy;
     FoldersHierarchy m_newHierarchy;
+    bool m_fetchedFromCloud = false;
 };
 }
 

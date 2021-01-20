@@ -32,58 +32,53 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "UploadCloudFileOperation.h"
-
-#include <QDir>
-#include <QFile>
-#include <QMimeDatabase>
-
-#include "CloudFileOperation.h"
-#include "FileUtils.h"
-#include "Messenger.h"
-#include "Utils.h"
+#include "CloudFileId.h"
 
 using namespace vm;
 
-UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, const QString &filePath, const CloudFileHandler &folder)
-    : Operation(QLatin1String("UploadCloudFile"), parent)
-    , m_parent(parent)
-    , m_filePath(filePath)
-    , m_folder(folder)
+CloudFileId::CloudFileId()
 {
 }
 
-void UploadCloudFileOperation::run()
+CloudFileId::CloudFileId(CloudFsFileId id)
+    : m_id(id)
 {
-    /*
-    // Create local dir & copy file to local dir
-    QDir folderDir(m_folder->localPath());
-    folderDir.mkpath(".");
-    QFileInfo info(m_filePath);
-    const auto localPath = folderDir.filePath(info.fileName());
-    QFile::copy(info.absoluteFilePath(), localPath);
+}
 
-    // Create cloud file
-    auto cloudFile = std::make_shared<CloudFile>();
-    cloudFile->setId(Utils::createUuid());
-    cloudFile->setParentId(m_folder->id());
-    cloudFile->setName(info.fileName());
-    cloudFile->setIsFolder(false);
-    cloudFile->setType(FileUtils::fileMimeType(m_filePath));
-    cloudFile->setSize(info.size());
-    const auto now = QDateTime::currentDateTime();
-    cloudFile->setCreatedAt(now);
-    cloudFile->setUpdatedAt(now);
-    cloudFile->setUpdatedBy(m_parent->messenger()->currentUser()->id());
-    cloudFile->setLocalPath(localPath);
-    cloudFile->setFingerprint(FileUtils::calculateFingerprint(m_filePath));
+CloudFileId::CloudFileId(CloudFsFolderId id)
+    : m_id(id)
+{
+}
 
-    // Send update
-    CreatedCloudFileUpdate update;
-    update.cloudFileId = cloudFile->id();
-    update.cloudFile = cloudFile;
-    m_parent->cloudFileUpdate(update);
+CloudFileId::operator QString() const
+{
+    if (auto id = std::get_if<CloudFsFileId>(&m_id)) {
+        return QString(*id);
+    }
+    if (auto id = std::get_if<CloudFsFolderId>(&m_id)) {
+        return QString(*id);
+    }
+    return QLatin1String("");
+}
 
-    finish();
-    */
+bool CloudFileId::operator==(const CloudFileId &id) const
+{
+    // FIXME(fpohtmeh): add more precise realization
+    return QString(*this) == QString(id);
+}
+
+CloudFsFileId CloudFileId::toCoreFileId() const
+{
+    if (auto id = std::get_if<CloudFsFileId>(&m_id)) {
+        return *id;
+    }
+    return CloudFsFileId();
+}
+
+CloudFsFolderId CloudFileId::toCoreFolderId() const
+{
+    if (auto id = std::get_if<CloudFsFolderId>(&m_id)) {
+        return *id;
+    }
+    return CloudFsFolderId();
 }

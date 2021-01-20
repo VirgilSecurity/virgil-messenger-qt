@@ -41,21 +41,23 @@
 
 namespace vm
 {
+class CloudFileSystem;
+
 class CloudFileOperation : public Operation
 {
     Q_OBJECT
 
 public:
-    CloudFileOperation(const UserId &userId, QObject *parent);
+    CloudFileOperation(CloudFileSystem *fileSystem, QObject *parent);
 
-    UserId userId() const;
+    CloudFileSystem *cloudFileSystem();
 
 signals:
     void cloudFileUpdate(const CloudFileUpdate &update);
 
 private:
     static quint64 m_counter;
-    UserId m_userId;
+    CloudFileSystem *m_cloudFileSystem;
 };
 }
 

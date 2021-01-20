@@ -37,6 +37,7 @@
 #include <QDir>
 
 #include "CloudFileOperation.h"
+#include "Messenger.h"
 #include "Utils.h"
 
 using namespace vm;
@@ -51,29 +52,26 @@ CreateCloudFolderOperation::CreateCloudFolderOperation(CloudFileOperation *paren
 
 void CreateCloudFolderOperation::run()
 {
-    // Create local dir
-    QDir parentDir(m_parentFolder->localPath());
-    if (!parentDir.mkpath(m_name)) {
+    auto folder = m_parent->cloudFileSystem()->createFolder(m_name, m_parentFolder);
+    if (!folder) {
         invalidate(tr("Failed to create folder: %1").arg(m_name));
         return;
     }
 
-    // Create cloud folder
-    auto cloudFile = std::make_shared<CloudFile>();
-    cloudFile->setId(Utils::createUuid());
-    cloudFile->setParentId(m_parentFolder->id());
-    cloudFile->setName(m_name);
-    cloudFile->setIsFolder(true);
-    const auto now = QDateTime::currentDateTime();
-    cloudFile->setCreatedAt(now);
-    cloudFile->setUpdatedAt(now);
-    cloudFile->setUpdatedBy(m_parent->userId());
-    cloudFile->setLocalPath(parentDir.filePath(m_name));
+    // Create local dir
+    QDir parentDir(m_parentFolder->localPath());
+    if (!parentDir.mkpath(m_name)) {
+        qCWarning(lcOperation) << tr("Failed to create local folder: %1").arg(m_name);
+    }
+
+    // Set local path
+    // FIXME(fpohtmeh): remove?
+    folder->setLocalPath(parentDir.filePath(m_name));
 
     // Send update
     CreatedCloudFileUpdate update;
-    update.cloudFileId = cloudFile->id();
-    update.cloudFile = cloudFile;
+    update.cloudFileId = folder->id();
+    update.cloudFile = folder;
     m_parent->cloudFileUpdate(update);
 
     finish();

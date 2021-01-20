@@ -157,7 +157,7 @@ QHash<int, QByteArray> CloudFilesModel::roleNames() const
 
 std::optional<int> CloudFilesModel::findRowById(const CloudFileId &cloudFileId) const
 {
-    auto it = std::find_if(std::begin(m_files), std::end(m_files), [&cloudFileId](auto cloudFile) {
+    const auto it = std::find_if(std::begin(m_files), std::end(m_files), [&cloudFileId](auto cloudFile) {
         return cloudFile->id() == cloudFileId;
     });
 

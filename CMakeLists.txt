@@ -378,6 +378,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/ConfirmationCodeType.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFile.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileId.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileSystem.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileUpdate.h
         # Messenger Core
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/AttachmentId.h
@@ -556,6 +557,8 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/ContactAvatarLoader.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CustomerEnv.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CloudFile.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileId.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileSystem.cpp
         # Messenger Core
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/AttachmentId.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Chat.cpp

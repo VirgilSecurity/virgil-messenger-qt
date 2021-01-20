@@ -302,8 +302,13 @@ ModifiableCloudFileHandler Self::readCloudFile(const QSqlQuery &query)
     const auto fingerprint = query.value("cloudFileFingerprint").toString();
 
     auto cloudFile = std::make_shared<CloudFile>();
-    cloudFile->setId(id);
-    cloudFile->setParentId(parentId);
+    if (isFolder) {
+        cloudFile->setId(CloudFsFolderId(id));
+    }
+    else {
+        cloudFile->setId(CloudFsFileId(id));
+    }
+    cloudFile->setParentId(CloudFsFolderId(parentId));
     cloudFile->setName(name);
     cloudFile->setIsFolder(isFolder);
     cloudFile->setType(type);

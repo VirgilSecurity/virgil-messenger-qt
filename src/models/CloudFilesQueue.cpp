@@ -64,7 +64,7 @@ Operation *Self::createOperation(OperationSourcePtr source)
 {
     const auto cloudFileSource = dynamic_cast<CloudFileOperationSource *>(source.get());
 
-    auto *op = new CloudFileOperation(m_messenger->currentUser()->id(), nullptr);
+    auto *op = new CloudFileOperation(m_messenger->cloudFileSystem(), nullptr);
     connect(op, &Operation::notificationCreated, this, &Self::notificationCreated);
     connect(op, &CloudFileOperation::cloudFileUpdate, this, &Self::updateCloudFile);
 

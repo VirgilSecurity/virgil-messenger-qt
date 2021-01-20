@@ -32,58 +32,43 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "UploadCloudFileOperation.h"
+#ifndef VM_CLOUD_FILE_SYSTEM_H
+#define VM_CLOUD_FILE_SYSTEM_H
 
-#include <QDir>
-#include <QFile>
-#include <QMimeDatabase>
+#include <QObject>
 
-#include "CloudFileOperation.h"
-#include "FileUtils.h"
-#include "Messenger.h"
-#include "Utils.h"
+#include "CloudFile.h"
+#include "CoreMessengerCloudFs.h"
 
-using namespace vm;
-
-UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, const QString &filePath, const CloudFileHandler &folder)
-    : Operation(QLatin1String("UploadCloudFile"), parent)
-    , m_parent(parent)
-    , m_filePath(filePath)
-    , m_folder(folder)
+namespace vm
 {
+class CoreMessenger;
+
+class CloudFileSystem : public QObject
+{
+    Q_OBJECT
+
+public:
+    CloudFileSystem(CoreMessenger *coreMessenger, QObject *parent);
+
+    void signIn();
+    void signOut();
+
+    void fetchList(const CloudFileHandler &folder);
+    ModifiableCloudFileHandler createFolder(const QString &name, const CloudFileHandler &parentFolder);
+    bool deleteFiles(const CloudFiles &files);
+
+signals:
+    void listFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &files);
+    void fetchListErrorOccured(const QString &errorText);
+
+private:
+    ModifiableCloudFileHandler createFolder(const CloudFsFolderInfo &info) const;
+    ModifiableCloudFileHandler createFile(const CloudFsFileInfo &info) const;
+
+    CoreMessenger *m_coreMessenger;
+    std::optional<CoreMessengerCloudFs> m_coreFs;
+};
 }
 
-void UploadCloudFileOperation::run()
-{
-    /*
-    // Create local dir & copy file to local dir
-    QDir folderDir(m_folder->localPath());
-    folderDir.mkpath(".");
-    QFileInfo info(m_filePath);
-    const auto localPath = folderDir.filePath(info.fileName());
-    QFile::copy(info.absoluteFilePath(), localPath);
-
-    // Create cloud file
-    auto cloudFile = std::make_shared<CloudFile>();
-    cloudFile->setId(Utils::createUuid());
-    cloudFile->setParentId(m_folder->id());
-    cloudFile->setName(info.fileName());
-    cloudFile->setIsFolder(false);
-    cloudFile->setType(FileUtils::fileMimeType(m_filePath));
-    cloudFile->setSize(info.size());
-    const auto now = QDateTime::currentDateTime();
-    cloudFile->setCreatedAt(now);
-    cloudFile->setUpdatedAt(now);
-    cloudFile->setUpdatedBy(m_parent->messenger()->currentUser()->id());
-    cloudFile->setLocalPath(localPath);
-    cloudFile->setFingerprint(FileUtils::calculateFingerprint(m_filePath));
-
-    // Send update
-    CreatedCloudFileUpdate update;
-    update.cloudFileId = cloudFile->id();
-    update.cloudFile = cloudFile;
-    m_parent->cloudFileUpdate(update);
-
-    finish();
-    */
-}
+#endif // VM_CLOUD_FILE_SYSTEM_H

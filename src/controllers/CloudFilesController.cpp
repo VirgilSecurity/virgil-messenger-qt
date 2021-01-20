@@ -45,16 +45,17 @@
 using namespace vm;
 using Self = CloudFilesController;
 
-Self::CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase, QObject *parent)
+Self::CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase, CloudFileSystem *cloudFileSystem,
+                           QObject *parent)
     : QObject(parent)
     , m_settings(settings)
     , m_models(models)
     , m_userDatabase(userDatabase)
+    , m_cloudFileSystem(cloudFileSystem)
 {
     qRegisterMetaType<CloudFileUpdate>("CloudFileUpdate");
 
     m_rootFolder = std::make_shared<CloudFile>();
-    m_rootFolder->setId("");
     m_rootFolder->setName(tr("File Manager"));
     m_rootFolder->setIsFolder(true);
 
@@ -62,6 +63,7 @@ Self::CloudFilesController(const Settings *settings, Models *models, UserDatabas
 
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
     connect(models->cloudFilesQueue(), &CloudFilesQueue::updateCloudFile, this, &Self::onUpdateCloudFile);
+    connect(cloudFileSystem, &CloudFileSystem::listFetched, this, &Self::onCloudFilesFetched);
 }
 
 CloudFilesModel *Self::model()
@@ -130,13 +132,27 @@ void Self::setupTableConnections()
     qCDebug(lcController) << "Setup database table connections for cloud files...";
     auto table = m_userDatabase->cloudFilesTable();
     connect(table, &CloudFilesTable::errorOccurred, this, &Self::errorOccurred);
-    connect(table, &CloudFilesTable::fetched, this, &Self::onCloudFilesFetched);
+    connect(table, &CloudFilesTable::fetched, this, &Self::onDbFilesFetched);
 }
 
 void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)
 {
     m_newHierarchy = hierarchy;
+    m_fetchedFromCloud = false;
     m_userDatabase->cloudFilesTable()->fetch(hierarchy.back());
+    m_cloudFileSystem->fetchList(hierarchy.back());
+}
+
+void CloudFilesController::setCloudFiles(const ModifiableCloudFiles &cloudFiles)
+{
+    m_models->cloudFiles()->setFiles(cloudFiles);
+
+    if (m_hierarchy != m_newHierarchy) {
+        m_hierarchy = m_newHierarchy;
+        m_newHierarchy.clear();
+        emit displayPathChanged(displayPath());
+        emit isRootChanged(isRoot());
+    }
 }
 
 QString CloudFilesController::displayPath() const
@@ -153,17 +169,25 @@ bool CloudFilesController::isRoot() const
     return m_hierarchy.size() == 1;
 }
 
-void Self::onCloudFilesFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles)
+void Self::onDbFilesFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles)
 {
-    Q_UNUSED(folder)
-    m_models->cloudFiles()->setFiles(cloudFiles);
-
-    if (m_hierarchy != m_newHierarchy) {
-        m_hierarchy = m_newHierarchy;
-        m_newHierarchy.clear();
-        emit displayPathChanged(displayPath());
-        emit isRootChanged(isRoot());
+    if (m_fetchedFromCloud) {
+        return; // Cloud list was fetched earlier, skip DB cache
     }
+    if (folder != m_newHierarchy.back()) {
+        return; // Files were fetched for another folder
+    }
+    setCloudFiles(cloudFiles);
+}
+
+void CloudFilesController::onCloudFilesFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles)
+{
+    if (folder != m_newHierarchy.back()) {
+        return; // Files were fetched for another folder
+    }
+    m_fetchedFromCloud = true;
+    setCloudFiles(cloudFiles);
+    // FIXME(fpohtmeh): replace cloud files in db
 }
 
 void Self::onUpdateCloudFile(const CloudFileUpdate &update)

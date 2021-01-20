@@ -137,7 +137,7 @@ QStringList CloudFilesTable::getCloudFolderFileIds(const CloudFileId &folderId)
         if (!isFolder) {
             continue;
         }
-        const CloudFileId id = query->value("cloudFileId").toString();
+        const CloudFileId id = CloudFsFileId(query->value("cloudFileId").toString());
         ids += getCloudFolderFileIds(id);
     }
     return ids;
@@ -147,7 +147,7 @@ void CloudFilesTable::onFetch(const CloudFileHandler &folder)
 {
     qCDebug(lcDatabase) << "Fetching cloud files...";
     ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues values{{ ":folderId", folder->id() }};
+    const DatabaseUtils::BindValues values{{ ":folderId", QString(folder->id()) }};
     auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectCloudFolderFiles"), values);
     if (!query) {
         qCCritical(lcDatabase) << "CloudFilesTable::onFetch error";

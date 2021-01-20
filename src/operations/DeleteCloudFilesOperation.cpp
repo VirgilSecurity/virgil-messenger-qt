@@ -35,6 +35,7 @@
 #include "DeleteCloudFilesOperation.h"
 
 #include "CloudFileOperation.h"
+#include "Messenger.h"
 #include "FileUtils.h"
 
 using namespace vm;
@@ -48,6 +49,12 @@ DeleteCloudFilesOperation::DeleteCloudFilesOperation(CloudFileOperation *parent,
 
 void DeleteCloudFilesOperation::run()
 {
+    const auto deleted = m_parent->cloudFileSystem()->deleteFiles(m_files);
+    if (!deleted) {
+        invalidate(tr("Some files were not deleted"));
+        return;
+    }
+
     for (auto &file : m_files) {
         // Delete local file/dir
         if (file->isFolder()) {
@@ -63,5 +70,6 @@ void DeleteCloudFilesOperation::run()
         update.isFolder = file->isFolder();
         m_parent->cloudFileUpdate(update);
     }
+
     finish();
 }
