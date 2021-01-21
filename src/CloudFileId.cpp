@@ -37,52 +37,63 @@
 using namespace vm;
 
 CloudFileId::CloudFileId()
+    : m_coreId(CloudFsFolderId(""))
 {
 }
 
-CloudFileId::CloudFileId(CloudFsFileId id)
-    : m_id(id)
+CloudFileId::CloudFileId(CloudFsFileId coreId)
+    : m_coreId(coreId)
 {
 }
 
-CloudFileId::CloudFileId(CloudFsFolderId id)
-    : m_id(id)
+CloudFileId::CloudFileId(CloudFsFolderId coreId)
+    : m_coreId(coreId)
 {
 }
 
-CloudFileId::operator QString() const
+CloudFsFileId CloudFileId::coreFileId() const
 {
-    if (auto id = std::get_if<CloudFsFileId>(&m_id)) {
-        return QString(*id);
-    }
-    if (auto id = std::get_if<CloudFsFolderId>(&m_id)) {
-        return QString(*id);
-    }
-    return QLatin1String("");
-}
-
-bool CloudFileId::operator==(const CloudFileId &id) const
-{
-    return m_id.index() == id.m_id.index() && QString(*this) == QString(id);
-}
-
-bool CloudFileId::operator!=(const CloudFileId &id) const
-{
-    return !operator==(id);
-}
-
-CloudFsFileId CloudFileId::toCoreFileId() const
-{
-    if (auto id = std::get_if<CloudFsFileId>(&m_id)) {
+    if (auto id = std::get_if<CloudFsFileId>(&m_coreId)) {
         return *id;
     }
     return CloudFsFileId();
 }
 
-CloudFsFolderId CloudFileId::toCoreFolderId() const
+CloudFsFolderId CloudFileId::coreFolderId() const
 {
-    if (auto id = std::get_if<CloudFsFolderId>(&m_id)) {
+    if (auto id = std::get_if<CloudFsFolderId>(&m_coreId)) {
         return *id;
     }
     return CloudFsFolderId();
+}
+
+bool CloudFileId::operator<(const CloudFileId &id) const
+{
+    return m_coreId < id.m_coreId;
+}
+
+bool CloudFileId::operator>(const CloudFileId &id) const
+{
+    return m_coreId > id.m_coreId;
+}
+
+bool CloudFileId::operator==(const CloudFileId &id) const
+{
+    return m_coreId == id.m_coreId;
+}
+
+bool CloudFileId::operator!=(const CloudFileId &id) const
+{
+    return m_coreId != id.m_coreId;
+}
+
+CloudFileId::operator QString() const
+{
+    if (auto id = std::get_if<CloudFsFileId>(&m_coreId)) {
+        return QString(*id);
+    }
+    if (auto id = std::get_if<CloudFsFolderId>(&m_coreId)) {
+        return QString(*id);
+    }
+    return QLatin1String("");
 }

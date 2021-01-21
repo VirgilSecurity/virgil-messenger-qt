@@ -53,7 +53,7 @@ Self::CloudFilesController(const Settings *settings, Models *models, UserDatabas
     , m_userDatabase(userDatabase)
     , m_cloudFileSystem(cloudFileSystem)
 {
-    qRegisterMetaType<CloudFilesUpdate>("CloudFileUpdate");
+    qRegisterMetaType<CloudFilesUpdate>("CloudFilesUpdate");
 
     m_rootFolder = std::make_shared<CloudFile>();
     m_rootFolder->setName(tr("File Manager"));
@@ -132,41 +132,14 @@ void Self::setupTableConnections()
 {
     qCDebug(lcController) << "Setup database table connections for cloud files...";
     auto table = m_userDatabase->cloudFilesTable();
-    connect(m_cloudFileSystem, &CloudFileSystem::fetchListErrorOccured, table, &CloudFilesTable::fetch);
     connect(table, &CloudFilesTable::errorOccurred, this, &Self::errorOccurred);
-    connect(table, &CloudFilesTable::fetched, this, &Self::onDbFilesFetched);
+    connect(table, &CloudFilesTable::fetched, this, &Self::onDbListFetched);
 }
 
 void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)
 {
     m_newHierarchy = hierarchy;
-    m_cloudFileSystem->fetchList(hierarchy.back());
-}
-
-void CloudFilesController::processFetchedFiles(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles, bool databaseUsed)
-{
-    if (folder->id() != m_newHierarchy.back()->id()) {
-        qCWarning(lcController) << "Fetched folder isn't current" << folder->id();
-        return; // Files were fetched for another folder
-    }
-
-    // Update hierarchy
-    const auto oldDisplayPath = displayPath();
-    const auto oldIsRoot = isRoot();
-    m_hierarchy = m_newHierarchy;
-    if (displayPath() != oldDisplayPath) {
-        emit displayPathChanged(displayPath());
-    }
-    if (isRoot() != oldIsRoot) {
-        emit isRootChanged(isRoot());
-    }
-
-    // Emit update
-    ListedCloudFolderUpdate update;
-    update.folder = folder;
-    update.files = cloudFiles;
-    update.databaseUsed = databaseUsed;
-    emit updateCloudFiles(update);
+    m_userDatabase->cloudFilesTable()->fetch(hierarchy.back());
 }
 
 QString CloudFilesController::displayPath() const
@@ -183,14 +156,67 @@ bool CloudFilesController::isRoot() const
     return m_hierarchy.size() == 1;
 }
 
-void Self::onDbFilesFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles)
+void Self::onDbListFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles)
 {
-    processFetchedFiles(folder, cloudFiles, true);
+    // Update hierarchy
+    const auto oldDisplayPath = displayPath();
+    const auto oldIsRoot = isRoot();
+    m_hierarchy = m_newHierarchy;
+    if (displayPath() != oldDisplayPath) {
+        emit displayPathChanged(displayPath());
+    }
+    if (isRoot() != oldIsRoot) {
+        emit isRootChanged(isRoot());
+    }
+
+    // Emit update
+    ListedCloudFolderUpdate update;
+    update.parentFolder = parentFolder;
+    update.files = cloudFiles;
+    emit updateCloudFiles(update);
+
+    // Fetch cloud folder
+    m_databaseCloudFiles = cloudFiles;
+    // TODO(fpohtmeh): restore
+    //m_cloudFileSystem->fetchList(parentFolder);
 }
 
-void CloudFilesController::onCloudFilesFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles)
+void CloudFilesController::onCloudFilesFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles)
 {
-    processFetchedFiles(folder, cloudFiles, false);
+    if (parentFolder->id() != m_hierarchy.back()->id()) {
+        qCWarning(lcController) << "Fetched cloud folder isn't relevant more" << parentFolder->id();
+    }
+
+    // Find differenctes
+    auto oldFiles = m_databaseCloudFiles;
+    std::sort(std::begin(oldFiles), std::end(oldFiles), fileIdLess);
+    auto newFiles = cloudFiles;
+    std::sort(std::begin(newFiles), std::end(newFiles), fileIdLess);
+
+    MergeCloudFolderUpdate update;
+    update.parentFolder = parentFolder;
+    const auto oldSize = oldFiles.size();
+    const auto newSize = newFiles.size();
+    for (size_t oldI = 0, newI = 0; oldI < oldSize && newI < newSize; ) {
+        const auto &oldFile = oldFiles[oldI];
+        const auto &newFile = newFiles[newI];
+        if (fileIdLess(oldFile, newFile)) {
+            update.deleted.push_back(oldFile);
+            ++oldI;
+        }
+        else if (fileIdLess(newFile, oldFile)) {
+            update.added.push_back(newFile);
+            ++newI;
+        }
+        else {
+            if (!filesAreEqual(oldFile, newFile)) {
+                update.updated.push_back(newFile);
+            }
+            ++oldI;
+            ++newI;
+        }
+    }
+    emit updateCloudFiles(update);
 }
 
 void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)
@@ -199,4 +225,14 @@ void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)
     m_models->cloudFiles()->updateCloudFiles(update);
     // Update DB
     m_userDatabase->cloudFilesTable()->updateCloudFiles(update);
+}
+
+bool CloudFilesController::fileIdLess(const ModifiableCloudFileHandler &a, const ModifiableCloudFileHandler &b)
+{
+    return a->id() < b->id();
+}
+
+bool CloudFilesController::filesAreEqual(const ModifiableCloudFileHandler &a, const ModifiableCloudFileHandler &b)
+{
+    return a->id() == b->id() && a->updatedAt() == b->updatedAt();
 }

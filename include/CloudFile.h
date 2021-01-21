@@ -95,7 +95,6 @@ using CloudFileHandler = std::shared_ptr<const CloudFile>;
 using ModifiableCloudFileHandler = std::shared_ptr<CloudFile>;
 using CloudFiles = std::vector<CloudFileHandler>;
 using ModifiableCloudFiles = std::vector<ModifiableCloudFileHandler>;
-
 }
 
 #endif // VM_CLOUD_FILE_H

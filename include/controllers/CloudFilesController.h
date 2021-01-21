@@ -78,21 +78,22 @@ signals:
 
     void displayPathChanged(const QString &path);
     void isRootChanged(const bool isRoot);
-    void isFetchingChanged(const bool isFetching);
 
 private:
     using FoldersHierarchy = std::vector<CloudFileHandler>;
 
     void setupTableConnections();
     void switchToHierarchy(const FoldersHierarchy &hierarchy);
-    void processFetchedFiles(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles, bool databaseUsed);
 
     QString displayPath() const;
     bool isRoot() const;
 
-    void onDbFilesFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles);
-    void onCloudFilesFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles);
+    void onDbListFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
+    void onCloudFilesFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
     void onUpdateCloudFiles(const CloudFilesUpdate &update);
+
+    static bool fileIdLess(const ModifiableCloudFileHandler &a, const ModifiableCloudFileHandler &b);
+    static bool filesAreEqual(const ModifiableCloudFileHandler &a, const ModifiableCloudFileHandler &b);
 
     QPointer<const Settings> m_settings;
     QPointer<Models> m_models;
@@ -102,6 +103,7 @@ private:
     ModifiableCloudFileHandler m_rootFolder;
     FoldersHierarchy m_hierarchy;
     FoldersHierarchy m_newHierarchy;
+    ModifiableCloudFiles m_databaseCloudFiles;
 };
 }
 

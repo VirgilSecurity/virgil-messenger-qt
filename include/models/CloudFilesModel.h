@@ -74,6 +74,9 @@ private:
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
+    void addFile(const ModifiableCloudFileHandler &file);
+    void removeFile(const CloudFileHandler &file);
+    void updateFile(const ModifiableCloudFileHandler &file);
     std::optional<int> findRowById(const CloudFileId &cloudFileId) const;
     void invalidateDateTime();
 

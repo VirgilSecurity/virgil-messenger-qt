@@ -45,11 +45,11 @@
 
 using namespace vm;
 
-UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, const QString &filePath, const CloudFileHandler &folder)
+UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, const QString &filePath, const CloudFileHandler &parentFolder)
     : Operation(QLatin1String("UploadCloudFile"), parent)
     , m_parent(parent)
     , m_filePath(filePath)
-    , m_folder(folder)
+    , m_parentFolder(parentFolder)
 {
 }
 

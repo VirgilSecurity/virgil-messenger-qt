@@ -46,19 +46,21 @@ class CloudFileId
 {
 public:
     CloudFileId();
-    CloudFileId(CloudFsFileId id);
-    CloudFileId(CloudFsFolderId id);
+    CloudFileId(CloudFsFileId coreId);
+    CloudFileId(CloudFsFolderId coreId);
+
+    CloudFsFileId coreFileId() const;
+    CloudFsFolderId coreFolderId() const;
 
     operator QString() const;
 
+    bool operator<(const CloudFileId &id) const;
+    bool operator>(const CloudFileId &id) const;
     bool operator==(const CloudFileId &id) const;
     bool operator!=(const CloudFileId &id) const;
 
-    CloudFsFileId toCoreFileId() const;
-    CloudFsFolderId toCoreFolderId() const;
-
 private:
-    std::variant<CloudFsFileId, CloudFsFolderId> m_id;
+    std::variant<CloudFsFileId, CloudFsFolderId> m_coreId;
 };
 }
 

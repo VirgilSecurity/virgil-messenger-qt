@@ -43,7 +43,7 @@ CloudFilesTable::CloudFilesTable(Database *database)
     : DatabaseTable(QLatin1String("cloudFiles"), database)
 {
     connect(this, &CloudFilesTable::fetch, this, &CloudFilesTable::onFetch);
-    connect(this, &CloudFilesTable::updateCloudFiles, this, &CloudFilesTable::onupdateCloudFiles);
+    connect(this, &CloudFilesTable::updateCloudFiles, this, &CloudFilesTable::onUpdateCloudFiles);
 }
 
 bool CloudFilesTable::create()
@@ -56,91 +56,111 @@ bool CloudFilesTable::create()
     return false;
 }
 
-void CloudFilesTable::updateListedFolder(const CloudFileHandler &cloudFolder, const ModifiableCloudFiles &cloudFiles)
+bool CloudFilesTable::createFiles(const ModifiableCloudFiles &cloudFiles)
 {
-    // FIXME(fpohtmeh): implement
-    // Update cloudFolder properties as well
-    Q_UNUSED(cloudFolder)
-    Q_UNUSED(cloudFiles)
+    for (auto &f : cloudFiles) {
+        if (!createFile(f)) {
+            return false;
+        }
+    }
+    return true;
 }
 
-void CloudFilesTable::createFile(const CloudFileHandler &cloudFile)
+bool CloudFilesTable::createFile(const CloudFileHandler &cloudFile)
 {
-    ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues bindValues = {
-        { ":id", QString(cloudFile->id()) },
-        { ":parentId", QString(cloudFile->parentId()) },
-        { ":name", cloudFile->name() },
-        { ":isFolder", cloudFile->isFolder() },
-        { ":type", cloudFile->type() },
-        { ":size", cloudFile->size() },
-        { ":createdAt", cloudFile->createdAt().toTime_t() },
-        { ":updatedAt", cloudFile->updatedAt().toTime_t() },
-        { ":updatedBy", QString(cloudFile->updatedBy()) },
-        { ":encryptedKey", cloudFile->encryptedKey() },
-        { ":publicKey", cloudFile->publicKey() },
-        { ":localPath", cloudFile->localPath() },
-        { ":fingerprint", cloudFile->fingerprint() }
-    };
+    const auto bindValues = DatabaseUtils::buildCloudFileBindings(cloudFile);
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertCloudFile"), bindValues);
     if (query) {
         qCDebug(lcDatabase) << "Cloud file was created" << bindValues.front().second;
+        return true;
     }
     else {
-        qCCritical(lcDatabase) << "CloudFilesTable::createCloudFile error";
+        qCCritical(lcDatabase) << "CloudFilesTable::createFile error";
         emit errorOccurred(tr("Failed to create cloud file"));
+        return false;
     }
 }
 
-void CloudFilesTable::deleteFile(const CloudFileId &cloudFileId, bool isFolder)
+bool CloudFilesTable::updateFiles(const ModifiableCloudFiles &cloudFiles)
 {
-    ScopedConnection connection(*database());
-    ScopedTransaction transaction(*database());
-    // Delete files/folders recursively
-    if (isFolder) {
-        const auto parentIds = getCloudFolderFileIds(cloudFileId);
-        // TODO(fpohtmeh): process in one query
-        for (auto &parentId : parentIds) {
-            const DatabaseUtils::BindValues bindValues {{ ":parentId", parentId }};
-            auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("deleteCloudFilesByParentId"), bindValues);
-            if (!query) {
-                qCCritical(lcDatabase) << "CloudFilesTable::deleteCloudFile folder error";
-                emit errorOccurred(tr("Failed to delete cloud folder"));
-                transaction.rollback();
-                return;
-            }
+    for (auto &f : cloudFiles) {
+        if (!updateFile(f)) {
+            return false;
         }
     }
-    // Delete file
-    const DatabaseUtils::BindValues bindValues {{ ":id", QString(cloudFileId) }};
-    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("deleteCloudFileById"), bindValues);
-    if (!query) {
-        qCCritical(lcDatabase) << "CloudFilesTable::deleteCloudFile file error";
-        emit errorOccurred(tr("Failed to delete cloud file"));
-        transaction.rollback();
+    return true;
+}
+
+bool CloudFilesTable::updateFile(const CloudFileHandler &cloudFile)
+{
+    const auto bindValues = DatabaseUtils::buildCloudFileBindings(cloudFile);
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateCloudFile"), bindValues);
+    if (query) {
+        qCDebug(lcDatabase) << "Cloud file was updated" << bindValues.front().second;
+        return true;
+    }
+    else {
+        qCCritical(lcDatabase) << "CloudFilesTable::updateFile error";
+        emit errorOccurred(tr("Failed to update cloud file"));
+        return false;
     }
 }
 
-QStringList CloudFilesTable::getCloudFolderFileIds(const CloudFileId &folderId)
+bool CloudFilesTable::deleteFiles(const CloudFiles &cloudFiles)
 {
-    QStringList ids;
-    ids << folderId;
+    QStringList deletedIds;
+    QStringList deletedParentIds;
+    for (auto &file : cloudFiles) {
+        const auto &id = file->id();
+        deletedIds << id;
+        if (file->isFolder()) {
+            deletedParentIds << id;
+            deletedParentIds += getSubFoldersIds(id);
+        }
+    }
 
+    if (!deletedIds.empty()) {
+        const DatabaseUtils::BindValues bindValues {{ ":ids", deletedIds }};
+        const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("deleteCloudFilesByIds"), bindValues);
+        if (!query) {
+            qCCritical(lcDatabase) << "CloudFilesTable::deleteCloudFile file error";
+            emit errorOccurred(tr("Failed to delete cloud file by id"));
+            return false;
+        }
+    }
+
+    if (!deletedParentIds.empty()) {
+        const DatabaseUtils::BindValues bindValues {{ ":parentIds", deletedParentIds }};
+        const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("deleteCloudFilesByParentIds"), bindValues);
+        if (!query) {
+            qCCritical(lcDatabase) << "CloudFilesTable::deleteCloudFile file error";
+            emit errorOccurred(tr("Failed to delete cloud file by parentId"));
+            return false;
+        }
+    }
+
+    return true;
+}
+
+QStringList CloudFilesTable::getSubFoldersIds(const QString &folderId)
+{
     const DatabaseUtils::BindValues values{{ ":folderId", QString(folderId) }};
     auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectCloudFolderFiles"), values);
     if (!query) {
         qCCritical(lcDatabase) << "CloudFilesTable::getCloudFolderFileIds error";
         emit errorOccurred(tr("Failed to get cloud folder file ids"));
-        return ids;
+        return QStringList();
     }
 
+    QStringList ids;
     while (query->next()) {
         const bool isFolder = query->value("cloudFileIsFolder").toBool();
         if (!isFolder) {
             continue;
         }
-        const CloudFileId id = CloudFsFileId(query->value("cloudFileId").toString());
-        ids += getCloudFolderFileIds(id);
+        const auto id = query->value("cloudFileId").toString();
+        ids << id;
+        ids += getSubFoldersIds(id);
     }
     return ids;
 }
@@ -149,7 +169,7 @@ void CloudFilesTable::onFetch(const CloudFileHandler &folder)
 {
     qCDebug(lcDatabase) << "Fetching cloud files...";
     ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues values{{ ":folderId", QString(folder->id()) }};
+    const DatabaseUtils::BindValues values{{ ":folderId", QString(folder->id())}};
     auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectCloudFolderFiles"), values);
     if (!query) {
         qCCritical(lcDatabase) << "CloudFilesTable::onFetch error";
@@ -165,18 +185,29 @@ void CloudFilesTable::onFetch(const CloudFileHandler &folder)
     }
 }
 
-void CloudFilesTable::onupdateCloudFiles(const CloudFilesUpdate &update)
+void CloudFilesTable::onUpdateCloudFiles(const CloudFilesUpdate &update)
 {
     if (auto upd = std::get_if<ListedCloudFolderUpdate>(&update)) {
-        if (!upd->databaseUsed) {
-            updateListedFolder(upd->folder, upd->files);
+        return;
+    }
+
+    ScopedConnection connection(*database());
+    if (auto upd = std::get_if<MergeCloudFolderUpdate>(&update)) {
+        ScopedTransaction transaction(*database());
+        if (!deleteFiles(upd->deleted) || !updateFiles(upd->updated) || !createFiles(upd->added)) {
+            transaction.rollback();
         }
     }
     else if (auto upd = std::get_if<CreatedCloudFileUpdate>(&update)) {
         createFile(upd->file);
     }
-    // FIXME(fpohtmeh): implement
-//    else if (auto upd = std::get_if<DeletedCloudFilesUpdate>(&update)) {
-//        deleteFile(upd->fileId, upd->isFolder);
-//    }
+    else if (auto upd = std::get_if<DeletedCloudFilesUpdate>(&update)) {
+        ScopedTransaction transaction(*database());
+        if (!deleteFiles(upd->files)) {
+            transaction.rollback();
+        }
+    }
+    else {
+        throw std::logic_error("Invalid CloudFilesUpdate");
+    }
 }

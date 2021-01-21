@@ -41,22 +41,32 @@
 
 namespace vm
 {
-struct ListedCloudFolderUpdate {
-    CloudFileHandler folder;
-    ModifiableCloudFiles files;
-    bool databaseUsed = false;
+struct CloudFilesUpdateBase
+{
+    CloudFileHandler parentFolder;
 };
 
-struct CreatedCloudFileUpdate {
+struct ListedCloudFolderUpdate : public CloudFilesUpdateBase {
+    ModifiableCloudFiles files;
+};
+
+struct MergeCloudFolderUpdate : public CloudFilesUpdateBase {
+    ModifiableCloudFiles added;
+    CloudFiles deleted;
+    ModifiableCloudFiles updated;
+};
+
+struct CreatedCloudFileUpdate : public CloudFilesUpdateBase {
     ModifiableCloudFileHandler file;
 };
 
-struct DeletedCloudFilesUpdate  {
+struct DeletedCloudFilesUpdate : public CloudFilesUpdateBase {
     CloudFiles files;
 };
 
 using CloudFilesUpdate = std::variant<
     ListedCloudFolderUpdate,
+    MergeCloudFolderUpdate,
     CreatedCloudFileUpdate,
     DeletedCloudFilesUpdate
     >;

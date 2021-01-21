@@ -47,14 +47,14 @@ class UploadCloudFileOperation : public Operation
     Q_OBJECT
 
 public:
-    UploadCloudFileOperation(CloudFileOperation *parent, const QString &filePath, const CloudFileHandler &folder);
+    UploadCloudFileOperation(CloudFileOperation *parent, const QString &filePath, const CloudFileHandler &parentFolder);
 
     void run() override;
 
 private:
     CloudFileOperation *m_parent;
     QString m_filePath;
-    CloudFileHandler m_folder;
+    CloudFileHandler m_parentFolder;
 };
 }
 

@@ -39,6 +39,8 @@
 #include "CoreMessenger.h"
 #include "FutureWorker.h"
 
+Q_LOGGING_CATEGORY(lcCloudFileSystem, "cloud-fs")
+
 using namespace vm;
 
 CloudFileSystem::CloudFileSystem(CoreMessenger *coreMessenger, QObject *parent)
@@ -49,21 +51,23 @@ CloudFileSystem::CloudFileSystem(CoreMessenger *coreMessenger, QObject *parent)
 
 void CloudFileSystem::signIn()
 {
+    qCDebug(lcCloudFileSystem) << "Sign-in cloud-fs";
     m_coreFs = m_coreMessenger->cloudFs();
 }
 
 void CloudFileSystem::signOut()
 {
+    qCDebug(lcCloudFileSystem) << "Sign-out cloud-fs";
     m_coreFs = {};
 }
 
 void CloudFileSystem::fetchList(const CloudFileHandler &parentFolder)
 {
-    const auto parentId = parentFolder->id().toCoreFolderId();
+    const auto parentId = parentFolder->id().coreFolderId();
     const auto isRoot = !parentId.isValid();
     FutureWorker::run(m_coreFs->listFolder(parentId), [this, parentFolder, isRoot](auto result) {
         if (std::holds_alternative<CoreMessengerStatus>(result)) {
-            emit fetchListErrorOccured(parentFolder, tr("Cloud folder listing error"));
+            emit fetchListErrorOccured(tr("Cloud folder listing error"));
             return;
         }
         const auto fsFolder = std::get_if<CloudFsFolder>(&result);
@@ -95,7 +99,7 @@ void CloudFileSystem::fetchList(const CloudFileHandler &parentFolder)
 
 void CloudFileSystem::createFolder(const QString &name, const CloudFileHandler &parentFolder)
 {
-    const auto parentId = parentFolder->id().toCoreFolderId();
+    const auto parentId = parentFolder->id().coreFolderId();
     const auto isRoot = !parentId.isValid();
     auto future = isRoot ? m_coreFs->createFolder(name) : m_coreFs->createFolder(name, parentId, parentFolder->publicKey());
     FutureWorker::run(future, [this, parentFolder, name, isRoot](auto result) {

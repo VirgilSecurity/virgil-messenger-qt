@@ -92,19 +92,27 @@ void CloudFilesModel::updateCloudFiles(const CloudFilesUpdate &update)
         m_files = upd->files;
         endResetModel();
     }
+    else if (auto upd = std::get_if<MergeCloudFolderUpdate>(&update)) {
+        for (auto &file : upd->deleted) {
+            removeFile(file);
+        }
+        for (auto &file : upd->updated) {
+            updateFile(file);
+        }
+        for (auto &file : upd->added) {
+            addFile(file);
+        }
+    }
     else if (auto upd = std::get_if<CreatedCloudFileUpdate>(&update)) {
-        beginInsertRows(QModelIndex(), rowCount(), rowCount());
-        m_files.push_back(upd->file);
-        endInsertRows();
+        addFile(upd->file);
     }
     else if (auto upd = std::get_if<DeletedCloudFilesUpdate>(&update)) {
-        for (auto file : upd->files) {
-            if (const auto row = findRowById(file->id())) {
-                beginRemoveRows(QModelIndex(), *row, *row);
-                m_files.erase(m_files.begin() + *row);
-                endRemoveRows();
-            }
+        for (auto &file : upd->files) {
+            removeFile(file);
         }
+    }
+    else {
+        throw std::logic_error("Invalid CloudFilesUpdate");
     }
 }
 
@@ -146,6 +154,31 @@ QHash<int, QByteArray> CloudFilesModel::roleNames() const
         { DisplayDateTimeRole, "displayDateTime" },
         { DisplayFileSize, "displayFileSize" }
     });
+}
+
+void CloudFilesModel::addFile(const ModifiableCloudFileHandler &file)
+{
+    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+    m_files.push_back(file);
+    endInsertRows();
+}
+
+void CloudFilesModel::removeFile(const CloudFileHandler &file)
+{
+    if (const auto row = findRowById(file->id())) {
+        beginRemoveRows(QModelIndex(), *row, *row);
+        m_files.erase(m_files.begin() + *row);
+        endRemoveRows();
+    }
+}
+
+void CloudFilesModel::updateFile(const ModifiableCloudFileHandler &file)
+{
+    if (const auto row = findRowById(file->id())) {
+        m_files[*row] = file;
+        const auto modelIndex = index(*row);
+        emit dataChanged(modelIndex, modelIndex);
+    }
 }
 
 std::optional<int> CloudFilesModel::findRowById(const CloudFileId &cloudFileId) const

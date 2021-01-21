@@ -49,13 +49,14 @@ DeleteCloudFilesOperation::DeleteCloudFilesOperation(CloudFileOperation *parent,
 
 void DeleteCloudFilesOperation::run()
 {
+    // Delete cloud files
     const auto deleted = m_parent->cloudFileSystem()->deleteFiles(m_files);
     if (!deleted) {
         invalidate(tr("Some files were not deleted"));
         return;
     }
 
-    // Delete local files/dirs
+    // Delete local files
     for (auto &file : m_files) {
         if (file->isFolder()) {
             FileUtils::removeDir(file->localPath());
