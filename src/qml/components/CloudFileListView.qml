@@ -11,8 +11,15 @@ ModelListView {
     emptyIcon: "../resources/icons/Chats.png"
     emptyText: qsTr("Add a file<br/>by pressing the plus<br/>button above")
 
+    QtObject {
+        id: d
+        readonly property real defaultChatHeight: 60
+    }
+
     delegate: ListDelegate {
+        id: fileListDelegate
         width: cloudFileListView.width
+        height: d.defaultChatHeight
         backgroundColor: (model.isSelected || down) ? Theme.contactPressedColor : "transparent"
 
         ImageButton {
