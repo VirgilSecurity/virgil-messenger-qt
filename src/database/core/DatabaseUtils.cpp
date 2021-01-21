@@ -411,7 +411,7 @@ QString DatabaseUtils::replaceListBindValue(const QString &queryText, const Bind
     switch (bindValue.second.type()) {
         case QVariant::StringList:
             for (auto &v : bindValue.second.toStringList()) {
-                values << '(' + v + ')';
+                values << '"' + v + '"';
             }
             break;
         case QVariant::List:

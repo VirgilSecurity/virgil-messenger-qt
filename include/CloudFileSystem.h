@@ -59,13 +59,15 @@ public:
 
     void fetchList(const CloudFileHandler &parentFolder);
     void createFolder(const QString &name, const CloudFileHandler &parentFolder);
-    bool deleteFiles(const CloudFiles &files);
+    void deleteFiles(const CloudFiles &files);
 
 signals:
     void listFetched(const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &files);
     void fetchListErrorOccured(const QString &errorText);
     void folderCreated(const ModifiableCloudFileHandler &parentFolder);
     void createFolderErrorOccured(const QString &errorText);
+    void fileDeleted(const CloudFileHandler &file);
+    void deleteFileErrorOccured(const QString &errorText);
 
 private:
     ModifiableCloudFileHandler createParentFolderFromInfo(const CloudFsFolder &fsFolder, const CloudFileHandler &oldFolder) const;

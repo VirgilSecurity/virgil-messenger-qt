@@ -103,12 +103,19 @@ void CloudFileSystem::createFolder(const QString &name, const CloudFileHandler &
     });
 }
 
-bool CloudFileSystem::deleteFiles(const CloudFiles &files)
+void CloudFileSystem::deleteFiles(const CloudFiles &files)
 {
-    Q_UNUSED(files)
-    // TODO(fpohtmeh): implement
-    throw std::logic_error("Not implemented: CloudFileSystem::deleteFiles");
-    return false;
+    for (auto &file : files) {
+        auto future = file->isFolder() ? m_coreFs->deleteFolder(file->id().coreFolderId()) : m_coreFs->deleteFile(file->id().coreFileId());
+        FutureWorker::run(future, [this, file](auto result) {
+            if (result == CoreMessengerStatus::Success) {
+                emit fileDeleted(file);
+            }
+            else {
+                emit deleteFileErrorOccured(tr("Cloud file deletion error: %1. Code: %2").arg(file->name()).arg(static_cast<int>(result)));
+            }
+        });
+    }
 }
 
 ModifiableCloudFileHandler CloudFileSystem::createParentFolderFromInfo(const CloudFsFolder &fsFolder, const CloudFileHandler &oldFolder) const
