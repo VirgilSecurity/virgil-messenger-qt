@@ -727,6 +727,7 @@ target_link_libraries(${VS_TARGET_NAME}
         $<$<STREQUAL:"${VS_PLATFORM}","android">:log>
         $<$<STREQUAL:"${VS_PLATFORM}","windows">:Qt5::Widgets>
         $<$<STREQUAL:"${VS_PLATFORM}","ios">:Qt5::Gui>
+        $<$<STREQUAL:"${VS_PLATFORM}","ios">:Qt5::QIosOptionalPlugin_NSPhotoLibrary>
         Qt5::Sql
         Qt5::Network
         Qt5::Concurrent
