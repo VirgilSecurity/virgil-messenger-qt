@@ -45,11 +45,6 @@ Item {
         onCountChanged: chatList.countChangedController()
         onContentYChanged: chatList.autoFlickToBottomController()
 
-        bottomMargin: flick.calculateContentMargin()
-        Behavior on bottomMargin {
-            NumberAnimation { duration: isReady ? Theme.animationDuration : 0; easing.type: Easing.InOutCubic }
-        }
-
         ScrollBar.vertical: MessageListViewScrollBar {}
 
         NumberAnimation {
@@ -222,16 +217,6 @@ Item {
             flickToStartAnimation.from = currentPosition
             flickToStartAnimation.to = destinationPosition
             flickToStartAnimation.running = true
-        }
-
-        function calculateContentMargin() {
-            if (messagesListView.contentHeight < messagesListItem.height) {
-                let contentMargin = messagesListItem.height - messagesListView.contentHeight
-                if (contentMargin < 0) return 0
-                return contentMargin
-            } else {
-                return 0
-            }
         }
     }
 
