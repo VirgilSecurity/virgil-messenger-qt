@@ -131,6 +131,7 @@ ModifiableCloudFileHandler CloudFileSystem::createFolderFromInfo(const CloudFsFo
     folder->setId(info.id);
     folder->setParentId(parentId);
     folder->setName(info.name);
+    folder->setIsFolder(true);
     folder->setCreatedAt(info.createdAt);
     folder->setUpdatedAt(info.updatedAt);
     folder->setUpdatedBy(info.updatedBy);

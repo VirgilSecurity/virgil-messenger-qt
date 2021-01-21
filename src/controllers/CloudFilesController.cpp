@@ -177,8 +177,7 @@ void Self::onDbListFetched(const CloudFileHandler &parentFolder, const Modifiabl
 
     // Fetch cloud folder
     m_databaseCloudFiles = cloudFiles;
-    // TODO(fpohtmeh): restore
-    //m_cloudFileSystem->fetchList(parentFolder);
+    m_cloudFileSystem->fetchList(parentFolder);
 }
 
 void CloudFilesController::onCloudFilesFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles)
@@ -187,17 +186,19 @@ void CloudFilesController::onCloudFilesFetched(const CloudFileHandler &parentFol
         qCWarning(lcController) << "Fetched cloud folder isn't relevant more" << parentFolder->id();
     }
 
+    MergeCloudFolderUpdate update;
+    update.parentFolder = parentFolder;
+
     // Find differenctes
     auto oldFiles = m_databaseCloudFiles;
     std::sort(std::begin(oldFiles), std::end(oldFiles), fileIdLess);
     auto newFiles = cloudFiles;
     std::sort(std::begin(newFiles), std::end(newFiles), fileIdLess);
-
-    MergeCloudFolderUpdate update;
-    update.parentFolder = parentFolder;
     const auto oldSize = oldFiles.size();
     const auto newSize = newFiles.size();
-    for (size_t oldI = 0, newI = 0; oldI < oldSize && newI < newSize; ) {
+    size_t oldI = 0;
+    size_t newI = 0;
+    while (oldI < oldSize && newI < newSize) {
         const auto &oldFile = oldFiles[oldI];
         const auto &newFile = newFiles[newI];
         if (fileIdLess(oldFile, newFile)) {
@@ -216,6 +217,13 @@ void CloudFilesController::onCloudFilesFetched(const CloudFileHandler &parentFol
             ++newI;
         }
     }
+    if (oldI < oldSize) {
+        update.deleted.insert(update.deleted.end(), oldFiles.begin() + oldI, oldFiles.end());
+    }
+    if (newI < newSize) {
+        update.added.insert(update.added.end(), newFiles.begin() + newI, newFiles.end());
+    }
+
     emit updateCloudFiles(update);
 }
 
