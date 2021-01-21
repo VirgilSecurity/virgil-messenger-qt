@@ -52,7 +52,7 @@ option(ENABLE_CLANGFORMAT "On/Off formatting source code with clangformat." ON)
 # ---------------------------------------------------------------------------
 # Project version
 # ---------------------------------------------------------------------------
-set(VS_TARGET_VERSION "3.5.4")
+set(VS_TARGET_VERSION "3.5.5")
 set(VS_CORE_VERSION "0.2.1.39")
 set(VERSION_DATABASE_SCHEME "0")
 
@@ -157,7 +157,7 @@ if (VS_PLATFORM STREQUAL "ios")
     endif ()
 
     # QT Extra packages
-    string(APPEND VS_QT_EXTRA "QmlImportScanner")
+    list(APPEND VS_QT_EXTRA QmlImportScanner Gui)
 
     # Android
 elseif (VS_PLATFORM STREQUAL "android")
@@ -729,6 +729,8 @@ target_link_libraries(${VS_TARGET_NAME}
         $<$<STREQUAL:"${VS_PLATFORM}","android">:Qt5::AndroidExtras>
         $<$<STREQUAL:"${VS_PLATFORM}","android">:log>
         $<$<STREQUAL:"${VS_PLATFORM}","windows">:Qt5::Widgets>
+        $<$<STREQUAL:"${VS_PLATFORM}","ios">:Qt5::Gui>
+        $<$<STREQUAL:"${VS_PLATFORM}","ios">:Qt5::QIosOptionalPlugin_NSPhotoLibrary>
         Qt5::Sql
         Qt5::Network
         Qt5::Concurrent

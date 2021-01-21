@@ -12,7 +12,7 @@ Item {
     property real keyboardHeight: 0
 
     QtObject {
-        id: d
+        id: keyboardProps
         property var initKeyboardRectangle
         property real initKeyboardYTranslate: 0
         property bool keyboardOpen: false
@@ -29,8 +29,8 @@ Item {
 
     function onOpeningKeyboard() {
         if (isAnimationRequired()) {
-            let keyboard = keyboardHandler.d.initKeyboardRectangle
-            let keyboardYTranslate = keyboardHandler.d.initKeyboardYTranslate
+            let keyboard = keyboardProps.initKeyboardRectangle
+            let keyboardYTranslate = keyboardProps.initKeyboardYTranslate
             let toPosition = keyboard.height - keyboardYTranslate
             keyboardAnimation.to = toPosition
             keyboardAnimation.easing.type = Easing.OutCubic
@@ -52,9 +52,9 @@ Item {
         }
 
         let currentKeyboard = Qt.inputMethod.keyboardRectangle
-        let initKeyboard = keyboardHandler.d.initKeyboardRectangle
+        let initKeyboard = keyboardProps.initKeyboardRectangle
         if (currentKeyboard.y !== initKeyboard.y) {
-            keyboardAnimation.to = currentKeyboard.height - keyboardHandler.d.initKeyboardYTranslate
+            keyboardAnimation.to = currentKeyboard.height - keyboardProps.initKeyboardYTranslate
             keyboardAnimation.easing.type = Easing.InOutSine
             keyboardAnimation.duration = Theme.shortAnimationDuration
             keyboardAnimation.restart()
@@ -65,7 +65,7 @@ Item {
         let globalPoint = mainView.mapFromItem(activeFocusItem, activeFocusItem.x, activeFocusItem.y)
         let activeItemBottomPoint = globalPoint.y + activeFocusItem.height
 
-        let keyboard = keyboardHandler.d.initKeyboardRectangle
+        let keyboard = keyboardProps.initKeyboardRectangle
         let keyboardSpacing = Theme.margin * 2
         let keyboardTopPoint = mainView.height - keyboard.height - keyboardSpacing
 
@@ -78,8 +78,8 @@ Item {
 
     function keyboardInit() {
         let keyboard = Qt.inputMethod.keyboardRectangle
-        keyboardHandler.d.initKeyboardRectangle = Qt.rect(keyboard.x, keyboard.y, keyboard.width, keyboard.height)
-        keyboardHandler.d.initKeyboardYTranslate = keyboard.y - mainView.height
+        keyboardProps.initKeyboardRectangle = Qt.rect(keyboard.x, keyboard.y, keyboard.width, keyboard.height)
+        keyboardProps.initKeyboardYTranslate = keyboard.y - mainView.height
     }
 
     Connections {
@@ -87,13 +87,13 @@ Item {
          enabled: visible
 
          function onVisibleChanged() {
-             if(visible && keyboardHandler.d.keyboardOpen) {
-                 keyboardHandler.d.keyboardOpen = false;
+             if(visible && keyboardProps.keyboardOpen) {
+                 keyboardProps.keyboardOpen = false;
              } else {
-                 if (typeof keyboardHandler.d.initKeyboardRectangle === "undefined") {
+                 if (typeof keyboardProps.initKeyboardRectangle === "undefined") {
                      keyboardHandler.keyboardInit()
                  }
-                 keyboardHandler.d.keyboardOpen = true;
+                 keyboardProps.keyboardOpen = true;
              }
          }
 
