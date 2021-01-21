@@ -21,7 +21,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>MinimumOSVersion</key>
-	<string>@MACOSX_DEPLOYMENT_TARGET@</string>
+	<string>@CMAKE_OSX_DEPLOYMENT_TARGET@</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>UILaunchStoryboardName</key>
@@ -38,6 +38,6 @@
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
-	<true/>	
+	<true/>
 </dict>
 </plist>
