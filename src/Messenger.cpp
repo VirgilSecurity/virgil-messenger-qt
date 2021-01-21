@@ -114,22 +114,22 @@ bool Messenger::isOnline() const noexcept {
 void
 Self::signIn(const QString &username)
 {
-    FutureWorker::run(m_coreMessenger->signIn(username), [this, username = username](const FutureResult &result) {
+    FutureWorker::run(m_coreMessenger->signIn(username), [this, username = username](auto result) {
         switch (result) {
-        case FutureResult::Success:
+        case CoreMessengerStatus::Success:
             m_settings->setLastSignedInUser(username);
             emit signedIn(username);
             break;
 
-        case FutureResult::Error_NoCred:
+        case CoreMessengerStatus::Error_NoCred:
             emit signInErrorOccured(tr("Cannot load credentials"));
             break;
 
-        case FutureResult::Error_ImportCredentials:
+        case CoreMessengerStatus::Error_ImportCredentials:
             emit signInErrorOccured(tr("Cannot import loaded credentials"));
             break;
 
-        case FutureResult::Error_Signin:
+        case CoreMessengerStatus::Error_Signin:
             emit signInErrorOccured(tr("Cannot sign-in user"));
             break;
 
@@ -144,7 +144,7 @@ Self::signIn(const QString &username)
 void
 Self::signOut()
 {
-    FutureWorker::run(m_coreMessenger->signOut(), [this](const FutureResult &) {
+    FutureWorker::run(m_coreMessenger->signOut(), [this](auto ) {
         m_settings->setLastSignedInUser(QString());
         emit signedOut();
     });
@@ -154,15 +154,15 @@ Self::signOut()
 void
 Self::signUp(const QString &username)
 {
-    FutureWorker::run(m_coreMessenger->signUp(username), [this, username = username](const FutureResult &result) {
+    FutureWorker::run(m_coreMessenger->signUp(username), [this, username = username](auto result) {
         switch (result) {
 
-        case FutureResult::Success:
+        case CoreMessengerStatus::Success:
             m_settings->setLastSignedInUser(username);
             emit signedUp(username);
             break;
 
-        case FutureResult::Error_UserAlreadyExists:
+        case CoreMessengerStatus::Error_UserAlreadyExists:
             emit signUpErrorOccured(tr("Username is already taken"));
             break;
 
@@ -184,8 +184,8 @@ Self::backupKey(const QString &password, const QString &confirmedPassword)
         emit backupKeyFailed(tr("Passwords do not match"));
 
     } else {
-        FutureWorker::run(m_coreMessenger->backupKey(password), [this](const FutureResult &result) {
-            if (result == FutureResult::Success) {
+        FutureWorker::run(m_coreMessenger->backupKey(password), [this](auto result) {
+            if (result == CoreMessengerStatus::Success) {
                 auto username = m_coreMessenger->currentUser()->username();
                 emit keyBackuped(username);
             }
@@ -204,8 +204,8 @@ Self::downloadKey(const QString &username, const QString &password)
         emit downloadKeyFailed(tr("Password cannot be empty"));
 
     } else {
-        FutureWorker::run(m_coreMessenger->signInWithBackupKey(username, password), [this, username = username](const FutureResult &result) {
-            if (result == FutureResult::Success) {
+        FutureWorker::run(m_coreMessenger->signInWithBackupKey(username, password), [this, username = username](auto result) {
+            if (result == CoreMessengerStatus::Success) {
                 m_settings->setLastSignedInUser(username);
                 emit keyDownloaded(username);
             }
@@ -238,7 +238,7 @@ bool
 Self::sendMessage(MessageHandler message) {
 
     const auto future = m_coreMessenger->sendMessage(message);
-    if (future.result() == FutureResult::Success) {
+    if (future.result() == CoreMessengerStatus::Success) {
         emit messageSent(message);
         return true;
     }
