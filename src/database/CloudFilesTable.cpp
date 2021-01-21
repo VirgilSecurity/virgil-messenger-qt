@@ -58,8 +58,8 @@ bool CloudFilesTable::create()
 
 bool CloudFilesTable::createFiles(const ModifiableCloudFiles &cloudFiles)
 {
-    for (auto &f : cloudFiles) {
-        if (!createFile(f)) {
+    for (auto &file : cloudFiles) {
+        if (!createFile(file)) {
             return false;
         }
     }
@@ -68,7 +68,7 @@ bool CloudFilesTable::createFiles(const ModifiableCloudFiles &cloudFiles)
 
 bool CloudFilesTable::createFile(const CloudFileHandler &cloudFile)
 {
-    const auto bindValues = DatabaseUtils::buildCloudFileBindings(cloudFile);
+    const auto bindValues = DatabaseUtils::createNewCloudFileBindings(cloudFile);
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertCloudFile"), bindValues);
     if (query) {
         qCDebug(lcDatabase) << "Cloud file was created" << bindValues.front().second;
@@ -81,20 +81,33 @@ bool CloudFilesTable::createFile(const CloudFileHandler &cloudFile)
     }
 }
 
-bool CloudFilesTable::updateFiles(const ModifiableCloudFiles &cloudFiles)
+bool CloudFilesTable::updateFiles(const CloudFiles &cloudFiles, const CloudFileUpdateSource source)
 {
-    for (auto &f : cloudFiles) {
-        if (!updateFile(f)) {
+    for (auto &file : cloudFiles) {
+        if (!updateFile(file, source)) {
             return false;
         }
     }
     return true;
 }
 
-bool CloudFilesTable::updateFile(const CloudFileHandler &cloudFile)
+bool CloudFilesTable::updateFile(const CloudFileHandler &cloudFile, const CloudFileUpdateSource source)
 {
-    const auto bindValues = DatabaseUtils::buildCloudFileBindings(cloudFile);
-    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateCloudFile"), bindValues);
+    QString queryId;
+    switch (source) {
+        case CloudFileUpdateSource::ListedParent:
+            queryId = QLatin1String("updateListedParentCloudFolder");
+            break;
+        case CloudFileUpdateSource::ListedChild:
+            queryId = cloudFile->isFolder() ? QLatin1String("updateListedChildCloudFolder") : QLatin1String("updateListedChildCloudFile");
+            break;
+        default:
+            throw std::logic_error("Invalid CloudFileUpdateSource");
+            break;
+    }
+
+    const auto bindValues = DatabaseUtils::createUpdatedCloudFileBindings(cloudFile, source);
+    const auto query = DatabaseUtils::readExecQuery(database(), queryId, bindValues);
     if (query) {
         qCDebug(lcDatabase) << "Cloud file was updated" << bindValues.front().second;
         return true;
@@ -187,27 +200,40 @@ void CloudFilesTable::onFetch(const CloudFileHandler &folder)
 
 void CloudFilesTable::onUpdateCloudFiles(const CloudFilesUpdate &update)
 {
-    if (auto upd = std::get_if<ListedCloudFolderUpdate>(&update)) {
+    if (auto upd = std::get_if<ListCloudFolderUpdate>(&update)) {
         return;
     }
 
     ScopedConnection connection(*database());
+    ScopedTransaction transaction(*database());
+    bool success = false;
     if (auto upd = std::get_if<MergeCloudFolderUpdate>(&update)) {
-        ScopedTransaction transaction(*database());
-        if (!deleteFiles(upd->deleted) || !updateFiles(upd->updated) || !createFiles(upd->added)) {
-            transaction.rollback();
+        success = deleteFiles(upd->deleted) &&
+                updateFile(upd->parentFolder, CloudFileUpdateSource::ListedParent) &&
+                updateFiles(upd->updated, CloudFileUpdateSource::ListedChild) &&
+                createFiles(upd->added);
+    }
+    else if (auto upd = std::get_if<CreateCloudFilesUpdate>(&update)) {
+        success = createFiles(upd->files);
+    }
+    else if (auto upd = std::get_if<UpdateCloudFilesUpdate>(&update)) {
+        switch (upd->source) {
+            case CloudFileUpdateSource::ListedChild:
+                success = updateFiles(upd->files, upd->source);
+                break;
+            default:
+                throw std::logic_error("Unhandled CloudFileUpdateSource");
+                break;
         }
     }
-    else if (auto upd = std::get_if<CreatedCloudFileUpdate>(&update)) {
-        createFile(upd->file);
-    }
-    else if (auto upd = std::get_if<DeletedCloudFilesUpdate>(&update)) {
-        ScopedTransaction transaction(*database());
-        if (!deleteFiles(upd->files)) {
-            transaction.rollback();
-        }
+    else if (auto upd = std::get_if<DeleteCloudFilesUpdate>(&update)) {
+        success = deleteFiles(upd->files);
     }
     else {
         throw std::logic_error("Invalid CloudFilesUpdate");
+    }
+
+    if (!success) {
+        transaction.rollback();
     }
 }

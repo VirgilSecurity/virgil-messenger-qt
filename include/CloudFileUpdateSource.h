@@ -32,44 +32,17 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#ifndef VM_CLOUD_FILE_UPDATE_SOURCE_H
+#define VM_CLOUD_FILE_UPDATE_SOURCE_H
 
-#include "CloudFsFolderId.h"
-
-
-using namespace vm;
-using Self = CloudFsFolderId;
-
-
-Self::CloudFsFolderId(QString id) : m_id(std::move(id)) {
-
-}
-
-Self::operator QString() const {
-    return m_id;
-}
-
-bool Self::isValid() const noexcept {
-    return !m_id.isEmpty();
-}
-
-CloudFsFolderId CloudFsFolderId::root()
+namespace vm
 {
-    static CloudFsFolderId id("");
-    return id;
+enum class CloudFileUpdateSource
+{
+    None,
+    ListedChild,
+    ListedParent
+};
 }
 
-bool Self::operator<(const Self& id) const {
-    return QString(*this) < QString(id);
-}
-
-bool Self::operator>(const Self& id) const {
-    return QString(*this) > QString(id);
-}
-
-bool Self::operator==(const Self& id) const {
-    return QString(*this) == QString(id);
-}
-
-bool Self::operator!=(const Self& id) const {
-    return QString(*this) != QString(id);
-}
+#endif // VM_CLOUD_FILE_UPDATE_SOURCE_H

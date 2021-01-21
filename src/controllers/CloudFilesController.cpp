@@ -56,6 +56,7 @@ Self::CloudFilesController(const Settings *settings, Models *models, UserDatabas
     qRegisterMetaType<CloudFilesUpdate>("CloudFilesUpdate");
 
     m_rootFolder = std::make_shared<CloudFile>();
+    m_rootFolder->setId(CloudFileId::root());
     m_rootFolder->setName(tr("File Manager"));
     m_rootFolder->setIsFolder(true);
 
@@ -170,7 +171,7 @@ void Self::onDbListFetched(const CloudFileHandler &parentFolder, const Modifiabl
     }
 
     // Emit update
-    ListedCloudFolderUpdate update;
+    ListCloudFolderUpdate update;
     update.parentFolder = parentFolder;
     update.files = cloudFiles;
     emit updateCloudFiles(update);
@@ -180,16 +181,17 @@ void Self::onDbListFetched(const CloudFileHandler &parentFolder, const Modifiabl
     m_cloudFileSystem->fetchList(parentFolder);
 }
 
-void CloudFilesController::onCloudFilesFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles)
+void CloudFilesController::onCloudFilesFetched(const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles)
 {
     if (parentFolder->id() != m_hierarchy.back()->id()) {
         qCWarning(lcController) << "Fetched cloud folder isn't relevant more" << parentFolder->id();
     }
 
-    MergeCloudFolderUpdate update;
-    update.parentFolder = parentFolder;
+    // Merge update
 
-    // Find differenctes
+    MergeCloudFolderUpdate mergeUpdate;
+    mergeUpdate.parentFolder = parentFolder;
+
     auto oldFiles = m_databaseCloudFiles;
     std::sort(std::begin(oldFiles), std::end(oldFiles), fileIdLess);
     auto newFiles = cloudFiles;
@@ -202,29 +204,29 @@ void CloudFilesController::onCloudFilesFetched(const CloudFileHandler &parentFol
         const auto &oldFile = oldFiles[oldI];
         const auto &newFile = newFiles[newI];
         if (fileIdLess(oldFile, newFile)) {
-            update.deleted.push_back(oldFile);
+            mergeUpdate.deleted.push_back(oldFile);
             ++oldI;
         }
         else if (fileIdLess(newFile, oldFile)) {
-            update.added.push_back(newFile);
+            mergeUpdate.added.push_back(newFile);
             ++newI;
         }
         else {
             if (!filesAreEqual(oldFile, newFile)) {
-                update.updated.push_back(newFile);
+                mergeUpdate.updated.push_back(newFile);
             }
             ++oldI;
             ++newI;
         }
     }
     if (oldI < oldSize) {
-        update.deleted.insert(update.deleted.end(), oldFiles.begin() + oldI, oldFiles.end());
+        mergeUpdate.deleted.insert(mergeUpdate.deleted.end(), oldFiles.begin() + oldI, oldFiles.end());
     }
     if (newI < newSize) {
-        update.added.insert(update.added.end(), newFiles.begin() + newI, newFiles.end());
+        mergeUpdate.added.insert(mergeUpdate.added.end(), newFiles.begin() + newI, newFiles.end());
     }
 
-    emit updateCloudFiles(update);
+    emit updateCloudFiles(mergeUpdate);
 }
 
 void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)
@@ -242,5 +244,17 @@ bool CloudFilesController::fileIdLess(const ModifiableCloudFileHandler &a, const
 
 bool CloudFilesController::filesAreEqual(const ModifiableCloudFileHandler &a, const ModifiableCloudFileHandler &b)
 {
-    return a->id() == b->id() && a->updatedAt() == b->updatedAt();
+    // Compare common fields
+    if (!(a->parentId() == b->parentId() && a->isFolder() == b->isFolder())) {
+        return false;
+    }
+    // Compare fetched fields
+    if (!(a->id() == b->id() && a->name() == b->name() && a->createdAt() == b->createdAt() && a->updatedAt() == b->updatedAt())) {
+        return false;
+    }
+    // Compare file fields
+    if (!a->isFolder()) {
+        return a->type() == b->type() && a->size() == b->size();
+    }
+    return true;
 }

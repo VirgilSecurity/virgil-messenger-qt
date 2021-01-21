@@ -37,7 +37,6 @@
 using namespace vm;
 
 CloudFileId::CloudFileId()
-    : m_coreId(CloudFsFolderId(""))
 {
 }
 
@@ -65,6 +64,12 @@ CloudFsFolderId CloudFileId::coreFolderId() const
         return *id;
     }
     return CloudFsFolderId();
+}
+
+CloudFileId CloudFileId::root()
+{
+    static CloudFileId id(CloudFsFolderId::root());
+    return id;
 }
 
 bool CloudFileId::operator<(const CloudFileId &id) const

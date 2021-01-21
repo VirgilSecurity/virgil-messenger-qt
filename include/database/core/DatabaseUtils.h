@@ -64,7 +64,8 @@ public:
     static ModifiableMessageHandler readMessage(const QSqlQuery &query, const QString &idColumn = {});
     static ModifiableCloudFileHandler readCloudFile(const QSqlQuery &query);
 
-    static BindValues buildCloudFileBindings(const CloudFileHandler &cloudFile);
+    static BindValues createNewCloudFileBindings(const CloudFileHandler &cloudFile);
+    static BindValues createUpdatedCloudFileBindings(const CloudFileHandler &cloudFile, const CloudFileUpdateSource source);
 
 private:
     static bool readMessageContentAttachment(const QSqlQuery &query, MessageContentAttachment& attachment);

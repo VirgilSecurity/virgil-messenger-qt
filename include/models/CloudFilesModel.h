@@ -56,7 +56,7 @@ public:
         FilenameRole = Qt::UserRole,
         IsFolderRole,
         DisplayDateTimeRole,
-        DisplayFileSize,
+        DisplayFileSizeRole,
         SortRole
     };
 
@@ -74,9 +74,11 @@ private:
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
+    static QVector<int> rolesFromUpdateSource(const CloudFileUpdateSource& source, const bool isFolder);
+
     void addFile(const ModifiableCloudFileHandler &file);
     void removeFile(const CloudFileHandler &file);
-    void updateFile(const ModifiableCloudFileHandler &file);
+    void updateFile(const CloudFileHandler &file, const CloudFileUpdateSource source);
     std::optional<int> findRowById(const CloudFileId &cloudFileId) const;
     void invalidateDateTime();
 

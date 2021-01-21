@@ -62,8 +62,8 @@ private:
 
     bool createFiles(const ModifiableCloudFiles &cloudFiles);
     bool createFile(const CloudFileHandler &cloudFile);
-    bool updateFiles(const ModifiableCloudFiles &cloudFiles);
-    bool updateFile(const CloudFileHandler &cloudFile);
+    bool updateFiles(const CloudFiles &cloudFiles, const CloudFileUpdateSource source);
+    bool updateFile(const CloudFileHandler &cloudFile, const CloudFileUpdateSource source);
     bool deleteFiles(const CloudFiles &cloudFiles);
 
     QStringList getSubFoldersIds(const QString &folderId);

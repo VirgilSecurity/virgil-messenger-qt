@@ -89,7 +89,7 @@ private:
     bool isRoot() const;
 
     void onDbListFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
-    void onCloudFilesFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
+    void onCloudFilesFetched(const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
     void onUpdateCloudFiles(const CloudFilesUpdate &update);
 
     static bool fileIdLess(const ModifiableCloudFileHandler &a, const ModifiableCloudFileHandler &b);

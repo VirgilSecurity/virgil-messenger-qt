@@ -64,34 +64,21 @@ void CloudFileSystem::signOut()
 void CloudFileSystem::fetchList(const CloudFileHandler &parentFolder)
 {
     const auto parentId = parentFolder->id().coreFolderId();
-    const auto isRoot = !parentId.isValid();
-    FutureWorker::run(m_coreFs->listFolder(parentId), [this, parentFolder, isRoot](auto result) {
+    FutureWorker::run(m_coreFs->listFolder(parentId), [this, parentFolder](auto result) {
         if (std::holds_alternative<CoreMessengerStatus>(result)) {
             emit fetchListErrorOccured(tr("Cloud folder listing error"));
             return;
         }
         const auto fsFolder = std::get_if<CloudFsFolder>(&result);
-        const auto parentFolderId = fsFolder->info.id;
-        // Update fetched folder
-        auto listedFolder = createFolderFromInfo(fsFolder->info, parentFolderId);
-        if (isRoot) {
-            listedFolder->setId(CloudFileId()); // empty id for root
-        }
-        listedFolder->setEncryptedKey(fsFolder->folderEncryptedKey);
-        listedFolder->setPublicKey(fsFolder->folderPublicKey);
-        listedFolder->setLocalPath(parentFolder->localPath());
-        const QDir listedDir(parentFolder->localPath());
+        const auto listedFolder = createParentFolderFromInfo(*fsFolder, parentFolder);
+        const QDir localDir(listedFolder->localPath());
         // Build list
         ModifiableCloudFiles list;
         for (auto &info : fsFolder->folders) {
-            auto folder = createFolderFromInfo(info, parentFolderId);
-            folder->setLocalPath(listedDir.filePath(info.name));
-            list.push_back(folder);
+            list.push_back(createFolderFromInfo(info, listedFolder->id(), localDir.filePath(info.name)));
         }
         for (auto &info : fsFolder->files) {
-            auto file = createFileFromInfo(info, parentFolderId);
-            file->setLocalPath(listedDir.filePath(info.name));
-            list.push_back(file);
+            list.push_back(createFileFromInfo(info, listedFolder->id(), localDir.filePath(info.name)));
         }
         emit listFetched(listedFolder, list);
     });
@@ -102,30 +89,39 @@ void CloudFileSystem::createFolder(const QString &name, const CloudFileHandler &
     const auto parentId = parentFolder->id().coreFolderId();
     const auto isRoot = !parentId.isValid();
     auto future = isRoot ? m_coreFs->createFolder(name) : m_coreFs->createFolder(name, parentId, parentFolder->publicKey());
-    FutureWorker::run(future, [this, parentFolder, name, isRoot](auto result) {
+    FutureWorker::run(future, [this, parentFolder, name](auto result) {
         if (std::holds_alternative<CoreMessengerStatus>(result)) {
             emit createFolderErrorOccured(tr("Cloud file creation error: %1").arg(name));
             return;
         }
         const auto fsFolder = std::get_if<CloudFsFolder>(&result);
-        const auto parentFolderId = fsFolder->info.id;
+
         // Create folder from core info
-        auto createdFolder = createFolderFromInfo(fsFolder->info, parentFolderId);
-        if (isRoot) {
-            createdFolder->setId(CloudFileId()); // empty id for root
-        }
-        createdFolder->setLocalPath(QDir(parentFolder->localPath()).filePath(name)); // TODO(fpohtmeh): create local folder?
+        auto createdFolder = createFolderFromInfo(fsFolder->info, parentFolder->id(),
+                                                  QDir(parentFolder->localPath()).filePath(name));
         emit folderCreated(createdFolder);
     });
 }
 
 bool CloudFileSystem::deleteFiles(const CloudFiles &files)
 {
-    // FIXME(fpohtmeh): implement
+    Q_UNUSED(files)
+    // TODO(fpohtmeh): implement
+    throw std::logic_error("Not implemented: CloudFileSystem::deleteFiles");
     return false;
 }
 
-ModifiableCloudFileHandler CloudFileSystem::createFolderFromInfo(const CloudFsFolderInfo &info, const CloudFsFolderId &parentId) const
+ModifiableCloudFileHandler CloudFileSystem::createParentFolderFromInfo(const CloudFsFolder &fsFolder, const CloudFileHandler &oldFolder) const
+{
+    auto folder = createFolderFromInfo(fsFolder.info, oldFolder->parentId(), oldFolder->localPath());
+    folder->setId(oldFolder->id()); // avoid root with non-empty id
+    folder->update(*oldFolder, CloudFileUpdateSource::ListedParent);
+    folder->setEncryptedKey(fsFolder.folderEncryptedKey);
+    folder->setPublicKey(fsFolder.folderPublicKey);
+    return folder;
+}
+
+ModifiableCloudFileHandler CloudFileSystem::createFolderFromInfo(const CloudFsFolderInfo &info, const CloudFileId &parentId, const QString &localPath) const
 {
     auto folder = std::make_shared<CloudFile>();
     folder->setId(info.id);
@@ -135,10 +131,11 @@ ModifiableCloudFileHandler CloudFileSystem::createFolderFromInfo(const CloudFsFo
     folder->setCreatedAt(info.createdAt);
     folder->setUpdatedAt(info.updatedAt);
     folder->setUpdatedBy(info.updatedBy);
+    folder->setLocalPath(localPath);
     return folder;
 }
 
-ModifiableCloudFileHandler CloudFileSystem::createFileFromInfo(const CloudFsFileInfo &info, const CloudFsFolderId &parentId) const
+ModifiableCloudFileHandler CloudFileSystem::createFileFromInfo(const CloudFsFileInfo &info, const CloudFileId &parentId, const QString &localPath) const
 {
     auto file = std::make_shared<CloudFile>();
     file->setId(info.id);
@@ -149,5 +146,6 @@ ModifiableCloudFileHandler CloudFileSystem::createFileFromInfo(const CloudFsFile
     file->setCreatedAt(info.createdAt);
     file->setUpdatedAt(info.updatedAt);
     file->setUpdatedBy(info.updatedBy);
+    file->setLocalPath(localPath);
     return file;
 }

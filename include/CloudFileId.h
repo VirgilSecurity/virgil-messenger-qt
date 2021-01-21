@@ -52,6 +52,8 @@ public:
     CloudFsFileId coreFileId() const;
     CloudFsFolderId coreFolderId() const;
 
+    static CloudFileId root();
+
     operator QString() const;
 
     bool operator<(const CloudFileId &id) const;

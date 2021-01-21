@@ -59,8 +59,9 @@ void CreateCloudFolderOperation::run()
 
 void CreateCloudFolderOperation::onCreated(const ModifiableCloudFileHandler &folder)
 {
-    CreatedCloudFileUpdate update;
-    update.file = folder;
+    CreateCloudFilesUpdate update;
+    update.parentFolder = m_parentFolder;
+    update.files.push_back(folder);
     m_parent->cloudFilesUpdate(update);
 
     finish();

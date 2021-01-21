@@ -62,14 +62,15 @@ public:
     bool deleteFiles(const CloudFiles &files);
 
 signals:
-    void listFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &files);
+    void listFetched(const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &files);
     void fetchListErrorOccured(const QString &errorText);
     void folderCreated(const ModifiableCloudFileHandler &parentFolder);
     void createFolderErrorOccured(const QString &errorText);
 
 private:
-    ModifiableCloudFileHandler createFolderFromInfo(const CloudFsFolderInfo &info, const CloudFsFolderId &parentId) const;
-    ModifiableCloudFileHandler createFileFromInfo(const CloudFsFileInfo &info, const CloudFsFolderId &parentId) const;
+    ModifiableCloudFileHandler createParentFolderFromInfo(const CloudFsFolder &fsFolder, const CloudFileHandler &oldFolder) const;
+    ModifiableCloudFileHandler createFolderFromInfo(const CloudFsFolderInfo &info, const CloudFileId &parentId, const QString &localPath) const;
+    ModifiableCloudFileHandler createFileFromInfo(const CloudFsFileInfo &info, const CloudFileId &parentId, const QString &localPath) const;
 
     CoreMessenger *m_coreMessenger;
     std::optional<CoreMessengerCloudFs> m_coreFs;

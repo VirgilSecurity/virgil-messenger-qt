@@ -50,6 +50,8 @@ public:
 
     bool isValid() const noexcept;
 
+    static CloudFsFolderId root();
+
     bool operator<(const CloudFsFolderId& id) const;
     bool operator>(const CloudFsFolderId& id) const;
     bool operator==(const CloudFsFolderId& id) const;

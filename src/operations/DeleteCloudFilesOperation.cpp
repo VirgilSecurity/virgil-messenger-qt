@@ -67,7 +67,7 @@ void DeleteCloudFilesOperation::run()
     }
 
     // Emit update
-    DeletedCloudFilesUpdate update;
+    DeleteCloudFilesUpdate update;
     update.files = m_files;
     m_parent->cloudFilesUpdate(update);
 

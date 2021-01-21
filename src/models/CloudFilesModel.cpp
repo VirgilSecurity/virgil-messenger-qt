@@ -86,7 +86,7 @@ CloudFiles CloudFilesModel::selectedFiles() const
 
 void CloudFilesModel::updateCloudFiles(const CloudFilesUpdate &update)
 {
-    if (auto upd = std::get_if<ListedCloudFolderUpdate>(&update)) {
+    if (auto upd = std::get_if<ListCloudFolderUpdate>(&update)) {
         beginResetModel();
         m_now = QDateTime::currentDateTime();
         m_files = upd->files;
@@ -97,16 +97,30 @@ void CloudFilesModel::updateCloudFiles(const CloudFilesUpdate &update)
             removeFile(file);
         }
         for (auto &file : upd->updated) {
-            updateFile(file);
+            updateFile(file, CloudFileUpdateSource::ListedChild);
         }
         for (auto &file : upd->added) {
             addFile(file);
         }
     }
-    else if (auto upd = std::get_if<CreatedCloudFileUpdate>(&update)) {
-        addFile(upd->file);
+    else if (auto upd = std::get_if<CreateCloudFilesUpdate>(&update)) {
+        for (auto &file : upd->files) {
+            addFile(file);
+        }
     }
-    else if (auto upd = std::get_if<DeletedCloudFilesUpdate>(&update)) {
+    else if (auto upd = std::get_if<UpdateCloudFilesUpdate>(&update)) {
+        switch (upd->source) {
+            case CloudFileUpdateSource::ListedChild:
+                for (auto &file : upd->files) {
+                    updateFile(file, upd->source);
+                }
+                break;
+            default:
+                throw std::logic_error("Unhandled CloudFileUpdateSource");
+                break;
+        }
+    }
+    else if (auto upd = std::get_if<DeleteCloudFilesUpdate>(&update)) {
         for (auto &file : upd->files) {
             removeFile(file);
         }
@@ -137,7 +151,7 @@ QVariant CloudFilesModel::data(const QModelIndex &index, int role) const
         const auto diff = std::chrono::seconds(file->createdAt().secsTo(m_now));
         return Utils::formattedElapsedSeconds(diff, m_settings->nowInterval());
     }
-    case DisplayFileSize:
+    case DisplayFileSizeRole:
         return file->isFolder() ? QString() : Utils::formattedSize(file->size());
     case SortRole:
         return QString("%1%2").arg(static_cast<int>(!file->isFolder())).arg(file->name());
@@ -152,8 +166,20 @@ QHash<int, QByteArray> CloudFilesModel::roleNames() const
         { FilenameRole, "fileName" },
         { IsFolderRole, "isFolder" },
         { DisplayDateTimeRole, "displayDateTime" },
-        { DisplayFileSize, "displayFileSize" }
+        { DisplayFileSizeRole, "displayFileSize" }
     });
+}
+
+QVector<int> CloudFilesModel::rolesFromUpdateSource(const CloudFileUpdateSource &source, const bool isFolder)
+{
+    QVector<int> roles;
+    if ((source == CloudFileUpdateSource::ListedParent) || (source == CloudFileUpdateSource::ListedParent)) {
+        roles << FilenameRole << DisplayDateTimeRole;
+    }
+    if ((source == CloudFileUpdateSource::ListedChild) && !isFolder) {
+        roles << DisplayFileSizeRole;
+    }
+    return roles;
 }
 
 void CloudFilesModel::addFile(const ModifiableCloudFileHandler &file)
@@ -172,12 +198,12 @@ void CloudFilesModel::removeFile(const CloudFileHandler &file)
     }
 }
 
-void CloudFilesModel::updateFile(const ModifiableCloudFileHandler &file)
+void CloudFilesModel::updateFile(const CloudFileHandler &file, const CloudFileUpdateSource source)
 {
     if (const auto row = findRowById(file->id())) {
-        m_files[*row] = file;
+        m_files[*row]->update(*file, source);
         const auto modelIndex = index(*row);
-        emit dataChanged(modelIndex, modelIndex);
+        emit dataChanged(modelIndex, modelIndex, rolesFromUpdateSource(source, file->isFolder()));
     }
 }
 

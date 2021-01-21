@@ -41,6 +41,7 @@
 #include <QDateTime>
 
 #include "CloudFileId.h"
+#include "CloudFileUpdateSource.h"
 #include "UserId.h"
 
 namespace vm
@@ -74,6 +75,8 @@ public:
     void setLocalPath(const QString &path);
     QString fingerprint() const noexcept;
     void setFingerprint(const QString &fingerprint);
+
+    void update(const CloudFile &file, const CloudFileUpdateSource source);
 
 private:
     CloudFileId m_id;

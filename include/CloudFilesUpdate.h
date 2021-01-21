@@ -36,6 +36,7 @@
 #define VM_CLOUD_FILES_UPDATE_H
 
 #include "CloudFile.h"
+#include "CloudFileUpdateSource.h"
 
 #include <variant>
 
@@ -46,29 +47,35 @@ struct CloudFilesUpdateBase
     CloudFileHandler parentFolder;
 };
 
-struct ListedCloudFolderUpdate : public CloudFilesUpdateBase {
+struct ListCloudFolderUpdate : public CloudFilesUpdateBase {
     ModifiableCloudFiles files;
 };
 
 struct MergeCloudFolderUpdate : public CloudFilesUpdateBase {
     ModifiableCloudFiles added;
     CloudFiles deleted;
-    ModifiableCloudFiles updated;
+    CloudFiles updated;
 };
 
-struct CreatedCloudFileUpdate : public CloudFilesUpdateBase {
-    ModifiableCloudFileHandler file;
+struct CreateCloudFilesUpdate : public CloudFilesUpdateBase {
+    ModifiableCloudFiles files;
 };
 
-struct DeletedCloudFilesUpdate : public CloudFilesUpdateBase {
+struct UpdateCloudFilesUpdate : public CloudFilesUpdateBase {
+    CloudFiles files;
+    CloudFileUpdateSource source = CloudFileUpdateSource::None;
+};
+
+struct DeleteCloudFilesUpdate : public CloudFilesUpdateBase {
     CloudFiles files;
 };
 
 using CloudFilesUpdate = std::variant<
-    ListedCloudFolderUpdate,
+    ListCloudFolderUpdate,
     MergeCloudFolderUpdate,
-    CreatedCloudFileUpdate,
-    DeletedCloudFilesUpdate
+    CreateCloudFilesUpdate,
+    UpdateCloudFilesUpdate,
+    DeleteCloudFilesUpdate
     >;
 
 }
