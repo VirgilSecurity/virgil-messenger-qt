@@ -107,7 +107,7 @@ Page {
 
     FileManagerUploadDownload {
         id: fileUploadDownload
-        visible: !isChatList
+        visible: !d.isChatList
     }
 
     Connections {

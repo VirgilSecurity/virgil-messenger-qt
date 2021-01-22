@@ -15,7 +15,7 @@ Item {
     QtObject {
         id: d
 
-//        readonly property var model: models.discoveredContacts
+        readonly property var model: models.uploadDownload
         readonly property real defaultChatHeight: 60
     }
 
@@ -24,10 +24,6 @@ Item {
         State {
             name: "minInfo"
             PropertyChanges {
-                target: minInfoRec
-                opacity: 1
-            }
-            PropertyChanges {
                 target: fileManagerUploadDownload
                 maxInfoTopMargin: fileManagerUploadDownload.height
             }
@@ -35,10 +31,6 @@ Item {
 
         State {
             name: "maxInfo"
-            PropertyChanges {
-                target: minInfoRec
-                opacity: 0
-            }
             PropertyChanges {
                 target: fileManagerUploadDownload
                 maxInfoTopMargin: 0
@@ -51,11 +43,6 @@ Item {
             from: "minInfo"
             to: "maxInfo"
             NumberAnimation {
-                property: 'opacity'
-                duration: Theme.shortAnimationDuration
-                easing.type: Easing.OutCubic
-            }
-            NumberAnimation {
                 property: 'maxInfoTopMargin'
                 duration: Theme.longAnimationDuration
                 easing.type: Easing.OutExpo
@@ -65,11 +52,6 @@ Item {
         Transition {
             from: "maxInfo"
             to: "minInfo"
-            NumberAnimation {
-                property: 'opacity'
-                duration: Theme.animationDuration
-                easing.type: Easing.OutCubic
-            }
             NumberAnimation {
                 property: 'maxInfoTopMargin'
                 duration: Theme.longAnimationDuration
@@ -90,6 +72,12 @@ Item {
         height: minInfoHeight
         radius: height * 0.5
         color: Theme.chatSeparatorColor
+        visible: opacity > 0
+        opacity: fileManagerUploadDownload.state === "minInfo" && modelListView.count > 0 ? 1 : 0
+
+        Behavior on opacity {
+            NumberAnimation { duration: Theme.animationDuration; easing.type: Easing.OutCubic }
+        }
 
         Behavior on width {
             NumberAnimation { duration: Theme.shortAnimationDuration; easing.type: Easing.OutCubic }
@@ -99,7 +87,7 @@ Item {
             id: shortInfoLabel
             anchors.centerIn: parent
             elide: Label.ElideRight
-            text: qsTr("Uploading file 7 of 9")
+            text: qsTr("Uploading %1 file(s)").arg(modelListView.count)
             font.family: Theme.mainFont
             font.pointSize: UiHelper.fixFontSz(12)
             horizontalAlignment: Qt.AlignHCenter
@@ -173,7 +161,7 @@ Item {
                         }
                         Label {
                             topPadding: 2
-                            text: qsTr("Uploading file 7 of 9")
+                            text: qsTr("Uploading %1 file(s)").arg(modelListView.count)
                             font.pointSize: UiHelper.fixFontSz(12)
                             color: Theme.secondaryTextColor
                         }
@@ -195,7 +183,7 @@ Item {
                 }
                 emptyIcon: "../resources/icons/File-Big.png"
                 emptyText: qsTr("Download files<br/>will appear here")
-                model: tempModel
+                model: d.model
                 header: Item {width: parent.width; height: Theme.margin}
                 delegate: listDelegate
                 footer: Item {width: parent.width; height: Theme.margin}
@@ -238,7 +226,7 @@ Item {
                                 width: parent.width
                                 height: 2
                                 from: 0
-                                to: model.totalBytes
+                                to: model.bytesTotal
                                 value: model.bytesLoaded
 
                                 Behavior on value {
@@ -268,46 +256,13 @@ Item {
                             Text {
                                 color: Theme.secondaryTextColor
                                 font.pointSize: UiHelper.fixFontSz(12)
-                                text: qsTr(model.bytesLoaded + "of" + model.bytesTotal)
+                                text: qsTr(model.bytesLoaded + " of " + model.bytesTotal)
                                 width: parent.width
                                 elide: Text.ElideRight
                                 textFormat: Text.RichText
                             }
                         }
                     }
-                }
-            }
-
-            ListModel {
-                id: tempModel
-                ListElement {
-                    name: "File 1.png"
-                    bytesLoaded: 300
-                    totalBytes: 1000
-                }
-
-                ListElement {
-                    name: "File 2.png"
-                    bytesLoaded: 400
-                    totalBytes: 1000
-                }
-
-                ListElement {
-                    name: "File 3.png"
-                    bytesLoaded: 300
-                    totalBytes: 1000
-                }
-
-                ListElement {
-                    name: "File 4.png"
-                    bytesLoaded: 900
-                    totalBytes: 1000
-                }
-
-                ListElement {
-                    name: "File 5.png"
-                    bytesLoaded: 990
-                    totalBytes: 1000
                 }
             }
         }

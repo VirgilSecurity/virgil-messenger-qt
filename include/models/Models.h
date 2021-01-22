@@ -53,6 +53,7 @@ class MessagesModel;
 class MessagesQueue;
 class Messenger;
 class UserDatabase;
+class UploadDownloadModel;
 class Validator;
 
 class Models : public QObject
@@ -64,6 +65,7 @@ class Models : public QObject
     Q_PROPERTY(CloudFilesModel *cloudFiles MEMBER m_cloudFiles CONSTANT)
     Q_PROPERTY(CloudFilesUploader *cloudFilesUploader MEMBER m_cloudFilesUploader CONSTANT)
     Q_PROPERTY(MessagesModel *messages READ messages CONSTANT)
+    Q_PROPERTY(UploadDownloadModel *uploadDownload READ uploadDownload CONSTANT)
 
 public:
     Models(Messenger *messenger, Settings *settings, UserDatabase *userDatabase, Validator *validator, QObject *parent);
@@ -87,6 +89,8 @@ public:
     MessagesModel *messages();
     const MessagesQueue *messagesQueue() const;
     MessagesQueue *messagesQueue();
+    const UploadDownloadModel *uploadDownload() const;
+    UploadDownloadModel *uploadDownload();
 
 signals:
     void notificationCreated(const QString &notification, const bool error);
@@ -101,6 +105,7 @@ private:
     QPointer<CloudFilesUploader> m_cloudFilesUploader;
     QPointer<FileLoader> m_fileLoader;
     QPointer<MessagesQueue> m_messagesQueue;
+    QPointer<UploadDownloadModel> m_uploadDownload;
 };
 }
 
