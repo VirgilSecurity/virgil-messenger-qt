@@ -49,7 +49,8 @@ VSQMacos::~VSQMacos() {
 /******************************************************************************/
 void VSQMacos::_setURL() const {
     NSString *urlStr = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"SUFeedURL"];
-    NSURL *appcastURL = [NSURL URLWithString:[urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+    NSCharacterSet *urlCharset = [NSCharacterSet URLPathAllowedCharacterSet];
+    NSURL *appcastURL = [NSURL URLWithString:[urlStr stringByAddingPercentEncodingWithAllowedCharacters:urlCharset]];
     [[SUUpdater sharedUpdater] setFeedURL:appcastURL];
 }
 
