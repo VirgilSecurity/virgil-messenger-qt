@@ -105,6 +105,11 @@ Page {
         }
     }
 
+    FileManagerUploadDownload {
+        id: fileUploadDownload
+        visible: !d.isChatList
+    }
+
     Connections {
         target: d.manager
 

@@ -496,6 +496,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/Model.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationQueue.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationSource.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/UploadDownloadModel.h
         # Operations
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateAttachmentFingerprintOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateFileFingerprintOperation.h
@@ -660,6 +661,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/models/Models.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/Model.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/OperationQueue.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/UploadDownloadModel.cpp
         # Operations
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CalculateAttachmentFingerprintOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CalculateFileFingerprintOperation.cpp

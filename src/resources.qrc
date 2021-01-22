@@ -131,6 +131,7 @@
         <file>qml/components/ImageButton.qml</file>
         <file>qml/components/FormImage.qml</file>
         <file>qml/components/FormSubtitle.qml</file>
+        <file>qml/components/FileManagerUploadDownload.qml</file>
         <file>qml/components/SidebarButton.qml</file>
         <file>qml/components/SidebarPanel.qml</file>
         <file>qml/components/CommonHelpers/IconWithText.qml</file>

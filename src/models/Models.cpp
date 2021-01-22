@@ -44,6 +44,7 @@
 #include "MessagesQueue.h"
 #include "FileLoader.h"
 #include "UserDatabase.h"
+#include "UploadDownloadModel.h"
 #include "Messenger.h"
 
 using namespace vm;
@@ -59,6 +60,8 @@ Models::Models(Messenger *messenger, Settings *settings, UserDatabase *userDatab
     , m_cloudFilesUploader(new CloudFilesUploader(this))
     , m_fileLoader(messenger->fileLoader())
     , m_messagesQueue(new MessagesQueue(messenger, userDatabase, this))
+    , m_uploadDownload(new UploadDownloadModel(this))
+
 {
     connect(m_messagesQueue, &MessagesQueue::notificationCreated, this, &Models::notificationCreated);
     connect(m_cloudFilesQueue, &CloudFilesQueue::notificationCreated, this, &Models::notificationCreated);
@@ -156,4 +159,14 @@ const MessagesQueue *Models::messagesQueue() const
 MessagesQueue *Models::messagesQueue()
 {
     return m_messagesQueue;
+}
+
+const UploadDownloadModel *Models::uploadDownload() const
+{
+    return m_uploadDownload;
+}
+
+UploadDownloadModel *Models::uploadDownload()
+{
+    return m_uploadDownload;
 }
