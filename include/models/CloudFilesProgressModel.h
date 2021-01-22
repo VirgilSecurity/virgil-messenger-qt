@@ -32,43 +32,23 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_UPLOADDOWNLOADMODEL_H
-#define VM_UPLOADDOWNLOADMODEL_H
+#ifndef VM_CLOUDFILESPROGRESSMODEL_H
+#define VM_CLOUDFILESPROGRESSMODEL_H
 
-#include "ListModel.h"
+#include "CloudFilesUpdate.h"
+#include "FilesProgressModel.h"
 
 namespace vm
 {
-class UploadDownloadModel : public ListModel
+class CloudFilesProgressModel : public FilesProgressModel
 {
     Q_OBJECT
 
 public:
-    explicit UploadDownloadModel(QObject *parent);
-    ~UploadDownloadModel() override;
+    using FilesProgressModel::FilesProgressModel;
 
-private:
-    enum Roles
-    {
-        NameRole = Qt::UserRole,
-        BytesLoadedRole,
-        BytesTotalRole
-    };
-
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
-
-private:
-    struct uploadDownloadStruct
-    {
-        QString name;
-        int bytesLoaded;
-        int bytesTotal;
-    };
-
-    QList<uploadDownloadStruct> m_uploadDownloadList;
+    void updateCloudFiles(const CloudFilesUpdate &update);
 };
 } // namespace vm
 
-#endif // VM_UPLOADDOWNLOADMODEL_H
+#endif // VM_CLOUDFILESPROGRESSMODEL_H

@@ -36,6 +36,7 @@
 
 #include "CloudFilesUpdate.h"
 #include "CloudFilesModel.h"
+#include "CloudFilesProgressModel.h"
 #include "CloudFilesQueue.h"
 #include "CloudFilesTable.h"
 #include "Controller.h"
@@ -262,6 +263,7 @@ void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)
     }
     // Update UI
     m_models->cloudFiles()->updateCloudFiles(update);
+    m_models->cloudFilesProgress()->updateCloudFiles(update);
     // Update DB
     m_userDatabase->cloudFilesTable()->updateCloudFiles(update);
 }

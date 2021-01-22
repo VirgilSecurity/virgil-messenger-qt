@@ -32,61 +32,49 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/CloudFilesUploader.h"
+#ifndef VM_FILESPROGRESSMODEL_H
+#define VM_FILESPROGRESSMODEL_H
 
-using namespace vm;
+#include "ListModel.h"
 
-CloudFilesUploader::CloudFilesUploader(QObject *parent)
-    : QObject(parent)
-    , m_currentIndex(-1)
-    , m_currentProcessedBytes(-1)
-    , m_currentTotalBytes(-1)
+namespace vm
 {
-    qRegisterMetaType<CloudFilesUploader *>("CloudFilesUploader*");
-}
-
-int CloudFilesUploader::currentIndex() const
+class FilesProgressModel : public ListModel
 {
-    return m_currentIndex;
-}
+    Q_OBJECT
 
-qint64 CloudFilesUploader::currentProcessedBytes() const
-{
-    return m_currentProcessedBytes;
-}
+public:
+    explicit FilesProgressModel(QObject *parent);
+    ~FilesProgressModel() override;
 
-qint64 CloudFilesUploader::currentTotalBytes() const
-{
-    return m_currentTotalBytes;
-}
+    void add(const QString &id, const QString &name);
+    void setProgress(const QString &id, const quint64 bytesLoaded, const quint64 bytesTotal);
+    void remove(const QString &id);
 
-QStringList CloudFilesUploader::fileNames() const
-{
-    return m_fileNames;
-}
+private:
+    enum Roles
+    {
+        NameRole = Qt::UserRole,
+        BytesLoadedRole,
+        BytesTotalRole
+    };
 
-void CloudFilesUploader::setCurrentIndex(const int index)
-{
-    if (m_currentIndex != index) {
-        m_currentIndex = index;
-        emit currentIndexChanged(m_currentIndex);
-    }
-}
+    struct Item
+    {
+        QString id;
+        QString name;
+        quint64 bytesLoaded = 0;
+        quint64 bytesTotal = 0;
+    };
 
-void CloudFilesUploader::setCurrentProcessedBytes(const qint64 bytes)
-{
-    if (m_currentProcessedBytes != bytes) {
-        m_currentProcessedBytes = bytes;
-        emit currentProcessedBytesChanged(m_currentProcessedBytes);
-    }
-}
+    std::optional<int> findRowById(const QString &id) const;
 
-void CloudFilesUploader::setCurrentTotalBytes(const qint64 bytes)
-{
-    if (m_currentTotalBytes != bytes) {
-        m_currentTotalBytes = bytes;
-        emit currentTotalBytesChanged(m_currentTotalBytes);
-    }
-}
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
 
+    QList<Item> m_items;
+};
+} // namespace vm
 
+#endif // VM_FILESPROGRESSMODEL_H

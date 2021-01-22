@@ -113,6 +113,10 @@ ApplicationWindow {
                 text = ""
             }
         }
+
+        KeyboardHandler {
+            id: keyboardHandler
+        }
     }
 
     function showPopup(message, popupBackgroundColor, textColor, interval) {

@@ -131,8 +131,11 @@ void CloudFilesModel::updateCloudFiles(const CloudFilesUpdate &update)
             removeFile(file);
         }
     }
+    else if (auto upd = std::get_if<SetProgressCloudFileUpdate>(&update)) {
+        return;
+    }
     else {
-        throw std::logic_error("Invalid CloudFilesUpdate");
+        throw std::logic_error("Invalid CloudFilesUpdate in CloudFilesModel::updateCloudFiles");
     }
 
     updateDescription();

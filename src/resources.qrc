@@ -131,7 +131,6 @@
         <file>qml/components/ImageButton.qml</file>
         <file>qml/components/FormImage.qml</file>
         <file>qml/components/FormSubtitle.qml</file>
-        <file>qml/components/FileManagerUploadDownload.qml</file>
         <file>qml/components/SidebarButton.qml</file>
         <file>qml/components/SidebarPanel.qml</file>
         <file>qml/components/CommonHelpers/IconWithText.qml</file>
@@ -158,7 +157,6 @@
         <file>qml/components/ListDelegate.qml</file>
         <file>qml/components/ModelListView.qml</file>
         <file>qml/components/Dialogs/TemplateDialog.qml</file>
-        <file>qml/components/UploadProgressBar.qml</file>
         <file>qml/components/ServerSelectionRow.qml</file>
         <file>qml/components/SelectedContactsFlow.qml</file>
         <file>qml/components/HorizontalRule.qml</file>
@@ -166,6 +164,7 @@
         <file>qml/components/ChatListView.qml</file>
         <file>qml/components/CloudFileListView.qml</file>
         <file>qml/components/NewGroupChatHeader.qml</file>
+        <file>qml/components/FilesProgressPanel.qml</file>
         <!-- Database -->
         <file>resources/database/createAttachments.sql</file>
         <file>resources/database/createChats.sql</file>

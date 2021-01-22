@@ -104,9 +104,9 @@ Page {
         }
     }
 
-    FileManagerUploadDownload {
-        id: fileUploadDownload
-        visible: !d.isChatList
+    FilesProgressPanel {
+        // FIXME(fpohtmeh): move to CloudFileListView?
+        visible: d.isCloudFileList
     }
 
     Connections {

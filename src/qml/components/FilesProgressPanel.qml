@@ -6,7 +6,7 @@ import QtQuick.Controls 2.15
 import "../theme"
 
 Item {
-    id: fileManagerUploadDownload
+    id: root
     anchors.fill: parent
 
     readonly property real minInfoHeight: 40
@@ -15,7 +15,7 @@ Item {
     QtObject {
         id: d
 
-        readonly property var model: models.uploadDownload
+        readonly property var model: models.cloudFilesProgress
         readonly property real defaultChatHeight: 60
     }
 
@@ -24,15 +24,15 @@ Item {
         State {
             name: "minInfo"
             PropertyChanges {
-                target: fileManagerUploadDownload
-                maxInfoTopMargin: fileManagerUploadDownload.height
+                target: root
+                maxInfoTopMargin: root.height
             }
         },
 
         State {
             name: "maxInfo"
             PropertyChanges {
-                target: fileManagerUploadDownload
+                target: root
                 maxInfoTopMargin: 0
             }
         }
@@ -73,7 +73,7 @@ Item {
         radius: height * 0.5
         color: Theme.chatSeparatorColor
         visible: opacity > 0
-        opacity: fileManagerUploadDownload.state === "minInfo" && modelListView.count > 0 ? 1 : 0
+        opacity: root.state === "minInfo" && listView.count > 0 ? 1 : 0
 
         Behavior on opacity {
             NumberAnimation { duration: Theme.animationDuration; easing.type: Easing.OutCubic }
@@ -87,7 +87,7 @@ Item {
             id: shortInfoLabel
             anchors.centerIn: parent
             elide: Label.ElideRight
-            text: qsTr("Uploading %1 file(s)").arg(modelListView.count)
+            text: qsTr("Uploading %1 file(s)").arg(listView.count)
             font.family: Theme.mainFont
             font.pointSize: UiHelper.fixFontSz(12)
             horizontalAlignment: Qt.AlignHCenter
@@ -110,7 +110,7 @@ Item {
             }
 
             onClicked: {
-                fileManagerUploadDownload.state = "maxInfo"
+                root.state = "maxInfo"
             }
         }
     }
@@ -119,7 +119,7 @@ Item {
         id: maxInfoRec
         anchors {
             fill: parent
-            topMargin: fileManagerUploadDownload.maxInfoTopMargin
+            topMargin: root.maxInfoTopMargin
         }
 
         Page {
@@ -161,7 +161,7 @@ Item {
                         }
                         Label {
                             topPadding: 2
-                            text: qsTr("Uploading %1 file(s)").arg(modelListView.count)
+                            text: qsTr("Uploading %1 file(s)").arg(listView.count)
                             font.pointSize: UiHelper.fixFontSz(12)
                             color: Theme.secondaryTextColor
                         }
@@ -169,13 +169,13 @@ Item {
 
                     ImageButton {
                         image: "Close"
-                        onClicked: fileManagerUploadDownload.state = "minInfo"
+                        onClicked: root.state = "minInfo"
                     }
                 }
             }
 
             ModelListView {
-                id: modelListView
+                id: listView
                 anchors {
                     fill: parent
                     leftMargin: Theme.smallMargin
@@ -194,7 +194,7 @@ Item {
 
                 ListDelegate {
                     id: contactListDelegate
-                    width: modelListView.width
+                    width: listView.width
                     height: d.defaultChatHeight
 
                     Row {

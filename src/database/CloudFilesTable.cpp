@@ -200,7 +200,10 @@ void CloudFilesTable::onFetch(const CloudFileHandler &folder)
 
 void CloudFilesTable::onUpdateCloudFiles(const CloudFilesUpdate &update)
 {
-    if (auto upd = std::get_if<ListCloudFolderUpdate>(&update)) {
+    if (std::holds_alternative<ListCloudFolderUpdate>(update)) {
+        return;
+    }
+    if (std::holds_alternative<SetProgressCloudFileUpdate>(update)) {
         return;
     }
 
@@ -230,7 +233,7 @@ void CloudFilesTable::onUpdateCloudFiles(const CloudFilesUpdate &update)
         success = deleteFiles(upd->files);
     }
     else {
-        throw std::logic_error("Invalid CloudFilesUpdate");
+        throw std::logic_error("Invalid CloudFilesUpdate in CloudFilesTable::onUpdateCloudFiles");
     }
 
     if (!success) {
