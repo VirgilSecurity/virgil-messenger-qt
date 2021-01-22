@@ -22,7 +22,7 @@ Page {
         readonly property string chatsDescription: qsTr("%1 Server").arg(app.organizationDisplayName)
 
         readonly property string cloudFilesTitle: controllers.cloudFiles.displayPath
-        readonly property string cloudFilesDescription: cloudFilesSelection.hasSelection ? qsTr("Selected: %1").arg(cloudFilesSelection.selectedCount) : ""
+        readonly property string cloudFilesDescription: cloudFilesSelection.hasSelection ? qsTr("Selected: %1").arg(cloudFilesSelection.selectedCount) : qsTr("Files: %1").arg(cloudFileListView.count)
     }
 
     background: Rectangle {
@@ -101,6 +101,7 @@ Page {
         }
 
         CloudFileListView {
+            id: cloudFileListView
             searchHeader: mainSearchHeader
         }
     }
