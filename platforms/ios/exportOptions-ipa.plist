@@ -5,6 +5,6 @@
     <key>method</key>
     <string>app-store</string>
     <key>destination</key>
-    <string>upload</string>
+    <string>export</string>
 </dict>
 </plist>

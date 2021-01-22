@@ -166,21 +166,21 @@ Self::FutureResult<CloudFsNewFile> Self::createFile(const QString &sourceFilePat
         //  Encrypt file.
         //
         const auto encryptFileResult = encryptFile(sourceFilePath, destFilePath);
-        if (std::holds_alternative<CoreMessengerStatus>(encryptFileResult)) {
-            return std::get<CoreMessengerStatus>(encryptFileResult);
+        if (auto status = std::get_if<CoreMessengerStatus>(&encryptFileResult)) {
+            return *status;
         }
 
-        auto fileKey = std::get<QByteArray>(encryptFileResult);
+        auto fileKey = std::move(*std::get_if<QByteArray>(&encryptFileResult));
 
         //
         //  Encrypt file key.
         //
         auto encryptKeyResult = encryptKey(fileKey, parentFolderId, parentFolderPublicKey);
-        if (std::holds_alternative<CoreMessengerStatus>(encryptKeyResult)) {
-            return std::get<CoreMessengerStatus>(encryptFileResult);
+        if (auto status = std::get_if<CoreMessengerStatus>(&encryptKeyResult)) {
+            return *status;
         }
 
-        auto fileEncryptedKey = std::get<QByteArray>(encryptKeyResult);
+        auto fileEncryptedKey = std::move(*std::get_if<QByteArray>(&encryptKeyResult));
 
         //
         //  Create file on the CLoudFS.
@@ -283,23 +283,23 @@ Self::FutureResult<CloudFsFolder> Self::createFolder(const QString& folderName, 
         //
         auto folderPrivateKeyResult = generateKeyPair();
 
-        if (std::holds_alternative<CoreMessengerStatus>(folderPrivateKeyResult)) {
-            return std::get<CoreMessengerStatus>(folderPrivateKeyResult);
+        if (auto status = std::get_if<CoreMessengerStatus>(&folderPrivateKeyResult)) {
+            return *status;
         }
 
         auto [folderPublicKey, folderPrivateKey] =
-                std::get<std::tuple<QByteArray, QByteArray>>(std::move(folderPrivateKeyResult));
+                std::move(*std::get_if<std::tuple<QByteArray, QByteArray>>(&folderPrivateKeyResult));
 
         //
         //  Encrypt folder private key.
         //
         auto folderEncryptedKeyResult = encryptKey(folderPrivateKey, parentFolderId, parentFolderPublicKey);
 
-        if (std::holds_alternative<CoreMessengerStatus>(folderEncryptedKeyResult)) {
-            return std::get<CoreMessengerStatus>(folderEncryptedKeyResult);
+        if (auto status = std::get_if<CoreMessengerStatus>(&folderEncryptedKeyResult)) {
+            return *status;
         }
 
-        auto folderEncryptedKey = std::get<QByteArray>(folderEncryptedKeyResult);
+        auto folderEncryptedKey = std::move(*std::get_if<QByteArray>(&folderEncryptedKeyResult));
 
         //
         //  Request folder creation.
@@ -625,11 +625,11 @@ CoreMessengerStatus Self::decryptFile(const QString &sourceFilePath, const QStri
     //  Decrypt - Step 2 - Decrypt a file decryption key.
     //
     auto decryptKeyResult = decryptKey(encryptedFileKey, sender);
-    if (std::holds_alternative<CoreMessengerStatus>(decryptKeyResult)) {
-        return std::get<CoreMessengerStatus>(decryptKeyResult);
+    if (auto status = std::get_if<CoreMessengerStatus>(&decryptKeyResult)) {
+        return *status;
     }
 
-    auto decryptionKey = std::get<QByteArray>(decryptKeyResult);
+    auto decryptionKey = std::move(*std::get_if<QByteArray>(&decryptKeyResult));
 
     //
     //  Decrypt - Step 3 - Setup decryption key.
@@ -741,13 +741,13 @@ Self::Result<QByteArray> Self::encryptKey(const QByteArray &fileKey, const Cloud
     if(parentFolderId.isValid()) {
         auto publicKeyResult = importPublicKey(parentFolderPublicKey);
 
-        if (std::holds_alternative<CoreMessengerStatus>(publicKeyResult)) {
-            return std::get<CoreMessengerStatus>(publicKeyResult);
+        if (auto status = std::get_if<CoreMessengerStatus>(&publicKeyResult)) {
+            return *status;
         }
 
         auto parentFolderIdStd = QString(parentFolderId).toStdString();
         auto parentFolderIdC = vsc_str_from(parentFolderIdStd);
-        auto folderPublicKeyC = std::get<vscf_impl_ptr_t>(std::move(publicKeyResult));
+        auto folderPublicKeyC = std::move(*std::get_if<vscf_impl_ptr_t>(&publicKeyResult));
 
         vscf_recipient_cipher_add_key_recipient(cipher.get(), vsc_str_as_data(parentFolderIdC), folderPublicKeyC.get());
     }
