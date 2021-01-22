@@ -37,39 +37,48 @@
 
 #include <QObject>
 #include <QLoggingCategory>
+#include <QPointer>
 
 #include "CloudFile.h"
 #include "CoreMessengerCloudFs.h"
+#include "Settings.h"
 
 Q_DECLARE_LOGGING_CATEGORY(lcCloudFileSystem)
 
 namespace vm
 {
 class CoreMessenger;
+class Messenger;
 
 class CloudFileSystem : public QObject
 {
     Q_OBJECT
 
 public:
-    CloudFileSystem(CoreMessenger *coreMessenger, QObject *parent);
+    CloudFileSystem(CoreMessenger *coreMessenger, Messenger *messenger);
 
     void signIn();
     void signOut();
 
     void fetchList(const CloudFileHandler &parentFolder);
-    void uploadFile(const QString &filePath, const CloudFileHandler &parentFolder)
-    {
-
-    }
+    void createFile(const QString &filePath, const CloudFileHandler &parentFolder);
     void createFolder(const QString &name, const CloudFileHandler &parentFolder);
     void deleteFiles(const CloudFiles &files);
 
+    QDir downloadsDir() const;
+
 signals:
+    void downloadsDirChanged(const QDir &downloadsDir);
+
     void listFetched(const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &files);
     void fetchListErrorOccured(const QString &errorText);
+
+    void fileCreated(const ModifiableCloudFileHandler &cloudFile, const QString &encryptedFilePath, const QUrl &uploadUrl);
+    void createFileErrorOccurred(const QString &errorText);
+
     void folderCreated(const ModifiableCloudFileHandler &parentFolder);
     void createFolderErrorOccured(const QString &errorText);
+
     void fileDeleted(const CloudFileHandler &file);
     void deleteFileErrorOccured(const QString &errorText);
 
@@ -78,8 +87,10 @@ private:
     ModifiableCloudFileHandler createFolderFromInfo(const CloudFsFolderInfo &info, const CloudFileId &parentId, const QString &localPath) const;
     ModifiableCloudFileHandler createFileFromInfo(const CloudFsFileInfo &info, const CloudFileId &parentId, const QString &localPath) const;
 
-    CoreMessenger *m_coreMessenger;
+    QPointer<CoreMessenger> m_coreMessenger;
+    Messenger *m_messenger;
     std::optional<CoreMessengerCloudFs> m_coreFs;
+    QDir m_downloadsDir;
 };
 }
 

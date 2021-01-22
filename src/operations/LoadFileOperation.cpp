@@ -34,8 +34,6 @@
 
 #include "operations/LoadFileOperation.h"
 
-#include <QNetworkReply>
-
 #include "Utils.h"
 #include "FileUtils.h"
 #include "operations/MessageOperation.h"
@@ -127,11 +125,9 @@ void LoadFileOperation::onReplyFinished(QNetworkReply *reply)
     }
 }
 
-void LoadFileOperation::onReplyErrorOccurred(const int &errorCode, QNetworkReply *reply)
+void LoadFileOperation::onReplyErrorOccurred(const QNetworkReply::NetworkError errorCode, QNetworkReply *reply)
 {
     Q_UNUSED(reply)
-    // TODO(fpohtmeh): change 1st parameter to QNetworkReply::NetworkError
-    // after fixing of deprecated warnings that appear if QNetworkReply is included into header
     if (status() == Status::Failed) {
         return;
     }

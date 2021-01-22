@@ -36,28 +36,33 @@
 #define VM_CLOUD_FILE_OPERATION_H
 
 #include "CloudFilesUpdate.h"
-#include "Operation.h"
-#include "UserId.h"
+#include "NetworkOperation.h"
+
+class Settings;
 
 namespace vm
 {
 class CloudFileSystem;
+class FileLoader;
+class Messenger;
 
-class CloudFileOperation : public Operation
+class CloudFileOperation : public NetworkOperation
 {
     Q_OBJECT
 
 public:
-    CloudFileOperation(CloudFileSystem *fileSystem, QObject *parent);
+    CloudFileOperation(Messenger *messenger, QObject *parent);
 
+    Settings *settings();
     CloudFileSystem *cloudFileSystem();
+    FileLoader *fileLoader();
 
 signals:
     void cloudFilesUpdate(const CloudFilesUpdate &update);
 
 private:
-    static quint64 m_counter;
-    CloudFileSystem *m_cloudFileSystem;
+    static qsizetype m_counter;
+    Messenger *m_messenger;
 };
 }
 

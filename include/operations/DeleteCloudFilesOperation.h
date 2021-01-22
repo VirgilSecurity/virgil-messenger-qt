@@ -52,6 +52,8 @@ public:
     void run() override;
 
 private:
+    void processDeletedFiles();
+
     void onFileDeleted();
     void onDeleteFileErrorOccured();
 

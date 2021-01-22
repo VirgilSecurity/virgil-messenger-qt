@@ -38,15 +38,26 @@
 
 using namespace vm;
 
-quint64 CloudFileOperation::m_counter = 0;
+qsizetype CloudFileOperation::m_counter = 0;
 
-CloudFileOperation::CloudFileOperation(CloudFileSystem *fileSystem, QObject *parent)
-    : Operation(QLatin1String("CloudFile(%1)").arg(QString::number(++m_counter)), parent)
-    , m_cloudFileSystem(fileSystem)
+CloudFileOperation::CloudFileOperation(Messenger *messenger, QObject *parent)
+    : NetworkOperation(parent, messenger->isOnline())
+    , m_messenger(messenger)
 {
+    setName(QLatin1String("CloudFile(%1)").arg(QString::number(++m_counter)));
+}
+
+Settings *CloudFileOperation::settings()
+{
+    return m_messenger->settings();
 }
 
 CloudFileSystem *CloudFileOperation::cloudFileSystem()
 {
-    return m_cloudFileSystem;
+    return m_messenger->cloudFileSystem();
+}
+
+FileLoader *CloudFileOperation::fileLoader()
+{
+    return m_messenger->fileLoader();
 }

@@ -39,7 +39,7 @@
 
 #include "QFile"
 
-class QNetworkReply;
+#include <QNetworkReply>
 
 namespace vm
 {
@@ -67,7 +67,7 @@ protected:
 
 private:
     void onReplyFinished(QNetworkReply *reply);
-    void onReplyErrorOccurred(const int &errorCode, QNetworkReply *reply);
+    void onReplyErrorOccurred(const QNetworkReply::NetworkError errorCode, QNetworkReply *reply);
     void onReplySslErrors();
     void onSetProgress(quint64 bytesLoaded, quint64 bytesTotal);
 

@@ -62,7 +62,6 @@ public:
 
     CloudFilesModel *model();
     void switchToRootFolder();
-    void setDownloadsDir(const QDir &dir);
 
     Q_INVOKABLE void openFile(const QVariant &proxyRow);
     Q_INVOKABLE void switchToFolder(const QVariant &proxyRow);

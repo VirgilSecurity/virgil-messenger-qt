@@ -70,12 +70,19 @@ struct DeleteCloudFilesUpdate : public CloudFilesUpdateBase {
     CloudFiles files;
 };
 
+struct SetProgressCloudFileUpdate : public CloudFilesUpdateBase {
+    CloudFileHandler file;
+    quint64 bytesLoaded = 0;
+    quint64 bytesTotal = 0;
+};
+
 using CloudFilesUpdate = std::variant<
     ListCloudFolderUpdate,
     MergeCloudFolderUpdate,
     CreateCloudFilesUpdate,
     UpdateCloudFilesUpdate,
-    DeleteCloudFilesUpdate
+    DeleteCloudFilesUpdate,
+    SetProgressCloudFileUpdate
     >;
 
 }

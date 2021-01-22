@@ -65,6 +65,9 @@ Self::CloudFilesController(const Settings *settings, Models *models, UserDatabas
     connect(this, &Self::updateCloudFiles, this, &Self::onUpdateCloudFiles);
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
     connect(models->cloudFilesQueue(), &CloudFilesQueue::updateCloudFiles, this, &Self::updateCloudFiles);
+    connect(cloudFileSystem, &CloudFileSystem::downloadsDirChanged, [this](const QDir &downloadsDir) {
+        m_rootFolder->setLocalPath(downloadsDir.absolutePath());
+    });
     connect(cloudFileSystem, &CloudFileSystem::listFetched, this, &Self::onCloudFilesFetched);
     connect(cloudFileSystem, &CloudFileSystem::fetchListErrorOccured, this, &Self::onCloudFilesFetchErrorOccured);
 }
@@ -77,11 +80,6 @@ CloudFilesModel *Self::model()
 void Self::switchToRootFolder()
 {
     switchToHierarchy({ m_rootFolder });
-}
-
-void Self::setDownloadsDir(const QDir &dir)
-{
-    m_rootFolder->setLocalPath(dir.absolutePath());
 }
 
 void Self::openFile(const QVariant &proxyRow)

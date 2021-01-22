@@ -36,13 +36,13 @@
 #define VM_UPLOAD_CLOUD_FILE_OPERATION_H
 
 #include "CloudFile.h"
-#include "Operation.h"
+#include "UploadFileOperation.h"
 
 namespace vm
 {
 class CloudFileOperation;
 
-class UploadCloudFileOperation : public Operation
+class UploadCloudFileOperation : public UploadFileOperation
 {
     Q_OBJECT
 
@@ -52,9 +52,15 @@ public:
     void run() override;
 
 private:
+    void onFileCreated(const ModifiableCloudFileHandler &cloudFile, const QString &encryptedFilePath, const QUrl &putUrl);
+    void onCreateCloudFileErrorOccurred(const QString &errorText);
+    void onProgressChanged(const quint64 bytesLoaded, const quint64 bytesTotal);
+    void onUploaded();
+
     CloudFileOperation *m_parent;
-    QString m_filePath;
     CloudFileHandler m_parentFolder;
+    ModifiableCloudFileHandler m_cloudFile;
+    QString m_sourceFilePath;
 };
 }
 
