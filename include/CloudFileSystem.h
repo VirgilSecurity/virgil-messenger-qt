@@ -58,6 +58,10 @@ public:
     void signOut();
 
     void fetchList(const CloudFileHandler &parentFolder);
+    void uploadFile(const QString &filePath, const CloudFileHandler &parentFolder)
+    {
+
+    }
     void createFolder(const QString &name, const CloudFileHandler &parentFolder);
     void deleteFiles(const CloudFiles &files);
 

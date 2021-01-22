@@ -52,8 +52,12 @@ public:
     void run() override;
 
 private:
+    void onFileDeleted();
+    void onDeleteFileErrorOccured();
+
     CloudFileOperation *m_parent;
     CloudFiles m_files;
+    size_t m_deletedCount = 0;
 };
 }
 

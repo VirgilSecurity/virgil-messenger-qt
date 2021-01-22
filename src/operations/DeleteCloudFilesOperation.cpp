@@ -45,15 +45,25 @@ DeleteCloudFilesOperation::DeleteCloudFilesOperation(CloudFileOperation *parent,
     , m_parent(parent)
     , m_files(files)
 {
+    auto fileSystem = m_parent->cloudFileSystem();
+    connect(fileSystem, &CloudFileSystem::fileDeleted, this, &DeleteCloudFilesOperation::onFileDeleted);
+    connect(fileSystem, &CloudFileSystem::deleteFileErrorOccured, this, &DeleteCloudFilesOperation::onDeleteFileErrorOccured);
 }
 
 void DeleteCloudFilesOperation::run()
 {
-    // Delete cloud files
     m_parent->cloudFileSystem()->deleteFiles(m_files);
+}
 
+void DeleteCloudFilesOperation::processDeletedFiles()
+{
+    if (m_deletedCount == 0) {
+        return;
+    }
+
+    CloudFiles deletedFiles(m_files.begin(), m_files.begin() + m_deletedCount);
     // Delete local files
-    for (auto &file : m_files) {
+    for (auto &file : deletedFiles) {
         if (file->isFolder()) {
             FileUtils::removeDir(file->localPath());
         }
@@ -64,8 +74,21 @@ void DeleteCloudFilesOperation::run()
 
     // Emit update
     DeleteCloudFilesUpdate update;
-    update.files = m_files;
+    update.files = deletedFiles;
     m_parent->cloudFilesUpdate(update);
+}
 
-    finish();
+void DeleteCloudFilesOperation::onFileDeleted()
+{
+    ++m_deletedCount;
+    if (m_deletedCount == m_files.size()) {
+        processDeletedFiles();
+        finish();
+    }
+}
+
+void DeleteCloudFilesOperation::onDeleteFileErrorOccured()
+{
+    processDeletedFiles();
+    invalidate(tr("File deletion failed"));
 }
