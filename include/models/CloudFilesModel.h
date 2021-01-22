@@ -49,6 +49,7 @@ namespace vm
 class CloudFilesModel : public ListModel
 {
     Q_OBJECT
+    Q_PROPERTY(QString description MEMBER m_description NOTIFY descriptionChanged)
 
 public:
     enum Roles
@@ -65,9 +66,13 @@ public:
     void setEnabled(bool enabled);
 
     CloudFileHandler file(const int proxyRow) const;
+    ModifiableCloudFileHandler file(const int proxyRow);
     CloudFiles selectedFiles() const;
 
     void updateCloudFiles(const CloudFilesUpdate &update);
+
+signals:
+    void descriptionChanged(const QString &description);
 
 private:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -81,11 +86,13 @@ private:
     void updateFile(const CloudFileHandler &file, const CloudFileUpdateSource source);
     std::optional<int> findRowById(const CloudFileId &cloudFileId) const;
     void invalidateDateTime();
+    void updateDescription();
 
     const Settings *m_settings;
     ModifiableCloudFiles m_files;
     QDateTime m_now;
     QTimer m_updateTimer;
+    QString m_description;
 };
 }
 

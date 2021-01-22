@@ -54,6 +54,7 @@ class CloudFilesController : public QObject
     Q_OBJECT
     Q_PROPERTY(QString displayPath READ displayPath NOTIFY displayPathChanged)
     Q_PROPERTY(bool isRoot READ isRoot NOTIFY isRootChanged)
+    Q_PROPERTY(bool isLoading MEMBER m_isLoading NOTIFY isLoadingChanged)
 
 public:
     CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase, CloudFileSystem *cloudFileSystem,
@@ -78,18 +79,21 @@ signals:
 
     void displayPathChanged(const QString &path);
     void isRootChanged(const bool isRoot);
+    void isLoadingChanged(const bool isLoading);
 
 private:
-    using FoldersHierarchy = std::vector<CloudFileHandler>;
+    using FoldersHierarchy = std::vector<ModifiableCloudFileHandler>;
 
     void setupTableConnections();
     void switchToHierarchy(const FoldersHierarchy &hierarchy);
 
     QString displayPath() const;
     bool isRoot() const;
+    void setIsLoading(const bool isLoading);
 
     void onDbListFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
     void onCloudFilesFetched(const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
+    void onCloudFilesFetchErrorOccured(const QString &errorText);
     void onUpdateCloudFiles(const CloudFilesUpdate &update);
 
     static bool fileIdLess(const ModifiableCloudFileHandler &a, const ModifiableCloudFileHandler &b);
@@ -104,6 +108,7 @@ private:
     FoldersHierarchy m_hierarchy;
     FoldersHierarchy m_newHierarchy;
     ModifiableCloudFiles m_databaseCloudFiles;
+    bool m_isLoading = false;
 };
 }
 

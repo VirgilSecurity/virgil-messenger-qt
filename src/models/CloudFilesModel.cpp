@@ -56,6 +56,7 @@ CloudFilesModel::CloudFilesModel(const Settings *settings, QObject *parent)
 
     selection()->setMultiSelect(true);
 
+    connect(selection(), &ListSelectionModel::selectedCountChanged, this, &CloudFilesModel::updateDescription);
     connect(&m_updateTimer, &QTimer::timeout, this, &CloudFilesModel::invalidateDateTime);
 }
 
@@ -70,6 +71,11 @@ void CloudFilesModel::setEnabled(bool enabled)
 }
 
 CloudFileHandler CloudFilesModel::file(const int proxyRow) const
+{
+    return m_files[sourceIndex(proxyRow).row()];
+}
+
+ModifiableCloudFileHandler CloudFilesModel::file(const int proxyRow)
 {
     return m_files[sourceIndex(proxyRow).row()];
 }
@@ -128,6 +134,8 @@ void CloudFilesModel::updateCloudFiles(const CloudFilesUpdate &update)
     else {
         throw std::logic_error("Invalid CloudFilesUpdate");
     }
+
+    updateDescription();
 }
 
 int CloudFilesModel::rowCount(const QModelIndex &parent) const
@@ -224,4 +232,37 @@ void CloudFilesModel::invalidateDateTime()
 {
     m_now = QDateTime::currentDateTime();
     emit dataChanged(index(0), index(rowCount() - 1), { DisplayDateTimeRole });
+}
+
+void CloudFilesModel::updateDescription()
+{
+    // Count folders and files
+    int foldersCount = 0;
+    int filesCount = 0;
+    const bool hasSelection = selection()->hasSelection();
+    if (hasSelection) {
+        for (auto &file : selectedFiles()) {
+            file->isFolder() ? ++foldersCount : ++filesCount;
+        }
+    }
+    else {
+        for (auto &file : m_files) {
+            file->isFolder() ? ++foldersCount : ++filesCount;
+        }
+    }
+
+    // Build new description
+    QString newDescription;
+    newDescription.append(((foldersCount == 1) ? tr("%1 Folder") : tr("%1 Folders")).arg(foldersCount));
+    newDescription.append(QLatin1String(", "));
+    newDescription.append(((filesCount == 1) ? tr("%1 File") : tr("%1 Files")).arg(filesCount));
+    if (hasSelection) {
+        newDescription = tr("Selected: %1").arg(newDescription);
+    }
+
+    // Update description
+    if (m_description != newDescription) {
+        m_description = newDescription;
+        emit descriptionChanged(m_description);
+    }
 }

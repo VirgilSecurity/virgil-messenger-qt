@@ -71,7 +71,7 @@ bool CloudFilesTable::createFile(const CloudFileHandler &cloudFile)
     const auto bindValues = DatabaseUtils::createNewCloudFileBindings(cloudFile);
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertCloudFile"), bindValues);
     if (query) {
-        qCDebug(lcDatabase) << "Cloud file was created" << bindValues.front().second;
+        qCDebug(lcDatabase) << "Cloud file was created" << bindValues.front().first << bindValues.front().second;
         return true;
     }
     else {
@@ -109,7 +109,7 @@ bool CloudFilesTable::updateFile(const CloudFileHandler &cloudFile, const CloudF
     const auto bindValues = DatabaseUtils::createUpdatedCloudFileBindings(cloudFile, source);
     const auto query = DatabaseUtils::readExecQuery(database(), queryId, bindValues);
     if (query) {
-        qCDebug(lcDatabase) << "Cloud file was updated" << bindValues.front().second;
+        qCDebug(lcDatabase) << "Cloud file was updated" << bindValues.front().first << bindValues.front().second;
         return true;
     }
     else {

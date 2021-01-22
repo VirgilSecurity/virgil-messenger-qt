@@ -66,6 +66,7 @@ Self::CloudFilesController(const Settings *settings, Models *models, UserDatabas
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
     connect(models->cloudFilesQueue(), &CloudFilesQueue::updateCloudFiles, this, &Self::updateCloudFiles);
     connect(cloudFileSystem, &CloudFileSystem::listFetched, this, &Self::onCloudFilesFetched);
+    connect(cloudFileSystem, &CloudFileSystem::fetchListErrorOccured, this, &Self::onCloudFilesFetchErrorOccured);
 }
 
 CloudFilesModel *Self::model()
@@ -157,8 +158,22 @@ bool CloudFilesController::isRoot() const
     return m_hierarchy.size() == 1;
 }
 
+void CloudFilesController::setIsLoading(const bool isLoading)
+{
+    if (isLoading == m_isLoading) {
+        return;
+    }
+    m_isLoading = isLoading;
+    emit isLoadingChanged(isLoading);
+}
+
 void Self::onDbListFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles)
 {
+    if (parentFolder->id() != m_newHierarchy.back()->id()) {
+        qCDebug(lcController) << "Fetched db folder isn't relevant more" << parentFolder->id();
+        return;
+    }
+
     // Update hierarchy
     const auto oldDisplayPath = displayPath();
     const auto oldIsRoot = isRoot();
@@ -178,16 +193,18 @@ void Self::onDbListFetched(const CloudFileHandler &parentFolder, const Modifiabl
 
     // Fetch cloud folder
     m_databaseCloudFiles = cloudFiles;
+    setIsLoading(true);
     m_cloudFileSystem->fetchList(parentFolder);
 }
 
 void CloudFilesController::onCloudFilesFetched(const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles)
 {
     if (parentFolder->id() != m_hierarchy.back()->id()) {
-        qCWarning(lcController) << "Fetched cloud folder isn't relevant more" << parentFolder->id();
+        qCDebug(lcController) << "Fetched cloud folder isn't relevant more" << parentFolder->id();
+        return;
     }
 
-    // Merge update
+    // Emit merge update
 
     MergeCloudFolderUpdate mergeUpdate;
     mergeUpdate.parentFolder = parentFolder;
@@ -227,10 +244,24 @@ void CloudFilesController::onCloudFilesFetched(const ModifiableCloudFileHandler 
     }
 
     emit updateCloudFiles(mergeUpdate);
+
+    // Finish loading
+
+    setIsLoading(false);
+}
+
+void CloudFilesController::onCloudFilesFetchErrorOccured(const QString &errorText)
+{
+    Q_UNUSED(errorText)
+    setIsLoading(false);
 }
 
 void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)
 {
+    // Update hierarchy
+    if (auto upd = std::get_if<MergeCloudFolderUpdate>(&update)) {
+        m_hierarchy.back()->update(*upd->parentFolder, CloudFileUpdateSource::ListedParent);
+    }
     // Update UI
     m_models->cloudFiles()->updateCloudFiles(update);
     // Update DB
