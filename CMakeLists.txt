@@ -243,6 +243,7 @@ if (VS_PLATFORM STREQUAL "android")
 
     message(STATUS "Android OpenSSL root path:    [${SSL_ROOT_PATH}]")
     message(STATUS "Android OpenSSL library path: [${VS_ANDROID_SSL_DIR}]")
+    message(STATUS "Android extra libraries:      [${ANDROID_EXTRA_LIBS}]")
 
     # Linux
 elseif (VS_PLATFORM STREQUAL "linux")
@@ -794,6 +795,7 @@ target_include_directories(${VS_TARGET_NAME}
 target_compile_definitions(${VS_TARGET_NAME}
         PRIVATE
 
+        $<BUILD_INTERFACE:VERSION="${VS_TARGET_VERSION}">
         $<BUILD_INTERFACE:VS_MSGR_ENV_DEV=0>
         $<BUILD_INTERFACE:VS_MSGR_ENV_STG=0>
         $<BUILD_INTERFACE:VS_MSGR_ENV_PROD=1>

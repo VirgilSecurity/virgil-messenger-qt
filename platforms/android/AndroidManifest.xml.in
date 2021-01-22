@@ -10,7 +10,7 @@
     <application
         android:hardwareAccelerated="true"
         android:name="org.qtproject.qt5.android.bindings.QtApplication"
-        android:label="@VS_APPLICATION_DISPLAY_NAME@"
+        android:label="@VS_APPLICATION_NAME@"
         android:extractNativeLibs="true"
         android:theme="@style/AppTheme"
         android:icon="@drawable/icon"
@@ -18,7 +18,7 @@
         <activity
             android:configChanges="orientation|keyboardHidden"
             android:name="org.qtproject.qt5.android.bindings.QtActivity"
-            android:label="@VS_APPLICATION_DISPLAY_NAME@"
+            android:label="@VS_APPLICATION_NAME@"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
             android:launchMode="singleTop"
