@@ -53,7 +53,7 @@ option(ENABLE_CLANGFORMAT "On/Off formatting source code with clangformat." ON)
 # Project version
 # ---------------------------------------------------------------------------
 set(VS_TARGET_VERSION "3.5.5")
-set(VS_CORE_VERSION "0.2.1.39")
+set(VS_CORE_VERSION "0.2.1.45")
 set(VERSION_DATABASE_SCHEME "0")
 
 # ---------------------------------------------------------------------------
