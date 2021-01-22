@@ -62,8 +62,9 @@ Item {
     readonly property real overlayZ: 1000
 
     // animation
-    readonly property int animationDuration: 250
     readonly property int shortAnimationDuration: 125
+    readonly property int animationDuration: 250
+    readonly property int longAnimationDuration: 500
 
     // transitions
     readonly property var addTransition: Transition {

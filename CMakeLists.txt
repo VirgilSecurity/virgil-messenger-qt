@@ -52,8 +52,8 @@ option(ENABLE_CLANGFORMAT "On/Off formatting source code with clangformat." ON)
 # ---------------------------------------------------------------------------
 # Project version
 # ---------------------------------------------------------------------------
-set(VS_TARGET_VERSION "3.5.5")
-set(VS_CORE_VERSION "0.2.1.39")
+set(VS_TARGET_VERSION "3.5.7")
+set(VS_CORE_VERSION "0.2.1.45")
 set(VERSION_DATABASE_SCHEME "0")
 
 # ---------------------------------------------------------------------------
@@ -243,6 +243,7 @@ if (VS_PLATFORM STREQUAL "android")
 
     message(STATUS "Android OpenSSL root path:    [${SSL_ROOT_PATH}]")
     message(STATUS "Android OpenSSL library path: [${VS_ANDROID_SSL_DIR}]")
+    message(STATUS "Android extra libraries:      [${ANDROID_EXTRA_LIBS}]")
 
     # Linux
 elseif (VS_PLATFORM STREQUAL "linux")
@@ -497,6 +498,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/Model.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationQueue.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationSource.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/UploadDownloadModel.h
         # Operations
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateAttachmentFingerprintOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateFileFingerprintOperation.h
@@ -663,6 +665,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/models/Models.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/Model.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/OperationQueue.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/UploadDownloadModel.cpp
         # Operations
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CalculateAttachmentFingerprintOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CalculateFileFingerprintOperation.cpp
@@ -798,6 +801,7 @@ target_include_directories(${VS_TARGET_NAME}
 target_compile_definitions(${VS_TARGET_NAME}
         PRIVATE
 
+        $<BUILD_INTERFACE:VERSION="${VS_TARGET_VERSION}">
         $<BUILD_INTERFACE:VS_MSGR_ENV_DEV=0>
         $<BUILD_INTERFACE:VS_MSGR_ENV_STG=0>
         $<BUILD_INTERFACE:VS_MSGR_ENV_PROD=1>

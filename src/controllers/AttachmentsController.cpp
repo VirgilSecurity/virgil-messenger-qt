@@ -142,9 +142,7 @@ void AttachmentsController::downloadAttachment(const ModifiableMessageHandler &m
         function();
     }
     else {
-        if (localPath.isEmpty()) {
-            localPath = FileUtils::findUniqueFileName(m_settings->downloadsDir().filePath(attachment->fileName()));
-        }
+        localPath = FileUtils::findUniqueFileName(m_settings->downloadsDir().filePath(attachment->fileName()));
 
         m_models->messagesQueue()->pushMessageDownload(message, localPath, function);
     }

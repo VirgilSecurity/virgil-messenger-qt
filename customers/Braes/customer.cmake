@@ -2,7 +2,7 @@ message(STATUS "[Begin] customer.cmake")
 
 # Set project target name and variables before define project in main Cmake file
 if(NOT PROJECT_NAME)
-    set(VS_TARGET_NAME "BraesMessenger")
+    set(VS_TARGET_NAME "BraesMessenger2")
     message(STATUS "Set target name: [${VS_TARGET_NAME}]")
 else()
 
@@ -17,9 +17,9 @@ else()
     set(VS_MESSANGER_URL_TEMPLATE "https://messenger%1.virgilsecurity.com")
     set(VS_XMPP_URL_TEMPLATE "xmpp%1.virgilsecurity.com")
     set(VS_XMPP_DOMAIN_TEMPLATE "xmpp%1.virgilsecurity.com")
-    set(CONTACT_DISCOVERY_URL_TEMPLATE "https://disco%1-va.virgilsecurity.com")
+    set(CONTACT_DISCOVERY_URL_TEMPLATE "https://disco%1.virgilsecurity.com")
     set(VS_PUSH_PROXY "braes-push-notifications-proxy")
-    set(VS_PUSH_TOPIC "com.virgil.BraesMessenger")
+    set(VS_PUSH_TOPIC "com.virgil.BraesMessenger2")
 
     set(SECURITY_APPLICATION_GROUP_IDENTIFIER "group.com.virgil.BraesMessenger")
 
@@ -31,7 +31,7 @@ else()
     # ----------
     # Android
     # ----------
-    # ***********************************************************************************    
+    # ***********************************************************************************
     if(VS_PLATFORM STREQUAL "android")
         # Firebase dir for gradle
         set(VS_ANDROID_PACKAGE_NAME "com.virgil.BraesMessenger")
