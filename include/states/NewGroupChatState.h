@@ -36,6 +36,7 @@
 #define VM_NEWGROUPCHATSTATE_H
 
 #include "OperationState.h"
+#include "Contact.h"
 
 namespace vm
 {
@@ -50,6 +51,7 @@ public:
 
 signals:
     void requestChatName();
+    void contactsSelected(const Contacts &contacts);
 
 private:
     void onEntry(QEvent *event);

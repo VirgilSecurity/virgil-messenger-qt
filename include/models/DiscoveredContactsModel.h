@@ -55,6 +55,7 @@ public:
 
     void reload();
     int fixedContactsCount() const;
+    const ContactsModel *selectedContactsModel() const;
 
     Q_INVOKABLE void toggleById(const QString &contactId);
     Q_INVOKABLE QString firstContactId() const;

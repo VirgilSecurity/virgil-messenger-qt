@@ -43,6 +43,10 @@ NewGroupChatState::NewGroupChatState(DiscoveredContactsModel *contactsModel, QSt
     : OperationState(parent)
     , m_contactsModel(contactsModel)
 {
+    connect(this, &NewGroupChatState::requestChatName, [this]() {
+        const Contacts contacts = m_contactsModel->selectedContactsModel()->getContacts();
+        emit contactsSelected(contacts);
+    });
 }
 
 void NewGroupChatState::onEntry(QEvent *event)

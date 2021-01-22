@@ -77,6 +77,11 @@ int DiscoveredContactsModel::fixedContactsCount() const
     return m_fixedContactsCount;
 }
 
+const ContactsModel *DiscoveredContactsModel::selectedContactsModel() const
+{
+    return m_selectedContacts;
+}
+
 void DiscoveredContactsModel::toggleById(const QString &contactId)
 {
     const auto row = findRowByContactId(contactId);

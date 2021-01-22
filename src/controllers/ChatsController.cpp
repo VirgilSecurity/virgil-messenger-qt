@@ -128,16 +128,16 @@ void Self::createChatWithUserId(const UserId &userId)
     });
 }
 
-void ChatsController::createChatWithGroupName(const QString &groupName)
+void ChatsController::createGroupChat(const QString &groupName, const Contacts &contacts)
 {
-    QtConcurrent::run([this, groupName = groupName]() {
+    QtConcurrent::run([this, groupName = groupName, contacts = contacts]() {
         if (!m_messenger) {
             qCWarning(lcController) << "Messenger was not initialized";
             emit errorOccurred(tr("Group con not be created"));
         }
 
         //
-        //  FIXME: Add initial participants.
+        //  FIXME: use contacts
         //
         auto group = std::make_shared<Group>(Utils::createUuid(), groupName);
 

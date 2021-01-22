@@ -36,6 +36,7 @@
 #define VM_CHATSCONTROLLER_H
 
 #include "ChatId.h"
+#include "Contact.h"
 #include "Group.h"
 #include "MessageId.h"
 #include "UserId.h"
@@ -66,7 +67,7 @@ public:
 
     void createChatWithUsername(const QString &username);
     void createChatWithUserId(const UserId &userId);
-    void createChatWithGroupName(const QString &groupName);
+    void createGroupChat(const QString &groupName, const Contacts &contacts);
 
     void openChat(const ChatHandler& chat);
     Q_INVOKABLE void openChat(const QString& chatId); // can be used within QML only

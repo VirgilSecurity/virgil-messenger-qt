@@ -37,6 +37,8 @@
 
 #include "GroupId.h"
 
+#include <memory>
+
 namespace vm
 {
 class Group

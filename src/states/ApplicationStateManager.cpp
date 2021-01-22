@@ -138,6 +138,7 @@ void Self::addTransitions()
     m_chatListState->addTransition(this, &Self::cloudFileListRequested, m_cloudFileListState);
 
     addTwoSideTransition(m_newGroupChatState, m_newGroupChatState, &NewGroupChatState::requestChatName, m_nameGroupChatState);
+    connect(m_newGroupChatState, &NewGroupChatState::contactsSelected, m_nameGroupChatState, &NameGroupChatState::setContacts);
 
     m_nameGroupChatState->addTransition(chats, &ChatsController::chatOpened, m_chatState);
 

@@ -35,6 +35,7 @@
 #ifndef VM_NAMEGROUPCHATSTATE_H
 #define VM_NAMEGROUPCHATSTATE_H
 
+#include "Contact.h"
 #include "GroupId.h"
 #include "OperationState.h"
 
@@ -49,6 +50,8 @@ class NameGroupChatState : public OperationState
 public:
     NameGroupChatState(ChatsController *chatsController, QState *parent);
 
+    void setContacts(const Contacts &contacts);
+
 signals:
     void createGroup(const QString &name);
 
@@ -56,6 +59,7 @@ private:
     void onCreateGroup(const QString &name);
 
     ChatsController *m_chatsController;
+    Contacts m_contacts;
 };
 }
 
