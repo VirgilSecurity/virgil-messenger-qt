@@ -237,6 +237,16 @@ QDir Settings::downloadsDir() const
     return m_downloadsDir;
 }
 
+QDir Settings::cloudFilesDownloadsDir(const QString &userName) const
+{
+    const QDir dir = m_downloadsDir.filePath(QLatin1String("VirgilCloudFiles/") + userName);
+    if (!dir.exists()) {
+        FileUtils::forceCreateDir(dir.absolutePath());
+    }
+    qCDebug(lcSettings) << "Cloud files dir:" << dir.absolutePath();
+    return dir;
+}
+
 QString Settings::makeThumbnailPath(const AttachmentId &attachmentId, bool isPreview) const
 {
     return thumbnailsDir().filePath((isPreview ? QLatin1String("p-") : QLatin1String("t-")) + attachmentId + QLatin1String(".png"));
@@ -259,15 +269,6 @@ bool Settings::devMode() const
 #else
     return false;
 #endif // VS_DEVMODE
-}
-
-bool Settings::fileCloudEnabled() const
-{
-#ifdef VS_NO_FILECLOUD
-    return false;
-#else
-    return true;
-#endif // VS_NO_FILECLOUD
 }
 
 bool Settings::autoSendCrashReport() const

@@ -45,6 +45,7 @@ namespace vm
 {
 class AttachmentsTable;
 class ChatsTable;
+class CloudFilesTable;
 class ContactsTable;
 class MessagesTable;
 
@@ -60,6 +61,8 @@ public:
     AttachmentsTable *attachmentsTable();
     const ChatsTable *chatsTable() const;
     ChatsTable *chatsTable();
+    const CloudFilesTable *cloudFilesTable() const;
+    CloudFilesTable *cloudFilesTable();
     const ContactsTable *contactsTable() const;
     ContactsTable *contactsTable();
     const MessagesTable *messagesTable() const;
@@ -95,6 +98,7 @@ private:
     const QDir m_databaseDir;
     int m_attachmentsTableIndex;
     int m_chatsTableIndex;
+    int m_cloudFilesTableIndex;
     int m_contactsTableIndex;
     int m_messagesTableIndex;
 };

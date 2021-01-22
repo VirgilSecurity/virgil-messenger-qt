@@ -41,6 +41,7 @@ Validator::Validator(QObject *parent)
     , m_reUsername(new QRegularExpressionValidator(QRegularExpression(R"(^(?!_)\w{1,20}(?<!_)$)"), this))
     , m_rePhone(new QRegularExpressionValidator(QRegularExpression(R"(^\+?[1-9]\d{3,14}$)"), this))
     , m_reEmail(new QRegularExpressionValidator(QRegularExpression(R"(^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$)"), this))
+    , m_reDirectoryName(new QRegularExpressionValidator(QRegularExpression(R"(^.+$)"), this))
 {
 }
 

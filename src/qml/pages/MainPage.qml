@@ -1,17 +1,29 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.12
+import QtQuick.Layouts 1.15
 
 import "../base"
-import "../theme"
 import "../components"
 import "../components/CommonHelpers"
+import "../theme"
 
 Page {
     property var appState: manager.chatListState
 
-    readonly property var manager: app.stateManager
-    readonly property bool isChatList: appState === manager.chatListState
+    QtObject {
+        id: d
+
+        readonly property var manager: app.stateManager
+        readonly property bool isChatList: appState === manager.chatListState
+        readonly property bool isCloudFileList: appState === manager.cloudFileListState
+        readonly property var cloudFilesSelection: models.cloudFiles.selection
+
+        readonly property string chatsTitle: app.organizationDisplayName
+        readonly property string chatsDescription: qsTr("%1 Server").arg(app.organizationDisplayName)
+
+        readonly property string cloudFilesTitle: controllers.cloudFiles.displayPath
+        readonly property string cloudFilesDescription: cloudFilesSelection.hasSelection ? qsTr("Selected: %1").arg(cloudFilesSelection.selectedCount) : ""
+    }
 
     background: Rectangle {
         color: Theme.contactsBackgroundColor
@@ -19,25 +31,61 @@ Page {
 
     header: SearchHeader {
         id: mainSearchHeader
-        title: isChatList ? app.organizationDisplayName : qsTr("File Cloud") + controllers.fileCloud.displayPath
-        description: isChatList ? qsTr("%1 Server").arg(app.organizationDisplayName) : ""
-        showDescription: isChatList
-        showBackButton: !isChatList && controllers.fileCloud.displayPath
-        menuImage: isChatList ? "More" : "Plus"
-        searchPlaceholder: isChatList ? qsTr("Search conversation") : qsTr("Search file")
-        filterSource: isChatList ? models.chats : models.fileCloud
+        title: d.isChatList ? d.chatsTitle : d.cloudFilesTitle
+        description: d.isChatList ? d.chatsDescription : d.cloudFilesDescription
+        showDescription: description
+        showBackButton: d.isCloudFileList && !controllers.cloudFiles.isRoot
+        menuImage: d.isChatList ? "More" : "Plus"
+        searchPlaceholder: d.isChatList ? qsTr("Search conversation") : qsTr("Search file")
+        filterSource: d.isChatList ? models.chats : models.cloudFiles
 
-        Action {
-            text: isChatList ? qsTr("New chat") : qsTr("Add file")
-            onTriggered: isChatList ? appState.requestNewChat() : attachmentPicker.open(AttachmentTypes.file)
+        // Chat actions
+
+        ContextMenuItem {
+            text: qsTr("New chat")
+            onTriggered: appState.requestNewChat()
+            visible: d.isChatList
         }
 
-        // TODO(fpohtmeh): restore later
-        // Action {
-        //     text: qsTr("New group")
-        //     enabled: isChatList
-        //     onTriggered: appState.requestNewGroupChat()
-        // }
+        ContextMenuItem {
+            text: qsTr("New group")
+            onTriggered: appState.requestNewGroupChat()
+            visible: false //d.isChatList // TODO(fpohtmeh): enable
+        }
+
+        // Cloud file actions
+
+        ContextMenuItem {
+            text: qsTr("Add file")
+            onTriggered: attachmentPicker.open(AttachmentTypes.file)
+            visible: d.isCloudFileList
+        }
+
+        ContextMenuItem {
+            text: qsTr("New directory")
+            onTriggered: createCloudFolderDialog.open()
+            visible: d.isCloudFileList
+        }
+
+        ContextMenuSeparator {
+            visible: d.isCloudFileList
+        }
+
+        ContextMenuItem {
+            text: qsTr("Refresh")
+            onTriggered: controllers.cloudFiles.refresh()
+            visible: d.isCloudFileList
+        }
+
+        ContextMenuSeparator {
+            visible: d.isCloudFileList && d.cloudFilesSelection.hasSelection
+        }
+
+        ContextMenuItem {
+            text: qsTr("Delete")
+            onTriggered: deleteCloudFilesDialog.open()
+            visible: d.isCloudFileList && d.cloudFilesSelection.hasSelection
+        }
     }
 
     StackLayout {
@@ -46,118 +94,14 @@ Page {
             rightMargin: Theme.smallMargin
             fill: parent
         }
-        currentIndex: isChatList ? 0 : 1
+        currentIndex: d.isChatList ? 0 : 1
 
-        ModelListView {
-            id: chatListView
-            model: models.chats.proxy
+        ChatListView {
             searchHeader: mainSearchHeader
-            emptyIcon: "../resources/icons/Chats.png"
-            emptyText: qsTr("Create your first chat<br/>by pressing the dots<br/>button above")
-
-            delegate: ListDelegate {
-                width: chatListView.width
-
-                Avatar {
-                    id: avatar
-                    nickname: model.contactId
-                }
-
-                Column {
-                    Layout.fillWidth: true
-                    clip: true
-
-                    Text {
-                        color: Theme.primaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(15)
-                        text: model.contactId
-                    }
-
-                    Text {
-                        id: messageBody
-                        color: Theme.secondaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(12)
-                        width: parent.width
-                        text: model.lastMessageBody
-                        elide: Text.ElideRight
-                    }
-                }
-
-                Column {
-                    width: 30
-                    spacing: 5
-
-                    MessageCounter {
-                       count: model.unreadMessageCount
-                       anchors.horizontalCenter: parent.horizontalCenter
-                    }
-
-                    Text {
-                        text: model.lastEventTime
-                        color: Theme.secondaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(9)
-                        anchors.horizontalCenter: parent.horizontalCenter
-                    }
-                }
-
-                onClicked: controllers.chats.openChat(model.id)
-            }
-
-            onPlaceholderClicked: appState.requestNewChat()
         }
 
-        ModelListView {
-            id: fileCloudListView
-            model: models.fileCloud.proxy
+        CloudFileListView {
             searchHeader: mainSearchHeader
-            emptyIcon: "../resources/icons/Chats.png"
-            emptyText: qsTr("Add a file<br/>by pressing the plus<br/>button above")
-
-            delegate: ListDelegate {
-                width: fileCloudListView.width
-
-                ImageButton {
-                    image: model.isDir ? "Folder-Big" : "File-Big"
-                    imageSize: 48
-                    iconSize: 40
-                    onClicked: controllers.fileCloud.processClick(index)
-                }
-
-                Column {
-                    Layout.fillWidth: true
-                    clip: true
-
-                    Text {
-                        color: Theme.primaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(15)
-                        text: model.fileName
-                        width: parent.width
-                    }
-                }
-
-                Column {
-                    width: 30
-                    spacing: 5
-
-                    Text {
-                        text: model.displayFileSize
-                        color: Theme.primaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(12)
-                        anchors.right: parent.right
-                    }
-
-                    Text {
-                        text: model.displayDateTime
-                        color: Theme.secondaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(9)
-                        anchors.right: parent.right
-                    }
-                }
-
-                onClicked: controllers.fileCloud.processClick(index)
-            }
-
-            onPlaceholderClicked: attachmentPicker.open(AttachmentTypes.file)
         }
     }
 
@@ -167,10 +111,10 @@ Page {
     }
 
     Connections {
-        target: app.stateManager
+        target: d.manager
 
         function onCurrentStateChanged(state) {
-            if ([manager.chatListState, manager.fileCloudState].includes(state)) {
+            if ([d.manager.chatListState, d.manager.cloudFileListState].includes(state)) {
                 appState = state
             }
         }
@@ -180,11 +124,11 @@ Page {
         target: attachmentPicker
 
         function onPicked(fileUrls, attachmentType) {
-            if (manager.currentState !== manager.fileCloudState) {
+            if (d.manager.currentState !== d.manager.cloudFileListState) {
                 return;
             }
             const url = fileUrls[fileUrls.length - 1]
-            controllers.fileCloud.addFile(url)
+            controllers.cloudFiles.addFile(url)
         }
     }
 }

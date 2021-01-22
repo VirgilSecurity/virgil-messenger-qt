@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,30 +32,57 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "states/FileCloudState.h"
+#ifndef VM_OPERATIONQUEUE_H
+#define VM_OPERATIONQUEUE_H
 
-#include "models/FileCloudModel.h"
-#include "models/Models.h"
+#include <QLoggingCategory>
+#include <QPointer>
 
-using namespace vm;
+#include "OperationSource.h"
 
-FileCloudState::FileCloudState(Models *models, QState *parent)
-    : QState(parent)
-    , m_models(models)
+class QThreadPool;
+
+namespace vm
 {
+class Operation;
+
+class OperationQueue : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit OperationQueue(const QLoggingCategory &category, QObject *parent);
+    ~OperationQueue() override;
+
+    void start();
+    void run();
+    void stop();
+
+    void addSource(OperationSourcePtr source);
+
+signals:
+    void stopRequested(QPrivateSignal);
+    void operationFailed(OperationSourcePtr source, QPrivateSignal);
+    void notificationCreated(const QString &notification, const bool error);
+
+protected:
+    virtual Operation *createOperation(OperationSourcePtr source) = 0;
+    virtual void invalidateOperation(OperationSourcePtr source) = 0;
+
+private:
+    void addSourceImpl(OperationSourcePtr source, const bool run);
+    void runSource(OperationSourcePtr source);
+
+    void onOperationFailed(OperationSourcePtr source);
+
+    const QLoggingCategory &m_category;
+
+    QPointer<QThreadPool> m_threadPool;
+    std::atomic_bool m_isStopped = false;
+    std::vector<OperationSourcePtr> m_sources;
+};
 }
 
-void FileCloudState::onEntry(QEvent *)
-{
-    setEnabled(true);
-}
+Q_DECLARE_METATYPE(vm::OperationSourcePtr);
 
-void FileCloudState::onExit(QEvent *)
-{
-    setEnabled(false);
-}
-
-void FileCloudState::setEnabled(bool enabled)
-{
-    m_models->fileCloud()->setEnabled(enabled);
-}
+#endif // VM_OPERATIONQUEUE_H

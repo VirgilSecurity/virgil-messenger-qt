@@ -32,24 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VS_MESSAGESQUEUE_H
-#define VS_MESSAGESQUEUE_H
+#ifndef VM_MESSAGESQUEUE_H
+#define VM_MESSAGESQUEUE_H
 
-#include "DownloadAttachmentOperation.h"
+#include "MessageOperationSource.h"
 #include "Messenger.h"
-
-#include <QPointer>
-#include <QLoggingCategory>
-
+#include "OperationQueue.h"
 
 Q_DECLARE_LOGGING_CATEGORY(lcMessagesQueue);
-
-
-class QThreadPool;
-
-
-class Settings;
-
 
 namespace vm
 {
@@ -57,26 +47,14 @@ class MessageOperation;
 class MessageOperationFactory;
 class UserDatabase;
 
-class MessagesQueue : public QObject
+class MessagesQueue : public OperationQueue
 {
     Q_OBJECT
 
 public:
-    using PostDownloadFunction = std::function<void ()>;
+    using PostDownloadFunction = MessageOperationSource::PostDownloadFunction;
 
-    struct DownloadParameter : DownloadAttachmentOperation::Parameter
-    {
-        PostDownloadFunction postFunction;
-    };
-
-    struct Item
-    {
-        ModifiableMessageHandler message;
-        std::optional<DownloadParameter> download = std::nullopt; // Parameter for download/preload
-        qsizetype attemptCount = 0;
-    };
-
-    MessagesQueue(const Settings *settings, Messenger *messenger, UserDatabase *userDatabase, QObject *parent);
+    MessagesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject *parent);
     ~MessagesQueue() override;
 
 signals:
@@ -85,16 +63,10 @@ signals:
     void pushMessagePreload(const ModifiableMessageHandler &message);
 
     void updateMessage(const MessageUpdate &messagesUpdate);
-    void notificationCreated(const QString &notification, const bool error);
-
-    void itemFailed(Item item, QPrivateSignal);
-    void stopRequested(QPrivateSignal);
 
 private:
-    void run();
-    void stop();
-    void addItem(Item item, const bool run);
-    void runItem(Item item);
+    Operation *createOperation(OperationSourcePtr source) override;
+    void invalidateOperation(OperationSourcePtr source) override;
 
     void onPushMessage(const ModifiableMessageHandler &message);
     void onPushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath, const PostDownloadFunction &postFunction);
@@ -103,19 +75,13 @@ private:
     void onDatabaseOpened();
     void onOnlineStatusChanged(const bool isOnline);
     void onNotSentMessagesFetched(const ModifiableMessages &messages);
-    void onItemFailed(Item item);
 
     QPointer<Messenger> m_messenger;
     QPointer<UserDatabase> m_userDatabase;
     QPointer<MessageOperationFactory> m_factory;
-    QPointer<QThreadPool> m_threadPool;
-
-    std::vector<Item> m_items;
-    std::atomic_bool m_isStopped = false;
 };
 }
 
-Q_DECLARE_METATYPE(vm::MessagesQueue::Item);
 Q_DECLARE_METATYPE(vm::MessagesQueue::PostDownloadFunction);
 
-#endif // VS_MESSAGESQUEUE_H
+#endif // VM_MESSAGESQUEUE_H

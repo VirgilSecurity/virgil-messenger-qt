@@ -159,9 +159,15 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     qRegisterMetaType<vm::ChatHandler>("ChatHandler");
     qRegisterMetaType<vm::ModifiableChatHandler>("ModifiableChatHandler");
     qRegisterMetaType<vm::ModifiableChats>("ModifiableChats");
+    qRegisterMetaType<vm::CloudFileHandler>("CloudFileHandler");
+    qRegisterMetaType<vm::ModifiableCloudFileHandler>("ModifiableCloudFileHandler");
+    qRegisterMetaType<vm::CloudFiles>("CloudFiles");
+    qRegisterMetaType<vm::ModifiableCloudFiles>("ModifiableCloudFiles");
+
     qRegisterMetaType<vm::ChatId>("ChatId");
     qRegisterMetaType<vm::MessageId>("MessageId");
     qRegisterMetaType<vm::AttachmentId>("AttachmentId");
+    qRegisterMetaType<vm::CloudFileId>("CloudFileId");
 
     //
     //  Register self signals-slots

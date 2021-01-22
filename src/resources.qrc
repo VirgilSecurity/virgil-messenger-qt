@@ -92,7 +92,7 @@
         <file>qml/resources/icons/Mic Selected@2x.png</file>
         <file>qml/resources/icons/File Download Big.png</file>
         <file>qml/resources/icons/File Download Big@2x.png</file>
-	<!-- Others -->
+        <!-- Others -->
         <file>qml/components/Avatar.qml</file>
         <file>qml/components/AttachmentPreview.qml</file>
         <file>qml/components/FlowListView.qml</file>
@@ -126,6 +126,8 @@
         <file>qml/components/SelectContactsList.qml</file>
         <file>qml/components/Header.qml</file>
         <file>qml/components/ContextMenu.qml</file>
+        <file>qml/components/ContextMenuItem.qml</file>
+        <file>qml/components/ContextMenuSeparator.qml</file>
         <file>qml/components/ImageButton.qml</file>
         <file>qml/components/FormImage.qml</file>
         <file>qml/components/FormSubtitle.qml</file>
@@ -145,6 +147,8 @@
         <file>qml/base/Platform.qml</file>
         <file>qml/base/qmldir</file>
         <file>qml/components/Dialogs/SendReportDialog.qml</file>
+        <file>qml/components/Dialogs/MessageDialog.qml</file>
+        <file>qml/components/Dialogs/InputDialog.qml</file>
         <file>qml/components/SelectAttachmentsDialog.qml</file>
         <file>qml/components/CircleProgressBar.qml</file>
         <file>qml/components/TextScrollView.qml</file>
@@ -159,18 +163,25 @@
         <file>qml/components/SelectedContactsFlow.qml</file>
         <file>qml/components/HorizontalRule.qml</file>
         <file>qml/components/NetworkStatusControl.qml</file>
-	<file>qml/components/NewGroupChatHeader.qml</file>
+        <file>qml/components/ChatListView.qml</file>
+        <file>qml/components/CloudFileListView.qml</file>
+        <file>qml/components/NewGroupChatHeader.qml</file>
         <!-- Database -->
         <file>resources/database/createAttachments.sql</file>
         <file>resources/database/createChats.sql</file>
+        <file>resources/database/createCloudFiles.sql</file>
         <file>resources/database/createContacts.sql</file>
         <file>resources/database/createMessages.sql</file>
+        <file>resources/database/deleteCloudFileById.sql</file>
+        <file>resources/database/deleteCloudFilesByParentId.sql</file>
         <file>resources/database/insertAttachment.sql</file>
         <file>resources/database/insertChat.sql</file>
+        <file>resources/database/insertCloudFile.sql</file>
         <file>resources/database/insertMessage.sql</file>
         <file>resources/database/resetUnreadCount.sql</file>
         <file>resources/database/selectChatMessages.sql</file>
         <file>resources/database/selectChats.sql</file>
+        <file>resources/database/selectCloudFolderFiles.sql</file>
         <file>resources/database/selectNotSentMessages.sql</file>
         <file>resources/database/updateAttachmentDownloadStage.sql</file>
         <file>resources/database/updateAttachmentEncryption.sql</file>
