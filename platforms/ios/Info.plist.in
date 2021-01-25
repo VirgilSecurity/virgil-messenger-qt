@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDisplayName</key>
-	<string>@VS_APPLICATION_DISPLAY_NAME@</string>
+	<string>@VS_APPLICATION_NAME@</string>
 	<key>CFBundleExecutable</key>
 	<string>@VS_APPLICATION_NAME@</string>
 	<key>CFBundleIdentifier</key>

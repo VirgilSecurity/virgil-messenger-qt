@@ -1,5 +1,6 @@
 ##### Generated
 gradle.properties
+AndroidManifest.xml
 VSQCustomer.h
 transitive-args.cmake
 #####
