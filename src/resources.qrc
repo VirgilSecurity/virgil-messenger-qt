@@ -189,6 +189,7 @@
         <file>resources/database/updateAttachmentLocalPath.sql</file>
         <file>resources/database/updateAttachmentUploadStage.sql</file>
         <file>resources/database/updateAttachmentRemoteUrl.sql</file>
+        <file>resources/database/updateDownloadedCloudFile.sql</file>
         <file>resources/database/updateLastMessage.sql</file>
         <file>resources/database/updateListedChildCloudFile.sql</file>
         <file>resources/database/updateListedChildCloudFolder.sql</file>

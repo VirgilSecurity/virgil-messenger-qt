@@ -69,5 +69,6 @@ void CreateCloudFolderOperation::onCreated(const ModifiableCloudFileHandler &fol
 
 void CreateCloudFolderOperation::onErrorOccured(const QString &errorText)
 {
-    invalidate(errorText);
+    emit notificationCreated(errorText, true);
+    fail();
 }

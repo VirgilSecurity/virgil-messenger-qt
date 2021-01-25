@@ -47,7 +47,7 @@ DeleteCloudFilesOperation::DeleteCloudFilesOperation(CloudFileOperation *parent,
 {
     auto fileSystem = m_parent->cloudFileSystem();
     connect(fileSystem, &CloudFileSystem::fileDeleted, this, &DeleteCloudFilesOperation::onFileDeleted);
-    connect(fileSystem, &CloudFileSystem::deleteFileErrorOccured, this, &DeleteCloudFilesOperation::onDeleteFileErrorOccured);
+    connect(fileSystem, &CloudFileSystem::deleteFileErrorOccurred, this, &DeleteCloudFilesOperation::onDeleteFileErrorOccured);
 }
 
 void DeleteCloudFilesOperation::run()
@@ -90,5 +90,6 @@ void DeleteCloudFilesOperation::onFileDeleted()
 void DeleteCloudFilesOperation::onDeleteFileErrorOccured()
 {
     processDeletedFiles();
-    invalidate(tr("File deletion failed"));
+    emit notificationCreated(tr("File deletion failed"), true);
+    fail();
 }

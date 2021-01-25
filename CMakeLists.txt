@@ -511,6 +511,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DecryptFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DeleteCloudFilesOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadAttachmentOperation.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadCloudFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadDecryptFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/EncryptFileOperation.h
@@ -678,6 +679,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DecryptFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DeleteCloudFilesOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadAttachmentOperation.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadCloudFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadDecryptFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/EncryptFileOperation.cpp

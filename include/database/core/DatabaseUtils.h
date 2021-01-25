@@ -66,6 +66,7 @@ public:
 
     static BindValues createNewCloudFileBindings(const CloudFileHandler &cloudFile);
     static BindValues createUpdatedCloudFileBindings(const CloudFileHandler &cloudFile, const CloudFileUpdateSource source);
+    static BindValues createDownloadedCloudFileBindings(const CloudFileHandler &cloudFile, const QString &fingerprint);
 
 private:
     static bool readMessageContentAttachment(const QSqlQuery &query, MessageContentAttachment& attachment);

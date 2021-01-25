@@ -97,6 +97,7 @@ void CloudFilesModel::updateCloudFiles(const CloudFilesUpdate &update)
         m_now = QDateTime::currentDateTime();
         m_files = upd->files;
         endResetModel();
+        updateDescription();
     }
     else if (auto upd = std::get_if<MergeCloudFolderUpdate>(&update)) {
         for (auto &file : upd->deleted) {
@@ -108,28 +109,22 @@ void CloudFilesModel::updateCloudFiles(const CloudFilesUpdate &update)
         for (auto &file : upd->added) {
             addFile(file);
         }
+        updateDescription();
     }
     else if (auto upd = std::get_if<CreateCloudFilesUpdate>(&update)) {
         for (auto &file : upd->files) {
             addFile(file);
         }
+        updateDescription();
     }
-    else if (auto upd = std::get_if<UpdateCloudFilesUpdate>(&update)) {
-        switch (upd->source) {
-            case CloudFileUpdateSource::ListedChild:
-                for (auto &file : upd->files) {
-                    updateFile(file, upd->source);
-                }
-                break;
-            default:
-                throw std::logic_error("Unhandled CloudFileUpdateSource");
-                break;
-        }
+    else if (auto upd = std::get_if<DownloadCloudFileUpdate>(&update)) {
+        updateDownloadedFile(*upd);
     }
     else if (auto upd = std::get_if<DeleteCloudFilesUpdate>(&update)) {
         for (auto &file : upd->files) {
             removeFile(file);
         }
+        updateDescription();
     }
     else if (auto upd = std::get_if<SetProgressCloudFileUpdate>(&update)) {
         return;
@@ -137,8 +132,6 @@ void CloudFilesModel::updateCloudFiles(const CloudFilesUpdate &update)
     else {
         throw std::logic_error("Invalid CloudFilesUpdate in CloudFilesModel::updateCloudFiles");
     }
-
-    updateDescription();
 }
 
 int CloudFilesModel::rowCount(const QModelIndex &parent) const
@@ -215,6 +208,15 @@ void CloudFilesModel::updateFile(const CloudFileHandler &file, const CloudFileUp
         m_files[*row]->update(*file, source);
         const auto modelIndex = index(*row);
         emit dataChanged(modelIndex, modelIndex, rolesFromUpdateSource(source, file->isFolder()));
+    }
+}
+
+void CloudFilesModel::updateDownloadedFile(const DownloadCloudFileUpdate &update)
+{
+    const auto &file = update.file;
+    if (const auto row = findRowById(file->id())) {
+        m_files[*row]->setFingerprint(update.fingerprint);
+        // No roles to update
     }
 }
 

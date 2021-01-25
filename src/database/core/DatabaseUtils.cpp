@@ -341,21 +341,21 @@ ModifiableCloudFileHandler Self::readCloudFile(const QSqlQuery &query)
 
 DatabaseUtils::BindValues DatabaseUtils::createNewCloudFileBindings(const CloudFileHandler &cloudFile)
 {
-return {
-    { ":id", QString(cloudFile->id()) },
-    { ":parentId", QString(cloudFile->parentId()) },
-    { ":name", cloudFile->name() },
-    { ":isFolder", cloudFile->isFolder() },
-    { ":type", cloudFile->type() },
-    { ":size", cloudFile->size() },
-    { ":createdAt", cloudFile->createdAt().toTime_t() },
-    { ":updatedAt", cloudFile->updatedAt().toTime_t() },
-    { ":updatedBy", QString(cloudFile->updatedBy()) },
-    { ":encryptedKey", cloudFile->encryptedKey() },
-    { ":publicKey", cloudFile->publicKey() },
-    { ":localPath", cloudFile->localPath() },
-    { ":fingerprint", cloudFile->fingerprint() }
-};
+    return {
+        { ":id", QString(cloudFile->id()) },
+        { ":parentId", QString(cloudFile->parentId()) },
+        { ":name", cloudFile->name() },
+        { ":isFolder", cloudFile->isFolder() },
+        { ":type", cloudFile->type() },
+        { ":size", cloudFile->size() },
+        { ":createdAt", cloudFile->createdAt().toTime_t() },
+        { ":updatedAt", cloudFile->updatedAt().toTime_t() },
+        { ":updatedBy", QString(cloudFile->updatedBy()) },
+        { ":encryptedKey", cloudFile->encryptedKey() },
+        { ":publicKey", cloudFile->publicKey() },
+        { ":localPath", cloudFile->localPath() },
+        { ":fingerprint", cloudFile->fingerprint() }
+    };
 }
 
 DatabaseUtils::BindValues DatabaseUtils::createUpdatedCloudFileBindings(const CloudFileHandler &cloudFile, const CloudFileUpdateSource source)
@@ -387,18 +387,22 @@ DatabaseUtils::BindValues DatabaseUtils::createUpdatedCloudFileBindings(const Cl
         };
         values.insert(values.end(), extra.begin(), extra.end());
     }
-    // TODO(fpohtmeh): set other properties
-//    {
-//        { ":fingerprint", cloudFile->fingerprint() }
-//    };
     return values;
+}
+
+DatabaseUtils::BindValues DatabaseUtils::createDownloadedCloudFileBindings(const CloudFileHandler &cloudFile, const QString &fingerprint)
+{
+    return {
+        { ":id", QString(cloudFile->id()) },
+        { ":fingerprint", fingerprint }
+    };
 }
 
 bool DatabaseUtils::hasListType(const BindValue &bindValue)
 {
     switch (bindValue.second.type()) {
-        case QVariant::StringList:
-        case QVariant::List:
+    case QVariant::StringList:
+    case QVariant::List:
             return true;
         default:
             return false;

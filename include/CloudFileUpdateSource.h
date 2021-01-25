@@ -41,7 +41,8 @@ enum class CloudFileUpdateSource
 {
     None,
     ListedChild,
-    ListedParent
+    ListedParent,
+    Download
 };
 }
 

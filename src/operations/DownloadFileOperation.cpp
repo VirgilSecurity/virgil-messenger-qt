@@ -63,6 +63,11 @@ void DownloadFileOperation::run()
     m_fileLoader->startDownload(m_url, fileHandle(), std::bind(&DownloadFileOperation::connectReply, this, std::placeholders::_1));
 }
 
+void DownloadFileOperation::setUrl(const QUrl &url)
+{
+    m_url = url;
+}
+
 void DownloadFileOperation::connectReply(QNetworkReply *reply)
 {
     LoadFileOperation::connectReply(reply);

@@ -37,10 +37,17 @@
 using namespace vm;
 using Self = CloudFilesProgressModel;
 
+CloudFilesProgressModel::CloudFilesProgressModel(QObject *parent)
+    : FilesProgressModel(parent)
+{
+    qRegisterMetaType<CloudFilesProgressModel *>("CloudFilesProgressModel*");
+}
+
 void Self::updateCloudFiles(const CloudFilesUpdate &update)
 {
     if (auto upd = std::get_if<SetProgressCloudFileUpdate>(&update)) {
-        add(upd->file->id(), upd->file->name());
-        setProgress(upd->file->id(), upd->bytesLoaded, upd->bytesTotal);
+        // FIXME(fpohtmeh): implement
+        //add(upd->file->id(), upd->file->name());
+        //setProgress(upd->file->id(), upd->bytesLoaded, upd->bytesTotal);
     }
 }

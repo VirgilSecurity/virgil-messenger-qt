@@ -52,6 +52,8 @@ public:
     void run() override;
 
 private:
+    void cleanup() override;
+
     void onFileCreated(const ModifiableCloudFileHandler &cloudFile, const QString &encryptedFilePath, const QUrl &putUrl);
     void onCreateCloudFileErrorOccurred(const QString &errorText);
     void onProgressChanged(const quint64 bytesLoaded, const quint64 bytesTotal);
@@ -59,7 +61,7 @@ private:
 
     CloudFileOperation *m_parent;
     CloudFileHandler m_parentFolder;
-    ModifiableCloudFileHandler m_cloudFile;
+    ModifiableCloudFileHandler m_file;
     QString m_sourceFilePath;
 };
 }

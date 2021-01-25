@@ -64,6 +64,7 @@ private:
     bool createFile(const CloudFileHandler &cloudFile);
     bool updateFiles(const CloudFiles &cloudFiles, const CloudFileUpdateSource source);
     bool updateFile(const CloudFileHandler &cloudFile, const CloudFileUpdateSource source);
+    bool updateDownloadedFile(const DownloadCloudFileUpdate &update);
     bool deleteFiles(const CloudFiles &cloudFiles);
 
     QStringList getSubFoldersIds(const QString &folderId);

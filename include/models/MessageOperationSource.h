@@ -44,12 +44,10 @@ namespace vm
 class MessageOperationSource : public OperationSource
 {
 public:
-    using PostDownloadFunction = std::function<void ()>;
-
     // Parameter for download/preload
     struct DownloadParameter : DownloadAttachmentOperation::Parameter
     {
-        PostDownloadFunction postFunction;
+        PostFunction postFunction;
     };
 
     MessageOperationSource() = default;

@@ -61,11 +61,6 @@ struct CreateCloudFilesUpdate : public CloudFilesUpdateBase {
     ModifiableCloudFiles files;
 };
 
-struct UpdateCloudFilesUpdate : public CloudFilesUpdateBase {
-    CloudFiles files;
-    CloudFileUpdateSource source = CloudFileUpdateSource::None;
-};
-
 struct DeleteCloudFilesUpdate : public CloudFilesUpdateBase {
     CloudFiles files;
 };
@@ -76,13 +71,18 @@ struct SetProgressCloudFileUpdate : public CloudFilesUpdateBase {
     quint64 bytesTotal = 0;
 };
 
+struct DownloadCloudFileUpdate : public CloudFilesUpdateBase {
+    CloudFileHandler file;
+    QString fingerprint;
+};
+
 using CloudFilesUpdate = std::variant<
     ListCloudFolderUpdate,
     MergeCloudFolderUpdate,
     CreateCloudFilesUpdate,
-    UpdateCloudFilesUpdate,
     DeleteCloudFilesUpdate,
-    SetProgressCloudFileUpdate
+    SetProgressCloudFileUpdate,
+    DownloadCloudFileUpdate
     >;
 
 }

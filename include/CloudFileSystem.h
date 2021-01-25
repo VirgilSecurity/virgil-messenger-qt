@@ -63,6 +63,8 @@ public:
     void fetchList(const CloudFileHandler &parentFolder);
     void createFile(const QString &filePath, const CloudFileHandler &parentFolder);
     void createFolder(const QString &name, const CloudFileHandler &parentFolder);
+    void getDownloadInfo(const CloudFileHandler &file);
+    bool decryptFile(const QString &sourcePath, const QByteArray &encryptionKey, const CloudFileHandler &file);
     void deleteFiles(const CloudFiles &files);
 
     QDir downloadsDir() const;
@@ -79,8 +81,11 @@ signals:
     void folderCreated(const ModifiableCloudFileHandler &parentFolder);
     void createFolderErrorOccured(const QString &errorText);
 
+    void downloadInfoGot(const CloudFileHandler &file, const QUrl &url, const QByteArray &encryptionKey);
+    void getDownloadInfoErrorOccurred(const QString &errorText);
+
     void fileDeleted(const CloudFileHandler &file);
-    void deleteFileErrorOccured(const QString &errorText);
+    void deleteFileErrorOccurred(const QString &errorText);
 
 private:
     ModifiableCloudFileHandler createParentFolderFromInfo(const CloudFsFolder &fsFolder, const CloudFileHandler &oldFolder) const;

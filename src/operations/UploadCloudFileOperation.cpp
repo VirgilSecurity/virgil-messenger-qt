@@ -55,13 +55,19 @@ UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, c
 
     connect(m_parent->cloudFileSystem(), &CloudFileSystem::fileCreated, this, &UploadCloudFileOperation::onFileCreated);
     connect(m_parent->cloudFileSystem(), &CloudFileSystem::createFileErrorOccurred, this, &UploadCloudFileOperation::onCreateCloudFileErrorOccurred);
-    connect(this, &UploadFileOperation::uploaded, this, &UploadCloudFileOperation::onUploaded);
     connect(this, &UploadFileOperation::progressChanged, this, &UploadCloudFileOperation::onProgressChanged);
+    connect(this, &UploadFileOperation::uploaded, this, &UploadCloudFileOperation::onUploaded);
 }
 
 void UploadCloudFileOperation::run()
 {
     m_parent->cloudFileSystem()->createFile(m_sourceFilePath, m_parentFolder);
+}
+
+void UploadCloudFileOperation::cleanup()
+{
+    Operation::cleanup();
+    FileUtils::removeFile(filePath()); // remove encrypted file
 }
 
 void UploadCloudFileOperation::onFileCreated(const ModifiableCloudFileHandler &cloudFile, const QString &encryptedFilePath, const QUrl &putUrl)
@@ -71,21 +77,22 @@ void UploadCloudFileOperation::onFileCreated(const ModifiableCloudFileHandler &c
         return;
     }
 
-    m_cloudFile = cloudFile;
+    m_file = cloudFile;
     qCDebug(lcOperation) << "Started to upload cloud file to" << putUrl;
     startUploadToSlot(putUrl, putUrl); // NOTE(fpohtmeh): We don't know get url at this moment, using of putUrl is fine
 }
 
 void UploadCloudFileOperation::onCreateCloudFileErrorOccurred(const QString &errorText)
 {
-    invalidate(errorText);
+    emit notificationCreated(errorText, true);
+    fail();
 }
 
 void UploadCloudFileOperation::onProgressChanged(const quint64 bytesLoaded, const quint64 bytesTotal)
 {
     SetProgressCloudFileUpdate update;
     update.parentFolder = m_parentFolder;
-    update.file = m_cloudFile;
+    update.file = m_file;
     update.bytesLoaded = bytesLoaded;
     update.bytesTotal = bytesTotal;
     m_parent->cloudFilesUpdate(update);
@@ -95,17 +102,17 @@ void UploadCloudFileOperation::onUploaded()
 {
     // Copy file to cloud downloads dir
     const QDir parentFolderDir(m_parentFolder->localPath());
-    const auto cloudFileLocalPath = parentFolderDir.filePath(m_cloudFile->name());
+    const auto cloudFileLocalPath = parentFolderDir.filePath(m_file->name());
     if (parentFolderDir.mkpath(".")) {
         QFile::copy(m_sourceFilePath, cloudFileLocalPath);
-        m_cloudFile->setLocalPath(cloudFileLocalPath);
-        m_cloudFile->setFingerprint(FileUtils::calculateFingerprint(cloudFileLocalPath));
+        m_file->setLocalPath(cloudFileLocalPath);
+        m_file->setFingerprint(FileUtils::calculateFingerprint(cloudFileLocalPath));
     }
 
     // Send update
     CreateCloudFilesUpdate update;
     update.parentFolder = m_parentFolder;
-    update.files.push_back(m_cloudFile);
+    update.files.push_back(m_file);
     m_parent->cloudFilesUpdate(update);
 
     finish();

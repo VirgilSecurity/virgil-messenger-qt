@@ -86,7 +86,30 @@ void Self::switchToRootFolder()
 void Self::openFile(const QVariant &proxyRow)
 {
     const auto cloudFile = model()->file(proxyRow.toInt());
-    FileUtils::openUrl(FileUtils::localFileToUrl(cloudFile->localPath()));
+    const auto localPath = cloudFile->localPath();
+    bool needDownload = false;
+    if (!FileUtils::fileExists(localPath)) {
+        needDownload = true;
+    }
+    else if (const auto fingerprint = FileUtils::calculateFingerprint(localPath); fingerprint.isEmpty()) {
+        qCritical(lcController) << "Failed to calculate fingerprint for file:" << localPath;
+        emit notificationCreated(tr("Attachment file is broken"), true);
+        return;
+    }
+    else if (fingerprint != cloudFile->fingerprint()) {
+        qWarning(lcController) << "Fingerprint mismatch, downloading cloud file";
+        emit notificationCreated(tr("Downloading cloud file..."), true);
+        needDownload = true;
+    }
+
+    if (!needDownload) {
+        FileUtils::openUrl(FileUtils::localFileToUrl(localPath));
+    }
+    else {
+        m_models->cloudFilesQueue()->pushDownloadFile(cloudFile, [this]() {
+            emit notificationCreated(tr("Cloud file was downloaded"), false);
+        });
+    }
 }
 
 void Self::switchToFolder(const QVariant &proxyRow)

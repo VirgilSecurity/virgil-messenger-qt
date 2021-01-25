@@ -132,6 +132,25 @@ void CloudFileSystem::createFolder(const QString &name, const CloudFileHandler &
     });
 }
 
+void CloudFileSystem::getDownloadInfo(const CloudFileHandler &file)
+{
+    FutureWorker::run(m_coreFs->getFileDownloadInfo(file->id().coreFileId()), [this, file](auto result) {
+        if (std::holds_alternative<CoreMessengerStatus>(result)) {
+            emit getDownloadInfoErrorOccurred(tr("Get download info error"));
+            return;
+        }
+
+        const auto fsInfo = std::get_if<CloudFsFileDownloadInfo>(&result);
+        emit downloadInfoGot(file, fsInfo->downloadLink, fsInfo->fileEncryptedKey);
+    });
+}
+
+bool CloudFileSystem::decryptFile(const QString &sourcePath, const QByteArray &encryptionKey, const CloudFileHandler &file)
+{
+    const auto status = m_coreFs->decryptFile(sourcePath, file->localPath(), encryptionKey, m_messenger->currentUser());
+    return status == CoreMessengerStatus::Success;
+}
+
 void CloudFileSystem::deleteFiles(const CloudFiles &files)
 {
     for (auto &file : files) {
@@ -141,7 +160,7 @@ void CloudFileSystem::deleteFiles(const CloudFiles &files)
                 emit fileDeleted(file);
             }
             else {
-                emit deleteFileErrorOccured(tr("Cloud file deletion error: %1. Code: %2").arg(file->name()).arg(static_cast<int>(result)));
+                emit deleteFileErrorOccurred(tr("Cloud file deletion error: %1. Code: %2").arg(file->name()).arg(static_cast<int>(result)));
             }
         });
     }

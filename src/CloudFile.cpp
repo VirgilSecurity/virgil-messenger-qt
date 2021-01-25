@@ -195,6 +195,7 @@ void CloudFile::update(const CloudFile &file, const CloudFileUpdateSource source
         setEncryptedKey(file.encryptedKey());
         setPublicKey(file.publicKey());
     }
-    // TODO(fpohtmeh): set fingerprint
-    //setFingerprint(file.fingerprint());
+    if ((source == CloudFileUpdateSource::Download) && !isFolder()) {
+        setFingerprint(file.fingerprint());
+    }
 }

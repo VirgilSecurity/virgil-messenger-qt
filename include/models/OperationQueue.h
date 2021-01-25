@@ -51,6 +51,8 @@ class OperationQueue : public QObject
     Q_OBJECT
 
 public:
+    using PostFunction = OperationSource::PostFunction;
+
     explicit OperationQueue(const QLoggingCategory &category, QObject *parent);
     ~OperationQueue() override;
 
@@ -84,5 +86,6 @@ private:
 }
 
 Q_DECLARE_METATYPE(vm::OperationSourcePtr);
+Q_DECLARE_METATYPE(vm::OperationQueue::PostFunction);
 
 #endif // VM_OPERATIONQUEUE_H

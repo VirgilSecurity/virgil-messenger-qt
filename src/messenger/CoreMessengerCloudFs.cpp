@@ -574,7 +574,7 @@ Self::Result<QByteArray> Self::encryptFile(const QString &sourceFilePath, const 
 
 
 CoreMessengerStatus Self::decryptFile(const QString &sourceFilePath, const QString &destFilePath,
-        const CloudFsFileInfo &fileInfo, const QByteArray& encryptedFileKey, const UserHandler& sender) {
+        const QByteArray& encryptedFileKey, const UserHandler& sender) {
     //
     //  Create helpers for error handling.
     //

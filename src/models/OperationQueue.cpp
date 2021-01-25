@@ -47,6 +47,7 @@ Self::OperationQueue(const QLoggingCategory &category, QObject *parent)
     , m_threadPool(new QThreadPool(this))
 {
     qRegisterMetaType<vm::OperationSourcePtr>("OperationSourcePtr");
+    qRegisterMetaType<vm::OperationQueue::PostFunction>("PostFunction");
 
     m_threadPool->setMaxThreadCount(5);
 

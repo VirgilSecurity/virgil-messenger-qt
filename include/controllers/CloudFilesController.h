@@ -74,6 +74,8 @@ public:
 
 signals:
     void updateCloudFiles(const CloudFilesUpdate &update);
+
+    void notificationCreated(const QString &notification, const bool error) const;
     void errorOccurred(const QString &errorText);
 
     void displayPathChanged(const QString &path);

@@ -119,6 +119,21 @@ bool CloudFilesTable::updateFile(const CloudFileHandler &cloudFile, const CloudF
     }
 }
 
+bool CloudFilesTable::updateDownloadedFile(const DownloadCloudFileUpdate &update)
+{
+    const auto bindValues = DatabaseUtils::createDownloadedCloudFileBindings(update.file, update.fingerprint);
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateDownloadedCloudFile"), bindValues);
+    if (query) {
+        qCDebug(lcDatabase) << "Downloaded cloud file was updated" << bindValues.front().first << bindValues.front().second;
+        return true;
+    }
+    else {
+        qCCritical(lcDatabase) << "CloudFilesTable::updateDownloadedFile error";
+        emit errorOccurred(tr("Failed to update downloaded cloud file"));
+        return false;
+    }
+}
+
 bool CloudFilesTable::deleteFiles(const CloudFiles &cloudFiles)
 {
     QStringList deletedIds;
@@ -219,15 +234,8 @@ void CloudFilesTable::onUpdateCloudFiles(const CloudFilesUpdate &update)
     else if (auto upd = std::get_if<CreateCloudFilesUpdate>(&update)) {
         success = createFiles(upd->files);
     }
-    else if (auto upd = std::get_if<UpdateCloudFilesUpdate>(&update)) {
-        switch (upd->source) {
-            case CloudFileUpdateSource::ListedChild:
-                success = updateFiles(upd->files, upd->source);
-                break;
-            default:
-                throw std::logic_error("Unhandled CloudFileUpdateSource");
-                break;
-        }
+    else if (auto upd = std::get_if<DownloadCloudFileUpdate>(&update)) {
+        success = updateDownloadedFile(*upd);
     }
     else if (auto upd = std::get_if<DeleteCloudFilesUpdate>(&update)) {
         success = deleteFiles(upd->files);

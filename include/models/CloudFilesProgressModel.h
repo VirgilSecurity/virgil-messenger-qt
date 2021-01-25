@@ -45,7 +45,7 @@ class CloudFilesProgressModel : public FilesProgressModel
     Q_OBJECT
 
 public:
-    using FilesProgressModel::FilesProgressModel;
+    explicit CloudFilesProgressModel(QObject *parent);
 
     void updateCloudFiles(const CloudFilesUpdate &update);
 };
