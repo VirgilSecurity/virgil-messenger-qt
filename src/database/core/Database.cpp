@@ -70,7 +70,7 @@ bool Self::open(const QString &databaseFileName, const QString &connectionName)
     if (!readVersion()) {
         return false;
     }
-    // Create table
+    // Create tables
     {
         ScopedTransaction transaction(*this);
         if (!create()) {

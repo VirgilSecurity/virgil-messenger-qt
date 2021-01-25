@@ -55,7 +55,11 @@ public:
 
     static void removeFile(const QString &filePath);
 
+    static void removeDir(const QString &dirPath);
+
     static QString attachmentFileName(const QUrl &url, bool isPicture);
+
+    static QString fileMimeType(const QString &filePath);
 
     static bool openUrl(const QUrl &url);
 

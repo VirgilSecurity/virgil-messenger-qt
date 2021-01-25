@@ -1,0 +1,26 @@
+- Additional setting for sign application:
+    VS_CODE_SIGN_IDENTITY
+    VS_DEVELOPMENT_TEAM
+    VS_PROVISIONING_PROFILE_SPECIFIER
+
+- Build simulator version:
+
+    mkdir -p build
+    cd build
+    cmake -S. -Bbuild -GXcode -DCMAKE_BUILD_TYPE="Debug" -DVS_PLATFORM="ios" -DVS_IOS_SIMULATOR=TRUE -DVS_DEVELOPMENT_TEAM="You development team"
+    cmake --build build --config Debug
+
+- Build release version:
+
+    mkdir -p build
+    cd build
+
+    cmake -S. -Bbuild -GXcode -DCMAKE_BUILD_TYPE="Release" -DVS_PLATFORM="ios" -DVS_DEVELOPMENT_TEAM="You development team"
+    cmake --build build --config Release    
+
+
+- Building xcarchive and upload to App-store
+
+    cmake -S. -Bbuild -GXcode -DCMAKE_BUILD_TYPE="Release" -DVS_PLATFORM="ios" -DVS_DEVELOPMENT_TEAM="You development team"
+    cmake --build build --config Release --target xcarchive
+    cmake --build build --config Release --target upload_testflight

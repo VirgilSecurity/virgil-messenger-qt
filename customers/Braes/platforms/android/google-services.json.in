@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "444558413842",
+    "firebase_url": "https://virgil-9e749.firebaseio.com",
+    "project_id": "virgil-9e749",
+    "storage_bucket": "virgil-9e749.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:444558413842:android:aad465cd30ffcd193dc8cb",
+        "android_client_info": {
+          "package_name": "@VS_ANDROID_PACKAGE_NAME@"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "444558413842-nphg78lpnkf3og5mhs288amqb6sun18v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1gQodDpeiaDd7pv98GpmOn9ZqisA2kQU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "444558413842-nphg78lpnkf3og5mhs288amqb6sun18v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

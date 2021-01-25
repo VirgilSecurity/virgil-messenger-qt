@@ -106,7 +106,7 @@ bool Self::updateMessage(const MessageUpdate &messageUpdate, const bool apply) {
     const auto row = *messageRow;
     if (apply) {
         m_messages[row]->applyUpdate(messageUpdate);
-        // FIXME(fpohtmeh): merge logic with MessageOperation logic
+        // TODO(fpohtmeh): merge logic with MessageOperation logic
     }
 
     const auto roles = rolesFromMessageUpdate(messageUpdate);
@@ -338,15 +338,15 @@ QHash<int, QByteArray> Self::roleNames() const
 
 std::optional<int> Self::findRowById(const MessageId &messageId) const
 {
-    auto messageIt = std::find_if(std::rbegin(m_messages), std::rend(m_messages), [&messageId](auto message) {
+    auto it = std::find_if(std::rbegin(m_messages), std::rend(m_messages), [&messageId](auto message) {
         return message->id() == messageId;
     });
 
-    if (messageIt != std::rend(m_messages)) {
-        return std::distance(std::begin(m_messages), messageIt.base()) - 1;
+    if (it != std::rend(m_messages)) {
+        return std::distance(std::begin(m_messages), it.base()) - 1;
     }
 
-    return {};
+    return std::nullopt;
 }
 
 void Self::invalidateRow(const int row, const QVector<int> &roles)

@@ -1,0 +1,2 @@
+module Customers
+singleton Customer 1.0 Customer.qml

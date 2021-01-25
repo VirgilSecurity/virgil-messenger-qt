@@ -62,7 +62,7 @@ namespace
         const auto text = FileUtils::readTextFile(queryPath(queryId));
         QStringList queries;
         const auto texts = text.split(";");
-        for (auto text : texts) {
+        for (auto &text : texts) {
             auto query = text.trimmed();
             if (!query.isEmpty()) {
                 queries << query;
@@ -122,6 +122,7 @@ bool Self::readMessageContentAttachment(const QSqlQuery &query, MessageContentAt
     const auto attachmentId = query.value("attachmentId").toString();
     const auto attachmentFingerprint = query.value("attachmentFingerprint").toString();
     const auto attachmentDecryptionKey = query.value("attachmentDecryptionKey").toByteArray();
+    const auto attachmentSignature = query.value("attachmentSignature").toByteArray();
     const auto attachmentFilename = query.value("attachmentFilename").toString();
     const auto attachmentLocalPath = query.value("attachmentLocalPath").toString();
     const auto attachmentUrl = query.value("attachmentUrl").toString();
@@ -133,6 +134,7 @@ bool Self::readMessageContentAttachment(const QSqlQuery &query, MessageContentAt
     attachment.setId(AttachmentId(attachmentId));
     attachment.setFingerprint(attachmentFingerprint);
     attachment.setDecryptionKey(attachmentDecryptionKey);
+    attachment.setSignature(attachmentSignature);
     attachment.setFileName(attachmentFilename);
     attachment.setLocalPath(attachmentLocalPath);
     attachment.setRemoteUrl(attachmentUrl);
@@ -281,4 +283,38 @@ ModifiableMessageHandler Self::readMessage(const QSqlQuery &query, const QString
     message->setContent(std::move(content));
 
     return message;
+}
+
+ModifiableCloudFileHandler Self::readCloudFile(const QSqlQuery &query)
+{
+    const auto id = query.value("cloudFileId").toString();
+    const auto parentId = query.value("cloudFileParentId").toString();
+    const auto name = query.value("cloudFileName").toString();
+    const auto isFolder = query.value("cloudFileIsFolder").toBool();
+    const auto type = query.value("cloudFileType").toString();
+    const auto size = query.value("cloudFileSize").value<quint64>();
+    const auto createdAt = query.value("cloudFileCreatedAt").toULongLong();
+    const auto updatedAt = query.value("cloudFileUpdatedAt").toULongLong();
+    const auto updatedBy = query.value("cloudFileUpdatedBy").toString();
+    const auto encryptedKey = query.value("cloudFileEncryptedKey").toByteArray();
+    const auto publicKey = query.value("cloudFilePublicKey").toByteArray();
+    const auto localPath = query.value("cloudFileLocalPath").toString();
+    const auto fingerprint = query.value("cloudFileFingerprint").toString();
+
+    auto cloudFile = std::make_shared<CloudFile>();
+    cloudFile->setId(id);
+    cloudFile->setParentId(parentId);
+    cloudFile->setName(name);
+    cloudFile->setIsFolder(isFolder);
+    cloudFile->setType(type);
+    cloudFile->setSize(size);
+    cloudFile->setCreatedAt(QDateTime::fromTime_t(createdAt));
+    cloudFile->setUpdatedAt(QDateTime::fromTime_t(updatedAt));
+    cloudFile->setUpdatedBy(UserId(updatedBy));
+    cloudFile->setEncryptedKey(encryptedKey);
+    cloudFile->setPublicKey(publicKey);
+    cloudFile->setLocalPath(localPath);
+    cloudFile->setFingerprint(fingerprint);
+
+    return cloudFile;
 }

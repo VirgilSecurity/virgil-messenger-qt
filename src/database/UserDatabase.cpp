@@ -39,6 +39,7 @@
 #include "database/core/DatabaseUtils.h"
 #include "database/AttachmentsTable.h"
 #include "database/ChatsTable.h"
+#include "database/CloudFilesTable.h"
 #include "database/ContactsTable.h"
 #include "database/MessagesTable.h"
 #include "database/SchemeVersion.h"
@@ -84,6 +85,16 @@ ChatsTable *Self::chatsTable()
     return static_cast<ChatsTable *>(table(m_chatsTableIndex));
 }
 
+const CloudFilesTable *UserDatabase::cloudFilesTable() const
+{
+    return static_cast<const CloudFilesTable *>(table(m_cloudFilesTableIndex));
+}
+
+CloudFilesTable *UserDatabase::cloudFilesTable()
+{
+    return static_cast<CloudFilesTable *>(table(m_cloudFilesTableIndex));
+}
+
 const ContactsTable *Self::contactsTable() const
 {
     return static_cast<const ContactsTable *>(table(m_contactsTableIndex));
@@ -120,6 +131,10 @@ bool Self::create()
         return false;
     }
     m_contactsTableIndex = ++counter;
+    if (!addTable(std::make_unique<CloudFilesTable>(this))) {
+        return false;
+    }
+    m_cloudFilesTableIndex = ++counter;
     if (!addTable(std::make_unique<MessagesTable>(this))) {
         return false;
     }

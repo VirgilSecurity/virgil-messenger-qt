@@ -1,33 +1,25 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 
-import "../"
+import "../" // components
 import "../../theme"
 
 Popup {
-    id: templateDialog
-
-    property alias backgroundRect: backgroundRectangle
-
-    // Bahavior settings
-    property real exitTransitionDuration: 200
-
-    // Content settings
-    property string title: "Dialog"
-    property string text: "Text"
-
-    // Button settings
-    property string acceptedButtonText: qsTr('Ok')
-    property string rejectedButtonText: qsTr('Cancel')
-
-    // Signals
-    signal accepted()
-    signal rejected()
-
+    id: dialog
+    anchors.centerIn: parent
+    padding: Theme.margin
     modal: true
     focus: true
     closePolicy: Popup.NoAutoClose
-    padding: Theme.margin
+
+    property alias title: titleLabel.text
+    property alias acceptButtonText: acceptButton.text
+    property alias rejectButtonText: rejectButton.text
+    property alias acceptButtonEnabled: acceptButton.enabled
+    default property alias children: childrenLayout.children
+
+    signal accepted()
+    signal rejected()
 
     QtObject {
         id: d
@@ -37,30 +29,22 @@ Popup {
 
     enter: Transition {
         ParallelAnimation {
-            NumberAnimation {property: "opacity"; from: 0.0; to: 1.0; easing.type: Easing.InOutQuad;
-                duration: Theme.animationDuration; easing.overshoot: 1}
-            NumberAnimation {property: "scale"; from: 0.8; to: 1.0; easing.type: Easing.InOutQuad;
-                duration: Theme.animationDuration; easing.overshoot: 2}
+            NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; easing.type: Easing.InOutQuad; duration: Theme.animationDuration; easing.overshoot: 1 }
         }
     }
 
     exit: Transition {
         ParallelAnimation {
-            NumberAnimation {property: "opacity"; from: 1.0; to: 0.0; easing.type: Easing.InOutQuad;
-                duration: exitTransitionDuration; easing.overshoot: 1}
-            NumberAnimation {property: "scale"; from: 1.0; to: 0.8; easing.type: Easing.InOutQuad;
-                duration: exitTransitionDuration; easing.overshoot: 1}
+            NumberAnimation { property: "opacity"; from: 1.0; to: 0.0; easing.type: Easing.InOutQuad; duration: Theme.animationDuration; easing.overshoot: 1 }
         }
     }
 
     Rectangle {
-        id: backgroundRectangle
-        focus: false
-        color: Theme.mainBackgroundColor
-        radius: d.radius
         anchors.centerIn: parent
         implicitWidth: d.popupImplicitWidth
         height: contentColumn.height + 2 * Theme.margin
+        color: Theme.mainBackgroundColor
+        radius: d.radius
 
         Column {
             id: contentColumn
@@ -76,19 +60,16 @@ Popup {
             spacing: Theme.spacing
 
             Text {
+                id: titleLabel
                 width: parent.width
-                text: templateDialog.title
                 color: Theme.primaryTextColor
                 font.pointSize: UiHelper.fixFontSz(17)
                 wrapMode: Text.WordWrap
             }
 
-            Text {
+            Column {
+                id: childrenLayout
                 width: parent.width
-                text: templateDialog.text
-                color: Theme.primaryTextColor
-                font.pointSize: UiHelper.fixFontSz(15)
-                wrapMode: Text.WordWrap
             }
 
             Row {
@@ -96,23 +77,22 @@ Popup {
                 spacing: Theme.spacing
 
                 FormPrimaryButton {
-                    text: acceptedButtonText
-                    onClicked: {
-                        accepted()
-                        templateDialog.close()
-                    }
+                    id: acceptButton
+                    text: qsTr("Ok")
+                    onClicked: dialog.accepted()
                 }
 
                 FormSecondaryButton {
-                    text: rejectedButtonText
-                    onClicked: {
-                        rejected()
-                        templateDialog.close()
-                    }
+                    id: rejectButton
+                    text: qsTr("Cancel")
+                    onClicked: dialog.rejected()
                 }
             }
         }
     }
 
     background: Item {}
+
+    onAccepted: dialog.close()
+    onRejected: dialog.close()
 }

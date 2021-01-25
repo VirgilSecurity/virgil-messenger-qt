@@ -42,12 +42,11 @@
 
 using namespace vm;
 
-DownloadDecryptFileOperation::DownloadDecryptFileOperation(NetworkOperation *parent, Messenger *messenger, const Settings *settings,
+DownloadDecryptFileOperation::DownloadDecryptFileOperation(NetworkOperation *parent, Messenger *messenger,
                                                            const QUrl &url, quint64 bytesTotal, const QString &filePath,
                                                            const QByteArray& decryptionKey, const QByteArray& signature, const UserId &senderId)
     : NetworkOperation(parent)
     , m_messenger(messenger)
-    , m_settings(settings)
     , m_url(url)
     , m_bytesTotal(bytesTotal)
     , m_filePath(filePath)
@@ -60,7 +59,7 @@ DownloadDecryptFileOperation::DownloadDecryptFileOperation(NetworkOperation *par
 
 bool DownloadDecryptFileOperation::populateChildren()
 {
-    m_tempPath = m_settings->attachmentCacheDir().filePath(Utils::createUuid());
+    m_tempPath = m_messenger->settings()->attachmentCacheDir().filePath(Utils::createUuid());
 
     auto downOp = new DownloadFileOperation(this, m_messenger->fileLoader(), m_url, m_bytesTotal, m_tempPath);
     connect(downOp, &DownloadFileOperation::progressChanged, this, &DownloadDecryptFileOperation::progressChanged);

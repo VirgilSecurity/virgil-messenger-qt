@@ -12,10 +12,10 @@ OperationPage {
     loadingText: qsTr("Adding of contact...")
     footerText: ""
 
-    property alias actionButtonText: actionButton.text
-
     signal contactSelected(string contactId)
     signal actionButtonClicked()
+
+    property alias selectedContacts: flow
 
     QtObject {
         id: d
@@ -26,13 +26,23 @@ OperationPage {
         onSearchChanged: model.filter = search
     }
 
-    header: Header {
-        title: qsTr("New group")
-    }
-
     Form {
         id: form
         isCentered: false
+
+        SelectedContactsFlow {
+            id: flow
+            Layout.fillWidth: true
+            Layout.preferredHeight: recommendedHeight
+            visible: d.model.selection.multiSelect
+
+            Behavior on Layout.preferredHeight {
+                NumberAnimation {
+                    easing.type: Easing.InOutCubic
+                    duration: Theme.animationDuration
+                }
+            }
+        }
 
         Search {
             id: contactSearch
@@ -63,27 +73,6 @@ OperationPage {
             footerPositioning: ListView.OverlayFooter
 
             onContactSelected: root.contactSelected(contactId)
-        }
-
-        SelectedContactsFlow {
-            id: flow
-            Layout.fillWidth: true
-            Layout.preferredHeight: recommendedHeight
-            visible: d.model.selection.multiSelect
-
-            Behavior on Layout.preferredHeight {
-                NumberAnimation {
-                    easing.type: Easing.InOutCubic
-                    duration: Theme.animationDuration
-                }
-            }
-        }
-
-        FormPrimaryButton {
-            id: actionButton
-            visible: d.model.selection.multiSelect
-            enabled: flow.visible
-            onClicked: root.actionButtonClicked()
         }
 
         ServerSelectionRow {

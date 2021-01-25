@@ -1,0 +1,41 @@
+    Requirements for build project
+
+Pltaform independ:
+1. QT Framework (Version: 5.15)
+2. Set system enviroments variable for QT framework:
+
+    export QTDIR=/opt/Qt/5.15.0/android
+
+Android:
+1. Android SDK with QT prebuild OpenSSL library on path [$ANDROID_SDK/android_openssl]
+2. Set system enviroment variable for Android SDK:
+
+    export ANDROID_SDK=/opt/android/sdk
+
+3. Android NDK
+4. Set system enviroment variable for Android NDK:
+
+    export ANDROID_NDK=/opt/android/sdk/ndk/21.1.6352462
+
+Linux:
+
+1. Compilers and utilites:
+
+    dnf -y install bison cmake curl-devel diffutils gcc gcc-c++  libtool make openssl-devel \
+           patchutils wget zlib-devel cups-devel java-1.8.0-openjdk java-1.8.0-openjdk-devel 
+
+2. Install CQtDeployer [https://github.com/QuasarApp/CQtDeployer]
+
+    export export PATH=$PATH:/opt/CQtDeployer/1.3/bin
+
+
+MacOS:
+
+1. Install appdmg [https://github.com/LinusU/node-appdmg] (Required for signed release only)
+
+    npm install -g appdmg
+
+2. Console json parser
+
+    brew install jq
+
