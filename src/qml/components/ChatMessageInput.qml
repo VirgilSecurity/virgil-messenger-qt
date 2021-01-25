@@ -207,7 +207,7 @@ Control {
     Component.onCompleted: {
         if (Platform.isDesktop) {
             messageField.forceActiveFocus();
-        } else if (!Platform.isDesktop) {
+        } else if (Platform.isIos) {
             app.keyboardEventFilter.install(messageField)
         }
     }

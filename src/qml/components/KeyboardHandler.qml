@@ -84,7 +84,7 @@ Item {
 
     Connections {
          target: Qt.inputMethod
-         enabled: visible
+         enabled: visible && !Platform.isAndroid
 
          function onVisibleChanged() {
              if(visible && keyboardProps.keyboardOpen) {
