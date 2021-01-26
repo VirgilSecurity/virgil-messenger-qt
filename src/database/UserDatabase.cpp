@@ -42,7 +42,6 @@
 #include "database/CloudFilesTable.h"
 #include "database/ContactsTable.h"
 #include "database/MessagesTable.h"
-#include "database/SchemeVersion.h"
 #include "database/UserDatabaseMigration.h"
 
 using namespace vm;

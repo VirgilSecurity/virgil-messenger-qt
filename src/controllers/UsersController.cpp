@@ -62,6 +62,7 @@ Self::UsersController(Messenger *messenger, Models *models, UserDatabase *userDa
 
     connect(userDatabase, &UserDatabase::opened, this, &Self::onFinishSignIn);
     connect(userDatabase, &UserDatabase::closed, this, &Self::onFinishSignOut);
+    connect(userDatabase, &UserDatabase::errorOccurred, this, &Self::databaseErrorOccurred);
 
     connect(models->chats(), &ChatsModel::chatAdded, this, &Self::onChatAdded);
 }

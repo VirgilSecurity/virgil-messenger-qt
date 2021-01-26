@@ -59,9 +59,12 @@ namespace
 
     std::optional<QStringList> readQueryTexts(const QString &queryId)
     {
-        const auto text = FileUtils::readTextFile(queryPath(queryId));
+        const auto maybeText = FileUtils::readTextFile(queryPath(queryId));
+        if (!maybeText) {
+            return {};
+        }
         QStringList queries;
-        const auto texts = text.split(";");
+        const auto texts = maybeText->split(";");
         for (auto &text : texts) {
             auto query = text.trimmed();
             if (!query.isEmpty()) {
@@ -96,21 +99,21 @@ bool Self::readExecQueries(Database *database, const QString &queryId)
 
 std::optional<QSqlQuery> Self::readExecQuery(Database *database, const QString &queryId, const BindValues &values)
 {
-    const auto text = FileUtils::readTextFile(queryPath(queryId));
-    if (text.isEmpty()) {
-        return {};
+    const auto maybeText = FileUtils::readTextFile(queryPath(queryId));
+    if (!maybeText) {
+        return std::nullopt;
     }
     auto query = database->createQuery();
-    if (!query.prepare(text)) {
+    if (!query.prepare(*maybeText)) {
         qCCritical(lcDatabase) << "Failed to prepare query:" << query.lastError().databaseText();
-        return {};
+        return std::nullopt;
     }
     for (auto &v : values) {
         query.bindValue(v.first, v.second);
     }
     if (!query.exec()) {
         qCCritical(lcDatabase) << "Failed to exec query:" << query.lastError().databaseText();
-        return {};
+        return std::nullopt;
     }
     return query;
 }
