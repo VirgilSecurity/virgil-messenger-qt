@@ -32,25 +32,27 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_GROUP_EPOCHS_TABLE_H
-#define VM_GROUP_EPOCHS_TABLE_H
 
-#include "core/DatabaseTable.h"
+#include "GroupUpdate.h"
 
-namespace vm
-{
-class GroupEpochsTable : public DatabaseTable
-{
-    Q_OBJECT
+#include <stdexcept>
 
-public:
-    explicit GroupEpochsTable(Database *database);
+using namespace vm;
 
-signals:
-
-private:
-    bool create() override;
-};
+GroupId vm::GroupUpdateGetId(const GroupUpdate& update) {
+    if (auto base = std::get_if<AddGroupOwnersUpdate>(&update)) {
+        return base->groupId;
+    }
+    else if (auto base = std::get_if<AddGroupMembersUpdate>(&update)) {
+        return base->groupId;
+    }
+    else if (auto base = std::get_if<AddGroupUpdate>(&update)) {
+        return base->groupId;
+    }
+    else if (auto base = std::get_if<GroupMemberInvitationUpdate>(&update)) {
+        return base->groupId;
+    }
+    else {
+        throw std::logic_error("Unhandled GroupUpdate when ask for group id.");
+    }
 }
-
-#endif // VM_GROUP_EPOCHS_TABLE_H

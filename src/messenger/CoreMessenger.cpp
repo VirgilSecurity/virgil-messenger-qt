@@ -34,13 +34,13 @@
 
 #include "CoreMessenger.h"
 
-#include "Utils.h"
-#include "CustomerEnv.h"
-#include "UserImpl.h"
 #include "CommKitBridge.h"
-#include "MessageContentJsonUtils.h"
+#include "CustomerEnv.h"
 #include "IncomingMessage.h"
+#include "MessageContentJsonUtils.h"
 #include "OutgoingMessage.h"
+#include "UserImpl.h"
+#include "Utils.h"
 
 #include "VSQNetworkAnalyzer.h"
 #include "VSQDiscoveryManager.h"
@@ -90,6 +90,9 @@ using vssc_json_object_unique_ptr_t = vsc_unique_ptr<vssc_json_object_t>;
 using vssq_messenger_creds_unique_ptr_t = vsc_unique_ptr<vssq_messenger_creds_t>;
 using vssq_messenger_ptr_t = vsc_unique_ptr<vssq_messenger_t>;
 using vssq_messenger_file_cipher_ptr_t = vsc_unique_ptr<vssq_messenger_file_cipher_t>;
+using vssq_messenger_user_list_ptr_t = vsc_unique_ptr<vssq_messenger_user_list_t>;
+using vssq_messenger_group_ptr_t = vsc_unique_ptr<vssq_messenger_group_t>;
+using vssq_messenger_group_shared_ptr_t = std::shared_ptr<vssq_messenger_group_t>;
 
 
 static vscf_ctr_drbg_ptr_t vscf_ctr_drbg_wrap_ptr(vscf_ctr_drbg_t *ptr) {
@@ -112,6 +115,61 @@ static vssq_messenger_file_cipher_ptr_t vssq_messenger_file_cipher_wrap(vssq_mes
     return vssq_messenger_file_cipher_ptr_t{ptr, vssq_messenger_file_cipher_delete};
 }
 
+static vssq_messenger_user_list_ptr_t vssq_messenger_user_list_wrap_ptr(vssq_messenger_user_list_t *ptr) {
+    return vssq_messenger_user_list_ptr_t{ptr, vssq_messenger_user_list_delete};
+}
+
+static vssq_messenger_group_ptr_t vssq_messenger_group_wrap_ptr(vssq_messenger_group_t *ptr) {
+    return vssq_messenger_group_ptr_t{ptr, vssq_messenger_group_delete};
+}
+
+
+static CoreMessengerStatus mapStatus(vssq_status_t status) {
+    switch (status) {
+    case vssq_status_SUCCESS:
+        return CoreMessengerStatus::Success;
+
+    case vssq_status_MODIFY_GROUP_FAILED_PERMISSION_VIOLATION:
+        return CoreMessengerStatus::Error_ModifyGroup_PermissionViolation;
+
+    case vssq_status_ACCESS_GROUP_FAILED_PERMISSION_VIOLATION:
+        return CoreMessengerStatus::Error_AccessGroup_PermissionViolation;
+
+    case vssq_status_CREATE_GROUP_FAILED_CRYPTO_FAILED:
+        return CoreMessengerStatus::Error_CreateGroup_CryptoFailed;
+
+    case vssq_status_IMPORT_GROUP_EPOCH_FAILED_PARSE_FAILED:
+        return CoreMessengerStatus::Error_ImportGroupEpoch_ParseFailed;
+
+    case vssq_status_PROCESS_GROUP_MESSAGE_FAILED_SESSION_ID_DOESNT_MATCH:
+        return CoreMessengerStatus::Error_ProcessGroupMessage_SessionIDDoesntMatch;
+
+    case vssq_status_PROCESS_GROUP_MESSAGE_FAILED_EPOCH_NOT_FOUND:
+        return CoreMessengerStatus::Error_ProcessGroupMessage_EpochNotFound;
+
+    case vssq_status_PROCESS_GROUP_MESSAGE_FAILED_WRONG_KEY_TYPE:
+        return CoreMessengerStatus::Error_ProcessGroupMessage_WrongKeyType;
+
+    case vssq_status_PROCESS_GROUP_MESSAGE_FAILED_INVALID_SIGNATURE:
+        return CoreMessengerStatus::Error_ProcessGroupMessage_InvalidSignature;
+
+    case vssq_status_PROCESS_GROUP_MESSAGE_FAILED_ED25519_FAILED:
+        return CoreMessengerStatus::Error_ProcessGroupMessage_Ed25519Failed;
+
+    case vssq_status_PROCESS_GROUP_MESSAGE_FAILED_DUPLICATE_EPOCH:
+        return CoreMessengerStatus::Error_ProcessGroupMessage_DuplicateEpoch;
+
+    case vssq_status_PROCESS_GROUP_MESSAGE_FAILED_PLAIN_TEXT_TOO_LONG:
+        return CoreMessengerStatus::Error_ProcessGroupMessage_PlainTextTooLong;
+
+    case vssq_status_PROCESS_GROUP_MESSAGE_FAILED_CRYPTO_FAILED:
+        return CoreMessengerStatus::Error_ProcessGroupMessage_CryptoFailed;
+
+    default:
+        return CoreMessengerStatus::Error_UnexpectedCommKitError;
+    }
+}
+
 
 // --------------------------------------------------------------------------
 // Configuration.
@@ -121,6 +179,8 @@ public:
     vscf_impl_ptr_t random = vscf_impl_ptr_t(nullptr, vscf_impl_delete);
 
     vssq_messenger_ptr_t messenger = vssq_messenger_wrap_ptr(nullptr);
+
+    std::map<QString, vssq_messenger_group_shared_ptr_t> messengerGroups;
 
     VSQNetworkAnalyzer *networkAnalyzer;
 
@@ -166,6 +226,8 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     qRegisterMetaType<vm::ModifiableCloudFileHandler>("ModifiableCloudFileHandler");
     qRegisterMetaType<vm::CloudFiles>("CloudFiles");
     qRegisterMetaType<vm::ModifiableCloudFiles>("ModifiableCloudFiles");
+    qRegisterMetaType<vm::GroupUpdate>("GroupUpdate");
+    qRegisterMetaType<vm::Users>("Users");
 
     qRegisterMetaType<vm::ChatId>("ChatId");
     qRegisterMetaType<vm::GroupId>("GroupId");
@@ -186,7 +248,7 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     connect(this, &Self::cleanupCommKitMessenger, this, &Self::onCleanupCommKitMessenger);
     connect(this, &Self::registerPushNotifications, this, &Self::onRegisterPushNotifications);
     connect(this, &Self::deregisterPushNotifications, this, &Self::onDeregisterPushNotifications);
-    connect(this, &Self::createGroupChat, this, &Self::onCreateGroupChat);
+    connect(this, &Self::xmppCreateGroupChat, this, &Self::xmppOnCreateGroupChat);
 
     //
     //  Configure Network Analyzer.
@@ -1812,8 +1874,89 @@ Self::cloudFs() const {
 //  Group chats.
 // --------------------------------------------------------------------------
 void
-Self::onCreateGroupChat(const GroupHandler& group) {
-    qCInfo(lcCoreMessenger) << "Trying to create group chat";
+Self::createGroupChat(const GroupHandler& group) {
+
+    QtConcurrent::run([this, group]() {
+        //
+        // Find participants.
+        //
+        qCInfo(lcCoreMessenger) << "Trying to create group chat";
+        qCDebug(lcCoreMessenger) << "Crate group chat - start to find participants";
+        Users userList;
+        auto userListC = vssq_messenger_user_list_wrap_ptr(vssq_messenger_user_list_new());
+        for (const auto& contact : group->contacts()) {
+            //
+            //  Find by username.
+            //
+            if (!contact.name.isEmpty()) {
+                auto user = findUserByUsername(contact.name);
+                if (user) {
+                    userList.push_back(user);
+                    vssq_messenger_user_list_add(userListC.get(), (vssq_messenger_user_t *)user->impl()->user.get());
+                }
+            }
+
+            //
+            //  TODO: Add contact by email and phone as well.
+            //
+        }
+
+        qCDebug(lcCoreMessenger) << "Crate group chat - found " << userList.size() << " participants";
+        for(const auto& user : userList) {
+            qCDebug(lcCoreMessenger) << "Crate group chat - found participant: " << user->username();
+        }
+
+        if (!vssq_messenger_user_list_has_item(userListC.get())) {
+            emit groupChatCreateFailed(group->id(), CoreMessengerStatus::Error_GroupNoParticipants);
+            return;
+        }
+
+        //
+        //  Tell the World that members are found.
+        //
+        auto owner = currentUser();
+        emit updateGroup(AddGroupOwnersUpdate{group->id(), {owner}});
+        emit updateGroup(GroupMemberInvitationUpdate{group->id(), owner->id(), GroupInvitationStatus::Accepted});
+        emit updateGroup(AddGroupMembersUpdate{group->id(), userList});
+
+        //
+        //  Create Comm Kit group chat.
+        //
+        qCInfo(lcCoreMessenger) << "Trying to create group chat within CommKit";
+
+        vssq_error_t error;
+        vssq_error_reset(&error);
+
+        auto groupIdStd = group->id().toStdString();
+        auto groupC = vssq_messenger_group_wrap_ptr(
+                vssq_messenger_create_group(
+                        m_impl->messenger.get(), vsc_str_from(groupIdStd), userListC.get(), &error));
+
+        if (vssq_error_has_error(&error)) {
+            qCWarning(lcCoreMessenger) << "Got error status: " << vsc_str_to_qstring(vssq_error_message_from_error(&error));
+            emit groupChatCreateFailed(group->id(), mapStatus(vssq_error_status(&error)));
+            return;
+        }
+
+        //
+        //  Tell the world that we have encryption keys for the group.
+        //
+        m_impl->messengerGroups[QString(group->id())] = std::move(groupC);
+
+        emit updateGroup(AddGroupUpdate{group->id()});
+
+        //
+        //  Create XMPP multi-user chat room, aka group chat.
+        //
+        xmppCreateGroupChat(group, userList);
+    });
+}
+
+
+void
+Self::xmppOnCreateGroupChat(const GroupHandler& group, const Users& membersToBeInvited) {
+    qCInfo(lcCoreMessenger) << "Trying to create group chat within XMPP server";
+
     //
     //  Create XMPP multi-user chat room, aka group chat.
     //
@@ -1835,8 +1978,20 @@ Self::onCreateGroupChat(const GroupHandler& group) {
         qCDebug(lcCoreMessenger) << "---> error: ";
     });
 
-    connect(room, &QXmppMucRoom::joined, [room]() {
-        qCDebug(lcCoreMessenger) << "---> joined: ";
+    connect(room, &QXmppMucRoom::joined, [this, groupId = group->id(), room, membersToBeInvited]() {
+        qCDebug(lcCoreMessenger) << "Joined to the XMPP room: " << room->jid();
+
+        emit groupChatCreated(groupId);
+
+        for (const auto &user : membersToBeInvited) {
+            if (room->sendInvitation(userIdToJid(user->id()), "Hello it's your friend.")) {
+                qCDebug(lcCoreMessenger) << "User was invited: " << user->id();
+                emit updateGroup(GroupMemberInvitationUpdate{groupId, user->id(), GroupInvitationStatus::Invited});
+
+            } else {
+                qCDebug(lcCoreMessenger) << "User invitation was postponed: " << user->id();
+            }
+        }
     });
 
     connect(room, &QXmppMucRoom::kicked, [room](const QString &jid, const QString &reason) {
@@ -1853,6 +2008,9 @@ Self::onCreateGroupChat(const GroupHandler& group) {
 
     connect(room, &QXmppMucRoom::messageReceived, [room](const QXmppMessage &message) {
         qCDebug(lcCoreMessenger) << "---> messageReceived: ";
+        //
+        //  FIXME: Create group chat message and emit it.
+        //
     });
 
     connect(room, &QXmppMucRoom::nameChanged, [room](const QString &name) {
@@ -1864,19 +2022,19 @@ Self::onCreateGroupChat(const GroupHandler& group) {
     });
 
     connect(room, &QXmppMucRoom::participantAdded, [room](const QString &jid) {
-        qCDebug(lcCoreMessenger) << "---> participantAdded: ";
+        qCDebug(lcCoreMessenger) << "---> participantAdded: " << jid;
     });
 
     connect(room, &QXmppMucRoom::participantChanged, [room](const QString &jid) {
-        qCDebug(lcCoreMessenger) << "---> participantChanged: ";
+        qCDebug(lcCoreMessenger) << "---> participantChanged: " << jid;
     });
 
     connect(room, &QXmppMucRoom::participantRemoved, [room](const QString &jid) {
-        qCDebug(lcCoreMessenger) << "---> participantRemoved: ";
+        qCDebug(lcCoreMessenger) << "---> participantRemoved: " << jid;
     });
 
     connect(room, &QXmppMucRoom::participantsChanged, [room]() {
-        qCDebug(lcCoreMessenger) << "---> participantsChanged: ";
+        qCDebug(lcCoreMessenger) << "---> participantsChanged";
     });
 
     connect(room, &QXmppMucRoom::permissionsReceived, [room](const QList<QXmppMucItem> &permissions) {
@@ -1888,14 +2046,6 @@ Self::onCreateGroupChat(const GroupHandler& group) {
     });
 
     room->join();
-
-    room->requestConfiguration();
-    room->requestPermissions();
-
-
-    //
-    //  Create Comm Kit group chat.
-    //
 }
 
 
@@ -1907,3 +2057,4 @@ void Self::xmppOnMucInvitationReceived(const QString &roomJid, const QString &in
 void Self::xmppOnMucRoomAdded(QXmppMucRoom *room) {
     qCDebug(lcCoreMessenger) << "---> xmppOnRoomAdded: " << room->jid();
 }
+

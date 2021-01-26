@@ -110,11 +110,9 @@ public:
 
     //
     //  Group chats.
-    //
 
     //
     //  Create a new group chats.
-    //  FIXME: Add initial participants.
     //  If success - signal 'groupChatCreated' is emitted.
     //  If fail - signal 'groupChatCreateFailed' is emitted.
     //
@@ -186,6 +184,7 @@ signals:
     //
     void groupChatCreated(const GroupId& chatId);
     void groupChatCreateFailed(const GroupId& chatId, const QString& errorText);
+    void updateGroup(const GroupUpdate& groupUpdate);
     //--
 
 private slots:

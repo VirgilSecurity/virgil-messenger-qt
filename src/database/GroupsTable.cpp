@@ -43,7 +43,9 @@ using Self = GroupsTable;
 Self::GroupsTable(Database *database)
     : DatabaseTable(QLatin1String("groups"), database)
 {
+    connect(this, &Self::updateGroup, this, &Self::onUpdateGroup);
 }
+
 
 bool Self::create()
 {
@@ -54,5 +56,31 @@ bool Self::create()
     } else {
         qCCritical(lcDatabase) << "Failed to create table 'groups'.";
         return false;
+    }
+}
+
+
+void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
+{
+    DatabaseUtils::BindValues bindValues;
+    QLatin1String queryId;
+
+    if (auto update = std::get_if<AddGroupUpdate>(&groupUpdate)) {
+        queryId = QLatin1String("insertGroup");
+        bindValues.push_back({ ":id", QString(update->groupId) });
+    }
+
+    if (queryId.isEmpty()) {
+        return;
+    }
+
+    ScopedConnection connection(*database());
+    const auto query = DatabaseUtils::readExecQuery(database(), queryId, bindValues);
+    if (query) {
+        qCDebug(lcDatabase) << "Group was updated: " << bindValues.front().second;
+    }
+    else {
+        qCCritical(lcDatabase) << "GroupsTable::onUpdateGroup error";
+        emit errorOccurred(tr("Failed to update groups table"));
     }
 }

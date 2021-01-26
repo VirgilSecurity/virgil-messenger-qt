@@ -41,7 +41,6 @@
 #include "database/ChatsTable.h"
 #include "database/CloudFilesTable.h"
 #include "database/ContactsTable.h"
-#include "database/GroupEpochsTable.h"
 #include "database/GroupMembersTable.h"
 #include "database/GroupsTable.h"
 #include "database/MessagesTable.h"
@@ -54,10 +53,9 @@ constexpr const int k_attachmentsTableIndex = 0;
 constexpr const int k_chatsTableIndex = 1;
 constexpr const int k_contactsTableIndex = 2;
 constexpr const int k_cloudFilesTableIndex = 3;
-constexpr const int k_groupEpochsTableIndex = 4;
-constexpr const int k_groupMembersTableIndex = 5;
-constexpr const int k_groupsTableIndex = 6;
-constexpr const int k_messagesTableIndex = 7;
+constexpr const int k_groupMembersTableIndex = 4;
+constexpr const int k_groupsTableIndex = 5;
+constexpr const int k_messagesTableIndex = 6;
 
 
 Self::UserDatabase(const QDir &databaseDir, QObject *parent)
@@ -72,10 +70,8 @@ Self::UserDatabase(const QDir &databaseDir, QObject *parent)
     connect(this, &Self::updateMessage, this, &Self::onUpdateMessage);
     connect(this, &Self::writeChatAndLastMessage, this, &Self::onWriteChatAndLastMessage);
     connect(this, &Self::resetUnreadCount, this, &Self::onResetUnreadCount);
+    connect(this, &Self::updateGroup, this, &Self::onUpdateGroup);
 }
-
-Self::~UserDatabase()
-{}
 
 const AttachmentsTable *Self::attachmentsTable() const
 {
@@ -115,14 +111,6 @@ const ContactsTable *Self::contactsTable() const
 ContactsTable *Self::contactsTable()
 {
     return static_cast<ContactsTable *>(table(k_contactsTableIndex));
-}
-
-const GroupEpochsTable *Self::groupEpochsTable() const {
-    return static_cast<const GroupEpochsTable *>(table(k_groupEpochsTableIndex));
-}
-
-GroupEpochsTable *Self::groupEpochsTable() {
-    return static_cast<GroupEpochsTable *>(table(k_groupEpochsTableIndex));
 }
 
 const GroupMembersTable *Self::groupMembersTable() const {
@@ -172,11 +160,6 @@ bool Self::create()
 
     Q_ASSERT(k_cloudFilesTableIndex == tables().size());
     if (!addTable(std::make_unique<CloudFilesTable>(this))) {
-        return false;
-    }
-
-    Q_ASSERT(k_groupEpochsTableIndex == tables().size());
-    if (!addTable(std::make_unique<GroupEpochsTable>(this))) {
         return false;
     }
 
@@ -267,4 +250,10 @@ void Self::onResetUnreadCount(const ChatHandler &chat)
     ScopedConnection connection(*this);
     ScopedTransaction transaction(*this);
     chatsTable()->resetUnreadCount(chat);
+}
+
+void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
+{
+    groupsTable()->updateGroup(groupUpdate);
+    groupMembersTable()->updateGroup(groupUpdate);
 }

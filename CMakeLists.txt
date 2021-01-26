@@ -385,18 +385,20 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Chat.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/ChatId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/ChatType.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CommKitBridge.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessenger.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFileId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFileInfo.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolder.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolderId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolderInfo.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsNewFile.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CommKitBridge.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessenger.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessengerCloudFs.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessengerStatus.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Group.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupId.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupInvitationStatus.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupUpdate.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/IncomingMessage.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/IncomingMessageStage.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Message.h
@@ -467,7 +469,6 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/database/ContactsTable.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/ChatsTable.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/CloudFilesTable.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/database/GroupEpochsTable.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/GroupMembersTable.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/GroupsTable.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/MessagesTable.h
@@ -575,6 +576,8 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsNewFile.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CoreMessengerCloudFs.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Group.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupInvitationStatus.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupUpdate.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/IncomingMessage.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/IncomingMessageStage.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Message.cpp
@@ -637,7 +640,6 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/database/ContactsTable.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/ChatsTable.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/CloudFilesTable.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/database/GroupEpochsTable.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/GroupMembersTable.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/GroupsTable.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/MessagesTable.cpp

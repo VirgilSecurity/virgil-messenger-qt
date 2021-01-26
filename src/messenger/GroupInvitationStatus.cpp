@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2021 Virgil Security, Inc.
+//  Copyright (C) 2015-2020 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,27 +32,47 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "GroupEpochsTable.h"
 
-#include "core/Database.h"
-#include "core/DatabaseUtils.h"
+#include "GroupInvitationStatus.h"
+
 
 using namespace vm;
-using Self = GroupEpochsTable;
 
-Self::GroupEpochsTable(Database *database)
-    : DatabaseTable(QLatin1String("groupEpochs"), database)
-{
+
+GroupInvitationStatus vm::GroupInvitationStatusFromString(const QString& stageString) {
+    if (stageString == QLatin1String("none")) {
+        return GroupInvitationStatus::None;
+    }
+    else if (stageString == QLatin1String("invited")) {
+        return GroupInvitationStatus::Invited;
+    }
+    else if (stageString == QLatin1String("accepted")) {
+        return GroupInvitationStatus::Accepted;
+    }
+    else if (stageString == QLatin1String("rejected")) {
+        return GroupInvitationStatus::Rejected;
+    }
+    else {
+        throw std::logic_error("Invalid GroupInvitationStatus string");
+    }
 }
 
-bool Self::create()
-{
-    if (DatabaseUtils::readExecQueries(database(), QLatin1String("createGroupEpochs"))) {
-        qCDebug(lcDatabase) << "Table 'groupEpochs' was created.";
-        return true;
 
-    } else {
-        qCCritical(lcDatabase) << "Failed to create table 'groupEpochs'.";
-        return false;
+QString vm::GroupInvitationStatusToString(GroupInvitationStatus stage) {
+    switch (stage) {
+        case GroupInvitationStatus::None:
+            return QLatin1String("none");
+
+        case GroupInvitationStatus::Invited:
+            return QLatin1String("invited");
+
+        case GroupInvitationStatus::Accepted:
+            return QLatin1String("accepted");
+
+        case GroupInvitationStatus::Rejected:
+            return QLatin1String("rejected");
+
+        default:
+            throw std::logic_error("Invalid GroupInvitationStatus");
     }
 }

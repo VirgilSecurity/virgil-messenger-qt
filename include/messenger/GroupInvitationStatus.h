@@ -32,39 +32,33 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_GROUP_MEMBERS_TABLE_H
-#define VM_GROUP_MEMBERS_TABLE_H
-
-#include "core/DatabaseTable.h"
-#include "GroupUpdate.h"
+#ifndef VM_GROUP_INVITATION_STATUS_H
+#define VM_GROUP_INVITATION_STATUS_H
 
 #include <QString>
 
-namespace vm
-{
-class GroupMembersTable : public DatabaseTable
-{
-    Q_OBJECT
+namespace vm {
 
-public:
-    explicit GroupMembersTable(Database *database);
-
-signals:
-    //
-    //  Control signals.
-    //
-    void updateGroup(const GroupUpdate& groupUpdate);
-
-    //
-    //  Notification signals.
-    //
-    void errorOccurred(const QString &errorText);
-
-private:
-    void onUpdateGroup(const GroupUpdate& groupUpdate);
-
-    bool create() override;
+enum class GroupInvitationStatus {
+    None,
+    Invited,
+    Accepted,
+    Rejected
 };
-}
 
-#endif // VM_GROUP_MEMBERS_TABLE_H
+//
+//  Return status from a given string.
+//  Throws if correspond status is not found.
+//
+GroupInvitationStatus GroupInvitationStatusFromString(const QString& stageString);
+
+//
+//  Return string from a given status.
+//
+QString GroupInvitationStatusToString(GroupInvitationStatus stage);
+
+
+} // namespace vm
+
+
+#endif // VM_GROUP_INVITATION_STATUS_H

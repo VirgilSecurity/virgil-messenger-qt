@@ -36,6 +36,9 @@
 #define VM_GROUPS_TABLE_H
 
 #include "core/DatabaseTable.h"
+#include "GroupUpdate.h"
+
+#include <QString>
 
 namespace vm
 {
@@ -47,8 +50,19 @@ public:
     explicit GroupsTable(Database *database);
 
 signals:
+    //
+    //  Control signals.
+    //
+    void updateGroup(const GroupUpdate& groupUpdate);
+
+    //
+    //  Notification signals.
+    //
+    void errorOccurred(const QString &errorText);
 
 private:
+    void onUpdateGroup(const GroupUpdate& groupUpdate);
+
     bool create() override;
 };
 }

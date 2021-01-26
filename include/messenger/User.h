@@ -38,6 +38,7 @@
 #include "UserId.h"
 
 #include <memory>
+#include <list>
 
 namespace vm
 {
@@ -57,6 +58,7 @@ private:
 };
 
 using UserHandler = std::shared_ptr<User>;
+using Users = std::list<UserHandler>;
 
 } // namespace vm
 

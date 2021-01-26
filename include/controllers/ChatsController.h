@@ -35,13 +35,14 @@
 #ifndef VM_CHATSCONTROLLER_H
 #define VM_CHATSCONTROLLER_H
 
+#include "Chat.h"
 #include "ChatId.h"
 #include "Contact.h"
 #include "Group.h"
+#include "GroupUpdate.h"
 #include "MessageId.h"
-#include "UserId.h"
-#include "Chat.h"
 #include "User.h"
+#include "UserId.h"
 
 #include <QObject>
 #include <QPointer>
@@ -99,6 +100,11 @@ private:
     void onChatsLoaded(ModifiableChats chats);
     void onCreateChatWithUser(const UserHandler &user);
     void onCreateChatWithGroup(const GroupHandler& group);
+
+    void onGroupChatCreated(const GroupId& groupId);
+    void onGroupChatCreateFailed(const GroupId& chatId, const QString& errorText);
+    void onUpdateGroup(const GroupUpdate& groupUpdate);
+
 
     QPointer<Messenger> m_messenger;
     QPointer<Models> m_models;

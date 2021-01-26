@@ -32,39 +32,60 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_GROUP_MEMBERS_TABLE_H
-#define VM_GROUP_MEMBERS_TABLE_H
+#ifndef VM_GROUP_UPDATE_H
+#define VM_GROUP_UPDATE_H
 
-#include "core/DatabaseTable.h"
-#include "GroupUpdate.h"
+#include "GroupId.h"
+#include "GroupInvitationStatus.h"
+#include "User.h"
 
+#include <QtCore>
 #include <QString>
 
-namespace vm
-{
-class GroupMembersTable : public DatabaseTable
-{
-    Q_OBJECT
+#include <optional>
+#include <variant>
 
-public:
-    explicit GroupMembersTable(Database *database);
+namespace vm {
 
-signals:
-    //
-    //  Control signals.
-    //
-    void updateGroup(const GroupUpdate& groupUpdate);
-
-    //
-    //  Notification signals.
-    //
-    void errorOccurred(const QString &errorText);
-
-private:
-    void onUpdateGroup(const GroupUpdate& groupUpdate);
-
-    bool create() override;
+struct GroupUpdateBase {
+    GroupId groupId;
 };
-}
 
-#endif // VM_GROUP_MEMBERS_TABLE_H
+
+struct AddGroupOwnersUpdate : public GroupUpdateBase {
+    Users owners;
+};
+
+
+struct AddGroupMembersUpdate : public GroupUpdateBase {
+    Users members;
+};
+
+
+struct AddGroupUpdate : public GroupUpdateBase {
+
+};
+
+
+struct GroupMemberInvitationUpdate : public GroupUpdateBase {
+    UserId memberId;
+    GroupInvitationStatus invitationStatus;
+};
+
+
+using GroupUpdate = std::variant<
+    AddGroupOwnersUpdate,
+    AddGroupMembersUpdate,
+    AddGroupUpdate,
+    GroupMemberInvitationUpdate
+    >;
+
+//
+//  Return group unique identifier the update relates to.
+//
+GroupId GroupUpdateGetId(const GroupUpdate& update);
+
+} // namespace vm
+
+
+#endif // VM_GROUP_UPDATE_H

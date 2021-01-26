@@ -40,6 +40,8 @@
 #include "database/ChatsTable.h"
 #include "database/MessagesTable.h"
 #include "database/UserDatabase.h"
+#include "database/GroupMembersTable.h"
+#include "database/GroupsTable.h"
 #include "models/ChatsModel.h"
 #include "models/MessagesModel.h"
 #include "models/Models.h"
@@ -58,6 +60,10 @@ Self::ChatsController(Messenger *messenger, Models *models, UserDatabase *userDa
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
     connect(this, &Self::createChatWithUser, this, &Self::onCreateChatWithUser);
     connect(this, &Self::createChatWithGroup, this, &Self::onCreateChatWithGroup);
+
+    connect(m_messenger, &Messenger::groupChatCreated, this, &Self::onGroupChatCreated);
+    connect(m_messenger, &Messenger::groupChatCreateFailed, this, &Self::onGroupChatCreateFailed);
+    connect(m_messenger, &Messenger::updateGroup, this, &Self::onUpdateGroup);
 }
 
 ChatHandler Self::currentChat() const
@@ -136,9 +142,6 @@ void ChatsController::createGroupChat(const QString &groupName, const Contacts &
             emit errorOccurred(tr("Group con not be created"));
         }
 
-        //
-        //  FIXME: use contacts
-        //
         auto group = std::make_shared<Group>(Utils::createUuid(), std::move(groupName), std::move(contacts));
 
         emit createChatWithGroup(group, QPrivateSignal());
@@ -176,6 +179,9 @@ void Self::setupTableConnections()
     auto table = m_userDatabase->chatsTable();
     connect(table, &ChatsTable::errorOccurred, this, &Self::errorOccurred);
     connect(table, &ChatsTable::fetched, this, &Self::onChatsLoaded);
+
+    connect(m_userDatabase->groupsTable(), &GroupsTable::errorOccurred, this, &Self::errorOccurred);
+    connect(m_userDatabase->groupMembersTable(), &GroupMembersTable::errorOccurred, this, &Self::errorOccurred);
 }
 
 void Self::onCreateChatWithUser(const UserHandler &user)
@@ -207,4 +213,32 @@ void Self::onChatsLoaded(ModifiableChats chats)
     qCDebug(lcController) << "Chats loaded from the database";
     m_models->chats()->setChats(std::move(chats));
     emit chatsLoaded();
+}
+
+void Self::onGroupChatCreated(const GroupId& groupId) {
+    auto createdChat = m_models->chats()->findChat(ChatId(QString(groupId)));
+    if (createdChat) {
+        emit chatCreated(createdChat);
+    }
+}
+
+
+void Self::onGroupChatCreateFailed(const GroupId& chatId, const QString& errorText) {
+    //
+    //  FIXME: Remove chat and show error text.
+    //
+}
+
+
+void Self::onUpdateGroup(const GroupUpdate& groupUpdate) {
+    auto groupId = GroupUpdateGetId(groupUpdate);
+
+    if (m_currentChat && m_currentChat->id() == groupId) {
+        //
+        //  FIXME: Update group info within chat.
+        //
+        //m_currentChat->updateGroup(groupUpdate);
+    }
+
+    m_userDatabase->updateGroup(groupUpdate);
 }

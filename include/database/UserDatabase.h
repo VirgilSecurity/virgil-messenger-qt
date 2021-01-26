@@ -38,6 +38,7 @@
 #include "core/Database.h"
 #include "Message.h"
 #include "Chat.h"
+#include "GroupUpdate.h"
 
 #include <QDir>
 
@@ -58,7 +59,6 @@ class UserDatabase : public Database
 
 public:
     explicit UserDatabase(const QDir &databaseDir, QObject *parent);
-    ~UserDatabase() override;
 
     const AttachmentsTable *attachmentsTable() const;
     AttachmentsTable *attachmentsTable();
@@ -71,9 +71,6 @@ public:
 
     const ContactsTable *contactsTable() const;
     ContactsTable *contactsTable();
-
-    const GroupEpochsTable *groupEpochsTable() const;
-    GroupEpochsTable *groupEpochsTable();
 
     const GroupMembersTable *groupMembersTable() const;
     GroupMembersTable *groupMembersTable();
@@ -96,6 +93,9 @@ signals:
     void writeChatAndLastMessage(const ChatHandler &chat);
     void resetUnreadCount(const ChatHandler &chat);
 
+    void updateGroup(const GroupUpdate& groupUpdate);
+
+
     //
     //  Notification signals.
     //
@@ -110,6 +110,8 @@ private:
     void onUpdateMessage(const MessageUpdate &messageUpdate);
     void onWriteChatAndLastMessage(const ChatHandler &chat);
     void onResetUnreadCount(const ChatHandler &chat);
+
+    void onUpdateGroup(const GroupUpdate& groupUpdate);
 
     const QDir m_databaseDir;
 };

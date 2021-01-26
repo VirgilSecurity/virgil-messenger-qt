@@ -43,7 +43,9 @@ using Self = GroupMembersTable;
 Self::GroupMembersTable(Database *database)
     : DatabaseTable(QLatin1String("groupMembers"), database)
 {
+    connect(this, &Self::updateGroup, this, &Self::onUpdateGroup);
 }
+
 
 bool Self::create()
 {
@@ -54,5 +56,70 @@ bool Self::create()
     } else {
         qCCritical(lcDatabase) << "Failed to create table 'groupMembers'.";
         return false;
+    }
+}
+
+
+void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
+{
+    std::list<DatabaseUtils::BindValues> bindValuesCollection;
+    QLatin1String queryId;
+
+    if (auto update = std::get_if<AddGroupOwnersUpdate>(&groupUpdate)) {
+        queryId = QLatin1String("insertGroupMember");
+
+        for (const auto& member : update->owners) {
+            DatabaseUtils::BindValues bindValues;
+            bindValues.push_back({ ":groupId", QString(update->groupId) });
+            bindValues.push_back({ ":memberId", QString(member->id()) });
+            bindValues.push_back({ ":memberNickname", QString(member->username()) });
+            bindValues.push_back({ ":memberAffiliation", "owner" });
+
+            bindValuesCollection.push_back(std::move(bindValues));
+        }
+    }
+
+    if (auto update = std::get_if<AddGroupMembersUpdate>(&groupUpdate)) {
+        queryId = QLatin1String("insertGroupMember");
+
+        for (const auto& member : update->members) {
+            DatabaseUtils::BindValues bindValues;
+            bindValues.push_back({ ":groupId", QString(update->groupId) });
+            bindValues.push_back({ ":memberId", QString(member->id()) });
+            bindValues.push_back({ ":memberNickname", QString(member->username()) });
+            bindValues.push_back({ ":memberAffiliation", "member" });
+
+            bindValuesCollection.push_back(std::move(bindValues));
+        }
+    }
+
+    if (auto update = std::get_if<GroupMemberInvitationUpdate>(&groupUpdate)) {
+        queryId = QLatin1String("updateGroupMemberInvitationStatus");
+
+        DatabaseUtils::BindValues bindValues;
+        bindValues.push_back({ ":groupId", QString(update->groupId) });
+        bindValues.push_back({ ":memberId", QString(update->memberId) });
+        bindValues.push_back({ ":invitationStatus", GroupInvitationStatusToString(update->invitationStatus) });
+
+        bindValuesCollection.push_back(std::move(bindValues));
+    }
+
+    if (queryId.isEmpty()) {
+        return;
+    }
+
+    ScopedConnection connection(*database());
+    ScopedTransaction transaction(*database());
+    for (const auto& bindValues : bindValuesCollection) {
+
+        const auto query = DatabaseUtils::readExecQuery(database(), queryId, bindValues);
+        if (query) {
+            qCDebug(lcDatabase) << "GroupMembers was updated: " << bindValues.front().second;
+        }
+        else {
+            transaction.rollback();
+            qCCritical(lcDatabase) << "GroupMembersTable::onUpdateGroup error";
+            emit errorOccurred(tr("Failed to update group members table"));
+        }
     }
 }

@@ -98,6 +98,15 @@ Self::Messenger(Settings *settings, Validator *validator)
     connect(m_coreMessenger, &CoreMessenger::messageReceived, this, &Self::onMessageReceived);
 
     //
+    //  Handle group chat events.
+    //
+    connect(m_coreMessenger, &CoreMessenger::groupChatCreated, this, &Self::groupChatCreated);
+    connect(m_coreMessenger, &CoreMessenger::updateGroup, this, &Self::updateGroup);
+    connect(m_coreMessenger, &CoreMessenger::groupChatCreateFailed, [this](const auto& groupId, const auto& status) {
+        emit groupChatCreateFailed(groupId, "Chat was not created on the services");
+    });
+
+    //
     // Push notifications
     //
 #if VS_PUSHNOTIFICATIONS

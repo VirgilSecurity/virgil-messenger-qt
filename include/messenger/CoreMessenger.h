@@ -45,6 +45,7 @@
 #include "Settings.h"
 #include "User.h"
 #include "Group.h"
+#include "GroupUpdate.h"
 
 #include <qxmpp/QXmppClient.h>
 #include <qxmpp/QXmppHttpUploadIq.h>
@@ -57,6 +58,7 @@
 
 #include <memory>
 #include <tuple>
+#include <list>
 
 
 namespace vm
@@ -103,10 +105,9 @@ signals:
     //
     //  Group Chats has signal / slot architecture.
     //
-    void createGroupChat(const GroupHandler& group);
-
     void groupChatCreated(const GroupId& groupId);
-    void groupChatCreateFailed(const GroupId& chatId, const QString& errorText);
+    void groupChatCreateFailed(const GroupId& chatId, CoreMessengerStatus errorStatus);
+    void updateGroup(const GroupUpdate& groupUpdate);
 
     //
     //  Private signals, to resolve thread. issues.
@@ -116,6 +117,8 @@ signals:
     void cleanupCommKitMessenger();
     void registerPushNotifications();
     void deregisterPushNotifications();
+    void xmppCreateGroupChat(const GroupHandler& group, const Users& membersToBeInvited);
+
 public:
     //
     //  Create.
@@ -180,6 +183,11 @@ public:
     CoreMessengerCloudFs cloudFs() const;
 
     //
+    //  Group chats.
+    //
+    void createGroupChat(const GroupHandler& group);
+
+    //
     //  Internal helpers.
     //
     QUrl getCrashReportEndpointUrl() const;
@@ -231,7 +239,6 @@ private slots:
     void onActivate();
     void onDeactivate();
     void onSuspend();
-    void onCreateGroupChat(const GroupHandler& groupHandler);
     void xmppOnConnected();
     void xmppOnDisconnected();
     void xmppOnStateChanged(QXmppClient::State state);
@@ -247,6 +254,7 @@ private slots:
     void xmppOnUploadRequestFailed(const QXmppHttpUploadRequestIq &request);
     void xmppOnMucInvitationReceived(const QString &roomJid, const QString &inviter, const QString &reason);
     void xmppOnMucRoomAdded(QXmppMucRoom *room);
+    void xmppOnCreateGroupChat(const GroupHandler& groupHandler, const Users& membersToBeInvited);
 
     void onReconnectXmppServerIfNeeded();
     void onDisconnectXmppServer();
@@ -280,6 +288,7 @@ Q_DECLARE_METATYPE(vm::ChatId);
 Q_DECLARE_METATYPE(vm::MessageId);
 Q_DECLARE_METATYPE(vm::AttachmentId);
 Q_DECLARE_METATYPE(vm::CloudFileId);
+Q_DECLARE_METATYPE(vm::Users);
 
 Q_DECLARE_METATYPE(QXmppClient::State);
 Q_DECLARE_METATYPE(QXmppClient::Error);

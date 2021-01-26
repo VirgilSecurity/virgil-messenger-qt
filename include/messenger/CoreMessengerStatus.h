@@ -70,6 +70,20 @@ enum class CoreMessengerStatus
     Error_CloudFsRequestFailed,
     Error_SendMessageFailed,
     Error_GroupIsAlreadyExists,
+    Error_GroupNoParticipants,
+    Error_UnexpectedCommKitError,
+    Error_ModifyGroup_PermissionViolation,
+    Error_AccessGroup_PermissionViolation,
+    Error_CreateGroup_CryptoFailed,
+    Error_ImportGroupEpoch_ParseFailed,
+    Error_ProcessGroupMessage_SessionIDDoesntMatch,
+    Error_ProcessGroupMessage_EpochNotFound,
+    Error_ProcessGroupMessage_WrongKeyType,
+    Error_ProcessGroupMessage_InvalidSignature,
+    Error_ProcessGroupMessage_Ed25519Failed,
+    Error_ProcessGroupMessage_DuplicateEpoch,
+    Error_ProcessGroupMessage_PlainTextTooLong,
+    Error_ProcessGroupMessage_CryptoFailed,
 };
 
 } // namespace vm
