@@ -113,7 +113,6 @@ ToolBar {
             leftMargin: Theme.margin
             rightMargin: Theme.smallMargin
         }
-
         height: searchId.recommendedHeight
 
         ImageButton {

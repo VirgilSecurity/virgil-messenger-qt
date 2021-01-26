@@ -126,7 +126,7 @@ void CloudFilesModel::updateCloudFiles(const CloudFilesUpdate &update)
         }
         updateDescription();
     }
-    else if (auto upd = std::get_if<SetProgressCloudFileUpdate>(&update)) {
+    else if (auto upd = std::get_if<TransferCloudFileUpdate>(&update)) {
         return;
     }
     else {

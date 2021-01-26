@@ -87,7 +87,7 @@ Item {
             id: shortInfoLabel
             anchors.centerIn: parent
             elide: Label.ElideRight
-            text: qsTr("Uploading %1 file(s)").arg(listView.count)
+            text: qsTr("Transfering %1 file(s)").arg(listView.count)
             font.family: Theme.mainFont
             font.pointSize: UiHelper.fixFontSz(12)
             horizontalAlignment: Qt.AlignHCenter
@@ -125,51 +125,74 @@ Item {
         Page {
             anchors.fill: parent
             background: Rectangle {
-                color: Theme.chatBackgroundColor
+                color: Theme.contactsBackgroundColor
             }
 
-            header: Control {
-                id: headerControl
-                width: parent.width
-                height: Theme.headerHeight
-                z: 1
-
+            header: ToolBar {
                 background: Rectangle {
-                    color: Theme.chatBackgroundColor
-                    anchors.leftMargin: 5
-                    anchors.rightMargin: 5
-                }
+                    implicitHeight: Theme.headerHeight
+                    color: Theme.contactsBackgroundColor
 
-                MouseArea {
-                    anchors.fill: parent
-                    acceptedButtons: Qt.AllButtons
-                }
-
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: Theme.smallMargin
-                    anchors.rightMargin: Theme.smallMargin
-
-                    Column {
-                        Layout.fillWidth: true
-                        Layout.leftMargin: Theme.smallMargin
-                        Label {
-                            text: qsTr("Progress")
-                            font.pointSize: UiHelper.fixFontSz(15)
-                            color: Theme.primaryTextColor
-                            font.bold: true
-                        }
-                        Label {
-                            topPadding: 2
-                            text: qsTr("Uploading %1 file(s)").arg(listView.count)
-                            font.pointSize: UiHelper.fixFontSz(12)
-                            color: Theme.secondaryTextColor
-                        }
+                    HorizontalRule {
+                        id: separator
+                        anchors.leftMargin: Theme.margin
+                        anchors.rightMargin: Theme.margin
+                        anchors.bottom: parent.bottom
                     }
+                }
 
-                    ImageButton {
-                        image: "Close"
-                        onClicked: root.state = "minInfo"
+                Item {
+                    id: contentRow
+                    anchors {
+                        fill: parent
+                        leftMargin: Theme.margin
+                        rightMargin: Theme.smallMargin
+                    }
+                    height: 40
+
+                    Item {
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                        height: parent.height
+
+                        Column {
+                            anchors {
+                                verticalCenter: parent.verticalCenter
+                                left: parent.left
+                            }
+
+                            Label {
+                                elide: Label.ElideRight
+                                font.family: Theme.mainFont
+                                font.pointSize: UiHelper.fixFontSz(15)
+                                horizontalAlignment: Qt.AlignLeft
+                                verticalAlignment: Qt.AlignVCenter
+                                font.bold: true
+                                color: Theme.primaryTextColor
+                                text: qsTr("Transfer")
+                            }
+
+                            Label {
+                                elide: Label.ElideRight
+                                font.family: Theme.mainFont
+                                horizontalAlignment: Qt.AlignLeft
+                                verticalAlignment: Qt.AlignVCenter
+                                font.pointSize: UiHelper.fixFontSz(11)
+                                color: Theme.secondaryTextColor
+                                text: qsTr("Transfering %1 file(s)").arg(listView.count)
+                            }
+                        }
+
+                        ImageButton {
+                            anchors {
+                                verticalCenter: parent.verticalCenter
+                                right: parent.right
+                            }
+                            image: "Close"
+                            onClicked: root.state = "minInfo"
+                        }
                     }
                 }
             }
@@ -182,11 +205,9 @@ Item {
                     rightMargin: Theme.smallMargin
                 }
                 emptyIcon: "../resources/icons/File-Big.png"
-                emptyText: qsTr("Download files<br/>will appear here")
+                emptyText: qsTr("Transfered files<br/>will appear here")
                 model: d.model
-                header: Item {width: parent.width; height: Theme.margin}
                 delegate: listDelegate
-                footer: Item {width: parent.width; height: Theme.margin}
             }
 
             Component {
@@ -256,7 +277,7 @@ Item {
                             Text {
                                 color: Theme.secondaryTextColor
                                 font.pointSize: UiHelper.fixFontSz(12)
-                                text: qsTr(model.bytesLoaded + " of " + model.bytesTotal)
+                                text: model.displayProgress
                                 width: parent.width
                                 elide: Text.ElideRight
                                 textFormat: Text.RichText

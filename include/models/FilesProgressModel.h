@@ -47,7 +47,7 @@ public:
     explicit FilesProgressModel(QObject *parent);
     ~FilesProgressModel() override;
 
-    void add(const QString &id, const QString &name);
+    void add(const QString &id, const QString &name, const quint64 bytesTotal);
     void setProgress(const QString &id, const quint64 bytesLoaded, const quint64 bytesTotal);
     void remove(const QString &id);
 
@@ -56,7 +56,8 @@ private:
     {
         NameRole = Qt::UserRole,
         BytesLoadedRole,
-        BytesTotalRole
+        BytesTotalRole,
+        DisplayProgressRole
     };
 
     struct Item

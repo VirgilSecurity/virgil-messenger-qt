@@ -50,10 +50,10 @@ Self::~FilesProgressModel()
 {
 }
 
-void Self::add(const QString &id, const QString &name)
+void Self::add(const QString &id, const QString &name, const quint64 bytesTotal)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    m_items.push_back({ id, name });
+    m_items.push_back({ id, name, 0, bytesTotal });
     endInsertRows();
 }
 
@@ -101,16 +101,20 @@ QVariant Self::data(const QModelIndex &index, int role) const
 {
     const auto &item = m_items[index.row()];
     switch (role) {
-    case NameRole:
-        return item.name;
+        case NameRole:
+            return item.name;
 
-    case BytesLoadedRole:
-        return item.bytesLoaded;
+        case BytesLoadedRole:
+            return item.bytesLoaded;
 
-    case BytesTotalRole:
-        return item.bytesTotal;
-    default:
-        return QVariant();
+        case BytesTotalRole:
+            return item.bytesTotal;
+
+        case DisplayProgressRole:
+            return Utils::formattedDataSizeProgress(item.bytesLoaded, item.bytesTotal);
+
+        default:
+            return QVariant();
     }
 }
 
@@ -119,6 +123,7 @@ QHash<int, QByteArray> Self::roleNames() const
     return {
         { NameRole, "name" },
         { BytesLoadedRole, "bytesLoaded" },
-        { BytesTotalRole, "bytesTotal" }
+        { BytesTotalRole, "bytesTotal" },
+        { DisplayProgressRole, "displayProgress" }
     };
 }

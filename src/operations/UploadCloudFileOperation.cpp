@@ -61,6 +61,7 @@ UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, c
 
 void UploadCloudFileOperation::run()
 {
+    transferUpdate(TransferCloudFileUpdate::Stage::Started, 0);
     m_parent->cloudFileSystem()->createFile(m_sourceFilePath, m_parentFolder);
 }
 
@@ -85,17 +86,14 @@ void UploadCloudFileOperation::onFileCreated(const ModifiableCloudFileHandler &c
 void UploadCloudFileOperation::onCreateCloudFileErrorOccurred(const QString &errorText)
 {
     emit notificationCreated(errorText, true);
+    transferUpdate(TransferCloudFileUpdate::Stage::Failed, 0);
     fail();
 }
 
 void UploadCloudFileOperation::onProgressChanged(const quint64 bytesLoaded, const quint64 bytesTotal)
 {
-    SetProgressCloudFileUpdate update;
-    update.parentFolder = m_parentFolder;
-    update.file = m_file;
-    update.bytesLoaded = bytesLoaded;
-    update.bytesTotal = bytesTotal;
-    m_parent->cloudFilesUpdate(update);
+    Q_UNUSED(bytesTotal)
+    transferUpdate(TransferCloudFileUpdate::Stage::Transfering, bytesLoaded);
 }
 
 void UploadCloudFileOperation::onUploaded()
@@ -109,11 +107,23 @@ void UploadCloudFileOperation::onUploaded()
         m_file->setFingerprint(FileUtils::calculateFingerprint(cloudFileLocalPath));
     }
 
-    // Send update
+    // Send updates
     CreateCloudFilesUpdate update;
     update.parentFolder = m_parentFolder;
     update.files.push_back(m_file);
     m_parent->cloudFilesUpdate(update);
 
+    transferUpdate(TransferCloudFileUpdate::Stage::Finished, m_file->size());
+
     finish();
+}
+
+void UploadCloudFileOperation::transferUpdate(const TransferCloudFileUpdate::Stage stage, const quint64 bytesLoaded)
+{
+    TransferCloudFileUpdate update;
+    update.parentFolder = m_parentFolder;
+    update.file = m_file;
+    update.stage = stage;
+    update.bytesLoaded = bytesLoaded;
+    m_parent->cloudFilesUpdate(update);
 }

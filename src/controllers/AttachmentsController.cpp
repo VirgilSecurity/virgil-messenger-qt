@@ -118,7 +118,7 @@ ModifiableMessageHandler Self::findMessageById(const QString &messageId) const
     return message;
 }
 
-void AttachmentsController::downloadAttachment(const ModifiableMessageHandler &message, const MessagesQueue::PostFunction &function)
+void Self::downloadAttachment(const ModifiableMessageHandler &message, const MessagesQueue::PostFunction &function)
 {
     const auto attachment = message->contentAsAttachment();
     auto localPath = attachment->localPath();

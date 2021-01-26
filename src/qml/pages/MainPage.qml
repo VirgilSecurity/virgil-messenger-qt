@@ -104,11 +104,6 @@ Page {
         }
     }
 
-    FilesProgressPanel {
-        // FIXME(fpohtmeh): move to CloudFileListView?
-        visible: d.isCloudFileList
-    }
-
     Connections {
         target: d.manager
 

@@ -56,6 +56,11 @@ Control {
         }
     }
 
+    FilesProgressPanel {
+        anchors.leftMargin: sideBar.width
+        visible: manager.currentState === manager.cloudFileListState
+    }
+
     LogControl {
         id: logControl
         anchors {

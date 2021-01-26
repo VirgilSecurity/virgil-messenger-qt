@@ -218,7 +218,7 @@ void CloudFilesTable::onUpdateCloudFiles(const CloudFilesUpdate &update)
     if (std::holds_alternative<ListCloudFolderUpdate>(update)) {
         return;
     }
-    if (std::holds_alternative<SetProgressCloudFileUpdate>(update)) {
+    if (std::holds_alternative<TransferCloudFileUpdate>(update)) {
         return;
     }
 

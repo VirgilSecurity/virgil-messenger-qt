@@ -35,6 +35,7 @@
 #ifndef VM_DOWNLOAD_CLOUD_FILE_OPERATION_H
 #define VM_DOWNLOAD_CLOUD_FILE_OPERATION_H
 
+#include "CloudFilesUpdate.h"
 #include "DownloadFileOperation.h"
 
 namespace vm
@@ -59,6 +60,8 @@ private:
     void onGetDownloadInfoErrorOccurred(const QString &errorText);
     void onProgressChanged(const quint64 bytesLoaded, const quint64 bytesTotal);
     void onDownloaded();
+
+    void transferUpdate(const TransferCloudFileUpdate::Stage stage, const quint64 bytesLoaded);
 
     CloudFileOperation *m_parent;
     CloudFileHandler m_file;

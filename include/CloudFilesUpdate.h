@@ -65,10 +65,18 @@ struct DeleteCloudFilesUpdate : public CloudFilesUpdateBase {
     CloudFiles files;
 };
 
-struct SetProgressCloudFileUpdate : public CloudFilesUpdateBase {
+struct TransferCloudFileUpdate : public CloudFilesUpdateBase {
+    enum class Stage
+    {
+        Started,
+        Transfering,
+        Finished,
+        Failed
+    };
+
     CloudFileHandler file;
+    Stage stage = Stage::Started;
     quint64 bytesLoaded = 0;
-    quint64 bytesTotal = 0;
 };
 
 struct DownloadCloudFileUpdate : public CloudFilesUpdateBase {
@@ -81,7 +89,7 @@ using CloudFilesUpdate = std::variant<
     MergeCloudFolderUpdate,
     CreateCloudFilesUpdate,
     DeleteCloudFilesUpdate,
-    SetProgressCloudFileUpdate,
+    TransferCloudFileUpdate,
     DownloadCloudFileUpdate
     >;
 

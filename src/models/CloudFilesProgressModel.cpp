@@ -45,9 +45,22 @@ CloudFilesProgressModel::CloudFilesProgressModel(QObject *parent)
 
 void Self::updateCloudFiles(const CloudFilesUpdate &update)
 {
-    if (auto upd = std::get_if<SetProgressCloudFileUpdate>(&update)) {
-        // FIXME(fpohtmeh): implement
-        //add(upd->file->id(), upd->file->name());
-        //setProgress(upd->file->id(), upd->bytesLoaded, upd->bytesTotal);
+    auto upd = std::get_if<TransferCloudFileUpdate>(&update);
+    if (!upd) {
+        return;
+    }
+
+    const auto &file = upd->file;
+    switch (upd->stage) {
+        case TransferCloudFileUpdate::Stage::Started:
+            add(file->id(), file->name(), file->size());
+            break;
+        case TransferCloudFileUpdate::Stage::Transfering:
+            setProgress(file->id(), upd->bytesLoaded, file->size());
+            break;
+        case TransferCloudFileUpdate::Stage::Finished:
+        case TransferCloudFileUpdate::Stage::Failed:
+            remove(file->id());
+            break;
     }
 }

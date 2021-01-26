@@ -36,6 +36,7 @@
 #define VM_UPLOAD_CLOUD_FILE_OPERATION_H
 
 #include "CloudFile.h"
+#include "CloudFilesUpdate.h"
 #include "UploadFileOperation.h"
 
 namespace vm
@@ -58,6 +59,8 @@ private:
     void onCreateCloudFileErrorOccurred(const QString &errorText);
     void onProgressChanged(const quint64 bytesLoaded, const quint64 bytesTotal);
     void onUploaded();
+
+    void transferUpdate(const TransferCloudFileUpdate::Stage stage, const quint64 bytesLoaded);
 
     CloudFileOperation *m_parent;
     CloudFileHandler m_parentFolder;

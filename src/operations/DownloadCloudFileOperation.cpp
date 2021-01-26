@@ -78,23 +78,21 @@ void DownloadCloudFileOperation::onDownloadInfoGot(const CloudFileHandler &file,
     }
     setUrl(url);
     m_encryptionKey = encryptionKey;
+    qCDebug(lcOperation) << "Started to download cloud file from" << url;
     DownloadFileOperation::run();
 }
 
 void DownloadCloudFileOperation::onGetDownloadInfoErrorOccurred(const QString &errorText)
 {
     emit notificationCreated(errorText, true);
+    transferUpdate(TransferCloudFileUpdate::Stage::Failed, 0);
     fail();
 }
 
 void DownloadCloudFileOperation::onProgressChanged(const quint64 bytesLoaded, const quint64 bytesTotal)
 {
-    SetProgressCloudFileUpdate update;
-    update.parentFolder = m_parentFolder;
-    update.file = m_file;
-    update.bytesLoaded = bytesLoaded;
-    update.bytesTotal = bytesTotal;
-    m_parent->cloudFilesUpdate(update);
+    Q_UNUSED(bytesTotal)
+    transferUpdate(TransferCloudFileUpdate::Stage::Transfering, bytesLoaded);
 }
 
 void DownloadCloudFileOperation::onDownloaded()
@@ -112,6 +110,17 @@ void DownloadCloudFileOperation::onDownloaded()
     update.fingerprint = FileUtils::calculateFingerprint(m_file->localPath());
     m_parent->cloudFilesUpdate(update);
 
-    emit notificationCreated(tr("File was decrypted"), false);
+    transferUpdate(TransferCloudFileUpdate::Stage::Finished, m_file->size());
+
     finish();
+}
+
+void DownloadCloudFileOperation::transferUpdate(const TransferCloudFileUpdate::Stage stage, const quint64 bytesLoaded)
+{
+    TransferCloudFileUpdate update;
+    update.parentFolder = m_parentFolder;
+    update.file = m_file;
+    update.stage = stage;
+    update.bytesLoaded = bytesLoaded;
+    m_parent->cloudFilesUpdate(update);
 }
