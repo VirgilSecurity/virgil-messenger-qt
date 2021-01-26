@@ -115,173 +115,138 @@ Item {
         }
     }
 
-    Item {
+    Page {
         id: maxInfoRec
+
         anchors {
             fill: parent
             topMargin: root.maxInfoTopMargin
         }
+        background: Rectangle {
+            color: Theme.contactsBackgroundColor
+        }
 
-        Page {
-            anchors.fill: parent
-            background: Rectangle {
-                color: Theme.contactsBackgroundColor
+        header: ToolBar {
+            background: HeaderBackground {
             }
 
-            header: ToolBar {
-                background: Rectangle {
-                    implicitHeight: Theme.headerHeight
-                    color: Theme.contactsBackgroundColor
-
-                    HorizontalRule {
-                        id: separator
-                        anchors.leftMargin: Theme.margin
-                        anchors.rightMargin: Theme.margin
-                        anchors.bottom: parent.bottom
-                    }
-                }
-
-                Item {
-                    id: contentRow
-                    anchors {
-                        fill: parent
-                        leftMargin: Theme.margin
-                        rightMargin: Theme.smallMargin
-                    }
-                    height: 40
-
-                    Item {
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-                        }
-                        height: parent.height
-
-                        Column {
-                            anchors {
-                                verticalCenter: parent.verticalCenter
-                                left: parent.left
-                            }
-
-                            Label {
-                                elide: Label.ElideRight
-                                font.family: Theme.mainFont
-                                font.pointSize: UiHelper.fixFontSz(15)
-                                horizontalAlignment: Qt.AlignLeft
-                                verticalAlignment: Qt.AlignVCenter
-                                font.bold: true
-                                color: Theme.primaryTextColor
-                                text: qsTr("Transfer")
-                            }
-
-                            Label {
-                                elide: Label.ElideRight
-                                font.family: Theme.mainFont
-                                horizontalAlignment: Qt.AlignLeft
-                                verticalAlignment: Qt.AlignVCenter
-                                font.pointSize: UiHelper.fixFontSz(11)
-                                color: Theme.secondaryTextColor
-                                text: qsTr("Transfering %1 file(s)").arg(listView.count)
-                            }
-                        }
-
-                        ImageButton {
-                            anchors {
-                                verticalCenter: parent.verticalCenter
-                                right: parent.right
-                            }
-                            image: "Close"
-                            onClicked: root.state = "minInfo"
-                        }
-                    }
-                }
-            }
-
-            ModelListView {
-                id: listView
+            Item {
+                id: contentRow
                 anchors {
                     fill: parent
-                    leftMargin: Theme.smallMargin
+                    leftMargin: Theme.margin
                     rightMargin: Theme.smallMargin
                 }
-                emptyIcon: "../resources/icons/File-Big.png"
-                emptyText: qsTr("Transfered files<br/>will appear here")
-                model: d.model
-                delegate: listDelegate
+                height: 40
+
+                Item {
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                    }
+                    height: parent.height
+
+                    HeaderTitle {
+                        title: qsTr("Transfer")
+                        description: qsTr("Transfering %1 file(s)").arg(listView.count)
+                    }
+
+                    ImageButton {
+                        anchors {
+                            verticalCenter: parent.verticalCenter
+                            right: parent.right
+                        }
+                        image: "Close"
+                        onClicked: root.state = "minInfo"
+                    }
+                }
             }
+        }
 
-            Component {
-                id: listDelegate
+        ModelListView {
+            id: listView
+            anchors {
+                fill: parent
+                leftMargin: Theme.smallMargin
+                rightMargin: Theme.smallMargin
+            }
+            emptyIcon: "../resources/icons/File-Big.png"
+            emptyText: qsTr("Transfered files<br/>will appear here")
+            model: d.model
+            delegate: listDelegate
+        }
 
-                ListDelegate {
-                    id: contactListDelegate
-                    width: listView.width
-                    height: d.defaultChatHeight
+        Component {
+            id: listDelegate
 
-                    Row {
-                        Layout.preferredHeight: parent.height
-                        Layout.fillWidth: true
-                        spacing: Theme.smallSpacing
+            ListDelegate {
+                id: contactListDelegate
+                width: listView.width
+                height: d.defaultChatHeight
 
-                        Image {
-                            id: multiselectAvatarItem
-                            anchors.verticalCenter: parent.verticalCenter
-                            height: Theme.avatarHeight
-                            source: "../resources/icons/File-Big.png"
-                            fillMode: Image.PreserveAspectFit
+                Row {
+                    Layout.preferredHeight: parent.height
+                    Layout.fillWidth: true
+                    spacing: Theme.smallSpacing
+
+                    Image {
+                        id: multiselectAvatarItem
+                        anchors.verticalCenter: parent.verticalCenter
+                        height: Theme.avatarHeight
+                        source: "../resources/icons/File-Big.png"
+                        fillMode: Image.PreserveAspectFit
+                    }
+
+                    Column {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width - multiselectAvatarItem.width - parent.spacing
+                        spacing: 2
+
+                        Text {
+                            color: Theme.primaryTextColor
+                            font.pointSize: UiHelper.fixFontSz(15)
+                            text: model.name
                         }
 
-                        Column {
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: parent.width - multiselectAvatarItem.width - parent.spacing
-                            spacing: 2
+                        ProgressBar {
+                            id: progressBar
+                            width: parent.width
+                            height: 2
+                            from: 0
+                            to: model.bytesTotal
+                            value: model.bytesLoaded
 
-                            Text {
-                                color: Theme.primaryTextColor
-                                font.pointSize: UiHelper.fixFontSz(15)
-                                text: model.name
+                            Behavior on value {
+                                NumberAnimation { duration: Theme.animationDuration * 2 }
                             }
 
-                            ProgressBar {
-                                id: progressBar
-                                width: parent.width
-                                height: 2
-                                from: 0
-                                to: model.bytesTotal
-                                value: model.bytesLoaded
+                            background: Rectangle {
+                                implicitWidth: progressBar.width
+                                implicitHeight: progressBar.height
+                                radius: height
+                                color: Theme.menuSeparatorColor
+                            }
 
-                                Behavior on value {
-                                    NumberAnimation { duration: Theme.animationDuration * 2 }
-                                }
+                            contentItem: Item {
+                                implicitWidth: progressBar.width
+                                implicitHeight: progressBar.height
 
-                                background: Rectangle {
-                                    implicitWidth: progressBar.width
-                                    implicitHeight: progressBar.height
+                                Rectangle {
+                                    width: parent.width * progressBar.visualPosition
+                                    height: parent.height
                                     radius: height
-                                    color: Theme.menuSeparatorColor
-                                }
-
-                                contentItem: Item {
-                                    implicitWidth: progressBar.width
-                                    implicitHeight: progressBar.height
-
-                                    Rectangle {
-                                        width: parent.width * progressBar.visualPosition
-                                        height: parent.height
-                                        radius: height
-                                        color: Theme.buttonPrimaryColor
-                                    }
+                                    color: Theme.buttonPrimaryColor
                                 }
                             }
+                        }
 
-                            Text {
-                                color: Theme.secondaryTextColor
-                                font.pointSize: UiHelper.fixFontSz(12)
-                                text: model.displayProgress
-                                width: parent.width
-                                elide: Text.ElideRight
-                                textFormat: Text.RichText
-                            }
+                        Text {
+                            color: Theme.secondaryTextColor
+                            font.pointSize: UiHelper.fixFontSz(12)
+                            text: model.displayProgress
+                            width: parent.width
+                            elide: Text.ElideRight
+                            textFormat: Text.RichText
                         }
                     }
                 }

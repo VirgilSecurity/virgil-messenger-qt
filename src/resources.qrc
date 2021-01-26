@@ -125,6 +125,8 @@
         <file>qml/components/SearchHeader.qml</file>
         <file>qml/components/SelectContactsList.qml</file>
         <file>qml/components/Header.qml</file>
+        <file>qml/components/HeaderBackground.qml</file>
+        <file>qml/components/HeaderTitle.qml</file>
         <file>qml/components/ContextMenu.qml</file>
         <file>qml/components/ContextMenuItem.qml</file>
         <file>qml/components/ContextMenuSeparator.qml</file>
