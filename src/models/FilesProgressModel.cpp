@@ -59,36 +59,34 @@ void Self::add(const QString &id, const QString &name, const quint64 bytesTotal)
 
 void Self::setProgress(const QString &id, const quint64 bytesLoaded, const quint64 bytesTotal)
 {
-    if (const auto row = findRowById(id)) {
-        auto &item = m_items[*row];
+    if (const auto index = findById(id); index.isValid()) {
+        auto &item = m_items[index.row()];
         item.bytesLoaded = bytesLoaded;
         item.bytesTotal = bytesTotal;
-
-        const auto modelIndex = index(*row);
-        emit dataChanged(modelIndex, modelIndex, { BytesLoadedRole, BytesTotalRole });
+        emit dataChanged(index, index, { BytesLoadedRole, BytesTotalRole, DisplayProgressRole });
     }
 }
 
 void Self::remove(const QString &id)
 {
-    if (const auto row = findRowById(id)) {
-        beginRemoveRows(QModelIndex(), *row, *row);
-        m_items.erase(m_items.begin() + *row);
-        endInsertRows();
+    if (const auto index = findById(id); index.isValid()) {
+        beginRemoveRows(QModelIndex(), index.row(), index.row());
+        m_items.erase(m_items.begin() + index.row());
+        endRemoveRows();
     }
 }
 
-std::optional<int> Self::findRowById(const QString &id) const
+QModelIndex Self::findById(const QString &id) const
 {
     const auto it = std::find_if(std::begin(m_items), std::end(m_items), [&id](auto item) {
         return item.id == id;
     });
 
     if (it != std::end(m_items)) {
-        return std::distance(std::begin(m_items), it);
+        return index(std::distance(std::begin(m_items), it));
     }
 
-    return std::nullopt;
+    return QModelIndex();
 }
 
 int Self::rowCount(const QModelIndex &parent) const

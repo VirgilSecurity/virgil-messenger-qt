@@ -166,11 +166,6 @@ void CloudFileSystem::deleteFiles(const CloudFiles &files)
     }
 }
 
-QDir CloudFileSystem::downloadsDir() const
-{
-    return m_downloadsDir;
-}
-
 ModifiableCloudFileHandler CloudFileSystem::createParentFolderFromInfo(const CloudFsFolder &fsFolder, const CloudFileHandler &oldFolder) const
 {
     auto folder = createFolderFromInfo(fsFolder.info, oldFolder->parentId(), oldFolder->localPath());

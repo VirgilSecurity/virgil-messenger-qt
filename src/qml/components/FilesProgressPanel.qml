@@ -2,19 +2,18 @@ import QtQuick 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15
 
-
 import "../theme"
 
 Item {
     id: root
     anchors.fill: parent
 
-    readonly property real minInfoHeight: 40
-    property real maxInfoTopMargin: height
+    property bool buttonVisible: true
 
     QtObject {
         id: d
 
+        property real maxInfoTopMargin: root.height
         readonly property var model: models.cloudFilesProgress
         readonly property real defaultChatHeight: 60
     }
@@ -24,7 +23,7 @@ Item {
         State {
             name: "minInfo"
             PropertyChanges {
-                target: root
+                target: d
                 maxInfoTopMargin: root.height
             }
         },
@@ -32,7 +31,7 @@ Item {
         State {
             name: "maxInfo"
             PropertyChanges {
-                target: root
+                target: d
                 maxInfoTopMargin: 0
             }
         }
@@ -43,7 +42,8 @@ Item {
             from: "minInfo"
             to: "maxInfo"
             NumberAnimation {
-                property: 'maxInfoTopMargin'
+                target: d
+                property: "maxInfoTopMargin"
                 duration: Theme.longAnimationDuration
                 easing.type: Easing.OutExpo
             }
@@ -53,65 +53,20 @@ Item {
             from: "maxInfo"
             to: "minInfo"
             NumberAnimation {
-                property: 'maxInfoTopMargin'
+                target: d
+                property: "maxInfoTopMargin"
                 duration: Theme.longAnimationDuration
                 easing.type: Easing.OutExpo
             }
         }
     ]
 
-    Rectangle {
-        id: minInfoRec
-        anchors {
-            horizontalCenter: parent.horizontalCenter
-            bottom: parent.bottom
-            bottomMargin: minInfoHeight
-        }
+    ListStatusButton {
+        visible: buttonVisible && root.state === "minInfo" && listView.count > 0 ? 1 : 0
+        text: qsTr("Transfering %1 file(s)").arg(listView.count)
 
-        width: shortInfoLabel.width + Theme.margin * 2
-        height: minInfoHeight
-        radius: height * 0.5
-        color: Theme.chatSeparatorColor
-        visible: opacity > 0
-        opacity: root.state === "minInfo" && listView.count > 0 ? 1 : 0
-
-        Behavior on opacity {
-            NumberAnimation { duration: Theme.animationDuration; easing.type: Easing.OutCubic }
-        }
-
-        Behavior on width {
-            NumberAnimation { duration: Theme.shortAnimationDuration; easing.type: Easing.OutCubic }
-        }
-
-        Label {
-            id: shortInfoLabel
-            anchors.centerIn: parent
-            elide: Label.ElideRight
-            text: qsTr("Transfering %1 file(s)").arg(listView.count)
-            font.family: Theme.mainFont
-            font.pointSize: UiHelper.fixFontSz(12)
-            horizontalAlignment: Qt.AlignHCenter
-            verticalAlignment: Qt.AlignVCenter
-            color: Theme.primaryTextColor
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            hoverEnabled: true
-
-            onEntered: {
-                cursorShape = Qt.PointingHandCursor
-                minInfoRec.scale = 1.02
-            }
-
-            onExited:  {
-                cursorShape = Qt.ArrowCursor
-                minInfoRec.scale = 1
-            }
-
-            onClicked: {
-                root.state = "maxInfo"
-            }
+        onClicked: {
+            root.state = "maxInfo"
         }
     }
 
@@ -120,7 +75,7 @@ Item {
 
         anchors {
             fill: parent
-            topMargin: root.maxInfoTopMargin
+            topMargin: d.maxInfoTopMargin
         }
         background: Rectangle {
             color: Theme.contactsBackgroundColor
@@ -208,36 +163,10 @@ Item {
                             text: model.name
                         }
 
-                        ProgressBar {
-                            id: progressBar
+                        LineProgressBar {
                             width: parent.width
-                            height: 2
-                            from: 0
                             to: model.bytesTotal
                             value: model.bytesLoaded
-
-                            Behavior on value {
-                                NumberAnimation { duration: Theme.animationDuration * 2 }
-                            }
-
-                            background: Rectangle {
-                                implicitWidth: progressBar.width
-                                implicitHeight: progressBar.height
-                                radius: height
-                                color: Theme.menuSeparatorColor
-                            }
-
-                            contentItem: Item {
-                                implicitWidth: progressBar.width
-                                implicitHeight: progressBar.height
-
-                                Rectangle {
-                                    width: parent.width * progressBar.visualPosition
-                                    height: parent.height
-                                    radius: height
-                                    color: Theme.buttonPrimaryColor
-                                }
-                            }
                         }
 
                         Text {

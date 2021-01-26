@@ -85,7 +85,7 @@ private:
     void removeFile(const CloudFileHandler &file);
     void updateFile(const CloudFileHandler &file, const CloudFileUpdateSource source);
     void updateDownloadedFile(const DownloadCloudFileUpdate &update);
-    std::optional<int> findRowById(const CloudFileId &cloudFileId) const;
+    QModelIndex findById(const CloudFileId &cloudFileId) const;
     void invalidateDateTime();
     void updateDescription();
 

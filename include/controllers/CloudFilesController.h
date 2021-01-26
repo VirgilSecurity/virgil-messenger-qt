@@ -54,7 +54,7 @@ class CloudFilesController : public QObject
     Q_OBJECT
     Q_PROPERTY(QString displayPath READ displayPath NOTIFY displayPathChanged)
     Q_PROPERTY(bool isRoot READ isRoot NOTIFY isRootChanged)
-    Q_PROPERTY(bool isLoading MEMBER m_isLoading NOTIFY isLoadingChanged)
+    Q_PROPERTY(bool isLoading READ isLoading NOTIFY isLoadingChanged)
 
 public:
     CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase, CloudFileSystem *cloudFileSystem,
@@ -90,11 +90,12 @@ private:
 
     QString displayPath() const;
     bool isRoot() const;
-    void setIsLoading(const bool isLoading);
+    bool isLoading() const;
+    void incLoadingCounter();
+    void decLoadingCounter();
 
     void onDbListFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
     void onCloudFilesFetched(const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
-    void onCloudFilesFetchErrorOccured(const QString &errorText);
     void onUpdateCloudFiles(const CloudFilesUpdate &update);
 
     static bool fileIdLess(const ModifiableCloudFileHandler &a, const ModifiableCloudFileHandler &b);
@@ -109,7 +110,7 @@ private:
     FoldersHierarchy m_hierarchy;
     FoldersHierarchy m_newHierarchy;
     ModifiableCloudFiles m_databaseCloudFiles;
-    bool m_isLoading = false;
+    int m_loadingCounter = 0;
 };
 }
 

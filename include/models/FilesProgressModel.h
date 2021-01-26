@@ -68,7 +68,7 @@ private:
         quint64 bytesTotal = 0;
     };
 
-    std::optional<int> findRowById(const QString &id) const;
+    QModelIndex findById(const QString &id) const;
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;

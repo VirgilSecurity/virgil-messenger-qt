@@ -98,7 +98,7 @@
         <file>qml/components/FlowListView.qml</file>
         <file>qml/components/CommonHelpers/TextInCircle.qml</file>
         <file>qml/components/Popups/Popup.qml</file>
-        <file>qml/components/Progress/Progress.qml</file>
+        <file>qml/components/LineProgressBar.qml</file>
         <file>qml/theme/qmldir</file>
         <file>qml/theme/Theme.qml</file>
         <file>qml/main.qml</file>
@@ -167,6 +167,7 @@
         <file>qml/components/CloudFileListView.qml</file>
         <file>qml/components/NewGroupChatHeader.qml</file>
         <file>qml/components/FilesProgressPanel.qml</file>
+        <file>qml/components/ListStatusButton.qml</file>
         <!-- Database -->
         <file>resources/database/createAttachments.sql</file>
         <file>resources/database/createChats.sql</file>

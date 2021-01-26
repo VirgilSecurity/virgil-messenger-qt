@@ -195,42 +195,41 @@ void CloudFilesModel::addFile(const ModifiableCloudFileHandler &file)
 
 void CloudFilesModel::removeFile(const CloudFileHandler &file)
 {
-    if (const auto row = findRowById(file->id())) {
-        beginRemoveRows(QModelIndex(), *row, *row);
-        m_files.erase(m_files.begin() + *row);
+    if (const auto index = findById(file->id()); index.isValid()) {
+        beginRemoveRows(QModelIndex(), index.row(), index.row());
+        m_files.erase(m_files.begin() + index.row());
         endRemoveRows();
     }
 }
 
 void CloudFilesModel::updateFile(const CloudFileHandler &file, const CloudFileUpdateSource source)
 {
-    if (const auto row = findRowById(file->id())) {
-        m_files[*row]->update(*file, source);
-        const auto modelIndex = index(*row);
-        emit dataChanged(modelIndex, modelIndex, rolesFromUpdateSource(source, file->isFolder()));
+    if (const auto index = findById(file->id()); index.isValid()) {
+        m_files[index.row()]->update(*file, source);
+        emit dataChanged(index, index, rolesFromUpdateSource(source, file->isFolder()));
     }
 }
 
 void CloudFilesModel::updateDownloadedFile(const DownloadCloudFileUpdate &update)
 {
     const auto &file = update.file;
-    if (const auto row = findRowById(file->id())) {
-        m_files[*row]->setFingerprint(update.fingerprint);
+    if (const auto index = findById(file->id()); index.isValid()) {
+        m_files[index.row()]->setFingerprint(update.fingerprint);
         // No roles to update
     }
 }
 
-std::optional<int> CloudFilesModel::findRowById(const CloudFileId &cloudFileId) const
+QModelIndex CloudFilesModel::findById(const CloudFileId &cloudFileId) const
 {
     const auto it = std::find_if(std::begin(m_files), std::end(m_files), [&cloudFileId](auto cloudFile) {
         return cloudFile->id() == cloudFileId;
     });
 
     if (it != std::end(m_files)) {
-        return std::distance(std::begin(m_files), it);
+        return index(std::distance(std::begin(m_files), it));
     }
 
-    return std::nullopt;
+    return QModelIndex();
 }
 
 void CloudFilesModel::invalidateDateTime()

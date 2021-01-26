@@ -70,7 +70,15 @@ Self::CloudFilesController(const Settings *settings, Models *models, UserDatabas
         m_rootFolder->setLocalPath(downloadsDir.absolutePath());
     });
     connect(cloudFileSystem, &CloudFileSystem::listFetched, this, &Self::onCloudFilesFetched);
-    connect(cloudFileSystem, &CloudFileSystem::fetchListErrorOccured, this, &Self::onCloudFilesFetchErrorOccured);
+    // Connect to loading counter
+    connect(cloudFileSystem, &CloudFileSystem::listFetched, this, &Self::decLoadingCounter);
+    connect(cloudFileSystem, &CloudFileSystem::fetchListErrorOccured, this, &Self::decLoadingCounter);
+    connect(cloudFileSystem, &CloudFileSystem::folderCreated, this, &Self::decLoadingCounter);
+    connect(cloudFileSystem, &CloudFileSystem::createFolderErrorOccured, this, &Self::decLoadingCounter);
+    connect(cloudFileSystem, &CloudFileSystem::fileCreated, this, &Self::decLoadingCounter);
+    connect(cloudFileSystem, &CloudFileSystem::createFileErrorOccurred, this, &Self::decLoadingCounter);
+    connect(cloudFileSystem, &CloudFileSystem::fileDeleted, this, &Self::decLoadingCounter);
+    connect(cloudFileSystem, &CloudFileSystem::deleteFileErrorOccurred, this, &Self::decLoadingCounter);
 }
 
 CloudFilesModel *Self::model()
@@ -144,11 +152,16 @@ void Self::addFile(const QVariant &attachmentUrl)
 
 void Self::deleteFiles()
 {
-    m_models->cloudFilesQueue()->pushDeleteFiles(m_models->cloudFiles()->selectedFiles());
+    const auto files = m_models->cloudFiles()->selectedFiles();
+    for (auto f : files) {
+        incLoadingCounter();
+    }
+    m_models->cloudFilesQueue()->pushDeleteFiles(files);
 }
 
 void Self::createFolder(const QString &name)
 {
+    incLoadingCounter();
     m_models->cloudFilesQueue()->pushCreateFolder(name, m_hierarchy.back());
 }
 
@@ -180,13 +193,27 @@ bool CloudFilesController::isRoot() const
     return m_hierarchy.size() == 1;
 }
 
-void CloudFilesController::setIsLoading(const bool isLoading)
+bool CloudFilesController::isLoading() const
 {
-    if (isLoading == m_isLoading) {
-        return;
+    return m_loadingCounter > 0;
+}
+
+void CloudFilesController::incLoadingCounter()
+{
+    const auto wasLoading = isLoading();
+    ++m_loadingCounter;
+    if (wasLoading != isLoading()) {
+        emit isLoadingChanged(true);
     }
-    m_isLoading = isLoading;
-    emit isLoadingChanged(isLoading);
+}
+
+void CloudFilesController::decLoadingCounter()
+{
+    const auto wasLoading = isLoading();
+    --m_loadingCounter;
+    if (wasLoading != isLoading()) {
+        emit isLoadingChanged(false);
+    }
 }
 
 void Self::onDbListFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles)
@@ -215,7 +242,7 @@ void Self::onDbListFetched(const CloudFileHandler &parentFolder, const Modifiabl
 
     // Fetch cloud folder
     m_databaseCloudFiles = cloudFiles;
-    setIsLoading(true);
+    incLoadingCounter();
     m_cloudFileSystem->fetchList(parentFolder);
 }
 
@@ -226,7 +253,7 @@ void CloudFilesController::onCloudFilesFetched(const ModifiableCloudFileHandler 
         return;
     }
 
-    // Emit merge update
+    // Build merge update
 
     MergeCloudFolderUpdate mergeUpdate;
     mergeUpdate.parentFolder = parentFolder;
@@ -266,16 +293,6 @@ void CloudFilesController::onCloudFilesFetched(const ModifiableCloudFileHandler 
     }
 
     emit updateCloudFiles(mergeUpdate);
-
-    // Finish loading
-
-    setIsLoading(false);
-}
-
-void CloudFilesController::onCloudFilesFetchErrorOccured(const QString &errorText)
-{
-    Q_UNUSED(errorText)
-    setIsLoading(false);
 }
 
 void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)

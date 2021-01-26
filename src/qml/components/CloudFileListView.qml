@@ -16,17 +16,9 @@ ModelListView {
         readonly property real defaultChatHeight: 60
     }
 
-    Text {
+    ListStatusButton {
         text: qsTr("Updating...")
-        color: "white"
-        horizontalAlignment: Qt.AlignHCenter
         visible: controllers.cloudFiles.isLoading
-        anchors {
-            left: parent.left
-            right: parent.right
-            bottom: parent.bottom
-            bottomMargin: Theme.margin
-        }
     }
 
     delegate: ListDelegate {

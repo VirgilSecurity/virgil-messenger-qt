@@ -67,8 +67,6 @@ public:
     bool decryptFile(const QString &sourcePath, const QByteArray &encryptionKey, const CloudFileHandler &file);
     void deleteFiles(const CloudFiles &files);
 
-    QDir downloadsDir() const;
-
 signals:
     void downloadsDirChanged(const QDir &downloadsDir);
 
