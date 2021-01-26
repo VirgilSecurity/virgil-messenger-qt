@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,9 +32,25 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VS_SCHEMEVERSION_H
-#define VS_SCHEMEVERSION_H
+#ifndef VM_GROUPS_TABLE_H
+#define VM_GROUPS_TABLE_H
 
-#define VERSION_DATABASE_SCHEME 0
+#include "core/DatabaseTable.h"
 
-#endif // VS_SCHEMEVERSION_H
+namespace vm
+{
+class GroupsTable : public DatabaseTable
+{
+    Q_OBJECT
+
+public:
+    explicit GroupsTable(Database *database);
+
+signals:
+
+private:
+    bool create() override;
+};
+}
+
+#endif // VM_GROUPS_TABLE_H

@@ -172,6 +172,9 @@
         <file>resources/database/createCloudFiles.sql</file>
         <file>resources/database/createContacts.sql</file>
         <file>resources/database/createMessages.sql</file>
+        <file>resources/database/createGroups.sql</file>
+        <file>resources/database/createGroupMembers.sql</file>
+        <file>resources/database/createGroupEpochs.sql</file>
         <file>resources/database/deleteCloudFileById.sql</file>
         <file>resources/database/deleteCloudFilesByParentId.sql</file>
         <file>resources/database/insertAttachment.sql</file>

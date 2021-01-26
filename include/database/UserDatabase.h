@@ -47,6 +47,9 @@ class AttachmentsTable;
 class ChatsTable;
 class CloudFilesTable;
 class ContactsTable;
+class GroupEpochsTable;
+class GroupMembersTable;
+class GroupsTable;
 class MessagesTable;
 
 class UserDatabase : public Database
@@ -59,12 +62,25 @@ public:
 
     const AttachmentsTable *attachmentsTable() const;
     AttachmentsTable *attachmentsTable();
+
     const ChatsTable *chatsTable() const;
     ChatsTable *chatsTable();
+
     const CloudFilesTable *cloudFilesTable() const;
     CloudFilesTable *cloudFilesTable();
+
     const ContactsTable *contactsTable() const;
     ContactsTable *contactsTable();
+
+    const GroupEpochsTable *groupEpochsTable() const;
+    GroupEpochsTable *groupEpochsTable();
+
+    const GroupMembersTable *groupMembersTable() const;
+    GroupMembersTable *groupMembersTable();
+
+    const GroupsTable *groupsTable() const;
+    GroupsTable *groupsTable();
+
     const MessagesTable *messagesTable() const;
     MessagesTable *messagesTable();
 
@@ -96,11 +112,6 @@ private:
     void onResetUnreadCount(const ChatHandler &chat);
 
     const QDir m_databaseDir;
-    int m_attachmentsTableIndex;
-    int m_chatsTableIndex;
-    int m_cloudFilesTableIndex;
-    int m_contactsTableIndex;
-    int m_messagesTableIndex;
 };
 }
 

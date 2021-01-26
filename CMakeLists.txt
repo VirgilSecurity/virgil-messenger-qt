@@ -467,8 +467,10 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/database/ContactsTable.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/ChatsTable.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/CloudFilesTable.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/database/GroupEpochsTable.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/database/GroupMembersTable.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/database/GroupsTable.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/MessagesTable.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/database/SchemeVersion.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/UserDatabase.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/UserDatabaseMigration.h
         # Logging
@@ -635,6 +637,9 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/database/ContactsTable.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/ChatsTable.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/CloudFilesTable.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/database/GroupEpochsTable.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/database/GroupMembersTable.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/database/GroupsTable.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/MessagesTable.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/UserDatabase.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/UserDatabaseMigration.cpp

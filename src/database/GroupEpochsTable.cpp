@@ -32,33 +32,27 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_GROUP_H
-#define VM_GROUP_H
+#include "GroupEpochsTable.h"
 
-#include "GroupId.h"
-#include "Contact.h"
+#include "core/Database.h"
+#include "core/DatabaseUtils.h"
 
-#include <list>
+using namespace vm;
+using Self = GroupEpochsTable;
 
-namespace vm
+Self::GroupEpochsTable(Database *database)
+    : DatabaseTable(QLatin1String("groupEpochs"), database)
 {
-class Group
-{
-public:
-    Group(GroupId id, QString name, Contacts contacts);
-
-    GroupId id() const;
-    QString name() const;
-    Contacts contacts() const;
-
-private:
-    GroupId m_id;
-    QString m_name;
-    Contacts m_contacts;
-};
-
-using GroupHandler = std::shared_ptr<Group>;
-
 }
 
-#endif // VM_GROUP_H
+bool Self::create()
+{
+    if (DatabaseUtils::readExecQueries(database(), QLatin1String("createGroupEpochs"))) {
+        qCDebug(lcDatabase) << "Table 'groupEpochs' was created.";
+        return true;
+
+    } else {
+        qCCritical(lcDatabase) << "Failed to create table 'groupEpochs'.";
+        return false;
+    }
+}

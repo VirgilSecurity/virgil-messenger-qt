@@ -32,33 +32,25 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_GROUP_H
-#define VM_GROUP_H
+#ifndef VM_GROUP_EPOCHS_TABLE_H
+#define VM_GROUP_EPOCHS_TABLE_H
 
-#include "GroupId.h"
-#include "Contact.h"
-
-#include <list>
+#include "core/DatabaseTable.h"
 
 namespace vm
 {
-class Group
+class GroupEpochsTable : public DatabaseTable
 {
-public:
-    Group(GroupId id, QString name, Contacts contacts);
+    Q_OBJECT
 
-    GroupId id() const;
-    QString name() const;
-    Contacts contacts() const;
+public:
+    explicit GroupEpochsTable(Database *database);
+
+signals:
 
 private:
-    GroupId m_id;
-    QString m_name;
-    Contacts m_contacts;
+    bool create() override;
 };
-
-using GroupHandler = std::shared_ptr<Group>;
-
 }
 
-#endif // VM_GROUP_H
+#endif // VM_GROUP_EPOCHS_TABLE_H

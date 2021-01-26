@@ -130,7 +130,7 @@ void Self::createChatWithUserId(const UserId &userId)
 
 void ChatsController::createGroupChat(const QString &groupName, const Contacts &contacts)
 {
-    QtConcurrent::run([this, groupName = groupName, contacts = contacts]() {
+    QtConcurrent::run([this, groupName, contacts]() {
         if (!m_messenger) {
             qCWarning(lcController) << "Messenger was not initialized";
             emit errorOccurred(tr("Group con not be created"));
@@ -139,7 +139,7 @@ void ChatsController::createGroupChat(const QString &groupName, const Contacts &
         //
         //  FIXME: use contacts
         //
-        auto group = std::make_shared<Group>(Utils::createUuid(), groupName);
+        auto group = std::make_shared<Group>(Utils::createUuid(), std::move(groupName), std::move(contacts));
 
         emit createChatWithGroup(group, QPrivateSignal());
 
