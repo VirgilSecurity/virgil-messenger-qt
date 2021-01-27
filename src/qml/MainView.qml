@@ -6,6 +6,8 @@ import "./base"
 import "./theme"
 import "./components"
 
+import "./pages" //delete
+
 Control {
     id: mainView
 
@@ -220,5 +222,14 @@ Control {
         manager.signInUsernameState.entered.connect(d.openSignInUsernamePage)
         manager.signUpState.entered.connect(d.openSignUpPage)
         manager.downloadKeyState.entered.connect(d.openDownloadKeyPage)
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        color: 'black'
+    }
+
+    ChatInfoPage {
+        anchors.fill: parent
     }
 }
