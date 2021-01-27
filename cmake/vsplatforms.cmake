@@ -74,7 +74,7 @@ if (VS_CUSTOMER)
     message(STATUS "Write VS_CUSTOMER transitive-args.cmake")
 endif ()
 
-if (CMAKE_BUILD_TYPE)
+if (CMAKE_BUILD_TYPE AND VS_PLATFORM)
     file(APPEND "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake" "set(CMAKE_BUILD_TYPE \"${CMAKE_BUILD_TYPE}\" CACHE STRING \"Build type\")\n")
     message(STATUS "Write CMAKE_BUILD_TYPE  transitive-args.cmake")
 endif ()
