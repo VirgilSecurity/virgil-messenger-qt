@@ -36,6 +36,7 @@
 #define VM_DOWNLOAD_CLOUD_FILE_OPERATION_H
 
 #include "CloudFilesUpdate.h"
+#include "CloudFileRequestId.h"
 #include "DownloadFileOperation.h"
 
 namespace vm
@@ -56,17 +57,18 @@ private:
 
     QString tempFilePath() const;
 
-    void onDownloadInfoGot(const CloudFileHandler &file, const QUrl &url, const QByteArray &encryptionKey);
-    void onGetDownloadInfoErrorOccurred(const QString &errorText);
+    void onDownloadInfoGot(const CloudFileRequestId requestId, const CloudFileHandler &file, const QUrl &url, const QByteArray &encryptionKey);
+    void onGetDownloadInfoErrorOccurred(const CloudFileRequestId requestId, const QString &errorText);
     void onProgressChanged(const quint64 bytesLoaded, const quint64 bytesTotal);
     void onDownloaded();
-    void onFailed();
+    void sendFailedTransferUpdate();
 
     void transferUpdate(const TransferCloudFileUpdate::Stage stage, const quint64 bytesLoaded);
 
     CloudFileOperation *m_parent;
     CloudFileHandler m_file;
     CloudFileHandler m_parentFolder;
+    CloudFileRequestId m_requestId = 0;
     QByteArray m_encryptionKey;
 };
 }

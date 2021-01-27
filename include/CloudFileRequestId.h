@@ -32,38 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_DELETE_CLOUD_FILES_OPERATION_H
-#define VM_DELETE_CLOUD_FILES_OPERATION_H
+#ifndef VM_CLOUD_FILE_REQUEST_ID_H
+#define VM_CLOUD_FILE_REQUEST_ID_H
 
-#include "CloudFile.h"
-#include "CloudFileRequestId.h"
-#include "Operation.h"
+#include <QtGlobal>
 
 namespace vm
 {
-class CloudFileOperation;
-
-class DeleteCloudFilesOperation : public Operation
-{
-    Q_OBJECT
-
-public:
-    DeleteCloudFilesOperation(CloudFileOperation *parent, const CloudFiles &files);
-
-    void run() override;
-
-private:
-    void incProcessedCount();
-
-    void onFileDeleted(const CloudFileRequestId requestId, const CloudFileHandler &file);
-    void onDeleteFileErrorOccured(const CloudFileRequestId requestId, const QString &errorText);
-
-    CloudFileOperation *m_parent;
-    CloudFiles m_files;
-    CloudFileRequestId m_requestId = 0;
-    size_t m_processedCount = 0;
-    CloudFiles m_deletedFiles;
-};
+    using CloudFileRequestId = quint64;
 }
 
-#endif // VM_DELETE_CLOUD_FILES_OPERATION_H
+#endif // VM_CLOUD_FILE_REQUEST_ID_H

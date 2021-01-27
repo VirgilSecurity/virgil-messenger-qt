@@ -36,6 +36,7 @@
 #define VM_UPLOAD_CLOUD_FILE_OPERATION_H
 
 #include "CloudFile.h"
+#include "CloudFileRequestId.h"
 #include "CloudFilesUpdate.h"
 #include "UploadFileOperation.h"
 
@@ -55,16 +56,17 @@ public:
 private:
     void cleanup() override;
 
-    void onFileCreated(const ModifiableCloudFileHandler &cloudFile, const QString &encryptedFilePath, const QUrl &putUrl);
-    void onCreateCloudFileErrorOccurred(const QString &errorText);
+    void onFileCreated(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &cloudFile, const QString &encryptedFilePath, const QUrl &putUrl);
+    void onCreateCloudFileErrorOccurred(const CloudFileRequestId requestId, const QString &errorText);
     void onProgressChanged(const quint64 bytesLoaded, const quint64 bytesTotal);
     void onUploaded();
-    void onFailed();
+    void sendFailedTransferUpdate();
 
     void transferUpdate(const TransferCloudFileUpdate::Stage stage, const quint64 bytesLoaded);
 
     CloudFileOperation *m_parent;
     CloudFileHandler m_parentFolder;
+    CloudFileRequestId m_requestId = 0;
     ModifiableCloudFileHandler m_file;
     QString m_sourceFilePath;
 };

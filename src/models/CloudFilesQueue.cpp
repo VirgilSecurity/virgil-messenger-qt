@@ -96,6 +96,11 @@ void Self::invalidateOperation(OperationSourcePtr source)
     Q_UNUSED(source)
 }
 
+qsizetype Self::maxAttemptCount() const
+{
+    return 0;
+}
+
 void Self::onPushCreateFolder(const QString &name, const CloudFileHandler &parentFolder)
 {
     auto source = std::make_shared<CloudFileOperationSource>(CloudFileOperationSource::Type::CreateFolder);

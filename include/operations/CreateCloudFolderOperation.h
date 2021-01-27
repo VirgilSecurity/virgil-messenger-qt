@@ -36,6 +36,7 @@
 #define VM_CREATE_CLOUD_FOLDER_OPERATION_H
 
 #include "CloudFile.h"
+#include "CloudFileRequestId.h"
 #include "Operation.h"
 
 namespace vm
@@ -52,11 +53,13 @@ public:
     void run() override;
 
 private:
-    void onCreated(const ModifiableCloudFileHandler &folder);
+    void onCreated(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &folder);
+    void onCreateErrorOccured(const CloudFileRequestId requestId, const QString &errorText);
 
     CloudFileOperation *m_parent;
     QString m_name;
     CloudFileHandler m_parentFolder;
+    CloudFileRequestId m_requestId = 0;
 };
 }
 

@@ -53,12 +53,13 @@ DownloadCloudFileOperation::DownloadCloudFileOperation(CloudFileOperation *paren
     connect(m_parent->cloudFileSystem(), &CloudFileSystem::getDownloadInfoErrorOccurred, this, &DownloadCloudFileOperation::onGetDownloadInfoErrorOccurred);
     connect(this, &DownloadFileOperation::progressChanged, this, &DownloadCloudFileOperation::onProgressChanged);
     connect(this, &DownloadFileOperation::downloaded, this, &DownloadCloudFileOperation::onDownloaded);
-    connect(this, &DownloadFileOperation::failed, this, &DownloadCloudFileOperation::onFailed);
+    connect(this, &DownloadFileOperation::failed, this, &DownloadCloudFileOperation::sendFailedTransferUpdate);
+    connect(this, &DownloadFileOperation::invalidated, this, &DownloadCloudFileOperation::sendFailedTransferUpdate);
 }
 
 void DownloadCloudFileOperation::run()
 {
-    m_parent->cloudFileSystem()->getDownloadInfo(m_file);
+    m_requestId = m_parent->cloudFileSystem()->getDownloadInfo(m_file);
 }
 
 void DownloadCloudFileOperation::cleanup()
@@ -72,20 +73,22 @@ QString DownloadCloudFileOperation::tempFilePath() const
     return m_parent->settings()->cloudFilesCacheDir().filePath(QLatin1String("download-") + m_file->id());
 }
 
-void DownloadCloudFileOperation::onDownloadInfoGot(const CloudFileHandler &file, const QUrl &url, const QByteArray &encryptionKey)
+void DownloadCloudFileOperation::onDownloadInfoGot(const CloudFileRequestId requestId, const CloudFileHandler &file, const QUrl &url, const QByteArray &encryptionKey)
 {
     Q_UNUSED(file)
-    // FIXME(fpohtmeh): check if it's answer for this request
-    setUrl(url);
-    m_encryptionKey = encryptionKey;
-    qCDebug(lcOperation) << "Started to download cloud file from" << url;
-    DownloadFileOperation::run();
+    if (m_requestId == requestId) {
+        setUrl(url);
+        m_encryptionKey = encryptionKey;
+        qCDebug(lcOperation) << "Started to download cloud file from" << url;
+        DownloadFileOperation::run();
+    }
 }
 
-void DownloadCloudFileOperation::onGetDownloadInfoErrorOccurred(const QString &errorText)
+void DownloadCloudFileOperation::onGetDownloadInfoErrorOccurred(const CloudFileRequestId requestId, const QString &errorText)
 {
-    // FIXME(fpohtmeh): check if it's answer for this request
-    failAndNotify(errorText);
+    if(m_requestId == requestId) {
+        failAndNotify(errorText);
+    }
 }
 
 void DownloadCloudFileOperation::onProgressChanged(const quint64 bytesLoaded, const quint64 bytesTotal)
@@ -113,7 +116,7 @@ void DownloadCloudFileOperation::onDownloaded()
     finish();
 }
 
-void DownloadCloudFileOperation::onFailed()
+void DownloadCloudFileOperation::sendFailedTransferUpdate()
 {
     transferUpdate(TransferCloudFileUpdate::Stage::Failed, 0);
 }

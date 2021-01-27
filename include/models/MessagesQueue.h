@@ -65,6 +65,7 @@ signals:
 private:
     Operation *createOperation(OperationSourcePtr source) override;
     void invalidateOperation(OperationSourcePtr source) override;
+    qsizetype maxAttemptCount() const override;
 
     void onPushMessage(const ModifiableMessageHandler &message);
     void onPushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath, const PostFunction &postFunction);

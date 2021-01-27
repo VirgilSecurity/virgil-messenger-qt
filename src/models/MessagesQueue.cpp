@@ -115,6 +115,12 @@ void Self::invalidateOperation(OperationSourcePtr source)
 }
 
 
+qsizetype Self::maxAttemptCount() const
+{
+    return 3;
+}
+
+
 void Self::onDatabaseOpened()
 {
     start();

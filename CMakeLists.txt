@@ -379,6 +379,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/ConfirmationCodeType.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFile.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileId.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileRequestId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileSystem.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileUpdateSource.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFilesUpdate.h

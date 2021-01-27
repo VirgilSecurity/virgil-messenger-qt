@@ -95,7 +95,7 @@ private:
     void decLoadingCounter();
 
     void onDbListFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
-    void onCloudFilesFetched(const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
+    void onCloudFilesFetched(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
     void onUpdateCloudFiles(const CloudFilesUpdate &update);
 
     static bool fileIdLess(const ModifiableCloudFileHandler &a, const ModifiableCloudFileHandler &b);
@@ -110,6 +110,7 @@ private:
     FoldersHierarchy m_hierarchy;
     FoldersHierarchy m_newHierarchy;
     ModifiableCloudFiles m_databaseCloudFiles;
+    CloudFileRequestId m_fetchRequestId = 0;
     int m_loadingCounter = 0;
 };
 }

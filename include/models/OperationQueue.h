@@ -70,6 +70,7 @@ signals:
 protected:
     virtual Operation *createOperation(OperationSourcePtr source) = 0;
     virtual void invalidateOperation(OperationSourcePtr source) = 0;
+    virtual qsizetype maxAttemptCount() const = 0;
 
 private:
     void addSourceImpl(OperationSourcePtr source, const bool run);

@@ -22,7 +22,7 @@ MenuItem {
         rightPadding: d.itemPadding
         text: menuItem.text
         font: menuItem.font
-        color: Theme.primaryTextColor
+        color: menuItem.enabled ? Theme.primaryTextColor : Qt.darker(Theme.primaryTextColor, 1.5)
         horizontalAlignment: Text.AlignLeft
         verticalAlignment: Text.AlignVCenter
         elide: Text.ElideRight

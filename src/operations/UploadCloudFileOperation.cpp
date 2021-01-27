@@ -57,12 +57,13 @@ UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, c
     connect(m_parent->cloudFileSystem(), &CloudFileSystem::createFileErrorOccurred, this, &UploadCloudFileOperation::onCreateCloudFileErrorOccurred);
     connect(this, &UploadFileOperation::progressChanged, this, &UploadCloudFileOperation::onProgressChanged);
     connect(this, &UploadFileOperation::uploaded, this, &UploadCloudFileOperation::onUploaded);
-    connect(this, &UploadFileOperation::failed, this, &UploadCloudFileOperation::onFailed);
+    connect(this, &UploadFileOperation::failed, this, &UploadCloudFileOperation::sendFailedTransferUpdate);
+    connect(this, &UploadFileOperation::invalidated, this, &UploadCloudFileOperation::sendFailedTransferUpdate);
 }
 
 void UploadCloudFileOperation::run()
 {
-    m_parent->cloudFileSystem()->createFile(m_sourceFilePath, m_parentFolder);
+    m_requestId = m_parent->cloudFileSystem()->createFile(m_sourceFilePath, m_parentFolder);
 }
 
 void UploadCloudFileOperation::cleanup()
@@ -71,9 +72,12 @@ void UploadCloudFileOperation::cleanup()
     FileUtils::removeFile(filePath()); // remove encrypted file
 }
 
-void UploadCloudFileOperation::onFileCreated(const ModifiableCloudFileHandler &cloudFile, const QString &encryptedFilePath, const QUrl &putUrl)
+void UploadCloudFileOperation::onFileCreated(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &cloudFile, const QString &encryptedFilePath, const QUrl &putUrl)
 {
-    // FIXME(fpohtmeh): check if it's answer for this request
+    if (m_requestId != requestId) {
+        return;
+    }
+
     setFilePath(encryptedFilePath);
     if (!openFileHandle(QFile::ReadOnly)) {
         return;
@@ -85,10 +89,11 @@ void UploadCloudFileOperation::onFileCreated(const ModifiableCloudFileHandler &c
     startUploadToSlot(putUrl, putUrl); // NOTE(fpohtmeh): We don't know get url at this moment, using of putUrl is fine
 }
 
-void UploadCloudFileOperation::onCreateCloudFileErrorOccurred(const QString &errorText)
+void UploadCloudFileOperation::onCreateCloudFileErrorOccurred(const CloudFileRequestId requestId, const QString &errorText)
 {
-    // FIXME(fpohtmeh): check if it's answer for this request
-    failAndNotify(errorText);
+    if (m_requestId == requestId) {
+        failAndNotify(errorText);
+    }
 }
 
 void UploadCloudFileOperation::onProgressChanged(const quint64 bytesLoaded, const quint64 bytesTotal)
@@ -119,7 +124,7 @@ void UploadCloudFileOperation::onUploaded()
     finish();
 }
 
-void UploadCloudFileOperation::onFailed()
+void UploadCloudFileOperation::sendFailedTransferUpdate()
 {
     transferUpdate(TransferCloudFileUpdate::Stage::Failed, 0);
 }

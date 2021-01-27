@@ -52,18 +52,17 @@ DeleteCloudFilesOperation::DeleteCloudFilesOperation(CloudFileOperation *parent,
 
 void DeleteCloudFilesOperation::run()
 {
-    m_parent->cloudFileSystem()->deleteFiles(m_files);
+    m_requestId = m_parent->cloudFileSystem()->deleteFiles(m_files);
 }
 
-void DeleteCloudFilesOperation::processDeletedFiles()
+void DeleteCloudFilesOperation::incProcessedCount()
 {
-    if (m_deletedCount == 0) {
+    if (++m_processedCount < m_files.size()) {
         return;
     }
 
-    CloudFiles deletedFiles(m_files.begin(), m_files.begin() + m_deletedCount);
     // Delete local files
-    for (auto &file : deletedFiles) {
+    for (auto &file : m_deletedFiles) {
         if (file->isFolder()) {
             FileUtils::removeDir(file->localPath());
         }
@@ -74,21 +73,29 @@ void DeleteCloudFilesOperation::processDeletedFiles()
 
     // Emit update
     DeleteCloudFilesUpdate update;
-    update.files = deletedFiles;
+    update.files = m_deletedFiles;
     m_parent->cloudFilesUpdate(update);
-}
 
-void DeleteCloudFilesOperation::onFileDeleted()
-{
-    ++m_deletedCount;
-    if (m_deletedCount == m_files.size()) {
-        processDeletedFiles();
+    if (m_deletedFiles.size() < m_files.size()) {
+        failAndNotify(tr("Some files were not deleted"));
+    }
+    else {
         finish();
     }
 }
 
-void DeleteCloudFilesOperation::onDeleteFileErrorOccured()
+void DeleteCloudFilesOperation::onFileDeleted(const CloudFileRequestId requestId, const CloudFileHandler &file)
 {
-    processDeletedFiles();
-    failAndNotify(tr("File deletion failed"));
+    if (m_requestId == requestId) {
+        m_deletedFiles.push_back(file);
+        incProcessedCount();
+    }
+}
+
+void DeleteCloudFilesOperation::onDeleteFileErrorOccured(const CloudFileRequestId requestId, const QString &errorText)
+{
+    Q_UNUSED(errorText)
+    if (m_requestId == requestId) {
+        incProcessedCount();
+    }
 }

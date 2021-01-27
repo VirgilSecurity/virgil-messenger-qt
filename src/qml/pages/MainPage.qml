@@ -58,12 +58,14 @@ Page {
             text: qsTr("Add file")
             onTriggered: attachmentPicker.open(AttachmentTypes.file)
             visible: d.isCloudFileList
+            enabled: !controllers.cloudFiles.isLoading
         }
 
         ContextMenuItem {
             text: qsTr("New directory")
             onTriggered: createCloudFolderDialog.open()
             visible: d.isCloudFileList
+            enabled: !controllers.cloudFiles.isLoading
         }
 
         ContextMenuSeparator {

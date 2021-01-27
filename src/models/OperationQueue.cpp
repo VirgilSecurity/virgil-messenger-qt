@@ -118,13 +118,12 @@ void Self::runSource(OperationSourcePtr source)
 
 void Self::onOperationFailed(OperationSourcePtr source)
 {
-    const int maxAttemptCount = 3;
-    if (source->attemptCount() < maxAttemptCount) {
+    if (source->attemptCount() < maxAttemptCount()) {
         qCDebug(m_category) << "Enqueued failed operation source:" << source->toString();
         source->incAttemptCount();
         addSourceImpl(std::move(source), false);
     }
-    else if (source->attemptCount() == maxAttemptCount) {
+    else if (source->attemptCount() == maxAttemptCount()) {
         invalidateOperation(source);
     }
 }

@@ -243,14 +243,13 @@ void Self::onDbListFetched(const CloudFileHandler &parentFolder, const Modifiabl
     // Fetch cloud folder
     m_databaseCloudFiles = cloudFiles;
     incLoadingCounter();
-    m_cloudFileSystem->fetchList(parentFolder);
+    m_fetchRequestId = m_cloudFileSystem->fetchList(parentFolder);
 }
 
-void CloudFilesController::onCloudFilesFetched(const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles)
+void CloudFilesController::onCloudFilesFetched(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles)
 {
-    if (parentFolder->id() != m_hierarchy.back()->id()) {
-        qCDebug(lcController) << "Fetched cloud folder isn't relevant more" << parentFolder->id();
-        return;
+    if (requestId != m_fetchRequestId) {
+        return; // fetch isn' relevant more because newer request exists
     }
 
     // Build merge update

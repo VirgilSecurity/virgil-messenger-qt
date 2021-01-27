@@ -49,20 +49,28 @@ CreateCloudFolderOperation::CreateCloudFolderOperation(CloudFileOperation *paren
     , m_parentFolder(parentFolder)
 {
     connect(m_parent->cloudFileSystem(), &CloudFileSystem::folderCreated, this, &CreateCloudFolderOperation::onCreated);
-    connect(m_parent->cloudFileSystem(), &CloudFileSystem::createFolderErrorOccured, this, &CreateCloudFolderOperation::failAndNotify);
+    connect(m_parent->cloudFileSystem(), &CloudFileSystem::createFolderErrorOccured, this, &CreateCloudFolderOperation::onCreateErrorOccured);
 }
 
 void CreateCloudFolderOperation::run()
 {
-    m_parent->cloudFileSystem()->createFolder(m_name, m_parentFolder);
+    m_requestId = m_parent->cloudFileSystem()->createFolder(m_name, m_parentFolder);
 }
 
-void CreateCloudFolderOperation::onCreated(const ModifiableCloudFileHandler &folder)
+void CreateCloudFolderOperation::onCreated(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &folder)
 {
-    CreateCloudFilesUpdate update;
-    update.parentFolder = m_parentFolder;
-    update.files.push_back(folder);
-    m_parent->cloudFilesUpdate(update);
+    if (m_requestId == requestId) {
+        CreateCloudFilesUpdate update;
+        update.parentFolder = m_parentFolder;
+        update.files.push_back(folder);
+        m_parent->cloudFilesUpdate(update);
+        finish();
+    }
+}
 
-    finish();
+void CreateCloudFolderOperation::onCreateErrorOccured(const CloudFileRequestId requestId, const QString &errorText)
+{
+    if (m_requestId == requestId) {
+        failAndNotify(errorText);
+    }
 }
