@@ -53,7 +53,6 @@ public:
 
 private:
     void onCreated(const ModifiableCloudFileHandler &folder);
-    void onErrorOccured(const QString &errorText);
 
     CloudFileOperation *m_parent;
     QString m_name;

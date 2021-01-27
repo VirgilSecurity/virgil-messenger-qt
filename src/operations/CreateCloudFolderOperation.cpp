@@ -49,7 +49,7 @@ CreateCloudFolderOperation::CreateCloudFolderOperation(CloudFileOperation *paren
     , m_parentFolder(parentFolder)
 {
     connect(m_parent->cloudFileSystem(), &CloudFileSystem::folderCreated, this, &CreateCloudFolderOperation::onCreated);
-    connect(m_parent->cloudFileSystem(), &CloudFileSystem::createFolderErrorOccured, this, &CreateCloudFolderOperation::onErrorOccured);
+    connect(m_parent->cloudFileSystem(), &CloudFileSystem::createFolderErrorOccured, this, &CreateCloudFolderOperation::failAndNotify);
 }
 
 void CreateCloudFolderOperation::run()
@@ -65,10 +65,4 @@ void CreateCloudFolderOperation::onCreated(const ModifiableCloudFileHandler &fol
     m_parent->cloudFilesUpdate(update);
 
     finish();
-}
-
-void CreateCloudFolderOperation::onErrorOccured(const QString &errorText)
-{
-    emit notificationCreated(errorText, true);
-    fail();
 }

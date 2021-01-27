@@ -113,7 +113,7 @@ void Self::onSlotUrlErrorOcurrend(const QString &slotId, const QString &errorTex
 {
     if (slotId == m_slotId) {
         if (status() != Status::Failed) {
-            invalidate(errorText);
+            invalidateAndNotify(errorText);
         }
     }
 }

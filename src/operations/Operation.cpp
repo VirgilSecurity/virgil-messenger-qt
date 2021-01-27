@@ -152,13 +152,19 @@ void Operation::fail()
     }
 }
 
+void Operation::failAndNotify(const QString &notification)
+{
+    fail();
+    emit notificationCreated(notification, true);
+}
+
 void Operation::invalidate()
 {
     setStatus(Status::Invalid);
     drop();
 }
 
-void Operation::invalidate(const QString &notification)
+void Operation::invalidateAndNotify(const QString &notification)
 {
     invalidate();
     emit notificationCreated(notification, true);
@@ -209,7 +215,7 @@ void Operation::connectChild(Operation *child)
 {
     child->setParent(this);
     connect(child, &Operation::failed, this, &Operation::fail);
-    connect(child, &Operation::invalidated, this, qOverload<>(&Operation::invalidate));
+    connect(child, &Operation::invalidated, this, &Operation::invalidate);
     connect(child, &Operation::finished, this, &Operation::startNextChild);
     connect(child, &Operation::notificationCreated, this, &Operation::notificationCreated);
 }

@@ -53,6 +53,7 @@ DownloadCloudFileOperation::DownloadCloudFileOperation(CloudFileOperation *paren
     connect(m_parent->cloudFileSystem(), &CloudFileSystem::getDownloadInfoErrorOccurred, this, &DownloadCloudFileOperation::onGetDownloadInfoErrorOccurred);
     connect(this, &DownloadFileOperation::progressChanged, this, &DownloadCloudFileOperation::onProgressChanged);
     connect(this, &DownloadFileOperation::downloaded, this, &DownloadCloudFileOperation::onDownloaded);
+    connect(this, &DownloadFileOperation::failed, this, &DownloadCloudFileOperation::onFailed);
 }
 
 void DownloadCloudFileOperation::run()
@@ -73,9 +74,8 @@ QString DownloadCloudFileOperation::tempFilePath() const
 
 void DownloadCloudFileOperation::onDownloadInfoGot(const CloudFileHandler &file, const QUrl &url, const QByteArray &encryptionKey)
 {
-    if (file != m_file) {
-        return; // FIXME(fpohtmeh): add filtering to other operations?
-    }
+    Q_UNUSED(file)
+    // FIXME(fpohtmeh): check if it's answer for this request
     setUrl(url);
     m_encryptionKey = encryptionKey;
     qCDebug(lcOperation) << "Started to download cloud file from" << url;
@@ -84,9 +84,8 @@ void DownloadCloudFileOperation::onDownloadInfoGot(const CloudFileHandler &file,
 
 void DownloadCloudFileOperation::onGetDownloadInfoErrorOccurred(const QString &errorText)
 {
-    emit notificationCreated(errorText, true);
-    transferUpdate(TransferCloudFileUpdate::Stage::Failed, 0);
-    fail();
+    // FIXME(fpohtmeh): check if it's answer for this request
+    failAndNotify(errorText);
 }
 
 void DownloadCloudFileOperation::onProgressChanged(const quint64 bytesLoaded, const quint64 bytesTotal)
@@ -99,8 +98,7 @@ void DownloadCloudFileOperation::onDownloaded()
 {
     const auto decrypted = m_parent->cloudFileSystem()->decryptFile(tempFilePath(), m_encryptionKey, m_file);
     if (!decrypted) {
-        emit notificationCreated(tr("File decryption was failed"), true);
-        fail();
+        failAndNotify(tr("File decryption was failed"));
     }
 
     // Send update
@@ -113,6 +111,11 @@ void DownloadCloudFileOperation::onDownloaded()
     transferUpdate(TransferCloudFileUpdate::Stage::Finished, m_file->size());
 
     finish();
+}
+
+void DownloadCloudFileOperation::onFailed()
+{
+    transferUpdate(TransferCloudFileUpdate::Stage::Failed, 0);
 }
 
 void DownloadCloudFileOperation::transferUpdate(const TransferCloudFileUpdate::Stage stage, const quint64 bytesLoaded)

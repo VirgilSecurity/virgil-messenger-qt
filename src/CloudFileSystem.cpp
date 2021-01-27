@@ -136,7 +136,7 @@ void CloudFileSystem::getDownloadInfo(const CloudFileHandler &file)
 {
     FutureWorker::run(m_coreFs->getFileDownloadInfo(file->id().coreFileId()), [this, file](auto result) {
         if (std::holds_alternative<CoreMessengerStatus>(result)) {
-            emit getDownloadInfoErrorOccurred(tr("Get download info error"));
+            emit getDownloadInfoErrorOccurred(file, tr("Get download info error"));
             return;
         }
 

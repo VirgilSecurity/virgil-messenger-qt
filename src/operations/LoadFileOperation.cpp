@@ -68,20 +68,20 @@ bool LoadFileOperation::openFileHandle(const QIODevice::OpenMode &mode)
 {
     if (m_filePath.isEmpty()) {
         qCWarning(lcOperation) << "File path is empty";
-        invalidate(tr("File path is empty"));
+        invalidateAndNotify(tr("File path is empty"));
         return false;
     }
 
     if ((mode == QFile::ReadOnly) && !FileUtils::fileExists(m_filePath)) {
         qCWarning(lcOperation) << "File doesn't exist" << m_filePath;
-        invalidate(tr("File doesn't exist"));
+        invalidateAndNotify(tr("File doesn't exist"));
         return false;
     }
 
     m_fileHandle.reset(new QFile(m_filePath));
     if (!m_fileHandle->open(mode)) {
         qCWarning(lcOperation) << "File can't be opened" << m_filePath;
-        invalidate(tr("File can't be opened"));
+        invalidateAndNotify(tr("File can't be opened"));
         return false;
     }
 
@@ -121,7 +121,7 @@ void LoadFileOperation::onReplyFinished(QNetworkReply *reply)
     }
     else {
         qCWarning(lcOperation) << "Failed. Load file was processed partially";
-        invalidate(tr("File loading failed"));
+        invalidateAndNotify(tr("File loading failed"));
     }
 }
 
@@ -141,7 +141,7 @@ void LoadFileOperation::onReplyErrorOccurred(const QNetworkReply::NetworkError e
         break;
     default:
         qCWarning(lcOperation) << "File load error occurred:" << errorCode;
-        invalidate(tr("File loading error: %1").arg(errorCode));
+        invalidateAndNotify(tr("File loading error: %1").arg(errorCode));
         break;
     }
 }

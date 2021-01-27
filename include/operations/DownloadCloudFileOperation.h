@@ -60,6 +60,7 @@ private:
     void onGetDownloadInfoErrorOccurred(const QString &errorText);
     void onProgressChanged(const quint64 bytesLoaded, const quint64 bytesTotal);
     void onDownloaded();
+    void onFailed();
 
     void transferUpdate(const TransferCloudFileUpdate::Stage stage, const quint64 bytesLoaded);
 

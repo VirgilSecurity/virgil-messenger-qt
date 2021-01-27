@@ -90,8 +90,9 @@ signals:
 
 protected:
     void fail();
+    void failAndNotify(const QString &notification);
     void invalidate();
-    void invalidate(const QString &notification);
+    void invalidateAndNotify(const QString &notification);
     void finish();
 
     void cleanupOnce();

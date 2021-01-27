@@ -90,6 +90,5 @@ void DeleteCloudFilesOperation::onFileDeleted()
 void DeleteCloudFilesOperation::onDeleteFileErrorOccured()
 {
     processDeletedFiles();
-    emit notificationCreated(tr("File deletion failed"), true);
-    fail();
+    failAndNotify(tr("File deletion failed"));
 }

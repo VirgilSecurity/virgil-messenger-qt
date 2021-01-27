@@ -57,11 +57,11 @@ UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, c
     connect(m_parent->cloudFileSystem(), &CloudFileSystem::createFileErrorOccurred, this, &UploadCloudFileOperation::onCreateCloudFileErrorOccurred);
     connect(this, &UploadFileOperation::progressChanged, this, &UploadCloudFileOperation::onProgressChanged);
     connect(this, &UploadFileOperation::uploaded, this, &UploadCloudFileOperation::onUploaded);
+    connect(this, &UploadFileOperation::failed, this, &UploadCloudFileOperation::onFailed);
 }
 
 void UploadCloudFileOperation::run()
 {
-    transferUpdate(TransferCloudFileUpdate::Stage::Started, 0);
     m_parent->cloudFileSystem()->createFile(m_sourceFilePath, m_parentFolder);
 }
 
@@ -73,21 +73,22 @@ void UploadCloudFileOperation::cleanup()
 
 void UploadCloudFileOperation::onFileCreated(const ModifiableCloudFileHandler &cloudFile, const QString &encryptedFilePath, const QUrl &putUrl)
 {
+    // FIXME(fpohtmeh): check if it's answer for this request
     setFilePath(encryptedFilePath);
     if (!openFileHandle(QFile::ReadOnly)) {
         return;
     }
 
     m_file = cloudFile;
+    transferUpdate(TransferCloudFileUpdate::Stage::Started, 0);
     qCDebug(lcOperation) << "Started to upload cloud file to" << putUrl;
     startUploadToSlot(putUrl, putUrl); // NOTE(fpohtmeh): We don't know get url at this moment, using of putUrl is fine
 }
 
 void UploadCloudFileOperation::onCreateCloudFileErrorOccurred(const QString &errorText)
 {
-    emit notificationCreated(errorText, true);
-    transferUpdate(TransferCloudFileUpdate::Stage::Failed, 0);
-    fail();
+    // FIXME(fpohtmeh): check if it's answer for this request
+    failAndNotify(errorText);
 }
 
 void UploadCloudFileOperation::onProgressChanged(const quint64 bytesLoaded, const quint64 bytesTotal)
@@ -116,6 +117,11 @@ void UploadCloudFileOperation::onUploaded()
     transferUpdate(TransferCloudFileUpdate::Stage::Finished, m_file->size());
 
     finish();
+}
+
+void UploadCloudFileOperation::onFailed()
+{
+    transferUpdate(TransferCloudFileUpdate::Stage::Failed, 0);
 }
 
 void UploadCloudFileOperation::transferUpdate(const TransferCloudFileUpdate::Stage stage, const quint64 bytesLoaded)
