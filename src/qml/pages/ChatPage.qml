@@ -97,7 +97,31 @@ Page {
                     dropdown: true
                     currentIndex: -1
 
-                    Action {
+                    ContextMenuItem {
+                        text: qsTr("Call")
+                        iconName: "Make-Call"
+                        onTriggered: console.log("Chat deletion isn't implemented")
+                    }
+
+                    ContextMenuSeparator {
+                    }
+
+                    ContextMenuItem {
+                        text: qsTr("Chat info")
+                        onTriggered: console.log("Chat deletion isn't implemented")
+                    }
+
+                    ContextMenuItem {
+                        text: qsTr("Mute notifications")
+                        onTriggered: console.log("Chat deletion isn't implemented")
+                    }
+
+                    ContextMenuItem {
+                        text: qsTr("Clear chat history")
+                        onTriggered: console.log("Chat deletion isn't implemented")
+                    }
+
+                    ContextMenuItem {
                         text: qsTr("Delete chat")
                         onTriggered: console.log("Chat deletion isn't implemented")
                     }
@@ -108,7 +132,26 @@ Page {
                     dropdown: true
                     currentIndex: -1
 
-                    Action {
+                    ContextMenuItem {
+                        text: qsTr("Call")
+                        iconName: "Make-Call"
+                        onTriggered: console.log("Chat deletion isn't implemented")
+                    }
+
+                    ContextMenuSeparator {
+                    }
+
+                    ContextMenuItem {
+                        text: qsTr("Chat info")
+                        onTriggered: console.log("Chat deletion isn't implemented")
+                    }
+
+                    ContextMenuItem {
+                        text: qsTr("Mute notifications")
+                        onTriggered: console.log("Chat deletion isn't implemented")
+                    }
+
+                    ContextMenuItem {
                         text: qsTr("Leave group")
                         onTriggered: controllers.chats.leaveGroup()
                     }
@@ -119,17 +162,36 @@ Page {
                     dropdown: true
                     currentIndex: -1
 
-                    Action {
+                    ContextMenuItem {
+                        text: qsTr("Call")
+                        iconName: "Make-Call"
+                        onTriggered: console.log("Chat deletion isn't implemented")
+                    }
+
+                    ContextMenuSeparator {
+                    }
+
+                    ContextMenuItem {
+                        text: qsTr("Chat info")
+                        onTriggered: console.log("Chat deletion isn't implemented")
+                    }
+
+                    ContextMenuItem {
+                        text: qsTr("Mute notifications")
+                        onTriggered: console.log("Chat deletion isn't implemented")
+                    }
+
+                    ContextMenuItem {
                         text: qsTr("Add participant")
                         onTriggered: controllers.chats.addParticipant("userId")
                     }
 
-                    Action {
+                    ContextMenuItem {
                         text: qsTr("Remove participant")
                         onTriggered: controllers.chats.removeParticipants("userId")
                     }
 
-                    Action {
+                    ContextMenuItem {
                         text: qsTr("Leave group")
                         onTriggered: controllers.chats.leaveGroup()
                     }

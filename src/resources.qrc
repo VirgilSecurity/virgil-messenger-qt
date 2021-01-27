@@ -44,6 +44,8 @@
         <file>qml/resources/icons/Key@2x.png</file>
         <file>qml/resources/icons/Menu.png</file>
         <file>qml/resources/icons/Menu@2x.png</file>
+        <file>qml/resources/icons/Make-Call.png</file>
+        <file>qml/resources/icons/Make-Call@2x.png</file>
         <file>qml/resources/icons/Plus.png</file>
         <file>qml/resources/icons/Plus@2x.png</file>
         <file>qml/resources/icons/Grid.png</file>
