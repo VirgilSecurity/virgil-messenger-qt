@@ -16,6 +16,8 @@ Page {
 //    readonly property var contactId: controllers.chats.currentContactId
 //    property real chatListViewHeight: 0
 
+    property string chatName: qsTr("Chat info")
+    property string chatDescription: ""
     property real chatListViewHeight: 0
 
     property bool notificationsEnabled: false
@@ -36,6 +38,10 @@ Page {
         id: d
         readonly property real listSpacing: 5
         readonly property real smallItemHeight: 30
+        readonly property real stdItemHeight: 40
+        readonly property real bigItemHeight: 50
+
+        readonly property real stdItemWidth: 280
     }
 
     background: Rectangle {
@@ -52,6 +58,13 @@ Page {
             color: Theme.chatBackgroundColor
             anchors.leftMargin: 5
             anchors.rightMargin: 5
+
+            HorizontalRule {
+                anchors.bottom: parent.bottom
+                anchors.leftMargin: 20
+                anchors.rightMargin: 20
+                color: Theme.chatSeparatorColor
+            }
         }
 
         MouseArea {
@@ -59,52 +72,46 @@ Page {
             acceptedButtons: Qt.AllButtons
         }
 
-        Column {
+        RowLayout {
             anchors.fill: parent
             anchors.leftMargin: Theme.smallMargin
             anchors.rightMargin: Theme.smallMargin
 
-            Row {
-                width: parent.width
-                height: parent.height
-                spacing: Theme.smallSpacing
+            ImageButton {
+                image: "Arrow-Left"
+//                onClicked: app.stateManager.goBack()
+            }
 
-                ImageButton {
-                    anchors.verticalCenter: parent.verticalCenter
-                    image: "Arrow-Left"
-    //                onClicked: app.stateManager.goBack()
+            Column {
+                Layout.fillWidth: true
+                Layout.leftMargin: Theme.smallMargin
+                Label {
+                    text: chatName
+                    font.pointSize: UiHelper.fixFontSz(15)
+                    color: Theme.primaryTextColor
+                    font.bold: true
                 }
 
-                Item {
-                    id: avatarItem
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: avatar.width + 8
-                    height: width
-
-                    Avatar {
-                        id: avatar
-                        nickname: model.name
-                        avatarUrl: model.avatarUrl
-                        anchors.centerIn: parent
-                    }
+                Label {
+                    topPadding: 2
+                    text: chatDescription
+                    visible: chatDescription !== ""
+                    font.pointSize: UiHelper.fixFontSz(12)
+                    color: Theme.secondaryTextColor
                 }
+            }
 
-                Column {
-                    anchors.verticalCenter: parent.verticalCenter
+            ImageButton {
+                image: "More"
+                onClicked: chatInfoContextMenu.open()
 
-                    Text {
-                        color: Theme.primaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(15)
-                        text: model.name
-                    }
+                ContextMenu {
+                    id: chatInfoContextMenu
+                    dropdown: true
+                    currentIndex: -1
 
-                    Text {
-                        color: Theme.secondaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(12)
-                        text: model.details
-                        width: parent.width
-                        elide: Text.ElideRight
-                        textFormat: Text.RichText
+                    Action {
+                        text: qsTr("Do something")
                     }
                 }
             }
@@ -131,7 +138,49 @@ Page {
                     margins: Theme.margin
                 }
 
-                Item {
+                Item { // spacing
+                    width: parent.width
+                    height: 1
+                }
+
+                Row {
+                    spacing: Theme.smallSpacing
+
+                    Item {
+                        id: avatarItem
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: avatar.width + 8
+                        height: width
+
+                        Avatar {
+                            id: avatar
+                            nickname: model.name
+                            avatarUrl: model.avatarUrl
+                            anchors.centerIn: parent
+                        }
+                    }
+
+                    Column {
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Text {
+                            color: Theme.primaryTextColor
+                            font.pointSize: UiHelper.fixFontSz(15)
+                            text: model.name
+                        }
+
+                        Text {
+                            color: Theme.secondaryTextColor
+                            font.pointSize: UiHelper.fixFontSz(12)
+                            text: model.details
+                            width: parent.width
+                            elide: Text.ElideRight
+                            textFormat: Text.RichText
+                        }
+                    }
+                }
+
+                Item { // spacing
                     width: parent.width
                     height: 1
                 }
@@ -197,10 +246,10 @@ Page {
                 }
             }
 
-            Item { // list view item
+            Column { // list view item
                 id: listViewItem
+
                 width: chatPage.width
-                height: chatPage.height - Theme.headerHeight
 
                 ListView {
                     id: menuBar
@@ -216,14 +265,15 @@ Page {
                     model: menuModel
                     spacing: Theme.spacing * 1.5
                     currentIndex: menuBarIndex
+                    interactive: false
 
                     ListModel {
                         id: menuModel
 
                         ListElement { name: qsTr("Participants") }
-        //                ListElement { name: qsTr("Media") }
-        //                ListElement { name: qsTr("Files") }
-        //                ListElement { name: qsTr("Links") }
+                        ListElement { name: qsTr("Media") }
+                        ListElement { name: qsTr("Files") }
+                        ListElement { name: qsTr("Links") }
                     }
 
                     delegate: Item {
@@ -253,30 +303,186 @@ Page {
                             hoverEnabled: true
                             onEntered: cursorShape = Qt.PointingHandCursor
                             onExited: cursorShape = Qt.ArrowCursor
-                            onClicked: menuBarIndex = index
+                            onClicked: {
+                                menuBarIndex = index
+                            }
                         }
                     }
                 }
 
-                SwipeView {
-                    id: swipeView
-                    currentIndex: menuBarIndex
-                    onCurrentIndexChanged: menuBarIndex = currentIndex
-                    clip: true
-                    enabled: false
+                GridView {
+                    id: participantsListView
+
+                    QtObject {
+                        id: gridProps
+                        readonly property real cellWidth: calculateCellWidth()
+                        readonly property real cellHeight: d.bigItemHeight
+                        readonly property real targetCellWidth: d.stdItemWidth
+
+                        function calculateCellWidth() {
+                            if (!Platform.isDesktop) {
+                                return chatPage.width
+                            } else {
+                                let numOfTargetCells = Math.round(chatPage.width / targetCellWidth)
+                                return chatPage.width / numOfTargetCells
+                            }
+                        }
+                    }
 
                     anchors {
-                        top: menuBar.bottom
-                        bottom: parent.bottom
                         left: parent.left
                         right: parent.right
                     }
 
-                    Rectangle {
-                        color: 'gray'
-                        radius: 50
+                    height: contentHeight
+                    interactive: false
+
+                    model: 30
+
+                    cellWidth: gridProps.cellWidth
+                    cellHeight: gridProps.cellHeight
+
+                    footer: spacingDelegate
+                    delegate: participantsDelegate
+                    header: spacingDelegate
+
+                    Component {
+                        id: participantsDelegate
+
+                        Item {
+                            width: participantsListView.cellWidth
+                            height: participantsListView.cellHeight
+
+                            Row {
+                                spacing: Theme.smallSpacing
+
+                                anchors {
+                                    fill: parent
+                                    margins: Theme.margin
+                                }
+
+                                Item {
+                                    id: avatarItem
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: avatar.width + 8
+                                    height: width
+
+                                    Avatar {
+                                        id: avatar
+                                        nickname: "model.name"
+    //                                        avatarUrl: model.avatarUrl
+                                        anchors.centerIn: parent
+                                    }
+                                }
+
+                                Column {
+                                    anchors.verticalCenter: parent.verticalCenter
+
+                                    Text {
+                                        color: Theme.primaryTextColor
+                                        font.pointSize: UiHelper.fixFontSz(15)
+                                        text: "model.name " + index
+                                    }
+
+                                    Text {
+                                        color: Theme.secondaryTextColor
+                                        font.pointSize: UiHelper.fixFontSz(12)
+                                        text: "model.details"
+                                        width: parent.width
+                                        elide: Text.ElideRight
+                                        textFormat: Text.RichText
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+
+                    Component {
+                        id: spacingDelegate
+
+                        Item {
+                            width: parent.width
+                            height: Theme.margin
+                        }
                     }
                 }
+
+
+//                ListView {
+//                    id: participantsListView
+
+//                    anchors {
+//                        left: parent.left
+//                        right: parent.right
+//                    }
+
+//                    height: contentHeight
+//                    spacing: Theme.minSpacing
+//                    interactive: false
+
+//                    model: 30
+
+//                    footer: spacingDelegate
+//                    delegate: participantsDelegate
+//                    header: spacingDelegate
+
+//                    Component {
+//                        id: participantsDelegate
+
+//                        Row {
+//                            spacing: Theme.smallSpacing
+
+//                            anchors {
+//                                left: parent.left
+//                                leftMargin: Theme.margin
+//                            }
+
+//                            Item {
+//                                id: avatarItem
+//                                anchors.verticalCenter: parent.verticalCenter
+//                                width: avatar.width + 8
+//                                height: width
+
+//                                Avatar {
+//                                    id: avatar
+//                                    nickname: "model.name"
+////                                        avatarUrl: model.avatarUrl
+//                                    anchors.centerIn: parent
+//                                }
+//                            }
+
+//                            Column {
+//                                anchors.verticalCenter: parent.verticalCenter
+
+//                                Text {
+//                                    color: Theme.primaryTextColor
+//                                    font.pointSize: UiHelper.fixFontSz(15)
+//                                    text: "model.name " + index
+//                                }
+
+//                                Text {
+//                                    color: Theme.secondaryTextColor
+//                                    font.pointSize: UiHelper.fixFontSz(12)
+//                                    text: "model.details"
+//                                    width: parent.width
+//                                    elide: Text.ElideRight
+//                                    textFormat: Text.RichText
+//                                }
+//                            }
+//                        }
+
+//                    }
+
+//                    Component {
+//                        id: spacingDelegate
+
+//                        Item {
+//                            width: parent.width
+//                            height: Theme.margin
+//                        }
+//                    }
+//                }
             }
         }
     }
