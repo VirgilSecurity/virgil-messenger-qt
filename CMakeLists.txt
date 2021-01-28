@@ -245,6 +245,11 @@ if (VS_PLATFORM STREQUAL "android")
     message(STATUS "Android OpenSSL library path: [${VS_ANDROID_SSL_DIR}]")
     message(STATUS "Android extra libraries:      [${ANDROID_EXTRA_LIBS}]")
 
+    add_custom_command(TARGET ${VS_TARGET_NAME} POST_BUILD
+          COMMAND touch "${CMAKE_BINARY_DIR}/CMakeCache.txt"
+          COMMENT "Touch CMakeCache.txt"
+    )
+
     # Linux
 elseif (VS_PLATFORM STREQUAL "linux")
     add_executable(${VS_TARGET_NAME})
