@@ -140,31 +140,9 @@ Page {
                 }
 
                 text: qsTr("Cancel")
-                font.pointSize: UiHelper.fixFontSz(13)
-                color: Theme.primaryTextColor
-                font.bold: false
-
-                MouseArea {
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onEntered: cursorShape = Qt.PointingHandCursor
-                    onExited: cursorShape = Qt.ArrowCursor
-                    onClicked: {
-                        chatPage.state = "view"
-                    }
-                }
-            }
-
-            Label {
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                    horizontalCenter: parent.horizontalCenter
-                }
-
-                text: qsTr("Deleting members")
                 font.pointSize: UiHelper.fixFontSz(15)
                 color: Theme.primaryTextColor
-                font.bold: true
+                font.bold: false
 
                 MouseArea {
                     anchors.fill: parent
@@ -184,10 +162,10 @@ Page {
                     rightMargin: Theme.margin
                 }
 
-                text: qsTr("Done")
-                font.pointSize: UiHelper.fixFontSz(13)
-                color: Theme.primaryTextColor
-                font.bold: false
+                text: qsTr("Delete")
+                font.pointSize: UiHelper.fixFontSz(15)
+                color: Theme.buttonPrimaryColor
+                font.bold: true
 
                 MouseArea {
                     anchors.fill: parent
@@ -207,6 +185,8 @@ Page {
         height: parent.height
         contentHeight: commonColumn.height
         boundsBehavior: Flickable.StopAtBounds
+
+        ScrollBar.vertical: ScrollBar {}
 
         Column {
             id: commonColumn
