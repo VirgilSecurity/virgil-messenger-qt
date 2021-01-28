@@ -92,6 +92,7 @@ void Self::loadChats()
 {
     qCDebug(lcController) << "Started to load chats...";
     m_userDatabase->chatsTable()->fetch();
+    m_userDatabase->groupMembersTable()->fetchByMemberId(m_messenger->currentUser()->id());
 }
 
 void Self::clearChats()
@@ -142,7 +143,7 @@ void ChatsController::createGroupChat(const QString &groupName, const Contacts &
             emit errorOccurred(tr("Group con not be created"));
         }
 
-        auto group = std::make_shared<Group>(Utils::createUuid(), std::move(groupName), std::move(contacts));
+        auto group = std::make_shared<Group>(GroupId::generate(), std::move(groupName), std::move(contacts));
 
         emit createChatWithGroup(group, QPrivateSignal());
 
@@ -176,12 +177,12 @@ void Self::closeChat()
 void Self::setupTableConnections()
 {
     qCDebug(lcController) << "Setup database table connections for chats...";
-    auto table = m_userDatabase->chatsTable();
-    connect(table, &ChatsTable::errorOccurred, this, &Self::errorOccurred);
-    connect(table, &ChatsTable::fetched, this, &Self::onChatsLoaded);
+    connect(m_userDatabase->chatsTable(), &ChatsTable::errorOccurred, this, &Self::errorOccurred);
+    connect(m_userDatabase->chatsTable(), &ChatsTable::fetched, this, &Self::onChatsLoaded);
 
     connect(m_userDatabase->groupsTable(), &GroupsTable::errorOccurred, this, &Self::errorOccurred);
     connect(m_userDatabase->groupMembersTable(), &GroupMembersTable::errorOccurred, this, &Self::errorOccurred);
+    connect(m_userDatabase->groupMembersTable(), &GroupMembersTable::fetched, this, &Self::onGroupMembersFetched);
 }
 
 void Self::onCreateChatWithUser(const UserHandler &user)
@@ -215,7 +216,8 @@ void Self::onChatsLoaded(ModifiableChats chats)
     emit chatsLoaded();
 }
 
-void Self::onGroupChatCreated(const GroupId& groupId) {
+void Self::onGroupChatCreated(const GroupId& groupId)
+{
     auto createdChat = m_models->chats()->findChat(ChatId(QString(groupId)));
     if (createdChat) {
         emit chatCreated(createdChat);
@@ -223,14 +225,16 @@ void Self::onGroupChatCreated(const GroupId& groupId) {
 }
 
 
-void Self::onGroupChatCreateFailed(const GroupId& chatId, const QString& errorText) {
+void Self::onGroupChatCreateFailed(const GroupId& chatId, const QString& errorText)
+{
     //
     //  FIXME: Remove chat and show error text.
     //
 }
 
 
-void Self::onUpdateGroup(const GroupUpdate& groupUpdate) {
+void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
+{
     auto groupId = GroupUpdateGetId(groupUpdate);
 
     if (m_currentChat && m_currentChat->id() == groupId) {
@@ -241,4 +245,20 @@ void Self::onUpdateGroup(const GroupUpdate& groupUpdate) {
     }
 
     m_userDatabase->updateGroup(groupUpdate);
+}
+
+
+void Self::onGroupMembersFetched(const GroupMembers& groupMembers)
+{
+    qCDebug(lcController) << "Group chats members with a current user was fetched";
+
+    //
+    //  When chats are loaded we need to join groups chats to be able receive messages.
+    //
+    m_messenger->joinGroupChats(groupMembers);
+
+    //
+    //  Disconnect to avoid calling this slot, when fetch group members within specific group.
+    //
+    disconnect(m_userDatabase->groupMembersTable(), &GroupMembersTable::fetched, this, &Self::onGroupMembersFetched);
 }

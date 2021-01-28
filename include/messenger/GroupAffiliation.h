@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,49 +32,34 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#ifndef VM_GROUP_AFFILIATION_H
+#define VM_GROUP_AFFILIATION_H
 
-#include "GroupInvitationStatus.h"
+#include <QString>
 
-#include <stdexcept>
+namespace vm {
 
+enum class GroupAffiliation {
+    None,
+    Outcast,
+    Member,
+    Admin,
+    Owner
+};
 
-using namespace vm;
+//
+//  Return affiliation from a given string.
+//  Throws if correspond affiliation is not found.
+//
+GroupAffiliation GroupAffiliationFromString(const QString& stageString);
 
-
-GroupInvitationStatus vm::GroupInvitationStatusFromString(const QString& statusString) {
-    if (statusString == QLatin1String("none")) {
-        return GroupInvitationStatus::None;
-    }
-    else if (statusString == QLatin1String("invited")) {
-        return GroupInvitationStatus::Invited;
-    }
-    else if (statusString == QLatin1String("accepted")) {
-        return GroupInvitationStatus::Accepted;
-    }
-    else if (statusString == QLatin1String("rejected")) {
-        return GroupInvitationStatus::Rejected;
-    }
-    else {
-        throw std::logic_error("Invalid GroupInvitationStatus string");
-    }
-}
+//
+//  Return string from a given affiliation.
+//
+QString GroupAffiliationToString(GroupAffiliation stage);
 
 
-QString vm::GroupInvitationStatusToString(GroupInvitationStatus status) {
-    switch (status) {
-        case GroupInvitationStatus::None:
-            return QLatin1String("none");
+} // namespace vm
 
-        case GroupInvitationStatus::Invited:
-            return QLatin1String("invited");
 
-        case GroupInvitationStatus::Accepted:
-            return QLatin1String("accepted");
-
-        case GroupInvitationStatus::Rejected:
-            return QLatin1String("rejected");
-
-        default:
-            throw std::logic_error("Invalid GroupInvitationStatus");
-    }
-}
+#endif // VM_GROUP_AFFILIATION_H

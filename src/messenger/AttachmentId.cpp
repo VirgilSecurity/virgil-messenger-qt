@@ -53,8 +53,8 @@ bool Self::isValid() const noexcept {
     return !m_attachmentId.isEmpty();
 }
 
-AttachmentId Self::generate() {
-    return AttachmentId(Utils::createUuid());
+Self Self::generate() {
+    return Self(Utils::createUuid());
 }
 
 bool operator<(const vm::AttachmentId& lhs, const vm::AttachmentId& rhs) {

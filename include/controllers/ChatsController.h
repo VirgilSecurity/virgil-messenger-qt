@@ -39,6 +39,7 @@
 #include "ChatId.h"
 #include "Contact.h"
 #include "Group.h"
+#include "GroupMember.h"
 #include "GroupUpdate.h"
 #include "MessageId.h"
 #include "User.h"
@@ -100,6 +101,7 @@ private:
     void onChatsLoaded(ModifiableChats chats);
     void onCreateChatWithUser(const UserHandler &user);
     void onCreateChatWithGroup(const GroupHandler& group);
+    void onGroupMembersFetched(const GroupMembers& groupMembers);
 
     void onGroupChatCreated(const GroupId& groupId);
     void onGroupChatCreateFailed(const GroupId& chatId, const QString& errorText);

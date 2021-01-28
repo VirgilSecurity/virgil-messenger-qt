@@ -352,6 +352,13 @@ Self::createGroupChat(const GroupHandler& group) {
 
 
 void
+Self::joinGroupChats(const GroupMembers& groupsWithMe) {
+
+    m_coreMessenger->joinGroupChats(groupsWithMe);
+}
+
+
+void
 Self::onPushNotificationTokenUpdate() {
     m_coreMessenger->registerPushNotifications();
 }

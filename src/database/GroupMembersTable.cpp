@@ -44,6 +44,8 @@ Self::GroupMembersTable(Database *database)
     : DatabaseTable(QLatin1String("groupMembers"), database)
 {
     connect(this, &Self::updateGroup, this, &Self::onUpdateGroup);
+    connect(this, &Self::fetchByMemberId, this, &Self::onFetchByMemberId);
+    connect(this, &Self::fetchByGroupId, this, &Self::onFetchByGroupId);
 }
 
 
@@ -122,4 +124,73 @@ void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
             emit errorOccurred(tr("Failed to update group members table"));
         }
     }
+}
+
+
+void Self::onFetchByMemberId(const UserId& memberId) {
+    qCDebug(lcDatabase) << "Start fetching group members by member id";
+
+    ScopedConnection connection(*database());
+
+    const DatabaseUtils::BindValues bindValues{{":memberId", QString(memberId) }};
+
+    auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectGroupMembersByMemberId"), bindValues);
+    if (!query) {
+        qCCritical(lcDatabase) << "GroupMembersTable::onFetchFailed error";
+        emit errorOccurred(tr("Failed to fetch group members"));
+    }
+    else {
+        GroupMembers groupMembers;
+        while (query->next()) {
+            if (auto maybyGroupMember = readGroupMember(*query); maybyGroupMember) {
+                groupMembers.push_back(std::move(*maybyGroupMember));
+            }
+        }
+        emit fetched(groupMembers);
+    }
+}
+
+
+void Self::onFetchByGroupId(const GroupId& groupId) {
+    qCDebug(lcDatabase) << "Start fetching group members by member id";
+
+    ScopedConnection connection(*database());
+
+    const DatabaseUtils::BindValues bindValues{{":groupId", QString(groupId) }};
+
+    auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectGroupMembersByGroupId"), bindValues);
+    if (!query) {
+        qCCritical(lcDatabase) << "GroupMembersTable::onFetchFailed error";
+        emit errorOccurred(tr("Failed to fetch group members"));
+    }
+    else {
+        GroupMembers groupMembers;
+        while (query->next()) {
+            if (auto maybyGroupMember = readGroupMember(*query); maybyGroupMember) {
+                groupMembers.push_back(std::move(*maybyGroupMember));
+            }
+        }
+        emit fetched(groupMembers);
+    }
+}
+
+
+std::optional<GroupMember> Self::readGroupMember(const QSqlQuery &query) {
+
+    auto groupId = query.value("groupId").toString();
+    auto memberId = query.value("memberId").toString();
+    auto memberNickname = query.value("memberNickname").toString();
+    auto memberAffiliation = query.value("memberAffiliation").toString();
+    auto invitationStatus = query.value("invitationStatus").toString();
+
+    if (groupId.isEmpty() || memberId.isEmpty() || memberNickname.isEmpty() || memberAffiliation.isEmpty() ||
+            invitationStatus.isEmpty()) {
+
+        qCCritical(lcDatabase) << "GroupMembersTable: failed to parse query result";
+
+        return std::nullopt;
+    }
+
+    return GroupMember(GroupId(std::move(groupId)), UserId(std::move(memberId)), std::move(memberNickname),
+            GroupAffiliationFromString(memberAffiliation), GroupInvitationStatusFromString(invitationStatus));
 }

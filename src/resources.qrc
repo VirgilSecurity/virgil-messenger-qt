@@ -198,5 +198,7 @@
         <file>resources/database/insertGroup.sql</file>
         <file>resources/database/insertGroupMember.sql</file>
         <file>resources/database/updateGroupMemberInvitationStatus.sql</file>
+        <file>resources/database/selectGroupMembersByMemberId.sql</file>
+        <file>resources/database/selectGroupMembersByGroupId.sql</file>
     </qresource>
 </RCC>

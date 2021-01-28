@@ -33,48 +33,53 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 
-#include "GroupInvitationStatus.h"
+#include "GroupAffiliation.h"
 
 #include <stdexcept>
-
 
 using namespace vm;
 
 
-GroupInvitationStatus vm::GroupInvitationStatusFromString(const QString& statusString) {
-    if (statusString == QLatin1String("none")) {
-        return GroupInvitationStatus::None;
+GroupAffiliation vm::GroupAffiliationFromString(const QString& affiliationString) {
+    if (affiliationString == QLatin1String("none")) {
+        return GroupAffiliation::None;
     }
-    else if (statusString == QLatin1String("invited")) {
-        return GroupInvitationStatus::Invited;
+    else if (affiliationString == QLatin1String("outcast")) {
+        return GroupAffiliation::Outcast;
     }
-    else if (statusString == QLatin1String("accepted")) {
-        return GroupInvitationStatus::Accepted;
+    else if (affiliationString == QLatin1String("member")) {
+        return GroupAffiliation::Member;
     }
-    else if (statusString == QLatin1String("rejected")) {
-        return GroupInvitationStatus::Rejected;
+    else if (affiliationString == QLatin1String("admin")) {
+        return GroupAffiliation::Admin;
+    }
+    else if (affiliationString == QLatin1String("owner")) {
+        return GroupAffiliation::Owner;
     }
     else {
-        throw std::logic_error("Invalid GroupInvitationStatus string");
+        throw std::logic_error("Invalid GroupAffiliation string");
     }
 }
 
 
-QString vm::GroupInvitationStatusToString(GroupInvitationStatus status) {
-    switch (status) {
-        case GroupInvitationStatus::None:
+QString vm::GroupAffiliationToString(GroupAffiliation affiliation) {
+    switch (affiliation) {
+        case GroupAffiliation::None:
             return QLatin1String("none");
 
-        case GroupInvitationStatus::Invited:
-            return QLatin1String("invited");
+        case GroupAffiliation::Outcast:
+            return QLatin1String("outcast");
 
-        case GroupInvitationStatus::Accepted:
-            return QLatin1String("accepted");
+        case GroupAffiliation::Member:
+            return QLatin1String("member");
 
-        case GroupInvitationStatus::Rejected:
-            return QLatin1String("rejected");
+        case GroupAffiliation::Admin:
+            return QLatin1String("admin");
+
+        case GroupAffiliation::Owner:
+            return QLatin1String("owner");
 
         default:
-            throw std::logic_error("Invalid GroupInvitationStatus");
+            throw std::logic_error("Invalid GroupAffiliation");
     }
 }

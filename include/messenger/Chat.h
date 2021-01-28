@@ -123,6 +123,7 @@ private:
 
 using ChatHandler = std::shared_ptr<const Chat>;
 using ModifiableChatHandler = std::shared_ptr<Chat>;
+using Chats = std::vector<ChatHandler>;
 using ModifiableChats = std::vector<ModifiableChatHandler>;
 
 } // namespace vm

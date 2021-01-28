@@ -33,48 +33,74 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 
-#include "GroupInvitationStatus.h"
+#include "GroupId.h"
 
-#include <stdexcept>
-
+#include "Utils.h"
 
 using namespace vm;
+using Self = GroupId;
 
 
-GroupInvitationStatus vm::GroupInvitationStatusFromString(const QString& statusString) {
-    if (statusString == QLatin1String("none")) {
-        return GroupInvitationStatus::None;
-    }
-    else if (statusString == QLatin1String("invited")) {
-        return GroupInvitationStatus::Invited;
-    }
-    else if (statusString == QLatin1String("accepted")) {
-        return GroupInvitationStatus::Accepted;
-    }
-    else if (statusString == QLatin1String("rejected")) {
-        return GroupInvitationStatus::Rejected;
-    }
-    else {
-        throw std::logic_error("Invalid GroupInvitationStatus string");
-    }
+Self::GroupId(QString groupId) : m_groupId(std::move(groupId)) {
+
 }
 
+Self::operator QString() const {
+    return m_groupId;
+}
 
-QString vm::GroupInvitationStatusToString(GroupInvitationStatus status) {
-    switch (status) {
-        case GroupInvitationStatus::None:
-            return QLatin1String("none");
+bool Self::isValid() const noexcept {
+    return !m_groupId.isEmpty();
+}
 
-        case GroupInvitationStatus::Invited:
-            return QLatin1String("invited");
+Self Self::generate() {
+    return Self(Utils::createUuid());
+}
 
-        case GroupInvitationStatus::Accepted:
-            return QLatin1String("accepted");
+bool operator<(const vm::GroupId& lhs, const vm::GroupId& rhs) {
+    return QString(lhs) < QString(rhs);
+}
 
-        case GroupInvitationStatus::Rejected:
-            return QLatin1String("rejected");
+bool operator>(const vm::GroupId& lhs, const vm::GroupId& rhs) {
+    return QString(lhs) > QString(rhs);
+}
 
-        default:
-            throw std::logic_error("Invalid GroupInvitationStatus");
-    }
+bool operator==(const vm::GroupId& lhs, const vm::GroupId& rhs) {
+    return QString(lhs) == QString(rhs);
+}
+
+bool operator!=(const vm::GroupId& lhs, const vm::GroupId& rhs) {
+    return QString(lhs) != QString(rhs);
+}
+
+bool operator<(const vm::ChatId& lhs, const vm::GroupId& rhs) {
+    return QString(lhs) < QString(rhs);
+}
+
+bool operator>(const vm::ChatId& lhs, const vm::GroupId& rhs) {
+    return QString(lhs) > QString(rhs);
+}
+
+bool operator==(const vm::ChatId& lhs, const vm::GroupId& rhs) {
+    return QString(lhs) == QString(rhs);
+}
+
+bool operator!=(const vm::ChatId& lhs, const vm::GroupId& rhs) {
+    return QString(lhs) != QString(rhs);
+}
+
+bool operator<(const vm::GroupId& lhs, const vm::ChatId& rhs) {
+    return QString(lhs) < QString(rhs);
+}
+
+bool operator>(const vm::GroupId& lhs, const vm::ChatId& rhs) {
+    return QString(lhs) > QString(rhs);
+}
+
+bool operator==(const vm::GroupId& lhs, const vm::ChatId& rhs) {
+    return QString(lhs) == QString(rhs);
+}
+
+bool operator!=(const vm::GroupId& lhs, const vm::ChatId& rhs) {
+    return QString(lhs) != QString(rhs);
 }

@@ -37,8 +37,12 @@
 
 #include "core/DatabaseTable.h"
 #include "GroupUpdate.h"
+#include "GroupMember.h"
 
 #include <QString>
+#include <QSqlQuery>
+
+#include <optional>
 
 namespace vm
 {
@@ -54,16 +58,23 @@ signals:
     //  Control signals.
     //
     void updateGroup(const GroupUpdate& groupUpdate);
+    void fetchByMemberId(const UserId& memberId);
+    void fetchByGroupId(const GroupId& groupId);
 
     //
     //  Notification signals.
     //
     void errorOccurred(const QString &errorText);
+    void fetched(const GroupMembers& groupMember);
 
 private:
     void onUpdateGroup(const GroupUpdate& groupUpdate);
+    void onFetchByMemberId(const UserId& memberId);
+    void onFetchByGroupId(const GroupId& groupId);
 
     bool create() override;
+
+    std::optional<GroupMember> readGroupMember(const QSqlQuery &query);
 };
 }
 

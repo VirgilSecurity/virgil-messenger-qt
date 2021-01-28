@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,49 +32,42 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
-#include "GroupInvitationStatus.h"
-
-#include <stdexcept>
-
+#include "GroupMember.h"
 
 using namespace vm;
+using Self = GroupMember;
+
+Self::GroupMember(GroupId groupId, UserId memberId, QString memberNickName, GroupAffiliation memberAffiliation,
+        GroupInvitationStatus invitationStatus)
+        : m_groupId(std::move(groupId)),
+        m_memberId(std::move(memberId)),
+        m_memberNickName(std::move(memberNickName)),
+        m_memberAffiliation(memberAffiliation),
+        m_invitationStatus(invitationStatus)
+    {}
 
 
-GroupInvitationStatus vm::GroupInvitationStatusFromString(const QString& statusString) {
-    if (statusString == QLatin1String("none")) {
-        return GroupInvitationStatus::None;
-    }
-    else if (statusString == QLatin1String("invited")) {
-        return GroupInvitationStatus::Invited;
-    }
-    else if (statusString == QLatin1String("accepted")) {
-        return GroupInvitationStatus::Accepted;
-    }
-    else if (statusString == QLatin1String("rejected")) {
-        return GroupInvitationStatus::Rejected;
-    }
-    else {
-        throw std::logic_error("Invalid GroupInvitationStatus string");
-    }
+
+GroupId Self::groupId() const {
+    return m_groupId;
 }
 
 
-QString vm::GroupInvitationStatusToString(GroupInvitationStatus status) {
-    switch (status) {
-        case GroupInvitationStatus::None:
-            return QLatin1String("none");
+UserId Self::memberId() const {
+    return m_memberId;
+}
 
-        case GroupInvitationStatus::Invited:
-            return QLatin1String("invited");
 
-        case GroupInvitationStatus::Accepted:
-            return QLatin1String("accepted");
+QString Self::memberNickName() const {
+    return m_memberNickName;
+}
 
-        case GroupInvitationStatus::Rejected:
-            return QLatin1String("rejected");
 
-        default:
-            throw std::logic_error("Invalid GroupInvitationStatus");
-    }
+GroupAffiliation Self::memberAffiliation() const {
+    return m_memberAffiliation;
+}
+
+
+GroupInvitationStatus Self::invitationStatus() const {
+    return m_invitationStatus;
 }

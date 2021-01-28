@@ -44,7 +44,7 @@ namespace vm {
 //
 class UserId {
 public:
-    explicit UserId(QString messegeId = {});
+    explicit UserId(QString userId = {});
 
     bool isValid() const noexcept;
 

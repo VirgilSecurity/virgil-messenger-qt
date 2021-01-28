@@ -43,6 +43,7 @@
 #include "MessageSender.h"
 #include "FileLoader.h"
 #include "Group.h"
+#include "GroupMember.h"
 
 #include <QObject>
 #include <QPointer>
@@ -117,6 +118,11 @@ public:
     //  If fail - signal 'groupChatCreateFailed' is emitted.
     //
     void createGroupChat(const GroupHandler& group);
+
+    //
+    //  Join existent group chat when online to be able receive messages.
+    //
+    void joinGroupChats(const GroupMembers& groupsWithMe);
 
     //
     //  Helpers.

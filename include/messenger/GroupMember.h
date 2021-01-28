@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,49 +32,50 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
+#ifndef VM_GROUP_MEMBER_H
+#define VM_GROUP_MEMBER_H
 
+#include "GroupId.h"
+#include "UserId.h"
+#include "GroupAffiliation.h"
 #include "GroupInvitationStatus.h"
 
-#include <stdexcept>
+#include <list>
+#include <memory>
 
+namespace vm {
 
-using namespace vm;
+class GroupMember {
+public:
+    //
+    //  Required by signal / slot architecture.
+    //
+    GroupMember() = default;
 
+    GroupMember(GroupId groupId, UserId memberId, QString memberNickName, GroupAffiliation memberAffiliation,
+        GroupInvitationStatus invitationStatus);
 
-GroupInvitationStatus vm::GroupInvitationStatusFromString(const QString& statusString) {
-    if (statusString == QLatin1String("none")) {
-        return GroupInvitationStatus::None;
-    }
-    else if (statusString == QLatin1String("invited")) {
-        return GroupInvitationStatus::Invited;
-    }
-    else if (statusString == QLatin1String("accepted")) {
-        return GroupInvitationStatus::Accepted;
-    }
-    else if (statusString == QLatin1String("rejected")) {
-        return GroupInvitationStatus::Rejected;
-    }
-    else {
-        throw std::logic_error("Invalid GroupInvitationStatus string");
-    }
-}
+    [[nodiscard]] GroupId groupId() const;
 
+    [[nodiscard]] UserId memberId() const;
 
-QString vm::GroupInvitationStatusToString(GroupInvitationStatus status) {
-    switch (status) {
-        case GroupInvitationStatus::None:
-            return QLatin1String("none");
+    [[nodiscard]] QString memberNickName() const;
 
-        case GroupInvitationStatus::Invited:
-            return QLatin1String("invited");
+    [[nodiscard]] GroupAffiliation memberAffiliation() const;
 
-        case GroupInvitationStatus::Accepted:
-            return QLatin1String("accepted");
+    [[nodiscard]] GroupInvitationStatus invitationStatus() const;
 
-        case GroupInvitationStatus::Rejected:
-            return QLatin1String("rejected");
+private:
+    GroupId m_groupId;
+    UserId m_memberId;
+    QString m_memberNickName;
+    GroupAffiliation m_memberAffiliation;
+    GroupInvitationStatus m_invitationStatus;
+};
 
-        default:
-            throw std::logic_error("Invalid GroupInvitationStatus");
-    }
-}
+using GroupMembers = std::list<GroupMember>;
+
+} // namespace vm
+
+#endif // VM_GROUP_MEMBER_H
+
