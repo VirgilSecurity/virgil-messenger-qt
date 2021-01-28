@@ -77,7 +77,7 @@ void DeleteCloudFilesOperation::incProcessedCount()
     m_parent->cloudFilesUpdate(update);
 
     if (m_deletedFiles.size() < m_files.size()) {
-        failAndNotify(tr("Some files were not deleted"));
+        failAndNotify(tr("Failed to delete file"));
     }
     else {
         finish();

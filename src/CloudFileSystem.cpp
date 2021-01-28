@@ -107,7 +107,7 @@ CloudFileRequestId CloudFileSystem::createFile(const QString &filePath, const Cl
         : m_coreFs->createFile(filePath, encFilePath, parentFolderId, parentFolder->publicKey());
     FutureWorker::run(future, [this, filePath, encFilePath, parentFolder, requestId](auto result) {
         if (std::holds_alternative<CoreMessengerStatus>(result)) {
-            emit createFileErrorOccurred(requestId, tr("Cloud file creation error: %1").arg(filePath));
+            emit createFileErrorOccurred(requestId, tr("Failed to create file"));
             return;
         }
 
@@ -127,7 +127,7 @@ CloudFileRequestId CloudFileSystem::createFolder(const QString &name, const Clou
     auto future = isRoot ? m_coreFs->createFolder(name) : m_coreFs->createFolder(name, parentFolderId, parentFolder->publicKey());
     FutureWorker::run(future, [this, parentFolder, name, requestId](auto result) {
         if (std::holds_alternative<CoreMessengerStatus>(result)) {
-            emit createFolderErrorOccured(requestId, tr("Cloud folder creation error: %1").arg(name));
+            emit createFolderErrorOccured(requestId, tr("Failed to create folder"));
             return;
         }
 

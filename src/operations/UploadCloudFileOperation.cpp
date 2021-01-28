@@ -131,10 +131,12 @@ void UploadCloudFileOperation::sendFailedTransferUpdate()
 
 void UploadCloudFileOperation::transferUpdate(const TransferCloudFileUpdate::Stage stage, const quint64 bytesLoaded)
 {
-    TransferCloudFileUpdate update;
-    update.parentFolder = m_parentFolder;
-    update.file = m_file;
-    update.stage = stage;
-    update.bytesLoaded = bytesLoaded;
-    m_parent->cloudFilesUpdate(update);
+    if (m_file) {
+        TransferCloudFileUpdate update;
+        update.parentFolder = m_parentFolder;
+        update.file = m_file;
+        update.stage = stage;
+        update.bytesLoaded = bytesLoaded;
+        m_parent->cloudFilesUpdate(update);
+    }
 }

@@ -204,6 +204,13 @@ Self::FutureResult<CloudFsNewFile> Self::createFile(const QString &sourceFilePat
                         m_cloudFs.get(), fileNameC, sourceFileMimeTypeC, destFileInfo.size(),
                         vsc_str_from(parentFolderIdStd), fileEncryptedKeyC, &error));
 
+        if (vssq_error_has_error(&error)) {
+            qCWarning(lcCoreMessengerCloudFs) << "Can not create file: " <<
+                    vsc_str_to_qstring(vssq_error_message_from_error(&error));
+
+            return CoreMessengerStatus::Error_CloudFsRequestFailed;
+        }
+
         //
         //  Return a new file.
         //
