@@ -39,10 +39,13 @@ Page {
         readonly property real listSpacing: 5
         readonly property real smallItemHeight: 30
         readonly property real stdItemHeight: 40
+        readonly property real mediumItemHeight: 44
         readonly property real bigItemHeight: 50
 
         readonly property real stdItemWidth: 280
     }
+
+    state: "view" // 'view' or 'deleting'
 
     background: Rectangle {
         color: Theme.mainBackgroundColor
@@ -76,6 +79,8 @@ Page {
             anchors.fill: parent
             anchors.leftMargin: Theme.smallMargin
             anchors.rightMargin: Theme.smallMargin
+
+            visible: chatPage.state === "view"
 
             ImageButton {
                 image: "Arrow-Left"
@@ -111,7 +116,86 @@ Page {
                     currentIndex: -1
 
                     Action {
-                        text: qsTr("Do something")
+                        text: qsTr("Add member")
+                    }
+
+                    Action {
+                        text: qsTr("Delete members")
+                        onTriggered: chatPage.state = "deleting"
+                    }
+                }
+            }
+        }
+
+        Item {
+            anchors.fill: parent
+
+            visible: chatPage.state === "deleting"
+
+            Label {
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    left: parent.left
+                    leftMargin: Theme.margin
+                }
+
+                text: qsTr("Cancel")
+                font.pointSize: UiHelper.fixFontSz(13)
+                color: Theme.primaryTextColor
+                font.bold: false
+
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: cursorShape = Qt.PointingHandCursor
+                    onExited: cursorShape = Qt.ArrowCursor
+                    onClicked: {
+                        chatPage.state = "view"
+                    }
+                }
+            }
+
+            Label {
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    horizontalCenter: parent.horizontalCenter
+                }
+
+                text: qsTr("Deleting members")
+                font.pointSize: UiHelper.fixFontSz(15)
+                color: Theme.primaryTextColor
+                font.bold: true
+
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: cursorShape = Qt.PointingHandCursor
+                    onExited: cursorShape = Qt.ArrowCursor
+                    onClicked: {
+                        chatPage.state = "view"
+                    }
+                }
+            }
+
+            Label {
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    right: parent.right
+                    rightMargin: Theme.margin
+                }
+
+                text: qsTr("Done")
+                font.pointSize: UiHelper.fixFontSz(13)
+                color: Theme.primaryTextColor
+                font.bold: false
+
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: cursorShape = Qt.PointingHandCursor
+                    onExited: cursorShape = Qt.ArrowCursor
+                    onClicked: {
+                        chatPage.state = "view"
                     }
                 }
             }
@@ -128,9 +212,15 @@ Page {
             id: commonColumn
             spacing: Theme.spacing
 
+            add: Theme.addTransition
+            move: Theme.moveTransition
+
             Column {
                 id: column
                 spacing: Theme.spacing
+
+                add: Theme.addTransition
+                move: Theme.moveTransition
 
                 anchors {
                     left: parent.left
@@ -180,17 +270,6 @@ Page {
                     }
                 }
 
-                Item { // spacing
-                    width: parent.width
-                    height: 1
-                }
-
-                Text {
-                    color: Theme.primaryTextColor
-                    font.pointSize: UiHelper.fixFontSz(18)
-                    text: qsTr("Information")
-                }
-
                 Column {
 
                     Text {
@@ -226,24 +305,6 @@ Page {
                         textFormat: Text.RichText
                     }
                 }
-
-                Column {
-
-                    Text {
-                        color: Theme.primaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(15)
-                        text: qsTr("Notifications")
-                    }
-
-                    Text {
-                        color: Theme.secondaryTextColor
-                        font.pointSize: UiHelper.fixFontSz(12)
-                        text: notificationsEnabled ? qsTr("enabled") : qsTr("disabled")
-                        width: parent.width
-                        elide: Text.ElideRight
-                        textFormat: Text.RichText
-                    }
-                }
             }
 
             Column { // list view item
@@ -271,9 +332,8 @@ Page {
                         id: menuModel
 
                         ListElement { name: qsTr("Participants") }
-                        ListElement { name: qsTr("Media") }
-                        ListElement { name: qsTr("Files") }
-                        ListElement { name: qsTr("Links") }
+//                        ListElement { name: qsTr("Media") } TODO: dz
+//                        ListElement { name: qsTr("Files") }
                     }
 
                     delegate: Item {
@@ -310,24 +370,107 @@ Page {
                     }
                 }
 
-                GridView {
+//                GridView {
+//                    id: participantsListView
+
+//                    QtObject {
+//                        id: gridProps
+//                        readonly property real cellWidth: calculateCellWidth()
+//                        readonly property real cellHeight: d.bigItemHeight
+//                        readonly property real targetCellWidth: d.stdItemWidth
+
+//                        function calculateCellWidth() {
+//                            if (!Platform.isDesktop) {
+//                                return chatPage.width
+//                            } else {
+//                                let numOfTargetCells = Math.round(chatPage.width / targetCellWidth)
+//                                return chatPage.width / numOfTargetCells
+//                            }
+//                        }
+//                    }
+
+//                    anchors {
+//                        left: parent.left
+//                        right: parent.right
+//                    }
+
+//                    height: contentHeight
+//                    interactive: false
+
+//                    model: 30
+
+//                    cellWidth: gridProps.cellWidth
+//                    cellHeight: gridProps.cellHeight
+
+//                    footer: spacingDelegate
+//                    delegate: participantsDelegate
+//                    header: spacingDelegate
+
+//                    Component {
+//                        id: participantsDelegate
+
+//                        Item {
+//                            width: participantsListView.cellWidth
+//                            height: participantsListView.cellHeight
+
+//                            Row {
+//                                spacing: Theme.smallSpacing
+
+//                                anchors {
+//                                    fill: parent
+//                                    margins: Theme.margin
+//                                }
+
+//                                Item {
+//                                    id: avatarItem
+//                                    anchors.verticalCenter: parent.verticalCenter
+//                                    width: avatar.width + 8
+//                                    height: width
+
+//                                    Avatar {
+//                                        id: avatar
+//                                        nickname: "model.name"
+//    //                                        avatarUrl: model.avatarUrl
+//                                        anchors.centerIn: parent
+//                                    }
+//                                }
+
+//                                Column {
+//                                    anchors.verticalCenter: parent.verticalCenter
+
+//                                    Text {
+//                                        color: Theme.primaryTextColor
+//                                        font.pointSize: UiHelper.fixFontSz(15)
+//                                        text: "model.name " + index
+//                                    }
+
+//                                    Text {
+//                                        color: Theme.secondaryTextColor
+//                                        font.pointSize: UiHelper.fixFontSz(12)
+//                                        text: "model.details"
+//                                        width: parent.width
+//                                        elide: Text.ElideRight
+//                                        textFormat: Text.RichText
+//                                    }
+//                                }
+//                            }
+
+//                        }
+//                    }
+
+//                    Component {
+//                        id: spacingDelegate
+
+//                        Item {
+//                            width: parent.width
+//                            height: Theme.margin
+//                        }
+//                    }
+//                }
+
+
+                ListView {
                     id: participantsListView
-
-                    QtObject {
-                        id: gridProps
-                        readonly property real cellWidth: calculateCellWidth()
-                        readonly property real cellHeight: d.bigItemHeight
-                        readonly property real targetCellWidth: d.stdItemWidth
-
-                        function calculateCellWidth() {
-                            if (!Platform.isDesktop) {
-                                return chatPage.width
-                            } else {
-                                let numOfTargetCells = Math.round(chatPage.width / targetCellWidth)
-                                return chatPage.width / numOfTargetCells
-                            }
-                        }
-                    }
 
                     anchors {
                         left: parent.left
@@ -335,12 +478,10 @@ Page {
                     }
 
                     height: contentHeight
+                    spacing: Theme.minSpacing
                     interactive: false
 
                     model: 30
-
-                    cellWidth: gridProps.cellWidth
-                    cellHeight: gridProps.cellHeight
 
                     footer: spacingDelegate
                     delegate: participantsDelegate
@@ -350,15 +491,16 @@ Page {
                         id: participantsDelegate
 
                         Item {
-                            width: participantsListView.cellWidth
-                            height: participantsListView.cellHeight
+                            width: parent.width
+                            height: contentRow.height
 
                             Row {
+                                id: contentRow
                                 spacing: Theme.smallSpacing
 
                                 anchors {
-                                    fill: parent
-                                    margins: Theme.margin
+                                    left: parent.left
+                                    leftMargin: Theme.margin
                                 }
 
                                 Item {
@@ -395,6 +537,20 @@ Page {
                                 }
                             }
 
+                            MouseArea {
+                                anchors.fill: parent
+                                enabled: chatPage.state === "deleting"
+                                hoverEnabled: chatPage.state === "deleting"
+                                onEntered: cursorShape = Qt.PointingHandCursor
+                                onExited: cursorShape = Qt.ArrowCursor
+                                onClicked: {
+                                    if (avatar.isSelected) {
+                                        avatar.isSelected = false
+                                    } else {
+                                        avatar.isSelected = true
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -407,82 +563,6 @@ Page {
                         }
                     }
                 }
-
-
-//                ListView {
-//                    id: participantsListView
-
-//                    anchors {
-//                        left: parent.left
-//                        right: parent.right
-//                    }
-
-//                    height: contentHeight
-//                    spacing: Theme.minSpacing
-//                    interactive: false
-
-//                    model: 30
-
-//                    footer: spacingDelegate
-//                    delegate: participantsDelegate
-//                    header: spacingDelegate
-
-//                    Component {
-//                        id: participantsDelegate
-
-//                        Row {
-//                            spacing: Theme.smallSpacing
-
-//                            anchors {
-//                                left: parent.left
-//                                leftMargin: Theme.margin
-//                            }
-
-//                            Item {
-//                                id: avatarItem
-//                                anchors.verticalCenter: parent.verticalCenter
-//                                width: avatar.width + 8
-//                                height: width
-
-//                                Avatar {
-//                                    id: avatar
-//                                    nickname: "model.name"
-////                                        avatarUrl: model.avatarUrl
-//                                    anchors.centerIn: parent
-//                                }
-//                            }
-
-//                            Column {
-//                                anchors.verticalCenter: parent.verticalCenter
-
-//                                Text {
-//                                    color: Theme.primaryTextColor
-//                                    font.pointSize: UiHelper.fixFontSz(15)
-//                                    text: "model.name " + index
-//                                }
-
-//                                Text {
-//                                    color: Theme.secondaryTextColor
-//                                    font.pointSize: UiHelper.fixFontSz(12)
-//                                    text: "model.details"
-//                                    width: parent.width
-//                                    elide: Text.ElideRight
-//                                    textFormat: Text.RichText
-//                                }
-//                            }
-//                        }
-
-//                    }
-
-//                    Component {
-//                        id: spacingDelegate
-
-//                        Item {
-//                            width: parent.width
-//                            height: Theme.margin
-//                        }
-//                    }
-//                }
             }
         }
     }
