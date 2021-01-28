@@ -60,6 +60,7 @@ public:
     void resetUnreadCount(const ChatId &chatId);
     void updateLastMessage(const MessageHandler &message, qsizetype unreadMessageCount);
 
+    Q_INVOKABLE void toggleById(const QString &chatId);
 
 signals:
     void chatAdded(const ChatHandler &chat);

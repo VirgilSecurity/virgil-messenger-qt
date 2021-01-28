@@ -6,14 +6,20 @@ import "../theme"
 
 ModelListView {
     id: chatListView
-    model: models.chats.proxy
+    model: d.model.proxy
     emptyIcon: "../resources/icons/Chats.png"
     emptyText: qsTr("Create your first chat<br/>by pressing the dots<br/>button above")
 
     signal chatSelected(string chatId)
 
+    QtObject {
+        id: d
+        readonly property var model: models.chats
+    }
+
     delegate: ListDelegate {
         width: chatListView.width
+        backgroundColor: (model.isSelected || down) ? Theme.contactPressedColor : "transparent"
 
         Avatar {
             id: avatar
@@ -56,7 +62,12 @@ ModelListView {
             }
         }
 
-        onClicked: chatListView.chatSelected(model.id)
+        onClicked: {
+            if (d.model.selection.multiSelect) {
+                d.model.toggleById(model.id)
+            }
+            chatListView.chatSelected(model.id)
+        }
     }
 
     onPlaceholderClicked: appState.requestNewChat()

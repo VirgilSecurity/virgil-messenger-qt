@@ -34,7 +34,8 @@
 
 #include "SelectChatsState.h"
 
-#include "models/ChatsModel.h"
+#include "ChatsModel.h"
+#include "ListSelectionModel.h"
 
 using namespace vm;
 
@@ -47,4 +48,11 @@ SelectChatsState::SelectChatsState(ChatsModel *chatsModel, QState *parent)
 void SelectChatsState::onEntry(QEvent *)
 {
     m_chatsModel->clearFilter();
+    m_chatsModel->selection()->setMultiSelect(true);
+}
+
+void SelectChatsState::onExit(QEvent *)
+{
+    m_chatsModel->selection()->setMultiSelect(false);
+    m_chatsModel->selection()->clear();
 }

@@ -141,10 +141,10 @@ void Self::sendPictureMessage(const QVariant &attachmentUrl)
     emit messageCreated(message);
 }
 
-void MessagesController::shareMessage(const QVariant &messageId, const QVariant &chatId)
+void MessagesController::shareMessage(const QVariant &messageId)
 {
     Q_UNUSED(messageId)
-    Q_UNUSED(chatId)
+    // TODO(fpohtmeh): get selected chats from m_models->chats()->selection()
     qCDebug(lcController) << "Message sharing is under development";
 }
 

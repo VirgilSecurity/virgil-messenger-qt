@@ -10,8 +10,22 @@ Page {
         color: Theme.contactsBackgroundColor
     }
 
-    header: Header {
+    header: NewGroupChatHeader {
+        id: selectChatsHeader
         title: qsTr("Share to...")
+        description: d.selectedCount > 0 ? qsTr("%1 selected").arg(d.selectedCount) : ""
+        rightButtonEnabled: d.selectedCount > 0
+
+        onActionButtonClicked: {
+            controllers.messages.shareMessage(app.stateManager.chatState.currentMessageId)
+            app.stateManager.goBack()
+        }
+    }
+
+    QtObject {
+        id: d
+        readonly property var model: models.chats
+        readonly property int selectedCount: d.model.selection.selectedCount
     }
 
     Form {
@@ -31,15 +45,10 @@ Page {
 
         ChatListView {
             id: listView
-            model: models.chats.proxy
+            model: d.model.proxy
 
             Layout.fillWidth: true
             Layout.fillHeight: true
-
-            onChatSelected: {
-                controllers.messages.shareMessage(app.stateManager.chatState.currentMessageId, chatId)
-                app.stateManager.goBack()
-            }
         }
     }
 }

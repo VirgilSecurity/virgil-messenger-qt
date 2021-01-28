@@ -50,6 +50,7 @@ public:
 
 private:
     void onEntry(QEvent *) override;
+    void onExit(QEvent *) override;
 
     ChatsModel *m_chatsModel;
 };
