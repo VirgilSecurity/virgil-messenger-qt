@@ -53,10 +53,13 @@ using namespace notifications;
 using namespace notifications::xmpp;
 #endif // VS_PUSHNOTIFICATIONS
 
+#include <virgil/crypto/foundation/vscf_ctr_drbg.h>
+
 #include <virgil/sdk/core/vssc_json_object.h>
 #include <virgil/sdk/comm-kit/vssq_messenger.h>
 #include <virgil/sdk/comm-kit/vssq_error_message.h>
 #include <virgil/sdk/comm-kit/vssq_messenger_file_cipher.h>
+#include <virgil/sdk/comm-kit/vssq_messenger_cloud_fs.h>
 
 #include <qxmpp/QXmppMessage.h>
 #include <qxmpp/QXmppMessageReceiptManager.h>
@@ -80,18 +83,16 @@ Q_LOGGING_CATEGORY(lcCoreMessenger, "core-messenger");
 // --------------------------------------------------------------------------
 // C Helpers.
 // --------------------------------------------------------------------------
-template<typename CType>
-using vsc_unique_ptr = std::unique_ptr<CType, void(*)(const CType*)>;
+using vscf_ctr_drbg_ptr_t = vsc_unique_ptr<vscf_ctr_drbg_t>;
 
-using vsc_buffer_unique_ptr_t = vsc_unique_ptr<vsc_buffer_t>;
 using vssc_json_object_unique_ptr_t = vsc_unique_ptr<vssc_json_object_t>;
 using vssq_messenger_creds_unique_ptr_t = vsc_unique_ptr<vssq_messenger_creds_t>;
-using vssq_messenger_unique_ptr_t = vsc_unique_ptr<vssq_messenger_t>;
+using vssq_messenger_ptr_t = vsc_unique_ptr<vssq_messenger_t>;
 using vssq_messenger_file_cipher_ptr_t = vsc_unique_ptr<vssq_messenger_file_cipher_t>;
 
 
-static vsc_buffer_unique_ptr_t vsc_buffer_wrap_ptr(vsc_buffer_t *ptr) {
-    return vsc_buffer_unique_ptr_t{ptr, vsc_buffer_delete};
+static vscf_ctr_drbg_ptr_t vscf_ctr_drbg_wrap_ptr(vscf_ctr_drbg_t *ptr) {
+    return vscf_ctr_drbg_ptr_t{ptr, vscf_ctr_drbg_delete};
 }
 
 static vssc_json_object_unique_ptr_t vssc_json_object_wrap_ptr(vssc_json_object_t *ptr) {
@@ -102,26 +103,12 @@ static vssq_messenger_creds_unique_ptr_t vssq_messenger_creds_wrap_ptr(vssq_mess
     return vssq_messenger_creds_unique_ptr_t{ptr, vssq_messenger_creds_delete};
 }
 
-static vssq_messenger_unique_ptr_t vssq_messenger_wrap_ptr(vssq_messenger_t *ptr) {
-    return vssq_messenger_unique_ptr_t{ptr, vssq_messenger_delete};
+static vssq_messenger_ptr_t vssq_messenger_wrap_ptr(vssq_messenger_t *ptr) {
+    return vssq_messenger_ptr_t{ptr, vssq_messenger_delete};
 }
 
 static vssq_messenger_file_cipher_ptr_t vssq_messenger_file_cipher_wrap(vssq_messenger_file_cipher_t *ptr) {
     return vssq_messenger_file_cipher_ptr_t{ptr, vssq_messenger_file_cipher_delete};
-}
-
-static std::tuple<QByteArray, vsc_buffer_unique_ptr_t> makeMappedBuffer(size_t size) {
-
-    QByteArray byteArray(size, 0x00);
-    auto buffer  = vsc_buffer_wrap_ptr(vsc_buffer_new());
-    vsc_buffer_use(buffer.get(),  (byte *)byteArray.data(), byteArray.size());
-
-    return std::make_tuple(std::move(byteArray), std::move(buffer));
-}
-
-static void adjustMappedBuffer(const vsc_buffer_unique_ptr_t& buffer, QByteArray& bytes) {
-
-    bytes.resize(vsc_buffer_len(buffer.get()));
 }
 
 
@@ -130,7 +117,9 @@ static void adjustMappedBuffer(const vsc_buffer_unique_ptr_t& buffer, QByteArray
 // --------------------------------------------------------------------------
 class Self::Impl {
 public:
-    vssq_messenger_unique_ptr_t messenger = vssq_messenger_wrap_ptr(nullptr);
+    vscf_impl_ptr_t random = vscf_impl_ptr_t(nullptr, vscf_impl_delete);
+
+    vssq_messenger_ptr_t messenger = vssq_messenger_wrap_ptr(nullptr);
 
     VSQNetworkAnalyzer *networkAnalyzer;
 
@@ -166,12 +155,19 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     qRegisterMetaType<vm::Messages>("Messages");
     qRegisterMetaType<vm::ModifiableMessages>("ModifiableMessages");
     qRegisterMetaType<vm::UserHandler>("UserHandler");
+    qRegisterMetaType<vm::GroupHandler>("GroupHandler");
     qRegisterMetaType<vm::ChatHandler>("ChatHandler");
     qRegisterMetaType<vm::ModifiableChatHandler>("ModifiableChatHandler");
     qRegisterMetaType<vm::ModifiableChats>("ModifiableChats");
+    qRegisterMetaType<vm::CloudFileHandler>("CloudFileHandler");
+    qRegisterMetaType<vm::ModifiableCloudFileHandler>("ModifiableCloudFileHandler");
+    qRegisterMetaType<vm::CloudFiles>("CloudFiles");
+    qRegisterMetaType<vm::ModifiableCloudFiles>("ModifiableCloudFiles");
+
     qRegisterMetaType<vm::ChatId>("ChatId");
     qRegisterMetaType<vm::MessageId>("MessageId");
     qRegisterMetaType<vm::AttachmentId>("AttachmentId");
+    qRegisterMetaType<vm::CloudFileId>("CloudFileId");
 
     //
     //  Register self signals-slots
@@ -224,9 +220,21 @@ Self::resetCommKitConfiguration() {
     }
 
     m_impl->messenger = vssq_messenger_wrap_ptr(vssq_messenger_new_with_config(config));
-
-    auto status = vssq_messenger_setup_defaults(m_impl->messenger.get());
     vssq_messenger_config_destroy(&config);
+
+    if (!m_impl->random) {
+        auto randomImpl = vscf_ctr_drbg_wrap_ptr(vscf_ctr_drbg_new());
+        auto randomStatus = vscf_ctr_drbg_setup_defaults(randomImpl.get());
+        if (randomStatus != vscf_status_SUCCESS) {
+            qCWarning(lcCoreMessenger) << "Got error status: failed to init crypto module - random";
+            return Self::Result::Error_CryptoInit;
+        }
+
+        m_impl->random = vscf_impl_wrap_ptr(vscf_ctr_drbg_impl(randomImpl.release()));
+    }
+
+    vssq_messenger_use_random(m_impl->messenger.get(), m_impl->random.get());
+    auto status = vssq_messenger_setup_defaults(m_impl->messenger.get());
 
     if (status != vssq_status_SUCCESS) {
         qCWarning(lcCoreMessenger) << "Got error status: " << vsc_str_to_qstring(vssq_error_message_from_status(status));
@@ -317,6 +325,11 @@ Self::isOnline() const noexcept {
 bool
 Self::isSignedIn() const noexcept {
     return m_impl->messenger && vssq_messenger_is_authenticated(m_impl->messenger.get());
+}
+
+
+CoreMessenger::ConnectionState Self::connectionState() const {
+    return m_impl->connectionState;
 }
 
 
@@ -577,7 +590,7 @@ Self::onRegisterPushNotifications() {
 #if VS_PUSHNOTIFICATIONS
     if (!isOnline()) {
         qCWarning(lcCoreMessenger) << "Can not subscribe for push notifications, no connection. Will try it later.";
-        return false;
+        return;
     }
 
     qCInfo(lcCoreMessenger) << "Register for push notifications on XMPP server.";
@@ -696,6 +709,8 @@ Self::connectXmppServer() {
     }
 
     QString xmppPass = vsc_str_to_qstring(vssq_ejabberd_jwt_as_string(jwt));
+
+    qCDebug(lcCoreMessenger) << "Connect user with JID: " << currentUserJid();
 
     QXmppConfiguration config{};
     config.setJid(currentUserJid());
@@ -920,6 +935,9 @@ Self::sendMessage(MessageHandler message) {
         // TODO: review next lines when implement group chats.
         auto senderJid = userIdToJid(message->senderId());
         auto recipientJid = userIdToJid(UserId(message->chatId()));
+
+        qCDebug(lcCoreMessenger) << "Will send XMPP message from JID: " << senderJid;
+        qCDebug(lcCoreMessenger) << "Will send XMPP message to JID: " << recipientJid;
 
         QXmppMessage xmppMessage(senderJid, recipientJid, messageBody);
         xmppMessage.setId(message->id());
@@ -1270,22 +1288,22 @@ Self::processReceivedXmppCarbonMessage(const QXmppMessage& xmppMessage) {
     });
 }
 
-std::tuple<Self::Result, QByteArray>
+std::tuple<Self::Result, QByteArray, QByteArray>
 Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
     //
     //  Create helpers for error handling.
     //
-    auto cryptoError = [](vssq_status_t status) -> std::tuple<Result, QByteArray> {
+    auto cryptoError = [](vssq_status_t status) -> std::tuple<Result, QByteArray, QByteArray> {
         qCWarning(lcCoreMessenger) << "Can not encrypt file: " <<
                 vsc_str_to_qstring(vssq_error_message_from_status(status));
 
-        return std::make_tuple(Self::Result::Error_FileEncryptionCryptoFailed, QByteArray());
+        return std::make_tuple(Self::Result::Error_FileEncryptionCryptoFailed, QByteArray(), QByteArray());
     };
 
-    auto fileError = [](Self::Result error) -> std::tuple<Result, QByteArray> {
+    auto fileError = [](Self::Result error) -> std::tuple<Result, QByteArray, QByteArray> {
         qCWarning(lcCoreMessenger) << "Can not encrypt file - read/write failed.";
 
-        return std::make_tuple(error, QByteArray());
+        return std::make_tuple(error, QByteArray(), QByteArray());
     };
 
 
@@ -1325,10 +1343,7 @@ Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
     const auto decryptionKeyBufLen = vssq_messenger_file_cipher_init_encryption_out_key_len(fileCipher.get());
     auto [decryptionKey, decryptionKeyBuf] = makeMappedBuffer(decryptionKeyBufLen);
 
-    const auto ownerPrivateKey = vssq_messenger_creds_private_key(vssq_messenger_creds(m_impl->messenger.get()));
-
-    encryptionStatus = vssq_messenger_file_cipher_init_encryption(
-                fileCipher.get(), ownerPrivateKey, fileSize, decryptionKeyBuf.get());
+    encryptionStatus = vssq_messenger_file_cipher_init_encryption(fileCipher.get(), decryptionKeyBuf.get());
 
     if (encryptionStatus != vssq_status_SUCCESS) {
         return cryptoError(encryptionStatus);
@@ -1353,7 +1368,6 @@ Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
     if (destFile.write((const char *)vsc_buffer_bytes(workingBuffer.get()), vsc_buffer_len(workingBuffer.get())) == -1) {
         return fileError(Self::Result::Error_FileEncryptionWriteFailed);
     }
-
 
     //
     //  Encrypt - Step 4 - Encrypt file.
@@ -1402,28 +1416,17 @@ Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
     }
 
     //
-    //  Encrypt - Step 5 - Write tail.
+    //  Encrypt - Step 5 - Write tail and produce signature.
     //
     const auto tailLen = vssq_messenger_file_cipher_finish_encryption_out_len(fileCipher.get());
     vsc_buffer_reset_with_capacity(workingBuffer.get(), tailLen);
 
-    encryptionStatus = vssq_messenger_file_cipher_finish_encryption(fileCipher.get(), workingBuffer.get());
+    const auto ownerPrivateKey = vssq_messenger_creds_private_key(vssq_messenger_creds(m_impl->messenger.get()));
 
-    if (encryptionStatus != vssq_status_SUCCESS) {
-        return cryptoError(encryptionStatus);
-    }
+    const auto signatureBufferLen = vssq_messenger_file_cipher_finish_encryption_signature_len(fileCipher.get(), ownerPrivateKey);
+    auto [signature, signatureBuffer] = makeMappedBuffer(signatureBufferLen);
 
-    if (destFile.write((const char *)vsc_buffer_bytes(workingBuffer.get()), vsc_buffer_len(workingBuffer.get())) == -1) {
-        return fileError(Self::Result::Error_FileEncryptionWriteFailed);
-    }
-
-    //
-    //  Encrypt - Step 6 - Write footer.
-    //
-    const auto footerLen = vssq_messenger_file_cipher_finish_encryption_footer_out_len(fileCipher.get());
-    vsc_buffer_reset_with_capacity(workingBuffer.get(), footerLen);
-
-    encryptionStatus = vssq_messenger_file_cipher_finish_encryption_footer(fileCipher.get(), workingBuffer.get());
+    encryptionStatus = vssq_messenger_file_cipher_finish_encryption(fileCipher.get(), ownerPrivateKey, workingBuffer.get(), signatureBuffer.get());
 
     if (encryptionStatus != vssq_status_SUCCESS) {
         return cryptoError(encryptionStatus);
@@ -1436,13 +1439,13 @@ Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
     //
     //  Return result.
     //
-    return std::make_tuple(Self::Result::Success, std::move(decryptionKey));
+    return std::make_tuple(Self::Result::Success, std::move(decryptionKey), std::move(signature));
 }
 
 
 Self::Result
 Self::decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray& decryptionKey,
-        const UserId senderId) {
+        const QByteArray& signature, const UserId senderId) {
     //
     //  Create helpers for error handling.
     //
@@ -1501,7 +1504,7 @@ Self::decryptFile(const QString &sourceFilePath, const QString &destFilePath, co
     //
     //  Decrypt - Step 2 - Setup decryption key.
     //
-    decryptionStatus = vssq_messenger_file_cipher_start_decryption(fileCipher.get(), vsc_data_from(decryptionKey));
+    decryptionStatus = vssq_messenger_file_cipher_start_decryption(fileCipher.get(), vsc_data_from(decryptionKey), vsc_data_from(signature));
 
     if (decryptionStatus != vssq_status_SUCCESS) {
         return cryptoError(decryptionStatus);
@@ -1772,4 +1775,15 @@ Self::onLogConnectionStateChanged(CoreMessenger::ConnectionState state) {
             qCDebug(lcCoreMessenger) << "New connection status: error";
             break;
     }
+}
+
+// --------------------------------------------------------------------------
+//  Cloud FS.
+// --------------------------------------------------------------------------
+CoreMessengerCloudFs
+Self::cloudFs() const {
+    auto cloudFsCopyPtr = vssq_messenger_cloud_fs_shallow_copy_const(vssq_messenger_cloud_fs(m_impl->messenger.get()));
+    auto cloudFsCopy = vssq_messenger_cloud_fs_ptr_t(cloudFsCopyPtr, vssq_messenger_cloud_fs_delete);
+    auto randomCopy = vscf_impl_wrap_ptr(vscf_impl_shallow_copy(m_impl->random.get()));
+    return CoreMessengerCloudFs(std::move(cloudFsCopy), std::move(randomCopy));
 }

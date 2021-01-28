@@ -41,6 +41,7 @@
 #include <QSize>
 
 #include "AttachmentId.h"
+#include "UserId.h"
 
 class Settings : public QSettings
 {
@@ -48,7 +49,6 @@ class Settings : public QSettings
     Q_PROPERTY(QString lastSignedInUser READ lastSignedInUser WRITE setLastSignedInUser NOTIFY lastSignedInUserChanged)
     Q_PROPERTY(QStringList usersList READ usersList WRITE setUsersList NOTIFY usersListChanged)
     Q_PROPERTY(bool devMode READ devMode CONSTANT)
-    Q_PROPERTY(bool fileCloudEnabled READ fileCloudEnabled CONSTANT)
     Q_PROPERTY(QRect windowGeometry READ windowGeometry WRITE setWindowGeometry NOTIFY windowGeometryChanged)
 
 public:
@@ -75,11 +75,13 @@ public:
 
     // Attachments
 
+    static QDir logsDir();
     QDir databaseDir() const;
     quint64 attachmentMaxFileSize() const;
     QDir attachmentCacheDir() const;
     QDir thumbnailsDir() const;
     QDir downloadsDir() const;
+    QDir cloudFilesDownloadsDir(const QString &userName) const;
 
     QString makeThumbnailPath(const vm::AttachmentId &attachmentId, bool isPreview) const;
     QSize thumbnailMaxSize() const;
@@ -87,7 +89,6 @@ public:
 
     // Modes / features
     bool devMode() const;
-    bool fileCloudEnabled() const;
     bool autoSendCrashReport() const;
 
     // Window
@@ -111,8 +112,11 @@ private:
 
     void createDeviceId();
     void addUserToList(const QString &user);
+    static QString settingsFileName();
 
     QString m_sessionId;
+    static QDir m_logsDir;
+    static bool m_logsDirInitialized;
     QDir m_databaseDir;
     QDir m_attachmentCacheDir;
     QDir m_thumbnaisDir;

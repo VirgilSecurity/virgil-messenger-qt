@@ -6,7 +6,7 @@ import "../theme"
 Rectangle {
     id: uploadProgressBar
 
-    readonly property var model: models.fileCloudUploader
+    readonly property var model: models.cloudFilesUploader
     readonly property int fileIndex: model.currentIndex
     readonly property int filesCount: model.fileNames.length
     readonly property real fileUploadValue: model.currentProcessedBytes

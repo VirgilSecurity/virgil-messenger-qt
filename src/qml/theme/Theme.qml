@@ -32,6 +32,7 @@ Item {
     readonly property color menuSeparatorColor: "#90A4AE"
     readonly property color inputBackgroundColor: "#37474F"
     readonly property color chatBackgroundColor: "#263238"
+    readonly property color contactSelectionColor: "#2196F3"
 
     // sizes
     readonly property real margin: 20
@@ -56,6 +57,9 @@ Item {
     readonly property string mainLogoText: app.organizationDisplayName
     readonly property string mainFont: robotoRegular.name
     readonly property string mainFontBold: robotoBold.name
+
+    // z indices
+    readonly property real overlayZ: 1000
 
     // animation
     readonly property int animationDuration: 250

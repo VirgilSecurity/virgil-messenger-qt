@@ -5,9 +5,8 @@ import QtQuick.Controls 2.15
 import "../base"
 import "../theme"
 
-Control {
+Column {
     id: chatMessage
-    height: chatMessageBody.height
 
     property int thisIndex: -1
     property var thisDay
@@ -25,7 +24,6 @@ Control {
     signal openContextMenu(string messageId, var mouse, var contextMenu)
 
     readonly property int stdCheckHeight: 14
-    readonly property int stdTopMargin: 15
     readonly property int stdSmallMargin: 5
     readonly property int stdRadiusHeight: 20
     readonly property int stdRectangleSize: 22
@@ -37,7 +35,7 @@ Control {
     readonly property bool isMessageAlignedLeft: {
         if (!Platform.isMobile) {
             if (isOwnMessage) {
-                if (chatMessage.width > 500) {
+                if (chatMessage.width > 800) {
                     return true
                 } else {
                     return false
@@ -56,7 +54,6 @@ Control {
         }
     }
 
-
     Behavior on leftBottomRadiusHeight {
         NumberAnimation { duration: Theme.animationDuration}
     }
@@ -69,12 +66,28 @@ Control {
         readonly property double defaultRadius: 4
     }
 
-    ChatMessageBody {
-        id: chatMessageBody
+    ChatMessageHeader {
+        id: chatMessageHeader
+        width: parent.width
     }
 
-//  Smart items
-    UnreadMessagesSeparator {
-        id: unreadMessagesSeparator
+    ChatMessageBody {
+        id: chatMessageBody
+        property real translateY: 0
+        transform: Translate { y: chatMessageBody.translateY }
+
+        ParallelAnimation {
+            id: chatMessageBodyAnimation
+            NumberAnimation { target: chatMessageBody; property: 'translateY'; from: chatMessageBody.height; to: 0; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+            NumberAnimation { target: chatMessageBody; property: 'scale'; from: 0; to: 1; duration: Theme.animationDuration; easing.type: Easing.InOutCubic }
+            NumberAnimation { target: chatMessageBody; property: 'opacity'; from: 0; to: 1; duration: Theme.animationDuration }
+        }
+    }
+
+    Component.onCompleted: {
+        if (index === 0 && addAnimationEnabled && isReady) {
+            addAnimationEnabled = false
+            chatMessageBodyAnimation.restart()
+        }
     }
 }

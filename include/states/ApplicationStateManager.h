@@ -45,8 +45,8 @@
 #include "VerifyProfileState.h"
 #include "ChatListState.h"
 #include "ChatState.h"
+#include "CloudFileListState.h"
 #include "DownloadKeyState.h"
-#include "FileCloudState.h"
 #include "NewChatState.h"
 #include "NewGroupChatState.h"
 #include "NameGroupChatState.h"
@@ -76,7 +76,7 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(ChatListState *chatListState MEMBER m_chatListState CONSTANT)
     Q_PROPERTY(ChatState *chatState MEMBER m_chatState CONSTANT)
     Q_PROPERTY(DownloadKeyState *downloadKeyState MEMBER m_downloadKeyState CONSTANT)
-    Q_PROPERTY(FileCloudState *fileCloudState MEMBER m_fileCloudState CONSTANT)
+    Q_PROPERTY(CloudFileListState *cloudFileListState MEMBER m_cloudFileListState CONSTANT)
     Q_PROPERTY(NewChatState *newChatState MEMBER m_newChatState CONSTANT)
     Q_PROPERTY(NewGroupChatState *newGroupChatState MEMBER m_newGroupChatState CONSTANT)
     Q_PROPERTY(NameGroupChatState *nameGroupChatState MEMBER m_nameGroupChatState CONSTANT)
@@ -91,14 +91,14 @@ class ApplicationStateManager : public QStateMachine
 
 public:
     ApplicationStateManager(Messenger *messenger, Controllers *controllers, Models *models,
-                            Validator *validator, Settings *settings, QObject *parent);
+                            Validator *validator, QObject *parent);
     ~ApplicationStateManager() override;
 
 signals:
     void setUiState();
     void goBack();
     void openChatList();
-    void openFileCloud();
+    void openCloudFileList();
     void selectChats();
 
     void currentStateChanged(QState *);
@@ -106,7 +106,7 @@ signals:
 
     void splashScreenRequested(QPrivateSignal);
     void chatListRequested(QPrivateSignal);
-    void fileCloudRequested(QPrivateSignal);
+    void cloudFileListRequested(QPrivateSignal);
     void selectChatsRequested(QPrivateSignal);
 
 private:
@@ -138,7 +138,7 @@ private:
     ChatListState *m_chatListState;
     ChatState *m_chatState;
     DownloadKeyState *m_downloadKeyState;
-    FileCloudState *m_fileCloudState;
+    CloudFileListState *m_cloudFileListState;
     NewChatState *m_newChatState;
     NewGroupChatState *m_newGroupChatState;
     NameGroupChatState *m_nameGroupChatState;

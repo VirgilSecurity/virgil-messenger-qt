@@ -12,6 +12,9 @@ import "theme"
 
 ApplicationWindow {
     id: root
+
+    property alias mainView: mainView
+
     visible: true
     title: (!settings.devMode || !controllers.users.currentUsername) ? app.applicationDisplayName : controllers.users.currentUsername
 
@@ -64,6 +67,7 @@ ApplicationWindow {
     Item {
         anchors.fill: parent
 
+        // TODO(fpohtmeh): rename to NotificationPopup, move logic inside
         Popup {
             id: inform
         }
@@ -83,11 +87,34 @@ ApplicationWindow {
         }
 
         NetworkStatusControl {
-            anchors.centerIn: parent
+            anchors {
+                bottom: parent.bottom
+                left: parent.left
+                bottomMargin: Theme.smallMargin
+                leftMargin: Theme.smallMargin
+            }
+            z: Theme.overlayZ
+        }
+
+        MessageDialog {
+            id: deleteCloudFilesDialog
+            title: qsTr("File Manager")
+            text: qsTr("Delete file(s)?")
+            onAccepted: controllers.cloudFiles.deleteFiles()
+        }
+
+        InputDialog {
+            id: createCloudFolderDialog
+            title: qsTr("File Manager")
+            label: qsTr("New directory")
+            placeholderText: qsTr("Enter name")
+            onAccepted: {
+                controllers.cloudFiles.createFolder(text)
+                text = ""
+            }
         }
     }
 
-    // Show Popup message
     function showPopup(message, popupBackgroundColor, textColor, interval) {
         inform.popupBackgroundColor = popupBackgroundColor
         inform.popupColorText = textColor

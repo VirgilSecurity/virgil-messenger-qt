@@ -61,6 +61,7 @@ bool Self::applyUpdate(const MessageUpdate& messageUpdate) {
     else if (auto update = std::get_if<MessageAttachmentEncryptionUpdate>(&messageUpdate)) {
         setEncryptedSize(update->encryptedSize);
         setDecryptionKey(update->decryptionKey);
+        setSignature(update->signature);
     }
     else if (auto update = std::get_if<MessageAttachmentLocalPathUpdate>(&messageUpdate)) {
         setLocalPath(update->localPath);
@@ -112,6 +113,16 @@ QByteArray Self::decryptionKey() const {
 
 void Self::setDecryptionKey(QByteArray decryptionKey) {
     m_decryptionKey = std::move(decryptionKey);
+}
+
+
+QByteArray Self::signature() const {
+    return m_signature;
+}
+
+
+void Self::setSignature(QByteArray signature) {
+    m_signature = std::move(signature);
 }
 
 

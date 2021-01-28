@@ -125,13 +125,13 @@ MessageContent Self::fromBytes(const QByteArray& messageJsonBytes, QString &erro
 
 
 void Self::writeAttachment(const MessageContentAttachment& attachment, QJsonObject& json) {
-    // FIXME(fpohtmeh): write/read id?
     json.insert(QLatin1String("fileName"), attachment.fileName());
     json.insert(QLatin1String("size"), attachment.size());
     json.insert(QLatin1String("remoteUrl"), attachment.remoteUrl().toString());
     json.insert(QLatin1String("encryptedSize"), attachment.encryptedSize());
     json.insert(QLatin1String("fingerprint"), attachment.fingerprint());
     json.insert(QLatin1String("decryptionKey"), toBase64(attachment.decryptionKey()));
+    json.insert(QLatin1String("signature"), toBase64(attachment.signature()));
 }
 
 
@@ -140,6 +140,7 @@ void Self::writeExtras(const MessageContentPicture& picture, const bool writeLoc
     json["thumbnailUrl"] = thumbnail.remoteUrl().toString();
     json["thumbnailEncryptedSize"] = thumbnail.encryptedSize();
     json["thumbnailDecryptionKey"] = toBase64(thumbnail.decryptionKey());
+    json["thumbnailSignature"] = toBase64(thumbnail.signature());
 
     const auto thumbnailSize = picture.thumbnailSize();
     json["thumbnailWidth"] = thumbnailSize.width();
@@ -166,6 +167,7 @@ bool Self::readExtras(const QJsonObject& json, MessageContentPicture &picture) {
     thumbnail.setRemoteUrl(json["thumbnailUrl"].toString());
     thumbnail.setEncryptedSize(json["thumbnailEncryptedSize"].toInt());
     thumbnail.setDecryptionKey(fromBase64(json["thumbnailDecryptionKey"]));
+    thumbnail.setSignature(fromBase64(json["thumbnailSignature"]));
     picture.setThumbnail(thumbnail);
     picture.setThumbnailSize(QSize(json["thumbnailWidth"].toInt(), json["thumbnailHeight"].toInt()));
     picture.setPreviewPath(json["previewPath"].toString());
@@ -176,13 +178,14 @@ bool Self::readExtras(const QJsonObject& json, MessageContentPicture &picture) {
 
 bool Self::readAttachment(const QJsonObject& jsonObject, MessageContentAttachment& attachment) {
     // TODO: Check mandatory fields and return false if absent.
-    attachment.setId(AttachmentId(Utils::createUuid())); // FIXME(fpohtmeh): keep attachment id in json?
+    attachment.setId(AttachmentId(Utils::createUuid()));
     attachment.setFileName(jsonObject[QLatin1String("fileName")].toString());
     attachment.setSize(jsonObject[QLatin1String("size")].toInt());
     attachment.setRemoteUrl(jsonObject[QLatin1String("remoteUrl")].toString());
     attachment.setEncryptedSize(jsonObject[QLatin1String("encryptedSize")].toInt());
     attachment.setFingerprint(jsonObject[QLatin1String("fingerprint")].toString());
     attachment.setDecryptionKey(fromBase64(jsonObject[QLatin1String("decryptionKey")]));
+    attachment.setSignature(fromBase64(jsonObject[QLatin1String("signature")]));
 
     return true;
 }

@@ -69,12 +69,6 @@ bool Self::populateChildren()
     return true;
 }
 
-void Self::cleanup()
-{
-    Operation::cleanup();
-    FileUtils::removeFile(m_tempPngPath);
-}
-
 void Self::populateFileOperations()
 {
     const auto message = m_parent->message();
@@ -98,9 +92,13 @@ void Self::populatePictureOperations()
     const auto factory = m_parent->factory();
 
     // Convert to png
-    auto convertOp = factory->populateConvertToPngOperation(this, attachment->localPath());
-    connect(convertOp, &ConvertToPngOperation::fileCreated, [this](const QString &filePath) {
-        m_tempPngPath = filePath;
+    auto convertOp = factory->populateConvertToPngOperation(this, attachment->localPath(), QLatin1String("png-%1").arg(attachment->id()));
+    connect(convertOp, &ConvertToPngOperation::fileCreated, [this, message](const QString &filePath) {
+        MessageAttachmentLocalPathUpdate update;
+        update.messageId = message->id();
+        update.attachmentId = message->contentAsAttachment()->id();
+        update.localPath = filePath;
+        m_parent->messageUpdate(update);
     });
 
     // Create picture preview
@@ -116,7 +114,7 @@ void Self::populatePictureOperations()
     // Encrypt/Upload thumbnail
     auto encUploadThumbOp = factory->populateEncryptUpload(this, thumbnailFilePath);
     connect(encUploadThumbOp, &EncryptUploadFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
-    connect(encUploadThumbOp, &EncryptUploadFileOperation::encrypted, [this, message](const QFileInfo &file, const QByteArray &decryptionKey) {
+    connect(encUploadThumbOp, &EncryptUploadFileOperation::encrypted, [this, message](const QFileInfo &file, const QByteArray &decryptionKey, const QByteArray &signature) {
         const auto extrasToJson = [message]() {
             return message->contentAsAttachment()->extrasToJson(true);
         };
@@ -129,6 +127,7 @@ void Self::populatePictureOperations()
         update.extrasToJson = extrasToJson;
         update.encryptedSize = file.size();
         update.decryptionKey = decryptionKey;
+        update.signature = signature;
         m_parent->messageUpdate(update);
     });
 
@@ -167,7 +166,8 @@ EncryptUploadFileOperation *Self::populateEncryptUpload()
     // Encrypt/Upload
     auto encUploadOp = m_parent->factory()->populateEncryptUpload(this, attachment->localPath());
     connect(encUploadOp, &EncryptUploadFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
-    connect(encUploadOp, &EncryptUploadFileOperation::encrypted, [this, message](const QFileInfo &file, const QByteArray &decryptionKey) {
+    connect(encUploadOp, &EncryptUploadFileOperation::encrypted, [this, message](const QFileInfo &file,
+            const QByteArray &decryptionKey, const QByteArray &signature) {
         startLoadOperation(file.size());
         // Encrypted size update
         MessageAttachmentEncryptionUpdate update;
@@ -175,6 +175,7 @@ EncryptUploadFileOperation *Self::populateEncryptUpload()
         update.attachmentId = message->contentAsAttachment()->id();
         update.encryptedSize = file.size();
         update.decryptionKey = decryptionKey;
+        update.signature = signature;
         m_parent->messageUpdate(update);
         // Stage update
         updateStage(MessageContentUploadStage::Encrypted);

@@ -53,7 +53,6 @@ Item {
 
     Row {
         id: contentRow
-        y: model.firstInRow ? stdTopMargin : 0
         spacing: contentSpacing
 
         Item { // avatar placeholder. visible on left side
@@ -107,6 +106,7 @@ Item {
                 }
 
                 MessageShape {
+                    id: messageShape
                     anchors.fill: parent
                 }
 

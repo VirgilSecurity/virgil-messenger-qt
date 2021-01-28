@@ -35,6 +35,7 @@
 #ifndef VM_CUSTOMER_ENV_H
 #define VM_CUSTOMER_ENV_H
 
+#include <QDir>
 #include <QString>
 
 namespace vm {
@@ -47,6 +48,7 @@ public:
     static QString contactDiscoveryServiceUrl();
     static QString caBundlePath();
     static QString version();
+    static QDir appDataLocation();
 };
 
 } // vm

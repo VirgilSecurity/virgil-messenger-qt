@@ -53,7 +53,7 @@ public:
     void run() override;
 
 signals:
-    void encrypted(const QFileInfo &file, const QByteArray &decryptionKey);
+    void encrypted(const QFileInfo &file, const QByteArray &decryptionKey, const QByteArray &signature);
 
 private:
     QPointer<Messenger> m_messenger;

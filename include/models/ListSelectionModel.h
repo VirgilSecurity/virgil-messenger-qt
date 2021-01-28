@@ -46,6 +46,7 @@ class ListSelectionModel : public QItemSelectionModel
     Q_OBJECT
     Q_PROPERTY(bool hasSelection READ hasSelection NOTIFY hasSelectionChanged)
     Q_PROPERTY(bool multiSelect MEMBER m_multiSelect WRITE setMultiSelect NOTIFY multiSelectChanged)
+    Q_PROPERTY(int selectedCount READ selectedCount NOTIFY selectedCountChanged)
 
 public:
     explicit ListSelectionModel(ListModel *source);
@@ -58,18 +59,22 @@ public:
     void setMultiSelect(const bool multiSelect);
 
     bool hasSelection() const;
+    int selectedCount() const;
 
 signals:
     void changed(const QList<QModelIndex> &indices);
     void hasSelectionChanged(const bool changed);
     void multiSelectChanged(const bool multiselect);
+    void selectedCountChanged(const int count);
 
 private:
+    void updateProperties();
     void onChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
     ListModel *m_sourceModel;
     bool m_hasSelection = false;
     bool m_multiSelect = false;
+    int m_selectedCount = 0;
 };
 }
 

@@ -66,7 +66,7 @@ class MessageOperationFactory : public QObject
     Q_OBJECT
 
 public:
-    explicit MessageOperationFactory(const Settings *settings, Messenger *messenger, QObject *parent);
+    MessageOperationFactory(Messenger *messenger, QObject *parent);
 
     void populateAll(MessageOperation *messageOp);
     void populateDownload(MessageOperation *messageOp, const QString &filePath);
@@ -74,9 +74,9 @@ public:
     void populatePreload(MessageOperation *messageOp);
 
     DownloadDecryptFileOperation *populateDownloadDecrypt(NetworkOperation *parent, const QUrl &url, quint64 bytesTotal,
-                                                          const QString &destPath, const QByteArray &decryptionKey, const UserId &senderId);
+                                                          const QString &destPath, const QByteArray &decryptionKey, const QByteArray& signature, const UserId &senderId);
     EncryptUploadFileOperation *populateEncryptUpload(NetworkOperation *parent, const QString &sourcePath);
-    ConvertToPngOperation *populateConvertToPngOperation(Operation *parent, const QString &sourcePath);
+    ConvertToPngOperation *populateConvertToPngOperation(Operation *parent, const QString &sourcePath, const QString &destFileName);
     CreateAttachmentThumbnailOperation *populateCreateAttachmentThumbnail(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &filePath);
     CreateAttachmentPreviewOperation *populateCreateAttachmentPreview(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &destPath);
     CalculateAttachmentFingerprintOperation *populateCalculateAttachmentFingerprint(MessageOperation *messageOp, Operation *parent, const QString &sourcePath);
@@ -87,7 +87,8 @@ private:
     void populateMessageOperation(MessageOperation *messageOp);
     void populateDownloadOperation(MessageOperation *messageOp);
 
-    const Settings *m_settings;
+    const QPointer<Settings> settings() const;
+
     QPointer<Messenger> m_messenger;
 };
 }

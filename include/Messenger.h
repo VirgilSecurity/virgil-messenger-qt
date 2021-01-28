@@ -46,7 +46,7 @@
 #include <QObject>
 #include <QPointer>
 
-#include <optional>
+#include <tuple>
 
 
 Q_DECLARE_LOGGING_CATEGORY(lcMessenger)
@@ -54,7 +54,7 @@ Q_DECLARE_LOGGING_CATEGORY(lcMessenger)
 namespace vm {
 class Messenger : public MessageSender {
     Q_OBJECT
-    Q_PROPERTY(bool isOnline READ isOnline NOTIFY onlineStatusChanged)
+    Q_PROPERTY(QString connectionStateString READ connectionStateString NOTIFY connectionStateStringChanged)
 
 public:
 
@@ -78,13 +78,13 @@ public:
     //
     //  Encrypt given file and returns a key for decryption.
     //
-    std::optional<QByteArray> encryptFile(const QString &sourceFilePath, const QString &destFilePath);
+    std::tuple<bool, QByteArray, QByteArray> encryptFile(const QString &sourceFilePath, const QString &destFilePath);
 
     //
     //  Decrypt given file and returns a key for decryption.
     //
     bool decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray& decryptionKey,
-            const UserId senderId);
+            const QByteArray& signature, const UserId senderId);
 
     //
     // User control.
@@ -113,8 +113,11 @@ public:
     void setApplicationActive(bool active);
     void suspend();
 
+    QPointer<Settings> settings() noexcept;
     QPointer<CrashReporter> crashReporter() noexcept;
     QPointer<FileLoader> fileLoader() noexcept;
+
+    QString connectionStateString() const noexcept;
 
 public slots:
     void setCurrentRecipient(const UserId &recipientId);
@@ -154,6 +157,7 @@ signals:
     // Connection.
     //
     void onlineStatusChanged(bool isOnline);
+    void connectionStateStringChanged(const QString &stateString);
     //--
 
     //--

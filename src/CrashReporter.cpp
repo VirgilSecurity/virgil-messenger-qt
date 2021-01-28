@@ -78,16 +78,16 @@ bool Self::sendLogFiles()
 {
     qCDebug(lcCrashReporter) << "Collecting of logs...";
 
-    const QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    if (!writeDir.exists()) {
-        qWarning("Directory [%s] not exist.", qPrintable(writeDir.absolutePath()));
+    const auto logsDir = m_settings->logsDir();
+    if (!logsDir.exists()) {
+        qWarning("Directory [%s] not exist.", qPrintable(logsDir.absolutePath()));
         return false;
     }
 
-    qCDebug(lcCrashReporter) << "Lokup logs within directory: " << writeDir.absolutePath();
+    qCDebug(lcCrashReporter) << "Lookup logs within directory: " << logsDir.absolutePath();
 
     QByteArray fileData;
-    QDirIterator fileIterator(writeDir.absolutePath(), QStringList() << "VirgilMessenger*.log");
+    QDirIterator fileIterator(logsDir.absolutePath(), QStringList() << "VirgilMessenger*.log");
     while (fileIterator.hasNext()) {
         QFile readFile(fileIterator.next());
         if (readFile.open(QIODevice::ReadOnly | QIODevice::Text)) {

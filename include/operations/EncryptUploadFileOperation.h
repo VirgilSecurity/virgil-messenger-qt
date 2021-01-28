@@ -50,13 +50,13 @@ class EncryptUploadFileOperation : public NetworkOperation
     Q_OBJECT
 
 public:
-    EncryptUploadFileOperation(NetworkOperation *parent, Messenger *messenger, const Settings *settings, const QString &sourcePath);
+    EncryptUploadFileOperation(NetworkOperation *parent, Messenger *messenger, const QString &sourcePath);
 
     void setSourcePath(const QString &sourcePath);
 
 signals:
     void progressChanged(quint64 bytesLoaded, quint64 bytesTotal);
-    void encrypted(const QFileInfo &file, const QByteArray &decryptionKey);
+    void encrypted(const QFileInfo &file, const QByteArray &decryptionKey, const QByteArray &signature);
     void uploadSlotReceived();
     void uploaded(const QUrl &url);
 

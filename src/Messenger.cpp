@@ -114,22 +114,22 @@ bool Messenger::isOnline() const noexcept {
 void
 Self::signIn(const QString &username)
 {
-    FutureWorker::run(m_coreMessenger->signIn(username), [this, username = username](const FutureResult &result) {
+    FutureWorker::run(m_coreMessenger->signIn(username), [this, username = username](auto result) {
         switch (result) {
-        case FutureResult::Success:
+        case CoreMessengerStatus::Success:
             m_settings->setLastSignedInUser(username);
             emit signedIn(username);
             break;
 
-        case FutureResult::Error_NoCred:
+        case CoreMessengerStatus::Error_NoCred:
             emit signInErrorOccured(tr("Cannot load credentials"));
             break;
 
-        case FutureResult::Error_ImportCredentials:
+        case CoreMessengerStatus::Error_ImportCredentials:
             emit signInErrorOccured(tr("Cannot import loaded credentials"));
             break;
 
-        case FutureResult::Error_Signin:
+        case CoreMessengerStatus::Error_Signin:
             emit signInErrorOccured(tr("Cannot sign-in user"));
             break;
 
@@ -144,7 +144,7 @@ Self::signIn(const QString &username)
 void
 Self::signOut()
 {
-    FutureWorker::run(m_coreMessenger->signOut(), [this](const FutureResult &) {
+    FutureWorker::run(m_coreMessenger->signOut(), [this](auto ) {
         m_settings->setLastSignedInUser(QString());
         emit signedOut();
     });
@@ -154,15 +154,15 @@ Self::signOut()
 void
 Self::signUp(const QString &username)
 {
-    FutureWorker::run(m_coreMessenger->signUp(username), [this, username = username](const FutureResult &result) {
+    FutureWorker::run(m_coreMessenger->signUp(username), [this, username = username](auto result) {
         switch (result) {
 
-        case FutureResult::Success:
+        case CoreMessengerStatus::Success:
             m_settings->setLastSignedInUser(username);
             emit signedUp(username);
             break;
 
-        case FutureResult::Error_UserAlreadyExists:
+        case CoreMessengerStatus::Error_UserAlreadyExists:
             emit signUpErrorOccured(tr("Username is already taken"));
             break;
 
@@ -184,8 +184,8 @@ Self::backupKey(const QString &password, const QString &confirmedPassword)
         emit backupKeyFailed(tr("Passwords do not match"));
 
     } else {
-        FutureWorker::run(m_coreMessenger->backupKey(password), [this](const FutureResult &result) {
-            if (result == FutureResult::Success) {
+        FutureWorker::run(m_coreMessenger->backupKey(password), [this](auto result) {
+            if (result == CoreMessengerStatus::Success) {
                 auto username = m_coreMessenger->currentUser()->username();
                 emit keyBackuped(username);
             }
@@ -204,8 +204,8 @@ Self::downloadKey(const QString &username, const QString &password)
         emit downloadKeyFailed(tr("Password cannot be empty"));
 
     } else {
-        FutureWorker::run(m_coreMessenger->signInWithBackupKey(username, password), [this, username = username](const FutureResult &result) {
-            if (result == FutureResult::Success) {
+        FutureWorker::run(m_coreMessenger->signInWithBackupKey(username, password), [this, username = username](auto result) {
+            if (result == CoreMessengerStatus::Success) {
                 m_settings->setLastSignedInUser(username);
                 emit keyDownloaded(username);
             }
@@ -238,7 +238,7 @@ bool
 Self::sendMessage(MessageHandler message) {
 
     const auto future = m_coreMessenger->sendMessage(message);
-    if (future.result() == FutureResult::Success) {
+    if (future.result() == CoreMessengerStatus::Success) {
         emit messageSent(message);
         return true;
     }
@@ -246,12 +246,12 @@ Self::sendMessage(MessageHandler message) {
 }
 
 
-std::optional<QByteArray>
+std::tuple<bool, QByteArray, QByteArray>
 Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
-    auto [result, decryptionKey] = m_coreMessenger->encryptFile(sourceFilePath, destFilePath);
+    auto [result, decryptionKey, signature] = m_coreMessenger->encryptFile(sourceFilePath, destFilePath);
 
     if (CoreMessenger::Result::Success == result) {
-        return std::move(decryptionKey);
+        return std::make_tuple(true, std::move(decryptionKey), std::move(signature));
     }
 
     return {};
@@ -259,8 +259,8 @@ Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
 
 
 bool
-Self::decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray& decryptionKey, const UserId senderId) {
-    auto result = m_coreMessenger->decryptFile(sourceFilePath, destFilePath, decryptionKey, senderId);
+Self::decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray& decryptionKey, const QByteArray& signature, const UserId senderId) {
+    auto result = m_coreMessenger->decryptFile(sourceFilePath, destFilePath, decryptionKey, signature, senderId);
 
     return CoreMessenger::Result::Success == result;
 }
@@ -280,6 +280,10 @@ Self::subscribeToUser(const UserId &userId)
 }
 
 
+QPointer<Settings> Self::settings() noexcept {
+    return m_settings;
+}
+
 
 QPointer<CrashReporter> Self::crashReporter() noexcept {
     return m_crashReporter;
@@ -288,6 +292,21 @@ QPointer<CrashReporter> Self::crashReporter() noexcept {
 
 QPointer<FileLoader> Self::fileLoader() noexcept {
     return m_fileLoader;
+}
+
+
+QString Messenger::connectionStateString() const noexcept {
+    switch (m_coreMessenger->connectionState()) {
+        case CoreMessenger::ConnectionState::Connected:
+            return QLatin1String("connected");
+        case CoreMessenger::ConnectionState::Connecting:
+            return QLatin1String("connecting");
+        case CoreMessenger::ConnectionState::Disconnected:
+            return QLatin1String("disconnected");
+        case CoreMessenger::ConnectionState::Error:
+        default:
+            return QLatin1String("error");
+    }
 }
 
 
@@ -325,6 +344,7 @@ void
 Self::onConnectionStateChanged(CoreMessenger::ConnectionState state) {
     const bool isOnline = CoreMessenger::ConnectionState::Connected == state;
     emit onlineStatusChanged(isOnline);
+    emit connectionStateStringChanged(connectionStateString());
 }
 
 
