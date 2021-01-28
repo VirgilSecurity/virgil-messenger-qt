@@ -319,9 +319,9 @@ elseif (VS_PLATFORM STREQUAL "ios")
             )
     # Storyboard default
     configure_file("${CMAKE_CURRENT_LIST_DIR}/platforms/ios/LaunchScreen.storyboard.in"
-                   "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard" @ONLY)
+            "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard" @ONLY)
     configure_file("${CMAKE_CURRENT_LIST_DIR}/platforms/ios/Default-568h@2x.png"
-                   "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/Default-568h@2x.png" COPYONLY)
+            "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/Default-568h@2x.png" COPYONLY)
 
     set(STORYBOARD_DEFAULT
             ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard
@@ -341,6 +341,27 @@ elseif (VS_PLATFORM STREQUAL "ios")
             LINK_FLAGS "-framework Foundation -framework UserNotifications"
             RESOURCE "${STORYBOARD_DEFAULT}"
             )
+
+    #   IOS extension
+    set(EXT_SOURCE_FILES
+            ${CMAKE_CURRENT_LIST_DIR}/include/ios/NotificationService.h
+            ${CMAKE_CURRENT_LIST_DIR}/src/ios/NotificationService.mm
+            )
+
+    add_library(${VS_TARGET_NAME}_EXT MODULE ${EXT_SOURCE_FILES})
+    set_target_properties(${VS_TARGET_NAME}_EXT
+            PROPERTIES
+            BUNDLE YES
+            XCODE_PRODUCT_TYPE com.apple.product-type.app-extension)
+
+    target_include_directories(${VS_TARGET_NAME}_EXT
+            PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+            )
+
+    find_library(UN_LIB UserNotifications)
+    find_library(UNUI_LIB UserNotificationsUI)
+    target_link_libraries(${VS_TARGET_NAME}_EXT PRIVATE ${UN_LIB} ${UNUI_LIB})
 
     qt5_import_qml_plugins(${VS_TARGET_NAME})
 else ()
@@ -833,7 +854,6 @@ target_compile_options(${VS_TARGET_NAME}
 # ---------------------------------------------------------------------------
 #   Additional debug parameters
 # ---------------------------------------------------------------------------
-
 target_compile_definitions(${VS_TARGET_NAME}
         PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>
         )
