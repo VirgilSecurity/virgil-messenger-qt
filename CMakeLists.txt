@@ -245,7 +245,10 @@ if (VS_PLATFORM STREQUAL "android")
     message(STATUS "Android OpenSSL library path: [${VS_ANDROID_SSL_DIR}]")
     message(STATUS "Android extra libraries:      [${ANDROID_EXTRA_LIBS}]")
 
-    execute_process(COMMAND touch "${CMAKE_CURRENT_LIST_DIR}/transitive-args.cmake")
+    add_custom_command(TARGET ${VS_TARGET_NAME} POST_BUILD
+          COMMAND touch "${CMAKE_CURRENT_LIST_DIR}/transitive-args.cmake"
+          COMMENT "Touch transitive-args.cmake"
+    )
 
     # Linux
 elseif (VS_PLATFORM STREQUAL "linux")
