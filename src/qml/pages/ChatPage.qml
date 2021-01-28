@@ -135,20 +135,21 @@ Page {
                     ContextMenuItem {
                         text: qsTr("Call")
                         iconName: "Make-Call"
-                        onTriggered: console.log("Chat deletion isn't implemented")
+                        visible: false
                     }
 
                     ContextMenuSeparator {
+                        visible: false
                     }
 
                     ContextMenuItem {
                         text: qsTr("Chat info")
-                        onTriggered: console.log("Chat deletion isn't implemented")
+                        visible: false
                     }
 
                     ContextMenuItem {
                         text: qsTr("Mute notifications")
-                        onTriggered: console.log("Chat deletion isn't implemented")
+                        visible: false
                     }
 
                     ContextMenuItem {
@@ -165,20 +166,21 @@ Page {
                     ContextMenuItem {
                         text: qsTr("Call")
                         iconName: "Make-Call"
-                        onTriggered: console.log("Chat deletion isn't implemented")
+                        visible: false
                     }
 
                     ContextMenuSeparator {
+                        visible: false
                     }
 
                     ContextMenuItem {
                         text: qsTr("Chat info")
-                        onTriggered: console.log("Chat deletion isn't implemented")
+                        visible: false
                     }
 
                     ContextMenuItem {
                         text: qsTr("Mute notifications")
-                        onTriggered: console.log("Chat deletion isn't implemented")
+                        visible: false
                     }
 
                     ContextMenuItem {
