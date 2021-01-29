@@ -166,7 +166,6 @@ ToolBar {
                 enabled: menu.length > 0
 
                 onClicked: {
-                    contextMenu.currentIndex = -1
                     contextMenu.open()
                 }
 
