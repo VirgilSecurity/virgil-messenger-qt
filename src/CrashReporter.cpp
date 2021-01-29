@@ -63,7 +63,7 @@ void Self::checkAppCrash()
 #ifndef QT_DEBUG
         qCCritical(lcCrashReporter) << "Previous application run is crashed! Sending log files...";
         if (m_settings->autoSendCrashReport()) {
-            sendLogFiles();
+            sendLogFiles("");
         }
         else {
             emit crashReportRequested();
