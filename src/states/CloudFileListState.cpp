@@ -36,23 +36,18 @@
 
 #include "CloudFilesController.h"
 #include "CloudFilesModel.h"
-#include "Messenger.h"
 
 using namespace vm;
 
-CloudFileListState::CloudFileListState(Messenger *messenger, CloudFilesController *controller, QState *parent)
+CloudFileListState::CloudFileListState(CloudFilesController *controller, QState *parent)
     : QState(parent)
-    , m_messenger(messenger)
     , m_controller(controller)
 {
 }
 
 void CloudFileListState::onEntry(QEvent *)
 {
-    const auto username = m_messenger->currentUser()->username();
-    const auto rootDir = m_messenger->settings()->cloudFilesDownloadsDir(username);
     m_controller->switchToRootFolder();
-    m_controller->setDownloadsDir(rootDir);
     m_controller->model()->setEnabled(true);
 }
 

@@ -32,46 +32,50 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CLOUDFILESUPLOADER_H
-#define VM_CLOUDFILESUPLOADER_H
+#ifndef VM_FILESPROGRESSMODEL_H
+#define VM_FILESPROGRESSMODEL_H
 
-#include <QObject>
+#include "ListModel.h"
 
 namespace vm
 {
-class CloudFilesUploader : public QObject
+class FilesProgressModel : public ListModel
 {
     Q_OBJECT
 
-    Q_PROPERTY(int currentIndex READ currentIndex NOTIFY currentIndexChanged)
-    Q_PROPERTY(qint64 currentProcessedBytes READ currentProcessedBytes WRITE setCurrentProcessedBytes NOTIFY currentProcessedBytesChanged)
-    Q_PROPERTY(qint64 currentTotalBytes READ currentTotalBytes NOTIFY currentTotalBytesChanged)
-    Q_PROPERTY(QStringList fileNames READ fileNames NOTIFY fileNamesChanged)
-
 public:
-    CloudFilesUploader(QObject *parent);
+    explicit FilesProgressModel(QObject *parent);
+    ~FilesProgressModel() override;
 
-    int currentIndex() const;
-    qint64 currentProcessedBytes() const;
-    qint64 currentTotalBytes() const;
-    QStringList fileNames() const;
-
-    void setCurrentIndex(const int index);
-    void setCurrentProcessedBytes(const qint64 bytes);
-    void setCurrentTotalBytes(const qint64 bytes);
-
-signals:
-    void currentIndexChanged(const int &index);
-    void currentProcessedBytesChanged(const qint64 bytes);
-    void currentTotalBytesChanged(const qint64 bytes);
-    void fileNamesChanged(const QStringList &fileNames);
+    void add(const QString &id, const QString &name, const quint64 bytesTotal);
+    void setProgress(const QString &id, const quint64 bytesLoaded, const quint64 bytesTotal);
+    void remove(const QString &id);
 
 private:
-    QStringList m_fileNames;
-    int m_currentIndex;
-    int m_currentProcessedBytes;
-    int m_currentTotalBytes;
-};
-}
+    enum Roles
+    {
+        NameRole = Qt::UserRole,
+        BytesLoadedRole,
+        BytesTotalRole,
+        DisplayProgressRole
+    };
 
-#endif // VM_CLOUDFILESUPLOADER_H
+    struct Item
+    {
+        QString id;
+        QString name;
+        quint64 bytesLoaded = 0;
+        quint64 bytesTotal = 0;
+    };
+
+    QModelIndex findById(const QString &id) const;
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
+
+    QList<Item> m_items;
+};
+} // namespace vm
+
+#endif // VM_FILESPROGRESSMODEL_H

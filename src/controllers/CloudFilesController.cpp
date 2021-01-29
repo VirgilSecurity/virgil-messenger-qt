@@ -34,8 +34,9 @@
 
 #include "CloudFilesController.h"
 
-#include "CloudFileUpdate.h"
+#include "CloudFilesUpdate.h"
 #include "CloudFilesModel.h"
+#include "CloudFilesProgressModel.h"
 #include "CloudFilesQueue.h"
 #include "CloudFilesTable.h"
 #include "Controller.h"
@@ -45,23 +46,41 @@
 using namespace vm;
 using Self = CloudFilesController;
 
-Self::CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase, QObject *parent)
+Self::CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase, CloudFileSystem *cloudFileSystem,
+                           QObject *parent)
     : QObject(parent)
     , m_settings(settings)
     , m_models(models)
     , m_userDatabase(userDatabase)
+    , m_cloudFileSystem(cloudFileSystem)
+    , m_fetchRequestId(0)
+    , m_loadingCounter(0)
 {
-    qRegisterMetaType<CloudFileUpdate>("CloudFileUpdate");
+    qRegisterMetaType<CloudFilesUpdate>("CloudFilesUpdate");
 
     m_rootFolder = std::make_shared<CloudFile>();
-    m_rootFolder->setId("");
+    m_rootFolder->setId(CloudFileId::root());
     m_rootFolder->setName(tr("File Manager"));
     m_rootFolder->setIsFolder(true);
 
     m_hierarchy.push_back(m_rootFolder);
 
+    connect(this, &Self::updateCloudFiles, this, &Self::onUpdateCloudFiles);
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
-    connect(models->cloudFilesQueue(), &CloudFilesQueue::updateCloudFile, this, &Self::onUpdateCloudFile);
+    connect(models->cloudFilesQueue(), &CloudFilesQueue::updateCloudFiles, this, &Self::updateCloudFiles);
+    connect(cloudFileSystem, &CloudFileSystem::downloadsDirChanged, [this](const QDir &downloadsDir) {
+        m_rootFolder->setLocalPath(downloadsDir.absolutePath());
+    });
+    connect(cloudFileSystem, &CloudFileSystem::listFetched, this, &Self::onCloudFilesFetched);
+    // Connect to loading counter
+    connect(cloudFileSystem, &CloudFileSystem::listFetched, this, &Self::decLoadingCounter);
+    connect(cloudFileSystem, &CloudFileSystem::fetchListErrorOccured, this, &Self::decLoadingCounter);
+    connect(cloudFileSystem, &CloudFileSystem::folderCreated, this, &Self::decLoadingCounter);
+    connect(cloudFileSystem, &CloudFileSystem::createFolderErrorOccured, this, &Self::decLoadingCounter);
+    connect(cloudFileSystem, &CloudFileSystem::fileCreated, this, &Self::decLoadingCounter);
+    connect(cloudFileSystem, &CloudFileSystem::createFileErrorOccurred, this, &Self::decLoadingCounter);
+    connect(cloudFileSystem, &CloudFileSystem::fileDeleted, this, &Self::decLoadingCounter);
+    connect(cloudFileSystem, &CloudFileSystem::deleteFileErrorOccurred, this, &Self::decLoadingCounter);
 }
 
 CloudFilesModel *Self::model()
@@ -74,15 +93,33 @@ void Self::switchToRootFolder()
     switchToHierarchy({ m_rootFolder });
 }
 
-void Self::setDownloadsDir(const QDir &dir)
-{
-    m_rootFolder->setLocalPath(dir.absolutePath());
-}
-
 void Self::openFile(const QVariant &proxyRow)
 {
     const auto cloudFile = model()->file(proxyRow.toInt());
-    FileUtils::openUrl(FileUtils::localFileToUrl(cloudFile->localPath()));
+    const auto localPath = cloudFile->localPath();
+    bool needDownload = false;
+    if (!FileUtils::fileExists(localPath)) {
+        needDownload = true;
+    }
+    else if (const auto fingerprint = FileUtils::calculateFingerprint(localPath); fingerprint.isEmpty()) {
+        qCritical(lcController) << "Failed to calculate fingerprint for file:" << localPath;
+        emit notificationCreated(tr("Attachment file is broken"), true);
+        return;
+    }
+    else if (fingerprint != cloudFile->fingerprint()) {
+        qWarning(lcController) << "Fingerprint mismatch, downloading cloud file";
+        emit notificationCreated(tr("Downloading cloud file..."), true);
+        needDownload = true;
+    }
+
+    if (!needDownload) {
+        FileUtils::openUrl(FileUtils::localFileToUrl(localPath));
+    }
+    else {
+        m_models->cloudFilesQueue()->pushDownloadFile(cloudFile, [this]() {
+            emit notificationCreated(tr("Cloud file was downloaded"), false);
+        });
+    }
 }
 
 void Self::switchToFolder(const QVariant &proxyRow)
@@ -117,11 +154,16 @@ void Self::addFile(const QVariant &attachmentUrl)
 
 void Self::deleteFiles()
 {
-    m_models->cloudFilesQueue()->pushDeleteFiles(m_models->cloudFiles()->selectedFiles());
+    const auto files = m_models->cloudFiles()->selectedFiles();
+    for (auto f : files) {
+        incLoadingCounter();
+    }
+    m_models->cloudFilesQueue()->pushDeleteFiles(files);
 }
 
 void Self::createFolder(const QString &name)
 {
+    incLoadingCounter();
     m_models->cloudFilesQueue()->pushCreateFolder(name, m_hierarchy.back());
 }
 
@@ -130,7 +172,7 @@ void Self::setupTableConnections()
     qCDebug(lcController) << "Setup database table connections for cloud files...";
     auto table = m_userDatabase->cloudFilesTable();
     connect(table, &CloudFilesTable::errorOccurred, this, &Self::errorOccurred);
-    connect(table, &CloudFilesTable::fetched, this, &Self::onCloudFilesFetched);
+    connect(table, &CloudFilesTable::fetched, this, &Self::onDbListFetched);
 }
 
 void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)
@@ -153,23 +195,138 @@ bool CloudFilesController::isRoot() const
     return m_hierarchy.size() == 1;
 }
 
-void Self::onCloudFilesFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles)
+bool CloudFilesController::isLoading() const
 {
-    Q_UNUSED(folder)
-    m_models->cloudFiles()->setFiles(cloudFiles);
+    return m_loadingCounter > 0;
+}
 
-    if (m_hierarchy != m_newHierarchy) {
-        m_hierarchy = m_newHierarchy;
-        m_newHierarchy.clear();
-        emit displayPathChanged(displayPath());
-        emit isRootChanged(isRoot());
+void CloudFilesController::incLoadingCounter()
+{
+    const auto wasLoading = isLoading();
+    ++m_loadingCounter;
+    if (wasLoading != isLoading()) {
+        emit isLoadingChanged(true);
     }
 }
 
-void Self::onUpdateCloudFile(const CloudFileUpdate &update)
+void CloudFilesController::decLoadingCounter()
 {
+    const auto wasLoading = isLoading();
+    --m_loadingCounter;
+    if (wasLoading != isLoading()) {
+        emit isLoadingChanged(false);
+    }
+}
+
+void Self::onDbListFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles)
+{
+    if (parentFolder->id() != m_newHierarchy.back()->id()) {
+        qCDebug(lcController) << "Fetched db folder isn't relevant more" << parentFolder->id();
+        return;
+    }
+
+    // Update hierarchy
+    const auto oldDisplayPath = displayPath();
+    const auto oldIsRoot = isRoot();
+    m_hierarchy = m_newHierarchy;
+    if (displayPath() != oldDisplayPath) {
+        emit displayPathChanged(displayPath());
+    }
+    if (isRoot() != oldIsRoot) {
+        emit isRootChanged(isRoot());
+    }
+
+    // Emit update
+    ListCloudFolderUpdate update;
+    update.parentFolder = parentFolder;
+    update.files = cloudFiles;
+    emit updateCloudFiles(update);
+
+    // Fetch cloud folder
+    m_databaseCloudFiles = cloudFiles;
+    incLoadingCounter();
+    m_fetchRequestId = m_cloudFileSystem->fetchList(parentFolder);
+}
+
+void CloudFilesController::onCloudFilesFetched(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles)
+{
+    if (requestId != m_fetchRequestId) {
+        return; // fetch isn' relevant more because newer request exists
+    }
+
+    // Build merge update
+
+    MergeCloudFolderUpdate mergeUpdate;
+    mergeUpdate.parentFolder = parentFolder;
+
+    auto oldFiles = m_databaseCloudFiles;
+    std::sort(std::begin(oldFiles), std::end(oldFiles), fileIdLess);
+    auto newFiles = cloudFiles;
+    std::sort(std::begin(newFiles), std::end(newFiles), fileIdLess);
+    const auto oldSize = oldFiles.size();
+    const auto newSize = newFiles.size();
+    size_t oldI = 0;
+    size_t newI = 0;
+    while (oldI < oldSize && newI < newSize) {
+        const auto &oldFile = oldFiles[oldI];
+        const auto &newFile = newFiles[newI];
+        if (fileIdLess(oldFile, newFile)) {
+            mergeUpdate.deleted.push_back(oldFile);
+            ++oldI;
+        }
+        else if (fileIdLess(newFile, oldFile)) {
+            mergeUpdate.added.push_back(newFile);
+            ++newI;
+        }
+        else {
+            if (!filesAreEqual(oldFile, newFile)) {
+                mergeUpdate.updated.push_back(newFile);
+            }
+            ++oldI;
+            ++newI;
+        }
+    }
+    if (oldI < oldSize) {
+        mergeUpdate.deleted.insert(mergeUpdate.deleted.end(), oldFiles.begin() + oldI, oldFiles.end());
+    }
+    if (newI < newSize) {
+        mergeUpdate.added.insert(mergeUpdate.added.end(), newFiles.begin() + newI, newFiles.end());
+    }
+
+    emit updateCloudFiles(mergeUpdate);
+}
+
+void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)
+{
+    // Update hierarchy
+    if (auto upd = std::get_if<MergeCloudFolderUpdate>(&update)) {
+        m_hierarchy.back()->update(*upd->parentFolder, CloudFileUpdateSource::ListedParent);
+    }
     // Update UI
-    m_models->cloudFiles()->updateCloudFile(update);
+    m_models->cloudFiles()->updateCloudFiles(update);
+    m_models->cloudFilesProgress()->updateCloudFiles(update);
     // Update DB
-    m_userDatabase->cloudFilesTable()->updateCloudFile(update);
+    m_userDatabase->cloudFilesTable()->updateCloudFiles(update);
+}
+
+bool CloudFilesController::fileIdLess(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs)
+{
+    return lhs->id() < rhs->id();
+}
+
+bool CloudFilesController::filesAreEqual(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs)
+{
+    // Compare common fields
+    if (!(lhs->parentId() == rhs->parentId() && lhs->isFolder() == rhs->isFolder())) {
+        return false;
+    }
+    // Compare fetched fields
+    if (!(lhs->id() == rhs->id() && lhs->name() == rhs->name() && lhs->createdAt() == rhs->createdAt() && lhs->updatedAt() == rhs->updatedAt())) {
+        return false;
+    }
+    // Compare file fields
+    if (!lhs->isFolder()) {
+        return lhs->type() == rhs->type() && lhs->size() == rhs->size();
+    }
+    return true;
 }

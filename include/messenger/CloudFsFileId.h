@@ -55,9 +55,9 @@ private:
 };
 } // namespace vm
 
-bool operator<(const vm::CloudFsFileId& lhs, const vm::CloudFsFileId& rhs);
-bool operator>(const vm::CloudFsFileId& lhs, const vm::CloudFsFileId& rhs);
-bool operator==(const vm::CloudFsFileId& lhs, const vm::CloudFsFileId& rhs);
-bool operator!=(const vm::CloudFsFileId& lhs, const vm::CloudFsFileId& rhs);
+bool operator<(const vm::CloudFsFileId &lhs, const vm::CloudFsFileId &rhs);
+bool operator>(const vm::CloudFsFileId &lhs, const vm::CloudFsFileId &rhs);
+bool operator==(const vm::CloudFsFileId &lhs, const vm::CloudFsFileId &rhs);
+bool operator!=(const vm::CloudFsFileId &lhs, const vm::CloudFsFileId &rhs);
 
 #endif // VM_CLOUD_FS_FILE_ID_H

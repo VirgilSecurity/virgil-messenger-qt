@@ -37,14 +37,13 @@
 #include "AccountSelectionModel.h"
 #include "ChatsModel.h"
 #include "CloudFilesModel.h"
+#include "CloudFilesProgressModel.h"
 #include "CloudFilesQueue.h"
-#include "CloudFilesUploader.h"
 #include "DiscoveredContactsModel.h"
 #include "MessagesModel.h"
 #include "MessagesQueue.h"
 #include "FileLoader.h"
 #include "UserDatabase.h"
-#include "UploadDownloadModel.h"
 #include "Messenger.h"
 
 using namespace vm;
@@ -56,11 +55,10 @@ Models::Models(Messenger *messenger, Settings *settings, UserDatabase *userDatab
     , m_discoveredContacts(new DiscoveredContactsModel(validator, this))
     , m_messages(new MessagesModel(this))
     , m_cloudFiles(new CloudFilesModel(settings, this))
+    , m_cloudFilesProgress(new CloudFilesProgressModel(this))
     , m_cloudFilesQueue(new CloudFilesQueue(messenger, this))
-    , m_cloudFilesUploader(new CloudFilesUploader(this))
     , m_fileLoader(messenger->fileLoader())
     , m_messagesQueue(new MessagesQueue(messenger, userDatabase, this))
-    , m_uploadDownload(new UploadDownloadModel(this))
 
 {
     connect(m_messagesQueue, &MessagesQueue::notificationCreated, this, &Models::notificationCreated);
@@ -111,6 +109,16 @@ CloudFilesModel *Models::cloudFiles()
     return m_cloudFiles;
 }
 
+const CloudFilesProgressModel *Models::cloudFilesProgress() const
+{
+    return m_cloudFilesProgress;
+}
+
+CloudFilesProgressModel *Models::cloudFilesProgress()
+{
+    return m_cloudFilesProgress;
+}
+
 const CloudFilesQueue *Models::cloudFilesQueue() const
 {
     return m_cloudFilesQueue;
@@ -119,16 +127,6 @@ const CloudFilesQueue *Models::cloudFilesQueue() const
 CloudFilesQueue *Models::cloudFilesQueue()
 {
     return m_cloudFilesQueue;
-}
-
-const CloudFilesUploader *Models::cloudFilesUploader() const
-{
-    return m_cloudFilesUploader;
-}
-
-CloudFilesUploader *Models::cloudFilesUploader()
-{
-    return m_cloudFilesUploader;
 }
 
 const FileLoader *Models::fileLoader() const
@@ -159,14 +157,4 @@ const MessagesQueue *Models::messagesQueue() const
 MessagesQueue *Models::messagesQueue()
 {
     return m_messagesQueue;
-}
-
-const UploadDownloadModel *Models::uploadDownload() const
-{
-    return m_uploadDownload;
-}
-
-UploadDownloadModel *Models::uploadDownload()
-{
-    return m_uploadDownload;
 }

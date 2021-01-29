@@ -56,15 +56,8 @@ CloudFilesModel::CloudFilesModel(const Settings *settings, QObject *parent)
 
     selection()->setMultiSelect(true);
 
+    connect(selection(), &ListSelectionModel::selectedCountChanged, this, &CloudFilesModel::updateDescription);
     connect(&m_updateTimer, &QTimer::timeout, this, &CloudFilesModel::invalidateDateTime);
-}
-
-void CloudFilesModel::setFiles(const ModifiableCloudFiles &files)
-{
-    beginResetModel();
-    m_now = QDateTime::currentDateTime();
-    m_files = files;
-    endResetModel();
 }
 
 void CloudFilesModel::setEnabled(bool enabled)
@@ -82,6 +75,11 @@ CloudFileHandler CloudFilesModel::file(const int proxyRow) const
     return m_files[sourceIndex(proxyRow).row()];
 }
 
+ModifiableCloudFileHandler CloudFilesModel::file(const int proxyRow)
+{
+    return m_files[sourceIndex(proxyRow).row()];
+}
+
 CloudFiles CloudFilesModel::selectedFiles() const
 {
     CloudFiles files;
@@ -92,26 +90,47 @@ CloudFiles CloudFilesModel::selectedFiles() const
     return files;
 }
 
-void CloudFilesModel::updateCloudFile(const CloudFileUpdate &update)
+void CloudFilesModel::updateCloudFiles(const CloudFilesUpdate &update)
 {
-    if (auto upd = std::get_if<CreatedCloudFileUpdate>(&update)) {
-        beginInsertRows(QModelIndex(), rowCount(), rowCount());
-        m_files.push_back(upd->cloudFile);
-        endInsertRows();
+    if (auto upd = std::get_if<ListCloudFolderUpdate>(&update)) {
+        beginResetModel();
+        m_now = QDateTime::currentDateTime();
+        m_files = upd->files;
+        endResetModel();
+        updateDescription();
     }
-    else if (auto upd = std::get_if<DeletedCloudFileUpdate>(&update)) {
-        if (const auto row = findRowById(upd->cloudFileId)) {
-            beginRemoveRows(QModelIndex(), *row, *row);
-            m_files.erase(m_files.begin() + *row);
-            endRemoveRows();
+    else if (auto upd = std::get_if<MergeCloudFolderUpdate>(&update)) {
+        for (auto &file : upd->deleted) {
+            removeFile(file);
         }
+        for (auto &file : upd->updated) {
+            updateFile(file, CloudFileUpdateSource::ListedChild);
+        }
+        for (auto &file : upd->added) {
+            addFile(file);
+        }
+        updateDescription();
     }
-    else if (auto upd = std::get_if<RenamedCloudFileUpdate>(&update)) {
-        if (const auto row = findRowById(upd->cloudFileId)) {
-            m_files[*row]->setName(upd->name);
-            const auto modelIndex = index(*row);
-            emit dataChanged(modelIndex, modelIndex, { FilenameRole });
+    else if (auto upd = std::get_if<CreateCloudFilesUpdate>(&update)) {
+        for (auto &file : upd->files) {
+            addFile(file);
         }
+        updateDescription();
+    }
+    else if (auto upd = std::get_if<DownloadCloudFileUpdate>(&update)) {
+        updateDownloadedFile(*upd);
+    }
+    else if (auto upd = std::get_if<DeleteCloudFilesUpdate>(&update)) {
+        for (auto &file : upd->files) {
+            removeFile(file);
+        }
+        updateDescription();
+    }
+    else if (auto upd = std::get_if<TransferCloudFileUpdate>(&update)) {
+        return;
+    }
+    else {
+        throw std::logic_error("Invalid CloudFilesUpdate in CloudFilesModel::updateCloudFiles");
     }
 }
 
@@ -136,7 +155,7 @@ QVariant CloudFilesModel::data(const QModelIndex &index, int role) const
         const auto diff = std::chrono::seconds(file->createdAt().secsTo(m_now));
         return Utils::formattedElapsedSeconds(diff, m_settings->nowInterval());
     }
-    case DisplayFileSize:
+    case DisplayFileSizeRole:
         return file->isFolder() ? QString() : Utils::formattedSize(file->size());
     case SortRole:
         return QString("%1%2").arg(static_cast<int>(!file->isFolder())).arg(file->name());
@@ -151,25 +170,103 @@ QHash<int, QByteArray> CloudFilesModel::roleNames() const
         { FilenameRole, "fileName" },
         { IsFolderRole, "isFolder" },
         { DisplayDateTimeRole, "displayDateTime" },
-        { DisplayFileSize, "displayFileSize" }
+        { DisplayFileSizeRole, "displayFileSize" }
     });
 }
 
-std::optional<int> CloudFilesModel::findRowById(const CloudFileId &cloudFileId) const
+QVector<int> CloudFilesModel::rolesFromUpdateSource(const CloudFileUpdateSource source, const bool isFolder)
 {
-    auto it = std::find_if(std::begin(m_files), std::end(m_files), [&cloudFileId](auto cloudFile) {
+    QVector<int> roles;
+    if ((source == CloudFileUpdateSource::ListedParent) || (source == CloudFileUpdateSource::ListedParent)) {
+        roles << FilenameRole << DisplayDateTimeRole;
+    }
+    if ((source == CloudFileUpdateSource::ListedChild) && !isFolder) {
+        roles << DisplayFileSizeRole;
+    }
+    return roles;
+}
+
+void CloudFilesModel::addFile(const ModifiableCloudFileHandler &file)
+{
+    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+    m_files.push_back(file);
+    endInsertRows();
+}
+
+void CloudFilesModel::removeFile(const CloudFileHandler &file)
+{
+    if (const auto index = findById(file->id()); index.isValid()) {
+        beginRemoveRows(QModelIndex(), index.row(), index.row());
+        m_files.erase(m_files.begin() + index.row());
+        endRemoveRows();
+    }
+}
+
+void CloudFilesModel::updateFile(const CloudFileHandler &file, const CloudFileUpdateSource source)
+{
+    if (const auto index = findById(file->id()); index.isValid()) {
+        m_files[index.row()]->update(*file, source);
+        emit dataChanged(index, index, rolesFromUpdateSource(source, file->isFolder()));
+    }
+}
+
+void CloudFilesModel::updateDownloadedFile(const DownloadCloudFileUpdate &update)
+{
+    const auto &file = update.file;
+    if (const auto index = findById(file->id()); index.isValid()) {
+        m_files[index.row()]->setFingerprint(update.fingerprint);
+        // No roles to update
+    }
+}
+
+QModelIndex CloudFilesModel::findById(const CloudFileId &cloudFileId) const
+{
+    const auto it = std::find_if(std::begin(m_files), std::end(m_files), [&cloudFileId](auto cloudFile) {
         return cloudFile->id() == cloudFileId;
     });
 
     if (it != std::end(m_files)) {
-        return std::distance(std::begin(m_files), it);
+        return index(std::distance(std::begin(m_files), it));
     }
 
-    return std::nullopt;
+    return QModelIndex();
 }
 
 void CloudFilesModel::invalidateDateTime()
 {
     m_now = QDateTime::currentDateTime();
     emit dataChanged(index(0), index(rowCount() - 1), { DisplayDateTimeRole });
+}
+
+void CloudFilesModel::updateDescription()
+{
+    // Count folders and files
+    int foldersCount = 0;
+    int filesCount = 0;
+    const bool hasSelection = selection()->hasSelection();
+    if (hasSelection) {
+        for (auto &file : selectedFiles()) {
+            file->isFolder() ? ++foldersCount : ++filesCount;
+        }
+    }
+    else {
+        for (auto &file : m_files) {
+            file->isFolder() ? ++foldersCount : ++filesCount;
+        }
+    }
+
+    // Build new description
+    QString newDescription;
+    newDescription.append(((foldersCount == 1) ? tr("%1 Folder") : tr("%1 Folders")).arg(foldersCount));
+    newDescription.append(QLatin1String(", "));
+    newDescription.append(((filesCount == 1) ? tr("%1 File") : tr("%1 Files")).arg(filesCount));
+    if (hasSelection) {
+        newDescription = tr("Selected: %1").arg(newDescription);
+    }
+
+    // Update description
+    if (m_description != newDescription) {
+        m_description = newDescription;
+        emit descriptionChanged(m_description);
+    }
 }

@@ -38,6 +38,7 @@
 #include "CloudFileOperation.h"
 #include "CloudFileOperationSource.h"
 #include "DeleteCloudFilesOperation.h"
+#include "DownloadCloudFileOperation.h"
 #include "Messenger.h"
 #include "UploadCloudFileOperation.h"
 
@@ -53,6 +54,7 @@ Self::CloudFilesQueue(Messenger *messenger, QObject *parent)
     connect(m_messenger, &Messenger::signedOut, this, &CloudFilesQueue::stop);
     connect(this, &Self::pushCreateFolder, this, &Self::onPushCreateFolder);
     connect(this, &Self::pushUploadFile, this, &Self::onPushUploadFile);
+    connect(this, &Self::pushDownloadFile, this, &Self::onPushDownloadFile);
     connect(this, &Self::pushDeleteFiles, this, &Self::onPushDeleteFiles);
 }
 
@@ -64,9 +66,9 @@ Operation *Self::createOperation(OperationSourcePtr source)
 {
     const auto cloudFileSource = dynamic_cast<CloudFileOperationSource *>(source.get());
 
-    auto *op = new CloudFileOperation(m_messenger->currentUser()->id(), nullptr);
+    auto *op = new CloudFileOperation(m_messenger, nullptr);
     connect(op, &Operation::notificationCreated, this, &Self::notificationCreated);
-    connect(op, &CloudFileOperation::cloudFileUpdate, this, &Self::updateCloudFile);
+    connect(op, &CloudFileOperation::cloudFilesUpdate, this, &Self::updateCloudFiles);
 
     switch (cloudFileSource->type()) {
         case CloudFileOperationSource::Type::CreateFolder:
@@ -74,6 +76,9 @@ Operation *Self::createOperation(OperationSourcePtr source)
             break;
         case CloudFileOperationSource::Type::Upload:
             op->appendChild(new UploadCloudFileOperation(op, cloudFileSource->filePath(), cloudFileSource->folder()));
+            break;
+        case CloudFileOperationSource::Type::Download:
+            op->appendChild(new DownloadCloudFileOperation(op, cloudFileSource->files().front(), cloudFileSource->folder()));
             break;
         case CloudFileOperationSource::Type::Delete:
             op->appendChild(new DeleteCloudFilesOperation(op, cloudFileSource->files()));
@@ -91,6 +96,11 @@ void Self::invalidateOperation(OperationSourcePtr source)
     Q_UNUSED(source)
 }
 
+qsizetype Self::maxAttemptCount() const
+{
+    return 0;
+}
+
 void Self::onPushCreateFolder(const QString &name, const CloudFileHandler &parentFolder)
 {
     auto source = std::make_shared<CloudFileOperationSource>(CloudFileOperationSource::Type::CreateFolder);
@@ -105,6 +115,14 @@ void Self::onPushUploadFile(const QString &filePath, const CloudFileHandler &par
     auto source = std::make_shared<CloudFileOperationSource>(CloudFileOperationSource::Type::Upload);
     source->setFolder(parentFolder);
     source->setFilePath(filePath);
+    addSource(source);
+}
+
+void CloudFilesQueue::onPushDownloadFile(const CloudFileHandler &file, const PostFunction &func)
+{
+    auto source = std::make_shared<CloudFileOperationSource>(CloudFileOperationSource::Type::Download);
+    source->setFiles({ file });
+    source->setPostFunction(func);
     addSource(source);
 }
 

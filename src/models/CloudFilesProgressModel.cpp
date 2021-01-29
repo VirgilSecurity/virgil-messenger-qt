@@ -32,51 +32,35 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/UploadDownloadModel.h"
-
-#include "Utils.h"
-#include "Model.h"
+#include "CloudFilesProgressModel.h"
 
 using namespace vm;
-using Self = UploadDownloadModel;
+using Self = CloudFilesProgressModel;
 
-Self::UploadDownloadModel(QObject *parent)
-    : ListModel(parent)
+CloudFilesProgressModel::CloudFilesProgressModel(QObject *parent)
+    : FilesProgressModel(parent)
 {
-    qRegisterMetaType<UploadDownloadModel *>("UploadDownloadModel*");
+    qRegisterMetaType<CloudFilesProgressModel *>("CloudFilesProgressModel*");
 }
 
-Self::~UploadDownloadModel()
-{}
-
-int Self::rowCount(const QModelIndex &parent) const
+void Self::updateCloudFiles(const CloudFilesUpdate &update)
 {
-    Q_UNUSED(parent);
-    return m_uploadDownloadList.size();
-}
-
-QVariant Self::data(const QModelIndex &index, int role) const
-{
-    const auto &item = m_uploadDownloadList[index.row()];
-    switch (role) {
-    case NameRole:
-        return item.name;
-
-    case BytesLoadedRole:
-        return item.bytesLoaded;
-
-    case BytesTotalRole:
-        return item.bytesTotal;
-    default:
-        return QVariant();
+    auto upd = std::get_if<TransferCloudFileUpdate>(&update);
+    if (!upd) {
+        return;
     }
-}
 
-QHash<int, QByteArray> Self::roleNames() const
-{
-    return {
-        { NameRole, "name" },
-        { BytesLoadedRole, "bytesLoaded" },
-        { BytesTotalRole, "bytesTotal" }
-    };
+    const auto &file = upd->file;
+    switch (upd->stage) {
+        case TransferCloudFileUpdate::Stage::Started:
+            add(file->id(), file->name(), file->size());
+            break;
+        case TransferCloudFileUpdate::Stage::Transfering:
+            setProgress(file->id(), upd->bytesLoaded, file->size());
+            break;
+        case TransferCloudFileUpdate::Stage::Finished:
+        case TransferCloudFileUpdate::Stage::Failed:
+            remove(file->id());
+            break;
+    }
 }

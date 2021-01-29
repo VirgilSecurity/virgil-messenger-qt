@@ -16,6 +16,11 @@ ModelListView {
         readonly property real defaultChatHeight: 60
     }
 
+    ListStatusButton {
+        text: qsTr("Updating...")
+        visible: controllers.cloudFiles.isLoading
+    }
+
     delegate: ListDelegate {
         id: fileListDelegate
         width: cloudFileListView.width

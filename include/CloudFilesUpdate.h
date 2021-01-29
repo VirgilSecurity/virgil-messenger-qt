@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,61 +32,67 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/CloudFilesUploader.h"
+#ifndef VM_CLOUD_FILES_UPDATE_H
+#define VM_CLOUD_FILES_UPDATE_H
 
-using namespace vm;
+#include "CloudFile.h"
+#include "CloudFileUpdateSource.h"
 
-CloudFilesUploader::CloudFilesUploader(QObject *parent)
-    : QObject(parent)
-    , m_currentIndex(-1)
-    , m_currentProcessedBytes(-1)
-    , m_currentTotalBytes(-1)
+#include <variant>
+
+namespace vm
 {
-    qRegisterMetaType<CloudFilesUploader *>("CloudFilesUploader*");
+struct CloudFilesUpdateBase
+{
+    CloudFileHandler parentFolder;
+};
+
+struct ListCloudFolderUpdate : public CloudFilesUpdateBase {
+    ModifiableCloudFiles files;
+};
+
+struct MergeCloudFolderUpdate : public CloudFilesUpdateBase {
+    ModifiableCloudFiles added;
+    CloudFiles deleted;
+    CloudFiles updated;
+};
+
+struct CreateCloudFilesUpdate : public CloudFilesUpdateBase {
+    ModifiableCloudFiles files;
+};
+
+struct DeleteCloudFilesUpdate : public CloudFilesUpdateBase {
+    CloudFiles files;
+};
+
+struct TransferCloudFileUpdate : public CloudFilesUpdateBase {
+    enum class Stage
+    {
+        Started,
+        Transfering,
+        Finished,
+        Failed
+    };
+
+    CloudFileHandler file;
+    Stage stage = Stage::Started;
+    quint64 bytesLoaded = 0;
+};
+
+struct DownloadCloudFileUpdate : public CloudFilesUpdateBase {
+    CloudFileHandler file;
+    QString fingerprint;
+};
+
+using CloudFilesUpdate = std::variant<
+    ListCloudFolderUpdate,
+    MergeCloudFolderUpdate,
+    CreateCloudFilesUpdate,
+    DeleteCloudFilesUpdate,
+    TransferCloudFileUpdate,
+    DownloadCloudFileUpdate
+    >;
+
 }
 
-int CloudFilesUploader::currentIndex() const
-{
-    return m_currentIndex;
-}
-
-qint64 CloudFilesUploader::currentProcessedBytes() const
-{
-    return m_currentProcessedBytes;
-}
-
-qint64 CloudFilesUploader::currentTotalBytes() const
-{
-    return m_currentTotalBytes;
-}
-
-QStringList CloudFilesUploader::fileNames() const
-{
-    return m_fileNames;
-}
-
-void CloudFilesUploader::setCurrentIndex(const int index)
-{
-    if (m_currentIndex != index) {
-        m_currentIndex = index;
-        emit currentIndexChanged(m_currentIndex);
-    }
-}
-
-void CloudFilesUploader::setCurrentProcessedBytes(const qint64 bytes)
-{
-    if (m_currentProcessedBytes != bytes) {
-        m_currentProcessedBytes = bytes;
-        emit currentProcessedBytesChanged(m_currentProcessedBytes);
-    }
-}
-
-void CloudFilesUploader::setCurrentTotalBytes(const qint64 bytes)
-{
-    if (m_currentTotalBytes != bytes) {
-        m_currentTotalBytes = bytes;
-        emit currentTotalBytesChanged(m_currentTotalBytes);
-    }
-}
-
-
+#endif // VM_CLOUD_FILES_UPDATE_H

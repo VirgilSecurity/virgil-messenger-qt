@@ -74,8 +74,11 @@ void Self::checkAppCrash()
     m_settings->setRunFlag(true);
 }
 
-bool Self::sendLogFiles()
+bool Self::sendLogFiles(const QString &details)
 {
+    if (!details.isEmpty()) {
+        qCDebug(lcCrashReporter) << "Details:" << details;
+    }
     qCDebug(lcCrashReporter) << "Collecting of logs...";
 
     const auto logsDir = m_settings->logsDir();

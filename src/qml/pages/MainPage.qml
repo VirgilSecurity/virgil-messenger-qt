@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.15
 import "../base"
 import "../components"
 import "../components/CommonHelpers"
+import "../components/Dialogs"
 import "../theme"
 
 Page {
@@ -22,7 +23,7 @@ Page {
         readonly property string chatsDescription: qsTr("%1 Server").arg(app.organizationDisplayName)
 
         readonly property string cloudFilesTitle: controllers.cloudFiles.displayPath
-        readonly property string cloudFilesDescription: cloudFilesSelection.hasSelection ? qsTr("Selected: %1").arg(cloudFilesSelection.selectedCount) : ""
+        readonly property string cloudFilesDescription: models.cloudFiles.description
     }
 
     background: Rectangle {
@@ -33,7 +34,6 @@ Page {
         id: mainSearchHeader
         title: d.isChatList ? d.chatsTitle : d.cloudFilesTitle
         description: d.isChatList ? d.chatsDescription : d.cloudFilesDescription
-        showDescription: description
         showBackButton: d.isCloudFileList && !controllers.cloudFiles.isRoot
         menuImage: d.isChatList ? "More" : "Plus"
         searchPlaceholder: d.isChatList ? qsTr("Search conversation") : qsTr("Search file")
@@ -59,12 +59,14 @@ Page {
             text: qsTr("Add file")
             onTriggered: attachmentPicker.open(AttachmentTypes.file)
             visible: d.isCloudFileList
+            enabled: !controllers.cloudFiles.isLoading
         }
 
         ContextMenuItem {
             text: qsTr("New directory")
             onTriggered: createCloudFolderDialog.open()
             visible: d.isCloudFileList
+            enabled: !controllers.cloudFiles.isLoading
         }
 
         ContextMenuSeparator {
@@ -105,11 +107,6 @@ Page {
         }
     }
 
-    FileManagerUploadDownload {
-        id: fileUploadDownload
-        visible: !d.isChatList
-    }
-
     Connections {
         target: d.manager
 
@@ -130,5 +127,21 @@ Page {
             const url = fileUrls[fileUrls.length - 1]
             controllers.cloudFiles.addFile(url)
         }
+    }
+
+    MessageDialog {
+        id: deleteCloudFilesDialog
+        title: qsTr("File Manager")
+        text: qsTr("Delete file(s)?")
+        onAccepted: controllers.cloudFiles.deleteFiles()
+    }
+
+    InputDialog {
+        id: createCloudFolderDialog
+        title: qsTr("File Manager")
+        label: qsTr("New directory")
+        placeholderText: qsTr("Enter name")
+        validator: app.validator.reDirectoryName
+        onAccepted: controllers.cloudFiles.createFolder(text)
     }
 }

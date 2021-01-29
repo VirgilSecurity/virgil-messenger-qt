@@ -1,16 +1,15 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.12
+import QtQuick.Layouts 1.15
 
 import "../theme"
 import "../components"
 
 ToolBar {
     id: toolbarId
-    property alias title: titleLabel.text
-    property alias description: descriptionLabel.text
-    property alias showSeparator: separator.visible
-    property alias showDescription: descriptionLabel.visible
+    property alias title: headerTitle.title
+    property alias description: headerTitle.description
+    property alias showSeparator: headerBackground.showSeparator
     property alias menuImage: menuButton.image
     property var showBackButton: false
     // search
@@ -35,16 +34,8 @@ ToolBar {
         }
     }
 
-    background: Rectangle {
-        implicitHeight: Theme.headerHeight
-        color: Theme.contactsBackgroundColor
-
-        HorizontalRule {
-            id: separator
-            anchors.leftMargin: Theme.margin
-            anchors.rightMargin: Theme.margin
-            anchors.bottom: parent.bottom
-        }
+    background: HeaderBackground {
+        id: headerBackground
     }
 
     state: "closed"
@@ -53,7 +44,7 @@ ToolBar {
             name: "opened"
 
             PropertyChanges {
-                target: titleDescriptionColumn
+                target: headerTitle
                 anchors.leftMargin: -searchId.recommendedHeight
                 opacity: 0
 
@@ -76,7 +67,7 @@ ToolBar {
             name: "closed"
 
             PropertyChanges {
-                target: titleDescriptionColumn
+                target: headerTitle
                 anchors.leftMargin: 0
                 opacity: 1
 
@@ -113,7 +104,6 @@ ToolBar {
             leftMargin: Theme.margin
             rightMargin: Theme.smallMargin
         }
-
         height: searchId.recommendedHeight
 
         ImageButton {
@@ -134,38 +124,10 @@ ToolBar {
                 leftMargin: showBackButton ? Theme.smallMargin : 0
                 right: parent.right
             }
-
             height: parent.height
 
-            Column {
-                id: titleDescriptionColumn
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                    left: parent.left
-                }
-
-                Label {
-                    id: titleLabel
-                    elide: Label.ElideRight
-
-                    font.family: Theme.mainFont
-                    font.pointSize: UiHelper.fixFontSz(15)
-                    horizontalAlignment: Qt.AlignLeft
-                    verticalAlignment: Qt.AlignVCenter
-                    font.bold: true
-                    color: Theme.primaryTextColor
-                }
-
-                Label {
-                    id: descriptionLabel
-                    elide: Label.ElideRight
-
-                    font.family: Theme.mainFont
-                    horizontalAlignment: Qt.AlignLeft
-                    verticalAlignment: Qt.AlignVCenter
-                    font.pointSize: UiHelper.fixFontSz(11)
-                    color: Theme.secondaryTextColor
-                }
+            HeaderTitle {
+                id: headerTitle
             }
 
             Item {
