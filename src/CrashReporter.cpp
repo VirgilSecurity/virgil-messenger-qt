@@ -63,7 +63,7 @@ void Self::checkAppCrash()
 #ifndef QT_DEBUG
         qCCritical(lcCrashReporter) << "Previous application run is crashed! Sending log files...";
         if (m_settings->autoSendCrashReport()) {
-            sendLogFiles("");
+            sendLogFiles("crash-logs auto-send");
         }
         else {
             emit crashReportRequested();
@@ -76,9 +76,7 @@ void Self::checkAppCrash()
 
 bool Self::sendLogFiles(const QString &details)
 {
-    if (!details.isEmpty()) {
-        qCDebug(lcCrashReporter) << "Details:" << details;
-    }
+    qCDebug(lcCrashReporter) << "Details:" << (details.isEmpty() ? QLatin1String("not specified") : details);
     qCDebug(lcCrashReporter) << "Collecting of logs...";
 
     const auto logsDir = m_settings->logsDir();
@@ -133,6 +131,7 @@ void Self::sendSendCrashReportReply(QNetworkReply *reply)
        qCDebug(lcCrashReporter) << "Error sending report. Code:" << static_cast<int>(reply->error())
                                 << ". Name:" << reply->error()
                                 << ". Message:" << reply->errorString();
+       qCDebug(lcCrashReporter) << "Error body:" << reply->readAll();
        emit reportErrorOccurred(tr("Crash report failed to send"));
    }
    qCDebug(lcCrashReporter) << "Sending finished";
