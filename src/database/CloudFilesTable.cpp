@@ -103,7 +103,6 @@ bool CloudFilesTable::updateFile(const CloudFileHandler &cloudFile, const CloudF
             break;
         default:
             throw std::logic_error("Invalid CloudFileUpdateSource");
-            break;
     }
 
     const auto bindValues = DatabaseUtils::createUpdatedCloudFileBindings(cloudFile, source);

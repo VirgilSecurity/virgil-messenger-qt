@@ -35,7 +35,6 @@ Page {
         title: d.isChatList ? d.chatsTitle : d.cloudFilesTitle
         description: d.isChatList ? d.chatsDescription : d.cloudFilesDescription
         showBackButton: d.isCloudFileList && !controllers.cloudFiles.isRoot
-        menuImage: d.isChatList ? "More" : "Plus"
         searchPlaceholder: d.isChatList ? qsTr("Search conversation") : qsTr("Search file")
         filterSource: d.isChatList ? models.chats : models.cloudFiles
 
