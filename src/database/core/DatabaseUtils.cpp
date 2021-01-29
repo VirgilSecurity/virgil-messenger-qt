@@ -425,7 +425,6 @@ QString DatabaseUtils::replaceListBindValue(const QString &queryText, const Bind
             break;
         default:
             throw std::logic_error("Invalid bindValue, type is not list");
-            break;
     }
 
     const auto name = '(' + bindValue.first + ')';

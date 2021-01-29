@@ -15,6 +15,5 @@ TemplateDialog {
         height: implicitHeight
     }
 
-    onAccepted: text = ""
-    onRejected: text = ""
+    onClosed: text = ""
 }

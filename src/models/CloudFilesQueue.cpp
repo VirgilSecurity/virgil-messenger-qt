@@ -85,7 +85,6 @@ Operation *Self::createOperation(OperationSourcePtr source)
             break;
         default:
             throw std::logic_error("CloudFilesQueue::createOperation is not fully implemented");
-            break;
     }
 
     return op;
