@@ -44,6 +44,8 @@ DeleteCloudFilesOperation::DeleteCloudFilesOperation(CloudFileOperation *parent,
     : Operation(QLatin1String("DeleteCloudFiles"), parent)
     , m_parent(parent)
     , m_files(files)
+    , m_requestId(0)
+    , m_processedCount(0)
 {
     auto fileSystem = m_parent->cloudFileSystem();
     connect(fileSystem, &CloudFileSystem::fileDeleted, this, &DeleteCloudFilesOperation::onFileDeleted);

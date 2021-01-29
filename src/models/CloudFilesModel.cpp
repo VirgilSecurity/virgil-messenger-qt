@@ -174,7 +174,7 @@ QHash<int, QByteArray> CloudFilesModel::roleNames() const
     });
 }
 
-QVector<int> CloudFilesModel::rolesFromUpdateSource(const CloudFileUpdateSource &source, const bool isFolder)
+QVector<int> CloudFilesModel::rolesFromUpdateSource(const CloudFileUpdateSource source, const bool isFolder)
 {
     QVector<int> roles;
     if ((source == CloudFileUpdateSource::ListedParent) || (source == CloudFileUpdateSource::ListedParent)) {

@@ -50,14 +50,14 @@ public:
 
     bool isValid() const noexcept;
 
-    bool operator<(const CloudFsFileId& id) const;
-    bool operator>(const CloudFsFileId& id) const;
-    bool operator==(const CloudFsFileId& id) const;
-    bool operator!=(const CloudFsFileId& id) const;
-
 private:
     QString m_id;
 };
 } // namespace vm
+
+bool operator<(const vm::CloudFsFileId &lhs, const vm::CloudFsFileId &rhs);
+bool operator>(const vm::CloudFsFileId &lhs, const vm::CloudFsFileId &rhs);
+bool operator==(const vm::CloudFsFileId &lhs, const vm::CloudFsFileId &rhs);
+bool operator!=(const vm::CloudFsFileId &lhs, const vm::CloudFsFileId &rhs);
 
 #endif // VM_CLOUD_FS_FILE_ID_H

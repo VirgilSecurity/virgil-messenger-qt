@@ -62,8 +62,8 @@ private:
 
     bool createFiles(const ModifiableCloudFiles &cloudFiles);
     bool createFile(const CloudFileHandler &cloudFile);
-    bool updateFiles(const CloudFiles &cloudFiles, const CloudFileUpdateSource source);
-    bool updateFile(const CloudFileHandler &cloudFile, const CloudFileUpdateSource source);
+    bool updateFiles(const CloudFiles &cloudFiles, CloudFileUpdateSource source);
+    bool updateFile(const CloudFileHandler &cloudFile, CloudFileUpdateSource source);
     bool updateDownloadedFile(const DownloadCloudFileUpdate &update);
     bool deleteFiles(const CloudFiles &cloudFiles);
 

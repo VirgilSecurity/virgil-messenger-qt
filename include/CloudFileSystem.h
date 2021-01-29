@@ -71,20 +71,20 @@ public:
 signals:
     void downloadsDirChanged(const QDir &downloadsDir);
 
-    void listFetched(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &files);
-    void fetchListErrorOccured(const CloudFileRequestId requestId, const QString &errorText);
+    void listFetched(CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &files);
+    void fetchListErrorOccured(CloudFileRequestId requestId, const QString &errorText);
 
-    void fileCreated(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &cloudFile, const QString &encryptedFilePath, const QUrl &uploadUrl);
-    void createFileErrorOccurred(const CloudFileRequestId requestId, const QString &errorText);
+    void fileCreated(CloudFileRequestId requestId, const ModifiableCloudFileHandler &cloudFile, const QString &encryptedFilePath, const QUrl &uploadUrl);
+    void createFileErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
 
-    void folderCreated(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &folder);
-    void createFolderErrorOccured(const CloudFileRequestId requestId, const QString &errorText);
+    void folderCreated(CloudFileRequestId requestId, const ModifiableCloudFileHandler &folder);
+    void createFolderErrorOccured(CloudFileRequestId requestId, const QString &errorText);
 
-    void downloadInfoGot(const CloudFileRequestId requestId, const CloudFileHandler &file, const QUrl &url, const QByteArray &encryptionKey);
-    void getDownloadInfoErrorOccurred(const CloudFileRequestId requestId, const QString &errorText);
+    void downloadInfoGot(CloudFileRequestId requestId, const CloudFileHandler &file, const QUrl &url, const QByteArray &encryptionKey);
+    void getDownloadInfoErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
 
-    void fileDeleted(const CloudFileRequestId requestId, const CloudFileHandler &file);
-    void deleteFileErrorOccurred(const CloudFileRequestId requestId, const QString &errorText);
+    void fileDeleted(CloudFileRequestId requestId, const CloudFileHandler &file);
+    void deleteFileErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
 
 private:
     ModifiableCloudFileHandler createParentFolderFromInfo(const CloudFsFolder &fsFolder, const CloudFileHandler &oldFolder) const;
@@ -94,7 +94,7 @@ private:
     QPointer<CoreMessenger> m_coreMessenger;
     std::optional<CoreMessengerCloudFs> m_coreFs;
     std::atomic<CloudFileRequestId> m_requestId = 0;
-    Messenger *m_messenger;
+    QPointer<Messenger> m_messenger;
     QDir m_downloadsDir;
 };
 }

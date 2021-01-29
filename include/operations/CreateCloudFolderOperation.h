@@ -53,13 +53,13 @@ public:
     void run() override;
 
 private:
-    void onCreated(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &folder);
-    void onCreateErrorOccured(const CloudFileRequestId requestId, const QString &errorText);
+    void onCreated(CloudFileRequestId requestId, const ModifiableCloudFileHandler &folder);
+    void onCreateErrorOccured(CloudFileRequestId requestId, const QString &errorText);
 
     CloudFileOperation *m_parent;
     QString m_name;
     CloudFileHandler m_parentFolder;
-    CloudFileRequestId m_requestId = 0;
+    CloudFileRequestId m_requestId;
 };
 }
 

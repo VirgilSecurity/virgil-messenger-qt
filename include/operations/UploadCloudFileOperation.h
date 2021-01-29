@@ -56,17 +56,17 @@ public:
 private:
     void cleanup() override;
 
-    void onFileCreated(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &cloudFile, const QString &encryptedFilePath, const QUrl &putUrl);
-    void onCreateCloudFileErrorOccurred(const CloudFileRequestId requestId, const QString &errorText);
-    void onProgressChanged(const quint64 bytesLoaded, const quint64 bytesTotal);
+    void onFileCreated(CloudFileRequestId requestId, const ModifiableCloudFileHandler &cloudFile, const QString &encryptedFilePath, const QUrl &putUrl);
+    void onCreateCloudFileErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
+    void onProgressChanged(quint64 bytesLoaded, quint64 bytesTotal);
     void onUploaded();
     void sendFailedTransferUpdate();
 
-    void transferUpdate(const TransferCloudFileUpdate::Stage stage, const quint64 bytesLoaded);
+    void transferUpdate(TransferCloudFileUpdate::Stage stage, quint64 bytesLoaded);
 
     CloudFileOperation *m_parent;
     CloudFileHandler m_parentFolder;
-    CloudFileRequestId m_requestId = 0;
+    CloudFileRequestId m_requestId;
     ModifiableCloudFileHandler m_file;
     QString m_sourceFilePath;
 };

@@ -57,18 +57,18 @@ private:
 
     QString tempFilePath() const;
 
-    void onDownloadInfoGot(const CloudFileRequestId requestId, const CloudFileHandler &file, const QUrl &url, const QByteArray &encryptionKey);
-    void onGetDownloadInfoErrorOccurred(const CloudFileRequestId requestId, const QString &errorText);
-    void onProgressChanged(const quint64 bytesLoaded, const quint64 bytesTotal);
+    void onDownloadInfoGot(CloudFileRequestId requestId, const CloudFileHandler &file, const QUrl &url, const QByteArray &encryptionKey);
+    void onGetDownloadInfoErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
+    void onProgressChanged(quint64 bytesLoaded, quint64 bytesTotal);
     void onDownloaded();
     void sendFailedTransferUpdate();
 
-    void transferUpdate(const TransferCloudFileUpdate::Stage stage, const quint64 bytesLoaded);
+    void transferUpdate(TransferCloudFileUpdate::Stage stage, quint64 bytesLoaded);
 
     CloudFileOperation *m_parent;
     CloudFileHandler m_file;
     CloudFileHandler m_parentFolder;
-    CloudFileRequestId m_requestId = 0;
+    CloudFileRequestId m_requestId;
     QByteArray m_encryptionKey;
 };
 }

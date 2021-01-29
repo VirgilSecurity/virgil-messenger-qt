@@ -55,13 +55,13 @@ public:
 private:
     void incProcessedCount();
 
-    void onFileDeleted(const CloudFileRequestId requestId, const CloudFileHandler &file);
-    void onDeleteFileErrorOccured(const CloudFileRequestId requestId, const QString &errorText);
+    void onFileDeleted(CloudFileRequestId requestId, const CloudFileHandler &file);
+    void onDeleteFileErrorOccured(CloudFileRequestId requestId, const QString &errorText);
 
     CloudFileOperation *m_parent;
     CloudFiles m_files;
-    CloudFileRequestId m_requestId = 0;
-    size_t m_processedCount = 0;
+    CloudFileRequestId m_requestId;
+    size_t m_processedCount;
     CloudFiles m_deletedFiles;
 };
 }

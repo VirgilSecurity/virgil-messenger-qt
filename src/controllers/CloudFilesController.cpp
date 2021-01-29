@@ -53,6 +53,8 @@ Self::CloudFilesController(const Settings *settings, Models *models, UserDatabas
     , m_models(models)
     , m_userDatabase(userDatabase)
     , m_cloudFileSystem(cloudFileSystem)
+    , m_fetchRequestId(0)
+    , m_loadingCounter(0)
 {
     qRegisterMetaType<CloudFilesUpdate>("CloudFilesUpdate");
 
@@ -307,24 +309,24 @@ void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)
     m_userDatabase->cloudFilesTable()->updateCloudFiles(update);
 }
 
-bool CloudFilesController::fileIdLess(const ModifiableCloudFileHandler &a, const ModifiableCloudFileHandler &b)
+bool CloudFilesController::fileIdLess(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs)
 {
-    return a->id() < b->id();
+    return lhs->id() < rhs->id();
 }
 
-bool CloudFilesController::filesAreEqual(const ModifiableCloudFileHandler &a, const ModifiableCloudFileHandler &b)
+bool CloudFilesController::filesAreEqual(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs)
 {
     // Compare common fields
-    if (!(a->parentId() == b->parentId() && a->isFolder() == b->isFolder())) {
+    if (!(lhs->parentId() == rhs->parentId() && lhs->isFolder() == rhs->isFolder())) {
         return false;
     }
     // Compare fetched fields
-    if (!(a->id() == b->id() && a->name() == b->name() && a->createdAt() == b->createdAt() && a->updatedAt() == b->updatedAt())) {
+    if (!(lhs->id() == rhs->id() && lhs->name() == rhs->name() && lhs->createdAt() == rhs->createdAt() && lhs->updatedAt() == rhs->updatedAt())) {
         return false;
     }
     // Compare file fields
-    if (!a->isFolder()) {
-        return a->type() == b->type() && a->size() == b->size();
+    if (!lhs->isFolder()) {
+        return lhs->type() == rhs->type() && lhs->size() == rhs->size();
     }
     return true;
 }

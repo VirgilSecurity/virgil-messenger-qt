@@ -52,18 +52,22 @@ bool Self::isValid() const noexcept {
     return !m_id.isEmpty();
 }
 
-bool Self::operator<(const Self& id) const {
-    return QString(*this) < QString(id);
+bool operator<(const Self &lhs, const Self &rhs)
+{
+    return QString(lhs) < QString(rhs);
 }
 
-bool Self::operator>(const Self& id) const {
-    return QString(*this) > QString(id);
+bool operator>(const Self &lhs, const Self &rhs)
+{
+    return QString(lhs) > QString(rhs);
 }
 
-bool Self::operator==(const Self& id) const {
-    return QString(*this) == QString(id);
+bool operator==(const Self &lhs, const Self &rhs)
+{
+    return QString(lhs) == QString(rhs);
 }
 
-bool Self::operator!=(const Self& id) const {
-    return QString(*this) != QString(id);
+bool operator!=(const Self &lhs, const Self &rhs)
+{
+    return QString(lhs) != QString(rhs);
 }

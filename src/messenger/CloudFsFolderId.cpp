@@ -58,18 +58,22 @@ CloudFsFolderId CloudFsFolderId::root()
     return id;
 }
 
-bool Self::operator<(const Self& id) const {
-    return QString(*this) < QString(id);
+bool operator<(const Self &lhs, const Self &rhs)
+{
+    return QString(lhs) < QString(rhs);
 }
 
-bool Self::operator>(const Self& id) const {
-    return QString(*this) > QString(id);
+bool operator>(const Self &lhs, const Self &rhs)
+{
+    return QString(lhs) > QString(rhs);
 }
 
-bool Self::operator==(const Self& id) const {
-    return QString(*this) == QString(id);
+bool operator==(const Self &lhs, const Self &rhs)
+{
+    return QString(lhs) == QString(rhs);
 }
 
-bool Self::operator!=(const Self& id) const {
-    return QString(*this) != QString(id);
+bool operator!=(const Self &lhs, const Self &rhs)
+{
+    return QString(lhs) != QString(rhs);
 }

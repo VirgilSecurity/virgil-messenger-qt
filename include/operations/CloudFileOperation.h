@@ -38,6 +38,8 @@
 #include "CloudFilesUpdate.h"
 #include "NetworkOperation.h"
 
+#include <QPointer>
+
 class Settings;
 
 namespace vm
@@ -62,7 +64,7 @@ signals:
 
 private:
     static qsizetype m_counter;
-    Messenger *m_messenger;
+    QPointer<Messenger> m_messenger;
 };
 }
 

@@ -45,6 +45,7 @@ DownloadCloudFileOperation::DownloadCloudFileOperation(CloudFileOperation *paren
     , m_parent(parent)
     , m_file(file)
     , m_parentFolder(parentFolder)
+    , m_requestId(0)
 {
     setName(QLatin1String("DownloadCloudFile"));
     setFilePath(tempFilePath());

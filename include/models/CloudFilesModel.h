@@ -65,8 +65,8 @@ public:
 
     void setEnabled(bool enabled);
 
-    CloudFileHandler file(const int proxyRow) const;
-    ModifiableCloudFileHandler file(const int proxyRow);
+    CloudFileHandler file(int proxyRow) const;
+    ModifiableCloudFileHandler file(int proxyRow);
     CloudFiles selectedFiles() const;
 
     void updateCloudFiles(const CloudFilesUpdate &update);
@@ -79,11 +79,11 @@ private:
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    static QVector<int> rolesFromUpdateSource(const CloudFileUpdateSource& source, const bool isFolder);
+    static QVector<int> rolesFromUpdateSource(CloudFileUpdateSource source, bool isFolder);
 
     void addFile(const ModifiableCloudFileHandler &file);
     void removeFile(const CloudFileHandler &file);
-    void updateFile(const CloudFileHandler &file, const CloudFileUpdateSource source);
+    void updateFile(const CloudFileHandler &file, CloudFileUpdateSource source);
     void updateDownloadedFile(const DownloadCloudFileUpdate &update);
     QModelIndex findById(const CloudFileId &cloudFileId) const;
     void invalidateDateTime();

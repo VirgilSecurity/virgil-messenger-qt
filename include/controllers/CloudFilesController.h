@@ -79,8 +79,8 @@ signals:
     void errorOccurred(const QString &errorText);
 
     void displayPathChanged(const QString &path);
-    void isRootChanged(const bool isRoot);
-    void isLoadingChanged(const bool isLoading);
+    void isRootChanged(bool isRoot);
+    void isLoadingChanged(bool isLoading);
 
 private:
     using FoldersHierarchy = std::vector<ModifiableCloudFileHandler>;
@@ -95,11 +95,11 @@ private:
     void decLoadingCounter();
 
     void onDbListFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
-    void onCloudFilesFetched(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
+    void onCloudFilesFetched(CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
     void onUpdateCloudFiles(const CloudFilesUpdate &update);
 
-    static bool fileIdLess(const ModifiableCloudFileHandler &a, const ModifiableCloudFileHandler &b);
-    static bool filesAreEqual(const ModifiableCloudFileHandler &a, const ModifiableCloudFileHandler &b);
+    static bool fileIdLess(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs);
+    static bool filesAreEqual(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs);
 
     QPointer<const Settings> m_settings;
     QPointer<Models> m_models;
@@ -110,8 +110,8 @@ private:
     FoldersHierarchy m_hierarchy;
     FoldersHierarchy m_newHierarchy;
     ModifiableCloudFiles m_databaseCloudFiles;
-    CloudFileRequestId m_fetchRequestId = 0;
-    int m_loadingCounter = 0;
+    CloudFileRequestId m_fetchRequestId;
+    int m_loadingCounter;
 };
 }
 

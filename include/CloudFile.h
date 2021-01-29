@@ -56,11 +56,11 @@ public:
     QString name() const noexcept;
     void setName(const QString &name);
     bool isFolder() const noexcept;
-    void setIsFolder(const bool isFolder);
+    void setIsFolder(bool isFolder);
     QString type() const;
     void setType(const QString &type);
     quint64 size() const noexcept;
-    void setSize(const quint64 size);
+    void setSize(quint64 size);
     QDateTime createdAt() const noexcept;
     void setCreatedAt(const QDateTime &dateTime);
     QDateTime updatedAt() const noexcept;
@@ -76,15 +76,15 @@ public:
     QString fingerprint() const noexcept;
     void setFingerprint(const QString &fingerprint);
 
-    void update(const CloudFile &file, const CloudFileUpdateSource source);
+    void update(const CloudFile &file, CloudFileUpdateSource source);
 
 private:
     CloudFileId m_id;
     CloudFileId m_parentId;
     QString m_name;
-    bool m_isFolder = false;
+    bool m_isFolder;
     QString m_type;
-    quint64 m_size = 0;
+    quint64 m_size;
     QDateTime m_createdAt;
     QDateTime m_updatedAt;
     UserId m_updatedBy;

@@ -49,6 +49,7 @@ UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, c
     : UploadFileOperation(parent, parent->fileLoader(), QString()) // filePath will be known after encryption
     , m_parent(parent)
     , m_parentFolder(parentFolder)
+    , m_requestId(0)
     , m_sourceFilePath(filePath)
 {
     setName(QLatin1String("UploadCloudFile"));

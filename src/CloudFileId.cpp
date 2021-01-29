@@ -72,26 +72,6 @@ CloudFileId CloudFileId::root()
     return id;
 }
 
-bool CloudFileId::operator<(const CloudFileId &id) const
-{
-    return m_coreId < id.m_coreId;
-}
-
-bool CloudFileId::operator>(const CloudFileId &id) const
-{
-    return m_coreId > id.m_coreId;
-}
-
-bool CloudFileId::operator==(const CloudFileId &id) const
-{
-    return m_coreId == id.m_coreId;
-}
-
-bool CloudFileId::operator!=(const CloudFileId &id) const
-{
-    return m_coreId != id.m_coreId;
-}
-
 CloudFileId::operator QString() const
 {
     if (auto id = std::get_if<CloudFsFileId>(&m_coreId)) {
@@ -101,4 +81,24 @@ CloudFileId::operator QString() const
         return QString(*id);
     }
     return QLatin1String("");
+}
+
+bool operator<(const CloudFileId &lhs, const CloudFileId &rhs)
+{
+    return QString(lhs) < QString(rhs);
+}
+
+bool operator>(const CloudFileId &lhs, const CloudFileId &rhs)
+{
+    return QString(lhs) > QString(rhs);
+}
+
+bool operator==(const CloudFileId &lhs, const CloudFileId &rhs)
+{
+    return QString(lhs) == QString(rhs);
+}
+
+bool operator!=(const CloudFileId &lhs, const CloudFileId &rhs)
+{
+    return QString(lhs) != QString(rhs);
 }
