@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.15
 import "../base"
 import "../components"
 import "../components/CommonHelpers"
+import "../components/Dialogs"
 import "../theme"
 
 Page {
@@ -126,5 +127,21 @@ Page {
             const url = fileUrls[fileUrls.length - 1]
             controllers.cloudFiles.addFile(url)
         }
+    }
+
+    MessageDialog {
+        id: deleteCloudFilesDialog
+        title: qsTr("File Manager")
+        text: qsTr("Delete file(s)?")
+        onAccepted: controllers.cloudFiles.deleteFiles()
+    }
+
+    InputDialog {
+        id: createCloudFolderDialog
+        title: qsTr("File Manager")
+        label: qsTr("New directory")
+        placeholderText: qsTr("Enter name")
+        validator: app.validator.reDirectoryName
+        onAccepted: controllers.cloudFiles.createFolder(text)
     }
 }
