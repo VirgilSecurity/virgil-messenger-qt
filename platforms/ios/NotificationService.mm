@@ -32,7 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#import "ios/NotificationService.h"
+#import "NotificationService.h"
 
 @interface NotificationService ()
 

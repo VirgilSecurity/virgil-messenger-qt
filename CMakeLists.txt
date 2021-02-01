@@ -363,7 +363,7 @@ elseif (VS_PLATFORM STREQUAL "ios")
 
     target_include_directories(${VS_TARGET_NAME}_EXT
             PUBLIC
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios>
             )
 
     find_library(UN_LIB UserNotifications)
