@@ -110,9 +110,8 @@ endif ()
 string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
 message("-- Build type: [${CMAKE_BUILD_TYPE}]")
 
-#if(CMAKE_BUILD_TYPE_LOWER STREQUAL "minsizerel" OR CMAKE_BUILD_TYPE_LOWER STREQUAL "relwithdebinfo")
-#    set(CMAKE_BUILD_TYPE_LOWER "release")
-#endif()
+string(TOLOWER "${VS_ENV}" VS_ENV)
+message("-- Virgil enviroment: [${VS_ENV}]")
 
 set(CMAKE_BUILD_TYPE_LOWER "release")
 
@@ -349,8 +348,8 @@ elseif (VS_PLATFORM STREQUAL "ios")
 
     #   IOS extension
     set(EXT_SOURCE_FILES
-            ${CMAKE_CURRENT_LIST_DIR}/include/ios/NotificationService.h
-            ${CMAKE_CURRENT_LIST_DIR}/src/ios/NotificationService.mm
+            ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/NotificationService.mm
+            ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/NotificationService.h
             )
 
     add_library(${VS_TARGET_NAME}_EXT MODULE ${EXT_SOURCE_FILES})
@@ -824,9 +823,10 @@ target_compile_definitions(${VS_TARGET_NAME}
         PRIVATE
 
         $<BUILD_INTERFACE:VERSION="${VS_TARGET_VERSION}">
-        $<BUILD_INTERFACE:VS_MSGR_ENV_DEV=0>
-        $<BUILD_INTERFACE:VS_MSGR_ENV_STG=0>
-        $<BUILD_INTERFACE:VS_MSGR_ENV_PROD=1>
+
+        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_ENV}","dev">:VS_MSGR_ENV_DEV=1>>
+        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_ENV}","stg">:VS_MSGR_ENV_STG=1>>
+        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_ENV}","prod">:VS_MSGR_ENV_PROD=1>>
 
         $<BUILD_INTERFACE:INFO_CLIENT=1>
         $<BUILD_INTERFACE:CFG_CLIENT=1>
