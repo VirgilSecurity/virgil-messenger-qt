@@ -47,7 +47,7 @@ include(customers)
 #
 # Code formatting
 #
-option(ENABLE_CLANGFORMAT "On/Off formatting source code with clangformat." ON)
+option(ENABLE_CLANGFORMAT "On/Off formatting source code with clangformat." OFF)
 
 # ---------------------------------------------------------------------------
 # Project version
@@ -866,6 +866,6 @@ target_compile_definitions(${VS_TARGET_NAME}
         PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>
         )
 
-#if(COMMAND add_clangformat AND ENABLE_CLANGFORMAT)
-#    add_clangformat(${VS_TARGET_NAME})
-#endif()
+if(COMMAND add_clangformat AND ENABLE_CLANGFORMAT)
+    add_clangformat(${VS_TARGET_NAME})
+endif()
