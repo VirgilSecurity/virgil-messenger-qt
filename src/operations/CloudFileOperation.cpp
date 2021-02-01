@@ -61,3 +61,21 @@ FileLoader *CloudFileOperation::fileLoader()
 {
     return m_messenger->fileLoader();
 }
+
+bool CloudFileOperation::waitForFolderKeys(const CloudFileHandler &cloudFolder)
+{
+    const auto folderId = cloudFolder->id().coreFolderId();
+    if (const auto isRoot = !folderId.isValid()) {
+        // We don't need keys
+        return true;
+    }
+
+    // Wait a second for fetched keys
+    QEventLoop loop;
+    connect(cloudFileSystem(), &CloudFileSystem::listFetched, &loop, &QEventLoop::quit);
+    connect(cloudFileSystem(), &CloudFileSystem::fetchListErrorOccured, &loop, &QEventLoop::quit);
+    QTimer::singleShot(1000, &loop, &QEventLoop::quit);
+    loop.exec();
+
+    return !cloudFolder->publicKey().isEmpty() && !cloudFolder->encryptedKey().isEmpty();
+}

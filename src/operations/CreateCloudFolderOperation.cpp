@@ -55,7 +55,12 @@ CreateCloudFolderOperation::CreateCloudFolderOperation(CloudFileOperation *paren
 
 void CreateCloudFolderOperation::run()
 {
-    m_requestId = m_parent->cloudFileSystem()->createFolder(m_name, m_parentFolder);
+    if (!m_parent->waitForFolderKeys(m_parentFolder)) {
+        failAndNotify(tr("Failed to update parent folder"));
+    }
+    else {
+        m_requestId = m_parent->cloudFileSystem()->createFolder(m_name, m_parentFolder);
+    }
 }
 
 void CreateCloudFolderOperation::onCreated(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &folder)

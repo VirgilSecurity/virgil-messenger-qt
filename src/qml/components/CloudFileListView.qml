@@ -75,5 +75,5 @@ ModelListView {
         }
     }
 
-    onPlaceholderClicked: attachmentPicker.open(AttachmentTypes.file)
+    onPlaceholderClicked: attachmentPicker.open(AttachmentTypes.file, true)
 }

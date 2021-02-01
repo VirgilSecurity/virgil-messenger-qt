@@ -62,12 +62,10 @@ Item {
     ]
 
     ListStatusButton {
-        visible: buttonVisible && root.state === "minInfo" && listView.count > 0 ? 1 : 0
-        text: qsTr("Transfering %1 file(s)").arg(listView.count)
+        visible: buttonVisible && root.state === "minInfo" && d.model.activeCount > 0
+        text: qsTr("Transfering %1 file(s)").arg(d.model.activeCount)
 
-        onClicked: {
-            root.state = "maxInfo"
-        }
+        onClicked: root.showTransfers()
     }
 
     Page {
@@ -106,6 +104,7 @@ Item {
                         description: qsTr("Transfering %1 file(s)").arg(listView.count)
                     }
 
+                    // TODO(fpohtmeh): create component?
                     ImageButton {
                         anchors {
                             verticalCenter: parent.verticalCenter
@@ -154,7 +153,7 @@ Item {
 
                     Column {
                         anchors.verticalCenter: parent.verticalCenter
-                        width: parent.width - multiselectAvatarItem.width - parent.spacing
+                        width: parent.width - multiselectAvatarItem.width - parent.spacing - (closeButton.visible ? (closeButton.width + parent.spacing) : 0)
                         spacing: 2
 
                         Text {
@@ -170,7 +169,7 @@ Item {
                         }
 
                         Text {
-                            color: Theme.secondaryTextColor
+                            color: model.isFailed ? "red" : Theme.secondaryTextColor
                             font.pointSize: UiHelper.fixFontSz(12)
                             text: model.displayProgress
                             width: parent.width
@@ -178,8 +177,20 @@ Item {
                             textFormat: Text.RichText
                         }
                     }
+
+                    ImageButton {
+                        id: closeButton
+                        anchors.verticalCenter: parent.verticalCenter
+                        image: "Close"
+                        visible: false // !model.isCompleted // TODO(fpohtmeh): implement
+                        onClicked: d.model.interrupt(model.id)
+                    }
                 }
             }
         }
+    }
+
+    function showTransfers() {
+        root.state = "maxInfo"
     }
 }

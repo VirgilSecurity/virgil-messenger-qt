@@ -58,7 +58,7 @@ public:
 signals:
     void pushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
     void pushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
-    void pushDownloadFile(const CloudFileHandler &file, const PostFunction &func);
+    void pushDownloadFile(const CloudFileHandler &file, const CloudFileHandler &parentFolder, const PostFunction &func);
     void pushDeleteFiles(const CloudFiles &files);
 
     void updateCloudFiles(const CloudFilesUpdate &update);
@@ -70,7 +70,7 @@ private:
 
     void onPushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
     void onPushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
-    void onPushDownloadFile(const CloudFileHandler &file, const PostFunction &func);
+    void onPushDownloadFile(const CloudFileHandler &file, const CloudFileHandler &parentFolder, const PostFunction &func);
     void onPushDeleteFiles(const CloudFiles &files);
 
     Messenger *m_messenger;
