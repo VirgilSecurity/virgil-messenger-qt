@@ -35,6 +35,7 @@
 #include "CoreMessengerCloudFs.h"
 
 #include "CommKitBridge.h"
+#include "FileUtils.h"
 #include "UserImpl.h"
 
 #include <virgil/crypto/foundation/vscf_recipient_cipher.h>
@@ -185,15 +186,14 @@ Self::FutureResult<CloudFsNewFile> Self::createFile(const QString &sourceFilePat
         //
         //  Create file on the CLoudFS.
         //
-        QFileInfo sourceFileInfo(sourceFilePath);
         QFileInfo destFileInfo(destFilePath);
 
-        auto sourceFileMimeType = QMimeDatabase().mimeTypeForFile(sourceFileInfo).name().toStdString();
+        auto sourceFileMimeType = FileUtils::fileMimeType(sourceFilePath).toStdString();
 
         vssq_error_t error;
         vssq_error_reset(&error);
 
-        auto fileName = sourceFileInfo.fileName().toStdString();
+        auto fileName = FileUtils::attachmentFileName(FileUtils::localFileToUrl(sourceFilePath), false).toStdString();
         auto fileNameC = vsc_str_from(fileName);
         auto fileEncryptedKeyC = vsc_data_from(fileEncryptedKey);
         auto sourceFileMimeTypeC = vsc_str_from(sourceFileMimeType);
