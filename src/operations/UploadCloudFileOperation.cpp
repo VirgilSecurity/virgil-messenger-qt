@@ -64,7 +64,12 @@ UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, c
 
 void UploadCloudFileOperation::run()
 {
-    m_requestId = m_parent->cloudFileSystem()->createFile(m_sourceFilePath, m_parentFolder);
+    if (!m_parent->waitForFolderKeys(m_parentFolder)) {
+        failAndNotify(tr("Failed to update parent folder"));
+    }
+    else {
+        m_requestId = m_parent->cloudFileSystem()->createFile(m_sourceFilePath, m_parentFolder);
+    }
 }
 
 void UploadCloudFileOperation::cleanup()

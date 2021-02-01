@@ -116,7 +116,7 @@ void Self::openFile(const QVariant &proxyRow)
         FileUtils::openUrl(FileUtils::localFileToUrl(localPath));
     }
     else {
-        m_models->cloudFilesQueue()->pushDownloadFile(cloudFile, [this]() {
+        m_models->cloudFilesQueue()->pushDownloadFile(cloudFile, m_hierarchy.back(), [this]() {
             emit notificationCreated(tr("Cloud file was downloaded"), false);
         });
     }
