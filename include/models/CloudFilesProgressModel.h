@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2021 Virgil Security, Inc.
+//  Copyright (C) 2015-2020 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,37 +32,23 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CLOUD_FILE_UPDATE_H
-#define VM_CLOUD_FILE_UPDATE_H
+#ifndef VM_CLOUDFILESPROGRESSMODEL_H
+#define VM_CLOUDFILESPROGRESSMODEL_H
 
-#include "CloudFile.h"
-
-#include <variant>
+#include "CloudFilesUpdate.h"
+#include "FilesProgressModel.h"
 
 namespace vm
 {
-struct CloudFileUpdateBase {
-    CloudFileId cloudFileId;
+class CloudFilesProgressModel : public FilesProgressModel
+{
+    Q_OBJECT
+
+public:
+    explicit CloudFilesProgressModel(QObject *parent);
+
+    void updateCloudFiles(const CloudFilesUpdate &update);
 };
+} // namespace vm
 
-struct CreatedCloudFileUpdate : public CloudFileUpdateBase {
-    ModifiableCloudFileHandler cloudFile;
-};
-
-struct DeletedCloudFileUpdate : public CloudFileUpdateBase {
-    bool isFolder = false;
-};
-
-struct RenamedCloudFileUpdate : public CloudFileUpdateBase {
-    QString name;
-};
-
-using CloudFileUpdate = std::variant<
-    CreatedCloudFileUpdate,
-    DeletedCloudFileUpdate,
-    RenamedCloudFileUpdate
-    >;
-
-}
-
-#endif // VM_CLOUD_FILE_UPDATE_H
+#endif // VM_CLOUDFILESPROGRESSMODEL_H

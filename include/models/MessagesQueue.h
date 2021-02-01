@@ -52,14 +52,12 @@ class MessagesQueue : public OperationQueue
     Q_OBJECT
 
 public:
-    using PostDownloadFunction = MessageOperationSource::PostDownloadFunction;
-
     MessagesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject *parent);
     ~MessagesQueue() override;
 
 signals:
     void pushMessage(const ModifiableMessageHandler &message);
-    void pushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath, const PostDownloadFunction &func);
+    void pushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath, const PostFunction &func);
     void pushMessagePreload(const ModifiableMessageHandler &message);
 
     void updateMessage(const MessageUpdate &messagesUpdate);
@@ -67,9 +65,10 @@ signals:
 private:
     Operation *createOperation(OperationSourcePtr source) override;
     void invalidateOperation(OperationSourcePtr source) override;
+    qsizetype maxAttemptCount() const override;
 
     void onPushMessage(const ModifiableMessageHandler &message);
-    void onPushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath, const PostDownloadFunction &postFunction);
+    void onPushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath, const PostFunction &postFunction);
     void onPushMessagePreload(const ModifiableMessageHandler &message);
 
     void onDatabaseOpened();
@@ -81,7 +80,5 @@ private:
     QPointer<MessageOperationFactory> m_factory;
 };
 }
-
-Q_DECLARE_METATYPE(vm::MessagesQueue::PostDownloadFunction);
 
 #endif // VM_MESSAGESQUEUE_H

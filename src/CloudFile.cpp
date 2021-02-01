@@ -169,3 +169,33 @@ void CloudFile::setFingerprint(const QString &fingerprint)
 {
     m_fingerprint = fingerprint;
 }
+
+void CloudFile::update(const CloudFile &file, const CloudFileUpdateSource source)
+{
+    if (file.id() != id()) {
+        throw std::logic_error("Failed to update cloud file: source id is different");
+    }
+    if (isFolder() != file.isFolder()) {
+        throw std::logic_error("Failed to update cloud file: used file and folder");
+    }
+    setParentId(file.parentId()); // update always
+
+    if ((source == CloudFileUpdateSource::ListedChild) || (source == CloudFileUpdateSource::ListedParent)) {
+        setName(file.name());
+        setCreatedAt(file.createdAt());
+        setUpdatedAt(file.updatedAt());
+        setUpdatedBy(file.updatedBy());
+        setLocalPath(file.localPath());
+    }
+    if ((source == CloudFileUpdateSource::ListedChild) && !isFolder()) {
+        setType(file.type());
+        setSize(file.size());
+    }
+    if ((source == CloudFileUpdateSource::ListedParent) && isFolder()) {
+        setEncryptedKey(file.encryptedKey());
+        setPublicKey(file.publicKey());
+    }
+    if ((source == CloudFileUpdateSource::Download) && !isFolder()) {
+        setFingerprint(file.fingerprint());
+    }
+}

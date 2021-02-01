@@ -50,6 +50,8 @@ public:
         Highest
     };
 
+    using PostFunction = std::function<void ()>;
+
     virtual ~OperationSource() {}
 
     virtual bool isValid() const = 0;

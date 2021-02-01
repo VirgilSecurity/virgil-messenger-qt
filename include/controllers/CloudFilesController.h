@@ -39,7 +39,8 @@
 #include <QObject>
 
 #include "CloudFile.h"
-#include "CloudFileUpdate.h"
+#include "CloudFileSystem.h"
+#include "CloudFilesUpdate.h"
 #include "Models.h"
 #include "Settings.h"
 #include "UserDatabase.h"
@@ -53,13 +54,14 @@ class CloudFilesController : public QObject
     Q_OBJECT
     Q_PROPERTY(QString displayPath READ displayPath NOTIFY displayPathChanged)
     Q_PROPERTY(bool isRoot READ isRoot NOTIFY isRootChanged)
+    Q_PROPERTY(bool isLoading READ isLoading NOTIFY isLoadingChanged)
 
 public:
-    CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase, QObject *parent);
+    CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase, CloudFileSystem *cloudFileSystem,
+                         QObject *parent);
 
     CloudFilesModel *model();
     void switchToRootFolder();
-    void setDownloadsDir(const QDir &dir);
 
     Q_INVOKABLE void openFile(const QVariant &proxyRow);
     Q_INVOKABLE void switchToFolder(const QVariant &proxyRow);
@@ -71,31 +73,45 @@ public:
     Q_INVOKABLE void createFolder(const QString &name);
 
 signals:
+    void updateCloudFiles(const CloudFilesUpdate &update);
+
+    void notificationCreated(const QString &notification, const bool error) const;
     void errorOccurred(const QString &errorText);
 
     void displayPathChanged(const QString &path);
-    void isRootChanged(const bool isRoot);
-    void isFetchingChanged(const bool isFetching);
+    void isRootChanged(bool isRoot);
+    void isLoadingChanged(bool isLoading);
 
 private:
-    using FoldersHierarchy = std::vector<CloudFileHandler>;
+    using FoldersHierarchy = std::vector<ModifiableCloudFileHandler>;
 
     void setupTableConnections();
     void switchToHierarchy(const FoldersHierarchy &hierarchy);
 
     QString displayPath() const;
     bool isRoot() const;
+    bool isLoading() const;
+    void incLoadingCounter();
+    void decLoadingCounter();
 
-    void onCloudFilesFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles);
-    void onUpdateCloudFile(const CloudFileUpdate &update);
+    void onDbListFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
+    void onCloudFilesFetched(CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
+    void onUpdateCloudFiles(const CloudFilesUpdate &update);
+
+    static bool fileIdLess(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs);
+    static bool filesAreEqual(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs);
 
     QPointer<const Settings> m_settings;
     QPointer<Models> m_models;
     QPointer<UserDatabase> m_userDatabase;
+    QPointer<CloudFileSystem> m_cloudFileSystem;
 
     ModifiableCloudFileHandler m_rootFolder;
     FoldersHierarchy m_hierarchy;
     FoldersHierarchy m_newHierarchy;
+    ModifiableCloudFiles m_databaseCloudFiles;
+    CloudFileRequestId m_fetchRequestId;
+    int m_loadingCounter;
 };
 }
 

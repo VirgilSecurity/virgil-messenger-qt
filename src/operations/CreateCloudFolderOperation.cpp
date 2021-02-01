@@ -37,6 +37,7 @@
 #include <QDir>
 
 #include "CloudFileOperation.h"
+#include "Messenger.h"
 #include "Utils.h"
 
 using namespace vm;
@@ -46,35 +47,31 @@ CreateCloudFolderOperation::CreateCloudFolderOperation(CloudFileOperation *paren
     , m_parent(parent)
     , m_name(name)
     , m_parentFolder(parentFolder)
+    , m_requestId(0)
 {
+    connect(m_parent->cloudFileSystem(), &CloudFileSystem::folderCreated, this, &CreateCloudFolderOperation::onCreated);
+    connect(m_parent->cloudFileSystem(), &CloudFileSystem::createFolderErrorOccured, this, &CreateCloudFolderOperation::onCreateErrorOccured);
 }
 
 void CreateCloudFolderOperation::run()
 {
-    // Create local dir
-    QDir parentDir(m_parentFolder->localPath());
-    if (!parentDir.mkpath(m_name)) {
-        invalidate(tr("Failed to create folder: %1").arg(m_name));
-        return;
+    m_requestId = m_parent->cloudFileSystem()->createFolder(m_name, m_parentFolder);
+}
+
+void CreateCloudFolderOperation::onCreated(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &folder)
+{
+    if (m_requestId == requestId) {
+        CreateCloudFilesUpdate update;
+        update.parentFolder = m_parentFolder;
+        update.files.push_back(folder);
+        m_parent->cloudFilesUpdate(update);
+        finish();
     }
+}
 
-    // Create cloud folder
-    auto cloudFile = std::make_shared<CloudFile>();
-    cloudFile->setId(Utils::createUuid());
-    cloudFile->setParentId(m_parentFolder->id());
-    cloudFile->setName(m_name);
-    cloudFile->setIsFolder(true);
-    const auto now = QDateTime::currentDateTime();
-    cloudFile->setCreatedAt(now);
-    cloudFile->setUpdatedAt(now);
-    cloudFile->setUpdatedBy(m_parent->userId());
-    cloudFile->setLocalPath(parentDir.filePath(m_name));
-
-    // Send update
-    CreatedCloudFileUpdate update;
-    update.cloudFileId = cloudFile->id();
-    update.cloudFile = cloudFile;
-    m_parent->cloudFileUpdate(update);
-
-    finish();
+void CreateCloudFolderOperation::onCreateErrorOccured(const CloudFileRequestId requestId, const QString &errorText)
+{
+    if (m_requestId == requestId) {
+        failAndNotify(errorText);
+    }
 }

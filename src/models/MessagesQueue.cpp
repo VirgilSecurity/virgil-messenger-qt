@@ -57,8 +57,6 @@ Self::MessagesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject *p
     , m_userDatabase(userDatabase)
     , m_factory(new MessageOperationFactory(messenger, this))
 {
-    qRegisterMetaType<vm::MessagesQueue::PostDownloadFunction>("PostDownloadFunction");
-
     connect(m_messenger, &Messenger::onlineStatusChanged, this, &MessagesQueue::onOnlineStatusChanged);
     connect(m_messenger, &Messenger::signedOut, this, &MessagesQueue::stop);
     connect(m_userDatabase, &UserDatabase::opened, this, &Self::onDatabaseOpened);
@@ -117,6 +115,12 @@ void Self::invalidateOperation(OperationSourcePtr source)
 }
 
 
+qsizetype Self::maxAttemptCount() const
+{
+    return 3;
+}
+
+
 void Self::onDatabaseOpened()
 {
     start();
@@ -153,7 +157,7 @@ void Self::onPushMessage(const ModifiableMessageHandler &message)
 }
 
 
-void Self::onPushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath, const PostDownloadFunction &postFunction)
+void Self::onPushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath, const PostFunction &postFunction)
 {
     DownloadParameter parameter;
     parameter.type = DownloadParameter::Type::Download;

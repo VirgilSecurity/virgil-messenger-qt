@@ -78,10 +78,6 @@ ApplicationWindow {
             visible: false
         }
 
-        SendReportDialog {
-            id: sendReportDialog
-        }
-
         AttachmentPicker {
             id: attachmentPicker
         }
@@ -96,22 +92,8 @@ ApplicationWindow {
             z: Theme.overlayZ
         }
 
-        MessageDialog {
-            id: deleteCloudFilesDialog
-            title: qsTr("File Manager")
-            text: qsTr("Delete file(s)?")
-            onAccepted: controllers.cloudFiles.deleteFiles()
-        }
-
-        InputDialog {
-            id: createCloudFolderDialog
-            title: qsTr("File Manager")
-            label: qsTr("New directory")
-            placeholderText: qsTr("Enter name")
-            onAccepted: {
-                controllers.cloudFiles.createFolder(text)
-                text = ""
-            }
+        KeyboardHandler {
+            id: keyboardHandler
         }
     }
 
@@ -144,7 +126,6 @@ ApplicationWindow {
                 showPopupInform(text)
             }
         })
-        crashReporter.crashReportRequested.connect(sendReportDialog.open)
         crashReporter.reportSent.connect(showPopupSuccess)
         crashReporter.reportErrorOccurred.connect(showPopupError)
 

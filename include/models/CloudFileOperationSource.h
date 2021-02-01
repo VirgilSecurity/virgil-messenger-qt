@@ -47,6 +47,7 @@ public:
     {
         CreateFolder,
         Upload,
+        Download,
         Delete
     };
 
@@ -62,6 +63,8 @@ public:
     void setFilePath(const QString &path);
     QString name() const;
     void setName(const QString &name);
+    PostFunction postFunction() const;
+    void setPostFunction(const PostFunction &func);
 
     bool isValid() const override;
     QString toString() const override;
@@ -72,6 +75,7 @@ private:
     CloudFiles m_files;
     QString m_filePath;
     QString m_name;
+    PostFunction m_postFunction;
 };
 }
 

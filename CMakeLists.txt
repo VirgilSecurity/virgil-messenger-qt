@@ -52,7 +52,7 @@ option(ENABLE_CLANGFORMAT "On/Off formatting source code with clangformat." OFF)
 # ---------------------------------------------------------------------------
 # Project version
 # ---------------------------------------------------------------------------
-set(VS_TARGET_VERSION "3.5.7")
+set(VS_TARGET_VERSION "3.6.0")
 set(VS_CORE_VERSION "0.2.1.45")
 set(VERSION_DATABASE_SCHEME "0")
 
@@ -407,7 +407,10 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/ConfirmationCodeType.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFile.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileId.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileUpdate.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileRequestId.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileSystem.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileUpdateSource.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFilesUpdate.h
         # Messenger Core
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/AttachmentId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Chat.h
@@ -512,8 +515,9 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/DiscoveredContactsProxyModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFileOperationSource.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesProgressModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesQueue.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesUploader.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/FilesProgressModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListProxyModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListSelectionModel.h
@@ -524,7 +528,6 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/Model.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationQueue.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationSource.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/UploadDownloadModel.h
         # Operations
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateAttachmentFingerprintOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateFileFingerprintOperation.h
@@ -537,6 +540,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DecryptFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DeleteCloudFilesOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadAttachmentOperation.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadCloudFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadDecryptFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/EncryptFileOperation.h
@@ -586,6 +590,8 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/ContactAvatarLoader.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CustomerEnv.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CloudFile.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileId.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileSystem.cpp
         # Messenger Core
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/AttachmentId.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Chat.cpp
@@ -674,12 +680,13 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ChatsModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFileOperationSource.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesProgressModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesQueue.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesUploader.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ContactsModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ContactsProxyModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/DiscoveredContactsModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/DiscoveredContactsProxyModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/FilesProgressModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ListModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ListProxyModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ListSelectionModel.cpp
@@ -689,7 +696,6 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/models/Models.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/Model.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/OperationQueue.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/models/UploadDownloadModel.cpp
         # Operations
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CalculateAttachmentFingerprintOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CalculateFileFingerprintOperation.cpp
@@ -702,6 +708,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DecryptFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DeleteCloudFilesOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadAttachmentOperation.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadCloudFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadDecryptFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/EncryptFileOperation.cpp

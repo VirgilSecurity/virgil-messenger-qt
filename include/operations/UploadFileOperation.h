@@ -55,10 +55,12 @@ signals:
     void uploadSlotReceived();
     void uploaded(const QUrl &getUrl);
 
+protected:
+    void startUploadToSlot(const QUrl &putUrl, const QUrl &getUrl);
+
 private:
     void connectReply(QNetworkReply *reply) override;
 
-    void tryAutoDeleteFile();
     void startUpload();
 
     void onSlotRequestFinished(const QString &requestId, const QString &slotId);
