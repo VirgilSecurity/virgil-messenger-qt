@@ -66,6 +66,12 @@ struct DeleteCloudFilesUpdate : public CloudFilesUpdateBase {
 };
 
 struct TransferCloudFileUpdate : public CloudFilesUpdateBase {
+    enum class Type
+    {
+        Upload,
+        Download
+    };
+
     enum class Stage
     {
         Started,
@@ -77,6 +83,7 @@ struct TransferCloudFileUpdate : public CloudFilesUpdateBase {
     CloudFileHandler file;
     Stage stage = Stage::Started;
     quint64 bytesLoaded = 0;
+    Type type = Type::Upload;
 };
 
 struct DownloadCloudFileUpdate : public CloudFilesUpdateBase {

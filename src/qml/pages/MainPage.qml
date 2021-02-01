@@ -55,8 +55,8 @@ Page {
         // Cloud file actions
 
         ContextMenuItem {
-            text: qsTr("Add file")
-            onTriggered: attachmentPicker.open(AttachmentTypes.file)
+            text: qsTr("Add files")
+            onTriggered: attachmentPicker.open(AttachmentTypes.file, true)
             visible: d.isCloudFileList
             enabled: !controllers.cloudFiles.isLoading
         }
@@ -75,6 +75,12 @@ Page {
         ContextMenuItem {
             text: qsTr("Refresh")
             onTriggered: controllers.cloudFiles.refresh()
+            visible: d.isCloudFileList
+        }
+
+        ContextMenuItem {
+            text: qsTr("Show transfers")
+            onTriggered: filesProgressPanel.showTransfers() // TODO(fpohtmeh): don't use global id
             visible: d.isCloudFileList
         }
 
@@ -123,8 +129,7 @@ Page {
             if (d.manager.currentState !== d.manager.cloudFileListState) {
                 return;
             }
-            const url = fileUrls[fileUrls.length - 1]
-            controllers.cloudFiles.addFile(url)
+            controllers.cloudFiles.addFiles(fileUrls)
         }
     }
 

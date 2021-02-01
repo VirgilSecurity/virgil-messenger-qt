@@ -137,6 +137,7 @@ void UploadCloudFileOperation::transferUpdate(const TransferCloudFileUpdate::Sta
         update.parentFolder = m_parentFolder;
         update.file = m_file;
         update.stage = stage;
+        update.type = TransferCloudFileUpdate::Type::Upload;
         update.bytesLoaded = bytesLoaded;
         m_parent->cloudFilesUpdate(update);
     }
