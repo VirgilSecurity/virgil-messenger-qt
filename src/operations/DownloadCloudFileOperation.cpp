@@ -106,9 +106,15 @@ void DownloadCloudFileOperation::onProgressChanged(const quint64 bytesLoaded, co
 
 void DownloadCloudFileOperation::onDownloaded()
 {
+    if (!FileUtils::forceCreateDir(m_parentFolder->localPath())) {
+        failAndNotify(tr("Failed to create directory"));
+        return;
+    }
+
     const auto decrypted = m_parent->cloudFileSystem()->decryptFile(tempFilePath(), m_encryptionKey, m_file);
     if (!decrypted) {
         failAndNotify(tr("File decryption failed"));
+        return;
     }
 
     // Send update

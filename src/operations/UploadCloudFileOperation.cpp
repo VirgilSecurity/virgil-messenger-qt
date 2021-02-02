@@ -110,14 +110,18 @@ void UploadCloudFileOperation::onProgressChanged(const quint64 bytesLoaded, cons
 
 void UploadCloudFileOperation::onUploaded()
 {
-    // Copy file to cloud downloads dir
-    const QDir parentFolderDir(m_parentFolder->localPath());
-    const auto cloudFileLocalPath = parentFolderDir.filePath(m_file->name());
-    if (parentFolderDir.mkpath(".")) {
-        QFile::copy(m_sourceFilePath, cloudFileLocalPath);
-        m_file->setLocalPath(cloudFileLocalPath);
-        m_file->setFingerprint(FileUtils::calculateFingerprint(cloudFileLocalPath));
+    if (!FileUtils::forceCreateDir(m_parentFolder->localPath())) {
+        failAndNotify(tr("Failed to create directory"));
+        return;
     }
+
+    // Copy file to cloud downloads dir
+    const auto cloudFileLocalPath = QDir(m_parentFolder->localPath()).filePath(m_file->name());
+    if (!QFile::copy(m_sourceFilePath, cloudFileLocalPath)) {
+        qCWarning(lcOperation) << "Failed to copy file from" << m_sourceFilePath << "to" << cloudFileLocalPath;
+    }
+    m_file->setLocalPath(cloudFileLocalPath);
+    m_file->setFingerprint(FileUtils::calculateFingerprint(cloudFileLocalPath));
 
     // Send updates
     CreateCloudFilesUpdate update;

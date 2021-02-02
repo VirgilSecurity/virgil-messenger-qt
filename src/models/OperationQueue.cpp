@@ -124,6 +124,7 @@ void Self::onOperationFailed(OperationSourcePtr source)
         addSourceImpl(std::move(source), false);
     }
     else if (source->attemptCount() == maxAttemptCount()) {
+        qCDebug(m_category) << "Failed operation was invalidated:" << source->toString();
         invalidateOperation(source);
     }
 }

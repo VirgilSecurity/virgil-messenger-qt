@@ -117,6 +117,6 @@ QString CloudFileOperationSource::toString() const
     case Type::Delete:
         return str.arg(QLatin1String("Delete"));
     default:
-        return str.arg(QLatin1String("???"));
+        throw std::logic_error("Invalid cloud file operation source type");
     }
 }
