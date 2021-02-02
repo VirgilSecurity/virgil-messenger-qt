@@ -43,7 +43,6 @@ namespace vm
 class FilesProgressModel : public ListModel
 {
     Q_OBJECT
-    Q_PROPERTY(int activeCount MEMBER m_activeCount NOTIFY activeCountChanged)
 
 public:
     using TransferType = TransferCloudFileUpdate::Type;
@@ -54,11 +53,9 @@ public:
     void add(const QString &id, const QString &name, const quint64 bytesTotal, const TransferType transferType);
     void setProgress(const QString &id, const quint64 bytesLoaded, const quint64 bytesTotal);
     void remove(const QString &id);
-    void markAsFailed(const QString &id);
 
 signals:
     void interrupt(const QString &id);
-    void activeCountChanged(const int count);
 
 private:
     enum Roles
@@ -66,9 +63,7 @@ private:
         NameRole = Qt::UserRole,
         BytesLoadedRole,
         BytesTotalRole,
-        DisplayProgressRole,
-        IsFailedRole,
-        IsCompletedRole
+        DisplayProgressRole
     };
 
     struct Item
@@ -78,22 +73,16 @@ private:
         quint64 bytesLoaded = 0;
         quint64 bytesTotal = 0;
         TransferType transferType = TransferType::Upload;
-        bool isFailed = false;
     };
 
     QModelIndex findById(const QString &id) const;
     static QString displayedProgress(const Item &item);
-    static bool isItemCompleted(const Item &item);
-
-    int calculateActiveCount() const;
-    void setActiveCount(const int activeCount);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
     QList<Item> m_items;
-    int m_activeCount = 0;
 };
 } // namespace vm
 

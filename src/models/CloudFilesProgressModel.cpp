@@ -59,9 +59,8 @@ void Self::updateCloudFiles(const CloudFilesUpdate &update)
             setProgress(file->id(), upd->bytesLoaded, file->size());
             break;
         case TransferCloudFileUpdate::Stage::Finished:
-            break;
         case TransferCloudFileUpdate::Stage::Failed:
-            markAsFailed(file->id());
+            remove(file->id());
             break;
     }
 }

@@ -62,10 +62,12 @@ Item {
     ]
 
     ListStatusButton {
-        visible: buttonVisible && root.state === "minInfo" && d.model.activeCount > 0
-        text: qsTr("Transfering %1 file(s)").arg(d.model.activeCount)
+        visible: buttonVisible && root.state === "minInfo" && listView.count > 0
+        text: qsTr("Transfering %1 file(s)").arg(listView.count)
 
-        onClicked: root.showTransfers()
+        onClicked: {
+            root.state = "maxInfo"
+        }
     }
 
     Page {
@@ -153,7 +155,7 @@ Item {
 
                     Column {
                         anchors.verticalCenter: parent.verticalCenter
-                        width: parent.width - multiselectAvatarItem.width - parent.spacing - (closeButton.visible ? (closeButton.width + parent.spacing) : 0)
+                        width: parent.width - multiselectAvatarItem.width - closeButton.width - 2 * parent.spacing
                         spacing: 2
 
                         Text {
@@ -169,7 +171,7 @@ Item {
                         }
 
                         Text {
-                            color: model.isFailed ? "red" : Theme.secondaryTextColor
+                            color: Theme.secondaryTextColor
                             font.pointSize: UiHelper.fixFontSz(12)
                             text: model.displayProgress
                             width: parent.width
@@ -182,15 +184,10 @@ Item {
                         id: closeButton
                         anchors.verticalCenter: parent.verticalCenter
                         image: "Close"
-                        visible: false // !model.isCompleted // TODO(fpohtmeh): implement
                         onClicked: d.model.interrupt(model.id)
                     }
                 }
             }
         }
-    }
-
-    function showTransfers() {
-        root.state = "maxInfo"
     }
 }

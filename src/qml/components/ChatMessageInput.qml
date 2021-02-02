@@ -58,12 +58,12 @@ Control {
 
                 Action {
                     text: qsTr("Send picture")
-                    onTriggered: attachmentPicker.open(AttachmentTypes.picture, false)
+                    onTriggered: attachmentPicker.open(AttachmentTypes.picture)
                 }
 
                 Action {
                     text: qsTr("Send file")
-                    onTriggered: attachmentPicker.open(AttachmentTypes.file, false)
+                    onTriggered: attachmentPicker.open(AttachmentTypes.file)
                 }
             }
         }

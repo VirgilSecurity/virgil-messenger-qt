@@ -57,7 +57,6 @@ Control {
     }
 
     FilesProgressPanel {
-        id: filesProgressPanel
         anchors.leftMargin: sideBar.width
         visible: manager.currentState === manager.cloudFileListState
         buttonVisible: !controllers.cloudFiles.isLoading

@@ -157,7 +157,7 @@ void Self::addFiles(const QVariant &fileUrls)
 void Self::deleteFiles()
 {
     const auto files = m_models->cloudFiles()->selectedFiles();
-    for (size_t i = 0, s = files.size(); i < s; ++i) {
+    for (auto f : files) {
         incLoadingCounter();
     }
     m_models->cloudFilesQueue()->pushDeleteFiles(files);
@@ -183,7 +183,7 @@ void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)
     m_userDatabase->cloudFilesTable()->fetch(hierarchy.back());
 }
 
-QString Self::displayPath() const
+QString CloudFilesController::displayPath() const
 {
     QStringList names;
     for (auto &folder : m_hierarchy) {
@@ -192,17 +192,17 @@ QString Self::displayPath() const
     return names.join(QLatin1String(" / "));
 }
 
-bool Self::isRoot() const
+bool CloudFilesController::isRoot() const
 {
     return m_hierarchy.size() == 1;
 }
 
-bool Self::isLoading() const
+bool CloudFilesController::isLoading() const
 {
     return m_loadingCounter > 0;
 }
 
-void Self::incLoadingCounter()
+void CloudFilesController::incLoadingCounter()
 {
     const auto wasLoading = isLoading();
     ++m_loadingCounter;
@@ -211,7 +211,7 @@ void Self::incLoadingCounter()
     }
 }
 
-void Self::decLoadingCounter()
+void CloudFilesController::decLoadingCounter()
 {
     const auto wasLoading = isLoading();
     --m_loadingCounter;
@@ -250,7 +250,7 @@ void Self::onDbListFetched(const CloudFileHandler &parentFolder, const Modifiabl
     m_fetchRequestId = m_cloudFileSystem->fetchList(parentFolder);
 }
 
-void Self::onCloudFilesFetched(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles)
+void CloudFilesController::onCloudFilesFetched(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles)
 {
     if (requestId != m_fetchRequestId) {
         return; // fetch isn' relevant more because newer request exists
@@ -311,12 +311,12 @@ void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)
     m_userDatabase->cloudFilesTable()->updateCloudFiles(update);
 }
 
-bool Self::fileIdLess(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs)
+bool CloudFilesController::fileIdLess(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs)
 {
     return lhs->id() < rhs->id();
 }
 
-bool Self::filesAreEqual(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs)
+bool CloudFilesController::filesAreEqual(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs)
 {
     // Compare common fields
     if (!(lhs->parentId() == rhs->parentId() && lhs->isFolder() == rhs->isFolder())) {
