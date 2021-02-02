@@ -74,12 +74,26 @@ Operation *Self::createOperation(OperationSourcePtr source)
         case CloudFileOperationSource::Type::CreateFolder:
             op->appendChild(new CreateCloudFolderOperation(op, cloudFileSource->name(), cloudFileSource->folder()));
             break;
-        case CloudFileOperationSource::Type::Upload:
-            op->appendChild(new UploadCloudFileOperation(op, cloudFileSource->filePath(), cloudFileSource->folder()));
+        case CloudFileOperationSource::Type::Upload: {
+            auto uploadOp = new UploadCloudFileOperation(op, cloudFileSource->filePath(), cloudFileSource->folder());
+            connect(this, &Self::interruptFileOperation, uploadOp, [uploadOp](auto cloudFileId) {
+                if (cloudFileId == uploadOp->cloudFileId()) {
+                    uploadOp->interrupt();
+                }
+            });
+            op->appendChild(uploadOp);
             break;
-        case CloudFileOperationSource::Type::Download:
-            op->appendChild(new DownloadCloudFileOperation(op, cloudFileSource->files().front(), cloudFileSource->folder()));
+        }
+        case CloudFileOperationSource::Type::Download: {
+            auto downloadOp = new DownloadCloudFileOperation(op, cloudFileSource->files().front(), cloudFileSource->folder());
+            connect(this, &Self::interruptFileOperation, downloadOp, [downloadOp](auto cloudFileId) {
+                if (cloudFileId == downloadOp->cloudFileId()) {
+                    downloadOp->interrupt();
+                }
+            });
+            op->appendChild(downloadOp);
             break;
+        }
         case CloudFileOperationSource::Type::Delete:
             op->appendChild(new DeleteCloudFilesOperation(op, cloudFileSource->files()));
             break;

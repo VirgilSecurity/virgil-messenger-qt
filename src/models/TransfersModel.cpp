@@ -53,14 +53,14 @@ Self::~TransfersModel()
 void Self::add(const QString &id, const QString &name, const quint64 bytesTotal, const TransferType transferType)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    m_items.push_back({ id, name, 0, bytesTotal, transferType });
+    m_transfers.push_back({ id, name, 0, bytesTotal, transferType });
     endInsertRows();
 }
 
 void Self::setProgress(const QString &id, const quint64 bytesLoaded, const quint64 bytesTotal)
 {
     if (const auto index = findById(id); index.isValid()) {
-        auto &item = m_items[index.row()];
+        auto &item = m_transfers[index.row()];
         item.bytesLoaded = bytesLoaded;
         item.bytesTotal = bytesTotal;
         emit dataChanged(index, index, { BytesLoadedRole, BytesTotalRole, DisplayProgressRole });
@@ -71,25 +71,25 @@ void Self::remove(const QString &id)
 {
     if (const auto index = findById(id); index.isValid()) {
         beginRemoveRows(QModelIndex(), index.row(), index.row());
-        m_items.erase(m_items.begin() + index.row());
+        m_transfers.erase(m_transfers.begin() + index.row());
         endRemoveRows();
     }
 }
 
-QModelIndex Self::findById(const QString &id) const
+QModelIndex Self::findById(const QString &transferId) const
 {
-    const auto it = std::find_if(std::begin(m_items), std::end(m_items), [&id](auto item) {
-        return item.id == id;
+    const auto it = std::find_if(std::begin(m_transfers), std::end(m_transfers), [&transferId](auto item) {
+        return item.id == transferId;
     });
 
-    if (it != std::end(m_items)) {
-        return index(std::distance(std::begin(m_items), it));
+    if (it != std::end(m_transfers)) {
+        return index(std::distance(std::begin(m_transfers), it));
     }
 
     return QModelIndex();
 }
 
-QString Self::displayedProgress(const Item &item)
+QString Self::displayedProgress(const Transfer &item)
 {
     const auto isDownload = item.transferType == TransferType::Download;
     if (item.bytesLoaded == 0) {
@@ -101,13 +101,16 @@ QString Self::displayedProgress(const Item &item)
 int Self::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return m_items.size();
+    return m_transfers.size();
 }
 
 QVariant Self::data(const QModelIndex &index, int role) const
 {
-    const auto &item = m_items[index.row()];
+    const auto &item = m_transfers[index.row()];
     switch (role) {
+        case IdRole:
+            return item.id;
+
         case NameRole:
             return item.name;
 
@@ -128,6 +131,7 @@ QVariant Self::data(const QModelIndex &index, int role) const
 QHash<int, QByteArray> Self::roleNames() const
 {
     return {
+        { IdRole, "id" },
         { NameRole, "name" },
         { BytesLoadedRole, "bytesLoaded" },
         { BytesTotalRole, "bytesTotal" },

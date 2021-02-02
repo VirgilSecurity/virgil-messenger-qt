@@ -56,6 +56,8 @@ signals:
     void setProgress(quint64 bytesLoaded, quint64 bytesTotal);
     void progressChanged(quint64 bytesLoaded, quint64 bytesTotal);
 
+    void interrupt();
+
 protected:
     virtual void connectReply(QNetworkReply *reply);
 
@@ -67,7 +69,7 @@ protected:
 
 private:
     void onReplyFinished(QNetworkReply *reply);
-    void onReplyErrorOccurred(const QNetworkReply::NetworkError errorCode, QNetworkReply *reply);
+    void onReplyErrorOccurred(const QNetworkReply::NetworkError error, QNetworkReply *reply);
     void onReplySslErrors();
     void onSetProgress(quint64 bytesLoaded, quint64 bytesTotal);
 

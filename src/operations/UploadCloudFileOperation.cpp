@@ -72,6 +72,11 @@ void UploadCloudFileOperation::run()
     }
 }
 
+CloudFileId UploadCloudFileOperation::cloudFileId() const
+{
+    return m_file->id();
+}
+
 void UploadCloudFileOperation::cleanup()
 {
     Operation::cleanup();

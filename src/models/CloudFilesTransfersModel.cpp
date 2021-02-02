@@ -41,6 +41,10 @@ CloudFilesTransfersModel::CloudFilesTransfersModel(QObject *parent)
     : TransfersModel(parent)
 {
     qRegisterMetaType<CloudFilesTransfersModel *>("CloudFilesTransfersModel*");
+
+    connect(this, &TransfersModel::interrupt, [this](const QString &transferId) {
+        emit interruptByCloudFileId(CloudFsFileId(transferId));
+    });
 }
 
 void Self::updateCloudFiles(const CloudFilesUpdate &update)

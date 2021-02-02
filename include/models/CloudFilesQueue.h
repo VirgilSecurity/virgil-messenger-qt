@@ -60,6 +60,7 @@ signals:
     void pushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
     void pushDownloadFile(const CloudFileHandler &file, const CloudFileHandler &parentFolder, const PostFunction &func);
     void pushDeleteFiles(const CloudFiles &files);
+    void interruptFileOperation(const CloudFileId &fileId);
 
     void updateCloudFiles(const CloudFilesUpdate &update);
 

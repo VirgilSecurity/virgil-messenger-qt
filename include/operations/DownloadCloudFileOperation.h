@@ -51,6 +51,7 @@ public:
     DownloadCloudFileOperation(CloudFileOperation *parent, const CloudFileHandler &file, const CloudFileHandler &parentFolder);
 
     void run() override;
+    CloudFileId cloudFileId() const;
 
 private:
     void cleanup() override;

@@ -67,7 +67,11 @@ Self::CloudFilesController(const Settings *settings, Models *models, UserDatabas
 
     connect(this, &Self::updateCloudFiles, this, &Self::onUpdateCloudFiles);
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
+    // Queue connections
     connect(models->cloudFilesQueue(), &CloudFilesQueue::updateCloudFiles, this, &Self::updateCloudFiles);
+    connect(models->cloudFilesTransfers(), &CloudFilesTransfersModel::interruptByCloudFileId,
+            models->cloudFilesQueue(), &CloudFilesQueue::interruptFileOperation);
+    // Cloud file system connections
     connect(cloudFileSystem, &CloudFileSystem::downloadsDirChanged, [this](const QDir &downloadsDir) {
         m_rootFolder->setLocalPath(downloadsDir.absolutePath());
     });

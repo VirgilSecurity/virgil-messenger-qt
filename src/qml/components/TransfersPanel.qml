@@ -16,6 +16,13 @@ Item {
 
         property real maxInfoTopMargin: root.height
         readonly property real defaultChatHeight: 60
+        readonly property int transfersCount: listView.count
+
+        onTransfersCountChanged: {
+            if (transfersCount == 0) {
+                root.state = "minInfo"
+            }
+        }
     }
 
     state: "minInfo"
@@ -62,12 +69,10 @@ Item {
     ]
 
     ListStatusButton {
-        visible: buttonVisible && root.state === "minInfo" && listView.count > 0
-        text: qsTr("Transfering %1 file(s)").arg(listView.count)
+        visible: buttonVisible && root.state === "minInfo" && d.transfersCount > 0
+        text: qsTr("Transfering %1 file(s)").arg(d.transfersCount)
 
-        onClicked: {
-            root.state = "maxInfo"
-        }
+        onClicked: root.state = "maxInfo"
     }
 
     Page {

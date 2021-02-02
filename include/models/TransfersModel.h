@@ -60,13 +60,14 @@ signals:
 private:
     enum Roles
     {
-        NameRole = Qt::UserRole,
+        IdRole = Qt::UserRole,
+        NameRole,
         BytesLoadedRole,
         BytesTotalRole,
         DisplayProgressRole
     };
 
-    struct Item
+    struct Transfer
     {
         QString id;
         QString name;
@@ -75,14 +76,14 @@ private:
         TransferType transferType = TransferType::Upload;
     };
 
-    QModelIndex findById(const QString &id) const;
-    static QString displayedProgress(const Item &item);
+    QModelIndex findById(const QString &transferId) const;
+    static QString displayedProgress(const Transfer &item);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    QList<Item> m_items;
+    QList<Transfer> m_transfers;
 };
 } // namespace vm
 

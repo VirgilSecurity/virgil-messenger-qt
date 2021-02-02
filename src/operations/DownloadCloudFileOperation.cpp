@@ -69,6 +69,11 @@ void DownloadCloudFileOperation::run()
     }
 }
 
+CloudFileId DownloadCloudFileOperation::cloudFileId() const
+{
+    return m_file->id();
+}
+
 void DownloadCloudFileOperation::cleanup()
 {
     Operation::cleanup();

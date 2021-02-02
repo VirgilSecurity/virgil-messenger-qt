@@ -48,6 +48,9 @@ public:
     explicit CloudFilesTransfersModel(QObject *parent);
 
     void updateCloudFiles(const CloudFilesUpdate &update);
+
+signals:
+    void interruptByCloudFileId(const CloudFileId &cloudFileId);
 };
 } // namespace vm
 
