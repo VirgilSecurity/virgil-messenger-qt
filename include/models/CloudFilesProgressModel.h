@@ -32,46 +32,23 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CLOUDFILESUPLOADER_H
-#define VM_CLOUDFILESUPLOADER_H
+#ifndef VM_CLOUDFILESPROGRESSMODEL_H
+#define VM_CLOUDFILESPROGRESSMODEL_H
 
-#include <QObject>
+#include "CloudFilesUpdate.h"
+#include "FilesProgressModel.h"
 
 namespace vm
 {
-class CloudFilesUploader : public QObject
+class CloudFilesProgressModel : public FilesProgressModel
 {
     Q_OBJECT
 
-    Q_PROPERTY(int currentIndex READ currentIndex NOTIFY currentIndexChanged)
-    Q_PROPERTY(qint64 currentProcessedBytes READ currentProcessedBytes WRITE setCurrentProcessedBytes NOTIFY currentProcessedBytesChanged)
-    Q_PROPERTY(qint64 currentTotalBytes READ currentTotalBytes NOTIFY currentTotalBytesChanged)
-    Q_PROPERTY(QStringList fileNames READ fileNames NOTIFY fileNamesChanged)
-
 public:
-    CloudFilesUploader(QObject *parent);
+    explicit CloudFilesProgressModel(QObject *parent);
 
-    int currentIndex() const;
-    qint64 currentProcessedBytes() const;
-    qint64 currentTotalBytes() const;
-    QStringList fileNames() const;
-
-    void setCurrentIndex(const int index);
-    void setCurrentProcessedBytes(const qint64 bytes);
-    void setCurrentTotalBytes(const qint64 bytes);
-
-signals:
-    void currentIndexChanged(const int &index);
-    void currentProcessedBytesChanged(const qint64 bytes);
-    void currentTotalBytesChanged(const qint64 bytes);
-    void fileNamesChanged(const QStringList &fileNames);
-
-private:
-    QStringList m_fileNames;
-    int m_currentIndex;
-    int m_currentProcessedBytes;
-    int m_currentTotalBytes;
+    void updateCloudFiles(const CloudFilesUpdate &update);
 };
-}
+} // namespace vm
 
-#endif // VM_CLOUDFILESUPLOADER_H
+#endif // VM_CLOUDFILESPROGRESSMODEL_H

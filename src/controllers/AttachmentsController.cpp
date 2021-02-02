@@ -56,6 +56,7 @@ Self::AttachmentsController(const Settings *settings, Models *models, QObject *p
 
 void Self::saveAs(const QString &messageId, const QVariant &fileUrl)
 {
+    // TODO(fpohtmeh): don't use messageId, use proxyRow
     const auto message = findMessageById(messageId);
     if (!message) {
         return;
@@ -117,7 +118,7 @@ ModifiableMessageHandler Self::findMessageById(const QString &messageId) const
     return message;
 }
 
-void AttachmentsController::downloadAttachment(const ModifiableMessageHandler &message, const MessagesQueue::PostDownloadFunction &function)
+void Self::downloadAttachment(const ModifiableMessageHandler &message, const MessagesQueue::PostFunction &function)
 {
     const auto attachment = message->contentAsAttachment();
     auto localPath = attachment->localPath();
@@ -133,7 +134,7 @@ void AttachmentsController::downloadAttachment(const ModifiableMessageHandler &m
         return;
     }
     else if (fingerprint != attachment->fingerprint()) {
-        qCritical(lcController) << "Fingerprint mismatch, download file";
+        qWarning(lcController) << "Fingerprint mismatch, downloading attachment";
         emit notificationCreated(tr("Downloading attachment..."), false);
         needDownload = true;
     }
@@ -142,9 +143,7 @@ void AttachmentsController::downloadAttachment(const ModifiableMessageHandler &m
         function();
     }
     else {
-        if (localPath.isEmpty()) {
-            localPath = FileUtils::findUniqueFileName(m_settings->downloadsDir().filePath(attachment->fileName()));
-        }
+        localPath = FileUtils::findUniqueFileName(m_settings->downloadsDir().filePath(attachment->fileName()));
 
         m_models->messagesQueue()->pushMessageDownload(message, localPath, function);
     }

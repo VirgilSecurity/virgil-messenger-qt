@@ -78,6 +78,7 @@ Settings::Settings(QObject *parent)
     m_attachmentCacheDir.setPath(cacheDir.filePath(QLatin1String("attachments")));
     m_thumbnaisDir.setPath(cacheDir.filePath(QLatin1String("thumbnails")));
     m_downloadsDir.setPath(QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
+    m_cloudFilesCacheDir.setPath(cacheDir.filePath(QLatin1String("cloudFiles")));
 }
 
 Settings::~Settings()
@@ -245,6 +246,14 @@ QDir Settings::cloudFilesDownloadsDir(const QString &userName) const
     }
     qCDebug(lcSettings) << "Cloud files dir:" << dir.absolutePath();
     return dir;
+}
+
+QDir Settings::cloudFilesCacheDir() const
+{
+    if (!m_cloudFilesCacheDir.exists()) {
+        FileUtils::forceCreateDir(m_cloudFilesCacheDir.absolutePath());
+    }
+    return m_cloudFilesCacheDir;
 }
 
 QString Settings::makeThumbnailPath(const AttachmentId &attachmentId, bool isPreview) const

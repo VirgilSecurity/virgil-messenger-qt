@@ -99,7 +99,7 @@
         <file>qml/components/FlowListView.qml</file>
         <file>qml/components/CommonHelpers/TextInCircle.qml</file>
         <file>qml/components/Popups/Popup.qml</file>
-        <file>qml/components/Progress/Progress.qml</file>
+        <file>qml/components/LineProgressBar.qml</file>
         <file>qml/theme/qmldir</file>
         <file>qml/theme/Theme.qml</file>
         <file>qml/main.qml</file>
@@ -128,6 +128,8 @@
         <file>qml/components/SearchHeader.qml</file>
         <file>qml/components/SelectContactsList.qml</file>
         <file>qml/components/Header.qml</file>
+        <file>qml/components/HeaderBackground.qml</file>
+        <file>qml/components/HeaderTitle.qml</file>
         <file>qml/components/ContextMenu.qml</file>
         <file>qml/components/ContextMenuItem.qml</file>
         <file>qml/components/ContextMenuSeparator.qml</file>
@@ -160,7 +162,6 @@
         <file>qml/components/ListDelegate.qml</file>
         <file>qml/components/ModelListView.qml</file>
         <file>qml/components/Dialogs/TemplateDialog.qml</file>
-        <file>qml/components/UploadProgressBar.qml</file>
         <file>qml/components/ServerSelectionRow.qml</file>
         <file>qml/components/SelectedContactsFlow.qml</file>
         <file>qml/components/HorizontalRule.qml</file>
@@ -168,14 +169,16 @@
         <file>qml/components/ChatListView.qml</file>
         <file>qml/components/CloudFileListView.qml</file>
         <file>qml/components/NewGroupChatHeader.qml</file>
+        <file>qml/components/FilesProgressPanel.qml</file>
+        <file>qml/components/ListStatusButton.qml</file>
         <!-- Database -->
         <file>resources/database/createAttachments.sql</file>
         <file>resources/database/createChats.sql</file>
         <file>resources/database/createCloudFiles.sql</file>
         <file>resources/database/createContacts.sql</file>
         <file>resources/database/createMessages.sql</file>
-        <file>resources/database/deleteCloudFileById.sql</file>
-        <file>resources/database/deleteCloudFilesByParentId.sql</file>
+        <file>resources/database/deleteCloudFilesByIds.sql</file>
+        <file>resources/database/deleteCloudFilesByParentIds.sql</file>
         <file>resources/database/insertAttachment.sql</file>
         <file>resources/database/insertChat.sql</file>
         <file>resources/database/insertCloudFile.sql</file>
@@ -192,7 +195,11 @@
         <file>resources/database/updateAttachmentLocalPath.sql</file>
         <file>resources/database/updateAttachmentUploadStage.sql</file>
         <file>resources/database/updateAttachmentRemoteUrl.sql</file>
+        <file>resources/database/updateDownloadedCloudFile.sql</file>
         <file>resources/database/updateLastMessage.sql</file>
+        <file>resources/database/updateListedChildCloudFile.sql</file>
+        <file>resources/database/updateListedChildCloudFolder.sql</file>
+        <file>resources/database/updateListedParentCloudFolder.sql</file>
         <file>resources/database/updateMessageStage.sql</file>
     </qresource>
 </RCC>

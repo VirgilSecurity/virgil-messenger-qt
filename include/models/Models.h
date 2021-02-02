@@ -45,8 +45,8 @@ namespace vm
 class AccountSelectionModel;
 class ChatsModel;
 class CloudFilesModel;
+class CloudFilesProgressModel;
 class CloudFilesQueue;
-class CloudFilesUploader;
 class DiscoveredContactsModel;
 class FileLoader;
 class MessagesModel;
@@ -62,7 +62,7 @@ class Models : public QObject
     Q_PROPERTY(ChatsModel *chats READ chats CONSTANT)
     Q_PROPERTY(DiscoveredContactsModel *discoveredContacts MEMBER m_discoveredContacts CONSTANT)
     Q_PROPERTY(CloudFilesModel *cloudFiles MEMBER m_cloudFiles CONSTANT)
-    Q_PROPERTY(CloudFilesUploader *cloudFilesUploader MEMBER m_cloudFilesUploader CONSTANT)
+    Q_PROPERTY(CloudFilesProgressModel *cloudFilesProgress MEMBER m_cloudFilesProgress CONSTANT)
     Q_PROPERTY(MessagesModel *messages READ messages CONSTANT)
 
 public:
@@ -77,10 +77,10 @@ public:
     DiscoveredContactsModel *discoveredContacts();
     const CloudFilesModel *cloudFiles() const;
     CloudFilesModel *cloudFiles();
+    const CloudFilesProgressModel *cloudFilesProgress() const;
+    CloudFilesProgressModel *cloudFilesProgress();
     const CloudFilesQueue *cloudFilesQueue() const;
     CloudFilesQueue *cloudFilesQueue();
-    const CloudFilesUploader *cloudFilesUploader() const;
-    CloudFilesUploader *cloudFilesUploader();
     const FileLoader *fileLoader() const;
     FileLoader *fileLoader();
     const MessagesModel *messages() const;
@@ -97,8 +97,8 @@ private:
     QPointer<DiscoveredContactsModel> m_discoveredContacts;
     QPointer<MessagesModel> m_messages;
     QPointer<CloudFilesModel> m_cloudFiles;
+    QPointer<CloudFilesProgressModel> m_cloudFilesProgress;
     QPointer<CloudFilesQueue> m_cloudFilesQueue;
-    QPointer<CloudFilesUploader> m_cloudFilesUploader;
     QPointer<FileLoader> m_fileLoader;
     QPointer<MessagesQueue> m_messagesQueue;
 };

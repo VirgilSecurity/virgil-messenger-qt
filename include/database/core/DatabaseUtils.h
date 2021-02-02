@@ -52,7 +52,8 @@ class Database;
 class DatabaseUtils
 {
 public:
-    using BindValues = std::vector<std::pair<QString, QVariant>>;
+    using BindValue = std::pair<QString, QVariant>;
+    using BindValues = std::vector<BindValue>;
 
     static bool isValidName(const QString &id);
 
@@ -63,6 +64,10 @@ public:
     static ModifiableMessageHandler readMessage(const QSqlQuery &query, const QString &idColumn = {});
     static ModifiableCloudFileHandler readCloudFile(const QSqlQuery &query);
 
+    static BindValues createNewCloudFileBindings(const CloudFileHandler &cloudFile);
+    static BindValues createUpdatedCloudFileBindings(const CloudFileHandler &cloudFile, CloudFileUpdateSource source);
+    static BindValues createDownloadedCloudFileBindings(const CloudFileHandler &cloudFile, const QString &fingerprint);
+
 private:
     static bool readMessageContentAttachment(const QSqlQuery &query, MessageContentAttachment& attachment);
     static MessageContent readMessageContent(const QSqlQuery &query);
@@ -72,6 +77,9 @@ private:
     static MessageContent readMessageContentEncrypted(const QSqlQuery &query);
 
     static void printQueryRecord(const QSqlQuery &query);
+
+    static bool hasListType(const BindValue &bindValue);
+    static QString replaceListBindValue(const QString &queryText, const BindValue &bindValue);
 };
 }
 

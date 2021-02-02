@@ -51,6 +51,8 @@ class OperationQueue : public QObject
     Q_OBJECT
 
 public:
+    using PostFunction = OperationSource::PostFunction;
+
     explicit OperationQueue(const QLoggingCategory &category, QObject *parent);
     ~OperationQueue() override;
 
@@ -68,6 +70,7 @@ signals:
 protected:
     virtual Operation *createOperation(OperationSourcePtr source) = 0;
     virtual void invalidateOperation(OperationSourcePtr source) = 0;
+    virtual qsizetype maxAttemptCount() const = 0;
 
 private:
     void addSourceImpl(OperationSourcePtr source, const bool run);
@@ -84,5 +87,6 @@ private:
 }
 
 Q_DECLARE_METATYPE(vm::OperationSourcePtr);
+Q_DECLARE_METATYPE(vm::OperationQueue::PostFunction);
 
 #endif // VM_OPERATIONQUEUE_H

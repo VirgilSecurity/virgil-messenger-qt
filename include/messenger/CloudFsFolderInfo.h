@@ -44,7 +44,7 @@
 
 namespace vm {
 //
-//  Handles meta information about a folder stored within the CLoud FS.
+//  Handles meta information about a folder stored within the Cloud FS.
 //
 struct CloudFsFolderInfo {
     CloudFsFolderId id;

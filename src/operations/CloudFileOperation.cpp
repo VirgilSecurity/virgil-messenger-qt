@@ -34,17 +34,48 @@
 
 #include "CloudFileOperation.h"
 
+#include "Messenger.h"
+
 using namespace vm;
 
-quint64 CloudFileOperation::m_counter = 0;
+qsizetype CloudFileOperation::m_counter = 0;
 
-CloudFileOperation::CloudFileOperation(const UserId &userId, QObject *parent)
-    : Operation(QLatin1String("CloudFile(%1)").arg(QString::number(++m_counter)), parent)
-    , m_userId(userId)
+CloudFileOperation::CloudFileOperation(Messenger *messenger, QObject *parent)
+    : NetworkOperation(parent, messenger->isOnline())
+    , m_messenger(messenger)
 {
+    setName(QLatin1String("CloudFile(%1)").arg(QString::number(++m_counter)));
 }
 
-UserId CloudFileOperation::userId() const
+Settings *CloudFileOperation::settings()
 {
-    return m_userId;
+    return m_messenger->settings();
+}
+
+CloudFileSystem *CloudFileOperation::cloudFileSystem()
+{
+    return m_messenger->cloudFileSystem();
+}
+
+FileLoader *CloudFileOperation::fileLoader()
+{
+    return m_messenger->fileLoader();
+}
+
+bool CloudFileOperation::waitForFolderKeys(const CloudFileHandler &cloudFolder)
+{
+    const auto folderId = cloudFolder->id().coreFolderId();
+    if (const auto isRoot = !folderId.isValid()) {
+        // We don't need keys
+        return true;
+    }
+
+    // Wait a second for fetched keys
+    QEventLoop loop;
+    connect(cloudFileSystem(), &CloudFileSystem::listFetched, &loop, &QEventLoop::quit);
+    connect(cloudFileSystem(), &CloudFileSystem::fetchListErrorOccured, &loop, &QEventLoop::quit);
+    QTimer::singleShot(1000, &loop, &QEventLoop::quit);
+    loop.exec();
+
+    return !cloudFolder->publicKey().isEmpty() && !cloudFolder->encryptedKey().isEmpty();
 }

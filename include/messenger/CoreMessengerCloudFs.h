@@ -137,14 +137,13 @@ public:
     //
     //  Decrypt given file owned by me.
     //
-    CoreMessengerStatus decryptFile(const QString &sourceFilePath, const QString &destFilePath,
-            const CloudFsFileInfo &fileInfo, const QByteArray& encryptedFileKey, const UserHandler& sender);
+    CoreMessengerStatus decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray& encryptedFileKey, const UserHandler& sender);
 
     //
     //  Decrypt given file from a shared folder.
     //
     CoreMessengerStatus decryptFile(const QString &sourceFilePath, const QString &destFilePath,
-            const CloudFsFileInfo &fileInfo, const QByteArray& fileEncryptedKey, const CloudFsFolderId& parentFolderId,
+            const QByteArray& fileEncryptedKey, const CloudFsFolderId& parentFolderId,
             const QByteArray& parentFolderEncryptedKey, const UserHandler& sender);
 
 private:

@@ -35,12 +35,35 @@
 #ifndef VM_CLOUD_FILE_ID_H
 #define VM_CLOUD_FILE_ID_H
 
-#include <QString>
+#include "CloudFsFileId.h"
+#include "CloudFsFolderId.h"
+
+#include <variant>
 
 namespace vm
 {
-// TODO(fpohtmeh): refactor
-using CloudFileId = QString;
+class CloudFileId
+{
+public:
+    CloudFileId();
+    CloudFileId(CloudFsFileId coreId);
+    CloudFileId(CloudFsFolderId coreId);
+
+    CloudFsFileId coreFileId() const;
+    CloudFsFolderId coreFolderId() const;
+
+    static CloudFileId root();
+
+    operator QString() const;
+
+private:
+    std::variant<CloudFsFileId, CloudFsFolderId> m_coreId;
+};
 }
+
+bool operator<(const vm::CloudFileId &lhs, const vm::CloudFileId &rhs);
+bool operator>(const vm::CloudFileId &lhs, const vm::CloudFileId &rhs);
+bool operator==(const vm::CloudFileId &lhs, const vm::CloudFileId &rhs);
+bool operator!=(const vm::CloudFileId &lhs, const vm::CloudFileId &rhs);
 
 #endif // VM_CLOUD_FILE_ID_H

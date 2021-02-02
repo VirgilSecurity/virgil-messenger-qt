@@ -9,10 +9,22 @@ ModelListView {
     id: cloudFileListView
     model: models.cloudFiles.proxy
     emptyIcon: "../resources/icons/Chats.png"
-    emptyText: qsTr("Add a file<br/>by pressing the plus<br/>button above")
+    emptyText: qsTr("Add a file<br/>by pressing the menu<br/>button above")
+
+    QtObject {
+        id: d
+        readonly property real defaultChatHeight: 60
+    }
+
+    ListStatusButton {
+        text: qsTr("Updating...")
+        visible: controllers.cloudFiles.isLoading
+    }
 
     delegate: ListDelegate {
+        id: fileListDelegate
         width: cloudFileListView.width
+        height: d.defaultChatHeight
         backgroundColor: (model.isSelected || down) ? Theme.contactPressedColor : "transparent"
 
         ImageButton {
@@ -63,5 +75,5 @@ ModelListView {
         }
     }
 
-    onPlaceholderClicked: attachmentPicker.open(AttachmentTypes.file)
+    onPlaceholderClicked: attachmentPicker.open(AttachmentTypes.file, true)
 }

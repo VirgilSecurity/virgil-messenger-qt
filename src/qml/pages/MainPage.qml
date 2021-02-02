@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.15
 import "../base"
 import "../components"
 import "../components/CommonHelpers"
+import "../components/Dialogs"
 import "../theme"
 
 Page {
@@ -22,7 +23,7 @@ Page {
         readonly property string chatsDescription: qsTr("%1 Server").arg(app.organizationDisplayName)
 
         readonly property string cloudFilesTitle: controllers.cloudFiles.displayPath
-        readonly property string cloudFilesDescription: cloudFilesSelection.hasSelection ? qsTr("Selected: %1").arg(cloudFilesSelection.selectedCount) : ""
+        readonly property string cloudFilesDescription: models.cloudFiles.description
     }
 
     background: Rectangle {
@@ -33,9 +34,7 @@ Page {
         id: mainSearchHeader
         title: d.isChatList ? d.chatsTitle : d.cloudFilesTitle
         description: d.isChatList ? d.chatsDescription : d.cloudFilesDescription
-        showDescription: description
         showBackButton: d.isCloudFileList && !controllers.cloudFiles.isRoot
-        menuImage: d.isChatList ? "More" : "Plus"
         searchPlaceholder: d.isChatList ? qsTr("Search conversation") : qsTr("Search file")
         filterSource: d.isChatList ? models.chats : models.cloudFiles
 
@@ -56,8 +55,8 @@ Page {
         // Cloud file actions
 
         ContextMenuItem {
-            text: qsTr("Add file")
-            onTriggered: attachmentPicker.open(AttachmentTypes.file)
+            text: qsTr("Add files")
+            onTriggered: attachmentPicker.open(AttachmentTypes.file, true)
             visible: d.isCloudFileList
         }
 
@@ -74,6 +73,12 @@ Page {
         ContextMenuItem {
             text: qsTr("Refresh")
             onTriggered: controllers.cloudFiles.refresh()
+            visible: d.isCloudFileList
+        }
+
+        ContextMenuItem {
+            text: qsTr("Show transfers")
+            onTriggered: filesProgressPanel.showTransfers() // TODO(fpohtmeh): don't use global id
             visible: d.isCloudFileList
         }
 
@@ -123,8 +128,23 @@ Page {
             if (d.manager.currentState !== d.manager.cloudFileListState) {
                 return;
             }
-            const url = fileUrls[fileUrls.length - 1]
-            controllers.cloudFiles.addFile(url)
+            controllers.cloudFiles.addFiles(fileUrls)
         }
+    }
+
+    MessageDialog {
+        id: deleteCloudFilesDialog
+        title: qsTr("File Manager")
+        text: qsTr("Delete file(s)?")
+        onAccepted: controllers.cloudFiles.deleteFiles()
+    }
+
+    InputDialog {
+        id: createCloudFolderDialog
+        title: qsTr("File Manager")
+        label: qsTr("New directory")
+        placeholderText: qsTr("Enter name")
+        validator: app.validator.reDirectoryName
+        onAccepted: controllers.cloudFiles.createFolder(text)
     }
 }

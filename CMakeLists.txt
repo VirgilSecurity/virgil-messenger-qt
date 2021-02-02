@@ -52,8 +52,8 @@ option(ENABLE_CLANGFORMAT "On/Off formatting source code with clangformat." ON)
 # ---------------------------------------------------------------------------
 # Project version
 # ---------------------------------------------------------------------------
-set(VS_TARGET_VERSION "3.5.4")
-set(VS_CORE_VERSION "0.2.1.39")
+set(VS_TARGET_VERSION "3.6.1")
+set(VS_CORE_VERSION "0.2.1.45")
 set(VERSION_DATABASE_SCHEME "0")
 
 # ---------------------------------------------------------------------------
@@ -157,7 +157,7 @@ if (VS_PLATFORM STREQUAL "ios")
     endif ()
 
     # QT Extra packages
-    string(APPEND VS_QT_EXTRA "QmlImportScanner")
+    list(APPEND VS_QT_EXTRA QmlImportScanner Gui)
 
     # Android
 elseif (VS_PLATFORM STREQUAL "android")
@@ -243,6 +243,12 @@ if (VS_PLATFORM STREQUAL "android")
 
     message(STATUS "Android OpenSSL root path:    [${SSL_ROOT_PATH}]")
     message(STATUS "Android OpenSSL library path: [${VS_ANDROID_SSL_DIR}]")
+    message(STATUS "Android extra libraries:      [${ANDROID_EXTRA_LIBS}]")
+
+    add_custom_command(TARGET ${VS_TARGET_NAME} POST_BUILD
+          COMMAND touch "${CMAKE_BINARY_DIR}/CMakeCache.txt"
+          COMMENT "Touch CMakeCache.txt"
+    )
 
     # Linux
 elseif (VS_PLATFORM STREQUAL "linux")
@@ -378,7 +384,10 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/ConfirmationCodeType.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFile.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileId.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileUpdate.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileRequestId.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileSystem.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileUpdateSource.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFilesUpdate.h
         # Messenger Core
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/AttachmentId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Chat.h
@@ -484,8 +493,9 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/DiscoveredContactsProxyModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFileOperationSource.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesProgressModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesQueue.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesUploader.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/FilesProgressModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListProxyModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListSelectionModel.h
@@ -508,6 +518,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DecryptFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DeleteCloudFilesOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadAttachmentOperation.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadCloudFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadDecryptFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/EncryptFileOperation.h
@@ -557,6 +568,8 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/ContactAvatarLoader.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CustomerEnv.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CloudFile.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileId.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileSystem.cpp
         # Messenger Core
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/AttachmentId.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Chat.cpp
@@ -646,12 +659,13 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ChatsModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFileOperationSource.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesProgressModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesQueue.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesUploader.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ContactsModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ContactsProxyModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/DiscoveredContactsModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/DiscoveredContactsProxyModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/FilesProgressModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ListModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ListProxyModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ListSelectionModel.cpp
@@ -673,6 +687,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DecryptFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DeleteCloudFilesOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadAttachmentOperation.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadCloudFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadDecryptFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/EncryptFileOperation.cpp
@@ -728,6 +743,8 @@ target_link_libraries(${VS_TARGET_NAME}
         $<$<STREQUAL:"${VS_PLATFORM}","android">:Qt5::AndroidExtras>
         $<$<STREQUAL:"${VS_PLATFORM}","android">:log>
         $<$<STREQUAL:"${VS_PLATFORM}","windows">:Qt5::Widgets>
+        $<$<STREQUAL:"${VS_PLATFORM}","ios">:Qt5::Gui>
+        $<$<STREQUAL:"${VS_PLATFORM}","ios">:Qt5::QIosOptionalPlugin_NSPhotoLibrary>
         Qt5::Sql
         Qt5::Network
         Qt5::Concurrent
@@ -794,6 +811,7 @@ target_include_directories(${VS_TARGET_NAME}
 target_compile_definitions(${VS_TARGET_NAME}
         PRIVATE
 
+        $<BUILD_INTERFACE:VERSION=${VS_TARGET_VERSION}>
         $<BUILD_INTERFACE:VS_MSGR_ENV_DEV=0>
         $<BUILD_INTERFACE:VS_MSGR_ENV_STG=0>
         $<BUILD_INTERFACE:VS_MSGR_ENV_PROD=1>

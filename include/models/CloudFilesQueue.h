@@ -38,7 +38,7 @@
 #include <QLoggingCategory>
 
 #include "CloudFile.h"
-#include "CloudFileUpdate.h"
+#include "CloudFilesUpdate.h"
 #include "OperationQueue.h"
 
 Q_DECLARE_LOGGING_CATEGORY(lcCloudFilesQueue);
@@ -58,16 +58,19 @@ public:
 signals:
     void pushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
     void pushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
+    void pushDownloadFile(const CloudFileHandler &file, const CloudFileHandler &parentFolder, const PostFunction &func);
     void pushDeleteFiles(const CloudFiles &files);
 
-    void updateCloudFile(const CloudFileUpdate &update);
+    void updateCloudFiles(const CloudFilesUpdate &update);
 
 private:
     Operation *createOperation(OperationSourcePtr source) override;
     void invalidateOperation(OperationSourcePtr source) override;
+    qsizetype maxAttemptCount() const override;
 
     void onPushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
     void onPushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
+    void onPushDownloadFile(const CloudFileHandler &file, const CloudFileHandler &parentFolder, const PostFunction &func);
     void onPushDeleteFiles(const CloudFiles &files);
 
     Messenger *m_messenger;

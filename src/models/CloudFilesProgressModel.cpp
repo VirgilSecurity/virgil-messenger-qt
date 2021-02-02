@@ -32,61 +32,36 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/CloudFilesUploader.h"
+#include "CloudFilesProgressModel.h"
 
 using namespace vm;
+using Self = CloudFilesProgressModel;
 
-CloudFilesUploader::CloudFilesUploader(QObject *parent)
-    : QObject(parent)
-    , m_currentIndex(-1)
-    , m_currentProcessedBytes(-1)
-    , m_currentTotalBytes(-1)
+CloudFilesProgressModel::CloudFilesProgressModel(QObject *parent)
+    : FilesProgressModel(parent)
 {
-    qRegisterMetaType<CloudFilesUploader *>("CloudFilesUploader*");
+    qRegisterMetaType<CloudFilesProgressModel *>("CloudFilesProgressModel*");
 }
 
-int CloudFilesUploader::currentIndex() const
+void Self::updateCloudFiles(const CloudFilesUpdate &update)
 {
-    return m_currentIndex;
-}
+    auto upd = std::get_if<TransferCloudFileUpdate>(&update);
+    if (!upd) {
+        return;
+    }
 
-qint64 CloudFilesUploader::currentProcessedBytes() const
-{
-    return m_currentProcessedBytes;
-}
-
-qint64 CloudFilesUploader::currentTotalBytes() const
-{
-    return m_currentTotalBytes;
-}
-
-QStringList CloudFilesUploader::fileNames() const
-{
-    return m_fileNames;
-}
-
-void CloudFilesUploader::setCurrentIndex(const int index)
-{
-    if (m_currentIndex != index) {
-        m_currentIndex = index;
-        emit currentIndexChanged(m_currentIndex);
+    const auto &file = upd->file;
+    switch (upd->stage) {
+        case TransferCloudFileUpdate::Stage::Started:
+            add(file->id(), file->name(), file->size(), upd->type);
+            break;
+        case TransferCloudFileUpdate::Stage::Transfering:
+            setProgress(file->id(), upd->bytesLoaded, file->size());
+            break;
+        case TransferCloudFileUpdate::Stage::Finished:
+            break;
+        case TransferCloudFileUpdate::Stage::Failed:
+            markAsFailed(file->id());
+            break;
     }
 }
-
-void CloudFilesUploader::setCurrentProcessedBytes(const qint64 bytes)
-{
-    if (m_currentProcessedBytes != bytes) {
-        m_currentProcessedBytes = bytes;
-        emit currentProcessedBytesChanged(m_currentProcessedBytes);
-    }
-}
-
-void CloudFilesUploader::setCurrentTotalBytes(const qint64 bytes)
-{
-    if (m_currentTotalBytes != bytes) {
-        m_currentTotalBytes = bytes;
-        emit currentTotalBytesChanged(m_currentTotalBytes);
-    }
-}
-
-

@@ -6,7 +6,5 @@
     <string>app-store</string>
     <key>destination</key>
     <string>upload</string>
-    <key>method</key>
-    <string>app-store</string>
 </dict>
 </plist>
