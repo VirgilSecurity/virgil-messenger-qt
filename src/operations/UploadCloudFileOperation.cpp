@@ -64,7 +64,12 @@ UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, c
 
 void UploadCloudFileOperation::run()
 {
-    m_requestId = m_parent->cloudFileSystem()->createFile(m_sourceFilePath, m_parentFolder);
+    if (!m_parent->waitForFolderKeys(m_parentFolder)) {
+        failAndNotify(tr("Failed to update parent folder"));
+    }
+    else {
+        m_requestId = m_parent->cloudFileSystem()->createFile(m_sourceFilePath, m_parentFolder);
+    }
 }
 
 void UploadCloudFileOperation::cleanup()
@@ -137,6 +142,7 @@ void UploadCloudFileOperation::transferUpdate(const TransferCloudFileUpdate::Sta
         update.parentFolder = m_parentFolder;
         update.file = m_file;
         update.stage = stage;
+        update.type = TransferCloudFileUpdate::Type::Upload;
         update.bytesLoaded = bytesLoaded;
         m_parent->cloudFilesUpdate(update);
     }

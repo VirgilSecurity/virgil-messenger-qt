@@ -117,9 +117,10 @@ void Self::onPushUploadFile(const QString &filePath, const CloudFileHandler &par
     addSource(source);
 }
 
-void CloudFilesQueue::onPushDownloadFile(const CloudFileHandler &file, const PostFunction &func)
+void CloudFilesQueue::onPushDownloadFile(const CloudFileHandler &file, const CloudFileHandler &parentFolder, const PostFunction &func)
 {
     auto source = std::make_shared<CloudFileOperationSource>(CloudFileOperationSource::Type::Download);
+    source->setFolder(parentFolder);
     source->setFiles({ file });
     source->setPostFunction(func);
     addSource(source);

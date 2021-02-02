@@ -53,14 +53,15 @@ void Self::updateCloudFiles(const CloudFilesUpdate &update)
     const auto &file = upd->file;
     switch (upd->stage) {
         case TransferCloudFileUpdate::Stage::Started:
-            add(file->id(), file->name(), file->size());
+            add(file->id(), file->name(), file->size(), upd->type);
             break;
         case TransferCloudFileUpdate::Stage::Transfering:
             setProgress(file->id(), upd->bytesLoaded, file->size());
             break;
         case TransferCloudFileUpdate::Stage::Finished:
+            break;
         case TransferCloudFileUpdate::Stage::Failed:
-            remove(file->id());
+            markAsFailed(file->id());
             break;
     }
 }

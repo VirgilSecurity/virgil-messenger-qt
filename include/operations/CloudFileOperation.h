@@ -59,6 +59,8 @@ public:
     CloudFileSystem *cloudFileSystem();
     FileLoader *fileLoader();
 
+    bool waitForFolderKeys(const CloudFileHandler &cloudFolder);
+
 signals:
     void cloudFilesUpdate(const CloudFilesUpdate &update);
 

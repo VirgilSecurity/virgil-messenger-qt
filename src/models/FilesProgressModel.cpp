@@ -50,20 +50,25 @@ Self::~FilesProgressModel()
 {
 }
 
-void Self::add(const QString &id, const QString &name, const quint64 bytesTotal)
+void Self::add(const QString &id, const QString &name, const quint64 bytesTotal, const TransferType transferType)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    m_items.push_back({ id, name, 0, bytesTotal });
+    m_items.push_back({ id, name, 0, bytesTotal, transferType });
     endInsertRows();
+    setActiveCount(true);
 }
 
 void Self::setProgress(const QString &id, const quint64 bytesLoaded, const quint64 bytesTotal)
 {
     if (const auto index = findById(id); index.isValid()) {
         auto &item = m_items[index.row()];
+        if (item.isFailed) {
+            return;
+        }
         item.bytesLoaded = bytesLoaded;
         item.bytesTotal = bytesTotal;
-        emit dataChanged(index, index, { BytesLoadedRole, BytesTotalRole, DisplayProgressRole });
+        emit dataChanged(index, index, { BytesLoadedRole, BytesTotalRole, DisplayProgressRole, IsCompletedRole });
+        setActiveCount(isItemCompleted(item) ? calculateActiveCount() : true);
     }
 }
 
@@ -73,6 +78,17 @@ void Self::remove(const QString &id)
         beginRemoveRows(QModelIndex(), index.row(), index.row());
         m_items.erase(m_items.begin() + index.row());
         endRemoveRows();
+        setActiveCount(calculateActiveCount());
+    }
+}
+
+void Self::markAsFailed(const QString &id)
+{
+    if (const auto index = findById(id); index.isValid()) {
+        auto &item = m_items[index.row()];
+        item.isFailed = true;
+        emit dataChanged(index, index, { IsFailedRole, DisplayProgressRole, IsCompletedRole });
+        setActiveCount(calculateActiveCount());
     }
 }
 
@@ -89,6 +105,46 @@ QModelIndex Self::findById(const QString &id) const
     return QModelIndex();
 }
 
+QString Self::displayedProgress(const Item &item)
+{
+    const auto isDownload = item.transferType == TransferType::Download;
+    if (item.isFailed) {
+        return isDownload ? tr("Download failed") : tr("Upload failed");
+    }
+    if (item.bytesLoaded == 0) {
+        return isDownload ? tr("Waiting for download...") : tr("Waiting for upload...");
+    }
+    if (item.bytesLoaded == item.bytesTotal) {
+        return isDownload ? tr("Downloaded") : tr("Uploaded");
+    }
+    return Utils::formattedDataSizeProgress(item.bytesLoaded, item.bytesTotal);
+}
+
+bool Self::isItemCompleted(const FilesProgressModel::Item &item)
+{
+    return item.bytesTotal > 0 && item.bytesLoaded == item.bytesTotal;
+}
+
+int Self::calculateActiveCount() const
+{
+    int activeCount = 0;
+    for (const auto &item : m_items) {
+        if (item.isFailed || isItemCompleted(item)) {
+            continue;
+        }
+        ++activeCount;
+    }
+    return activeCount;
+}
+
+void Self::setActiveCount(const int activeCount)
+{
+    if (activeCount != m_activeCount) {
+        m_activeCount = activeCount;
+        emit activeCountChanged(activeCount);
+    }
+}
+
 int Self::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
@@ -103,13 +159,19 @@ QVariant Self::data(const QModelIndex &index, int role) const
             return item.name;
 
         case BytesLoadedRole:
-            return item.bytesLoaded;
+            return item.isFailed ? 0 : item.bytesLoaded;
 
         case BytesTotalRole:
             return item.bytesTotal;
 
         case DisplayProgressRole:
-            return Utils::formattedDataSizeProgress(item.bytesLoaded, item.bytesTotal);
+            return displayedProgress(item);
+
+        case IsFailedRole:
+            return item.isFailed;
+
+        case IsCompletedRole:
+            return isItemCompleted(item);
 
         default:
             return QVariant();
@@ -122,6 +184,8 @@ QHash<int, QByteArray> Self::roleNames() const
         { NameRole, "name" },
         { BytesLoadedRole, "bytesLoaded" },
         { BytesTotalRole, "bytesTotal" },
-        { DisplayProgressRole, "displayProgress" }
+        { DisplayProgressRole, "displayProgress" },
+        { IsFailedRole, "isFailed" },
+        { IsCompletedRole, "isCompleted" }
     };
 }

@@ -52,7 +52,7 @@ set(ENABLE_CLANGFORMAT OFF CACHE BOOL "On/Off formatting source code with clangf
 # ---------------------------------------------------------------------------
 # Project version
 # ---------------------------------------------------------------------------
-set(VS_TARGET_VERSION "3.6.0")
+set(VS_TARGET_VERSION "3.6.1")
 set(VS_CORE_VERSION "0.2.1.45")
 set(VERSION_DATABASE_SCHEME "0")
 
