@@ -66,7 +66,7 @@ void Self::start()
 
 void Self::run()
 {
-    std::vector<OperationSourcePtr> sources;
+    OperationSources sources;
     std::swap(sources, m_sources);
     for (auto &source : sources) {
         runSource(source);
@@ -77,6 +77,7 @@ void Self::stop()
 {
     qCDebug(m_category) << "stop";
     m_sources.clear();
+    m_runningSources.clear();
     m_isStopped = true;
     emit stopRequested(QPrivateSignal());
     m_threadPool->waitForDone();
@@ -102,10 +103,17 @@ void Self::runSource(OperationSourcePtr source)
 {
     auto threadPool = (source->priority() == OperationSource::Priority::Highest) ? QThreadPool::globalInstance() : &*m_threadPool;
     QtConcurrent::run(threadPool, [=, source = std::move(source)]() {
+        // Skip if queue is stopped
         if (m_isStopped) {
             qCDebug(m_category) << "Operation was skipped because queue was stopped";
             return;
         }
+        // Add running source
+        if (!addRunningSource(source)) {
+            qCDebug(m_category) << "Duplicated operation was skipped. Unique id:" << source->uniqueId();
+            return;
+        }
+        // Perform operation
         auto op = createOperation(source);
         op->start();
         op->waitForDone();
@@ -113,7 +121,34 @@ void Self::runSource(OperationSourcePtr source)
             emit operationFailed(source, QPrivateSignal());
         }
         op->drop(true);
+        // Remove running source
+        removeRunningSource(source);
     });
+}
+
+bool Self::addRunningSource(OperationSourcePtr source)
+{
+    QMutexLocker locker(&m_runningSourcesMutex);
+    const auto uniqueId = source->uniqueId();
+    if (!uniqueId.isEmpty()) {
+        const auto it = std::find_if(m_runningSources.begin(), m_runningSources.end(), [uniqueId](auto source) {
+            return source->uniqueId() == uniqueId;
+        });
+        if (it != m_runningSources.end()) {
+            return false;
+        }
+    }
+    m_runningSources.push_back(source);
+    return true;
+}
+
+void Self::removeRunningSource(OperationSourcePtr source)
+{
+    QMutexLocker locker(&m_runningSourcesMutex);
+    const auto it = std::find(m_runningSources.begin(), m_runningSources.end(), source);
+    if (it != m_runningSources.end()) {
+        m_runningSources.erase(it);
+    }
 }
 
 void Self::onOperationFailed(OperationSourcePtr source)

@@ -54,6 +54,11 @@ QString Self::toString() const
     return QLatin1String("MessageOperationSource(%1)").arg(m_message->id());
 }
 
+QString MessageOperationSource::uniqueId() const
+{
+    return QString();
+}
+
 ModifiableMessageHandler Self::message()
 {
     return m_message;

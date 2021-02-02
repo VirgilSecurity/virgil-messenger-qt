@@ -58,6 +58,7 @@ public:
     CloudFileHandler folder() const;
     void setFolder(const CloudFileHandler &folder);
     CloudFiles files() const;
+    CloudFileHandler file() const;
     void setFiles(const CloudFiles &files);
     QString filePath() const;
     void setFilePath(const QString &path);
@@ -68,6 +69,7 @@ public:
 
     bool isValid() const override;
     QString toString() const override;
+    QString uniqueId() const override;
 
 private:
     Type m_type;

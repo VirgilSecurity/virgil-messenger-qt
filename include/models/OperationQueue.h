@@ -36,6 +36,7 @@
 #define VM_OPERATIONQUEUE_H
 
 #include <QLoggingCategory>
+#include <QMutex>
 #include <QPointer>
 
 #include "OperationSource.h"
@@ -63,9 +64,10 @@ public:
     void addSource(OperationSourcePtr source);
 
 signals:
+    void notificationCreated(const QString &notification, const bool error);
+
     void stopRequested(QPrivateSignal);
     void operationFailed(OperationSourcePtr source, QPrivateSignal);
-    void notificationCreated(const QString &notification, const bool error);
 
 protected:
     virtual Operation *createOperation(OperationSourcePtr source) = 0;
@@ -76,13 +78,18 @@ private:
     void addSourceImpl(OperationSourcePtr source, const bool run);
     void runSource(OperationSourcePtr source);
 
+    bool addRunningSource(OperationSourcePtr source);
+    void removeRunningSource(OperationSourcePtr source);
+
     void onOperationFailed(OperationSourcePtr source);
 
     const QLoggingCategory &m_category;
 
     QPointer<QThreadPool> m_threadPool;
     std::atomic_bool m_isStopped = false;
-    std::vector<OperationSourcePtr> m_sources;
+    OperationSources m_sources;
+    OperationSources m_runningSources;
+    QMutex m_runningSourcesMutex;
 };
 }
 

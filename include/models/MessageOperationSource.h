@@ -55,6 +55,7 @@ public:
 
     bool isValid() const override;
     QString toString() const override;
+    QString uniqueId() const override;
 
     ModifiableMessageHandler message();
     MessageHandler message() const;

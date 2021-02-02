@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2021 Virgil Security, Inc.
+﻿//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -56,6 +56,7 @@ public:
 
     virtual bool isValid() const = 0;
     virtual QString toString() const = 0;
+    virtual QString uniqueId() const = 0;
 
     qsizetype attemptCount() const { return m_attemptCount; }
     void incAttemptCount() { ++m_attemptCount; }
@@ -69,6 +70,7 @@ private:
 };
 
 using OperationSourcePtr = std::shared_ptr<OperationSource>;
+using OperationSources = std::vector<OperationSourcePtr>;
 }
 
 #endif // VM_OPERATIONSOURCE_H

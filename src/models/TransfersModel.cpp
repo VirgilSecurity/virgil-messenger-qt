@@ -95,9 +95,6 @@ QString Self::displayedProgress(const Item &item)
     if (item.bytesLoaded == 0) {
         return isDownload ? tr("Waiting for download...") : tr("Waiting for upload...");
     }
-    if (item.bytesLoaded == item.bytesTotal) {
-        return isDownload ? tr("Downloaded") : tr("Uploaded");
-    }
     return Utils::formattedDataSizeProgress(item.bytesLoaded, item.bytesTotal);
 }
 
