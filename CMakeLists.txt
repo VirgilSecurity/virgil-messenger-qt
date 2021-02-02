@@ -47,7 +47,7 @@ include(customers)
 #
 # Code formatting
 #
-option(ENABLE_CLANGFORMAT "On/Off formatting source code with clangformat." OFF)
+set(ENABLE_CLANGFORMAT OFF CACHE BOOL "On/Off formatting source code with clangformat.")
 
 # ---------------------------------------------------------------------------
 # Project version
