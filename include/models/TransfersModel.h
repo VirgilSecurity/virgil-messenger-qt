@@ -32,23 +32,23 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_FILESPROGRESSMODEL_H
-#define VM_FILESPROGRESSMODEL_H
+#ifndef VM_TRANSFERSMODEL_H
+#define VM_TRANSFERSMODEL_H
 
 #include "CloudFilesUpdate.h"
 #include "ListModel.h"
 
 namespace vm
 {
-class FilesProgressModel : public ListModel
+class TransfersModel : public ListModel
 {
     Q_OBJECT
 
 public:
     using TransferType = TransferCloudFileUpdate::Type;
 
-    explicit FilesProgressModel(QObject *parent);
-    ~FilesProgressModel() override;
+    explicit TransfersModel(QObject *parent);
+    ~TransfersModel() override;
 
     void add(const QString &id, const QString &name, const quint64 bytesTotal, const TransferType transferType);
     void setProgress(const QString &id, const quint64 bytesLoaded, const quint64 bytesTotal);
@@ -86,4 +86,4 @@ private:
 };
 } // namespace vm
 
-#endif // VM_FILESPROGRESSMODEL_H
+#endif // VM_TRANSFERSMODEL_H

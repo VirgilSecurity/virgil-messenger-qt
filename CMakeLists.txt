@@ -492,9 +492,9 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/DiscoveredContactsProxyModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFileOperationSource.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesModel.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesProgressModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesTransfersModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesQueue.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/FilesProgressModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/TransfersModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListProxyModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListSelectionModel.h
@@ -657,13 +657,13 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ChatsModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFileOperationSource.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesModel.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesProgressModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesTransfersModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesQueue.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ContactsModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ContactsProxyModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/DiscoveredContactsModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/DiscoveredContactsProxyModel.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/models/FilesProgressModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/TransfersModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ListModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ListProxyModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ListSelectionModel.cpp

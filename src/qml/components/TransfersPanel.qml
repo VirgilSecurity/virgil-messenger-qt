@@ -8,13 +8,13 @@ Item {
     id: root
     anchors.fill: parent
 
+    property alias model: listView.model
     property bool buttonVisible: true
 
     QtObject {
         id: d
 
         property real maxInfoTopMargin: root.height
-        readonly property var model: models.cloudFilesProgress
         readonly property real defaultChatHeight: 60
     }
 
@@ -128,7 +128,7 @@ Item {
             }
             emptyIcon: "../resources/icons/File-Big.png"
             emptyText: qsTr("Transfered files<br/>will appear here")
-            model: d.model
+            model: root.model
             delegate: listDelegate
         }
 
@@ -184,7 +184,7 @@ Item {
                         id: closeButton
                         anchors.verticalCenter: parent.verticalCenter
                         image: "Close"
-                        onClicked: d.model.interrupt(model.id)
+                        onClicked: root.model.interrupt(model.id)
                     }
                 }
             }

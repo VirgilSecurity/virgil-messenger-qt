@@ -32,15 +32,15 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "CloudFilesProgressModel.h"
+#include "CloudFilesTransfersModel.h"
 
 using namespace vm;
-using Self = CloudFilesProgressModel;
+using Self = CloudFilesTransfersModel;
 
-CloudFilesProgressModel::CloudFilesProgressModel(QObject *parent)
-    : FilesProgressModel(parent)
+CloudFilesTransfersModel::CloudFilesTransfersModel(QObject *parent)
+    : TransfersModel(parent)
 {
-    qRegisterMetaType<CloudFilesProgressModel *>("CloudFilesProgressModel*");
+    qRegisterMetaType<CloudFilesTransfersModel *>("CloudFilesTransfersModel*");
 }
 
 void Self::updateCloudFiles(const CloudFilesUpdate &update)

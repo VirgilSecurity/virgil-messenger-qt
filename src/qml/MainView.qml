@@ -56,8 +56,9 @@ Control {
         }
     }
 
-    FilesProgressPanel {
+    TransfersPanel {
         anchors.leftMargin: sideBar.width
+        model: models.cloudFilesTransfers
         visible: manager.currentState === manager.cloudFileListState
         buttonVisible: !controllers.cloudFiles.isLoading
     }

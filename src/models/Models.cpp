@@ -37,7 +37,7 @@
 #include "AccountSelectionModel.h"
 #include "ChatsModel.h"
 #include "CloudFilesModel.h"
-#include "CloudFilesProgressModel.h"
+#include "CloudFilesTransfersModel.h"
 #include "CloudFilesQueue.h"
 #include "DiscoveredContactsModel.h"
 #include "MessagesModel.h"
@@ -55,7 +55,7 @@ Models::Models(Messenger *messenger, Settings *settings, UserDatabase *userDatab
     , m_discoveredContacts(new DiscoveredContactsModel(validator, this))
     , m_messages(new MessagesModel(this))
     , m_cloudFiles(new CloudFilesModel(settings, this))
-    , m_cloudFilesProgress(new CloudFilesProgressModel(this))
+    , m_cloudFilesTransfers(new CloudFilesTransfersModel(this))
     , m_cloudFilesQueue(new CloudFilesQueue(messenger, this))
     , m_fileLoader(messenger->fileLoader())
     , m_messagesQueue(new MessagesQueue(messenger, userDatabase, this))
@@ -109,14 +109,14 @@ CloudFilesModel *Models::cloudFiles()
     return m_cloudFiles;
 }
 
-const CloudFilesProgressModel *Models::cloudFilesProgress() const
+const CloudFilesTransfersModel *Models::cloudFilesTransfers() const
 {
-    return m_cloudFilesProgress;
+    return m_cloudFilesTransfers;
 }
 
-CloudFilesProgressModel *Models::cloudFilesProgress()
+CloudFilesTransfersModel *Models::cloudFilesTransfers()
 {
-    return m_cloudFilesProgress;
+    return m_cloudFilesTransfers;
 }
 
 const CloudFilesQueue *Models::cloudFilesQueue() const

@@ -32,21 +32,21 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "FilesProgressModel.h"
+#include "TransfersModel.h"
 
 #include "Utils.h"
 #include "Model.h"
 
 using namespace vm;
-using Self = FilesProgressModel;
+using Self = TransfersModel;
 
-Self::FilesProgressModel(QObject *parent)
+Self::TransfersModel(QObject *parent)
     : ListModel(parent)
 {
-    qRegisterMetaType<FilesProgressModel *>("FilesProgressModel*");
+    qRegisterMetaType<TransfersModel *>("TransfersModel*");
 }
 
-Self::~FilesProgressModel()
+Self::~TransfersModel()
 {
 }
 
