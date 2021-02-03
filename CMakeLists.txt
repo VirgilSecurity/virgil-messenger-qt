@@ -48,6 +48,7 @@ include(customers)
 # Code formatting
 #
 set(ENABLE_CLANGFORMAT OFF CACHE BOOL "On/Off formatting source code with clangformat.")
+set(ENABLE_IOS_EXTENSION OFF CACHE BOOL "On/Off building IOS extension.")
 
 # ---------------------------------------------------------------------------
 # Project version
@@ -348,27 +349,28 @@ elseif (VS_PLATFORM STREQUAL "ios")
             LINK_FLAGS "-framework Foundation -framework UserNotifications"
             RESOURCE "${STORYBOARD_DEFAULT}"
             )
-
     #   IOS extension
-    set(EXT_SOURCE_FILES
-            ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/NotificationService.mm
-            ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/NotificationService.h
-            )
+    if (ENABLE_IOS_EXTENSION)
+        set(EXT_SOURCE_FILES
+                ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/NotificationService.mm
+                ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/NotificationService.h
+                )
 
-    add_library(${VS_TARGET_NAME}_EXT MODULE ${EXT_SOURCE_FILES})
-    set_target_properties(${VS_TARGET_NAME}_EXT
-            PROPERTIES
-            BUNDLE YES
-            XCODE_PRODUCT_TYPE com.apple.product-type.app-extension)
+        add_library(${VS_TARGET_NAME}_EXT MODULE ${EXT_SOURCE_FILES})
+        set_target_properties(${VS_TARGET_NAME}_EXT
+                PROPERTIES
+                BUNDLE YES
+                XCODE_PRODUCT_TYPE com.apple.product-type.app-extension)
 
-    target_include_directories(${VS_TARGET_NAME}_EXT
-            PUBLIC
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios>
-            )
+        target_include_directories(${VS_TARGET_NAME}_EXT
+                PUBLIC
+                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios>
+                )
 
-    find_library(UN_LIB UserNotifications)
-    find_library(UNUI_LIB UserNotificationsUI)
-    target_link_libraries(${VS_TARGET_NAME}_EXT PRIVATE ${UN_LIB} ${UNUI_LIB})
+        find_library(UN_LIB UserNotifications)
+        find_library(UNUI_LIB UserNotificationsUI)
+        target_link_libraries(${VS_TARGET_NAME}_EXT PRIVATE ${UN_LIB} ${UNUI_LIB})
+    endif ()
 
     qt5_import_qml_plugins(${VS_TARGET_NAME})
 else ()
@@ -834,9 +836,9 @@ target_compile_definitions(${VS_TARGET_NAME}
 
         $<BUILD_INTERFACE:VERSION="${VS_TARGET_VERSION}">
 
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_ENV}","dev">:VS_MSGR_ENV_DEV=1>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_ENV}","stg">:VS_MSGR_ENV_STG=1>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_ENV}","prod">:VS_MSGR_ENV_PROD=1>>
+        $<BUILD_INTERFACE:VS_MSGR_ENV_DEV=$<STREQUAL:"${VS_ENV}","dev">>
+        $<BUILD_INTERFACE:VS_MSGR_ENV_STG=$<STREQUAL:"${VS_ENV}","stg">>
+        $<BUILD_INTERFACE:VS_MSGR_ENV_PROD=$<STREQUAL:"${VS_ENV}","prod">>
 
         $<BUILD_INTERFACE:INFO_CLIENT=1>
         $<BUILD_INTERFACE:CFG_CLIENT=1>
