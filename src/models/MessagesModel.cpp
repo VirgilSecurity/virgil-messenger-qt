@@ -171,6 +171,11 @@ QVariant Self::data(const QModelIndex &index, int role) const
         if (auto textContent = std::get_if<MessageContentText>(&message->content())) {
             return textContent->text().split('\n').join("<br/>");
         }
+
+        if (std::holds_alternative<MessageContentGroupInvitation>(message->content())) {
+            auto text = "Invitation was sent to " + message->recipientUsername();
+            return text.split('\n').join("<br/>");
+        }
         return QString();
     }
 

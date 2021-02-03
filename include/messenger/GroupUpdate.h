@@ -38,6 +38,7 @@
 #include "GroupId.h"
 #include "GroupInvitationStatus.h"
 #include "User.h"
+#include "Message.h"
 
 #include <QtCore>
 #include <QString>
@@ -57,13 +58,13 @@ struct AddGroupOwnersUpdate : public GroupUpdateBase {
 };
 
 
+
 struct AddGroupMembersUpdate : public GroupUpdateBase {
     Users members;
 };
 
 
 struct AddGroupUpdate : public GroupUpdateBase {
-
 };
 
 
@@ -73,12 +74,18 @@ struct GroupMemberInvitationUpdate : public GroupUpdateBase {
 };
 
 
+struct ProcessGroupInvitationUpdate : public GroupUpdateBase {
+    MessageHandler invitationMessage;
+};
+
+
 using GroupUpdate = std::variant<
-    AddGroupOwnersUpdate,
-    AddGroupMembersUpdate,
-    AddGroupUpdate,
-    GroupMemberInvitationUpdate
-    >;
+        AddGroupOwnersUpdate,
+        AddGroupMembersUpdate,
+        AddGroupUpdate,
+        GroupMemberInvitationUpdate,
+        ProcessGroupInvitationUpdate
+        >;
 
 //
 //  Return group unique identifier the update relates to.

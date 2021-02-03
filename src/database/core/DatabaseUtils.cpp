@@ -35,6 +35,7 @@
 #include "database/core/DatabaseUtils.h"
 
 #include "FileUtils.h"
+#include "JsonUtils.h"
 #include "database/core/Database.h"
 #include "AttachmentId.h"
 #include "OutgoingMessage.h"
@@ -213,12 +214,15 @@ void DatabaseUtils::printQueryRecord(const QSqlQuery &query)
 
 MessageContent Self::readMessageContent(const QSqlQuery &query) {
 
-    const auto contentType = query.value("messageContentType").toString();
-    if (contentType.isEmpty()) {
+    const auto contentTypeStr = query.value("messageContentType").toString();
+    if (contentTypeStr.isEmpty()) {
         return {};
     }
 
-    switch (MessageContentTypeFrom(contentType)) {
+    const auto messageBody = query.value("messageBody").toString();
+
+    const auto contentType = MessageContentTypeFrom(contentTypeStr);
+    switch (contentType) {
         case MessageContentType::None:
             return {};
 
@@ -231,8 +235,13 @@ MessageContent Self::readMessageContent(const QSqlQuery &query) {
         case MessageContentType::Encrypted:
             return Self::readMessageContentEncrypted(query);
 
-        case MessageContentType::Text:
-            return Self::readMessageContentText(query);
+        case MessageContentType::Text: {
+            return MessageContentText(messageBody);
+        }
+
+        case MessageContentType::GroupInvitation: {
+            return MessageContentJsonUtils::toObject<MessageContentGroupInvitation>(messageBody);
+        }
 
         default:
             return {};

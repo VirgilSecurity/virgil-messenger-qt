@@ -60,7 +60,6 @@ public:
     void resetUnreadCount(const ChatId &chatId);
     void updateLastMessage(const MessageHandler &message, qsizetype unreadMessageCount);
 
-
 signals:
     void chatAdded(const ChatHandler &chat);
     void chatUpdated(const ChatHandler &chat);

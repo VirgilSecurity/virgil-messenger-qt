@@ -38,6 +38,8 @@
 #include "Contact.h"
 #include "ListModel.h"
 
+#include <QUrl>
+
 namespace vm
 {
 class ContactAvatarLoader;
@@ -66,27 +68,27 @@ public:
     const Contacts &getContacts() const;
     int getContactsCount() const;
 
-    Contact createContact(const Contact::Id &contactId) const;
+    Contact createContact(const UserId &contactId) const;
     const Contact &getContact(const int row) const;
-    bool hasContact(const Contact::Id &contactId) const;
+    bool hasContact(const UserId &contactId) const;
 
     void addContact(const Contact &contact);
-    void removeContact(const Contact::Id &contactId);
+    void removeContact(const UserId &contactId);
     void removeContactsByRows(const int startRow, const int endRow);
     void updateContact(const Contact &contact, int row);
 
 signals:
-    void avatarUrlNotFound(const Contact::Id &contactId, QPrivateSignal) const;
+    void avatarUrlNotFound(const UserId &contactId, QPrivateSignal) const;
 
 protected:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    std::optional<int> findRowByContactId(const Contact::Id &contactId) const;
+    std::optional<int> findRowByContactId(const UserId &contactId) const;
 
 private:
-    void loadAvatarUrl(const Contact::Id &contactId);
+    void loadAvatarUrl(const UserId &contactId);
     void setAvatarUrl(const Contact &contact, const QUrl &url);
 
     Contacts m_contacts;

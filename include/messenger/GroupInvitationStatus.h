@@ -50,12 +50,12 @@ enum class GroupInvitationStatus {
 //  Return status from a given string.
 //  Throws if correspond status is not found.
 //
-GroupInvitationStatus GroupInvitationStatusFromString(const QString& stageString);
+GroupInvitationStatus GroupInvitationStatusFromString(const QString& statusString);
 
 //
 //  Return string from a given status.
 //
-QString GroupInvitationStatusToString(GroupInvitationStatus stage);
+QString GroupInvitationStatusToString(GroupInvitationStatus status);
 
 
 } // namespace vm

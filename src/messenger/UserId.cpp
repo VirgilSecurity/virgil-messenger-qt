@@ -52,18 +52,18 @@ bool Self::isValid() const noexcept {
     return !m_userId.isEmpty();
 }
 
-bool operator<(const vm::UserId& lhs, const vm::UserId& rhs) {
+bool vm::operator<(const vm::UserId& lhs, const vm::UserId& rhs) {
     return QString(lhs) < QString(rhs);
 }
 
-bool operator>(const vm::UserId& lhs, const vm::UserId& rhs) {
+bool vm::operator>(const vm::UserId& lhs, const vm::UserId& rhs) {
     return QString(lhs) > QString(rhs);
 }
 
-bool operator==(const vm::UserId& lhs, const vm::UserId& rhs) {
+bool vm::operator==(const vm::UserId& lhs, const vm::UserId& rhs) {
     return QString(lhs) == QString(rhs);
 }
 
-bool operator!=(const vm::UserId& lhs, const vm::UserId& rhs) {
+bool vm::operator!=(const vm::UserId& lhs, const vm::UserId& rhs) {
     return QString(lhs) != QString(rhs);
 }

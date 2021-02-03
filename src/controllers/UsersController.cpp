@@ -36,6 +36,7 @@
 
 #include "Messenger.h"
 #include "database/UserDatabase.h"
+#include "database/ContactsTable.h"
 #include "models/Models.h"
 #include "models/ChatsModel.h"
 #include "models/MessagesModel.h"
@@ -129,6 +130,13 @@ void Self::onSignedOut()
 
 void Self::onFinishSignIn() {
     const auto user = m_messenger->currentUser();
+
+    Contact contact;
+    contact.setUserId(user->id());
+    contact.setUsername(user->username());
+
+    m_userDatabase->contactsTable()->addContact(contact);
+
     // TODO: Do we really need to duplicate signals?
     emit signedIn(user->username());
 

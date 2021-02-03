@@ -32,20 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CONTACTSTABLE_H
-#define VM_CONTACTSTABLE_H
+#ifndef VM_CONTACTS_TABLE_H
+#define VM_CONTACTS_TABLE_H
 
 #include "core/DatabaseTable.h"
+
+#include "Contact.h"
 
 namespace vm
 {
 class ContactsTable : public DatabaseTable
 {
+    Q_OBJECT
+
+signals:
+    void addContact(const Contact &contact);
+
 public:
     explicit ContactsTable(Database *database);
 
     bool create() override;
+
+private:
+    void onAddContact(const Contact &contact);
 };
+
 }
 
-#endif // VM_CONTACTSTABLE_H
+#endif // VM_CONTACTS_TABLE_H

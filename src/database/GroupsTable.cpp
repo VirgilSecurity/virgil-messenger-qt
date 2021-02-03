@@ -70,6 +70,11 @@ void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
         bindValues.push_back({ ":id", QString(update->groupId) });
     }
 
+    if (auto update = std::get_if<ProcessGroupInvitationUpdate>(&groupUpdate)) {
+        queryId = QLatin1String("insertGroup");
+        bindValues.push_back({ ":id", QString(update->groupId) });
+    }
+
     if (queryId.isEmpty()) {
         return;
     }

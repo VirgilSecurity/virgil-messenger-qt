@@ -170,7 +170,6 @@
         <file>resources/database/createAttachments.sql</file>
         <file>resources/database/createChats.sql</file>
         <file>resources/database/createCloudFiles.sql</file>
-        <file>resources/database/createContacts.sql</file>
         <file>resources/database/createMessages.sql</file>
         <file>resources/database/createGroups.sql</file>
         <file>resources/database/createGroupMembers.sql</file>
@@ -199,6 +198,19 @@
         <file>resources/database/insertGroupMember.sql</file>
         <file>resources/database/updateGroupMemberInvitationStatus.sql</file>
         <file>resources/database/selectGroupMembersByMemberId.sql</file>
-        <file>resources/database/selectGroupMembersByGroupId.sql</file>
+        <file>resources/database/createContacts.sql</file>
+        <file>resources/database/dropContacts.sql</file>
+        <file>resources/database/insertContact.sql</file>
+        <file>resources/database/insertContactsFromChats.sql</file>
+        <file>resources/database/insertContactWithUsername.sql</file>
+        <file>resources/database/migrateMessagesToVersion1.sql</file>
+        <file>resources/database/selectAllContacts.sql</file>
+        <file>resources/database/selectContact.sql</file>
+        <file>resources/database/updateContactAvatarLocalPath.sql</file>
+        <file>resources/database/updateContactEmail.sql</file>
+        <file>resources/database/updateContactIsBanned.sql</file>
+        <file>resources/database/updateContactName.sql</file>
+        <file>resources/database/updateContactPhone.sql</file>
+        <file>resources/database/updateContactPlatformId.sql</file>
     </qresource>
 </RCC>

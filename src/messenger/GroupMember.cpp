@@ -37,9 +37,10 @@
 using namespace vm;
 using Self = GroupMember;
 
-Self::GroupMember(GroupId groupId, UserId memberId, QString memberNickName, GroupAffiliation memberAffiliation,
+Self::GroupMember(GroupId groupId, UserId groupOwnerId, UserId memberId, QString memberNickName, GroupAffiliation memberAffiliation,
         GroupInvitationStatus invitationStatus)
         : m_groupId(std::move(groupId)),
+        m_groupOwnerId(std::move(groupOwnerId)),
         m_memberId(std::move(memberId)),
         m_memberNickName(std::move(memberNickName)),
         m_memberAffiliation(memberAffiliation),
@@ -50,6 +51,11 @@ Self::GroupMember(GroupId groupId, UserId memberId, QString memberNickName, Grou
 
 GroupId Self::groupId() const {
     return m_groupId;
+}
+
+
+UserId Self::groupOwnerId() const {
+    return m_groupOwnerId;
 }
 
 

@@ -54,7 +54,7 @@ option(ENABLE_CLANGFORMAT "On/Off formatting source code with clangformat." ON)
 # ---------------------------------------------------------------------------
 set(VS_TARGET_VERSION "3.5.7")
 set(VS_CORE_VERSION "0.2.1.45")
-set(VERSION_DATABASE_SCHEME "0")
+set(VERSION_DATABASE_SCHEME "1")
 
 # ---------------------------------------------------------------------------
 #   Customers selection
@@ -375,11 +375,11 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/Validator.h
         ${CMAKE_CURRENT_LIST_DIR}/include/ContactAvatarLoader.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CustomerEnv.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/Contact.h
         ${CMAKE_CURRENT_LIST_DIR}/include/ConfirmationCodeType.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFile.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileUpdate.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/JsonUtils.h
         # Messenger Core
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/AttachmentId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Chat.h
@@ -392,6 +392,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolderInfo.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsNewFile.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CommKitBridge.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Contact.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessenger.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessengerCloudFs.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessengerStatus.h
@@ -409,6 +410,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentDownloadStage.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentEncrypted.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentFile.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentGroupInvitation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentJsonUtils.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentPicture.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentText.h
@@ -476,6 +478,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/database/MessagesTable.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/UserDatabase.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/UserDatabaseMigration.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version1/PatchContacts.h
         # Logging
         ${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogging.h
         ${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogWorker.h
@@ -569,6 +572,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/ChatId.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/ChatType.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CommKitBridge.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Contact.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CoreMessenger.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFileId.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFileInfo.cpp
@@ -590,6 +594,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentDownloadStage.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentEncrypted.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentFile.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentGroupInvitation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentJsonUtils.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentPicture.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentText.cpp
@@ -650,6 +655,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/database/MessagesTable.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/UserDatabase.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/UserDatabaseMigration.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version1/PatchContacts.cpp
         # Logging
         ${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogging.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogWorker.cpp

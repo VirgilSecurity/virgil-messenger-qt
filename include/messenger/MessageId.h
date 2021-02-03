@@ -56,11 +56,12 @@ public:
 private:
     QString m_messageId;
 };
-} // namespace vm
 
-bool operator<(const vm::MessageId& lhs, const vm::MessageId& rhs);
-bool operator>(const vm::MessageId& lhs, const vm::MessageId& rhs);
-bool operator==(const vm::MessageId& lhs, const vm::MessageId& rhs);
-bool operator!=(const vm::MessageId& lhs, const vm::MessageId& rhs);
+bool operator<(const MessageId& lhs, const MessageId& rhs);
+bool operator>(const MessageId& lhs, const MessageId& rhs);
+bool operator==(const MessageId& lhs, const MessageId& rhs);
+bool operator!=(const MessageId& lhs, const MessageId& rhs);
+
+} // namespace vm
 
 #endif // VM_MESSAGE_ID_H

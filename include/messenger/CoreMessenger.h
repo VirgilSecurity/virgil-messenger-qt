@@ -47,6 +47,7 @@
 #include "Group.h"
 #include "GroupMember.h"
 #include "GroupUpdate.h"
+#include "Contact.h"
 
 #include <qxmpp/QXmppClient.h>
 #include <qxmpp/QXmppHttpUploadIq.h>
@@ -60,6 +61,7 @@
 #include <memory>
 #include <tuple>
 #include <list>
+#include <variant>
 
 
 namespace vm
@@ -67,6 +69,13 @@ namespace vm
 class CoreMessenger : public QObject
 {
     Q_OBJECT
+private:
+    enum class PushType {
+        None,
+        Alert,
+        Voip
+    };
+
 public:
     using Result = CoreMessengerStatus;
 
@@ -218,6 +227,12 @@ signals:
 
 private:
     //
+    //  Helper types.
+    //
+    class GroupImpl;
+    using GroupImplHandler = std::shared_ptr<GroupImpl>;
+private:
+    //
     //  Configuration.
     //
     Result resetCommKitConfiguration();
@@ -231,6 +246,27 @@ private:
     void changeConnectionState(ConnectionState state);
 
     //
+    //  Message processing helpers.
+    //
+    QByteArray packMessage(const MessageHandler& message);
+    CoreMessengerStatus unpackMessage(const QByteArray& messageData, Message& message);
+
+    QByteArray packXmppMessageBody(const QByteArray& messageCiphertext, PushType pushType);
+    std::variant<CoreMessengerStatus, QByteArray> unpackXmppMessageBody(const QXmppMessage& xmppMessage);
+
+    //
+    //  Group helpers.
+    //--
+    std::variant<CoreMessengerStatus, GroupImplHandler> findGroup(const GroupId &groupId) const;
+
+    std::variant<CoreMessengerStatus, QByteArray> encryptGroupMessage(
+            const GroupId& groupId, const QByteArray& messageData);
+
+    std::variant<CoreMessengerStatus, QByteArray> decryptGroupMessage(
+            const GroupId& groupId, const UserId& senderId, const QByteArray& encryptedMessageData);
+    //--
+
+    //
     //  Helpers.
     //
     UserId userIdFromJid(const QString& jid) const;
@@ -238,6 +274,7 @@ private:
     QString currentUserJid() const;
 
     QString groupIdToJid(const GroupId& userId) const;
+    GroupId groupIdFromJid(const QString& jid) const;
 
     bool isNetworkOnline() const noexcept;
     bool isXmppConnected() const noexcept;
@@ -307,6 +344,8 @@ Q_DECLARE_METATYPE(vm::UserId);
 Q_DECLARE_METATYPE(vm::GroupId);
 Q_DECLARE_METATYPE(vm::GroupMember);
 Q_DECLARE_METATYPE(vm::GroupMembers);
+Q_DECLARE_METATYPE(vm::Contact);
+Q_DECLARE_METATYPE(vm::Contacts);
 
 Q_DECLARE_METATYPE(QXmppClient::State);
 Q_DECLARE_METATYPE(QXmppClient::Error);

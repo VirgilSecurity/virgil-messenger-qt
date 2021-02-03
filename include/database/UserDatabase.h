@@ -48,7 +48,6 @@ class AttachmentsTable;
 class ChatsTable;
 class CloudFilesTable;
 class ContactsTable;
-class GroupEpochsTable;
 class GroupMembersTable;
 class GroupsTable;
 class MessagesTable;

@@ -13,7 +13,6 @@ Page {
 
     readonly property var appState: app.stateManager.chatState
     readonly property var chatName: controllers.chats.currentChatName
-    readonly property var contactId: controllers.chats.currentContactId
     property real chatListViewHeight: 0
 
     QtObject {

@@ -41,6 +41,7 @@
 #include "MessageContentAttachment.h"
 #include "MessageContentFile.h"
 #include "MessageContentPicture.h"
+#include "MessageContentGroupInvitation.h"
 
 #include <variant>
 
@@ -51,7 +52,8 @@ using MessageContent = std::variant<
     MessageContentText,
     MessageContentEncrypted,
     MessageContentFile,
-    MessageContentPicture
+    MessageContentPicture,
+    MessageContentGroupInvitation
     >;
 
 } // namespace vm

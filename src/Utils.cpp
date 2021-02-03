@@ -280,21 +280,6 @@ Contacts Utils::getDeviceContacts(const Contacts &cachedContacts)
 #elif defined(VS_ANDROID)
     contacts = VSQAndroid::getContacts();
 #endif // VS_ANDROID
-    if (!contacts.empty() && !cachedContacts.empty()) {
-        // Load avatar information from cache
-        std::map<QVariant, Contact> cache;
-        for (const auto &c : cachedContacts) {
-            cache[c.platformId] = c;
-        }
-        for (auto &c : contacts) {
-            const auto it = cache.find(c.platformId);
-            if (it == cache.cend()) {
-                continue;
-            }
-            c.avatarUrl = it->second.avatarUrl;
-            c.avatarUrlRetryCount = it->second.avatarUrlRetryCount;
-        }
-    }
     return contacts;
 }
 

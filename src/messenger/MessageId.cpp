@@ -57,18 +57,18 @@ MessageId Self::generate() {
     return MessageId(Utils::createUuid());
 }
 
-bool operator<(const vm::MessageId& lhs, const vm::MessageId& rhs) {
+bool vm::operator<(const vm::MessageId& lhs, const vm::MessageId& rhs) {
     return QString(lhs) < QString(rhs);
 }
 
-bool operator>(const vm::MessageId& lhs, const vm::MessageId& rhs) {
+bool vm::operator>(const vm::MessageId& lhs, const vm::MessageId& rhs) {
     return QString(lhs) > QString(rhs);
 }
 
-bool operator==(const vm::MessageId& lhs, const vm::MessageId& rhs) {
+bool vm::operator==(const vm::MessageId& lhs, const vm::MessageId& rhs) {
     return QString(lhs) == QString(rhs);
 }
 
-bool operator!=(const vm::MessageId& lhs, const vm::MessageId& rhs) {
+bool vm::operator!=(const vm::MessageId& lhs, const vm::MessageId& rhs) {
     return QString(lhs) != QString(rhs);
 }

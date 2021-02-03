@@ -70,7 +70,7 @@ private:
     Contacts findContactsByFilter() const;
     void invalidateIsSelectedRole(int startRow, int endRow);
     void updateDiscoveredContacts();
-    void updateSelectedContacts(const Contact::Id &contactId, const Contact *contact = nullptr);
+    void updateSelectedContacts(const UserId &contactId, const Contact *contact = nullptr);
 
     void onDeviceContactsPopulated(const Contacts &contacts);
     void onSelectionChanged(const QList<QModelIndex> &indices);
@@ -81,7 +81,5 @@ private:
     int m_fixedContactsCount = 0;
 };
 }
-
-Q_DECLARE_METATYPE(vm::Contacts)
 
 #endif // VM_DISCOVEREDCONTACTSMODEL_H

@@ -51,12 +51,12 @@ enum class GroupAffiliation {
 //  Return affiliation from a given string.
 //  Throws if correspond affiliation is not found.
 //
-GroupAffiliation GroupAffiliationFromString(const QString& stageString);
+GroupAffiliation GroupAffiliationFromString(const QString& affiliationString);
 
 //
 //  Return string from a given affiliation.
 //
-QString GroupAffiliationToString(GroupAffiliation stage);
+QString GroupAffiliationToString(GroupAffiliation affiliation);
 
 
 } // namespace vm

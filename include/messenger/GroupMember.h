@@ -52,10 +52,12 @@ public:
     //
     GroupMember() = default;
 
-    GroupMember(GroupId groupId, UserId memberId, QString memberNickName, GroupAffiliation memberAffiliation,
-        GroupInvitationStatus invitationStatus);
+    GroupMember(GroupId groupId, UserId groupOwnerId,  UserId memberId, QString memberNickName,
+        GroupAffiliation memberAffiliation, GroupInvitationStatus invitationStatus);
 
     [[nodiscard]] GroupId groupId() const;
+
+    [[nodiscard]] UserId groupOwnerId() const;
 
     [[nodiscard]] UserId memberId() const;
 
@@ -67,6 +69,7 @@ public:
 
 private:
     GroupId m_groupId;
+    UserId m_groupOwnerId;
     UserId m_memberId;
     QString m_memberNickName;
     GroupAffiliation m_memberAffiliation;

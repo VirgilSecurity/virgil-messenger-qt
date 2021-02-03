@@ -58,21 +58,21 @@ private:
     QString m_groupId;
 };
 
+bool operator<(const GroupId& lhs, const GroupId& rhs);
+bool operator>(const GroupId& lhs, const GroupId& rhs);
+bool operator==(const GroupId& lhs, const GroupId& rhs);
+bool operator!=(const GroupId& lhs, const GroupId& rhs);
+
+bool operator<(const ChatId& lhs, const GroupId& rhs);
+bool operator>(const ChatId& lhs, const GroupId& rhs);
+bool operator==(const ChatId& lhs, const GroupId& rhs);
+bool operator!=(const ChatId& lhs, const GroupId& rhs);
+
+bool operator<(const GroupId& lhs, const ChatId& rhs);
+bool operator>(const GroupId& lhs, const ChatId& rhs);
+bool operator==(const GroupId& lhs, const ChatId& rhs);
+bool operator!=(const GroupId& lhs, const ChatId& rhs);
+
 } // namespace vm
-
-bool operator<(const vm::GroupId& lhs, const vm::GroupId& rhs);
-bool operator>(const vm::GroupId& lhs, const vm::GroupId& rhs);
-bool operator==(const vm::GroupId& lhs, const vm::GroupId& rhs);
-bool operator!=(const vm::GroupId& lhs, const vm::GroupId& rhs);
-
-bool operator<(const vm::ChatId& lhs, const vm::GroupId& rhs);
-bool operator>(const vm::ChatId& lhs, const vm::GroupId& rhs);
-bool operator==(const vm::ChatId& lhs, const vm::GroupId& rhs);
-bool operator!=(const vm::ChatId& lhs, const vm::GroupId& rhs);
-
-bool operator<(const vm::GroupId& lhs, const vm::ChatId& rhs);
-bool operator>(const vm::GroupId& lhs, const vm::ChatId& rhs);
-bool operator==(const vm::GroupId& lhs, const vm::ChatId& rhs);
-bool operator!=(const vm::GroupId& lhs, const vm::ChatId& rhs);
 
 #endif // VM_GROUP_ID_H

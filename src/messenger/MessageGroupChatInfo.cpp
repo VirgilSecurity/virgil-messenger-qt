@@ -40,14 +40,23 @@ using namespace vm;
 using Self = MessageGroupChatInfo;
 
 
-Self::MessageGroupChatInfo(QString groupId, QString senderGroupNickname, QString recipientGroupNickname, bool isPrivate)
+Self::MessageGroupChatInfo(GroupId groupId)
+    : m_groupId(std::move(groupId)),
+    m_senderGroupNickname(),
+    m_recipientGroupNickname(),
+    m_isPrivate(false)
+{}
+
+
+Self::MessageGroupChatInfo(GroupId groupId, QString senderGroupNickname, QString recipientGroupNickname, bool isPrivate)
     : m_groupId(std::move(groupId)),
     m_senderGroupNickname(std::move(senderGroupNickname)),
     m_recipientGroupNickname(std::move(recipientGroupNickname)),
     m_isPrivate(isPrivate)
 {}
 
-QString Self::groupId() const {
+
+GroupId Self::groupId() const {
     return m_groupId;
 }
 

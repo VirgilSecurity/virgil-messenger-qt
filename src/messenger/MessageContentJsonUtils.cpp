@@ -64,6 +64,11 @@ QJsonObject Self::to(const MessageContent& messageContent) {
         writeExtras(*picture, false, attachmentObject);
         mainObject.insert(QLatin1String("picture"), attachmentObject);
     }
+    else if (auto invitation = std::get_if<MessageContentGroupInvitation>(&messageContent)) {
+        QJsonObject invitationObject;
+        invitation->writeJson(invitationObject);
+        mainObject.insert(QLatin1String("groupInvitation"), invitationObject);
+    }
     else {
         throw std::logic_error("Invalid messageContent");
     }
@@ -106,8 +111,11 @@ MessageContent Self::from(const QJsonObject& json, QString& errorString) {
         readExtras(value.toObject(), picture);
         return picture;
     }
+    else if (auto value = json[QLatin1String("groupInvitation")]; !value.isUndefined()) {
+        return toObject<MessageContentGroupInvitation>(value.toObject());
+    }
     else {
-        errorString = QObject::tr("Invalid messageContent json");
+        errorString = QObject::tr("Invalid messageContent JSON");
         return {};
     }
 }

@@ -169,22 +169,26 @@ Contacts VSQAndroid::getContacts()
         "(Landroid/content/Context;)Ljava/lang/String;",
         QtAndroid::androidActivity().object<jobject>()
     );
-    const auto lines = javaStr.toString().split('\n');
+    const auto contactInfos = javaStr.toString().split('\n');
+
+    static constexpr const size_t kContactInfo_Name = 0;
+    static constexpr const size_t kContactInfo_Phone = 1;
+    static constexpr const size_t kContactInfo_Email = 2;
+    static constexpr const size_t kContactInfo_PlatformId = 3;
+    static constexpr const size_t kContactInfo_Size = 4;
 
     Contacts contacts;
-    for (int i = 0, s = lines.size() - 4; i <= s; i += 4) {
+    for (size_t pos = 0; pos < contactInfos.size(); pos += kContactInfo_Size) {
         Contact contact;
-        contact.name = lines[i];
-        contact.phoneNumber = lines[i + 1];
-        contact.email = lines[i + 2];
-        const auto &platformIdStr = lines[i + 3];
-        contact.id = QLatin1String("AndroidContact(%1)").arg(platformIdStr);
-        contact.platformId = platformIdStr.toLongLong();
-        contact.avatarUrlRetryCount = 1;
-        contacts.push_back(contact);
+        contact.setName(contactInfos[pos + kContactInfo_Name]);
+        contact.setPhone(contactInfos[pos + kContactInfo_Phone]);
+        contact.setEmail(contactInfos[pos + kContactInfo_Email]);
+        contact.setPlatformId(contactInfos[pos + kContactInfo_PlatformId]);
+        contacts.push_back(std::move(contact));
     }
     return contacts;
 }
+
 
 QUrl VSQAndroid::getContactAvatarUrl(const Contact &contact)
 {

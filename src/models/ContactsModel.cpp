@@ -37,6 +37,8 @@
 #include "models/ContactsProxyModel.h"
 #include "ContactAvatarLoader.h"
 
+#include <stdexcept>
+
 using namespace vm;
 
 ContactsModel::ContactsModel(QObject *parent, bool createProxy)
@@ -71,13 +73,15 @@ int ContactsModel::getContactsCount() const
     return m_contacts.size();
 }
 
-Contact ContactsModel::createContact(const Contact::Id &contactId) const
+Contact ContactsModel::createContact(const UserId &contactId) const
 {
-    Contact contact;
-    contact.id = contactId;
-    contact.name = contactId;
-    contact.platformId = contactId;
-    return contact;
+    // FIXME: Re-implement this.
+    // Contact contact;
+    // contact.id = contactId;
+    // contact.name = contactId;
+    // contact.platformId = contactId;
+    // return contact;
+    throw std::logic_error("Not implemented - ContactsModel::createContact()");
 }
 
 const Contact &ContactsModel::getContact(const int row) const
@@ -85,7 +89,7 @@ const Contact &ContactsModel::getContact(const int row) const
     return m_contacts[row];
 }
 
-bool ContactsModel::hasContact(const Contact::Id &contactId) const
+bool ContactsModel::hasContact(const UserId &contactId) const
 {
     return findRowByContactId(contactId) != std::nullopt;
 }
@@ -98,7 +102,7 @@ void ContactsModel::addContact(const Contact &contact)
     m_avatarLoader->load(m_contacts.back());
 }
 
-void ContactsModel::removeContact(const Contact::Id &contactId)
+void ContactsModel::removeContact(const UserId &contactId)
 {
     if (auto row = findRowByContactId(contactId)) {
         beginRemoveRows(QModelIndex(), *row, *row);
@@ -121,19 +125,19 @@ void ContactsModel::updateContact(const Contact &contact, int row)
     emit dataChanged(rowIndex, rowIndex);
 }
 
-std::optional<int> ContactsModel::findRowByContactId(const Contact::Id &contactId) const
+std::optional<int> ContactsModel::findRowByContactId(const UserId &contactId) const
 {
     int row = -1;
     for (auto &info : m_contacts) {
         ++row;
-        if (info.id == contactId) {
+        if (info.userId() == contactId) {
             return row;
         }
     }
     return std::nullopt;
 }
 
-void ContactsModel::loadAvatarUrl(const Contact::Id &contactId)
+void ContactsModel::loadAvatarUrl(const UserId &contactId)
 {
     if (const auto row = findRowByContactId(contactId)) {
         m_avatarLoader->load(m_contacts[*row]);
@@ -142,8 +146,8 @@ void ContactsModel::loadAvatarUrl(const Contact::Id &contactId)
 
 void ContactsModel::setAvatarUrl(const Contact &contact, const QUrl &url)
 {
-    if (const auto row = findRowByContactId(contact.id)) {
-        m_contacts[*row].avatarUrl = url;
+    if (const auto row = findRowByContactId(contact.userId())) {
+        m_contacts[*row].setAvatarLocalPath(url.toLocalFile());
         const auto idx = index(*row);
         emit dataChanged(idx, idx, { AvatarUrlRole });
     }
@@ -160,30 +164,30 @@ QVariant ContactsModel::data(const QModelIndex &index, int role) const
     const auto &info = m_contacts[index.row()];
     switch (role) {
     case IdRole:
-        return info.id;
+        return QString(info.userId());
     case NameRole:
-        return info.name;
+        return info.name();
     case DetailsRole:
     {
-        if (info.email.isEmpty()) {
-            return info.phoneNumber.isEmpty() ? tr("No phone/email") : info.phoneNumber;
+        if (info.email().isEmpty()) {
+            return info.phone().isEmpty() ? tr("No phone/email") : info.phone();
         }
         else {
-            return info.phoneNumber.isEmpty() ? info.email : (info.phoneNumber + QLatin1String(" / ") + info.email);
+            return info.phone().isEmpty() ? info.email() : (info.phone() + QLatin1String(" / ") + info.email());
         }
     }
     case AvatarUrlRole:
     {
-        const auto &url = info.avatarUrl;
+        const auto &url = info.avatarLocalPath();
         if (url.isEmpty()) {
-            emit avatarUrlNotFound(info.id, QPrivateSignal());
+            emit avatarUrlNotFound(info.userId(), QPrivateSignal());
         }
         return url;
     }
     case FilterRole:
-        return info.name + QLatin1Char('\n') + info.email + QLatin1Char('\n') + info.phoneNumber;
+        return info.name() + QLatin1Char('\n') + info.email() + QLatin1Char('\n') + info.phone();
     case SortRole:
-        return info.name;
+        return info.name();
     default:
         return ListModel::data(index, role);
     }

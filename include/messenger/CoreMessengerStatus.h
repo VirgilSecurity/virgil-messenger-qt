@@ -74,6 +74,8 @@ enum class CoreMessengerStatus
     Error_UnexpectedCommKitError,
     Error_ModifyGroup_PermissionViolation,
     Error_AccessGroup_PermissionViolation,
+    Error_GroupNotFound,
+    Error_GroupOwnerNotFound,
     Error_CreateGroup_CryptoFailed,
     Error_ImportGroupEpoch_ParseFailed,
     Error_ProcessGroupMessage_SessionIDDoesntMatch,
