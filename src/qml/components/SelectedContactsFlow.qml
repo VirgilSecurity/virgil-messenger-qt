@@ -58,7 +58,7 @@ FlowListView {
 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: editedModel.toggleById(model.contactId)
+                    onClicked: editedModel.toggleByName(model.contactId)
                 }
             }
 

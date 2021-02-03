@@ -14,7 +14,7 @@ ModelListView {
     section.property: "section"
     isSearchOpened: true
 
-    signal contactSelected(string contactId)
+    signal contactSelected(string contacName)
 
     QtObject {
         id: d
@@ -124,9 +124,9 @@ ModelListView {
 
             onClicked: {
                 if (d.model.selection.multiSelect) {
-                    d.model.toggleById(model.contactId)
+                    d.model.toggleByName(model.name)
                 }
-                contactSelected(contactId)
+                contactSelected(model.name)
             }
         }
     }

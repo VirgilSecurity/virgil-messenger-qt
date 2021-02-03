@@ -53,6 +53,7 @@ public:
     enum Roles
     {
         IdRole = Qt::UserRole,
+        UsernameRole,
         NameRole,
         DetailsRole,
         AvatarUrlRole,
@@ -68,27 +69,27 @@ public:
     const Contacts &getContacts() const;
     int getContactsCount() const;
 
-    Contact createContact(const UserId &contactId) const;
+    Contact createContact(const QString &username) const;
     const Contact &getContact(const int row) const;
-    bool hasContact(const UserId &contactId) const;
+    bool hasContact(const QString &contactId) const;
 
     void addContact(const Contact &contact);
-    void removeContact(const UserId &contactId);
+    void removeContact(const QString &contactId);
     void removeContactsByRows(const int startRow, const int endRow);
     void updateContact(const Contact &contact, int row);
 
 signals:
-    void avatarUrlNotFound(const UserId &contactId, QPrivateSignal) const;
+    void avatarUrlNotFound(const QString &contactId, QPrivateSignal) const;
 
 protected:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    std::optional<int> findRowByContactId(const UserId &contactId) const;
+    std::optional<int> findRowByContactName(const QString &contactId) const;
 
 private:
-    void loadAvatarUrl(const UserId &contactId);
+    void loadAvatarUrl(const QString &contactId);
     void setAvatarUrl(const Contact &contact, const QUrl &url);
 
     Contacts m_contacts;
