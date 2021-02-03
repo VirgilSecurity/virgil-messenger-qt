@@ -38,6 +38,7 @@
 #include "GroupId.h"
 #include "Contact.h"
 
+#include <memory>
 #include <list>
 
 namespace vm
