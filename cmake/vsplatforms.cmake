@@ -62,6 +62,10 @@ endfunction()
 
 if (VS_PLATFORM OR VS_CUSTOMER AND EXISTS "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake")
     file(REMOVE "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake")
+    set(VS_ENV "prod" CACHE STRING "Virgil messenger enviroment type")
+    string(TOLOWER "${VS_ENV}" VS_ENV)
+    message("-- Virgil enviroment: [${VS_ENV}]")
+    file(APPEND "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake" "set(VS_ENV \"${VS_ENV}\" CACHE STRING \"Virgil messenger enviroment type\")\n")
 endif ()
 
 if (VS_PLATFORM)
