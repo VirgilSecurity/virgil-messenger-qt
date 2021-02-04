@@ -64,6 +64,13 @@ UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, c
 
 void UploadCloudFileOperation::run()
 {
+    const auto fileName = QFileInfo(m_sourceFilePath).fileName();
+    const auto cloudFileLocalPath = QDir(m_parentFolder->localPath()).filePath(fileName);
+    if (FileUtils::fileExists(cloudFileLocalPath)) {
+        failAndNotify(tr("File %1 already exists").arg(fileName));
+        return;
+    }
+
     if (!m_parent->waitForFolderKeys(m_parentFolder)) {
         failAndNotify(tr("Failed to update parent folder"));
     }
