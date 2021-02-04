@@ -58,13 +58,13 @@ FlowListView {
 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: editedModel.toggleByName(model.contactId)
+                    onClicked: editedModel.toggleByUsername(model.username)
                 }
             }
 
             // avatar
             Avatar {
-                nickname: model.name
+                nickname: model.displayName
                 avatarUrl: model.avatarUrl
                 diameter: d.flowItemHeight
                 visible: !isSelected
@@ -74,7 +74,7 @@ FlowListView {
             Text {
                 color: Theme.primaryTextColor
                 font.pointSize: UiHelper.fixFontSz(15)
-                text: model.name
+                text: model.displayName
                 anchors.verticalCenter: parent.verticalCenter
             }
         }

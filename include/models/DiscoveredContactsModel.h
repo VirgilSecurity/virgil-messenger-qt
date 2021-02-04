@@ -57,8 +57,8 @@ public:
     int fixedContactsCount() const;
     const ContactsModel *selectedContactsModel() const;
 
-    Q_INVOKABLE void toggleByName(const QString &contactId);
-    Q_INVOKABLE QString firstContactId() const;
+    Q_INVOKABLE void toggleByUsername(const QString &contactUsername);
+    Q_INVOKABLE QString firstContactUsername() const;
 
 signals:
     void fixedContactsPopulated(const Contacts &contacts, QPrivateSignal);
@@ -70,7 +70,7 @@ private:
     Contacts findContactsByFilter() const;
     void invalidateIsSelectedRole(int startRow, int endRow);
     void updateDiscoveredContacts();
-    void updateSelectedContacts(const QString &contactId, const Contact *contact = nullptr);
+    void updateSelectedContacts(const QString &contactUsername, const Contact *contact = nullptr);
 
     void onDeviceContactsPopulated(const Contacts &contacts);
     void onSelectionChanged(const QList<QModelIndex> &indices);

@@ -126,3 +126,19 @@ bool Self::isBanned() const {
 void Self::setIsBanned(bool isBanned) {
     m_isBanned = isBanned;
 }
+
+QString Self::displayName() const {
+    if (!m_name.isEmpty()) {
+        return m_name;
+    }
+    if (!m_username.isEmpty()) {
+        return m_username;
+    }
+    if (!m_phone.isEmpty()) {
+        return m_phone;
+    }
+    if (!m_email.isEmpty()) {
+        return m_email;
+    }
+    return QString();
+}

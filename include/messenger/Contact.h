@@ -83,6 +83,8 @@ public:
 
     void setIsBanned(bool isBanned);
 
+    QString displayName() const;
+
 private:
     UserId m_userId;
     QString m_username;

@@ -75,7 +75,6 @@ int ContactsModel::getContactsCount() const
 
 Contact ContactsModel::createContact(const QString &username) const
 {
-    // TODO: Re-implement this.
     Contact contact;
     contact.setUsername(username);
     contact.setName(username);
@@ -87,9 +86,9 @@ const Contact &ContactsModel::getContact(const int row) const
     return m_contacts[row];
 }
 
-bool ContactsModel::hasContact(const QString &contactId) const
+bool ContactsModel::hasContact(const QString &contactUsername) const
 {
-    return findRowByContactName(contactId) != std::nullopt;
+    return findByUsername(contactUsername).isValid();
 }
 
 void ContactsModel::addContact(const Contact &contact)
@@ -100,11 +99,11 @@ void ContactsModel::addContact(const Contact &contact)
     m_avatarLoader->load(m_contacts.back());
 }
 
-void ContactsModel::removeContact(const QString &contactId)
+void ContactsModel::removeContact(const QString &contactUsername)
 {
-    if (auto row = findRowByContactName(contactId)) {
-        beginRemoveRows(QModelIndex(), *row, *row);
-        m_contacts.erase(m_contacts.begin() + *row);
+    if (const auto index = findByUsername(contactUsername); index.isValid()) {
+        beginRemoveRows(QModelIndex(), index.row(), index.row());
+        m_contacts.erase(m_contacts.begin() + index.row());
         endRemoveRows();
     }
 }
@@ -123,31 +122,29 @@ void ContactsModel::updateContact(const Contact &contact, int row)
     emit dataChanged(rowIndex, rowIndex);
 }
 
-std::optional<int> ContactsModel::findRowByContactName(const QString &contactId) const
+QModelIndex ContactsModel::findByUsername(const QString &contactUsername) const
 {
-    int row = -1;
-    for (auto &info : m_contacts) {
-        ++row;
-        if (info.name() == contactId) {
-            return row;
-        }
+    const auto it = std::find_if(m_contacts.begin(), m_contacts.end(), [&contactUsername](auto contact) {
+        return contact.username() == contactUsername;
+    });
+    if (it != m_contacts.end()) {
+        return index(std::distance(m_contacts.begin(), it));
     }
-    return std::nullopt;
+    return QModelIndex();
 }
 
-void ContactsModel::loadAvatarUrl(const QString &contactId)
+void ContactsModel::loadAvatarUrl(const QString &contactUsername)
 {
-    if (const auto row = findRowByContactName(contactId)) {
-        m_avatarLoader->load(m_contacts[*row]);
+    if (const auto index = findByUsername(contactUsername); index.isValid()) {
+        m_avatarLoader->load(m_contacts[index.row()]);
     }
 }
 
 void ContactsModel::setAvatarUrl(const Contact &contact, const QUrl &url)
 {
-    if (const auto row = findRowByContactName(contact.name())) {
-        m_contacts[*row].setAvatarLocalPath(url.toLocalFile());
-        const auto idx = index(*row);
-        emit dataChanged(idx, idx, { AvatarUrlRole });
+    if (const auto index = findByUsername(contact.username()); index.isValid()) {
+        m_contacts[index.row()].setAvatarLocalPath(url.toLocalFile());
+        emit dataChanged(index, index, { AvatarUrlRole });
     }
 }
 
@@ -170,6 +167,9 @@ QVariant ContactsModel::data(const QModelIndex &index, int role) const
     case NameRole:
         return info.name();
 
+    case DisplayNameRole:
+        return info.displayName();
+
     case DetailsRole:
     {
         if (info.email().isEmpty()) {
@@ -183,7 +183,7 @@ QVariant ContactsModel::data(const QModelIndex &index, int role) const
     {
         const auto &url = info.avatarLocalPath();
         if (url.isEmpty()) {
-            emit avatarUrlNotFound(info.userId(), QPrivateSignal());
+            emit avatarUrlNotFound(info.username(), QPrivateSignal());
         }
         return url;
     }
@@ -201,9 +201,10 @@ QVariant ContactsModel::data(const QModelIndex &index, int role) const
 QHash<int, QByteArray> ContactsModel::roleNames() const
 {
     return unitedRoleNames(ListModel::roleNames(), {
-        { IdRole, "contactId" }, // TODO: Rename to 'userId'
+        { IdRole, "userId" },
         { UsernameRole, "username" },
         { NameRole, "name" },
+        { DisplayNameRole, "displayName" },
         { DetailsRole, "details" },
         { AvatarUrlRole, "avatarUrl" }
     });
