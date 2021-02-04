@@ -111,12 +111,6 @@ endif ()
 string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
 message("-- Build type: [${CMAKE_BUILD_TYPE}]")
 
-if (NOT VS_ENV)
-    set(VS_ENV "prod")
-endif ()
-string(TOLOWER "${VS_ENV}" VS_ENV)
-message("-- Virgil enviroment: [${VS_ENV}]")
-
 set(CMAKE_BUILD_TYPE_LOWER "release")
 
 set(PREBUILT_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt")
