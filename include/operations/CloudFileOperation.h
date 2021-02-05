@@ -59,13 +59,13 @@ public:
     CloudFileSystem *cloudFileSystem();
     FileLoader *fileLoader();
 
-    bool waitForFolderKeys(const CloudFileHandler &cloudFolder);
+    CloudFileHandler getUpdatedCloudFolder(const CloudFileHandler &cloudFolder);
 
 signals:
     void cloudFilesUpdate(const CloudFilesUpdate &update);
 
 private:
-    static qsizetype m_counter;
+    static qsizetype m_nameCounter;
     QPointer<Messenger> m_messenger;
 };
 }

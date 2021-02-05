@@ -96,10 +96,10 @@ bool CloudFilesTable::updateFile(const CloudFileHandler &cloudFile, const CloudF
     QString queryId;
     switch (source) {
         case CloudFileUpdateSource::ListedParent:
-            queryId = QLatin1String("updateListedParentCloudFolder");
+            queryId = QLatin1String("updateCloudFolder");
             break;
         case CloudFileUpdateSource::ListedChild:
-            queryId = cloudFile->isFolder() ? QLatin1String("updateListedChildCloudFolder") : QLatin1String("updateListedChildCloudFile");
+            queryId = cloudFile->isFolder() ? QLatin1String("updateCloudFolder") : QLatin1String("updateCloudFile");
             break;
         default:
             throw std::logic_error("Invalid CloudFileUpdateSource");
@@ -214,7 +214,7 @@ void CloudFilesTable::onFetch(const CloudFileHandler &folder)
 
 void CloudFilesTable::onUpdateCloudFiles(const CloudFilesUpdate &update)
 {
-    if (std::holds_alternative<ListCloudFolderUpdate>(update)) {
+    if (std::holds_alternative<CachedListCloudFolderUpdate>(update)) {
         return;
     }
     if (std::holds_alternative<TransferCloudFileUpdate>(update)) {
@@ -224,7 +224,7 @@ void CloudFilesTable::onUpdateCloudFiles(const CloudFilesUpdate &update)
     ScopedConnection connection(*database());
     ScopedTransaction transaction(*database());
     bool success = false;
-    if (auto upd = std::get_if<MergeCloudFolderUpdate>(&update)) {
+    if (auto upd = std::get_if<CloudListCloudFolderUpdate>(&update)) {
         success = deleteFiles(upd->deleted) &&
                 updateFile(upd->parentFolder, CloudFileUpdateSource::ListedParent) &&
                 updateFiles(upd->updated, CloudFileUpdateSource::ListedChild) &&

@@ -45,6 +45,7 @@ class CloudFileOperationSource : public OperationSource
 public:
     enum class Type
     {
+        ListFolder,
         CreateFolder,
         Upload,
         Download,

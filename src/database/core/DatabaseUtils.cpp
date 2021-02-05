@@ -360,34 +360,41 @@ DatabaseUtils::BindValues DatabaseUtils::createNewCloudFileBindings(const CloudF
 
 DatabaseUtils::BindValues DatabaseUtils::createUpdatedCloudFileBindings(const CloudFileHandler &cloudFile, const CloudFileUpdateSource source)
 {
-    BindValues values {
-        { ":id", QString(cloudFile->id()) },
-        { ":parentId", QString(cloudFile->parentId()) }
-    };
     if ((source == CloudFileUpdateSource::ListedChild) || (source == CloudFileUpdateSource::ListedParent)) {
-        BindValues extra {
-            { ":name", cloudFile->name() },
-            { ":createdAt", cloudFile->createdAt().toTime_t() },
-            { ":updatedAt", cloudFile->updatedAt().toTime_t() },
-            { ":updatedBy", QString(cloudFile->updatedBy()) }
-        };
-        values.insert(values.end(), extra.begin(), extra.end());
+        if (cloudFile->isFolder()) {
+            return {
+                { ":id", QString(cloudFile->id()) },
+                { ":parentId", QString(cloudFile->parentId()) },
+                { ":name", cloudFile->name() },
+                { ":isFolder", cloudFile->isFolder() },
+                // No type and size
+                { ":createdAt", cloudFile->createdAt().toTime_t() },
+                { ":updatedAt", cloudFile->updatedAt().toTime_t() },
+                { ":updatedBy", QString(cloudFile->updatedBy()) },
+                { ":encryptedKey", cloudFile->encryptedKey() },
+                { ":publicKey", cloudFile->publicKey() },
+                { ":localPath", cloudFile->localPath() }
+                // No fingerprint
+            };
+        }
+        else {
+            return {
+                { ":id", QString(cloudFile->id()) },
+                { ":parentId", QString(cloudFile->parentId()) },
+                { ":name", cloudFile->name() },
+                { ":isFolder", cloudFile->isFolder() },
+                { ":type", cloudFile->type() },
+                { ":size", cloudFile->size() },
+                { ":createdAt", cloudFile->createdAt().toTime_t() },
+                { ":updatedAt", cloudFile->updatedAt().toTime_t() },
+                { ":updatedBy", QString(cloudFile->updatedBy()) },
+                // No encrypted and public keys
+                { ":localPath", cloudFile->localPath() },
+                { ":fingerprint", cloudFile->fingerprint() }
+            };
+        }
     };
-    if ((source == CloudFileUpdateSource::ListedChild) && !cloudFile->isFolder()) {
-        BindValues extra {
-            { ":type", cloudFile->type() },
-            { ":size", cloudFile->size() }
-        };
-        values.insert(values.end(), extra.begin(), extra.end());
-    }
-    if ((source == CloudFileUpdateSource::ListedParent) && cloudFile->isFolder()) {
-        BindValues extra {
-            { ":encryptedKey", cloudFile->encryptedKey() },
-            { ":publicKey", cloudFile->publicKey() }
-        };
-        values.insert(values.end(), extra.begin(), extra.end());
-    }
-    return values;
+    return {};
 }
 
 DatabaseUtils::BindValues DatabaseUtils::createDownloadedCloudFileBindings(const CloudFileHandler &cloudFile, const QString &fingerprint)

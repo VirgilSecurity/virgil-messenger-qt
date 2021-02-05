@@ -32,40 +32,44 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "CloudFileOperation.h"
+#ifndef VM_LIST_CLOUD_FOLDER_OPERATION_H
+#define VM_LIST_CLOUD_FOLDER_OPERATION_H
 
-#include <QEventLoop>
+#include <QPointer>
 
-#include "Messenger.h"
+#include "CloudFile.h"
+#include "CloudFileRequestId.h"
+#include "Operation.h"
 
-using namespace vm;
-
-qsizetype CloudFileOperation::m_nameCounter = 0;
-
-CloudFileOperation::CloudFileOperation(Messenger *messenger, QObject *parent)
-    : NetworkOperation(parent, messenger->isOnline())
-    , m_messenger(messenger)
+namespace vm
 {
-    setName(QLatin1String("CloudFile(%1)").arg(QString::number(++m_nameCounter)));
+class CloudFileOperation;
+class UserDatabase;
+
+class ListCloudFolderOperation : public Operation
+{
+    Q_OBJECT
+
+public:
+    ListCloudFolderOperation(CloudFileOperation *parent, const CloudFileHandler &parentFolder, UserDatabase *userDatabase);
+
+    void run() override;
+
+private:
+    void onDatabaseListFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
+    void onCloudListFetched(CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &files);
+    void onCloudListFetchErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
+
+    static bool fileIdLess(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs);
+    static bool fileUpdated(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs);
+
+    CloudFileOperation *m_parent;
+    CloudFileHandler m_parentFolder;
+    QPointer<UserDatabase> m_userDatabase;
+
+    ModifiableCloudFiles m_cachedFiles;
+    CloudFileRequestId m_requestId = 0;
+};
 }
 
-Settings *CloudFileOperation::settings()
-{
-    return m_messenger->settings();
-}
-
-CloudFileSystem *CloudFileOperation::cloudFileSystem()
-{
-    return m_messenger->cloudFileSystem();
-}
-
-FileLoader *CloudFileOperation::fileLoader()
-{
-    return m_messenger->fileLoader();
-}
-
-CloudFileHandler CloudFileOperation::getUpdatedCloudFolder(const CloudFileHandler &cloudFolder)
-{
-    // FIXME(fpohtmeh): implement or remove
-    return cloudFolder;
-}
+#endif // VM_LIST_CLOUD_FOLDER_OPERATION_H

@@ -47,11 +47,11 @@ struct CloudFilesUpdateBase
     CloudFileHandler parentFolder;
 };
 
-struct ListCloudFolderUpdate : public CloudFilesUpdateBase {
+struct CachedListCloudFolderUpdate : public CloudFilesUpdateBase {
     ModifiableCloudFiles files;
 };
 
-struct MergeCloudFolderUpdate : public CloudFilesUpdateBase {
+struct CloudListCloudFolderUpdate : public CloudFilesUpdateBase {
     ModifiableCloudFiles added;
     CloudFiles deleted;
     CloudFiles updated;
@@ -92,8 +92,8 @@ struct DownloadCloudFileUpdate : public CloudFilesUpdateBase {
 };
 
 using CloudFilesUpdate = std::variant<
-    ListCloudFolderUpdate,
-    MergeCloudFolderUpdate,
+    CachedListCloudFolderUpdate,
+    CloudListCloudFolderUpdate,
     CreateCloudFilesUpdate,
     DeleteCloudFilesUpdate,
     TransferCloudFileUpdate,

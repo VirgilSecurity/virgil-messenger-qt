@@ -56,7 +56,7 @@ Models::Models(Messenger *messenger, Settings *settings, UserDatabase *userDatab
     , m_messages(new MessagesModel(this))
     , m_cloudFiles(new CloudFilesModel(settings, this))
     , m_cloudFilesTransfers(new CloudFilesTransfersModel(this))
-    , m_cloudFilesQueue(new CloudFilesQueue(messenger, this))
+    , m_cloudFilesQueue(new CloudFilesQueue(messenger, userDatabase, this))
     , m_fileLoader(messenger->fileLoader())
     , m_messagesQueue(new MessagesQueue(messenger, userDatabase, this))
 

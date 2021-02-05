@@ -113,6 +113,8 @@ QString CloudFileOperationSource::toString() const
 {
     const QString str("CloudFileOperationSource(%1)");
     switch (m_type) {
+    case Type::ListFolder:
+        return str.arg(QLatin1String("ListFolder"));
     case Type::CreateFolder:
         return str.arg(QLatin1String("CreateFolder"));
     case Type::Upload:

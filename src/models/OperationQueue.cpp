@@ -129,6 +129,7 @@ void Self::runSource(OperationSourcePtr source)
 bool Self::addRunningSource(OperationSourcePtr source)
 {
     QMutexLocker locker(&m_runningSourcesMutex);
+    // FIXME(fpohtmeh): copy running sources
     const auto uniqueId = source->uniqueId();
     if (!uniqueId.isEmpty()) {
         const auto it = std::find_if(m_runningSources.begin(), m_runningSources.end(), [uniqueId](auto source) {

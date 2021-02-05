@@ -60,13 +60,9 @@ DownloadCloudFileOperation::DownloadCloudFileOperation(CloudFileOperation *paren
 
 void DownloadCloudFileOperation::run()
 {
-    if (!m_parent->waitForFolderKeys(m_parentFolder)) {
-        failAndNotify(tr("Failed to update parent folder"));
-    }
-    else {
-        transferUpdate(TransferCloudFileUpdate::Stage::Started, 0);
-        m_requestId = m_parent->cloudFileSystem()->getDownloadInfo(m_file);
-    }
+    // FIXME(fpohtmeh): get updated folder
+    transferUpdate(TransferCloudFileUpdate::Stage::Started, 0);
+    m_requestId = m_parent->cloudFileSystem()->getDownloadInfo(m_file);
 }
 
 CloudFileId DownloadCloudFileOperation::cloudFileId() const

@@ -36,22 +36,25 @@
 
 #include "CreateCloudFolderOperation.h"
 #include "CloudFileOperation.h"
-#include "CloudFileOperationSource.h"
 #include "DeleteCloudFilesOperation.h"
 #include "DownloadCloudFileOperation.h"
+#include "ListCloudFolderOperation.h"
 #include "Messenger.h"
 #include "UploadCloudFileOperation.h"
+#include "UserDatabase.h"
 
 using namespace vm;
 using Self = CloudFilesQueue;
 
 Q_LOGGING_CATEGORY(lcCloudFilesQueue, "cloudfiles-queue");
 
-Self::CloudFilesQueue(Messenger *messenger, QObject *parent)
+Self::CloudFilesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject *parent)
     : OperationQueue(lcCloudFilesQueue(), parent)
     , m_messenger(messenger)
+    , m_userDatabase(userDatabase)
 {
     connect(m_messenger, &Messenger::signedOut, this, &CloudFilesQueue::stop);
+    connect(this, &Self::pushListFolder, this, &Self::onPushListFolder);
     connect(this, &Self::pushCreateFolder, this, &Self::onPushCreateFolder);
     connect(this, &Self::pushUploadFile, this, &Self::onPushUploadFile);
     connect(this, &Self::pushDownloadFile, this, &Self::onPushDownloadFile);
@@ -71,10 +74,13 @@ Operation *Self::createOperation(OperationSourcePtr source)
     connect(op, &CloudFileOperation::cloudFilesUpdate, this, &Self::updateCloudFiles);
 
     switch (cloudFileSource->type()) {
-        case CloudFileOperationSource::Type::CreateFolder:
+        case SourceType::ListFolder:
+            op->appendChild(new ListCloudFolderOperation(op, cloudFileSource->folder(), m_userDatabase));
+            break;
+        case SourceType::CreateFolder:
             op->appendChild(new CreateCloudFolderOperation(op, cloudFileSource->name(), cloudFileSource->folder()));
             break;
-        case CloudFileOperationSource::Type::Upload: {
+        case SourceType::Upload: {
             auto uploadOp = new UploadCloudFileOperation(op, cloudFileSource->filePath(), cloudFileSource->folder());
             connect(this, &Self::interruptFileOperation, uploadOp, [uploadOp](auto cloudFileId) {
                 if (cloudFileId == uploadOp->cloudFileId()) {
@@ -84,7 +90,7 @@ Operation *Self::createOperation(OperationSourcePtr source)
             op->appendChild(uploadOp);
             break;
         }
-        case CloudFileOperationSource::Type::Download: {
+        case SourceType::Download: {
             auto downloadOp = new DownloadCloudFileOperation(op, cloudFileSource->files().front(), cloudFileSource->folder());
             connect(this, &Self::interruptFileOperation, downloadOp, [downloadOp](auto cloudFileId) {
                 if (cloudFileId == downloadOp->cloudFileId()) {
@@ -94,7 +100,7 @@ Operation *Self::createOperation(OperationSourcePtr source)
             op->appendChild(downloadOp);
             break;
         }
-        case CloudFileOperationSource::Type::Delete:
+        case SourceType::Delete:
             op->appendChild(new DeleteCloudFilesOperation(op, cloudFileSource->files()));
             break;
         default:
@@ -114,36 +120,59 @@ qsizetype Self::maxAttemptCount() const
     return 0;
 }
 
+bool Self::addRunningSource(OperationSourcePtr source)
+{
+    if (!OperationQueue::addRunningSource(source)) {
+        return false;
+    }
+    // FIXME(fpohtmeh): remove override and virtual specifier?
+    return true;
+}
+
+void Self::removeRunningSource(OperationSourcePtr source)
+{
+    OperationQueue::removeRunningSource(source);
+    // FIXME(fpohtmeh): remove override and virtual specifier?
+}
+
+void Self::onPushListFolder(const CloudFileHandler &parentFolder)
+{
+    auto source = std::make_shared<CloudFileOperationSource>(SourceType::ListFolder);
+    source->setPriority(OperationSource::Priority::Highest);
+    source->setFolder(parentFolder);
+    addSource(std::move(source));
+}
+
 void Self::onPushCreateFolder(const QString &name, const CloudFileHandler &parentFolder)
 {
-    auto source = std::make_shared<CloudFileOperationSource>(CloudFileOperationSource::Type::CreateFolder);
+    auto source = std::make_shared<CloudFileOperationSource>(SourceType::CreateFolder);
     source->setPriority(OperationSource::Priority::Highest);
     source->setName(name);
     source->setFolder(parentFolder);
-    addSource(source);
+    addSource(std::move(source));
 }
 
 void Self::onPushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder)
 {
-    auto source = std::make_shared<CloudFileOperationSource>(CloudFileOperationSource::Type::Upload);
+    auto source = std::make_shared<CloudFileOperationSource>(SourceType::Upload);
     source->setFolder(parentFolder);
     source->setFilePath(filePath);
-    addSource(source);
+    addSource(std::move(source));
 }
 
-void CloudFilesQueue::onPushDownloadFile(const CloudFileHandler &file, const CloudFileHandler &parentFolder, const PostFunction &func)
+void Self::onPushDownloadFile(const CloudFileHandler &file, const CloudFileHandler &parentFolder, const PostFunction &func)
 {
-    auto source = std::make_shared<CloudFileOperationSource>(CloudFileOperationSource::Type::Download);
+    auto source = std::make_shared<CloudFileOperationSource>(SourceType::Download);
     source->setFolder(parentFolder);
     source->setFiles({ file });
     source->setPostFunction(func);
-    addSource(source);
+    addSource(std::move(source));
 }
 
 void Self::onPushDeleteFiles(const CloudFiles &files)
 {
-    auto source = std::make_shared<CloudFileOperationSource>(CloudFileOperationSource::Type::Delete);
+    auto source = std::make_shared<CloudFileOperationSource>(SourceType::Delete);
     source->setPriority(OperationSource::Priority::Highest);
     source->setFiles(files);
-    addSource(source);
+    addSource(std::move(source));
 }

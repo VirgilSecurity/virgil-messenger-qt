@@ -67,16 +67,12 @@ void UploadCloudFileOperation::run()
     const auto fileName = QFileInfo(m_sourceFilePath).fileName();
     const auto cloudFileLocalPath = QDir(m_parentFolder->localPath()).filePath(fileName);
     if (FileUtils::fileExists(cloudFileLocalPath)) {
-        failAndNotify(tr("File %1 already exists").arg(fileName));
+        failAndNotify(tr("File already exists in folder"));
         return;
     }
 
-    if (!m_parent->waitForFolderKeys(m_parentFolder)) {
-        failAndNotify(tr("Failed to update parent folder"));
-    }
-    else {
-        m_requestId = m_parent->cloudFileSystem()->createFile(m_sourceFilePath, m_parentFolder);
-    }
+    // FIXME(fpohtmeh): get updated folder
+    m_requestId = m_parent->cloudFileSystem()->createFile(m_sourceFilePath, m_parentFolder);
 }
 
 CloudFileId UploadCloudFileOperation::cloudFileId() const

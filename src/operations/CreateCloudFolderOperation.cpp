@@ -34,11 +34,8 @@
 
 #include "CreateCloudFolderOperation.h"
 
-#include <QDir>
-
 #include "CloudFileOperation.h"
 #include "Messenger.h"
-#include "Utils.h"
 
 using namespace vm;
 
@@ -55,12 +52,9 @@ CreateCloudFolderOperation::CreateCloudFolderOperation(CloudFileOperation *paren
 
 void CreateCloudFolderOperation::run()
 {
-    if (!m_parent->waitForFolderKeys(m_parentFolder)) {
-        failAndNotify(tr("Failed to update parent folder"));
-    }
-    else {
-        m_requestId = m_parent->cloudFileSystem()->createFolder(m_name, m_parentFolder);
-    }
+    // FIXME(fpohtmeh): check if local path exists
+    // FIXME(fpohtmeh): get updated folder
+    m_requestId = m_parent->cloudFileSystem()->createFolder(m_name, m_parentFolder);
 }
 
 void CreateCloudFolderOperation::onCreated(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &folder)

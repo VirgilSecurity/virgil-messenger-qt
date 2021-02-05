@@ -35,26 +35,25 @@
 #ifndef VM_CLOUDFILESCONTROLLER_H
 #define VM_CLOUDFILESCONTROLLER_H
 
-#include <QDir>
 #include <QObject>
 
-#include "CloudFile.h"
 #include "CloudFileSystem.h"
 #include "CloudFilesUpdate.h"
-#include "Models.h"
-#include "Settings.h"
-#include "UserDatabase.h"
 
 class Settings;
 
 namespace vm
 {
+class CloudFilesModel;
+class Models;
+class UserDatabase;
+
 class CloudFilesController : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString displayPath READ displayPath NOTIFY displayPathChanged)
     Q_PROPERTY(bool isRoot READ isRoot NOTIFY isRootChanged)
-    Q_PROPERTY(bool isLoading READ isLoading NOTIFY isLoadingChanged)
+    Q_PROPERTY(bool isListUpdating READ isListUpdating NOTIFY isListUpdatingChanged)
 
 public:
     CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase, CloudFileSystem *cloudFileSystem,
@@ -80,38 +79,27 @@ signals:
 
     void displayPathChanged(const QString &path);
     void isRootChanged(bool isRoot);
-    void isLoadingChanged(bool isLoading);
+    void isListUpdatingChanged(bool isUpdating);
 
 private:
-    using FoldersHierarchy = std::vector<ModifiableCloudFileHandler>;
+    using FoldersHierarchy = ModifiableCloudFiles;
 
-    void setupTableConnections();
     void switchToHierarchy(const FoldersHierarchy &hierarchy);
 
     QString displayPath() const;
     bool isRoot() const;
-    bool isLoading() const;
-    void incLoadingCounter();
-    void decLoadingCounter();
+    ModifiableCloudFileHandler rootFolder() const;
+    bool isListUpdating() const;
 
-    void onDbListFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
-    void onCloudFilesFetched(CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
     void onUpdateCloudFiles(const CloudFilesUpdate &update);
-
-    static bool fileIdLess(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs);
-    static bool filesAreEqual(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs);
 
     QPointer<const Settings> m_settings;
     QPointer<Models> m_models;
     QPointer<UserDatabase> m_userDatabase;
     QPointer<CloudFileSystem> m_cloudFileSystem;
 
-    ModifiableCloudFileHandler m_rootFolder;
     FoldersHierarchy m_hierarchy;
-    FoldersHierarchy m_newHierarchy;
-    ModifiableCloudFiles m_databaseCloudFiles;
-    CloudFileRequestId m_fetchRequestId;
-    int m_loadingCounter;
+    FoldersHierarchy m_requestedHierarchy;
 };
 }
 

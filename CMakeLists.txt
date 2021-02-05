@@ -522,6 +522,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadDecryptFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/EncryptFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/EncryptUploadFileOperation.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/operations/ListCloudFolderOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/LoadAttachmentOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/LoadFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/MessageOperation.h
@@ -690,6 +691,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadDecryptFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/EncryptFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/EncryptUploadFileOperation.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/operations/ListCloudFolderOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/LoadAttachmentOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/LoadFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/MessageOperation.cpp

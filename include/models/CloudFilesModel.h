@@ -86,6 +86,7 @@ private:
     void updateFile(const CloudFileHandler &file, CloudFileUpdateSource source);
     void updateDownloadedFile(const DownloadCloudFileUpdate &update);
     QModelIndex findById(const CloudFileId &cloudFileId) const;
+
     void invalidateDateTime();
     void updateDescription();
 
