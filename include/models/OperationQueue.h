@@ -39,6 +39,7 @@
 #include <QMutex>
 #include <QPointer>
 
+#include "OperationQueueListener.h"
 #include "OperationSource.h"
 
 class QThreadPool;
@@ -62,6 +63,7 @@ public:
     void stop();
 
     void addSource(OperationSourcePtr source);
+    void addListener(OperationQueueListenerPtr listener);
 
 signals:
     void notificationCreated(const QString &notification, const bool error);
@@ -70,15 +72,9 @@ signals:
     void operationFailed(OperationSourcePtr source, QPrivateSignal);
 
 protected:
-    // Create operation from source. Run in operation thread
     virtual Operation *createOperation(OperationSourcePtr source) = 0;
     virtual void invalidateOperation(OperationSourcePtr source) = 0;
     virtual qsizetype maxAttemptCount() const = 0;
-
-    // Try to add running source. Run in operation thread
-    virtual bool addRunningSource(OperationSourcePtr source);
-    // Remove running source. Run in operation thread
-    virtual void removeRunningSource(OperationSourcePtr source);
 
 private:
     void addSourceImpl(OperationSourcePtr source, const bool run);
@@ -91,9 +87,7 @@ private:
     QPointer<QThreadPool> m_threadPool;
     std::atomic_bool m_isStopped = false;
     OperationSources m_sources;
-    // Running sources
-    OperationSources m_runningSources;
-    QMutex m_runningSourcesMutex;
+    OperationQueueListeners m_listeners;
 };
 }
 

@@ -75,9 +75,6 @@ private:
     void invalidateOperation(OperationSourcePtr source) override;
     qsizetype maxAttemptCount() const override;
 
-    bool addRunningSource(OperationSourcePtr source) override;
-    void removeRunningSource(OperationSourcePtr source) override;
-
     void onPushListFolder(const CloudFileHandler &parentFolder);
     void onPushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
     void onPushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);

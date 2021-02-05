@@ -494,6 +494,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesTransfersModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesQueue.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesQueueListeners.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/TransfersModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListProxyModel.h
@@ -504,6 +505,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/Models.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/Model.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationQueue.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationQueueListener.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationSource.h
         # Operations
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateAttachmentFingerprintOperation.h
@@ -660,6 +662,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesTransfersModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesQueue.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesQueueListeners.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ContactsModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ContactsProxyModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/DiscoveredContactsModel.cpp

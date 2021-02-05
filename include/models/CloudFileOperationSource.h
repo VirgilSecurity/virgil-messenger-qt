@@ -70,7 +70,6 @@ public:
 
     bool isValid() const override;
     QString toString() const override;
-    QString uniqueId() const override;
 
 private:
     Type m_type;

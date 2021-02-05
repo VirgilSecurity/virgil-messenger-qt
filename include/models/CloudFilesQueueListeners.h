@@ -1,4 +1,4 @@
-﻿//  Copyright (C) 2015-2021 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,44 +32,52 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_OPERATIONSOURCE_H
-#define VM_OPERATIONSOURCE_H
+#ifndef VM_CLOUD_FILES_QUEUE_LISTENER_H
+#define VM_CLOUD_FILES_QUEUE_LISTENER_H
 
-#include <memory>
+#include "CloudFileOperationSource.h"
+#include "OperationQueueListener.h"
 
-#include <QString>
+#include <QLoggingCategory>
+#include <QMutex>
+
+Q_DECLARE_LOGGING_CATEGORY(lcCloudFilesQueueListener);
 
 namespace vm
 {
-class OperationSource
+class CloudFilesQueueListener : public OperationQueueListener
 {
+    Q_OBJECT
+
 public:
-    enum class Priority
-    {
-        Default,
-        Highest
-    };
+    using SourceType = CloudFileOperationSource::Type;
 
-    using PostFunction = std::function<void ()>;
+    ~CloudFilesQueueListener() override;
 
-    virtual ~OperationSource() {}
-
-    virtual bool isValid() const = 0;
-    virtual QString toString() const = 0;
-
-    qsizetype attemptCount() const { return m_attemptCount; }
-    void incAttemptCount() { ++m_attemptCount; }
-
-    void setPriority(Priority priority) { m_priority = priority; }
-    Priority priority() const { return m_priority; }
+    virtual bool preRunCloudFile(CloudFileOperationSource *source);
+    virtual void postRunCloudFile(CloudFileOperationSource *source);
 
 private:
-    qsizetype m_attemptCount = 0;
-    Priority m_priority = Priority::Default;
+    bool preRun(OperationSourcePtr source) override;
+    void postRun(OperationSourcePtr source) override;
 };
 
-using OperationSourcePtr = std::shared_ptr<OperationSource>;
-using OperationSources = std::vector<OperationSourcePtr>;
+class UniqueCloudFileFilter : public CloudFilesQueueListener
+{
+    Q_OBJECT
+
+public:
+    bool preRunCloudFile(CloudFileOperationSource *source) override;
+    void postRunCloudFile(CloudFileOperationSource *source) override;
+    void clear() override;
+
+private:
+    QString createUniqueId(CloudFileOperationSource *source) const;
+    void notifyNotUnique(CloudFileOperationSource *source);
+
+    QStringList m_ids;
+    QMutex m_mutex;
+};
 }
 
-#endif // VM_OPERATIONSOURCE_H
+#endif // VM_CLOUD_FILES_QUEUE_LISTENER_H

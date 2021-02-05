@@ -127,15 +127,3 @@ QString CloudFileOperationSource::toString() const
         throw std::logic_error("Invalid cloud file operation source type");
     }
 }
-
-QString CloudFileOperationSource::uniqueId() const
-{
-    switch (m_type) {
-    case Type::CreateFolder:
-        return QLatin1String("CreateCloudFolder(%1;%2)").arg(m_name, m_folder->id());
-    case Type::Download:
-        return QLatin1String("DownloadCloudFile(%1)").arg(file()->id());
-    default:
-        return QString();
-    }
-}

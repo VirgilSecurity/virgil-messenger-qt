@@ -36,6 +36,7 @@
 
 #include "CreateCloudFolderOperation.h"
 #include "CloudFileOperation.h"
+#include "CloudFilesQueueListeners.h"
 #include "DeleteCloudFilesOperation.h"
 #include "DownloadCloudFileOperation.h"
 #include "ListCloudFolderOperation.h"
@@ -59,6 +60,8 @@ Self::CloudFilesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject 
     connect(this, &Self::pushUploadFile, this, &Self::onPushUploadFile);
     connect(this, &Self::pushDownloadFile, this, &Self::onPushDownloadFile);
     connect(this, &Self::pushDeleteFiles, this, &Self::onPushDeleteFiles);
+
+    addListener(std::make_shared<UniqueCloudFileFilter>());
 }
 
 Self::~CloudFilesQueue()
@@ -118,21 +121,6 @@ void Self::invalidateOperation(OperationSourcePtr source)
 qsizetype Self::maxAttemptCount() const
 {
     return 0;
-}
-
-bool Self::addRunningSource(OperationSourcePtr source)
-{
-    if (!OperationQueue::addRunningSource(source)) {
-        return false;
-    }
-    // FIXME(fpohtmeh): remove override and virtual specifier?
-    return true;
-}
-
-void Self::removeRunningSource(OperationSourcePtr source)
-{
-    OperationQueue::removeRunningSource(source);
-    // FIXME(fpohtmeh): remove override and virtual specifier?
 }
 
 void Self::onPushListFolder(const CloudFileHandler &parentFolder)

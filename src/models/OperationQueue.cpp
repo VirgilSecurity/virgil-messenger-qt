@@ -77,7 +77,9 @@ void Self::stop()
 {
     qCDebug(m_category) << "stop";
     m_sources.clear();
-    m_runningSources.clear();
+    for (auto listener : m_listeners) {
+        listener->clear();
+    }
     m_isStopped = true;
     emit stopRequested(QPrivateSignal());
     m_threadPool->waitForDone();
@@ -86,6 +88,12 @@ void Self::stop()
 void Self::addSource(OperationSourcePtr source)
 {
     addSourceImpl(std::move(source), true);
+}
+
+void Self::addListener(OperationQueueListenerPtr listener)
+{
+    m_listeners.push_back(listener);
+    connect(listener.get(), &OperationQueueListener::notificationCreated, this, &Self::notificationCreated);
 }
 
 void Self::addSourceImpl(OperationSourcePtr source, const bool run)
@@ -108,10 +116,11 @@ void Self::runSource(OperationSourcePtr source)
             qCDebug(m_category) << "Operation was skipped because queue was stopped";
             return;
         }
-        // Add running source
-        if (!addRunningSource(source)) {
-            qCDebug(m_category) << "Duplicated operation was skipped. Unique id:" << source->uniqueId();
-            return;
+        // Pre-run listeners
+        for (auto listener : m_listeners) {
+            if (!listener->preRun(source)) {
+                return;
+            }
         }
         // Perform operation
         auto op = createOperation(source);
@@ -121,35 +130,11 @@ void Self::runSource(OperationSourcePtr source)
             emit operationFailed(source, QPrivateSignal());
         }
         op->drop(true);
-        // Remove running source
-        removeRunningSource(source);
-    });
-}
-
-bool Self::addRunningSource(OperationSourcePtr source)
-{
-    QMutexLocker locker(&m_runningSourcesMutex);
-    // FIXME(fpohtmeh): copy running sources
-    const auto uniqueId = source->uniqueId();
-    if (!uniqueId.isEmpty()) {
-        const auto it = std::find_if(m_runningSources.begin(), m_runningSources.end(), [uniqueId](auto source) {
-            return source->uniqueId() == uniqueId;
-        });
-        if (it != m_runningSources.end()) {
-            return false;
+        // Post-run listeners
+        for (auto listener : m_listeners) {
+            listener->postRun(source);
         }
-    }
-    m_runningSources.push_back(source);
-    return true;
-}
-
-void Self::removeRunningSource(OperationSourcePtr source)
-{
-    QMutexLocker locker(&m_runningSourcesMutex);
-    const auto it = std::find(m_runningSources.begin(), m_runningSources.end(), source);
-    if (it != m_runningSources.end()) {
-        m_runningSources.erase(it);
-    }
+    });
 }
 
 void Self::onOperationFailed(OperationSourcePtr source)

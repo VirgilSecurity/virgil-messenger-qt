@@ -1,4 +1,4 @@
-﻿//  Copyright (C) 2015-2021 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,44 +32,36 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_OPERATIONSOURCE_H
-#define VM_OPERATIONSOURCE_H
+#ifndef VM_OPERATION_QUEUE_LISTENER_H
+#define VM_OPERATION_QUEUE_LISTENER_H
 
 #include <memory>
 
-#include <QString>
+#include <QObject>
+
+#include "OperationSource.h"
 
 namespace vm
 {
-class OperationSource
+class OperationQueueListener : public QObject
 {
+    Q_OBJECT
+
 public:
-    enum class Priority
-    {
-        Default,
-        Highest
-    };
+    using QObject::QObject;
+    virtual ~OperationQueueListener() {}
 
-    using PostFunction = std::function<void ()>;
+    virtual bool preRun(OperationSourcePtr source) { Q_UNUSED(source) return true; }
+    virtual void postRun(OperationSourcePtr source) { Q_UNUSED(source) }
+    virtual void clear() {}
 
-    virtual ~OperationSource() {}
-
-    virtual bool isValid() const = 0;
-    virtual QString toString() const = 0;
-
-    qsizetype attemptCount() const { return m_attemptCount; }
-    void incAttemptCount() { ++m_attemptCount; }
-
-    void setPriority(Priority priority) { m_priority = priority; }
-    Priority priority() const { return m_priority; }
-
-private:
-    qsizetype m_attemptCount = 0;
-    Priority m_priority = Priority::Default;
+signals:
+    void notificationCreated(const QString &notification, const bool error);
 };
 
-using OperationSourcePtr = std::shared_ptr<OperationSource>;
-using OperationSources = std::vector<OperationSourcePtr>;
+using OperationQueueListenerPtr = std::shared_ptr<OperationQueueListener>;
+using OperationQueueListeners = std::vector<OperationQueueListenerPtr>;
 }
 
-#endif // VM_OPERATIONSOURCE_H
+#endif // VM_OPERATION_QUEUE_LISTENER_H
+

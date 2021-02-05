@@ -35,6 +35,7 @@
 #include "CreateCloudFolderOperation.h"
 
 #include "CloudFileOperation.h"
+#include "FileUtils.h"
 #include "Messenger.h"
 
 using namespace vm;
@@ -52,6 +53,13 @@ CreateCloudFolderOperation::CreateCloudFolderOperation(CloudFileOperation *paren
 
 void CreateCloudFolderOperation::run()
 {
+    // Local folder check
+    const auto localPath = QDir(m_parentFolder->localPath()).filePath(m_name);
+    if (FileUtils::fileExists(localPath)) {
+        failAndNotify(tr("Folder name is not unique"));
+        return;
+    }
+
     // FIXME(fpohtmeh): check if local path exists
     // FIXME(fpohtmeh): get updated folder
     m_requestId = m_parent->cloudFileSystem()->createFolder(m_name, m_parentFolder);
