@@ -49,10 +49,7 @@ GroupId vm::GroupUpdateGetId(const GroupUpdate& update) {
     else if (auto base = std::get_if<AddGroupUpdate>(&update)) {
         return base->groupId;
     }
-    else if (auto base = std::get_if<GroupMemberInvitationUpdate>(&update)) {
-        return base->groupId;
-    }
-    else if (auto base = std::get_if<ProcessGroupInvitationUpdate>(&update)) {
+    else if (auto base = std::get_if<GroupInvitationUpdate>(&update)) {
         return base->groupId;
     }
     else {

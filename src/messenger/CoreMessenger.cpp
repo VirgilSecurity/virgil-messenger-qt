@@ -81,6 +81,19 @@ using namespace vm;
 using Self = vm::CoreMessenger;
 
 Q_LOGGING_CATEGORY(lcCoreMessenger, "core-messenger");
+Q_LOGGING_CATEGORY(lcCoreMessengerXMPP, "core-messenger-xmpp");
+
+// --------------------------------------------------------------------------
+// XMPP Helpers.
+// --------------------------------------------------------------------------
+template<typename T>
+static QString toXmlString(const T& obj) {
+    QString xmlStr;
+    QXmlStreamWriter xmlWriter(&xmlStr);
+    xmlWriter.setAutoFormatting(true);
+    obj.toXml(&xmlWriter);
+    return xmlStr;
+}
 
 // --------------------------------------------------------------------------
 // C Helpers.
@@ -391,17 +404,17 @@ Self::resetXmppConfiguration() {
     connect(m_impl->xmppCarbonManager, &QXmppCarbonManager::messageSent, this, &Self::xmppOnCarbonMessageReceived);
 
     // Add extra logging
-#if USE_XMPP_LOGS
+// #if USE_XMPP_LOGS
     auto logger = QXmppLogger::getLogger();
     logger->setLoggingType(QXmppLogger::SignalLogging);
     logger->setMessageTypes(QXmppLogger::AnyMessage);
 
     connect(logger, &QXmppLogger::message, [](QXmppLogger::MessageType, const QString &text){
-        qCDebug(lcCoreMessenger) << text;
+        qCDebug(lcCoreMessengerXMPP).noquote() << "" << text;
     });
 
     m_impl->xmpp->setLogger(logger);
-#endif
+// #endif
 
     auto receipt = m_impl->xmpp->findExtension<QXmppMessageReceiptManager>();
     connect(receipt, &QXmppMessageReceiptManager::messageDelivered, this, &Self::xmppOnMessageDelivered);
@@ -707,13 +720,7 @@ Self::onRegisterPushNotifications() {
 
     xmppPush.setNode(currentUserJid());
 
-#ifdef QT_DEBUG
-    QString xml;
-    QXmlStreamWriter xmlWriter(&xml);
-    xmlWriter.setAutoFormatting(true);
-    xmppPush.toXml(&xmlWriter);
-    qCDebug(lcCoreMessenger).noquote() << "Subscribe XMPP request:" << xml;
-#endif
+    qCDebug(lcCoreMessenger).noquote() << "Subscribe XMPP request:" << toXmlString(xmppPush);
 
     const bool sentStatus = m_impl->xmpp->sendPacket(xmppPush);
 
@@ -734,13 +741,7 @@ Self::onDeregisterPushNotifications() {
 
     xmppPush.setNode(currentUserJid());
 
-#ifdef QT_DEBUG
-    QString xml;
-    QXmlStreamWriter xmlWriter(&xml);
-    xmlWriter.setAutoFormatting(true);
-    xmppPush.toXml(&xmlWriter);
-    qCDebug(lcCoreMessenger).noquote() << "Unsubscribe XMPP request:" << xml;
-#endif
+    qCDebug(lcCoreMessenger).noquote() << "Unsubscribe XMPP request:" << toXmlString(xmppPush);
 
     const bool sentStatus = m_impl->xmpp->sendPacket(xmppPush);
 
@@ -992,76 +993,137 @@ Self::sendMessage(MessageHandler message) {
             return Self::Result::Error_Offline;
         }
 
-        //
-        //  Find recipient.
-        //
-        auto recipient = findUserById(message->recipientId());
-        if (!recipient) {
-            //
-            //  Got network troubles to find recipient, so cache message and try later.
-            //
-            qCWarning(lcCoreMessenger) << "Can not send message - recipient is not found";
-            return Self::Result::Error_UserNotFound;
-        }
+        switch (message->chatType()) {
+            case ChatType::Personal:
+                return sendPersonalMessage(message);
 
-        //
-        //  Encrypt message.
-        //
-        auto messageData = packMessage(message);
-        auto ciphertextDataMinLen = vssq_messenger_encrypted_message_len(
-                    m_impl->messenger.get(), messageData.size(), recipient->impl()->user.get());
-
-        qCDebug(lcCoreMessenger) << "Message Len   :" << messageData.size();
-        qCDebug(lcCoreMessenger) << "ciphertext Len:" << ciphertextDataMinLen;
-
-        QByteArray ciphertextData(ciphertextDataMinLen, 0x00);
-
-        auto ciphertext = vsc_buffer_wrap_ptr(vsc_buffer_new());
-        vsc_buffer_use(ciphertext.get(), (byte *)ciphertextData.data(), ciphertextData.size());
-
-        const vssq_status_t encryptionStatus = vssq_messenger_encrypt_data(
-                    m_impl->messenger.get(), vsc_data_from(messageData), recipient->impl()->user.get(), ciphertext.get());
-
-        if (encryptionStatus != vssq_status_SUCCESS) {
-            qCWarning(lcCoreMessenger) << "Can not encrypt ciphertext:" << vsc_str_to_qstring(vssq_error_message_from_status(encryptionStatus));
-            return Self::Result::Error_InvalidMessageCiphertext;
-        }
-
-        ciphertextData.resize(vsc_buffer_len(ciphertext.get()));
-
-        //
-        //  Pack JSON body.
-        //
-        auto messageBody = packXmppMessageBody(ciphertextData, PushType::Alert);
-
-        qCDebug(lcCoreMessenger) << "Will send XMPP message with body:" << messageBody;
-
-        // TODO: review next lines when implement group chats.
-        auto senderJid = userIdToJid(message->senderId());
-        auto recipientJid = userIdToJid(UserId(message->chatId()));
-
-        qCDebug(lcCoreMessenger) << "Will send XMPP message from JID:" << senderJid;
-        qCDebug(lcCoreMessenger) << "Will send XMPP message to JID:" << recipientJid;
-
-        QXmppMessage xmppMessage(senderJid, recipientJid, messageBody);
-        xmppMessage.setId(message->id());
-        xmppMessage.setStamp(message->createdAt());
-        xmppMessage.setType(QXmppMessage::Type::Chat);
-        xmppMessage.setReceiptRequested(true);
-
-        //
-        //  Send.
-        //
-        bool isSent = m_impl->xmpp->sendPacket(xmppMessage);
-        if (isSent) {
-            qCDebug(lcCoreMessenger) << "XMPP message was sent";
-            return Self::Result::Success;
-        } else {
-            qCWarning(lcCoreMessenger) << "Can not send message - XMPP send failed";
-            return Self::Result::Error_SendMessageFailed;
+            case ChatType::Group:
+                return sendGroupMessage(message);
         }
     });
+}
 
+
+Self::Result
+Self::sendPersonalMessage(const MessageHandler& message) {
+
+    //
+    //  Find recipient.
+    //
+    auto recipient = findUserById(message->recipientId());
+    if (!recipient) {
+        //
+        //  Got network troubles to find recipient, so cache message and try later.
+        //
+        qCWarning(lcCoreMessenger) << "Can not send message - recipient is not found";
+        return Self::Result::Error_UserNotFound;
+    }
+
+    //
+    //  Encrypt message.
+    //
+    auto messageData = packMessage(message);
+    auto ciphertextDataMinLen = vssq_messenger_encrypted_message_len(
+                m_impl->messenger.get(), messageData.size(), recipient->impl()->user.get());
+
+    qCDebug(lcCoreMessenger) << "Message Len   :" << messageData.size();
+    qCDebug(lcCoreMessenger) << "ciphertext Len:" << ciphertextDataMinLen;
+
+    auto [ciphertextData, ciphertext] = makeMappedBuffer(ciphertextDataMinLen);
+
+    const vssq_status_t encryptionStatus = vssq_messenger_encrypt_data(
+                m_impl->messenger.get(), vsc_data_from(messageData), recipient->impl()->user.get(), ciphertext.get());
+
+    if (encryptionStatus != vssq_status_SUCCESS) {
+        qCWarning(lcCoreMessenger) << "Can not encrypt ciphertext:" << vsc_str_to_qstring(vssq_error_message_from_status(encryptionStatus));
+        return Self::Result::Error_InvalidMessageCiphertext;
+    }
+
+    adjustMappedBuffer(ciphertext, ciphertextData);
+
+    //
+    //  Pack JSON body.
+    //
+    auto messageBody = packXmppMessageBody(ciphertextData, UserId(), PushType::Alert);
+
+    qCDebug(lcCoreMessenger) << "Will send XMPP message with body:" << messageBody;
+
+    auto senderJid = userIdToJid(message->senderId());
+    auto recipientJid = userIdToJid(UserId(message->chatId()));
+
+    qCDebug(lcCoreMessenger) << "Will send XMPP message from JID:" << senderJid;
+    qCDebug(lcCoreMessenger) << "Will send XMPP message to JID:" << recipientJid;
+
+    QXmppMessage xmppMessage(senderJid, recipientJid, messageBody);
+    xmppMessage.setId(message->id());
+    xmppMessage.setStamp(message->createdAt());
+    xmppMessage.setType(QXmppMessage::Type::Chat);
+    xmppMessage.setReceiptRequested(true);
+
+    //
+    //  Send.
+    //
+    bool isSent = m_impl->xmpp->sendPacket(xmppMessage);
+    if (isSent) {
+        qCDebug(lcCoreMessenger) << "XMPP message was sent:" << message->id();
+        return Self::Result::Success;
+    } else {
+        qCWarning(lcCoreMessenger) << "Can not send message - XMPP send failed:" << message->id();
+        return Self::Result::Error_SendMessageFailed;
+    }
+}
+
+
+Self::Result
+Self::sendGroupMessage(const MessageHandler& message) {
+
+    //
+    //  Encrypt message for a group.
+    //
+    auto groupId = message->groupChatInfo()->groupId();
+
+    auto messageData = packMessage(message);
+
+    auto encryptedMessageDataResult = encryptGroupMessage(groupId, messageData);
+
+    if (auto status = std::get_if<Self::Result>(&encryptedMessageDataResult)) {
+        qCDebug(lcCoreMessenger) << "Failed to send message with id:" << message->id();
+        return *status;
+    }
+
+    auto encryptedMessageData = std::get_if<QByteArray>(&encryptedMessageDataResult)->toBase64();
+
+    //
+    //  Pack JSON body.
+    //
+    auto messageBody = packXmppMessageBody(encryptedMessageData, message->senderId(), PushType::Alert);
+
+
+    qCDebug(lcCoreMessenger) << "Will send XMPP message with body:" << messageBody;
+
+    auto senderJid = userIdToJid(message->senderId());
+    auto groupJid = groupIdToJid(groupId);
+
+    qCDebug(lcCoreMessenger) << "Will send XMPP message from JID:" << senderJid;
+    qCDebug(lcCoreMessenger) << "Will send XMPP message to group JID:" << groupJid;
+
+    QXmppMessage xmppMessage(senderJid, groupJid, messageBody);
+    xmppMessage.setId(message->id());
+    xmppMessage.setStamp(message->createdAt());
+    xmppMessage.setType(QXmppMessage::Type::GroupChat);
+    xmppMessage.setReceiptRequested(false); // TODO: Review this decision.
+
+    //
+    //  Send.
+    //
+    bool isSent = m_impl->xmpp->sendPacket(xmppMessage);
+    if (isSent) {
+        qCDebug(lcCoreMessenger) << "XMPP message was sent";
+        return Self::Result::Success;
+    } else {
+        qCWarning(lcCoreMessenger) << "Can not send message - XMPP send failed";
+        return Self::Result::Error_SendMessageFailed;
+    }
 }
 
 
@@ -1072,87 +1134,176 @@ Self::processReceivedXmppMessage(const QXmppMessage& xmppMessage) {
         qCInfo(lcCoreMessenger) << "Received XMPP message";
         qCDebug(lcCoreMessenger) << "Received XMPP message:" << xmppMessage.id() << "from:" << xmppMessage.from();
 
-        if (xmppMessage.type() != QXmppMessage::Type::Chat) {
-            qCDebug(lcCoreMessenger) << "Got message that is not of type 'chat', so ignore it";
-            return Self::Result::Success;
+        switch (xmppMessage.type()) {
+            case QXmppMessage::Type::Chat:
+                return processChatReceivedXmppMessage(xmppMessage);
+
+            case QXmppMessage::Type::GroupChat:
+                return processGroupChatReceivedXmppMessage(xmppMessage);
+
+            default:
+                break;
         }
 
-        auto message = std::make_unique<IncomingMessage>();
-
-        // TODO: review next lines when implement group chats.
-        message->setId(MessageId(xmppMessage.id()));
-        message->setRecipientId(userIdFromJid(xmppMessage.to()));
-        message->setSenderId(userIdFromJid(xmppMessage.from()));
-        message->setCreatedAt(xmppMessage.stamp());
-
-        if (message->recipientId() != currentUser()->id()) {
-            qCWarning(lcCoreMessenger) << "Got message sent to an another account:" << message->recipientId();
-
-            return Self::Result::Success;
-        }
-
-        //
-        //  Decode message body from Base64 and JSON.
-        //
-        auto ciphertextResult = unpackXmppMessageBody(xmppMessage);
-        if (auto status = std::get_if<CoreMessengerStatus>(&ciphertextResult)) {
-            return *status;
-        }
-
-        auto ciphertext = std::move(*std::get_if<QByteArray>(&ciphertextResult));
-
-        //
-        //  Find sender.
-        //
-        auto sender = findUserById(message->senderId());
-        if (!sender) {
-            //
-            //  Got network troubles to find sender, so cache message and try later.
-            //
-            qCWarning(lcCoreMessenger) << "Can not decrypt ciphertext - sender is not found";
-            message->setContent(MessageContentEncrypted(ciphertext));
-            emit messageReceived(std::move(message));
-            return Self::Result::Success;
-        }
-
-        //
-        //  Decrypt message.
-        //
-        auto plaintextDataMinLen = vssq_messenger_decrypted_message_len(m_impl->messenger.get(), ciphertext.size());
-        QByteArray plaintextData(plaintextDataMinLen, 0x00);
-
-        auto plaintext = vsc_buffer_wrap_ptr(vsc_buffer_new());
-        vsc_buffer_use(plaintext.get(),  (byte *)plaintextData.data(), plaintextData.size());
-
-        const vssq_status_t decryptionStatus = vssq_messenger_decrypt_data(
-                    m_impl->messenger.get(), vsc_data_from(ciphertext), sender->impl()->user.get(), plaintext.get());
-
-        if (decryptionStatus != vssq_status_SUCCESS) {
-            qCWarning(lcCoreMessenger) << "Can not decrypt ciphertext:" << vsc_str_to_qstring(vssq_error_message_from_status(decryptionStatus));
-            return Self::Result::Error_InvalidMessageCiphertext;
-        }
-
-        plaintextData.resize(vsc_buffer_len(plaintext.get()));
-
-        qCInfo(lcCoreMessenger) << "Received XMPP message was decrypted";
-
-        //
-        //  Unpack message.
-        //
-        if (auto result = unpackMessage(plaintextData, *message); result != Self::Result::Success) {
-            return result;
-        }
-
-        qCInfo(lcCoreMessenger) << "Received XMPP message was parsed";
-
-        //
-        //  Tell the world we got a message.
-        //
-        emit messageReceived(std::move(message));
+        qCWarning(lcCoreMessenger) << "Got unexpected message of type:" << xmppMessage.type();
+        qCDebug(lcCoreMessenger).noquote() << "Got unexpected message:" << toXmlString(xmppMessage);
 
         return Self::Result::Success;
     });
 }
+
+
+Self::Result
+Self::processChatReceivedXmppMessage(const QXmppMessage& xmppMessage) {
+
+    auto message = std::make_unique<IncomingMessage>();
+
+    message->setId(MessageId(xmppMessage.id()));
+    message->setRecipientId(userIdFromJid(xmppMessage.to()));
+    message->setSenderId(userIdFromJid(xmppMessage.from()));
+    message->setCreatedAt(xmppMessage.stamp());
+
+    if (message->recipientId() != currentUser()->id()) {
+        qCWarning(lcCoreMessenger) << "Got message sent to an another account:" << message->recipientId();
+
+        return Self::Result::Error_InvalidMessageRecipient;
+    }
+
+    //
+    //  Decode message body from Base64 and JSON.
+    //
+    auto ciphertextResult = unpackXmppMessageBody(xmppMessage);
+    if (auto status = std::get_if<CoreMessengerStatus>(&ciphertextResult)) {
+        return *status;
+    }
+
+    auto [ciphertext, _] = std::move(*std::get_if<std::tuple<QByteArray, UserId>>(&ciphertextResult));
+
+    //
+    //  Find sender.
+    //
+    auto sender = findUserById(message->senderId());
+    if (!sender) {
+        //
+        //  Got network troubles to find sender, so cache message and try later.
+        //
+        qCWarning(lcCoreMessenger) << "Can not decrypt ciphertext - sender is not found";
+        message->setContent(MessageContentEncrypted(ciphertext));
+        emit messageReceived(std::move(message));
+        return Self::Result::Success;
+    }
+
+    //
+    //  Decrypt message.
+    //
+    auto plaintextDataMinLen = vssq_messenger_decrypted_message_len(m_impl->messenger.get(), ciphertext.size());
+
+    auto [plaintextData, plaintext] = makeMappedBuffer(plaintextDataMinLen);
+
+    const vssq_status_t decryptionStatus = vssq_messenger_decrypt_data(
+                m_impl->messenger.get(), vsc_data_from(ciphertext), sender->impl()->user.get(), plaintext.get());
+
+    if (decryptionStatus != vssq_status_SUCCESS) {
+        qCWarning(lcCoreMessenger) << "Can not decrypt ciphertext:" << vsc_str_to_qstring(vssq_error_message_from_status(decryptionStatus));
+        return Self::Result::Error_InvalidMessageCiphertext;
+    }
+
+    adjustMappedBuffer(plaintext, plaintextData);
+
+    qCInfo(lcCoreMessenger) << "Received XMPP message was decrypted";
+
+    //
+    //  Unpack message.
+    //
+    if (auto result = unpackMessage(plaintextData, *message); result != Self::Result::Success) {
+        return result;
+    }
+
+    qCInfo(lcCoreMessenger) << "Received XMPP message was parsed";
+
+    //
+    //  Tell the world we got a message.
+    //
+    emit messageReceived(std::move(message));
+
+    return Self::Result::Success;
+}
+
+
+Self::Result
+Self::processGroupChatReceivedXmppMessage(const QXmppMessage& xmppMessage) {
+
+    auto groupId = groupIdFromJid(xmppMessage.from());
+
+    auto message = std::make_unique<IncomingMessage>();
+
+    message->setId(MessageId(xmppMessage.id()));
+    message->setRecipientId(userIdFromJid(xmppMessage.to()));
+    message->setCreatedAt(xmppMessage.stamp());
+    message->setGroupChatInfo(std::make_unique<MessageGroupChatInfo>(groupId));
+
+    if (message->recipientId() != currentUser()->id()) {
+        qCWarning(lcCoreMessenger) << "Got message sent to an another account:" << message->recipientId();
+
+        return Self::Result::Error_InvalidMessageRecipient;
+    }
+
+    //
+    //  Decode message body from Base64 and JSON.
+    //
+    auto ciphertextResult = unpackXmppMessageBody(xmppMessage);
+    if (auto status = std::get_if<CoreMessengerStatus>(&ciphertextResult)) {
+        return *status;
+    }
+
+    auto [ciphertext, senderId] = std::move(*std::get_if<std::tuple<QByteArray, UserId>>(&ciphertextResult));
+
+    if (!senderId.isValid()) {
+        qCWarning(lcCoreMessenger) << "Got group message without explicitly defined sender id";
+        return Self::Result::Error_InvalidMessageFormat;
+    }
+
+    message->setSenderId(senderId);
+
+    //
+    //  Decrypt message.
+    //
+    auto decryptedMessageResult = decryptGroupMessage(groupId, senderId, ciphertext);
+
+    if (auto status = std::get_if<Self::Result>(&decryptedMessageResult)) {
+        qCDebug(lcCoreMessenger) << "Can not decrypt a message for group:" << groupId << ", from:" << senderId;
+
+        if (*status == Self::Result::Error_GroupNotFound) {
+            message->setContent(MessageContentEncrypted(std::move(ciphertext)));
+            emit messageReceived(std::move(message));
+            return Self::Result::Success;
+        }
+
+        return *status;
+    }
+
+    auto plaintextData = std::move(*std::get_if<QByteArray>(&decryptedMessageResult));
+
+    qCInfo(lcCoreMessenger) << "Received XMPP message was decrypted";
+
+    //
+    //  Unpack message.
+    //
+    if (auto result = unpackMessage(plaintextData, *message); result != Self::Result::Success) {
+        return result;
+    }
+
+    qCInfo(lcCoreMessenger) << "Received XMPP message was parsed";
+
+    //
+    //  Tell the world we got a message.
+    //
+    emit messageReceived(std::move(message));
+
+    return Self::Result::Success;
+}
+
+
 
 QFuture<Self::Result>
 Self::processReceivedXmppCarbonMessage(const QXmppMessage& xmppMessage) {
@@ -1295,7 +1446,6 @@ Self::processReceivedXmppCarbonMessage(const QXmppMessage& xmppMessage) {
 
             message->setRecipientUsername(std::move(recipientUsername));
         }
-
 
         //
         //  Parse content.
@@ -1632,7 +1782,12 @@ Self::xmppOnConnected() {
     }
 
     for (auto xmppRoom : m_impl->xmppGroupChatManager->rooms()) {
-        xmppRoom->join();
+        if (xmppRoom->isJoined()) {
+            qCDebug(lcCoreMessenger) << "XMPP room is already joined:" << xmppRoom->jid();
+        } else {
+            qCDebug(lcCoreMessenger) << "Re-join XMPP room:" << xmppRoom->jid();
+            xmppRoom->join();
+        }
     }
 
     changeConnectionState(Self::ConnectionState::Connected);
@@ -1673,13 +1828,13 @@ Self::xmppOnError(QXmppClient::Error error) {
 
 void
 Self::xmppOnPresenceReceived(const QXmppPresence &presence) {
-    Q_UNUSED(presence)
+    qCDebug(lcCoreMessenger).noquote() << "Got XMPP presence:" << toXmlString(presence);
 }
 
 
 void
 Self::xmppOnIqReceived(const QXmppIq &iq) {
-    Q_UNUSED(iq)
+    qCDebug(lcCoreMessenger).noquote() << "Got XMPP IQ:" << toXmlString(iq);
 }
 
 void
@@ -1912,7 +2067,7 @@ Self::unpackMessage(const QByteArray& messageData, Message& message) {
     message.setContent(std::move(content));
 
     //
-    //  FIXME: Parse group chat info (optional).
+    //  TODO: Parse addition fields related to group chats if exists.
     //
 
     return Self::Result::Success;
@@ -1920,7 +2075,7 @@ Self::unpackMessage(const QByteArray& messageData, Message& message) {
 
 
 QByteArray
-Self::packXmppMessageBody(const QByteArray& messageCiphertext, PushType pushType) {
+Self::packXmppMessageBody(const QByteArray& messageCiphertext, const UserId& senderId, PushType pushType) {
     //
     //  Pack to JSON and return Base64 string.
     //
@@ -1942,11 +2097,15 @@ Self::packXmppMessageBody(const QByteArray& messageCiphertext, PushType pushType
 
     messageBodyJson["ciphertext"] = QString::fromLatin1(messageCiphertext.toBase64());
 
+    if (!senderId.isValid()) {
+        messageBodyJson["fromId"] = QString(senderId);
+    }
+
     return MessageContentJsonUtils::toBytes(messageBodyJson).toBase64();
 }
 
 
-std::variant<CoreMessengerStatus, QByteArray>
+std::variant<CoreMessengerStatus, std::tuple<QByteArray, UserId>>
 Self::unpackXmppMessageBody(const QXmppMessage& xmppMessage) {
 
         //
@@ -1987,7 +2146,12 @@ Self::unpackXmppMessageBody(const QXmppMessage& xmppMessage) {
             return Self::Result::Error_InvalidMessageCiphertext;
         }
 
-        return *ciphertextDecoded;
+        //
+        //  Get senderId (optional).
+        //
+        const auto senderId = messageBodyJson["fromId"].toString();
+
+        return std::make_tuple(*ciphertextDecoded, UserId(senderId));
 }
 
 
@@ -2050,7 +2214,7 @@ Self::onCreateGroupChat(const GroupHandler& group) {
         //
         auto owner = currentUser();
         emit updateGroup(AddGroupOwnersUpdate{group->id(), {owner}});
-        emit updateGroup(GroupMemberInvitationUpdate{group->id(), owner->id(), GroupInvitationStatus::Accepted});
+        emit updateGroup(GroupInvitationUpdate{group->id(), owner->id(), GroupInvitationStatus::Accepted});
         emit updateGroup(AddGroupMembersUpdate{group->id(), userList});
 
         //
@@ -2140,8 +2304,8 @@ Self::xmppOnCreateGroupChat(const GroupHandler& group, const Users& membersToBeI
             invitationMessage->setRecipientId(user->id());
             invitationMessage->setRecipientUsername(user->username());
             invitationMessage->setContent(MessageContentGroupInvitation{group->name(), "Hello!"});
-            invitationMessage->setChatType(ChatType::Group);
             invitationMessage->setGroupChatInfo(std::make_unique<MessageGroupChatInfo>(group->id()));
+            invitationMessage->setCreatedNow();
 
             auto invitationMessageData = packMessage(invitationMessage);
 
@@ -2158,7 +2322,7 @@ Self::xmppOnCreateGroupChat(const GroupHandler& group, const Users& membersToBeI
                 qCDebug(lcCoreMessenger) << "User was invited:" << user->id();
                 invitationMessage->setStage(OutgoingMessageStage::Sent);
                 emit messageReceived(invitationMessage);
-                emit updateGroup(GroupMemberInvitationUpdate{group->id(), user->id(), GroupInvitationStatus::Invited});
+                emit updateGroup(GroupInvitationUpdate{group->id(), user->id(), GroupInvitationStatus::Invited});
 
             } else {
                 qCDebug(lcCoreMessenger) << "User invitation was postponed:" << user->id();
@@ -2177,7 +2341,6 @@ void Self::xmppOnMucInvitationReceived(const QString &roomJid, const QString &in
     qCDebug(lcCoreMessenger) << "Got XMPP room invitation:";
     qCDebug(lcCoreMessenger) << "    -> room:" << roomJid;
     qCDebug(lcCoreMessenger) << "    -> inviter:" << inviter;
-    qCDebug(lcCoreMessenger) << "    -> reason:" << reason;
 
     QtConcurrent::run([this, roomJid, inviter, reason]() {
 
@@ -2208,8 +2371,11 @@ void Self::xmppOnMucInvitationReceived(const QString &roomJid, const QString &in
         //  Decrypt.
         //
         auto invitationMessage = std::make_shared<IncomingMessage>();
+        invitationMessage->setId(MessageId::generate());
         invitationMessage->setSenderId(senderId);
         invitationMessage->setRecipientId(recipientId);
+        invitationMessage->setGroupChatInfo(std::make_unique<MessageGroupChatInfo>(groupId));
+
 
         auto decryptedInvitationMessageResult = decryptGroupMessage(groupId, senderId, encryptedInvitationMessage);
 
@@ -2218,7 +2384,7 @@ void Self::xmppOnMucInvitationReceived(const QString &roomJid, const QString &in
 
             invitationMessage->setContent(MessageContentEncrypted(std::move(encryptedInvitationMessage)));
 
-            emit updateGroup(ProcessGroupInvitationUpdate{std::move(groupId), invitationMessage});
+            emit messageReceived(invitationMessage);
 
             return;
         }
@@ -2236,7 +2402,6 @@ void Self::xmppOnMucInvitationReceived(const QString &roomJid, const QString &in
         }
 
         emit messageReceived(invitationMessage);
-        emit updateGroup(ProcessGroupInvitationUpdate{std::move(groupId), invitationMessage});
     });
 }
 
@@ -2255,15 +2420,37 @@ void Self::connectXmppRoomSignals(QXmppMucRoom *room) {
     });
 
     connect(room, &QXmppMucRoom::configurationReceived, [room](const QXmppDataForm &configuration) {
-        qCDebug(lcCoreMessenger) << "---> configurationReceived:";
+        qCDebug(lcCoreMessenger).noquote() << "Room configuration received:" << toXmlString(configuration);
     });
 
     connect(room, &QXmppMucRoom::error, [room](const QXmppStanza::Error &error) {
-        qCDebug(lcCoreMessenger) << "---> error:";
+        qCWarning(lcCoreMessenger) << "Got room:" << room->jid() << ", error:"<< toXmlString(error);
     });
 
-    connect(room, &QXmppMucRoom::joined, [room]() {
+    connect(room, &QXmppMucRoom::joined, [this, room]() {
         qCDebug(lcCoreMessenger) << "Joined to the XMPP room:" << room->jid();
+        room->requestConfiguration();
+        room->requestPermissions();
+
+        //
+        //  FIXME: Remove this debug code
+        //
+
+        //  Admin Requests Member List
+        QXmppMucItem requestMemberItem;
+        requestMemberItem.setAffiliation(QXmppMucItem::MemberAffiliation);
+
+        auto requestId = QString(MessageId::generate());
+
+        QXmppMucAdminIq requestMemberList;
+        requestMemberList.setId(requestId);
+        requestMemberList.setFrom(currentUserJid());
+        requestMemberList.setTo(room->jid());
+        requestMemberList.setItems({ requestMemberItem });
+
+        if (m_impl->xmpp->sendPacket(requestMemberList)) {
+            qCDebug(lcCoreMessenger()) << "Requested members list for group:" << room->jid() << ", iq:" << requestId;
+        }
     });
 
     connect(room, &QXmppMucRoom::kicked, [room](const QString &jid, const QString &reason) {
@@ -2278,18 +2465,10 @@ void Self::connectXmppRoomSignals(QXmppMucRoom *room) {
         qCDebug(lcCoreMessenger) << "---> left:";
     });
 
-    connect(room, &QXmppMucRoom::messageReceived, [room](const QXmppMessage &message) {
-        qCDebug(lcCoreMessenger) << "---> messageReceived:" << message.type() << message.body();
+    connect(room, &QXmppMucRoom::messageReceived, [this, room](const QXmppMessage &message) {
+        qCDebug(lcCoreMessenger) << "Received room message:" << room->jid();
 
-        QString messageXml;
-        QXmlStreamWriter writer(&messageXml);
-        writer.setAutoFormatting(true);
-        message.toXml(&writer);
-
-        qCDebug(lcCoreMessenger) << "--->2 messageReceived:" << messageXml;
-        //
-        //  FIXME: Create group chat message and emit it.
-        //
+        processReceivedXmppMessage(message);
     });
 
     connect(room, &QXmppMucRoom::nameChanged, [room](const QString &name) {
@@ -2317,7 +2496,10 @@ void Self::connectXmppRoomSignals(QXmppMucRoom *room) {
     });
 
     connect(room, &QXmppMucRoom::permissionsReceived, [room](const QList<QXmppMucItem> &permissions) {
-        qCDebug(lcCoreMessenger) << "---> permissionsReceived:";
+        qCDebug(lcCoreMessenger) << "Room permissions received:" << room->jid();
+        for (const auto&permission : permissions) {
+            qCDebug(lcCoreMessenger).noquote() << toXmlString(permission);
+        }
     });
 
     connect(room, &QXmppMucRoom::subjectChanged, [room](const QString &subject) {

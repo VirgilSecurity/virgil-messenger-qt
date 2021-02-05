@@ -79,7 +79,7 @@ void Self::addMessage(ModifiableMessageHandler message) {
         emit messageAdding();
         const auto count = rowCount();
         beginInsertRows(QModelIndex(), count, count);
-        m_messages.emplace_back(std::move(message));
+        m_messages.push_back(std::move(message));
         endInsertRows();
         invalidateRow(count);
     }

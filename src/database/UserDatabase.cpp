@@ -46,6 +46,8 @@
 #include "database/MessagesTable.h"
 #include "database/UserDatabaseMigration.h"
 
+#include "MessageContentGroupInvitation.h"
+
 using namespace vm;
 using Self = UserDatabase;
 
@@ -233,14 +235,32 @@ void Self::onWriteChatAndLastMessage(const ChatHandler &chat)
 {
     ScopedConnection connection(*this);
     ScopedTransaction transaction(*this);
-    // Create chat without last message
+    //
+    // Create chat without last message.
+    //
     chatsTable()->addChat(chat);
-    // Create message & attachment
+
+    //
+    // Create groups for group chat.
+    //
+    if (chat->type() == ChatType::Group) {
+        groupsTable()->addGroupForChat(chat);
+        groupMembersTable()->addMembersFromLastMessage(chat->lastMessage());
+    }
+
+    //
+    // Create message.
+    //
     const auto message = chat->lastMessage();
     messagesTable()->addMessage(message);
+
+    //
+    // Create attachment (optional).
+    //
     if (message->contentIsAttachment()) {
         attachmentsTable()->addAttachment(message);
     }
+
     // Update last message
     chatsTable()->updateLastMessage(message, chat->unreadMessageCount());
 }

@@ -180,8 +180,6 @@ public:
     //  Messages.
     //
     QFuture<Result> sendMessage(MessageHandler message);
-    QFuture<Result> processReceivedXmppMessage(const QXmppMessage& xmppMessage);
-    QFuture<Result> processReceivedXmppCarbonMessage(const QXmppMessage& xmppMessage);
 
     //
     //  Encrypt given file and returns a key for decryption and signature.
@@ -251,8 +249,20 @@ private:
     QByteArray packMessage(const MessageHandler& message);
     CoreMessengerStatus unpackMessage(const QByteArray& messageData, Message& message);
 
-    QByteArray packXmppMessageBody(const QByteArray& messageCiphertext, PushType pushType);
-    std::variant<CoreMessengerStatus, QByteArray> unpackXmppMessageBody(const QXmppMessage& xmppMessage);
+    QByteArray packXmppMessageBody(const QByteArray& messageCiphertext, const UserId& senderId, PushType pushType);
+    std::variant<CoreMessengerStatus, std::tuple<QByteArray, UserId>> unpackXmppMessageBody(const QXmppMessage& xmppMessage);
+
+    //
+    //  Message sending / processing helpers.
+    //
+    Result sendPersonalMessage(const MessageHandler& message);
+    Result sendGroupMessage(const MessageHandler& message);
+
+    QFuture<Result> processReceivedXmppMessage(const QXmppMessage& xmppMessage);
+    Result processChatReceivedXmppMessage(const QXmppMessage& xmppMessage);
+    Result processGroupChatReceivedXmppMessage(const QXmppMessage& xmppMessage);
+
+    QFuture<Result> processReceivedXmppCarbonMessage(const QXmppMessage& xmppMessage);
 
     //
     //  Group helpers.

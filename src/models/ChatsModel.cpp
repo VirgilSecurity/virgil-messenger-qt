@@ -120,6 +120,13 @@ void Self::updateLastMessage(const MessageHandler &message, qsizetype unreadMess
     emit chatUpdated(chat);
 }
 
+void Self::updateGroup(const GroupUpdate& groupUpdate)
+{
+    //
+    //  TODO: Add group chat title update.
+    //
+}
+
 ChatHandler Self::findChat(const ChatId &chatId) const
 {
     if (const auto row = findRowById(chatId)) {

@@ -236,39 +236,14 @@ void Self::onGroupChatCreateFailed(const GroupId& chatId, const QString& errorTe
 void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
 {
     //
-    //  Add a new chat when invitation received.
+    //  Update UI.
     //
-    if (auto invitationUpdate = std::get_if<ProcessGroupInvitationUpdate>(&groupUpdate)) {
-
-        if (invitationUpdate->invitationMessage->contentType() != MessageContentType::Text) {
-            //
-            //  TODO: Postpone if encrypted.
-            //  TODO: Make message content type for invitations.
-            //
-            return;
-        }
-
-        auto chat = std::make_shared<Chat>();
-        chat->setId(ChatId(invitationUpdate->groupId));
-        chat->setTitle("New Chat");
-        chat->setType(ChatType::Group);
-        chat->setCreatedAt(QDateTime::currentDateTime());
-
-        m_userDatabase->chatsTable()->addChat(chat);
-
-        m_models->chats()->addChat(std::move(chat));
-    }
+    m_models->chats()->updateGroup(groupUpdate);
 
     //
     //  Update DB.
     //
     m_userDatabase->updateGroup(groupUpdate);
-
-    if (auto groupId = GroupUpdateGetId(groupUpdate); m_currentChat && m_currentChat->id() == groupId) {
-        //
-        //  TODO: Maybe we need invalidate UI for the current chat, aka show notification about the changes.
-        //
-    }
 }
 
 

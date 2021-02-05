@@ -38,6 +38,7 @@
 #include "core/DatabaseTable.h"
 #include "GroupUpdate.h"
 #include "GroupMember.h"
+#include "Message.h"
 
 #include <QString>
 #include <QSqlQuery>
@@ -60,6 +61,7 @@ signals:
     void updateGroup(const GroupUpdate& groupUpdate);
     void fetchByMemberId(const UserId& memberId);
     void fetchByGroupId(const GroupId& groupId);
+    void addMembersFromLastMessage(const MessageHandler& lastMessage);
 
     //
     //  Notification signals.
@@ -71,6 +73,7 @@ private:
     void onUpdateGroup(const GroupUpdate& groupUpdate);
     void onFetchByMemberId(const UserId& memberId);
     void onFetchByGroupId(const GroupId& groupId);
+    void onAddMembersFromLastMessage(const MessageHandler& lastMessage);
 
     bool create() override;
 

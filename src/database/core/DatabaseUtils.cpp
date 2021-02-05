@@ -267,7 +267,7 @@ ModifiableMessageHandler Self::readMessage(const QSqlQuery &query, const QString
     const auto messageIsOutgoing = query.value("messageIsOutgoing").toBool();
     const auto messageStage = query.value("messageStage").toString();
 
-    const auto content = readMessageContent(query);
+    auto content = readMessageContent(query);
     if (std::holds_alternative<std::monostate>(content)) {
         qCCritical(lcDatabase) << "Read message without content with id: " << messageId;
         return nullptr;
@@ -288,11 +288,14 @@ ModifiableMessageHandler Self::readMessage(const QSqlQuery &query, const QString
     message->setId(MessageId(messageId));
     message->setRecipientId(UserId(messageRecipientId));
     message->setSenderId(UserId(messageSenderId));
-    message->setChatType(ChatTypeFromString(messageChatType));
     message->setCreatedAt(QDateTime::fromTime_t(messageCreatedAt));
     message->setSenderUsername(UserId(messageSenderUsername));
     message->setRecipientUsername(UserId(messageRecipientUsername));
     message->setContent(std::move(content));
+
+    if (ChatTypeFromString(messageChatType) == ChatType::Group) {
+        message->setGroupChatInfo(std::make_unique<MessageGroupChatInfo>(GroupId(messageChatId)));
+    }
 
     return message;
 }

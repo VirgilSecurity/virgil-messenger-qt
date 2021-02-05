@@ -68,14 +68,9 @@ struct AddGroupUpdate : public GroupUpdateBase {
 };
 
 
-struct GroupMemberInvitationUpdate : public GroupUpdateBase {
+struct GroupInvitationUpdate : public GroupUpdateBase {
     UserId memberId;
     GroupInvitationStatus invitationStatus;
-};
-
-
-struct ProcessGroupInvitationUpdate : public GroupUpdateBase {
-    MessageHandler invitationMessage;
 };
 
 
@@ -83,8 +78,7 @@ using GroupUpdate = std::variant<
         AddGroupOwnersUpdate,
         AddGroupMembersUpdate,
         AddGroupUpdate,
-        GroupMemberInvitationUpdate,
-        ProcessGroupInvitationUpdate
+        GroupInvitationUpdate
         >;
 
 //

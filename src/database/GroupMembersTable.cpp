@@ -46,6 +46,7 @@ Self::GroupMembersTable(Database *database)
     connect(this, &Self::updateGroup, this, &Self::onUpdateGroup);
     connect(this, &Self::fetchByMemberId, this, &Self::onFetchByMemberId);
     connect(this, &Self::fetchByGroupId, this, &Self::onFetchByGroupId);
+    connect(this, &Self::addMembersFromLastMessage, this, &Self::onAddMembersFromLastMessage);
 }
 
 
@@ -95,7 +96,7 @@ void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
         }
     }
 
-    if (auto update = std::get_if<GroupMemberInvitationUpdate>(&groupUpdate)) {
+    if (auto update = std::get_if<GroupInvitationUpdate>(&groupUpdate)) {
         queryId = QLatin1String("updateGroupMemberInvitationStatus");
 
         DatabaseUtils::BindValues bindValues;
@@ -104,32 +105,6 @@ void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
         bindValues.push_back({ ":invitationStatus", GroupInvitationStatusToString(update->invitationStatus) });
 
         bindValuesCollection.push_back(std::move(bindValues));
-    }
-
-    if (auto update = std::get_if<ProcessGroupInvitationUpdate>(&groupUpdate)) {
-        queryId = QLatin1String("insertGroupMember");
-
-        { // Insert sender (inviter)
-            DatabaseUtils::BindValues bindValues;
-            bindValues.push_back({ ":groupId", QString(update->groupId) });
-            bindValues.push_back({ ":memberId", QString(update->invitationMessage->senderId()) });
-            bindValues.push_back({ ":memberNickname", update->invitationMessage->senderUsername() });
-            bindValues.push_back({ ":memberAffiliation", GroupAffiliationToString(GroupAffiliation::Owner) });
-            bindValues.push_back({ ":invitationStatus", GroupInvitationStatusToString(GroupInvitationStatus::Accepted) });
-
-            bindValuesCollection.push_back(std::move(bindValues));
-        }
-
-        { // Insert recipient (me)
-            DatabaseUtils::BindValues bindValues;
-            bindValues.push_back({ ":groupId", QString(update->groupId) });
-            bindValues.push_back({ ":memberId", QString(update->invitationMessage->recipientId()) });
-            bindValues.push_back({ ":memberNickname", update->invitationMessage->recipientUsername() });
-            bindValues.push_back({ ":memberAffiliation", GroupAffiliationToString(GroupAffiliation::Member) });
-            bindValues.push_back({ ":invitationStatus", GroupInvitationStatusToString(GroupInvitationStatus::None) });
-
-            bindValuesCollection.push_back(std::move(bindValues));
-        }
     }
 
     if (queryId.isEmpty()) {
@@ -154,7 +129,7 @@ void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
 
 
 void Self::onFetchByMemberId(const UserId& memberId) {
-    qCDebug(lcDatabase) << "Start fetching group members by member id";
+    qCDebug(lcDatabase) << "Start fetching group members by member id:" << memberId;
 
     ScopedConnection connection(*database());
 
@@ -178,7 +153,7 @@ void Self::onFetchByMemberId(const UserId& memberId) {
 
 
 void Self::onFetchByGroupId(const GroupId& groupId) {
-    qCDebug(lcDatabase) << "Start fetching group members by member id";
+    qCDebug(lcDatabase) << "Start fetching group members by for group:" << groupId;
 
     ScopedConnection connection(*database());
 
@@ -197,6 +172,52 @@ void Self::onFetchByGroupId(const GroupId& groupId) {
             }
         }
         emit fetched(groupMembers);
+    }
+}
+
+
+void Self::onAddMembersFromLastMessage(const MessageHandler& lastMessage) {
+    qCDebug(lcDatabase)
+            << "Add members to the group:" << lastMessage->chatId()
+            << ", from the last message:" << lastMessage->id();
+
+    std::list<DatabaseUtils::BindValues> bindValuesCollection;
+
+    { // Insert sender (sender)
+        DatabaseUtils::BindValues bindValues;
+        bindValues.push_back({ ":groupId", QString(lastMessage->chatId()) });
+        bindValues.push_back({ ":memberId", QString(lastMessage->senderId()) });
+        bindValues.push_back({ ":memberNickname", lastMessage->senderUsername() });
+        bindValues.push_back({ ":memberAffiliation", GroupAffiliationToString(GroupAffiliation::Owner) });
+        bindValues.push_back({ ":invitationStatus", GroupInvitationStatusToString(GroupInvitationStatus::Accepted) });
+
+        bindValuesCollection.push_back(std::move(bindValues));
+    }
+
+    { // Insert recipient (me)
+        DatabaseUtils::BindValues bindValues;
+        bindValues.push_back({ ":groupId", QString(lastMessage->chatId()) });
+        bindValues.push_back({ ":memberId", QString(lastMessage->recipientId()) });
+        bindValues.push_back({ ":memberNickname", lastMessage->recipientUsername() });
+        bindValues.push_back({ ":memberAffiliation", GroupAffiliationToString(GroupAffiliation::Member) });
+        bindValues.push_back({ ":invitationStatus", GroupInvitationStatusToString(GroupInvitationStatus::None) });
+
+        bindValuesCollection.push_back(std::move(bindValues));
+    }
+
+    ScopedConnection connection(*database());
+    ScopedTransaction transaction(*database());
+    for (const auto& bindValues : bindValuesCollection) {
+
+        const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertGroupMember"), bindValues);
+        if (query) {
+            qCDebug(lcDatabase) << "GroupMember was added: " << bindValues.front().second;
+        }
+        else {
+            transaction.rollback();
+            qCCritical(lcDatabase) << "GroupMembersTable::onAddMembersFromLastMessage error";
+            emit errorOccurred(tr("Failed to add group member to the database"));
+        }
     }
 }
 

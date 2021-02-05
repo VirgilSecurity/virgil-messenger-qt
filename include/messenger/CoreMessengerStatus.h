@@ -55,6 +55,7 @@ enum class CoreMessengerStatus
     Error_InvalidMessageFormat,
     Error_InvalidMessageVersion,
     Error_InvalidMessageCiphertext,
+    Error_InvalidMessageRecipient,
     Error_FileEncryptionReadFailed,
     Error_FileEncryptionWriteFailed,
     Error_FileEncryptionCryptoFailed,

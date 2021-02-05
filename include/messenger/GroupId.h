@@ -46,6 +46,7 @@ namespace vm {
 //
 class GroupId {
 public:
+    explicit GroupId(ChatId chatId);
     explicit GroupId(QString groupId = {});
 
     bool isValid() const noexcept;

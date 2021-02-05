@@ -45,19 +45,31 @@ namespace vm {
 //
 //  Class with a group invitation message content.
 //
-class MessageContentGroupInvitation  {
+class MessageContentGroupInvitation {
 
 public:
     MessageContentGroupInvitation() = default;
 
     explicit MessageContentGroupInvitation(QString title, QString helloText = {});
 
+    //
+    //  Return group title.
+    //
     QString title() const;
 
+    //
+    //  Return greetings.
+    //
     QString helloText() const;
 
+    //
+    //  Serialize object to JSON.
+    //
     void writeJson(QJsonObject& json) const;
 
+    //
+    //  restore object from JSON.
+    //
     bool readJson(const QJsonObject& json);
 
 private:

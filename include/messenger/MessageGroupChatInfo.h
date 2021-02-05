@@ -49,33 +49,13 @@ class MessageGroupChatInfo  {
 public:
     explicit MessageGroupChatInfo(GroupId groupId);
 
-    MessageGroupChatInfo(GroupId groupId, QString senderGroupNickname, QString recipientGroupNickname, bool isPrivate);
-
     //
     // Return group unique identifier the message belongs to.
     //
     GroupId groupId() const;
 
-    //
-    // Return sender "nickname" - a group unique name of the sender.
-    //
-    QString senderGroupNickname() const;
-
-    //
-    // Return sender "nickname" - a group unique name of the recipient.
-    //
-    QString recipientGroupNickname() const;
-
-    //
-    // Return true if message was send personally (privately).
-    //
-    bool isPrivate() const;
-
 private:
     GroupId m_groupId;
-    QString m_senderGroupNickname;
-    QString m_recipientGroupNickname;
-    bool m_isPrivate;
 
 };
 } // namespace vm

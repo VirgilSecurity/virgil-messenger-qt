@@ -35,6 +35,8 @@
 
 #include "Message.h"
 
+#include "MessageContentGroupInvitation.h"
+
 
 using namespace vm;
 using Self = Message;
@@ -104,6 +106,15 @@ ChatId Self::chatId() const {
 
 
 QString Self::chatTitle() const {
+    if (isGroupChatMessage()) {
+        if (auto inviatation = std::get_if<MessageContentGroupInvitation>(&m_content)) {
+            return inviatation->title();
+        }
+        else {
+            return "Unknown";
+        }
+    }
+
     if (isIncoming()) {
         return m_senderUsername;
     }
@@ -114,12 +125,13 @@ QString Self::chatTitle() const {
 
 
 ChatType Self::chatType() const {
-    return m_chatType;
-}
 
+    if (isGroupChatMessage()) {
+        return ChatType::Group;
 
-void Self::setChatType(ChatType chatType) {
-    m_chatType = chatType;
+    } else {
+        return ChatType::Personal;
+    }
 }
 
 
@@ -130,6 +142,11 @@ QDateTime Self::createdAt() const {
 
 void Self::setCreatedAt(QDateTime createdAt) {
     m_createdAt = std::move(createdAt);
+}
+
+
+void Self::setCreatedNow() {
+    m_createdAt = QDateTime::currentDateTime();
 }
 
 
@@ -207,11 +224,6 @@ bool Self::applyUpdate(const MessageUpdate& update) {
         return contentAsAttachment()->applyUpdate(update);
     }
     return false;
-}
-
-
-bool Self::isPersonal() const noexcept {
-    return (nullptr == m_groupChatInfo) || m_groupChatInfo->isPrivate();
 }
 
 

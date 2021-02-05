@@ -134,11 +134,6 @@ public:
     QString chatTitle() const;
 
     //
-    // Set a chat type the message belongs to.
-    //
-    void setChatType(ChatType chatType);
-
-    //
     // Return date when message was created.
     //
     QDateTime createdAt() const;
@@ -147,6 +142,11 @@ public:
     // Set date when message was created.
     //
     void setCreatedAt(QDateTime createdAt);
+
+    //
+    // Set date when message was created to current date and time.
+    //
+    void setCreatedNow();
 
     //
     //  Return message content.
@@ -221,11 +221,6 @@ public:
     bool applyUpdate(const MessageUpdate& update) override;
 
     //
-    //  Return whether message is peer-to-peer or direct message from a group chat.
-    //
-    bool isPersonal() const noexcept;
-
-    //
     //  Returns true if message was sent to the group or was received by using GroupChat,
     //  including direct messages.
     //
@@ -257,7 +252,6 @@ private:
     UserId m_recipientId;
     QString m_senderUsername;
     QString m_recipientUsername;
-    ChatType m_chatType;
     QDateTime m_createdAt;
     MessageContent m_content;
     std::shared_ptr<MessageGroupChatInfo> m_groupChatInfo;

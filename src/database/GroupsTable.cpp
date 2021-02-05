@@ -44,6 +44,7 @@ Self::GroupsTable(Database *database)
     : DatabaseTable(QLatin1String("groups"), database)
 {
     connect(this, &Self::updateGroup, this, &Self::onUpdateGroup);
+    connect(this, &Self::addGroupForChat, this, &Self::onAddGroupForChat);
 }
 
 
@@ -60,17 +61,17 @@ bool Self::create()
 }
 
 
+void Self::onAddGroupForChat(const ChatHandler& chat) {
+    onUpdateGroup(AddGroupUpdate{ GroupId(chat->id()) });
+}
+
+
 void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
 {
     DatabaseUtils::BindValues bindValues;
     QLatin1String queryId;
 
     if (auto update = std::get_if<AddGroupUpdate>(&groupUpdate)) {
-        queryId = QLatin1String("insertGroup");
-        bindValues.push_back({ ":id", QString(update->groupId) });
-    }
-
-    if (auto update = std::get_if<ProcessGroupInvitationUpdate>(&groupUpdate)) {
         queryId = QLatin1String("insertGroup");
         bindValues.push_back({ ":id", QString(update->groupId) });
     }

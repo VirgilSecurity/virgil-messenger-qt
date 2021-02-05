@@ -37,6 +37,7 @@
 
 #include "core/DatabaseTable.h"
 #include "GroupUpdate.h"
+#include "Chat.h"
 
 #include <QString>
 
@@ -53,6 +54,7 @@ signals:
     //
     //  Control signals.
     //
+    void addGroupForChat(const ChatHandler& chat);
     void updateGroup(const GroupUpdate& groupUpdate);
 
     //
@@ -61,6 +63,7 @@ signals:
     void errorOccurred(const QString &errorText);
 
 private:
+    void onAddGroupForChat(const ChatHandler& chat);
     void onUpdateGroup(const GroupUpdate& groupUpdate);
 
     bool create() override;
