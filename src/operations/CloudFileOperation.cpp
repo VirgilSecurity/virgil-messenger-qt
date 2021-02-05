@@ -34,17 +34,17 @@
 
 #include "CloudFileOperation.h"
 
-#include <QEventLoop>
-
+#include "CloudFilesQueueListeners.h"
 #include "Messenger.h"
 
 using namespace vm;
 
 qsizetype CloudFileOperation::m_nameCounter = 0;
 
-CloudFileOperation::CloudFileOperation(Messenger *messenger, QObject *parent)
+CloudFileOperation::CloudFileOperation(Messenger *messenger, CloudFolderUpdateWatcher *watcher, QObject *parent)
     : NetworkOperation(parent, messenger->isOnline())
     , m_messenger(messenger)
+    , m_watcher(watcher)
 {
     setName(QLatin1String("CloudFile(%1)").arg(QString::number(++m_nameCounter)));
 }
@@ -64,8 +64,12 @@ FileLoader *CloudFileOperation::fileLoader()
     return m_messenger->fileLoader();
 }
 
-CloudFileHandler CloudFileOperation::getUpdatedCloudFolder(const CloudFileHandler &cloudFolder)
+void CloudFileOperation::watchFolderAndRun(const CloudFileHandler &folder, QObject *receiver, FolderUpdateSlot slot)
 {
-    // FIXME(fpohtmeh): implement or remove
-    return cloudFolder;
+    connect(m_watcher, &CloudFolderUpdateWatcher::finished, receiver, [folder, slot](auto f) {
+        if (folder->id() == f->id()) {
+            slot(f);
+        }
+    });
+    m_watcher->subscribe(folder);
 }

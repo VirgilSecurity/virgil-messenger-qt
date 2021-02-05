@@ -80,7 +80,7 @@ Self::CloudFilesController(const Settings *settings, Models *models, UserDatabas
 
     // Setup list updating
     auto updatingListener = new CloudListUpdatingCounter(queue);
-    queue->addListener(updatingListener);
+    queue->addCloudFileListener(updatingListener);
     connect(updatingListener, &CloudListUpdatingCounter::countChanged, this, [this](auto count) {
         if (m_isListUpdating == (count > 0)) {
             return;

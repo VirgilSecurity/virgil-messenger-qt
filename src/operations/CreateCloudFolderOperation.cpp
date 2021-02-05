@@ -35,6 +35,7 @@
 #include "CreateCloudFolderOperation.h"
 
 #include "CloudFileOperation.h"
+#include "CloudFilesQueueListeners.h"
 #include "FileUtils.h"
 #include "Messenger.h"
 
@@ -60,13 +61,17 @@ void CreateCloudFolderOperation::run()
         return;
     }
 
-    // FIXME(fpohtmeh): get updated folder
-    m_requestId = m_parent->cloudFileSystem()->createFolder(m_name, m_parentFolder);
+    m_parent->watchFolderAndRun(m_parentFolder, this, [this](auto folder) {
+        m_parentFolder = folder;
+        m_requestId = m_parent->cloudFileSystem()->createFolder(m_name, m_parentFolder);
+    });
 }
 
 void CreateCloudFolderOperation::onCreated(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &folder)
 {
     if (m_requestId == requestId) {
+        FileUtils::forceCreateDir(folder->localPath());
+
         CreateCloudFilesUpdate update;
         update.parentFolder = m_parentFolder;
         update.files.push_back(folder);

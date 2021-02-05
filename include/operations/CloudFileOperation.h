@@ -45,6 +45,7 @@ class Settings;
 namespace vm
 {
 class CloudFileSystem;
+class CloudFolderUpdateWatcher;
 class FileLoader;
 class Messenger;
 
@@ -53,13 +54,15 @@ class CloudFileOperation : public NetworkOperation
     Q_OBJECT
 
 public:
-    CloudFileOperation(Messenger *messenger, QObject *parent);
+    using FolderUpdateSlot = std::function<void (const CloudFileHandler &)>;
+
+    CloudFileOperation(Messenger *messenger, CloudFolderUpdateWatcher *watcher, QObject *parent);
 
     Settings *settings();
     CloudFileSystem *cloudFileSystem();
     FileLoader *fileLoader();
 
-    CloudFileHandler getUpdatedCloudFolder(const CloudFileHandler &cloudFolder);
+    void watchFolderAndRun(const CloudFileHandler &folder, QObject *receiver, FolderUpdateSlot slot);
 
 signals:
     void cloudFilesUpdate(const CloudFilesUpdate &update);
@@ -67,6 +70,7 @@ signals:
 private:
     static qsizetype m_nameCounter;
     QPointer<Messenger> m_messenger;
+    QPointer<CloudFolderUpdateWatcher> m_watcher;
 };
 }
 

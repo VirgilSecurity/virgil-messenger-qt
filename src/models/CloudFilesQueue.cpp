@@ -36,7 +36,6 @@
 
 #include "CreateCloudFolderOperation.h"
 #include "CloudFileOperation.h"
-#include "CloudFilesQueueListeners.h"
 #include "DeleteCloudFilesOperation.h"
 #include "DownloadCloudFileOperation.h"
 #include "ListCloudFolderOperation.h"
@@ -53,6 +52,7 @@ Self::CloudFilesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject 
     : OperationQueue(lcCloudFilesQueue(), parent)
     , m_messenger(messenger)
     , m_userDatabase(userDatabase)
+    , m_watcher(new CloudFolderUpdateWatcher(this))
 {
     connect(m_messenger, &Messenger::signedOut, this, &CloudFilesQueue::stop);
     connect(this, &Self::pushListFolder, this, &Self::onPushListFolder);
@@ -60,19 +60,27 @@ Self::CloudFilesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject 
     connect(this, &Self::pushUploadFile, this, &Self::onPushUploadFile);
     connect(this, &Self::pushDownloadFile, this, &Self::onPushDownloadFile);
     connect(this, &Self::pushDeleteFiles, this, &Self::onPushDeleteFiles);
+    connect(this, &Self::updateCloudFiles, this, &Self::onUpdateCloudFiles);
 
-    addListener(new UniqueCloudFileFilter(this));
+    addCloudFileListener(m_watcher.data());
+    addCloudFileListener(new UniqueCloudFileFilter(this));
 }
 
 Self::~CloudFilesQueue()
 {
 }
 
+void Self::addCloudFileListener(CloudFilesQueueListenerPtr listener)
+{
+    m_cloudFileListeners.push_back(listener);
+    addListener(listener.data());
+}
+
 Operation *Self::createOperation(OperationSourcePtr source)
 {
     const auto cloudFileSource = dynamic_cast<CloudFileOperationSource *>(source.get());
 
-    auto *op = new CloudFileOperation(m_messenger, nullptr);
+    auto *op = new CloudFileOperation(m_messenger, m_watcher, nullptr);
     connect(op, &Operation::notificationCreated, this, &Self::notificationCreated);
     connect(op, &CloudFileOperation::cloudFilesUpdate, this, &Self::updateCloudFiles);
 
@@ -163,4 +171,11 @@ void Self::onPushDeleteFiles(const CloudFiles &files)
     source->setPriority(OperationSource::Priority::Highest);
     source->setFiles(files);
     addSource(std::move(source));
+}
+
+void CloudFilesQueue::onUpdateCloudFiles(const CloudFilesUpdate &update)
+{
+    for (auto &listener : m_cloudFileListeners) {
+        listener->updateCloudFiles(update);
+    }
 }

@@ -36,6 +36,7 @@
 #define VM_CLOUD_FILES_QUEUE_LISTENER_H
 
 #include "CloudFileOperationSource.h"
+#include "CloudFilesUpdate.h"
 #include "OperationQueueListener.h"
 
 #include <QLoggingCategory>
@@ -56,11 +57,14 @@ public:
 
     virtual bool preRunCloudFile(CloudFileOperationSource *source);
     virtual void postRunCloudFile(CloudFileOperationSource *source);
+    virtual void updateCloudFiles(const CloudFilesUpdate &update);
 
 private:
     bool preRun(OperationSourcePtr source) override;
     void postRun(OperationSourcePtr source) override;
 };
+
+using CloudFilesQueueListenerPtr = QPointer<CloudFilesQueueListener>;
 
 
 //
@@ -73,11 +77,11 @@ class UniqueCloudFileFilter : public CloudFilesQueueListener
 public:
     using CloudFilesQueueListener::CloudFilesQueueListener;
 
+private:
     bool preRunCloudFile(CloudFileOperationSource *source) override;
     void postRunCloudFile(CloudFileOperationSource *source) override;
     void clear() override;
 
-private:
     QString createUniqueId(CloudFileOperationSource *source) const;
     void notifyNotUnique(CloudFileOperationSource *source);
 
@@ -110,6 +114,41 @@ private:
     void onIncrement(int inc);
 
     int m_count = 0;
+};
+
+
+class CloudFilesQueue;
+
+//
+// Listener that watch for folder update operations
+//
+class CloudFolderUpdateWatcher : public CloudFilesQueueListener
+{
+    Q_OBJECT
+
+public:
+    using CloudFilesQueueListener::CloudFilesQueueListener;
+
+    void subscribe(const CloudFileHandler &cloudFolder);
+
+signals:
+    void finished(const CloudFileHandler &cloudFolder, bool updated);
+
+private:
+    struct Item
+    {
+        CloudFileHandler folder;
+        bool subscribed = false;
+        bool updated = false;
+    };
+
+    bool preRunCloudFile(CloudFileOperationSource *source) override;
+    void postRunCloudFile(CloudFileOperationSource *source) override;
+    void updateCloudFiles(const CloudFilesUpdate &update) override;
+    void clear() override;
+
+    std::vector<Item> m_items;
+    QMutex m_mutex;
 };
 }
 

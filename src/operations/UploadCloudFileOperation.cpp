@@ -72,8 +72,10 @@ void UploadCloudFileOperation::run()
         return;
     }
 
-    // FIXME(fpohtmeh): get updated folder
-    m_requestId = m_parent->cloudFileSystem()->createFile(m_sourceFilePath, m_parentFolder);
+    m_parent->watchFolderAndRun(m_parentFolder, this, [this](auto folder) {
+        m_parentFolder = folder;
+        m_requestId = m_parent->cloudFileSystem()->createFile(m_sourceFilePath, m_parentFolder);
+    });
 }
 
 CloudFileId UploadCloudFileOperation::cloudFileId() const

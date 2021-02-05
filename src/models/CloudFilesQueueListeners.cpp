@@ -36,9 +36,11 @@
 
 #include <QFileInfo>
 
+#include "CloudFilesQueue.h"
+
 using namespace vm;
 
-Q_LOGGING_CATEGORY(lcCloudFilesQueueListener, "cloudfiles-queue-listener");
+Q_LOGGING_CATEGORY(lcCloudFilesQueueListener, "cloudfiles-listener");
 
 bool CloudFilesQueueListener::preRunCloudFile(CloudFileOperationSource *source)
 {
@@ -49,6 +51,11 @@ bool CloudFilesQueueListener::preRunCloudFile(CloudFileOperationSource *source)
 void CloudFilesQueueListener::postRunCloudFile(CloudFileOperationSource *source)
 {
     Q_UNUSED(source)
+}
+
+void CloudFilesQueueListener::updateCloudFiles(const CloudFilesUpdate &update)
+{
+    Q_UNUSED(update)
 }
 
 bool CloudFilesQueueListener::preRun(OperationSourcePtr source)
@@ -71,8 +78,7 @@ bool UniqueCloudFileFilter::preRunCloudFile(CloudFileOperationSource *source)
     }
 
     QMutexLocker locker(&m_mutex);
-    const auto it = std::find(m_ids.begin(), m_ids.end(), id);
-    if (it == m_ids.end()) {
+    if (!m_ids.contains(id)) {
         m_ids.push_back(id);
         return true;
     }
@@ -90,10 +96,7 @@ void UniqueCloudFileFilter::postRunCloudFile(CloudFileOperationSource *source)
     }
 
     QMutexLocker locker(&m_mutex);
-    const auto it = std::find(m_ids.begin(), m_ids.end(), id);
-    if (it != m_ids.end()) {
-        m_ids.erase(it);
-    }
+    m_ids.removeAll(id);
 }
 
 void UniqueCloudFileFilter::clear()
@@ -176,4 +179,95 @@ void CloudListUpdatingCounter::onIncrement(int inc)
 {
     m_count += inc;
     emit countChanged(m_count);
+}
+
+void CloudFolderUpdateWatcher::subscribe(const CloudFileHandler &cloudFolder)
+{
+    // Check for root folder, it is never updated
+    const auto isRoot = !cloudFolder->id().coreFolderId().isValid();
+    if (isRoot) {
+        emit finished(cloudFolder, false);
+        return;
+    }
+
+    // Subscribe to folder
+    qCDebug(lcCloudFilesQueueListener) << "Subscribing to folder" << cloudFolder->name();
+    QMutexLocker locker(&m_mutex);
+    const auto it = std::find_if(m_items.begin(), m_items.end(), [cloudFolder](auto item) {
+        return cloudFolder->id() == item.folder->id();
+    });
+    if (it == m_items.end()) {
+        qCDebug(lcCloudFilesQueueListener) << "Folder is not updated" << cloudFolder->name();
+        emit finished(cloudFolder, false);
+    }
+    else {
+        it->subscribed = true;
+    }
+}
+
+bool CloudFolderUpdateWatcher::preRunCloudFile(CloudFileOperationSource *source)
+{
+    if (source->type() != SourceType::ListFolder) {
+        return true;
+    }
+
+    qCDebug(lcCloudFilesQueueListener) << "Starting folder watching:" << source->folder()->name();
+    QMutexLocker locker(&m_mutex);
+    m_items.push_back({ source->folder() });
+    return true;
+}
+
+void CloudFolderUpdateWatcher::postRunCloudFile(CloudFileOperationSource *source)
+{
+    if (source->type() != SourceType::ListFolder) {
+        return;
+    }
+
+    // Find item
+    QMutexLocker locker(&m_mutex);
+    const auto folderId = source->folder()->id();
+    const auto it = std::find_if(m_items.begin(), m_items.end(), [folderId](auto item) {
+        return folderId == item.folder->id();
+    });
+    if (it == m_items.end()) {
+        qCritical(lcCloudFilesQueueListener) << "Interrupted folder watching:" << source->folder()->name();
+        throw std::logic_error("Folder must be watched");
+    }
+
+    // Emit if subscribed and erase item
+    if (it->subscribed) {
+        if (!it->updated) {
+            qCDebug(lcCloudFilesQueueListener) << "Folder must be updated but it's not. Name:" << it->folder->name();
+        }
+        emit finished(it->folder, it->updated);
+    }
+    m_items.erase(it);
+    qCDebug(lcCloudFilesQueueListener) << "Finished folder watching:" << source->folder()->name();
+}
+
+void CloudFolderUpdateWatcher::updateCloudFiles(const CloudFilesUpdate &update)
+{
+    auto upd = std::get_if<CloudListCloudFolderUpdate>(&update);
+    if (!upd) {
+        return;
+    }
+
+    QMutexLocker locker(&m_mutex);
+    const auto folderId = upd->parentFolder->id();
+    const auto it = std::find_if(m_items.begin(), m_items.end(), [folderId](auto item) {
+        return folderId == item.folder->id();
+    });
+    if (it == m_items.end()) {
+        return;
+    }
+
+    it->folder = upd->parentFolder;
+    it->updated = true;
+    qCDebug(lcCloudFilesQueueListener) << "Folder is updated:" << upd->parentFolder->name();
+}
+
+void CloudFolderUpdateWatcher::clear()
+{
+    QMutexLocker locker(&m_mutex);
+    m_items.clear();
 }

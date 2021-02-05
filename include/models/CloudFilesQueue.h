@@ -40,6 +40,7 @@
 
 #include "CloudFile.h"
 #include "CloudFileOperationSource.h"
+#include "CloudFilesQueueListeners.h"
 #include "CloudFilesUpdate.h"
 #include "OperationQueue.h"
 
@@ -57,6 +58,8 @@ class CloudFilesQueue : public OperationQueue
 public:
     CloudFilesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject *parent);
     ~CloudFilesQueue() override;
+
+    void addCloudFileListener(CloudFilesQueueListenerPtr listener);
 
 signals:
     void pushListFolder(const CloudFileHandler &parentFolder);
@@ -80,9 +83,12 @@ private:
     void onPushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
     void onPushDownloadFile(const CloudFileHandler &file, const CloudFileHandler &parentFolder, const PostFunction &func);
     void onPushDeleteFiles(const CloudFiles &files);
+    void onUpdateCloudFiles(const CloudFilesUpdate &update);
 
     QPointer<Messenger> m_messenger;
     QPointer<UserDatabase> m_userDatabase;
+    QPointer<CloudFolderUpdateWatcher> m_watcher;
+    std::vector<CloudFilesQueueListenerPtr> m_cloudFileListeners;
 };
 }
 

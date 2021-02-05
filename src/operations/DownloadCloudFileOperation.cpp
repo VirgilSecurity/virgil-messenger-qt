@@ -60,9 +60,12 @@ DownloadCloudFileOperation::DownloadCloudFileOperation(CloudFileOperation *paren
 
 void DownloadCloudFileOperation::run()
 {
-    // FIXME(fpohtmeh): get updated folder
     transferUpdate(TransferCloudFileUpdate::Stage::Started, 0);
-    m_requestId = m_parent->cloudFileSystem()->getDownloadInfo(m_file);
+
+    m_parent->watchFolderAndRun(m_parentFolder, this, [this](auto folder) {
+        m_parentFolder = folder;
+        m_requestId = m_parent->cloudFileSystem()->getDownloadInfo(m_file);
+    });
 }
 
 CloudFileId DownloadCloudFileOperation::cloudFileId() const
