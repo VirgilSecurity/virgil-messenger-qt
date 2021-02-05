@@ -52,7 +52,7 @@ class CloudFilesQueueListener : public OperationQueueListener
 public:
     using SourceType = CloudFileOperationSource::Type;
 
-    ~CloudFilesQueueListener() override;
+    using OperationQueueListener::OperationQueueListener;
 
     virtual bool preRunCloudFile(CloudFileOperationSource *source);
     virtual void postRunCloudFile(CloudFileOperationSource *source);
@@ -62,11 +62,17 @@ private:
     void postRun(OperationSourcePtr source) override;
 };
 
+
+//
+// Listener that skips non-unique operations and warns about it
+//
 class UniqueCloudFileFilter : public CloudFilesQueueListener
 {
     Q_OBJECT
 
 public:
+    using CloudFilesQueueListener::CloudFilesQueueListener;
+
     bool preRunCloudFile(CloudFileOperationSource *source) override;
     void postRunCloudFile(CloudFileOperationSource *source) override;
     void clear() override;
@@ -77,6 +83,33 @@ private:
 
     QStringList m_ids;
     QMutex m_mutex;
+};
+
+
+//
+// Listener that counts list active updates
+//
+class CloudListUpdatingCounter : public CloudFilesQueueListener
+{
+    Q_OBJECT
+
+public:
+    explicit CloudListUpdatingCounter(QObject *parent);
+
+    bool preRunCloudFile(CloudFileOperationSource *source) override;
+    void postRunCloudFile(CloudFileOperationSource *source) override;
+    void clear() override;
+
+signals:
+    void countChanged(int count);
+
+    void increment(int inc, QPrivateSignal);
+
+private:
+    int getIncValue(CloudFileOperationSource *source) const;
+    void onIncrement(int inc);
+
+    int m_count = 0;
 };
 }
 

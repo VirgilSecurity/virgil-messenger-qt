@@ -38,6 +38,7 @@
 #include "CloudFilesModel.h"
 #include "CloudFilesTransfersModel.h"
 #include "CloudFilesQueue.h"
+#include "CloudFilesQueueListeners.h"
 #include "CloudFilesTable.h"
 #include "Controller.h"
 #include "FileUtils.h"
@@ -59,21 +60,33 @@ Self::CloudFilesController(const Settings *settings, Models *models, UserDatabas
 {
     qRegisterMetaType<CloudFilesUpdate>("CloudFilesUpdate");
 
+    // Setup root & initial hierarcy
     auto rootFolder = std::make_shared<CloudFile>();
     rootFolder->setId(CloudFileId::root());
     rootFolder->setName(tr("File Manager"));
     rootFolder->setIsFolder(true);
-
     m_hierarchy.push_back(rootFolder);
 
     connect(this, &Self::updateCloudFiles, this, &Self::onUpdateCloudFiles);
+
     // Queue connections
-    connect(models->cloudFilesQueue(), &CloudFilesQueue::updateCloudFiles, this, &Self::updateCloudFiles);
-    connect(models->cloudFilesTransfers(), &CloudFilesTransfersModel::interruptByCloudFileId,
-            models->cloudFilesQueue(), &CloudFilesQueue::interruptFileOperation);
+    auto queue = models->cloudFilesQueue();
+    connect(queue, &CloudFilesQueue::updateCloudFiles, this, &Self::updateCloudFiles);
+    connect(models->cloudFilesTransfers(), &CloudFilesTransfersModel::interruptByCloudFileId, queue, &CloudFilesQueue::interruptFileOperation);
     // Cloud file system connections
     connect(cloudFileSystem, &CloudFileSystem::downloadsDirChanged, [rootFolder](const QDir &downloadsDir) {
         rootFolder->setLocalPath(downloadsDir.absolutePath());
+    });
+
+    // Setup list updating
+    auto updatingListener = new CloudListUpdatingCounter(queue);
+    queue->addListener(updatingListener);
+    connect(updatingListener, &CloudListUpdatingCounter::countChanged, this, [this](auto count) {
+        if (m_isListUpdating == (count > 0)) {
+            return;
+        }
+        m_isListUpdating = !m_isListUpdating;
+        emit isListUpdatingChanged(m_isListUpdating);
     });
 }
 
@@ -182,12 +195,6 @@ bool CloudFilesController::isRoot() const
 ModifiableCloudFileHandler CloudFilesController::rootFolder() const
 {
     return m_hierarchy.front();
-}
-
-bool CloudFilesController::isListUpdating() const
-{
-    // FIXME(fpohtmeh): implement
-    return false;
 }
 
 void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)

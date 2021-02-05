@@ -60,7 +60,6 @@ void CreateCloudFolderOperation::run()
         return;
     }
 
-    // FIXME(fpohtmeh): check if local path exists
     // FIXME(fpohtmeh): get updated folder
     m_requestId = m_parent->cloudFileSystem()->createFolder(m_name, m_parentFolder);
 }

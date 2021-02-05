@@ -40,10 +40,6 @@ using namespace vm;
 
 Q_LOGGING_CATEGORY(lcCloudFilesQueueListener, "cloudfiles-queue-listener");
 
-CloudFilesQueueListener::~CloudFilesQueueListener()
-{
-}
-
 bool CloudFilesQueueListener::preRunCloudFile(CloudFileOperationSource *source)
 {
     Q_UNUSED(source)
@@ -135,4 +131,49 @@ void UniqueCloudFileFilter::notifyNotUnique(CloudFileOperationSource *source)
         default:
             break;
     }
+}
+
+CloudListUpdatingCounter::CloudListUpdatingCounter(QObject *parent)
+    : CloudFilesQueueListener(parent)
+{
+    connect(this, &CloudListUpdatingCounter::increment, this, &CloudListUpdatingCounter::onIncrement);
+}
+
+bool CloudListUpdatingCounter::preRunCloudFile(CloudFileOperationSource *source)
+{
+    if (const auto value = getIncValue(source)) {
+        emit increment(value, QPrivateSignal());
+    }
+    return true;
+}
+
+void CloudListUpdatingCounter::postRunCloudFile(CloudFileOperationSource *source)
+{
+    if (const auto value = getIncValue(source)) {
+        emit increment(-value, QPrivateSignal());
+    }
+}
+
+void CloudListUpdatingCounter::clear()
+{
+    emit increment(-m_count, QPrivateSignal());
+}
+
+int CloudListUpdatingCounter::getIncValue(CloudFileOperationSource *source) const
+{
+    switch (source->type()) {
+    case SourceType::CreateFolder:
+    case SourceType::ListFolder:
+        return 1;
+    case SourceType::Delete:
+        return source->files().size();
+    default:
+        return 0;
+    }
+}
+
+void CloudListUpdatingCounter::onIncrement(int inc)
+{
+    m_count += inc;
+    emit countChanged(m_count);
 }

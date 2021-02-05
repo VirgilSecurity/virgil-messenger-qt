@@ -53,7 +53,7 @@ class CloudFilesController : public QObject
     Q_OBJECT
     Q_PROPERTY(QString displayPath READ displayPath NOTIFY displayPathChanged)
     Q_PROPERTY(bool isRoot READ isRoot NOTIFY isRootChanged)
-    Q_PROPERTY(bool isListUpdating READ isListUpdating NOTIFY isListUpdatingChanged)
+    Q_PROPERTY(bool isListUpdating MEMBER m_isListUpdating NOTIFY isListUpdatingChanged)
 
 public:
     CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase, CloudFileSystem *cloudFileSystem,
@@ -89,7 +89,6 @@ private:
     QString displayPath() const;
     bool isRoot() const;
     ModifiableCloudFileHandler rootFolder() const;
-    bool isListUpdating() const;
 
     void onUpdateCloudFiles(const CloudFilesUpdate &update);
 
@@ -100,6 +99,7 @@ private:
 
     FoldersHierarchy m_hierarchy;
     FoldersHierarchy m_requestedHierarchy;
+    bool m_isListUpdating = false;
 };
 }
 

@@ -35,9 +35,8 @@
 #ifndef VM_OPERATION_QUEUE_LISTENER_H
 #define VM_OPERATION_QUEUE_LISTENER_H
 
-#include <memory>
-
 #include <QObject>
+#include <QPointer>
 
 #include "OperationSource.h"
 
@@ -59,7 +58,7 @@ signals:
     void notificationCreated(const QString &notification, const bool error);
 };
 
-using OperationQueueListenerPtr = std::shared_ptr<OperationQueueListener>;
+using OperationQueueListenerPtr = QPointer<OperationQueueListener>;
 using OperationQueueListeners = std::vector<OperationQueueListenerPtr>;
 }
 

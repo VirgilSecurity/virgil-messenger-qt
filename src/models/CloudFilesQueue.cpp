@@ -61,7 +61,7 @@ Self::CloudFilesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject 
     connect(this, &Self::pushDownloadFile, this, &Self::onPushDownloadFile);
     connect(this, &Self::pushDeleteFiles, this, &Self::onPushDeleteFiles);
 
-    addListener(std::make_shared<UniqueCloudFileFilter>());
+    addListener(new UniqueCloudFileFilter(this));
 }
 
 Self::~CloudFilesQueue()

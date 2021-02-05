@@ -93,7 +93,7 @@ void Self::addSource(OperationSourcePtr source)
 void Self::addListener(OperationQueueListenerPtr listener)
 {
     m_listeners.push_back(listener);
-    connect(listener.get(), &OperationQueueListener::notificationCreated, this, &Self::notificationCreated);
+    connect(listener, &OperationQueueListener::notificationCreated, this, &Self::notificationCreated);
 }
 
 void Self::addSourceImpl(OperationSourcePtr source, const bool run)
