@@ -48,13 +48,13 @@ using namespace vm;
 DiscoveredContactsModel::DiscoveredContactsModel(Validator *validator, QObject *parent)
     : ContactsModel(parent, false)
     , m_validator(validator)
-    , m_selectedContacts(new ContactsModel(this, false))
+    , m_selectedContactsModel(new ContactsModel(this, false))
 {
     qRegisterMetaType<Contacts>("Contacts");
     qRegisterMetaType<DiscoveredContactsModel *>("DiscoveredContactsModel*");
 
     setProxy(new DiscoveredContactsProxyModel(this));
-    m_selectedContacts->setProxy(new ContactsProxyModel(m_selectedContacts, false));
+    m_selectedContactsModel->setProxy(new ContactsProxyModel(m_selectedContactsModel, false));
 
     connect(selection(), &ListSelectionModel::changed, this, &DiscoveredContactsModel::onSelectionChanged);
     connect(this, &DiscoveredContactsModel::filterChanged, this, &DiscoveredContactsModel::updateDiscoveredContacts);
@@ -63,7 +63,7 @@ DiscoveredContactsModel::DiscoveredContactsModel(Validator *validator, QObject *
 
 void DiscoveredContactsModel::reload()
 {
-    m_selectedContacts->setContacts(Contacts());
+    m_selectedContactsModel->setContacts(Contacts());
     clearFilter();
 
     QtConcurrent::run([this]() {
@@ -75,6 +75,11 @@ void DiscoveredContactsModel::reload()
 int DiscoveredContactsModel::fixedContactsCount() const
 {
     return m_fixedContactsCount;
+}
+
+Contacts DiscoveredContactsModel::getSelectedContacts() const
+{
+    return m_selectedContactsModel->getContacts();
 }
 
 void DiscoveredContactsModel::toggleById(const QString &contactId)
@@ -111,7 +116,7 @@ QVariant DiscoveredContactsModel::data(const QModelIndex &index, int role) const
     {
         if (index.row() >= m_fixedContactsCount) {
             const auto contactId = getContact(index.row()).id;
-            return m_selectedContacts->hasContact(contactId);
+            return m_selectedContactsModel->hasContact(contactId);
         }
         break;
     }
@@ -175,11 +180,11 @@ void DiscoveredContactsModel::updateDiscoveredContacts()
 
 void DiscoveredContactsModel::updateSelectedContacts(const Contact::Id &contactId, const Contact *contact)
 {
-    if (m_selectedContacts->hasContact(contactId)) {
-        m_selectedContacts->removeContact(contactId);
+    if (m_selectedContactsModel->hasContact(contactId)) {
+        m_selectedContactsModel->removeContact(contactId);
     }
     else {
-        m_selectedContacts->addContact(contact ? *contact : createContact(contactId));
+        m_selectedContactsModel->addContact(contact ? *contact : createContact(contactId));
     }
     // Invalidate selection for discovered contacts
     const auto row = findRowByContactId(contactId);

@@ -42,6 +42,7 @@
 #include "CloudFileOperationSource.h"
 #include "CloudFilesQueueListeners.h"
 #include "CloudFilesUpdate.h"
+#include "Contact.h"
 #include "OperationQueue.h"
 
 Q_DECLARE_LOGGING_CATEGORY(lcCloudFilesQueue);
@@ -67,6 +68,7 @@ signals:
     void pushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
     void pushDownloadFile(const CloudFileHandler &file, const CloudFileHandler &parentFolder, const PostFunction &func);
     void pushDeleteFiles(const CloudFiles &files);
+    void pushShareFiles(const CloudFiles &files, const Contacts &contacts);
 
     void interruptFileOperation(const CloudFileId &fileId);
     void updateCloudFiles(const CloudFilesUpdate &update);
@@ -83,6 +85,7 @@ private:
     void onPushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
     void onPushDownloadFile(const CloudFileHandler &file, const CloudFileHandler &parentFolder, const PostFunction &func);
     void onPushDeleteFiles(const CloudFiles &files);
+    void onPushShareFiles(const CloudFiles &files, const Contacts &contacts);
     void onUpdateCloudFiles(const CloudFilesUpdate &update);
 
     QPointer<Messenger> m_messenger;

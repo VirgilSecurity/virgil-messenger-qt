@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,57 +32,21 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_DISCOVEREDCONTACTSMODEL_H
-#define VM_DISCOVEREDCONTACTSMODEL_H
+#include "ShareCloudFilesOperation.h"
 
-#include "ContactsModel.h"
+#include "CloudFileOperation.h"
 
-namespace vm
+using namespace vm;
+
+ShareCloudFilesOperation::ShareCloudFilesOperation(CloudFileOperation *parent, const CloudFiles &files, const Contacts &contacts)
+    : Operation(QLatin1String("ShareCloudFiles"), parent)
+    , m_parent(parent)
+    , m_files(files)
+    , m_contacts(contacts)
 {
-class Validator;
-
-class DiscoveredContactsModel : public ContactsModel
-{
-    Q_OBJECT
-    Q_PROPERTY(ContactsModel *selectedContacts MEMBER m_selectedContactsModel CONSTANT)
-
-public:
-    enum Roles {
-        SectionRole = UserRole
-    };
-
-    DiscoveredContactsModel(Validator *validator, QObject *parent);
-
-    void reload();
-    int fixedContactsCount() const;
-    Contacts getSelectedContacts() const;
-
-
-    Q_INVOKABLE void toggleById(const QString &contactId);
-    Q_INVOKABLE QString firstContactId() const;
-
-signals:
-    void fixedContactsPopulated(const Contacts &contacts, QPrivateSignal);
-
-private:
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
-
-    Contacts findContactsByFilter() const;
-    void invalidateIsSelectedRole(int startRow, int endRow);
-    void updateDiscoveredContacts();
-    void updateSelectedContacts(const Contact::Id &contactId, const Contact *contact = nullptr);
-
-    void onDeviceContactsPopulated(const Contacts &contacts);
-    void onSelectionChanged(const QList<QModelIndex> &indices);
-
-    Validator *m_validator;
-    ContactsModel *m_selectedContactsModel;
-
-    int m_fixedContactsCount = 0;
-};
 }
 
-Q_DECLARE_METATYPE(vm::Contacts)
-
-#endif // VM_DISCOVEREDCONTACTSMODEL_H
+void ShareCloudFilesOperation::run()
+{
+    failAndNotify(tr("Sharing is under development"));
+}

@@ -18,6 +18,7 @@ Page {
         readonly property bool isChatList: appState === manager.chatListState
         readonly property bool isCloudFileList: appState === manager.cloudFileListState
         readonly property var cloudFilesSelection: models.cloudFiles.selection
+        readonly property bool cloudFilesHasSelection: cloudFilesSelection.hasSelection
 
         readonly property string chatsTitle: app.organizationDisplayName
         readonly property string chatsDescription: qsTr("%1 Server").arg(app.organizationDisplayName)
@@ -67,6 +68,16 @@ Page {
         }
 
         ContextMenuSeparator {
+            visible: d.isCloudFileList && d.cloudFilesHasSelection
+        }
+
+        ContextMenuItem {
+            text: qsTr("Share to...")
+            onTriggered: app.stateManager.shareCloudFiles()
+            visible: false // d.isCloudFileList && d.cloudFilesHasSelection // TODO(fpohtmeh): enable
+        }
+
+        ContextMenuSeparator {
             visible: d.isCloudFileList
         }
 
@@ -77,19 +88,13 @@ Page {
         }
 
         ContextMenuSeparator {
-            visible: d.isCloudFileList && d.cloudFilesSelection.hasSelection
+            visible: d.isCloudFileList && d.cloudFilesHasSelection
         }
 
         ContextMenuItem {
             text: qsTr("Delete")
             onTriggered: deleteCloudFilesDialog.open()
-            visible: d.isCloudFileList && d.cloudFilesSelection.hasSelection
-        }
-
-        ContextMenuItem {
-            text: qsTr("Share to...")
-            onTriggered: app.stateManager.shareCloudFiles()
-            visible: d.isCloudFileList && d.cloudFilesSelection.hasSelection
+            visible: d.isCloudFileList && d.cloudFilesHasSelection
         }
     }
 

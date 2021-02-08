@@ -40,6 +40,7 @@
 #include "DownloadCloudFileOperation.h"
 #include "ListCloudFolderOperation.h"
 #include "Messenger.h"
+#include "ShareCloudFilesOperation.h"
 #include "UploadCloudFileOperation.h"
 #include "UserDatabase.h"
 
@@ -60,6 +61,7 @@ Self::CloudFilesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject 
     connect(this, &Self::pushUploadFile, this, &Self::onPushUploadFile);
     connect(this, &Self::pushDownloadFile, this, &Self::onPushDownloadFile);
     connect(this, &Self::pushDeleteFiles, this, &Self::onPushDeleteFiles);
+    connect(this, &Self::pushShareFiles, this, &Self::onPushShareFiles);
     connect(this, &Self::updateCloudFiles, this, &Self::onUpdateCloudFiles);
 
     addCloudFileListener(m_watcher.data());
@@ -113,6 +115,9 @@ Operation *Self::createOperation(OperationSourcePtr source)
         }
         case SourceType::Delete:
             op->appendChild(new DeleteCloudFilesOperation(op, cloudFileSource->files()));
+            break;
+        case SourceType::Share:
+            op->appendChild(new ShareCloudFilesOperation(op, cloudFileSource->files(), cloudFileSource->contacts()));
             break;
         default:
             throw std::logic_error("CloudFilesQueue::createOperation is not fully implemented");
@@ -170,6 +175,15 @@ void Self::onPushDeleteFiles(const CloudFiles &files)
     auto source = std::make_shared<CloudFileOperationSource>(SourceType::Delete);
     source->setPriority(OperationSource::Priority::Highest);
     source->setFiles(files);
+    addSource(std::move(source));
+}
+
+void Self::onPushShareFiles(const CloudFiles &files, const Contacts &contacts)
+{
+    auto source = std::make_shared<CloudFileOperationSource>(SourceType::Share);
+    source->setPriority(OperationSource::Priority::Highest);
+    source->setFiles(files);
+    source->setContacts(contacts);
     addSource(std::move(source));
 }
 

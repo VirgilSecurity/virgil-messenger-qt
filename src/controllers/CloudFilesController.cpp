@@ -41,6 +41,7 @@
 #include "CloudFilesQueueListeners.h"
 #include "CloudFilesTable.h"
 #include "Controller.h"
+#include "DiscoveredContactsModel.h"
 #include "FileUtils.h"
 #include "Models.h"
 #include "Settings.h"
@@ -174,7 +175,9 @@ void Self::createFolder(const QString &name)
 
 void Self::shareFiles()
 {
-    qDebug() << "Self::shareFiles is under development";
+    const auto files = m_models->cloudFiles()->selectedFiles();
+    const auto contacts = m_models->discoveredContacts()->getSelectedContacts();
+    m_models->cloudFilesQueue()->pushShareFiles(files, contacts);
 }
 
 void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)

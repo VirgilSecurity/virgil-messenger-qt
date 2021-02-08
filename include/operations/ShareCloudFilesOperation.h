@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,57 +32,30 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_DISCOVEREDCONTACTSMODEL_H
-#define VM_DISCOVEREDCONTACTSMODEL_H
+#ifndef VM_SHARED_CLOUD_FILES_OPERATION_H
+#define VM_SHARED_CLOUD_FILES_OPERATION_H
 
-#include "ContactsModel.h"
+#include "CloudFile.h"
+#include "Contact.h"
+#include "Operation.h"
 
 namespace vm
 {
-class Validator;
+class CloudFileOperation;
 
-class DiscoveredContactsModel : public ContactsModel
+class ShareCloudFilesOperation : public Operation
 {
-    Q_OBJECT
-    Q_PROPERTY(ContactsModel *selectedContacts MEMBER m_selectedContactsModel CONSTANT)
 
 public:
-    enum Roles {
-        SectionRole = UserRole
-    };
+    ShareCloudFilesOperation(CloudFileOperation *parent, const CloudFiles &files, const Contacts &contacts);
 
-    DiscoveredContactsModel(Validator *validator, QObject *parent);
-
-    void reload();
-    int fixedContactsCount() const;
-    Contacts getSelectedContacts() const;
-
-
-    Q_INVOKABLE void toggleById(const QString &contactId);
-    Q_INVOKABLE QString firstContactId() const;
-
-signals:
-    void fixedContactsPopulated(const Contacts &contacts, QPrivateSignal);
+    void run() override;
 
 private:
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
-
-    Contacts findContactsByFilter() const;
-    void invalidateIsSelectedRole(int startRow, int endRow);
-    void updateDiscoveredContacts();
-    void updateSelectedContacts(const Contact::Id &contactId, const Contact *contact = nullptr);
-
-    void onDeviceContactsPopulated(const Contacts &contacts);
-    void onSelectionChanged(const QList<QModelIndex> &indices);
-
-    Validator *m_validator;
-    ContactsModel *m_selectedContactsModel;
-
-    int m_fixedContactsCount = 0;
+    CloudFileOperation *m_parent;
+    const CloudFiles m_files;
+    const Contacts m_contacts;
 };
 }
 
-Q_DECLARE_METATYPE(vm::Contacts)
-
-#endif // VM_DISCOVEREDCONTACTSMODEL_H
+#endif // VM_SHARED_CLOUD_FILES_OPERATION_H
