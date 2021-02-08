@@ -74,7 +74,7 @@ Page {
         ContextMenuItem {
             text: qsTr("Share to...")
             onTriggered: app.stateManager.shareCloudFiles()
-            visible: false // d.isCloudFileList && d.cloudFilesHasSelection // TODO(fpohtmeh): enable
+            visible: d.isCloudFileList && d.cloudFilesHasSelection
         }
 
         ContextMenuSeparator {
