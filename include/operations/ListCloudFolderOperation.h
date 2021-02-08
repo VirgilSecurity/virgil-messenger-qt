@@ -32,70 +32,44 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CLOUDFILESMODEL_H
-#define VM_CLOUDFILESMODEL_H
+#ifndef VM_LIST_CLOUD_FOLDER_OPERATION_H
+#define VM_LIST_CLOUD_FOLDER_OPERATION_H
 
-#include <QDateTime>
-#include <QTimer>
+#include <QPointer>
 
 #include "CloudFile.h"
-#include "CloudFilesUpdate.h"
-#include "ListModel.h"
-
-class Settings;
+#include "CloudFileRequestId.h"
+#include "Operation.h"
 
 namespace vm
 {
-class CloudFilesModel : public ListModel
+class CloudFileOperation;
+class UserDatabase;
+
+class ListCloudFolderOperation : public Operation
 {
     Q_OBJECT
-    Q_PROPERTY(QString description MEMBER m_description NOTIFY descriptionChanged)
 
 public:
-    enum Roles
-    {
-        FilenameRole = Qt::UserRole,
-        IsFolderRole,
-        DisplayDateTimeRole,
-        DisplayFileSizeRole,
-        SortRole
-    };
+    ListCloudFolderOperation(CloudFileOperation *parent, const CloudFileHandler &parentFolder, UserDatabase *userDatabase);
 
-    CloudFilesModel(const Settings *settings, QObject *parent);
-
-    void setEnabled(bool enabled);
-
-    CloudFileHandler file(int proxyRow) const;
-    ModifiableCloudFileHandler file(int proxyRow);
-    CloudFiles selectedFiles() const;
-
-    void updateCloudFiles(const CloudFilesUpdate &update);
-
-signals:
-    void descriptionChanged(const QString &description);
+    void run() override;
 
 private:
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
+    void onDatabaseListFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
+    void onCloudListFetched(CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &files);
+    void onCloudListFetchErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
 
-    static QVector<int> rolesFromUpdateSource(CloudFileUpdateSource source, bool isFolder);
+    static bool fileIdLess(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs);
+    static bool fileUpdated(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs);
 
-    void addFile(const ModifiableCloudFileHandler &file);
-    void removeFile(const CloudFileHandler &file);
-    void updateFile(const CloudFileHandler &file, CloudFileUpdateSource source);
-    void updateDownloadedFile(const DownloadCloudFileUpdate &update);
-    QModelIndex findById(const CloudFileId &cloudFileId) const;
+    CloudFileOperation *m_parent;
+    CloudFileHandler m_parentFolder;
+    QPointer<UserDatabase> m_userDatabase;
 
-    void invalidateDateTime();
-    void updateDescription();
-
-    const Settings *m_settings;
-    ModifiableCloudFiles m_files;
-    QDateTime m_now;
-    QTimer m_updateTimer;
-    QString m_description;
+    ModifiableCloudFiles m_cachedFiles;
+    CloudFileRequestId m_requestId = 0;
 };
 }
 
-#endif // VM_CLOUDFILESMODEL_H
+#endif // VM_LIST_CLOUD_FOLDER_OPERATION_H

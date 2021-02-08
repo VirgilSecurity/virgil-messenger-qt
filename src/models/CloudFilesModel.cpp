@@ -92,14 +92,14 @@ CloudFiles CloudFilesModel::selectedFiles() const
 
 void CloudFilesModel::updateCloudFiles(const CloudFilesUpdate &update)
 {
-    if (auto upd = std::get_if<ListCloudFolderUpdate>(&update)) {
+    if (auto upd = std::get_if<CachedListCloudFolderUpdate>(&update)) {
         beginResetModel();
         m_now = QDateTime::currentDateTime();
         m_files = upd->files;
         endResetModel();
         updateDescription();
     }
-    else if (auto upd = std::get_if<MergeCloudFolderUpdate>(&update)) {
+    else if (auto upd = std::get_if<CloudListCloudFolderUpdate>(&update)) {
         for (auto &file : upd->deleted) {
             removeFile(file);
         }
@@ -177,8 +177,8 @@ QHash<int, QByteArray> CloudFilesModel::roleNames() const
 QVector<int> CloudFilesModel::rolesFromUpdateSource(const CloudFileUpdateSource source, const bool isFolder)
 {
     QVector<int> roles;
-    if ((source == CloudFileUpdateSource::ListedParent) || (source == CloudFileUpdateSource::ListedParent)) {
-        roles << FilenameRole << DisplayDateTimeRole;
+    if ((source == CloudFileUpdateSource::ListedParent) || (source == CloudFileUpdateSource::ListedChild)) {
+        roles << FilenameRole << DisplayDateTimeRole << SortRole;
     }
     if ((source == CloudFileUpdateSource::ListedChild) && !isFolder) {
         roles << DisplayFileSizeRole;
@@ -206,7 +206,10 @@ void CloudFilesModel::updateFile(const CloudFileHandler &file, const CloudFileUp
 {
     if (const auto index = findById(file->id()); index.isValid()) {
         m_files[index.row()]->update(*file, source);
-        emit dataChanged(index, index, rolesFromUpdateSource(source, file->isFolder()));
+        const auto roles = rolesFromUpdateSource(source, file->isFolder());
+        if (!roles.isEmpty()) {
+            emit dataChanged(index, index, roles);
+        }
     }
 }
 

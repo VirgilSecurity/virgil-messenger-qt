@@ -52,6 +52,7 @@ public:
     UploadCloudFileOperation(CloudFileOperation *parent, const QString &filePath, const CloudFileHandler &parentFolder);
 
     void run() override;
+    CloudFileId cloudFileId() const;
 
 private:
     void cleanup() override;

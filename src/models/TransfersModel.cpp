@@ -32,43 +32,38 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "FilesProgressModel.h"
+#include "TransfersModel.h"
 
 #include "Utils.h"
 #include "Model.h"
 
 using namespace vm;
-using Self = FilesProgressModel;
+using Self = TransfersModel;
 
-Self::FilesProgressModel(QObject *parent)
+Self::TransfersModel(QObject *parent)
     : ListModel(parent)
 {
-    qRegisterMetaType<FilesProgressModel *>("FilesProgressModel*");
+    qRegisterMetaType<TransfersModel *>("TransfersModel*");
 }
 
-Self::~FilesProgressModel()
+Self::~TransfersModel()
 {
 }
 
 void Self::add(const QString &id, const QString &name, const quint64 bytesTotal, const TransferType transferType)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    m_items.push_back({ id, name, 0, bytesTotal, transferType });
+    m_transfers.push_back({ id, name, 0, bytesTotal, transferType });
     endInsertRows();
-    setActiveCount(true);
 }
 
 void Self::setProgress(const QString &id, const quint64 bytesLoaded, const quint64 bytesTotal)
 {
     if (const auto index = findById(id); index.isValid()) {
-        auto &item = m_items[index.row()];
-        if (item.isFailed) {
-            return;
-        }
+        auto &item = m_transfers[index.row()];
         item.bytesLoaded = bytesLoaded;
         item.bytesTotal = bytesTotal;
-        emit dataChanged(index, index, { BytesLoadedRole, BytesTotalRole, DisplayProgressRole, IsCompletedRole });
-        setActiveCount(isItemCompleted(item) ? calculateActiveCount() : true);
+        emit dataChanged(index, index, { BytesLoadedRole, BytesTotalRole, DisplayProgressRole });
     }
 }
 
@@ -76,102 +71,57 @@ void Self::remove(const QString &id)
 {
     if (const auto index = findById(id); index.isValid()) {
         beginRemoveRows(QModelIndex(), index.row(), index.row());
-        m_items.erase(m_items.begin() + index.row());
+        m_transfers.erase(m_transfers.begin() + index.row());
         endRemoveRows();
-        setActiveCount(calculateActiveCount());
     }
 }
 
-void Self::markAsFailed(const QString &id)
+QModelIndex Self::findById(const QString &transferId) const
 {
-    if (const auto index = findById(id); index.isValid()) {
-        auto &item = m_items[index.row()];
-        item.isFailed = true;
-        emit dataChanged(index, index, { IsFailedRole, DisplayProgressRole, IsCompletedRole });
-        setActiveCount(calculateActiveCount());
-    }
-}
-
-QModelIndex Self::findById(const QString &id) const
-{
-    const auto it = std::find_if(std::begin(m_items), std::end(m_items), [&id](auto item) {
-        return item.id == id;
+    const auto it = std::find_if(std::begin(m_transfers), std::end(m_transfers), [&transferId](auto item) {
+        return item.id == transferId;
     });
 
-    if (it != std::end(m_items)) {
-        return index(std::distance(std::begin(m_items), it));
+    if (it != std::end(m_transfers)) {
+        return index(std::distance(std::begin(m_transfers), it));
     }
 
     return QModelIndex();
 }
 
-QString Self::displayedProgress(const Item &item)
+QString Self::displayedProgress(const Transfer &item)
 {
     const auto isDownload = item.transferType == TransferType::Download;
-    if (item.isFailed) {
-        return isDownload ? tr("Download failed") : tr("Upload failed");
-    }
     if (item.bytesLoaded == 0) {
         return isDownload ? tr("Waiting for download...") : tr("Waiting for upload...");
     }
-    if (item.bytesLoaded == item.bytesTotal) {
-        return isDownload ? tr("Downloaded") : tr("Uploaded");
-    }
     return Utils::formattedDataSizeProgress(item.bytesLoaded, item.bytesTotal);
-}
-
-bool Self::isItemCompleted(const FilesProgressModel::Item &item)
-{
-    return item.bytesTotal > 0 && item.bytesLoaded == item.bytesTotal;
-}
-
-int Self::calculateActiveCount() const
-{
-    int activeCount = 0;
-    for (const auto &item : m_items) {
-        if (item.isFailed || isItemCompleted(item)) {
-            continue;
-        }
-        ++activeCount;
-    }
-    return activeCount;
-}
-
-void Self::setActiveCount(const int activeCount)
-{
-    if (activeCount != m_activeCount) {
-        m_activeCount = activeCount;
-        emit activeCountChanged(activeCount);
-    }
 }
 
 int Self::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return m_items.size();
+    return m_transfers.size();
 }
 
 QVariant Self::data(const QModelIndex &index, int role) const
 {
-    const auto &item = m_items[index.row()];
+    const auto &item = m_transfers[index.row()];
     switch (role) {
+        case IdRole:
+            return item.id;
+
         case NameRole:
             return item.name;
 
         case BytesLoadedRole:
-            return item.isFailed ? 0 : item.bytesLoaded;
+            return item.bytesLoaded;
 
         case BytesTotalRole:
             return item.bytesTotal;
 
         case DisplayProgressRole:
             return displayedProgress(item);
-
-        case IsFailedRole:
-            return item.isFailed;
-
-        case IsCompletedRole:
-            return isItemCompleted(item);
 
         default:
             return QVariant();
@@ -181,11 +131,10 @@ QVariant Self::data(const QModelIndex &index, int role) const
 QHash<int, QByteArray> Self::roleNames() const
 {
     return {
+        { IdRole, "id" },
         { NameRole, "name" },
         { BytesLoadedRole, "bytesLoaded" },
         { BytesTotalRole, "bytesTotal" },
-        { DisplayProgressRole, "displayProgress" },
-        { IsFailedRole, "isFailed" },
-        { IsCompletedRole, "isCompleted" }
+        { DisplayProgressRole, "displayProgress" }
     };
 }

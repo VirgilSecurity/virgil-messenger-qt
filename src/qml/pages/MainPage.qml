@@ -76,12 +76,6 @@ Page {
             visible: d.isCloudFileList
         }
 
-        ContextMenuItem {
-            text: qsTr("Show transfers")
-            onTriggered: filesProgressPanel.showTransfers() // TODO(fpohtmeh): don't use global id
-            visible: d.isCloudFileList
-        }
-
         ContextMenuSeparator {
             visible: d.isCloudFileList && d.cloudFilesSelection.hasSelection
         }
