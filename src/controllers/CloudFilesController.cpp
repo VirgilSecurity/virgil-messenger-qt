@@ -172,6 +172,11 @@ void Self::createFolder(const QString &name)
     m_models->cloudFilesQueue()->pushCreateFolder(name, m_hierarchy.back());
 }
 
+void Self::shareFiles()
+{
+    qDebug() << "Self::shareFiles is under development";
+}
+
 void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)
 {
     m_requestedHierarchy = hierarchy;

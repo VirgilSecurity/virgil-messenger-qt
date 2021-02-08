@@ -108,10 +108,5 @@ Item {
             text: Platform.isMobile ? qsTr("Save to downloads") : qsTr("Save As...")
             onTriggered: (Platform.isMobile ? controllers.attachments.download : chatMessage.saveAttachmentAs)(messageId)
         }
-
-        Action {
-            text: qsTr("Share to...")
-            onTriggered: app.stateManager.selectChats()
-        }
     }
 }

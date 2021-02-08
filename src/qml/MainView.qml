@@ -136,7 +136,7 @@ Control {
         }
 
         function openChatPage() {
-            if ([manager.attachmentPreviewState, manager.selectChatsState].includes(manager.previousState)) {
+            if (manager.attachmentPreviewState === manager.previousState) {
                 return
             }
             const replace = [manager.newChatState, manager.nameGroupChatState, manager.downloadKeyState].includes(manager.previousState)
@@ -194,8 +194,8 @@ Control {
             stackView.push(page("DownloadKey"))
         }
 
-        function openSelectChatsPage() {
-            stackView.push(page("SelectChats"))
+        function openShareCloudFilesPage() {
+            stackView.push(page("ShareCloudFiles"))
         }
     }
 
@@ -217,6 +217,6 @@ Control {
         manager.signInUsernameState.entered.connect(d.openSignInUsernamePage)
         manager.signUpState.entered.connect(d.openSignUpPage)
         manager.downloadKeyState.entered.connect(d.openDownloadKeyPage)
-        manager.selectChatsState.entered.connect(d.openSelectChatsPage)
+        manager.shareCloudFilesState.entered.connect(d.openShareCloudFilesPage)
     }
 }

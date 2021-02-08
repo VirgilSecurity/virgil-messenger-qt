@@ -32,28 +32,22 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_SELECTCHATSSTATE_H
-#define VM_SELECTCHATSSTATE_H
+#include "ShareCloudFilesState.h"
 
-#include <QState>
+#include "models/DiscoveredContactsModel.h"
+#include "models/ListSelectionModel.h"
 
-namespace vm
+using namespace vm;
+
+ShareCloudFilesState::ShareCloudFilesState(DiscoveredContactsModel *contactsModel, QState *parent)
+    : OperationState(parent)
+    , m_contactsModel(contactsModel)
 {
-class ChatsModel;
-
-class SelectChatsState : public QState
-{
-    Q_OBJECT
-
-public:
-    SelectChatsState(ChatsModel *chatsModel, QState *parent);
-
-private:
-    void onEntry(QEvent *) override;
-    void onExit(QEvent *) override;
-
-    ChatsModel *m_chatsModel;
-};
 }
 
-#endif // VM_SELECTCHATSSTATE_H
+void ShareCloudFilesState::onEntry(QEvent *event)
+{
+    Q_UNUSED(event)
+    m_contactsModel->reload();
+    m_contactsModel->selection()->setMultiSelect(true);
+}

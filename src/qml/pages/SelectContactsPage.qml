@@ -13,7 +13,6 @@ OperationPage {
     footerText: ""
 
     signal contactSelected(string contactId)
-    signal actionButtonClicked()
 
     property alias selectedContacts: flow
 

@@ -85,6 +85,12 @@ Page {
             onTriggered: deleteCloudFilesDialog.open()
             visible: d.isCloudFileList && d.cloudFilesSelection.hasSelection
         }
+
+        ContextMenuItem {
+            text: qsTr("Share to...")
+            onTriggered: app.stateManager.shareCloudFiles()
+            visible: d.isCloudFileList && d.cloudFilesSelection.hasSelection
+        }
     }
 
     StackLayout {

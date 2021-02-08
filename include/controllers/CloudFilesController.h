@@ -70,6 +70,7 @@ public:
     Q_INVOKABLE void addFiles(const QVariant &fileUrls);
     Q_INVOKABLE void deleteFiles();
     Q_INVOKABLE void createFolder(const QString &name);
+    Q_INVOKABLE void shareFiles();
 
 signals:
     void updateCloudFiles(const CloudFilesUpdate &update);

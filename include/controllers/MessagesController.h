@@ -59,8 +59,6 @@ public:
     Q_INVOKABLE void sendFileMessage(const QVariant &attachmentUrl);
     Q_INVOKABLE void sendPictureMessage(const QVariant &attachmentUrl);
 
-    Q_INVOKABLE void shareMessage(const QVariant &messageId);
-
 signals:
     void errorOccurred(const QString &errorText);
     void notificationCreated(const QString &notification, const bool error);

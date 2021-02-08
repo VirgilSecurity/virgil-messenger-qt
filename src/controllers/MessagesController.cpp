@@ -141,14 +141,6 @@ void Self::sendPictureMessage(const QVariant &attachmentUrl)
     emit messageCreated(message);
 }
 
-void MessagesController::shareMessage(const QVariant &messageId)
-{
-    Q_UNUSED(messageId)
-    // TODO(fpohtmeh): get selected chats from m_models->chats()->selection()
-    qCDebug(lcController) << "Message sharing is under development";
-}
-
-
 std::unique_ptr<OutgoingMessage> Self::createOutgoingMessage() {
     auto message = std::make_unique<OutgoingMessage>();
 
