@@ -87,7 +87,7 @@ void ListCloudFolderOperation::onCloudListFetched(const CloudFileRequestId reque
             ++newI;
         }
         else {
-            if (!fileUpdated(oldFile, newFile)) {
+            if (fileUpdated(oldFile, newFile)) {
                 update.updated.push_back(newFile);
             }
             ++oldI;
@@ -137,5 +137,5 @@ bool Self::fileIdLess(const ModifiableCloudFileHandler &lhs, const ModifiableClo
 
 bool Self::fileUpdated(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs)
 {
-    return rhs->updatedAt() > lhs->updatedAt();
+    return lhs->updatedAt() < rhs->updatedAt();
 }

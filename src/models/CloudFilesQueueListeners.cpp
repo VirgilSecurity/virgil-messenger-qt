@@ -183,9 +183,7 @@ void CloudListUpdatingCounter::onIncrement(int inc)
 
 void CloudFolderUpdateWatcher::subscribe(const CloudFileHandler &cloudFolder)
 {
-    // Check for root folder, it is never updated
-    const auto isRoot = !cloudFolder->id().coreFolderId().isValid();
-    if (isRoot) {
+    if (cloudFolder->isRoot()) {
         emit finished(cloudFolder, false);
         return;
     }

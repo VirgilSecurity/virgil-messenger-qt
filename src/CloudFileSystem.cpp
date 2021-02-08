@@ -99,10 +99,9 @@ CloudFileRequestId CloudFileSystem::createFile(const QString &filePath, const Cl
 {
     const auto requestId = ++m_requestId;
     const auto parentFolderId = parentFolder->id().coreFolderId();
-    const auto isRoot = !parentFolderId.isValid();
     const auto tempDir = m_messenger->settings()->cloudFilesCacheDir();
     const auto encFilePath = tempDir.filePath(QLatin1String("upload-") + Utils::createUuid());
-    auto future = isRoot
+    auto future = parentFolder->isRoot()
         ? m_coreFs->createFile(filePath, encFilePath)
         : m_coreFs->createFile(filePath, encFilePath, parentFolderId, parentFolder->publicKey());
     FutureWorker::run(future, [this, filePath, encFilePath, parentFolder, requestId](auto result) {
@@ -123,8 +122,7 @@ CloudFileRequestId CloudFileSystem::createFolder(const QString &name, const Clou
 {
     const auto requestId = ++m_requestId;
     const auto parentFolderId = parentFolder->id().coreFolderId();
-    const auto isRoot = !parentFolderId.isValid();
-    auto future = isRoot ? m_coreFs->createFolder(name) : m_coreFs->createFolder(name, parentFolderId, parentFolder->publicKey());
+    auto future = parentFolder->isRoot() ? m_coreFs->createFolder(name) : m_coreFs->createFolder(name, parentFolderId, parentFolder->publicKey());
     FutureWorker::run(future, [this, parentFolder, name, requestId](auto result) {
         if (std::holds_alternative<CoreMessengerStatus>(result)) {
             emit createFolderErrorOccured(requestId, tr("Failed to create folder"));

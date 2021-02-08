@@ -93,6 +93,10 @@ bool CloudFilesTable::updateFiles(const CloudFiles &cloudFiles, const CloudFileU
 
 bool CloudFilesTable::updateFile(const CloudFileHandler &cloudFile, const CloudFileUpdateSource source)
 {
+    if (cloudFile->isRoot()) {
+        return true;
+    }
+
     QString queryId;
     switch (source) {
         case CloudFileUpdateSource::ListedParent:

@@ -115,7 +115,7 @@ void Self::openFile(const QVariant &proxyRow)
     }
     else if (fingerprint != cloudFile->fingerprint()) {
         qWarning(lcController) << "Fingerprint mismatch, downloading cloud file";
-        emit notificationCreated(tr("Downloading cloud file..."), true);
+        emit notificationCreated(tr("Downloading cloud file..."), false);
         needDownload = true;
     }
 

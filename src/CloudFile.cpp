@@ -170,6 +170,11 @@ void CloudFile::setFingerprint(const QString &fingerprint)
     m_fingerprint = fingerprint;
 }
 
+bool CloudFile::isRoot() const
+{
+    return m_isFolder && m_id == CloudFileId::root();
+}
+
 void CloudFile::update(const CloudFile &file, const CloudFileUpdateSource source)
 {
     if (file.id() != id()) {
