@@ -62,6 +62,7 @@ void LoadFileOperation::connectReply(QNetworkReply *reply)
     connect(reply, &QNetworkReply::finished, this, std::bind(&LoadFileOperation::onReplyFinished, this, reply));
     connect(reply, &QNetworkReply::errorOccurred, this, std::bind(&LoadFileOperation::onReplyErrorOccurred, this, std::placeholders::_1, reply));
     connect(reply, &QNetworkReply::sslErrors, this, &LoadFileOperation::onReplySslErrors);
+    connect(this, &LoadFileOperation::interrupt, reply, &QNetworkReply::abort);
 }
 
 bool LoadFileOperation::openFileHandle(const QIODevice::OpenMode &mode)
@@ -109,6 +110,7 @@ QString LoadFileOperation::filePath() const
 
 void LoadFileOperation::onReplyFinished(QNetworkReply *reply)
 {
+    const auto error = reply->error();
     reply->deleteLater();
     if (status() == Status::Failed) {
         return;
@@ -120,28 +122,33 @@ void LoadFileOperation::onReplyFinished(QNetworkReply *reply)
         finish();
     }
     else {
-        qCWarning(lcOperation) << "Failed. Load file was processed partially";
+        qCWarning(lcOperation) << "Failed. Load file was processed partially" << error;
         invalidateAndNotify(tr("File loading failed"));
     }
 }
 
-void LoadFileOperation::onReplyErrorOccurred(const QNetworkReply::NetworkError errorCode, QNetworkReply *reply)
+void LoadFileOperation::onReplyErrorOccurred(const QNetworkReply::NetworkError error, QNetworkReply *reply)
 {
     Q_UNUSED(reply)
     if (status() == Status::Failed) {
         return;
     }
     using Error = QNetworkReply::NetworkError;
-    switch (errorCode) {
+    switch (error) {
     case Error::TemporaryNetworkFailureError:
     case Error::NetworkSessionFailedError:
     case Error::UnknownNetworkError:
         qCDebug(lcOperation) << "Failed due to temporary network issue";
         fail();
         break;
+    case Error::OperationCanceledError:
+        qCWarning(lcOperation) << "File loading cancelled";
+        fail();
+        emit notificationCreated(tr("File loading cancelled"), false);
+        break;
     default:
-        qCWarning(lcOperation) << "File load error occurred:" << errorCode;
-        invalidateAndNotify(tr("File loading error: %1").arg(errorCode));
+        qCWarning(lcOperation) << "File load error occurred:" << error;
+        invalidateAndNotify(tr("File loading error: %1").arg(error));
         break;
     }
 }

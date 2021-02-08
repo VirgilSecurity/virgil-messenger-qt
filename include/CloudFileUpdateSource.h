@@ -39,9 +39,13 @@ namespace vm
 {
 enum class CloudFileUpdateSource
 {
+    // No updates
     None,
+    // Update all properties for file/folder
     ListedChild,
+    // Update all properties for parent folder
     ListedParent,
+    // Update file fingerprint
     Download
 };
 }

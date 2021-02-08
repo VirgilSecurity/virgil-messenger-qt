@@ -32,52 +32,39 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_LOADFILEOPERATION_H
-#define VM_LOADFILEOPERATION_H
+#include "CloudFilesTransfersModel.h"
 
-#include "NetworkOperation.h"
+using namespace vm;
+using Self = CloudFilesTransfersModel;
 
-#include "QFile"
-
-#include <QNetworkReply>
-
-namespace vm
+CloudFilesTransfersModel::CloudFilesTransfersModel(QObject *parent)
+    : TransfersModel(parent)
 {
-class LoadFileOperation : public NetworkOperation
-{
-    Q_OBJECT
+    qRegisterMetaType<CloudFilesTransfersModel *>("CloudFilesTransfersModel*");
 
-public:
-    LoadFileOperation(NetworkOperation *parent, quint64 bytesTotal = 0);
-
-    void setFilePath(const QString &filePath);
-
-signals:
-    void setProgress(quint64 bytesLoaded, quint64 bytesTotal);
-    void progressChanged(quint64 bytesLoaded, quint64 bytesTotal);
-
-    void interrupt();
-
-protected:
-    virtual void connectReply(QNetworkReply *reply);
-
-    bool openFileHandle(const QFile::OpenMode &mode);
-    void closeFileHandle();
-    QFile *fileHandle();
-
-    QString filePath() const;
-
-private:
-    void onReplyFinished(QNetworkReply *reply);
-    void onReplyErrorOccurred(const QNetworkReply::NetworkError error, QNetworkReply *reply);
-    void onReplySslErrors();
-    void onSetProgress(quint64 bytesLoaded, quint64 bytesTotal);
-
-    QString m_filePath;
-    QScopedPointer<QFile> m_fileHandle;
-    quint64 m_bytesLoaded = 0;
-    quint64 m_bytesTotal = 0;
-};
+    connect(this, &TransfersModel::interrupt, [this](const QString &transferId) {
+        emit interruptByCloudFileId(CloudFsFileId(transferId));
+    });
 }
 
-#endif // VM_LOADFILEOPERATION_H
+void Self::updateCloudFiles(const CloudFilesUpdate &update)
+{
+    auto upd = std::get_if<TransferCloudFileUpdate>(&update);
+    if (!upd) {
+        return;
+    }
+
+    const auto &file = upd->file;
+    switch (upd->stage) {
+        case TransferCloudFileUpdate::Stage::Started:
+            add(file->id(), file->name(), file->size(), upd->type);
+            break;
+        case TransferCloudFileUpdate::Stage::Transfering:
+            setProgress(file->id(), upd->bytesLoaded, file->size());
+            break;
+        case TransferCloudFileUpdate::Stage::Finished:
+        case TransferCloudFileUpdate::Stage::Failed:
+            remove(file->id());
+            break;
+    }
+}

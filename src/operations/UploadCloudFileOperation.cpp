@@ -64,12 +64,23 @@ UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, c
 
 void UploadCloudFileOperation::run()
 {
-    if (!m_parent->waitForFolderKeys(m_parentFolder)) {
-        failAndNotify(tr("Failed to update parent folder"));
+    // Local file check
+    const auto fileName = QFileInfo(m_sourceFilePath).fileName();
+    const auto localPath = QDir(m_parentFolder->localPath()).filePath(fileName);
+    if (FileUtils::fileExists(localPath)) {
+        failAndNotify(tr("File name is not unique"));
+        return;
     }
-    else {
+
+    m_parent->watchFolderAndRun(m_parentFolder, this, [this](auto folder) {
+        m_parentFolder = folder;
         m_requestId = m_parent->cloudFileSystem()->createFile(m_sourceFilePath, m_parentFolder);
-    }
+    });
+}
+
+CloudFileId UploadCloudFileOperation::cloudFileId() const
+{
+    return m_file->id();
 }
 
 void UploadCloudFileOperation::cleanup()
@@ -110,14 +121,18 @@ void UploadCloudFileOperation::onProgressChanged(const quint64 bytesLoaded, cons
 
 void UploadCloudFileOperation::onUploaded()
 {
-    // Copy file to cloud downloads dir
-    const QDir parentFolderDir(m_parentFolder->localPath());
-    const auto cloudFileLocalPath = parentFolderDir.filePath(m_file->name());
-    if (parentFolderDir.mkpath(".")) {
-        QFile::copy(m_sourceFilePath, cloudFileLocalPath);
-        m_file->setLocalPath(cloudFileLocalPath);
-        m_file->setFingerprint(FileUtils::calculateFingerprint(cloudFileLocalPath));
+    if (!FileUtils::forceCreateDir(m_parentFolder->localPath())) {
+        failAndNotify(tr("Failed to create directory"));
+        return;
     }
+
+    // Copy file to cloud downloads dir
+    const auto cloudFileLocalPath = QDir(m_parentFolder->localPath()).filePath(m_file->name());
+    if (!QFile::copy(m_sourceFilePath, cloudFileLocalPath)) {
+        qCWarning(lcOperation) << "Failed to copy file from" << m_sourceFilePath << "to" << cloudFileLocalPath;
+    }
+    m_file->setLocalPath(cloudFileLocalPath);
+    m_file->setFingerprint(FileUtils::calculateFingerprint(cloudFileLocalPath));
 
     // Send updates
     CreateCloudFilesUpdate update;

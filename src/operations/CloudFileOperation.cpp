@@ -34,17 +34,19 @@
 
 #include "CloudFileOperation.h"
 
+#include "CloudFilesQueueListeners.h"
 #include "Messenger.h"
 
 using namespace vm;
 
-qsizetype CloudFileOperation::m_counter = 0;
+qsizetype CloudFileOperation::m_nameCounter = 0;
 
-CloudFileOperation::CloudFileOperation(Messenger *messenger, QObject *parent)
+CloudFileOperation::CloudFileOperation(Messenger *messenger, CloudFolderUpdateWatcher *watcher, QObject *parent)
     : NetworkOperation(parent, messenger->isOnline())
     , m_messenger(messenger)
+    , m_watcher(watcher)
 {
-    setName(QLatin1String("CloudFile(%1)").arg(QString::number(++m_counter)));
+    setName(QLatin1String("CloudFile(%1)").arg(QString::number(++m_nameCounter)));
 }
 
 Settings *CloudFileOperation::settings()
@@ -62,20 +64,12 @@ FileLoader *CloudFileOperation::fileLoader()
     return m_messenger->fileLoader();
 }
 
-bool CloudFileOperation::waitForFolderKeys(const CloudFileHandler &cloudFolder)
+void CloudFileOperation::watchFolderAndRun(const CloudFileHandler &folder, QObject *receiver, FolderUpdateSlot slot)
 {
-    const auto folderId = cloudFolder->id().coreFolderId();
-    if (const auto isRoot = !folderId.isValid()) {
-        // We don't need keys
-        return true;
-    }
-
-    // Wait a second for fetched keys
-    QEventLoop loop;
-    connect(cloudFileSystem(), &CloudFileSystem::listFetched, &loop, &QEventLoop::quit);
-    connect(cloudFileSystem(), &CloudFileSystem::fetchListErrorOccured, &loop, &QEventLoop::quit);
-    QTimer::singleShot(1000, &loop, &QEventLoop::quit);
-    loop.exec();
-
-    return !cloudFolder->publicKey().isEmpty() && !cloudFolder->encryptedKey().isEmpty();
+    connect(m_watcher, &CloudFolderUpdateWatcher::finished, receiver, [folder, slot](auto f) {
+        if (folder->id() == f->id()) {
+            slot(f);
+        }
+    });
+    m_watcher->subscribe(folder);
 }

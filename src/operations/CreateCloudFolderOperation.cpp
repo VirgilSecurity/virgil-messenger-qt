@@ -34,11 +34,10 @@
 
 #include "CreateCloudFolderOperation.h"
 
-#include <QDir>
-
 #include "CloudFileOperation.h"
+#include "CloudFilesQueueListeners.h"
+#include "FileUtils.h"
 #include "Messenger.h"
-#include "Utils.h"
 
 using namespace vm;
 
@@ -55,17 +54,24 @@ CreateCloudFolderOperation::CreateCloudFolderOperation(CloudFileOperation *paren
 
 void CreateCloudFolderOperation::run()
 {
-    if (!m_parent->waitForFolderKeys(m_parentFolder)) {
-        failAndNotify(tr("Failed to update parent folder"));
+    // Local folder check
+    const auto localPath = QDir(m_parentFolder->localPath()).filePath(m_name);
+    if (FileUtils::fileExists(localPath)) {
+        failAndNotify(tr("Folder name is not unique"));
+        return;
     }
-    else {
+
+    m_parent->watchFolderAndRun(m_parentFolder, this, [this](auto folder) {
+        m_parentFolder = folder;
         m_requestId = m_parent->cloudFileSystem()->createFolder(m_name, m_parentFolder);
-    }
+    });
 }
 
 void CreateCloudFolderOperation::onCreated(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &folder)
 {
     if (m_requestId == requestId) {
+        FileUtils::forceCreateDir(folder->localPath());
+
         CreateCloudFilesUpdate update;
         update.parentFolder = m_parentFolder;
         update.files.push_back(folder);

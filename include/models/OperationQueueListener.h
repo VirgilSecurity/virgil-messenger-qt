@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,36 +32,35 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "CloudFilesProgressModel.h"
+#ifndef VM_OPERATION_QUEUE_LISTENER_H
+#define VM_OPERATION_QUEUE_LISTENER_H
 
-using namespace vm;
-using Self = CloudFilesProgressModel;
+#include <QObject>
+#include <QPointer>
 
-CloudFilesProgressModel::CloudFilesProgressModel(QObject *parent)
-    : FilesProgressModel(parent)
+#include "OperationSource.h"
+
+namespace vm
 {
-    qRegisterMetaType<CloudFilesProgressModel *>("CloudFilesProgressModel*");
+class OperationQueueListener : public QObject
+{
+    Q_OBJECT
+
+public:
+    using QObject::QObject;
+    virtual ~OperationQueueListener() {}
+
+    virtual bool preRun(OperationSourcePtr source) { Q_UNUSED(source) return true; }
+    virtual void postRun(OperationSourcePtr source) { Q_UNUSED(source) }
+    virtual void clear() {}
+
+signals:
+    void notificationCreated(const QString &notification, const bool error);
+};
+
+using OperationQueueListenerPtr = QPointer<OperationQueueListener>;
+using OperationQueueListeners = std::vector<OperationQueueListenerPtr>;
 }
 
-void Self::updateCloudFiles(const CloudFilesUpdate &update)
-{
-    auto upd = std::get_if<TransferCloudFileUpdate>(&update);
-    if (!upd) {
-        return;
-    }
+#endif // VM_OPERATION_QUEUE_LISTENER_H
 
-    const auto &file = upd->file;
-    switch (upd->stage) {
-        case TransferCloudFileUpdate::Stage::Started:
-            add(file->id(), file->name(), file->size(), upd->type);
-            break;
-        case TransferCloudFileUpdate::Stage::Transfering:
-            setProgress(file->id(), upd->bytesLoaded, file->size());
-            break;
-        case TransferCloudFileUpdate::Stage::Finished:
-            break;
-        case TransferCloudFileUpdate::Stage::Failed:
-            markAsFailed(file->id());
-            break;
-    }
-}

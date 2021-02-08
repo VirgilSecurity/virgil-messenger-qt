@@ -170,6 +170,11 @@ void CloudFile::setFingerprint(const QString &fingerprint)
     m_fingerprint = fingerprint;
 }
 
+bool CloudFile::isRoot() const
+{
+    return m_isFolder && m_id == CloudFileId::root();
+}
+
 void CloudFile::update(const CloudFile &file, const CloudFileUpdateSource source)
 {
     if (file.id() != id()) {
@@ -180,22 +185,40 @@ void CloudFile::update(const CloudFile &file, const CloudFileUpdateSource source
     }
     setParentId(file.parentId()); // update always
 
-    if ((source == CloudFileUpdateSource::ListedChild) || (source == CloudFileUpdateSource::ListedParent)) {
+    if (source == CloudFileUpdateSource::ListedParent) {
         setName(file.name());
         setCreatedAt(file.createdAt());
         setUpdatedAt(file.updatedAt());
         setUpdatedBy(file.updatedBy());
         setLocalPath(file.localPath());
+        if (isFolder()) {
+            setEncryptedKey(file.encryptedKey());
+            setPublicKey(file.publicKey());
+        }
     }
-    if ((source == CloudFileUpdateSource::ListedChild) && !isFolder()) {
-        setType(file.type());
-        setSize(file.size());
+    else if (source == CloudFileUpdateSource::ListedChild) {
+        setName(file.name());
+        setCreatedAt(file.createdAt());
+        setUpdatedAt(file.updatedAt());
+        setUpdatedBy(file.updatedBy());
+        setLocalPath(file.localPath());
+        if (isFolder()) {
+            if (file.updatedAt() > updatedAt()) {
+                setEncryptedKey(QByteArray());
+                setPublicKey(QByteArray());
+            }
+        }
+        else {
+            setType(file.type());
+            setSize(file.size());
+            if (file.updatedAt() > updatedAt()) {
+                setFingerprint(QString());
+            }
+        }
     }
-    if ((source == CloudFileUpdateSource::ListedParent) && isFolder()) {
-        setEncryptedKey(file.encryptedKey());
-        setPublicKey(file.publicKey());
-    }
-    if ((source == CloudFileUpdateSource::Download) && !isFolder()) {
-        setFingerprint(file.fingerprint());
+    else if (source == CloudFileUpdateSource::Download) {
+        if (!isFolder()) {
+            setFingerprint(file.fingerprint());
+        }
     }
 }

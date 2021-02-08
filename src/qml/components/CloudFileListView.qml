@@ -18,7 +18,7 @@ ModelListView {
 
     ListStatusButton {
         text: qsTr("Updating...")
-        visible: controllers.cloudFiles.isLoading
+        visible: controllers.cloudFiles.isListUpdating
     }
 
     delegate: ListDelegate {

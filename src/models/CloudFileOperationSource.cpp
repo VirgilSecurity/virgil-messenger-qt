@@ -64,6 +64,11 @@ CloudFiles CloudFileOperationSource::files() const
     return m_files;
 }
 
+CloudFileHandler CloudFileOperationSource::file() const
+{
+    return m_files.empty() ? nullptr : m_files.front();
+}
+
 void CloudFileOperationSource::setFiles(const CloudFiles &files)
 {
     m_files = files;
@@ -108,6 +113,8 @@ QString CloudFileOperationSource::toString() const
 {
     const QString str("CloudFileOperationSource(%1)");
     switch (m_type) {
+    case Type::ListFolder:
+        return str.arg(QLatin1String("ListFolder"));
     case Type::CreateFolder:
         return str.arg(QLatin1String("CreateFolder"));
     case Type::Upload:
@@ -117,6 +124,6 @@ QString CloudFileOperationSource::toString() const
     case Type::Delete:
         return str.arg(QLatin1String("Delete"));
     default:
-        return str.arg(QLatin1String("???"));
+        throw std::logic_error("Invalid cloud file operation source type");
     }
 }

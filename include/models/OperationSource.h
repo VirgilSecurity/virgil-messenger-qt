@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2021 Virgil Security, Inc.
+﻿//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -69,6 +69,7 @@ private:
 };
 
 using OperationSourcePtr = std::shared_ptr<OperationSource>;
+using OperationSources = std::vector<OperationSourcePtr>;
 }
 
 #endif // VM_OPERATIONSOURCE_H

@@ -32,23 +32,26 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CLOUDFILESPROGRESSMODEL_H
-#define VM_CLOUDFILESPROGRESSMODEL_H
+#ifndef VM_CLOUDFILESTRANSFERSMODEL_H
+#define VM_CLOUDFILESTRANSFERSMODEL_H
 
 #include "CloudFilesUpdate.h"
-#include "FilesProgressModel.h"
+#include "TransfersModel.h"
 
 namespace vm
 {
-class CloudFilesProgressModel : public FilesProgressModel
+class CloudFilesTransfersModel : public TransfersModel
 {
     Q_OBJECT
 
 public:
-    explicit CloudFilesProgressModel(QObject *parent);
+    explicit CloudFilesTransfersModel(QObject *parent);
 
     void updateCloudFiles(const CloudFilesUpdate &update);
+
+signals:
+    void interruptByCloudFileId(const CloudFileId &cloudFileId);
 };
 } // namespace vm
 
-#endif // VM_CLOUDFILESPROGRESSMODEL_H
+#endif // VM_CLOUDFILESTRANSFERSMODEL_H

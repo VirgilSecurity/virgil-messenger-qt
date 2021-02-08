@@ -60,13 +60,17 @@ DownloadCloudFileOperation::DownloadCloudFileOperation(CloudFileOperation *paren
 
 void DownloadCloudFileOperation::run()
 {
-    if (!m_parent->waitForFolderKeys(m_parentFolder)) {
-        failAndNotify(tr("Failed to update parent folder"));
-    }
-    else {
-        transferUpdate(TransferCloudFileUpdate::Stage::Started, 0);
+    transferUpdate(TransferCloudFileUpdate::Stage::Started, 0);
+
+    m_parent->watchFolderAndRun(m_parentFolder, this, [this](auto folder) {
+        m_parentFolder = folder;
         m_requestId = m_parent->cloudFileSystem()->getDownloadInfo(m_file);
-    }
+    });
+}
+
+CloudFileId DownloadCloudFileOperation::cloudFileId() const
+{
+    return m_file->id();
 }
 
 void DownloadCloudFileOperation::cleanup()
@@ -106,9 +110,15 @@ void DownloadCloudFileOperation::onProgressChanged(const quint64 bytesLoaded, co
 
 void DownloadCloudFileOperation::onDownloaded()
 {
+    if (!FileUtils::forceCreateDir(m_parentFolder->localPath())) {
+        failAndNotify(tr("Failed to create directory"));
+        return;
+    }
+
     const auto decrypted = m_parent->cloudFileSystem()->decryptFile(tempFilePath(), m_encryptionKey, m_file);
     if (!decrypted) {
         failAndNotify(tr("File decryption failed"));
+        return;
     }
 
     // Send update

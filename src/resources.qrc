@@ -169,7 +169,7 @@
         <file>qml/components/ChatListView.qml</file>
         <file>qml/components/CloudFileListView.qml</file>
         <file>qml/components/NewGroupChatHeader.qml</file>
-        <file>qml/components/FilesProgressPanel.qml</file>
+        <file>qml/components/TransfersPanel.qml</file>
         <file>qml/components/ListStatusButton.qml</file>
         <!-- Database -->
         <file>resources/database/createAttachments.sql</file>
@@ -195,11 +195,10 @@
         <file>resources/database/updateAttachmentLocalPath.sql</file>
         <file>resources/database/updateAttachmentUploadStage.sql</file>
         <file>resources/database/updateAttachmentRemoteUrl.sql</file>
+        <file>resources/database/updateCloudFile.sql</file>
+        <file>resources/database/updateCloudFolder.sql</file>
         <file>resources/database/updateDownloadedCloudFile.sql</file>
         <file>resources/database/updateLastMessage.sql</file>
-        <file>resources/database/updateListedChildCloudFile.sql</file>
-        <file>resources/database/updateListedChildCloudFolder.sql</file>
-        <file>resources/database/updateListedParentCloudFolder.sql</file>
         <file>resources/database/updateMessageStage.sql</file>
     </qresource>
 </RCC>

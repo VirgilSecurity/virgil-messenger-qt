@@ -76,6 +76,8 @@ public:
     QString fingerprint() const noexcept;
     void setFingerprint(const QString &fingerprint);
 
+    bool isRoot() const;
+
     void update(const CloudFile &file, CloudFileUpdateSource source);
 
 private:
