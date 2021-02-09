@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,61 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/CloudFilesUploader.h"
+#ifndef VM_CLOUD_FILE_REQUEST_ID_H
+#define VM_CLOUD_FILE_REQUEST_ID_H
 
-using namespace vm;
+#include <QtGlobal>
 
-CloudFilesUploader::CloudFilesUploader(QObject *parent)
-    : QObject(parent)
-    , m_currentIndex(-1)
-    , m_currentProcessedBytes(-1)
-    , m_currentTotalBytes(-1)
+namespace vm
 {
-    qRegisterMetaType<CloudFilesUploader *>("CloudFilesUploader*");
+    using CloudFileRequestId = quint64;
 }
 
-int CloudFilesUploader::currentIndex() const
-{
-    return m_currentIndex;
-}
-
-qint64 CloudFilesUploader::currentProcessedBytes() const
-{
-    return m_currentProcessedBytes;
-}
-
-qint64 CloudFilesUploader::currentTotalBytes() const
-{
-    return m_currentTotalBytes;
-}
-
-QStringList CloudFilesUploader::fileNames() const
-{
-    return m_fileNames;
-}
-
-void CloudFilesUploader::setCurrentIndex(const int index)
-{
-    if (m_currentIndex != index) {
-        m_currentIndex = index;
-        emit currentIndexChanged(m_currentIndex);
-    }
-}
-
-void CloudFilesUploader::setCurrentProcessedBytes(const qint64 bytes)
-{
-    if (m_currentProcessedBytes != bytes) {
-        m_currentProcessedBytes = bytes;
-        emit currentProcessedBytesChanged(m_currentProcessedBytes);
-    }
-}
-
-void CloudFilesUploader::setCurrentTotalBytes(const qint64 bytes)
-{
-    if (m_currentTotalBytes != bytes) {
-        m_currentTotalBytes = bytes;
-        emit currentTotalBytesChanged(m_currentTotalBytes);
-    }
-}
-
-
+#endif // VM_CLOUD_FILE_REQUEST_ID_H

@@ -117,7 +117,7 @@ bool Self::updateMessage(const MessageUpdate &messageUpdate, const bool apply) {
 
 ModifiableMessageHandler Self::findById(const MessageId &messageId) const
 {
-    auto messageIt = std::find_if(std::rbegin(m_messages), std::rend(m_messages), [&messageId](auto message) {
+    const auto messageIt = std::find_if(std::rbegin(m_messages), std::rend(m_messages), [&messageId](auto message) {
         return message->id() == messageId;
     });
 

@@ -45,8 +45,10 @@ class CloudFileOperationSource : public OperationSource
 public:
     enum class Type
     {
+        ListFolder,
         CreateFolder,
         Upload,
+        Download,
         Delete
     };
 
@@ -57,11 +59,14 @@ public:
     CloudFileHandler folder() const;
     void setFolder(const CloudFileHandler &folder);
     CloudFiles files() const;
+    CloudFileHandler file() const;
     void setFiles(const CloudFiles &files);
     QString filePath() const;
     void setFilePath(const QString &path);
     QString name() const;
     void setName(const QString &name);
+    PostFunction postFunction() const;
+    void setPostFunction(const PostFunction &func);
 
     bool isValid() const override;
     QString toString() const override;
@@ -72,6 +77,7 @@ private:
     CloudFiles m_files;
     QString m_filePath;
     QString m_name;
+    PostFunction m_postFunction;
 };
 }
 

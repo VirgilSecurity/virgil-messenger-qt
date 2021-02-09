@@ -65,7 +65,7 @@ signals:
 private:
     ModifiableMessageHandler findMessageById(const QString &messageId) const;
 
-    void downloadAttachment(const ModifiableMessageHandler &message, const MessagesQueue::PostDownloadFunction &function);
+    void downloadAttachment(const ModifiableMessageHandler &message, const MessagesQueue::PostFunction &function);
 
     QPointer<const Settings> m_settings;
     QPointer<Models> m_models;

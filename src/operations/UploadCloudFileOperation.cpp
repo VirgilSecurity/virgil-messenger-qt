@@ -40,47 +40,125 @@
 
 #include "CloudFileOperation.h"
 #include "FileUtils.h"
+#include "Messenger.h"
 #include "Utils.h"
 
 using namespace vm;
 
-UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, const QString &filePath, const CloudFileHandler &folder)
-    : Operation(QLatin1String("UploadCloudFile"), parent)
+UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, const QString &filePath, const CloudFileHandler &parentFolder)
+    : UploadFileOperation(parent, parent->fileLoader(), QString()) // filePath will be known after encryption
     , m_parent(parent)
-    , m_filePath(filePath)
-    , m_folder(folder)
+    , m_parentFolder(parentFolder)
+    , m_requestId(0)
+    , m_sourceFilePath(filePath)
 {
+    setName(QLatin1String("UploadCloudFile"));
+
+    connect(m_parent->cloudFileSystem(), &CloudFileSystem::fileCreated, this, &UploadCloudFileOperation::onFileCreated);
+    connect(m_parent->cloudFileSystem(), &CloudFileSystem::createFileErrorOccurred, this, &UploadCloudFileOperation::onCreateCloudFileErrorOccurred);
+    connect(this, &UploadFileOperation::progressChanged, this, &UploadCloudFileOperation::onProgressChanged);
+    connect(this, &UploadFileOperation::uploaded, this, &UploadCloudFileOperation::onUploaded);
+    connect(this, &UploadFileOperation::failed, this, &UploadCloudFileOperation::sendFailedTransferUpdate);
+    connect(this, &UploadFileOperation::invalidated, this, &UploadCloudFileOperation::sendFailedTransferUpdate);
 }
 
 void UploadCloudFileOperation::run()
 {
-    // Create local dir & copy file to local dir
-    QDir folderDir(m_folder->localPath());
-    folderDir.mkpath(".");
-    QFileInfo info(m_filePath);
-    const auto localPath = folderDir.filePath(info.fileName());
-    QFile::copy(info.absoluteFilePath(), localPath);
+    // Local file check
+    const auto fileName = QFileInfo(m_sourceFilePath).fileName();
+    const auto localPath = QDir(m_parentFolder->localPath()).filePath(fileName);
+    if (FileUtils::fileExists(localPath)) {
+        failAndNotify(tr("File name is not unique"));
+        return;
+    }
 
-    // Create cloud file
-    auto cloudFile = std::make_shared<CloudFile>();
-    cloudFile->setId(Utils::createUuid());
-    cloudFile->setParentId(m_folder->id());
-    cloudFile->setName(info.fileName());
-    cloudFile->setIsFolder(false);
-    cloudFile->setType(FileUtils::fileMimeType(m_filePath));
-    cloudFile->setSize(info.size());
-    const auto now = QDateTime::currentDateTime();
-    cloudFile->setCreatedAt(now);
-    cloudFile->setUpdatedAt(now);
-    cloudFile->setUpdatedBy(m_parent->userId());
-    cloudFile->setLocalPath(localPath);
-    cloudFile->setFingerprint(FileUtils::calculateFingerprint(m_filePath));
+    m_parent->watchFolderAndRun(m_parentFolder, this, [this](auto folder) {
+        m_parentFolder = folder;
+        m_requestId = m_parent->cloudFileSystem()->createFile(m_sourceFilePath, m_parentFolder);
+    });
+}
 
-    // Send update
-    CreatedCloudFileUpdate update;
-    update.cloudFileId = cloudFile->id();
-    update.cloudFile = cloudFile;
-    m_parent->cloudFileUpdate(update);
+CloudFileId UploadCloudFileOperation::cloudFileId() const
+{
+    return m_file->id();
+}
+
+void UploadCloudFileOperation::cleanup()
+{
+    Operation::cleanup();
+    FileUtils::removeFile(filePath()); // remove encrypted file
+}
+
+void UploadCloudFileOperation::onFileCreated(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &cloudFile, const QString &encryptedFilePath, const QUrl &putUrl)
+{
+    if (m_requestId != requestId) {
+        return;
+    }
+
+    setFilePath(encryptedFilePath);
+    if (!openFileHandle(QFile::ReadOnly)) {
+        return;
+    }
+
+    m_file = cloudFile;
+    transferUpdate(TransferCloudFileUpdate::Stage::Started, 0);
+    qCDebug(lcOperation) << "Started to upload cloud file to" << putUrl;
+    startUploadToSlot(putUrl, putUrl); // NOTE(fpohtmeh): We don't know get url at this moment, using of putUrl is fine
+}
+
+void UploadCloudFileOperation::onCreateCloudFileErrorOccurred(const CloudFileRequestId requestId, const QString &errorText)
+{
+    if (m_requestId == requestId) {
+        failAndNotify(errorText);
+    }
+}
+
+void UploadCloudFileOperation::onProgressChanged(const quint64 bytesLoaded, const quint64 bytesTotal)
+{
+    Q_UNUSED(bytesTotal)
+    transferUpdate(TransferCloudFileUpdate::Stage::Transfering, bytesLoaded);
+}
+
+void UploadCloudFileOperation::onUploaded()
+{
+    if (!FileUtils::forceCreateDir(m_parentFolder->localPath())) {
+        failAndNotify(tr("Failed to create directory"));
+        return;
+    }
+
+    // Copy file to cloud downloads dir
+    const auto cloudFileLocalPath = QDir(m_parentFolder->localPath()).filePath(m_file->name());
+    if (!QFile::copy(m_sourceFilePath, cloudFileLocalPath)) {
+        qCWarning(lcOperation) << "Failed to copy file from" << m_sourceFilePath << "to" << cloudFileLocalPath;
+    }
+    m_file->setLocalPath(cloudFileLocalPath);
+    m_file->setFingerprint(FileUtils::calculateFingerprint(cloudFileLocalPath));
+
+    // Send updates
+    CreateCloudFilesUpdate update;
+    update.parentFolder = m_parentFolder;
+    update.files.push_back(m_file);
+    m_parent->cloudFilesUpdate(update);
+
+    transferUpdate(TransferCloudFileUpdate::Stage::Finished, m_file->size());
 
     finish();
+}
+
+void UploadCloudFileOperation::sendFailedTransferUpdate()
+{
+    transferUpdate(TransferCloudFileUpdate::Stage::Failed, 0);
+}
+
+void UploadCloudFileOperation::transferUpdate(const TransferCloudFileUpdate::Stage stage, const quint64 bytesLoaded)
+{
+    if (m_file) {
+        TransferCloudFileUpdate update;
+        update.parentFolder = m_parentFolder;
+        update.file = m_file;
+        update.stage = stage;
+        update.type = TransferCloudFileUpdate::Type::Upload;
+        update.bytesLoaded = bytesLoaded;
+        m_parent->cloudFilesUpdate(update);
+    }
 }

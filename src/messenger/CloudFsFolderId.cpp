@@ -52,18 +52,28 @@ bool Self::isValid() const noexcept {
     return !m_id.isEmpty();
 }
 
-bool operator<(const Self& lhs, const Self& rhs) {
+CloudFsFolderId CloudFsFolderId::root()
+{
+    static CloudFsFolderId id("");
+    return id;
+}
+
+bool operator<(const Self &lhs, const Self &rhs)
+{
     return QString(lhs) < QString(rhs);
 }
 
-bool operator>(const Self& lhs, const Self& rhs) {
+bool operator>(const Self &lhs, const Self &rhs)
+{
     return QString(lhs) > QString(rhs);
 }
 
-bool operator==(const Self& lhs, const Self& rhs) {
+bool operator==(const Self &lhs, const Self &rhs)
+{
     return QString(lhs) == QString(rhs);
 }
 
-bool operator!=(const Self& lhs, const Self& rhs) {
+bool operator!=(const Self &lhs, const Self &rhs)
+{
     return QString(lhs) != QString(rhs);
 }

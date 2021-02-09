@@ -45,8 +45,6 @@ MenuItem {
         }
     }
 
-
-
     background: Rectangle {
         implicitWidth: d.contextMenu.implicitWidth
         implicitHeight: d.contextMenu.implicitHeight

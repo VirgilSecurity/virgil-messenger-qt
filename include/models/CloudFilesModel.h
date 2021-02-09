@@ -39,7 +39,7 @@
 #include <QTimer>
 
 #include "CloudFile.h"
-#include "CloudFileUpdate.h"
+#include "CloudFilesUpdate.h"
 #include "ListModel.h"
 
 class Settings;
@@ -49,6 +49,7 @@ namespace vm
 class CloudFilesModel : public ListModel
 {
     Q_OBJECT
+    Q_PROPERTY(QString description MEMBER m_description NOTIFY descriptionChanged)
 
 public:
     enum Roles
@@ -56,32 +57,44 @@ public:
         FilenameRole = Qt::UserRole,
         IsFolderRole,
         DisplayDateTimeRole,
-        DisplayFileSize,
+        DisplayFileSizeRole,
         SortRole
     };
 
     CloudFilesModel(const Settings *settings, QObject *parent);
 
-    void setFiles(const ModifiableCloudFiles &files);
     void setEnabled(bool enabled);
 
-    CloudFileHandler file(const int proxyRow) const;
+    CloudFileHandler file(int proxyRow) const;
+    ModifiableCloudFileHandler file(int proxyRow);
     CloudFiles selectedFiles() const;
 
-    void updateCloudFile(const CloudFileUpdate &update);
+    void updateCloudFiles(const CloudFilesUpdate &update);
+
+signals:
+    void descriptionChanged(const QString &description);
 
 private:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    std::optional<int> findRowById(const CloudFileId &cloudFileId) const;
+    static QVector<int> rolesFromUpdateSource(CloudFileUpdateSource source, bool isFolder);
+
+    void addFile(const ModifiableCloudFileHandler &file);
+    void removeFile(const CloudFileHandler &file);
+    void updateFile(const CloudFileHandler &file, CloudFileUpdateSource source);
+    void updateDownloadedFile(const DownloadCloudFileUpdate &update);
+    QModelIndex findById(const CloudFileId &cloudFileId) const;
+
     void invalidateDateTime();
+    void updateDescription();
 
     const Settings *m_settings;
     ModifiableCloudFiles m_files;
     QDateTime m_now;
     QTimer m_updateTimer;
+    QString m_description;
 };
 }
 

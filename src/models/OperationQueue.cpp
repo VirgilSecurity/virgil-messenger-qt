@@ -47,6 +47,7 @@ Self::OperationQueue(const QLoggingCategory &category, QObject *parent)
     , m_threadPool(new QThreadPool(this))
 {
     qRegisterMetaType<vm::OperationSourcePtr>("OperationSourcePtr");
+    qRegisterMetaType<vm::OperationQueue::PostFunction>("PostFunction");
 
     m_threadPool->setMaxThreadCount(5);
 
@@ -65,7 +66,7 @@ void Self::start()
 
 void Self::run()
 {
-    std::vector<OperationSourcePtr> sources;
+    OperationSources sources;
     std::swap(sources, m_sources);
     for (auto &source : sources) {
         runSource(source);
@@ -76,6 +77,9 @@ void Self::stop()
 {
     qCDebug(m_category) << "stop";
     m_sources.clear();
+    for (auto listener : m_listeners) {
+        listener->clear();
+    }
     m_isStopped = true;
     emit stopRequested(QPrivateSignal());
     m_threadPool->waitForDone();
@@ -84,6 +88,12 @@ void Self::stop()
 void Self::addSource(OperationSourcePtr source)
 {
     addSourceImpl(std::move(source), true);
+}
+
+void Self::addListener(OperationQueueListenerPtr listener)
+{
+    m_listeners.push_back(listener);
+    connect(listener, &OperationQueueListener::notificationCreated, this, &Self::notificationCreated);
 }
 
 void Self::addSourceImpl(OperationSourcePtr source, const bool run)
@@ -101,10 +111,18 @@ void Self::runSource(OperationSourcePtr source)
 {
     auto threadPool = (source->priority() == OperationSource::Priority::Highest) ? QThreadPool::globalInstance() : &*m_threadPool;
     QtConcurrent::run(threadPool, [=, source = std::move(source)]() {
+        // Skip if queue is stopped
         if (m_isStopped) {
             qCDebug(m_category) << "Operation was skipped because queue was stopped";
             return;
         }
+        // Pre-run listeners
+        for (auto listener : m_listeners) {
+            if (!listener->preRun(source)) {
+                return;
+            }
+        }
+        // Perform operation
         auto op = createOperation(source);
         op->start();
         op->waitForDone();
@@ -112,18 +130,22 @@ void Self::runSource(OperationSourcePtr source)
             emit operationFailed(source, QPrivateSignal());
         }
         op->drop(true);
+        // Post-run listeners
+        for (auto listener : m_listeners) {
+            listener->postRun(source);
+        }
     });
 }
 
 void Self::onOperationFailed(OperationSourcePtr source)
 {
-    const int maxAttemptCount = 3;
-    if (source->attemptCount() < maxAttemptCount) {
+    if (source->attemptCount() < maxAttemptCount()) {
         qCDebug(m_category) << "Enqueued failed operation source:" << source->toString();
         source->incAttemptCount();
         addSourceImpl(std::move(source), false);
     }
-    else if (source->attemptCount() == maxAttemptCount) {
+    else if (source->attemptCount() == maxAttemptCount()) {
+        qCDebug(m_category) << "Failed operation was invalidated:" << source->toString();
         invalidateOperation(source);
     }
 }
