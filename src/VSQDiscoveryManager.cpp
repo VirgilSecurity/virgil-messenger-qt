@@ -87,7 +87,7 @@ void VSQDiscoveryManager::onItemsReceived(const QXmppDiscoveryIq &info)
     for (const QXmppDiscoveryIq::Item &item : items) {
         if (item.jid() == domain)
             continue;
-        qCDebug(lcDiscoveryManager) << "Discovery manager items requested" << item.jid();
+        qCDebug(lcDiscoveryManager) << "Discovery manager item received" << item.jid();
         m_manager->requestInfo(item.jid());
     }
 }
