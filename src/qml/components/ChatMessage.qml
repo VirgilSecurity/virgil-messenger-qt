@@ -15,6 +15,7 @@ Column {
     readonly property real leftIndent: isMessageAlignedLeft ? avatarSize + contentSpacing + Theme.margin : avatarSize + contentSpacing
 
     property bool isOwnMessage: false
+    property bool isBroken: false
     property string statusIcon: ""
     property int attachmentPictureThumbnailWidth: 0
     property int attachmentPictureThumbnailHeight: 0

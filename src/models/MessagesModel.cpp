@@ -374,7 +374,7 @@ QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate& messageUpdate) {
 
     if(std::holds_alternative<IncomingMessageStageUpdate>(messageUpdate) ||
             std::holds_alternative<OutgoingMessageStageUpdate>(messageUpdate)) {
-        return { StatusIconRole, IsBrokenRole, InRowRole };
+        return { AttachmentIsLoadingRole, StatusIconRole, IsBrokenRole, InRowRole };
 
     } else if(std::holds_alternative<MessageAttachmentUploadStageUpdate>(messageUpdate) ||
               std::holds_alternative<MessageAttachmentDownloadStageUpdate>(messageUpdate)) {
