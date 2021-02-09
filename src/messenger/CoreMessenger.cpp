@@ -1598,14 +1598,10 @@ void
 Self::xmppOnConnected() {
     m_impl->lastActivityManager->setEnabled(true);
 
-    if (m_impl->xmppCarbonManager->carbonsEnabled()) {
-        m_impl->xmppCarbonManager->setCarbonsEnabled(true);
-    }
-
     changeConnectionState(Self::ConnectionState::Connected);
 
     //
-    //  TODO: Check for if next 3 lines are redundant.
+    //  TODO: get available status from the cache as described within XEP-0318
     //
     QXmppPresence presenceOnline(QXmppPresence::Available);
     presenceOnline.setAvailableStatusType(QXmppPresence::Online);

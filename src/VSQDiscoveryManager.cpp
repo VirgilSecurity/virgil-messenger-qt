@@ -57,25 +57,35 @@ VSQDiscoveryManager::~VSQDiscoveryManager()
 void VSQDiscoveryManager::onClientConnected()
 {
     const auto domain = m_client->configuration().domain();
+
     auto infoId = m_manager->requestInfo(domain);
     qCDebug(lcDiscoveryManager) << "Discovery manager info requested" << domain << "id:" << infoId;
+
     auto itemsId = m_manager->requestItems(domain);
     qCDebug(lcDiscoveryManager) << "Discovery manager items requested" << domain << "id:" << itemsId;
 }
 
 void VSQDiscoveryManager::onInfoReceived(const QXmppDiscoveryIq &info)
 {
-    if (info.from() != m_client->configuration().domain())
+    if (info.from() != m_client->configuration().domain()) {
         return;
+    }
 
     if (info.features().contains("urn:xmpp:carbons:2")) {
-        auto carbonManager = m_client->findExtension<QXmppCarbonManager>();
-        if (!carbonManager) {
-            qCDebug(lcDiscoveryManager) << "Carbon manager is not found";
+        qCDebug(lcDiscoveryManager) << "Set carbon manager to enabled";
+
+        QXmppElement carbonsElement;
+        carbonsElement.setTagName("enable");
+        carbonsElement.setAttribute("xmlns", "urn:xmpp:carbons:2");
+
+        QXmppIq carbonsIq(QXmppIq::Set);
+        carbonsIq.setExtensions(QXmppElementList() << carbonsElement);
+
+        if (m_client->sendPacket(carbonsIq)) {
+            qCDebug(lcDiscoveryManager) << "Carbon manager was enabled";
         }
         else {
-            qCDebug(lcDiscoveryManager) << "Set carbon manager enabled";
-            carbonManager->setCarbonsEnabled(true);
+            qCDebug(lcDiscoveryManager) << "Carbon manager was not enabled (failed to send packet)";
         }
     }
 }
@@ -85,9 +95,11 @@ void VSQDiscoveryManager::onItemsReceived(const QXmppDiscoveryIq &info)
     const auto domain = m_client->configuration().domain();
     const QList<QXmppDiscoveryIq::Item> items = info.items();
     for (const QXmppDiscoveryIq::Item &item : items) {
-        if (item.jid() == domain)
+        if (item.jid() == domain) {
             continue;
-        qCDebug(lcDiscoveryManager) << "Discovery manager item received" << item.jid();
+        }
+
+        qCDebug(lcDiscoveryManager) << "Discovery manager info requested" << item.jid();
         m_manager->requestInfo(item.jid());
     }
 }
