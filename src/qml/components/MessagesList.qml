@@ -94,7 +94,8 @@ Item {
             thisIndex: index
             thisDay: day
             isOwnMessage: model.senderId === controllers.users.currentUserId
-            statusIcon: isOwnMessage ? model.statusIcon : ""
+            isBroken: model.isBroken
+            statusIcon: (isOwnMessage || isBroken) ? model.statusIcon : ""
             attachmentPictureThumbnailWidth: model.attachmentPictureThumbnailSize.width
             attachmentPictureThumbnailHeight: model.attachmentPictureThumbnailSize.height
             messageId: model.id
