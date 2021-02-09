@@ -84,8 +84,9 @@ void ensureMappedBuffer(QByteArray& bytes, vsc_buffer_ptr_t& buffer, size_t capa
 
     auto len = vsc_buffer_len(buffer.get());
 
-    bytes.resize(capacity);
+    bytes.resize(len + capacity);
 
+    vsc_buffer_release(buffer.get());
     vsc_buffer_use(buffer.get(), (byte *)bytes.data(), bytes.size());
     vsc_buffer_inc_used(buffer.get(), len);
 }

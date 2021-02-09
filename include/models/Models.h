@@ -45,15 +45,14 @@ namespace vm
 class AccountSelectionModel;
 class ChatsModel;
 class CloudFilesModel;
+class CloudFilesTransfersModel;
 class CloudFilesQueue;
-class CloudFilesUploader;
 class DiscoveredContactsModel;
 class FileLoader;
 class MessagesModel;
 class MessagesQueue;
 class Messenger;
 class UserDatabase;
-class UploadDownloadModel;
 class Validator;
 
 class Models : public QObject
@@ -63,9 +62,8 @@ class Models : public QObject
     Q_PROPERTY(ChatsModel *chats READ chats CONSTANT)
     Q_PROPERTY(DiscoveredContactsModel *discoveredContacts MEMBER m_discoveredContacts CONSTANT)
     Q_PROPERTY(CloudFilesModel *cloudFiles MEMBER m_cloudFiles CONSTANT)
-    Q_PROPERTY(CloudFilesUploader *cloudFilesUploader MEMBER m_cloudFilesUploader CONSTANT)
+    Q_PROPERTY(CloudFilesTransfersModel *cloudFilesTransfers MEMBER m_cloudFilesTransfers CONSTANT)
     Q_PROPERTY(MessagesModel *messages READ messages CONSTANT)
-    Q_PROPERTY(UploadDownloadModel *uploadDownload READ uploadDownload CONSTANT)
 
 public:
     Models(Messenger *messenger, Settings *settings, UserDatabase *userDatabase, Validator *validator, QObject *parent);
@@ -79,18 +77,16 @@ public:
     DiscoveredContactsModel *discoveredContacts();
     const CloudFilesModel *cloudFiles() const;
     CloudFilesModel *cloudFiles();
+    const CloudFilesTransfersModel *cloudFilesTransfers() const;
+    CloudFilesTransfersModel *cloudFilesTransfers();
     const CloudFilesQueue *cloudFilesQueue() const;
     CloudFilesQueue *cloudFilesQueue();
-    const CloudFilesUploader *cloudFilesUploader() const;
-    CloudFilesUploader *cloudFilesUploader();
     const FileLoader *fileLoader() const;
     FileLoader *fileLoader();
     const MessagesModel *messages() const;
     MessagesModel *messages();
     const MessagesQueue *messagesQueue() const;
     MessagesQueue *messagesQueue();
-    const UploadDownloadModel *uploadDownload() const;
-    UploadDownloadModel *uploadDownload();
 
 signals:
     void notificationCreated(const QString &notification, const bool error);
@@ -101,11 +97,10 @@ private:
     QPointer<DiscoveredContactsModel> m_discoveredContacts;
     QPointer<MessagesModel> m_messages;
     QPointer<CloudFilesModel> m_cloudFiles;
+    QPointer<CloudFilesTransfersModel> m_cloudFilesTransfers;
     QPointer<CloudFilesQueue> m_cloudFilesQueue;
-    QPointer<CloudFilesUploader> m_cloudFilesUploader;
     QPointer<FileLoader> m_fileLoader;
     QPointer<MessagesQueue> m_messagesQueue;
-    QPointer<UploadDownloadModel> m_uploadDownload;
 };
 }
 

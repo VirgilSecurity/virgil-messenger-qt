@@ -63,7 +63,7 @@ void Self::checkAppCrash()
 #ifndef QT_DEBUG
         qCCritical(lcCrashReporter) << "Previous application run is crashed! Sending log files...";
         if (m_settings->autoSendCrashReport()) {
-            sendLogFiles();
+            sendLogFiles("crash-logs auto-send");
         }
         else {
             emit crashReportRequested();
@@ -74,8 +74,9 @@ void Self::checkAppCrash()
     m_settings->setRunFlag(true);
 }
 
-bool Self::sendLogFiles()
+bool Self::sendLogFiles(const QString &details)
 {
+    qCDebug(lcCrashReporter) << "Details:" << (details.isEmpty() ? QLatin1String("not specified") : details);
     qCDebug(lcCrashReporter) << "Collecting of logs...";
 
     const auto logsDir = m_settings->logsDir();
@@ -108,8 +109,7 @@ bool Self::sendLogFiles()
     QNetworkRequest request(endpointUrl);
     request.setHeader(QNetworkRequest::ContentTypeHeader, QString("application/json"));
     request.setRawHeader(QString("Authorization").toUtf8(), authHeaderValue.toUtf8());
-    request.setRawHeader(QString("Version").toUtf8(), qPrintable(CustomerEnv::version()));
-    request.setRawHeader(QString("Platform").toUtf8(), qPrintable(QSysInfo::kernelType()));
+    request.setRawHeader(QString("Virgil-Agent").toUtf8(),qPrintable(CustomerEnv::version() + ";" + QSysInfo::kernelType()));
     auto reply = m_networkManager->post(request, fileData);
     connect(reply, &QNetworkReply::finished, this, std::bind(&CrashReporter::sendSendCrashReportReply, this, reply));
     for (auto name : request.rawHeaderList()) {
@@ -127,9 +127,11 @@ void Self::sendSendCrashReportReply(QNetworkReply *reply)
        emit reportSent(tr("Crash report sent"));
    }
    else {
-       qCDebug(lcCrashReporter) << "Error sending report. Code:" << static_cast<int>(reply->error())
-                                << ". Name:" << reply->error()
-                                << ". Message:" << reply->errorString();
+       qCDebug(lcCrashReporter) << "Error sending report:";
+       qCDebug(lcCrashReporter) << "    -> Code:" << static_cast<int>(reply->error());
+       qCDebug(lcCrashReporter) << "    -> Name:" << reply->error();
+       qCDebug(lcCrashReporter) << "    -> Message:" << reply->errorString();
+       qCDebug(lcCrashReporter) << "    -> Error body:" << reply->readAll();
        emit reportErrorOccurred(tr("Crash report failed to send"));
    }
    qCDebug(lcCrashReporter) << "Sending finished";

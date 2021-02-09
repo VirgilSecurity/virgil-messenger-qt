@@ -32,37 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CLOUD_FILE_UPDATE_H
-#define VM_CLOUD_FILE_UPDATE_H
+#import "NotificationService.h"
 
-#include "CloudFile.h"
+@interface NotificationService ()
 
-#include <variant>
+@property (nonatomic, strong) void (^contentHandler)(UNNotificationContent *contentToDeliver);
+@property (nonatomic, strong) UNMutableNotificationContent *bestAttemptContent;
 
-namespace vm
-{
-struct CloudFileUpdateBase {
-    CloudFileId cloudFileId;
-};
+@end
 
-struct CreatedCloudFileUpdate : public CloudFileUpdateBase {
-    ModifiableCloudFileHandler cloudFile;
-};
+@implementation NotificationService
 
-struct DeletedCloudFileUpdate : public CloudFileUpdateBase {
-    bool isFolder = false;
-};
-
-struct RenamedCloudFileUpdate : public CloudFileUpdateBase {
-    QString name;
-};
-
-using CloudFileUpdate = std::variant<
-    CreatedCloudFileUpdate,
-    DeletedCloudFileUpdate,
-    RenamedCloudFileUpdate
-    >;
-
+- (void)didReceiveNotificationRequest:(UNNotificationRequest *)request withContentHandler:(void (^)(UNNotificationContent * _Nonnull))contentHandler {
+    self.contentHandler = contentHandler;
+    self.bestAttemptContent = [request.content mutableCopy];
+    
+    // Modify the notification content here...
+    self.bestAttemptContent.title = [NSString stringWithFormat:@"%@ [modified]", self.bestAttemptContent.title];
+    
+    self.contentHandler(self.bestAttemptContent);
 }
 
-#endif // VM_CLOUD_FILE_UPDATE_H
+- (void)serviceExtensionTimeWillExpire {
+    // Called just before the extension will be terminated by the system.
+    // Use this as an opportunity to deliver your "best attempt" at modified content, otherwise the original push payload will be used.
+    self.contentHandler(self.bestAttemptContent);
+}
+
+@end

@@ -34,34 +34,60 @@
 
 #include "CloudFilesController.h"
 
-#include "CloudFileUpdate.h"
+#include "CloudFilesUpdate.h"
 #include "CloudFilesModel.h"
+#include "CloudFilesTransfersModel.h"
 #include "CloudFilesQueue.h"
+#include "CloudFilesQueueListeners.h"
 #include "CloudFilesTable.h"
 #include "Controller.h"
 #include "FileUtils.h"
+#include "Models.h"
+#include "Settings.h"
+#include "UserDatabase.h"
 #include "Utils.h"
 
 using namespace vm;
 using Self = CloudFilesController;
 
-Self::CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase, QObject *parent)
+Self::CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase, CloudFileSystem *cloudFileSystem,
+                           QObject *parent)
     : QObject(parent)
     , m_settings(settings)
     , m_models(models)
     , m_userDatabase(userDatabase)
+    , m_cloudFileSystem(cloudFileSystem)
 {
-    qRegisterMetaType<CloudFileUpdate>("CloudFileUpdate");
+    qRegisterMetaType<CloudFilesUpdate>("CloudFilesUpdate");
 
-    m_rootFolder = std::make_shared<CloudFile>();
-    m_rootFolder->setId("");
-    m_rootFolder->setName(tr("File Manager"));
-    m_rootFolder->setIsFolder(true);
+    // Setup root & initial hierarcy
+    auto rootFolder = std::make_shared<CloudFile>();
+    rootFolder->setId(CloudFileId::root());
+    rootFolder->setName(tr("File Manager"));
+    rootFolder->setIsFolder(true);
+    m_hierarchy.push_back(rootFolder);
 
-    m_hierarchy.push_back(m_rootFolder);
+    connect(this, &Self::updateCloudFiles, this, &Self::onUpdateCloudFiles);
 
-    connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
-    connect(models->cloudFilesQueue(), &CloudFilesQueue::updateCloudFile, this, &Self::onUpdateCloudFile);
+    // Queue connections
+    auto queue = models->cloudFilesQueue();
+    connect(queue, &CloudFilesQueue::updateCloudFiles, this, &Self::updateCloudFiles);
+    connect(models->cloudFilesTransfers(), &CloudFilesTransfersModel::interruptByCloudFileId, queue, &CloudFilesQueue::interruptFileOperation);
+    // Cloud file system connections
+    connect(cloudFileSystem, &CloudFileSystem::downloadsDirChanged, [rootFolder](const QDir &downloadsDir) {
+        rootFolder->setLocalPath(downloadsDir.absolutePath());
+    });
+
+    // Setup list updating
+    auto updatingListener = new CloudListUpdatingCounter(queue);
+    queue->addCloudFileListener(updatingListener);
+    connect(updatingListener, &CloudListUpdatingCounter::countChanged, this, [this](auto count) {
+        if (m_isListUpdating == (count > 0)) {
+            return;
+        }
+        m_isListUpdating = !m_isListUpdating;
+        emit isListUpdatingChanged(m_isListUpdating);
+    });
 }
 
 CloudFilesModel *Self::model()
@@ -71,18 +97,36 @@ CloudFilesModel *Self::model()
 
 void Self::switchToRootFolder()
 {
-    switchToHierarchy({ m_rootFolder });
-}
-
-void Self::setDownloadsDir(const QDir &dir)
-{
-    m_rootFolder->setLocalPath(dir.absolutePath());
+    switchToHierarchy({ rootFolder() });
 }
 
 void Self::openFile(const QVariant &proxyRow)
 {
     const auto cloudFile = model()->file(proxyRow.toInt());
-    FileUtils::openUrl(FileUtils::localFileToUrl(cloudFile->localPath()));
+    const auto localPath = cloudFile->localPath();
+    bool needDownload = false;
+    if (!FileUtils::fileExists(localPath)) {
+        needDownload = true;
+    }
+    else if (const auto fingerprint = FileUtils::calculateFingerprint(localPath); fingerprint.isEmpty()) {
+        qCritical(lcController) << "Failed to calculate fingerprint for file:" << localPath;
+        emit notificationCreated(tr("Attachment file is broken"), true);
+        return;
+    }
+    else if (fingerprint != cloudFile->fingerprint()) {
+        qWarning(lcController) << "Fingerprint mismatch, downloading cloud file";
+        emit notificationCreated(tr("Downloading cloud file..."), false);
+        needDownload = true;
+    }
+
+    if (!needDownload) {
+        FileUtils::openUrl(FileUtils::localFileToUrl(localPath));
+    }
+    else {
+        m_models->cloudFilesQueue()->pushDownloadFile(cloudFile, m_hierarchy.back(), [this]() {
+            emit notificationCreated(tr("Cloud file was downloaded"), false);
+        });
+    }
 }
 
 void Self::switchToFolder(const QVariant &proxyRow)
@@ -108,16 +152,19 @@ void Self::refresh()
     switchToHierarchy(m_hierarchy);
 }
 
-void Self::addFile(const QVariant &attachmentUrl)
+void Self::addFiles(const QVariant &fileUrls)
 {
-    const auto url = attachmentUrl.toUrl();
-    const auto filePath = FileUtils::urlToLocalFile(url);
-    m_models->cloudFilesQueue()->pushUploadFile(filePath, m_hierarchy.back());
+    const auto urls = fileUrls.value<QList<QUrl>>();
+    for (auto &url : urls) {
+        const auto filePath = FileUtils::urlToLocalFile(url);
+        m_models->cloudFilesQueue()->pushUploadFile(filePath, m_hierarchy.back());
+    }
 }
 
 void Self::deleteFiles()
 {
-    m_models->cloudFilesQueue()->pushDeleteFiles(m_models->cloudFiles()->selectedFiles());
+    const auto files = m_models->cloudFiles()->selectedFiles();
+    m_models->cloudFilesQueue()->pushDeleteFiles(files);
 }
 
 void Self::createFolder(const QString &name)
@@ -125,18 +172,10 @@ void Self::createFolder(const QString &name)
     m_models->cloudFilesQueue()->pushCreateFolder(name, m_hierarchy.back());
 }
 
-void Self::setupTableConnections()
-{
-    qCDebug(lcController) << "Setup database table connections for cloud files...";
-    auto table = m_userDatabase->cloudFilesTable();
-    connect(table, &CloudFilesTable::errorOccurred, this, &Self::errorOccurred);
-    connect(table, &CloudFilesTable::fetched, this, &Self::onCloudFilesFetched);
-}
-
 void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)
 {
-    m_newHierarchy = hierarchy;
-    m_userDatabase->cloudFilesTable()->fetch(hierarchy.back());
+    m_requestedHierarchy = hierarchy;
+    m_models->cloudFilesQueue()->pushListFolder(hierarchy.back());
 }
 
 QString CloudFilesController::displayPath() const
@@ -153,23 +192,47 @@ bool CloudFilesController::isRoot() const
     return m_hierarchy.size() == 1;
 }
 
-void Self::onCloudFilesFetched(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles)
+ModifiableCloudFileHandler CloudFilesController::rootFolder() const
 {
-    Q_UNUSED(folder)
-    m_models->cloudFiles()->setFiles(cloudFiles);
-
-    if (m_hierarchy != m_newHierarchy) {
-        m_hierarchy = m_newHierarchy;
-        m_newHierarchy.clear();
-        emit displayPathChanged(displayPath());
-        emit isRootChanged(isRoot());
-    }
+    return m_hierarchy.front();
 }
 
-void Self::onUpdateCloudFile(const CloudFileUpdate &update)
+void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)
 {
+    bool isRelevantUpdate = true;
+    if (auto upd = std::get_if<CachedListCloudFolderUpdate>(&update)) {
+        isRelevantUpdate = upd->parentFolder->id() == m_requestedHierarchy.back()->id();
+
+        // Update properties
+        if (isRelevantUpdate) {
+            const auto oldDisplayPath = displayPath();
+            const auto oldIsRoot = isRoot();
+            m_hierarchy = m_requestedHierarchy;
+            if (displayPath() != oldDisplayPath) {
+                emit displayPathChanged(displayPath());
+            }
+            if (isRoot() != oldIsRoot) {
+                emit isRootChanged(isRoot());
+            }
+        }
+    }
+    else if (auto upd = std::get_if<CloudListCloudFolderUpdate>(&update)) {
+        isRelevantUpdate = upd->parentFolder->id() == m_requestedHierarchy.back()->id();
+
+        // Update folder in hierarchy
+        const auto it = std::find_if(m_hierarchy.begin(), m_hierarchy.end(), [&upd](auto folder) {
+            return folder->id() == upd->parentFolder->id();
+        });
+        if (it != m_hierarchy.end()) {
+            (*it)->update(*upd->parentFolder, CloudFileUpdateSource::ListedParent);
+        }
+    }
+
     // Update UI
-    m_models->cloudFiles()->updateCloudFile(update);
+    if (isRelevantUpdate) {
+        m_models->cloudFiles()->updateCloudFiles(update);
+    }
+    m_models->cloudFilesTransfers()->updateCloudFiles(update);
     // Update DB
-    m_userDatabase->cloudFilesTable()->updateCloudFile(update);
+    m_userDatabase->cloudFilesTable()->updateCloudFiles(update);
 }

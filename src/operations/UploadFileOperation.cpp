@@ -67,6 +67,14 @@ void Self::run()
     m_fileLoader->requestUploadSlot(m_requestId, filePath());
 }
 
+void UploadFileOperation::startUploadToSlot(const QUrl &putUrl, const QUrl &getUrl)
+{
+    m_putUrl = putUrl;
+    m_getUrl = getUrl;
+    emit uploadSlotReceived();
+    startUpload();
+}
+
 void Self::connectReply(QNetworkReply *reply)
 {
     LoadFileOperation::connectReply(reply);
@@ -97,10 +105,7 @@ void Self::onSlotUrlsReceived(const QString &slotId, const QUrl &putUrl, const Q
 {
     if (slotId == m_slotId) {
         qCDebug(lcOperation) << "Upload url received";
-        m_putUrl = putUrl;
-        m_getUrl = getUrl;
-        emit uploadSlotReceived();
-        startUpload();
+        startUploadToSlot(putUrl, getUrl);
     }
 }
 
@@ -108,7 +113,7 @@ void Self::onSlotUrlErrorOcurrend(const QString &slotId, const QString &errorTex
 {
     if (slotId == m_slotId) {
         if (status() != Status::Failed) {
-            invalidate(errorText);
+            invalidateAndNotify(errorText);
         }
     }
 }

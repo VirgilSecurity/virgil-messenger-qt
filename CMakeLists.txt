@@ -47,12 +47,13 @@ include(customers)
 #
 # Code formatting
 #
-option(ENABLE_CLANGFORMAT "On/Off formatting source code with clangformat." ON)
+set(ENABLE_CLANGFORMAT OFF CACHE BOOL "On/Off formatting source code with clangformat.")
+set(ENABLE_IOS_EXTENSION OFF CACHE BOOL "On/Off building IOS extension.")
 
 # ---------------------------------------------------------------------------
 # Project version
 # ---------------------------------------------------------------------------
-set(VS_TARGET_VERSION "3.5.7")
+set(VS_TARGET_VERSION "3.6.1")
 set(VS_CORE_VERSION "0.2.1.45")
 set(VERSION_DATABASE_SCHEME "0")
 
@@ -109,10 +110,6 @@ if (NOT CMAKE_BUILD_TYPE)
 endif ()
 string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
 message("-- Build type: [${CMAKE_BUILD_TYPE}]")
-
-#if(CMAKE_BUILD_TYPE_LOWER STREQUAL "minsizerel" OR CMAKE_BUILD_TYPE_LOWER STREQUAL "relwithdebinfo")
-#    set(CMAKE_BUILD_TYPE_LOWER "release")
-#endif()
 
 set(CMAKE_BUILD_TYPE_LOWER "release")
 
@@ -245,6 +242,11 @@ if (VS_PLATFORM STREQUAL "android")
     message(STATUS "Android OpenSSL library path: [${VS_ANDROID_SSL_DIR}]")
     message(STATUS "Android extra libraries:      [${ANDROID_EXTRA_LIBS}]")
 
+    add_custom_command(TARGET ${VS_TARGET_NAME} POST_BUILD
+          COMMAND touch "${CMAKE_BINARY_DIR}/CMakeCache.txt"
+          COMMENT "Touch CMakeCache.txt"
+    )
+
     # Linux
 elseif (VS_PLATFORM STREQUAL "linux")
     add_executable(${VS_TARGET_NAME})
@@ -319,9 +321,9 @@ elseif (VS_PLATFORM STREQUAL "ios")
             )
     # Storyboard default
     configure_file("${CMAKE_CURRENT_LIST_DIR}/platforms/ios/LaunchScreen.storyboard.in"
-                   "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard" @ONLY)
+            "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard" @ONLY)
     configure_file("${CMAKE_CURRENT_LIST_DIR}/platforms/ios/Default-568h@2x.png"
-                   "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/Default-568h@2x.png" COPYONLY)
+            "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/Default-568h@2x.png" COPYONLY)
 
     set(STORYBOARD_DEFAULT
             ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard
@@ -341,6 +343,28 @@ elseif (VS_PLATFORM STREQUAL "ios")
             LINK_FLAGS "-framework Foundation -framework UserNotifications"
             RESOURCE "${STORYBOARD_DEFAULT}"
             )
+    #   IOS extension
+    if (ENABLE_IOS_EXTENSION)
+        set(EXT_SOURCE_FILES
+                ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/NotificationService.mm
+                ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/NotificationService.h
+                )
+
+        add_library(${VS_TARGET_NAME}_EXT MODULE ${EXT_SOURCE_FILES})
+        set_target_properties(${VS_TARGET_NAME}_EXT
+                PROPERTIES
+                BUNDLE YES
+                XCODE_PRODUCT_TYPE com.apple.product-type.app-extension)
+
+        target_include_directories(${VS_TARGET_NAME}_EXT
+                PUBLIC
+                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios>
+                )
+
+        find_library(UN_LIB UserNotifications)
+        find_library(UNUI_LIB UserNotificationsUI)
+        target_link_libraries(${VS_TARGET_NAME}_EXT PRIVATE ${UN_LIB} ${UNUI_LIB})
+    endif ()
 
     qt5_import_qml_plugins(${VS_TARGET_NAME})
 else ()
@@ -379,7 +403,10 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/ConfirmationCodeType.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFile.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileId.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileUpdate.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileRequestId.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileSystem.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileUpdateSource.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFilesUpdate.h
         # Messenger Core
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/AttachmentId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Chat.h
@@ -484,8 +511,10 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/DiscoveredContactsProxyModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFileOperationSource.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesTransfersModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesQueue.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesUploader.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesQueueListeners.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/TransfersModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListProxyModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListSelectionModel.h
@@ -495,8 +524,8 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/Models.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/Model.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationQueue.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationQueueListener.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationSource.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/UploadDownloadModel.h
         # Operations
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateAttachmentFingerprintOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateFileFingerprintOperation.h
@@ -509,10 +538,12 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DecryptFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DeleteCloudFilesOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadAttachmentOperation.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadCloudFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/DownloadDecryptFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/EncryptFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/EncryptUploadFileOperation.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/operations/ListCloudFolderOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/LoadAttachmentOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/LoadFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/MessageOperation.h
@@ -558,6 +589,8 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/ContactAvatarLoader.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CustomerEnv.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CloudFile.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileId.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileSystem.cpp
         # Messenger Core
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/AttachmentId.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Chat.cpp
@@ -646,12 +679,14 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ChatsModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFileOperationSource.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesTransfersModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesQueue.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesUploader.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesQueueListeners.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ContactsModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ContactsProxyModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/DiscoveredContactsModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/DiscoveredContactsProxyModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/TransfersModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ListModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ListProxyModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ListSelectionModel.cpp
@@ -661,7 +696,6 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/models/Models.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/Model.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/OperationQueue.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/models/UploadDownloadModel.cpp
         # Operations
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CalculateAttachmentFingerprintOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CalculateFileFingerprintOperation.cpp
@@ -674,10 +708,12 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DecryptFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DeleteCloudFilesOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadAttachmentOperation.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadCloudFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/DownloadDecryptFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/EncryptFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/EncryptUploadFileOperation.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/operations/ListCloudFolderOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/LoadAttachmentOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/LoadFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/MessageOperation.cpp
@@ -798,9 +834,10 @@ target_compile_definitions(${VS_TARGET_NAME}
         PRIVATE
 
         $<BUILD_INTERFACE:VERSION="${VS_TARGET_VERSION}">
-        $<BUILD_INTERFACE:VS_MSGR_ENV_DEV=0>
-        $<BUILD_INTERFACE:VS_MSGR_ENV_STG=0>
-        $<BUILD_INTERFACE:VS_MSGR_ENV_PROD=1>
+
+        $<BUILD_INTERFACE:VS_MSGR_ENV_DEV=$<STREQUAL:"${VS_ENV}","dev">>
+        $<BUILD_INTERFACE:VS_MSGR_ENV_STG=$<STREQUAL:"${VS_ENV}","stg">>
+        $<BUILD_INTERFACE:VS_MSGR_ENV_PROD=$<STREQUAL:"${VS_ENV}","prod">>
 
         $<BUILD_INTERFACE:INFO_CLIENT=1>
         $<BUILD_INTERFACE:CFG_CLIENT=1>
@@ -833,11 +870,10 @@ target_compile_options(${VS_TARGET_NAME}
 # ---------------------------------------------------------------------------
 #   Additional debug parameters
 # ---------------------------------------------------------------------------
-
 target_compile_definitions(${VS_TARGET_NAME}
         PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>
         )
 
-#if(COMMAND add_clangformat AND ENABLE_CLANGFORMAT)
-#    add_clangformat(${VS_TARGET_NAME})
-#endif()
+if(COMMAND add_clangformat AND ENABLE_CLANGFORMAT)
+    add_clangformat(${VS_TARGET_NAME})
+endif()

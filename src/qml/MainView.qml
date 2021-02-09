@@ -58,14 +58,11 @@ Control {
         }
     }
 
-    UploadProgressBar {
-        // TODO(fpohtmeh): move to main.qml
-        anchors {
-            bottom: parent.bottom
-            left: parent.left
-            right: parent.right
-        }
-        visible: manager.currentState === manager.cloudFileListState ? "opened" : "closed"
+    TransfersPanel {
+        anchors.leftMargin: sideBar.width
+        model: models.cloudFilesTransfers
+        visible: manager.currentState === manager.cloudFileListState
+        buttonVisible: !controllers.cloudFiles.isLoading
     }
 
     LogControl {
@@ -75,10 +72,6 @@ Control {
             topMargin: 0.75 * mainView.height
         }
         visible: settings.devMode
-    }
-
-    KeyboardHandler {
-        id: keyboardHandler
     }
 
     QtObject {

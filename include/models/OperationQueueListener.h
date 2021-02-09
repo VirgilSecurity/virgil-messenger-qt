@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,51 +32,35 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/UploadDownloadModel.h"
+#ifndef VM_OPERATION_QUEUE_LISTENER_H
+#define VM_OPERATION_QUEUE_LISTENER_H
 
-#include "Utils.h"
-#include "Model.h"
+#include <QObject>
+#include <QPointer>
 
-using namespace vm;
-using Self = UploadDownloadModel;
+#include "OperationSource.h"
 
-Self::UploadDownloadModel(QObject *parent)
-    : ListModel(parent)
+namespace vm
 {
-    qRegisterMetaType<UploadDownloadModel *>("UploadDownloadModel*");
+class OperationQueueListener : public QObject
+{
+    Q_OBJECT
+
+public:
+    using QObject::QObject;
+    virtual ~OperationQueueListener() {}
+
+    virtual bool preRun(OperationSourcePtr source) { Q_UNUSED(source) return true; }
+    virtual void postRun(OperationSourcePtr source) { Q_UNUSED(source) }
+    virtual void clear() {}
+
+signals:
+    void notificationCreated(const QString &notification, const bool error);
+};
+
+using OperationQueueListenerPtr = QPointer<OperationQueueListener>;
+using OperationQueueListeners = std::vector<OperationQueueListenerPtr>;
 }
 
-Self::~UploadDownloadModel()
-{}
+#endif // VM_OPERATION_QUEUE_LISTENER_H
 
-int Self::rowCount(const QModelIndex &parent) const
-{
-    Q_UNUSED(parent);
-    return m_uploadDownloadList.size();
-}
-
-QVariant Self::data(const QModelIndex &index, int role) const
-{
-    const auto &item = m_uploadDownloadList[index.row()];
-    switch (role) {
-    case NameRole:
-        return item.name;
-
-    case BytesLoadedRole:
-        return item.bytesLoaded;
-
-    case BytesTotalRole:
-        return item.bytesTotal;
-    default:
-        return QVariant();
-    }
-}
-
-QHash<int, QByteArray> Self::roleNames() const
-{
-    return {
-        { NameRole, "name" },
-        { BytesLoadedRole, "bytesLoaded" },
-        { BytesTotalRole, "bytesTotal" }
-    };
-}

@@ -39,6 +39,7 @@
 #include "Validator.h"
 #include "User.h"
 #include "CoreMessenger.h"
+#include "CloudFileSystem.h"
 #include "CrashReporter.h"
 #include "MessageSender.h"
 #include "FileLoader.h"
@@ -114,6 +115,7 @@ public:
     void suspend();
 
     QPointer<Settings> settings() noexcept;
+    QPointer<CloudFileSystem> cloudFileSystem() noexcept;
     QPointer<CrashReporter> crashReporter() noexcept;
     QPointer<FileLoader> fileLoader() noexcept;
 
@@ -177,6 +179,7 @@ private:
     QPointer<Settings> m_settings;
     QPointer<Validator> m_validator;
     QPointer<CoreMessenger> m_coreMessenger;
+    QPointer<CloudFileSystem> m_cloudFileSystem;
     QPointer<CrashReporter> m_crashReporter;
     QPointer<FileLoader> m_fileLoader;
 };

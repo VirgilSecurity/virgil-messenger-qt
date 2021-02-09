@@ -6,5 +6,5 @@ MessageDialog {
     //standardButtons: Dialog.Yes | StandardButton.No // TODO(fpohtmeh): implement
     acceptButtonText: qsTr("Yes")
     rejectButtonText: qsTr("No")
-    onAccepted: crashReporter.sendLogFiles()
+    onAccepted: crashReporter.sendLogFiles("crash-logs from dialog")
 }

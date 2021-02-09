@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,43 +32,22 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_UPLOADDOWNLOADMODEL_H
-#define VM_UPLOADDOWNLOADMODEL_H
-
-#include "ListModel.h"
+#ifndef VM_CLOUD_FILE_UPDATE_SOURCE_H
+#define VM_CLOUD_FILE_UPDATE_SOURCE_H
 
 namespace vm
 {
-class UploadDownloadModel : public ListModel
+enum class CloudFileUpdateSource
 {
-    Q_OBJECT
-
-public:
-    explicit UploadDownloadModel(QObject *parent);
-    ~UploadDownloadModel() override;
-
-private:
-    enum Roles
-    {
-        NameRole = Qt::UserRole,
-        BytesLoadedRole,
-        BytesTotalRole
-    };
-
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
-
-private:
-    struct uploadDownloadStruct
-    {
-        QString name;
-        int bytesLoaded;
-        int bytesTotal;
-    };
-
-    QList<uploadDownloadStruct> m_uploadDownloadList;
+    // No updates
+    None,
+    // Update all properties for file/folder
+    ListedChild,
+    // Update all properties for parent folder
+    ListedParent,
+    // Update file fingerprint
+    Download
 };
-} // namespace vm
+}
 
-#endif // VM_UPLOADDOWNLOADMODEL_H
+#endif // VM_CLOUD_FILE_UPDATE_SOURCE_H
