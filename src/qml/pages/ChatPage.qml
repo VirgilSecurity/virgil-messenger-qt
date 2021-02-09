@@ -93,6 +93,7 @@ Page {
 
                     ContextMenuItem {
                         text: qsTr("Chat info")
+                        onTriggered: appState.requestInfo()
                     }
 
                     ContextMenuSeparator {
@@ -128,8 +129,6 @@ Page {
     MessagesList {
         anchors.fill: parent
     }
-
-// Components
 
     Item {
         SelectAttachmentsDialog {

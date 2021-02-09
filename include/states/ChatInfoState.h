@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,56 +32,20 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHATSTATE_H
-#define VM_CHATSTATE_H
+#ifndef VM_CHAT_INFO_STATE_H
+#define VM_CHAT_INFO_STATE_H
 
 #include <QState>
 
-#include "Message.h"
-
-
-class Messenger;
-
 namespace vm
 {
-class Messenger;
-class Controllers;
-
-class ChatState : public QState
+class ChatInfoState : public QState
 {
     Q_OBJECT
-    Q_PROPERTY(QString lastActivityText READ lastActivityText NOTIFY lastActivityTextChanged)
-    Q_PROPERTY(bool isAdmin READ isAdmin NOTIFY isAdminChanged)
-    Q_PROPERTY(bool isGroupChat READ isGroupChat NOTIFY isGroupChatChanged)
 
 public:
-    ChatState(Controllers *controllers, Messenger *messenger, QState *parent);
-
-    QString lastActivityText() const;
-    bool isAdmin() const;
-    bool isGroupChat() const;
-
-signals:
-    void lastActivityTextChanged(const QString& text);
-    void requestPreview(const QUrl &url);
-    void requestInfo();
-
-    void messageSent();
-    void isAdminChanged(const bool);
-    void isGroupChatChanged(const bool);
-
-private:
-    void setLastActivityText(const QString &text);
-    void setIsAdmin(const bool isAdmin);
-    void setIsGroupChat(const bool isGroupChat);
-
-    void onMessageSent(MessageHandler message);
-
-    Controllers *m_controllers;
-    QString m_lastActivityText;
-    bool m_isAdmin = false;
-    bool m_isGroupChat = false;
+    using QState::QState;
 };
 }
 
-#endif // VM_CHATSTATE_H
+#endif // VM_CHAT_INFO_STATE_H

@@ -84,7 +84,7 @@ Page {
 
             ImageButton {
                 image: "Arrow-Left"
-//                onClicked: app.stateManager.goBack()
+                onClicked: app.stateManager.goBack()
             }
 
             Column {

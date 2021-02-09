@@ -61,6 +61,7 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
     , m_backupKeyState(new BackupKeyState(m_messenger, this))
     , m_editProfileState(new EditProfileState(controllers->users(), this))
     , m_verifyProfileState(new VerifyProfileState(this))
+    , m_chatInfoState(new ChatInfoState(this))
     , m_chatListState(new ChatListState(controllers->chats(), this))
     , m_chatState(new ChatState(controllers, m_messenger, this))
     , m_downloadKeyState(new DownloadKeyState(controllers->users(), this))
@@ -92,6 +93,7 @@ void Self::registerStatesMetaTypes()
     qRegisterMetaType<BackupKeyState *>("BackupKeyState*");
     qRegisterMetaType<EditProfileState *>("EditProfileState*");
     qRegisterMetaType<VerifyProfileState *>("VerifyProfileState*");
+    qRegisterMetaType<ChatInfoState *>("ChatInfoState*");
     qRegisterMetaType<ChatListState *>("ChatListState*");
     qRegisterMetaType<ChatState *>("ChatState*");
     qRegisterMetaType<DownloadKeyState *>("DownloadKeyState*");
@@ -159,6 +161,7 @@ void Self::addTransitions()
 
     addTwoSideTransition(m_chatState, m_chatState, &ChatState::requestPreview, m_attachmentPreviewState);
     connect(m_chatState, &ChatState::requestPreview, m_attachmentPreviewState, &AttachmentPreviewState::setUrl);
+    addTwoSideTransition(m_chatState, m_chatState, &ChatState::requestInfo, m_chatInfoState);
 
     m_signUpState->addTransition(users, &UsersController::signedIn, m_chatListState);
 
