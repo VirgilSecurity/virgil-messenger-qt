@@ -232,6 +232,7 @@ private slots:
     void xmppOnUploadServiceFound();
     void xmppOnUploadSlotReceived(const QXmppHttpUploadSlotIq &slot);
     void xmppOnUploadRequestFailed(const QXmppHttpUploadRequestIq &request);
+    void xmppOnArchivedMessageReceived(const QString &queryId, const QXmppMessage &message);
 
     void onReconnectXmppServerIfNeeded();
     void onDisconnectXmppServer();

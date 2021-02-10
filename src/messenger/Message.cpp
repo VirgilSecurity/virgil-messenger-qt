@@ -150,6 +150,17 @@ MessageContentType Self::contentType() const noexcept {
 
 void Self::setContent(MessageContent content) {
     m_content = std::move(content);
+    //
+    //  Fix attachment if it's ID is not give.
+    //  This fix is required for backward compatibility, when attachment ID was not included in the attachment's JSON,
+    //  so when archived messages received attachments are not duplicated.
+    //
+    if (contentIsAttachment()) {
+        auto attachment = contentAsAttachment();
+        if (!attachment->id().isValid()) {
+            attachment->setId(AttachmentId(QString(id())));
+        }
+    }
 }
 
 

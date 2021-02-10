@@ -65,6 +65,7 @@ using namespace notifications::xmpp;
 #include <qxmpp/QXmppMessageReceiptManager.h>
 #include <qxmpp/QXmppCarbonManager.h>
 #include <qxmpp/QXmppUploadRequestManager.h>
+#include <qxmpp/QXmppMamManager.h>
 
 #include <QCryptographicHash>
 #include <QMap>
@@ -72,6 +73,7 @@ using namespace notifications::xmpp;
 #include <QtConcurrent>
 #include <QJsonDocument>
 #include <QLoggingCategory>
+#include <QPointer>
 
 #include <memory>
 
@@ -127,8 +129,9 @@ public:
     std::unique_ptr<VSQDiscoveryManager> discoveryManager;
     std::unique_ptr<VSQContactManager> contactManager;
 
-    QXmppCarbonManager *xmppCarbonManager;
-    QXmppUploadRequestManager *xmppUploadManager;
+    QPointer<QXmppCarbonManager> xmppCarbonManager;
+    QPointer<QXmppUploadRequestManager> xmppUploadManager;
+    QPointer<QXmppMamManager> xmppMamManager;
     VSQLastActivityManager *lastActivityManager;
 
     std::map<QString, std::shared_ptr<User>> identityToUser;
@@ -259,12 +262,14 @@ Self::resetXmppConfiguration() {
     //  Create & connect extensions.
     m_impl->xmppCarbonManager = new QXmppCarbonManager();
     m_impl->xmppUploadManager = new QXmppUploadRequestManager();
+    m_impl->xmppMamManager = new QXmppMamManager();
     m_impl->lastActivityManager = new VSQLastActivityManager(m_settings);
 
     // Parent is implicitly changed to the QXmppClient within addExtension()
     m_impl->xmpp->addExtension(new QXmppMessageReceiptManager());
     m_impl->xmpp->addExtension(m_impl->xmppCarbonManager);
     m_impl->xmpp->addExtension(m_impl->xmppUploadManager);
+    m_impl->xmpp->addExtension(m_impl->xmppMamManager);
     m_impl->xmpp->addExtension(m_impl->lastActivityManager);
 
     // Connect XMPP signals
@@ -278,6 +283,9 @@ Self::resetXmppConfiguration() {
 
     connect(m_impl->xmppUploadManager, &QXmppUploadRequestManager::requestFailed,
                 this, &Self::xmppOnUploadRequestFailed);
+
+    connect(m_impl->xmppMamManager, &QXmppMamManager::archivedMessageReceived,
+                this, &Self::xmppOnArchivedMessageReceived);
 
     connect(m_impl->xmpp.get(), &QXmppClient::connected, this, &Self::xmppOnConnected);
     connect(m_impl->xmpp.get(), &QXmppClient::disconnected, this, &Self::xmppOnDisconnected);
@@ -993,6 +1001,12 @@ Self::processReceivedXmppMessage(const QXmppMessage& xmppMessage) {
         auto messageBody = xmppMessage.body().toLatin1();
         if (messageBody.isEmpty()) {
             qCWarning(lcCoreMessenger) << "Got invalid XMPP message - body is empty";
+
+            QString xmlStr;
+            QXmlStreamWriter xmlWriter(&xmlStr);
+            xmppMessage.toXml(&xmlWriter);
+            qCDebug(lcCoreMessenger).noquote() << "Got invalid XMPP message:" << xmlStr;
+
             return Self::Result::Error_InvalidMessageFormat;
         }
 
@@ -1607,6 +1621,11 @@ Self::xmppOnConnected() {
     presenceOnline.setAvailableStatusType(QXmppPresence::Online);
     m_impl->xmpp->setClientPresence(presenceOnline);
 
+    //
+    //  Request archived messages.
+    //
+    m_impl->xmppMamManager->retrieveArchivedMessages();
+
     registerPushNotifications();
 }
 
@@ -1763,6 +1782,20 @@ void Self::xmppOnUploadRequestFailed(const QXmppHttpUploadRequestIq &request) {
     }
     else {
         emit uploadSlotErrorOccurred(request.id(), tr("Fail to upload file"));
+    }
+}
+
+
+void Self::xmppOnArchivedMessageReceived(const QString &queryId, const QXmppMessage &message) {
+    QString xmlStr;
+    QXmlStreamWriter xmlWriter(&xmlStr);
+    message.toXml(&xmlWriter);
+    qCDebug(lcCoreMessenger).noquote() << "Got archived message:" << xmlStr;
+
+    if (userIdFromJid(message.from()) == currentUser()->id()) {
+        processReceivedXmppCarbonMessage(message);
+    } else {
+        processReceivedXmppMessage(message);
     }
 }
 
