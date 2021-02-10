@@ -199,6 +199,6 @@ void ChatsController::onCreateChatWithGroup(const GroupHandler &group)
 void Self::onChatsLoaded(ModifiableChats chats)
 {
     qCDebug(lcController) << "Chats loaded from the database";
-    m_models->chats()->setChats(chats);
+    m_models->chats()->setChats(std::move(chats));
     emit chatsLoaded();
 }
