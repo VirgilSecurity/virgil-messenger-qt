@@ -1624,7 +1624,21 @@ Self::xmppOnConnected() {
     //
     //  Request archived messages.
     //
-    m_impl->xmppMamManager->retrieveArchivedMessages();
+    // m_impl->xmppMamManager->retrieveArchivedMessages();
+
+    QXmppElement offlineElement;
+    offlineElement.setTagName("offline");
+    offlineElement.setAttribute("xmlns", "http://jabber.org/protocol/offline");
+
+    QXmppElement fetchOfflineElement;
+    fetchOfflineElement.setTagName("fetch");
+
+    offlineElement.appendChild(fetchOfflineElement);
+
+    QXmppIq offlineIq(QXmppIq::Get);
+    offlineIq.setExtensions(QXmppElementList() << offlineElement);
+
+    m_impl->xmpp->sendPacket(offlineIq);
 
     registerPushNotifications();
 }
@@ -1668,7 +1682,10 @@ Self::xmppOnPresenceReceived(const QXmppPresence &presence) {
 
 void
 Self::xmppOnIqReceived(const QXmppIq &iq) {
-    Q_UNUSED(iq)
+    QString xmlStr;
+    QXmlStreamWriter xmlWriter(&xmlStr);
+    iq.toXml(&xmlWriter);
+    qCDebug(lcCoreMessenger).noquote() << "Got XMPP IQ:" << xmlStr;
 }
 
 void
