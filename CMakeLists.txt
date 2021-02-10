@@ -505,6 +505,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQMessageLogContext.h
         # Models
         ${CMAKE_CURRENT_LIST_DIR}/include/models/AccountSelectionModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/ChatObject.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ChatsModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ContactsModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ContactsProxyModel.h
@@ -678,6 +679,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogWorker.cpp
         # Models
         ${CMAKE_CURRENT_LIST_DIR}/src/models/AccountSelectionModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/ChatObject.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ChatsModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFileOperationSource.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesModel.cpp

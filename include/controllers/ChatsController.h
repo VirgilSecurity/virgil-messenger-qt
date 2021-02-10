@@ -36,6 +36,7 @@
 #define VM_CHATSCONTROLLER_H
 
 #include "ChatId.h"
+#include "ChatObject.h"
 #include "Group.h"
 #include "MessageId.h"
 #include "UserId.h"
@@ -56,7 +57,7 @@ class Messenger;
 class ChatsController : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString currentChatName READ currentChatName NOTIFY currentChatNameChanged)
+    Q_PROPERTY(ChatObject *current MEMBER m_chatObject CONSTANT)
 
 public:
     ChatsController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
@@ -86,8 +87,6 @@ signals:
     void chatCreated(const ChatHandler &chat);
     void chatClosed();
 
-    void currentChatNameChanged(const QString &name);
-
     void createChatWithUser(const UserHandler& user, QPrivateSignal);
     void createChatWithGroup(const GroupHandler& group, QPrivateSignal);
 
@@ -102,7 +101,7 @@ private:
     QPointer<Messenger> m_messenger;
     QPointer<Models> m_models;
     QPointer<UserDatabase> m_userDatabase;
-    ChatHandler m_currentChat;
+    QPointer<ChatObject> m_chatObject;
 };
 }
 

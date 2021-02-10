@@ -25,7 +25,7 @@ Page {
     }
 
     header: PageHeader {
-        title: controllers.chats.currentChatName
+        title: controllers.chats.current.title
         description: appState.lastActivityText
         contextMenu: ContextMenu {
             ContextMenuItem {

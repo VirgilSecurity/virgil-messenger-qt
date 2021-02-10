@@ -54,6 +54,7 @@ Self::ChatsController(Messenger *messenger, Models *models, UserDatabase *userDa
     , m_messenger(messenger)
     , m_models(models)
     , m_userDatabase(userDatabase)
+    , m_chatObject(new ChatObject(this))
 {
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
     connect(this, &Self::createChatWithUser, this, &Self::onCreateChatWithUser);
@@ -62,7 +63,7 @@ Self::ChatsController(Messenger *messenger, Models *models, UserDatabase *userDa
 
 ChatHandler Self::currentChat() const
 {
-    return m_currentChat;
+    return m_chatObject->chat();
 }
 
 void ChatsController::addParticipant(const QString &username) {
@@ -79,7 +80,7 @@ void ChatsController::leaveGroup() {
 
 QString Self::currentChatName() const
 {
-    return m_currentChat ? m_currentChat->title() : QString();
+    return m_chatObject ? m_chatObject->title() : QString();
 }
 
 void Self::loadChats()
@@ -148,9 +149,8 @@ void Self::openChat(const ChatHandler& chat)
         m_models->chats()->resetUnreadCount(chat->id());
         m_userDatabase->resetUnreadCount(chat);
     }
-    m_currentChat = chat;
-    emit chatOpened(m_currentChat);
-    emit currentChatNameChanged(currentChatName());
+    m_chatObject->setChat(chat);
+    emit chatOpened(chat);
 }
 
 void Self::openChat(const QString &chatId)
@@ -160,7 +160,7 @@ void Self::openChat(const QString &chatId)
 
 void Self::closeChat()
 {
-    m_currentChat = nullptr;
+    m_chatObject->setChat(ChatHandler());
     emit chatClosed();
 }
 

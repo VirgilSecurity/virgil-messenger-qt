@@ -13,7 +13,7 @@ OperationPage {
     footerText: ""
 
     signal contactSelected(string contactId)
-    signal actionButtonClicked()
+    signal actionButtonClicked() // TODO(fpohtmeh): remove signal?
 
     property alias selectedContacts: flow
 
