@@ -109,6 +109,7 @@ Item {
                     HeaderTitle {
                         title: qsTr("Transfer")
                         description: qsTr("Transfering %1 file(s)").arg(listView.count)
+                        anchors.verticalCenter: parent.verticalCenter
                     }
 
                     // TODO(fpohtmeh): create component?

@@ -12,8 +12,7 @@ Page {
     id: chatPage
 
     readonly property var appState: app.stateManager.chatState
-    readonly property var chatName: controllers.chats.currentChatName
-    readonly property var contactId: controllers.chats.currentContactId
+    readonly property var contactId: controllers.chats.currentContactId // TODO(fpohtmeh): remove?
     property real chatListViewHeight: 0
 
     QtObject {
@@ -25,99 +24,41 @@ Page {
         color: Theme.chatBackgroundColor
     }
 
-    header: Control {
-        id: headerControl
-        width: parent.width
-        height: Theme.headerHeight
-        z: 1
-
-        background: Rectangle {
-            color: Theme.chatBackgroundColor
-            anchors.leftMargin: 5
-            anchors.rightMargin: 5
-
-            HorizontalRule {
-                anchors.bottom: parent.bottom
-                anchors.leftMargin: 20
-                anchors.rightMargin: 20
-                color: Theme.chatSeparatorColor
-            }
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            acceptedButtons: Qt.AllButtons
-        }
-
-        RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: Theme.smallMargin
-            anchors.rightMargin: Theme.smallMargin
-
-            ImageButton {
-                image: "Arrow-Left"
-                onClicked: app.stateManager.goBack()
+    header: PageHeader {
+        title: controllers.chats.currentChatName
+        description: appState.lastActivityText
+        contextMenu: ContextMenu {
+            ContextMenuItem {
+                text: qsTr("Call")
+                iconName: "Make-Call"
+                visible: false
             }
 
-            Column {
-                Layout.fillWidth: true
-                Layout.leftMargin: Theme.smallMargin
-                Label {
-                    text: chatName
-                    font.pointSize: UiHelper.fixFontSz(15)
-                    color: Theme.primaryTextColor
-                    font.bold: true
-                }
-
-                Label {
-                    topPadding: 2
-                    text: appState.lastActivityText
-                    font.pointSize: UiHelper.fixFontSz(12)
-                    color: Theme.secondaryTextColor
-                }
+            ContextMenuItem {
+                text: appState.isGroupChat ? qsTr("Group info") : qsTr("Chat info")
+                onTriggered: appState.requestInfo()
             }
 
-            ImageButton {
-                image: "More"
-                onClicked: contextMenu.open()
+            ContextMenuSeparator {
+                visible: appState.isGroupChat
+            }
 
-                ContextMenu {
-                    id: contextMenu
-                    dropdown: true
+            ContextMenuItem {
+                text: qsTr("Add participant")
+                visible: appState.isGroupChat
+                onTriggered: controllers.chats.addParticipant("userId")
+            }
 
-                    ContextMenuItem {
-                        text: qsTr("Call")
-                        iconName: "Make-Call"
-                        visible: false
-                    }
+            ContextMenuItem {
+                text: qsTr("Remove participant")
+                visible: appState.isGroupChat
+                onTriggered: controllers.chats.removeParticipants("userId")
+            }
 
-                    ContextMenuItem {
-                        text: qsTr("Chat info")
-                        onTriggered: appState.requestInfo()
-                    }
-
-                    ContextMenuSeparator {
-                        visible: appState.isGroupChat
-                    }
-
-                    ContextMenuItem {
-                        text: qsTr("Add participant")
-                        visible: appState.isGroupChat
-                        onTriggered: controllers.chats.addParticipant("userId")
-                    }
-
-                    ContextMenuItem {
-                        text: qsTr("Remove participant")
-                        visible: appState.isGroupChat
-                        onTriggered: controllers.chats.removeParticipants("userId")
-                    }
-
-                    ContextMenuItem {
-                        text: qsTr("Leave group")
-                        visible: appState.isGroupChat
-                        onTriggered: controllers.chats.leaveGroup()
-                    }
-                }
+            ContextMenuItem {
+                text: qsTr("Leave group")
+                visible: appState.isGroupChat
+                onTriggered: controllers.chats.leaveGroup()
             }
         }
     }
@@ -128,6 +69,7 @@ Page {
 
     MessagesList {
         anchors.fill: parent
+        clip: true
     }
 
     Item {

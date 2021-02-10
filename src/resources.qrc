@@ -168,9 +168,9 @@
         <file>qml/components/NetworkStatusControl.qml</file>
         <file>qml/components/ChatListView.qml</file>
         <file>qml/components/CloudFileListView.qml</file>
-        <file>qml/components/NewGroupChatHeader.qml</file>
         <file>qml/components/TransfersPanel.qml</file>
         <file>qml/components/ListStatusButton.qml</file>
+        <file>qml/components/PageHeader.qml</file>
         <!-- Database -->
         <file>resources/database/createAttachments.sql</file>
         <file>resources/database/createChats.sql</file>
