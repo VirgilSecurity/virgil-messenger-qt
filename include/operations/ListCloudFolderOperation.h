@@ -61,7 +61,7 @@ private:
     void onCloudListFetched(CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &files);
     void onCloudListFetchErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
 
-    CloudListCloudFolderUpdate buildDifference(const ModifiableCloudFiles &files) const;
+    CloudListCloudFolderUpdate buildDifference(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &files) const;
     void deleteObsoleteLocalFiles(const ModifiableCloudFiles &files);
 
     static bool fileIdLess(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs);

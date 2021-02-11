@@ -66,7 +66,7 @@ void ListCloudFolderOperation::onCloudListFetched(const CloudFileRequestId reque
         return;
     }
 
-    m_parent->cloudFilesUpdate(buildDifference(files));
+    m_parent->cloudFilesUpdate(buildDifference(parentFolder, files));
     deleteObsoleteLocalFiles(files);
 
     finish();
@@ -81,10 +81,10 @@ void ListCloudFolderOperation::onCloudListFetchErrorOccurred(CloudFileRequestId 
     fail();
 }
 
-CloudListCloudFolderUpdate ListCloudFolderOperation::buildDifference(const ModifiableCloudFiles &files) const
+CloudListCloudFolderUpdate ListCloudFolderOperation::buildDifference(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &files) const
 {
     CloudListCloudFolderUpdate update;
-    update.parentFolder = m_parentFolder;
+    update.parentFolder = parentFolder;
     auto oldFiles = m_cachedFiles;
     std::sort(std::begin(oldFiles), std::end(oldFiles), fileIdLess);
     auto newFiles = files;
