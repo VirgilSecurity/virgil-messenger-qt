@@ -39,6 +39,7 @@
 
 #include "CloudFile.h"
 #include "CloudFileRequestId.h"
+#include "CloudFilesUpdate.h"
 #include "Operation.h"
 
 namespace vm
@@ -59,6 +60,9 @@ private:
     void onDatabaseListFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
     void onCloudListFetched(CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &files);
     void onCloudListFetchErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
+
+    CloudListCloudFolderUpdate buildDifference(const ModifiableCloudFiles &files) const;
+    void deleteObsoleteLocalFiles(const ModifiableCloudFiles &files);
 
     static bool fileIdLess(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs);
     static bool fileUpdated(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs);

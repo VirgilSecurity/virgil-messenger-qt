@@ -64,11 +64,7 @@ UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, c
 
 void UploadCloudFileOperation::run()
 {
-    // Local file check
-    const auto fileName = FileUtils::fileName(m_sourceFilePath);
-    const auto localPath = QDir(m_parentFolder->localPath()).filePath(fileName);
-    if (FileUtils::fileExists(localPath)) {
-        qCDebug(lcOperation) << "File name is not unique:" << localPath;
+    if (localFileExists()) {
         failAndNotify(tr("File name is not unique"));
         return;
     }
@@ -122,18 +118,11 @@ void UploadCloudFileOperation::onProgressChanged(const quint64 bytesLoaded, cons
 
 void UploadCloudFileOperation::onUploaded()
 {
-    if (!FileUtils::forceCreateDir(m_parentFolder->localPath())) {
+    if (!createLocalDir()) {
         failAndNotify(tr("Failed to create directory"));
         return;
     }
-
-    // Copy file to cloud downloads dir
-    const auto cloudFileLocalPath = QDir(m_parentFolder->localPath()).filePath(m_file->name());
-    if (!QFile::copy(m_sourceFilePath, cloudFileLocalPath)) {
-        qCWarning(lcOperation) << "Failed to copy file from" << m_sourceFilePath << "to" << cloudFileLocalPath;
-    }
-    m_file->setLocalPath(cloudFileLocalPath);
-    m_file->setFingerprint(FileUtils::calculateFingerprint(cloudFileLocalPath));
+    createLocalFile();
 
     // Send updates
     CreateCloudFilesUpdate update;
@@ -162,4 +151,32 @@ void UploadCloudFileOperation::transferUpdate(const TransferCloudFileUpdate::Sta
         update.bytesLoaded = bytesLoaded;
         m_parent->cloudFilesUpdate(update);
     }
+}
+
+bool UploadCloudFileOperation::localFileExists() const
+{
+    const auto fileName = FileUtils::fileName(m_sourceFilePath);
+    const auto localPath = QDir(m_parentFolder->localPath()).filePath(fileName);
+    if (FileUtils::fileExists(localPath)) {
+        qCDebug(lcOperation) << "File name is not unique:" << localPath;
+        return true;
+    }
+    return false;
+}
+
+bool UploadCloudFileOperation::createLocalDir()
+{
+    return FileUtils::forceCreateDir(m_parentFolder->localPath());
+}
+
+void UploadCloudFileOperation::createLocalFile()
+{
+    // Copy file to cloud downloads dir
+    const auto cloudFileLocalPath = QDir(m_parentFolder->localPath()).filePath(m_file->name());
+    if (!QFile::copy(m_sourceFilePath, cloudFileLocalPath)) {
+        qCWarning(lcOperation) << "Failed to copy file from" << m_sourceFilePath << "to" << cloudFileLocalPath;
+    }
+    // Update file "local" properties
+    m_file->setLocalPath(cloudFileLocalPath);
+    m_file->setFingerprint(FileUtils::calculateFingerprint(cloudFileLocalPath));
 }

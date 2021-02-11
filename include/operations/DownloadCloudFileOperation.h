@@ -65,6 +65,7 @@ private:
     void sendFailedTransferUpdate();
 
     void transferUpdate(TransferCloudFileUpdate::Stage stage, quint64 bytesLoaded);
+    bool createLocalDir();
 
     CloudFileOperation *m_parent;
     CloudFileHandler m_file;

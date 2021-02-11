@@ -36,8 +36,8 @@
 
 #include "CloudFileOperation.h"
 #include "CloudFilesTable.h"
-#include "CloudFilesUpdate.h"
 #include "CloudFileSystem.h"
+#include "FileUtils.h"
 #include "UserDatabase.h"
 
 using namespace vm;
@@ -61,12 +61,30 @@ void Self::run()
 
 void ListCloudFolderOperation::onCloudListFetched(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &files)
 {
+    Q_UNUSED(parentFolder)
     if (m_requestId != requestId) {
         return;
     }
 
+    m_parent->cloudFilesUpdate(buildDifference(files));
+    deleteObsoleteLocalFiles(files);
+
+    finish();
+}
+
+void ListCloudFolderOperation::onCloudListFetchErrorOccurred(CloudFileRequestId requestId, const QString &errorText)
+{
+    Q_UNUSED(errorText)
+    if (m_requestId != requestId) {
+        return;
+    }
+    fail();
+}
+
+CloudListCloudFolderUpdate ListCloudFolderOperation::buildDifference(const ModifiableCloudFiles &files) const
+{
     CloudListCloudFolderUpdate update;
-    update.parentFolder = parentFolder;
+    update.parentFolder = m_parentFolder;
     auto oldFiles = m_cachedFiles;
     std::sort(std::begin(oldFiles), std::end(oldFiles), fileIdLess);
     auto newFiles = files;
@@ -100,18 +118,32 @@ void ListCloudFolderOperation::onCloudListFetched(const CloudFileRequestId reque
     if (newI < newSize) {
         update.added.insert(update.added.end(), newFiles.begin() + newI, newFiles.end());
     }
-    m_parent->cloudFilesUpdate(update);
-
-    finish();
+    return update;
 }
 
-void ListCloudFolderOperation::onCloudListFetchErrorOccurred(CloudFileRequestId requestId, const QString &errorText)
+void ListCloudFolderOperation::deleteObsoleteLocalFiles(const ModifiableCloudFiles &files)
 {
-    Q_UNUSED(errorText)
-    if (m_requestId != requestId) {
-        return;
+    QSet<QString> filePaths;
+    QSet<QString> folderPaths;
+    for (auto &file : files) {
+        (file->isFolder() ? folderPaths : filePaths) << file->localPath().toLower();
     }
-    fail();
+
+    const auto localDir = QDir(m_parentFolder->localPath());
+    const auto localFiles = localDir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs | QDir::Hidden);
+    for (auto &localFile : localFiles) {
+        const auto localPath = localFile.absoluteFilePath();
+        if (localFile.isDir()) {
+            if (!folderPaths.contains(localPath.toLower())) {
+                FileUtils::removeDir(localPath);
+            }
+        }
+        else if (localFile.isFile()) {
+            if (!filePaths.contains(localPath.toLower())) {
+                FileUtils::removeFile(localPath);
+            }
+        }
+    }
 }
 
 void Self::onDatabaseListFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles)
