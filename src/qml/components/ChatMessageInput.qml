@@ -58,12 +58,12 @@ Control {
 
                 Action {
                     text: qsTr("Send picture")
-                    onTriggered: attachmentPicker.open(AttachmentTypes.picture)
+                    onTriggered: attachmentPicker.open(AttachmentTypes.picture, false)
                 }
 
                 Action {
                     text: qsTr("Send file")
-                    onTriggered: attachmentPicker.open(AttachmentTypes.file)
+                    onTriggered: attachmentPicker.open(AttachmentTypes.file, false)
                 }
             }
         }
@@ -207,8 +207,7 @@ Control {
     Component.onCompleted: {
         if (Platform.isDesktop) {
             messageField.forceActiveFocus();
-        }
-        else if (Platform.isIos) {
+        } else if (Platform.isIos) {
             app.keyboardEventFilter.install(messageField)
         }
     }

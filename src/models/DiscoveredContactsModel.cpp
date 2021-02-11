@@ -111,7 +111,7 @@ QVariant DiscoveredContactsModel::data(const QModelIndex &index, int role) const
         return preffix + getContact(row).displayName();
     }
     case SectionRole:
-        return (index.row() < m_fixedContactsCount) ? tr("Phone contacts") : tr("Discovered contacts");
+        return (index.row() < m_fixedContactsCount) ? tr("Phone contacts") : tr("Contacts to be found");
     case IsSelectedRole:
     {
         if (index.row() >= m_fixedContactsCount) {

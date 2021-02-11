@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,61 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/CloudFilesUploader.h"
+#import "NotificationService.h"
 
-using namespace vm;
+@interface NotificationService ()
 
-CloudFilesUploader::CloudFilesUploader(QObject *parent)
-    : QObject(parent)
-    , m_currentIndex(-1)
-    , m_currentProcessedBytes(-1)
-    , m_currentTotalBytes(-1)
-{
-    qRegisterMetaType<CloudFilesUploader *>("CloudFilesUploader*");
+@property (nonatomic, strong) void (^contentHandler)(UNNotificationContent *contentToDeliver);
+@property (nonatomic, strong) UNMutableNotificationContent *bestAttemptContent;
+
+@end
+
+@implementation NotificationService
+
+- (void)didReceiveNotificationRequest:(UNNotificationRequest *)request withContentHandler:(void (^)(UNNotificationContent * _Nonnull))contentHandler {
+    self.contentHandler = contentHandler;
+    self.bestAttemptContent = [request.content mutableCopy];
+    
+    // Modify the notification content here...
+    self.bestAttemptContent.title = [NSString stringWithFormat:@"%@ [modified]", self.bestAttemptContent.title];
+    
+    self.contentHandler(self.bestAttemptContent);
 }
 
-int CloudFilesUploader::currentIndex() const
-{
-    return m_currentIndex;
+- (void)serviceExtensionTimeWillExpire {
+    // Called just before the extension will be terminated by the system.
+    // Use this as an opportunity to deliver your "best attempt" at modified content, otherwise the original push payload will be used.
+    self.contentHandler(self.bestAttemptContent);
 }
 
-qint64 CloudFilesUploader::currentProcessedBytes() const
-{
-    return m_currentProcessedBytes;
-}
-
-qint64 CloudFilesUploader::currentTotalBytes() const
-{
-    return m_currentTotalBytes;
-}
-
-QStringList CloudFilesUploader::fileNames() const
-{
-    return m_fileNames;
-}
-
-void CloudFilesUploader::setCurrentIndex(const int index)
-{
-    if (m_currentIndex != index) {
-        m_currentIndex = index;
-        emit currentIndexChanged(m_currentIndex);
-    }
-}
-
-void CloudFilesUploader::setCurrentProcessedBytes(const qint64 bytes)
-{
-    if (m_currentProcessedBytes != bytes) {
-        m_currentProcessedBytes = bytes;
-        emit currentProcessedBytesChanged(m_currentProcessedBytes);
-    }
-}
-
-void CloudFilesUploader::setCurrentTotalBytes(const qint64 bytes)
-{
-    if (m_currentTotalBytes != bytes) {
-        m_currentTotalBytes = bytes;
-        emit currentTotalBytesChanged(m_currentTotalBytes);
-    }
-}
-
-
+@end

@@ -77,6 +77,7 @@ Self::Messenger(Settings *settings, Validator *validator)
     , m_settings(settings)
     , m_validator(validator)
     , m_coreMessenger(new CoreMessenger(settings, this))
+    , m_cloudFileSystem(new CloudFileSystem(m_coreMessenger, this))
     , m_crashReporter(new CrashReporter(settings, m_coreMessenger, this))
     , m_fileLoader(new FileLoader(m_coreMessenger, this))
 {
@@ -96,6 +97,13 @@ Self::Messenger(Settings *settings, Validator *validator)
     //  Handle received messages.
     //
     connect(m_coreMessenger, &CoreMessenger::messageReceived, this, &Self::onMessageReceived);
+
+    //
+    //  Cloud file system signals
+    //
+    connect(this, &Self::signedIn, m_cloudFileSystem, &CloudFileSystem::signIn);
+    connect(this, &Self::signedUp, m_cloudFileSystem, &CloudFileSystem::signIn);
+    connect(this, &Self::signedOut, m_cloudFileSystem, &CloudFileSystem::signOut);
 
     //
     //  Handle group chat events.
@@ -292,6 +300,11 @@ Self::subscribeToUser(const UserId &userId)
 
 QPointer<Settings> Self::settings() noexcept {
     return m_settings;
+}
+
+
+QPointer<CloudFileSystem> Self::cloudFileSystem() noexcept {
+    return m_cloudFileSystem;
 }
 
 

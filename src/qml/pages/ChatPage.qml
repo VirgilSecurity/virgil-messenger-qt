@@ -78,58 +78,41 @@ Page {
 
             ImageButton {
                 image: "More"
-                visible: appState.isGroupChat
-                onClicked: {
-                    if (appState.isGroupChat) {
-                        if (appState.isAdmin) {
-                            groupChatAdminContextMenu.open()
-                        } else {
-                            groupChatNotAdminContextMenu.open()
-                        }
-                    } else {
-                        stdChatContextMenu.open()
-                    }
-                }
+                onClicked: contextMenu.open()
 
                 ContextMenu {
-                    id: stdChatContextMenu
+                    id: contextMenu
                     dropdown: true
-                    currentIndex: -1
 
-                    Action {
-                        text: qsTr("Delete chat")
-                        onTriggered: console.log("Chat deletion isn't implemented")
+                    ContextMenuItem {
+                        text: qsTr("Call")
+                        iconName: "Make-Call"
+                        visible: false
                     }
-                }
 
-                ContextMenu {
-                    id: groupChatNotAdminContextMenu
-                    dropdown: true
-                    currentIndex: -1
-
-                    Action {
-                        text: qsTr("Leave group")
-                        onTriggered: controllers.chats.leaveGroup()
+                    ContextMenuItem {
+                        text: qsTr("Chat info")
                     }
-                }
 
-                ContextMenu {
-                    id: groupChatAdminContextMenu
-                    dropdown: true
-                    currentIndex: -1
+                    ContextMenuSeparator {
+                        visible: appState.isGroupChat
+                    }
 
-                    Action {
+                    ContextMenuItem {
                         text: qsTr("Add participant")
+                        visible: appState.isGroupChat
                         onTriggered: controllers.chats.addParticipant("userId")
                     }
 
-                    Action {
+                    ContextMenuItem {
                         text: qsTr("Remove participant")
+                        visible: appState.isGroupChat
                         onTriggered: controllers.chats.removeParticipants("userId")
                     }
 
-                    Action {
+                    ContextMenuItem {
                         text: qsTr("Leave group")
+                        visible: appState.isGroupChat
                         onTriggered: controllers.chats.leaveGroup()
                     }
                 }

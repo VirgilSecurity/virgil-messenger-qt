@@ -119,7 +119,7 @@ Item {
                         leftMargin: d.isPicture ? 1 : -3
                         bottom: parent.bottom
                     }
-                    visible: isOwnMessage
+                    visible: statusIcon
 
                     Image {
                         width: parent.width

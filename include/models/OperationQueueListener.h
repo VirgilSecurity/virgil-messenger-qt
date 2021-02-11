@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,43 +32,35 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_UPLOADDOWNLOADMODEL_H
-#define VM_UPLOADDOWNLOADMODEL_H
+#ifndef VM_OPERATION_QUEUE_LISTENER_H
+#define VM_OPERATION_QUEUE_LISTENER_H
 
-#include "ListModel.h"
+#include <QObject>
+#include <QPointer>
+
+#include "OperationSource.h"
 
 namespace vm
 {
-class UploadDownloadModel : public ListModel
+class OperationQueueListener : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit UploadDownloadModel(QObject *parent);
-    ~UploadDownloadModel() override;
+    using QObject::QObject;
+    virtual ~OperationQueueListener() {}
 
-private:
-    enum Roles
-    {
-        NameRole = Qt::UserRole,
-        BytesLoadedRole,
-        BytesTotalRole
-    };
+    virtual bool preRun(OperationSourcePtr source) { Q_UNUSED(source) return true; }
+    virtual void postRun(OperationSourcePtr source) { Q_UNUSED(source) }
+    virtual void clear() {}
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
-
-private:
-    struct uploadDownloadStruct
-    {
-        QString name;
-        int bytesLoaded;
-        int bytesTotal;
-    };
-
-    QList<uploadDownloadStruct> m_uploadDownloadList;
+signals:
+    void notificationCreated(const QString &notification, const bool error);
 };
-} // namespace vm
 
-#endif // VM_UPLOADDOWNLOADMODEL_H
+using OperationQueueListenerPtr = QPointer<OperationQueueListener>;
+using OperationQueueListeners = std::vector<OperationQueueListenerPtr>;
+}
+
+#endif // VM_OPERATION_QUEUE_LISTENER_H
+

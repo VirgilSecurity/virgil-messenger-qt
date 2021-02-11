@@ -50,6 +50,8 @@ public:
 
     bool isValid() const noexcept;
 
+    static CloudFsFolderId root();
+
 private:
     QString m_id;
 };

@@ -100,18 +100,37 @@ bool Self::readExecQueries(Database *database, const QString &queryId)
 
 std::optional<QSqlQuery> Self::readExecQuery(Database *database, const QString &queryId, const BindValues &values)
 {
-    const auto maybeText = FileUtils::readTextFile(queryPath(queryId));
+    auto maybeText = FileUtils::readTextFile(queryPath(queryId));
     if (!maybeText) {
         return std::nullopt;
     }
+
+    auto text = std::move(*maybeText);
+
+    for (auto &v : values) {
+        if (hasListType(v)) {
+            text = replaceListBindValue(text, v);
+        }
+    }
+
     auto query = database->createQuery();
-    if (!query.prepare(*maybeText)) {
+    if (!query.prepare(text)) {
         qCCritical(lcDatabase) << "Failed to prepare query:" << query.lastError().databaseText();
         return std::nullopt;
     }
+
     for (auto &v : values) {
-        query.bindValue(v.first, v.second);
+        if (hasListType(v)) {
+            // bindValue was processed earlier
+        }
+        else if (v.first == QLatin1Char('?')) {
+            query.addBindValue(v.second);
+        }
+        else {
+            query.bindValue(v.first, v.second);
+        }
     }
+
     if (!query.exec()) {
         qCCritical(lcDatabase) << "Failed to exec query:" << query.lastError().databaseText();
         return std::nullopt;
@@ -210,7 +229,6 @@ void DatabaseUtils::printQueryRecord(const QSqlQuery &query)
         qCDebug(lcDatabase).noquote().nospace() << r.field(i).name() << "=>" << r.value(i);
     }
 }
-
 
 MessageContent Self::readMessageContent(const QSqlQuery &query) {
 
@@ -317,8 +335,13 @@ ModifiableCloudFileHandler Self::readCloudFile(const QSqlQuery &query)
     const auto fingerprint = query.value("cloudFileFingerprint").toString();
 
     auto cloudFile = std::make_shared<CloudFile>();
-    cloudFile->setId(id);
-    cloudFile->setParentId(parentId);
+    if (isFolder) {
+        cloudFile->setId(CloudFsFolderId(id));
+    }
+    else {
+        cloudFile->setId(CloudFsFileId(id));
+    }
+    cloudFile->setParentId(CloudFsFolderId(parentId));
     cloudFile->setName(name);
     cloudFile->setIsFolder(isFolder);
     cloudFile->setType(type);
@@ -332,4 +355,103 @@ ModifiableCloudFileHandler Self::readCloudFile(const QSqlQuery &query)
     cloudFile->setFingerprint(fingerprint);
 
     return cloudFile;
+}
+
+DatabaseUtils::BindValues DatabaseUtils::createNewCloudFileBindings(const CloudFileHandler &cloudFile)
+{
+    return {
+        { ":id", QString(cloudFile->id()) },
+        { ":parentId", QString(cloudFile->parentId()) },
+        { ":name", cloudFile->name() },
+        { ":isFolder", cloudFile->isFolder() },
+        { ":type", cloudFile->type() },
+        { ":size", cloudFile->size() },
+        { ":createdAt", cloudFile->createdAt().toTime_t() },
+        { ":updatedAt", cloudFile->updatedAt().toTime_t() },
+        { ":updatedBy", QString(cloudFile->updatedBy()) },
+        { ":encryptedKey", cloudFile->encryptedKey() },
+        { ":publicKey", cloudFile->publicKey() },
+        { ":localPath", cloudFile->localPath() },
+        { ":fingerprint", cloudFile->fingerprint() }
+    };
+}
+
+DatabaseUtils::BindValues DatabaseUtils::createUpdatedCloudFileBindings(const CloudFileHandler &cloudFile, const CloudFileUpdateSource source)
+{
+    if ((source == CloudFileUpdateSource::ListedChild) || (source == CloudFileUpdateSource::ListedParent)) {
+        if (cloudFile->isFolder()) {
+            return {
+                { ":id", QString(cloudFile->id()) },
+                { ":parentId", QString(cloudFile->parentId()) },
+                { ":name", cloudFile->name() },
+                { ":isFolder", cloudFile->isFolder() },
+                // No type and size
+                { ":createdAt", cloudFile->createdAt().toTime_t() },
+                { ":updatedAt", cloudFile->updatedAt().toTime_t() },
+                { ":updatedBy", QString(cloudFile->updatedBy()) },
+                { ":encryptedKey", cloudFile->encryptedKey() },
+                { ":publicKey", cloudFile->publicKey() },
+                { ":localPath", cloudFile->localPath() }
+                // No fingerprint
+            };
+        }
+        else {
+            return {
+                { ":id", QString(cloudFile->id()) },
+                { ":parentId", QString(cloudFile->parentId()) },
+                { ":name", cloudFile->name() },
+                { ":isFolder", cloudFile->isFolder() },
+                { ":type", cloudFile->type() },
+                { ":size", cloudFile->size() },
+                { ":createdAt", cloudFile->createdAt().toTime_t() },
+                { ":updatedAt", cloudFile->updatedAt().toTime_t() },
+                { ":updatedBy", QString(cloudFile->updatedBy()) },
+                // No encrypted and public keys
+                { ":localPath", cloudFile->localPath() },
+                { ":fingerprint", cloudFile->fingerprint() }
+            };
+        }
+    };
+    return {};
+}
+
+DatabaseUtils::BindValues DatabaseUtils::createDownloadedCloudFileBindings(const CloudFileHandler &cloudFile, const QString &fingerprint)
+{
+    return {
+        { ":id", QString(cloudFile->id()) },
+        { ":fingerprint", fingerprint }
+    };
+}
+
+bool DatabaseUtils::hasListType(const BindValue &bindValue)
+{
+    switch (bindValue.second.type()) {
+    case QVariant::StringList:
+    case QVariant::List:
+            return true;
+        default:
+            return false;
+    }
+}
+
+QString DatabaseUtils::replaceListBindValue(const QString &queryText, const BindValue &bindValue)
+{
+    QStringList values;
+    switch (bindValue.second.type()) {
+        case QVariant::StringList:
+            for (auto &v : bindValue.second.toStringList()) {
+                values << '"' + v + '"';
+            }
+            break;
+        case QVariant::List:
+            for (auto &v : bindValue.second.toList()) {
+                values << v.toString();
+            }
+            break;
+        default:
+            throw std::logic_error("Invalid bindValue, type is not list");
+    }
+
+    const auto name = '(' + bindValue.first + ')';
+    return QString(queryText).replace(name, '(' + values.join(',') + ')');
 }

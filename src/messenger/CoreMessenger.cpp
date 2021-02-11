@@ -481,17 +481,20 @@ Self::isXmppDisconnected() const noexcept {
 // --------------------------------------------------------------------------
 void
 Self::onActivate() {
+    m_impl->suspended = false;
+
     if (m_impl->xmpp) {
         m_impl->xmpp->setActive(true);
+    }
 
+    if (isOnline()) {
         QXmppPresence presenceOnline(QXmppPresence::Available);
         presenceOnline.setAvailableStatusType(QXmppPresence::Online);
         m_impl->xmpp->setClientPresence(presenceOnline);
+
+    } else {
+        reconnectXmppServerIfNeeded();
     }
-
-    m_impl->suspended = false;
-
-    reconnectXmppServerIfNeeded();
 }
 
 
@@ -499,7 +502,9 @@ void
 Self::onDeactivate() {
     if (m_impl->xmpp) {
         m_impl->xmpp->setActive(false);
+    }
 
+    if (isOnline()) {
         QXmppPresence presenceAway(QXmppPresence::Available);
         presenceAway.setAvailableStatusType(QXmppPresence::Away);
         m_impl->xmpp->setClientPresence(presenceAway);
@@ -510,8 +515,14 @@ Self::onDeactivate() {
 void
 Self::onSuspend() {
     if (m_impl->xmpp) {
-        m_impl->xmpp->disconnectFromServer();
+        //
+        //  Setting QXmppPresence::Unavailable also call the disconnectFromServer() function underneath.
+        //
+        QXmppPresence presenceAway(QXmppPresence::Unavailable);
+        presenceAway.setAvailableStatusType(QXmppPresence::XA);
+        m_impl->xmpp->setClientPresence(presenceAway);
     }
+
     m_impl->suspended = true;
 }
 
@@ -1777,10 +1788,9 @@ void
 Self::xmppOnConnected() {
     m_impl->lastActivityManager->setEnabled(true);
 
-    if (m_impl->xmppCarbonManager->carbonsEnabled()) {
-        m_impl->xmppCarbonManager->setCarbonsEnabled(true);
-    }
-
+    //
+    //  TODO: Extract to a method
+    //
     for (auto xmppRoom : m_impl->xmppGroupChatManager->rooms()) {
         if (xmppRoom->isJoined()) {
             qCDebug(lcCoreMessenger) << "XMPP room is already joined:" << xmppRoom->jid();
@@ -1791,6 +1801,13 @@ Self::xmppOnConnected() {
     }
 
     changeConnectionState(Self::ConnectionState::Connected);
+
+    //
+    //  TODO: get available status from the cache as described within XEP-0318
+    //
+    QXmppPresence presenceOnline(QXmppPresence::Available);
+    presenceOnline.setAvailableStatusType(QXmppPresence::Online);
+    m_impl->xmpp->setClientPresence(presenceOnline);
 
     registerPushNotifications();
 }

@@ -35,10 +35,13 @@
 #ifndef VS_CLOUDFILESQUEUE_H
 #define VS_CLOUDFILESQUEUE_H
 
+#include <QPointer>
 #include <QLoggingCategory>
 
 #include "CloudFile.h"
-#include "CloudFileUpdate.h"
+#include "CloudFileOperationSource.h"
+#include "CloudFilesQueueListeners.h"
+#include "CloudFilesUpdate.h"
 #include "OperationQueue.h"
 
 Q_DECLARE_LOGGING_CATEGORY(lcCloudFilesQueue);
@@ -46,31 +49,46 @@ Q_DECLARE_LOGGING_CATEGORY(lcCloudFilesQueue);
 namespace vm
 {
 class Messenger;
+class UserDatabase;
 
 class CloudFilesQueue : public OperationQueue
 {
     Q_OBJECT
 
 public:
-    CloudFilesQueue(Messenger *messenger, QObject *parent);
+    CloudFilesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject *parent);
     ~CloudFilesQueue() override;
 
+    void addCloudFileListener(CloudFilesQueueListenerPtr listener);
+
 signals:
+    void pushListFolder(const CloudFileHandler &parentFolder);
     void pushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
     void pushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
+    void pushDownloadFile(const CloudFileHandler &file, const CloudFileHandler &parentFolder, const PostFunction &func);
     void pushDeleteFiles(const CloudFiles &files);
 
-    void updateCloudFile(const CloudFileUpdate &update);
+    void interruptFileOperation(const CloudFileId &fileId);
+    void updateCloudFiles(const CloudFilesUpdate &update);
 
 private:
+    using SourceType = CloudFileOperationSource::Type;
+
     Operation *createOperation(OperationSourcePtr source) override;
     void invalidateOperation(OperationSourcePtr source) override;
+    qsizetype maxAttemptCount() const override;
 
+    void onPushListFolder(const CloudFileHandler &parentFolder);
     void onPushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
     void onPushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
+    void onPushDownloadFile(const CloudFileHandler &file, const CloudFileHandler &parentFolder, const PostFunction &func);
     void onPushDeleteFiles(const CloudFiles &files);
+    void onUpdateCloudFiles(const CloudFilesUpdate &update);
 
-    Messenger *m_messenger;
+    QPointer<Messenger> m_messenger;
+    QPointer<UserDatabase> m_userDatabase;
+    QPointer<CloudFolderUpdateWatcher> m_watcher;
+    std::vector<CloudFilesQueueListenerPtr> m_cloudFileListeners;
 };
 }
 

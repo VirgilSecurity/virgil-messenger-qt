@@ -117,7 +117,7 @@ bool Self::updateMessage(const MessageUpdate &messageUpdate, const bool apply) {
 
 ModifiableMessageHandler Self::findById(const MessageId &messageId) const
 {
-    auto messageIt = std::find_if(std::rbegin(m_messages), std::rend(m_messages), [&messageId](auto message) {
+    const auto messageIt = std::find_if(std::rbegin(m_messages), std::rend(m_messages), [&messageId](auto message) {
         return message->id() == messageId;
     });
 
@@ -379,7 +379,7 @@ QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate& messageUpdate) {
 
     if(std::holds_alternative<IncomingMessageStageUpdate>(messageUpdate) ||
             std::holds_alternative<OutgoingMessageStageUpdate>(messageUpdate)) {
-        return { StatusIconRole, IsBrokenRole, InRowRole };
+        return { AttachmentIsLoadingRole, StatusIconRole, IsBrokenRole, InRowRole };
 
     } else if(std::holds_alternative<MessageAttachmentUploadStageUpdate>(messageUpdate) ||
               std::holds_alternative<MessageAttachmentDownloadStageUpdate>(messageUpdate)) {

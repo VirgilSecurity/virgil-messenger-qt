@@ -40,6 +40,9 @@
 
 include_guard()
 
+# Clang-format extensions
+list(APPEND VS_CLANG_EXT ".c" ".cpp" ".h" ".hpp" ".m" ".mm")
+
 find_program(CLANG_FORMAT_EXECUTABLE clang-format)
 
 function(add_clangformat _targetname)
@@ -52,7 +55,6 @@ function(add_clangformat _targetname)
         get_target_property(_clang_sources ${_targetname} SOURCES)
         get_target_property(_builddir ${_targetname} BINARY_DIR)
 
-
         set(_sources "")
         foreach(_source ${_clang_sources})
             # remove cmake generator expressions if exists
@@ -61,7 +63,12 @@ function(add_clangformat _targetname)
 
             if(NOT TARGET ${_source})
                 get_filename_component(_source_file ${_source} NAME)
+                get_filename_component(_source_ext ${_source} EXT)
                 get_source_file_property(_clang_loc "${_source}" LOCATION)
+
+                if (NOT _source_ext IN_LIST VS_CLANG_EXT)
+                   continue()
+                endif()
 
                 set(_format_file ${_targetname}_${_source_file}.format)
 

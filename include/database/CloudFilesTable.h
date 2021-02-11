@@ -37,7 +37,9 @@
 
 #include "core/DatabaseTable.h"
 #include "CloudFile.h"
-#include "CloudFileUpdate.h"
+#include "CloudFilesUpdate.h"
+
+class QSqlQuery;
 
 namespace vm
 {
@@ -50,22 +52,25 @@ public:
 
 signals:
     void fetch(const CloudFileHandler &folder);
-    void updateCloudFile(const CloudFileUpdate &update);
+    void updateCloudFiles(const CloudFilesUpdate &update);
 
     void errorOccurred(const QString &errorText);
-    void fetched(const CloudFileHandler &folder, ModifiableCloudFiles cloudFiles);
+    void fetched(const CloudFileHandler &folder, const ModifiableCloudFiles &cloudFiles);
 
 private:
     bool create() override;
 
-    void createCloudFile(const CloudFileHandler &cloudFile);
-    void deleteCloudFile(const CloudFileId &cloudFileId, bool isFolder);
-    void renameCloudFile();
+    bool createFiles(const ModifiableCloudFiles &cloudFiles);
+    bool createFile(const CloudFileHandler &cloudFile);
+    bool updateFiles(const CloudFiles &cloudFiles, CloudFileUpdateSource source);
+    bool updateFile(const CloudFileHandler &cloudFile, CloudFileUpdateSource source);
+    bool updateDownloadedFile(const DownloadCloudFileUpdate &update);
+    bool deleteFiles(const CloudFiles &cloudFiles);
 
-    QStringList getCloudFolderFileIds(const CloudFileId &folderId);
+    QStringList getSubFoldersIds(const QString &folderId);
 
     void onFetch(const CloudFileHandler &folder);
-    void onUpdateCloudFile(const CloudFileUpdate &update);
+    void onUpdateCloudFiles(const CloudFilesUpdate &update);
 };
 }
 

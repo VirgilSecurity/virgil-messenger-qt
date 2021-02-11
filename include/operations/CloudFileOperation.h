@@ -35,27 +35,42 @@
 #ifndef VM_CLOUD_FILE_OPERATION_H
 #define VM_CLOUD_FILE_OPERATION_H
 
-#include "CloudFileUpdate.h"
-#include "Operation.h"
-#include "UserId.h"
+#include "CloudFilesUpdate.h"
+#include "NetworkOperation.h"
+
+#include <QPointer>
+
+class Settings;
 
 namespace vm
 {
-class CloudFileOperation : public Operation
+class CloudFileSystem;
+class CloudFolderUpdateWatcher;
+class FileLoader;
+class Messenger;
+
+class CloudFileOperation : public NetworkOperation
 {
     Q_OBJECT
 
 public:
-    CloudFileOperation(const UserId &userId, QObject *parent);
+    using FolderUpdateSlot = std::function<void (const CloudFileHandler &)>;
 
-    UserId userId() const;
+    CloudFileOperation(Messenger *messenger, CloudFolderUpdateWatcher *watcher, QObject *parent);
+
+    Settings *settings();
+    CloudFileSystem *cloudFileSystem();
+    FileLoader *fileLoader();
+
+    void watchFolderAndRun(const CloudFileHandler &folder, QObject *receiver, FolderUpdateSlot slot);
 
 signals:
-    void cloudFileUpdate(const CloudFileUpdate &update);
+    void cloudFilesUpdate(const CloudFilesUpdate &update);
 
 private:
-    static quint64 m_counter;
-    UserId m_userId;
+    static qsizetype m_nameCounter;
+    QPointer<Messenger> m_messenger;
+    QPointer<CloudFolderUpdateWatcher> m_watcher;
 };
 }
 

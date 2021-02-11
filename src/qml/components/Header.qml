@@ -7,19 +7,11 @@ import "../theme"
 ToolBar {
     property alias title: titleLabel.text
     property bool showBackButton: true
-    property alias showSeparator: separator.visible
+    property alias showSeparator: headerBackground.showSeparator
     default property alias menu: contextMenu.contentData
 
-    background: Rectangle {
-        implicitHeight: Theme.headerHeight
-        color: "transparent"
-
-        HorizontalRule {
-            id: separator
-            anchors.leftMargin: Theme.margin
-            anchors.rightMargin: Theme.margin
-            anchors.bottom: parent.bottom
-        }
+    background: HeaderBackground {
+        id: headerBackground
     }
 
     RowLayout {

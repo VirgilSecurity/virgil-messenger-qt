@@ -118,7 +118,7 @@ QString Utils::formattedDataSizeProgress(quint64 loaded, quint64 total)
     const auto formattedLoaded = power
         ? locale.toString(loaded / std::pow(double(base), power), 'f', qMin(precision, 3 * power))
         : locale.toString(loaded);
-    return formattedLoaded + QChar('/') + formattedSize(total);
+    return formattedLoaded + QLatin1String(" / ") + formattedSize(total);
 }
 
 QString Utils::formattedElapsedSeconds(std::chrono::seconds seconds, std::chrono::seconds nowInterval)

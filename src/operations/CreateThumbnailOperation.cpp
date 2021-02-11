@@ -53,7 +53,7 @@ void CreateThumbnailOperation::run()
         QImageReader reader(m_sourcePath);
         QImage source;
         if (!Utils::readImage(&reader, &source)) {
-            invalidate(tr("Failed to read image for thumbnail"));
+            invalidateAndNotify(tr("Failed to read image for thumbnail"));
             return;
         }
         m_sourceImage = Utils::applyOrientation(source, reader.transformation());
@@ -66,7 +66,7 @@ void CreateThumbnailOperation::run()
         const auto dest = m_sourceImage.scaled(size.width(), size.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
         if (!QImage(dest).save(m_destPath)) {
             qCDebug(lcOperation) << "Failed to save thumbnail file:" << m_destPath;
-            invalidate(tr("Failed to save thumbnail file"));
+            invalidateAndNotify(tr("Failed to save thumbnail file"));
             return;
         }
     }

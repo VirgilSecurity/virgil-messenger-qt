@@ -76,16 +76,16 @@ Popup {
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing: Theme.spacing
 
-                FormPrimaryButton {
-                    id: acceptButton
-                    text: qsTr("Ok")
-                    onClicked: dialog.accepted()
-                }
-
                 FormSecondaryButton {
                     id: rejectButton
                     text: qsTr("Cancel")
                     onClicked: dialog.rejected()
+                }
+
+                FormPrimaryButton {
+                    id: acceptButton
+                    text: qsTr("Ok")
+                    onClicked: dialog.accepted()
                 }
             }
         }

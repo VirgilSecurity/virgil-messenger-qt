@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,51 +32,74 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/UploadDownloadModel.h"
-
-#include "Utils.h"
-#include "Model.h"
+#include "CloudFileId.h"
 
 using namespace vm;
-using Self = UploadDownloadModel;
+using Self = CloudFileId;
 
-Self::UploadDownloadModel(QObject *parent)
-    : ListModel(parent)
+Self::CloudFileId()
 {
-    qRegisterMetaType<UploadDownloadModel *>("UploadDownloadModel*");
 }
 
-Self::~UploadDownloadModel()
-{}
-
-int Self::rowCount(const QModelIndex &parent) const
+Self::CloudFileId(CloudFsFileId coreId)
+    : m_coreId(std::move(coreId))
 {
-    Q_UNUSED(parent);
-    return m_uploadDownloadList.size();
 }
 
-QVariant Self::data(const QModelIndex &index, int role) const
+Self::CloudFileId(CloudFsFolderId coreId)
+    : m_coreId(std::move(coreId))
 {
-    const auto &item = m_uploadDownloadList[index.row()];
-    switch (role) {
-    case NameRole:
-        return item.name;
+}
 
-    case BytesLoadedRole:
-        return item.bytesLoaded;
-
-    case BytesTotalRole:
-        return item.bytesTotal;
-    default:
-        return QVariant();
+CloudFsFileId Self::coreFileId() const
+{
+    if (auto id = std::get_if<CloudFsFileId>(&m_coreId)) {
+        return *id;
     }
+    return CloudFsFileId();
 }
 
-QHash<int, QByteArray> Self::roleNames() const
+CloudFsFolderId Self::coreFolderId() const
 {
-    return {
-        { NameRole, "name" },
-        { BytesLoadedRole, "bytesLoaded" },
-        { BytesTotalRole, "bytesTotal" }
-    };
+    if (auto id = std::get_if<CloudFsFolderId>(&m_coreId)) {
+        return *id;
+    }
+    return CloudFsFolderId();
+}
+
+CloudFileId Self::root()
+{
+    static CloudFileId id(CloudFsFolderId::root());
+    return id;
+}
+
+Self::operator QString() const
+{
+    if (auto id = std::get_if<CloudFsFileId>(&m_coreId)) {
+        return QString(*id);
+    }
+    if (auto id = std::get_if<CloudFsFolderId>(&m_coreId)) {
+        return QString(*id);
+    }
+    return QLatin1String("");
+}
+
+bool vm::operator<(const CloudFileId &lhs, const CloudFileId &rhs)
+{
+    return QString(lhs) < QString(rhs);
+}
+
+bool vm::operator>(const CloudFileId &lhs, const CloudFileId &rhs)
+{
+    return QString(lhs) > QString(rhs);
+}
+
+bool vm::operator==(const CloudFileId &lhs, const CloudFileId &rhs)
+{
+    return QString(lhs) == QString(rhs);
+}
+
+bool vm::operator!=(const CloudFileId &lhs, const CloudFileId &rhs)
+{
+    return QString(lhs) != QString(rhs);
 }
