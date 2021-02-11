@@ -40,6 +40,7 @@
 #include "QFile"
 
 #include <QNetworkReply>
+#include <QPointer>
 
 namespace vm
 {
@@ -75,6 +76,7 @@ private:
 
     QString m_filePath;
     QScopedPointer<QFile> m_fileHandle;
+    QPointer<QNetworkReply> m_reply;
     quint64 m_bytesLoaded = 0;
     quint64 m_bytesTotal = 0;
 };

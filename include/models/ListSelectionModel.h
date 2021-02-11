@@ -55,6 +55,7 @@ public:
     Q_INVOKABLE void toggle(const QVariant &proxyRow);
     void toggle(const QModelIndex &sourceIndex);
     Q_INVOKABLE void clear();
+    Q_INVOKABLE void selectAll();
 
     void setMultiSelect(const bool multiSelect);
 

@@ -37,6 +37,7 @@
 #include <QFileInfo>
 
 #include "CloudFilesQueue.h"
+#include "FileUtils.h"
 
 using namespace vm;
 
@@ -111,7 +112,7 @@ QString UniqueCloudFileFilter::createUniqueId(CloudFileOperationSource *source) 
         case SourceType::Download:
             return source->file()->id();
         case SourceType::Upload:
-            return source->folder()->id() + QLatin1Char('/') + QFileInfo(source->filePath()).fileName();
+            return source->folder()->id() + QLatin1Char('/') + FileUtils::fileName(source->filePath());
         case SourceType::CreateFolder:
             return source->folder()->id() + QLatin1Char('/') + source->name();
         default:

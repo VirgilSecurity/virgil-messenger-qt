@@ -174,6 +174,11 @@ void FileUtils::removeDir(const QString &dirPath)
     }
 }
 
+QString FileUtils::fileName(const QString &filePath)
+{
+    return QFileInfo(filePath).fileName();
+}
+
 QString Self::attachmentFileName(const QUrl &url, bool isPicture)
 {
     QString fileName;
@@ -194,7 +199,7 @@ QString Self::attachmentFileName(const QUrl &url, bool isPicture)
     Q_UNUSED(isPicture)
 #endif
     if (fileName.isEmpty()) {
-        fileName = QFileInfo(urlToLocalFile(url)).fileName();
+        fileName = FileUtils::fileName(urlToLocalFile(url));
     }
     return fileName;
 }
