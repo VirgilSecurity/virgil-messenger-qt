@@ -57,6 +57,7 @@ void CreateCloudFolderOperation::run()
     // Local folder check
     const auto localPath = QDir(m_parentFolder->localPath()).filePath(m_name);
     if (FileUtils::fileExists(localPath)) {
+        qCDebug(lcOperation) << "Folder name is not unique:" << localPath;
         failAndNotify(tr("Folder name is not unique"));
         return;
     }

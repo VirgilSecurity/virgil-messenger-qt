@@ -56,6 +56,7 @@ Self::CloudFilesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject 
     , m_watcher(new CloudFolderUpdateWatcher(this))
 {
     connect(m_messenger, &Messenger::signedOut, this, &CloudFilesQueue::stop);
+    connect(m_userDatabase, &UserDatabase::opened, this, &Self::start);
     connect(this, &Self::pushListFolder, this, &Self::onPushListFolder);
     connect(this, &Self::pushCreateFolder, this, &Self::onPushCreateFolder);
     connect(this, &Self::pushUploadFile, this, &Self::onPushUploadFile);

@@ -161,7 +161,7 @@ Self::FutureResult<CloudFsNewFile> Self::createFile(const QString &sourceFilePat
     return QtConcurrent::run([this, sourceFilePath, destFilePath, parentFolderId, parentFolderPublicKey]()
             -> Result<CloudFsNewFile> {
 
-        qCInfo(lcCoreMessengerCloudFs) << "Trying to create file";
+        qCInfo(lcCoreMessengerCloudFs) << "Trying to create file" << FileUtils::fileName(sourceFilePath);
 
         //
         //  Encrypt file.

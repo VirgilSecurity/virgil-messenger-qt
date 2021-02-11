@@ -129,6 +129,9 @@ void Self::runSource(OperationSourcePtr source)
         if (op->status() == Operation::Status::Failed) {
             emit operationFailed(source, QPrivateSignal());
         }
+        else if (op->status() == Operation::Status::Invalid) {
+            invalidateOperation(source);
+        }
         op->drop(true);
         // Post-run listeners
         for (auto listener : m_listeners) {

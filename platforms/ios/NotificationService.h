@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,54 +32,8 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_LOADFILEOPERATION_H
-#define VM_LOADFILEOPERATION_H
+#import <UserNotifications/UserNotifications.h>
 
-#include "NetworkOperation.h"
+@interface NotificationService : UNNotificationServiceExtension
 
-#include "QFile"
-
-#include <QNetworkReply>
-#include <QPointer>
-
-namespace vm
-{
-class LoadFileOperation : public NetworkOperation
-{
-    Q_OBJECT
-
-public:
-    LoadFileOperation(NetworkOperation *parent, quint64 bytesTotal = 0);
-
-    void setFilePath(const QString &filePath);
-
-signals:
-    void setProgress(quint64 bytesLoaded, quint64 bytesTotal);
-    void progressChanged(quint64 bytesLoaded, quint64 bytesTotal);
-
-    void interrupt();
-
-protected:
-    virtual void connectReply(QNetworkReply *reply);
-
-    bool openFileHandle(const QFile::OpenMode &mode);
-    void closeFileHandle();
-    QFile *fileHandle();
-
-    QString filePath() const;
-
-private:
-    void onReplyFinished(QNetworkReply *reply);
-    void onReplyErrorOccurred(const QNetworkReply::NetworkError error, QNetworkReply *reply);
-    void onReplySslErrors();
-    void onSetProgress(quint64 bytesLoaded, quint64 bytesTotal);
-
-    QString m_filePath;
-    QScopedPointer<QFile> m_fileHandle;
-    QPointer<QNetworkReply> m_reply;
-    quint64 m_bytesLoaded = 0;
-    quint64 m_bytesTotal = 0;
-};
-}
-
-#endif // VM_LOADFILEOPERATION_H
+@end

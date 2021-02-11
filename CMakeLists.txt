@@ -47,12 +47,13 @@ include(customers)
 #
 # Code formatting
 #
-option(ENABLE_CLANGFORMAT "On/Off formatting source code with clangformat." ON)
+set(ENABLE_CLANGFORMAT OFF CACHE BOOL "On/Off formatting source code with clangformat.")
+set(ENABLE_IOS_EXTENSION OFF CACHE BOOL "On/Off building IOS extension.")
 
 # ---------------------------------------------------------------------------
 # Project version
 # ---------------------------------------------------------------------------
-set(VS_TARGET_VERSION "3.6.1")
+set(VS_TARGET_VERSION "3.6.2")
 set(VS_CORE_VERSION "0.2.1.45")
 set(VERSION_DATABASE_SCHEME "0")
 
@@ -109,10 +110,6 @@ if (NOT CMAKE_BUILD_TYPE)
 endif ()
 string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
 message("-- Build type: [${CMAKE_BUILD_TYPE}]")
-
-#if(CMAKE_BUILD_TYPE_LOWER STREQUAL "minsizerel" OR CMAKE_BUILD_TYPE_LOWER STREQUAL "relwithdebinfo")
-#    set(CMAKE_BUILD_TYPE_LOWER "release")
-#endif()
 
 set(CMAKE_BUILD_TYPE_LOWER "release")
 
@@ -324,9 +321,9 @@ elseif (VS_PLATFORM STREQUAL "ios")
             )
     # Storyboard default
     configure_file("${CMAKE_CURRENT_LIST_DIR}/platforms/ios/LaunchScreen.storyboard.in"
-                   "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard" @ONLY)
+            "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard" @ONLY)
     configure_file("${CMAKE_CURRENT_LIST_DIR}/platforms/ios/Default-568h@2x.png"
-                   "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/Default-568h@2x.png" COPYONLY)
+            "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/Default-568h@2x.png" COPYONLY)
 
     set(STORYBOARD_DEFAULT
             ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard
@@ -346,6 +343,28 @@ elseif (VS_PLATFORM STREQUAL "ios")
             LINK_FLAGS "-framework Foundation -framework UserNotifications"
             RESOURCE "${STORYBOARD_DEFAULT}"
             )
+    #   IOS extension
+    if (ENABLE_IOS_EXTENSION)
+        set(EXT_SOURCE_FILES
+                ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/NotificationService.mm
+                ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/NotificationService.h
+                )
+
+        add_library(${VS_TARGET_NAME}_EXT MODULE ${EXT_SOURCE_FILES})
+        set_target_properties(${VS_TARGET_NAME}_EXT
+                PROPERTIES
+                BUNDLE YES
+                XCODE_PRODUCT_TYPE com.apple.product-type.app-extension)
+
+        target_include_directories(${VS_TARGET_NAME}_EXT
+                PUBLIC
+                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios>
+                )
+
+        find_library(UN_LIB UserNotifications)
+        find_library(UNUI_LIB UserNotificationsUI)
+        target_link_libraries(${VS_TARGET_NAME}_EXT PRIVATE ${UN_LIB} ${UNUI_LIB})
+    endif ()
 
     qt5_import_qml_plugins(${VS_TARGET_NAME})
 else ()
@@ -818,10 +837,11 @@ target_include_directories(${VS_TARGET_NAME}
 target_compile_definitions(${VS_TARGET_NAME}
         PRIVATE
 
-        $<BUILD_INTERFACE:VERSION=${VS_TARGET_VERSION}>
-        $<BUILD_INTERFACE:VS_MSGR_ENV_DEV=0>
-        $<BUILD_INTERFACE:VS_MSGR_ENV_STG=0>
-        $<BUILD_INTERFACE:VS_MSGR_ENV_PROD=1>
+        $<BUILD_INTERFACE:VERSION="${VS_TARGET_VERSION}">
+
+        $<BUILD_INTERFACE:VS_MSGR_ENV_DEV=$<STREQUAL:"${VS_ENV}","dev">>
+        $<BUILD_INTERFACE:VS_MSGR_ENV_STG=$<STREQUAL:"${VS_ENV}","stg">>
+        $<BUILD_INTERFACE:VS_MSGR_ENV_PROD=$<STREQUAL:"${VS_ENV}","prod">>
 
         $<BUILD_INTERFACE:INFO_CLIENT=1>
         $<BUILD_INTERFACE:CFG_CLIENT=1>
@@ -854,11 +874,10 @@ target_compile_options(${VS_TARGET_NAME}
 # ---------------------------------------------------------------------------
 #   Additional debug parameters
 # ---------------------------------------------------------------------------
-
 target_compile_definitions(${VS_TARGET_NAME}
         PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>
         )
 
-#if(COMMAND add_clangformat AND ENABLE_CLANGFORMAT)
-#    add_clangformat(${VS_TARGET_NAME})
-#endif()
+if(COMMAND add_clangformat AND ENABLE_CLANGFORMAT)
+    add_clangformat(${VS_TARGET_NAME})
+endif()

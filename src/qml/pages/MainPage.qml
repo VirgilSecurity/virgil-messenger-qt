@@ -88,13 +88,19 @@ Page {
         }
 
         ContextMenuSeparator {
-            visible: d.isCloudFileList && d.cloudFilesHasSelection
+            visible: d.isCloudFileList
         }
 
         ContextMenuItem {
             text: qsTr("Delete")
             onTriggered: deleteCloudFilesDialog.open()
             visible: d.isCloudFileList && d.cloudFilesHasSelection
+        }
+
+        ContextMenuItem {
+            text: qsTr("Select All")
+            onTriggered: d.cloudFilesSelection.selectAll()
+            visible: d.isCloudFileList && !d.cloudFilesSelection.hasSelection // TODO(fpohtmeh): hide for empty list
         }
     }
 
