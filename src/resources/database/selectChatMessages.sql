@@ -29,7 +29,7 @@ FROM
     messages
 LEFT JOIN attachments ON attachments.messageId = messages.id
 LEFT JOIN chats ON chats.id = :chatId
-LEFT JOIN contacts  AS senderContacts ON senderContacts.userId = messages.recipientId
-LEFT JOIN contacts  AS recipientContacts ON recipientContacts.userId = messages.senderId
+LEFT JOIN contacts  AS senderContacts ON senderContacts.userId = messages.senderId
+LEFT JOIN contacts  AS recipientContacts ON recipientContacts.userId = messages.recipientId
 WHERE messages.chatId = :chatId
 ORDER BY messages.createdAt

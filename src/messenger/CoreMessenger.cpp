@@ -404,7 +404,7 @@ Self::resetXmppConfiguration() {
     connect(m_impl->xmppCarbonManager, &QXmppCarbonManager::messageSent, this, &Self::xmppOnCarbonMessageReceived);
 
     // Add extra logging
-// #if USE_XMPP_LOGS
+#if USE_XMPP_LOGS
     auto logger = QXmppLogger::getLogger();
     logger->setLoggingType(QXmppLogger::SignalLogging);
     logger->setMessageTypes(QXmppLogger::AnyMessage);
@@ -414,7 +414,7 @@ Self::resetXmppConfiguration() {
     });
 
     m_impl->xmpp->setLogger(logger);
-// #endif
+#endif
 
     auto receipt = m_impl->xmpp->findExtension<QXmppMessageReceiptManager>();
     connect(receipt, &QXmppMessageReceiptManager::messageDelivered, this, &Self::xmppOnMessageDelivered);
@@ -1102,7 +1102,7 @@ Self::sendGroupMessage(const MessageHandler& message) {
         return *status;
     }
 
-    auto encryptedMessageData = std::get_if<QByteArray>(&encryptedMessageDataResult)->toBase64();
+    auto encryptedMessageData = std::move(*std::get_if<QByteArray>(&encryptedMessageDataResult));
 
     //
     //  Pack JSON body.
@@ -1122,7 +1122,7 @@ Self::sendGroupMessage(const MessageHandler& message) {
     xmppMessage.setId(message->id());
     xmppMessage.setStamp(message->createdAt());
     xmppMessage.setType(QXmppMessage::Type::GroupChat);
-    xmppMessage.setReceiptRequested(false); // TODO: Review this decision.
+    xmppMessage.setReceiptRequested(true); // TODO: Review this decision.
 
     //
     //  Send.
@@ -1151,6 +1151,9 @@ Self::processReceivedXmppMessage(const QXmppMessage& xmppMessage) {
 
             case QXmppMessage::Type::GroupChat:
                 return processGroupChatReceivedXmppMessage(xmppMessage);
+
+            case QXmppMessage::Type::Error:
+                return processErrorXmppMessage(xmppMessage);
 
             default:
                 break;
@@ -1315,18 +1318,26 @@ Self::processGroupChatReceivedXmppMessage(const QXmppMessage& xmppMessage) {
 }
 
 
+Self::Result Self::processErrorXmppMessage(const QXmppMessage& xmppMessage) {
+
+    qCDebug(lcCoreMessenger).noquote() << "Got error message:" << toXmlString(xmppMessage);
+
+    //
+    //  TODO: Emit error.
+    //
+    return Self::Result::Success;
+}
+
 
 QFuture<Self::Result>
 Self::processReceivedXmppCarbonMessage(const QXmppMessage& xmppMessage) {
 
+    //
+    //  FIXME: fix for group chat carbons.
+    //
     return QtConcurrent::run([this, xmppMessage]() -> Result {
         qCInfo(lcCoreMessenger) << "Received XMPP message copy";
         qCDebug(lcCoreMessenger) << "Received XMPP message copy:" << xmppMessage.id();
-
-        if (xmppMessage.type() != QXmppMessage::Type::Normal) {
-            qCDebug(lcCoreMessenger) << "Got carbon message that is not of type 'normal', so ignore it";
-            return Self::Result::Success;
-        }
 
         auto senderId = userIdFromJid(xmppMessage.from());
         auto recipientId = userIdFromJid(xmppMessage.to());
@@ -2114,7 +2125,7 @@ Self::packXmppMessageBody(const QByteArray& messageCiphertext, const UserId& sen
 
     messageBodyJson["ciphertext"] = QString::fromLatin1(messageCiphertext.toBase64());
 
-    if (!senderId.isValid()) {
+    if (senderId.isValid()) {
         messageBodyJson["fromId"] = QString(senderId);
     }
 
@@ -2288,6 +2299,10 @@ Self::onJoinGroupChats(const GroupMembers& groupMembers) {
         m_impl->groupOwners[groupMember.groupId()] = groupMember.groupOwnerId();
 
         connectXmppRoomSignals(room);
+
+        if (isOnline()) {
+            room->join();
+        }
     }
 }
 
@@ -2334,6 +2349,26 @@ Self::xmppOnCreateGroupChat(const GroupHandler& group, const Users& membersToBeI
             }
 
             auto encryptedInvitationMessage = std::get_if<QByteArray>(&encryptedInvitationMessageResult)->toBase64();
+
+            //
+            //  Add to the room.
+            //  TODO: Maybe add changes to the Database
+            QXmppMucItem addMemberItem;
+            addMemberItem.setAffiliation(QXmppMucItem::MemberAffiliation);
+            addMemberItem.setJid(userIdToJid(user->id()));
+
+            QXmppMucAdminIq requestAddMember;
+            requestAddMember.setFrom(currentUserJid());
+            requestAddMember.setTo(room->jid());
+            requestAddMember.setItems({ addMemberItem });
+            requestAddMember.setType(QXmppIq::Type::Set);
+
+            if (m_impl->xmpp->sendPacket(requestAddMember)) {
+                qCDebug(lcCoreMessenger) << "Requested to add user:" << user->id() << " the XMPP room:" << group->id();
+
+            } else {
+                qCDebug(lcCoreMessenger) << "User invitation was postponed:" << user->id();
+            }
 
             if (room->sendInvitation(userIdToJid(user->id()), encryptedInvitationMessage)) {
                 qCDebug(lcCoreMessenger) << "User was invited:" << user->id();
@@ -2418,6 +2453,14 @@ void Self::xmppOnMucInvitationReceived(const QString &roomJid, const QString &in
             return;
         }
 
+        //
+        //  FIXME: Do not auto accept, invitation should be accepted by user interaction.
+        //
+        auto groupMember = GroupMember(groupId, invitationMessage->senderId(), invitationMessage->recipientId(),
+                invitationMessage->recipientUsername(), GroupAffiliation::Member, GroupInvitationStatus::Accepted);
+
+        emit joinGroupChats({ groupMember });
+
         emit messageReceived(invitationMessage);
     });
 }
@@ -2446,28 +2489,8 @@ void Self::connectXmppRoomSignals(QXmppMucRoom *room) {
 
     connect(room, &QXmppMucRoom::joined, [this, room]() {
         qCDebug(lcCoreMessenger) << "Joined to the XMPP room:" << room->jid();
-        room->requestConfiguration();
-        room->requestPermissions();
-
-        //
-        //  FIXME: Remove this debug code
-        //
-
-        //  Admin Requests Member List
-        QXmppMucItem requestMemberItem;
-        requestMemberItem.setAffiliation(QXmppMucItem::MemberAffiliation);
-
-        auto requestId = QString(MessageId::generate());
-
-        QXmppMucAdminIq requestMemberList;
-        requestMemberList.setId(requestId);
-        requestMemberList.setFrom(currentUserJid());
-        requestMemberList.setTo(room->jid());
-        requestMemberList.setItems({ requestMemberItem });
-
-        if (m_impl->xmpp->sendPacket(requestMemberList)) {
-            qCDebug(lcCoreMessenger()) << "Requested members list for group:" << room->jid() << ", iq:" << requestId;
-        }
+        // room->requestConfiguration();
+        // room->requestPermissions();
     });
 
     connect(room, &QXmppMucRoom::kicked, [room](const QString &jid, const QString &reason) {
@@ -2480,12 +2503,6 @@ void Self::connectXmppRoomSignals(QXmppMucRoom *room) {
 
     connect(room, &QXmppMucRoom::left, [room]() {
         qCDebug(lcCoreMessenger) << "---> left:";
-    });
-
-    connect(room, &QXmppMucRoom::messageReceived, [this, room](const QXmppMessage &message) {
-        qCDebug(lcCoreMessenger) << "Received room message:" << room->jid();
-
-        processReceivedXmppMessage(message);
     });
 
     connect(room, &QXmppMucRoom::nameChanged, [room](const QString &name) {
@@ -2636,7 +2653,7 @@ std::variant<CoreMessengerStatus, QByteArray> Self::decryptGroupMessage(
         return *status;
     }
 
-    auto group = std::move(*std::get_if<1>(&groupResult));
+    auto group = *std::get_if<1>(&groupResult);
 
     //
     //  Find sender.
@@ -2647,7 +2664,7 @@ std::variant<CoreMessengerStatus, QByteArray> Self::decryptGroupMessage(
     }
 
     //
-    //  Encrypt message.
+    //  Decrypt message.
     //
     const auto outLen = vssq_messenger_group_decrypted_message_len(group->ctx.get(), encryptedMessageData.size());
     auto [out, outBuf] = makeMappedBuffer(outLen);

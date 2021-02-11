@@ -261,6 +261,7 @@ private:
     QFuture<Result> processReceivedXmppMessage(const QXmppMessage& xmppMessage);
     Result processChatReceivedXmppMessage(const QXmppMessage& xmppMessage);
     Result processGroupChatReceivedXmppMessage(const QXmppMessage& xmppMessage);
+    Result processErrorXmppMessage(const QXmppMessage& xmppMessage);
 
     QFuture<Result> processReceivedXmppCarbonMessage(const QXmppMessage& xmppMessage);
 
