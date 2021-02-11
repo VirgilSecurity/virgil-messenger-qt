@@ -65,9 +65,10 @@ UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, c
 void UploadCloudFileOperation::run()
 {
     // Local file check
-    const auto fileName = QFileInfo(m_sourceFilePath).fileName();
+    const auto fileName = FileUtils::fileName(m_sourceFilePath);
     const auto localPath = QDir(m_parentFolder->localPath()).filePath(fileName);
     if (FileUtils::fileExists(localPath)) {
+        qCDebug(lcOperation) << "File name is not unique:" << localPath;
         failAndNotify(tr("File name is not unique"));
         return;
     }

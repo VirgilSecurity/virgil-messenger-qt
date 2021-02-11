@@ -82,6 +82,14 @@ void ListSelectionModel::clear()
     QTimer::singleShot(10, this, &ListSelectionModel::updateProperties);
 }
 
+void ListSelectionModel::selectAll()
+{
+    for (int i = 0, s = m_sourceModel->rowCount(); i < s; ++i) {
+        const auto index = m_sourceModel->index(i);
+        QItemSelectionModel::select(index, QItemSelectionModel::Select);
+    }
+}
+
 void ListSelectionModel::setMultiSelect(const bool multiSelect)
 {
     if (multiSelect == m_multiSelect) {
