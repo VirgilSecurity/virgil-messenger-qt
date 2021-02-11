@@ -59,6 +59,7 @@ void LoadFileOperation::setFilePath(const QString &filePath)
 
 void LoadFileOperation::connectReply(QNetworkReply *reply)
 {
+    m_reply = reply; // Store reply with QPointer to control lifetime
     connect(reply, &QNetworkReply::finished, this, std::bind(&LoadFileOperation::onReplyFinished, this, reply));
     connect(reply, &QNetworkReply::errorOccurred, this, std::bind(&LoadFileOperation::onReplyErrorOccurred, this, std::placeholders::_1, reply));
     connect(reply, &QNetworkReply::sslErrors, this, &LoadFileOperation::onReplySslErrors);
@@ -129,7 +130,7 @@ void LoadFileOperation::onReplyFinished(QNetworkReply *reply)
 
 void LoadFileOperation::onReplyErrorOccurred(const QNetworkReply::NetworkError error, QNetworkReply *reply)
 {
-    Q_UNUSED(reply)
+    reply->deleteLater();
     if (status() == Status::Failed) {
         return;
     }
