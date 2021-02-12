@@ -66,8 +66,9 @@ FileLoader *CloudFileOperation::fileLoader()
 
 void CloudFileOperation::watchFolderAndRun(const CloudFileHandler &folder, QObject *receiver, FolderUpdateSlot slot)
 {
-    connect(m_watcher, &CloudFolderUpdateWatcher::finished, receiver, [folder, slot](auto f) {
+    connect(m_watcher, &CloudFolderUpdateWatcher::finished, receiver, [this, folder, slot, receiver](auto f) {
         if (folder->id() == f->id()) {
+            disconnect(m_watcher, nullptr, receiver, nullptr);
             slot(f);
         }
     });

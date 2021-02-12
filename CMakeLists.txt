@@ -53,7 +53,7 @@ set(ENABLE_IOS_EXTENSION OFF CACHE BOOL "On/Off building IOS extension.")
 # ---------------------------------------------------------------------------
 # Project version
 # ---------------------------------------------------------------------------
-set(VS_TARGET_VERSION "3.6.1")
+set(VS_TARGET_VERSION "3.6.2")
 set(VS_CORE_VERSION "0.2.1.45")
 set(VERSION_DATABASE_SCHEME "0")
 
