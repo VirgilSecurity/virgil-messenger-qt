@@ -58,6 +58,8 @@ private:
     void onFileDeleted(CloudFileRequestId requestId, const CloudFileHandler &file);
     void onDeleteFileErrorOccured(CloudFileRequestId requestId, const QString &errorText);
 
+    void deleteLocalFiles();
+
     CloudFileOperation *m_parent;
     CloudFiles m_files;
     CloudFileRequestId m_requestId;
