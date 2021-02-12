@@ -78,6 +78,7 @@ enum class CoreMessengerStatus
     Error_GroupNotFound,
     Error_GroupOwnerNotFound,
     Error_CreateGroup_CryptoFailed,
+    Error_CreateGroup_XmppConfigFailed,
     Error_ImportGroupEpoch_ParseFailed,
     Error_ProcessGroupMessage_SessionIDDoesntMatch,
     Error_ProcessGroupMessage_EpochNotFound,

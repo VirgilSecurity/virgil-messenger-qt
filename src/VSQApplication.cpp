@@ -109,7 +109,10 @@ void Self::initialize()
     QCoreApplication::setApplicationName(Customer::ApplicationName);
     QGuiApplication::setApplicationDisplayName(Customer::ApplicationDisplayName);
 
-    // TODO(fpohtmeh): set version, use in CustomerEnv::version()
+    // Loggers
+#if !ENABLE_XMPP_LOGS && !ENABLE_XMPP_EXTRA_LOGS
+    QLoggingCategory::setFilterRules("core-messenger-xmpp.debug=false");
+#endif
 }
 
 /******************************************************************************/

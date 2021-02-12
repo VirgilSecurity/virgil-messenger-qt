@@ -49,9 +49,6 @@ GroupId vm::GroupUpdateGetId(const GroupUpdate& update) {
     else if (auto base = std::get_if<AddGroupUpdate>(&update)) {
         return base->groupId;
     }
-    else if (auto base = std::get_if<GroupInvitationUpdate>(&update)) {
-        return base->groupId;
-    }
     else {
         throw std::logic_error("Unhandled GroupUpdate when ask for group id.");
     }

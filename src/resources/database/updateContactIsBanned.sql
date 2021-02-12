@@ -1,3 +1,3 @@
 UPDATE contacts
 SET isBanned = :isBanned
-WHERE id = :id
+WHERE userId = :userId AND isBanned != :isBanned

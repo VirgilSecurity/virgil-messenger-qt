@@ -1,3 +1,3 @@
 UPDATE contacts
 SET platformId = :platformId
-WHERE id = :id
+WHERE userId = :userId AND platformId != :platformId

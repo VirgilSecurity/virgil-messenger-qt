@@ -216,6 +216,10 @@ void Self::onWriteMessage(const MessageHandler &message, qsizetype unreadCount)
         attachmentsTable()->addAttachment(message);
     }
     chatsTable()->updateLastMessage(message, unreadCount);
+
+    if (message->isIncoming()) {
+        contactsTable()->updateContact(UsernameContactUpdate{message->senderId(), message->senderUsername()});
+    }
 }
 
 void UserDatabase::onUpdateMessage(const MessageUpdate &messageUpdate)
@@ -263,6 +267,10 @@ void Self::onWriteChatAndLastMessage(const ChatHandler &chat)
 
     // Update last message
     chatsTable()->updateLastMessage(message, chat->unreadMessageCount());
+
+    if (message->isIncoming()) {
+        contactsTable()->updateContact(UsernameContactUpdate{message->senderId(), message->senderUsername()});
+    }
 }
 
 void Self::onResetUnreadCount(const ChatHandler &chat)

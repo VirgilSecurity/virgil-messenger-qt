@@ -149,7 +149,9 @@ void Self::onNotSentMessagesFetched(const ModifiableMessages &messages)
 void Self::onPushMessage(const ModifiableMessageHandler &message)
 {
     if (message->isIncoming() || message->isOutgoingCopyFromOtherDevice()) {
-        pushMessagePreload(message);
+        if (message->contentType() == MessageContentType::Picture) {
+            pushMessagePreload(message);
+        }
     }
     else {
         addSource(std::make_shared<MessageOperationSource>(message));
@@ -159,6 +161,7 @@ void Self::onPushMessage(const ModifiableMessageHandler &message)
 
 void Self::onPushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath, const PostFunction &postFunction)
 {
+    Q_ASSERT(message->contentIsAttachment());
     DownloadParameter parameter;
     parameter.type = DownloadParameter::Type::Download;
     parameter.filePath = filePath;
@@ -169,6 +172,7 @@ void Self::onPushMessageDownload(const ModifiableMessageHandler &message, const 
 
 void Self::onPushMessagePreload(const ModifiableMessageHandler &message)
 {
+    Q_ASSERT(message->contentType() == MessageContentType::Picture);
     DownloadParameter parameter;
     parameter.type = DownloadParameter::Type::Preload;
     addSource(std::make_shared<MessageOperationSource>(message, std::move(parameter)));

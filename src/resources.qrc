@@ -204,13 +204,11 @@
         <file>resources/database/updateMessageStage.sql</file>
         <file>resources/database/insertGroup.sql</file>
         <file>resources/database/insertGroupMember.sql</file>
-        <file>resources/database/updateGroupMemberInvitationStatus.sql</file>
         <file>resources/database/selectGroupMembersByMemberId.sql</file>
         <file>resources/database/createContacts.sql</file>
         <file>resources/database/dropContacts.sql</file>
         <file>resources/database/insertContact.sql</file>
         <file>resources/database/insertContactsFromChats.sql</file>
-        <file>resources/database/insertContactWithUsername.sql</file>
         <file>resources/database/migrateMessagesToVersion1.sql</file>
         <file>resources/database/selectAllContacts.sql</file>
         <file>resources/database/selectContact.sql</file>
@@ -220,5 +218,6 @@
         <file>resources/database/updateContactName.sql</file>
         <file>resources/database/updateContactPhone.sql</file>
         <file>resources/database/updateContactPlatformId.sql</file>
+        <file>resources/database/updateContactUsername.sql</file>
     </qresource>
 </RCC>

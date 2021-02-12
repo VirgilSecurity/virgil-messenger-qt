@@ -37,6 +37,7 @@
 
 #include "UserId.h"
 #include "Chat.h"
+#include "Messenger.h"
 
 #include <QObject>
 #include <QPointer>
@@ -48,7 +49,6 @@ namespace vm
 {
 class Models;
 class UserDatabase;
-class Messenger;
 
 class UsersController : public QObject
 {
@@ -92,6 +92,7 @@ private:
     void onSignedOut();
     void onFinishSignIn();
     void onFinishSignOut();
+    void onUpdateContactsWithUser(const UserHandler& user);
 
     void onChatAdded(const ChatHandler &chat);
 

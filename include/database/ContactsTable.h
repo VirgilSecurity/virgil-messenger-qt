@@ -38,6 +38,7 @@
 #include "core/DatabaseTable.h"
 
 #include "Contact.h"
+#include "ContactUpdate.h"
 
 namespace vm
 {
@@ -48,6 +49,8 @@ class ContactsTable : public DatabaseTable
 signals:
     void addContact(const Contact &contact);
 
+    void updateContact(const ContactUpdate &update);
+
 public:
     explicit ContactsTable(Database *database);
 
@@ -55,6 +58,8 @@ public:
 
 private:
     void onAddContact(const Contact &contact);
+
+    void onUpdateContact(const ContactUpdate &update);
 };
 
 }

@@ -195,6 +195,12 @@ signals:
     void updateGroup(const GroupUpdate& groupUpdate);
     //--
 
+    //--
+    // Users.
+    //
+    void userWasFound(const UserHandler& user);
+    //--
+
 private slots:
     void onPushNotificationTokenUpdate();
     void onConnectionStateChanged(CoreMessenger::ConnectionState state);

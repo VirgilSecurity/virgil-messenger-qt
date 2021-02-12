@@ -110,7 +110,10 @@ signals:
     void lastActivityTextChanged(const QString& text);
 
     void messageReceived(ModifiableMessageHandler message);
+
     void updateMessage(const MessageUpdate& messageUpdate);
+
+    void userWasFound(const UserHandler& user) const;
 
     //
     //  Group Chats has signal / slot architecture.

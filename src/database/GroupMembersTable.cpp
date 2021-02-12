@@ -96,17 +96,6 @@ void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
         }
     }
 
-    if (auto update = std::get_if<GroupInvitationUpdate>(&groupUpdate)) {
-        queryId = QLatin1String("updateGroupMemberInvitationStatus");
-
-        DatabaseUtils::BindValues bindValues;
-        bindValues.push_back({ ":groupId", QString(update->groupId) });
-        bindValues.push_back({ ":memberId", QString(update->memberId) });
-        bindValues.push_back({ ":invitationStatus", GroupInvitationStatusToString(update->invitationStatus) });
-
-        bindValuesCollection.push_back(std::move(bindValues));
-    }
-
     if (queryId.isEmpty()) {
         return;
     }
@@ -189,7 +178,6 @@ void Self::onAddMembersFromLastMessage(const MessageHandler& lastMessage) {
         bindValues.push_back({ ":memberId", QString(lastMessage->senderId()) });
         bindValues.push_back({ ":memberNickname", lastMessage->senderUsername() });
         bindValues.push_back({ ":memberAffiliation", GroupAffiliationToString(GroupAffiliation::Owner) });
-        bindValues.push_back({ ":invitationStatus", GroupInvitationStatusToString(GroupInvitationStatus::Accepted) });
 
         bindValuesCollection.push_back(std::move(bindValues));
     }
@@ -200,7 +188,6 @@ void Self::onAddMembersFromLastMessage(const MessageHandler& lastMessage) {
         bindValues.push_back({ ":memberId", QString(lastMessage->recipientId()) });
         bindValues.push_back({ ":memberNickname", lastMessage->recipientUsername() });
         bindValues.push_back({ ":memberAffiliation", GroupAffiliationToString(GroupAffiliation::Member) });
-        bindValues.push_back({ ":invitationStatus", GroupInvitationStatusToString(GroupInvitationStatus::None) });
 
         bindValuesCollection.push_back(std::move(bindValues));
     }
@@ -229,10 +216,8 @@ std::optional<GroupMember> Self::readGroupMember(const QSqlQuery &query) {
     auto memberId = query.value("memberId").toString();
     auto memberNickname = query.value("memberNickname").toString();
     auto memberAffiliation = query.value("memberAffiliation").toString();
-    auto invitationStatus = query.value("invitationStatus").toString();
 
-    if (groupId.isEmpty() || memberId.isEmpty() || memberNickname.isEmpty() || memberAffiliation.isEmpty() ||
-            invitationStatus.isEmpty()) {
+    if (groupId.isEmpty() || memberId.isEmpty() || memberNickname.isEmpty() || memberAffiliation.isEmpty()) {
 
         qCCritical(lcDatabase) << "GroupMembersTable: failed to parse query result";
 
@@ -240,6 +225,5 @@ std::optional<GroupMember> Self::readGroupMember(const QSqlQuery &query) {
     }
 
     return GroupMember(GroupId(std::move(groupId)), UserId(std::move(groupOwnerId)), UserId(std::move(memberId)),
-        std::move(memberNickname), GroupAffiliationFromString(memberAffiliation),
-        GroupInvitationStatusFromString(invitationStatus));
+        std::move(memberNickname), GroupAffiliationFromString(memberAffiliation));
 }

@@ -53,7 +53,7 @@ public:
     GroupMember() = default;
 
     GroupMember(GroupId groupId, UserId groupOwnerId,  UserId memberId, QString memberNickName,
-        GroupAffiliation memberAffiliation, GroupInvitationStatus invitationStatus);
+        GroupAffiliation memberAffiliation);
 
     [[nodiscard]] GroupId groupId() const;
 
@@ -65,15 +65,12 @@ public:
 
     [[nodiscard]] GroupAffiliation memberAffiliation() const;
 
-    [[nodiscard]] GroupInvitationStatus invitationStatus() const;
-
 private:
     GroupId m_groupId;
     UserId m_groupOwnerId;
     UserId m_memberId;
     QString m_memberNickName;
     GroupAffiliation m_memberAffiliation;
-    GroupInvitationStatus m_invitationStatus;
 };
 
 using GroupMembers = std::list<GroupMember>;

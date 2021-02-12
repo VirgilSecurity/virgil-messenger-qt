@@ -3,7 +3,6 @@ SELECT
     groupMembers.memberId,
     groupMembers.memberNickname,
     groupMembers.memberAffiliation,
-    groupMembers.invitationStatus,
     ownerMembers.memberId as groupOwnerId
 FROM
     groupMembers
