@@ -12,7 +12,7 @@ OperationPage {
     loadingText: qsTr("Adding of contact...")
     footerText: ""
 
-    signal contactSelected(string contactId)
+    signal contactSelected(string contactUsername)
     signal actionButtonClicked() // TODO(fpohtmeh): remove signal?
 
     property alias selectedContacts: flow
@@ -55,12 +55,7 @@ OperationPage {
             Layout.fillWidth: true
             Layout.leftMargin: Theme.smallSpacing
 
-            onAccepted: {
-                const contactId = d.model.firstContactId();
-                if (contactId) {
-                    root.contactSelected(contactId)
-                }
-            }
+            onAccepted: contactsList.toggleFirst()
         }
 
         SelectContactsList {
@@ -72,7 +67,7 @@ OperationPage {
             footer: HorizontalRule {}
             footerPositioning: ListView.OverlayFooter
 
-            onContactSelected: root.contactSelected(contactId)
+            onContactSelected: root.contactSelected(contactUsername)
         }
 
         ServerSelectionRow {

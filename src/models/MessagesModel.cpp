@@ -75,11 +75,11 @@ void Self::setMessages(ModifiableMessages messages)
 }
 
 void Self::addMessage(ModifiableMessageHandler message) {
-    if (m_currentChat && (m_currentChat->id() == message->chatId())) {
+    if (m_currentChat && (m_currentChat->id() == message->chatId()) && !findById(message->id())) {
         emit messageAdding();
         const auto count = rowCount();
         beginInsertRows(QModelIndex(), count, count);
-        m_messages.emplace_back(std::move(message));
+        m_messages.push_back(std::move(message));
         endInsertRows();
         invalidateRow(count);
     }
@@ -170,6 +170,17 @@ QVariant Self::data(const QModelIndex &index, int role) const
     case BodyRole: {
         if (auto textContent = std::get_if<MessageContentText>(&message->content())) {
             return textContent->text().split('\n').join("<br/>");
+        }
+
+        if (std::holds_alternative<MessageContentGroupInvitation>(message->content())) {
+            if (message->isOutgoing()) {
+                auto text = "Invitation was sent to " + message->recipientUsername();
+                return text.split('\n').join("<br/>");
+            }
+            else {
+                auto text = "Invitation from " + message->senderUsername();
+                return text.split('\n').join("<br/>");
+            }
         }
         return QString();
     }

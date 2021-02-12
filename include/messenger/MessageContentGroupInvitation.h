@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,30 +32,51 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CONTACT_H
-#define VM_CONTACT_H
+
+
+#ifndef VM_MESSAGE_CONTENT_GROUP_INVITATION_H
+#define VM_MESSAGE_CONTENT_GROUP_INVITATION_H
 
 #include <QString>
-#include <QUrl>
-#include <QVariant>
+#include <QJsonObject>
 
-namespace vm
-{
-struct Contact
-{
-    using Id = QString;
+namespace vm {
 
-    Id id;
-    QString name;
-    QString phoneNumber;
-    QString email;
-    QUrl avatarUrl;
+//
+//  Class with a group invitation message content.
+//
+class MessageContentGroupInvitation {
 
-    QVariant platformId;
-    int avatarUrlRetryCount = 0;
+public:
+    MessageContentGroupInvitation() = default;
+
+    explicit MessageContentGroupInvitation(QString title, QString helloText = {});
+
+    //
+    //  Return group title.
+    //
+    QString title() const;
+
+    //
+    //  Return greetings.
+    //
+    QString helloText() const;
+
+    //
+    //  Serialize object to JSON.
+    //
+    void writeJson(QJsonObject& json) const;
+
+    //
+    //  restore object from JSON.
+    //
+    bool readJson(const QJsonObject& json);
+
+private:
+    QString m_title;
+    QString m_helloText;
+
 };
+} // namespace vm
 
-using Contacts = std::vector<Contact>;
-}
-
-#endif // VM_CONTACT_H
+#endif // VM_MESSAGE_CONTENT_GROUP_INVITATION_H

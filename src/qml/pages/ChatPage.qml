@@ -12,7 +12,6 @@ Page {
     id: chatPage
 
     readonly property var appState: app.stateManager.chatState
-    readonly property var contactId: controllers.chats.currentContactId // TODO(fpohtmeh): remove?
     property real chatListViewHeight: 0
 
     QtObject {

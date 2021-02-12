@@ -37,6 +37,8 @@
 #include "models/ContactsProxyModel.h"
 #include "ContactAvatarLoader.h"
 
+#include <stdexcept>
+
 using namespace vm;
 
 ContactsModel::ContactsModel(QObject *parent, bool createProxy)
@@ -71,12 +73,11 @@ int ContactsModel::getContactsCount() const
     return m_contacts.size();
 }
 
-Contact ContactsModel::createContact(const Contact::Id &contactId) const
+Contact ContactsModel::createContact(const QString &username) const
 {
     Contact contact;
-    contact.id = contactId;
-    contact.name = contactId;
-    contact.platformId = contactId;
+    contact.setUsername(username);
+    contact.setName(username);
     return contact;
 }
 
@@ -85,9 +86,9 @@ const Contact &ContactsModel::getContact(const int row) const
     return m_contacts[row];
 }
 
-bool ContactsModel::hasContact(const Contact::Id &contactId) const
+bool ContactsModel::hasContact(const QString &contactUsername) const
 {
-    return findRowByContactId(contactId) != std::nullopt;
+    return findByUsername(contactUsername).isValid();
 }
 
 void ContactsModel::addContact(const Contact &contact)
@@ -98,11 +99,11 @@ void ContactsModel::addContact(const Contact &contact)
     m_avatarLoader->load(m_contacts.back());
 }
 
-void ContactsModel::removeContact(const Contact::Id &contactId)
+void ContactsModel::removeContact(const QString &contactUsername)
 {
-    if (auto row = findRowByContactId(contactId)) {
-        beginRemoveRows(QModelIndex(), *row, *row);
-        m_contacts.erase(m_contacts.begin() + *row);
+    if (const auto index = findByUsername(contactUsername); index.isValid()) {
+        beginRemoveRows(QModelIndex(), index.row(), index.row());
+        m_contacts.erase(m_contacts.begin() + index.row());
         endRemoveRows();
     }
 }
@@ -121,31 +122,29 @@ void ContactsModel::updateContact(const Contact &contact, int row)
     emit dataChanged(rowIndex, rowIndex);
 }
 
-std::optional<int> ContactsModel::findRowByContactId(const Contact::Id &contactId) const
+QModelIndex ContactsModel::findByUsername(const QString &contactUsername) const
 {
-    int row = -1;
-    for (auto &info : m_contacts) {
-        ++row;
-        if (info.id == contactId) {
-            return row;
-        }
+    const auto it = std::find_if(m_contacts.begin(), m_contacts.end(), [&contactUsername](auto contact) {
+        return contact.username() == contactUsername;
+    });
+    if (it != m_contacts.end()) {
+        return index(std::distance(m_contacts.begin(), it));
     }
-    return std::nullopt;
+    return QModelIndex();
 }
 
-void ContactsModel::loadAvatarUrl(const Contact::Id &contactId)
+void ContactsModel::loadAvatarUrl(const QString &contactUsername)
 {
-    if (const auto row = findRowByContactId(contactId)) {
-        m_avatarLoader->load(m_contacts[*row]);
+    if (const auto index = findByUsername(contactUsername); index.isValid()) {
+        m_avatarLoader->load(m_contacts[index.row()]);
     }
 }
 
 void ContactsModel::setAvatarUrl(const Contact &contact, const QUrl &url)
 {
-    if (const auto row = findRowByContactId(contact.id)) {
-        m_contacts[*row].avatarUrl = url;
-        const auto idx = index(*row);
-        emit dataChanged(idx, idx, { AvatarUrlRole });
+    if (const auto index = findByUsername(contact.username()); index.isValid()) {
+        m_contacts[index.row()].setAvatarLocalPath(url.toLocalFile());
+        emit dataChanged(index, index, { AvatarUrlRole });
     }
 }
 
@@ -160,30 +159,40 @@ QVariant ContactsModel::data(const QModelIndex &index, int role) const
     const auto &info = m_contacts[index.row()];
     switch (role) {
     case IdRole:
-        return info.id;
+        return QString(info.userId());
+
+    case UsernameRole:
+        return info.username();
+
     case NameRole:
-        return info.name;
+        return info.name();
+
+    case DisplayNameRole:
+        return info.displayName();
+
     case DetailsRole:
     {
-        if (info.email.isEmpty()) {
-            return info.phoneNumber.isEmpty() ? tr("No phone/email") : info.phoneNumber;
+        if (info.email().isEmpty()) {
+            return info.phone().isEmpty() ? tr("No phone/email") : info.phone();
         }
         else {
-            return info.phoneNumber.isEmpty() ? info.email : (info.phoneNumber + QLatin1String(" / ") + info.email);
+            return info.phone().isEmpty() ? info.email() : (info.phone() + QLatin1String(" / ") + info.email());
         }
     }
     case AvatarUrlRole:
     {
-        const auto &url = info.avatarUrl;
+        const auto &url = info.avatarLocalPath();
         if (url.isEmpty()) {
-            emit avatarUrlNotFound(info.id, QPrivateSignal());
+            emit avatarUrlNotFound(info.username(), QPrivateSignal());
         }
         return url;
     }
     case FilterRole:
-        return info.name + QLatin1Char('\n') + info.email + QLatin1Char('\n') + info.phoneNumber;
+        return info.name() + QLatin1Char('\n') + info.email() + QLatin1Char('\n') + info.phone();
+
     case SortRole:
-        return info.name;
+        return info.name();
+
     default:
         return ListModel::data(index, role);
     }
@@ -192,8 +201,10 @@ QVariant ContactsModel::data(const QModelIndex &index, int role) const
 QHash<int, QByteArray> ContactsModel::roleNames() const
 {
     return unitedRoleNames(ListModel::roleNames(), {
-        { IdRole, "contactId" },
+        { IdRole, "userId" },
+        { UsernameRole, "username" },
         { NameRole, "name" },
+        { DisplayNameRole, "displayName" },
         { DetailsRole, "details" },
         { AvatarUrlRole, "avatarUrl" }
     });

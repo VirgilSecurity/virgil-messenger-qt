@@ -37,6 +37,7 @@
 
 #include "ListModel.h"
 #include "Chat.h"
+#include "GroupUpdate.h"
 
 #include <optional>
 
@@ -60,6 +61,10 @@ public:
     void resetUnreadCount(const ChatId &chatId);
     void updateLastMessage(const MessageHandler &message, qsizetype unreadMessageCount);
 
+    //
+    // Update group chat UI.
+    //
+    void updateGroup(const GroupUpdate& groupUpdate);
 
 signals:
     void chatAdded(const ChatHandler &chat);

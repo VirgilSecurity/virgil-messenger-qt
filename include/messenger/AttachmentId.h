@@ -56,11 +56,12 @@ public:
 private:
     QString m_attachmentId;
 };
-} // namespace vm
 
-bool operator<(const vm::AttachmentId& lhs, const vm::AttachmentId& rhs);
-bool operator>(const vm::AttachmentId& lhs, const vm::AttachmentId& rhs);
-bool operator==(const vm::AttachmentId& lhs, const vm::AttachmentId& rhs);
-bool operator!=(const vm::AttachmentId& lhs, const vm::AttachmentId& rhs);
+bool operator<(const AttachmentId& lhs, const AttachmentId& rhs);
+bool operator>(const AttachmentId& lhs, const AttachmentId& rhs);
+bool operator==(const AttachmentId& lhs, const AttachmentId& rhs);
+bool operator!=(const AttachmentId& lhs, const AttachmentId& rhs);
+
+} // namespace vm
 
 #endif // VM_ATTACHMENT_ID_H

@@ -32,9 +32,49 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VS_SCHEMEVERSION_H
-#define VS_SCHEMEVERSION_H
 
-#define VERSION_DATABASE_SCHEME 0
+#include "GroupInvitationStatus.h"
 
-#endif // VS_SCHEMEVERSION_H
+#include <stdexcept>
+
+
+using namespace vm;
+
+
+GroupInvitationStatus vm::GroupInvitationStatusFromString(const QString& statusString) {
+    if (statusString == QLatin1String("none")) {
+        return GroupInvitationStatus::None;
+    }
+    else if (statusString == QLatin1String("invited")) {
+        return GroupInvitationStatus::Invited;
+    }
+    else if (statusString == QLatin1String("accepted")) {
+        return GroupInvitationStatus::Accepted;
+    }
+    else if (statusString == QLatin1String("rejected")) {
+        return GroupInvitationStatus::Rejected;
+    }
+    else {
+        throw std::logic_error("Invalid GroupInvitationStatus string");
+    }
+}
+
+
+QString vm::GroupInvitationStatusToString(GroupInvitationStatus status) {
+    switch (status) {
+        case GroupInvitationStatus::None:
+            return QLatin1String("none");
+
+        case GroupInvitationStatus::Invited:
+            return QLatin1String("invited");
+
+        case GroupInvitationStatus::Accepted:
+            return QLatin1String("accepted");
+
+        case GroupInvitationStatus::Rejected:
+            return QLatin1String("rejected");
+
+        default:
+            throw std::logic_error("Invalid GroupInvitationStatus");
+    }
+}

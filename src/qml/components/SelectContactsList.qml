@@ -14,7 +14,7 @@ ModelListView {
     section.property: "section"
     isSearchOpened: true
 
-    signal contactSelected(string contactId)
+    signal contactSelected(string contactUsername)
 
     QtObject {
         id: d
@@ -23,6 +23,15 @@ ModelListView {
         property real headerOpacity: 0
         readonly property real defaultChatHeight: 50
         readonly property real selectionIconSize: 20
+
+        function toggleByUsername(username) {
+            if (username) {
+                if (d.model.selection.multiSelect) {
+                    d.model.toggleByUsername(username)
+                }
+                contactSelected(username)
+            }
+        }
     }
 
     Component {
@@ -65,7 +74,7 @@ ModelListView {
 
                     Avatar {
                         id: avatar
-                        nickname: model.name
+                        nickname: model.displayName
                         avatarUrl: model.avatarUrl
                         anchors.centerIn: parent
                     }
@@ -108,7 +117,7 @@ ModelListView {
                     Text {
                         color: Theme.primaryTextColor
                         font.pointSize: UiHelper.fixFontSz(15)
-                        text: model.name
+                        text: model.displayName
                     }
 
                     Text {
@@ -122,12 +131,11 @@ ModelListView {
                 }
             }
 
-            onClicked: {
-                if (d.model.selection.multiSelect) {
-                    d.model.toggleById(model.contactId)
-                }
-                contactSelected(contactId)
-            }
+            onClicked: d.toggleByUsername(model.username)
         }
+    }
+
+    function toggleFirst() {
+        d.toggleByUsername(d.model.firstContactUsername())
     }
 }

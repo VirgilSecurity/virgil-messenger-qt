@@ -43,17 +43,7 @@ Patch::Patch(const Patch::Version &version)
 {
 }
 
-Patch::~Patch()
-{
-}
-
 bool Patch::isOutdated(Database *database) const
 {
     return m_version < database->version();
-}
-
-bool Patch::apply(Database *database)
-{
-    Q_UNUSED(database)
-    return false;
 }

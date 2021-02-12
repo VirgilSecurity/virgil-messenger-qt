@@ -55,6 +55,9 @@ MessageContentType vm::MessageContentTypeFrom(const QString& typeString) {
     else if (typeString == QLatin1String("file")) {
         return MessageContentType::File;
     }
+    else if (typeString == QLatin1String("group_invitation")) {
+        return MessageContentType::GroupInvitation;
+    }
     else {
         throw std::logic_error("Invalid MessageContentType string");
     }
@@ -78,6 +81,8 @@ QString vm::MessageContentTypeToString(MessageContentType type) {
             return QLatin1String("picture");
         case MessageContentType::File:
             return QLatin1String("file");
+        case MessageContentType::GroupInvitation:
+            return QLatin1String("group_invitation");
         default:
             throw std::logic_error("Invalid MessageContentType");
     }

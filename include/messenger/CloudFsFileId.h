@@ -53,11 +53,12 @@ public:
 private:
     QString m_id;
 };
-} // namespace vm
 
-bool operator<(const vm::CloudFsFileId &lhs, const vm::CloudFsFileId &rhs);
-bool operator>(const vm::CloudFsFileId &lhs, const vm::CloudFsFileId &rhs);
-bool operator==(const vm::CloudFsFileId &lhs, const vm::CloudFsFileId &rhs);
-bool operator!=(const vm::CloudFsFileId &lhs, const vm::CloudFsFileId &rhs);
+bool operator<(const CloudFsFileId& lhs, const CloudFsFileId& rhs);
+bool operator>(const CloudFsFileId& lhs, const CloudFsFileId& rhs);
+bool operator==(const CloudFsFileId& lhs, const CloudFsFileId& rhs);
+bool operator!=(const CloudFsFileId& lhs, const CloudFsFileId& rhs);
+
+} // namespace vm
 
 #endif // VM_CLOUD_FS_FILE_ID_H

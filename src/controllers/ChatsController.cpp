@@ -40,6 +40,8 @@
 #include "database/ChatsTable.h"
 #include "database/MessagesTable.h"
 #include "database/UserDatabase.h"
+#include "database/GroupMembersTable.h"
+#include "database/GroupsTable.h"
 #include "models/ChatsModel.h"
 #include "models/MessagesModel.h"
 #include "models/Models.h"
@@ -59,6 +61,10 @@ Self::ChatsController(Messenger *messenger, Models *models, UserDatabase *userDa
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
     connect(this, &Self::createChatWithUser, this, &Self::onCreateChatWithUser);
     connect(this, &Self::createChatWithGroup, this, &Self::onCreateChatWithGroup);
+
+    connect(m_messenger, &Messenger::groupChatCreated, this, &Self::onGroupChatCreated);
+    connect(m_messenger, &Messenger::groupChatCreateFailed, this, &Self::onGroupChatCreateFailed);
+    connect(m_messenger, &Messenger::updateGroup, this, &Self::onUpdateGroup);
 }
 
 ChatHandler Self::currentChat() const
@@ -87,6 +93,7 @@ void Self::loadChats()
 {
     qCDebug(lcController) << "Started to load chats...";
     m_userDatabase->chatsTable()->fetch();
+    m_userDatabase->groupMembersTable()->fetchByMemberId(m_messenger->currentUser()->id());
 }
 
 void Self::clearChats()
@@ -129,16 +136,19 @@ void Self::createChatWithUserId(const UserId &userId)
     });
 }
 
-void ChatsController::createChatWithGroupName(const QString &groupName)
+void ChatsController::createGroupChat(const QString &groupName, const Contacts &contacts)
 {
-    QtConcurrent::run([this, groupName = groupName]() {
+    QtConcurrent::run([this, groupName, contacts]() {
         if (!m_messenger) {
             qCWarning(lcController) << "Messenger was not initialized";
-            emit errorOccurred(tr("Group was not found"));
+            emit errorOccurred(tr("Group con not be created"));
         }
-        // TODO(fpohtmeh): use core messenger here
-        auto group = std::make_shared<Group>(Utils::createUuid(), groupName);
+
+        auto group = std::make_shared<Group>(GroupId::generate(), std::move(groupName), std::move(contacts));
+
         emit createChatWithGroup(group, QPrivateSignal());
+
+        m_messenger->createGroupChat(group);
     });
 }
 
@@ -167,9 +177,12 @@ void Self::closeChat()
 void Self::setupTableConnections()
 {
     qCDebug(lcController) << "Setup database table connections for chats...";
-    auto table = m_userDatabase->chatsTable();
-    connect(table, &ChatsTable::errorOccurred, this, &Self::errorOccurred);
-    connect(table, &ChatsTable::fetched, this, &Self::onChatsLoaded);
+    connect(m_userDatabase->chatsTable(), &ChatsTable::errorOccurred, this, &Self::errorOccurred);
+    connect(m_userDatabase->chatsTable(), &ChatsTable::fetched, this, &Self::onChatsLoaded);
+
+    connect(m_userDatabase->groupsTable(), &GroupsTable::errorOccurred, this, &Self::errorOccurred);
+    connect(m_userDatabase->groupMembersTable(), &GroupMembersTable::errorOccurred, this, &Self::errorOccurred);
+    connect(m_userDatabase->groupMembersTable(), &GroupMembersTable::fetched, this, &Self::onGroupMembersFetched);
 }
 
 void Self::onCreateChatWithUser(const UserHandler &user)
@@ -201,4 +214,50 @@ void Self::onChatsLoaded(ModifiableChats chats)
     qCDebug(lcController) << "Chats loaded from the database";
     m_models->chats()->setChats(std::move(chats));
     emit chatsLoaded();
+}
+
+void Self::onGroupChatCreated(const GroupId& groupId)
+{
+    auto createdChat = m_models->chats()->findChat(ChatId(QString(groupId)));
+    if (createdChat) {
+        emit chatCreated(createdChat);
+    }
+}
+
+
+void Self::onGroupChatCreateFailed(const GroupId& chatId, const QString& errorText)
+{
+    //
+    //  FIXME: Remove chat and show error text.
+    //
+}
+
+
+void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
+{
+    //
+    //  Update UI.
+    //
+    m_models->chats()->updateGroup(groupUpdate);
+
+    //
+    //  Update DB.
+    //
+    m_userDatabase->updateGroup(groupUpdate);
+}
+
+
+void Self::onGroupMembersFetched(const GroupMembers& groupMembers)
+{
+    qCDebug(lcController) << "Group chats members with a current user was fetched";
+
+    //
+    //  When chats are loaded we need to join groups chats to be able receive messages.
+    //
+    m_messenger->joinGroupChats(groupMembers);
+
+    //
+    //  Disconnect to avoid calling this slot, when fetch group members within specific group.
+    //
+    disconnect(m_userDatabase->groupMembersTable(), &GroupMembersTable::fetched, this, &Self::onGroupMembersFetched);
 }

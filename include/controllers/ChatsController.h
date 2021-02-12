@@ -35,13 +35,15 @@
 #ifndef VM_CHATSCONTROLLER_H
 #define VM_CHATSCONTROLLER_H
 
+#include "Chat.h"
 #include "ChatId.h"
 #include "ChatObject.h"
 #include "Group.h"
+#include "GroupMember.h"
+#include "GroupUpdate.h"
 #include "MessageId.h"
-#include "UserId.h"
-#include "Chat.h"
 #include "User.h"
+#include "UserId.h"
 
 #include <QObject>
 #include <QPointer>
@@ -67,7 +69,7 @@ public:
 
     void createChatWithUsername(const QString &username);
     void createChatWithUserId(const UserId &userId);
-    void createChatWithGroupName(const QString &groupName);
+    void createGroupChat(const QString &groupName, const Contacts &contacts);
 
     void openChat(const ChatHandler& chat);
     Q_INVOKABLE void openChat(const QString& chatId); // can be used within QML only
@@ -97,6 +99,12 @@ private:
     void onChatsLoaded(ModifiableChats chats);
     void onCreateChatWithUser(const UserHandler &user);
     void onCreateChatWithGroup(const GroupHandler& group);
+    void onGroupMembersFetched(const GroupMembers& groupMembers);
+
+    void onGroupChatCreated(const GroupId& groupId);
+    void onGroupChatCreateFailed(const GroupId& chatId, const QString& errorText);
+    void onUpdateGroup(const GroupUpdate& groupUpdate);
+
 
     QPointer<Messenger> m_messenger;
     QPointer<Models> m_models;
