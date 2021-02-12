@@ -64,6 +64,9 @@ private:
     void sendFailedTransferUpdate();
 
     void transferUpdate(TransferCloudFileUpdate::Stage stage, quint64 bytesLoaded);
+    bool localFileExists() const;
+    bool createLocalDir();
+    void createLocalFile();
 
     CloudFileOperation *m_parent;
     CloudFileHandler m_parentFolder;

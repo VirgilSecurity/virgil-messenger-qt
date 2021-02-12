@@ -110,7 +110,7 @@ void DownloadCloudFileOperation::onProgressChanged(const quint64 bytesLoaded, co
 
 void DownloadCloudFileOperation::onDownloaded()
 {
-    if (!FileUtils::forceCreateDir(m_parentFolder->localPath())) {
+    if (!createLocalDir()) {
         failAndNotify(tr("Failed to create directory"));
         return;
     }
@@ -147,4 +147,9 @@ void DownloadCloudFileOperation::transferUpdate(const TransferCloudFileUpdate::S
     update.type = TransferCloudFileUpdate::Type::Download;
     update.bytesLoaded = bytesLoaded;
     m_parent->cloudFilesUpdate(update);
+}
+
+bool DownloadCloudFileOperation::createLocalDir()
+{
+    return FileUtils::forceCreateDir(m_parentFolder->localPath());
 }

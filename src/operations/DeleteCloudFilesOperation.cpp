@@ -63,15 +63,7 @@ void DeleteCloudFilesOperation::incProcessedCount()
         return;
     }
 
-    // Delete local files
-    for (auto &file : m_deletedFiles) {
-        if (file->isFolder()) {
-            FileUtils::removeDir(file->localPath());
-        }
-        else {
-            FileUtils::removeFile(file->localPath());
-        }
-    }
+    deleteLocalFiles();
 
     // Emit update
     DeleteCloudFilesUpdate update;
@@ -99,5 +91,18 @@ void DeleteCloudFilesOperation::onDeleteFileErrorOccured(const CloudFileRequestI
     Q_UNUSED(errorText)
     if (m_requestId == requestId) {
         incProcessedCount();
+    }
+}
+
+void DeleteCloudFilesOperation::deleteLocalFiles()
+{
+    for (auto &file : m_deletedFiles) {
+        const QFileInfo fileInfo(file->localPath());
+        if (fileInfo.isDir()) {
+            FileUtils::removeDir(file->localPath());
+        }
+        else if (fileInfo.isFile()) {
+            FileUtils::removeFile(file->localPath());
+        }
     }
 }
