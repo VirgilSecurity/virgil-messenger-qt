@@ -7,6 +7,7 @@ import QtMultimedia 5.15
 import "../base"
 import "../theme"
 import "../components"
+import "../components/Dialogs"
 
 Page {
     id: chatPage
@@ -72,6 +73,8 @@ Page {
     }
 
     Item {
+        anchors.fill: parent
+
         SelectAttachmentsDialog {
             id: saveAttachmentAsDialog
             selectExisting: false
@@ -82,22 +85,18 @@ Page {
         }
 
         SoundEffect {
-            id: messageReceived
+            id: messageReceivedAudio
             source: "../resources/sounds/message-received.wav"
         }
 
         SoundEffect {
-            id: messageSent
+            id: messageSentAudio
             source: "../resources/sounds/message-sent.wav"
         }
     }
 
-    Connections {
-        target: appState
-
-        function onMessageSent() {
-            messageSent.play()
-        }
+    Component.onCompleted: {
+        appState.messageSent.connect(messageSentAudio.play)
     }
 }
 

@@ -153,7 +153,8 @@
         <file>qml/components/Dialogs/SendReportDialog.qml</file>
         <file>qml/components/Dialogs/MessageDialog.qml</file>
         <file>qml/components/Dialogs/InputDialog.qml</file>
-        <file>qml/components/SelectAttachmentsDialog.qml</file>
+        <file>qml/components/Dialogs/GroupInvitationDialog.qml</file>
+        <file>qml/components/Dialogs/SelectAttachmentsDialog.qml</file>
         <file>qml/components/CircleProgressBar.qml</file>
         <file>qml/components/TextScrollView.qml</file>
         <file>qml/components/AttachmentPicker.qml</file>

@@ -370,6 +370,18 @@ Self::joinGroupChats(const GroupMembers& groupsWithMe) {
     m_coreMessenger->joinGroupChats(groupsWithMe);
 }
 
+void
+Self::acceptGroupInvitation(const GroupId &groupId) {
+    Q_UNUSED(groupId)
+    // TODO(fpohtmeh): implement
+}
+
+void
+Messenger::rejectGroupInvitation(const GroupId &groupId) {
+    Q_UNUSED(groupId)
+    // TODO(fpohtmeh): implement
+}
+
 
 void
 Self::onPushNotificationTokenUpdate() {

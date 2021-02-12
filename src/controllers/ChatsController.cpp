@@ -72,6 +72,19 @@ ChatHandler Self::currentChat() const
     return m_chatObject->chat();
 }
 
+void Self::acceptGroupInvitation()
+{
+    const GroupId groupId(currentChat()->id());
+    m_messenger->acceptGroupInvitation(groupId);
+}
+
+void Self::rejectGroupInvitation()
+{
+    const GroupId groupId(currentChat()->id());
+    m_messenger->rejectGroupInvitation(groupId);
+    emit groupInvitationRejected();
+}
+
 void ChatsController::addParticipant(const QString &username) {
     Q_UNUSED(username)
 }

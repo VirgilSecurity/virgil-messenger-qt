@@ -199,6 +199,9 @@ QString Utils::messageContentDisplayText(const MessageContent &messageContent)
     } else if (auto file = std::get_if<MessageContentFile>(&messageContent)) {
         return Utils::elidedText(file->fileName(), 50);
 
+    } else if (std::holds_alternative<MessageContentGroupInvitation>(messageContent)) {
+        return QObject::tr("invitation");
+
     } else {
         return {};
     }

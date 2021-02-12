@@ -126,6 +126,12 @@ public:
     void joinGroupChats(const GroupMembers& groupsWithMe);
 
     //
+    //  Group invitations
+    //
+    void acceptGroupInvitation(const GroupId &groupId);
+    void rejectGroupInvitation(const GroupId &groupId);
+
+    //
     //  Helpers.
     //
     void setApplicationActive(bool active);

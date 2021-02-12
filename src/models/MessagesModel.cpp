@@ -72,6 +72,10 @@ void Self::setMessages(ModifiableMessages messages)
     beginResetModel();
     m_messages = std::move(messages);
     endResetModel();
+
+    if (!m_messages.empty()) {
+        checkForGroupInvitation(m_messages.front());
+    }
 }
 
 void Self::addMessage(ModifiableMessageHandler message) {
@@ -379,6 +383,16 @@ void Self::invalidateRow(const int row, const QVector<int> &roles)
 void Self::invalidateModel(const QModelIndex &index, const QVector<int> &roles)
 {
     emit dataChanged(index, index, roles);
+}
+
+void Self::checkForGroupInvitation(const MessageHandler &message)
+{
+    if (!message->isOutgoing()) {
+        const auto invitation = std::get_if<MessageContentGroupInvitation>(&message->content());
+        if (invitation) {
+            emit groupInvitationReceived(invitation->title(), invitation->helloText());
+        }
+    }
 }
 
 QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate& messageUpdate) {

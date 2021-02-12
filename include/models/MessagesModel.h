@@ -92,7 +92,7 @@ public:
 signals:
     void pictureIconNotFound(const MessageId &messageId) const;
     void messageAdding();
-
+    void groupInvitationReceived(const QString &title, const QString &helloText);
 
 private:
     enum Roles
@@ -140,6 +140,8 @@ private:
     std::optional<int> findRowById(const MessageId &messageId) const;
     void invalidateRow(const int row, const QVector<int> &roles = {});
     void invalidateModel(const QModelIndex &index, const QVector<int> &roles);
+
+    void checkForGroupInvitation(const MessageHandler &message);
 
 private:
     ModifiableMessages m_messages;

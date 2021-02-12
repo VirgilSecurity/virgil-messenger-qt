@@ -163,6 +163,7 @@ void Self::addTransitions()
     addTwoSideTransition(m_chatState, m_chatState, &ChatState::requestPreview, m_attachmentPreviewState);
     connect(m_chatState, &ChatState::requestPreview, m_attachmentPreviewState, &AttachmentPreviewState::setUrl);
     addTwoSideTransition(m_chatState, m_chatState, &ChatState::requestInfo, m_chatInfoState);
+    connect(chats, &ChatsController::groupInvitationRejected, this, &ApplicationStateManager::goBack);
 
     m_signUpState->addTransition(users, &UsersController::signedIn, m_chatListState);
 

@@ -77,6 +77,8 @@ public:
     Q_INVOKABLE QString currentChatName() const;
     ChatHandler currentChat() const;
 
+    Q_INVOKABLE void acceptGroupInvitation();
+    Q_INVOKABLE void rejectGroupInvitation();
     Q_INVOKABLE void addParticipant(const QString &username);
     Q_INVOKABLE void removeParticipant(const QString &username);
     Q_INVOKABLE void leaveGroup();
@@ -91,6 +93,8 @@ signals:
 
     void createChatWithUser(const UserHandler& user, QPrivateSignal);
     void createChatWithGroup(const GroupHandler& group, QPrivateSignal);
+
+    void groupInvitationRejected();
 
 private:
     void setupTableConnections();
