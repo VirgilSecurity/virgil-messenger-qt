@@ -49,52 +49,6 @@ class MessagesModel : public ListModel
     Q_OBJECT
 
 public:
-    explicit MessagesModel(QObject *parent);
-    ~MessagesModel() override = default;
-
-    //
-    //  Current chat.
-    //
-    ChatHandler chat() const;
-
-    //
-    //  Change current chat.
-    //
-    void setChat(ChatHandler chat);
-
-    //
-    //  Set messages for the current chat.
-    //
-    void setMessages(ModifiableMessages messages);
-
-    //
-    //  Add message to the current chat if ids match, otherwise - ignore.
-    //
-    void addMessage(ModifiableMessageHandler message);
-
-    //
-    //  Invalidate chat.
-    //
-    void clearChat();
-
-    //
-    // Update message. Returns false if message had the same status.
-    //
-    bool updateMessage(const MessageUpdate &messageUpdate, const bool apply);
-
-    //
-    //  Return message if found, nullptr otherwise.
-    //
-    ModifiableMessageHandler findById(const MessageId &messageId) const;
-
-    Q_INVOKABLE QString lastMessageSenderId() const;
-
-signals:
-    void pictureIconNotFound(const MessageId &messageId) const;
-    void messageAdding();
-    void groupInvitationReceived(const QString &title, const QString &helloText);
-
-private:
     enum Roles
     {
         // Common
@@ -130,6 +84,57 @@ private:
         SortRole
     };
 
+    explicit MessagesModel(QObject *parent);
+    ~MessagesModel() override = default;
+
+    //
+    //  Current chat.
+    //
+    ChatHandler chat() const;
+
+    //
+    //  Change current chat.
+    //
+    void setChat(ChatHandler chat);
+
+    //
+    //  Set messages for the current chat.
+    //
+    void setMessages(ModifiableMessages messages);
+
+    //
+    //  Add message to the current chat if ids match, otherwise - ignore.
+    //
+    void addMessage(ModifiableMessageHandler message);
+
+    //
+    //  Get message by row
+    //
+    MessageHandler getMessage(int row) const;
+
+    //
+    //  Invalidate chat.
+    //
+    void clearChat();
+
+    //
+    // Update message. Returns false if message had the same status.
+    //
+    bool updateMessage(const MessageUpdate &messageUpdate, const bool apply);
+
+    //
+    //  Return message if found, nullptr otherwise.
+    //
+    ModifiableMessageHandler findById(const MessageId &messageId) const;
+
+    Q_INVOKABLE QString lastMessageSenderId() const; // TODO(fpohtmeh): remove
+
+signals:
+    void pictureIconNotFound(const MessageId &messageId) const;
+    void messageAdding(); // TODO(fpohtmeh): remove
+    void groupInvitationReceived(const QString &title, const QString &helloText);
+
+private:
     static QVector<int> rolesFromMessageUpdate(const MessageUpdate& messageUpdate);
     static QString statusIconPath(MessageHandler message);
 

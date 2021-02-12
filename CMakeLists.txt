@@ -530,6 +530,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListSelectionModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/MessageOperationSource.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/MessagesModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/MessagesProxyModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/MessagesQueue.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/Models.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/Model.h
@@ -714,6 +715,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ListSelectionModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/MessageOperationSource.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/MessagesModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/MessagesProxyModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/MessagesQueue.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/Models.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/Model.cpp

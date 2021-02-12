@@ -32,12 +32,12 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/MessagesModel.h"
+#include "MessagesModel.h"
 
-#include "Utils.h"
 #include "FileUtils.h"
+#include "MessagesProxyModel.h"
 #include "Model.h"
-#include "models/ListProxyModel.h"
+#include "Utils.h"
 
 #include <algorithm>
 
@@ -46,12 +46,11 @@ using Self = MessagesModel;
 
 
 Self::MessagesModel(QObject *parent)
-    : ListModel(parent)
+    : ListModel(parent, false)
 {
     qRegisterMetaType<MessagesModel *>("MessagesModel*");
 
-    proxy()->setSortRole(SortRole);
-    proxy()->sort(0, Qt::DescendingOrder);
+    setProxy(new MessagesProxyModel(this));
 }
 
 
@@ -87,6 +86,12 @@ void Self::addMessage(ModifiableMessageHandler message) {
         endInsertRows();
         invalidateRow(count);
     }
+}
+
+
+MessageHandler Self::getMessage(int row) const
+{
+    return m_messages[row];
 }
 
 
@@ -177,14 +182,7 @@ QVariant Self::data(const QModelIndex &index, int role) const
         }
 
         if (std::holds_alternative<MessageContentGroupInvitation>(message->content())) {
-            if (message->isOutgoing()) {
-                auto text = "Invitation was sent to " + message->recipientUsername();
-                return text.split('\n').join("<br/>");
-            }
-            else {
-                auto text = "Invitation from " + message->senderUsername();
-                return text.split('\n').join("<br/>");
-            }
+            throw std::logic_error("Group invitation must be filtered");
         }
         return QString();
     }
