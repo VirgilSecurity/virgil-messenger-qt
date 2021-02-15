@@ -14,6 +14,7 @@ Control {
     property alias description: headerTitle.description
     property alias titleHorizontalAlignment: headerTitle.horizontalAlignment
     property alias contextMenu: menuButton.contextMenu
+    property alias contextMenuVisible: menuButton.visible
     property alias rightControl: rightControlLoader.sourceComponent
 
     background: HeaderBackground {

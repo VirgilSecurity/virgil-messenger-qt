@@ -82,10 +82,6 @@ ApplicationWindow {
             id: attachmentPicker
         }
 
-        GroupInvitationDialog {
-            Component.onCompleted: models.messages.groupInvitationReceived.connect(openWithParams)
-        }
-
         NetworkStatusControl {
             anchors {
                 bottom: parent.bottom

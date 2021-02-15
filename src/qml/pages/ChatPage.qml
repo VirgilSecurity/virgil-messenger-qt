@@ -27,6 +27,7 @@ Page {
     header: PageHeader {
         title: controllers.chats.current.title
         description: appState.lastActivityText
+        contextMenuVisible: !groupInvitationDialog.visible
         contextMenu: ContextMenu {
             ContextMenuItem {
                 text: qsTr("Call")
@@ -65,6 +66,7 @@ Page {
 
     footer: ChatMessageInput {
         id: footerControl
+        visible: !groupInvitationDialog.visible
     }
 
     MessagesList {
@@ -74,6 +76,10 @@ Page {
 
     Item {
         anchors.fill: parent
+
+        GroupInvitationDialog {
+            id: groupInvitationDialog
+        }
 
         SelectAttachmentsDialog {
             id: saveAttachmentAsDialog
