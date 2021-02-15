@@ -72,6 +72,8 @@ Self::UserDatabase(const QDir &databaseDir, QObject *parent)
     connect(this, &Self::updateMessage, this, &Self::onUpdateMessage);
     connect(this, &Self::writeChatAndLastMessage, this, &Self::onWriteChatAndLastMessage);
     connect(this, &Self::resetUnreadCount, this, &Self::onResetUnreadCount);
+    connect(this, &Self::deleteNewGroupChat, this, &Self::onDeleteNewGroupChat);
+    connect(this, &Self::deleteGroupChatInvitation, this, &Self::onDeleteGroupChatInvitation);
     connect(this, &Self::updateGroup, this, &Self::onUpdateGroup);
 }
 
@@ -268,12 +270,30 @@ void Self::onWriteChatAndLastMessage(const ChatHandler &chat)
 void Self::onResetUnreadCount(const ChatHandler &chat)
 {
     ScopedConnection connection(*this);
-    ScopedTransaction transaction(*this);
     chatsTable()->resetUnreadCount(chat);
+}
+
+void Self::onDeleteNewGroupChat(const ChatId &chatId)
+{
+    ScopedConnection connection(*this);
+    ScopedTransaction transaction(*this);
+    // NOTE(fpohtmeh): new group chat has no attachments
+    messagesTable()->deleteChatMessages(chatId);
+    chatsTable()->deleteChat(chatId);
+}
+
+void Self::onDeleteGroupChatInvitation(const ChatId &chatId)
+{
+    ScopedConnection connection(*this);
+    ScopedTransaction transaction(*this);
+    chatsTable()->resetLastMessage(chatId);
+    messagesTable()->deleteGroupInvitationMessage(chatId);
 }
 
 void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
 {
+    ScopedConnection connection(*this);
+    ScopedTransaction transaction(*this);
     groupsTable()->updateGroup(groupUpdate);
     groupMembersTable()->updateGroup(groupUpdate);
 }

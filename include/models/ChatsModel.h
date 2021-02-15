@@ -55,11 +55,13 @@ public:
     void clearChats();
 
     void addChat(ModifiableChatHandler chat);
+    void deleteChat(const ChatId &chatId);
     ChatHandler findChat(const ChatId &chatId) const;
     ModifiableChatHandler findChat(const ChatId &chatId);
 
     void resetUnreadCount(const ChatId &chatId);
     void updateLastMessage(const MessageHandler &message, qsizetype unreadMessageCount);
+    void resetLastMessage(const ChatId &chatId);
 
     //
     // Update group chat UI.

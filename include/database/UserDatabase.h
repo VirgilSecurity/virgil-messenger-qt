@@ -91,6 +91,8 @@ signals:
     void updateMessage(const MessageUpdate &messageUpdate);
     void writeChatAndLastMessage(const ChatHandler &chat);
     void resetUnreadCount(const ChatHandler &chat);
+    void deleteNewGroupChat(const ChatId &chatId);
+    void deleteGroupChatInvitation(const ChatId &chatId);
 
     void updateGroup(const GroupUpdate& groupUpdate);
 
@@ -109,6 +111,8 @@ private:
     void onUpdateMessage(const MessageUpdate &messageUpdate);
     void onWriteChatAndLastMessage(const ChatHandler &chat);
     void onResetUnreadCount(const ChatHandler &chat);
+    void onDeleteNewGroupChat(const ChatId &chatId);
+    void onDeleteGroupChatInvitation(const ChatId &chatId);
 
     void onUpdateGroup(const GroupUpdate& groupUpdate);
 

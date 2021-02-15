@@ -74,7 +74,6 @@ public:
     void openChat(const ChatHandler& chat);
     Q_INVOKABLE void openChat(const QString& chatId); // can be used within QML only
     Q_INVOKABLE void closeChat();
-    Q_INVOKABLE QString currentChatName() const;
     ChatHandler currentChat() const;
 
     Q_INVOKABLE void acceptGroupInvitation();
@@ -94,6 +93,7 @@ signals:
     void createChatWithUser(const UserHandler& user, QPrivateSignal);
     void createChatWithGroup(const GroupHandler& group, QPrivateSignal);
 
+    void groupInvitationAccepted();
     void groupInvitationRejected();
 
 private:

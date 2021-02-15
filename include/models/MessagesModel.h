@@ -108,7 +108,12 @@ public:
     void addMessage(ModifiableMessageHandler message);
 
     //
-    //  Get message by row
+    // Delete message by row
+    //
+    void deleteMessage(int row);
+
+    //
+    //  Get message by row.
     //
     MessageHandler getMessage(int row) const;
 
@@ -121,6 +126,11 @@ public:
     // Update message. Returns false if message had the same status.
     //
     bool updateMessage(const MessageUpdate &messageUpdate, const bool apply);
+
+    //
+    //  Accept group invitation.
+    //
+    void acceptGroupInvitation();
 
     //
     //  Return message if found, nullptr otherwise.
@@ -146,7 +156,7 @@ private:
     void invalidateRow(const int row, const QVector<int> &roles = {});
     void invalidateModel(const QModelIndex &index, const QVector<int> &roles);
 
-    void checkForGroupInvitation(const MessageHandler &message);
+    const MessageContentGroupInvitation *findIncomingInvitation() const;
 
 private:
     ModifiableMessages m_messages;

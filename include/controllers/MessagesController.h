@@ -54,6 +54,8 @@ public:
 
     void loadMessages(const ChatHandler &chat);
     void clearMessages();
+    void deleteGroupInvitationMessage();
+
     Q_INVOKABLE void sendTextMessage(const QString &body);
     Q_INVOKABLE void sendFileMessage(const QVariant &attachmentUrl);
     Q_INVOKABLE void sendPictureMessage(const QVariant &attachmentUrl);

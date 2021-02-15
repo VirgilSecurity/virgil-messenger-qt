@@ -74,14 +74,20 @@ ChatHandler Self::currentChat() const
 
 void Self::acceptGroupInvitation()
 {
-    const GroupId groupId(currentChat()->id());
-    m_messenger->acceptGroupInvitation(groupId);
+    const auto chatId(currentChat()->id());
+    m_messenger->acceptGroupInvitation(GroupId(chatId));
+    m_models->chats()->resetLastMessage(chatId);
+    m_models->messages()->acceptGroupInvitation();
+    m_userDatabase->deleteGroupChatInvitation(chatId);
+    emit groupInvitationAccepted();
 }
 
 void Self::rejectGroupInvitation()
 {
-    const GroupId groupId(currentChat()->id());
-    m_messenger->rejectGroupInvitation(groupId);
+    const auto chatId(currentChat()->id());
+    m_messenger->rejectGroupInvitation(GroupId(chatId));
+    m_models->chats()->deleteChat(chatId);
+    m_userDatabase->deleteNewGroupChat(chatId);
     emit groupInvitationRejected();
 }
 
@@ -94,12 +100,7 @@ void ChatsController::removeParticipant(const QString &username) {
 }
 
 void ChatsController::leaveGroup() {
-
-}
-
-QString Self::currentChatName() const
-{
-    return m_chatObject ? m_chatObject->title() : QString();
+    // TODO(fpohtmeh): implement
 }
 
 void Self::loadChats()

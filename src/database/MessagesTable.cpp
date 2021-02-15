@@ -49,6 +49,8 @@ MessagesTable::MessagesTable(Database *database)
     connect(this, &MessagesTable::fetchChatMessages, this, &MessagesTable::onFetchChatMessages);
     connect(this, &MessagesTable::fetchNotSentMessages, this, &MessagesTable::onFetchNotSentMessages);
     connect(this, &MessagesTable::addMessage, this, &MessagesTable::onAddMessage);
+    connect(this, &MessagesTable::deleteChatMessages, this, &MessagesTable::onDeleteChatMessages);
+    connect(this, &MessagesTable::deleteGroupInvitationMessage, this, &MessagesTable::onDeleteGroupInvitationMessage);
     connect(this, &MessagesTable::updateMessage, this, &MessagesTable::onUpdateMessage);
 }
 
@@ -136,6 +138,35 @@ void MessagesTable::onAddMessage(const MessageHandler &message)
     else {
         qCCritical(lcDatabase) << "MessagesTable::onCreateMessage error";
         emit errorOccurred(tr("Failed to insert message"));
+    }
+}
+
+void MessagesTable::onDeleteChatMessages(const ChatId &chatId)
+{
+    const DatabaseUtils::BindValues values {{ ":id", QString(chatId) }};
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("deleteMessagesByChatId"), values);
+    if (query) {
+        qCDebug(lcDatabase) << "Chat messages was removed, chatId:" << chatId;
+    }
+    else {
+        qCCritical(lcDatabase) << "MessagesTable::onDeleteChatMessages deletion error";
+        emit errorOccurred(tr("Failed to delete chat messages"));
+    }
+}
+
+void MessagesTable::onDeleteGroupInvitationMessage(const ChatId &chatId)
+{
+    const DatabaseUtils::BindValues values {
+        { ":id", QString(chatId) },
+        { ":contentType", MessageContentTypeToString(MessageContentType::GroupInvitation) }
+    };
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("deleteGroupInvitationMessageByChatId"), values);
+    if (query) {
+        qCDebug(lcDatabase) << "Group invitation message was removed, chatId:" << chatId;
+    }
+    else {
+        qCCritical(lcDatabase) << "MessagesTable::onDeleteGroupInvitationMessage deletion error";
+        emit errorOccurred(tr("Failed to delete group invitation message"));
     }
 }
 

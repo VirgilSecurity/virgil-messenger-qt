@@ -178,8 +178,11 @@
         <file>resources/database/createCloudFiles.sql</file>
         <file>resources/database/createContacts.sql</file>
         <file>resources/database/createMessages.sql</file>
+        <file>resources/database/deleteChatById.sql</file>
         <file>resources/database/deleteCloudFilesByIds.sql</file>
         <file>resources/database/deleteCloudFilesByParentIds.sql</file>
+        <file>resources/database/deleteGroupInvitationMessageByChatId.sql</file>
+        <file>resources/database/deleteMessagesByChatId.sql</file>
         <file>resources/database/createGroups.sql</file>
         <file>resources/database/createGroupMembers.sql</file>
         <file>resources/database/insertAttachment.sql</file>

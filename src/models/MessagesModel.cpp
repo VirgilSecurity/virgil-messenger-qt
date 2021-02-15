@@ -72,8 +72,8 @@ void Self::setMessages(ModifiableMessages messages)
     m_messages = std::move(messages);
     endResetModel();
 
-    if (!m_messages.empty()) {
-        checkForGroupInvitation(m_messages.front());
+    if (auto invitation = findIncomingInvitation()) {
+        emit groupInvitationReceived(invitation->title(), invitation->helloText());
     }
 }
 
@@ -88,8 +88,14 @@ void Self::addMessage(ModifiableMessageHandler message) {
     }
 }
 
+void Self::deleteMessage(const int row)
+{
+    beginRemoveRows(QModelIndex(), row, row);
+    m_messages.erase(m_messages.begin() + row);
+    endRemoveRows();
+}
 
-MessageHandler Self::getMessage(int row) const
+MessageHandler Self::getMessage(const int row) const
 {
     return m_messages[row];
 }
@@ -121,6 +127,14 @@ bool Self::updateMessage(const MessageUpdate &messageUpdate, const bool apply) {
     const auto roles = rolesFromMessageUpdate(messageUpdate);
     invalidateRow(row, roles);
     return true;
+}
+
+
+void Self::acceptGroupInvitation()
+{
+    if (findIncomingInvitation()) {
+        deleteMessage(0); // Invitation is always first
+    }
 }
 
 
@@ -383,14 +397,16 @@ void Self::invalidateModel(const QModelIndex &index, const QVector<int> &roles)
     emit dataChanged(index, index, roles);
 }
 
-void Self::checkForGroupInvitation(const MessageHandler &message)
+const MessageContentGroupInvitation *Self::findIncomingInvitation() const
 {
-    if (!message->isOutgoing()) {
-        const auto invitation = std::get_if<MessageContentGroupInvitation>(&message->content());
-        if (invitation) {
-            emit groupInvitationReceived(invitation->title(), invitation->helloText());
-        }
+    if (m_messages.empty()) {
+        return nullptr;
     }
+    const auto message = m_messages.front();
+    if (!message->isIncoming()) {
+        return nullptr;
+    }
+    return std::get_if<MessageContentGroupInvitation>(&message->content());
 }
 
 QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate& messageUpdate) {
