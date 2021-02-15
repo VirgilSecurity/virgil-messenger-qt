@@ -30,64 +30,52 @@
 //  IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 //  POSSIBILITY OF SUCH DAMAGE.
 //
-//  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
+//
 
-#ifndef VM_GROUP_UPDATE_H
-#define VM_GROUP_UPDATE_H
+#include <qxmpp/QXmppClientExtension.h>
+#include <qxmpp/QXmppMucIq.h>
+#include <qxmpp/QXmppClient.h>
+#include <qxmpp/QXmppClient.h>
 
-#include "GroupId.h"
-#include "GroupInvitationStatus.h"
-#include "GroupAffiliation.h"
-#include "User.h"
-#include "Message.h"
-
-#include <QtCore>
-#include <QString>
-
-#include <optional>
-#include <variant>
+#include <QPointer>
 
 namespace vm {
 
-struct GroupUpdateBase {
-    GroupId groupId;
-};
-
-
-struct AddGroupOwnersUpdate : public GroupUpdateBase {
-    Users owners;
-};
-
-
-
-struct AddGroupMembersUpdate : public GroupUpdateBase {
-    Users members;
-};
-
-
-struct AddGroupUpdate : public GroupUpdateBase {
-};
-
-
-struct GroupMemberAffiliationUpdate : public GroupUpdateBase {
-    UserId memberId;
-    GroupAffiliation memberAffiliation;
-};
-
-
-using GroupUpdate = std::variant<
-        AddGroupOwnersUpdate,
-        AddGroupMembersUpdate,
-        AddGroupUpdate,
-        GroupMemberAffiliationUpdate
-        >;
-
 //
-//  Return group unique identifier the update relates to.
+//  TODO: Add handle <presence/> with membership changes.
 //
-GroupId GroupUpdateGetId(const GroupUpdate& update);
+class XmppRoomParticipantsManager : public QXmppClientExtension
+{
+    Q_OBJECT
 
-} // namespace vm
+public:
+    //
+    //  Should be called on the same thread where QXmppClient was created.
+    //
+    void requestAll(const QString& roomJid);
 
+    //
+    //  Handle IQs with room participants.
+    //
+    bool handleStanza(const QDomElement &element) override;
 
-#endif // VM_GROUP_UPDATE_H
+Q_SIGNALS:
+    //
+    //  This signal is emitted when a room participant info received.
+    //
+    void participantReceived(const QString& roomJid, const QString& jid, QXmppMucItem::Affiliation affiliation);
+
+    //
+    //  This signal is emitted when a room participant affiliation was changed.
+    //
+    void participantAffiliationChanged(const QString& roomJid, const QString& jid, QXmppMucItem::Affiliation affiliation);
+
+protected:
+    void setClient(QXmppClient *client) override;
+
+private:
+    QPointer<QXmppClient> m_client;
+};
+
+} // vm
+

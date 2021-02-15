@@ -317,6 +317,7 @@ private slots:
     void xmppOnMucInvitationReceived(const QString &roomJid, const QString &inviter, const QString &reason);
     void xmppOnMucRoomAdded(QXmppMucRoom *room);
     void xmppOnCreateGroupChat(const GroupHandler& groupHandler, const Users& membersToBeInvited);
+    void xmppOnRoomParticipantReceived(const QString& roomJid, const QString& jid, QXmppMucItem::Affiliation affiliation);
 
     void onReconnectXmppServerIfNeeded();
     void onDisconnectXmppServer();
@@ -368,5 +369,6 @@ Q_DECLARE_METATYPE(QXmppPresence);
 Q_DECLARE_METATYPE(QXmppIq);
 Q_DECLARE_METATYPE(QXmppHttpUploadSlotIq);
 Q_DECLARE_METATYPE(QXmppHttpUploadRequestIq);
+Q_DECLARE_METATYPE(QXmppMucItem::Affiliation);
 
 #endif // VM_CORE_MESSENGER_H

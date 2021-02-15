@@ -1,2 +1,2 @@
-INSERT INTO groupMembers (groupId, memberId, memberNickname, memberAffiliation)
-VALUES (:groupId, :memberId, :memberNickname, :memberAffiliation)
+INSERT OR IGNORE INTO groupMembers (groupId, memberId, memberNickname, memberAffiliation)
+VALUES (:groupId, :memberId, "", :memberAffiliation)

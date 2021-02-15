@@ -461,6 +461,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/User.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/UserId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/UserImpl.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppRoomParticipantsManager.h
         # Controllers
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/Controller.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/AttachmentsController.h
@@ -652,6 +653,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/OutgoingMessageStage.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/User.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/UserId.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppRoomParticipantsManager.cpp
         # Controllers
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/Controller.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/AttachmentsController.cpp
@@ -851,6 +853,7 @@ target_include_directories(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/states>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/operations>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp>
 
         $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}>
         $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}/qxmpp>

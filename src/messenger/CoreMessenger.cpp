@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -46,6 +46,7 @@
 #include "VSQDiscoveryManager.h"
 #include "VSQContactManager.h"
 #include "VSQLastActivityManager.h"
+#include "XmppRoomParticipantsManager.h"
 
 #if VS_PUSHNOTIFICATIONS
 #include "XmppPushNotifications.h"
@@ -211,10 +212,11 @@ public:
     std::unique_ptr<VSQDiscoveryManager> discoveryManager;
     std::unique_ptr<VSQContactManager> contactManager;
 
-    QXmppCarbonManager *xmppCarbonManager;
-    QXmppUploadRequestManager *xmppUploadManager;
-    QXmppMucManager *xmppGroupChatManager;
-    VSQLastActivityManager *lastActivityManager;
+    QPointer<QXmppCarbonManager> xmppCarbonManager;
+    QPointer<QXmppUploadRequestManager> xmppUploadManager;
+    QPointer<QXmppMucManager> xmppGroupChatManager;
+    QPointer<VSQLastActivityManager> lastActivityManager;
+    QPointer<XmppRoomParticipantsManager> xmppRoomParticipantsManager;
 
     std::map<QString, std::shared_ptr<User>> identityToUser;
     std::map<QString, std::shared_ptr<User>> usernameToUser;
@@ -235,6 +237,7 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     qRegisterMetaType<QXmppHttpUploadSlotIq>();
     qRegisterMetaType<QXmppHttpUploadRequestIq>();
     qRegisterMetaType<QXmppPresence>();
+    qRegisterMetaType<QXmppMucItem::Affiliation>();
 
     qRegisterMetaType<vm::MessageHandler>("MessageHandler");
     qRegisterMetaType<vm::ModifiableMessageHandler>("ModifiableMessageHandler");
@@ -366,6 +369,7 @@ Self::resetXmppConfiguration() {
     m_impl->xmppUploadManager = new QXmppUploadRequestManager();
     m_impl->xmppGroupChatManager = new QXmppMucManager();
     m_impl->lastActivityManager = new VSQLastActivityManager(m_settings);
+    m_impl->xmppRoomParticipantsManager = new XmppRoomParticipantsManager();
 
     // Parent is implicitly changed to the QXmppClient within addExtension()
     m_impl->xmpp->addExtension(new QXmppMessageReceiptManager());
@@ -373,6 +377,7 @@ Self::resetXmppConfiguration() {
     m_impl->xmpp->addExtension(m_impl->xmppUploadManager);
     m_impl->xmpp->addExtension(m_impl->xmppGroupChatManager);
     m_impl->xmpp->addExtension(m_impl->lastActivityManager);
+    m_impl->xmpp->addExtension(m_impl->xmppRoomParticipantsManager);
 
     // Connect XMPP signals
     connect(m_impl->lastActivityManager, &VSQLastActivityManager::lastActivityTextChanged, this, &Self::lastActivityTextChanged);
@@ -391,6 +396,9 @@ Self::resetXmppConfiguration() {
 
     connect(m_impl->xmppGroupChatManager, &QXmppMucManager::roomAdded,
                 this, &Self::xmppOnMucRoomAdded);
+
+    connect(m_impl->xmppRoomParticipantsManager, &XmppRoomParticipantsManager::participantReceived,
+                this, &Self::xmppOnRoomParticipantReceived);
 
 
     connect(m_impl->xmpp.get(), &QXmppClient::connected, this, &Self::xmppOnConnected);
@@ -2502,7 +2510,35 @@ void Self::xmppOnMucInvitationReceived(const QString &roomJid, const QString &in
 
 
 void Self::xmppOnMucRoomAdded(QXmppMucRoom *room) {
-    qCDebug(lcCoreMessenger) << "Room was added:" << room->jid();
+    qCDebug(lcCoreMessenger) << "!!!!Room was added:" << room->jid();
+}
+
+
+void Self::xmppOnRoomParticipantReceived(const QString& roomJid, const QString& jid, QXmppMucItem::Affiliation affiliation) {
+
+    auto mapAffiliation = [](QXmppMucItem::Affiliation affiliation) {
+        switch(affiliation) {
+        case QXmppMucItem::UnspecifiedAffiliation:
+            throw std::logic_error("Got UnspecifiedAffiliation when handle participantAffiliationChanged() signal.");
+
+        case QXmppMucItem::OutcastAffiliation:
+            return GroupAffiliation::Outcast;
+
+        case QXmppMucItem::NoAffiliation:
+            return GroupAffiliation::None;
+
+        case QXmppMucItem::MemberAffiliation:
+            return GroupAffiliation::Member;
+
+        case QXmppMucItem::AdminAffiliation:
+            return GroupAffiliation::Admin;
+
+        case QXmppMucItem::OwnerAffiliation:
+            return GroupAffiliation::Owner;
+        }
+    };
+
+    emit updateGroup(GroupMemberAffiliationUpdate{groupIdFromJid(roomJid), userIdFromJid(jid), mapAffiliation(affiliation)});
 }
 
 
@@ -2527,43 +2563,7 @@ void Self::connectXmppRoomSignals(QXmppMucRoom *room) {
 
         qCDebug(lcCoreMessenger) << "Joined to the XMPP room:" << roomId;
 
-        //
-        //  Request Owners.
-        //  TODO: Extract to a method.
-        //
-        {
-            QXmppMucItem getOwnersItem;
-            getOwnersItem.setAffiliation(QXmppMucItem::OwnerAffiliation);
-
-            QXmppMucAdminIq getOwnersIq;
-            getOwnersIq.setFrom(currentUserJid());
-            getOwnersIq.setTo(room->jid());
-            getOwnersIq.setType(QXmppIq::Type::Get);
-            getOwnersIq.setItems({ getOwnersItem });
-
-            if (m_impl->xmpp->sendPacket(getOwnersIq)) {
-                qCDebug(lcCoreMessenger) << "Request owners of the group:" << roomId;
-            }
-        }
-
-        //
-        //  Request Members.
-        //  TODO: Extract to a method.
-        //
-        {
-            QXmppMucItem getMembersItem;
-            getMembersItem.setAffiliation(QXmppMucItem::MemberAffiliation);
-
-            QXmppMucAdminIq getMembersIq;
-            getMembersIq.setFrom(currentUserJid());
-            getMembersIq.setTo(room->jid());
-            getMembersIq.setType(QXmppIq::Type::Get);
-            getMembersIq.setItems({ getMembersItem });
-
-            if (m_impl->xmpp->sendPacket(getMembersIq)) {
-                qCDebug(lcCoreMessenger) << "Request members of the group:" << roomId;
-            }
-        }
+        m_impl->xmppRoomParticipantsManager->requestAll(room->jid());
 
         // room->requestConfiguration();
         // room->requestPermissions();

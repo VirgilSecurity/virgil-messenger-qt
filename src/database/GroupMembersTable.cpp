@@ -75,25 +75,32 @@ void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
             DatabaseUtils::BindValues bindValues;
             bindValues.push_back({ ":groupId", QString(update->groupId) });
             bindValues.push_back({ ":memberId", QString(member->id()) });
-            bindValues.push_back({ ":memberNickname", QString(member->username()) });
             bindValues.push_back({ ":memberAffiliation", "owner" });
 
             bindValuesCollection.push_back(std::move(bindValues));
         }
-    }
 
-    if (auto update = std::get_if<AddGroupMembersUpdate>(&groupUpdate)) {
+    } else if (auto update = std::get_if<AddGroupMembersUpdate>(&groupUpdate)) {
         queryId = QLatin1String("insertGroupMember");
 
         for (const auto& member : update->members) {
             DatabaseUtils::BindValues bindValues;
             bindValues.push_back({ ":groupId", QString(update->groupId) });
             bindValues.push_back({ ":memberId", QString(member->id()) });
-            bindValues.push_back({ ":memberNickname", QString(member->username()) });
             bindValues.push_back({ ":memberAffiliation", "member" });
 
             bindValuesCollection.push_back(std::move(bindValues));
         }
+
+    } else if (auto update = std::get_if<GroupMemberAffiliationUpdate>(&groupUpdate)) {
+        queryId = QLatin1String("updateGroupMemberAffiliation");
+
+        DatabaseUtils::BindValues bindValues;
+        bindValues.push_back({ ":groupId", QString(update->groupId) });
+        bindValues.push_back({ ":memberId", QString(update->memberId) });
+        bindValues.push_back({ ":memberAffiliation", GroupAffiliationToString(update->memberAffiliation) });
+
+        bindValuesCollection.push_back(std::move(bindValues));
     }
 
     if (queryId.isEmpty()) {
