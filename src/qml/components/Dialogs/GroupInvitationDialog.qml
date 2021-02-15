@@ -49,6 +49,7 @@ Rectangle {
             horizontalAlignment: Qt.AlignHCenter
             wrapMode: Text.WordWrap
             text: d.helloText
+            visible: text
         }
 
         Row {
@@ -75,9 +76,9 @@ Rectangle {
         }
     }
 
-    function open(ownerId, groupTitle, helloText) {
-        d.groupTitle = qsTr("You are invited to group '%1'").arg(groupTitle)
-        d.helloText = qsTr("Message: %1").arg(helloText)
+    function open(ownerId, ownerUsername, helloText) {
+        d.groupTitle = qsTr("%1 invites you to the group").arg(ownerUsername)
+        //d.helloText = qsTr("Message: %1").arg(helloText) // TODO(fpohtmeh): uncomment once helloText is customizable
         root.visible = true
     }
 
