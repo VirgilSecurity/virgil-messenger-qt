@@ -68,17 +68,10 @@ struct AddGroupUpdate : public GroupUpdateBase {
 };
 
 
-struct GroupInvitationUpdate : public GroupUpdateBase {
-    UserId memberId;
-    GroupInvitationStatus invitationStatus;
-};
-
-
 using GroupUpdate = std::variant<
         AddGroupOwnersUpdate,
         AddGroupMembersUpdate,
-        AddGroupUpdate,
-        GroupInvitationUpdate
+        AddGroupUpdate
         >;
 
 //

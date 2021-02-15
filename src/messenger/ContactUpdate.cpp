@@ -32,40 +32,21 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "GroupMember.h"
+
+#include "ContactUpdate.h"
+
+#include <stdexcept>
 
 using namespace vm;
-using Self = GroupMember;
 
-Self::GroupMember(GroupId groupId, UserId groupOwnerId, UserId memberId, QString memberNickName, GroupAffiliation memberAffiliation)
-        : m_groupId(std::move(groupId)),
-        m_groupOwnerId(std::move(groupOwnerId)),
-        m_memberId(std::move(memberId)),
-        m_memberNickName(std::move(memberNickName)),
-        m_memberAffiliation(memberAffiliation)
-{}
-
-
-GroupId Self::groupId() const {
-    return m_groupId;
-}
-
-
-UserId Self::groupOwnerId() const {
-    return m_groupOwnerId;
-}
-
-
-UserId Self::memberId() const {
-    return m_memberId;
-}
-
-
-QString Self::memberNickName() const {
-    return m_memberNickName;
-}
-
-
-GroupAffiliation Self::memberAffiliation() const {
-    return m_memberAffiliation;
+UserId vm::ContactUpdateGetUserId(const ContactUpdate& update) {
+    if (auto base = std::get_if<UsernameContactUpdate>(&update)) {
+        return base->userId;
+    }
+    else if (auto base = std::get_if<NameContactUpdate>(&update)) {
+        return base->userId;
+    }
+    else {
+        throw std::logic_error("Unhandled ContactUpdate when ask for user id.");
+    }
 }

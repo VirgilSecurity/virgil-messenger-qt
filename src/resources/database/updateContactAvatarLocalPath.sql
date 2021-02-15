@@ -1,3 +1,3 @@
 UPDATE contacts
 SET avatarLocalPath = :avatarLocalPath
-WHERE id = :id
+WHERE userId = :userId AND avatarLocalPath != :avatarLocalPath

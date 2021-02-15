@@ -62,9 +62,6 @@ using namespace notifications::xmpp;
 #include <QSslSocket>
 #include <QUuid>
 
-#ifndef USE_XMPP_LOGS
-#define USE_XMPP_LOGS 0
-#endif
 
 Q_LOGGING_CATEGORY(lcMessenger, "messenger")
 
@@ -87,6 +84,7 @@ Self::Messenger(Settings *settings, Validator *validator)
     connect(m_coreMessenger, &CoreMessenger::lastActivityTextChanged, this, &Self::lastActivityTextChanged);
     connect(m_coreMessenger, &CoreMessenger::updateMessage, this, &Self::updateMessage);
     connect(m_coreMessenger, &CoreMessenger::groupChatCreated, this, &Self::groupChatCreated);
+    connect(m_coreMessenger, &CoreMessenger::userWasFound, this, &Self::userWasFound);
 
     //
     //  Handle connection states.

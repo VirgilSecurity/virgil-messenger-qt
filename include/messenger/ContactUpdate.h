@@ -32,40 +32,45 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "GroupMember.h"
+#ifndef VM_CONTACT_UPDATE_H
+#define VM_CONTACT_UPDATE_H
 
-using namespace vm;
-using Self = GroupMember;
+#include "UserId.h"
 
-Self::GroupMember(GroupId groupId, UserId groupOwnerId, UserId memberId, QString memberNickName, GroupAffiliation memberAffiliation)
-        : m_groupId(std::move(groupId)),
-        m_groupOwnerId(std::move(groupOwnerId)),
-        m_memberId(std::move(memberId)),
-        m_memberNickName(std::move(memberNickName)),
-        m_memberAffiliation(memberAffiliation)
-{}
+#include <QtCore>
+#include <QString>
 
+#include <variant>
 
-GroupId Self::groupId() const {
-    return m_groupId;
-}
+namespace vm {
+
+struct ContactUpdateBase {
+    UserId userId;
+};
 
 
-UserId Self::groupOwnerId() const {
-    return m_groupOwnerId;
-}
+struct UsernameContactUpdate : public ContactUpdateBase {
+    QString username;
+};
 
 
-UserId Self::memberId() const {
-    return m_memberId;
-}
+struct NameContactUpdate : public ContactUpdateBase {
+    QString name;
+};
 
 
-QString Self::memberNickName() const {
-    return m_memberNickName;
-}
+
+using ContactUpdate = std::variant<
+        UsernameContactUpdate,
+        NameContactUpdate
+        >;
+
+//
+//  Return user's unique identifier the update relates to.
+//
+UserId ContactUpdateGetUserId(const ContactUpdate& update);
+
+} // namespace vm
 
 
-GroupAffiliation Self::memberAffiliation() const {
-    return m_memberAffiliation;
-}
+#endif // VM_CONTACT_UPDATE_H

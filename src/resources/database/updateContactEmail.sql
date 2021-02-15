@@ -1,3 +1,3 @@
 UPDATE contacts
 SET email = :email
-WHERE id = :id
+WHERE userId = :userId AND email != :email

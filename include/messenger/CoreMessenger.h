@@ -110,7 +110,10 @@ signals:
     void lastActivityTextChanged(const QString& text);
 
     void messageReceived(ModifiableMessageHandler message);
+
     void updateMessage(const MessageUpdate& messageUpdate);
+
+    void userWasFound(const UserHandler& user) const;
 
     //
     //  Group Chats has signal / slot architecture.
@@ -249,8 +252,8 @@ private:
     QByteArray packMessage(const MessageHandler& message);
     CoreMessengerStatus unpackMessage(const QByteArray& messageData, Message& message);
 
-    QByteArray packXmppMessageBody(const QByteArray& messageCiphertext, const UserId& senderId, PushType pushType);
-    std::variant<CoreMessengerStatus, std::tuple<QByteArray, UserId>> unpackXmppMessageBody(const QXmppMessage& xmppMessage);
+    QByteArray packXmppMessageBody(const QByteArray& messageCiphertext, PushType pushType);
+    std::variant<CoreMessengerStatus, QByteArray> unpackXmppMessageBody(const QXmppMessage& xmppMessage);
 
     //
     //  Message sending / processing helpers.
@@ -286,6 +289,7 @@ private:
 
     QString groupIdToJid(const GroupId& userId) const;
     GroupId groupIdFromJid(const QString& jid) const;
+    UserId groupUserIdFromJid(const QString& jid) const;
 
     bool isNetworkOnline() const noexcept;
     bool isXmppConnected() const noexcept;

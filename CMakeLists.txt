@@ -44,18 +44,24 @@ include(varpadding)
 include(getprebuild)
 include(customers)
 
-#
-# Code formatting
-#
-set(ENABLE_CLANGFORMAT OFF CACHE BOOL "On/Off formatting source code with clangformat.")
-set(ENABLE_IOS_EXTENSION OFF CACHE BOOL "On/Off building IOS extension.")
-
 # ---------------------------------------------------------------------------
 # Project version
 # ---------------------------------------------------------------------------
 set(VS_TARGET_VERSION "3.6.2")
-set(VS_CORE_VERSION "0.2.1.47")
+set(VS_CORE_VERSION "0.2.1.48")
 set(VERSION_DATABASE_SCHEME "1")
+
+# ---------------------------------------------------------------------------
+# Code formatting
+# ---------------------------------------------------------------------------
+set(ENABLE_CLANGFORMAT OFF CACHE BOOL "On/Off formatting source code with clangformat.")
+
+# ---------------------------------------------------------------------------
+# Other build options.
+# ---------------------------------------------------------------------------
+set(ENABLE_IOS_EXTENSION OFF CACHE BOOL "On/Off building IOS extension.")
+set(ENABLE_XMPP_LOGS OFF CACHE BOOL "On/Off noisy XMPP logs.")
+set(ENABLE_XMPP_EXTRA_LOGS OFF CACHE BOOL "On/Off QXMPP logs.")
 
 # ---------------------------------------------------------------------------
 #   Customers selection
@@ -130,8 +136,8 @@ set(PREBUILT_INCLUDE_DIR "${PREBUILT_BASE_DIR}/include")
 set(PREBUILT_LIB_DIR "${PREBUILT_BASE_DIR}/lib")
 set(QUICKFUTURE_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/quickfuture/src")
 
-message(STATUS "Setting prebuild QT directory:	        [${PREBUILT_QT_DIR}]")
-message(STATUS "Setting prebuild directory:		[${PREBUILT_BASE_DIR}]")
+message(STATUS "Setting prebuild QT directory:      [${PREBUILT_QT_DIR}]")
+message(STATUS "Setting prebuild directory:	        [${PREBUILT_BASE_DIR}]")
 message(STATUS "Setting prebuild include directory:	[${PREBUILT_INCLUDE_DIR}]")
 message(STATUS "Setting prebuild library directory:	[${PREBUILT_LIB_DIR}]")
 
@@ -420,6 +426,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsNewFile.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CommKitBridge.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Contact.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/ContactUpdate.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessenger.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessengerCloudFs.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessengerStatus.h
@@ -609,6 +616,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/ChatType.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CommKitBridge.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Contact.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/ContactUpdate.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CoreMessenger.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFileId.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFileInfo.cpp
@@ -863,10 +871,13 @@ target_compile_definitions(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:VS_MSGR_ENV_STG=$<STREQUAL:"${VS_ENV}","stg">>
         $<BUILD_INTERFACE:VS_MSGR_ENV_PROD=$<STREQUAL:"${VS_ENV}","prod">>
 
+
         $<BUILD_INTERFACE:INFO_CLIENT=1>
         $<BUILD_INTERFACE:CFG_CLIENT=1>
         $<BUILD_INTERFACE:VERSION_DATABASE_SCHEME=${VERSION_DATABASE_SCHEME}>
         $<BUILD_INTERFACE:VS_CUSTOMER=${VS_CUSTOMER}>
+        $<BUILD_INTERFACE:ENABLE_XMPP_LOGS=$<BOOL:${ENABLE_XMPP_LOGS}>>
+        $<BUILD_INTERFACE:ENABLE_XMPP_EXTRA_LOGS=$<BOOL:${ENABLE_XMPP_EXTRA_LOGS}>>
 
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:VS_ANDROID=1>>
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:VS_MOBILE=1>>
