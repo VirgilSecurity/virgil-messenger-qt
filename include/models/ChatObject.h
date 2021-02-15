@@ -58,6 +58,9 @@ public:
     QString title() const;
     bool isGroup() const;
 
+    void setGroupOwnerId(const UserId &userId);
+    UserId groupOwnerId() const;
+
 signals:
     void titleChanged(const QString &title);
     void isGroupChanged(bool isGroup);
@@ -65,6 +68,7 @@ signals:
 private:
     ChatHandler m_chat;
     ContactsModel *m_contactsModel;
+    UserId m_groupOwnerId;
 };
 }
 

@@ -28,6 +28,7 @@ Page {
         title: controllers.chats.current.title
         description: appState.lastActivityText
         contextMenuVisible: !groupInvitationDialog.visible
+        showSeparator: !groupInvitationDialog.visible
         contextMenu: ContextMenu {
             ContextMenuItem {
                 text: qsTr("Call")

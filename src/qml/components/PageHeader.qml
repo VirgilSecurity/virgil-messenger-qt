@@ -15,9 +15,11 @@ Control {
     property alias titleHorizontalAlignment: headerTitle.horizontalAlignment
     property alias contextMenu: menuButton.contextMenu
     property alias contextMenuVisible: menuButton.visible
+    property alias showSeparator: headerBackground.showSeparator
     property alias rightControl: rightControlLoader.sourceComponent
 
     background: HeaderBackground {
+        id: headerBackground
         separatorColor: Theme.chatSeparatorColor
     }
 

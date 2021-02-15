@@ -65,6 +65,8 @@ Self::ChatsController(Messenger *messenger, Models *models, UserDatabase *userDa
     connect(m_messenger, &Messenger::groupChatCreated, this, &Self::onGroupChatCreated);
     connect(m_messenger, &Messenger::groupChatCreateFailed, this, &Self::onGroupChatCreateFailed);
     connect(m_messenger, &Messenger::updateGroup, this, &Self::onUpdateGroup);
+
+    connect(m_models->messages(), &MessagesModel::groupInvitationReceived, m_chatObject, &ChatObject::setGroupOwnerId);
 }
 
 ChatHandler Self::currentChat() const
@@ -75,7 +77,7 @@ ChatHandler Self::currentChat() const
 void Self::acceptGroupInvitation()
 {
     const auto chatId(currentChat()->id());
-    m_messenger->acceptGroupInvitation(GroupId(chatId));
+    m_messenger->acceptGroupInvitation(GroupId(chatId), m_chatObject->groupOwnerId());
     m_models->chats()->resetLastMessage(chatId);
     m_models->messages()->acceptGroupInvitation();
     m_userDatabase->deleteGroupChatInvitation(chatId);
@@ -85,7 +87,7 @@ void Self::acceptGroupInvitation()
 void Self::rejectGroupInvitation()
 {
     const auto chatId(currentChat()->id());
-    m_messenger->rejectGroupInvitation(GroupId(chatId));
+    m_messenger->rejectGroupInvitation(GroupId(chatId), m_chatObject->groupOwnerId());
     m_models->chats()->deleteChat(chatId);
     m_userDatabase->deleteNewGroupChat(chatId);
     emit groupInvitationRejected();

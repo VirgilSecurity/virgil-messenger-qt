@@ -75,7 +75,7 @@ Rectangle {
         }
     }
 
-    function open(groupTitle, helloText) {
+    function open(ownerId, groupTitle, helloText) {
         d.groupTitle = qsTr("You are invited to group '%1'").arg(groupTitle)
         d.helloText = qsTr("Message: %1").arg(helloText)
         root.visible = true

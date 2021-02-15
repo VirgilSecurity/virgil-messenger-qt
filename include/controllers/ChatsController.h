@@ -109,7 +109,6 @@ private:
     void onGroupChatCreateFailed(const GroupId& chatId, const QString& errorText);
     void onUpdateGroup(const GroupUpdate& groupUpdate);
 
-
     QPointer<Messenger> m_messenger;
     QPointer<Models> m_models;
     QPointer<UserDatabase> m_userDatabase;

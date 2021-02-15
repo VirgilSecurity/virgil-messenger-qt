@@ -73,7 +73,8 @@ void Self::setMessages(ModifiableMessages messages)
     endResetModel();
 
     if (auto invitation = findIncomingInvitation()) {
-        emit groupInvitationReceived(invitation->title(), invitation->helloText());
+        const auto ownerId = m_messages.front()->senderId();
+        emit groupInvitationReceived(ownerId, invitation->title(), invitation->helloText());
     }
 }
 

@@ -369,15 +369,15 @@ Self::joinGroupChats(const GroupMembers& groupsWithMe) {
 }
 
 void
-Self::acceptGroupInvitation(const GroupId &groupId) {
+Self::acceptGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId) {
     // TODO(fpohtmeh): uncomment
-    //m_coreMessenger->acceptGroupInvitation(groupId);
+    //m_coreMessenger->acceptGroupInvitation(groupId, groupOwnerId);
 }
 
 void
-Messenger::rejectGroupInvitation(const GroupId &groupId) {
+Messenger::rejectGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId) {
     // TODO(fpohtmeh): uncomment
-    //m_coreMessenger->rejectGroupInvitation(groupId);
+    //m_coreMessenger->rejectGroupInvitation(groupId, groupOwnerId);
 }
 
 

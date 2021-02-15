@@ -78,3 +78,13 @@ bool ChatObject::isGroup() const
 {
     return true; // FIXME(fpohtmeh): implement isGroup
 }
+
+void ChatObject::setGroupOwnerId(const UserId &userId)
+{
+    m_groupOwnerId = userId;
+}
+
+UserId ChatObject::groupOwnerId() const
+{
+    return m_groupOwnerId;
+}

@@ -128,8 +128,8 @@ public:
     //
     //  Group invitations
     //
-    void acceptGroupInvitation(const GroupId &groupId);
-    void rejectGroupInvitation(const GroupId &groupId);
+    void acceptGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId);
+    void rejectGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId);
 
     //
     //  Helpers.
