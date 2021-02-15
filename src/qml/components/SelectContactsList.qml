@@ -23,15 +23,6 @@ ModelListView {
         property real headerOpacity: 0
         readonly property real defaultChatHeight: 50
         readonly property real selectionIconSize: 20
-
-        function toggleByUsername(username) {
-            if (username) {
-                if (d.model.selection.multiSelect) {
-                    d.model.toggleByUsername(username)
-                }
-                contactSelected(username)
-            }
-        }
     }
 
     Component {
@@ -131,11 +122,7 @@ ModelListView {
                 }
             }
 
-            onClicked: d.toggleByUsername(model.username)
+            onClicked: contactSelected(model.username)
         }
-    }
-
-    function toggleFirst() {
-        d.toggleByUsername(d.model.firstContactUsername())
     }
 }

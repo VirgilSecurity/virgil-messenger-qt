@@ -370,14 +370,14 @@ Self::joinGroupChats(const GroupMembers& groupsWithMe) {
 
 void
 Self::acceptGroupInvitation(const GroupId &groupId) {
-    Q_UNUSED(groupId)
-    // TODO(fpohtmeh): implement
+    // TODO(fpohtmeh): uncomment
+    //m_coreMessenger->acceptGroupInvitation(groupId);
 }
 
 void
 Messenger::rejectGroupInvitation(const GroupId &groupId) {
-    Q_UNUSED(groupId)
-    // TODO(fpohtmeh): implement
+    // TODO(fpohtmeh): uncomment
+    //m_coreMessenger->rejectGroupInvitation(groupId);
 }
 
 

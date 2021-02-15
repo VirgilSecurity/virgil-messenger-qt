@@ -13,7 +13,6 @@ OperationPage {
     footerText: ""
 
     signal contactSelected(string contactUsername)
-    signal actionButtonClicked() // TODO(fpohtmeh): remove signal?
 
     property alias selectedContacts: flow
 
@@ -42,6 +41,8 @@ OperationPage {
                     duration: Theme.animationDuration
                 }
             }
+
+            onContactSelected: root.contactSelected(contactUsername)
         }
 
         Search {
@@ -55,7 +56,12 @@ OperationPage {
             Layout.fillWidth: true
             Layout.leftMargin: Theme.smallSpacing
 
-            onAccepted: contactsList.toggleFirst()
+            onAccepted: {
+                const username = models.discoveredContacts.firstContactUsername()
+                if (username) {
+                    root.contactSelected(username)
+                }
+            }
         }
 
         SelectContactsList {
@@ -72,6 +78,13 @@ OperationPage {
 
         ServerSelectionRow {
             Layout.alignment: Qt.AlignHCenter
+        }
+    }
+
+    onContactSelected: {
+        if (models.discoveredContacts.selection.multiSelect) {
+            models.discoveredContacts.toggleByUsername(contactUsername)
+            contactSearch.clear()
         }
     }
 }

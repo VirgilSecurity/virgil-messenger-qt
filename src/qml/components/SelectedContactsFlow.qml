@@ -14,6 +14,8 @@ FlowListView {
     readonly property var editedModel: models.discoveredContacts
     readonly property real recommendedHeight: d.recommendedHeight
 
+    signal contactSelected(string contactUsername)
+
     QtObject {
         id: d
 
@@ -41,7 +43,7 @@ FlowListView {
             Item {
                 height: d.flowItemHeight
                 width: height
-                visible: isSelected
+                visible: model.isSelected
 
                 Repeater {
                     model: 2
@@ -58,7 +60,7 @@ FlowListView {
 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: editedModel.toggleByUsername(model.username)
+                    onClicked: flowListView.contactSelected(model.username)
                 }
             }
 
@@ -67,7 +69,7 @@ FlowListView {
                 nickname: model.displayName
                 avatarUrl: model.avatarUrl
                 diameter: d.flowItemHeight
-                visible: !isSelected
+                visible: !model.isSelected
             }
 
             // contact name
