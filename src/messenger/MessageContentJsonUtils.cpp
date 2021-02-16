@@ -133,6 +133,7 @@ MessageContent Self::fromBytes(const QByteArray& messageJsonBytes, QString &erro
 
 
 void Self::writeAttachment(const MessageContentAttachment& attachment, QJsonObject& json) {
+    json.insert(QLatin1String("attachmentId"), QString(attachment.id()));
     json.insert(QLatin1String("fileName"), attachment.fileName());
     json.insert(QLatin1String("size"), attachment.size());
     json.insert(QLatin1String("remoteUrl"), attachment.remoteUrl().toString());
@@ -186,7 +187,7 @@ bool Self::readExtras(const QJsonObject& json, MessageContentPicture &picture) {
 
 bool Self::readAttachment(const QJsonObject& jsonObject, MessageContentAttachment& attachment) {
     // TODO: Check mandatory fields and return false if absent.
-    attachment.setId(AttachmentId(Utils::createUuid()));
+    attachment.setId(AttachmentId(jsonObject[QLatin1String("attachmentId")].toString()));
     attachment.setFileName(jsonObject[QLatin1String("fileName")].toString());
     attachment.setSize(jsonObject[QLatin1String("size")].toInt());
     attachment.setRemoteUrl(jsonObject[QLatin1String("remoteUrl")].toString());

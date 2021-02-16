@@ -321,6 +321,7 @@ private slots:
     void xmppOnMucRoomAdded(QXmppMucRoom *room);
     void xmppOnCreateGroupChat(const GroupHandler& groupHandler, const Users& membersToBeInvited);
     void xmppOnRoomParticipantReceived(const QString& roomJid, const QString& jid, QXmppMucItem::Affiliation affiliation);
+    void xmppOnArchivedMessageReceived(const QString &queryId, const QXmppMessage &message);
 
     void onReconnectXmppServerIfNeeded();
     void onDisconnectXmppServer();

@@ -67,6 +67,7 @@ using namespace notifications::xmpp;
 #include <qxmpp/QXmppCarbonManager.h>
 #include <qxmpp/QXmppUploadRequestManager.h>
 #include <qxmpp/QXmppMucManager.h>
+#include <qxmpp/QXmppMamManager.h>
 
 #include <QCryptographicHash>
 #include <QMap>
@@ -74,6 +75,7 @@ using namespace notifications::xmpp;
 #include <QtConcurrent>
 #include <QJsonDocument>
 #include <QLoggingCategory>
+#include <QPointer>
 
 #include <memory>
 #include <mutex>
@@ -217,6 +219,7 @@ public:
     QPointer<QXmppMucManager> xmppGroupChatManager;
     QPointer<VSQLastActivityManager> lastActivityManager;
     QPointer<XmppRoomParticipantsManager> xmppRoomParticipantsManager;
+    QPointer<QXmppMamManager> xmppMamManager;
 
     std::map<QString, std::shared_ptr<User>> identityToUser;
     std::map<QString, std::shared_ptr<User>> usernameToUser;
@@ -372,6 +375,7 @@ Self::resetXmppConfiguration() {
     m_impl->xmppGroupChatManager = new QXmppMucManager();
     m_impl->lastActivityManager = new VSQLastActivityManager(m_settings);
     m_impl->xmppRoomParticipantsManager = new XmppRoomParticipantsManager();
+    m_impl->xmppMamManager = new QXmppMamManager();
 
     // Parent is implicitly changed to the QXmppClient within addExtension()
     m_impl->xmpp->addExtension(new QXmppMessageReceiptManager());
@@ -380,6 +384,7 @@ Self::resetXmppConfiguration() {
     m_impl->xmpp->addExtension(m_impl->xmppGroupChatManager);
     m_impl->xmpp->addExtension(m_impl->lastActivityManager);
     m_impl->xmpp->addExtension(m_impl->xmppRoomParticipantsManager);
+    m_impl->xmpp->addExtension(m_impl->xmppMamManager);
 
     // Connect XMPP signals
     connect(m_impl->lastActivityManager, &VSQLastActivityManager::lastActivityTextChanged, this, &Self::lastActivityTextChanged);
@@ -402,6 +407,8 @@ Self::resetXmppConfiguration() {
     connect(m_impl->xmppRoomParticipantsManager, &XmppRoomParticipantsManager::participantReceived,
                 this, &Self::xmppOnRoomParticipantReceived);
 
+    connect(m_impl->xmppMamManager, &QXmppMamManager::archivedMessageReceived,
+                this, &Self::xmppOnArchivedMessageReceived);
 
     connect(m_impl->xmpp.get(), &QXmppClient::connected, this, &Self::xmppOnConnected);
     connect(m_impl->xmpp.get(), &QXmppClient::disconnected, this, &Self::xmppOnDisconnected);
@@ -1393,6 +1400,12 @@ Self::processReceivedXmppCarbonMessage(const QXmppMessage& xmppMessage) {
         auto messageBody = xmppMessage.body().toLatin1();
         if (messageBody.isEmpty()) {
             qCWarning(lcCoreMessenger) << "Got invalid XMPP message - body is empty";
+
+            QString xmlStr;
+            QXmlStreamWriter xmlWriter(&xmlStr);
+            xmppMessage.toXml(&xmlWriter);
+            qCDebug(lcCoreMessenger).noquote() << "Got invalid XMPP message:" << xmlStr;
+
             return Self::Result::Error_InvalidMessageFormat;
         }
 
@@ -1852,6 +1865,25 @@ Self::xmppOnConnected() {
     presenceOnline.setAvailableStatusType(QXmppPresence::Online);
     m_impl->xmpp->setClientPresence(presenceOnline);
 
+    //
+    //  Request archived messages.
+    //
+    // m_impl->xmppMamManager->retrieveArchivedMessages();
+
+    QXmppElement offlineElement;
+    offlineElement.setTagName("offline");
+    offlineElement.setAttribute("xmlns", "http://jabber.org/protocol/offline");
+
+    QXmppElement fetchOfflineElement;
+    fetchOfflineElement.setTagName("fetch");
+
+    offlineElement.appendChild(fetchOfflineElement);
+
+    QXmppIq offlineIq(QXmppIq::Get);
+    offlineIq.setExtensions(QXmppElementList() << offlineElement);
+
+    m_impl->xmpp->sendPacket(offlineIq);
+
     registerPushNotifications();
 }
 
@@ -2008,6 +2040,20 @@ void Self::xmppOnUploadRequestFailed(const QXmppHttpUploadRequestIq &request) {
     }
     else {
         emit uploadSlotErrorOccurred(request.id(), tr("Fail to upload file"));
+    }
+}
+
+
+void Self::xmppOnArchivedMessageReceived(const QString &queryId, const QXmppMessage &message) {
+    QString xmlStr;
+    QXmlStreamWriter xmlWriter(&xmlStr);
+    message.toXml(&xmlWriter);
+    qCDebug(lcCoreMessenger).noquote() << "Got archived message:" << xmlStr;
+
+    if (userIdFromJid(message.from()) == currentUser()->id()) {
+        processReceivedXmppCarbonMessage(message);
+    } else {
+        processReceivedXmppMessage(message);
     }
 }
 
