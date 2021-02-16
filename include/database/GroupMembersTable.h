@@ -61,7 +61,6 @@ signals:
     void updateGroup(const GroupUpdate& groupUpdate);
     void fetchByMemberId(const UserId& memberId);
     void fetchByGroupId(const GroupId& groupId);
-    void addMembersFromLastMessage(const MessageHandler& lastMessage);
     void deleteGroupMembers(const GroupId &groupId);
 
     //
@@ -74,7 +73,6 @@ private:
     void onUpdateGroup(const GroupUpdate& groupUpdate);
     void onFetchByMemberId(const UserId& memberId);
     void onFetchByGroupId(const GroupId& groupId);
-    void onAddMembersFromLastMessage(const MessageHandler& lastMessage);
     void onDeleteGroupMembers(const GroupId &groupId);
 
     bool create() override;

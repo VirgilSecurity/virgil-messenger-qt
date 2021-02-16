@@ -276,6 +276,8 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     connect(this, &Self::connectionStateChanged, this, &Self::onLogConnectionStateChanged);
     connect(this, &Self::createGroupChat, this, &Self::onCreateGroupChat);
     connect(this, &Self::joinGroupChats, this, &Self::onJoinGroupChats);
+    connect(this, &Self::acceptGroupInvitation, this, &Self::onAcceptGroupInvitation);
+    connect(this, &Self::rejectGroupInvitation, this, &Self::onRejectGroupInvitation);
 
     connect(this, &Self::reconnectXmppServerIfNeeded, this, &Self::onReconnectXmppServerIfNeeded);
     connect(this, &Self::disconnectXmppServer, this, &Self::onDisconnectXmppServer);
@@ -2327,6 +2329,49 @@ Self::onJoinGroupChats(const GroupMembers& groupMembers) {
 }
 
 
+void Self::onAcceptGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId) {
+
+    auto roomJid = groupIdToJid(groupId);
+    auto room = m_impl->xmppGroupChatManager->addRoom(roomJid);
+    room->setNickName(currentUser()->id());
+
+    m_impl->groupOwners[groupId] = groupOwnerId;
+
+    connectXmppRoomSignals(room);
+
+    emit updateGroup(GroupMemberAffiliationUpdate {groupId, currentUser()->id(), GroupAffiliation::Member});
+
+    if (isOnline()) {
+        room->join();
+    }
+}
+
+
+void Self::onRejectGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId) {
+
+    if (isOnline()) {
+        QXmppElement xElement;
+        xElement.setTagName("x");
+        xElement.setAttribute("xmlns", "http://jabber.org/protocol/muc#user");
+
+        QXmppElement declineElement;
+        declineElement.setTagName("decline");
+        declineElement.setAttribute("to", userIdToJid(groupOwnerId));
+
+        xElement.appendChild(declineElement);
+
+        QXmppMessage rejectInvitationMessage;
+        rejectInvitationMessage.setTo(groupIdToJid(groupId));
+        rejectInvitationMessage.setFrom(currentUserJid());
+        rejectInvitationMessage.setReceiptRequested(false);
+
+        rejectInvitationMessage.setExtensions(QXmppElementList() << xElement);
+
+        m_impl->xmpp->sendPacket(rejectInvitationMessage);
+    }
+}
+
+
 void
 Self::xmppOnCreateGroupChat(const GroupHandler& group, const Users& membersToBeInvited) {
     qCInfo(lcCoreMessenger) << "Trying to create group chat within XMPP server";
@@ -2495,14 +2540,6 @@ void Self::xmppOnMucInvitationReceived(const QString &roomJid, const QString &in
             qCDebug(lcCoreMessenger) << "Failed to unpack invitation message";
             return;
         }
-
-        //
-        //  FIXME: Do not auto accept, invitation should be accepted by user interaction.
-        //
-        auto groupMember = GroupMember(groupId, invitationMessage->senderId(), invitationMessage->recipientId(),
-                invitationMessage->recipientUsername(), GroupAffiliation::Member);
-
-        emit joinGroupChats({ groupMember });
 
         emit messageReceived(invitationMessage);
     });

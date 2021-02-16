@@ -129,6 +129,9 @@ signals:
     //
     void joinGroupChats(const GroupMembers& groupsWithMe);
 
+    void acceptGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId);
+    void rejectGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId);
+
     void groupChatCreated(const GroupId& groupId);
     void groupChatCreateFailed(const GroupId& chatId, CoreMessengerStatus errorStatus);
     void updateGroup(const GroupUpdate& groupUpdate);
@@ -328,6 +331,8 @@ private slots:
 
     void onCreateGroupChat(const GroupHandler& group);
     void onJoinGroupChats(const GroupMembers& groupsWithMe);
+    void onAcceptGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId);
+    void onRejectGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId);
 
     void onProcessNetworkState(bool online);
     void onLogConnectionStateChanged(CoreMessenger::ConnectionState state);

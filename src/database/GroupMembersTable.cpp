@@ -46,7 +46,6 @@ Self::GroupMembersTable(Database *database)
     connect(this, &Self::updateGroup, this, &Self::onUpdateGroup);
     connect(this, &Self::fetchByMemberId, this, &Self::onFetchByMemberId);
     connect(this, &Self::fetchByGroupId, this, &Self::onFetchByGroupId);
-    connect(this, &Self::addMembersFromLastMessage, this, &Self::onAddMembersFromLastMessage);
     connect(this, &Self::deleteGroupMembers, this, &Self::onDeleteGroupMembers);
 }
 
@@ -169,50 +168,6 @@ void Self::onFetchByGroupId(const GroupId& groupId) {
             }
         }
         emit fetched(groupMembers);
-    }
-}
-
-
-void Self::onAddMembersFromLastMessage(const MessageHandler& lastMessage) {
-    qCDebug(lcDatabase)
-            << "Add members to the group:" << lastMessage->chatId()
-            << ", from the last message:" << lastMessage->id();
-
-    std::list<DatabaseUtils::BindValues> bindValuesCollection;
-
-    { // Insert sender (sender)
-        DatabaseUtils::BindValues bindValues;
-        bindValues.push_back({ ":groupId", QString(lastMessage->chatId()) });
-        bindValues.push_back({ ":memberId", QString(lastMessage->senderId()) });
-        bindValues.push_back({ ":memberNickname", lastMessage->senderUsername() });
-        bindValues.push_back({ ":memberAffiliation", GroupAffiliationToString(GroupAffiliation::Owner) });
-
-        bindValuesCollection.push_back(std::move(bindValues));
-    }
-
-    { // Insert recipient (me)
-        DatabaseUtils::BindValues bindValues;
-        bindValues.push_back({ ":groupId", QString(lastMessage->chatId()) });
-        bindValues.push_back({ ":memberId", QString(lastMessage->recipientId()) });
-        bindValues.push_back({ ":memberNickname", lastMessage->recipientUsername() });
-        bindValues.push_back({ ":memberAffiliation", GroupAffiliationToString(GroupAffiliation::Member) });
-
-        bindValuesCollection.push_back(std::move(bindValues));
-    }
-
-    ScopedConnection connection(*database());
-    ScopedTransaction transaction(*database());
-    for (const auto& bindValues : bindValuesCollection) {
-
-        const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertGroupMember"), bindValues);
-        if (query) {
-            qCDebug(lcDatabase) << "GroupMember was added: " << bindValues.front().second;
-        }
-        else {
-            transaction.rollback();
-            qCCritical(lcDatabase) << "GroupMembersTable::onAddMembersFromLastMessage error";
-            emit errorOccurred(tr("Failed to add group member to the database"));
-        }
     }
 }
 
