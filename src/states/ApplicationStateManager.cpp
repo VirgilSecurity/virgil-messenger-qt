@@ -61,7 +61,7 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
     , m_backupKeyState(new BackupKeyState(m_messenger, this))
     , m_editProfileState(new EditProfileState(controllers->users(), this))
     , m_verifyProfileState(new VerifyProfileState(this))
-    , m_chatInfoState(new ChatInfoState(this))
+    , m_chatInfoState(new ChatInfoState(controllers, this))
     , m_chatListState(new ChatListState(controllers->chats(), this))
     , m_chatState(new ChatState(controllers, m_messenger, this))
     , m_downloadKeyState(new DownloadKeyState(controllers->users(), this))

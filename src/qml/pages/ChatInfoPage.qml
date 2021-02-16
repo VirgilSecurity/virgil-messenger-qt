@@ -11,6 +11,7 @@ Page {
     QtObject {
         id: d
         readonly property var chat: controllers.chats.current
+        readonly property var model: chat.contacts
     }
 
     background: Rectangle {
@@ -55,10 +56,25 @@ Page {
             Layout.leftMargin: Theme.smallMargin
         }
 
-        SelectContactsList {
+        Row {
+            spacing: Theme.smallSpacing
+
+            FormPrimaryButton {
+                text: qsTr("Add")
+            }
+
+            FormPrimaryButton {
+                text: qsTr("Remove")
+                visible: d.model.selection.hasSelection
+                onClicked: controllers.chats.removeSelectedMembers()
+            }
+        }
+
+        ContactsListView {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            model: d.chat.contacts
+            model: d.model.proxy
+            onContactSelected: d.model.toggleByUsername(contactUsername)
         }
     }
 }

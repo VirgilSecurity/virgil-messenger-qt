@@ -32,12 +32,11 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/ContactsModel.h"
+#include "ContactsModel.h"
 
-#include "models/ContactsProxyModel.h"
 #include "ContactAvatarLoader.h"
-
-#include <stdexcept>
+#include "ContactsProxyModel.h"
+#include "ListSelectionModel.h"
 
 using namespace vm;
 
@@ -120,6 +119,23 @@ void ContactsModel::updateContact(const Contact &contact, int row)
     m_contacts[row] = contact;
     const auto rowIndex = index(row);
     emit dataChanged(rowIndex, rowIndex);
+}
+
+Contacts ContactsModel::selectedContacts() const
+{
+    Contacts contacts;
+    const auto indices = selection()->selectedIndexes();
+    for (const auto &i : indices) {
+        contacts.push_back(m_contacts[i.row()]);
+    }
+    return contacts;
+}
+
+void ContactsModel::toggleByUsername(const QString &contactUsername)
+{
+    if (const auto index = findByUsername(contactUsername); index.isValid()) {
+        selection()->toggle(index.row());
+    }
 }
 
 QModelIndex ContactsModel::findByUsername(const QString &contactUsername) const

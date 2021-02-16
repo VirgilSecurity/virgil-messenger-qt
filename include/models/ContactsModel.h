@@ -79,6 +79,10 @@ public:
     void removeContactsByRows(const int startRow, const int endRow);
     void updateContact(const Contact &contact, int row);
 
+    Contacts selectedContacts() const;
+
+    Q_INVOKABLE virtual void toggleByUsername(const QString &contactUsername);
+
 signals:
     void avatarUrlNotFound(const QString &contactName, QPrivateSignal) const;
 

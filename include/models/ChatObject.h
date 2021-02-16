@@ -58,8 +58,11 @@ public:
     QString title() const;
     bool isGroup() const;
 
-    void setGroupOwnerId(const UserId &userId);
+    void setGroupOwnerId(const UserId &groupOwnerId);
     UserId groupOwnerId() const;
+
+    void setContacts(const Contacts &contacts);
+    Contacts selectedContacts() const;
 
 signals:
     void titleChanged(const QString &title);

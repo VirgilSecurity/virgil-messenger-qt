@@ -57,7 +57,7 @@ public:
     int fixedContactsCount() const;
     const ContactsModel *selectedContactsModel() const;
 
-    Q_INVOKABLE void toggleByUsername(const QString &contactUsername);
+    Q_INVOKABLE void toggleByUsername(const QString &contactUsername) override;
     Q_INVOKABLE QString firstContactUsername() const;
 
 signals:

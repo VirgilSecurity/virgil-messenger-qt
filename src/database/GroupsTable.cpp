@@ -63,7 +63,9 @@ bool Self::create()
 
 
 void Self::onAddGroupForChat(const ChatHandler& chat) {
-    onUpdateGroup(AddGroupUpdate{ GroupId(chat->id()) });
+    AddGroupUpdate update;
+    update.groupId = GroupId(chat->id());
+    onUpdateGroup(update);
 }
 
 

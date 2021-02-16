@@ -74,6 +74,12 @@ ChatHandler Self::currentChat() const
     return m_chatObject->chat();
 }
 
+void Self::loadGroupInfo()
+{
+    const auto chatId(currentChat()->id());
+    m_userDatabase->groupMembersTable()->fetchByGroupId(GroupId(chatId));
+}
+
 void Self::acceptGroupInvitation()
 {
     const auto chatId(currentChat()->id());
@@ -93,12 +99,17 @@ void Self::rejectGroupInvitation()
     emit groupInvitationRejected();
 }
 
-void ChatsController::addParticipant(const QString &username) {
+void ChatsController::addMember(const QString &username) {
     Q_UNUSED(username)
 }
 
-void ChatsController::removeParticipant(const QString &username) {
-    Q_UNUSED(username)
+void ChatsController::removeSelectedMembers() {
+    std::vector<UserId> memberIds;
+    for (auto contact : m_chatObject->selectedContacts()) {
+        memberIds.push_back(contact.userId());
+    }
+    const GroupId groupId(currentChat()->id());
+    // FIXME(fpohtmeh): call in core messenger
 }
 
 void ChatsController::leaveGroup() {
@@ -198,7 +209,8 @@ void Self::setupTableConnections()
 
     connect(m_userDatabase->groupsTable(), &GroupsTable::errorOccurred, this, &Self::errorOccurred);
     connect(m_userDatabase->groupMembersTable(), &GroupMembersTable::errorOccurred, this, &Self::errorOccurred);
-    connect(m_userDatabase->groupMembersTable(), &GroupMembersTable::fetched, this, &Self::onGroupMembersFetched);
+    connect(m_userDatabase->groupMembersTable(), &GroupMembersTable::fetchedByMemberId, this, &Self::onGroupMembersFetchedByMemberId);
+    connect(m_userDatabase->groupMembersTable(), &GroupMembersTable::fetchedByGroupId, this, &Self::onGroupMembersFetchedByGroupId);
 }
 
 void Self::onCreateChatWithUser(const UserHandler &user)
@@ -263,17 +275,28 @@ void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
 }
 
 
-void Self::onGroupMembersFetched(const GroupMembers& groupMembers)
+void Self::onGroupMembersFetchedByMemberId(const UserId &memberId, const GroupMembers& groupMembers)
 {
-    qCDebug(lcController) << "Group chats members with a current user was fetched";
-
+    qCDebug(lcController) << "Group chats members with a current user were fetched" << memberId;
     //
     //  When chats are loaded we need to join groups chats to be able receive messages.
     //
     m_messenger->joinGroupChats(groupMembers);
+}
 
-    //
-    //  Disconnect to avoid calling this slot, when fetch group members within specific group.
-    //
-    disconnect(m_userDatabase->groupMembersTable(), &GroupMembersTable::fetched, this, &Self::onGroupMembersFetched);
+void Self::onGroupMembersFetchedByGroupId(const GroupId &groupId, const GroupMembers &groupMembers)
+{
+    qCDebug(lcController) << "Group chats members with a current group were fetched" << groupId;
+    if (currentChat()->id() != groupId) {
+        return;
+    }
+    Contacts contacts;
+    for (auto &member : groupMembers) {
+        // FIXME(fpohtmeh): rework, use group affiliation
+        Contact contact;
+        contact.setName(member.memberNickName());
+        contact.setUsername(member.memberId());
+        contacts.push_back(contact);
+    }
+    m_chatObject->setContacts(contacts);
 }

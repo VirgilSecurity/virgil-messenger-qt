@@ -34,14 +34,15 @@
 
 #include "ChatObject.h"
 
-#include "Utils.h" // TODO(fpohtmeh): remove include
+#include "ListSelectionModel.h"
 
 using namespace vm;
 
 ChatObject::ChatObject(QObject *parent)
     : QObject(parent)
-    , m_contactsModel(new ContactsModel(this, false))
+    , m_contactsModel(new ContactsModel(this, true))
 {
+    m_contactsModel->selection()->setMultiSelect(true);
 }
 
 void ChatObject::setChat(const ChatHandler &chat)
@@ -49,18 +50,13 @@ void ChatObject::setChat(const ChatHandler &chat)
     const auto oldTitle = title();
     const auto oldIsGroup = isGroup();
     m_chat = chat;
+    m_groupOwnerId = UserId();
+    m_contactsModel->setContacts({});
     if (oldTitle != title()) {
         emit titleChanged(title());
     }
     if (oldIsGroup != isGroup()) {
         emit isGroupChanged(isGroup());
-    }
-    // FIXME(fpohtmeh): remove dummy code
-    if (chat && isGroup()) {
-        m_contactsModel->setContacts(Utils::getDeviceContacts());
-    }
-    else {
-        m_contactsModel->setContacts({});
     }
 }
 
@@ -76,15 +72,25 @@ QString ChatObject::title() const
 
 bool ChatObject::isGroup() const
 {
-    return true; // FIXME(fpohtmeh): implement isGroup
+    return m_chat && m_chat->type() == ChatType::Group;
 }
 
-void ChatObject::setGroupOwnerId(const UserId &userId)
+void ChatObject::setGroupOwnerId(const UserId &groupOwnerId)
 {
-    m_groupOwnerId = userId;
+    m_groupOwnerId = groupOwnerId;
 }
 
 UserId ChatObject::groupOwnerId() const
 {
     return m_groupOwnerId;
+}
+
+void ChatObject::setContacts(const Contacts &contacts)
+{
+    m_contactsModel->setContacts(contacts);
+}
+
+Contacts ChatObject::selectedContacts() const
+{
+    return m_contactsModel->selectedContacts();
 }

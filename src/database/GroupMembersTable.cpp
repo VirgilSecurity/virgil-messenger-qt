@@ -143,7 +143,7 @@ void Self::onFetchByMemberId(const UserId& memberId) {
                 groupMembers.push_back(std::move(*maybyGroupMember));
             }
         }
-        emit fetched(groupMembers);
+        emit fetchedByMemberId(memberId, groupMembers);
     }
 }
 
@@ -167,7 +167,7 @@ void Self::onFetchByGroupId(const GroupId& groupId) {
                 groupMembers.push_back(std::move(*maybyGroupMember));
             }
         }
-        emit fetched(groupMembers);
+        emit fetchedByGroupId(groupId, groupMembers);
     }
 }
 
@@ -192,6 +192,9 @@ std::optional<GroupMember> Self::readGroupMember(const QSqlQuery &query) {
     auto groupOwnerId = query.value("groupOwnerId").toString();
     auto memberId = query.value("memberId").toString();
     auto memberNickname = query.value("memberNickname").toString();
+    if (memberNickname.isEmpty()) {
+        memberNickname = memberId; // FIXME(fpohtmeh): remove this workaround
+    }
     auto memberAffiliation = query.value("memberAffiliation").toString();
 
     if (groupId.isEmpty() || memberId.isEmpty() || memberNickname.isEmpty() || memberAffiliation.isEmpty()) {
