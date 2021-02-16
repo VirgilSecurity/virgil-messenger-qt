@@ -288,6 +288,9 @@ void Self::onDeleteNewGroupChat(const ChatId &chatId)
     // NOTE(fpohtmeh): new group chat has no attachments
     messagesTable()->deleteChatMessages(chatId);
     chatsTable()->deleteChat(chatId);
+    const GroupId groupId(chatId);
+    groupsTable()->deleteGroup(groupId);
+    groupMembersTable()->deleteGroupMembers(groupId);
 }
 
 void Self::onDeleteGroupChatInvitation(const ChatId &chatId)

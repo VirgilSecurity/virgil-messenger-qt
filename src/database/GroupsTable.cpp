@@ -45,6 +45,7 @@ Self::GroupsTable(Database *database)
 {
     connect(this, &Self::updateGroup, this, &Self::onUpdateGroup);
     connect(this, &Self::addGroupForChat, this, &Self::onAddGroupForChat);
+    connect(this, &Self::deleteGroup, this, &Self::onDeleteGroup);
 }
 
 
@@ -88,5 +89,18 @@ void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
     else {
         qCCritical(lcDatabase) << "GroupsTable::onUpdateGroup error";
         emit errorOccurred(tr("Failed to update groups table"));
+    }
+}
+
+void Self::onDeleteGroup(const GroupId &groupId)
+{
+    const DatabaseUtils::BindValues values {{ ":id", QString(groupId) }};
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("deleteGroupById"), values);
+    if (query) {
+        qCDebug(lcDatabase) << "Group was removed, id:" << groupId;
+    }
+    else {
+        qCCritical(lcDatabase) << "GroupsTable::onDeleteGroup deletion error";
+        emit errorOccurred(tr("Failed to delete group"));
     }
 }

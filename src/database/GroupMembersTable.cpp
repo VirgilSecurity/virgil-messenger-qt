@@ -47,6 +47,7 @@ Self::GroupMembersTable(Database *database)
     connect(this, &Self::fetchByMemberId, this, &Self::onFetchByMemberId);
     connect(this, &Self::fetchByGroupId, this, &Self::onFetchByGroupId);
     connect(this, &Self::addMembersFromLastMessage, this, &Self::onAddMembersFromLastMessage);
+    connect(this, &Self::deleteGroupMembers, this, &Self::onDeleteGroupMembers);
 }
 
 
@@ -212,6 +213,20 @@ void Self::onAddMembersFromLastMessage(const MessageHandler& lastMessage) {
             qCCritical(lcDatabase) << "GroupMembersTable::onAddMembersFromLastMessage error";
             emit errorOccurred(tr("Failed to add group member to the database"));
         }
+    }
+}
+
+
+void Self::onDeleteGroupMembers(const GroupId &groupId)
+{
+    const DatabaseUtils::BindValues values {{ ":id", QString(groupId) }};
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("deleteGroupMembersByGroupId"), values);
+    if (query) {
+        qCDebug(lcDatabase) << "Group members were removed, group id:" << groupId;
+    }
+    else {
+        qCCritical(lcDatabase) << "GroupMembersTable::onDeleteGroupMembers deletion error";
+        emit errorOccurred(tr("Failed to delete group members"));
     }
 }
 

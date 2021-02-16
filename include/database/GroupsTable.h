@@ -56,6 +56,7 @@ signals:
     //
     void addGroupForChat(const ChatHandler& chat);
     void updateGroup(const GroupUpdate& groupUpdate);
+    void deleteGroup(const GroupId &groupId);
 
     //
     //  Notification signals.
@@ -65,6 +66,7 @@ signals:
 private:
     void onAddGroupForChat(const ChatHandler& chat);
     void onUpdateGroup(const GroupUpdate& groupUpdate);
+    void onDeleteGroup(const GroupId &groupId);
 
     bool create() override;
 };
