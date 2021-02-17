@@ -79,7 +79,7 @@ public:
     void loadGroupInfo();
     Q_INVOKABLE void acceptGroupInvitation();
     Q_INVOKABLE void rejectGroupInvitation();
-    Q_INVOKABLE void addMember(const QString &username);
+    Q_INVOKABLE void addSelectedMembers();
     Q_INVOKABLE void removeSelectedMembers();
     Q_INVOKABLE void leaveGroup();
 

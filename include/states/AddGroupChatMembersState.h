@@ -32,23 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHAT_INFO_STATE_H
-#define VM_CHAT_INFO_STATE_H
+#ifndef VM_ADD_GROUP_CHAT_MEMBERS_STATE_H
+#define VM_ADD_GROUP_CHAT_MEMBERS_STATE_H
 
-#include <QState>
+#include "OperationState.h"
+#include "Contact.h"
 
 namespace vm
 {
-class ChatInfoState : public QState
+class ChatsController;
+class DiscoveredContactsModel;
+
+class AddGroupChatMembersState : public OperationState
 {
     Q_OBJECT
 
 public:
-    using QState::QState;
+    AddGroupChatMembersState(ChatsController *chatsController, DiscoveredContactsModel *contactsModel, QState *parent);
 
 signals:
-    void addMembersRequested();
+    void addMembers();
+
+private:
+    void onEntry(QEvent *event);
+
+    DiscoveredContactsModel *m_contactsModel;
 };
 }
 
-#endif // VM_CHAT_INFO_STATE_H
+#endif // VM_ADD_GROUP_CHAT_MEMBERS_STATE_H

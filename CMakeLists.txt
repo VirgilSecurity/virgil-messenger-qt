@@ -477,6 +477,7 @@ target_sources(${VS_TARGET_NAME}
         # Applications states
         ${CMAKE_CURRENT_LIST_DIR}/include/states/AccountSelectionState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/AccountSettingsState.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/states/AddGroupChatMembersState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/ApplicationStateManager.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/AttachmentPreviewState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/BackupKeyState.h
@@ -667,6 +668,7 @@ target_sources(${VS_TARGET_NAME}
         # Applications states
         ${CMAKE_CURRENT_LIST_DIR}/src/states/AccountSelectionState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/AccountSettingsState.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/states/AddGroupChatMembersState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/ApplicationStateManager.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/AttachmentPreviewState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/BackupKeyState.cpp

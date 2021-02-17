@@ -33,21 +33,3 @@
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 #include "ChatInfoState.h"
-
-#include "ChatsController.h"
-#include "Controllers.h"
-
-using namespace vm;
-
-ChatInfoState::ChatInfoState(Controllers *controllers, QState *parent)
-    : QState(parent)
-    , m_controllers(controllers)
-{
-}
-
-void ChatInfoState::onEntry(QEvent *event)
-{
-    Q_UNUSED(event)
-    // FIXME(fpohtmeh): move to controller
-    m_controllers->chats()->loadGroupInfo();
-}

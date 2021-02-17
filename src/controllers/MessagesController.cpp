@@ -89,11 +89,6 @@ void Self::clearMessages()
     m_models->messages()->clearChat();
 }
 
-void Self::deleteGroupInvitationMessage()
-{
-    // FIXME(fpohtmeh): implement
-}
-
 void Self::sendTextMessage(const QString &body)
 {
     auto message = createTextMessage(body);

@@ -39,6 +39,7 @@
 
 #include "AccountSelectionState.h"
 #include "AccountSettingsState.h"
+#include "AddGroupChatMembersState.h"
 #include "AttachmentPreviewState.h"
 #include "BackupKeyState.h"
 #include "ChatInfoState.h"
@@ -68,6 +69,7 @@ class ApplicationStateManager : public QStateMachine
     Q_OBJECT
     Q_PROPERTY(AccountSelectionState *accountSelectionState MEMBER m_accountSelectionState CONSTANT)
     Q_PROPERTY(AccountSettingsState *accountSettingsState MEMBER m_accountSettingsState CONSTANT)
+    Q_PROPERTY(AddGroupChatMembersState *addGroupChatMembersState MEMBER m_addGroupChatMembersState CONSTANT)
     Q_PROPERTY(AttachmentPreviewState *attachmentPreviewState MEMBER m_attachmentPreviewState CONSTANT)
     Q_PROPERTY(BackupKeyState *backupKeyState MEMBER m_backupKeyState CONSTANT)
     Q_PROPERTY(EditProfileState *editProfileState MEMBER m_editProfileState CONSTANT)
@@ -128,6 +130,7 @@ private:
 
     AccountSelectionState *m_accountSelectionState;
     AccountSettingsState *m_accountSettingsState;
+    AddGroupChatMembersState *m_addGroupChatMembersState;
     AttachmentPreviewState *m_attachmentPreviewState;
     BackupKeyState *m_backupKeyState;
     EditProfileState *m_editProfileState;

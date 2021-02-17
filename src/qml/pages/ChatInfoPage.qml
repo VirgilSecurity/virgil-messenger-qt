@@ -6,7 +6,7 @@ import "../theme"
 import "../components"
 
 Page {
-    readonly property var appState: app.stateManager.chatState
+    readonly property var appState: app.stateManager.chatInfoState
 
     QtObject {
         id: d
@@ -61,6 +61,7 @@ Page {
 
             FormPrimaryButton {
                 text: qsTr("Add")
+                onClicked: appState.addMembersRequested()
             }
 
             FormPrimaryButton {

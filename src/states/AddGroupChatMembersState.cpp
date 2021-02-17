@@ -32,23 +32,24 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHAT_INFO_STATE_H
-#define VM_CHAT_INFO_STATE_H
+#include "AddGroupChatMembersState.h"
 
-#include <QState>
+#include "ChatsController.h"
+#include "DiscoveredContactsModel.h"
+#include "ListSelectionModel.h"
 
-namespace vm
+using namespace vm;
+
+AddGroupChatMembersState::AddGroupChatMembersState(ChatsController *chatsController, DiscoveredContactsModel *contactsModel, QState *parent)
+    : OperationState(parent)
+    , m_contactsModel(contactsModel)
 {
-class ChatInfoState : public QState
-{
-    Q_OBJECT
-
-public:
-    using QState::QState;
-
-signals:
-    void addMembersRequested();
-};
+    connect(this, &AddGroupChatMembersState::addMembers, chatsController, &ChatsController::addSelectedMembers);
 }
 
-#endif // VM_CHAT_INFO_STATE_H
+void AddGroupChatMembersState::onEntry(QEvent *event)
+{
+    Q_UNUSED(event)
+    m_contactsModel->reload();
+    m_contactsModel->selection()->setMultiSelect(true);
+}

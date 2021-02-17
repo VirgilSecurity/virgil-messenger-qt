@@ -47,6 +47,7 @@ class ChatObject : public QObject
     Q_OBJECT
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
     Q_PROPERTY(bool isGroup READ isGroup NOTIFY isGroupChanged)
+    // FIXME(fpohtmeh): add property isGroupOwner
     Q_PROPERTY(ContactsModel *contacts MEMBER m_contactsModel CONSTANT)
 
 public:

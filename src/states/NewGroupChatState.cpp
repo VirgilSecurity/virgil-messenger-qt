@@ -32,10 +32,10 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "states/NewGroupChatState.h"
+#include "NewGroupChatState.h"
 
-#include "models/DiscoveredContactsModel.h"
-#include "models/ListSelectionModel.h"
+#include "DiscoveredContactsModel.h"
+#include "ListSelectionModel.h"
 
 using namespace vm;
 

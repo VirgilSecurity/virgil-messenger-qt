@@ -43,6 +43,7 @@
 #include "database/GroupMembersTable.h"
 #include "database/GroupsTable.h"
 #include "models/ChatsModel.h"
+#include "models/DiscoveredContactsModel.h"
 #include "models/MessagesModel.h"
 #include "models/Models.h"
 #include "Controller.h"
@@ -99,13 +100,18 @@ void Self::rejectGroupInvitation()
     emit groupInvitationRejected();
 }
 
-void ChatsController::addMember(const QString &username) {
-    Q_UNUSED(username)
+void ChatsController::addSelectedMembers() {
+    std::vector<UserId> memberIds;
+    for (auto &contact : m_models->discoveredContacts()->selectedContacts()) {
+        memberIds.push_back(contact.userId());
+    }
+    const GroupId groupId(currentChat()->id());
+    // FIXME(fpohtmeh): call in core messenger
 }
 
 void ChatsController::removeSelectedMembers() {
     std::vector<UserId> memberIds;
-    for (auto contact : m_chatObject->selectedContacts()) {
+    for (auto &contact : m_chatObject->selectedContacts()) {
         memberIds.push_back(contact.userId());
     }
     const GroupId groupId(currentChat()->id());
@@ -113,7 +119,8 @@ void ChatsController::removeSelectedMembers() {
 }
 
 void ChatsController::leaveGroup() {
-    // TODO(fpohtmeh): implement
+    const GroupId groupId(currentChat()->id());
+    // FIXME(fpohtmeh): call in core messenger
 }
 
 void Self::loadChats()
@@ -187,6 +194,10 @@ void Self::openChat(const ChatHandler& chat)
         m_userDatabase->resetUnreadCount(chat);
     }
     m_chatObject->setChat(chat);
+    if (chat->type() == ChatType::Group) {
+        const GroupId groupId(chat->id());
+        m_userDatabase->groupMembersTable()->fetchByGroupId(groupId);
+    }
     emit chatOpened(chat);
 }
 

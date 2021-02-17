@@ -3,6 +3,7 @@
         <!-- Pages -->
         <file>qml/pages/AccountSelectionPage.qml</file>
         <file>qml/pages/AccountSettingsPage.qml</file>
+        <file>qml/pages/AddGroupChatMembersPage.qml</file>
         <file>qml/pages/BackupKeyPage.qml</file>
         <file>qml/pages/ChatPage.qml</file>
         <file>qml/pages/ChatInfoPage.qml</file>
