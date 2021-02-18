@@ -76,6 +76,7 @@ public:
 
     void addContact(const ContactHandler contact);
     void removeContact(const QString &contactUsername);
+    void removeContactByRow(const int row);
     void removeContactsByRows(const int startRow, const int endRow);
     void updateContact(const ContactHandler contact, int row);
 
@@ -92,6 +93,7 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
     QModelIndex findByUsername(const QString &contactUsername) const;
+    QModelIndex findByUserId(const UserId &userId) const;
 
 private:
     void loadAvatarUrl(const QString &contactUsername);

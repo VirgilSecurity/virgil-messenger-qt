@@ -101,10 +101,15 @@ void ContactsModel::addContact(const ContactHandler contact)
 void ContactsModel::removeContact(const QString &contactUsername)
 {
     if (const auto index = findByUsername(contactUsername); index.isValid()) {
-        beginRemoveRows(QModelIndex(), index.row(), index.row());
-        m_contacts.erase(m_contacts.begin() + index.row());
-        endRemoveRows();
+        removeContactByRow(index.row());
     }
+}
+
+void ContactsModel::removeContactByRow(const int row)
+{
+    beginRemoveRows(QModelIndex(), row, row);
+    m_contacts.erase(m_contacts.begin() + row);
+    endRemoveRows();
 }
 
 void ContactsModel::removeContactsByRows(const int startRow, const int endRow)
@@ -142,6 +147,17 @@ QModelIndex ContactsModel::findByUsername(const QString &contactUsername) const
 {
     const auto it = std::find_if(m_contacts.begin(), m_contacts.end(), [&contactUsername](auto contact) {
         return contact->username() == contactUsername;
+    });
+    if (it != m_contacts.end()) {
+        return index(std::distance(m_contacts.begin(), it));
+    }
+    return QModelIndex();
+}
+
+QModelIndex ContactsModel::findByUserId(const UserId &userId) const
+{
+    const auto it = std::find_if(m_contacts.begin(), m_contacts.end(), [&userId](auto contact) {
+        return contact->userId() == userId;
     });
     if (it != m_contacts.end()) {
         return index(std::distance(m_contacts.begin(), it));

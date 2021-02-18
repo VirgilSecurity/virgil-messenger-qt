@@ -68,6 +68,17 @@ void GroupMembersModel::setCurrentUser(const UserHandler &user)
     m_currentUser = user;
 }
 
+void GroupMembersModel::updateGroup(const GroupUpdate &groupUpdate)
+{
+    if (auto upd = std::get_if<RemoveGroupMembersUpdate>(&groupUpdate)) {
+        for (auto &member : upd->members) {
+            if (auto index = findByUserId(member->id()); index.isValid()) {
+                removeContactByRow(index.row());
+            }
+        }
+    }
+}
+
 QVariant GroupMembersModel::data(const QModelIndex &index, int role) const
 {
     const auto &contact = getContact(index.row());

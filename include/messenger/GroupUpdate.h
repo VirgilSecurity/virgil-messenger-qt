@@ -59,8 +59,12 @@ struct AddGroupOwnersUpdate : public GroupUpdateBase {
 };
 
 
-
 struct AddGroupMembersUpdate : public GroupUpdateBase {
+    Users members;
+};
+
+
+struct RemoveGroupMembersUpdate : public GroupUpdateBase {
     Users members;
 };
 
@@ -78,6 +82,7 @@ struct GroupMemberAffiliationUpdate : public GroupUpdateBase {
 using GroupUpdate = std::variant<
         AddGroupOwnersUpdate,
         AddGroupMembersUpdate,
+        RemoveGroupMembersUpdate,
         AddGroupUpdate,
         GroupMemberAffiliationUpdate
         >;

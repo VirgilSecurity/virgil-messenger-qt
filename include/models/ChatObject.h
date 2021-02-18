@@ -39,6 +39,7 @@
 
 #include "Chat.h"
 #include "GroupMembersModel.h"
+#include "GroupUpdate.h"
 #include "User.h"
 
 namespace vm
@@ -69,6 +70,8 @@ public:
 
     void setGroupMembers(const GroupMembers &groupMembers);
     GroupMembers selectedGroupMembers() const;
+
+    void updateGroup(const GroupUpdate &groupUpdate);
 
 signals:
     void titleChanged(const QString &title);

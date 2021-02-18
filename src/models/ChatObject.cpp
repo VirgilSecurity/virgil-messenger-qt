@@ -103,6 +103,11 @@ GroupMembers ChatObject::selectedGroupMembers() const
     return ContactsToGroupMembers(GroupId(m_chat->id()), m_groupMembersModel->selectedContacts());
 }
 
+void ChatObject::updateGroup(const GroupUpdate &groupUpdate)
+{
+    m_groupMembersModel->updateGroup(groupUpdate);
+}
+
 void ChatObject::setLastActivityText(const QString &text)
 {
     if (text == m_lastActivityText) {

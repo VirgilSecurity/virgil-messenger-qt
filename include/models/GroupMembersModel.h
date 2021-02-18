@@ -37,6 +37,7 @@
 
 #include "ContactsModel.h"
 #include "GroupMember.h"
+#include "GroupUpdate.h"
 #include "User.h"
 
 namespace vm
@@ -52,6 +53,8 @@ public:
 
     void setGroupMembers(const GroupMembers &groupMembers);
     void setCurrentUser(const UserHandler &user);
+
+    void updateGroup(const GroupUpdate &groupUpdate);
 
 signals:
     void isReadOnlyChanged(bool isReadOnly);
