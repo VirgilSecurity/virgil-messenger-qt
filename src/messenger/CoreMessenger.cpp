@@ -47,6 +47,7 @@
 #include "VSQContactManager.h"
 #include "VSQLastActivityManager.h"
 #include "XmppRoomParticipantsManager.h"
+#include "XmppMucSubManager.h"
 
 #if VS_PUSHNOTIFICATIONS
 #include "XmppPushNotifications.h"
@@ -68,6 +69,8 @@ using namespace notifications::xmpp;
 #include <qxmpp/QXmppUploadRequestManager.h>
 #include <qxmpp/QXmppMucManager.h>
 #include <qxmpp/QXmppMamManager.h>
+#include <qxmpp/QXmppPubSubItem.h>
+#include <qxmpp/QXmppPubSubIq.h>
 
 #include <QCryptographicHash>
 #include <QMap>
@@ -219,6 +222,7 @@ public:
     QPointer<QXmppMucManager> xmppGroupChatManager;
     QPointer<VSQLastActivityManager> lastActivityManager;
     QPointer<XmppRoomParticipantsManager> xmppRoomParticipantsManager;
+    QPointer<XmppMucSubManager> xmppMucSubManager;
     QPointer<QXmppMamManager> xmppMamManager;
 
     std::map<QString, std::shared_ptr<User>> identityToUser;
@@ -375,6 +379,7 @@ Self::resetXmppConfiguration() {
     m_impl->xmppGroupChatManager = new QXmppMucManager();
     m_impl->lastActivityManager = new VSQLastActivityManager(m_settings);
     m_impl->xmppRoomParticipantsManager = new XmppRoomParticipantsManager();
+    m_impl->xmppMucSubManager = new XmppMucSubManager();
     m_impl->xmppMamManager = new QXmppMamManager();
 
     // Parent is implicitly changed to the QXmppClient within addExtension()
@@ -384,6 +389,7 @@ Self::resetXmppConfiguration() {
     m_impl->xmpp->addExtension(m_impl->xmppGroupChatManager);
     m_impl->xmpp->addExtension(m_impl->lastActivityManager);
     m_impl->xmpp->addExtension(m_impl->xmppRoomParticipantsManager);
+    m_impl->xmpp->addExtension(m_impl->xmppMucSubManager);
     m_impl->xmpp->addExtension(m_impl->xmppMamManager);
 
     // Connect XMPP signals
@@ -407,8 +413,23 @@ Self::resetXmppConfiguration() {
     connect(m_impl->xmppRoomParticipantsManager, &XmppRoomParticipantsManager::participantReceived,
                 this, &Self::xmppOnRoomParticipantReceived);
 
-    connect(m_impl->xmppMamManager, &QXmppMamManager::archivedMessageReceived,
-                this, &Self::xmppOnArchivedMessageReceived);
+    connect(m_impl->xmppMucSubManager, &XmppMucSubManager::subscribeReceived,
+                this, &Self::xmppOnMucSubscribeReceived);
+
+    connect(m_impl->xmppMucSubManager, &XmppMucSubManager::subscribedRoomReceived,
+                this, &Self::xmppOnMucSubscribedRoomReceived);
+
+    connect(m_impl->xmppMucSubManager, &XmppMucSubManager::roomSubscriberReceived,
+                this, &Self::xmppOnMucRoomSubscriberReceived);
+
+    connect(m_impl->xmppMucSubManager, &XmppMucSubManager::subscribedRoomsProcessed,
+                this, &Self::xmppOnMucSubscribedRoomsProcessed);
+
+    connect(m_impl->xmppMucSubManager, &XmppMucSubManager::roomSubscribersProcessed,
+                this, &Self::xmppOnMucRoomSubscribersProcessed);
+
+    connect(m_impl->xmppMucSubManager, &XmppMucSubManager::messageReceived,
+                this, &Self::xmppOnMessageReceived);
 
     connect(m_impl->xmpp.get(), &QXmppClient::connected, this, &Self::xmppOnConnected);
     connect(m_impl->xmpp.get(), &QXmppClient::disconnected, this, &Self::xmppOnDisconnected);
@@ -1870,20 +1891,6 @@ Self::xmppOnConnected() {
     //
     // m_impl->xmppMamManager->retrieveArchivedMessages();
 
-    QXmppElement offlineElement;
-    offlineElement.setTagName("offline");
-    offlineElement.setAttribute("xmlns", "http://jabber.org/protocol/offline");
-
-    QXmppElement fetchOfflineElement;
-    fetchOfflineElement.setTagName("fetch");
-
-    offlineElement.appendChild(fetchOfflineElement);
-
-    QXmppIq offlineIq(QXmppIq::Get);
-    offlineIq.setExtensions(QXmppElementList() << offlineElement);
-
-    m_impl->xmpp->sendPacket(offlineIq);
-
     registerPushNotifications();
 }
 
@@ -2056,7 +2063,6 @@ void Self::xmppOnArchivedMessageReceived(const QString &queryId, const QXmppMess
         processReceivedXmppMessage(message);
     }
 }
-
 
 // --------------------------------------------------------------------------
 //  Handle self events for debug purposes.
@@ -2625,6 +2631,35 @@ void Self::xmppOnRoomParticipantReceived(const QString& roomJid, const QString& 
 }
 
 
+void Self::xmppOnMucSubscribeReceived(const QString& roomJid, const QString& subscriberJid, const QString& nickname) {
+
+}
+
+
+void Self::xmppOnMucSubscribedRoomReceived(const QString& id, const QString& roomJid, const QString& subscriberJid,
+                const std::list<XmppMucSubEvent>& events) {
+
+    qCDebug(lcCoreMessenger) << "!!!!!!!!!!!!!!!!!!!!!!!!!" << id << roomJid;
+}
+
+
+void Self::xmppOnMucRoomSubscriberReceived(const QString& id, const QString& roomJid, const QString& subscriberJid,
+                const std::list<XmppMucSubEvent>& events) {
+
+    qCDebug(lcCoreMessenger) << "----------------------" << id << roomJid;
+};
+
+
+void Self::xmppOnMucSubscribedRoomsProcessed(const QString& id) {
+
+}
+
+
+void Self::xmppOnMucRoomSubscribersProcessed(const QString& id, const QString& roomJid) {
+
+}
+
+
 void Self::connectXmppRoomSignals(QXmppMucRoom *room) {
 
     qCDebug(lcCoreMessenger) << "Connecting room signals:" << room->jid();
@@ -2646,7 +2681,17 @@ void Self::connectXmppRoomSignals(QXmppMucRoom *room) {
 
         qCDebug(lcCoreMessenger) << "Joined to the XMPP room:" << roomId;
 
-        m_impl->xmppRoomParticipantsManager->requestAll(room->jid());
+        // FIXME: Check if still needed.
+        // m_impl->xmppRoomParticipantsManager->requestAll(room->jid());
+
+        m_impl->xmppMucSubManager->subscribe(
+                {
+                    XmppMucSubEvent::Messages,
+                    XmppMucSubEvent::Affiliations,
+                    XmppMucSubEvent::Subscribers,
+                    XmppMucSubEvent::Presence,
+                },
+                currentUserJid(), room->jid(), currentUser()->id());
 
         // room->requestConfiguration();
         // room->requestPermissions();

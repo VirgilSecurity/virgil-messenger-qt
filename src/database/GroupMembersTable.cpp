@@ -194,7 +194,7 @@ std::optional<GroupMember> Self::readGroupMember(const QSqlQuery &query) {
     auto memberNickname = query.value("memberNickname").toString();
     auto memberAffiliation = query.value("memberAffiliation").toString();
 
-    if (groupId.isEmpty() || memberId.isEmpty() || memberNickname.isEmpty() || memberAffiliation.isEmpty()) {
+    if (groupId.isEmpty() || memberId.isEmpty() || memberAffiliation.isEmpty()) {
 
         qCCritical(lcDatabase) << "GroupMembersTable: failed to parse query result";
 

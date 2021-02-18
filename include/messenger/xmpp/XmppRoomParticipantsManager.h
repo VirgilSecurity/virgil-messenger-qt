@@ -32,9 +32,11 @@
 //
 //
 
+#ifndef VM_XMPP_ROOM_PARTICIPANTS_MANAGER_H
+#define VM_XMPP_ROOM_PARTICIPANTS_MANAGER_H
+
 #include <qxmpp/QXmppClientExtension.h>
 #include <qxmpp/QXmppMucIq.h>
-#include <qxmpp/QXmppClient.h>
 #include <qxmpp/QXmppClient.h>
 
 #include <QPointer>
@@ -79,3 +81,4 @@ private:
 
 } // vm
 
+#endif // VM_XMPP_ROOM_PARTICIPANTS_MANAGER_H

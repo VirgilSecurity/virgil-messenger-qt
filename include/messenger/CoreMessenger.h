@@ -48,6 +48,7 @@
 #include "GroupMember.h"
 #include "GroupUpdate.h"
 #include "Contact.h"
+#include "XmppMucSubIq.h"
 
 #include <qxmpp/QXmppClient.h>
 #include <qxmpp/QXmppHttpUploadIq.h>
@@ -66,7 +67,7 @@
 
 namespace vm
 {
-class CoreMessenger : public QObject
+    class CoreMessenger : public QObject
 {
     Q_OBJECT
 private:
@@ -322,6 +323,22 @@ private slots:
     void xmppOnCreateGroupChat(const GroupHandler& groupHandler, const Users& membersToBeInvited);
     void xmppOnRoomParticipantReceived(const QString& roomJid, const QString& jid, QXmppMucItem::Affiliation affiliation);
     void xmppOnArchivedMessageReceived(const QString &queryId, const QXmppMessage &message);
+
+    //
+    //  MUC/Sub slots.
+    //--
+    void xmppOnMucSubscribeReceived(const QString& roomJid, const QString& subscriberJid, const QString& nickname);
+
+    void xmppOnMucSubscribedRoomReceived(const QString& id, const QString& roomJid, const QString& subscriberJid,
+                const std::list<XmppMucSubEvent>& events);
+
+    void xmppOnMucSubscribedRoomsProcessed(const QString& id);
+
+    void xmppOnMucRoomSubscriberReceived(const QString& id, const QString& roomJid, const QString& subscriberJid,
+                const std::list<XmppMucSubEvent>& events);
+
+    void xmppOnMucRoomSubscribersProcessed(const QString& id, const QString& roomJid);
+    //--
 
     void onReconnectXmppServerIfNeeded();
     void onDisconnectXmppServer();
