@@ -14,6 +14,8 @@ Page {
         readonly property var chat: controllers.chats.current
         readonly property var model: chat.groupMembers
         readonly property bool groupMembersEditable: chat.isGroup && !model.isReadOnly
+        readonly property bool isOwnGroup: chat.isGroup && model.isOwnedByUser
+        readonly property int selectedGroupMembersCount: model.selection.selectedCount
     }
 
     background: Rectangle {
@@ -22,7 +24,7 @@ Page {
 
     header: PageHeader {
         title: d.chat.isGroup ? qsTr("Group info") : qsTr("Chat info")
-        contextMenuVisible: d.groupMembersEditable
+        contextMenuVisible: d.groupMembersEditable || !d.isOwnGroup // TODO(fpohtmeh): check if menu is empty
         contextMenu: ContextMenu {
             ContextMenuItem {
                 text: qsTr("Add members")
@@ -31,13 +33,19 @@ Page {
             }
 
             ContextMenuSeparator {
-                visible: d.groupMembersEditable && d.model.selection.hasSelection
+                visible: d.groupMembersEditable && d.selectedGroupMembersCount
             }
 
             ContextMenuItem {
                 text: qsTr("Remove members")
-                visible: d.groupMembersEditable && d.model.selection.hasSelection
+                visible: d.groupMembersEditable && d.selectedGroupMembersCount
                 onTriggered: deleteGroupMembersDialog.open()
+            }
+
+            ContextMenuItem {
+                text: qsTr("Leave group")
+                visible: !d.isOwnGroup
+                onTriggered: controllers.chats.leaveGroup()
             }
         }
     }
@@ -62,7 +70,7 @@ Page {
 
             HeaderTitle {
                 title: d.chat.title
-                description: qsTr("%1 members").arg(10)
+                description: d.chat.isGroup ? qsTr("%1 members").arg(d.model.count) : d.chat.lastActivityText
             }
         }
 
@@ -71,9 +79,10 @@ Page {
         }
 
         Text {
-            text: qsTr("Participants")
-            color: "white"
             Layout.leftMargin: Theme.smallMargin
+            text: d.selectedGroupMembersCount ? qsTr("Participants (%1 selected)").arg(d.selectedGroupMembersCount) : qsTr("Participants")
+            color: "white"
+            visible: d.chat.isGroup
         }
 
         ContactsListView {
@@ -81,7 +90,13 @@ Page {
             Layout.fillHeight: true
             model: d.model.proxy
             isSelectable: d.groupMembersEditable
+            visible: d.chat.isGroup
             onContactSelected: d.model.toggleByUsername(contactUsername)
+        }
+
+        Item {
+            Layout.fillHeight: true
+            visible: !d.chat.isGroup
         }
     }
 

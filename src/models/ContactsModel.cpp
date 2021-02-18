@@ -149,17 +149,6 @@ QModelIndex ContactsModel::findByUsername(const QString &contactUsername) const
     return QModelIndex();
 }
 
-QModelIndex ContactsModel::findByUserId(const UserId &userId) const
-{
-    const auto it = std::find_if(m_contacts.begin(), m_contacts.end(), [&userId](auto contact) {
-        return contact->userId() == userId;
-    });
-    if (it != m_contacts.end()) {
-        return index(std::distance(m_contacts.begin(), it));
-    }
-    return QModelIndex();
-}
-
 void ContactsModel::loadAvatarUrl(const QString &contactUsername)
 {
     if (const auto index = findByUsername(contactUsername); index.isValid()) {

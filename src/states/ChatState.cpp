@@ -48,22 +48,7 @@ ChatState::ChatState(Controllers *controllers, Messenger *messenger, QState *par
     , m_controllers(controllers)
 {
     connect(m_controllers->attachments(), &AttachmentsController::openPreviewRequested, this, &ChatState::requestPreview);
-    connect(messenger, &Messenger::lastActivityTextChanged, this, &ChatState::setLastActivityText);
     connect(messenger, &Messenger::messageSent, this, &ChatState::onMessageSent);
-}
-
-QString ChatState::lastActivityText() const
-{
-    return m_lastActivityText;
-}
-
-void ChatState::setLastActivityText(const QString &text)
-{
-    if (text == m_lastActivityText) {
-        return;
-    }
-    m_lastActivityText = text;
-    emit lastActivityTextChanged(text);
 }
 
 void ChatState::onMessageSent(MessageHandler message)

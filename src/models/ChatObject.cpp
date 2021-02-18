@@ -35,14 +35,17 @@
 #include "ChatObject.h"
 
 #include "ListSelectionModel.h"
+#include "Messenger.h"
 
 using namespace vm;
 
-ChatObject::ChatObject(QObject *parent)
+ChatObject::ChatObject(Messenger *messenger, QObject *parent)
     : QObject(parent)
     , m_groupMembersModel(new GroupMembersModel(this, true))
 {
     m_groupMembersModel->selection()->setMultiSelect(true);
+
+    connect(messenger, &Messenger::lastActivityTextChanged, this, &ChatObject::setLastActivityText);
 }
 
 void ChatObject::setChat(const ChatHandler &chat)
@@ -98,4 +101,13 @@ void ChatObject::setGroupMembers(const GroupMembers &groupMembers)
 GroupMembers ChatObject::selectedGroupMembers() const
 {
     return ContactsToGroupMembers(GroupId(m_chat->id()), m_groupMembersModel->selectedContacts());
+}
+
+void ChatObject::setLastActivityText(const QString &text)
+{
+    if (text == m_lastActivityText) {
+        return;
+    }
+    m_lastActivityText = text;
+    emit lastActivityTextChanged(text);
 }

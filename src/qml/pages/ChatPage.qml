@@ -27,43 +27,13 @@ Page {
 
     header: PageHeader {
         title: d.chat.title
-        description: appState.lastActivityText
+        description: d.chat.lastActivityText
         showSeparator: !groupInvitationDialog.visible
-        contextMenuVisible: d.chat.isGroup && !groupInvitationDialog.visible
+        contextMenuVisible: !groupInvitationDialog.visible
         contextMenu: ContextMenu {
-            // TODO(fpohtmeh): remove permanently hidden items
             ContextMenuItem {
-                text: qsTr("Call")
-                iconName: "Make-Call"
-                visible: false
-            }
-
-            ContextMenuItem {
-                text: qsTr("Group info")
-                visible: d.chat.isGroup
+                text: d.chat.isGroup ? qsTr("Group info") : qsTr("Chat info")
                 onTriggered: appState.requestInfo()
-            }
-
-            ContextMenuSeparator {
-                visible: false
-            }
-
-            ContextMenuItem {
-                text: qsTr("Add participant")
-                visible: false
-                onTriggered: controllers.chats.addParticipant("userId")
-            }
-
-            ContextMenuItem {
-                text: qsTr("Remove participant")
-                visible: false
-                onTriggered: controllers.chats.removeParticipants("userId")
-            }
-
-            ContextMenuItem {
-                text: qsTr("Leave group")
-                visible: false
-                onTriggered: controllers.chats.leaveGroup()
             }
         }
     }

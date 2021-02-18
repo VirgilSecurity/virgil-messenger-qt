@@ -57,7 +57,7 @@ Self::ChatsController(Messenger *messenger, Models *models, UserDatabase *userDa
     , m_messenger(messenger)
     , m_models(models)
     , m_userDatabase(userDatabase)
-    , m_chatObject(new ChatObject(this))
+    , m_chatObject(new ChatObject(messenger, this))
 {
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
     connect(this, &Self::createChatWithUser, this, &Self::onCreateChatWithUser);
@@ -105,18 +105,18 @@ void Self::rejectGroupInvitation()
 void ChatsController::addSelectedMembers() {
     const GroupId groupId(currentChat()->id());
     const auto groupMembers = ContactsToGroupMembers(groupId, m_models->discoveredContacts()->selectedContacts());
-    // FIXME(fpohtmeh): call in core messenger
+    // FIXME: call in core messenger
 }
 
 void ChatsController::removeSelectedMembers() {
     const GroupId groupId(currentChat()->id());
     const auto groupMembers = m_chatObject->selectedGroupMembers();
-    // FIXME(fpohtmeh): call in core messenger
+    // FIXME: call in core messenger
 }
 
 void ChatsController::leaveGroup() {
     const GroupId groupId(currentChat()->id());
-    // FIXME(fpohtmeh): call in core messenger
+    // FIXME: call in core messenger
 }
 
 void Self::loadChats()

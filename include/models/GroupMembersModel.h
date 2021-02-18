@@ -45,6 +45,7 @@ class GroupMembersModel : public ContactsModel
 {
     Q_OBJECT
     Q_PROPERTY(bool isReadOnly MEMBER m_isReadOnly NOTIFY isReadOnlyChanged)
+    Q_PROPERTY(bool isOwnedByUser MEMBER m_isOwnedByUser NOTIFY isOwnedByUserChanged)
 
 public:
     using ContactsModel::ContactsModel;
@@ -54,6 +55,7 @@ public:
 
 signals:
     void isReadOnlyChanged(bool isReadOnly);
+    void isOwnedByUserChanged(bool isOwned);
 
 private:
     QVariant data(const QModelIndex &index, int role) const override;
@@ -61,6 +63,7 @@ private:
     static int sortOrder(const ContactHandler contact);
 
     bool m_isReadOnly = true;
+    bool m_isOwnedByUser = false;
     UserHandler m_currentUser;
 };
 }

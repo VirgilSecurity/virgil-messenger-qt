@@ -43,15 +43,18 @@
 
 namespace vm
 {
+class Messenger;
+
 class ChatObject : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
+    Q_PROPERTY(QString lastActivityText MEMBER m_lastActivityText NOTIFY lastActivityTextChanged)
     Q_PROPERTY(bool isGroup READ isGroup NOTIFY isGroupChanged)
     Q_PROPERTY(GroupMembersModel *groupMembers MEMBER m_groupMembersModel CONSTANT)
 
 public:
-    explicit ChatObject(QObject *parent);
+    ChatObject(Messenger *messenger, QObject *parent);
 
     void setChat(const ChatHandler &chat);
     ChatHandler chat() const;
@@ -69,11 +72,15 @@ public:
 
 signals:
     void titleChanged(const QString &title);
+    void lastActivityTextChanged(const QString& text);
     void isGroupChanged(bool isGroup);
 
 private:
+    void setLastActivityText(const QString &text);
+
     ChatHandler m_chat;
     GroupMembersModel *m_groupMembersModel;
+    QString m_lastActivityText;
     UserId m_groupInvitationOwnerId;
 };
 }

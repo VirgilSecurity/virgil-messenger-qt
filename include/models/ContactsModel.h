@@ -92,7 +92,6 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
     QModelIndex findByUsername(const QString &contactUsername) const;
-    QModelIndex findByUserId(const UserId &userId) const;
 
 private:
     void loadAvatarUrl(const QString &contactUsername);

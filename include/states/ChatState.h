@@ -50,27 +50,20 @@ class Controllers;
 class ChatState : public QState
 {
     Q_OBJECT
-    Q_PROPERTY(QString lastActivityText READ lastActivityText NOTIFY lastActivityTextChanged)
 
 public:
     ChatState(Controllers *controllers, Messenger *messenger, QState *parent);
 
-    QString lastActivityText() const;
-
 signals:
-    void lastActivityTextChanged(const QString& text);
     void requestPreview(const QUrl &url);
     void requestInfo();
 
     void messageSent();
 
 private:
-    void setLastActivityText(const QString &text);
-
     void onMessageSent(MessageHandler message);
 
     Controllers *m_controllers;
-    QString m_lastActivityText;
 };
 }
 

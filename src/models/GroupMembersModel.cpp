@@ -40,17 +40,26 @@ void GroupMembersModel::setGroupMembers(const GroupMembers &groupMembers)
 {
     setContacts(GroupMembersToContacts(groupMembers));
 
-    // Update isReadOnly
+    // Update isReadOnly & isOwnedByUser
     bool isReadOnly = true;
+    bool isOwnedByUser = false;
     if (m_currentUser) {
         const auto it = std::find_if(groupMembers.begin(), groupMembers.end(), [id = m_currentUser->id()](auto m) {
             return m->memberId() == id && (m->memberAffiliation() == GroupAffiliation::Owner || m->memberAffiliation() == GroupAffiliation::Admin);
         });
-        isReadOnly = it == groupMembers.end();
+        if (it != groupMembers.end()) {
+            isReadOnly = false;
+            isOwnedByUser = (*it)->memberAffiliation() == GroupAffiliation::Owner;
+        }
     }
+
     if (m_isReadOnly != isReadOnly) {
         m_isReadOnly = isReadOnly;
         emit isReadOnlyChanged(isReadOnly);
+    }
+    if (m_isOwnedByUser != isOwnedByUser) {
+        m_isOwnedByUser = isOwnedByUser;
+        emit isOwnedByUserChanged(isOwnedByUser);
     }
 }
 
