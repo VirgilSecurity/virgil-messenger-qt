@@ -8,7 +8,7 @@ import "../theme"
 
 ModelListView {
     id: root
-    model: d.model.proxy
+    model: models.discoveredContacts.proxy
     delegate: contactListComponent
     section.delegate: contactSectionComponent
     section.property: "section"
@@ -21,7 +21,6 @@ ModelListView {
     QtObject {
         id: d
 
-        readonly property var model: models.discoveredContacts
         property real headerOpacity: 0
         readonly property real defaultChatHeight: 50
         readonly property real selectionIconSize: 20

@@ -84,7 +84,7 @@ const ContactsModel *DiscoveredContactsModel::selectedContactsModel() const
 void DiscoveredContactsModel::toggleByUsername(const QString &contactUsername)
 {
     if (const auto index = findByUsername(contactUsername); index.isValid() && index.row() < m_fixedContactsCount) {
-        selection()->toggle(index.row());
+        selection()->toggle(index);
     }
     else {
         updateSelectedContacts(contactUsername);

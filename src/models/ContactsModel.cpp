@@ -134,7 +134,7 @@ Contacts ContactsModel::selectedContacts() const
 void ContactsModel::toggleByUsername(const QString &contactUsername)
 {
     if (const auto index = findByUsername(contactUsername); index.isValid()) {
-        selection()->toggle(index.row());
+        selection()->toggle(index);
     }
 }
 
@@ -142,6 +142,17 @@ QModelIndex ContactsModel::findByUsername(const QString &contactUsername) const
 {
     const auto it = std::find_if(m_contacts.begin(), m_contacts.end(), [&contactUsername](auto contact) {
         return contact->username() == contactUsername;
+    });
+    if (it != m_contacts.end()) {
+        return index(std::distance(m_contacts.begin(), it));
+    }
+    return QModelIndex();
+}
+
+QModelIndex ContactsModel::findByUserId(const UserId &userId) const
+{
+    const auto it = std::find_if(m_contacts.begin(), m_contacts.end(), [&userId](auto contact) {
+        return contact->userId() == userId;
     });
     if (it != m_contacts.end()) {
         return index(std::distance(m_contacts.begin(), it));
@@ -195,6 +206,7 @@ QVariant ContactsModel::data(const QModelIndex &index, int role) const
             return contact->phone().isEmpty() ? contact->email() : (contact->phone() + QLatin1String(" / ") + contact->email());
         }
     }
+
     case AvatarUrlRole:
     {
         const auto &url = contact->avatarLocalPath();
@@ -207,7 +219,7 @@ QVariant ContactsModel::data(const QModelIndex &index, int role) const
         return contact->name() + QLatin1Char('\n') + contact->email() + QLatin1Char('\n') + contact->phone();
 
     case SortRole:
-        return contact->name();
+        return contact->displayName();
 
     default:
         return ListModel::data(index, role);

@@ -67,7 +67,7 @@ Self::ChatsController(Messenger *messenger, Models *models, UserDatabase *userDa
     connect(m_messenger, &Messenger::groupChatCreateFailed, this, &Self::onGroupChatCreateFailed);
     connect(m_messenger, &Messenger::updateGroup, this, &Self::onUpdateGroup);
 
-    connect(m_models->messages(), &MessagesModel::groupInvitationReceived, m_chatObject, &ChatObject::setGroupOwnerId);
+    connect(m_models->messages(), &MessagesModel::groupInvitationReceived, m_chatObject, &ChatObject::setGroupInvitationOwnerId);
 }
 
 ChatHandler Self::currentChat() const
@@ -75,16 +75,18 @@ ChatHandler Self::currentChat() const
     return m_chatObject->chat();
 }
 
-void Self::loadGroupInfo()
+void Self::loadGroupMembers()
 {
-    const auto chatId(currentChat()->id());
-    m_userDatabase->groupMembersTable()->fetchByGroupId(GroupId(chatId));
+    if (currentChat()->type() == ChatType::Group) {
+        const auto chatId(currentChat()->id());
+        m_userDatabase->groupMembersTable()->fetchByGroupId(GroupId(chatId));
+    }
 }
 
 void Self::acceptGroupInvitation()
 {
     const auto chatId(currentChat()->id());
-    m_messenger->acceptGroupInvitation(GroupId(chatId), m_chatObject->groupOwnerId());
+    m_messenger->acceptGroupInvitation(GroupId(chatId), m_chatObject->groupInvitationOwnerId());
     m_models->chats()->resetLastMessage(chatId);
     m_models->messages()->acceptGroupInvitation();
     m_userDatabase->deleteGroupChatInvitation(chatId);
@@ -94,27 +96,21 @@ void Self::acceptGroupInvitation()
 void Self::rejectGroupInvitation()
 {
     const auto chatId(currentChat()->id());
-    m_messenger->rejectGroupInvitation(GroupId(chatId), m_chatObject->groupOwnerId());
+    m_messenger->rejectGroupInvitation(GroupId(chatId), m_chatObject->groupInvitationOwnerId());
     m_models->chats()->deleteChat(chatId);
     m_userDatabase->deleteNewGroupChat(chatId);
     emit groupInvitationRejected();
 }
 
 void ChatsController::addSelectedMembers() {
-    std::vector<UserId> memberIds;
-    for (auto &contact : m_models->discoveredContacts()->selectedContacts()) {
-        memberIds.push_back(contact->userId());
-    }
     const GroupId groupId(currentChat()->id());
+    const auto groupMembers = ContactsToGroupMembers(groupId, m_models->discoveredContacts()->selectedContacts());
     // FIXME(fpohtmeh): call in core messenger
 }
 
 void ChatsController::removeSelectedMembers() {
-    std::vector<UserId> memberIds;
-    for (auto &contact : m_chatObject->selectedContacts()) {
-        memberIds.push_back(contact->userId());
-    }
     const GroupId groupId(currentChat()->id());
+    const auto groupMembers = m_chatObject->selectedGroupMembers();
     // FIXME(fpohtmeh): call in core messenger
 }
 
@@ -194,10 +190,7 @@ void Self::openChat(const ChatHandler& chat)
         m_userDatabase->resetUnreadCount(chat);
     }
     m_chatObject->setChat(chat);
-    if (chat->type() == ChatType::Group) {
-        const GroupId groupId(chat->id());
-        m_userDatabase->groupMembersTable()->fetchByGroupId(groupId);
-    }
+    m_chatObject->setCurrentUser(m_messenger->currentUser());
     emit chatOpened(chat);
 }
 
@@ -266,9 +259,8 @@ void Self::onGroupChatCreated(const GroupId& groupId)
 
 void Self::onGroupChatCreateFailed(const GroupId& chatId, const QString& errorText)
 {
-    //
-    //  FIXME: Remove chat and show error text.
-    //
+    Q_UNUSED(chatId)
+    emit notificationCreated(errorText, true);
 }
 
 
@@ -297,17 +289,8 @@ void Self::onGroupMembersFetchedByMemberId(const UserId &memberId, const GroupMe
 
 void Self::onGroupMembersFetchedByGroupId(const GroupId &groupId, const GroupMembers &groupMembers)
 {
-    qCDebug(lcController) << "Group chats members with a current group were fetched" << groupId;
-    if (currentChat()->id() != groupId) {
-        return;
+    if (currentChat()->id() == groupId) {
+        qCDebug(lcController) << "Group chats members with a current group were fetched" << groupId;
+        m_chatObject->setGroupMembers(groupMembers);
     }
-    Contacts contacts;
-    for (auto &member : groupMembers) {
-        // FIXME(fpohtmeh): rework, use group affiliation
-        auto contact = std::make_shared<Contact>();
-        contact->setName(member.memberNickName());
-        contact->setUsername(member.memberId());
-        contacts.push_back(contact);
-    }
-    m_chatObject->setContacts(contacts);
 }

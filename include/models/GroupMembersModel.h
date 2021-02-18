@@ -32,39 +32,37 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_GROUP_AFFILIATION_H
-#define VM_GROUP_AFFILIATION_H
+#ifndef VM_GROUP_MEMBERS_MODEL_H
+#define VM_GROUP_MEMBERS_MODEL_H
 
-#include <QString>
+#include "ContactsModel.h"
+#include "GroupMember.h"
+#include "User.h"
 
-namespace vm {
+namespace vm
+{
+class GroupMembersModel : public ContactsModel
+{
+    Q_OBJECT
+    Q_PROPERTY(bool isReadOnly MEMBER m_isReadOnly NOTIFY isReadOnlyChanged)
 
-enum class GroupAffiliation {
-    None,
-    Outcast,
-    Member,
-    Admin,
-    Owner
+public:
+    using ContactsModel::ContactsModel;
+
+    void setGroupMembers(const GroupMembers &groupMembers);
+    void setCurrentUser(const UserHandler &user);
+
+signals:
+    void isReadOnlyChanged(bool isReadOnly);
+
+private:
+    QVariant data(const QModelIndex &index, int role) const override;
+
+    static int sortOrder(const ContactHandler contact);
+
+    bool m_isReadOnly = true;
+    UserHandler m_currentUser;
 };
+}
 
-//
-//  Return affiliation from a given string.
-//  Throws if correspond affiliation is not found.
-//
-GroupAffiliation GroupAffiliationFromString(const QString& affiliationString);
-
-//
-//  Return string from a given affiliation.
-//
-QString GroupAffiliationToString(GroupAffiliation affiliation);
-
-//
-//  Return display string from a given affiliation.
-//
-QString GroupAffiliationToDisplayString(GroupAffiliation affiliation);
-
-
-} // namespace vm
-
-
-#endif // VM_GROUP_AFFILIATION_H
+#endif // VM_GROUP_MEMBERS_MODEL_H

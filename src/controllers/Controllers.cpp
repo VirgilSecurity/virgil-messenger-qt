@@ -58,6 +58,7 @@ Controllers::Controllers(Messenger *messenger, Settings *settings,
 {
     connect(m_attachments, &AttachmentsController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_messages, &MessagesController::notificationCreated, this, &Controllers::notificationCreated);
+    connect(m_chats, &ChatsController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_cloudFiles, &CloudFilesController::notificationCreated, this, &Controllers::notificationCreated);
 
     //

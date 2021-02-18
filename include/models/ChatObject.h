@@ -38,7 +38,8 @@
 #include <QObject>
 
 #include "Chat.h"
-#include "ContactsModel.h"
+#include "GroupMembersModel.h"
+#include "User.h"
 
 namespace vm
 {
@@ -47,8 +48,7 @@ class ChatObject : public QObject
     Q_OBJECT
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
     Q_PROPERTY(bool isGroup READ isGroup NOTIFY isGroupChanged)
-    // FIXME(fpohtmeh): add property isGroupOwner
-    Q_PROPERTY(ContactsModel *contacts MEMBER m_contactsModel CONSTANT)
+    Q_PROPERTY(GroupMembersModel *groupMembers MEMBER m_groupMembersModel CONSTANT)
 
 public:
     explicit ChatObject(QObject *parent);
@@ -59,11 +59,13 @@ public:
     QString title() const;
     bool isGroup() const;
 
-    void setGroupOwnerId(const UserId &groupOwnerId);
-    UserId groupOwnerId() const;
+    void setCurrentUser(const UserHandler &user);
 
-    void setContacts(const Contacts &contacts);
-    Contacts selectedContacts() const;
+    void setGroupInvitationOwnerId(const UserId &ownerId);
+    UserId groupInvitationOwnerId() const;
+
+    void setGroupMembers(const GroupMembers &groupMembers);
+    GroupMembers selectedGroupMembers() const;
 
 signals:
     void titleChanged(const QString &title);
@@ -71,8 +73,8 @@ signals:
 
 private:
     ChatHandler m_chat;
-    ContactsModel *m_contactsModel;
-    UserId m_groupOwnerId;
+    GroupMembersModel *m_groupMembersModel;
+    UserId m_groupInvitationOwnerId;
 };
 }
 

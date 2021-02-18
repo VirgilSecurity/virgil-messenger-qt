@@ -40,9 +40,9 @@ using namespace vm;
 
 ChatObject::ChatObject(QObject *parent)
     : QObject(parent)
-    , m_contactsModel(new ContactsModel(this, true))
+    , m_groupMembersModel(new GroupMembersModel(this, true))
 {
-    m_contactsModel->selection()->setMultiSelect(true);
+    m_groupMembersModel->selection()->setMultiSelect(true);
 }
 
 void ChatObject::setChat(const ChatHandler &chat)
@@ -50,8 +50,8 @@ void ChatObject::setChat(const ChatHandler &chat)
     const auto oldTitle = title();
     const auto oldIsGroup = isGroup();
     m_chat = chat;
-    m_groupOwnerId = UserId();
-    m_contactsModel->setContacts({});
+    m_groupInvitationOwnerId = UserId();
+    m_groupMembersModel->setGroupMembers({});
     if (oldTitle != title()) {
         emit titleChanged(title());
     }
@@ -75,22 +75,27 @@ bool ChatObject::isGroup() const
     return m_chat && m_chat->type() == ChatType::Group;
 }
 
-void ChatObject::setGroupOwnerId(const UserId &groupOwnerId)
+void ChatObject::setCurrentUser(const UserHandler &user)
 {
-    m_groupOwnerId = groupOwnerId;
+    m_groupMembersModel->setCurrentUser(user);
 }
 
-UserId ChatObject::groupOwnerId() const
+void ChatObject::setGroupInvitationOwnerId(const UserId &ownerId)
 {
-    return m_groupOwnerId;
+    m_groupInvitationOwnerId = ownerId;
 }
 
-void ChatObject::setContacts(const Contacts &contacts)
+UserId ChatObject::groupInvitationOwnerId() const
 {
-    m_contactsModel->setContacts(contacts);
+    return m_groupInvitationOwnerId;
 }
 
-Contacts ChatObject::selectedContacts() const
+void ChatObject::setGroupMembers(const GroupMembers &groupMembers)
 {
-    return m_contactsModel->selectedContacts();
+    m_groupMembersModel->setGroupMembers(groupMembers);
+}
+
+GroupMembers ChatObject::selectedGroupMembers() const
+{
+    return ContactsToGroupMembers(GroupId(m_chat->id()), m_groupMembersModel->selectedContacts());
 }

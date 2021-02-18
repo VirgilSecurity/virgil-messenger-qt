@@ -76,7 +76,7 @@ public:
     Q_INVOKABLE void closeChat();
     ChatHandler currentChat() const;
 
-    void loadGroupInfo();
+    void loadGroupMembers();
     Q_INVOKABLE void acceptGroupInvitation();
     Q_INVOKABLE void rejectGroupInvitation();
     Q_INVOKABLE void addSelectedMembers();
@@ -85,6 +85,7 @@ public:
 
 signals:
     void errorOccurred(const QString &errorText); // TODO(fpohtmeh): remove this signal everywhere?
+    void notificationCreated(const QString &notification, const bool error);
 
     void chatsLoaded();
     void chatOpened(const ChatHandler &chat);

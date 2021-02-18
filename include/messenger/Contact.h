@@ -35,6 +35,7 @@
 #ifndef VM_CONTACT_H
 #define VM_CONTACT_H
 
+#include "GroupAffiliation.h"
 #include "UserId.h"
 
 #include <QString>
@@ -84,6 +85,10 @@ public:
 
     void setIsBanned(bool isBanned);
 
+    GroupAffiliation groupAffiliation() const;
+
+    void setGroupAffiliation(GroupAffiliation groupAffiliation);
+
     QString displayName() const;
 
 private:
@@ -95,6 +100,7 @@ private:
     QString m_platformId;
     QString m_avatarLocalPath;
     bool m_isBanned;
+    GroupAffiliation m_groupAffiliation;
 };
 
 using ContactHandler = std::shared_ptr<Contact>;

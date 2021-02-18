@@ -67,6 +67,7 @@ private:
     void onAddGroupForChat(const ChatHandler& chat);
     void onUpdateGroup(const GroupUpdate& groupUpdate);
     void onDeleteGroup(const GroupId &groupId);
+    void insertGroup(const GroupId &groupId);
 
     bool create() override;
 };

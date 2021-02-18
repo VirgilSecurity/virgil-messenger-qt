@@ -37,6 +37,8 @@
 
 #include <stdexcept>
 
+#include <QObject>
+
 using namespace vm;
 
 
@@ -78,6 +80,28 @@ QString vm::GroupAffiliationToString(GroupAffiliation affiliation) {
 
         case GroupAffiliation::Owner:
             return QLatin1String("owner");
+
+        default:
+            throw std::logic_error("Invalid GroupAffiliation");
+    }
+}
+
+QString vm::GroupAffiliationToDisplayString(GroupAffiliation affiliation) {
+    switch (affiliation) {
+        case GroupAffiliation::None:
+            return QObject::tr("none");
+
+        case GroupAffiliation::Outcast:
+            return QObject::tr("outcast");
+
+        case GroupAffiliation::Member:
+            return QObject::tr("member");
+
+        case GroupAffiliation::Admin:
+            return QObject::tr("admin");
+
+        case GroupAffiliation::Owner:
+            return QObject::tr("owner");
 
         default:
             throw std::logic_error("Invalid GroupAffiliation");

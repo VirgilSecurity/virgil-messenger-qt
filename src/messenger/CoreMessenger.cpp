@@ -2312,13 +2312,13 @@ Self::onJoinGroupChats(const GroupMembers& groupMembers) {
     std::scoped_lock _(m_impl->groupMutex);
 
     for (const auto& groupMember : groupMembers) {
-        Q_ASSERT(groupMember.memberId() == currentUser()->id());
+        Q_ASSERT(groupMember->memberId() == currentUser()->id());
 
-        auto roomJid = groupIdToJid(groupMember.groupId());
+        auto roomJid = groupIdToJid(groupMember->groupId());
         auto room = m_impl->xmppGroupChatManager->addRoom(roomJid);
-        room->setNickName(groupMember.memberId());
+        room->setNickName(groupMember->memberId());
 
-        m_impl->groupOwners[groupMember.groupId()] = groupMember.groupOwnerId();
+        m_impl->groupOwners[groupMember->groupId()] = groupMember->groupOwnerId();
 
         connectXmppRoomSignals(room);
 

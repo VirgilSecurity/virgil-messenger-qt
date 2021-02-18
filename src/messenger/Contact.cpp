@@ -45,7 +45,9 @@ Self::Contact()
     m_email(""),
     m_platformId(""),
     m_avatarLocalPath(""),
-    m_isBanned(false) {
+    m_isBanned(false),
+    m_groupAffiliation(GroupAffiliation::None)
+{
 }
 
 UserId Self::userId() const {
@@ -125,6 +127,16 @@ bool Self::isBanned() const {
 
 void Self::setIsBanned(bool isBanned) {
     m_isBanned = isBanned;
+}
+
+GroupAffiliation Self::groupAffiliation() const
+{
+    return m_groupAffiliation;
+}
+
+void Self::setGroupAffiliation(GroupAffiliation groupAffiliation)
+{
+    m_groupAffiliation = groupAffiliation;
 }
 
 QString Self::displayName() const {

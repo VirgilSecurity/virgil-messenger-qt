@@ -32,39 +32,56 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_GROUP_AFFILIATION_H
-#define VM_GROUP_AFFILIATION_H
+#include "GroupMembersModel.h"
 
-#include <QString>
+using namespace vm;
 
-namespace vm {
+void GroupMembersModel::setGroupMembers(const GroupMembers &groupMembers)
+{
+    setContacts(GroupMembersToContacts(groupMembers));
 
-enum class GroupAffiliation {
-    None,
-    Outcast,
-    Member,
-    Admin,
-    Owner
-};
+    // Update isReadOnly
+    bool isReadOnly = true;
+    if (m_currentUser) {
+        const auto it = std::find_if(groupMembers.begin(), groupMembers.end(), [id = m_currentUser->id()](auto m) {
+            return m->memberId() == id && (m->memberAffiliation() == GroupAffiliation::Owner || m->memberAffiliation() == GroupAffiliation::Admin);
+        });
+        isReadOnly = it == groupMembers.end();
+    }
+    if (m_isReadOnly != isReadOnly) {
+        m_isReadOnly = isReadOnly;
+        emit isReadOnlyChanged(isReadOnly);
+    }
+}
 
-//
-//  Return affiliation from a given string.
-//  Throws if correspond affiliation is not found.
-//
-GroupAffiliation GroupAffiliationFromString(const QString& affiliationString);
+void GroupMembersModel::setCurrentUser(const UserHandler &user)
+{
+    m_currentUser = user;
+}
 
-//
-//  Return string from a given affiliation.
-//
-QString GroupAffiliationToString(GroupAffiliation affiliation);
+QVariant GroupMembersModel::data(const QModelIndex &index, int role) const
+{
+    const auto &contact = getContact(index.row());
+    switch (role) {
+        case DetailsRole:
+            return GroupAffiliationToDisplayString(contact->groupAffiliation());
 
-//
-//  Return display string from a given affiliation.
-//
-QString GroupAffiliationToDisplayString(GroupAffiliation affiliation);
+        case SortRole:
+            return QString::number(sortOrder(contact)) + contact->displayName();
 
+        default:
+            return ContactsModel::data(index, role);
+    }
+}
 
-} // namespace vm
-
-
-#endif // VM_GROUP_AFFILIATION_H
+int GroupMembersModel::sortOrder(const ContactHandler contact)
+{
+    switch (contact->groupAffiliation()) {
+        case GroupAffiliation::Owner:
+            return 0;
+        case GroupAffiliation::Admin:
+            return 1;
+        default:
+            return 2;
+    }
+}

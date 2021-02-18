@@ -78,7 +78,7 @@ private:
 
     bool create() override;
 
-    std::optional<GroupMember> readGroupMember(const QSqlQuery &query);
+    GroupMemberHanlder readGroupMember(const QSqlQuery &query);
 };
 }
 
