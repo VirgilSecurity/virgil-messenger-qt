@@ -48,7 +48,6 @@ Control {
             id: menuButton
             image: "More"
             onClicked: contextMenu.open()
-            visible: contextMenu.count > 0
 
             property var contextMenu: ContextMenu {
             }

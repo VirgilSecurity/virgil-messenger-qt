@@ -48,7 +48,7 @@ ContactAvatarLoader::ContactAvatarLoader(QObject *parent)
     connect(&m_timer, &QTimer::timeout, this, &ContactAvatarLoader::processLoad);
 }
 
-void ContactAvatarLoader::load(Contact &contact)
+void ContactAvatarLoader::load(ContactHandler contact)
 {
     // FIXME: Re-implement this.
     // if (canLoad(contact)) {
@@ -59,7 +59,7 @@ void ContactAvatarLoader::load(Contact &contact)
     // }
 }
 
-void ContactAvatarLoader::load(Contacts &contacts, int maxLimit)
+void ContactAvatarLoader::load(Contacts contacts, int maxLimit)
 {
     // FIXME: Re-implement this.
     // const auto s = qMin<int>(maxLimit, m_contacts.size());
@@ -68,7 +68,7 @@ void ContactAvatarLoader::load(Contacts &contacts, int maxLimit)
     // }
 }
 
-bool ContactAvatarLoader::canLoad(Contact &contact)
+bool ContactAvatarLoader::canLoad(ContactHandler contact)
 {
     // FIXME: Re-implement this.
     // if (contact.avatarUrlRetryCount == 0) {

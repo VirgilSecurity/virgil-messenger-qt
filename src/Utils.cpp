@@ -57,36 +57,36 @@ namespace
 #ifdef VS_DUMMY_CONTACTS
     Contacts getDummyContacts()
     {
-        Contact c0;
-        c0.setName("John Doe");
-        c0.setAvatarLocalPath("https://avatars.mds.yandex.net/get-zen_doc/1779726/pub_5d32ac8bf2df2500adb00103_5d32aeae21f9ff00ad9973ee/scale_1200");
-        c0.setEmail("johndoe@gmail.com");
+        auto c0 = std::make_shared<Contact>();
+        c0->setName("John Doe");
+        c0->setAvatarLocalPath("https://avatars.mds.yandex.net/get-zen_doc/1779726/pub_5d32ac8bf2df2500adb00103_5d32aeae21f9ff00ad9973ee/scale_1200");
+        c0->setEmail("johndoe@gmail.com");
 
-        Contact c1;
-        c1.setName("Bon Min");
-        c1.setAvatarLocalPath("https://peopletalk.ru/wp-content/uploads/2016/10/orig_95f063cefa53daf194fa9f6d5e20b86c.jpg");
+        auto c1 = std::make_shared<Contact>();
+        c1->setName("Bon Min");
+        c1->setAvatarLocalPath("https://peopletalk.ru/wp-content/uploads/2016/10/orig_95f063cefa53daf194fa9f6d5e20b86c.jpg");
 
-        Contact c2;
-        c2.setName("Tin Bin");
-        c2.setAvatarLocalPath("https://i.postimg.cc/wBJKr6CR/K5-W-z1n-Lqms.jpg");
+        auto c2 = std::make_shared<Contact>();
+        c2->setName("Tin Bin");
+        c2->setAvatarLocalPath("https://i.postimg.cc/wBJKr6CR/K5-W-z1n-Lqms.jpg");
 
-        Contact c3;
-        c3.setName("Mister Bean");
-        c3.setAvatarLocalPath("https://avatars.mds.yandex.net/get-zen_doc/175962/pub_5a7b1334799d9dbfb9cc0f46_5a7b135b57906a1b6eb710eb/scale_1200");
-        c3.setPhone("+12345678");
+        auto c3 = std::make_shared<Contact>();
+        c3->setName("Mister Bean");
+        c3->setAvatarLocalPath("https://avatars.mds.yandex.net/get-zen_doc/175962/pub_5a7b1334799d9dbfb9cc0f46_5a7b135b57906a1b6eb710eb/scale_1200");
+        c3->setPhone("+12345678");
 
-        Contact c4;
-        c4.setName("Erick Helicopter");
-        c4.setEmail("heli@copt.er");
+        auto c4 = std::make_shared<Contact>();
+        c4->setName("Erick Helicopter");
+        c4->setEmail("heli@copt.er");
 
-        Contact c5;
-        c5.setName("Peter Griffin");
+        auto c5 = std::make_shared<Contact>();
+        c5->setName("Peter Griffin");
 
         Contacts contacts{ c0, c1, c2, c3, c4, c5 };
         int i = 0;
         for (auto &c : contacts) {
-            c.setUserId(UserId(QLatin1String("dummy/%1").arg(i)));
-            c.setPlatformId(c.userId());
+            c->setUserId(UserId(QLatin1String("dummy/%1").arg(i)));
+            c->setPlatformId(c->userId());
             ++i;
         }
         return contacts;
@@ -284,7 +284,7 @@ Contacts Utils::getDeviceContacts(const Contacts &cachedContacts)
     return contacts;
 }
 
-QUrl Utils::getContactAvatarUrl(const Contact &contact)
+QUrl Utils::getContactAvatarUrl(const ContactHandler contact)
 {
 #ifdef VS_ANDROID
     return VSQAndroid::getContactAvatarUrl(contact);

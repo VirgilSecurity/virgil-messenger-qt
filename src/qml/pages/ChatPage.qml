@@ -17,6 +17,7 @@ Page {
 
     QtObject {
         id: d
+        readonly property var chat: controllers.chats.current
         readonly property real listSpacing: 5
     }
 
@@ -25,11 +26,12 @@ Page {
     }
 
     header: PageHeader {
-        title: controllers.chats.current.title
+        title: d.chat.title
         description: appState.lastActivityText
-        contextMenuVisible: !groupInvitationDialog.visible
         showSeparator: !groupInvitationDialog.visible
+        contextMenuVisible: d.chat.isGroup && !groupInvitationDialog.visible
         contextMenu: ContextMenu {
+            // TODO(fpohtmeh): remove permanently hidden items
             ContextMenuItem {
                 text: qsTr("Call")
                 iconName: "Make-Call"
@@ -37,29 +39,30 @@ Page {
             }
 
             ContextMenuItem {
-                text: appState.isGroupChat ? qsTr("Group info") : qsTr("Chat info")
+                text: qsTr("Group info")
+                visible: d.chat.isGroup
                 onTriggered: appState.requestInfo()
             }
 
             ContextMenuSeparator {
-                visible: appState.isGroupChat
+                visible: false
             }
 
             ContextMenuItem {
                 text: qsTr("Add participant")
-                visible: appState.isGroupChat
+                visible: false
                 onTriggered: controllers.chats.addParticipant("userId")
             }
 
             ContextMenuItem {
                 text: qsTr("Remove participant")
-                visible: appState.isGroupChat
+                visible: false
                 onTriggered: controllers.chats.removeParticipants("userId")
             }
 
             ContextMenuItem {
                 text: qsTr("Leave group")
-                visible: appState.isGroupChat
+                visible: false
                 onTriggered: controllers.chats.leaveGroup()
             }
         }

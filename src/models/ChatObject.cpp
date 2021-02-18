@@ -34,14 +34,15 @@
 
 #include "ChatObject.h"
 
-#include "Utils.h" // TODO(fpohtmeh): remove include
+#include "ListSelectionModel.h"
 
 using namespace vm;
 
 ChatObject::ChatObject(QObject *parent)
     : QObject(parent)
-    , m_contactsModel(new ContactsModel(this, false))
+    , m_groupMembersModel(new GroupMembersModel(this, true))
 {
+    m_groupMembersModel->selection()->setMultiSelect(true);
 }
 
 void ChatObject::setChat(const ChatHandler &chat)
@@ -49,18 +50,13 @@ void ChatObject::setChat(const ChatHandler &chat)
     const auto oldTitle = title();
     const auto oldIsGroup = isGroup();
     m_chat = chat;
+    m_groupInvitationOwnerId = UserId();
+    m_groupMembersModel->setGroupMembers({});
     if (oldTitle != title()) {
         emit titleChanged(title());
     }
     if (oldIsGroup != isGroup()) {
         emit isGroupChanged(isGroup());
-    }
-    // FIXME(fpohtmeh): remove dummy code
-    if (chat && isGroup()) {
-        m_contactsModel->setContacts(Utils::getDeviceContacts());
-    }
-    else {
-        m_contactsModel->setContacts({});
     }
 }
 
@@ -76,15 +72,30 @@ QString ChatObject::title() const
 
 bool ChatObject::isGroup() const
 {
-    return true; // FIXME(fpohtmeh): implement isGroup
+    return m_chat && m_chat->type() == ChatType::Group;
 }
 
-void ChatObject::setGroupOwnerId(const UserId &userId)
+void ChatObject::setCurrentUser(const UserHandler &user)
 {
-    m_groupOwnerId = userId;
+    m_groupMembersModel->setCurrentUser(user);
 }
 
-UserId ChatObject::groupOwnerId() const
+void ChatObject::setGroupInvitationOwnerId(const UserId &ownerId)
 {
-    return m_groupOwnerId;
+    m_groupInvitationOwnerId = ownerId;
+}
+
+UserId ChatObject::groupInvitationOwnerId() const
+{
+    return m_groupInvitationOwnerId;
+}
+
+void ChatObject::setGroupMembers(const GroupMembers &groupMembers)
+{
+    m_groupMembersModel->setGroupMembers(groupMembers);
+}
+
+GroupMembers ChatObject::selectedGroupMembers() const
+{
+    return ContactsToGroupMembers(GroupId(m_chat->id()), m_groupMembersModel->selectedContacts());
 }

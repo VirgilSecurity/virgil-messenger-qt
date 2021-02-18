@@ -140,10 +140,10 @@ void Self::onFetchByMemberId(const UserId& memberId) {
         GroupMembers groupMembers;
         while (query->next()) {
             if (auto maybyGroupMember = readGroupMember(*query); maybyGroupMember) {
-                groupMembers.push_back(std::move(*maybyGroupMember));
+                groupMembers.push_back(std::move(maybyGroupMember));
             }
         }
-        emit fetched(groupMembers);
+        emit fetchedByMemberId(memberId, groupMembers);
     }
 }
 
@@ -164,10 +164,10 @@ void Self::onFetchByGroupId(const GroupId& groupId) {
         GroupMembers groupMembers;
         while (query->next()) {
             if (auto maybyGroupMember = readGroupMember(*query); maybyGroupMember) {
-                groupMembers.push_back(std::move(*maybyGroupMember));
+                groupMembers.push_back(std::move(maybyGroupMember));
             }
         }
-        emit fetched(groupMembers);
+        emit fetchedByGroupId(groupId, groupMembers);
     }
 }
 
@@ -186,21 +186,25 @@ void Self::onDeleteGroupMembers(const GroupId &groupId)
 }
 
 
-std::optional<GroupMember> Self::readGroupMember(const QSqlQuery &query) {
+GroupMemberHanlder Self::readGroupMember(const QSqlQuery &query) {
 
     auto groupId = query.value("groupId").toString();
     auto groupOwnerId = query.value("groupOwnerId").toString();
     auto memberId = query.value("memberId").toString();
     auto memberNickname = query.value("memberNickname").toString();
+    if (memberNickname.isEmpty()) {
+        memberNickname = memberId; // FIXME(fpohtmeh): remove this workaround
+    }
     auto memberAffiliation = query.value("memberAffiliation").toString();
 
     if (groupId.isEmpty() || memberId.isEmpty() || memberAffiliation.isEmpty()) {
 
         qCCritical(lcDatabase) << "GroupMembersTable: failed to parse query result";
 
-        return std::nullopt;
+        return GroupMemberHanlder();
     }
 
-    return GroupMember(GroupId(std::move(groupId)), UserId(std::move(groupOwnerId)), UserId(std::move(memberId)),
-        std::move(memberNickname), GroupAffiliationFromString(memberAffiliation));
+    return std::make_shared<GroupMember>(
+                GroupId(std::move(groupId)), UserId(std::move(groupOwnerId)), UserId(std::move(memberId)),
+                std::move(memberNickname), GroupAffiliationFromString(memberAffiliation));
 }

@@ -76,14 +76,16 @@ public:
     Q_INVOKABLE void closeChat();
     ChatHandler currentChat() const;
 
+    void loadGroupMembers();
     Q_INVOKABLE void acceptGroupInvitation();
     Q_INVOKABLE void rejectGroupInvitation();
-    Q_INVOKABLE void addParticipant(const QString &username);
-    Q_INVOKABLE void removeParticipant(const QString &username);
+    Q_INVOKABLE void addSelectedMembers();
+    Q_INVOKABLE void removeSelectedMembers();
     Q_INVOKABLE void leaveGroup();
 
 signals:
     void errorOccurred(const QString &errorText); // TODO(fpohtmeh): remove this signal everywhere?
+    void notificationCreated(const QString &notification, const bool error);
 
     void chatsLoaded();
     void chatOpened(const ChatHandler &chat);
@@ -103,7 +105,8 @@ private:
     void onChatsLoaded(ModifiableChats chats);
     void onCreateChatWithUser(const UserHandler &user);
     void onCreateChatWithGroup(const GroupHandler& group);
-    void onGroupMembersFetched(const GroupMembers& groupMembers);
+    void onGroupMembersFetchedByMemberId(const UserId& memberId, const GroupMembers& groupMembers);
+    void onGroupMembersFetchedByGroupId(const GroupId& groupId, const GroupMembers& groupMembers);
 
     void onGroupChatCreated(const GroupId& groupId);
     void onGroupChatCreateFailed(const GroupId& chatId, const QString& errorText);

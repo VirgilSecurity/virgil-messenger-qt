@@ -67,7 +67,8 @@ signals:
     //  Notification signals.
     //
     void errorOccurred(const QString &errorText);
-    void fetched(const GroupMembers& groupMember);
+    void fetchedByMemberId(const UserId& memberId, const GroupMembers& groupMember);
+    void fetchedByGroupId(const GroupId& groupId, const GroupMembers& groupMember);
 
 private:
     void onUpdateGroup(const GroupUpdate& groupUpdate);
@@ -77,7 +78,7 @@ private:
 
     bool create() override;
 
-    std::optional<GroupMember> readGroupMember(const QSqlQuery &query);
+    GroupMemberHanlder readGroupMember(const QSqlQuery &query);
 };
 }
 

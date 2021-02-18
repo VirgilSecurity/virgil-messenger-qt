@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.15
 import "../components"
 import "../theme"
 
-FlowListView {
+FlowView {
     id: flowListView
     clip: true
     model: selectedModel.proxy

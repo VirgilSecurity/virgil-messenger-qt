@@ -148,7 +148,13 @@ Control {
         }
 
         function openChatInfoPage() {
-            stackView.push(page("ChatInfo"))
+            if (manager.previousState !== manager.addGroupChatMembersState) {
+                stackView.push(page("ChatInfo"))
+            }
+        }
+
+        function openAddGroupChatMembersPage() {
+            stackView.push(page("AddGroupChatMembers"))
         }
 
         function showAttachmentPreview() {
@@ -210,6 +216,7 @@ Control {
         manager.nameGroupChatState.entered.connect(d.openNameGroupChatPage)
         manager.chatState.entered.connect(d.openChatPage)
         manager.chatInfoState.entered.connect(d.openChatInfoPage)
+        manager.addGroupChatMembersState.entered.connect(d.openAddGroupChatMembersPage)
         manager.attachmentPreviewState.entered.connect(d.showAttachmentPreview)
         manager.backupKeyState.entered.connect(d.openBackupKeyPage)
         manager.editProfileState.entered.connect(d.openEditProfilePage)

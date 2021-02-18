@@ -57,11 +57,12 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
     , m_settings(m_messenger->settings())
     , m_accountSelectionState(new AccountSelectionState(controllers->users(), validator, this))
     , m_accountSettingsState(new AccountSettingsState(this))
+    , m_addGroupChatMembersState(new AddGroupChatMembersState(controllers->chats(), models->discoveredContacts(), this))
     , m_attachmentPreviewState(new AttachmentPreviewState(this))
     , m_backupKeyState(new BackupKeyState(m_messenger, this))
     , m_editProfileState(new EditProfileState(controllers->users(), this))
     , m_verifyProfileState(new VerifyProfileState(this))
-    , m_chatInfoState(new ChatInfoState(this))
+    , m_chatInfoState(new ChatInfoState(controllers->chats(), this))
     , m_chatListState(new ChatListState(controllers->chats(), this))
     , m_chatState(new ChatState(controllers, m_messenger, this))
     , m_downloadKeyState(new DownloadKeyState(controllers->users(), this))
@@ -89,6 +90,7 @@ void Self::registerStatesMetaTypes()
     // Qt requires registering to avoid namespace issues
     qRegisterMetaType<AccountSelectionState *>("AccountSelectionState*");
     qRegisterMetaType<AccountSettingsState *>("AccountSettingsState*");
+    qRegisterMetaType<AddGroupChatMembersState *>("AddGroupChatMembersState*");
     qRegisterMetaType<AttachmentPreviewState *>("AttachmentPreviewState*");
     qRegisterMetaType<BackupKeyState *>("BackupKeyState*");
     qRegisterMetaType<EditProfileState *>("EditProfileState*");
@@ -110,7 +112,8 @@ void Self::registerStatesMetaTypes()
 
 void Self::addTransitions()
 {
-    for (auto state : findChildren<QState *>()) {
+    const auto states = findChildren<QState *>();
+    for (auto state : states) {
         connect(state, &QState::entered, this, std::bind(&Self::setCurrentState, this, state));
         connect(state, &QState::exited, this, std::bind(&Self::setPreviousState, this, state));
     }
@@ -164,6 +167,10 @@ void Self::addTransitions()
     connect(m_chatState, &ChatState::requestPreview, m_attachmentPreviewState, &AttachmentPreviewState::setUrl);
     addTwoSideTransition(m_chatState, m_chatState, &ChatState::requestInfo, m_chatInfoState);
     connect(chats, &ChatsController::groupInvitationRejected, this, &ApplicationStateManager::goBack);
+
+    addTwoSideTransition(m_chatInfoState, m_chatInfoState, &ChatInfoState::addMembersRequested, m_addGroupChatMembersState);
+
+    connect(m_addGroupChatMembersState, &AddGroupChatMembersState::addMembers, this, &ApplicationStateManager::goBack);
 
     m_signUpState->addTransition(users, &UsersController::signedIn, m_chatListState);
 

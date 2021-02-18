@@ -58,6 +58,7 @@ Controllers::Controllers(Messenger *messenger, Settings *settings,
 {
     connect(m_attachments, &AttachmentsController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_messages, &MessagesController::notificationCreated, this, &Controllers::notificationCreated);
+    connect(m_chats, &ChatsController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_cloudFiles, &CloudFilesController::notificationCreated, this, &Controllers::notificationCreated);
 
     //
@@ -67,7 +68,6 @@ Controllers::Controllers(Messenger *messenger, Settings *settings,
     connect(m_users, &UsersController::signedIn, m_chats, &ChatsController::loadChats, Qt::QueuedConnection);
     connect(m_chats, &ChatsController::chatOpened, m_messages, &MessagesController::loadMessages);
     connect(m_chats, &ChatsController::chatClosed, m_messages, &MessagesController::clearMessages);
-    connect(m_chats, &ChatsController::groupInvitationAccepted, m_messages, &MessagesController::deleteGroupInvitationMessage);
 
     qRegisterMetaType<AttachmentsController *>("AttachmentsController*");
     qRegisterMetaType<ChatsController *>("ChatsController*");

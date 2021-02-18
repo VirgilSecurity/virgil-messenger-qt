@@ -29,7 +29,7 @@ OperationPage {
         id: form
         isCentered: false
 
-        SelectedContactsFlow {
+        ContactsFlowView {
             id: flow
             Layout.fillWidth: true
             Layout.preferredHeight: recommendedHeight
@@ -64,7 +64,7 @@ OperationPage {
             }
         }
 
-        SelectContactsList {
+        ContactsListView {
             id: contactsList
             search: d.search
             Layout.fillWidth: true

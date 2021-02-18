@@ -39,12 +39,22 @@
 
 namespace vm
 {
+class ChatsController;
+
 class ChatInfoState : public QState
 {
     Q_OBJECT
 
 public:
-    using QState::QState;
+    ChatInfoState(ChatsController *chatsController, QState *parent);
+
+signals:
+    void addMembersRequested();
+
+private:
+    void onEntry(QEvent *event) override;
+
+    ChatsController *m_chatsController;
 };
 }
 

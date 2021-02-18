@@ -63,32 +63,14 @@ bool Self::create()
 
 
 void Self::onAddGroupForChat(const ChatHandler& chat) {
-    onUpdateGroup(AddGroupUpdate{ GroupId(chat->id()) });
+    insertGroup(GroupId(chat->id()));
 }
 
 
 void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
 {
-    DatabaseUtils::BindValues bindValues;
-    QLatin1String queryId;
-
     if (auto update = std::get_if<AddGroupUpdate>(&groupUpdate)) {
-        queryId = QLatin1String("insertGroup");
-        bindValues.push_back({ ":id", QString(update->groupId) });
-    }
-
-    if (queryId.isEmpty()) {
-        return;
-    }
-
-    ScopedConnection connection(*database());
-    const auto query = DatabaseUtils::readExecQuery(database(), queryId, bindValues);
-    if (query) {
-        qCDebug(lcDatabase) << "Group was updated: " << bindValues.front().second;
-    }
-    else {
-        qCCritical(lcDatabase) << "GroupsTable::onUpdateGroup error";
-        emit errorOccurred(tr("Failed to update groups table"));
+        insertGroup(update->groupId);
     }
 }
 
@@ -102,5 +84,19 @@ void Self::onDeleteGroup(const GroupId &groupId)
     else {
         qCCritical(lcDatabase) << "GroupsTable::onDeleteGroup deletion error";
         emit errorOccurred(tr("Failed to delete group"));
+    }
+}
+
+void Self::insertGroup(const GroupId &groupId)
+{
+    ScopedConnection connection(*database());
+    const DatabaseUtils::BindValues bindValues{{ ":id", QString(groupId) }};
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertGroup"), bindValues);
+    if (query) {
+        qCDebug(lcDatabase) << "Group was updated: " << bindValues.front().second;
+    }
+    else {
+        qCCritical(lcDatabase) << "GroupsTable::onUpdateGroup error";
+        emit errorOccurred(tr("Failed to update groups table"));
     }
 }

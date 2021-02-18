@@ -32,39 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_GROUP_AFFILIATION_H
-#define VM_GROUP_AFFILIATION_H
+#ifndef VM_ADD_GROUP_CHAT_MEMBERS_STATE_H
+#define VM_ADD_GROUP_CHAT_MEMBERS_STATE_H
 
-#include <QString>
+#include "OperationState.h"
+#include "Contact.h"
 
-namespace vm {
+namespace vm
+{
+class ChatsController;
+class DiscoveredContactsModel;
 
-enum class GroupAffiliation {
-    None,
-    Outcast,
-    Member,
-    Admin,
-    Owner
+class AddGroupChatMembersState : public OperationState
+{
+    Q_OBJECT
+
+public:
+    AddGroupChatMembersState(ChatsController *chatsController, DiscoveredContactsModel *contactsModel, QState *parent);
+
+signals:
+    void addMembers();
+
+private:
+    void onEntry(QEvent *event);
+
+    DiscoveredContactsModel *m_contactsModel;
 };
+}
 
-//
-//  Return affiliation from a given string.
-//  Throws if correspond affiliation is not found.
-//
-GroupAffiliation GroupAffiliationFromString(const QString& affiliationString);
-
-//
-//  Return string from a given affiliation.
-//
-QString GroupAffiliationToString(GroupAffiliation affiliation);
-
-//
-//  Return display string from a given affiliation.
-//
-QString GroupAffiliationToDisplayString(GroupAffiliation affiliation);
-
-
-} // namespace vm
-
-
-#endif // VM_GROUP_AFFILIATION_H
+#endif // VM_ADD_GROUP_CHAT_MEMBERS_STATE_H

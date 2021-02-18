@@ -35,13 +35,14 @@
 #ifndef VM_GROUP_MEMBER_H
 #define VM_GROUP_MEMBER_H
 
+#include "Contact.h"
 #include "GroupId.h"
-#include "UserId.h"
 #include "GroupAffiliation.h"
 #include "GroupInvitationStatus.h"
+#include "UserId.h"
 
-#include <list>
 #include <memory>
+#include <vector>
 
 namespace vm {
 
@@ -73,7 +74,11 @@ private:
     GroupAffiliation m_memberAffiliation;
 };
 
-using GroupMembers = std::list<GroupMember>;
+using GroupMemberHanlder = std::shared_ptr<GroupMember>;
+using GroupMembers = std::vector<GroupMemberHanlder>;
+
+Contacts GroupMembersToContacts(const GroupMembers &groupMembers);
+GroupMembers ContactsToGroupMembers(const GroupId &groupId, const Contacts &contacts);
 
 } // namespace vm
 

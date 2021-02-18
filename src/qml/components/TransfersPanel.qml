@@ -112,7 +112,6 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                     }
 
-                    // TODO(fpohtmeh): create component?
                     ImageButton {
                         anchors {
                             verticalCenter: parent.verticalCenter

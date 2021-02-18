@@ -52,6 +52,7 @@ public:
     explicit ListSelectionModel(ListModel *source);
 
     Q_INVOKABLE void setSelected(const QVariant &proxyRow, bool selected);
+    void setSelected(const QModelIndex &sourceIndex, bool selected);
     Q_INVOKABLE void toggle(const QVariant &proxyRow);
     void toggle(const QModelIndex &sourceIndex);
     Q_INVOKABLE void clear();
