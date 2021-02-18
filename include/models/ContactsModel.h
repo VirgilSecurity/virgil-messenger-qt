@@ -70,14 +70,14 @@ public:
     const Contacts &getContacts() const;
     int getContactsCount() const;
 
-    Contact createContact(const QString &username) const;
-    const Contact &getContact(const int row) const;
+    ContactHandler createContact(const QString &username) const;
+    const ContactHandler getContact(const int row) const;
     bool hasContact(const QString &contactUsername) const;
 
-    void addContact(const Contact &contact);
+    void addContact(const ContactHandler contact);
     void removeContact(const QString &contactUsername);
     void removeContactsByRows(const int startRow, const int endRow);
-    void updateContact(const Contact &contact, int row);
+    void updateContact(const ContactHandler contact, int row);
 
     Contacts selectedContacts() const;
 
@@ -95,7 +95,7 @@ protected:
 
 private:
     void loadAvatarUrl(const QString &contactUsername);
-    void setAvatarUrl(const Contact &contact, const QUrl &url);
+    void setAvatarUrl(const ContactHandler contact, const QUrl &url);
 
     Contacts m_contacts;
     ContactAvatarLoader *m_avatarLoader;

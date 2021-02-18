@@ -178,21 +178,21 @@ Contacts VSQAndroid::getContacts()
     static constexpr const size_t kContactInfo_Size = 4;
 
     Contacts contacts;
-    for (size_t pos = 0; pos < contactInfos.size(); pos += kContactInfo_Size) {
-        Contact contact;
-        contact.setName(contactInfos[pos + kContactInfo_Name]);
-        contact.setPhone(contactInfos[pos + kContactInfo_Phone]);
-        contact.setEmail(contactInfos[pos + kContactInfo_Email]);
-        contact.setPlatformId(contactInfos[pos + kContactInfo_PlatformId]);
+    for (int pos = 0; pos < contactInfos.size(); pos += kContactInfo_Size) {
+        auto contact = std::make_shared<Contact>();
+        contact->setName(contactInfos[pos + kContactInfo_Name]);
+        contact->setPhone(contactInfos[pos + kContactInfo_Phone]);
+        contact->setEmail(contactInfos[pos + kContactInfo_Email]);
+        contact->setPlatformId(contactInfos[pos + kContactInfo_PlatformId]);
         contacts.push_back(std::move(contact));
     }
     return contacts;
 }
 
 
-QUrl VSQAndroid::getContactAvatarUrl(const Contact &contact)
+QUrl VSQAndroid::getContactAvatarUrl(const ContactHandler contact)
 {
-    const QString idString = QString::number(contact.platformId.toLongLong());
+    const QString idString = QString::number(contact->platformId().toLongLong());
     const auto javaIdString = QAndroidJniObject::fromString(idString);
     const auto javaFilePath = QAndroidJniObject::callStaticObjectMethod(
         "org/virgil/utils/ContactUtils",

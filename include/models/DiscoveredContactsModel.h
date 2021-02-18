@@ -70,7 +70,7 @@ private:
     Contacts findContactsByFilter() const;
     void invalidateIsSelectedRole(int startRow, int endRow);
     void updateDiscoveredContacts();
-    void updateSelectedContacts(const QString &contactUsername, const Contact *contact = nullptr);
+    void updateSelectedContacts(const QString &contactUsername, const ContactHandler contact = nullptr);
 
     void onDeviceContactsPopulated(const Contacts &contacts);
     void onSelectionChanged(const QList<QModelIndex> &indices);

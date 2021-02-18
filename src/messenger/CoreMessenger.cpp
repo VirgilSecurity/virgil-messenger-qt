@@ -2237,8 +2237,8 @@ Self::onCreateGroupChat(const GroupHandler& group) {
             //
             //  Find by username.
             //
-            if (!contact.username().isEmpty()) {
-                auto user = findUserByUsername(contact.username());
+            if (!contact->username().isEmpty()) {
+                auto user = findUserByUsername(contact->username());
                 if (user) {
                     userList.push_back(user);
                     vssq_messenger_user_list_add(userListC.get(), (vssq_messenger_user_t *)user->impl()->user.get());

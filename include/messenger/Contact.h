@@ -39,6 +39,7 @@
 
 #include <QString>
 
+#include <memory>
 #include <vector>
 
 namespace vm
@@ -96,7 +97,8 @@ private:
     bool m_isBanned;
 };
 
-using Contacts = std::vector<Contact>;
+using ContactHandler = std::shared_ptr<Contact>;
+using Contacts = std::vector<ContactHandler>;
 }
 
 #endif // VM_CONTACT_H

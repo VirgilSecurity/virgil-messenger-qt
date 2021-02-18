@@ -103,7 +103,7 @@ void Self::rejectGroupInvitation()
 void ChatsController::addSelectedMembers() {
     std::vector<UserId> memberIds;
     for (auto &contact : m_models->discoveredContacts()->selectedContacts()) {
-        memberIds.push_back(contact.userId());
+        memberIds.push_back(contact->userId());
     }
     const GroupId groupId(currentChat()->id());
     // FIXME(fpohtmeh): call in core messenger
@@ -112,7 +112,7 @@ void ChatsController::addSelectedMembers() {
 void ChatsController::removeSelectedMembers() {
     std::vector<UserId> memberIds;
     for (auto &contact : m_chatObject->selectedContacts()) {
-        memberIds.push_back(contact.userId());
+        memberIds.push_back(contact->userId());
     }
     const GroupId groupId(currentChat()->id());
     // FIXME(fpohtmeh): call in core messenger
@@ -304,9 +304,9 @@ void Self::onGroupMembersFetchedByGroupId(const GroupId &groupId, const GroupMem
     Contacts contacts;
     for (auto &member : groupMembers) {
         // FIXME(fpohtmeh): rework, use group affiliation
-        Contact contact;
-        contact.setName(member.memberNickName());
-        contact.setUsername(member.memberId());
+        auto contact = std::make_shared<Contact>();
+        contact->setName(member.memberNickName());
+        contact->setUsername(member.memberId());
         contacts.push_back(contact);
     }
     m_chatObject->setContacts(contacts);
