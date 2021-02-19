@@ -44,7 +44,7 @@ namespace vm {
 //
 class UserId {
 public:
-    explicit UserId(QString messegeId = {});
+    explicit UserId(QString userId = {});
 
     bool isValid() const noexcept;
 
@@ -54,11 +54,11 @@ private:
     QString m_userId;
 };
 
-} // namespace vm
+bool operator<(const UserId& lhs, const UserId& rhs);
+bool operator>(const UserId& lhs, const UserId& rhs);
+bool operator==(const UserId& lhs, const UserId& rhs);
+bool operator!=(const UserId& lhs, const UserId& rhs);
 
-bool operator<(const vm::UserId& lhs, const vm::UserId& rhs);
-bool operator>(const vm::UserId& lhs, const vm::UserId& rhs);
-bool operator==(const vm::UserId& lhs, const vm::UserId& rhs);
-bool operator!=(const vm::UserId& lhs, const vm::UserId& rhs);
+} // namespace vm
 
 #endif // VM_USER_ID_H

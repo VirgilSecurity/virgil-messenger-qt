@@ -42,8 +42,6 @@
 using namespace vm;
 using Self = AttachmentsTable;
 
-template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-
 Self::AttachmentsTable(Database *database)
     : DatabaseTable(QLatin1String("attachments"), database)
 {

@@ -1,6 +1,7 @@
 import QtQuick 2.15
 
 import "../base"
+import "../components/Dialogs"
 
 Loader {
     id: loader

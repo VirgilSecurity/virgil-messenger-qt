@@ -32,12 +32,12 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "models/MessagesModel.h"
+#include "MessagesModel.h"
 
-#include "Utils.h"
 #include "FileUtils.h"
+#include "MessagesProxyModel.h"
 #include "Model.h"
-#include "models/ListProxyModel.h"
+#include "Utils.h"
 
 #include <algorithm>
 
@@ -46,12 +46,11 @@ using Self = MessagesModel;
 
 
 Self::MessagesModel(QObject *parent)
-    : ListModel(parent)
+    : ListModel(parent, false)
 {
     qRegisterMetaType<MessagesModel *>("MessagesModel*");
 
-    proxy()->setSortRole(SortRole);
-    proxy()->sort(0, Qt::DescendingOrder);
+    setProxy(new MessagesProxyModel(this));
 }
 
 
@@ -72,17 +71,34 @@ void Self::setMessages(ModifiableMessages messages)
     beginResetModel();
     m_messages = std::move(messages);
     endResetModel();
+
+    if (auto invitation = findIncomingInvitation()) {
+        const auto &message = m_messages.front();
+        emit groupInvitationReceived(message->senderId(), message->senderUsername(), invitation->helloText());
+    }
 }
 
 void Self::addMessage(ModifiableMessageHandler message) {
-    if (m_currentChat && (m_currentChat->id() == message->chatId())) {
+    if (m_currentChat && (m_currentChat->id() == message->chatId()) && !findById(message->id())) {
         emit messageAdding();
         const auto count = rowCount();
         beginInsertRows(QModelIndex(), count, count);
-        m_messages.emplace_back(std::move(message));
+        m_messages.push_back(std::move(message));
         endInsertRows();
         invalidateRow(count);
     }
+}
+
+void Self::deleteMessage(const int row)
+{
+    beginRemoveRows(QModelIndex(), row, row);
+    m_messages.erase(m_messages.begin() + row);
+    endRemoveRows();
+}
+
+MessageHandler Self::getMessage(const int row) const
+{
+    return m_messages[row];
 }
 
 
@@ -112,6 +128,14 @@ bool Self::updateMessage(const MessageUpdate &messageUpdate, const bool apply) {
     const auto roles = rolesFromMessageUpdate(messageUpdate);
     invalidateRow(row, roles);
     return true;
+}
+
+
+void Self::acceptGroupInvitation()
+{
+    if (findIncomingInvitation()) {
+        deleteMessage(0); // Invitation is always first
+    }
 }
 
 
@@ -170,6 +194,10 @@ QVariant Self::data(const QModelIndex &index, int role) const
     case BodyRole: {
         if (auto textContent = std::get_if<MessageContentText>(&message->content())) {
             return textContent->text().split('\n').join("<br/>");
+        }
+
+        if (std::holds_alternative<MessageContentGroupInvitation>(message->content())) {
+            throw std::logic_error("Group invitation must be filtered");
         }
         return QString();
     }
@@ -368,6 +396,18 @@ void Self::invalidateRow(const int row, const QVector<int> &roles)
 void Self::invalidateModel(const QModelIndex &index, const QVector<int> &roles)
 {
     emit dataChanged(index, index, roles);
+}
+
+const MessageContentGroupInvitation *Self::findIncomingInvitation() const
+{
+    if (m_messages.empty()) {
+        return nullptr;
+    }
+    const auto message = m_messages.front();
+    if (!message->isIncoming()) {
+        return nullptr;
+    }
+    return std::get_if<MessageContentGroupInvitation>(&message->content());
 }
 
 QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate& messageUpdate) {

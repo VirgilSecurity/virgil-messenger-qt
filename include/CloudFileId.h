@@ -59,11 +59,13 @@ public:
 private:
     std::variant<CloudFsFileId, CloudFsFolderId> m_coreId;
 };
-}
 
 bool operator<(const vm::CloudFileId &lhs, const vm::CloudFileId &rhs);
 bool operator>(const vm::CloudFileId &lhs, const vm::CloudFileId &rhs);
 bool operator==(const vm::CloudFileId &lhs, const vm::CloudFileId &rhs);
 bool operator!=(const vm::CloudFileId &lhs, const vm::CloudFileId &rhs);
+
+}
+
 
 #endif // VM_CLOUD_FILE_ID_H

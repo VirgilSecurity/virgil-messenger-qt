@@ -50,7 +50,6 @@ DiscoveredContactsModel::DiscoveredContactsModel(Validator *validator, QObject *
     , m_validator(validator)
     , m_selectedContacts(new ContactsModel(this, false))
 {
-    qRegisterMetaType<Contacts>("Contacts");
     qRegisterMetaType<DiscoveredContactsModel *>("DiscoveredContactsModel*");
 
     setProxy(new DiscoveredContactsProxyModel(this));
@@ -77,21 +76,25 @@ int DiscoveredContactsModel::fixedContactsCount() const
     return m_fixedContactsCount;
 }
 
-void DiscoveredContactsModel::toggleById(const QString &contactId)
+const ContactsModel *DiscoveredContactsModel::selectedContactsModel() const
 {
-    const auto row = findRowByContactId(contactId);
-    if (row && *row < m_fixedContactsCount) {
-        selection()->toggle(index(*row));
+    return m_selectedContacts;
+}
+
+void DiscoveredContactsModel::toggleByUsername(const QString &contactUsername)
+{
+    if (const auto index = findByUsername(contactUsername); index.isValid() && index.row() < m_fixedContactsCount) {
+        selection()->toggle(index);
     }
     else {
-        updateSelectedContacts(contactId);
+        updateSelectedContacts(contactUsername);
     }
 }
 
-QString DiscoveredContactsModel::firstContactId() const
+QString DiscoveredContactsModel::firstContactUsername() const
 {
     if (proxy()->rowCount() > 0) {
-        return proxy()->data(proxy()->index(0, 0), IdRole).toString();
+        return proxy()->data(proxy()->index(0, 0), UsernameRole).toString();
     }
     return QString();
 }
@@ -103,15 +106,15 @@ QVariant DiscoveredContactsModel::data(const QModelIndex &index, int role) const
     {
         const auto row = index.row();
         const auto preffix = (row < m_fixedContactsCount) ? QLatin1Char('1') : QLatin1Char('0');
-        return preffix + getContact(row).name;
+        return preffix + getContact(row)->displayName();
     }
     case SectionRole:
         return (index.row() < m_fixedContactsCount) ? tr("Phone contacts") : tr("Contacts to be found");
     case IsSelectedRole:
     {
         if (index.row() >= m_fixedContactsCount) {
-            const auto contactId = getContact(index.row()).id;
-            return m_selectedContacts->hasContact(contactId);
+            const auto contactUsername = getContact(index.row())->username();
+            return m_selectedContacts->hasContact(contactUsername);
         }
         break;
     }
@@ -131,10 +134,11 @@ QHash<int, QByteArray> DiscoveredContactsModel::roleNames() const
 Contacts DiscoveredContactsModel::findContactsByFilter() const
 {
     Contacts contacts;
-    for (const Contact::Id &id : { filter() }) {
+    for (const QString &contactFilter : { filter() }) {
         // TODO(fpohtmeh): exclude current user
-        if (m_validator->isValidUsername(id)) {
-            contacts.push_back(createContact(id));
+        // TODO: add searching user within DB contacts.
+        if (m_validator->isValidUsername(contactFilter)) {
+            contacts.push_back(createContact(contactFilter));
         }
     }
     return contacts;
@@ -150,9 +154,8 @@ void DiscoveredContactsModel::updateDiscoveredContacts()
     const auto contacts = findContactsByFilter();
     int contactsCount = m_fixedContactsCount;
     for (auto &c : contacts) {
-        auto row = findRowByContactId(c.id);
-        if (row && *row < m_fixedContactsCount) {
-            continue; // Contact already exists
+        if (const auto index = findByUsername(c->username()); index.isValid() && index.row() < m_fixedContactsCount) {
+            continue;
         }
         // Replace or add contact
         if (contactsCount < getContactsCount()) {
@@ -173,18 +176,19 @@ void DiscoveredContactsModel::updateDiscoveredContacts()
     }
 }
 
-void DiscoveredContactsModel::updateSelectedContacts(const Contact::Id &contactId, const Contact *contact)
+void DiscoveredContactsModel::updateSelectedContacts(const QString &contactUsername, const ContactHandler contact)
 {
-    if (m_selectedContacts->hasContact(contactId)) {
-        m_selectedContacts->removeContact(contactId);
+    if (m_selectedContacts->hasContact(contactUsername)) {
+        m_selectedContacts->removeContact(contactUsername);
     }
     else {
-        m_selectedContacts->addContact(contact ? *contact : createContact(contactId));
+        m_selectedContacts->addContact(contact ? contact : createContact(contactUsername));
     }
     // Invalidate selection for discovered contacts
-    const auto row = findRowByContactId(contactId);
-    if (row && *row >= m_fixedContactsCount) {
-        invalidateIsSelectedRole(*row, *row);
+    if (const auto index = findByUsername(contactUsername); index.isValid()) {
+        if (index.row() > m_fixedContactsCount) {
+            invalidateIsSelectedRole(index.row(), index.row());
+        }
     }
 }
 
@@ -200,7 +204,7 @@ void DiscoveredContactsModel::onSelectionChanged(const QList<QModelIndex> &indic
     for (const auto &i : indices) {
         if (i.row() < m_fixedContactsCount) {
             const auto &contact = getContact(i.row());
-            updateSelectedContacts(contact.id, &contact);
+            updateSelectedContacts(contact->username(), contact);
         }
     }
 }

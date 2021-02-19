@@ -36,6 +36,7 @@
 
 #include "Messenger.h"
 #include "database/UserDatabase.h"
+#include "database/ContactsTable.h"
 #include "models/Models.h"
 #include "models/ChatsModel.h"
 #include "models/MessagesModel.h"
@@ -60,8 +61,11 @@ Self::UsersController(Messenger *messenger, Models *models, UserDatabase *userDa
     connect(messenger, &Messenger::signUpErrorOccured, this, &Self::signUpErrorOccured);
     connect(messenger, &Messenger::downloadKeyFailed, this, &Self::downloadKeyFailed);
 
+    connect(messenger, &Messenger::userWasFound, this, &Self::onUpdateContactsWithUser);
+
     connect(userDatabase, &UserDatabase::opened, this, &Self::onFinishSignIn);
     connect(userDatabase, &UserDatabase::closed, this, &Self::onFinishSignOut);
+    connect(userDatabase, &UserDatabase::errorOccurred, this, &Self::databaseErrorOccurred);
 
     connect(models->chats(), &ChatsModel::chatAdded, this, &Self::onChatAdded);
 }
@@ -128,6 +132,13 @@ void Self::onSignedOut()
 
 void Self::onFinishSignIn() {
     const auto user = m_messenger->currentUser();
+
+    Contact contact;
+    contact.setUserId(user->id());
+    contact.setUsername(user->username());
+
+    m_userDatabase->contactsTable()->addContact(contact);
+
     // TODO: Do we really need to duplicate signals?
     emit signedIn(user->username());
 
@@ -143,4 +154,14 @@ void Self::onChatAdded(const ChatHandler &chat) {
     if (chat->type() == Chat::Type::Personal) {
         m_messenger->subscribeToUser(UserId(chat->id()));
     }
+}
+
+
+void Self::onUpdateContactsWithUser(const UserHandler& user) {
+
+    Contact contact;
+    contact.setUserId(user->id());
+    contact.setUsername(user->username());
+
+    m_userDatabase->contactsTable()->addContact(contact);
 }

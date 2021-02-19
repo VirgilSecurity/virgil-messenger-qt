@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.15
 import "../theme"
 import "../components"
 
+// TODO(fpohtmeh): use PageHeader
 ToolBar {
     id: toolbarId
     property alias title: headerTitle.title
@@ -128,6 +129,7 @@ ToolBar {
 
             HeaderTitle {
                 id: headerTitle
+                anchors.verticalCenter: parent.verticalCenter
             }
 
             Item {

@@ -55,9 +55,10 @@ public:
 
     void reload();
     int fixedContactsCount() const;
+    const ContactsModel *selectedContactsModel() const;
 
-    Q_INVOKABLE void toggleById(const QString &contactId);
-    Q_INVOKABLE QString firstContactId() const;
+    Q_INVOKABLE void toggleByUsername(const QString &contactUsername) override;
+    Q_INVOKABLE QString firstContactUsername() const;
 
 signals:
     void fixedContactsPopulated(const Contacts &contacts, QPrivateSignal);
@@ -69,7 +70,7 @@ private:
     Contacts findContactsByFilter() const;
     void invalidateIsSelectedRole(int startRow, int endRow);
     void updateDiscoveredContacts();
-    void updateSelectedContacts(const Contact::Id &contactId, const Contact *contact = nullptr);
+    void updateSelectedContacts(const QString &contactUsername, const ContactHandler contact = nullptr);
 
     void onDeviceContactsPopulated(const Contacts &contacts);
     void onSelectionChanged(const QList<QModelIndex> &indices);
@@ -80,7 +81,5 @@ private:
     int m_fixedContactsCount = 0;
 };
 }
-
-Q_DECLARE_METATYPE(vm::Contacts)
 
 #endif // VM_DISCOVEREDCONTACTSMODEL_H

@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,9 +32,51 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VS_SCHEMEVERSION_H
-#define VS_SCHEMEVERSION_H
 
-#define VERSION_DATABASE_SCHEME 0
 
-#endif // VS_SCHEMEVERSION_H
+#ifndef VM_MESSAGE_CONTENT_GROUP_INVITATION_H
+#define VM_MESSAGE_CONTENT_GROUP_INVITATION_H
+
+#include <QString>
+#include <QJsonObject>
+
+namespace vm {
+
+//
+//  Class with a group invitation message content.
+//
+class MessageContentGroupInvitation {
+
+public:
+    MessageContentGroupInvitation() = default;
+
+    explicit MessageContentGroupInvitation(QString title, QString helloText = {});
+
+    //
+    //  Return group title.
+    //
+    QString title() const;
+
+    //
+    //  Return greetings.
+    //
+    QString helloText() const;
+
+    //
+    //  Serialize object to JSON.
+    //
+    void writeJson(QJsonObject& json) const;
+
+    //
+    //  restore object from JSON.
+    //
+    bool readJson(const QJsonObject& json);
+
+private:
+    QString m_title;
+    QString m_helloText;
+
+};
+} // namespace vm
+
+#endif // VM_MESSAGE_CONTENT_GROUP_INVITATION_H

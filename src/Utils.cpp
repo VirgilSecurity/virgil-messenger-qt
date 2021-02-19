@@ -57,40 +57,38 @@ namespace
 #ifdef VS_DUMMY_CONTACTS
     Contacts getDummyContacts()
     {
-        Contact c0;
-        c0.name = "John Doe";
-        c0.avatarUrl = "https://avatars.mds.yandex.net/get-zen_doc/1779726/pub_5d32ac8bf2df2500adb00103_5d32aeae21f9ff00ad9973ee/scale_1200";
-        c0.email = "johndoe@gmail.com";
+        auto c0 = std::make_shared<Contact>();
+        c0->setName("John Doe");
+        c0->setAvatarLocalPath("https://avatars.mds.yandex.net/get-zen_doc/1779726/pub_5d32ac8bf2df2500adb00103_5d32aeae21f9ff00ad9973ee/scale_1200");
+        c0->setEmail("johndoe@gmail.com");
 
-        Contact c1;
-        c1.name = "Bon Min";
-        c1.avatarUrl = "https://peopletalk.ru/wp-content/uploads/2016/10/orig_95f063cefa53daf194fa9f6d5e20b86c.jpg";
+        auto c1 = std::make_shared<Contact>();
+        c1->setName("Bon Min");
+        c1->setAvatarLocalPath("https://peopletalk.ru/wp-content/uploads/2016/10/orig_95f063cefa53daf194fa9f6d5e20b86c.jpg");
 
-        Contact c2;
-        c2.name = "Tin Bin";
-        c2.avatarUrl = "https://i.postimg.cc/wBJKr6CR/K5-W-z1n-Lqms.jpg";
+        auto c2 = std::make_shared<Contact>();
+        c2->setName("Tin Bin");
+        c2->setAvatarLocalPath("https://i.postimg.cc/wBJKr6CR/K5-W-z1n-Lqms.jpg");
 
-        Contact c3;
-        c3.name = "Mister Bean";
-        c3.avatarUrl = "https://avatars.mds.yandex.net/get-zen_doc/175962/pub_5a7b1334799d9dbfb9cc0f46_5a7b135b57906a1b6eb710eb/scale_1200";
-        c3.phoneNumber = "+12345678";
+        auto c3 = std::make_shared<Contact>();
+        c3->setName("Mister Bean");
+        c3->setAvatarLocalPath("https://avatars.mds.yandex.net/get-zen_doc/175962/pub_5a7b1334799d9dbfb9cc0f46_5a7b135b57906a1b6eb710eb/scale_1200");
+        c3->setPhone("+12345678");
 
-        Contact c4;
-        c4.name = "Erick Helicopter";
-        c4.email = "heli@copt.er";
+        auto c4 = std::make_shared<Contact>();
+        c4->setName("Erick Helicopter");
+        c4->setEmail("heli@copt.er");
 
-        Contact c5;
-        c5.name = "Peter Griffin";
+        auto c5 = std::make_shared<Contact>();
+        c5->setName("Peter Griffin");
 
         Contacts contacts{ c0, c1, c2, c3, c4, c5 };
         int i = 0;
         for (auto &c : contacts) {
-            c.id = QLatin1String("dummy/%1").arg(i);
-            c.platformId = c.id;
+            c->setUserId(UserId(QLatin1String("dummy/%1").arg(i)));
+            c->setPlatformId(c->userId());
             ++i;
         }
-        contacts[1].id = "fff";
-        contacts[4].id = "ppp";
         return contacts;
     }
 #endif // VS_DUMMY_CONTACTS
@@ -201,6 +199,9 @@ QString Utils::messageContentDisplayText(const MessageContent &messageContent)
     } else if (auto file = std::get_if<MessageContentFile>(&messageContent)) {
         return Utils::elidedText(file->fileName(), 50);
 
+    } else if (std::holds_alternative<MessageContentGroupInvitation>(messageContent)) {
+        return QObject::tr("...");
+
     } else {
         return {};
     }
@@ -280,25 +281,10 @@ Contacts Utils::getDeviceContacts(const Contacts &cachedContacts)
 #elif defined(VS_ANDROID)
     contacts = VSQAndroid::getContacts();
 #endif // VS_ANDROID
-    if (!contacts.empty() && !cachedContacts.empty()) {
-        // Load avatar information from cache
-        std::map<QVariant, Contact> cache;
-        for (const auto &c : cachedContacts) {
-            cache[c.platformId] = c;
-        }
-        for (auto &c : contacts) {
-            const auto it = cache.find(c.platformId);
-            if (it == cache.cend()) {
-                continue;
-            }
-            c.avatarUrl = it->second.avatarUrl;
-            c.avatarUrlRetryCount = it->second.avatarUrlRetryCount;
-        }
-    }
     return contacts;
 }
 
-QUrl Utils::getContactAvatarUrl(const Contact &contact)
+QUrl Utils::getContactAvatarUrl(const ContactHandler contact)
 {
 #ifdef VS_ANDROID
     return VSQAndroid::getContactAvatarUrl(contact);
@@ -306,4 +292,21 @@ QUrl Utils::getContactAvatarUrl(const Contact &contact)
     Q_UNUSED(contact)
     return QUrl();
 #endif // VS_ANDROID
+}
+
+QString Utils::contactDisplayName(const QString &name, const QString &username, const QString &phone, const QString &email)
+{
+    if (!name.isEmpty()) {
+        return name;
+    }
+    if (!username.isEmpty()) {
+        return username;
+    }
+    if (!phone.isEmpty()) {
+        return phone;
+    }
+    if (!email.isEmpty()) {
+        return email;
+    }
+    return QObject::tr("Unknown");
 }

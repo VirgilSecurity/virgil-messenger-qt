@@ -68,6 +68,7 @@ enum class MessageContentType : size_t {
     Text = variant_index<MessageContent, MessageContentText>(),
     Picture = variant_index<MessageContent, MessageContentPicture>(),
     File = variant_index<MessageContent, MessageContentFile>(),
+    GroupInvitation = variant_index<MessageContent, MessageContentGroupInvitation>(),
 };
 
 //

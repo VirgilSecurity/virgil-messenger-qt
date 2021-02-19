@@ -39,6 +39,7 @@
 #include "database/core/DatabaseUtils.h"
 #include "IncomingMessage.h"
 #include "OutgoingMessage.h"
+#include "MessageContentJsonUtils.h"
 
 using namespace vm;
 
@@ -48,6 +49,8 @@ MessagesTable::MessagesTable(Database *database)
     connect(this, &MessagesTable::fetchChatMessages, this, &MessagesTable::onFetchChatMessages);
     connect(this, &MessagesTable::fetchNotSentMessages, this, &MessagesTable::onFetchNotSentMessages);
     connect(this, &MessagesTable::addMessage, this, &MessagesTable::onAddMessage);
+    connect(this, &MessagesTable::deleteChatMessages, this, &MessagesTable::onDeleteChatMessages);
+    connect(this, &MessagesTable::deleteGroupInvitationMessage, this, &MessagesTable::onDeleteGroupInvitationMessage);
     connect(this, &MessagesTable::updateMessage, this, &MessagesTable::onUpdateMessage);
 }
 
@@ -105,28 +108,28 @@ void MessagesTable::onAddMessage(const MessageHandler &message)
         { ":id", QString(message->id()) },
         { ":recipientId", QString(message->recipientId()) },
         { ":senderId", QString(message->senderId()) },
-        { ":senderUsername", QString(message->senderUsername()) },
         { ":chatId", QString(message->chatId()) },
-        { ":chatType", ChatTypeToString(message->chatType()) },
         { ":createdAt", message->createdAt().toTime_t() },
         { ":isOutgoing", message->isOutgoing() },
         { ":stage", messageStage },
         { ":contentType", MessageContentTypeToString(message->content()) }
     };
 
+    QString body{};
+    QByteArray ciphertext{};
+
     if (auto text = std::get_if<MessageContentText>(&message->content())) {
-        values.push_back({ ":body", text->text() });
-        values.push_back({ ":ciphertext", QVariant() });
+        body = text->text();
 
     } else if (auto encrypted = std::get_if<MessageContentEncrypted>(&message->content())) {
-        values.push_back({ ":ciphertext", encrypted->ciphertext() });
-        values.push_back({ ":body", QVariant() });
+        ciphertext = encrypted->ciphertext();
 
-    } else if (auto attachment = message->contentAsAttachment()) {
-        Q_UNUSED(attachment)
-        values.push_back({ ":ciphertext", QVariant() });
-        values.push_back({ ":body", QVariant() });
+    } else if (auto invitation = std::get_if<MessageContentGroupInvitation>(&message->content())) {
+        body = MessageContentJsonUtils::toString(*invitation);
     }
+
+    values.push_back({ ":body", body });
+    values.push_back({ ":ciphertext", ciphertext });
 
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertMessage"), values);
     if (query) {
@@ -135,6 +138,35 @@ void MessagesTable::onAddMessage(const MessageHandler &message)
     else {
         qCCritical(lcDatabase) << "MessagesTable::onCreateMessage error";
         emit errorOccurred(tr("Failed to insert message"));
+    }
+}
+
+void MessagesTable::onDeleteChatMessages(const ChatId &chatId)
+{
+    const DatabaseUtils::BindValues values {{ ":id", QString(chatId) }};
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("deleteMessagesByChatId"), values);
+    if (query) {
+        qCDebug(lcDatabase) << "Chat messages was removed, chatId:" << chatId;
+    }
+    else {
+        qCCritical(lcDatabase) << "MessagesTable::onDeleteChatMessages deletion error";
+        emit errorOccurred(tr("Failed to delete chat messages"));
+    }
+}
+
+void MessagesTable::onDeleteGroupInvitationMessage(const ChatId &chatId)
+{
+    const DatabaseUtils::BindValues values {
+        { ":id", QString(chatId) },
+        { ":contentType", MessageContentTypeToString(MessageContentType::GroupInvitation) }
+    };
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("deleteGroupInvitationMessageByChatId"), values);
+    if (query) {
+        qCDebug(lcDatabase) << "Group invitation message was removed, chatId:" << chatId;
+    }
+    else {
+        qCCritical(lcDatabase) << "MessagesTable::onDeleteGroupInvitationMessage deletion error";
+        emit errorOccurred(tr("Failed to delete group invitation message"));
     }
 }
 

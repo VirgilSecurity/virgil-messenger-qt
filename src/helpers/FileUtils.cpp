@@ -138,12 +138,12 @@ QUrl Self::localFileToUrl(const QString &filePath)
 #endif
 }
 
-QString Self::readTextFile(const QString &filePath)
+std::optional<QString> Self::readTextFile(const QString &filePath)
 {
     QFile file(filePath);
     if (!file.open(QFile::Text | QFile::ReadOnly)) {
         qCWarning(lcFileUtils) << "Failed to read text file";
-        return QString();
+        return std::nullopt;
     }
     return file.readAll();
 }

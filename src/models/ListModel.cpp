@@ -45,6 +45,10 @@ ListModel::ListModel(QObject *parent, bool createProxy)
     , m_selection(new ListSelectionModel(this))
 {
     connect(m_selection, &ListSelectionModel::changed, this, &ListModel::onSelectionChanged);
+
+    connect(this, &QAbstractListModel::rowsInserted, this, &ListModel::onRowCountChanged);
+    connect(this, &QAbstractListModel::rowsRemoved, this, &ListModel::onRowCountChanged);
+    connect(this, &QAbstractListModel::modelReset, this, &ListModel::onRowCountChanged);
 }
 
 QString ListModel::filter() const
@@ -126,5 +130,13 @@ void ListModel::onSelectionChanged(const QList<QModelIndex> &indices)
 {
     for (auto &i : indices) {
         emit dataChanged(i, i, { IsSelectedRole });
+    }
+}
+
+void ListModel::onRowCountChanged()
+{
+    if (m_count != rowCount()) {
+        m_count = rowCount();
+        emit countChanged(m_count);
     }
 }

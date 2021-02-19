@@ -47,8 +47,13 @@ NameGroupChatState::NameGroupChatState(ChatsController *chatsController, QState 
     connect(this, &NameGroupChatState::createGroup, this, &NameGroupChatState::onCreateGroup);
 }
 
+void NameGroupChatState::setContacts(const Contacts &contacts)
+{
+    m_contacts = contacts;
+}
+
 void NameGroupChatState::onCreateGroup(const QString &name)
 {
     emit operationStarted();
-    m_chatsController->createChatWithGroupName(name);
+    m_chatsController->createGroupChat(name, m_contacts);
 }

@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,15 +32,48 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_GROUPID_H
-#define VM_GROUPID_H
+
+#ifndef VM_GROUP_ID_H
+#define VM_GROUP_ID_H
+
+#include "ChatId.h"
 
 #include <QString>
 
-namespace vm
-{
-// TODO(fpohtmeh): refactor
-using GroupId = QString;
-}
+namespace vm {
+//
+//  This class just wraps QString but is used for a strong type checking.
+//
+class GroupId {
+public:
+    explicit GroupId(ChatId chatId);
+    explicit GroupId(QString groupId = {});
 
-#endif // VM_GROUPID_H
+    bool isValid() const noexcept;
+
+    operator QString() const;
+
+    static GroupId generate();
+
+private:
+    QString m_groupId;
+};
+
+bool operator<(const GroupId& lhs, const GroupId& rhs);
+bool operator>(const GroupId& lhs, const GroupId& rhs);
+bool operator==(const GroupId& lhs, const GroupId& rhs);
+bool operator!=(const GroupId& lhs, const GroupId& rhs);
+
+bool operator<(const ChatId& lhs, const GroupId& rhs);
+bool operator>(const ChatId& lhs, const GroupId& rhs);
+bool operator==(const ChatId& lhs, const GroupId& rhs);
+bool operator!=(const ChatId& lhs, const GroupId& rhs);
+
+bool operator<(const GroupId& lhs, const ChatId& rhs);
+bool operator>(const GroupId& lhs, const ChatId& rhs);
+bool operator==(const GroupId& lhs, const ChatId& rhs);
+bool operator!=(const GroupId& lhs, const ChatId& rhs);
+
+} // namespace vm
+
+#endif // VM_GROUP_ID_H

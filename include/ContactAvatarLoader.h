@@ -48,14 +48,14 @@ class ContactAvatarLoader : public QObject
 public:
     explicit ContactAvatarLoader(QObject *parent);
 
-    void load(Contact &contact);
-    void load(Contacts &contacts, int maxLimit);
+    void load(ContactHandler contact);
+    void load(Contacts contacts, int maxLimit);
 
 signals:
-    void loaded(const Contact &contact, const QUrl &url);
+    void loaded(const ContactHandler contact, const QUrl &url);
 
 private:
-    bool canLoad(Contact &contact);
+    bool canLoad(ContactHandler contact);
     void processLoad();
 
     Contacts m_contacts;

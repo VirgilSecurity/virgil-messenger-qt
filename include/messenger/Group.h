@@ -36,23 +36,26 @@
 #define VM_GROUP_H
 
 #include "GroupId.h"
+#include "Contact.h"
 
 #include <memory>
+#include <list>
 
 namespace vm
 {
 class Group
 {
 public:
-    Group(const GroupId &id, const QString &name);
-    ~Group() noexcept;
+    Group(GroupId id, QString name, Contacts contacts);
 
     GroupId id() const;
     QString name() const;
+    Contacts contacts() const;
 
 private:
     GroupId m_id;
     QString m_name;
+    Contacts m_contacts;
 };
 
 using GroupHandler = std::shared_ptr<Group>;

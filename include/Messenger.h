@@ -43,6 +43,8 @@
 #include "CrashReporter.h"
 #include "MessageSender.h"
 #include "FileLoader.h"
+#include "Group.h"
+#include "GroupMember.h"
 
 #include <QObject>
 #include <QPointer>
@@ -109,6 +111,27 @@ public:
     UserHandler findUserById(const UserId &id) const;
 
     //
+    //  Group chats.
+
+    //
+    //  Create a new group chats.
+    //  If success - signal 'groupChatCreated' is emitted.
+    //  If fail - signal 'groupChatCreateFailed' is emitted.
+    //
+    void createGroupChat(const GroupHandler& group);
+
+    //
+    //  Join existent group chat when online to be able receive messages.
+    //
+    void joinGroupChats(const GroupMembers& groupsWithMe);
+
+    //
+    //  Group invitations
+    //
+    void acceptGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId);
+    void rejectGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId);
+
+    //
     //  Helpers.
     //
     void setApplicationActive(bool active);
@@ -168,6 +191,20 @@ signals:
     void uploadServiceFound(bool found);
     void uploadSlotReceived(const QString &slotId, const QUrl &putUrl, const QUrl &getUrl);
     void uploadSlotErrorOcurred(const QString &slotId, const QString &errorText);
+    //--
+
+    //--
+    //  Group chats.
+    //
+    void groupChatCreated(const GroupId& chatId);
+    void groupChatCreateFailed(const GroupId& chatId, const QString& errorText);
+    void updateGroup(const GroupUpdate& groupUpdate);
+    //--
+
+    //--
+    // Users.
+    //
+    void userWasFound(const UserHandler& user);
     //--
 
 private slots:
