@@ -154,6 +154,7 @@ void XmppMucSubscribeItem::setEvents(const std::list<XmppMucSubEvent>& events) {
 
 void XmppMucSubscribeItem::parse(const QDomElement &element) {
 
+    m_jid = element.attribute(QStringLiteral("jid"));
     m_nickName = element.attribute(QStringLiteral("nick"));
     m_password = element.attribute(QStringLiteral("password"));
 
@@ -174,6 +175,7 @@ void XmppMucSubscribeItem::toXml(QXmlStreamWriter *writer) const {
     writer->writeStartElement(QStringLiteral("subscribe"));
     writer->writeDefaultNamespace(ns_muc_sub);
 
+    helperToXmlAddAttribute(writer, QStringLiteral("jid"), m_jid);
     helperToXmlAddAttribute(writer, QStringLiteral("nick"), m_nickName);
     helperToXmlAddAttribute(writer, QStringLiteral("password"), m_password);
 

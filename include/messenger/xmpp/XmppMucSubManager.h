@@ -66,6 +66,14 @@ public:
             const QString& from, const QString& to, const QString& nickName);
 
     //
+    //  Subscribe another user (jid) to given events.
+    //  Only a room moderator can subscribe another user.
+    //  Return operation id.
+    //
+    QString subscribeOther(const std::list<XmppMucSubEvent>& events,
+            const QString& from, const QString& to, const QString& jid, const QString& nickName);
+
+    //
     //  Unsubscribe from a MUC Room.
     //  A room moderator can unsubscribe another room user from MUC Room events by providing the user JID.
     //  Return operation id.

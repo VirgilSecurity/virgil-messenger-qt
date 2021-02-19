@@ -87,6 +87,25 @@ QString Self::subscribe(const std::list<XmppMucSubEvent>& events,
     return iq.id();
 }
 
+QString Self::subscribeOther(const std::list<XmppMucSubEvent>& events,
+            const QString& from, const QString& to, const QString& jid, const QString& nickName) {
+
+    XmppMucSubscribeItem subscribeItem;
+    subscribeItem.setEvents(events);
+    subscribeItem.setNickName(nickName);
+    subscribeItem.setJid(jid);
+
+    XmppMucSubscribeIq iq(QXmppIq::Type::Set);
+    iq.setTo(to);
+    iq.setFrom(from);
+    iq.setItem(subscribeItem);
+
+    if (m_impl->client && m_impl->client->sendPacket(iq)) {
+        qCDebug(lsXmppMucSubManager) << "User:" << jid << "nickname:" << nickName <<  "subscribed to the room:" << to;
+    }
+
+    return iq.id();
+}
 
 bool Self::handleStanza(const QDomElement &element) {
     if (element.tagName() == "iq") {

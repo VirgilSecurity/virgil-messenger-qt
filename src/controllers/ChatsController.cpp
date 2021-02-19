@@ -34,8 +34,6 @@
 
 #include "controllers/ChatsController.h"
 
-#include <QtConcurrent>
-
 #include "Messenger.h"
 #include "database/ChatsTable.h"
 #include "database/MessagesTable.h"
@@ -48,6 +46,10 @@
 #include "models/Models.h"
 #include "Controller.h"
 #include "Utils.h"
+
+#include <QtConcurrent>
+
+#include <algorithm>
 
 using namespace vm;
 using Self = ChatsController;
@@ -283,8 +285,15 @@ void Self::onGroupMembersFetchedByMemberId(const UserId &memberId, const GroupMe
     qCDebug(lcController) << "Group chats members with a current user were fetched" << memberId;
     //
     //  When chats are loaded we need to join groups chats to be able receive messages.
+    //  Filter out group where invitation was not accepted.
     //
-    m_messenger->joinGroupChats(groupMembers);
+    GroupMembers membersFromAcceptedGroups;
+    std::copy_if(groupMembers.cbegin(), groupMembers.cbegin(), std::back_inserter(membersFromAcceptedGroups),
+            [](const auto& groupMember) {
+                return groupMember->memberAffiliation() != GroupAffiliation::None;
+            });
+
+    m_messenger->joinGroupChats(membersFromAcceptedGroups);
 }
 
 void Self::onGroupMembersFetchedByGroupId(const GroupId &groupId, const GroupMembers &groupMembers)
