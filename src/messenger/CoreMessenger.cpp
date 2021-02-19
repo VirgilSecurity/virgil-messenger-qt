@@ -68,7 +68,6 @@ using namespace notifications::xmpp;
 #include <qxmpp/QXmppCarbonManager.h>
 #include <qxmpp/QXmppUploadRequestManager.h>
 #include <qxmpp/QXmppMucManager.h>
-#include <qxmpp/QXmppMamManager.h>
 #include <qxmpp/QXmppPubSubItem.h>
 #include <qxmpp/QXmppPubSubIq.h>
 
@@ -223,7 +222,6 @@ public:
     QPointer<VSQLastActivityManager> lastActivityManager;
     QPointer<XmppRoomParticipantsManager> xmppRoomParticipantsManager;
     QPointer<XmppMucSubManager> xmppMucSubManager;
-    QPointer<QXmppMamManager> xmppMamManager;
 
     std::map<QString, std::shared_ptr<User>> identityToUser;
     std::map<QString, std::shared_ptr<User>> usernameToUser;
@@ -380,7 +378,6 @@ Self::resetXmppConfiguration() {
     m_impl->lastActivityManager = new VSQLastActivityManager(m_settings);
     m_impl->xmppRoomParticipantsManager = new XmppRoomParticipantsManager();
     m_impl->xmppMucSubManager = new XmppMucSubManager();
-    m_impl->xmppMamManager = new QXmppMamManager();
 
     // Parent is implicitly changed to the QXmppClient within addExtension()
     m_impl->xmpp->addExtension(new QXmppMessageReceiptManager());
@@ -390,7 +387,6 @@ Self::resetXmppConfiguration() {
     m_impl->xmpp->addExtension(m_impl->lastActivityManager);
     m_impl->xmpp->addExtension(m_impl->xmppRoomParticipantsManager);
     m_impl->xmpp->addExtension(m_impl->xmppMucSubManager);
-    m_impl->xmpp->addExtension(m_impl->xmppMamManager);
 
     // Connect XMPP signals
     connect(m_impl->lastActivityManager, &VSQLastActivityManager::lastActivityTextChanged, this, &Self::lastActivityTextChanged);
@@ -1886,11 +1882,6 @@ Self::xmppOnConnected() {
     presenceOnline.setAvailableStatusType(QXmppPresence::Online);
     m_impl->xmpp->setClientPresence(presenceOnline);
 
-    //
-    //  Request archived messages.
-    //
-    // m_impl->xmppMamManager->retrieveArchivedMessages();
-
     registerPushNotifications();
 }
 
@@ -2047,20 +2038,6 @@ void Self::xmppOnUploadRequestFailed(const QXmppHttpUploadRequestIq &request) {
     }
     else {
         emit uploadSlotErrorOccurred(request.id(), tr("Fail to upload file"));
-    }
-}
-
-
-void Self::xmppOnArchivedMessageReceived(const QString &queryId, const QXmppMessage &message) {
-    QString xmlStr;
-    QXmlStreamWriter xmlWriter(&xmlStr);
-    message.toXml(&xmlWriter);
-    qCDebug(lcCoreMessenger).noquote() << "Got archived message:" << xmlStr;
-
-    if (userIdFromJid(message.from()) == currentUser()->id()) {
-        processReceivedXmppCarbonMessage(message);
-    } else {
-        processReceivedXmppMessage(message);
     }
 }
 
