@@ -258,13 +258,22 @@ void Self::onWriteChatAndLastMessage(const ChatHandler &chat)
         //  Add Group Owner and myself with affiliation "none" that equals to "invitation is not accepted yet".
         //
         const auto message = chat->lastMessage();
-        Q_ASSERT(std::holds_alternative<MessageContentGroupInvitation>(message->content()));
 
-        groupMembersTable()->updateGroup(
-                GroupMemberAffiliationUpdate{GroupId(chat->id()), message->senderId(), GroupAffiliation::Owner});
+        if(std::holds_alternative<MessageContentGroupInvitation>(message->content())) {
+            groupMembersTable()->updateGroup(
+                    GroupMemberAffiliationUpdate{GroupId(chat->id()), message->senderId(), GroupAffiliation::Owner});
 
-        groupMembersTable()->updateGroup(
-                GroupMemberAffiliationUpdate {GroupId(chat->id()), message->recipientId(), GroupAffiliation::None});
+            groupMembersTable()->updateGroup(
+                    GroupMemberAffiliationUpdate {GroupId(chat->id()), message->recipientId(), GroupAffiliation::None});
+
+        } else {
+            groupMembersTable()->updateGroup(
+                    GroupMemberAffiliationUpdate{GroupId(chat->id()), message->senderId(), GroupAffiliation::Member});
+
+            groupMembersTable()->updateGroup(
+                    GroupMemberAffiliationUpdate {GroupId(chat->id()), message->recipientId(), GroupAffiliation::Member});
+        }
+
     }
 
     //
