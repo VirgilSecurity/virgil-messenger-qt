@@ -13,8 +13,9 @@ Page {
         id: d
         readonly property var chat: controllers.chats.current
         readonly property var model: chat.groupMembers
-        readonly property bool groupMembersEditable: chat.isGroup && !model.isReadOnly
-        readonly property bool isOwnGroup: chat.isGroup && model.isOwnedByUser
+        // FIXME(fpohtmeh): restore once it's implemented in core
+        readonly property bool groupMembersEditable: false // chat.isGroup && !model.isReadOnly
+        readonly property bool isOwnGroup: chat.isGroup // chat.isGroup && model.isOwnedByUser
         readonly property int selectedGroupMembersCount: model.selection.selectedCount
     }
 

@@ -105,18 +105,18 @@ void Self::rejectGroupInvitation()
 void ChatsController::addSelectedMembers() {
     const GroupId groupId(currentChat()->id());
     const auto groupMembers = ContactsToGroupMembers(groupId, m_models->discoveredContacts()->selectedContacts());
-    // FIXME: call in core messenger
+    // TODO: call in core messenger
 }
 
 void ChatsController::removeSelectedMembers() {
     const GroupId groupId(currentChat()->id());
     const auto groupMembers = m_chatObject->selectedGroupMembers();
-    // FIXME: call in core messenger
+    // TODO: call in core messenger
 }
 
 void ChatsController::leaveGroup() {
     const GroupId groupId(currentChat()->id());
-    // FIXME: call in core messenger
+    // TODO: call in core messenger
 }
 
 void Self::loadChats()

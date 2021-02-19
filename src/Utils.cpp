@@ -293,3 +293,20 @@ QUrl Utils::getContactAvatarUrl(const ContactHandler contact)
     return QUrl();
 #endif // VS_ANDROID
 }
+
+QString Utils::contactDisplayName(const QString &name, const QString &username, const QString &phone, const QString &email)
+{
+    if (!name.isEmpty()) {
+        return name;
+    }
+    if (!username.isEmpty()) {
+        return username;
+    }
+    if (!phone.isEmpty()) {
+        return phone;
+    }
+    if (!email.isEmpty()) {
+        return email;
+    }
+    return QObject::tr("Unknown");
+}

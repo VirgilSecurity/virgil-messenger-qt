@@ -36,6 +36,7 @@
 
 #include "core/Database.h"
 #include "core/DatabaseUtils.h"
+#include "Utils.h"
 
 using namespace vm;
 using Self = GroupMembersTable;
@@ -193,7 +194,10 @@ GroupMemberHanlder Self::readGroupMember(const QSqlQuery &query) {
     auto memberId = query.value("memberId").toString();
     auto memberNickname = query.value("memberNickname").toString();
     if (memberNickname.isEmpty()) {
-        memberNickname = memberId; // FIXME(fpohtmeh): remove this workaround
+        const auto username = query.value("username").toString();
+        const auto email = query.value("email").toString();
+        const auto phone = query.value("phone").toString();
+        memberNickname = Utils::contactDisplayName(memberNickname, username, email, phone);
     }
     auto memberAffiliation = query.value("memberAffiliation").toString();
 

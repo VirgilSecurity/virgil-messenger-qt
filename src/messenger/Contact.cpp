@@ -34,6 +34,8 @@
 
 #include "Contact.h"
 
+#include "Utils.h"
+
 using namespace vm;
 using Self = Contact;
 
@@ -140,17 +142,5 @@ void Self::setGroupAffiliation(GroupAffiliation groupAffiliation)
 }
 
 QString Self::displayName() const {
-    if (!m_name.isEmpty()) {
-        return m_name;
-    }
-    if (!m_username.isEmpty()) {
-        return m_username;
-    }
-    if (!m_phone.isEmpty()) {
-        return m_phone;
-    }
-    if (!m_email.isEmpty()) {
-        return m_email;
-    }
-    return QString();
+    return Utils::contactDisplayName(m_name, m_username, m_phone, m_email);
 }
