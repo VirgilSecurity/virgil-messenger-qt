@@ -200,7 +200,7 @@ QString Utils::messageContentDisplayText(const MessageContent &messageContent)
         return Utils::elidedText(file->fileName(), 50);
 
     } else if (std::holds_alternative<MessageContentGroupInvitation>(messageContent)) {
-        return QObject::tr("group");
+        return QObject::tr("...");
 
     } else {
         return {};

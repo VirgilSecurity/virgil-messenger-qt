@@ -25,7 +25,7 @@ Page {
 
     header: PageHeader {
         title: d.chat.isGroup ? qsTr("Group info") : qsTr("Chat info")
-        contextMenuVisible: d.groupMembersEditable || !d.isOwnGroup // TODO(fpohtmeh): check if menu is empty
+        contextMenuVisible: d.groupMembersEditable || !d.isOwnGroup
         contextMenu: ContextMenu {
             ContextMenuItem {
                 text: qsTr("Add members")
