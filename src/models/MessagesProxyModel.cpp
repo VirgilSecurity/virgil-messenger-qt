@@ -48,7 +48,7 @@ MessagesProxyModel::MessagesProxyModel(MessagesModel *model)
 
 bool MessagesProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
-    const auto message = m_model->getMessage(0);
+    const auto message = m_model->getMessage(sourceRow);
     if (std::holds_alternative<MessageContentGroupInvitation>(message->content())) {
         return false;
     }
