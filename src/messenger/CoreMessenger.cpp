@@ -1941,6 +1941,11 @@ Self::xmppOnSslErrors(const QList<QSslError> &errors) {
 
 void
 Self::xmppOnMessageReceived(const QXmppMessage &xmppMessage) {
+    if (xmppMessage.type() == QXmppMessage::Type::Normal) {
+        //  Ignore normal messages.
+        return;
+    }
+
     //
     //  TODO: handle result.
     //
@@ -2469,7 +2474,7 @@ Self::xmppOnCreateGroupChat(const GroupHandler& group, const Users& membersToBeI
 
             //
             //  Add to the room.
-            //  TODO: Maybe add changes to the Database
+            //
             QXmppMucItem addMemberItem;
             addMemberItem.setAffiliation(QXmppMucItem::MemberAffiliation);
             addMemberItem.setJid(userIdToJid(user->id()));
