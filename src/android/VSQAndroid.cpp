@@ -178,7 +178,9 @@ Contacts VSQAndroid::getContacts()
     static constexpr const size_t kContactInfo_Size = 4;
 
     Contacts contacts;
-    for (int pos = 0; pos < contactInfos.size(); pos += kContactInfo_Size) {
+    const size_t defectiveFiledsNum =  contactInfos.size() % kContactInfo_Size;
+    const size_t fullFledgedFiledsNum  = contactInfos.size() - defectiveFiledsNum;
+    for (size_t pos = 0; pos < fullFledgedFiledsNum; pos += kContactInfo_Size) {
         auto contact = std::make_shared<Contact>();
         contact->setName(contactInfos[pos + kContactInfo_Name]);
         contact->setPhone(contactInfos[pos + kContactInfo_Phone]);
