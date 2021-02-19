@@ -2616,14 +2616,12 @@ void Self::xmppOnMucSubscribeReceived(const QString& roomJid, const QString& sub
 void Self::xmppOnMucSubscribedRoomReceived(const QString& id, const QString& roomJid, const QString& subscriberJid,
                 const std::list<XmppMucSubEvent>& events) {
 
-    qCDebug(lcCoreMessenger) << "!!!!!!!!!!!!!!!!!!!!!!!!!" << id << roomJid;
 }
 
 
 void Self::xmppOnMucRoomSubscriberReceived(const QString& id, const QString& roomJid, const QString& subscriberJid,
                 const std::list<XmppMucSubEvent>& events) {
 
-    qCDebug(lcCoreMessenger) << "----------------------" << id << roomJid;
 };
 
 
@@ -2658,8 +2656,8 @@ void Self::connectXmppRoomSignals(QXmppMucRoom *room) {
 
         qCDebug(lcCoreMessenger) << "Joined to the XMPP room:" << roomId;
 
-        // FIXME: Check if still needed.
-        // m_impl->xmppRoomParticipantsManager->requestAll(room->jid());
+        // TODO: Maybe replace it with MUC/Sub Subscribers mechanism?
+        m_impl->xmppRoomParticipantsManager->requestAll(room->jid());
 
         m_impl->xmppMucSubManager->subscribe(
                 {
@@ -2669,11 +2667,11 @@ void Self::connectXmppRoomSignals(QXmppMucRoom *room) {
                     XmppMucSubEvent::Presence,
                 },
                 currentUserJid(), room->jid(), currentUser()->id());
-
-        // room->requestConfiguration();
-        // room->requestPermissions();
     });
 
+    //
+    //  TODO: Replace this events with MUC/Sub events.
+    //
     connect(room, &QXmppMucRoom::kicked, [room](const QString &jid, const QString &reason) {
         qCDebug(lcCoreMessenger) << "---> kicked:";
     });
