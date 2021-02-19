@@ -261,7 +261,8 @@ void XmppMucSubscriptionsIq::parseElementFromChild(const QDomElement &element) {
         XmppMucSubscriptionItem item;
         item.parse(child);
         m_items.push_back(std::move(item));
-    }}
+    }
+}
 
 
 void XmppMucSubscriptionsIq::toXmlElementFromChild(QXmlStreamWriter *writer) const {
