@@ -110,7 +110,7 @@ void Self::clearChat()
 
 bool Self::updateMessage(const MessageUpdate &messageUpdate, const bool apply)
 {
-    auto messageId = MessageUpdateGetMessageId(messageUpdate);
+    const auto messageId = MessageUpdateGetMessageId(messageUpdate);
 
     const auto messageRow = findRowById(messageId);
     if (!messageRow) {
@@ -120,7 +120,6 @@ bool Self::updateMessage(const MessageUpdate &messageUpdate, const bool apply)
     const auto row = *messageRow;
     if (apply) {
         m_messages[row]->applyUpdate(messageUpdate);
-        // TODO(fpohtmeh): merge logic with MessageOperation logic
     }
 
     const auto roles = rolesFromMessageUpdate(messageUpdate);
@@ -422,9 +421,6 @@ QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate &messageUpdate)
 
     } else if (std::holds_alternative<MessagePictureThumbnailPathUpdate>(messageUpdate)) {
         return { AttachmentIconPathRole };
-
-    } else if (std::holds_alternative<MessagePictureThumbnailSizeUpdate>(messageUpdate)) {
-        return { AttachmentPictureThumbnailSizeRole };
 
     } else if (std::holds_alternative<MessagePicturePreviewPathUpdate>(messageUpdate)) {
         return { AttachmentIconPathRole };

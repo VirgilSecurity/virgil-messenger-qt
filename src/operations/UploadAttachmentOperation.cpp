@@ -95,7 +95,7 @@ void Self::populatePictureOperations()
         update.messageId = message->id();
         update.attachmentId = message->contentAsAttachment()->id();
         update.localPath = filePath;
-        m_parent->messageUpdate(update);
+        m_parent->apply(update);
     });
 
     // Create picture preview
@@ -118,30 +118,24 @@ void Self::populatePictureOperations()
             &LoadAttachmentOperation::setLoadOperationProgress);
     connect(encUploadThumbOp, &EncryptUploadFileOperation::encrypted,
             [this, message](const QFileInfo &file, const QByteArray &decryptionKey, const QByteArray &signature) {
-                const auto extrasToJson = [message]() { return message->contentAsAttachment()->extrasToJson(true); };
-
                 startLoadOperation(file.size());
                 // Thumbnail encrypted size update
                 MessagePictureThumbnailEncryptionUpdate update;
                 update.messageId = message->id();
                 update.attachmentId = message->contentAsAttachment()->id();
-                update.extrasToJson = extrasToJson;
                 update.encryptedSize = file.size();
                 update.decryptionKey = decryptionKey;
                 update.signature = signature;
-                m_parent->messageUpdate(update);
+                m_parent->apply(update);
             });
 
     connect(encUploadThumbOp, &EncryptUploadFileOperation::uploaded, [this, message](const QUrl &url) {
         // Thumbnail remote url update
-        const auto extrasToJson = [message]() { return message->contentAsAttachment()->extrasToJson(true); };
-
         MessagePictureThumbnailRemoteUrlUpdate urlUpdate;
         urlUpdate.messageId = message->id();
         urlUpdate.attachmentId = message->contentAsAttachment()->id();
-        urlUpdate.extrasToJson = extrasToJson;
         urlUpdate.remoteUrl = url;
-        m_parent->messageUpdate(urlUpdate);
+        m_parent->apply(urlUpdate);
     });
 
     // Calculate attachment fingerprint
@@ -177,7 +171,7 @@ EncryptUploadFileOperation *Self::populateEncryptUpload()
                 update.encryptedSize = file.size();
                 update.decryptionKey = decryptionKey;
                 update.signature = signature;
-                m_parent->messageUpdate(update);
+                m_parent->apply(update);
                 // Stage update
                 updateStage(MessageContentUploadStage::Encrypted);
             });
@@ -191,7 +185,7 @@ EncryptUploadFileOperation *Self::populateEncryptUpload()
         urlUpdate.messageId = message->id();
         urlUpdate.attachmentId = message->contentAsAttachment()->id();
         urlUpdate.remoteUrl = url;
-        m_parent->messageUpdate(urlUpdate);
+        m_parent->apply(urlUpdate);
         // Stage update
         updateStage(MessageContentUploadStage::Uploaded);
     });
@@ -207,5 +201,5 @@ void Self::updateStage(MessageContentUploadStage uploadStage)
     stageUpdate.messageId = message->id();
     stageUpdate.attachmentId = message->contentAsAttachment()->id();
     stageUpdate.uploadStage = uploadStage;
-    m_parent->messageUpdate(stageUpdate);
+    m_parent->apply(stageUpdate);
 }

@@ -68,7 +68,7 @@ Self::MessagesController(Messenger *messenger, const Settings *settings, Models 
     // Queue
     connect(this, &Self::messageCreated, messagesQueue, &MessagesQueue::pushMessage);
     connect(messagesQueue, &MessagesQueue::updateMessage, this,
-            std::bind(&Self::onUpdateMessage, this, std::placeholders::_1, true));
+            std::bind(&Self::onUpdateMessage, this, std::placeholders::_1, false));
     // Models
     connect(m_models->messages(), &MessagesModel::pictureIconNotFound, this, &Self::onPictureIconNotFound);
     // Messages
