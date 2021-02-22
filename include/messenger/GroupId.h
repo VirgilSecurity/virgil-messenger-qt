@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_GROUP_ID_H
 #define VM_GROUP_ID_H
 
@@ -44,7 +43,8 @@ namespace vm {
 //
 //  This class just wraps QString but is used for a strong type checking.
 //
-class GroupId {
+class GroupId
+{
 public:
     explicit GroupId(ChatId chatId);
     explicit GroupId(QString groupId = {});
@@ -59,20 +59,20 @@ private:
     QString m_groupId;
 };
 
-bool operator<(const GroupId& lhs, const GroupId& rhs);
-bool operator>(const GroupId& lhs, const GroupId& rhs);
-bool operator==(const GroupId& lhs, const GroupId& rhs);
-bool operator!=(const GroupId& lhs, const GroupId& rhs);
+bool operator<(const GroupId &lhs, const GroupId &rhs);
+bool operator>(const GroupId &lhs, const GroupId &rhs);
+bool operator==(const GroupId &lhs, const GroupId &rhs);
+bool operator!=(const GroupId &lhs, const GroupId &rhs);
 
-bool operator<(const ChatId& lhs, const GroupId& rhs);
-bool operator>(const ChatId& lhs, const GroupId& rhs);
-bool operator==(const ChatId& lhs, const GroupId& rhs);
-bool operator!=(const ChatId& lhs, const GroupId& rhs);
+bool operator<(const ChatId &lhs, const GroupId &rhs);
+bool operator>(const ChatId &lhs, const GroupId &rhs);
+bool operator==(const ChatId &lhs, const GroupId &rhs);
+bool operator!=(const ChatId &lhs, const GroupId &rhs);
 
-bool operator<(const GroupId& lhs, const ChatId& rhs);
-bool operator>(const GroupId& lhs, const ChatId& rhs);
-bool operator==(const GroupId& lhs, const ChatId& rhs);
-bool operator!=(const GroupId& lhs, const ChatId& rhs);
+bool operator<(const GroupId &lhs, const ChatId &rhs);
+bool operator>(const GroupId &lhs, const ChatId &rhs);
+bool operator==(const GroupId &lhs, const ChatId &rhs);
+bool operator!=(const GroupId &lhs, const ChatId &rhs);
 
 } // namespace vm
 

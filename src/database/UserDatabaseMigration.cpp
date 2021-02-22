@@ -38,8 +38,7 @@
 
 using namespace vm;
 
-UserDatabaseMigration::UserDatabaseMigration()
-    : Migration()
+UserDatabaseMigration::UserDatabaseMigration() : Migration()
 {
     // Add patches here in the order of execution
     addPatch(std::make_unique<version1::PatchContacts>());

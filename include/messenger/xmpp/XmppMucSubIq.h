@@ -58,19 +58,20 @@ enum class XmppMucSubEvent {
 //
 //  Represents XML element: <subscribe xmlns='urn:xmpp:mucsub:0'/>
 //
-class XmppMucSubscribeItem {
+class XmppMucSubscribeItem
+{
 public:
     QString jid() const;
-    void setJid(const QString& jid);
+    void setJid(const QString &jid);
 
     QString nickName() const;
-    void setNickName(const QString& nickName);
+    void setNickName(const QString &nickName);
 
     QString password() const;
-    void setPassword(const QString& password);
+    void setPassword(const QString &password);
 
     std::list<XmppMucSubEvent> events() const;
-    void setEvents(const std::list<XmppMucSubEvent>& events);
+    void setEvents(const std::list<XmppMucSubEvent> &events);
 
     void parse(const QDomElement &element);
     void toXml(QXmlStreamWriter *writer) const;
@@ -82,11 +83,11 @@ private:
     std::list<XmppMucSubEvent> m_events;
 };
 
-
 //
 //  Represents XML element: <subscription/> from the  <subscriptions xmlns='urn:xmpp:mucsub:0'/>
 //
-class XmppMucSubscriptionItem {
+class XmppMucSubscriptionItem
+{
 public:
     QString jid() const;
 
@@ -100,12 +101,11 @@ private:
     std::list<XmppMucSubEvent> m_events;
 };
 
-
-
 //
 //  IQ for subscribing to MUC/Sub subscription list.
 //
-class XmppMucSubscriptionsIq : public QXmppIq {
+class XmppMucSubscriptionsIq : public QXmppIq
+{
 public:
     using QXmppIq::QXmppIq;
 
@@ -134,11 +134,11 @@ private:
     std::list<XmppMucSubscriptionItem> m_items;
 };
 
-
 //
 //  IQ for subscribing to MUC/Sub events.
 //
-class XmppMucSubscribeIq : public QXmppIq {
+class XmppMucSubscribeIq : public QXmppIq
+{
 public:
     using QXmppIq::QXmppIq;
 
@@ -155,7 +155,7 @@ private:
     XmppMucSubscribeItem m_item;
 };
 
-} // vm
+} // namespace vm
 
 Q_DECLARE_METATYPE(vm::XmppMucSubEvent);
 Q_DECLARE_METATYPE(std::list<vm::XmppMucSubEvent>);

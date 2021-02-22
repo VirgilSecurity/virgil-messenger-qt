@@ -43,8 +43,8 @@
 #include "helpers/FutureWorker.h"
 
 #if VS_PUSHNOTIFICATIONS
-#include "PushNotifications.h"
-#include "XmppPushNotifications.h"
+#    include "PushNotifications.h"
+#    include "XmppPushNotifications.h"
 using namespace notifications;
 using namespace notifications::xmpp;
 #endif // VS_PUSHNOTIFICATIONS
@@ -62,21 +62,19 @@ using namespace notifications::xmpp;
 #include <QSslSocket>
 #include <QUuid>
 
-
 Q_LOGGING_CATEGORY(lcMessenger, "messenger")
 
 using namespace vm;
 using Self = Messenger;
 
-
 Self::Messenger(Settings *settings, Validator *validator)
-    : MessageSender()
-    , m_settings(settings)
-    , m_validator(validator)
-    , m_coreMessenger(new CoreMessenger(settings, this))
-    , m_cloudFileSystem(new CloudFileSystem(m_coreMessenger, this))
-    , m_crashReporter(new CrashReporter(settings, m_coreMessenger, this))
-    , m_fileLoader(new FileLoader(m_coreMessenger, this))
+    : MessageSender(),
+      m_settings(settings),
+      m_validator(validator),
+      m_coreMessenger(new CoreMessenger(settings, this)),
+      m_cloudFileSystem(new CloudFileSystem(m_coreMessenger, this)),
+      m_crashReporter(new CrashReporter(settings, m_coreMessenger, this)),
+      m_fileLoader(new FileLoader(m_coreMessenger, this))
 {
     //
     //  Proxy messenger signals.
@@ -108,7 +106,7 @@ Self::Messenger(Settings *settings, Validator *validator)
     //
     connect(m_coreMessenger, &CoreMessenger::groupChatCreated, this, &Self::groupChatCreated);
     connect(m_coreMessenger, &CoreMessenger::updateGroup, this, &Self::updateGroup);
-    connect(m_coreMessenger, &CoreMessenger::groupChatCreateFailed, [this](const auto& groupId, const auto& status) {
+    connect(m_coreMessenger, &CoreMessenger::groupChatCreateFailed, [this](const auto &groupId, const auto &status) {
         emit groupChatCreateFailed(groupId, "Chat was not created on the services");
     });
 
@@ -116,19 +114,17 @@ Self::Messenger(Settings *settings, Validator *validator)
     // Push notifications
     //
 #if VS_PUSHNOTIFICATIONS
-    auto& pushNotifications  = PushNotifications::instance();
+    auto &pushNotifications = PushNotifications::instance();
     connect(&pushNotifications, &PushNotifications::tokenUpdated, this, &Self::onPushNotificationTokenUpdate);
 #endif // VS_PUSHNOTIFICATIONS
 }
 
-
-bool Messenger::isOnline() const noexcept {
+bool Messenger::isOnline() const noexcept
+{
     return m_coreMessenger->isOnline();
 }
 
-
-void
-Self::signIn(const QString &username)
+void Self::signIn(const QString &username)
 {
     FutureWorker::run(m_coreMessenger->signIn(username), [this, username = username](auto result) {
         switch (result) {
@@ -156,19 +152,15 @@ Self::signIn(const QString &username)
     });
 }
 
-
-void
-Self::signOut()
+void Self::signOut()
 {
-    FutureWorker::run(m_coreMessenger->signOut(), [this](auto ) {
+    FutureWorker::run(m_coreMessenger->signOut(), [this](auto) {
         m_settings->setLastSignedInUser(QString());
         emit signedOut();
     });
 }
 
-
-void
-Self::signUp(const QString &username)
+void Self::signUp(const QString &username)
 {
     FutureWorker::run(m_coreMessenger->signUp(username), [this, username = username](auto result) {
         switch (result) {
@@ -189,9 +181,7 @@ Self::signUp(const QString &username)
     });
 }
 
-
-void
-Self::backupKey(const QString &password, const QString &confirmedPassword)
+void Self::backupKey(const QString &password, const QString &confirmedPassword)
 {
     if (password.isEmpty()) {
         emit backupKeyFailed(tr("Password cannot be empty"));
@@ -204,54 +194,48 @@ Self::backupKey(const QString &password, const QString &confirmedPassword)
             if (result == CoreMessengerStatus::Success) {
                 auto username = m_coreMessenger->currentUser()->username();
                 emit keyBackuped(username);
-            }
-            else {
+            } else {
                 emit backupKeyFailed(tr("Backup private key error"));
             }
         });
     }
 }
 
-
-void
-Self::downloadKey(const QString &username, const QString &password)
+void Self::downloadKey(const QString &username, const QString &password)
 {
     if (password.isEmpty()) {
         emit downloadKeyFailed(tr("Password cannot be empty"));
 
     } else {
-        FutureWorker::run(m_coreMessenger->signInWithBackupKey(username, password), [this, username = username](auto result) {
-            if (result == CoreMessengerStatus::Success) {
-                m_settings->setLastSignedInUser(username);
-                emit keyDownloaded(username);
-            }
-            else {
-                emit downloadKeyFailed(tr("Private key download error"));
-            }
-        });
+        FutureWorker::run(m_coreMessenger->signInWithBackupKey(username, password),
+                          [this, username = username](auto result) {
+                              if (result == CoreMessengerStatus::Success) {
+                                  m_settings->setLastSignedInUser(username);
+                                  emit keyDownloaded(username);
+                              } else {
+                                  emit downloadKeyFailed(tr("Private key download error"));
+                              }
+                          });
     }
 }
 
-
-UserHandler
-Self::findUserByUsername(const QString &username) const {
+UserHandler Self::findUserByUsername(const QString &username) const
+{
     return m_coreMessenger->findUserByUsername(username);
 }
 
-
-UserHandler
-Self::findUserById(const UserId &id) const {
+UserHandler Self::findUserById(const UserId &id) const
+{
     return m_coreMessenger->findUserById(id);
 }
 
-
-UserHandler
-Self::currentUser() const {
+UserHandler Self::currentUser() const
+{
     return m_coreMessenger->currentUser();
 }
 
-bool
-Self::sendMessage(MessageHandler message) {
+bool Self::sendMessage(MessageHandler message)
+{
 
     const auto future = m_coreMessenger->sendMessage(message);
     if (future.result() == CoreMessengerStatus::Success) {
@@ -261,9 +245,8 @@ Self::sendMessage(MessageHandler message) {
     return false;
 }
 
-
-std::tuple<bool, QByteArray, QByteArray>
-Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
+std::tuple<bool, QByteArray, QByteArray> Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath)
+{
     auto [result, decryptionKey, signature] = m_coreMessenger->encryptFile(sourceFilePath, destFilePath);
 
     if (CoreMessenger::Result::Success == result) {
@@ -273,17 +256,15 @@ Self::encryptFile(const QString &sourceFilePath, const QString &destFilePath) {
     return {};
 }
 
-
-bool
-Self::decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray& decryptionKey, const QByteArray& signature, const UserId senderId) {
+bool Self::decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray &decryptionKey,
+                       const QByteArray &signature, const UserId senderId)
+{
     auto result = m_coreMessenger->decryptFile(sourceFilePath, destFilePath, decryptionKey, signature, senderId);
 
     return CoreMessenger::Result::Success == result;
 }
 
-
-bool
-Self::subscribeToUser(const UserId &userId)
+bool Self::subscribeToUser(const UserId &userId)
 {
     auto user = m_coreMessenger->findUserById(userId);
     if (user) {
@@ -295,44 +276,42 @@ Self::subscribeToUser(const UserId &userId)
     return false;
 }
 
-
-QPointer<Settings> Self::settings() noexcept {
+QPointer<Settings> Self::settings() noexcept
+{
     return m_settings;
 }
 
-
-QPointer<CloudFileSystem> Self::cloudFileSystem() noexcept {
+QPointer<CloudFileSystem> Self::cloudFileSystem() noexcept
+{
     return m_cloudFileSystem;
 }
 
-
-QPointer<CrashReporter> Self::crashReporter() noexcept {
+QPointer<CrashReporter> Self::crashReporter() noexcept
+{
     return m_crashReporter;
 }
 
-
-QPointer<FileLoader> Self::fileLoader() noexcept {
+QPointer<FileLoader> Self::fileLoader() noexcept
+{
     return m_fileLoader;
 }
 
-
-QString Messenger::connectionStateString() const noexcept {
+QString Messenger::connectionStateString() const noexcept
+{
     switch (m_coreMessenger->connectionState()) {
-        case CoreMessenger::ConnectionState::Connected:
-            return QLatin1String("connected");
-        case CoreMessenger::ConnectionState::Connecting:
-            return QLatin1String("connecting");
-        case CoreMessenger::ConnectionState::Disconnected:
-            return QLatin1String("disconnected");
-        case CoreMessenger::ConnectionState::Error:
-        default:
-            return QLatin1String("error");
+    case CoreMessenger::ConnectionState::Connected:
+        return QLatin1String("connected");
+    case CoreMessenger::ConnectionState::Connecting:
+        return QLatin1String("connecting");
+    case CoreMessenger::ConnectionState::Disconnected:
+        return QLatin1String("disconnected");
+    case CoreMessenger::ConnectionState::Error:
+    default:
+        return QLatin1String("error");
     }
 }
 
-
-void
-Self::setApplicationActive(bool active)
+void Self::setApplicationActive(bool active)
 {
     if (active) {
         m_coreMessenger->activate();
@@ -341,61 +320,53 @@ Self::setApplicationActive(bool active)
     }
 }
 
-
-void
-Self::suspend() {
+void Self::suspend()
+{
     m_coreMessenger->suspend();
 }
 
-
-void
-Self::setCurrentRecipient(const UserId &recipientId)
+void Self::setCurrentRecipient(const UserId &recipientId)
 {
     m_coreMessenger->setCurrentRecipient(recipientId);
 }
 
-
-void
-Self::createGroupChat(const GroupHandler& group) {
+void Self::createGroupChat(const GroupHandler &group)
+{
 
     m_coreMessenger->createGroupChat(group);
 }
 
-
-void
-Self::joinGroupChats(const GroupMembers& groupsWithMe) {
+void Self::joinGroupChats(const GroupMembers &groupsWithMe)
+{
 
     m_coreMessenger->joinGroupChats(groupsWithMe);
 }
 
-void
-Self::acceptGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId) {
+void Self::acceptGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId)
+{
 
     m_coreMessenger->acceptGroupInvitation(groupId, groupOwnerId);
 }
 
-void
-Messenger::rejectGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId) {
+void Messenger::rejectGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId)
+{
 
     m_coreMessenger->rejectGroupInvitation(groupId, groupOwnerId);
 }
 
-
-void
-Self::onPushNotificationTokenUpdate() {
+void Self::onPushNotificationTokenUpdate()
+{
     m_coreMessenger->registerPushNotifications();
 }
 
-
-void
-Self::onConnectionStateChanged(CoreMessenger::ConnectionState state) {
+void Self::onConnectionStateChanged(CoreMessenger::ConnectionState state)
+{
     const bool isOnline = CoreMessenger::ConnectionState::Connected == state;
     emit onlineStatusChanged(isOnline);
     emit connectionStateStringChanged(connectionStateString());
 }
 
-
-void
-Self::onMessageReceived(ModifiableMessageHandler message) {
+void Self::onMessageReceived(ModifiableMessageHandler message)
+{
     emit messageReceived(std::move(message));
 }

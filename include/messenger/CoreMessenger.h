@@ -35,7 +35,6 @@
 #ifndef VM_CORE_MESSENGER_H
 #define VM_CORE_MESSENGER_H
 
-
 #include "Chat.h"
 #include "CloudFile.h"
 #include "CoreMessengerCloudFs.h"
@@ -64,28 +63,17 @@
 #include <list>
 #include <variant>
 
-
-namespace vm
-{
-    class CoreMessenger : public QObject
+namespace vm {
+class CoreMessenger : public QObject
 {
     Q_OBJECT
 private:
-    enum class PushType {
-        None,
-        Alert,
-        Voip
-    };
+    enum class PushType { None, Alert, Voip };
 
 public:
     using Result = CoreMessengerStatus;
 
-    enum class ConnectionState {
-        Disconnected,
-        Connecting,
-        Connected,
-        Error
-    };
+    enum class ConnectionState { Disconnected, Connecting, Connected, Error };
 
 signals:
     //
@@ -108,13 +96,13 @@ signals:
     //
     void connectionStateChanged(ConnectionState state);
 
-    void lastActivityTextChanged(const QString& text);
+    void lastActivityTextChanged(const QString &text);
 
     void messageReceived(ModifiableMessageHandler message);
 
-    void updateMessage(const MessageUpdate& messageUpdate);
+    void updateMessage(const MessageUpdate &messageUpdate);
 
-    void userWasFound(const UserHandler& user) const;
+    void userWasFound(const UserHandler &user) const;
 
     //
     //  Group Chats has signal / slot architecture.
@@ -123,19 +111,19 @@ signals:
     //
     //  Create a new group chat and became the owner.
     //
-    void createGroupChat(const GroupHandler& group);
+    void createGroupChat(const GroupHandler &group);
 
     //
     //  Join existent group chat to be able receive messages.
     //
-    void joinGroupChats(const GroupMembers& groupsWithMe);
+    void joinGroupChats(const GroupMembers &groupsWithMe);
 
     void acceptGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId);
     void rejectGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId);
 
-    void groupChatCreated(const GroupId& groupId);
-    void groupChatCreateFailed(const GroupId& chatId, CoreMessengerStatus errorStatus);
-    void updateGroup(const GroupUpdate& groupUpdate);
+    void groupChatCreated(const GroupId &groupId);
+    void groupChatCreateFailed(const GroupId &chatId, CoreMessengerStatus errorStatus);
+    void updateGroup(const GroupUpdate &groupUpdate);
     // --
 
     //
@@ -147,7 +135,7 @@ signals:
     void cleanupCommKitMessenger();
     void registerPushNotifications();
     void deregisterPushNotifications();
-    void xmppCreateGroupChat(const GroupHandler& group, const Users& membersToBeInvited);
+    void xmppCreateGroupChat(const GroupHandler &group, const Users &membersToBeInvited);
 
 public:
     //
@@ -170,10 +158,10 @@ public:
     //
     //  Sign-in / Sign-up / Backup.
     //
-    QFuture<Result> signIn(const QString& username);
-    QFuture<Result> signUp(const QString& username);
-    QFuture<Result> signInWithBackupKey(const QString& username, const QString& password);
-    QFuture<Result> backupKey(const QString& password);
+    QFuture<Result> signIn(const QString &username);
+    QFuture<Result> signUp(const QString &username);
+    QFuture<Result> signInWithBackupKey(const QString &username, const QString &password);
+    QFuture<Result> backupKey(const QString &password);
     QFuture<Result> signOut();
 
     //
@@ -196,14 +184,14 @@ public:
     //
     //  Decrypt given file.
     //
-    Result decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray& decryptionKey,
-            const QByteArray& signature, const UserId senderId);
+    Result decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray &decryptionKey,
+                       const QByteArray &signature, const UserId senderId);
 
     //
     //  Contacts (XMPP).
     //
     bool subscribeToUser(const User &user);
-    void setCurrentRecipient(const UserId& recipientId);
+    void setCurrentRecipient(const UserId &recipientId);
 
     //
     //  Cloud FS.
@@ -236,6 +224,7 @@ private:
     //
     class GroupImpl;
     using GroupImplHandler = std::shared_ptr<GroupImpl>;
+
 private:
     //
     //  Configuration.
@@ -253,53 +242,52 @@ private:
     //
     //  Message processing helpers.
     //
-    QByteArray packMessage(const MessageHandler& message);
-    CoreMessengerStatus unpackMessage(const QByteArray& messageData, Message& message);
+    QByteArray packMessage(const MessageHandler &message);
+    CoreMessengerStatus unpackMessage(const QByteArray &messageData, Message &message);
 
-    QByteArray packXmppMessageBody(const QByteArray& messageCiphertext, PushType pushType);
-    std::variant<CoreMessengerStatus, QByteArray> unpackXmppMessageBody(const QXmppMessage& xmppMessage);
+    QByteArray packXmppMessageBody(const QByteArray &messageCiphertext, PushType pushType);
+    std::variant<CoreMessengerStatus, QByteArray> unpackXmppMessageBody(const QXmppMessage &xmppMessage);
 
     //
     //  Message sending / processing helpers.
     //
-    Result sendPersonalMessage(const MessageHandler& message);
-    Result sendGroupMessage(const MessageHandler& message);
+    Result sendPersonalMessage(const MessageHandler &message);
+    Result sendGroupMessage(const MessageHandler &message);
 
-    QFuture<Result> processReceivedXmppMessage(const QXmppMessage& xmppMessage);
-    Result processChatReceivedXmppMessage(const QXmppMessage& xmppMessage);
-    Result processGroupChatReceivedXmppMessage(const QXmppMessage& xmppMessage);
-    Result processErrorXmppMessage(const QXmppMessage& xmppMessage);
+    QFuture<Result> processReceivedXmppMessage(const QXmppMessage &xmppMessage);
+    Result processChatReceivedXmppMessage(const QXmppMessage &xmppMessage);
+    Result processGroupChatReceivedXmppMessage(const QXmppMessage &xmppMessage);
+    Result processErrorXmppMessage(const QXmppMessage &xmppMessage);
 
-    QFuture<Result> processReceivedXmppCarbonMessage(const QXmppMessage& xmppMessage);
+    QFuture<Result> processReceivedXmppCarbonMessage(const QXmppMessage &xmppMessage);
 
     //
     //  Group helpers.
     //--
     std::variant<CoreMessengerStatus, GroupImplHandler> findGroup(const GroupId &groupId) const;
 
-    std::variant<CoreMessengerStatus, QByteArray> encryptGroupMessage(
-            const GroupId& groupId, const QByteArray& messageData);
+    std::variant<CoreMessengerStatus, QByteArray> encryptGroupMessage(const GroupId &groupId,
+                                                                      const QByteArray &messageData);
 
-    std::variant<CoreMessengerStatus, QByteArray> decryptGroupMessage(
-            const GroupId& groupId, const UserId& senderId, const QByteArray& encryptedMessageData);
+    std::variant<CoreMessengerStatus, QByteArray> decryptGroupMessage(const GroupId &groupId, const UserId &senderId,
+                                                                      const QByteArray &encryptedMessageData);
     //--
 
     //
     //  Helpers.
     //
-    UserId userIdFromJid(const QString& jid) const;
-    QString userIdToJid(const UserId& userId) const;
+    UserId userIdFromJid(const QString &jid) const;
+    QString userIdToJid(const UserId &userId) const;
     QString currentUserJid() const;
 
-    QString groupIdToJid(const GroupId& userId) const;
-    GroupId groupIdFromJid(const QString& jid) const;
-    UserId groupUserIdFromJid(const QString& jid) const;
+    QString groupIdToJid(const GroupId &userId) const;
+    GroupId groupIdFromJid(const QString &jid) const;
+    UserId groupUserIdFromJid(const QString &jid) const;
 
     bool isNetworkOnline() const noexcept;
     bool isXmppConnected() const noexcept;
     bool isXmppConnecting() const noexcept;
     bool isXmppDisconnected() const noexcept;
-
 
 private slots:
     void onActivate();
@@ -320,23 +308,24 @@ private slots:
     void xmppOnUploadRequestFailed(const QXmppHttpUploadRequestIq &request);
     void xmppOnMucInvitationReceived(const QString &roomJid, const QString &inviter, const QString &reason);
     void xmppOnMucRoomAdded(QXmppMucRoom *room);
-    void xmppOnCreateGroupChat(const GroupHandler& groupHandler, const Users& membersToBeInvited);
-    void xmppOnRoomParticipantReceived(const QString& roomJid, const QString& jid, QXmppMucItem::Affiliation affiliation);
+    void xmppOnCreateGroupChat(const GroupHandler &groupHandler, const Users &membersToBeInvited);
+    void xmppOnRoomParticipantReceived(const QString &roomJid, const QString &jid,
+                                       QXmppMucItem::Affiliation affiliation);
 
     //
     //  MUC/Sub slots.
     //--
-    void xmppOnMucSubscribeReceived(const QString& roomJid, const QString& subscriberJid, const QString& nickname);
+    void xmppOnMucSubscribeReceived(const QString &roomJid, const QString &subscriberJid, const QString &nickname);
 
-    void xmppOnMucSubscribedRoomReceived(const QString& id, const QString& roomJid, const QString& subscriberJid,
-                const std::list<XmppMucSubEvent>& events);
+    void xmppOnMucSubscribedRoomReceived(const QString &id, const QString &roomJid, const QString &subscriberJid,
+                                         const std::list<XmppMucSubEvent> &events);
 
-    void xmppOnMucSubscribedRoomsProcessed(const QString& id);
+    void xmppOnMucSubscribedRoomsProcessed(const QString &id);
 
-    void xmppOnMucRoomSubscriberReceived(const QString& id, const QString& roomJid, const QString& subscriberJid,
-                const std::list<XmppMucSubEvent>& events);
+    void xmppOnMucRoomSubscriberReceived(const QString &id, const QString &roomJid, const QString &subscriberJid,
+                                         const std::list<XmppMucSubEvent> &events);
 
-    void xmppOnMucRoomSubscribersProcessed(const QString& id, const QString& roomJid);
+    void xmppOnMucRoomSubscribersProcessed(const QString &id, const QString &roomJid);
     //--
 
     void onReconnectXmppServerIfNeeded();
@@ -346,8 +335,8 @@ private slots:
     void onRegisterPushNotifications();
     void onDeregisterPushNotifications();
 
-    void onCreateGroupChat(const GroupHandler& group);
-    void onJoinGroupChats(const GroupMembers& groupsWithMe);
+    void onCreateGroupChat(const GroupHandler &group);
+    void onJoinGroupChats(const GroupMembers &groupsWithMe);
     void onAcceptGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId);
     void onRejectGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId);
 
@@ -359,7 +348,7 @@ private:
     std::unique_ptr<Impl> m_impl;
     QPointer<Settings> m_settings;
 };
-}
+} // namespace vm
 
 Q_DECLARE_METATYPE(vm::MessageHandler);
 Q_DECLARE_METATYPE(vm::ModifiableMessageHandler);

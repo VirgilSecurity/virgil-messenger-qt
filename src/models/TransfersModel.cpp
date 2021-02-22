@@ -40,15 +40,12 @@
 using namespace vm;
 using Self = TransfersModel;
 
-Self::TransfersModel(QObject *parent)
-    : ListModel(parent)
+Self::TransfersModel(QObject *parent) : ListModel(parent)
 {
     qRegisterMetaType<TransfersModel *>("TransfersModel*");
 }
 
-Self::~TransfersModel()
-{
-}
+Self::~TransfersModel() {}
 
 void Self::add(const QString &id, const QString &name, const quint64 bytesTotal, const TransferType transferType)
 {
@@ -78,9 +75,8 @@ void Self::remove(const QString &id)
 
 QModelIndex Self::findById(const QString &transferId) const
 {
-    const auto it = std::find_if(std::begin(m_transfers), std::end(m_transfers), [&transferId](auto item) {
-        return item.id == transferId;
-    });
+    const auto it = std::find_if(std::begin(m_transfers), std::end(m_transfers),
+                                 [&transferId](auto item) { return item.id == transferId; });
 
     if (it != std::end(m_transfers)) {
         return index(std::distance(std::begin(m_transfers), it));
@@ -108,33 +104,31 @@ QVariant Self::data(const QModelIndex &index, int role) const
 {
     const auto &item = m_transfers[index.row()];
     switch (role) {
-        case IdRole:
-            return item.id;
+    case IdRole:
+        return item.id;
 
-        case NameRole:
-            return item.name;
+    case NameRole:
+        return item.name;
 
-        case BytesLoadedRole:
-            return item.bytesLoaded;
+    case BytesLoadedRole:
+        return item.bytesLoaded;
 
-        case BytesTotalRole:
-            return item.bytesTotal;
+    case BytesTotalRole:
+        return item.bytesTotal;
 
-        case DisplayProgressRole:
-            return displayedProgress(item);
+    case DisplayProgressRole:
+        return displayedProgress(item);
 
-        default:
-            return QVariant();
+    default:
+        return QVariant();
     }
 }
 
 QHash<int, QByteArray> Self::roleNames() const
 {
-    return {
-        { IdRole, "id" },
-        { NameRole, "name" },
-        { BytesLoadedRole, "bytesLoaded" },
-        { BytesTotalRole, "bytesTotal" },
-        { DisplayProgressRole, "displayProgress" }
-    };
+    return { { IdRole, "id" },
+             { NameRole, "name" },
+             { BytesLoadedRole, "bytesLoaded" },
+             { BytesTotalRole, "bytesTotal" },
+             { DisplayProgressRole, "displayProgress" } };
 }

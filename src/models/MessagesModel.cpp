@@ -44,26 +44,23 @@
 using namespace vm;
 using Self = MessagesModel;
 
-
-Self::MessagesModel(QObject *parent)
-    : ListModel(parent, false)
+Self::MessagesModel(QObject *parent) : ListModel(parent, false)
 {
     qRegisterMetaType<MessagesModel *>("MessagesModel*");
 
     setProxy(new MessagesProxyModel(this));
 }
 
-
-ChatHandler Self::chat() const {
+ChatHandler Self::chat() const
+{
     return m_currentChat;
 }
 
-
-void Self::setChat(ChatHandler chat) {
+void Self::setChat(ChatHandler chat)
+{
     qCDebug(lcModel) << "Set chat to the messages model: " << chat->id();
     m_currentChat = std::move(chat);
 }
-
 
 void Self::setMessages(ModifiableMessages messages)
 {
@@ -78,7 +75,8 @@ void Self::setMessages(ModifiableMessages messages)
     }
 }
 
-void Self::addMessage(ModifiableMessageHandler message) {
+void Self::addMessage(ModifiableMessageHandler message)
+{
     if (m_currentChat && (m_currentChat->id() == message->chatId()) && !findById(message->id())) {
         emit messageAdding();
         const auto count = rowCount();
@@ -101,8 +99,8 @@ MessageHandler Self::getMessage(const int row) const
     return m_messages[row];
 }
 
-
-void Self::clearChat() {
+void Self::clearChat()
+{
     qCDebug(lcModel) << "Clear all messages";
     beginResetModel();
     m_messages.clear();
@@ -110,8 +108,8 @@ void Self::clearChat() {
     endResetModel();
 }
 
-
-bool Self::updateMessage(const MessageUpdate &messageUpdate, const bool apply) {
+bool Self::updateMessage(const MessageUpdate &messageUpdate, const bool apply)
+{
     auto messageId = MessageUpdateGetMessageId(messageUpdate);
 
     const auto messageRow = findRowById(messageId);
@@ -130,7 +128,6 @@ bool Self::updateMessage(const MessageUpdate &messageUpdate, const bool apply) {
     return true;
 }
 
-
 void Self::acceptGroupInvitation()
 {
     if (findIncomingInvitation()) {
@@ -138,12 +135,10 @@ void Self::acceptGroupInvitation()
     }
 }
 
-
 ModifiableMessageHandler Self::findById(const MessageId &messageId) const
 {
-    const auto messageIt = std::find_if(std::rbegin(m_messages), std::rend(m_messages), [&messageId](auto message) {
-        return message->id() == messageId;
-    });
+    const auto messageIt = std::find_if(std::rbegin(m_messages), std::rend(m_messages),
+                                        [&messageId](auto message) { return message->id() == messageId; });
 
     if (messageIt != std::rend(m_messages)) {
         return *messageIt;
@@ -224,10 +219,9 @@ QVariant Self::data(const QModelIndex &index, int role) const
         if (message->isOutgoing() && (attachment->uploadStage() != MessageContentUploadStage::Uploaded)) {
             return true; // uploading
         }
-        const bool isDownloading =
-                attachment->downloadStage() == MessageContentDownloadStage::Preloading ||
-                attachment->downloadStage() == MessageContentDownloadStage::Downloading ||
-                attachment->downloadStage() == MessageContentDownloadStage::Downloaded;
+        const bool isDownloading = attachment->downloadStage() == MessageContentDownloadStage::Preloading
+                || attachment->downloadStage() == MessageContentDownloadStage::Downloading
+                || attachment->downloadStage() == MessageContentDownloadStage::Downloaded;
         return isDownloading;
     }
 
@@ -310,8 +304,8 @@ QVariant Self::data(const QModelIndex &index, int role) const
 
     case FirstInRowRole: {
         const auto prevMessage = (row == 0) ? nullptr : m_messages[row - 1];
-        return !prevMessage || prevMessage->senderId() != message->senderId() ||
-                prevMessage->createdAt().addSecs(5 * 60) <= message->createdAt();
+        return !prevMessage || prevMessage->senderId() != message->senderId()
+                || prevMessage->createdAt().addSecs(5 * 60) <= message->createdAt();
     }
 
     case InRowRole: {
@@ -335,40 +329,36 @@ QVariant Self::data(const QModelIndex &index, int role) const
 
 QHash<int, QByteArray> Self::roleNames() const
 {
-    return {
-        { IdRole, "id" },
-        { DayRole, "day" },
-        { DisplayTimeRole, "displayTime" },
-        { SenderIdRole, "senderId" },
-        { SenderUsernameRole, "senderUsername" },
-        { StatusIconRole, "statusIcon" },
-        { IsBrokenRole, "isBroken" },
-        { BodyRole, "body" },
-        { AttachmentIdRole, "attachmentId" },
-        { AttachmentTypeIsFileRole, "attachmentTypeIsFile" },
-        { AttachmentTypeIsPictureRole, "attachmentTypeIsPicture" },
-        { AttachmentIsLoadingRole, "attachmentIsLoading" },
-        { AttachmentIsLoadedRole, "attachmentIsLoaded" },
-        { AttachmentIconPathRole, "attachmentIconPath" },
-        { AttachmentPictureThumbnailSizeRole, "attachmentPictureThumbnailSize" },
-        { AttachmentDisplaySizeRole, "attachmentDisplaySize" },
-        { AttachmentDisplayProgressRole, "attachmentDisplayProgress" },
-        { AttachmentDisplayTextRole, "attachmentDisplayText" },
-        { AttachmentBytesTotalRole, "attachmentBytesTotal" },
-        { AttachmentBytesLoadedRole, "attachmentBytesLoaded" },
-        { AttachmentFileExistsRole, "attachmentFileExists" },
-        { FirstInRowRole, "firstInRow" },
-        { InRowRole, "inRow" },
-        { FirstInSectionRole, "firstInSection" }
-    };
+    return { { IdRole, "id" },
+             { DayRole, "day" },
+             { DisplayTimeRole, "displayTime" },
+             { SenderIdRole, "senderId" },
+             { SenderUsernameRole, "senderUsername" },
+             { StatusIconRole, "statusIcon" },
+             { IsBrokenRole, "isBroken" },
+             { BodyRole, "body" },
+             { AttachmentIdRole, "attachmentId" },
+             { AttachmentTypeIsFileRole, "attachmentTypeIsFile" },
+             { AttachmentTypeIsPictureRole, "attachmentTypeIsPicture" },
+             { AttachmentIsLoadingRole, "attachmentIsLoading" },
+             { AttachmentIsLoadedRole, "attachmentIsLoaded" },
+             { AttachmentIconPathRole, "attachmentIconPath" },
+             { AttachmentPictureThumbnailSizeRole, "attachmentPictureThumbnailSize" },
+             { AttachmentDisplaySizeRole, "attachmentDisplaySize" },
+             { AttachmentDisplayProgressRole, "attachmentDisplayProgress" },
+             { AttachmentDisplayTextRole, "attachmentDisplayText" },
+             { AttachmentBytesTotalRole, "attachmentBytesTotal" },
+             { AttachmentBytesLoadedRole, "attachmentBytesLoaded" },
+             { AttachmentFileExistsRole, "attachmentFileExists" },
+             { FirstInRowRole, "firstInRow" },
+             { InRowRole, "inRow" },
+             { FirstInSectionRole, "firstInSection" } };
 }
-
 
 std::optional<int> Self::findRowById(const MessageId &messageId) const
 {
-    auto it = std::find_if(std::rbegin(m_messages), std::rend(m_messages), [&messageId](auto message) {
-        return message->id() == messageId;
-    });
+    auto it = std::find_if(std::rbegin(m_messages), std::rend(m_messages),
+                           [&messageId](auto message) { return message->id() == messageId; });
 
     if (it != std::rend(m_messages)) {
         return std::distance(std::begin(m_messages), it.base()) - 1;
@@ -410,36 +400,37 @@ const MessageContentGroupInvitation *Self::findIncomingInvitation() const
     return std::get_if<MessageContentGroupInvitation>(&message->content());
 }
 
-QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate& messageUpdate) {
+QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate &messageUpdate)
+{
 
-    if(std::holds_alternative<IncomingMessageStageUpdate>(messageUpdate) ||
-            std::holds_alternative<OutgoingMessageStageUpdate>(messageUpdate)) {
+    if (std::holds_alternative<IncomingMessageStageUpdate>(messageUpdate)
+        || std::holds_alternative<OutgoingMessageStageUpdate>(messageUpdate)) {
         return { AttachmentIsLoadingRole, StatusIconRole, IsBrokenRole, InRowRole };
 
-    } else if(std::holds_alternative<MessageAttachmentUploadStageUpdate>(messageUpdate) ||
-              std::holds_alternative<MessageAttachmentDownloadStageUpdate>(messageUpdate)) {
+    } else if (std::holds_alternative<MessageAttachmentUploadStageUpdate>(messageUpdate)
+               || std::holds_alternative<MessageAttachmentDownloadStageUpdate>(messageUpdate)) {
         return { AttachmentIsLoadingRole, AttachmentIsLoadedRole, AttachmentFileExistsRole };
 
-    } else if(std::holds_alternative<MessageAttachmentLocalPathUpdate>(messageUpdate)) {
+    } else if (std::holds_alternative<MessageAttachmentLocalPathUpdate>(messageUpdate)) {
         return { AttachmentIconPathRole };
 
-    } else if(std::holds_alternative<MessageAttachmentEncryptionUpdate>(messageUpdate)) {
+    } else if (std::holds_alternative<MessageAttachmentEncryptionUpdate>(messageUpdate)) {
         return { AttachmentBytesTotalRole, AttachmentDisplayProgressRole };
 
-    } else if(std::holds_alternative<MessageAttachmentProcessedSizeUpdate>(messageUpdate)) {
+    } else if (std::holds_alternative<MessageAttachmentProcessedSizeUpdate>(messageUpdate)) {
         return { AttachmentBytesLoadedRole, AttachmentDisplayProgressRole };
 
-    } else if(std::holds_alternative<MessagePictureThumbnailPathUpdate>(messageUpdate)) {
+    } else if (std::holds_alternative<MessagePictureThumbnailPathUpdate>(messageUpdate)) {
         return { AttachmentIconPathRole };
 
-    } else if(std::holds_alternative<MessagePictureThumbnailSizeUpdate>(messageUpdate)) {
+    } else if (std::holds_alternative<MessagePictureThumbnailSizeUpdate>(messageUpdate)) {
         return { AttachmentPictureThumbnailSizeRole };
 
-    } else if(std::holds_alternative<MessagePicturePreviewPathUpdate>(messageUpdate)) {
+    } else if (std::holds_alternative<MessagePicturePreviewPathUpdate>(messageUpdate)) {
         return { AttachmentIconPathRole };
 
     } else {
-        return { };
+        return {};
     }
 }
 
@@ -448,25 +439,24 @@ QString Self::statusIconPath(MessageHandler message)
     const QString path("../resources/icons/%1.png");
 
     switch (message->status()) {
-        case Message::Status::New:
-        case Message::Status::Processing:
-            return path.arg("M-Sending");
-        case Message::Status::Succeed:
-            if (message->isOutgoing()) {
-                // TODO(fpohtmeh): implement smarter check?
-                if (message->stageString() == OutgoingMessageStageToString(OutgoingMessageStage::Delivered)) {
-                    return path.arg("M-Read"); // TODO(fpohtmeh): should be "M-Delivered"
-                }
-                else if (message->stageString() == OutgoingMessageStageToString(OutgoingMessageStage::Read)) {
-                    return path.arg("M-Read");
-                }
+    case Message::Status::New:
+    case Message::Status::Processing:
+        return path.arg("M-Sending");
+    case Message::Status::Succeed:
+        if (message->isOutgoing()) {
+            // TODO(fpohtmeh): implement smarter check?
+            if (message->stageString() == OutgoingMessageStageToString(OutgoingMessageStage::Delivered)) {
+                return path.arg("M-Read"); // TODO(fpohtmeh): should be "M-Delivered"
+            } else if (message->stageString() == OutgoingMessageStageToString(OutgoingMessageStage::Read)) {
+                return path.arg("M-Read");
             }
-            return path.arg("M-Sent");
-        case Message::Status::Failed:
-            return path.arg("M-Sending");
-        case Message::Status::Broken:
-            return path.arg("M-Error");
-        default:
-            return QString();
+        }
+        return path.arg("M-Sent");
+    case Message::Status::Failed:
+        return path.arg("M-Sending");
+    case Message::Status::Broken:
+        return path.arg("M-Error");
+    default:
+        return QString();
     }
 }

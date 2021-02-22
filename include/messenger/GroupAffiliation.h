@@ -39,19 +39,13 @@
 
 namespace vm {
 
-enum class GroupAffiliation {
-    None,
-    Outcast,
-    Member,
-    Admin,
-    Owner
-};
+enum class GroupAffiliation { None, Outcast, Member, Admin, Owner };
 
 //
 //  Return affiliation from a given string.
 //  Throws if correspond affiliation is not found.
 //
-GroupAffiliation GroupAffiliationFromString(const QString& affiliationString);
+GroupAffiliation GroupAffiliationFromString(const QString &affiliationString);
 
 //
 //  Return string from a given affiliation.
@@ -63,8 +57,6 @@ QString GroupAffiliationToString(GroupAffiliation affiliation);
 //
 QString GroupAffiliationToDisplayString(GroupAffiliation affiliation);
 
-
 } // namespace vm
-
 
 #endif // VM_GROUP_AFFILIATION_H

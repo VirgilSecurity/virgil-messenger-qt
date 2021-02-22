@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_CLOUD_FS_FOLDER_ID_H
 #define VM_CLOUD_FS_FOLDER_ID_H
 
@@ -42,7 +41,8 @@ namespace vm {
 //
 //  This class just wraps QString but is used for a strong type checking.
 //
-class CloudFsFolderId {
+class CloudFsFolderId
+{
 public:
     explicit CloudFsFolderId(QString id = {});
 
@@ -56,10 +56,10 @@ private:
     QString m_id;
 };
 
-bool operator<(const CloudFsFolderId& lhs, const CloudFsFolderId& rhs);
-bool operator>(const CloudFsFolderId& lhs, const CloudFsFolderId& rhs);
-bool operator==(const CloudFsFolderId& lhs, const CloudFsFolderId& rhs);
-bool operator!=(const CloudFsFolderId& lhs, const CloudFsFolderId& rhs);
+bool operator<(const CloudFsFolderId &lhs, const CloudFsFolderId &rhs);
+bool operator>(const CloudFsFolderId &lhs, const CloudFsFolderId &rhs);
+bool operator==(const CloudFsFolderId &lhs, const CloudFsFolderId &rhs);
+bool operator!=(const CloudFsFolderId &lhs, const CloudFsFolderId &rhs);
 
 } // namespace vm
 

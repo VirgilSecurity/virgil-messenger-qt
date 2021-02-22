@@ -40,8 +40,7 @@
 using namespace vm;
 
 CloudFileListState::CloudFileListState(CloudFilesController *controller, QState *parent)
-    : QState(parent)
-    , m_controller(controller)
+    : QState(parent), m_controller(controller)
 {
 }
 

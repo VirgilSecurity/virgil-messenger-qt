@@ -39,8 +39,7 @@
 using namespace vm;
 
 DiscoveredContactsProxyModel::DiscoveredContactsProxyModel(DiscoveredContactsModel *model)
-    : ContactsProxyModel(model)
-    , m_model(model)
+    : ContactsProxyModel(model), m_model(model)
 {
 }
 

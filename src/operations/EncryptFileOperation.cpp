@@ -34,17 +34,16 @@
 
 #include "EncryptFileOperation.h"
 
-
 #include <QFile>
-
 
 using namespace vm;
 
-EncryptFileOperation::EncryptFileOperation(QObject *parent, Messenger *messenger, const QString &sourcePath, const QString &destPath)
-    : Operation(QLatin1String("EncryptFile"), parent)
-    , m_messenger(messenger)
-    , m_sourcePath(sourcePath)
-    , m_destPath(destPath)
+EncryptFileOperation::EncryptFileOperation(QObject *parent, Messenger *messenger, const QString &sourcePath,
+                                           const QString &destPath)
+    : Operation(QLatin1String("EncryptFile"), parent),
+      m_messenger(messenger),
+      m_sourcePath(sourcePath),
+      m_destPath(destPath)
 {
 }
 
@@ -54,8 +53,7 @@ void EncryptFileOperation::run()
     if (success) {
         emit encrypted(QFileInfo(m_destPath), decryptionKey, signature);
         finish();
-    }
-    else {
+    } else {
         qCWarning(lcOperation) << "Failed to encrypt file:" << m_sourcePath;
         fail();
     }

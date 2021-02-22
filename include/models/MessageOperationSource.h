@@ -39,8 +39,7 @@
 #include "Message.h"
 #include "OperationSource.h"
 
-namespace vm
-{
+namespace vm {
 class MessageOperationSource : public OperationSource
 {
 public:
@@ -51,7 +50,8 @@ public:
     };
 
     MessageOperationSource() = default;
-    explicit MessageOperationSource(ModifiableMessageHandler message, std::optional<DownloadParameter> download = std::nullopt);
+    explicit MessageOperationSource(ModifiableMessageHandler message,
+                                    std::optional<DownloadParameter> download = std::nullopt);
 
     bool isValid() const override;
     QString toString() const override;
@@ -64,6 +64,6 @@ private:
     ModifiableMessageHandler m_message;
     std::optional<DownloadParameter> m_download;
 };
-}
+} // namespace vm
 
 #endif // VM_MESSAGEOPERATIONSOURCE_H

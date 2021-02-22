@@ -36,14 +36,10 @@
 
 using namespace vm;
 
-NetworkOperation::NetworkOperation(NetworkOperation *parent)
-    : NetworkOperation(parent, parent->isOnline())
-{
-}
+NetworkOperation::NetworkOperation(NetworkOperation *parent) : NetworkOperation(parent, parent->isOnline()) {}
 
 NetworkOperation::NetworkOperation(QObject *parent, bool isOnline)
-    : Operation(QLatin1String("Network"), parent)
-    , m_isOnline(isOnline)
+    : Operation(QLatin1String("Network"), parent), m_isOnline(isOnline)
 {
 }
 

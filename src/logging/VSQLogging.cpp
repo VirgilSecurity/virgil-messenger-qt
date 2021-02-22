@@ -40,14 +40,12 @@
 
 VSQLogging *VSQLogging::m_instance = nullptr;
 
-VSQLogging::VSQLogging(QObject *parent)
-    : QObject(parent)
+VSQLogging::VSQLogging(QObject *parent) : QObject(parent)
 {
     // Set instance
     if (m_instance) {
         qFatal("Instance of logger worker already exists!");
-    }
-    else {
+    } else {
         m_instance = this;
     }
 

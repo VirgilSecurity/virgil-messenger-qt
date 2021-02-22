@@ -43,8 +43,7 @@
 
 class Settings;
 
-namespace vm
-{
+namespace vm {
 class Models;
 
 class AttachmentsController : public QObject
@@ -70,6 +69,6 @@ private:
     QPointer<const Settings> m_settings;
     QPointer<Models> m_models;
 };
-}
+} // namespace vm
 
 #endif // VM_ATTACHMENTSCONTROLLER_H

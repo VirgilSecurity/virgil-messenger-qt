@@ -38,4 +38,5 @@ using namespace vm;
 
 AccountSelectionState::AccountSelectionState(UsersController *usersController, Validator *validator, QState *parent)
     : SignInState(usersController, validator, parent)
-{}
+{
+}

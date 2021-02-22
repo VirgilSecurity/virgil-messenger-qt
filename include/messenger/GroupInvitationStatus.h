@@ -39,26 +39,19 @@
 
 namespace vm {
 
-enum class GroupInvitationStatus {
-    None,
-    Invited,
-    Accepted,
-    Rejected
-};
+enum class GroupInvitationStatus { None, Invited, Accepted, Rejected };
 
 //
 //  Return status from a given string.
 //  Throws if correspond status is not found.
 //
-GroupInvitationStatus GroupInvitationStatusFromString(const QString& statusString);
+GroupInvitationStatus GroupInvitationStatusFromString(const QString &statusString);
 
 //
 //  Return string from a given status.
 //
 QString GroupInvitationStatusToString(GroupInvitationStatus status);
 
-
 } // namespace vm
-
 
 #endif // VM_GROUP_INVITATION_STATUS_H

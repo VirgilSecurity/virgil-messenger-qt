@@ -59,8 +59,7 @@
 #include "Validator.h"
 #include "VerifyProfileState.h"
 
-namespace vm
-{
+namespace vm {
 class Controllers;
 class Models;
 
@@ -91,8 +90,8 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(QState *previousState MEMBER m_previousState NOTIFY previousStateChanged)
 
 public:
-    ApplicationStateManager(Messenger *messenger, Controllers *controllers, Models *models,
-                            Validator *validator, QObject *parent);
+    ApplicationStateManager(Messenger *messenger, Controllers *controllers, Models *models, Validator *validator,
+                            QObject *parent);
     ~ApplicationStateManager() override;
 
 signals:
@@ -113,8 +112,9 @@ private:
     void addConnections();
     void addTransitions();
 
-    template <typename Func>
-    void addTwoSideTransition(QState *source, const typename QtPrivate::FunctionPointer<Func>::Object *obj, Func signal, QState *target)
+    template<typename Func>
+    void addTwoSideTransition(QState *source, const typename QtPrivate::FunctionPointer<Func>::Object *obj, Func signal,
+                              QState *target)
     {
         source->addTransition(obj, signal, target);
         target->addTransition(this, &ApplicationStateManager::goBack, source);
@@ -152,6 +152,6 @@ private:
     QState *m_currentState = nullptr;
     QState *m_previousState = nullptr;
 };
-}
+} // namespace vm
 
 #endif // VM_APPLICATIONSTATEMANAGER_H

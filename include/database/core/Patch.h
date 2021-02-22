@@ -37,8 +37,7 @@
 
 #include <QtCore>
 
-namespace vm
-{
+namespace vm {
 class Database;
 
 class Patch
@@ -55,6 +54,6 @@ public:
 private:
     const Version m_version = 0;
 };
-}
+} // namespace vm
 
 #endif // VM_PATCH_H

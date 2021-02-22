@@ -39,9 +39,7 @@
 using namespace vm;
 
 SendMessageOperation::SendMessageOperation(MessageOperation *parent, MessageSender *messageSender)
-    : NetworkOperation(parent)
-    , m_parent(parent)
-    , m_messageSender(messageSender)
+    : NetworkOperation(parent), m_parent(parent), m_messageSender(messageSender)
 {
     setName(QLatin1String("SendMessage"));
     connect(this, &Operation::finished, this, &SendMessageOperation::setSentStage);

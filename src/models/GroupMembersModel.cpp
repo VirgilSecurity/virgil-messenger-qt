@@ -45,7 +45,9 @@ void GroupMembersModel::setGroupMembers(const GroupMembers &groupMembers)
     bool isOwnedByUser = false;
     if (m_currentUser) {
         const auto it = std::find_if(groupMembers.begin(), groupMembers.end(), [id = m_currentUser->id()](auto m) {
-            return m->memberId() == id && (m->memberAffiliation() == GroupAffiliation::Owner || m->memberAffiliation() == GroupAffiliation::Admin);
+            return m->memberId() == id
+                    && (m->memberAffiliation() == GroupAffiliation::Owner
+                        || m->memberAffiliation() == GroupAffiliation::Admin);
         });
         if (it != groupMembers.end()) {
             isReadOnly = false;
@@ -83,25 +85,25 @@ QVariant GroupMembersModel::data(const QModelIndex &index, int role) const
 {
     const auto &contact = getContact(index.row());
     switch (role) {
-        case DetailsRole:
-            return GroupAffiliationToDisplayString(contact->groupAffiliation());
+    case DetailsRole:
+        return GroupAffiliationToDisplayString(contact->groupAffiliation());
 
-        case SortRole:
-            return QString::number(sortOrder(contact)) + contact->displayName();
+    case SortRole:
+        return QString::number(sortOrder(contact)) + contact->displayName();
 
-        default:
-            return ContactsModel::data(index, role);
+    default:
+        return ContactsModel::data(index, role);
     }
 }
 
 int GroupMembersModel::sortOrder(const ContactHandler contact)
 {
     switch (contact->groupAffiliation()) {
-        case GroupAffiliation::Owner:
-            return 0;
-        case GroupAffiliation::Admin:
-            return 1;
-        default:
-            return 2;
+    case GroupAffiliation::Owner:
+        return 0;
+    case GroupAffiliation::Admin:
+        return 1;
+    default:
+        return 2;
     }
 }

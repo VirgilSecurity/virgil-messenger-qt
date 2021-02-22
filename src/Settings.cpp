@@ -61,8 +61,7 @@ bool Settings::m_logsDirInitialized = false;
 Q_LOGGING_CATEGORY(lcSettings, "settings")
 
 Settings::Settings(QObject *parent)
-    : QSettings(settingsFileName(), QSettings::NativeFormat, parent)
-    , m_sessionId(Utils::createUuid())
+    : QSettings(settingsFileName(), QSettings::NativeFormat, parent), m_sessionId(Utils::createUuid())
 {
 
     qCDebug(lcSettings) << "Settings are written to: " << fileName();
@@ -81,9 +80,7 @@ Settings::Settings(QObject *parent)
     m_cloudFilesCacheDir.setPath(cacheDir.filePath(QLatin1String("cloudFiles")));
 }
 
-Settings::~Settings()
-{
-}
+Settings::~Settings() {}
 
 void Settings::print()
 {
@@ -146,7 +143,7 @@ void Settings::addUserToList(const QString &user)
 QString Settings::settingsFileName()
 {
     QString ext;
-#if defined(VS_MACOS) || defined (VS_IOS)
+#if defined(VS_MACOS) || defined(VS_IOS)
     ext = QLatin1String(".plist");
 #elif defined(VS_LINUX)
     ext = QLatin1String(".ini");
@@ -181,8 +178,7 @@ void Settings::setRunFlag(bool run)
     if (run) {
         qCDebug(lcSettings) << "Save session id" << m_sessionId;
         setGroupValue(kLastSessionGroup, kSessionId, m_sessionId);
-    }
-    else {
+    } else {
         qCDebug(lcSettings) << "Reset session id";
         removeGroupKey(kLastSessionGroup, kSessionId);
     }
@@ -216,7 +212,7 @@ quint64 Settings::attachmentMaxFileSize() const
 
 QDir Settings::attachmentCacheDir() const
 {
-    if(!m_attachmentCacheDir.exists()) {
+    if (!m_attachmentCacheDir.exists()) {
         FileUtils::forceCreateDir(m_attachmentCacheDir.absolutePath());
     }
     return m_attachmentCacheDir;
@@ -224,7 +220,7 @@ QDir Settings::attachmentCacheDir() const
 
 QDir Settings::thumbnailsDir() const
 {
-    if(!m_thumbnaisDir.exists()) {
+    if (!m_thumbnaisDir.exists()) {
         FileUtils::forceCreateDir(m_thumbnaisDir.absolutePath());
     }
     return m_thumbnaisDir;
@@ -232,7 +228,7 @@ QDir Settings::thumbnailsDir() const
 
 QDir Settings::downloadsDir() const
 {
-    if(!m_downloadsDir.exists()) {
+    if (!m_downloadsDir.exists()) {
         FileUtils::forceCreateDir(m_downloadsDir.absolutePath());
     }
     return m_downloadsDir;
@@ -258,7 +254,8 @@ QDir Settings::cloudFilesCacheDir() const
 
 QString Settings::makeThumbnailPath(const AttachmentId &attachmentId, bool isPreview) const
 {
-    return thumbnailsDir().filePath((isPreview ? QLatin1String("p-") : QLatin1String("t-")) + attachmentId + QLatin1String(".png"));
+    return thumbnailsDir().filePath((isPreview ? QLatin1String("p-") : QLatin1String("t-")) + attachmentId
+                                    + QLatin1String(".png"));
 }
 
 QSize Settings::thumbnailMaxSize() const

@@ -39,11 +39,9 @@
 
 #include "Message.h"
 
-
 class Messenger;
 
-namespace vm
-{
+namespace vm {
 class Messenger;
 class Controllers;
 
@@ -65,6 +63,6 @@ private:
 
     Controllers *m_controllers;
 };
-}
+} // namespace vm
 
 #endif // VM_CHATSTATE_H

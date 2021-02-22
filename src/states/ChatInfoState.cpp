@@ -40,8 +40,7 @@
 using namespace vm;
 
 ChatInfoState::ChatInfoState(ChatsController *chatsController, QState *parent)
-    : QState(parent)
-    , m_chatsController(chatsController)
+    : QState(parent), m_chatsController(chatsController)
 {
 }
 

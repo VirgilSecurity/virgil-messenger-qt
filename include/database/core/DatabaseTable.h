@@ -37,9 +37,7 @@
 
 #include <QObject>
 
-
-namespace vm
-{
+namespace vm {
 class Database;
 
 class DatabaseTable : public QObject
@@ -60,6 +58,6 @@ private:
     QString m_name;
     Database *m_database;
 };
-}
+} // namespace vm
 
 #endif // VM_DATABASETABLE_H

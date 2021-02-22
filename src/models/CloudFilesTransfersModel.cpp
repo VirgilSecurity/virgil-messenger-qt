@@ -37,14 +37,12 @@
 using namespace vm;
 using Self = CloudFilesTransfersModel;
 
-CloudFilesTransfersModel::CloudFilesTransfersModel(QObject *parent)
-    : TransfersModel(parent)
+CloudFilesTransfersModel::CloudFilesTransfersModel(QObject *parent) : TransfersModel(parent)
 {
     qRegisterMetaType<CloudFilesTransfersModel *>("CloudFilesTransfersModel*");
 
-    connect(this, &TransfersModel::interrupt, [this](const QString &transferId) {
-        emit interruptByCloudFileId(CloudFsFileId(transferId));
-    });
+    connect(this, &TransfersModel::interrupt,
+            [this](const QString &transferId) { emit interruptByCloudFileId(CloudFsFileId(transferId)); });
 }
 
 void Self::updateCloudFiles(const CloudFilesUpdate &update)
@@ -56,15 +54,15 @@ void Self::updateCloudFiles(const CloudFilesUpdate &update)
 
     const auto &file = upd->file;
     switch (upd->stage) {
-        case TransferCloudFileUpdate::Stage::Started:
-            add(file->id(), file->name(), file->size(), upd->type);
-            break;
-        case TransferCloudFileUpdate::Stage::Transfering:
-            setProgress(file->id(), upd->bytesLoaded, file->size());
-            break;
-        case TransferCloudFileUpdate::Stage::Finished:
-        case TransferCloudFileUpdate::Stage::Failed:
-            remove(file->id());
-            break;
+    case TransferCloudFileUpdate::Stage::Started:
+        add(file->id(), file->name(), file->size(), upd->type);
+        break;
+    case TransferCloudFileUpdate::Stage::Transfering:
+        setProgress(file->id(), upd->bytesLoaded, file->size());
+        break;
+    case TransferCloudFileUpdate::Stage::Finished:
+    case TransferCloudFileUpdate::Stage::Failed:
+        remove(file->id());
+        break;
     }
 }

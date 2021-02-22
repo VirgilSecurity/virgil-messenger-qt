@@ -38,9 +38,7 @@
 
 using namespace vm;
 
-MessagesProxyModel::MessagesProxyModel(MessagesModel *model)
-    : ListProxyModel(model)
-    , m_model(model)
+MessagesProxyModel::MessagesProxyModel(MessagesModel *model) : ListProxyModel(model), m_model(model)
 {
     setSortRole(MessagesModel::SortRole);
     sort(0, Qt::DescendingOrder);

@@ -37,8 +37,7 @@
 
 namespace vm {
 
-enum class CoreMessengerStatus
-{
+enum class CoreMessengerStatus {
     Success,
     Error_CryptoInit,
     Error_Offline,

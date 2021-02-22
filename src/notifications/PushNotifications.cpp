@@ -38,19 +38,19 @@ using namespace notifications;
 
 using Self = PushNotifications;
 
-Self &
-Self::instance() {
+Self &Self::instance()
+{
     static Self instance;
     return instance;
 }
 
-void
-Self::registerToken(QString token) {
+void Self::registerToken(QString token)
+{
     m_token = token;
     emit tokenUpdated();
 }
 
-const QString &
-Self::token() const noexcept {
+const QString &Self::token() const noexcept
+{
     return m_token;
 }

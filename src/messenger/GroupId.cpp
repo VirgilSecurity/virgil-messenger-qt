@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "GroupId.h"
 
 #include "Utils.h"
@@ -40,72 +39,81 @@
 using namespace vm;
 using Self = GroupId;
 
+Self::GroupId(ChatId chatId) : m_groupId(QString(std::move(chatId))) {}
 
-Self::GroupId(ChatId chatId) : m_groupId(QString(std::move(chatId))) {
+Self::GroupId(QString groupId) : m_groupId(std::move(groupId)) {}
 
-}
-
-
-Self::GroupId(QString groupId) : m_groupId(std::move(groupId)) {
-
-}
-
-Self::operator QString() const {
+Self::operator QString() const
+{
     return m_groupId;
 }
 
-bool Self::isValid() const noexcept {
+bool Self::isValid() const noexcept
+{
     return !m_groupId.isEmpty();
 }
 
-Self Self::generate() {
+Self Self::generate()
+{
     return Self(Utils::createUuid());
 }
 
-bool vm::operator<(const vm::GroupId& lhs, const vm::GroupId& rhs) {
+bool vm::operator<(const vm::GroupId &lhs, const vm::GroupId &rhs)
+{
     return QString(lhs) < QString(rhs);
 }
 
-bool vm::operator>(const vm::GroupId& lhs, const vm::GroupId& rhs) {
+bool vm::operator>(const vm::GroupId &lhs, const vm::GroupId &rhs)
+{
     return QString(lhs) > QString(rhs);
 }
 
-bool vm::operator==(const vm::GroupId& lhs, const vm::GroupId& rhs) {
+bool vm::operator==(const vm::GroupId &lhs, const vm::GroupId &rhs)
+{
     return QString(lhs) == QString(rhs);
 }
 
-bool vm::operator!=(const vm::GroupId& lhs, const vm::GroupId& rhs) {
+bool vm::operator!=(const vm::GroupId &lhs, const vm::GroupId &rhs)
+{
     return QString(lhs) != QString(rhs);
 }
 
-bool vm::operator<(const vm::ChatId& lhs, const vm::GroupId& rhs) {
+bool vm::operator<(const vm::ChatId &lhs, const vm::GroupId &rhs)
+{
     return QString(lhs) < QString(rhs);
 }
 
-bool vm::operator>(const vm::ChatId& lhs, const vm::GroupId& rhs) {
+bool vm::operator>(const vm::ChatId &lhs, const vm::GroupId &rhs)
+{
     return QString(lhs) > QString(rhs);
 }
 
-bool vm::operator==(const vm::ChatId& lhs, const vm::GroupId& rhs) {
+bool vm::operator==(const vm::ChatId &lhs, const vm::GroupId &rhs)
+{
     return QString(lhs) == QString(rhs);
 }
 
-bool vm::operator!=(const vm::ChatId& lhs, const vm::GroupId& rhs) {
+bool vm::operator!=(const vm::ChatId &lhs, const vm::GroupId &rhs)
+{
     return QString(lhs) != QString(rhs);
 }
 
-bool vm::operator<(const vm::GroupId& lhs, const vm::ChatId& rhs) {
+bool vm::operator<(const vm::GroupId &lhs, const vm::ChatId &rhs)
+{
     return QString(lhs) < QString(rhs);
 }
 
-bool vm::operator>(const vm::GroupId& lhs, const vm::ChatId& rhs) {
+bool vm::operator>(const vm::GroupId &lhs, const vm::ChatId &rhs)
+{
     return QString(lhs) > QString(rhs);
 }
 
-bool vm::operator==(const vm::GroupId& lhs, const vm::ChatId& rhs) {
+bool vm::operator==(const vm::GroupId &lhs, const vm::ChatId &rhs)
+{
     return QString(lhs) == QString(rhs);
 }
 
-bool vm::operator!=(const vm::GroupId& lhs, const vm::ChatId& rhs) {
+bool vm::operator!=(const vm::GroupId &lhs, const vm::ChatId &rhs)
+{
     return QString(lhs) != QString(rhs);
 }

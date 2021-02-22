@@ -38,9 +38,7 @@ using namespace vm;
 using Self = MessageOperationSource;
 
 Self::MessageOperationSource(ModifiableMessageHandler message, std::optional<DownloadParameter> download)
-    : OperationSource()
-    , m_message(std::move(message))
-    , m_download(std::move(download))
+    : OperationSource(), m_message(std::move(message)), m_download(std::move(download))
 {
 }
 

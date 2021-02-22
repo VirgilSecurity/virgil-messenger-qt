@@ -41,14 +41,14 @@
 
 #include <QFileInfo>
 
-namespace vm
-{
+namespace vm {
 class EncryptFileOperation : public Operation
 {
     Q_OBJECT
 
 public:
-    explicit EncryptFileOperation(QObject *parent, Messenger *messenger, const QString &sourcePath, const QString &destPath);
+    explicit EncryptFileOperation(QObject *parent, Messenger *messenger, const QString &sourcePath,
+                                  const QString &destPath);
 
     void run() override;
 
@@ -60,6 +60,6 @@ private:
     const QString m_sourcePath;
     const QString m_destPath;
 };
-}
+} // namespace vm
 
 #endif // VM_ENCRYPTFILEOPERATION_H

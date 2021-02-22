@@ -42,8 +42,7 @@
 
 class VSQMessenger;
 
-namespace vm
-{
+namespace vm {
 class VerifyProfileState : public OperationState
 {
     Q_OBJECT
@@ -64,6 +63,6 @@ signals:
 private:
     ConfirmationCodeType m_codeType = ConfirmationCodeType::PhoneNumber;
 };
-}
+} // namespace vm
 
 #endif // VM_VERIFYPROFILESTATE_H

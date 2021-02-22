@@ -40,8 +40,7 @@
 #include "GroupUpdate.h"
 #include "User.h"
 
-namespace vm
-{
+namespace vm {
 class GroupMembersModel : public ContactsModel
 {
     Q_OBJECT
@@ -69,6 +68,6 @@ private:
     bool m_isOwnedByUser = false;
     UserHandler m_currentUser;
 };
-}
+} // namespace vm
 
 #endif // VM_GROUP_MEMBERS_MODEL_H

@@ -38,8 +38,7 @@
 
 using namespace vm;
 
-ScopedTransaction::ScopedTransaction(QSqlDatabase qtDatabase)
-    : m_qtDatabase(qtDatabase)
+ScopedTransaction::ScopedTransaction(QSqlDatabase qtDatabase) : m_qtDatabase(qtDatabase)
 {
     // TODO(fpohtmeh): check for transaction inside transaction?
     if (qtDatabase.isOpen()) {
@@ -47,8 +46,7 @@ ScopedTransaction::ScopedTransaction(QSqlDatabase qtDatabase)
         if (m_isActive) {
             qCDebug(lcDatabase) << "Transaction start";
         }
-    }
-    else {
+    } else {
         qCCritical(lcDatabase) << "Connection databaseName:" << qtDatabase.databaseName();
         qCCritical(lcDatabase) << "Connection is not opened";
         m_isActive = false;

@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "MessageId.h"
 
 #include "Utils.h"
@@ -40,35 +39,39 @@
 using namespace vm;
 using Self = MessageId;
 
+Self::MessageId(QString messageId) : m_messageId(std::move(messageId)) {}
 
-Self::MessageId(QString messageId) : m_messageId(std::move(messageId)) {
-
-}
-
-Self::operator QString() const {
+Self::operator QString() const
+{
     return m_messageId;
 }
 
-bool Self::isValid() const noexcept {
+bool Self::isValid() const noexcept
+{
     return !m_messageId.isEmpty();
 }
 
-MessageId Self::generate() {
+MessageId Self::generate()
+{
     return MessageId(Utils::createUuid());
 }
 
-bool vm::operator<(const vm::MessageId& lhs, const vm::MessageId& rhs) {
+bool vm::operator<(const vm::MessageId &lhs, const vm::MessageId &rhs)
+{
     return QString(lhs) < QString(rhs);
 }
 
-bool vm::operator>(const vm::MessageId& lhs, const vm::MessageId& rhs) {
+bool vm::operator>(const vm::MessageId &lhs, const vm::MessageId &rhs)
+{
     return QString(lhs) > QString(rhs);
 }
 
-bool vm::operator==(const vm::MessageId& lhs, const vm::MessageId& rhs) {
+bool vm::operator==(const vm::MessageId &lhs, const vm::MessageId &rhs)
+{
     return QString(lhs) == QString(rhs);
 }
 
-bool vm::operator!=(const vm::MessageId& lhs, const vm::MessageId& rhs) {
+bool vm::operator!=(const vm::MessageId &lhs, const vm::MessageId &rhs)
+{
     return QString(lhs) != QString(rhs);
 }

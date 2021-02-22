@@ -37,7 +37,8 @@
 #include "ui/VSQUiHelper.h"
 
 /******************************************************************************/
-int VSQUiHelper::fixFontSz(int sz) {
+int VSQUiHelper::fixFontSz(int sz)
+{
 #if defined(Q_OS_WIN)
     return sz * 96 / 128;
 #else

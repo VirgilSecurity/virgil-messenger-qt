@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_MESSAGE_H
 #define VM_MESSAGE_H
 
@@ -61,7 +60,8 @@ class OutgoingMessage;
 //
 //  Base class for all messages.
 //
-class Message : public MessageUpdateable  {
+class Message : public MessageUpdateable
+{
 
 public:
     using Status = MessageStatus;
@@ -151,12 +151,12 @@ public:
     //
     //  Return message content.
     //
-    const MessageContent& content() const noexcept;
+    const MessageContent &content() const noexcept;
 
     //
     //  Return message content.
     //
-    MessageContent& content() noexcept;
+    MessageContent &content() noexcept;
 
     //
     //  Return message content type.
@@ -177,13 +177,13 @@ public:
     //  Return message content as attachment.
     //  Throws if isContentAttachment() returns false.
     //
-    const MessageContentAttachment* contentAsAttachment() const;
+    const MessageContentAttachment *contentAsAttachment() const;
 
     //
     //  Return message content as attachment.
     //  Throws if isContentAttachment() returns false.
     //
-    MessageContentAttachment* contentAsAttachment();
+    MessageContentAttachment *contentAsAttachment();
 
     //
     //  Return info related to a group chat message.
@@ -218,7 +218,7 @@ public:
     //
     //  Apply message update. Return true some properties were actually updated.
     //
-    bool applyUpdate(const MessageUpdate& update) override;
+    bool applyUpdate(const MessageUpdate &update) override;
 
     //
     //  Returns true if message was sent to the group or was received by using GroupChat,

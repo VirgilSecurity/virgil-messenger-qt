@@ -42,8 +42,7 @@
 #include <QNetworkReply>
 #include <QPointer>
 
-namespace vm
-{
+namespace vm {
 class LoadFileOperation : public NetworkOperation
 {
     Q_OBJECT
@@ -80,6 +79,6 @@ private:
     quint64 m_bytesLoaded = 0;
     quint64 m_bytesTotal = 0;
 };
-}
+} // namespace vm
 
 #endif // VM_LOADFILEOPERATION_H

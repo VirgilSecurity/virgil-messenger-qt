@@ -32,19 +32,18 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_OUTGOING_MESSAGE_H
 #define VM_OUTGOING_MESSAGE_H
 
 #include "Message.h"
 #include "OutgoingMessageStage.h"
 
-
 namespace vm {
 //
 //  Handles outgoing message.
 //
-class OutgoingMessage : public Message {
+class OutgoingMessage : public Message
+{
 
 public:
     //
@@ -56,7 +55,7 @@ public:
     //  Return stage from a given string.
     //  Throws if correspond stage is not found.
     //
-    static Stage stageFromString(const QString& stageString);
+    static Stage stageFromString(const QString &stageString);
 
     //
     //  Return string from a given stage.
@@ -96,11 +95,10 @@ public:
     //
     //  Apply message update. Return true some properties were actually updated.
     //
-    bool applyUpdate(const MessageUpdate& update) override;
+    bool applyUpdate(const MessageUpdate &update) override;
 
 private:
     Stage m_stage = Stage::Created;
-
 };
 } // namespace vm
 

@@ -32,19 +32,17 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_MESSAGE_CONTENT_DOWNLOAD_STAGE_H
 #define VM_MESSAGE_CONTENT_DOWNLOAD_STAGE_H
 
 #include <QString>
-
 
 namespace vm {
 //
 //  Defines processing stages for incoming attachment.
 //
 enum class MessageContentDownloadStage {
-    Initial,  // Nothing was done.
+    Initial, // Nothing was done.
     Preloading, // Attachment preload is active.
     Preloaded, // Attachment was preloaded.
     Downloading, // Attachment download is active.
@@ -56,7 +54,7 @@ enum class MessageContentDownloadStage {
 //  Return download stage from a given string.
 //  Throws if correspond stage is not found.
 //
-MessageContentDownloadStage MessageContentDownloadStageFromString(const QString& stageString);
+MessageContentDownloadStage MessageContentDownloadStageFromString(const QString &stageString);
 
 //
 //  Return string from a given download stage.

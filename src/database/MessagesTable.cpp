@@ -43,8 +43,7 @@
 
 using namespace vm;
 
-MessagesTable::MessagesTable(Database *database)
-    : DatabaseTable(QLatin1String("messages"), database)
+MessagesTable::MessagesTable(Database *database) : DatabaseTable(QLatin1String("messages"), database)
 {
     connect(this, &MessagesTable::fetchChatMessages, this, &MessagesTable::onFetchChatMessages);
     connect(this, &MessagesTable::fetchNotSentMessages, this, &MessagesTable::onFetchNotSentMessages);
@@ -67,13 +66,12 @@ bool MessagesTable::create()
 void MessagesTable::onFetchChatMessages(const ChatId &chatId)
 {
     ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues values{{":chatId", QString(chatId) }};
+    const DatabaseUtils::BindValues values { { ":chatId", QString(chatId) } };
     auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectChatMessages"), values);
     if (!query) {
         qCCritical(lcDatabase) << "MessagesTable::onFetch error";
         emit errorOccurred(tr("Failed to fetch messages"));
-    }
-    else {
+    } else {
         ModifiableMessages messages;
         while (query->next()) {
             messages.push_back(DatabaseUtils::readMessage(*query));
@@ -89,8 +87,7 @@ void MessagesTable::onFetchNotSentMessages()
     if (!query) {
         qCCritical(lcDatabase) << "MessagesTable::onFetchFailed error";
         emit errorOccurred(tr("Failed to fetch failed messages"));
-    }
-    else {
+    } else {
         ModifiableMessages messages;
         while (query->next()) {
             messages.push_back(DatabaseUtils::readMessage(*query));
@@ -104,19 +101,17 @@ void MessagesTable::onAddMessage(const MessageHandler &message)
     auto messageStage = message->stageString();
 
     ScopedConnection connection(*database());
-    DatabaseUtils::BindValues values{
-        { ":id", QString(message->id()) },
-        { ":recipientId", QString(message->recipientId()) },
-        { ":senderId", QString(message->senderId()) },
-        { ":chatId", QString(message->chatId()) },
-        { ":createdAt", message->createdAt().toTime_t() },
-        { ":isOutgoing", message->isOutgoing() },
-        { ":stage", messageStage },
-        { ":contentType", MessageContentTypeToString(message->content()) }
-    };
+    DatabaseUtils::BindValues values { { ":id", QString(message->id()) },
+                                       { ":recipientId", QString(message->recipientId()) },
+                                       { ":senderId", QString(message->senderId()) },
+                                       { ":chatId", QString(message->chatId()) },
+                                       { ":createdAt", message->createdAt().toTime_t() },
+                                       { ":isOutgoing", message->isOutgoing() },
+                                       { ":stage", messageStage },
+                                       { ":contentType", MessageContentTypeToString(message->content()) } };
 
-    QString body{};
-    QByteArray ciphertext{};
+    QString body {};
+    QByteArray ciphertext {};
 
     if (auto text = std::get_if<MessageContentText>(&message->content())) {
         body = text->text();
@@ -134,8 +129,7 @@ void MessagesTable::onAddMessage(const MessageHandler &message)
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertMessage"), values);
     if (query) {
         qCDebug(lcDatabase) << "Message was inserted into table" << message->id();
-    }
-    else {
+    } else {
         qCCritical(lcDatabase) << "MessagesTable::onCreateMessage error";
         emit errorOccurred(tr("Failed to insert message"));
     }
@@ -143,12 +137,11 @@ void MessagesTable::onAddMessage(const MessageHandler &message)
 
 void MessagesTable::onDeleteChatMessages(const ChatId &chatId)
 {
-    const DatabaseUtils::BindValues values {{ ":id", QString(chatId) }};
+    const DatabaseUtils::BindValues values { { ":id", QString(chatId) } };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("deleteMessagesByChatId"), values);
     if (query) {
         qCDebug(lcDatabase) << "Chat messages was removed, chatId:" << chatId;
-    }
-    else {
+    } else {
         qCCritical(lcDatabase) << "MessagesTable::onDeleteChatMessages deletion error";
         emit errorOccurred(tr("Failed to delete chat messages"));
     }
@@ -157,14 +150,13 @@ void MessagesTable::onDeleteChatMessages(const ChatId &chatId)
 void MessagesTable::onDeleteGroupInvitationMessage(const ChatId &chatId)
 {
     const DatabaseUtils::BindValues values {
-        { ":id", QString(chatId) },
-        { ":contentType", MessageContentTypeToString(MessageContentType::GroupInvitation) }
+        { ":id", QString(chatId) }, { ":contentType", MessageContentTypeToString(MessageContentType::GroupInvitation) }
     };
-    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("deleteGroupInvitationMessageByChatId"), values);
+    const auto query =
+            DatabaseUtils::readExecQuery(database(), QLatin1String("deleteGroupInvitationMessageByChatId"), values);
     if (query) {
         qCDebug(lcDatabase) << "Group invitation message was removed, chatId:" << chatId;
-    }
-    else {
+    } else {
         qCCritical(lcDatabase) << "MessagesTable::onDeleteGroupInvitationMessage deletion error";
         emit errorOccurred(tr("Failed to delete group invitation message"));
     }
@@ -191,8 +183,7 @@ void MessagesTable::onUpdateMessage(const MessageUpdate &messageUpdate)
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateMessageStage"), bindValues);
     if (query) {
         qCDebug(lcDatabase) << "Message was updated" << bindValues.front().second << bindValues.back();
-    }
-    else {
+    } else {
         qCCritical(lcDatabase) << "MessagesTable::onUpdateMessage error";
         emit errorOccurred(tr("Failed to update message stage"));
     }

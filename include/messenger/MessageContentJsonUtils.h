@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_MESSAGE_CONTENT_JSON_UTILS_H
 #define VM_MESSAGE_CONTENT_JSON_UTILS_H
 
@@ -48,64 +47,66 @@ namespace vm {
 //
 //  Utility class to convert MessageContent to/from JSON.
 //
-class MessageContentJsonUtils {
+class MessageContentJsonUtils
+{
 
 public:
     //
     //  Convert message content to the JSON object.
     //
-    static QJsonObject to(const MessageContent& messageContent);
+    static QJsonObject to(const MessageContent &messageContent);
 
     //
     //  Convert message content to the JSON string.
     //
-    static QString toString(const MessageContent& messageContent);
+    static QString toString(const MessageContent &messageContent);
 
     //
     //  Convert message content to the JSON byte array.
     //
-    static QByteArray toBytes(const MessageContent& messageContent);
+    static QByteArray toBytes(const MessageContent &messageContent);
 
     //
     //  Convert any JSON object to JSON byte array.
     //
-    static QByteArray toBytes(const QJsonObject& jsonObject);
+    static QByteArray toBytes(const QJsonObject &jsonObject);
 
     //
     //  Get message content from the JSON object.
     //
-    static MessageContent from(const QJsonObject& json, QString& errorString);
+    static MessageContent from(const QJsonObject &json, QString &errorString);
 
     //
     //  Get message content from the JSON string.
     //
-    static MessageContent fromString(const QString& str, QString& errorString);
+    static MessageContent fromString(const QString &str, QString &errorString);
 
     //
     //  Get message content from the JSON byte array.
     //
-    static MessageContent fromBytes(const QByteArray& data, QString& errorString);
+    static MessageContent fromBytes(const QByteArray &data, QString &errorString);
 
     //
     //  Write picture extra fields.
     //
-    static void writeExtras(const MessageContentPicture& picture, bool writeLocalPaths, QJsonObject& json);
+    static void writeExtras(const MessageContentPicture &picture, bool writeLocalPaths, QJsonObject &json);
 
     //
     //  Parse extra JSON fields related to a picture content.
     //
-    static bool readExtras(const QJsonObject& json, MessageContentPicture& picture);
+    static bool readExtras(const QJsonObject &json, MessageContentPicture &picture);
 
     //
     //  Parse extra JSON fields related to a picture content.
     //
-    static bool readExtras(const QString& str, MessageContentPicture& picture);
+    static bool readExtras(const QString &str, MessageContentPicture &picture);
 
     //
     //  TODO: Write description.
     //
     template<typename T>
-    static MessageContent toObject(const QString& jsonStr, const QString& underKey = {}) {
+    static MessageContent toObject(const QString &jsonStr, const QString &underKey = {})
+    {
         auto maybeObject = JsonUtils::toObject<T>(jsonStr, underKey);
 
         if (maybeObject) {
@@ -115,9 +116,9 @@ public:
         return {};
     }
 
-
     template<typename T>
-    static MessageContent toObject(const QJsonObject& json, const QString& underKey = {}) {
+    static MessageContent toObject(const QJsonObject &json, const QString &underKey = {})
+    {
         auto maybeObject = JsonUtils::toObject<T>(json, underKey);
 
         if (maybeObject) {
@@ -131,7 +132,8 @@ public:
     //  TODO: Write description.
     //
     template<typename T>
-    static QString toString(const T& obj, const QString& underKey = {}) {
+    static QString toString(const T &obj, const QString &underKey = {})
+    {
         return JsonUtils::toString(obj, underKey);
     }
 
@@ -139,10 +141,10 @@ public:
     //  TODO: Write description.
     //
     template<typename T>
-    static QString toBytes(const T& obj, const QString& underKey = {}) {
+    static QString toBytes(const T &obj, const QString &underKey = {})
+    {
         return JsonUtils::toBytes(obj, underKey);
     }
-
 
 private:
     MessageContentJsonUtils() = default;
@@ -150,12 +152,12 @@ private:
     //
     //  Write attachment fields except extras.
     //
-    static void writeAttachment(const MessageContentAttachment& attachment, QJsonObject& json);
+    static void writeAttachment(const MessageContentAttachment &attachment, QJsonObject &json);
 
     //
     //  Parse attachment fields except extras.
     //
-    static bool readAttachment(const QJsonObject& json, MessageContentAttachment& attachment);
+    static bool readAttachment(const QJsonObject &json, MessageContentAttachment &attachment);
 
     //
     //  Builds Base64 string

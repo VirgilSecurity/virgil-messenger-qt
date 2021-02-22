@@ -32,56 +32,53 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "OutgoingMessage.h"
-
 
 using namespace vm;
 using Self = OutgoingMessage;
 
-
-Self::Stage Self::stageFromString(const QString& stageString) {
+Self::Stage Self::stageFromString(const QString &stageString)
+{
     return OutgoingMessageStageFromString(stageString);
 }
 
-
-QString Self::stageToString(Self::Stage stage) {
+QString Self::stageToString(Self::Stage stage)
+{
     return OutgoingMessageStageToString(stage);
 }
 
-
-bool Self::isOutgoing() const noexcept {
+bool Self::isOutgoing() const noexcept
+{
     return true;
 }
-
 
 Self::Status Self::status() const noexcept
 {
     return OutgoingMessageStageToMessageStatus(m_stage);
 }
 
-
-Self::Stage Self::stage() const noexcept {
+Self::Stage Self::stage() const noexcept
+{
     return m_stage;
 }
 
-
-void Self::setStage(Self::Stage stage) {
+void Self::setStage(Self::Stage stage)
+{
     m_stage = stage;
 }
 
-
-QString Self::stageString() const {
+QString Self::stageString() const
+{
     return Self::stageToString(m_stage);
 }
 
-
-void Self::setStageString(QString stageString) {
+void Self::setStageString(QString stageString)
+{
     m_stage = Self::stageFromString(stageString);
 }
 
-
-bool Self::applyUpdate(const MessageUpdate& update) {
+bool Self::applyUpdate(const MessageUpdate &update)
+{
     if (auto stageUpdate = std::get_if<OutgoingMessageStageUpdate>(&update)) {
         m_stage = stageUpdate->stage;
         return true;

@@ -39,8 +39,7 @@
 
 using namespace vm;
 
-LoadAttachmentOperation::LoadAttachmentOperation(MessageOperation *parent)
-    : NetworkOperation(parent)
+LoadAttachmentOperation::LoadAttachmentOperation(MessageOperation *parent) : NetworkOperation(parent)
 {
     setName(QLatin1String("LoadAttachment"));
 

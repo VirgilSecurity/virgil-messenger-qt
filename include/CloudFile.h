@@ -44,8 +44,7 @@
 #include "CloudFileUpdateSource.h"
 #include "UserId.h"
 
-namespace vm
-{
+namespace vm {
 class CloudFile
 {
 public:
@@ -100,6 +99,6 @@ using CloudFileHandler = std::shared_ptr<const CloudFile>;
 using ModifiableCloudFileHandler = std::shared_ptr<CloudFile>;
 using CloudFiles = std::vector<CloudFileHandler>;
 using ModifiableCloudFiles = std::vector<ModifiableCloudFileHandler>;
-}
+} // namespace vm
 
 #endif // VM_CLOUD_FILE_H

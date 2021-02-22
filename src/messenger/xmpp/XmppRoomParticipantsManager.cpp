@@ -40,14 +40,14 @@
 using namespace vm;
 using Self = XmppRoomParticipantsManager;
 
-
 Q_LOGGING_CATEGORY(lcXmppRoomParticipantsManager, "xmpp-room-participants-manager");
 
-static const constexpr std::array<QXmppMucItem::Affiliation, 3> kAffiliations{
-        QXmppMucItem::OwnerAffiliation, QXmppMucItem::AdminAffiliation, QXmppMucItem::MemberAffiliation};
+static const constexpr std::array<QXmppMucItem::Affiliation, 3> kAffiliations { QXmppMucItem::OwnerAffiliation,
+                                                                                QXmppMucItem::AdminAffiliation,
+                                                                                QXmppMucItem::MemberAffiliation };
 
-void Self::requestAll(const QString& roomJid) {
-
+void Self::requestAll(const QString &roomJid)
+{
 
     for (auto affiliation : kAffiliations) {
         QXmppMucItem item;
@@ -59,13 +59,14 @@ void Self::requestAll(const QString& roomJid) {
         iq.setItems({ item });
 
         if (m_client && m_client->sendPacket(iq)) {
-            qCDebug(lcXmppRoomParticipantsManager) << "Requested group:" << roomJid << QXmppMucItem::affiliationToString(affiliation);
+            qCDebug(lcXmppRoomParticipantsManager)
+                    << "Requested group:" << roomJid << QXmppMucItem::affiliationToString(affiliation);
         }
     }
 }
 
-
-bool Self::handleStanza(const QDomElement &element) {
+bool Self::handleStanza(const QDomElement &element)
+{
     if (element.tagName() == "iq" && QXmppMucAdminIq::isMucAdminIq(element)) {
 
         QXmppMucAdminIq iq;
@@ -87,8 +88,8 @@ bool Self::handleStanza(const QDomElement &element) {
     return false;
 }
 
-
-void Self::setClient(QXmppClient *client) {
+void Self::setClient(QXmppClient *client)
+{
 
     QXmppClientExtension::setClient(client);
 

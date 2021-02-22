@@ -40,10 +40,10 @@
 #include <memory>
 #include <list>
 
-namespace vm
-{
+namespace vm {
 class UserImpl;
-class User {
+class User
+{
 public:
     User(std::unique_ptr<UserImpl> impl);
     ~User() noexcept;
@@ -51,7 +51,7 @@ public:
     UserId id() const;
     QString username() const;
 
-    const UserImpl* impl() const noexcept;
+    const UserImpl *impl() const noexcept;
 
 private:
     std::unique_ptr<UserImpl> m_impl;

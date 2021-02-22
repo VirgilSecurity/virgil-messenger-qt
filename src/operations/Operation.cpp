@@ -40,10 +40,7 @@ Q_LOGGING_CATEGORY(lcOperation, "operation")
 
 using namespace vm;
 
-Operation::Operation(const QString &name, QObject *parent)
-    : QObject(parent)
-    , m_name(name)
-{}
+Operation::Operation(const QString &name, QObject *parent) : QObject(parent), m_name(name) {}
 
 Operation::~Operation()
 {
@@ -60,8 +57,7 @@ void Operation::start()
     m_cleanedUp = false;
     if (hasChildren() || populateChildren()) {
         m_children.front()->start();
-    }
-    else {
+    } else {
         run();
     }
 }
@@ -70,8 +66,7 @@ void Operation::stop()
 {
     if (!m_children.empty()) {
         m_children.front()->stop();
-    }
-    else if (m_status == Status::Started) {
+    } else if (m_status == Status::Started) {
         fail();
     }
     qCDebug(lcOperation) << "Stopped operation:" << this;
@@ -226,8 +221,7 @@ bool Operation::setStatus(const Operation::Status &status)
         return false;
     }
 
-    switch (status)
-    {
+    switch (status) {
     case Status::Created:
         return false;
     case Status::Started:
@@ -275,8 +269,7 @@ void Operation::startNextChild()
         if (child->status() == Operation::Status::Finished || child->status() == Operation::Status::Invalid) {
             child->drop();
             m_children.pop_front();
-        }
-        else {
+        } else {
             break;
         }
     }

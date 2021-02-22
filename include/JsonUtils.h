@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_JSON_UTILS_H
 #define VM_JSON_UTILS_H
 
@@ -47,10 +46,11 @@ namespace vm {
 //
 //  Utility functions that simplifies JSON operations.
 //
-class JsonUtils {
+class JsonUtils
+{
 public:
-
-    static QByteArray toBytes(const QJsonObject& json, const QString& underKey = {}) {
+    static QByteArray toBytes(const QJsonObject &json, const QString &underKey = {})
+    {
 
         if (underKey.isEmpty()) {
             return QJsonDocument(json).toJson(QJsonDocument::Compact);
@@ -62,9 +62,9 @@ public:
         }
     }
 
-
     template<typename T>
-    static QByteArray toBytes(const T& obj, const QString& underKey = {}) {
+    static QByteArray toBytes(const T &obj, const QString &underKey = {})
+    {
 
         QJsonObject json;
         obj.writeJson(json);
@@ -72,20 +72,20 @@ public:
         return toBytes(json, underKey);
     }
 
-
-    static QString toString(const QJsonObject& json, const QString& underKey = {}) {
+    static QString toString(const QJsonObject &json, const QString &underKey = {})
+    {
         return QString(toBytes(json, underKey));
     }
 
-
     template<typename T>
-    static QString toString(const T& obj, const QString& underKey = {}) {
+    static QString toString(const T &obj, const QString &underKey = {})
+    {
         return QString(toBytes(obj, underKey));
     }
 
-
     template<typename T>
-    static std::optional<T> toObject(const QJsonObject& json, const QString& underKey = {}) {
+    static std::optional<T> toObject(const QJsonObject &json, const QString &underKey = {})
+    {
 
         T obj;
 
@@ -103,9 +103,9 @@ public:
         return std::nullopt;
     }
 
-
     template<typename T>
-    static std::optional<T> toObject(const QByteArray& jsonBytes, const QString& underKey = {}) {
+    static std::optional<T> toObject(const QByteArray &jsonBytes, const QString &underKey = {})
+    {
 
         const auto jsonDoc = QJsonDocument::fromJson(jsonBytes);
 
@@ -117,7 +117,8 @@ public:
     }
 
     template<typename T>
-    static std::optional<T> toObject(const QString& jsonBytes, const QString& underKey = {}) {
+    static std::optional<T> toObject(const QString &jsonBytes, const QString &underKey = {})
+    {
         return toObject<T>(jsonBytes.toUtf8(), underKey);
     }
 

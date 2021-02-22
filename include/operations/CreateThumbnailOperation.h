@@ -39,8 +39,7 @@
 
 #include "Operation.h"
 
-namespace vm
-{
+namespace vm {
 class CreateThumbnailOperation : public Operation
 {
     Q_OBJECT
@@ -62,6 +61,6 @@ private:
     QString m_destPath;
     const QSize m_maxSize;
 };
-}
+} // namespace vm
 
 #endif // VM_CREATETHUMBNAILOPERATION_H

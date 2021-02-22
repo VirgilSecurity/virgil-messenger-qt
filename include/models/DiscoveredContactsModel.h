@@ -37,8 +37,7 @@
 
 #include "ContactsModel.h"
 
-namespace vm
-{
+namespace vm {
 class Validator;
 
 class DiscoveredContactsModel : public ContactsModel
@@ -47,9 +46,7 @@ class DiscoveredContactsModel : public ContactsModel
     Q_PROPERTY(ContactsModel *selectedContacts MEMBER m_selectedContacts CONSTANT)
 
 public:
-    enum Roles {
-        SectionRole = UserRole
-    };
+    enum Roles { SectionRole = UserRole };
 
     DiscoveredContactsModel(Validator *validator, QObject *parent);
 
@@ -80,6 +77,6 @@ private:
 
     int m_fixedContactsCount = 0;
 };
-}
+} // namespace vm
 
 #endif // VM_DISCOVEREDCONTACTSMODEL_H

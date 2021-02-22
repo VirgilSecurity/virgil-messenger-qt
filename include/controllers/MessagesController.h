@@ -42,15 +42,15 @@
 
 #include <QObject>
 
-namespace vm
-{
+namespace vm {
 
 class MessagesController : public QObject
 {
     Q_OBJECT
 
 public:
-    MessagesController(Messenger *messenger, const Settings *settings, Models *models, UserDatabase *userDatabase, QObject *parent);
+    MessagesController(Messenger *messenger, const Settings *settings, Models *models, UserDatabase *userDatabase,
+                       QObject *parent);
 
     void loadMessages(const ChatHandler &chat);
     void clearMessages();
@@ -89,7 +89,7 @@ private:
     //
     //  Return new unread message count based on destination chat and current chat.
     //
-    size_t calculateUnreadMessageCount(const ChatHandler& destinationChat, const MessageHandler& message) const;
+    size_t calculateUnreadMessageCount(const ChatHandler &destinationChat, const MessageHandler &message) const;
 
     //
     //  Connect to the database.
@@ -97,7 +97,7 @@ private:
     void setupTableConnections();
 
     void onMessageReceived(ModifiableMessageHandler message);
-    void onUpdateMessage(const MessageUpdate& messageUpdate, const bool apply);
+    void onUpdateMessage(const MessageUpdate &messageUpdate, const bool apply);
     void onPictureIconNotFound(const MessageId &messageId);
 
     QPointer<const Settings> m_settings;

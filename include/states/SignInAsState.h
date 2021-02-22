@@ -37,8 +37,7 @@
 
 #include <QState>
 
-namespace vm
-{
+namespace vm {
 class SignInAsState : public QState
 {
     Q_OBJECT
@@ -49,6 +48,6 @@ public:
 signals:
     void requestDownloadKey(const QString &userId);
 };
-}
+} // namespace vm
 
 #endif // VM_SIGNINASSTATE_H

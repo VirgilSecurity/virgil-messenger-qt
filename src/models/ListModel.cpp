@@ -40,9 +40,9 @@
 using namespace vm;
 
 ListModel::ListModel(QObject *parent, bool createProxy)
-    : QAbstractListModel(parent)
-    , m_proxy(createProxy ? new ListProxyModel(this) : nullptr)
-    , m_selection(new ListSelectionModel(this))
+    : QAbstractListModel(parent),
+      m_proxy(createProxy ? new ListProxyModel(this) : nullptr),
+      m_selection(new ListSelectionModel(this))
 {
     connect(m_selection, &ListSelectionModel::changed, this, &ListModel::onSelectionChanged);
 
@@ -86,9 +86,7 @@ QVariant ListModel::data(const QModelIndex &index, int role) const
 
 QHash<int, QByteArray> ListModel::roleNames() const
 {
-    return {
-        { IsSelectedRole, "isSelected" }
-    };
+    return { { IsSelectedRole, "isSelected" } };
 }
 
 ListModel::RoleNames ListModel::unitedRoleNames(const ListModel::RoleNames &a, const ListModel::RoleNames &b)

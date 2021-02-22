@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_USER_ID_H
 #define VM_USER_ID_H
 
@@ -42,7 +41,8 @@ namespace vm {
 //
 //  This class just wraps QString but is used for a strong type checking.
 //
-class UserId {
+class UserId
+{
 public:
     explicit UserId(QString userId = {});
 
@@ -54,10 +54,10 @@ private:
     QString m_userId;
 };
 
-bool operator<(const UserId& lhs, const UserId& rhs);
-bool operator>(const UserId& lhs, const UserId& rhs);
-bool operator==(const UserId& lhs, const UserId& rhs);
-bool operator!=(const UserId& lhs, const UserId& rhs);
+bool operator<(const UserId &lhs, const UserId &rhs);
+bool operator>(const UserId &lhs, const UserId &rhs);
+bool operator==(const UserId &lhs, const UserId &rhs);
+bool operator!=(const UserId &lhs, const UserId &rhs);
 
 } // namespace vm
 

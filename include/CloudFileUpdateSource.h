@@ -35,10 +35,8 @@
 #ifndef VM_CLOUD_FILE_UPDATE_SOURCE_H
 #define VM_CLOUD_FILE_UPDATE_SOURCE_H
 
-namespace vm
-{
-enum class CloudFileUpdateSource
-{
+namespace vm {
+enum class CloudFileUpdateSource {
     // No updates
     None,
     // Update all properties for file/folder

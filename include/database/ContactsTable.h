@@ -40,8 +40,7 @@
 #include "Contact.h"
 #include "ContactUpdate.h"
 
-namespace vm
-{
+namespace vm {
 class ContactsTable : public DatabaseTable
 {
     Q_OBJECT
@@ -62,6 +61,6 @@ private:
     void onUpdateContact(const ContactUpdate &update);
 };
 
-}
+} // namespace vm
 
 #endif // VM_CONTACTS_TABLE_H

@@ -45,17 +45,20 @@
 
 using namespace vm;
 
-UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, const QString &filePath, const CloudFileHandler &parentFolder)
+UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, const QString &filePath,
+                                                   const CloudFileHandler &parentFolder)
     : UploadFileOperation(parent, parent->fileLoader(), QString()) // filePath will be known after encryption
-    , m_parent(parent)
-    , m_parentFolder(parentFolder)
-    , m_requestId(0)
-    , m_sourceFilePath(filePath)
+      ,
+      m_parent(parent),
+      m_parentFolder(parentFolder),
+      m_requestId(0),
+      m_sourceFilePath(filePath)
 {
     setName(QLatin1String("UploadCloudFile"));
 
     connect(m_parent->cloudFileSystem(), &CloudFileSystem::fileCreated, this, &UploadCloudFileOperation::onFileCreated);
-    connect(m_parent->cloudFileSystem(), &CloudFileSystem::createFileErrorOccurred, this, &UploadCloudFileOperation::onCreateCloudFileErrorOccurred);
+    connect(m_parent->cloudFileSystem(), &CloudFileSystem::createFileErrorOccurred, this,
+            &UploadCloudFileOperation::onCreateCloudFileErrorOccurred);
     connect(this, &UploadFileOperation::progressChanged, this, &UploadCloudFileOperation::onProgressChanged);
     connect(this, &UploadFileOperation::uploaded, this, &UploadCloudFileOperation::onUploaded);
     connect(this, &UploadFileOperation::failed, this, &UploadCloudFileOperation::sendFailedTransferUpdate);
@@ -86,7 +89,9 @@ void UploadCloudFileOperation::cleanup()
     FileUtils::removeFile(filePath()); // remove encrypted file
 }
 
-void UploadCloudFileOperation::onFileCreated(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &cloudFile, const QString &encryptedFilePath, const QUrl &putUrl)
+void UploadCloudFileOperation::onFileCreated(const CloudFileRequestId requestId,
+                                             const ModifiableCloudFileHandler &cloudFile,
+                                             const QString &encryptedFilePath, const QUrl &putUrl)
 {
     if (m_requestId != requestId) {
         return;
@@ -103,7 +108,8 @@ void UploadCloudFileOperation::onFileCreated(const CloudFileRequestId requestId,
     startUploadToSlot(putUrl, putUrl); // NOTE(fpohtmeh): We don't know get url at this moment, using of putUrl is fine
 }
 
-void UploadCloudFileOperation::onCreateCloudFileErrorOccurred(const CloudFileRequestId requestId, const QString &errorText)
+void UploadCloudFileOperation::onCreateCloudFileErrorOccurred(const CloudFileRequestId requestId,
+                                                              const QString &errorText)
 {
     if (m_requestId == requestId) {
         failAndNotify(errorText);

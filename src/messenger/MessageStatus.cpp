@@ -32,53 +32,46 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "MessageStatus.h"
-
 
 using namespace vm;
 
-
-MessageStatus vm::MessageStatusFromString(const QString& statusString) {
+MessageStatus vm::MessageStatusFromString(const QString &statusString)
+{
     if (statusString == QLatin1String("new")) {
         return MessageStatus::New;
-    }
-    else if (statusString == QLatin1String("processing")) {
+    } else if (statusString == QLatin1String("processing")) {
         return MessageStatus::Processing;
-    }
-    else if (statusString == QLatin1String("succeed")) {
+    } else if (statusString == QLatin1String("succeed")) {
         return MessageStatus::Succeed;
-    }
-    else if (statusString == QLatin1String("failed")) {
+    } else if (statusString == QLatin1String("failed")) {
         return MessageStatus::Failed;
-    }
-    else if (statusString == QLatin1String("broken")) {
+    } else if (statusString == QLatin1String("broken")) {
         return MessageStatus::Broken;
-    }
-    else {
+    } else {
         throw std::logic_error("Invalid MessageStatus string");
     }
 }
 
-
-QString vm::MessageStatusToString(MessageStatus status) {
+QString vm::MessageStatusToString(MessageStatus status)
+{
     switch (status) {
-        case MessageStatus::New:
-            return QLatin1String("new");
+    case MessageStatus::New:
+        return QLatin1String("new");
 
-        case MessageStatus::Processing:
-            return QLatin1String("processing");
+    case MessageStatus::Processing:
+        return QLatin1String("processing");
 
-        case MessageStatus::Succeed:
-            return QLatin1String("succeed");
+    case MessageStatus::Succeed:
+        return QLatin1String("succeed");
 
-        case MessageStatus::Failed:
-            return QLatin1String("failed");
+    case MessageStatus::Failed:
+        return QLatin1String("failed");
 
-        case MessageStatus::Broken:
-            return QLatin1String("broken");
+    case MessageStatus::Broken:
+        return QLatin1String("broken");
 
-        default:
-            throw std::logic_error("Invalid MessageStatus");
+    default:
+        throw std::logic_error("Invalid MessageStatus");
     }
 }

@@ -35,31 +35,20 @@
 #ifndef VM_OPERATION_H
 #define VM_OPERATION_H
 
-
 #include <QObject>
 #include <QLoggingCategory>
 
-
 #include <deque>
-
 
 Q_DECLARE_LOGGING_CATEGORY(lcOperation)
 
-namespace vm
-{
+namespace vm {
 class Operation : public QObject
 {
     Q_OBJECT
 
 public:
-    enum class Status
-    {
-        Created,
-        Started,
-        Failed,
-        Invalid,
-        Finished
-    };
+    enum class Status { Created, Started, Failed, Invalid, Finished };
 
     Operation(const QString &name, QObject *parent);
     ~Operation() override;
@@ -114,6 +103,6 @@ private:
     std::deque<Operation *> m_children;
     bool m_cleanedUp = false;
 };
-}
+} // namespace vm
 
 #endif // VM_OPERATION_H

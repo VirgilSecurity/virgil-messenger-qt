@@ -39,11 +39,14 @@
 
 using namespace vm;
 
-CreateAttachmentThumbnailOperation::CreateAttachmentThumbnailOperation(MessageOperation *parent, const Settings *settings, const QString &sourcePath, const QString &destPath)
+CreateAttachmentThumbnailOperation::CreateAttachmentThumbnailOperation(MessageOperation *parent,
+                                                                       const Settings *settings,
+                                                                       const QString &sourcePath,
+                                                                       const QString &destPath)
     : CreateThumbnailOperation(parent, sourcePath, destPath, settings->thumbnailMaxSize())
 {
     setName(QLatin1String("CreateAttachmentThumbnail"));
-    connect(this, &CreateThumbnailOperation::thumbnailReady, [parent](const QString& destPath) {
+    connect(this, &CreateThumbnailOperation::thumbnailReady, [parent](const QString &destPath) {
         const auto extrasToJson = [message = parent->message()]() {
             return message->contentAsAttachment()->extrasToJson(true);
         };

@@ -40,14 +40,12 @@
 using namespace vm;
 using Self = GroupsTable;
 
-Self::GroupsTable(Database *database)
-    : DatabaseTable(QLatin1String("groups"), database)
+Self::GroupsTable(Database *database) : DatabaseTable(QLatin1String("groups"), database)
 {
     connect(this, &Self::updateGroup, this, &Self::onUpdateGroup);
     connect(this, &Self::addGroupForChat, this, &Self::onAddGroupForChat);
     connect(this, &Self::deleteGroup, this, &Self::onDeleteGroup);
 }
-
 
 bool Self::create()
 {
@@ -61,13 +59,12 @@ bool Self::create()
     }
 }
 
-
-void Self::onAddGroupForChat(const ChatHandler& chat) {
+void Self::onAddGroupForChat(const ChatHandler &chat)
+{
     insertGroup(GroupId(chat->id()));
 }
 
-
-void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
+void Self::onUpdateGroup(const GroupUpdate &groupUpdate)
 {
     if (auto update = std::get_if<AddGroupUpdate>(&groupUpdate)) {
         insertGroup(update->groupId);
@@ -76,12 +73,11 @@ void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
 
 void Self::onDeleteGroup(const GroupId &groupId)
 {
-    const DatabaseUtils::BindValues values {{ ":id", QString(groupId) }};
+    const DatabaseUtils::BindValues values { { ":id", QString(groupId) } };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("deleteGroupById"), values);
     if (query) {
         qCDebug(lcDatabase) << "Group was removed, id:" << groupId;
-    }
-    else {
+    } else {
         qCCritical(lcDatabase) << "GroupsTable::onDeleteGroup deletion error";
         emit errorOccurred(tr("Failed to delete group"));
     }
@@ -90,12 +86,11 @@ void Self::onDeleteGroup(const GroupId &groupId)
 void Self::insertGroup(const GroupId &groupId)
 {
     ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues bindValues{{ ":id", QString(groupId) }};
+    const DatabaseUtils::BindValues bindValues { { ":id", QString(groupId) } };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertGroup"), bindValues);
     if (query) {
         qCDebug(lcDatabase) << "Group was updated: " << bindValues.front().second;
-    }
-    else {
+    } else {
         qCCritical(lcDatabase) << "GroupsTable::onUpdateGroup error";
         emit errorOccurred(tr("Failed to update groups table"));
     }

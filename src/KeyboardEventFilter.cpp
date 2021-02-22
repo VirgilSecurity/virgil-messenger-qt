@@ -39,15 +39,13 @@
 
 using namespace vm;
 
-KeyboardEventFilter::KeyboardEventFilter(QObject *parent)
-    : QObject(parent)
-    , m_inputMethod(qApp->inputMethod())
+KeyboardEventFilter::KeyboardEventFilter(QObject *parent) : QObject(parent), m_inputMethod(qApp->inputMethod())
 {
-    connect(m_inputMethod, &QInputMethod::keyboardRectangleChanged, this, &KeyboardEventFilter::updateKeyboardRectangle);
+    connect(m_inputMethod, &QInputMethod::keyboardRectangleChanged, this,
+            &KeyboardEventFilter::updateKeyboardRectangle);
 }
 
-KeyboardEventFilter::~KeyboardEventFilter()
-{}
+KeyboardEventFilter::~KeyboardEventFilter() {}
 
 void KeyboardEventFilter::install(QQuickItem *item)
 {

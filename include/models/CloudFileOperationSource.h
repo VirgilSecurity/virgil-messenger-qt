@@ -38,19 +38,11 @@
 #include "CloudFile.h"
 #include "OperationSource.h"
 
-namespace vm
-{
+namespace vm {
 class CloudFileOperationSource : public OperationSource
 {
 public:
-    enum class Type
-    {
-        ListFolder,
-        CreateFolder,
-        Upload,
-        Download,
-        Delete
-    };
+    enum class Type { ListFolder, CreateFolder, Upload, Download, Delete };
 
     explicit CloudFileOperationSource(Type type);
 
@@ -79,7 +71,6 @@ private:
     QString m_name;
     PostFunction m_postFunction;
 };
-}
+} // namespace vm
 
 #endif // VM_CLOUD_FILE_OPERATION_SOURCE_H
-

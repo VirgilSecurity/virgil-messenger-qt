@@ -40,8 +40,7 @@
 
 #include "OperationSource.h"
 
-namespace vm
-{
+namespace vm {
 class OperationQueueListener : public QObject
 {
     Q_OBJECT
@@ -50,7 +49,11 @@ public:
     using QObject::QObject;
     virtual ~OperationQueueListener() {}
 
-    virtual bool preRun(OperationSourcePtr source) { Q_UNUSED(source) return true; }
+    virtual bool preRun(OperationSourcePtr source)
+    {
+        Q_UNUSED(source)
+        return true;
+    }
     virtual void postRun(OperationSourcePtr source) { Q_UNUSED(source) }
     virtual void clear() {}
 
@@ -60,7 +63,6 @@ signals:
 
 using OperationQueueListenerPtr = QPointer<OperationQueueListener>;
 using OperationQueueListeners = std::vector<OperationQueueListenerPtr>;
-}
+} // namespace vm
 
 #endif // VM_OPERATION_QUEUE_LISTENER_H
-

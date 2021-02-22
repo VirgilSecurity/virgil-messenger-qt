@@ -40,8 +40,7 @@
 using namespace vm;
 
 ChatObject::ChatObject(Messenger *messenger, QObject *parent)
-    : QObject(parent)
-    , m_groupMembersModel(new GroupMembersModel(this, true))
+    : QObject(parent), m_groupMembersModel(new GroupMembersModel(this, true))
 {
     m_groupMembersModel->selection()->setMultiSelect(true);
 

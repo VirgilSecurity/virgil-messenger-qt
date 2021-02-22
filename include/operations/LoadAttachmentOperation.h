@@ -37,8 +37,7 @@
 
 #include "NetworkOperation.h"
 
-namespace vm
-{
+namespace vm {
 class MessageOperation;
 
 class LoadAttachmentOperation : public NetworkOperation
@@ -62,6 +61,6 @@ private:
     quint64 m_previousBytesTotal = 0;
     quint64 m_currentBytesLoaded = 0;
 };
-}
+} // namespace vm
 
 #endif // VM_LOADATTACHMENTOPERATION_H

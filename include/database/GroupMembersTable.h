@@ -45,8 +45,7 @@
 
 #include <optional>
 
-namespace vm
-{
+namespace vm {
 class GroupMembersTable : public DatabaseTable
 {
     Q_OBJECT
@@ -58,28 +57,28 @@ signals:
     //
     //  Control signals.
     //
-    void updateGroup(const GroupUpdate& groupUpdate);
-    void fetchByMemberId(const UserId& memberId);
-    void fetchByGroupId(const GroupId& groupId);
+    void updateGroup(const GroupUpdate &groupUpdate);
+    void fetchByMemberId(const UserId &memberId);
+    void fetchByGroupId(const GroupId &groupId);
     void deleteGroupMembers(const GroupId &groupId);
 
     //
     //  Notification signals.
     //
     void errorOccurred(const QString &errorText);
-    void fetchedByMemberId(const UserId& memberId, const GroupMembers& groupMember);
-    void fetchedByGroupId(const GroupId& groupId, const GroupMembers& groupMember);
+    void fetchedByMemberId(const UserId &memberId, const GroupMembers &groupMember);
+    void fetchedByGroupId(const GroupId &groupId, const GroupMembers &groupMember);
 
 private:
-    void onUpdateGroup(const GroupUpdate& groupUpdate);
-    void onFetchByMemberId(const UserId& memberId);
-    void onFetchByGroupId(const GroupId& groupId);
+    void onUpdateGroup(const GroupUpdate &groupUpdate);
+    void onFetchByMemberId(const UserId &memberId);
+    void onFetchByGroupId(const GroupId &groupId);
     void onDeleteGroupMembers(const GroupId &groupId);
 
     bool create() override;
 
     GroupMemberHanlder readGroupMember(const QSqlQuery &query);
 };
-}
+} // namespace vm
 
 #endif // VM_GROUP_MEMBERS_TABLE_H

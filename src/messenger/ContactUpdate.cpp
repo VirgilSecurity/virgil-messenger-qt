@@ -32,21 +32,19 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "ContactUpdate.h"
 
 #include <stdexcept>
 
 using namespace vm;
 
-UserId vm::ContactUpdateGetUserId(const ContactUpdate& update) {
+UserId vm::ContactUpdateGetUserId(const ContactUpdate &update)
+{
     if (auto base = std::get_if<UsernameContactUpdate>(&update)) {
         return base->userId;
-    }
-    else if (auto base = std::get_if<NameContactUpdate>(&update)) {
+    } else if (auto base = std::get_if<NameContactUpdate>(&update)) {
         return base->userId;
-    }
-    else {
+    } else {
         throw std::logic_error("Unhandled ContactUpdate when ask for user id.");
     }
 }

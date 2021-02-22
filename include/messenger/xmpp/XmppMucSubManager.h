@@ -54,7 +54,6 @@ class XmppMucSubManager : public QXmppClientExtension
     Q_OBJECT
 
 public:
-
 public:
     XmppMucSubManager();
 
@@ -62,23 +61,23 @@ public:
     //  Subscribe to given events.
     //  Return operation id.
     //
-    QString subscribe(const std::list<XmppMucSubEvent>& events,
-            const QString& from, const QString& to, const QString& nickName);
+    QString subscribe(const std::list<XmppMucSubEvent> &events, const QString &from, const QString &to,
+                      const QString &nickName);
 
     //
     //  Subscribe another user (jid) to given events.
     //  Only a room moderator can subscribe another user.
     //  Return operation id.
     //
-    QString subscribeOther(const std::list<XmppMucSubEvent>& events,
-            const QString& from, const QString& to, const QString& jid, const QString& nickName);
+    QString subscribeOther(const std::list<XmppMucSubEvent> &events, const QString &from, const QString &to,
+                           const QString &jid, const QString &nickName);
 
     //
     //  Unsubscribe from a MUC Room.
     //  A room moderator can unsubscribe another room user from MUC Room events by providing the user JID.
     //  Return operation id.
     //
-    QString unsubscribe(const QString& jid = {});
+    QString unsubscribe(const QString &jid = {});
 
     //
     //  Get list of the subscribed rooms.
@@ -86,7 +85,7 @@ public:
     //  Signal subscribedRoomsProcessed() is emitted when all rooms were processed.
     //  Return operation id.
     //
-    QString retreiveSubscribedRooms(const QString& from);
+    QString retreiveSubscribedRooms(const QString &from);
 
     //
     //  Get list of the subscribed rooms.
@@ -94,7 +93,7 @@ public:
     //  Signal roomSubscribersProcessed() is emitted when all room subscribers were processed.
     //  Return operation id.
     //
-    QString retreiveRoomSubscribers(const QString& from, const QString& to);
+    QString retreiveRoomSubscribers(const QString &from, const QString &to);
 
     //
     //  Handle IQs with subscription events.
@@ -103,19 +102,19 @@ public:
 
 Q_SIGNALS:
 
-    void messageReceived(const QXmppMessage& message);
-    void subscribeReceived(const QString& roomJid, const QString& subscriberJid, const QString& nickname);
+    void messageReceived(const QXmppMessage &message);
+    void subscribeReceived(const QString &roomJid, const QString &subscriberJid, const QString &nickname);
     void unsubscribeReceived();
 
-    void subscribedRoomReceived(const QString& id, const QString& roomJid, const QString& subscriberJid,
-                const std::list<XmppMucSubEvent>& events);
+    void subscribedRoomReceived(const QString &id, const QString &roomJid, const QString &subscriberJid,
+                                const std::list<XmppMucSubEvent> &events);
 
-    void subscribedRoomsProcessed(const QString& id);
+    void subscribedRoomsProcessed(const QString &id);
 
-    void roomSubscriberReceived(const QString& id, const QString& roomJid, const QString& subscriberJid,
-                const std::list<XmppMucSubEvent>& events);
+    void roomSubscriberReceived(const QString &id, const QString &roomJid, const QString &subscriberJid,
+                                const std::list<XmppMucSubEvent> &events);
 
-    void roomSubscribersProcessed(const QString& id, const QString& roomJid);
+    void roomSubscribersProcessed(const QString &id, const QString &roomJid);
 
 protected:
     void setClient(QXmppClient *client) override;
@@ -125,9 +124,10 @@ private:
 
 private:
     class Impl;
-    std::shared_ptr<Impl> m_impl;;
+    std::shared_ptr<Impl> m_impl;
+    ;
 };
 
-} // vm
+} // namespace vm
 
 #endif // VM_XMPP_MUC_SUB_MANAGER_H

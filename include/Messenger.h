@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VIRGIL_IOTKIT_QT_MESSENGER_H
 #define VIRGIL_IOTKIT_QT_MESSENGER_H
 
@@ -51,16 +50,15 @@
 
 #include <tuple>
 
-
 Q_DECLARE_LOGGING_CATEGORY(lcMessenger)
 
 namespace vm {
-class Messenger : public MessageSender {
+class Messenger : public MessageSender
+{
     Q_OBJECT
     Q_PROPERTY(QString connectionStateString READ connectionStateString NOTIFY connectionStateStringChanged)
 
 public:
-
     Messenger(Settings *settings, Validator *validator);
     Messenger() = default; // QML engine requires default constructor
     virtual ~Messenger() noexcept = default;
@@ -86,8 +84,8 @@ public:
     //
     //  Decrypt given file and returns a key for decryption.
     //
-    bool decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray& decryptionKey,
-            const QByteArray& signature, const UserId senderId);
+    bool decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray &decryptionKey,
+                     const QByteArray &signature, const UserId senderId);
 
     //
     // User control.
@@ -118,12 +116,12 @@ public:
     //  If success - signal 'groupChatCreated' is emitted.
     //  If fail - signal 'groupChatCreateFailed' is emitted.
     //
-    void createGroupChat(const GroupHandler& group);
+    void createGroupChat(const GroupHandler &group);
 
     //
     //  Join existent group chat when online to be able receive messages.
     //
-    void joinGroupChats(const GroupMembers& groupsWithMe);
+    void joinGroupChats(const GroupMembers &groupsWithMe);
 
     //
     //  Group invitations
@@ -175,7 +173,7 @@ signals:
     void updateMessage(const MessageUpdate &messageUpdate);
     void messageSent(MessageHandler message);
     void messageReceived(ModifiableMessageHandler message);
-    void lastActivityTextChanged(const QString& text);
+    void lastActivityTextChanged(const QString &text);
     //--
 
     //--
@@ -196,15 +194,15 @@ signals:
     //--
     //  Group chats.
     //
-    void groupChatCreated(const GroupId& chatId);
-    void groupChatCreateFailed(const GroupId& chatId, const QString& errorText);
-    void updateGroup(const GroupUpdate& groupUpdate);
+    void groupChatCreated(const GroupId &chatId);
+    void groupChatCreateFailed(const GroupId &chatId, const QString &errorText);
+    void updateGroup(const GroupUpdate &groupUpdate);
     //--
 
     //--
     // Users.
     //
-    void userWasFound(const UserHandler& user);
+    void userWasFound(const UserHandler &user);
     //--
 
 private slots:

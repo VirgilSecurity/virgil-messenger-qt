@@ -42,52 +42,50 @@
 #include "Message.h"
 #include "MessageContentAttachment.h"
 
-namespace vm
-{
-namespace Utils
-{
-    QString createUuid();
+namespace vm {
+namespace Utils {
+QString createUuid();
 
-    // String processing/format
+// String processing/format
 
-    QString formattedSize(quint64 fileSize);
+QString formattedSize(quint64 fileSize);
 
-    QString formattedDataSizeProgress(quint64 loaded, quint64 total);
+QString formattedDataSizeProgress(quint64 loaded, quint64 total);
 
-    QString formattedElapsedSeconds(std::chrono::seconds seconds, std::chrono::seconds nowInterval);
+QString formattedElapsedSeconds(std::chrono::seconds seconds, std::chrono::seconds nowInterval);
 
-    QString formattedLastSeenActivity(std::chrono::seconds seconds, std::chrono::seconds updateInterval);
+QString formattedLastSeenActivity(std::chrono::seconds seconds, std::chrono::seconds updateInterval);
 
-    QString formattedLastSeenNoActivity();
+QString formattedLastSeenNoActivity();
 
-    QString elidedText(const QString &text, const int maxLength);
+QString elidedText(const QString &text, const int maxLength);
 
-    QString messageContentDisplayText(const MessageContent &messageContent);
+QString messageContentDisplayText(const MessageContent &messageContent);
 
-    QString printableLoadProgress(quint64 loaded, quint64 total);
+QString printableLoadProgress(quint64 loaded, quint64 total);
 
-    // Debug
+// Debug
 
-    void printThreadId(const QString &message);
+void printThreadId(const QString &message);
 
-    // Image functions
+// Image functions
 
-    QSize applyOrientation(const QSize &size, const int orientation);
+QSize applyOrientation(const QSize &size, const int orientation);
 
-    QImage applyOrientation(const QImage &image, const int orientation);
+QImage applyOrientation(const QImage &image, const int orientation);
 
-    QSize calculateThumbnailSize(const QSize &size, const QSize &maxSize, const int orientation = 0);
+QSize calculateThumbnailSize(const QSize &size, const QSize &maxSize, const int orientation = 0);
 
-    bool readImage(QImageReader *reader, QImage *image);
+bool readImage(QImageReader *reader, QImage *image);
 
-    // Contacts
+// Contacts
 
-    Contacts getDeviceContacts(const Contacts &cachedContacts = Contacts());
+Contacts getDeviceContacts(const Contacts &cachedContacts = Contacts());
 
-    QUrl getContactAvatarUrl(const ContactHandler contact);
+QUrl getContactAvatarUrl(const ContactHandler contact);
 
-    QString contactDisplayName(const QString &name, const QString &username, const QString &phone, const QString &email);
-}
-}
+QString contactDisplayName(const QString &name, const QString &username, const QString &phone, const QString &email);
+} // namespace Utils
+} // namespace vm
 
 #endif // VM_UTILS_H

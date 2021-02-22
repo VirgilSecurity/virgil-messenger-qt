@@ -44,22 +44,14 @@
 
 class Settings;
 
-namespace vm
-{
+namespace vm {
 class CloudFilesModel : public ListModel
 {
     Q_OBJECT
     Q_PROPERTY(QString description MEMBER m_description NOTIFY descriptionChanged)
 
 public:
-    enum Roles
-    {
-        FilenameRole = Qt::UserRole,
-        IsFolderRole,
-        DisplayDateTimeRole,
-        DisplayFileSizeRole,
-        SortRole
-    };
+    enum Roles { FilenameRole = Qt::UserRole, IsFolderRole, DisplayDateTimeRole, DisplayFileSizeRole, SortRole };
 
     CloudFilesModel(const Settings *settings, QObject *parent);
 
@@ -96,6 +88,6 @@ private:
     QTimer m_updateTimer;
     QString m_description;
 };
-}
+} // namespace vm
 
 #endif // VM_CLOUDFILESMODEL_H

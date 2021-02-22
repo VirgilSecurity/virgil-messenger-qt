@@ -40,9 +40,9 @@
 
 using namespace vm;
 
-AddGroupChatMembersState::AddGroupChatMembersState(ChatsController *chatsController, DiscoveredContactsModel *contactsModel, QState *parent)
-    : OperationState(parent)
-    , m_contactsModel(contactsModel)
+AddGroupChatMembersState::AddGroupChatMembersState(ChatsController *chatsController,
+                                                   DiscoveredContactsModel *contactsModel, QState *parent)
+    : OperationState(parent), m_contactsModel(contactsModel)
 {
     connect(this, &AddGroupChatMembersState::addMembers, chatsController, &ChatsController::addSelectedMembers);
 }

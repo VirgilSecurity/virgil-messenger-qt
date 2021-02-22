@@ -41,93 +41,94 @@ using Self = Contact;
 
 Self::Contact()
     : m_userId(""),
-    m_username(""),
-    m_name(""),
-    m_phone(""),
-    m_email(""),
-    m_platformId(""),
-    m_avatarLocalPath(""),
-    m_isBanned(false),
-    m_groupAffiliation(GroupAffiliation::None)
+      m_username(""),
+      m_name(""),
+      m_phone(""),
+      m_email(""),
+      m_platformId(""),
+      m_avatarLocalPath(""),
+      m_isBanned(false),
+      m_groupAffiliation(GroupAffiliation::None)
 {
 }
 
-UserId Self::userId() const {
+UserId Self::userId() const
+{
     return m_userId;
 }
 
-
-void Self::setUserId(UserId userId) {
+void Self::setUserId(UserId userId)
+{
     m_userId = std::move(userId);
 }
 
-
-QString Self::username() const {
+QString Self::username() const
+{
     return m_username;
 }
 
-
-void Self::setUsername(QString username) {
+void Self::setUsername(QString username)
+{
     m_username = std::move(username);
 }
 
-
-QString Self::name() const {
+QString Self::name() const
+{
     return m_name;
 }
 
-
-void Self::setName(QString name) {
+void Self::setName(QString name)
+{
     m_name = std::move(name);
 }
 
-
-QString Self::phone() const {
+QString Self::phone() const
+{
     return m_phone;
 }
 
-
-void Self::setPhone(QString phone) {
+void Self::setPhone(QString phone)
+{
     m_phone = std::move(phone);
 }
 
-
-QString Self::email() const {
+QString Self::email() const
+{
     return m_email;
 }
 
-
-void Self::setEmail(QString email) {
+void Self::setEmail(QString email)
+{
     m_email = std::move(email);
 }
 
-
-QString Self::platformId() const {
+QString Self::platformId() const
+{
     return m_platformId;
 }
 
-
-void Self::setPlatformId(QString platformId) {
+void Self::setPlatformId(QString platformId)
+{
     m_platformId = std::move(platformId);
 }
 
-
-QString Self::avatarLocalPath() const {
+QString Self::avatarLocalPath() const
+{
     return m_avatarLocalPath;
 }
 
-
-void Self::setAvatarLocalPath(QString avatarLocalPath) {
+void Self::setAvatarLocalPath(QString avatarLocalPath)
+{
     m_avatarLocalPath = std::move(avatarLocalPath);
 }
 
-
-bool Self::isBanned() const {
+bool Self::isBanned() const
+{
     return m_isBanned;
 }
 
-
-void Self::setIsBanned(bool isBanned) {
+void Self::setIsBanned(bool isBanned)
+{
     m_isBanned = isBanned;
 }
 
@@ -141,6 +142,7 @@ void Self::setGroupAffiliation(GroupAffiliation groupAffiliation)
     m_groupAffiliation = groupAffiliation;
 }
 
-QString Self::displayName() const {
+QString Self::displayName() const
+{
     return Utils::contactDisplayName(m_name, m_username, m_phone, m_email);
 }

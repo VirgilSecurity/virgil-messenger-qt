@@ -40,8 +40,7 @@
 
 using namespace vm;
 
-ContactAvatarLoader::ContactAvatarLoader(QObject *parent)
-    : QObject(parent)
+ContactAvatarLoader::ContactAvatarLoader(QObject *parent) : QObject(parent)
 {
     m_timer.setSingleShot(true);
     m_timer.setInterval(100);

@@ -41,9 +41,9 @@
 
 #include <optional>
 
-namespace vm
+namespace vm {
+class FileUtils
 {
-class FileUtils {
 public:
     static QString calculateFingerprint(const QString &path);
 
@@ -59,7 +59,7 @@ public:
 
     static void removeDir(const QString &dirPath);
 
-    static QString fileName(const  QString &filePath);
+    static QString fileName(const QString &filePath);
 
     static QString attachmentFileName(const QUrl &url, bool isPicture);
 
@@ -73,6 +73,6 @@ public:
 
     static QUrl localFileToUrl(const QString &filePath);
 };
-}; // vm
+}; // namespace vm
 
 #endif // VM_FILE_UTILS_H

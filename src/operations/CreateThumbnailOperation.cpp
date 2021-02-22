@@ -40,12 +40,14 @@
 
 using namespace vm;
 
-CreateThumbnailOperation::CreateThumbnailOperation(QObject *parent, const QString &sourcePath, const QString &destPath, const QSize &maxSize)
-    : Operation(QLatin1String("CreateThumbnailOperation"), parent)
-    , m_sourcePath(sourcePath)
-    , m_destPath(destPath)
-    , m_maxSize(maxSize)
-{}
+CreateThumbnailOperation::CreateThumbnailOperation(QObject *parent, const QString &sourcePath, const QString &destPath,
+                                                   const QSize &maxSize)
+    : Operation(QLatin1String("CreateThumbnailOperation"), parent),
+      m_sourcePath(sourcePath),
+      m_destPath(destPath),
+      m_maxSize(maxSize)
+{
+}
 
 void CreateThumbnailOperation::run()
 {
@@ -61,9 +63,9 @@ void CreateThumbnailOperation::run()
     const auto size = Utils::calculateThumbnailSize(m_sourceImage.size(), m_maxSize);
     if (size == m_sourceImage.size()) {
         QFile::copy(m_sourcePath, m_destPath);
-    }
-    else {
-        const auto dest = m_sourceImage.scaled(size.width(), size.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    } else {
+        const auto dest =
+                m_sourceImage.scaled(size.width(), size.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
         if (!QImage(dest).save(m_destPath)) {
             qCDebug(lcOperation) << "Failed to save thumbnail file:" << m_destPath;
             invalidateAndNotify(tr("Failed to save thumbnail file"));
