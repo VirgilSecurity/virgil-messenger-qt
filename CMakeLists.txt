@@ -54,7 +54,7 @@ set(VERSION_DATABASE_SCHEME "1")
 # ---------------------------------------------------------------------------
 # Code formatting
 # ---------------------------------------------------------------------------
-set(ENABLE_CLANGFORMAT OFF CACHE BOOL "On/Off formatting source code with clangformat.")
+set(ENABLE_CLANGFORMAT ON CACHE BOOL "On/Off formatting source code with clangformat.")
 
 # ---------------------------------------------------------------------------
 # Other build options.
