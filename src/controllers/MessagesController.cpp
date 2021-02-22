@@ -154,7 +154,10 @@ std::unique_ptr<OutgoingMessage> Self::createOutgoingMessage() {
     message->setStage(OutgoingMessageStage::Created);
     message->setCreatedAt(QDateTime::currentDateTime());
 
-    if (currentChat->type() == ChatType::Group) {
+    if (currentChat->type() == ChatType::Personal) {
+        message->setRecipientUsername(currentChat->title());
+    }
+    else if (currentChat->type() == ChatType::Group) {
         auto groupId = GroupId(QString(currentChat->id()));
         message->setGroupChatInfo(std::make_unique<MessageGroupChatInfo>(std::move(groupId)));
     }
