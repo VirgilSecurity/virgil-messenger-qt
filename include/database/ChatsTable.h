@@ -50,9 +50,11 @@ public:
 signals:
     void fetch();
     void addChat(const ChatHandler &chat);
+    void deleteChat(const ChatId &chatId);
 
     void resetUnreadCount(const ChatHandler &chat);
     void updateLastMessage(const MessageHandler &message, qsizetype unreadMessageCount);
+    void resetLastMessage(const ChatId &chatId);
 
     void errorOccurred(const QString &errorText);
     void fetched(ModifiableChats chats);
@@ -62,8 +64,10 @@ private:
 
     void onFetch();
     void onAddChat(const ChatHandler &chat);
+    void onDeleteChat(const ChatId &chatId);
     void onResetUnreadCount(const ChatHandler &chat);
     void onUpdateLastMessage(const MessageHandler &message, qsizetype unreadMessageCount);
+    void onResetLastMessage(const ChatId &chatId);
 };
 }
 

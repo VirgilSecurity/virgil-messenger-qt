@@ -1,25 +1,18 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 
 import "../theme"
 
+// TODO(fpohtmeh): use PageHeader
 ToolBar {
     property alias title: titleLabel.text
     property bool showBackButton: true
-    property alias showSeparator: separator.visible
+    property alias showSeparator: headerBackground.showSeparator
     default property alias menu: contextMenu.contentData
 
-    background: Rectangle {
-        implicitHeight: Theme.headerHeight
-        color: "transparent"
-
-        HorizontalRule {
-            id: separator
-            anchors.leftMargin: Theme.margin
-            anchors.rightMargin: Theme.margin
-            anchors.bottom: parent.bottom
-        }
+    background: HeaderBackground {
+        id: headerBackground
     }
 
     RowLayout {

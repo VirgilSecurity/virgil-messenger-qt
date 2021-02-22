@@ -36,12 +36,11 @@
 
 using namespace vm;
 
-Group::Group(const GroupId &id, const QString &name)
-    : m_id(id)
-    , m_name(name)
+Group::Group(GroupId id, QString name, Contacts contacts)
+    : m_id(std::move(id))
+    , m_name(std::move(name))
+    , m_contacts(std::move(contacts))
 {}
-
-Group::~Group() noexcept = default;
 
 GroupId Group::id() const
 {
@@ -51,4 +50,8 @@ GroupId Group::id() const
 QString Group::name() const
 {
     return m_name;
+}
+
+Contacts Group::contacts() const {
+    return m_contacts;
 }

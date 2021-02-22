@@ -56,14 +56,11 @@ Control {
         }
     }
 
-    UploadProgressBar {
-        // TODO(fpohtmeh): move to main.qml
-        anchors {
-            bottom: parent.bottom
-            left: parent.left
-            right: parent.right
-        }
-        visible: manager.currentState === manager.cloudFileListState ? "opened" : "closed"
+    TransfersPanel {
+        anchors.leftMargin: sideBar.width
+        model: models.cloudFilesTransfers
+        visible: manager.currentState === manager.cloudFileListState
+        buttonVisible: !controllers.cloudFiles.isLoading
     }
 
     LogControl {
@@ -73,10 +70,6 @@ Control {
             topMargin: 0.75 * mainView.height
         }
         visible: settings.devMode
-    }
-
-    KeyboardHandler {
-        id: keyboardHandler
     }
 
     QtObject {
@@ -143,7 +136,7 @@ Control {
         }
 
         function openChatPage() {
-            if (manager.previousState === manager.attachmentPreviewState) {
+            if ([manager.attachmentPreviewState, manager.chatInfoState].includes(manager.previousState)) {
                 return
             }
             const replace = [manager.newChatState, manager.nameGroupChatState, manager.downloadKeyState].includes(manager.previousState)
@@ -152,6 +145,16 @@ Control {
             }
             var push = replace ? stackView.replace : stackView.push
             push(page("Chat"), StackView.Transition)
+        }
+
+        function openChatInfoPage() {
+            if (manager.previousState !== manager.addGroupChatMembersState) {
+                stackView.push(page("ChatInfo"))
+            }
+        }
+
+        function openAddGroupChatMembersPage() {
+            stackView.push(page("AddGroupChatMembers"))
         }
 
         function showAttachmentPreview() {
@@ -212,6 +215,8 @@ Control {
         manager.newGroupChatState.entered.connect(d.openAddNewGroupChatPage)
         manager.nameGroupChatState.entered.connect(d.openNameGroupChatPage)
         manager.chatState.entered.connect(d.openChatPage)
+        manager.chatInfoState.entered.connect(d.openChatInfoPage)
+        manager.addGroupChatMembersState.entered.connect(d.openAddGroupChatMembersPage)
         manager.attachmentPreviewState.entered.connect(d.showAttachmentPreview)
         manager.backupKeyState.entered.connect(d.openBackupKeyPage)
         manager.editProfileState.entered.connect(d.openEditProfilePage)

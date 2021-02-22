@@ -36,8 +36,10 @@
 #define VM_OPERATIONQUEUE_H
 
 #include <QLoggingCategory>
+#include <QMutex>
 #include <QPointer>
 
+#include "OperationQueueListener.h"
 #include "OperationSource.h"
 
 class QThreadPool;
@@ -51,6 +53,8 @@ class OperationQueue : public QObject
     Q_OBJECT
 
 public:
+    using PostFunction = OperationSource::PostFunction;
+
     explicit OperationQueue(const QLoggingCategory &category, QObject *parent);
     ~OperationQueue() override;
 
@@ -59,15 +63,18 @@ public:
     void stop();
 
     void addSource(OperationSourcePtr source);
+    void addListener(OperationQueueListenerPtr listener);
 
 signals:
+    void notificationCreated(const QString &notification, const bool error);
+
     void stopRequested(QPrivateSignal);
     void operationFailed(OperationSourcePtr source, QPrivateSignal);
-    void notificationCreated(const QString &notification, const bool error);
 
 protected:
     virtual Operation *createOperation(OperationSourcePtr source) = 0;
     virtual void invalidateOperation(OperationSourcePtr source) = 0;
+    virtual qsizetype maxAttemptCount() const = 0;
 
 private:
     void addSourceImpl(OperationSourcePtr source, const bool run);
@@ -79,10 +86,12 @@ private:
 
     QPointer<QThreadPool> m_threadPool;
     std::atomic_bool m_isStopped = false;
-    std::vector<OperationSourcePtr> m_sources;
+    OperationSources m_sources;
+    OperationQueueListeners m_listeners;
 };
 }
 
 Q_DECLARE_METATYPE(vm::OperationSourcePtr);
+Q_DECLARE_METATYPE(vm::OperationQueue::PostFunction);
 
 #endif // VM_OPERATIONQUEUE_H

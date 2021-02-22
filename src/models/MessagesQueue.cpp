@@ -57,8 +57,6 @@ Self::MessagesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject *p
     , m_userDatabase(userDatabase)
     , m_factory(new MessageOperationFactory(messenger, this))
 {
-    qRegisterMetaType<vm::MessagesQueue::PostDownloadFunction>("PostDownloadFunction");
-
     connect(m_messenger, &Messenger::onlineStatusChanged, this, &MessagesQueue::onOnlineStatusChanged);
     connect(m_messenger, &Messenger::signedOut, this, &MessagesQueue::stop);
     connect(m_userDatabase, &UserDatabase::opened, this, &Self::onDatabaseOpened);
@@ -117,6 +115,12 @@ void Self::invalidateOperation(OperationSourcePtr source)
 }
 
 
+qsizetype Self::maxAttemptCount() const
+{
+    return 3;
+}
+
+
 void Self::onDatabaseOpened()
 {
     start();
@@ -145,7 +149,9 @@ void Self::onNotSentMessagesFetched(const ModifiableMessages &messages)
 void Self::onPushMessage(const ModifiableMessageHandler &message)
 {
     if (message->isIncoming() || message->isOutgoingCopyFromOtherDevice()) {
-        pushMessagePreload(message);
+        if (message->contentType() == MessageContentType::Picture) {
+            pushMessagePreload(message);
+        }
     }
     else {
         addSource(std::make_shared<MessageOperationSource>(message));
@@ -153,8 +159,9 @@ void Self::onPushMessage(const ModifiableMessageHandler &message)
 }
 
 
-void Self::onPushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath, const PostDownloadFunction &postFunction)
+void Self::onPushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath, const PostFunction &postFunction)
 {
+    Q_ASSERT(message->contentIsAttachment());
     DownloadParameter parameter;
     parameter.type = DownloadParameter::Type::Download;
     parameter.filePath = filePath;
@@ -165,6 +172,7 @@ void Self::onPushMessageDownload(const ModifiableMessageHandler &message, const 
 
 void Self::onPushMessagePreload(const ModifiableMessageHandler &message)
 {
+    Q_ASSERT(message->contentType() == MessageContentType::Picture);
     DownloadParameter parameter;
     parameter.type = DownloadParameter::Type::Preload;
     addSource(std::make_shared<MessageOperationSource>(message, std::move(parameter)));

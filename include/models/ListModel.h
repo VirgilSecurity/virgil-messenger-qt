@@ -45,6 +45,7 @@ class ListSelectionModel;
 class ListModel : public QAbstractListModel
 {
     Q_OBJECT
+    Q_PROPERTY(int count MEMBER m_count NOTIFY countChanged)
     Q_PROPERTY(ListProxyModel *proxy MEMBER m_proxy NOTIFY proxyChanged)
     Q_PROPERTY(ListSelectionModel *selection MEMBER m_selection CONSTANT)
     Q_PROPERTY(QString filter MEMBER m_filter WRITE setFilter NOTIFY filterChanged)
@@ -77,12 +78,15 @@ public:
     ListSelectionModel *selection();
 
 signals:
+    void countChanged(int count);
     void filterChanged(const QString &filter);
     void proxyChanged(ListProxyModel *proxy);
 
 private:
     void onSelectionChanged(const QList<QModelIndex> &indices);
+    void onRowCountChanged();
 
+    int m_count = 0;
     ListProxyModel *m_proxy;
     ListSelectionModel *m_selection;
     QString m_filter;

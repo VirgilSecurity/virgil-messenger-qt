@@ -45,8 +45,10 @@ ChatsTable::ChatsTable(Database *database)
 {
     connect(this, &ChatsTable::fetch, this, &ChatsTable::onFetch);
     connect(this, &ChatsTable::addChat, this, &ChatsTable::onAddChat);
+    connect(this, &ChatsTable::deleteChat, this, &ChatsTable::onDeleteChat);
     connect(this, &ChatsTable::resetUnreadCount, this, &ChatsTable::onResetUnreadCount);
     connect(this, &ChatsTable::updateLastMessage, this, &ChatsTable::onUpdateLastMessage);
+    connect(this, &ChatsTable::resetLastMessage, this, &ChatsTable::onResetLastMessage);
 }
 
 bool ChatsTable::create()
@@ -113,7 +115,19 @@ void ChatsTable::onAddChat(const ChatHandler &chat)
     else {
         qCCritical(lcDatabase) << "ChatsTable::onCreateChat insertion error";
         emit errorOccurred(tr("Failed to insert chat"));
-        return;
+    }
+}
+
+void ChatsTable::onDeleteChat(const ChatId &chatId)
+{
+    const DatabaseUtils::BindValues values {{ ":id", QString(chatId) }};
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("deleteChatById"), values);
+    if (query) {
+        qCDebug(lcDatabase) << "Chat was removed, id:" << chatId;
+    }
+    else {
+        qCCritical(lcDatabase) << "ChatsTable::onDeleteChat deletion error";
+        emit errorOccurred(tr("Failed to delete chat"));
     }
 }
 
@@ -146,5 +160,23 @@ void ChatsTable::onUpdateLastMessage(const MessageHandler &message, qsizetype un
     else {
         qCCritical(lcDatabase) << "ChatsTable::onUpdateLastMessage error";
         emit errorOccurred(tr("Failed to update last message"));
+    }
+}
+
+void ChatsTable::onResetLastMessage(const ChatId &chatId)
+{
+    ScopedConnection connection(*database());
+    const DatabaseUtils::BindValues values {
+        { ":id", QString(chatId) },
+        { ":lastMessageId", QString() },
+        { ":unreadMessageCount", 0 }
+    };
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateLastMessage"), values);
+    if (query) {
+        qCDebug(lcDatabase) << "Last message was reset for chat id: " << chatId << ", unread: " << 0;
+    }
+    else {
+        qCCritical(lcDatabase) << "ChatsTable::onResetLastMessage error";
+        emit errorOccurred(tr("Failed to reset last message"));
     }
 }

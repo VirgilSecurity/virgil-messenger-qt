@@ -46,6 +46,12 @@ SignInState::SignInState(UsersController *usersController, Validator *validator,
 {
     connect(usersController, &UsersController::signedIn, this, &SignInState::operationFinished);
     connect(usersController, &UsersController::signInErrorOccured, this, &SignInState::operationErrorOccurred);
+
+    connect(usersController, &UsersController::databaseErrorOccurred, [this](const auto& errorText) {
+        m_usersController->signOut();
+        emit operationErrorOccurred(errorText);
+    });
+
     connect(this, &SignInState::signIn, this, &SignInState::processSignIn);
 }
 

@@ -39,7 +39,8 @@
 
 #include "QFile"
 
-class QNetworkReply;
+#include <QNetworkReply>
+#include <QPointer>
 
 namespace vm
 {
@@ -56,6 +57,8 @@ signals:
     void setProgress(quint64 bytesLoaded, quint64 bytesTotal);
     void progressChanged(quint64 bytesLoaded, quint64 bytesTotal);
 
+    void interrupt();
+
 protected:
     virtual void connectReply(QNetworkReply *reply);
 
@@ -67,12 +70,13 @@ protected:
 
 private:
     void onReplyFinished(QNetworkReply *reply);
-    void onReplyErrorOccurred(const int &errorCode, QNetworkReply *reply);
+    void onReplyErrorOccurred(const QNetworkReply::NetworkError error, QNetworkReply *reply);
     void onReplySslErrors();
     void onSetProgress(quint64 bytesLoaded, quint64 bytesTotal);
 
     QString m_filePath;
     QScopedPointer<QFile> m_fileHandle;
+    QPointer<QNetworkReply> m_reply;
     quint64 m_bytesLoaded = 0;
     quint64 m_bytesTotal = 0;
 };

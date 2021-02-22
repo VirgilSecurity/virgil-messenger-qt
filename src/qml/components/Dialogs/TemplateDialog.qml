@@ -24,7 +24,7 @@ Popup {
     QtObject {
         id: d
         readonly property real radius: 10
-        readonly property real popupImplicitWidth: Math.min(420, root.width * 0.8)
+        readonly property real popupImplicitWidth: Math.min(420, mainView.parent.width * 0.8) // TODO(fpohtmeh): remove trick with mainView
     }
 
     enter: Transition {
@@ -76,16 +76,16 @@ Popup {
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing: Theme.spacing
 
-                FormPrimaryButton {
-                    id: acceptButton
-                    text: qsTr("Ok")
-                    onClicked: dialog.accepted()
-                }
-
                 FormSecondaryButton {
                     id: rejectButton
                     text: qsTr("Cancel")
                     onClicked: dialog.rejected()
+                }
+
+                FormPrimaryButton {
+                    id: acceptButton
+                    text: qsTr("Ok")
+                    onClicked: dialog.accepted()
                 }
             }
         }

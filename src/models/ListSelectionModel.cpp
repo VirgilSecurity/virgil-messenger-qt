@@ -53,12 +53,17 @@ ListSelectionModel::ListSelectionModel(ListModel *source)
 
 void ListSelectionModel::setSelected(const QVariant &proxyRow, bool selected)
 {
+    const auto sourceIndex = m_sourceModel->sourceIndex(proxyRow.toInt());
+    setSelected(sourceIndex, selected);
+}
+
+void ListSelectionModel::setSelected(const QModelIndex &sourceIndex, bool selected)
+{
     if (!m_multiSelect && selected) {
         clear();
     }
-    const auto index = m_sourceModel->sourceIndex(proxyRow.toInt());
     const auto flag = selected ? QItemSelectionModel::Select : QItemSelectionModel::Deselect;
-    QItemSelectionModel::select(index, flag);
+    QItemSelectionModel::select(sourceIndex, flag);
 }
 
 void ListSelectionModel::toggle(const QVariant &proxyRow)
@@ -80,6 +85,14 @@ void ListSelectionModel::clear()
     QItemSelectionModel::clear();
     // NOTE(fpohtmeh): don't update properties immediatelly because signals are blocked
     QTimer::singleShot(10, this, &ListSelectionModel::updateProperties);
+}
+
+void ListSelectionModel::selectAll()
+{
+    for (int i = 0, s = m_sourceModel->rowCount(); i < s; ++i) {
+        const auto index = m_sourceModel->index(i);
+        QItemSelectionModel::select(index, QItemSelectionModel::Select);
+    }
 }
 
 void ListSelectionModel::setMultiSelect(const bool multiSelect)

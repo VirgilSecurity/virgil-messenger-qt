@@ -50,14 +50,17 @@ public:
 
     bool isValid() const noexcept;
 
+    static CloudFsFolderId root();
+
 private:
     QString m_id;
 };
-} // namespace vm
 
-bool operator<(const vm::CloudFsFolderId& lhs, const vm::CloudFsFolderId& rhs);
-bool operator>(const vm::CloudFsFolderId& lhs, const vm::CloudFsFolderId& rhs);
-bool operator==(const vm::CloudFsFolderId& lhs, const vm::CloudFsFolderId& rhs);
-bool operator!=(const vm::CloudFsFolderId& lhs, const vm::CloudFsFolderId& rhs);
+bool operator<(const CloudFsFolderId& lhs, const CloudFsFolderId& rhs);
+bool operator>(const CloudFsFolderId& lhs, const CloudFsFolderId& rhs);
+bool operator==(const CloudFsFolderId& lhs, const CloudFsFolderId& rhs);
+bool operator!=(const CloudFsFolderId& lhs, const CloudFsFolderId& rhs);
+
+} // namespace vm
 
 #endif // VM_CLOUD_FS_FOLDER_ID_H

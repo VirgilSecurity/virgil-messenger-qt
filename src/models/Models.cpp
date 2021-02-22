@@ -37,8 +37,8 @@
 #include "AccountSelectionModel.h"
 #include "ChatsModel.h"
 #include "CloudFilesModel.h"
+#include "CloudFilesTransfersModel.h"
 #include "CloudFilesQueue.h"
-#include "CloudFilesUploader.h"
 #include "DiscoveredContactsModel.h"
 #include "MessagesModel.h"
 #include "MessagesQueue.h"
@@ -55,10 +55,11 @@ Models::Models(Messenger *messenger, Settings *settings, UserDatabase *userDatab
     , m_discoveredContacts(new DiscoveredContactsModel(validator, this))
     , m_messages(new MessagesModel(this))
     , m_cloudFiles(new CloudFilesModel(settings, this))
-    , m_cloudFilesQueue(new CloudFilesQueue(messenger, this))
-    , m_cloudFilesUploader(new CloudFilesUploader(this))
+    , m_cloudFilesTransfers(new CloudFilesTransfersModel(this))
+    , m_cloudFilesQueue(new CloudFilesQueue(messenger, userDatabase, this))
     , m_fileLoader(messenger->fileLoader())
     , m_messagesQueue(new MessagesQueue(messenger, userDatabase, this))
+
 {
     connect(m_messagesQueue, &MessagesQueue::notificationCreated, this, &Models::notificationCreated);
     connect(m_cloudFilesQueue, &CloudFilesQueue::notificationCreated, this, &Models::notificationCreated);
@@ -108,6 +109,16 @@ CloudFilesModel *Models::cloudFiles()
     return m_cloudFiles;
 }
 
+const CloudFilesTransfersModel *Models::cloudFilesTransfers() const
+{
+    return m_cloudFilesTransfers;
+}
+
+CloudFilesTransfersModel *Models::cloudFilesTransfers()
+{
+    return m_cloudFilesTransfers;
+}
+
 const CloudFilesQueue *Models::cloudFilesQueue() const
 {
     return m_cloudFilesQueue;
@@ -116,16 +127,6 @@ const CloudFilesQueue *Models::cloudFilesQueue() const
 CloudFilesQueue *Models::cloudFilesQueue()
 {
     return m_cloudFilesQueue;
-}
-
-const CloudFilesUploader *Models::cloudFilesUploader() const
-{
-    return m_cloudFilesUploader;
-}
-
-CloudFilesUploader *Models::cloudFilesUploader()
-{
-    return m_cloudFilesUploader;
 }
 
 const FileLoader *Models::fileLoader() const

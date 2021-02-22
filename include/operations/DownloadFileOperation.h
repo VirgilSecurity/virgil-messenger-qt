@@ -54,6 +54,9 @@ public:
 signals:
     void downloaded(const QString &filePath);
 
+protected:
+    void setUrl(const QUrl &url);
+
 private:
     void connectReply(QNetworkReply *reply) override;
 

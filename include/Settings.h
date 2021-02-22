@@ -82,6 +82,7 @@ public:
     QDir thumbnailsDir() const;
     QDir downloadsDir() const;
     QDir cloudFilesDownloadsDir(const QString &userName) const;
+    QDir cloudFilesCacheDir() const;
 
     QString makeThumbnailPath(const vm::AttachmentId &attachmentId, bool isPreview) const;
     QSize thumbnailMaxSize() const;
@@ -121,6 +122,7 @@ private:
     QDir m_attachmentCacheDir;
     QDir m_thumbnaisDir;
     QDir m_downloadsDir;
+    QDir m_cloudFilesCacheDir;
 };
 
 #endif // VM_SETTINGS_H

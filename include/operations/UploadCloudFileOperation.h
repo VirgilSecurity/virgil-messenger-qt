@@ -36,25 +36,43 @@
 #define VM_UPLOAD_CLOUD_FILE_OPERATION_H
 
 #include "CloudFile.h"
-#include "Operation.h"
+#include "CloudFileRequestId.h"
+#include "CloudFilesUpdate.h"
+#include "UploadFileOperation.h"
 
 namespace vm
 {
 class CloudFileOperation;
 
-class UploadCloudFileOperation : public Operation
+class UploadCloudFileOperation : public UploadFileOperation
 {
     Q_OBJECT
 
 public:
-    UploadCloudFileOperation(CloudFileOperation *parent, const QString &filePath, const CloudFileHandler &folder);
+    UploadCloudFileOperation(CloudFileOperation *parent, const QString &filePath, const CloudFileHandler &parentFolder);
 
     void run() override;
+    CloudFileId cloudFileId() const;
 
 private:
+    void cleanup() override;
+
+    void onFileCreated(CloudFileRequestId requestId, const ModifiableCloudFileHandler &cloudFile, const QString &encryptedFilePath, const QUrl &putUrl);
+    void onCreateCloudFileErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
+    void onProgressChanged(quint64 bytesLoaded, quint64 bytesTotal);
+    void onUploaded();
+    void sendFailedTransferUpdate();
+
+    void transferUpdate(TransferCloudFileUpdate::Stage stage, quint64 bytesLoaded);
+    bool localFileExists() const;
+    bool createLocalDir();
+    void createLocalFile();
+
     CloudFileOperation *m_parent;
-    QString m_filePath;
-    CloudFileHandler m_folder;
+    CloudFileHandler m_parentFolder;
+    CloudFileRequestId m_requestId;
+    ModifiableCloudFileHandler m_file;
+    QString m_sourceFilePath;
 };
 }
 

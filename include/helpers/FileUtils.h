@@ -39,6 +39,8 @@
 #include <QUrl>
 #include <QFileInfo>
 
+#include <optional>
+
 namespace vm
 {
 class FileUtils {
@@ -49,13 +51,15 @@ public:
 
     static bool forceCreateDir(const QString &absolutePath);
 
-    static QString readTextFile(const QString &filePath);
+    static std::optional<QString> readTextFile(const QString &filePath);
 
     static bool fileExists(const QString &filePath);
 
     static void removeFile(const QString &filePath);
 
     static void removeDir(const QString &dirPath);
+
+    static QString fileName(const  QString &filePath);
 
     static QString attachmentFileName(const QUrl &url, bool isPicture);
 

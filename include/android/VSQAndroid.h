@@ -61,7 +61,7 @@ public:
 
     static Contacts getContacts();
 
-    static QUrl getContactAvatarUrl(const Contact &contact);
+    static QUrl getContactAvatarUrl(const ContactHandler contact);
 
 private:
     static int runLoggingThread();

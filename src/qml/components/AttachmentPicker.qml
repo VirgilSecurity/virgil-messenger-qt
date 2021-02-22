@@ -1,11 +1,12 @@
 import QtQuick 2.15
 
 import "../base"
+import "../components/Dialogs"
 
 Loader {
     id: loader
 
-    signal open(int attachmentType)
+    signal open(int attachmentType, bool selectMultiple)
     signal picked(var fileUrls, int attachmentType)
 
     Component {
@@ -27,8 +28,9 @@ Loader {
 
             Connections {
                 target: loader
-                function onOpen(attachmentType) {
+                function onOpen(attachmentType, selectMultiple) {
                     var dialog = (attachmentType === AttachmentTypes.picture) ? selectPictureDialog : selectFileDialog
+                    dialog.selectMultiple = selectMultiple
                     dialog.open()
                 }
             }
@@ -46,8 +48,9 @@ Loader {
 
             Connections {
                 target: loader
-                function onOpen(attachmentType) {
+                function onOpen(attachmentType, selectMultiple) {
                     selectDialog.attachmentType = attachmentType
+                    selectDialog.selectMultiple = selectMultiple
                     selectDialog.open()
                 }
             }

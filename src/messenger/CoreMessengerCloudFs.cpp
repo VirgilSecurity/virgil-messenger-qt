@@ -35,6 +35,7 @@
 #include "CoreMessengerCloudFs.h"
 
 #include "CommKitBridge.h"
+#include "FileUtils.h"
 #include "UserImpl.h"
 
 #include <virgil/crypto/foundation/vscf_recipient_cipher.h>
@@ -160,7 +161,7 @@ Self::FutureResult<CloudFsNewFile> Self::createFile(const QString &sourceFilePat
     return QtConcurrent::run([this, sourceFilePath, destFilePath, parentFolderId, parentFolderPublicKey]()
             -> Result<CloudFsNewFile> {
 
-        qCInfo(lcCoreMessengerCloudFs) << "Trying to create file";
+        qCDebug(lcCoreMessengerCloudFs) << "Trying to create file" << FileUtils::fileName(sourceFilePath);
 
         //
         //  Encrypt file.
@@ -185,15 +186,14 @@ Self::FutureResult<CloudFsNewFile> Self::createFile(const QString &sourceFilePat
         //
         //  Create file on the CLoudFS.
         //
-        QFileInfo sourceFileInfo(sourceFilePath);
         QFileInfo destFileInfo(destFilePath);
 
-        auto sourceFileMimeType = QMimeDatabase().mimeTypeForFile(sourceFileInfo).name().toStdString();
+        auto sourceFileMimeType = FileUtils::fileMimeType(sourceFilePath).toStdString();
 
         vssq_error_t error;
         vssq_error_reset(&error);
 
-        auto fileName = sourceFileInfo.fileName().toStdString();
+        auto fileName = FileUtils::attachmentFileName(FileUtils::localFileToUrl(sourceFilePath), false).toStdString();
         auto fileNameC = vsc_str_from(fileName);
         auto fileEncryptedKeyC = vsc_data_from(fileEncryptedKey);
         auto sourceFileMimeTypeC = vsc_str_from(sourceFileMimeType);
@@ -203,6 +203,13 @@ Self::FutureResult<CloudFsNewFile> Self::createFile(const QString &sourceFilePat
                 vssq_messenger_cloud_fs_create_file(
                         m_cloudFs.get(), fileNameC, sourceFileMimeTypeC, destFileInfo.size(),
                         vsc_str_from(parentFolderIdStd), fileEncryptedKeyC, &error));
+
+        if (vssq_error_has_error(&error)) {
+            qCWarning(lcCoreMessengerCloudFs) << "Can not create file: " <<
+                    vsc_str_to_qstring(vssq_error_message_from_error(&error));
+
+            return CoreMessengerStatus::Error_CloudFsRequestFailed;
+        }
 
         //
         //  Return a new file.
@@ -574,7 +581,7 @@ Self::Result<QByteArray> Self::encryptFile(const QString &sourceFilePath, const 
 
 
 CoreMessengerStatus Self::decryptFile(const QString &sourceFilePath, const QString &destFilePath,
-        const CloudFsFileInfo &fileInfo, const QByteArray& encryptedFileKey, const UserHandler& sender) {
+        const QByteArray& encryptedFileKey, const UserHandler& sender) {
     //
     //  Create helpers for error handling.
     //

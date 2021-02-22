@@ -1,9 +1,10 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 
 import "../theme"
 import "../components"
+import "../components/Dialogs"
 
 Page {
     property var appState: app.stateManager.accountSettingsState
@@ -47,8 +48,28 @@ Page {
         }
 
         FormPrimaryButton {
+            text: qsTr("Send logs")
+            onClicked: sendLogsDialog.open()
+        }
+
+        FormPrimaryButton {
             text: qsTr("Sign out")
             onClicked: controllers.users.signOut()
         }
+    }
+
+    SendReportDialog {
+        id: sendReportDialog
+    }
+
+    InputDialog {
+        id: sendLogsDialog
+        title: qsTr("Send Logs")
+        label: qsTr("Add details (optional)")
+        onAccepted: crashReporter.sendLogFiles(text)
+    }
+
+    Component.onCompleted: {
+        crashReporter.crashReportRequested.connect(sendReportDialog.open)
     }
 }

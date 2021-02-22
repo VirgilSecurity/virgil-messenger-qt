@@ -57,7 +57,7 @@ public:
     virtual ~CrashReporter() noexcept = default;
 
     void checkAppCrash();
-    Q_INVOKABLE bool sendLogFiles();
+    Q_INVOKABLE bool sendLogFiles(const QString &details);
 
 signals:
     void crashReportRequested();

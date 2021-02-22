@@ -38,13 +38,16 @@
 #include "database/core/DatabaseUtils.h"
 
 using namespace vm;
+using Self = ContactsTable;
 
-ContactsTable::ContactsTable(Database *database)
+Self::ContactsTable(Database *database)
     : DatabaseTable(QLatin1String("contacts"), database)
 {
+    connect(this, &Self::addContact, this, &Self::onAddContact);
+    connect(this, &Self::updateContact, this, &Self::onUpdateContact);
 }
 
-bool ContactsTable::create()
+bool Self::create()
 {
     if (DatabaseUtils::readExecQueries(database(), QLatin1String("createContacts"))) {
         qCDebug(lcDatabase) << "Contacts table was created";
@@ -52,4 +55,59 @@ bool ContactsTable::create()
     }
     qCCritical(lcDatabase) << "Failed to create contacts table";
     return false;
+}
+
+
+void Self::onAddContact(const Contact& contact) {
+
+    DatabaseUtils::BindValues bindValues {
+        { ":userId", QString(contact.userId()) },
+        { ":username", contact.username() },
+        { ":name", contact.name() },
+        { ":email", contact.email() },
+        { ":phone", contact.phone() },
+        { ":platformId", contact.platformId() },
+        { ":avatarLocalPath", contact.avatarLocalPath() },
+        { ":isBanned", contact.isBanned() }
+    };
+
+    ScopedConnection connection(*database());
+    const auto query = DatabaseUtils::readExecQuery(database(), "insertContact", bindValues);
+    if (query) {
+        qCDebug(lcDatabase) << "Contact was inserted, user id:" << bindValues.front().second;
+    }
+    else {
+        qCWarning(lcDatabase) << "Contact was not inserted";
+    }
+}
+
+
+void Self::onUpdateContact(const ContactUpdate &contactUpdate) {
+
+    DatabaseUtils::BindValues bindValues;
+    QLatin1String queryId;
+
+    bindValues.emplace_back(":userId", QString(ContactUpdateGetUserId(contactUpdate)));
+
+    if (auto update = std::get_if<UsernameContactUpdate>(&contactUpdate)) {
+        queryId = QLatin1String("updateContactUsername");
+        bindValues.emplace_back(":username", QString(update->username));
+    }
+    else if (auto update = std::get_if<NameContactUpdate>(&contactUpdate)) {
+        queryId = QLatin1String("updateContactName");
+        bindValues.emplace_back(":name", QString(update->name));
+    }
+
+    if (queryId.isEmpty()) {
+        return;
+    }
+
+    ScopedConnection connection(*database());
+    const auto query = DatabaseUtils::readExecQuery(database(), queryId, bindValues);
+    if (query) {
+        qCDebug(lcDatabase) << "Contact was updated:" << bindValues.front().second;
+    }
+    else {
+        qCWarning(lcDatabase) << "Contact was not updated";
+    }
 }

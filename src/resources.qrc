@@ -3,8 +3,10 @@
         <!-- Pages -->
         <file>qml/pages/AccountSelectionPage.qml</file>
         <file>qml/pages/AccountSettingsPage.qml</file>
+        <file>qml/pages/AddGroupChatMembersPage.qml</file>
         <file>qml/pages/BackupKeyPage.qml</file>
         <file>qml/pages/ChatPage.qml</file>
+        <file>qml/pages/ChatInfoPage.qml</file>
         <file>qml/pages/DownloadKeyPage.qml</file>
         <file>qml/pages/EditProfilePage.qml</file>
         <file>qml/pages/MainPage.qml</file>
@@ -44,6 +46,8 @@
         <file>qml/resources/icons/Key@2x.png</file>
         <file>qml/resources/icons/Menu.png</file>
         <file>qml/resources/icons/Menu@2x.png</file>
+        <file>qml/resources/icons/Make-Call.png</file>
+        <file>qml/resources/icons/Make-Call@2x.png</file>
         <file>qml/resources/icons/Plus.png</file>
         <file>qml/resources/icons/Plus@2x.png</file>
         <file>qml/resources/icons/Grid.png</file>
@@ -92,15 +96,17 @@
         <file>qml/resources/icons/Mic Selected@2x.png</file>
         <file>qml/resources/icons/File Download Big.png</file>
         <file>qml/resources/icons/File Download Big@2x.png</file>
+        <!-- Sounds -->
+        <file>qml/resources/sounds/notification.wav</file>
+        <file>qml/resources/sounds/message-received.wav</file>
+        <file>qml/resources/sounds/message-sent.wav</file>
         <!-- Others -->
         <file>qml/components/Avatar.qml</file>
         <file>qml/components/AttachmentPreview.qml</file>
-        <file>qml/components/FlowListView.qml</file>
+        <file>qml/components/FlowView.qml</file>
         <file>qml/components/CommonHelpers/TextInCircle.qml</file>
         <file>qml/components/Popups/Popup.qml</file>
-        <file>qml/components/Progress/Progress.qml</file>
-        <file>qml/theme/qmldir</file>
-        <file>qml/theme/Theme.qml</file>
+        <file>qml/components/LineProgressBar.qml</file>
         <file>qml/main.qml</file>
         <file>qml/MainView.qml</file>
         <file>qml/components/Form.qml</file>
@@ -123,8 +129,10 @@
         <file>qml/components/ChatMessageInput.qml</file>
         <file>qml/components/ChatMessageBody.qml</file>
         <file>qml/components/SearchHeader.qml</file>
-        <file>qml/components/SelectContactsList.qml</file>
+        <file>qml/components/ContactsListView.qml</file>
         <file>qml/components/Header.qml</file>
+        <file>qml/components/HeaderBackground.qml</file>
+        <file>qml/components/HeaderTitle.qml</file>
         <file>qml/components/ContextMenu.qml</file>
         <file>qml/components/ContextMenuItem.qml</file>
         <file>qml/components/ContextMenuSeparator.qml</file>
@@ -139,16 +147,11 @@
         <file>qml/components/UserNameTextField.qml</file>
         <file>qml/components/UserNameFormInput.qml</file>
         <file>qml/components/UnreadMessagesSeparator.qml</file>
-        <file>qml/resources/sounds/notification.wav</file>
-        <file>qml/resources/sounds/message-received.wav</file>
-        <file>qml/resources/sounds/message-sent.wav</file>
-        <file>qml/base/AttachmentTypes.qml</file>
-        <file>qml/base/Platform.qml</file>
-        <file>qml/base/qmldir</file>
         <file>qml/components/Dialogs/SendReportDialog.qml</file>
         <file>qml/components/Dialogs/MessageDialog.qml</file>
         <file>qml/components/Dialogs/InputDialog.qml</file>
-        <file>qml/components/SelectAttachmentsDialog.qml</file>
+        <file>qml/components/Dialogs/GroupInvitationDialog.qml</file>
+        <file>qml/components/Dialogs/SelectAttachmentsDialog.qml</file>
         <file>qml/components/CircleProgressBar.qml</file>
         <file>qml/components/TextScrollView.qml</file>
         <file>qml/components/AttachmentPicker.qml</file>
@@ -157,22 +160,37 @@
         <file>qml/components/ListDelegate.qml</file>
         <file>qml/components/ModelListView.qml</file>
         <file>qml/components/Dialogs/TemplateDialog.qml</file>
-        <file>qml/components/UploadProgressBar.qml</file>
         <file>qml/components/ServerSelectionRow.qml</file>
-        <file>qml/components/SelectedContactsFlow.qml</file>
+        <file>qml/components/ContactsFlowView.qml</file>
         <file>qml/components/HorizontalRule.qml</file>
         <file>qml/components/NetworkStatusControl.qml</file>
         <file>qml/components/ChatListView.qml</file>
         <file>qml/components/CloudFileListView.qml</file>
-        <file>qml/components/NewGroupChatHeader.qml</file>
+        <file>qml/components/TransfersPanel.qml</file>
+        <file>qml/components/ListStatusButton.qml</file>
+        <file>qml/components/PageHeader.qml</file>
+        <!-- Base -->
+        <file>qml/base/AttachmentTypes.qml</file>
+        <file>qml/base/Platform.qml</file>
+        <file>qml/base/qmldir</file>
+        <!-- Theme -->
+        <file>qml/theme/qmldir</file>
+        <file>qml/theme/Theme.qml</file>
         <!-- Database -->
         <file>resources/database/createAttachments.sql</file>
         <file>resources/database/createChats.sql</file>
         <file>resources/database/createCloudFiles.sql</file>
         <file>resources/database/createContacts.sql</file>
         <file>resources/database/createMessages.sql</file>
-        <file>resources/database/deleteCloudFileById.sql</file>
-        <file>resources/database/deleteCloudFilesByParentId.sql</file>
+        <file>resources/database/deleteChatById.sql</file>
+        <file>resources/database/deleteCloudFilesByIds.sql</file>
+        <file>resources/database/deleteCloudFilesByParentIds.sql</file>
+        <file>resources/database/deleteGroupById.sql</file>
+        <file>resources/database/deleteGroupInvitationMessageByChatId.sql</file>
+        <file>resources/database/deleteGroupMembersByGroupId.sql</file>
+        <file>resources/database/deleteMessagesByChatId.sql</file>
+        <file>resources/database/createGroups.sql</file>
+        <file>resources/database/createGroupMembers.sql</file>
         <file>resources/database/insertAttachment.sql</file>
         <file>resources/database/insertChat.sql</file>
         <file>resources/database/insertCloudFile.sql</file>
@@ -189,7 +207,30 @@
         <file>resources/database/updateAttachmentLocalPath.sql</file>
         <file>resources/database/updateAttachmentUploadStage.sql</file>
         <file>resources/database/updateAttachmentRemoteUrl.sql</file>
+        <file>resources/database/updateCloudFile.sql</file>
+        <file>resources/database/updateCloudFolder.sql</file>
+        <file>resources/database/updateDownloadedCloudFile.sql</file>
         <file>resources/database/updateLastMessage.sql</file>
         <file>resources/database/updateMessageStage.sql</file>
+        <file>resources/database/updateMessageStage.sql</file>
+        <file>resources/database/insertGroup.sql</file>
+        <file>resources/database/insertGroupMember.sql</file>
+        <file>resources/database/selectGroupMembersByGroupId.sql</file>
+        <file>resources/database/selectGroupMembersByMemberId.sql</file>
+        <file>resources/database/updateGroupMemberAffiliation.sql</file>
+        <file>resources/database/createContacts.sql</file>
+        <file>resources/database/dropContacts.sql</file>
+        <file>resources/database/insertContact.sql</file>
+        <file>resources/database/insertContactsFromChats.sql</file>
+        <file>resources/database/migrateMessagesToVersion1.sql</file>
+        <file>resources/database/selectAllContacts.sql</file>
+        <file>resources/database/selectContact.sql</file>
+        <file>resources/database/updateContactAvatarLocalPath.sql</file>
+        <file>resources/database/updateContactEmail.sql</file>
+        <file>resources/database/updateContactIsBanned.sql</file>
+        <file>resources/database/updateContactName.sql</file>
+        <file>resources/database/updateContactPhone.sql</file>
+        <file>resources/database/updateContactPlatformId.sql</file>
+        <file>resources/database/updateContactUsername.sql</file>
     </qresource>
 </RCC>

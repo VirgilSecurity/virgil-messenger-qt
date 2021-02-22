@@ -62,9 +62,6 @@ using namespace notifications::xmpp;
 #include <QSslSocket>
 #include <QUuid>
 
-#ifndef USE_XMPP_LOGS
-#define USE_XMPP_LOGS 0
-#endif
 
 Q_LOGGING_CATEGORY(lcMessenger, "messenger")
 
@@ -77,6 +74,7 @@ Self::Messenger(Settings *settings, Validator *validator)
     , m_settings(settings)
     , m_validator(validator)
     , m_coreMessenger(new CoreMessenger(settings, this))
+    , m_cloudFileSystem(new CloudFileSystem(m_coreMessenger, this))
     , m_crashReporter(new CrashReporter(settings, m_coreMessenger, this))
     , m_fileLoader(new FileLoader(m_coreMessenger, this))
 {
@@ -85,6 +83,8 @@ Self::Messenger(Settings *settings, Validator *validator)
     //
     connect(m_coreMessenger, &CoreMessenger::lastActivityTextChanged, this, &Self::lastActivityTextChanged);
     connect(m_coreMessenger, &CoreMessenger::updateMessage, this, &Self::updateMessage);
+    connect(m_coreMessenger, &CoreMessenger::groupChatCreated, this, &Self::groupChatCreated);
+    connect(m_coreMessenger, &CoreMessenger::userWasFound, this, &Self::userWasFound);
 
     //
     //  Handle connection states.
@@ -95,6 +95,22 @@ Self::Messenger(Settings *settings, Validator *validator)
     //  Handle received messages.
     //
     connect(m_coreMessenger, &CoreMessenger::messageReceived, this, &Self::onMessageReceived);
+
+    //
+    //  Cloud file system signals
+    //
+    connect(this, &Self::signedIn, m_cloudFileSystem, &CloudFileSystem::signIn);
+    connect(this, &Self::signedUp, m_cloudFileSystem, &CloudFileSystem::signIn);
+    connect(this, &Self::signedOut, m_cloudFileSystem, &CloudFileSystem::signOut);
+
+    //
+    //  Handle group chat events.
+    //
+    connect(m_coreMessenger, &CoreMessenger::groupChatCreated, this, &Self::groupChatCreated);
+    connect(m_coreMessenger, &CoreMessenger::updateGroup, this, &Self::updateGroup);
+    connect(m_coreMessenger, &CoreMessenger::groupChatCreateFailed, [this](const auto& groupId, const auto& status) {
+        emit groupChatCreateFailed(groupId, "Chat was not created on the services");
+    });
 
     //
     // Push notifications
@@ -285,6 +301,11 @@ QPointer<Settings> Self::settings() noexcept {
 }
 
 
+QPointer<CloudFileSystem> Self::cloudFileSystem() noexcept {
+    return m_cloudFileSystem;
+}
+
+
 QPointer<CrashReporter> Self::crashReporter() noexcept {
     return m_crashReporter;
 }
@@ -331,6 +352,32 @@ void
 Self::setCurrentRecipient(const UserId &recipientId)
 {
     m_coreMessenger->setCurrentRecipient(recipientId);
+}
+
+
+void
+Self::createGroupChat(const GroupHandler& group) {
+
+    m_coreMessenger->createGroupChat(group);
+}
+
+
+void
+Self::joinGroupChats(const GroupMembers& groupsWithMe) {
+
+    m_coreMessenger->joinGroupChats(groupsWithMe);
+}
+
+void
+Self::acceptGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId) {
+
+    m_coreMessenger->acceptGroupInvitation(groupId, groupOwnerId);
+}
+
+void
+Messenger::rejectGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId) {
+
+    m_coreMessenger->rejectGroupInvitation(groupId, groupOwnerId);
 }
 
 

@@ -36,7 +36,9 @@
 #ifndef VM_MESSAGE_GROUP_CHAT_INFO_H
 #define VM_MESSAGE_GROUP_CHAT_INFO_H
 
-#include "MessageContent.h"
+#include "GroupId.h"
+
+#include <QString>
 
 namespace vm {
 
@@ -45,33 +47,15 @@ namespace vm {
 //
 class MessageGroupChatInfo  {
 public:
-    MessageGroupChatInfo(QString groupId, QString senderGroupNickname, QString recipientGroupNickname, bool isPrivate);
+    explicit MessageGroupChatInfo(GroupId groupId);
 
     //
     // Return group unique identifier the message belongs to.
     //
-    QString groupId() const;
-
-    //
-    // Return sender "nickname" - a group unique name of the sender.
-    //
-    QString senderGroupNickname() const;
-
-    //
-    // Return sender "nickname" - a group unique name of the recipient.
-    //
-    QString recipientGroupNickname() const;
-
-    //
-    // Return true if message was send personally (privately).
-    //
-    bool isPrivate() const;
+    GroupId groupId() const;
 
 private:
-    QString m_groupId;
-    QString m_senderGroupNickname;
-    QString m_recipientGroupNickname;
-    bool m_isPrivate;
+    GroupId m_groupId;
 
 };
 } // namespace vm

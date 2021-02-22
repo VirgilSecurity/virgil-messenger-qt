@@ -37,6 +37,7 @@
 #define VM_MESSAGE_CONTENT_JSON_UTILS_H
 
 #include "MessageContent.h"
+#include "JsonUtils.h"
 
 #include <QByteArray>
 #include <QString>
@@ -100,8 +101,51 @@ public:
     //
     static bool readExtras(const QString& str, MessageContentPicture& picture);
 
+    //
+    //  TODO: Write description.
+    //
+    template<typename T>
+    static MessageContent toObject(const QString& jsonStr, const QString& underKey = {}) {
+        auto maybeObject = JsonUtils::toObject<T>(jsonStr, underKey);
+
+        if (maybeObject) {
+            return *maybeObject;
+        }
+
+        return {};
+    }
+
+
+    template<typename T>
+    static MessageContent toObject(const QJsonObject& json, const QString& underKey = {}) {
+        auto maybeObject = JsonUtils::toObject<T>(json, underKey);
+
+        if (maybeObject) {
+            return *maybeObject;
+        }
+
+        return {};
+    }
+
+    //
+    //  TODO: Write description.
+    //
+    template<typename T>
+    static QString toString(const T& obj, const QString& underKey = {}) {
+        return JsonUtils::toString(obj, underKey);
+    }
+
+    //
+    //  TODO: Write description.
+    //
+    template<typename T>
+    static QString toBytes(const T& obj, const QString& underKey = {}) {
+        return JsonUtils::toBytes(obj, underKey);
+    }
+
+
 private:
-    MessageContentJsonUtils() {};
+    MessageContentJsonUtils() = default;
 
     //
     //  Write attachment fields except extras.

@@ -64,6 +64,11 @@ QJsonObject Self::to(const MessageContent& messageContent) {
         writeExtras(*picture, false, attachmentObject);
         mainObject.insert(QLatin1String("picture"), attachmentObject);
     }
+    else if (auto invitation = std::get_if<MessageContentGroupInvitation>(&messageContent)) {
+        QJsonObject invitationObject;
+        invitation->writeJson(invitationObject);
+        mainObject.insert(QLatin1String("groupInvitation"), invitationObject);
+    }
     else {
         throw std::logic_error("Invalid messageContent");
     }
@@ -106,8 +111,11 @@ MessageContent Self::from(const QJsonObject& json, QString& errorString) {
         readExtras(value.toObject(), picture);
         return picture;
     }
+    else if (auto value = json[QLatin1String("groupInvitation")]; !value.isUndefined()) {
+        return toObject<MessageContentGroupInvitation>(value.toObject());
+    }
     else {
-        errorString = QObject::tr("Invalid messageContent json");
+        errorString = QObject::tr("Invalid messageContent JSON");
         return {};
     }
 }
@@ -125,6 +133,7 @@ MessageContent Self::fromBytes(const QByteArray& messageJsonBytes, QString &erro
 
 
 void Self::writeAttachment(const MessageContentAttachment& attachment, QJsonObject& json) {
+    json.insert(QLatin1String("attachmentId"), QString(attachment.id()));
     json.insert(QLatin1String("fileName"), attachment.fileName());
     json.insert(QLatin1String("size"), attachment.size());
     json.insert(QLatin1String("remoteUrl"), attachment.remoteUrl().toString());
@@ -178,7 +187,7 @@ bool Self::readExtras(const QJsonObject& json, MessageContentPicture &picture) {
 
 bool Self::readAttachment(const QJsonObject& jsonObject, MessageContentAttachment& attachment) {
     // TODO: Check mandatory fields and return false if absent.
-    attachment.setId(AttachmentId(Utils::createUuid()));
+    attachment.setId(AttachmentId(jsonObject[QLatin1String("attachmentId")].toString()));
     attachment.setFileName(jsonObject[QLatin1String("fileName")].toString());
     attachment.setSize(jsonObject[QLatin1String("size")].toInt());
     attachment.setRemoteUrl(jsonObject[QLatin1String("remoteUrl")].toString());

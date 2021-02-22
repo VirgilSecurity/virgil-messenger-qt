@@ -12,6 +12,8 @@ Item {
     property alias content: textInCircle.content
     property alias pointSize: textInCircle.pointSize
 
+    property bool isSelected: false
+
     width: Theme.avatarHeight
     height: width
 
@@ -59,4 +61,38 @@ Item {
             maskSource: rectangleMask
         }
     }
+
+    Rectangle {
+        anchors.centerIn: parent
+        width: parent.width + 8
+        height: width
+        visible: isSelected
+        radius: width
+        color: 'transparent'
+        border.width: 2
+        border.color: Theme.contactSelectionColor
+
+        Rectangle {
+            anchors {
+                bottom: parent.bottom
+                right: parent.right
+            }
+
+            width: parent.width * 0.38
+            height: width
+            radius: width
+            color: Theme.contactSelectionColor
+
+            border.width: 2
+            border.color: Theme.mainBackgroundColor
+
+            Image {
+                anchors.centerIn: parent
+                width: parent.width * 0.7
+                fillMode: Image.PreserveAspectFit
+                source: "../resources/icons/Check-XSmall.png"
+            }
+        }
+    }
+
 }

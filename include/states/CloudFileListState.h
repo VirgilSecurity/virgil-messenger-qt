@@ -43,20 +43,18 @@
 namespace vm
 {
 class CloudFilesController;
-class Messenger;
 
 class CloudFileListState : public QState
 {
     Q_OBJECT
 
 public:
-    CloudFileListState(Messenger *messenger, CloudFilesController *controller, QState *parent);
+    CloudFileListState(CloudFilesController *controller, QState *parent);
 
 private:
     void onEntry(QEvent *);
     void onExit(QEvent *);
 
-    Messenger *m_messenger;
     CloudFilesController *m_controller;
 };
 }

@@ -35,12 +35,15 @@
 #ifndef VM_CHATSCONTROLLER_H
 #define VM_CHATSCONTROLLER_H
 
-#include "ChatId.h"
-#include "Group.h"
-#include "MessageId.h"
-#include "UserId.h"
 #include "Chat.h"
+#include "ChatId.h"
+#include "ChatObject.h"
+#include "Group.h"
+#include "GroupMember.h"
+#include "GroupUpdate.h"
+#include "MessageId.h"
 #include "User.h"
+#include "UserId.h"
 
 #include <QObject>
 #include <QPointer>
@@ -56,7 +59,7 @@ class Messenger;
 class ChatsController : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString currentChatName READ currentChatName NOTIFY currentChatNameChanged)
+    Q_PROPERTY(ChatObject *current MEMBER m_chatObject CONSTANT)
 
 public:
     ChatsController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
@@ -66,30 +69,34 @@ public:
 
     void createChatWithUsername(const QString &username);
     void createChatWithUserId(const UserId &userId);
-    void createChatWithGroupName(const QString &groupName);
+    void createGroupChat(const QString &groupName, const Contacts &contacts);
 
     void openChat(const ChatHandler& chat);
     Q_INVOKABLE void openChat(const QString& chatId); // can be used within QML only
     Q_INVOKABLE void closeChat();
-    Q_INVOKABLE QString currentChatName() const;
     ChatHandler currentChat() const;
 
-    Q_INVOKABLE void addParticipant(const QString &username);
-    Q_INVOKABLE void removeParticipant(const QString &username);
+    void loadGroupMembers();
+    Q_INVOKABLE void acceptGroupInvitation();
+    Q_INVOKABLE void rejectGroupInvitation();
+    Q_INVOKABLE void addSelectedMembers();
+    Q_INVOKABLE void removeSelectedMembers();
     Q_INVOKABLE void leaveGroup();
 
 signals:
     void errorOccurred(const QString &errorText); // TODO(fpohtmeh): remove this signal everywhere?
+    void notificationCreated(const QString &notification, const bool error);
 
     void chatsLoaded();
     void chatOpened(const ChatHandler &chat);
     void chatCreated(const ChatHandler &chat);
     void chatClosed();
 
-    void currentChatNameChanged(const QString &name);
-
     void createChatWithUser(const UserHandler& user, QPrivateSignal);
     void createChatWithGroup(const GroupHandler& group, QPrivateSignal);
+
+    void groupInvitationAccepted();
+    void groupInvitationRejected();
 
 private:
     void setupTableConnections();
@@ -98,11 +105,17 @@ private:
     void onChatsLoaded(ModifiableChats chats);
     void onCreateChatWithUser(const UserHandler &user);
     void onCreateChatWithGroup(const GroupHandler& group);
+    void onGroupMembersFetchedByMemberId(const UserId& memberId, const GroupMembers& groupMembers);
+    void onGroupMembersFetchedByGroupId(const GroupId& groupId, const GroupMembers& groupMembers);
+
+    void onGroupChatCreated(const GroupId& groupId);
+    void onGroupChatCreateFailed(const GroupId& chatId, const QString& errorText);
+    void onUpdateGroup(const GroupUpdate& groupUpdate);
 
     QPointer<Messenger> m_messenger;
     QPointer<Models> m_models;
     QPointer<UserDatabase> m_userDatabase;
-    ChatHandler m_currentChat;
+    QPointer<ChatObject> m_chatObject;
 };
 }
 

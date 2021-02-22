@@ -35,6 +35,7 @@
 #include "DeleteCloudFilesOperation.h"
 
 #include "CloudFileOperation.h"
+#include "Messenger.h"
 #include "FileUtils.h"
 
 using namespace vm;
@@ -43,25 +44,65 @@ DeleteCloudFilesOperation::DeleteCloudFilesOperation(CloudFileOperation *parent,
     : Operation(QLatin1String("DeleteCloudFiles"), parent)
     , m_parent(parent)
     , m_files(files)
+    , m_requestId(0)
+    , m_processedCount(0)
 {
+    auto fileSystem = m_parent->cloudFileSystem();
+    connect(fileSystem, &CloudFileSystem::fileDeleted, this, &DeleteCloudFilesOperation::onFileDeleted);
+    connect(fileSystem, &CloudFileSystem::deleteFileErrorOccurred, this, &DeleteCloudFilesOperation::onDeleteFileErrorOccured);
 }
 
 void DeleteCloudFilesOperation::run()
 {
-    for (auto &file : m_files) {
-        // Delete local file/dir
-        if (file->isFolder()) {
+    m_requestId = m_parent->cloudFileSystem()->deleteFiles(m_files);
+}
+
+void DeleteCloudFilesOperation::incProcessedCount()
+{
+    if (++m_processedCount < m_files.size()) {
+        return;
+    }
+
+    deleteLocalFiles();
+
+    // Emit update
+    DeleteCloudFilesUpdate update;
+    update.files = m_deletedFiles;
+    m_parent->cloudFilesUpdate(update);
+
+    if (m_deletedFiles.size() < m_files.size()) {
+        failAndNotify(tr("Failed to delete file"));
+    }
+    else {
+        finish();
+    }
+}
+
+void DeleteCloudFilesOperation::onFileDeleted(const CloudFileRequestId requestId, const CloudFileHandler &file)
+{
+    if (m_requestId == requestId) {
+        m_deletedFiles.push_back(file);
+        incProcessedCount();
+    }
+}
+
+void DeleteCloudFilesOperation::onDeleteFileErrorOccured(const CloudFileRequestId requestId, const QString &errorText)
+{
+    Q_UNUSED(errorText)
+    if (m_requestId == requestId) {
+        incProcessedCount();
+    }
+}
+
+void DeleteCloudFilesOperation::deleteLocalFiles()
+{
+    for (auto &file : m_deletedFiles) {
+        const QFileInfo fileInfo(file->localPath());
+        if (fileInfo.isDir()) {
             FileUtils::removeDir(file->localPath());
         }
-        else {
+        else if (fileInfo.isFile()) {
             FileUtils::removeFile(file->localPath());
         }
-
-        // Send update
-        DeletedCloudFileUpdate update;
-        update.cloudFileId = file->id();
-        update.isFolder = file->isFolder();
-        m_parent->cloudFileUpdate(update);
     }
-    finish();
 }

@@ -84,7 +84,9 @@ namespace Utils
 
     Contacts getDeviceContacts(const Contacts &cachedContacts = Contacts());
 
-    QUrl getContactAvatarUrl(const Contact &contact);
+    QUrl getContactAvatarUrl(const ContactHandler contact);
+
+    QString contactDisplayName(const QString &name, const QString &username, const QString &phone, const QString &email);
 }
 }
 
