@@ -66,7 +66,7 @@ Models::Models(Messenger *messenger, Settings *settings, UserDatabase *userDatab
     connect(m_cloudFilesQueue, &CloudFilesQueue::notificationCreated, this, &Models::notificationCreated);
 }
 
-Models::~Models() {}
+Models::~Models() { }
 
 const AccountSelectionModel *Models::accountSelection() const
 {

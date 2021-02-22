@@ -37,7 +37,7 @@
 using namespace vm;
 using Self = ChatId;
 
-Self::ChatId(QString chatId) : m_chatId(std::move(chatId)) {}
+Self::ChatId(QString chatId) : m_chatId(std::move(chatId)) { }
 
 Self::operator QString() const
 {

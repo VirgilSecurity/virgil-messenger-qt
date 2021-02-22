@@ -39,7 +39,7 @@
 using namespace vm;
 using Self = AttachmentId;
 
-Self::AttachmentId(QString attachmentId) : m_attachmentId(std::move(attachmentId)) {}
+Self::AttachmentId(QString attachmentId) : m_attachmentId(std::move(attachmentId)) { }
 
 Self::operator QString() const
 {

@@ -38,7 +38,7 @@
 
 using namespace vm;
 
-CloudFileOperationSource::CloudFileOperationSource(Type type) : OperationSource(), m_type(type) {}
+CloudFileOperationSource::CloudFileOperationSource(Type type) : OperationSource(), m_type(type) { }
 
 CloudFileOperationSource::Type CloudFileOperationSource::type() const
 {

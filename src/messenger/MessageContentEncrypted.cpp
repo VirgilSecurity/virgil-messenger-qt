@@ -37,7 +37,7 @@
 using namespace vm;
 using Self = MessageContentEncrypted;
 
-Self::MessageContentEncrypted(QByteArray ciphertext) : m_ciphertext(ciphertext) {}
+Self::MessageContentEncrypted(QByteArray ciphertext) : m_ciphertext(ciphertext) { }
 
 QByteArray Self::ciphertext() const
 {

@@ -38,9 +38,9 @@
 
 using namespace vm;
 
-DatabaseTable::DatabaseTable(const QString &name, Database *database) : m_name(name), m_database(database) {}
+DatabaseTable::DatabaseTable(const QString &name, Database *database) : m_name(name), m_database(database) { }
 
-DatabaseTable::~DatabaseTable() {}
+DatabaseTable::~DatabaseTable() { }
 
 QString DatabaseTable::name() const
 {

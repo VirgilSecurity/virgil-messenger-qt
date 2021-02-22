@@ -47,7 +47,7 @@ constexpr const qint64 LOG_MAX_FILESIZE = 20 * 1024 * 1024;
 
 using namespace vm;
 
-VSQLogWorker::VSQLogWorker(QObject *parent) : QObject(parent), m_logFile(), m_logFileIndex(0) {}
+VSQLogWorker::VSQLogWorker(QObject *parent) : QObject(parent), m_logFile(), m_logFileIndex(0) { }
 
 void VSQLogWorker::processMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
 {

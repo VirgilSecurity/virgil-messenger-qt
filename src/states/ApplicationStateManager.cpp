@@ -82,7 +82,7 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
     start();
 }
 
-Self::~ApplicationStateManager() {}
+Self::~ApplicationStateManager() { }
 
 void Self::registerStatesMetaTypes()
 {

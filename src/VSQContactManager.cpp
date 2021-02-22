@@ -45,7 +45,7 @@ VSQContactManager::VSQContactManager(QXmppClient *client, QObject *parent)
 {
 }
 
-VSQContactManager::~VSQContactManager() {}
+VSQContactManager::~VSQContactManager() { }
 
 bool VSQContactManager::addContact(const QString &jid, const QString &name, const QString &reason)
 {

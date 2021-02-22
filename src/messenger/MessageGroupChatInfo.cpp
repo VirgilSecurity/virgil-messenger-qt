@@ -37,7 +37,7 @@
 using namespace vm;
 using Self = MessageGroupChatInfo;
 
-Self::MessageGroupChatInfo(GroupId groupId) : m_groupId(std::move(groupId)) {}
+Self::MessageGroupChatInfo(GroupId groupId) : m_groupId(std::move(groupId)) { }
 
 GroupId Self::groupId() const
 {

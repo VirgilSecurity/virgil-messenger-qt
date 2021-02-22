@@ -52,7 +52,7 @@ Self::ChatsModel(QObject *parent) : ListModel(parent)
     proxy()->setFilterRole(ContactIdRole);
 }
 
-Self::~ChatsModel() {}
+Self::~ChatsModel() { }
 
 void Self::setChats(ModifiableChats chats)
 {

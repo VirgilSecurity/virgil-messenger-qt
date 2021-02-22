@@ -49,7 +49,7 @@ VSQDiscoveryManager::VSQDiscoveryManager(QXmppClient *client, QObject *parent)
     connect(m_manager, &QXmppDiscoveryManager::itemsReceived, this, &VSQDiscoveryManager::onItemsReceived);
 }
 
-VSQDiscoveryManager::~VSQDiscoveryManager() {}
+VSQDiscoveryManager::~VSQDiscoveryManager() { }
 
 void VSQDiscoveryManager::onClientConnected()
 {

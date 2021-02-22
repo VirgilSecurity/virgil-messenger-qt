@@ -63,9 +63,8 @@ using namespace notifications;
                                       qDebug() << QString("User allowed notifications: %1").arg(granted);
 
                                       if (granted) {
-                                          dispatch_async(dispatch_get_main_queue(), ^{
-                                              [application registerForRemoteNotifications];
-                                          });
+                                          dispatch_async(dispatch_get_main_queue(),
+                                              ^{ [application registerForRemoteNotifications]; });
                                       }
 
                                       if (error != nil) {
@@ -75,9 +74,7 @@ using namespace notifications;
                                   }];
 
         } else if (settings.authorizationStatus == UNAuthorizationStatusAuthorized) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [application registerForRemoteNotifications];
-            });
+            dispatch_async(dispatch_get_main_queue(), ^{ [application registerForRemoteNotifications]; });
         }
     }];
 }

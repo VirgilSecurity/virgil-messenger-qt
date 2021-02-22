@@ -45,7 +45,7 @@ Self::TransfersModel(QObject *parent) : ListModel(parent)
     qRegisterMetaType<TransfersModel *>("TransfersModel*");
 }
 
-Self::~TransfersModel() {}
+Self::~TransfersModel() { }
 
 void Self::add(const QString &id, const QString &name, const quint64 bytesTotal, const TransferType transferType)
 {

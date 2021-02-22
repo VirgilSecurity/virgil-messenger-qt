@@ -61,7 +61,7 @@ Self::MessagesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject *p
     connect(this, &Self::pushMessagePreload, this, &Self::onPushMessagePreload);
 }
 
-Self::~MessagesQueue() {}
+Self::~MessagesQueue() { }
 
 Operation *Self::createOperation(OperationSourcePtr source)
 {

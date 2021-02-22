@@ -39,9 +39,9 @@
 using namespace vm;
 using Self = GroupId;
 
-Self::GroupId(ChatId chatId) : m_groupId(QString(std::move(chatId))) {}
+Self::GroupId(ChatId chatId) : m_groupId(QString(std::move(chatId))) { }
 
-Self::GroupId(QString groupId) : m_groupId(std::move(groupId)) {}
+Self::GroupId(QString groupId) : m_groupId(std::move(groupId)) { }
 
 Self::operator QString() const
 {

@@ -199,7 +199,7 @@ static CoreMessengerStatus mapStatus(vssq_status_t status)
 class Self::GroupImpl
 {
 public:
-    explicit GroupImpl(vssq_messenger_group_ptr_t a_ctx) : ctx(std::move(a_ctx)) {}
+    explicit GroupImpl(vssq_messenger_group_ptr_t a_ctx) : ctx(std::move(a_ctx)) { }
     vssq_messenger_group_ptr_t ctx;
 };
 
@@ -2581,7 +2581,7 @@ void Self::xmppOnRoomParticipantReceived(const QString &roomJid, const QString &
             GroupMemberAffiliationUpdate { groupIdFromJid(roomJid), userIdFromJid(jid), mapAffiliation(affiliation) });
 }
 
-void Self::xmppOnMucSubscribeReceived(const QString &roomJid, const QString &subscriberJid, const QString &nickname) {}
+void Self::xmppOnMucSubscribeReceived(const QString &roomJid, const QString &subscriberJid, const QString &nickname) { }
 
 void Self::xmppOnMucSubscribedRoomReceived(const QString &id, const QString &roomJid, const QString &subscriberJid,
                                            const std::list<XmppMucSubEvent> &events)
@@ -2593,9 +2593,9 @@ void Self::xmppOnMucRoomSubscriberReceived(const QString &id, const QString &roo
 
 };
 
-void Self::xmppOnMucSubscribedRoomsProcessed(const QString &id) {}
+void Self::xmppOnMucSubscribedRoomsProcessed(const QString &id) { }
 
-void Self::xmppOnMucRoomSubscribersProcessed(const QString &id, const QString &roomJid) {}
+void Self::xmppOnMucRoomSubscribersProcessed(const QString &id, const QString &roomJid) { }
 
 void Self::connectXmppRoomSignals(QXmppMucRoom *room)
 {

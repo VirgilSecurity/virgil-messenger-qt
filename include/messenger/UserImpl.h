@@ -45,7 +45,7 @@ class UserImpl
 public:
     using PointerType = std::unique_ptr<const vssq_messenger_user_t, void (*)(const vssq_messenger_user_t *)>;
 
-    UserImpl(vssq_messenger_user_t *ptr) : user(ptr, vssq_messenger_user_delete) {}
+    UserImpl(vssq_messenger_user_t *ptr) : user(ptr, vssq_messenger_user_delete) { }
 
     UserImpl(const vssq_messenger_user_t *ptr)
         : user(vssq_messenger_user_shallow_copy_const(ptr), vssq_messenger_user_delete)

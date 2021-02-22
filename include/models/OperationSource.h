@@ -47,7 +47,7 @@ public:
 
     using PostFunction = std::function<void()>;
 
-    virtual ~OperationSource() {}
+    virtual ~OperationSource() { }
 
     virtual bool isValid() const = 0;
     virtual QString toString() const = 0;
