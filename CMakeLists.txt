@@ -54,7 +54,7 @@ set(ENABLE_IOS_EXTENSION OFF CACHE BOOL "On/Off building IOS extension.")
 # Project version
 # ---------------------------------------------------------------------------
 set(VS_TARGET_VERSION "3.6.2")
-set(VS_CORE_VERSION "0.2.1.45")
+set(VS_CORE_VERSION "0.2.1.51")
 set(VERSION_DATABASE_SCHEME "0")
 
 # ---------------------------------------------------------------------------
@@ -82,7 +82,10 @@ message(STATUS "CMAKE_FIND_ROOT_PATH: [${CMAKE_FIND_ROOT_PATH}]")
 # Detecting platform if VS_PLATFORM not specified
 # ---------------------------------------------------------------------------
 if (NOT VS_PLATFORM)
-    if (ANDROID)
+    if (MINGW32 OR MINGW64 OR CYGWIN OR WIN32)
+        message(STATUS "Detected target platform: [Windows]")
+        set(VS_PLATFORM "windows")
+    elseif (ANDROID)
         message(STATUS "Detected target platform: [Android]")
         set(VS_PLATFORM "android")
     elseif (IOS)
@@ -94,9 +97,6 @@ if (NOT VS_PLATFORM)
     elseif (UNIX)
         message(STATUS "Detected target platform: [Unix]")
         set(VS_PLATFORM "linux")
-    elseif (MINGW32)
-        message(STATUS "Detected target platform: [Windows]")
-        set(VS_PLATFORM "windows")
     endif ()
 endif ()
 
@@ -156,7 +156,7 @@ if (VS_PLATFORM STREQUAL "ios")
     # QT Extra packages
     list(APPEND VS_QT_EXTRA QmlImportScanner Gui)
 
-    # Android
+# Android
 elseif (VS_PLATFORM STREQUAL "android")
     # Get firebase
     get_firebase()
@@ -193,12 +193,16 @@ elseif (VS_PLATFORM STREQUAL "android")
     # Android gradle path
     set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/platforms/android")
 
-    # Linux
+# Linux
 elseif (VS_PLATFORM STREQUAL "linux")
     string(APPEND VS_QT_EXTRA "Widgets")
 
-    # MacOS
+# MacOS
 elseif (VS_PLATFORM STREQUAL "macos")
+    string(APPEND VS_QT_EXTRA "Widgets")
+
+# Windows
+elseif (VS_PLATFORM STREQUAL "windows")
     string(APPEND VS_QT_EXTRA "Widgets")
 
 endif ()
@@ -247,11 +251,15 @@ if (VS_PLATFORM STREQUAL "android")
           COMMENT "Touch CMakeCache.txt"
     )
 
-    # Linux
+# Linux
 elseif (VS_PLATFORM STREQUAL "linux")
     add_executable(${VS_TARGET_NAME})
 
-    # MacOS
+# Windows
+elseif (VS_PLATFORM STREQUAL "windows")
+    add_executable(${VS_TARGET_NAME})
+
+# MacOS
 elseif (VS_PLATFORM STREQUAL "macos")
     set(App_ICON "${VS_CUSTOMER_DIR}/platforms/macos/pkg_resources/${MACOSX_BUNDLE_ICON_FILE}")
     set_source_files_properties(${App_ICON}
@@ -278,7 +286,7 @@ elseif (VS_PLATFORM STREQUAL "macos")
     set_target_properties(${VS_TARGET_NAME}
             PROPERTIES LINK_FLAGS "-F${PREBUILT_DIR}/${VS_PLATFORM}/sparkle -framework Sparkle -framework CoreFoundation -framework Foundation"
             )
-    # IOS
+# IOS
 elseif (VS_PLATFORM STREQUAL "ios")
 
     if (VS_IOS_SIMULATOR)
@@ -729,6 +737,8 @@ target_sources(${VS_TARGET_NAME}
         ${VS_CUSTOMER_DIR}/src/customer.qrc
         # Linux
         $<$<STREQUAL:"${VS_PLATFORM}","linux">:${CMAKE_CURRENT_LIST_DIR}/platforms/default/CustomerEnvDefault.cpp>
+        # Windows
+        $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/platforms/default/CustomerEnvDefault.cpp>
         # MACOS
         $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/platforms/apple/CustomerEnvApple.mm>
         $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/src/macos/VSQMacos.mm>
@@ -758,6 +768,7 @@ target_link_libraries(${VS_TARGET_NAME}
         PUBLIC
 
         # Qt5
+        qxmpp
         Qt5::Core
         Qt5::Quick
         $<$<STREQUAL:"${VS_PLATFORM}","linux">:Qt5::Widgets>
@@ -773,22 +784,17 @@ target_link_libraries(${VS_TARGET_NAME}
         Qt5::Qml
         Qt5::Xml
 
-        # Other libs
-        qxmpp
-
         vsc_comm_kit
         vsc_comm_kit_pb
+        vsc_brainkey_sdk
         vsc_keyknox_sdk
-        vsc_pythia_sdk
         vsc_core_sdk
         vsc_foundation
         vsc_foundation_pb
-        vsc_pythia
         vsc_common
         protobuf-nanopb
         mbedcrypto
         ed25519
-        relic_s
         json-c
 
         $<$<STREQUAL:"${VS_PLATFORM}","android">:firebase_messaging>
@@ -859,6 +865,8 @@ target_compile_definitions(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","linux">:VS_DESKTOP=1>>
 
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","linux">:VS_DESKTOP=1>>
+
+        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","windows">:VS_DESKTOP=1>>
 
         )
 
