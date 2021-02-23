@@ -10,7 +10,7 @@ pushd ${PROJECT_FOLDER}
 
   pushd build
    cmake -DVS_PLATFORM="linux" -DVS_CUSTOMER="Virgil" ..
-   make
+   make -j10
    make deploy
   popd
 

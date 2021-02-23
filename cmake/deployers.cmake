@@ -95,6 +95,18 @@ elseif (VS_PLATFORM STREQUAL "linux")
             -qmake ${QT_QMAKE_EXECUTABLE} clear
             VERBATIM)
 
+elseif (VS_PLATFORM STREQUAL "windows")
+
+    find_program(LINUX_DEPLOY_QT cqtdeployer)
+
+    add_custom_target(deploy
+            COMMAND ${LINUX_DEPLOY_QT}
+            -bin ${PROJECT_NAME}.exe
+            -qmlDir ${PROJECT_SOURCE_DIR}/src/qml
+            -targetDir ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist
+            -qmake ${QT_QMAKE_EXECUTABLE} clear
+            VERBATIM)
+
 elseif (VS_PLATFORM STREQUAL "macos")
 
     find_program(MAC_DEPLOY_QT macdeployqt)
