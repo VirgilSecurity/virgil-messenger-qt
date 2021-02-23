@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <manifest
-    package="com.virgilsecurity.android.virgil"
+    package="@VS_ANDROID_PACKAGE_NAME@"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:versionName="-- %%INSERT_VERSION_NAME%% --"
     android:versionCode="-- %%INSERT_VERSION_CODE%% --"
