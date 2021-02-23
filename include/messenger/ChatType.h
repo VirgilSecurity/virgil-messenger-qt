@@ -32,12 +32,10 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_CHAT_TYPE_H
 #define VM_CHAT_TYPE_H
 
 #include <QString>
-
 
 namespace vm {
 //
@@ -52,7 +50,7 @@ enum class ChatType {
 //  Return chat type from a given string.
 //  Throws if correspond type is not found.
 //
-ChatType ChatTypeFromString(const QString& typeString);
+ChatType ChatTypeFromString(const QString &typeString);
 
 //
 //  Return string from a given chat type.

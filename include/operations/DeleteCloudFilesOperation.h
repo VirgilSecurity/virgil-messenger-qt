@@ -39,8 +39,7 @@
 #include "CloudFileRequestId.h"
 #include "Operation.h"
 
-namespace vm
-{
+namespace vm {
 class CloudFileOperation;
 
 class DeleteCloudFilesOperation : public Operation
@@ -58,12 +57,14 @@ private:
     void onFileDeleted(CloudFileRequestId requestId, const CloudFileHandler &file);
     void onDeleteFileErrorOccured(CloudFileRequestId requestId, const QString &errorText);
 
+    void deleteLocalFiles();
+
     CloudFileOperation *m_parent;
     const CloudFiles m_files;
     CloudFileRequestId m_requestId;
     size_t m_processedCount;
     CloudFiles m_deletedFiles;
 };
-}
+} // namespace vm
 
 #endif // VM_DELETE_CLOUD_FILES_OPERATION_H

@@ -37,8 +37,7 @@
 
 #include <QState>
 
-namespace vm
-{
+namespace vm {
 class StartState : public QState
 {
     Q_OBJECT
@@ -46,6 +45,6 @@ class StartState : public QState
 public:
     using QState::QState;
 };
-}
+} // namespace vm
 
 #endif // VM_STARTSTATE_H

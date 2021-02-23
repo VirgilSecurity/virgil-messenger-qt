@@ -38,11 +38,9 @@
 
 using namespace vm;
 
-ShareCloudFilesOperation::ShareCloudFilesOperation(CloudFileOperation *parent, const CloudFiles &files, const Contacts &contacts)
-    : Operation(QLatin1String("ShareCloudFiles"), parent)
-    , m_parent(parent)
-    , m_files(files)
-    , m_contacts(contacts)
+ShareCloudFilesOperation::ShareCloudFilesOperation(CloudFileOperation *parent, const CloudFiles &files,
+                                                   const Contacts &contacts)
+    : Operation(QLatin1String("ShareCloudFiles"), parent), m_parent(parent), m_files(files), m_contacts(contacts)
 {
 }
 

@@ -44,8 +44,7 @@
 
 Q_DECLARE_LOGGING_CATEGORY(lcCloudFilesQueueListener);
 
-namespace vm
-{
+namespace vm {
 class CloudFilesQueueListener : public OperationQueueListener
 {
     Q_OBJECT
@@ -65,7 +64,6 @@ private:
 };
 
 using CloudFilesQueueListenerPtr = QPointer<CloudFilesQueueListener>;
-
 
 //
 // Listener that skips non-unique operations and warns about it
@@ -88,7 +86,6 @@ private:
     QStringList m_ids;
     QMutex m_mutex;
 };
-
 
 //
 // Listener that counts list active updates
@@ -115,7 +112,6 @@ private:
 
     int m_count = 0;
 };
-
 
 class CloudFilesQueue;
 
@@ -150,6 +146,6 @@ private:
     std::vector<Item> m_items;
     QMutex m_mutex;
 };
-}
+} // namespace vm
 
 #endif // VM_CLOUD_FILES_QUEUE_LISTENER_H

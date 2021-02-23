@@ -40,14 +40,12 @@
 
 using namespace vm;
 
-ScopedConnection::ScopedConnection(QSqlDatabase qtDatabase)
-    : m_qtDatabase(qtDatabase)
+ScopedConnection::ScopedConnection(QSqlDatabase qtDatabase) : m_qtDatabase(qtDatabase)
 {
     const bool opened = qtDatabase.isOpen();
     if (opened) {
         m_isActive = false;
-    }
-    else if (!qtDatabase.open()) {
+    } else if (!qtDatabase.open()) {
         m_isActive = false;
         qCCritical(lcDatabase) << "Connection databaseName:" << qtDatabase.databaseName();
         qCCritical(lcDatabase) << "Connection error:" << qtDatabase.lastError().databaseText();

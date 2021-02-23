@@ -40,9 +40,7 @@
 using namespace vm;
 
 ChatListState::ChatListState(ChatsController *chatsController, ChatsModel *chatsModel, QState *parent)
-    : QState(parent)
-    , m_chatsController(chatsController)
-    , m_chatsModel(chatsModel)
+    : QState(parent), m_chatsController(chatsController), m_chatsModel(chatsModel)
 {
 }
 

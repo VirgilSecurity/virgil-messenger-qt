@@ -4,32 +4,29 @@ import QtQuick.Controls 2.15
 import "../theme"
 
 Column {
-    anchors {
-        verticalCenter: parent.verticalCenter
-        left: parent.left
-    }
+    id: root
 
     property alias title: titleLabel.text
     property alias description: descriptionLabel.text
+    property alias horizontalAlignment: titleLabel.horizontalAlignment
 
     Label {
         id: titleLabel
-        elide: Label.ElideRight
         font.family: Theme.mainFont
         font.pointSize: UiHelper.fixFontSz(15)
-        horizontalAlignment: Qt.AlignLeft
-        verticalAlignment: Qt.AlignVCenter
         font.bold: true
+        elide: Label.ElideRight
         color: Theme.primaryTextColor
+        anchors.horizontalCenter: (horizontalAlignment == Qt.AlignHCenter) ? parent.horizontalCenter : undefined
     }
 
     Label {
         id: descriptionLabel
-        elide: Label.ElideRight
         font.family: Theme.mainFont
-        horizontalAlignment: Qt.AlignLeft
-        verticalAlignment: Qt.AlignVCenter
         font.pointSize: UiHelper.fixFontSz(11)
+        elide: Label.ElideRight
         color: Theme.secondaryTextColor
+        horizontalAlignment: titleLabel.horizontalAlignment
+        anchors.horizontalCenter: (horizontalAlignment == Qt.AlignHCenter) ? parent.horizontalCenter : undefined
     }
 }

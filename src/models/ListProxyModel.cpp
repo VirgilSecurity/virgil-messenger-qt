@@ -38,8 +38,7 @@
 
 using namespace vm;
 
-ListProxyModel::ListProxyModel(ListModel *listModel)
-    : QSortFilterProxyModel(listModel)
+ListProxyModel::ListProxyModel(ListModel *listModel) : QSortFilterProxyModel(listModel)
 {
     qRegisterMetaType<ListProxyModel *>("ListProxyModel*");
 

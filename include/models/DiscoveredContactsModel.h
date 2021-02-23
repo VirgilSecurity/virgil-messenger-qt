@@ -37,8 +37,7 @@
 
 #include "ContactsModel.h"
 
-namespace vm
-{
+namespace vm {
 class Validator;
 
 class DiscoveredContactsModel : public ContactsModel
@@ -47,9 +46,7 @@ class DiscoveredContactsModel : public ContactsModel
     Q_PROPERTY(ContactsModel *selectedContacts MEMBER m_selectedContactsModel CONSTANT)
 
 public:
-    enum Roles {
-        SectionRole = UserRole
-    };
+    enum Roles { SectionRole = UserRole };
 
     DiscoveredContactsModel(Validator *validator, QObject *parent);
 
@@ -57,9 +54,8 @@ public:
     int fixedContactsCount() const;
     Contacts getSelectedContacts() const;
 
-
-    Q_INVOKABLE void toggleById(const QString &contactId);
-    Q_INVOKABLE QString firstContactId() const;
+    Q_INVOKABLE void toggleByUsername(const QString &contactUsername) override;
+    Q_INVOKABLE QString firstContactUsername() const;
 
 signals:
     void fixedContactsPopulated(const Contacts &contacts, QPrivateSignal);
@@ -71,7 +67,7 @@ private:
     Contacts findContactsByFilter() const;
     void invalidateIsSelectedRole(int startRow, int endRow);
     void updateDiscoveredContacts();
-    void updateSelectedContacts(const Contact::Id &contactId, const Contact *contact = nullptr);
+    void updateSelectedContacts(const QString &contactUsername, const ContactHandler contact = nullptr);
 
     void onDeviceContactsPopulated(const Contacts &contacts);
     void onSelectionChanged(const QList<QModelIndex> &indices);
@@ -81,8 +77,6 @@ private:
 
     int m_fixedContactsCount = 0;
 };
-}
-
-Q_DECLARE_METATYPE(vm::Contacts)
+} // namespace vm
 
 #endif // VM_DISCOVEREDCONTACTSMODEL_H

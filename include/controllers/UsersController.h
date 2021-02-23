@@ -37,18 +37,16 @@
 
 #include "UserId.h"
 #include "Chat.h"
+#include "Messenger.h"
 
 #include <QObject>
 #include <QPointer>
 
-
 class Messenger;
 
-namespace vm
-{
+namespace vm {
 class Models;
 class UserDatabase;
-class Messenger;
 
 class UsersController : public QObject
 {
@@ -79,6 +77,7 @@ signals:
     void signInErrorOccured(const QString &errorText);
     void signUpErrorOccured(const QString &errorText);
     void downloadKeyFailed(const QString &errorText);
+    void databaseErrorOccurred(const QString &errorText);
 
     void accountSettingsRequested(const QString &username);
 
@@ -91,6 +90,7 @@ private:
     void onSignedOut();
     void onFinishSignIn();
     void onFinishSignOut();
+    void onUpdateContactsWithUser(const UserHandler &user);
 
     void onChatAdded(const ChatHandler &chat);
 
@@ -99,6 +99,6 @@ private:
     QPointer<UserDatabase> m_userDatabase;
     QString m_nextUsername;
 };
-}
+} // namespace vm
 
 #endif // VM_USERSCONTROLLER_H

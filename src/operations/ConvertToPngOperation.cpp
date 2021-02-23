@@ -42,12 +42,14 @@
 
 using namespace vm;
 
-ConvertToPngOperation::ConvertToPngOperation(const Settings *settings, const QString &sourcePath, const QString &destFileName, QObject *parent)
-    : Operation(QLatin1String("ConvertToPng"), parent)
-    , m_settings(settings)
-    , m_sourcePath(sourcePath)
-    , m_destFileName(destFileName)
-{}
+ConvertToPngOperation::ConvertToPngOperation(const Settings *settings, const QString &sourcePath,
+                                             const QString &destFileName, QObject *parent)
+    : Operation(QLatin1String("ConvertToPng"), parent),
+      m_settings(settings),
+      m_sourcePath(sourcePath),
+      m_destFileName(destFileName)
+{
+}
 
 void ConvertToPngOperation::run()
 {
@@ -64,18 +66,15 @@ void ConvertToPngOperation::run()
     if (isPngFile) {
         emit converted(m_sourcePath);
         finish();
-    }
-    else {
+    } else {
         const auto filePath = m_settings->attachmentCacheDir().filePath(m_destFileName + QLatin1String(".png"));
         if (!image.save(filePath)) {
             qCWarning(lcOperation) << "Unable to save png file";
             invalidateAndNotify(tr("Failed to convert to png"));
-        }
-        else if (!FileUtils::fileExists(filePath)) {
+        } else if (!FileUtils::fileExists(filePath)) {
             qCWarning(lcOperation) << "Png file exceeds file limit";
             invalidateAndNotify(tr("Png file exceeds file limit"));
-        }
-        else {
+        } else {
             qCDebug(lcOperation) << "File was converted to png";
             emit converted(filePath);
             emit fileCreated(filePath);

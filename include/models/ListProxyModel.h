@@ -37,8 +37,7 @@
 
 #include <QSortFilterProxyModel>
 
-namespace vm
-{
+namespace vm {
 class ListModel;
 
 class ListProxyModel : public QSortFilterProxyModel
@@ -48,6 +47,6 @@ class ListProxyModel : public QSortFilterProxyModel
 public:
     explicit ListProxyModel(ListModel *listModel);
 };
-}
+} // namespace vm
 
 #endif // VM_LISTPROXYMODEL_H

@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_CLOUD_FS_NEW_FILE_H
 #define VM_CLOUD_FS_NEW_FILE_H
 
@@ -44,7 +43,8 @@ namespace vm {
 //
 //  TODO: Add description.
 //
-struct CloudFsNewFile {
+struct CloudFsNewFile
+{
     QString uploadLink;
     CloudFsFileInfo info;
 };

@@ -12,7 +12,7 @@ OperationPage {
     loadingText: qsTr("Adding of contact...")
     footerText: ""
 
-    signal contactSelected(string contactId)
+    signal contactSelected(string contactUsername)
 
     property alias selectedContacts: flow
 
@@ -29,7 +29,7 @@ OperationPage {
         id: form
         isCentered: false
 
-        SelectedContactsFlow {
+        ContactsFlowView {
             id: flow
             Layout.fillWidth: true
             Layout.preferredHeight: recommendedHeight
@@ -41,6 +41,8 @@ OperationPage {
                     duration: Theme.animationDuration
                 }
             }
+
+            onContactSelected: root.contactSelected(contactUsername)
         }
 
         Search {
@@ -55,14 +57,14 @@ OperationPage {
             Layout.leftMargin: Theme.smallSpacing
 
             onAccepted: {
-                const contactId = d.model.firstContactId();
-                if (contactId) {
-                    root.contactSelected(contactId)
+                const username = models.discoveredContacts.firstContactUsername()
+                if (username) {
+                    root.contactSelected(username)
                 }
             }
         }
 
-        SelectContactsList {
+        ContactsListView {
             id: contactsList
             search: d.search
             Layout.fillWidth: true
@@ -71,11 +73,18 @@ OperationPage {
             footer: HorizontalRule {}
             footerPositioning: ListView.OverlayFooter
 
-            onContactSelected: root.contactSelected(contactId)
+            onContactSelected: root.contactSelected(contactUsername)
         }
 
         ServerSelectionRow {
             Layout.alignment: Qt.AlignHCenter
+        }
+    }
+
+    onContactSelected: {
+        if (models.discoveredContacts.selection.multiSelect) {
+            models.discoveredContacts.toggleByUsername(contactUsername)
+            contactSearch.clear()
         }
     }
 }

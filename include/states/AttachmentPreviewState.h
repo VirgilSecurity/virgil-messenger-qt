@@ -38,8 +38,7 @@
 #include <QState>
 #include <QUrl>
 
-namespace vm
-{
+namespace vm {
 class AttachmentPreviewState : public QState
 {
     Q_OBJECT
@@ -57,6 +56,6 @@ signals:
 private:
     QUrl m_url;
 };
-}
+} // namespace vm
 
 #endif // VM_ATTACHMENTPREVIEWSTATE_H

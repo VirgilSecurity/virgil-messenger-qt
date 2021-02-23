@@ -39,20 +39,15 @@
 
 #include <QString>
 
-namespace vm
-{
+namespace vm {
 class OperationSource
 {
 public:
-    enum class Priority
-    {
-        Default,
-        Highest
-    };
+    enum class Priority { Default, Highest };
 
-    using PostFunction = std::function<void ()>;
+    using PostFunction = std::function<void()>;
 
-    virtual ~OperationSource() {}
+    virtual ~OperationSource() { }
 
     virtual bool isValid() const = 0;
     virtual QString toString() const = 0;
@@ -70,6 +65,6 @@ private:
 
 using OperationSourcePtr = std::shared_ptr<OperationSource>;
 using OperationSources = std::vector<OperationSourcePtr>;
-}
+} // namespace vm
 
 #endif // VM_OPERATIONSOURCE_H

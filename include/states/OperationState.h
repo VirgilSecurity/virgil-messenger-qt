@@ -37,8 +37,7 @@
 
 #include <QState>
 
-namespace vm
-{
+namespace vm {
 class OperationState : public QState
 {
     Q_OBJECT
@@ -51,6 +50,6 @@ signals:
     void operationFinished();
     void operationErrorOccurred(const QString &errorText);
 };
-}
+} // namespace vm
 
 #endif // VM_OPERATIONSTATE_H

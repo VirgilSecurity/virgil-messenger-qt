@@ -37,8 +37,7 @@
 
 #include "SignInState.h"
 
-namespace vm
-{
+namespace vm {
 class AccountSelectionState : public SignInState
 {
     Q_OBJECT
@@ -50,6 +49,6 @@ signals:
     void requestSignInUsername();
     void requestSignUp();
 };
-}
+} // namespace vm
 
 #endif // VM_ACCOUNTSELECTIONSTATE_H

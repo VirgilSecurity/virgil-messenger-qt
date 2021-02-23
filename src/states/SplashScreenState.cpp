@@ -41,9 +41,9 @@
 
 using namespace vm;
 
-SplashScreenState::SplashScreenState(UsersController *usersController, Validator *validator, Settings *settings, QState *parent)
-    : SignInState(usersController, validator, parent)
-    , m_settings(settings)
+SplashScreenState::SplashScreenState(UsersController *usersController, Validator *validator, Settings *settings,
+                                     QState *parent)
+    : SignInState(usersController, validator, parent), m_settings(settings)
 {
 }
 
@@ -53,8 +53,7 @@ void SplashScreenState::trySignIn()
     const auto username = m_settings->lastSignedInUser();
     if (username.isEmpty()) {
         emit userNotSelected();
-    }
-    else {
+    } else {
         signIn(username);
     }
 }

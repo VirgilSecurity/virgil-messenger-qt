@@ -3,7 +3,6 @@ SELECT
     messages.id AS messageId,
     messages.recipientId AS messageRecipientId,
     messages.senderId AS messageSenderId,
-    messages.senderUsername AS messageSenderUsername,
     messages.chatId AS messageChatId,
     messages.createdAt AS messageCreatedAt,
     messages.isOutgoing AS messageIsOutgoing,
@@ -25,8 +24,12 @@ SELECT
     attachments.encryptedSize AS attachmentEncryptedSize,
     attachments.extras AS attachmentExtras,
     attachments.uploadStage AS attachmentUploadStage,
-    attachments.downloadStage AS attachmentDownloadStage
+    attachments.downloadStage AS attachmentDownloadStage,
+    senderContacts.username as messageSenderUsername,
+    recipientContacts.username as messageRecipientUsername
 FROM
     chats
 LEFT JOIN messages ON chats.lastMessageId = messages.id
 LEFT JOIN attachments ON chats.lastMessageId = attachments.messageId
+LEFT JOIN contacts  AS senderContacts ON senderContacts.userId = messages.recipientId
+LEFT JOIN contacts  AS recipientContacts ON recipientContacts.userId = messages.senderId

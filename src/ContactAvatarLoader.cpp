@@ -40,56 +40,59 @@
 
 using namespace vm;
 
-ContactAvatarLoader::ContactAvatarLoader(QObject *parent)
-    : QObject(parent)
+ContactAvatarLoader::ContactAvatarLoader(QObject *parent) : QObject(parent)
 {
     m_timer.setSingleShot(true);
     m_timer.setInterval(100);
     connect(&m_timer, &QTimer::timeout, this, &ContactAvatarLoader::processLoad);
 }
 
-void ContactAvatarLoader::load(Contact &contact)
+void ContactAvatarLoader::load(ContactHandler contact)
 {
-    if (canLoad(contact)) {
-        m_contacts.push_back(contact);
-        if (!m_timer.isActive()) {
-            m_timer.start();
-        }
-    }
+    // FIXME: Re-implement this.
+    // if (canLoad(contact)) {
+    //     m_contacts.push_back(contact);
+    //     if (!m_timer.isActive()) {
+    //         m_timer.start();
+    //     }
+    // }
 }
 
-void ContactAvatarLoader::load(Contacts &contacts, int maxLimit)
+void ContactAvatarLoader::load(Contacts contacts, int maxLimit)
 {
-    const auto s = qMin<int>(maxLimit, m_contacts.size());
-    for (int i = 0; i < s; ++i) {
-        load(contacts[i]);
-    }
+    // FIXME: Re-implement this.
+    // const auto s = qMin<int>(maxLimit, m_contacts.size());
+    // for (int i = 0; i < s; ++i) {
+    //     load(contacts[i]);
+    // }
 }
 
-bool ContactAvatarLoader::canLoad(Contact &contact)
+bool ContactAvatarLoader::canLoad(ContactHandler contact)
 {
-    if (contact.avatarUrlRetryCount == 0) {
-        return false;
-    }
-    --contact.avatarUrlRetryCount;
-    for (auto &c : m_contacts) {
-        if (c.id == contact.id) {
-            return false;
-        }
-    }
+    // FIXME: Re-implement this.
+    // if (contact.avatarUrlRetryCount == 0) {
+    //     return false;
+    // }
+    // --contact.avatarUrlRetryCount;
+    // for (auto &c : m_contacts) {
+    //     if (c.id == contact.id) {
+    //         return false;
+    //     }
+    // }
     return true;
 }
 
 void ContactAvatarLoader::processLoad()
 {
-    Contacts contacts;
-    std::swap(contacts, m_contacts);
-    QtConcurrent::run([this, contacts = std::move(contacts)]() {
-        for (auto &contact : contacts) {
-            const auto url = Utils::getContactAvatarUrl(contact);
-            if (!url.isEmpty()) {
-                emit loaded(contact, url);
-            }
-        }
-    });
+    // FIXME: Re-implement this.
+    // Contacts contacts;
+    // std::swap(contacts, m_contacts);
+    // QtConcurrent::run([this, contacts = std::move(contacts)]() {
+    //     for (auto &contact : contacts) {
+    //         const auto url = Utils::getContactAvatarUrl(contact);
+    //         if (!url.isEmpty()) {
+    //             emit loaded(contact, url);
+    //         }
+    //     }
+    // });
 }

@@ -40,45 +40,39 @@
 
 #include <variant>
 
-namespace vm
-{
+namespace vm {
 struct CloudFilesUpdateBase
 {
     CloudFileHandler parentFolder;
 };
 
-struct CachedListCloudFolderUpdate : public CloudFilesUpdateBase {
+struct CachedListCloudFolderUpdate : public CloudFilesUpdateBase
+{
     ModifiableCloudFiles files;
 };
 
-struct CloudListCloudFolderUpdate : public CloudFilesUpdateBase {
+struct CloudListCloudFolderUpdate : public CloudFilesUpdateBase
+{
     ModifiableCloudFiles added;
     CloudFiles deleted;
     CloudFiles updated;
 };
 
-struct CreateCloudFilesUpdate : public CloudFilesUpdateBase {
+struct CreateCloudFilesUpdate : public CloudFilesUpdateBase
+{
     ModifiableCloudFiles files;
 };
 
-struct DeleteCloudFilesUpdate : public CloudFilesUpdateBase {
+struct DeleteCloudFilesUpdate : public CloudFilesUpdateBase
+{
     CloudFiles files;
 };
 
-struct TransferCloudFileUpdate : public CloudFilesUpdateBase {
-    enum class Type
-    {
-        Upload,
-        Download
-    };
+struct TransferCloudFileUpdate : public CloudFilesUpdateBase
+{
+    enum class Type { Upload, Download };
 
-    enum class Stage
-    {
-        Started,
-        Transfering,
-        Finished,
-        Failed
-    };
+    enum class Stage { Started, Transfering, Finished, Failed };
 
     CloudFileHandler file;
     Stage stage = Stage::Started;
@@ -86,20 +80,15 @@ struct TransferCloudFileUpdate : public CloudFilesUpdateBase {
     Type type = Type::Upload;
 };
 
-struct DownloadCloudFileUpdate : public CloudFilesUpdateBase {
+struct DownloadCloudFileUpdate : public CloudFilesUpdateBase
+{
     CloudFileHandler file;
     QString fingerprint;
 };
 
-using CloudFilesUpdate = std::variant<
-    CachedListCloudFolderUpdate,
-    CloudListCloudFolderUpdate,
-    CreateCloudFilesUpdate,
-    DeleteCloudFilesUpdate,
-    TransferCloudFileUpdate,
-    DownloadCloudFileUpdate
-    >;
+using CloudFilesUpdate = std::variant<CachedListCloudFolderUpdate, CloudListCloudFolderUpdate, CreateCloudFilesUpdate,
+                                      DeleteCloudFilesUpdate, TransferCloudFileUpdate, DownloadCloudFileUpdate>;
 
-}
+} // namespace vm
 
 #endif // VM_CLOUD_FILES_UPDATE_H

@@ -37,8 +37,7 @@
 
 #include "OperationState.h"
 
-namespace vm
-{
+namespace vm {
 class UsersController;
 class Validator;
 
@@ -59,6 +58,6 @@ private:
     UsersController *m_usersController;
     Validator *m_validator;
 };
-}
+} // namespace vm
 
 #endif // VM_SIGNINUSERNAMESTATE_H

@@ -32,38 +32,39 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "ChatId.h"
-
 
 using namespace vm;
 using Self = ChatId;
 
+Self::ChatId(QString chatId) : m_chatId(std::move(chatId)) { }
 
-Self::ChatId(QString chatId) : m_chatId(std::move(chatId)) {
-
-}
-
-Self::operator QString() const {
+Self::operator QString() const
+{
     return m_chatId;
 }
 
-bool Self::isValid() const noexcept {
+bool Self::isValid() const noexcept
+{
     return !m_chatId.isEmpty();
 }
 
-bool operator<(const vm::ChatId& lhs, const vm::ChatId& rhs) {
+bool vm::operator<(const vm::ChatId &lhs, const vm::ChatId &rhs)
+{
     return QString(lhs) < QString(rhs);
 }
 
-bool operator>(const vm::ChatId& lhs, const vm::ChatId& rhs) {
+bool vm::operator>(const vm::ChatId &lhs, const vm::ChatId &rhs)
+{
     return QString(lhs) > QString(rhs);
 }
 
-bool operator==(const vm::ChatId& lhs, const vm::ChatId& rhs) {
+bool vm::operator==(const vm::ChatId &lhs, const vm::ChatId &rhs)
+{
     return QString(lhs) == QString(rhs);
 }
 
-bool operator!=(const vm::ChatId& lhs, const vm::ChatId& rhs) {
+bool vm::operator!=(const vm::ChatId &lhs, const vm::ChatId &rhs)
+{
     return QString(lhs) != QString(rhs);
 }

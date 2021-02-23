@@ -40,18 +40,21 @@
 
 using namespace vm;
 
-DownloadCloudFileOperation::DownloadCloudFileOperation(CloudFileOperation *parent, const CloudFileHandler &file, const CloudFileHandler &parentFolder)
-    : DownloadFileOperation(parent, parent->fileLoader(), QUrl(), file->size(), QString())
-    , m_parent(parent)
-    , m_file(file)
-    , m_parentFolder(parentFolder)
-    , m_requestId(0)
+DownloadCloudFileOperation::DownloadCloudFileOperation(CloudFileOperation *parent, const CloudFileHandler &file,
+                                                       const CloudFileHandler &parentFolder)
+    : DownloadFileOperation(parent, parent->fileLoader(), QUrl(), file->size(), QString()),
+      m_parent(parent),
+      m_file(file),
+      m_parentFolder(parentFolder),
+      m_requestId(0)
 {
     setName(QLatin1String("DownloadCloudFile"));
     setFilePath(tempFilePath());
 
-    connect(m_parent->cloudFileSystem(), &CloudFileSystem::downloadInfoGot, this, &DownloadCloudFileOperation::onDownloadInfoGot);
-    connect(m_parent->cloudFileSystem(), &CloudFileSystem::getDownloadInfoErrorOccurred, this, &DownloadCloudFileOperation::onGetDownloadInfoErrorOccurred);
+    connect(m_parent->cloudFileSystem(), &CloudFileSystem::downloadInfoGot, this,
+            &DownloadCloudFileOperation::onDownloadInfoGot);
+    connect(m_parent->cloudFileSystem(), &CloudFileSystem::getDownloadInfoErrorOccurred, this,
+            &DownloadCloudFileOperation::onGetDownloadInfoErrorOccurred);
     connect(this, &DownloadFileOperation::progressChanged, this, &DownloadCloudFileOperation::onProgressChanged);
     connect(this, &DownloadFileOperation::downloaded, this, &DownloadCloudFileOperation::onDownloaded);
     connect(this, &DownloadFileOperation::failed, this, &DownloadCloudFileOperation::sendFailedTransferUpdate);
@@ -84,7 +87,8 @@ QString DownloadCloudFileOperation::tempFilePath() const
     return m_parent->settings()->cloudFilesCacheDir().filePath(QLatin1String("download-") + m_file->id());
 }
 
-void DownloadCloudFileOperation::onDownloadInfoGot(const CloudFileRequestId requestId, const CloudFileHandler &file, const QUrl &url, const QByteArray &encryptionKey)
+void DownloadCloudFileOperation::onDownloadInfoGot(const CloudFileRequestId requestId, const CloudFileHandler &file,
+                                                   const QUrl &url, const QByteArray &encryptionKey)
 {
     Q_UNUSED(file)
     if (m_requestId == requestId) {
@@ -95,9 +99,10 @@ void DownloadCloudFileOperation::onDownloadInfoGot(const CloudFileRequestId requ
     }
 }
 
-void DownloadCloudFileOperation::onGetDownloadInfoErrorOccurred(const CloudFileRequestId requestId, const QString &errorText)
+void DownloadCloudFileOperation::onGetDownloadInfoErrorOccurred(const CloudFileRequestId requestId,
+                                                                const QString &errorText)
 {
-    if(m_requestId == requestId) {
+    if (m_requestId == requestId) {
         failAndNotify(errorText);
     }
 }
@@ -110,7 +115,7 @@ void DownloadCloudFileOperation::onProgressChanged(const quint64 bytesLoaded, co
 
 void DownloadCloudFileOperation::onDownloaded()
 {
-    if (!FileUtils::forceCreateDir(m_parentFolder->localPath())) {
+    if (!createLocalDir()) {
         failAndNotify(tr("Failed to create directory"));
         return;
     }
@@ -147,4 +152,9 @@ void DownloadCloudFileOperation::transferUpdate(const TransferCloudFileUpdate::S
     update.type = TransferCloudFileUpdate::Type::Download;
     update.bytesLoaded = bytesLoaded;
     m_parent->cloudFilesUpdate(update);
+}
+
+bool DownloadCloudFileOperation::createLocalDir()
+{
+    return FileUtils::forceCreateDir(m_parentFolder->localPath());
 }

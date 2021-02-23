@@ -40,8 +40,7 @@
 using namespace vm;
 
 ShareCloudFilesState::ShareCloudFilesState(DiscoveredContactsModel *contactsModel, QState *parent)
-    : OperationState(parent)
-    , m_contactsModel(contactsModel)
+    : OperationState(parent), m_contactsModel(contactsModel)
 {
 }
 

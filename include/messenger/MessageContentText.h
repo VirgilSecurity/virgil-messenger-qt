@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_MESSAGE_CONTENT_TEXT_H
 #define VM_MESSAGE_CONTENT_TEXT_H
 
@@ -43,7 +42,8 @@ namespace vm {
 //
 //  Class with a text message content.
 //
-class MessageContentText {
+class MessageContentText
+{
 public:
     explicit MessageContentText(QString text);
 
@@ -54,7 +54,6 @@ public:
 
 private:
     QString m_text;
-
 };
 } // namespace vm
 

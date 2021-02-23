@@ -42,8 +42,7 @@
 
 class Settings;
 
-namespace vm
-{
+namespace vm {
 class CloudFileSystem;
 class CloudFolderUpdateWatcher;
 class FileLoader;
@@ -54,7 +53,7 @@ class CloudFileOperation : public NetworkOperation
     Q_OBJECT
 
 public:
-    using FolderUpdateSlot = std::function<void (const CloudFileHandler &)>;
+    using FolderUpdateSlot = std::function<void(const CloudFileHandler &)>;
 
     CloudFileOperation(Messenger *messenger, CloudFolderUpdateWatcher *watcher, QObject *parent);
 
@@ -72,6 +71,6 @@ private:
     QPointer<Messenger> m_messenger;
     QPointer<CloudFolderUpdateWatcher> m_watcher;
 };
-}
+} // namespace vm
 
 #endif // VM_CLOUD_FILE_OPERATION_H

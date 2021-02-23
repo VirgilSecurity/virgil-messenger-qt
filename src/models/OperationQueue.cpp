@@ -42,9 +42,7 @@ using namespace vm;
 using Self = OperationQueue;
 
 Self::OperationQueue(const QLoggingCategory &category, QObject *parent)
-    : QObject(parent)
-    , m_category(category)
-    , m_threadPool(new QThreadPool(this))
+    : QObject(parent), m_category(category), m_threadPool(new QThreadPool(this))
 {
     qRegisterMetaType<vm::OperationSourcePtr>("OperationSourcePtr");
     qRegisterMetaType<vm::OperationQueue::PostFunction>("PostFunction");
@@ -109,7 +107,8 @@ void Self::addSourceImpl(OperationSourcePtr source, const bool run)
 
 void Self::runSource(OperationSourcePtr source)
 {
-    auto threadPool = (source->priority() == OperationSource::Priority::Highest) ? QThreadPool::globalInstance() : &*m_threadPool;
+    auto threadPool =
+            (source->priority() == OperationSource::Priority::Highest) ? QThreadPool::globalInstance() : &*m_threadPool;
     QtConcurrent::run(threadPool, [=, source = std::move(source)]() {
         // Skip if queue is stopped
         if (m_isStopped) {
@@ -128,8 +127,7 @@ void Self::runSource(OperationSourcePtr source)
         op->waitForDone();
         if (op->status() == Operation::Status::Failed) {
             emit operationFailed(source, QPrivateSignal());
-        }
-        else if (op->status() == Operation::Status::Invalid) {
+        } else if (op->status() == Operation::Status::Invalid) {
             invalidateOperation(source);
         }
         op->drop(true);
@@ -146,8 +144,7 @@ void Self::onOperationFailed(OperationSourcePtr source)
         qCDebug(m_category) << "Enqueued failed operation source:" << source->toString();
         source->incAttemptCount();
         addSourceImpl(std::move(source), false);
-    }
-    else if (source->attemptCount() == maxAttemptCount()) {
+    } else if (source->attemptCount() == maxAttemptCount()) {
         qCDebug(m_category) << "Failed operation was invalidated:" << source->toString();
         invalidateOperation(source);
     }

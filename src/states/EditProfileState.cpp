@@ -37,8 +37,7 @@
 using namespace vm;
 
 EditProfileState::EditProfileState(UsersController *usersController, QState *parent)
-    : OperationState(parent)
-    , m_usersController(usersController)
+    : OperationState(parent), m_usersController(usersController)
 {
 }
 

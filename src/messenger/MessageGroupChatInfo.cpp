@@ -32,36 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "MessageGroupChatInfo.h"
-
 
 using namespace vm;
 using Self = MessageGroupChatInfo;
 
+Self::MessageGroupChatInfo(GroupId groupId) : m_groupId(std::move(groupId)) { }
 
-Self::MessageGroupChatInfo(QString groupId, QString senderGroupNickname, QString recipientGroupNickname, bool isPrivate)
-    : m_groupId(std::move(groupId)),
-    m_senderGroupNickname(std::move(senderGroupNickname)),
-    m_recipientGroupNickname(std::move(recipientGroupNickname)),
-    m_isPrivate(isPrivate)
-{}
-
-QString Self::groupId() const {
+GroupId Self::groupId() const
+{
     return m_groupId;
-}
-
-
-QString Self::senderGroupNickname() const {
-    return m_senderGroupNickname;
-}
-
-
-QString Self::recipientGroupNickname() const {
-    return m_recipientGroupNickname;
-}
-
-
-bool Self::isPrivate() const {
-    return m_isPrivate;
 }

@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "AttachmentId.h"
 
 #include "Utils.h"
@@ -40,35 +39,39 @@
 using namespace vm;
 using Self = AttachmentId;
 
+Self::AttachmentId(QString attachmentId) : m_attachmentId(std::move(attachmentId)) { }
 
-Self::AttachmentId(QString attachmentId) : m_attachmentId(std::move(attachmentId)) {
-
-}
-
-Self::operator QString() const {
+Self::operator QString() const
+{
     return m_attachmentId;
 }
 
-bool Self::isValid() const noexcept {
+bool Self::isValid() const noexcept
+{
     return !m_attachmentId.isEmpty();
 }
 
-AttachmentId Self::generate() {
-    return AttachmentId(Utils::createUuid());
+Self Self::generate()
+{
+    return Self(Utils::createUuid());
 }
 
-bool operator<(const vm::AttachmentId& lhs, const vm::AttachmentId& rhs) {
+bool vm::operator<(const vm::AttachmentId &lhs, const vm::AttachmentId &rhs)
+{
     return QString(lhs) < QString(rhs);
 }
 
-bool operator>(const vm::AttachmentId& lhs, const vm::AttachmentId& rhs) {
+bool vm::operator>(const vm::AttachmentId &lhs, const vm::AttachmentId &rhs)
+{
     return QString(lhs) > QString(rhs);
 }
 
-bool operator==(const vm::AttachmentId& lhs, const vm::AttachmentId& rhs) {
+bool vm::operator==(const vm::AttachmentId &lhs, const vm::AttachmentId &rhs)
+{
     return QString(lhs) == QString(rhs);
 }
 
-bool operator!=(const vm::AttachmentId& lhs, const vm::AttachmentId& rhs) {
+bool vm::operator!=(const vm::AttachmentId &lhs, const vm::AttachmentId &rhs)
+{
     return QString(lhs) != QString(rhs);
 }

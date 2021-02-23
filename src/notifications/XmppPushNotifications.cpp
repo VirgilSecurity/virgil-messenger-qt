@@ -41,7 +41,6 @@
 #include <qxmpp/QXmppDataForm.h>
 #include "VSQCustomer.h"
 
-
 using namespace notifications;
 using namespace notifications::xmpp;
 using namespace Customer;
@@ -51,7 +50,6 @@ using Self = XmppPushNotifications;
 static const QString kPushNotificationsDeviceID = "device_id";
 static const QString kPushNotificationsFormType = "FORM_TYPE";
 static const QString kPushNotificationsFormTypeVal = "http://jabber.org/protocol/pubsub#publish-options";
-
 
 static const QString kPushNotificationsService = "service";
 
@@ -69,15 +67,14 @@ static const QString kPushNotificationsPushModeVal = "dev";
 static const QString kPushNotificationsPushModeVal = "prod";
 #endif // QT_DEBUG
 
-
-Self &
-Self::instance() {
+Self &Self::instance()
+{
     static Self instance;
     return instance;
 }
 
-QXmppPushEnableIq
-Self::buildEnableIq() const {
+QXmppPushEnableIq Self::buildEnableIq() const
+{
     // Create request
     QXmppPushEnableIq xmppPush;
     xmppPush.setType(QXmppIq::Set);
@@ -136,8 +133,8 @@ Self::buildEnableIq() const {
     return xmppPush;
 }
 
-QXmppPushEnableIq
-Self::buildDisableIq() const {
+QXmppPushEnableIq Self::buildDisableIq() const
+{
     QXmppPushEnableIq xmppPush;
     xmppPush.setType(QXmppIq::Set);
     xmppPush.setMode(QXmppPushEnableIq::Disable);

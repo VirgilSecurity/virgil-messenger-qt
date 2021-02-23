@@ -42,8 +42,7 @@
 
 class Settings;
 
-namespace vm
-{
+namespace vm {
 class CloudFilesModel;
 class Models;
 class UserDatabase;
@@ -56,8 +55,8 @@ class CloudFilesController : public QObject
     Q_PROPERTY(bool isListUpdating MEMBER m_isListUpdating NOTIFY isListUpdatingChanged)
 
 public:
-    CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase, CloudFileSystem *cloudFileSystem,
-                         QObject *parent);
+    CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase,
+                         CloudFileSystem *cloudFileSystem, QObject *parent);
 
     CloudFilesModel *model();
     void switchToRootFolder();
@@ -102,6 +101,6 @@ private:
     FoldersHierarchy m_requestedHierarchy;
     bool m_isListUpdating = false;
 };
-}
+} // namespace vm
 
 #endif // VM_CLOUDFILESCONTROLLER_H

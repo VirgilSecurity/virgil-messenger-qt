@@ -41,15 +41,16 @@
 using namespace vm;
 
 DeleteCloudFilesOperation::DeleteCloudFilesOperation(CloudFileOperation *parent, const CloudFiles &files)
-    : Operation(QLatin1String("DeleteCloudFiles"), parent)
-    , m_parent(parent)
-    , m_files(files)
-    , m_requestId(0)
-    , m_processedCount(0)
+    : Operation(QLatin1String("DeleteCloudFiles"), parent),
+      m_parent(parent),
+      m_files(files),
+      m_requestId(0),
+      m_processedCount(0)
 {
     auto fileSystem = m_parent->cloudFileSystem();
     connect(fileSystem, &CloudFileSystem::fileDeleted, this, &DeleteCloudFilesOperation::onFileDeleted);
-    connect(fileSystem, &CloudFileSystem::deleteFileErrorOccurred, this, &DeleteCloudFilesOperation::onDeleteFileErrorOccured);
+    connect(fileSystem, &CloudFileSystem::deleteFileErrorOccurred, this,
+            &DeleteCloudFilesOperation::onDeleteFileErrorOccured);
 }
 
 void DeleteCloudFilesOperation::run()
@@ -63,15 +64,7 @@ void DeleteCloudFilesOperation::incProcessedCount()
         return;
     }
 
-    // Delete local files
-    for (auto &file : m_deletedFiles) {
-        if (file->isFolder()) {
-            FileUtils::removeDir(file->localPath());
-        }
-        else {
-            FileUtils::removeFile(file->localPath());
-        }
-    }
+    deleteLocalFiles();
 
     // Emit update
     DeleteCloudFilesUpdate update;
@@ -80,8 +73,7 @@ void DeleteCloudFilesOperation::incProcessedCount()
 
     if (m_deletedFiles.size() < m_files.size()) {
         failAndNotify(tr("Failed to delete file"));
-    }
-    else {
+    } else {
         finish();
     }
 }
@@ -99,5 +91,17 @@ void DeleteCloudFilesOperation::onDeleteFileErrorOccured(const CloudFileRequestI
     Q_UNUSED(errorText)
     if (m_requestId == requestId) {
         incProcessedCount();
+    }
+}
+
+void DeleteCloudFilesOperation::deleteLocalFiles()
+{
+    for (auto &file : m_deletedFiles) {
+        const QFileInfo fileInfo(file->localPath());
+        if (fileInfo.isDir()) {
+            FileUtils::removeDir(file->localPath());
+        } else if (fileInfo.isFile()) {
+            FileUtils::removeFile(file->localPath());
+        }
     }
 }

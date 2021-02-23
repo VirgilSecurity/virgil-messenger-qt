@@ -42,10 +42,7 @@
 using namespace vm;
 using Self = AttachmentsTable;
 
-template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-
-Self::AttachmentsTable(Database *database)
-    : DatabaseTable(QLatin1String("attachments"), database)
+Self::AttachmentsTable(Database *database) : DatabaseTable(QLatin1String("attachments"), database)
 {
     connect(this, &Self::addAttachment, this, &Self::onAddAttachment);
     connect(this, &Self::updateAttachment, this, &Self::onUpdateAttachment);
@@ -70,7 +67,7 @@ void Self::onAddAttachment(MessageHandler message)
     const DatabaseUtils::BindValues values {
         { ":id", QString(attachment->id()) },
         { ":messageId", QString(message->id()) },
-        { ":type",  MessageContentTypeToString(message->contentType()) },
+        { ":type", MessageContentTypeToString(message->contentType()) },
         { ":fingerprint", attachment->fingerprint() },
         { ":decryptionKey", attachment->decryptionKey() },
         { ":signature", attachment->signature() },
@@ -92,62 +89,52 @@ void Self::onAddAttachment(MessageHandler message)
     qCDebug(lcDatabase) << "Attachment was inserted into table: " << attachment->id();
 }
 
-static std::tuple<QString, DatabaseUtils::BindValues> createDatabaseBindings(const MessageUpdate &attachmentUpdate) {
+static std::tuple<QString, DatabaseUtils::BindValues> createDatabaseBindings(const MessageUpdate &attachmentUpdate)
+{
     if (const auto arg = std::get_if<MessageAttachmentUploadStageUpdate>(&attachmentUpdate)) {
-        return {"updateAttachmentUploadStage", {
-            { ":id", QString(arg->attachmentId) },
-            { ":uploadStage", MessageContentUploadStageToString(arg->uploadStage) }
-        }};
+        return { "updateAttachmentUploadStage",
+                 { { ":id", QString(arg->attachmentId) },
+                   { ":uploadStage", MessageContentUploadStageToString(arg->uploadStage) } } };
     }
 
     if (const auto arg = std::get_if<MessageAttachmentDownloadStageUpdate>(&attachmentUpdate)) {
-        return {"updateAttachmentDownloadStage", {
-            { ":id", QString(arg->attachmentId) },
-            { ":downloadStage", MessageContentDownloadStageToString(arg->downloadStage) }
-        }};
+        return { "updateAttachmentDownloadStage",
+                 { { ":id", QString(arg->attachmentId) },
+                   { ":downloadStage", MessageContentDownloadStageToString(arg->downloadStage) } } };
     }
 
     if (const auto arg = std::get_if<MessageAttachmentFingerprintUpdate>(&attachmentUpdate)) {
-        return {"updateAttachmentFingerprint", {
-            { ":id", QString(arg->attachmentId) },
-            { ":fingerprint", arg->fingerprint }
-        }};
+        return { "updateAttachmentFingerprint",
+                 { { ":id", QString(arg->attachmentId) }, { ":fingerprint", arg->fingerprint } } };
     }
 
     if (const auto arg = std::get_if<MessageAttachmentRemoteUrlUpdate>(&attachmentUpdate)) {
-        return {"updateAttachmentRemoteUrl", {
-            { ":id", QString(arg->attachmentId) },
-            { ":url",  arg->remoteUrl }
-        }};
+        return { "updateAttachmentRemoteUrl", { { ":id", QString(arg->attachmentId) }, { ":url", arg->remoteUrl } } };
     }
 
     if (const auto arg = std::get_if<MessageAttachmentEncryptionUpdate>(&attachmentUpdate)) {
-        return {"updateAttachmentEncryption", {
-            { ":id", QString(arg->attachmentId) },
-            { ":encryptedSize", arg->encryptedSize },
-            { ":decryptionKey", arg->decryptionKey },
-            { ":signature", arg->signature }
-        }};
+        return { "updateAttachmentEncryption",
+                 { { ":id", QString(arg->attachmentId) },
+                   { ":encryptedSize", arg->encryptedSize },
+                   { ":decryptionKey", arg->decryptionKey },
+                   { ":signature", arg->signature } } };
     }
 
     if (const auto arg = std::get_if<MessageAttachmentLocalPathUpdate>(&attachmentUpdate)) {
-        return {"updateAttachmentLocalPath", {
-            { ":id", QString(arg->attachmentId) },
-            { ":localPath", arg->localPath }
-        }};
+        return { "updateAttachmentLocalPath",
+                 { { ":id", QString(arg->attachmentId) }, { ":localPath", arg->localPath } } };
     }
 
     if (const auto arg = MessageUpdateToAttachmentExtrasUpdate(attachmentUpdate)) {
-        return {"updateAttachmentExtras", {
-            { ":id", QString(arg->attachmentId) },
-            { ":extras", arg->extrasToJson() }
-        }};
+        return { "updateAttachmentExtras",
+                 { { ":id", QString(arg->attachmentId) }, { ":extras", arg->extrasToJson() } } };
     }
 
     return {};
 }
 
-void Self::onUpdateAttachment(const MessageUpdate &attachmentUpdate) {
+void Self::onUpdateAttachment(const MessageUpdate &attachmentUpdate)
+{
     auto [queryId, bindValues] = createDatabaseBindings(attachmentUpdate);
     if (queryId.isEmpty()) {
         // Nothing to update.

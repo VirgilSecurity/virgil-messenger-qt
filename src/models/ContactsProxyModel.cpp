@@ -38,8 +38,7 @@
 
 using namespace vm;
 
-ContactsProxyModel::ContactsProxyModel(ContactsModel *contactsModel, bool sorted)
-    : ListProxyModel(contactsModel)
+ContactsProxyModel::ContactsProxyModel(ContactsModel *contactsModel, bool sorted) : ListProxyModel(contactsModel)
 {
     if (sorted) {
         setSortRole(ContactsModel::SortRole);

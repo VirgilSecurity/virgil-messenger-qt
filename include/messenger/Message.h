@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_MESSAGE_H
 #define VM_MESSAGE_H
 
@@ -61,7 +60,8 @@ class OutgoingMessage;
 //
 //  Base class for all messages.
 //
-class Message : public MessageUpdateable  {
+class Message : public MessageUpdateable
+{
 
 public:
     using Status = MessageStatus;
@@ -134,11 +134,6 @@ public:
     QString chatTitle() const;
 
     //
-    // Set a chat type the message belongs to.
-    //
-    void setChatType(ChatType chatType);
-
-    //
     // Return date when message was created.
     //
     QDateTime createdAt() const;
@@ -149,14 +144,19 @@ public:
     void setCreatedAt(QDateTime createdAt);
 
     //
-    //  Return message content.
+    // Set date when message was created to current date and time.
     //
-    const MessageContent& content() const noexcept;
+    void setCreatedNow();
 
     //
     //  Return message content.
     //
-    MessageContent& content() noexcept;
+    const MessageContent &content() const noexcept;
+
+    //
+    //  Return message content.
+    //
+    MessageContent &content() noexcept;
 
     //
     //  Return message content type.
@@ -177,13 +177,13 @@ public:
     //  Return message content as attachment.
     //  Throws if isContentAttachment() returns false.
     //
-    const MessageContentAttachment* contentAsAttachment() const;
+    const MessageContentAttachment *contentAsAttachment() const;
 
     //
     //  Return message content as attachment.
     //  Throws if isContentAttachment() returns false.
     //
-    MessageContentAttachment* contentAsAttachment();
+    MessageContentAttachment *contentAsAttachment();
 
     //
     //  Return info related to a group chat message.
@@ -218,12 +218,7 @@ public:
     //
     //  Apply message update. Return true some properties were actually updated.
     //
-    bool applyUpdate(const MessageUpdate& update) override;
-
-    //
-    //  Return whether message is peer-to-peer or direct message from a group chat.
-    //
-    bool isPersonal() const noexcept;
+    bool applyUpdate(const MessageUpdate &update) override;
 
     //
     //  Returns true if message was sent to the group or was received by using GroupChat,
@@ -257,7 +252,6 @@ private:
     UserId m_recipientId;
     QString m_senderUsername;
     QString m_recipientUsername;
-    ChatType m_chatType;
     QDateTime m_createdAt;
     MessageContent m_content;
     std::shared_ptr<MessageGroupChatInfo> m_groupChatInfo;

@@ -37,8 +37,7 @@
 
 #include <QtCore>
 
-namespace vm
-{
+namespace vm {
 class Database;
 
 class Patch
@@ -46,15 +45,15 @@ class Patch
 public:
     using Version = qsizetype;
     explicit Patch(const Version &version);
-    virtual ~Patch();
+    virtual ~Patch() = default;
 
     bool isOutdated(Database *database) const;
 
-    virtual bool apply(Database *database);
+    virtual bool apply(Database *database) = 0;
 
 private:
     const Version m_version = 0;
 };
-}
+} // namespace vm
 
 #endif // VM_PATCH_H

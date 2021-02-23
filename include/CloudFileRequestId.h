@@ -37,9 +37,8 @@
 
 #include <QtGlobal>
 
-namespace vm
-{
-    using CloudFileRequestId = quint64;
+namespace vm {
+using CloudFileRequestId = quint64;
 }
 
 #endif // VM_CLOUD_FILE_REQUEST_ID_H

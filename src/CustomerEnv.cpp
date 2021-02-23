@@ -37,9 +37,8 @@
 #include "VSQCustomer.h"
 
 #if VS_ANDROID
-    #include "android/VSQAndroid.h"
+#    include "android/VSQAndroid.h"
 #endif
-
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
@@ -50,52 +49,56 @@ static const QString kVersion = QString(TOSTRING(VERSION)) + "-alpha";
 static const QString kVersion = "unknown";
 #endif
 
-
 using namespace vm;
 using Self = vm::CustomerEnv;
 
-
-QString Self::messengerServiceUrl() {
-    #if VS_MSGR_ENV_DEV
-        return Customer::MessengerUrlTemplate.arg(QLatin1String("-dev"));
-    #elif VS_MSGR_ENV_STG
-        return Customer::MessengerUrlTemplate.arg(QLatin1String("-stg"));
-    #else
-        return Customer::MessengerUrlTemplate.arg(QString());
-    #endif
+QString Self::messengerServiceUrl()
+{
+#if VS_MSGR_ENV_DEV
+    return Customer::MessengerUrlTemplate.arg(QLatin1String("-dev"));
+#elif VS_MSGR_ENV_STG
+    return Customer::MessengerUrlTemplate.arg(QLatin1String("-stg"));
+    Í
+#else
+    return Customer::MessengerUrlTemplate.arg(QString());
+#endif
 }
 
-QString Self::xmppServiceUrl() {
-    #if VS_MSGR_ENV_DEV
-        return Customer::XmppUrlTemplate.arg(QLatin1String("-dev"));
-    #elif VS_MSGR_ENV_STG
-        return Customer::XmppUrlTemplate.arg(QLatin1String("-stg"));
-    #else
-        return Customer::XmppUrlTemplate.arg(QString());
-    #endif
+QString Self::xmppServiceUrl()
+{
+#if VS_MSGR_ENV_DEV
+    return Customer::XmppUrlTemplate.arg(QLatin1String("-dev"));
+#elif VS_MSGR_ENV_STG
+    return Customer::XmppUrlTemplate.arg(QLatin1String("-stg"));
+#else
+    return Customer::XmppUrlTemplate.arg(QString());
+#endif
 }
 
-QString Self::xmppServiceDomain() {
-    #if VS_MSGR_ENV_DEV
-        return Customer::XmppDomainTemplate.arg(QLatin1String("-dev"));
-    #elif VS_MSGR_ENV_STG
-        return Customer::XmppDomainTemplate.arg(QLatin1String("-stg"));
-    #else
-        return Customer::XmppDomainTemplate.arg(QString());
-    #endif
+QString Self::xmppServiceDomain()
+{
+#if VS_MSGR_ENV_DEV
+    return Customer::XmppDomainTemplate.arg(QLatin1String("-dev"));
+#elif VS_MSGR_ENV_STG
+    return Customer::XmppDomainTemplate.arg(QLatin1String("-stg"));
+#else
+    return Customer::XmppDomainTemplate.arg(QString());
+#endif
 }
 
-QString Self::contactDiscoveryServiceUrl() {
-    #if VS_MSGR_ENV_DEV
-        return Customer::ContactDiscoveryUrlTemplate.arg(QLatin1String("-dev"));
-    #elif VS_MSGR_ENV_STG
-        return Customer::ContactDiscoveryUrlTemplate.arg(QLatin1String("-stg"));
-    #else
-        return Customer::ContactDiscoveryUrlTemplate.arg(QString());
-    #endif
+QString Self::contactDiscoveryServiceUrl()
+{
+#if VS_MSGR_ENV_DEV
+    return Customer::ContactDiscoveryUrlTemplate.arg(QLatin1String("-dev"));
+#elif VS_MSGR_ENV_STG
+    return Customer::ContactDiscoveryUrlTemplate.arg(QLatin1String("-stg"));
+#else
+    return Customer::ContactDiscoveryUrlTemplate.arg(QString());
+#endif
 }
 
-QString Self::caBundlePath() {
+QString Self::caBundlePath()
+{
 #if VS_ANDROID
     return VSQAndroid::caBundlePath();
 #else
@@ -103,8 +106,7 @@ QString Self::caBundlePath() {
 #endif
 }
 
-
-QString Self::version() {
+QString Self::version()
+{
     return kVersion;
 }
-

@@ -56,12 +56,9 @@
 using namespace vm;
 using Self = MessagesController;
 
-Self::MessagesController(Messenger *messenger, const Settings *settings, Models *models, UserDatabase *userDatabase, QObject *parent)
-    : QObject(parent)
-    , m_settings(settings)
-    , m_messenger(messenger)
-    , m_models(models)
-    , m_userDatabase(userDatabase)
+Self::MessagesController(Messenger *messenger, const Settings *settings, Models *models, UserDatabase *userDatabase,
+                         QObject *parent)
+    : QObject(parent), m_settings(settings), m_messenger(messenger), m_models(models), m_userDatabase(userDatabase)
 {
     qRegisterMetaType<MessageUpdate>("MessageUpdate");
 
@@ -70,12 +67,14 @@ Self::MessagesController(Messenger *messenger, const Settings *settings, Models 
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
     // Queue
     connect(this, &Self::messageCreated, messagesQueue, &MessagesQueue::pushMessage);
-    connect(messagesQueue, &MessagesQueue::updateMessage, this, std::bind(&Self::onUpdateMessage, this, std::placeholders::_1, true));
+    connect(messagesQueue, &MessagesQueue::updateMessage, this,
+            std::bind(&Self::onUpdateMessage, this, std::placeholders::_1, true));
     // Models
     connect(m_models->messages(), &MessagesModel::pictureIconNotFound, this, &Self::onPictureIconNotFound);
     // Messages
     connect(m_messenger, &Messenger::messageReceived, this, &Self::onMessageReceived);
-    connect(m_messenger, &Messenger::updateMessage, this, std::bind(&Self::onUpdateMessage, this, std::placeholders::_1, true));
+    connect(m_messenger, &Messenger::updateMessage, this,
+            std::bind(&Self::onUpdateMessage, this, std::placeholders::_1, true));
 }
 
 void Self::loadMessages(const ChatHandler &chat)
@@ -141,7 +140,8 @@ void Self::sendPictureMessage(const QVariant &attachmentUrl)
     emit messageCreated(message);
 }
 
-std::unique_ptr<OutgoingMessage> Self::createOutgoingMessage() {
+std::unique_ptr<OutgoingMessage> Self::createOutgoingMessage()
+{
     auto message = std::make_unique<OutgoingMessage>();
 
     auto currentChat = m_models->messages()->chat();
@@ -150,14 +150,18 @@ std::unique_ptr<OutgoingMessage> Self::createOutgoingMessage() {
     message->setRecipientId(UserId(currentChat->id()));
     message->setSenderId(m_messenger->currentUser()->id());
     message->setSenderUsername(m_messenger->currentUser()->username());
-    message->setRecipientUsername(currentChat->title());
-    message->setChatType(currentChat->type());
     message->setStage(OutgoingMessageStage::Created);
     message->setCreatedAt(QDateTime::currentDateTime());
 
+    if (currentChat->type() == ChatType::Personal) {
+        message->setRecipientUsername(currentChat->title());
+    } else if (currentChat->type() == ChatType::Group) {
+        auto groupId = GroupId(QString(currentChat->id()));
+        message->setGroupChatInfo(std::make_unique<MessageGroupChatInfo>(std::move(groupId)));
+    }
+
     return message;
 }
-
 
 ModifiableMessageHandler Self::createTextMessage(const QString &body)
 {
@@ -168,7 +172,6 @@ ModifiableMessageHandler Self::createTextMessage(const QString &body)
 
     return message;
 }
-
 
 ModifiableMessageHandler Self::createFileMessage(const QUrl &localFileUrl)
 {
@@ -185,11 +188,11 @@ ModifiableMessageHandler Self::createFileMessage(const QUrl &localFileUrl)
     return message;
 }
 
-
 ModifiableMessageHandler Self::createPictureMessage(const QUrl &localFileUrl)
 {
     QString errorString;
-    const auto content = MessageContentPicture::createFromLocalFile(localFileUrl, m_settings->thumbnailMaxSize(), errorString);
+    const auto content =
+            MessageContentPicture::createFromLocalFile(localFileUrl, m_settings->thumbnailMaxSize(), errorString);
     if (!content) {
         qCWarning(lcController) << "MessageContentPicture creation error:" << errorString;
         return ModifiableMessageHandler();
@@ -201,23 +204,20 @@ ModifiableMessageHandler Self::createPictureMessage(const QUrl &localFileUrl)
     return message;
 }
 
-
-qsizetype Self::calculateUnreadMessageCount(const ChatHandler& destinationChat, const MessageHandler& message) const {
-
+qsizetype Self::calculateUnreadMessageCount(const ChatHandler &destinationChat, const MessageHandler &message) const
+{
     auto currentChat = m_models->messages()->chat();
 
-    if((nullptr == currentChat) || (currentChat->id() != destinationChat->id())) {
+    if ((nullptr == currentChat) || (currentChat->id() != destinationChat->id())) {
         if (message->isOutgoingCopyFromOtherDevice()) {
             return destinationChat->unreadMessageCount();
-        }
-        else {
+        } else {
             return destinationChat->unreadMessageCount() + 1;
         }
     }
 
     return 0;
 }
-
 
 void Self::setupTableConnections()
 {
@@ -226,8 +226,7 @@ void Self::setupTableConnections()
     connect(table, &MessagesTable::chatMessagesFetched, m_models->messages(), &MessagesModel::setMessages);
 }
 
-
-void Self::onUpdateMessage(const MessageUpdate& messageUpdate, const bool apply)
+void Self::onUpdateMessage(const MessageUpdate &messageUpdate, const bool apply)
 {
     //
     //  Update UI for the current chat.
@@ -240,7 +239,6 @@ void Self::onUpdateMessage(const MessageUpdate& messageUpdate, const bool apply)
     m_userDatabase->updateMessage(messageUpdate);
 }
 
-
 void Self::onPictureIconNotFound(const MessageId &messageId)
 {
     const auto message = m_models->messages()->findById(messageId);
@@ -250,7 +248,6 @@ void Self::onPictureIconNotFound(const MessageId &messageId)
     qCDebug(lcController) << "Auto-downloading of missing picture icon for:" << messageId;
     m_models->messagesQueue()->pushMessagePreload(message);
 }
-
 
 void Self::onMessageReceived(ModifiableMessageHandler message)
 {

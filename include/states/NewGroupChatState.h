@@ -36,9 +36,9 @@
 #define VM_NEWGROUPCHATSTATE_H
 
 #include "OperationState.h"
+#include "Contact.h"
 
-namespace vm
-{
+namespace vm {
 class DiscoveredContactsModel;
 
 class NewGroupChatState : public OperationState
@@ -50,12 +50,13 @@ public:
 
 signals:
     void requestChatName();
+    void contactsSelected(const Contacts &contacts);
 
 private:
     void onEntry(QEvent *event);
 
     DiscoveredContactsModel *m_contactsModel;
 };
-}
+} // namespace vm
 
 #endif // VM_NEWGROUPCHATSTATE_H

@@ -50,10 +50,10 @@ using Self = CloudFilesQueue;
 Q_LOGGING_CATEGORY(lcCloudFilesQueue, "cloudfiles-queue");
 
 Self::CloudFilesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject *parent)
-    : OperationQueue(lcCloudFilesQueue(), parent)
-    , m_messenger(messenger)
-    , m_userDatabase(userDatabase)
-    , m_watcher(new CloudFolderUpdateWatcher(this))
+    : OperationQueue(lcCloudFilesQueue(), parent),
+      m_messenger(messenger),
+      m_userDatabase(userDatabase),
+      m_watcher(new CloudFolderUpdateWatcher(this))
 {
     connect(m_messenger, &Messenger::signedOut, this, &CloudFilesQueue::stop);
     connect(m_userDatabase, &UserDatabase::opened, this, &Self::start);
@@ -69,9 +69,7 @@ Self::CloudFilesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject 
     addCloudFileListener(new UniqueCloudFileFilter(this));
 }
 
-Self::~CloudFilesQueue()
-{
-}
+Self::~CloudFilesQueue() { }
 
 void Self::addCloudFileListener(CloudFilesQueueListenerPtr listener)
 {
@@ -88,40 +86,41 @@ Operation *Self::createOperation(OperationSourcePtr source)
     connect(op, &CloudFileOperation::cloudFilesUpdate, this, &Self::updateCloudFiles);
 
     switch (cloudFileSource->type()) {
-        case SourceType::ListFolder:
-            op->appendChild(new ListCloudFolderOperation(op, cloudFileSource->folder(), m_userDatabase));
-            break;
-        case SourceType::CreateFolder:
-            op->appendChild(new CreateCloudFolderOperation(op, cloudFileSource->name(), cloudFileSource->folder()));
-            break;
-        case SourceType::Upload: {
-            auto uploadOp = new UploadCloudFileOperation(op, cloudFileSource->filePath(), cloudFileSource->folder());
-            connect(this, &Self::interruptFileOperation, uploadOp, [uploadOp](auto cloudFileId) {
-                if (cloudFileId == uploadOp->cloudFileId()) {
-                    uploadOp->interrupt();
-                }
-            });
-            op->appendChild(uploadOp);
-            break;
-        }
-        case SourceType::Download: {
-            auto downloadOp = new DownloadCloudFileOperation(op, cloudFileSource->files().front(), cloudFileSource->folder());
-            connect(this, &Self::interruptFileOperation, downloadOp, [downloadOp](auto cloudFileId) {
-                if (cloudFileId == downloadOp->cloudFileId()) {
-                    downloadOp->interrupt();
-                }
-            });
-            op->appendChild(downloadOp);
-            break;
-        }
-        case SourceType::Delete:
-            op->appendChild(new DeleteCloudFilesOperation(op, cloudFileSource->files()));
-            break;
-        case SourceType::Share:
-            op->appendChild(new ShareCloudFilesOperation(op, cloudFileSource->files(), cloudFileSource->contacts()));
-            break;
-        default:
-            throw std::logic_error("CloudFilesQueue::createOperation is not fully implemented");
+    case SourceType::ListFolder:
+        op->appendChild(new ListCloudFolderOperation(op, cloudFileSource->folder(), m_userDatabase));
+        break;
+    case SourceType::CreateFolder:
+        op->appendChild(new CreateCloudFolderOperation(op, cloudFileSource->name(), cloudFileSource->folder()));
+        break;
+    case SourceType::Upload: {
+        auto uploadOp = new UploadCloudFileOperation(op, cloudFileSource->filePath(), cloudFileSource->folder());
+        connect(this, &Self::interruptFileOperation, uploadOp, [uploadOp](auto cloudFileId) {
+            if (cloudFileId == uploadOp->cloudFileId()) {
+                uploadOp->interrupt();
+            }
+        });
+        op->appendChild(uploadOp);
+        break;
+    }
+    case SourceType::Download: {
+        auto downloadOp =
+                new DownloadCloudFileOperation(op, cloudFileSource->files().front(), cloudFileSource->folder());
+        connect(this, &Self::interruptFileOperation, downloadOp, [downloadOp](auto cloudFileId) {
+            if (cloudFileId == downloadOp->cloudFileId()) {
+                downloadOp->interrupt();
+            }
+        });
+        op->appendChild(downloadOp);
+        break;
+    }
+    case SourceType::Delete:
+        op->appendChild(new DeleteCloudFilesOperation(op, cloudFileSource->files()));
+        break;
+    case SourceType::Share:
+        op->appendChild(new ShareCloudFilesOperation(op, cloudFileSource->files(), cloudFileSource->contacts()));
+        break;
+    default:
+        throw std::logic_error("CloudFilesQueue::createOperation is not fully implemented");
     }
 
     return op;
@@ -162,7 +161,8 @@ void Self::onPushUploadFile(const QString &filePath, const CloudFileHandler &par
     addSource(std::move(source));
 }
 
-void Self::onPushDownloadFile(const CloudFileHandler &file, const CloudFileHandler &parentFolder, const PostFunction &func)
+void Self::onPushDownloadFile(const CloudFileHandler &file, const CloudFileHandler &parentFolder,
+                              const PostFunction &func)
 {
     auto source = std::make_shared<CloudFileOperationSource>(SourceType::Download);
     source->setFolder(parentFolder);

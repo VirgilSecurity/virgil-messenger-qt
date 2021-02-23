@@ -36,22 +36,24 @@
 
 #include "CloudFileOperation.h"
 #include "CloudFilesTable.h"
-#include "CloudFilesUpdate.h"
 #include "CloudFileSystem.h"
+#include "FileUtils.h"
 #include "UserDatabase.h"
 
 using namespace vm;
 using Self = vm::ListCloudFolderOperation;
 
-Self::ListCloudFolderOperation(CloudFileOperation *parent, const CloudFileHandler &parentFolder, UserDatabase *userDatabase)
-    : Operation(QLatin1String("ListCloudFolder"), parent)
-    , m_parent(parent)
-    , m_parentFolder(parentFolder)
-    , m_userDatabase(userDatabase)
+Self::ListCloudFolderOperation(CloudFileOperation *parent, const CloudFileHandler &parentFolder,
+                               UserDatabase *userDatabase)
+    : Operation(QLatin1String("ListCloudFolder"), parent),
+      m_parent(parent),
+      m_parentFolder(parentFolder),
+      m_userDatabase(userDatabase)
 {
     connect(m_userDatabase->cloudFilesTable(), &CloudFilesTable::fetched, this, &Self::onDatabaseListFetched);
     connect(m_parent->cloudFileSystem(), &CloudFileSystem::listFetched, this, &Self::onCloudListFetched);
-    connect(m_parent->cloudFileSystem(), &CloudFileSystem::fetchListErrorOccured, this, &Self::onCloudListFetchErrorOccurred);
+    connect(m_parent->cloudFileSystem(), &CloudFileSystem::fetchListErrorOccured, this,
+            &Self::onCloudListFetchErrorOccurred);
 }
 
 void Self::run()
@@ -59,12 +61,33 @@ void Self::run()
     m_userDatabase->cloudFilesTable()->fetch(m_parentFolder);
 }
 
-void ListCloudFolderOperation::onCloudListFetched(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &files)
+void ListCloudFolderOperation::onCloudListFetched(const CloudFileRequestId requestId,
+                                                  const ModifiableCloudFileHandler &parentFolder,
+                                                  const ModifiableCloudFiles &files)
 {
+    Q_UNUSED(parentFolder)
     if (m_requestId != requestId) {
         return;
     }
 
+    m_parent->cloudFilesUpdate(buildDifference(parentFolder, files));
+    deleteObsoleteLocalFiles(files);
+
+    finish();
+}
+
+void ListCloudFolderOperation::onCloudListFetchErrorOccurred(CloudFileRequestId requestId, const QString &errorText)
+{
+    Q_UNUSED(errorText)
+    if (m_requestId != requestId) {
+        return;
+    }
+    fail();
+}
+
+CloudListCloudFolderUpdate ListCloudFolderOperation::buildDifference(const CloudFileHandler &parentFolder,
+                                                                     const ModifiableCloudFiles &files) const
+{
     CloudListCloudFolderUpdate update;
     update.parentFolder = parentFolder;
     auto oldFiles = m_cachedFiles;
@@ -81,12 +104,10 @@ void ListCloudFolderOperation::onCloudListFetched(const CloudFileRequestId reque
         if (fileIdLess(oldFile, newFile)) {
             update.deleted.push_back(oldFile);
             ++oldI;
-        }
-        else if (fileIdLess(newFile, oldFile)) {
+        } else if (fileIdLess(newFile, oldFile)) {
             update.added.push_back(newFile);
             ++newI;
-        }
-        else {
+        } else {
             if (fileUpdated(oldFile, newFile)) {
                 update.updated.push_back(newFile);
             }
@@ -100,18 +121,31 @@ void ListCloudFolderOperation::onCloudListFetched(const CloudFileRequestId reque
     if (newI < newSize) {
         update.added.insert(update.added.end(), newFiles.begin() + newI, newFiles.end());
     }
-    m_parent->cloudFilesUpdate(update);
-
-    finish();
+    return update;
 }
 
-void ListCloudFolderOperation::onCloudListFetchErrorOccurred(CloudFileRequestId requestId, const QString &errorText)
+void ListCloudFolderOperation::deleteObsoleteLocalFiles(const ModifiableCloudFiles &files)
 {
-    Q_UNUSED(errorText)
-    if (m_requestId != requestId) {
-        return;
+    QSet<QString> filePaths;
+    QSet<QString> folderPaths;
+    for (auto &file : files) {
+        (file->isFolder() ? folderPaths : filePaths) << file->localPath().toLower();
     }
-    fail();
+
+    const auto localDir = QDir(m_parentFolder->localPath());
+    const auto localFiles = localDir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs | QDir::Hidden);
+    for (auto &localFile : localFiles) {
+        const auto localPath = localFile.absoluteFilePath();
+        if (localFile.isDir()) {
+            if (!folderPaths.contains(localPath.toLower())) {
+                FileUtils::removeDir(localPath);
+            }
+        } else if (localFile.isFile()) {
+            if (!filePaths.contains(localPath.toLower())) {
+                FileUtils::removeFile(localPath);
+            }
+        }
+    }
 }
 
 void Self::onDatabaseListFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles)

@@ -34,7 +34,6 @@
 
 #include "models/MessagesQueue.h"
 
-
 #include "Messenger.h"
 #include "Utils.h"
 #include "MessagesTable.h"
@@ -42,20 +41,17 @@
 #include "MessageOperation.h"
 #include "MessageOperationFactory.h"
 
-
 using namespace vm;
 using Self = MessagesQueue;
 using DownloadParameter = MessageOperationSource::DownloadParameter;
 
-
 Q_LOGGING_CATEGORY(lcMessagesQueue, "messages-queue");
 
-
 Self::MessagesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject *parent)
-    : OperationQueue(lcMessagesQueue(), parent)
-    , m_messenger(messenger)
-    , m_userDatabase(userDatabase)
-    , m_factory(new MessageOperationFactory(messenger, this))
+    : OperationQueue(lcMessagesQueue(), parent),
+      m_messenger(messenger),
+      m_userDatabase(userDatabase),
+      m_factory(new MessageOperationFactory(messenger, this))
 {
     connect(m_messenger, &Messenger::onlineStatusChanged, this, &MessagesQueue::onOnlineStatusChanged);
     connect(m_messenger, &Messenger::signedOut, this, &MessagesQueue::stop);
@@ -65,11 +61,7 @@ Self::MessagesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject *p
     connect(this, &Self::pushMessagePreload, this, &Self::onPushMessagePreload);
 }
 
-
-Self::~MessagesQueue()
-{
-}
-
+Self::~MessagesQueue() { }
 
 Operation *Self::createOperation(OperationSourcePtr source)
 {
@@ -83,17 +75,14 @@ Operation *Self::createOperation(OperationSourcePtr source)
     if (auto download = messageSource->download()) {
         if (download->type == DownloadParameter::Type::Download) {
             m_factory->populateDownload(op, download->filePath);
-        }
-        else {
+        } else {
             m_factory->populatePreload(op);
         }
-    }
-    else {
+    } else {
         m_factory->populateAll(op);
     }
     return op;
 }
-
 
 void Self::invalidateOperation(OperationSourcePtr source)
 {
@@ -105,8 +94,7 @@ void Self::invalidateOperation(OperationSourcePtr source)
         update.messageId = message->id();
         update.stage = IncomingMessageStage::Broken;
         emit updateMessage(update);
-    }
-    else if (message->isOutgoing()) {
+    } else if (message->isOutgoing()) {
         OutgoingMessageStageUpdate update;
         update.messageId = message->id();
         update.stage = OutgoingMessageStage::Broken;
@@ -114,20 +102,18 @@ void Self::invalidateOperation(OperationSourcePtr source)
     }
 }
 
-
 qsizetype Self::maxAttemptCount() const
 {
     return 3;
 }
 
-
 void Self::onDatabaseOpened()
 {
     start();
-    connect(m_userDatabase->messagesTable(), &MessagesTable::notSentMessagesFetched, this, &Self::onNotSentMessagesFetched);
+    connect(m_userDatabase->messagesTable(), &MessagesTable::notSentMessagesFetched, this,
+            &Self::onNotSentMessagesFetched);
     m_userDatabase->messagesTable()->fetchNotSentMessages();
 }
-
 
 void MessagesQueue::onOnlineStatusChanged(const bool isOnline)
 {
@@ -135,7 +121,6 @@ void MessagesQueue::onOnlineStatusChanged(const bool isOnline)
         run();
     }
 }
-
 
 void Self::onNotSentMessagesFetched(const ModifiableMessages &messages)
 {
@@ -145,20 +130,21 @@ void Self::onNotSentMessagesFetched(const ModifiableMessages &messages)
     }
 }
 
-
 void Self::onPushMessage(const ModifiableMessageHandler &message)
 {
     if (message->isIncoming() || message->isOutgoingCopyFromOtherDevice()) {
-        pushMessagePreload(message);
-    }
-    else {
+        if (message->contentType() == MessageContentType::Picture) {
+            pushMessagePreload(message);
+        }
+    } else {
         addSource(std::make_shared<MessageOperationSource>(message));
     }
 }
 
-
-void Self::onPushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath, const PostFunction &postFunction)
+void Self::onPushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath,
+                                 const PostFunction &postFunction)
 {
+    Q_ASSERT(message->contentIsAttachment());
     DownloadParameter parameter;
     parameter.type = DownloadParameter::Type::Download;
     parameter.filePath = filePath;
@@ -166,9 +152,9 @@ void Self::onPushMessageDownload(const ModifiableMessageHandler &message, const 
     addSource(std::make_shared<MessageOperationSource>(message, std::move(parameter)));
 }
 
-
 void Self::onPushMessagePreload(const ModifiableMessageHandler &message)
 {
+    Q_ASSERT(message->contentType() == MessageContentType::Picture);
     DownloadParameter parameter;
     parameter.type = DownloadParameter::Type::Preload;
     addSource(std::make_shared<MessageOperationSource>(message, std::move(parameter)));

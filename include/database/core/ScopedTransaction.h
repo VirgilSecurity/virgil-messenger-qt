@@ -37,8 +37,7 @@
 
 #include <QSqlDatabase>
 
-namespace vm
-{
+namespace vm {
 class ScopedTransaction
 {
 public:
@@ -52,6 +51,6 @@ private:
     QSqlDatabase m_qtDatabase;
     bool m_isActive = true;
 };
-}
+} // namespace vm
 
 #endif // VM_SCOPEDTRANSACTION_H

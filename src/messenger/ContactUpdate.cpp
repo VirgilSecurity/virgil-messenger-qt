@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,9 +32,19 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VS_SCHEMEVERSION_H
-#define VS_SCHEMEVERSION_H
+#include "ContactUpdate.h"
 
-#define VERSION_DATABASE_SCHEME 0
+#include <stdexcept>
 
-#endif // VS_SCHEMEVERSION_H
+using namespace vm;
+
+UserId vm::ContactUpdateGetUserId(const ContactUpdate &update)
+{
+    if (auto base = std::get_if<UsernameContactUpdate>(&update)) {
+        return base->userId;
+    } else if (auto base = std::get_if<NameContactUpdate>(&update)) {
+        return base->userId;
+    } else {
+        throw std::logic_error("Unhandled ContactUpdate when ask for user id.");
+    }
+}

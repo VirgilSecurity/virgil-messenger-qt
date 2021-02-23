@@ -32,53 +32,46 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "MessageContentUploadStage.h"
-
 
 using namespace vm;
 
-
-MessageContentUploadStage vm::MessageContentUploadStageFromString(const QString& stageString) {
+MessageContentUploadStage vm::MessageContentUploadStageFromString(const QString &stageString)
+{
     if (stageString == QLatin1String("initial")) {
         return MessageContentUploadStage::Initial;
-    }
-    else if (stageString == QLatin1String("preprocessed")) {
+    } else if (stageString == QLatin1String("preprocessed")) {
         return MessageContentUploadStage::Preprocessed;
-    }
-    else if (stageString == QLatin1String("encrypted")) {
+    } else if (stageString == QLatin1String("encrypted")) {
         return MessageContentUploadStage::Encrypted;
-    }
-    else if (stageString == QLatin1String("gotUploadingSlot")) {
+    } else if (stageString == QLatin1String("gotUploadingSlot")) {
         return MessageContentUploadStage::GotUploadingSlot;
-    }
-    else if (stageString == QLatin1String("uploaded")) {
+    } else if (stageString == QLatin1String("uploaded")) {
         return MessageContentUploadStage::Uploaded;
-    }
-    else {
+    } else {
         throw std::logic_error("Invalid MessageContentUploadStage string");
     }
 }
 
-
-QString vm::MessageContentUploadStageToString(MessageContentUploadStage stage) {
+QString vm::MessageContentUploadStageToString(MessageContentUploadStage stage)
+{
     switch (stage) {
-        case MessageContentUploadStage::Initial:
-            return QLatin1String("initial");
+    case MessageContentUploadStage::Initial:
+        return QLatin1String("initial");
 
-        case MessageContentUploadStage::Preprocessed:
-            return QLatin1String("preprocessed");
+    case MessageContentUploadStage::Preprocessed:
+        return QLatin1String("preprocessed");
 
-        case MessageContentUploadStage::Encrypted:
-            return QLatin1String("encrypted");
+    case MessageContentUploadStage::Encrypted:
+        return QLatin1String("encrypted");
 
-        case MessageContentUploadStage::GotUploadingSlot:
-            return QLatin1String("gotUploadingSlot");
+    case MessageContentUploadStage::GotUploadingSlot:
+        return QLatin1String("gotUploadingSlot");
 
-        case MessageContentUploadStage::Uploaded:
-            return QLatin1String("uploaded");
+    case MessageContentUploadStage::Uploaded:
+        return QLatin1String("uploaded");
 
-        default:
-            throw std::logic_error("Invalid MessageContentUploadStage");
+    default:
+        throw std::logic_error("Invalid MessageContentUploadStage");
     }
 }

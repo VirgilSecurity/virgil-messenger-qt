@@ -109,36 +109,35 @@ void UniqueCloudFileFilter::clear()
 QString UniqueCloudFileFilter::createUniqueId(CloudFileOperationSource *source) const
 {
     switch (source->type()) {
-        case SourceType::Download:
-            return source->file()->id();
-        case SourceType::Upload:
-            return source->folder()->id() + QLatin1Char('/') + FileUtils::fileName(source->filePath());
-        case SourceType::CreateFolder:
-            return source->folder()->id() + QLatin1Char('/') + source->name();
-        default:
-            return QString();
+    case SourceType::Download:
+        return source->file()->id();
+    case SourceType::Upload:
+        return source->folder()->id() + QLatin1Char('/') + FileUtils::fileName(source->filePath());
+    case SourceType::CreateFolder:
+        return source->folder()->id() + QLatin1Char('/') + source->name();
+    default:
+        return QString();
     }
 }
 
 void UniqueCloudFileFilter::notifyNotUnique(CloudFileOperationSource *source)
 {
     switch (source->type()) {
-        case SourceType::Download:
-            emit notificationCreated(tr("File is downloading"), false);
-            break;
-        case SourceType::Upload:
-            emit notificationCreated(tr("File name is not unique"), true);
-            break;
-        case SourceType::CreateFolder:
-            emit notificationCreated(tr("Folder name is not unique"), true);
-            break;
-        default:
-            break;
+    case SourceType::Download:
+        emit notificationCreated(tr("File is downloading"), false);
+        break;
+    case SourceType::Upload:
+        emit notificationCreated(tr("File name is not unique"), true);
+        break;
+    case SourceType::CreateFolder:
+        emit notificationCreated(tr("Folder name is not unique"), true);
+        break;
+    default:
+        break;
     }
 }
 
-CloudListUpdatingCounter::CloudListUpdatingCounter(QObject *parent)
-    : CloudFilesQueueListener(parent)
+CloudListUpdatingCounter::CloudListUpdatingCounter(QObject *parent) : CloudFilesQueueListener(parent)
 {
     connect(this, &CloudListUpdatingCounter::increment, this, &CloudListUpdatingCounter::onIncrement);
 }
@@ -192,14 +191,12 @@ void CloudFolderUpdateWatcher::subscribe(const CloudFileHandler &cloudFolder)
     // Subscribe to folder
     qCDebug(lcCloudFilesQueueListener) << "Subscribing to folder" << cloudFolder->name();
     QMutexLocker locker(&m_mutex);
-    const auto it = std::find_if(m_items.begin(), m_items.end(), [cloudFolder](auto item) {
-        return cloudFolder->id() == item.folder->id();
-    });
+    const auto it = std::find_if(m_items.begin(), m_items.end(),
+                                 [cloudFolder](auto item) { return cloudFolder->id() == item.folder->id(); });
     if (it == m_items.end()) {
         qCDebug(lcCloudFilesQueueListener) << "Folder is not updated" << cloudFolder->name();
         emit finished(cloudFolder, false);
-    }
-    else {
+    } else {
         it->subscribed = true;
     }
 }
@@ -225,9 +222,8 @@ void CloudFolderUpdateWatcher::postRunCloudFile(CloudFileOperationSource *source
     // Find item
     QMutexLocker locker(&m_mutex);
     const auto folderId = source->folder()->id();
-    const auto it = std::find_if(m_items.begin(), m_items.end(), [folderId](auto item) {
-        return folderId == item.folder->id();
-    });
+    const auto it = std::find_if(m_items.begin(), m_items.end(),
+                                 [folderId](auto item) { return folderId == item.folder->id(); });
     if (it == m_items.end()) {
         qCritical(lcCloudFilesQueueListener) << "Interrupted folder watching:" << source->folder()->name();
         throw std::logic_error("Folder must be watched");
@@ -253,9 +249,8 @@ void CloudFolderUpdateWatcher::updateCloudFiles(const CloudFilesUpdate &update)
 
     QMutexLocker locker(&m_mutex);
     const auto folderId = upd->parentFolder->id();
-    const auto it = std::find_if(m_items.begin(), m_items.end(), [folderId](auto item) {
-        return folderId == item.folder->id();
-    });
+    const auto it = std::find_if(m_items.begin(), m_items.end(),
+                                 [folderId](auto item) { return folderId == item.folder->id(); });
     if (it == m_items.end()) {
         return;
     }

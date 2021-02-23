@@ -39,20 +39,11 @@
 #include "Contact.h"
 #include "OperationSource.h"
 
-namespace vm
-{
+namespace vm {
 class CloudFileOperationSource : public OperationSource
 {
 public:
-    enum class Type
-    {
-        ListFolder,
-        CreateFolder,
-        Upload,
-        Download,
-        Delete,
-        Share
-    };
+    enum class Type { ListFolder, CreateFolder, Upload, Download, Delete, Share };
 
     explicit CloudFileOperationSource(Type type);
 
@@ -84,7 +75,6 @@ private:
     PostFunction m_postFunction;
     Contacts m_contacts;
 };
-}
+} // namespace vm
 
 #endif // VM_CLOUD_FILE_OPERATION_SOURCE_H
-

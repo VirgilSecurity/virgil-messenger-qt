@@ -41,15 +41,17 @@
 
 using namespace vm;
 
-CreateCloudFolderOperation::CreateCloudFolderOperation(CloudFileOperation *parent, const QString &name, const CloudFileHandler &parentFolder)
-    : Operation(QLatin1String("CreateCloudFolder"), parent)
-    , m_parent(parent)
-    , m_name(name)
-    , m_parentFolder(parentFolder)
-    , m_requestId(0)
+CreateCloudFolderOperation::CreateCloudFolderOperation(CloudFileOperation *parent, const QString &name,
+                                                       const CloudFileHandler &parentFolder)
+    : Operation(QLatin1String("CreateCloudFolder"), parent),
+      m_parent(parent),
+      m_name(name),
+      m_parentFolder(parentFolder),
+      m_requestId(0)
 {
     connect(m_parent->cloudFileSystem(), &CloudFileSystem::folderCreated, this, &CreateCloudFolderOperation::onCreated);
-    connect(m_parent->cloudFileSystem(), &CloudFileSystem::createFolderErrorOccured, this, &CreateCloudFolderOperation::onCreateErrorOccured);
+    connect(m_parent->cloudFileSystem(), &CloudFileSystem::createFolderErrorOccured, this,
+            &CreateCloudFolderOperation::onCreateErrorOccured);
 }
 
 void CreateCloudFolderOperation::run()

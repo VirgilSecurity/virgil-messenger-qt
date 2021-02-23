@@ -37,8 +37,7 @@
 
 #include "OperationState.h"
 
-namespace vm
-{
+namespace vm {
 class DiscoveredContactsModel;
 
 class ShareCloudFilesState : public OperationState
@@ -53,6 +52,6 @@ private:
 
     DiscoveredContactsModel *m_contactsModel;
 };
-}
+} // namespace vm
 
 #endif // VM_SHARECLOUDFILESSTATE_H

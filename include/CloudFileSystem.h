@@ -46,8 +46,7 @@
 
 Q_DECLARE_LOGGING_CATEGORY(lcCloudFileSystem)
 
-namespace vm
-{
+namespace vm {
 class CoreMessenger;
 class Messenger;
 
@@ -71,25 +70,31 @@ public:
 signals:
     void downloadsDirChanged(const QDir &downloadsDir);
 
-    void listFetched(CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &files);
+    void listFetched(CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder,
+                     const ModifiableCloudFiles &files);
     void fetchListErrorOccured(CloudFileRequestId requestId, const QString &errorText);
 
-    void fileCreated(CloudFileRequestId requestId, const ModifiableCloudFileHandler &cloudFile, const QString &encryptedFilePath, const QUrl &uploadUrl);
+    void fileCreated(CloudFileRequestId requestId, const ModifiableCloudFileHandler &cloudFile,
+                     const QString &encryptedFilePath, const QUrl &uploadUrl);
     void createFileErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
 
     void folderCreated(CloudFileRequestId requestId, const ModifiableCloudFileHandler &folder);
     void createFolderErrorOccured(CloudFileRequestId requestId, const QString &errorText);
 
-    void downloadInfoGot(CloudFileRequestId requestId, const CloudFileHandler &file, const QUrl &url, const QByteArray &encryptionKey);
+    void downloadInfoGot(CloudFileRequestId requestId, const CloudFileHandler &file, const QUrl &url,
+                         const QByteArray &encryptionKey);
     void getDownloadInfoErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
 
     void fileDeleted(CloudFileRequestId requestId, const CloudFileHandler &file);
     void deleteFileErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
 
 private:
-    ModifiableCloudFileHandler createParentFolderFromInfo(const CloudFsFolder &fsFolder, const CloudFileHandler &oldFolder) const;
-    ModifiableCloudFileHandler createFolderFromInfo(const CloudFsFolderInfo &info, const CloudFileId &parentId, const QString &localPath) const;
-    ModifiableCloudFileHandler createFileFromInfo(const CloudFsFileInfo &info, const CloudFileId &parentId, const QString &localPath) const;
+    ModifiableCloudFileHandler createParentFolderFromInfo(const CloudFsFolder &fsFolder,
+                                                          const CloudFileHandler &oldFolder) const;
+    ModifiableCloudFileHandler createFolderFromInfo(const CloudFsFolderInfo &info, const CloudFileId &parentId,
+                                                    const QString &localPath) const;
+    ModifiableCloudFileHandler createFileFromInfo(const CloudFsFileInfo &info, const CloudFileId &parentId,
+                                                  const QString &localPath) const;
 
     QPointer<CoreMessenger> m_coreMessenger;
     std::optional<CoreMessengerCloudFs> m_coreFs;
@@ -97,6 +102,6 @@ private:
     QPointer<Messenger> m_messenger;
     QDir m_downloadsDir;
 };
-}
+} // namespace vm
 
 #endif // VM_CLOUD_FILE_SYSTEM_H

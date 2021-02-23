@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_MESSAGE_ID_H
 #define VM_MESSAGE_ID_H
 
@@ -43,7 +42,8 @@ namespace vm {
 //
 //  This class just wraps QString but is used for a strong type checking.
 //
-class MessageId {
+class MessageId
+{
 public:
     explicit MessageId(QString messageId = {});
 
@@ -56,11 +56,12 @@ public:
 private:
     QString m_messageId;
 };
-} // namespace vm
 
-bool operator<(const vm::MessageId& lhs, const vm::MessageId& rhs);
-bool operator>(const vm::MessageId& lhs, const vm::MessageId& rhs);
-bool operator==(const vm::MessageId& lhs, const vm::MessageId& rhs);
-bool operator!=(const vm::MessageId& lhs, const vm::MessageId& rhs);
+bool operator<(const MessageId &lhs, const MessageId &rhs);
+bool operator>(const MessageId &lhs, const MessageId &rhs);
+bool operator==(const MessageId &lhs, const MessageId &rhs);
+bool operator!=(const MessageId &lhs, const MessageId &rhs);
+
+} // namespace vm
 
 #endif // VM_MESSAGE_ID_H

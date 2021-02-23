@@ -42,9 +42,7 @@ using namespace vm;
 using Self = NewChatState;
 
 Self::NewChatState(ChatsController *chatsController, DiscoveredContactsModel *contactsModel, QState *parent)
-    : OperationState(parent)
-    , m_chatsController(chatsController)
-    , m_contactsModel(contactsModel)
+    : OperationState(parent), m_chatsController(chatsController), m_contactsModel(contactsModel)
 {
     connect(chatsController, &ChatsController::chatOpened, this, &Self::operationFinished);
     connect(chatsController, &ChatsController::errorOccurred, this, &Self::operationErrorOccurred);

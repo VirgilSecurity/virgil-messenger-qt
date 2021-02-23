@@ -36,25 +36,25 @@
 
 #include <QtCore>
 
-#include <Sparkle.h>
 #include <SUUpdater.h>
+#include <Sparkle.h>
 
 #include "macos/VSQMacos.h"
 
 /******************************************************************************/
-VSQMacos::~VSQMacos() {
-    _deleteTimer();
-}
+VSQMacos::~VSQMacos() { _deleteTimer(); }
 
 /******************************************************************************/
-void VSQMacos::_setURL() const {
-    NSString *urlStr = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"SUFeedURL"];
-    NSURL *appcastURL = [NSURL URLWithString:[urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+void VSQMacos::_setURL() const
+{
+    NSString* urlStr = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"SUFeedURL"];
+    NSURL* appcastURL = [NSURL URLWithString:urlStr];
     [[SUUpdater sharedUpdater] setFeedURL:appcastURL];
 }
 
 /******************************************************************************/
-void VSQMacos::checkUpdates() const {
+void VSQMacos::checkUpdates() const
+{
     if (FALSE == [SUUpdater sharedUpdater].updateInProgress) {
         _setURL();
         [[SUUpdater sharedUpdater] checkForUpdates:nil];
@@ -62,7 +62,8 @@ void VSQMacos::checkUpdates() const {
 }
 
 /******************************************************************************/
-void VSQMacos::checkUpdatesBackground() const {
+void VSQMacos::checkUpdatesBackground() const
+{
     if (FALSE == [SUUpdater sharedUpdater].updateInProgress) {
         _setURL();
         [[SUUpdater sharedUpdater] checkForUpdatesInBackground];
@@ -70,7 +71,8 @@ void VSQMacos::checkUpdatesBackground() const {
 }
 
 /******************************************************************************/
-void VSQMacos::_deleteTimer() {
+void VSQMacos::_deleteTimer()
+{
     if (m_updateTimer) {
         m_updateTimer->stop();
         delete m_updateTimer;
@@ -79,7 +81,8 @@ void VSQMacos::_deleteTimer() {
 }
 
 /******************************************************************************/
-void VSQMacos::startUpdatesTimer() {
+void VSQMacos::startUpdatesTimer()
+{
     _deleteTimer();
     m_updateTimer = new QTimer();
     m_updateTimer->setSingleShot(false);

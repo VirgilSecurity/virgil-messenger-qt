@@ -41,8 +41,7 @@
 using namespace vm;
 
 LoadFileOperation::LoadFileOperation(NetworkOperation *parent, quint64 bytesTotal)
-    : NetworkOperation(parent)
-    , m_bytesTotal(bytesTotal)
+    : NetworkOperation(parent), m_bytesTotal(bytesTotal)
 {
     setName(QLatin1String("LoadFile"));
     connect(this, &LoadFileOperation::setProgress, this, &LoadFileOperation::onSetProgress);
@@ -61,7 +60,8 @@ void LoadFileOperation::connectReply(QNetworkReply *reply)
 {
     m_reply = reply; // Store reply with QPointer to control lifetime
     connect(reply, &QNetworkReply::finished, this, std::bind(&LoadFileOperation::onReplyFinished, this, reply));
-    connect(reply, &QNetworkReply::errorOccurred, this, std::bind(&LoadFileOperation::onReplyErrorOccurred, this, std::placeholders::_1, reply));
+    connect(reply, &QNetworkReply::errorOccurred, this,
+            std::bind(&LoadFileOperation::onReplyErrorOccurred, this, std::placeholders::_1, reply));
     connect(reply, &QNetworkReply::sslErrors, this, &LoadFileOperation::onReplySslErrors);
     connect(this, &LoadFileOperation::interrupt, reply, &QNetworkReply::abort);
 }
@@ -121,8 +121,7 @@ void LoadFileOperation::onReplyFinished(QNetworkReply *reply)
     if (m_bytesTotal > 0 && m_bytesLoaded >= m_bytesTotal) {
         qCDebug(lcOperation) << "Reply success";
         finish();
-    }
-    else {
+    } else {
         qCWarning(lcOperation) << "Failed. Load file was processed partially" << error;
         invalidateAndNotify(tr("File loading failed"));
     }
@@ -164,19 +163,17 @@ void LoadFileOperation::onSetProgress(quint64 bytesLoaded, quint64 bytesTotal)
     if (bytesTotal == 0 && bytesLoaded == 0) {
         // NOTE(fpohtmeh): Qt finishes upload with zero values
         return;
-    }
-    else if (bytesTotal == quint64(-1)) {
+    } else if (bytesTotal == quint64(-1)) {
         // NOTE(fpohtmeh): Qt uses correct bytesLoaded and bytesTotal=-1 when starts download
         // and finishes it with correct bytesTotal and bytesLoaded=bytesTotal
         if (m_bytesTotal < bytesLoaded) {
             qCWarning(lcOperation) << "Pass bytesTotal to constructor for correct progress calculation";
             m_bytesTotal = bytesLoaded;
         }
-    }
-    else {
+    } else {
         m_bytesTotal = bytesTotal;
     }
     m_bytesLoaded = bytesLoaded;
-    //qCDebug(lcOperation) << "Load progress:" << Utils::printableLoadProgress(m_bytesLoaded, m_bytesTotal);
+    // qCDebug(lcOperation) << "Load progress:" << Utils::printableLoadProgress(m_bytesLoaded, m_bytesTotal);
     emit progressChanged(m_bytesLoaded, m_bytesTotal);
 }

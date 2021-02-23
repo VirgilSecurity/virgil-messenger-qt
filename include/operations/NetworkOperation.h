@@ -37,8 +37,7 @@
 
 #include "Operation.h"
 
-namespace vm
-{
+namespace vm {
 class NetworkOperation : public Operation
 {
     Q_OBJECT
@@ -56,6 +55,6 @@ protected:
 private:
     bool m_isOnline = false;
 };
-}
+} // namespace vm
 
 #endif // VM_NETWORKOPERATION_H

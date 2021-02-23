@@ -40,9 +40,7 @@
 
 #include "QPointer"
 
-
-namespace vm
-{
+namespace vm {
 class MessageOperation;
 
 class SendMessageOperation : public NetworkOperation
@@ -60,6 +58,6 @@ private:
     MessageOperation *m_parent;
     QPointer<MessageSender> m_messageSender;
 };
-}
+} // namespace vm
 
 #endif // VM_SENDMESSAGEOPERATION_H

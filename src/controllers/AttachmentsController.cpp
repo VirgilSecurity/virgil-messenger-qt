@@ -48,9 +48,7 @@ using namespace vm;
 using Self = AttachmentsController;
 
 Self::AttachmentsController(const Settings *settings, Models *models, QObject *parent)
-    : QObject(parent)
-    , m_settings(settings)
-    , m_models(models)
+    : QObject(parent), m_settings(settings), m_models(models)
 {
 }
 
@@ -76,9 +74,7 @@ void Self::download(const QString &messageId)
         return;
     }
 
-    downloadAttachment(message, [this]() {
-        emit notificationCreated(tr("File was downloaded"), false);
-    });
+    downloadAttachment(message, [this]() { emit notificationCreated(tr("File was downloaded"), false); });
 }
 
 void Self::open(const QString &messageId)
@@ -94,8 +90,7 @@ void Self::open(const QString &messageId)
         if (std::holds_alternative<MessageContentPicture>(message->content())) {
             qCDebug(lcController) << "Opening of preview for" << url.fileName();
             emit openPreviewRequested(url);
-        }
-        else {
+        } else {
             qCDebug(lcController) << "Opening of file:" << url.fileName();
             FileUtils::openUrl(url);
         }
@@ -104,7 +99,7 @@ void Self::open(const QString &messageId)
 
 ModifiableMessageHandler Self::findMessageById(const QString &messageId) const
 {
-    const auto message = m_models->messages()->findById(MessageId{ messageId });
+    const auto message = m_models->messages()->findById(MessageId { messageId });
     if (!message) {
         qCWarning(lcController) << "Message not found: " << messageId;
         return nullptr;
@@ -127,13 +122,11 @@ void Self::downloadAttachment(const ModifiableMessageHandler &message, const Mes
     bool needDownload = false;
     if (!FileUtils::fileExists(localPath)) {
         needDownload = true;
-    }
-    else if (const auto fingerprint = FileUtils::calculateFingerprint(localPath); fingerprint.isEmpty()) {
+    } else if (const auto fingerprint = FileUtils::calculateFingerprint(localPath); fingerprint.isEmpty()) {
         qCritical(lcController) << "Failed to calculate fingerprint for file:" << localPath;
         emit notificationCreated(tr("Attachment file is broken"), true);
         return;
-    }
-    else if (fingerprint != attachment->fingerprint()) {
+    } else if (fingerprint != attachment->fingerprint()) {
         qWarning(lcController) << "Fingerprint mismatch, downloading attachment";
         emit notificationCreated(tr("Downloading attachment..."), false);
         needDownload = true;
@@ -141,8 +134,7 @@ void Self::downloadAttachment(const ModifiableMessageHandler &message, const Mes
 
     if (!needDownload) {
         function();
-    }
-    else {
+    } else {
         localPath = FileUtils::findUniqueFileName(m_settings->downloadsDir().filePath(attachment->fileName()));
 
         m_models->messagesQueue()->pushMessageDownload(message, localPath, function);

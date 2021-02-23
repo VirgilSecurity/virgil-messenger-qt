@@ -39,10 +39,10 @@
 
 #include "CloudFile.h"
 #include "CloudFileRequestId.h"
+#include "CloudFilesUpdate.h"
 #include "Operation.h"
 
-namespace vm
-{
+namespace vm {
 class CloudFileOperation;
 class UserDatabase;
 
@@ -51,14 +51,20 @@ class ListCloudFolderOperation : public Operation
     Q_OBJECT
 
 public:
-    ListCloudFolderOperation(CloudFileOperation *parent, const CloudFileHandler &parentFolder, UserDatabase *userDatabase);
+    ListCloudFolderOperation(CloudFileOperation *parent, const CloudFileHandler &parentFolder,
+                             UserDatabase *userDatabase);
 
     void run() override;
 
 private:
     void onDatabaseListFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
-    void onCloudListFetched(CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &files);
+    void onCloudListFetched(CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder,
+                            const ModifiableCloudFiles &files);
     void onCloudListFetchErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
+
+    CloudListCloudFolderUpdate buildDifference(const CloudFileHandler &parentFolder,
+                                               const ModifiableCloudFiles &files) const;
+    void deleteObsoleteLocalFiles(const ModifiableCloudFiles &files);
 
     static bool fileIdLess(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs);
     static bool fileUpdated(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs);
@@ -70,6 +76,6 @@ private:
     ModifiableCloudFiles m_cachedFiles;
     CloudFileRequestId m_requestId = 0;
 };
-}
+} // namespace vm
 
 #endif // VM_LIST_CLOUD_FOLDER_OPERATION_H

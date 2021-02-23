@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_MESSAGE_CONTENT_ATTACHMENT_H
 #define VM_MESSAGE_CONTENT_ATTACHMENT_H
 
@@ -50,7 +49,8 @@ namespace vm {
 //  Base class for all message contents that handle attachment,
 //  for instance image, file, voice record, etc.
 //
-class MessageContentAttachment : public MessageUpdateable {
+class MessageContentAttachment : public MessageUpdateable
+{
 
 public:
     virtual ~MessageContentAttachment() noexcept = default;
@@ -58,17 +58,17 @@ public:
     //
     //  Defines processing stages for outgoing attachment.
     //
-    using UploadStage =  MessageContentUploadStage;
+    using UploadStage = MessageContentUploadStage;
 
     //
     //  Defines processing stages for incoming attachment.
     //
-    using DownloadStage =  MessageContentDownloadStage;
+    using DownloadStage = MessageContentDownloadStage;
 
     //
     //  Apply file specific update.
     //
-    bool applyUpdate(const MessageUpdate& update) override;
+    bool applyUpdate(const MessageUpdate &update) override;
 
     //
     //  Return attachment unique identifier.
@@ -228,7 +228,6 @@ private:
     quint64 m_processedSize = 0;
     UploadStage m_uploadStage = UploadStage::Initial;
     DownloadStage m_downloadStage = DownloadStage::Initial;
-
 };
 } // namespace vm
 

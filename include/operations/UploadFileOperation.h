@@ -40,8 +40,7 @@
 
 #include <QPointer>
 
-namespace vm
-{
+namespace vm {
 class UploadFileOperation : public LoadFileOperation
 {
     Q_OBJECT
@@ -74,8 +73,7 @@ private:
     QUrl m_putUrl;
     QUrl m_getUrl;
     QPointer<FileLoader> m_fileLoader;
-
 };
-}
+} // namespace vm
 
 #endif // VM_UPLOADFILEOPERATION_H

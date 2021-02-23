@@ -42,26 +42,25 @@
 
 #include <QDebug>
 
-
 Q_DECLARE_LOGGING_CATEGORY(lcFirebaseListener);
 Q_LOGGING_CATEGORY(lcFirebaseListener, "firebase");
-
 
 using namespace notifications::android;
 using Self = FirebaseListener;
 
-static firebase::InitResult
-_InitializeMessaging(firebase::App *app, void *context) {
+static firebase::InitResult _InitializeMessaging(firebase::App *app, void *context)
+{
     return firebase::messaging::Initialize(*app, static_cast<firebase::messaging::Listener *>(context));
 }
 
-Self&
-Self::instance() {
+Self &Self::instance()
+{
     static Self instance;
     return instance;
 }
 
-Self::FirebaseListener() {
+Self::FirebaseListener()
+{
     qCDebug(lcFirebaseListener) << "PushDelegate. Creating JNI Env";
     m_jniEnv = new QAndroidJniEnvironment();
 
@@ -80,35 +79,32 @@ Self::FirebaseListener() {
     }
 }
 
-
-void
-Self::init() {
+void Self::init()
+{
     qCDebug(lcFirebaseListener) << "Initializing Firebase module";
     m_initializer.Initialize(m_app, this, _InitializeMessaging);
     qCDebug(lcFirebaseListener) << "Module initialized. Waiting on messaging initialization";
 }
 
-void
-Self::showNotification(QString title, QString message) {
+void Self::showNotification(QString title, QString message)
+{
     QAndroidJniObject javaNotificationTitle = QAndroidJniObject::fromString(title);
     QAndroidJniObject javaNotificationMessage = QAndroidJniObject::fromString(message);
-    QAndroidJniObject::callStaticMethod<void>("org/virgil/notification/NotificationClient",
-                                              "notify",
-                                              "(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V",
-                                              QtAndroid::androidContext().object(),
-                                              javaNotificationTitle.object<jstring>(),
-                                              javaNotificationMessage.object<jstring>());
+    QAndroidJniObject::callStaticMethod<void>(
+            "org/virgil/notification/NotificationClient", "notify",
+            "(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V", QtAndroid::androidContext().object(),
+            javaNotificationTitle.object<jstring>(), javaNotificationMessage.object<jstring>());
 }
 
-void
-Self::OnTokenReceived(const char *token) {
+void Self::OnTokenReceived(const char *token)
+{
     qCDebug(lcFirebaseListener) << "Token received: [" << token << "]";
     auto deviceToken = QString::fromUtf8(token);
     PushNotifications::instance().registerToken(deviceToken);
 }
 
-void
-Self::OnMessage(const firebase::messaging::Message &message) {
+void Self::OnMessage(const firebase::messaging::Message &message)
+{
     firebase::messaging::Message mes = message;
     qCDebug(lcFirebaseListener) << "Received message: ";
     qCDebug(lcFirebaseListener) << "to    : " << QString::fromStdString(mes.to);

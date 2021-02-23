@@ -42,61 +42,13 @@
 
 #include <optional>
 
-namespace vm
-{
+namespace vm {
 class MessagesModel : public ListModel
 {
     Q_OBJECT
 
 public:
-    explicit MessagesModel(QObject *parent);
-    ~MessagesModel() override = default;
-
-    //
-    //  Current chat.
-    //
-    ChatHandler chat() const;
-
-    //
-    //  Change current chat.
-    //
-    void setChat(ChatHandler chat);
-
-    //
-    //  Set messages for the current chat.
-    //
-    void setMessages(ModifiableMessages messages);
-
-    //
-    //  Add message to the current chat if ids match, otherwise - ignore.
-    //
-    void addMessage(ModifiableMessageHandler message);
-
-    //
-    //  Invalidate chat.
-    //
-    void clearChat();
-
-    //
-    // Update message. Returns false if message had the same status.
-    //
-    bool updateMessage(const MessageUpdate &messageUpdate, const bool apply);
-
-    //
-    //  Return message if found, nullptr otherwise.
-    //
-    ModifiableMessageHandler findById(const MessageId &messageId) const;
-
-    Q_INVOKABLE QString lastMessageSenderId() const;
-
-signals:
-    void pictureIconNotFound(const MessageId &messageId) const;
-    void messageAdding();
-
-
-private:
-    enum Roles
-    {
+    enum Roles {
         // Common
         IdRole = Qt::UserRole,
         DayRole,
@@ -130,7 +82,68 @@ private:
         SortRole
     };
 
-    static QVector<int> rolesFromMessageUpdate(const MessageUpdate& messageUpdate);
+    explicit MessagesModel(QObject *parent);
+    ~MessagesModel() override = default;
+
+    //
+    //  Current chat.
+    //
+    ChatHandler chat() const;
+
+    //
+    //  Change current chat.
+    //
+    void setChat(ChatHandler chat);
+
+    //
+    //  Set messages for the current chat.
+    //
+    void setMessages(ModifiableMessages messages);
+
+    //
+    //  Add message to the current chat if ids match, otherwise - ignore.
+    //
+    void addMessage(ModifiableMessageHandler message);
+
+    //
+    // Delete message by row
+    //
+    void deleteMessage(int row);
+
+    //
+    //  Get message by row.
+    //
+    MessageHandler getMessage(int row) const;
+
+    //
+    //  Invalidate chat.
+    //
+    void clearChat();
+
+    //
+    // Update message. Returns false if message had the same status.
+    //
+    bool updateMessage(const MessageUpdate &messageUpdate, const bool apply);
+
+    //
+    //  Accept group invitation.
+    //
+    void acceptGroupInvitation();
+
+    //
+    //  Return message if found, nullptr otherwise.
+    //
+    ModifiableMessageHandler findById(const MessageId &messageId) const;
+
+    Q_INVOKABLE QString lastMessageSenderId() const; // TODO(fpohtmeh): remove
+
+signals:
+    void pictureIconNotFound(const MessageId &messageId) const;
+    void messageAdding(); // TODO(fpohtmeh): remove
+    void groupInvitationReceived(const UserId &ownerId, const QString &ownerUsername, const QString &helloText);
+
+private:
+    static QVector<int> rolesFromMessageUpdate(const MessageUpdate &messageUpdate);
     static QString statusIconPath(MessageHandler message);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -141,10 +154,12 @@ private:
     void invalidateRow(const int row, const QVector<int> &roles = {});
     void invalidateModel(const QModelIndex &index, const QVector<int> &roles);
 
+    const MessageContentGroupInvitation *findIncomingInvitation() const;
+
 private:
     ModifiableMessages m_messages;
     ChatHandler m_currentChat;
 };
-}
+} // namespace vm
 
 #endif // VM_MESSAGESMODEL_H

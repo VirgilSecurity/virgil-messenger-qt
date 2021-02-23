@@ -37,8 +37,7 @@
 
 #include "OperationState.h"
 
-namespace vm
-{
+namespace vm {
 class Messenger;
 class BackupKeyState : public OperationState
 {
@@ -56,6 +55,6 @@ private:
 
     Messenger *m_messenger;
 };
-}
+} // namespace vm
 
 #endif // VM_BACKUPKEYSTATE_H

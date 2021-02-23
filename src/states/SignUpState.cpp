@@ -40,12 +40,16 @@
 using namespace vm;
 
 SignUpState::SignUpState(UsersController *usersController, Validator *validator, QState *parent)
-    : OperationState(parent)
-    , m_usersController(usersController)
-    , m_validator(validator)
+    : OperationState(parent), m_usersController(usersController), m_validator(validator)
 {
     connect(usersController, &UsersController::signedIn, this, &SignUpState::operationFinished);
     connect(usersController, &UsersController::signUpErrorOccured, this, &SignUpState::operationErrorOccurred);
+
+    connect(usersController, &UsersController::databaseErrorOccurred, [this](const auto &errorText) {
+        m_usersController->signOut();
+        emit operationErrorOccurred(errorText);
+    });
+
     connect(this, &SignUpState::signUp, this, &SignUpState::processSignUp);
 }
 

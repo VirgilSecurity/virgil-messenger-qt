@@ -40,8 +40,7 @@
 
 #include <QPointer>
 
-namespace vm
-{
+namespace vm {
 class FileLoader;
 class Messenger;
 
@@ -68,6 +67,6 @@ private:
     QString m_sourcePath;
     const QString m_tempPath;
 };
-}
+} // namespace vm
 
 #endif // VM_ENCRYPTUPLOADFILEOPERATION_H

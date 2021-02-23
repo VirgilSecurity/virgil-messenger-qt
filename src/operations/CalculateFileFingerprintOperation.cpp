@@ -39,17 +39,16 @@
 using namespace vm;
 
 CalculateFileFingerprintOperation::CalculateFileFingerprintOperation(QObject *parent, const QString &sourcePath)
-    : Operation(QLatin1String("CalculateAttachmentFingerprint"), parent)
-    , m_sourcePath(sourcePath)
-{}
+    : Operation(QLatin1String("CalculateAttachmentFingerprint"), parent), m_sourcePath(sourcePath)
+{
+}
 
 void CalculateFileFingerprintOperation::run()
 {
     const auto fingerpint = FileUtils::calculateFingerprint(m_sourcePath);
     if (!fingerpint.isEmpty()) {
         emit fingerprintCalculated(fingerpint);
-    }
-    else {
+    } else {
         emit fingerpintCalculationFailed();
     }
     // NOTE(fpohtmeh): fingerprint is not mandatory so operation is always succesfull

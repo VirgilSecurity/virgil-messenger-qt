@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_MESSAGE_UPDATEABLE_H
 #define VM_MESSAGE_UPDATEABLE_H
 
@@ -43,14 +42,15 @@ namespace vm {
 //
 //  Interface that ensures that derived is able to apply message updates.
 //
-class MessageUpdateable {
+class MessageUpdateable
+{
 public:
     virtual ~MessageUpdateable() noexcept = default;
 
     //
     //  Apply message update. Return true some properties were actually updated.
     //
-    virtual bool applyUpdate(const MessageUpdate& update) = 0;
+    virtual bool applyUpdate(const MessageUpdate &update) = 0;
 };
 } // namespace vm
 

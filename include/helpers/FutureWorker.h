@@ -37,13 +37,11 @@
 
 #include <QFutureWatcher>
 
-namespace vm
-{
+namespace vm {
 
 class FutureWorker
 {
 public:
-
     template<typename FutureType, typename ResultType = decltype(typename FutureType::result())>
     static void run(FutureType future, std::function<void(ResultType)> resultHandler)
     {
@@ -51,23 +49,23 @@ public:
 
         auto futureWatcher = new FutureWatcher();
         QObject::connect(futureWatcher, &FutureWatcher::finished,
-            [futureWatcher, future = std::move(future), resultHandler = std::move(resultHandler)]() {
-                futureWatcher->deleteLater();
-                resultHandler(future.result());
-            });
+                         [futureWatcher, future = std::move(future), resultHandler = std::move(resultHandler)]() {
+                             futureWatcher->deleteLater();
+                             resultHandler(future.result());
+                         });
         futureWatcher->setFuture(future);
     }
 
     template<typename FutureType, typename ResultHandler>
-    static void run(FutureType future, ResultHandler resultHandler) {
+    static void run(FutureType future, ResultHandler resultHandler)
+    {
         using ResultType = decltype(future.result());
 
         std::function<void(ResultType)> f = std::move(resultHandler);
 
         run(std::move(future), std::move(f));
     }
-
 };
-}
+} // namespace vm
 
 #endif // VM_FUTUREWORKER_H

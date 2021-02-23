@@ -42,14 +42,14 @@
 
 using namespace vm;
 
-DownloadFileOperation::DownloadFileOperation(NetworkOperation *parent, FileLoader *fileLoader, const QUrl &url, quint64 bytesTotal, const QString &filePath)
-    : LoadFileOperation(parent, bytesTotal)
-    , m_url(url)
-    , m_fileLoader(fileLoader)
+DownloadFileOperation::DownloadFileOperation(NetworkOperation *parent, FileLoader *fileLoader, const QUrl &url,
+                                             quint64 bytesTotal, const QString &filePath)
+    : LoadFileOperation(parent, bytesTotal), m_url(url), m_fileLoader(fileLoader)
 {
     setName(QLatin1String("DownloadFile"));
     if (bytesTotal <= 0) {
-        qCWarning(lcOperation) << "Download file operation can't determine bytesTotal. Pass correct bytesTotal to constructor";
+        qCWarning(lcOperation)
+                << "Download file operation can't determine bytesTotal. Pass correct bytesTotal to constructor";
     }
     setFilePath(filePath);
     connect(this, &DownloadFileOperation::finished, this, &DownloadFileOperation::onFinished);
@@ -60,7 +60,8 @@ void DownloadFileOperation::run()
     if (!openFileHandle(QFile::WriteOnly)) {
         return;
     }
-    m_fileLoader->startDownload(m_url, fileHandle(), std::bind(&DownloadFileOperation::connectReply, this, std::placeholders::_1));
+    m_fileLoader->startDownload(m_url, fileHandle(),
+                                std::bind(&DownloadFileOperation::connectReply, this, std::placeholders::_1));
 }
 
 void DownloadFileOperation::setUrl(const QUrl &url)

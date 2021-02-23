@@ -37,8 +37,7 @@
 
 #include "ListProxyModel.h"
 
-namespace vm
-{
+namespace vm {
 class ContactsModel;
 
 class ContactsProxyModel : public ListProxyModel
@@ -48,6 +47,6 @@ class ContactsProxyModel : public ListProxyModel
 public:
     explicit ContactsProxyModel(ContactsModel *contactsModel, bool sorted = true);
 };
-}
+} // namespace vm
 
 #endif // VM_CONTACTSPROXYMODEL_H

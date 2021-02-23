@@ -45,17 +45,20 @@
 
 using namespace vm;
 
-UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, const QString &filePath, const CloudFileHandler &parentFolder)
+UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, const QString &filePath,
+                                                   const CloudFileHandler &parentFolder)
     : UploadFileOperation(parent, parent->fileLoader(), QString()) // filePath will be known after encryption
-    , m_parent(parent)
-    , m_parentFolder(parentFolder)
-    , m_requestId(0)
-    , m_sourceFilePath(filePath)
+      ,
+      m_parent(parent),
+      m_parentFolder(parentFolder),
+      m_requestId(0),
+      m_sourceFilePath(filePath)
 {
     setName(QLatin1String("UploadCloudFile"));
 
     connect(m_parent->cloudFileSystem(), &CloudFileSystem::fileCreated, this, &UploadCloudFileOperation::onFileCreated);
-    connect(m_parent->cloudFileSystem(), &CloudFileSystem::createFileErrorOccurred, this, &UploadCloudFileOperation::onCreateCloudFileErrorOccurred);
+    connect(m_parent->cloudFileSystem(), &CloudFileSystem::createFileErrorOccurred, this,
+            &UploadCloudFileOperation::onCreateCloudFileErrorOccurred);
     connect(this, &UploadFileOperation::progressChanged, this, &UploadCloudFileOperation::onProgressChanged);
     connect(this, &UploadFileOperation::uploaded, this, &UploadCloudFileOperation::onUploaded);
     connect(this, &UploadFileOperation::failed, this, &UploadCloudFileOperation::sendFailedTransferUpdate);
@@ -64,11 +67,7 @@ UploadCloudFileOperation::UploadCloudFileOperation(CloudFileOperation *parent, c
 
 void UploadCloudFileOperation::run()
 {
-    // Local file check
-    const auto fileName = FileUtils::fileName(m_sourceFilePath);
-    const auto localPath = QDir(m_parentFolder->localPath()).filePath(fileName);
-    if (FileUtils::fileExists(localPath)) {
-        qCDebug(lcOperation) << "File name is not unique:" << localPath;
+    if (localFileExists()) {
         failAndNotify(tr("File name is not unique"));
         return;
     }
@@ -90,7 +89,9 @@ void UploadCloudFileOperation::cleanup()
     FileUtils::removeFile(filePath()); // remove encrypted file
 }
 
-void UploadCloudFileOperation::onFileCreated(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &cloudFile, const QString &encryptedFilePath, const QUrl &putUrl)
+void UploadCloudFileOperation::onFileCreated(const CloudFileRequestId requestId,
+                                             const ModifiableCloudFileHandler &cloudFile,
+                                             const QString &encryptedFilePath, const QUrl &putUrl)
 {
     if (m_requestId != requestId) {
         return;
@@ -107,7 +108,8 @@ void UploadCloudFileOperation::onFileCreated(const CloudFileRequestId requestId,
     startUploadToSlot(putUrl, putUrl); // NOTE(fpohtmeh): We don't know get url at this moment, using of putUrl is fine
 }
 
-void UploadCloudFileOperation::onCreateCloudFileErrorOccurred(const CloudFileRequestId requestId, const QString &errorText)
+void UploadCloudFileOperation::onCreateCloudFileErrorOccurred(const CloudFileRequestId requestId,
+                                                              const QString &errorText)
 {
     if (m_requestId == requestId) {
         failAndNotify(errorText);
@@ -122,18 +124,11 @@ void UploadCloudFileOperation::onProgressChanged(const quint64 bytesLoaded, cons
 
 void UploadCloudFileOperation::onUploaded()
 {
-    if (!FileUtils::forceCreateDir(m_parentFolder->localPath())) {
+    if (!createLocalDir()) {
         failAndNotify(tr("Failed to create directory"));
         return;
     }
-
-    // Copy file to cloud downloads dir
-    const auto cloudFileLocalPath = QDir(m_parentFolder->localPath()).filePath(m_file->name());
-    if (!QFile::copy(m_sourceFilePath, cloudFileLocalPath)) {
-        qCWarning(lcOperation) << "Failed to copy file from" << m_sourceFilePath << "to" << cloudFileLocalPath;
-    }
-    m_file->setLocalPath(cloudFileLocalPath);
-    m_file->setFingerprint(FileUtils::calculateFingerprint(cloudFileLocalPath));
+    createLocalFile();
 
     // Send updates
     CreateCloudFilesUpdate update;
@@ -162,4 +157,32 @@ void UploadCloudFileOperation::transferUpdate(const TransferCloudFileUpdate::Sta
         update.bytesLoaded = bytesLoaded;
         m_parent->cloudFilesUpdate(update);
     }
+}
+
+bool UploadCloudFileOperation::localFileExists() const
+{
+    const auto fileName = FileUtils::fileName(m_sourceFilePath);
+    const auto localPath = QDir(m_parentFolder->localPath()).filePath(fileName);
+    if (FileUtils::fileExists(localPath)) {
+        qCDebug(lcOperation) << "File name is not unique:" << localPath;
+        return true;
+    }
+    return false;
+}
+
+bool UploadCloudFileOperation::createLocalDir()
+{
+    return FileUtils::forceCreateDir(m_parentFolder->localPath());
+}
+
+void UploadCloudFileOperation::createLocalFile()
+{
+    // Copy file to cloud downloads dir
+    const auto cloudFileLocalPath = QDir(m_parentFolder->localPath()).filePath(m_file->name());
+    if (!QFile::copy(m_sourceFilePath, cloudFileLocalPath)) {
+        qCWarning(lcOperation) << "Failed to copy file from" << m_sourceFilePath << "to" << cloudFileLocalPath;
+    }
+    // Update file "local" properties
+    m_file->setLocalPath(cloudFileLocalPath);
+    m_file->setFingerprint(FileUtils::calculateFingerprint(cloudFileLocalPath));
 }

@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.15
 import "../components"
 import "../theme"
 
-FlowListView {
+FlowView {
     id: flowListView
     clip: true
     model: selectedModel.proxy
@@ -13,6 +13,8 @@ FlowListView {
     readonly property var selectedModel: models.discoveredContacts.selectedContacts
     readonly property var editedModel: models.discoveredContacts
     readonly property real recommendedHeight: d.recommendedHeight
+
+    signal contactSelected(string contactUsername)
 
     QtObject {
         id: d
@@ -41,7 +43,7 @@ FlowListView {
             Item {
                 height: d.flowItemHeight
                 width: height
-                visible: isSelected
+                visible: model.isSelected
 
                 Repeater {
                     model: 2
@@ -58,23 +60,23 @@ FlowListView {
 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: editedModel.toggleById(model.contactId)
+                    onClicked: flowListView.contactSelected(model.username)
                 }
             }
 
             // avatar
             Avatar {
-                nickname: model.name
+                nickname: model.displayName
                 avatarUrl: model.avatarUrl
                 diameter: d.flowItemHeight
-                visible: !isSelected
+                visible: !model.isSelected
             }
 
             // contact name
             Text {
                 color: Theme.primaryTextColor
                 font.pointSize: UiHelper.fixFontSz(15)
-                text: model.name
+                text: model.displayName
                 anchors.verticalCenter: parent.verticalCenter
             }
         }

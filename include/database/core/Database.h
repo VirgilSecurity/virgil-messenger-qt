@@ -44,11 +44,9 @@
 #include <QSqlQuery>
 #include <QLoggingCategory>
 
-
 Q_DECLARE_LOGGING_CATEGORY(lcDatabase);
 
-namespace vm
-{
+namespace vm {
 class Database : public QObject
 {
     Q_OBJECT
@@ -96,6 +94,6 @@ private:
     QSqlDatabase m_qtDatabase;
     Tables m_tables;
 };
-}
+} // namespace vm
 
 #endif // VM_DATABASE_H

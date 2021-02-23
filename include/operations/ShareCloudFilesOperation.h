@@ -39,8 +39,7 @@
 #include "Contact.h"
 #include "Operation.h"
 
-namespace vm
-{
+namespace vm {
 class CloudFileOperation;
 
 class ShareCloudFilesOperation : public Operation
@@ -56,6 +55,6 @@ private:
     const CloudFiles m_files;
     const Contacts m_contacts;
 };
-}
+} // namespace vm
 
 #endif // VM_SHARED_CLOUD_FILES_OPERATION_H
