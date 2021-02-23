@@ -41,8 +41,7 @@
 
 #include <QFileInfo>
 
-namespace vm
-{
+namespace vm {
 class MessageOperation;
 
 class DecryptFileOperation : public Operation
@@ -50,8 +49,9 @@ class DecryptFileOperation : public Operation
     Q_OBJECT
 
 public:
-    explicit DecryptFileOperation(QObject *parent, Messenger *messenger, const QString &sourcePath, const QString &destPath,
-                                  const QByteArray& decryptionKey, const QByteArray& signature, const UserId &senderId);
+    explicit DecryptFileOperation(QObject *parent, Messenger *messenger, const QString &sourcePath,
+                                  const QString &destPath, const QByteArray &decryptionKey, const QByteArray &signature,
+                                  const UserId &senderId);
 
     void run() override;
 
@@ -66,6 +66,6 @@ private:
     const QByteArray m_signature;
     const UserId m_senderId;
 };
-}
+} // namespace vm
 
 #endif // VM_DECRYPTFILEOPERATION_H

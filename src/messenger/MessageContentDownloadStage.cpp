@@ -32,59 +32,51 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "MessageContentDownloadStage.h"
-
 
 using namespace vm;
 
-
-MessageContentDownloadStage vm::MessageContentDownloadStageFromString(const QString& stageString) {
+MessageContentDownloadStage vm::MessageContentDownloadStageFromString(const QString &stageString)
+{
     if (stageString == QLatin1String("initial")) {
         return MessageContentDownloadStage::Initial;
-    }
-    else if (stageString == QLatin1String("preloading")) {
+    } else if (stageString == QLatin1String("preloading")) {
         return MessageContentDownloadStage::Preloading;
-    }
-    else if (stageString == QLatin1String("preloaded")) {
+    } else if (stageString == QLatin1String("preloaded")) {
         return MessageContentDownloadStage::Preloaded;
-    }
-    else if (stageString == QLatin1String("downloading")) {
+    } else if (stageString == QLatin1String("downloading")) {
         return MessageContentDownloadStage::Downloading;
-    }
-    else if (stageString == QLatin1String("downloaded")) {
+    } else if (stageString == QLatin1String("downloaded")) {
         return MessageContentDownloadStage::Downloaded;
-    }
-    else if (stageString == QLatin1String("decrypted")) {
+    } else if (stageString == QLatin1String("decrypted")) {
         return MessageContentDownloadStage::Decrypted;
-    }
-    else {
+    } else {
         throw std::logic_error("Invalid MessageContentDownloadStage string");
     }
 }
 
-
-QString vm::MessageContentDownloadStageToString(MessageContentDownloadStage stage) {
+QString vm::MessageContentDownloadStageToString(MessageContentDownloadStage stage)
+{
     switch (stage) {
-        case MessageContentDownloadStage::Initial:
-            return QLatin1String("initial");
+    case MessageContentDownloadStage::Initial:
+        return QLatin1String("initial");
 
-        case MessageContentDownloadStage::Preloading:
-            return QLatin1String("preloading");
+    case MessageContentDownloadStage::Preloading:
+        return QLatin1String("preloading");
 
-        case MessageContentDownloadStage::Preloaded:
-            return QLatin1String("preloaded");
+    case MessageContentDownloadStage::Preloaded:
+        return QLatin1String("preloaded");
 
-        case MessageContentDownloadStage::Downloading:
-            return QLatin1String("downloading");
+    case MessageContentDownloadStage::Downloading:
+        return QLatin1String("downloading");
 
-        case MessageContentDownloadStage::Downloaded:
-            return QLatin1String("downloaded");
+    case MessageContentDownloadStage::Downloaded:
+        return QLatin1String("downloaded");
 
-        case MessageContentDownloadStage::Decrypted:
-            return QLatin1String("decrypted");
+    case MessageContentDownloadStage::Decrypted:
+        return QLatin1String("decrypted");
 
-        default:
-            throw std::logic_error("Invalid MessageContentDownloadStage");
+    default:
+        throw std::logic_error("Invalid MessageContentDownloadStage");
     }
 }

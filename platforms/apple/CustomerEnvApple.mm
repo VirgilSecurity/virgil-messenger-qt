@@ -43,21 +43,25 @@
 using namespace vm;
 using Self = vm::CustomerEnv;
 
-static NSString * getEnvSuffix() {
-    #if VS_MSGR_ENV_DEV
-        return @".dev";
-    #elif VS_MSGR_ENV_STG
-        return @".stg";
-    #else
-        return @"";
-    #endif
+static NSString* getEnvSuffix()
+{
+#if VS_MSGR_ENV_DEV
+    return @".dev";
+#elif VS_MSGR_ENV_STG
+    return @".stg";
+#else
+    return @"";
+#endif
 }
 
-QDir Self::appDataLocation() {
+QDir Self::appDataLocation()
+{
 
-    NSString *appGroup = [NSString stringWithFormat:@"%@%@", Customer::kSecurityApplicationGroupIdentifier.toNSString(), getEnvSuffix()];
+    NSString* appGroup =
+        [NSString stringWithFormat:@"%@%@", Customer::kSecurityApplicationGroupIdentifier.toNSString(), getEnvSuffix()];
 
-    NSURL* appDataLocationNative= [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier: appGroup];
+    NSURL* appDataLocationNative =
+        [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:appGroup];
 
     QUrl appDataLocation = QUrl::fromNSURL(appDataLocationNative);
 

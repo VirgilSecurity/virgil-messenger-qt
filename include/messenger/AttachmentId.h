@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_ATTACHMENT_ID_H
 #define VM_ATTACHMENT_ID_H
 
@@ -43,7 +42,8 @@ namespace vm {
 //
 //  This class just wraps QString but is used for a strong type checking.
 //
-class AttachmentId {
+class AttachmentId
+{
 public:
     explicit AttachmentId(QString attachmentId = {});
 
@@ -56,11 +56,12 @@ public:
 private:
     QString m_attachmentId;
 };
-} // namespace vm
 
-bool operator<(const vm::AttachmentId& lhs, const vm::AttachmentId& rhs);
-bool operator>(const vm::AttachmentId& lhs, const vm::AttachmentId& rhs);
-bool operator==(const vm::AttachmentId& lhs, const vm::AttachmentId& rhs);
-bool operator!=(const vm::AttachmentId& lhs, const vm::AttachmentId& rhs);
+bool operator<(const AttachmentId &lhs, const AttachmentId &rhs);
+bool operator>(const AttachmentId &lhs, const AttachmentId &rhs);
+bool operator==(const AttachmentId &lhs, const AttachmentId &rhs);
+bool operator!=(const AttachmentId &lhs, const AttachmentId &rhs);
+
+} // namespace vm
 
 #endif // VM_ATTACHMENT_ID_H

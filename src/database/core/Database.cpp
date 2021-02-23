@@ -37,17 +37,12 @@
 #include <QSqlError>
 #include <QLoggingCategory>
 
-
 using namespace vm;
 using Self = Database;
 
-
 Q_LOGGING_CATEGORY(lcDatabase, "db")
 
-
-Self::Database(const Version &latestVersion, QObject *parent)
-    : QObject(parent)
-    , m_latestVersion(latestVersion)
+Self::Database(const Version &latestVersion, QObject *parent) : QObject(parent), m_latestVersion(latestVersion)
 {
     qCDebug(lcDatabase) << "Database latest version:" << latestVersion;
 }

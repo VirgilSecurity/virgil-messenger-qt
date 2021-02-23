@@ -40,7 +40,8 @@
 
 namespace vm {
 
-class CustomerEnv {
+class CustomerEnv
+{
 public:
     static QString messengerServiceUrl();
     static QString xmppServiceUrl();
@@ -51,7 +52,6 @@ public:
     static QDir appDataLocation();
 };
 
-} // vm
+} // namespace vm
 
 #endif // VM_CUSTOMER_ENV_H
-

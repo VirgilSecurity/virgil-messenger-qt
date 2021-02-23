@@ -44,9 +44,7 @@
 
 using namespace vm;
 
-CloudFilesModel::CloudFilesModel(const Settings *settings, QObject *parent)
-    : ListModel(parent)
-    , m_settings(settings)
+CloudFilesModel::CloudFilesModel(const Settings *settings, QObject *parent) : ListModel(parent), m_settings(settings)
 {
     qRegisterMetaType<CloudFilesModel *>("CloudFilesModel*");
 
@@ -64,8 +62,7 @@ void CloudFilesModel::setEnabled(bool enabled)
 {
     if (enabled) {
         m_updateTimer.start(m_settings->nowInterval());
-    }
-    else {
+    } else {
         m_updateTimer.stop();
     }
 }
@@ -98,8 +95,7 @@ void CloudFilesModel::updateCloudFiles(const CloudFilesUpdate &update)
         m_files = upd->files;
         endResetModel();
         updateDescription();
-    }
-    else if (auto upd = std::get_if<CloudListCloudFolderUpdate>(&update)) {
+    } else if (auto upd = std::get_if<CloudListCloudFolderUpdate>(&update)) {
         for (auto &file : upd->deleted) {
             removeFile(file);
         }
@@ -110,26 +106,21 @@ void CloudFilesModel::updateCloudFiles(const CloudFilesUpdate &update)
             addFile(file);
         }
         updateDescription();
-    }
-    else if (auto upd = std::get_if<CreateCloudFilesUpdate>(&update)) {
+    } else if (auto upd = std::get_if<CreateCloudFilesUpdate>(&update)) {
         for (auto &file : upd->files) {
             addFile(file);
         }
         updateDescription();
-    }
-    else if (auto upd = std::get_if<DownloadCloudFileUpdate>(&update)) {
+    } else if (auto upd = std::get_if<DownloadCloudFileUpdate>(&update)) {
         updateDownloadedFile(*upd);
-    }
-    else if (auto upd = std::get_if<DeleteCloudFilesUpdate>(&update)) {
+    } else if (auto upd = std::get_if<DeleteCloudFilesUpdate>(&update)) {
         for (auto &file : upd->files) {
             removeFile(file);
         }
         updateDescription();
-    }
-    else if (auto upd = std::get_if<TransferCloudFileUpdate>(&update)) {
+    } else if (auto upd = std::get_if<TransferCloudFileUpdate>(&update)) {
         return;
-    }
-    else {
+    } else {
         throw std::logic_error("Invalid CloudFilesUpdate in CloudFilesModel::updateCloudFiles");
     }
 }
@@ -166,12 +157,11 @@ QVariant CloudFilesModel::data(const QModelIndex &index, int role) const
 
 QHash<int, QByteArray> CloudFilesModel::roleNames() const
 {
-    return unitedRoleNames(ListModel::roleNames(), {
-        { FilenameRole, "fileName" },
-        { IsFolderRole, "isFolder" },
-        { DisplayDateTimeRole, "displayDateTime" },
-        { DisplayFileSizeRole, "displayFileSize" }
-    });
+    return unitedRoleNames(ListModel::roleNames(),
+                           { { FilenameRole, "fileName" },
+                             { IsFolderRole, "isFolder" },
+                             { DisplayDateTimeRole, "displayDateTime" },
+                             { DisplayFileSizeRole, "displayFileSize" } });
 }
 
 QVector<int> CloudFilesModel::rolesFromUpdateSource(const CloudFileUpdateSource source, const bool isFolder)
@@ -224,9 +214,8 @@ void CloudFilesModel::updateDownloadedFile(const DownloadCloudFileUpdate &update
 
 QModelIndex CloudFilesModel::findById(const CloudFileId &cloudFileId) const
 {
-    const auto it = std::find_if(std::begin(m_files), std::end(m_files), [&cloudFileId](auto cloudFile) {
-        return cloudFile->id() == cloudFileId;
-    });
+    const auto it = std::find_if(std::begin(m_files), std::end(m_files),
+                                 [&cloudFileId](auto cloudFile) { return cloudFile->id() == cloudFileId; });
 
     if (it != std::end(m_files)) {
         return index(std::distance(std::begin(m_files), it));
@@ -251,8 +240,7 @@ void CloudFilesModel::updateDescription()
         for (auto &file : selectedFiles()) {
             file->isFolder() ? ++foldersCount : ++filesCount;
         }
-    }
-    else {
+    } else {
         for (auto &file : m_files) {
             file->isFolder() ? ++foldersCount : ++filesCount;
         }

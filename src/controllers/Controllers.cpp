@@ -47,17 +47,18 @@
 
 using namespace vm;
 
-Controllers::Controllers(Messenger *messenger, Settings *settings,
-                         Models *models, UserDatabase *userDatabase, QObject *parent)
-    : QObject(parent)
-    , m_attachments(new AttachmentsController(settings, models, this))
-    , m_users(new UsersController(messenger, models, userDatabase, this))
-    , m_chats(new ChatsController(messenger, models, userDatabase, this))
-    , m_messages(new MessagesController(messenger, settings, models, userDatabase, this))
-    , m_cloudFiles(new CloudFilesController(settings, models, userDatabase, messenger->cloudFileSystem(), this))
+Controllers::Controllers(Messenger *messenger, Settings *settings, Models *models, UserDatabase *userDatabase,
+                         QObject *parent)
+    : QObject(parent),
+      m_attachments(new AttachmentsController(settings, models, this)),
+      m_users(new UsersController(messenger, models, userDatabase, this)),
+      m_chats(new ChatsController(messenger, models, userDatabase, this)),
+      m_messages(new MessagesController(messenger, settings, models, userDatabase, this)),
+      m_cloudFiles(new CloudFilesController(settings, models, userDatabase, messenger->cloudFileSystem(), this))
 {
     connect(m_attachments, &AttachmentsController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_messages, &MessagesController::notificationCreated, this, &Controllers::notificationCreated);
+    connect(m_chats, &ChatsController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_cloudFiles, &CloudFilesController::notificationCreated, this, &Controllers::notificationCreated);
 
     //

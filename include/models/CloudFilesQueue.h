@@ -46,8 +46,7 @@
 
 Q_DECLARE_LOGGING_CATEGORY(lcCloudFilesQueue);
 
-namespace vm
-{
+namespace vm {
 class Messenger;
 class UserDatabase;
 
@@ -81,7 +80,8 @@ private:
     void onPushListFolder(const CloudFileHandler &parentFolder);
     void onPushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
     void onPushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
-    void onPushDownloadFile(const CloudFileHandler &file, const CloudFileHandler &parentFolder, const PostFunction &func);
+    void onPushDownloadFile(const CloudFileHandler &file, const CloudFileHandler &parentFolder,
+                            const PostFunction &func);
     void onPushDeleteFiles(const CloudFiles &files);
     void onUpdateCloudFiles(const CloudFilesUpdate &update);
 
@@ -90,6 +90,6 @@ private:
     QPointer<CloudFolderUpdateWatcher> m_watcher;
     std::vector<CloudFilesQueueListenerPtr> m_cloudFileListeners;
 };
-}
+} // namespace vm
 
 #endif // VS_CLOUDFILESQUEUE_H

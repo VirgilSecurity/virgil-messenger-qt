@@ -32,23 +32,20 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "MessageContentFile.h"
 
-
 #include "FileUtils.h"
-
 
 using namespace vm;
 using Self = MessageContentFile;
 
-
-bool Self::applyUpdate(const MessageUpdate& update) {
+bool Self::applyUpdate(const MessageUpdate &update)
+{
     return MessageContentAttachment::applyUpdate(update);
 }
 
-
-std::optional<MessageContentFile> Self::createFromLocalFile(const QUrl& localUrl, QString &errorString) {
+std::optional<MessageContentFile> Self::createFromLocalFile(const QUrl &localUrl, QString &errorString)
+{
     MessageContentFile file;
     if (!file.readLocalFile(localUrl, errorString)) {
         return std::nullopt;

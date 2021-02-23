@@ -39,14 +39,14 @@
 
 class Settings;
 
-namespace vm
-{
+namespace vm {
 class ConvertToPngOperation : public Operation
 {
     Q_OBJECT
 
 public:
-    ConvertToPngOperation(const Settings *settings, const QString &sourcePath, const QString &destFileName, QObject *parent);
+    ConvertToPngOperation(const Settings *settings, const QString &sourcePath, const QString &destFileName,
+                          QObject *parent);
 
 signals:
     void imageRead(const QImage &image);
@@ -60,6 +60,6 @@ private:
     const QString m_sourcePath;
     const QString m_destFileName;
 };
-}
+} // namespace vm
 
 #endif // VM_CONVERTTOPNGOPERATION_H

@@ -32,35 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "ChatType.h"
-
 
 using namespace vm;
 
-
-ChatType vm::ChatTypeFromString(const QString& typeString) {
+ChatType vm::ChatTypeFromString(const QString &typeString)
+{
     if (typeString == QLatin1String("personal")) {
         return ChatType::Personal;
-    }
-    else if (typeString == QLatin1String("group")) {
+    } else if (typeString == QLatin1String("group")) {
         return ChatType::Group;
-    }
-    else {
+    } else {
         throw std::logic_error("Invalid ChatType string");
     }
 }
 
-
-QString vm::ChatTypeToString(ChatType type) {
+QString vm::ChatTypeToString(ChatType type)
+{
     switch (type) {
-        case ChatType::Personal:
-            return QLatin1String("personal");
+    case ChatType::Personal:
+        return QLatin1String("personal");
 
-        case ChatType::Group:
-            return QLatin1String("group");
+    case ChatType::Group:
+        return QLatin1String("group");
 
-        default:
-            throw std::logic_error("Invalid ChatType");
+    default:
+        throw std::logic_error("Invalid ChatType");
     }
 }

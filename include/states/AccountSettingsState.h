@@ -37,8 +37,7 @@
 
 #include <QState>
 
-namespace vm
-{
+namespace vm {
 class AccountSettingsState : public QState
 {
     Q_OBJECT
@@ -50,6 +49,6 @@ signals:
     void editProfile();
     void requestBackupKey(const QString &username);
 };
-}
+} // namespace vm
 
 #endif // VM_ACCOUNTSETTINGSSTATE_H

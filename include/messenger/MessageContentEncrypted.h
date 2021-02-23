@@ -32,8 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
-
 #ifndef VM_MESSAGE_CONTENT_ENCRYPTED_H
 #define VM_MESSAGE_CONTENT_ENCRYPTED_H
 
@@ -44,7 +42,8 @@ namespace vm {
 //
 //  Class with an encrypted message content.
 //
-class MessageContentEncrypted  {
+class MessageContentEncrypted
+{
 
 public:
     explicit MessageContentEncrypted(QByteArray ciphertext);
@@ -53,7 +52,6 @@ public:
 
 private:
     QByteArray m_ciphertext;
-
 };
 } // namespace vm
 

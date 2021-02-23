@@ -38,8 +38,7 @@
 #include "NetworkOperation.h"
 #include "Message.h"
 
-namespace vm
-{
+namespace vm {
 class MessageOperationFactory;
 
 class MessageOperation : public NetworkOperation
@@ -62,6 +61,6 @@ private:
     MessageOperationFactory *m_factory;
     ModifiableMessageHandler m_message;
 };
-}
+} // namespace vm
 
 #endif // VS_MESSAGEOPERATION_H

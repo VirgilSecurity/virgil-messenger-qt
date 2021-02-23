@@ -39,8 +39,7 @@
 using namespace vm;
 
 AccountSelectionModel::AccountSelectionModel(Settings *settings, QObject *parent)
-    : ListModel(parent)
-    , m_settings(settings)
+    : ListModel(parent), m_settings(settings)
 {
     qRegisterMetaType<AccountSelectionModel *>("AccountSelectionModel*");
 

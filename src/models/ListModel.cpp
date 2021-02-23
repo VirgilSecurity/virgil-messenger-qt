@@ -40,11 +40,15 @@
 using namespace vm;
 
 ListModel::ListModel(QObject *parent, bool createProxy)
-    : QAbstractListModel(parent)
-    , m_proxy(createProxy ? new ListProxyModel(this) : nullptr)
-    , m_selection(new ListSelectionModel(this))
+    : QAbstractListModel(parent),
+      m_proxy(createProxy ? new ListProxyModel(this) : nullptr),
+      m_selection(new ListSelectionModel(this))
 {
     connect(m_selection, &ListSelectionModel::changed, this, &ListModel::onSelectionChanged);
+
+    connect(this, &QAbstractListModel::rowsInserted, this, &ListModel::onRowCountChanged);
+    connect(this, &QAbstractListModel::rowsRemoved, this, &ListModel::onRowCountChanged);
+    connect(this, &QAbstractListModel::modelReset, this, &ListModel::onRowCountChanged);
 }
 
 QString ListModel::filter() const
@@ -82,9 +86,7 @@ QVariant ListModel::data(const QModelIndex &index, int role) const
 
 QHash<int, QByteArray> ListModel::roleNames() const
 {
-    return {
-        { IsSelectedRole, "isSelected" }
-    };
+    return { { IsSelectedRole, "isSelected" } };
 }
 
 ListModel::RoleNames ListModel::unitedRoleNames(const ListModel::RoleNames &a, const ListModel::RoleNames &b)
@@ -126,5 +128,13 @@ void ListModel::onSelectionChanged(const QList<QModelIndex> &indices)
 {
     for (auto &i : indices) {
         emit dataChanged(i, i, { IsSelectedRole });
+    }
+}
+
+void ListModel::onRowCountChanged()
+{
+    if (m_count != rowCount()) {
+        m_count = rowCount();
+        emit countChanged(m_count);
     }
 }

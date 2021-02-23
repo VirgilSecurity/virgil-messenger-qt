@@ -37,11 +37,11 @@
 
 #include "ListModel.h"
 #include "Chat.h"
+#include "GroupUpdate.h"
 
 #include <optional>
 
-namespace vm
-{
+namespace vm {
 class ChatsModel : public ListModel
 {
     Q_OBJECT
@@ -54,20 +54,25 @@ public:
     void clearChats();
 
     void addChat(ModifiableChatHandler chat);
+    void deleteChat(const ChatId &chatId);
     ChatHandler findChat(const ChatId &chatId) const;
     ModifiableChatHandler findChat(const ChatId &chatId);
 
     void resetUnreadCount(const ChatId &chatId);
     void updateLastMessage(const MessageHandler &message, qsizetype unreadMessageCount);
+    void resetLastMessage(const ChatId &chatId);
 
+    //
+    // Update group chat UI.
+    //
+    void updateGroup(const GroupUpdate &groupUpdate);
 
 signals:
     void chatAdded(const ChatHandler &chat);
     void chatUpdated(const ChatHandler &chat);
 
 private:
-    enum Roles
-    {
+    enum Roles {
         IdRole = Qt::UserRole,
         ContactIdRole,
         LastEventTimeRole,

@@ -32,19 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "MessageContentEncrypted.h"
-
 
 using namespace vm;
 using Self = MessageContentEncrypted;
 
+Self::MessageContentEncrypted(QByteArray ciphertext) : m_ciphertext(ciphertext) { }
 
-Self::MessageContentEncrypted(QByteArray ciphertext) : m_ciphertext(ciphertext) {
-
-}
-
-
-QByteArray Self::ciphertext() const {
-	return m_ciphertext;
+QByteArray Self::ciphertext() const
+{
+    return m_ciphertext;
 }

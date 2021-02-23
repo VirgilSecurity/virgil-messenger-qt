@@ -6,19 +6,16 @@ SelectContactsPage {
     id: selectContactsPage
     appState: app.stateManager.newGroupChatState
 
-    header: NewGroupChatHeader {
-        id: newGroupChatHeader
+    header: PageHeader {
         title: qsTr("Add members")
-        description: selectedContacts.count > 0 ? qsTr("%1 selected".arg(selectedContacts.count)) : ''
-        rightButtonEnabled: selectedContacts.count > 0
-    }
+        description: selectedContacts.count ? qsTr("%1 selected".arg(selectedContacts.count)) : ""
+        titleHorizontalAlignment: Qt.AlignHCenter
 
-    onActionButtonClicked: appState.requestChatName()
-
-    Connections {
-        target: newGroupChatHeader
-        function onActionButtonClicked() {
-            appState.requestChatName()
+        rightControl: ImageButton {
+            id: rightButton
+            image: "Send"
+            visible: selectedContacts.count
+            onClicked: appState.requestChatName()
         }
     }
 }

@@ -35,22 +35,15 @@
 #include "CloudFileId.h"
 
 using namespace vm;
+using Self = CloudFileId;
 
-CloudFileId::CloudFileId()
-{
-}
+Self::CloudFileId() { }
 
-CloudFileId::CloudFileId(CloudFsFileId coreId)
-    : m_coreId(coreId)
-{
-}
+Self::CloudFileId(CloudFsFileId coreId) : m_coreId(std::move(coreId)) { }
 
-CloudFileId::CloudFileId(CloudFsFolderId coreId)
-    : m_coreId(coreId)
-{
-}
+Self::CloudFileId(CloudFsFolderId coreId) : m_coreId(std::move(coreId)) { }
 
-CloudFsFileId CloudFileId::coreFileId() const
+CloudFsFileId Self::coreFileId() const
 {
     if (auto id = std::get_if<CloudFsFileId>(&m_coreId)) {
         return *id;
@@ -58,7 +51,7 @@ CloudFsFileId CloudFileId::coreFileId() const
     return CloudFsFileId();
 }
 
-CloudFsFolderId CloudFileId::coreFolderId() const
+CloudFsFolderId Self::coreFolderId() const
 {
     if (auto id = std::get_if<CloudFsFolderId>(&m_coreId)) {
         return *id;
@@ -66,13 +59,13 @@ CloudFsFolderId CloudFileId::coreFolderId() const
     return CloudFsFolderId();
 }
 
-CloudFileId CloudFileId::root()
+CloudFileId Self::root()
 {
     static CloudFileId id(CloudFsFolderId::root());
     return id;
 }
 
-CloudFileId::operator QString() const
+Self::operator QString() const
 {
     if (auto id = std::get_if<CloudFsFileId>(&m_coreId)) {
         return QString(*id);
@@ -83,22 +76,22 @@ CloudFileId::operator QString() const
     return QLatin1String("");
 }
 
-bool operator<(const CloudFileId &lhs, const CloudFileId &rhs)
+bool vm::operator<(const CloudFileId &lhs, const CloudFileId &rhs)
 {
     return QString(lhs) < QString(rhs);
 }
 
-bool operator>(const CloudFileId &lhs, const CloudFileId &rhs)
+bool vm::operator>(const CloudFileId &lhs, const CloudFileId &rhs)
 {
     return QString(lhs) > QString(rhs);
 }
 
-bool operator==(const CloudFileId &lhs, const CloudFileId &rhs)
+bool vm::operator==(const CloudFileId &lhs, const CloudFileId &rhs)
 {
     return QString(lhs) == QString(rhs);
 }
 
-bool operator!=(const CloudFileId &lhs, const CloudFileId &rhs)
+bool vm::operator!=(const CloudFileId &lhs, const CloudFileId &rhs)
 {
     return QString(lhs) != QString(rhs);
 }

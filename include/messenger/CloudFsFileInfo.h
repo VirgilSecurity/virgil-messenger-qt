@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_CLOUD_FS_FILE_INFO_H
 #define VM_CLOUD_FS_FILE_INFO_H
 
@@ -46,7 +45,8 @@ namespace vm {
 //
 //  Handles meta information about a file stored within the CLoud FS.
 //
-struct CloudFsFileInfo {
+struct CloudFsFileInfo
+{
     CloudFsFileId id;
     QString name;
     QString type;

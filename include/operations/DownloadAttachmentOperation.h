@@ -40,8 +40,7 @@
 
 class Settings;
 
-namespace vm
-{
+namespace vm {
 class DownloadAttachmentOperation : public LoadAttachmentOperation
 {
     Q_OBJECT
@@ -49,11 +48,7 @@ class DownloadAttachmentOperation : public LoadAttachmentOperation
 public:
     struct Parameter
     {
-        enum class Type
-        {
-            Preload,
-            Download
-        };
+        enum class Type { Preload, Download };
 
         Type type = Type::Preload;
         QString filePath = QString(); // for download
@@ -73,6 +68,6 @@ private:
     const Settings *m_settings;
     Parameter m_parameter;
 };
-}
+} // namespace vm
 
 #endif // VM_DOWNLOADATTACHMENTOPERATION_H

@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_CHAT_ID_H
 #define VM_CHAT_ID_H
 
@@ -42,7 +41,8 @@ namespace vm {
 //
 //  This class just wraps QString but is used for a strong type checking.
 //
-class ChatId {
+class ChatId
+{
 public:
     explicit ChatId(QString chatId = {});
 
@@ -53,11 +53,12 @@ public:
 private:
     QString m_chatId;
 };
-} // namespace vm
 
-bool operator<(const vm::ChatId& lhs, const vm::ChatId& rhs);
-bool operator>(const vm::ChatId& lhs, const vm::ChatId& rhs);
-bool operator==(const vm::ChatId& lhs, const vm::ChatId& rhs);
-bool operator!=(const vm::ChatId& lhs, const vm::ChatId& rhs);
+bool operator<(const ChatId &lhs, const ChatId &rhs);
+bool operator>(const ChatId &lhs, const ChatId &rhs);
+bool operator==(const ChatId &lhs, const ChatId &rhs);
+bool operator!=(const ChatId &lhs, const ChatId &rhs);
+
+} // namespace vm
 
 #endif // VM_CHAT_ID_H

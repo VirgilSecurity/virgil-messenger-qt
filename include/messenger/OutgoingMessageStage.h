@@ -32,16 +32,12 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_OUTGOING_MESSAGE_STAGE_H
 #define VM_OUTGOING_MESSAGE_STAGE_H
 
-
 #include "MessageStatus.h"
 
-
 #include <QString>
-
 
 namespace vm {
 //
@@ -59,7 +55,7 @@ enum class OutgoingMessageStage {
 //  Return outgoing stage from a given string.
 //  Throws if correspond stage is not found.
 //
-OutgoingMessageStage OutgoingMessageStageFromString(const QString& stageString);
+OutgoingMessageStage OutgoingMessageStageFromString(const QString &stageString);
 
 //
 //  Return string from a given outgoing stage.

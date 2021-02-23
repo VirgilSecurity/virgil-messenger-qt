@@ -40,14 +40,14 @@
 
 #include <QPointer>
 
-namespace vm
-{
+namespace vm {
 class DownloadFileOperation : public LoadFileOperation
 {
     Q_OBJECT
 
 public:
-    DownloadFileOperation(NetworkOperation *parent, FileLoader *fileLoader, const QUrl &url, quint64 bytesTotal, const QString &filePath);
+    DownloadFileOperation(NetworkOperation *parent, FileLoader *fileLoader, const QUrl &url, quint64 bytesTotal,
+                          const QString &filePath);
 
     void run() override;
 
@@ -65,6 +65,6 @@ private:
     QUrl m_url;
     QPointer<FileLoader> m_fileLoader;
 };
-}
+} // namespace vm
 
 #endif // VM_DOWNLOADFILEOPERATION_H

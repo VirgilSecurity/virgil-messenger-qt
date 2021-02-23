@@ -44,7 +44,8 @@
 
 namespace vm {
 
-class Chat {
+class Chat
+{
 
 public:
     //
@@ -110,7 +111,7 @@ public:
     //
     //  Set count of unread messages in chat.
     //
-    void setUnreadMessageCount(qsizetype  unreadMessageCount);
+    void setUnreadMessageCount(qsizetype unreadMessageCount);
 
 private:
     ChatId m_id;
@@ -123,9 +124,9 @@ private:
 
 using ChatHandler = std::shared_ptr<const Chat>;
 using ModifiableChatHandler = std::shared_ptr<Chat>;
+using Chats = std::vector<ChatHandler>;
 using ModifiableChats = std::vector<ModifiableChatHandler>;
 
 } // namespace vm
 
 #endif // VM_CHAT_H
-

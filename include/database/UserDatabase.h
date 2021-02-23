@@ -38,15 +38,17 @@
 #include "core/Database.h"
 #include "Message.h"
 #include "Chat.h"
+#include "GroupUpdate.h"
 
 #include <QDir>
 
-namespace vm
-{
+namespace vm {
 class AttachmentsTable;
 class ChatsTable;
 class CloudFilesTable;
 class ContactsTable;
+class GroupMembersTable;
+class GroupsTable;
 class MessagesTable;
 
 class UserDatabase : public Database
@@ -55,16 +57,25 @@ class UserDatabase : public Database
 
 public:
     explicit UserDatabase(const QDir &databaseDir, QObject *parent);
-    ~UserDatabase() override;
 
     const AttachmentsTable *attachmentsTable() const;
     AttachmentsTable *attachmentsTable();
+
     const ChatsTable *chatsTable() const;
     ChatsTable *chatsTable();
+
     const CloudFilesTable *cloudFilesTable() const;
     CloudFilesTable *cloudFilesTable();
+
     const ContactsTable *contactsTable() const;
     ContactsTable *contactsTable();
+
+    const GroupMembersTable *groupMembersTable() const;
+    GroupMembersTable *groupMembersTable();
+
+    const GroupsTable *groupsTable() const;
+    GroupsTable *groupsTable();
+
     const MessagesTable *messagesTable() const;
     MessagesTable *messagesTable();
 
@@ -79,6 +90,10 @@ signals:
     void updateMessage(const MessageUpdate &messageUpdate);
     void writeChatAndLastMessage(const ChatHandler &chat);
     void resetUnreadCount(const ChatHandler &chat);
+    void deleteNewGroupChat(const ChatId &chatId);
+    void deleteGroupChatInvitation(const ChatId &chatId);
+
+    void updateGroup(const GroupUpdate &groupUpdate);
 
     //
     //  Notification signals.
@@ -94,14 +109,13 @@ private:
     void onUpdateMessage(const MessageUpdate &messageUpdate);
     void onWriteChatAndLastMessage(const ChatHandler &chat);
     void onResetUnreadCount(const ChatHandler &chat);
+    void onDeleteNewGroupChat(const ChatId &chatId);
+    void onDeleteGroupChatInvitation(const ChatId &chatId);
+
+    void onUpdateGroup(const GroupUpdate &groupUpdate);
 
     const QDir m_databaseDir;
-    int m_attachmentsTableIndex;
-    int m_chatsTableIndex;
-    int m_cloudFilesTableIndex;
-    int m_contactsTableIndex;
-    int m_messagesTableIndex;
 };
-}
+} // namespace vm
 
 #endif // VM_USERDATABASE_H

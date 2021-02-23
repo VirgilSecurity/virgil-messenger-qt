@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_MESSAGE_CONTENT_H
 #define VM_MESSAGE_CONTENT_H
 
@@ -41,18 +40,14 @@
 #include "MessageContentAttachment.h"
 #include "MessageContentFile.h"
 #include "MessageContentPicture.h"
+#include "MessageContentGroupInvitation.h"
 
 #include <variant>
 
 namespace vm {
 
-using MessageContent = std::variant<
-    std::monostate,
-    MessageContentText,
-    MessageContentEncrypted,
-    MessageContentFile,
-    MessageContentPicture
-    >;
+using MessageContent = std::variant<std::monostate, MessageContentText, MessageContentEncrypted, MessageContentFile,
+                                    MessageContentPicture, MessageContentGroupInvitation>;
 
 } // namespace vm
 

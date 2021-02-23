@@ -38,22 +38,9 @@
 
 using namespace vm;
 
-Patch::Patch(const Patch::Version &version)
-    : m_version(version)
-{
-}
-
-Patch::~Patch()
-{
-}
+Patch::Patch(const Patch::Version &version) : m_version(version) { }
 
 bool Patch::isOutdated(Database *database) const
 {
     return m_version < database->version();
-}
-
-bool Patch::apply(Database *database)
-{
-    Q_UNUSED(database)
-    return false;
 }

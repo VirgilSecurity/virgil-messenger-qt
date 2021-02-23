@@ -41,8 +41,7 @@
 
 Q_DECLARE_LOGGING_CATEGORY(lcMessagesQueue);
 
-namespace vm
-{
+namespace vm {
 class MessageOperation;
 class MessageOperationFactory;
 class UserDatabase;
@@ -57,7 +56,8 @@ public:
 
 signals:
     void pushMessage(const ModifiableMessageHandler &message);
-    void pushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath, const PostFunction &func);
+    void pushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath,
+                             const PostFunction &func);
     void pushMessagePreload(const ModifiableMessageHandler &message);
 
     void updateMessage(const MessageUpdate &messagesUpdate);
@@ -68,7 +68,8 @@ private:
     qsizetype maxAttemptCount() const override;
 
     void onPushMessage(const ModifiableMessageHandler &message);
-    void onPushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath, const PostFunction &postFunction);
+    void onPushMessageDownload(const ModifiableMessageHandler &message, const QString &filePath,
+                               const PostFunction &postFunction);
     void onPushMessagePreload(const ModifiableMessageHandler &message);
 
     void onDatabaseOpened();
@@ -79,6 +80,6 @@ private:
     QPointer<UserDatabase> m_userDatabase;
     QPointer<MessageOperationFactory> m_factory;
 };
-}
+} // namespace vm
 
 #endif // VM_MESSAGESQUEUE_H

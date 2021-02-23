@@ -39,8 +39,7 @@
 #include "CloudFileRequestId.h"
 #include "Operation.h"
 
-namespace vm
-{
+namespace vm {
 class CloudFileOperation;
 
 class DeleteCloudFilesOperation : public Operation
@@ -66,6 +65,6 @@ private:
     size_t m_processedCount;
     CloudFiles m_deletedFiles;
 };
-}
+} // namespace vm
 
 #endif // VM_DELETE_CLOUD_FILES_OPERATION_H

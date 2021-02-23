@@ -32,99 +32,95 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "MessageContentJsonUtils.h"
-
 
 #include "MessageContentType.h"
 #include "Utils.h"
 
-
 using namespace vm;
 using Self = MessageContentJsonUtils;
 
-
-QJsonObject Self::to(const MessageContent& messageContent) {
+QJsonObject Self::to(const MessageContent &messageContent)
+{
     QJsonObject mainObject;
 
     if (auto text = std::get_if<MessageContentText>(&messageContent)) {
         mainObject.insert(QLatin1String("text"), text->text());
-    }
-    else if (auto encrypted = std::get_if<MessageContentEncrypted>(&messageContent)) {
+    } else if (auto encrypted = std::get_if<MessageContentEncrypted>(&messageContent)) {
         mainObject.insert(QLatin1String("ciphertext"), toBase64(encrypted->ciphertext()));
-    }
-    else if (auto file = std::get_if<MessageContentFile>(&messageContent)) {
+    } else if (auto file = std::get_if<MessageContentFile>(&messageContent)) {
         QJsonObject attachmentObject;
         writeAttachment(*file, attachmentObject);
         mainObject.insert(QLatin1String("file"), attachmentObject);
-    }
-    else if (auto picture = std::get_if<MessageContentPicture>(&messageContent)) {
+    } else if (auto picture = std::get_if<MessageContentPicture>(&messageContent)) {
         QJsonObject attachmentObject;
         writeAttachment(*picture, attachmentObject);
         writeExtras(*picture, false, attachmentObject);
         mainObject.insert(QLatin1String("picture"), attachmentObject);
-    }
-    else {
+    } else if (auto invitation = std::get_if<MessageContentGroupInvitation>(&messageContent)) {
+        QJsonObject invitationObject;
+        invitation->writeJson(invitationObject);
+        mainObject.insert(QLatin1String("groupInvitation"), invitationObject);
+    } else {
         throw std::logic_error("Invalid messageContent");
     }
 
     return mainObject;
 }
 
-
-QString Self::toString(const MessageContent& messageContent) {
+QString Self::toString(const MessageContent &messageContent)
+{
     return Self::toBytes(messageContent);
 }
 
-
-QByteArray Self::toBytes(const MessageContent& messageContent) {
+QByteArray Self::toBytes(const MessageContent &messageContent)
+{
     return Self::toBytes(Self::to(messageContent));
 }
 
-
-QByteArray MessageContentJsonUtils::toBytes(const QJsonObject& jsonObject) {
+QByteArray MessageContentJsonUtils::toBytes(const QJsonObject &jsonObject)
+{
     return QJsonDocument(jsonObject).toJson(QJsonDocument::Compact);
 }
 
-
-MessageContent Self::from(const QJsonObject& json, QString& errorString) {
+MessageContent Self::from(const QJsonObject &json, QString &errorString)
+{
 
     if (auto value = json[QLatin1String("text")]; !value.isUndefined()) {
         return MessageContentText(value.toString());
-    }
-    else if (auto value = json[QLatin1String("ciphertext")]; !value.isUndefined()) {
+    } else if (auto value = json[QLatin1String("ciphertext")]; !value.isUndefined()) {
         return MessageContentEncrypted(fromBase64(value));
-    }
-    else if (auto value = json[QLatin1String("file")]; !value.isUndefined()) {
+    } else if (auto value = json[QLatin1String("file")]; !value.isUndefined()) {
         MessageContentFile file;
         readAttachment(value.toObject(), file);
         return file;
-    }
-    else if (auto value = json[QLatin1String("picture")]; !value.isUndefined()) {
+    } else if (auto value = json[QLatin1String("picture")]; !value.isUndefined()) {
         MessageContentPicture picture;
         readAttachment(value.toObject(), picture);
         readExtras(value.toObject(), picture);
         return picture;
-    }
-    else {
-        errorString = QObject::tr("Invalid messageContent json");
+    } else if (auto value = json[QLatin1String("groupInvitation")]; !value.isUndefined()) {
+        return toObject<MessageContentGroupInvitation>(value.toObject());
+    } else {
+        errorString = QObject::tr("Invalid messageContent JSON");
         return {};
     }
 }
 
-
-MessageContent Self::fromString(const QString& messageJsonString, QString& errorString) {
+MessageContent Self::fromString(const QString &messageJsonString, QString &errorString)
+{
     return Self::fromBytes(messageJsonString.toUtf8(), errorString);
 }
 
-
-MessageContent Self::fromBytes(const QByteArray& messageJsonBytes, QString &errorString) {
+MessageContent Self::fromBytes(const QByteArray &messageJsonBytes, QString &errorString)
+{
     const auto json = QJsonDocument::fromJson(messageJsonBytes).object();
     return Self::from(json, errorString);
 }
 
-
-void Self::writeAttachment(const MessageContentAttachment& attachment, QJsonObject& json) {
+void Self::writeAttachment(const MessageContentAttachment &attachment, QJsonObject &json)
+{
+    json.insert(QLatin1String("attachmentId"), QString(attachment.id()));
     json.insert(QLatin1String("fileName"), attachment.fileName());
     json.insert(QLatin1String("size"), attachment.size());
     json.insert(QLatin1String("remoteUrl"), attachment.remoteUrl().toString());
@@ -134,8 +130,8 @@ void Self::writeAttachment(const MessageContentAttachment& attachment, QJsonObje
     json.insert(QLatin1String("signature"), toBase64(attachment.signature()));
 }
 
-
-void Self::writeExtras(const MessageContentPicture& picture, const bool writeLocalPaths, QJsonObject& json) {
+void Self::writeExtras(const MessageContentPicture &picture, const bool writeLocalPaths, QJsonObject &json)
+{
     const auto thumbnail = picture.thumbnail();
     json["thumbnailUrl"] = thumbnail.remoteUrl().toString();
     json["thumbnailEncryptedSize"] = thumbnail.encryptedSize();
@@ -152,14 +148,14 @@ void Self::writeExtras(const MessageContentPicture& picture, const bool writeLoc
     }
 }
 
-
-bool Self::readExtras(const QString& str, MessageContentPicture &picture) {
+bool Self::readExtras(const QString &str, MessageContentPicture &picture)
+{
     const auto json = QJsonDocument::fromJson(str.toUtf8()).object();
     return Self::readExtras(json, picture);
 }
 
-
-bool Self::readExtras(const QJsonObject& json, MessageContentPicture &picture) {
+bool Self::readExtras(const QJsonObject &json, MessageContentPicture &picture)
+{
     // TODO: Check mandatory fields and return false if absent.
 
     MessageContentFile thumbnail;
@@ -175,10 +171,10 @@ bool Self::readExtras(const QJsonObject& json, MessageContentPicture &picture) {
     return true;
 }
 
-
-bool Self::readAttachment(const QJsonObject& jsonObject, MessageContentAttachment& attachment) {
+bool Self::readAttachment(const QJsonObject &jsonObject, MessageContentAttachment &attachment)
+{
     // TODO: Check mandatory fields and return false if absent.
-    attachment.setId(AttachmentId(Utils::createUuid()));
+    attachment.setId(AttachmentId(jsonObject[QLatin1String("attachmentId")].toString()));
     attachment.setFileName(jsonObject[QLatin1String("fileName")].toString());
     attachment.setSize(jsonObject[QLatin1String("size")].toInt());
     attachment.setRemoteUrl(jsonObject[QLatin1String("remoteUrl")].toString());

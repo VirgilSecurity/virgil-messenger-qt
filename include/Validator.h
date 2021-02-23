@@ -40,8 +40,7 @@
 
 #include <optional>
 
-namespace vm
-{
+namespace vm {
 class Validator : public QObject
 {
     Q_OBJECT
@@ -64,6 +63,6 @@ private:
     QRegularExpressionValidator *m_reEmail;
     QRegularExpressionValidator *m_reDirectoryName;
 };
-}
+} // namespace vm
 
 #endif // VM_VALIDATOR_H

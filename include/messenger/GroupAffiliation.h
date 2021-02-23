@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,30 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CONTACT_H
-#define VM_CONTACT_H
+#ifndef VM_GROUP_AFFILIATION_H
+#define VM_GROUP_AFFILIATION_H
 
 #include <QString>
-#include <QUrl>
-#include <QVariant>
 
-namespace vm
-{
-struct Contact
-{
-    using Id = QString;
+namespace vm {
 
-    Id id;
-    QString name;
-    QString phoneNumber;
-    QString email;
-    QUrl avatarUrl;
+enum class GroupAffiliation { None, Outcast, Member, Admin, Owner };
 
-    QVariant platformId;
-    int avatarUrlRetryCount = 0;
-};
+//
+//  Return affiliation from a given string.
+//  Throws if correspond affiliation is not found.
+//
+GroupAffiliation GroupAffiliationFromString(const QString &affiliationString);
 
-using Contacts = std::vector<Contact>;
-}
+//
+//  Return string from a given affiliation.
+//
+QString GroupAffiliationToString(GroupAffiliation affiliation);
 
-#endif // VM_CONTACT_H
+//
+//  Return display string from a given affiliation.
+//
+QString GroupAffiliationToDisplayString(GroupAffiliation affiliation);
+
+} // namespace vm
+
+#endif // VM_GROUP_AFFILIATION_H

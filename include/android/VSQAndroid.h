@@ -37,13 +37,14 @@
 
 #if (VS_ANDROID)
 
-#include <QObject>
-#include <Contact.h>
-#include <FileUtils.h>
+#    include <QObject>
+#    include <Contact.h>
+#    include <FileUtils.h>
 
 using namespace vm;
 
-class VSQAndroid {
+class VSQAndroid
+{
 public:
     VSQAndroid() = delete;
 
@@ -61,7 +62,7 @@ public:
 
     static Contacts getContacts();
 
-    static QUrl getContactAvatarUrl(const Contact &contact);
+    static QUrl getContactAvatarUrl(const ContactHandler contact);
 
 private:
     static int runLoggingThread();

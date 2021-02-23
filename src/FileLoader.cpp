@@ -47,11 +47,9 @@ Q_LOGGING_CATEGORY(lcFileLoader, "fileLoader");
 using namespace vm;
 using Self = FileLoader;
 
-
 Self::FileLoader(CoreMessenger *commKitMessenger, QObject *parent)
-    : QObject(parent)
-    , m_coreMessenger(commKitMessenger)
-    , m_networkAccessManager(new QNetworkAccessManager(this)) {
+    : QObject(parent), m_coreMessenger(commKitMessenger), m_networkAccessManager(new QNetworkAccessManager(this))
+{
 
     qRegisterMetaType<Self::ConnectionSetup>("ConnectionSetup");
 
@@ -64,25 +62,24 @@ Self::FileLoader(CoreMessenger *commKitMessenger, QObject *parent)
     connect(this, &Self::requestUploadSlot, this, &Self::onRequestUploadSlot);
 }
 
-
-bool Self::isServiceFound() const {
+bool Self::isServiceFound() const
+{
     return m_coreMessenger->isUploadServiceFound();
 }
 
-
-void Self::onRequestUploadSlot(const QString &requestId, const QString &filePath){
+void Self::onRequestUploadSlot(const QString &requestId, const QString &filePath)
+{
     const auto slotId = m_coreMessenger->requestUploadSlot(filePath);
 
     if (slotId.isEmpty()) {
         emit uploadSlotRequestFailed(requestId);
-    }
-    else {
+    } else {
         emit uploadSlotRequestFinished(requestId, slotId);
     }
 }
 
-
-void Self::onStartUpload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup){
+void Self::onStartUpload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup)
+{
 
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentLengthHeader, file->size());
@@ -90,8 +87,8 @@ void Self::onStartUpload(const QUrl &url, QFile *file, const ConnectionSetup &co
     connectionSetup(reply);
 }
 
-
-void Self::onStartDownload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup) {
+void Self::onStartDownload(const QUrl &url, QFile *file, const ConnectionSetup &connectionSetup)
+{
 
     QNetworkRequest request(url);
     auto reply = m_networkAccessManager->get(request);

@@ -152,4 +152,8 @@ Rectangle {
 
         }
     }
+
+    function clear() {
+        searchField.text = ""
+    }
 }

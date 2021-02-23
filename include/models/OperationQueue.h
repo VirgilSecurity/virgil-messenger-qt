@@ -44,8 +44,7 @@
 
 class QThreadPool;
 
-namespace vm
-{
+namespace vm {
 class Operation;
 
 class OperationQueue : public QObject
@@ -89,7 +88,7 @@ private:
     OperationSources m_sources;
     OperationQueueListeners m_listeners;
 };
-}
+} // namespace vm
 
 Q_DECLARE_METATYPE(vm::OperationSourcePtr);
 Q_DECLARE_METATYPE(vm::OperationQueue::PostFunction);

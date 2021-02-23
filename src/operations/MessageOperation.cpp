@@ -40,11 +40,9 @@
 
 using namespace vm;
 
-MessageOperation::MessageOperation(const ModifiableMessageHandler &message, MessageOperationFactory *factory, bool isOnline,
-                                   QObject *parent)
-    : NetworkOperation(parent, isOnline)
-    , m_factory(factory)
-    , m_message(message)
+MessageOperation::MessageOperation(const ModifiableMessageHandler &message, MessageOperationFactory *factory,
+                                   bool isOnline, QObject *parent)
+    : NetworkOperation(parent, isOnline), m_factory(factory), m_message(message)
 {
     setName(message->id());
 

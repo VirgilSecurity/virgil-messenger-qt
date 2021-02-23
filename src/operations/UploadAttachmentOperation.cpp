@@ -47,9 +47,7 @@ using namespace vm;
 using Self = UploadAttachmentOperation;
 
 Self::UploadAttachmentOperation(MessageOperation *parent, const Settings *settings)
-    : LoadAttachmentOperation(parent)
-    , m_parent(parent)
-    , m_settings(settings)
+    : LoadAttachmentOperation(parent), m_parent(parent), m_settings(settings)
 {
     setName(QString("UploadAttachment"));
 }
@@ -59,11 +57,9 @@ bool Self::populateChildren()
     const auto content = m_parent->message()->content();
     if (std::holds_alternative<MessageContentFile>(content)) {
         populateFileOperations();
-    }
-    else if (std::holds_alternative<MessageContentPicture>(content)) {
+    } else if (std::holds_alternative<MessageContentPicture>(content)) {
         populatePictureOperations();
-    }
-    else {
+    } else {
         throw std::logic_error("Invalid attachment content");
     }
     return true;
@@ -92,7 +88,8 @@ void Self::populatePictureOperations()
     const auto factory = m_parent->factory();
 
     // Convert to png
-    auto convertOp = factory->populateConvertToPngOperation(this, attachment->localPath(), QLatin1String("png-%1").arg(attachment->id()));
+    auto convertOp = factory->populateConvertToPngOperation(this, attachment->localPath(),
+                                                            QLatin1String("png-%1").arg(attachment->id()));
     connect(convertOp, &ConvertToPngOperation::fileCreated, [this, message](const QString &filePath) {
         MessageAttachmentLocalPathUpdate update;
         update.messageId = message->id();
@@ -103,39 +100,41 @@ void Self::populatePictureOperations()
 
     // Create picture preview
     const auto previewFilePath = m_settings->makeThumbnailPath(attachment->id(), true);
-    auto createPreviewOp = factory->populateCreateAttachmentPreview(m_parent, this, attachment->localPath(), previewFilePath);
-    connect(convertOp, &ConvertToPngOperation::converted, createPreviewOp, &CreateAttachmentPreviewOperation::setSourcePath);
+    auto createPreviewOp =
+            factory->populateCreateAttachmentPreview(m_parent, this, attachment->localPath(), previewFilePath);
+    connect(convertOp, &ConvertToPngOperation::converted, createPreviewOp,
+            &CreateAttachmentPreviewOperation::setSourcePath);
 
     // Create thumbnail
     const auto thumbnailFilePath = m_settings->makeThumbnailPath(attachment->id(), false);
-    auto createThumbnailOp = factory->populateCreateAttachmentThumbnail(m_parent, this, attachment->localPath(), thumbnailFilePath);
-    connect(convertOp, &ConvertToPngOperation::converted, createThumbnailOp, &CreateAttachmentThumbnailOperation::setSourcePath);
+    auto createThumbnailOp =
+            factory->populateCreateAttachmentThumbnail(m_parent, this, attachment->localPath(), thumbnailFilePath);
+    connect(convertOp, &ConvertToPngOperation::converted, createThumbnailOp,
+            &CreateAttachmentThumbnailOperation::setSourcePath);
 
     // Encrypt/Upload thumbnail
     auto encUploadThumbOp = factory->populateEncryptUpload(this, thumbnailFilePath);
-    connect(encUploadThumbOp, &EncryptUploadFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
-    connect(encUploadThumbOp, &EncryptUploadFileOperation::encrypted, [this, message](const QFileInfo &file, const QByteArray &decryptionKey, const QByteArray &signature) {
-        const auto extrasToJson = [message]() {
-            return message->contentAsAttachment()->extrasToJson(true);
-        };
+    connect(encUploadThumbOp, &EncryptUploadFileOperation::progressChanged, this,
+            &LoadAttachmentOperation::setLoadOperationProgress);
+    connect(encUploadThumbOp, &EncryptUploadFileOperation::encrypted,
+            [this, message](const QFileInfo &file, const QByteArray &decryptionKey, const QByteArray &signature) {
+                const auto extrasToJson = [message]() { return message->contentAsAttachment()->extrasToJson(true); };
 
-        startLoadOperation(file.size());
-        // Thumbnail encrypted size update
-        MessagePictureThumbnailEncryptionUpdate update;
-        update.messageId = message->id();
-        update.attachmentId = message->contentAsAttachment()->id();
-        update.extrasToJson = extrasToJson;
-        update.encryptedSize = file.size();
-        update.decryptionKey = decryptionKey;
-        update.signature = signature;
-        m_parent->messageUpdate(update);
-    });
+                startLoadOperation(file.size());
+                // Thumbnail encrypted size update
+                MessagePictureThumbnailEncryptionUpdate update;
+                update.messageId = message->id();
+                update.attachmentId = message->contentAsAttachment()->id();
+                update.extrasToJson = extrasToJson;
+                update.encryptedSize = file.size();
+                update.decryptionKey = decryptionKey;
+                update.signature = signature;
+                m_parent->messageUpdate(update);
+            });
 
     connect(encUploadThumbOp, &EncryptUploadFileOperation::uploaded, [this, message](const QUrl &url) {
         // Thumbnail remote url update
-        const auto extrasToJson = [message]() {
-            return message->contentAsAttachment()->extrasToJson(true);
-        };
+        const auto extrasToJson = [message]() { return message->contentAsAttachment()->extrasToJson(true); };
 
         MessagePictureThumbnailRemoteUrlUpdate urlUpdate;
         urlUpdate.messageId = message->id();
@@ -147,7 +146,8 @@ void Self::populatePictureOperations()
 
     // Calculate attachment fingerprint
     auto fingerprintOp = factory->populateCalculateAttachmentFingerprint(m_parent, this, attachment->localPath());
-    connect(convertOp, &ConvertToPngOperation::converted, fingerprintOp, &CalculateAttachmentFingerprintOperation::setSourcePath);
+    connect(convertOp, &ConvertToPngOperation::converted, fingerprintOp,
+            &CalculateAttachmentFingerprintOperation::setSourcePath);
     connect(fingerprintOp, &Operation::finished, [this]() {
         // Stage update
         updateStage(MessageContentUploadStage::Preprocessed);
@@ -165,21 +165,22 @@ EncryptUploadFileOperation *Self::populateEncryptUpload()
 
     // Encrypt/Upload
     auto encUploadOp = m_parent->factory()->populateEncryptUpload(this, attachment->localPath());
-    connect(encUploadOp, &EncryptUploadFileOperation::progressChanged, this, &LoadAttachmentOperation::setLoadOperationProgress);
-    connect(encUploadOp, &EncryptUploadFileOperation::encrypted, [this, message](const QFileInfo &file,
-            const QByteArray &decryptionKey, const QByteArray &signature) {
-        startLoadOperation(file.size());
-        // Encrypted size update
-        MessageAttachmentEncryptionUpdate update;
-        update.messageId = message->id();
-        update.attachmentId = message->contentAsAttachment()->id();
-        update.encryptedSize = file.size();
-        update.decryptionKey = decryptionKey;
-        update.signature = signature;
-        m_parent->messageUpdate(update);
-        // Stage update
-        updateStage(MessageContentUploadStage::Encrypted);
-    });
+    connect(encUploadOp, &EncryptUploadFileOperation::progressChanged, this,
+            &LoadAttachmentOperation::setLoadOperationProgress);
+    connect(encUploadOp, &EncryptUploadFileOperation::encrypted,
+            [this, message](const QFileInfo &file, const QByteArray &decryptionKey, const QByteArray &signature) {
+                startLoadOperation(file.size());
+                // Encrypted size update
+                MessageAttachmentEncryptionUpdate update;
+                update.messageId = message->id();
+                update.attachmentId = message->contentAsAttachment()->id();
+                update.encryptedSize = file.size();
+                update.decryptionKey = decryptionKey;
+                update.signature = signature;
+                m_parent->messageUpdate(update);
+                // Stage update
+                updateStage(MessageContentUploadStage::Encrypted);
+            });
     connect(encUploadOp, &EncryptUploadFileOperation::uploadSlotReceived, [this]() {
         // Stage update
         updateStage(MessageContentUploadStage::GotUploadingSlot);

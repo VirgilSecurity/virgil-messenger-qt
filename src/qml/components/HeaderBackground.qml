@@ -7,6 +7,7 @@ Rectangle {
     color: "transparent"
 
     property alias showSeparator: separator.visible
+    property alias separatorColor: separator.color
 
     HorizontalRule {
         id: separator

@@ -40,8 +40,7 @@
 
 class Settings;
 
-namespace vm
-{
+namespace vm {
 class EncryptUploadFileOperation;
 
 class UploadAttachmentOperation : public LoadAttachmentOperation
@@ -63,6 +62,6 @@ private:
     MessageOperation *m_parent;
     const Settings *m_settings;
 };
-}
+} // namespace vm
 
 #endif // VM_UPLOADATTACHMENTOPERATION_H

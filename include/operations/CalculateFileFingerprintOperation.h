@@ -37,8 +37,7 @@
 
 #include "Operation.h"
 
-namespace vm
-{
+namespace vm {
 class CalculateFileFingerprintOperation : public Operation
 {
     Q_OBJECT
@@ -57,6 +56,6 @@ signals:
 private:
     QString m_sourcePath;
 };
-}
+} // namespace vm
 
 #endif // VM_CALCULATEFILEFINGERPRINTOPERATION_H

@@ -41,8 +41,7 @@
 
 class QSqlQuery;
 
-namespace vm
-{
+namespace vm {
 class CloudFilesTable : public DatabaseTable
 {
     Q_OBJECT
@@ -72,6 +71,6 @@ private:
     void onFetch(const CloudFileHandler &folder);
     void onUpdateCloudFiles(const CloudFilesUpdate &update);
 };
-}
+} // namespace vm
 
 #endif // VM_CLOUDFILESTABLE_H

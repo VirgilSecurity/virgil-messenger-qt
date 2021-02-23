@@ -38,8 +38,7 @@
 #include "CalculateFileFingerprintOperation.h"
 #include "MessageOperation.h"
 
-namespace vm
-{
+namespace vm {
 class MessageOperation;
 
 class CalculateAttachmentFingerprintOperation : public CalculateFileFingerprintOperation
@@ -49,6 +48,6 @@ class CalculateAttachmentFingerprintOperation : public CalculateFileFingerprintO
 public:
     CalculateAttachmentFingerprintOperation(MessageOperation *parent, const QString &sourcePath);
 };
-}
+} // namespace vm
 
 #endif // VM_CALCULATEATTACHMENTFINGERPRINTOPERATION_H

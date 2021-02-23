@@ -38,8 +38,7 @@
 #include "core/DatabaseTable.h"
 #include "Message.h"
 
-namespace vm
-{
+namespace vm {
 class AttachmentsTable : public DatabaseTable
 {
     Q_OBJECT
@@ -58,6 +57,6 @@ private:
     void onAddAttachment(MessageHandler message);
     void onUpdateAttachment(const MessageUpdate &attachmentUpdate);
 };
-}
+} // namespace vm
 
 #endif // VM_ATTACHMENTSTABLE_H

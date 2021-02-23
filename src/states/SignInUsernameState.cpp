@@ -41,9 +41,7 @@
 using namespace vm;
 
 SignInUsernameState::SignInUsernameState(UsersController *usersController, Validator *validator, QState *parent)
-    : OperationState(parent)
-    , m_usersController(usersController)
-    , m_validator(validator)
+    : OperationState(parent), m_usersController(usersController), m_validator(validator)
 {
     connect(this, &SignInUsernameState::validate, this, &SignInUsernameState::processValidation);
 }
@@ -56,8 +54,7 @@ void SignInUsernameState::processValidation(const QString &username)
     emit operationStarted();
     if (!validUsername) {
         emit operationErrorOccurred(errorText);
-    }
-    else {
+    } else {
         m_usersController->setNextUsername(username);
         emit operationFinished();
         emit validated(*validUsername);

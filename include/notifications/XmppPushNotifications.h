@@ -40,16 +40,14 @@
 namespace notifications {
 namespace xmpp {
 
-class XmppPushNotifications {
+class XmppPushNotifications
+{
 public:
-    static XmppPushNotifications &
-    instance();
+    static XmppPushNotifications &instance();
 
-    QXmppPushEnableIq
-    buildEnableIq() const;
+    QXmppPushEnableIq buildEnableIq() const;
 
-    QXmppPushEnableIq
-    buildDisableIq() const;
+    QXmppPushEnableIq buildDisableIq() const;
 
 private:
     XmppPushNotifications() = default;

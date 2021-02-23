@@ -40,8 +40,7 @@
 
 class Settings;
 
-namespace vm
-{
+namespace vm {
 class AccountSelectionModel;
 class ChatsModel;
 class CloudFilesModel;
@@ -102,6 +101,6 @@ private:
     QPointer<FileLoader> m_fileLoader;
     QPointer<MessagesQueue> m_messagesQueue;
 };
-}
+} // namespace vm
 
 #endif // VM_MODELS_H

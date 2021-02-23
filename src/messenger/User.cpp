@@ -39,33 +39,26 @@
 
 #include <QCryptographicHash>
 
-
 using namespace vm;
 using Self = User;
 
-
-Self::User(std::unique_ptr<UserImpl> impl) : m_impl(std::move(impl)) {
-}
-
+Self::User(std::unique_ptr<UserImpl> impl) : m_impl(std::move(impl)) { }
 
 Self::~User() noexcept = default;
 
-
-UserId
-Self::id() const {
+UserId Self::id() const
+{
     auto user = m_impl->user.get();
     return UserId(vsc_str_to_qstring(vssq_messenger_user_identity(user)));
 }
 
-
-QString
-Self::username() const {
+QString Self::username() const
+{
     auto user = m_impl->user.get();
     return vsc_str_to_qstring(vssq_messenger_user_username(user));
 }
 
-
-const UserImpl*
-Self::impl() const noexcept {
+const UserImpl *Self::impl() const noexcept
+{
     return m_impl.get();
 }

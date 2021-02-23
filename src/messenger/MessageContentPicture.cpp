@@ -32,23 +32,19 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "MessageContentPicture.h"
 
-
 #include <QImageReader>
-
 
 #include "FileUtils.h"
 #include "MessageContentJsonUtils.h"
 #include "Utils.h"
 
-
 using namespace vm;
 using Self = MessageContentPicture;
 
-
-bool Self::applyUpdate(const MessageUpdate& update) {
+bool Self::applyUpdate(const MessageUpdate &update)
+{
     if (auto thumbnailPathUpdate = std::get_if<MessagePictureThumbnailPathUpdate>(&update)) {
         const auto thumbnailUrl = FileUtils::localFileToUrl(thumbnailPathUpdate->thumbnailPath);
         QString errorString;
@@ -56,73 +52,68 @@ bool Self::applyUpdate(const MessageUpdate& update) {
         if (thumbnail) {
             setThumbnail(*thumbnail);
         }
-    }
-    else if (auto thumbnailSizeUpdate = std::get_if<MessagePictureThumbnailSizeUpdate>(&update)) {
+    } else if (auto thumbnailSizeUpdate = std::get_if<MessagePictureThumbnailSizeUpdate>(&update)) {
         setThumbnailSize(thumbnailSizeUpdate->thumbnailSize);
-    }
-    else if (auto thumbnailEncryptionUpdate = std::get_if<MessagePictureThumbnailEncryptionUpdate>(&update)) {
+    } else if (auto thumbnailEncryptionUpdate = std::get_if<MessagePictureThumbnailEncryptionUpdate>(&update)) {
         m_thumbnail.setEncryptedSize(thumbnailEncryptionUpdate->encryptedSize);
         m_thumbnail.setDecryptionKey(thumbnailEncryptionUpdate->decryptionKey);
         m_thumbnail.setSignature(thumbnailEncryptionUpdate->signature);
-    }
-    else if (auto thumbnailRemoteUrlUpdate = std::get_if<MessagePictureThumbnailRemoteUrlUpdate>(&update)) {
+    } else if (auto thumbnailRemoteUrlUpdate = std::get_if<MessagePictureThumbnailRemoteUrlUpdate>(&update)) {
         m_thumbnail.setRemoteUrl(thumbnailRemoteUrlUpdate->remoteUrl);
-    }
-    else if (auto previewPathUpdate = std::get_if<MessagePicturePreviewPathUpdate>(&update)) {
+    } else if (auto previewPathUpdate = std::get_if<MessagePicturePreviewPathUpdate>(&update)) {
         setPreviewPath(previewPathUpdate->previewPath);
-    }
-    else {
+    } else {
         return MessageContentAttachment::applyUpdate(update);
     }
     return false;
 }
 
-
-QString MessageContentPicture::extrasToJson(const bool writeLocalPaths) const {
+QString MessageContentPicture::extrasToJson(const bool writeLocalPaths) const
+{
     QJsonObject json;
     MessageContentJsonUtils::writeExtras(*this, writeLocalPaths, json);
     return MessageContentJsonUtils::toBytes(json);
 }
 
-
-QString Self::previewPath() const {
+QString Self::previewPath() const
+{
     return m_previewPath;
 }
 
-
-void MessageContentPicture::setPreviewPath(const QString &path) {
+void MessageContentPicture::setPreviewPath(const QString &path)
+{
     m_previewPath = path;
 }
 
-
-QString Self::previewOrThumbnailPath() const {
+QString Self::previewOrThumbnailPath() const
+{
     return !m_previewPath.isEmpty() ? m_previewPath : m_thumbnail.localPath();
 }
 
-
-QSize Self::thumbnailSize() const {
+QSize Self::thumbnailSize() const
+{
     return QSize(m_thumbnailWidth, m_thumbnailHeight);
 }
 
-
-void MessageContentPicture::setThumbnailSize(const QSize &thumbnailSize) {
+void MessageContentPicture::setThumbnailSize(const QSize &thumbnailSize)
+{
     m_thumbnailWidth = thumbnailSize.width();
     m_thumbnailHeight = thumbnailSize.height();
 }
 
-
-MessageContentFile Self::thumbnail() const {
+MessageContentFile Self::thumbnail() const
+{
     return m_thumbnail;
 }
-
 
 void MessageContentPicture::setThumbnail(MessageContentFile thumbnail)
 {
     m_thumbnail = std::move(thumbnail);
 }
 
-
-std::optional<MessageContentPicture> Self::createFromLocalFile(const QUrl& localUrl, const QSize &thumbnailMaxSize, QString &errorString) {
+std::optional<MessageContentPicture> Self::createFromLocalFile(const QUrl &localUrl, const QSize &thumbnailMaxSize,
+                                                               QString &errorString)
+{
     MessageContentPicture picture;
     if (!picture.readLocalFile(localUrl, errorString)) {
         return std::nullopt;
@@ -134,8 +125,8 @@ std::optional<MessageContentPicture> Self::createFromLocalFile(const QUrl& local
     return picture;
 }
 
-
-bool MessageContentPicture::readImage(const QSize &thumbnailMaxSize, QString &errorString) {
+bool MessageContentPicture::readImage(const QSize &thumbnailMaxSize, QString &errorString)
+{
     QImage source;
     QImageReader reader(localPath());
     if (!Utils::readImage(&reader, &source)) {

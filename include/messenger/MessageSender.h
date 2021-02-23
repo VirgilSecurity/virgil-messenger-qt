@@ -40,10 +40,11 @@
 #include <QObject>
 
 namespace vm {
-class MessageSender : public QObject {
+class MessageSender : public QObject
+{
     Q_OBJECT
 public:
-    explicit MessageSender(QObject *parent = nullptr) : QObject(parent) {}
+    explicit MessageSender(QObject *parent = nullptr) : QObject(parent) { }
 
     virtual bool sendMessage(MessageHandler message) = 0;
 };

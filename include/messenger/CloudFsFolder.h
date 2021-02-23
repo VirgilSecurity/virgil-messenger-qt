@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_CLOUD_FS_FOLDER_H
 #define VM_CLOUD_FS_FOLDER_H
 
@@ -47,7 +46,8 @@ namespace vm {
 //
 //  Handles folder entries from the CLoud FS.
 //
-struct CloudFsFolder {
+struct CloudFsFolder
+{
     CloudFsFolderInfo info;
     QByteArray folderEncryptedKey;
     QByteArray folderPublicKey;

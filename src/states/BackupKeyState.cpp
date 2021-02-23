@@ -38,9 +38,7 @@
 
 using namespace vm;
 
-BackupKeyState::BackupKeyState(Messenger *messenger, QState *parent)
-    : OperationState(parent)
-    , m_messenger(messenger)
+BackupKeyState::BackupKeyState(Messenger *messenger, QState *parent) : OperationState(parent), m_messenger(messenger)
 {
     connect(m_messenger, &Messenger::keyBackuped, this, &BackupKeyState::operationFinished);
     connect(m_messenger, &Messenger::backupKeyFailed, this, &BackupKeyState::operationErrorOccurred);

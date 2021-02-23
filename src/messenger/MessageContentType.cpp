@@ -32,58 +32,55 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "MessageContentType.h"
-
 
 using namespace vm;
 
-
-MessageContentType vm::MessageContentTypeFrom(const QString& typeString) {
+MessageContentType vm::MessageContentTypeFrom(const QString &typeString)
+{
     if (typeString == QLatin1String("none")) {
         return MessageContentType::None;
-    }
-    else if (typeString == QLatin1String("encrypted")) {
+    } else if (typeString == QLatin1String("encrypted")) {
         return MessageContentType::Encrypted;
-    }
-    else if (typeString == QLatin1String("text")) {
+    } else if (typeString == QLatin1String("text")) {
         return MessageContentType::Text;
-    }
-    else if (typeString == QLatin1String("picture")) {
+    } else if (typeString == QLatin1String("picture")) {
         return MessageContentType::Picture;
-    }
-    else if (typeString == QLatin1String("file")) {
+    } else if (typeString == QLatin1String("file")) {
         return MessageContentType::File;
-    }
-    else {
+    } else if (typeString == QLatin1String("group_invitation")) {
+        return MessageContentType::GroupInvitation;
+    } else {
         throw std::logic_error("Invalid MessageContentType string");
     }
 }
 
-
-MessageContentType vm::MessageContentTypeFrom(const MessageContent& messageContent) {
+MessageContentType vm::MessageContentTypeFrom(const MessageContent &messageContent)
+{
     return static_cast<MessageContentType>(messageContent.index());
 }
 
-
-QString vm::MessageContentTypeToString(MessageContentType type) {
+QString vm::MessageContentTypeToString(MessageContentType type)
+{
     switch (type) {
-        case MessageContentType::None:
-            return QLatin1String("none");
-        case MessageContentType::Encrypted:
-            return QLatin1String("encrypted");
-        case MessageContentType::Text:
-            return QLatin1String("text");
-        case MessageContentType::Picture:
-            return QLatin1String("picture");
-        case MessageContentType::File:
-            return QLatin1String("file");
-        default:
-            throw std::logic_error("Invalid MessageContentType");
+    case MessageContentType::None:
+        return QLatin1String("none");
+    case MessageContentType::Encrypted:
+        return QLatin1String("encrypted");
+    case MessageContentType::Text:
+        return QLatin1String("text");
+    case MessageContentType::Picture:
+        return QLatin1String("picture");
+    case MessageContentType::File:
+        return QLatin1String("file");
+    case MessageContentType::GroupInvitation:
+        return QLatin1String("group_invitation");
+    default:
+        throw std::logic_error("Invalid MessageContentType");
     }
 }
 
-
-QString vm::MessageContentTypeToString(const MessageContent& content) {
+QString vm::MessageContentTypeToString(const MessageContent &content)
+{
     return MessageContentTypeToString(MessageContentTypeFrom(content));
 }

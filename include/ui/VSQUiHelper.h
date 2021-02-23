@@ -37,7 +37,8 @@
 
 #include <QObject>
 
-class VSQUiHelper: public QObject {
+class VSQUiHelper : public QObject
+{
     Q_OBJECT
 public:
     VSQUiHelper() = default;

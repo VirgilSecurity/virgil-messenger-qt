@@ -39,22 +39,19 @@
 
 namespace notifications {
 
-class PushNotifications : public QObject {
+class PushNotifications : public QObject
+{
     Q_OBJECT
 
 signals:
-    void
-    tokenUpdated();
+    void tokenUpdated();
 
 public:
-    static PushNotifications &
-    instance();
+    static PushNotifications &instance();
 
-    void
-    registerToken(QString token);
+    void registerToken(QString token);
 
-    const QString &
-    token() const noexcept;
+    const QString &token() const noexcept;
 
 protected:
     PushNotifications() = default;

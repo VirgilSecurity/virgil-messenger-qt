@@ -39,8 +39,7 @@
 
 class Settings;
 
-namespace vm
-{
+namespace vm {
 class AccountSelectionModel : public ListModel
 {
     Q_OBJECT
@@ -58,6 +57,6 @@ private:
     Settings *m_settings;
     const int m_chunkSize = 4;
 };
-}
+} // namespace vm
 
 #endif // VM_ACCOUNTSELECTIONMODEL_H

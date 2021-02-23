@@ -37,8 +37,7 @@
 
 #include "ContactsProxyModel.h"
 
-namespace vm
-{
+namespace vm {
 class DiscoveredContactsModel;
 
 class DiscoveredContactsProxyModel : public ContactsProxyModel
@@ -53,6 +52,6 @@ private:
 
     DiscoveredContactsModel *m_model;
 };
-}
+} // namespace vm
 
 #endif // VM_DISCOVEREDCONTACTSPROXYMODEL_H

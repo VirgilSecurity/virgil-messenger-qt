@@ -38,15 +38,16 @@
 
 using namespace vm;
 
-DecryptFileOperation::DecryptFileOperation(QObject *parent, Messenger *messenger, const QString &sourcePath, const QString &destPath,
-                                           const QByteArray &decryptionKey, const QByteArray &signature, const UserId &senderId)
-    : Operation(QLatin1String("DecryptFile"), parent)
-    , m_messenger(messenger)
-    , m_sourcePath(sourcePath)
-    , m_destPath(destPath)
-    , m_decryptionKey(decryptionKey)
-    , m_signature(signature)
-    , m_senderId(senderId)
+DecryptFileOperation::DecryptFileOperation(QObject *parent, Messenger *messenger, const QString &sourcePath,
+                                           const QString &destPath, const QByteArray &decryptionKey,
+                                           const QByteArray &signature, const UserId &senderId)
+    : Operation(QLatin1String("DecryptFile"), parent),
+      m_messenger(messenger),
+      m_sourcePath(sourcePath),
+      m_destPath(destPath),
+      m_decryptionKey(decryptionKey),
+      m_signature(signature),
+      m_senderId(senderId)
 {
 }
 
@@ -55,8 +56,7 @@ void DecryptFileOperation::run()
     if (m_messenger->decryptFile(m_sourcePath, m_destPath, m_decryptionKey, m_signature, m_senderId)) {
         emit decrypted(QFileInfo(m_destPath));
         finish();
-    }
-    else {
+    } else {
         qCWarning(lcOperation) << "Failed to decrypt file:" << m_sourcePath;
         fail();
     }
