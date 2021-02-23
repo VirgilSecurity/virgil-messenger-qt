@@ -108,7 +108,7 @@ void Self::clearChat()
     endResetModel();
 }
 
-bool Self::updateMessage(const MessageUpdate &messageUpdate, const bool apply)
+bool Self::updateMessage(const MessageUpdate &messageUpdate)
 {
     const auto messageId = MessageUpdateGetMessageId(messageUpdate);
 
@@ -118,9 +118,7 @@ bool Self::updateMessage(const MessageUpdate &messageUpdate, const bool apply)
     }
 
     const auto row = *messageRow;
-    if (apply) {
-        m_messages[row]->applyUpdate(messageUpdate);
-    }
+    m_messages[row]->applyUpdate(messageUpdate);
 
     const auto roles = rolesFromMessageUpdate(messageUpdate);
     invalidateRow(row, roles);
