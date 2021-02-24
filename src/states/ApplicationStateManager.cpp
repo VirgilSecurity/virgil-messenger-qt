@@ -175,7 +175,12 @@ void Self::addTransitions()
     m_cloudFileListState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
     m_cloudFileListState->addTransition(this, &Self::chatListRequested, m_chatListState);
 
+    addTwoSideTransition(m_cloudFileSharingState, m_cloudFileSharingState, &CloudFileSharingState::addMembersRequested,
+                         m_addCloudFolderMembersState);
+
     connect(m_newCloudFolderMembersState, &NewCloudFolderMembersState::contactsSelected, this,
+            &ApplicationStateManager::goBack);
+    connect(m_addCloudFolderMembersState, &AddCloudFolderMembersState::contactsSelected, this,
             &ApplicationStateManager::goBack);
 
     addTwoSideTransition(m_accountSettingsState, m_accountSettingsState, &AccountSettingsState::requestBackupKey,
@@ -200,7 +205,6 @@ void Self::addTransitions()
 
     addTwoSideTransition(m_chatInfoState, m_chatInfoState, &ChatInfoState::addMembersRequested,
                          m_addGroupChatMembersState);
-
     connect(m_addGroupChatMembersState, &AddGroupChatMembersState::contactsSelected, this,
             &ApplicationStateManager::goBack);
 

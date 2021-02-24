@@ -38,6 +38,7 @@
 #include <QObject>
 
 #include "Contact.h"
+#include "CloudFileObject.h"
 #include "CloudFileSystem.h"
 #include "CloudFilesUpdate.h"
 
@@ -54,6 +55,7 @@ class CloudFilesController : public QObject
     Q_PROPERTY(QString displayPath READ displayPath NOTIFY displayPathChanged)
     Q_PROPERTY(bool isRoot READ isRoot NOTIFY isRootChanged)
     Q_PROPERTY(bool isListUpdating MEMBER m_isListUpdating NOTIFY isListUpdatingChanged)
+    Q_PROPERTY(CloudFileObject *current MEMBER m_cloudFileObject CONSTANT)
 
 public:
     CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase,
@@ -66,13 +68,17 @@ public:
     Q_INVOKABLE void switchToFolder(const QVariant &proxyRow);
     Q_INVOKABLE void switchToParentFolder();
     Q_INVOKABLE void refresh();
+    CloudFileHandler currentFile() const;
 
     Q_INVOKABLE void addFiles(const QVariant &fileUrls);
     Q_INVOKABLE void deleteFiles();
     void createFolder(const QString &name);
     void createSharedFolder(const QString &name, const Contacts &contacts);
+
+    void loadCloudFileMembers();
     void addMembers(const Contacts &contacts);
     Q_INVOKABLE void removeSelectedMembers();
+    Q_INVOKABLE void leaveMembership();
 
 signals:
     void updateCloudFiles(const CloudFilesUpdate &update);
@@ -94,11 +100,13 @@ private:
     ModifiableCloudFileHandler rootFolder() const;
 
     void onUpdateCloudFiles(const CloudFilesUpdate &update);
+    void onSelectionChanged();
 
     QPointer<const Settings> m_settings;
     QPointer<Models> m_models;
     QPointer<UserDatabase> m_userDatabase;
     QPointer<CloudFileSystem> m_cloudFileSystem;
+    QPointer<CloudFileObject> m_cloudFileObject;
 
     FoldersHierarchy m_hierarchy;
     FoldersHierarchy m_requestedHierarchy;

@@ -32,19 +32,50 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "CloudFileSharingState.h"
+#include "CloudFilePropertiesModel.h"
 
-#include "CloudFilesController.h"
+#include "Utils.h"
 
 using namespace vm;
-using Self = CloudFileSharingState;
+using Self = CloudFilePropertiesModel;
 
-Self::CloudFileSharingState(CloudFilesController *controller, QState *parent) : QState(parent), m_controller(controller)
+void Self::setCloudFile(const CloudFileHandler &cloudFile)
 {
+    m_cloudFile = cloudFile;
+    beginResetModel();
+    m_values.clear();
+    if (cloudFile) {
+        m_values << cloudFile->name();
+        m_values << (cloudFile->isFolder() ? QLatin1String("-") : Utils::formattedSize(cloudFile->size()));
+    }
+    endResetModel();
 }
 
-void CloudFileSharingState::onEntry(QEvent *event)
+int Self::rowCount(const QModelIndex &parent) const
 {
-    Q_UNUSED(event)
-    m_controller->loadCloudFileMembers();
+    Q_UNUSED(parent)
+    return m_values.size();
+}
+
+QVariant Self::data(const QModelIndex &index, int role) const
+{
+    if (role == ValueRole) {
+        return m_values[index.row()];
+    }
+    if (role == NameRole) {
+        switch (index.row()) {
+        case 0:
+            return tr("Name");
+        case 1:
+            return tr("Size");
+        default:
+            break;
+        }
+    }
+    return ListModel::data(index, role);
+}
+
+QHash<int, QByteArray> Self::roleNames() const
+{
+    return unitedRoleNames(ListModel::roleNames(), { { NameRole, "propertyName" }, { ValueRole, "propertyValue" } });
 }

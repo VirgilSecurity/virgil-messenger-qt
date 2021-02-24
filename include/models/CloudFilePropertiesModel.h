@@ -32,19 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "CloudFileSharingState.h"
+#ifndef VM_CLOUD_FILE_PROPERTIES_MODEL_H
+#define VM_CLOUD_FILE_PROPERTIES_MODEL_H
 
-#include "CloudFilesController.h"
+#include "CloudFile.h"
+#include "ListModel.h"
 
-using namespace vm;
-using Self = CloudFileSharingState;
-
-Self::CloudFileSharingState(CloudFilesController *controller, QState *parent) : QState(parent), m_controller(controller)
+namespace vm {
+class CloudFilePropertiesModel : public ListModel
 {
-}
+    Q_OBJECT
 
-void CloudFileSharingState::onEntry(QEvent *event)
-{
-    Q_UNUSED(event)
-    m_controller->loadCloudFileMembers();
-}
+public:
+    using ListModel::ListModel;
+
+    void setCloudFile(const CloudFileHandler &cloudFile);
+
+private:
+    enum Roles { NameRole = Qt::UserRole, ValueRole };
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
+
+    CloudFileHandler m_cloudFile;
+    QVariantList m_values;
+};
+} // namespace vm
+
+#endif // VM_CLOUD_FILE_PROPERTIES_MODEL_H

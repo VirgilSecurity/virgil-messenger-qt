@@ -43,6 +43,7 @@
 #include "Controller.h"
 #include "DiscoveredContactsModel.h"
 #include "FileUtils.h"
+#include "ListSelectionModel.h"
 #include "Models.h"
 #include "Settings.h"
 #include "UserDatabase.h"
@@ -57,7 +58,8 @@ Self::CloudFilesController(const Settings *settings, Models *models, UserDatabas
       m_settings(settings),
       m_models(models),
       m_userDatabase(userDatabase),
-      m_cloudFileSystem(cloudFileSystem)
+      m_cloudFileSystem(cloudFileSystem),
+      m_cloudFileObject(new CloudFileObject(this))
 {
     qRegisterMetaType<CloudFilesUpdate>("CloudFilesUpdate");
 
@@ -75,6 +77,8 @@ Self::CloudFilesController(const Settings *settings, Models *models, UserDatabas
     connect(queue, &CloudFilesQueue::updateCloudFiles, this, &Self::updateCloudFiles);
     connect(models->cloudFilesTransfers(), &CloudFilesTransfersModel::interruptByCloudFileId, queue,
             &CloudFilesQueue::interruptFileOperation);
+    // Selection connections
+    connect(models->cloudFiles()->selection(), &ListSelectionModel::changed, this, &Self::onSelectionChanged);
     // Cloud file system connections
     connect(cloudFileSystem, &CloudFileSystem::downloadsDirChanged,
             [rootFolder](const QDir &downloadsDir) { rootFolder->setLocalPath(downloadsDir.absolutePath()); });
@@ -150,6 +154,11 @@ void Self::refresh()
     switchToHierarchy(m_hierarchy);
 }
 
+CloudFileHandler Self::currentFile() const
+{
+    return m_cloudFileObject->cloudFile();
+}
+
 void Self::addFiles(const QVariant &fileUrls)
 {
     const auto urls = fileUrls.value<QList<QUrl>>();
@@ -176,6 +185,20 @@ void Self::createSharedFolder(const QString &name, const Contacts &contacts)
                             << Utils::printableContactsList(contacts);
 }
 
+void Self::loadCloudFileMembers()
+{
+    if (m_cloudFileObject->isShared()) {
+        // TODO(fpohtmeh): fetch real members
+        const auto c1 = std::make_shared<GroupMember>(GroupId(), UserId(), UserId("id1"), QLatin1String("OwnerUser"),
+                                                      GroupAffiliation::Owner);
+        const auto c2 = std::make_shared<GroupMember>(GroupId(), UserId(), UserId("id2"), QLatin1String("Member1User"),
+                                                      GroupAffiliation::Member);
+        const auto c3 = std::make_shared<GroupMember>(GroupId(), UserId(), UserId("id3"), QLatin1String("Member2User"),
+                                                      GroupAffiliation::Member);
+        m_cloudFileObject->setMembers({ c1, c2, c3 });
+    }
+}
+
 void Self::addMembers(const Contacts &contacts)
 {
     qCWarning(lcController) << "CloudFilesController::addMembers is under development"
@@ -185,6 +208,11 @@ void Self::addMembers(const Contacts &contacts)
 void Self::removeSelectedMembers()
 {
     qCWarning(lcController) << "CloudFilesController::removeSelectedMembers is under development";
+}
+
+void Self::leaveMembership()
+{
+    qCWarning(lcController) << "CloudFilesController::leaveMembership is under development";
 }
 
 void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)
@@ -248,4 +276,10 @@ void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)
     m_models->cloudFilesTransfers()->updateCloudFiles(update);
     // Update DB
     m_userDatabase->cloudFilesTable()->updateCloudFiles(update);
+}
+
+void Self::onSelectionChanged()
+{
+    const auto files = m_models->cloudFiles()->selectedFiles();
+    m_cloudFileObject->setCloudFile(files.empty() ? CloudFileHandler() : files.front());
 }

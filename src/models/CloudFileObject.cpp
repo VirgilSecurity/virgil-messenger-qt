@@ -32,19 +32,63 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "CloudFileSharingState.h"
+#include "CloudFileObject.h"
 
-#include "CloudFilesController.h"
+#include "ListSelectionModel.h"
 
 using namespace vm;
-using Self = CloudFileSharingState;
+using Self = CloudFileObject;
 
-Self::CloudFileSharingState(CloudFilesController *controller, QState *parent) : QState(parent), m_controller(controller)
+Self::CloudFileObject(QObject *parent)
+    : QObject(parent),
+      m_propertiesModel(new CloudFilePropertiesModel(this)),
+      m_membersModel(new GroupMembersModel(this, true))
 {
+    m_membersModel->selection()->setMultiSelect(true);
 }
 
-void CloudFileSharingState::onEntry(QEvent *event)
+void Self::setCloudFile(const CloudFileHandler &cloudFile)
 {
-    Q_UNUSED(event)
-    m_controller->loadCloudFileMembers();
+    const auto oldName = name();
+    const auto oldIsFolder = isFolder();
+    const auto oldIsShared = isShared();
+
+    m_cloudFile = cloudFile;
+    m_propertiesModel->setCloudFile(cloudFile);
+
+    if (oldName != name()) {
+        emit nameChanged(name());
+    }
+    if (oldIsFolder != isFolder()) {
+        emit isFolderChanged(isFolder());
+    }
+    if (oldIsShared != isShared()) {
+        emit isSharedChanged(isShared());
+    }
+}
+
+CloudFileHandler Self::cloudFile() const
+{
+    return m_cloudFile;
+}
+
+QString Self::name() const
+{
+    return m_cloudFile ? m_cloudFile->name() : QString();
+}
+
+bool Self::isFolder() const
+{
+    return m_cloudFile ? m_cloudFile->isFolder() : false;
+}
+
+bool Self::isShared() const
+{
+    // TODO(fpohtmeh): implement
+    return true;
+}
+
+void Self::setMembers(const GroupMembers &members)
+{
+    m_membersModel->setGroupMembers(members);
 }

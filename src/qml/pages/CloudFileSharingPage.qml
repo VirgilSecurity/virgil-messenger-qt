@@ -11,7 +11,11 @@ Page {
 
     QtObject {
         id: d
-        readonly property int selectedGroupMembersCount: 0
+        readonly property var cloudFile: controllers.cloudFiles.current
+        readonly property var model: cloudFile.members
+        readonly property bool groupMembersEditable: true
+        readonly property bool isOwnFile: true
+        readonly property int selectedGroupMembersCount: model.selection.selectedCount
     }
 
     background: Rectangle {
@@ -19,7 +23,31 @@ Page {
     }
 
     header: PageHeader {
+        id: pageHeader
         title: qsTr("Cloud folder info")
+        contextMenu: ContextMenu {
+            ContextMenuItem {
+                text: qsTr("Add members")
+                visible: d.groupMembersEditable
+                onTriggered: appState.addMembersRequested()
+            }
+
+            ContextMenuSeparator {
+                visible: d.groupMembersEditable && d.selectedGroupMembersCount
+            }
+
+            ContextMenuItem {
+                text: qsTr("Remove members")
+                visible: d.groupMembersEditable && d.selectedGroupMembersCount
+                onTriggered: removeParticipantsDialog.open()
+            }
+
+            ContextMenuItem {
+                text: qsTr("Leave")
+                visible: !d.isOwnFile
+                onTriggered: controllers.cloudFiles.leaveMembership()
+            }
+        }
     }
 
     ColumnLayout {
@@ -34,17 +62,7 @@ Page {
 
         PropertiesView {
             Layout.leftMargin: Theme.smallMargin
-
-            model: ListModel {
-                ListElement {
-                    propertyName: qsTr("Name:")
-                    propertyValue: qsTr("Folder1")
-                }
-                ListElement {
-                    propertyName: qsTr("Size:")
-                    propertyValue: qsTr("1 Mb")
-                }
-            }
+            model: d.cloudFile.properties
         }
 
         TabView {
@@ -55,7 +73,16 @@ Page {
                 readonly property var tabTitle: d.selectedGroupMembersCount
                                                 ? qsTr("Participants (%1 selected)").arg(d.selectedGroupMembersCount)
                                                 : qsTr("Participants")
+                model: d.model.proxy
+                onContactSelected: d.model.toggleByUsername(contactUsername)
             }
         }
+    }
+
+    MessageDialog {
+        id: removeParticipantsDialog
+        title: pageHeader.title
+        text: qsTr("Remove participant(s)?")
+        onAccepted: controllers.cloudFiles.removeSelectedMembers()
     }
 }

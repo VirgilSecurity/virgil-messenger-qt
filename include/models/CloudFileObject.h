@@ -32,19 +32,49 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "CloudFileSharingState.h"
+#ifndef VM_CLOUD_FILE_OBJECT_H
+#define VM_CLOUD_FILE_OBJECT_H
 
-#include "CloudFilesController.h"
+#include <QObject>
 
-using namespace vm;
-using Self = CloudFileSharingState;
+#include "CloudFile.h"
+#include "CloudFilePropertiesModel.h"
+#include "GroupMembersModel.h"
 
-Self::CloudFileSharingState(CloudFilesController *controller, QState *parent) : QState(parent), m_controller(controller)
+namespace vm {
+
+class CloudFileObject : public QObject
 {
-}
+    Q_OBJECT
+    Q_PROPERTY(QString name READ name NOTIFY nameChanged)
+    Q_PROPERTY(bool isFolder READ isFolder NOTIFY isFolderChanged)
+    Q_PROPERTY(bool isShared READ isShared NOTIFY isSharedChanged)
+    Q_PROPERTY(CloudFilePropertiesModel *properties MEMBER m_propertiesModel CONSTANT)
+    Q_PROPERTY(GroupMembersModel *members MEMBER m_membersModel CONSTANT)
 
-void CloudFileSharingState::onEntry(QEvent *event)
-{
-    Q_UNUSED(event)
-    m_controller->loadCloudFileMembers();
-}
+public:
+    explicit CloudFileObject(QObject *parent);
+
+    void setCloudFile(const CloudFileHandler &cloudFile);
+    CloudFileHandler cloudFile() const;
+
+    QString name() const;
+    bool isFolder() const;
+    bool isShared() const;
+
+    void setMembers(const GroupMembers &members);
+
+signals:
+    void nameChanged(const QString &name);
+    void isFolderChanged(bool isFolder);
+    void isSharedChanged(bool isShared);
+
+private:
+    CloudFileHandler m_cloudFile;
+    CloudFilePropertiesModel *m_propertiesModel;
+    GroupMembersModel *m_membersModel;
+};
+
+} // namespace vm
+
+#endif // VM_CLOUD_FILE_OBJECT_H

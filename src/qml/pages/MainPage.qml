@@ -20,7 +20,8 @@ Page {
         readonly property var cloudFilesSelection: models.cloudFiles.selection
         readonly property bool cloudFilesHasSelection: cloudFilesSelection.hasSelection
         readonly property bool cloudFilesEmpty: models.cloudFiles.count === 0
-        readonly property bool cloudFilesShared: cloudFilesSelection.hasSelection // FIXME(fpohtmeh): implement
+        readonly property var cloudFile: controllers.cloudFiles.current
+        readonly property bool cloudFilesShared: cloudFilesSelection.selectedCount === 1 && cloudFile.isFolder && cloudFile.isShared
 
         readonly property string chatsTitle: app.organizationDisplayName
         readonly property string chatsDescription: qsTr("%1 Server").arg(app.organizationDisplayName)

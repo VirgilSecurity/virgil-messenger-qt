@@ -213,7 +213,9 @@ Control {
         }
 
         function openCloudFileSharingPage() {
-            stackView.push(page("CloudFileSharing"))
+            if (manager.previousState !== manager.addCloudFolderMembersState) {
+                stackView.push(page("CloudFileSharing"))
+            }
         }
     }
 

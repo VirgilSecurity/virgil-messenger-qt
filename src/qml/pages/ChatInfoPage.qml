@@ -24,6 +24,7 @@ Page {
     }
 
     header: PageHeader {
+        id: pageHeader
         title: d.chat.isGroup ? qsTr("Group info") : qsTr("Chat info")
         contextMenuVisible: d.chat.isGroup && (d.groupMembersEditable || !d.isOwnGroup)
         contextMenu: ContextMenu {
@@ -97,7 +98,7 @@ Page {
 
     MessageDialog {
         id: removeParticipantsDialog
-        title: qsTr("Group")
+        title: pageHeader.title
         text: qsTr("Remove participant(s)?")
         onAccepted: controllers.chats.removeSelectedMembers()
     }

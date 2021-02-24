@@ -530,6 +530,8 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/AccountSelectionModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ChatObject.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ChatsModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFileObject.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilePropertiesModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ContactsModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ContactsProxyModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/DiscoveredContactsModel.h
@@ -726,6 +728,8 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/models/AccountSelectionModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ChatObject.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ChatsModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFileObject.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilePropertiesModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFileOperationSource.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesTransfersModel.cpp

@@ -1,5 +1,4 @@
 import QtQuick 2.15
-import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
 import "../theme"
@@ -7,6 +6,7 @@ import "../theme"
 GridLayout {
     columns: 2
     columnSpacing: Theme.spacing
+    rowSpacing: Theme.spacing
 
     property alias model: repeater.model
 
