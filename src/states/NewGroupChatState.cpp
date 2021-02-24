@@ -42,10 +42,8 @@ using namespace vm;
 NewGroupChatState::NewGroupChatState(DiscoveredContactsModel *contactsModel, QState *parent)
     : OperationState(parent), m_contactsModel(contactsModel)
 {
-    connect(this, &NewGroupChatState::requestChatName, [this]() {
-        const Contacts contacts = m_contactsModel->selectedContactsModel()->getContacts();
-        emit contactsSelected(contacts);
-    });
+    connect(this, &NewGroupChatState::requestChatName,
+            [this]() { emit contactsSelected(m_contactsModel->getSelectedContacts()); });
 }
 
 void NewGroupChatState::onEntry(QEvent *event)
