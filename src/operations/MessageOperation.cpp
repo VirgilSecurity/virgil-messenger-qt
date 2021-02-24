@@ -59,15 +59,13 @@ MessageOperationFactory *MessageOperation::factory()
 
 void MessageOperation::apply(const MessageUpdate &update)
 {
-    m_message->applyUpdate(update);
+    const auto applied = m_message->applyUpdate(update);
     emit updateMessage(update);
 
-    if (m_message->applyUpdate(update)) {
-        if (MessageUpdateHasAttachmentExtrasJsonUpdate(update)) {
-            MessageAttachmentExtrasJsonUpdate extrasUpdate;
-            extrasUpdate.messageId = m_message->id();
-            extrasUpdate.extrasJson = m_message->contentAsAttachment()->extrasToJson(true);
-            emit updateMessage(extrasUpdate);
-        }
+    if (applied && MessageUpdateHasAttachmentExtrasJsonUpdate(update)) {
+        MessageAttachmentExtrasJsonUpdate extrasUpdate;
+        extrasUpdate.messageId = m_message->id();
+        extrasUpdate.extrasJson = m_message->contentAsAttachment()->extrasToJson(true);
+        emit updateMessage(extrasUpdate);
     }
 }
