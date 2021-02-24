@@ -14,9 +14,9 @@
         <file>qml/pages/MultiSelectContactsPage.qml</file>
         <file>qml/pages/NameGroupChatPage.qml</file>
         <file>qml/pages/NewChatPage.qml</file>
+        <file>qml/pages/NewCloudFolderMembersPage.qml</file>
         <file>qml/pages/NewGroupChatPage.qml</file>
         <file>qml/pages/OperationPage.qml</file>
-        <file>qml/pages/ShareCloudFilesPage.qml</file>
         <file>qml/pages/SelectContactsPage.qml</file>
         <file>qml/pages/SignInAsPage.qml</file>
         <file>qml/pages/SignInPage.qml</file>

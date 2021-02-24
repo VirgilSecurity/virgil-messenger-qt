@@ -50,6 +50,10 @@ class CloudFileListState : public QState
 public:
     CloudFileListState(CloudFilesController *controller, QState *parent);
 
+signals:
+    void requestNewFolder(const QString &name);
+    void requestNewSharedFolder(const QString &name);
+
 private:
     void onEntry(QEvent *);
     void onExit(QEvent *);

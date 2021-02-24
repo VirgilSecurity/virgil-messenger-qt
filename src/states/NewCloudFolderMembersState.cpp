@@ -32,22 +32,22 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_ADD_CLOUD_FOLDER_MEMBERS_STATE_H
-#define VM_ADD_CLOUD_FOLDER_MEMBERS_STATE_H
+#include "NewCloudFolderMembersState.h"
 
-#include "SelectContactsState.h"
+#include "CloudFilesController.h"
 
-namespace vm {
-class CloudFilesController;
+using namespace vm;
+using Self = NewCloudFolderMembersState;
 
-class AddCloudFolderMembersState : public SelectContactsState
+Self::NewCloudFolderMembersState(CloudFilesController *controller, DiscoveredContactsModel *contactsModel,
+                                 QState *parent)
+    : SelectContactsState(contactsModel, parent)
 {
-    Q_OBJECT
+    connect(this, &Self::contactsSelected,
+            [this, controller](auto contacts) { controller->createSharedFolder(m_name, contacts); });
+}
 
-public:
-    AddCloudFolderMembersState(CloudFilesController *cloudFilesController, DiscoveredContactsModel *contactsModel,
-                               QState *parent);
-};
-} // namespace vm
-
-#endif // VM_ADD_CLOUD_FOLDER_MEMBERS_STATE_H
+void Self::setName(const QString &name)
+{
+    m_name = name;
+}

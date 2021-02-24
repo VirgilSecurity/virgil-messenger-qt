@@ -493,6 +493,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/states/DownloadKeyState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/OperationState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/NewChatState.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/states/NewCloudFolderMembersState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/NewGroupChatState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/NameGroupChatState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/SelectContactsState.h
@@ -689,6 +690,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/states/CloudFileListState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/DownloadKeyState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/NewChatState.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/states/NewCloudFolderMembersState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/NewGroupChatState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/NameGroupChatState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/SelectContactsState.cpp

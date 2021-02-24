@@ -181,6 +181,7 @@ void Self::onPushDeleteFiles(const CloudFiles &files)
 
 void Self::onPushShareFiles(const CloudFiles &files, const Contacts &contacts)
 {
+    // FIXME(fpohtmeh): rework
     auto source = std::make_shared<CloudFileOperationSource>(SourceType::Share);
     source->setPriority(OperationSource::Priority::Highest);
     source->setFiles(files);

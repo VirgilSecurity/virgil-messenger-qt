@@ -32,22 +32,27 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_ADD_CLOUD_FOLDER_MEMBERS_STATE_H
-#define VM_ADD_CLOUD_FOLDER_MEMBERS_STATE_H
+#ifndef VM_NEW_CLOUD_FOLDER_MEMBERS_STATE_H
+#define VM_NEW_CLOUD_FOLDER_MEMBERS_STATE_H
 
 #include "SelectContactsState.h"
 
 namespace vm {
 class CloudFilesController;
 
-class AddCloudFolderMembersState : public SelectContactsState
+class NewCloudFolderMembersState : public SelectContactsState
 {
     Q_OBJECT
 
 public:
-    AddCloudFolderMembersState(CloudFilesController *cloudFilesController, DiscoveredContactsModel *contactsModel,
+    NewCloudFolderMembersState(CloudFilesController *controller, DiscoveredContactsModel *contactsModel,
                                QState *parent);
+
+    void setName(const QString &name);
+
+private:
+    QString m_name;
 };
 } // namespace vm
 
-#endif // VM_ADD_CLOUD_FOLDER_MEMBERS_STATE_H
+#endif // VM_NEW_CLOUD_FOLDER_MEMBERS_STATE_H

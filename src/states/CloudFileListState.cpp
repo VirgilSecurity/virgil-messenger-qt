@@ -38,10 +38,11 @@
 #include "CloudFilesModel.h"
 
 using namespace vm;
+using Self = CloudFileListState;
 
-CloudFileListState::CloudFileListState(CloudFilesController *controller, QState *parent)
-    : QState(parent), m_controller(controller)
+Self::CloudFileListState(CloudFilesController *controller, QState *parent) : QState(parent), m_controller(controller)
 {
+    connect(this, &Self::requestNewFolder, controller, &CloudFilesController::createFolder);
 }
 
 void CloudFileListState::onEntry(QEvent *)

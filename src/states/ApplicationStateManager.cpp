@@ -70,6 +70,8 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
       m_downloadKeyState(new DownloadKeyState(controllers->users(), this)),
       m_cloudFileListState(new CloudFileListState(controllers->cloudFiles(), this)),
       m_newChatState(new NewChatState(controllers->chats(), models->discoveredContacts(), this)),
+      m_newCloudFolderMembersState(
+              new NewCloudFolderMembersState(controllers->cloudFiles(), models->discoveredContacts(), this)),
       m_newGroupChatState(new NewGroupChatState(models->discoveredContacts(), this)),
       m_nameGroupChatState(new NameGroupChatState(controllers->chats(), this)),
       m_signInAsState(new SignInAsState(this)),
@@ -103,6 +105,7 @@ void Self::registerStatesMetaTypes()
     qRegisterMetaType<DownloadKeyState *>("DownloadKeyState*");
     qRegisterMetaType<CloudFileListState *>("CloudFileListState*");
     qRegisterMetaType<NewChatState *>("NewChatState*");
+    qRegisterMetaType<NewCloudFolderMembersState *>("NewCloudFolderMembersState*");
     qRegisterMetaType<NewGroupChatState *>("NewGroupChatState*");
     qRegisterMetaType<NameGroupChatState *>("NameGroupChatState*");
     qRegisterMetaType<SignInAsState *>("SignInAsState*");
@@ -152,7 +155,7 @@ void Self::addTransitions()
     addTwoSideTransition(m_chatListState, chats, &ChatsController::chatOpened, m_chatState);
     m_chatListState->addTransition(this, &Self::cloudFileListRequested, m_cloudFileListState);
 
-    addTwoSideTransition(m_newGroupChatState, m_newGroupChatState, &NewGroupChatState::requestChatName,
+    addTwoSideTransition(m_newGroupChatState, m_newGroupChatState, &NewGroupChatState::contactsSelected,
                          m_nameGroupChatState);
     connect(m_newGroupChatState, &NewGroupChatState::contactsSelected, m_nameGroupChatState,
             &NameGroupChatState::setContacts);
@@ -161,8 +164,15 @@ void Self::addTransitions()
 
     addTwoSideTransition(m_cloudFileListState, users, &UsersController::accountSettingsRequested,
                          m_accountSettingsState);
+    addTwoSideTransition(m_cloudFileListState, m_cloudFileListState, &CloudFileListState::requestNewSharedFolder,
+                         m_newCloudFolderMembersState);
+    connect(m_cloudFileListState, &CloudFileListState::requestNewSharedFolder, m_newCloudFolderMembersState,
+            &NewCloudFolderMembersState::setName);
     m_cloudFileListState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
     m_cloudFileListState->addTransition(this, &Self::chatListRequested, m_chatListState);
+
+    connect(m_newCloudFolderMembersState, &NewCloudFolderMembersState::contactsSelected, this,
+            &ApplicationStateManager::goBack);
 
     addTwoSideTransition(m_accountSettingsState, m_accountSettingsState, &AccountSettingsState::requestBackupKey,
                          m_backupKeyState);
@@ -187,7 +197,8 @@ void Self::addTransitions()
     addTwoSideTransition(m_chatInfoState, m_chatInfoState, &ChatInfoState::addMembersRequested,
                          m_addGroupChatMembersState);
 
-    connect(m_addGroupChatMembersState, &AddGroupChatMembersState::addMembers, this, &ApplicationStateManager::goBack);
+    connect(m_addGroupChatMembersState, &AddGroupChatMembersState::contactsSelected, this,
+            &ApplicationStateManager::goBack);
 
     m_signUpState->addTransition(users, &UsersController::signedIn, m_chatListState);
 

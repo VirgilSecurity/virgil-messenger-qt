@@ -204,8 +204,12 @@ Control {
             stackView.push(page("DownloadKey"))
         }
 
-        function openShareCloudFilesPage() {
-            stackView.push(page("ShareCloudFiles"))
+        function openNewCloudFolderMembersPage() {
+            stackView.push(page("NewCloudFolderMembers"))
+        }
+
+        function openAddCloudFolderMembersPage() {
+            stackView.push(page("AddCloudFolderMembers"))
         }
     }
 
@@ -229,6 +233,7 @@ Control {
         manager.signInUsernameState.entered.connect(d.openSignInUsernamePage)
         manager.signUpState.entered.connect(d.openSignUpPage)
         manager.downloadKeyState.entered.connect(d.openDownloadKeyPage)
-        manager.shareCloudFilesState.entered.connect(d.openShareCloudFilesPage)
+        manager.newCloudFolderMembersState.entered.connect(d.openNewCloudFolderMembersPage)
+        manager.addCloudFolderMembersState.entered.connect(d.openAddCloudFolderMembersPage)
     }
 }

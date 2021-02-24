@@ -104,24 +104,25 @@ void Self::rejectGroupInvitation()
     emit groupInvitationRejected();
 }
 
-void ChatsController::addMembers(const Contacts &contacts)
+void Self::addMembers(const Contacts &contacts)
 {
     const GroupId groupId(currentChat()->id());
     const auto groupMembers = ContactsToGroupMembers(groupId, contacts);
-    // TODO: call in core messenger
+    qCWarning(lcController) << "ChatsController::addMembers is under development"
+                            << Utils::printableContactsList(contacts);
 }
 
-void ChatsController::removeSelectedMembers()
+void Self::removeSelectedMembers()
 {
     const GroupId groupId(currentChat()->id());
     const auto groupMembers = m_chatObject->selectedGroupMembers();
-    // TODO: call in core messenger
+    qCWarning(lcController) << "ChatsController::removeSelectedMembers is under development";
 }
 
-void ChatsController::leaveGroup()
+void Self::leaveGroup()
 {
     const GroupId groupId(currentChat()->id());
-    // TODO: call in core messenger
+    qCWarning(lcController) << "ChatsController::leaveGroup is under development";
 }
 
 void Self::loadChats()

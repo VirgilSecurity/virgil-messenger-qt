@@ -170,17 +170,21 @@ void Self::createFolder(const QString &name)
     m_models->cloudFilesQueue()->pushCreateFolder(name, m_hierarchy.back());
 }
 
+void Self::createSharedFolder(const QString &name, const Contacts &contacts)
+{
+    qCWarning(lcController) << "CloudFilesController::createSharedFolder is under development" << name
+                            << Utils::printableContactsList(contacts);
+}
+
 void Self::addMembers(const Contacts &contacts)
 {
-    qDebug() << "CloudFilesController::addMembers is under development";
-    Q_UNUSED(contacts)
-    // FIXME(fpohtmeh): implement
+    qCWarning(lcController) << "CloudFilesController::addMembers is under development"
+                            << Utils::printableContactsList(contacts);
 }
 
 void Self::removeSelectedMembers()
 {
-    qDebug() << "CloudFilesController::removeSelectedMembers is under development";
-    // FIXME(fpohtmeh): implement
+    qCWarning(lcController) << "CloudFilesController::removeSelectedMembers is under development";
 }
 
 void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)

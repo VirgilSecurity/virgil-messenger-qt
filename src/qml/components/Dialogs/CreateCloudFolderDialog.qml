@@ -7,9 +7,11 @@ InputDialog {
     label: qsTr("New directory")
     placeholderText: qsTr("Enter name")
     validator: app.validator.reDirectoryName
-    onAccepted: controllers.cloudFiles.createFolder(text)
+    onAccepted: sharedCheckBox.checked ? appState.requestNewSharedFolder(text) : appState.requestNewFolder(text)
+    onClosed: sharedCheckBox.checked = false
 
     StyledCheckBox {
+        id: sharedCheckBox
         text: qsTr("Shared")
     }
 }

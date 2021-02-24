@@ -214,6 +214,15 @@ QString Utils::printableLoadProgress(quint64 loaded, quint64 total)
     return QString("%1% (%2/%3)").arg(qRound(100 * qMin<double>(loaded, total) / total)).arg(loaded).arg(total);
 }
 
+QString Utils::printableContactsList(const Contacts &contacts)
+{
+    QStringList list;
+    for (auto &c : contacts) {
+        list << c->displayName();
+    }
+    return list.join(QLatin1String(","));
+}
+
 void Utils::printThreadId(const QString &message)
 {
 #ifdef VS_DEVMODE

@@ -50,6 +50,7 @@
 #include "DownloadKeyState.h"
 #include "EditProfileState.h"
 #include "NewChatState.h"
+#include "NewCloudFolderMembersState.h"
 #include "NewGroupChatState.h"
 #include "NameGroupChatState.h"
 #include "SignInAsState.h"
@@ -81,6 +82,7 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(DownloadKeyState *downloadKeyState MEMBER m_downloadKeyState CONSTANT)
     Q_PROPERTY(CloudFileListState *cloudFileListState MEMBER m_cloudFileListState CONSTANT)
     Q_PROPERTY(NewChatState *newChatState MEMBER m_newChatState CONSTANT)
+    Q_PROPERTY(NewCloudFolderMembersState *newCloudFolderMembersState MEMBER m_newCloudFolderMembersState CONSTANT)
     Q_PROPERTY(NewGroupChatState *newGroupChatState MEMBER m_newGroupChatState CONSTANT)
     Q_PROPERTY(NameGroupChatState *nameGroupChatState MEMBER m_nameGroupChatState CONSTANT)
     Q_PROPERTY(SignInAsState *signInAsState MEMBER m_signInAsState CONSTANT)
@@ -144,6 +146,7 @@ private:
     DownloadKeyState *m_downloadKeyState;
     CloudFileListState *m_cloudFileListState;
     NewChatState *m_newChatState;
+    NewCloudFolderMembersState *m_newCloudFolderMembersState;
     NewGroupChatState *m_newGroupChatState;
     NameGroupChatState *m_nameGroupChatState;
     SignInAsState *m_signInAsState;
