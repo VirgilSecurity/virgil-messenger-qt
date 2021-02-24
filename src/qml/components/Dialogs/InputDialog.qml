@@ -2,7 +2,7 @@ import QtQuick 2.15
 
 import "../" // components
 
-TemplateDialog {
+StyledDialog {
     property alias label: formInput.label
     property alias text: formInput.text
     property alias placeholderText: formInput.placeholder

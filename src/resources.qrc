@@ -102,15 +102,18 @@
         <file>qml/resources/sounds/notification.wav</file>
         <file>qml/resources/sounds/message-received.wav</file>
         <file>qml/resources/sounds/message-sent.wav</file>
-        <!-- Others -->
-        <file>qml/components/Avatar.qml</file>
-        <file>qml/components/AttachmentPreview.qml</file>
-        <file>qml/components/FlowView.qml</file>
-        <file>qml/components/CommonHelpers/TextInCircle.qml</file>
-        <file>qml/components/Popups/Popup.qml</file>
-        <file>qml/components/LineProgressBar.qml</file>
+        <!-- Dialogs -->
+        <file>qml/components/Dialogs/SendReportDialog.qml</file>
+        <file>qml/components/Dialogs/MessageDialog.qml</file>
+        <file>qml/components/Dialogs/InputDialog.qml</file>
+        <file>qml/components/Dialogs/GroupInvitationDialog.qml</file>
+        <file>qml/components/Dialogs/SelectAttachmentsDialog.qml</file>
+        <file>qml/components/Dialogs/CreateCloudFolderDialog.qml</file>
+        <file>qml/components/Dialogs/StyledDialog.qml</file>
+        <!-- Main -->
         <file>qml/main.qml</file>
         <file>qml/MainView.qml</file>
+        <!-- Form -->
         <file>qml/components/Form.qml</file>
         <file>qml/components/FormLabel.qml</file>
         <file>qml/components/FormInput.qml</file>
@@ -118,6 +121,15 @@
         <file>qml/components/Footer.qml</file>
         <file>qml/components/FormSecondaryButton.qml</file>
         <file>qml/components/FormVendor.qml</file>
+        <file>qml/components/FormImage.qml</file>
+        <file>qml/components/FormSubtitle.qml</file>
+        <!-- Others -->
+        <file>qml/components/Avatar.qml</file>
+        <file>qml/components/AttachmentPreview.qml</file>
+        <file>qml/components/FlowView.qml</file>
+        <file>qml/components/CommonHelpers/TextInCircle.qml</file>
+        <file>qml/components/Popups/Popup.qml</file>
+        <file>qml/components/LineProgressBar.qml</file>
         <file>qml/components/AccountSelection.qml</file>
         <file>qml/components/MessagesList.qml</file>
         <file>qml/components/MessagesFlickToBottomButton.qml</file>
@@ -141,8 +153,6 @@
         <file>qml/components/ContextMenuItem.qml</file>
         <file>qml/components/ContextMenuSeparator.qml</file>
         <file>qml/components/ImageButton.qml</file>
-        <file>qml/components/FormImage.qml</file>
-        <file>qml/components/FormSubtitle.qml</file>
         <file>qml/components/SidebarButton.qml</file>
         <file>qml/components/SidebarPanel.qml</file>
         <file>qml/components/CommonHelpers/IconWithText.qml</file>
@@ -151,12 +161,6 @@
         <file>qml/components/UserNameTextField.qml</file>
         <file>qml/components/UserNameFormInput.qml</file>
         <file>qml/components/UnreadMessagesSeparator.qml</file>
-        <file>qml/components/Dialogs/SendReportDialog.qml</file>
-        <file>qml/components/Dialogs/MessageDialog.qml</file>
-        <file>qml/components/Dialogs/InputDialog.qml</file>
-        <file>qml/components/Dialogs/GroupInvitationDialog.qml</file>
-        <file>qml/components/Dialogs/SelectAttachmentsDialog.qml</file>
-        <file>qml/components/Dialogs/CreateCloudFolderDialog.qml</file>
         <file>qml/components/CircleProgressBar.qml</file>
         <file>qml/components/TextScrollView.qml</file>
         <file>qml/components/AttachmentPicker.qml</file>
@@ -164,7 +168,6 @@
         <file>qml/components/KeyboardHandler.qml</file>
         <file>qml/components/ListDelegate.qml</file>
         <file>qml/components/ModelListView.qml</file>
-        <file>qml/components/Dialogs/TemplateDialog.qml</file>
         <file>qml/components/ServerSelectionRow.qml</file>
         <file>qml/components/ContactsFlowView.qml</file>
         <file>qml/components/HorizontalRule.qml</file>
