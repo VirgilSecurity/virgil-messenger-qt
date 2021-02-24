@@ -35,22 +35,13 @@
 #include "AddCloudFolderMembersState.h"
 
 #include "CloudFilesController.h"
-#include "DiscoveredContactsModel.h"
-#include "ListSelectionModel.h"
 
 using namespace vm;
+using Self = AddCloudFolderMembersState;
 
-AddCloudFolderMembersState::AddCloudFolderMembersState(CloudFilesController *cloudFilesController,
-                                                       DiscoveredContactsModel *contactsModel, QState *parent)
-    : OperationState(parent), m_contactsModel(contactsModel)
+Self::AddCloudFolderMembersState(CloudFilesController *cloudFilesController, DiscoveredContactsModel *contactsModel,
+                                 QState *parent)
+    : SelectContactsState(contactsModel, parent)
 {
-    connect(this, &AddCloudFolderMembersState::addMembers, cloudFilesController,
-            &CloudFilesController::addSelectedMembers);
-}
-
-void AddCloudFolderMembersState::onEntry(QEvent *event)
-{
-    Q_UNUSED(event)
-    m_contactsModel->reload();
-    m_contactsModel->selection()->setMultiSelect(true);
+    connect(this, &Self::contactsSelected, cloudFilesController, &CloudFilesController::addMembers);
 }

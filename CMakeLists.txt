@@ -495,7 +495,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/states/NewChatState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/NewGroupChatState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/NameGroupChatState.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/states/ShareCloudFilesState.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/states/SelectContactsState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/SignInAsState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/SignInState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/SignInUsernameState.h
@@ -691,7 +691,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/states/NewChatState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/NewGroupChatState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/NameGroupChatState.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/states/ShareCloudFilesState.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/states/SelectContactsState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/SignInAsState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/SignInState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/SignInUsernameState.cpp

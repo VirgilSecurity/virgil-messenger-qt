@@ -35,21 +35,12 @@
 #include "AddGroupChatMembersState.h"
 
 #include "ChatsController.h"
-#include "DiscoveredContactsModel.h"
-#include "ListSelectionModel.h"
 
 using namespace vm;
+using Self = AddGroupChatMembersState;
 
-AddGroupChatMembersState::AddGroupChatMembersState(ChatsController *chatsController,
-                                                   DiscoveredContactsModel *contactsModel, QState *parent)
-    : OperationState(parent), m_contactsModel(contactsModel)
+Self::AddGroupChatMembersState(ChatsController *chatsController, DiscoveredContactsModel *contactsModel, QState *parent)
+    : SelectContactsState(contactsModel, parent)
 {
-    connect(this, &AddGroupChatMembersState::addMembers, chatsController, &ChatsController::addSelectedMembers);
-}
-
-void AddGroupChatMembersState::onEntry(QEvent *event)
-{
-    Q_UNUSED(event)
-    m_contactsModel->reload();
-    m_contactsModel->selection()->setMultiSelect(true);
+    connect(this, &Self::contactsSelected, chatsController, &ChatsController::addMembers);
 }

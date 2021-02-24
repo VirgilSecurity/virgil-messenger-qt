@@ -35,13 +35,12 @@
 #ifndef VM_ADD_CLOUD_FOLDER_MEMBERS_STATE_H
 #define VM_ADD_CLOUD_FOLDER_MEMBERS_STATE_H
 
-#include "OperationState.h"
+#include "SelectContactsState.h"
 
 namespace vm {
 class CloudFilesController;
-class DiscoveredContactsModel;
 
-class AddCloudFolderMembersState : public OperationState
+class AddCloudFolderMembersState : public SelectContactsState
 {
     Q_OBJECT
 
@@ -51,11 +50,6 @@ public:
 
 signals:
     void addMembers();
-
-private:
-    void onEntry(QEvent *event);
-
-    DiscoveredContactsModel *m_contactsModel;
 };
 } // namespace vm
 

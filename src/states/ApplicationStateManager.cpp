@@ -72,7 +72,6 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
       m_newChatState(new NewChatState(controllers->chats(), models->discoveredContacts(), this)),
       m_newGroupChatState(new NewGroupChatState(models->discoveredContacts(), this)),
       m_nameGroupChatState(new NameGroupChatState(controllers->chats(), this)),
-      m_shareCloudFilesState(new ShareCloudFilesState(models->discoveredContacts(), this)),
       m_signInAsState(new SignInAsState(this)),
       m_signInUsernameState(new SignInUsernameState(controllers->users(), validator, this)),
       m_signUpState(new SignUpState(controllers->users(), validator, this)),
@@ -106,7 +105,6 @@ void Self::registerStatesMetaTypes()
     qRegisterMetaType<NewChatState *>("NewChatState*");
     qRegisterMetaType<NewGroupChatState *>("NewGroupChatState*");
     qRegisterMetaType<NameGroupChatState *>("NameGroupChatState*");
-    qRegisterMetaType<ShareCloudFilesState *>("ShareCloudFilesState*");
     qRegisterMetaType<SignInAsState *>("SignInAsState*");
     qRegisterMetaType<SignInUsernameState *>("SignInUsernameState*");
     qRegisterMetaType<SignUpState *>("SignUpState*");
@@ -132,8 +130,6 @@ void Self::addTransitions()
     connect(this, &Self::openChatList, this, std::bind(&Self::chatListRequested, this, QPrivateSignal()),
             Qt::QueuedConnection);
     connect(this, &Self::openCloudFileList, this, std::bind(&Self::cloudFileListRequested, this, QPrivateSignal()),
-            Qt::QueuedConnection);
-    connect(this, &Self::shareCloudFiles, this, std::bind(&Self::shareCloudFilesRequested, this, QPrivateSignal()),
             Qt::QueuedConnection);
 
     m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::userNotSelected,
@@ -167,8 +163,6 @@ void Self::addTransitions()
                          m_accountSettingsState);
     m_cloudFileListState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
     m_cloudFileListState->addTransition(this, &Self::chatListRequested, m_chatListState);
-    addTwoSideTransition(m_cloudFileListState, this, &ApplicationStateManager::shareCloudFilesRequested,
-                         m_shareCloudFilesState);
 
     addTwoSideTransition(m_accountSettingsState, m_accountSettingsState, &AccountSettingsState::requestBackupKey,
                          m_backupKeyState);

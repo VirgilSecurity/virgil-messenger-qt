@@ -41,7 +41,6 @@
 #include "database/GroupMembersTable.h"
 #include "database/GroupsTable.h"
 #include "models/ChatsModel.h"
-#include "models/DiscoveredContactsModel.h"
 #include "models/MessagesModel.h"
 #include "models/Models.h"
 #include "Controller.h"
@@ -105,10 +104,10 @@ void Self::rejectGroupInvitation()
     emit groupInvitationRejected();
 }
 
-void ChatsController::addSelectedMembers()
+void ChatsController::addMembers(const Contacts &contacts)
 {
     const GroupId groupId(currentChat()->id());
-    const auto groupMembers = ContactsToGroupMembers(groupId, m_models->discoveredContacts()->selectedContacts());
+    const auto groupMembers = ContactsToGroupMembers(groupId, contacts);
     // TODO: call in core messenger
 }
 

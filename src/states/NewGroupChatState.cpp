@@ -34,21 +34,5 @@
 
 #include "NewGroupChatState.h"
 
-#include "DiscoveredContactsModel.h"
-#include "ListSelectionModel.h"
-
 using namespace vm;
-
-NewGroupChatState::NewGroupChatState(DiscoveredContactsModel *contactsModel, QState *parent)
-    : OperationState(parent), m_contactsModel(contactsModel)
-{
-    connect(this, &NewGroupChatState::requestChatName,
-            [this]() { emit contactsSelected(m_contactsModel->getSelectedContacts()); });
-}
-
-void NewGroupChatState::onEntry(QEvent *event)
-{
-    Q_UNUSED(event)
-    m_contactsModel->reload();
-    m_contactsModel->selection()->setMultiSelect(true);
-}
+using Self = NewGroupChatState;

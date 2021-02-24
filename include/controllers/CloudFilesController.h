@@ -37,6 +37,7 @@
 
 #include <QObject>
 
+#include "Contact.h"
 #include "CloudFileSystem.h"
 #include "CloudFilesUpdate.h"
 
@@ -69,7 +70,7 @@ public:
     Q_INVOKABLE void addFiles(const QVariant &fileUrls);
     Q_INVOKABLE void deleteFiles();
     Q_INVOKABLE void createFolder(const QString &name);
-    Q_INVOKABLE void addSelectedMembers();
+    Q_INVOKABLE void addMembers(const Contacts &contacts);
     Q_INVOKABLE void removeSelectedMembers();
 
 signals:

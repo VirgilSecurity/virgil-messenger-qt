@@ -35,27 +35,15 @@
 #ifndef VM_NEWGROUPCHATSTATE_H
 #define VM_NEWGROUPCHATSTATE_H
 
-#include "OperationState.h"
-#include "Contact.h"
+#include "SelectContactsState.h"
 
 namespace vm {
-class DiscoveredContactsModel;
-
-class NewGroupChatState : public OperationState
+class NewGroupChatState : public SelectContactsState
 {
     Q_OBJECT
 
 public:
-    NewGroupChatState(DiscoveredContactsModel *contactsModel, QState *parent);
-
-signals:
-    void requestChatName();
-    void contactsSelected(const Contacts &contacts);
-
-private:
-    void onEntry(QEvent *event);
-
-    DiscoveredContactsModel *m_contactsModel;
+    using SelectContactsState::SelectContactsState;
 };
 } // namespace vm
 

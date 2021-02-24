@@ -45,7 +45,7 @@ Page {
 
             ContextMenuItem {
                 text: qsTr("Leave group")
-                visible: !d.isOwnGroup
+                visible: chat.isGroup && !d.isOwnGroup
                 onTriggered: controllers.chats.leaveGroup()
             }
         }

@@ -170,13 +170,16 @@ void Self::createFolder(const QString &name)
     m_models->cloudFilesQueue()->pushCreateFolder(name, m_hierarchy.back());
 }
 
-void CloudFilesController::addSelectedMembers()
+void Self::addMembers(const Contacts &contacts)
 {
+    qDebug() << "CloudFilesController::addMembers is under development";
+    Q_UNUSED(contacts)
     // FIXME(fpohtmeh): implement
 }
 
-void CloudFilesController::removeSelectedMembers()
+void Self::removeSelectedMembers()
 {
+    qDebug() << "CloudFilesController::removeSelectedMembers is under development";
     // FIXME(fpohtmeh): implement
 }
 
@@ -186,7 +189,7 @@ void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)
     m_models->cloudFilesQueue()->pushListFolder(hierarchy.back());
 }
 
-QString CloudFilesController::displayPath() const
+QString Self::displayPath() const
 {
     QStringList names;
     for (auto &folder : m_hierarchy) {
@@ -195,12 +198,12 @@ QString CloudFilesController::displayPath() const
     return names.join(QLatin1String(" / "));
 }
 
-bool CloudFilesController::isRoot() const
+bool Self::isRoot() const
 {
     return m_hierarchy.size() == 1;
 }
 
-ModifiableCloudFileHandler CloudFilesController::rootFolder() const
+ModifiableCloudFileHandler Self::rootFolder() const
 {
     return m_hierarchy.front();
 }

@@ -7,8 +7,6 @@ SelectContactsPage {
 
     property alias headerTitle: pageHeader.title
 
-    signal finished()
-
     header: PageHeader {
         id: pageHeader
         title: qsTr("Add members")
@@ -18,7 +16,7 @@ SelectContactsPage {
         rightControl: ImageButton {
             image: "Send"
             visible: selectedContacts.count
-            onClicked: root.finished()
+            onClicked: appState.finishSelection()
         }
     }
 }
