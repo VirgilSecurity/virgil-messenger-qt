@@ -150,12 +150,7 @@ Page {
         onAccepted: controllers.cloudFiles.deleteFiles()
     }
 
-    InputDialog {
+    CreateCloudFolderDialog {
         id: createCloudFolderDialog
-        title: qsTr("File Manager")
-        label: qsTr("New directory")
-        placeholderText: qsTr("Enter name")
-        validator: app.validator.reDirectoryName
-        onAccepted: controllers.cloudFiles.createFolder(text)
     }
 }

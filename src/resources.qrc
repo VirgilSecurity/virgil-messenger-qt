@@ -156,6 +156,7 @@
         <file>qml/components/Dialogs/InputDialog.qml</file>
         <file>qml/components/Dialogs/GroupInvitationDialog.qml</file>
         <file>qml/components/Dialogs/SelectAttachmentsDialog.qml</file>
+        <file>qml/components/Dialogs/CreateCloudFolderDialog.qml</file>
         <file>qml/components/CircleProgressBar.qml</file>
         <file>qml/components/TextScrollView.qml</file>
         <file>qml/components/AttachmentPicker.qml</file>
@@ -173,6 +174,7 @@
         <file>qml/components/TransfersPanel.qml</file>
         <file>qml/components/ListStatusButton.qml</file>
         <file>qml/components/PageHeader.qml</file>
+        <file>qml/components/StyledCheckBox.qml</file>
         <!-- Base -->
         <file>qml/base/AttachmentTypes.qml</file>
         <file>qml/base/Platform.qml</file>
