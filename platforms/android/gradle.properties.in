@@ -2,5 +2,5 @@ org.gradle.jvmargs=-Xmx1536M
 android.useAndroidX=true
 android.enableJetifier=true
 androidBuildToolsVersion=28.0.2
-androidCompileSdkVersion=28
+androidCompileSdkVersion=29
 systemProp.firebase_cpp_sdk.dir=@VS_FIREBASE_DIR@
