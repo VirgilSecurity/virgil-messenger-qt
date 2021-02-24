@@ -40,6 +40,7 @@
 #include "AccountSelectionState.h"
 #include "AccountSettingsState.h"
 #include "AddGroupChatMembersState.h"
+#include "AddCloudFolderMembersState.h"
 #include "AttachmentPreviewState.h"
 #include "BackupKeyState.h"
 #include "ChatInfoState.h"
@@ -69,6 +70,7 @@ class ApplicationStateManager : public QStateMachine
     Q_OBJECT
     Q_PROPERTY(AccountSelectionState *accountSelectionState MEMBER m_accountSelectionState CONSTANT)
     Q_PROPERTY(AccountSettingsState *accountSettingsState MEMBER m_accountSettingsState CONSTANT)
+    Q_PROPERTY(AddCloudFolderMembersState *addCloudFolderMembersState MEMBER m_addCloudFolderMembersState CONSTANT)
     Q_PROPERTY(AddGroupChatMembersState *addGroupChatMembersState MEMBER m_addGroupChatMembersState CONSTANT)
     Q_PROPERTY(AttachmentPreviewState *attachmentPreviewState MEMBER m_attachmentPreviewState CONSTANT)
     Q_PROPERTY(BackupKeyState *backupKeyState MEMBER m_backupKeyState CONSTANT)
@@ -101,7 +103,7 @@ signals:
     void goBack();
     void openChatList();
     void openCloudFileList();
-    void shareCloudFiles();
+    void shareCloudFiles(); // FIXME(fpohtmeh): remove
 
     void currentStateChanged(QState *);
     void previousStateChanged(QState *);
@@ -134,6 +136,7 @@ private:
 
     AccountSelectionState *m_accountSelectionState;
     AccountSettingsState *m_accountSettingsState;
+    AddCloudFolderMembersState *m_addCloudFolderMembersState;
     AddGroupChatMembersState *m_addGroupChatMembersState;
     AttachmentPreviewState *m_attachmentPreviewState;
     BackupKeyState *m_backupKeyState;

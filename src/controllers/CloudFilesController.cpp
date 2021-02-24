@@ -170,11 +170,14 @@ void Self::createFolder(const QString &name)
     m_models->cloudFilesQueue()->pushCreateFolder(name, m_hierarchy.back());
 }
 
-void Self::shareFiles()
+void CloudFilesController::addSelectedMembers()
 {
-    const auto files = m_models->cloudFiles()->selectedFiles();
-    const auto contacts = m_models->discoveredContacts()->getSelectedContacts();
-    m_models->cloudFilesQueue()->pushShareFiles(files, contacts);
+    // FIXME(fpohtmeh): implement
+}
+
+void CloudFilesController::removeSelectedMembers()
+{
+    // FIXME(fpohtmeh): implement
 }
 
 void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)

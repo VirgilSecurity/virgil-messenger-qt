@@ -72,6 +72,7 @@ Page {
         }
 
         ContextMenuItem {
+            // FIXME(fpohtmeh): remove
             text: qsTr("Share to...")
             onTriggered: app.stateManager.shareCloudFiles()
             visible: d.isCloudFileList && d.cloudFilesHasSelection

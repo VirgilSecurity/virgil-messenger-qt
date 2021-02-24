@@ -56,6 +56,8 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
       m_settings(m_messenger->settings()),
       m_accountSelectionState(new AccountSelectionState(controllers->users(), validator, this)),
       m_accountSettingsState(new AccountSettingsState(this)),
+      m_addCloudFolderMembersState(
+              new AddCloudFolderMembersState(controllers->cloudFiles(), models->discoveredContacts(), this)),
       m_addGroupChatMembersState(
               new AddGroupChatMembersState(controllers->chats(), models->discoveredContacts(), this)),
       m_attachmentPreviewState(new AttachmentPreviewState(this)),
@@ -90,6 +92,7 @@ void Self::registerStatesMetaTypes()
     // Qt requires registering to avoid namespace issues
     qRegisterMetaType<AccountSelectionState *>("AccountSelectionState*");
     qRegisterMetaType<AccountSettingsState *>("AccountSettingsState*");
+    qRegisterMetaType<AddCloudFolderMembersState *>("AddCloudFolderMembersState*");
     qRegisterMetaType<AddGroupChatMembersState *>("AddGroupChatMembersState*");
     qRegisterMetaType<AttachmentPreviewState *>("AttachmentPreviewState*");
     qRegisterMetaType<BackupKeyState *>("BackupKeyState*");
