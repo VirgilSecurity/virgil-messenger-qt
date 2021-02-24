@@ -19,6 +19,8 @@ Page {
         readonly property bool isCloudFileList: appState === manager.cloudFileListState
         readonly property var cloudFilesSelection: models.cloudFiles.selection
         readonly property bool cloudFilesHasSelection: cloudFilesSelection.hasSelection
+        readonly property bool cloudFilesEmpty: models.cloudFiles.count === 0
+        readonly property bool cloudFilesShared: cloudFilesSelection.hasSelection // FIXME(fpohtmeh): implement
 
         readonly property string chatsTitle: app.organizationDisplayName
         readonly property string chatsDescription: qsTr("%1 Server").arg(app.organizationDisplayName)
@@ -67,6 +69,12 @@ Page {
             visible: d.isCloudFileList
         }
 
+        ContextMenuItem {
+            text: qsTr("Sharing")
+            onTriggered: appState.requestSharingInfo();
+            visible: d.cloudFilesShared
+        }
+
         ContextMenuSeparator {
             visible: d.isCloudFileList
         }
@@ -78,19 +86,21 @@ Page {
         }
 
         ContextMenuSeparator {
-            visible: d.isCloudFileList
+            visible: deleteCloudFilesItem.visible || selectAllCloudFilesItem.visible
         }
 
         ContextMenuItem {
+            id: deleteCloudFilesItem
             text: qsTr("Delete")
             onTriggered: deleteCloudFilesDialog.open()
             visible: d.isCloudFileList && d.cloudFilesHasSelection
         }
 
         ContextMenuItem {
+            id: selectAllCloudFilesItem
             text: qsTr("Select All")
             onTriggered: d.cloudFilesSelection.selectAll()
-            visible: d.isCloudFileList && !d.cloudFilesSelection.hasSelection // TODO(fpohtmeh): hide for empty list
+            visible: d.isCloudFileList && !d.cloudFilesEmpty && !d.cloudFilesHasSelection
         }
     }
 

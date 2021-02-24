@@ -211,6 +211,10 @@ Control {
         function openAddCloudFolderMembersPage() {
             stackView.push(page("AddCloudFolderMembers"))
         }
+
+        function openCloudFileSharingPage() {
+            stackView.push(page("CloudFileSharing"))
+        }
     }
 
     Component.onCompleted: {
@@ -235,5 +239,6 @@ Control {
         manager.downloadKeyState.entered.connect(d.openDownloadKeyPage)
         manager.newCloudFolderMembersState.entered.connect(d.openNewCloudFolderMembersPage)
         manager.addCloudFolderMembersState.entered.connect(d.openAddCloudFolderMembersPage)
+        manager.cloudFileSharingState.entered.connect(d.openCloudFileSharingPage)
     }
 }

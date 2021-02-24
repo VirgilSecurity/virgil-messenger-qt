@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,35 +32,29 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CLOUDFILELISTSTATE_H
-#define VM_CLOUDFILELISTSTATE_H
+#ifndef VM_CLOUD_FILE_SHARING_STATE_H
+#define VM_CLOUD_FILE_SHARING_STATE_H
 
 #include <QState>
-
-#include "UserId.h"
-#include "models/CloudFilesModel.h"
 
 namespace vm {
 class CloudFilesController;
 
-class CloudFileListState : public QState
+class CloudFileSharingState : public QState
 {
     Q_OBJECT
 
 public:
-    CloudFileListState(CloudFilesController *controller, QState *parent);
+    CloudFileSharingState(CloudFilesController *controller, QState *parent);
 
 signals:
-    void requestNewFolder(const QString &name);
-    void requestNewSharedFolder(const QString &name);
-    void requestSharingInfo();
+    void addMembersRequested();
 
 private:
-    void onEntry(QEvent *);
-    void onExit(QEvent *);
+    void onEntry(QEvent *event) override;
 
     CloudFilesController *m_controller;
 };
 } // namespace vm
 
-#endif // VM_CLOUDFILELISTSTATE_H
+#endif // VM_CLOUD_FILE_SHARING_STATE_H

@@ -47,6 +47,7 @@
 #include "ChatListState.h"
 #include "ChatState.h"
 #include "CloudFileListState.h"
+#include "CloudFileSharingState.h"
 #include "DownloadKeyState.h"
 #include "EditProfileState.h"
 #include "NewChatState.h"
@@ -81,6 +82,7 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(ChatState *chatState MEMBER m_chatState CONSTANT)
     Q_PROPERTY(DownloadKeyState *downloadKeyState MEMBER m_downloadKeyState CONSTANT)
     Q_PROPERTY(CloudFileListState *cloudFileListState MEMBER m_cloudFileListState CONSTANT)
+    Q_PROPERTY(CloudFileSharingState *cloudFileSharingState MEMBER m_cloudFileSharingState CONSTANT)
     Q_PROPERTY(NewChatState *newChatState MEMBER m_newChatState CONSTANT)
     Q_PROPERTY(NewCloudFolderMembersState *newCloudFolderMembersState MEMBER m_newCloudFolderMembersState CONSTANT)
     Q_PROPERTY(NewGroupChatState *newGroupChatState MEMBER m_newGroupChatState CONSTANT)
@@ -145,6 +147,7 @@ private:
     ChatState *m_chatState;
     DownloadKeyState *m_downloadKeyState;
     CloudFileListState *m_cloudFileListState;
+    CloudFileSharingState *m_cloudFileSharingState;
     NewChatState *m_newChatState;
     NewCloudFolderMembersState *m_newCloudFolderMembersState;
     NewGroupChatState *m_newGroupChatState;

@@ -25,7 +25,7 @@ Page {
 
     header: PageHeader {
         title: d.chat.isGroup ? qsTr("Group info") : qsTr("Chat info")
-        contextMenuVisible: d.groupMembersEditable || !d.isOwnGroup
+        contextMenuVisible: d.chat.isGroup && (d.groupMembersEditable || !d.isOwnGroup)
         contextMenu: ContextMenu {
             ContextMenuItem {
                 text: qsTr("Add members")
@@ -40,12 +40,12 @@ Page {
             ContextMenuItem {
                 text: qsTr("Remove members")
                 visible: d.groupMembersEditable && d.selectedGroupMembersCount
-                onTriggered: deleteGroupMembersDialog.open()
+                onTriggered: removeParticipantsDialog.open()
             }
 
             ContextMenuItem {
                 text: qsTr("Leave group")
-                visible: chat.isGroup && !d.isOwnGroup
+                visible: d.chat.isGroup && !d.isOwnGroup
                 onTriggered: controllers.chats.leaveGroup()
             }
         }
@@ -75,24 +75,18 @@ Page {
             }
         }
 
-        Item {
-            height: Theme.smallSpacing
-        }
-
-        Text {
-            Layout.leftMargin: Theme.smallMargin
-            text: d.selectedGroupMembersCount ? qsTr("Participants (%1 selected)").arg(d.selectedGroupMembersCount) : qsTr("Participants")
-            color: "white"
+        TabView {
             visible: d.chat.isGroup
-        }
+            Layout.topMargin: Theme.margin
 
-        ContactsListView {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            model: d.model.proxy
-            isSelectable: d.groupMembersEditable
-            visible: d.chat.isGroup
-            onContactSelected: d.model.toggleByUsername(contactUsername)
+            ContactsListView {
+                readonly property var tabTitle: d.selectedGroupMembersCount
+                                                ? qsTr("Participants (%1 selected)").arg(d.selectedGroupMembersCount)
+                                                : qsTr("Participants")
+                model: d.model.proxy
+                isSelectable: d.groupMembersEditable
+                onContactSelected: d.model.toggleByUsername(contactUsername)
+            }
         }
 
         Item {
@@ -102,9 +96,9 @@ Page {
     }
 
     MessageDialog {
-        id: deleteGroupMembersDialog
+        id: removeParticipantsDialog
         title: qsTr("Group")
-        text: qsTr("Remove group members(s)?")
+        text: qsTr("Remove participant(s)?")
         onAccepted: controllers.chats.removeSelectedMembers()
     }
 }

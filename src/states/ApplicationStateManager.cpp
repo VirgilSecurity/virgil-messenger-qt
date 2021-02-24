@@ -69,6 +69,7 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
       m_chatState(new ChatState(controllers, m_messenger, this)),
       m_downloadKeyState(new DownloadKeyState(controllers->users(), this)),
       m_cloudFileListState(new CloudFileListState(controllers->cloudFiles(), this)),
+      m_cloudFileSharingState(new CloudFileSharingState(controllers->cloudFiles(), this)),
       m_newChatState(new NewChatState(controllers->chats(), models->discoveredContacts(), this)),
       m_newCloudFolderMembersState(
               new NewCloudFolderMembersState(controllers->cloudFiles(), models->discoveredContacts(), this)),
@@ -104,6 +105,7 @@ void Self::registerStatesMetaTypes()
     qRegisterMetaType<ChatState *>("ChatState*");
     qRegisterMetaType<DownloadKeyState *>("DownloadKeyState*");
     qRegisterMetaType<CloudFileListState *>("CloudFileListState*");
+    qRegisterMetaType<CloudFileSharingState *>("CloudFileSharingState*");
     qRegisterMetaType<NewChatState *>("NewChatState*");
     qRegisterMetaType<NewCloudFolderMembersState *>("NewCloudFolderMembersState*");
     qRegisterMetaType<NewGroupChatState *>("NewGroupChatState*");
@@ -166,6 +168,8 @@ void Self::addTransitions()
                          m_accountSettingsState);
     addTwoSideTransition(m_cloudFileListState, m_cloudFileListState, &CloudFileListState::requestNewSharedFolder,
                          m_newCloudFolderMembersState);
+    addTwoSideTransition(m_cloudFileListState, m_cloudFileListState, &CloudFileListState::requestSharingInfo,
+                         m_cloudFileSharingState);
     connect(m_cloudFileListState, &CloudFileListState::requestNewSharedFolder, m_newCloudFolderMembersState,
             &NewCloudFolderMembersState::setName);
     m_cloudFileListState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
