@@ -95,7 +95,7 @@ void Self::populateDownload()
             update.messageId = message->id();
             update.attachmentId = message->contentAsAttachment()->id();
             update.localPath = file.absoluteFilePath();
-            m_parent->messageUpdate(update);
+            m_parent->apply(update);
 
             updateStage(MessageContentDownloadStage::Decrypted);
         });
@@ -150,17 +150,11 @@ void Self::populatePreload()
         connect(downloadDecOp, &Operation::started,
                 [this, encryptedSize = thumbnail.encryptedSize()]() { startLoadOperation(encryptedSize); });
         connect(downloadDecOp, &DownloadDecryptFileOperation::decrypted, [this, message](const QFileInfo &file) {
-            const auto extrasToJson = [message]() {
-                const auto picture = std::get_if<MessageContentPicture>(&message->content());
-                return picture->extrasToJson(true);
-            };
-
             MessagePictureThumbnailPathUpdate update;
             update.messageId = message->id();
             update.attachmentId = message->contentAsAttachment()->id();
-            update.extrasToJson = extrasToJson;
             update.thumbnailPath = file.absoluteFilePath();
-            m_parent->messageUpdate(update);
+            m_parent->apply(update);
         });
     }
 
@@ -178,5 +172,5 @@ void DownloadAttachmentOperation::updateStage(MessageContentDownloadStage downlo
     stageUpdate.messageId = message->id();
     stageUpdate.attachmentId = message->contentAsAttachment()->id();
     stageUpdate.downloadStage = downloadStage;
-    m_parent->messageUpdate(stageUpdate);
+    m_parent->apply(stageUpdate);
 }

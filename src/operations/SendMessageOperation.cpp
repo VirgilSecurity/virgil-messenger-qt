@@ -56,5 +56,5 @@ void SendMessageOperation::setSentStage()
     OutgoingMessageStageUpdate update;
     update.messageId = m_parent->message()->id();
     update.stage = OutgoingMessageStage::Sent;
-    m_parent->messageUpdate(update);
+    m_parent->apply(update);
 }

@@ -123,7 +123,7 @@ public:
     //
     // Update message. Returns false if message had the same status.
     //
-    bool updateMessage(const MessageUpdate &messageUpdate, const bool apply);
+    bool updateMessage(const MessageUpdate &messageUpdate);
 
     //
     //  Accept group invitation.

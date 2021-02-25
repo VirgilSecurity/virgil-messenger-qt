@@ -67,14 +67,12 @@ Self::MessagesController(Messenger *messenger, const Settings *settings, Models 
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
     // Queue
     connect(this, &Self::messageCreated, messagesQueue, &MessagesQueue::pushMessage);
-    connect(messagesQueue, &MessagesQueue::updateMessage, this,
-            std::bind(&Self::onUpdateMessage, this, std::placeholders::_1, true));
+    connect(messagesQueue, &MessagesQueue::updateMessage, this, &Self::onUpdateMessage);
     // Models
     connect(m_models->messages(), &MessagesModel::pictureIconNotFound, this, &Self::onPictureIconNotFound);
     // Messages
     connect(m_messenger, &Messenger::messageReceived, this, &Self::onMessageReceived);
-    connect(m_messenger, &Messenger::updateMessage, this,
-            std::bind(&Self::onUpdateMessage, this, std::placeholders::_1, true));
+    connect(m_messenger, &Messenger::updateMessage, this, &Self::onUpdateMessage);
 }
 
 void Self::loadMessages(const ChatHandler &chat)
@@ -226,12 +224,12 @@ void Self::setupTableConnections()
     connect(table, &MessagesTable::chatMessagesFetched, m_models->messages(), &MessagesModel::setMessages);
 }
 
-void Self::onUpdateMessage(const MessageUpdate &messageUpdate, const bool apply)
+void Self::onUpdateMessage(const MessageUpdate &messageUpdate)
 {
     //
     //  Update UI for the current chat.
     //
-    m_models->messages()->updateMessage(messageUpdate, apply);
+    m_models->messages()->updateMessage(messageUpdate);
 
     //
     //  Update DB.
