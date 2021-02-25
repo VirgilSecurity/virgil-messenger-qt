@@ -60,36 +60,23 @@ MessageId vm::MessageUpdateGetMessageId(const MessageUpdate &update)
         return base->messageId;
     } else if (auto base = std::get_if<MessagePictureThumbnailPathUpdate>(&update)) {
         return base->messageId;
-    } else if (auto base = std::get_if<MessagePictureThumbnailSizeUpdate>(&update)) {
-        return base->messageId;
     } else if (auto base = std::get_if<MessagePictureThumbnailEncryptionUpdate>(&update)) {
         return base->messageId;
     } else if (auto base = std::get_if<MessagePictureThumbnailRemoteUrlUpdate>(&update)) {
         return base->messageId;
     } else if (auto base = std::get_if<MessagePicturePreviewPathUpdate>(&update)) {
         return base->messageId;
+    } else if (auto base = std::get_if<MessageAttachmentExtrasJsonUpdate>(&update)) {
+        return base->messageId;
     } else {
         throw std::logic_error("Unhandled MessageUpdate when ask for message id.");
     }
 }
 
-const MessageAttachmentExtrasUpdate *vm::MessageUpdateToAttachmentExtrasUpdate(const MessageUpdate &update)
+bool vm::MessageUpdateHasAttachmentExtrasJsonUpdate(const MessageUpdate &update)
 {
-    if (auto base = std::get_if<MessagePictureThumbnailPathUpdate>(&update)) {
-        return base;
-    }
-    if (auto base = std::get_if<MessagePictureThumbnailSizeUpdate>(&update)) {
-        return base;
-    }
-    if (auto base = std::get_if<MessagePictureThumbnailEncryptionUpdate>(&update)) {
-        return base;
-    }
-    if (auto base = std::get_if<MessagePictureThumbnailRemoteUrlUpdate>(&update)) {
-        return base;
-    }
-    if (auto base = std::get_if<MessagePicturePreviewPathUpdate>(&update)) {
-        return base;
-    } else {
-        return nullptr;
-    }
+    return std::holds_alternative<MessagePictureThumbnailPathUpdate>(update)
+            || std::holds_alternative<MessagePictureThumbnailEncryptionUpdate>(update)
+            || std::holds_alternative<MessagePictureThumbnailRemoteUrlUpdate>(update)
+            || std::holds_alternative<MessagePicturePreviewPathUpdate>(update);
 }

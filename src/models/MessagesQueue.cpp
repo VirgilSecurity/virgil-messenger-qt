@@ -68,7 +68,7 @@ Operation *Self::createOperation(OperationSourcePtr source)
     const auto messageSource = dynamic_cast<MessageOperationSource *>(source.get());
 
     auto op = new MessageOperation(messageSource->message(), m_factory, m_messenger->isOnline(), nullptr);
-    connect(op, &MessageOperation::messageUpdate, this, &Self::updateMessage);
+    connect(op, &MessageOperation::updateMessage, this, &Self::updateMessage);
     connect(m_messenger, &Messenger::onlineStatusChanged, op, &NetworkOperation::setIsOnline);
     connect(op, &MessageOperation::notificationCreated, this, &MessagesQueue::notificationCreated);
     connect(this, &MessagesQueue::stopRequested, op, &MessageOperation::stop);

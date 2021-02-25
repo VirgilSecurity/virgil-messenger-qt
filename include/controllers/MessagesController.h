@@ -97,7 +97,7 @@ private:
     void setupTableConnections();
 
     void onMessageReceived(ModifiableMessageHandler message);
-    void onUpdateMessage(const MessageUpdate &messageUpdate, const bool apply);
+    void onUpdateMessage(const MessageUpdate &messageUpdate);
     void onPictureIconNotFound(const MessageId &messageId);
 
     QPointer<const Settings> m_settings;

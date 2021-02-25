@@ -45,8 +45,6 @@ MessageOperation::MessageOperation(const ModifiableMessageHandler &message, Mess
     : NetworkOperation(parent, isOnline), m_factory(factory), m_message(message)
 {
     setName(message->id());
-
-    connect(this, &MessageOperation::messageUpdate, &MessageOperation::onMessageUpdate);
 }
 
 MessageHandler MessageOperation::message() const
@@ -59,9 +57,15 @@ MessageOperationFactory *MessageOperation::factory()
     return m_factory;
 }
 
-void MessageOperation::onMessageUpdate(const MessageUpdate &update)
+void MessageOperation::apply(const MessageUpdate &update)
 {
-    // TODO(fpohtmeh): use update result?
-    m_message->applyUpdate(update);
-    // TODO(fpohtmeh): create json extras update here
+    const auto applied = m_message->applyUpdate(update);
+    emit updateMessage(update);
+
+    if (applied && MessageUpdateHasAttachmentExtrasJsonUpdate(update)) {
+        MessageAttachmentExtrasJsonUpdate extrasUpdate;
+        extrasUpdate.messageId = m_message->id();
+        extrasUpdate.extrasJson = m_message->contentAsAttachment()->extrasToJson(true);
+        emit updateMessage(extrasUpdate);
+    }
 }

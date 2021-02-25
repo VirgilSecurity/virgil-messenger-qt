@@ -52,8 +52,6 @@ bool Self::applyUpdate(const MessageUpdate &update)
         if (thumbnail) {
             setThumbnail(*thumbnail);
         }
-    } else if (auto thumbnailSizeUpdate = std::get_if<MessagePictureThumbnailSizeUpdate>(&update)) {
-        setThumbnailSize(thumbnailSizeUpdate->thumbnailSize);
     } else if (auto thumbnailEncryptionUpdate = std::get_if<MessagePictureThumbnailEncryptionUpdate>(&update)) {
         m_thumbnail.setEncryptedSize(thumbnailEncryptionUpdate->encryptedSize);
         m_thumbnail.setDecryptionKey(thumbnailEncryptionUpdate->decryptionKey);
@@ -65,7 +63,7 @@ bool Self::applyUpdate(const MessageUpdate &update)
     } else {
         return MessageContentAttachment::applyUpdate(update);
     }
-    return false;
+    return true;
 }
 
 QString MessageContentPicture::extrasToJson(const bool writeLocalPaths) const
