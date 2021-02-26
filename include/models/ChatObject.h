@@ -70,6 +70,8 @@ public:
     void setGroupMembers(const GroupMembers &groupMembers);
     GroupMembers selectedGroupMembers() const;
 
+    UserId groupOwnerId() const;
+
     void updateGroup(const GroupUpdate &groupUpdate);
 
 signals:

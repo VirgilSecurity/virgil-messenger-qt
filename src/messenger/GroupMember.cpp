@@ -80,21 +80,17 @@ Contacts vm::GroupMembersToContacts(const GroupMembers &groupMembers)
         contact->setUserId(member->memberId());
         contact->setUsername(member->memberId());
         contact->setName(member->memberNickName());
-        contact->setGroupAffiliation(member->memberAffiliation());
         contacts.push_back(std::move(contact));
     }
     return contacts;
 }
 
-GroupMembers vm::ContactsToGroupMembers(const GroupId &groupId, const Contacts &contacts)
+GroupMembers vm::ContactsToGroupMembers(const GroupId &groupId, const UserId &groupOwnerId, const Contacts &contacts)
 {
-    const auto owners = FindContactsByGroupAffiliation(contacts, GroupAffiliation::Owner);
-    const auto groupOwnerId = owners.empty() ? UserId() : owners.front()->userId();
-
     GroupMembers members;
     for (auto &contact : contacts) {
-        auto member = std::make_shared<GroupMember>(groupId, groupOwnerId, contact->userId(), contact->name(),
-                                                    contact->groupAffiliation());
+        const auto member = std::make_shared<GroupMember>(groupId, groupOwnerId, contact->userId(), contact->name(),
+                                                          GroupAffiliation::Member);
         members.push_back(std::move(member));
     }
     return members;
@@ -104,5 +100,12 @@ GroupMemberHandler vm::FindGroupMemberById(const GroupMembers &groupMembers, con
 {
     const auto it = std::find_if(groupMembers.cbegin(), groupMembers.cend(),
                                  [memberId](auto member) { return memberId == member->memberId(); });
+    return (it == groupMembers.cend()) ? GroupMemberHandler() : *it;
+}
+
+GroupMemberHandler vm::FindGroupOwner(const GroupMembers &groupMembers)
+{
+    const auto it = std::find_if(groupMembers.cbegin(), groupMembers.cend(),
+                                 [](auto member) { return member->memberAffiliation() == GroupAffiliation::Owner; });
     return (it == groupMembers.cend()) ? GroupMemberHandler() : *it;
 }

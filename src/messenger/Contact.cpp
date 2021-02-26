@@ -47,8 +47,7 @@ Self::Contact()
       m_email(""),
       m_platformId(""),
       m_avatarLocalPath(""),
-      m_isBanned(false),
-      m_groupAffiliation(GroupAffiliation::None)
+      m_isBanned(false)
 {
 }
 
@@ -132,28 +131,7 @@ void Self::setIsBanned(bool isBanned)
     m_isBanned = isBanned;
 }
 
-GroupAffiliation Self::groupAffiliation() const
-{
-    return m_groupAffiliation;
-}
-
-void Self::setGroupAffiliation(GroupAffiliation groupAffiliation)
-{
-    m_groupAffiliation = groupAffiliation;
-}
-
 QString Self::displayName() const
 {
     return Utils::contactDisplayName(m_name, m_username, m_phone, m_email);
-}
-
-Contacts vm::FindContactsByGroupAffiliation(const Contacts &contacts, const GroupAffiliation groupAffiliation)
-{
-    Contacts result;
-    for (auto &c : contacts) {
-        if (c->groupAffiliation() == groupAffiliation) {
-            result.push_back(c);
-        }
-    }
-    return result;
 }

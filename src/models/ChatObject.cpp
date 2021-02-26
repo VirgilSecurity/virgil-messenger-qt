@@ -104,7 +104,12 @@ void Self::setGroupMembers(const GroupMembers &groupMembers)
 
 GroupMembers Self::selectedGroupMembers() const
 {
-    return ContactsToGroupMembers(GroupId(m_chat->id()), m_groupMembersModel->selectedContacts());
+    return m_groupMembersModel->selectedGroupMembers();
+}
+
+UserId Self::groupOwnerId() const
+{
+    return FindGroupOwner(m_groupMembersModel->groupMembers())->memberId();
 }
 
 void Self::updateGroup(const GroupUpdate &groupUpdate)

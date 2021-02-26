@@ -50,6 +50,9 @@ public:
     GroupMembersModel(Messenger *messenger, QObject *parent);
 
     void setGroupMembers(const GroupMembers &groupMembers);
+    GroupMembers groupMembers() const;
+
+    GroupMembers selectedGroupMembers() const;
 
     void updateGroup(const GroupUpdate &groupUpdate);
 

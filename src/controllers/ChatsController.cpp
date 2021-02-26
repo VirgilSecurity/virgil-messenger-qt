@@ -107,7 +107,7 @@ void Self::rejectGroupInvitation()
 void Self::addMembers(const Contacts &contacts)
 {
     const GroupId groupId(currentChat()->id());
-    const auto groupMembers = ContactsToGroupMembers(groupId, contacts);
+    const auto groupMembers = ContactsToGroupMembers(groupId, m_chatObject->groupOwnerId(), contacts);
     qCWarning(lcController) << "ChatsController::addMembers is under development"
                             << Utils::printableContactsList(contacts);
 }

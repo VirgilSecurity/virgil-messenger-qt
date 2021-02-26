@@ -51,6 +51,20 @@ void Self::setGroupMembers(const GroupMembers &groupMembers)
     setContacts(GroupMembersToContacts(groupMembers));
 }
 
+GroupMembers Self::groupMembers() const
+{
+    return m_groupMembers;
+}
+
+GroupMembers Self::selectedGroupMembers() const
+{
+    GroupMembers result;
+    for (auto &i : selection()->selectedIndexes()) {
+        result.push_back(m_groupMembers[i.row()]);
+    }
+    return result;
+}
+
 void Self::updateGroup(const GroupUpdate &groupUpdate)
 {
     if (auto upd = std::get_if<RemoveGroupMembersUpdate>(&groupUpdate)) {
