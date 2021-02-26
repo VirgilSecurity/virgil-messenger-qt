@@ -49,7 +49,7 @@ LoadAttachmentOperation::LoadAttachmentOperation(MessageOperation *parent) : Net
         update.messageId = parent->message()->id();
         update.attachmentId = parent->message()->contentAsAttachment()->id();
         update.processedSize = bytesLoaded;
-        parent->messageUpdate(update);
+        parent->updateMessage(update);
     });
 }
 

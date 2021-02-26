@@ -50,6 +50,6 @@ CalculateAttachmentFingerprintOperation::CalculateAttachmentFingerprintOperation
                 update.messageId = parent->message()->id();
                 update.attachmentId = parent->message()->contentAsAttachment()->id();
                 update.fingerprint = fingerprint;
-                parent->messageUpdate(update);
+                parent->apply(update);
             });
 }
