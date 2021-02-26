@@ -13,10 +13,6 @@ Page {
         id: d
         readonly property var chat: controllers.chats.current
         readonly property var model: chat.groupMembers
-        // FIXME(fpohtmeh): restore once it's implemented in core
-        readonly property bool groupMembersEditable: false // chat.isGroup && !model.isReadOnly
-        readonly property bool isOwnGroup: chat.isGroup // chat.isGroup && model.isOwnedByUser
-        readonly property int selectedGroupMembersCount: model.selection.selectedCount
     }
 
     background: Rectangle {
@@ -29,24 +25,27 @@ Page {
         contextMenuVisible: d.chat.isGroup && (d.groupMembersEditable || !d.isOwnGroup)
         contextMenu: ContextMenu {
             ContextMenuItem {
+                id: addMembersItem
                 text: qsTr("Add members")
-                visible: d.groupMembersEditable
+                visible: d.chat.isGroup && d.chat.userCanEdit
                 onTriggered: appState.addMembersRequested()
             }
 
             ContextMenuSeparator {
-                visible: d.groupMembersEditable && d.selectedGroupMembersCount
+                visible: addMembersItem.visible && removeMembersItem.visible
             }
 
             ContextMenuItem {
+                id: removeMembersItem
                 text: qsTr("Remove members")
-                visible: d.groupMembersEditable && d.selectedGroupMembersCount
+                visible: d.chat.isGroup && d.model.selection.hasSelection
                 onTriggered: removeParticipantsDialog.open()
             }
 
             ContextMenuItem {
+                id: leaveGroupItem
                 text: qsTr("Leave group")
-                visible: d.chat.isGroup && !d.isOwnGroup
+                visible: d.chat.isGroup && !d.chat.userIsOwner
                 onTriggered: controllers.chats.leaveGroup()
             }
         }
@@ -81,9 +80,7 @@ Page {
             Layout.topMargin: Theme.margin
 
             ContactsListView {
-                readonly property var tabTitle: d.selectedGroupMembersCount
-                                                ? qsTr("Participants (%1 selected)").arg(d.selectedGroupMembersCount)
-                                                : qsTr("Participants")
+                readonly property var tabTitle: qsTr("Participants")
                 model: d.model.proxy
                 isSelectable: d.groupMembersEditable
                 onContactSelected: d.model.toggleByUsername(contactUsername)

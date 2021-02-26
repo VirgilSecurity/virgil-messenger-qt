@@ -13,9 +13,6 @@ Page {
         id: d
         readonly property var cloudFile: controllers.cloudFiles.current
         readonly property var model: cloudFile.members
-        readonly property bool groupMembersEditable: true
-        readonly property bool isOwnFile: true
-        readonly property int selectedGroupMembersCount: model.selection.selectedCount
     }
 
     background: Rectangle {
@@ -27,24 +24,27 @@ Page {
         title: qsTr("Cloud folder info")
         contextMenu: ContextMenu {
             ContextMenuItem {
+                id: addMembersItem
                 text: qsTr("Add members")
-                visible: d.groupMembersEditable
+                visible: d.cloudFile.userIsOwner
                 onTriggered: appState.addMembersRequested()
             }
 
             ContextMenuSeparator {
-                visible: d.groupMembersEditable && d.selectedGroupMembersCount
+                visible: addMembersItem.visible && removeMembersItem.visible
             }
 
             ContextMenuItem {
+                id: removeMembersItem
                 text: qsTr("Remove members")
-                visible: d.groupMembersEditable && d.selectedGroupMembersCount
+                visible: d.model.selection.hasSelection
                 onTriggered: removeParticipantsDialog.open()
             }
 
             ContextMenuItem {
+                id: leaveGroupItem
                 text: qsTr("Leave")
-                visible: !d.isOwnFile
+                visible: !d.cloudFile.userIsOwner
                 onTriggered: controllers.cloudFiles.leaveMembership()
             }
         }
@@ -70,9 +70,7 @@ Page {
             Layout.fillHeight: true
 
             ContactsListView {
-                readonly property var tabTitle: d.selectedGroupMembersCount
-                                                ? qsTr("Participants (%1 selected)").arg(d.selectedGroupMembersCount)
-                                                : qsTr("Participants")
+                readonly property var tabTitle: qsTr("Participants")
                 model: d.model.proxy
                 onContactSelected: d.model.toggleByUsername(contactUsername)
             }
