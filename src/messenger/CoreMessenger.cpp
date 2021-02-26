@@ -1215,7 +1215,7 @@ Self::Result Self::processChatReceivedXmppMessage(const QXmppMessage &xmppMessag
     message->setId(MessageId(xmppMessage.id()));
     message->setRecipientId(userIdFromJid(xmppMessage.to()));
     message->setSenderId(userIdFromJid(xmppMessage.from()));
-    message->setCreatedAt(xmppMessage.stamp());
+    message->setCreatedAt(xmppMessage.stamp().toLocalTime());
 
     if (message->recipientId() != currentUser()->id()) {
         qCWarning(lcCoreMessenger) << "Got message sent to an another account:" << message->recipientId();
