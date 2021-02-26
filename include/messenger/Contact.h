@@ -104,6 +104,9 @@ private:
 
 using ContactHandler = std::shared_ptr<Contact>;
 using Contacts = std::vector<ContactHandler>;
+
+Contacts FindContactsByGroupAffiliation(const Contacts &contacts, const GroupAffiliation groupAffiliation);
+
 } // namespace vm
 
 #endif // VM_CONTACT_H

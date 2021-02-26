@@ -40,6 +40,7 @@
 #include <QPointer>
 
 #include "CloudFile.h"
+#include "CloudFileMember.h"
 #include "CloudFileRequestId.h"
 #include "CoreMessengerCloudFs.h"
 #include "Settings.h"
@@ -62,7 +63,8 @@ public:
 
     CloudFileRequestId fetchList(const CloudFileHandler &parentFolder);
     CloudFileRequestId createFile(const QString &filePath, const CloudFileHandler &parentFolder);
-    CloudFileRequestId createFolder(const QString &name, const CloudFileHandler &parentFolder);
+    CloudFileRequestId createFolder(const QString &name, const CloudFileHandler &parentFolder,
+                                    const CloudFileMembers &members);
     CloudFileRequestId getDownloadInfo(const CloudFileHandler &file);
     bool decryptFile(const QString &sourcePath, const QByteArray &encryptionKey, const CloudFileHandler &file);
     CloudFileRequestId deleteFiles(const CloudFiles &files);

@@ -75,11 +75,13 @@ private:
     GroupAffiliation m_memberAffiliation;
 };
 
-using GroupMemberHanlder = std::shared_ptr<GroupMember>;
-using GroupMembers = std::vector<GroupMemberHanlder>;
+using GroupMemberHandler = std::shared_ptr<GroupMember>;
+using GroupMembers = std::vector<GroupMemberHandler>;
 
 Contacts GroupMembersToContacts(const GroupMembers &groupMembers);
 GroupMembers ContactsToGroupMembers(const GroupId &groupId, const Contacts &contacts);
+
+GroupMemberHandler FindGroupMemberById(const GroupMembers &groupMembers, const UserId &memberId);
 
 } // namespace vm
 

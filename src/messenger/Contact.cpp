@@ -146,3 +146,14 @@ QString Self::displayName() const
 {
     return Utils::contactDisplayName(m_name, m_username, m_phone, m_email);
 }
+
+Contacts vm::FindContactsByGroupAffiliation(const Contacts &contacts, const GroupAffiliation groupAffiliation)
+{
+    Contacts result;
+    for (auto &c : contacts) {
+        if (c->groupAffiliation() == groupAffiliation) {
+            result.push_back(c);
+        }
+    }
+    return result;
+}

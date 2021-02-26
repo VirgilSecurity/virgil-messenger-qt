@@ -37,7 +37,6 @@
 
 #include <QObject>
 
-#include "Contact.h"
 #include "CloudFileObject.h"
 #include "CloudFileSystem.h"
 #include "CloudFilesUpdate.h"
@@ -46,6 +45,7 @@ class Settings;
 
 namespace vm {
 class CloudFilesModel;
+class Messenger;
 class Models;
 class UserDatabase;
 
@@ -58,8 +58,7 @@ class CloudFilesController : public QObject
     Q_PROPERTY(CloudFileObject *current MEMBER m_cloudFileObject CONSTANT)
 
 public:
-    CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase,
-                         CloudFileSystem *cloudFileSystem, QObject *parent);
+    CloudFilesController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
     CloudFilesModel *model();
     void switchToRootFolder();
@@ -72,11 +71,10 @@ public:
 
     Q_INVOKABLE void addFiles(const QVariant &fileUrls);
     Q_INVOKABLE void deleteFiles();
-    void createFolder(const QString &name);
-    void createSharedFolder(const QString &name, const Contacts &contacts);
+    void createFolder(const QString &name, const CloudFileMembers &members);
 
     void loadCloudFileMembers();
-    void addMembers(const Contacts &contacts);
+    void addMembers(const CloudFileMembers &members);
     Q_INVOKABLE void removeSelectedMembers();
     Q_INVOKABLE void leaveMembership();
 
@@ -102,7 +100,7 @@ private:
     void onUpdateCloudFiles(const CloudFilesUpdate &update);
     void onSelectionChanged();
 
-    QPointer<const Settings> m_settings;
+    QPointer<Messenger> m_messenger;
     QPointer<Models> m_models;
     QPointer<UserDatabase> m_userDatabase;
     QPointer<CloudFileSystem> m_cloudFileSystem;

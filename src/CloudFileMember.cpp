@@ -32,35 +32,60 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_GROUP_MEMBERS_MODEL_H
-#define VM_GROUP_MEMBERS_MODEL_H
+#include "CloudFileMember.h"
 
-#include "ContactsModel.h"
-#include "GroupMember.h"
-#include "GroupUpdate.h"
+#include <QObject>
 
-namespace vm {
-class Messenger;
+using namespace vm;
+using Self = CloudFileMember;
 
-class GroupMembersModel : public ContactsModel
+Self::CloudFileMember() : m_type(Type::Member) { }
+
+Self::CloudFileMember(const ContactHandler &contact, const Type type) : m_contact(contact), m_type(type) { }
+
+ContactHandler Self::contact() const
 {
-    Q_OBJECT
+    return m_contact;
+}
 
-public:
-    GroupMembersModel(Messenger *messenger, QObject *parent);
+CloudFileMember::Type Self::type() const
+{
+    return m_type;
+}
 
-    void setGroupMembers(const GroupMembers &groupMembers);
+CloudFileMembers vm::ContactsToCloudFileMembers(const Contacts &contacts)
+{
+    CloudFileMembers members;
+    for (auto &c : contacts) {
+        members.push_back(std::make_shared<CloudFileMember>(c, CloudFileMember::Type::Member));
+    }
+    return members;
+}
 
-    void updateGroup(const GroupUpdate &groupUpdate);
+Contacts vm::CloudFileMembersToContacts(const CloudFileMembers &members)
+{
+    Contacts contacts;
+    for (auto &m : members) {
+        contacts.push_back(m->contact());
+    }
+    return contacts;
+}
 
-private:
-    QVariant data(const QModelIndex &index, int role) const override;
+QString vm::CloudFileMemberTypeToDisplayString(const CloudFileMember::Type type)
+{
+    switch (type) {
+    case CloudFileMember::Type::Owner:
+        return QObject::tr("Owner");
+    case CloudFileMember::Type::Member:
+        return QObject::tr("Member");
+    default:
+        throw std::logic_error("Invalid CloudFileMember type");
+    }
+}
 
-    static int sortOrder(const GroupMemberHandler member);
-
-    QPointer<Messenger> m_messenger;
-    GroupMembers m_groupMembers;
-};
-} // namespace vm
-
-#endif // VM_GROUP_MEMBERS_MODEL_H
+CloudFileMemberHandler vm::FindCloudFileMemberById(const CloudFileMembers &members, const UserId &memberId)
+{
+    const auto it = std::find_if(members.cbegin(), members.cend(),
+                                 [memberId](auto member) { return memberId == member->contact()->userId(); });
+    return (it == members.cend()) ? CloudFileMemberHandler() : *it;
+}

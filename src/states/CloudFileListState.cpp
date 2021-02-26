@@ -42,7 +42,8 @@ using Self = CloudFileListState;
 
 Self::CloudFileListState(CloudFilesController *controller, QState *parent) : QState(parent), m_controller(controller)
 {
-    connect(this, &Self::requestNewFolder, controller, &CloudFilesController::createFolder);
+    connect(this, &Self::requestNewFolder, this,
+            [controller](auto name) { controller->createFolder(name, CloudFileMembers()); });
 }
 
 void CloudFileListState::onEntry(QEvent *)

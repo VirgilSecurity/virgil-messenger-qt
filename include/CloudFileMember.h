@@ -32,35 +32,41 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_GROUP_MEMBERS_MODEL_H
-#define VM_GROUP_MEMBERS_MODEL_H
+#ifndef VM_CLOUD_FILE_MEMBER_H
+#define VM_CLOUD_FILE_MEMBER_H
 
-#include "ContactsModel.h"
-#include "GroupMember.h"
-#include "GroupUpdate.h"
+#include "Contact.h"
+
+#include <memory>
+#include <vector>
 
 namespace vm {
-class Messenger;
-
-class GroupMembersModel : public ContactsModel
+class CloudFileMember
 {
-    Q_OBJECT
-
 public:
-    GroupMembersModel(Messenger *messenger, QObject *parent);
+    enum class Type { Member, Owner };
 
-    void setGroupMembers(const GroupMembers &groupMembers);
+    CloudFileMember();
+    CloudFileMember(const ContactHandler &contact, const Type type);
 
-    void updateGroup(const GroupUpdate &groupUpdate);
+    ContactHandler contact() const;
+    Type type() const;
 
 private:
-    QVariant data(const QModelIndex &index, int role) const override;
-
-    static int sortOrder(const GroupMemberHandler member);
-
-    QPointer<Messenger> m_messenger;
-    GroupMembers m_groupMembers;
+    ContactHandler m_contact;
+    Type m_type;
 };
+
+using CloudFileMemberHandler = std::shared_ptr<CloudFileMember>;
+using CloudFileMembers = std::vector<CloudFileMemberHandler>;
+
+QString CloudFileMemberTypeToDisplayString(const CloudFileMember::Type type);
+
+CloudFileMembers ContactsToCloudFileMembers(const Contacts &contacts);
+Contacts CloudFileMembersToContacts(const CloudFileMembers &members);
+
+CloudFileMemberHandler FindCloudFileMemberById(const CloudFileMembers &members, const UserId &memberId);
+
 } // namespace vm
 
-#endif // VM_GROUP_MEMBERS_MODEL_H
+#endif // VM_CLOUD_FILE_MEMBER_H

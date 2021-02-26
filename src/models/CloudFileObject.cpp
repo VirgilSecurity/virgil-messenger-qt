@@ -34,17 +34,17 @@
 
 #include "CloudFileObject.h"
 
-#include "ListSelectionModel.h"
+#include "Messenger.h"
 
 using namespace vm;
 using Self = CloudFileObject;
 
-Self::CloudFileObject(QObject *parent)
+Self::CloudFileObject(Messenger *messenger, QObject *parent)
     : QObject(parent),
+      m_messenger(messenger),
       m_propertiesModel(new CloudFilePropertiesModel(this)),
-      m_membersModel(new GroupMembersModel(this, true))
+      m_membersModel(new CloudFileMembersModel(messenger, this))
 {
-    m_membersModel->selection()->setMultiSelect(true);
 }
 
 void Self::setCloudFile(const CloudFileHandler &cloudFile)
@@ -88,7 +88,24 @@ bool Self::isShared() const
     return true;
 }
 
-void Self::setMembers(const GroupMembers &members)
+void Self::setMembers(const CloudFileMembers &members)
 {
-    m_membersModel->setGroupMembers(members);
+    m_membersModel->setMembers(members);
+
+    const auto userMember = findMemberById(m_messenger->currentUser()->id());
+    const bool userIsOwner = userMember && userMember->type() == CloudFileMember::Type::Owner;
+    if (m_userIsOwner != userIsOwner) {
+        m_userIsOwner = userIsOwner;
+        emit userIsOwnerChanged(userIsOwner);
+    }
+}
+
+CloudFileMembers Self::selectedMembers() const
+{
+    return m_membersModel->selectedMembers();
+}
+
+CloudFileMemberHandler Self::findMemberById(const UserId &userId) const
+{
+    return FindCloudFileMemberById(m_membersModel->members(), userId);
 }

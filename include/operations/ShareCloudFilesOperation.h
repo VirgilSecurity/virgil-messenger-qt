@@ -36,7 +36,7 @@
 #define VM_SHARED_CLOUD_FILES_OPERATION_H
 
 #include "CloudFile.h"
-#include "Contact.h"
+#include "CloudFileMember.h"
 #include "Operation.h"
 
 namespace vm {
@@ -44,16 +44,19 @@ class CloudFileOperation;
 
 class ShareCloudFilesOperation : public Operation
 {
-
 public:
-    ShareCloudFilesOperation(CloudFileOperation *parent, const CloudFiles &files, const Contacts &contacts);
+    ShareCloudFilesOperation(CloudFileOperation *parent, const CloudFiles &files);
+
+    void addMembers(const CloudFileMembers &members);
+    void removeMembers(const CloudFileMembers &members);
 
     void run() override;
 
 private:
     CloudFileOperation *m_parent;
     const CloudFiles m_files;
-    const Contacts m_contacts;
+    CloudFileMembers m_addedMembers;
+    CloudFileMembers m_removedMembers;
 };
 } // namespace vm
 

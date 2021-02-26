@@ -36,14 +36,14 @@
 #define VM_CLOUD_FILE_OPERATION_SOURCE_H
 
 #include "CloudFile.h"
-#include "Contact.h"
+#include "CloudFileMember.h"
 #include "OperationSource.h"
 
 namespace vm {
 class CloudFileOperationSource : public OperationSource
 {
 public:
-    enum class Type { ListFolder, CreateFolder, Upload, Download, Delete, Share };
+    enum class Type { ListFolder, CreateFolder, Upload, Download, Delete, AddMembers, RemoveMembers };
 
     explicit CloudFileOperationSource(Type type);
 
@@ -60,8 +60,8 @@ public:
     void setName(const QString &name);
     PostFunction postFunction() const;
     void setPostFunction(const PostFunction &func);
-    Contacts contacts() const;
-    void setContacts(const Contacts &contacts);
+    CloudFileMembers members() const;
+    void setMembers(const CloudFileMembers &members);
 
     bool isValid() const override;
     QString toString() const override;
@@ -73,7 +73,7 @@ private:
     QString m_filePath;
     QString m_name;
     PostFunction m_postFunction;
-    Contacts m_contacts;
+    CloudFileMembers m_members;
 };
 } // namespace vm
 

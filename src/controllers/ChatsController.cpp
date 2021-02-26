@@ -194,7 +194,6 @@ void Self::openChat(const ChatHandler &chat)
         m_userDatabase->resetUnreadCount(chat);
     }
     m_chatObject->setChat(chat);
-    m_chatObject->setCurrentUser(m_messenger->currentUser());
     emit chatOpened(chat);
 }
 

@@ -87,6 +87,12 @@ CloudFiles CloudFilesModel::selectedFiles() const
     return files;
 }
 
+CloudFileHandler CloudFilesModel::selectedFile() const
+{
+    const auto indices = selection()->selectedIndexes();
+    return indices.empty() ? CloudFileHandler() : m_files[indices.front().row()];
+}
+
 void CloudFilesModel::updateCloudFiles(const CloudFilesUpdate &update)
 {
     if (auto upd = std::get_if<CachedListCloudFolderUpdate>(&update)) {

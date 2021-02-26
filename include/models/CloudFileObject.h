@@ -36,12 +36,14 @@
 #define VM_CLOUD_FILE_OBJECT_H
 
 #include <QObject>
+#include <QPointer>
 
 #include "CloudFile.h"
+#include "CloudFileMembersModel.h"
 #include "CloudFilePropertiesModel.h"
-#include "GroupMembersModel.h"
 
 namespace vm {
+class Messenger;
 
 class CloudFileObject : public QObject
 {
@@ -50,10 +52,11 @@ class CloudFileObject : public QObject
     Q_PROPERTY(bool isFolder READ isFolder NOTIFY isFolderChanged)
     Q_PROPERTY(bool isShared READ isShared NOTIFY isSharedChanged)
     Q_PROPERTY(CloudFilePropertiesModel *properties MEMBER m_propertiesModel CONSTANT)
-    Q_PROPERTY(GroupMembersModel *members MEMBER m_membersModel CONSTANT)
+    Q_PROPERTY(CloudFileMembersModel *members MEMBER m_membersModel CONSTANT)
+    Q_PROPERTY(bool userIsOwner MEMBER m_userIsOwner NOTIFY userIsOwnerChanged)
 
 public:
-    explicit CloudFileObject(QObject *parent);
+    CloudFileObject(Messenger *messenger, QObject *parent);
 
     void setCloudFile(const CloudFileHandler &cloudFile);
     CloudFileHandler cloudFile() const;
@@ -62,17 +65,23 @@ public:
     bool isFolder() const;
     bool isShared() const;
 
-    void setMembers(const GroupMembers &members);
+    void setMembers(const CloudFileMembers &members);
+    CloudFileMembers selectedMembers() const;
+    CloudFileMemberHandler findMemberById(const UserId &userId) const;
 
 signals:
     void nameChanged(const QString &name);
     void isFolderChanged(bool isFolder);
     void isSharedChanged(bool isShared);
 
+    void userIsOwnerChanged(bool isOwner);
+
 private:
+    QPointer<Messenger> m_messenger;
     CloudFileHandler m_cloudFile;
     CloudFilePropertiesModel *m_propertiesModel;
-    GroupMembersModel *m_membersModel;
+    CloudFileMembersModel *m_membersModel;
+    bool m_userIsOwner = false;
 };
 
 } // namespace vm

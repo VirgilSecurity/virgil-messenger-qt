@@ -116,8 +116,11 @@ CloudFileRequestId CloudFileSystem::createFile(const QString &filePath, const Cl
     return requestId;
 }
 
-CloudFileRequestId CloudFileSystem::createFolder(const QString &name, const CloudFileHandler &parentFolder)
+CloudFileRequestId CloudFileSystem::createFolder(const QString &name, const CloudFileHandler &parentFolder,
+                                                 const CloudFileMembers &members)
 {
+    Q_UNUSED(members) // TODO(fpohtmeh): create shared folder if members specified
+
     const auto requestId = ++m_requestId;
     const auto parentFolderId = parentFolder->id().coreFolderId();
     auto future = parentFolder->isRoot() ? m_coreFs->createFolder(name)

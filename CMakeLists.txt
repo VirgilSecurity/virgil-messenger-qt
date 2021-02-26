@@ -409,6 +409,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/ConfirmationCodeType.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFile.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileId.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileMember.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileRequestId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileSystem.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileUpdateSource.h
@@ -532,17 +533,17 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ChatsModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFileObject.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilePropertiesModel.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/ContactsModel.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/ContactsProxyModel.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/DiscoveredContactsModel.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/DiscoveredContactsProxyModel.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/GroupMembersModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFileMembersModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFileOperationSource.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesTransfersModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesQueue.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesQueueListeners.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/TransfersModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/ContactsModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/ContactsProxyModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/DiscoveredContactsModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/DiscoveredContactsProxyModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/GroupMembersModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListProxyModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListSelectionModel.h
@@ -555,6 +556,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationQueue.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationQueueListener.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationSource.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/TransfersModel.h
         # Operations
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateAttachmentFingerprintOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateFileFingerprintOperation.h
@@ -620,6 +622,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/CustomerEnv.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CloudFile.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileId.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileMember.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileSystem.cpp
         # Messenger Core
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/AttachmentId.cpp
@@ -728,6 +731,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/models/AccountSelectionModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ChatObject.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ChatsModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFileMembersModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFileObject.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilePropertiesModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFileOperationSource.cpp

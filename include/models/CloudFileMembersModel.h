@@ -32,35 +32,43 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_GROUP_MEMBERS_MODEL_H
-#define VM_GROUP_MEMBERS_MODEL_H
+#ifndef VM_CLOUD_FILE_MEMBERS_MODEL_H
+#define VM_CLOUD_FILE_MEMBERS_MODEL_H
 
+#include <QPointer>
+
+#include "CloudFileMember.h"
 #include "ContactsModel.h"
-#include "GroupMember.h"
-#include "GroupUpdate.h"
 
 namespace vm {
 class Messenger;
 
-class GroupMembersModel : public ContactsModel
+class CloudFileMembersModel : public ContactsModel
 {
     Q_OBJECT
+    Q_PROPERTY(bool isReadOnly MEMBER m_isReadOnly NOTIFY isReadOnlyChanged)
+    Q_PROPERTY(bool isOwnedByUser MEMBER m_isOwnedByUser NOTIFY isOwnedByUserChanged)
 
 public:
-    GroupMembersModel(Messenger *messenger, QObject *parent);
+    CloudFileMembersModel(Messenger *messenger, QObject *parent);
 
-    void setGroupMembers(const GroupMembers &groupMembers);
+    void setMembers(const CloudFileMembers &members);
+    CloudFileMembers members() const;
 
-    void updateGroup(const GroupUpdate &groupUpdate);
+    CloudFileMembers selectedMembers() const;
+
+signals:
+    void isReadOnlyChanged(bool isReadOnly);
+    void isOwnedByUserChanged(bool isOwned);
 
 private:
     QVariant data(const QModelIndex &index, int role) const override;
 
-    static int sortOrder(const GroupMemberHandler member);
-
     QPointer<Messenger> m_messenger;
-    GroupMembers m_groupMembers;
+    CloudFileMembers m_members;
+    bool m_isReadOnly = true;
+    bool m_isOwnedByUser = false;
 };
 } // namespace vm
 
-#endif // VM_GROUP_MEMBERS_MODEL_H
+#endif // VM_CLOUD_FILE_MEMBERS_MODEL_H

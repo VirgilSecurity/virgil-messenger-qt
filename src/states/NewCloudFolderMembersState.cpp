@@ -43,8 +43,9 @@ Self::NewCloudFolderMembersState(CloudFilesController *controller, DiscoveredCon
                                  QState *parent)
     : SelectContactsState(contactsModel, parent)
 {
-    connect(this, &Self::contactsSelected,
-            [this, controller](auto contacts) { controller->createSharedFolder(m_name, contacts); });
+    connect(this, &Self::contactsSelected, [this, controller](auto contacts) {
+        controller->createFolder(m_name, ContactsToCloudFileMembers(contacts));
+    });
 }
 
 void Self::setName(const QString &name)

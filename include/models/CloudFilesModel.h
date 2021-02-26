@@ -60,6 +60,7 @@ public:
     CloudFileHandler file(int proxyRow) const;
     ModifiableCloudFileHandler file(int proxyRow);
     CloudFiles selectedFiles() const;
+    CloudFileHandler selectedFile() const;
 
     void updateCloudFiles(const CloudFilesUpdate &update);
 

@@ -32,62 +32,69 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "GroupMembersModel.h"
+#include "CloudFileMembersModel.h"
 
 #include "ListSelectionModel.h"
 #include "Messenger.h"
 
 using namespace vm;
-using Self = GroupMembersModel;
+using Self = CloudFileMembersModel;
 
-Self::GroupMembersModel(Messenger *messenger, QObject *parent) : ContactsModel(parent), m_messenger(messenger)
+Self::CloudFileMembersModel(Messenger *messenger, QObject *parent) : ContactsModel(parent), m_messenger(messenger)
 {
     selection()->setMultiSelect(true);
 }
 
-void Self::setGroupMembers(const GroupMembers &groupMembers)
+void Self::setMembers(const CloudFileMembers &members)
 {
-    m_groupMembers = groupMembers;
-    setContacts(GroupMembersToContacts(groupMembers));
+    m_members = members;
+    setContacts(CloudFileMembersToContacts(members));
+
+    const auto it = std::find_if(members.begin(), members.end(),
+                                 [](auto m) { return m->type() == CloudFileMember::Type::Owner; });
+
+    const auto owner = (it == members.end()) ? ContactHandler() : (*it)->contact();
+    const auto currentUser = m_messenger->currentUser();
+    const bool isOwnedByUser = currentUser && owner && currentUser->id() == owner->userId();
+    const bool isReadOnly = !isOwnedByUser;
+
+    if (m_isReadOnly != isReadOnly) {
+        m_isReadOnly = isReadOnly;
+        emit isReadOnlyChanged(isReadOnly);
+    }
+    if (m_isOwnedByUser != isOwnedByUser) {
+        m_isOwnedByUser = isOwnedByUser;
+        emit isOwnedByUserChanged(isOwnedByUser);
+    }
 }
 
-void Self::updateGroup(const GroupUpdate &groupUpdate)
+CloudFileMembers Self::members() const
 {
-    if (auto upd = std::get_if<RemoveGroupMembersUpdate>(&groupUpdate)) {
-        for (auto &member : upd->members) {
-            if (auto index = findByUserId(member->id()); index.isValid()) {
-                m_groupMembers.erase(m_groupMembers.begin() + index.row());
-                removeContactByRow(index.row());
-            }
-        }
+    return m_members;
+}
+
+CloudFileMembers Self::selectedMembers() const
+{
+    CloudFileMembers result;
+    for (auto &i : selection()->selectedIndexes()) {
+        result.push_back(m_members[i.row()]);
     }
+    return result;
 }
 
 QVariant Self::data(const QModelIndex &index, int role) const
 {
     switch (role) {
     case DetailsRole:
-        return GroupAffiliationToDisplayString(m_groupMembers[index.row()]->memberAffiliation());
+        return CloudFileMemberTypeToDisplayString(m_members[index.row()]->type());
 
     case SortRole: {
-        const auto m = m_groupMembers[index.row()];
-        // TODO(fpohtmeh): remove getContact call after GroupMember refactoring
-        return QString::number(sortOrder(m)) + getContact(index.row())->displayName();
+        const auto &m = m_members[index.row()];
+        return (m->type() == CloudFileMember::Type::Owner ? QLatin1Char('0') : QLatin1Char('1'))
+                + m->contact()->displayName();
     }
 
     default:
         return ContactsModel::data(index, role);
-    }
-}
-
-int Self::sortOrder(const GroupMemberHandler member)
-{
-    switch (member->memberAffiliation()) {
-    case GroupAffiliation::Owner:
-        return 0;
-    case GroupAffiliation::Admin:
-        return 1;
-    default:
-        return 2;
     }
 }

@@ -37,14 +37,33 @@
 #include "CloudFileOperation.h"
 
 using namespace vm;
+using Self = ShareCloudFilesOperation;
 
-ShareCloudFilesOperation::ShareCloudFilesOperation(CloudFileOperation *parent, const CloudFiles &files,
-                                                   const Contacts &contacts)
-    : Operation(QLatin1String("ShareCloudFiles"), parent), m_parent(parent), m_files(files), m_contacts(contacts)
+Self::ShareCloudFilesOperation(CloudFileOperation *parent, const CloudFiles &files)
+    : Operation(QLatin1String("ShareCloudFiles"), parent), m_parent(parent), m_files(files)
 {
 }
 
-void ShareCloudFilesOperation::run()
+void Self::addMembers(const CloudFileMembers &members)
 {
-    failAndNotify(tr("Sharing is under development"));
+    m_addedMembers.insert(m_addedMembers.end(), members.begin(), members.end());
+}
+
+void Self::removeMembers(const CloudFileMembers &members)
+{
+    m_removedMembers.insert(m_removedMembers.end(), members.begin(), members.end());
+}
+
+void Self::run()
+{
+    if (m_addedMembers.empty() && m_removedMembers.empty()) {
+        throw std::logic_error("ShareCloudFileOperation members are empty");
+    }
+
+    if (!m_addedMembers.empty()) {
+        failAndNotify(tr("Add cloud file members is under development"));
+    }
+    if (!m_removedMembers.empty()) {
+        failAndNotify(tr("Remove cloud file members is under development"));
+    }
 }

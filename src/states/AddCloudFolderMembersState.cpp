@@ -39,9 +39,10 @@
 using namespace vm;
 using Self = AddCloudFolderMembersState;
 
-Self::AddCloudFolderMembersState(CloudFilesController *cloudFilesController, DiscoveredContactsModel *contactsModel,
+Self::AddCloudFolderMembersState(CloudFilesController *controller, DiscoveredContactsModel *contactsModel,
                                  QState *parent)
     : SelectContactsState(contactsModel, parent)
 {
-    connect(this, &Self::contactsSelected, cloudFilesController, &CloudFilesController::addMembers);
+    connect(this, &Self::contactsSelected,
+            [controller](auto contacts) { controller->addMembers(ContactsToCloudFileMembers(contacts)); });
 }

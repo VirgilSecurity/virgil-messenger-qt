@@ -178,7 +178,7 @@ void Self::onDeleteGroupMembers(const GroupId &groupId)
     }
 }
 
-GroupMemberHanlder Self::readGroupMember(const QSqlQuery &query)
+GroupMemberHandler Self::readGroupMember(const QSqlQuery &query)
 {
 
     auto groupId = query.value("groupId").toString();
@@ -197,7 +197,7 @@ GroupMemberHanlder Self::readGroupMember(const QSqlQuery &query)
 
         qCCritical(lcDatabase) << "GroupMembersTable: failed to parse query result";
 
-        return GroupMemberHanlder();
+        return GroupMemberHandler();
     }
 
     return std::make_shared<GroupMember>(GroupId(std::move(groupId)), UserId(std::move(groupOwnerId)),

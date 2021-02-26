@@ -44,6 +44,7 @@
 #include "DiscoveredContactsModel.h"
 #include "FileUtils.h"
 #include "ListSelectionModel.h"
+#include "Messenger.h"
 #include "Models.h"
 #include "Settings.h"
 #include "UserDatabase.h"
@@ -52,14 +53,13 @@
 using namespace vm;
 using Self = CloudFilesController;
 
-Self::CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase,
-                           CloudFileSystem *cloudFileSystem, QObject *parent)
+Self::CloudFilesController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent),
-      m_settings(settings),
+      m_messenger(messenger),
       m_models(models),
       m_userDatabase(userDatabase),
-      m_cloudFileSystem(cloudFileSystem),
-      m_cloudFileObject(new CloudFileObject(this))
+      m_cloudFileSystem(messenger->cloudFileSystem()),
+      m_cloudFileObject(new CloudFileObject(messenger, this))
 {
     qRegisterMetaType<CloudFilesUpdate>("CloudFilesUpdate");
 
@@ -80,8 +80,8 @@ Self::CloudFilesController(const Settings *settings, Models *models, UserDatabas
     // Selection connections
     connect(models->cloudFiles()->selection(), &ListSelectionModel::changed, this, &Self::onSelectionChanged);
     // Cloud file system connections
-    connect(cloudFileSystem, &CloudFileSystem::downloadsDirChanged,
-            [rootFolder](const QDir &downloadsDir) { rootFolder->setLocalPath(downloadsDir.absolutePath()); });
+    connect(m_cloudFileSystem, &CloudFileSystem::downloadsDirChanged,
+            [rootFolder](auto downloadsDir) { rootFolder->setLocalPath(downloadsDir.absolutePath()); });
 
     // Setup list updating
     auto updatingListener = new CloudListUpdatingCounter(queue);
@@ -174,45 +174,51 @@ void Self::deleteFiles()
     m_models->cloudFilesQueue()->pushDeleteFiles(files);
 }
 
-void Self::createFolder(const QString &name)
+void Self::createFolder(const QString &name, const CloudFileMembers &members)
 {
-    m_models->cloudFilesQueue()->pushCreateFolder(name, m_hierarchy.back());
-}
-
-void Self::createSharedFolder(const QString &name, const Contacts &contacts)
-{
-    qCWarning(lcController) << "CloudFilesController::createSharedFolder is under development" << name
-                            << Utils::printableContactsList(contacts);
+    m_models->cloudFilesQueue()->pushCreateFolder(name, m_hierarchy.back(), members);
 }
 
 void Self::loadCloudFileMembers()
 {
     if (m_cloudFileObject->isShared()) {
-        // TODO(fpohtmeh): fetch real members
-        const auto c1 = std::make_shared<GroupMember>(GroupId(), UserId(), UserId("id1"), QLatin1String("OwnerUser"),
-                                                      GroupAffiliation::Owner);
-        const auto c2 = std::make_shared<GroupMember>(GroupId(), UserId(), UserId("id2"), QLatin1String("Member1User"),
-                                                      GroupAffiliation::Member);
-        const auto c3 = std::make_shared<GroupMember>(GroupId(), UserId(), UserId("id3"), QLatin1String("Member2User"),
-                                                      GroupAffiliation::Member);
-        m_cloudFileObject->setMembers({ c1, c2, c3 });
+        const auto c1 = std::make_shared<Contact>();
+        c1->setUserId(UserId("id1"));
+        c1->setUsername(QLatin1String("OwnerUser"));
+        const auto m1 = std::make_shared<CloudFileMember>(c1, CloudFileMember::Type::Owner);
+
+        const auto c2 = std::make_shared<Contact>();
+        c2->setUserId(UserId("id2"));
+        c2->setUsername(QLatin1String("Member1User"));
+        const auto m2 = std::make_shared<CloudFileMember>(c2, CloudFileMember::Type::Member);
+
+        const auto c3 = std::make_shared<Contact>();
+        c3->setUserId(UserId("id3"));
+        c3->setUsername(QLatin1String("Member2User"));
+        const auto m3 = std::make_shared<CloudFileMember>(c3, CloudFileMember::Type::Member);
+
+        m_cloudFileObject->setMembers({ m1, m2, m3 });
     }
 }
 
-void Self::addMembers(const Contacts &contacts)
+void Self::addMembers(const CloudFileMembers &members)
 {
-    qCWarning(lcController) << "CloudFilesController::addMembers is under development"
-                            << Utils::printableContactsList(contacts);
+    const auto files = m_models->cloudFiles()->selectedFiles();
+    m_models->cloudFilesQueue()->pushAddMembers(files, members);
 }
 
 void Self::removeSelectedMembers()
 {
-    qCWarning(lcController) << "CloudFilesController::removeSelectedMembers is under development";
+    const auto files = m_models->cloudFiles()->selectedFiles();
+    const auto members = m_cloudFileObject->selectedMembers();
+    m_models->cloudFilesQueue()->pushRemoveMembers(files, members);
 }
 
 void Self::leaveMembership()
 {
-    qCWarning(lcController) << "CloudFilesController::leaveMembership is under development";
+    const auto files = m_models->cloudFiles()->selectedFiles();
+    const auto member = m_cloudFileObject->findMemberById(m_messenger->currentUser()->id());
+    m_models->cloudFilesQueue()->pushRemoveMembers(files, { member });
 }
 
 void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)
@@ -280,6 +286,6 @@ void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)
 
 void Self::onSelectionChanged()
 {
-    const auto files = m_models->cloudFiles()->selectedFiles();
-    m_cloudFileObject->setCloudFile(files.empty() ? CloudFileHandler() : files.front());
+    const auto file = m_models->cloudFiles()->selectedFile();
+    m_cloudFileObject->setCloudFile(file);
 }

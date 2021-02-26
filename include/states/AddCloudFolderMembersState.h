@@ -45,7 +45,7 @@ class AddCloudFolderMembersState : public SelectContactsState
     Q_OBJECT
 
 public:
-    AddCloudFolderMembersState(CloudFilesController *cloudFilesController, DiscoveredContactsModel *contactsModel,
+    AddCloudFolderMembersState(CloudFilesController *controller, DiscoveredContactsModel *contactsModel,
                                QState *parent);
 };
 } // namespace vm
