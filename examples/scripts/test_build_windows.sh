@@ -9,9 +9,8 @@ pushd ${PROJECT_FOLDER}
   mkdir -p build 
 
   pushd build
-   cmake -DVS_PLATFORM="linux" -DVS_CUSTOMER="Virgil" ..
+   cmake -DVS_PLATFORM="windows" -DCMAKE_TOOLCHAIN_FILE=/usr/share/mingw/toolchain-mingw64.cmake ..
    make -j10
    make deploy
   popd
-
 popd
