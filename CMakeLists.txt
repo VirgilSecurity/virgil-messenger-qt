@@ -162,7 +162,7 @@ if (VS_PLATFORM STREQUAL "ios")
     # QT Extra packages
     list(APPEND VS_QT_EXTRA QmlImportScanner Gui)
 
-    # Android
+# Android
 elseif (VS_PLATFORM STREQUAL "android")
     # Get firebase
     get_firebase()
@@ -199,11 +199,11 @@ elseif (VS_PLATFORM STREQUAL "android")
     # Android gradle path
     set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/platforms/android")
 
-    # Linux
+# Linux
 elseif (VS_PLATFORM STREQUAL "linux")
     string(APPEND VS_QT_EXTRA "Widgets")
 
-    # MacOS
+# MacOS
 elseif (VS_PLATFORM STREQUAL "macos")
     string(APPEND VS_QT_EXTRA "Widgets")
 
@@ -253,11 +253,11 @@ if (VS_PLATFORM STREQUAL "android")
           COMMENT "Touch CMakeCache.txt"
     )
 
-    # Linux
+# Linux
 elseif (VS_PLATFORM STREQUAL "linux")
     add_executable(${VS_TARGET_NAME})
 
-    # MacOS
+# MacOS
 elseif (VS_PLATFORM STREQUAL "macos")
     set(App_ICON "${VS_CUSTOMER_DIR}/platforms/macos/pkg_resources/${MACOSX_BUNDLE_ICON_FILE}")
     set_source_files_properties(${App_ICON}
@@ -284,7 +284,7 @@ elseif (VS_PLATFORM STREQUAL "macos")
     set_target_properties(${VS_TARGET_NAME}
             PROPERTIES LINK_FLAGS "-F${PREBUILT_DIR}/${VS_PLATFORM}/sparkle -framework Sparkle -framework CoreFoundation -framework Foundation"
             )
-    # IOS
+# IOS
 elseif (VS_PLATFORM STREQUAL "ios")
 
     if (VS_IOS_SIMULATOR)
