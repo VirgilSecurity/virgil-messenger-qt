@@ -48,5 +48,8 @@ Self::CloudFileListState(CloudFilesController *controller, QState *parent) : QSt
 
 void Self::onEntry(QEvent *)
 {
-    m_controller->switchToRootFolder();
+    if (m_firstRun) {
+        m_controller->switchToRootFolder();
+        m_firstRun = false;
+    }
 }

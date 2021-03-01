@@ -84,8 +84,7 @@ bool Self::isFolder() const
 
 bool Self::isShared() const
 {
-    // TODO(fpohtmeh): implement
-    return true;
+    return isFolder(); // TODO(fpohtmeh): implement
 }
 
 void Self::setMembers(const CloudFileMembers &members)

@@ -18,14 +18,6 @@ ModelListView {
 
     signal contactSelected(string contactUsername)
 
-    QtObject {
-        id: d
-
-        property real headerOpacity: 0
-        readonly property real defaultChatHeight: 50
-        readonly property real selectionIconSize: 20
-    }
-
     Component {
         id: contactSectionComponent
 
@@ -52,7 +44,7 @@ ModelListView {
         ListDelegate {
             id: delegate
             width: root.width
-            height: d.defaultChatHeight
+            height: Theme.headerHeight
 
             Avatar {
                 id: avatar

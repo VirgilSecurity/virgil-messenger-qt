@@ -16,18 +16,6 @@ ModelListView {
         readonly property var model: models.cloudFiles
         readonly property var selection: model.selection
         readonly property var controller: controllers.cloudFiles
-
-        property var contextMenu: ContextMenu {
-            dropdown: true
-
-//            ContextMenuItem {
-//                text: qsTr("Item 1")
-//            }
-
-//            ContextMenuItem {
-//                text: qsTr("Item 1")
-//            }
-        }
     }
 
     ListStatusButton {
@@ -36,7 +24,7 @@ ModelListView {
     }
 
     delegate: ListDelegate {
-        id: fileListDelegate
+        id: listDelegate
         width: cloudFileListView.width
         height: Theme.headerHeight
         rightMargin: 0
@@ -62,9 +50,44 @@ ModelListView {
         ImageButton {
             id: menuButton
             image: "More"
+            height: imageSize
+
+            ContextMenu {
+                id: contextMenu
+                dropdown: true
+
+                ContextMenuItem {
+                    text: qsTr("Open file")
+                    visible: !model.isFolder
+                    onTriggered: listDelegate.openItem()
+                }
+
+                ContextMenuItem {
+                    text: qsTr("Open folder")
+                    visible: model.isFolder
+                    onTriggered: listDelegate.openItem()
+                }
+
+                ContextMenuItem {
+                    id: sharingItem
+                    text: qsTr("Sharing")
+                    visible: model.isShared
+                    onTriggered: appState.requestSharingInfo()
+                }
+
+                ContextMenuSeparator {
+                }
+
+                ContextMenuItem {
+                    text: qsTr("Delete")
+                    onTriggered: deleteCloudFilesDialog.open()
+                }
+            }
+
             onClicked: {
-                d.contextMenu.parent = menuButton
-                d.contextMenu.open()
+                d.selection.clear()
+                d.selection.toggle(model.index)
+                contextMenu.open()
             }
         }
 

@@ -59,6 +59,7 @@ private:
     void onEntry(QEvent *);
 
     CloudFilesController *m_controller;
+    bool m_firstRun = true;
 };
 } // namespace vm
 

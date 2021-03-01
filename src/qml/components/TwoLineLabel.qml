@@ -17,7 +17,7 @@ Column {
         elide: Label.ElideRight
         color: Theme.primaryTextColor
 
-        Binding on anchors.horizontalCenter { when: horizontalAlignment == Qt.AlignHCenter; value: parent.horizontalCenter }
+        Binding on anchors.horizontalCenter { when: horizontalAlignment == Qt.AlignHCenter; value: root.horizontalCenter }
         Binding on font.family { when: root.bold; value: Theme.mainFont }
     }
 
@@ -28,7 +28,7 @@ Column {
         color: Theme.secondaryTextColor
         horizontalAlignment: titleLabel.horizontalAlignment
 
-        Binding on anchors.horizontalCenter { when: horizontalAlignment == Qt.AlignHCenter; value: parent.horizontalCenter }
+        Binding on anchors.horizontalCenter { when: horizontalAlignment == Qt.AlignHCenter; value: root.horizontalCenter }
         Binding on font.family { when: root.bold; value: Theme.mainFont }
     }
 }
