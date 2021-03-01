@@ -57,10 +57,8 @@ void ListSelectionModel::setSelected(const QVariant &proxyRow, bool selected)
 
 void ListSelectionModel::setSelected(const QModelIndex &sourceIndex, bool selected)
 {
-    if (!m_multiSelect && selected) {
-        clear();
-    }
-    const auto flag = selected ? QItemSelectionModel::Select : QItemSelectionModel::Deselect;
+    const auto flag = (selected ? QItemSelectionModel::Select : QItemSelectionModel::Deselect)
+            | (m_multiSelect ? QItemSelectionModel::NoUpdate : QItemSelectionModel::Clear);
     QItemSelectionModel::select(sourceIndex, flag);
 }
 
@@ -72,10 +70,10 @@ void ListSelectionModel::toggle(const QVariant &proxyRow)
 
 void ListSelectionModel::toggle(const QModelIndex &sourceIndex)
 {
-    if (!m_multiSelect && !isSelected(sourceIndex)) {
-        clear();
-    }
-    QItemSelectionModel::select(sourceIndex, QItemSelectionModel::Toggle);
+    const auto flag = (m_multiSelect ? QItemSelectionModel::Toggle
+                                     : (isSelected(sourceIndex) ? QItemSelectionModel::Clear
+                                                                : QItemSelectionModel::ClearAndSelect));
+    QItemSelectionModel::select(sourceIndex, flag);
 }
 
 void ListSelectionModel::clear()

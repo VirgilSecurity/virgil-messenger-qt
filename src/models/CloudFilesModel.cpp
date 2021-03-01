@@ -52,8 +52,6 @@ CloudFilesModel::CloudFilesModel(const Settings *settings, QObject *parent) : Li
     proxy()->sort(0, Qt::AscendingOrder);
     proxy()->setFilterRole(FilenameRole);
 
-    selection()->setMultiSelect(true);
-
     connect(selection(), &ListSelectionModel::selectedCountChanged, this, &CloudFilesModel::updateDescription);
     connect(&m_updateTimer, &QTimer::timeout, this, &CloudFilesModel::invalidateDateTime);
 }

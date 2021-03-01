@@ -7,31 +7,32 @@ import "../theme"
 
 ModelListView {
     id: cloudFileListView
-    model: models.cloudFiles.proxy
+    model: d.model.proxy
     emptyIcon: "../resources/icons/Chats.png"
     emptyText: qsTr("Add a file<br/>by pressing the menu<br/>button above")
 
     QtObject {
         id: d
         readonly property real defaultChatHeight: 60
+        readonly property var model: models.cloudFiles
+        readonly property var selection: model.selection
+        readonly property var controller: controllers.cloudFiles
     }
 
     ListStatusButton {
         text: qsTr("Updating...")
-        visible: controllers.cloudFiles.isListUpdating
+        visible: d.controller.isListUpdating
     }
 
     delegate: ListDelegate {
         id: fileListDelegate
         width: cloudFileListView.width
         height: d.defaultChatHeight
-        backgroundColor: (model.isSelected || down) ? Theme.contactPressedColor : "transparent"
 
-        ImageButton {
-            image: model.isFolder ? "Folder-Big" : "File-Big"
-            imageSize: 48
-            iconSize: 40
-            onClicked: models.cloudFiles.selection.toggle(model.index)
+        Image {
+            source: "../resources/icons/%1.png".arg(model.isFolder ? "Folder-Big" : "File-Big")
+            width: 40
+            height: width
         }
 
         Column {
@@ -65,13 +66,18 @@ ModelListView {
             }
         }
 
-        onClicked: {
+        onOpenItem: {
             if (model.isFolder) {
-                controllers.cloudFiles.switchToFolder(model.index)
+                d.controller.switchToFolder(model.index)
             }
             else {
-                controllers.cloudFiles.openFile(model.index)
+                d.controller.openFile(model.index)
             }
+        }
+
+        onSelectItem: {
+            d.selection.multiSelect = multiSelect
+            d.selection.toggle(model.index)
         }
     }
 

@@ -198,6 +198,11 @@ bool Self::isIosSimulator() const
 #endif
 }
 
+Qt::KeyboardModifiers Self::keyboardModifiers() const
+{
+    return qApp->keyboardModifiers();
+}
+
 void Self::onApplicationStateChanged(Qt::ApplicationState state)
 {
     qDebug() << state;
