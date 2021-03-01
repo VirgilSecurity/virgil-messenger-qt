@@ -35,9 +35,6 @@
 #ifndef VM_CLOUDFILESMODEL_H
 #define VM_CLOUDFILESMODEL_H
 
-#include <QDateTime>
-#include <QTimer>
-
 #include "CloudFile.h"
 #include "CloudFilesUpdate.h"
 #include "ListModel.h"
@@ -51,11 +48,9 @@ class CloudFilesModel : public ListModel
     Q_PROPERTY(QString description MEMBER m_description NOTIFY descriptionChanged)
 
 public:
-    enum Roles { FilenameRole = Qt::UserRole, IsFolderRole, DisplayDateTimeRole, DisplayFileSizeRole, SortRole };
+    enum Roles { FilenameRole = Qt::UserRole, IsFolderRole, DisplayFileSizeRole, SortRole };
 
     CloudFilesModel(const Settings *settings, QObject *parent);
-
-    void setEnabled(bool enabled);
 
     CloudFileHandler file(int proxyRow) const;
     ModifiableCloudFileHandler file(int proxyRow);
@@ -80,13 +75,10 @@ private:
     void updateDownloadedFile(const DownloadCloudFileUpdate &update);
     QModelIndex findById(const CloudFileId &cloudFileId) const;
 
-    void invalidateDateTime();
     void updateDescription();
 
     const Settings *m_settings;
     ModifiableCloudFiles m_files;
-    QDateTime m_now;
-    QTimer m_updateTimer;
     QString m_description;
 };
 } // namespace vm

@@ -9,6 +9,9 @@ ItemDelegate {
     id: root
 
     property alias backgroundColor: backgroundItem.color
+    property real leftMargin: Theme.smallSpacing
+    property real rightMargin: Theme.smallSpacing
+
     property var selectionModel: undefined
     default property alias children: rowLayout.children
 
@@ -25,16 +28,15 @@ ItemDelegate {
         id: rowLayout
         anchors {
             fill: parent
-            leftMargin: Theme.smallSpacing
-            rightMargin: Theme.smallSpacing
+            leftMargin: root.leftMargin
+            rightMargin: root.rightMargin
         }
-        height: Theme.avatarHeight
         spacing: Theme.smallSpacing
     }
 
     onClicked: {
         if (Platform.isDesktop) {
-            root.selectItem(app.keyboardModifiers() & (Qt.ControlModifier | Qt.ShiftModifier))
+            root.selectItem(app.keyboardModifiers() & Qt.ControlModifier)
         }
         else if (root.selectionModel && root.selectionModel.hasSelection) {
             root.selectItem(true)

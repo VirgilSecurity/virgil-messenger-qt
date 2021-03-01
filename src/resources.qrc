@@ -182,6 +182,7 @@
         <file>qml/components/StyledCheckBox.qml</file>
         <file>qml/components/TabView.qml</file>
         <file>qml/components/PropertiesView.qml</file>
+        <file>qml/components/TwoLineLabel.qml</file>
         <!-- Base -->
         <file>qml/base/AttachmentTypes.qml</file>
         <file>qml/base/Platform.qml</file>

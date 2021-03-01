@@ -40,8 +40,6 @@
 #include "Utils.h"
 #include "Model.h"
 
-#include <algorithm>
-
 using namespace vm;
 
 CloudFilesModel::CloudFilesModel(const Settings *settings, QObject *parent) : ListModel(parent), m_settings(settings)
@@ -53,16 +51,6 @@ CloudFilesModel::CloudFilesModel(const Settings *settings, QObject *parent) : Li
     proxy()->setFilterRole(FilenameRole);
 
     connect(selection(), &ListSelectionModel::selectedCountChanged, this, &CloudFilesModel::updateDescription);
-    connect(&m_updateTimer, &QTimer::timeout, this, &CloudFilesModel::invalidateDateTime);
-}
-
-void CloudFilesModel::setEnabled(bool enabled)
-{
-    if (enabled) {
-        m_updateTimer.start(m_settings->nowInterval());
-    } else {
-        m_updateTimer.stop();
-    }
 }
 
 CloudFileHandler CloudFilesModel::file(const int proxyRow) const
@@ -95,7 +83,6 @@ void CloudFilesModel::updateCloudFiles(const CloudFilesUpdate &update)
 {
     if (auto upd = std::get_if<CachedListCloudFolderUpdate>(&update)) {
         beginResetModel();
-        m_now = QDateTime::currentDateTime();
         m_files = upd->files;
         endResetModel();
         updateDescription();
@@ -143,13 +130,6 @@ QVariant CloudFilesModel::data(const QModelIndex &index, int role) const
         return file->name();
     case IsFolderRole:
         return file->isFolder();
-    case DisplayDateTimeRole: {
-        if (file->isFolder()) {
-            return QString();
-        }
-        const auto diff = std::chrono::seconds(file->createdAt().secsTo(m_now));
-        return Utils::formattedElapsedSeconds(diff, m_settings->nowInterval());
-    }
     case DisplayFileSizeRole:
         return file->isFolder() ? QString() : Utils::formattedSize(file->size());
     case SortRole:
@@ -161,18 +141,16 @@ QVariant CloudFilesModel::data(const QModelIndex &index, int role) const
 
 QHash<int, QByteArray> CloudFilesModel::roleNames() const
 {
-    return unitedRoleNames(ListModel::roleNames(),
-                           { { FilenameRole, "fileName" },
-                             { IsFolderRole, "isFolder" },
-                             { DisplayDateTimeRole, "displayDateTime" },
-                             { DisplayFileSizeRole, "displayFileSize" } });
+    return unitedRoleNames(
+            ListModel::roleNames(),
+            { { FilenameRole, "fileName" }, { IsFolderRole, "isFolder" }, { DisplayFileSizeRole, "displayFileSize" } });
 }
 
 QVector<int> CloudFilesModel::rolesFromUpdateSource(const CloudFileUpdateSource source, const bool isFolder)
 {
     QVector<int> roles;
     if ((source == CloudFileUpdateSource::ListedParent) || (source == CloudFileUpdateSource::ListedChild)) {
-        roles << FilenameRole << DisplayDateTimeRole << SortRole;
+        roles << FilenameRole << SortRole;
     }
     if ((source == CloudFileUpdateSource::ListedChild) && !isFolder) {
         roles << DisplayFileSizeRole;
@@ -226,12 +204,6 @@ QModelIndex CloudFilesModel::findById(const CloudFileId &cloudFileId) const
     }
 
     return QModelIndex();
-}
-
-void CloudFilesModel::invalidateDateTime()
-{
-    m_now = QDateTime::currentDateTime();
-    emit dataChanged(index(0), index(rowCount() - 1), { DisplayDateTimeRole });
 }
 
 void CloudFilesModel::updateDescription()

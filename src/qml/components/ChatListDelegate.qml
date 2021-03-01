@@ -4,29 +4,18 @@ import QtQuick.Layouts 1.15
 import "../theme"
 
 ListDelegate {
+    height: Theme.headerHeight
+
     Avatar {
         id: avatar
         nickname: model.contactId
     }
 
-    Column {
+    TwoLineLabel {
         Layout.fillWidth: true
         clip: true
-
-        Text {
-            color: Theme.primaryTextColor
-            font.pointSize: UiHelper.fixFontSz(15)
-            text: model.contactId
-        }
-
-        Text {
-            id: messageBody
-            color: Theme.secondaryTextColor
-            font.pointSize: UiHelper.fixFontSz(12)
-            width: parent.width
-            text: model.lastMessageBody
-            elide: Text.ElideRight
-        }
+        title: model.contactId
+        description: model.lastMessageBody
     }
 
     Column {

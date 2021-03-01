@@ -46,13 +46,7 @@ Self::CloudFileListState(CloudFilesController *controller, QState *parent) : QSt
             [controller](auto name) { controller->createFolder(name, CloudFileMembers()); });
 }
 
-void CloudFileListState::onEntry(QEvent *)
+void Self::onEntry(QEvent *)
 {
     m_controller->switchToRootFolder();
-    m_controller->model()->setEnabled(true);
-}
-
-void CloudFileListState::onExit(QEvent *)
-{
-    m_controller->model()->setEnabled(false);
 }

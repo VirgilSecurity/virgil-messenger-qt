@@ -13,10 +13,21 @@ ModelListView {
 
     QtObject {
         id: d
-        readonly property real defaultChatHeight: 60
         readonly property var model: models.cloudFiles
         readonly property var selection: model.selection
         readonly property var controller: controllers.cloudFiles
+
+        property var contextMenu: ContextMenu {
+            dropdown: true
+
+//            ContextMenuItem {
+//                text: qsTr("Item 1")
+//            }
+
+//            ContextMenuItem {
+//                text: qsTr("Item 1")
+//            }
+        }
     }
 
     ListStatusButton {
@@ -27,42 +38,33 @@ ModelListView {
     delegate: ListDelegate {
         id: fileListDelegate
         width: cloudFileListView.width
-        height: d.defaultChatHeight
+        height: Theme.headerHeight
+        rightMargin: 0
+        selectionModel: d.selection
 
-        Image {
-            source: "../resources/icons/%1.png".arg(model.isFolder ? "Folder-Big" : "File-Big")
-            width: 40
-            height: width
+        Item {
+            Layout.preferredWidth: Theme.avatarWidth
+            Layout.preferredHeight: Theme.avatarHeight
+
+            Image {
+                source: "../resources/icons/%1.png".arg(model.isFolder ? "Folder-Big" : "File-Big")
+                anchors.centerIn: parent
+            }
         }
 
-        Column {
+        TwoLineLabel {
             Layout.fillWidth: true
             clip: true
-
-            Text {
-                color: Theme.primaryTextColor
-                font.pointSize: UiHelper.fixFontSz(15)
-                text: model.fileName
-                width: parent.width
-            }
+            title: model.fileName
+            description: model.isFolder ? "" : model.displayFileSize
         }
 
-        Column {
-            width: 30
-            spacing: 5
-
-            Text {
-                text: model.displayFileSize
-                color: Theme.primaryTextColor
-                font.pointSize: UiHelper.fixFontSz(12)
-                anchors.right: parent.right
-            }
-
-            Text {
-                text: model.displayDateTime
-                color: Theme.secondaryTextColor
-                font.pointSize: UiHelper.fixFontSz(9)
-                anchors.right: parent.right
+        ImageButton {
+            id: menuButton
+            image: "More"
+            onClicked: {
+                d.contextMenu.parent = menuButton
+                d.contextMenu.open()
             }
         }
 

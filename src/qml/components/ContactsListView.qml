@@ -53,7 +53,6 @@ ModelListView {
             id: delegate
             width: root.width
             height: d.defaultChatHeight
-            hoverEnabled: true
 
             Avatar {
                 id: avatar

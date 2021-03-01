@@ -57,7 +57,6 @@ signals:
 
 private:
     void onEntry(QEvent *);
-    void onExit(QEvent *);
 
     CloudFilesController *m_controller;
 };

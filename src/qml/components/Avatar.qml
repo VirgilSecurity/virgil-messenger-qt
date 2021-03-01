@@ -66,9 +66,9 @@ Item {
         anchors.centerIn: parent
         width: parent.width + 8
         height: width
-        visible: isSelected
+        visible: avatar.isSelected
         radius: width
-        color: 'transparent'
+        color: "transparent"
         border.width: 2
         border.color: Theme.contactSelectionColor
 
