@@ -32,6 +32,16 @@ ModelListView {
             imageSize: 48
             iconSize: 40
             onClicked: models.cloudFiles.selection.toggle(model.index)
+
+            Image {
+                source: "../resources/icons/Plus.png"
+                fillMode: Image.PreserveAspectFit
+                width: 0.4 * parent.iconSize
+                height: width
+                anchors.centerIn: parent
+                anchors.verticalCenterOffset: 2
+                visible: model.isShared
+            }
         }
 
         Column {
