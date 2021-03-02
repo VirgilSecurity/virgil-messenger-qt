@@ -50,8 +50,7 @@
 
 #include <memory>
 
-namespace vm
-{
+namespace vm {
 class Models;
 class UserDatabase;
 class Messenger;
@@ -71,8 +70,8 @@ public:
     void createChatWithUserId(const UserId &userId);
     void createGroupChat(const QString &groupName, const Contacts &contacts);
 
-    void openChat(const ChatHandler& chat);
-    Q_INVOKABLE void openChat(const QString& chatId); // can be used within QML only
+    void openChat(const ChatHandler &chat);
+    Q_INVOKABLE void openChat(const QString &chatId); // can be used within QML only
     Q_INVOKABLE void closeChat();
     ChatHandler currentChat() const;
 
@@ -92,8 +91,8 @@ signals:
     void chatCreated(const ChatHandler &chat);
     void chatClosed();
 
-    void createChatWithUser(const UserHandler& user, QPrivateSignal);
-    void createChatWithGroup(const GroupHandler& group, QPrivateSignal);
+    void createChatWithUser(const UserHandler &user, QPrivateSignal);
+    void createChatWithGroup(const GroupHandler &group, QPrivateSignal);
 
     void groupInvitationAccepted();
     void groupInvitationRejected();
@@ -104,19 +103,19 @@ private:
 
     void onChatsLoaded(ModifiableChats chats);
     void onCreateChatWithUser(const UserHandler &user);
-    void onCreateChatWithGroup(const GroupHandler& group);
-    void onGroupMembersFetchedByMemberId(const UserId& memberId, const GroupMembers& groupMembers);
-    void onGroupMembersFetchedByGroupId(const GroupId& groupId, const GroupMembers& groupMembers);
+    void onCreateChatWithGroup(const GroupHandler &group);
+    void onGroupMembersFetchedByMemberId(const UserId &memberId, const GroupMembers &groupMembers);
+    void onGroupMembersFetchedByGroupId(const GroupId &groupId, const GroupMembers &groupMembers);
 
-    void onGroupChatCreated(const GroupId& groupId);
-    void onGroupChatCreateFailed(const GroupId& chatId, const QString& errorText);
-    void onUpdateGroup(const GroupUpdate& groupUpdate);
+    void onGroupChatCreated(const GroupId &groupId);
+    void onGroupChatCreateFailed(const GroupId &chatId, const QString &errorText);
+    void onUpdateGroup(const GroupUpdate &groupUpdate);
 
     QPointer<Messenger> m_messenger;
     QPointer<Models> m_models;
     QPointer<UserDatabase> m_userDatabase;
     QPointer<ChatObject> m_chatObject;
 };
-}
+} // namespace vm
 
 #endif // VM_CHATSSCONTROLLER_H

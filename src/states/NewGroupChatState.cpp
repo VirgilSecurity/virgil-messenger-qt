@@ -40,8 +40,7 @@
 using namespace vm;
 
 NewGroupChatState::NewGroupChatState(DiscoveredContactsModel *contactsModel, QState *parent)
-    : OperationState(parent)
-    , m_contactsModel(contactsModel)
+    : OperationState(parent), m_contactsModel(contactsModel)
 {
     connect(this, &NewGroupChatState::requestChatName, [this]() {
         const Contacts contacts = m_contactsModel->selectedContactsModel()->getContacts();

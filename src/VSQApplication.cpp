@@ -44,29 +44,28 @@
 #include "VSQUiHelper.h"
 
 #if defined(VS_ANDROID) && VS_ANDROID
-#include "FirebaseListener.h"
+#    include "FirebaseListener.h"
 #endif // VS_ANDROID
 
 #include <QGuiApplication>
 #include <QFont>
 #include <QDesktopServices>
 
-
 using namespace vm;
 using Self = VSQApplication;
 
 /******************************************************************************/
 Self::VSQApplication()
-    : m_settings(this)
-    , m_engine(new QQmlApplicationEngine(this))
-    , m_validator(new Validator(this))
-    , m_messenger(&m_settings, m_validator)
-    , m_userDatabase(new UserDatabase(m_settings.databaseDir(), nullptr))
-    , m_models(&m_messenger, &m_settings, m_userDatabase, m_validator, this)
-    , m_databaseThread(new QThread())
-    , m_controllers(&m_messenger, &m_settings, &m_models, m_userDatabase, this)
-    , m_keyboardEventFilter(new KeyboardEventFilter(this))
-    , m_applicationStateManager(&m_messenger, &m_controllers, &m_models, m_validator, this)
+    : m_settings(this),
+      m_engine(new QQmlApplicationEngine(this)),
+      m_validator(new Validator(this)),
+      m_messenger(&m_settings, m_validator),
+      m_userDatabase(new UserDatabase(m_settings.databaseDir(), nullptr)),
+      m_models(&m_messenger, &m_settings, m_userDatabase, m_validator, this),
+      m_databaseThread(new QThread()),
+      m_controllers(&m_messenger, &m_settings, &m_models, m_userDatabase, this),
+      m_keyboardEventFilter(new KeyboardEventFilter(this)),
+      m_applicationStateManager(&m_messenger, &m_controllers, &m_models, m_validator, this)
 {
     m_settings.print();
 
@@ -116,8 +115,8 @@ void Self::initialize()
 }
 
 /******************************************************************************/
-int
-Self::run(const QString &basePath, VSQLogging *logging) {
+int Self::run(const QString &basePath, VSQLogging *logging)
+{
 
     VSQUiHelper uiHelper;
 
@@ -160,7 +159,8 @@ Self::run(const QString &basePath, VSQLogging *logging) {
 }
 
 /******************************************************************************/
-void Self::reloadQml() {
+void Self::reloadQml()
+{
     const QUrl url(QStringLiteral("main.qml"));
     m_engine->clearComponentCache();
     m_engine->load(url);
@@ -184,8 +184,8 @@ QString Self::applicationDisplayName() const
     return Customer::ApplicationDisplayName;
 }
 
-QString
-Self::currentVersion() const {
+QString Self::currentVersion() const
+{
     return CustomerEnv::version();
 }
 
@@ -198,7 +198,8 @@ bool Self::isIosSimulator() const
 #endif
 }
 
-void Self::onApplicationStateChanged(Qt::ApplicationState state) {
+void Self::onApplicationStateChanged(Qt::ApplicationState state)
+{
     qDebug() << state;
     m_messenger.setApplicationActive(Qt::ApplicationState::ApplicationActive == state);
 

@@ -32,8 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
-
 #ifndef VM_MESSAGE_CONTENT_PICTURE_H
 #define VM_MESSAGE_CONTENT_PICTURE_H
 
@@ -44,13 +42,14 @@ namespace vm {
 //
 //  Class that handles picture as message content.
 //
-class MessageContentPicture : public MessageContentAttachment  {
+class MessageContentPicture : public MessageContentAttachment
+{
 
 public:
     //
     //  Apply picture specific update.
     //
-    bool applyUpdate(const MessageUpdate& update) override;
+    bool applyUpdate(const MessageUpdate &update) override;
 
     //
     //  Return JSON string with extra attachment attributes.
@@ -95,7 +94,8 @@ public:
     //
     //  Create picture message content from the given path.
     //
-    static std::optional<MessageContentPicture> createFromLocalFile(const QUrl& localUrl, const QSize &thumbnailMaxSize, QString &errorString);
+    static std::optional<MessageContentPicture> createFromLocalFile(const QUrl &localUrl, const QSize &thumbnailMaxSize,
+                                                                    QString &errorString);
 
 private:
     bool readImage(const QSize &thumbnailMaxSize, QString &errorString);

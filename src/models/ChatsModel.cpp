@@ -43,8 +43,7 @@
 using namespace vm;
 using Self = ChatsModel;
 
-Self::ChatsModel(QObject *parent)
-    : ListModel(parent)
+Self::ChatsModel(QObject *parent) : ListModel(parent)
 {
     qRegisterMetaType<ChatsModel *>("ChatsModel*");
 
@@ -53,8 +52,7 @@ Self::ChatsModel(QObject *parent)
     proxy()->setFilterRole(ContactIdRole);
 }
 
-Self::~ChatsModel()
-{}
+Self::~ChatsModel() { }
 
 void Self::setChats(ModifiableChats chats)
 {
@@ -121,7 +119,7 @@ void Self::updateLastMessage(const MessageHandler &message, qsizetype unreadMess
         qCDebug(lcModel) << "Last message was set to" << message->id();
     }
     chat->setLastMessage(message); // TODO(fpohtmeh): don't set last message if it's not older then current
-    QVector<int> roles{ LastMessageBodyRole, LastEventTimeRole };
+    QVector<int> roles { LastMessageBodyRole, LastEventTimeRole };
     if (unreadMessageCount != chat->unreadMessageCount()) {
         chat->setUnreadMessageCount(unreadMessageCount);
         qCDebug(lcModel) << "Unread message count was set to" << unreadMessageCount;
@@ -145,7 +143,7 @@ void ChatsModel::resetLastMessage(const ChatId &chatId)
         qCDebug(lcModel) << "Last message was reset";
     }
     chat->setLastMessage(MessageHandler());
-    QVector<int> roles{ LastMessageBodyRole, LastEventTimeRole };
+    QVector<int> roles { LastMessageBodyRole, LastEventTimeRole };
     if (chat->unreadMessageCount() != 0) {
         chat->setUnreadMessageCount(0);
         qCDebug(lcModel) << "Unread message count was reset";
@@ -156,7 +154,7 @@ void ChatsModel::resetLastMessage(const ChatId &chatId)
     emit chatUpdated(chat);
 }
 
-void Self::updateGroup(const GroupUpdate& groupUpdate)
+void Self::updateGroup(const GroupUpdate &groupUpdate)
 {
     //
     //  TODO: Add group chat title update.
@@ -196,7 +194,8 @@ QVariant Self::data(const QModelIndex &index, int role) const
         return chat->title(); // TODO: maybe we need change the role
 
     case LastEventTimeRole:
-        return (chat->lastMessage() ? qMax(chat->lastMessage()->createdAt(), chat->createdAt()) : chat->createdAt()).toString("hh:mm");
+        return (chat->lastMessage() ? qMax(chat->lastMessage()->createdAt(), chat->createdAt()) : chat->createdAt())
+                .toString("hh:mm");
 
     case LastEventTimestampRole:
         return chat->lastMessage() ? qMax(chat->lastMessage()->createdAt(), chat->createdAt()) : chat->createdAt();
@@ -219,13 +218,11 @@ QVariant Self::data(const QModelIndex &index, int role) const
 
 QHash<int, QByteArray> Self::roleNames() const
 {
-    return {
-        { IdRole, "id" },
-        { ContactIdRole, "contactId" },
-        { LastMessageBodyRole, "lastMessageBody" },
-        { LastEventTimeRole, "lastEventTime" },
-        { UnreadMessagesCountRole, "unreadMessageCount" }
-    };
+    return { { IdRole, "id" },
+             { ContactIdRole, "contactId" },
+             { LastMessageBodyRole, "lastMessageBody" },
+             { LastEventTimeRole, "lastEventTime" },
+             { UnreadMessagesCountRole, "unreadMessageCount" } };
 }
 
 std::optional<int> Self::findRowById(const ChatId &chatId) const

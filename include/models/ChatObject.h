@@ -42,8 +42,7 @@
 #include "GroupUpdate.h"
 #include "User.h"
 
-namespace vm
-{
+namespace vm {
 class Messenger;
 
 class ChatObject : public QObject
@@ -75,7 +74,7 @@ public:
 
 signals:
     void titleChanged(const QString &title);
-    void lastActivityTextChanged(const QString& text);
+    void lastActivityTextChanged(const QString &text);
     void isGroupChanged(bool isGroup);
 
 private:
@@ -86,6 +85,6 @@ private:
     QString m_lastActivityText;
     UserId m_groupInvitationOwnerId;
 };
-}
+} // namespace vm
 
 #endif // VM_CHAT_OBJECT_H

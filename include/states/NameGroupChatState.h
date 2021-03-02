@@ -39,8 +39,7 @@
 #include "GroupId.h"
 #include "OperationState.h"
 
-namespace vm
-{
+namespace vm {
 class ChatsController;
 
 class NameGroupChatState : public OperationState
@@ -61,6 +60,6 @@ private:
     ChatsController *m_chatsController;
     Contacts m_contacts;
 };
-}
+} // namespace vm
 
 #endif // VM_NAMEGROUPCHATSTATE_H

@@ -32,38 +32,39 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "UserId.h"
-
 
 using namespace vm;
 using Self = UserId;
 
+Self::UserId(QString userId) : m_userId(std::move(userId)) { }
 
-Self::UserId(QString userId) : m_userId(std::move(userId)) {
-
-}
-
-Self::operator QString() const {
+Self::operator QString() const
+{
     return m_userId;
 }
 
-bool Self::isValid() const noexcept {
+bool Self::isValid() const noexcept
+{
     return !m_userId.isEmpty();
 }
 
-bool vm::operator<(const vm::UserId& lhs, const vm::UserId& rhs) {
+bool vm::operator<(const vm::UserId &lhs, const vm::UserId &rhs)
+{
     return QString(lhs) < QString(rhs);
 }
 
-bool vm::operator>(const vm::UserId& lhs, const vm::UserId& rhs) {
+bool vm::operator>(const vm::UserId &lhs, const vm::UserId &rhs)
+{
     return QString(lhs) > QString(rhs);
 }
 
-bool vm::operator==(const vm::UserId& lhs, const vm::UserId& rhs) {
+bool vm::operator==(const vm::UserId &lhs, const vm::UserId &rhs)
+{
     return QString(lhs) == QString(rhs);
 }
 
-bool vm::operator!=(const vm::UserId& lhs, const vm::UserId& rhs) {
+bool vm::operator!=(const vm::UserId &lhs, const vm::UserId &rhs)
+{
     return QString(lhs) != QString(rhs);
 }

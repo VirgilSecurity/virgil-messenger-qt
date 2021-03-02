@@ -46,9 +46,7 @@
 using namespace vm;
 
 DiscoveredContactsModel::DiscoveredContactsModel(Validator *validator, QObject *parent)
-    : ContactsModel(parent, false)
-    , m_validator(validator)
-    , m_selectedContacts(new ContactsModel(this, false))
+    : ContactsModel(parent, false), m_validator(validator), m_selectedContacts(new ContactsModel(this, false))
 {
     qRegisterMetaType<DiscoveredContactsModel *>("DiscoveredContactsModel*");
 
@@ -57,7 +55,8 @@ DiscoveredContactsModel::DiscoveredContactsModel(Validator *validator, QObject *
 
     connect(selection(), &ListSelectionModel::changed, this, &DiscoveredContactsModel::onSelectionChanged);
     connect(this, &DiscoveredContactsModel::filterChanged, this, &DiscoveredContactsModel::updateDiscoveredContacts);
-    connect(this, &DiscoveredContactsModel::fixedContactsPopulated, this, &DiscoveredContactsModel::onDeviceContactsPopulated);
+    connect(this, &DiscoveredContactsModel::fixedContactsPopulated, this,
+            &DiscoveredContactsModel::onDeviceContactsPopulated);
 }
 
 void DiscoveredContactsModel::reload()
@@ -85,8 +84,7 @@ void DiscoveredContactsModel::toggleByUsername(const QString &contactUsername)
 {
     if (const auto index = findByUsername(contactUsername); index.isValid() && index.row() < m_fixedContactsCount) {
         selection()->toggle(index);
-    }
-    else {
+    } else {
         updateSelectedContacts(contactUsername);
     }
 }
@@ -102,16 +100,14 @@ QString DiscoveredContactsModel::firstContactUsername() const
 QVariant DiscoveredContactsModel::data(const QModelIndex &index, int role) const
 {
     switch (role) {
-    case SortRole:
-    {
+    case SortRole: {
         const auto row = index.row();
         const auto preffix = (row < m_fixedContactsCount) ? QLatin1Char('1') : QLatin1Char('0');
         return preffix + getContact(row)->displayName();
     }
     case SectionRole:
         return (index.row() < m_fixedContactsCount) ? tr("Phone contacts") : tr("Contacts to be found");
-    case IsSelectedRole:
-    {
+    case IsSelectedRole: {
         if (index.row() >= m_fixedContactsCount) {
             const auto contactUsername = getContact(index.row())->username();
             return m_selectedContacts->hasContact(contactUsername);
@@ -126,9 +122,7 @@ QVariant DiscoveredContactsModel::data(const QModelIndex &index, int role) const
 
 QHash<int, QByteArray> DiscoveredContactsModel::roleNames() const
 {
-    return unitedRoleNames(ContactsModel::roleNames(), {
-        { SectionRole, "section" }
-    });
+    return unitedRoleNames(ContactsModel::roleNames(), { { SectionRole, "section" } });
 }
 
 Contacts DiscoveredContactsModel::findContactsByFilter() const
@@ -160,8 +154,7 @@ void DiscoveredContactsModel::updateDiscoveredContacts()
         // Replace or add contact
         if (contactsCount < getContactsCount()) {
             updateContact(c, contactsCount);
-        }
-        else {
+        } else {
             addContact(c);
         }
         ++contactsCount;
@@ -180,8 +173,7 @@ void DiscoveredContactsModel::updateSelectedContacts(const QString &contactUsern
 {
     if (m_selectedContacts->hasContact(contactUsername)) {
         m_selectedContacts->removeContact(contactUsername);
-    }
-    else {
+    } else {
         m_selectedContacts->addContact(contact ? contact : createContact(contactUsername));
     }
     // Invalidate selection for discovered contacts

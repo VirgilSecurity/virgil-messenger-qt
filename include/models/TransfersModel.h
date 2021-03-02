@@ -38,8 +38,7 @@
 #include "CloudFilesUpdate.h"
 #include "ListModel.h"
 
-namespace vm
-{
+namespace vm {
 class TransfersModel : public ListModel
 {
     Q_OBJECT
@@ -58,14 +57,7 @@ signals:
     void interrupt(const QString &id);
 
 private:
-    enum Roles
-    {
-        IdRole = Qt::UserRole,
-        NameRole,
-        BytesLoadedRole,
-        BytesTotalRole,
-        DisplayProgressRole
-    };
+    enum Roles { IdRole = Qt::UserRole, NameRole, BytesLoadedRole, BytesTotalRole, DisplayProgressRole };
 
     struct Transfer
     {

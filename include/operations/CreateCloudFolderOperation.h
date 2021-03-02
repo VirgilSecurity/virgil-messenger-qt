@@ -39,8 +39,7 @@
 #include "CloudFileRequestId.h"
 #include "Operation.h"
 
-namespace vm
-{
+namespace vm {
 class CloudFileOperation;
 
 class CreateCloudFolderOperation : public Operation
@@ -61,6 +60,6 @@ private:
     CloudFileHandler m_parentFolder;
     CloudFileRequestId m_requestId;
 };
-}
+} // namespace vm
 
 #endif // VM_CREATE_CLOUD_FOLDER_OPERATION_H

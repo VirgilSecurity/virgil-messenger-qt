@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_MESSAGE_GROUP_CHAT_INFO_H
 #define VM_MESSAGE_GROUP_CHAT_INFO_H
 
@@ -45,7 +44,8 @@ namespace vm {
 //
 //  Handles information about group chat the message belongs to.
 //
-class MessageGroupChatInfo  {
+class MessageGroupChatInfo
+{
 public:
     explicit MessageGroupChatInfo(GroupId groupId);
 
@@ -56,7 +56,6 @@ public:
 
 private:
     GroupId m_groupId;
-
 };
 } // namespace vm
 

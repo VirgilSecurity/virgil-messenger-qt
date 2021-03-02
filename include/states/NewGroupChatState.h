@@ -38,8 +38,7 @@
 #include "OperationState.h"
 #include "Contact.h"
 
-namespace vm
-{
+namespace vm {
 class DiscoveredContactsModel;
 
 class NewGroupChatState : public OperationState
@@ -58,6 +57,6 @@ private:
 
     DiscoveredContactsModel *m_contactsModel;
 };
-}
+} // namespace vm
 
 #endif // VM_NEWGROUPCHATSTATE_H

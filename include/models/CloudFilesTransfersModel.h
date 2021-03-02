@@ -38,8 +38,7 @@
 #include "CloudFilesUpdate.h"
 #include "TransfersModel.h"
 
-namespace vm
-{
+namespace vm {
 class CloudFilesTransfersModel : public TransfersModel
 {
     Q_OBJECT

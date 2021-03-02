@@ -41,8 +41,7 @@
 class QInputMethod;
 class QQuickItem;
 
-namespace vm
-{
+namespace vm {
 class KeyboardEventFilter : public QObject
 {
     Q_OBJECT
@@ -65,6 +64,6 @@ private:
     QInputMethod *m_inputMethod;
     QRectF m_keyboardRectangle;
 };
-}
+} // namespace vm
 
 #endif // VM_KEYBOARDEVENTFILTER_H

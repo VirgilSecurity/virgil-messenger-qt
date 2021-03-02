@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "GroupAffiliation.h"
 
 #include <stdexcept>
@@ -41,69 +40,65 @@
 
 using namespace vm;
 
-
-GroupAffiliation vm::GroupAffiliationFromString(const QString& affiliationString) {
+GroupAffiliation vm::GroupAffiliationFromString(const QString &affiliationString)
+{
     if (affiliationString == QLatin1String("none")) {
         return GroupAffiliation::None;
-    }
-    else if (affiliationString == QLatin1String("outcast")) {
+    } else if (affiliationString == QLatin1String("outcast")) {
         return GroupAffiliation::Outcast;
-    }
-    else if (affiliationString == QLatin1String("member")) {
+    } else if (affiliationString == QLatin1String("member")) {
         return GroupAffiliation::Member;
-    }
-    else if (affiliationString == QLatin1String("admin")) {
+    } else if (affiliationString == QLatin1String("admin")) {
         return GroupAffiliation::Admin;
-    }
-    else if (affiliationString == QLatin1String("owner")) {
+    } else if (affiliationString == QLatin1String("owner")) {
         return GroupAffiliation::Owner;
-    }
-    else {
+    } else {
         throw std::logic_error("Invalid GroupAffiliation string");
     }
 }
 
-
-QString vm::GroupAffiliationToString(GroupAffiliation affiliation) {
+QString vm::GroupAffiliationToString(GroupAffiliation affiliation)
+{
     switch (affiliation) {
-        case GroupAffiliation::None:
-            return QLatin1String("none");
+    case GroupAffiliation::None:
+        return QLatin1String("none");
 
-        case GroupAffiliation::Outcast:
-            return QLatin1String("outcast");
+    case GroupAffiliation::Outcast:
+        return QLatin1String("outcast");
 
-        case GroupAffiliation::Member:
-            return QLatin1String("member");
+    case GroupAffiliation::Member:
+        return QLatin1String("member");
 
-        case GroupAffiliation::Admin:
-            return QLatin1String("admin");
+    case GroupAffiliation::Admin:
+        return QLatin1String("admin");
 
-        case GroupAffiliation::Owner:
-            return QLatin1String("owner");
+    case GroupAffiliation::Owner:
+        return QLatin1String("owner");
 
-        default:
-            throw std::logic_error("Invalid GroupAffiliation");
+    default:
+        throw std::logic_error("Invalid GroupAffiliation");
     }
 }
 
-QString vm::GroupAffiliationToDisplayString(GroupAffiliation affiliation) {
+QString vm::GroupAffiliationToDisplayString(GroupAffiliation affiliation)
+{
     switch (affiliation) {
-        case GroupAffiliation::None:
-            return QObject::tr("none");
+    case GroupAffiliation::None:
+        return QObject::tr("none");
 
-        case GroupAffiliation::Outcast:
-            return QObject::tr("outcast");
+    case GroupAffiliation::Outcast:
+        return QObject::tr("outcast");
 
-        case GroupAffiliation::Member:
-            return QObject::tr("member");
+    case GroupAffiliation::Member:
+        return QObject::tr("member");
 
-        case GroupAffiliation::Admin:
-            return QObject::tr("admin");
+    case GroupAffiliation::Admin:
+        return QObject::tr("admin");
 
-        case GroupAffiliation::Owner:
-            return QObject::tr("owner");
+    case GroupAffiliation::Owner:
+        return QObject::tr("owner");
 
-        default:
-            throw std::logic_error("Invalid GroupAffiliation");
+    default:
+        throw std::logic_error("Invalid GroupAffiliation");
     }
 }

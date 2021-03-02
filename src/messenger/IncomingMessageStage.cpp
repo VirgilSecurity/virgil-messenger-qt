@@ -32,66 +32,61 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "IncomingMessageStage.h"
-
 
 using namespace vm;
 
-
-IncomingMessageStage vm::IncomingMessageStageFromString(const QString& stageString) {
+IncomingMessageStage vm::IncomingMessageStageFromString(const QString &stageString)
+{
     if (stageString == QLatin1String("received")) {
         return IncomingMessageStage::Received;
-    }
-    else if (stageString == QLatin1String("decrypted")) {
+    } else if (stageString == QLatin1String("decrypted")) {
         return IncomingMessageStage::Decrypted;
-    }
-    else if (stageString == QLatin1String("processed")) {
+    } else if (stageString == QLatin1String("processed")) {
         return IncomingMessageStage::Processed;
-    }
-    else if (stageString == QLatin1String("broken")) {
+    } else if (stageString == QLatin1String("broken")) {
         return IncomingMessageStage::Broken;
-    }
-    else {
+    } else {
         throw std::logic_error("Invalid IncomingMessageStage string");
     }
 }
 
-
-QString vm::IncomingMessageStageToString(IncomingMessageStage stage) {
+QString vm::IncomingMessageStageToString(IncomingMessageStage stage)
+{
     switch (stage) {
-        case IncomingMessageStage::Received:
-            return QLatin1String("received");
+    case IncomingMessageStage::Received:
+        return QLatin1String("received");
 
-        case IncomingMessageStage::Decrypted:
-            return QLatin1String("decrypted");
+    case IncomingMessageStage::Decrypted:
+        return QLatin1String("decrypted");
 
-        case IncomingMessageStage::Processed:
-            return QLatin1String("processed");
+    case IncomingMessageStage::Processed:
+        return QLatin1String("processed");
 
-        case IncomingMessageStage::Broken:
-            return QLatin1String("broken");
+    case IncomingMessageStage::Broken:
+        return QLatin1String("broken");
 
-        default:
-            throw std::logic_error("Invalid IncomingMessageStage");
+    default:
+        throw std::logic_error("Invalid IncomingMessageStage");
     }
 }
 
-MessageStatus vm::IncomingMessageStageToMessageStatus(IncomingMessageStage stage) {
+MessageStatus vm::IncomingMessageStageToMessageStatus(IncomingMessageStage stage)
+{
     switch (stage) {
-        case IncomingMessageStage::Received:
-            return MessageStatus::New;
+    case IncomingMessageStage::Received:
+        return MessageStatus::New;
 
-        case IncomingMessageStage::Decrypted:
-            return MessageStatus::Processing;
+    case IncomingMessageStage::Decrypted:
+        return MessageStatus::Processing;
 
-        case IncomingMessageStage::Processed:
-            return MessageStatus::Succeed;
+    case IncomingMessageStage::Processed:
+        return MessageStatus::Succeed;
 
-        case IncomingMessageStage::Broken:
-            return MessageStatus::Broken;
+    case IncomingMessageStage::Broken:
+        return MessageStatus::Broken;
 
-        default:
-            throw std::logic_error("Invalid IncomingMessageStage");
+    default:
+        throw std::logic_error("Invalid IncomingMessageStage");
     }
 }

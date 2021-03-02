@@ -32,69 +32,67 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "Chat.h"
-
 
 using namespace vm;
 using Self = Chat;
 
-
-ChatId Self::id() const {
+ChatId Self::id() const
+{
     return m_id;
 }
 
-
-void Self::setId(ChatId id) {
+void Self::setId(ChatId id)
+{
     m_id = std::move(id);
 }
 
-
-QString Self::title() const {
+QString Self::title() const
+{
     return m_title;
 }
 
-
-void Self::setTitle(QString title) {
+void Self::setTitle(QString title)
+{
     m_title = std::move(title);
 }
 
-
-Self::Type Self::type() const {
+Self::Type Self::type() const
+{
     return m_type;
 }
 
-
-void Self::setType(Self::Type type) {
+void Self::setType(Self::Type type)
+{
     m_type = type;
 }
 
-
-QDateTime Self::createdAt() const {
+QDateTime Self::createdAt() const
+{
     return m_createdAt;
 }
 
-
-void Self::setCreatedAt(QDateTime createdAt) {
+void Self::setCreatedAt(QDateTime createdAt)
+{
     m_createdAt = std::move(createdAt);
 }
 
-
-MessageHandler Self::lastMessage() const {
+MessageHandler Self::lastMessage() const
+{
     return m_lastMessage;
 }
 
-
-void Self::setLastMessage(MessageHandler lastMessage) {
+void Self::setLastMessage(MessageHandler lastMessage)
+{
     m_lastMessage = std::move(lastMessage);
 }
 
-
-qsizetype Self::unreadMessageCount() const {
+qsizetype Self::unreadMessageCount() const
+{
     return m_unreadMessageCount;
 }
 
-
-void Self::setUnreadMessageCount(qsizetype  unreadMessageCount) {
+void Self::setUnreadMessageCount(qsizetype unreadMessageCount)
+{
     m_unreadMessageCount = unreadMessageCount;
 }

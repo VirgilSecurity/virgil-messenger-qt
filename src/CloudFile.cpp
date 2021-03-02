@@ -195,8 +195,7 @@ void CloudFile::update(const CloudFile &file, const CloudFileUpdateSource source
             setEncryptedKey(file.encryptedKey());
             setPublicKey(file.publicKey());
         }
-    }
-    else if (source == CloudFileUpdateSource::ListedChild) {
+    } else if (source == CloudFileUpdateSource::ListedChild) {
         setName(file.name());
         setCreatedAt(file.createdAt());
         setUpdatedAt(file.updatedAt());
@@ -207,16 +206,14 @@ void CloudFile::update(const CloudFile &file, const CloudFileUpdateSource source
                 setEncryptedKey(QByteArray());
                 setPublicKey(QByteArray());
             }
-        }
-        else {
+        } else {
             setType(file.type());
             setSize(file.size());
             if (file.updatedAt() > updatedAt()) {
                 setFingerprint(QString());
             }
         }
-    }
-    else if (source == CloudFileUpdateSource::Download) {
+    } else if (source == CloudFileUpdateSource::Download) {
         if (!isFolder()) {
             setFingerprint(file.fingerprint());
         }

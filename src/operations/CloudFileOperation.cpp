@@ -42,9 +42,7 @@ using namespace vm;
 qsizetype CloudFileOperation::m_nameCounter = 0;
 
 CloudFileOperation::CloudFileOperation(Messenger *messenger, CloudFolderUpdateWatcher *watcher, QObject *parent)
-    : NetworkOperation(parent, messenger->isOnline())
-    , m_messenger(messenger)
-    , m_watcher(watcher)
+    : NetworkOperation(parent, messenger->isOnline()), m_messenger(messenger), m_watcher(watcher)
 {
     setName(QLatin1String("CloudFile(%1)").arg(QString::number(++m_nameCounter)));
 }

@@ -40,7 +40,6 @@
 
 using namespace vm;
 
-
 static const QLatin1String ns_muc_sub("urn:xmpp:mucsub:0");
 
 static const QLatin1String ns_muc_sub_node_presence("urn:xmpp:mucsub:nodes:presence");
@@ -54,7 +53,8 @@ static const QLatin1String ns_muc_sub_node_system("urn:xmpp:mucsub:nodes:system"
 // --------------------------------------------------------------------------
 //  Helpers.
 // --------------------------------------------------------------------------
-static QString xmppMucSubEventToNodeString(XmppMucSubEvent event) {
+static QString xmppMucSubEventToNodeString(XmppMucSubEvent event)
+{
 
     switch (event) {
     case XmppMucSubEvent::Unspecified:
@@ -83,8 +83,8 @@ static QString xmppMucSubEventToNodeString(XmppMucSubEvent event) {
     }
 }
 
-
-static XmppMucSubEvent xmppMucSubEventFromNodeString(const QString& eventString) {
+static XmppMucSubEvent xmppMucSubEventFromNodeString(const QString &eventString)
+{
 
     if (eventString == ns_muc_sub_node_presence) {
         return XmppMucSubEvent::Presence;
@@ -112,54 +112,58 @@ static XmppMucSubEvent xmppMucSubEventFromNodeString(const QString& eventString)
     }
 }
 
-
 // --------------------------------------------------------------------------
 //  XmppMucSubscribeItem
 // --------------------------------------------------------------------------
-QString XmppMucSubscribeItem::jid() const {
+QString XmppMucSubscribeItem::jid() const
+{
     return m_jid;
 }
 
-void XmppMucSubscribeItem::setJid(const QString& jid) {
+void XmppMucSubscribeItem::setJid(const QString &jid)
+{
     m_jid = jid;
 }
 
-
-QString XmppMucSubscribeItem::nickName() const {
+QString XmppMucSubscribeItem::nickName() const
+{
     return m_nickName;
 }
 
-void XmppMucSubscribeItem::setNickName(const QString& nickName) {
+void XmppMucSubscribeItem::setNickName(const QString &nickName)
+{
     m_nickName = nickName;
 }
 
-
-QString XmppMucSubscribeItem::password() const {
+QString XmppMucSubscribeItem::password() const
+{
     return m_password;
 }
 
-void XmppMucSubscribeItem::setPassword(const QString& password) {
+void XmppMucSubscribeItem::setPassword(const QString &password)
+{
     m_password = password;
 }
 
-
-std::list<XmppMucSubEvent> XmppMucSubscribeItem::events() const {
+std::list<XmppMucSubEvent> XmppMucSubscribeItem::events() const
+{
     return m_events;
 }
 
-void XmppMucSubscribeItem::setEvents(const std::list<XmppMucSubEvent>& events) {
+void XmppMucSubscribeItem::setEvents(const std::list<XmppMucSubEvent> &events)
+{
     m_events = events;
 }
 
-
-void XmppMucSubscribeItem::parse(const QDomElement &element) {
+void XmppMucSubscribeItem::parse(const QDomElement &element)
+{
 
     m_jid = element.attribute(QStringLiteral("jid"));
     m_nickName = element.attribute(QStringLiteral("nick"));
     m_password = element.attribute(QStringLiteral("password"));
 
     auto child = element.firstChildElement(QStringLiteral("event"));
-    for(m_events.clear(); !child.isNull(); child = child.nextSiblingElement(QStringLiteral("event"))) {
+    for (m_events.clear(); !child.isNull(); child = child.nextSiblingElement(QStringLiteral("event"))) {
 
         auto node = element.attribute(QStringLiteral("node"));
         auto event = xmppMucSubEventFromNodeString(node);
@@ -170,8 +174,8 @@ void XmppMucSubscribeItem::parse(const QDomElement &element) {
     }
 }
 
-
-void XmppMucSubscribeItem::toXml(QXmlStreamWriter *writer) const {
+void XmppMucSubscribeItem::toXml(QXmlStreamWriter *writer) const
+{
     writer->writeStartElement(QStringLiteral("subscribe"));
     writer->writeDefaultNamespace(ns_muc_sub);
 
@@ -179,7 +183,7 @@ void XmppMucSubscribeItem::toXml(QXmlStreamWriter *writer) const {
     helperToXmlAddAttribute(writer, QStringLiteral("nick"), m_nickName);
     helperToXmlAddAttribute(writer, QStringLiteral("password"), m_password);
 
-    for (const auto& event: m_events) {
+    for (const auto &event : m_events) {
         writer->writeStartElement(QStringLiteral("event"));
         helperToXmlAddAttribute(writer, QStringLiteral("node"), xmppMucSubEventToNodeString(event));
         writer->writeEndElement();
@@ -188,24 +192,26 @@ void XmppMucSubscribeItem::toXml(QXmlStreamWriter *writer) const {
     writer->writeEndElement();
 }
 
-
 // --------------------------------------------------------------------------
 //  XmppMucSubscriptionItem
 // --------------------------------------------------------------------------
 
-QString XmppMucSubscriptionItem::jid() const {
+QString XmppMucSubscriptionItem::jid() const
+{
     return m_jid;
 }
 
-std::list<XmppMucSubEvent> XmppMucSubscriptionItem::events() const {
+std::list<XmppMucSubEvent> XmppMucSubscriptionItem::events() const
+{
     return m_events;
 }
 
-void XmppMucSubscriptionItem::parse(const QDomElement &element) {
+void XmppMucSubscriptionItem::parse(const QDomElement &element)
+{
     m_jid = element.attribute(QStringLiteral("jid"));
 
     auto child = element.firstChildElement(QStringLiteral("event"));
-    for(m_events.clear(); !child.isNull(); child = child.nextSiblingElement(QStringLiteral("event"))) {
+    for (m_events.clear(); !child.isNull(); child = child.nextSiblingElement(QStringLiteral("event"))) {
 
         auto node = element.attribute(QStringLiteral("node"));
         auto event = xmppMucSubEventFromNodeString(node);
@@ -216,14 +222,14 @@ void XmppMucSubscriptionItem::parse(const QDomElement &element) {
     }
 }
 
-
-void XmppMucSubscriptionItem::toXml(QXmlStreamWriter *writer) const {
+void XmppMucSubscriptionItem::toXml(QXmlStreamWriter *writer) const
+{
 
     writer->writeStartElement(QStringLiteral("subscription"));
 
     helperToXmlAddAttribute(writer, QStringLiteral("jid"), m_jid);
 
-    for (const auto& event: m_events) {
+    for (const auto &event : m_events) {
         writer->writeStartElement(QStringLiteral("event"));
         helperToXmlAddAttribute(writer, QStringLiteral("node"), xmppMucSubEventToNodeString(event));
         writer->writeEndElement();
@@ -233,27 +239,29 @@ void XmppMucSubscriptionItem::toXml(QXmlStreamWriter *writer) const {
 // --------------------------------------------------------------------------
 //  XmppMucSubscriptionsIq
 // --------------------------------------------------------------------------
-std::list<XmppMucSubscriptionItem> XmppMucSubscriptionsIq::items() const {
+std::list<XmppMucSubscriptionItem> XmppMucSubscriptionsIq::items() const
+{
     return m_items;
 }
 
-bool XmppMucSubscriptionsIq::isMySubscriptions() const {
+bool XmppMucSubscriptionsIq::isMySubscriptions() const
+{
     return from().indexOf(QChar('@')) < 0;
 }
 
-
-bool XmppMucSubscriptionsIq::isRoomSubscriptions() const {
+bool XmppMucSubscriptionsIq::isRoomSubscriptions() const
+{
     return from().indexOf(QChar('@')) > 0;
 }
 
-
-bool XmppMucSubscriptionsIq::isMucSubscriptionsIq(const QDomElement &element) {
+bool XmppMucSubscriptionsIq::isMucSubscriptionsIq(const QDomElement &element)
+{
     QDomElement queryElement = element.firstChildElement(QStringLiteral("subscriptions"));
     return (queryElement.namespaceURI() == ns_muc_sub);
 }
 
-
-void XmppMucSubscriptionsIq::parseElementFromChild(const QDomElement &element) {
+void XmppMucSubscriptionsIq::parseElementFromChild(const QDomElement &element)
+{
 
     auto queryElement = element.firstChildElement(QStringLiteral("subscriptions"));
 
@@ -266,8 +274,8 @@ void XmppMucSubscriptionsIq::parseElementFromChild(const QDomElement &element) {
     }
 }
 
-
-void XmppMucSubscriptionsIq::toXmlElementFromChild(QXmlStreamWriter *writer) const {
+void XmppMucSubscriptionsIq::toXmlElementFromChild(QXmlStreamWriter *writer) const
+{
 
     writer->writeStartElement(QStringLiteral("subscriptions"));
     writer->writeDefaultNamespace(ns_muc_sub);
@@ -279,33 +287,32 @@ void XmppMucSubscriptionsIq::toXmlElementFromChild(QXmlStreamWriter *writer) con
     writer->writeEndElement();
 }
 
-
 // --------------------------------------------------------------------------
 //  XmppMucSubscriptionsIq
 // --------------------------------------------------------------------------
-XmppMucSubscribeItem XmppMucSubscribeIq::item() const {
+XmppMucSubscribeItem XmppMucSubscribeIq::item() const
+{
     return m_item;
 }
 
-
-void XmppMucSubscribeIq::setItem(const XmppMucSubscribeItem &item) {
+void XmppMucSubscribeIq::setItem(const XmppMucSubscribeItem &item)
+{
     m_item = item;
 }
 
-
-bool XmppMucSubscribeIq::isMucSubscribeIq(const QDomElement &element) {
+bool XmppMucSubscribeIq::isMucSubscribeIq(const QDomElement &element)
+{
     QDomElement queryElement = element.firstChildElement(QStringLiteral("subscribe"));
     return (queryElement.namespaceURI() == ns_muc_sub);
 }
 
-
-void XmppMucSubscribeIq::parseElementFromChild(const QDomElement &element) {
+void XmppMucSubscribeIq::parseElementFromChild(const QDomElement &element)
+{
     QDomElement queryElement = element.firstChildElement(QStringLiteral("subscribe"));
     m_item.parse(queryElement);
 }
 
-
-void XmppMucSubscribeIq::toXmlElementFromChild(QXmlStreamWriter *writer) const {
+void XmppMucSubscribeIq::toXmlElementFromChild(QXmlStreamWriter *writer) const
+{
     m_item.toXml(writer);
 }
-

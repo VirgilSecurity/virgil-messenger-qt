@@ -55,11 +55,11 @@ using namespace vm;
 using Self = ChatsController;
 
 Self::ChatsController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent)
-    : QObject(parent)
-    , m_messenger(messenger)
-    , m_models(models)
-    , m_userDatabase(userDatabase)
-    , m_chatObject(new ChatObject(messenger, this))
+    : QObject(parent),
+      m_messenger(messenger),
+      m_models(models),
+      m_userDatabase(userDatabase),
+      m_chatObject(new ChatObject(messenger, this))
 {
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
     connect(this, &Self::createChatWithUser, this, &Self::onCreateChatWithUser);
@@ -69,7 +69,8 @@ Self::ChatsController(Messenger *messenger, Models *models, UserDatabase *userDa
     connect(m_messenger, &Messenger::groupChatCreateFailed, this, &Self::onGroupChatCreateFailed);
     connect(m_messenger, &Messenger::updateGroup, this, &Self::onUpdateGroup);
 
-    connect(m_models->messages(), &MessagesModel::groupInvitationReceived, m_chatObject, &ChatObject::setGroupInvitationOwnerId);
+    connect(m_models->messages(), &MessagesModel::groupInvitationReceived, m_chatObject,
+            &ChatObject::setGroupInvitationOwnerId);
 }
 
 ChatHandler Self::currentChat() const
@@ -104,19 +105,22 @@ void Self::rejectGroupInvitation()
     emit groupInvitationRejected();
 }
 
-void ChatsController::addSelectedMembers() {
+void ChatsController::addSelectedMembers()
+{
     const GroupId groupId(currentChat()->id());
     const auto groupMembers = ContactsToGroupMembers(groupId, m_models->discoveredContacts()->selectedContacts());
     // TODO: call in core messenger
 }
 
-void ChatsController::removeSelectedMembers() {
+void ChatsController::removeSelectedMembers()
+{
     const GroupId groupId(currentChat()->id());
     const auto groupMembers = m_chatObject->selectedGroupMembers();
     // TODO: call in core messenger
 }
 
-void ChatsController::leaveGroup() {
+void ChatsController::leaveGroup()
+{
     const GroupId groupId(currentChat()->id());
     // TODO: call in core messenger
 }
@@ -144,8 +148,7 @@ void Self::createChatWithUsername(const QString &username)
         auto user = m_messenger->findUserByUsername(username);
         if (user) {
             emit createChatWithUser(user, QPrivateSignal());
-        }
-        else {
+        } else {
             emit errorOccurred(tr("Contact not found"));
         }
     });
@@ -161,8 +164,7 @@ void Self::createChatWithUserId(const UserId &userId)
         auto user = m_messenger->findUserById(userId);
         if (user) {
             emit createChatWithUser(user, QPrivateSignal());
-        }
-        else {
+        } else {
             emit errorOccurred(tr("Contact not found"));
         }
     });
@@ -184,7 +186,7 @@ void ChatsController::createGroupChat(const QString &groupName, const Contacts &
     });
 }
 
-void Self::openChat(const ChatHandler& chat)
+void Self::openChat(const ChatHandler &chat)
 {
     qCDebug(lcController) << "Opening chat with id: " << chat->id();
     if (chat->unreadMessageCount() > 0) {
@@ -215,8 +217,10 @@ void Self::setupTableConnections()
 
     connect(m_userDatabase->groupsTable(), &GroupsTable::errorOccurred, this, &Self::errorOccurred);
     connect(m_userDatabase->groupMembersTable(), &GroupMembersTable::errorOccurred, this, &Self::errorOccurred);
-    connect(m_userDatabase->groupMembersTable(), &GroupMembersTable::fetchedByMemberId, this, &Self::onGroupMembersFetchedByMemberId);
-    connect(m_userDatabase->groupMembersTable(), &GroupMembersTable::fetchedByGroupId, this, &Self::onGroupMembersFetchedByGroupId);
+    connect(m_userDatabase->groupMembersTable(), &GroupMembersTable::fetchedByMemberId, this,
+            &Self::onGroupMembersFetchedByMemberId);
+    connect(m_userDatabase->groupMembersTable(), &GroupMembersTable::fetchedByGroupId, this,
+            &Self::onGroupMembersFetchedByGroupId);
 }
 
 void Self::onCreateChatWithUser(const UserHandler &user)
@@ -250,7 +254,7 @@ void Self::onChatsLoaded(ModifiableChats chats)
     emit chatsLoaded();
 }
 
-void Self::onGroupChatCreated(const GroupId& groupId)
+void Self::onGroupChatCreated(const GroupId &groupId)
 {
     auto createdChat = m_models->chats()->findChat(ChatId(QString(groupId)));
     if (createdChat) {
@@ -258,15 +262,13 @@ void Self::onGroupChatCreated(const GroupId& groupId)
     }
 }
 
-
-void Self::onGroupChatCreateFailed(const GroupId& chatId, const QString& errorText)
+void Self::onGroupChatCreateFailed(const GroupId &chatId, const QString &errorText)
 {
     Q_UNUSED(chatId)
     emit notificationCreated(errorText, true);
 }
 
-
-void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
+void Self::onUpdateGroup(const GroupUpdate &groupUpdate)
 {
     //
     //  Update UI.
@@ -279,8 +281,7 @@ void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
     m_userDatabase->updateGroup(groupUpdate);
 }
 
-
-void Self::onGroupMembersFetchedByMemberId(const UserId &memberId, const GroupMembers& groupMembers)
+void Self::onGroupMembersFetchedByMemberId(const UserId &memberId, const GroupMembers &groupMembers)
 {
     qCDebug(lcController) << "Group chats members with a current user were fetched" << memberId;
     //
@@ -289,9 +290,7 @@ void Self::onGroupMembersFetchedByMemberId(const UserId &memberId, const GroupMe
     //
     GroupMembers membersFromAcceptedGroups;
     std::copy_if(groupMembers.cbegin(), groupMembers.cbegin(), std::back_inserter(membersFromAcceptedGroups),
-            [](const auto& groupMember) {
-                return groupMember->memberAffiliation() != GroupAffiliation::None;
-            });
+                 [](const auto &groupMember) { return groupMember->memberAffiliation() != GroupAffiliation::None; });
 
     m_messenger->joinGroupChats(membersFromAcceptedGroups);
 }

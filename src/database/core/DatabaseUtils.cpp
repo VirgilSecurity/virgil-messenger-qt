@@ -51,30 +51,29 @@
 using namespace vm;
 using Self = DatabaseUtils;
 
-namespace
+namespace {
+QString queryPath(const QString &fileName)
 {
-    QString queryPath(const QString &fileName)
-    {
-        return QString(":/resources/database/%1.sql").arg(fileName);
-    }
-
-    std::optional<QStringList> readQueryTexts(const QString &queryId)
-    {
-        const auto maybeText = FileUtils::readTextFile(queryPath(queryId));
-        if (!maybeText) {
-            return {};
-        }
-        QStringList queries;
-        const auto texts = maybeText->split(";");
-        for (auto &text : texts) {
-            auto query = text.trimmed();
-            if (!query.isEmpty()) {
-                queries << query;
-            }
-        }
-        return queries;
-    }
+    return QString(":/resources/database/%1.sql").arg(fileName);
 }
+
+std::optional<QStringList> readQueryTexts(const QString &queryId)
+{
+    const auto maybeText = FileUtils::readTextFile(queryPath(queryId));
+    if (!maybeText) {
+        return {};
+    }
+    QStringList queries;
+    const auto texts = maybeText->split(";");
+    for (auto &text : texts) {
+        auto query = text.trimmed();
+        if (!query.isEmpty()) {
+            queries << query;
+        }
+    }
+    return queries;
+}
+} // namespace
 
 bool Self::isValidName(const QString &id)
 {
@@ -122,11 +121,9 @@ std::optional<QSqlQuery> Self::readExecQuery(Database *database, const QString &
     for (auto &v : values) {
         if (hasListType(v)) {
             // bindValue was processed earlier
-        }
-        else if (v.first == QLatin1Char('?')) {
+        } else if (v.first == QLatin1Char('?')) {
             query.addBindValue(v.second);
-        }
-        else {
+        } else {
             query.bindValue(v.first, v.second);
         }
     }
@@ -138,7 +135,8 @@ std::optional<QSqlQuery> Self::readExecQuery(Database *database, const QString &
     return query;
 }
 
-bool Self::readMessageContentAttachment(const QSqlQuery &query, MessageContentAttachment& attachment) {
+bool Self::readMessageContentAttachment(const QSqlQuery &query, MessageContentAttachment &attachment)
+{
     //
     //  Read generic attachment properties.
     //
@@ -169,8 +167,8 @@ bool Self::readMessageContentAttachment(const QSqlQuery &query, MessageContentAt
     return true;
 }
 
-
-MessageContent Self::readMessageContentFile(const QSqlQuery &query) {
+MessageContent Self::readMessageContentFile(const QSqlQuery &query)
+{
 
     MessageContentFile content;
 
@@ -181,8 +179,8 @@ MessageContent Self::readMessageContentFile(const QSqlQuery &query) {
     return {};
 }
 
-
-MessageContent Self::readMessageContentPicture(const QSqlQuery &query) {
+MessageContent Self::readMessageContentPicture(const QSqlQuery &query)
+{
 
     MessageContentPicture content;
 
@@ -205,16 +203,16 @@ MessageContent Self::readMessageContentPicture(const QSqlQuery &query) {
     return {};
 }
 
-
-MessageContent Self::readMessageContentText(const QSqlQuery &query) {
+MessageContent Self::readMessageContentText(const QSqlQuery &query)
+{
 
     const auto messageBody = query.value("messageBody").toString();
 
     return MessageContentText(messageBody);
 }
 
-
-MessageContent Self::readMessageContentEncrypted(const QSqlQuery &query) {
+MessageContent Self::readMessageContentEncrypted(const QSqlQuery &query)
+{
 
     const auto messageCiphertext = query.value("messageCiphertext").toByteArray();
 
@@ -230,7 +228,8 @@ void DatabaseUtils::printQueryRecord(const QSqlQuery &query)
     }
 }
 
-MessageContent Self::readMessageContent(const QSqlQuery &query) {
+MessageContent Self::readMessageContent(const QSqlQuery &query)
+{
 
     const auto contentTypeStr = query.value("messageContentType").toString();
     if (contentTypeStr.isEmpty()) {
@@ -241,31 +240,30 @@ MessageContent Self::readMessageContent(const QSqlQuery &query) {
 
     const auto contentType = MessageContentTypeFrom(contentTypeStr);
     switch (contentType) {
-        case MessageContentType::None:
-            return {};
+    case MessageContentType::None:
+        return {};
 
-        case MessageContentType::File:
-            return Self::readMessageContentFile(query);
+    case MessageContentType::File:
+        return Self::readMessageContentFile(query);
 
-        case MessageContentType::Picture:
-            return Self::readMessageContentPicture(query);
+    case MessageContentType::Picture:
+        return Self::readMessageContentPicture(query);
 
-        case MessageContentType::Encrypted:
-            return Self::readMessageContentEncrypted(query);
+    case MessageContentType::Encrypted:
+        return Self::readMessageContentEncrypted(query);
 
-        case MessageContentType::Text: {
-            return MessageContentText(messageBody);
-        }
+    case MessageContentType::Text: {
+        return MessageContentText(messageBody);
+    }
 
-        case MessageContentType::GroupInvitation: {
-            return MessageContentJsonUtils::toObject<MessageContentGroupInvitation>(messageBody);
-        }
+    case MessageContentType::GroupInvitation: {
+        return MessageContentJsonUtils::toObject<MessageContentGroupInvitation>(messageBody);
+    }
 
-        default:
-            return {};
+    default:
+        return {};
     }
 }
-
 
 ModifiableMessageHandler Self::readMessage(const QSqlQuery &query, const QString &idColumn)
 {
@@ -337,8 +335,7 @@ ModifiableCloudFileHandler Self::readCloudFile(const QSqlQuery &query)
     auto cloudFile = std::make_shared<CloudFile>();
     if (isFolder) {
         cloudFile->setId(CloudFsFolderId(id));
-    }
-    else {
+    } else {
         cloudFile->setId(CloudFsFileId(id));
     }
     cloudFile->setParentId(CloudFsFolderId(parentId));
@@ -359,24 +356,23 @@ ModifiableCloudFileHandler Self::readCloudFile(const QSqlQuery &query)
 
 DatabaseUtils::BindValues DatabaseUtils::createNewCloudFileBindings(const CloudFileHandler &cloudFile)
 {
-    return {
-        { ":id", QString(cloudFile->id()) },
-        { ":parentId", QString(cloudFile->parentId()) },
-        { ":name", cloudFile->name() },
-        { ":isFolder", cloudFile->isFolder() },
-        { ":type", cloudFile->type() },
-        { ":size", cloudFile->size() },
-        { ":createdAt", cloudFile->createdAt().toTime_t() },
-        { ":updatedAt", cloudFile->updatedAt().toTime_t() },
-        { ":updatedBy", QString(cloudFile->updatedBy()) },
-        { ":encryptedKey", cloudFile->encryptedKey() },
-        { ":publicKey", cloudFile->publicKey() },
-        { ":localPath", cloudFile->localPath() },
-        { ":fingerprint", cloudFile->fingerprint() }
-    };
+    return { { ":id", QString(cloudFile->id()) },
+             { ":parentId", QString(cloudFile->parentId()) },
+             { ":name", cloudFile->name() },
+             { ":isFolder", cloudFile->isFolder() },
+             { ":type", cloudFile->type() },
+             { ":size", cloudFile->size() },
+             { ":createdAt", cloudFile->createdAt().toTime_t() },
+             { ":updatedAt", cloudFile->updatedAt().toTime_t() },
+             { ":updatedBy", QString(cloudFile->updatedBy()) },
+             { ":encryptedKey", cloudFile->encryptedKey() },
+             { ":publicKey", cloudFile->publicKey() },
+             { ":localPath", cloudFile->localPath() },
+             { ":fingerprint", cloudFile->fingerprint() } };
 }
 
-DatabaseUtils::BindValues DatabaseUtils::createUpdatedCloudFileBindings(const CloudFileHandler &cloudFile, const CloudFileUpdateSource source)
+DatabaseUtils::BindValues DatabaseUtils::createUpdatedCloudFileBindings(const CloudFileHandler &cloudFile,
+                                                                        const CloudFileUpdateSource source)
 {
     if ((source == CloudFileUpdateSource::ListedChild) || (source == CloudFileUpdateSource::ListedParent)) {
         if (cloudFile->isFolder()) {
@@ -394,33 +390,28 @@ DatabaseUtils::BindValues DatabaseUtils::createUpdatedCloudFileBindings(const Cl
                 { ":localPath", cloudFile->localPath() }
                 // No fingerprint
             };
-        }
-        else {
-            return {
-                { ":id", QString(cloudFile->id()) },
-                { ":parentId", QString(cloudFile->parentId()) },
-                { ":name", cloudFile->name() },
-                { ":isFolder", cloudFile->isFolder() },
-                { ":type", cloudFile->type() },
-                { ":size", cloudFile->size() },
-                { ":createdAt", cloudFile->createdAt().toTime_t() },
-                { ":updatedAt", cloudFile->updatedAt().toTime_t() },
-                { ":updatedBy", QString(cloudFile->updatedBy()) },
-                // No encrypted and public keys
-                { ":localPath", cloudFile->localPath() },
-                { ":fingerprint", cloudFile->fingerprint() }
-            };
+        } else {
+            return { { ":id", QString(cloudFile->id()) },
+                     { ":parentId", QString(cloudFile->parentId()) },
+                     { ":name", cloudFile->name() },
+                     { ":isFolder", cloudFile->isFolder() },
+                     { ":type", cloudFile->type() },
+                     { ":size", cloudFile->size() },
+                     { ":createdAt", cloudFile->createdAt().toTime_t() },
+                     { ":updatedAt", cloudFile->updatedAt().toTime_t() },
+                     { ":updatedBy", QString(cloudFile->updatedBy()) },
+                     // No encrypted and public keys
+                     { ":localPath", cloudFile->localPath() },
+                     { ":fingerprint", cloudFile->fingerprint() } };
         }
     };
     return {};
 }
 
-DatabaseUtils::BindValues DatabaseUtils::createDownloadedCloudFileBindings(const CloudFileHandler &cloudFile, const QString &fingerprint)
+DatabaseUtils::BindValues DatabaseUtils::createDownloadedCloudFileBindings(const CloudFileHandler &cloudFile,
+                                                                           const QString &fingerprint)
 {
-    return {
-        { ":id", QString(cloudFile->id()) },
-        { ":fingerprint", fingerprint }
-    };
+    return { { ":id", QString(cloudFile->id()) }, { ":fingerprint", fingerprint } };
 }
 
 bool DatabaseUtils::hasListType(const BindValue &bindValue)
@@ -428,9 +419,9 @@ bool DatabaseUtils::hasListType(const BindValue &bindValue)
     switch (bindValue.second.type()) {
     case QVariant::StringList:
     case QVariant::List:
-            return true;
-        default:
-            return false;
+        return true;
+    default:
+        return false;
     }
 }
 
@@ -438,18 +429,18 @@ QString DatabaseUtils::replaceListBindValue(const QString &queryText, const Bind
 {
     QStringList values;
     switch (bindValue.second.type()) {
-        case QVariant::StringList:
-            for (auto &v : bindValue.second.toStringList()) {
-                values << '"' + v + '"';
-            }
-            break;
-        case QVariant::List:
-            for (auto &v : bindValue.second.toList()) {
-                values << v.toString();
-            }
-            break;
-        default:
-            throw std::logic_error("Invalid bindValue, type is not list");
+    case QVariant::StringList:
+        for (auto &v : bindValue.second.toStringList()) {
+            values << '"' + v + '"';
+        }
+        break;
+    case QVariant::List:
+        for (auto &v : bindValue.second.toList()) {
+            values << v.toString();
+        }
+        break;
+    default:
+        throw std::logic_error("Invalid bindValue, type is not list");
     }
 
     const auto name = '(' + bindValue.first + ')';

@@ -34,17 +34,17 @@
 
 #if (VS_ANDROID)
 
-#include <QtCore>
-#include <QtAndroid>
+#    include <QtCore>
+#    include <QtAndroid>
 
-#include "android/VSQAndroid.h"
-#include "CustomerEnv.h"
-#include "Utils.h"
+#    include "android/VSQAndroid.h"
+#    include "CustomerEnv.h"
+#    include "Utils.h"
 
-#include <android/log.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <cstdio>
+#    include <android/log.h>
+#    include <pthread.h>
+#    include <unistd.h>
+#    include <cstdio>
 
 using namespace vm;
 
@@ -53,22 +53,21 @@ static int pfd[2];
 static pthread_t loggingThread;
 
 /******************************************************************************/
-QString VSQAndroid::caBundlePath() {
+QString VSQAndroid::caBundlePath()
+{
     return CustomerEnv::appDataLocation().filePath("cert.pem");
 }
 
 /******************************************************************************/
-static bool _checkPermissions() {
-    const QStringList permissions({
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.READ_CONTACTS"
-    });
-    for(const QString &permission : permissions) {
+static bool _checkPermissions()
+{
+    const QStringList permissions({ "android.permission.WRITE_EXTERNAL_STORAGE",
+                                    "android.permission.READ_EXTERNAL_STORAGE", "android.permission.READ_CONTACTS" });
+    for (const QString &permission : permissions) {
         auto result = QtAndroid::checkPermission(permission);
-        if(result == QtAndroid::PermissionResult::Denied){
-            auto resultHash = QtAndroid::requestPermissionsSync(QStringList({permission}));
-            if(resultHash[permission] == QtAndroid::PermissionResult::Denied)
+        if (result == QtAndroid::PermissionResult::Denied) {
+            auto resultHash = QtAndroid::requestPermissionsSync(QStringList({ permission }));
+            if (resultHash[permission] == QtAndroid::PermissionResult::Denied)
                 return false;
         }
     }
@@ -77,7 +76,8 @@ static bool _checkPermissions() {
 }
 
 /******************************************************************************/
-bool VSQAndroid::prepare() {
+bool VSQAndroid::prepare()
+{
     _checkPermissions();
     runLoggingThread();
     auto certFile = caBundlePath();
@@ -94,16 +94,17 @@ void VSQAndroid::hideSplashScreen()
 }
 
 /******************************************************************************/
-static void *loggingFunction(void*) {
+static void *loggingFunction(void *)
+{
     ssize_t readSize;
     char buf[128];
 
-    while((readSize = read(pfd[0], buf, sizeof buf - 1)) > 0) {
-        if(buf[readSize - 1] == '\n') {
+    while ((readSize = read(pfd[0], buf, sizeof buf - 1)) > 0) {
+        if (buf[readSize - 1] == '\n') {
             --readSize;
         }
 
-        buf[readSize] = 0;  // add null-terminator
+        buf[readSize] = 0; // add null-terminator
 
         __android_log_write(ANDROID_LOG_DEBUG, "", buf); // Set any log level you want
     }
@@ -112,7 +113,8 @@ static void *loggingFunction(void*) {
 }
 
 /******************************************************************************/
-int VSQAndroid::runLoggingThread() { // run this function to redirect your output to android log
+int VSQAndroid::runLoggingThread()
+{ // run this function to redirect your output to android log
     setvbuf(stdout, nullptr, _IOLBF, 0); // make stdout line-buffered
     setvbuf(stderr, nullptr, _IONBF, 0); // make stderr unbuffered
 
@@ -122,7 +124,7 @@ int VSQAndroid::runLoggingThread() { // run this function to redirect your outpu
     dup2(pfd[1], 2);
 
     /* spawn the logging thread */
-    if(pthread_create(&loggingThread, nullptr, loggingFunction, nullptr) == -1) {
+    if (pthread_create(&loggingThread, nullptr, loggingFunction, nullptr) == -1) {
         return -1;
     }
 
@@ -137,13 +139,10 @@ QString VSQAndroid::getDisplayName(const QUrl &url)
 {
     const QString urlString = url.toString();
     const auto javaUrl = QAndroidJniObject::fromString(urlString);
-    const auto javaDisplayName = QAndroidJniObject::callStaticObjectMethod(
-        "org/virgil/utils/Utils",
-        "getDisplayName",
-        "(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;",
-        QtAndroid::androidContext().object(),
-        javaUrl.object<jstring>()
-    );
+    const auto javaDisplayName =
+            QAndroidJniObject::callStaticObjectMethod("org/virgil/utils/Utils", "getDisplayName",
+                                                      "(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;",
+                                                      QtAndroid::androidContext().object(), javaUrl.object<jstring>());
     return javaDisplayName.toString();
 }
 
@@ -152,23 +151,16 @@ quint64 VSQAndroid::getFileSize(const QUrl &url)
     const QString urlString = url.toString();
     const auto javaUrl = QAndroidJniObject::fromString(urlString);
     const auto javaFileSize = QAndroidJniObject::callStaticMethod<jint>(
-        "org/virgil/utils/Utils",
-        "getFileSize",
-        "(Landroid/content/Context;Ljava/lang/String;)I",
-        QtAndroid::androidContext().object(),
-        javaUrl.object<jstring>()
-    );
+            "org/virgil/utils/Utils", "getFileSize", "(Landroid/content/Context;Ljava/lang/String;)I",
+            QtAndroid::androidContext().object(), javaUrl.object<jstring>());
     return static_cast<quint64>(javaFileSize);
 }
 
 Contacts VSQAndroid::getContacts()
 {
-    const auto javaStr = QAndroidJniObject::callStaticObjectMethod(
-        "org/virgil/utils/ContactUtils",
-        "getContacts",
-        "(Landroid/content/Context;)Ljava/lang/String;",
-        QtAndroid::androidActivity().object<jobject>()
-    );
+    const auto javaStr = QAndroidJniObject::callStaticObjectMethod("org/virgil/utils/ContactUtils", "getContacts",
+                                                                   "(Landroid/content/Context;)Ljava/lang/String;",
+                                                                   QtAndroid::androidActivity().object<jobject>());
     const auto contactInfos = javaStr.toString().split('\n');
 
     static constexpr const size_t kContactInfo_Name = 0;
@@ -178,8 +170,8 @@ Contacts VSQAndroid::getContacts()
     static constexpr const size_t kContactInfo_Size = 4;
 
     Contacts contacts;
-    const size_t defectiveFiledsNum =  contactInfos.size() % kContactInfo_Size;
-    const size_t fullFledgedFiledsNum  = contactInfos.size() - defectiveFiledsNum;
+    const size_t defectiveFiledsNum = contactInfos.size() % kContactInfo_Size;
+    const size_t fullFledgedFiledsNum = contactInfos.size() - defectiveFiledsNum;
     for (size_t pos = 0; pos < fullFledgedFiledsNum; pos += kContactInfo_Size) {
         auto contact = std::make_shared<Contact>();
         contact->setName(contactInfos[pos + kContactInfo_Name]);
@@ -191,18 +183,14 @@ Contacts VSQAndroid::getContacts()
     return contacts;
 }
 
-
 QUrl VSQAndroid::getContactAvatarUrl(const ContactHandler contact)
 {
     const QString idString = QString::number(contact->platformId().toLongLong());
     const auto javaIdString = QAndroidJniObject::fromString(idString);
     const auto javaFilePath = QAndroidJniObject::callStaticObjectMethod(
-        "org/virgil/utils/ContactUtils",
-        "getContactThumbnailUrl",
-        "(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;",
-        QtAndroid::androidContext().object(),
-        javaIdString.object<jstring>()
-    );
+            "org/virgil/utils/ContactUtils", "getContactThumbnailUrl",
+            "(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;", QtAndroid::androidContext().object(),
+            javaIdString.object<jstring>());
     return FileUtils::localFileToUrl(javaFilePath.toString());
 }
 

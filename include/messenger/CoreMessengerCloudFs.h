@@ -35,7 +35,6 @@
 #ifndef VM_CORE_MESSENGER_CLOUD_FS_H
 #define VM_CORE_MESSENGER_CLOUD_FS_H
 
-
 #include "CloudFsFileDownloadInfo.h"
 #include "CloudFsFileId.h"
 #include "CloudFsFileInfo.h"
@@ -53,15 +52,13 @@
 #include <memory>
 #include <variant>
 
-
 //
 //  Forward C struct declarations.
 //
 struct vssq_messenger_cloud_fs_t;
 struct vscf_impl_t;
 
-namespace vm
-{
+namespace vm {
 
 //
 //  Sync files and folders with the Cloud FS.
@@ -78,11 +75,11 @@ public:
     using FutureStatus = QFuture<CoreMessengerStatus>;
 
     using vssq_messenger_cloud_fs_ptr_t =
-            std::unique_ptr<const vssq_messenger_cloud_fs_t, void(*)(const vssq_messenger_cloud_fs_t*)>;
+            std::unique_ptr<const vssq_messenger_cloud_fs_t, void (*)(const vssq_messenger_cloud_fs_t *)>;
 
-    using vscf_impl_ptr_t = std::unique_ptr<vscf_impl_t, void(*)(const vscf_impl_t*)>;
+    using vscf_impl_ptr_t = std::unique_ptr<vscf_impl_t, void (*)(const vscf_impl_t *)>;
 
-    using vscf_impl_ptr_const_t = std::unique_ptr<const vscf_impl_t, void(*)(const vscf_impl_t*)>;
+    using vscf_impl_ptr_const_t = std::unique_ptr<const vscf_impl_t, void (*)(const vscf_impl_t *)>;
 
 public:
     //
@@ -101,50 +98,52 @@ public:
     //  Note, file created in given folder.
     //
     FutureResult<CloudFsNewFile> createFile(const QString &sourceFilePath, const QString &destFilePath,
-            const CloudFsFolderId& parentFolderId, const QByteArray& parentFolderPublicKey);
+                                            const CloudFsFolderId &parentFolderId,
+                                            const QByteArray &parentFolderPublicKey);
 
     //
     //  Delete file with a given identifier.
     //
-    FutureStatus deleteFile(const CloudFsFileId& fileId);
+    FutureStatus deleteFile(const CloudFsFileId &fileId);
 
     //
     //  Request a file download link and it's encrypted private key for decryption.
     //
-    FutureResult<CloudFsFileDownloadInfo> getFileDownloadInfo(const CloudFsFileId& fileId) const;
+    FutureResult<CloudFsFileDownloadInfo> getFileDownloadInfo(const CloudFsFileId &fileId) const;
 
     //
     //  Create a new folder in the root folder.
     //
-    FutureResult<CloudFsFolder> createFolder(const QString& folderName);
+    FutureResult<CloudFsFolder> createFolder(const QString &folderName);
 
     //
     //  Create a new folder in the given folder.
     //
-    FutureResult<CloudFsFolder> createFolder(const QString& folderName, const CloudFsFolderId& parentFolderId,
-            const QByteArray& parentFolderPublicKey);
+    FutureResult<CloudFsFolder> createFolder(const QString &folderName, const CloudFsFolderId &parentFolderId,
+                                             const QByteArray &parentFolderPublicKey);
 
     //
     //  Delete folder with a given identifier.
     //
-    FutureStatus deleteFolder(const CloudFsFolderId& folderId);
+    FutureStatus deleteFolder(const CloudFsFolderId &folderId);
 
     //
     //  Request a list of folder entries.
     //
-    FutureResult<CloudFsFolder> listFolder(const CloudFsFolderId& folderId);
+    FutureResult<CloudFsFolder> listFolder(const CloudFsFolderId &folderId);
 
     //
     //  Decrypt given file owned by me.
     //
-    CoreMessengerStatus decryptFile(const QString &sourceFilePath, const QString &destFilePath, const QByteArray& encryptedFileKey, const UserHandler& sender);
+    CoreMessengerStatus decryptFile(const QString &sourceFilePath, const QString &destFilePath,
+                                    const QByteArray &encryptedFileKey, const UserHandler &sender);
 
     //
     //  Decrypt given file from a shared folder.
     //
     CoreMessengerStatus decryptFile(const QString &sourceFilePath, const QString &destFilePath,
-            const QByteArray& fileEncryptedKey, const CloudFsFolderId& parentFolderId,
-            const QByteArray& parentFolderEncryptedKey, const UserHandler& sender);
+                                    const QByteArray &fileEncryptedKey, const CloudFsFolderId &parentFolderId,
+                                    const QByteArray &parentFolderEncryptedKey, const UserHandler &sender);
 
 private:
     //
@@ -155,23 +154,23 @@ private:
     //
     //  Encrypt file decryption key for given participants.
     //
-    Result<QByteArray> encryptKey(const QByteArray &fileKey, const CloudFsFolderId& parentFolderId,
-            const QByteArray& parentFolderPublicKey) const;
+    Result<QByteArray> encryptKey(const QByteArray &fileKey, const CloudFsFolderId &parentFolderId,
+                                  const QByteArray &parentFolderPublicKey) const;
 
     //
     //  Decrypt file decryption key and check it's owners signature.
     //
-    Result<QByteArray> decryptKey(const QByteArray &fileEncryptedKey, const UserHandler& sender) const;
+    Result<QByteArray> decryptKey(const QByteArray &fileEncryptedKey, const UserHandler &sender) const;
 
     //
     //  Import given public key to the internal crypto representation.
     //
-    Result<vscf_impl_ptr_t> importPublicKey(const QByteArray& publicKeyData) const;
+    Result<vscf_impl_ptr_t> importPublicKey(const QByteArray &publicKeyData) const;
 
     //
     //  Import given private key to the internal crypto representation.
     //
-    Result<vscf_impl_ptr_t> importPrivateKey(const QByteArray& privateKeyData) const;
+    Result<vscf_impl_ptr_t> importPrivateKey(const QByteArray &privateKeyData) const;
 
     //
     //  Generate a new private key and export it.
@@ -182,8 +181,7 @@ private:
 private:
     vssq_messenger_cloud_fs_ptr_t m_cloudFs;
     vscf_impl_ptr_t m_random;
-
 };
-}
+} // namespace vm
 
 #endif // VM_CORE_MESSENGER_CLOUD_FS_H

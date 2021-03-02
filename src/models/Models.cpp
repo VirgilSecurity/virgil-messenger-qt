@@ -48,26 +48,25 @@
 
 using namespace vm;
 
-Models::Models(Messenger *messenger, Settings *settings, UserDatabase *userDatabase, Validator *validator, QObject *parent)
-    : QObject(parent)
-    , m_accountSelection(new AccountSelectionModel(settings, this))
-    , m_chats(new ChatsModel(this))
-    , m_discoveredContacts(new DiscoveredContactsModel(validator, this))
-    , m_messages(new MessagesModel(this))
-    , m_cloudFiles(new CloudFilesModel(settings, this))
-    , m_cloudFilesTransfers(new CloudFilesTransfersModel(this))
-    , m_cloudFilesQueue(new CloudFilesQueue(messenger, userDatabase, this))
-    , m_fileLoader(messenger->fileLoader())
-    , m_messagesQueue(new MessagesQueue(messenger, userDatabase, this))
+Models::Models(Messenger *messenger, Settings *settings, UserDatabase *userDatabase, Validator *validator,
+               QObject *parent)
+    : QObject(parent),
+      m_accountSelection(new AccountSelectionModel(settings, this)),
+      m_chats(new ChatsModel(this)),
+      m_discoveredContacts(new DiscoveredContactsModel(validator, this)),
+      m_messages(new MessagesModel(this)),
+      m_cloudFiles(new CloudFilesModel(settings, this)),
+      m_cloudFilesTransfers(new CloudFilesTransfersModel(this)),
+      m_cloudFilesQueue(new CloudFilesQueue(messenger, userDatabase, this)),
+      m_fileLoader(messenger->fileLoader()),
+      m_messagesQueue(new MessagesQueue(messenger, userDatabase, this))
 
 {
     connect(m_messagesQueue, &MessagesQueue::notificationCreated, this, &Models::notificationCreated);
     connect(m_cloudFilesQueue, &CloudFilesQueue::notificationCreated, this, &Models::notificationCreated);
 }
 
-Models::~Models()
-{
-}
+Models::~Models() { }
 
 const AccountSelectionModel *Models::accountSelection() const
 {

@@ -40,8 +40,7 @@
 
 using namespace vm;
 
-ChatsTable::ChatsTable(Database *database)
-    : DatabaseTable(QLatin1String("chats"), database)
+ChatsTable::ChatsTable(Database *database) : DatabaseTable(QLatin1String("chats"), database)
 {
     connect(this, &ChatsTable::fetch, this, &ChatsTable::onFetch);
     connect(this, &ChatsTable::addChat, this, &ChatsTable::onAddChat);
@@ -69,8 +68,7 @@ void ChatsTable::onFetch()
     if (!query) {
         qCCritical(lcDatabase) << "ChatsTable::onFetch error";
         emit errorOccurred(tr("Failed to fetch chats"));
-    }
-    else {
+    } else {
         ModifiableChats chats;
         while (query->next()) {
             auto id = query->value("id").toString();
@@ -101,18 +99,14 @@ void ChatsTable::onAddChat(const ChatHandler &chat)
     ScopedConnection connection(*database());
     const auto lastMessageId = chat->lastMessage() ? chat->lastMessage()->id() : QString();
     const DatabaseUtils::BindValues values {
-        { ":id", QString(chat->id()) },
-        { ":type", ChatTypeToString(chat->type()) },
-        { ":title", chat->title() },
-        { ":createdAt", chat->createdAt().toTime_t() },
-        { ":lastMessageId", QVariant() },
-        { ":unreadMessageCount", chat->unreadMessageCount() }
+        { ":id", QString(chat->id()) },   { ":type", ChatTypeToString(chat->type()) },
+        { ":title", chat->title() },      { ":createdAt", chat->createdAt().toTime_t() },
+        { ":lastMessageId", QVariant() }, { ":unreadMessageCount", chat->unreadMessageCount() }
     };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertChat"), values);
     if (query) {
         qCDebug(lcDatabase) << "Chat was inserted into table, id: " << chat->id();
-    }
-    else {
+    } else {
         qCCritical(lcDatabase) << "ChatsTable::onCreateChat insertion error";
         emit errorOccurred(tr("Failed to insert chat"));
     }
@@ -120,12 +114,11 @@ void ChatsTable::onAddChat(const ChatHandler &chat)
 
 void ChatsTable::onDeleteChat(const ChatId &chatId)
 {
-    const DatabaseUtils::BindValues values {{ ":id", QString(chatId) }};
+    const DatabaseUtils::BindValues values { { ":id", QString(chatId) } };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("deleteChatById"), values);
     if (query) {
         qCDebug(lcDatabase) << "Chat was removed, id:" << chatId;
-    }
-    else {
+    } else {
         qCCritical(lcDatabase) << "ChatsTable::onDeleteChat deletion error";
         emit errorOccurred(tr("Failed to delete chat"));
     }
@@ -134,12 +127,11 @@ void ChatsTable::onDeleteChat(const ChatId &chatId)
 void ChatsTable::onResetUnreadCount(const ChatHandler &chat)
 {
     ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues values{{ ":id", QString(chat->id()) }};
+    const DatabaseUtils::BindValues values { { ":id", QString(chat->id()) } };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("resetUnreadCount"), values);
     if (query) {
         qCDebug(lcDatabase) << "Chat unread count was reset, id: " << chat->id();
-    }
-    else {
+    } else {
         qCCritical(lcDatabase) << "ChatsTable::onResetUnreadCount error";
         emit errorOccurred(tr("Failed to reset unread count"));
     }
@@ -148,16 +140,14 @@ void ChatsTable::onResetUnreadCount(const ChatHandler &chat)
 void ChatsTable::onUpdateLastMessage(const MessageHandler &message, qsizetype unreadMessageCount)
 {
     ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues values {
-        { ":id", QString(message->chatId()) },
-        { ":lastMessageId", QString(message->id()) },
-        { ":unreadMessageCount", unreadMessageCount }
-    };
+    const DatabaseUtils::BindValues values { { ":id", QString(message->chatId()) },
+                                             { ":lastMessageId", QString(message->id()) },
+                                             { ":unreadMessageCount", unreadMessageCount } };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateLastMessage"), values);
     if (query) {
-        qCDebug(lcDatabase) << "Last message was updated for chat id: " << message->chatId() << ", unread: " << unreadMessageCount;
-    }
-    else {
+        qCDebug(lcDatabase) << "Last message was updated for chat id: " << message->chatId()
+                            << ", unread: " << unreadMessageCount;
+    } else {
         qCCritical(lcDatabase) << "ChatsTable::onUpdateLastMessage error";
         emit errorOccurred(tr("Failed to update last message"));
     }
@@ -166,16 +156,13 @@ void ChatsTable::onUpdateLastMessage(const MessageHandler &message, qsizetype un
 void ChatsTable::onResetLastMessage(const ChatId &chatId)
 {
     ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues values {
-        { ":id", QString(chatId) },
-        { ":lastMessageId", QString() },
-        { ":unreadMessageCount", 0 }
-    };
+    const DatabaseUtils::BindValues values { { ":id", QString(chatId) },
+                                             { ":lastMessageId", QString() },
+                                             { ":unreadMessageCount", 0 } };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateLastMessage"), values);
     if (query) {
         qCDebug(lcDatabase) << "Last message was reset for chat id: " << chatId << ", unread: " << 0;
-    }
-    else {
+    } else {
         qCCritical(lcDatabase) << "ChatsTable::onResetLastMessage error";
         emit errorOccurred(tr("Failed to reset last message"));
     }

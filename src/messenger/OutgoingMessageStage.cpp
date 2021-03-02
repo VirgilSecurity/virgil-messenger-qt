@@ -32,71 +32,65 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "OutgoingMessageStage.h"
-
 
 using namespace vm;
 
-
-OutgoingMessageStage vm::OutgoingMessageStageFromString(const QString& stageString) {
+OutgoingMessageStage vm::OutgoingMessageStageFromString(const QString &stageString)
+{
     if (stageString == QLatin1String("created")) {
         return OutgoingMessageStage::Created;
-    }
-    else if (stageString == QLatin1String("delivered")) {
+    } else if (stageString == QLatin1String("delivered")) {
         return OutgoingMessageStage::Delivered;
-    }
-    else if (stageString == QLatin1String("read")) {
+    } else if (stageString == QLatin1String("read")) {
         return OutgoingMessageStage::Read;
-    }
-    else if (stageString == QLatin1String("sent")) {
+    } else if (stageString == QLatin1String("sent")) {
         return OutgoingMessageStage::Sent;
-    }
-    else if (stageString == QLatin1String("broken")) {
+    } else if (stageString == QLatin1String("broken")) {
         return OutgoingMessageStage::Broken;
-    }
-    else {
+    } else {
         throw std::logic_error("Invalid OutgoingMessageStage string");
     }
 }
 
-
-QString vm::OutgoingMessageStageToString(OutgoingMessageStage stage) {
+QString vm::OutgoingMessageStageToString(OutgoingMessageStage stage)
+{
     switch (stage) {
-        case OutgoingMessageStage::Created:
-            return QLatin1String("created");
+    case OutgoingMessageStage::Created:
+        return QLatin1String("created");
 
-        case OutgoingMessageStage::Delivered:
-            return QLatin1String("delivered");
+    case OutgoingMessageStage::Delivered:
+        return QLatin1String("delivered");
 
-        case OutgoingMessageStage::Read:
-            return QLatin1String("read");
+    case OutgoingMessageStage::Read:
+        return QLatin1String("read");
 
-        case OutgoingMessageStage::Sent:
-            return QLatin1String("sent");
+    case OutgoingMessageStage::Sent:
+        return QLatin1String("sent");
 
-        case OutgoingMessageStage::Broken:
-            return QLatin1String("broken");
+    case OutgoingMessageStage::Broken:
+        return QLatin1String("broken");
 
-        default:
-            throw std::logic_error("Invalid OutgoingMessageStage");
+    default:
+        throw std::logic_error("Invalid OutgoingMessageStage");
     }
 }
 
-MessageStatus vm::OutgoingMessageStageToMessageStatus(OutgoingMessageStage stage) {
+MessageStatus vm::OutgoingMessageStageToMessageStatus(OutgoingMessageStage stage)
+{
     switch (stage) {
-        case OutgoingMessageStage::Created:
-            return MessageStatus::New;
+    case OutgoingMessageStage::Created:
+        return MessageStatus::New;
 
-        case OutgoingMessageStage::Delivered:
-        case OutgoingMessageStage::Read:
-        case OutgoingMessageStage::Sent:
-            return MessageStatus::Succeed;
+    case OutgoingMessageStage::Delivered:
+    case OutgoingMessageStage::Read:
+    case OutgoingMessageStage::Sent:
+        return MessageStatus::Succeed;
 
-        case OutgoingMessageStage::Broken:
-            return MessageStatus::Broken;
+    case OutgoingMessageStage::Broken:
+        return MessageStatus::Broken;
 
-        default:
-            throw std::logic_error("Invalid OutgoingMessageStage");
+    default:
+        throw std::logic_error("Invalid OutgoingMessageStage");
     }
 }

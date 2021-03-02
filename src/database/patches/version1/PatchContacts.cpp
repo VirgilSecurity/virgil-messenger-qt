@@ -44,10 +44,10 @@ using namespace version1;
 
 using Self = PatchContacts;
 
-Self::PatchContacts() : Patch(1) {
-}
+Self::PatchContacts() : Patch(1) { }
 
-bool Self::apply(Database *database) {
+bool Self::apply(Database *database)
+{
 
     if (!DatabaseUtils::readExecQueries(database, "dropContacts")) {
         return false;

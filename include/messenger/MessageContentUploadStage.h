@@ -32,19 +32,17 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_MESSAGE_CONTENT_UPLOAD_STAGE_H
 #define VM_MESSAGE_CONTENT_UPLOAD_STAGE_H
 
 #include <QString>
-
 
 namespace vm {
 //
 //  Defines processing stages for outgoing attachment.
 //
 enum class MessageContentUploadStage {
-    Initial,  // Nothing was done.
+    Initial, // Nothing was done.
     Preprocessed, // Attachment was pre-processed.
     Encrypted, // Attachment was encrypted.
     GotUploadingSlot, // Requested uploading slots (URLs) were received.
@@ -55,7 +53,7 @@ enum class MessageContentUploadStage {
 //  Return upload stage from a given string.
 //  Throws if correspond stage is not found.
 //
-MessageContentUploadStage MessageContentUploadStageFromString(const QString& stageString);
+MessageContentUploadStage MessageContentUploadStageFromString(const QString &stageString);
 
 //
 //  Return string from a given upload stage.

@@ -37,8 +37,7 @@
 
 #include "database/core/Patch.h"
 
-namespace vm
-{
+namespace vm {
 class Migration
 {
 public:
@@ -51,6 +50,6 @@ public:
 private:
     std::vector<PatchPointer> m_patches;
 };
-}
+} // namespace vm
 
 #endif // VM_MIGRATION_H

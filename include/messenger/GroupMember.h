@@ -46,15 +46,16 @@
 
 namespace vm {
 
-class GroupMember {
+class GroupMember
+{
 public:
     //
     //  Required by signal / slot architecture.
     //
     GroupMember() = default;
 
-    GroupMember(GroupId groupId, UserId groupOwnerId,  UserId memberId, QString memberNickName,
-        GroupAffiliation memberAffiliation);
+    GroupMember(GroupId groupId, UserId groupOwnerId, UserId memberId, QString memberNickName,
+                GroupAffiliation memberAffiliation);
 
     [[nodiscard]] GroupId groupId() const;
 
@@ -83,4 +84,3 @@ GroupMembers ContactsToGroupMembers(const GroupId &groupId, const Contacts &cont
 } // namespace vm
 
 #endif // VM_GROUP_MEMBER_H
-

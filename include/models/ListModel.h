@@ -37,8 +37,7 @@
 
 #include <QAbstractListModel>
 
-namespace vm
-{
+namespace vm {
 class ListProxyModel;
 class ListSelectionModel;
 
@@ -51,10 +50,7 @@ class ListModel : public QAbstractListModel
     Q_PROPERTY(QString filter MEMBER m_filter WRITE setFilter NOTIFY filterChanged)
 
 public:
-    enum Roles
-    {
-        IsSelectedRole = Qt::CheckStateRole
-    };
+    enum Roles { IsSelectedRole = Qt::CheckStateRole };
 
     using RoleNames = QHash<int, QByteArray>;
 
@@ -91,6 +87,6 @@ private:
     ListSelectionModel *m_selection;
     QString m_filter;
 };
-}
+} // namespace vm
 
 #endif // VM_LISTMODEL_H

@@ -39,8 +39,7 @@
 using namespace vm;
 
 DownloadKeyState::DownloadKeyState(UsersController *usersController, QState *parent)
-    : OperationState(parent)
-    , m_usersController(usersController)
+    : OperationState(parent), m_usersController(usersController)
 {
     connect(usersController, &UsersController::signedIn, this, &DownloadKeyState::operationFinished);
     connect(usersController, &UsersController::downloadKeyFailed, this, &DownloadKeyState::operationErrorOccurred);

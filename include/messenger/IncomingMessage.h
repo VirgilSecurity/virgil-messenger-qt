@@ -32,19 +32,18 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_INCOMING_MESSAGE_H
 #define VM_INCOMING_MESSAGE_H
 
 #include "Message.h"
 #include "IncomingMessageStage.h"
 
-
 namespace vm {
 //
 //  Handles incoming message.
 //
-class IncomingMessage : public Message {
+class IncomingMessage : public Message
+{
 public:
     //
     //  Denotes the message processing stage.
@@ -55,7 +54,7 @@ public:
     //  Return stage from a given string.
     //  Throws if correspond stage is not found.
     //
-    static Stage stageFromString(const QString& stageString);
+    static Stage stageFromString(const QString &stageString);
 
     //
     //  Return string from a given stage.
@@ -95,11 +94,10 @@ public:
     //
     //  Apply message update. Return true some properties were actually updated.
     //
-    bool applyUpdate(const MessageUpdate& update) override;
+    bool applyUpdate(const MessageUpdate &update) override;
 
 private:
     Stage m_stage = Stage::Received;
-
 };
 } // namespace vm
 

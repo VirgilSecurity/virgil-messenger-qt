@@ -39,8 +39,7 @@
 
 using namespace vm;
 
-LoadAttachmentOperation::LoadAttachmentOperation(MessageOperation *parent)
-    : NetworkOperation(parent)
+LoadAttachmentOperation::LoadAttachmentOperation(MessageOperation *parent) : NetworkOperation(parent)
 {
     setName(QLatin1String("LoadAttachment"));
 
@@ -50,7 +49,7 @@ LoadAttachmentOperation::LoadAttachmentOperation(MessageOperation *parent)
         update.messageId = parent->message()->id();
         update.attachmentId = parent->message()->contentAsAttachment()->id();
         update.processedSize = bytesLoaded;
-        parent->messageUpdate(update);
+        parent->updateMessage(update);
     });
 }
 

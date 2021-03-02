@@ -56,9 +56,9 @@ using namespace vm;
 using DownloadType = DownloadAttachmentOperation::Parameter::Type;
 
 MessageOperationFactory::MessageOperationFactory(Messenger *messenger, QObject *parent)
-    : QObject(parent)
-    , m_messenger(messenger)
-{}
+    : QObject(parent), m_messenger(messenger)
+{
+}
 
 void MessageOperationFactory::populateAll(MessageOperation *messageOp)
 {
@@ -68,7 +68,8 @@ void MessageOperationFactory::populateAll(MessageOperation *messageOp)
 
 void MessageOperationFactory::populateDownload(MessageOperation *messageOp, const QString &filePath)
 {
-    messageOp->appendChild(new DownloadAttachmentOperation(messageOp, settings(), { DownloadType::Download, filePath }));
+    messageOp->appendChild(
+            new DownloadAttachmentOperation(messageOp, settings(), { DownloadType::Download, filePath }));
 }
 
 void MessageOperationFactory::populateUpload(MessageOperation *messageOp)
@@ -78,46 +79,60 @@ void MessageOperationFactory::populateUpload(MessageOperation *messageOp)
 
 void MessageOperationFactory::populatePreload(MessageOperation *messageOp)
 {
-    messageOp->appendChild(new DownloadAttachmentOperation(messageOp, settings(), { DownloadType::Preload, QString() }));
+    messageOp->appendChild(
+            new DownloadAttachmentOperation(messageOp, settings(), { DownloadType::Preload, QString() }));
 }
 
-DownloadDecryptFileOperation *MessageOperationFactory::populateDownloadDecrypt(NetworkOperation *parent, const QUrl &url, quint64 bytesTotal,
-                                                                               const QString &destPath, const QByteArray& decryptionKey, const QByteArray& signature, const UserId &senderId)
+DownloadDecryptFileOperation *
+MessageOperationFactory::populateDownloadDecrypt(NetworkOperation *parent, const QUrl &url, quint64 bytesTotal,
+                                                 const QString &destPath, const QByteArray &decryptionKey,
+                                                 const QByteArray &signature, const UserId &senderId)
 {
-    auto op = new DownloadDecryptFileOperation(parent, m_messenger, url, bytesTotal, destPath, decryptionKey, signature, senderId);
+    auto op = new DownloadDecryptFileOperation(parent, m_messenger, url, bytesTotal, destPath, decryptionKey, signature,
+                                               senderId);
     parent->appendChild(op);
     return op;
 }
 
-EncryptUploadFileOperation *MessageOperationFactory::populateEncryptUpload(NetworkOperation *parent, const QString &sourcePath)
+EncryptUploadFileOperation *MessageOperationFactory::populateEncryptUpload(NetworkOperation *parent,
+                                                                           const QString &sourcePath)
 {
     auto op = new EncryptUploadFileOperation(parent, m_messenger, sourcePath);
     parent->appendChild(op);
     return op;
 }
 
-ConvertToPngOperation *MessageOperationFactory::populateConvertToPngOperation(Operation *parent, const QString &sourcePath, const QString &destFileName)
+ConvertToPngOperation *MessageOperationFactory::populateConvertToPngOperation(Operation *parent,
+                                                                              const QString &sourcePath,
+                                                                              const QString &destFileName)
 {
     auto op = new ConvertToPngOperation(settings(), sourcePath, destFileName, parent);
     parent->appendChild(op);
     return op;
 }
 
-CreateAttachmentThumbnailOperation *MessageOperationFactory::populateCreateAttachmentThumbnail(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &filePath)
+CreateAttachmentThumbnailOperation *
+MessageOperationFactory::populateCreateAttachmentThumbnail(MessageOperation *messageOp, Operation *parent,
+                                                           const QString &sourcePath, const QString &filePath)
 {
     auto op = new CreateAttachmentThumbnailOperation(messageOp, settings(), sourcePath, filePath);
     parent->appendChild(op);
     return op;
 }
 
-CreateAttachmentPreviewOperation *MessageOperationFactory::populateCreateAttachmentPreview(MessageOperation *messageOp, Operation *parent, const QString &sourcePath, const QString &destPath)
+CreateAttachmentPreviewOperation *MessageOperationFactory::populateCreateAttachmentPreview(MessageOperation *messageOp,
+                                                                                           Operation *parent,
+                                                                                           const QString &sourcePath,
+                                                                                           const QString &destPath)
 {
     auto op = new CreateAttachmentPreviewOperation(messageOp, settings(), sourcePath, destPath);
     parent->appendChild(op);
     return op;
 }
 
-CalculateAttachmentFingerprintOperation *MessageOperationFactory::populateCalculateAttachmentFingerprint(MessageOperation *messageOp, Operation *parent, const QString &sourcePath)
+CalculateAttachmentFingerprintOperation *
+MessageOperationFactory::populateCalculateAttachmentFingerprint(MessageOperation *messageOp, Operation *parent,
+                                                                const QString &sourcePath)
 {
     auto op = new CalculateAttachmentFingerprintOperation(messageOp, sourcePath);
     parent->appendChild(op);

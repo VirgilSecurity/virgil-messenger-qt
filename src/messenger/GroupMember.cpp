@@ -37,40 +37,43 @@
 using namespace vm;
 using Self = GroupMember;
 
-Self::GroupMember(GroupId groupId, UserId groupOwnerId, UserId memberId, QString memberNickName, GroupAffiliation memberAffiliation)
-        : m_groupId(std::move(groupId)),
-        m_groupOwnerId(std::move(groupOwnerId)),
-        m_memberId(std::move(memberId)),
-        m_memberNickName(std::move(memberNickName)),
-        m_memberAffiliation(memberAffiliation)
-{}
+Self::GroupMember(GroupId groupId, UserId groupOwnerId, UserId memberId, QString memberNickName,
+                  GroupAffiliation memberAffiliation)
+    : m_groupId(std::move(groupId)),
+      m_groupOwnerId(std::move(groupOwnerId)),
+      m_memberId(std::move(memberId)),
+      m_memberNickName(std::move(memberNickName)),
+      m_memberAffiliation(memberAffiliation)
+{
+}
 
-
-GroupId Self::groupId() const {
+GroupId Self::groupId() const
+{
     return m_groupId;
 }
 
-
-UserId Self::groupOwnerId() const {
+UserId Self::groupOwnerId() const
+{
     return m_groupOwnerId;
 }
 
-
-UserId Self::memberId() const {
+UserId Self::memberId() const
+{
     return m_memberId;
 }
 
-
-QString Self::memberNickName() const {
+QString Self::memberNickName() const
+{
     return m_memberNickName;
 }
 
-
-GroupAffiliation Self::memberAffiliation() const {
+GroupAffiliation Self::memberAffiliation() const
+{
     return m_memberAffiliation;
 }
 
-Contacts vm::GroupMembersToContacts(const GroupMembers &groupMembers) {
+Contacts vm::GroupMembersToContacts(const GroupMembers &groupMembers)
+{
     Contacts contacts;
     for (auto &member : groupMembers) {
         auto contact = std::make_shared<Contact>();
@@ -83,15 +86,15 @@ Contacts vm::GroupMembersToContacts(const GroupMembers &groupMembers) {
     return contacts;
 }
 
-GroupMembers vm::ContactsToGroupMembers(const GroupId &groupId, const Contacts &contacts) {
-    auto it = std::find_if(contacts.begin(), contacts.end(), [](auto contact) {
-        return contact->groupAffiliation() == GroupAffiliation::Owner;
-    });
+GroupMembers vm::ContactsToGroupMembers(const GroupId &groupId, const Contacts &contacts)
+{
+    auto it = std::find_if(contacts.begin(), contacts.end(),
+                           [](auto contact) { return contact->groupAffiliation() == GroupAffiliation::Owner; });
     auto groupOwnerId = (it == contacts.end()) ? UserId() : (*it)->userId();
     GroupMembers members;
     for (auto &contact : contacts) {
-        auto member = std::make_shared<GroupMember>(groupId, groupOwnerId, contact->userId(),
-            contact->name(), contact->groupAffiliation());
+        auto member = std::make_shared<GroupMember>(groupId, groupOwnerId, contact->userId(), contact->name(),
+                                                    contact->groupAffiliation());
         members.push_back(std::move(member));
     }
     return members;

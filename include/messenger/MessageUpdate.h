@@ -52,106 +52,107 @@
 
 namespace vm {
 
-struct MessageUpdateBase {
+struct MessageUpdateBase
+{
     MessageId messageId;
 };
 
-struct MessageAttachmentUpdateBase : public MessageUpdateBase {
+struct MessageAttachmentUpdateBase : public MessageUpdateBase
+{
     AttachmentId attachmentId;
 };
 
-struct IncomingMessageStageUpdate : public MessageUpdateBase {
+struct IncomingMessageStageUpdate : public MessageUpdateBase
+{
     IncomingMessageStage stage;
 };
 
-struct OutgoingMessageStageUpdate : public MessageUpdateBase {
+struct OutgoingMessageStageUpdate : public MessageUpdateBase
+{
     OutgoingMessageStage stage;
 };
 
-struct MessageAttachmentUploadStageUpdate : public MessageAttachmentUpdateBase {
+struct MessageAttachmentUploadStageUpdate : public MessageAttachmentUpdateBase
+{
     MessageContentUploadStage uploadStage;
 };
 
-struct MessageAttachmentDownloadStageUpdate : public MessageAttachmentUpdateBase {
+struct MessageAttachmentDownloadStageUpdate : public MessageAttachmentUpdateBase
+{
     MessageContentDownloadStage downloadStage;
 };
 
-struct MessageAttachmentFingerprintUpdate : public MessageAttachmentUpdateBase {
+struct MessageAttachmentFingerprintUpdate : public MessageAttachmentUpdateBase
+{
     QString fingerprint;
 };
 
-struct MessageAttachmentRemoteUrlUpdate : public MessageAttachmentUpdateBase {
+struct MessageAttachmentRemoteUrlUpdate : public MessageAttachmentUpdateBase
+{
     QUrl remoteUrl;
 };
 
-struct MessageAttachmentLocalPathUpdate : public MessageAttachmentUpdateBase {
+struct MessageAttachmentLocalPathUpdate : public MessageAttachmentUpdateBase
+{
     QString localPath;
 };
 
-struct MessageAttachmentEncryptionUpdate : public MessageAttachmentUpdateBase {
+struct MessageAttachmentEncryptionUpdate : public MessageAttachmentUpdateBase
+{
     quint64 encryptedSize;
     QByteArray decryptionKey;
     QByteArray signature;
 };
 
-struct MessageAttachmentProcessedSizeUpdate : public MessageAttachmentUpdateBase {
+struct MessageAttachmentProcessedSizeUpdate : public MessageAttachmentUpdateBase
+{
     quint64 processedSize;
 };
 
-struct MessageAttachmentExtrasUpdate : public MessageAttachmentUpdateBase {
-    std::function<QString()> extrasToJson; // TODO(fpohtmeh): find better way to get extras in update
-};
-
-struct MessagePictureThumbnailPathUpdate : public MessageAttachmentExtrasUpdate {
+struct MessagePictureThumbnailPathUpdate : public MessageAttachmentUpdateBase
+{
     QString thumbnailPath;
 };
 
-struct MessagePictureThumbnailSizeUpdate : public MessageAttachmentExtrasUpdate {
-    QSize thumbnailSize;
-};
-
-struct MessagePictureThumbnailEncryptionUpdate : public MessageAttachmentExtrasUpdate {
+struct MessagePictureThumbnailEncryptionUpdate : public MessageAttachmentUpdateBase
+{
     qint64 encryptedSize;
     QByteArray decryptionKey;
     QByteArray signature;
 };
 
-struct MessagePictureThumbnailRemoteUrlUpdate : public MessageAttachmentExtrasUpdate {
+struct MessagePictureThumbnailRemoteUrlUpdate : public MessageAttachmentUpdateBase
+{
     QUrl remoteUrl;
 };
 
-struct MessagePicturePreviewPathUpdate : public MessageAttachmentExtrasUpdate {
+struct MessagePicturePreviewPathUpdate : public MessageAttachmentUpdateBase
+{
     QString previewPath;
 };
 
+struct MessageAttachmentExtrasJsonUpdate : public MessageAttachmentUpdateBase
+{
+    QString extrasJson;
+};
 
 using MessageUpdate = std::variant<
-    IncomingMessageStageUpdate,
-    OutgoingMessageStageUpdate,
-    MessageAttachmentUploadStageUpdate,
-    MessageAttachmentDownloadStageUpdate,
-    MessageAttachmentFingerprintUpdate,
-    MessageAttachmentRemoteUrlUpdate,
-    MessageAttachmentEncryptionUpdate,
-    MessageAttachmentLocalPathUpdate,
-    MessageAttachmentProcessedSizeUpdate,
-    MessagePictureThumbnailPathUpdate,
-    MessagePictureThumbnailSizeUpdate,
-    MessagePictureThumbnailEncryptionUpdate,
-    MessagePictureThumbnailRemoteUrlUpdate,
-    MessagePicturePreviewPathUpdate
-    >;
+        IncomingMessageStageUpdate, OutgoingMessageStageUpdate, MessageAttachmentUploadStageUpdate,
+        MessageAttachmentDownloadStageUpdate, MessageAttachmentFingerprintUpdate, MessageAttachmentRemoteUrlUpdate,
+        MessageAttachmentEncryptionUpdate, MessageAttachmentLocalPathUpdate, MessageAttachmentProcessedSizeUpdate,
+        MessagePictureThumbnailPathUpdate, MessagePictureThumbnailEncryptionUpdate,
+        MessagePictureThumbnailRemoteUrlUpdate, MessagePicturePreviewPathUpdate, MessageAttachmentExtrasJsonUpdate>;
 
 //
 //  Return message unique identifier the update relates to.
 //
-MessageId MessageUpdateGetMessageId(const MessageUpdate& update);
+MessageId MessageUpdateGetMessageId(const MessageUpdate &update);
 
 //
-//  Convert to message attachment extras update if possible.
+//  Return true if update changes attachment extras json
 //
-const MessageAttachmentExtrasUpdate *MessageUpdateToAttachmentExtrasUpdate(const MessageUpdate &update);
+bool MessageUpdateHasAttachmentExtrasJsonUpdate(const MessageUpdate &update);
+
 } // namespace vm
-
 
 #endif // VM_MESSAGE_UPDATE_H

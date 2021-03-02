@@ -41,8 +41,7 @@
 
 #include <optional>
 
-namespace vm
-{
+namespace vm {
 class MessagesTable : public DatabaseTable
 {
     Q_OBJECT
@@ -82,6 +81,6 @@ private:
     void onUpdateMessage(const MessageUpdate &messageUpdate);
     void onMarkAllAsRead(const Chat &chat);
 };
-}
+} // namespace vm
 
 #endif // VM_MESSAGESTABLE_H

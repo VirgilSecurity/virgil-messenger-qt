@@ -41,8 +41,7 @@
 class Messenger;
 class Settings;
 
-namespace vm
-{
+namespace vm {
 class AttachmentsController;
 class ChatsController;
 class CloudFilesController;
@@ -62,8 +61,7 @@ class Controllers : public QObject
     Q_PROPERTY(CloudFilesController *cloudFiles READ cloudFiles CONSTANT)
 
 public:
-    Controllers(Messenger *messenger, Settings *settings,
-                Models *models, UserDatabase *userDatabase, QObject *parent);
+    Controllers(Messenger *messenger, Settings *settings, Models *models, UserDatabase *userDatabase, QObject *parent);
 
     const AttachmentsController *attachments() const;
     AttachmentsController *attachments();
@@ -86,6 +84,6 @@ private:
     QPointer<MessagesController> m_messages;
     QPointer<CloudFilesController> m_cloudFiles;
 };
-}
+} // namespace vm
 
 #endif // VM_CONTROLLERS_H

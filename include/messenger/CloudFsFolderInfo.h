@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_CLOUD_FS_FOLDER_INFO_H
 #define VM_CLOUD_FS_FOLDER_INFO_H
 
@@ -46,7 +45,8 @@ namespace vm {
 //
 //  Handles meta information about a folder stored within the Cloud FS.
 //
-struct CloudFsFolderInfo {
+struct CloudFsFolderInfo
+{
     CloudFsFolderId id;
     QString name;
     QDateTime createdAt;

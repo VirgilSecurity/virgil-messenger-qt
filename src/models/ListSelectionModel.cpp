@@ -40,9 +40,7 @@
 
 using namespace vm;
 
-ListSelectionModel::ListSelectionModel(ListModel *source)
-    : QItemSelectionModel(source)
-    , m_sourceModel(source)
+ListSelectionModel::ListSelectionModel(ListModel *source) : QItemSelectionModel(source), m_sourceModel(source)
 {
     qRegisterMetaType<ListSelectionModel *>("ListSelectionModel*");
 

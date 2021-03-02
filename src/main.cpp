@@ -35,19 +35,19 @@
 #include <iostream>
 #include <VSQApplication.h>
 #ifdef VS_MOBILE
-#include <QGuiApplication>
+#    include <QGuiApplication>
 #else
-#include <QApplication>
+#    include <QApplication>
 #endif
 #include <android/VSQAndroid.h>
 #include <logging/VSQLogging.h>
 
 #if (VSQ_WEBDRIVER_DEBUG)
-#include "Test/Headers.h"
+#    include "Test/Headers.h"
 #endif
 
-int
-main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 
 #if (VS_ANDROID)
     VSQAndroid::prepare();

@@ -32,19 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "MessageGroupChatInfo.h"
-
 
 using namespace vm;
 using Self = MessageGroupChatInfo;
 
+Self::MessageGroupChatInfo(GroupId groupId) : m_groupId(std::move(groupId)) { }
 
-Self::MessageGroupChatInfo(GroupId groupId)
-    : m_groupId(std::move(groupId))
-{}
-
-
-GroupId Self::groupId() const {
+GroupId Self::groupId() const
+{
     return m_groupId;
 }

@@ -48,9 +48,7 @@ using Self = VSQLastActivityManager;
 
 Q_LOGGING_CATEGORY(lcLastActivityManager, "last-activity-manager");
 
-Self::VSQLastActivityManager(Settings *settings)
-    : QXmppClientExtension()
-    , m_settings(settings)
+Self::VSQLastActivityManager(Settings *settings) : QXmppClientExtension(), m_settings(settings)
 {
     connect(this, &Self::lastActivityMissing, this, &Self::lastActivityTextChanged);
     connect(this, &Self::lastActivityDetected, this, [this](std::chrono::seconds seconds) {
@@ -97,11 +95,9 @@ bool Self::handleStanza(const QDomElement &element)
         }
         if (lastActivityIq.isValid()) {
             emit lastActivityDetected(lastActivityIq.seconds());
-        }
-        else if (lastActivityIq.needSubscription()) {
+        } else if (lastActivityIq.needSubscription()) {
             emit lastActivityMissing(vm::Utils::formattedLastSeenNoActivity());
-        }
-        else {
+        } else {
             emit errorOccured(tr("Failed to find last activity"));
         }
         return true;
@@ -126,8 +122,7 @@ QString Self::requestInfo()
     request.setTo(m_jid);
     if (client()->sendPacket(request)) {
         return request.id();
-    }
-    else {
+    } else {
         qCWarning(lcLastActivityManager) << "Last activity request failed";
         return QString();
     }

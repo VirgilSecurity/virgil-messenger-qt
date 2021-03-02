@@ -47,9 +47,7 @@ Q_LOGGING_CATEGORY(lcCloudFileSystem, "cloud-fs")
 using namespace vm;
 
 CloudFileSystem::CloudFileSystem(CoreMessenger *coreMessenger, Messenger *messenger)
-    : QObject(messenger)
-    , m_coreMessenger(coreMessenger)
-    , m_messenger(messenger)
+    : QObject(messenger), m_coreMessenger(coreMessenger), m_messenger(messenger)
 {
     qRegisterMetaType<CloudFileRequestId>("CloudFileRequestId");
 }
@@ -102,8 +100,8 @@ CloudFileRequestId CloudFileSystem::createFile(const QString &filePath, const Cl
     const auto tempDir = m_messenger->settings()->cloudFilesCacheDir();
     const auto encFilePath = tempDir.filePath(QLatin1String("upload-") + Utils::createUuid());
     auto future = parentFolder->isRoot()
-        ? m_coreFs->createFile(filePath, encFilePath)
-        : m_coreFs->createFile(filePath, encFilePath, parentFolderId, parentFolder->publicKey());
+            ? m_coreFs->createFile(filePath, encFilePath)
+            : m_coreFs->createFile(filePath, encFilePath, parentFolderId, parentFolder->publicKey());
     FutureWorker::run(future, [this, filePath, encFilePath, parentFolder, requestId](auto result) {
         if (std::holds_alternative<CoreMessengerStatus>(result)) {
             emit createFileErrorOccurred(requestId, tr("Failed to create file"));
@@ -122,7 +120,8 @@ CloudFileRequestId CloudFileSystem::createFolder(const QString &name, const Clou
 {
     const auto requestId = ++m_requestId;
     const auto parentFolderId = parentFolder->id().coreFolderId();
-    auto future = parentFolder->isRoot() ? m_coreFs->createFolder(name) : m_coreFs->createFolder(name, parentFolderId, parentFolder->publicKey());
+    auto future = parentFolder->isRoot() ? m_coreFs->createFolder(name)
+                                         : m_coreFs->createFolder(name, parentFolderId, parentFolder->publicKey());
     FutureWorker::run(future, [this, parentFolder, name, requestId](auto result) {
         if (std::holds_alternative<CoreMessengerStatus>(result)) {
             emit createFolderErrorOccured(requestId, tr("Failed to create folder"));
@@ -152,7 +151,8 @@ CloudFileRequestId CloudFileSystem::getDownloadInfo(const CloudFileHandler &file
     return requestId;
 }
 
-bool CloudFileSystem::decryptFile(const QString &sourcePath, const QByteArray &encryptionKey, const CloudFileHandler &file)
+bool CloudFileSystem::decryptFile(const QString &sourcePath, const QByteArray &encryptionKey,
+                                  const CloudFileHandler &file)
 {
     const auto status = m_coreFs->decryptFile(sourcePath, file->localPath(), encryptionKey, m_messenger->currentUser());
     return status == CoreMessengerStatus::Success;
@@ -162,20 +162,23 @@ CloudFileRequestId CloudFileSystem::deleteFiles(const CloudFiles &files)
 {
     const auto requestId = ++m_requestId;
     for (auto &file : files) {
-        auto future = file->isFolder() ? m_coreFs->deleteFolder(file->id().coreFolderId()) : m_coreFs->deleteFile(file->id().coreFileId());
+        auto future = file->isFolder() ? m_coreFs->deleteFolder(file->id().coreFolderId())
+                                       : m_coreFs->deleteFile(file->id().coreFileId());
         FutureWorker::run(future, [this, file, requestId](auto result) {
             if (result == CoreMessengerStatus::Success) {
                 emit fileDeleted(requestId, file);
-            }
-            else {
-                emit deleteFileErrorOccurred(requestId, tr("Cloud file deletion error: %1. Code: %2").arg(file->name()).arg(static_cast<int>(result)));
+            } else {
+                emit deleteFileErrorOccurred(
+                        requestId,
+                        tr("Cloud file deletion error: %1. Code: %2").arg(file->name()).arg(static_cast<int>(result)));
             }
         });
     }
     return requestId;
 }
 
-ModifiableCloudFileHandler CloudFileSystem::createParentFolderFromInfo(const CloudFsFolder &fsFolder, const CloudFileHandler &oldFolder) const
+ModifiableCloudFileHandler CloudFileSystem::createParentFolderFromInfo(const CloudFsFolder &fsFolder,
+                                                                       const CloudFileHandler &oldFolder) const
 {
     auto folder = createFolderFromInfo(fsFolder.info, oldFolder->parentId(), oldFolder->localPath());
     folder->setId(oldFolder->id()); // avoid root with non-empty id
@@ -185,7 +188,9 @@ ModifiableCloudFileHandler CloudFileSystem::createParentFolderFromInfo(const Clo
     return folder;
 }
 
-ModifiableCloudFileHandler CloudFileSystem::createFolderFromInfo(const CloudFsFolderInfo &info, const CloudFileId &parentId, const QString &localPath) const
+ModifiableCloudFileHandler CloudFileSystem::createFolderFromInfo(const CloudFsFolderInfo &info,
+                                                                 const CloudFileId &parentId,
+                                                                 const QString &localPath) const
 {
     auto folder = std::make_shared<CloudFile>();
     folder->setId(info.id);
@@ -199,7 +204,8 @@ ModifiableCloudFileHandler CloudFileSystem::createFolderFromInfo(const CloudFsFo
     return folder;
 }
 
-ModifiableCloudFileHandler CloudFileSystem::createFileFromInfo(const CloudFsFileInfo &info, const CloudFileId &parentId, const QString &localPath) const
+ModifiableCloudFileHandler CloudFileSystem::createFileFromInfo(const CloudFsFileInfo &info, const CloudFileId &parentId,
+                                                               const QString &localPath) const
 {
     auto file = std::make_shared<CloudFile>();
     file->setId(info.id);

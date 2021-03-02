@@ -37,7 +37,6 @@
 
 #include <qxmpp/QXmppRosterManager.h>
 
-
 class VSQContactManager : public QObject
 {
     Q_OBJECT

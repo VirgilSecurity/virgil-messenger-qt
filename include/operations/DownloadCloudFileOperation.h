@@ -39,8 +39,7 @@
 #include "CloudFileRequestId.h"
 #include "DownloadFileOperation.h"
 
-namespace vm
-{
+namespace vm {
 class CloudFileOperation;
 
 class DownloadCloudFileOperation : public DownloadFileOperation
@@ -48,7 +47,8 @@ class DownloadCloudFileOperation : public DownloadFileOperation
     Q_OBJECT
 
 public:
-    DownloadCloudFileOperation(CloudFileOperation *parent, const CloudFileHandler &file, const CloudFileHandler &parentFolder);
+    DownloadCloudFileOperation(CloudFileOperation *parent, const CloudFileHandler &file,
+                               const CloudFileHandler &parentFolder);
 
     void run() override;
     CloudFileId cloudFileId() const;
@@ -58,7 +58,8 @@ private:
 
     QString tempFilePath() const;
 
-    void onDownloadInfoGot(CloudFileRequestId requestId, const CloudFileHandler &file, const QUrl &url, const QByteArray &encryptionKey);
+    void onDownloadInfoGot(CloudFileRequestId requestId, const CloudFileHandler &file, const QUrl &url,
+                           const QByteArray &encryptionKey);
     void onGetDownloadInfoErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
     void onProgressChanged(quint64 bytesLoaded, quint64 bytesTotal);
     void onDownloaded();
@@ -73,6 +74,6 @@ private:
     CloudFileRequestId m_requestId;
     QByteArray m_encryptionKey;
 };
-}
+} // namespace vm
 
 #endif // VM_DOWNLOAD_CLOUD_FILE_OPERATION_H

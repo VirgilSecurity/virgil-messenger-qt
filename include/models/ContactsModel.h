@@ -40,8 +40,7 @@
 
 #include <QUrl>
 
-namespace vm
-{
+namespace vm {
 class ContactAvatarLoader;
 class ContactsProxyModel;
 
@@ -50,8 +49,7 @@ class ContactsModel : public ListModel
     Q_OBJECT
 
 public:
-    enum Roles
-    {
+    enum Roles {
         IdRole = Qt::UserRole,
         UsernameRole,
         NameRole,
@@ -102,6 +100,6 @@ private:
     Contacts m_contacts;
     ContactAvatarLoader *m_avatarLoader;
 };
-}
+} // namespace vm
 
 #endif // VM_CONTACTSMODEL_H

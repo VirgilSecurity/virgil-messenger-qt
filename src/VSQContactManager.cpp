@@ -41,13 +41,11 @@
 Q_LOGGING_CATEGORY(lcContactManager, "contact-manager");
 
 VSQContactManager::VSQContactManager(QXmppClient *client, QObject *parent)
-    : QObject(parent)
-    , m_client(client)
-    , m_manager(client->findExtension<QXmppRosterManager>())
-{}
+    : QObject(parent), m_client(client), m_manager(client->findExtension<QXmppRosterManager>())
+{
+}
 
-VSQContactManager::~VSQContactManager()
-{}
+VSQContactManager::~VSQContactManager() { }
 
 bool VSQContactManager::addContact(const QString &jid, const QString &name, const QString &reason)
 {
@@ -58,15 +56,13 @@ bool VSQContactManager::addContact(const QString &jid, const QString &name, cons
     const auto status = find(jid);
     if (status.exists) {
         qCDebug(lcContactManager) << "Contact already added:" << jid;
-    }
-    else if (!m_manager->addItem(jid, name)) {
+    } else if (!m_manager->addItem(jid, name)) {
         return setLastErrorText(tr("Contact adding failed"));
     }
 
     if (status.subscriptionType == SubscriptionType::Both) {
         qCDebug(lcContactManager) << "Contact already subscribed" << jid;
-    }
-    else if (!m_manager->subscribe(jid, reason)) {
+    } else if (!m_manager->subscribe(jid, reason)) {
         return setLastErrorText(tr("Contact subscription failed"));
     }
 
@@ -86,8 +82,7 @@ bool VSQContactManager::removeContact(const QString &jid)
 
     if (status.subscriptionType == SubscriptionType::None) {
         qCWarning(lcContactManager) << "Contact wasn't subscribed" << jid;
-    }
-    else if (!m_manager->unsubscribe(jid)) {
+    } else if (!m_manager->unsubscribe(jid)) {
         return setLastErrorText(tr("Contact unsubscription failed"));
     }
 

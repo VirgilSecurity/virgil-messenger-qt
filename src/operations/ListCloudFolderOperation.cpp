@@ -43,15 +43,17 @@
 using namespace vm;
 using Self = vm::ListCloudFolderOperation;
 
-Self::ListCloudFolderOperation(CloudFileOperation *parent, const CloudFileHandler &parentFolder, UserDatabase *userDatabase)
-    : Operation(QLatin1String("ListCloudFolder"), parent)
-    , m_parent(parent)
-    , m_parentFolder(parentFolder)
-    , m_userDatabase(userDatabase)
+Self::ListCloudFolderOperation(CloudFileOperation *parent, const CloudFileHandler &parentFolder,
+                               UserDatabase *userDatabase)
+    : Operation(QLatin1String("ListCloudFolder"), parent),
+      m_parent(parent),
+      m_parentFolder(parentFolder),
+      m_userDatabase(userDatabase)
 {
     connect(m_userDatabase->cloudFilesTable(), &CloudFilesTable::fetched, this, &Self::onDatabaseListFetched);
     connect(m_parent->cloudFileSystem(), &CloudFileSystem::listFetched, this, &Self::onCloudListFetched);
-    connect(m_parent->cloudFileSystem(), &CloudFileSystem::fetchListErrorOccured, this, &Self::onCloudListFetchErrorOccurred);
+    connect(m_parent->cloudFileSystem(), &CloudFileSystem::fetchListErrorOccured, this,
+            &Self::onCloudListFetchErrorOccurred);
 }
 
 void Self::run()
@@ -59,7 +61,9 @@ void Self::run()
     m_userDatabase->cloudFilesTable()->fetch(m_parentFolder);
 }
 
-void ListCloudFolderOperation::onCloudListFetched(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder, const ModifiableCloudFiles &files)
+void ListCloudFolderOperation::onCloudListFetched(const CloudFileRequestId requestId,
+                                                  const ModifiableCloudFileHandler &parentFolder,
+                                                  const ModifiableCloudFiles &files)
 {
     Q_UNUSED(parentFolder)
     if (m_requestId != requestId) {
@@ -81,7 +85,8 @@ void ListCloudFolderOperation::onCloudListFetchErrorOccurred(CloudFileRequestId 
     fail();
 }
 
-CloudListCloudFolderUpdate ListCloudFolderOperation::buildDifference(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &files) const
+CloudListCloudFolderUpdate ListCloudFolderOperation::buildDifference(const CloudFileHandler &parentFolder,
+                                                                     const ModifiableCloudFiles &files) const
 {
     CloudListCloudFolderUpdate update;
     update.parentFolder = parentFolder;
@@ -99,12 +104,10 @@ CloudListCloudFolderUpdate ListCloudFolderOperation::buildDifference(const Cloud
         if (fileIdLess(oldFile, newFile)) {
             update.deleted.push_back(oldFile);
             ++oldI;
-        }
-        else if (fileIdLess(newFile, oldFile)) {
+        } else if (fileIdLess(newFile, oldFile)) {
             update.added.push_back(newFile);
             ++newI;
-        }
-        else {
+        } else {
             if (fileUpdated(oldFile, newFile)) {
                 update.updated.push_back(newFile);
             }
@@ -137,8 +140,7 @@ void ListCloudFolderOperation::deleteObsoleteLocalFiles(const ModifiableCloudFil
             if (!folderPaths.contains(localPath.toLower())) {
                 FileUtils::removeDir(localPath);
             }
-        }
-        else if (localFile.isFile()) {
+        } else if (localFile.isFile()) {
             if (!filePaths.contains(localPath.toLower())) {
                 FileUtils::removeFile(localPath);
             }

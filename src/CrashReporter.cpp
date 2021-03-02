@@ -45,27 +45,25 @@
 using namespace vm;
 using Self = CrashReporter;
 
-
 Q_LOGGING_CATEGORY(lcCrashReporter, "crash-reporter")
 
 Self::CrashReporter(Settings *settings, vm::CoreMessenger *commKitMessenger, QObject *parent)
-    : QObject(parent)
-    , m_settings(settings)
-    , m_coreMessenger(commKitMessenger)
-    , m_networkManager(new QNetworkAccessManager(this))
-{}
-
+    : QObject(parent),
+      m_settings(settings),
+      m_coreMessenger(commKitMessenger),
+      m_networkManager(new QNetworkAccessManager(this))
+{
+}
 
 void Self::checkAppCrash()
 {
     qCDebug(lcCrashReporter) << "Checking previous run flag...";
-    if(m_settings->runFlag()) {
+    if (m_settings->runFlag()) {
 #ifndef QT_DEBUG
         qCCritical(lcCrashReporter) << "Previous application run is crashed! Sending log files...";
         if (m_settings->autoSendCrashReport()) {
             sendLogFiles("crash-logs auto-send");
-        }
-        else {
+        } else {
             emit crashReportRequested();
         }
 #endif
@@ -94,8 +92,7 @@ bool Self::sendLogFiles(const QString &details)
         if (readFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
             qCDebug(lcCrashReporter) << "Read file:" << readFile.fileName();
             fileData.append(readFile.readAll());
-        }
-        else {
+        } else {
             qCDebug(lcCrashReporter) << "Can't open " << readFile.fileName() << readFile.errorString();
         }
     }
@@ -109,7 +106,8 @@ bool Self::sendLogFiles(const QString &details)
     QNetworkRequest request(endpointUrl);
     request.setHeader(QNetworkRequest::ContentTypeHeader, QString("application/json"));
     request.setRawHeader(QString("Authorization").toUtf8(), authHeaderValue.toUtf8());
-    request.setRawHeader(QString("Virgil-Agent").toUtf8(),qPrintable(CustomerEnv::version() + ";" + QSysInfo::kernelType()));
+    request.setRawHeader(QString("Virgil-Agent").toUtf8(),
+                         qPrintable(CustomerEnv::version() + ";" + QSysInfo::kernelType()));
     auto reply = m_networkManager->post(request, fileData);
     connect(reply, &QNetworkReply::finished, this, std::bind(&CrashReporter::sendSendCrashReportReply, this, reply));
     for (auto name : request.rawHeaderList()) {
@@ -122,18 +120,17 @@ bool Self::sendLogFiles(const QString &details)
 
 void Self::sendSendCrashReportReply(QNetworkReply *reply)
 {
-   if (reply->error() == QNetworkReply::NoError) {
-       qCDebug(lcCrashReporter) << "Send report OK";
-       emit reportSent(tr("Crash report sent"));
-   }
-   else {
-       qCDebug(lcCrashReporter) << "Error sending report:";
-       qCDebug(lcCrashReporter) << "    -> Code:" << static_cast<int>(reply->error());
-       qCDebug(lcCrashReporter) << "    -> Name:" << reply->error();
-       qCDebug(lcCrashReporter) << "    -> Message:" << reply->errorString();
-       qCDebug(lcCrashReporter) << "    -> Error body:" << reply->readAll();
-       emit reportErrorOccurred(tr("Crash report failed to send"));
-   }
-   qCDebug(lcCrashReporter) << "Sending finished";
-   reply->deleteLater();
+    if (reply->error() == QNetworkReply::NoError) {
+        qCDebug(lcCrashReporter) << "Send report OK";
+        emit reportSent(tr("Crash report sent"));
+    } else {
+        qCDebug(lcCrashReporter) << "Error sending report:";
+        qCDebug(lcCrashReporter) << "    -> Code:" << static_cast<int>(reply->error());
+        qCDebug(lcCrashReporter) << "    -> Name:" << reply->error();
+        qCDebug(lcCrashReporter) << "    -> Message:" << reply->errorString();
+        qCDebug(lcCrashReporter) << "    -> Error body:" << reply->readAll();
+        emit reportErrorOccurred(tr("Crash report failed to send"));
+    }
+    qCDebug(lcCrashReporter) << "Sending finished";
+    reply->deleteLater();
 }

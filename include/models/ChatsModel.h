@@ -41,8 +41,7 @@
 
 #include <optional>
 
-namespace vm
-{
+namespace vm {
 class ChatsModel : public ListModel
 {
     Q_OBJECT
@@ -66,15 +65,14 @@ public:
     //
     // Update group chat UI.
     //
-    void updateGroup(const GroupUpdate& groupUpdate);
+    void updateGroup(const GroupUpdate &groupUpdate);
 
 signals:
     void chatAdded(const ChatHandler &chat);
     void chatUpdated(const ChatHandler &chat);
 
 private:
-    enum Roles
-    {
+    enum Roles {
         IdRole = Qt::UserRole,
         ContactIdRole,
         LastEventTimeRole,

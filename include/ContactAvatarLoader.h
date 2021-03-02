@@ -39,8 +39,7 @@
 
 #include "Contact.h"
 
-namespace vm
-{
+namespace vm {
 class ContactAvatarLoader : public QObject
 {
     Q_OBJECT
@@ -61,6 +60,6 @@ private:
     Contacts m_contacts;
     QTimer m_timer;
 };
-}
+} // namespace vm
 
 #endif // VM_CONTACTAVATARLOADER_H

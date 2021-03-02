@@ -44,7 +44,7 @@
 #include "Messenger.h"
 #include "Settings.h"
 #ifdef VS_MACOS
-#include <macos/VSQMacos.h>
+#    include <macos/VSQMacos.h>
 #endif // VS_MACOS
 #include "Controllers.h"
 #include "UserDatabase.h"
@@ -78,8 +78,7 @@ public:
     Q_INVOKABLE
     void checkUpdates();
 
-    Q_INVOKABLE QString
-    currentVersion() const;
+    Q_INVOKABLE QString currentVersion() const;
 
     // Names
 

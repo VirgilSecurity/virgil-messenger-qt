@@ -32,27 +32,23 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "GroupUpdate.h"
 
 #include <stdexcept>
 
 using namespace vm;
 
-GroupId vm::GroupUpdateGetId(const GroupUpdate& update) {
+GroupId vm::GroupUpdateGetId(const GroupUpdate &update)
+{
     if (auto base = std::get_if<AddGroupOwnersUpdate>(&update)) {
         return base->groupId;
-    }
-    else if (auto base = std::get_if<AddGroupMembersUpdate>(&update)) {
+    } else if (auto base = std::get_if<AddGroupMembersUpdate>(&update)) {
         return base->groupId;
-    }
-    else if (auto base = std::get_if<AddGroupUpdate>(&update)) {
+    } else if (auto base = std::get_if<AddGroupUpdate>(&update)) {
         return base->groupId;
-    }
-    else if (auto base = std::get_if<GroupMemberAffiliationUpdate>(&update)) {
+    } else if (auto base = std::get_if<GroupMemberAffiliationUpdate>(&update)) {
         return base->groupId;
-    }
-    else {
+    } else {
         throw std::logic_error("Unhandled GroupUpdate when ask for group id.");
     }
 }

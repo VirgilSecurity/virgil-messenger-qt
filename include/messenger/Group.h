@@ -41,8 +41,7 @@
 #include <memory>
 #include <list>
 
-namespace vm
-{
+namespace vm {
 class Group
 {
 public:
@@ -60,6 +59,6 @@ private:
 
 using GroupHandler = std::shared_ptr<Group>;
 
-}
+} // namespace vm
 
 #endif // VM_GROUP_H

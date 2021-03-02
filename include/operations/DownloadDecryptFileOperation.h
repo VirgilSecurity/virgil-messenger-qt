@@ -40,8 +40,7 @@
 
 #include <QPointer>
 
-namespace vm
-{
+namespace vm {
 class Messenger;
 
 class DownloadDecryptFileOperation : public NetworkOperation
@@ -49,9 +48,9 @@ class DownloadDecryptFileOperation : public NetworkOperation
     Q_OBJECT
 
 public:
-    DownloadDecryptFileOperation(NetworkOperation *parent, Messenger *messenger,
-                                 const QUrl &url, quint64 bytesTotal, const QString &filePath,
-                                 const QByteArray& decryptionKey, const QByteArray& signature, const UserId &senderId);
+    DownloadDecryptFileOperation(NetworkOperation *parent, Messenger *messenger, const QUrl &url, quint64 bytesTotal,
+                                 const QString &filePath, const QByteArray &decryptionKey, const QByteArray &signature,
+                                 const UserId &senderId);
 
 signals:
     void progressChanged(quint64 bytesLoaded, quint64 bytesTotal);
@@ -72,6 +71,6 @@ private:
     const QByteArray m_signature;
     const UserId m_senderId;
 };
-}
+} // namespace vm
 
 #endif // VM_DOWNLOADDECRYPTFILEOPERATION_H

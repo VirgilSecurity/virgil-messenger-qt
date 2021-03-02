@@ -32,99 +32,93 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "Message.h"
 
 #include "MessageContentGroupInvitation.h"
 
-
 using namespace vm;
 using Self = Message;
 
-
-MessageId Self::id() const {
+MessageId Self::id() const
+{
     return m_id;
 }
 
-
-void Self::setId(MessageId id) {
+void Self::setId(MessageId id)
+{
     m_id = std::move(id);
 }
 
-
-UserId Self::senderId() const {
+UserId Self::senderId() const
+{
     return m_senderId;
 }
 
-
-void Self::setSenderId(UserId userId) {
+void Self::setSenderId(UserId userId)
+{
     m_senderId = std::move(userId);
 }
 
-
-QString Self::senderUsername() const {
+QString Self::senderUsername() const
+{
     return m_senderUsername;
 }
 
-
-void Self::setSenderUsername(QString username) {
+void Self::setSenderUsername(QString username)
+{
     m_senderUsername = std::move(username);
 }
 
-
-UserId Self::recipientId() const {
+UserId Self::recipientId() const
+{
     return m_recipientId;
 }
 
-
-void Self::setRecipientId(UserId userId) {
+void Self::setRecipientId(UserId userId)
+{
     m_recipientId = std::move(userId);
 }
 
-
-QString Self::recipientUsername() const {
+QString Self::recipientUsername() const
+{
     return m_recipientUsername;
 }
 
-
-void Self::setRecipientUsername(QString username) {
+void Self::setRecipientUsername(QString username)
+{
     m_recipientUsername = std::move(username);
 }
 
-
-ChatId Self::chatId() const {
+ChatId Self::chatId() const
+{
     if (isGroupChatMessage()) {
         return ChatId(m_groupChatInfo->groupId());
-    }
-    else if (isIncoming()) {
+    } else if (isIncoming()) {
         return ChatId(m_senderId);
-    }
-    else {
+    } else {
         return ChatId(m_recipientId);
     }
 }
 
-
-QString Self::chatTitle() const {
+QString Self::chatTitle() const
+{
     if (isGroupChatMessage()) {
         if (auto inviatation = std::get_if<MessageContentGroupInvitation>(&m_content)) {
             return inviatation->title();
-        }
-        else {
+        } else {
             return "Unknown";
         }
     }
 
     if (isIncoming()) {
         return m_senderUsername;
-    }
-    else {
+    } else {
         return m_recipientUsername;
     }
 }
 
-
-ChatType Self::chatType() const {
+ChatType Self::chatType() const
+{
 
     if (isGroupChatMessage()) {
         return ChatType::Group;
@@ -134,38 +128,38 @@ ChatType Self::chatType() const {
     }
 }
 
-
-QDateTime Self::createdAt() const {
+QDateTime Self::createdAt() const
+{
     return m_createdAt;
 }
 
-
-void Self::setCreatedAt(QDateTime createdAt) {
+void Self::setCreatedAt(QDateTime createdAt)
+{
     m_createdAt = std::move(createdAt);
 }
 
-
-void Self::setCreatedNow() {
+void Self::setCreatedNow()
+{
     m_createdAt = QDateTime::currentDateTime();
 }
 
-
-const MessageContent& Self::content() const noexcept {
+const MessageContent &Self::content() const noexcept
+{
     return m_content;
 }
 
-
-MessageContent& Self::content() noexcept {
+MessageContent &Self::content() noexcept
+{
     return m_content;
 }
 
-
-MessageContentType Self::contentType() const noexcept {
+MessageContentType Self::contentType() const noexcept
+{
     return MessageContentTypeFrom(m_content);
 }
 
-
-void Self::setContent(MessageContent content) {
+void Self::setContent(MessageContent content)
+{
     m_content = std::move(content);
     //
     //  Fix attachment if it's ID is not give.
@@ -180,56 +174,52 @@ void Self::setContent(MessageContent content) {
     }
 }
 
-
-bool Self::contentIsAttachment() const noexcept {
+bool Self::contentIsAttachment() const noexcept
+{
     const bool isFile = std::holds_alternative<MessageContentFile>(m_content);
     const bool isPicture = std::holds_alternative<MessageContentPicture>(m_content);
     return isFile || isPicture;
 }
 
-
-const MessageContentAttachment* Self::contentAsAttachment() const {
+const MessageContentAttachment *Self::contentAsAttachment() const
+{
     if (auto file = std::get_if<MessageContentFile>(&m_content)) {
         return file;
-    }
-    else if (auto picture = std::get_if<MessageContentPicture>(&m_content)) {
+    } else if (auto picture = std::get_if<MessageContentPicture>(&m_content)) {
         return picture;
-    }
-    else {
+    } else {
         throw std::logic_error("Message content is not an attachment.");
     }
 }
 
-
-MessageContentAttachment* Self::contentAsAttachment() {
+MessageContentAttachment *Self::contentAsAttachment()
+{
     if (auto file = std::get_if<MessageContentFile>(&m_content)) {
         return file;
-    }
-    else if (auto picture = std::get_if<MessageContentPicture>(&m_content)) {
+    } else if (auto picture = std::get_if<MessageContentPicture>(&m_content)) {
         return picture;
-    }
-    else {
+    } else {
         throw std::logic_error("Message content is not an attachment.");
     }
 }
 
-
-std::shared_ptr<MessageGroupChatInfo> Self::groupChatInfo() const {
+std::shared_ptr<MessageGroupChatInfo> Self::groupChatInfo() const
+{
     return m_groupChatInfo;
 }
 
-
-void Self::setGroupChatInfo(std::shared_ptr<MessageGroupChatInfo> groupChatInfo) {
+void Self::setGroupChatInfo(std::shared_ptr<MessageGroupChatInfo> groupChatInfo)
+{
     m_groupChatInfo = std::move(groupChatInfo);
 }
 
-
-QString Self::statusString() const {
+QString Self::statusString() const
+{
     return MessageStatusToString(status());
 }
 
-
-bool Self::applyUpdate(const MessageUpdate& update) {
+bool Self::applyUpdate(const MessageUpdate &update)
+{
     std::lock_guard<std::mutex> _(m_updateGuardMutex);
     if (contentIsAttachment()) {
         return contentAsAttachment()->applyUpdate(update);
@@ -237,27 +227,27 @@ bool Self::applyUpdate(const MessageUpdate& update) {
     return false;
 }
 
-
-bool Self::isGroupChatMessage() const noexcept {
+bool Self::isGroupChatMessage() const noexcept
+{
     return m_groupChatInfo != nullptr;
 }
 
-
-bool Self::isOutgoing() const noexcept {
+bool Self::isOutgoing() const noexcept
+{
     return false;
 }
 
-
-bool Self::isIncoming() const noexcept {
+bool Self::isIncoming() const noexcept
+{
     return false;
 }
 
-
-bool Self::isOutgoingCopyFromOtherDevice() const noexcept {
+bool Self::isOutgoingCopyFromOtherDevice() const noexcept
+{
     return m_isCarbonsCopy;
 }
 
-
-void Self::markAsOutgoingCopyFromOtherDevice() {
+void Self::markAsOutgoingCopyFromOtherDevice()
+{
     m_isCarbonsCopy = true;
 }

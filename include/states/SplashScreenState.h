@@ -39,8 +39,7 @@
 
 class Settings;
 
-namespace vm
-{
+namespace vm {
 class SplashScreenState : public SignInState
 {
     Q_OBJECT
@@ -58,6 +57,6 @@ private:
 
     Settings *m_settings;
 };
-}
+} // namespace vm
 
 #endif // VM_SPLASHSCREENSTATE_H

@@ -46,11 +46,8 @@
 using namespace vm;
 using Self = UsersController;
 
-
 Self::UsersController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent)
-    : QObject(parent)
-    , m_messenger(messenger)
-    , m_userDatabase(userDatabase)
+    : QObject(parent), m_messenger(messenger), m_userDatabase(userDatabase)
 {
     connect(messenger, &Messenger::signedIn, this, &Self::onSignedIn);
     connect(messenger, &Messenger::signedUp, this, &Self::onSignedIn);
@@ -130,7 +127,8 @@ void Self::onSignedOut()
     m_userDatabase->close();
 }
 
-void Self::onFinishSignIn() {
+void Self::onFinishSignIn()
+{
     const auto user = m_messenger->currentUser();
 
     Contact contact;
@@ -146,18 +144,20 @@ void Self::onFinishSignIn() {
     emit currentUsernameChanged(user->username());
 }
 
-void Self::onFinishSignOut() {
+void Self::onFinishSignOut()
+{
     emit signedOut();
 }
 
-void Self::onChatAdded(const ChatHandler &chat) {
+void Self::onChatAdded(const ChatHandler &chat)
+{
     if (chat->type() == Chat::Type::Personal) {
         m_messenger->subscribeToUser(UserId(chat->id()));
     }
 }
 
-
-void Self::onUpdateContactsWithUser(const UserHandler& user) {
+void Self::onUpdateContactsWithUser(const UserHandler &user)
+{
 
     Contact contact;
     contact.setUserId(user->id());

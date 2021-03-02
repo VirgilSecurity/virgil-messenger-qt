@@ -32,8 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
-
 #ifndef VM_MESSAGE_CONTENT_GROUP_INVITATION_H
 #define VM_MESSAGE_CONTENT_GROUP_INVITATION_H
 
@@ -45,7 +43,8 @@ namespace vm {
 //
 //  Class with a group invitation message content.
 //
-class MessageContentGroupInvitation {
+class MessageContentGroupInvitation
+{
 
 public:
     MessageContentGroupInvitation() = default;
@@ -65,17 +64,16 @@ public:
     //
     //  Serialize object to JSON.
     //
-    void writeJson(QJsonObject& json) const;
+    void writeJson(QJsonObject &json) const;
 
     //
     //  restore object from JSON.
     //
-    bool readJson(const QJsonObject& json);
+    bool readJson(const QJsonObject &json);
 
 private:
     QString m_title;
     QString m_helloText;
-
 };
 } // namespace vm
 

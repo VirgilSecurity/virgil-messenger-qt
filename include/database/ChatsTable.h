@@ -38,8 +38,7 @@
 #include "core/DatabaseTable.h"
 #include "Chat.h"
 
-namespace vm
-{
+namespace vm {
 class ChatsTable : public DatabaseTable
 {
     Q_OBJECT
@@ -69,7 +68,6 @@ private:
     void onUpdateLastMessage(const MessageHandler &message, qsizetype unreadMessageCount);
     void onResetLastMessage(const ChatId &chatId);
 };
-}
-
+} // namespace vm
 
 #endif // VM_CHATSTABLE_H

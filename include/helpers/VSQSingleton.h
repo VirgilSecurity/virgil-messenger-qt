@@ -65,7 +65,9 @@ YourClass::instance().member();         // Class usage
  * \tparam T Base class for \a D
  * \tparam D Class to be singleton
  */
-template <typename T, typename D = T> class VSQSingleton {
+template<typename T, typename D = T>
+class VSQSingleton
+{
     friend D;
     static_assert(std::is_base_of<T, D>::value, "T should be a base type for D");
 
@@ -75,8 +77,8 @@ public:
      * Creates once \a D class instance and returns its base class \a T
      * \return
      */
-    static T &
-    instance() {
+    static T &instance()
+    {
         static D inst;
         return inst;
     }
@@ -85,8 +87,7 @@ private:
     VSQSingleton() = default;
     ~VSQSingleton() = default;
     VSQSingleton(const VSQSingleton &) = delete;
-    VSQSingleton &
-    operator=(const VSQSingleton &) = delete;
+    VSQSingleton &operator=(const VSQSingleton &) = delete;
 };
 
 #endif // VIRGIL_IOTKIT_QT_SINGLETON_H

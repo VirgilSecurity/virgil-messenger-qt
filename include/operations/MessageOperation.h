@@ -38,8 +38,7 @@
 #include "NetworkOperation.h"
 #include "Message.h"
 
-namespace vm
-{
+namespace vm {
 class MessageOperationFactory;
 
 class MessageOperation : public NetworkOperation
@@ -53,15 +52,15 @@ public:
     MessageHandler message() const;
     MessageOperationFactory *factory();
 
+    void apply(const MessageUpdate &update);
+
 signals:
-    void messageUpdate(const MessageUpdate &update);
+    void updateMessage(const MessageUpdate &update);
 
 private:
-    void onMessageUpdate(const MessageUpdate &update);
-
     MessageOperationFactory *m_factory;
     ModifiableMessageHandler m_message;
 };
-}
+} // namespace vm
 
 #endif // VS_MESSAGEOPERATION_H

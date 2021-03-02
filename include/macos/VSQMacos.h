@@ -37,11 +37,12 @@
 
 #ifdef VS_MACOS
 
-#include <QObject>
-#include <QTimer>
-#include "helpers/VSQSingleton.h"
+#    include <QObject>
+#    include <QTimer>
+#    include "helpers/VSQSingleton.h"
 
-class VSQMacos: public QObject, public VSQSingleton<VSQMacos> {
+class VSQMacos : public QObject, public VSQSingleton<VSQMacos>
+{
     Q_OBJECT
 public:
     virtual ~VSQMacos();

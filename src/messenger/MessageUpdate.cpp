@@ -32,79 +32,51 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "MessageUpdate.h"
 
 #include <stdexcept>
 
 using namespace vm;
 
-MessageId vm::MessageUpdateGetMessageId(const MessageUpdate& update) {
+MessageId vm::MessageUpdateGetMessageId(const MessageUpdate &update)
+{
     if (auto base = std::get_if<IncomingMessageStageUpdate>(&update)) {
         return base->messageId;
-    }
-    else if (auto base = std::get_if<OutgoingMessageStageUpdate>(&update)) {
+    } else if (auto base = std::get_if<OutgoingMessageStageUpdate>(&update)) {
         return base->messageId;
-    }
-    else if (auto base = std::get_if<MessageAttachmentUploadStageUpdate>(&update)) {
+    } else if (auto base = std::get_if<MessageAttachmentUploadStageUpdate>(&update)) {
         return base->messageId;
-    }
-    else if (auto base = std::get_if<MessageAttachmentDownloadStageUpdate>(&update)) {
+    } else if (auto base = std::get_if<MessageAttachmentDownloadStageUpdate>(&update)) {
         return base->messageId;
-    }
-    else if (auto base = std::get_if<MessageAttachmentFingerprintUpdate>(&update)) {
+    } else if (auto base = std::get_if<MessageAttachmentFingerprintUpdate>(&update)) {
         return base->messageId;
-    }
-    else if (auto base = std::get_if<MessageAttachmentRemoteUrlUpdate>(&update)) {
+    } else if (auto base = std::get_if<MessageAttachmentRemoteUrlUpdate>(&update)) {
         return base->messageId;
-    }
-    else if (auto base = std::get_if<MessageAttachmentEncryptionUpdate>(&update)) {
+    } else if (auto base = std::get_if<MessageAttachmentEncryptionUpdate>(&update)) {
         return base->messageId;
-    }
-    else if (auto base = std::get_if<MessageAttachmentLocalPathUpdate>(&update)) {
+    } else if (auto base = std::get_if<MessageAttachmentLocalPathUpdate>(&update)) {
         return base->messageId;
-    }
-    else if (auto base = std::get_if<MessageAttachmentProcessedSizeUpdate>(&update)) {
+    } else if (auto base = std::get_if<MessageAttachmentProcessedSizeUpdate>(&update)) {
         return base->messageId;
-    }
-    else if (auto base = std::get_if<MessagePictureThumbnailPathUpdate>(&update)) {
+    } else if (auto base = std::get_if<MessagePictureThumbnailPathUpdate>(&update)) {
         return base->messageId;
-    }
-    else if (auto base = std::get_if<MessagePictureThumbnailSizeUpdate>(&update)) {
+    } else if (auto base = std::get_if<MessagePictureThumbnailEncryptionUpdate>(&update)) {
         return base->messageId;
-    }
-    else if (auto base = std::get_if<MessagePictureThumbnailEncryptionUpdate>(&update)) {
+    } else if (auto base = std::get_if<MessagePictureThumbnailRemoteUrlUpdate>(&update)) {
         return base->messageId;
-    }
-    else if (auto base = std::get_if<MessagePictureThumbnailRemoteUrlUpdate>(&update)) {
+    } else if (auto base = std::get_if<MessagePicturePreviewPathUpdate>(&update)) {
         return base->messageId;
-    }
-    else if (auto base = std::get_if<MessagePicturePreviewPathUpdate>(&update)) {
+    } else if (auto base = std::get_if<MessageAttachmentExtrasJsonUpdate>(&update)) {
         return base->messageId;
-    }
-    else {
+    } else {
         throw std::logic_error("Unhandled MessageUpdate when ask for message id.");
     }
 }
 
-const MessageAttachmentExtrasUpdate *vm::MessageUpdateToAttachmentExtrasUpdate(const MessageUpdate &update)
+bool vm::MessageUpdateHasAttachmentExtrasJsonUpdate(const MessageUpdate &update)
 {
-    if (auto base = std::get_if<MessagePictureThumbnailPathUpdate>(&update)) {
-        return base;
-    }
-    if (auto base = std::get_if<MessagePictureThumbnailSizeUpdate>(&update)) {
-        return base;
-    }
-    if (auto base = std::get_if<MessagePictureThumbnailEncryptionUpdate>(&update)) {
-        return base;
-    }
-    if (auto base = std::get_if<MessagePictureThumbnailRemoteUrlUpdate>(&update)) {
-        return base;
-    }
-    if (auto base = std::get_if<MessagePicturePreviewPathUpdate>(&update)) {
-        return base;
-    }
-    else {
-        return nullptr;
-    }
+    return std::holds_alternative<MessagePictureThumbnailPathUpdate>(update)
+            || std::holds_alternative<MessagePictureThumbnailEncryptionUpdate>(update)
+            || std::holds_alternative<MessagePictureThumbnailRemoteUrlUpdate>(update)
+            || std::holds_alternative<MessagePicturePreviewPathUpdate>(update);
 }

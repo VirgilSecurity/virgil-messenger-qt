@@ -37,8 +37,7 @@
 
 #include "OperationState.h"
 
-namespace vm
-{
+namespace vm {
 class UsersController;
 
 class DownloadKeyState : public OperationState
@@ -56,6 +55,6 @@ private:
 
     UsersController *m_usersController;
 };
-}
+} // namespace vm
 
 #endif // VM_DOWNLOADKEYSTATE_H

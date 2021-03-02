@@ -41,8 +41,7 @@
 
 #include <QString>
 
-namespace vm
-{
+namespace vm {
 class GroupsTable : public DatabaseTable
 {
     Q_OBJECT
@@ -54,8 +53,8 @@ signals:
     //
     //  Control signals.
     //
-    void addGroupForChat(const ChatHandler& chat);
-    void updateGroup(const GroupUpdate& groupUpdate);
+    void addGroupForChat(const ChatHandler &chat);
+    void updateGroup(const GroupUpdate &groupUpdate);
     void deleteGroup(const GroupId &groupId);
 
     //
@@ -64,13 +63,13 @@ signals:
     void errorOccurred(const QString &errorText);
 
 private:
-    void onAddGroupForChat(const ChatHandler& chat);
-    void onUpdateGroup(const GroupUpdate& groupUpdate);
+    void onAddGroupForChat(const ChatHandler &chat);
+    void onUpdateGroup(const GroupUpdate &groupUpdate);
     void onDeleteGroup(const GroupId &groupId);
     void insertGroup(const GroupId &groupId);
 
     bool create() override;
 };
-}
+} // namespace vm
 
 #endif // VM_GROUPS_TABLE_H

@@ -37,8 +37,7 @@
 
 #include "ListProxyModel.h"
 
-namespace vm
-{
+namespace vm {
 class MessagesModel;
 
 class MessagesProxyModel : public ListProxyModel
@@ -53,6 +52,6 @@ private:
 
     MessagesModel *m_model;
 };
-}
+} // namespace vm
 
 #endif // VM_MESSAGES_PROXY_MODEL_H

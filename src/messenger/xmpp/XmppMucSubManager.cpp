@@ -43,33 +43,34 @@
 using namespace vm;
 using Self = XmppMucSubManager;
 
-
 Q_LOGGING_CATEGORY(lsXmppMucSubManager, "xmpp-muc-sub");
 
-
-class Self::Impl {
+class Self::Impl
+{
 public:
     QPointer<QXmppClient> client;
 };
 
 namespace {
-class MetaTypeInitilazer {
+class MetaTypeInitilazer
+{
 public:
-    MetaTypeInitilazer() {
+    MetaTypeInitilazer()
+    {
         qRegisterMetaType<vm::XmppMucSubEvent>();
         qRegisterMetaType<std::list<vm::XmppMucSubEvent>>();
     }
 };
-}
+} // namespace
 
-
-Self::XmppMucSubManager() : m_impl(std::make_shared<Self::Impl>()) {
+Self::XmppMucSubManager() : m_impl(std::make_shared<Self::Impl>())
+{
     static MetaTypeInitilazer _;
 }
 
-
-QString Self::subscribe(const std::list<XmppMucSubEvent>& events,
-            const QString& from, const QString& to, const QString& nickName) {
+QString Self::subscribe(const std::list<XmppMucSubEvent> &events, const QString &from, const QString &to,
+                        const QString &nickName)
+{
 
     XmppMucSubscribeItem subscribeItem;
     subscribeItem.setEvents(events);
@@ -81,14 +82,15 @@ QString Self::subscribe(const std::list<XmppMucSubEvent>& events,
     iq.setItem(subscribeItem);
 
     if (m_impl->client && m_impl->client->sendPacket(iq)) {
-        qCDebug(lsXmppMucSubManager) << "User:" << from << "nickname:" << nickName <<  "subscribed to the room:" << to;
+        qCDebug(lsXmppMucSubManager) << "User:" << from << "nickname:" << nickName << "subscribed to the room:" << to;
     }
 
     return iq.id();
 }
 
-QString Self::subscribeOther(const std::list<XmppMucSubEvent>& events,
-            const QString& from, const QString& to, const QString& jid, const QString& nickName) {
+QString Self::subscribeOther(const std::list<XmppMucSubEvent> &events, const QString &from, const QString &to,
+                             const QString &jid, const QString &nickName)
+{
 
     XmppMucSubscribeItem subscribeItem;
     subscribeItem.setEvents(events);
@@ -101,13 +103,14 @@ QString Self::subscribeOther(const std::list<XmppMucSubEvent>& events,
     iq.setItem(subscribeItem);
 
     if (m_impl->client && m_impl->client->sendPacket(iq)) {
-        qCDebug(lsXmppMucSubManager) << "User:" << jid << "nickname:" << nickName <<  "subscribed to the room:" << to;
+        qCDebug(lsXmppMucSubManager) << "User:" << jid << "nickname:" << nickName << "subscribed to the room:" << to;
     }
 
     return iq.id();
 }
 
-bool Self::handleStanza(const QDomElement &element) {
+bool Self::handleStanza(const QDomElement &element)
+{
     if (element.tagName() == "iq") {
 
         if (XmppMucSubscriptionsIq::isMucSubscriptionsIq(element)) {
@@ -115,7 +118,7 @@ bool Self::handleStanza(const QDomElement &element) {
             iq.parse(element);
 
             if (iq.isMySubscriptions()) {
-                for (const auto& subscribedRoom : iq.items()) {
+                for (const auto &subscribedRoom : iq.items()) {
                     emit subscribedRoomReceived(iq.id(), subscribedRoom.jid(), iq.to(), subscribedRoom.events());
                 }
 
@@ -123,7 +126,7 @@ bool Self::handleStanza(const QDomElement &element) {
             }
 
             if (iq.isRoomSubscriptions()) {
-                for (const auto& subscriber : iq.items()) {
+                for (const auto &subscriber : iq.items()) {
                     emit roomSubscriberReceived(iq.id(), iq.from(), subscriber.jid(), subscriber.events());
                 }
 
@@ -141,8 +144,8 @@ bool Self::handleStanza(const QDomElement &element) {
     return false;
 }
 
-
-void Self::setClient(QXmppClient *client) {
+void Self::setClient(QXmppClient *client)
+{
 
     QXmppClientExtension::setClient(client);
 
@@ -151,16 +154,16 @@ void Self::setClient(QXmppClient *client) {
     m_impl->client = client;
 }
 
-
-void Self::onMessageReceived(const QXmppMessage &mucSubMessage) {
+void Self::onMessageReceived(const QXmppMessage &mucSubMessage)
+{
 
     if (mucSubMessage.type() != QXmppMessage::Normal) {
         return;
     }
 
-    for (const auto& mucSubEvent : mucSubMessage.extensions()) {
-        if (mucSubEvent.attribute(QStringLiteral("xmlns")) !=
-                    QStringLiteral("http://jabber.org/protocol/pubsub#event")) {
+    for (const auto &mucSubEvent : mucSubMessage.extensions()) {
+        if (mucSubEvent.attribute(QStringLiteral("xmlns"))
+            != QStringLiteral("http://jabber.org/protocol/pubsub#event")) {
             continue;
         }
 
@@ -177,7 +180,7 @@ void Self::onMessageReceived(const QXmppMessage &mucSubMessage) {
         if (node == QStringLiteral("urn:xmpp:mucsub:nodes:messages")) {
 
             auto item = items.firstChildElement(QStringLiteral("item"));
-            for(;!item.isNull(); item = items.nextSiblingElement(QStringLiteral("item"))) {
+            for (; !item.isNull(); item = items.nextSiblingElement(QStringLiteral("item"))) {
                 auto messageElement = item.firstChildElement(QStringLiteral("message"));
                 if (!messageElement.isNull()) {
                     QXmppMessage message;
@@ -195,7 +198,7 @@ void Self::onMessageReceived(const QXmppMessage &mucSubMessage) {
 
             auto item = items.firstChildElement(QStringLiteral("item"));
             auto id = item.attribute("id");
-            for(;!item.isNull(); item = items.nextSiblingElement(QStringLiteral("item"))) {
+            for (; !item.isNull(); item = items.nextSiblingElement(QStringLiteral("item"))) {
                 auto subscribeElement = item.firstChildElement(QStringLiteral("subscribe"));
                 if (!subscribeElement.isNull()) {
                     XmppMucSubscribeItem subscribeItem;

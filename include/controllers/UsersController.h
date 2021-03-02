@@ -42,11 +42,9 @@
 #include <QObject>
 #include <QPointer>
 
-
 class Messenger;
 
-namespace vm
-{
+namespace vm {
 class Models;
 class UserDatabase;
 
@@ -92,7 +90,7 @@ private:
     void onSignedOut();
     void onFinishSignIn();
     void onFinishSignOut();
-    void onUpdateContactsWithUser(const UserHandler& user);
+    void onUpdateContactsWithUser(const UserHandler &user);
 
     void onChatAdded(const ChatHandler &chat);
 
@@ -101,6 +99,6 @@ private:
     QPointer<UserDatabase> m_userDatabase;
     QString m_nextUsername;
 };
-}
+} // namespace vm
 
 #endif // VM_USERSCONTROLLER_H

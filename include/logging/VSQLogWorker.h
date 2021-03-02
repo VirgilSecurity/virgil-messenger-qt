@@ -40,7 +40,6 @@
 #include <QObject>
 #include <QFile>
 
-
 class VSQLogWorker : public QObject
 {
     Q_OBJECT
@@ -58,8 +57,8 @@ private:
     void consoleMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
 
     bool prepareLogFile(qint64 messageLen);
-    void logToFile(const QString& formattedMessage);
-    void logToConsole(const QString& formattedMessage);
+    void logToFile(const QString &formattedMessage);
+    void logToConsole(const QString &formattedMessage);
 
 private:
     QFile m_logFile;

@@ -32,23 +32,19 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_INCOMING_MESSAGE_STAGE_H
 #define VM_INCOMING_MESSAGE_STAGE_H
 
-
 #include "MessageStatus.h"
 
-
 #include <QString>
-
 
 namespace vm {
 //
 //  Denotes incoming message processing stage.
 //
 enum class IncomingMessageStage {
-    Received,  // A message was locally received from a sender.
+    Received, // A message was locally received from a sender.
     Decrypted, // A message was decrypted, so content handles specific message content: text, picture, etc.
     Processed, // A message was fully processed, i.e. attachment was downloaded, decrypted, and stored locally.
     Broken // A message is broken and can't be processed.
@@ -58,7 +54,7 @@ enum class IncomingMessageStage {
 //  Return incoming stage from a given string.
 //  Throws if correspond stage is not found.
 //
-IncomingMessageStage IncomingMessageStageFromString(const QString& stageString);
+IncomingMessageStage IncomingMessageStageFromString(const QString &stageString);
 
 //
 //  Return string from a given incoming stage.

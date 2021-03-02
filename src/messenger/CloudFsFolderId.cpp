@@ -32,43 +32,45 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "CloudFsFolderId.h"
-
 
 using namespace vm;
 using Self = CloudFsFolderId;
 
+Self::CloudFsFolderId(QString id) : m_id(std::move(id)) { }
 
-Self::CloudFsFolderId(QString id) : m_id(std::move(id)) {
-
-}
-
-Self::operator QString() const {
+Self::operator QString() const
+{
     return m_id;
 }
 
-bool Self::isValid() const noexcept {
+bool Self::isValid() const noexcept
+{
     return !m_id.isEmpty();
 }
 
-CloudFsFolderId Self::root() {
+CloudFsFolderId Self::root()
+{
     static CloudFsFolderId id("");
     return id;
 }
 
-bool vm::operator<(const Self& lhs, const Self& rhs) {
+bool vm::operator<(const Self &lhs, const Self &rhs)
+{
     return QString(lhs) < QString(rhs);
 }
 
-bool vm::operator>(const Self& lhs, const Self& rhs) {
+bool vm::operator>(const Self &lhs, const Self &rhs)
+{
     return QString(lhs) > QString(rhs);
 }
 
-bool vm::operator==(const Self& lhs, const Self& rhs) {
+bool vm::operator==(const Self &lhs, const Self &rhs)
+{
     return QString(lhs) == QString(rhs);
 }
 
-bool vm::operator!=(const Self& lhs, const Self& rhs) {
+bool vm::operator!=(const Self &lhs, const Self &rhs)
+{
     return QString(lhs) != QString(rhs);
 }

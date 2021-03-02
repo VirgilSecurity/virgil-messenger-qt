@@ -44,33 +44,28 @@
 
 namespace vm {
 
-struct ContactUpdateBase {
+struct ContactUpdateBase
+{
     UserId userId;
 };
 
-
-struct UsernameContactUpdate : public ContactUpdateBase {
+struct UsernameContactUpdate : public ContactUpdateBase
+{
     QString username;
 };
 
-
-struct NameContactUpdate : public ContactUpdateBase {
+struct NameContactUpdate : public ContactUpdateBase
+{
     QString name;
 };
 
-
-
-using ContactUpdate = std::variant<
-        UsernameContactUpdate,
-        NameContactUpdate
-        >;
+using ContactUpdate = std::variant<UsernameContactUpdate, NameContactUpdate>;
 
 //
 //  Return user's unique identifier the update relates to.
 //
-UserId ContactUpdateGetUserId(const ContactUpdate& update);
+UserId ContactUpdateGetUserId(const ContactUpdate &update);
 
 } // namespace vm
-
 
 #endif // VM_CONTACT_UPDATE_H

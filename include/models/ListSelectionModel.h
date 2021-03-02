@@ -37,8 +37,7 @@
 
 #include <QItemSelectionModel>
 
-namespace vm
-{
+namespace vm {
 class ListModel;
 
 class ListSelectionModel : public QItemSelectionModel
@@ -78,6 +77,6 @@ private:
     bool m_multiSelect = false;
     int m_selectedCount = 0;
 };
-}
+} // namespace vm
 
 #endif // VM_LISTSELECTIONMODEL_H

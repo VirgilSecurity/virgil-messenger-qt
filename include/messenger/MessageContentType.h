@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_MESSAGE_CONTENT_TYPE_H
 #define VM_MESSAGE_CONTENT_TYPE_H
 
@@ -47,7 +46,8 @@ namespace vm {
 //
 namespace {
 template<typename VariantType, typename T, std::size_t index = 0>
-constexpr std::size_t variant_index() {
+constexpr std::size_t variant_index()
+{
     if constexpr (index == std::variant_size_v<VariantType>) {
         return index;
     } else if constexpr (std::is_same_v<std::variant_alternative_t<index, VariantType>, T>) {
@@ -56,7 +56,7 @@ constexpr std::size_t variant_index() {
         return variant_index<VariantType, T, index + 1>();
     }
 }
-}
+} // namespace
 
 //
 //  Defines content type of a message.
@@ -75,13 +75,13 @@ enum class MessageContentType : size_t {
 //  Return message content type from a given string.
 //  Throws if correspond type is not found.
 //
-MessageContentType MessageContentTypeFrom(const QString& typeString);
+MessageContentType MessageContentTypeFrom(const QString &typeString);
 
 //
 //  Return message content type from a given content.
 //  Throws if correspond type is not found.
 //
-MessageContentType MessageContentTypeFrom(const MessageContent& messageContent);
+MessageContentType MessageContentTypeFrom(const MessageContent &messageContent);
 
 //
 //  Return string from a given message content type.
@@ -91,7 +91,7 @@ QString MessageContentTypeToString(MessageContentType type);
 //
 //  Return string from a given message content.
 //
-QString MessageContentTypeToString(const MessageContent& content);
+QString MessageContentTypeToString(const MessageContent &content);
 
 } // namespace vm
 

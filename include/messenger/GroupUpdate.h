@@ -49,50 +49,44 @@
 
 namespace vm {
 
-struct GroupUpdateBase {
+struct GroupUpdateBase
+{
     GroupId groupId;
 };
 
-
-struct AddGroupOwnersUpdate : public GroupUpdateBase {
+struct AddGroupOwnersUpdate : public GroupUpdateBase
+{
     Users owners;
 };
 
-
-struct AddGroupMembersUpdate : public GroupUpdateBase {
+struct AddGroupMembersUpdate : public GroupUpdateBase
+{
     Users members;
 };
 
-
-struct RemoveGroupMembersUpdate : public GroupUpdateBase {
+struct RemoveGroupMembersUpdate : public GroupUpdateBase
+{
     Users members;
 };
 
-
-struct AddGroupUpdate : public GroupUpdateBase {
+struct AddGroupUpdate : public GroupUpdateBase
+{
 };
 
-
-struct GroupMemberAffiliationUpdate : public GroupUpdateBase {
+struct GroupMemberAffiliationUpdate : public GroupUpdateBase
+{
     UserId memberId;
     GroupAffiliation memberAffiliation;
 };
 
-
-using GroupUpdate = std::variant<
-        AddGroupOwnersUpdate,
-        AddGroupMembersUpdate,
-        RemoveGroupMembersUpdate,
-        AddGroupUpdate,
-        GroupMemberAffiliationUpdate
-        >;
+using GroupUpdate = std::variant<AddGroupOwnersUpdate, AddGroupMembersUpdate, RemoveGroupMembersUpdate, AddGroupUpdate,
+                                 GroupMemberAffiliationUpdate>;
 
 //
 //  Return group unique identifier the update relates to.
 //
-GroupId GroupUpdateGetId(const GroupUpdate& update);
+GroupId GroupUpdateGetId(const GroupUpdate &update);
 
 } // namespace vm
-
 
 #endif // VM_GROUP_UPDATE_H

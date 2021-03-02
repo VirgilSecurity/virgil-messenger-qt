@@ -39,15 +39,15 @@
 using namespace vm;
 using Self = vm::CustomerEnv;
 
-
-QDir Self::appDataLocation() {
+QDir Self::appDataLocation()
+{
     auto appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 
-    #if VS_MSGR_ENV_DEV
-        return appDataLocation + "-dev";
-    #elif VS_MSGR_ENV_STG
-        return appDataLocation + "-stg";
-    #else
-        return appDataLocation;
-    #endif
+#if VS_MSGR_ENV_DEV
+    return appDataLocation + "-dev";
+#elif VS_MSGR_ENV_STG
+    return appDataLocation + "-stg";
+#else
+    return appDataLocation;
+#endif
 }

@@ -37,13 +37,12 @@
 
 #include "database/core/Migration.h"
 
-namespace vm
-{
+namespace vm {
 class UserDatabaseMigration : public Migration
 {
 public:
     UserDatabaseMigration();
 };
-}
+} // namespace vm
 
 #endif // VM_USERDATABASEMIGRATION_H

@@ -40,8 +40,7 @@
 #include "UserId.h"
 #include "models/CloudFilesModel.h"
 
-namespace vm
-{
+namespace vm {
 class CloudFilesController;
 
 class CloudFileListState : public QState
@@ -57,6 +56,6 @@ private:
 
     CloudFilesController *m_controller;
 };
-}
+} // namespace vm
 
 #endif // VM_CLOUDFILELISTSTATE_H

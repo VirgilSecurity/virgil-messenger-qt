@@ -42,11 +42,12 @@
 #include <QTimer>
 
 #if defined(VS_MACOS) || defined(VS_LINUX)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
-class VSQNetworkAnalyzer : public QObject {
+class VSQNetworkAnalyzer : public QObject
+{
     Q_OBJECT
 
     typedef QMap<int, QString> VSQNetworkInterfaceData;
@@ -62,24 +63,18 @@ signals:
     void heartBeat();
 
 protected slots:
-    void
-    onUpdateCompleted();
+    void onUpdateCompleted();
 
-    void
-    onAnalyzeNetwork();
+    void onAnalyzeNetwork();
 
 protected:
-    void
-    printConfiguration(const QNetworkConfiguration &configuration) const;
+    void printConfiguration(const QNetworkConfiguration &configuration) const;
 
-    void
-    printSession(const QNetworkSession &session) const;
+    void printSession(const QNetworkSession &session) const;
 
-    void
-    printNetworkInterface(const QNetworkInterface &interface) const;
+    void printNetworkInterface(const QNetworkInterface &interface) const;
 
-    void
-    printMap(const VSQNetworkInterfaceData &networkInterfaceData) const;
+    void printMap(const VSQNetworkInterfaceData &networkInterfaceData) const;
 
     static const int kTimerInterval = 5000;
     static const int kSessionTimeoutMs = 1000;
@@ -90,18 +85,16 @@ protected:
     QTimer m_timer;
 
 private slots:
-    void
-    onStart();
+    void onStart();
 
 private:
     QThread *m_thread;
 
-    bool
-    checkIsNeedStop();
+    bool checkIsNeedStop();
 };
 
 #if defined(VS_MACOS) || defined(VS_LINUX)
-#pragma GCC diagnostic pop
+#    pragma GCC diagnostic pop
 #endif
 
 #endif // VSQNETWORKANALYZER_H

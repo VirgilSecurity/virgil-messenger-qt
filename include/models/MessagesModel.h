@@ -42,15 +42,13 @@
 
 #include <optional>
 
-namespace vm
-{
+namespace vm {
 class MessagesModel : public ListModel
 {
     Q_OBJECT
 
 public:
-    enum Roles
-    {
+    enum Roles {
         // Common
         IdRole = Qt::UserRole,
         DayRole,
@@ -125,7 +123,7 @@ public:
     //
     // Update message. Returns false if message had the same status.
     //
-    bool updateMessage(const MessageUpdate &messageUpdate, const bool apply);
+    bool updateMessage(const MessageUpdate &messageUpdate);
 
     //
     //  Accept group invitation.
@@ -145,7 +143,7 @@ signals:
     void groupInvitationReceived(const UserId &ownerId, const QString &ownerUsername, const QString &helloText);
 
 private:
-    static QVector<int> rolesFromMessageUpdate(const MessageUpdate& messageUpdate);
+    static QVector<int> rolesFromMessageUpdate(const MessageUpdate &messageUpdate);
     static QString statusIconPath(MessageHandler message);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -162,6 +160,6 @@ private:
     ModifiableMessages m_messages;
     ChatHandler m_currentChat;
 };
-}
+} // namespace vm
 
 #endif // VM_MESSAGESMODEL_H

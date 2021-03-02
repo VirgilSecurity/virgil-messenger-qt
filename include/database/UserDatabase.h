@@ -42,8 +42,7 @@
 
 #include <QDir>
 
-namespace vm
-{
+namespace vm {
 class AttachmentsTable;
 class ChatsTable;
 class CloudFilesTable;
@@ -94,8 +93,7 @@ signals:
     void deleteNewGroupChat(const ChatId &chatId);
     void deleteGroupChatInvitation(const ChatId &chatId);
 
-    void updateGroup(const GroupUpdate& groupUpdate);
-
+    void updateGroup(const GroupUpdate &groupUpdate);
 
     //
     //  Notification signals.
@@ -114,10 +112,10 @@ private:
     void onDeleteNewGroupChat(const ChatId &chatId);
     void onDeleteGroupChatInvitation(const ChatId &chatId);
 
-    void onUpdateGroup(const GroupUpdate& groupUpdate);
+    void onUpdateGroup(const GroupUpdate &groupUpdate);
 
     const QDir m_databaseDir;
 };
-}
+} // namespace vm
 
 #endif // VM_USERDATABASE_H

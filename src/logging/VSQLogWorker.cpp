@@ -47,10 +47,7 @@ constexpr const qint64 LOG_MAX_FILESIZE = 20 * 1024 * 1024;
 
 using namespace vm;
 
-VSQLogWorker::VSQLogWorker(QObject *parent)
-    : QObject(parent), m_logFile(), m_logFileIndex(0)
-{
-}
+VSQLogWorker::VSQLogWorker(QObject *parent) : QObject(parent), m_logFile(), m_logFileIndex(0) { }
 
 void VSQLogWorker::processMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
 {
@@ -63,24 +60,23 @@ void VSQLogWorker::processMessage(QtMsgType type, const VSQMessageLogContext &co
 void VSQLogWorker::fileMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
 {
 
-    auto formattedMessage = QString("%1 [%2] [%3:%4] %5").arg(formatLogType(type))
-                                                            .arg(context.category)
-                                                            .arg(context.fileName)
-                                                            .arg(context.line)
-                                                            .arg(message);
+    auto formattedMessage = QString("%1 [%2] [%3:%4] %5")
+                                    .arg(formatLogType(type))
+                                    .arg(context.category)
+                                    .arg(context.fileName)
+                                    .arg(context.line)
+                                    .arg(message);
     logToFile(formattedMessage);
 }
 
 void VSQLogWorker::consoleMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
 {
-    auto formattedMessage = QString("%1 [%2] %3").arg(formatLogType(type))
-                                                    .arg(context.category)
-                                                    .arg(message);
+    auto formattedMessage = QString("%1 [%2] %3").arg(formatLogType(type)).arg(context.category).arg(message);
     logToConsole(formattedMessage);
 }
 
-
-bool VSQLogWorker::prepareLogFile(qint64 messageLen) {
+bool VSQLogWorker::prepareLogFile(qint64 messageLen)
+{
     if (messageLen > LOG_MAX_FILESIZE) {
         return false;
     }
@@ -106,27 +102,26 @@ bool VSQLogWorker::prepareLogFile(qint64 messageLen) {
     return true;
 }
 
-
-void VSQLogWorker::logToFile(const QString& formattedMessage)
+void VSQLogWorker::logToFile(const QString &formattedMessage)
 {
     if (!prepareLogFile(formattedMessage.size())) {
         return;
     }
 
-    QTextStream{&m_logFile} << formattedMessage << "\n";
+    QTextStream { &m_logFile } << formattedMessage << "\n";
 }
 
-
-void VSQLogWorker::logToConsole(const QString& formattedMessage)
+void VSQLogWorker::logToConsole(const QString &formattedMessage)
 {
     fflush(stdout);
     QFile consoleFile;
     if (consoleFile.open(stderr, QIODevice::WriteOnly)) {
-        QTextStream{&consoleFile} << formattedMessage << "\n";
+        QTextStream { &consoleFile } << formattedMessage << "\n";
     }
 }
 
-QString VSQLogWorker::formatLogType(QtMsgType type) {
+QString VSQLogWorker::formatLogType(QtMsgType type)
+{
     switch (type) {
     case QtDebugMsg:
         return "D:";

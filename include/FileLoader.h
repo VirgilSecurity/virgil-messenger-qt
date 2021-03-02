@@ -41,19 +41,16 @@
 #include <QNetworkReply>
 #include <QLoggingCategory>
 
-
 Q_DECLARE_LOGGING_CATEGORY(lcFileLoader);
 
-
-namespace vm
-{
+namespace vm {
 
 class FileLoader : public QObject
 {
     Q_OBJECT
 
 public:
-    using ConnectionSetup = std::function<void (QNetworkReply *)>;
+    using ConnectionSetup = std::function<void(QNetworkReply *)>;
 
     FileLoader(CoreMessenger *client, QObject *parent);
 
@@ -79,7 +76,7 @@ private:
     QPointer<CoreMessenger> m_coreMessenger;
     QPointer<QNetworkAccessManager> m_networkAccessManager;
 };
-}
+} // namespace vm
 
 Q_DECLARE_METATYPE(vm::FileLoader::ConnectionSetup);
 

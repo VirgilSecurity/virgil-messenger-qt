@@ -40,8 +40,7 @@
 
 #include <QUrl>
 
-namespace vm
-{
+namespace vm {
 class UsersController;
 
 class EditProfileState : public OperationState
@@ -49,7 +48,8 @@ class EditProfileState : public OperationState
     Q_OBJECT
     Q_PROPERTY(QString phoneNumber READ phoneNumber WRITE setPhoneNumber NOTIFY phoneNumberChanged)
     Q_PROPERTY(QString email READ email WRITE setEmail NOTIFY emailChanged)
-    Q_PROPERTY(bool isPhoneNumberConfirmed READ isPhoneNumberConfirmed WRITE setIsPhoneNumberConfirmed NOTIFY isPhoneNumberConfirmedChanged)
+    Q_PROPERTY(bool isPhoneNumberConfirmed READ isPhoneNumberConfirmed WRITE setIsPhoneNumberConfirmed NOTIFY
+                       isPhoneNumberConfirmedChanged)
     Q_PROPERTY(bool isEmailConfirmed READ isEmailConfirmed WRITE setIsEmailConfirmed NOTIFY isEmailConfirmedChanged)
     Q_PROPERTY(QUrl avatarUrl READ avatarUrl WRITE setAvatarUrl NOTIFY avatarUrlChanged)
 
@@ -86,6 +86,6 @@ private:
     bool m_isEmailConfirmed;
     QUrl m_avatarUrl;
 };
-}
+} // namespace vm
 
 #endif // VM_EDITPROFILESTATE_H

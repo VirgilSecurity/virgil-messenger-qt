@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_MESSAGE_STATUS_H
 #define VM_MESSAGE_STATUS_H
 
@@ -54,13 +53,12 @@ enum class MessageStatus {
 //  Return incoming status from a given string.
 //  Throws if correspond status is not found.
 //
-MessageStatus MessageStatusFromString(const QString& statusString);
+MessageStatus MessageStatusFromString(const QString &statusString);
 
 //
 //  Return string from a given incoming status.
 //
 QString MessageStatusToString(MessageStatus status);
-
 
 } // namespace vm
 

@@ -40,8 +40,7 @@
 #include "CloudFilesUpdate.h"
 #include "UploadFileOperation.h"
 
-namespace vm
-{
+namespace vm {
 class CloudFileOperation;
 
 class UploadCloudFileOperation : public UploadFileOperation
@@ -57,7 +56,8 @@ public:
 private:
     void cleanup() override;
 
-    void onFileCreated(CloudFileRequestId requestId, const ModifiableCloudFileHandler &cloudFile, const QString &encryptedFilePath, const QUrl &putUrl);
+    void onFileCreated(CloudFileRequestId requestId, const ModifiableCloudFileHandler &cloudFile,
+                       const QString &encryptedFilePath, const QUrl &putUrl);
     void onCreateCloudFileErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
     void onProgressChanged(quint64 bytesLoaded, quint64 bytesTotal);
     void onUploaded();
@@ -74,6 +74,6 @@ private:
     ModifiableCloudFileHandler m_file;
     QString m_sourceFilePath;
 };
-}
+} // namespace vm
 
 #endif // VM_UPLOAD_CLOUD_FILE_OPERATION_H

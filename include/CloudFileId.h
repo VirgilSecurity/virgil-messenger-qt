@@ -40,8 +40,7 @@
 
 #include <variant>
 
-namespace vm
-{
+namespace vm {
 class CloudFileId
 {
 public:
@@ -65,7 +64,6 @@ bool operator>(const vm::CloudFileId &lhs, const vm::CloudFileId &rhs);
 bool operator==(const vm::CloudFileId &lhs, const vm::CloudFileId &rhs);
 bool operator!=(const vm::CloudFileId &lhs, const vm::CloudFileId &rhs);
 
-}
-
+} // namespace vm
 
 #endif // VM_CLOUD_FILE_ID_H

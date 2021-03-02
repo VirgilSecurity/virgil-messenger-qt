@@ -37,7 +37,7 @@
 #include <QLoggingCategory>
 #include <QDomElement>
 
-const char* ns_last = "jabber:iq:last";
+const char *ns_last = "jabber:iq:last";
 
 Q_LOGGING_CATEGORY(lcLastActivity, "lastActivity");
 
@@ -80,12 +80,10 @@ void VSQLastActivityIq::parseElementFromChild(const QDomElement &element)
         } else {
             qCDebug(lcLastActivity) << "Time sincle last activity (sec):" << secondsStr;
         }
-    }
-    else {
+    } else {
         if (type() == QXmppIq::Type::Error) {
             qCWarning(lcLastActivity) << "Error: " << error().code() << error().text();
-        }
-        else {
+        } else {
             qCWarning(lcLastActivity) << "Invalid result type: " << type();
         }
     }

@@ -37,8 +37,7 @@
 
 #include <QState>
 
-namespace vm
-{
+namespace vm {
 class ChatsController;
 
 class ChatInfoState : public QState
@@ -56,6 +55,6 @@ private:
 
     ChatsController *m_chatsController;
 };
-}
+} // namespace vm
 
 #endif // VM_CHAT_INFO_STATE_H

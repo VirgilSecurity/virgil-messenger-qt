@@ -43,8 +43,7 @@
 #include <memory>
 #include <vector>
 
-namespace vm
-{
+namespace vm {
 class Contact
 {
 public:
@@ -105,6 +104,6 @@ private:
 
 using ContactHandler = std::shared_ptr<Contact>;
 using Contacts = std::vector<ContactHandler>;
-}
+} // namespace vm
 
 #endif // VM_CONTACT_H

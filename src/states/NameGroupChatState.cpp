@@ -39,8 +39,7 @@
 using namespace vm;
 
 NameGroupChatState::NameGroupChatState(ChatsController *chatsController, QState *parent)
-    : OperationState(parent)
-    , m_chatsController(chatsController)
+    : OperationState(parent), m_chatsController(chatsController)
 {
     connect(chatsController, &ChatsController::chatOpened, this, &NameGroupChatState::operationFinished);
     connect(chatsController, &ChatsController::errorOccurred, this, &NameGroupChatState::operationErrorOccurred);

@@ -59,10 +59,8 @@ constexpr const int k_groupMembersTableIndex = 4;
 constexpr const int k_groupsTableIndex = 5;
 constexpr const int k_messagesTableIndex = 6;
 
-
 Self::UserDatabase(const QDir &databaseDir, QObject *parent)
-    : Database(VERSION_DATABASE_SCHEME, parent)
-    , m_databaseDir(databaseDir)
+    : Database(VERSION_DATABASE_SCHEME, parent), m_databaseDir(databaseDir)
 {
     setMigration(std::make_unique<UserDatabaseMigration>());
 
@@ -117,19 +115,23 @@ ContactsTable *Self::contactsTable()
     return static_cast<ContactsTable *>(table(k_contactsTableIndex));
 }
 
-const GroupMembersTable *Self::groupMembersTable() const {
+const GroupMembersTable *Self::groupMembersTable() const
+{
     return static_cast<const GroupMembersTable *>(table(k_groupMembersTableIndex));
 }
 
-GroupMembersTable *Self::groupMembersTable() {
+GroupMembersTable *Self::groupMembersTable()
+{
     return static_cast<GroupMembersTable *>(table(k_groupMembersTableIndex));
 }
 
-const GroupsTable *Self::groupsTable() const {
+const GroupsTable *Self::groupsTable() const
+{
     return static_cast<const GroupsTable *>(table(k_groupsTableIndex));
 }
 
-GroupsTable *Self::groupsTable() {
+GroupsTable *Self::groupsTable()
+{
     return static_cast<GroupsTable *>(table(k_groupsTableIndex));
 }
 
@@ -190,15 +192,13 @@ void Self::onOpen(const QString &username)
     if (!DatabaseUtils::isValidName(username)) {
         qCCritical(lcDatabase) << "Invalid database id:" << username;
         emit errorOccurred(tr("Invalid database id"));
-    }
-    else {
+    } else {
         const QString fileName = QString("user-%1.sqlite3").arg(username);
         const QString filePath(m_databaseDir.filePath(fileName));
 
         if (Database::open(filePath, username + QLatin1String("-messenger"))) {
             emit opened();
-        }
-        else {
+        } else {
             emit errorOccurred(tr("Can not open database with users"));
         }
     }
@@ -220,7 +220,7 @@ void Self::onWriteMessage(const MessageHandler &message, qsizetype unreadCount)
     chatsTable()->updateLastMessage(message, unreadCount);
 
     if (message->isIncoming()) {
-        contactsTable()->updateContact(UsernameContactUpdate{message->senderId(), message->senderUsername()});
+        contactsTable()->updateContact(UsernameContactUpdate { message->senderId(), message->senderUsername() });
     }
 }
 
@@ -259,21 +259,20 @@ void Self::onWriteChatAndLastMessage(const ChatHandler &chat)
         //
         const auto message = chat->lastMessage();
 
-        if(std::holds_alternative<MessageContentGroupInvitation>(message->content())) {
+        if (std::holds_alternative<MessageContentGroupInvitation>(message->content())) {
             groupMembersTable()->updateGroup(
-                    GroupMemberAffiliationUpdate{GroupId(chat->id()), message->senderId(), GroupAffiliation::Owner});
+                    GroupMemberAffiliationUpdate { GroupId(chat->id()), message->senderId(), GroupAffiliation::Owner });
 
-            groupMembersTable()->updateGroup(
-                    GroupMemberAffiliationUpdate {GroupId(chat->id()), message->recipientId(), GroupAffiliation::None});
+            groupMembersTable()->updateGroup(GroupMemberAffiliationUpdate { GroupId(chat->id()), message->recipientId(),
+                                                                            GroupAffiliation::None });
 
         } else {
-            groupMembersTable()->updateGroup(
-                    GroupMemberAffiliationUpdate{GroupId(chat->id()), message->senderId(), GroupAffiliation::Member});
+            groupMembersTable()->updateGroup(GroupMemberAffiliationUpdate { GroupId(chat->id()), message->senderId(),
+                                                                            GroupAffiliation::Member });
 
-            groupMembersTable()->updateGroup(
-                    GroupMemberAffiliationUpdate {GroupId(chat->id()), message->recipientId(), GroupAffiliation::Member});
+            groupMembersTable()->updateGroup(GroupMemberAffiliationUpdate { GroupId(chat->id()), message->recipientId(),
+                                                                            GroupAffiliation::Member });
         }
-
     }
 
     //
@@ -293,7 +292,7 @@ void Self::onWriteChatAndLastMessage(const ChatHandler &chat)
     chatsTable()->updateLastMessage(message, chat->unreadMessageCount());
 
     if (message->isIncoming()) {
-        contactsTable()->updateContact(UsernameContactUpdate{message->senderId(), message->senderUsername()});
+        contactsTable()->updateContact(UsernameContactUpdate { message->senderId(), message->senderUsername() });
     }
 }
 
@@ -323,7 +322,7 @@ void Self::onDeleteGroupChatInvitation(const ChatId &chatId)
     messagesTable()->deleteGroupInvitationMessage(chatId);
 }
 
-void Self::onUpdateGroup(const GroupUpdate& groupUpdate)
+void Self::onUpdateGroup(const GroupUpdate &groupUpdate)
 {
     ScopedConnection connection(*this);
     ScopedTransaction transaction(*this);

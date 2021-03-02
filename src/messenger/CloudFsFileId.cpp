@@ -32,38 +32,39 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "CloudFsFileId.h"
-
 
 using namespace vm;
 using Self = CloudFsFileId;
 
+Self::CloudFsFileId(QString id) : m_id(std::move(id)) { }
 
-Self::CloudFsFileId(QString id) : m_id(std::move(id)) {
-
-}
-
-Self::operator QString() const {
+Self::operator QString() const
+{
     return m_id;
 }
 
-bool Self::isValid() const noexcept {
+bool Self::isValid() const noexcept
+{
     return !m_id.isEmpty();
 }
 
-bool vm::operator<(const Self& lhs, const Self& rhs) {
+bool vm::operator<(const Self &lhs, const Self &rhs)
+{
     return QString(lhs) < QString(rhs);
 }
 
-bool vm::operator>(const Self& lhs, const Self& rhs) {
+bool vm::operator>(const Self &lhs, const Self &rhs)
+{
     return QString(lhs) > QString(rhs);
 }
 
-bool vm::operator==(const Self& lhs, const Self& rhs) {
+bool vm::operator==(const Self &lhs, const Self &rhs)
+{
     return QString(lhs) == QString(rhs);
 }
 
-bool vm::operator!=(const Self& lhs, const Self& rhs) {
+bool vm::operator!=(const Self &lhs, const Self &rhs)
+{
     return QString(lhs) != QString(rhs);
 }

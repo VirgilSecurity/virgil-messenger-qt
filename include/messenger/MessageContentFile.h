@@ -32,7 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #ifndef VM_MESSAGE_CONTENT_FILE_H
 #define VM_MESSAGE_CONTENT_FILE_H
 
@@ -43,7 +42,8 @@ namespace vm {
 //
 //  Class that handles file as message content.
 //
-class MessageContentFile : public MessageContentAttachment  {
+class MessageContentFile : public MessageContentAttachment
+{
 
 public:
     using MessageContentAttachment::MessageContentAttachment;
@@ -51,12 +51,12 @@ public:
     //
     //  Apply file specific update.
     //
-    bool applyUpdate(const MessageUpdate& update) override;
+    bool applyUpdate(const MessageUpdate &update) override;
 
     //
     //  Create file message content from the given path.
     //
-    static std::optional<MessageContentFile> createFromLocalFile(const QUrl& localUrl, QString &errorString);
+    static std::optional<MessageContentFile> createFromLocalFile(const QUrl &localUrl, QString &errorString);
 };
 } // namespace vm
 

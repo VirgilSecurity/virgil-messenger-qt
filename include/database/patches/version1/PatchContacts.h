@@ -37,7 +37,8 @@
 
 #include "database/core/Patch.h"
 
-namespace vm { namespace version1 {
+namespace vm {
+namespace version1 {
 
 class PatchContacts : public Patch
 {
@@ -45,7 +46,6 @@ public:
     PatchContacts();
 
     bool apply(Database *database) override;
-
 };
 } // namespace version1
 } // namespace vm

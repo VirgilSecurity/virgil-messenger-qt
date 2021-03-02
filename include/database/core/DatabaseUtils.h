@@ -44,9 +44,7 @@
 #include <utility>
 #include <optional>
 
-
-namespace vm
-{
+namespace vm {
 class Database;
 
 class DatabaseUtils
@@ -59,7 +57,8 @@ public:
 
     static bool readExecQueries(Database *database, const QString &queryId);
 
-    static std::optional<QSqlQuery> readExecQuery(Database *database, const QString &queryId, const BindValues &values = {});
+    static std::optional<QSqlQuery> readExecQuery(Database *database, const QString &queryId,
+                                                  const BindValues &values = {});
 
     static ModifiableMessageHandler readMessage(const QSqlQuery &query, const QString &idColumn = {});
     static ModifiableCloudFileHandler readCloudFile(const QSqlQuery &query);
@@ -69,7 +68,7 @@ public:
     static BindValues createDownloadedCloudFileBindings(const CloudFileHandler &cloudFile, const QString &fingerprint);
 
 private:
-    static bool readMessageContentAttachment(const QSqlQuery &query, MessageContentAttachment& attachment);
+    static bool readMessageContentAttachment(const QSqlQuery &query, MessageContentAttachment &attachment);
     static MessageContent readMessageContent(const QSqlQuery &query);
     static MessageContent readMessageContentFile(const QSqlQuery &query);
     static MessageContent readMessageContentPicture(const QSqlQuery &query);
@@ -81,6 +80,6 @@ private:
     static bool hasListType(const BindValue &bindValue);
     static QString replaceListBindValue(const QString &queryText, const BindValue &bindValue);
 };
-}
+} // namespace vm
 
 #endif // VM_DATABASEUTILS_H

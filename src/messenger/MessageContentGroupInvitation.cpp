@@ -32,40 +32,37 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-
 #include "MessageContentGroupInvitation.h"
-
 
 using namespace vm;
 using Self = MessageContentGroupInvitation;
 
-
 constexpr static const auto kJsonKey_Tile = "title";
 constexpr static const auto kJsonKey_HelloText = "greetings";
 
-
 Self::MessageContentGroupInvitation(QString title, QString helloText)
-        : m_title(std::move(title)), m_helloText(std::move(helloText)) {
+    : m_title(std::move(title)), m_helloText(std::move(helloText))
+{
 }
 
-
-QString Self::title() const {
+QString Self::title() const
+{
     return m_title;
 }
 
-
-QString Self::helloText() const {
+QString Self::helloText() const
+{
     return m_helloText;
 }
 
-
-void Self::writeJson(QJsonObject& json) const {
+void Self::writeJson(QJsonObject &json) const
+{
     json[kJsonKey_Tile] = m_title;
     json[kJsonKey_HelloText] = m_helloText;
 }
 
-
-bool Self::readJson(const QJsonObject& json) {
+bool Self::readJson(const QJsonObject &json)
+{
     auto titleValue = json[kJsonKey_Tile];
     auto helloTextValue = json[kJsonKey_HelloText];
 

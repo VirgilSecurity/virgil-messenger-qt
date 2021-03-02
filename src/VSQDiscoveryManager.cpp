@@ -42,17 +42,14 @@
 Q_LOGGING_CATEGORY(lcDiscoveryManager, "discovery-manager");
 
 VSQDiscoveryManager::VSQDiscoveryManager(QXmppClient *client, QObject *parent)
-    : QObject(parent)
-    , m_client(client)
-    , m_manager(client->findExtension<QXmppDiscoveryManager>())
+    : QObject(parent), m_client(client), m_manager(client->findExtension<QXmppDiscoveryManager>())
 {
     connect(client, &QXmppClient::connected, this, &VSQDiscoveryManager::onClientConnected);
     connect(m_manager, &QXmppDiscoveryManager::infoReceived, this, &VSQDiscoveryManager::onInfoReceived);
     connect(m_manager, &QXmppDiscoveryManager::itemsReceived, this, &VSQDiscoveryManager::onItemsReceived);
 }
 
-VSQDiscoveryManager::~VSQDiscoveryManager()
-{}
+VSQDiscoveryManager::~VSQDiscoveryManager() { }
 
 void VSQDiscoveryManager::onClientConnected()
 {
@@ -83,8 +80,7 @@ void VSQDiscoveryManager::onInfoReceived(const QXmppDiscoveryIq &info)
 
         if (m_client->sendPacket(carbonsIq)) {
             qCDebug(lcDiscoveryManager) << "Carbon manager was enabled";
-        }
-        else {
+        } else {
             qCDebug(lcDiscoveryManager) << "Carbon manager was not enabled (failed to send packet)";
         }
     }

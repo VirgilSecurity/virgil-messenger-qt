@@ -54,7 +54,7 @@ public:
     //
     //  Should be called on the same thread where QXmppClient was created.
     //
-    void requestAll(const QString& roomJid);
+    void requestAll(const QString &roomJid);
 
     //
     //  Handle IQs with room participants.
@@ -65,12 +65,13 @@ Q_SIGNALS:
     //
     //  This signal is emitted when a room participant info received.
     //
-    void participantReceived(const QString& roomJid, const QString& jid, QXmppMucItem::Affiliation affiliation);
+    void participantReceived(const QString &roomJid, const QString &jid, QXmppMucItem::Affiliation affiliation);
 
     //
     //  This signal is emitted when a room participant affiliation was changed.
     //
-    void participantAffiliationChanged(const QString& roomJid, const QString& jid, QXmppMucItem::Affiliation affiliation);
+    void participantAffiliationChanged(const QString &roomJid, const QString &jid,
+                                       QXmppMucItem::Affiliation affiliation);
 
 protected:
     void setClient(QXmppClient *client) override;
@@ -79,6 +80,6 @@ private:
     QPointer<QXmppClient> m_client;
 };
 
-} // vm
+} // namespace vm
 
 #endif // VM_XMPP_ROOM_PARTICIPANTS_MANAGER_H

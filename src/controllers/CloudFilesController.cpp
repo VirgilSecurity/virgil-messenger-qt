@@ -50,13 +50,13 @@
 using namespace vm;
 using Self = CloudFilesController;
 
-Self::CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase, CloudFileSystem *cloudFileSystem,
-                           QObject *parent)
-    : QObject(parent)
-    , m_settings(settings)
-    , m_models(models)
-    , m_userDatabase(userDatabase)
-    , m_cloudFileSystem(cloudFileSystem)
+Self::CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase,
+                           CloudFileSystem *cloudFileSystem, QObject *parent)
+    : QObject(parent),
+      m_settings(settings),
+      m_models(models),
+      m_userDatabase(userDatabase),
+      m_cloudFileSystem(cloudFileSystem)
 {
     qRegisterMetaType<CloudFilesUpdate>("CloudFilesUpdate");
 
@@ -72,11 +72,11 @@ Self::CloudFilesController(const Settings *settings, Models *models, UserDatabas
     // Queue connections
     auto queue = models->cloudFilesQueue();
     connect(queue, &CloudFilesQueue::updateCloudFiles, this, &Self::updateCloudFiles);
-    connect(models->cloudFilesTransfers(), &CloudFilesTransfersModel::interruptByCloudFileId, queue, &CloudFilesQueue::interruptFileOperation);
+    connect(models->cloudFilesTransfers(), &CloudFilesTransfersModel::interruptByCloudFileId, queue,
+            &CloudFilesQueue::interruptFileOperation);
     // Cloud file system connections
-    connect(cloudFileSystem, &CloudFileSystem::downloadsDirChanged, [rootFolder](const QDir &downloadsDir) {
-        rootFolder->setLocalPath(downloadsDir.absolutePath());
-    });
+    connect(cloudFileSystem, &CloudFileSystem::downloadsDirChanged,
+            [rootFolder](const QDir &downloadsDir) { rootFolder->setLocalPath(downloadsDir.absolutePath()); });
 
     // Setup list updating
     auto updatingListener = new CloudListUpdatingCounter(queue);
@@ -107,13 +107,11 @@ void Self::openFile(const QVariant &proxyRow)
     bool needDownload = false;
     if (!FileUtils::fileExists(localPath)) {
         needDownload = true;
-    }
-    else if (const auto fingerprint = FileUtils::calculateFingerprint(localPath); fingerprint.isEmpty()) {
+    } else if (const auto fingerprint = FileUtils::calculateFingerprint(localPath); fingerprint.isEmpty()) {
         qCritical(lcController) << "Failed to calculate fingerprint for file:" << localPath;
         emit notificationCreated(tr("Attachment file is broken"), true);
         return;
-    }
-    else if (fingerprint != cloudFile->fingerprint()) {
+    } else if (fingerprint != cloudFile->fingerprint()) {
         qWarning(lcController) << "Fingerprint mismatch, downloading cloud file";
         emit notificationCreated(tr("Downloading cloud file..."), false);
         needDownload = true;
@@ -121,8 +119,7 @@ void Self::openFile(const QVariant &proxyRow)
 
     if (!needDownload) {
         FileUtils::openUrl(FileUtils::localFileToUrl(localPath));
-    }
-    else {
+    } else {
         m_models->cloudFilesQueue()->pushDownloadFile(cloudFile, m_hierarchy.back(), [this]() {
             emit notificationCreated(tr("Cloud file was downloaded"), false);
         });
@@ -215,14 +212,12 @@ void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)
                 emit isRootChanged(isRoot());
             }
         }
-    }
-    else if (auto upd = std::get_if<CloudListCloudFolderUpdate>(&update)) {
+    } else if (auto upd = std::get_if<CloudListCloudFolderUpdate>(&update)) {
         isRelevantUpdate = upd->parentFolder->id() == m_requestedHierarchy.back()->id();
 
         // Update folder in hierarchy
-        const auto it = std::find_if(m_hierarchy.begin(), m_hierarchy.end(), [&upd](auto folder) {
-            return folder->id() == upd->parentFolder->id();
-        });
+        const auto it = std::find_if(m_hierarchy.begin(), m_hierarchy.end(),
+                                     [&upd](auto folder) { return folder->id() == upd->parentFolder->id(); });
         if (it != m_hierarchy.end()) {
             (*it)->update(*upd->parentFolder, CloudFileUpdateSource::ListedParent);
         }

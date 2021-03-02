@@ -39,8 +39,7 @@
 
 class Settings;
 
-namespace vm
-{
+namespace vm {
 class MessageOperation;
 
 class CreateAttachmentPreviewOperation : public CreateThumbnailOperation
@@ -48,8 +47,9 @@ class CreateAttachmentPreviewOperation : public CreateThumbnailOperation
     Q_OBJECT
 
 public:
-    CreateAttachmentPreviewOperation(MessageOperation *parent, const Settings *settings, const QString &sourcePath, const QString &destPath);
+    CreateAttachmentPreviewOperation(MessageOperation *parent, const Settings *settings, const QString &sourcePath,
+                                     const QString &destPath);
 };
-}
+} // namespace vm
 
 #endif // VM_CREATEATTACHMENTPREVIEWOPERATION_H

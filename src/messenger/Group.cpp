@@ -37,10 +37,9 @@
 using namespace vm;
 
 Group::Group(GroupId id, QString name, Contacts contacts)
-    : m_id(std::move(id))
-    , m_name(std::move(name))
-    , m_contacts(std::move(contacts))
-{}
+    : m_id(std::move(id)), m_name(std::move(name)), m_contacts(std::move(contacts))
+{
+}
 
 GroupId Group::id() const
 {
@@ -52,6 +51,7 @@ QString Group::name() const
     return m_name;
 }
 
-Contacts Group::contacts() const {
+Contacts Group::contacts() const
+{
     return m_contacts;
 }
