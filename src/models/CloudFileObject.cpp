@@ -79,12 +79,12 @@ QString Self::name() const
 
 bool Self::isFolder() const
 {
-    return m_cloudFile ? m_cloudFile->isFolder() : false;
+    return m_cloudFile && m_cloudFile->isFolder();
 }
 
 bool Self::isShared() const
 {
-    return m_cloudFile->isShared();
+    return m_cloudFile && m_cloudFile->isShared();
 }
 
 void Self::setMembers(const CloudFileMembers &members)

@@ -241,6 +241,11 @@ bool Self::isRoot() const
     return m_hierarchy.size() == 1;
 }
 
+bool Self::isShared() const
+{
+    return m_hierarchy.back()->isShared();
+}
+
 ModifiableCloudFileHandler Self::rootFolder() const
 {
     return m_hierarchy.front();
@@ -255,13 +260,17 @@ void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)
         // Update properties
         if (isRelevantUpdate) {
             const auto oldDisplayPath = displayPath();
-            const auto oldIsRoot = isRoot();
+            const auto wasRoot = isRoot();
+            const auto wasShared = isShared();
             m_hierarchy = m_requestedHierarchy;
             if (displayPath() != oldDisplayPath) {
                 emit displayPathChanged(displayPath());
             }
-            if (isRoot() != oldIsRoot) {
+            if (isRoot() != wasRoot) {
                 emit isRootChanged(isRoot());
+            }
+            if (isShared() != wasShared) {
+                emit isSharedChanged(isShared());
             }
         }
     } else if (auto upd = std::get_if<CloudListCloudFolderUpdate>(&update)) {
