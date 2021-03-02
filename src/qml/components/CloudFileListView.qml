@@ -37,6 +37,16 @@ ModelListView {
             Image {
                 source: "../resources/icons/%1.png".arg(model.isFolder ? "Folder-Big" : "File-Big")
                 anchors.centerIn: parent
+
+                Image {
+                    source: "../resources/icons/Plus.png"
+                    fillMode: Image.PreserveAspectFit
+                    width: 0.4 * parent.iconSize
+                    height: width
+                    anchors.centerIn: parent
+                    anchors.verticalCenterOffset: 2
+                    visible: model.isShared
+                }
             }
         }
 

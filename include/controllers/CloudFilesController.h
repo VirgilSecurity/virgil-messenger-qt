@@ -54,6 +54,7 @@ class CloudFilesController : public QObject
     Q_OBJECT
     Q_PROPERTY(QString displayPath READ displayPath NOTIFY displayPathChanged)
     Q_PROPERTY(bool isRoot READ isRoot NOTIFY isRootChanged)
+    Q_PROPERTY(bool isShared READ isShared NOTIFY isSharedChanged)
     Q_PROPERTY(bool isListUpdating MEMBER m_isListUpdating NOTIFY isListUpdatingChanged)
     Q_PROPERTY(CloudFileObject *current MEMBER m_cloudFileObject CONSTANT)
 
@@ -86,6 +87,7 @@ signals:
 
     void displayPathChanged(const QString &path);
     void isRootChanged(bool isRoot);
+    void isSharedChanged(bool isShared);
     void isListUpdatingChanged(bool isUpdating);
 
 private:
@@ -95,6 +97,7 @@ private:
 
     QString displayPath() const;
     bool isRoot() const;
+    bool isShared() const;
     ModifiableCloudFileHandler rootFolder() const;
 
     void onUpdateCloudFiles(const CloudFilesUpdate &update);

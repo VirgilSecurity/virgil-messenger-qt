@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2021 Virgil Security, Inc.
+//  Copyright (C) 2015-2020 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,30 +32,35 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CLOUD_FS_FOLDER_H
-#define VM_CLOUD_FS_FOLDER_H
+#ifndef VM_CLOUD_FS_SHARED_GROUP_ID_H
+#define VM_CLOUD_FS_SHARED_GROUP_ID_H
 
-#include "CloudFsFolderInfo.h"
-#include "CloudFsFileInfo.h"
-
-#include <QByteArray>
-
-#include <list>
+#include <QString>
 
 namespace vm {
 //
-//  Handles folder entries from the CLoud FS.
+//  This class just wraps QString but is used for a strong type checking.
 //
-struct CloudFsFolder
+class CloudFsSharedGroupId
 {
-    CloudFsFolderInfo info;
-    QByteArray folderEncryptedKey;
-    QByteArray folderPublicKey;
-    std::list<CloudFsFolderInfo> folders;
-    std::list<CloudFsFileInfo> files;
+public:
+    explicit CloudFsSharedGroupId(QString id = {});
 
-    [[nodiscard]] bool isShared() const { return info.sharedGroupId.isValid(); }
+    operator QString() const;
+
+    bool isValid() const noexcept;
+
+    static CloudFsSharedGroupId root();
+
+private:
+    QString m_id;
 };
+
+bool operator<(const CloudFsSharedGroupId &lhs, const CloudFsSharedGroupId &rhs);
+bool operator>(const CloudFsSharedGroupId &lhs, const CloudFsSharedGroupId &rhs);
+bool operator==(const CloudFsSharedGroupId &lhs, const CloudFsSharedGroupId &rhs);
+bool operator!=(const CloudFsSharedGroupId &lhs, const CloudFsSharedGroupId &rhs);
+
 } // namespace vm
 
-#endif // VM_CLOUD_FS_FOLDER_H
+#endif // VM_CLOUD_FS_SHARED_GROUP_ID_H

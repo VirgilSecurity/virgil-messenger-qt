@@ -32,30 +32,45 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CLOUD_FS_FOLDER_H
-#define VM_CLOUD_FS_FOLDER_H
+#include "CloudFsSharedGroupId.h"
 
-#include "CloudFsFolderInfo.h"
-#include "CloudFsFileInfo.h"
+using namespace vm;
+using Self = CloudFsSharedGroupId;
 
-#include <QByteArray>
+Self::CloudFsSharedGroupId(QString id) : m_id(std::move(id)) { }
 
-#include <list>
-
-namespace vm {
-//
-//  Handles folder entries from the CLoud FS.
-//
-struct CloudFsFolder
+Self::operator QString() const
 {
-    CloudFsFolderInfo info;
-    QByteArray folderEncryptedKey;
-    QByteArray folderPublicKey;
-    std::list<CloudFsFolderInfo> folders;
-    std::list<CloudFsFileInfo> files;
+    return m_id;
+}
 
-    [[nodiscard]] bool isShared() const { return info.sharedGroupId.isValid(); }
-};
-} // namespace vm
+bool Self::isValid() const noexcept
+{
+    return !m_id.isEmpty();
+}
 
-#endif // VM_CLOUD_FS_FOLDER_H
+CloudFsSharedGroupId Self::root()
+{
+    static CloudFsSharedGroupId id("");
+    return id;
+}
+
+bool vm::operator<(const Self &lhs, const Self &rhs)
+{
+    return QString(lhs) < QString(rhs);
+}
+
+bool vm::operator>(const Self &lhs, const Self &rhs)
+{
+    return QString(lhs) > QString(rhs);
+}
+
+bool vm::operator==(const Self &lhs, const Self &rhs)
+{
+    return QString(lhs) == QString(rhs);
+}
+
+bool vm::operator!=(const Self &lhs, const Self &rhs)
+{
+    return QString(lhs) != QString(rhs);
+}

@@ -170,9 +170,24 @@ void CloudFile::setFingerprint(const QString &fingerprint)
     m_fingerprint = fingerprint;
 }
 
+CloudFsSharedGroupId CloudFile::sharedGroupId() const
+{
+    return m_sharedGroupId;
+}
+
+void CloudFile::setSharedGroupId(const CloudFsSharedGroupId &sharedGroupId)
+{
+    m_sharedGroupId = sharedGroupId;
+}
+
 bool CloudFile::isRoot() const
 {
     return m_isFolder && m_id == CloudFileId::root();
+}
+
+bool CloudFile::isShared() const
+{
+    return m_sharedGroupId.isValid();
 }
 
 void CloudFile::update(const CloudFile &file, const CloudFileUpdateSource source)
@@ -194,6 +209,7 @@ void CloudFile::update(const CloudFile &file, const CloudFileUpdateSource source
         if (isFolder()) {
             setEncryptedKey(file.encryptedKey());
             setPublicKey(file.publicKey());
+            setSharedGroupId(file.sharedGroupId());
         }
     } else if (source == CloudFileUpdateSource::ListedChild) {
         setName(file.name());
@@ -205,6 +221,7 @@ void CloudFile::update(const CloudFile &file, const CloudFileUpdateSource source
             if (file.updatedAt() > updatedAt()) {
                 setEncryptedKey(QByteArray());
                 setPublicKey(QByteArray());
+                setSharedGroupId(CloudFsSharedGroupId());
             }
         } else {
             setType(file.type());

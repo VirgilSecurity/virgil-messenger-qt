@@ -120,7 +120,8 @@ void DownloadCloudFileOperation::onDownloaded()
         return;
     }
 
-    const auto decrypted = m_parent->cloudFileSystem()->decryptFile(tempFilePath(), m_encryptionKey, m_file);
+    const auto decrypted =
+            m_parent->cloudFileSystem()->decryptFile(tempFilePath(), m_encryptionKey, m_file, m_parentFolder);
     if (!decrypted) {
         failAndNotify(tr("File decryption failed"));
         return;

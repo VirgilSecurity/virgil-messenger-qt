@@ -66,7 +66,8 @@ public:
     CloudFileRequestId createFolder(const QString &name, const CloudFileHandler &parentFolder,
                                     const CloudFileMembers &members);
     CloudFileRequestId getDownloadInfo(const CloudFileHandler &file);
-    bool decryptFile(const QString &sourcePath, const QByteArray &encryptionKey, const CloudFileHandler &file);
+    bool decryptFile(const QString &sourcePath, const QByteArray &encryptionKey, const CloudFileHandler &file,
+                     const CloudFileHandler &parentFolder);
     CloudFileRequestId deleteFiles(const CloudFiles &files);
 
 signals:
@@ -97,6 +98,8 @@ private:
                                                     const QString &localPath) const;
     ModifiableCloudFileHandler createFileFromInfo(const CloudFsFileInfo &info, const CloudFileId &parentId,
                                                   const QString &localPath) const;
+    CloudFsFolder createFsFolder(const CloudFileHandler &folder) const;
+    CloudFsFolderInfo createFsFolderInfo(const CloudFileHandler &folder) const;
 
     QPointer<CoreMessenger> m_coreMessenger;
     std::optional<CoreMessengerCloudFs> m_coreFs;

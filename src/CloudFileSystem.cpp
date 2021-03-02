@@ -99,9 +99,7 @@ CloudFileRequestId CloudFileSystem::createFile(const QString &filePath, const Cl
     const auto parentFolderId = parentFolder->id().coreFolderId();
     const auto tempDir = m_messenger->settings()->cloudFilesCacheDir();
     const auto encFilePath = tempDir.filePath(QLatin1String("upload-") + Utils::createUuid());
-    auto future = parentFolder->isRoot()
-            ? m_coreFs->createFile(filePath, encFilePath)
-            : m_coreFs->createFile(filePath, encFilePath, parentFolderId, parentFolder->publicKey());
+    auto future = m_coreFs->createFile(filePath, encFilePath, parentFolderId, parentFolder->publicKey());
     FutureWorker::run(future, [this, filePath, encFilePath, parentFolder, requestId](auto result) {
         if (std::holds_alternative<CoreMessengerStatus>(result)) {
             emit createFileErrorOccurred(requestId, tr("Failed to create file"));
@@ -119,12 +117,10 @@ CloudFileRequestId CloudFileSystem::createFile(const QString &filePath, const Cl
 CloudFileRequestId CloudFileSystem::createFolder(const QString &name, const CloudFileHandler &parentFolder,
                                                  const CloudFileMembers &members)
 {
-    Q_UNUSED(members) // TODO(fpohtmeh): create shared folder if members specified
-
     const auto requestId = ++m_requestId;
     const auto parentFolderId = parentFolder->id().coreFolderId();
-    auto future = parentFolder->isRoot() ? m_coreFs->createFolder(name)
-                                         : m_coreFs->createFolder(name, parentFolderId, parentFolder->publicKey());
+    auto future = m_coreFs->createFolder(name, CloudFileMembersToContacts(members), parentFolderId,
+                                         parentFolder->publicKey());
     FutureWorker::run(future, [this, parentFolder, name, requestId](auto result) {
         if (std::holds_alternative<CoreMessengerStatus>(result)) {
             emit createFolderErrorOccured(requestId, tr("Failed to create folder"));
@@ -155,9 +151,10 @@ CloudFileRequestId CloudFileSystem::getDownloadInfo(const CloudFileHandler &file
 }
 
 bool CloudFileSystem::decryptFile(const QString &sourcePath, const QByteArray &encryptionKey,
-                                  const CloudFileHandler &file)
+                                  const CloudFileHandler &file, const CloudFileHandler &parentFolder)
 {
-    const auto status = m_coreFs->decryptFile(sourcePath, file->localPath(), encryptionKey, m_messenger->currentUser());
+    const auto status = m_coreFs->decryptFile(sourcePath, file->localPath(), encryptionKey, m_messenger->currentUser(),
+                                              createFsFolder(parentFolder));
     return status == CoreMessengerStatus::Success;
 }
 
@@ -204,6 +201,7 @@ ModifiableCloudFileHandler CloudFileSystem::createFolderFromInfo(const CloudFsFo
     folder->setUpdatedAt(info.updatedAt);
     folder->setUpdatedBy(info.updatedBy);
     folder->setLocalPath(localPath);
+    folder->setSharedGroupId(info.sharedGroupId);
     return folder;
 }
 
@@ -221,4 +219,25 @@ ModifiableCloudFileHandler CloudFileSystem::createFileFromInfo(const CloudFsFile
     file->setUpdatedBy(info.updatedBy);
     file->setLocalPath(localPath);
     return file;
+}
+
+CloudFsFolder CloudFileSystem::createFsFolder(const CloudFileHandler &folder) const
+{
+    CloudFsFolder fsFolder;
+    fsFolder.info = createFsFolderInfo(folder);
+    fsFolder.folderEncryptedKey = folder->encryptedKey();
+    fsFolder.folderPublicKey = folder->publicKey();
+    return fsFolder;
+}
+
+CloudFsFolderInfo CloudFileSystem::createFsFolderInfo(const CloudFileHandler &folder) const
+{
+    CloudFsFolderInfo info;
+    info.id = folder->id().coreFolderId();
+    info.name = folder->name();
+    info.createdAt = folder->createdAt();
+    info.updatedAt = folder->updatedAt();
+    info.updatedBy = folder->updatedBy();
+    info.sharedGroupId = folder->sharedGroupId();
+    return info;
 }

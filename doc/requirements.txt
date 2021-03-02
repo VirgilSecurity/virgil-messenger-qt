@@ -12,6 +12,11 @@ Android:
 
     export ANDROID_SDK=/opt/android/sdk
 
+3. Aply path for QT(5.15.2).
+
+    patch -d ${QTDIR}/../android/lib/cmake/Qt5Core < Qt5AndroidSupport.patch
+
+
 3. Android NDK
 4. Set system enviroment variable for Android NDK:
 
