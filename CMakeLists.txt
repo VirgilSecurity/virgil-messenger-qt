@@ -48,7 +48,7 @@ include(customers)
 # Project version
 # ---------------------------------------------------------------------------
 set(VS_TARGET_VERSION "3.8.0")
-set(VS_CORE_VERSION "0.2.1.52")
+set(VS_CORE_VERSION "0.2.1.55")
 set(VERSION_DATABASE_SCHEME "1")
 
 # ---------------------------------------------------------------------------
@@ -433,6 +433,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolderId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolderInfo.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsNewFile.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsSharedGroupId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CommKitBridge.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Contact.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/ContactUpdate.h
@@ -647,6 +648,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolderId.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolderInfo.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsNewFile.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsSharedGroupId.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CoreMessengerCloudFs.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Group.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupAffiliation.cpp

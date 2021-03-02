@@ -48,6 +48,7 @@
 #include <QObject>
 #include <QFuture>
 #include <QFileInfo>
+#include <QPointer>
 
 #include <memory>
 #include <variant>
@@ -59,6 +60,8 @@ struct vssq_messenger_cloud_fs_t;
 struct vscf_impl_t;
 
 namespace vm {
+
+class CoreMessenger;
 
 //
 //  Sync files and folders with the Cloud FS.
@@ -85,7 +88,8 @@ public:
     //
     //  Constructor handles C context from the CommKit.
     //
-    CoreMessengerCloudFs(vssq_messenger_cloud_fs_ptr_t cloudFs, vscf_impl_ptr_t random);
+    CoreMessengerCloudFs(vssq_messenger_cloud_fs_ptr_t cloudFs, vscf_impl_ptr_t random,
+                         const CoreMessenger *coreMessenger);
 
     //
     //  Encrypt given file and then request remote server for it's uploading URL.
@@ -123,6 +127,13 @@ public:
                                              const QByteArray &parentFolderPublicKey);
 
     //
+    //  Create a new shared folder in the root folder.
+    //
+    FutureResult<CloudFsFolder> createSharedFolder(const QString &folderName, const Users &users,
+                                                   const CloudFsFolderId &parentFolderId,
+                                                   const QByteArray &parentFolderPublicKey);
+
+    //
     //  Delete folder with a given identifier.
     //
     FutureStatus deleteFolder(const CloudFsFolderId &folderId);
@@ -136,14 +147,8 @@ public:
     //  Decrypt given file owned by me.
     //
     CoreMessengerStatus decryptFile(const QString &sourceFilePath, const QString &destFilePath,
-                                    const QByteArray &encryptedFileKey, const UserHandler &sender);
-
-    //
-    //  Decrypt given file from a shared folder.
-    //
-    CoreMessengerStatus decryptFile(const QString &sourceFilePath, const QString &destFilePath,
-                                    const QByteArray &fileEncryptedKey, const CloudFsFolderId &parentFolderId,
-                                    const QByteArray &parentFolderEncryptedKey, const UserHandler &sender);
+                                    const QByteArray &encryptedFileKey, const UserHandler &sender,
+                                    const CloudFsFolder &parentFolder);
 
 private:
     //
@@ -152,15 +157,15 @@ private:
     Result<QByteArray> encryptFile(const QString &sourceFilePath, const QString &destFilePath);
 
     //
-    //  Encrypt file decryption key for given participants.
+    //  Decrypt file/folder key by current user key and verify it's issuer signature.
     //
-    Result<QByteArray> encryptKey(const QByteArray &fileKey, const CloudFsFolderId &parentFolderId,
-                                  const QByteArray &parentFolderPublicKey) const;
+    Result<QByteArray> decryptKey(const QByteArray &encryptedKey, const UserHandler &issuer) const;
 
     //
     //  Decrypt file decryption key and check it's owners signature.
     //
-    Result<QByteArray> decryptKey(const QByteArray &fileEncryptedKey, const UserHandler &sender) const;
+    Result<QByteArray> decryptFileKey(const QByteArray &fileEncryptedKey, const UserHandler &sender,
+                                      const CloudFsFolder &parentFolder) const;
 
     //
     //  Import given public key to the internal crypto representation.
@@ -181,6 +186,7 @@ private:
 private:
     vssq_messenger_cloud_fs_ptr_t m_cloudFs;
     vscf_impl_ptr_t m_random;
+    QPointer<const CoreMessenger> m_coreMessenger;
 };
 } // namespace vm
 
