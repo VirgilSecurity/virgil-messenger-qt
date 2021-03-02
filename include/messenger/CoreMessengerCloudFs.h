@@ -93,12 +93,6 @@ public:
 
     //
     //  Encrypt given file and then request remote server for it's uploading URL.
-    //  Note, file created in the root folder.
-    //
-    FutureResult<CloudFsNewFile> createFile(const QString &sourceFilePath, const QString &destFilePath);
-
-    //
-    //  Encrypt given file and then request remote server for it's uploading URL.
     //  Note, file created in given folder.
     //
     FutureResult<CloudFsNewFile> createFile(const QString &sourceFilePath, const QString &destFilePath,
@@ -116,22 +110,12 @@ public:
     FutureResult<CloudFsFileDownloadInfo> getFileDownloadInfo(const CloudFsFileId &fileId) const;
 
     //
-    //  Create a new folder in the root folder.
-    //
-    FutureResult<CloudFsFolder> createFolder(const QString &folderName);
-
-    //
     //  Create a new folder in the given folder.
+    //  Note, folder is shared if users are specified.
     //
-    FutureResult<CloudFsFolder> createFolder(const QString &folderName, const CloudFsFolderId &parentFolderId,
+    FutureResult<CloudFsFolder> createFolder(const QString &folderName, const Users &users,
+                                             const CloudFsFolderId &parentFolderId,
                                              const QByteArray &parentFolderPublicKey);
-
-    //
-    //  Create a new shared folder in the root folder.
-    //
-    FutureResult<CloudFsFolder> createSharedFolder(const QString &folderName, const Users &users,
-                                                   const CloudFsFolderId &parentFolderId,
-                                                   const QByteArray &parentFolderPublicKey);
 
     //
     //  Delete folder with a given identifier.

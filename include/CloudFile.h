@@ -79,6 +79,7 @@ public:
     void setSharedGroupId(const CloudFsSharedGroupId &sharedGroupId);
 
     bool isRoot() const;
+    bool isShared() const;
 
     void update(const CloudFile &file, CloudFileUpdateSource source);
 

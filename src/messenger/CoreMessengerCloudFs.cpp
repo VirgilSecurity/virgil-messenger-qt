@@ -162,12 +162,6 @@ Self::CoreMessengerCloudFs(vssq_messenger_cloud_fs_ptr_t cloudFs, vscf_impl_ptr_
 {
 }
 
-Self::FutureResult<CloudFsNewFile> Self::createFile(const QString &sourceFilePath, const QString &destFilePath)
-{
-
-    return createFile(sourceFilePath, destFilePath, CloudFsFolderId(), QByteArray());
-}
-
 Self::FutureResult<CloudFsNewFile> Self::createFile(const QString &sourceFilePath, const QString &destFilePath,
                                                     const CloudFsFolderId &parentFolderId,
                                                     const QByteArray &parentFolderPublicKey)
@@ -274,29 +268,39 @@ Self::FutureResult<CloudFsFileDownloadInfo> Self::getFileDownloadInfo(const Clou
     });
 }
 
-Self::FutureResult<CloudFsFolder> Self::createFolder(const QString &folderName)
-{
-
-    return createFolder(folderName, CloudFsFolderId(), QByteArray());
-}
-
-Self::FutureResult<CloudFsFolder> Self::createFolder(const QString &folderName, const CloudFsFolderId &parentFolderId,
+Self::FutureResult<CloudFsFolder> Self::createFolder(const QString &folderName, const Users &users,
+                                                     const CloudFsFolderId &parentFolderId,
                                                      const QByteArray &parentFolderPublicKey)
 {
-
-    return QtConcurrent::run([this, folderName, parentFolderId, parentFolderPublicKey]() -> Result<CloudFsFolder> {
+    return QtConcurrent::run([this, folderName, users, parentFolderId,
+                              parentFolderPublicKey]() -> Result<CloudFsFolder> {
         //
         //  Request folder creation.
         //
-        vssq_error_t error;
-        vssq_error_reset(&error);
-
         auto folderNameStd = folderName.toStdString();
         auto parentFolderIdStd = QString(parentFolderId).toStdString();
 
-        auto fileInfoC = vssq_messenger_cloud_fs_folder_info_wrap_ptr(vssq_messenger_cloud_fs_create_folder(
-                m_cloudFs.get(), vsc_str_from(folderNameStd), vsc_str_from(parentFolderIdStd),
-                vsc_data_from(parentFolderPublicKey), &error));
+        vssq_error_t error;
+        vssq_error_reset(&error);
+
+        vssq_messenger_cloud_fs_folder_info_t *fileInfo;
+        if (users.empty()) {
+            fileInfo = vssq_messenger_cloud_fs_create_folder(m_cloudFs.get(), vsc_str_from(folderNameStd),
+                                                             vsc_str_from(parentFolderIdStd),
+                                                             vsc_data_from(parentFolderPublicKey), &error);
+        } else {
+            auto usersAccess = vssq_messenger_cloud_fs_access_list_wrap_ptr(vssq_messenger_cloud_fs_access_list_new());
+            for (const auto &user : users) {
+                // FIXME: Pass correct permission.
+                vssq_messenger_cloud_fs_access_list_add_user(usersAccess.get(), user->impl()->user.get(),
+                                                             vssq_messenger_cloud_fs_permission_USER);
+            }
+
+            fileInfo = vssq_messenger_cloud_fs_create_shared_folder(
+                    m_cloudFs.get(), vsc_str_from(folderNameStd), vsc_str_from(parentFolderIdStd),
+                    vsc_data_from(parentFolderPublicKey), usersAccess.get(), &error);
+        }
+        auto fileInfoC = vssq_messenger_cloud_fs_folder_info_wrap_ptr(fileInfo);
 
         if (vssq_error_has_error(&error)) {
             qCWarning(lcCoreMessengerCloudFs)
@@ -307,51 +311,6 @@ Self::FutureResult<CloudFsFolder> Self::createFolder(const QString &folderName, 
 
         CloudFsFolder folder;
         folder.info = cloudFsFolderInfoFromC(fileInfoC.get());
-
-        return folder;
-    });
-}
-
-Self::FutureResult<CloudFsFolder> Self::createSharedFolder(const QString &folderName, const Users &users,
-                                                           const CloudFsFolderId &parentFolderId,
-                                                           const QByteArray &parentFolderPublicKey)
-{
-
-    return QtConcurrent::run([this, folderName, users, parentFolderId,
-                              parentFolderPublicKey]() -> Result<CloudFsFolder> {
-        //
-        //  Request shared folder creation.
-        //
-        auto usersAccess = vssq_messenger_cloud_fs_access_list_wrap_ptr(vssq_messenger_cloud_fs_access_list_new());
-        for (const auto &user : users) {
-            // FIXME: Pass correct permission.
-            vssq_messenger_cloud_fs_access_list_add_user(usersAccess.get(), user->impl()->user.get(),
-                                                         vssq_messenger_cloud_fs_permission_USER);
-        }
-
-        //
-        //  Request shared folder creation.
-        //
-        vssq_error_t error;
-        vssq_error_reset(&error);
-
-        auto folderNameStd = folderName.toStdString();
-        auto parentFolderIdStd = QString(parentFolderId).toStdString();
-
-        auto fileInfoC = vssq_messenger_cloud_fs_folder_info_wrap_ptr(vssq_messenger_cloud_fs_create_shared_folder(
-                m_cloudFs.get(), vsc_str_from(folderNameStd), vsc_str_from(parentFolderIdStd),
-                vsc_data_from(parentFolderPublicKey), usersAccess.get(), &error));
-
-        if (vssq_error_has_error(&error)) {
-            qCWarning(lcCoreMessengerCloudFs)
-                    << "Cannot create shared folder: " << vsc_str_to_qstring(vssq_error_message_from_error(&error));
-
-            return CoreMessengerStatus::Error_CloudFsRequestFailed;
-        }
-
-        CloudFsFolder folder;
-        folder.info = cloudFsFolderInfoFromC(fileInfoC.get());
-
         return folder;
     });
 }
