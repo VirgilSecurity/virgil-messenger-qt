@@ -155,9 +155,10 @@ CloudFileRequestId CloudFileSystem::getDownloadInfo(const CloudFileHandler &file
 }
 
 bool CloudFileSystem::decryptFile(const QString &sourcePath, const QByteArray &encryptionKey,
-                                  const CloudFileHandler &file)
+                                  const CloudFileHandler &file, const CloudFileHandler &parentFolder)
 {
-    const auto status = m_coreFs->decryptFile(sourcePath, file->localPath(), encryptionKey, m_messenger->currentUser());
+    const auto status = m_coreFs->decryptFile(sourcePath, file->localPath(), encryptionKey, m_messenger->currentUser(),
+                                              createFsFolder(parentFolder));
     return status == CoreMessengerStatus::Success;
 }
 
@@ -204,6 +205,7 @@ ModifiableCloudFileHandler CloudFileSystem::createFolderFromInfo(const CloudFsFo
     folder->setUpdatedAt(info.updatedAt);
     folder->setUpdatedBy(info.updatedBy);
     folder->setLocalPath(localPath);
+    folder->setSharedGroupId(info.sharedGroupId);
     return folder;
 }
 
@@ -221,4 +223,25 @@ ModifiableCloudFileHandler CloudFileSystem::createFileFromInfo(const CloudFsFile
     file->setUpdatedBy(info.updatedBy);
     file->setLocalPath(localPath);
     return file;
+}
+
+CloudFsFolder CloudFileSystem::createFsFolder(const CloudFileHandler &folder) const
+{
+    CloudFsFolder fsFolder;
+    fsFolder.info = createFsFolderInfo(folder);
+    fsFolder.folderEncryptedKey = folder->encryptedKey();
+    fsFolder.folderPublicKey = folder->publicKey();
+    return fsFolder;
+}
+
+CloudFsFolderInfo CloudFileSystem::createFsFolderInfo(const CloudFileHandler &folder) const
+{
+    CloudFsFolderInfo info;
+    info.id = folder->id().coreFolderId();
+    info.name = folder->name();
+    info.createdAt = folder->createdAt();
+    info.updatedAt = folder->updatedAt();
+    info.updatedBy = folder->updatedBy();
+    info.sharedGroupId = folder->sharedGroupId();
+    return info;
 }
