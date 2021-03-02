@@ -268,11 +268,11 @@ Self::FutureResult<CloudFsFileDownloadInfo> Self::getFileDownloadInfo(const Clou
     });
 }
 
-Self::FutureResult<CloudFsFolder> Self::createFolder(const QString &folderName, const Users &users,
+Self::FutureResult<CloudFsFolder> Self::createFolder(const QString &folderName, const Contacts &members,
                                                      const CloudFsFolderId &parentFolderId,
                                                      const QByteArray &parentFolderPublicKey)
 {
-    return QtConcurrent::run([this, folderName, users, parentFolderId,
+    return QtConcurrent::run([this, folderName, members, parentFolderId,
                               parentFolderPublicKey]() -> Result<CloudFsFolder> {
         //
         //  Request folder creation.
@@ -284,13 +284,14 @@ Self::FutureResult<CloudFsFolder> Self::createFolder(const QString &folderName, 
         vssq_error_reset(&error);
 
         vssq_messenger_cloud_fs_folder_info_t *fileInfo;
-        if (users.empty()) {
+        if (members.empty()) {
             fileInfo = vssq_messenger_cloud_fs_create_folder(m_cloudFs.get(), vsc_str_from(folderNameStd),
                                                              vsc_str_from(parentFolderIdStd),
                                                              vsc_data_from(parentFolderPublicKey), &error);
         } else {
             auto usersAccess = vssq_messenger_cloud_fs_access_list_wrap_ptr(vssq_messenger_cloud_fs_access_list_new());
-            for (const auto &user : users) {
+            for (const auto &member : members) {
+                const auto user = m_coreMessenger->findUserByUsername(member->username());
                 // FIXME: Pass correct permission.
                 vssq_messenger_cloud_fs_access_list_add_user(usersAccess.get(), user->impl()->user.get(),
                                                              vssq_messenger_cloud_fs_permission_USER);

@@ -42,6 +42,7 @@
 #include "CloudFsFolderId.h"
 #include "CloudFsFolderInfo.h"
 #include "CloudFsNewFile.h"
+#include "Contact.h"
 #include "CoreMessengerStatus.h"
 #include "User.h"
 
@@ -111,9 +112,9 @@ public:
 
     //
     //  Create a new folder in the given folder.
-    //  Note, folder is shared if users are specified.
+    //  Note, folder is shared if members are specified.
     //
-    FutureResult<CloudFsFolder> createFolder(const QString &folderName, const Users &users,
+    FutureResult<CloudFsFolder> createFolder(const QString &folderName, const Contacts &members,
                                              const CloudFsFolderId &parentFolderId,
                                              const QByteArray &parentFolderPublicKey);
 
