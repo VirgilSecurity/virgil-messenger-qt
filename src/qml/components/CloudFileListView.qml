@@ -60,6 +60,7 @@ ModelListView {
             id: menuButton
             image: "More"
             height: imageSize
+            hoverVisible: !model.isSelected
 
             ContextMenu {
                 id: contextMenu
