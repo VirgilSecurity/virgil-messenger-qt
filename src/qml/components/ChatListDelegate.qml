@@ -13,7 +13,6 @@ ListDelegate {
 
     TwoLineLabel {
         Layout.fillWidth: true
-        clip: true
         title: model.contactId
         description: model.lastMessageBody
     }

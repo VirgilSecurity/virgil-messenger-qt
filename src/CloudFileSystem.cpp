@@ -119,8 +119,7 @@ CloudFileRequestId CloudFileSystem::createFolder(const QString &name, const Clou
 {
     const auto requestId = ++m_requestId;
     const auto parentFolderId = parentFolder->id().coreFolderId();
-    auto future = m_coreFs->createFolder(name, CloudFileMembersToContacts(members), parentFolderId,
-                                         parentFolder->publicKey());
+    auto future = m_coreFs->createFolder(name, members, parentFolderId, parentFolder->publicKey());
     FutureWorker::run(future, [this, parentFolder, name, requestId](auto result) {
         if (std::holds_alternative<CoreMessengerStatus>(result)) {
             emit createFolderErrorOccured(requestId, tr("Failed to create folder"));

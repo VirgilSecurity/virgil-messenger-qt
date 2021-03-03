@@ -5,6 +5,7 @@ import "../theme"
 
 Column {
     id: root
+    clip: true
 
     property alias title: titleLabel.text
     property alias description: descriptionLabel.text

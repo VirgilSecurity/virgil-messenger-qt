@@ -50,8 +50,8 @@ Self::CloudFileObject(Messenger *messenger, QObject *parent)
 void Self::setCloudFile(const CloudFileHandler &cloudFile)
 {
     const auto oldName = name();
-    const auto oldIsFolder = isFolder();
-    const auto oldIsShared = isShared();
+    const auto wasFolder = isFolder();
+    const auto wasShared = isShared();
 
     m_cloudFile = cloudFile;
     m_propertiesModel->setCloudFile(cloudFile);
@@ -59,10 +59,10 @@ void Self::setCloudFile(const CloudFileHandler &cloudFile)
     if (oldName != name()) {
         emit nameChanged(name());
     }
-    if (oldIsFolder != isFolder()) {
+    if (wasFolder != isFolder()) {
         emit isFolderChanged(isFolder());
     }
-    if (oldIsShared != isShared()) {
+    if (wasShared != isShared()) {
         emit isSharedChanged(isShared());
     }
 }

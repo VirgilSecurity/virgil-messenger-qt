@@ -52,7 +52,6 @@ ModelListView {
 
         TwoLineLabel {
             Layout.fillWidth: true
-            clip: true
             title: model.fileName
             description: model.isFolder ? "" : model.displayFileSize
         }

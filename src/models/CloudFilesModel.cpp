@@ -133,7 +133,7 @@ QVariant CloudFilesModel::data(const QModelIndex &index, int role) const
     case DisplayFileSizeRole:
         return file->isFolder() ? QString() : Utils::formattedSize(file->size());
     case IsSharedRole:
-        return file->isFolder(); // TODO(fpohtmeh): implement
+        return file->isShared();
     case SortRole:
         return QString("%1%2").arg(static_cast<int>(!file->isFolder())).arg(file->name());
     default:
