@@ -42,6 +42,7 @@
 #include "CloudFsFolderId.h"
 #include "CloudFsFolderInfo.h"
 #include "CloudFsNewFile.h"
+#include "CloudFsSharedGroupId.h"
 #include "CloudFileMember.h"
 #include "CoreMessengerStatus.h"
 #include "User.h"
@@ -129,11 +130,23 @@ public:
     FutureResult<CloudFsFolder> listFolder(const CloudFsFolderId &folderId);
 
     //
-    //  Decrypt given file owned by me.
+    //  Decrypt given file with current user key or folder key.
     //
     CoreMessengerStatus decryptFile(const QString &sourceFilePath, const QString &destFilePath,
                                     const QByteArray &encryptedFileKey, const UserHandler &sender,
                                     const CloudFsFolder &parentFolder);
+
+    //
+    //  Return list of group shared users (including current user).
+    //
+    FutureResult<CloudFileMembers> getSharedGroupUsers(const CloudFsSharedGroupId &sharedGroupId);
+
+    //
+    //  Set list of group shared users.
+    //  Note, current user SHOULD NOT be passed.
+    //
+    FutureStatus setSharedGroupUsers(const CloudFsSharedGroupId &sharedGroupId, const QByteArray &encryptedKey,
+                                     const UserHandler &keyIssuer, const CloudFileMembers &members);
 
 private:
     //

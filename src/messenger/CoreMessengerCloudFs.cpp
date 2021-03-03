@@ -285,29 +285,33 @@ Self::FutureResult<CloudFsFolder> Self::createFolder(const QString &folderName, 
         vssq_error_t error;
         vssq_error_reset(&error);
 
-        vssq_messenger_cloud_fs_folder_info_t *fileInfo;
+        vssq_messenger_cloud_fs_folder_info_ptr_t fileInfo = vssq_messenger_cloud_fs_folder_info_wrap_ptr(nullptr);
         if (members.empty()) {
-            fileInfo = vssq_messenger_cloud_fs_create_folder(m_cloudFs.get(), vsc_str_from(folderNameStd),
-                                                             vsc_str_from(parentFolderIdStd),
-                                                             vsc_data_from(parentFolderPublicKey), &error);
+            fileInfo = vssq_messenger_cloud_fs_folder_info_wrap_ptr(vssq_messenger_cloud_fs_create_folder(
+                    m_cloudFs.get(), vsc_str_from(folderNameStd), vsc_str_from(parentFolderIdStd),
+                    vsc_data_from(parentFolderPublicKey), &error));
         } else {
             auto usersAccess = vssq_messenger_cloud_fs_access_list_wrap_ptr(vssq_messenger_cloud_fs_access_list_new());
             for (const auto &member : members) {
                 const auto user = m_coreMessenger->findUserByUsername(member->contact()->username());
                 if (user) {
+                    //
+                    //  TODO: Make enum mapping function.
+                    //
                     const auto permission = (member->type() == CloudFileMember::Type::Member)
                             ? vssq_messenger_cloud_fs_permission_USER
                             : vssq_messenger_cloud_fs_permission_ADMIN;
                     vssq_messenger_cloud_fs_access_list_add_user(usersAccess.get(), user->impl()->user.get(),
                                                                  permission);
+                } else {
+                    return CoreMessengerStatus::Error_UserNotFound;
                 }
             }
 
-            fileInfo = vssq_messenger_cloud_fs_create_shared_folder(
+            fileInfo = vssq_messenger_cloud_fs_folder_info_wrap_ptr(vssq_messenger_cloud_fs_create_shared_folder(
                     m_cloudFs.get(), vsc_str_from(folderNameStd), vsc_str_from(parentFolderIdStd),
-                    vsc_data_from(parentFolderPublicKey), usersAccess.get(), &error);
+                    vsc_data_from(parentFolderPublicKey), usersAccess.get(), &error));
         }
-        auto fileInfoC = vssq_messenger_cloud_fs_folder_info_wrap_ptr(fileInfo);
 
         if (vssq_error_has_error(&error)) {
             qCWarning(lcCoreMessengerCloudFs)
@@ -317,7 +321,7 @@ Self::FutureResult<CloudFsFolder> Self::createFolder(const QString &folderName, 
         }
 
         CloudFsFolder folder;
-        folder.info = cloudFsFolderInfoFromC(fileInfoC.get());
+        folder.info = cloudFsFolderInfoFromC(fileInfo.get());
         return folder;
     });
 }
@@ -692,6 +696,91 @@ CoreMessengerStatus Self::decryptFile(const QString &sourceFilePath, const QStri
     }
 
     return CoreMessengerStatus::Success;
+}
+
+Self::FutureResult<CloudFileMembers> Self::getSharedGroupUsers(const CloudFsSharedGroupId &sharedGroupId)
+{
+    return QtConcurrent::run([this, sharedGroupId]() -> Result<CloudFileMembers> {
+        qCDebug(lcCoreMessengerCloudFs) << "Get group shared users:" << sharedGroupId;
+
+        vssq_error_t error;
+        vssq_error_reset(&error);
+
+        const auto sharedGroupIdStd = QString(sharedGroupId).toStdString();
+
+        auto accessList = vssq_messenger_cloud_fs_access_list_wrap_ptr(vssq_messenger_cloud_fs_get_shared_group_users(
+                m_cloudFs.get(), vsc_str_from(sharedGroupIdStd), &error));
+
+        if (vssq_error_has_error(&error)) {
+            qCWarning(lcCoreMessengerCloudFs)
+                    << "Can not get shared group users: " << vsc_str_to_qstring(vssq_error_message_from_error(&error));
+
+            return CoreMessengerStatus::Error_CloudFsRequestFailed;
+        }
+
+        CloudFileMembers cloudFileMembers;
+        for (const auto *user_it = accessList.get();
+             (user_it != NULL) && vssq_messenger_cloud_fs_access_list_has_item(user_it);
+             user_it = vssq_messenger_cloud_fs_access_list_next(user_it)) {
+
+            const auto user_permission = vssq_messenger_cloud_fs_access_list_item(user_it);
+            const auto identity = vssq_messenger_cloud_fs_access_identity(user_permission);
+            const auto permission = vssq_messenger_cloud_fs_access_permission(user_permission);
+
+            auto contact = std::make_shared<Contact>();
+            contact->setUserId(UserId(vsc_str_to_qstring(identity)));
+
+            //
+            //  TODO: Make enum mapping function.
+            //
+            const auto type = permission == vssq_messenger_cloud_fs_permission_ADMIN ? CloudFileMember::Type::Owner
+                                                                                     : CloudFileMember::Type::Member;
+
+            cloudFileMembers.emplace_back(std::make_unique<CloudFileMember>(contact, type));
+        }
+
+        return cloudFileMembers;
+    });
+}
+
+Self::FutureStatus Self::setSharedGroupUsers(const CloudFsSharedGroupId &sharedGroupId, const QByteArray &encryptedKey,
+                                             const UserHandler &keyIssuer, const CloudFileMembers &members)
+{
+    return QtConcurrent::run([this, sharedGroupId, encryptedKey, keyIssuer, members]() -> CoreMessengerStatus {
+        qCDebug(lcCoreMessengerCloudFs) << "Set group shared users:" << sharedGroupId;
+
+        auto usersAccess = vssq_messenger_cloud_fs_access_list_wrap_ptr(vssq_messenger_cloud_fs_access_list_new());
+        for (const auto &member : members) {
+            const auto user = m_coreMessenger->findUserByUsername(member->contact()->username());
+            if (user) {
+                //
+                //  TODO: Make enum mapping function.
+                //
+                const auto permission = (member->type() == CloudFileMember::Type::Member)
+                        ? vssq_messenger_cloud_fs_permission_USER
+                        : vssq_messenger_cloud_fs_permission_ADMIN;
+
+                vssq_messenger_cloud_fs_access_list_add_user(usersAccess.get(), user->impl()->user.get(), permission);
+            } else {
+                return CoreMessengerStatus::Error_UserNotFound;
+            }
+        }
+
+        const auto sharedGroupIdStd = QString(sharedGroupId).toStdString();
+
+        const auto status = vssq_messenger_cloud_fs_set_shared_group_users(
+                m_cloudFs.get(), vsc_str_from(sharedGroupIdStd), vsc_data_from(encryptedKey),
+                keyIssuer->impl()->user.get(), usersAccess.get());
+
+        if (status != vssq_status_SUCCESS) {
+            qCWarning(lcCoreMessengerCloudFs)
+                    << "Can not get shared group users: " << vsc_str_to_qstring(vssq_error_message_from_status(status));
+
+            return CoreMessengerStatus::Error_CloudFsRequestFailed;
+        }
+
+        return CoreMessengerStatus::Success;
+    });
 }
 
 Self::Result<QByteArray> Self::decryptKey(const QByteArray &encryptedKey, const UserHandler &issuer) const
