@@ -51,7 +51,14 @@ class CloudFilesModel : public ListModel
     Q_PROPERTY(QString description MEMBER m_description NOTIFY descriptionChanged)
 
 public:
-    enum Roles { FilenameRole = Qt::UserRole, IsFolderRole, DisplayDateTimeRole, DisplayFileSizeRole, SortRole };
+    enum Roles {
+        FilenameRole = Qt::UserRole,
+        IsFolderRole,
+        DisplayDateTimeRole,
+        DisplayFileSizeRole,
+        IsSharedRole,
+        SortRole
+    };
 
     CloudFilesModel(const Settings *settings, QObject *parent);
 

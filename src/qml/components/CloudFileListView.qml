@@ -47,6 +47,7 @@ ModelListView {
         Column {
             Layout.fillWidth: true
             clip: true
+            // TODO(fpohtmeh): remove column, add eliding
 
             Text {
                 color: Theme.primaryTextColor

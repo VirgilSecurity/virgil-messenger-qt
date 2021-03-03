@@ -149,6 +149,8 @@ static CloudFsFolderInfo cloudFsFolderInfoFromC(const vssq_messenger_cloud_fs_fo
     info.createdAt = QDateTime::fromTime_t(vssq_messenger_cloud_fs_folder_info_created_at(folderInfoC));
     info.updatedAt = QDateTime::fromTime_t(vssq_messenger_cloud_fs_folder_info_updated_at(folderInfoC));
     info.updatedBy = UserId(vsc_str_to_qstring(vssq_messenger_cloud_fs_folder_info_updated_by(folderInfoC)));
+    info.sharedGroupId =
+            CloudFsSharedGroupId(vsc_str_to_qstring(vssq_messenger_cloud_fs_folder_info_shared_group_id(folderInfoC)));
 
     return info;
 }
@@ -268,7 +270,7 @@ Self::FutureResult<CloudFsFileDownloadInfo> Self::getFileDownloadInfo(const Clou
     });
 }
 
-Self::FutureResult<CloudFsFolder> Self::createFolder(const QString &folderName, const Contacts &members,
+Self::FutureResult<CloudFsFolder> Self::createFolder(const QString &folderName, const CloudFileMembers &members,
                                                      const CloudFsFolderId &parentFolderId,
                                                      const QByteArray &parentFolderPublicKey)
 {
@@ -291,10 +293,14 @@ Self::FutureResult<CloudFsFolder> Self::createFolder(const QString &folderName, 
         } else {
             auto usersAccess = vssq_messenger_cloud_fs_access_list_wrap_ptr(vssq_messenger_cloud_fs_access_list_new());
             for (const auto &member : members) {
-                const auto user = m_coreMessenger->findUserByUsername(member->username());
-                // FIXME: Pass correct permission.
-                vssq_messenger_cloud_fs_access_list_add_user(usersAccess.get(), user->impl()->user.get(),
-                                                             vssq_messenger_cloud_fs_permission_USER);
+                const auto user = m_coreMessenger->findUserByUsername(member->contact()->username());
+                if (user) {
+                    const auto permission = (member->type() == CloudFileMember::Type::Member)
+                            ? vssq_messenger_cloud_fs_permission_USER
+                            : vssq_messenger_cloud_fs_permission_ADMIN;
+                    vssq_messenger_cloud_fs_access_list_add_user(usersAccess.get(), user->impl()->user.get(),
+                                                                 permission);
+                }
             }
 
             fileInfo = vssq_messenger_cloud_fs_create_shared_folder(
