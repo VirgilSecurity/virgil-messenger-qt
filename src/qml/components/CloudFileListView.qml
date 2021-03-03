@@ -41,7 +41,7 @@ ModelListView {
                 Image {
                     source: "../resources/icons/Plus.png"
                     fillMode: Image.PreserveAspectFit
-                    width: 0.4 * parent.iconSize
+                    width: 0.5 * parent.width
                     height: width
                     anchors.centerIn: parent
                     anchors.verticalCenterOffset: 2
