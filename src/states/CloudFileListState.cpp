@@ -36,11 +36,13 @@
 
 #include "CloudFilesController.h"
 #include "CloudFilesModel.h"
+#include "Messenger.h"
 
 using namespace vm;
 using Self = CloudFileListState;
 
-Self::CloudFileListState(CloudFilesController *controller, QState *parent) : QState(parent), m_controller(controller)
+Self::CloudFileListState(Messenger *messenger, CloudFilesController *controller, QState *parent)
+    : QState(parent), m_messenger(messenger), m_controller(controller)
 {
     connect(this, &Self::requestNewFolder, this,
             [controller](auto name) { controller->createFolder(name, CloudFileMembers()); });
@@ -48,8 +50,9 @@ Self::CloudFileListState(CloudFilesController *controller, QState *parent) : QSt
 
 void Self::onEntry(QEvent *)
 {
-    if (m_firstRun) {
-        m_controller->switchToRootFolder();
-        m_firstRun = false;
+    if (m_lastUser == m_messenger->currentUser()) {
+        return;
     }
+    m_lastUser = m_messenger->currentUser();
+    m_controller->switchToRootFolder();
 }
