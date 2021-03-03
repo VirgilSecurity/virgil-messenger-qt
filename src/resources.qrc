@@ -12,6 +12,7 @@
         <file>qml/pages/DownloadKeyPage.qml</file>
         <file>qml/pages/EditProfilePage.qml</file>
         <file>qml/pages/MainPage.qml</file>
+        <file>qml/pages/MainListsPage.qml</file>
         <file>qml/pages/MultiSelectContactsPage.qml</file>
         <file>qml/pages/NameGroupChatPage.qml</file>
         <file>qml/pages/NewChatPage.qml</file>

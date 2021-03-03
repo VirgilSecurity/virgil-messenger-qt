@@ -5,11 +5,6 @@ import "../base"
 
 Item {
     id: logControl
-    anchors {
-        fill: parent
-        topMargin: 0.75 * mainView.height
-    }
-    visible: settings.devMode
 
     TextScrollView {
         anchors.fill: parent
