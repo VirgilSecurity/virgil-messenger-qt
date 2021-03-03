@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,16 +32,23 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "database/UserDatabaseMigration.h"
+#ifndef VM_VERSION2_PATCH_CLOUDFILES_H
+#define VM_VERSION2_PATCH_CLOUDFILES_H
 
-#include "database/patches/version1/PatchContacts.h"
-#include "database/patches/version2/PatchCloudFiles.h"
+#include "core/Patch.h"
 
-using namespace vm;
+namespace vm {
+namespace version2 {
 
-UserDatabaseMigration::UserDatabaseMigration() : Migration()
+class PatchCloudFiles : public Patch
 {
-    // Add patches here in the order of execution
-    addPatch(std::make_unique<version1::PatchContacts>());
-    addPatch(std::make_unique<version2::PatchCloudFiles>());
-}
+public:
+    PatchCloudFiles();
+
+    bool apply(Database *database) override;
+};
+
+} // namespace version2
+} // namespace vm
+
+#endif // VM_VERSION2_PATCH_CLOUDFILES_H

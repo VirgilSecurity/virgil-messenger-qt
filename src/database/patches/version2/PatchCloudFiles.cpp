@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,16 +32,24 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "database/UserDatabaseMigration.h"
+#include "patches/version2/PatchCloudFiles.h"
 
-#include "database/patches/version1/PatchContacts.h"
-#include "database/patches/version2/PatchCloudFiles.h"
+#include "core/DatabaseUtils.h"
 
 using namespace vm;
+using namespace version2;
 
-UserDatabaseMigration::UserDatabaseMigration() : Migration()
+using Self = PatchCloudFiles;
+
+Self::PatchCloudFiles() : Patch(2) { }
+
+bool Self::apply(Database *database)
 {
-    // Add patches here in the order of execution
-    addPatch(std::make_unique<version1::PatchContacts>());
-    addPatch(std::make_unique<version2::PatchCloudFiles>());
+    const QLatin1String versionPath("patches/version2/");
+
+    if (!DatabaseUtils::readExecQueries(database, versionPath + "addSharedGroupIdColumn")) {
+        return false;
+    }
+
+    return true;
 }

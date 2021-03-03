@@ -49,7 +49,7 @@ include(customers)
 # ---------------------------------------------------------------------------
 set(VS_TARGET_VERSION "3.8.0")
 set(VS_CORE_VERSION "0.2.1.58")
-set(VERSION_DATABASE_SCHEME "1")
+set(VERSION_DATABASE_SCHEME "2")
 
 # ---------------------------------------------------------------------------
 # Code formatting
@@ -532,6 +532,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/database/UserDatabase.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/UserDatabaseMigration.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version1/PatchContacts.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version2/PatchCloudFiles.h
         # Logging
         ${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogging.h
         ${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogWorker.h
@@ -734,6 +735,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/database/UserDatabase.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/UserDatabaseMigration.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version1/PatchContacts.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version2/PatchCloudFiles.cpp
         # Logging
         ${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogging.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogWorker.cpp

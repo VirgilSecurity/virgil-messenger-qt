@@ -233,10 +233,7 @@
         <file>resources/database/selectGroupMembersByMemberId.sql</file>
         <file>resources/database/updateGroupMemberAffiliation.sql</file>
         <file>resources/database/createContacts.sql</file>
-        <file>resources/database/dropContacts.sql</file>
         <file>resources/database/insertContact.sql</file>
-        <file>resources/database/insertContactsFromChats.sql</file>
-        <file>resources/database/migrateMessagesToVersion1.sql</file>
         <file>resources/database/selectAllContacts.sql</file>
         <file>resources/database/selectContact.sql</file>
         <file>resources/database/updateContactAvatarLocalPath.sql</file>
@@ -246,5 +243,10 @@
         <file>resources/database/updateContactPhone.sql</file>
         <file>resources/database/updateContactPlatformId.sql</file>
         <file>resources/database/updateContactUsername.sql</file>
+        <!-- Database patches -->
+        <file>resources/database/patches/version1/dropContacts.sql</file>
+        <file>resources/database/patches/version1/insertContactsFromChats.sql</file>
+        <file>resources/database/patches/version1/migrateMessagesToVersion1.sql</file>
+        <file>resources/database/patches/version2/addSharedGroupIdColumn.sql</file>
     </qresource>
 </RCC>
