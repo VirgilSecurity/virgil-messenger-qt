@@ -36,6 +36,7 @@
 #define VM_CLOUD_FILES_UPDATE_H
 
 #include "CloudFile.h"
+#include "CloudFileMember.h"
 #include "CloudFileUpdateSource.h"
 
 #include <variant>
@@ -86,8 +87,15 @@ struct DownloadCloudFileUpdate : public CloudFilesUpdateBase
     QString fingerprint;
 };
 
+struct ListMembersCloudFileUpdate : public CloudFilesUpdateBase
+{
+    CloudFileHandler file;
+    CloudFileMembers members;
+};
+
 using CloudFilesUpdate = std::variant<CachedListCloudFolderUpdate, CloudListCloudFolderUpdate, CreateCloudFilesUpdate,
-                                      DeleteCloudFilesUpdate, TransferCloudFileUpdate, DownloadCloudFileUpdate>;
+                                      DeleteCloudFilesUpdate, TransferCloudFileUpdate, DownloadCloudFileUpdate,
+                                      ListMembersCloudFileUpdate>;
 
 } // namespace vm
 

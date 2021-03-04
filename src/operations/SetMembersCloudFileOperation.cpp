@@ -32,38 +32,49 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "ShareCloudFilesOperation.h"
+#include "SetMembersCloudFileOperation.h"
 
 #include "CloudFileOperation.h"
+#include "CloudFileSystem.h"
+#include "CloudFilesUpdate.h"
 
 using namespace vm;
-using Self = ShareCloudFilesOperation;
+using Self = SetMembersCloudFileOperation;
 
-Self::ShareCloudFilesOperation(CloudFileOperation *parent, const CloudFiles &files)
-    : Operation(QLatin1String("ShareCloudFiles"), parent), m_parent(parent), m_files(files)
+Self::SetMembersCloudFileOperation(CloudFileOperation *parent, const CloudFileMembers &members,
+                                   const CloudFileHandler &file, const CloudFileHandler &parentFolder)
+    : Operation(QLatin1String("ShareCloudFiles"), parent),
+      m_parent(parent),
+      m_members(members),
+      m_file(file),
+      m_parentFolder(parentFolder),
+      m_requestId(0)
 {
-}
-
-void Self::addMembers(const CloudFileMembers &members)
-{
-    m_addedMembers.insert(m_addedMembers.end(), members.begin(), members.end());
-}
-
-void Self::removeMembers(const CloudFileMembers &members)
-{
-    m_removedMembers.insert(m_removedMembers.end(), members.begin(), members.end());
+    connect(m_parent->cloudFileSystem(), &CloudFileSystem::membersSet, this, &Self::onSet);
+    connect(m_parent->cloudFileSystem(), &CloudFileSystem::setMembersErrorOccurred, this, &Self::onSetErrorOccured);
 }
 
 void Self::run()
 {
-    if (m_addedMembers.empty() && m_removedMembers.empty()) {
-        throw std::logic_error("ShareCloudFileOperation members are empty");
-    }
+    m_requestId = m_parent->cloudFileSystem()->setMembers(m_file, m_members);
+}
 
-    if (!m_addedMembers.empty()) {
-        failAndNotify(tr("Add cloud file members is under development"));
+void Self::onSet(CloudFileRequestId requestId, const CloudFileHandler &file, const CloudFileMembers &members)
+{
+    if (m_requestId == requestId) {
+        ListMembersCloudFileUpdate update;
+        update.parentFolder = m_parentFolder;
+        update.file = file;
+        update.members = members;
+        m_parent->cloudFilesUpdate(update);
+
+        finish();
     }
-    if (!m_removedMembers.empty()) {
-        failAndNotify(tr("Remove cloud file members is under development"));
+}
+
+void Self::onSetErrorOccured(CloudFileRequestId requestId, const QString &errorText)
+{
+    if (m_requestId == requestId) {
+        failAndNotify(errorText);
     }
 }

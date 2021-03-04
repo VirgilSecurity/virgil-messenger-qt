@@ -69,6 +69,8 @@ public:
     bool decryptFile(const QString &sourcePath, const QByteArray &encryptionKey, const CloudFileHandler &file,
                      const CloudFileHandler &parentFolder);
     CloudFileRequestId deleteFiles(const CloudFiles &files);
+    CloudFileRequestId setMembers(const CloudFileHandler &file, const CloudFileMembers &members);
+    CloudFileRequestId fetchMembers(const CloudFileHandler &file);
 
 signals:
     void downloadsDirChanged(const QDir &downloadsDir);
@@ -90,6 +92,12 @@ signals:
 
     void fileDeleted(CloudFileRequestId requestId, const CloudFileHandler &file);
     void deleteFileErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
+
+    void membersSet(CloudFileRequestId requestId, const CloudFileHandler &file, const CloudFileMembers &members);
+    void setMembersErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
+
+    void membersFetched(CloudFileRequestId requestId, const CloudFileHandler &file, const CloudFileMembers &members);
+    void fetchMembersErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
 
 private:
     ModifiableCloudFileHandler createParentFolderFromInfo(const CloudFsFolder &fsFolder,

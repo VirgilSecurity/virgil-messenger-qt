@@ -99,6 +99,11 @@ void Self::setMembers(const CloudFileMembers &members)
     }
 }
 
+CloudFileMembers Self::members() const
+{
+    return m_membersModel->members();
+}
+
 CloudFileMembers Self::selectedMembers() const
 {
     return m_membersModel->selectedMembers();
@@ -107,4 +112,20 @@ CloudFileMembers Self::selectedMembers() const
 CloudFileMemberHandler Self::findMemberById(const UserId &userId) const
 {
     return FindCloudFileMemberById(m_membersModel->members(), userId);
+}
+
+void Self::updateCloudFiles(const CloudFilesUpdate &update)
+{
+    if (std::holds_alternative<CachedListCloudFolderUpdate>(update)
+        || std::holds_alternative<CloudListCloudFolderUpdate>(update)
+        || std::holds_alternative<CreateCloudFilesUpdate>(update)
+        || std::holds_alternative<DeleteCloudFilesUpdate>(update)
+        || std::holds_alternative<TransferCloudFileUpdate>(update)
+        || std::holds_alternative<DownloadCloudFileUpdate>(update)) {
+        return;
+    } else if (auto upd = std::get_if<ListMembersCloudFileUpdate>(&update)) {
+        setMembers(upd->members);
+    } else {
+        throw std::logic_error("Invalid CloudFilesUpdate in CloudFileObject::updateCloudFiles");
+    }
 }

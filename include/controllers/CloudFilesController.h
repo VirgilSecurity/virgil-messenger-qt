@@ -94,6 +94,7 @@ private:
     using FoldersHierarchy = ModifiableCloudFiles;
 
     void switchToHierarchy(const FoldersHierarchy &hierarchy);
+    void removeMembers(const CloudFileMembers &members);
 
     QString displayPath() const;
     bool isRoot() const;

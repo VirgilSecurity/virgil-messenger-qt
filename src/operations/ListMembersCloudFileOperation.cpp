@@ -32,49 +32,49 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CLOUD_FILE_OPERATION_SOURCE_H
-#define VM_CLOUD_FILE_OPERATION_SOURCE_H
+#include "ListMembersCloudFileOperation.h"
 
-#include "CloudFile.h"
-#include "CloudFileMember.h"
-#include "OperationSource.h"
+#include "CloudFileOperation.h"
+#include "CloudFileSystem.h"
+#include "CloudFilesUpdate.h"
 
-namespace vm {
-class CloudFileOperationSource : public OperationSource
+using namespace vm;
+using Self = ListMembersCloudFileOperation;
+
+Self::ListMembersCloudFileOperation(CloudFileOperation *parent, const CloudFileHandler &file,
+                                    const CloudFileHandler &parentFolder)
+    : Operation(QLatin1String("ShareCloudFiles"), parent),
+      m_parent(parent),
+      m_file(file),
+      m_parentFolder(parentFolder),
+      m_requestId(0)
 {
-public:
-    enum class Type { ListFolder, CreateFolder, Upload, Download, Delete, ListMembers, SetMembers };
+    connect(m_parent->cloudFileSystem(), &CloudFileSystem::membersFetched, this, &Self::onListFetched);
+    connect(m_parent->cloudFileSystem(), &CloudFileSystem::fetchMembersErrorOccurred, this,
+            &Self::onListFetchErrorOccured);
+}
 
-    explicit CloudFileOperationSource(Type type);
+void Self::run()
+{
+    m_requestId = m_parent->cloudFileSystem()->fetchMembers(m_file);
+}
 
-    Type type() const;
+void Self::onListFetched(CloudFileRequestId requestId, const CloudFileHandler &file, const CloudFileMembers &members)
+{
+    if (m_requestId == requestId) {
+        ListMembersCloudFileUpdate update;
+        update.parentFolder = m_parentFolder;
+        update.file = file;
+        update.members = members;
+        m_parent->cloudFilesUpdate(update);
 
-    CloudFileHandler folder() const;
-    void setFolder(const CloudFileHandler &folder);
-    CloudFiles files() const;
-    CloudFileHandler file() const;
-    void setFiles(const CloudFiles &files);
-    QString filePath() const;
-    void setFilePath(const QString &path);
-    QString name() const;
-    void setName(const QString &name);
-    PostFunction postFunction() const;
-    void setPostFunction(const PostFunction &func);
-    CloudFileMembers members() const;
-    void setMembers(const CloudFileMembers &members);
+        finish();
+    }
+}
 
-    bool isValid() const override;
-    QString toString() const override;
-
-private:
-    Type m_type;
-    CloudFileHandler m_folder;
-    CloudFiles m_files;
-    QString m_filePath;
-    QString m_name;
-    PostFunction m_postFunction;
-    CloudFileMembers m_members;
-};
-} // namespace vm
-
-#endif // VM_CLOUD_FILE_OPERATION_SOURCE_H
+void Self::onListFetchErrorOccured(CloudFileRequestId requestId, const QString &errorText)
+{
+    if (m_requestId == requestId) {
+        failAndNotify(errorText);
+    }
+}

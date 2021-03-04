@@ -50,6 +50,8 @@
 #include "UserDatabase.h"
 #include "Utils.h"
 
+#include <set>
+
 using namespace vm;
 using Self = CloudFilesController;
 
@@ -181,50 +183,54 @@ void Self::createFolder(const QString &name, const CloudFileMembers &members)
 
 void Self::loadCloudFileMembers()
 {
-    if (m_cloudFileObject->isShared()) {
-        const auto c1 = std::make_shared<Contact>();
-        c1->setUserId(UserId("id1"));
-        c1->setUsername(QLatin1String("OwnerUser"));
-        const auto m1 = std::make_shared<CloudFileMember>(c1, CloudFileMember::Type::Owner);
-
-        const auto c2 = std::make_shared<Contact>();
-        c2->setUserId(UserId("id2"));
-        c2->setUsername(QLatin1String("Member1User"));
-        const auto m2 = std::make_shared<CloudFileMember>(c2, CloudFileMember::Type::Member);
-
-        const auto c3 = std::make_shared<Contact>();
-        c3->setUserId(UserId("id3"));
-        c3->setUsername(QLatin1String("Member2User"));
-        const auto m3 = std::make_shared<CloudFileMember>(c3, CloudFileMember::Type::Member);
-
-        m_cloudFileObject->setMembers({ m1, m2, m3 });
-    }
+    const auto file = m_models->cloudFiles()->selectedFile();
+    m_models->cloudFilesQueue()->pushListMembers(file, m_hierarchy.back());
 }
 
 void Self::addMembers(const CloudFileMembers &members)
 {
-    const auto files = m_models->cloudFiles()->selectedFiles();
-    m_models->cloudFilesQueue()->pushAddMembers(files, members);
+    const auto file = m_models->cloudFiles()->selectedFile();
+    auto allMembers = m_cloudFileObject->members();
+    allMembers.insert(allMembers.end(), members.begin(), members.end());
+    m_models->cloudFilesQueue()->pushSetMembers(members, file, m_hierarchy.back());
 }
 
 void Self::removeSelectedMembers()
 {
-    const auto files = m_models->cloudFiles()->selectedFiles();
-    const auto members = m_cloudFileObject->selectedMembers();
-    m_models->cloudFilesQueue()->pushRemoveMembers(files, members);
+    removeMembers(m_cloudFileObject->selectedMembers());
 }
 
 void Self::leaveMembership()
 {
-    const auto files = m_models->cloudFiles()->selectedFiles();
     const auto member = m_cloudFileObject->findMemberById(m_messenger->currentUser()->id());
-    m_models->cloudFilesQueue()->pushRemoveMembers(files, { member });
+    removeMembers({ member });
 }
 
 void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)
 {
     m_requestedHierarchy = hierarchy;
     m_models->cloudFilesQueue()->pushListFolder(hierarchy.back());
+}
+
+void Self::removeMembers(const CloudFileMembers &members)
+{
+    std::set<UserId> removedIds;
+    for (auto &m : members) {
+        removedIds.insert(m->contact()->userId());
+    }
+
+    const auto file = m_models->cloudFiles()->selectedFile();
+    auto newMembers = m_cloudFileObject->members();
+    newMembers.erase(std::remove_if(newMembers.begin(), newMembers.end(), [&removedIds](auto &m) {
+        const auto userId = m->contact()->userId();
+        if (removedIds.find(userId) != removedIds.end()) {
+            removedIds.erase(userId);
+            return true;
+        }
+        return false;
+    }));
+
+    m_models->cloudFilesQueue()->pushSetMembers(newMembers, file, m_hierarchy.back());
 }
 
 QString Self::displayPath() const
@@ -287,6 +293,7 @@ void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)
     // Update UI
     if (isRelevantUpdate) {
         m_models->cloudFiles()->updateCloudFiles(update);
+        m_cloudFileObject->updateCloudFiles(update);
     }
     m_models->cloudFilesTransfers()->updateCloudFiles(update);
     // Update DB

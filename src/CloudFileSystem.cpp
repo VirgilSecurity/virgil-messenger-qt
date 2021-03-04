@@ -176,6 +176,37 @@ CloudFileRequestId CloudFileSystem::deleteFiles(const CloudFiles &files)
     return requestId;
 }
 
+CloudFileRequestId CloudFileSystem::setMembers(const CloudFileHandler &file, const CloudFileMembers &members)
+{
+    const auto requestId = ++m_requestId;
+    const UserHandler keyIssuer = m_coreMessenger->findUserById(file->updatedBy());
+    auto future = m_coreFs->setSharedGroupUsers(file->sharedGroupId(), file->encryptedKey(), keyIssuer, members);
+    FutureWorker::run(future, [this, file, members, requestId](auto result) {
+        if (result == CoreMessengerStatus::Success) {
+            emit membersSet(requestId, file, members);
+        } else {
+            emit setMembersErrorOccurred(requestId, tr("Failed to set members"));
+        }
+    });
+    return requestId;
+}
+
+CloudFileRequestId CloudFileSystem::fetchMembers(const CloudFileHandler &file)
+{
+    const auto requestId = ++m_requestId;
+    auto future = m_coreFs->getSharedGroupUsers(file->sharedGroupId());
+    FutureWorker::run(future, [this, file, requestId](auto result) {
+        if (std::holds_alternative<CoreMessengerStatus>(result)) {
+            emit fetchMembersErrorOccurred(requestId, tr("Failed to fetch members"));
+            return;
+        }
+
+        const auto members = std::get_if<CloudFileMembers>(&result);
+        emit membersFetched(requestId, file, *members);
+    });
+    return requestId;
+}
+
 ModifiableCloudFileHandler CloudFileSystem::createParentFolderFromInfo(const CloudFsFolder &fsFolder,
                                                                        const CloudFileHandler &oldFolder) const
 {

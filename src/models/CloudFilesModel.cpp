@@ -109,7 +109,8 @@ void CloudFilesModel::updateCloudFiles(const CloudFilesUpdate &update)
             removeFile(file);
         }
         updateDescription();
-    } else if (auto upd = std::get_if<TransferCloudFileUpdate>(&update)) {
+    } else if (std::holds_alternative<TransferCloudFileUpdate>(update)
+               || std::holds_alternative<ListMembersCloudFileUpdate>(update)) {
         return;
     } else {
         throw std::logic_error("Invalid CloudFilesUpdate in CloudFilesModel::updateCloudFiles");

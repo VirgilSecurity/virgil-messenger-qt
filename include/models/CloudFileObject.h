@@ -41,6 +41,7 @@
 #include "CloudFile.h"
 #include "CloudFileMembersModel.h"
 #include "CloudFilePropertiesModel.h"
+#include "CloudFilesUpdate.h"
 
 namespace vm {
 class Messenger;
@@ -66,8 +67,11 @@ public:
     bool isShared() const;
 
     void setMembers(const CloudFileMembers &members);
+    CloudFileMembers members() const;
     CloudFileMembers selectedMembers() const;
     CloudFileMemberHandler findMemberById(const UserId &userId) const;
+
+    void updateCloudFiles(const CloudFilesUpdate &update);
 
 signals:
     void nameChanged(const QString &name);

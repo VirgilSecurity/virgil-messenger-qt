@@ -32,32 +32,34 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_SHARED_CLOUD_FILES_OPERATION_H
-#define VM_SHARED_CLOUD_FILES_OPERATION_H
+#ifndef VM_LIST_MEMBERS_CLOUD_FILE_OPERATION_H
+#define VM_LIST_MEMBERS_CLOUD_FILE_OPERATION_H
 
 #include "CloudFile.h"
 #include "CloudFileMember.h"
+#include "CloudFileRequestId.h"
 #include "Operation.h"
 
 namespace vm {
 class CloudFileOperation;
 
-class ShareCloudFilesOperation : public Operation
+class ListMembersCloudFileOperation : public Operation
 {
 public:
-    ShareCloudFilesOperation(CloudFileOperation *parent, const CloudFiles &files);
-
-    void addMembers(const CloudFileMembers &members);
-    void removeMembers(const CloudFileMembers &members);
+    ListMembersCloudFileOperation(CloudFileOperation *parent, const CloudFileHandler &file,
+                                  const CloudFileHandler &parentFolder);
 
     void run() override;
 
 private:
+    void onListFetched(CloudFileRequestId requestId, const CloudFileHandler &file, const CloudFileMembers &members);
+    void onListFetchErrorOccured(CloudFileRequestId requestId, const QString &errorText);
+
     CloudFileOperation *m_parent;
-    const CloudFiles m_files;
-    CloudFileMembers m_addedMembers;
-    CloudFileMembers m_removedMembers;
+    const CloudFileHandler m_file;
+    const CloudFileHandler m_parentFolder;
+    CloudFileRequestId m_requestId;
 };
 } // namespace vm
 
-#endif // VM_SHARED_CLOUD_FILES_OPERATION_H
+#endif // VM_LIST_MEMBERS_CLOUD_FILE_OPERATION_H

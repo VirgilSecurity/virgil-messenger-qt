@@ -39,8 +39,9 @@
 #include "DeleteCloudFilesOperation.h"
 #include "DownloadCloudFileOperation.h"
 #include "ListCloudFolderOperation.h"
+#include "ListMembersCloudFileOperation.h"
 #include "Messenger.h"
-#include "ShareCloudFilesOperation.h"
+#include "SetMembersCloudFileOperation.h"
 #include "UploadCloudFileOperation.h"
 #include "UserDatabase.h"
 
@@ -62,8 +63,8 @@ Self::CloudFilesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject 
     connect(this, &Self::pushUploadFile, this, &Self::onPushUploadFile);
     connect(this, &Self::pushDownloadFile, this, &Self::onPushDownloadFile);
     connect(this, &Self::pushDeleteFiles, this, &Self::onPushDeleteFiles);
-    connect(this, &Self::pushAddMembers, this, &Self::onPushAddMembers);
-    connect(this, &Self::pushRemoveMembers, this, &Self::onPushRemoveMembers);
+    connect(this, &Self::pushSetMembers, this, &Self::onPushSetMembers);
+    connect(this, &Self::pushListMembers, this, &Self::onPushListMembers);
     connect(this, &Self::updateCloudFiles, this, &Self::onUpdateCloudFiles);
 
     addCloudFileListener(m_watcher.data());
@@ -118,16 +119,12 @@ Operation *Self::createOperation(OperationSourcePtr source)
     case SourceType::Delete:
         op->appendChild(new DeleteCloudFilesOperation(op, cloudFileSource->files()));
         break;
-    case SourceType::AddMembers: {
-        auto shareOp = new ShareCloudFilesOperation(op, cloudFileSource->files());
-        shareOp->addMembers(cloudFileSource->members());
-        op->appendChild(shareOp);
+    case SourceType::SetMembers:
+        op->appendChild(new SetMembersCloudFileOperation(op, cloudFileSource->members(), cloudFileSource->file(),
+                                                         cloudFileSource->folder()));
         break;
-    }
-    case SourceType::RemoveMembers: {
-        auto shareOp = new ShareCloudFilesOperation(op, cloudFileSource->files());
-        shareOp->removeMembers(cloudFileSource->members());
-        op->appendChild(shareOp);
+    case SourceType::ListMembers: {
+        op->appendChild(new ListMembersCloudFileOperation(op, cloudFileSource->file(), cloudFileSource->folder()));
         break;
     }
     default:
@@ -192,21 +189,23 @@ void Self::onPushDeleteFiles(const CloudFiles &files)
     addSource(std::move(source));
 }
 
-void Self::onPushAddMembers(const CloudFiles &files, const CloudFileMembers &members)
+void Self::onPushSetMembers(const CloudFileMembers &members, const CloudFileHandler &file,
+                            const CloudFileHandler &parentFolder)
 {
-    auto source = std::make_shared<CloudFileOperationSource>(SourceType::AddMembers);
+    auto source = std::make_shared<CloudFileOperationSource>(SourceType::SetMembers);
     source->setPriority(OperationSource::Priority::Highest);
-    source->setFiles(files);
+    source->setFolder(parentFolder);
+    source->setFiles({ file });
     source->setMembers(members);
     addSource(std::move(source));
 }
 
-void Self::onPushRemoveMembers(const CloudFiles &files, const CloudFileMembers &members)
+void Self::onPushListMembers(const CloudFileHandler &file, const CloudFileHandler &parentFolder)
 {
-    auto source = std::make_shared<CloudFileOperationSource>(SourceType::RemoveMembers);
+    auto source = std::make_shared<CloudFileOperationSource>(SourceType::ListMembers);
     source->setPriority(OperationSource::Priority::Highest);
-    source->setFiles(files);
-    source->setMembers(members);
+    source->setFolder(parentFolder);
+    source->setFiles({ file });
     addSource(std::move(source));
 }
 

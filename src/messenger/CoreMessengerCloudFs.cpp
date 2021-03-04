@@ -155,6 +155,30 @@ static CloudFsFolderInfo cloudFsFolderInfoFromC(const vssq_messenger_cloud_fs_fo
     return info;
 }
 
+vssq_messenger_cloud_fs_permission_t memberTypeToPermission(const CloudFileMember::Type &memberType)
+{
+    switch (memberType) {
+    case CloudFileMember::Type::Member:
+        return vssq_messenger_cloud_fs_permission_USER;
+    case CloudFileMember::Type::Owner:
+        return vssq_messenger_cloud_fs_permission_ADMIN;
+    default:
+        throw std::logic_error("Invalid CloudFileMember type");
+    }
+}
+
+CloudFileMember::Type permissionToMemberType(const vssq_messenger_cloud_fs_permission_t permission)
+{
+    switch (permission) {
+    case vssq_messenger_cloud_fs_permission_USER:
+        return CloudFileMember::Type::Member;
+    case vssq_messenger_cloud_fs_permission_ADMIN:
+        return CloudFileMember::Type::Owner;
+    default:
+        throw std::logic_error("Invalid cloud fs permission");
+    }
+}
+
 // --------------------------------------------------------------------------
 //  Implementation.
 // --------------------------------------------------------------------------
@@ -295,14 +319,8 @@ Self::FutureResult<CloudFsFolder> Self::createFolder(const QString &folderName, 
             for (const auto &member : members) {
                 const auto user = m_coreMessenger->findUserByUsername(member->contact()->username());
                 if (user) {
-                    //
-                    //  TODO: Make enum mapping function.
-                    //
-                    const auto permission = (member->type() == CloudFileMember::Type::Member)
-                            ? vssq_messenger_cloud_fs_permission_USER
-                            : vssq_messenger_cloud_fs_permission_ADMIN;
                     vssq_messenger_cloud_fs_access_list_add_user(usersAccess.get(), user->impl()->user.get(),
-                                                                 permission);
+                                                                 memberTypeToPermission(member->type()));
                 } else {
                     return CoreMessengerStatus::Error_UserNotFound;
                 }
@@ -730,13 +748,8 @@ Self::FutureResult<CloudFileMembers> Self::getSharedGroupUsers(const CloudFsShar
             auto contact = std::make_shared<Contact>();
             contact->setUserId(UserId(vsc_str_to_qstring(identity)));
 
-            //
-            //  TODO: Make enum mapping function.
-            //
-            const auto type = permission == vssq_messenger_cloud_fs_permission_ADMIN ? CloudFileMember::Type::Owner
-                                                                                     : CloudFileMember::Type::Member;
-
-            cloudFileMembers.emplace_back(std::make_unique<CloudFileMember>(contact, type));
+            cloudFileMembers.emplace_back(
+                    std::make_unique<CloudFileMember>(contact, permissionToMemberType(permission)));
         }
 
         return cloudFileMembers;
@@ -753,14 +766,8 @@ Self::FutureStatus Self::setSharedGroupUsers(const CloudFsSharedGroupId &sharedG
         for (const auto &member : members) {
             const auto user = m_coreMessenger->findUserByUsername(member->contact()->username());
             if (user) {
-                //
-                //  TODO: Make enum mapping function.
-                //
-                const auto permission = (member->type() == CloudFileMember::Type::Member)
-                        ? vssq_messenger_cloud_fs_permission_USER
-                        : vssq_messenger_cloud_fs_permission_ADMIN;
-
-                vssq_messenger_cloud_fs_access_list_add_user(usersAccess.get(), user->impl()->user.get(), permission);
+                vssq_messenger_cloud_fs_access_list_add_user(usersAccess.get(), user->impl()->user.get(),
+                                                             memberTypeToPermission(member->type()));
             } else {
                 return CoreMessengerStatus::Error_UserNotFound;
             }

@@ -585,6 +585,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/EncryptFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/EncryptUploadFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/ListCloudFolderOperation.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/operations/ListMembersCloudFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/LoadAttachmentOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/LoadFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/MessageOperation.h
@@ -592,7 +593,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/NetworkOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/Operation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/SendMessageOperation.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/operations/ShareCloudFilesOperation.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/operations/SetMembersCloudFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadAttachmentOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadCloudFileOperation.h
@@ -785,14 +786,15 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/EncryptFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/EncryptUploadFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/ListCloudFolderOperation.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/operations/ListMembersCloudFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/LoadAttachmentOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/LoadFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/MessageOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/MessageOperationFactory.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/NetworkOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/Operation.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/operations/ShareCloudFilesOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/SendMessageOperation.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/operations/SetMembersCloudFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/UploadAttachmentOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/UploadFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/UploadCloudFileOperation.cpp

@@ -66,8 +66,9 @@ signals:
     void pushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
     void pushDownloadFile(const CloudFileHandler &file, const CloudFileHandler &parentFolder, const PostFunction &func);
     void pushDeleteFiles(const CloudFiles &files);
-    void pushAddMembers(const CloudFiles &files, const CloudFileMembers &members);
-    void pushRemoveMembers(const CloudFiles &files, const CloudFileMembers &members);
+    void pushSetMembers(const CloudFileMembers &members, const CloudFileHandler &file,
+                        const CloudFileHandler &parentFolder);
+    void pushListMembers(const CloudFileHandler &file, const CloudFileHandler &parentFolder);
 
     void interruptFileOperation(const CloudFileId &fileId);
     void updateCloudFiles(const CloudFilesUpdate &update);
@@ -85,8 +86,9 @@ private:
     void onPushDownloadFile(const CloudFileHandler &file, const CloudFileHandler &parentFolder,
                             const PostFunction &func);
     void onPushDeleteFiles(const CloudFiles &files);
-    void onPushAddMembers(const CloudFiles &files, const CloudFileMembers &members);
-    void onPushRemoveMembers(const CloudFiles &files, const CloudFileMembers &members);
+    void onPushSetMembers(const CloudFileMembers &members, const CloudFileHandler &file,
+                          const CloudFileHandler &parentFolder);
+    void onPushListMembers(const CloudFileHandler &file, const CloudFileHandler &parentFolder);
 
     void onUpdateCloudFiles(const CloudFilesUpdate &update);
 

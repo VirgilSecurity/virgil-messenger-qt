@@ -32,49 +32,35 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CLOUD_FILE_OPERATION_SOURCE_H
-#define VM_CLOUD_FILE_OPERATION_SOURCE_H
+#ifndef VM_SET_MEMBERS_CLOUD_FILE_OPERATION_H
+#define VM_SET_MEMBERS_CLOUD_FILE_OPERATION_H
 
 #include "CloudFile.h"
 #include "CloudFileMember.h"
-#include "OperationSource.h"
+#include "CloudFileRequestId.h"
+#include "Operation.h"
 
 namespace vm {
-class CloudFileOperationSource : public OperationSource
+class CloudFileOperation;
+
+class SetMembersCloudFileOperation : public Operation
 {
 public:
-    enum class Type { ListFolder, CreateFolder, Upload, Download, Delete, ListMembers, SetMembers };
+    SetMembersCloudFileOperation(CloudFileOperation *parent, const CloudFileMembers &members,
+                                 const CloudFileHandler &file, const CloudFileHandler &parentFolder);
 
-    explicit CloudFileOperationSource(Type type);
-
-    Type type() const;
-
-    CloudFileHandler folder() const;
-    void setFolder(const CloudFileHandler &folder);
-    CloudFiles files() const;
-    CloudFileHandler file() const;
-    void setFiles(const CloudFiles &files);
-    QString filePath() const;
-    void setFilePath(const QString &path);
-    QString name() const;
-    void setName(const QString &name);
-    PostFunction postFunction() const;
-    void setPostFunction(const PostFunction &func);
-    CloudFileMembers members() const;
-    void setMembers(const CloudFileMembers &members);
-
-    bool isValid() const override;
-    QString toString() const override;
+    void run() override;
 
 private:
-    Type m_type;
-    CloudFileHandler m_folder;
-    CloudFiles m_files;
-    QString m_filePath;
-    QString m_name;
-    PostFunction m_postFunction;
-    CloudFileMembers m_members;
+    void onSet(CloudFileRequestId requestId, const CloudFileHandler &file, const CloudFileMembers &members);
+    void onSetErrorOccured(CloudFileRequestId requestId, const QString &errorText);
+
+    CloudFileOperation *m_parent;
+    const CloudFileMembers m_members;
+    const CloudFileHandler m_file;
+    const CloudFileHandler m_parentFolder;
+    CloudFileRequestId m_requestId;
 };
 } // namespace vm
 
-#endif // VM_CLOUD_FILE_OPERATION_SOURCE_H
+#endif // VM_SET_MEMBERS_CLOUD_FILE_OPERATION_H
