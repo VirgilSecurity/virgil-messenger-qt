@@ -64,7 +64,6 @@ using namespace notifications::xmpp;
 #include <virgil/sdk/comm-kit/vssq_messenger_cloud_fs.h>
 
 #include <qxmpp/QXmppMessage.h>
-#include <qxmpp/QXmppMessageReceiptManager.h>
 #include <qxmpp/QXmppCarbonManager.h>
 #include <qxmpp/QXmppUploadRequestManager.h>
 #include <qxmpp/QXmppMucManager.h>
@@ -314,6 +313,7 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     connect(this, &Self::registerPushNotifications, this, &Self::onRegisterPushNotifications);
     connect(this, &Self::deregisterPushNotifications, this, &Self::onDeregisterPushNotifications);
     connect(this, &Self::xmppCreateGroupChat, this, &Self::xmppOnCreateGroupChat);
+    connect(this, &Self::xmppMessageDelivered, this, &Self::xmppOnMessageDelivered);
 
     //
     //  Configure Network Analyzer.
@@ -402,7 +402,6 @@ void Self::resetXmppConfiguration()
     m_impl->xmppMamManager = new QXmppMamManager();
 
     // Parent is implicitly changed to the QXmppClient within addExtension()
-    m_impl->xmpp->addExtension(new QXmppMessageReceiptManager());
     m_impl->xmpp->addExtension(m_impl->xmppCarbonManager);
     m_impl->xmpp->addExtension(m_impl->xmppUploadManager);
     m_impl->xmpp->addExtension(m_impl->xmppGroupChatManager);
@@ -480,9 +479,6 @@ void Self::resetXmppConfiguration()
 
     m_impl->xmpp->setLogger(logger);
 #endif
-
-    auto receipt = m_impl->xmpp->findExtension<QXmppMessageReceiptManager>();
-    connect(receipt, &QXmppMessageReceiptManager::messageDelivered, this, &Self::xmppOnMessageDelivered);
 }
 
 // --------------------------------------------------------------------------
@@ -1133,7 +1129,6 @@ Self::Result Self::sendPersonalMessage(const MessageHandler &message)
     xmppMessage.setId(message->id());
     xmppMessage.setStamp(message->createdAt());
     xmppMessage.setType(QXmppMessage::Type::Chat);
-    xmppMessage.setReceiptRequested(true);
     xmppMessage.setMarkable(true);
 
     //
@@ -1186,7 +1181,7 @@ Self::Result Self::sendGroupMessage(const MessageHandler &message)
     xmppMessage.setId(message->id());
     xmppMessage.setStamp(message->createdAt());
     xmppMessage.setType(QXmppMessage::Type::GroupChat);
-    xmppMessage.setReceiptRequested(true);
+    xmppMessage.setMarkable(true);
 
     //
     //  Send.
@@ -1211,13 +1206,7 @@ QFuture<Self::Result> Self::processReceivedXmppMessage(const QXmppMessage &xmppM
         //  Handle receipts (may come from archived messages).
         //
         if (xmppMessage.marker() == QXmppMessage::Marker::Received) {
-            OutgoingMessageStageUpdate update;
-            update.messageId = MessageId(xmppMessage.markedId());
-            update.stage = OutgoingMessageStage::Delivered;
-            emit updateMessage(update);
-
-            qCDebug(lcCoreMessenger) << "Received 'received' marker for message:" << update.messageId;
-
+            emit xmppMessageDelivered(xmppMessage.from(), xmppMessage.markedId());
             return Self::Result::Success;
         }
 
@@ -2001,10 +1990,6 @@ void Self::xmppOnMessageDelivered(const QString &jid, const QString &messageId)
     update.messageId = MessageId(messageId);
     update.stage = OutgoingMessageStage::Delivered;
     emit updateMessage(update);
-
-    //
-    //  Mark given message as delivered.
-    //
 }
 
 // --------------------------------------------------------------------------
@@ -2420,7 +2405,6 @@ void Self::onRejectGroupInvitation(const GroupId &groupId, const UserId &groupOw
         QXmppMessage rejectInvitationMessage;
         rejectInvitationMessage.setTo(groupIdToJid(groupId));
         rejectInvitationMessage.setFrom(currentUserJid());
-        rejectInvitationMessage.setReceiptRequested(false);
 
         rejectInvitationMessage.setExtensions(QXmppElementList() << xElement);
 

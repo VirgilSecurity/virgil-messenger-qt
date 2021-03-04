@@ -143,6 +143,7 @@ signals:
     void registerPushNotifications();
     void deregisterPushNotifications();
     void xmppCreateGroupChat(const GroupHandler &group, const Users &membersToBeInvited);
+    void xmppMessageDelivered(const QString &jid, const QString &messageId);
 
 public:
     //
