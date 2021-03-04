@@ -85,7 +85,7 @@ Operation *Self::createOperation(OperationSourcePtr source)
 
     auto *op = new CloudFileOperation(m_messenger, m_watcher, nullptr);
     connect(op, &Operation::notificationCreated, this, &Self::notificationCreated);
-    connect(op, &CloudFileOperation::cloudFilesUpdate, this, &Self::updateCloudFiles);
+    connect(op, &CloudFileOperation::updateCloudFiles, this, &Self::updateCloudFiles);
 
     switch (cloudFileSource->type()) {
     case SourceType::ListFolder:

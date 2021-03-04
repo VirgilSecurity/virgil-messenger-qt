@@ -156,11 +156,6 @@ void Self::refresh()
     switchToHierarchy(m_hierarchy);
 }
 
-CloudFileHandler Self::currentFile() const
-{
-    return m_cloudFileObject->cloudFile();
-}
-
 void Self::addFiles(const QVariant &fileUrls)
 {
     const auto urls = fileUrls.value<QList<QUrl>>();
@@ -198,12 +193,6 @@ void Self::addMembers(const CloudFileMembers &members)
 void Self::removeSelectedMembers()
 {
     removeMembers(m_cloudFileObject->selectedMembers());
-}
-
-void Self::leaveMembership()
-{
-    const auto member = m_cloudFileObject->findMemberById(m_messenger->currentUser()->id());
-    removeMembers({ member });
 }
 
 void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)

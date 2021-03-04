@@ -40,13 +40,6 @@ Page {
                 visible: d.model.selection.hasSelection
                 onTriggered: removeParticipantsDialog.open()
             }
-
-            ContextMenuItem {
-                id: leaveGroupItem
-                text: qsTr("Leave")
-                visible: !d.cloudFile.userIsOwner
-                onTriggered: controllers.cloudFiles.leaveMembership()
-            }
         }
     }
 

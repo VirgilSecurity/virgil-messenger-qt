@@ -132,7 +132,7 @@ void DownloadCloudFileOperation::onDownloaded()
     update.parentFolder = m_parentFolder;
     update.file = m_file;
     update.fingerprint = FileUtils::calculateFingerprint(m_file->localPath());
-    m_parent->cloudFilesUpdate(update);
+    m_parent->updateCloudFiles(update);
 
     transferUpdate(TransferCloudFileUpdate::Stage::Finished, m_file->size());
 
@@ -152,7 +152,7 @@ void DownloadCloudFileOperation::transferUpdate(const TransferCloudFileUpdate::S
     update.stage = stage;
     update.type = TransferCloudFileUpdate::Type::Download;
     update.bytesLoaded = bytesLoaded;
-    m_parent->cloudFilesUpdate(update);
+    m_parent->updateCloudFiles(update);
 }
 
 bool DownloadCloudFileOperation::createLocalDir()

@@ -176,7 +176,7 @@ CloudFileRequestId CloudFileSystem::deleteFiles(const CloudFiles &files)
     return requestId;
 }
 
-CloudFileRequestId CloudFileSystem::setMembers(const CloudFileHandler &file, const CloudFileMembers &members)
+CloudFileRequestId CloudFileSystem::setMembers(const CloudFileMembers &members, const CloudFileHandler &file)
 {
     const auto requestId = ++m_requestId;
     const UserHandler keyIssuer = m_coreMessenger->findUserById(file->updatedBy());

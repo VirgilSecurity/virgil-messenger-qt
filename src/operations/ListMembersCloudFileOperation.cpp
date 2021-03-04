@@ -101,7 +101,7 @@ void Self::onContactsFetched(const Contacts &requestedContacts, const Contacts &
         update.parentFolder = m_parentFolder;
         update.file = m_file;
         update.members = m_members;
-        m_parent->cloudFilesUpdate(update);
+        m_parent->updateCloudFiles(update);
 
         finish();
     }

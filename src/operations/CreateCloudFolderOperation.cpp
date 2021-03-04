@@ -80,7 +80,7 @@ void CreateCloudFolderOperation::onCreated(const CloudFileRequestId requestId, c
         CreateCloudFilesUpdate update;
         update.parentFolder = m_parentFolder;
         update.files.push_back(folder);
-        m_parent->cloudFilesUpdate(update);
+        m_parent->updateCloudFiles(update);
         finish();
     }
 }

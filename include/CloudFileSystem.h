@@ -69,7 +69,7 @@ public:
     bool decryptFile(const QString &sourcePath, const QByteArray &encryptionKey, const CloudFileHandler &file,
                      const CloudFileHandler &parentFolder);
     CloudFileRequestId deleteFiles(const CloudFiles &files);
-    CloudFileRequestId setMembers(const CloudFileHandler &file, const CloudFileMembers &members);
+    CloudFileRequestId setMembers(const CloudFileMembers &members, const CloudFileHandler &file);
     CloudFileRequestId fetchMembers(const CloudFileHandler &file);
 
 signals:

@@ -56,7 +56,7 @@ Self::SetMembersCloudFileOperation(CloudFileOperation *parent, const CloudFileMe
 
 void Self::run()
 {
-    m_requestId = m_parent->cloudFileSystem()->setMembers(m_file, m_members);
+    m_requestId = m_parent->cloudFileSystem()->setMembers(m_members, m_file);
 }
 
 void Self::onSet(CloudFileRequestId requestId, const CloudFileHandler &file, const CloudFileMembers &members)
@@ -66,7 +66,7 @@ void Self::onSet(CloudFileRequestId requestId, const CloudFileHandler &file, con
         update.parentFolder = m_parentFolder;
         update.file = file;
         update.members = members;
-        m_parent->cloudFilesUpdate(update);
+        m_parent->updateCloudFiles(update);
 
         finish();
     }

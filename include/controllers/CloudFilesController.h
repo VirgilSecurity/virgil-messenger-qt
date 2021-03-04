@@ -68,7 +68,6 @@ public:
     Q_INVOKABLE void switchToFolder(const QVariant &proxyRow);
     Q_INVOKABLE void switchToParentFolder();
     Q_INVOKABLE void refresh();
-    CloudFileHandler currentFile() const;
 
     Q_INVOKABLE void addFiles(const QVariant &fileUrls);
     Q_INVOKABLE void deleteFiles();
@@ -77,7 +76,6 @@ public:
     void loadCloudFileMembers();
     void addMembers(const CloudFileMembers &members);
     Q_INVOKABLE void removeSelectedMembers();
-    Q_INVOKABLE void leaveMembership();
 
 signals:
     void updateCloudFiles(const CloudFilesUpdate &update);
