@@ -460,6 +460,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentUploadStage.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageGroupChatInfo.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageId.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageRequest.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageSender.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageStatus.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageUpdate.h
@@ -659,6 +660,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentUploadStage.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageGroupChatInfo.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageId.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageRequest.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageStatus.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageUpdate.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/OutgoingMessage.cpp

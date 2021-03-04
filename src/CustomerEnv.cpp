@@ -58,7 +58,6 @@ QString Self::messengerServiceUrl()
     return Customer::MessengerUrlTemplate.arg(QLatin1String("-dev"));
 #elif VS_MSGR_ENV_STG
     return Customer::MessengerUrlTemplate.arg(QLatin1String("-stg"));
-    Í
 #else
     return Customer::MessengerUrlTemplate.arg(QString());
 #endif

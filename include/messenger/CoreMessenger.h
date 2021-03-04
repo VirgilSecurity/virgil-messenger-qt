@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -48,6 +48,7 @@
 #include "GroupUpdate.h"
 #include "Contact.h"
 #include "XmppMucSubIq.h"
+#include "MessageRequest.h"
 
 #include <qxmpp/QXmppClient.h>
 #include <qxmpp/QXmppHttpUploadIq.h>
@@ -124,6 +125,12 @@ signals:
     void groupChatCreated(const GroupId &groupId);
     void groupChatCreateFailed(const GroupId &chatId, CoreMessengerStatus errorStatus);
     void updateGroup(const GroupUpdate &groupUpdate);
+    // --
+
+    //
+    //  Message history control.
+    // --
+    void requestMessageHistory(const MessageRequest &request);
     // --
 
     //
@@ -259,6 +266,9 @@ private:
     Result processGroupChatReceivedXmppMessage(const QXmppMessage &xmppMessage);
     Result processErrorXmppMessage(const QXmppMessage &xmppMessage);
 
+    Result processChatReceivedXmppCarbonMessage(const QXmppMessage &xmppMessage);
+    Result processGroupChatReceivedXmppCarbonMessage(const QXmppMessage &xmppMessage);
+
     QFuture<Result> processReceivedXmppCarbonMessage(const QXmppMessage &xmppMessage);
 
     //
@@ -312,6 +322,8 @@ private slots:
     void xmppOnRoomParticipantReceived(const QString &roomJid, const QString &jid,
                                        QXmppMucItem::Affiliation affiliation);
 
+    void xmppOnArchivedMessageReceived(const QString &queryId, const QXmppMessage &message);
+
     //
     //  MUC/Sub slots.
     //--
@@ -343,6 +355,8 @@ private slots:
     void onProcessNetworkState(bool online);
     void onLogConnectionStateChanged(CoreMessenger::ConnectionState state);
 
+    void onRequestMessageHistory(const MessageRequest &request);
+
 private:
     class Impl;
     std::unique_ptr<Impl> m_impl;
@@ -373,6 +387,7 @@ Q_DECLARE_METATYPE(vm::GroupMember);
 Q_DECLARE_METATYPE(vm::GroupMembers);
 Q_DECLARE_METATYPE(vm::Contact);
 Q_DECLARE_METATYPE(vm::Contacts);
+Q_DECLARE_METATYPE(vm::MessageRequest);
 
 Q_DECLARE_METATYPE(QXmppClient::State);
 Q_DECLARE_METATYPE(QXmppClient::Error);
