@@ -264,6 +264,8 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     qRegisterMetaType<vm::ModifiableCloudFileHandler>("ModifiableCloudFileHandler");
     qRegisterMetaType<vm::CloudFiles>("CloudFiles");
     qRegisterMetaType<vm::ModifiableCloudFiles>("ModifiableCloudFiles");
+    qRegisterMetaType<vm::CloudFileMemberHandler>("CloudFileMemberHandler");
+    qRegisterMetaType<vm::CloudFileMembers>("CloudFileMembers");
     qRegisterMetaType<vm::GroupUpdate>("GroupUpdate");
     qRegisterMetaType<vm::Users>("Users");
     qRegisterMetaType<vm::GroupMember>("GroupMember");

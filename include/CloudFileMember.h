@@ -50,6 +50,7 @@ public:
     CloudFileMember(const ContactHandler &contact, const Type type);
 
     ContactHandler contact() const;
+    void setContact(const ContactHandler &contact);
     Type type() const;
 
 private:

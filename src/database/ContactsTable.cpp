@@ -43,6 +43,7 @@ using Self = ContactsTable;
 Self::ContactsTable(Database *database) : DatabaseTable(QLatin1String("contacts"), database)
 {
     connect(this, &Self::addContact, this, &Self::onAddContact);
+    connect(this, &Self::fetch, this, &Self::onFetch);
     connect(this, &Self::updateContact, this, &Self::onUpdateContact);
 }
 
@@ -77,6 +78,29 @@ void Self::onAddContact(const Contact &contact)
     }
 }
 
+void Self::onFetch(const Contacts &requestedContacts)
+{
+    QStringList userIds;
+    for (auto &c : requestedContacts) {
+        userIds.push_back(c->userId());
+    }
+    DatabaseUtils::BindValues bindValues { { ":userIds", userIds } };
+
+    ScopedConnection connection(*database());
+    auto query = DatabaseUtils::readExecQuery(database(), "selectContactsByIds", bindValues);
+    if (!query) {
+        qCCritical(lcDatabase) << "ContactsTable::onFetch error";
+        emit errorOccurred(tr("Failed to fetch contacts by ids"));
+    } else {
+        Contacts contacts;
+        while (query->next()) {
+            contacts.push_back(readContact(*query));
+        }
+        qCDebug(lcDatabase) << "Fetched contacts count: " << contacts.size();
+        emit fetched(requestedContacts, contacts);
+    }
+}
+
 void Self::onUpdateContact(const ContactUpdate &contactUpdate)
 {
 
@@ -104,4 +128,18 @@ void Self::onUpdateContact(const ContactUpdate &contactUpdate)
     } else {
         qCWarning(lcDatabase) << "Contact was not updated";
     }
+}
+
+ContactHandler Self::readContact(const QSqlQuery &query) const
+{
+    auto contact = std::make_shared<Contact>();
+    contact->setUserId(UserId(query.value("userId").toString()));
+    contact->setUsername(query.value("username").toString());
+    contact->setName(query.value("name").toString());
+    contact->setEmail(query.value("email").toString());
+    contact->setPhone(query.value("phone").toString());
+    contact->setPlatformId(query.value("platformId").toString());
+    contact->setAvatarLocalPath(query.value("avatarLocalPath").toString());
+    contact->setIsBanned(query.value("isBanned").toBool());
+    return contact;
 }

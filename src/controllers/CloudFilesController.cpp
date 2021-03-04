@@ -222,12 +222,7 @@ void Self::removeMembers(const CloudFileMembers &members)
     const auto file = m_models->cloudFiles()->selectedFile();
     auto newMembers = m_cloudFileObject->members();
     newMembers.erase(std::remove_if(newMembers.begin(), newMembers.end(), [&removedIds](auto &m) {
-        const auto userId = m->contact()->userId();
-        if (removedIds.find(userId) != removedIds.end()) {
-            removedIds.erase(userId);
-            return true;
-        }
-        return false;
+        return removedIds.find(m->contact()->userId()) != removedIds.end();
     }));
 
     m_models->cloudFilesQueue()->pushSetMembers(newMembers, file, m_hierarchy.back());

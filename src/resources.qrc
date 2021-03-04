@@ -237,6 +237,7 @@
         <file>resources/database/insertContact.sql</file>
         <file>resources/database/selectAllContacts.sql</file>
         <file>resources/database/selectContact.sql</file>
+        <file>resources/database/selectContactsByIds.sql</file>
         <file>resources/database/updateContactAvatarLocalPath.sql</file>
         <file>resources/database/updateContactEmail.sql</file>
         <file>resources/database/updateContactIsBanned.sql</file>

@@ -34,24 +34,28 @@
 
 #include "ListMembersCloudFileOperation.h"
 
+#include "ContactsTable.h"
 #include "CloudFileOperation.h"
 #include "CloudFileSystem.h"
 #include "CloudFilesUpdate.h"
+#include "UserDatabase.h"
 
 using namespace vm;
 using Self = ListMembersCloudFileOperation;
 
 Self::ListMembersCloudFileOperation(CloudFileOperation *parent, const CloudFileHandler &file,
-                                    const CloudFileHandler &parentFolder)
+                                    const CloudFileHandler &parentFolder, UserDatabase *userDatabase)
     : Operation(QLatin1String("ShareCloudFiles"), parent),
       m_parent(parent),
       m_file(file),
       m_parentFolder(parentFolder),
+      m_userDatabase(userDatabase),
       m_requestId(0)
 {
     connect(m_parent->cloudFileSystem(), &CloudFileSystem::membersFetched, this, &Self::onListFetched);
     connect(m_parent->cloudFileSystem(), &CloudFileSystem::fetchMembersErrorOccurred, this,
             &Self::onListFetchErrorOccured);
+    connect(m_userDatabase->contactsTable(), &ContactsTable::fetched, this, &Self::onContactsFetched);
 }
 
 void Self::run()
@@ -62,13 +66,10 @@ void Self::run()
 void Self::onListFetched(CloudFileRequestId requestId, const CloudFileHandler &file, const CloudFileMembers &members)
 {
     if (m_requestId == requestId) {
-        ListMembersCloudFileUpdate update;
-        update.parentFolder = m_parentFolder;
-        update.file = file;
-        update.members = members;
-        m_parent->cloudFilesUpdate(update);
-
-        finish();
+        m_file = file;
+        m_members = members;
+        m_membersContacts = CloudFileMembersToContacts(members);
+        m_userDatabase->contactsTable()->fetch(m_membersContacts);
     }
 }
 
@@ -76,5 +77,32 @@ void Self::onListFetchErrorOccured(CloudFileRequestId requestId, const QString &
 {
     if (m_requestId == requestId) {
         failAndNotify(errorText);
+    }
+}
+
+void Self::onContactsFetched(const Contacts &requestedContacts, const Contacts &fetchedContacts)
+{
+    if (requestedContacts == m_membersContacts) {
+        // Build map for quick search
+        std::map<UserId, ContactHandler> map;
+        for (auto &c : fetchedContacts) {
+            map[c->userId()] = c;
+        }
+
+        // Update contacts in members
+        for (auto &m : m_members) {
+            if (const auto c = map[m->contact()->userId()]) {
+                m->setContact(c);
+            }
+        }
+
+        // Emit update and finish
+        ListMembersCloudFileUpdate update;
+        update.parentFolder = m_parentFolder;
+        update.file = m_file;
+        update.members = m_members;
+        m_parent->cloudFilesUpdate(update);
+
+        finish();
     }
 }

@@ -124,7 +124,8 @@ Operation *Self::createOperation(OperationSourcePtr source)
                                                          cloudFileSource->folder()));
         break;
     case SourceType::ListMembers: {
-        op->appendChild(new ListMembersCloudFileOperation(op, cloudFileSource->file(), cloudFileSource->folder()));
+        op->appendChild(new ListMembersCloudFileOperation(op, cloudFileSource->file(), cloudFileSource->folder(),
+                                                          m_userDatabase));
         break;
     }
     default:

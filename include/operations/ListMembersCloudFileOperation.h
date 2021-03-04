@@ -42,23 +42,29 @@
 
 namespace vm {
 class CloudFileOperation;
+class UserDatabase;
 
 class ListMembersCloudFileOperation : public Operation
 {
 public:
     ListMembersCloudFileOperation(CloudFileOperation *parent, const CloudFileHandler &file,
-                                  const CloudFileHandler &parentFolder);
+                                  const CloudFileHandler &parentFolder, UserDatabase *userDatabase);
 
     void run() override;
 
 private:
     void onListFetched(CloudFileRequestId requestId, const CloudFileHandler &file, const CloudFileMembers &members);
     void onListFetchErrorOccured(CloudFileRequestId requestId, const QString &errorText);
+    void onContactsFetched(const Contacts &requestedContacts, const Contacts &fetchedContacts);
 
     CloudFileOperation *m_parent;
-    const CloudFileHandler m_file;
+    CloudFileHandler m_file;
     const CloudFileHandler m_parentFolder;
+    UserDatabase *m_userDatabase;
+
     CloudFileRequestId m_requestId;
+    CloudFileMembers m_members;
+    Contacts m_membersContacts;
 };
 } // namespace vm
 

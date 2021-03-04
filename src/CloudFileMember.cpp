@@ -48,6 +48,11 @@ ContactHandler Self::contact() const
     return m_contact;
 }
 
+void Self::setContact(const ContactHandler &contact)
+{
+    m_contact = contact;
+}
+
 CloudFileMember::Type Self::type() const
 {
     return m_type;
