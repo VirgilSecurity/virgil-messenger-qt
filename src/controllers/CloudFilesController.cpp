@@ -186,7 +186,7 @@ void Self::addMembers(const CloudFileMembers &members)
     allMembers.insert(allMembers.end(), members.begin(), members.end());
 
     const auto file = m_cloudFolderObject->cloudFile();
-    m_models->cloudFilesQueue()->pushSetMembers(members, file, parentFolder());
+    m_models->cloudFilesQueue()->pushSetMembers(allMembers, file, parentFolder());
 }
 
 void Self::removeSelectedMembers()
