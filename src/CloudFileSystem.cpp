@@ -55,6 +55,8 @@ CloudFileSystem::CloudFileSystem(CoreMessenger *coreMessenger, Messenger *messen
 void CloudFileSystem::signIn()
 {
     qCDebug(lcCloudFileSystem) << "Sign-in cloud-fs";
+    m_coreFs = m_coreMessenger->cloudFs();
+
     const auto userName = m_messenger->currentUser()->username();
     m_downloadsDir = m_messenger->settings()->cloudFilesDownloadsDir(userName);
     emit downloadsDirChanged(m_downloadsDir);
@@ -63,13 +65,14 @@ void CloudFileSystem::signIn()
 void CloudFileSystem::signOut()
 {
     qCDebug(lcCloudFileSystem) << "Sign-out cloud-fs";
+    m_coreFs = {};
 }
 
 CloudFileRequestId CloudFileSystem::fetchList(const CloudFileHandler &parentFolder)
 {
     const auto requestId = ++m_requestId;
     const auto parentFolderId = parentFolder->id().coreFolderId();
-    FutureWorker::run(coreFs().listFolder(parentFolderId), [this, parentFolder, requestId](auto result) {
+    FutureWorker::run(m_coreFs->listFolder(parentFolderId), [this, parentFolder, requestId](auto result) {
         if (std::holds_alternative<CoreMessengerStatus>(result)) {
             emit fetchListErrorOccured(requestId, tr("Cloud folder listing error"));
             return;
@@ -96,7 +99,7 @@ CloudFileRequestId CloudFileSystem::createFile(const QString &filePath, const Cl
     const auto parentFolderId = parentFolder->id().coreFolderId();
     const auto tempDir = m_messenger->settings()->cloudFilesCacheDir();
     const auto encFilePath = tempDir.filePath(QLatin1String("upload-") + Utils::createUuid());
-    auto future = coreFs().createFile(filePath, encFilePath, parentFolderId, parentFolder->publicKey());
+    auto future = m_coreFs->createFile(filePath, encFilePath, parentFolderId, parentFolder->publicKey());
     FutureWorker::run(future, [this, filePath, encFilePath, parentFolder, requestId](auto result) {
         if (std::holds_alternative<CoreMessengerStatus>(result)) {
             emit createFileErrorOccurred(requestId, tr("Failed to create file"));
@@ -116,7 +119,7 @@ CloudFileRequestId CloudFileSystem::createFolder(const QString &name, const Clou
 {
     const auto requestId = ++m_requestId;
     const auto parentFolderId = parentFolder->id().coreFolderId();
-    auto future = coreFs().createFolder(name, members, parentFolderId, parentFolder->publicKey());
+    auto future = m_coreFs->createFolder(name, members, parentFolderId, parentFolder->publicKey());
     FutureWorker::run(future, [this, parentFolder, name, requestId](auto result) {
         if (std::holds_alternative<CoreMessengerStatus>(result)) {
             emit createFolderErrorOccured(requestId, tr("Failed to create folder"));
@@ -134,7 +137,7 @@ CloudFileRequestId CloudFileSystem::createFolder(const QString &name, const Clou
 CloudFileRequestId CloudFileSystem::getDownloadInfo(const CloudFileHandler &file)
 {
     const auto requestId = ++m_requestId;
-    FutureWorker::run(coreFs().getFileDownloadInfo(file->id().coreFileId()), [this, file, requestId](auto result) {
+    FutureWorker::run(m_coreFs->getFileDownloadInfo(file->id().coreFileId()), [this, file, requestId](auto result) {
         if (std::holds_alternative<CoreMessengerStatus>(result)) {
             emit getDownloadInfoErrorOccurred(requestId, tr("Get download info error"));
             return;
@@ -149,8 +152,8 @@ CloudFileRequestId CloudFileSystem::getDownloadInfo(const CloudFileHandler &file
 bool CloudFileSystem::decryptFile(const QString &sourcePath, const QByteArray &encryptionKey,
                                   const CloudFileHandler &file, const CloudFileHandler &parentFolder)
 {
-    const auto status = coreFs().decryptFile(sourcePath, file->localPath(), encryptionKey, m_messenger->currentUser(),
-                                             createFsFolder(parentFolder));
+    const auto status = m_coreFs->decryptFile(sourcePath, file->localPath(), encryptionKey, m_messenger->currentUser(),
+                                              createFsFolder(parentFolder));
     return status == CoreMessengerStatus::Success;
 }
 
@@ -158,8 +161,8 @@ CloudFileRequestId CloudFileSystem::deleteFiles(const CloudFiles &files)
 {
     const auto requestId = ++m_requestId;
     for (auto &file : files) {
-        auto future = file->isFolder() ? coreFs().deleteFolder(file->id().coreFolderId())
-                                       : coreFs().deleteFile(file->id().coreFileId());
+        auto future = file->isFolder() ? m_coreFs->deleteFolder(file->id().coreFolderId())
+                                       : m_coreFs->deleteFile(file->id().coreFileId());
         FutureWorker::run(future, [this, file, requestId](auto result) {
             if (result == CoreMessengerStatus::Success) {
                 emit fileDeleted(requestId, file);
@@ -177,7 +180,7 @@ CloudFileRequestId CloudFileSystem::setMembers(const CloudFileMembers &members, 
 {
     const auto requestId = ++m_requestId;
     const UserHandler keyIssuer = m_coreMessenger->findUserById(file->updatedBy());
-    auto future = coreFs().setSharedGroupUsers(file->sharedGroupId(), file->encryptedKey(), keyIssuer, members);
+    auto future = m_coreFs->setSharedGroupUsers(file->sharedGroupId(), file->encryptedKey(), keyIssuer, members);
     FutureWorker::run(future, [this, file, members, requestId](auto result) {
         if (result == CoreMessengerStatus::Success) {
             emit membersSet(requestId, file, members);
@@ -191,7 +194,7 @@ CloudFileRequestId CloudFileSystem::setMembers(const CloudFileMembers &members, 
 CloudFileRequestId CloudFileSystem::fetchMembers(const CloudFileHandler &file)
 {
     const auto requestId = ++m_requestId;
-    auto future = coreFs().getSharedGroupUsers(file->sharedGroupId());
+    auto future = m_coreFs->getSharedGroupUsers(file->sharedGroupId());
     FutureWorker::run(future, [this, file, requestId](auto result) {
         if (std::holds_alternative<CoreMessengerStatus>(result)) {
             emit fetchMembersErrorOccurred(requestId, tr("Failed to fetch members"));
@@ -267,9 +270,4 @@ CloudFsFolderInfo CloudFileSystem::createFsFolderInfo(const CloudFileHandler &fo
     info.updatedBy = folder->updatedBy();
     info.sharedGroupId = folder->sharedGroupId();
     return info;
-}
-
-CoreMessengerCloudFs CloudFileSystem::coreFs()
-{
-    return m_coreMessenger->cloudFs();
 }

@@ -109,9 +109,8 @@ private:
     CloudFsFolder createFsFolder(const CloudFileHandler &folder) const;
     CloudFsFolderInfo createFsFolderInfo(const CloudFileHandler &folder) const;
 
-    CoreMessengerCloudFs coreFs();
-
     QPointer<CoreMessenger> m_coreMessenger;
+    std::optional<CoreMessengerCloudFs> m_coreFs;
     std::atomic<CloudFileRequestId> m_requestId = 0;
     QPointer<Messenger> m_messenger;
     QDir m_downloadsDir;
