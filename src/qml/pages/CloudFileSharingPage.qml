@@ -13,6 +13,7 @@ Page {
         id: d
         readonly property var cloudFolder: controllers.cloudFiles.currentFolder
         readonly property var model: cloudFolder.members
+        readonly property var selection: model.selection
     }
 
     background: Rectangle {
@@ -22,7 +23,7 @@ Page {
     header: PageHeader {
         id: pageHeader
         title: qsTr("Cloud folder info")
-        contextMenuVisible: addMembersItem.visible || removeMembersItem.visible
+        contextMenuVisible: d.cloudFolder.userIsOwner
         contextMenu: ContextMenu {
             ContextMenuItem {
                 id: addMembersItem
@@ -66,8 +67,17 @@ Page {
             ContactsListView {
                 readonly property var tabTitle: qsTr("Participants")
                 model: d.model.proxy
+                selectionModel: d.selection
                 isSelectable: d.cloudFolder.userIsOwner
                 onContactSelected: d.model.toggleByUsername(contactUsername)
+                itemContextMenu: ContextMenu {
+                    dropdown: true
+
+                    ContextMenuItem {
+                        text: qsTr("Remove member")
+                        onTriggered: removeParticipantsDialog.open()
+                    }
+                }
             }
         }
     }

@@ -8,15 +8,22 @@ import "../theme"
 
 ModelListView {
     id: root
-    model: models.discoveredContacts.proxy
+    model: d.model.proxy
     delegate: contactListComponent
     section.delegate: contactSectionComponent
     section.property: "section"
     isSearchOpened: true
 
+    property var selectionModel: d.model.selection
     property bool isSelectable: true
+    property var itemContextMenu: null
 
     signal contactSelected(string contactUsername)
+
+    QtObject {
+        id: d
+        readonly property var model: models.discoveredContacts
+    }
 
     Component {
         id: contactSectionComponent
@@ -53,29 +60,31 @@ ModelListView {
                 isSelected: model.isSelected
             }
 
-            Column {
+            TwoLineLabel {
                 Layout.fillWidth: true
+                title: model.displayName
+                description: model.details
+            }
 
-                Text {
-                    color: Theme.primaryTextColor
-                    font.pointSize: UiHelper.fixFontSz(15)
-                    text: model.displayName
-                    elide: Text.ElideRight
-                }
+            ImageButton {
+                id: menuButton
+                image: "More"
+                height: imageSize
+                hoverVisible: !model.isSelected
+                visible: root.isSelectable && root.itemContextMenu
 
-                Text {
-                    color: Theme.secondaryTextColor
-                    font.pointSize: UiHelper.fixFontSz(12)
-                    text: model.details
-                    width: parent.width
-                    elide: Text.ElideRight
-                    textFormat: Text.RichText
+                onClicked: {
+                    root.selectionModel.clear()
+                    root.selectionModel.toggle(model.index)
+                    root.itemContextMenu.parent = menuButton
+                    root.itemContextMenu.open()
                 }
             }
 
-            onClicked: {
+            onSelectItem: {
                 if (root.isSelectable) {
-                    root.contactSelected(model.username)
+                    root.selectionModel.multiSelect = multiSelect
+                    root.selectionModel.toggle(model.index)
                 }
             }
         }
