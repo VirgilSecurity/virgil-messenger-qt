@@ -61,7 +61,7 @@ void SplashScreenState::trySignIn()
 void SplashScreenState::onEntry(QEvent *)
 {
     // Schedule sign-in
-#ifdef VS_ANDROID
+#if VS_ANDROID
     const auto interval = 100;
 #else
     const auto interval = 1000;
@@ -71,7 +71,7 @@ void SplashScreenState::onEntry(QEvent *)
 
 void SplashScreenState::hideNativeSplashScreen()
 {
-#ifdef VS_ANDROID
+#if VS_ANDROID
     VSQAndroid::hideSplashScreen();
 #endif
 }

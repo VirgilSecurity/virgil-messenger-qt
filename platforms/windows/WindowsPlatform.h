@@ -32,18 +32,21 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <QtCore>
+#ifndef VM_WINDOWS_PLATFORM_H
+#define VM_WINDOWS_PLATFORM_H
 
-#include "ui/VSQUiHelper.h"
+namespace vm {
 
-/******************************************************************************/
-int VSQUiHelper::fixFontSz(int sz)
+class WindowsPlatform
 {
-#if VS_WINDOWS
-    return sz * 96 / 128;
-#else
-    return sz;
-#endif
-}
+public:
+    WindowsPlatform() = delete;
 
-/******************************************************************************/
+    static QString caBundlePath();
+
+    static bool prepare();
+};
+
+} // namespace vm
+
+#endif // VM_WINDOWS_PLATFORM_H

@@ -143,9 +143,9 @@ void Settings::addUserToList(const QString &user)
 QString Settings::settingsFileName()
 {
     QString ext;
-#if defined(VS_MACOS) || defined(VS_IOS)
+#if VS_MACOS || VS_IOS
     ext = QLatin1String(".plist");
-#elif defined(VS_LINUX)
+#elif VS_LINUX
     ext = QLatin1String(".ini");
 #endif
     return CustomerEnv::appDataLocation().filePath(QLatin1String("settings") + ext);
@@ -270,11 +270,7 @@ QSize Settings::previewMaxSize() const
 
 bool Settings::devMode() const
 {
-#ifdef VS_DEVMODE
-    return true;
-#else
     return false;
-#endif // VS_DEVMODE
 }
 
 bool Settings::autoSendCrashReport() const

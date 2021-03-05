@@ -32,18 +32,21 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <QtCore>
+#include "WindowsPlatform.h"
 
-#include "ui/VSQUiHelper.h"
+#include "CustomerEnv.h"
 
-/******************************************************************************/
-int VSQUiHelper::fixFontSz(int sz)
+using namespace vm;
+using Self = WindowsPlatform;
+
+QString Self::caBundlePath()
 {
-#if VS_WINDOWS
-    return sz * 96 / 128;
-#else
-    return sz;
-#endif
+    return CustomerEnv::appDataLocation().filePath("cert.pem");
 }
 
-/******************************************************************************/
+bool Self::prepare()
+{
+    const auto destCertFile = caBundlePath();
+    QFile::remove(destCertFile);
+    return QFile::copy(":qml/resources/cert.pem", destCertFile);
+}

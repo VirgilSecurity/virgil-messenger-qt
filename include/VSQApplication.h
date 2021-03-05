@@ -43,7 +43,7 @@
 #include "Validator.h"
 #include "Messenger.h"
 #include "Settings.h"
-#ifdef VS_MACOS
+#if VS_MACOS
 #    include <macos/VSQMacos.h>
 #endif // VS_MACOS
 #include "Controllers.h"

@@ -599,6 +599,8 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadCloudFileOperation.h
         # Generated
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQCustomer.h
+        # Windows
+        $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/platforms/windows/WindowsPlatform.h>
         # MacOS
         $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/include/macos/VSQMacos.h>
         # IOS
@@ -805,6 +807,7 @@ target_sources(${VS_TARGET_NAME}
         $<$<STREQUAL:"${VS_PLATFORM}","linux">:${CMAKE_CURRENT_LIST_DIR}/platforms/default/CustomerEnvDefault.cpp>
         # Windows
         $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/platforms/default/CustomerEnvDefault.cpp>
+        $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/platforms/windows/WindowsPlatform.cpp>
         # MACOS
         $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/platforms/apple/CustomerEnvApple.mm>
         $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/src/macos/VSQMacos.mm>
@@ -893,6 +896,8 @@ target_include_directories(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp>
 
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/platforms>
+
         $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}>
         $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}/qxmpp>
 
@@ -920,24 +925,16 @@ target_compile_definitions(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:ENABLE_XMPP_LOGS=$<BOOL:${ENABLE_XMPP_LOGS}>>
         $<BUILD_INTERFACE:ENABLE_XMPP_EXTRA_LOGS=$<BOOL:${ENABLE_XMPP_EXTRA_LOGS}>>
 
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:VS_ANDROID=1>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:VS_MOBILE=1>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:VS_PUSHNOTIFICATIONS=1>>
+        $<BUILD_INTERFACE:VS_ANDROID=$<STREQUAL:"${VS_PLATFORM}","android">>
+        $<BUILD_INTERFACE:VS_IOS=$<STREQUAL:"${VS_PLATFORM}","ios">>
+        $<BUILD_INTERFACE:VS_IOS_SIMULATOR=$<BOOL:${VS_IOS_SIMULATOR}>>
+        $<BUILD_INTERFACE:VS_MACOS=$<STREQUAL:"${VS_PLATFORM}","macos">>
+        $<BUILD_INTERFACE:VS_LINUX=$<STREQUAL:"${VS_PLATFORM}","linux">>
+        $<BUILD_INTERFACE:VS_WINDOWS=$<STREQUAL:"${VS_PLATFORM}","windows">>
 
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","ios">:VS_IOS=1>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","ios">:VS_MOBILE=1>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","ios">:VS_PUSHNOTIFICATIONS=1>>
-        $<BUILD_INTERFACE:$<$<BOOL:${VS_IOS_SIMULATOR}>:VS_IOS_SIMULATOR=1>>
-
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","macos">:VS_MACOS=1>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","macos">:VS_DESKTOP=1>>
-
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","linux">:VS_DESKTOP=1>>
-
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","linux">:VS_DESKTOP=1>>
-
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","windows">:VS_DESKTOP=1>>
-
+        $<BUILD_INTERFACE:VS_DESKTOP=$<IN_LIST:${VS_PLATFORM},${VS_DESKTOP_PLATFORM_LIST}>>
+        $<BUILD_INTERFACE:VS_MOBILE=$<IN_LIST:"${VS_PLATFORM}",${VS_MOBILE_PLATFORM_LIST}>>
+        $<BUILD_INTERFACE:VS_PUSHNOTIFICATIONS=$<IN_LIST:${VS_PLATFORM},${VS_MOBILE_PLATFORM_LIST}>>
         )
 
 target_compile_options(${VS_TARGET_NAME}

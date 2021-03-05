@@ -95,7 +95,7 @@ bool Self::isValidUrl(const QUrl &url)
 
 QString Self::urlToLocalFile(const QUrl &url)
 {
-#if defined(Q_OS_ANDROID)
+#if VS_ANDROID
     qCDebug(lcFileUtils) << "Android file url (before encoding):" << url.toString();
     auto res = QUrl::fromPercentEncoding(url.toString().toUtf8());
     qCDebug(lcFileUtils) << "Android file url:" << res;
@@ -125,7 +125,7 @@ bool Self::forceCreateDir(const QString &absolutePath)
 
 QUrl Self::localFileToUrl(const QString &filePath)
 {
-#if defined(Q_OS_ANDROID)
+#if VS_ANDROID
     QUrl url(filePath);
     if (url.scheme().isEmpty()) {
         return QUrl::fromLocalFile(filePath);
@@ -180,12 +180,12 @@ QString FileUtils::fileName(const QString &filePath)
 QString Self::attachmentFileName(const QUrl &url, bool isPicture)
 {
     QString fileName;
-#ifdef VS_ANDROID
+#if VS_ANDROID
     Q_UNUSED(isPicture)
     fileName = VSQAndroid::getDisplayName(url);
-#elif defined(VS_IOS_SIMULATOR)
+#elif VS_IOS_SIMULATOR
     fileName = url.fileName();
-#elif defined(VS_IOS)
+#elif VS_IOS
     if (isPicture) {
         // Build file name from url, i.e.
         // "file:assets-library://asset/asset.PNG?id=7CE20DC4-89A8-4079-88DC-AD37920581B5&ext=PNG"

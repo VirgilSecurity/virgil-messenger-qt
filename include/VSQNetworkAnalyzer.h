@@ -41,7 +41,7 @@
 #include <QMap>
 #include <QTimer>
 
-#if defined(VS_MACOS) || defined(VS_LINUX)
+#if VS_MACOS || VS_LINUX
 #    pragma GCC diagnostic push
 #    pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
@@ -93,7 +93,7 @@ private:
     bool checkIsNeedStop();
 };
 
-#if defined(VS_MACOS) || defined(VS_LINUX)
+#if VS_MACOS || VS_LINUX
 #    pragma GCC diagnostic pop
 #endif
 
