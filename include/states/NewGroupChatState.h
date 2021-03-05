@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+﻿//  Copyright (C) 2015-2020 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -43,7 +43,7 @@ class NewGroupChatState : public SelectContactsState
     Q_OBJECT
 
 public:
-    using SelectContactsState::SelectContactsState;
+    NewGroupChatState(DiscoveredContactsModel *contactsModel, QState *parent);
 };
 } // namespace vm
 

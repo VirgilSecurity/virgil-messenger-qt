@@ -36,3 +36,9 @@
 
 using namespace vm;
 using Self = NewGroupChatState;
+
+Self::NewGroupChatState(DiscoveredContactsModel *contactsModel, QState *parent)
+    : SelectContactsState(contactsModel, parent)
+{
+    setMultiSelect(true);
+}

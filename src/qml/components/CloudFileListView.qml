@@ -88,8 +88,7 @@ ModelListView {
             }
 
             onClicked: {
-                d.selection.clear()
-                d.selection.toggle(model.index)
+                d.selection.selectOnly(model.index)
                 contextMenu.open()
             }
         }

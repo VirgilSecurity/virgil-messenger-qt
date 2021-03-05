@@ -61,7 +61,7 @@ private:
     void onEntry(QEvent *event);
 
     DiscoveredContactsModel *m_contactsModel;
-    bool m_multiSelect = true;
+    bool m_multiSelect = false;
 };
 } // namespace vm
 

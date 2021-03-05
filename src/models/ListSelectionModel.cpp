@@ -83,6 +83,12 @@ void ListSelectionModel::clear()
     QTimer::singleShot(10, this, &ListSelectionModel::updateProperties);
 }
 
+void ListSelectionModel::selectOnly(const QVariant &proxyRow)
+{
+    const auto sourceIndex = m_sourceModel->sourceIndex(proxyRow.toInt());
+    QItemSelectionModel::select(sourceIndex, QItemSelectionModel::ClearAndSelect);
+}
+
 void ListSelectionModel::selectAll()
 {
     for (int i = 0, s = m_sourceModel->rowCount(); i < s; ++i) {

@@ -42,5 +42,6 @@ using Self = AddGroupChatMembersState;
 Self::AddGroupChatMembersState(ChatsController *chatsController, DiscoveredContactsModel *contactsModel, QState *parent)
     : SelectContactsState(contactsModel, parent)
 {
+    setMultiSelect(true);
     connect(this, &Self::contactsSelected, chatsController, &ChatsController::addMembers);
 }

@@ -42,8 +42,6 @@ using Self = NewChatState;
 Self::NewChatState(ChatsController *chatsController, DiscoveredContactsModel *contactsModel, QState *parent)
     : SelectContactsState(contactsModel, parent)
 {
-    setMultiSelect(false);
-
     connect(chatsController, &ChatsController::chatOpened, this, &Self::operationFinished);
     connect(chatsController, &ChatsController::errorOccurred, this, &Self::operationErrorOccurred);
     connect(this, &Self::contactSelected, this, &Self::operationStarted);

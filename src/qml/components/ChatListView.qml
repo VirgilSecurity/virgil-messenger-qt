@@ -19,13 +19,7 @@ ModelListView {
 
     delegate: ChatListDelegate {
         width: chatListView.width
-
-        onClicked: {
-            if (d.model.selection.multiSelect) {
-                d.model.toggleById(model.id)
-            }
-            chatListView.chatSelected(model.id)
-        }
+        onSelectItem: chatListView.chatSelected(model.id)
     }
 
     onPlaceholderClicked: appState.requestNewChat()

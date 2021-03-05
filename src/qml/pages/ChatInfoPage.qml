@@ -82,8 +82,7 @@ Page {
             ContactsListView {
                 readonly property var tabTitle: qsTr("Participants")
                 model: d.model.proxy
-                isSelectable: d.chat.isGroup && d.chat.userCanEdit
-                onContactSelected: d.model.toggleByUsername(contactUsername)
+                selectionModel: d.chat.isGroup && d.chat.userCanEdit ? d.model.selection : null
             }
         }
 

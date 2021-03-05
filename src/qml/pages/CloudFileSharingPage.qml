@@ -67,9 +67,7 @@ Page {
             ContactsListView {
                 readonly property var tabTitle: qsTr("Participants")
                 model: d.model.proxy
-                selectionModel: d.selection
-                isSelectable: d.cloudFolder.userIsOwner
-                onContactSelected: d.model.toggleByUsername(contactUsername)
+                selectionModel: d.cloudFolder.userIsOwner ? d.selection : null
                 itemContextMenu: ContextMenu {
                     dropdown: true
 

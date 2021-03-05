@@ -40,10 +40,7 @@
 using namespace vm;
 using Self = GroupMembersModel;
 
-Self::GroupMembersModel(Messenger *messenger, QObject *parent) : ContactsModel(parent), m_messenger(messenger)
-{
-    selection()->setMultiSelect(true);
-}
+Self::GroupMembersModel(Messenger *messenger, QObject *parent) : ContactsModel(parent), m_messenger(messenger) { }
 
 void Self::setGroupMembers(const GroupMembers &groupMembers)
 {

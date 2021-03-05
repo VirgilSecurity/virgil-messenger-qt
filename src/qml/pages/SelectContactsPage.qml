@@ -23,9 +23,9 @@ OperationPage {
 
         function selectContact(contactUsername) {
             appState.contactSelected(contactUsername)
+            contactSearch.clear()
             if (models.discoveredContacts.selection.multiSelect) {
                 models.discoveredContacts.toggleByUsername(contactUsername)
-                contactSearch.clear()
             }
         }
     }

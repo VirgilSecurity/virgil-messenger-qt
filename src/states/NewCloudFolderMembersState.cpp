@@ -43,6 +43,7 @@ Self::NewCloudFolderMembersState(CloudFilesController *controller, DiscoveredCon
                                  QState *parent)
     : SelectContactsState(contactsModel, parent)
 {
+    setMultiSelect(true);
     connect(this, &Self::contactsSelected, [this, controller](auto contacts) {
         controller->createFolder(m_name, ContactsToCloudFileMembers(contacts));
     });

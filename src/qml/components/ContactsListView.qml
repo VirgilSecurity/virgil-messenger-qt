@@ -8,22 +8,16 @@ import "../theme"
 
 ModelListView {
     id: root
-    model: d.model.proxy
+    model: models.discoveredContacts.proxy
     delegate: contactListComponent
     section.delegate: contactSectionComponent
     section.property: "section"
     isSearchOpened: true
 
-    property var selectionModel: d.model.selection
-    property bool isSelectable: true
+    property var selectionModel: null
     property var itemContextMenu: null
 
     signal contactSelected(string contactUsername)
-
-    QtObject {
-        id: d
-        readonly property var model: models.discoveredContacts
-    }
 
     Component {
         id: contactSectionComponent
@@ -71,20 +65,22 @@ ModelListView {
                 image: "More"
                 height: imageSize
                 hoverVisible: !model.isSelected
-                visible: root.isSelectable && root.itemContextMenu
+                visible: root.selectionModel && root.itemContextMenu
 
                 onClicked: {
-                    root.selectionModel.clear()
-                    root.selectionModel.toggle(model.index)
+                    root.selectionModel.selectOnly(model.index)
                     root.itemContextMenu.parent = menuButton
                     root.itemContextMenu.open()
                 }
             }
 
             onSelectItem: {
-                if (root.isSelectable) {
+                if (root.selectionModel) {
                     root.selectionModel.multiSelect = multiSelect
                     root.selectionModel.toggle(model.index)
+                }
+                else {
+                    root.contactSelected(model.username)
                 }
             }
         }
