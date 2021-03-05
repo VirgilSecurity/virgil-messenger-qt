@@ -319,8 +319,13 @@ Self::FutureResult<CloudFsFolder> Self::createFolder(const QString &folderName, 
             for (const auto &member : members) {
                 const auto user = m_coreMessenger->findUserByUsername(member->contact()->username());
                 if (user) {
-                    vssq_messenger_cloud_fs_access_list_add_user(usersAccess.get(), user->impl()->user.get(),
-                                                                 memberTypeToPermission(member->type()));
+                    //
+                    //  Exclude Self.
+                    //
+                    if (user->id() != m_coreMessenger->currentUser()->id()) {
+                        vssq_messenger_cloud_fs_access_list_add_user(usersAccess.get(), user->impl()->user.get(),
+                                                                     memberTypeToPermission(member->type()));
+                    }
                 } else {
                     return CoreMessengerStatus::Error_UserNotFound;
                 }
