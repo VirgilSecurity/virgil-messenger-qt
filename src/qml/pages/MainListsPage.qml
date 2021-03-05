@@ -120,6 +120,12 @@ Page {
         }
     }
 
+    TransfersPanel {
+        model: models.cloudFilesTransfers
+        visible: d.isCloudFileList
+        buttonVisible: !controllers.cloudFiles.isLoading
+    }
+
     Connections {
         target: d.manager
 

@@ -47,6 +47,8 @@ ModelListView {
             width: root.width
             height: Theme.headerHeight
 
+            Binding on rightMargin { when: menuButton.visible; value: 0 }
+
             Avatar {
                 id: avatar
                 nickname: model.displayName
