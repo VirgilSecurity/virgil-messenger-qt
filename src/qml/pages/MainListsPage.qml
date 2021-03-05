@@ -17,9 +17,8 @@ Page {
         readonly property var manager: app.stateManager
         readonly property bool isChatList: appState === manager.chatListState
         readonly property bool isCloudFileList: appState === manager.cloudFileListState
-        readonly property var cloudFilesSelection: models.cloudFiles.selection
-        readonly property bool cloudFilesHasSelection: cloudFilesSelection.hasSelection
-        readonly property bool cloudFilesEmpty: models.cloudFiles.count === 0
+        readonly property int cloudFilesCount: models.cloudFiles.count
+        readonly property int cloudFilesSelectedCount: models.cloudFiles.selection.selectedCount
         readonly property var cloudFolder: controllers.cloudFiles.currentFolder
 
         readonly property string chatsTitle: app.organizationDisplayName
@@ -85,22 +84,21 @@ Page {
             visible: d.isCloudFileList
         }
 
+        ContextMenuItem {
+            text: qsTr("Select All")
+            onTriggered: models.cloudFiles.selection.selectAll()
+            visible: d.isCloudFileList && d.cloudFilesCount && (d.cloudFilesCount !== d.cloudFilesSelectedCount)
+        }
+
         ContextMenuSeparator {
-            visible: deleteCloudFilesItem.visible || selectAllCloudFilesItem.visible
+            visible: deleteCloudFilesItem.visible
         }
 
         ContextMenuItem {
             id: deleteCloudFilesItem
             text: qsTr("Delete")
             onTriggered: deleteCloudFilesDialog.open()
-            visible: d.isCloudFileList && d.cloudFilesHasSelection
-        }
-
-        ContextMenuItem {
-            id: selectAllCloudFilesItem
-            text: qsTr("Select All")
-            onTriggered: d.cloudFilesSelection.selectAll()
-            visible: d.isCloudFileList && !d.cloudFilesEmpty && !d.cloudFilesHasSelection
+            visible: d.isCloudFileList && d.cloudFilesSelectedCount
         }
     }
 
