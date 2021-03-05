@@ -11,8 +11,8 @@ Page {
 
     QtObject {
         id: d
-        readonly property var cloudFile: controllers.cloudFiles.current
-        readonly property var model: cloudFile.members
+        readonly property var cloudFolder: controllers.cloudFiles.currentFolder
+        readonly property var model: cloudFolder.members
     }
 
     background: Rectangle {
@@ -22,11 +22,12 @@ Page {
     header: PageHeader {
         id: pageHeader
         title: qsTr("Cloud folder info")
+        contextMenuVisible: addMembersItem.visible || removeMembersItem.visible
         contextMenu: ContextMenu {
             ContextMenuItem {
                 id: addMembersItem
                 text: qsTr("Add members")
-                visible: d.cloudFile.userIsOwner
+                visible: d.cloudFolder.userIsOwner
                 onTriggered: appState.addMembersRequested()
             }
 
@@ -37,7 +38,7 @@ Page {
             ContextMenuItem {
                 id: removeMembersItem
                 text: qsTr("Remove members")
-                visible: d.model.selection.hasSelection
+                visible: d.cloudFolder.userIsOwner && d.model.selection.hasSelection
                 onTriggered: removeParticipantsDialog.open()
             }
         }
@@ -55,7 +56,7 @@ Page {
 
         PropertiesView {
             Layout.leftMargin: Theme.smallMargin
-            model: d.cloudFile.properties
+            model: d.cloudFolder.properties
         }
 
         TabView {
@@ -65,6 +66,7 @@ Page {
             ContactsListView {
                 readonly property var tabTitle: qsTr("Participants")
                 model: d.model.proxy
+                isSelectable: d.cloudFolder.userIsOwner
                 onContactSelected: d.model.toggleByUsername(contactUsername)
             }
         }

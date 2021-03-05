@@ -54,9 +54,8 @@ class CloudFilesController : public QObject
     Q_OBJECT
     Q_PROPERTY(QString displayPath READ displayPath NOTIFY displayPathChanged)
     Q_PROPERTY(bool isRoot READ isRoot NOTIFY isRootChanged)
-    Q_PROPERTY(bool isShared READ isShared NOTIFY isSharedChanged)
     Q_PROPERTY(bool isListUpdating MEMBER m_isListUpdating NOTIFY isListUpdatingChanged)
-    Q_PROPERTY(CloudFileObject *current MEMBER m_cloudFileObject CONSTANT)
+    Q_PROPERTY(CloudFileObject *currentFolder MEMBER m_cloudFolderObject CONSTANT)
 
 public:
     CloudFilesController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
@@ -85,28 +84,25 @@ signals:
 
     void displayPathChanged(const QString &path);
     void isRootChanged(bool isRoot);
-    void isSharedChanged(bool isShared);
     void isListUpdatingChanged(bool isUpdating);
 
 private:
     using FoldersHierarchy = ModifiableCloudFiles;
 
     void switchToHierarchy(const FoldersHierarchy &hierarchy);
-    void removeMembers(const CloudFileMembers &members);
 
     QString displayPath() const;
     bool isRoot() const;
-    bool isShared() const;
     ModifiableCloudFileHandler rootFolder() const;
+    CloudFileHandler parentFolder() const;
 
     void onUpdateCloudFiles(const CloudFilesUpdate &update);
-    void onSelectionChanged();
 
     QPointer<Messenger> m_messenger;
     QPointer<Models> m_models;
     QPointer<UserDatabase> m_userDatabase;
     QPointer<CloudFileSystem> m_cloudFileSystem;
-    QPointer<CloudFileObject> m_cloudFileObject;
+    QPointer<CloudFileObject> m_cloudFolderObject;
 
     FoldersHierarchy m_hierarchy;
     FoldersHierarchy m_requestedHierarchy;

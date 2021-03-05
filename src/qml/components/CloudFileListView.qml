@@ -78,13 +78,6 @@ ModelListView {
                     onTriggered: listDelegate.openItem()
                 }
 
-                ContextMenuItem {
-                    id: sharingItem
-                    text: qsTr("Sharing")
-                    visible: model.isShared
-                    onTriggered: appState.requestSharingInfo()
-                }
-
                 ContextMenuSeparator {
                 }
 
