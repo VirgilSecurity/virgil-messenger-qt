@@ -191,7 +191,7 @@ QDir Settings::logsDir()
         m_logsDirInitialized = true;
     }
     if (!m_logsDir.exists()) {
-        qDebug(lcSettings) << "Create logs dir:" << m_logsDir.absolutePath();
+        qCDebug(lcSettings) << "Create logs dir:" << m_logsDir.absolutePath();
         QDir().mkpath(m_logsDir.absolutePath());
     }
     return m_logsDir;

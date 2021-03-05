@@ -2496,7 +2496,7 @@ void Self::xmppOnMucInvitationReceived(const QString &roomJid, const QString &in
         //
         auto maybeEncryptedInvitationMessage = QByteArray::fromBase64Encoding(reason.toLatin1());
         if (!maybeEncryptedInvitationMessage) {
-            qDebug(lcCoreMessenger) << "Received invitation that is not Base64 encoded.";
+            qCDebug(lcCoreMessenger) << "Received invitation that is not Base64 encoded.";
             return;
         }
 
