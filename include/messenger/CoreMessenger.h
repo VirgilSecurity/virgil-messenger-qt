@@ -64,6 +64,13 @@
 #include <list>
 #include <variant>
 
+extern "C" {
+//
+//  Forward declaration C types.
+//
+typedef struct vssq_messenger_cloud_fs_t vssq_messenger_cloud_fs_t;
+}
+
 namespace vm {
 class CoreMessenger : public QObject
 {
@@ -343,6 +350,10 @@ private slots:
 
     void onProcessNetworkState(bool online);
     void onLogConnectionStateChanged(CoreMessenger::ConnectionState state);
+
+private:
+    friend class CoreMessengerCloudFs;
+    const vssq_messenger_cloud_fs_t *cloudFsC() const;
 
 private:
     class Impl;

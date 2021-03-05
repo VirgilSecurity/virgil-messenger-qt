@@ -2219,10 +2219,15 @@ std::variant<CoreMessengerStatus, QByteArray> Self::unpackXmppMessageBody(const 
 // --------------------------------------------------------------------------
 CoreMessengerCloudFs Self::cloudFs() const
 {
-    auto cloudFsCopyPtr = vssq_messenger_cloud_fs_shallow_copy_const(vssq_messenger_cloud_fs(m_impl->messenger.get()));
-    auto cloudFsCopy = vssq_messenger_cloud_fs_ptr_t(cloudFsCopyPtr, vssq_messenger_cloud_fs_delete);
     auto randomCopy = vscf_impl_wrap_ptr(vscf_impl_shallow_copy(m_impl->random.get()));
-    return CoreMessengerCloudFs(std::move(cloudFsCopy), std::move(randomCopy), this);
+    return CoreMessengerCloudFs(this, std::move(randomCopy));
+}
+
+const vssq_messenger_cloud_fs_t *Self::cloudFsC() const
+{
+    const auto result = vssq_messenger_cloud_fs(m_impl->messenger.get());
+    Q_ASSERT(result != nullptr);
+    return result;
 }
 
 // --------------------------------------------------------------------------

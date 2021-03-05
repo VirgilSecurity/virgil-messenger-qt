@@ -182,9 +182,8 @@ CloudFileMember::Type permissionToMemberType(const vssq_messenger_cloud_fs_permi
 // --------------------------------------------------------------------------
 //  Implementation.
 // --------------------------------------------------------------------------
-Self::CoreMessengerCloudFs(vssq_messenger_cloud_fs_ptr_t cloudFs, vscf_impl_ptr_t random,
-                           const CoreMessenger *coreMessenger)
-    : m_cloudFs(std::move(cloudFs)), m_random(std::move(random)), m_coreMessenger(coreMessenger)
+Self::CoreMessengerCloudFs(const CoreMessenger *coreMessenger, vscf_impl_ptr_t random)
+    : m_coreMessenger(coreMessenger), m_random(std::move(random))
 {
 }
 
@@ -224,7 +223,7 @@ Self::FutureResult<CloudFsNewFile> Self::createFile(const QString &sourceFilePat
         auto parentFolderIdStd = QString(parentFolderId).toStdString();
 
         auto createdFile = vssq_messenger_cloud_fs_created_file_wrap_ptr(vssq_messenger_cloud_fs_create_file(
-                m_cloudFs.get(), fileNameC, sourceFileMimeTypeC, destFileInfo.size(), fileKeyC,
+                m_coreMessenger->cloudFsC(), fileNameC, sourceFileMimeTypeC, destFileInfo.size(), fileKeyC,
                 vsc_str_from(parentFolderIdStd), vsc_data_from(parentFolderPublicKey), &error));
 
         if (vssq_error_has_error(&error)) {
@@ -251,7 +250,7 @@ Self::FutureStatus Self::deleteFile(const CloudFsFileId &fileId)
     return QtConcurrent::run([this, fileId]() -> CoreMessengerStatus {
         auto fileIdStd = QString(fileId).toStdString();
 
-        const auto status = vssq_messenger_cloud_fs_delete_file(m_cloudFs.get(), vsc_str_from(fileIdStd));
+        const auto status = vssq_messenger_cloud_fs_delete_file(m_coreMessenger->cloudFsC(), vsc_str_from(fileIdStd));
 
         if (status != vssq_status_SUCCESS) {
             qCWarning(lcCoreMessengerCloudFs)
@@ -273,8 +272,9 @@ Self::FutureResult<CloudFsFileDownloadInfo> Self::getFileDownloadInfo(const Clou
 
         auto fileIdStd = QString(fileId).toStdString();
 
-        auto fileDownloadInfoC = vssq_messenger_cloud_fs_file_download_info_wrap_ptr(
-                vssq_messenger_cloud_fs_get_download_link(m_cloudFs.get(), vsc_str_from(fileIdStd), &error));
+        auto fileDownloadInfoC =
+                vssq_messenger_cloud_fs_file_download_info_wrap_ptr(vssq_messenger_cloud_fs_get_download_link(
+                        m_coreMessenger->cloudFsC(), vsc_str_from(fileIdStd), &error));
 
         if (vssq_error_has_error(&error)) {
             qCWarning(lcCoreMessengerCloudFs)
@@ -312,7 +312,7 @@ Self::FutureResult<CloudFsFolder> Self::createFolder(const QString &folderName, 
         vssq_messenger_cloud_fs_folder_info_ptr_t fileInfo = vssq_messenger_cloud_fs_folder_info_wrap_ptr(nullptr);
         if (members.empty()) {
             fileInfo = vssq_messenger_cloud_fs_folder_info_wrap_ptr(vssq_messenger_cloud_fs_create_folder(
-                    m_cloudFs.get(), vsc_str_from(folderNameStd), vsc_str_from(parentFolderIdStd),
+                    m_coreMessenger->cloudFsC(), vsc_str_from(folderNameStd), vsc_str_from(parentFolderIdStd),
                     vsc_data_from(parentFolderPublicKey), &error));
         } else {
             auto usersAccess = vssq_messenger_cloud_fs_access_list_wrap_ptr(vssq_messenger_cloud_fs_access_list_new());
@@ -327,7 +327,7 @@ Self::FutureResult<CloudFsFolder> Self::createFolder(const QString &folderName, 
             }
 
             fileInfo = vssq_messenger_cloud_fs_folder_info_wrap_ptr(vssq_messenger_cloud_fs_create_shared_folder(
-                    m_cloudFs.get(), vsc_str_from(folderNameStd), vsc_str_from(parentFolderIdStd),
+                    m_coreMessenger->cloudFsC(), vsc_str_from(folderNameStd), vsc_str_from(parentFolderIdStd),
                     vsc_data_from(parentFolderPublicKey), usersAccess.get(), &error));
         }
 
@@ -350,7 +350,8 @@ Self::FutureStatus Self::deleteFolder(const CloudFsFolderId &folderId)
     return QtConcurrent::run([this, folderId]() -> CoreMessengerStatus {
         auto folderIdStd = QString(folderId).toStdString();
 
-        const auto status = vssq_messenger_cloud_fs_delete_folder(m_cloudFs.get(), vsc_str_from(folderIdStd));
+        const auto status =
+                vssq_messenger_cloud_fs_delete_folder(m_coreMessenger->cloudFsC(), vsc_str_from(folderIdStd));
 
         if (status != vssq_status_SUCCESS) {
             qCWarning(lcCoreMessengerCloudFs)
@@ -373,7 +374,7 @@ Self::FutureResult<CloudFsFolder> Self::listFolder(const CloudFsFolderId &folder
         auto folderIdStd = QString(folderId).toStdString();
 
         const auto folderC = vssq_messenger_cloud_fs_folder_wrap_ptr(
-                vssq_messenger_cloud_fs_list_folder(m_cloudFs.get(), vsc_str_from(folderIdStd), &error));
+                vssq_messenger_cloud_fs_list_folder(m_coreMessenger->cloudFsC(), vsc_str_from(folderIdStd), &error));
 
         if (vssq_error_has_error(&error)) {
             qCWarning(lcCoreMessengerCloudFs)
@@ -460,7 +461,7 @@ Self::Result<QByteArray> Self::encryptFile(const QString &sourceFilePath, const 
     const auto decryptionKeyBufLen = vssq_messenger_cloud_fs_cipher_init_encryption_out_key_len(fileCipher.get());
     auto [decryptionKey, decryptionKeyBuf] = makeMappedBuffer(decryptionKeyBufLen);
 
-    const auto userPrivateKey = vssq_messenger_cloud_fs_user_private_key(m_cloudFs.get());
+    const auto userPrivateKey = vssq_messenger_cloud_fs_user_private_key(m_coreMessenger->cloudFsC());
 
     vssq_status_t encryptionStatus = vssq_messenger_cloud_fs_cipher_init_encryption(fileCipher.get(), userPrivateKey,
                                                                                     fileSize, decryptionKeyBuf.get());
@@ -727,7 +728,7 @@ Self::FutureResult<CloudFileMembers> Self::getSharedGroupUsers(const CloudFsShar
         const auto sharedGroupIdStd = QString(sharedGroupId).toStdString();
 
         auto accessList = vssq_messenger_cloud_fs_access_list_wrap_ptr(vssq_messenger_cloud_fs_get_shared_group_users(
-                m_cloudFs.get(), vsc_str_from(sharedGroupIdStd), &error));
+                m_coreMessenger->cloudFsC(), vsc_str_from(sharedGroupIdStd), &error));
 
         if (vssq_error_has_error(&error)) {
             qCWarning(lcCoreMessengerCloudFs)
@@ -781,7 +782,7 @@ Self::FutureStatus Self::setSharedGroupUsers(const CloudFsSharedGroupId &sharedG
         const auto sharedGroupIdStd = QString(sharedGroupId).toStdString();
 
         const auto status = vssq_messenger_cloud_fs_set_shared_group_users(
-                m_cloudFs.get(), vsc_str_from(sharedGroupIdStd), vsc_data_from(encryptedKey),
+                m_coreMessenger->cloudFsC(), vsc_str_from(sharedGroupIdStd), vsc_data_from(encryptedKey),
                 keyIssuer->impl()->user.get(), usersAccess.get());
 
         if (status != vssq_status_SUCCESS) {
@@ -809,11 +810,12 @@ Self::Result<QByteArray> Self::decryptKey(const QByteArray &encryptedKey, const 
     };
 
     const auto encryptedKeyC = vsc_data_from(encryptedKey);
-    const size_t decryptedKeyLen = vssq_messenger_cloud_fs_decrypted_key_len(m_cloudFs.get(), encryptedKeyC);
+    const size_t decryptedKeyLen =
+            vssq_messenger_cloud_fs_decrypted_key_len(m_coreMessenger->cloudFsC(), encryptedKeyC);
     auto [decryptedKey, decryptedKeyBuf] = makeMappedBuffer(decryptedKeyLen);
 
     const vssq_status_t status = vssq_messenger_cloud_fs_decrypt_key(
-            m_cloudFs.get(), encryptedKeyC, issuer.get()->impl()->user.get(), decryptedKeyBuf.get());
+            m_coreMessenger->cloudFsC(), encryptedKeyC, issuer.get()->impl()->user.get(), decryptedKeyBuf.get());
 
     if (status != vssq_status_SUCCESS) {
         return handleError(status);
@@ -839,7 +841,8 @@ Self::Result<QByteArray> Self::decryptFileKey(const QByteArray &fileEncryptedKey
     };
 
     const auto fileEncryptedKeyC = vsc_data_from(fileEncryptedKey);
-    const size_t decryptedKeyLen = vssq_messenger_cloud_fs_decrypted_key_len(m_cloudFs.get(), fileEncryptedKeyC);
+    const size_t decryptedKeyLen =
+            vssq_messenger_cloud_fs_decrypted_key_len(m_coreMessenger->cloudFsC(), fileEncryptedKeyC);
     auto [decryptedKey, decryptedKeyBuf] = makeMappedBuffer(decryptedKeyLen);
 
     vssq_status_t status = vssq_status_SUCCESS;
@@ -864,12 +867,12 @@ Self::Result<QByteArray> Self::decryptFileKey(const QByteArray &fileEncryptedKey
         auto folderKey = std::move(*std::get_if<QByteArray>(&folderKeyResult));
 
         status = vssq_messenger_cloud_fs_decrypt_key_with_parent_folder_key(
-                m_cloudFs.get(), fileEncryptedKeyC, parentFolderIssuer->impl()->user.get(), parentFolderIdStdC,
-                vsc_data_from(folderKey), decryptedKeyBuf.get());
+                m_coreMessenger->cloudFsC(), fileEncryptedKeyC, parentFolderIssuer->impl()->user.get(),
+                parentFolderIdStdC, vsc_data_from(folderKey), decryptedKeyBuf.get());
 
     } else {
-        status = vssq_messenger_cloud_fs_decrypt_key(m_cloudFs.get(), fileEncryptedKeyC, sender->impl()->user.get(),
-                                                     decryptedKeyBuf.get());
+        status = vssq_messenger_cloud_fs_decrypt_key(m_coreMessenger->cloudFsC(), fileEncryptedKeyC,
+                                                     sender->impl()->user.get(), decryptedKeyBuf.get());
     }
 
     if (status != vssq_status_SUCCESS) {

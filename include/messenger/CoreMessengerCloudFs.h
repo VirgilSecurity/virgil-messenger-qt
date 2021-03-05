@@ -79,9 +79,6 @@ public:
 
     using FutureStatus = QFuture<CoreMessengerStatus>;
 
-    using vssq_messenger_cloud_fs_ptr_t =
-            std::unique_ptr<const vssq_messenger_cloud_fs_t, void (*)(const vssq_messenger_cloud_fs_t *)>;
-
     using vscf_impl_ptr_t = std::unique_ptr<vscf_impl_t, void (*)(const vscf_impl_t *)>;
 
     using vscf_impl_ptr_const_t = std::unique_ptr<const vscf_impl_t, void (*)(const vscf_impl_t *)>;
@@ -90,8 +87,7 @@ public:
     //
     //  Constructor handles C context from the CommKit.
     //
-    CoreMessengerCloudFs(vssq_messenger_cloud_fs_ptr_t cloudFs, vscf_impl_ptr_t random,
-                         const CoreMessenger *coreMessenger);
+    CoreMessengerCloudFs(const CoreMessenger *coreMessenger, vscf_impl_ptr_t random);
 
     //
     //  Encrypt given file and then request remote server for it's uploading URL.
@@ -182,9 +178,8 @@ private:
     Result<std::tuple<QByteArray, QByteArray>> generateKeyPair() const;
 
 private:
-    vssq_messenger_cloud_fs_ptr_t m_cloudFs;
-    vscf_impl_ptr_t m_random;
     QPointer<const CoreMessenger> m_coreMessenger;
+    vscf_impl_ptr_t m_random;
 };
 } // namespace vm
 
