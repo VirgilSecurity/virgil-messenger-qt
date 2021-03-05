@@ -36,6 +36,8 @@
 
 #include "CustomerEnv.h"
 
+#include <QFile>
+
 using namespace vm;
 using Self = WindowsPlatform;
 

@@ -35,6 +35,8 @@
 #ifndef VM_WINDOWS_PLATFORM_H
 #define VM_WINDOWS_PLATFORM_H
 
+#include <QString>
+
 namespace vm {
 
 class WindowsPlatform
