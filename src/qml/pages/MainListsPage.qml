@@ -69,7 +69,7 @@ Page {
         }
 
         ContextMenuItem {
-            text: qsTr("Sharing")
+            text: qsTr("Share")
             onTriggered: appState.requestSharingInfo();
             visible: d.isCloudFileList && d.cloudFolder.isShared
         }
