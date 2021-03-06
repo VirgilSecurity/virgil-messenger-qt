@@ -7,71 +7,104 @@ import "../theme"
 
 ModelListView {
     id: cloudFileListView
-    model: models.cloudFiles.proxy
+    model: d.model.proxy
     emptyIcon: "../resources/icons/Chats.png"
     emptyText: qsTr("Add a file<br/>by pressing the menu<br/>button above")
 
     QtObject {
         id: d
-        readonly property real defaultChatHeight: 60
+        readonly property var model: models.cloudFiles
+        readonly property var selection: model.selection
+        readonly property var controller: controllers.cloudFiles
     }
 
     ListStatusButton {
         text: qsTr("Updating...")
-        visible: controllers.cloudFiles.isListUpdating
+        visible: d.controller.isListUpdating
     }
 
     delegate: ListDelegate {
-        id: fileListDelegate
+        id: listDelegate
         width: cloudFileListView.width
-        height: d.defaultChatHeight
-        backgroundColor: (model.isSelected || down) ? Theme.contactPressedColor : "transparent"
+        height: Theme.headerHeight
+        rightMargin: 0
+        selectionModel: d.selection
+
+        Item {
+            Layout.preferredWidth: Theme.avatarWidth
+            Layout.preferredHeight: Theme.avatarHeight
+
+            Image {
+                source: "../resources/icons/%1.png".arg(model.isFolder ? "Folder-Big" : "File-Big")
+                anchors.centerIn: parent
+
+                Image {
+                    source: "../resources/icons/Plus.png"
+                    fillMode: Image.PreserveAspectFit
+                    width: 0.5 * parent.width
+                    height: width
+                    anchors.centerIn: parent
+                    anchors.verticalCenterOffset: 2
+                    visible: model.isShared
+                }
+            }
+        }
+
+        TwoLineLabel {
+            Layout.fillWidth: true
+            title: model.fileName
+            description: model.isFolder ? "" : model.displayFileSize
+        }
 
         ImageButton {
-            image: model.isFolder ? "Folder-Big" : "File-Big"
-            imageSize: 48
-            iconSize: 40
-            onClicked: models.cloudFiles.selection.toggle(model.index)
-        }
+            id: menuButton
+            image: "More"
+            height: imageSize
+            hoverVisible: !model.isSelected
 
-        Column {
-            Layout.fillWidth: true
-            clip: true
+            ContextMenu {
+                id: contextMenu
+                dropdown: true
 
-            Text {
-                color: Theme.primaryTextColor
-                font.pointSize: UiHelper.fixFontSz(15)
-                text: model.fileName
-                width: parent.width
+                ContextMenuItem {
+                    text: qsTr("Open file")
+                    visible: !model.isFolder
+                    onTriggered: listDelegate.openItem()
+                }
+
+                ContextMenuItem {
+                    text: qsTr("Open folder")
+                    visible: model.isFolder
+                    onTriggered: listDelegate.openItem()
+                }
+
+                ContextMenuSeparator {
+                }
+
+                ContextMenuItem {
+                    text: qsTr("Delete")
+                    onTriggered: deleteCloudFilesDialog.open()
+                }
+            }
+
+            onClicked: {
+                d.selection.selectOnly(model.index)
+                contextMenu.open()
             }
         }
 
-        Column {
-            width: 30
-            spacing: 5
-
-            Text {
-                text: model.displayFileSize
-                color: Theme.primaryTextColor
-                font.pointSize: UiHelper.fixFontSz(12)
-                anchors.right: parent.right
-            }
-
-            Text {
-                text: model.displayDateTime
-                color: Theme.secondaryTextColor
-                font.pointSize: UiHelper.fixFontSz(9)
-                anchors.right: parent.right
-            }
-        }
-
-        onClicked: {
+        onOpenItem: {
             if (model.isFolder) {
-                controllers.cloudFiles.switchToFolder(model.index)
+                d.controller.switchToFolder(model.index)
             }
             else {
-                controllers.cloudFiles.openFile(model.index)
+                d.controller.openFile(model.index)
             }
+        }
+
+        onSelectItem: {
+            d.selection.multiSelect = multiSelect
+            d.selection.toggle(model.index)
         }
     }
 

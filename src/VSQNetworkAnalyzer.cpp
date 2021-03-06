@@ -49,7 +49,7 @@
 
 Q_LOGGING_CATEGORY(lcNetwork, "network");
 
-#if defined(VS_MACOS) || defined(VS_LINUX)
+#if VS_MACOS || VS_LINUX
 #    pragma GCC diagnostic push
 #    pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
@@ -310,6 +310,6 @@ void VSQNetworkAnalyzer::printConfiguration(const QNetworkConfiguration &configu
 #endif
 }
 
-#if defined(VS_MACOS) || defined(VS_LINUX)
+#if VS_MACOS || VS_LINUX
 #    pragma GCC diagnostic pop
 #endif

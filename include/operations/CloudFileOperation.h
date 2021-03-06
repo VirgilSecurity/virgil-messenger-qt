@@ -64,7 +64,7 @@ public:
     void watchFolderAndRun(const CloudFileHandler &folder, QObject *receiver, FolderUpdateSlot slot);
 
 signals:
-    void cloudFilesUpdate(const CloudFilesUpdate &update);
+    void updateCloudFiles(const CloudFilesUpdate &update);
 
 private:
     static qsizetype m_nameCounter;

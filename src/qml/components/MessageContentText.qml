@@ -24,7 +24,7 @@ TextEdit {
     textFormat: Text.RichText
     width: Math.min(implicitWidth, maxWidth)
     color: Theme.primaryTextColor
-    font.pointSize: UiHelper.fixFontSz(15)
+    font.pointSize: UiHelper.fixFontSz(Platform.isMobile ? 16 : 15)
     wrapMode: Text.Wrap
     readOnly: true
     text: model.body

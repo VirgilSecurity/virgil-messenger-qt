@@ -128,7 +128,7 @@ void Self::downloadAttachment(const ModifiableMessageHandler &message, const Mes
         return;
     } else if (fingerprint != attachment->fingerprint()) {
         qWarning(lcController) << "Fingerprint mismatch, downloading attachment";
-        emit notificationCreated(tr("Downloading attachment..."), true);
+        emit notificationCreated(tr("Downloading attachment..."), false);
         needDownload = true;
     }
 

@@ -34,20 +34,18 @@
 
 #include "ChatObject.h"
 
-#include "ListSelectionModel.h"
 #include "Messenger.h"
 
 using namespace vm;
+using Self = ChatObject;
 
-ChatObject::ChatObject(Messenger *messenger, QObject *parent)
-    : QObject(parent), m_groupMembersModel(new GroupMembersModel(this, true))
+Self::ChatObject(Messenger *messenger, QObject *parent)
+    : QObject(parent), m_messenger(messenger), m_groupMembersModel(new GroupMembersModel(messenger, this))
 {
-    m_groupMembersModel->selection()->setMultiSelect(true);
-
     connect(messenger, &Messenger::lastActivityTextChanged, this, &ChatObject::setLastActivityText);
 }
 
-void ChatObject::setChat(const ChatHandler &chat)
+void Self::setChat(const ChatHandler &chat)
 {
     const auto oldTitle = title();
     const auto oldIsGroup = isGroup();
@@ -62,52 +60,64 @@ void ChatObject::setChat(const ChatHandler &chat)
     }
 }
 
-ChatHandler ChatObject::chat() const
+ChatHandler Self::chat() const
 {
     return m_chat;
 }
 
-QString ChatObject::title() const
+QString Self::title() const
 {
     return m_chat ? m_chat->title() : QString();
 }
 
-bool ChatObject::isGroup() const
+bool Self::isGroup() const
 {
     return m_chat && m_chat->type() == ChatType::Group;
 }
 
-void ChatObject::setCurrentUser(const UserHandler &user)
-{
-    m_groupMembersModel->setCurrentUser(user);
-}
-
-void ChatObject::setGroupInvitationOwnerId(const UserId &ownerId)
+void Self::setGroupInvitationOwnerId(const UserId &ownerId)
 {
     m_groupInvitationOwnerId = ownerId;
 }
 
-UserId ChatObject::groupInvitationOwnerId() const
+UserId Self::groupInvitationOwnerId() const
 {
     return m_groupInvitationOwnerId;
 }
 
-void ChatObject::setGroupMembers(const GroupMembers &groupMembers)
+void Self::setGroupMembers(const GroupMembers &groupMembers)
 {
     m_groupMembersModel->setGroupMembers(groupMembers);
+
+    const auto userMember = FindGroupMemberById(groupMembers, m_messenger->currentUser()->id());
+    const bool userIsOwner = userMember && userMember->memberAffiliation() == GroupAffiliation::Owner;
+    const bool userCanEdit = userIsOwner || (userMember && userMember->memberAffiliation() == GroupAffiliation::Admin);
+    if (m_userIsOwner != userIsOwner) {
+        m_userIsOwner = userIsOwner;
+        emit userIsOwnerChanged(userIsOwner);
+    }
+    if (m_userCanEdit != userCanEdit) {
+        m_userCanEdit = userCanEdit;
+        emit userCanEditChanged(userCanEdit);
+    }
 }
 
-GroupMembers ChatObject::selectedGroupMembers() const
+GroupMembers Self::selectedGroupMembers() const
 {
-    return ContactsToGroupMembers(GroupId(m_chat->id()), m_groupMembersModel->selectedContacts());
+    return m_groupMembersModel->selectedGroupMembers();
 }
 
-void ChatObject::updateGroup(const GroupUpdate &groupUpdate)
+UserId Self::groupOwnerId() const
+{
+    return FindGroupOwner(m_groupMembersModel->groupMembers())->memberId();
+}
+
+void Self::updateGroup(const GroupUpdate &groupUpdate)
 {
     m_groupMembersModel->updateGroup(groupUpdate);
 }
 
-void ChatObject::setLastActivityText(const QString &text)
+void Self::setLastActivityText(const QString &text)
 {
     if (text == m_lastActivityText) {
         return;

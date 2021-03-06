@@ -35,26 +35,34 @@
 #ifndef VM_CLOUDFILELISTSTATE_H
 #define VM_CLOUDFILELISTSTATE_H
 
+#include <QPointer>
 #include <QState>
 
-#include "UserId.h"
-#include "models/CloudFilesModel.h"
+#include "CloudFilesModel.h"
+#include "User.h"
 
 namespace vm {
 class CloudFilesController;
+class Messenger;
 
 class CloudFileListState : public QState
 {
     Q_OBJECT
 
 public:
-    CloudFileListState(CloudFilesController *controller, QState *parent);
+    CloudFileListState(Messenger *messenger, CloudFilesController *controller, QState *parent);
+
+signals:
+    void requestNewFolder(const QString &name);
+    void requestNewSharedFolder(const QString &name);
+    void requestSharingInfo();
 
 private:
     void onEntry(QEvent *);
-    void onExit(QEvent *);
 
-    CloudFilesController *m_controller;
+    QPointer<Messenger> m_messenger;
+    QPointer<CloudFilesController> m_controller;
+    UserHandler m_lastUser;
 };
 } // namespace vm
 

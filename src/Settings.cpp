@@ -143,9 +143,9 @@ void Settings::addUserToList(const QString &user)
 QString Settings::settingsFileName()
 {
     QString ext;
-#if defined(VS_MACOS) || defined(VS_IOS)
+#if VS_MACOS || VS_IOS
     ext = QLatin1String(".plist");
-#elif defined(VS_LINUX)
+#elif VS_LINUX
     ext = QLatin1String(".ini");
 #endif
     return CustomerEnv::appDataLocation().filePath(QLatin1String("settings") + ext);
@@ -191,7 +191,7 @@ QDir Settings::logsDir()
         m_logsDirInitialized = true;
     }
     if (!m_logsDir.exists()) {
-        qDebug(lcSettings) << "Create logs dir:" << m_logsDir.absolutePath();
+        qCDebug(lcSettings) << "Create logs dir:" << m_logsDir.absolutePath();
         QDir().mkpath(m_logsDir.absolutePath());
     }
     return m_logsDir;
@@ -270,11 +270,7 @@ QSize Settings::previewMaxSize() const
 
 bool Settings::devMode() const
 {
-#ifdef VS_DEVMODE
-    return true;
-#else
     return false;
-#endif // VS_DEVMODE
 }
 
 bool Settings::autoSendCrashReport() const

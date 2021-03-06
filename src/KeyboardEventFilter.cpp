@@ -54,7 +54,7 @@ void KeyboardEventFilter::install(QQuickItem *item)
 
 bool KeyboardEventFilter::eventFilter(QObject *obj, QEvent *event)
 {
-#ifdef VS_IOS
+#if VS_IOS
     if (event->type() == QEvent::InputMethodQuery) {
         // HACK(fpohtmeh): Qt scrolls up entire root view if input item is overlapped by keyboard.
         // Set empty cursor rectangle to avoid scrolling.

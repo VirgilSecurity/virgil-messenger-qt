@@ -43,7 +43,7 @@
 #include "Validator.h"
 #include "Messenger.h"
 #include "Settings.h"
-#ifdef VS_MACOS
+#if VS_MACOS
 #    include <macos/VSQMacos.h>
 #endif // VS_MACOS
 #include "Controllers.h"
@@ -86,6 +86,7 @@ public:
     QString applicationDisplayName() const;
 
     Q_INVOKABLE bool isIosSimulator() const;
+    Q_INVOKABLE Qt::KeyboardModifiers keyboardModifiers() const;
 
 signals:
     void notificationCreated(const QString &notification, const bool error);

@@ -13,8 +13,6 @@ Control {
     readonly property bool isCloudFileList: app.stateManager.currentState === manager.cloudFileListState
     readonly property int defaultMargin: 9
 
-    default property alias menu: contextMenu.contentData
-
     Rectangle {
         x: 0
         y: button.y - defaultMargin
@@ -39,6 +37,19 @@ Control {
             ContextMenu {
                 id: contextMenu
                 dropdown: true
+
+                Action {
+                    text: qsTr("Settings")
+                    onTriggered: controllers.users.requestAccountSettings(controllers.users.currentUsername)
+                }
+
+                ContextMenuSeparator {
+                }
+
+                Action {
+                    text: qsTr("Sign Out")
+                    onTriggered: controllers.users.signOut()
+                }
             }
         }
 

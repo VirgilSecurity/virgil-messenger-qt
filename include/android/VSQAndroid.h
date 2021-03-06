@@ -52,8 +52,6 @@ public:
 
     static bool prepare();
 
-    static QString certFile();
-
     static void hideSplashScreen();
 
     static QString getDisplayName(const QUrl &url);

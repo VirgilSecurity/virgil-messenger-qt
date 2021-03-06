@@ -35,27 +35,17 @@
 #ifndef VM_ADD_GROUP_CHAT_MEMBERS_STATE_H
 #define VM_ADD_GROUP_CHAT_MEMBERS_STATE_H
 
-#include "OperationState.h"
-#include "Contact.h"
+#include "SelectContactsState.h"
 
 namespace vm {
 class ChatsController;
-class DiscoveredContactsModel;
 
-class AddGroupChatMembersState : public OperationState
+class AddGroupChatMembersState : public SelectContactsState
 {
     Q_OBJECT
 
 public:
     AddGroupChatMembersState(ChatsController *chatsController, DiscoveredContactsModel *contactsModel, QState *parent);
-
-signals:
-    void addMembers();
-
-private:
-    void onEntry(QEvent *event);
-
-    DiscoveredContactsModel *m_contactsModel;
 };
 } // namespace vm
 

@@ -100,6 +100,16 @@ void CloudFileOperationSource::setPostFunction(const PostFunction &func)
     m_postFunction = func;
 }
 
+CloudFileMembers CloudFileOperationSource::members() const
+{
+    return m_members;
+}
+
+void CloudFileOperationSource::setMembers(const CloudFileMembers &members)
+{
+    m_members = members;
+}
+
 bool CloudFileOperationSource::isValid() const
 {
     return true;
@@ -119,6 +129,10 @@ QString CloudFileOperationSource::toString() const
         return str.arg(QLatin1String("Download"));
     case Type::Delete:
         return str.arg(QLatin1String("Delete"));
+    case Type::SetMembers:
+        return str.arg(QLatin1String("SetMembers"));
+    case Type::ListMembers:
+        return str.arg(QLatin1String("ListMembers"));
     default:
         throw std::logic_error("Invalid cloud file operation source type");
     }

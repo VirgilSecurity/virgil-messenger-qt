@@ -215,10 +215,9 @@ void CloudFilesTable::onFetch(const CloudFileHandler &folder)
 
 void CloudFilesTable::onUpdateCloudFiles(const CloudFilesUpdate &update)
 {
-    if (std::holds_alternative<CachedListCloudFolderUpdate>(update)) {
-        return;
-    }
-    if (std::holds_alternative<TransferCloudFileUpdate>(update)) {
+    if (std::holds_alternative<CachedListCloudFolderUpdate>(update)
+        || std::holds_alternative<TransferCloudFileUpdate>(update)
+        || std::holds_alternative<ListMembersCloudFileUpdate>(update)) {
         return;
     }
 

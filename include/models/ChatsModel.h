@@ -62,6 +62,8 @@ public:
     void updateLastMessage(const MessageHandler &message, qsizetype unreadMessageCount);
     void resetLastMessage(const ChatId &chatId);
 
+    Q_INVOKABLE void toggleById(const QString &chatId);
+
     //
     // Update group chat UI.
     //

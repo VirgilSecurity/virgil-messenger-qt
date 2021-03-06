@@ -40,6 +40,8 @@
 #include "Contact.h"
 #include "ContactUpdate.h"
 
+#include <QSqlQuery>
+
 namespace vm {
 class ContactsTable : public DatabaseTable
 {
@@ -47,8 +49,12 @@ class ContactsTable : public DatabaseTable
 
 signals:
     void addContact(const Contact &contact);
+    void fetch(const Contacts &requestedContacts);
 
     void updateContact(const ContactUpdate &update);
+
+    void errorOccurred(const QString &errorText);
+    void fetched(const Contacts &requestedContacts, const Contacts &fetchedContacts);
 
 public:
     explicit ContactsTable(Database *database);
@@ -57,8 +63,11 @@ public:
 
 private:
     void onAddContact(const Contact &contact);
+    void onFetch(const Contacts &requestedContacts);
 
     void onUpdateContact(const ContactUpdate &update);
+
+    ContactHandler readContact(const QSqlQuery &query) const;
 };
 
 } // namespace vm

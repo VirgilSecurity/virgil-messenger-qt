@@ -186,7 +186,7 @@ Control {
             Layout.leftMargin: 2
             Layout.alignment: Qt.AlignVCenter
             focusPolicy: Qt.NoFocus
-            disabled: d.messageText.length == 0
+            enabled: d.messageText.length > 0
             image: "Send"
             onClicked: d.sendTextMessage()
         }

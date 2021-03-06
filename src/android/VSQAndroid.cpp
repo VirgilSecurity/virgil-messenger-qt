@@ -79,12 +79,12 @@ static bool _checkPermissions()
 bool VSQAndroid::prepare()
 {
     _checkPermissions();
-    runLoggingThread();
-    auto certFile = caBundlePath();
-    QFile::remove(certFile);
-    QFile::copy(":qml/resources/cert.pem", certFile);
 
-    return true;
+    runLoggingThread();
+
+    auto destCertFile = caBundlePath();
+    QFile::remove(destCertFile);
+    return QFile::copy(":qml/resources/cert.pem", destCertFile);
 }
 
 /******************************************************************************/

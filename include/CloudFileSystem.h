@@ -40,6 +40,7 @@
 #include <QPointer>
 
 #include "CloudFile.h"
+#include "CloudFileMember.h"
 #include "CloudFileRequestId.h"
 #include "CoreMessengerCloudFs.h"
 #include "Settings.h"
@@ -62,10 +63,14 @@ public:
 
     CloudFileRequestId fetchList(const CloudFileHandler &parentFolder);
     CloudFileRequestId createFile(const QString &filePath, const CloudFileHandler &parentFolder);
-    CloudFileRequestId createFolder(const QString &name, const CloudFileHandler &parentFolder);
+    CloudFileRequestId createFolder(const QString &name, const CloudFileHandler &parentFolder,
+                                    const CloudFileMembers &members);
     CloudFileRequestId getDownloadInfo(const CloudFileHandler &file);
-    bool decryptFile(const QString &sourcePath, const QByteArray &encryptionKey, const CloudFileHandler &file);
+    bool decryptFile(const QString &sourcePath, const QByteArray &encryptionKey, const CloudFileHandler &file,
+                     const CloudFileHandler &parentFolder);
     CloudFileRequestId deleteFiles(const CloudFiles &files);
+    CloudFileRequestId setMembers(const CloudFileMembers &members, const CloudFileHandler &file);
+    CloudFileRequestId fetchMembers(const CloudFileHandler &file);
 
 signals:
     void downloadsDirChanged(const QDir &downloadsDir);
@@ -88,6 +93,12 @@ signals:
     void fileDeleted(CloudFileRequestId requestId, const CloudFileHandler &file);
     void deleteFileErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
 
+    void membersSet(CloudFileRequestId requestId, const CloudFileHandler &file, const CloudFileMembers &members);
+    void setMembersErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
+
+    void membersFetched(CloudFileRequestId requestId, const CloudFileHandler &file, const CloudFileMembers &members);
+    void fetchMembersErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
+
 private:
     ModifiableCloudFileHandler createParentFolderFromInfo(const CloudFsFolder &fsFolder,
                                                           const CloudFileHandler &oldFolder) const;
@@ -95,6 +106,8 @@ private:
                                                     const QString &localPath) const;
     ModifiableCloudFileHandler createFileFromInfo(const CloudFsFileInfo &info, const CloudFileId &parentId,
                                                   const QString &localPath) const;
+    CloudFsFolder createFsFolder(const CloudFileHandler &folder) const;
+    CloudFsFolderInfo createFsFolderInfo(const CloudFileHandler &folder) const;
 
     QPointer<CoreMessenger> m_coreMessenger;
     std::optional<CoreMessengerCloudFs> m_coreFs;

@@ -11,7 +11,8 @@ SELECT
     encryptedKey AS cloudFileEncryptedKey,
     publicKey AS cloudFilePublicKey,
     localPath AS cloudFileLocalPath,
-    fingerprint AS cloudFileFingerprint
+    fingerprint AS cloudFileFingerprint,
+    sharedGroupId AS cloudFileSharedGroupId
 FROM
     cloudFiles
 WHERE

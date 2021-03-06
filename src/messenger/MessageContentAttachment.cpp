@@ -209,7 +209,7 @@ bool Self::readLocalFile(const QUrl &localUrl, QString &errorString)
         return false;
     }
 
-#ifdef VS_ANDROID
+#if VS_ANDROID
     const quint64 fileSize = VSQAndroid::getFileSize(localUrl);
 #else
     const quint64 fileSize = localInfo.size();

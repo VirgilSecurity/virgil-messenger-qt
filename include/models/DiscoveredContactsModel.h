@@ -43,7 +43,7 @@ class Validator;
 class DiscoveredContactsModel : public ContactsModel
 {
     Q_OBJECT
-    Q_PROPERTY(ContactsModel *selectedContacts MEMBER m_selectedContacts CONSTANT)
+    Q_PROPERTY(ContactsModel *selectedContacts MEMBER m_selectedContactsModel CONSTANT)
 
 public:
     enum Roles { SectionRole = UserRole };
@@ -52,7 +52,7 @@ public:
 
     void reload();
     int fixedContactsCount() const;
-    const ContactsModel *selectedContactsModel() const;
+    Contacts getSelectedContacts() const;
 
     Q_INVOKABLE void toggleByUsername(const QString &contactUsername) override;
     Q_INVOKABLE QString firstContactUsername() const;
@@ -73,7 +73,7 @@ private:
     void onSelectionChanged(const QList<QModelIndex> &indices);
 
     Validator *m_validator;
-    ContactsModel *m_selectedContacts;
+    ContactsModel *m_selectedContactsModel;
 
     int m_fixedContactsCount = 0;
 };

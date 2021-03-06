@@ -35,9 +35,8 @@
 #include "patches/version1/PatchContacts.h"
 
 #include "core/Database.h"
-#include "core/Patch.h"
-
 #include "core/DatabaseUtils.h"
+#include "core/Patch.h"
 
 using namespace vm;
 using namespace version1;
@@ -48,8 +47,9 @@ Self::PatchContacts() : Patch(1) { }
 
 bool Self::apply(Database *database)
 {
+    const QLatin1String versionPath("patches/version1/");
 
-    if (!DatabaseUtils::readExecQueries(database, "dropContacts")) {
+    if (!DatabaseUtils::readExecQueries(database, versionPath + "dropContacts")) {
         return false;
     }
 
@@ -57,11 +57,11 @@ bool Self::apply(Database *database)
         return false;
     }
 
-    if (!DatabaseUtils::readExecQueries(database, "insertContactsFromChats")) {
+    if (!DatabaseUtils::readExecQueries(database, versionPath + "insertContactsFromChats")) {
         return false;
     }
 
-    if (!DatabaseUtils::readExecQueries(database, "migrateMessagesToVersion1")) {
+    if (!DatabaseUtils::readExecQueries(database, versionPath + "migrateMessagesToVersion1")) {
         return false;
     }
 

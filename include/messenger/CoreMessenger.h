@@ -37,6 +37,7 @@
 
 #include "Chat.h"
 #include "CloudFile.h"
+#include "CloudFileMember.h"
 #include "CoreMessengerCloudFs.h"
 #include "CoreMessengerStatus.h"
 #include "Group.h"
@@ -62,6 +63,13 @@
 #include <tuple>
 #include <list>
 #include <variant>
+
+extern "C" {
+//
+//  Forward declaration C types.
+//
+typedef struct vssq_messenger_cloud_fs_t vssq_messenger_cloud_fs_t;
+}
 
 namespace vm {
 class CoreMessenger : public QObject
@@ -344,6 +352,10 @@ private slots:
     void onLogConnectionStateChanged(CoreMessenger::ConnectionState state);
 
 private:
+    friend class CoreMessengerCloudFs;
+    const vssq_messenger_cloud_fs_t *cloudFsC() const;
+
+private:
     class Impl;
     std::unique_ptr<Impl> m_impl;
     QPointer<Settings> m_settings;
@@ -362,6 +374,8 @@ Q_DECLARE_METATYPE(vm::CloudFileHandler);
 Q_DECLARE_METATYPE(vm::ModifiableCloudFileHandler);
 Q_DECLARE_METATYPE(vm::CloudFiles);
 Q_DECLARE_METATYPE(vm::ModifiableCloudFiles);
+Q_DECLARE_METATYPE(vm::CloudFileMemberHandler);
+Q_DECLARE_METATYPE(vm::CloudFileMembers);
 Q_DECLARE_METATYPE(vm::ChatId);
 Q_DECLARE_METATYPE(vm::MessageId);
 Q_DECLARE_METATYPE(vm::AttachmentId);
