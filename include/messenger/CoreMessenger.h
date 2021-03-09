@@ -139,6 +139,7 @@ signals:
     //  Message history control.
     // --
     void requestMessageHistory(const MessageRequest &request);
+    void sendMessageStatusDisplayed(const MessageHandler &message);
     // --
 
     //
@@ -365,6 +366,7 @@ private slots:
     void onLogConnectionStateChanged(CoreMessenger::ConnectionState state);
 
     void onRequestMessageHistory(const MessageRequest &request);
+    void onSendMessageStatusDisplayed(const MessageHandler &message);
 
 private:
     friend class CoreMessengerCloudFs;

@@ -59,7 +59,7 @@ public:
     ModifiableChatHandler findChat(const ChatId &chatId);
 
     void resetUnreadCount(const ChatId &chatId);
-    void updateLastMessage(const MessageHandler &message, qsizetype unreadMessageCount);
+    void updateLastMessage(const MessageHandler &message);
     void resetLastMessage(const ChatId &chatId);
 
     Q_INVOKABLE void toggleById(const QString &chatId);

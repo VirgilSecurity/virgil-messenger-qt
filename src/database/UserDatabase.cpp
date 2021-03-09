@@ -209,7 +209,7 @@ void Self::onClose()
     Database::close();
 }
 
-void Self::onWriteMessage(const MessageHandler &message, qsizetype unreadCount)
+void Self::onWriteMessage(const MessageHandler &message)
 {
     ScopedConnection connection(*this);
     ScopedTransaction transaction(*this);
@@ -217,7 +217,7 @@ void Self::onWriteMessage(const MessageHandler &message, qsizetype unreadCount)
     if (message->contentIsAttachment()) {
         attachmentsTable()->addAttachment(message);
     }
-    chatsTable()->updateLastMessage(message, unreadCount);
+    chatsTable()->updateLastMessage(message);
 
     if (message->isIncoming()) {
         contactsTable()->updateContact(UsernameContactUpdate { message->senderId(), message->senderUsername() });
@@ -289,7 +289,7 @@ void Self::onWriteChatAndLastMessage(const ChatHandler &chat)
     }
 
     // Update last message
-    chatsTable()->updateLastMessage(message, chat->unreadMessageCount());
+    chatsTable()->updateLastMessage(message);
 
     if (message->isIncoming()) {
         contactsTable()->updateContact(UsernameContactUpdate { message->senderId(), message->senderUsername() });
@@ -299,7 +299,7 @@ void Self::onWriteChatAndLastMessage(const ChatHandler &chat)
 void Self::onResetUnreadCount(const ChatHandler &chat)
 {
     ScopedConnection connection(*this);
-    chatsTable()->resetUnreadCount(chat);
+    chatsTable()->markMessagesAsRead(chat);
 }
 
 void Self::onDeleteNewGroupChat(const ChatId &chatId)

@@ -192,6 +192,7 @@ void Self::openChat(const ChatHandler &chat)
     if (chat->unreadMessageCount() > 0) {
         m_models->chats()->resetUnreadCount(chat->id());
         m_userDatabase->resetUnreadCount(chat);
+        m_messenger->sendMessageStatusDisplayed(chat->lastMessage());
     }
     m_chatObject->setChat(chat);
     emit chatOpened(chat);

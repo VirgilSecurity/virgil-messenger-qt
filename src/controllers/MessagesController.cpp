@@ -89,9 +89,8 @@ void Self::clearMessages()
 void Self::sendTextMessage(const QString &body)
 {
     auto message = createTextMessage(body);
-    const qsizetype unreadCount = 0; // message can be created in current chat only
-    m_userDatabase->writeMessage(message, unreadCount);
-    m_models->chats()->updateLastMessage(message, unreadCount);
+    m_userDatabase->writeMessage(message);
+    m_models->chats()->updateLastMessage(message);
     m_models->messages()->addMessage(message);
     emit messageCreated(message);
 }
@@ -110,9 +109,8 @@ void Self::sendFileMessage(const QVariant &attachmentUrl)
         return;
     }
 
-    const qsizetype unreadCount = 0; // message can be created in current chat only
-    m_models->chats()->updateLastMessage(message, unreadCount);
-    m_userDatabase->writeMessage(message, unreadCount);
+    m_models->chats()->updateLastMessage(message);
+    m_userDatabase->writeMessage(message);
     m_models->messages()->addMessage(message);
     emit messageCreated(message);
 }
@@ -131,9 +129,8 @@ void Self::sendPictureMessage(const QVariant &attachmentUrl)
         return;
     }
 
-    const qsizetype unreadCount = 0; // message can be created in current chat only
-    m_models->chats()->updateLastMessage(message, unreadCount);
-    m_userDatabase->writeMessage(message, unreadCount);
+    m_models->chats()->updateLastMessage(message);
+    m_userDatabase->writeMessage(message);
     m_models->messages()->addMessage(message);
     emit messageCreated(message);
 }
@@ -202,21 +199,6 @@ ModifiableMessageHandler Self::createPictureMessage(const QUrl &localFileUrl)
     return message;
 }
 
-qsizetype Self::calculateUnreadMessageCount(const ChatHandler &destinationChat, const MessageHandler &message) const
-{
-    auto currentChat = m_models->messages()->chat();
-
-    if ((nullptr == currentChat) || (currentChat->id() != destinationChat->id())) {
-        if (message->isOutgoingCopyFromOtherDevice()) {
-            return destinationChat->unreadMessageCount();
-        } else {
-            return destinationChat->unreadMessageCount() + 1;
-        }
-    }
-
-    return 0;
-}
-
 void Self::setupTableConnections()
 {
     auto table = m_userDatabase->messagesTable();
@@ -265,10 +247,9 @@ void Self::onMessageReceived(ModifiableMessageHandler message)
         //
         //  Update existing chat.
         //
-        const auto unreadMessageCount = calculateUnreadMessageCount(destChat, message);
-        chats->updateLastMessage(message, unreadMessageCount);
+        chats->updateLastMessage(message);
 
-        m_userDatabase->writeMessage(message, unreadMessageCount);
+        m_userDatabase->writeMessage(message);
     } else {
         //
         //  Create a new chat.

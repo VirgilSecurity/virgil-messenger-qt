@@ -110,8 +110,8 @@ public:
 
     //
     //  Group chats.
+    //--
 
-    //
     //  Create a new group chats.
     //  If success - signal 'groupChatCreated' is emitted.
     //  If fail - signal 'groupChatCreateFailed' is emitted.
@@ -128,6 +128,7 @@ public:
     //
     void acceptGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId);
     void rejectGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId);
+    //--
 
     //
     //  Helpers.
@@ -204,6 +205,13 @@ signals:
     //
     void userWasFound(const UserHandler &user);
     //--
+
+    //
+    //  Message history control.
+    // --
+    void requestMessageHistory(const MessageRequest &request);
+    void sendMessageStatusDisplayed(const MessageHandler &message);
+    // --
 
 private slots:
     void onPushNotificationTokenUpdate();

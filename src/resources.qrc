@@ -213,6 +213,7 @@
         <file>resources/database/resetUnreadCount.sql</file>
         <file>resources/database/selectChatMessages.sql</file>
         <file>resources/database/selectChats.sql</file>
+        <file>resources/database/selectUnreadMessageCount.sql</file>
         <file>resources/database/selectCloudFolderFiles.sql</file>
         <file>resources/database/selectNotSentMessages.sql</file>
         <file>resources/database/updateAttachmentDownloadStage.sql</file>
@@ -250,5 +251,6 @@
         <file>resources/database/patches/version1/insertContactsFromChats.sql</file>
         <file>resources/database/patches/version1/migrateMessagesToVersion1.sql</file>
         <file>resources/database/patches/version2/addSharedGroupIdColumn.sql</file>
+        <file>resources/database/patches/version3/dropUnreadMessageCountColumn.sql</file>
     </qresource>
 </RCC>

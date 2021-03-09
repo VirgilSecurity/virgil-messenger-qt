@@ -308,6 +308,7 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     connect(this, &Self::acceptGroupInvitation, this, &Self::onAcceptGroupInvitation);
     connect(this, &Self::rejectGroupInvitation, this, &Self::onRejectGroupInvitation);
     connect(this, &Self::requestMessageHistory, this, &Self::onRequestMessageHistory);
+    connect(this, &Self::sendMessageStatusDisplayed, this, &Self::onSendMessageStatusDisplayed);
 
     connect(this, &Self::reconnectXmppServerIfNeeded, this, &Self::onReconnectXmppServerIfNeeded);
     connect(this, &Self::disconnectXmppServer, this, &Self::onDisconnectXmppServer);
@@ -1208,9 +1209,19 @@ QFuture<Self::Result> Self::processReceivedXmppMessage(const QXmppMessage &xmppM
         //
         //  Handle receipts (may come from archived messages).
         //
-        if (xmppMessage.marker() == QXmppMessage::Marker::Received) {
+        switch (xmppMessage.marker()) {
+        case QXmppMessage::Marker::Received: {
             emit xmppMessageDelivered(xmppMessage.from(), xmppMessage.markedId());
             return Self::Result::Success;
+        }
+        case QXmppMessage::Marker::Acknowledged:
+        case QXmppMessage::Marker::Displayed: {
+            emit updateMessage(
+                    OutgoingMessageStageUpdate { MessageId(xmppMessage.markedId()), OutgoingMessageStage::Read });
+            return Self::Result::Success;
+        }
+        default:
+            break;
         }
 
         switch (xmppMessage.type()) {
@@ -1295,6 +1306,8 @@ Self::Result Self::processChatReceivedXmppMessage(const QXmppMessage &xmppMessag
 
     adjustMappedBuffer(plaintext, plaintextData);
 
+    message->setStage(IncomingMessageStage::Decrypted);
+
     qCInfo(lcCoreMessenger) << "Received XMPP message was decrypted";
 
     //
@@ -1366,6 +1379,8 @@ Self::Result Self::processGroupChatReceivedXmppMessage(const QXmppMessage &xmppM
 
     auto plaintextData = std::move(*std::get_if<QByteArray>(&decryptedMessageResult));
 
+    message->setStage(IncomingMessageStage::Decrypted);
+
     qCInfo(lcCoreMessenger) << "Received XMPP message was decrypted";
 
     //
@@ -1403,6 +1418,17 @@ QFuture<Self::Result> Self::processReceivedXmppCarbonMessage(const QXmppMessage 
         qCInfo(lcCoreMessenger) << "Received Carbon XMPP message:" << xmppMessage.id();
         qCDebug(lcCoreMessenger) << "Received Carbon XMPP message:" << xmppMessage.id()
                                  << "from:" << xmppMessage.from();
+
+        switch (xmppMessage.marker()) {
+        case QXmppMessage::Marker::Displayed:
+        case QXmppMessage::Marker::Acknowledged: {
+            emit updateMessage(
+                    IncomingMessageStageUpdate { MessageId(xmppMessage.markedId()), IncomingMessageStage::Read });
+            return Self::Result::Success;
+        }
+        default:
+            break;
+        }
 
         switch (xmppMessage.type()) {
         case QXmppMessage::Type::Chat:
@@ -2576,6 +2602,8 @@ void Self::xmppOnMucInvitationReceived(const QString &roomJid, const QString &in
             return;
         }
 
+        invitationMessage->setStage(IncomingMessageStage::Decrypted);
+
         qCDebug(lcCoreMessenger) << "Invitation was decrypted, group:" << groupId << ", inviter:" << senderId;
 
         //
@@ -2877,5 +2905,20 @@ void Self::xmppOnArchivedMessageReceived(const QString &queryId, const QXmppMess
         processReceivedXmppCarbonMessage(message);
     } else {
         processReceivedXmppMessage(message);
+    }
+}
+
+void Self::onSendMessageStatusDisplayed(const MessageHandler &message)
+{
+    QXmppMessage mark;
+    mark.setTo(userIdToJid(message->senderId()));
+    mark.setFrom(userIdToJid(message->recipientId()));
+    mark.setMarkerId(message->id());
+    mark.addHint(QXmppMessage::Store);
+    mark.setMarker(QXmppMessage::Marker::Displayed);
+    m_impl->xmpp->sendPacket(mark);
+
+    if (m_impl->xmpp->sendPacket(mark)) {
+        qCDebug(lcCoreMessenger) << "Sent 'displayed' marker for message:" << message->id();
     }
 }

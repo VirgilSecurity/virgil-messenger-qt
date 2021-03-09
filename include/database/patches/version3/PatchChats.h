@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,39 +32,23 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_INCOMING_MESSAGE_STAGE_H
-#define VM_INCOMING_MESSAGE_STAGE_H
+#ifndef VM_VERSION3_PATCH_CHATS_H
+#define VM_VERSION3_PATCH_CHATS_H
 
-#include "MessageStatus.h"
-
-#include <QString>
+#include "core/Patch.h"
 
 namespace vm {
-//
-//  Denotes incoming message processing stage.
-//
-enum class IncomingMessageStage {
-    Received, // A message was locally received from a sender.
-    Decrypted, // A message was decrypted, so content handles specific message content: text, picture, etc.
-    Read, // A message was read by a recipient.
-    Broken // A message is broken and can't be processed.
+namespace version3 {
+
+class PatchChats : public Patch
+{
+public:
+    PatchChats();
+
+    bool apply(Database *database) override;
 };
 
-//
-//  Return incoming stage from a given string.
-//  Throws if correspond stage is not found.
-//
-IncomingMessageStage IncomingMessageStageFromString(const QString &stageString);
-
-//
-//  Return string from a given incoming stage.
-//
-QString IncomingMessageStageToString(IncomingMessageStage stage);
-
-//
-// Converts incoming message stage to message status
-//
-MessageStatus IncomingMessageStageToMessageStatus(IncomingMessageStage stage);
+} // namespace version3
 } // namespace vm
 
-#endif // VM_INCOMING_MESSAGE_STAGE_H
+#endif // VM_VERSION3_PATCH_CHATS_H

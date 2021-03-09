@@ -107,7 +107,7 @@ void Self::resetUnreadCount(const ChatId &chatId)
     emit chatUpdated(chat);
 }
 
-void Self::updateLastMessage(const MessageHandler &message, qsizetype unreadMessageCount)
+void Self::updateLastMessage(const MessageHandler &message)
 {
     const auto chatRow = findRowById(message->chatId());
     if (!chatRow) {
@@ -121,11 +121,6 @@ void Self::updateLastMessage(const MessageHandler &message, qsizetype unreadMess
     }
     chat->setLastMessage(message); // TODO(fpohtmeh): don't set last message if it's not older then current
     QVector<int> roles { LastMessageBodyRole, LastEventTimeRole };
-    if (unreadMessageCount != chat->unreadMessageCount()) {
-        chat->setUnreadMessageCount(unreadMessageCount);
-        qCDebug(lcModel) << "Unread message count was set to" << unreadMessageCount;
-        roles << UnreadMessagesCountRole;
-    }
     const auto chatIndex = index(*chatRow);
     emit dataChanged(chatIndex, chatIndex, roles);
     emit chatUpdated(chat);
@@ -145,11 +140,6 @@ void ChatsModel::resetLastMessage(const ChatId &chatId)
     }
     chat->setLastMessage(MessageHandler());
     QVector<int> roles { LastMessageBodyRole, LastEventTimeRole };
-    if (chat->unreadMessageCount() != 0) {
-        chat->setUnreadMessageCount(0);
-        qCDebug(lcModel) << "Unread message count was reset";
-        roles << UnreadMessagesCountRole;
-    }
     const auto chatIndex = index(*chatRow);
     emit dataChanged(chatIndex, chatIndex, roles);
     emit chatUpdated(chat);

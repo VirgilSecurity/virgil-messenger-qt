@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,39 +32,24 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_INCOMING_MESSAGE_STAGE_H
-#define VM_INCOMING_MESSAGE_STAGE_H
+#include "patches/version3/PatchChats.h"
 
-#include "MessageStatus.h"
+#include "core/DatabaseUtils.h"
 
-#include <QString>
+using namespace vm;
+using namespace version3;
 
-namespace vm {
-//
-//  Denotes incoming message processing stage.
-//
-enum class IncomingMessageStage {
-    Received, // A message was locally received from a sender.
-    Decrypted, // A message was decrypted, so content handles specific message content: text, picture, etc.
-    Read, // A message was read by a recipient.
-    Broken // A message is broken and can't be processed.
-};
+using Self = PatchChats;
 
-//
-//  Return incoming stage from a given string.
-//  Throws if correspond stage is not found.
-//
-IncomingMessageStage IncomingMessageStageFromString(const QString &stageString);
+Self::PatchChats() : Patch(3) { }
 
-//
-//  Return string from a given incoming stage.
-//
-QString IncomingMessageStageToString(IncomingMessageStage stage);
+bool Self::apply(Database *database)
+{
+    const QLatin1String versionPath("patches/version3/");
 
-//
-// Converts incoming message stage to message status
-//
-MessageStatus IncomingMessageStageToMessageStatus(IncomingMessageStage stage);
-} // namespace vm
+    if (!DatabaseUtils::readExecQueries(database, versionPath + "dropUnreadMessageCountColumn")) {
+        return false;
+    }
 
-#endif // VM_INCOMING_MESSAGE_STAGE_H
+    return true;
+}

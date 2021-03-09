@@ -86,7 +86,7 @@ signals:
     void open(const QString &username);
     void close();
 
-    void writeMessage(const MessageHandler &message, qsizetype unreadCount = 0);
+    void writeMessage(const MessageHandler &message);
     void updateMessage(const MessageUpdate &messageUpdate);
     void writeChatAndLastMessage(const ChatHandler &chat);
     void resetUnreadCount(const ChatHandler &chat);
@@ -105,7 +105,7 @@ private:
     void onOpen(const QString &username);
     void onClose();
 
-    void onWriteMessage(const MessageHandler &message, qsizetype unreadCount);
+    void onWriteMessage(const MessageHandler &message);
     void onUpdateMessage(const MessageUpdate &messageUpdate);
     void onWriteChatAndLastMessage(const ChatHandler &chat);
     void onResetUnreadCount(const ChatHandler &chat);
