@@ -5,6 +5,7 @@ import "../theme"
 
 ListDelegate {
     height: Theme.headerHeight
+    openable: false
 
     Avatar {
         id: avatar
