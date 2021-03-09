@@ -129,7 +129,13 @@ ToolBar {
 
             HeaderTitle {
                 id: headerTitle
-                anchors.verticalCenter: parent.verticalCenter
+                fillWidth: true
+                titleLabel.elide: Label.ElideLeft
+                anchors {
+                    left: parent.left
+                    right: searchContainer.left
+                    verticalCenter: parent.verticalCenter
+                }
             }
 
             Item {

@@ -13,6 +13,9 @@ Column {
     property alias bold: titleLabel.font.bold
     property bool fillWidth: true
 
+    property alias titleLabel: titleLabel
+    property alias descriptionLabel: descriptionLabel
+
     Label {
         id: titleLabel
         font.pointSize: UiHelper.fixFontSz(15)
