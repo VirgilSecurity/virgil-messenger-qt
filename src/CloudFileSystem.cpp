@@ -152,8 +152,9 @@ CloudFileRequestId CloudFileSystem::getDownloadInfo(const CloudFileHandler &file
 bool CloudFileSystem::decryptFile(const QString &sourcePath, const QByteArray &encryptionKey,
                                   const CloudFileHandler &file, const CloudFileHandler &parentFolder)
 {
-    const auto status = m_coreFs->decryptFile(sourcePath, file->localPath(), encryptionKey, m_messenger->currentUser(),
-                                              createFsFolder(parentFolder));
+    const auto owner = m_coreMessenger->findUserById(file->updatedBy());
+    const auto status =
+            m_coreFs->decryptFile(sourcePath, file->localPath(), encryptionKey, owner, createFsFolder(parentFolder));
     return status == CoreMessengerStatus::Success;
 }
 
