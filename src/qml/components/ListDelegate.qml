@@ -13,6 +13,7 @@ ItemDelegate {
     property real rightMargin: Theme.smallSpacing
 
     property var selectionModel: undefined
+    property bool openable: true
     default property alias children: rowLayout.children
 
     signal openItem()
@@ -38,7 +39,7 @@ ItemDelegate {
         if (Platform.isDesktop) {
             root.selectItem(app.keyboardModifiers() & Qt.ControlModifier)
         }
-        else if (root.selectionModel && root.selectionModel.hasSelection) {
+        else if (!root.openable || root.selectionModel && root.selectionModel.hasSelection) {
             root.selectItem(true)
         }
         else {
@@ -47,7 +48,7 @@ ItemDelegate {
     }
 
     onDoubleClicked: {
-        if (Platform.isDesktop) {
+        if (root.openable && Platform.isDesktop) {
             root.openItem()
         }
     }

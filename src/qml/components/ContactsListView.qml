@@ -46,6 +46,7 @@ ModelListView {
             id: delegate
             width: root.width
             height: Theme.headerHeight
+            openable: false
 
             Binding on rightMargin { when: menuButton.visible; value: 0 }
 
