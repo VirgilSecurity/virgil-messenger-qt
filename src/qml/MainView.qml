@@ -47,7 +47,13 @@ Control {
                 attachmentPreview.visible = false
             }
             else if (manager.currentState === manager.cloudFileListState) {
-                controllers.cloudFiles.switchToParentFolder()
+                var selection = models.cloudFiles.selection
+                if (selection.hasSelection) {
+                    selection.clear()
+                }
+                else {
+                    controllers.cloudFiles.switchToParentFolder()
+                }
             }
             else {
                 stackView.pop()
