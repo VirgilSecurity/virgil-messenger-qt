@@ -153,6 +153,10 @@ bool CloudFileSystem::decryptFile(const QString &sourcePath, const QByteArray &e
                                   const CloudFileHandler &file, const CloudFileHandler &parentFolder)
 {
     const auto owner = m_coreMessenger->findUserById(file->updatedBy());
+    if (!owner) {
+        qCWarning(lcCloudFileSystem) << "User not found by id:" << file->updatedBy();
+        return false;
+    }
     const auto status =
             m_coreFs->decryptFile(sourcePath, file->localPath(), encryptionKey, owner, createFsFolder(parentFolder));
     return status == CoreMessengerStatus::Success;
@@ -181,6 +185,10 @@ CloudFileRequestId CloudFileSystem::setMembers(const CloudFileMembers &members, 
 {
     const auto requestId = ++m_requestId;
     const UserHandler keyIssuer = m_coreMessenger->findUserById(file->updatedBy());
+    if (!keyIssuer) {
+        qCWarning(lcCloudFileSystem) << "User not found by id:" << file->updatedBy();
+        return false;
+    }
     auto future = m_coreFs->setSharedGroupUsers(file->sharedGroupId(), file->encryptedKey(), keyIssuer, members);
     FutureWorker::run(future, [this, file, members, requestId](auto result) {
         if (result == CoreMessengerStatus::Success) {
