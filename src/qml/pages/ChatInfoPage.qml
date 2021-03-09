@@ -13,10 +13,6 @@ Page {
         id: d
         readonly property var chat: controllers.chats.current
         readonly property var model: chat.groupMembers
-        // FIXME(fpohtmeh): restore once it's implemented in core
-        readonly property bool groupMembersEditable: false // chat.isGroup && !model.isReadOnly
-        readonly property bool isOwnGroup: chat.isGroup // chat.isGroup && model.isOwnedByUser
-        readonly property int selectedGroupMembersCount: model.selection.selectedCount
     }
 
     background: Rectangle {
@@ -24,28 +20,32 @@ Page {
     }
 
     header: PageHeader {
+        id: pageHeader
         title: d.chat.isGroup ? qsTr("Group info") : qsTr("Chat info")
-        contextMenuVisible: d.groupMembersEditable || !d.isOwnGroup
+        contextMenuVisible: d.chat.isGroup && (d.groupMembersEditable || !d.isOwnGroup)
         contextMenu: ContextMenu {
             ContextMenuItem {
+                id: addMembersItem
                 text: qsTr("Add members")
-                visible: d.groupMembersEditable
+                visible: d.chat.isGroup && d.chat.userCanEdit
                 onTriggered: appState.addMembersRequested()
             }
 
             ContextMenuSeparator {
-                visible: d.groupMembersEditable && d.selectedGroupMembersCount
+                visible: addMembersItem.visible && removeMembersItem.visible
             }
 
             ContextMenuItem {
+                id: removeMembersItem
                 text: qsTr("Remove members")
-                visible: d.groupMembersEditable && d.selectedGroupMembersCount
-                onTriggered: deleteGroupMembersDialog.open()
+                visible: d.chat.isGroup && d.model.selection.hasSelection
+                onTriggered: removeParticipantsDialog.open()
             }
 
             ContextMenuItem {
+                id: leaveGroupItem
                 text: qsTr("Leave group")
-                visible: !d.isOwnGroup
+                visible: d.chat.isGroup && !d.chat.userIsOwner
                 onTriggered: controllers.chats.leaveGroup()
             }
         }
@@ -75,24 +75,15 @@ Page {
             }
         }
 
-        Item {
-            height: Theme.smallSpacing
-        }
-
-        Text {
-            Layout.leftMargin: Theme.smallMargin
-            text: d.selectedGroupMembersCount ? qsTr("Participants (%1 selected)").arg(d.selectedGroupMembersCount) : qsTr("Participants")
-            color: "white"
+        TabView {
             visible: d.chat.isGroup
-        }
+            Layout.topMargin: Theme.margin
 
-        ContactsListView {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            model: d.model.proxy
-            isSelectable: d.groupMembersEditable
-            visible: d.chat.isGroup
-            onContactSelected: d.model.toggleByUsername(contactUsername)
+            ContactsListView {
+                readonly property var tabTitle: qsTr("Participants")
+                model: d.model.proxy
+                selectionModel: d.chat.isGroup && d.chat.userCanEdit ? d.model.selection : null
+            }
         }
 
         Item {
@@ -102,9 +93,9 @@ Page {
     }
 
     MessageDialog {
-        id: deleteGroupMembersDialog
-        title: qsTr("Group")
-        text: qsTr("Remove group members(s)?")
+        id: removeParticipantsDialog
+        title: pageHeader.title
+        text: qsTr("Remove participant(s)?")
         onAccepted: controllers.chats.removeSelectedMembers()
     }
 }

@@ -60,7 +60,7 @@ private:
     void deleteLocalFiles();
 
     CloudFileOperation *m_parent;
-    CloudFiles m_files;
+    const CloudFiles m_files;
     CloudFileRequestId m_requestId;
     size_t m_processedCount;
     CloudFiles m_deletedFiles;

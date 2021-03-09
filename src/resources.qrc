@@ -3,15 +3,20 @@
         <!-- Pages -->
         <file>qml/pages/AccountSelectionPage.qml</file>
         <file>qml/pages/AccountSettingsPage.qml</file>
+        <file>qml/pages/AddCloudFolderMembersPage.qml</file>
         <file>qml/pages/AddGroupChatMembersPage.qml</file>
         <file>qml/pages/BackupKeyPage.qml</file>
         <file>qml/pages/ChatPage.qml</file>
         <file>qml/pages/ChatInfoPage.qml</file>
+        <file>qml/pages/CloudFileSharingPage.qml</file>
         <file>qml/pages/DownloadKeyPage.qml</file>
         <file>qml/pages/EditProfilePage.qml</file>
         <file>qml/pages/MainPage.qml</file>
+        <file>qml/pages/MainListsPage.qml</file>
+        <file>qml/pages/MultiSelectContactsPage.qml</file>
         <file>qml/pages/NameGroupChatPage.qml</file>
         <file>qml/pages/NewChatPage.qml</file>
+        <file>qml/pages/NewCloudFolderMembersPage.qml</file>
         <file>qml/pages/NewGroupChatPage.qml</file>
         <file>qml/pages/OperationPage.qml</file>
         <file>qml/pages/SelectContactsPage.qml</file>
@@ -100,15 +105,18 @@
         <file>qml/resources/sounds/notification.wav</file>
         <file>qml/resources/sounds/message-received.wav</file>
         <file>qml/resources/sounds/message-sent.wav</file>
-        <!-- Others -->
-        <file>qml/components/Avatar.qml</file>
-        <file>qml/components/AttachmentPreview.qml</file>
-        <file>qml/components/FlowView.qml</file>
-        <file>qml/components/CommonHelpers/TextInCircle.qml</file>
-        <file>qml/components/Popups/Popup.qml</file>
-        <file>qml/components/LineProgressBar.qml</file>
+        <!-- Dialogs -->
+        <file>qml/components/Dialogs/SendReportDialog.qml</file>
+        <file>qml/components/Dialogs/MessageDialog.qml</file>
+        <file>qml/components/Dialogs/InputDialog.qml</file>
+        <file>qml/components/Dialogs/GroupInvitationDialog.qml</file>
+        <file>qml/components/Dialogs/SelectAttachmentsDialog.qml</file>
+        <file>qml/components/Dialogs/CreateCloudFolderDialog.qml</file>
+        <file>qml/components/Dialogs/StyledDialog.qml</file>
+        <!-- Main -->
         <file>qml/main.qml</file>
         <file>qml/MainView.qml</file>
+        <!-- Form -->
         <file>qml/components/Form.qml</file>
         <file>qml/components/FormLabel.qml</file>
         <file>qml/components/FormInput.qml</file>
@@ -116,6 +124,15 @@
         <file>qml/components/Footer.qml</file>
         <file>qml/components/FormSecondaryButton.qml</file>
         <file>qml/components/FormVendor.qml</file>
+        <file>qml/components/FormImage.qml</file>
+        <file>qml/components/FormSubtitle.qml</file>
+        <!-- Others -->
+        <file>qml/components/Avatar.qml</file>
+        <file>qml/components/AttachmentPreview.qml</file>
+        <file>qml/components/FlowView.qml</file>
+        <file>qml/components/CommonHelpers/TextInCircle.qml</file>
+        <file>qml/components/Popups/Popup.qml</file>
+        <file>qml/components/LineProgressBar.qml</file>
         <file>qml/components/AccountSelection.qml</file>
         <file>qml/components/MessagesList.qml</file>
         <file>qml/components/MessagesFlickToBottomButton.qml</file>
@@ -128,6 +145,8 @@
         <file>qml/components/ChatMessageHeader.qml</file>
         <file>qml/components/ChatMessageInput.qml</file>
         <file>qml/components/ChatMessageBody.qml</file>
+        <file>qml/components/ChatListDelegate.qml</file>
+        <file>qml/components/ChatListView.qml</file>
         <file>qml/components/SearchHeader.qml</file>
         <file>qml/components/ContactsListView.qml</file>
         <file>qml/components/Header.qml</file>
@@ -137,8 +156,6 @@
         <file>qml/components/ContextMenuItem.qml</file>
         <file>qml/components/ContextMenuSeparator.qml</file>
         <file>qml/components/ImageButton.qml</file>
-        <file>qml/components/FormImage.qml</file>
-        <file>qml/components/FormSubtitle.qml</file>
         <file>qml/components/SidebarButton.qml</file>
         <file>qml/components/SidebarPanel.qml</file>
         <file>qml/components/CommonHelpers/IconWithText.qml</file>
@@ -147,11 +164,6 @@
         <file>qml/components/UserNameTextField.qml</file>
         <file>qml/components/UserNameFormInput.qml</file>
         <file>qml/components/UnreadMessagesSeparator.qml</file>
-        <file>qml/components/Dialogs/SendReportDialog.qml</file>
-        <file>qml/components/Dialogs/MessageDialog.qml</file>
-        <file>qml/components/Dialogs/InputDialog.qml</file>
-        <file>qml/components/Dialogs/GroupInvitationDialog.qml</file>
-        <file>qml/components/Dialogs/SelectAttachmentsDialog.qml</file>
         <file>qml/components/CircleProgressBar.qml</file>
         <file>qml/components/TextScrollView.qml</file>
         <file>qml/components/AttachmentPicker.qml</file>
@@ -159,7 +171,6 @@
         <file>qml/components/KeyboardHandler.qml</file>
         <file>qml/components/ListDelegate.qml</file>
         <file>qml/components/ModelListView.qml</file>
-        <file>qml/components/Dialogs/TemplateDialog.qml</file>
         <file>qml/components/ServerSelectionRow.qml</file>
         <file>qml/components/ContactsFlowView.qml</file>
         <file>qml/components/HorizontalRule.qml</file>
@@ -169,6 +180,10 @@
         <file>qml/components/TransfersPanel.qml</file>
         <file>qml/components/ListStatusButton.qml</file>
         <file>qml/components/PageHeader.qml</file>
+        <file>qml/components/StyledCheckBox.qml</file>
+        <file>qml/components/TabView.qml</file>
+        <file>qml/components/PropertiesView.qml</file>
+        <file>qml/components/TwoLineLabel.qml</file>
         <!-- Base -->
         <file>qml/base/AttachmentTypes.qml</file>
         <file>qml/base/Platform.qml</file>
@@ -219,12 +234,10 @@
         <file>resources/database/selectGroupMembersByMemberId.sql</file>
         <file>resources/database/updateGroupMemberAffiliation.sql</file>
         <file>resources/database/createContacts.sql</file>
-        <file>resources/database/dropContacts.sql</file>
         <file>resources/database/insertContact.sql</file>
-        <file>resources/database/insertContactsFromChats.sql</file>
-        <file>resources/database/migrateMessagesToVersion1.sql</file>
         <file>resources/database/selectAllContacts.sql</file>
         <file>resources/database/selectContact.sql</file>
+        <file>resources/database/selectContactsByIds.sql</file>
         <file>resources/database/updateContactAvatarLocalPath.sql</file>
         <file>resources/database/updateContactEmail.sql</file>
         <file>resources/database/updateContactIsBanned.sql</file>
@@ -232,5 +245,10 @@
         <file>resources/database/updateContactPhone.sql</file>
         <file>resources/database/updateContactPlatformId.sql</file>
         <file>resources/database/updateContactUsername.sql</file>
+        <!-- Database patches -->
+        <file>resources/database/patches/version1/dropContacts.sql</file>
+        <file>resources/database/patches/version1/insertContactsFromChats.sql</file>
+        <file>resources/database/patches/version1/migrateMessagesToVersion1.sql</file>
+        <file>resources/database/patches/version2/addSharedGroupIdColumn.sql</file>
     </qresource>
 </RCC>

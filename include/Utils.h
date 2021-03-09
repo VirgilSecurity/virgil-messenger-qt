@@ -64,6 +64,8 @@ QString messageContentDisplayText(const MessageContent &messageContent);
 
 QString printableLoadProgress(quint64 loaded, quint64 total);
 
+QString printableContactsList(const Contacts &contacts);
+
 // Debug
 
 void printThreadId(const QString &message);

@@ -41,7 +41,6 @@
 #include "database/GroupMembersTable.h"
 #include "database/GroupsTable.h"
 #include "models/ChatsModel.h"
-#include "models/DiscoveredContactsModel.h"
 #include "models/MessagesModel.h"
 #include "models/Models.h"
 #include "Controller.h"
@@ -105,24 +104,25 @@ void Self::rejectGroupInvitation()
     emit groupInvitationRejected();
 }
 
-void ChatsController::addSelectedMembers()
+void Self::addMembers(const Contacts &contacts)
 {
     const GroupId groupId(currentChat()->id());
-    const auto groupMembers = ContactsToGroupMembers(groupId, m_models->discoveredContacts()->selectedContacts());
-    // TODO: call in core messenger
+    const auto groupMembers = ContactsToGroupMembers(groupId, m_chatObject->groupOwnerId(), contacts);
+    qCWarning(lcController) << "ChatsController::addMembers is under development"
+                            << Utils::printableContactsList(contacts);
 }
 
-void ChatsController::removeSelectedMembers()
+void Self::removeSelectedMembers()
 {
     const GroupId groupId(currentChat()->id());
     const auto groupMembers = m_chatObject->selectedGroupMembers();
-    // TODO: call in core messenger
+    qCWarning(lcController) << "ChatsController::removeSelectedMembers is under development";
 }
 
-void ChatsController::leaveGroup()
+void Self::leaveGroup()
 {
     const GroupId groupId(currentChat()->id());
-    // TODO: call in core messenger
+    qCWarning(lcController) << "ChatsController::leaveGroup is under development";
 }
 
 void Self::loadChats()
@@ -194,7 +194,6 @@ void Self::openChat(const ChatHandler &chat)
         m_userDatabase->resetUnreadCount(chat);
     }
     m_chatObject->setChat(chat);
-    m_chatObject->setCurrentUser(m_messenger->currentUser());
     emit chatOpened(chat);
 }
 

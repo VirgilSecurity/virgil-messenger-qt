@@ -266,6 +266,8 @@ struct RegisterMetaTypesOnce
         qRegisterMetaType<vm::ModifiableCloudFileHandler>("ModifiableCloudFileHandler");
         qRegisterMetaType<vm::CloudFiles>("CloudFiles");
         qRegisterMetaType<vm::ModifiableCloudFiles>("ModifiableCloudFiles");
+        qRegisterMetaType<vm::CloudFileMemberHandler>("CloudFileMemberHandler");
+        qRegisterMetaType<vm::CloudFileMembers>("CloudFileMembers");
         qRegisterMetaType<vm::GroupUpdate>("GroupUpdate");
         qRegisterMetaType<vm::Users>("Users");
         qRegisterMetaType<vm::GroupMember>("GroupMember");
@@ -293,6 +295,7 @@ struct RegisterMetaTypesOnce
 Self::CoreMessenger(Settings *settings, QObject *parent)
     : QObject(parent), m_impl(std::make_unique<Self::Impl>()), m_settings(settings)
 {
+
     //
     //  Register self signals-slots
     //
@@ -2256,10 +2259,15 @@ std::variant<CoreMessengerStatus, QByteArray> Self::unpackXmppMessageBody(const 
 // --------------------------------------------------------------------------
 CoreMessengerCloudFs Self::cloudFs() const
 {
-    auto cloudFsCopyPtr = vssq_messenger_cloud_fs_shallow_copy_const(vssq_messenger_cloud_fs(m_impl->messenger.get()));
-    auto cloudFsCopy = vssq_messenger_cloud_fs_ptr_t(cloudFsCopyPtr, vssq_messenger_cloud_fs_delete);
     auto randomCopy = vscf_impl_wrap_ptr(vscf_impl_shallow_copy(m_impl->random.get()));
-    return CoreMessengerCloudFs(std::move(cloudFsCopy), std::move(randomCopy));
+    return CoreMessengerCloudFs(this, std::move(randomCopy));
+}
+
+const vssq_messenger_cloud_fs_t *Self::cloudFsC() const
+{
+    const auto result = vssq_messenger_cloud_fs(m_impl->messenger.get());
+    Q_ASSERT(result != nullptr);
+    return result;
 }
 
 // --------------------------------------------------------------------------
@@ -2532,7 +2540,7 @@ void Self::xmppOnMucInvitationReceived(const QString &roomJid, const QString &in
         //
         auto maybeEncryptedInvitationMessage = QByteArray::fromBase64Encoding(reason.toLatin1());
         if (!maybeEncryptedInvitationMessage) {
-            qDebug(lcCoreMessenger) << "Received invitation that is not Base64 encoded.";
+            qCDebug(lcCoreMessenger) << "Received invitation that is not Base64 encoded.";
             return;
         }
 

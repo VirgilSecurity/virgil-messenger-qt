@@ -32,7 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifdef VS_MACOS
+#if VS_MACOS
 
 #include <QtCore>
 

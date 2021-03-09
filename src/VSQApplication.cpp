@@ -43,9 +43,14 @@
 #include "VSQLogging.h"
 #include "VSQUiHelper.h"
 
-#if defined(VS_ANDROID) && VS_ANDROID
+#if VS_ANDROID
+#    include <android/VSQAndroid.h>
 #    include "FirebaseListener.h"
 #endif // VS_ANDROID
+
+#if VS_WINDOWS
+#    include "windows/WindowsPlatform.h"
+#endif // VS_WINDOWS
 
 #include <QGuiApplication>
 #include <QFont>
@@ -80,7 +85,7 @@ Self::VSQApplication()
     m_databaseThread->setObjectName("DatabaseThread");
     m_databaseThread->start();
 
-#ifdef VS_MACOS
+#if VS_MACOS
     VSQMacos::instance().startUpdatesTimer();
 #endif
 }
@@ -111,6 +116,19 @@ void Self::initialize()
     // Loggers
 #if !ENABLE_XMPP_LOGS && !ENABLE_XMPP_EXTRA_LOGS
     QLoggingCategory::setFilterRules("core-messenger-xmpp.debug=false");
+#endif
+
+    // Platforms
+#if (VS_ANDROID)
+    VSQAndroid::prepare();
+#endif
+
+#if (VS_WINDOWS)
+    WindowsPlatform::prepare();
+#endif
+
+#if (VSQ_WEBDRIVER_DEBUG)
+    wd_setup(argc, argv);
 #endif
 }
 
@@ -149,7 +167,7 @@ int Self::run(const QString &basePath, VSQLogging *logging)
 
     reloadQml();
 
-#if defined(VS_ANDROID) && VS_ANDROID
+#if VS_ANDROID
     notifications::android::FirebaseListener::instance().init();
 #endif
 
@@ -169,7 +187,7 @@ void Self::reloadQml()
 /******************************************************************************/
 void Self::checkUpdates()
 {
-#ifdef VS_MACOS
+#if VS_MACOS
     VSQMacos::instance().checkUpdates();
 #endif
 }
@@ -191,11 +209,16 @@ QString Self::currentVersion() const
 
 bool Self::isIosSimulator() const
 {
-#ifdef VS_IOS_SIMULATOR
+#if VS_IOS_SIMULATOR
     return true;
 #else
     return false;
 #endif
+}
+
+Qt::KeyboardModifiers Self::keyboardModifiers() const
+{
+    return qApp->keyboardModifiers();
 }
 
 void Self::onApplicationStateChanged(Qt::ApplicationState state)

@@ -37,6 +37,7 @@
 
 #include <QObject>
 
+#include "CloudFileObject.h"
 #include "CloudFileSystem.h"
 #include "CloudFilesUpdate.h"
 
@@ -44,6 +45,7 @@ class Settings;
 
 namespace vm {
 class CloudFilesModel;
+class Messenger;
 class Models;
 class UserDatabase;
 
@@ -53,10 +55,10 @@ class CloudFilesController : public QObject
     Q_PROPERTY(QString displayPath READ displayPath NOTIFY displayPathChanged)
     Q_PROPERTY(bool isRoot READ isRoot NOTIFY isRootChanged)
     Q_PROPERTY(bool isListUpdating MEMBER m_isListUpdating NOTIFY isListUpdatingChanged)
+    Q_PROPERTY(CloudFileObject *currentFolder MEMBER m_cloudFolderObject CONSTANT)
 
 public:
-    CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase,
-                         CloudFileSystem *cloudFileSystem, QObject *parent);
+    CloudFilesController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
     CloudFilesModel *model();
     void switchToRootFolder();
@@ -68,7 +70,11 @@ public:
 
     Q_INVOKABLE void addFiles(const QVariant &fileUrls);
     Q_INVOKABLE void deleteFiles();
-    Q_INVOKABLE void createFolder(const QString &name);
+    void createFolder(const QString &name, const CloudFileMembers &members);
+
+    void loadCloudFileMembers();
+    void addMembers(const CloudFileMembers &members);
+    Q_INVOKABLE void removeSelectedMembers();
 
 signals:
     void updateCloudFiles(const CloudFilesUpdate &update);
@@ -88,13 +94,15 @@ private:
     QString displayPath() const;
     bool isRoot() const;
     ModifiableCloudFileHandler rootFolder() const;
+    CloudFileHandler parentFolder() const;
 
     void onUpdateCloudFiles(const CloudFilesUpdate &update);
 
-    QPointer<const Settings> m_settings;
+    QPointer<Messenger> m_messenger;
     QPointer<Models> m_models;
     QPointer<UserDatabase> m_userDatabase;
     QPointer<CloudFileSystem> m_cloudFileSystem;
+    QPointer<CloudFileObject> m_cloudFolderObject;
 
     FoldersHierarchy m_hierarchy;
     FoldersHierarchy m_requestedHierarchy;

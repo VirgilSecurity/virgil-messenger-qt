@@ -36,6 +36,7 @@
 #define VM_CLOUD_FS_FOLDER_INFO_H
 
 #include "CloudFsFolderId.h"
+#include "CloudFsSharedGroupId.h"
 #include "UserId.h"
 
 #include <QString>
@@ -52,6 +53,7 @@ struct CloudFsFolderInfo
     QDateTime createdAt;
     QDateTime updatedAt;
     UserId updatedBy;
+    CloudFsSharedGroupId sharedGroupId;
 };
 } // namespace vm
 

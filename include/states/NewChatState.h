@@ -32,16 +32,15 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_NEWCHATSTATE_H
-#define VM_NEWCHATSTATE_H
+#ifndef VM_NEW_CHAT_STATE_H
+#define VM_NEW_CHAT_STATE_H
 
-#include "OperationState.h"
+#include "SelectContactsState.h"
 
 namespace vm {
 class ChatsController;
-class DiscoveredContactsModel;
 
-class NewChatState : public OperationState
+class NewChatState : public SelectContactsState
 {
     Q_OBJECT
 
@@ -50,15 +49,7 @@ public:
 
 signals:
     void addNewChatWithUsername(const QString &username);
-
-private:
-    void onEntry(QEvent *event);
-
-    void onAddNewChatWithUsername(const QString &username);
-
-    ChatsController *m_chatsController;
-    DiscoveredContactsModel *m_contactsModel;
 };
 } // namespace vm
 
-#endif // VM_NEWCHATSTATE_H
+#endif // VM_NEW_CHAT_STATE_H

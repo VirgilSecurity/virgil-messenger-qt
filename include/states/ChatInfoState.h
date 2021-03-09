@@ -45,7 +45,7 @@ class ChatInfoState : public QState
     Q_OBJECT
 
 public:
-    ChatInfoState(ChatsController *chatsController, QState *parent);
+    ChatInfoState(ChatsController *controller, QState *parent);
 
 signals:
     void addMembersRequested();
@@ -53,7 +53,7 @@ signals:
 private:
     void onEntry(QEvent *event) override;
 
-    ChatsController *m_chatsController;
+    ChatsController *m_controller;
 };
 } // namespace vm
 

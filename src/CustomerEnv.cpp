@@ -40,6 +40,10 @@
 #    include "android/VSQAndroid.h"
 #endif
 
+#if VS_WINDOWS
+#    include "windows/WindowsPlatform.h"
+#endif
+
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
@@ -100,6 +104,8 @@ QString Self::caBundlePath()
 {
 #if VS_ANDROID
     return VSQAndroid::caBundlePath();
+#elif VS_WINDOWS
+    return WindowsPlatform::caBundlePath();
 #else
     return qgetenv("VS_CURL_CA_BUNDLE");
 #endif

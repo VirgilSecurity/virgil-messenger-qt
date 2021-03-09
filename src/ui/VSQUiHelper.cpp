@@ -39,7 +39,7 @@
 /******************************************************************************/
 int VSQUiHelper::fixFontSz(int sz)
 {
-#if defined(Q_OS_WIN)
+#if VS_WINDOWS
     return sz * 96 / 128;
 #else
     return sz;

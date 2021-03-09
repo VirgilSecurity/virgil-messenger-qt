@@ -331,6 +331,7 @@ ModifiableCloudFileHandler Self::readCloudFile(const QSqlQuery &query)
     const auto publicKey = query.value("cloudFilePublicKey").toByteArray();
     const auto localPath = query.value("cloudFileLocalPath").toString();
     const auto fingerprint = query.value("cloudFileFingerprint").toString();
+    const auto sharedGroupId = query.value("cloudFileSharedGroupId").toString();
 
     auto cloudFile = std::make_shared<CloudFile>();
     if (isFolder) {
@@ -350,6 +351,7 @@ ModifiableCloudFileHandler Self::readCloudFile(const QSqlQuery &query)
     cloudFile->setPublicKey(publicKey);
     cloudFile->setLocalPath(localPath);
     cloudFile->setFingerprint(fingerprint);
+    cloudFile->setSharedGroupId(CloudFsSharedGroupId(sharedGroupId));
 
     return cloudFile;
 }
@@ -368,7 +370,8 @@ DatabaseUtils::BindValues DatabaseUtils::createNewCloudFileBindings(const CloudF
              { ":encryptedKey", cloudFile->encryptedKey() },
              { ":publicKey", cloudFile->publicKey() },
              { ":localPath", cloudFile->localPath() },
-             { ":fingerprint", cloudFile->fingerprint() } };
+             { ":fingerprint", cloudFile->fingerprint() },
+             { ":sharedGroupId", QString(cloudFile->sharedGroupId()) } };
 }
 
 DatabaseUtils::BindValues DatabaseUtils::createUpdatedCloudFileBindings(const CloudFileHandler &cloudFile,
@@ -376,20 +379,19 @@ DatabaseUtils::BindValues DatabaseUtils::createUpdatedCloudFileBindings(const Cl
 {
     if ((source == CloudFileUpdateSource::ListedChild) || (source == CloudFileUpdateSource::ListedParent)) {
         if (cloudFile->isFolder()) {
-            return {
-                { ":id", QString(cloudFile->id()) },
-                { ":parentId", QString(cloudFile->parentId()) },
-                { ":name", cloudFile->name() },
-                { ":isFolder", cloudFile->isFolder() },
-                // No type and size
-                { ":createdAt", cloudFile->createdAt().toTime_t() },
-                { ":updatedAt", cloudFile->updatedAt().toTime_t() },
-                { ":updatedBy", QString(cloudFile->updatedBy()) },
-                { ":encryptedKey", cloudFile->encryptedKey() },
-                { ":publicKey", cloudFile->publicKey() },
-                { ":localPath", cloudFile->localPath() }
-                // No fingerprint
-            };
+            return { { ":id", QString(cloudFile->id()) },
+                     { ":parentId", QString(cloudFile->parentId()) },
+                     { ":name", cloudFile->name() },
+                     { ":isFolder", cloudFile->isFolder() },
+                     // No type and size
+                     { ":createdAt", cloudFile->createdAt().toTime_t() },
+                     { ":updatedAt", cloudFile->updatedAt().toTime_t() },
+                     { ":updatedBy", QString(cloudFile->updatedBy()) },
+                     { ":encryptedKey", cloudFile->encryptedKey() },
+                     { ":publicKey", cloudFile->publicKey() },
+                     { ":localPath", cloudFile->localPath() },
+                     // No fingerprint
+                     { ":sharedGroupId", QString(cloudFile->sharedGroupId()) } };
         } else {
             return { { ":id", QString(cloudFile->id()) },
                      { ":parentId", QString(cloudFile->parentId()) },

@@ -8,7 +8,7 @@ Button {
     property string imageSource: ""
     property int imageSize: 40
     property int iconSize: 24
-    property bool disabled: false
+    property bool hoverVisible: true
     property alias backgroundColor: background.color
 
     icon.color: "transparent"
@@ -26,7 +26,7 @@ Button {
         radius: 0.5 * imageSize
     }
 
-    opacity: disabled ? 0.3 : 1
+    opacity: enabled ? 1 : 0.3
 
     Rectangle {
         id: hoverBackground
@@ -36,7 +36,7 @@ Button {
         color: "white"
         opacity: 0.07
         radius: 0.5 * imageSize
-        visible: button.hovered && !button.disabled
+        visible: button.hoverVisible && button.hovered
     }
 
     MouseArea {

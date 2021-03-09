@@ -14,17 +14,10 @@ ModelListView {
     section.property: "section"
     isSearchOpened: true
 
-    property bool isSelectable: true
+    property var selectionModel: null
+    property var itemContextMenu: null
 
     signal contactSelected(string contactUsername)
-
-    QtObject {
-        id: d
-
-        property real headerOpacity: 0
-        readonly property real defaultChatHeight: 50
-        readonly property real selectionIconSize: 20
-    }
 
     Component {
         id: contactSectionComponent
@@ -52,8 +45,9 @@ ModelListView {
         ListDelegate {
             id: delegate
             width: root.width
-            height: d.defaultChatHeight
-            hoverEnabled: true
+            height: Theme.headerHeight
+
+            Binding on rightMargin { when: menuButton.visible; value: 0 }
 
             Avatar {
                 id: avatar
@@ -62,28 +56,32 @@ ModelListView {
                 isSelected: model.isSelected
             }
 
-            Column {
+            TwoLineLabel {
                 Layout.fillWidth: true
+                title: model.displayName
+                description: model.details
+            }
 
-                Text {
-                    color: Theme.primaryTextColor
-                    font.pointSize: UiHelper.fixFontSz(15)
-                    text: model.displayName
-                    elide: Text.ElideRight
-                }
+            ImageButton {
+                id: menuButton
+                image: "More"
+                height: imageSize
+                hoverVisible: !model.isSelected
+                visible: root.selectionModel && root.itemContextMenu
 
-                Text {
-                    color: Theme.secondaryTextColor
-                    font.pointSize: UiHelper.fixFontSz(12)
-                    text: model.details
-                    width: parent.width
-                    elide: Text.ElideRight
-                    textFormat: Text.RichText
+                onClicked: {
+                    root.selectionModel.selectOnly(model.index)
+                    root.itemContextMenu.parent = menuButton
+                    root.itemContextMenu.open()
                 }
             }
 
-            onClicked: {
-                if (root.isSelectable) {
+            onSelectItem: {
+                if (root.selectionModel) {
+                    root.selectionModel.multiSelect = multiSelect
+                    root.selectionModel.toggle(model.index)
+                }
+                else {
                     root.contactSelected(model.username)
                 }
             }

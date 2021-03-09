@@ -58,6 +58,7 @@ public:
 
     QString filter() const;
     void setFilter(const QString &filter);
+    void clearFilter();
 
     QModelIndex sourceIndex(const int proxyRow) const;
     QModelIndex proxyIndex(const int sourceRow) const;

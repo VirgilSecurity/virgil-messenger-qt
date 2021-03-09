@@ -37,6 +37,8 @@
 
 #include <QString>
 
+#include <vector>
+
 namespace vm {
 //
 //  This class just wraps QString but is used for a strong type checking.

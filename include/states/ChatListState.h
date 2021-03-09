@@ -39,13 +39,14 @@
 
 namespace vm {
 class ChatsController;
+class ChatsModel;
 
 class ChatListState : public QState
 {
     Q_OBJECT
 
 public:
-    ChatListState(ChatsController *chatsController, QState *parent);
+    ChatListState(ChatsController *chatsController, ChatsModel *chatsModel, QState *parent);
 
 signals:
     void requestNewChat();
@@ -55,6 +56,7 @@ private:
     void onEntry(QEvent *) override;
 
     ChatsController *m_chatsController;
+    ChatsModel *m_chatsModel;
 };
 } // namespace vm
 

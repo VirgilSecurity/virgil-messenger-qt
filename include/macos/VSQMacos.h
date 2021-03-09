@@ -35,7 +35,7 @@
 #ifndef VSQMACOS_H
 #define VSQMACOS_H
 
-#ifdef VS_MACOS
+#if VS_MACOS
 
 #    include <QObject>
 #    include <QTimer>

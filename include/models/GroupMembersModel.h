@@ -38,35 +38,31 @@
 #include "ContactsModel.h"
 #include "GroupMember.h"
 #include "GroupUpdate.h"
-#include "User.h"
 
 namespace vm {
+class Messenger;
+
 class GroupMembersModel : public ContactsModel
 {
     Q_OBJECT
-    Q_PROPERTY(bool isReadOnly MEMBER m_isReadOnly NOTIFY isReadOnlyChanged)
-    Q_PROPERTY(bool isOwnedByUser MEMBER m_isOwnedByUser NOTIFY isOwnedByUserChanged)
 
 public:
-    using ContactsModel::ContactsModel;
+    GroupMembersModel(Messenger *messenger, QObject *parent);
 
     void setGroupMembers(const GroupMembers &groupMembers);
-    void setCurrentUser(const UserHandler &user);
+    GroupMembers groupMembers() const;
+
+    GroupMembers selectedGroupMembers() const;
 
     void updateGroup(const GroupUpdate &groupUpdate);
-
-signals:
-    void isReadOnlyChanged(bool isReadOnly);
-    void isOwnedByUserChanged(bool isOwned);
 
 private:
     QVariant data(const QModelIndex &index, int role) const override;
 
-    static int sortOrder(const ContactHandler contact);
+    static int sortOrder(const GroupMemberHandler member);
 
-    bool m_isReadOnly = true;
-    bool m_isOwnedByUser = false;
-    UserHandler m_currentUser;
+    QPointer<Messenger> m_messenger;
+    GroupMembers m_groupMembers;
 };
 } // namespace vm
 

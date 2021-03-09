@@ -34,9 +34,10 @@
 
 #include "models/ChatsModel.h"
 
-#include "Utils.h"
+#include "ListProxyModel.h"
+#include "ListSelectionModel.h"
 #include "Model.h"
-#include "models/ListProxyModel.h"
+#include "Utils.h"
 
 #include <QSortFilterProxyModel>
 
@@ -154,6 +155,13 @@ void ChatsModel::resetLastMessage(const ChatId &chatId)
     emit chatUpdated(chat);
 }
 
+void ChatsModel::toggleById(const QString &chatId)
+{
+    if (const auto row = findRowById(ChatId(chatId))) {
+        selection()->toggle(index(*row));
+    }
+}
+
 void Self::updateGroup(const GroupUpdate &groupUpdate)
 {
     //
@@ -212,17 +220,18 @@ QVariant Self::data(const QModelIndex &index, int role) const
         return chat->unreadMessageCount();
 
     default:
-        return QVariant();
+        return ListModel::data(index, role);
     }
 }
 
 QHash<int, QByteArray> Self::roleNames() const
 {
-    return { { IdRole, "id" },
-             { ContactIdRole, "contactId" },
-             { LastMessageBodyRole, "lastMessageBody" },
-             { LastEventTimeRole, "lastEventTime" },
-             { UnreadMessagesCountRole, "unreadMessageCount" } };
+    return unitedRoleNames(ListModel::roleNames(),
+                           { { IdRole, "id" },
+                             { ContactIdRole, "contactId" },
+                             { LastMessageBodyRole, "lastMessageBody" },
+                             { LastEventTimeRole, "lastEventTime" },
+                             { UnreadMessagesCountRole, "unreadMessageCount" } });
 }
 
 std::optional<int> Self::findRowById(const ChatId &chatId) const
