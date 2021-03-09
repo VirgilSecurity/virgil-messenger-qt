@@ -171,5 +171,6 @@ bool Self::fileIdLess(const ModifiableCloudFileHandler &lhs, const ModifiableClo
 
 bool Self::fileUpdated(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs)
 {
-    return lhs->updatedAt() < rhs->updatedAt();
+    // NOTE(fpohtmeh): compare localPath because it changes after reinstall (IOS)
+    return lhs->updatedAt() < rhs->updatedAt() || lhs->localPath() != rhs->localPath();
 }
