@@ -34,18 +34,31 @@
 
 #include "states/ChatListState.h"
 
-#include "controllers/ChatsController.h"
-#include "models/ChatsModel.h"
+#include "ChatsController.h"
+#include "ChatsModel.h"
+#include "Controllers.h"
+#include "UsersController.h"
 
 using namespace vm;
 
-ChatListState::ChatListState(ChatsController *chatsController, ChatsModel *chatsModel, QState *parent)
-    : QState(parent), m_chatsController(chatsController), m_chatsModel(chatsModel)
+ChatListState::ChatListState(Controllers *controllers, ChatsModel *model, Settings *settings, QState *parent)
+    : QState(parent), m_controllers(controllers), m_model(model), m_settings(settings)
 {
 }
 
 void ChatListState::onEntry(QEvent *)
 {
-    m_chatsModel->clearFilter();
-    m_chatsController->closeChat();
+    m_model->clearFilter();
+    m_controllers->chats()->closeChat();
+
+    if (m_firstRun) {
+        m_firstRun = false;
+        signIn();
+    }
+}
+
+void ChatListState::signIn()
+{
+    const auto username = m_settings->lastSignedInUser();
+    m_controllers->users()->signIn(username);
 }

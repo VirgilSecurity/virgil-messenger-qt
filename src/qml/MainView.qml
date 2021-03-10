@@ -72,8 +72,9 @@ Control {
         }
 
         function openMainPage() {
-            if ([manager.splashScreenState, manager.accountSelectionState,
+            if ([manager.startState, manager.accountSelectionState,
                  manager.signUpState, manager.downloadKeyState, manager.cloudFileListState].includes(manager.previousState)) {
+                // FIXME(fpohtmeh): replace state
                 stackView.clear()
                 stackView.push(page("Main"))
             }
@@ -190,7 +191,6 @@ Control {
 
     Component.onCompleted: {
         manager.goBack.connect(d.goBack)
-        manager.splashScreenState.entered.connect(d.openSplashScreenPage)
         manager.accountSelectionState.entered.connect(d.openAccountSelectionPage)
         manager.chatListState.entered.connect(d.openMainPage)
         manager.accountSettingsState.entered.connect(d.openAccountSettingsPage)

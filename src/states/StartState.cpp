@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,31 +32,34 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_SPLASHSCREENSTATE_H
-#define VM_SPLASHSCREENSTATE_H
+#include "StartState.h"
 
-#include "SignInState.h"
+#include "android/VSQAndroid.h"
+#include "Settings.h"
 
-class Settings;
+using namespace vm;
+using Self = StartState;
 
-namespace vm {
-class SplashScreenState : public SignInState
+Self::StartState(Settings *settings, QState *parent) : QState(parent), m_settings(settings)
 {
-    Q_OBJECT
+    connect(this, &Self::requestUi, this, &Self::onRequestUi, Qt::QueuedConnection);
+}
 
-public:
-    SplashScreenState(UsersController *usersController, Validator *validator, Settings *settings, QState *parent);
+void Self::hideNativeSplashScreen()
+{
+#if VS_ANDROID
+    VSQAndroid::hideSplashScreen();
+#endif
+}
 
-signals:
-    void userNotSelected();
+void Self::onRequestUi()
+{
+    hideNativeSplashScreen();
 
-private:
-    void onEntry(QEvent *) override;
-    void trySignIn();
-    void hideNativeSplashScreen();
-
-    Settings *m_settings;
-};
-} // namespace vm
-
-#endif // VM_SPLASHSCREENSTATE_H
+    const auto username = m_settings->lastSignedInUser();
+    if (username.isEmpty()) {
+        emit accountSelectionRequested();
+    } else {
+        emit chatListRequested();
+    }
+}

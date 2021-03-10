@@ -65,7 +65,7 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
       m_editProfileState(new EditProfileState(controllers->users(), this)),
       m_verifyProfileState(new VerifyProfileState(this)),
       m_chatInfoState(new ChatInfoState(controllers->chats(), this)),
-      m_chatListState(new ChatListState(controllers->chats(), models->chats(), this)),
+      m_chatListState(new ChatListState(controllers, models->chats(), m_settings, this)),
       m_chatState(new ChatState(controllers, m_messenger, this)),
       m_downloadKeyState(new DownloadKeyState(controllers->users(), this)),
       m_cloudFileListState(new CloudFileListState(messenger, controllers->cloudFiles(), this)),
@@ -78,8 +78,7 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
       m_signInAsState(new SignInAsState(this)),
       m_signInUsernameState(new SignInUsernameState(controllers->users(), validator, this)),
       m_signUpState(new SignUpState(controllers->users(), validator, this)),
-      m_splashScreenState(new SplashScreenState(controllers->users(), validator, m_messenger->settings(), this)),
-      m_startState(new StartState(this))
+      m_startState(new StartState(m_settings, this))
 {
     registerStatesMetaTypes();
     addTransitions();
@@ -113,7 +112,6 @@ void Self::registerStatesMetaTypes()
     qRegisterMetaType<SignInAsState *>("SignInAsState*");
     qRegisterMetaType<SignInUsernameState *>("SignInUsernameState*");
     qRegisterMetaType<SignUpState *>("SignUpState*");
-    qRegisterMetaType<SplashScreenState *>("SplashScreenState*");
     qRegisterMetaType<StartState *>("StartState*");
 }
 
@@ -128,21 +126,14 @@ void Self::addTransitions()
     auto users = m_controllers->users();
     auto chats = m_controllers->chats();
 
-    m_startState->addTransition(this, &Self::splashScreenRequested, m_splashScreenState);
     // NOTE: Queued connection is a workaround for working state transition
-    connect(this, &Self::setUiState, this, std::bind(&Self::splashScreenRequested, this, QPrivateSignal()),
-            Qt::QueuedConnection);
     connect(this, &Self::openChatList, this, std::bind(&Self::chatListRequested, this, QPrivateSignal()),
             Qt::QueuedConnection);
     connect(this, &Self::openCloudFileList, this, std::bind(&Self::cloudFileListRequested, this, QPrivateSignal()),
             Qt::QueuedConnection);
 
-    m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::userNotSelected,
-                                       m_accountSelectionState);
-    m_splashScreenState->addTransition(m_splashScreenState, &SplashScreenState::operationErrorOccurred,
-                                       m_accountSelectionState);
-
-    m_splashScreenState->addTransition(users, &UsersController::signedIn, m_chatListState);
+    m_startState->addTransition(m_startState, &StartState::chatListRequested, m_chatListState);
+    m_startState->addTransition(m_startState, &StartState::accountSelectionRequested, m_accountSelectionState);
 
     m_accountSelectionState->addTransition(users, &UsersController::signedIn, m_chatListState);
     addTwoSideTransition(m_accountSelectionState, m_accountSelectionState,
