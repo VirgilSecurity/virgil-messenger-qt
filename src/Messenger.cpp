@@ -129,9 +129,19 @@ bool Self::isReadyToSignIn() const noexcept
     return m_coreMessenger->isReadyToSignIn();
 }
 
+bool Self::isAuthenticated() const
+{
+    return m_coreMessenger->isAuthenticated();
+}
+
 void Self::signIn(const QString &username)
 {
-    FutureWorker::run(m_coreMessenger->signIn(username), [this, username = username](auto result) {
+    const auto sameUser = isAuthenticated() && currentUser()->username() == username;
+    FutureWorker::run(m_coreMessenger->signIn(username), [this, username = username, sameUser](auto result) {
+        if (sameUser) {
+            return;
+        }
+
         switch (result) {
         case CoreMessengerStatus::Success:
             m_settings->setLastSignedInUser(username);

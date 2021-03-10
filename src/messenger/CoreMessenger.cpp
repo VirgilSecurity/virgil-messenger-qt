@@ -489,6 +489,11 @@ CoreMessenger::ConnectionState Self::connectionState() const
     return m_impl->connectionState;
 }
 
+bool CoreMessenger::isAuthenticated() const
+{
+    return m_impl->messenger && vssq_messenger_is_authenticated(m_impl->messenger.get());
+}
+
 bool Self::isNetworkOnline() const noexcept
 {
     return m_impl->networkAnalyzer->isConnected();
@@ -602,8 +607,10 @@ QFuture<Self::Result> Self::signIn(const QString &username)
             return Self::Result::Error_ImportCredentials;
         }
 
-        qCInfo(lcCoreMessenger) << "Sign in user";
-        error.status = vssq_messenger_authenticate(m_impl->messenger.get(), creds.get());
+        if (isNetworkOnline()) {
+            qCInfo(lcCoreMessenger) << "Authenticate user";
+            error.status = vssq_messenger_authenticate(m_impl->messenger.get(), creds.get());
+        }
 
         if (vssq_error_has_error(&error)) {
             qCWarning(lcCoreMessenger) << "Got error status:"

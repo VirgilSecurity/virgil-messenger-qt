@@ -71,6 +71,7 @@ public:
     //
     bool isOnline() const noexcept;
     bool isReadyToSignIn() const noexcept;
+    bool isAuthenticated() const;
 
     //
     //  Messages.

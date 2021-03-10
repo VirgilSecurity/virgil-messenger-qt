@@ -162,7 +162,9 @@ public:
     bool isOnline() const noexcept;
     bool isSignedIn() const noexcept;
     bool isReadyToSignIn() const noexcept;
+
     ConnectionState connectionState() const;
+    bool isAuthenticated() const;
 
     //
     //  Sign-in / Sign-up / Backup.
