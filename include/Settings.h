@@ -98,6 +98,7 @@ public:
 
     // Short interval for elapsed seconds that means now
     std::chrono::seconds nowInterval() const;
+    std::chrono::seconds retrySignInInterval() const;
 
 signals:
     void lastSignedInUserChanged(const QString &username);

@@ -119,9 +119,14 @@ Self::Messenger(Settings *settings, Validator *validator)
 #endif // VS_PUSHNOTIFICATIONS
 }
 
-bool Messenger::isOnline() const noexcept
+bool Self::isOnline() const noexcept
 {
     return m_coreMessenger->isOnline();
+}
+
+bool Self::isReadyToSignIn() const noexcept
+{
+    return m_coreMessenger->isReadyToSignIn();
 }
 
 void Self::signIn(const QString &username)

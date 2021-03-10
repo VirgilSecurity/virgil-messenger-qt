@@ -37,28 +37,37 @@
 #include "ChatsController.h"
 #include "ChatsModel.h"
 #include "Controllers.h"
+#include "Messenger.h"
 #include "UsersController.h"
 
-using namespace vm;
+#include <QTimer>
 
-ChatListState::ChatListState(Controllers *controllers, ChatsModel *model, Settings *settings, QState *parent)
-    : QState(parent), m_controllers(controllers), m_model(model), m_settings(settings)
+using namespace vm;
+using Self = ChatListState;
+
+Self::ChatListState(Messenger *messenger, Controllers *controllers, ChatsModel *model, QState *parent)
+    : QState(parent), m_messenger(messenger), m_controllers(controllers), m_model(model)
 {
+    connect(m_messenger, &Messenger::onlineStatusChanged, this, &Self::trySignIn);
+    connect(controllers->users(), &UsersController::signInErrorOccured, this, &Self::retrySignIn);
 }
 
-void ChatListState::onEntry(QEvent *)
+void Self::onEntry(QEvent *)
 {
     m_model->clearFilter();
     m_controllers->chats()->closeChat();
+    trySignIn();
+}
 
-    if (m_firstRun) {
-        m_firstRun = false;
-        signIn();
+void Self::trySignIn()
+{
+    const auto username = m_messenger->settings()->lastSignedInUser();
+    if (!username.isEmpty() && m_messenger->isReadyToSignIn()) {
+        m_controllers->users()->signIn(username);
     }
 }
 
-void ChatListState::signIn()
+void Self::retrySignIn()
 {
-    const auto username = m_settings->lastSignedInUser();
-    m_controllers->users()->signIn(username);
+    QTimer::singleShot(m_messenger->settings()->retrySignInInterval(), this, &Self::trySignIn);
 }

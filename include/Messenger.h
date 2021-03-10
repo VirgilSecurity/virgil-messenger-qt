@@ -70,6 +70,7 @@ public:
     //  Return true if messenger has Internet connection with all services.
     //
     bool isOnline() const noexcept;
+    bool isReadyToSignIn() const noexcept;
 
     //
     //  Messages.

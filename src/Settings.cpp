@@ -294,6 +294,11 @@ std::chrono::seconds Settings::nowInterval() const
     return std::chrono::seconds(5);
 }
 
+std::chrono::seconds Settings::retrySignInInterval() const
+{
+    return std::chrono::seconds(10);
+}
+
 QString Settings::makeGroupKey(const QString &group, const QString &key) const
 {
     return group + '/' + key;

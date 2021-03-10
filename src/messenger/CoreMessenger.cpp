@@ -479,6 +479,11 @@ bool Self::isSignedIn() const noexcept
     return m_impl->messenger && vssq_messenger_is_authenticated(m_impl->messenger.get());
 }
 
+bool Self::isReadyToSignIn() const noexcept
+{
+    return !isSignedIn() && isNetworkOnline() && isXmppDisconnected();
+}
+
 CoreMessenger::ConnectionState Self::connectionState() const
 {
     return m_impl->connectionState;
@@ -894,7 +899,9 @@ void Self::onReconnectXmppServerIfNeeded()
 
 void Self::onDisconnectXmppServer()
 {
-    m_impl->xmpp->disconnectFromServer();
+    if (m_impl->xmpp != nullptr) {
+        m_impl->xmpp->disconnectFromServer();
+    }
 }
 
 void Self::onCleanupXmppMucRooms()

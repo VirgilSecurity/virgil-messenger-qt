@@ -37,18 +37,17 @@
 
 #include <QState>
 
-class Settings;
-
 namespace vm {
 class Controllers;
 class ChatsModel;
+class Messenger;
 
 class ChatListState : public QState
 {
     Q_OBJECT
 
 public:
-    ChatListState(Controllers *controllers, ChatsModel *model, Settings *settings, QState *parent);
+    ChatListState(Messenger *messenger, Controllers *controllers, ChatsModel *model, QState *parent);
 
 signals:
     void requestNewChat();
@@ -57,13 +56,12 @@ signals:
 private:
     void onEntry(QEvent *) override;
 
-    void signIn();
+    void trySignIn();
+    void retrySignIn();
 
+    Messenger *m_messenger;
     Controllers *m_controllers;
     ChatsModel *m_model;
-    Settings *m_settings;
-
-    bool m_firstRun = true;
 };
 } // namespace vm
 

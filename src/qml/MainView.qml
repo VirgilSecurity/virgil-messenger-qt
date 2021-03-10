@@ -74,7 +74,6 @@ Control {
         function openMainPage() {
             if ([manager.startState, manager.accountSelectionState,
                  manager.signUpState, manager.downloadKeyState, manager.cloudFileListState].includes(manager.previousState)) {
-                // FIXME(fpohtmeh): replace state
                 stackView.clear()
                 stackView.push(page("Main"))
             }
