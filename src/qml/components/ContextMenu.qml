@@ -17,7 +17,7 @@ Menu {
 
         readonly property real spacing: 5
         readonly property var menuPosition: calculatePosition()
-        readonly property real menuWidth: d.calculateWidth(compact ? 150 : 200)
+        readonly property real menuWidth: d.calculateWidth(compact ? 150 : 250)
         readonly property real vPadding: compact ? 0.5 * Theme.smallPadding : Theme.smallPadding
         readonly property real hPadding: 0
 

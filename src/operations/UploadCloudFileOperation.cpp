@@ -134,7 +134,7 @@ void UploadCloudFileOperation::onUploaded()
     CreateCloudFilesUpdate update;
     update.parentFolder = m_parentFolder;
     update.files.push_back(m_file);
-    m_parent->cloudFilesUpdate(update);
+    m_parent->updateCloudFiles(update);
 
     transferUpdate(TransferCloudFileUpdate::Stage::Finished, m_file->size());
 
@@ -155,7 +155,7 @@ void UploadCloudFileOperation::transferUpdate(const TransferCloudFileUpdate::Sta
         update.stage = stage;
         update.type = TransferCloudFileUpdate::Type::Upload;
         update.bytesLoaded = bytesLoaded;
-        m_parent->cloudFilesUpdate(update);
+        m_parent->updateCloudFiles(update);
     }
 }
 

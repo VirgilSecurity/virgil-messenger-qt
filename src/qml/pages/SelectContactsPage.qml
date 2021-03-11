@@ -8,11 +8,8 @@ import "../theme"
 
 OperationPage {
     id: root
-    appState: app.stateManager.newGroupChatState
     loadingText: qsTr("Adding of contact...")
     footerText: ""
-
-    signal contactSelected(string contactUsername)
 
     property alias selectedContacts: flow
 
@@ -23,6 +20,14 @@ OperationPage {
         readonly property alias search: contactSearch.search
 
         onSearchChanged: model.filter = search
+
+        function selectContact(contactUsername) {
+            appState.contactSelected(contactUsername)
+            contactSearch.clear()
+            if (models.discoveredContacts.selection.multiSelect) {
+                models.discoveredContacts.toggleByUsername(contactUsername)
+            }
+        }
     }
 
     Form {
@@ -42,7 +47,7 @@ OperationPage {
                 }
             }
 
-            onContactSelected: root.contactSelected(contactUsername)
+            onContactSelected: d.selectContact(contactUsername)
         }
 
         Search {
@@ -59,7 +64,7 @@ OperationPage {
             onAccepted: {
                 const username = models.discoveredContacts.firstContactUsername()
                 if (username) {
-                    root.contactSelected(username)
+                    d.selectContact(username)
                 }
             }
         }
@@ -73,7 +78,7 @@ OperationPage {
             footer: HorizontalRule {}
             footerPositioning: ListView.OverlayFooter
 
-            onContactSelected: root.contactSelected(contactUsername)
+            onContactSelected: d.selectContact(contactUsername)
         }
 
         ServerSelectionRow {
@@ -81,10 +86,5 @@ OperationPage {
         }
     }
 
-    onContactSelected: {
-        if (models.discoveredContacts.selection.multiSelect) {
-            models.discoveredContacts.toggleByUsername(contactUsername)
-            contactSearch.clear()
-        }
-    }
+
 }

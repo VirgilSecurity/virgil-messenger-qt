@@ -35,7 +35,7 @@
 #ifndef VM_VERSION1_PATCH_CONTACTS_H
 #define VM_VERSION1_PATCH_CONTACTS_H
 
-#include "database/core/Patch.h"
+#include "core/Patch.h"
 
 namespace vm {
 namespace version1 {

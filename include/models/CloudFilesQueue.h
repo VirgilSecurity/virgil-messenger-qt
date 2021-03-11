@@ -62,10 +62,13 @@ public:
 
 signals:
     void pushListFolder(const CloudFileHandler &parentFolder);
-    void pushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
+    void pushCreateFolder(const QString &name, const CloudFileHandler &parentFolder, const CloudFileMembers &members);
     void pushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
     void pushDownloadFile(const CloudFileHandler &file, const CloudFileHandler &parentFolder, const PostFunction &func);
     void pushDeleteFiles(const CloudFiles &files);
+    void pushSetMembers(const CloudFileMembers &members, const CloudFileHandler &file,
+                        const CloudFileHandler &parentFolder);
+    void pushListMembers(const CloudFileHandler &file, const CloudFileHandler &parentFolder);
 
     void interruptFileOperation(const CloudFileId &fileId);
     void updateCloudFiles(const CloudFilesUpdate &update);
@@ -78,11 +81,15 @@ private:
     qsizetype maxAttemptCount() const override;
 
     void onPushListFolder(const CloudFileHandler &parentFolder);
-    void onPushCreateFolder(const QString &name, const CloudFileHandler &parentFolder);
+    void onPushCreateFolder(const QString &name, const CloudFileHandler &parentFolder, const CloudFileMembers &members);
     void onPushUploadFile(const QString &filePath, const CloudFileHandler &parentFolder);
     void onPushDownloadFile(const CloudFileHandler &file, const CloudFileHandler &parentFolder,
                             const PostFunction &func);
     void onPushDeleteFiles(const CloudFiles &files);
+    void onPushSetMembers(const CloudFileMembers &members, const CloudFileHandler &file,
+                          const CloudFileHandler &parentFolder);
+    void onPushListMembers(const CloudFileHandler &file, const CloudFileHandler &parentFolder);
+
     void onUpdateCloudFiles(const CloudFilesUpdate &update);
 
     QPointer<Messenger> m_messenger;

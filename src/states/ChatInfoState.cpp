@@ -35,17 +35,15 @@
 #include "ChatInfoState.h"
 
 #include "ChatsController.h"
-#include "Controllers.h"
 
 using namespace vm;
+using Self = ChatInfoState;
 
-ChatInfoState::ChatInfoState(ChatsController *chatsController, QState *parent)
-    : QState(parent), m_chatsController(chatsController)
-{
-}
+Self::ChatInfoState(ChatsController *chatsController, QState *parent)
+    : QState(parent), m_controller(chatsController) { }
 
 void ChatInfoState::onEntry(QEvent *event)
 {
     Q_UNUSED(event)
-    m_chatsController->loadGroupMembers();
+    m_controller->loadGroupMembers();
 }

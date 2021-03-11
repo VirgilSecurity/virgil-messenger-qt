@@ -53,11 +53,11 @@ static const QString kPushNotificationsFormTypeVal = "http://jabber.org/protocol
 
 static const QString kPushNotificationsService = "service";
 
-#ifdef VS_ANDROID
+#if VS_ANDROID
 static const QString kPushNotificationsServiceVal = "fcm";
 #endif
 
-#ifdef VS_IOS
+#if VS_IOS
 static const QString kPushNotificationsServiceVal = "apns";
 #endif
 
@@ -102,7 +102,7 @@ QXmppPushEnableIq Self::buildEnableIq() const
         field.setValue(PushNotifications::instance().token());
         fields << field;
     }
-#ifdef VS_IOS
+#if VS_IOS
     {
         QXmppDataForm::Field field;
         field.setKey("topic");

@@ -77,7 +77,7 @@ private:
 
     bool create() override;
 
-    GroupMemberHanlder readGroupMember(const QSqlQuery &query);
+    GroupMemberHandler readGroupMember(const QSqlQuery &query);
 };
 } // namespace vm
 

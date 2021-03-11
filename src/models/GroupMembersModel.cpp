@@ -34,71 +34,66 @@
 
 #include "GroupMembersModel.h"
 
+#include "ListSelectionModel.h"
+#include "Messenger.h"
+
 using namespace vm;
+using Self = GroupMembersModel;
 
-void GroupMembersModel::setGroupMembers(const GroupMembers &groupMembers)
+Self::GroupMembersModel(Messenger *messenger, QObject *parent) : ContactsModel(parent), m_messenger(messenger) { }
+
+void Self::setGroupMembers(const GroupMembers &groupMembers)
 {
+    m_groupMembers = groupMembers;
     setContacts(GroupMembersToContacts(groupMembers));
-
-    // Update isReadOnly & isOwnedByUser
-    bool isReadOnly = true;
-    bool isOwnedByUser = false;
-    if (m_currentUser) {
-        const auto it = std::find_if(groupMembers.begin(), groupMembers.end(), [id = m_currentUser->id()](auto m) {
-            return m->memberId() == id
-                    && (m->memberAffiliation() == GroupAffiliation::Owner
-                        || m->memberAffiliation() == GroupAffiliation::Admin);
-        });
-        if (it != groupMembers.end()) {
-            isReadOnly = false;
-            isOwnedByUser = (*it)->memberAffiliation() == GroupAffiliation::Owner;
-        }
-    }
-
-    if (m_isReadOnly != isReadOnly) {
-        m_isReadOnly = isReadOnly;
-        emit isReadOnlyChanged(isReadOnly);
-    }
-    if (m_isOwnedByUser != isOwnedByUser) {
-        m_isOwnedByUser = isOwnedByUser;
-        emit isOwnedByUserChanged(isOwnedByUser);
-    }
 }
 
-void GroupMembersModel::setCurrentUser(const UserHandler &user)
+GroupMembers Self::groupMembers() const
 {
-    m_currentUser = user;
+    return m_groupMembers;
 }
 
-void GroupMembersModel::updateGroup(const GroupUpdate &groupUpdate)
+GroupMembers Self::selectedGroupMembers() const
+{
+    GroupMembers result;
+    for (auto &i : selection()->selectedIndexes()) {
+        result.push_back(m_groupMembers[i.row()]);
+    }
+    return result;
+}
+
+void Self::updateGroup(const GroupUpdate &groupUpdate)
 {
     if (auto upd = std::get_if<RemoveGroupMembersUpdate>(&groupUpdate)) {
         for (auto &member : upd->members) {
             if (auto index = findByUserId(member->id()); index.isValid()) {
+                m_groupMembers.erase(m_groupMembers.begin() + index.row());
                 removeContactByRow(index.row());
             }
         }
     }
 }
 
-QVariant GroupMembersModel::data(const QModelIndex &index, int role) const
+QVariant Self::data(const QModelIndex &index, int role) const
 {
-    const auto &contact = getContact(index.row());
     switch (role) {
     case DetailsRole:
-        return GroupAffiliationToDisplayString(contact->groupAffiliation());
+        return GroupAffiliationToDisplayString(m_groupMembers[index.row()]->memberAffiliation());
 
-    case SortRole:
-        return QString::number(sortOrder(contact)) + contact->displayName();
+    case SortRole: {
+        const auto m = m_groupMembers[index.row()];
+        // TODO(fpohtmeh): remove getContact call after GroupMember refactoring
+        return QString::number(sortOrder(m)) + getContact(index.row())->displayName();
+    }
 
     default:
         return ContactsModel::data(index, role);
     }
 }
 
-int GroupMembersModel::sortOrder(const ContactHandler contact)
+int Self::sortOrder(const GroupMemberHandler member)
 {
-    switch (contact->groupAffiliation()) {
+    switch (member->memberAffiliation()) {
     case GroupAffiliation::Owner:
         return 0;
     case GroupAffiliation::Admin:

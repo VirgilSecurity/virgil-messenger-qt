@@ -109,10 +109,15 @@ QString LoadFileOperation::filePath() const
     return m_filePath;
 }
 
-void LoadFileOperation::onReplyFinished(QNetworkReply *reply)
+void LoadFileOperation::onReplyFinished(QNetworkReply *)
 {
-    const auto error = reply->error();
-    reply->deleteLater();
+    if (m_reply.isNull()) {
+        return;
+    }
+
+    const auto error = m_reply->error();
+    m_reply->deleteLater();
+
     if (status() == Status::Failed) {
         return;
     }

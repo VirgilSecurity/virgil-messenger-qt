@@ -53,6 +53,8 @@ struct CloudFsFolder
     QByteArray folderPublicKey;
     std::list<CloudFsFolderInfo> folders;
     std::list<CloudFsFileInfo> files;
+
+    [[nodiscard]] bool isShared() const { return info.sharedGroupId.isValid(); }
 };
 } // namespace vm
 

@@ -34,12 +34,11 @@
 
 #include <iostream>
 #include <VSQApplication.h>
-#ifdef VS_MOBILE
+#if VS_MOBILE
 #    include <QGuiApplication>
 #else
 #    include <QApplication>
 #endif
-#include <android/VSQAndroid.h>
 #include <logging/VSQLogging.h>
 
 #if (VSQ_WEBDRIVER_DEBUG)
@@ -48,17 +47,8 @@
 
 int main(int argc, char *argv[])
 {
-
-#if (VS_ANDROID)
-    VSQAndroid::prepare();
-#endif
-
-#if (VSQ_WEBDRIVER_DEBUG)
-    wd_setup(argc, argv);
-#endif
-
     VSQApplication::initialize();
-#ifdef VS_MOBILE
+#if VS_MOBILE
     QGuiApplication a(argc, argv);
 #else
     QApplication a(argc, argv);

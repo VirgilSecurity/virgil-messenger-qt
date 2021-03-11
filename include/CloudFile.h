@@ -42,6 +42,7 @@
 
 #include "CloudFileId.h"
 #include "CloudFileUpdateSource.h"
+#include "CloudFsSharedGroupId.h"
 #include "UserId.h"
 
 namespace vm {
@@ -74,8 +75,11 @@ public:
     void setLocalPath(const QString &path);
     QString fingerprint() const noexcept;
     void setFingerprint(const QString &fingerprint);
+    CloudFsSharedGroupId sharedGroupId() const;
+    void setSharedGroupId(const CloudFsSharedGroupId &sharedGroupId);
 
     bool isRoot() const;
+    bool isShared() const;
 
     void update(const CloudFile &file, CloudFileUpdateSource source);
 
@@ -93,6 +97,7 @@ private:
     QByteArray m_publicKey;
     QString m_localPath;
     QString m_fingerprint;
+    CloudFsSharedGroupId m_sharedGroupId;
 };
 
 using CloudFileHandler = std::shared_ptr<const CloudFile>;

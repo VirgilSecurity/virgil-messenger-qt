@@ -96,6 +96,9 @@ endif ()
 
 # Autodetect sdk, ndk for specified platform
 list(APPEND VS_PLATFORM_LIST "linux" "android" "ios" "macos" "windows")
+set(VS_DESKTOP_PLATFORM_LIST "linux" "macos" "windows")
+set(VS_MOBILE_PLATFORM_LIST "ios" "android")
+
 if (VS_PLATFORM)
     message(STATUS "Autodetecting environment for target platform: [${VS_PLATFORM}]")
     # Check platform name

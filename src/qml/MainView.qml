@@ -12,64 +12,27 @@ Control {
     property var attachmentPreview: undefined
     readonly property var manager: app.stateManager
 
-    RowLayout {
+    ColumnLayout {
         anchors {
             fill: parent
-            bottomMargin: (logControl.visible ? logControl.height : 0) + keyboardHandler.keyboardHeight
+            bottomMargin: keyboardHandler.keyboardHeight
         }
         spacing: 0
-        clip: logControl.visible
-
-        SidebarPanel {
-            id: sideBar
-            visible: [manager.chatListState, manager.cloudFileListState].includes(manager.currentState)
-            z: 2
-            Layout.preferredWidth: Theme.headerHeight
-            Layout.fillHeight: true
-            focus: true
-            opacity: 0.99999 // Bug. If the transparency is set to 1, the images will disappear after stack.pop()
-
-            Action {
-                text: qsTr("Settings")
-                onTriggered: controllers.users.requestAccountSettings(controllers.users.currentUsername)
-            }
-
-            ContextMenuSeparator {
-            }
-
-            Action {
-                text: qsTr("Sign Out")
-                onTriggered: controllers.users.signOut()
-            }
-        }
 
         StackView {
             id: stackView
-            spacing: 0
-            z: 1
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-
             background: Rectangle {
                 color: Theme.contactsBackgroundColor
             }
+            Layout.fillWidth: true
+            Layout.fillHeight: true
         }
-    }
 
-    TransfersPanel {
-        anchors.leftMargin: sideBar.width
-        model: models.cloudFilesTransfers
-        visible: manager.currentState === manager.cloudFileListState
-        buttonVisible: !controllers.cloudFiles.isLoading
-    }
-
-    LogControl {
-        id: logControl
-        anchors {
-            fill: parent
-            topMargin: 0.75 * mainView.height
+        LogControl {
+            visible: settings.devMode
+            Layout.fillWidth: true
+            Layout.preferredHeight: 0.25 * mainView.height
         }
-        visible: settings.devMode
     }
 
     QtObject {
@@ -84,7 +47,13 @@ Control {
                 attachmentPreview.visible = false
             }
             else if (manager.currentState === manager.cloudFileListState) {
-                controllers.cloudFiles.switchToParentFolder()
+                var selection = models.cloudFiles.selection
+                if (selection.hasSelection) {
+                    selection.clear()
+                }
+                else {
+                    controllers.cloudFiles.switchToParentFolder()
+                }
             }
             else {
                 stackView.pop()
@@ -102,7 +71,7 @@ Control {
             stackView.push(page("AccountSelection"), StackView.Immediate)
         }
 
-        function openChatListPage() {
+        function openMainPage() {
             if ([manager.splashScreenState, manager.accountSelectionState,
                  manager.signUpState, manager.downloadKeyState, manager.cloudFileListState].includes(manager.previousState)) {
                 stackView.clear()
@@ -203,13 +172,27 @@ Control {
         function openDownloadKeyPage() {
             stackView.push(page("DownloadKey"))
         }
+
+        function openNewCloudFolderMembersPage() {
+            stackView.push(page("NewCloudFolderMembers"))
+        }
+
+        function openAddCloudFolderMembersPage() {
+            stackView.push(page("AddCloudFolderMembers"))
+        }
+
+        function openCloudFileSharingPage() {
+            if (manager.previousState !== manager.addCloudFolderMembersState) {
+                stackView.push(page("CloudFileSharing"))
+            }
+        }
     }
 
     Component.onCompleted: {
         manager.goBack.connect(d.goBack)
         manager.splashScreenState.entered.connect(d.openSplashScreenPage)
         manager.accountSelectionState.entered.connect(d.openAccountSelectionPage)
-        manager.chatListState.entered.connect(d.openChatListPage)
+        manager.chatListState.entered.connect(d.openMainPage)
         manager.accountSettingsState.entered.connect(d.openAccountSettingsPage)
         manager.newChatState.entered.connect(d.openAddNewChatPage)
         manager.newGroupChatState.entered.connect(d.openAddNewGroupChatPage)
@@ -225,5 +208,8 @@ Control {
         manager.signInUsernameState.entered.connect(d.openSignInUsernamePage)
         manager.signUpState.entered.connect(d.openSignUpPage)
         manager.downloadKeyState.entered.connect(d.openDownloadKeyPage)
+        manager.newCloudFolderMembersState.entered.connect(d.openNewCloudFolderMembersPage)
+        manager.addCloudFolderMembersState.entered.connect(d.openAddCloudFolderMembersPage)
+        manager.cloudFileSharingState.entered.connect(d.openCloudFileSharingPage)
     }
 }

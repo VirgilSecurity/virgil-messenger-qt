@@ -17,12 +17,6 @@ Item {
         property real maxInfoTopMargin: root.height
         readonly property real defaultChatHeight: 60
         readonly property int transfersCount: listView.count
-
-        onTransfersCountChanged: {
-            if (transfersCount == 0) {
-                root.state = "minInfo"
-            }
-        }
     }
 
     state: "minInfo"

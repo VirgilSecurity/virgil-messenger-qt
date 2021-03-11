@@ -35,15 +35,17 @@
 #include "states/ChatListState.h"
 
 #include "controllers/ChatsController.h"
+#include "models/ChatsModel.h"
 
 using namespace vm;
 
-ChatListState::ChatListState(ChatsController *chatsController, QState *parent)
-    : QState(parent), m_chatsController(chatsController)
+ChatListState::ChatListState(ChatsController *chatsController, ChatsModel *chatsModel, QState *parent)
+    : QState(parent), m_chatsController(chatsController), m_chatsModel(chatsModel)
 {
 }
 
 void ChatListState::onEntry(QEvent *)
 {
+    m_chatsModel->clearFilter();
     m_chatsController->closeChat();
 }

@@ -52,6 +52,8 @@ class ChatObject : public QObject
     Q_PROPERTY(QString lastActivityText MEMBER m_lastActivityText NOTIFY lastActivityTextChanged)
     Q_PROPERTY(bool isGroup READ isGroup NOTIFY isGroupChanged)
     Q_PROPERTY(GroupMembersModel *groupMembers MEMBER m_groupMembersModel CONSTANT)
+    Q_PROPERTY(bool userIsOwner MEMBER m_userIsOwner NOTIFY userIsOwnerChanged)
+    Q_PROPERTY(bool userCanEdit MEMBER m_userCanEdit NOTIFY userCanEditChanged)
 
 public:
     ChatObject(Messenger *messenger, QObject *parent);
@@ -62,13 +64,13 @@ public:
     QString title() const;
     bool isGroup() const;
 
-    void setCurrentUser(const UserHandler &user);
-
     void setGroupInvitationOwnerId(const UserId &ownerId);
     UserId groupInvitationOwnerId() const;
 
     void setGroupMembers(const GroupMembers &groupMembers);
     GroupMembers selectedGroupMembers() const;
+
+    UserId groupOwnerId() const;
 
     void updateGroup(const GroupUpdate &groupUpdate);
 
@@ -77,13 +79,19 @@ signals:
     void lastActivityTextChanged(const QString &text);
     void isGroupChanged(bool isGroup);
 
+    void userIsOwnerChanged(bool isOwner);
+    void userCanEditChanged(bool canEdit);
+
 private:
     void setLastActivityText(const QString &text);
 
+    QPointer<Messenger> m_messenger;
     ChatHandler m_chat;
     GroupMembersModel *m_groupMembersModel;
     QString m_lastActivityText;
     UserId m_groupInvitationOwnerId;
+    bool m_userIsOwner = false;
+    bool m_userCanEdit = false;
 };
 } // namespace vm
 

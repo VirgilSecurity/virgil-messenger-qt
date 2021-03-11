@@ -2,7 +2,7 @@ import QtQuick 2.15
 
 import "../../theme"
 
-TemplateDialog {
+StyledDialog {
     property alias text: textLabel.text
 
     Text {

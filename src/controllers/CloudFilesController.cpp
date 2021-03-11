@@ -41,22 +41,27 @@
 #include "CloudFilesQueueListeners.h"
 #include "CloudFilesTable.h"
 #include "Controller.h"
+#include "DiscoveredContactsModel.h"
 #include "FileUtils.h"
+#include "ListSelectionModel.h"
+#include "Messenger.h"
 #include "Models.h"
 #include "Settings.h"
 #include "UserDatabase.h"
 #include "Utils.h"
 
+#include <set>
+
 using namespace vm;
 using Self = CloudFilesController;
 
-Self::CloudFilesController(const Settings *settings, Models *models, UserDatabase *userDatabase,
-                           CloudFileSystem *cloudFileSystem, QObject *parent)
+Self::CloudFilesController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent),
-      m_settings(settings),
+      m_messenger(messenger),
       m_models(models),
       m_userDatabase(userDatabase),
-      m_cloudFileSystem(cloudFileSystem)
+      m_cloudFileSystem(messenger->cloudFileSystem()),
+      m_cloudFolderObject(new CloudFileObject(messenger, this))
 {
     qRegisterMetaType<CloudFilesUpdate>("CloudFilesUpdate");
 
@@ -75,8 +80,8 @@ Self::CloudFilesController(const Settings *settings, Models *models, UserDatabas
     connect(models->cloudFilesTransfers(), &CloudFilesTransfersModel::interruptByCloudFileId, queue,
             &CloudFilesQueue::interruptFileOperation);
     // Cloud file system connections
-    connect(cloudFileSystem, &CloudFileSystem::downloadsDirChanged,
-            [rootFolder](const QDir &downloadsDir) { rootFolder->setLocalPath(downloadsDir.absolutePath()); });
+    connect(m_cloudFileSystem, &CloudFileSystem::downloadsDirChanged,
+            [rootFolder](auto downloadsDir) { rootFolder->setLocalPath(downloadsDir.absolutePath()); });
 
     // Setup list updating
     auto updatingListener = new CloudListUpdatingCounter(queue);
@@ -164,9 +169,40 @@ void Self::deleteFiles()
     m_models->cloudFilesQueue()->pushDeleteFiles(files);
 }
 
-void Self::createFolder(const QString &name)
+void Self::createFolder(const QString &name, const CloudFileMembers &members)
 {
-    m_models->cloudFilesQueue()->pushCreateFolder(name, m_hierarchy.back());
+    m_models->cloudFilesQueue()->pushCreateFolder(name, m_hierarchy.back(), members);
+}
+
+void Self::loadCloudFileMembers()
+{
+    const auto file = m_cloudFolderObject->cloudFile();
+    m_models->cloudFilesQueue()->pushListMembers(file, parentFolder());
+}
+
+void Self::addMembers(const CloudFileMembers &members)
+{
+    auto allMembers = m_cloudFolderObject->members();
+    allMembers.insert(allMembers.end(), members.begin(), members.end());
+
+    const auto file = m_cloudFolderObject->cloudFile();
+    m_models->cloudFilesQueue()->pushSetMembers(allMembers, file, parentFolder());
+}
+
+void Self::removeSelectedMembers()
+{
+    auto members = m_cloudFolderObject->selectedMembers();
+    std::set<UserId> removedIds;
+    for (auto &m : members) {
+        removedIds.insert(m->contact()->userId());
+    }
+    auto newMembers = m_cloudFolderObject->members();
+    newMembers.erase(std::remove_if(newMembers.begin(), newMembers.end(), [&removedIds](auto &m) {
+        return removedIds.find(m->contact()->userId()) != removedIds.end();
+    }));
+
+    const auto file = m_cloudFolderObject->cloudFile();
+    m_models->cloudFilesQueue()->pushSetMembers(newMembers, file, parentFolder());
 }
 
 void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)
@@ -175,7 +211,7 @@ void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)
     m_models->cloudFilesQueue()->pushListFolder(hierarchy.back());
 }
 
-QString CloudFilesController::displayPath() const
+QString Self::displayPath() const
 {
     QStringList names;
     for (auto &folder : m_hierarchy) {
@@ -184,14 +220,20 @@ QString CloudFilesController::displayPath() const
     return names.join(QLatin1String(" / "));
 }
 
-bool CloudFilesController::isRoot() const
+bool Self::isRoot() const
 {
     return m_hierarchy.size() == 1;
 }
 
-ModifiableCloudFileHandler CloudFilesController::rootFolder() const
+ModifiableCloudFileHandler Self::rootFolder() const
 {
     return m_hierarchy.front();
+}
+
+CloudFileHandler Self::parentFolder() const
+{
+    const auto size = m_hierarchy.size();
+    return (size < 2) ? CloudFileHandler() : m_hierarchy[size - 2];
 }
 
 void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)
@@ -203,12 +245,13 @@ void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)
         // Update properties
         if (isRelevantUpdate) {
             const auto oldDisplayPath = displayPath();
-            const auto oldIsRoot = isRoot();
+            const auto wasRoot = isRoot();
             m_hierarchy = m_requestedHierarchy;
+            m_cloudFolderObject->setCloudFile(m_hierarchy.back());
             if (displayPath() != oldDisplayPath) {
                 emit displayPathChanged(displayPath());
             }
-            if (isRoot() != oldIsRoot) {
+            if (isRoot() != wasRoot) {
                 emit isRootChanged(isRoot());
             }
         }
@@ -226,6 +269,7 @@ void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)
     // Update UI
     if (isRelevantUpdate) {
         m_models->cloudFiles()->updateCloudFiles(update);
+        m_cloudFolderObject->updateCloudFiles(update);
     }
     m_models->cloudFilesTransfers()->updateCloudFiles(update);
     // Update DB

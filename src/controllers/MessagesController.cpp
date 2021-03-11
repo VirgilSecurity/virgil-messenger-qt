@@ -202,9 +202,8 @@ ModifiableMessageHandler Self::createPictureMessage(const QUrl &localFileUrl)
     return message;
 }
 
-size_t Self::calculateUnreadMessageCount(const ChatHandler &destinationChat, const MessageHandler &message) const
+qsizetype Self::calculateUnreadMessageCount(const ChatHandler &destinationChat, const MessageHandler &message) const
 {
-
     auto currentChat = m_models->messages()->chat();
 
     if ((nullptr == currentChat) || (currentChat->id() != destinationChat->id())) {

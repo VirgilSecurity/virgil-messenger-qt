@@ -47,9 +47,9 @@ include(customers)
 # ---------------------------------------------------------------------------
 # Project version
 # ---------------------------------------------------------------------------
-set(VS_TARGET_VERSION "3.8.0")
-set(VS_CORE_VERSION "0.2.1.52")
-set(VERSION_DATABASE_SCHEME "1")
+set(VS_TARGET_VERSION "3.9.2")
+set(VS_CORE_VERSION "0.2.1.73")
+set(VERSION_DATABASE_SCHEME "2")
 
 # ---------------------------------------------------------------------------
 # Code formatting
@@ -417,6 +417,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/ConfirmationCodeType.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFile.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileId.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileMember.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileRequestId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileSystem.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileUpdateSource.h
@@ -432,6 +433,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolderId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolderInfo.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsNewFile.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsSharedGroupId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CommKitBridge.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Contact.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/ContactUpdate.h
@@ -488,10 +490,12 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/states/AccountSelectionState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/AccountSettingsState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/AddGroupChatMembersState.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/states/AddCloudFolderMembersState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/ApplicationStateManager.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/AttachmentPreviewState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/BackupKeyState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/CloudFileListState.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/states/CloudFileSharingState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/EditProfileState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/VerifyProfileState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/ChatInfoState.h
@@ -500,8 +504,10 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/states/DownloadKeyState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/OperationState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/NewChatState.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/states/NewCloudFolderMembersState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/NewGroupChatState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/NameGroupChatState.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/states/SelectContactsState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/SignInAsState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/SignInState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/SignInUsernameState.h
@@ -526,6 +532,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/database/UserDatabase.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/UserDatabaseMigration.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version1/PatchContacts.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version2/PatchCloudFiles.h
         # Logging
         ${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogging.h
         ${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogWorker.h
@@ -534,17 +541,19 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/AccountSelectionModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ChatObject.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ChatsModel.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/ContactsModel.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/ContactsProxyModel.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/DiscoveredContactsModel.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/DiscoveredContactsProxyModel.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/GroupMembersModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFileObject.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilePropertiesModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFileMembersModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFileOperationSource.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesTransfersModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesQueue.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/CloudFilesQueueListeners.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/models/TransfersModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/ContactsModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/ContactsProxyModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/DiscoveredContactsModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/DiscoveredContactsProxyModel.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/GroupMembersModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListProxyModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ListSelectionModel.h
@@ -557,6 +566,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationQueue.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationQueueListener.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationSource.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/TransfersModel.h
         # Operations
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateAttachmentFingerprintOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateFileFingerprintOperation.h
@@ -575,6 +585,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/EncryptFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/EncryptUploadFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/ListCloudFolderOperation.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/operations/ListMembersCloudFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/LoadAttachmentOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/LoadFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/MessageOperation.h
@@ -582,11 +593,14 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/NetworkOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/Operation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/SendMessageOperation.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/operations/SetMembersCloudFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadAttachmentOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadCloudFileOperation.h
         # Generated
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQCustomer.h
+        # Windows
+        $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/platforms/windows/WindowsPlatform.h>
         # MacOS
         $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/include/macos/VSQMacos.h>
         # IOS
@@ -621,6 +635,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/CustomerEnv.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CloudFile.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileId.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileMember.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileSystem.cpp
         # Messenger Core
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/AttachmentId.cpp
@@ -637,6 +652,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolderId.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolderInfo.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsNewFile.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsSharedGroupId.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CoreMessengerCloudFs.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Group.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupAffiliation.cpp
@@ -682,6 +698,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/states/AccountSelectionState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/AccountSettingsState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/AddGroupChatMembersState.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/states/AddCloudFolderMembersState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/ApplicationStateManager.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/AttachmentPreviewState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/BackupKeyState.cpp
@@ -691,10 +708,13 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/states/ChatListState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/ChatState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/CloudFileListState.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/states/CloudFileSharingState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/DownloadKeyState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/NewChatState.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/states/NewCloudFolderMembersState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/NewGroupChatState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/NameGroupChatState.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/states/SelectContactsState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/SignInAsState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/SignInState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/SignInUsernameState.cpp
@@ -718,6 +738,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/database/UserDatabase.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/UserDatabaseMigration.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version1/PatchContacts.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version2/PatchCloudFiles.cpp
         # Logging
         ${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogging.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogWorker.cpp
@@ -725,6 +746,9 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/models/AccountSelectionModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ChatObject.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ChatsModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFileMembersModel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFileObject.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilePropertiesModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFileOperationSource.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/CloudFilesTransfersModel.cpp
@@ -764,6 +788,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/EncryptFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/EncryptUploadFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/ListCloudFolderOperation.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/operations/ListMembersCloudFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/LoadAttachmentOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/LoadFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/MessageOperation.cpp
@@ -771,6 +796,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/NetworkOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/Operation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/SendMessageOperation.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/operations/SetMembersCloudFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/UploadAttachmentOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/UploadFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/UploadCloudFileOperation.cpp
@@ -781,6 +807,7 @@ target_sources(${VS_TARGET_NAME}
         $<$<STREQUAL:"${VS_PLATFORM}","linux">:${CMAKE_CURRENT_LIST_DIR}/platforms/default/CustomerEnvDefault.cpp>
         # Windows
         $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/platforms/default/CustomerEnvDefault.cpp>
+        $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/platforms/windows/WindowsPlatform.cpp>
         # MACOS
         $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/platforms/apple/CustomerEnvApple.mm>
         $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/src/macos/VSQMacos.mm>
@@ -869,6 +896,8 @@ target_include_directories(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp>
 
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/platforms>
+
         $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}>
         $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}/qxmpp>
 
@@ -896,24 +925,18 @@ target_compile_definitions(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:ENABLE_XMPP_LOGS=$<BOOL:${ENABLE_XMPP_LOGS}>>
         $<BUILD_INTERFACE:ENABLE_XMPP_EXTRA_LOGS=$<BOOL:${ENABLE_XMPP_EXTRA_LOGS}>>
 
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:VS_ANDROID=1>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:VS_MOBILE=1>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:VS_PUSHNOTIFICATIONS=1>>
+        $<BUILD_INTERFACE:VS_ANDROID=$<STREQUAL:"${VS_PLATFORM}","android">>
+        $<BUILD_INTERFACE:VS_IOS=$<STREQUAL:"${VS_PLATFORM}","ios">>
+        $<BUILD_INTERFACE:VS_IOS_SIMULATOR=$<BOOL:${VS_IOS_SIMULATOR}>>
+        $<BUILD_INTERFACE:VS_MACOS=$<STREQUAL:"${VS_PLATFORM}","macos">>
+        $<BUILD_INTERFACE:VS_LINUX=$<STREQUAL:"${VS_PLATFORM}","linux">>
+        $<BUILD_INTERFACE:VS_WINDOWS=$<STREQUAL:"${VS_PLATFORM}","windows">>
 
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","ios">:VS_IOS=1>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","ios">:VS_MOBILE=1>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","ios">:VS_PUSHNOTIFICATIONS=1>>
-        $<BUILD_INTERFACE:$<$<BOOL:${VS_IOS_SIMULATOR}>:VS_IOS_SIMULATOR=1>>
+        $<BUILD_INTERFACE:VS_DESKTOP=$<IN_LIST:${VS_PLATFORM},${VS_DESKTOP_PLATFORM_LIST}>>
+        $<BUILD_INTERFACE:VS_MOBILE=$<IN_LIST:${VS_PLATFORM},${VS_MOBILE_PLATFORM_LIST}>>
+        $<BUILD_INTERFACE:VS_PUSHNOTIFICATIONS=$<IN_LIST:${VS_PLATFORM},${VS_MOBILE_PLATFORM_LIST}>>
 
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","macos">:VS_MACOS=1>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","macos">:VS_DESKTOP=1>>
-
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","linux">:VS_DESKTOP=1>>
-
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","linux">:VS_DESKTOP=1>>
-
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","windows">:VS_DESKTOP=1>>
-
+        $<BUILD_INTERFACE:$<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>>
         )
 
 target_compile_options(${VS_TARGET_NAME}

@@ -36,6 +36,7 @@
 #define VM_CREATE_CLOUD_FOLDER_OPERATION_H
 
 #include "CloudFile.h"
+#include "CloudFileMember.h"
 #include "CloudFileRequestId.h"
 #include "Operation.h"
 
@@ -47,7 +48,8 @@ class CreateCloudFolderOperation : public Operation
     Q_OBJECT
 
 public:
-    CreateCloudFolderOperation(CloudFileOperation *parent, const QString &name, const CloudFileHandler &parentFolder);
+    CreateCloudFolderOperation(CloudFileOperation *parent, const QString &name, const CloudFileHandler &parentFolder,
+                               const CloudFileMembers &members);
 
     void run() override;
 
@@ -58,6 +60,7 @@ private:
     CloudFileOperation *m_parent;
     QString m_name;
     CloudFileHandler m_parentFolder;
+    CloudFileMembers m_members;
     CloudFileRequestId m_requestId;
 };
 } // namespace vm

@@ -66,6 +66,11 @@ void ListModel::setFilter(const QString &filter)
     emit filterChanged(filter);
 }
 
+void ListModel::clearFilter()
+{
+    setFilter(QString());
+}
+
 QModelIndex ListModel::sourceIndex(const int proxyRow) const
 {
     return proxy()->mapToSource(proxy()->index(proxyRow, 0));

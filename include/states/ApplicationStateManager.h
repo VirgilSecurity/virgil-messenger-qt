@@ -40,15 +40,18 @@
 #include "AccountSelectionState.h"
 #include "AccountSettingsState.h"
 #include "AddGroupChatMembersState.h"
+#include "AddCloudFolderMembersState.h"
 #include "AttachmentPreviewState.h"
 #include "BackupKeyState.h"
 #include "ChatInfoState.h"
 #include "ChatListState.h"
 #include "ChatState.h"
 #include "CloudFileListState.h"
+#include "CloudFileSharingState.h"
 #include "DownloadKeyState.h"
 #include "EditProfileState.h"
 #include "NewChatState.h"
+#include "NewCloudFolderMembersState.h"
 #include "NewGroupChatState.h"
 #include "NameGroupChatState.h"
 #include "SignInAsState.h"
@@ -68,6 +71,7 @@ class ApplicationStateManager : public QStateMachine
     Q_OBJECT
     Q_PROPERTY(AccountSelectionState *accountSelectionState MEMBER m_accountSelectionState CONSTANT)
     Q_PROPERTY(AccountSettingsState *accountSettingsState MEMBER m_accountSettingsState CONSTANT)
+    Q_PROPERTY(AddCloudFolderMembersState *addCloudFolderMembersState MEMBER m_addCloudFolderMembersState CONSTANT)
     Q_PROPERTY(AddGroupChatMembersState *addGroupChatMembersState MEMBER m_addGroupChatMembersState CONSTANT)
     Q_PROPERTY(AttachmentPreviewState *attachmentPreviewState MEMBER m_attachmentPreviewState CONSTANT)
     Q_PROPERTY(BackupKeyState *backupKeyState MEMBER m_backupKeyState CONSTANT)
@@ -78,7 +82,9 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(ChatState *chatState MEMBER m_chatState CONSTANT)
     Q_PROPERTY(DownloadKeyState *downloadKeyState MEMBER m_downloadKeyState CONSTANT)
     Q_PROPERTY(CloudFileListState *cloudFileListState MEMBER m_cloudFileListState CONSTANT)
+    Q_PROPERTY(CloudFileSharingState *cloudFileSharingState MEMBER m_cloudFileSharingState CONSTANT)
     Q_PROPERTY(NewChatState *newChatState MEMBER m_newChatState CONSTANT)
+    Q_PROPERTY(NewCloudFolderMembersState *newCloudFolderMembersState MEMBER m_newCloudFolderMembersState CONSTANT)
     Q_PROPERTY(NewGroupChatState *newGroupChatState MEMBER m_newGroupChatState CONSTANT)
     Q_PROPERTY(NameGroupChatState *nameGroupChatState MEMBER m_nameGroupChatState CONSTANT)
     Q_PROPERTY(SignInAsState *signInAsState MEMBER m_signInAsState CONSTANT)
@@ -130,6 +136,7 @@ private:
 
     AccountSelectionState *m_accountSelectionState;
     AccountSettingsState *m_accountSettingsState;
+    AddCloudFolderMembersState *m_addCloudFolderMembersState;
     AddGroupChatMembersState *m_addGroupChatMembersState;
     AttachmentPreviewState *m_attachmentPreviewState;
     BackupKeyState *m_backupKeyState;
@@ -140,7 +147,9 @@ private:
     ChatState *m_chatState;
     DownloadKeyState *m_downloadKeyState;
     CloudFileListState *m_cloudFileListState;
+    CloudFileSharingState *m_cloudFileSharingState;
     NewChatState *m_newChatState;
+    NewCloudFolderMembersState *m_newCloudFolderMembersState;
     NewGroupChatState *m_newGroupChatState;
     NameGroupChatState *m_nameGroupChatState;
     SignInAsState *m_signInAsState;

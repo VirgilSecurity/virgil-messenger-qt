@@ -53,7 +53,9 @@ Q_LOGGING_CATEGORY(lcUtils, "utils")
 using namespace vm;
 
 namespace {
-#ifdef VS_DUMMY_CONTACTS
+#define VS_DUMMY_CONTACTS 0
+
+#if VS_DUMMY_CONTACTS
 Contacts getDummyContacts()
 {
     auto c0 = std::make_shared<Contact>();
@@ -214,14 +216,19 @@ QString Utils::printableLoadProgress(quint64 loaded, quint64 total)
     return QString("%1% (%2/%3)").arg(qRound(100 * qMin<double>(loaded, total) / total)).arg(loaded).arg(total);
 }
 
+QString Utils::printableContactsList(const Contacts &contacts)
+{
+    QStringList list;
+    for (auto &c : contacts) {
+        list << c->displayName();
+    }
+    return list.join(QLatin1String(","));
+}
+
 void Utils::printThreadId(const QString &message)
 {
-#ifdef VS_DEVMODE
-    qDebug().noquote().nospace() << "Thread " << QThread::currentThread()->objectName() << "("
-                                 << QThread::currentThreadId() << "): " << message;
-#else
-    Q_UNUSED(message)
-#endif
+    qCDebug(lcUtils).noquote().nospace() << "Thread " << QThread::currentThread()->objectName() << "("
+                                         << QThread::currentThreadId() << "): " << message;
 }
 
 QSize Utils::applyOrientation(const QSize &size, int orientation)
@@ -277,9 +284,9 @@ bool Utils::readImage(QImageReader *reader, QImage *image)
 Contacts Utils::getDeviceContacts(const Contacts &cachedContacts)
 {
     Contacts contacts;
-#ifdef VS_DUMMY_CONTACTS
+#if VS_DUMMY_CONTACTS
     contacts = getDummyContacts();
-#elif defined(VS_ANDROID)
+#elif VS_ANDROID
     contacts = VSQAndroid::getContacts();
 #endif // VS_ANDROID
     return contacts;
@@ -287,7 +294,7 @@ Contacts Utils::getDeviceContacts(const Contacts &cachedContacts)
 
 QUrl Utils::getContactAvatarUrl(const ContactHandler contact)
 {
-#ifdef VS_ANDROID
+#if VS_ANDROID
     return VSQAndroid::getContactAvatarUrl(contact);
 #else
     Q_UNUSED(contact)

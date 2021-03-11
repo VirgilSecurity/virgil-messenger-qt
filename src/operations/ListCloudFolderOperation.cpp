@@ -70,7 +70,7 @@ void ListCloudFolderOperation::onCloudListFetched(const CloudFileRequestId reque
         return;
     }
 
-    m_parent->cloudFilesUpdate(buildDifference(parentFolder, files));
+    m_parent->updateCloudFiles(buildDifference(parentFolder, files));
     deleteObsoleteLocalFiles(files);
 
     finish();
@@ -159,7 +159,7 @@ void Self::onDatabaseListFetched(const CloudFileHandler &parentFolder, const Mod
     CachedListCloudFolderUpdate update;
     update.parentFolder = parentFolder;
     update.files = cloudFiles;
-    m_parent->cloudFilesUpdate(update);
+    m_parent->updateCloudFiles(update);
 
     m_requestId = m_parent->cloudFileSystem()->fetchList(m_parentFolder);
 }
@@ -171,5 +171,6 @@ bool Self::fileIdLess(const ModifiableCloudFileHandler &lhs, const ModifiableClo
 
 bool Self::fileUpdated(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs)
 {
-    return lhs->updatedAt() < rhs->updatedAt();
+    // NOTE(fpohtmeh): compare localPath because it changes after reinstall (IOS)
+    return lhs->updatedAt() < rhs->updatedAt() || lhs->localPath() != rhs->localPath();
 }
