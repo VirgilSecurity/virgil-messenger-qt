@@ -38,7 +38,7 @@ MenuItem {
             anchors.verticalCenter: parent.verticalCenter
             text: menuItem.text
             font: menuItem.font
-            color: Theme.primaryTextColor
+            color: menuItem.enabled ? Theme.primaryTextColor : Qt.darker(Theme.menuBackgroundColor, 1.5)
             horizontalAlignment: Text.AlignLeft
             verticalAlignment: Text.AlignVCenter
             elide: Text.ElideRight
