@@ -36,11 +36,13 @@
 
 #include "android/VSQAndroid.h"
 #include "Settings.h"
+#include "UsersController.h"
 
 using namespace vm;
 using Self = StartState;
 
-Self::StartState(Settings *settings, QState *parent) : QState(parent), m_settings(settings)
+Self::StartState(UsersController *controller, Settings *settings, QState *parent)
+    : QState(parent), m_controller(controller), m_settings(settings)
 {
     connect(this, &Self::requestUi, this, &Self::onRequestUi, Qt::QueuedConnection);
 }
@@ -60,6 +62,7 @@ void Self::onRequestUi()
     if (username.isEmpty()) {
         emit accountSelectionRequested();
     } else {
+        m_controller->signIn(username);
         emit chatListRequested();
     }
 }

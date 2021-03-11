@@ -37,15 +37,15 @@
 
 #include "OperationState.h"
 
-class Settings;
-
 namespace vm {
+class UsersController;
+
 class AccountSelectionState : public OperationState
 {
     Q_OBJECT
 
 public:
-    AccountSelectionState(Settings *settings, QState *parent);
+    AccountSelectionState(UsersController *controller, QState *parent);
 
 signals:
     void requestSignIn(const QString &username);
@@ -57,7 +57,7 @@ signals:
 private:
     void onRequestSignIn(const QString &username);
 
-    Settings *m_settings;
+    UsersController *m_controller;
 };
 } // namespace vm
 

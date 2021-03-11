@@ -40,7 +40,6 @@
 namespace vm {
 class Controllers;
 class ChatsModel;
-class Messenger;
 
 class ChatListState : public QState
 {

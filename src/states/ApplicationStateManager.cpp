@@ -54,7 +54,7 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
       m_controllers(controllers),
       m_validator(validator),
       m_settings(m_messenger->settings()),
-      m_accountSelectionState(new AccountSelectionState(m_settings, this)),
+      m_accountSelectionState(new AccountSelectionState(controllers->users(), this)),
       m_accountSettingsState(new AccountSettingsState(this)),
       m_addCloudFolderMembersState(
               new AddCloudFolderMembersState(controllers->cloudFiles(), models->discoveredContacts(), this)),
@@ -78,7 +78,7 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
       m_signInAsState(new SignInAsState(this)),
       m_signInUsernameState(new SignInUsernameState(controllers->users(), validator, this)),
       m_signUpState(new SignUpState(controllers->users(), validator, this)),
-      m_startState(new StartState(m_settings, this))
+      m_startState(new StartState(controllers->users(), m_settings, this))
 {
     registerStatesMetaTypes();
     addTransitions();

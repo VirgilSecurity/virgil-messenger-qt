@@ -40,12 +40,14 @@
 class Settings;
 
 namespace vm {
+class UsersController;
+
 class StartState : public QState
 {
     Q_OBJECT
 
 public:
-    StartState(Settings *settings, QState *parent);
+    StartState(UsersController *controller, Settings *settings, QState *parent);
 
 signals:
     void requestUi();
@@ -58,6 +60,7 @@ private:
 
     void onRequestUi();
 
+    UsersController *m_controller;
     Settings *m_settings;
 };
 } // namespace vm
