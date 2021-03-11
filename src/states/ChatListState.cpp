@@ -45,29 +45,13 @@
 using namespace vm;
 using Self = ChatListState;
 
-Self::ChatListState(Messenger *messenger, Controllers *controllers, ChatsModel *model, QState *parent)
-    : QState(parent), m_messenger(messenger), m_controllers(controllers), m_model(model)
+Self::ChatListState(Controllers *controllers, ChatsModel *model, QState *parent)
+    : QState(parent), m_controllers(controllers), m_model(model)
 {
-    connect(m_messenger, &Messenger::onlineStatusChanged, this, &Self::trySignIn);
-    connect(controllers->users(), &UsersController::signInErrorOccured, this, &Self::retrySignIn);
 }
 
 void Self::onEntry(QEvent *)
 {
     m_model->clearFilter();
     m_controllers->chats()->closeChat();
-    trySignIn();
-}
-
-void Self::trySignIn()
-{
-    const auto username = m_messenger->settings()->lastSignedInUser();
-    if (!username.isEmpty() && m_messenger->isReadyToSignIn()) {
-        m_controllers->users()->signIn(username);
-    }
-}
-
-void Self::retrySignIn()
-{
-    QTimer::singleShot(m_messenger->settings()->retrySignInInterval(), this, &Self::trySignIn);
 }

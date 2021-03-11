@@ -54,7 +54,7 @@ Q_LOGGING_CATEGORY(lcNetwork, "network");
 #    pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
-VSQNetworkAnalyzer::VSQNetworkAnalyzer(QObject *parent) : QObject(parent), m_nwManager(this), m_isConnected(true)
+VSQNetworkAnalyzer::VSQNetworkAnalyzer(QObject *parent) : QObject(parent), m_nwManager(this), m_isConnected(false)
 {
     // To disable issue: QNetworkAccessManager shows "Network access is disabled."
     qputenv("QT_BEARER_POLL_TIMEOUT", QByteArray::number(-1));

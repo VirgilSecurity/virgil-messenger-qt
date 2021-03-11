@@ -41,7 +41,6 @@
 #include <QSize>
 
 #include "AttachmentId.h"
-#include "UserId.h"
 
 class Settings : public QSettings
 {
@@ -65,8 +64,11 @@ public:
     void setUsersList(const QStringList &users);
     QStringList usersList() const;
 
-    QString userCredential(const QString &user) const;
-    void setUserCredential(const QString &user, const QString &userCredential);
+    QString userCredential(const QString &username) const;
+    void setUserCredential(const QString &username, const QString &userCredential);
+
+    QString userInfo(const QString &username) const;
+    void setUserInfo(const QString &username, const QString &userInfo);
 
     // Device id, run flags
     QString deviceId() const;
@@ -98,7 +100,6 @@ public:
 
     // Short interval for elapsed seconds that means now
     std::chrono::seconds nowInterval() const;
-    std::chrono::seconds retrySignInInterval() const;
 
 signals:
     void lastSignedInUserChanged(const QString &username);

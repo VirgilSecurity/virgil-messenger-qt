@@ -47,7 +47,7 @@ class ChatListState : public QState
     Q_OBJECT
 
 public:
-    ChatListState(Messenger *messenger, Controllers *controllers, ChatsModel *model, QState *parent);
+    ChatListState(Controllers *controllers, ChatsModel *model, QState *parent);
 
 signals:
     void requestNewChat();
@@ -56,10 +56,6 @@ signals:
 private:
     void onEntry(QEvent *) override;
 
-    void trySignIn();
-    void retrySignIn();
-
-    Messenger *m_messenger;
     Controllers *m_controllers;
     ChatsModel *m_model;
 };

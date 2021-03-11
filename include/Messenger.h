@@ -64,14 +64,14 @@ public:
     virtual ~Messenger() noexcept = default;
 
     //
-    //  Status.
+    //  Return true if Internet connection is fine.
     //
+    bool isNetworkOnline() const noexcept;
+
     //
     //  Return true if messenger has Internet connection with all services.
     //
     bool isOnline() const noexcept;
-    bool isReadyToSignIn() const noexcept;
-    bool isAuthenticated() const;
 
     //
     //  Messages.

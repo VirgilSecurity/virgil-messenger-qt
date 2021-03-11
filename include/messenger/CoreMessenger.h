@@ -157,14 +157,26 @@ public:
     //
 
     //
+    //  Return true if Internet connection is fine.
+    //
+    bool isNetworkOnline() const noexcept;
+
+    //
     //  Return true if messenger has Internet connection with all services.
     //
     bool isOnline() const noexcept;
+
+    //
+    // Return true if a user is signed in.
+    //
     bool isSignedIn() const noexcept;
-    bool isReadyToSignIn() const noexcept;
+
+    //
+    // Return true if a user is authenticated on the Messenger Services.
+    //
+    bool isAuthenticated() const noexcept;
 
     ConnectionState connectionState() const;
-    bool isAuthenticated() const;
 
     //
     //  Sign-in / Sign-up / Backup.
@@ -245,8 +257,14 @@ private:
     void connectXmppRoomSignals(QXmppMucRoom *room);
 
     //
+    // Store helpers.
+    //
+    Result saveCurrentUserInfo();
+
+    //
     //  Connection
     //
+    void authenticate();
     void connectXmppServer();
     void changeConnectionState(ConnectionState state);
 
@@ -295,7 +313,6 @@ private:
     GroupId groupIdFromJid(const QString &jid) const;
     UserId groupUserIdFromJid(const QString &jid) const;
 
-    bool isNetworkOnline() const noexcept;
     bool isXmppConnected() const noexcept;
     bool isXmppConnecting() const noexcept;
     bool isXmppDisconnected() const noexcept;
