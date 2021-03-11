@@ -267,6 +267,7 @@ private:
     void authenticate();
     void connectXmppServer();
     void changeConnectionState(ConnectionState state);
+    Result finishSignIn();
 
     //
     //  Message processing helpers.

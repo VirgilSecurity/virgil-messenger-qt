@@ -132,9 +132,10 @@ bool Self::isOnline() const noexcept
 void Self::signIn(const QString &username)
 {
     FutureWorker::run(m_coreMessenger->signIn(username), [this, username = username](auto result) {
+        m_settings->setLastSignedInUser((result == CoreMessengerStatus::Success) ? username : QString());
+
         switch (result) {
         case CoreMessengerStatus::Success:
-            m_settings->setLastSignedInUser(username);
             emit signedIn(username);
             break;
 

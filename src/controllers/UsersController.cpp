@@ -64,6 +64,12 @@ Self::UsersController(Messenger *messenger, Models *models, UserDatabase *userDa
     connect(userDatabase, &UserDatabase::closed, this, &Self::onFinishSignOut);
     connect(userDatabase, &UserDatabase::errorOccurred, this, &Self::databaseErrorOccurred);
 
+    auto notifyAboutError = [this](const QString &text) { emit notificationCreated(text, true); };
+    connect(this, &Self::signInErrorOccured, notifyAboutError);
+    connect(this, &Self::signUpErrorOccured, notifyAboutError);
+    connect(this, &Self::downloadKeyFailed, notifyAboutError);
+    connect(this, &Self::databaseErrorOccurred, notifyAboutError);
+
     connect(models->chats(), &ChatsModel::chatAdded, this, &Self::onChatAdded);
 }
 

@@ -694,9 +694,7 @@ QFuture<Self::Result> Self::signIn(const QString &username)
             return Self::Result::Error_Signin;
         }
 
-        emit reconnectXmppServerIfNeeded();
-
-        return Self::Result::Success;
+        return finishSignIn();
     });
 }
 
@@ -723,16 +721,7 @@ QFuture<Self::Result> Self::signUp(const QString &username)
 
         qCInfo(lcCoreMessenger) << "User has been successfully signed up";
 
-        auto userC = vssq_messenger_user(m_impl->messenger.get());
-        m_impl->currentUser = std::make_shared<User>(std::make_unique<UserImpl>(userC));
-
-        const auto saveResult = saveCurrentUserInfo();
-
-        if (saveResult == Self::Result::Success) {
-            emit reconnectXmppServerIfNeeded();
-        }
-
-        return saveResult;
+        return finishSignIn();
     });
 }
 
@@ -774,16 +763,7 @@ QFuture<Self::Result> Self::signInWithBackupKey(const QString &username, const Q
 
         qCInfo(lcCoreMessenger) << "User has been successfully signed in with a backup key";
 
-        auto userC = vssq_messenger_user(m_impl->messenger.get());
-        m_impl->currentUser = std::make_shared<User>(std::make_unique<UserImpl>(userC));
-
-        const auto saveResult = saveCurrentUserInfo();
-
-        if (saveResult == Self::Result::Success) {
-            emit reconnectXmppServerIfNeeded();
-        }
-
-        return saveResult;
+        return finishSignIn();
     });
 }
 
@@ -921,6 +901,20 @@ void Self::changeConnectionState(ConnectionState state)
         m_impl->connectionState = state;
         emit connectionStateChanged(state);
     }
+}
+
+CoreMessenger::Result Self::finishSignIn()
+{
+    auto userC = vssq_messenger_user(m_impl->messenger.get());
+    m_impl->currentUser = std::make_shared<User>(std::make_unique<UserImpl>(userC));
+
+    const auto saveResult = saveCurrentUserInfo();
+
+    if (saveResult == Self::Result::Success) {
+        emit reconnectXmppServerIfNeeded();
+    }
+
+    return saveResult;
 }
 
 void Self::authenticate()

@@ -60,6 +60,7 @@ Controllers::Controllers(Messenger *messenger, Settings *settings, Models *model
     connect(m_messages, &MessagesController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_chats, &ChatsController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_cloudFiles, &CloudFilesController::notificationCreated, this, &Controllers::notificationCreated);
+    connect(m_users, &UsersController::notificationCreated, this, &Controllers::notificationCreated);
 
     //
     //  Queued connection is used here to give ChatsController a chance to setup database connections.

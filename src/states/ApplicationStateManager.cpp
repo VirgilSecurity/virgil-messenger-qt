@@ -143,6 +143,7 @@ void Self::addTransitions()
                          m_signUpState);
 
     m_chatListState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
+    m_chatListState->addTransition(users, &UsersController::signInErrorOccured, m_accountSelectionState);
     addTwoSideTransition(m_chatListState, users, &UsersController::accountSettingsRequested, m_accountSettingsState);
     addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestNewChat, m_newChatState);
     addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestNewGroupChat, m_newGroupChatState);
