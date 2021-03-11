@@ -73,6 +73,11 @@ public:
     Version version() const;
     void setMigration(std::unique_ptr<Migration> migration);
 
+    //
+    //  Proxy to sqlite3_changes().
+    //
+    qsizetype changes() const;
+
     operator QSqlDatabase() const;
 
 signals:

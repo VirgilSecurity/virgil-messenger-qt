@@ -214,6 +214,7 @@ void Self::onWriteMessage(const MessageHandler &message)
     ScopedConnection connection(*this);
     ScopedTransaction transaction(*this);
     messagesTable()->addMessage(message);
+
     if (message->contentIsAttachment()) {
         attachmentsTable()->addAttachment(message);
     }
@@ -294,6 +295,8 @@ void Self::onWriteChatAndLastMessage(const ChatHandler &chat)
     if (message->isIncoming()) {
         contactsTable()->updateContact(UsernameContactUpdate { message->senderId(), message->senderUsername() });
     }
+
+    chatsTable()->requestChatUnreadMessageCount(message->chatId());
 }
 
 void Self::onResetUnreadCount(const ChatHandler &chat)

@@ -68,6 +68,7 @@ signals:
     void errorOccurred(const QString &errorText);
     void chatMessagesFetched(ModifiableMessages messages);
     void notSentMessagesFetched(ModifiableMessages messages);
+    void messageAdded(const MessageHandler &message);
 
 private:
     bool create() override;

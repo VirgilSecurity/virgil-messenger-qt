@@ -58,7 +58,7 @@ public:
     ChatHandler findChat(const ChatId &chatId) const;
     ModifiableChatHandler findChat(const ChatId &chatId);
 
-    void resetUnreadCount(const ChatId &chatId);
+    void resetUnreadCount(const ChatId &chatId, qsizetype unreadMessageCount = 0);
     void updateLastMessage(const MessageHandler &message);
     void resetLastMessage(const ChatId &chatId);
 

@@ -129,6 +129,7 @@ void MessagesTable::onAddMessage(const MessageHandler &message)
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertMessage"), values);
     if (query) {
         qCDebug(lcDatabase) << "Message was inserted into table" << message->id();
+        emit messageAdded(message);
     } else {
         qCCritical(lcDatabase) << "MessagesTable::onCreateMessage error";
         emit errorOccurred(tr("Failed to insert message"));

@@ -190,7 +190,6 @@ void Self::openChat(const ChatHandler &chat)
 {
     qCDebug(lcController) << "Opening chat with id: " << chat->id();
     if (chat->unreadMessageCount() > 0) {
-        m_models->chats()->resetUnreadCount(chat->id());
         m_userDatabase->resetUnreadCount(chat);
         m_messenger->sendMessageStatusDisplayed(chat->lastMessage());
     }
@@ -214,6 +213,9 @@ void Self::setupTableConnections()
     qCDebug(lcController) << "Setup database table connections for chats...";
     connect(m_userDatabase->chatsTable(), &ChatsTable::errorOccurred, this, &Self::errorOccurred);
     connect(m_userDatabase->chatsTable(), &ChatsTable::fetched, this, &Self::onChatsLoaded);
+    connect(m_userDatabase->messagesTable(), &MessagesTable::messageAdded, this, &Self::onMessageAdded);
+    connect(m_userDatabase->chatsTable(), &ChatsTable::chatUnreadMessageCountUpdated, this,
+            &Self::onChatUnreadMessageCountUpdated);
 
     connect(m_userDatabase->groupsTable(), &GroupsTable::errorOccurred, this, &Self::errorOccurred);
     connect(m_userDatabase->groupMembersTable(), &GroupMembersTable::errorOccurred, this, &Self::errorOccurred);
@@ -301,4 +303,16 @@ void Self::onGroupMembersFetchedByGroupId(const GroupId &groupId, const GroupMem
         qCDebug(lcController) << "Group chats members with a current group were fetched" << groupId;
         m_chatObject->setGroupMembers(groupMembers);
     }
+}
+
+void Self::onMessageAdded(const MessageHandler &message)
+{
+    if (message->isIncoming()) {
+        m_userDatabase->chatsTable()->requestChatUnreadMessageCount(message->chatId());
+    }
+}
+
+void Self::onChatUnreadMessageCountUpdated(const ChatId &chatId, qsizetype unreadMessageCount)
+{
+    m_models->chats()->resetUnreadCount(chatId, unreadMessageCount);
 }

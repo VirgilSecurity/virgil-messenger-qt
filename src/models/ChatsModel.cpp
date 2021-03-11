@@ -92,7 +92,7 @@ void Self::deleteChat(const ChatId &chatId)
     endRemoveRows();
 }
 
-void Self::resetUnreadCount(const ChatId &chatId)
+void Self::resetUnreadCount(const ChatId &chatId, qsizetype unreadMessageCount)
 {
     const auto chatRow = findRowById(chatId);
     if (!chatRow) {
@@ -100,11 +100,13 @@ void Self::resetUnreadCount(const ChatId &chatId)
         return;
     }
     auto &chat = m_chats[*chatRow];
-    chat->setUnreadMessageCount(0);
-    qCDebug(lcModel) << "Unread message count was reset";
-    const auto chatIndex = index(*chatRow);
-    emit dataChanged(chatIndex, chatIndex, { UnreadMessagesCountRole });
-    emit chatUpdated(chat);
+    if (chat->unreadMessageCount() != unreadMessageCount) {
+        qCDebug(lcModel) << "Unread message count was reset to" << unreadMessageCount << "for chat" << chatId;
+        chat->setUnreadMessageCount(unreadMessageCount);
+        const auto chatIndex = index(*chatRow);
+        emit dataChanged(chatIndex, chatIndex, { UnreadMessagesCountRole });
+        emit chatUpdated(chat);
+    }
 }
 
 void Self::updateLastMessage(const MessageHandler &message)
@@ -119,11 +121,15 @@ void Self::updateLastMessage(const MessageHandler &message)
     if (!chat->lastMessage() || chat->lastMessage()->id() != message->id()) {
         qCDebug(lcModel) << "Last message was set to" << message->id();
     }
-    chat->setLastMessage(message); // TODO(fpohtmeh): don't set last message if it's not older then current
-    QVector<int> roles { LastMessageBodyRole, LastEventTimeRole };
-    const auto chatIndex = index(*chatRow);
-    emit dataChanged(chatIndex, chatIndex, roles);
-    emit chatUpdated(chat);
+
+    if (!chat->lastMessage() || chat->lastMessage()->createdAt() < message->createdAt()) {
+        chat->setLastMessage(message);
+
+        QVector<int> roles { LastMessageBodyRole, LastEventTimeRole };
+        const auto chatIndex = index(*chatRow);
+        emit dataChanged(chatIndex, chatIndex, roles);
+        emit chatUpdated(chat);
+    }
 }
 
 void ChatsModel::resetLastMessage(const ChatId &chatId)

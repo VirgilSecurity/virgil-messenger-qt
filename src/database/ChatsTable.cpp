@@ -128,10 +128,8 @@ void ChatsTable::onDeleteChat(const ChatId &chatId)
 void ChatsTable::onUpdateLastMessage(const MessageHandler &message)
 {
     ScopedConnection connection(*database());
-    const DatabaseUtils::BindValues values {
-        { ":id", QString(message->chatId()) },
-
-    };
+    const DatabaseUtils::BindValues values { { ":id", QString(message->chatId()) },
+                                             { ":lastMessageId", QString(message->id()) } };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateLastMessage"), values);
     if (query) {
         qCDebug(lcDatabase) << "Last message was updated for chat id:" << message->chatId();
@@ -148,6 +146,8 @@ void ChatsTable::onResetLastMessage(const ChatId &chatId)
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateLastMessage"), values);
     if (query) {
         qCDebug(lcDatabase) << "Last message was reset for chat id:" << chatId;
+        emit chatUnreadMessageCountUpdated(chatId, 0);
+
     } else {
         qCCritical(lcDatabase) << "ChatsTable::onResetLastMessage error";
         emit errorOccurred(tr("Failed to reset last message"));
@@ -158,12 +158,12 @@ void ChatsTable::onRequestChatUnreadMessageCount(const ChatId &chatId)
 {
     ScopedConnection connection(*database());
     const DatabaseUtils::BindValues values { { ":id", QString(chatId) } };
-    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectUnreadMessageCount"), values);
-    if (query) {
+    auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectUnreadMessageCount"), values);
+    if (query && query->next()) {
         const auto unreadMessageCount = query->value("unreadMessageCount").value<qsizetype>();
         qCDebug(lcDatabase) << "Chat unread count was calculated, id:" << chatId << ", count:" << unreadMessageCount;
+        emit chatUnreadMessageCountUpdated(chatId, unreadMessageCount);
 
-        emit chatUnreadMessageCount(chatId, unreadMessageCount);
     } else {
         qCCritical(lcDatabase) << "ChatsTable::onRequestChatUnreadMessageCount error";
         emit errorOccurred(tr("Failed to calculate chat unread message count"));
@@ -177,6 +177,7 @@ void ChatsTable::onMarkMessagesAsRead(const ChatHandler &chat)
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("resetUnreadCount"), values);
     if (query) {
         qCDebug(lcDatabase) << "Chat unread count was reset, id:" << chat->id();
+        emit chatUnreadMessageCountUpdated(chat->id(), 0);
     } else {
         qCCritical(lcDatabase) << "ChatsTable::onResetUnreadCount error";
         emit errorOccurred(tr("Failed to reset unread count"));

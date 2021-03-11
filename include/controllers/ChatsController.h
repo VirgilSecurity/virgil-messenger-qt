@@ -111,6 +111,9 @@ private:
     void onGroupChatCreateFailed(const GroupId &chatId, const QString &errorText);
     void onUpdateGroup(const GroupUpdate &groupUpdate);
 
+    void onMessageAdded(const MessageHandler &message);
+    void onChatUnreadMessageCountUpdated(const ChatId &chatId, qsizetype unreadMessageCount);
+
     QPointer<Messenger> m_messenger;
     QPointer<Models> m_models;
     QPointer<UserDatabase> m_userDatabase;
