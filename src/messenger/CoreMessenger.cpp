@@ -1055,6 +1055,9 @@ QFuture<Self::Result> Self::sendMessage(MessageHandler message)
 
         case ChatType::Group:
             return sendGroupMessage(message);
+
+        default:
+            throw std::logic_error("Invalid chat type");
         }
     });
 }
@@ -2581,6 +2584,9 @@ void Self::xmppOnRoomParticipantReceived(const QString &roomJid, const QString &
 
         case QXmppMucItem::OwnerAffiliation:
             return GroupAffiliation::Owner;
+
+        default:
+            throw std::logic_error("Invalid affiliation");
         }
     };
 

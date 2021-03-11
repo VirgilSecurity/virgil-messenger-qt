@@ -4,7 +4,7 @@ SELECT
     CASE groupMembers.memberNickname
         WHEN '' THEN contacts.name
         ELSE groupMembers.memberNickname
-    END memberNickname
+    END memberNickname,
     groupMembers.memberAffiliation,
     ownerMembers.memberId as groupOwnerId,
     contacts.username,
