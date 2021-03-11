@@ -105,6 +105,12 @@ void Self::switchToRootFolder()
     switchToHierarchy({ rootFolder() });
 }
 
+void Self::clearFiles()
+{
+    qCDebug(lcController) << "Clear cloud files...";
+    m_models->cloudFiles()->clearFiles();
+}
+
 void Self::openFile(const QVariant &proxyRow)
 {
     const auto cloudFile = model()->file(proxyRow.toInt());

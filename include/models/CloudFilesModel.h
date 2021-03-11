@@ -52,6 +52,8 @@ public:
 
     CloudFilesModel(const Settings *settings, QObject *parent);
 
+    void clearFiles();
+
     CloudFileHandler file(int proxyRow) const;
     ModifiableCloudFileHandler file(int proxyRow);
     CloudFiles selectedFiles() const;

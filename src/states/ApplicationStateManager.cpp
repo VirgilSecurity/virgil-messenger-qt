@@ -54,7 +54,7 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
       m_controllers(controllers),
       m_validator(validator),
       m_settings(m_messenger->settings()),
-      m_accountSelectionState(new AccountSelectionState(controllers->users(), validator, this)),
+      m_accountSelectionState(new AccountSelectionState(m_settings, this)),
       m_accountSettingsState(new AccountSettingsState(this)),
       m_addCloudFolderMembersState(
               new AddCloudFolderMembersState(controllers->cloudFiles(), models->discoveredContacts(), this)),
@@ -135,7 +135,8 @@ void Self::addTransitions()
     m_startState->addTransition(m_startState, &StartState::chatListRequested, m_chatListState);
     m_startState->addTransition(m_startState, &StartState::accountSelectionRequested, m_accountSelectionState);
 
-    m_accountSelectionState->addTransition(users, &UsersController::signedIn, m_chatListState);
+    m_accountSelectionState->addTransition(m_accountSelectionState, &AccountSelectionState::chatListRequested,
+                                           m_chatListState);
     addTwoSideTransition(m_accountSelectionState, m_accountSelectionState,
                          &AccountSelectionState::requestSignInUsername, m_signInUsernameState);
     addTwoSideTransition(m_accountSelectionState, m_accountSelectionState, &AccountSelectionState::requestSignUp,

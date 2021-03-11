@@ -66,6 +66,8 @@ Controllers::Controllers(Messenger *messenger, Settings *settings, Models *model
     //  TODO: find a better solution.
     //
     connect(m_users, &UsersController::signedIn, m_chats, &ChatsController::loadChats, Qt::QueuedConnection);
+    connect(m_users, &UsersController::signedOut, m_chats, &ChatsController::clearChats);
+    connect(m_users, &UsersController::signedOut, m_cloudFiles, &CloudFilesController::clearFiles);
     connect(m_chats, &ChatsController::chatOpened, m_messages, &MessagesController::loadMessages);
     connect(m_chats, &ChatsController::chatClosed, m_messages, &MessagesController::clearMessages);
 

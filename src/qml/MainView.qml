@@ -60,12 +60,8 @@ Control {
             }
         }
 
-        function openSplashScreenPage() {
-            stackView.push(page("SplashScreen"), StackView.Immediate)
-        }
-
         function openAccountSelectionPage() {
-            if ([manager.signUpState, manager.signInState].includes(manager.previousState)) {
+            if (manager.signUpState === manager.previousState) {
                 return
             }
             stackView.push(page("AccountSelection"), StackView.Immediate)
