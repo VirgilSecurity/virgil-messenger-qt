@@ -70,6 +70,7 @@ using namespace notifications::xmpp;
 #include <qxmpp/QXmppPubSubItem.h>
 #include <qxmpp/QXmppPubSubIq.h>
 #include <qxmpp/QXmppMamManager.h>
+#include <qxmpp/QXmppUtils.h>
 
 #include <QCryptographicHash>
 #include <QMap>
@@ -1204,7 +1205,8 @@ QFuture<Self::Result> Self::processReceivedXmppMessage(const QXmppMessage &xmppM
 {
     return QtConcurrent::run([this, xmppMessage]() -> Result {
         qCInfo(lcCoreMessenger) << "Received XMPP message";
-        qCDebug(lcCoreMessenger) << "Received XMPP message:" << xmppMessage.id() << "from:" << xmppMessage.from();
+        qCDebug(lcCoreMessenger) << "Received XMPP message with id:" << xmppMessage.id()
+                                 << "from:" << xmppMessage.from();
 
         //
         //  Handle receipts (may come from archived messages).
@@ -2911,7 +2913,18 @@ void Self::xmppOnArchivedMessageReceived(const QString &queryId, const QXmppMess
 void Self::onSendMessageStatusDisplayed(const MessageHandler &message)
 {
     QXmppMessage mark;
-    mark.setTo(userIdToJid(message->senderId()));
+
+    switch (message->chatType()) {
+    case ChatType::Personal:
+        mark.setTo(userIdToJid(message->senderId()));
+        break;
+
+    case ChatType::Group:
+        mark.setTo(groupIdToJid(message->groupChatInfo()->groupId()));
+        break;
+    }
+
+    mark.setId(QXmppUtils::generateStanzaUuid());
     mark.setFrom(userIdToJid(message->recipientId()));
     mark.setMarkerId(message->id());
     mark.addHint(QXmppMessage::Store);
