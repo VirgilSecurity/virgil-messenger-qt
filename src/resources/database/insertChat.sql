@@ -1,2 +1,2 @@
-INSERT INTO chats (id, title, type, createdAt, lastMessageId, unreadMessageCount)
-VALUES (:id, :title, :type, :createdAt, :lastMessageId, :unreadMessageCount)
+INSERT INTO chats (id, title, type, createdAt, lastMessageId)
+VALUES (:id, :title, :type, :createdAt, :lastMessageId)
