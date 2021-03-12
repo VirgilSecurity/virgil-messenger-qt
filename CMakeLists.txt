@@ -480,6 +480,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/ChatsController.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/CloudFilesController.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/Controllers.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/controllers/DocumentInteractionController.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/MessagesController.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/UsersController.h
         # Helpers
@@ -690,6 +691,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/ChatsController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/CloudFilesController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/Controllers.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/controllers/DocumentInteractionController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/MessagesController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/UsersController.cpp
         # Helpers

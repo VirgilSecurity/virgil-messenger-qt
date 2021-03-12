@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+﻿//  Copyright (C) 2015-2020 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -45,6 +45,7 @@ namespace vm {
 class AttachmentsController;
 class ChatsController;
 class CloudFilesController;
+class DocumentInteractionController;
 class MessagesController;
 class Models;
 class UserDatabase;
@@ -59,6 +60,7 @@ class Controllers : public QObject
     Q_PROPERTY(ChatsController *chats READ chats CONSTANT)
     Q_PROPERTY(MessagesController *messages READ messages CONSTANT)
     Q_PROPERTY(CloudFilesController *cloudFiles READ cloudFiles CONSTANT)
+    Q_PROPERTY(DocumentInteractionController *documentInteraction READ documentInteraction CONSTANT)
 
 public:
     Controllers(Messenger *messenger, Settings *settings, Models *models, UserDatabase *userDatabase, QObject *parent);
@@ -73,6 +75,8 @@ public:
     MessagesController *messages();
     const CloudFilesController *cloudFiles() const;
     CloudFilesController *cloudFiles();
+    const DocumentInteractionController *documentInteraction() const;
+    DocumentInteractionController *documentInteraction();
 
 signals:
     void notificationCreated(const QString &notification, const bool error);
@@ -83,6 +87,7 @@ private:
     QPointer<ChatsController> m_chats;
     QPointer<MessagesController> m_messages;
     QPointer<CloudFilesController> m_cloudFiles;
+    QPointer<DocumentInteractionController> m_documentInteraction;
 };
 } // namespace vm
 

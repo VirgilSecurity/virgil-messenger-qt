@@ -39,6 +39,7 @@
 #include "controllers/AttachmentsController.h"
 #include "controllers/ChatsController.h"
 #include "controllers/CloudFilesController.h"
+#include "controllers/DocumentInteractionController.h"
 #include "controllers/MessagesController.h"
 #include "controllers/UsersController.h"
 #include "database/UserDatabase.h"
@@ -54,12 +55,18 @@ Controllers::Controllers(Messenger *messenger, Settings *settings, Models *model
       m_users(new UsersController(messenger, models, userDatabase, this)),
       m_chats(new ChatsController(messenger, models, userDatabase, this)),
       m_messages(new MessagesController(messenger, settings, models, userDatabase, this)),
-      m_cloudFiles(new CloudFilesController(messenger, models, userDatabase, this))
+      m_cloudFiles(new CloudFilesController(messenger, models, userDatabase, this)),
+      m_documentInteraction(new DocumentInteractionController(this))
 {
     connect(m_attachments, &AttachmentsController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_messages, &MessagesController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_chats, &ChatsController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_cloudFiles, &CloudFilesController::notificationCreated, this, &Controllers::notificationCreated);
+
+    connect(m_attachments, &AttachmentsController::openUrlRequested, m_documentInteraction,
+            &DocumentInteractionController::openUrl);
+    connect(m_cloudFiles, &CloudFilesController::openUrlRequested, m_documentInteraction,
+            &DocumentInteractionController::openUrl);
 
     //
     //  Queued connection is used here to give ChatsController a chance to setup database connections.
@@ -74,6 +81,7 @@ Controllers::Controllers(Messenger *messenger, Settings *settings, Models *model
     qRegisterMetaType<MessagesController *>("MessagesController*");
     qRegisterMetaType<UsersController *>("UsersController*");
     qRegisterMetaType<CloudFilesController *>("CloudFilesController*");
+    qRegisterMetaType<DocumentInteractionController *>("DocumentInteractionController*");
 }
 
 const AttachmentsController *Controllers::attachments() const
@@ -124,4 +132,14 @@ const CloudFilesController *Controllers::cloudFiles() const
 CloudFilesController *Controllers::cloudFiles()
 {
     return m_cloudFiles;
+}
+
+const DocumentInteractionController *Controllers::documentInteraction() const
+{
+    return m_documentInteraction;
+}
+
+DocumentInteractionController *Controllers::documentInteraction()
+{
+    return m_documentInteraction;
 }

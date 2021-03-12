@@ -17,5 +17,5 @@ Text {
     wrapMode: Text.WordWrap
     textFormat: Text.RichText
     linkColor: Theme.buttonPrimaryColor
-    onLinkActivated: Qt.openUrlExternally(link)
+    onLinkActivated: controllers.documentInteraction.openUrl(link)
 }

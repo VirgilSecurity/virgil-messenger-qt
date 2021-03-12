@@ -77,6 +77,8 @@ public:
     Q_INVOKABLE void removeSelectedMembers();
 
 signals:
+    void openUrlRequested(const QUrl &url);
+
     void updateCloudFiles(const CloudFilesUpdate &update);
 
     void notificationCreated(const QString &notification, const bool error) const;
