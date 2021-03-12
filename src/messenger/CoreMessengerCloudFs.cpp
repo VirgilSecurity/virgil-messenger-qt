@@ -872,8 +872,8 @@ Self::Result<QByteArray> Self::decryptFileKey(const QByteArray &fileEncryptedKey
         auto folderKey = std::move(*std::get_if<QByteArray>(&folderKeyResult));
 
         status = vssq_messenger_cloud_fs_decrypt_key_with_parent_folder_key(
-                m_coreMessenger->cloudFsC(), fileEncryptedKeyC, parentFolderIssuer->impl()->user.get(),
-                parentFolderIdStdC, vsc_data_from(folderKey), decryptedKeyBuf.get());
+                m_coreMessenger->cloudFsC(), fileEncryptedKeyC, sender->impl()->user.get(), parentFolderIdStdC,
+                vsc_data_from(folderKey), decryptedKeyBuf.get());
 
     } else {
         status = vssq_messenger_cloud_fs_decrypt_key(m_coreMessenger->cloudFsC(), fileEncryptedKeyC,

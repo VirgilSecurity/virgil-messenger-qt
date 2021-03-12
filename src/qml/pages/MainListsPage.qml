@@ -36,7 +36,7 @@ Page {
         id: mainSearchHeader
         title: d.isChatList ? d.chatsTitle : d.cloudFilesTitle
         description: d.isChatList ? d.chatsDescription : d.cloudFilesDescription
-        showBackButton: d.isCloudFileList && !controllers.cloudFiles.isRoot
+        showBackButton: d.isCloudFileList && (!controllers.cloudFiles.isRoot || d.cloudFilesSelectedCount)
         searchPlaceholder: d.isChatList ? qsTr("Search conversation") : qsTr("Search file")
         filterSource: d.isChatList ? models.chats : models.cloudFiles
 
@@ -84,10 +84,22 @@ Page {
             visible: d.isCloudFileList
         }
 
+        ContextMenuSeparator {
+            visible: selectAllItem.visible || deselectAllItem.visible
+        }
+
         ContextMenuItem {
+            id: selectAllItem
             text: qsTr("Select All")
             onTriggered: models.cloudFiles.selection.selectAll()
             visible: d.isCloudFileList && d.cloudFilesCount && (d.cloudFilesCount !== d.cloudFilesSelectedCount)
+        }
+
+        ContextMenuItem {
+            id: deselectAllItem
+            text: qsTr("Deselect All")
+            onTriggered: models.cloudFiles.selection.clear()
+            visible: d.isCloudFileList && d.cloudFilesSelectedCount
         }
 
         ContextMenuSeparator {

@@ -12,7 +12,7 @@ ToolBar {
     property alias description: headerTitle.description
     property alias showSeparator: headerBackground.showSeparator
     property alias menuImage: menuButton.image
-    property var showBackButton: false
+    property bool showBackButton: false
     // search
     property alias search: searchId.search
     property alias isSearchOpen: searchId.isSearchOpen
@@ -129,7 +129,13 @@ ToolBar {
 
             HeaderTitle {
                 id: headerTitle
-                anchors.verticalCenter: parent.verticalCenter
+                fillWidth: true
+                titleLabel.elide: Label.ElideLeft
+                anchors {
+                    left: parent.left
+                    right: searchContainer.left
+                    verticalCenter: parent.verticalCenter
+                }
             }
 
             Item {

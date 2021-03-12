@@ -1,4 +1,5 @@
-import QtQuick 2.15
+import QtQml 2.15
+import QtQuick 2.12
 import QtQuick.Controls 2.15
 
 import "../theme"
@@ -12,6 +13,9 @@ Column {
     property alias horizontalAlignment: titleLabel.horizontalAlignment
     property alias bold: titleLabel.font.bold
     property bool fillWidth: true
+
+    property alias titleLabel: titleLabel
+    property alias descriptionLabel: descriptionLabel
 
     Label {
         id: titleLabel

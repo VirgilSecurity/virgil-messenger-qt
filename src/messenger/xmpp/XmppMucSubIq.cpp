@@ -80,6 +80,9 @@ static QString xmppMucSubEventToNodeString(XmppMucSubEvent event)
 
     case XmppMucSubEvent::System:
         return ns_muc_sub_node_system;
+
+    default:
+        throw std::logic_error("Invalid XmppMucSubEvent");
     }
 }
 
