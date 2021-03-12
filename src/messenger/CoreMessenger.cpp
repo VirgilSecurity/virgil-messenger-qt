@@ -310,6 +310,7 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     connect(this, &Self::acceptGroupInvitation, this, &Self::onAcceptGroupInvitation);
     connect(this, &Self::rejectGroupInvitation, this, &Self::onRejectGroupInvitation);
 
+    connect(this, &Self::resetXmppConfiguration, this, &Self::onResetXmppConfiguration);
     connect(this, &Self::reconnectXmppServerIfNeeded, this, &Self::onReconnectXmppServerIfNeeded);
     connect(this, &Self::disconnectXmppServer, this, &Self::onDisconnectXmppServer);
     connect(this, &Self::cleanupXmppMucRooms, this, &Self::onCleanupXmppMucRooms);
@@ -384,7 +385,7 @@ Self::Result Self::resetCommKitConfiguration()
     return Self::Result::Success;
 }
 
-void Self::resetXmppConfiguration()
+void Self::onResetXmppConfiguration()
 {
 
     qCDebug(lcCoreMessenger) << "Reset XMPP configuration";
@@ -668,11 +669,23 @@ QFuture<Self::Result> Self::signIn(const QString &username)
             //
             //  Fast sign-in.
             //
+            qCInfo(lcCoreMessenger) << "Trying a fast sign-in";
             const auto userInfoStd = userInfo.toStdString();
             auto userC = vssq_messenger_user_from_json_str(vsc_str_from(userInfoStd), m_impl->random.get(), &error);
             if (!vssq_error_has_error(&error)) {
+                qCInfo(lcCoreMessenger) << "Fast sign-in - success";
                 m_impl->currentUser = std::make_shared<User>(std::make_unique<UserImpl>(userC));
+
+                resetXmppConfiguration();
+
+                if (isNetworkOnline()) {
+                    authenticate();
+                }
+
                 return Self::Result::Success;
+            } else {
+                qCWarning(lcCoreMessenger)
+                        << "Got error status:" << vsc_str_to_qstring(vssq_error_message_from_error(&error));
             }
 
             // Go to a full sign-in.
@@ -934,7 +947,11 @@ void Self::authenticate()
             return;
         }
 
-        emit reconnectXmppServerIfNeeded();
+        const auto result = finishSignIn();
+
+        if (result == Self::Result::Success) {
+            emit reconnectXmppServerIfNeeded();
+        }
     });
 }
 
@@ -2059,8 +2076,10 @@ void Self::xmppOnMessageDelivered(const QString &jid, const QString &messageId)
 void Self::onProcessNetworkState(bool isOnline)
 {
     if (isOnline) {
+        qCDebug(lcCoreMessenger) << "Network go online.";
         emit reconnectXmppServerIfNeeded();
     } else {
+        qCDebug(lcCoreMessenger) << "Network go offline.";
         emit disconnectXmppServer();
     }
 }

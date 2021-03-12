@@ -137,6 +137,7 @@ signals:
     //
     //  Private signals, to resolve thread. issues.
     //
+    void resetXmppConfiguration();
     void reconnectXmppServerIfNeeded();
     void disconnectXmppServer();
     void cleanupXmppMucRooms();
@@ -253,7 +254,6 @@ private:
     //  Configuration.
     //
     Result resetCommKitConfiguration();
-    void resetXmppConfiguration();
     void connectXmppRoomSignals(QXmppMucRoom *room);
 
     //
@@ -357,6 +357,7 @@ private slots:
     void xmppOnMucRoomSubscribersProcessed(const QString &id, const QString &roomJid);
     //--
 
+    void onResetXmppConfiguration();
     void onReconnectXmppServerIfNeeded();
     void onDisconnectXmppServer();
     void onCleanupXmppMucRooms();
