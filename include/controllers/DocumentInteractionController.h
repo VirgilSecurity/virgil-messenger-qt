@@ -36,6 +36,7 @@
 #define VM_DOCUMENT_INTERACTION_CONTROLLER_H
 
 #include <QObject>
+#include <QUrl>
 
 namespace vm {
 class DocumentInteractionController : public QObject

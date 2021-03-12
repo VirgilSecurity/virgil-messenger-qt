@@ -32,40 +32,27 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#import "IosDocumentInteractionController.h"
+#include "ios/IosViewController.h"
 
-#import "IosViewController.h"
-
-#import <UIKit/UIKit.h>
-
-#import <QDebug>
-#import <QGuiApplication>
-
-using namespace vm;
-using Self = IosDocumentInteractionController;
-
-void Self::openUrl(const QUrl& url)
+@interface IosViewController ()
+@end
+@implementation IosViewController
+#pragma mark -
+#pragma mark View Life Cycle
+- (void)viewDidLoad
 {
-    NSURL* nsUrl = url.toNSURL();
-
-    static IosViewController* docViewController = nil;
-    if (docViewController != nil) {
-        [docViewController removeFromParentViewController];
-        [docViewController release];
-    }
-
-    UIDocumentInteractionController* documentInteractionController = nil;
-    documentInteractionController = [UIDocumentInteractionController interactionControllerWithURL:nsUrl];
-
-    UIViewController* qtUIViewController =
-        [[[[UIApplication sharedApplication] windows] firstObject] rootViewController];
-    if (qtUIViewController != nil) {
-        docViewController = [[IosViewController alloc] init];
-
-        [qtUIViewController addChildViewController:docViewController];
-        documentInteractionController.delegate = docViewController;
-        if (![documentInteractionController presentPreviewAnimated:YES]) {
-            qWarning() << "Failed to open file preview" << url;
-        }
-    }
+    [super viewDidLoad];
 }
+#pragma mark -
+#pragma mark Document Interaction Controller Delegate Methods
+- (UIViewController*)documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController*)controller
+{
+#pragma unused(controller)
+    return self;
+}
+- (void)documentInteractionControllerDidEndPreview:(UIDocumentInteractionController*)controller
+{
+#pragma unused(controller)
+    [self removeFromParentViewController];
+}
+@end

@@ -32,40 +32,12 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#import "IosDocumentInteractionController.h"
-
-#import "IosViewController.h"
+#ifndef IOS_VIEW_CONTROLLER_H
+#define IOS_VIEW_CONTROLLER_H
 
 #import <UIKit/UIKit.h>
 
-#import <QDebug>
-#import <QGuiApplication>
+@interface IosViewController : UIViewController <UIDocumentInteractionControllerDelegate>
+@end
 
-using namespace vm;
-using Self = IosDocumentInteractionController;
-
-void Self::openUrl(const QUrl& url)
-{
-    NSURL* nsUrl = url.toNSURL();
-
-    static IosViewController* docViewController = nil;
-    if (docViewController != nil) {
-        [docViewController removeFromParentViewController];
-        [docViewController release];
-    }
-
-    UIDocumentInteractionController* documentInteractionController = nil;
-    documentInteractionController = [UIDocumentInteractionController interactionControllerWithURL:nsUrl];
-
-    UIViewController* qtUIViewController =
-        [[[[UIApplication sharedApplication] windows] firstObject] rootViewController];
-    if (qtUIViewController != nil) {
-        docViewController = [[IosViewController alloc] init];
-
-        [qtUIViewController addChildViewController:docViewController];
-        documentInteractionController.delegate = docViewController;
-        if (![documentInteractionController presentPreviewAnimated:YES]) {
-            qWarning() << "Failed to open file preview" << url;
-        }
-    }
-}
+#endif // IOS_VIEW_CONTROLLER_H

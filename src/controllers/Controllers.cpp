@@ -46,6 +46,10 @@
 #include "models/DiscoveredContactsModel.h"
 #include "models/Models.h"
 
+#if VS_IOS
+#    include "ios/IosDocumentInteractionController.h"
+#endif
+
 using namespace vm;
 
 Controllers::Controllers(Messenger *messenger, Settings *settings, Models *models, UserDatabase *userDatabase,
@@ -56,7 +60,7 @@ Controllers::Controllers(Messenger *messenger, Settings *settings, Models *model
       m_chats(new ChatsController(messenger, models, userDatabase, this)),
       m_messages(new MessagesController(messenger, settings, models, userDatabase, this)),
       m_cloudFiles(new CloudFilesController(messenger, models, userDatabase, this)),
-      m_documentInteraction(new DocumentInteractionController(this))
+      m_documentInteraction(createDocumentInteraction())
 {
     connect(m_attachments, &AttachmentsController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_messages, &MessagesController::notificationCreated, this, &Controllers::notificationCreated);
@@ -142,4 +146,13 @@ const DocumentInteractionController *Controllers::documentInteraction() const
 DocumentInteractionController *Controllers::documentInteraction()
 {
     return m_documentInteraction;
+}
+
+DocumentInteractionController *Controllers::createDocumentInteraction()
+{
+#if VS_IOS
+    return new IosDocumentInteractionController(this);
+#else
+    return new DocumentInteractionController(this);
+#endif
 }

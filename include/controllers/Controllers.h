@@ -1,4 +1,4 @@
-﻿//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2020 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -82,6 +82,8 @@ signals:
     void notificationCreated(const QString &notification, const bool error);
 
 private:
+    DocumentInteractionController *createDocumentInteraction();
+
     QPointer<AttachmentsController> m_attachments;
     QPointer<UsersController> m_users;
     QPointer<ChatsController> m_chats;
