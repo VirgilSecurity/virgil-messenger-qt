@@ -76,7 +76,7 @@ public:
     //
     //  Proxy to sqlite3_changes().
     //
-    qsizetype changes() const;
+    qsizetype rowsChangedCount() const;
 
     operator QSqlDatabase() const;
 
@@ -86,7 +86,7 @@ signals:
     void errorOccurred(const QString &errorText);
 
 protected:
-    virtual bool create();
+    virtual bool create() = 0;
 
 private:
     bool readVersion();
