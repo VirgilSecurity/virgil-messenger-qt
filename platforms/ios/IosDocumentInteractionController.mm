@@ -32,21 +32,30 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_DOCUMENT_INTERACTION_CONTROLLER_H
-#define VM_DOCUMENT_INTERACTION_CONTROLLER_H
+#include "IosDocumentInteractionController.h"
 
-#include <QObject>
+#import <QGuiApplication>
 
-namespace vm {
-class DocumentInteractionController : public QObject
+#import <UIKit/UIKit.h>
+
+using namespace vm;
+using Self = IosDocumentInteractionController;
+
+void Self::openUrl(const QUrl& url)
 {
-    Q_OBJECT
+    NSMutableArray* sharingItems = [NSMutableArray new];
 
-public:
-    using QObject::QObject;
+    if (url.isValid()) {
+        [sharingItems addObject:url.toNSURL()];
+    }
 
-    Q_INVOKABLE virtual void openUrl(const QUrl &url);
-};
-} // namespace vm
+    // get the main window rootViewController
+    UIViewController* qtController = [[UIApplication sharedApplication].keyWindow rootViewController];
 
-#endif // VM_DOCUMENT_INTERACTION_CONTROLLER_H
+    UIActivityViewController* activityController = [[UIActivityViewController alloc] initWithActivityItems:sharingItems
+                                                                                     applicationActivities:nil];
+    if ([activityController respondsToSelector:@selector(popoverPresentationController)]) { // iOS8
+        activityController.popoverPresentationController.sourceView = qtController.view;
+    }
+    [qtController presentViewController:activityController animated:YES completion:nil];
+}

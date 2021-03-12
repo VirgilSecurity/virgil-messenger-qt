@@ -32,21 +32,21 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_DOCUMENT_INTERACTION_CONTROLLER_H
-#define VM_DOCUMENT_INTERACTION_CONTROLLER_H
+#ifndef VM_IOS_DOCUMENT_INTERACTION_CONTROLLER_H
+#define VM_IOS_DOCUMENT_INTERACTION_CONTROLLER_H
 
-#include <QObject>
+#include "DocumentInteractionController.h"
 
 namespace vm {
-class DocumentInteractionController : public QObject
+class IosDocumentInteractionController : public DocumentInteractionController
 {
     Q_OBJECT
 
 public:
-    using QObject::QObject;
+    using DocumentInteractionController::DocumentInteractionController;
 
-    Q_INVOKABLE virtual void openUrl(const QUrl &url);
+    void openUrl(const QUrl &url) override;
 };
 } // namespace vm
 
-#endif // VM_DOCUMENT_INTERACTION_CONTROLLER_H
+#endif // VM_IOS_DOCUMENT_INTERACTION_CONTROLLER_H
