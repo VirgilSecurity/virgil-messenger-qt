@@ -215,13 +215,16 @@ void Self::onWriteMessage(const MessageHandler &message)
     ScopedTransaction transaction(*this);
     messagesTable()->addMessage(message);
 
-    if (message->contentIsAttachment()) {
-        attachmentsTable()->addAttachment(message);
-    }
-    chatsTable()->updateLastMessage(message);
+    if (rowsChangedCount() > 0) {
+        if (message->contentIsAttachment()) {
+            attachmentsTable()->addAttachment(message);
+        }
 
-    if (message->isIncoming()) {
-        contactsTable()->updateContact(UsernameContactUpdate { message->senderId(), message->senderUsername() });
+        if (message->isIncoming()) {
+            contactsTable()->updateContact(UsernameContactUpdate { message->senderId(), message->senderUsername() });
+        }
+
+        chatsTable()->updateLastMessage(message);
     }
 }
 
