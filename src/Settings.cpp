@@ -61,7 +61,7 @@ bool Settings::m_logsDirInitialized = false;
 Q_LOGGING_CATEGORY(lcSettings, "settings")
 
 Settings::Settings(QObject *parent)
-    : QSettings(settingsFileName(), QSettings::NativeFormat, parent), m_sessionId(Utils::createUuid())
+    : QSettings(settingsFileName(), settingsFormat(), parent), m_sessionId(Utils::createUuid())
 {
 
     qCDebug(lcSettings) << "Settings are written to: " << fileName();
@@ -149,6 +149,15 @@ QString Settings::settingsFileName()
     ext = QLatin1String(".ini");
 #endif
     return CustomerEnv::appDataLocation().filePath(QLatin1String("settings") + ext);
+}
+
+QSettings::Format Settings::settingsFormat()
+{
+#if VS_WINDOWS
+    return Format::IniFormat;
+#else
+    return Format::NativeFormat;
+#endif
 }
 
 QString Settings::userCredential(const QString &user) const
