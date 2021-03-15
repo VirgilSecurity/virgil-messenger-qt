@@ -194,6 +194,10 @@ void Self::openChat(const ChatHandler &chat)
         m_userDatabase->resetUnreadCount(chat);
     }
     m_chatObject->setChat(chat);
+    if (chat->type() == Chat::Type::Personal) {
+        const UserId userId(chat->id());
+        m_messenger->setCurrentRecipient(userId);
+    }
     emit chatOpened(chat);
 }
 
@@ -205,6 +209,7 @@ void Self::openChat(const QString &chatId)
 void Self::closeChat()
 {
     m_chatObject->setChat(ChatHandler());
+    m_messenger->setCurrentRecipient(UserId());
     emit chatClosed();
 }
 

@@ -142,7 +142,6 @@ public:
 
     QString connectionStateString() const noexcept;
 
-public slots:
     void setCurrentRecipient(const UserId &recipientId);
 
     bool subscribeToUser(const UserId &contactId);

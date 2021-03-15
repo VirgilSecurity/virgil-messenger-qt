@@ -217,7 +217,8 @@ public:
     std::map<GroupId, UserId> groupOwners;
     std::mutex groupMutex;
 
-    VSQNetworkAnalyzer *networkAnalyzer;
+    QPointer<VSQNetworkAnalyzer> networkAnalyzer;
+    QPointer<Settings> settings;
 
     std::unique_ptr<QXmppClient> xmpp;
     std::unique_ptr<VSQDiscoveryManager> discoveryManager;
@@ -238,8 +239,7 @@ public:
     bool suspended = false;
 };
 
-Self::CoreMessenger(Settings *settings, QObject *parent)
-    : QObject(parent), m_impl(std::make_unique<Self::Impl>()), m_settings(settings)
+Self::CoreMessenger(Settings *settings, QObject *parent) : QObject(parent), m_impl(std::make_unique<Self::Impl>())
 {
 
     //
@@ -305,6 +305,7 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     //  Configure Network Analyzer.
     //
     m_impl->networkAnalyzer = new VSQNetworkAnalyzer(nullptr); // will be moved to the thread
+    m_impl->settings = settings;
     connect(m_impl->networkAnalyzer, &VSQNetworkAnalyzer::connectedChanged, this, &Self::onProcessNetworkState);
 }
 
@@ -382,7 +383,7 @@ void Self::resetXmppConfiguration()
     m_impl->xmppCarbonManager = new QXmppCarbonManager();
     m_impl->xmppUploadManager = new QXmppUploadRequestManager();
     m_impl->xmppGroupChatManager = new QXmppMucManager();
-    m_impl->lastActivityManager = new VSQLastActivityManager(m_settings);
+    m_impl->lastActivityManager = new VSQLastActivityManager(m_impl->settings);
     m_impl->xmppRoomParticipantsManager = new XmppRoomParticipantsManager();
     m_impl->xmppMucSubManager = new XmppMucSubManager();
 
@@ -579,7 +580,7 @@ QFuture<Self::Result> Self::signIn(const QString &username)
         }
 
         qCInfo(lcCoreMessenger) << "Load user credentials";
-        auto credentialsString = m_settings->userCredential(username).toStdString();
+        auto credentialsString = m_impl->settings->userCredential(username).toStdString();
         if (credentialsString.empty()) {
             qCWarning(lcCoreMessenger) << "User credentials are not found locally";
             return Self::Result::Error_NoCred;
@@ -646,7 +647,7 @@ QFuture<Self::Result> Self::signUp(const QString &username)
         }
 
         auto credentials = vsc_str_to_qstring(vssc_json_object_as_str(credsJson.get()));
-        m_settings->setUserCredential(QString::fromStdString(username), credentials);
+        m_impl->settings->setUserCredential(QString::fromStdString(username), credentials);
 
         emit reconnectXmppServerIfNeeded();
 
@@ -704,7 +705,7 @@ QFuture<Self::Result> Self::signInWithBackupKey(const QString &username, const Q
         }
 
         auto credentials = vsc_str_to_qstring(vssc_json_object_as_str(credsJson.get()));
-        m_settings->setUserCredential(QString::fromStdString(username), credentials);
+        m_impl->settings->setUserCredential(QString::fromStdString(username), credentials);
 
         emit reconnectXmppServerIfNeeded();
 
@@ -730,7 +731,8 @@ QString Self::currentUserJid() const
 {
     auto user = vssq_messenger_user(m_impl->messenger.get());
     vsc_str_t userIdentity = vssq_messenger_user_identity(user);
-    return vsc_str_to_qstring(userIdentity) + "@" + CustomerEnv::xmppServiceDomain() + "/" + m_settings->deviceId();
+    return vsc_str_to_qstring(userIdentity) + "@" + CustomerEnv::xmppServiceDomain() + "/"
+            + m_impl->settings->deviceId();
 }
 
 UserId Self::userIdFromJid(const QString &jid) const
