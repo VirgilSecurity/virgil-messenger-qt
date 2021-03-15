@@ -229,6 +229,7 @@ public:
     vssq_messenger_ptr_t messenger = vssq_messenger_wrap_ptr(nullptr);
     vssq_messenger_creds_ptr_t creds = vssq_messenger_creds_wrap_ptr(nullptr);
     UserHandler currentUser = nullptr;
+    std::mutex authMutex;
 
     std::map<GroupId, GroupImplHandler> messengerGroups;
     std::map<GroupId, UserId> groupOwners;
@@ -698,6 +699,8 @@ QFuture<Self::Result> Self::signIn(const QString &username)
             return Self::Result::Error_Offline;
         }
 
+        std::scoped_lock<std::mutex> _(m_impl->authMutex);
+
         qCInfo(lcCoreMessenger) << "Authenticate user";
         error.status = vssq_messenger_authenticate(m_impl->messenger.get(), m_impl->creds.get());
 
@@ -714,6 +717,8 @@ QFuture<Self::Result> Self::signIn(const QString &username)
 QFuture<Self::Result> Self::signUp(const QString &username)
 {
     return QtConcurrent::run([this, username = username.toStdString()]() -> Result {
+        std::scoped_lock<std::mutex> _(m_impl->authMutex);
+
         qCInfo(lcCoreMessenger) << "Trying to sign up";
 
         auto result = resetCommKitConfiguration();
@@ -757,6 +762,8 @@ QFuture<Self::Result> Self::backupKey(const QString &password)
 QFuture<Self::Result> Self::signInWithBackupKey(const QString &username, const QString &password)
 {
     return QtConcurrent::run([this, username = username.toStdString(), password = password.toStdString()]() -> Result {
+        std::scoped_lock<std::mutex> _(m_impl->authMutex);
+
         qCInfo(lcCoreMessenger) << "Load user key from the cloud";
 
         auto result = resetCommKitConfiguration();
@@ -937,6 +944,8 @@ void Self::authenticate()
     QtConcurrent::run([this] {
         vssq_error_t error;
         vssq_error_reset(&error);
+
+        std::scoped_lock<std::mutex> _(m_impl->authMutex);
 
         qCInfo(lcCoreMessenger) << "Authenticate user";
         error.status = vssq_messenger_authenticate(m_impl->messenger.get(), m_impl->creds.get());
