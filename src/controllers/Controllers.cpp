@@ -48,6 +48,8 @@
 
 #if VS_IOS
 #    include "ios/IosDocumentInteractionController.h"
+#elif VS_ANDROID
+#    include "android/AndroidDocumentInteractionController.h"
 #endif
 
 using namespace vm;
@@ -152,6 +154,8 @@ DocumentInteractionController *Controllers::createDocumentInteraction()
 {
 #if VS_IOS
     return new IosDocumentInteractionController(this);
+#elif VS_ANDROID
+    return new AndroidDocumentInteractionController(this);
 #else
     return new DocumentInteractionController(this);
 #endif

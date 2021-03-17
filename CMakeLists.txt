@@ -613,6 +613,7 @@ target_sources(${VS_TARGET_NAME}
         $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/PushNotifications.h>
         $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/XmppPushNotifications.h>
         $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/android/FirebaseListener.h>
+        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/platforms/android/AndroidDocumentInteractionController.h>
 
         #
         #  Sources
@@ -826,6 +827,7 @@ target_sources(${VS_TARGET_NAME}
         $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/PushNotifications.cpp>
         $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/XmppPushNotifications.cpp>
         $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/android/FirebaseListener.cpp>
+        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/platforms/android/AndroidDocumentInteractionController.cpp>
         $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/platforms/default/CustomerEnvDefault.cpp>
 
         # Customer sources
